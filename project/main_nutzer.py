@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from flask_table import LinkCol
 from . import db
 from .models import Angebote, Kaeufe, Nutzer
-from .forms import ProductSearchForm, ProductForm
+from .forms import ProductSearchForm
 from .tables import Results
 
 main_nutzer = Blueprint('main_nutzer', __name__)
@@ -64,6 +64,8 @@ def kaufen(id):
     qry = db.session.query(Angebote).filter(
                 Angebote.id==id)
     angebot = qry.first()
+    print("XXXX")
+    print(angebot)
     if angebot:
         if request.method == 'POST':
             # kauefe aktualisieren
@@ -80,7 +82,9 @@ def kaufen(id):
             nutzer.guthaben -= angebot.preis
             db.session.commit()
             # guthaben des arbeiters aktualisieren
+
             # XX
+
             flash(f"Kauf von '{angebot.name}' erfolgreich!")
             return redirect('/nutzer/suchen')
 
