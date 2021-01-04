@@ -1,0 +1,18 @@
+{% extends "base_betriebe.html" %}
+
+{% block content2 %}
+<h1 class="title">
+  Willkommen, {{ current_user.name }}!
+</h1>
+
+<div class="block">
+  Dein Guthaben: {{ current_user.guthaben }} Stunden
+</div>
+<div class="block">
+  Deine ID: {{ current_user.id }}.
+</div>
+<div class="block">
+  Deine Email: {{ current_user.email }}.
+</div>
+
+{% endblock %}

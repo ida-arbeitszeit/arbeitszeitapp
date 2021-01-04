@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content1 %}
+
+<section class="hero is-fullheight">
+        <div class="hero-head">
+            <nav class="navbar">
+                <div class="container">
+                    <div id="navbarMenuHeroA" class="navbar-menu">
+                        <div class="navbar-end">
+                            <a href="{{ url_for('auth.start') }}" class="navbar-item">
+                                Zurück
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </div>
+
+        <div class="hero-body">
+            <div class="container has-text-centered">
+              <h1 class="title">
+                Hilfe
+              </h1>
+              <h2 class="subtitle">
+                Eine Plattform auf Grundlage von Arbeitszeitrechnung.
+              </h2>
+
+              <div class="block">
+                Keine Ausbeutung, kein Wucher
+              </div>
+
+              <div class="block">
+                das Geld geht voll an die Beschäftigten
+              </div>
+              <div class="block">
+                du bezahlst nur, was wirklich an Arbeitszeit drin steckt
+              </div>
+
+
+
+
+            </div>
+        </div>
+</section>
+
+{% endblock %}

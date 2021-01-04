@@ -1,0 +1,46 @@
+{% extends "base_betriebe.html" %}
+
+{% block content2 %}
+<div class="column is-4 is-offset-4">
+  <h1 class="title">
+    Produktsuche
+  </h1>
+  <div class="box">
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="notification is-danger">{{ message }}  </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="post">
+      <div class="field">
+          <div class="control">
+            <div class="select is-large is-fullwidth">
+              {{ form.select }}
+            </div>
+          </div>
+          <p class="help">Suche in Namen oder Beschreibung</p>
+      </div>
+      <div class="field">
+        <div class="control">
+            {{ form.search(class_="input is-large") }}
+        </div>
+        <p class="help">Suchbegriff</p>
+      </div>
+        <button class="button is-block is-info is-large is-fullwidth">Suche</button>
+    </form>
+  </div>
+</div>
+
+
+
+<div class="columns is-centered">
+<div class="column is-narrow">
+  {{ table }}
+</div>
+</div>
+
+{% endblock %}

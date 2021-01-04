@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content1 %}
+<section class="hero is-fullheight">
+        <div class="hero-head">
+            <nav class="navbar">
+                <div class="container">
+                    <div id="navbarMenuHeroA" class="navbar-menu">
+                        <div class="navbar-end">
+                            <a href="{{ url_for('auth.help') }}" class="navbar-item">
+                                Hilfe
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </div>
+
+        <div class="hero-body">
+            <div class="container has-text-centered">
+              <h1 class="title">
+                Betriebe 2020
+              </h1>
+              <h2 class="subtitle">
+                Eine Plattform auf Grundlage von Arbeitszeitrechnung.
+              </h2>
+              <a class="button" href="{{ url_for('main_nutzer.index') }}">Ich bin Konsument</a>
+              <a class="button" href="{{ url_for('main_betriebe.index') }}">Ich bin ein Betrieb</a>
+            </div>
+        </div>
+</section>
+{% endblock %}

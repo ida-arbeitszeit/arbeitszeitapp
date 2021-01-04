@@ -1,0 +1,19 @@
+{% extends "base_betriebe.html" %}
+
+{% block content2 %}
+
+  <p>Möchtest du {{ angebot.name }} wirklich kaufen?<br>
+    Es werden dir {{ angebot.preis }} Stunden von deinem Guthaben abgezogen.<br>
+    Dein Guthaben beträgt momentan {{ current_user.guthaben }} Stunden.
+  </p>
+
+  <form method="post">
+    <input class="button" type="submit" value="Bestätigen">
+
+    <a class="button" href="{{  url_for('main_betriebe.suchen') }}">
+      Abbrechen
+    </a>
+  </form>
+
+
+{% endblock %}

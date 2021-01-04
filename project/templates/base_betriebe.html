@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block content1 %}
+<section class="hero is-primary is-fullheight">
+        <div class="hero-head">
+            <nav class="navbar">
+                <div class="container">
+                  <div class="navbar-brand">
+                    <div class="navbar-item">
+                      Betriebs-Ansicht
+                    </div>
+                  </div>
+                    <div id="navbarMenuHeroA" class="navbar-menu">
+
+                        <div class="navbar-end">
+                            <a href="{{ url_for('main_betriebe.index') }}" class="navbar-item">
+                                Home
+                            </a>
+                            {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('main_betriebe.suchen') }}" class="navbar-item">
+                                Angebot suchen
+                            </a>
+                            <a href="{{ url_for('main_betriebe.neues_angebot') }}" class="navbar-item">
+                                Angebot erstellen
+                            </a>
+
+                            <a href="{{ url_for('main_betriebe.produktionsmittel') }}" class="navbar-item">
+                                Produktionsmittel
+                            </a>
+
+                            <a href="" class="navbar-item">
+                                Arbeit
+                            </a>
+
+                            <a href="{{ url_for('main_betriebe.profile') }}" class="navbar-item">
+                                Mein Bereich
+                            </a>
+                            {% endif %}
+                            {% if not current_user.is_authenticated %}
+                            <a href="{{ url_for('auth.login_betriebe') }}" class="navbar-item">
+                                Login
+                            </a>
+                            <a href="{{ url_for('auth.signup_betriebe') }}" class="navbar-item">
+                                Sign Up
+                            </a>
+                            <a href="{{ url_for('auth.zurueck') }}" class="navbar-item">
+                                Zurück
+                            </a>
+                            {% endif %}
+                            {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('auth.logout') }}" class="navbar-item">
+                                Logout
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </div>
+
+        <div class="hero-body">
+            <div class="container has-text-centered">
+               {% block content2 %}
+               {% endblock %}
+            </div>
+        </div>
+</section>
+{% endblock %}

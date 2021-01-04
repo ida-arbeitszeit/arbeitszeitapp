@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content1 %}
+<section class="hero is-warning is-fullheight">
+        <div class="hero-head">
+            <nav class="navbar">
+                <div class="container">
+                    <div class="navbar-brand">
+                      <div class="navbar-item">
+                        Konsumenten-Ansicht
+                      </div>
+                    </div>
+
+                    <div id="navbarMenuHeroA" class="navbar-menu">
+
+                        <div class="navbar-end">
+                            <a href="{{ url_for('main_nutzer.index') }}" class="navbar-item">
+                                Home
+                            </a>
+                            {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('main_nutzer.suchen') }}" class="navbar-item">
+                                Angebote suchen
+                            </a>
+                            <a href="{{ url_for('main_nutzer.profile') }}" class="navbar-item">
+                                Mein Bereich
+                            </a>
+                            {% endif %}
+                            {% if not current_user.is_authenticated %}
+                            <a href="{{ url_for('auth.login_nutzer') }}" class="navbar-item">
+                                Login
+                            </a>
+                            <a href="{{ url_for('auth.signup_nutzer') }}" class="navbar-item">
+                                Sign Up
+                            </a>
+                            <a href="{{ url_for('auth.zurueck') }}" class="navbar-item">
+                                Zurück
+                            </a>
+                            {% endif %}
+                            {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('auth.logout') }}" class="navbar-item">
+                                Logout
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </div>
+
+        <div class="hero-body">
+            <div class="container has-text-centered">
+               {% block content2 %}
+               {% endblock %}
+            </div>
+        </div>
+</section>
+{% endblock %}
