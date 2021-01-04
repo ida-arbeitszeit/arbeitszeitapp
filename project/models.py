@@ -38,7 +38,12 @@ class Arbeit(UserMixin, db.Model):
     beginn = db.Column(db.DateTime(), nullable=False)
     ende = db.Column(db.DateTime(), nullable=False)
 
-class Produktionsmittel(UserMixin, db.Model):
+class PMVerbrauchGesamt(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    kauf = db.Column(db.Integer, db.ForeignKey("kaeufe.id"), nullable=False)
+    prozent_gebraucht = db.Column(db.Numeric(), nullable=False)
+
+class PMVerbrauchProdukt(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     angebot = db.Column(db.Integer, db.ForeignKey("angebote.id"), nullable=False)
     kauf = db.Column(db.Integer, db.ForeignKey("kaeufe.id"), nullable=False)
