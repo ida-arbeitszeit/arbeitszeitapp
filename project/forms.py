@@ -5,10 +5,3 @@ class ProductSearchForm(Form):
                ('Beschreibung', 'Beschreibung')]
     select = SelectField('Nach Produkten suchen:', choices=choices)
     search = StringField('')
-
-class ProductForm(Form):
-    name = StringField('Name')
-    betrieb = StringField('Betrieb')
-    beschreibung = StringField('Beschreibung')
-    # prod_mittel = DecimalField('Produktionsmittel')
-    arbeit = DecimalField("Arbeit")
