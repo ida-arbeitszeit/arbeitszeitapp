@@ -2,9 +2,9 @@ from flask import Blueprint, render_template, session, redirect, url_for, reques
 from flask_login import login_required, current_user
 from flask_table import LinkCol, Col
 from . import db
-from .models import Angebote, Kaeufe, Betriebe, PMVerbrauchGesamt, PMVerbrauchProdukt
+from .models import Angebote, Kaeufe, Betriebe, Nutzer, PMVerbrauchGesamt, PMVerbrauchProdukt, Arbeit, Arbeiter
 from .forms import ProductSearchForm
-from .tables import Results, ProduktionsmittelTable
+from .tables import Results, ProduktionsmittelTable, ArbeiterTable
 from decimal import Decimal
 from sqlalchemy.sql.functions import coalesce
 
@@ -32,6 +32,34 @@ def profile():
     elif user_type == "nutzer":
         return redirect(url_for('auth.zurueck'))
 
+
+@main_betriebe.route('/betriebe/arbeit', methods=['GET', 'POST'])
+@login_required
+def arbeit():
+    arbeiter = db.session.query(Nutzer.id, Nutzer.name).select_from(Arbeiter)\
+        .join(Nutzer, Arbeiter.nutzer==Nutzer.id).filter(Arbeiter.betrieb==current_user.id).all()
+    table = ArbeiterTable(arbeiter, classes=["table", "is-bordered", "is-striped"])
+
+    if request.method == 'POST':
+        # check if nutzer exists, if not flash warning
+        if not Nutzer.query.filter_by(id=request.form['nutzer']).first():
+            flash("Nutzer existiert nicht.")
+            print("nicht eexisteeent")
+            return redirect(url_for('main_betriebe.arbeit'))
+
+        # check if nutzer is already arbeiter in betrieb
+        req_arbeiter = Arbeiter.query.filter_by(nutzer=request.form['nutzer'], betrieb=current_user.id).first()
+        # if so, flash warning
+        if req_arbeiter:
+            flash("Nutzer ist bereits in diesem Betrieb beschäftigt.")
+        else:
+            new_arbeiter = Arbeiter(nutzer=request.form['nutzer'], betrieb=current_user.id)
+            db.session.add(new_arbeiter)
+            db.session.commit()
+        return redirect(url_for('main_betriebe.arbeit'))
+
+
+    return render_template("arbeit.html", table=table)
 
 @main_betriebe.route('/betriebe/produktionsmittel')
 @login_required
@@ -131,16 +159,28 @@ def neues_angebot():
         outerjoin(Angebote, Kaeufe.angebot==Angebote.id).outerjoin(PMVerbrauchGesamt,\
         Kaeufe.id==PMVerbrauchGesamt.kauf).filter(Kaeufe.betrieb==current_user.id, PMVerbrauchGesamt.prozent_gebraucht < 100).all()
 
+    arbeiter_all = db.session.query(Nutzer.id, Nutzer.name).select_from(Arbeiter)\
+        .join(Nutzer, Arbeiter.nutzer==Nutzer.id).filter(Arbeiter.betrieb==current_user.id).all()
+
     if request.method == 'POST':
         # create request dictionary
         request_dict = request.form.to_dict()
+
+        # arbeit
+        # dict with arbeit values
+        arbeit_dict = dict(filter(lambda elem: elem[0][:7] == 'nutzer_', request_dict.items()))
+        # arbeit dict entries that are not zero
+        arbeit_dict_not_zero = dict(filter(lambda elem: Decimal(elem[1]) != 0, arbeit_dict.items()))
+        kosten_arbeit = 0
+
+        # produktionsmittel
         # dict with produktionsmittel values
         pm_dict = dict(filter(lambda elem: elem[0][:3] == 'id_', request_dict.items()))
         # pm dict entries that are not zero
         pm_dict_not_zero = dict(filter(lambda elem: Decimal(elem[1]) != 0,pm_dict.items()))
         kosten_pm = 0
         if pm_dict_not_zero:
-            # calculate produktionsmittelkosten
+            # calculate kosten pm
             id_list = []
             prozent_list = []
             for key in list(pm_dict_not_zero.keys()):
@@ -162,23 +202,56 @@ def neues_angebot():
                 prdmittel = db.session.query(PMVerbrauchGesamt).filter(PMVerbrauchGesamt.kauf == i).first()
                 prdmittel.prozent_gebraucht += prozent_list[count]*100
                 db.session.commit()
-                print("prozent_gebraucht gesamt updated!")
+
+        if arbeit_dict_not_zero:
+            # calculate kosten arbeit
+            nutzer_id_list = []
+            stunden_list = []
+            for key in list(arbeit_dict_not_zero.keys()):
+                nutzer_id_list.append(key[7:])
+            for value in list(arbeit_dict_not_zero.values()):
+                stunden_list.append(Decimal(value))
+            print(nutzer_id_list, stunden_list)
+            assert len(nutzer_id_list) == len(stunden_list)
+            kosten_arbeit = sum(stunden_list)
+
+
+            # aktualisieren eigenes guthaben?!
+            # aktualisiere table "angebote" (add p+v)
+
 
         # save new angebot
         new_angebot = Angebote(name=request.form["name"], betrieb=current_user.id,\
-            beschreibung=request.form["beschreibung"], preis=Decimal(request.form["arbeit"]) + kosten_pm)
+            beschreibung=request.form["beschreibung"], p_kosten=kosten_pm,\
+            v_kosten=kosten_arbeit, preis=kosten_arbeit + kosten_pm)
         db.session.add(new_angebot)
         db.session.commit()
 
+        # create rows in prdmittel gebraucht (Produkt)
         if pm_dict_not_zero:
-            # create prdmittel gebraucht (Produkt) in prozent
             assert len(id_list) == len(prozent_list)
             for count, i in enumerate(id_list):
-                new_produktionsmittel_prd = PMVerbrauchProdukt(angebot=new_angebot.id, kauf=i, prozent_gebraucht=prozent_list[count]*100)
+                new_produktionsmittel_prd = PMVerbrauchProdukt\
+                    (angebot=new_angebot.id, kauf=i, prozent_gebraucht=prozent_list[count]*100)
                 db.session.add(new_produktionsmittel_prd)
+                db.session.commit()
+
+        # create rows in table "arbeit"
+        if arbeit_dict_not_zero:
+            if request_dict["radio"] == "now":
+                ausbezahlt=True
+            elif request_dict["radio"] == "later":
+                ausbezahlt=False
+
+            assert len(nutzer_id_list) == len(stunden_list)
+            for count, i in enumerate(nutzer_id_list):
+                new_arbeit = Arbeit(angebot=new_angebot.id, nutzer=i, stunden=stunden_list[count], ausbezahlt=ausbezahlt)
+                db.session.add(new_arbeit)
                 db.session.commit()
 
         flash('Angebot erfolgreich gespeichert!')
         return redirect('/betriebe/home')
 
-    return render_template('neues_angebot.html', produktionsmittel_aktiv=produktionsmittel_aktiv)
+    print(produktionsmittel_aktiv==True)
+    print(type(arbeiter_all))
+    return render_template('neues_angebot.html', produktionsmittel_aktiv=produktionsmittel_aktiv, arbeiter_all=arbeiter_all)
