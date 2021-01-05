@@ -1,7 +1,7 @@
 {% extends "base_betriebe.html" %}
 
 {% block content2 %}
-<div class="column is-4 is-offset-4">
+<div class="column is-6 is-offset-3">
   <h1 class="title">
     Produktsuche
   </h1>
@@ -33,14 +33,12 @@
         <button class="button is-block is-info is-large is-fullwidth">Suche</button>
     </form>
   </div>
-</div>
 
 
+  <div>
+      {{ table }}
+  </div>
 
-<div class="columns is-centered">
-<div class="column is-narrow">
-  {{ table }}
-</div>
 </div>
 
 {% endblock %}

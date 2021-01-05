@@ -9,32 +9,33 @@
     In deinem Betrieb arbeiten die folgenden ArbeiterInnen:
   </h1>
 
-  <div class="box">
-    <div class="columns is-centered">
-      <div class="column is-narrow">
-        {{ table }}
+  <div class="content">
+
+      <div class="columns is-centered">
+        <div class="column is-narrow">
+          {{ table }}
+        </div>
       </div>
-    </div>
 
 
-  {% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <div class="notification is-danger">
-        {{ messages[0] }}
-    </div>
-  {% endif %}
-  {% endwith %}
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <div class="notification is-danger">
+          {{ messages[0] }}
+      </div>
+    {% endif %}
+    {% endwith %}
 
-  <form method="post">
-    <div class="field is-grouped is-grouped-centered">
-      <div class="control">
-        <input class="input" type="text" placeholder="Nutzer-ID", name="nutzer" required>
+    <form method="post">
+      <div class="field is-grouped is-grouped-centered">
+        <div class="control">
+          <input class="input" type="text" placeholder="Nutzer-ID", name="nutzer" required>
+        </div>
+        <div class="control">
+          <button class="button" type="submit">ArbeiterIn hinzufügen</button>
+        </div>
       </div>
-      <div class="control">
-        <button class="button" type="submit">ArbeiterIn hinzufügen</button>
-      </div>
-    </div>
-  </form>
+    </form>
 </div>
 </div>
 
