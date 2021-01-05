@@ -14,6 +14,10 @@ class ProduktionsmittelTable(Table):
     preis = Col('Preis')
     prozent_gebraucht = Col('Prozent_Gebraucht')
 
+class ArbeiterTable(Table):
+    id = Col('Nutzer-Id')
+    name = Col('Name')
+
 # class ProduktionsmittelTable2(Table):
 #     id = Col('Kauf-Id')
 #     name = Col('Name')
