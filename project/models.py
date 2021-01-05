@@ -20,6 +20,8 @@ class Angebote(UserMixin, db.Model):
     name = db.Column(db.String(1000), nullable=False)
     betrieb = db.Column(db.Integer, db.ForeignKey("betriebe.id"), nullable=False)
     beschreibung = db.Column(db.String(1000), nullable=False)
+    p_kosten = db.Column(db.Numeric(), nullable=False)
+    v_kosten = db.Column(db.Numeric(), nullable=False)
     preis = db.Column(db.Numeric(), nullable=False)
     aktiv = db.Column(db.Boolean, nullable=False, default=True)
 
@@ -35,8 +37,12 @@ class Arbeit(UserMixin, db.Model):
     angebot = db.Column(db.Integer, db.ForeignKey("angebote.id"), nullable=False)
     nutzer = db.Column(db.Integer, db.ForeignKey("nutzer.id"), nullable=False)
     stunden = db.Column(db.Numeric(), nullable=False)
-    beginn = db.Column(db.DateTime(), nullable=False)
-    ende = db.Column(db.DateTime(), nullable=False)
+    ausbezahlt = db.Column(db.Boolean, nullable=False)
+
+class Arbeiter(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nutzer = db.Column(db.Integer, db.ForeignKey("nutzer.id"), nullable=False)
+    betrieb = db.Column(db.Integer, db.ForeignKey("betriebe.id"), nullable=False)
 
 class PMVerbrauchGesamt(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
