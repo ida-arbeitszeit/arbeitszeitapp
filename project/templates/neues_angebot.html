@@ -5,23 +5,41 @@
 
 <div class="column is-8 is-offset-2">
 
-    <h1 class="title">
-      Angebot erstellen
-    </h1>
+    <h1 class="title is-2">Angebot erstellen</h1>
 
     <form method="post">
+        <h1 class="subtitle is-4">Name des Produkts</h1>
         <div class="field">
           <div class="control">
-            <input class="input is-large", placeholder="Name des Produkts", type="text", name="name" required>
+            <input class="input is-large", type="text", name="name" required>
+          </div>
+        </div>
+        <div class="block"></div>
+
+        <h1 class="subtitle is-4">Beschreibung des Produkts</h1>
+        <div class="field">
+          <div class="control">
+            <textarea class="textarea is-large", name="beschreibung" required></textarea>
+          </div>
+        </div>
+        <div class="block"></div>
+
+        <h1 class="subtitle is-4">Kategorie auswählen</h1>
+        <div class="field is-grouped is-grouped-centered">
+          <div class="control">
+            <div class="select">
+              <select name="kategorie" required>
+                <option value="">Kategorie auswählen</option>
+                {% for cat in categ %}
+                <option value="{{ cat }}">{{ cat }}</option>
+                {% endfor %}
+              </select>
+
+            </div>
           </div>
         </div>
 
-        <div class="field">
-          <div class="control">
-            <input class="textarea is-large", placeholder="Beschreibung des Produktes", type="text", name="beschreibung" required>
-          </div>
-        </div>
-
+    <div class="block"></div>
     <h3 class="subtitle is-4">Welche Produktionsmittel sind enthalten?</h3>
 
     {% if produktionsmittel_aktiv is defined and produktionsmittel_aktiv|length %}
@@ -41,7 +59,7 @@
       </div>
     {% endif %}
 
-      <h3 class="subtitle is-4">Wer hat an dem Produkt mitgearbeitet?</h3>
+      <h3 class="subtitle is-4">Wer produziert das Produkt?</h3>
 
     {% if arbeiter_all is defined and arbeiter_all|length %}
         <table class="table is-bordered is-fullwidth">
@@ -55,13 +73,13 @@
         <div class="field is-grouped is-grouped-centered">
           <div class="control">
               <label class="radio">
-                <input type="radio" name="radio" value="now" checked>
+                <input type="radio" name="radio" value="now">
                 Arbeiter jetzt ausbezahlen
               </label>
               <br>
               <label class="radio">
-                <input type="radio" name="radio" value="later">
-                Arbeiter nach Verkauf ausbezahlen
+                <input type="radio" name="radio" value="later" checked>
+                Arbeiter bei Verkauf automatisch ausbezahlen
               </label>
           </div>
         </div>
@@ -72,10 +90,10 @@
         Füge deinem Betrieb erst <a href="{{ url_for('main_betriebe.arbeit') }}"><u>hier</u></a> MitarbeiterInnen hinzu.
       </p>
     {% endif %}
-
-        <button class="button">
-          Angebot erstellen
-        </button>
+    
+      <button class="button">
+        Angebot erstellen
+      </button>
 
     </form>
 
