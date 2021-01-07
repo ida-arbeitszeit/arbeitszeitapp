@@ -4,7 +4,7 @@ from flask_table import LinkCol, Col
 from . import db
 from .models import Angebote, Kaeufe, Betriebe, Nutzer, PMVerbrauchGesamt, PMVerbrauchProdukt, Arbeit, Arbeiter
 from .forms import ProductSearchForm
-from .tables import Results, ProduktionsmittelTable, ArbeiterTable
+from .tables import ProduktionsmittelTable, ArbeiterTable
 from decimal import Decimal
 from sqlalchemy.sql.functions import coalesce
 
@@ -39,12 +39,12 @@ def arbeit():
     arbeiter = db.session.query(Nutzer.id, Nutzer.name).select_from(Arbeiter)\
         .join(Nutzer, Arbeiter.nutzer==Nutzer.id).filter(Arbeiter.betrieb==current_user.id).all()
     table = ArbeiterTable(arbeiter, classes=["table", "is-bordered", "is-striped"])
+    fik = Betriebe.query.filter_by(id=current_user.id).first().fik
 
     if request.method == 'POST':
         # check if nutzer exists, if not flash warning
         if not Nutzer.query.filter_by(id=request.form['nutzer']).first():
             flash("Nutzer existiert nicht.")
-            print("nicht eexisteeent")
             return redirect(url_for('main_betriebe.arbeit'))
 
         # check if nutzer is already arbeiter in betrieb
@@ -58,8 +58,7 @@ def arbeit():
             db.session.commit()
         return redirect(url_for('main_betriebe.arbeit'))
 
-
-    return render_template("arbeit.html", table=table)
+    return render_template("arbeit.html", table=table, fik=fik)
 
 @main_betriebe.route('/betriebe/produktionsmittel')
 @login_required
@@ -87,27 +86,47 @@ def suchen():
 
         if search_string:
             if search.data['select'] == 'Name':
-                qry = db.session.query(Angebote).filter(Angebote.aktiv == True,
-                        Angebote.name.contains(search_string))
+                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name,\
+                    Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
+                    join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True,\
+                    Angebote.name.contains(search_string)).\
+                    order_by(Angebote.id)
                 results = qry.all()
+
             elif search.data['select'] == 'Beschreibung':
-                qry = db.session.query(Angebote).filter(Angebote.aktiv == True,
-                        Angebote.name.contains(search_string))
+                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name,\
+                    Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
+                    join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True,\
+                    Angebote.beschreibung.contains(search_string)).\
+                    order_by(Angebote.id)
                 results = qry.all()
+
+            elif search.data['select'] == 'Kategorie':
+                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name,\
+                    Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
+                    join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True,\
+                    Angebote.kategorie.contains(search_string)).\
+                    order_by(Angebote.id)
+                results = qry.all()
+
             else:
-                qry = db.session.query(Angebote).filter(Angebote.aktiv == True)
+                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name,\
+                    Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
+                    join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True).\
+                    order_by(Angebote.id)
                 results = qry.all()
         else:
-            qry = db.session.query(Angebote).filter(Angebote.aktiv == True)
+            qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name,\
+                Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
+                join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True).\
+                order_by(Angebote.id)
             results = qry.all()
 
         if not results:
             flash('Keine Ergebnisse!')
-            return redirect('/nutzer/suchen')
+            return redirect('/betriebe/suchen')
         else:
-            table = Results(results, classes=["table", "is-bordered", "is-striped"])
-            table.add_column("kaufen", LinkCol("Kaufen", 'main_betriebe.kaufen', url_kwargs=dict(id='id')))
-            return render_template('suchen_betriebe.html', form=search, table=table)
+            return render_template('suchen_betriebe.html', form=search, results=results)
 
     return render_template('suchen_betriebe.html', form=search)
 
@@ -134,17 +153,42 @@ def kaufen(id):
             db.session.add(new_produktionsmittel)
             db.session.commit()
             # guthaben self aktualisieren
-            betrieb = db.session.query(Betriebe).filter(Betriebe.id == current_user.id).first()
-            betrieb.guthaben -= angebot.preis
+            kaufender_betrieb = db.session.query(Betriebe).filter(Betriebe.id == current_user.id).first()
+            kaufender_betrieb.guthaben -= angebot.preis
             db.session.commit()
-            # guthaben des arbeiters aktualisieren
-            # XX
+            # guthaben des arbeiters erhöhen, wenn ausbezahlt = false
+            arbeit_in_produkt = Arbeit.query.filter_by(angebot=angebot.id, ausbezahlt=False).all()
+            print("u_u_u", arbeit_in_produkt)
+            for arb in arbeit_in_produkt:
+                Nutzer.query.filter_by(id=arb.nutzer).first().guthaben += arb.stunden
+                arb.ausbezahlt = True
+                db.session.commit()
+
+            # guthaben des anbietenden betriebes erhöhen
+            anbietender_betrieb_id = angebot.betrieb
+            anbietender_betrieb = Betriebe.query.filter_by(id=anbietender_betrieb_id).first()
+            anbietender_betrieb.guthaben += angebot.preis
+            # guthaben des anbietenden betriebes verringern, wenn ausbezahlt = false
+            for arb in arbeit_in_produkt:
+                anbietender_betrieb.guthaben -= arb.stunden
+                db.session.commit()
+
             flash(f"Kauf von '{angebot.name}' erfolgreich!")
             return redirect('/betriebe/suchen')
 
         return render_template('kaufen_betriebe.html', angebot=angebot)
     else:
         return 'Error loading #{id}'.format(id=id)
+
+
+@main_betriebe.route('/betriebe/anbieten_info', methods=['GET', 'POST'])
+@login_required
+def anbieten_info():
+    """
+    infos zum anbieten von produkten
+    """
+
+    return render_template('anbieten_info.html')
 
 
 
@@ -163,6 +207,7 @@ def neues_angebot():
         .join(Nutzer, Arbeiter.nutzer==Nutzer.id).filter(Arbeiter.betrieb==current_user.id).all()
 
     if request.method == 'POST':
+        print("ubb", request.form)
         # create request dictionary
         request_dict = request.form.to_dict()
 
@@ -216,13 +261,9 @@ def neues_angebot():
             kosten_arbeit = sum(stunden_list)
 
 
-            # aktualisieren eigenes guthaben?!
-            # aktualisiere table "angebote" (add p+v)
-
-
         # save new angebot
         new_angebot = Angebote(name=request.form["name"], betrieb=current_user.id,\
-            beschreibung=request.form["beschreibung"], p_kosten=kosten_pm,\
+            beschreibung=request.form["beschreibung"], kategorie=request.form["kategorie"], p_kosten=kosten_pm,\
             v_kosten=kosten_arbeit, preis=kosten_arbeit + kosten_pm)
         db.session.add(new_angebot)
         db.session.commit()
@@ -245,13 +286,23 @@ def neues_angebot():
 
             assert len(nutzer_id_list) == len(stunden_list)
             for count, i in enumerate(nutzer_id_list):
-                new_arbeit = Arbeit(angebot=new_angebot.id, nutzer=i, stunden=stunden_list[count], ausbezahlt=ausbezahlt)
+                new_arbeit = Arbeit(angebot=new_angebot.id, nutzer=i,\
+                    stunden=stunden_list[count], ausbezahlt=ausbezahlt)
                 db.session.add(new_arbeit)
                 db.session.commit()
+                # abzug arbeitskosten von guthaben UND überweisung auf arbeiter-konto,
+                # falls sofort ausgezahlt werden soll
+                if  ausbezahlt:
+                    current_user.guthaben -= stunden_list[count]
+                    Nutzer.query.filter_by(id=i).first().guthaben += stunden_list[count]
+                    db.session.commit()
 
+        # kosten zusammenfassen und bestätigen lassen!
         flash('Angebot erfolgreich gespeichert!')
         return redirect('/betriebe/home')
 
-    print(produktionsmittel_aktiv==True)
-    print(type(arbeiter_all))
-    return render_template('neues_angebot.html', produktionsmittel_aktiv=produktionsmittel_aktiv, arbeiter_all=arbeiter_all)
+    categ = ["Auto, Rad & Boot", "Dienstleistungen", "Eintrittskarten & Tickets", "Elektronik", "Familie, Kind & Baby",
+    "Freizeit, Hobby & Nachbarschaft", "Haus & Garten", "Haustiere", "Immobilien", "Jobs", "Mode & Beauty", "Musik, Filme und Bücher",
+    "Nachbarschaftshilfe", "Unterricht und Kurse", "Verschenken & Tauschen"]
+
+    return render_template('neues_angebot.html', produktionsmittel_aktiv=produktionsmittel_aktiv, arbeiter_all=arbeiter_all, categ=categ)

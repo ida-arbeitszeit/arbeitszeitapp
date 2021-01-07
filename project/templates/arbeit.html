@@ -5,18 +5,28 @@
 
 <div class="column is-6 is-offset-3">
 
+
+  <h1 class="title">
+    Der Auszahlungsfaktor in diesem Betrieb beträgt:<br>
+    {{ fik }}
+  </h1>
+
+  <p class="block">
+    Der Betrieb kann einen Auszahlungsfaktor zwischen 0 und 1 beschließen. Je höher dieser Faktor, desto
+    mehr Arbeitsgeld bekommen die Beschäftigten pro Arbeitsstunde. Je niedriger,
+    desto mehr Stunden kann der Betrieb in einem Akkumulationsfonds sammeln.
+  </p>
+
   <h1 class="title">
     In deinem Betrieb arbeiten die folgenden ArbeiterInnen:
   </h1>
 
   <div class="content">
-
       <div class="columns is-centered">
         <div class="column is-narrow">
           {{ table }}
         </div>
       </div>
-
 
     {% with messages = get_flashed_messages() %}
     {% if messages %}
