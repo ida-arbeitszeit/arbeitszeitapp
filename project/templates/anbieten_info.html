@@ -1,0 +1,37 @@
+{% extends "base_betriebe.html" %}
+
+{% block content2 %}
+
+<div class="column is-8 is-offset-2">
+
+  <h1 class="title is-2">Angebot erstellen</h1>
+
+
+
+  <div class="block content has-text-left">
+
+    <ol>
+      <li>Wenn du ein Angebot erstellst, musst du angeben,  wieviel Arbeit und
+      Produktionsmittel du eingesetzt hast.</li>
+      <li>Findet sich ein Käufer, werden dir vom Käufer alle Kosten für Produktionsmittel ersetzt
+        und die Arbeiter werden automatisch ausbezahlt.</li>
+      <li>Findet sich kein Käufer, kannst du dein Angebot jederzeit wieder löschen. Dann wirst du gefragt,
+      ob die angegebenen Produktionsmittel und Arbeit (in der Realität!) schon verbraucht wurden. Falls nein,
+      werden Produktionsmittel einfach wieder freigegeben und es muss keine Arbeit
+      ausbezahlt werden. Falls ja, werden Arbeiter auomatisch ausbezahlt, sofern genug Guthaben vorhanden,
+      und die Produktionsmittel werden als gebraucht markiert.</li>
+    </ol>
+  </div>
+
+  <form method="post">
+    <div class="field is-grouped is-grouped-centered">
+      <div class="control">
+        <a class="button is-link is-light" href="{{ url_for('main_betriebe.neues_angebot') }}">Verstanden</a>
+      </div>
+    </div>
+  </form>
+
+
+</div>
+
+{% endblock %}
