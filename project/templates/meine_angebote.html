@@ -1,0 +1,26 @@
+{% extends "base_betriebe.html" %}
+
+{% block content2 %}
+
+<h1 class="title">
+  Meine Angebote
+</h1>
+
+<p class="block">
+  Hier siehts du deine aktuellen Angebote. Bei Bedarf kannst du sie löschen.
+</p>
+
+  {% if results is defined and results|length %}
+    <table class="table is-bordered is-fullwidth">
+      <thead><tr><th>Angebot-ID</th><th>Name</th><th>Beschreibung</th><th>Kategorie</th><th>Kosten p</th><th>Kosten v</th><th>Preis</th><th>Löschen</th></tr></thead>
+        <tbody>
+          {% for res in results %}
+            <tr><td>{{ res.id }}</td><td>{{ res.name }}</td> <td>{{ res.beschreibung }}</td> <td>{{ res.kategorie }}</td><td>{{ res.p_kosten }}</td><td>{{ res.v_kosten }}</td><td>{{ res.preis }}</td><td><a href="{{ url_for('main_betriebe.angebot_loeschen', id=res.id) }}"><u>Link</u></a></td></tr>
+          {% endfor %}
+        </tbody>
+    </table>
+  {% endif %}
+
+
+
+{% endblock %}
