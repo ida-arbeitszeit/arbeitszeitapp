@@ -1,0 +1,75 @@
+{% extends "base_betriebe.html" %}
+
+{% block content2 %}
+
+<h1 class="title">Angebot löschen</h1>
+
+
+<p class="block">
+  Schade, dass du keinen Interessenten für <strong>"{{ angebot.name }}"</strong> gefunden hast.
+</p>
+<p class="block">
+  <span class="icon"><i class="fas fa-exclamation-triangle"></i></span>
+  Um das Angebot löschen zu können, müssen wir wissen, ob
+  das Produkt hergestellt wurde bzw. ob die angegebenen Produktionsmittel
+  und Arbeit tatsächlich verbraucht wurden.
+  <span class="icon"><i class="fas fa-exclamation-triangle"></i></span>
+</p>
+
+{% if angebot.p_kosten > 0 %}
+<p class="block">
+  Falls ja, werden Arbeiter automatisch ausbezahlt und die Produktionsmittel werden als gebraucht markiert.<br>
+  Falls nein, werden Produktionsmittel einfach wieder freigegeben und es wird keine Arbeit ausbezahlt.
+</p>
+{% else %}
+ <p class="block">
+   Falls ja, werden Arbeiter automatisch ausbezahlt.<br>
+   Falls nein, wird keine Arbeit ausbezahlt.
+ </p>
+{% endif %}
+
+  <div class="column is-4 is-offset-4">
+    <div class="content">
+      <table class="table is-bordered is-narrow">
+        <caption>Kosten für {{ angebot.name }}</caption>
+        <thead><tr><th>Kosten Produktionsmittel</th><th>Kosten Arbeit</th></tr></thead>
+        <tbody><tr><td>{{ angebot.p_kosten }}</td><td>{{ angebot.v_kosten }}</td></tr></tbody>
+      </table>
+    </div>
+
+    <form method="post">
+      <div class="field">
+        <div class="control">
+          <label class="radio">
+            <input type="radio" name="verbraucht" value="ja" required>
+            Ja, Arbeit und/oder PM wurden verbraucht.
+          </label>
+          <br>
+          <label class="radio">
+            <input type="radio" name="verbraucht" value="nein">
+            Nein, weder Arbeit noch PM wurden verbraucht.
+          </label>
+          <input class="button" type="submit" value="Bestätigen und Angebot löschen">
+        </div>
+        <br>
+      </div>
+    </form>
+  </div>
+
+
+
+
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      {% for message in messages %}
+        <div class="notification is-danger">{{ message }} (to do...) </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+
+
+
+
+
+{% endblock %}
