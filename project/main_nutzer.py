@@ -2,9 +2,8 @@ from flask import Blueprint, render_template, session, redirect, url_for, reques
 from flask_login import login_required, current_user
 from flask_table import LinkCol
 from . import db
-from .models import Angebote, Kaeufe, Nutzer
+from .models import Angebote, Kaeufe, Nutzer, Betriebe, Arbeit
 from .forms import ProductSearchForm
-from .tables import Results
 
 main_nutzer = Blueprint('main_nutzer', __name__)
 
@@ -33,28 +32,47 @@ def suchen():
 
         if search_string:
             if search.data['select'] == 'Name':
-                qry = db.session.query(Angebote).filter(Angebote.aktiv == True,
-                        Angebote.name.contains(search_string))
+                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name,\
+                    Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
+                    join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True,\
+                    Angebote.name.contains(search_string)).\
+                    order_by(Angebote.id)
                 results = qry.all()
+
             elif search.data['select'] == 'Beschreibung':
-                qry = db.session.query(Angebote).filter(Angebote.aktiv == True,
-                        Angebote.beschreibung.contains(search_string))
+                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name,\
+                    Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
+                    join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True,\
+                    Angebote.beschreibung.contains(search_string)).\
+                    order_by(Angebote.id)
                 results = qry.all()
+
+            elif search.data['select'] == 'Kategorie':
+                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name,\
+                    Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
+                    join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True,\
+                    Angebote.kategorie.contains(search_string)).\
+                    order_by(Angebote.id)
+                results = qry.all()
+
             else:
-                qry = db.session.query(Angebote).filter(Angebote.aktiv == True)
+                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name,\
+                    Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
+                    join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True).\
+                    order_by(Angebote.id)
                 results = qry.all()
         else:
-            qry = db.session.query(Angebote).filter(Angebote.aktiv == True)
+            qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name,\
+                Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
+                join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True).\
+                order_by(Angebote.id)
             results = qry.all()
 
         if not results:
             flash('Keine Ergebnisse!')
             return redirect('/nutzer/suchen')
         else:
-            # display results
-            table = Results(results, classes=["table", "is-bordered", "is-striped"])
-            table.add_column("kaufen", LinkCol("Kaufen", 'main_nutzer.kaufen', url_kwargs=dict(id='id')))
-            return render_template('suchen_nutzer.html', form=search, table=table)
+            return render_template('suchen_nutzer.html', form=search, results=results)
 
     return render_template('suchen_nutzer.html', form=search)
 
@@ -64,8 +82,6 @@ def kaufen(id):
     qry = db.session.query(Angebote).filter(
                 Angebote.id==id)
     angebot = qry.first()
-    print("XXXX")
-    print(angebot)
     if angebot:
         if request.method == 'POST':
             # kauefe aktualisieren
@@ -81,9 +97,25 @@ def kaufen(id):
             nutzer = db.session.query(Nutzer).filter(Nutzer.id == current_user.id).first()
             nutzer.guthaben -= angebot.preis
             db.session.commit()
-            # guthaben des arbeiters aktualisieren
 
-            # XX
+            # guthaben des arbeiters erhöhen, wenn ausbezahlt = false
+            arbeit_in_produkt = Arbeit.query.filter_by(angebot=angebot.id, ausbezahlt=False).all()
+            for arb in arbeit_in_produkt:
+                Nutzer.query.filter_by(id=arb.nutzer).first().guthaben += arb.stunden
+                arb.ausbezahlt = True
+                db.session.commit()
+
+            # guthaben des anbietenden betriebes erhöhen
+            anbietender_betrieb_id = angebot.betrieb
+            anbietender_betrieb = Betriebe.query.filter_by(id=anbietender_betrieb_id).first()
+            anbietender_betrieb.guthaben += angebot.preis
+
+            # guthaben des anbietenden betriebes verringern, wenn ausbezahlt = false
+            for arb in arbeit_in_produkt:
+                anbietender_betrieb.guthaben -= arb.stunden
+                db.session.commit()
+            
+
 
             flash(f"Kauf von '{angebot.name}' erfolgreich!")
             return redirect('/nutzer/suchen')
