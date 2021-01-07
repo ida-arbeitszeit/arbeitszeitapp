@@ -39,7 +39,7 @@ class Arbeit(UserMixin, db.Model):
     angebot = db.Column(db.Integer, db.ForeignKey("angebote.id"), nullable=False)
     nutzer = db.Column(db.Integer, db.ForeignKey("nutzer.id"), nullable=False)
     stunden = db.Column(db.Numeric(), nullable=False)
-    ausbezahlt = db.Column(db.Boolean, nullable=False)
+    ausbezahlt = db.Column(db.Boolean, nullable=False, default=False)
 
 class Arbeiter(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)

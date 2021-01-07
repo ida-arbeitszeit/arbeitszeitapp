@@ -70,19 +70,8 @@
               {% endfor %}
             </tbody>
         </table>
-        <div class="field is-grouped is-grouped-centered">
-          <div class="control">
-              <label class="radio">
-                <input type="radio" name="radio" value="now">
-                Arbeiter jetzt ausbezahlen
-              </label>
-              <br>
-              <label class="radio">
-                <input type="radio" name="radio" value="later" checked>
-                Arbeiter bei Verkauf automatisch ausbezahlen
-              </label>
-          </div>
-        </div>
+
+      
     {% else %}
       <p class="block">
         du hast noch keine MitarbeiterInnen registriert, deshalb kannst du noch keine
@@ -90,7 +79,7 @@
         Füge deinem Betrieb erst <a href="{{ url_for('main_betriebe.arbeit') }}"><u>hier</u></a> MitarbeiterInnen hinzu.
       </p>
     {% endif %}
-    
+
       <button class="button">
         Angebot erstellen
       </button>

@@ -156,8 +156,8 @@ def kaufen(id):
             kaufender_betrieb = db.session.query(Betriebe).filter(Betriebe.id == current_user.id).first()
             kaufender_betrieb.guthaben -= angebot.preis
             db.session.commit()
-            # guthaben des arbeiters erhöhen, wenn ausbezahlt = false
-            arbeit_in_produkt = Arbeit.query.filter_by(angebot=angebot.id, ausbezahlt=False).all()
+            # guthaben der arbeiter erhöhen
+            arbeit_in_produkt = Arbeit.query.filter_by(angebot=angebot.id).all()
             print("u_u_u", arbeit_in_produkt)
             for arb in arbeit_in_produkt:
                 Nutzer.query.filter_by(id=arb.nutzer).first().guthaben += arb.stunden
@@ -167,11 +167,12 @@ def kaufen(id):
             # guthaben des anbietenden betriebes erhöhen
             anbietender_betrieb_id = angebot.betrieb
             anbietender_betrieb = Betriebe.query.filter_by(id=anbietender_betrieb_id).first()
-            anbietender_betrieb.guthaben += angebot.preis
-            # guthaben des anbietenden betriebes verringern, wenn ausbezahlt = false
-            for arb in arbeit_in_produkt:
-                anbietender_betrieb.guthaben -= arb.stunden
-                db.session.commit()
+            anbietender_betrieb.guthaben += angebot.p_kosten
+
+            # # guthaben des anbietenden betriebes verringern, wenn ausbezahlt = false
+            # for arb in arbeit_in_produkt:
+            #     anbietender_betrieb.guthaben -= arb.stunden
+            #     db.session.commit()
 
             flash(f"Kauf von '{angebot.name}' erfolgreich!")
             return redirect('/betriebe/suchen')
@@ -260,7 +261,6 @@ def neues_angebot():
             assert len(nutzer_id_list) == len(stunden_list)
             kosten_arbeit = sum(stunden_list)
 
-
         # save new angebot
         new_angebot = Angebote(name=request.form["name"], betrieb=current_user.id,\
             beschreibung=request.form["beschreibung"], kategorie=request.form["kategorie"], p_kosten=kosten_pm,\
@@ -279,23 +279,12 @@ def neues_angebot():
 
         # create rows in table "arbeit"
         if arbeit_dict_not_zero:
-            if request_dict["radio"] == "now":
-                ausbezahlt=True
-            elif request_dict["radio"] == "later":
-                ausbezahlt=False
-
             assert len(nutzer_id_list) == len(stunden_list)
             for count, i in enumerate(nutzer_id_list):
                 new_arbeit = Arbeit(angebot=new_angebot.id, nutzer=i,\
-                    stunden=stunden_list[count], ausbezahlt=ausbezahlt)
+                    stunden=stunden_list[count], ausbezahlt=False)
                 db.session.add(new_arbeit)
                 db.session.commit()
-                # abzug arbeitskosten von guthaben UND überweisung auf arbeiter-konto,
-                # falls sofort ausgezahlt werden soll
-                if  ausbezahlt:
-                    current_user.guthaben -= stunden_list[count]
-                    Nutzer.query.filter_by(id=i).first().guthaben += stunden_list[count]
-                    db.session.commit()
 
         # kosten zusammenfassen und bestätigen lassen!
         flash('Angebot erfolgreich gespeichert!')
@@ -306,3 +295,28 @@ def neues_angebot():
     "Nachbarschaftshilfe", "Unterricht und Kurse", "Verschenken & Tauschen"]
 
     return render_template('neues_angebot.html', produktionsmittel_aktiv=produktionsmittel_aktiv, arbeiter_all=arbeiter_all, categ=categ)
+
+
+@main_betriebe.route('/betriebe/meine_angebote')
+@login_required
+def meine_angebote():
+    results = Angebote.query.filter_by(aktiv=True, betrieb=current_user.id).all()
+    print("res", results)
+    return render_template('meine_angebote.html', results=results)
+
+@main_betriebe.route('/betriebe/angebot_loeschen', methods=['GET', 'POST'])
+@login_required
+def angebot_loeschen():
+    angebot_id = request.args.get("id")
+    angebot = Angebote.query.filter_by(id=angebot_id).first()
+
+    if request.method == 'POST':
+        if request.form["verbraucht"] == "ja":
+            ...
+        else:
+            ...
+        flash("gelöscht...")
+
+
+
+    return render_template('angebot_loeschen.html', angebot=angebot)
