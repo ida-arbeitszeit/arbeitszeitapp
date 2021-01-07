@@ -14,12 +14,14 @@ class Betriebe(UserMixin, db.Model):
     password = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(1000), nullable=False)
     guthaben = db.Column(db.Numeric(), default=0)
+    fik = db.Column(db.Numeric(), nullable=False, default=1)
 
 class Angebote(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(1000), nullable=False)
     betrieb = db.Column(db.Integer, db.ForeignKey("betriebe.id"), nullable=False)
     beschreibung = db.Column(db.String(1000), nullable=False)
+    kategorie = db.Column(db.String(50), nullable=False)
     p_kosten = db.Column(db.Numeric(), nullable=False)
     v_kosten = db.Column(db.Numeric(), nullable=False)
     preis = db.Column(db.Numeric(), nullable=False)
