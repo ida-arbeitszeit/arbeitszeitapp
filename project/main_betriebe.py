@@ -6,9 +6,7 @@ from .models import Angebote, Kaeufe, Betriebe, Nutzer, PMVerbrauchProdukt, Arbe
 from .forms import ProductSearchForm
 from .tables import ProduktionsmittelTable, ArbeiterTable
 from decimal import Decimal
-from sqlalchemy.sql.functions import coalesce
 from sqlalchemy.sql import func
-
 
 main_betriebe = Blueprint('main_betriebe', __name__)
 
@@ -38,8 +36,8 @@ def profile():
 @main_betriebe.route('/betriebe/arbeit', methods=['GET', 'POST'])
 @login_required
 def arbeit():
-    arbeiter = db.session.query(Nutzer.id, Nutzer.name).select_from(Arbeiter)\
-        .join(Nutzer, Arbeiter.nutzer==Nutzer.id).filter(Arbeiter.betrieb==current_user.id).all()
+    arbeiter = db.session.query(Nutzer.id, Nutzer.name, func.sum(Arbeit.stunden).label('summe_stunden')).\
+        select_from(Arbeit).join(Angebote).join(Nutzer).filter(Angebote.betrieb==current_user.id).group_by(Nutzer.id)
     table = ArbeiterTable(arbeiter, classes=["table", "is-bordered", "is-striped"])
     fik = Betriebe.query.filter_by(id=current_user.id).first().fik
 
@@ -65,17 +63,11 @@ def arbeit():
 @main_betriebe.route('/betriebe/produktionsmittel')
 @login_required
 def produktionsmittel():
-    # produktionsmittel_qry = db.session.query(Kaeufe.id, Angebote.name, Angebote.beschreibung,\
-    #     Angebote.preis, coalesce(PMVerbrauchGesamt.prozent_gebraucht, 0).label("prozent_gebraucht")).\
-    #     outerjoin(Angebote, Kaeufe.angebot==Angebote.id).outerjoin(PMVerbrauchGesamt,\
-    #     Kaeufe.id==PMVerbrauchGesamt.kauf).filter(Kaeufe.betrieb==current_user.id)
-
     produktionsmittel_qry = db.session.query(Kaeufe.id, Angebote.name, Angebote.beschreibung,\
         Angebote.preis, func.sum(PMVerbrauchProdukt.prozent_gebraucht).label("prozent_gebraucht")).select_from(Kaeufe)\
         .filter(Kaeufe.betrieb==current_user.id).outerjoin(PMVerbrauchProdukt,\
         Kaeufe.id==PMVerbrauchProdukt.kauf).join(Angebote, Kaeufe.angebot==Angebote.id).\
         group_by(Kaeufe, Angebote, PMVerbrauchProdukt.kauf)
-
 
     produktionsmittel_aktiv = produktionsmittel_qry.having(func.sum(PMVerbrauchProdukt.prozent_gebraucht)<100).all()
     produktionsmittel_inaktiv = produktionsmittel_qry.having(func.sum(PMVerbrauchProdukt.prozent_gebraucht)== 100).all()
@@ -157,17 +149,12 @@ def kaufen(id):
             # angebote aktualisieren (aktiv = False)
             angebot.aktiv = False
             db.session.commit()
-            # produktionsmittel (Verbrauch Gesamt) aktualisieren
-            # new_produktionsmittel = PMVerbrauchGesamt(kauf=new_kauf.id, prozent_gebraucht=0)
-            # db.session.add(new_produktionsmittel)
-            # db.session.commit()
             # guthaben self aktualisieren
             kaufender_betrieb = db.session.query(Betriebe).filter(Betriebe.id == current_user.id).first()
             kaufender_betrieb.guthaben -= angebot.preis
             db.session.commit()
             # guthaben der arbeiter erhöhen
             arbeit_in_produkt = Arbeit.query.filter_by(angebot=angebot.id).all()
-            print("u_u_u", arbeit_in_produkt)
             for arb in arbeit_in_produkt:
                 Nutzer.query.filter_by(id=arb.nutzer).first().guthaben += arb.stunden
                 arb.ausbezahlt = True
@@ -177,11 +164,6 @@ def kaufen(id):
             anbietender_betrieb_id = angebot.betrieb
             anbietender_betrieb = Betriebe.query.filter_by(id=anbietender_betrieb_id).first()
             anbietender_betrieb.guthaben += angebot.p_kosten
-
-            # # guthaben des anbietenden betriebes verringern, wenn ausbezahlt = false
-            # for arb in arbeit_in_produkt:
-            #     anbietender_betrieb.guthaben -= arb.stunden
-            #     db.session.commit()
 
             flash(f"Kauf von '{angebot.name}' erfolgreich!")
             return redirect('/betriebe/suchen')
@@ -197,7 +179,6 @@ def anbieten_info():
     """
     infos zum anbieten von produkten
     """
-
     return render_template('anbieten_info.html')
 
 
@@ -218,10 +199,8 @@ def neues_angebot():
         .join(Nutzer, Arbeiter.nutzer==Nutzer.id).filter(Arbeiter.betrieb==current_user.id).all()
 
     if request.method == 'POST':
-        print("ubb", request.form)
         # create request dictionary
         request_dict = request.form.to_dict()
-
         # arbeit
         # dict with arbeit values
         arbeit_dict = dict(filter(lambda elem: elem[0][:7] == 'nutzer_', request_dict.items()))
@@ -252,12 +231,6 @@ def neues_angebot():
             for num1, num2 in zip(prozent_list, preise_list):
                 kosten_einzeln.append(num1 * num2)
             kosten_pm = sum(kosten_einzeln)
-            # update prodmittel gebraucht (gesamt) in prozent
-            # assert len(id_list) == len(prozent_list)
-            # for count, i in enumerate(id_list):
-            #     prdmittel = db.session.query(PMVerbrauchGesamt).filter(PMVerbrauchGesamt.kauf == i).first()
-            #     prdmittel.prozent_gebraucht += prozent_list[count]*100
-            #     db.session.commit()
 
         if arbeit_dict_not_zero:
             # calculate kosten arbeit
@@ -319,14 +292,27 @@ def meine_angebote():
 def angebot_loeschen():
     angebot_id = request.args.get("id")
     angebot = Angebote.query.filter_by(id=angebot_id).first()
-
     if request.method == 'POST':
         if request.form["verbraucht"] == "ja":
-            ...
+            # alle Arbeiter automatisch ausbezahlen. Die Produktionsmittel bleiben als verbraucht markiert.
+            arbeit_in_produkt = Arbeit.query.filter_by(angebot=angebot.id).all()
+            for arb in arbeit_in_produkt:
+                assert arb.ausbezahlt == False
+                Nutzer.query.filter_by(id=arb.nutzer).first().guthaben += arb.stunden
+                arb.ausbezahlt = True
         else:
-            ...
-        flash("gelöscht...")
+            # Produktionsmittel wieder freigegeben und geleistete Arbeit auf Null setzen
+            pm_in_produkt = PMVerbrauchProdukt.query.filter_by(angebot=angebot.id).all()
+            for pm in pm_in_produkt:
+                pm.prozent_gebraucht = 0
+            arbeit_in_produkt = Arbeit.query.filter_by(angebot=angebot.id).all()
+            for arb in arbeit_in_produkt:
+                arb.stunden = 0
+                arb.ausbezahlt = True
 
-
+        angebot.aktiv = False
+        db.session.commit()
+        flash("Löschen des Angebots erfolgreich.")
+        return redirect(url_for('main_betriebe.meine_angebote'))
 
     return render_template('angebot_loeschen.html', angebot=angebot)
