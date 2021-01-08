@@ -46,11 +46,6 @@ class Arbeiter(UserMixin, db.Model):
     nutzer = db.Column(db.Integer, db.ForeignKey("nutzer.id"), nullable=False)
     betrieb = db.Column(db.Integer, db.ForeignKey("betriebe.id"), nullable=False)
 
-class PMVerbrauchGesamt(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    kauf = db.Column(db.Integer, db.ForeignKey("kaeufe.id"), nullable=False)
-    prozent_gebraucht = db.Column(db.Numeric(), nullable=False)
-
 class PMVerbrauchProdukt(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     angebot = db.Column(db.Integer, db.ForeignKey("angebote.id"), nullable=False)
