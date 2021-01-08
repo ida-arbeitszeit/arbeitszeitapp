@@ -16,7 +16,6 @@ def help():
 
 
 ### Nutzer
-
 @auth.route('/nutzer/login')
 def login_nutzer():
     return render_template('login_nutzer.html')
@@ -66,7 +65,6 @@ def signup_nutzer_post():
 
 
 ## Betriebe
-
 @auth.route('/betriebe/login')
 def login_betriebe():
     return render_template('login_betriebe.html')
@@ -116,7 +114,6 @@ def signup_betriebe_post():
 
 
 ## logout
-
 @auth.route('/zurueck')
 def zurueck():
     session["user_type"] = None
