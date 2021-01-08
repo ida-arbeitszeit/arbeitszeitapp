@@ -18,7 +18,7 @@
 
 {% if angebot.p_kosten > 0 %}
 <p class="block">
-  Falls ja, werden Arbeiter automatisch ausbezahlt und die Produktionsmittel werden als gebraucht markiert.<br>
+  Falls ja, werden Arbeiter automatisch ausbezahlt und die Produktionsmittel bleiben als verbraucht markiert.<br>
   Falls nein, werden Produktionsmittel einfach wieder freigegeben und es wird keine Arbeit ausbezahlt.
 </p>
 {% else %}
@@ -55,20 +55,6 @@
       </div>
     </form>
   </div>
-
-
-
-
-  {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      {% for message in messages %}
-        <div class="notification is-danger">{{ message }} (to do...) </div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
-
-
-
 
 
 

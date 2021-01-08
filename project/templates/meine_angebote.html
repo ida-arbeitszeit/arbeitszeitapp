@@ -10,6 +10,18 @@
   Hier siehts du deine aktuellen Angebote. Bei Bedarf kannst du sie löschen.
 </p>
 
+
+
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      {% for message in messages %}
+        <div class="notification is-danger">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+
+
   {% if results is defined and results|length %}
     <table class="table is-bordered is-fullwidth">
       <thead><tr><th>Angebot-ID</th><th>Name</th><th>Beschreibung</th><th>Kategorie</th><th>Kosten p</th><th>Kosten v</th><th>Preis</th><th>Löschen</th></tr></thead>
