@@ -4,7 +4,7 @@ from flask_table import LinkCol, Col
 from . import db
 from .models import Angebote, Kaeufe, Betriebe, Nutzer, PMVerbrauchProdukt, Arbeit, Arbeiter
 from .forms import ProductSearchForm
-from .tables import ProduktionsmittelTable, ArbeiterTable
+from .tables import ProduktionsmittelTable, ArbeiterTable1, ArbeiterTable2
 from decimal import Decimal
 from sqlalchemy.sql import func
 
@@ -36,9 +36,13 @@ def profile():
 @main_betriebe.route('/betriebe/arbeit', methods=['GET', 'POST'])
 @login_required
 def arbeit():
-    arbeiter = db.session.query(Nutzer.id, Nutzer.name, func.sum(Arbeit.stunden).label('summe_stunden')).\
-        select_from(Arbeit).join(Angebote).join(Nutzer).filter(Angebote.betrieb==current_user.id).group_by(Nutzer.id)
-    table = ArbeiterTable(arbeiter, classes=["table", "is-bordered", "is-striped"])
+    arbeiter1 = db.session.query(Nutzer.id, Nutzer.name).\
+        select_from(Arbeiter).join(Nutzer).filter(Arbeiter.betrieb==current_user.id).group_by(Nutzer.id).all()
+    table1 = ArbeiterTable1(arbeiter1, classes=["table", "is-bordered", "is-striped"])
+
+    arbeiter2 = db.session.query(Nutzer.id, Nutzer.name, func.sum(Arbeit.stunden).label('summe_stunden')).\
+        select_from(Angebote).filter(Angebote.betrieb==current_user.id).join(Arbeit).join(Nutzer).group_by(Nutzer.id).all()
+    table2 = ArbeiterTable2(arbeiter2, classes=["table", "is-bordered", "is-striped"])
     fik = Betriebe.query.filter_by(id=current_user.id).first().fik
 
     if request.method == 'POST':
@@ -58,7 +62,7 @@ def arbeit():
             db.session.commit()
         return redirect(url_for('main_betriebe.arbeit'))
 
-    return render_template("arbeit.html", table=table, fik=fik)
+    return render_template("arbeit.html", table1=table1, table2=table2, fik=fik)
 
 @main_betriebe.route('/betriebe/produktionsmittel')
 @login_required
@@ -145,6 +149,10 @@ def kaufen(id):
                     type_nutzer = False, betrieb = current_user.id,
                     nutzer = None)
             db.session.add(new_kauf)
+            db.session.commit()
+            # pmverbrauchprodukt hinzufügen
+            new_pm = PMVerbrauchProdukt(angebot=angebot.id, kauf=new_kauf.id, prozent_gebraucht=0)
+            db.session.add(new_pm)
             db.session.commit()
             # angebote aktualisieren (aktiv = False)
             angebot.aktiv = False
@@ -273,9 +281,9 @@ def neues_angebot():
         flash('Angebot erfolgreich gespeichert!')
         return redirect('/betriebe/home')
 
-    categ = ["Auto, Rad & Boot", "Dienstleistungen", "Eintrittskarten & Tickets", "Elektronik", "Familie, Kind & Baby",
-    "Freizeit, Hobby & Nachbarschaft", "Haus & Garten", "Haustiere", "Immobilien", "Jobs", "Mode & Beauty", "Musik, Filme und Bücher",
-    "Nachbarschaftshilfe", "Unterricht und Kurse", "Verschenken & Tauschen"]
+    categ = ["Auto, Rad & Boot", "Dienstleistungen", "Elektronik", "Familie, Kind & Baby",
+    "Freizeit & Hobby", "Haus & Garten", "Haustiere", "Mode & Beauty", "Nahrungsmittel", "Musik, Filme und Bücher",
+    "Nachbarschaftshilfe", "Unterricht und Kurse"]
 
     return render_template('neues_angebot.html', produktionsmittel_aktiv=produktionsmittel_aktiv, arbeiter_all=arbeiter_all, categ=categ)
 
