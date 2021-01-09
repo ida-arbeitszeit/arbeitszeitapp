@@ -31,7 +31,7 @@
   <div class="column is-4 is-offset-4">
     <div class="content">
       <table class="table is-bordered is-narrow">
-        <caption>Kosten für {{ angebot.name }}</caption>
+        <caption  style="background-color:hsl(0, 0%, 100%);">Kosten für {{ angebot.name }}</caption>
         <thead><tr><th>Kosten Produktionsmittel</th><th>Kosten Arbeit</th></tr></thead>
         <tbody><tr><td>{{ angebot.p_kosten }}</td><td>{{ angebot.v_kosten }}</td></tr></tbody>
       </table>
@@ -49,6 +49,9 @@
             <input type="radio" name="verbraucht" value="nein">
             Nein, weder Arbeit noch PM wurden verbraucht.
           </label>
+          <div class="block">
+            <i><br>[Noch zu implementieren: Arbeit und PM wurden teilweise verbraucht.]</i>
+          </div>
           <input class="button" type="submit" value="Bestätigen und Angebot löschen">
         </div>
         <br>
