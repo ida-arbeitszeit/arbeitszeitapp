@@ -16,27 +16,6 @@ def help():
 
 
 ### Nutzer
-@auth.route('/nutzer/login')
-def login_nutzer():
-    return render_template('login_nutzer.html')
-
-@auth.route('/nutzer/login', methods=['POST'])
-def login_nutzer_post():
-    email = request.form.get('email')
-    password = request.form.get('password')
-    remember = True if request.form.get('remember') else False
-    nutzer = Nutzer.query.filter_by(email=email).first()
-
-    # check if the user actually exists
-    # take the user-supplied password, hash it, and compare it to the hashed password in the database
-    if not nutzer or not check_password_hash(nutzer.password, password):
-        flash('Please check your login details and try again.')
-        return redirect(url_for('auth.login_nutzer')) # if the user doesn't exist or password is wrong, reload the page
-
-    # if the above check passes, then we know the user has the right credentials
-    session["user_type"] = "nutzer"
-    login_user(nutzer, remember=remember)
-    return redirect(url_for('main_nutzer.profile'))
 
 @auth.route('/nutzer/signup')
 def signup_nutzer():
@@ -63,6 +42,28 @@ def signup_nutzer_post():
 
     return redirect(url_for('auth.login_nutzer'))
 
+
+@auth.route('/nutzer/login')
+def login_nutzer():
+    return render_template('login_nutzer.html')
+
+@auth.route('/nutzer/login', methods=['POST'])
+def login_nutzer_post():
+    email = request.form.get('email')
+    password = request.form.get('password')
+    remember = True if request.form.get('remember') else False
+    nutzer = Nutzer.query.filter_by(email=email).first()
+
+    # check if the user actually exists
+    # take the user-supplied password, hash it, and compare it to the hashed password in the database
+    if not nutzer or not check_password_hash(nutzer.password, password):
+        flash('Please check your login details and try again.')
+        return redirect(url_for('auth.login_nutzer')) # if the user doesn't exist or password is wrong, reload the page
+
+    # if the above check passes, then we know the user has the right credentials
+    session["user_type"] = "nutzer"
+    login_user(nutzer, remember=remember)
+    return redirect(url_for('main_nutzer.profile'))
 
 ## Betriebe
 @auth.route('/betriebe/login')
