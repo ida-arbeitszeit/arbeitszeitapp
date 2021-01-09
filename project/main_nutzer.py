@@ -32,7 +32,7 @@ def suchen():
 
         if search_string:
             if search.data['select'] == 'Name':
-                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name,\
+                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name, Betriebe.email,\
                     Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
                     join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True,\
                     Angebote.name.contains(search_string)).\
@@ -40,7 +40,7 @@ def suchen():
                 results = qry.all()
 
             elif search.data['select'] == 'Beschreibung':
-                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name,\
+                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name, Betriebe.email,\
                     Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
                     join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True,\
                     Angebote.beschreibung.contains(search_string)).\
@@ -48,7 +48,7 @@ def suchen():
                 results = qry.all()
 
             elif search.data['select'] == 'Kategorie':
-                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name,\
+                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name, Betriebe.email,\
                     Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
                     join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True,\
                     Angebote.kategorie.contains(search_string)).\
@@ -56,13 +56,13 @@ def suchen():
                 results = qry.all()
 
             else:
-                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name,\
+                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name, Betriebe.email,\
                     Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
                     join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True).\
                     order_by(Angebote.id)
                 results = qry.all()
         else:
-            qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name,\
+            qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name, Betriebe.email,\
                 Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
                 join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True).\
                 order_by(Angebote.id)
@@ -114,7 +114,7 @@ def kaufen(id):
             for arb in arbeit_in_produkt:
                 anbietender_betrieb.guthaben -= arb.stunden
                 db.session.commit()
-            
+
 
 
             flash(f"Kauf von '{angebot.name}' erfolgreich!")
