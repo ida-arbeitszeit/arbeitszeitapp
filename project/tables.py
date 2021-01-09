@@ -7,7 +7,11 @@ class ProduktionsmittelTable(Table):
     preis = Col('Preis')
     prozent_gebraucht = Col('Prozent_Gebraucht')
 
-class ArbeiterTable(Table):
+class ArbeiterTable1(Table):
+    id = Col('Nutzer-Id')
+    name = Col('Name')
+
+class ArbeiterTable2(Table):
     id = Col('Nutzer-Id')
     name = Col('Name')
     summe_stunden = Col('Summe Stunden')

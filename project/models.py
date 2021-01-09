@@ -6,7 +6,7 @@ class Nutzer(UserMixin, db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(1000), nullable=False)
-    guthaben = db.Column(db.Numeric(), default=0)
+    guthaben = db.Column(db.Numeric(), default=0, nullable=False)
 
 class Betriebe(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
