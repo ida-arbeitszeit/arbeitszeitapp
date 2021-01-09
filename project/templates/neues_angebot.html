@@ -16,13 +16,18 @@
         </div>
         <div class="block"></div>
 
+        <hr>
+
         <h1 class="subtitle is-4">Beschreibung des Produkts</h1>
         <div class="field">
           <div class="control">
             <textarea class="textarea is-large", name="beschreibung" required></textarea>
           </div>
+          <p class="help">(Verfügbarkeit, Kontaktmöglichkeiten, etc.)</p>
         </div>
         <div class="block"></div>
+
+        <hr>
 
         <h1 class="subtitle is-4">Kategorie auswählen</h1>
         <div class="field is-grouped is-grouped-centered">
@@ -39,6 +44,7 @@
           </div>
         </div>
 
+    <hr>
     <div class="block"></div>
     <h3 class="subtitle is-4">Sind Produktionsmittel enthalten?</h3>
 
@@ -59,6 +65,7 @@
       </div>
     {% endif %}
 
+    <hr>
       <h3 class="subtitle is-4">Wieviele Arbeitsstunden sind enthalten?</h3>
 
     {% if arbeiter_all is defined and arbeiter_all|length %}
@@ -82,6 +89,21 @@
         Füge deinem Betrieb erst <a href="{{ url_for('main_betriebe.arbeit') }}"><u>hier</u></a> MitarbeiterInnen hinzu.
       </p>
     {% endif %}
+
+    <hr>
+
+  <div class="column is-5 is-offset-4">
+    <div class="field">
+      <div class="control">
+        <input type="radio" id="male" name="gender" value="male">
+        <label for="male">Angebot nach Kauf automatisch erneuern</label><br>
+      </div>
+      <div class="control">
+        <input type="radio" id="female" name="gender" value="female">
+        <label for="female">Einmaliges Angebot</label><br>
+      </div>
+    </div>
+  </div>
 
     {% if produktionsmittel_aktiv|length or arbeiter_all|length %}
       <button class="button">

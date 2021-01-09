@@ -91,7 +91,7 @@ def suchen():
 
         if search_string:
             if search.data['select'] == 'Name':
-                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name,\
+                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name, Betriebe.email,\
                     Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
                     join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True,\
                     Angebote.name.contains(search_string)).\
@@ -99,7 +99,7 @@ def suchen():
                 results = qry.all()
 
             elif search.data['select'] == 'Beschreibung':
-                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name,\
+                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name, Betriebe.email,\
                     Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
                     join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True,\
                     Angebote.beschreibung.contains(search_string)).\
@@ -107,7 +107,7 @@ def suchen():
                 results = qry.all()
 
             elif search.data['select'] == 'Kategorie':
-                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name,\
+                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name, Betriebe.email,\
                     Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
                     join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True,\
                     Angebote.kategorie.contains(search_string)).\
@@ -115,13 +115,13 @@ def suchen():
                 results = qry.all()
 
             else:
-                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name,\
+                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name, Betriebe.email,\
                     Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
                     join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True).\
                     order_by(Angebote.id)
                 results = qry.all()
         else:
-            qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name,\
+            qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name, Betriebe.email,\
                 Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
                 join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True).\
                 order_by(Angebote.id)
@@ -291,9 +291,9 @@ def neues_angebot():
 @main_betriebe.route('/betriebe/meine_angebote')
 @login_required
 def meine_angebote():
-    results = Angebote.query.filter_by(aktiv=True, betrieb=current_user.id).all()
-    print("res", results)
-    return render_template('meine_angebote.html', results=results)
+    aktuelle_angebote = Angebote.query.filter_by(aktiv=True, betrieb=current_user.id).all()
+    vergangene_angebote = Angebote.query.filter_by(aktiv=False, betrieb=current_user.id).all()
+    return render_template('meine_angebote.html', aktuelle_angebote=aktuelle_angebote, vergangene_angebote=vergangene_angebote)
 
 @main_betriebe.route('/betriebe/angebot_loeschen', methods=['GET', 'POST'])
 @login_required

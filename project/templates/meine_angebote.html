@@ -22,14 +22,14 @@
 
 
 
-  {% if results is defined and results|length %}
+  {% if aktuelle_angebote is defined and aktuelle_angebote|length %}
   <div class="content">
 
   </div>
     <table class="table is-bordered is-fullwidth">
-      <thead><tr><th>Angebot-ID</th><th>Name</th><th>Beschreibung</th><th>Kategorie</th><th>Kosten p</th><th>Kosten v</th><th>Preis</th><th>Löschen</th></tr></thead>
+      <thead><tr><th>Angebot-ID</th><th>Produktname</th><th>Beschreibung</th><th>Kategorie</th><th>Kosten p</th><th>Kosten v</th><th>Preis</th><th>Löschen</th></tr></thead>
         <tbody>
-          {% for res in results %}
+          {% for res in aktuelle_angebote %}
             <tr><td>{{ res.id }}</td><td>{{ res.name }}</td> <td>{{ res.beschreibung }}</td> <td>{{ res.kategorie }}</td><td>{{ res.p_kosten }}</td><td>{{ res.v_kosten }}</td><td>{{ res.preis }}</td><td><a href="{{ url_for('main_betriebe.angebot_loeschen', id=res.id) }}"><u>Link</u></a></td></tr>
           {% endfor %}
         </tbody>
@@ -37,5 +37,22 @@
   {% endif %}
 
 
+  <h1 class="title">
+    Meine vergangenen Angebote
+  </h1>
+
+  {% if vergangene_angebote is defined and vergangene_angebote|length %}
+  <div class="content">
+
+  </div>
+    <table class="table is-bordered is-fullwidth">
+      <thead><tr><th>Angebot-ID</th><th>Produktname</th><th>Beschreibung</th><th>Kategorie</th><th>Kosten p</th><th>Kosten v</th><th>Preis</th></tr></thead>
+        <tbody>
+          {% for res in vergangene_angebote %}
+            <tr><td>{{ res.id }}</td><td>{{ res.name }}</td> <td>{{ res.beschreibung }}</td> <td>{{ res.kategorie }}</td><td>{{ res.p_kosten }}</td><td>{{ res.v_kosten }}</td><td>{{ res.preis }}</td></tr>
+          {% endfor %}
+        </tbody>
+    </table>
+  {% endif %}
 
 {% endblock %}
