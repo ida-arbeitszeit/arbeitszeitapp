@@ -5,14 +5,24 @@
   Willkommen, {{ current_user.name }}!
 </h1>
 
-<div class="block">
-  Dein Guthaben: {{ current_user.guthaben }} Stunden
+<div class="column is-4 is-offset-4">
+
+
+  <div class="content">
+    <table>
+      <tr>
+        <td>Dein Guthaben:</td><td>{{ current_user.guthaben }} Stunden</td>
+      </tr>
+      <tr>
+        <td>Deine ID:</td><td>{{ current_user.id }}</td>
+      </tr>
+      <tr>
+        <td>Deine Email:</td><td>{{ current_user.email }}</td>
+      </tr>
+    </table>
+  </div>
+
 </div>
-<div class="block">
-  Deine ID: {{ current_user.id }}.
-</div>
-<div class="block">
-  Deine Email: {{ current_user.email }}.
-</div>
+
 
 {% endblock %}
