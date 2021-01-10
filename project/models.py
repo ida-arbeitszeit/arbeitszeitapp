@@ -52,11 +52,6 @@ class Produktionsmittel(UserMixin, db.Model):
     kauf = db.Column(db.Integer, db.ForeignKey("kaeufe.id"), nullable=False)
     prozent_gebraucht = db.Column(db.Numeric(), nullable=False)
 
-class ProduktionsmittelBesitz(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    betrieb = db.Column(db.Integer, db.ForeignKey("betriebe.id"), nullable=False)
-    angebot = db.Column(db.Integer, db.ForeignKey("angebote.id"), nullable=False)
-
 class Bewertungen(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     type_nutzer = db.Column(db.Boolean, nullable=False) # either betrieb or nutzer
