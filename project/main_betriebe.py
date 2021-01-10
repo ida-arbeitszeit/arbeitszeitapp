@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, session, redirect, url_for, reques
 from flask_login import login_required, current_user
 from flask_table import LinkCol, Col
 from . import db
-from .models import Angebote, Kaeufe, Betriebe, Nutzer, PMVerbrauchProdukt, Arbeit, Arbeiter
+from .models import Angebote, Kaeufe, Betriebe, Nutzer, Produktionsmittel, ProduktionsmittelBesitz, Arbeit, Arbeiter
 from .forms import ProductSearchForm
 from .tables import ProduktionsmittelTable, ArbeiterTable1, ArbeiterTable2
 from decimal import Decimal
@@ -68,13 +68,13 @@ def arbeit():
 @login_required
 def produktionsmittel():
     produktionsmittel_qry = db.session.query(Kaeufe.id, Angebote.name, Angebote.beschreibung,\
-        Angebote.preis, func.sum(PMVerbrauchProdukt.prozent_gebraucht).label("prozent_gebraucht")).select_from(Kaeufe)\
-        .filter(Kaeufe.betrieb==current_user.id).outerjoin(PMVerbrauchProdukt,\
-        Kaeufe.id==PMVerbrauchProdukt.kauf).join(Angebote, Kaeufe.angebot==Angebote.id).\
-        group_by(Kaeufe, Angebote, PMVerbrauchProdukt.kauf)
+        Angebote.preis, func.sum(Produktionsmittel.prozent_gebraucht).label("prozent_gebraucht")).select_from(Kaeufe)\
+        .filter(Kaeufe.betrieb==current_user.id).outerjoin(Produktionsmittel,\
+        Kaeufe.id==Produktionsmittel.kauf).join(Angebote, Kaeufe.angebot==Angebote.id).\
+        group_by(Kaeufe, Angebote, Produktionsmittel.kauf)
 
-    produktionsmittel_aktiv = produktionsmittel_qry.having(func.sum(PMVerbrauchProdukt.prozent_gebraucht)<100).all()
-    produktionsmittel_inaktiv = produktionsmittel_qry.having(func.sum(PMVerbrauchProdukt.prozent_gebraucht)== 100).all()
+    produktionsmittel_aktiv = produktionsmittel_qry.having(func.sum(Produktionsmittel.prozent_gebraucht)<100).all()
+    produktionsmittel_inaktiv = produktionsmittel_qry.having(func.sum(Produktionsmittel.prozent_gebraucht)== 100).all()
 
     table_aktiv = ProduktionsmittelTable(produktionsmittel_aktiv, classes=["table", "is-bordered", "is-striped"])
     table_inaktiv = ProduktionsmittelTable(produktionsmittel_inaktiv, classes=["table", "is-bordered", "is-striped"])
@@ -150,16 +150,16 @@ def kaufen(id):
                     nutzer = None)
             db.session.add(new_kauf)
             db.session.commit()
-            # pmverbrauchprodukt hinzufügen
-            new_pm = PMVerbrauchProdukt(angebot=angebot.id, kauf=new_kauf.id, prozent_gebraucht=0)
-            db.session.add(new_pm)
-            db.session.commit()
             # angebote aktualisieren (aktiv = False)
             angebot.aktiv = False
             db.session.commit()
             # guthaben self aktualisieren
             kaufender_betrieb = db.session.query(Betriebe).filter(Betriebe.id == current_user.id).first()
             kaufender_betrieb.guthaben -= angebot.preis
+            db.session.commit()
+            # Produktionsmittel als Besitz hinzufügen
+            new_pm = ProduktionsmittelBesitz(betrieb=kaufender_betrieb.id, angebot=angebot.id)
+            db.session.add(new_pm)
             db.session.commit()
             # guthaben der arbeiter erhöhen
             arbeit_in_produkt = Arbeit.query.filter_by(angebot=angebot.id).all()
@@ -197,11 +197,11 @@ def neues_angebot():
     """
     Ein neues Angebot hinzufügen
     """
-    produktionsmittel_aktiv = produktionsmittel_qry = db.session.query(Kaeufe.id, Angebote.name, Angebote.beschreibung,\
-        Angebote.preis, func.sum(PMVerbrauchProdukt.prozent_gebraucht).label("prozent_gebraucht")).select_from(Kaeufe)\
-        .filter(Kaeufe.betrieb==current_user.id).outerjoin(PMVerbrauchProdukt,\
-        Kaeufe.id==PMVerbrauchProdukt.kauf).join(Angebote, Kaeufe.angebot==Angebote.id).\
-        group_by(Kaeufe, Angebote, PMVerbrauchProdukt.kauf).having(func.sum(PMVerbrauchProdukt.prozent_gebraucht) < 100).all()
+    produktionsmittel_aktiv = db.session.query(Kaeufe.id, Angebote.name, Angebote.beschreibung,\
+        Angebote.preis, func.sum(Produktionsmittel.prozent_gebraucht).label("prozent_gebraucht")).select_from(Kaeufe)\
+        .filter(Kaeufe.betrieb==current_user.id).outerjoin(Produktionsmittel,\
+        Kaeufe.id==Produktionsmittel.kauf).join(Angebote, Kaeufe.angebot==Angebote.id).\
+        group_by(Kaeufe, Angebote, Produktionsmittel.kauf).having(func.sum(Produktionsmittel.prozent_gebraucht) < 100).all()
 
     arbeiter_all = db.session.query(Nutzer.id, Nutzer.name).select_from(Arbeiter)\
         .join(Nutzer, Arbeiter.nutzer==Nutzer.id).filter(Arbeiter.betrieb==current_user.id).all()
@@ -224,21 +224,30 @@ def neues_angebot():
         kosten_pm = 0
         if pm_dict_not_zero:
             # calculate kosten pm
-            id_list = []
+            # turning pm-dict into two lists
+            kauf_id_list = []
             prozent_list = []
             for key in list(pm_dict_not_zero.keys()):
-                id_list.append(key[3:])
+                kauf_id_list.append(key[3:])
             for value in list(pm_dict_not_zero.values()):
                 prozent_list.append(Decimal(value)/100)
             # preise
             preise_list = []
-            for idx in id_list:
+            for idx in kauf_id_list:
                 qry = db.session.query(Kaeufe, Angebote.preis).join(Angebote, Kaeufe.angebot==Angebote.id).filter(Kaeufe.id == idx).all()
                 preise_list.append(Decimal(qry[0][1]))
             kosten_einzeln = []
             for num1, num2 in zip(prozent_list, preise_list):
                 kosten_einzeln.append(num1 * num2)
             kosten_pm = sum(kosten_einzeln)
+
+            # # update prdmittel gebraucht
+            # assert len(kauf_id_list) == len(prozent_list)
+            # for count, kauf_id in enumerate(kauf_id_list):
+            #     pm = Produktionsmittel.query.filter_by(kauf=kauf_id).first()
+            #     pm.prozent_gebraucht += prozent_list[count]*100
+            #     db.session.commit()
+
 
         if arbeit_dict_not_zero:
             # calculate kosten arbeit
@@ -259,14 +268,6 @@ def neues_angebot():
         db.session.add(new_angebot)
         db.session.commit()
 
-        # create rows in prdmittel gebraucht (Produkt)
-        if pm_dict_not_zero:
-            assert len(id_list) == len(prozent_list)
-            for count, i in enumerate(id_list):
-                new_produktionsmittel_prd = PMVerbrauchProdukt\
-                    (angebot=new_angebot.id, kauf=i, prozent_gebraucht=prozent_list[count]*100)
-                db.session.add(new_produktionsmittel_prd)
-                db.session.commit()
 
         # create rows in table "arbeit"
         if arbeit_dict_not_zero:
@@ -275,6 +276,15 @@ def neues_angebot():
                 new_arbeit = Arbeit(angebot=new_angebot.id, nutzer=i,\
                     stunden=stunden_list[count], ausbezahlt=False)
                 db.session.add(new_arbeit)
+                db.session.commit()
+
+        # new row in produktionsmittel! (um gesamten verbrauch zu erhalten, gruppieren/summieren!)
+        if pm_dict_not_zero:
+            assert len(kauf_id_list) == len(prozent_list)
+            for count, i in enumerate(kauf_id_list):
+                new_produktionsmittel_prd = Produktionsmittel\
+                    (angebot=new_angebot.id, kauf=i, prozent_gebraucht=prozent_list[count]*100)
+                db.session.add(new_produktionsmittel_prd)
                 db.session.commit()
 
         # kosten zusammenfassen und bestätigen lassen!
@@ -310,7 +320,7 @@ def angebot_loeschen():
                 arb.ausbezahlt = True
         else:
             # Produktionsmittel wieder freigegeben und geleistete Arbeit auf Null setzen
-            pm_in_produkt = PMVerbrauchProdukt.query.filter_by(angebot=angebot.id).all()
+            pm_in_produkt = Produktionsmittel.query.filter_by(angebot=angebot.id).all()
             for pm in pm_in_produkt:
                 pm.prozent_gebraucht = 0
             arbeit_in_produkt = Arbeit.query.filter_by(angebot=angebot.id).all()
