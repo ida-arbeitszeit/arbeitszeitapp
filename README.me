@@ -1,0 +1,9 @@
+in der python konsole:
+
+from project.app import db
+import project.models
+from project.app import app
+db.create_all(app=app)
+
+bash:
+export FLASK_APP=project.app
