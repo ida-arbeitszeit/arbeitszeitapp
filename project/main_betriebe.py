@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, session, redirect, url_for, reques
 from flask_login import login_required, current_user
 from flask_table import LinkCol, Col
 from . import db
-from .models import Angebote, Kaeufe, Betriebe, Nutzer, Produktionsmittel, ProduktionsmittelBesitz, Arbeit, Arbeiter
+from .models import Angebote, Kaeufe, Betriebe, Nutzer, Produktionsmittel, Arbeit, Arbeiter
 from .forms import ProductSearchForm
 from .tables import ProduktionsmittelTable, ArbeiterTable1, ArbeiterTable2
 from decimal import Decimal
@@ -67,14 +67,25 @@ def arbeit():
 @main_betriebe.route('/betriebe/produktionsmittel')
 @login_required
 def produktionsmittel():
+    # produktionsmittel_qry = db.session.query(Kaeufe.id, Angebote.name, Angebote.beschreibung,\
+    #     Angebote.preis, func.sum(Produktionsmittel.prozent_gebraucht).label("prozent_gebraucht")).select_from(Kaeufe)\
+    #     .filter(Kaeufe.betrieb==current_user.id).outerjoin(Produktionsmittel,\
+    #     Kaeufe.id==Produktionsmittel.kauf).join(Angebote, Kaeufe.angebot==Angebote.id).\
+    #     group_by(Kaeufe, Angebote, Produktionsmittel.kauf)
+
+
     produktionsmittel_qry = db.session.query(Kaeufe.id, Angebote.name, Angebote.beschreibung,\
-        Angebote.preis, func.sum(Produktionsmittel.prozent_gebraucht).label("prozent_gebraucht")).select_from(Kaeufe)\
+        Angebote.preis, func.coalesce(func.sum(Produktionsmittel.prozent_gebraucht).\
+        label("prozent_gebraucht"), 0).label("prozent_gebraucht")).select_from(Kaeufe)\
         .filter(Kaeufe.betrieb==current_user.id).outerjoin(Produktionsmittel,\
         Kaeufe.id==Produktionsmittel.kauf).join(Angebote, Kaeufe.angebot==Angebote.id).\
         group_by(Kaeufe, Angebote, Produktionsmittel.kauf)
 
-    produktionsmittel_aktiv = produktionsmittel_qry.having(func.sum(Produktionsmittel.prozent_gebraucht)<100).all()
-    produktionsmittel_inaktiv = produktionsmittel_qry.having(func.sum(Produktionsmittel.prozent_gebraucht)== 100).all()
+
+    produktionsmittel_aktiv = produktionsmittel_qry.having(func.coalesce(func.sum(Produktionsmittel.prozent_gebraucht).\
+    label("prozent_gebraucht"), 0).label("prozent_gebraucht")<100).all()
+    produktionsmittel_inaktiv = produktionsmittel_qry.having(func.coalesce(func.sum(Produktionsmittel.prozent_gebraucht).\
+    label("prozent_gebraucht"), 0).label("prozent_gebraucht")== 100).all()
 
     table_aktiv = ProduktionsmittelTable(produktionsmittel_aktiv, classes=["table", "is-bordered", "is-striped"])
     table_inaktiv = ProduktionsmittelTable(produktionsmittel_inaktiv, classes=["table", "is-bordered", "is-striped"])
@@ -157,10 +168,6 @@ def kaufen(id):
             kaufender_betrieb = db.session.query(Betriebe).filter(Betriebe.id == current_user.id).first()
             kaufender_betrieb.guthaben -= angebot.preis
             db.session.commit()
-            # Produktionsmittel als Besitz hinzufügen
-            new_pm = ProduktionsmittelBesitz(betrieb=kaufender_betrieb.id, angebot=angebot.id)
-            db.session.add(new_pm)
-            db.session.commit()
             # guthaben der arbeiter erhöhen
             arbeit_in_produkt = Arbeit.query.filter_by(angebot=angebot.id).all()
             for arb in arbeit_in_produkt:
@@ -197,11 +204,22 @@ def neues_angebot():
     """
     Ein neues Angebot hinzufügen
     """
+    # produktionsmittel_aktiv = db.session.query(Kaeufe.id, Angebote.name, Angebote.beschreibung,\
+    #     Angebote.preis, func.sum(Produktionsmittel.prozent_gebraucht).label("prozent_gebraucht")).select_from(Kaeufe)\
+    #     .filter(Kaeufe.betrieb==current_user.id).outerjoin(Produktionsmittel,\
+    #     Kaeufe.id==Produktionsmittel.kauf).join(Angebote, Kaeufe.angebot==Angebote.id).\
+    #     group_by(Kaeufe, Angebote, Produktionsmittel.kauf).having(func.sum(Produktionsmittel.prozent_gebraucht) < 100).all()
+
     produktionsmittel_aktiv = db.session.query(Kaeufe.id, Angebote.name, Angebote.beschreibung,\
-        Angebote.preis, func.sum(Produktionsmittel.prozent_gebraucht).label("prozent_gebraucht")).select_from(Kaeufe)\
+        Angebote.preis, func.coalesce(func.sum(Produktionsmittel.prozent_gebraucht).\
+        label("prozent_gebraucht"), 0).label("prozent_gebraucht")).select_from(Kaeufe)\
         .filter(Kaeufe.betrieb==current_user.id).outerjoin(Produktionsmittel,\
         Kaeufe.id==Produktionsmittel.kauf).join(Angebote, Kaeufe.angebot==Angebote.id).\
-        group_by(Kaeufe, Angebote, Produktionsmittel.kauf).having(func.sum(Produktionsmittel.prozent_gebraucht) < 100).all()
+        group_by(Kaeufe, Angebote, Produktionsmittel.kauf).\
+        having(func.coalesce(func.sum(Produktionsmittel.prozent_gebraucht).\
+        label("prozent_gebraucht"), 0).label("prozent_gebraucht")<100).all()
+
+
 
     arbeiter_all = db.session.query(Nutzer.id, Nutzer.name).select_from(Arbeiter)\
         .join(Nutzer, Arbeiter.nutzer==Nutzer.id).filter(Arbeiter.betrieb==current_user.id).all()
