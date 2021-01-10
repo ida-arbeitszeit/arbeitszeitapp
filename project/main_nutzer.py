@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, session, redirect, url_for, request, flash
 from flask_login import login_required, current_user
 from flask_table import LinkCol
-from . import db
+from .app import db
 from .models import Angebote, Kaeufe, Nutzer, Betriebe, Arbeit
 from .forms import ProductSearchForm
 
