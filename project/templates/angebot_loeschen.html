@@ -13,7 +13,6 @@
   Um das Angebot löschen zu können, müssen wir wissen, ob
   das Produkt hergestellt wurde bzw. ob die angegebenen Produktionsmittel
   und Arbeit tatsächlich verbraucht wurden.
-  <span class="icon"><i class="fas fa-exclamation-triangle"></i></span>
 </p>
 
 {% if angebot.p_kosten > 0 %}
@@ -52,7 +51,7 @@
           <div class="block">
             <i><br>[Noch zu implementieren: Arbeit und PM wurden teilweise verbraucht.]</i>
           </div>
-          <input class="button is-link" type="submit" value="Bestätigen und Angebot löschen">
+          <input class="button is-primary" type="submit" value="Bestätigen und Angebot löschen">
           <a class="button is-light" href="{{  url_for('main_betriebe.meine_angebote') }}">
             Abbrechen
           </a>
