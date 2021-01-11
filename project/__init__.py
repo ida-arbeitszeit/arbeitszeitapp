@@ -5,6 +5,7 @@ import project.my_database_key as db_key
 
 # init SQLAlchemy
 db = SQLAlchemy()
+login_manager = LoginManager()
 
 def create_app():
     app = Flask(__name__)
@@ -12,12 +13,10 @@ def create_app():
     app.config['SECRET_KEY'] = 'dev'
     # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
     app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{db_key.username}:{db_key.password}@localhost/betriebe2'
-
-    db.init_app(app)
-
-    login_manager = LoginManager()
     login_manager.login_view = 'auth.start'
+
     login_manager.init_app(app)
+    db.init_app(app)
 
     from .models import Nutzer
     from .models import Betriebe
