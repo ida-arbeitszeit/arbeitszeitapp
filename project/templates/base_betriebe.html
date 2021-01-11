@@ -1,70 +1,90 @@
 {% extends "base.html" %}
 {% block content1 %}
-<section class="hero is-primary is-fullheight">
-        <div class="hero-head">
-            <nav class="navbar">
-                <div class="container">
-                  <div class="navbar-brand">
-                    <div class="navbar-item">
-                      Betriebs-Ansicht
-                    </div>
-                  </div>
-                    <div id="navbarMenuHeroA" class="navbar-menu">
+<section class="hero is-fullheight">
+      <div class="hero-head">
 
-                        <div class="navbar-end">
-                            <a href="{{ url_for('main_betriebe.index') }}" class="navbar-item">
-                                Home
-                            </a>
-                            {% if current_user.is_authenticated %}
-                            <a href="{{ url_for('main_betriebe.suchen') }}" class="navbar-item">
-                                Angebot suchen
-                            </a>
-                            <a href="{{ url_for('main_betriebe.anbieten_info') }}" class="navbar-item">
-                                Angebot erstellen
-                            </a>
-                            <a href="{{ url_for('main_betriebe.meine_angebote') }}" class="navbar-item">
-                                Meine Angebote
-                            </a>
-
-                            <a href="{{ url_for('main_betriebe.produktionsmittel') }}" class="navbar-item">
-                                Produktionsmittel
-                            </a>
-
-                            <a href="{{ url_for('main_betriebe.arbeit') }}" class="navbar-item">
-                                Arbeit
-                            </a>
-
-                            <a href="{{ url_for('main_betriebe.profile') }}" class="navbar-item">
-                                Meine Daten
-                            </a>
-                            {% endif %}
-                            {% if not current_user.is_authenticated %}
-                            <a href="{{ url_for('auth.login_betriebe') }}" class="navbar-item">
-                                Anmelden
-                            </a>
-                            <a href="{{ url_for('auth.signup_betriebe') }}" class="navbar-item">
-                                Registrieren
-                            </a>
-                            <a href="{{ url_for('auth.zurueck') }}" class="navbar-item">
-                                Zurück
-                            </a>
-                            {% endif %}
-                            {% if current_user.is_authenticated %}
-                            <a href="{{ url_for('auth.logout') }}" class="navbar-item">
-                                Logout
-                            </a>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </nav>
-        </div>
-
-        <div class="hero-body">
-            <div class="container has-text-centered">
-               {% block content2 %}
-               {% endblock %}
+        <nav class="navbar is-light" role="navigation" aria-label="main navigation">
+          <div class="navbar-brand">
+            <div class="navbar-item has-background-grey	has-text-white">
+              Betriebs-Ansicht
             </div>
-        </div>
+
+            <a role="button" class="navbar-burger" onclick="expandMenu()" aria-label="menu" aria-expanded="false" data-target="navbarOnTop">
+              <span aria-hidden="true"></span>
+              <span aria-hidden="true"></span>
+              <span aria-hidden="true"></span>
+            </a>
+          </div>
+
+          <div id="navbarOnTop" class="navbar-menu">
+            <div class="navbar-start">
+                {% if current_user.is_authenticated %}
+                <div class="navbar-item has-dropdown is-hoverable">
+                      <a class="navbar-link">
+                        Angebote
+                      </a>
+
+                      <div class="navbar-dropdown">
+                          <a href="{{ url_for('main_betriebe.suchen') }}" class="navbar-item">
+                              Angebote suchen
+                          </a>
+                          <a href="{{ url_for('main_betriebe.anbieten_info') }}" class="navbar-item">
+                            Angebote erstellen
+                          </a>
+                          <a href="{{ url_for('main_betriebe.meine_angebote') }}" class="navbar-item">
+                            Meine Angebote
+                          </a>
+                      </div>
+                </div>
+
+
+                <a href="{{ url_for('main_betriebe.produktionsmittel') }}" class="navbar-item">
+                    Produktionsmittel
+                </a>
+
+                <a href="{{ url_for('main_betriebe.arbeit') }}" class="navbar-item">
+                    Arbeit
+                </a>
+
+                <a href="{{ url_for('main_betriebe.profile') }}" class="navbar-item">
+                    Meine Daten
+                </a>
+                {% endif %}
+
+            </div>
+            <div class="navbar-end">
+                <div class="navbar-item">
+                  <div class="buttons">
+                    {% if not current_user.is_authenticated %}
+                    <a class="button" href="{{ url_for('auth.login_betriebe') }}">
+                        Anmelden
+                    </a>
+                    <a class="button" href="{{ url_for('auth.signup_betriebe') }}">
+                        Registrieren
+                    </a>
+                    <a class="button" href="{{ url_for('auth.zurueck') }}">
+                        Zurück
+                    </a>
+                    {% endif %}
+                    {% if current_user.is_authenticated %}
+                    <a class="button" href="{{ url_for('auth.logout') }}">
+                        Logout
+                    </a>
+                    {% endif %}
+
+                  </div>
+                </div>
+            </div>
+
+          </div>
+        </nav>
+      </div>
+
+      <div class="hero-body">
+          <div class="container has-text-centered">
+             {% block content2 %}
+             {% endblock %}
+          </div>
+      </div>
 </section>
 {% endblock %}
