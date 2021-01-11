@@ -1,49 +1,63 @@
 {% extends "base.html" %}
 {% block content1 %}
-<section class="hero is-warning is-fullheight">
+<section class="hero is-fullheight">
         <div class="hero-head">
-            <nav class="navbar">
-                <div class="container">
-                    <div class="navbar-brand">
-                      <div class="navbar-item">
-                        Nutzer-Ansicht
-                      </div>
-                    </div>
 
-                    <div id="navbarMenuHeroA" class="navbar-menu">
+          <nav class="navbar is-light" role="navigation" aria-label="main navigation">
+            <div class="navbar-brand">
+              <div class="navbar-item has-background-primary	has-text-white">
+                Nutzer-Ansicht
+              </div>
 
-                        <div class="navbar-end">
-                            <a href="{{ url_for('main_nutzer.index') }}" class="navbar-item">
-                                Home
-                            </a>
-                            {% if current_user.is_authenticated %}
-                            <a href="{{ url_for('main_nutzer.suchen') }}" class="navbar-item">
-                                Angebote suchen
-                            </a>
-                            <a href="{{ url_for('main_nutzer.profile') }}" class="navbar-item">
-                                Meine Daten
-                            </a>
-                            {% endif %}
-                            {% if not current_user.is_authenticated %}
-                            <a href="{{ url_for('auth.login_nutzer') }}" class="navbar-item">
-                                Anmelden
-                            </a>
-                            <a href="{{ url_for('auth.signup_nutzer') }}" class="navbar-item">
-                                Registrieren
-                            </a>
-                            <a href="{{ url_for('auth.zurueck') }}" class="navbar-item">
-                                Zurück
-                            </a>
-                            {% endif %}
-                            {% if current_user.is_authenticated %}
-                            <a href="{{ url_for('auth.logout') }}" class="navbar-item">
-                                Logout
-                            </a>
-                            {% endif %}
-                        </div>
+              <a role="button" class="navbar-burger" onclick="expandMenu()" aria-label="menu" aria-expanded="false" data-target="navbarOnTop">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+              </a>
+            </div>
+
+            <div id="navbarOnTop" class="navbar-menu">
+              <div class="navbar-start">
+
+                  {% if current_user.is_authenticated %}
+                  <a href="{{ url_for('main_nutzer.suchen') }}" class="navbar-item">
+                      Angebote suchen
+                  </a>
+                  <a href="{{ url_for('main_nutzer.profile') }}" class="navbar-item">
+                      Meine Daten
+                  </a>
+                  {% endif %}
+
+              </div>
+
+              <div class="navbar-end">
+                  <div class="navbar-item">
+                    <div class="buttons">
+                      {% if not current_user.is_authenticated %}
+                      <a class="button" href="{{ url_for('auth.login_nutzer') }}">
+                          Anmelden
+                      </a>
+                      <a class="button" href="{{ url_for('auth.signup_nutzer') }}">
+                          Registrieren
+                      </a>
+                      <a class="button" href="{{ url_for('auth.zurueck') }}">
+                          Zurück
+                      </a>
+                      {% endif %}
+                      {% if current_user.is_authenticated %}
+                      <a class="button" href="{{ url_for('auth.logout') }}">
+                          Logout
+                      </a>
+                      {% endif %}
+
+
                     </div>
-                </div>
-            </nav>
+                  </div>
+              </div>
+
+            </div>
+          </nav>
+
         </div>
 
         <div class="hero-body">
