@@ -8,47 +8,52 @@
 
   <h1 class="title">
     Der Auszahlungsfaktor in diesem Betrieb beträgt:<br>
-    {{ fik }}
   </h1>
+  <div class="box">
+      {{ fik }}
+  </div>
 
   <p class="block">
-    Der Betrieb kann einen Auszahlungsfaktor zwischen 0 und 1 beschließen. Je höher dieser Faktor, desto
+    <span class="icon"><i class="fas fa-info-circle"></i></span>
+    Der Betrieb kann einen Auszahlungsfaktor zwischen 0 und 1 beschließen. Je höher dieser Faktor, umso
     mehr Arbeitsgeld bekommen die Beschäftigten pro Arbeitsstunde. Je niedriger,
-    desto mehr Stunden kann der Betrieb in einem Akkumulationsfonds sammeln.
+    umso mehr Stunden kann der Betrieb in einem Akkumulationsfonds sammeln.
   </p>
 
   <h1 class="title">
-    In deinem Betrieb arbeiten die folgenden ArbeiterInnen:
+    In diesem Betrieb arbeiten die folgenden ArbeiterInnen:
   </h1>
 
-  <div class="content">
-        <div class="columns is-centered">
-          <div class="column is-narrow">
+        <div class="content">
             {{ table1 }}
-          </div>
+
         </div>
 
+        <div class="content">
+
         <form method="post">
-          <div class="field is-grouped is-grouped-centered">
-            <div class="control">
+          <div class="field has-addons">
+            <div class="control is-expanded">
               <input class="input" type="text" placeholder="Nutzer-ID", name="nutzer" required>
             </div>
             <div class="control">
-              <button class="button" type="submit">MitarbeiterIn hinzufügen</button>
+              <button class="button is-primary" type="submit">MitarbeiterIn hinzufügen</button>
             </div>
           </div>
         </form>
+
+      </div>
 
         <h1 class="title">
           Gesamtzahl der Stunden:
         </h1>
 
       <div class="content">
-          <div class="columns is-centered">
-            <div class="column is-narrow">
+
+      <div class="content">
               {{ table2 }}
-            </div>
-          </div>
+
+      </div>
 
       {% with messages = get_flashed_messages() %}
       {% if messages %}
@@ -60,7 +65,6 @@
 
 
     </div>
-</div>
 
 
 
