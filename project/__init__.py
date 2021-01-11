@@ -16,7 +16,6 @@ def create_app():
     # Development configuration
     app.config.from_object('config.DevConfig')
 
-
     login_manager.login_view = 'auth.start'
 
     db.init_app(app)
