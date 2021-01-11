@@ -38,6 +38,6 @@ def create_app():
         app.register_blueprint(main_betriebe_blueprint)
 
         # Create Database Models
-        #db.create_all()
+        # db.create_all()
 
         return app
