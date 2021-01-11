@@ -6,11 +6,17 @@ from flask_table import Table, Col
 # init SQLAlchemy
 db = SQLAlchemy()
 login_manager = LoginManager()
-print("test")
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_object('config.Config')
+
+    # Production configuration
+    # app.config.from_object('config.ProdConfig')
+
+    # Development configuration
+    app.config.from_object('config.DevConfig')
+
+
     login_manager.login_view = 'auth.start'
 
     db.init_app(app)
