@@ -13,7 +13,7 @@ class Config:
 
     # FLASK_ENV = 'development'
     # TESTING = True
-    SECRET_KEY = 'dev'
+    SECRET_KEY = b'\xb1:\x7f/X\xfd\x9e\xe4)`\xc0\x88\x80\xad\xecK'
     # SECRET_KEY = environ.get('SECRET_KEY')
     # STATIC_FOLDER = 'static'
     # TEMPLATES_FOLDER = 'templates'
