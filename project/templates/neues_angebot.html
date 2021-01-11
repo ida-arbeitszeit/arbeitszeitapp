@@ -46,50 +46,53 @@
 
     <hr>
     <div class="block"></div>
-    <h3 class="subtitle is-4">Sind Produktionsmittel enthalten?</h3>
 
-    {% if produktionsmittel_aktiv is defined and produktionsmittel_aktiv|length %}
+    <h3 class="subtitle is-4">Wieviele Arbeitsstunden sind enthalten?</h3>
 
+  {% if arbeiter_all is defined and arbeiter_all|length %}
+      <div class="block">
+        (Füge deinem Betrieb <a href="{{ url_for('main_betriebe.arbeit') }}"><u>hier</u></a> weitere MitarbeiterInnen hinzu.)
+      </div>
       <table class="table is-bordered is-fullwidth">
-        <thead><tr><th>Kauf-Id</th><th>Name</th><th>Beschreibung</th><th>Preis</th><th>Prozent_Gebraucht</th><th>Benutzen (Prozent)</th></tr></thead>
+        <thead><tr><th>Id</th><th>Name</th><th>Stunden</th></tr></thead>
           <tbody>
-            {% for prod_mittel in produktionsmittel_aktiv %}
-              <tr><td>{{ prod_mittel[0] }}</td><td>{{ prod_mittel[1] }}</td> <td>{{ prod_mittel[2] }}</td> <td>{{ prod_mittel[3] }}</td> <td>{{ prod_mittel[4] }}</td><td> <input class="input" type="number" name="id_{{ prod_mittel[0] }}", value="0", min="0", step="0.5" max="{{ 100 - prod_mittel[4] }}"></td></tr>
+            {% for arbeiter in arbeiter_all %}
+                <tr><td>{{ arbeiter[0] }}</td><td>{{ arbeiter[1] }}</td><td><input class="input" type="number" name="nutzer_{{ arbeiter[0] }}", value="0", min="0", step="0.1"></td></tr>
             {% endfor %}
           </tbody>
       </table>
-    {% else %}
-      <div class="block">
-          Du hast noch keine Produkte erworben, deshalb kannst du keine Produkte abrechnen.<br>
-          Suche <a href="{{ url_for('main_betriebe.suchen') }}"><u>hier</u></a> nach Produktionsmitteln (optional).
-      </div>
-    {% endif %}
+
+
+  {% else %}
+    <p class="block">
+      Du hast noch keine MitarbeiterInnen registriert, deshalb kannst du noch keine
+      Arbeit abrechnen.<br>
+      Füge deinem Betrieb erst <a href="{{ url_for('main_betriebe.arbeit') }}"><u>hier</u></a> MitarbeiterInnen hinzu.
+    </p>
+  {% endif %}
+
 
     <hr>
-      <h3 class="subtitle is-4">Wieviele Arbeitsstunden sind enthalten?</h3>
-
-    {% if arbeiter_all is defined and arbeiter_all|length %}
-        <div class="block">
-          (Füge deinem Betrieb <a href="{{ url_for('main_betriebe.arbeit') }}"><u>hier</u></a> weitere MitarbeiterInnen hinzu.)
-        </div>
-        <table class="table is-bordered is-fullwidth">
-          <thead><tr><th>Id</th><th>Name</th><th>Stunden</th></tr></thead>
-            <tbody>
-              {% for arbeiter in arbeiter_all %}
-                  <tr><td>{{ arbeiter[0] }}</td><td>{{ arbeiter[1] }}</td><td><input class="input" type="number" name="nutzer_{{ arbeiter[0] }}", value="0", min="0", step="0.1"></td></tr>
-              {% endfor %}
-            </tbody>
-        </table>
 
 
-    {% else %}
-      <p class="block">
-        Du hast noch keine MitarbeiterInnen registriert, deshalb kannst du noch keine
-        Arbeit abrechnen.<br>
-        Füge deinem Betrieb erst <a href="{{ url_for('main_betriebe.arbeit') }}"><u>hier</u></a> MitarbeiterInnen hinzu.
-      </p>
-    {% endif %}
+        <h3 class="subtitle is-4">Sind Produktionsmittel enthalten?</h3>
 
+        {% if produktionsmittel_aktiv is defined and produktionsmittel_aktiv|length %}
+
+          <table class="table is-bordered is-fullwidth">
+            <thead><tr><th>Kauf-Id</th><th>Name</th><th>Beschreibung</th><th>Preis</th><th>Prozent_Gebraucht</th><th>Benutzen (Prozent)</th></tr></thead>
+              <tbody>
+                {% for prod_mittel in produktionsmittel_aktiv %}
+                  <tr><td>{{ prod_mittel[0] }}</td><td>{{ prod_mittel[1] }}</td> <td>{{ prod_mittel[2] }}</td> <td>{{ prod_mittel[3] }}</td> <td>{{ prod_mittel[4] }}</td><td> <input class="input" type="number" name="id_{{ prod_mittel[0] }}", value="0", min="0", step="0.5" max="{{ 100 - prod_mittel[4] }}"></td></tr>
+                {% endfor %}
+              </tbody>
+          </table>
+        {% else %}
+          <div class="block">
+              Du hast noch keine Produkte erworben, deshalb kannst du keine Produkte abrechnen.<br>
+              Suche <a href="{{ url_for('main_betriebe.suchen') }}"><u>hier</u></a> nach Produktionsmitteln (optional).
+          </div>
+        {% endif %}
     <hr>
 
   <!-- <div class="column is-5 is-offset-4">
@@ -106,11 +109,11 @@
   </div> -->
 
     {% if produktionsmittel_aktiv|length or arbeiter_all|length %}
-      <button class="button">
+      <button class="button is-primary">
         Angebot erstellen
       </button>
     {% else %}
-      <button class="button" disabled>
+      <button class="button is-primary" disabled>
         Angebot erstellen
       </button>
     {% endif %}
