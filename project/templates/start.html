@@ -1,32 +1,44 @@
 {% extends "base.html" %}
 
 {% block content1 %}
-<section class="hero is-fullheight">
-        <div class="hero-head">
-            <nav class="navbar">
-                <div class="container">
-                    <div id="navbarMenuHeroA" class="navbar-menu">
-                        <div class="navbar-end">
-                            <a href="{{ url_for('auth.help') }}" class="navbar-item">
-                                <strong>Hilfe</strong>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </nav>
-        </div>
 
-        <div class="hero-body">
-            <div class="container has-text-centered">
-              <h1 class="title">
-                Betriebe 2020
-              </h1>
-              <h2 class="subtitle">
-                Eine Plattform für Arbeitszeitrechnung.
-              </h2>
-              <a class="button" href="{{ url_for('main_nutzer.index') }}">ArbeiterIn/KonsumentIn</a>
-              <a class="button" href="{{ url_for('main_betriebe.index') }}">Betrieb</a>
+
+<section class="hero is-fullheight">
+    <div class="hero-head">
+      <nav class="navbar is-light" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+          <a role="button" class="navbar-burger" onclick="expandMenu()" aria-label="menu" aria-expanded="false" data-target="navbarOnTop">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+          </a>
+        </div>
+        <div id="navbarOnTop" class="navbar-menu">
+            <div class="navbar-end">
+                <div class="navbar-item">
+                  <a class="button" href="{{ url_for('auth.help') }}">
+                      Hilfe
+                  </a>
+                </div>
             </div>
         </div>
+      </nav>
+      </div>
+
+      <div class="hero-body">
+          <div class="container has-text-centered">
+            <h1 class="title">
+              Betriebe 2020
+            </h1>
+            <h2 class="subtitle">
+              Eine Plattform für Arbeitszeitrechnung.
+            </h2>
+            <a class="button" href="{{ url_for('main_nutzer.index') }}">ArbeiterIn/KonsumentIn</a>
+            <a class="button" href="{{ url_for('main_betriebe.index') }}">Betrieb</a>
+          </div>
+      </div>
+
+
+
 </section>
 {% endblock %}

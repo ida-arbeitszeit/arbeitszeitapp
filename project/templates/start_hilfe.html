@@ -3,17 +3,24 @@
 
 <section class="hero is-fullheight">
         <div class="hero-head">
-            <nav class="navbar">
-                <div class="container">
-                    <div id="navbarMenuHeroA" class="navbar-menu">
-                        <div class="navbar-end">
-                            <a href="{{ url_for('auth.start') }}" class="navbar-item">
-                                Zurück
-                            </a>
-                        </div>
+          <nav class="navbar is-light" role="navigation" aria-label="main navigation">
+            <div class="navbar-brand">
+              <a role="button" class="navbar-burger" onclick="expandMenu()" aria-label="menu" aria-expanded="false" data-target="navbarOnTop">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+              </a>
+            </div>
+            <div id="navbarOnTop" class="navbar-menu">
+                <div class="navbar-end">
+                    <div class="navbar-item">
+                      <a class="button" href="{{ url_for('auth.start') }}">
+                          Zurück
+                      </a>
                     </div>
                 </div>
-            </nav>
+            </div>
+          </nav>
         </div>
 
 
