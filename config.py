@@ -20,7 +20,8 @@ class Config:
 
     # Database
     #SQLALCHEMY_DATABASE_URI = environ.get('SQLALCHEMY_DATABASE_URI')
-    SQLALCHEMY_DATABASE_URI = f'postgresql://{db_key.username}:{db_key.password}@localhost/betriebe2'
+    SQLALCHEMY_DATABASE_URI = "postgres://nqursisgweipja:f08c53bd55db7e83a2a8b5837b9aae32ada35e83e32176a9172352bbf252b291@ec2-54-76-215-139.eu-west-1.compute.amazonaws.com:5432/deh13a0u5h8jkm"
+    # SQLALCHEMY_DATABASE_URI = f'postgresql://{db_key.username}:{db_key.password}@localhost/betriebe2'
     # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
     # SQLALCHEMY_TRACK_MODIFICATIONS = False
 
