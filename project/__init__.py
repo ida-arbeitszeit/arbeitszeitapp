@@ -6,6 +6,7 @@ from flask_table import Table, Col
 # init SQLAlchemy
 db = SQLAlchemy()
 login_manager = LoginManager()
+print("test")
 
 def create_app():
     app = Flask(__name__)
