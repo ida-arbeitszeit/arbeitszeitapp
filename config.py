@@ -1,5 +1,5 @@
 """Flask configuration."""
-import project.my_database_key as db_key
+# import project.my_database_key as db_key
 
 # from os import environ, path
 # from dotenv import load_dotenv
