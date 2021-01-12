@@ -33,7 +33,7 @@ def profile():
             having_workers = True
         else:
             having_workers = False
-        return render_template('profile_betriebe.html', having_workers=having_workers)        
+        return render_template('profile_betriebe.html', having_workers=having_workers)
     elif user_type == "nutzer":
         return redirect(url_for('auth.zurueck'))
 
@@ -43,11 +43,11 @@ def profile():
 def arbeit():
     arbeiter1 = db.session.query(Nutzer.id, Nutzer.name).\
         select_from(Arbeiter).join(Nutzer).filter(Arbeiter.betrieb==current_user.id).group_by(Nutzer.id).all()
-    table1 = ArbeiterTable1(arbeiter1, classes=["table", "is-bordered", "is-striped"])
+    table1 = ArbeiterTable1(arbeiter1)
 
     arbeiter2 = db.session.query(Nutzer.id, Nutzer.name, func.sum(Arbeit.stunden).label('summe_stunden')).\
         select_from(Angebote).filter(Angebote.betrieb==current_user.id).join(Arbeit).join(Nutzer).group_by(Nutzer.id).all()
-    table2 = ArbeiterTable2(arbeiter2, classes=["table", "is-bordered", "is-striped"])
+    table2 = ArbeiterTable2(arbeiter2)
     fik = Betriebe.query.filter_by(id=current_user.id).first().fik
 
     if request.method == 'POST':
@@ -69,15 +69,10 @@ def arbeit():
 
     return render_template("arbeit.html", table1=table1, table2=table2, fik=fik)
 
+
 @main_betriebe.route('/betriebe/produktionsmittel')
 @login_required
 def produktionsmittel():
-    # produktionsmittel_qry = db.session.query(Kaeufe.id, Angebote.name, Angebote.beschreibung,\
-    #     Angebote.preis, func.sum(Produktionsmittel.prozent_gebraucht).label("prozent_gebraucht")).select_from(Kaeufe)\
-    #     .filter(Kaeufe.betrieb==current_user.id).outerjoin(Produktionsmittel,\
-    #     Kaeufe.id==Produktionsmittel.kauf).join(Angebote, Kaeufe.angebot==Angebote.id).\
-    #     group_by(Kaeufe, Angebote, Produktionsmittel.kauf)
-
 
     produktionsmittel_qry = db.session.query(Kaeufe.id, Angebote.name, Angebote.beschreibung,\
         Angebote.preis, func.coalesce(func.sum(Produktionsmittel.prozent_gebraucht).\
@@ -92,8 +87,8 @@ def produktionsmittel():
     produktionsmittel_inaktiv = produktionsmittel_qry.having(func.coalesce(func.sum(Produktionsmittel.prozent_gebraucht).\
     label("prozent_gebraucht"), 0).label("prozent_gebraucht")== 100).all()
 
-    table_aktiv = ProduktionsmittelTable(produktionsmittel_aktiv, classes=["table", "is-bordered", "is-striped"])
-    table_inaktiv = ProduktionsmittelTable(produktionsmittel_inaktiv, classes=["table", "is-bordered", "is-striped"])
+    table_aktiv = ProduktionsmittelTable(produktionsmittel_aktiv)
+    table_inaktiv = ProduktionsmittelTable(produktionsmittel_inaktiv)
     return render_template('produktionsmittel.html', table_aktiv=table_aktiv, table_inaktiv=table_inaktiv)
 
 
