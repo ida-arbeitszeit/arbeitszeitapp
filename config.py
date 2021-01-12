@@ -7,7 +7,7 @@ load_dotenv(path.join(basedir, '.env'))
 
 class Config:
     """Base config."""
-    SECRET_KEY = os.environ('MY_SECRET_KEY')
+    SECRET_KEY = environ('MY_SECRET_KEY')
     # setting secret key with: heroku config:set MY_SECRET_KEY=...
     #SECRET_KEY = b'\xb1:\x7f/X\xfd\x9e\xe4)`\xc0\x88\x80\xad\xecK'
     STATIC_FOLDER = 'static'
