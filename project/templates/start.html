@@ -33,8 +33,11 @@
             <h2 class="subtitle">
               Eine Plattform für Arbeitszeitrechnung.
             </h2>
-            <a class="button" href="{{ url_for('main_nutzer.index') }}">ArbeiterIn/KonsumentIn</a>
-            <a class="button" href="{{ url_for('main_betriebe.index') }}">Betrieb</a>
+            <div class="buttons is-centered">
+              <a class="button" href="{{ url_for('main_nutzer.index') }}">Nutzer</a>
+              <a class="button" href="{{ url_for('main_betriebe.index') }}">Betrieb</a>
+            </div>
+
           </div>
       </div>
 
