@@ -6,8 +6,34 @@
 <div class="column is-6 is-offset-3">
 
 
+    <h1 class="title">
+      Mitarbeiter
+    </h1>
+
+          <div class="content">
+              {{ table1 }}
+
+          </div>
+
+          <div class="content">
+
+          <form method="post">
+            <div class="field has-addons">
+              <div class="control is-expanded">
+                <input class="input" type="text" placeholder="Nutzer-ID", name="nutzer" required>
+              </div>
+              <div class="control">
+                <button class="button is-primary" type="submit">MitarbeiterIn hinzufügen</button>
+              </div>
+            </div>
+          </form>
+
+        </div>
+
+    <br><br>
+
   <h1 class="title">
-    Der Auszahlungsfaktor in diesem Betrieb beträgt:<br>
+    Auszahlungsfaktor in diesem Betrieb<br>
   </h1>
   <div class="box">
       {{ fik }}
@@ -20,32 +46,10 @@
     umso mehr Stunden kann der Betrieb in einem Akkumulationsfonds sammeln.
   </p>
 
-  <h1 class="title">
-    In diesem Betrieb arbeiten die folgenden ArbeiterInnen:
-  </h1>
-
-        <div class="content">
-            {{ table1 }}
-
-        </div>
-
-        <div class="content">
-
-        <form method="post">
-          <div class="field has-addons">
-            <div class="control is-expanded">
-              <input class="input" type="text" placeholder="Nutzer-ID", name="nutzer" required>
-            </div>
-            <div class="control">
-              <button class="button is-primary" type="submit">MitarbeiterIn hinzufügen</button>
-            </div>
-          </div>
-        </form>
-
-      </div>
+  <br><br>
 
         <h1 class="title">
-          Gesamtzahl der Stunden:
+          Stunden gearbeitet
         </h1>
 
       <div class="content">
