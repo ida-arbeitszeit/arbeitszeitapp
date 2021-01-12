@@ -7,8 +7,6 @@ load_dotenv(path.join(basedir, '.env'))
 
 class Config:
     """Base config."""
-    SECRET_KEY = environ.get('MY_SECRET_KEY')
-    # setting secret key from bash with: heroku config:set MY_SECRET_KEY=...
     STATIC_FOLDER = 'static'
     TEMPLATES_FOLDER = 'templates'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -18,8 +16,10 @@ class ProdConfig(Config):
     FLASK_ENV = 'production'
     DEBUG = False
     TESTING = False
-    # using heroku's env variable
+    # using heroku's existing env variable
     SQLALCHEMY_DATABASE_URI = environ.get('DATABASE_URL')
+    # setting secret key from bash with: heroku config:set MY_SECRET_KEY=...
+    SECRET_KEY = environ.get('MY_SECRET_KEY')
 
 
 class DevConfig(Config):
@@ -27,3 +27,4 @@ class DevConfig(Config):
     DEBUG = True
     TESTING = True
     SQLALCHEMY_DATABASE_URI = environ.get('DEV_DATABASE_URI')
+    SECRET_KEY = environ.get('DEV_SECRET_KEY')
