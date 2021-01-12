@@ -22,6 +22,16 @@
     </table>
   </div>
 
+  <div class="content">
+    {% if having_workers is sameas false %}
+    <div class="block">
+      <p><span class="icon"><i class="fas fa-exclamation-triangle"></i></span>
+        Du hast noch keine Mitarbeiter. Füge sie <a href="{{ url_for('main_betriebe.arbeit') }}">hier</a> hinzu.</p>
+    </div>
+    {% endif %}
+
+  </div>
+
 </div>
 
 

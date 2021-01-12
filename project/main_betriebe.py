@@ -28,7 +28,12 @@ def index():
 def profile():
     user_type = session["user_type"]
     if user_type == "betrieb":
-        return render_template('profile_betriebe.html')
+        arbeiter = Arbeiter.query.filter_by(betrieb=current_user.id).first()
+        if arbeiter:
+            having_workers = True
+        else:
+            having_workers = False
+        return render_template('profile_betriebe.html', having_workers=having_workers)        
     elif user_type == "nutzer":
         return redirect(url_for('auth.zurueck'))
 
