@@ -2,7 +2,7 @@
 
 {% block content2 %}
 <h1 class="title">
-  Willkomen, {{ current_user.name }}!
+  Willkommen, {{ current_user.name }}!
 </h1>
 
 <div class="column is-4 is-offset-4">
@@ -10,7 +10,7 @@
   <div class="content">
     <table>
       <tr>
-        <td>Deine ID:</td><td>{{ current_user.id }}</td>
+        <td>Deine Nutzer-ID:</td><td>{{ current_user.id }}</td>
       </tr>
       <tr>
         <td>Dein Guthaben:</td><td>{{ current_user.guthaben }} Stunden</td>
@@ -19,6 +19,25 @@
         <td>Deine Email:</td><td>{{ current_user.email }}</td>
       </tr>
     </table>
+
+  </div>
+
+    {% if arbeitsstellen_table %}
+    <div class="content">
+      <h4 class="subtitle">Deine Arbeit:</h1>
+      <div class="content">
+        {{ arbeitsstellen_table }}
+      </div>
+    </div>
+    {% else %}
+      <div class="content">
+        <p><div class="icon-text"><i class="fas fa-exclamation-triangle"></i></div>
+          Du bist noch in keinem Betrieb als Mitarbeiter registriert.<br>
+          Teile deinem Betrieb deine Nutzer-ID mit, um dich registrieren zu lassen.</p>
+      </div>
+      {% endif %}
+
+
   </div>
 </div>
 
