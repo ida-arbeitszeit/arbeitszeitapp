@@ -8,12 +8,12 @@
 <p class="block">
   Schade, dass du keinen Interessenten für <strong>"{{ angebot.name }}"</strong> gefunden hast.
 </p>
-<p class="block">
-  <span class="icon"><i class="fas fa-exclamation-triangle"></i></span>
-  Um das Angebot löschen zu können, müssen wir wissen, ob
+<div class="content">
+  <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
+  <p>Um das Angebot löschen zu können, müssen wir wissen, ob
   das Produkt hergestellt wurde bzw. ob die angegebenen Produktionsmittel
-  und Arbeit tatsächlich verbraucht wurden.
-</p>
+  und Arbeit tatsächlich verbraucht wurden.</p>
+</div>
 
 {% if angebot.p_kosten > 0 %}
 <p class="block">
