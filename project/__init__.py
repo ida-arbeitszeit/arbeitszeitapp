@@ -3,16 +3,15 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_table import Table, Col
 
-# init SQLAlchemy
 db = SQLAlchemy()
 login_manager = LoginManager()
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, instance_relative_config=False)
 
     # Production/Development configuration
-    app.config.from_object('config.ProdConfig')
-    # app.config.from_object('config.DevConfig')
+    # app.config.from_object('config.ProdConfig')
+    app.config.from_object('config.DevConfig')
 
     login_manager.login_view = 'auth.start'
 
@@ -32,16 +31,13 @@ def create_app():
          elif user_type == "betrieb":
              return Betriebe.query.get(int(user_id))
 
-        from .auth import auth as auth_blueprint
-        app.register_blueprint(auth_blueprint)
+        from .auth import routes as auth_routes
+        from .betriebe import routes as betriebe_routes
+        from .nutzer import routes as nutzer_routes
+        app.register_blueprint(auth_routes.auth)
+        app.register_blueprint(betriebe_routes.main_betriebe)
+        app.register_blueprint(nutzer_routes.main_nutzer)
 
-        from .main_nutzer import main_nutzer as main_nutzer_blueprint
-        app.register_blueprint(main_nutzer_blueprint)
-
-        from .main_betriebe import main_betriebe as main_betriebe_blueprint
-        app.register_blueprint(main_betriebe_blueprint)
-
-        # Create Database Models
         db.create_all()
 
         return app

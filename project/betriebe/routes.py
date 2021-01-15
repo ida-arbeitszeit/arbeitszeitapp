@@ -1,14 +1,16 @@
 from flask import Blueprint, render_template, session, redirect, url_for, request, flash
 from flask_login import login_required, current_user
-from . import db
-from .models import Angebote, Kaeufe, Betriebe, Nutzer, Produktionsmittel, Arbeit, Arbeiter
-from .forms import ProductSearchForm
-from .tables import ProduktionsmittelTable, ArbeiterTable1, ArbeiterTable2
+from .. import db
+from ..models import Angebote, Kaeufe, Betriebe, Nutzer, Produktionsmittel, Arbeit, Arbeiter
+from ..forms import ProductSearchForm
+from ..tables import ProduktionsmittelTable, ArbeiterTable1, ArbeiterTable2
 from decimal import Decimal
 from sqlalchemy.sql import func
 
 
-main_betriebe = Blueprint('main_betriebe', __name__)
+main_betriebe = Blueprint('main_betriebe', __name__, template_folder='templates',
+    static_folder='static')
+
 
 @main_betriebe.route('/betriebe/home')
 def index():
@@ -22,6 +24,7 @@ def index():
     else:
         session["user_type"] = "betrieb"
         return render_template('index_betriebe.html')
+
 
 @main_betriebe.route('/betriebe/profile')
 @login_required
@@ -73,14 +76,12 @@ def arbeit():
 @main_betriebe.route('/betriebe/produktionsmittel')
 @login_required
 def produktionsmittel():
-
     produktionsmittel_qry = db.session.query(Kaeufe.id, Angebote.name, Angebote.beschreibung,\
         Angebote.preis, func.coalesce(func.sum(Produktionsmittel.prozent_gebraucht).\
         label("prozent_gebraucht"), 0).label("prozent_gebraucht")).select_from(Kaeufe)\
         .filter(Kaeufe.betrieb==current_user.id).outerjoin(Produktionsmittel,\
         Kaeufe.id==Produktionsmittel.kauf).join(Angebote, Kaeufe.angebot==Angebote.id).\
         group_by(Kaeufe, Angebote, Produktionsmittel.kauf)
-
 
     produktionsmittel_aktiv = produktionsmittel_qry.having(func.coalesce(func.sum(Produktionsmittel.prozent_gebraucht).\
     label("prozent_gebraucht"), 0).label("prozent_gebraucht")<100).all()
@@ -147,7 +148,6 @@ def suchen():
     return render_template('suchen_betriebe.html', form=search)
 
 
-
 @main_betriebe.route('/betriebe/kaufen/<int:id>', methods=['GET', 'POST'])
 def kaufen(id):
     qry = db.session.query(Angebote).filter(
@@ -197,19 +197,12 @@ def anbieten_info():
     return render_template('anbieten_info.html')
 
 
-
 @main_betriebe.route('/betriebe/anbieten', methods=['GET', 'POST'])
 @login_required
 def neues_angebot():
     """
     Ein neues Angebot hinzufügen
     """
-    # produktionsmittel_aktiv = db.session.query(Kaeufe.id, Angebote.name, Angebote.beschreibung,\
-    #     Angebote.preis, func.sum(Produktionsmittel.prozent_gebraucht).label("prozent_gebraucht")).select_from(Kaeufe)\
-    #     .filter(Kaeufe.betrieb==current_user.id).outerjoin(Produktionsmittel,\
-    #     Kaeufe.id==Produktionsmittel.kauf).join(Angebote, Kaeufe.angebot==Angebote.id).\
-    #     group_by(Kaeufe, Angebote, Produktionsmittel.kauf).having(func.sum(Produktionsmittel.prozent_gebraucht) < 100).all()
-
     produktionsmittel_aktiv = db.session.query(Kaeufe.id, Angebote.name, Angebote.beschreibung,\
         Angebote.preis, func.coalesce(func.sum(Produktionsmittel.prozent_gebraucht).\
         label("prozent_gebraucht"), 0).label("prozent_gebraucht")).select_from(Kaeufe)\
@@ -218,8 +211,6 @@ def neues_angebot():
         group_by(Kaeufe, Angebote, Produktionsmittel.kauf).\
         having(func.coalesce(func.sum(Produktionsmittel.prozent_gebraucht).\
         label("prozent_gebraucht"), 0).label("prozent_gebraucht")<100).all()
-
-
 
     arbeiter_all = db.session.query(Nutzer.id, Nutzer.name).select_from(Arbeiter)\
         .join(Nutzer, Arbeiter.nutzer==Nutzer.id).filter(Arbeiter.betrieb==current_user.id).all()
@@ -258,13 +249,6 @@ def neues_angebot():
             for num1, num2 in zip(prozent_list, preise_list):
                 kosten_einzeln.append(num1 * num2)
             kosten_pm = sum(kosten_einzeln)
-
-            # # update prdmittel gebraucht
-            # assert len(kauf_id_list) == len(prozent_list)
-            # for count, kauf_id in enumerate(kauf_id_list):
-            #     pm = Produktionsmittel.query.filter_by(kauf=kauf_id).first()
-            #     pm.prozent_gebraucht += prozent_list[count]*100
-            #     db.session.commit()
 
 
         if arbeit_dict_not_zero:
@@ -322,6 +306,7 @@ def meine_angebote():
     aktuelle_angebote = Angebote.query.filter_by(aktiv=True, betrieb=current_user.id).all()
     vergangene_angebote = Angebote.query.filter_by(aktiv=False, betrieb=current_user.id).all()
     return render_template('meine_angebote.html', aktuelle_angebote=aktuelle_angebote, vergangene_angebote=vergangene_angebote)
+
 
 @main_betriebe.route('/betriebe/angebot_loeschen', methods=['GET', 'POST'])
 @login_required

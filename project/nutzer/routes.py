@@ -1,12 +1,13 @@
 from flask import Blueprint, render_template, session, redirect, url_for, request, flash
 from flask_login import login_required, current_user
-from . import db
-from .models import Angebote, Kaeufe, Nutzer, Betriebe, Arbeit, Arbeiter
-from .forms import ProductSearchForm
-from .tables import KaeufeTable, ArbeitsstellenTable
+from .. import db
+from ..models import Angebote, Kaeufe, Nutzer, Betriebe, Arbeit, Arbeiter
+from ..forms import ProductSearchForm
+from ..tables import KaeufeTable, ArbeitsstellenTable
 
 
-main_nutzer = Blueprint('main_nutzer', __name__)
+main_nutzer = Blueprint('main_nutzer', __name__, template_folder='templates',
+    static_folder='static')
 
 
 @main_nutzer.route('/nutzer/home')
@@ -40,7 +41,6 @@ def meine_kaeufe():
             filter_by(nutzer=current_user.id).join(Angebote, Kaeufe.angebot==Angebote.id).all()
         kaufh_table = KaeufeTable(kaufhistorie)
         return render_template('meine_kaeufe.html', kaufh_table=kaufh_table)
-
 
 
 @main_nutzer.route('/nutzer/suchen', methods=['GET', 'POST'])
@@ -135,8 +135,6 @@ def kaufen(id):
             for arb in arbeit_in_produkt:
                 anbietender_betrieb.guthaben -= arb.stunden
                 db.session.commit()
-
-
 
             flash(f"Kauf von '{angebot.name}' erfolgreich!")
             return redirect('/nutzer/suchen')
