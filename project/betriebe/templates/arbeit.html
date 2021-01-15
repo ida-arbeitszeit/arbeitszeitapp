@@ -4,33 +4,39 @@
 
 
 <div class="column is-6 is-offset-3">
-
-
     <h1 class="title">
       Mitarbeiter
     </h1>
 
-          <div class="content">
-              {{ table1 }}
+    <div class="content">
+        {{ table1 }}
 
-          </div>
+    </div>
 
-          <div class="content">
+    <div class="content">
 
-          <form method="post">
-            <div class="field has-addons">
-              <div class="control is-expanded">
-                <input class="input" type="text" placeholder="Nutzer-ID", name="nutzer" required>
-              </div>
-              <div class="control">
-                <button class="button is-primary" type="submit">MitarbeiterIn hinzufügen</button>
-              </div>
-            </div>
-          </form>
-
+    <form method="post">
+      <div class="field has-addons">
+        <div class="control is-expanded">
+          <input class="input" type="text" placeholder="Nutzer-ID", name="nutzer" required>
         </div>
+        <div class="control">
+          <button class="button is-primary" type="submit">MitarbeiterIn hinzufügen</button>
+        </div>
+      </div>
+    </form>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <div class="block"></div>
+      <div class="notification is-danger">
+          {{ messages[0] }}
+      </div>
+    {% endif %}
+    {% endwith %}
+  </div>
 
-    <br><br>
+    <hr>
+    <br>
 
   <h1 class="title">
     Auszahlungsfaktor in diesem Betrieb<br>
@@ -40,37 +46,23 @@
   </div>
 
   <p class="content">
-    <span class="icon"><i class="fas fa-info-circle"></i></span>
-    Der Betrieb kann einen Auszahlungsfaktor zwischen 0 und 1 beschließen. Je höher dieser Faktor, umso
+    <div class="icon"><i class="fas fa-info-circle"></i></div>
+    <p>Der Betrieb kann einen Auszahlungsfaktor zwischen 0 und 1 beschließen. Je höher dieser Faktor, umso
     mehr Arbeitsgeld bekommen die Beschäftigten pro Arbeitsstunde. Je niedriger,
-    umso mehr Stunden kann der Betrieb in einem Akkumulationsfonds sammeln.
+    umso mehr Stunden kann der Betrieb in einem Akkumulationsfonds sammeln.</p>
   </p>
 
-  <br><br>
+  <hr>
+  <br>
 
-        <h1 class="title">
-          Stunden gearbeitet
-        </h1>
+  <h1 class="title">
+    Stunden gearbeitet
+  </h1>
 
-      <div class="content">
-
-      <div class="content">
-              {{ table2 }}
-
-      </div>
-
-      {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <div class="notification is-danger">
-            {{ messages[0] }}
-        </div>
-      {% endif %}
-      {% endwith %}
-
-
+  <div class="content">
+    <div class="content">
+            {{ table2 }}
     </div>
-
-
-
+  </div>
 
 {% endblock %}
