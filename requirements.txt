@@ -35,6 +35,7 @@ pycparser==2.20
 Pygments==2.7.3
 python-dateutil==2.8.1
 python-dotenv==0.15.0
+python-graphviz==0.16
 pytz==2020.5
 pyzmq==20.0.0
 six==1.15.0
