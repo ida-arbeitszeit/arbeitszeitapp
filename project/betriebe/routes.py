@@ -137,6 +137,8 @@ def produktionsmittel():
 
 
     print("-----")
+    dot = Digraph(comment='Graph zur Preiszusammensetzung')
+
     print(fourth_level.count())
 
     col4, col3, col2, col1 = [], [], [], []
@@ -178,13 +180,15 @@ def produktionsmittel():
     print(">>>>>")
     for cnt, col in enumerate(cols_dict):
         if cnt == 0: # if first column (should be the same angebot, anyway)
-            pass
+            angebot_0 = list(col[0].keys())[0]
+            dot.node(f"{angebot_0}_{cnt}", f"{angebot_0}")
         else: # the following columns
             print("cnt:", cnt)
             for j in col:
                 current_angebot = list(j.keys())[0]
                 current_position = list(j.values())[0]
-                print(current_angebot, current_position)
+                print("ee", current_angebot, current_position, "cnt:", cnt)
+                dot.node(f"{current_angebot}_{cnt}", f"{current_angebot}")
                 parent_angebote_list = cols_dict[cnt-1]
                 print("parent_angebote_list", parent_angebote_list)
                 for par in parent_angebote_list:
@@ -194,11 +198,15 @@ def produktionsmittel():
                     for cur_pos in current_position:
                         if cur_pos in parent_positions:
                             print("MATCH", parent_angebot, current_angebot)
+                            dot.edge(f"{parent_angebot}_{cnt-1}", f"{current_angebot}_{cnt}")
                             break # only one match is enough
 
         print(">")
 
-        print("<<<<<")
+        print("<<DOT<<")
+
+        print(dot)
+        dot.render('/home/sebas/Schreibtisch/gv/preiszusammensetzung.gv', view=True)
 
 
     # [int(s) for s in string_of_numbers.split(',')]
