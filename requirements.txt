@@ -18,6 +18,7 @@ Flask-SQLAlchemy==2.4.4
 Flask-Table==0.5.0
 Flask-User==1.0.2.2
 Flask-WTF==0.14.3
+graphviz==0.16
 gunicorn==20.0.4
 idna==3.1
 itsdangerous==1.1.0
@@ -35,7 +36,6 @@ pycparser==2.20
 Pygments==2.7.3
 python-dateutil==2.8.1
 python-dotenv==0.15.0
-python-graphviz==0.16
 pytz==2020.5
 pyzmq==20.0.0
 six==1.15.0
