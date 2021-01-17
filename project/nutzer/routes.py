@@ -3,7 +3,9 @@ from flask_login import login_required, current_user
 from .. import db
 from ..models import Angebote, Kaeufe, Nutzer, Betriebe, Arbeit, Arbeiter
 from ..forms import ProductSearchForm
-from ..tables import KaeufeTable, ArbeitsstellenTable
+from ..tables import KaeufeTable, ArbeitsstellenTable, Preiszusammensetzung
+from ..composition_of_prices import get_table_of_composition, get_positions_in_table, create_dots
+
 
 
 main_nutzer = Blueprint('main_nutzer', __name__, template_folder='templates',
@@ -47,6 +49,11 @@ def meine_kaeufe():
 @login_required
 def suchen():
     search = ProductSearchForm(request.form)
+    qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name, Betriebe.email,\
+        Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
+        join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True).\
+        order_by(Angebote.id)
+    results = qry.all()
     if request.method == 'POST':
         results = []
         search_string = search.data['search']
@@ -95,7 +102,24 @@ def suchen():
         else:
             return render_template('suchen_nutzer.html', form=search, results=results)
 
-    return render_template('suchen_nutzer.html', form=search)
+    return render_template('suchen_nutzer.html', form=search, results=results)
+
+
+@main_nutzer.route('/nutzer/details/<int:id>', methods=['GET', 'POST'])
+def details(id):
+
+    from ..composition_of_prices import get_table_of_composition, get_positions_in_table, create_dots
+
+    table_of_composition =  get_table_of_composition(id)
+    cols_dict = get_positions_in_table(table_of_composition)
+    dot = create_dots(cols_dict, table_of_composition)
+    piped = dot.pipe().decode('utf-8')
+    table_preiszus = Preiszusammensetzung(table_of_composition)
+
+    if request.method == 'POST':
+        return redirect('/nutzer/suchen')
+
+    return render_template('details_nutzer.html', table_preiszus=table_preiszus, piped=piped)
 
 
 @main_nutzer.route('/nutzer/kaufen/<int:id>', methods=['GET', 'POST'])
