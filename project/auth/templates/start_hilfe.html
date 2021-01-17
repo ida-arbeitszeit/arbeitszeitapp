@@ -2,85 +2,29 @@
 {% block content1 %}
 
 <section class="hero is-fullheight">
-        <div class="hero-head">
-          <nav class="navbar is-light" role="navigation" aria-label="main navigation">
-            <div class="navbar-brand">
-              <a role="button" class="navbar-burger" onclick="expandMenu()" aria-label="menu" aria-expanded="false" data-target="navbarOnTop">
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-              </a>
-            </div>
-            <div id="navbarOnTop" class="navbar-menu">
-                <div class="navbar-end">
-                    <div class="navbar-item">
-                      <a class="button" href="{{ url_for('auth.start') }}">
-                          Zurück
-                      </a>
-                    </div>
-                </div>
-            </div>
-          </nav>
-        </div>
-
-
-
-
-      <div class="hero-body">
-          <div class="container has-text-centered">
-              <h1 class="title">
-                Was ist das hier?
-              </h1>
-              <div class="block content has-text-left">
-                <ul>
-                  <li>Auf dieser Plattform kannst du Produkte und Dienstleistungen gegen Arbeitszeit tauschen.</li>
-                  <li>Produkte kosten soviel Arbeitszeit, wie sie zur Herstellung brauchen.</li>
-                </ul>
-              </div>
-
-              <h1 class="title">
-                Wie funktioniert es?
-              </h1>
-
-
-              <div class="block content has-text-left">
-                <ul>
-                  <li>Es gibt "Nutzer"-Accounts und "Betriebe"-Accounts.</li>
-                  <ul>
-                    <li>Als Arbeiter und Konsument brauchst du einen <strong>Nutzer-Account</strong>.<br>
-                    Für deine
-                    geleistete Arbeit bekommst du von deinem Betrieb Arbeitszeit überwiesen,
-                    die du gegen Dienstleistungen oder Produkte
-                    eintauschen kannst. </li>
-                    <li>Wer Dienstleistungen oder Produkte anbieten will,
-                    braucht einen <strong>Betriebe-Account</strong>.<br>
-                    Mit diesem Account kannst du Mitarbeiter mit Hilfe
-                    ihrer Nutzer-ID registrieren und berechnen, wieviel Arbeit in deinen Produkten steckt.</li>
-                    <li>Gelegenheitsverkäufer, Freelancer oder Solo-Selbstständige
-                      registrieren sowohl einen Nutzer- als auch
-                    einen Betriebe-Account und fügen sich selbst als (einzigen) Mitarbeiter hinzu.</li>
-                  </ul>
-                </ul>
-              </div>
-
-
-
-              <h1 class="title">
-                Wofür das Ganze?
-              </h1>
-
-              <div class="block content has-text-left">
-                <ul>
-                  <li>Eine demokratische Form des Wirtschaftens braucht Transparenz.</li>
-                  <li>In der kapitalistischen Wirtschaft ist unklar, weshalb
-                    ein Produkt 10 und nicht 100 Euro kostet oder weshalb ein
-                    Fußball-Profi in der gleichen Zeit so viel mehr als die Putzkraft "verdient".</li>
-                  <li>Die Arbeitszeitrechnung schafft diese Transparenz. Diese App soll zeigen,
-                  dass Arbeitszeitrechnung nicht nur mit Dienstleistungen, sondern auch mit Produkten klappt.</li>
-                </ul>
+  <div class="hero-head">
+    <nav class="navbar is-light" role="navigation" aria-label="main navigation">
+      <div class="navbar-brand">
+        <a role="button" class="navbar-burger" onclick="expandMenu()" aria-label="menu" aria-expanded="false" data-target="navbarOnTop">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div id="navbarOnTop" class="navbar-menu">
+          <div class="navbar-end">
+              <div class="navbar-item">
+                <a class="button" href="{{ url_for('auth.start') }}">
+                    Zurück
+                </a>
               </div>
           </div>
       </div>
+    </nav>
+  </div>
+{% from 'macros.html' import start_hilfe %}
+{{ start_hilfe() }}
+
 </section>
 
 {% endblock %}

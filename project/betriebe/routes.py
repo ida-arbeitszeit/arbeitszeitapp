@@ -359,3 +359,8 @@ def angebot_loeschen():
         return redirect(url_for('main_betriebe.meine_angebote'))
 
     return render_template('angebot_loeschen.html', angebot=angebot)
+
+@main_betriebe.route('/betriebe/hilfe')
+@login_required
+def hilfe():
+    return render_template('betriebe_hilfe.html')

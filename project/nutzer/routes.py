@@ -183,3 +183,8 @@ def profile():
         return render_template('profile_nutzer.html', arbeitsstellen_table=arbeitsstellen_table)
     elif user_type == "betrieb":
         return redirect(url_for('auth.zurueck'))
+
+@main_nutzer.route('/nutzer/hilfe')
+@login_required
+def hilfe():
+    return render_template('nutzer_hilfe.html')
