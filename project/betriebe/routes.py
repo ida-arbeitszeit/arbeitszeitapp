@@ -4,10 +4,9 @@ from .. import db
 from ..models import Angebote, Kaeufe, Betriebe, Nutzer, Produktionsmittel, Arbeit, Arbeiter
 from ..forms import ProductSearchForm
 from ..tables import ProduktionsmittelTable, ArbeiterTable1, ArbeiterTable2, Preiszusammensetzung
+from ..composition_of_prices import get_table_of_composition, get_positions_in_table, create_dots
 from decimal import Decimal
 from sqlalchemy.sql import func
-from sqlalchemy.orm import aliased
-from graphviz import Digraph
 
 
 main_betriebe = Blueprint('main_betriebe', __name__, template_folder='templates',
@@ -93,135 +92,19 @@ def produktionsmittel():
     table_aktiv = ProduktionsmittelTable(produktionsmittel_aktiv)
     table_inaktiv = ProduktionsmittelTable(produktionsmittel_inaktiv)
 
-
-
-    angebote1 = aliased(Angebote)
-    angebote2 = aliased(Angebote)
-    angebote3 = aliased(Angebote)
-    angebote4 = aliased(Angebote)
-
-    produktionsmittel1 = aliased(Produktionsmittel)
-    produktionsmittel2 = aliased(Produktionsmittel)
-    produktionsmittel3 = aliased(Produktionsmittel)
-    produktionsmittel4 = aliased(Produktionsmittel)
-
-    kaeufe2 = aliased(Kaeufe)
-    kaeufe3 = aliased(Kaeufe)
-    kaeufe4 = aliased(Kaeufe)
-
-    first_level = db.session.query(
-        angebote1.id.label("angebot1"), angebote1.name.label("name1"), angebote1.p_kosten.label("p1"),
-        angebote1.v_kosten.label("v1"), angebote1.preis.label("preis1"), produktionsmittel1.prozent_gebraucht.label("proz_gebr2"),
-        produktionsmittel1.kauf.label("kauf2"),
-        kaeufe2.angebot.label("angebot2"), angebote2.name.label("name2"),
-        angebote2.preis.label("preis2"), (angebote2.preis*(produktionsmittel1.prozent_gebraucht/100)).label("kosten2"),
-        produktionsmittel2.prozent_gebraucht.label("proz_gebr3"), produktionsmittel2.kauf.label("kauf3"),
-        kaeufe3.angebot.label("angebot3"), angebote3.name.label("name3"),
-        angebote3.preis.label("preis3"), (angebote3.preis*(produktionsmittel2.prozent_gebraucht/100)).label("kosten3"),
-        produktionsmittel3.prozent_gebraucht.label("proz_gebr4"), produktionsmittel3.kauf.label("kauf4"),
-        kaeufe4.angebot.label("angebot4"), angebote4.name.label("name4"),
-        angebote4.preis.label("preis4"), (angebote4.preis*(produktionsmittel3.prozent_gebraucht/100)).label("kosten4"),
-        produktionsmittel4.prozent_gebraucht.label("proz_gebr5"), produktionsmittel4.kauf.label("kauf5"))\
-            .select_from(angebote1).filter(angebote1.id==10).outerjoin\
-            (produktionsmittel1, angebote1.id==produktionsmittel1.angebot)
-
-    second_level = first_level.outerjoin(kaeufe2, produktionsmittel1.kauf==kaeufe2.id).outerjoin(angebote2, kaeufe2.angebot==angebote2.id).\
-        outerjoin(produktionsmittel2, angebote2.id == produktionsmittel2.angebot)
-
-    third_level = second_level.outerjoin(kaeufe3, produktionsmittel2.kauf==kaeufe3.id).outerjoin(angebote3, kaeufe3.angebot==angebote3.id).\
-        outerjoin(produktionsmittel3, angebote3.id == produktionsmittel3.angebot)
-
-    fourth_level = third_level.outerjoin(kaeufe4, produktionsmittel3.kauf==kaeufe4.id).outerjoin(angebote4, kaeufe4.angebot==angebote4.id).\
-        outerjoin(produktionsmittel4, angebote4.id == produktionsmittel4.angebot)
-
-
-
-    print("-----")
-    dot = Digraph(comment='Graph zur Preiszusammensetzung')
-
-    print(fourth_level.count())
-
-    col4, col3, col2, col1 = [], [], [], []
-
-    for row in fourth_level:
-        print(row.name1, row.name2, row.name3, row.name4)
-        col1.append(row.name1)
-        col2.append(row.name2)
-        col3.append(row.name3)
-        col4.append(row.name4)
-
-    list_of_cols = [col1, col2, col3, col4]
-
-    cols_dict = []
-
-    for r in range(fourth_level.count()):
-        list1 = []
-        for c, i in enumerate(list_of_cols[r]):
-            keys_in_list1 = []
-            for j in list1:
-                if j.keys():
-                    keys_in_list1.append(list(j.keys())[0])
-
-            if i in list(keys_in_list1):
-                for item in list1:
-                    if list(item.keys())[0] == i:
-                        item[i].append(c)
-            elif i == None:
-                pass
-            else:
-                list1.append({i:[c]})
-        cols_dict.append(list1)
-
-
-    print(">>>>>")
-    for i in cols_dict:
-        print(i)
-
-    print(">>>>>")
-    for cnt, col in enumerate(cols_dict):
-        if cnt == 0: # if first column (should be the same angebot, anyway)
-            angebot_0 = list(col[0].keys())[0]
-            dot.node(f"{angebot_0}_{cnt}", f"{angebot_0}")
-        else: # the following columns
-            print("cnt:", cnt)
-            for j in col:
-                current_angebot = list(j.keys())[0]
-                current_position = list(j.values())[0]
-                print("ee", current_angebot, current_position, "cnt:", cnt)
-                dot.node(f"{current_angebot}_{cnt}", f"{current_angebot}")
-                parent_angebote_list = cols_dict[cnt-1]
-                print("parent_angebote_list", parent_angebote_list)
-                for par in parent_angebote_list:
-                    parent_angebot = list(par.keys())[0]
-                    parent_positions = list(par.values())[0]
-                    print("-", parent_angebot, parent_positions)
-                    for cur_pos in current_position:
-                        if cur_pos in parent_positions:
-                            print("MATCH", parent_angebot, current_angebot)
-                            dot.edge(f"{parent_angebot}_{cnt-1}", f"{current_angebot}_{cnt}")
-                            break # only one match is enough
-
-        print(">")
-
-        print("<<DOT<<")
-
-        print(dot)
-        dot.render('/home/sebas/Schreibtisch/gv/preiszusammensetzung.gv', view=True)
-
-
-    # [int(s) for s in string_of_numbers.split(',')]
-
-
-
-
-    table_preiszus = Preiszusammensetzung(fourth_level)
-    return render_template('produktionsmittel.html', table_aktiv=table_aktiv, table_inaktiv=table_inaktiv, table_preiszus=table_preiszus)
+    return render_template('produktionsmittel.html', table_aktiv=table_aktiv, table_inaktiv=table_inaktiv)
 
 
 @main_betriebe.route('/betriebe/suchen', methods=['GET', 'POST'])
 @login_required
 def suchen():
     search = ProductSearchForm(request.form)
+    qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name, Betriebe.email,\
+        Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
+        join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True).\
+        order_by(Angebote.id)
+    results = qry.all()
+
     if request.method == 'POST':
         results = []
         search_string = search.data['search']
@@ -270,7 +153,21 @@ def suchen():
         else:
             return render_template('suchen_betriebe.html', form=search, results=results)
 
-    return render_template('suchen_betriebe.html', form=search)
+    return render_template('suchen_betriebe.html', form=search, results=results)
+
+
+@main_betriebe.route('/betriebe/details/<int:id>', methods=['GET', 'POST'])
+def details(id):
+    table_of_composition =  get_table_of_composition(id)
+    cols_dict = get_positions_in_table(table_of_composition)
+    dot = create_dots(cols_dict, table_of_composition)
+    piped = dot.pipe().decode('utf-8')
+    table_preiszus = Preiszusammensetzung(table_of_composition)
+
+    if request.method == 'POST':
+        return redirect('/betriebe/suchen')
+
+    return render_template('details_betriebe.html', table_preiszus=table_preiszus, piped=piped)
 
 
 @main_betriebe.route('/betriebe/kaufen/<int:id>', methods=['GET', 'POST'])
