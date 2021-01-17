@@ -37,6 +37,13 @@ class Preiszusammensetzung(Table):
     proz_gebr5 = Col("proz_gebr5")
     kauf5 = Col("kauf5")
 
+    angebot5 = Col("angebot5")
+    name5 = Col("name5")
+    preis5 = Col("preis5")
+    kosten5 = Col("kosten5")
+    proz_gebr6 = Col("proz_gebr6")
+    kauf6 = Col("kauf6")
+
 
 class KaeufeTable(Table):
     id = Col('Kauf-Id')
