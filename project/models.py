@@ -27,6 +27,13 @@ class Angebote(UserMixin, db.Model):
     preis = db.Column(db.Numeric(), nullable=False)
     aktiv = db.Column(db.Boolean, nullable=False, default=True)
 
+    def __repr__(self):
+        return "<Angebote(name='%s', betrieb='%s', beschreibung='%s', kategorie='%s', \
+p_kosten='%s', v_kosten='%s', preis='%s', aktiv='%s')>" % (
+                             self.name, self.betrieb, self.beschreibung,
+                             self.kategorie, self.p_kosten, self.v_kosten,
+                             self.preis, self.aktiv)
+
 class Kaeufe(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     angebot = db.Column(db.Integer, db.ForeignKey("angebote.id"), nullable=False)
@@ -51,6 +58,10 @@ class Produktionsmittel(UserMixin, db.Model):
     angebot = db.Column(db.Integer, db.ForeignKey("angebote.id"), nullable=False)
     kauf = db.Column(db.Integer, db.ForeignKey("kaeufe.id"), nullable=False)
     prozent_gebraucht = db.Column(db.Numeric(), nullable=False)
+
+    def __repr__(self):
+        return "<Produktionsmittel(angebot='%s', kauf='%s', prozent_gebraucht='%s')>" % (
+                             self.angebot, self.kauf, self.prozent_gebraucht)
 
 class Bewertungen(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
