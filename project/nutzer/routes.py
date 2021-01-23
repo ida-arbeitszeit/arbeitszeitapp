@@ -39,8 +39,12 @@ def meine_kaeufe():
     else:
         session["user_type"] = "nutzer"
 
-        kaufhistorie = db.session.query(Kaeufe.id, Angebote.name, Angebote.beschreibung, Angebote.preis).select_from(Kaeufe).\
-            filter_by(nutzer=current_user.id).join(Angebote, Kaeufe.angebot==Angebote.id).all()
+        kaufhistorie = db.session.query(Kaeufe.id, Angebote.name, Angebote.beschreibung,\
+            func.concat(func.round(Angebote.preis, 2), " Std.").label("preis")
+            ).\
+            select_from(Kaeufe).\
+            filter_by(nutzer=current_user.id).\
+            join(Angebote, Kaeufe.angebot==Angebote.id).all()
         kaufh_table = KaeufeTable(kaufhistorie, no_items="(Noch keine Käufe.)")
         return render_template('meine_kaeufe.html', kaufh_table=kaufh_table)
 
@@ -49,8 +53,9 @@ def meine_kaeufe():
 @login_required
 def suchen():
     search = ProductSearchForm(request.form)
-    qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name, Betriebe.email,\
-        Angebote.beschreibung, Angebote.kategorie, func.round(Angebote.preis, 2)).select_from(Angebote).\
+    qry = db.session.query(Angebote.id, Angebote.name.label("angebot_name"),\
+        Betriebe.name.label("betrieb_name"), Betriebe.email,\
+        Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
         join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True).\
         order_by(Angebote.id)
     results = qry.all()
@@ -79,13 +84,13 @@ def suchen():
         else:
             return render_template('suchen_nutzer.html', form=search, results=results)
 
+    for r in results:
+        print("zzz", r.id)
     return render_template('suchen_nutzer.html', form=search, results=results)
 
 
 @main_nutzer.route('/nutzer/details/<int:id>', methods=['GET', 'POST'])
 def details(id):
-
-    from ..composition_of_prices import get_table_of_composition, get_positions_in_table, create_dots
 
     table_of_composition =  get_table_of_composition(id)
     cols_dict = get_positions_in_table(table_of_composition)
