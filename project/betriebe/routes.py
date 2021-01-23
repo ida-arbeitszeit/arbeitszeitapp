@@ -49,7 +49,9 @@ def arbeit():
         select_from(Arbeiter).join(Nutzer).filter(Arbeiter.betrieb==current_user.id).group_by(Nutzer.id).all()
     table1 = ArbeiterTable1(arbeiter1, no_items='(Noch keine Mitarbeiter.)')
 
-    arbeiter2 = db.session.query(Nutzer.id, Nutzer.name, func.sum(Arbeit.stunden).label('summe_stunden')).\
+    arbeiter2 = db.session.query(Nutzer.id, Nutzer.name,
+        func.concat(func.sum(Arbeit.stunden), " Std.").label('summe_stunden')
+        ).\
         select_from(Angebote).filter(Angebote.betrieb==current_user.id).join(Arbeit).join(Nutzer).group_by(Nutzer.id).all()
     table2 = ArbeiterTable2(arbeiter2, no_items='(Noch keine Stunden gearbeitet.)')
     fik = Betriebe.query.filter_by(id=current_user.id).first().fik
@@ -78,8 +80,9 @@ def arbeit():
 @login_required
 def produktionsmittel():
     produktionsmittel_qry = db.session.query(Kaeufe.id, Angebote.name, Angebote.beschreibung,\
-        func.round(Angebote.preis, 2).label("preis"),\
-        func.round(func.coalesce(func.sum(Produktionsmittel.prozent_gebraucht), 0), 2).label("prozent_gebraucht"))\
+        func.concat(func.round(Angebote.preis, 2), " Std.").label("preis"),\
+        func.concat(func.round(func.coalesce(func.sum(Produktionsmittel.prozent_gebraucht), 0), 2), " %").\
+            label("prozent_gebraucht"))\
         .select_from(Kaeufe)\
         .filter(Kaeufe.betrieb==current_user.id).outerjoin(Produktionsmittel,\
         Kaeufe.id==Produktionsmittel.kauf).join(Angebote, Kaeufe.angebot==Angebote.id).\
@@ -100,8 +103,9 @@ def produktionsmittel():
 @login_required
 def suchen():
     search = ProductSearchForm(request.form)
-    qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name, Betriebe.email,\
-        Angebote.beschreibung, Angebote.kategorie, func.round(Angebote.preis, 2)).select_from(Angebote).\
+    qry = db.session.query(Angebote.id, Angebote.name.label("angebot_name"),
+        Betriebe.name.label("betrieb_name"), Betriebe.email,\
+        Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
         join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True).\
         order_by(Angebote.id)
     results = qry.all()
