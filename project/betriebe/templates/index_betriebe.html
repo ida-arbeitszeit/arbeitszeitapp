@@ -1,21 +1,22 @@
 {% extends "base_betriebe.html" %}
 
 {% block content2 %}
-<h1 class="title">
-  Betriebe 2020
-</h1>
-<h2 class="subtitle">
-  Eine Plattform für Arbeitszeitrechnung.<br>
-</h2>
+<div class="container has-text-centered">
+  <h1 class="title">
+    Betriebe 2020
+  </h1>
+  <h2 class="subtitle">
+    Eine Plattform für Arbeitszeitrechnung.<br>
+  </h2>
 
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <ul class="flashes has-text-danger">
-    {% for message in messages %}
-      <li>{{ message }}</li>
-    {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
-
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class="flashes has-text-danger">
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+</div>
 {% endblock %}

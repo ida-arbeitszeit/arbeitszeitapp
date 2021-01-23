@@ -2,25 +2,26 @@
 
 {% block content2 %}
 
-<h1 class="subtitle">PREISZUSAMMENSETZUNG</h1>
-<div class="content">
-  {{ piped|safe }}
+<div class="table-container has-text-centered">
+    <h1 class="subtitle">PREISZUSAMMENSETZUNG</h1>
+    <div class="table-container">
+        <figure class="image">
+          {{ piped|safe }}
+        </figure>
+    </div>
+
+    <h1 class="subtitle">DETAILS PREISZUSAMMENSETZUNG</h1>
+    <div class="table-container">
+        <div class="content">
+          {{ table_preiszus }}
+        </div>
+    </div>
+
+    <form method="post">
+        <a class="button is-primary" href="{{  url_for('main_betriebe.suchen') }}">
+          Zurück
+        </a>
+    </form>
 </div>
-
-
-<h1 class="subtitle">DETAILS PREISZUSAMMENSETZUNG</h1>
-<div class="table-container">
-  <div class="content">
-    {{ table_preiszus }}
-  </div>
-</div>
-
-
-<form method="post">
-  <a class="button is-primary" href="{{  url_for('main_betriebe.suchen') }}">
-    Zurück
-  </a>
-</form>
-
 
 {% endblock %}
