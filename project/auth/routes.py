@@ -5,6 +5,7 @@ from ..models import Nutzer, Betriebe
 from .. import db
 
 
+
 auth = Blueprint('auth', __name__, template_folder='templates',
     static_folder='static')
 
