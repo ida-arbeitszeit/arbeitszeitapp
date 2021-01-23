@@ -10,8 +10,8 @@ def create_app():
     app = Flask(__name__, instance_relative_config=False)
 
     # Production/Development configuration
-    app.config.from_object('config.ProdConfig')
-    # app.config.from_object('config.DevConfig')
+    # app.config.from_object('config.ProdConfig')
+    app.config.from_object('config.DevConfig')
 
     login_manager.login_view = 'auth.start'
 
