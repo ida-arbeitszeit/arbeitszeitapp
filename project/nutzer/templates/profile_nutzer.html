@@ -13,7 +13,7 @@
         <td>Deine Nutzer-ID:</td><td>{{ current_user.id }}</td>
       </tr>
       <tr>
-        <td>Dein Guthaben:</td><td>{{ current_user.guthaben }} Stunden</td>
+        <td>Dein Guthaben:</td><td>{{ current_user.guthaben|round(2) }} Stunden</td>
       </tr>
       <tr>
         <td>Deine Email:</td><td>{{ current_user.email }}</td>

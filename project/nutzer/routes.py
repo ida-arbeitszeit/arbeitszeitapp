@@ -5,7 +5,7 @@ from ..models import Angebote, Kaeufe, Nutzer, Betriebe, Arbeit, Arbeiter
 from ..forms import ProductSearchForm
 from ..tables import KaeufeTable, ArbeitsstellenTable, Preiszusammensetzung
 from ..composition_of_prices import get_table_of_composition, get_positions_in_table, create_dots
-
+from sqlalchemy.sql import func
 
 
 main_nutzer = Blueprint('main_nutzer', __name__, template_folder='templates',
@@ -50,7 +50,7 @@ def meine_kaeufe():
 def suchen():
     search = ProductSearchForm(request.form)
     qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name, Betriebe.email,\
-        Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
+        Angebote.beschreibung, Angebote.kategorie, func.round(Angebote.preis, 2)).select_from(Angebote).\
         join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True).\
         order_by(Angebote.id)
     results = qry.all()
@@ -60,40 +60,17 @@ def suchen():
 
         if search_string:
             if search.data['select'] == 'Name':
-                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name, Betriebe.email,\
-                    Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
-                    join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True,\
-                    Angebote.name.contains(search_string)).\
-                    order_by(Angebote.id)
-                results = qry.all()
+                results = qry.filter(Angebote.name.contains(search_string)).all()
 
             elif search.data['select'] == 'Beschreibung':
-                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name, Betriebe.email,\
-                    Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
-                    join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True,\
-                    Angebote.beschreibung.contains(search_string)).\
-                    order_by(Angebote.id)
-                results = qry.all()
+                results = qry.filter(Angebote.beschreibung.contains(search_string)).all()
 
             elif search.data['select'] == 'Kategorie':
-                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name, Betriebe.email,\
-                    Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
-                    join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True,\
-                    Angebote.kategorie.contains(search_string)).\
-                    order_by(Angebote.id)
-                results = qry.all()
+                results = qry.filter(Angebote.kategorie.contains(search_string)).all()
 
             else:
-                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name, Betriebe.email,\
-                    Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
-                    join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True).\
-                    order_by(Angebote.id)
                 results = qry.all()
         else:
-            qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name, Betriebe.email,\
-                Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
-                join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True).\
-                order_by(Angebote.id)
             results = qry.all()
 
         if not results:

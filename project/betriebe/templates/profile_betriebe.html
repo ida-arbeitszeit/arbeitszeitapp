@@ -11,7 +11,7 @@
   <div class="content">
     <table>
       <tr>
-        <td>Dein Guthaben:</td><td>{{ current_user.guthaben }} Stunden</td>
+        <td>Dein Guthaben:</td><td>{{ current_user.guthaben|round(2) }} Stunden</td>
       </tr>
       <tr>
         <td>Deine ID:</td><td>{{ current_user.id }}</td>

@@ -78,8 +78,9 @@ def arbeit():
 @login_required
 def produktionsmittel():
     produktionsmittel_qry = db.session.query(Kaeufe.id, Angebote.name, Angebote.beschreibung,\
-        Angebote.preis, func.coalesce(func.sum(Produktionsmittel.prozent_gebraucht).\
-        label("prozent_gebraucht"), 0).label("prozent_gebraucht")).select_from(Kaeufe)\
+        func.round(Angebote.preis, 2).label("preis"),\
+        func.round(func.coalesce(func.sum(Produktionsmittel.prozent_gebraucht), 0), 2).label("prozent_gebraucht"))\
+        .select_from(Kaeufe)\
         .filter(Kaeufe.betrieb==current_user.id).outerjoin(Produktionsmittel,\
         Kaeufe.id==Produktionsmittel.kauf).join(Angebote, Kaeufe.angebot==Angebote.id).\
         group_by(Kaeufe, Angebote, Produktionsmittel.kauf)
@@ -100,7 +101,7 @@ def produktionsmittel():
 def suchen():
     search = ProductSearchForm(request.form)
     qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name, Betriebe.email,\
-        Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
+        Angebote.beschreibung, Angebote.kategorie, func.round(Angebote.preis, 2)).select_from(Angebote).\
         join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True).\
         order_by(Angebote.id)
     results = qry.all()
@@ -111,40 +112,17 @@ def suchen():
 
         if search_string:
             if search.data['select'] == 'Name':
-                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name, Betriebe.email,\
-                    Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
-                    join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True,\
-                    Angebote.name.contains(search_string)).\
-                    order_by(Angebote.id)
-                results = qry.all()
+                results = qry.filter(Angebote.name.contains(search_string)).all()
 
             elif search.data['select'] == 'Beschreibung':
-                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name, Betriebe.email,\
-                    Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
-                    join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True,\
-                    Angebote.beschreibung.contains(search_string)).\
-                    order_by(Angebote.id)
-                results = qry.all()
+                results = qry.filter(Angebote.beschreibung.contains(search_string)).all()
 
             elif search.data['select'] == 'Kategorie':
-                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name, Betriebe.email,\
-                    Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
-                    join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True,\
-                    Angebote.kategorie.contains(search_string)).\
-                    order_by(Angebote.id)
-                results = qry.all()
+                results = qry.filter(Angebote.kategorie.contains(search_string)).all()
 
             else:
-                qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name, Betriebe.email,\
-                    Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
-                    join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True).\
-                    order_by(Angebote.id)
                 results = qry.all()
         else:
-            qry = db.session.query(Angebote.id, Angebote.name, Betriebe.name, Betriebe.email,\
-                Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
-                join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True).\
-                order_by(Angebote.id)
             results = qry.all()
 
         if not results:
