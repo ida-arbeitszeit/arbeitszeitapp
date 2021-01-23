@@ -14,55 +14,56 @@
     </div>
 
     <div class="content">
+      <form method="post">
+        <div class="field has-addons">
+          <div class="control is-expanded">
+            <input class="input" type="text" placeholder="Nutzer-ID", name="nutzer" required>
+          </div>
+          <div class="control">
+            <button class="button is-primary" type="submit">MitarbeiterIn hinzufügen</button>
+          </div>
+        </div>
+      </form>
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="block"></div>
+        <div class="notification is-danger">
+            {{ messages[0] }}
+        </div>
+      {% endif %}
+      {% endwith %}
 
-    <form method="post">
-      <div class="field has-addons">
-        <div class="control is-expanded">
-          <input class="input" type="text" placeholder="Nutzer-ID", name="nutzer" required>
-        </div>
-        <div class="control">
-          <button class="button is-primary" type="submit">MitarbeiterIn hinzufügen</button>
-        </div>
-      </div>
-    </form>
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      <div class="block"></div>
-      <div class="notification is-danger">
-          {{ messages[0] }}
-      </div>
-    {% endif %}
-    {% endwith %}
+        <div class="icon"><i class="fas fa-info-circle"></i></div>
+        <p>Mitarbeiter finden ihre Nutzer-Id unter "Meine Daten".</p>
   </div>
 
     <hr>
     <br>
+  <div class="content">
+    <h1 class="title">
+      Auszahlungsfaktor in diesem Betrieb<br>
+    </h1>
+    <div class="box">
+        {{ fik }}
+    </div>
 
-  <h1 class="title">
-    Auszahlungsfaktor in diesem Betrieb<br>
-  </h1>
-  <div class="box">
-      {{ fik }}
+      <div class="icon"><i class="fas fa-info-circle"></i></div>
+      <p>Der Betrieb kann einen Auszahlungsfaktor zwischen 0 und 1 beschließen.<br>  Je höher dieser Faktor, umso
+      mehr Arbeitsgeld bekommen die Beschäftigten pro Arbeitsstunde. Je niedriger,
+      umso mehr Stunden kann der Betrieb in einem Akkumulationsfonds sammeln.</p>
+
   </div>
-
-  <p class="content">
-    <div class="icon"><i class="fas fa-info-circle"></i></div>
-    <p>Der Betrieb kann einen Auszahlungsfaktor zwischen 0 und 1 beschließen. Je höher dieser Faktor, umso
-    mehr Arbeitsgeld bekommen die Beschäftigten pro Arbeitsstunde. Je niedriger,
-    umso mehr Stunden kann der Betrieb in einem Akkumulationsfonds sammeln.</p>
-  </p>
 
   <hr>
   <br>
 
-  <h1 class="title">
-    Stunden gearbeitet
-  </h1>
-
   <div class="content">
-    <div class="content">
-            {{ table2 }}
-    </div>
+    <h1 class="title">
+      Stunden gearbeitet
+    </h1>
+      <div class="content">
+              {{ table2 }}
+      </div>
   </div>
 
 {% endblock %}
