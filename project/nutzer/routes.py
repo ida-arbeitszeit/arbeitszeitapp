@@ -41,7 +41,7 @@ def meine_kaeufe():
 
         kaufhistorie = db.session.query(Kaeufe.id, Angebote.name, Angebote.beschreibung, Angebote.preis).select_from(Kaeufe).\
             filter_by(nutzer=current_user.id).join(Angebote, Kaeufe.angebot==Angebote.id).all()
-        kaufh_table = KaeufeTable(kaufhistorie)
+        kaufh_table = KaeufeTable(kaufhistorie, no_items="(Noch keine Käufe.)")
         return render_template('meine_kaeufe.html', kaufh_table=kaufh_table)
 
 

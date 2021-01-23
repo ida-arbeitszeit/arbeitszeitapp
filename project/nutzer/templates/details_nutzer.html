@@ -2,28 +2,25 @@
 
 {% block content2 %}
 
+w<h1 class="subtitle">PREISZUSAMMENSETZUNG</h1>
+<div class="content">
+  {{ piped|safe }}
+</div>
 
 
-
-  <h1 class="subtitle">PREISZUSAMMENSETZUNG-1</h1>
-  <div class="table-container">
-    <div class="content">
-      {{ table_preiszus }}
-    </div>
-  </div>
-
-
-  <h1 class="subtitle">PREISZUSAMMENSETZUNG-2</h1>
+<h1 class="subtitle">DETAILS PREISZUSAMMENSETZUNG</h1>
+<div class="table-container">
   <div class="content">
-    {{ piped|safe }}
+    {{ table_preiszus }}
   </div>
+</div>
 
 
-  <form method="post">
-    <a class="button is-primary" href="{{  url_for('main_nutzer.suchen') }}">
-      Zurück
-    </a>
-  </form>
+<form method="post">
+  <a class="button is-primary" href="{{  url_for('main_nutzer.suchen') }}">
+    Zurück
+  </a>
+</form>
 
 
 {% endblock %}
