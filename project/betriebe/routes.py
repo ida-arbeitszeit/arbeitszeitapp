@@ -47,11 +47,11 @@ def profile():
 def arbeit():
     arbeiter1 = db.session.query(Nutzer.id, Nutzer.name).\
         select_from(Arbeiter).join(Nutzer).filter(Arbeiter.betrieb==current_user.id).group_by(Nutzer.id).all()
-    table1 = ArbeiterTable1(arbeiter1)
+    table1 = ArbeiterTable1(arbeiter1, no_items='(Noch keine Mitarbeiter.)')
 
     arbeiter2 = db.session.query(Nutzer.id, Nutzer.name, func.sum(Arbeit.stunden).label('summe_stunden')).\
         select_from(Angebote).filter(Angebote.betrieb==current_user.id).join(Arbeit).join(Nutzer).group_by(Nutzer.id).all()
-    table2 = ArbeiterTable2(arbeiter2)
+    table2 = ArbeiterTable2(arbeiter2, no_items='(Noch keine Stunden gearbeitet.)')
     fik = Betriebe.query.filter_by(id=current_user.id).first().fik
 
     if request.method == 'POST':
@@ -89,8 +89,8 @@ def produktionsmittel():
     produktionsmittel_inaktiv = produktionsmittel_qry.having(func.coalesce(func.sum(Produktionsmittel.prozent_gebraucht).\
     label("prozent_gebraucht"), 0).label("prozent_gebraucht")== 100).all()
 
-    table_aktiv = ProduktionsmittelTable(produktionsmittel_aktiv)
-    table_inaktiv = ProduktionsmittelTable(produktionsmittel_inaktiv)
+    table_aktiv = ProduktionsmittelTable(produktionsmittel_aktiv, no_items="(Keine Produktionsmittel vorhanden.)")
+    table_inaktiv = ProduktionsmittelTable(produktionsmittel_inaktiv, no_items="(Noch keine Produktionsmittel verbraucht.)")
 
     return render_template('produktionsmittel.html', table_aktiv=table_aktiv, table_inaktiv=table_inaktiv)
 
