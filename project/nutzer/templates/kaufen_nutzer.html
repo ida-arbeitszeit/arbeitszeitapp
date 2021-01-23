@@ -2,9 +2,8 @@
 
 {% block content2 %}
 
+<div class="container has-text-centered">
   <h1 class="title">Kauf bestätigen?</h1>
-
-
   <div class="block">
     Möchtest du <b>{{ angebot.name }}</b> wirklich kaufen?
   </div>
@@ -12,7 +11,6 @@
     Der Preis beträgt <strong>{{ angebot.preis|round(2) }} Stunden</strong> (= {{ angebot.p_kosten|round(2) }} Stunden für
     Produktionsmittel und {{ angebot.v_kosten|round(2) }} Stunden für Arbeit des Betriebs selbst).
   </div>
-
   <div class="block">
     Der Betrag wird dir von deinem Guthaben abgezogen.
   </div>
@@ -20,13 +18,12 @@
     Dein Guthaben beträgt momentan {{ current_user.guthaben|round(2) }} Stunden.
   </div>
 
-
   <form method="post">
     <input class="button  is-primary" type="submit" value="Bestätigen">
     <a class="button  is-light" href="{{  url_for('main_nutzer.suchen') }}">
       Abbrechen
     </a>
   </form>
-
+</div>
 
 {% endblock %}

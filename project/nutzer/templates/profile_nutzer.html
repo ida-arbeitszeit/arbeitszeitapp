@@ -1,11 +1,12 @@
 {% extends "base_nutzer.html" %}
 
 {% block content2 %}
-<h1 class="title">
-  Willkommen, {{ current_user.name }}!
-</h1>
 
-<div class="column is-4 is-offset-4">
+<div class="column is-4 is-offset-4 has-text-centered">
+
+  <h1 class="title">
+    Willkommen, {{ current_user.name }}!
+  </h1>
 
   <div class="content">
     <table>
@@ -40,6 +41,7 @@
 
 
   </div>
-</div>
+
+
 
 {% endblock %}

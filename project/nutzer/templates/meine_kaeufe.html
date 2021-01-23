@@ -3,14 +3,22 @@
 {% block content2 %}
 
 
-<div class="column is-4 is-offset-4">
+<div class="table-container has-text-centered">
+
   <h1 class="title">
     Meine vergangenen Käufe:
   </h1>
 
-  <div class="content">
-        {{ kaufh_table }}
+
+
+  <div class="column is-8 is-offset-3">
+  <div class="table-container has-text-centered">
+    <div class="table">
+      {{ kaufh_table }}
+    </div>
+  </div>
   </div>
 
-  
+</div>
+
 {% endblock %}

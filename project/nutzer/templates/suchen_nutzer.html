@@ -3,10 +3,15 @@
 
 {% block content2 %}
 
+<div class="table-container has-text-centered">
+
 {% from 'macros.html' import produktsuche %}
 {{ produktsuche(form) }}
 
 {% if results is defined and results|length %}
+<h1 class="title">
+  Ergebnisse
+</h1>
 <table class="table is-bordered is-fullwidth">
   <thead><tr><th>Angebot-ID</th><th>Produktname</th><th>Betrieb</th><th>Kontakt</th><th>Beschreibung</th><th>Kategorie</th><th>Preis</th><th>Details</th><th>Kaufen</th></tr></thead>
     <tbody>
@@ -20,6 +25,9 @@
       {% endfor %}
     </tbody>
 </table>
+
 {% endif %}
+
+</div>
 
 {% endblock %}
