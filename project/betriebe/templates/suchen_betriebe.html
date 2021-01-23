@@ -11,7 +11,9 @@
   <thead><tr><th>Angebot-ID</th><th>Produktname</th><th>Betrieb</th><th>Kontakt</th><th>Beschreibung</th><th>Kategorie</th><th>Preis</th><th>Details</th><th>Kaufen</th></tr></thead>
     <tbody>
       {% for res in results %}
-        <tr><td>{{ res[0] }}</td><td>{{ res[1] }}</td> <td>{{ res[2] }}</td> <td>{{ res[3] }}</td><td>{{ res[4] }}</td><td>{{ res[5] }}</td><td>{{ res[6] }}</td><td><a href="{{ url_for('main_betriebe.details', id=res[0]) }}"><u>Link</u></a></td><td><a href="{{ url_for('main_betriebe.kaufen', id=res[0]) }}"><u>Link</u></a></td></tr>
+        <tr><td>{{ res.id }}</td><td>{{ res.angebot_name }}</td> <td>{{ res.betrieb_name }}</td>
+          <td>{{ res.email }}</td><td>{{ res.beschreibung }}</td><td>{{ res.kategorie }}</td>
+          <td>{{ res.preis|round(2) }} Std.</td><td><a href="{{ url_for('main_betriebe.details', id=res[0]) }}"><u>Link</u></a></td><td><a href="{{ url_for('main_betriebe.kaufen', id=res[0]) }}"><u>Link</u></a></td></tr>
       {% endfor %}
     </tbody>
 </table>
