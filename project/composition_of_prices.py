@@ -106,8 +106,8 @@ def create_dots(cols_dict, table_of_composition):
     for cnt, col in enumerate(cols_dict):
         if cnt == 0: # if first column (should be all the same angebot)
             angebot_0 = list(col[0].keys())[0]
-            dot.node(f"{angebot_0}_{cnt}", f"{angebot_0}, Preis: {round(table_of_composition[0].preis1, 2)}")
-            dot.node(f"{angebot_0}_v_{cnt}", f"Arbeitskraft: {round(table_of_composition[0].v1, 2)}")
+            dot.node(f"{angebot_0}_{cnt}", f"{angebot_0}, Preis: {round(table_of_composition[0].preis1, 2)} Std.")
+            dot.node(f"{angebot_0}_v_{cnt}", f"Arbeitskraft: {round(table_of_composition[0].v1, 2)} Std.")
             dot.edge(f"{angebot_0}_{cnt}", f"{angebot_0}_v_{cnt}")
         else: # the following columns
             for j in col:
@@ -115,7 +115,7 @@ def create_dots(cols_dict, table_of_composition):
                 current_position = list(j.values())[0]
                 if cnt == 1:
                     current_kosten = round(table_of_composition[current_position[0]].kosten2, 2)
-                    dot.node(f"{current_angebot}_{cnt}", f"{current_angebot}, Kosten: {current_kosten}")
+                    dot.node(f"{current_angebot}_{cnt}", f"{current_angebot}, Kosten: {current_kosten} Std.")
                 elif cnt in [2, 3, 4]:
                     dot.node(f"{current_angebot}_{cnt}", f"{current_angebot}")
 
@@ -125,7 +125,7 @@ def create_dots(cols_dict, table_of_composition):
                     parent_positions = list(par.values())[0]
                     for cur_pos in current_position:
                         if cur_pos in parent_positions:
-                            print("MATCH", parent_angebot, current_angebot)
+                            # print("MATCH", parent_angebot, current_angebot)
                             # create edge between parent node and current node
                             dot.edge(f"{parent_angebot}_{cnt-1}", f"{current_angebot}_{cnt}")
                             break # only one match is enough
