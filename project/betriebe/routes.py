@@ -6,6 +6,7 @@ from ..forms import ProductSearchForm
 from ..tables import ProduktionsmittelTable, ArbeiterTable1, ArbeiterTable2, Preiszusammensetzung
 from ..composition_of_prices import get_table_of_composition, get_positions_in_table, create_dots
 from decimal import Decimal
+import datetime
 from sqlalchemy.sql import func
 
 
@@ -220,6 +221,7 @@ def neues_angebot():
         .join(Nutzer, Arbeiter.nutzer==Nutzer.id).filter(Arbeiter.betrieb==current_user.id).all()
 
     if request.method == 'POST':
+        quantity = int(request.form["quantity"])
         # create request dictionary
         request_dict = request.form.to_dict()
         # arbeit
@@ -247,12 +249,13 @@ def neues_angebot():
             # preise
             preise_list = []
             for idx in kauf_id_list:
-                qry = db.session.query(Kaeufe, Angebote.preis).join(Angebote, Kaeufe.angebot==Angebote.id).filter(Kaeufe.id == idx).all()
+                qry = db.session.query(Kaeufe, Angebote.preis).\
+                    join(Angebote, Kaeufe.angebot==Angebote.id).filter(Kaeufe.id == idx).all()
                 preise_list.append(Decimal(qry[0][1]))
             kosten_einzeln = []
             for num1, num2 in zip(prozent_list, preise_list):
                 kosten_einzeln.append(num1 * num2)
-            kosten_pm = sum(kosten_einzeln)
+            kosten_pm = sum(kosten_einzeln) / quantity
 
 
         if arbeit_dict_not_zero:
@@ -263,35 +266,32 @@ def neues_angebot():
                 nutzer_id_list.append(key[7:])
             for value in list(arbeit_dict_not_zero.values()):
                 stunden_list.append(Decimal(value))
-            print(nutzer_id_list, stunden_list)
             assert len(nutzer_id_list) == len(stunden_list)
-            kosten_arbeit = sum(stunden_list)
+            kosten_arbeit = sum(stunden_list) / quantity
 
-        # save new angebot
-        new_angebot = Angebote(name=request.form["name"], betrieb=current_user.id,\
-            beschreibung=request.form["beschreibung"], kategorie=request.form["kategorie"], p_kosten=kosten_pm,\
-            v_kosten=kosten_arbeit, preis=kosten_arbeit + kosten_pm)
-        db.session.add(new_angebot)
-        db.session.commit()
+        # save new angebot(e)
+        for quant in range(quantity):
+            new_angebot = Angebote(name=request.form["name"], cr_date=datetime.datetime.now(),  betrieb=current_user.id,\
+                beschreibung=request.form["beschreibung"], kategorie=request.form["kategorie"], p_kosten=kosten_pm,\
+                v_kosten=kosten_arbeit, preis=kosten_arbeit + kosten_pm)
+            db.session.add(new_angebot)
+            db.session.commit()
 
-
-        # create rows in table "arbeit"
-        if arbeit_dict_not_zero:
-            assert len(nutzer_id_list) == len(stunden_list)
-            for count, i in enumerate(nutzer_id_list):
-                new_arbeit = Arbeit(angebot=new_angebot.id, nutzer=i,\
-                    stunden=stunden_list[count], ausbezahlt=False)
-                db.session.add(new_arbeit)
-                db.session.commit()
-
-        # new row in produktionsmittel! (um gesamten verbrauch zu erhalten, gruppieren/summieren!)
-        if pm_dict_not_zero:
-            assert len(kauf_id_list) == len(prozent_list)
-            for count, i in enumerate(kauf_id_list):
-                new_produktionsmittel_prd = Produktionsmittel\
-                    (angebot=new_angebot.id, kauf=i, prozent_gebraucht=prozent_list[count]*100)
-                db.session.add(new_produktionsmittel_prd)
-                db.session.commit()
+            # create rows in table "arbeit"
+            if arbeit_dict_not_zero:
+                assert len(nutzer_id_list) == len(stunden_list)
+                for count, i in enumerate(nutzer_id_list):
+                    new_arbeit = Arbeit(angebot=new_angebot.id, nutzer=i,\
+                        stunden=stunden_list[count] / quantity, ausbezahlt=False)
+                    db.session.add(new_arbeit)
+            # new row in produktionsmittel! (um gesamten verbrauch zu erhalten, gruppieren/summieren!)
+            if pm_dict_not_zero:
+                assert len(kauf_id_list) == len(prozent_list)
+                for count, i in enumerate(kauf_id_list):
+                    new_produktionsmittel_prd = Produktionsmittel\
+                        (angebot=new_angebot.id, kauf=i, prozent_gebraucht=(prozent_list[count]*100 / quantity ))
+                    db.session.add(new_produktionsmittel_prd)
+            db.session.commit()
 
         # kosten zusammenfassen und bestätigen lassen!
         flash('Angebot erfolgreich gespeichert!')
