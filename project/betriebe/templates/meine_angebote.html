@@ -11,7 +11,7 @@
   </h1>
   <div class="content">
     <div class="icon"><i class="fas fa-info-circle"></i></div>
-    <p>Hier siehts du deine aktuellen Angebote. Bei Bedarf kannst du sie löschen.</p>
+    <p>Hier sind deine aktuellen Angebote. Bei Bedarf kannst du sie löschen.</p>
   </div>
 
   {% with messages = get_flashed_messages() %}
@@ -29,7 +29,7 @@
       <thead><tr><th>Angebot-ID</th><th>Produktname</th><th>Beschreibung</th><th>Kategorie</th><th>Kosten p</th><th>Kosten v</th><th>Preis</th><th>Löschen</th></tr></thead>
         <tbody>
           {% for res in aktuelle_angebote %}
-            <tr><td>{{ res.id }}</td><td>{{ res.name }}</td> <td>{{ res.beschreibung }}</td> <td>{{ res.kategorie }}</td><td>{{ res.p_kosten|round(2) }}</td><td>{{ res.v_kosten|round(2) }}</td><td>{{ res.preis|round(2) }} Std.</td><td><a href="{{ url_for('main_betriebe.angebot_loeschen', id=res.id) }}"><u>Link</u></a></td></tr>
+            <tr><td>{{ res.id }}</td><td>{{ res.name }}</td> <td>{{ res.beschreibung }}</td> <td>{{ res.kategorie }}</td><td>{{ res.p_kosten|round(2) }}</td><td>{{ res.v_kosten|round(2) }}</td><td>{{ res.preis|round(2) }} Std.</td><td><a href="{{ url_for('main_betriebe.angebot_loeschen', id=res.id) }}"><u>Löschen</u></a></td></tr>
           {% endfor %}
         </tbody>
     </table>
