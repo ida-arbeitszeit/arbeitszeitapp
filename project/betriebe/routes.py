@@ -295,7 +295,7 @@ def neues_angebot():
 
         # kosten zusammenfassen und bestätigen lassen!
         flash('Angebot erfolgreich gespeichert!')
-        return redirect('/betriebe/home')
+        return redirect(url_for("main_betriebe.meine_angebote"))
 
     categ = ["Auto, Rad & Boot", "Dienstleistungen", "Elektronik", "Familie, Kind & Baby",
     "Freizeit & Hobby", "Haus & Garten", "Haustiere", "Mode & Beauty", "Nahrungsmittel", "Musik, Filme und Bücher",
