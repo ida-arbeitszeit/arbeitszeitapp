@@ -104,11 +104,15 @@ def produktionsmittel():
 @login_required
 def suchen():
     search = ProductSearchForm(request.form)
-    qry = db.session.query(Angebote.id, Angebote.name.label("angebot_name"),
+    # grouping by all kind of attributes of angebote, aggregating ID with min() --> only
+    # 1 angebot of the same kind is shown.
+    qry = db.session.query(func.min(Angebote.id).label("id"), Angebote.name.label("angebot_name"),\
         Betriebe.name.label("betrieb_name"), Betriebe.email,\
-        Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
+        Angebote.beschreibung, Angebote.kategorie, Angebote.preis,
+        func.count(Angebote.id).label("vorhanden")).select_from(Angebote).\
         join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True).\
-        order_by(Angebote.id)
+        group_by(Angebote.cr_date, "angebot_name", "betrieb_name",
+            Betriebe.email, Angebote.beschreibung, Angebote.kategorie, Angebote.preis)
     results = qry.all()
 
     if request.method == 'POST':
@@ -161,7 +165,7 @@ def kaufen(id):
     if angebot:
         if request.method == 'POST':
             # kauefe aktualisieren
-            new_kauf = Kaeufe(angebot = angebot.id,
+            new_kauf = Kaeufe(kauf_date=datetime.datetime.now(), angebot=angebot.id,
                     type_nutzer = False, betrieb = current_user.id,
                     nutzer = None)
             db.session.add(new_kauf)
@@ -270,8 +274,9 @@ def neues_angebot():
             kosten_arbeit = sum(stunden_list) / quantity
 
         # save new angebot(e)
+        current_time = datetime.datetime.now()
         for quant in range(quantity):
-            new_angebot = Angebote(name=request.form["name"], cr_date=datetime.datetime.now(),  betrieb=current_user.id,\
+            new_angebot = Angebote(name=request.form["name"], cr_date=current_time,  betrieb=current_user.id,\
                 beschreibung=request.form["beschreibung"], kategorie=request.form["kategorie"], p_kosten=kosten_pm,\
                 v_kosten=kosten_arbeit, preis=kosten_arbeit + kosten_pm)
             db.session.add(new_angebot)
