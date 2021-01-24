@@ -20,8 +20,8 @@
           <tr><td>{{ res.id }}</td><td>{{ res.angebot_name }}</td>
             <td>{{ res.betrieb_name }}</td><td>{{ res.email }}</td>
             <td>{{ res.beschreibung }}</td><td>{{ res.kategorie }}</td><td>{{ res.preis|round(2) }} Std.</td>
-            <td><a href="{{ url_for('main_nutzer.details', id=res[0]) }}"><u>Link</u></a></td>
-            <td><a href="{{ url_for('main_nutzer.kaufen', id=res[0]) }}"><u>Link</u></a></td>
+            <td><a href="{{ url_for('main_nutzer.details', id=res[0]) }}"><u>Details</u></a></td>
+            <td><a href="{{ url_for('main_nutzer.kaufen', id=res[0]) }}"><u>Kaufen</u></a></td>
           </tr>
         {% endfor %}
       </tbody>
