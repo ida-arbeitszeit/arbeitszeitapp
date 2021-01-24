@@ -29,14 +29,15 @@ class Angebote(UserMixin, db.Model):
     aktiv = db.Column(db.Boolean, nullable=False, default=True)
 
     def __repr__(self):
-        return "<Angebote(id='%s', name='%s', betrieb='%s', beschreibung='%s', kategorie='%s', \
+        return "<Angebote(cr_date='%s', name='%s', betrieb='%s', beschreibung='%s', kategorie='%s', \
 p_kosten='%s', v_kosten='%s', preis='%s', aktiv='%s')>" % (
-                             self.id, self.name, self.betrieb, self.beschreibung,
+                             self.cr_date, self.name, self.betrieb, self.beschreibung,
                              self.kategorie, self.p_kosten, self.v_kosten,
                              self.preis, self.aktiv)
 
 class Kaeufe(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    kauf_date = db.Column(db.DateTime, nullable=False)
     angebot = db.Column(db.Integer, db.ForeignKey("angebote.id"), nullable=False)
     type_nutzer = db.Column(db.Boolean, nullable=False)
     betrieb = db.Column(db.Integer, db.ForeignKey("betriebe.id"), nullable=True)
