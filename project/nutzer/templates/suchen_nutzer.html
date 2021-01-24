@@ -3,7 +3,6 @@
 
 {% block content2 %}
 
-<div class="table-container has-text-centered">
 
 {% from 'macros.html' import produktsuche %}
 {{ produktsuche(form) }}
@@ -12,22 +11,24 @@
 <h1 class="title">
   Ergebnisse
 </h1>
-<table class="table is-bordered is-fullwidth">
-  <thead><tr><th>Angebot-ID</th><th>Produktname</th><th>Betrieb</th><th>Kontakt</th><th>Beschreibung</th><th>Kategorie</th><th>Preis</th><th>Details</th><th>Kaufen</th></tr></thead>
-    <tbody>
-      {% for res in results %}
-        <tr><td>{{ res.id }}</td><td>{{ res.angebot_name }}</td>
-          <td>{{ res.betrieb_name }}</td><td>{{ res.email }}</td>
-          <td>{{ res.beschreibung }}</td><td>{{ res.kategorie }}</td><td>{{ res.preis|round(2) }} Std.</td>
-          <td><a href="{{ url_for('main_nutzer.details', id=res[0]) }}"><u>Link</u></a></td>
-          <td><a href="{{ url_for('main_nutzer.kaufen', id=res[0]) }}"><u>Link</u></a></td>
-        </tr>
-      {% endfor %}
-    </tbody>
-</table>
+<div class="table-container">
 
-{% endif %}
+  <table class="table is-bordered is-fullwidth">
+    <thead><tr><th>Angebot-ID</th><th>Produktname</th><th>Betrieb</th><th>Kontakt</th><th>Beschreibung</th><th>Kategorie</th><th>Preis</th><th>Details</th><th>Kaufen</th></tr></thead>
+      <tbody>
+        {% for res in results %}
+          <tr><td>{{ res.id }}</td><td>{{ res.angebot_name }}</td>
+            <td>{{ res.betrieb_name }}</td><td>{{ res.email }}</td>
+            <td>{{ res.beschreibung }}</td><td>{{ res.kategorie }}</td><td>{{ res.preis|round(2) }} Std.</td>
+            <td><a href="{{ url_for('main_nutzer.details', id=res[0]) }}"><u>Link</u></a></td>
+            <td><a href="{{ url_for('main_nutzer.kaufen', id=res[0]) }}"><u>Link</u></a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+  </table>
 
 </div>
+{% endif %}
+
 
 {% endblock %}
