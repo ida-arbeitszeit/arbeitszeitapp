@@ -57,16 +57,14 @@
 
 
 
-{% macro produktsuche(form) %}
+{% macro produktsuche(form, results, blueprint_name) %}
 
 <div class="columns is-centered">
-
   <div class="column is-one-third">
     <h1 class="title">
       Produktsuche
     </h1>
     <div class="box">
-
       {% with messages = get_flashed_messages() %}
         {% if messages %}
           {% for message in messages %}
@@ -98,5 +96,27 @@
     </div>
   </div>
 </div>
+{% if results is defined and results|length %}
+<h1 class="title">
+  Ergebnisse
+</h1>
+<div class="table-container">
+  <table class="table is-bordered is-fullwidth">
+    <thead><tr><th>Angebot-ID</th><th>Produktname</th><th>Betrieb</th><th>Kontakt</th>
+      <th>Beschreibung</th><th>Kategorie</th><th>Preis</th><th>Details</th><th>Kaufen</th></tr>
+    </thead>
+      <tbody>
+        {% for res in results %}
+          <tr><td>{{ res.id }}</td><td>{{ res.angebot_name }}</td>
+            <td>{{ res.betrieb_name }}</td><td>{{ res.email }}</td>
+            <td>{{ res.beschreibung }}</td><td>{{ res.kategorie }}</td>
+            <td>{{ res.preis|round(2) }} Std.</td>
+            <td><a href="{{ url_for('%s.details' % blueprint_name, id=res[0]) }}"><u>Details</u></a></td>
+            <td><a href="{{ url_for('%s.kaufen' % blueprint_name, id=res[0]) }}"><u>Kaufen</u></a></td></tr>
+        {% endfor %}
+      </tbody>
+  </table>
+</div>
+{% endif %}
 
 {% endmacro %}
