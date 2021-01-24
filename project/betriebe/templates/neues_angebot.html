@@ -6,12 +6,12 @@
 <div class="section">
   <div class="container">
 
-    <h1 class="title is-2">Angebot erstellen</h1>
+    <h1 class="title">Angebot erstellen</h1>
 
     <form method="post">
-        <h1 class="subtitle is-4">Name des Produkts</h1>
         <div class="field">
           <div class="control">
+            <label for="name">Name des Produkts</label>
             <input class="input is-large", type="text", name="name" required>
           </div>
         </div>
@@ -19,19 +19,19 @@
 
         <hr>
 
-        <h1 class="subtitle is-4">Beschreibung des Produkts</h1>
         <div class="field">
           <div class="control">
+            <label for="beschreibung">Beschreibung des Produkts</label>
             <textarea class="textarea is-large", name="beschreibung" required></textarea>
+            <p class="help">(Verfügbarkeit, Kontaktmöglichkeiten, etc.)</p>
           </div>
-          <p class="help">(Verfügbarkeit, Kontaktmöglichkeiten, etc.)</p>
+
         </div>
         <div class="block"></div>
 
         <hr>
 
-        <h1 class="subtitle is-4">Kategorie auswählen</h1>
-        <div class="field is-grouped is-grouped-centered">
+        <div class="field">
           <div class="control">
             <div class="select">
               <select name="kategorie" required>
@@ -40,15 +40,15 @@
                 <option value="{{ cat }}">{{ cat }}</option>
                 {% endfor %}
               </select>
-
             </div>
           </div>
         </div>
 
     <hr>
+    <hr>
     <div class="block"></div>
 
-    <h3 class="subtitle is-4">Wieviele Arbeitsstunden sind enthalten?</h3>
+    <h3 class="subtitle">Wieviele Arbeitsstunden sind enthalten?</h3>
 
   {% if arbeiter_all is defined and arbeiter_all|length %}
       <div class="block">
@@ -76,7 +76,7 @@
     <hr>
 
 
-        <h3 class="subtitle is-4">Sind Produktionsmittel enthalten?</h3>
+        <h3 class="subtitle">Sind Produktionsmittel enthalten?</h3>
 
         {% if produktionsmittel_aktiv is defined and produktionsmittel_aktiv|length %}
           <div class="table-container">
@@ -97,28 +97,41 @@
         {% endif %}
     <hr>
 
-  <!-- <div class="column is-5 is-offset-4">
-    <div class="field">
+    <div class="field is-grouped is-grouped-centered">
       <div class="control">
-        <input type="radio" id="male" name="gender" value="male" disabled>
-        <label for="male">Angebot nach Kauf automatisch erneuern <i>[to do...]</i></label><br>
-      </div>
-      <div class="control">
-        <input type="radio" id="female" name="gender" value="female" disabled>
-        <label for="female">Einmaliges Angebot<i>[to do...]</i></label><br>
+        <label for="quantity">Stückzahl:</label>
+        <input type="number" id="quantity" name="quantity" min=1 max=100 value=1></div>
       </div>
     </div>
-  </div> -->
+    <div class="block"></div>  
+    <div class="icon"><i class="fas fa-info-circle"></i></div>
+    <div class="block">
+      <p>Du kannst mehr als ein Stück dieses Produktes anbieten. Die oben angegebenen
+        Kosten werden dann auf die einzelnen Produkte aufgeteilt.</p>
+    </div>
+
+    <hr>
 
     {% if produktionsmittel_aktiv|length or arbeiter_all|length %}
-      <button class="button is-primary">
-        Angebot erstellen
-      </button>
+    <div class="field is-grouped is-grouped-centered">
+      <div class="control">
+        <button class="button is-primary">
+          Angebot erstellen
+        </button>
+      </div>
+    </div>
+
     {% else %}
-      <button class="button is-primary" disabled>
-        Angebot erstellen
-      </button>
+    <div class="field is-grouped is-grouped-centered">
+      <div class="control">
+        <button class="button is-primary" disabled>
+          Angebot erstellen
+        </button>
+      </div>
+    </div>
     {% endif %}
+
+
 
 
     </form>
