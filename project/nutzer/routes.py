@@ -6,6 +6,7 @@ from ..forms import ProductSearchForm
 from ..tables import KaeufeTable, ArbeitsstellenTable, Preiszusammensetzung
 from ..composition_of_prices import get_table_of_composition, get_positions_in_table, create_dots
 from sqlalchemy.sql import func
+import datetime
 
 
 main_nutzer = Blueprint('main_nutzer', __name__, template_folder='templates',
@@ -53,12 +54,17 @@ def meine_kaeufe():
 @login_required
 def suchen():
     search = ProductSearchForm(request.form)
-    qry = db.session.query(Angebote.id, Angebote.name.label("angebot_name"),\
+    # grouping by all kind of attributes of angebote, aggregating ID with min() --> only
+    # 1 angebot of the same kind is shown.
+    qry = db.session.query(func.min(Angebote.id).label("id"), Angebote.name.label("angebot_name"),\
         Betriebe.name.label("betrieb_name"), Betriebe.email,\
-        Angebote.beschreibung, Angebote.kategorie, Angebote.preis).select_from(Angebote).\
+        Angebote.beschreibung, Angebote.kategorie, Angebote.preis,
+        func.count(Angebote.id).label("vorhanden")).select_from(Angebote).\
         join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True).\
-        order_by(Angebote.id)
+        group_by(Angebote.cr_date, "angebot_name", "betrieb_name",
+            Betriebe.email, Angebote.beschreibung, Angebote.kategorie, Angebote.preis)
     results = qry.all()
+
     if request.method == 'POST':
         results = []
         search_string = search.data['search']
@@ -84,8 +90,6 @@ def suchen():
         else:
             return render_template('suchen_nutzer.html', form=search, results=results)
 
-    for r in results:
-        print("zzz", r.id)
     return render_template('suchen_nutzer.html', form=search, results=results)
 
 
@@ -112,7 +116,7 @@ def kaufen(id):
     if angebot:
         if request.method == 'POST':
             # kauefe aktualisieren
-            new_kauf = Kaeufe(angebot = angebot.id,
+            new_kauf = Kaeufe(kauf_date = datetime.datetime.now(), angebot = angebot.id,
                     type_nutzer = True, betrieb = None,
                     nutzer = current_user.id)
             db.session.add(new_kauf)
