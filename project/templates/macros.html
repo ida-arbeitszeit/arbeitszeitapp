@@ -59,40 +59,43 @@
 
 {% macro produktsuche(form) %}
 
-<div class="column is-4 is-offset-4">
-  <h1 class="title">
-    Produktsuche
-  </h1>
-  <div class="box">
+<div class="columns is-centered">
 
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        {% for message in messages %}
-          <div class="notification is-danger">{{ message }}  </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+  <div class="column is-two-fifths">
+    <h1 class="title">
+      Produktsuche
+    </h1>
+    <div class="box">
 
-    <form method="post">
-      <div class="field">
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          {% for message in messages %}
+            <div class="notification is-danger">{{ message }}  </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
 
-          <div class="control">
-            <div class="select is-large is-fullwidth">
-              {{ form.select }}
+      <form method="post">
+        <div class="field">
+
+            <div class="control">
+              <div class="select is-large is-fullwidth">
+                {{ form.select }}
+              </div>
             </div>
-          </div>
-          <p class="help">Suche in Name/Beschreibung/Kategorie</p>
-      </div>
-      <div class="field">
-        <div class="control">
-            {{ form.search(class_="input is-large") }}
+            <p class="help">Suche in Name/Beschreibung/Kategorie</p>
         </div>
-        <p class="help">Suchbegriff</p>
-      </div>
-      <button class="button is-block is-primary is-large is-fullwidth">
-        Suche
-      </button>
-    </form>
+        <div class="field">
+          <div class="control">
+              {{ form.search(class_="input is-large") }}
+          </div>
+          <p class="help">Suchbegriff</p>
+        </div>
+        <button class="button is-block is-primary is-large is-fullwidth">
+          Suche
+        </button>
+      </form>
+    </div>
   </div>
 </div>
 

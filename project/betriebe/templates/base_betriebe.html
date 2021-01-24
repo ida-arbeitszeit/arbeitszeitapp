@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content1 %}
-<section class="hero is-fullheight">
+<section class="hero">
       <div class="hero-head">
 
         <nav class="navbar is-light" role="navigation" aria-label="main navigation">
@@ -83,11 +83,12 @@
         </nav>
       </div>
 
-      <div class="hero-body">
+      <div class="hero-body has-text-centered">
              {% block content2 %}
              {% endblock %}
       </div>
 
-      
+
+
 </section>
 {% endblock %}
