@@ -72,3 +72,9 @@ class Bewertungen(UserMixin, db.Model):
     nutzer = db.Column(db.Integer, db.ForeignKey("nutzer.id"), nullable=True)
     kauf = db.Column(db.Integer, db.ForeignKey("kaeufe.id"), nullable=False)
     bewertung = db.Column(db.Integer, nullable=False)
+
+class Auszahlungen(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nutzer = db.Column(db.Integer, db.ForeignKey("nutzer.id"), nullable=False)
+    betrag = db.Column(db.Numeric(), nullable=False)
+    code = db.Column(db.String(100), nullable=False)
