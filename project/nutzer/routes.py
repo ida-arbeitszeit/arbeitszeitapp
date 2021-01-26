@@ -1,16 +1,22 @@
 from flask import Blueprint, render_template, session, redirect, url_for, request, flash
 from flask_login import login_required, current_user
 from .. import db
-from ..models import Angebote, Kaeufe, Nutzer, Betriebe, Arbeit, Arbeiter
+from ..models import Angebote, Kaeufe, Nutzer, Betriebe, Arbeit, Arbeiter, Auszahlungen
 from ..forms import ProductSearchForm
 from ..tables import KaeufeTable, ArbeitsstellenTable, Preiszusammensetzung
 from ..composition_of_prices import get_table_of_composition, get_positions_in_table, create_dots
 from sqlalchemy.sql import func
 import datetime
+import string
+import random
 
 
 main_nutzer = Blueprint('main_nutzer', __name__, template_folder='templates',
     static_folder='static')
+
+
+def id_generator(size=10, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.SystemRandom().choice(chars) for _ in range(size))
 
 
 @main_nutzer.route('/nutzer/home')
@@ -169,6 +175,31 @@ def profile():
         return render_template('profile_nutzer.html', arbeitsstellen_table=arbeitsstellen_table)
     elif user_type == "betrieb":
         return redirect(url_for('auth.zurueck'))
+
+@main_nutzer.route('/nutzer/auszahlung', methods=['GET', 'POST'])
+@login_required
+def auszahlung():
+    if request.method == 'POST':
+
+        betrag = request.form["betrag"]
+        code = id_generator()
+
+        # neuer eintrag in db-table auszahlungen
+        neue_auszahlung = Auszahlungen(nutzer=current_user.id, betrag=betrag, code=code)
+        db.session.add(neue_auszahlung)
+        db.session.commit()
+
+        # betrag vom guthaben des users abziehen
+
+        # Code User anzeigen
+
+        # Einlösen und Entwertung des Codes ermöglichen (hier und beim Verkäufer)
+
+        # implement Auszahlung for betriebe?!
+        
+        return render_template('auszahlung_nutzer.html')
+
+    return render_template('auszahlung_nutzer.html')
 
 @main_nutzer.route('/nutzer/hilfe')
 @login_required
