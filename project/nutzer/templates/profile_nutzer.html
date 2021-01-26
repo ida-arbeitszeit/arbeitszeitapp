@@ -12,13 +12,13 @@
   <div class="content">
     <table>
       <tr>
-        <td>Deine Nutzer-ID:</td><td>{{ current_user.id }}</td>
+        <td>Deine Nutzer-ID:</td><td>{{ current_user.id }}</td><td></td>
       </tr>
       <tr>
-        <td>Dein Guthaben:</td><td>{{ current_user.guthaben|round(2) }} Stunden</td>
+        <td>Dein Guthaben:</td><td>{{ current_user.guthaben|round(2) }} Stunden</td><td><a class="button is-primary" href="{{ url_for('main_nutzer.auszahlung') }}">Auszahlen</a></td>
       </tr>
       <tr>
-        <td>Deine Email:</td><td>{{ current_user.email }}</td>
+        <td>Deine Email:</td><td>{{ current_user.email }}</td><td></td>
       </tr>
     </table>
 
