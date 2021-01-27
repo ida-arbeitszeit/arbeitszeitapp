@@ -75,6 +75,7 @@ class Bewertungen(UserMixin, db.Model):
 
 class Auszahlungen(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    type_nutzer = db.Column(db.Boolean, nullable=False)
     nutzer = db.Column(db.Integer, db.ForeignKey("nutzer.id"), nullable=False)
     betrag = db.Column(db.Numeric(), nullable=False)
     code = db.Column(db.String(100), nullable=False)
