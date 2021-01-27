@@ -9,6 +9,7 @@ from ..models import Angebote, Kaeufe, Nutzer, Betriebe, Arbeit, Arbeiter, Ausza
 from ..forms import ProductSearchForm
 from ..tables import KaeufeTable, ArbeitsstellenTable, Preiszusammensetzung
 from ..composition_of_prices import get_table_of_composition, get_positions_in_table, create_dots
+from ..kauf_vorgang import kauf_vorgang
 from sqlalchemy.sql import func
 
 
@@ -123,35 +124,7 @@ def kaufen(id):
     angebot = qry.first()
     if angebot:
         if request.method == 'POST':
-
-
-            # kauefe aktualisieren
-            new_kauf = Kaeufe(kauf_date = datetime.datetime.now(), angebot = angebot.id,
-                    type_nutzer = True, betrieb = None,
-                    nutzer = current_user.id)
-            db.session.add(new_kauf)
-            db.session.commit()
-            # angebote aktualisieren (aktiv = False)
-            angebot.aktiv = False
-            db.session.commit()
-            # guthaben self verringern
-            kaeufer = db.session.query(Nutzer).filter(Nutzer.id == current_user.id).first()
-            kaeufer.guthaben -= angebot.preis
-            db.session.commit()
-
-            # guthaben des arbeiters erhöhen, wenn ausbezahlt = false
-            arbeit_in_produkt = Arbeit.query.filter_by(angebot=angebot.id, ausbezahlt=False).all()
-            for arb in arbeit_in_produkt:
-                Nutzer.query.filter_by(id=arb.nutzer).first().guthaben += arb.stunden
-                arb.ausbezahlt = True
-                db.session.commit()
-
-            # guthaben des anbietenden betriebes erhöhen
-            anbietender_betrieb_id = angebot.betrieb
-            anbietender_betrieb = Betriebe.query.filter_by(id=anbietender_betrieb_id).first()
-            anbietender_betrieb.guthaben += angebot.p_kosten
-            db.session.commit()
-
+            kauf_vorgang(kaufender_type="nutzer", angebot=angebot, kaeufer_id=current_user.id)
             flash(f"Kauf von '{angebot.name}' erfolgreich!")
             return redirect('/nutzer/suchen')
 
@@ -185,7 +158,7 @@ def auszahlung():
         code = id_generator()
 
         # neuer eintrag in db-table auszahlungen
-        neue_auszahlung = Auszahlungen(nutzer=current_user.id, betrag=betrag, code=code)
+        neue_auszahlung = Auszahlungen(type_nutzer=True, nutzer=current_user.id, betrag=betrag, code=code)
         db.session.add(neue_auszahlung)
         db.session.commit()
 
@@ -200,7 +173,7 @@ def auszahlung():
 
         # Einlösen und Entwertung des Codes ermöglichen (hier und beim Verkäufer)
 
-        # implement Auszahlung for betriebe?!
+        # implementierung Auszahlung for betriebe!
 
         return render_template('auszahlung_nutzer.html')
 
