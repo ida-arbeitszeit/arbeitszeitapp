@@ -51,9 +51,9 @@ def arbeit():
     table1 = ArbeiterTable1(arbeiter1, no_items='(Noch keine Mitarbeiter.)')
 
     arbeiter2 = db.session.query(Nutzer.id, Nutzer.name,
-        func.concat(func.sum(Arbeit.stunden), " Std.").label('summe_stunden')
-        ).\
-        select_from(Angebote).filter(Angebote.betrieb==current_user.id).join(Arbeit).join(Nutzer).group_by(Nutzer.id).all()
+        func.concat(func.sum(Arbeit.stunden), " Std.").label('summe_stunden')).\
+        select_from(Angebote).filter(Angebote.betrieb==current_user.id).\
+        join(Arbeit).join(Nutzer).group_by(Nutzer.id).order_by('summe_stunden').all()
     table2 = ArbeiterTable2(arbeiter2, no_items='(Noch keine Stunden gearbeitet.)')
     fik = Betriebe.query.filter_by(id=current_user.id).first().fik
 
@@ -164,8 +164,10 @@ def kaufen(id):
     angebot = qry.first()
     if angebot:
         if request.method == 'POST':
+
+
             # kauefe aktualisieren
-            new_kauf = Kaeufe(kauf_date=datetime.datetime.now(), angebot=angebot.id,
+            new_kauf = Kaeufe(kauf_date = datetime.datetime.now(), angebot = angebot.id,
                     type_nutzer = False, betrieb = current_user.id,
                     nutzer = None)
             db.session.add(new_kauf)
@@ -173,12 +175,13 @@ def kaufen(id):
             # angebote aktualisieren (aktiv = False)
             angebot.aktiv = False
             db.session.commit()
-            # guthaben self aktualisieren
-            kaufender_betrieb = db.session.query(Betriebe).filter(Betriebe.id == current_user.id).first()
-            kaufender_betrieb.guthaben -= angebot.preis
+            # guthaben self verringern
+            kaeufer = db.session.query(Betriebe).filter(Betriebe.id == current_user.id).first()
+            kaeufer.guthaben -= angebot.preis
             db.session.commit()
-            # guthaben der arbeiter erhöhen
-            arbeit_in_produkt = Arbeit.query.filter_by(angebot=angebot.id).all()
+
+            # guthaben der arbeiter erhöhen, wenn ausbezahlt = false
+            arbeit_in_produkt = Arbeit.query.filter_by(angebot=angebot.id, ausbezahlt=False).all()
             for arb in arbeit_in_produkt:
                 Nutzer.query.filter_by(id=arb.nutzer).first().guthaben += arb.stunden
                 arb.ausbezahlt = True
@@ -188,6 +191,7 @@ def kaufen(id):
             anbietender_betrieb_id = angebot.betrieb
             anbietender_betrieb = Betriebe.query.filter_by(id=anbietender_betrieb_id).first()
             anbietender_betrieb.guthaben += angebot.p_kosten
+            db.session.commit()
 
             flash(f"Kauf von '{angebot.name}' erfolgreich!")
             return redirect('/betriebe/suchen')
@@ -346,6 +350,13 @@ def angebot_loeschen():
         return redirect(url_for('main_betriebe.meine_angebote'))
 
     return render_template('angebot_loeschen.html', angebot=angebot)
+
+
+@main_betriebe.route('/betriebe/angebot_verkaufen', methods=['GET', 'POST'])
+@login_required
+def angebot_verkaufen():
+    # angebot_id = request.args.get("id")
+    pass
 
 @main_betriebe.route('/betriebe/hilfe')
 @login_required
