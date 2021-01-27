@@ -1,10 +1,11 @@
 from flask import Blueprint, render_template, session, redirect, url_for, request, flash
 from flask_login import login_required, current_user
 from .. import db
-from ..models import Angebote, Kaeufe, Betriebe, Nutzer, Produktionsmittel, Arbeit, Arbeiter
+from ..models import Angebote, Kaeufe, Betriebe, Nutzer, Produktionsmittel, Arbeit, Arbeiter, Auszahlungen
 from ..forms import ProductSearchForm
 from ..tables import ProduktionsmittelTable, ArbeiterTable1, ArbeiterTable2, Preiszusammensetzung
 from ..composition_of_prices import get_table_of_composition, get_positions_in_table, create_dots
+from ..kauf_vorgang import kauf_vorgang
 from decimal import Decimal
 import datetime
 from sqlalchemy.sql import func
@@ -53,7 +54,7 @@ def arbeit():
     arbeiter2 = db.session.query(Nutzer.id, Nutzer.name,
         func.concat(func.sum(Arbeit.stunden), " Std.").label('summe_stunden')).\
         select_from(Angebote).filter(Angebote.betrieb==current_user.id).\
-        join(Arbeit).join(Nutzer).group_by(Nutzer.id).order_by('summe_stunden').all()
+        join(Arbeit).join(Nutzer).group_by(Nutzer.id).order_by(func.sum(Arbeit.stunden).desc()).all()
     table2 = ArbeiterTable2(arbeiter2, no_items='(Noch keine Stunden gearbeitet.)')
     fik = Betriebe.query.filter_by(id=current_user.id).first().fik
 
@@ -164,35 +165,7 @@ def kaufen(id):
     angebot = qry.first()
     if angebot:
         if request.method == 'POST':
-
-
-            # kauefe aktualisieren
-            new_kauf = Kaeufe(kauf_date = datetime.datetime.now(), angebot = angebot.id,
-                    type_nutzer = False, betrieb = current_user.id,
-                    nutzer = None)
-            db.session.add(new_kauf)
-            db.session.commit()
-            # angebote aktualisieren (aktiv = False)
-            angebot.aktiv = False
-            db.session.commit()
-            # guthaben self verringern
-            kaeufer = db.session.query(Betriebe).filter(Betriebe.id == current_user.id).first()
-            kaeufer.guthaben -= angebot.preis
-            db.session.commit()
-
-            # guthaben der arbeiter erhöhen, wenn ausbezahlt = false
-            arbeit_in_produkt = Arbeit.query.filter_by(angebot=angebot.id, ausbezahlt=False).all()
-            for arb in arbeit_in_produkt:
-                Nutzer.query.filter_by(id=arb.nutzer).first().guthaben += arb.stunden
-                arb.ausbezahlt = True
-                db.session.commit()
-
-            # guthaben des anbietenden betriebes erhöhen
-            anbietender_betrieb_id = angebot.betrieb
-            anbietender_betrieb = Betriebe.query.filter_by(id=anbietender_betrieb_id).first()
-            anbietender_betrieb.guthaben += angebot.p_kosten
-            db.session.commit()
-
+            kauf_vorgang(kaufender_type="betriebe", angebot=angebot, kaeufer_id=current_user.id)
             flash(f"Kauf von '{angebot.name}' erfolgreich!")
             return redirect('/betriebe/suchen')
 
@@ -355,8 +328,28 @@ def angebot_loeschen():
 @main_betriebe.route('/betriebe/angebot_verkaufen', methods=['GET', 'POST'])
 @login_required
 def angebot_verkaufen():
-    # angebot_id = request.args.get("id")
-    pass
+    angebot_id = request.args.get("id")
+    angebot = Angebote.query.filter_by(id=angebot_id).first()
+
+    if request.method == 'POST':
+        code_input = request.form["code"]
+        auszahlung = Auszahlungen.query.filter_by(code=code_input, entwertet=False).first()
+        if not auszahlung:
+            flash("Code nicht korrekt oder schon entwertet.")
+        else:
+            value_code = auszahlung.betrag
+            if round(angebot.preis, 2) != round(value_code, 2):
+                flash("Wert des Codes entspricht nicht dem Preis.")
+            else:
+                kaufender_type = "nutzer" if auszahlung.type_nutzer else "betriebe"
+                kauf_vorgang(kaufender_type=kaufender_type, angebot=angebot, kaeufer_id=auszahlung.nutzer)
+                auszahlung.entwertet = True
+                db.session.commit()
+                flash("Verkauf erfolgreich")
+                return redirect(url_for("main_betriebe.meine_angebote"))
+
+    return render_template('angebot_verkaufen.html', angebot=angebot)
+
 
 @main_betriebe.route('/betriebe/hilfe')
 @login_required
