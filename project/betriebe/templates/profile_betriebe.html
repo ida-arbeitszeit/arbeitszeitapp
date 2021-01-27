@@ -10,6 +10,44 @@
               Willkommen, {{ current_user.name }}!
             </h1>
 
+            <div class="level">
+              <div class="level-left">
+                <div class="level-item">
+                  <p>Dein Guthaben:</p>
+                </div>
+              </div>
+              <div class="level-right">
+                <div class="level-item">
+                  <p>{{ current_user.guthaben|round(2) }} Stunden</p>
+                </div>
+              </div>
+            </div>
+            <div class="level">
+              <div class="level-left">
+                <div class="level-item">
+                  <p>Deine ID:</p>
+                </div>
+              </div>
+              <div class="level-right">
+                <div class="level-item">
+                  <p>{{ current_user.id }}</p>
+                </div>
+              </div>
+            </div>
+            <div class="level">
+              <div class="level-left">
+                <div class="level-item">
+                  <p>Deine Email:</p>
+                </div>
+              </div>
+              <div class="level-right">
+                <div class="level-item">
+                  <p>{{ current_user.email }}</p>
+                </div>
+              </div>
+            </div>
+
+<!--
             <div class="content">
               <table>
                 <tr>
@@ -22,7 +60,7 @@
                   <td>Deine Email:</td><td>{{ current_user.email }}</td>
                 </tr>
               </table>
-            </div>
+            </div> -->
 
             <div class="content">
               {% if having_workers is sameas false %}
