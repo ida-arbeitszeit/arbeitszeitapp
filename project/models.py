@@ -78,3 +78,4 @@ class Auszahlungen(UserMixin, db.Model):
     nutzer = db.Column(db.Integer, db.ForeignKey("nutzer.id"), nullable=False)
     betrag = db.Column(db.Numeric(), nullable=False)
     code = db.Column(db.String(100), nullable=False)
+    entwertet = db.Column(db.Boolean, nullable=False, default=False)

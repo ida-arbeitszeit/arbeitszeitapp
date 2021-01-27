@@ -21,7 +21,7 @@
         </div>
         <div class="field has-addons has-addons-centered">
           <div class="control">
-            <input class="input" type="number" name="betrag", value="0", min="0", max="{{current_user.guthaben|round(2, 'floor')}}" step="0.01">
+            <input class="input" type="number" name="betrag", value="0", min="0.01", max="{{current_user.guthaben|round(2, 'floor')}}" step="0.01">
           </div>
           <div class="control">
             <input class="button is-primary" type="submit" value="Auszahlen">
@@ -39,6 +39,17 @@
         <a class="button is-light" href="{{ url_for('main_nutzer.profile') }}">Zurück</a>
       </div>
     {% endif %}
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      <div class="notification is-primary is-light">
+        <p class="block">Dein Auszahlungscode in Wert von {{ messages[0] }} Stunden lautet:<br>
+        {{ messages[1] }}<br>
+        Jeder der diesen Code besitzt, kann ihn verwenden und damit entwerten.</p>
+      </div>
+      {% endif %}
+    {% endwith %}
+
   </div>
 </div>
 

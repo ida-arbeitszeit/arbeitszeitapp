@@ -1,3 +1,7 @@
+import datetime
+import string
+import random
+from decimal import Decimal
 from flask import Blueprint, render_template, session, redirect, url_for, request, flash
 from flask_login import login_required, current_user
 from .. import db
@@ -6,9 +10,7 @@ from ..forms import ProductSearchForm
 from ..tables import KaeufeTable, ArbeitsstellenTable, Preiszusammensetzung
 from ..composition_of_prices import get_table_of_composition, get_positions_in_table, create_dots
 from sqlalchemy.sql import func
-import datetime
-import string
-import random
+
 
 
 main_nutzer = Blueprint('main_nutzer', __name__, template_folder='templates',
@@ -181,7 +183,7 @@ def profile():
 def auszahlung():
     if request.method == 'POST':
 
-        betrag = request.form["betrag"]
+        betrag = Decimal(request.form["betrag"])
         code = id_generator()
 
         # neuer eintrag in db-table auszahlungen
@@ -190,13 +192,18 @@ def auszahlung():
         db.session.commit()
 
         # betrag vom guthaben des users abziehen
+        nutzer = db.session.query(Nutzer).filter(Nutzer.id == current_user.id).first()
+        nutzer.guthaben -= betrag
+        db.session.commit()
 
         # Code User anzeigen
+        flash(betrag)
+        flash(code)
 
         # Einlösen und Entwertung des Codes ermöglichen (hier und beim Verkäufer)
 
         # implement Auszahlung for betriebe?!
-        
+
         return render_template('auszahlung_nutzer.html')
 
     return render_template('auszahlung_nutzer.html')
