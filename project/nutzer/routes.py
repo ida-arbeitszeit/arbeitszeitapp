@@ -123,6 +123,8 @@ def kaufen(id):
     angebot = qry.first()
     if angebot:
         if request.method == 'POST':
+
+
             # kauefe aktualisieren
             new_kauf = Kaeufe(kauf_date = datetime.datetime.now(), angebot = angebot.id,
                     type_nutzer = True, betrieb = None,
@@ -132,9 +134,9 @@ def kaufen(id):
             # angebote aktualisieren (aktiv = False)
             angebot.aktiv = False
             db.session.commit()
-            # guthaben self aktualisieren
-            nutzer = db.session.query(Nutzer).filter(Nutzer.id == current_user.id).first()
-            nutzer.guthaben -= angebot.preis
+            # guthaben self verringern
+            kaeufer = db.session.query(Nutzer).filter(Nutzer.id == current_user.id).first()
+            kaeufer.guthaben -= angebot.preis
             db.session.commit()
 
             # guthaben des arbeiters erhöhen, wenn ausbezahlt = false
@@ -147,12 +149,8 @@ def kaufen(id):
             # guthaben des anbietenden betriebes erhöhen
             anbietender_betrieb_id = angebot.betrieb
             anbietender_betrieb = Betriebe.query.filter_by(id=anbietender_betrieb_id).first()
-            anbietender_betrieb.guthaben += angebot.preis
-
-            # guthaben des anbietenden betriebes verringern, wenn ausbezahlt = false
-            for arb in arbeit_in_produkt:
-                anbietender_betrieb.guthaben -= arb.stunden
-                db.session.commit()
+            anbietender_betrieb.guthaben += angebot.p_kosten
+            db.session.commit()
 
             flash(f"Kauf von '{angebot.name}' erfolgreich!")
             return redirect('/nutzer/suchen')
