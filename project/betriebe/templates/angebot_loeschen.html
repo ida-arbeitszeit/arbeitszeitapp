@@ -3,67 +3,65 @@
 {% block content2 %}
 
 <div class="section">
-
   <div class="container">
-    <h1 class="title">Angebot löschen</h1>
-    <p class="block">
-      Schade, dass du keinen Interessenten für <strong>"{{ angebot.name }}"</strong> gefunden hast.
-    </p>
-    <div class="content">
-      <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
-      <p>Um das Angebot löschen zu können, müssen wir wissen, ob
-      das Produkt hergestellt wurde bzw. ob die angegebenen Produktionsmittel
-      und Arbeit tatsächlich verbraucht wurden.</p>
-    </div>
+    <div class="columns is-centered">
+      <div class="column is-two-thirds">
 
-    {% if angebot.p_kosten > 0 %}
-    <p class="block">
-      Falls ja, werden Arbeiter automatisch ausbezahlt und die Produktionsmittel bleiben als verbraucht markiert.<br>
-      Falls nein, werden Produktionsmittel einfach wieder freigegeben und es wird keine Arbeit ausbezahlt.
-    </p>
-    {% else %}
-     <p class="block">
-       Falls ja, werden Arbeiter automatisch ausbezahlt.<br>
-       Falls nein, wird keine Arbeit ausbezahlt.
-     </p>
-    {% endif %}
 
-    <div class="column is-4 is-offset-4">
-      <div class="content">
-        <table class="table is-bordered is-narrow">
-          <caption  style="background-color:hsl(0, 0%, 100%);">Kosten für {{ angebot.name }}</caption>
-          <thead><tr><th>Kosten Produktionsmittel</th><th>Kosten Arbeit</th></tr></thead>
-          <tbody><tr><td>{{ angebot.p_kosten }}</td><td>{{ angebot.v_kosten }}</td></tr></tbody>
-        </table>
-      </div>
 
-      <form method="post">
-        <div class="field">
-          <div class="control">
-            <label class="radio">
-              <input type="radio" name="verbraucht" value="ja" required>
-              Ja, Arbeit und/oder PM wurden verbraucht.
-            </label>
-            <br>
-            <label class="radio">
-              <input type="radio" name="verbraucht" value="nein">
-              Nein, weder Arbeit noch PM wurden verbraucht.
-            </label>
-            <div class="block">
-              <i><br>[Noch zu implementieren: Arbeit und PM wurden teilweise verbraucht.]</i>
-            </div>
-            <input class="button is-primary" type="submit" value="Bestätigen und Angebot löschen">
-            <a class="button is-light" href="{{  url_for('main_betriebe.meine_angebote') }}">
-              Abbrechen
-            </a>
-          </div>
-          <br>
+        <h1 class="title">Angebot löschen</h1>
+        <div class="block">
+          <p>Schade, dass du keinen Interessenten für <strong>"{{ angebot.name }}"</strong> gefunden hast.</p>
         </div>
-      </form>
+        <div class="box">
+          <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
+          <p>Um das Angebot löschen zu können, müssen wir wissen, ob
+          das Produkt hergestellt wurde bzw. ob die angegebenen Produktionsmittel
+          und Arbeit tatsächlich verbraucht wurden.</p>
+        </div>
+
+        {% if angebot.p_kosten > 0 %}
+        <p class="block">
+          Falls ja, werden Arbeiter automatisch ausbezahlt und die Produktionsmittel bleiben als verbraucht markiert.<br>
+          Falls nein, werden Produktionsmittel einfach wieder freigegeben und es wird keine Arbeit ausbezahlt.
+        </p>
+        {% else %}
+         <p class="block">
+           Falls ja, werden Arbeiter automatisch ausbezahlt.<br>
+           Falls nein, wird keine Arbeit ausbezahlt.
+         </p>
+        {% endif %}
+
+          <form method="post">
+            <div class="field">
+              <div class="control">
+                <label class="radio">
+                  <input type="radio" name="verbraucht" value="ja" required>
+                  Ja, Arbeit und/oder PM wurden verbraucht.
+                </label>
+                <br>
+                <label class="radio">
+                  <input type="radio" name="verbraucht" value="nein">
+                  Nein, weder Arbeit noch PM wurden verbraucht.
+                </label>
+                <div class="block">
+                  <i><br>[Noch zu implementieren: Arbeit und PM wurden teilweise verbraucht.]</i>
+                </div>
+                <div class="field is-grouped is-grouped-centered">
+                  <input class="button is-primary" type="submit" value="Angebot löschen">
+                  <a class="button is-light" href="{{  url_for('main_betriebe.meine_angebote') }}">
+                    Abbrechen
+                  </a>
+                </div>
+
+              </div>
+              <br>
+            </div>
+          </form>
+
+      </div>
     </div>
-
   </div>
-
 </div>
 
 {% endblock %}
