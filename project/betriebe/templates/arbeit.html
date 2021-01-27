@@ -25,18 +25,21 @@
               </div>
             </div>
           </form>
+        </div>
           {% with messages = get_flashed_messages() %}
           {% if messages %}
             <div class="block"></div>
-            <div class="notification is-danger">
-                {{ messages[0] }}
+              <div class="notification is-danger">
+                  {{ messages[0] }}
             </div>
           {% endif %}
           {% endwith %}
+            <div class="block">
+              <div class="icon"><i class="fas fa-info-circle"></i></div>
+              <p>Mitarbeiter finden ihre Nutzer-Id unter "Meine Daten".</p>
+            </div>
 
-            <div class="icon"><i class="fas fa-info-circle"></i></div>
-            <p>Mitarbeiter finden ihre Nutzer-Id unter "Meine Daten".</p>
-      </div>
+
 
         <hr>
         <br>
