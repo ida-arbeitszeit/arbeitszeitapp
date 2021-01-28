@@ -59,6 +59,3 @@ class ArbeiterTable2(Table):
     id = Col('Nutzer-Id')
     name = Col('Name')
     summe_stunden = Col('Arbeitsstunden')
-
-class ArbeitsstellenTable(Table):
-    name = Col('Name Betrieb')
