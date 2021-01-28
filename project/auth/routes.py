@@ -12,6 +12,7 @@ auth = Blueprint('auth', __name__, template_folder='templates',
 
 @auth.route('/')
 def start():
+    session["user_type"] = None
     return render_template('start.html')
 
 
