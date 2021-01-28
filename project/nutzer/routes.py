@@ -7,7 +7,7 @@ from flask_login import login_required, current_user
 from .. import db
 from ..models import Angebote, Kaeufe, Nutzer, Betriebe, Arbeit, Arbeiter, Auszahlungen
 from ..forms import ProductSearchForm
-from ..tables import KaeufeTable, ArbeitsstellenTable, Preiszusammensetzung
+from ..tables import KaeufeTable, Preiszusammensetzung
 from ..composition_of_prices import get_table_of_composition, get_positions_in_table, create_dots
 from ..kauf_vorgang import kauf_vorgang
 from sqlalchemy.sql import func
@@ -124,14 +124,10 @@ def kaufen(id):
 def profile():
     user_type = session["user_type"]
     if user_type == "nutzer":
-        arbeitsstellen = db.session.query(Betriebe.name).select_from(Arbeiter).\
+        arbeitsstellen = db.session.query(Betriebe).select_from(Arbeiter).\
             filter_by(nutzer=current_user.id).join(Betriebe, Arbeiter.betrieb==Betriebe.id).all()
-        if arbeitsstellen:
-            arbeitsstellen_table = ArbeitsstellenTable(arbeitsstellen)
-        else:
-            arbeitsstellen_table = None
 
-        return render_template('profile_nutzer.html', arbeitsstellen_table=arbeitsstellen_table)
+        return render_template('profile_nutzer.html', arbeitsstellen=arbeitsstellen)
     elif user_type == "betrieb":
         return redirect(url_for('auth.zurueck'))
 
