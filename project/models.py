@@ -16,6 +16,10 @@ class Betriebe(UserMixin, db.Model):
     guthaben = db.Column(db.Numeric(), default=0)
     fik = db.Column(db.Numeric(), nullable=False, default=1)
 
+    def __repr__(self):
+        return "<Betriebe(email='%s', name='%s', guthaben='%s', fik='%s')>" % (
+                             self.email, self.name, self.guthaben, self.fik)
+
 class Angebote(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     cr_date = db.Column(db.DateTime, nullable=False)
