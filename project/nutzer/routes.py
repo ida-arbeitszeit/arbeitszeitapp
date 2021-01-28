@@ -22,20 +22,6 @@ def id_generator(size=10, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.SystemRandom().choice(chars) for _ in range(size))
 
 
-@main_nutzer.route('/nutzer/home')
-def index():
-    try:
-        user_type = session["user_type"]
-    except:
-        user_type = "nutzer"
-
-    if user_type == "betrieb":
-        return redirect(url_for('auth.zurueck'))
-    else:
-        session["user_type"] = "nutzer"
-        return render_template('index_nutzer.html')
-
-
 @main_nutzer.route('/nutzer/kaeufe')
 @login_required
 def meine_kaeufe():
