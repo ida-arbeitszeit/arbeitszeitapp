@@ -15,20 +15,6 @@ main_betriebe = Blueprint('main_betriebe', __name__, template_folder='templates'
     static_folder='static')
 
 
-@main_betriebe.route('/betriebe/home')
-def index():
-    try:
-        user_type = session["user_type"]
-    except:
-        user_type = "betrieb"
-
-    if user_type == "nutzer":
-        return redirect(url_for('auth.zurueck'))
-    else:
-        session["user_type"] = "betrieb"
-        return render_template('index_betriebe.html')
-
-
 @main_betriebe.route('/betriebe/profile')
 @login_required
 def profile():
