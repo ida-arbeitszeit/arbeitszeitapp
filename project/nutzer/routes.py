@@ -153,9 +153,7 @@ def auszahlung():
         flash(betrag)
         flash(code)
 
-        # Einlösen und Entwertung des Codes ermöglichen (hier und beim Verkäufer)
-
-        # implementierung Auszahlung for betriebe!
+        # Einlösen des Codes auch hier ermöglichen
 
         return render_template('auszahlung_nutzer.html')
 
