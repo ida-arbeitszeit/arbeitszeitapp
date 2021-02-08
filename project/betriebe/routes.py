@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, session, redirect, url_for, request, flash
 from flask_login import login_required, current_user
 from .. import db
-from ..models import Angebote, Kaeufe, Betriebe, Nutzer, Produktionsmittel, Arbeit, Arbeiter, Auszahlungen
+from ..models import Angebote, Kaeufe, Betriebe, Nutzer, Produktionsmittel, Arbeit, Arbeiter, Auszahlungen,\
+    Kooperationen, KooperationenMitglieder
 from ..forms import ProductSearchForm
 from ..tables import ProduktionsmittelTable, ArbeiterTable1, ArbeiterTable2, Preiszusammensetzung
 from ..composition_of_prices import get_table_of_composition, get_positions_in_table, create_dots
@@ -96,10 +97,14 @@ def suchen():
     qry = db.session.query(func.min(Angebote.id).label("id"), Angebote.name.label("angebot_name"),\
         Betriebe.name.label("betrieb_name"), Betriebe.email,\
         Angebote.beschreibung, Angebote.kategorie, Angebote.preis,
-        func.count(Angebote.id).label("vorhanden")).select_from(Angebote).\
-        join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True).\
+        func.count(Angebote.id).label("vorhanden"), KooperationenMitglieder.kooperation).\
+        select_from(Angebote).\
+        join(Betriebe, Angebote.betrieb==Betriebe.id).\
+        outerjoin(KooperationenMitglieder, Angebote.id==KooperationenMitglieder.mitglied).\
+        filter(Angebote.aktiv == True).\
         group_by(Angebote.cr_date, "angebot_name", "betrieb_name",
-            Betriebe.email, Angebote.beschreibung, Angebote.kategorie, Angebote.preis)
+            Betriebe.email, Angebote.beschreibung, Angebote.kategorie,
+            Angebote.preis, KooperationenMitglieder.kooperation)
     results = qry.all()
 
     if request.method == 'POST':
@@ -335,6 +340,75 @@ def angebot_verkaufen():
                 return redirect(url_for("main_betriebe.meine_angebote"))
 
     return render_template('angebot_verkaufen.html', angebot=angebot)
+
+@main_betriebe.route('/betriebe/kooperieren', methods=['GET', 'POST'])
+@login_required
+def kooperieren():
+
+    if request.method == 'POST':
+
+        angebot_id_eigenes = request.form["angebot_id_eigenes"]
+        angebot_id_externes = request.form["angebot_id_externes"]
+
+        # do both Angebote exist?
+        own = Angebote.query.filter_by(id=angebot_id_eigenes, aktiv=True).first()
+        extern = Angebote.query.filter_by(id=angebot_id_externes, aktiv=True).first()
+        if not (own and extern):
+            # BETTER/TO DO: is it really user's own product?
+            flash("Nicht existente Angebot-IDs")
+        else:
+            # one product can only be in one coop!
+            eigene_koop = KooperationenMitglieder.query.filter_by(mitglied=angebot_id_eigenes, aktiv=True).first()
+            externe_koop = KooperationenMitglieder.query.filter_by(mitglied=angebot_id_externes, aktiv=True).first()
+            if (not eigene_koop and not externe_koop):
+                print("neither exists")
+                flash("Kooperation wird gestartet.")
+                current_time = datetime.datetime.now()
+                new_koop = Kooperationen(cr_date=current_time)
+                db.session.add(new_koop)
+                db.session.commit()
+                # add all of the batch, not only specified angebot! (defined by cr_date and name) Muss evtl sicherer werden.
+                for i in db.session.query(Angebote).filter_by(cr_date=own.cr_date, name=own.name).all():
+                    new_koop_mitglieder_1 = KooperationenMitglieder(kooperation=new_koop.id, mitglied=i.id)
+                    db.session.add(new_koop_mitglieder_1)
+                for j in db.session.query(Angebote).filter_by(cr_date=extern.cr_date, name=extern.name).all():
+                    new_koop_mitglieder_2 = KooperationenMitglieder(kooperation=new_koop.id, mitglied=j.id)
+                    db.session.add(new_koop_mitglieder_2)
+                db.session.commit()
+
+                # to do here: adapt prices and show products as part of coop!!
+
+            elif eigene_koop and externe_koop:
+                print("both exist")
+                if eigene_koop.kooperation == externe_koop.kooperation:
+                    flash("Die beiden Produkte sind bereits in Kooperation.")
+                else:
+                    print("both in different coops")
+                    flash("Das Produkt des Kooperationspartners\
+                        befindet sich in einer Kooperation - die eigene Kooperation\
+                        wird verlassen und der neuen beigetreten.")
+
+            elif eigene_koop and not externe_koop:
+                print("only eigene exists")
+                flash("Du befindest dich bereits in einer Kooperation\
+                     - die aktuelle Kooperation wird verlassen und eine neue wird gestartet.")
+
+            elif externe_koop and not eigene_koop:
+                print("only externe exists")
+                flash("Das Produkt des Kooperationspartners\
+                    befindet sich in einer Kooperation - dein Produkt tritt dieser Kooperation bei.")
+
+            # eigenes und externes kooperieren schon --> "bereits kooperation!"
+            # eigenes ist schon in einer kooperation --> "kooperation verlassen und wechseln/neue kooperation starten"?
+            # externes ist schon in einer kooperation --> dieser koop beitreten?
+            # else: "wirklich neue kooperation gründen?"
+
+            #
+            # new_arbeiter = Arbeiter(nutzer=request.form['nutzer'], betrieb=current_user.id)
+            # db.session.add(new_arbeiter)
+            # db.session.commit()
+
+    return render_template('kooperieren.html')
 
 
 @main_betriebe.route('/betriebe/hilfe')
