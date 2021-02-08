@@ -84,3 +84,14 @@ class Auszahlungen(UserMixin, db.Model):
     betrag = db.Column(db.Numeric(), nullable=False)
     code = db.Column(db.String(100), nullable=False)
     entwertet = db.Column(db.Boolean, nullable=False, default=False)
+
+class Kooperationen(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    cr_date = db.Column(db.DateTime, nullable=False)
+    aktiv = db.Column(db.Boolean, nullable=False, default=True)
+
+class KooperationenMitglieder(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    kooperation = db.Column(db.Integer, db.ForeignKey("kooperationen.id"), nullable=False)
+    mitglied = db.Column(db.Integer, db.ForeignKey("angebote.id"), nullable=False)
+    aktiv = db.Column(db.Boolean, nullable=False, default=True)
