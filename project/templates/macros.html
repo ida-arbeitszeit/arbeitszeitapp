@@ -105,7 +105,7 @@
     <thead>
       <tr>
         <th>Angebot-ID</th> <th>Produktname</th><th>Betrieb</th><th>Kontakt</th>
-        <th>Beschreibung</th><th>Kategorie</th><th>Preis</th><th>Koop</th><th>Vorhanden</th><th>Details</th><th>Kaufen</th>
+        <th>Beschreibung</th><th>Kategorie</th><th>Preis</th><th>Koop</th><th>Koop-Preis</th><th>Vorhanden</th><th>Details</th><th>Kaufen</th>
       </tr>
     </thead>
       <tbody>
@@ -114,7 +114,10 @@
             <td>{{ res.id }}</td><td>{{ res.angebot_name }}</td>
             <td>{{ res.betrieb_name }}</td><td>{{ res.email }}</td>
             <td>{{ res.beschreibung }}</td><td>{{ res.kategorie }}</td>
-            <td>{{ res.preis|round(2) }} Std.</td><td>{{ res.kooperation }}</td><td>{{ res.vorhanden }}</td>
+            <td>{{ res.preis|round(2) }} Std.</td>
+            <td>{{ res.kooperation if res.kooperation else '-' }}</td>
+            <td>{{ res.koop_preis|round(2) }} Std.</td>
+            <td>{{ res.vorhanden }}</td>
             <td><a href="{{ url_for('%s.details' % blueprint_name, id=res.id) }}"><u>Details</u></a></td>
             <td><a href="{{ url_for('%s.kaufen' % blueprint_name, id=res.id) }}"><u>Kaufen</u></a></td></tr>
         {% endfor %}
