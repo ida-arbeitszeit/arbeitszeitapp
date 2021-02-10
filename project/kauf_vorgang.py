@@ -22,7 +22,10 @@ def kauf_vorgang(kaufender_type, angebot, kaeufer_id):
     # angebote aktualisieren (aktiv = False)
     angebot.aktiv = False
     db.session.commit()
-    # guthaben self verringern
+    # TO DO: aktuellen koop-preis erhalten: 
+
+
+    # guthaben self verringern TO DO: um den kooperativ-preis (durchschnitt) verringern!
     kaeufer = db.session.query(kaufender).filter(kaufender.id == kaeufer_id).first()
     kaeufer.guthaben -= angebot.preis
     db.session.commit()
