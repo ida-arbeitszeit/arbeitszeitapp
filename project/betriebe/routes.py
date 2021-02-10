@@ -125,15 +125,6 @@ def kaufen(id):
         return 'Error loading #{id}'.format(id=id)
 
 
-@main_betriebe.route('/betriebe/anbieten_info', methods=['GET', 'POST'])
-@login_required
-def anbieten_info():
-    """
-    infos zum anbieten von produkten
-    """
-    return render_template('anbieten_info.html')
-
-
 @main_betriebe.route('/betriebe/anbieten', methods=['GET', 'POST'])
 @login_required
 def neues_angebot():
@@ -230,8 +221,8 @@ def neues_angebot():
         flash('Angebot erfolgreich gespeichert!')
         return redirect(url_for("main_betriebe.meine_angebote"))
 
-    categ = ["Auto, Rad & Boot", "Dienstleistungen", "Elektronik", "Familie, Kind & Baby",
-    "Freizeit & Hobby", "Haus & Garten", "Haustiere", "Mode & Beauty", "Nahrungsmittel", "Musik, Filme und Bücher",
+    categ = ["Dienstleistungen", "Elektronik",
+    "Freizeit & Hobby", "Haus & Garten", "Haustiere", "Nahrungsmittel", "Musik, Filme und Bücher",
     "Nachbarschaftshilfe", "Unterricht und Kurse"]
 
     return render_template('neues_angebot.html', produktionsmittel_aktiv=produktionsmittel_aktiv, arbeiter_all=arbeiter_all, categ=categ)
