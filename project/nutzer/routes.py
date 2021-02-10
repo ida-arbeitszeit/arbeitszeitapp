@@ -10,8 +10,8 @@ from ..forms import ProductSearchForm
 from ..tables import KaeufeTable, Preiszusammensetzung
 from ..composition_of_prices import get_table_of_composition, get_positions_in_table, create_dots
 from ..kauf_vorgang import kauf_vorgang
+from ..such_vorgang import such_vorgang
 from sqlalchemy.sql import func
-
 
 
 main_nutzer = Blueprint('main_nutzer', __name__, template_folder='templates',
@@ -48,44 +48,7 @@ def meine_kaeufe():
 @main_nutzer.route('/nutzer/suchen', methods=['GET', 'POST'])
 @login_required
 def suchen():
-    search = ProductSearchForm(request.form)
-    # grouping by all kind of attributes of angebote, aggregating ID with min() --> only
-    # 1 angebot of the same kind is shown.
-    qry = db.session.query(func.min(Angebote.id).label("id"), Angebote.name.label("angebot_name"),\
-        Betriebe.name.label("betrieb_name"), Betriebe.email,\
-        Angebote.beschreibung, Angebote.kategorie, Angebote.preis,
-        func.count(Angebote.id).label("vorhanden")).select_from(Angebote).\
-        join(Betriebe, Angebote.betrieb==Betriebe.id).filter(Angebote.aktiv == True).\
-        group_by(Angebote.cr_date, "angebot_name", "betrieb_name",
-            Betriebe.email, Angebote.beschreibung, Angebote.kategorie, Angebote.preis)
-    results = qry.all()
-
-    if request.method == 'POST':
-        results = []
-        search_string = search.data['search']
-
-        if search_string:
-            if search.data['select'] == 'Name':
-                results = qry.filter(Angebote.name.contains(search_string)).all()
-
-            elif search.data['select'] == 'Beschreibung':
-                results = qry.filter(Angebote.beschreibung.contains(search_string)).all()
-
-            elif search.data['select'] == 'Kategorie':
-                results = qry.filter(Angebote.kategorie.contains(search_string)).all()
-
-            else:
-                results = qry.all()
-        else:
-            results = qry.all()
-
-        if not results:
-            flash('Keine Ergebnisse!')
-            return redirect('/nutzer/suchen')
-        else:
-            return render_template('suchen_nutzer.html', form=search, results=results)
-
-    return render_template('suchen_nutzer.html', form=search, results=results)
+    return such_vorgang("nutzer", request.form)
 
 
 @main_nutzer.route('/nutzer/details/<int:id>', methods=['GET', 'POST'])
