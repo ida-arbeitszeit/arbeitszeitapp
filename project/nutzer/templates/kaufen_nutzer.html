@@ -7,8 +7,7 @@
     Möchtest du <b>{{ angebot.name }}</b> wirklich kaufen?
   </div>
   <div class="block">
-    Der Preis beträgt <strong>{{ angebot.preis|round(2) }} Stunden</strong> (= {{ angebot.p_kosten|round(2) }} Stunden für
-    Produktionsmittel und {{ angebot.v_kosten|round(2) }} Stunden für Arbeit des Betriebs selbst).
+    Der Preis beträgt <strong>{{ angebot.koop_preis|round(2) }} Stunden</strong>.
   </div>
   <div class="block">
     Der Betrag wird dir von deinem Guthaben abgezogen.
