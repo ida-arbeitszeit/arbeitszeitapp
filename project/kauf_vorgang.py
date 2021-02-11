@@ -1,6 +1,8 @@
 import datetime
-from .models import Nutzer, Betriebe, Kaeufe, Arbeit
+from .models import Nutzer, Betriebe, Kaeufe, Arbeit, Angebote, KooperationenMitglieder
 from . import db
+from sqlalchemy.sql import func
+
 
 def kauf_vorgang(kaufender_type, angebot, kaeufer_id):
     # kauefe aktualisieren
@@ -19,15 +21,26 @@ def kauf_vorgang(kaufender_type, angebot, kaeufer_id):
         db.session.add(new_kauf)
         db.session.commit()
 
-    # angebote aktualisieren (aktiv = False)
+    # aktuellen (koop-)preis erhalten:
+    koop = db.session.query(KooperationenMitglieder).join(Angebote).\
+        filter(Angebote.id == angebot.id, Angebote.aktiv == angebot.aktiv).first()
+    if not koop:
+        preis = angebot.preis
+    else:
+        preis = db.session.query(func.avg(Angebote.preis)).\
+            select_from(KooperationenMitglieder).\
+            join(Angebote).\
+            filter(Angebote.aktiv == True).\
+            filter(KooperationenMitglieder.kooperation == koop.kooperation).\
+            group_by(KooperationenMitglieder.kooperation).scalar()
+
+    # angebote aktiv = False
     angebot.aktiv = False
     db.session.commit()
-    # TO DO: aktuellen koop-preis erhalten: 
 
-
-    # guthaben self verringern TO DO: um den kooperativ-preis (durchschnitt) verringern!
+    # guthaben käufer verringern
     kaeufer = db.session.query(kaufender).filter(kaufender.id == kaeufer_id).first()
-    kaeufer.guthaben -= angebot.preis
+    kaeufer.guthaben -= preis
     db.session.commit()
 
     # guthaben der arbeiter erhöhen, wenn ausbezahlt = false
