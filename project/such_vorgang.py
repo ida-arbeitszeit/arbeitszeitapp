@@ -7,32 +7,11 @@ from sqlalchemy.orm import aliased
 from flask import render_template, redirect, request, flash
 
 
-def such_vorgang(suchender_type, request_form):
-    if suchender_type == "betriebe":
-        redirect_dir = '/betriebe/suchen'
-        render_dir = 'suchen_betriebe.html'
-    elif suchender_type == "nutzer":
-        redirect_dir = '/nutzer/suchen'
-        render_dir = 'suchen_nutzer.html'
-
-    search = ProductSearchForm(request_form)
-
-    # grouping by all kind of attributes of angebote, aggregating ID with min() --> only
-    # 1 angebot of the same kind is shown.
-
-    # qry = db.session.query(func.min(Angebote.id).label("id"), Angebote.name.label("angebot_name"),\
-    #     Betriebe.name.label("betrieb_name"), Betriebe.email,\
-    #     Angebote.beschreibung, Angebote.kategorie, Angebote.preis,
-    #     func.count(Angebote.id).label("vorhanden"), KooperationenMitglieder.kooperation).\
-    #     select_from(Angebote).\
-    #     join(Betriebe, Angebote.betrieb==Betriebe.id).\
-    #     outerjoin(KooperationenMitglieder, Angebote.id==KooperationenMitglieder.mitglied).\
-    #     filter(Angebote.aktiv == True).\
-    #     group_by(Angebote.cr_date, "angebot_name", "betrieb_name",
-    #         Betriebe.email, Angebote.beschreibung, Angebote.kategorie,
-    #         Angebote.preis, KooperationenMitglieder.kooperation)
-    # results = qry.all()
-
+def get_angebote():
+    """
+    returns all active products available (grouped results),
+    with several columns, including the coop-price.
+    """
 
     km = aliased(KooperationenMitglieder)
     km2 = aliased(KooperationenMitglieder)
@@ -48,6 +27,8 @@ def such_vorgang(suchender_type, request_form):
     qry = db.session.query\
         (
         func.min(Angebote.id).label("id"), Angebote.name.label("angebot_name"),\
+        func.min(Angebote.p_kosten).label("p_kosten"),\
+        func.min(Angebote.v_kosten).label("v_kosten"),\
         Betriebe.name.label("betrieb_name"), Betriebe.email,\
         Angebote.beschreibung, Angebote.kategorie, Angebote.preis,
         func.count(Angebote.id).label("vorhanden"), km2.kooperation,
@@ -62,6 +43,24 @@ def such_vorgang(suchender_type, request_form):
             Betriebe.email, Angebote.beschreibung, Angebote.kategorie,
             Angebote.preis, km2.kooperation)
 
+    return qry
+
+
+def such_vorgang(suchender_type, request_form):
+    """
+    returns html pages with search results
+    """
+
+    if suchender_type == "betriebe":
+        redirect_dir = '/betriebe/suchen'
+        render_dir = 'suchen_betriebe.html'
+    elif suchender_type == "nutzer":
+        redirect_dir = '/nutzer/suchen'
+        render_dir = 'suchen_nutzer.html'
+
+    search = ProductSearchForm(request_form)
+
+    qry = get_angebote()
     results = qry.all()
 
     if request.method == 'POST':
