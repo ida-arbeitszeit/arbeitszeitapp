@@ -6,7 +6,7 @@ from ..models import Angebote, Kaeufe, Betriebe, Nutzer, Produktionsmittel, Arbe
 from ..forms import ProductSearchForm
 from ..tables import ProduktionsmittelTable, ArbeiterTable1, ArbeiterTable2, Preiszusammensetzung
 from ..composition_of_prices import get_table_of_composition, get_positions_in_table, create_dots
-from ..such_vorgang import such_vorgang
+from ..such_vorgang import such_vorgang, get_angebote
 from ..kauf_vorgang import kauf_vorgang
 from decimal import Decimal
 import datetime
@@ -114,12 +114,14 @@ def kaufen(id):
     qry = db.session.query(Angebote).filter(
                 Angebote.id==id)
     angebot = qry.first()
+
     if angebot:
         if request.method == 'POST':
             kauf_vorgang(kaufender_type="betriebe", angebot=angebot, kaeufer_id=current_user.id)
             flash(f"Kauf von '{angebot.name}' erfolgreich!")
             return redirect('/betriebe/suchen')
 
+        angebot = get_angebote().filter(Angebote.id==id).first()
         return render_template('kaufen_betriebe.html', angebot=angebot)
     else:
         return 'Error loading #{id}'.format(id=id)
