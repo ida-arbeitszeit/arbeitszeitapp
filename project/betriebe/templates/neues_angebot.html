@@ -7,6 +7,13 @@
   <div class="container">
 
     <h1 class="title">Angebot erstellen</h1>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="notification is-danger">{{ message }}  </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
 
     <div class="box has-background-danger-light has-text-danger-dark">
       <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
@@ -72,7 +79,11 @@
         <thead><tr><th>Id</th><th>Name</th><th>Stunden</th></tr></thead>
           <tbody>
             {% for arbeiter in arbeiter_all %}
-                <tr><td>{{ arbeiter[0] }}</td><td>{{ arbeiter[1] }}</td><td><input class="input" type="number" name="nutzer_{{ arbeiter[0] }}", value="0", min="0", step="0.1"></td></tr>
+                <tr>
+                  <td>{{ arbeiter[0] }}</td>
+                  <td>{{ arbeiter[1] }}</td>
+                  <td><input class="input" type="number" name="nutzer_{{ arbeiter[0] }}", value="0", min="0", step="0.1"></td>
+                </tr>
             {% endfor %}
           </tbody>
       </table>
