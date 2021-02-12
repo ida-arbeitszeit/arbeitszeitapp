@@ -304,6 +304,7 @@ def angebot_verkaufen():
 
     return render_template('angebot_verkaufen.html', angebot=angebot)
 
+
 @main_betriebe.route('/betriebe/kooperieren', methods=['GET', 'POST'])
 @login_required
 def kooperieren():
@@ -311,22 +312,27 @@ def kooperieren():
     if request.method == 'POST':
 
         angebot_id_eigenes = request.form["angebot_id_eigenes"]
-        angebot_id_externes = request.form["angebot_id_externes"]
-
-        # do both Angebote exist?
         own = Angebote.query.filter_by(id=angebot_id_eigenes, aktiv=True).first()
+
+        angebot_id_externes = request.form["angebot_id_externes"]
         extern = Angebote.query.filter_by(id=angebot_id_externes, aktiv=True).first()
+
         if not (own and extern):
-            # BETTER/TO DO: is it really user's own product?
             flash("Nicht existente Angebot-IDs")
+        elif not Angebote.query.filter_by(id=angebot_id_eigenes, betrieb=current_user.id, aktiv=True).first():
+            flash("Das Produkt ist nicht deines.")
         else:
             # one product can only be in one coop!
             eigene_koop = KooperationenMitglieder.query.filter_by(mitglied=angebot_id_eigenes, aktiv=True).first()
             externe_koop = KooperationenMitglieder.query.filter_by(mitglied=angebot_id_externes, aktiv=True).first()
+            current_time = datetime.datetime.now()
+
+
+
+
             if (not eigene_koop and not externe_koop):
                 print("neither exists")
                 flash("Kooperation wird gestartet.")
-                current_time = datetime.datetime.now()
                 new_koop = Kooperationen(cr_date=current_time)
                 db.session.add(new_koop)
                 db.session.commit()
@@ -339,8 +345,6 @@ def kooperieren():
                     db.session.add(new_koop_mitglieder_2)
                 db.session.commit()
 
-                # to do here: adapt prices and show products as part of coop!!
-
             elif eigene_koop and externe_koop:
                 print("both exist")
                 if eigene_koop.kooperation == externe_koop.kooperation:
@@ -350,6 +354,31 @@ def kooperieren():
                     flash("Das Produkt des Kooperationspartners\
                         befindet sich in einer Kooperation - die eigene Kooperation\
                         wird verlassen und der neuen beigetreten.")
+
+                    # find out, how many different group of products you are cooperating with
+                    coop_partners = db.session.query(func.count(Angebote.id)).\
+                        select_from(KooperationenMitglieder).\
+                        filter_by(kooperation=eigene_koop.kooperation, aktiv=True).\
+                        join(Angebote, KooperationenMitglieder.mitglied == Angebote.id).\
+                        group_by(Angebote.cr_date, Angebote.name, Angebote.preis).\
+                        all()
+                    amt_coop_partners = len(coop_partners)
+                    eigene_ex_coop_id = eigene_koop.kooperation
+
+                    # change coop
+                    for i in db.session.query(Angebote).filter_by(cr_date=own.cr_date, name=own.name).all():
+                        x = KooperationenMitglieder.query.filter_by(mitglied=i.id).first()
+                        x.kooperation = externe_koop.kooperation
+                    db.session.commit()
+
+                    # if only 1 stays in old coop, than delete!
+                    if amt_coop_partners == 2:
+                        # delete the one remaining coop-member and the kooperative
+                        for i in KooperationenMitglieder.query.filter_by(kooperation=eigene_ex_coop_id).all():
+                            db.session.delete(i)
+                        db.session.delete(Kooperationen.query.filter_by(id=eigene_ex_coop_id).first())
+                        db.session.commit()
+
 
             elif eigene_koop and not externe_koop:
                 print("only eigene exists")
@@ -365,11 +394,6 @@ def kooperieren():
             # eigenes ist schon in einer kooperation --> "kooperation verlassen und wechseln/neue kooperation starten"?
             # externes ist schon in einer kooperation --> dieser koop beitreten?
             # else: "wirklich neue kooperation gründen?"
-
-            #
-            # new_arbeiter = Arbeiter(nutzer=request.form['nutzer'], betrieb=current_user.id)
-            # db.session.add(new_arbeiter)
-            # db.session.commit()
 
     return render_template('kooperieren.html')
 
