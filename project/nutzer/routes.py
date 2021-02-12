@@ -10,7 +10,7 @@ from ..forms import ProductSearchForm
 from ..tables import KaeufeTable, Preiszusammensetzung
 from ..composition_of_prices import get_table_of_composition, get_positions_in_table, create_dots
 from ..kauf_vorgang import kauf_vorgang
-from ..such_vorgang import such_vorgang
+from ..such_vorgang import such_vorgang, get_angebote
 from sqlalchemy.sql import func
 
 
@@ -77,6 +77,7 @@ def kaufen(id):
             flash(f"Kauf von '{angebot.name}' erfolgreich!")
             return redirect('/nutzer/suchen')
 
+        angebot = get_angebote().filter(Angebote.id==id).first()
         return render_template('kaufen_nutzer.html', angebot=angebot)
     else:
         return 'Error loading #{id}'.format(id=id)
