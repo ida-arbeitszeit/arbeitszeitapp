@@ -4,7 +4,7 @@ class ProduktionsmittelTable(Table):
     id = Col('Kauf-Id')
     name = Col('Name')
     beschreibung = Col('Beschreibung')
-    preis = Col('Preis')
+    kaufpreis = Col('Kaufpreis')
     prozent_gebraucht = Col('Prozent Gebraucht')
 
 class Preiszusammensetzung(Table):
