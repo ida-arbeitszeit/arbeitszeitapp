@@ -70,7 +70,7 @@ def arbeit():
 @login_required
 def produktionsmittel():
     produktionsmittel_qry = db.session.query(Kaeufe.id, Angebote.name, Angebote.beschreibung,\
-        func.concat(func.round(Angebote.preis, 2), " Std.").label("preis"),\
+        func.concat(func.round(Kaeufe.kaufpreis, 2), " Std.").label("kaufpreis"),\
         func.concat(func.round(func.coalesce(func.sum(Produktionsmittel.prozent_gebraucht), 0), 2), " %").\
             label("prozent_gebraucht"))\
         .select_from(Kaeufe)\
@@ -149,12 +149,23 @@ def neues_angebot():
         quantity = int(request.form["quantity"])
         # create request dictionary
         request_dict = request.form.to_dict()
+
         # arbeit
         # dict with arbeit values
         arbeit_dict = dict(filter(lambda elem: elem[0][:7] == 'nutzer_', request_dict.items()))
         # arbeit dict entries that are not zero
         arbeit_dict_not_zero = dict(filter(lambda elem: Decimal(elem[1]) != 0, arbeit_dict.items()))
         kosten_arbeit = 0
+        if arbeit_dict_not_zero:
+            # calculate kosten arbeit
+            nutzer_id_list = []
+            stunden_list = []
+            for key in list(arbeit_dict_not_zero.keys()):
+                nutzer_id_list.append(key[7:])
+            for value in list(arbeit_dict_not_zero.values()):
+                stunden_list.append(Decimal(value))
+            assert len(nutzer_id_list) == len(stunden_list)
+            kosten_arbeit = sum(stunden_list) / quantity
 
         # produktionsmittel
         # dict with produktionsmittel values
@@ -171,30 +182,25 @@ def neues_angebot():
                 kauf_id_list.append(key[3:])
             for value in list(pm_dict_not_zero.values()):
                 prozent_list.append(Decimal(value)/100)
+
             # preise
             preise_list = []
             for idx in kauf_id_list:
-                qry = db.session.query(Kaeufe, Angebote.preis).\
-                    join(Angebote, Kaeufe.angebot==Angebote.id).filter(Kaeufe.id == idx).all()
-                preise_list.append(Decimal(qry[0][1]))
+                # HIER WERDEN DIE ORIGINALEN KAUFPREISE ANGERECHNET, NICHT DIE AKTUELLEN
+                # MARKTPREISE!
+                qry = db.session.query(Kaeufe.kaufpreis).select_from(Kaeufe).\
+                    filter(Kaeufe.id == idx).first()
+                preise_list.append(Decimal(qry.kaufpreis))
             kosten_einzeln = []
             for num1, num2 in zip(prozent_list, preise_list):
                 kosten_einzeln.append(num1 * num2)
             kosten_pm = sum(kosten_einzeln) / quantity
 
+        # TO DO LATER: validate input/check if enough guthaben
+        # if current_user.guthaben < sum(stunden_list):
+        #     flash("Dein Guthaben reicht nicht aus, um die Arbeit zu bezahlen.")
 
-        if arbeit_dict_not_zero:
-            # calculate kosten arbeit
-            nutzer_id_list = []
-            stunden_list = []
-            for key in list(arbeit_dict_not_zero.keys()):
-                nutzer_id_list.append(key[7:])
-            for value in list(arbeit_dict_not_zero.values()):
-                stunden_list.append(Decimal(value))
-            assert len(nutzer_id_list) == len(stunden_list)
-            kosten_arbeit = sum(stunden_list) / quantity
-
-        # save new angebot(e)
+        # save new angebot(e), pay workers and register arbeit and produktionsmittel
         current_time = datetime.datetime.now()
         for quant in range(quantity):
             new_angebot = Angebote(name=request.form["name"], cr_date=current_time,  betrieb=current_user.id,\
@@ -208,9 +214,13 @@ def neues_angebot():
                 assert len(nutzer_id_list) == len(stunden_list)
                 for count, i in enumerate(nutzer_id_list):
                     new_arbeit = Arbeit(angebot=new_angebot.id, nutzer=i,\
-                        stunden=stunden_list[count] / quantity, ausbezahlt=False)
+                        stunden=stunden_list[count] / quantity)
                     db.session.add(new_arbeit)
-            # new row in produktionsmittel! (um gesamten verbrauch zu erhalten, gruppieren/summieren!)
+                    # guthaben der arbeiter erhöhen
+                    # TO DO: check if it's inefficient doing this for every quant
+                    Nutzer.query.filter_by(id=i).first().guthaben += stunden_list[count] / quantity
+
+            # create new row in produktionsmittel (um gesamten verbrauch zu erhalten, muss gruppiert/summiert werden!)
             if pm_dict_not_zero:
                 assert len(kauf_id_list) == len(prozent_list)
                 for count, i in enumerate(kauf_id_list):
@@ -219,7 +229,7 @@ def neues_angebot():
                     db.session.add(new_produktionsmittel_prd)
             db.session.commit()
 
-        # kosten zusammenfassen und bestätigen lassen!
+        # TO DO: kosten zusammenfassen und bestätigen lassen!
         flash('Angebot erfolgreich gespeichert!')
         return redirect(url_for("main_betriebe.meine_angebote"))
 
@@ -244,22 +254,22 @@ def angebot_loeschen():
     angebot_id = request.args.get("id")
     angebot = Angebote.query.filter_by(id=angebot_id).first()
     if request.method == 'POST':
-        if request.form["verbraucht"] == "ja":
-            # alle Arbeiter automatisch ausbezahlen. Die Produktionsmittel bleiben als verbraucht markiert.
-            arbeit_in_produkt = Arbeit.query.filter_by(angebot=angebot.id).all()
-            for arb in arbeit_in_produkt:
-                assert arb.ausbezahlt == False
-                Nutzer.query.filter_by(id=arb.nutzer).first().guthaben += arb.stunden
-                arb.ausbezahlt = True
-        else:
-            # Produktionsmittel wieder freigegeben und geleistete Arbeit auf Null setzen
-            pm_in_produkt = Produktionsmittel.query.filter_by(angebot=angebot.id).all()
-            for pm in pm_in_produkt:
-                pm.prozent_gebraucht = 0
-            arbeit_in_produkt = Arbeit.query.filter_by(angebot=angebot.id).all()
-            for arb in arbeit_in_produkt:
-                arb.stunden = 0
-                arb.ausbezahlt = True
+        # if request.form["verbraucht"] == "ja":
+        #     # alle Arbeiter automatisch ausbezahlen. Die Produktionsmittel bleiben als verbraucht markiert.
+        #     arbeit_in_produkt = Arbeit.query.filter_by(angebot=angebot.id).all()
+        #     for arb in arbeit_in_produkt:
+        #         assert arb.ausbezahlt == False
+        #         Nutzer.query.filter_by(id=arb.nutzer).first().guthaben += arb.stunden
+        #         arb.ausbezahlt = True
+        # else:
+        #     # Produktionsmittel wieder freigegeben und geleistete Arbeit auf Null setzen
+        #     pm_in_produkt = Produktionsmittel.query.filter_by(angebot=angebot.id).all()
+        #     for pm in pm_in_produkt:
+        #         pm.prozent_gebraucht = 0
+        #     arbeit_in_produkt = Arbeit.query.filter_by(angebot=angebot.id).all()
+        #     for arb in arbeit_in_produkt:
+        #         arb.stunden = 0
+        #         arb.ausbezahlt = True
 
         angebot.aktiv = False
         db.session.commit()
