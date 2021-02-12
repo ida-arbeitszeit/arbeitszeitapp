@@ -46,13 +46,14 @@ class Kaeufe(UserMixin, db.Model):
     type_nutzer = db.Column(db.Boolean, nullable=False)
     betrieb = db.Column(db.Integer, db.ForeignKey("betriebe.id"), nullable=True)
     nutzer = db.Column(db.Integer, db.ForeignKey("nutzer.id"), nullable=True)
+    kaufpreis = db.Column(db.Numeric(), nullable=False) 
 
 class Arbeit(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     angebot = db.Column(db.Integer, db.ForeignKey("angebote.id"), nullable=False)
     nutzer = db.Column(db.Integer, db.ForeignKey("nutzer.id"), nullable=False)
     stunden = db.Column(db.Numeric(), nullable=False)
-    ausbezahlt = db.Column(db.Boolean, nullable=False, default=False)
+    # ausbezahlt = db.Column(db.Boolean, nullable=False, default=False)
 
 class Arbeiter(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
