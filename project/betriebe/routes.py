@@ -121,7 +121,7 @@ def kaufen(id):
             flash(f"Kauf von '{angebot.name}' erfolgreich!")
             return redirect('/betriebe/suchen')
 
-        angebot = get_angebote().filter(Angebote.id==id).first()
+        angebot = get_angebote().filter(Angebote.aktiv==True, Angebote.id==id).first()
         return render_template('kaufen_betriebe.html', angebot=angebot)
     else:
         return 'Error loading #{id}'.format(id=id)
@@ -243,8 +243,9 @@ def neues_angebot():
 @main_betriebe.route('/betriebe/meine_angebote')
 @login_required
 def meine_angebote():
-    aktuelle_angebote = Angebote.query.filter_by(aktiv=True, betrieb=current_user.id).all()
-    vergangene_angebote = Angebote.query.filter_by(aktiv=False, betrieb=current_user.id).all()
+    qry = get_angebote()
+    aktuelle_angebote = qry.filter(Angebote.aktiv == True, Betriebe.id==current_user.id).all()
+    vergangene_angebote = qry.filter(Angebote.aktiv == False, Betriebe.id==current_user.id).all()
     return render_template('meine_angebote.html', aktuelle_angebote=aktuelle_angebote, vergangene_angebote=vergangene_angebote)
 
 
@@ -254,23 +255,6 @@ def angebot_loeschen():
     angebot_id = request.args.get("id")
     angebot = Angebote.query.filter_by(id=angebot_id).first()
     if request.method == 'POST':
-        # if request.form["verbraucht"] == "ja":
-        #     # alle Arbeiter automatisch ausbezahlen. Die Produktionsmittel bleiben als verbraucht markiert.
-        #     arbeit_in_produkt = Arbeit.query.filter_by(angebot=angebot.id).all()
-        #     for arb in arbeit_in_produkt:
-        #         assert arb.ausbezahlt == False
-        #         Nutzer.query.filter_by(id=arb.nutzer).first().guthaben += arb.stunden
-        #         arb.ausbezahlt = True
-        # else:
-        #     # Produktionsmittel wieder freigegeben und geleistete Arbeit auf Null setzen
-        #     pm_in_produkt = Produktionsmittel.query.filter_by(angebot=angebot.id).all()
-        #     for pm in pm_in_produkt:
-        #         pm.prozent_gebraucht = 0
-        #     arbeit_in_produkt = Arbeit.query.filter_by(angebot=angebot.id).all()
-        #     for arb in arbeit_in_produkt:
-        #         arb.stunden = 0
-        #         arb.ausbezahlt = True
-
         angebot.aktiv = False
         db.session.commit()
         flash("Löschen des Angebots erfolgreich.")
@@ -308,9 +292,7 @@ def angebot_verkaufen():
 @main_betriebe.route('/betriebe/kooperieren', methods=['GET', 'POST'])
 @login_required
 def kooperieren():
-
     if request.method == 'POST':
-
         angebot_id_eigenes = request.form["angebot_id_eigenes"]
         own = Angebote.query.filter_by(id=angebot_id_eigenes, aktiv=True).first()
 
