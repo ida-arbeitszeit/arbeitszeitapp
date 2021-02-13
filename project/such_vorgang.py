@@ -9,7 +9,7 @@ from flask import render_template, redirect, request, flash
 
 def get_angebote():
     """
-    returns all active products available (grouped results),
+    returns all products available (grouped results, active or not),
     with several columns, including the coop-price.
     """
 
@@ -29,7 +29,7 @@ def get_angebote():
         func.min(Angebote.id).label("id"), Angebote.name.label("angebot_name"),\
         func.min(Angebote.p_kosten).label("p_kosten"),\
         func.min(Angebote.v_kosten).label("v_kosten"),\
-        Betriebe.name.label("betrieb_name"), Betriebe.email,\
+        Betriebe.name.label("betrieb_name"), Betriebe.id.label("betrieb_id"), Betriebe.email,\
         Angebote.beschreibung, Angebote.kategorie, Angebote.preis,
         func.count(Angebote.id).label("vorhanden"), km2.kooperation,
         case([(km2.kooperation == None, Angebote.preis),],
@@ -38,9 +38,9 @@ def get_angebote():
         select_from(Angebote).\
         join(Betriebe, Angebote.betrieb==Betriebe.id).\
         outerjoin(km2, Angebote.id==km2.mitglied).\
-        filter(Angebote.aktiv == True).\
-        group_by(Angebote.cr_date, "angebot_name", "betrieb_name",
-            Betriebe.email, Angebote.beschreibung, Angebote.kategorie,
+        group_by(
+            Betriebe, Angebote.cr_date, "angebot_name",
+            Angebote.beschreibung, Angebote.kategorie,
             Angebote.preis, km2.kooperation)
 
     return qry
@@ -60,7 +60,7 @@ def such_vorgang(suchender_type, request_form):
 
     search = ProductSearchForm(request_form)
 
-    qry = get_angebote()
+    qry = get_angebote().filter(Angebote.aktiv == True)
     results = qry.all()
 
     if request.method == 'POST':
