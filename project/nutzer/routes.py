@@ -77,7 +77,7 @@ def kaufen(id):
             flash(f"Kauf von '{angebot.name}' erfolgreich!")
             return redirect('/nutzer/suchen')
 
-        angebot = get_angebote().filter(Angebote.id==id).first()
+        angebot = get_angebote().filter(Angebote.aktiv==True, Angebote.id==id).first()
         return render_template('kaufen_nutzer.html', angebot=angebot)
     else:
         return 'Error loading #{id}'.format(id=id)
