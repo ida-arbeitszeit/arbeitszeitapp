@@ -7,8 +7,15 @@
         </h1>
         <div class="block content has-text-left">
           <ul>
-            <li>Auf dieser Plattform kannst du Produkte und Dienstleistungen gegen Arbeitszeit tauschen.</li>
-            <li>Produkte kosten soviel Arbeitszeit, wie sie zur Herstellung brauchen.</li>
+            <li>Diese Plattform ist ein gemeinschaftlicher Marktplatz, um Produkte
+              und Dienstleistungen auszutauschen.</li>
+            <li>Teilnehmer bekommen für geleistete Arbeit Arbeitszeitgeld,
+              mit dem sie Angebote bezahlen können.</li>
+              <li>Produkte kosten soviel Arbeitszeit,
+              wie sie zur Herstellung brauchen. Je mehr Arbeitszeit in einem Produkt steckt, desto "teurer" wird es.</li>
+              <li>Einzige Einnahmequelle ist die geleistete Arbeit, jenseits davon ist
+                kein Profit möglich. Diese Plattform richtet sich deshalb besonders
+                an Genossenschaften, Kooperativen und nicht-kommerzielle Anbieter.</li>
           </ul>
         </div>
 
@@ -21,8 +28,7 @@
             <li>Es gibt "Nutzer"-Accounts und "Betriebe"-Accounts.</li>
             <ul>
               <li>Als Arbeiter und Konsument brauchst du einen <strong>Nutzer-Account</strong>.<br>
-              Für deine
-              geleistete Arbeit bekommst du von deinem Betrieb Arbeitszeit überwiesen,
+              Für deine geleistete Arbeit bekommst du von deinem Betrieb Arbeitszeit überwiesen,
               die du gegen Dienstleistungen oder Produkte
               eintauschen kannst. </li>
               <li>Wer Dienstleistungen oder Produkte anbieten will,
@@ -36,20 +42,24 @@
           </ul>
         </div>
 
-        <h1 class="title">
-          Wofür das Ganze?
-        </h1>
 
+        <hr>
+
+        <p class="title">
+          FAQ
+        </p>
         <div class="block content has-text-left">
+        <ul>
+          <li>xxx1?</li>
           <ul>
-            <li>Eine demokratische Form des Wirtschaftens braucht Transparenz.</li>
-            <li>In der kapitalistischen Wirtschaft ist unklar, weshalb
-              ein Produkt 10 und nicht 100 Euro kostet oder weshalb ein
-              Fußball-Profi in der gleichen Zeit so viel mehr als die Putzkraft "verdient".</li>
-            <li>Die Arbeitszeitrechnung schafft diese Transparenz. Diese App soll zeigen,
-            dass Arbeitszeitrechnung nicht nur mit Dienstleistungen, sondern auch mit Produkten klappt.</li>
+            <li>xxx</li>
           </ul>
-        </div>
+          <li>xxx2?</li>
+          <ul>
+            <li>xxx</li>
+          </ul>
+        </ul>
+      </div>
     </div>
 </div>
 
@@ -57,7 +67,7 @@
 
 
 
-{% macro produktsuche(form, results, blueprint_name) %}
+{% macro produktsuche(form, results) %}
 
 <div class="columns is-centered">
   <div class="column is-one-third">
@@ -105,7 +115,7 @@
     <thead>
       <tr>
         <th>Angebot-ID</th> <th>Produktname</th><th>Betrieb</th><th>Kontakt</th>
-        <th>Beschreibung</th><th>Kategorie</th><th>Preis</th><th>Koop</th><th>Koop-Preis</th><th>Vorhanden</th><th>Details</th><th>Kaufen</th>
+        <th>Beschreibung</th><th>Kategorie</th><th>Koop-Nr.</th><th>Preis</th><th>Vorhanden</th><th>Details</th><th>Kaufen</th>
       </tr>
     </thead>
       <tbody>
@@ -114,16 +124,68 @@
             <td>{{ res.id }}</td><td>{{ res.angebot_name }}</td>
             <td>{{ res.betrieb_name }}</td><td>{{ res.email }}</td>
             <td>{{ res.beschreibung }}</td><td>{{ res.kategorie }}</td>
-            <td>{{ res.preis|round(2) }} Std.</td>
             <td>{{ res.kooperation if res.kooperation else '-' }}</td>
             <td>{{ res.koop_preis|round(2) }} Std.</td>
             <td>{{ res.vorhanden }}</td>
-            <td><a href="{{ url_for('%s.details' % blueprint_name, id=res.id) }}"><u>Details</u></a></td>
-            <td><a href="{{ url_for('%s.kaufen' % blueprint_name, id=res.id) }}"><u>Kaufen</u></a></td></tr>
+            <td><a href="{{ url_for('%s.details' % (request.blueprint), id=res.id) }}"><u>Details</u></a></td>
+            <td><a href="{{ url_for('%s.kaufen' % (request.blueprint), id=res.id) }}"><u>Kaufen</u></a></td></tr>
         {% endfor %}
       </tbody>
   </table>
 </div>
 {% endif %}
 
+{% endmacro %}
+
+
+{% macro details(piped, table_preiszus, preise) %}
+<h1 class="subtitle">PREIS VOR UND NACH KOOPERATION</h1>
+<div class="columns is-centered">
+    <div class="column is-two-fifths">
+      <div class="level">
+        <div class="level-left">
+          <div class="level-item">
+            <p class="has-text-weight-semibold">Preis vor Kooperation (betrieblich):</p>
+          </div>
+        </div>
+        <div class="level-right">
+          <div class="level-item">
+            <p>{{ preise[0]|round(2) }} Stunden</p>
+          </div>
+        </div>
+      </div>
+      <div class="level">
+        <div class="level-left">
+          <div class="level-item">
+            <p class="has-text-weight-semibold">Preis nach Kooperation (Durchschnittspreis):</p>
+          </div>
+        </div>
+        <div class="level-right">
+          <div class="level-item">
+            <p>{{ preise[1]|round(2) }} Stunden</p>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+<h1 class="subtitle">PREISZUSAMMENSETZUNG</h1>
+<div class="table-container">
+    <figure class="image">
+      {{ piped|safe }}
+    </figure>
+</div>
+
+<!-- <h1 class="subtitle">DETAILS PREISZUSAMMENSETZUNG</h1>
+<div class="table-container">
+    <div class="content">
+      {{ table_preiszus }}
+    </div>
+</div> -->
+
+<form method="post">
+    <a class="button is-primary" href="{{  url_for('%s.suchen' % (request.blueprint)) }}">
+      Zurück
+    </a>
+</form>
 {% endmacro %}
