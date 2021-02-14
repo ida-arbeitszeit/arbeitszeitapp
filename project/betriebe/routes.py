@@ -102,11 +102,13 @@ def details(id):
     dot = create_dots(cols_dict, table_of_composition)
     piped = dot.pipe().decode('utf-8')
     table_preiszus = Preiszusammensetzung(table_of_composition)
+    angebot_ = get_angebote().filter(Angebote.id == id).one()
+    preise = (angebot_.preis, angebot_.koop_preis)
 
     if request.method == 'POST':
         return redirect('/betriebe/suchen')
 
-    return render_template('details_betriebe.html', table_preiszus=table_preiszus, piped=piped)
+    return render_template('details_betriebe.html', table_preiszus=table_preiszus, piped=piped, preise=preise)
 
 
 @main_betriebe.route('/betriebe/kaufen/<int:id>', methods=['GET', 'POST'])
@@ -133,17 +135,26 @@ def neues_angebot():
     """
     Ein neues Angebot hinzufügen
     """
-    produktionsmittel_aktiv = db.session.query(Kaeufe.id, Angebote.name, Angebote.beschreibung,\
-        Angebote.preis, func.coalesce(func.sum(Produktionsmittel.prozent_gebraucht).\
-        label("prozent_gebraucht"), 0).label("prozent_gebraucht")).select_from(Kaeufe)\
-        .filter(Kaeufe.betrieb==current_user.id).outerjoin(Produktionsmittel,\
-        Kaeufe.id==Produktionsmittel.kauf).join(Angebote, Kaeufe.angebot==Angebote.id).\
+    produktionsmittel_aktiv = db.session.query(Kaeufe.id,\
+        Angebote.name,\
+        Angebote.beschreibung,\
+        Kaeufe.kaufpreis,\
+        func.coalesce(func.sum(Produktionsmittel.prozent_gebraucht).\
+            label("prozent_gebraucht"), 0).label("prozent_gebraucht")).\
+        select_from(Kaeufe).\
+        filter(Kaeufe.betrieb==current_user.id).outerjoin(Produktionsmittel,\
+        Kaeufe.id==Produktionsmittel.kauf).\
+        join(Angebote, Kaeufe.angebot==Angebote.id).\
         group_by(Kaeufe, Angebote, Produktionsmittel.kauf).\
         having(func.coalesce(func.sum(Produktionsmittel.prozent_gebraucht).\
-        label("prozent_gebraucht"), 0).label("prozent_gebraucht")<100).all()
+            label("prozent_gebraucht"), 0).label("prozent_gebraucht")<100).all()
 
-    arbeiter_all = db.session.query(Nutzer.id, Nutzer.name).select_from(Arbeiter)\
-        .join(Nutzer, Arbeiter.nutzer==Nutzer.id).filter(Arbeiter.betrieb==current_user.id).all()
+    arbeiter_all = db.session.\
+        query(Nutzer.id, Nutzer.name).\
+        select_from(Arbeiter).\
+        join(Nutzer, Arbeiter.nutzer==Nutzer.id).\
+        filter(Arbeiter.betrieb==current_user.id).\
+        all()
 
     if request.method == 'POST':
         quantity = int(request.form["quantity"])
@@ -309,9 +320,6 @@ def kooperieren():
             externe_koop = KooperationenMitglieder.query.filter_by(mitglied=angebot_id_externes, aktiv=True).first()
             current_time = datetime.datetime.now()
 
-
-
-
             if (not eigene_koop and not externe_koop):
                 print("neither exists")
                 flash("Kooperation wird gestartet.")
@@ -338,7 +346,8 @@ def kooperieren():
                         wird verlassen und der neuen beigetreten.")
 
                     # find out, how many different group of products you are cooperating with
-                    coop_partners = db.session.query(func.count(Angebote.id)).\
+                    coop_partners = db.session.\
+                        query(func.count(Angebote.id)).\
                         select_from(KooperationenMitglieder).\
                         filter_by(kooperation=eigene_koop.kooperation, aktiv=True).\
                         join(Angebote, KooperationenMitglieder.mitglied == Angebote.id).\
@@ -367,17 +376,65 @@ def kooperieren():
                 flash("Du befindest dich bereits in einer Kooperation\
                      - die aktuelle Kooperation wird verlassen und eine neue wird gestartet.")
 
+                # find out, how many different group of products you are cooperating with
+                coop_partners = db.session.\
+                    query(func.count(Angebote.id)).\
+                    select_from(KooperationenMitglieder).\
+                    filter_by(kooperation=eigene_koop.kooperation, aktiv=True).\
+                    join(Angebote, KooperationenMitglieder.mitglied == Angebote.id).\
+                    group_by(Angebote.cr_date, Angebote.name, Angebote.preis).\
+                    all()
+                amt_coop_partners = len(coop_partners)
+                eigene_ex_coop_id = eigene_koop.kooperation
+
+                # start new koop
+                new_koop = Kooperationen(cr_date=current_time)
+                db.session.add(new_koop)
+                db.session.commit()
+                # add all of the batch, not only specified angebot! (defined by cr_date and name) Muss evtl sicherer werden.
+                for i in db.session.query(Angebote).filter_by(cr_date=own.cr_date, name=own.name).all():
+                    x = KooperationenMitglieder.query.filter_by(mitglied=i.id).first()
+                    x.kooperation = new_koop.id
+                for j in db.session.query(Angebote).filter_by(cr_date=extern.cr_date, name=extern.name).all():
+                    new_koop_mitglieder_2 = KooperationenMitglieder(kooperation=new_koop.id, mitglied=j.id)
+                    db.session.add(new_koop_mitglieder_2)
+                db.session.commit()
+
+                # if only 1 stays in old coop, than delete!
+                if amt_coop_partners == 2:
+                    # delete the one remaining coop-member and the kooperative
+                    for i in KooperationenMitglieder.query.filter_by(kooperation=eigene_ex_coop_id).all():
+                        db.session.delete(i)
+                    db.session.delete(Kooperationen.query.filter_by(id=eigene_ex_coop_id).first())
+                    db.session.commit()
+
+
+
             elif externe_koop and not eigene_koop:
                 print("only externe exists")
                 flash("Das Produkt des Kooperationspartners\
                     befindet sich in einer Kooperation - dein Produkt tritt dieser Kooperation bei.")
+                # which coop to join?
+                coop_to_join = externe_koop.kooperation
+                # join coop
+                for i in db.session.query(Angebote).filter_by(cr_date=own.cr_date, name=own.name).all():
+                    new_koop_mitglieder = KooperationenMitglieder(kooperation=coop_to_join, mitglied=i.id)
+                    db.session.add(new_koop_mitglieder)
+                db.session.commit()
 
-            # eigenes und externes kooperieren schon --> "bereits kooperation!"
-            # eigenes ist schon in einer kooperation --> "kooperation verlassen und wechseln/neue kooperation starten"?
-            # externes ist schon in einer kooperation --> dieser koop beitreten?
-            # else: "wirklich neue kooperation gründen?"
 
-    return render_template('kooperieren.html')
+    meine_kooperationen = db.session.\
+        query(func.min(Angebote.name).label("name"), func.min(KooperationenMitglieder.kooperation).label("kooperation")).\
+        select_from(KooperationenMitglieder).\
+        join(Angebote, KooperationenMitglieder.mitglied == Angebote.id).\
+        filter(Angebote.betrieb == current_user.id, Angebote.aktiv == True).\
+        group_by(Angebote.cr_date, Angebote.name).\
+        all()
+
+    eigenes_produkt_from_get = request.args.get("id")
+
+
+    return render_template('kooperieren.html', meine_kooperationen=meine_kooperationen, prefilled=eigenes_produkt_from_get)
 
 
 @main_betriebe.route('/betriebe/hilfe')
