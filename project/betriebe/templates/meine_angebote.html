@@ -12,7 +12,7 @@
   <div class="content">
     <div class="icon"><i class="fas fa-info-circle"></i></div>
     <p>Hier sind deine aktuellen Angebote.<br>
-      Bei Bedarf kannst du sie löschen oder mit einem Code verkaufen.</p>
+      Bei Bedarf kannst du sie löschen, mit einem Code verkaufen oder eine Kooperation starten.</p>
   </div>
 
   {% with messages = get_flashed_messages() %}
@@ -30,7 +30,8 @@
       <thead>
         <tr>
           <th>Angebot-ID</th><th>Produktname</th><th>Beschreibung</th><th>Kategorie</th>
-          <th>Kosten p</th><th>Kosten v</th><th>Preis</th> <th>Koop</th> <th>Koop-Preis</th><th>Vorhanden</th><th>Löschen</th><th>Offline-Verkauf</th>
+          <th>Kosten p</th><th>Kosten v</th><th>Preis</th> <th>Koop</th>
+          <th>Koop-Preis</th><th>Vorhanden</th><th>Kooperieren</th><th>Löschen</th><th>Offline-Verkauf</th>
         </tr>
       </thead>
       <tbody>
@@ -46,6 +47,7 @@
             <td>{{ res.kooperation if res.kooperation else '-' }}</td>
             <td>{{ res.koop_preis|round(2) }} Std.</td>
             <td>{{ res.vorhanden }}</td>
+            <td><a href="{{ url_for('main_betriebe.kooperieren', id=res.id) }}"><u>Kooperieren</u></a></td>
             <td><a href="{{ url_for('main_betriebe.angebot_loeschen', id=res.id) }}"><u>Löschen</u></a></td>
             <td><a href="{{ url_for('main_betriebe.angebot_verkaufen', id=res.id) }}"><u>Offline-Verkauf</u></a>
             </td>
