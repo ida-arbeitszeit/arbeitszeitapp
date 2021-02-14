@@ -23,6 +23,9 @@ def create_app():
         from .models import Nutzer
         from .models import Betriebe
         from .models import Auszahlungen
+        from .models import Kaeufe
+        from .models import Kooperationen
+        from .models import KooperationenMitglieder
 
         @login_manager.user_loader
         def load_user(user_id):
