@@ -6,27 +6,52 @@
   <div class="container">
     <div class="columns is-centered">
         <div class="column is-three-fifths">
+          <div class="box has-background-info-light has-text-info-dark">
+            <div class="icon"><i class="fas fa-info-circle"></i></div>
+            <p>
+              Wenn ein anderer Betrieb das gleiche Produkt anbietet wie du, könnt ihr kooperieren. Das
+              heißt zunächst nichts anderes, als dass ihr eure Produkte zu einem
+              Durchschnittspreis anbietet.<br>
+              Du kannst dein Produkt problemlos von einem kooperativen Zusammenhang in einen anderen verschieben.
+            </p>
+          </div>
+
+
             <h1 class="title">
               Meine Kooperationen
             </h1>
-            <div class="table-container">
-              <div class="content">
-                    placeholder
-              </div>
-            </div>
+
+
+              {% if meine_kooperationen is defined and meine_kooperationen|length %}
+                <div class="table-container">
+                  <table class="table is-bordered is-fullwidth">
+                    <thead>
+                      <tr>
+                        <th>Angebot Name</th>
+                        <th>Kooperation</th>
+                      </tr>
+                    </thead>
+                      <tbody>
+                        {% for koop in meine_kooperationen %}
+                          <tr>
+                            <td>{{ koop.name }}</td>
+                            <td>{{ koop.kooperation }}</td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                  </table>
+                </div>
+              {% else %}
+                <div class="block">
+                    Noch keine Kooperationen
+                </div>
+              {% endif %}
+
+
 
             <h1 class="title">
               Neue Kooperation starten
             </h1>
-            <div class="box">
-              <div class="icon"><i class="fas fa-info-circle"></i></div>
-              <p>
-                Wenn ein anderer Betrieb das gleiche Produkt anbietet wie du, könnt ihr kooperieren! Das
-                heißt zunächst nichts anderes, als dass ihr eure Produkte zu einem
-                Durchschnittspreis anbietet.<br>
-                Du kannst dein Produkt problemlos von einem kooperativen Zusammenhang in einen anderen verschieben.
-              </p>
-            </div>
 
 
             <div class="content">
@@ -34,7 +59,7 @@
                 <div class="field">
                   <div class="control">
                     <label for="angebot_id">Eigenes Produkt</label>
-                    <input class="input" type="text" placeholder="Angebot-ID (Eigenes Produkt)", name="angebot_id_eigenes" required>
+                    <input class="input" type="text" placeholder="Angebot-ID (Eigenes Produkt)", name="angebot_id_eigenes" value="{{ prefilled if prefilled else '' }}" required>
                   </div>
                 </div>
                 <div class="field">
