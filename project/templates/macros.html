@@ -111,24 +111,45 @@
   Ergebnisse
 </h1>
 <div class="table-container">
-  <table class="table is-bordered is-fullwidth">
+  <table class="table is-fullwidth">
     <thead>
       <tr>
-        <th>Angebot-ID</th> <th>Produktname</th><th>Betrieb</th><th>Kontakt</th>
-        <th>Beschreibung</th><th>Kategorie</th><th>Koop-Nr.</th><th>Preis</th><th>Vorhanden</th><th>Details</th><th>Kaufen</th>
+        <th><abbr title="Angebot-ID">ID</abbr></th>
+        <th>Produktname</th>
+        <th>Betrieb</th>
+        <th>Mail</th>
+        <th>Beschreibung</th>
+        <th>Kategorie</th>
+        <th><abbr title="Kooperations-ID">Koop</abbr></th>
+        <th>Preis</th>
+        <th><abbr title="Noch vorhanden">Vorh.</abbr> </th>
+        <th>Kaufen</th>
       </tr>
     </thead>
       <tbody>
         {% for res in results %}
           <tr>
             <td>{{ res.id }}</td><td>{{ res.angebot_name }}</td>
-            <td>{{ res.betrieb_name }}</td><td>{{ res.email }}</td>
+            <td>{{ res.betrieb_name }}</td>
+            <td>
+              <a href="mailto:{{ res.email }}">
+                <u><span class="icon has-text-grey"><i class="far fa-envelope"></i></span></u>
+              </a>
+            </td>
             <td>{{ res.beschreibung }}</td><td>{{ res.kategorie }}</td>
             <td>{{ res.kooperation if res.kooperation else '-' }}</td>
-            <td>{{ res.koop_preis|round(2) }} Std.</td>
+            <td>{{ res.koop_preis|round(2) }} Std.
+              <a href="{{ url_for('%s.details' % (request.blueprint), id=res.id) }}">
+                <u><span class="icon has-text-grey"><i class="far fa-question-circle"></i></span></u>
+              </a>
+            </td>
             <td>{{ res.vorhanden }}</td>
-            <td><a href="{{ url_for('%s.details' % (request.blueprint), id=res.id) }}"><u>Details</u></a></td>
-            <td><a href="{{ url_for('%s.kaufen' % (request.blueprint), id=res.id) }}"><u>Kaufen</u></a></td></tr>
+            <td>
+              <a href="{{ url_for('%s.kaufen' % (request.blueprint), id=res.id) }}">
+                <u><u><span class="icon has-text-grey"><i class="fas fa-shopping-cart"></i></span></u></u>
+              </a>
+            </td>
+          </tr>
         {% endfor %}
       </tbody>
   </table>
