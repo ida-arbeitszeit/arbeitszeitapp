@@ -6,7 +6,7 @@
   <h1 class="title">
     Meine Angebote
   </h1>
-  <div class="content">
+  <div class="box has-background-info-light has-text-info-dark">
     <div class="icon"><i class="fas fa-info-circle"></i></div>
     <p>Hier sind deine aktuellen Angebote.<br>
       Bei Bedarf kannst du sie löschen, mit einem Code verkaufen oder eine Kooperation starten.</p>
@@ -23,12 +23,22 @@
 
 
     {% if aktuelle_angebote is defined and aktuelle_angebote|length %}
-    <table class="table is-bordered is-fullwidth">
+    <table class="table is-fullwidth">
       <thead>
         <tr>
-          <th>Angebot-ID</th><th>Produktname</th><th>Beschreibung</th><th>Kategorie</th>
-          <th>Kosten p</th><th>Kosten v</th><th>Preis</th> <th>Koop</th>
-          <th>Koop-Preis</th><th>Vorhanden</th><th>Kooperieren</th><th>Löschen</th><th>Offline-Verkauf</th>
+          <th><abbr title="Angebot-ID">ID</abbr></th>
+          <th>Produktname</th>
+          <th>Beschreibung</th>
+          <th>Kategorie</th>
+          <th><abbr title="Kosten Produktionsmittel">p</abbr></th>
+          <th><abbr title="Kosten Arbeit">v</abbr></th>
+          <th>Preis</th>
+          <th><abbr title="Kooperations-ID">Koop</abbr></th>
+          <th>Koop-Preis</th>
+          <th><abbr title="Noch vorhanden">Vorh.</abbr></th>
+          <th><abbr title="Kooperation starten/ändern">Koop.</abbr></th>
+          <th><abbr title="Löschen">Del.</abbr></th>
+          <th><abbr title="Offline-Verkauf mit Code">Offl.-Verk.</abbr></th>
         </tr>
       </thead>
       <tbody>
@@ -42,11 +52,12 @@
             <td>{{ res.v_kosten|round(2) }}</td>
             <td>{{ res.preis|round(2) }} Std.</td>
             <td>{{ res.kooperation if res.kooperation else '-' }}</td>
-            <td>{{ res.koop_preis|round(2) }} Std.</td>
+            <td>{{ res.koop_preis|round(2) }} Std.
+            </td>
             <td>{{ res.vorhanden }}</td>
-            <td><a href="{{ url_for('main_betriebe.kooperieren', id=res.id) }}"><u>Kooperieren</u></a></td>
-            <td><a href="{{ url_for('main_betriebe.angebot_loeschen', id=res.id) }}"><u>Löschen</u></a></td>
-            <td><a href="{{ url_for('main_betriebe.angebot_verkaufen', id=res.id) }}"><u>Offline-Verkauf</u></a>
+            <td><a href="{{ url_for('main_betriebe.kooperieren', id=res.id) }}"><u>Koop.</u></a></td>
+            <td><a href="{{ url_for('main_betriebe.angebot_loeschen', id=res.id) }}"><u>Del.</u></a></td>
+            <td><a href="{{ url_for('main_betriebe.angebot_verkaufen', id=res.id) }}"><u>Offl.-Verk.</u></a>
             </td>
           </tr>
         {% endfor %}
@@ -62,10 +73,20 @@
   </h1>
   <div class="table-container">
     {% if vergangene_angebote is defined and vergangene_angebote|length %}
-    <table class="table is-bordered is-fullwidth">
+    <table class="table is-fullwidth">
       <thead>
-        <tr><th>Angebot-ID</th><th>Produktname</th><th>Beschreibung</th><th>Kategorie</th><th>Kosten p</th><th>Kosten v</th><th>Preis</th>
-        <th>Koop</th><th>Koop-Preis</th><th>Verkauft</th></tr>
+        <tr>
+          <th><abbr title="Angebot-ID">ID</abbr></th>
+          <th>Produktname</th>
+          <th>Beschreibung</th>
+          <th>Kategorie</th>
+          <th><abbr title="Kosten Produktionsmittel">p</abbr></th>
+          <th><abbr title="Kosten Arbeit">v</abbr></th>
+          <th>Preis</th>
+          <th><abbr title="Kooperations-ID">Koop</abbr></th>
+          <th>Koop-Preis</th>
+          <th>Menge</th>
+        </tr>
       </thead>
         <tbody>
           {% for res in vergangene_angebote %}
