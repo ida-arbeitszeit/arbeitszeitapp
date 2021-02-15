@@ -2,65 +2,61 @@
 
 {% block content2 %}
 
-<div class="section">
-  <div class="container">
-      <div class="columns is-centered">
-          <div class="column is-two-fifths">
-            <h1 class="title">
-              Willkommen, {{ current_user.name }}!
-            </h1>
+<div class="columns is-centered">
+    <div class="column is-two-fifths">
+      <h1 class="title">
+        Willkommen, {{ current_user.name }}!
+      </h1>
 
-            <br>
+      <br>
 
-            <div class="level">
-              <div class="level-left">
-                <div class="level-item">
-                  <p class="has-text-weight-semibold">Dein Guthaben:</p>
-                </div>
-              </div>
-              <div class="level-right">
-                <div class="level-item">
-                  <p>{{ current_user.guthaben|round(2) }} Stunden</p>
-                </div>
-              </div>
-            </div>
-            <div class="level">
-              <div class="level-left">
-                <div class="level-item">
-                  <p class="has-text-weight-semibold">Deine ID:</p>
-                </div>
-              </div>
-              <div class="level-right">
-                <div class="level-item">
-                  <p>{{ current_user.id }}</p>
-                </div>
-              </div>
-            </div>
-            <div class="level">
-              <div class="level-left">
-                <div class="level-item">
-                  <p class="has-text-weight-semibold">Deine Email:</p>
-                </div>
-              </div>
-              <div class="level-right">
-                <div class="level-item">
-                  <p>{{ current_user.email }}</p>
-                </div>
-              </div>
-            </div>
+      <div class="level">
+        <div class="level-left">
+          <div class="level-item">
+            <p class="has-text-weight-semibold">Dein Guthaben:</p>
+          </div>
+        </div>
+        <div class="level-right">
+          <div class="level-item">
+            <p>{{ current_user.guthaben|round(2) }} Stunden</p>
+          </div>
+        </div>
+      </div>
+      <div class="level">
+        <div class="level-left">
+          <div class="level-item">
+            <p class="has-text-weight-semibold">Deine ID:</p>
+          </div>
+        </div>
+        <div class="level-right">
+          <div class="level-item">
+            <p>{{ current_user.id }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="level">
+        <div class="level-left">
+          <div class="level-item">
+            <p class="has-text-weight-semibold">Deine Email:</p>
+          </div>
+        </div>
+        <div class="level-right">
+          <div class="level-item">
+            <p>{{ current_user.email }}</p>
+          </div>
+        </div>
+      </div>
 
 
-            <div class="content">
-              {% if having_workers is sameas false %}
-              <div class="block">
-                <p><span class="icon"><i class="fas fa-exclamation-triangle"></i></span>
-                  Du hast noch keine Mitarbeiter. Füge sie <a href="{{ url_for('main_betriebe.arbeit') }}">hier</a> hinzu.</p>
-              </div>
-              {% endif %}
-            </div>
-       </div>
-    </div>
-  </div>
+      <div class="content">
+        {% if having_workers is sameas false %}
+        <div class="block">
+          <p><span class="icon"><i class="fas fa-exclamation-triangle"></i></span>
+            Du hast noch keine Mitarbeiter. Füge sie <a href="{{ url_for('main_betriebe.arbeit') }}">hier</a> hinzu.</p>
+        </div>
+        {% endif %}
+      </div>
+ </div>
 </div>
 
 

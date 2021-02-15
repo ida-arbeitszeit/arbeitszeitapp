@@ -2,13 +2,9 @@
 
 {% block content2 %}
 
-<div class="section">
-  <div class="container">
 
-  {% from 'macros.html' import produktsuche %}
-  {{ produktsuche(form, results) }}
+{% from 'macros.html' import produktsuche %}
+{{ produktsuche(form, results) }}
 
-  </div>
-</div>
 
 {% endblock %}

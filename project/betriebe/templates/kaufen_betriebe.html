@@ -2,31 +2,28 @@
 
 {% block content2 %}
 
-<div class="section">
-<div class="container">
-  <h1 class="title">Kauf bestätigen?</h1>
-  <div class="block">
-    Möchtest du <b>{{ angebot.angebot_name }}</b> wirklich kaufen?
-  </div>
-  <div class="block">
-    Der Preis beträgt <strong>{{ angebot.koop_preis|round(2) }} Stunden</strong>.
-  </div>
-
-  <div class="block">
-    Der Betrag wird dir von deinem Guthaben abgezogen.
-  </div>
-  <div class="block">
-    Dein Guthaben beträgt momentan {{ current_user.guthaben|round(2) }} Stunden.
-  </div>
-
-    <form method="post">
-      <input class="button is-primary" type="submit" value="Kauf bestätigen">
-
-      <a class="button is-light" href="{{  url_for('main_betriebe.suchen') }}">
-        Abbrechen
-      </a>
-    </form>
+<h1 class="title">Kauf bestätigen?</h1>
+<div class="block">
+  Möchtest du <b>{{ angebot.angebot_name }}</b> wirklich kaufen?
 </div>
+<div class="block">
+  Der Preis beträgt <strong>{{ angebot.koop_preis|round(2) }} Stunden</strong>.
 </div>
+
+<div class="block">
+  Der Betrag wird dir von deinem Guthaben abgezogen.
+</div>
+<div class="block">
+  Dein Guthaben beträgt momentan {{ current_user.guthaben|round(2) }} Stunden.
+</div>
+
+  <form method="post">
+    <input class="button is-primary" type="submit" value="Kauf bestätigen">
+
+    <a class="button is-light" href="{{  url_for('main_betriebe.suchen') }}">
+      Abbrechen
+    </a>
+  </form>
+
 
 {% endblock %}
