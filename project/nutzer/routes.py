@@ -59,11 +59,13 @@ def details(id):
     dot = create_dots(cols_dict, table_of_composition)
     piped = dot.pipe().decode('utf-8')
     table_preiszus = Preiszusammensetzung(table_of_composition)
+    angebot_ = get_angebote().filter(Angebote.id == id).one()
+    preise = (angebot_.preis, angebot_.koop_preis)
 
     if request.method == 'POST':
         return redirect('/nutzer/suchen')
 
-    return render_template('details_nutzer.html', table_preiszus=table_preiszus, piped=piped)
+    return render_template('details_nutzer.html', table_preiszus=table_preiszus, piped=piped, preise=preise)
 
 
 @main_nutzer.route('/nutzer/kaufen/<int:id>', methods=['GET', 'POST'])
