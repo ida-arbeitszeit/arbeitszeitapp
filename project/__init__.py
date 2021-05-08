@@ -1,10 +1,11 @@
 from flask import Flask, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
-from flask_table import Table, Col
+from flask_table import Table, Col  # Do not delete
 
 db = SQLAlchemy()
 login_manager = LoginManager()
+
 
 def create_app():
     app = Flask(__name__, instance_relative_config=False)
