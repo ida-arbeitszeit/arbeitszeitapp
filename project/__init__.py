@@ -1,10 +1,7 @@
 from flask import Flask, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
-<<<<<<< HEAD
 from flask_table import Table, Col  # Do not delete
-=======
->>>>>>> 41b48d022904cac8b5a632c4954b6562e6ff2b1c
 
 db = SQLAlchemy()
 login_manager = LoginManager()
