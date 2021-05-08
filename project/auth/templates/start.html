@@ -37,9 +37,18 @@
               <a class="button" href="{{ url_for('auth.login_nutzer') }}">Nutzer</a>
               <a class="button" href="{{ url_for('auth.login_betriebe') }}">Betrieb</a>
             </div>
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+              <div class="notification is-danger">
+                  {{ messages[0] }}
+              </div>
+            {% endif %}
+            {% endwith %}
 
           </div>
+
       </div>
+
 
 <footer class="footer">
   <div class="content has-text-centered">
