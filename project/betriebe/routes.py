@@ -5,9 +5,8 @@ from ..models import Angebote, Kaeufe, Betriebe, Nutzer, Produktionsmittel, Arbe
     Kooperationen, KooperationenMitglieder
 from ..forms import ProductSearchForm
 from ..tables import ProduktionsmittelTable, ArbeiterTable1, ArbeiterTable2, Preiszusammensetzung
-from ..composition_of_prices import get_table_of_composition, get_positions_in_table, create_dots
-from ..such_vorgang import such_vorgang, get_angebote
-from ..kauf_vorgang import kauf_vorgang
+from .. import composition_of_prices
+from .. import suchen_und_kaufen
 from decimal import Decimal
 import datetime
 from sqlalchemy.sql import func
@@ -92,17 +91,19 @@ def produktionsmittel():
 @main_betriebe.route('/betriebe/suchen', methods=['GET', 'POST'])
 @login_required
 def suchen():
-    return such_vorgang("betriebe", request.form)
+    return suchen_und_kaufen.such_vorgang("betriebe", request.form)
 
 
 @main_betriebe.route('/betriebe/details/<int:id>', methods=['GET', 'POST'])
+@login_required
 def details(id):
-    table_of_composition =  get_table_of_composition(id)
-    cols_dict = get_positions_in_table(table_of_composition)
-    dot = create_dots(cols_dict, table_of_composition)
+    """show details of selected product."""
+    table_of_composition =  composition_of_prices.get_table_of_composition(id)
+    cols_dict = composition_of_prices.get_positions_in_table(table_of_composition)
+    dot = composition_of_prices.create_dots(cols_dict, table_of_composition)
     piped = dot.pipe().decode('utf-8')
     table_preiszus = Preiszusammensetzung(table_of_composition)
-    angebot_ = get_angebote().filter(Angebote.id == id).one()
+    angebot_ = suchen_und_kaufen.get_angebote().filter(Angebote.id == id).one()
     preise = (angebot_.preis, angebot_.koop_preis)
 
     if request.method == 'POST':
@@ -120,7 +121,7 @@ def kaufen(id):
 
     if angebot:
         if request.method == 'POST':
-            kauf_vorgang(kaufender_type="betriebe", angebot=angebot, kaeufer_id=current_user.id)
+            suchen_und_kaufen.kauf_vorgang(kaufender_type="betriebe", angebot=angebot, kaeufer_id=current_user.id)
             flash(f"Kauf von '{angebot.name}' erfolgreich!")
             return redirect('/betriebe/suchen')
 
@@ -292,7 +293,7 @@ def angebot_verkaufen():
                 flash("Wert des Codes entspricht nicht dem Preis.")
             else:
                 kaufender_type = "nutzer" if auszahlung.type_nutzer else "betriebe"
-                kauf_vorgang(kaufender_type=kaufender_type, angebot=angebot, kaeufer_id=auszahlung.nutzer)
+                suchen_und_kaufen.kauf_vorgang(kaufender_type=kaufender_type, angebot=angebot, kaeufer_id=auszahlung.nutzer)
                 auszahlung.entwertet = True
                 db.session.commit()
                 flash("Verkauf erfolgreich")

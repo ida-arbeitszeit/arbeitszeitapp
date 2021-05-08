@@ -1,3 +1,8 @@
+"""
+SQL-requests around the topic of (graphical) representations of the composition
+of prices.
+"""
+
 from graphviz import Graph
 from sqlalchemy.orm import aliased
 from .models import Angebote, Kaeufe, Produktionsmittel

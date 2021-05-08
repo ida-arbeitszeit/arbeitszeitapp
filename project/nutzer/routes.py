@@ -8,9 +8,8 @@ from .. import db
 from ..models import Angebote, Kaeufe, Nutzer, Betriebe, Arbeit, Arbeiter, Auszahlungen
 from ..forms import ProductSearchForm
 from ..tables import KaeufeTable, Preiszusammensetzung
-from ..composition_of_prices import get_table_of_composition, get_positions_in_table, create_dots
-from ..kauf_vorgang import kauf_vorgang
-from ..such_vorgang import such_vorgang, get_angebote
+from .. import composition_of_prices
+from .. import suchen_und_kaufen
 from sqlalchemy.sql import func
 
 
@@ -48,19 +47,19 @@ def meine_kaeufe():
 @main_nutzer.route('/nutzer/suchen', methods=['GET', 'POST'])
 @login_required
 def suchen():
-    return such_vorgang("nutzer", request.form)
+    return suchen_und_kaufen.such_vorgang("nutzer", request.form)
 
 
 @main_nutzer.route('/nutzer/details/<int:id>', methods=['GET', 'POST'])
 @login_required
 def details(id):
-
-    table_of_composition =  get_table_of_composition(id)
-    cols_dict = get_positions_in_table(table_of_composition)
-    dot = create_dots(cols_dict, table_of_composition)
+    """show details of selected product."""
+    table_of_composition =  composition_of_prices.get_table_of_composition(id)
+    cols_dict = composition_of_prices.get_positions_in_table(table_of_composition)
+    dot = composition_of_prices.create_dots(cols_dict, table_of_composition)
     piped = dot.pipe().decode('utf-8')
     table_preiszus = Preiszusammensetzung(table_of_composition)
-    angebot_ = get_angebote().filter(Angebote.id == id).one()
+    angebot_ = suchen_und_kaufen.get_angebote().filter(Angebote.id == id).one()
     preise = (angebot_.preis, angebot_.koop_preis)
 
     if request.method == 'POST':
@@ -77,7 +76,7 @@ def kaufen(id):
     angebot = qry.first()
     if angebot:
         if request.method == 'POST':
-            kauf_vorgang(kaufender_type="nutzer", angebot=angebot, kaeufer_id=current_user.id)
+            suchen_und_kaufen.kauf_vorgang(kaufender_type="nutzer", angebot=angebot, kaeufer_id=current_user.id)
             flash(f"Kauf von '{angebot.name}' erfolgreich!")
             return redirect('/nutzer/suchen')
 
