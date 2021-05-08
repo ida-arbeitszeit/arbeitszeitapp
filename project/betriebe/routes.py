@@ -112,6 +112,7 @@ def details(id):
 
 
 @main_betriebe.route('/betriebe/kaufen/<int:id>', methods=['GET', 'POST'])
+@login_required
 def kaufen(id):
     qry = db.session.query(Angebote).filter(
                 Angebote.id==id)

@@ -52,6 +52,7 @@ def suchen():
 
 
 @main_nutzer.route('/nutzer/details/<int:id>', methods=['GET', 'POST'])
+@login_required
 def details(id):
 
     table_of_composition =  get_table_of_composition(id)
@@ -69,6 +70,7 @@ def details(id):
 
 
 @main_nutzer.route('/nutzer/kaufen/<int:id>', methods=['GET', 'POST'])
+@login_required
 def kaufen(id):
     qry = db.session.query(Angebote).filter(
                 Angebote.id==id)
