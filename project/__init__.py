@@ -1,10 +1,6 @@
 from flask import Flask, session
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
 from flask_table import Table, Col  # Do not delete
-
-db = SQLAlchemy()
-login_manager = LoginManager()
+from .extensions import db, login_manager
 
 
 def create_app():

@@ -2,7 +2,7 @@
 
 import datetime
 from flask import render_template, redirect, request, flash
-from . import db
+from .extensions import db
 from .forms import ProductSearchForm
 from .models import Angebote, Betriebe, KooperationenMitglieder, Nutzer, Kaeufe
 from sqlalchemy.sql import func, case

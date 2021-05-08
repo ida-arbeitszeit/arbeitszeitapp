@@ -6,7 +6,7 @@ of prices.
 from graphviz import Graph
 from sqlalchemy.orm import aliased
 from .models import Angebote, Kaeufe, Produktionsmittel
-from . import db
+from .extensions import db
 
 
 def get_table_of_composition(angebote_id):

@@ -4,7 +4,7 @@ from decimal import Decimal
 from flask import Blueprint, render_template, session,\
     redirect, url_for, request, flash
 from flask_login import login_required, current_user
-from .. import db
+from ..extensions import db
 from ..models import Angebote, Kaeufe, Nutzer,\
     Betriebe, Arbeiter, Auszahlungen
 from ..tables import KaeufeTable, Preiszusammensetzung

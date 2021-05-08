@@ -1,5 +1,5 @@
 import datetime
-from .. import db
+from ..extensions import db
 from decimal import Decimal
 from flask import Blueprint, render_template, session, redirect, url_for,\
     request, flash
