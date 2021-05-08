@@ -1,3 +1,11 @@
+"""
+Definition of database tables.
+
+The table name is automatically set by Flask-SQLAlchemy unless overridden.
+It’s derived from the class name converted to lowercase and
+with “CamelCase” converted to “camel_case”.
+"""
+
 from flask_login import UserMixin
 from . import db
 

@@ -13,6 +13,7 @@ class Config:
 
 
 class ProdConfig(Config):
+    """Config for production on heroku."""
     FLASK_ENV = 'production'
     DEBUG = False
     TESTING = False
@@ -23,6 +24,7 @@ class ProdConfig(Config):
 
 
 class DevConfig(Config):
+    """Config for development"""
     FLASK_ENV = 'development'
     DEBUG = True
     TESTING = True
