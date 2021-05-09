@@ -8,7 +8,6 @@ from ..extensions import db
 from ..models import Angebote, Kaeufe, Nutzer,\
     Betriebe, Arbeiter, Auszahlungen
 from ..tables import KaeufeTable, Preiszusammensetzung
-from .. import suchen_und_kaufen
 from sqlalchemy.sql import func
 from .. import sql
 
@@ -52,7 +51,8 @@ def meine_kaeufe():
 @main_nutzer.route('/nutzer/suchen', methods=['GET', 'POST'])
 @login_required
 def suchen():
-    return suchen_und_kaufen.such_vorgang("nutzer", request.form)
+    suk = sql.SuchenUndKaufen()
+    return suk.such_vorgang("nutzer", request.form)
 
 
 @main_nutzer.route('/nutzer/details/<int:id>', methods=['GET', 'POST'])
@@ -65,7 +65,8 @@ def details(id):
     dot = comp.create_dots(cols_dict, table_of_composition)
     piped = dot.pipe().decode('utf-8')
     table_preiszus = Preiszusammensetzung(table_of_composition)
-    angebot_ = suchen_und_kaufen.get_angebote().filter(Angebote.id == id).one()
+    suk = sql.SuchenUndKaufen()
+    angebot_ = suk.get_angebote().filter(Angebote.id == id).one()
     preise = (angebot_.preis, angebot_.koop_preis)
 
     if request.method == 'POST':
@@ -84,15 +85,16 @@ def kaufen(id):
     qry = db.session.query(Angebote).filter(
                 Angebote.id == id)
     angebot = qry.first()
+    suk = sql.SuchenUndKaufen()
     if angebot:
         if request.method == 'POST':
-            suchen_und_kaufen.kauf_vorgang(
+            suk.kauf_vorgang(
                 kaufender_type="nutzer", angebot=angebot,
                 kaeufer_id=current_user.id)
             flash(f"Kauf von '{angebot.name}' erfolgreich!")
             return redirect('/nutzer/suchen')
 
-        angebot = suchen_und_kaufen.get_angebote().\
+        angebot = suk.get_angebote().\
             filter(Angebote.aktiv == True, Angebote.id == id).first()
         return render_template('kaufen_nutzer.html', angebot=angebot)
     else:

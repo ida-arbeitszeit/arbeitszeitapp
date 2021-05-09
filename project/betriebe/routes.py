@@ -9,7 +9,6 @@ from ..models import Angebote, Kaeufe, Betriebe, Nutzer, Produktionsmittel,\
     Arbeit, Auszahlungen, Kooperationen, KooperationenMitglieder
 from ..tables import ProduktionsmittelTable, WorkersTable, HoursTable,\
     Preiszusammensetzung
-from .. import suchen_und_kaufen
 from .. import sql
 
 main_betriebe = Blueprint('main_betriebe', __name__,
@@ -84,7 +83,8 @@ def produktionsmittel():
 @login_required
 def suchen():
     """search products in catalog."""
-    return suchen_und_kaufen.such_vorgang("betriebe", request.form)
+    suk = sql.SuchenUndKaufen()
+    return suk.such_vorgang("betriebe", request.form)
 
 
 @main_betriebe.route('/betriebe/details/<int:id>', methods=['GET', 'POST'])
@@ -97,7 +97,8 @@ def details(id):
     dot = comp.create_dots(cols_dict, table_of_composition)
     piped = dot.pipe().decode('utf-8')
     table_preiszus = Preiszusammensetzung(table_of_composition)
-    angebot_ = suchen_und_kaufen.get_angebote().filter(Angebote.id == id).one()
+    suk = sql.SuchenUndKaufen()
+    angebot_ = suk.get_angebote().filter(Angebote.id == id).one()
     preise = (angebot_.preis, angebot_.koop_preis)
 
     if request.method == 'POST':
@@ -112,15 +113,15 @@ def details(id):
 @login_required
 def kaufen(id):
     angebot = sql.get_angebot_by_id(id)
+    suk = sql.SuchenUndKaufen()
     if angebot:
         if request.method == 'POST':
-            suchen_und_kaufen.\
-                kauf_vorgang(kaufender_type="betriebe", angebot=angebot,
+            suk.kauf_vorgang(kaufender_type="betriebe", angebot=angebot,
                              kaeufer_id=current_user.id)
             flash(f"Kauf von '{angebot.name}' erfolgreich!")
             return redirect('/betriebe/suchen')
 
-        angebot = suchen_und_kaufen.get_angebote().\
+        angebot = suk.get_angebote().\
             filter(Angebote.aktiv == True, Angebote.id == id).first()
         return render_template('kaufen_betriebe.html', angebot=angebot)
     else:
@@ -251,7 +252,8 @@ def neues_angebot():
 @main_betriebe.route('/betriebe/meine_angebote')
 @login_required
 def meine_angebote():
-    qry = suchen_und_kaufen.get_angebote()
+    suk = sql.SuchenUndKaufen()
+    qry = suk.get_angebote()
     aktuelle_angebote = qry.filter(
         Angebote.aktiv == True, Betriebe.id == current_user.id).all()
     vergangene_angebote = qry.filter(
@@ -294,7 +296,8 @@ def angebot_verkaufen():
             else:
                 kaufender_type = "nutzer" if auszahlung.type_nutzer\
                                           else "betriebe"
-                suchen_und_kaufen.kauf_vorgang(
+                suk = sql.SuchenUndKaufen()
+                suk.kauf_vorgang(
                     kaufender_type=kaufender_type,
                     angebot=angebot,
                     kaeufer_id=auszahlung.nutzer)
