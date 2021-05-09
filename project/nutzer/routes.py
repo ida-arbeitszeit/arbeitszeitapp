@@ -4,11 +4,8 @@ from decimal import Decimal
 from flask import Blueprint, render_template, session,\
     redirect, url_for, request, flash
 from flask_login import login_required, current_user
-from ..extensions import db
-from ..models import Angebote, Kaeufe, Nutzer,\
-    Betriebe, Arbeiter, Auszahlungen
+from ..models import Angebote
 from ..tables import KaeufeTable, Preiszusammensetzung
-from sqlalchemy.sql import func
 from .. import sql
 
 
@@ -35,16 +32,8 @@ def meine_kaeufe():
     else:
         session["user_type"] = "nutzer"
 
-        kaufhistorie = db.session.query(
-            Kaeufe.id, Angebote.name, Angebote.beschreibung,
-            func.concat(func.round(Angebote.preis, 2), " Std.").
-            label("preis")
-            ).\
-            select_from(Kaeufe).\
-            filter_by(nutzer=current_user.id).\
-            join(Angebote, Kaeufe.angebot == Angebote.id).\
-            all()
-        kaufh_table = KaeufeTable(kaufhistorie, no_items="(Noch keine Käufe.)")
+        purchases = sql.get_purchases(current_user.id)
+        kaufh_table = KaeufeTable(purchases, no_items="(Noch keine Käufe.)")
         return render_template('meine_kaeufe.html', kaufh_table=kaufh_table)
 
 
@@ -82,9 +71,7 @@ def details(id):
 @main_nutzer.route('/nutzer/kaufen/<int:id>', methods=['GET', 'POST'])
 @login_required
 def kaufen(id):
-    qry = db.session.query(Angebote).filter(
-                Angebote.id == id)
-    angebot = qry.first()
+    angebot = sql.get_angebot_by_id(id)
     suk = sql.SuchenUndKaufen()
     if angebot:
         if request.method == 'POST':
@@ -106,12 +93,9 @@ def kaufen(id):
 def profile():
     user_type = session["user_type"]
     if user_type == "nutzer":
-        arbeitsstellen = db.session.query(Betriebe).select_from(Arbeiter).\
-            filter_by(nutzer=current_user.id).\
-            join(Betriebe, Arbeiter.betrieb == Betriebe.id).all()
-
+        workplaces = sql.get_workplaces(current_user.id)
         return render_template('profile_nutzer.html',
-                               arbeitsstellen=arbeitsstellen)
+                               arbeitsstellen=workplaces)
     elif user_type == "betrieb":
         return redirect(url_for('auth.zurueck'))
 
@@ -120,29 +104,12 @@ def profile():
 @login_required
 def auszahlung():
     if request.method == 'POST':
-
-        betrag = Decimal(request.form["betrag"])
+        amount = Decimal(request.form["betrag"])
         code = id_generator()
-
-        # neuer eintrag in db-table auszahlungen
-        neue_auszahlung = Auszahlungen(
-            type_nutzer=True, nutzer=current_user.id, betrag=betrag, code=code)
-        db.session.add(neue_auszahlung)
-        db.session.commit()
-
-        # betrag vom guthaben des users abziehen
-        nutzer = db.session.query(Nutzer).\
-            filter(Nutzer.id == current_user.id).\
-            first()
-        nutzer.guthaben -= betrag
-        db.session.commit()
-
-        # Code User anzeigen
-        flash(betrag)
+        sql.new_withdrawal(current_user.id, amount, code)
+        # Show code to user
+        flash(amount)
         flash(code)
-
-        # Einlösen des Codes auch hier ermöglichen
-
         return render_template('auszahlung_nutzer.html')
 
     return render_template('auszahlung_nutzer.html')

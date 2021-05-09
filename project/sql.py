@@ -1,5 +1,5 @@
 from .models import Nutzer, Betriebe, Arbeiter, Angebote, Arbeit,\
-    Produktionsmittel, Kaeufe
+    Produktionsmittel, Kaeufe, Auszahlungen
 from sqlalchemy.sql import func
 from .extensions import db
 from graphviz import Graph
@@ -17,8 +17,6 @@ class SuchenUndKaufen():
 
     def get_angebote(self):
         """
-        search products.
-
         returns all products available (grouped results, active or not),
         with several columns, including the coop-price.
         """
@@ -58,8 +56,6 @@ class SuchenUndKaufen():
 
     def such_vorgang(self, suchender_type, request_form):
         """
-        search products.
-
         returns html pages with search results
         """
 
@@ -364,6 +360,50 @@ def add_new_user(email, name, password):
     db.session.commit()
 
 
+def get_purchases(user_id):
+    """returns all purchases made by user."""
+    purchases = db.session.query(
+        Kaeufe.id,
+        Angebote.name,
+        Angebote.beschreibung,
+        func.round(Angebote.preis, 2).
+        label("preis")
+        ).\
+        select_from(Kaeufe).\
+        filter_by(nutzer=user_id).\
+        join(Angebote, Kaeufe.angebot == Angebote.id).\
+        all()
+    return purchases
+
+
+def get_workplaces(user_id):
+    """returns all workplaces the user is assigned to."""
+    workplaces = db.session.query(Betriebe)\
+        .select_from(Arbeiter).\
+        filter_by(nutzer=user_id).\
+        join(Betriebe, Arbeiter.betrieb == Betriebe.id).\
+        all()
+    return workplaces
+
+
+def new_withdrawal(user_id, amount, code):
+    """register new withdrawal and withdraw amount from user's account."""
+    new_withdrawal = Auszahlungen(
+        type_nutzer=True,
+        nutzer=user_id,
+        betrag=amount,
+        code=code)
+    db.session.add(new_withdrawal)
+    db.session.commit()
+
+    # betrag vom guthaben des users abziehen
+    nutzer = db.session.query(Nutzer).\
+        filter(Nutzer.id == user_id).\
+        first()
+    nutzer.guthaben -= amount
+    db.session.commit()
+
+
 # Company
 
 def get_company_by_mail(email):
@@ -413,27 +453,6 @@ def get_hours_worked(betrieb_id):
     return hours_worked
 
 
-# Worker
-
-def get_worker_first(betrieb_id):
-    """get first worker in Worker."""
-    worker = Arbeiter.query.filter_by(betrieb=betrieb_id).first()
-    return worker
-
-
-def add_new_worker_to_company(nutzer_id, betrieb_id):
-    """
-    adds a new worker to Company.
-    """
-    new_worker = Arbeiter(
-        nutzer=nutzer_id,
-        betrieb=betrieb_id)
-    db.session.add(new_worker)
-    db.session.commit()
-
-
-# Means of production
-
 def get_means_of_prod(betrieb_id):
     """
     returns tuple of active and inactive means of prouction of company.
@@ -465,6 +484,25 @@ def get_means_of_prod(betrieb_id):
                label("prozent_gebraucht") == 100).all()
 
     return (produktionsmittel_aktiv, produktionsmittel_inaktiv)
+
+
+# Worker
+
+def get_worker_first(betrieb_id):
+    """get first worker in Worker."""
+    worker = Arbeiter.query.filter_by(betrieb=betrieb_id).first()
+    return worker
+
+
+def add_new_worker_to_company(nutzer_id, betrieb_id):
+    """
+    adds a new worker to Company.
+    """
+    new_worker = Arbeiter(
+        nutzer=nutzer_id,
+        betrieb=betrieb_id)
+    db.session.add(new_worker)
+    db.session.commit()
 
 
 # Angebote
