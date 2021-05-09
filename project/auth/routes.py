@@ -1,13 +1,12 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash, session
+from flask import Blueprint, render_template, redirect, url_for, request,\
+    flash, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required
 from ..models import Nutzer, Betriebe
 from .. import db
 
-
-
-auth = Blueprint('auth', __name__, template_folder='templates',
-    static_folder='static')
+auth = Blueprint(
+    'auth', __name__, template_folder='templates', static_folder='static')
 
 
 @auth.route('/')
@@ -21,7 +20,7 @@ def help():
     return render_template('start_hilfe.html')
 
 
-### Nutzer
+# Nutzer
 @auth.route('/nutzer/signup')
 def signup_nutzer():
     return render_template('signup_nutzer.html')
@@ -39,7 +38,9 @@ def signup_nutzer_post():
         flash('Email address already exists')
         return redirect(url_for('auth.signup_nutzer'))
 
-    new_user = Nutzer(email=email, name=name, password=generate_password_hash(password, method='sha256'))
+    new_user = Nutzer(
+        email=email, name=name,
+        password=generate_password_hash(password, method='sha256'))
 
     db.session.add(new_user)
     db.session.commit()
@@ -67,7 +68,7 @@ def login_nutzer_post():
     login_user(nutzer, remember=remember)
     return redirect(url_for('main_nutzer.profile'))
 
-## Betriebe
+# Betriebe
 @auth.route('/betriebe/login')
 def login_betriebe():
     return render_template('login_betriebe.html')
@@ -106,14 +107,16 @@ def signup_betriebe_post():
         flash('Email address already exists')
         return redirect(url_for('auth.signup_betriebe'))
 
-    new_betrieb = Betriebe(email=email, name=name, password=generate_password_hash(password, method='sha256'))
+    new_betrieb = Betriebe(
+        email=email, name=name,
+        password=generate_password_hash(password, method='sha256'))
     db.session.add(new_betrieb)
     db.session.commit()
 
     return redirect(url_for('auth.login_betriebe'))
 
 
-## logout
+# logout
 @auth.route('/zurueck')
 def zurueck():
     session["user_type"] = None

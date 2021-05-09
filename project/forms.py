@@ -1,4 +1,5 @@
-from wtforms import Form, StringField, SelectField, DecimalField
+from wtforms import Form, StringField, SelectField
+
 
 class ProductSearchForm(Form):
     choices = [('Name', 'Name'),
