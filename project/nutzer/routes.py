@@ -6,6 +6,7 @@ from flask import Blueprint, render_template, session,\
 from flask_login import login_required, current_user
 from ..models import Angebote
 from ..tables import KaeufeTable, Preiszusammensetzung
+from ..forms import ProductSearchForm
 from .. import sql
 
 
@@ -40,8 +41,29 @@ def meine_kaeufe():
 @main_nutzer.route('/nutzer/suchen', methods=['GET', 'POST'])
 @login_required
 def suchen():
-    suk = sql.SuchenUndKaufen()
-    return suk.such_vorgang("nutzer", request.form)
+    """search products in catalog."""
+    search_form = ProductSearchForm(request.form)
+    srch = sql.SearchProducts()
+    results = srch.get_angebote_aktiv()
+
+    if request.method == 'POST':
+        results = []
+        search_string = search_form.data['search']
+        search_field = search_form.data['select']  # Name, Beschr., Kategorie
+
+        if search_string:
+            results = srch.get_angebote_aktiv(search_string, search_field)
+        else:
+            results = srch.get_angebote_aktiv()
+
+        if not results:
+            flash('Keine Ergebnisse!')
+        else:
+            return render_template(
+                'suchen_nutzer.html', form=search_form, results=results)
+
+    return render_template(
+        'suchen_nutzer.html', form=search_form, results=results)
 
 
 @main_nutzer.route('/nutzer/details/<int:id>', methods=['GET', 'POST'])
@@ -54,8 +76,8 @@ def details(id):
     dot = comp.create_dots(cols_dict, table_of_composition)
     piped = dot.pipe().decode('utf-8')
     table_preiszus = Preiszusammensetzung(table_of_composition)
-    suk = sql.SuchenUndKaufen()
-    angebot_ = suk.get_angebote().filter(Angebote.id == id).one()
+    srch = sql.SearchProducts()
+    angebot_ = srch.get_angebote().filter(Angebote.id == id).one()
     preise = (angebot_.preis, angebot_.koop_preis)
 
     if request.method == 'POST':
@@ -71,21 +93,17 @@ def details(id):
 @main_nutzer.route('/nutzer/kaufen/<int:id>', methods=['GET', 'POST'])
 @login_required
 def kaufen(id):
-    angebot = sql.get_angebot_by_id(id)
-    suk = sql.SuchenUndKaufen()
-    if angebot:
-        if request.method == 'POST':
-            suk.kauf_vorgang(
-                kaufender_type="nutzer", angebot=angebot,
-                kaeufer_id=current_user.id)
-            flash(f"Kauf von '{angebot.name}' erfolgreich!")
-            return redirect('/nutzer/suchen')
+    srch = sql.SearchProducts()
+    angebot = srch.get_angebot_by_id(id)
+    if request.method == 'POST':  # if user buys
+        sql.kaufen(
+            kaufender_type="nutzer",
+            angebot=sql.get_angebot_by_id(id),
+            kaeufer_id=current_user.id)
+        flash(f"Kauf von '{angebot.angebot_name}' erfolgreich!")
+        return redirect('/nutzer/suchen')
 
-        angebot = suk.get_angebote().\
-            filter(Angebote.aktiv == True, Angebote.id == id).first()
-        return render_template('kaufen_nutzer.html', angebot=angebot)
-    else:
-        return 'Error loading #{id}'.format(id=id)
+    return render_template('kaufen_nutzer.html', angebot=angebot)
 
 
 @main_nutzer.route('/nutzer/profile')

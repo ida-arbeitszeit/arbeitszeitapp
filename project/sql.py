@@ -6,31 +6,35 @@ from graphviz import Graph
 from sqlalchemy.orm import aliased
 
 import datetime
-from flask import render_template, redirect, request, flash
-from .forms import ProductSearchForm
 from .models import KooperationenMitglieder
 from sqlalchemy.sql import case
 
 
-class SuchenUndKaufen():
-    """All SQL-requests around searching and buying products in the catalog."""
+class SearchProducts():
+    """
+    All SQL-requests around searching in the catalog.
+    Returns non-mutable _collections.result-Objects.
+    """
 
     def get_angebote(self):
         """
-        returns all products available (grouped results, active or not),
+        returns BaseQuery object with all products available
+        (grouped results, active or not),
         with several columns, including the coop-price.
         """
 
         km = aliased(KooperationenMitglieder)
         km2 = aliased(KooperationenMitglieder)
 
-        # AS_SCALAR, NOT SUBQUERY!
-        subq = db.session.query(func.avg(Angebote.preis)).\
+        # subquery returns koop-preis
+        subq = db.session.query(
+            func.avg(Angebote.preis)).\
             select_from(km).\
             join(Angebote, km.mitglied == Angebote.id).\
             filter(Angebote.aktiv == True).\
             filter(km.kooperation == km2.kooperation).\
-            group_by(km.kooperation).as_scalar()
+            group_by(km.kooperation).\
+            as_scalar()
 
         qry = db.session.query(
             func.min(Angebote.id).label("id"),
@@ -38,9 +42,13 @@ class SuchenUndKaufen():
             func.min(Angebote.p_kosten).label("p_kosten"),
             func.min(Angebote.v_kosten).label("v_kosten"),
             Betriebe.name.label("betrieb_name"),
-            Betriebe.id.label("betrieb_id"), Betriebe.email,
-            Angebote.beschreibung, Angebote.kategorie, Angebote.preis,
-            func.count(Angebote.id).label("vorhanden"), km2.kooperation,
+            Betriebe.id.label("betrieb_id"),
+            Betriebe.email,
+            Angebote.beschreibung,
+            Angebote.kategorie,
+            Angebote.preis,
+            func.count(Angebote.id).label("vorhanden"),
+            km2.kooperation,
             case([(km2.kooperation == None, Angebote.preis), ], else_=subq).
             label("koop_preis")
             ).\
@@ -54,111 +62,33 @@ class SuchenUndKaufen():
 
         return qry
 
-    def such_vorgang(self, suchender_type, request_form):
+    def get_angebot_by_id(self, angebote_id):
+        """returns one angebot filtered by angebote_id."""
+        return self.get_angebote().filter(Angebote.id == angebote_id).one()
+
+    def get_angebote_aktiv(self, search_string="", search_field=""):
         """
-        returns html pages with search results
+        returns all aktive angebote.
+        search string and search field may be optionally specified.
         """
+        if search_string or search_field:
+            if search_field == 'Name':
+                angebote = self.get_angebote().filter(
+                    Angebote.name.contains(search_string)).\
+                    all()
 
-        if suchender_type == "betriebe":
-            redirect_dir = '/betriebe/suchen'
-            render_dir = 'suchen_betriebe.html'
-        elif suchender_type == "nutzer":
-            redirect_dir = '/nutzer/suchen'
-            render_dir = 'suchen_nutzer.html'
-
-        search = ProductSearchForm(request_form)
-
-        qry = self.get_angebote().filter(Angebote.aktiv == True)
-        results = qry.all()
-
-        if request.method == 'POST':
-            results = []
-            search_string = search.data['search']
-
-            if search_string:
-                if search.data['select'] == 'Name':
-                    results = qry.filter(
-                        Angebote.name.contains(search_string)).\
+            elif search_field == 'Beschreibung':
+                angebote = self.get_angebote().filter(
+                    Angebote.beschreibung.contains(search_string)).\
                         all()
 
-                elif search.data['select'] == 'Beschreibung':
-                    results = qry.filter(
-                        Angebote.beschreibung.contains(search_string)).\
-                            all()
-
-                elif search.data['select'] == 'Kategorie':
-                    results = qry.filter(
-                        Angebote.kategorie.contains(search_string)).\
-                            all()
-
-                else:
-                    results = qry.all()
-            else:
-                results = qry.all()
-
-            if not results:
-                flash('Keine Ergebnisse!')
-                return redirect(redirect_dir)
-            else:
-                return render_template(
-                    render_dir, form=search, results=results)
-
-        return render_template(render_dir, form=search, results=results)
-
-    def kauf_vorgang(self, kaufender_type, angebot, kaeufer_id):
-        """
-        buy product.
-        """
-        # aktuellen (koop-)preis erhalten:
-        koop = db.session.query(KooperationenMitglieder).join(Angebote).\
-            filter(
-                Angebote.id == angebot.id, Angebote.aktiv == angebot.aktiv).\
-            first()
-        if not koop:
-            preis = angebot.preis
+            elif search_field == 'Kategorie':
+                angebote = self.get_angebote().filter(
+                    Angebote.kategorie.contains(search_string)).\
+                        all()
         else:
-            preis = db.session.query(func.avg(Angebote.preis)).\
-                select_from(KooperationenMitglieder).\
-                join(Angebote).\
-                filter(Angebote.aktiv == True).\
-                filter(
-                    KooperationenMitglieder.kooperation == koop.kooperation).\
-                group_by(KooperationenMitglieder.kooperation).scalar()
-
-        # kauefe aktualisieren
-        if kaufender_type == "betriebe":
-            kaufender = Betriebe
-            new_kauf = Kaeufe(kauf_date=datetime.datetime.now(),
-                              angebot=angebot.id,
-                              type_nutzer=False, betrieb=kaeufer_id,
-                              nutzer=None, kaufpreis=preis)
-            db.session.add(new_kauf)
-            db.session.commit()
-        elif kaufender_type == "nutzer":
-            kaufender = Nutzer
-            new_kauf = Kaeufe(kauf_date=datetime.datetime.now(),
-                              angebot=angebot.id,
-                              type_nutzer=True, betrieb=None,
-                              nutzer=kaeufer_id, kaufpreis=preis)
-            db.session.add(new_kauf)
-            db.session.commit()
-
-        # angebote aktiv = False
-        angebot.aktiv = False
-        db.session.commit()
-
-        # guthaben käufer verringern
-        kaeufer = db.session.query(kaufender).\
-            filter(kaufender.id == kaeufer_id).first()
-        kaeufer.guthaben -= preis
-        db.session.commit()
-
-        # guthaben des anbietenden betriebes erhöhen
-        anbietender_betrieb_id = angebot.betrieb
-        anbietender_betrieb = Betriebe.query.filter_by(
-            id=anbietender_betrieb_id).first()
-        anbietender_betrieb.guthaben += preis  # angebot.p_kosten
-        db.session.commit()
+            angebote = self.get_angebote().filter(Angebote.aktiv == True).all()
+        return angebote
 
 
 class CompositionOfPrices():
@@ -332,6 +262,55 @@ Kosten: {current_kosten} Std.")
                                     f"{current_angebot}_{cnt}")
                                 break  # only one match is enough
         return dot
+
+
+# Kaufen
+
+def kaufen(kaufender_type, angebot, kaeufer_id):
+    """
+    buy product.
+    """
+    # aktuellen (koop-)preis erhalten:
+    preis = SearchProducts().get_angebot_by_id(angebot.id).koop_preis
+
+    # kauefe aktualisieren
+    if kaufender_type == "betriebe":
+        kaufender = Betriebe
+        new_kauf = Kaeufe(kauf_date=datetime.datetime.now(),
+                          angebot=angebot.id,
+                          type_nutzer=False,
+                          betrieb=kaeufer_id,
+                          nutzer=None,
+                          kaufpreis=preis)
+        db.session.add(new_kauf)
+        db.session.commit()
+    elif kaufender_type == "nutzer":
+        kaufender = Nutzer
+        new_kauf = Kaeufe(kauf_date=datetime.datetime.now(),
+                          angebot=angebot.id,
+                          type_nutzer=True,
+                          betrieb=None,
+                          nutzer=kaeufer_id,
+                          kaufpreis=preis)
+        db.session.add(new_kauf)
+        db.session.commit()
+
+    # angebote aktiv = False
+    angebot.aktiv = False
+    db.session.commit()
+
+    # guthaben käufer verringern
+    kaeufer = db.session.query(kaufender).\
+        filter(kaufender.id == kaeufer_id).first()
+    kaeufer.guthaben -= preis
+    db.session.commit()
+
+    # guthaben des anbietenden betriebes erhöhen
+    anbietender_betrieb_id = angebot.betrieb
+    anbietender_betrieb = Betriebe.query.filter_by(
+        id=anbietender_betrieb_id).first()
+    anbietender_betrieb.guthaben += preis  # angebot.p_kosten
+    db.session.commit()
 
 
 # User
