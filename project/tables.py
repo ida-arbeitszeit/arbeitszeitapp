@@ -54,12 +54,12 @@ class KaeufeTable(Table):
     preis = Col('Preis')
 
 
-class ArbeiterTable1(Table):
+class WorkersTable(Table):
     id = Col('Nutzer-Id')
     name = Col('Name')
 
 
-class ArbeiterTable2(Table):
+class HoursTable(Table):
     id = Col('Nutzer-Id')
     name = Col('Name')
     summe_stunden = Col('Arbeitsstunden')

@@ -115,7 +115,7 @@
                       <td>{{ prod_mittel.id }}</td>
                       <td>{{ prod_mittel.name }}</td>
                       <td>{{ prod_mittel.beschreibung }}</td>
-                      <td>{{ prod_mittel.kaufpreis|round(2) }}</td>
+                      <td>{{ prod_mittel.kaufpreis }}</td>
                       <td>{{ prod_mittel.prozent_gebraucht }}</td>
                       <td><input class="input" type="number" name="id_{{ prod_mittel.id }}",\
                         value="0", min="0", step="0.5" max="{{ 100 - prod_mittel.prozent_gebraucht }}">
