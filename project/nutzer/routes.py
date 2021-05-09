@@ -8,9 +8,9 @@ from ..extensions import db
 from ..models import Angebote, Kaeufe, Nutzer,\
     Betriebe, Arbeiter, Auszahlungen
 from ..tables import KaeufeTable, Preiszusammensetzung
-from .. import composition_of_prices
 from .. import suchen_und_kaufen
 from sqlalchemy.sql import func
+from .. import sql
 
 
 main_nutzer = Blueprint(
@@ -59,10 +59,10 @@ def suchen():
 @login_required
 def details(id):
     """show details of selected product."""
-    table_of_composition = composition_of_prices.get_table_of_composition(id)
-    cols_dict = composition_of_prices.\
-        get_positions_in_table(table_of_composition)
-    dot = composition_of_prices.create_dots(cols_dict, table_of_composition)
+    comp = sql.CompositionOfPrices()
+    table_of_composition = comp.get_table_of_composition(id)
+    cols_dict = comp.get_positions_in_table(table_of_composition)
+    dot = comp.create_dots(cols_dict, table_of_composition)
     piped = dot.pipe().decode('utf-8')
     table_preiszus = Preiszusammensetzung(table_of_composition)
     angebot_ = suchen_und_kaufen.get_angebote().filter(Angebote.id == id).one()
