@@ -1,16 +1,17 @@
 import datetime
-from .. import db
+from ..extensions import db
 from decimal import Decimal
 from flask import Blueprint, render_template, session, redirect, url_for,\
     request, flash
 from flask_login import login_required, current_user
 from sqlalchemy.sql import func
 from ..models import Angebote, Kaeufe, Betriebe, Nutzer, Produktionsmittel,\
-    Arbeit, Arbeiter, Auszahlungen, Kooperationen, KooperationenMitglieder
-from ..tables import ProduktionsmittelTable, ArbeiterTable1, ArbeiterTable2,\
+    Arbeit, Auszahlungen, Kooperationen, KooperationenMitglieder
+from ..tables import ProduktionsmittelTable, WorkersTable, HoursTable,\
     Preiszusammensetzung
-from .. import composition_of_prices
-from .. import suchen_und_kaufen
+from ..forms import ProductSearchForm
+
+from .. import sql
 
 main_betriebe = Blueprint('main_betriebe', __name__,
                           template_folder='templates', static_folder='static')
@@ -21,7 +22,7 @@ main_betriebe = Blueprint('main_betriebe', __name__,
 def profile():
     user_type = session["user_type"]
     if user_type == "betrieb":
-        arbeiter = Arbeiter.query.filter_by(betrieb=current_user.id).first()
+        arbeiter = sql.get_worker_first(current_user.id)
         if arbeiter:
             having_workers = True
         else:
@@ -35,80 +36,46 @@ def profile():
 @main_betriebe.route('/betriebe/arbeit', methods=['GET', 'POST'])
 @login_required
 def arbeit():
-    arbeiter1 = db.session.query(Nutzer.id, Nutzer.name).\
-        select_from(Arbeiter).join(Nutzer).\
-        filter(Arbeiter.betrieb == current_user.id).group_by(Nutzer.id).all()
-    table1 = ArbeiterTable1(arbeiter1, no_items='(Noch keine Mitarbeiter.)')
+    """shows workers and worked hours."""
+    workers = sql.get_workers(current_user.id)
+    workers_table = WorkersTable(
+        workers, no_items='(Noch keine Mitarbeiter.)')
 
-    arbeiter2 = db.session.query(
-        Nutzer.id, Nutzer.name,
-        func.concat(func.sum(Arbeit.stunden), " Std.").
-        label('summe_stunden')
-        ).select_from(Angebote).\
-        filter(Angebote.betrieb == current_user.id).\
-        join(Arbeit).join(Nutzer).group_by(Nutzer.id).\
-        order_by(func.sum(Arbeit.stunden).desc()).all()
-    table2 = ArbeiterTable2(arbeiter2,
-                            no_items='(Noch keine Stunden gearbeitet.)')
-    fik = Betriebe.query.filter_by(id=current_user.id).first().fik
+    hours_worked = sql.get_hours_worked(current_user.id)
+    hours_table = HoursTable(
+        hours_worked, no_items='(Noch keine Stunden gearbeitet.)')
 
-    if request.method == 'POST':
+    if request.method == 'POST':  # (add worker to company)
         # check if nutzer exists, if not flash warning
-        if not Nutzer.query.filter_by(id=request.form['nutzer']).first():
+        if not sql.get_user_by_id(request.form['nutzer']):
             flash("Nutzer existiert nicht.")
             return redirect(url_for('main_betriebe.arbeit'))
 
-        # check if nutzer is already arbeiter in betrieb
-        req_arbeiter = Arbeiter.query.\
-            filter_by(nutzer=request.form['nutzer'],
-                      betrieb=current_user.id).first()
-        # if so, flash warning
+        # check if user already works in company
+        req_arbeiter = sql.get_worker_in_company(
+            request.form['nutzer'], current_user.id)
         if req_arbeiter:
             flash("Nutzer ist bereits in diesem Betrieb beschäftigt.")
         else:
-            new_arbeiter = Arbeiter(nutzer=request.form['nutzer'],
-                                    betrieb=current_user.id)
-            db.session.add(new_arbeiter)
-            db.session.commit()
+            sql.add_new_worker_to_company(
+                request.form['nutzer'], current_user.id)
+
         return redirect(url_for('main_betriebe.arbeit'))
 
-    return render_template("arbeit.html", table1=table1, table2=table2,
-                           fik=fik)
+    return render_template(
+        "arbeit.html", workers_table=workers_table, hours_table=hours_table)
 
 
 @main_betriebe.route('/betriebe/produktionsmittel')
 @login_required
 def produktionsmittel():
-    produktionsmittel_qry = db.session.query(
-        Kaeufe.id, Angebote.name, Angebote.beschreibung,
-        func.concat(func.round(Kaeufe.kaufpreis, 2), " Std.").
-        label("kaufpreis"),
-        func.concat(func.round(
-            func.coalesce(
-                func.sum(Produktionsmittel.prozent_gebraucht), 0), 2), " %").
-        label("prozent_gebraucht"))\
-        .select_from(Kaeufe)\
-        .filter(Kaeufe.betrieb == current_user.id).\
-        outerjoin(Produktionsmittel,
-                  Kaeufe.id == Produktionsmittel.kauf).\
-        join(Angebote, Kaeufe.angebot == Angebote.id).\
-        group_by(Kaeufe, Angebote, Produktionsmittel.kauf)
-
-    produktionsmittel_aktiv = produktionsmittel_qry.\
-        having(func.coalesce(func.sum(Produktionsmittel.prozent_gebraucht).
-               label("prozent_gebraucht"), 0).
-               label("prozent_gebraucht") < 100).all()
-    produktionsmittel_inaktiv = produktionsmittel_qry.\
-        having(func.coalesce(func.sum(Produktionsmittel.prozent_gebraucht).
-               label("prozent_gebraucht"), 0).
-               label("prozent_gebraucht") == 100).all()
+    """shows means of production."""
+    mop_aktiv, mop_inaktiv = sql.get_means_of_prod(current_user.id)
 
     table_aktiv = ProduktionsmittelTable(
-        produktionsmittel_aktiv,
-        no_items="(Keine Produktionsmittel vorhanden.)")
+        mop_aktiv, no_items="(Keine Produktionsmittel vorhanden.)")
     table_inaktiv = ProduktionsmittelTable(
-        produktionsmittel_inaktiv,
-        no_items="(Noch keine Produktionsmittel verbraucht.)")
+        mop_inaktiv, no_items="(Noch keine Produktionsmittel verbraucht.)")
 
     return render_template('produktionsmittel.html', table_aktiv=table_aktiv,
                            table_inaktiv=table_inaktiv)
@@ -117,20 +84,43 @@ def produktionsmittel():
 @main_betriebe.route('/betriebe/suchen', methods=['GET', 'POST'])
 @login_required
 def suchen():
-    return suchen_und_kaufen.such_vorgang("betriebe", request.form)
+    """search products in catalog."""
+    search_form = ProductSearchForm(request.form)
+    srch = sql.SearchProducts()
+    results = srch.get_angebote_aktiv()
+
+    if request.method == 'POST':
+        results = []
+        search_string = search_form.data['search']
+        search_field = search_form.data['select']  # Name, Beschr., Kategorie
+
+        if search_string:
+            results = srch.get_angebote_aktiv(search_string, search_field)
+        else:
+            results = srch.get_angebote_aktiv()
+
+        if not results:
+            flash('Keine Ergebnisse!')
+        else:
+            return render_template(
+                'suchen_betriebe.html', form=search_form, results=results)
+
+    return render_template(
+        'suchen_betriebe.html', form=search_form, results=results)
 
 
 @main_betriebe.route('/betriebe/details/<int:id>', methods=['GET', 'POST'])
 @login_required
 def details(id):
     """show details of selected product."""
-    table_of_composition = composition_of_prices.get_table_of_composition(id)
-    cols_dict = composition_of_prices.\
-        get_positions_in_table(table_of_composition)
-    dot = composition_of_prices.create_dots(cols_dict, table_of_composition)
+    comp = sql.CompositionOfPrices()
+    table_of_composition = comp.get_table_of_composition(id)
+    cols_dict = comp.get_positions_in_table(table_of_composition)
+    dot = comp.create_dots(cols_dict, table_of_composition)
     piped = dot.pipe().decode('utf-8')
     table_preiszus = Preiszusammensetzung(table_of_composition)
-    angebot_ = suchen_und_kaufen.get_angebote().filter(Angebote.id == id).one()
+    srch = sql.SearchProducts()
+    angebot_ = srch.get_angebot_by_id(id)
     preise = (angebot_.preis, angebot_.koop_preis)
 
     if request.method == 'POST':
@@ -144,23 +134,17 @@ def details(id):
 @main_betriebe.route('/betriebe/kaufen/<int:id>', methods=['GET', 'POST'])
 @login_required
 def kaufen(id):
-    qry = db.session.query(Angebote).filter(
-                Angebote.id == id)
-    angebot = qry.first()
+    srch = sql.SearchProducts()
+    angebot = srch.get_angebot_by_id(id)
+    if request.method == 'POST':  # if company buys
+        sql.kaufen(
+            kaufender_type="betriebe",
+            angebot=sql.get_angebot_by_id(id),
+            kaeufer_id=current_user.id)
+        flash(f"Kauf von '{angebot.angebot_name}' erfolgreich!")
+        return redirect('/betriebe/suchen')
 
-    if angebot:
-        if request.method == 'POST':
-            suchen_und_kaufen.\
-                kauf_vorgang(kaufender_type="betriebe", angebot=angebot,
-                             kaeufer_id=current_user.id)
-            flash(f"Kauf von '{angebot.name}' erfolgreich!")
-            return redirect('/betriebe/suchen')
-
-        angebot = suchen_und_kaufen.get_angebote().\
-            filter(Angebote.aktiv == True, Angebote.id == id).first()
-        return render_template('kaufen_betriebe.html', angebot=angebot)
-    else:
-        return 'Error loading #{id}'.format(id=id)
+    return render_template('kaufen_betriebe.html', angebot=angebot)
 
 
 @main_betriebe.route('/betriebe/anbieten', methods=['GET', 'POST'])
@@ -169,32 +153,8 @@ def neues_angebot():
     """
     Ein neues Angebot hinzufügen
     """
-    produktionsmittel_aktiv = db.session.query(
-        Kaeufe.id,
-        Angebote.name,
-        Angebote.beschreibung,
-        Kaeufe.kaufpreis,
-        func.coalesce(func.sum(Produktionsmittel.prozent_gebraucht).
-                      label("prozent_gebraucht"), 0).
-        label("prozent_gebraucht")).\
-        select_from(Kaeufe).\
-        filter(Kaeufe.betrieb == current_user.id).outerjoin(
-            Produktionsmittel,
-            Kaeufe.id == Produktionsmittel.kauf).\
-        join(Angebote, Kaeufe.angebot == Angebote.id).\
-        group_by(Kaeufe, Angebote, Produktionsmittel.kauf).\
-        having(func.coalesce(
-            func.sum(Produktionsmittel.prozent_gebraucht).
-            label("prozent_gebraucht"), 0).
-            label("prozent_gebraucht") < 100)\
-        .all()
-
-    arbeiter_all = db.session.\
-        query(Nutzer.id, Nutzer.name).\
-        select_from(Arbeiter).\
-        join(Nutzer, Arbeiter.nutzer == Nutzer.id).\
-        filter(Arbeiter.betrieb == current_user.id).\
-        all()
+    produktionsmittel_aktiv, _ = sql.get_means_of_prod(current_user.id)
+    arbeiter_all = sql.get_workers(current_user.id)
 
     if request.method == 'POST':
         quantity = int(request.form["quantity"])
@@ -311,7 +271,8 @@ def neues_angebot():
 @main_betriebe.route('/betriebe/meine_angebote')
 @login_required
 def meine_angebote():
-    qry = suchen_und_kaufen.get_angebote()
+    srch = sql.SearchProducts()
+    qry = srch.get_angebote()
     aktuelle_angebote = qry.filter(
         Angebote.aktiv == True, Betriebe.id == current_user.id).all()
     vergangene_angebote = qry.filter(
@@ -354,7 +315,7 @@ def angebot_verkaufen():
             else:
                 kaufender_type = "nutzer" if auszahlung.type_nutzer\
                                           else "betriebe"
-                suchen_und_kaufen.kauf_vorgang(
+                sql.kaufen(
                     kaufender_type=kaufender_type,
                     angebot=angebot,
                     kaeufer_id=auszahlung.nutzer)
