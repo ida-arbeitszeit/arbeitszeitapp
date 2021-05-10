@@ -12,6 +12,7 @@ from ..tables import ProduktionsmittelTable, WorkersTable, HoursTable,\
 from ..forms import ProductSearchForm
 
 from .. import sql
+from ..economy import company
 
 main_betriebe = Blueprint('main_betriebe', __name__,
                           template_folder='templates', static_folder='static')
@@ -57,8 +58,7 @@ def arbeit():
         if req_arbeiter:
             flash("Nutzer ist bereits in diesem Betrieb beschäftigt.")
         else:
-            sql.add_new_worker_to_company(
-                request.form['nutzer'], current_user.id)
+            company.add_new_worker(request.form['nutzer'], current_user.id)
 
         return redirect(url_for('main_betriebe.arbeit'))
 
@@ -137,10 +137,8 @@ def kaufen(id):
     srch = sql.SearchProducts()
     angebot = srch.get_angebot_by_id(id)
     if request.method == 'POST':  # if company buys
-        sql.kaufen(
-            kaufender_type="betriebe",
-            angebot=sql.get_angebot_by_id(id),
-            kaeufer_id=current_user.id)
+        company.buy_product(
+            "betriebe", sql.get_angebot_by_id(id), current_user.id)
         flash(f"Kauf von '{angebot.angebot_name}' erfolgreich!")
         return redirect('/betriebe/suchen')
 
@@ -222,10 +220,13 @@ def neues_angebot():
         for quant in range(quantity):
             new_angebot = Angebote(
                 name=request.form["name"],
-                cr_date=current_time,  betrieb=current_user.id,
+                cr_date=current_time,
+                betrieb=current_user.id,
                 beschreibung=request.form["beschreibung"],
-                kategorie=request.form["kategorie"], p_kosten=kosten_pm,
-                v_kosten=kosten_arbeit, preis=kosten_arbeit + kosten_pm)
+                kategorie=request.form["kategorie"],
+                p_kosten=kosten_pm,
+                v_kosten=kosten_arbeit,
+                preis=kosten_arbeit + kosten_pm)
             db.session.add(new_angebot)
             db.session.commit()
 
@@ -233,8 +234,10 @@ def neues_angebot():
             if arbeit_dict_not_zero:
                 assert len(nutzer_id_list) == len(stunden_list)
                 for count, i in enumerate(nutzer_id_list):
-                    new_arbeit = Arbeit(angebot=new_angebot.id, nutzer=i,
-                                        stunden=stunden_list[count] / quantity)
+                    new_arbeit = Arbeit(
+                        angebot=new_angebot.id,
+                        nutzer=i,
+                        stunden=stunden_list[count] / quantity)
                     db.session.add(new_arbeit)
                     # guthaben der arbeiter erhöhen
                     # TO DO: check if it's inefficient
@@ -264,8 +267,10 @@ def neues_angebot():
              "Nachbarschaftshilfe", "Unterricht und Kurse"]
 
     return render_template(
-        'neues_angebot.html', produktionsmittel_aktiv=produktionsmittel_aktiv,
-        arbeiter_all=arbeiter_all, categ=categ)
+        'neues_angebot.html',
+        produktionsmittel_aktiv=produktionsmittel_aktiv,
+        arbeiter_all=arbeiter_all,
+        categ=categ)
 
 
 @main_betriebe.route('/betriebe/meine_angebote')
@@ -288,8 +293,7 @@ def angebot_loeschen():
     angebot_id = request.args.get("id")
     angebot = Angebote.query.filter_by(id=angebot_id).first()
     if request.method == 'POST':
-        angebot.aktiv = False
-        db.session.commit()
+        company.delete_product(angebot_id)
         flash("Löschen des Angebots erfolgreich.")
         return redirect(url_for('main_betriebe.meine_angebote'))
 

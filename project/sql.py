@@ -1,13 +1,10 @@
+import datetime
 from .models import Nutzer, Betriebe, Arbeiter, Angebote, Arbeit,\
-    Produktionsmittel, Kaeufe, Auszahlungen
-from sqlalchemy.sql import func
+    Produktionsmittel, Kaeufe, Auszahlungen, KooperationenMitglieder
+from sqlalchemy.sql import func, case
 from .extensions import db
 from graphviz import Graph
 from sqlalchemy.orm import aliased
-
-import datetime
-from .models import KooperationenMitglieder
-from sqlalchemy.sql import case
 
 
 class SearchProducts():
@@ -465,6 +462,13 @@ def get_means_of_prod(betrieb_id):
     return (produktionsmittel_aktiv, produktionsmittel_inaktiv)
 
 
+def delete_product(angebot_id):
+    """delete product."""
+    angebot = Angebote.query.filter_by(id=angebot_id).first()
+    angebot.aktiv = False
+    db.session.commit()
+
+
 # Worker
 
 def get_worker_first(betrieb_id):
@@ -484,7 +488,7 @@ def add_new_worker_to_company(nutzer_id, betrieb_id):
     db.session.commit()
 
 
-# Angebote
+# Search Angebote
 
 def get_angebot_by_id(id):
     """get first angebot, filtered by id"""

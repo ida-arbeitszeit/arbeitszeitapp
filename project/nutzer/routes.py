@@ -4,7 +4,6 @@ from decimal import Decimal
 from flask import Blueprint, render_template, session,\
     redirect, url_for, request, flash
 from flask_login import login_required, current_user
-from ..models import Angebote
 from ..tables import KaeufeTable, Preiszusammensetzung
 from ..forms import ProductSearchForm
 from .. import sql
@@ -77,7 +76,7 @@ def details(id):
     piped = dot.pipe().decode('utf-8')
     table_preiszus = Preiszusammensetzung(table_of_composition)
     srch = sql.SearchProducts()
-    angebot_ = srch.get_angebote().filter(Angebote.id == id).one()
+    angebot_ = srch.get_angebot_by_id(id)
     preise = (angebot_.preis, angebot_.koop_preis)
 
     if request.method == 'POST':
