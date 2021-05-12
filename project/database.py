@@ -483,7 +483,7 @@ def delete_product(angebot_id):
 
 # Worker
 
-def get_first_worker(company_id):
+def get_first_worker(betrieb_id):
     """get first worker in Worker."""
     worker = Arbeiter.query.filter_by(company=company_id).first()
     return worker
