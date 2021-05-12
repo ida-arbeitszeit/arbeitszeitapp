@@ -467,7 +467,7 @@ def get_means_of_prod(betrieb_id):
 
 # Worker
 
-def get_worker_first(betrieb_id):
+def get_first_worker(betrieb_id):
     """get first worker in Worker."""
     worker = Arbeiter.query.filter_by(betrieb=betrieb_id).first()
     return worker

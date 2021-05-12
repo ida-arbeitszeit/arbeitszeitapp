@@ -22,7 +22,7 @@ main_betriebe = Blueprint('main_betriebe', __name__,
 def profile():
     user_type = session["user_type"]
     if user_type == "betrieb":
-        arbeiter = sql.get_worker_first(current_user.id)
+        arbeiter = sql.get_first_worker(current_user.id)
         if arbeiter:
             having_workers = True
         else:
@@ -70,15 +70,18 @@ def arbeit():
 @login_required
 def produktionsmittel():
     """shows means of production."""
-    mop_aktiv, mop_inaktiv = sql.get_means_of_prod(current_user.id)
+    means_of_production_in_use, means_of_production_consumed = sql.\
+        get_means_of_prod(current_user.id)
 
-    table_aktiv = ProduktionsmittelTable(
-        mop_aktiv, no_items="(Keine Produktionsmittel vorhanden.)")
-    table_inaktiv = ProduktionsmittelTable(
-        mop_inaktiv, no_items="(Noch keine Produktionsmittel verbraucht.)")
+    table_in_use = ProduktionsmittelTable(
+        means_of_production_in_use,
+        no_items="(Keine Produktionsmittel vorhanden.)")
+    table_consumed = ProduktionsmittelTable(
+        means_of_production_consumed,
+        no_items="(Noch keine Produktionsmittel verbraucht.)")
 
-    return render_template('produktionsmittel.html', table_aktiv=table_aktiv,
-                           table_inaktiv=table_inaktiv)
+    return render_template('produktionsmittel.html', table_aktiv=table_in_use,
+                           table_inaktiv=table_consumed)
 
 
 @main_betriebe.route('/betriebe/suchen', methods=['GET', 'POST'])
