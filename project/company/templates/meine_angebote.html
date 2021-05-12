@@ -1,4 +1,4 @@
-{% extends "base_betriebe.html" %}
+{% extends "base_company.html" %}
 
 {% block content2 %}
 
@@ -55,9 +55,9 @@
             <td>{{ res.koop_preis|round(2) }} Std.
             </td>
             <td>{{ res.vorhanden }}</td>
-            <td><a href="{{ url_for('main_betriebe.kooperieren', id=res.id) }}"><u>Koop.</u></a></td>
-            <td><a href="{{ url_for('main_betriebe.angebot_loeschen', id=res.id) }}"><u>Del.</u></a></td>
-            <td><a href="{{ url_for('main_betriebe.angebot_verkaufen', id=res.id) }}"><u>Offl.-Verk.</u></a>
+            <td><a href="{{ url_for('main_company.cooperate', id=res.id) }}"><u>Koop.</u></a></td>
+            <td><a href="{{ url_for('main_company.delete_offer', id=res.id) }}"><u>Del.</u></a></td>
+            <td><a href="{{ url_for('main_company.sell_offer', id=res.id) }}"><u>Offl.-Verk.</u></a>
             </td>
           </tr>
         {% endfor %}

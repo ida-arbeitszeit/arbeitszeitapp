@@ -1,4 +1,4 @@
-{% extends "base_betriebe.html" %}
+{% extends "base_company.html" %}
 
 {% block content2 %}
 
@@ -20,7 +20,7 @@
   <form method="post">
     <input class="button is-primary" type="submit" value="Kauf bestätigen">
 
-    <a class="button is-light" href="{{  url_for('main_betriebe.suchen') }}">
+    <a class="button is-light" href="{{  url_for('main_company.suchen') }}">
       Abbrechen
     </a>
   </form>

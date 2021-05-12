@@ -25,32 +25,32 @@
                       </a>
 
                       <div class="navbar-dropdown">
-                          <a href="{{ url_for('main_betriebe.suchen') }}" class="navbar-item">
+                          <a href="{{ url_for('main_company.suchen') }}" class="navbar-item">
                               Angebote suchen
                           </a>
-                          <a href="{{ url_for('main_betriebe.meine_angebote') }}" class="navbar-item">
+                          <a href="{{ url_for('main_company.meine_angebote') }}" class="navbar-item">
                             Meine Angebote
                           </a>
-                          <a href="{{ url_for('main_betriebe.neues_angebot') }}" class="navbar-item">
+                          <a href="{{ url_for('main_company.neues_angebot') }}" class="navbar-item">
                             Neues Angebot erstellen
                           </a>
                       </div>
                 </div>
 
 
-                <a href="{{ url_for('main_betriebe.produktionsmittel') }}" class="navbar-item">
+                <a href="{{ url_for('main_company.produktionsmittel') }}" class="navbar-item">
                     Produktionsmittel
                 </a>
 
-                <a href="{{ url_for('main_betriebe.arbeit') }}" class="navbar-item">
+                <a href="{{ url_for('main_company.arbeit') }}" class="navbar-item">
                     Arbeit
                 </a>
 
-                <a href="{{ url_for('main_betriebe.kooperieren') }}" class="navbar-item">
+                <a href="{{ url_for('main_company.cooperate') }}" class="navbar-item">
                     Kooperation
                 </a>
 
-                <a href="{{ url_for('main_betriebe.profile') }}" class="navbar-item">
+                <a href="{{ url_for('main_company.profile') }}" class="navbar-item">
                     Meine Daten
                 </a>
                 {% endif %}
@@ -60,10 +60,10 @@
                 <div class="navbar-item">
                   <div class="buttons">
                     {% if not current_user.is_authenticated %}
-                    <a class="button" href="{{ url_for('auth.login_betriebe') }}">
+                    <a class="button" href="{{ url_for('auth.login_company') }}">
                         Anmelden
                     </a>
-                    <a class="button" href="{{ url_for('auth.signup_betriebe') }}">
+                    <a class="button" href="{{ url_for('auth.signup_company') }}">
                         Registrieren
                     </a>
                     <a class="button" href="{{ url_for('auth.zurueck') }}">
@@ -74,7 +74,7 @@
                     <a class="button" href="{{ url_for('auth.logout') }}">
                         Logout
                     </a>
-                    <a class="button" href="{{ url_for('main_betriebe.hilfe') }}">
+                    <a class="button" href="{{ url_for('main_company.hilfe') }}">
                         ?
                     </a>
                     {% endif %}

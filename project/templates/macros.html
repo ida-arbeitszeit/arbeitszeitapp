@@ -1,4 +1,4 @@
-{% macro start_hilfe() %}
+company{% macro start_hilfe() %}
 
 <div class="hero-body">
     <div class="container has-text-centered">
@@ -130,7 +130,7 @@
         {% for res in results %}
           <tr>
             <td>{{ res.id }}</td><td>{{ res.angebot_name }}</td>
-            <td>{{ res.betrieb_name }}</td>
+            <td>{{ res.company_name }}</td>
             <td>
               <a href="mailto:{{ res.email }}">
                 <u><span class="icon has-text-grey"><i class="far fa-envelope"></i></span></u>

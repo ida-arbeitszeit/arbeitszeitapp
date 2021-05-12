@@ -22,7 +22,7 @@ def meine_kaeufe():
     except:
         user_type = "member"
 
-    if user_type == "betrieb":
+    if user_type == "company":
         return redirect(url_for('auth.zurueck'))
     else:
         session["user_type"] = "member"
@@ -106,7 +106,7 @@ def profile():
         workplaces = database.get_workplaces(current_user.id)
         return render_template('profile_member.html',
                                arbeitsstellen=workplaces)
-    elif user_type == "betrieb":
+    elif user_type == "company":
         return redirect(url_for('auth.zurueck'))
 
 

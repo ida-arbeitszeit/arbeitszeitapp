@@ -5,7 +5,7 @@ from flask import Blueprint, render_template, session, redirect, url_for,\
     request, flash
 from flask_login import login_required, current_user
 from sqlalchemy.sql import func
-from project.models import Angebote, Kaeufe, Betriebe, Member,\
+from project.models import Angebote, Kaeufe, Company, Member,\
     Produktionsmittel, Arbeit, Auszahlungen, Kooperationen,\
     KooperationenMitglieder
 from project.tables import ProduktionsmittelTable, WorkersTable, HoursTable,\
@@ -15,27 +15,27 @@ from project.forms import ProductSearchForm
 from project import database
 from project.economy import company
 
-main_betriebe = Blueprint('main_betriebe', __name__,
+main_company = Blueprint('main_company', __name__,
                           template_folder='templates', static_folder='static')
 
 
-@main_betriebe.route('/betriebe/profile')
+@main_company.route('/company/profile')
 @login_required
 def profile():
     user_type = session["user_type"]
-    if user_type == "betrieb":
+    if user_type == "company":
         arbeiter = database.get_first_worker(current_user.id)
         if arbeiter:
             having_workers = True
         else:
             having_workers = False
-        return render_template('profile_betriebe.html',
+        return render_template('profile.html',
                                having_workers=having_workers)
     elif user_type == "member":
         return redirect(url_for('auth.zurueck'))
 
 
-@main_betriebe.route('/betriebe/arbeit', methods=['GET', 'POST'])
+@main_company.route('/company/work', methods=['GET', 'POST'])
 @login_required
 def arbeit():
     """shows workers and worked hours."""
@@ -51,7 +51,7 @@ def arbeit():
         # check if member exists, if not flash warning
         if not database.get_user_by_id(request.form['member']):
             flash("Mitglied existiert nicht.")
-            return redirect(url_for('main_betriebe.arbeit'))
+            return redirect(url_for('main_company.arbeit'))
 
         # check if user already works in company
         req_arbeiter = database.get_worker_in_company(
@@ -61,13 +61,13 @@ def arbeit():
         else:
             company.add_new_worker(request.form['member'], current_user.id)
 
-        return redirect(url_for('main_betriebe.arbeit'))
+        return redirect(url_for('main_company.arbeit'))
 
     return render_template(
-        "arbeit.html", workers_table=workers_table, hours_table=hours_table)
+        "work.html", workers_table=workers_table, hours_table=hours_table)
 
 
-@main_betriebe.route('/betriebe/produktionsmittel')
+@main_company.route('/company/produktionsmittel')
 @login_required
 def produktionsmittel():
     """shows means of production."""
@@ -81,11 +81,11 @@ def produktionsmittel():
         means_of_production_consumed,
         no_items="(Noch keine Produktionsmittel verbraucht.)")
 
-    return render_template('produktionsmittel.html', table_aktiv=table_in_use,
+    return render_template('means_of_production.html', table_aktiv=table_in_use,
                            table_inaktiv=table_consumed)
 
 
-@main_betriebe.route('/betriebe/suchen', methods=['GET', 'POST'])
+@main_company.route('/company/suchen', methods=['GET', 'POST'])
 @login_required
 def suchen():
     """search products in catalog."""
@@ -107,13 +107,13 @@ def suchen():
             flash('Keine Ergebnisse!')
         else:
             return render_template(
-                'suchen_betriebe.html', form=search_form, results=results)
+                'search.html', form=search_form, results=results)
 
     return render_template(
-        'suchen_betriebe.html', form=search_form, results=results)
+        'search.html', form=search_form, results=results)
 
 
-@main_betriebe.route('/betriebe/details/<int:id>', methods=['GET', 'POST'])
+@main_company.route('/company/details/<int:id>', methods=['GET', 'POST'])
 @login_required
 def details(id):
     """show details of selected product."""
@@ -128,28 +128,28 @@ def details(id):
     preise = (angebot_.preis, angebot_.koop_preis)
 
     if request.method == 'POST':
-        return redirect('/betriebe/suchen')
+        return redirect('/company/suchen')
 
-    return render_template('details_betriebe.html',
+    return render_template('details.html',
                            table_preiszus=table_preiszus,
                            piped=piped, preise=preise)
 
 
-@main_betriebe.route('/betriebe/kaufen/<int:id>', methods=['GET', 'POST'])
+@main_company.route('/company/kaufen/<int:id>', methods=['GET', 'POST'])
 @login_required
 def kaufen(id):
     srch = database.SearchProducts()
     angebot = srch.get_angebot_by_id(id)
     if request.method == 'POST':  # if company buys
         company.buy_product(
-            "betriebe", database.get_angebot_by_id(id), current_user.id)
+            "company", database.get_angebot_by_id(id), current_user.id)
         flash(f"Kauf von '{angebot.angebot_name}' erfolgreich!")
-        return redirect('/betriebe/suchen')
+        return redirect('/company/suchen')
 
-    return render_template('kaufen_betriebe.html', angebot=angebot)
+    return render_template('buy.html', angebot=angebot)
 
 
-@main_betriebe.route('/betriebe/anbieten', methods=['GET', 'POST'])
+@main_company.route('/company/anbieten', methods=['GET', 'POST'])
 @login_required
 def neues_angebot():
     """
@@ -225,7 +225,7 @@ def neues_angebot():
             new_angebot = Angebote(
                 name=request.form["name"],
                 cr_date=current_time,
-                betrieb=current_user.id,
+                company=current_user.id,
                 beschreibung=request.form["beschreibung"],
                 kategorie=request.form["kategorie"],
                 p_kosten=kosten_pm,
@@ -263,7 +263,7 @@ def neues_angebot():
 
         # TO DO: kosten zusammenfassen und bestätigen lassen!
         flash('Angebot erfolgreich gespeichert!')
-        return redirect(url_for("main_betriebe.meine_angebote"))
+        return redirect(url_for("main_company.meine_angebote"))
 
     categ = ["Dienstleistungen", "Elektronik",
              "Freizeit & Hobby", "Haus & Garten", "Haustiere",
@@ -277,36 +277,36 @@ def neues_angebot():
         categ=categ)
 
 
-@main_betriebe.route('/betriebe/meine_angebote')
+@main_company.route('/company/meine_angebote')
 @login_required
 def meine_angebote():
     srch = database.SearchProducts()
     qry = srch.get_angebote()
     aktuelle_angebote = qry.filter(
-        Angebote.aktiv == True, Betriebe.id == current_user.id).all()
+        Angebote.aktiv == True, Company.id == current_user.id).all()
     vergangene_angebote = qry.filter(
-        Angebote.aktiv == False, Betriebe.id == current_user.id).all()
+        Angebote.aktiv == False, Company.id == current_user.id).all()
     return render_template('meine_angebote.html',
                            aktuelle_angebote=aktuelle_angebote,
                            vergangene_angebote=vergangene_angebote)
 
 
-@main_betriebe.route('/betriebe/angebot_loeschen', methods=['GET', 'POST'])
+@main_company.route('/company/delete_offer', methods=['GET', 'POST'])
 @login_required
-def angebot_loeschen():
+def delete_offer():
     angebot_id = request.args.get("id")
     angebot = Angebote.query.filter_by(id=angebot_id).first()
     if request.method == 'POST':
         company.delete_product(angebot_id)
         flash("Löschen des Angebots erfolgreich.")
-        return redirect(url_for('main_betriebe.meine_angebote'))
+        return redirect(url_for('main_company.meine_angebote'))
 
-    return render_template('angebot_loeschen.html', angebot=angebot)
+    return render_template('delete_offer.html', angebot=angebot)
 
 
-@main_betriebe.route('/betriebe/angebot_verkaufen', methods=['GET', 'POST'])
+@main_company.route('/company/sell_offer', methods=['GET', 'POST'])
 @login_required
-def angebot_verkaufen():
+def sell_offer():
     angebot_id = request.args.get("id")
     angebot = Angebote.query.filter_by(id=angebot_id).first()
 
@@ -322,7 +322,7 @@ def angebot_verkaufen():
                 flash("Wert des Codes entspricht nicht dem Preis.")
             else:
                 kaufender_type = "member" if auszahlung.type_member\
-                                          else "betriebe"
+                                          else "company"
                 database.kaufen(
                     kaufender_type=kaufender_type,
                     angebot=angebot,
@@ -330,14 +330,14 @@ def angebot_verkaufen():
                 auszahlung.entwertet = True
                 db.session.commit()
                 flash("Verkauf erfolgreich")
-                return redirect(url_for("main_betriebe.meine_angebote"))
+                return redirect(url_for("main_company.meine_angebote"))
 
-    return render_template('angebot_verkaufen.html', angebot=angebot)
+    return render_template('sell_offer.html', angebot=angebot)
 
 
-@main_betriebe.route('/betriebe/kooperieren', methods=['GET', 'POST'])
+@main_company.route('/company/cooperate', methods=['GET', 'POST'])
 @login_required
-def kooperieren():
+def cooperate():
     if request.method == 'POST':
         angebot_id_eigenes = request.form["angebot_id_eigenes"]
         own = Angebote.query.filter_by(
@@ -350,8 +350,9 @@ def kooperieren():
         if not (own and extern):
             flash("Nicht existente Angebot-IDs")
         elif not Angebote.query.filter_by(
-            id=angebot_id_eigenes,
-                betrieb=current_user.id, aktiv=True).first():
+                id=angebot_id_eigenes,
+                company=current_user.id,
+                aktiv=True).first():
             flash("Das Produkt ist nicht deines.")
         else:
             # one product can only be in one coop!
@@ -499,18 +500,18 @@ def kooperieren():
               label("kooperation")).\
         select_from(KooperationenMitglieder).\
         join(Angebote, KooperationenMitglieder.mitglied == Angebote.id).\
-        filter(Angebote.betrieb == current_user.id, Angebote.aktiv == True).\
+        filter(Angebote.company == current_user.id, Angebote.aktiv == True).\
         group_by(Angebote.cr_date, Angebote.name).\
         all()
 
     eigenes_produkt_from_get = request.args.get("id")
 
-    return render_template('kooperieren.html',
+    return render_template('cooperate.html',
                            meine_kooperationen=meine_kooperationen,
                            prefilled=eigenes_produkt_from_get)
 
 
-@main_betriebe.route('/betriebe/hilfe')
+@main_company.route('/company/hilfe')
 @login_required
 def hilfe():
-    return render_template('betriebe_hilfe.html')
+    return render_template('help.html')

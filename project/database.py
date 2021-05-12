@@ -1,7 +1,7 @@
 import datetime
 import random
 import string
-from project.models import Member, Betriebe, Arbeiter, Angebote, Arbeit,\
+from project.models import Member, Company, Arbeiter, Angebote, Arbeit,\
     Produktionsmittel, Kaeufe, Auszahlungen, KooperationenMitglieder
 from sqlalchemy.sql import func, case
 from project.extensions import db
@@ -45,9 +45,9 @@ class SearchProducts():
             Angebote.name.label("angebot_name"),
             func.min(Angebote.p_kosten).label("p_kosten"),
             func.min(Angebote.v_kosten).label("v_kosten"),
-            Betriebe.name.label("betrieb_name"),
-            Betriebe.id.label("betrieb_id"),
-            Betriebe.email,
+            Company.name.label("company_name"),
+            Company.id.label("company_id"),
+            Company.email,
             Angebote.beschreibung,
             Angebote.kategorie,
             Angebote.preis,
@@ -57,10 +57,10 @@ class SearchProducts():
             label("koop_preis")
             ).\
             select_from(Angebote).\
-            join(Betriebe, Angebote.betrieb == Betriebe.id).\
+            join(Company, Angebote.company == Company.id).\
             outerjoin(km2, Angebote.id == km2.mitglied).\
             group_by(
-                Betriebe, Angebote.cr_date, "angebot_name",
+                Company, Angebote.cr_date, "angebot_name",
                 Angebote.beschreibung, Angebote.kategorie,
                 Angebote.preis, km2.kooperation)
 
@@ -278,12 +278,12 @@ def kaufen(kaufender_type, angebot, kaeufer_id):
     preis = SearchProducts().get_angebot_by_id(angebot.id).koop_preis
 
     # kauefe aktualisieren
-    if kaufender_type == "betriebe":
-        kaufender = Betriebe
+    if kaufender_type == "company":
+        kaufender = Company
         new_kauf = Kaeufe(kauf_date=datetime.datetime.now(),
                           angebot=angebot.id,
                           type_member=False,
-                          betrieb=kaeufer_id,
+                          company=kaeufer_id,
                           member=None,
                           kaufpreis=preis)
         db.session.add(new_kauf)
@@ -293,7 +293,7 @@ def kaufen(kaufender_type, angebot, kaeufer_id):
         new_kauf = Kaeufe(kauf_date=datetime.datetime.now(),
                           angebot=angebot.id,
                           type_member=True,
-                          betrieb=None,
+                          company=None,
                           member=kaeufer_id,
                           kaufpreis=preis)
         db.session.add(new_kauf)
@@ -310,8 +310,8 @@ def kaufen(kaufender_type, angebot, kaeufer_id):
     db.session.commit()
 
     # guthaben des anbietenden betriebes erhöhen
-    anbietender_betrieb_id = angebot.betrieb
-    anbietender_betrieb = Betriebe.query.filter_by(
+    anbietender_betrieb_id = angebot.company
+    anbietender_betrieb = Company.query.filter_by(
         id=anbietender_betrieb_id).first()
     anbietender_betrieb.guthaben += preis  # angebot.p_kosten
     db.session.commit()
@@ -361,10 +361,10 @@ def get_purchases(user_id):
 
 def get_workplaces(user_id):
     """returns all workplaces the user is assigned to."""
-    workplaces = db.session.query(Betriebe)\
+    workplaces = db.session.query(Company)\
         .select_from(Arbeiter).\
         filter_by(member=user_id).\
-        join(Betriebe, Arbeiter.betrieb == Betriebe.id).\
+        join(Company, Arbeiter.company == Company.id).\
         all()
     return workplaces
 
@@ -396,15 +396,15 @@ def withdraw(user_id, amount):
 
 def get_company_by_mail(email):
     """returns first company in Company, filtered by mail."""
-    betrieb = Betriebe.query.filter_by(email=email).first()
-    return betrieb
+    company = Company.query.filter_by(email=email).first()
+    return company
 
 
 def add_new_company(email, name, password):
     """
     adds a new company to Company.
     """
-    new_company = Betriebe(
+    new_company = Company(
         email=email,
         name=name,
         password=password)
@@ -412,36 +412,36 @@ def add_new_company(email, name, password):
     db.session.commit()
 
 
-def get_workers(betrieb_id):
+def get_workers(company_id):
     """get all workers working in a company."""
     workers = db.session.query(Member.id, Member.name).\
         select_from(Arbeiter).join(Member).\
-        filter(Arbeiter.betrieb == betrieb_id).group_by(Member.id).all()
+        filter(Arbeiter.company == company_id).group_by(Member.id).all()
     return workers
 
 
 def get_worker_in_company(worker_id, company_id):
     """get specific worker in a company."""
     arbeiter = Arbeiter.query.filter_by(
-        member=worker_id, betrieb=company_id).\
+        member=worker_id, company=company_id).\
         first()
     return arbeiter
 
 
-def get_hours_worked(betrieb_id):
+def get_hours_worked(company_id):
     """get all hours worked in a company."""
     hours_worked = db.session.query(
         Member.id, Member.name,
         func.concat(func.sum(Arbeit.stunden), " Std.").
         label('summe_stunden')
         ).select_from(Angebote).\
-        filter(Angebote.betrieb == betrieb_id).\
+        filter(Angebote.company == company_id).\
         join(Arbeit).join(Member).group_by(Member.id).\
         order_by(func.sum(Arbeit.stunden).desc()).all()
     return hours_worked
 
 
-def get_means_of_prod(betrieb_id):
+def get_means_of_prod(company_id):
     """
     returns tuple of active and inactive means of prouction of company.
     """
@@ -456,7 +456,7 @@ def get_means_of_prod(betrieb_id):
                 func.sum(Produktionsmittel.prozent_gebraucht), 0), 2).
         label("prozent_gebraucht"))\
         .select_from(Kaeufe)\
-        .filter(Kaeufe.betrieb == betrieb_id).\
+        .filter(Kaeufe.company == company_id).\
         outerjoin(Produktionsmittel,
                   Kaeufe.id == Produktionsmittel.kauf).\
         join(Angebote, Kaeufe.angebot == Angebote.id).\
@@ -483,19 +483,19 @@ def delete_product(angebot_id):
 
 # Worker
 
-def get_first_worker(betrieb_id):
+def get_first_worker(company_id):
     """get first worker in Worker."""
-    worker = Arbeiter.query.filter_by(betrieb=betrieb_id).first()
+    worker = Arbeiter.query.filter_by(company=company_id).first()
     return worker
 
 
-def add_new_worker_to_company(member_id, betrieb_id):
+def add_new_worker_to_company(member_id, company_id):
     """
     adds a new worker to Company.
     """
     new_worker = Arbeiter(
         member=member_id,
-        betrieb=betrieb_id)
+        company=company_id)
     db.session.add(new_worker)
     db.session.commit()
 

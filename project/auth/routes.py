@@ -67,51 +67,51 @@ def login_member_post():
     return redirect(url_for('main_member.profile'))
 
 
-# Betriebe
-@auth.route('/betriebe/login')
-def login_betriebe():
-    return render_template('login_betriebe.html')
+# Company
+@auth.route('/company/login')
+def login_company():
+    return render_template('login_company.html')
 
 
-@auth.route('/betriebe/login', methods=['POST'])
-def login_betriebe_post():
+@auth.route('/company/login', methods=['POST'])
+def login_company_post():
     email = request.form.get('email')
     password = request.form.get('password')
     remember = True if request.form.get('remember') else False
-    betrieb = database.get_company_by_mail(email)
+    company = database.get_company_by_mail(email)
 
-    if not betrieb or not check_password_hash(betrieb.password, password):
+    if not company or not check_password_hash(company.password, password):
         flash('Please check your login details and try again.')
-        return redirect(url_for('auth.login_betriebe'))
+        return redirect(url_for('auth.login_company'))
 
-    session["user_type"] = "betrieb"
-    login_user(betrieb, remember=remember)
-    return redirect(url_for('main_betriebe.profile'))
-
-
-@auth.route('/betriebe/signup')
-def signup_betriebe():
-    return render_template('signup_betriebe.html')
+    session["user_type"] = "company"
+    login_user(company, remember=remember)
+    return redirect(url_for('main_company.profile'))
 
 
-@auth.route('/betriebe/signup', methods=['POST'])
-def signup_betriebe_post():
+@auth.route('/company/signup')
+def signup_company():
+    return render_template('signup_company.html')
+
+
+@auth.route('/company/signup', methods=['POST'])
+def signup_company_post():
     email = request.form.get('email')
     name = request.form.get('name')
     password = request.form.get('password')
 
-    betrieb = database.get_company_by_mail(email)
+    company = database.get_company_by_mail(email)
 
-    if betrieb:
+    if company:
         flash('Email address already exists')
-        return redirect(url_for('auth.signup_betriebe'))
+        return redirect(url_for('auth.signup_company'))
 
     database.add_new_company(
         email=email,
         name=name,
         password=generate_password_hash(password, method='sha256'))
 
-    return redirect(url_for('auth.login_betriebe'))
+    return redirect(url_for('auth.login_company'))
 
 
 # logout

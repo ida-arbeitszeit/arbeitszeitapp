@@ -20,7 +20,7 @@ def create_app():
 
     with app.app_context():
         from .models import Member
-        from .models import Betriebe
+        from .models import Company
 
         @login_manager.user_loader
         def load_user(user_id):
@@ -31,15 +31,15 @@ def create_app():
             user_type = session["user_type"]
             if user_type == "member":
                 return Member.query.get(int(user_id))
-            elif user_type == "betrieb":
-                return Betriebe.query.get(int(user_id))
+            elif user_type == "company":
+                return Company.query.get(int(user_id))
 
         # register blueprints
         from .auth import routes as auth_routes
-        from .betriebe import routes as betriebe_routes
+        from .company import routes as company_routes
         from .member import routes as member_routes
         app.register_blueprint(auth_routes.auth)
-        app.register_blueprint(betriebe_routes.main_betriebe)
+        app.register_blueprint(company_routes.main_company)
         app.register_blueprint(member_routes.main_member)
 
         # create the initial database
