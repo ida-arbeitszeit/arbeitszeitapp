@@ -16,7 +16,7 @@ main_member = Blueprint(
 
 @main_member.route('/member/kaeufe')
 @login_required
-def meine_kaeufe():
+def my_purchases():
     try:
         user_type = session["user_type"]
     except:
@@ -29,7 +29,7 @@ def meine_kaeufe():
 
         purchases = database.get_purchases(current_user.id)
         kaufh_table = KaeufeTable(purchases, no_items="(Noch keine Käufe.)")
-        return render_template('meine_kaeufe.html', kaufh_table=kaufh_table)
+        return render_template('my_purchases.html', kaufh_table=kaufh_table)
 
 
 @main_member.route('/member/suchen', methods=['GET', 'POST'])
@@ -54,10 +54,10 @@ def suchen():
             flash('Keine Ergebnisse!')
         else:
             return render_template(
-                'suchen_member.html', form=search_form, results=results)
+                'search.html', form=search_form, results=results)
 
     return render_template(
-        'suchen_member.html', form=search_form, results=results)
+        'search.html', form=search_form, results=results)
 
 
 @main_member.route('/member/details/<int:id>', methods=['GET', 'POST'])
@@ -78,15 +78,15 @@ def details(id):
         return redirect('/member/suchen')
 
     return render_template(
-        'details_member.html',
+        'details.html',
         table_preiszus=table_preiszus,
         piped=piped,
         preise=preise)
 
 
-@main_member.route('/member/kaufen/<int:id>', methods=['GET', 'POST'])
+@main_member.route('/member/buy/<int:id>', methods=['GET', 'POST'])
 @login_required
-def kaufen(id):
+def buy(id):
     srch = database.SearchProducts()
     angebot = srch.get_angebot_by_id(id)
     if request.method == 'POST':  # if user buys
@@ -95,7 +95,7 @@ def kaufen(id):
         flash(f"Kauf von '{angebot.angebot_name}' erfolgreich!")
         return redirect('/member/suchen')
 
-    return render_template('kaufen_member.html', angebot=angebot)
+    return render_template('buy.html', angebot=angebot)
 
 
 @main_member.route('/member/profile')
@@ -104,7 +104,7 @@ def profile():
     user_type = session["user_type"]
     if user_type == "member":
         workplaces = database.get_workplaces(current_user.id)
-        return render_template('profile_member.html',
+        return render_template('profile.html',
                                arbeitsstellen=workplaces)
     elif user_type == "company":
         return redirect(url_for('auth.zurueck'))
@@ -119,12 +119,12 @@ def auszahlung():
         # Show code to user
         flash(amount)
         flash(code)
-        return render_template('auszahlung_member.html')
+        return render_template('withdrawal.html')
 
-    return render_template('auszahlung_member.html')
+    return render_template('withdrawal.html')
 
 
 @main_member.route('/member/hilfe')
 @login_required
 def hilfe():
-    return render_template('member_hilfe.html')
+    return render_template('help.html')

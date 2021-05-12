@@ -145,7 +145,7 @@ company{% macro start_hilfe() %}
             </td>
             <td>{{ res.vorhanden }}</td>
             <td>
-              <a href="{{ url_for('%s.kaufen' % (request.blueprint), id=res.id) }}">
+              <a href="{{ url_for('%s.buy' % (request.blueprint), id=res.id) }}">
                 <u><u><span class="icon has-text-grey"><i class="fas fa-shopping-cart"></i></span></u></u>
               </a>
             </td>

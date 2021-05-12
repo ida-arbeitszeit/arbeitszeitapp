@@ -135,9 +135,9 @@ def details(id):
                            piped=piped, preise=preise)
 
 
-@main_company.route('/company/kaufen/<int:id>', methods=['GET', 'POST'])
+@main_company.route('/company/buy/<int:id>', methods=['GET', 'POST'])
 @login_required
-def kaufen(id):
+def buy(id):
     srch = database.SearchProducts()
     angebot = srch.get_angebot_by_id(id)
     if request.method == 'POST':  # if company buys
@@ -151,7 +151,7 @@ def kaufen(id):
 
 @main_company.route('/company/anbieten', methods=['GET', 'POST'])
 @login_required
-def neues_angebot():
+def new_offer():
     """
     Ein neues Angebot hinzufügen
     """
@@ -263,7 +263,7 @@ def neues_angebot():
 
         # TO DO: kosten zusammenfassen und bestätigen lassen!
         flash('Angebot erfolgreich gespeichert!')
-        return redirect(url_for("main_company.meine_angebote"))
+        return redirect(url_for("main_company.my_offers"))
 
     categ = ["Dienstleistungen", "Elektronik",
              "Freizeit & Hobby", "Haus & Garten", "Haustiere",
@@ -271,22 +271,22 @@ def neues_angebot():
              "Nachbarschaftshilfe", "Unterricht und Kurse"]
 
     return render_template(
-        'neues_angebot.html',
+        'new_offer.html',
         produktionsmittel_aktiv=produktionsmittel_aktiv,
         arbeiter_all=arbeiter_all,
         categ=categ)
 
 
-@main_company.route('/company/meine_angebote')
+@main_company.route('/company/my_offers')
 @login_required
-def meine_angebote():
+def my_offers():
     srch = database.SearchProducts()
     qry = srch.get_angebote()
     aktuelle_angebote = qry.filter(
         Angebote.aktiv == True, Company.id == current_user.id).all()
     vergangene_angebote = qry.filter(
         Angebote.aktiv == False, Company.id == current_user.id).all()
-    return render_template('meine_angebote.html',
+    return render_template('my_offers.html',
                            aktuelle_angebote=aktuelle_angebote,
                            vergangene_angebote=vergangene_angebote)
 
@@ -299,7 +299,7 @@ def delete_offer():
     if request.method == 'POST':
         company.delete_product(angebot_id)
         flash("Löschen des Angebots erfolgreich.")
-        return redirect(url_for('main_company.meine_angebote'))
+        return redirect(url_for('main_company.my_offers'))
 
     return render_template('delete_offer.html', angebot=angebot)
 
@@ -330,7 +330,7 @@ def sell_offer():
                 auszahlung.entwertet = True
                 db.session.commit()
                 flash("Verkauf erfolgreich")
-                return redirect(url_for("main_company.meine_angebote"))
+                return redirect(url_for("main_company.my_offers"))
 
     return render_template('sell_offer.html', angebot=angebot)
 
