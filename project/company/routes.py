@@ -29,7 +29,7 @@ def profile():
             having_workers = True
         else:
             having_workers = False
-        return render_template('profile.html',
+        return render_template('company/profile.html',
                                having_workers=having_workers)
     elif user_type == "member":
         return redirect(url_for('auth.zurueck'))
@@ -64,7 +64,8 @@ def arbeit():
         return redirect(url_for('main_company.arbeit'))
 
     return render_template(
-        "work.html", workers_table=workers_table, hours_table=hours_table)
+        "company/work.html",
+        workers_table=workers_table, hours_table=hours_table)
 
 
 @main_company.route('/company/produktionsmittel')
@@ -81,8 +82,10 @@ def produktionsmittel():
         means_of_production_consumed,
         no_items="(Noch keine Produktionsmittel verbraucht.)")
 
-    return render_template('means_of_production.html', table_aktiv=table_in_use,
-                           table_inaktiv=table_consumed)
+    return render_template(
+        'company/means_of_production.html',
+        table_aktiv=table_in_use,
+        table_inaktiv=table_consumed)
 
 
 @main_company.route('/company/suchen', methods=['GET', 'POST'])
@@ -107,10 +110,10 @@ def suchen():
             flash('Keine Ergebnisse!')
         else:
             return render_template(
-                'search.html', form=search_form, results=results)
+                'company/search.html', form=search_form, results=results)
 
     return render_template(
-        'search.html', form=search_form, results=results)
+        'company/search.html', form=search_form, results=results)
 
 
 @main_company.route('/company/details/<int:id>', methods=['GET', 'POST'])
@@ -130,7 +133,7 @@ def details(id):
     if request.method == 'POST':
         return redirect('/company/suchen')
 
-    return render_template('details.html',
+    return render_template('company/details.html',
                            table_preiszus=table_preiszus,
                            piped=piped, preise=preise)
 
@@ -146,7 +149,7 @@ def buy(id):
         flash(f"Kauf von '{angebot.angebot_name}' erfolgreich!")
         return redirect('/company/suchen')
 
-    return render_template('buy.html', angebot=angebot)
+    return render_template('company/buy.html', angebot=angebot)
 
 
 @main_company.route('/company/anbieten', methods=['GET', 'POST'])
@@ -271,7 +274,7 @@ def new_offer():
              "Nachbarschaftshilfe", "Unterricht und Kurse"]
 
     return render_template(
-        'new_offer.html',
+        'company/new_offer.html',
         produktionsmittel_aktiv=produktionsmittel_aktiv,
         arbeiter_all=arbeiter_all,
         categ=categ)
@@ -286,7 +289,7 @@ def my_offers():
         Angebote.aktiv == True, Company.id == current_user.id).all()
     vergangene_angebote = qry.filter(
         Angebote.aktiv == False, Company.id == current_user.id).all()
-    return render_template('my_offers.html',
+    return render_template('company/my_offers.html',
                            aktuelle_angebote=aktuelle_angebote,
                            vergangene_angebote=vergangene_angebote)
 
@@ -301,7 +304,7 @@ def delete_offer():
         flash("Löschen des Angebots erfolgreich.")
         return redirect(url_for('main_company.my_offers'))
 
-    return render_template('delete_offer.html', angebot=angebot)
+    return render_template('company/delete_offer.html', angebot=angebot)
 
 
 @main_company.route('/company/sell_offer', methods=['GET', 'POST'])
@@ -332,7 +335,7 @@ def sell_offer():
                 flash("Verkauf erfolgreich")
                 return redirect(url_for("main_company.my_offers"))
 
-    return render_template('sell_offer.html', angebot=angebot)
+    return render_template('company/sell_offer.html', angebot=angebot)
 
 
 @main_company.route('/company/cooperate', methods=['GET', 'POST'])
@@ -510,7 +513,7 @@ def cooperate():
     # eigenes_produkt_from_get = request.args.get("id")
 
     meine_kooperationen, eigenes_produkt_from_get = [], []
-    return render_template('cooperate.html',
+    return render_template('company/cooperate.html',
                            meine_kooperationen=meine_kooperationen,
                            prefilled=eigenes_produkt_from_get)
 
@@ -518,4 +521,4 @@ def cooperate():
 @main_company.route('/company/hilfe')
 @login_required
 def hilfe():
-    return render_template('help.html')
+    return render_template('company/help.html')

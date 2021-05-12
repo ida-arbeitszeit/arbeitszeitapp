@@ -29,7 +29,7 @@ def my_purchases():
 
         purchases = database.get_purchases(current_user.id)
         kaufh_table = KaeufeTable(purchases, no_items="(Noch keine Käufe.)")
-        return render_template('my_purchases.html', kaufh_table=kaufh_table)
+        return render_template('member/my_purchases.html', kaufh_table=kaufh_table)
 
 
 @main_member.route('/member/suchen', methods=['GET', 'POST'])
@@ -54,10 +54,10 @@ def suchen():
             flash('Keine Ergebnisse!')
         else:
             return render_template(
-                'search.html', form=search_form, results=results)
+                'member/search.html', form=search_form, results=results)
 
     return render_template(
-        'search.html', form=search_form, results=results)
+        'member/search.html', form=search_form, results=results)
 
 
 @main_member.route('/member/details/<int:id>', methods=['GET', 'POST'])
@@ -78,7 +78,7 @@ def details(id):
         return redirect('/member/suchen')
 
     return render_template(
-        'details.html',
+        'member/details.html',
         table_preiszus=table_preiszus,
         piped=piped,
         preise=preise)
@@ -95,7 +95,7 @@ def buy(id):
         flash(f"Kauf von '{angebot.angebot_name}' erfolgreich!")
         return redirect('/member/suchen')
 
-    return render_template('buy.html', angebot=angebot)
+    return render_template('member/buy.html', angebot=angebot)
 
 
 @main_member.route('/member/profile')
@@ -104,7 +104,7 @@ def profile():
     user_type = session["user_type"]
     if user_type == "member":
         workplaces = database.get_workplaces(current_user.id)
-        return render_template('profile.html',
+        return render_template('member/profile.html',
                                arbeitsstellen=workplaces)
     elif user_type == "company":
         return redirect(url_for('auth.zurueck'))
@@ -119,12 +119,12 @@ def auszahlung():
         # Show code to user
         flash(amount)
         flash(code)
-        return render_template('withdrawal.html')
+        return render_template('member/withdrawal.html')
 
-    return render_template('withdrawal.html')
+    return render_template('member/withdrawal.html')
 
 
 @main_member.route('/member/hilfe')
 @login_required
 def hilfe():
-    return render_template('help.html')
+    return render_template('member/help.html')
