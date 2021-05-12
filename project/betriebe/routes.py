@@ -11,7 +11,7 @@ from ..tables import ProduktionsmittelTable, WorkersTable, HoursTable,\
     Preiszusammensetzung
 from ..forms import ProductSearchForm
 
-from .. import sql
+from .. import database
 from ..economy import company
 
 main_betriebe = Blueprint('main_betriebe', __name__,
@@ -23,7 +23,7 @@ main_betriebe = Blueprint('main_betriebe', __name__,
 def profile():
     user_type = session["user_type"]
     if user_type == "betrieb":
-        arbeiter = sql.get_first_worker(current_user.id)
+        arbeiter = database.get_first_worker(current_user.id)
         if arbeiter:
             having_workers = True
         else:
@@ -38,22 +38,22 @@ def profile():
 @login_required
 def arbeit():
     """shows workers and worked hours."""
-    workers = sql.get_workers(current_user.id)
+    workers = database.get_workers(current_user.id)
     workers_table = WorkersTable(
         workers, no_items='(Noch keine Mitarbeiter.)')
 
-    hours_worked = sql.get_hours_worked(current_user.id)
+    hours_worked = database.get_hours_worked(current_user.id)
     hours_table = HoursTable(
         hours_worked, no_items='(Noch keine Stunden gearbeitet.)')
 
     if request.method == 'POST':  # (add worker to company)
         # check if nutzer exists, if not flash warning
-        if not sql.get_user_by_id(request.form['nutzer']):
+        if not database.get_user_by_id(request.form['nutzer']):
             flash("Nutzer existiert nicht.")
             return redirect(url_for('main_betriebe.arbeit'))
 
         # check if user already works in company
-        req_arbeiter = sql.get_worker_in_company(
+        req_arbeiter = database.get_worker_in_company(
             request.form['nutzer'], current_user.id)
         if req_arbeiter:
             flash("Nutzer ist bereits in diesem Betrieb beschäftigt.")
@@ -70,7 +70,7 @@ def arbeit():
 @login_required
 def produktionsmittel():
     """shows means of production."""
-    means_of_production_in_use, means_of_production_consumed = sql.\
+    means_of_production_in_use, means_of_production_consumed = database.\
         get_means_of_prod(current_user.id)
 
     table_in_use = ProduktionsmittelTable(
@@ -89,7 +89,7 @@ def produktionsmittel():
 def suchen():
     """search products in catalog."""
     search_form = ProductSearchForm(request.form)
-    srch = sql.SearchProducts()
+    srch = database.SearchProducts()
     results = srch.get_angebote_aktiv()
 
     if request.method == 'POST':
@@ -116,13 +116,13 @@ def suchen():
 @login_required
 def details(id):
     """show details of selected product."""
-    comp = sql.CompositionOfPrices()
+    comp = database.CompositionOfPrices()
     table_of_composition = comp.get_table_of_composition(id)
     cols_dict = comp.get_positions_in_table(table_of_composition)
     dot = comp.create_dots(cols_dict, table_of_composition)
     piped = dot.pipe().decode('utf-8')
     table_preiszus = Preiszusammensetzung(table_of_composition)
-    srch = sql.SearchProducts()
+    srch = database.SearchProducts()
     angebot_ = srch.get_angebot_by_id(id)
     preise = (angebot_.preis, angebot_.koop_preis)
 
@@ -137,11 +137,11 @@ def details(id):
 @main_betriebe.route('/betriebe/kaufen/<int:id>', methods=['GET', 'POST'])
 @login_required
 def kaufen(id):
-    srch = sql.SearchProducts()
+    srch = database.SearchProducts()
     angebot = srch.get_angebot_by_id(id)
     if request.method == 'POST':  # if company buys
         company.buy_product(
-            "betriebe", sql.get_angebot_by_id(id), current_user.id)
+            "betriebe", database.get_angebot_by_id(id), current_user.id)
         flash(f"Kauf von '{angebot.angebot_name}' erfolgreich!")
         return redirect('/betriebe/suchen')
 
@@ -154,8 +154,8 @@ def neues_angebot():
     """
     Ein neues Angebot hinzufügen
     """
-    produktionsmittel_aktiv, _ = sql.get_means_of_prod(current_user.id)
-    arbeiter_all = sql.get_workers(current_user.id)
+    produktionsmittel_aktiv, _ = database.get_means_of_prod(current_user.id)
+    arbeiter_all = database.get_workers(current_user.id)
 
     if request.method == 'POST':
         quantity = int(request.form["quantity"])
@@ -279,7 +279,7 @@ def neues_angebot():
 @main_betriebe.route('/betriebe/meine_angebote')
 @login_required
 def meine_angebote():
-    srch = sql.SearchProducts()
+    srch = database.SearchProducts()
     qry = srch.get_angebote()
     aktuelle_angebote = qry.filter(
         Angebote.aktiv == True, Betriebe.id == current_user.id).all()
@@ -322,7 +322,7 @@ def angebot_verkaufen():
             else:
                 kaufender_type = "nutzer" if auszahlung.type_nutzer\
                                           else "betriebe"
-                sql.kaufen(
+                database.kaufen(
                     kaufender_type=kaufender_type,
                     angebot=angebot,
                     kaeufer_id=auszahlung.nutzer)

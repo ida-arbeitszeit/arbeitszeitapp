@@ -1,6 +1,6 @@
 """Business logic"""
 
-from . import sql
+from . import database
 
 
 class SocialAccounting:
@@ -17,14 +17,14 @@ class SocialAccounting:
 class Company:
     def add_new_worker(self, user_id, company_id):
         """add new workers to company."""
-        sql.add_new_worker_to_company(user_id, company_id)
+        database.add_new_worker_to_company(user_id, company_id)
 
     def buy_product(self, buyer_type, product, buyer):
-        sql.kaufen(buyer_type, product, buyer)
+        database.kaufen(buyer_type, product, buyer)
 
     def delete_product(self, product):
         """delete own product from catalog."""
-        sql.delete_product(product)
+        database.delete_product(product)
 
     def send_plan(self, p, r, a, prd_name, prd_unit, prd_amount, timeframe):
         """send plan."""
