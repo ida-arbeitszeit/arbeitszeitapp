@@ -5,10 +5,7 @@ from .extensions import db, login_manager
 
 def create_app():
     app = Flask(__name__, instance_relative_config=False)
-
-    # Switch between production and development configuration
-    # app.config.from_object('config.ProdConfig')
-    app.config.from_object('config.DevConfig')
+    app.config.from_envvar('ARBEITSZEIT_APP_CONFIGURATION')
 
     # Where to redirect the user when he attempts to access a login_required
     # view without being logged in.
