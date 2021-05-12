@@ -96,17 +96,6 @@ prozent_gebraucht='%s')>" % (
                              self.angebot, self.kauf, self.prozent_gebraucht)
 
 
-class Bewertungen(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    # either company or member:
-    type_member = db.Column(db.Boolean, nullable=False)
-    company = db.Column(
-        db.Integer, db.ForeignKey("company.id"), nullable=True)
-    member = db.Column(db.Integer, db.ForeignKey("member.id"), nullable=True)
-    kauf = db.Column(db.Integer, db.ForeignKey("kaeufe.id"), nullable=False)
-    bewertung = db.Column(db.Integer, nullable=False)
-
-
 class Auszahlungen(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     type_member = db.Column(db.Boolean, nullable=False)

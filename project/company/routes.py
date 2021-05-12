@@ -338,174 +338,178 @@ def sell_offer():
 @main_company.route('/company/cooperate', methods=['GET', 'POST'])
 @login_required
 def cooperate():
-    if request.method == 'POST':
-        angebot_id_eigenes = request.form["angebot_id_eigenes"]
-        own = Angebote.query.filter_by(
-            id=angebot_id_eigenes, aktiv=True).first()
+    # under construction
+    pass
 
-        angebot_id_externes = request.form["angebot_id_externes"]
-        extern = Angebote.query.filter_by(
-            id=angebot_id_externes, aktiv=True).first()
+    # if request.method == 'POST':
+    #     angebot_id_eigenes = request.form["angebot_id_eigenes"]
+    #     own = Angebote.query.filter_by(
+    #         id=angebot_id_eigenes, aktiv=True).first()
+    #
+    #     angebot_id_externes = request.form["angebot_id_externes"]
+    #     extern = Angebote.query.filter_by(
+    #         id=angebot_id_externes, aktiv=True).first()
+    #
+    #     if not (own and extern):
+    #         flash("Nicht existente Angebot-IDs")
+    #     elif not Angebote.query.filter_by(
+    #             id=angebot_id_eigenes,
+    #             company=current_user.id,
+    #             aktiv=True).first():
+    #         flash("Das Produkt ist nicht deines.")
+    #     else:
+    #         # one product can only be in one coop!
+    #         eigene_koop = KooperationenMitglieder.query.\
+    #             filter_by(mitglied=angebot_id_eigenes, aktiv=True).first()
+    #         externe_koop = KooperationenMitglieder.query.\
+    #             filter_by(mitglied=angebot_id_externes, aktiv=True).first()
+    #         current_time = datetime.datetime.now()
+    #
+    #         if (not eigene_koop and not externe_koop):
+    #             print("neither exists")
+    #             flash("Kooperation wird gestartet.")
+    #             new_koop = Kooperationen(cr_date=current_time)
+    #             db.session.add(new_koop)
+    #             db.session.commit()
+    #             # add all of the batch, not only specified angebot!
+    #             # (defined by cr_date and name) Muss evtl sicherer werden.
+    #             for i in db.session.query(Angebote).\
+    #                     filter_by(cr_date=own.cr_date, name=own.name).all():
+    #                 new_koop_mitglieder_1 = KooperationenMitglieder(
+    #                     kooperation=new_koop.id, mitglied=i.id)
+    #                 db.session.add(new_koop_mitglieder_1)
+    #             for j in db.session.query(Angebote).\
+    #                     filter_by(cr_date=extern.cr_date,
+    #                               name=extern.name).all():
+    #                 new_koop_mitglieder_2 = KooperationenMitglieder(
+    #                     kooperation=new_koop.id, mitglied=j.id)
+    #                 db.session.add(new_koop_mitglieder_2)
+    #             db.session.commit()
+    #
+    #         elif eigene_koop and externe_koop:
+    #             print("both exist")
+    #             if eigene_koop.kooperation == externe_koop.kooperation:
+    #                 flash("Die beiden Produkte sind bereits in Kooperation.")
+    #             else:
+    #                 print("both in different coops")
+    #                 flash("Das Produkt des Kooperationspartners\
+    #                     befindet sich in einer Kooperation - \
+    #                     die eigene Kooperation\
+    #                     wird verlassen und der neuen beigetreten.")
+    #
+    #                 # find out, how many different group of products
+    #                 # you are cooperating with
+    #                 coop_partners = db.session.\
+    #                     query(func.count(Angebote.id)).\
+    #                     select_from(KooperationenMitglieder).\
+    #                     filter_by(kooperation=eigene_koop.kooperation,
+    #                               aktiv=True).\
+    #                     join(Angebote,
+    #                          KooperationenMitglieder.mitglied == Angebote.id).\
+    #                     group_by(Angebote.cr_date,
+    #                              Angebote.name, Angebote.preis).\
+    #                     all()
+    #                 amt_coop_partners = len(coop_partners)
+    #                 eigene_ex_coop_id = eigene_koop.kooperation
+    #
+    #                 # change coop
+    #                 for i in db.session.\
+    #                         query(Angebote).filter_by(cr_date=own.cr_date,
+    #                                                   name=own.name).all():
+    #                     x = KooperationenMitglieder.query.\
+    #                         filter_by(mitglied=i.id).first()
+    #                     x.kooperation = externe_koop.kooperation
+    #                 db.session.commit()
+    #
+    #                 # if only 1 stays in old coop, than delete!
+    #                 if amt_coop_partners == 2:
+    #                     # delete the one remaining coop-member
+    #                     # and the kooperative
+    #                     for i in KooperationenMitglieder.query.\
+    #                             filter_by(kooperation=eigene_ex_coop_id).all():
+    #                         db.session.delete(i)
+    #                     db.session.delete(Kooperationen.query.
+    #                                       filter_by(id=eigene_ex_coop_id).
+    #                                       first())
+    #                     db.session.commit()
+    #
+    #         elif eigene_koop and not externe_koop:
+    #             print("only eigene exists")
+    #             flash("Du befindest dich bereits in einer Kooperation\
+    #                  - die aktuelle Kooperation wird verlassen und eine \
+    #                 neue wird gestartet.")
+    #
+    #             # find out, how many different group of products you
+    #             # are cooperating with
+    #             coop_partners = db.session.\
+    #                 query(func.count(Angebote.id)).\
+    #                 select_from(KooperationenMitglieder).\
+    #                 filter_by(kooperation=eigene_koop.kooperation,
+    #                           aktiv=True).\
+    #                 join(Angebote,
+    #                      KooperationenMitglieder.mitglied == Angebote.id).\
+    #                 group_by(Angebote.cr_date, Angebote.name, Angebote.preis).\
+    #                 all()
+    #             amt_coop_partners = len(coop_partners)
+    #             eigene_ex_coop_id = eigene_koop.kooperation
+    #
+    #             # start new koop
+    #             new_koop = Kooperationen(cr_date=current_time)
+    #             db.session.add(new_koop)
+    #             db.session.commit()
+    #             # add all of the batch, not only specified angebot!
+    #             # (defined by cr_date and name) Muss evtl sicherer werden.
+    #             for i in db.session.query(Angebote).\
+    #                     filter_by(cr_date=own.cr_date, name=own.name).all():
+    #                 x = KooperationenMitglieder.query.\
+    #                     filter_by(mitglied=i.id).first()
+    #                 x.kooperation = new_koop.id
+    #             for j in db.session.query(Angebote).\
+    #                     filter_by(cr_date=extern.cr_date,
+    #                               name=extern.name).all():
+    #                 new_koop_mitglieder_2 = KooperationenMitglieder(
+    #                     kooperation=new_koop.id, mitglied=j.id)
+    #                 db.session.add(new_koop_mitglieder_2)
+    #             db.session.commit()
+    #
+    #             # if only 1 stays in old coop, than delete!
+    #             if amt_coop_partners == 2:
+    #                 # delete the one remaining coop-member and the kooperative
+    #                 for i in KooperationenMitglieder.query.\
+    #                         filter_by(kooperation=eigene_ex_coop_id).all():
+    #                     db.session.delete(i)
+    #                 db.session.delete(Kooperationen.query.
+    #                                   filter_by(id=eigene_ex_coop_id).first())
+    #                 db.session.commit()
+    #
+    #         elif externe_koop and not eigene_koop:
+    #             print("only externe exists")
+    #             flash("Das Produkt des Kooperationspartners\
+    #                 befindet sich in einer Kooperation - \
+    #                 dein Produkt tritt dieser Kooperation bei.")
+    #             # which coop to join?
+    #             coop_to_join = externe_koop.kooperation
+    #             # join coop
+    #             for i in db.session.query(Angebote).\
+    #                     filter_by(cr_date=own.cr_date, name=own.name).all():
+    #                 new_koop_mitglieder = KooperationenMitglieder(
+    #                     kooperation=coop_to_join, mitglied=i.id)
+    #                 db.session.add(new_koop_mitglieder)
+    #             db.session.commit()
+    #
+    # meine_kooperationen = db.session.\
+    #     query(func.min(Angebote.name).label("name"),
+    #           func.min(KooperationenMitglieder.kooperation).
+    #           label("kooperation")).\
+    #     select_from(KooperationenMitglieder).\
+    #     join(Angebote, KooperationenMitglieder.mitglied == Angebote.id).\
+    #     filter(Angebote.company == current_user.id, Angebote.aktiv == True).\
+    #     group_by(Angebote.cr_date, Angebote.name).\
+    #     all()
+    #
+    # eigenes_produkt_from_get = request.args.get("id")
 
-        if not (own and extern):
-            flash("Nicht existente Angebot-IDs")
-        elif not Angebote.query.filter_by(
-                id=angebot_id_eigenes,
-                company=current_user.id,
-                aktiv=True).first():
-            flash("Das Produkt ist nicht deines.")
-        else:
-            # one product can only be in one coop!
-            eigene_koop = KooperationenMitglieder.query.\
-                filter_by(mitglied=angebot_id_eigenes, aktiv=True).first()
-            externe_koop = KooperationenMitglieder.query.\
-                filter_by(mitglied=angebot_id_externes, aktiv=True).first()
-            current_time = datetime.datetime.now()
-
-            if (not eigene_koop and not externe_koop):
-                print("neither exists")
-                flash("Kooperation wird gestartet.")
-                new_koop = Kooperationen(cr_date=current_time)
-                db.session.add(new_koop)
-                db.session.commit()
-                # add all of the batch, not only specified angebot!
-                # (defined by cr_date and name) Muss evtl sicherer werden.
-                for i in db.session.query(Angebote).\
-                        filter_by(cr_date=own.cr_date, name=own.name).all():
-                    new_koop_mitglieder_1 = KooperationenMitglieder(
-                        kooperation=new_koop.id, mitglied=i.id)
-                    db.session.add(new_koop_mitglieder_1)
-                for j in db.session.query(Angebote).\
-                        filter_by(cr_date=extern.cr_date,
-                                  name=extern.name).all():
-                    new_koop_mitglieder_2 = KooperationenMitglieder(
-                        kooperation=new_koop.id, mitglied=j.id)
-                    db.session.add(new_koop_mitglieder_2)
-                db.session.commit()
-
-            elif eigene_koop and externe_koop:
-                print("both exist")
-                if eigene_koop.kooperation == externe_koop.kooperation:
-                    flash("Die beiden Produkte sind bereits in Kooperation.")
-                else:
-                    print("both in different coops")
-                    flash("Das Produkt des Kooperationspartners\
-                        befindet sich in einer Kooperation - \
-                        die eigene Kooperation\
-                        wird verlassen und der neuen beigetreten.")
-
-                    # find out, how many different group of products
-                    # you are cooperating with
-                    coop_partners = db.session.\
-                        query(func.count(Angebote.id)).\
-                        select_from(KooperationenMitglieder).\
-                        filter_by(kooperation=eigene_koop.kooperation,
-                                  aktiv=True).\
-                        join(Angebote,
-                             KooperationenMitglieder.mitglied == Angebote.id).\
-                        group_by(Angebote.cr_date,
-                                 Angebote.name, Angebote.preis).\
-                        all()
-                    amt_coop_partners = len(coop_partners)
-                    eigene_ex_coop_id = eigene_koop.kooperation
-
-                    # change coop
-                    for i in db.session.\
-                            query(Angebote).filter_by(cr_date=own.cr_date,
-                                                      name=own.name).all():
-                        x = KooperationenMitglieder.query.\
-                            filter_by(mitglied=i.id).first()
-                        x.kooperation = externe_koop.kooperation
-                    db.session.commit()
-
-                    # if only 1 stays in old coop, than delete!
-                    if amt_coop_partners == 2:
-                        # delete the one remaining coop-member
-                        # and the kooperative
-                        for i in KooperationenMitglieder.query.\
-                                filter_by(kooperation=eigene_ex_coop_id).all():
-                            db.session.delete(i)
-                        db.session.delete(Kooperationen.query.
-                                          filter_by(id=eigene_ex_coop_id).
-                                          first())
-                        db.session.commit()
-
-            elif eigene_koop and not externe_koop:
-                print("only eigene exists")
-                flash("Du befindest dich bereits in einer Kooperation\
-                     - die aktuelle Kooperation wird verlassen und eine \
-                    neue wird gestartet.")
-
-                # find out, how many different group of products you
-                # are cooperating with
-                coop_partners = db.session.\
-                    query(func.count(Angebote.id)).\
-                    select_from(KooperationenMitglieder).\
-                    filter_by(kooperation=eigene_koop.kooperation,
-                              aktiv=True).\
-                    join(Angebote,
-                         KooperationenMitglieder.mitglied == Angebote.id).\
-                    group_by(Angebote.cr_date, Angebote.name, Angebote.preis).\
-                    all()
-                amt_coop_partners = len(coop_partners)
-                eigene_ex_coop_id = eigene_koop.kooperation
-
-                # start new koop
-                new_koop = Kooperationen(cr_date=current_time)
-                db.session.add(new_koop)
-                db.session.commit()
-                # add all of the batch, not only specified angebot!
-                # (defined by cr_date and name) Muss evtl sicherer werden.
-                for i in db.session.query(Angebote).\
-                        filter_by(cr_date=own.cr_date, name=own.name).all():
-                    x = KooperationenMitglieder.query.\
-                        filter_by(mitglied=i.id).first()
-                    x.kooperation = new_koop.id
-                for j in db.session.query(Angebote).\
-                        filter_by(cr_date=extern.cr_date,
-                                  name=extern.name).all():
-                    new_koop_mitglieder_2 = KooperationenMitglieder(
-                        kooperation=new_koop.id, mitglied=j.id)
-                    db.session.add(new_koop_mitglieder_2)
-                db.session.commit()
-
-                # if only 1 stays in old coop, than delete!
-                if amt_coop_partners == 2:
-                    # delete the one remaining coop-member and the kooperative
-                    for i in KooperationenMitglieder.query.\
-                            filter_by(kooperation=eigene_ex_coop_id).all():
-                        db.session.delete(i)
-                    db.session.delete(Kooperationen.query.
-                                      filter_by(id=eigene_ex_coop_id).first())
-                    db.session.commit()
-
-            elif externe_koop and not eigene_koop:
-                print("only externe exists")
-                flash("Das Produkt des Kooperationspartners\
-                    befindet sich in einer Kooperation - \
-                    dein Produkt tritt dieser Kooperation bei.")
-                # which coop to join?
-                coop_to_join = externe_koop.kooperation
-                # join coop
-                for i in db.session.query(Angebote).\
-                        filter_by(cr_date=own.cr_date, name=own.name).all():
-                    new_koop_mitglieder = KooperationenMitglieder(
-                        kooperation=coop_to_join, mitglied=i.id)
-                    db.session.add(new_koop_mitglieder)
-                db.session.commit()
-
-    meine_kooperationen = db.session.\
-        query(func.min(Angebote.name).label("name"),
-              func.min(KooperationenMitglieder.kooperation).
-              label("kooperation")).\
-        select_from(KooperationenMitglieder).\
-        join(Angebote, KooperationenMitglieder.mitglied == Angebote.id).\
-        filter(Angebote.company == current_user.id, Angebote.aktiv == True).\
-        group_by(Angebote.cr_date, Angebote.name).\
-        all()
-
-    eigenes_produkt_from_get = request.args.get("id")
-
+    meine_kooperationen, eigenes_produkt_from_get = [], []
     return render_template('cooperate.html',
                            meine_kooperationen=meine_kooperationen,
                            prefilled=eigenes_produkt_from_get)
