@@ -7,7 +7,7 @@ with “CamelCase” converted to “camel_case”.
 """
 
 from flask_login import UserMixin
-from . import db
+from .extensions import db
 
 
 class Nutzer(UserMixin, db.Model):

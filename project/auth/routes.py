@@ -2,8 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, request,\
     flash, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required
-from ..models import Nutzer, Betriebe
-from .. import db
+from .. import sql
 
 auth = Blueprint(
     'auth', __name__, template_folder='templates', static_folder='static')
@@ -32,18 +31,17 @@ def signup_nutzer_post():
     name = request.form.get('name')
     password = request.form.get('password')
 
-    nutzer = Nutzer.query.filter_by(email=email).first()
+    nutzer = sql.get_user_by_mail(email=email)
 
     if nutzer:
         flash('Email address already exists')
         return redirect(url_for('auth.signup_nutzer'))
 
-    new_user = Nutzer(
-        email=email, name=name,
-        password=generate_password_hash(password, method='sha256'))
-
-    db.session.add(new_user)
-    db.session.commit()
+    sql.add_new_user(
+        email=email,
+        name=name,
+        password=generate_password_hash(password, method='sha256')
+    )
 
     return redirect(url_for('auth.login_nutzer'))
 
@@ -58,7 +56,7 @@ def login_nutzer_post():
     email = request.form.get('email')
     password = request.form.get('password')
     remember = True if request.form.get('remember') else False
-    nutzer = Nutzer.query.filter_by(email=email).first()
+    nutzer = sql.get_user_by_mail(email)
 
     if not nutzer or not check_password_hash(nutzer.password, password):
         flash('Please check your login details and try again.')
@@ -67,6 +65,7 @@ def login_nutzer_post():
     session["user_type"] = "nutzer"
     login_user(nutzer, remember=remember)
     return redirect(url_for('main_nutzer.profile'))
+
 
 # Betriebe
 @auth.route('/betriebe/login')
@@ -79,7 +78,7 @@ def login_betriebe_post():
     email = request.form.get('email')
     password = request.form.get('password')
     remember = True if request.form.get('remember') else False
-    betrieb = Betriebe.query.filter_by(email=email).first()
+    betrieb = sql.get_company_by_mail(email)
 
     if not betrieb or not check_password_hash(betrieb.password, password):
         flash('Please check your login details and try again.')
@@ -101,17 +100,16 @@ def signup_betriebe_post():
     name = request.form.get('name')
     password = request.form.get('password')
 
-    betrieb = Betriebe.query.filter_by(email=email).first()
+    betrieb = sql.get_company_by_mail(email)
 
     if betrieb:
         flash('Email address already exists')
         return redirect(url_for('auth.signup_betriebe'))
 
-    new_betrieb = Betriebe(
-        email=email, name=name,
+    sql.add_new_company(
+        email=email,
+        name=name,
         password=generate_password_hash(password, method='sha256'))
-    db.session.add(new_betrieb)
-    db.session.commit()
 
     return redirect(url_for('auth.login_betriebe'))
 

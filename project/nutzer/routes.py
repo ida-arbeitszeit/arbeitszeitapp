@@ -4,13 +4,10 @@ from decimal import Decimal
 from flask import Blueprint, render_template, session,\
     redirect, url_for, request, flash
 from flask_login import login_required, current_user
-from .. import db
-from ..models import Angebote, Kaeufe, Nutzer,\
-    Betriebe, Arbeiter, Auszahlungen
+from ..models import Angebote
 from ..tables import KaeufeTable, Preiszusammensetzung
-from .. import composition_of_prices
-from .. import suchen_und_kaufen
-from sqlalchemy.sql import func
+from ..forms import ProductSearchForm
+from .. import sql
 
 
 main_nutzer = Blueprint(
@@ -36,36 +33,51 @@ def meine_kaeufe():
     else:
         session["user_type"] = "nutzer"
 
-        kaufhistorie = db.session.query(
-            Kaeufe.id, Angebote.name, Angebote.beschreibung,
-            func.concat(func.round(Angebote.preis, 2), " Std.").
-            label("preis")
-            ).\
-            select_from(Kaeufe).\
-            filter_by(nutzer=current_user.id).\
-            join(Angebote, Kaeufe.angebot == Angebote.id).\
-            all()
-        kaufh_table = KaeufeTable(kaufhistorie, no_items="(Noch keine Käufe.)")
+        purchases = sql.get_purchases(current_user.id)
+        kaufh_table = KaeufeTable(purchases, no_items="(Noch keine Käufe.)")
         return render_template('meine_kaeufe.html', kaufh_table=kaufh_table)
 
 
 @main_nutzer.route('/nutzer/suchen', methods=['GET', 'POST'])
 @login_required
 def suchen():
-    return suchen_und_kaufen.such_vorgang("nutzer", request.form)
+    """search products in catalog."""
+    search_form = ProductSearchForm(request.form)
+    srch = sql.SearchProducts()
+    results = srch.get_angebote_aktiv()
+
+    if request.method == 'POST':
+        results = []
+        search_string = search_form.data['search']
+        search_field = search_form.data['select']  # Name, Beschr., Kategorie
+
+        if search_string:
+            results = srch.get_angebote_aktiv(search_string, search_field)
+        else:
+            results = srch.get_angebote_aktiv()
+
+        if not results:
+            flash('Keine Ergebnisse!')
+        else:
+            return render_template(
+                'suchen_nutzer.html', form=search_form, results=results)
+
+    return render_template(
+        'suchen_nutzer.html', form=search_form, results=results)
 
 
 @main_nutzer.route('/nutzer/details/<int:id>', methods=['GET', 'POST'])
 @login_required
 def details(id):
     """show details of selected product."""
-    table_of_composition = composition_of_prices.get_table_of_composition(id)
-    cols_dict = composition_of_prices.\
-        get_positions_in_table(table_of_composition)
-    dot = composition_of_prices.create_dots(cols_dict, table_of_composition)
+    comp = sql.CompositionOfPrices()
+    table_of_composition = comp.get_table_of_composition(id)
+    cols_dict = comp.get_positions_in_table(table_of_composition)
+    dot = comp.create_dots(cols_dict, table_of_composition)
     piped = dot.pipe().decode('utf-8')
     table_preiszus = Preiszusammensetzung(table_of_composition)
-    angebot_ = suchen_und_kaufen.get_angebote().filter(Angebote.id == id).one()
+    srch = sql.SearchProducts()
+    angebot_ = srch.get_angebote().filter(Angebote.id == id).one()
     preise = (angebot_.preis, angebot_.koop_preis)
 
     if request.method == 'POST':
@@ -81,22 +93,17 @@ def details(id):
 @main_nutzer.route('/nutzer/kaufen/<int:id>', methods=['GET', 'POST'])
 @login_required
 def kaufen(id):
-    qry = db.session.query(Angebote).filter(
-                Angebote.id == id)
-    angebot = qry.first()
-    if angebot:
-        if request.method == 'POST':
-            suchen_und_kaufen.kauf_vorgang(
-                kaufender_type="nutzer", angebot=angebot,
-                kaeufer_id=current_user.id)
-            flash(f"Kauf von '{angebot.name}' erfolgreich!")
-            return redirect('/nutzer/suchen')
+    srch = sql.SearchProducts()
+    angebot = srch.get_angebot_by_id(id)
+    if request.method == 'POST':  # if user buys
+        sql.kaufen(
+            kaufender_type="nutzer",
+            angebot=sql.get_angebot_by_id(id),
+            kaeufer_id=current_user.id)
+        flash(f"Kauf von '{angebot.angebot_name}' erfolgreich!")
+        return redirect('/nutzer/suchen')
 
-        angebot = suchen_und_kaufen.get_angebote().\
-            filter(Angebote.aktiv == True, Angebote.id == id).first()
-        return render_template('kaufen_nutzer.html', angebot=angebot)
-    else:
-        return 'Error loading #{id}'.format(id=id)
+    return render_template('kaufen_nutzer.html', angebot=angebot)
 
 
 @main_nutzer.route('/nutzer/profile')
@@ -104,12 +111,9 @@ def kaufen(id):
 def profile():
     user_type = session["user_type"]
     if user_type == "nutzer":
-        arbeitsstellen = db.session.query(Betriebe).select_from(Arbeiter).\
-            filter_by(nutzer=current_user.id).\
-            join(Betriebe, Arbeiter.betrieb == Betriebe.id).all()
-
+        workplaces = sql.get_workplaces(current_user.id)
         return render_template('profile_nutzer.html',
-                               arbeitsstellen=arbeitsstellen)
+                               arbeitsstellen=workplaces)
     elif user_type == "betrieb":
         return redirect(url_for('auth.zurueck'))
 
@@ -118,29 +122,12 @@ def profile():
 @login_required
 def auszahlung():
     if request.method == 'POST':
-
-        betrag = Decimal(request.form["betrag"])
+        amount = Decimal(request.form["betrag"])
         code = id_generator()
-
-        # neuer eintrag in db-table auszahlungen
-        neue_auszahlung = Auszahlungen(
-            type_nutzer=True, nutzer=current_user.id, betrag=betrag, code=code)
-        db.session.add(neue_auszahlung)
-        db.session.commit()
-
-        # betrag vom guthaben des users abziehen
-        nutzer = db.session.query(Nutzer).\
-            filter(Nutzer.id == current_user.id).\
-            first()
-        nutzer.guthaben -= betrag
-        db.session.commit()
-
-        # Code User anzeigen
-        flash(betrag)
+        sql.new_withdrawal(current_user.id, amount, code)
+        # Show code to user
+        flash(amount)
         flash(code)
-
-        # Einlösen des Codes auch hier ermöglichen
-
         return render_template('auszahlung_nutzer.html')
 
     return render_template('auszahlung_nutzer.html')
