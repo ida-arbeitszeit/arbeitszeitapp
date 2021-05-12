@@ -38,7 +38,7 @@ def suchen():
     """search products in catalog."""
     search_form = ProductSearchForm(request.form)
     srch = database.SearchProducts()
-    results = srch.get_angebote_aktiv()
+    results = srch.get_active_offers()
 
     if request.method == 'POST':
         results = []
@@ -46,9 +46,9 @@ def suchen():
         search_field = search_form.data['select']  # Name, Beschr., Kategorie
 
         if search_string:
-            results = srch.get_angebote_aktiv(search_string, search_field)
+            results = srch.get_active_offers(search_string, search_field)
         else:
-            results = srch.get_angebote_aktiv()
+            results = srch.get_active_offers()
 
         if not results:
             flash('Keine Ergebnisse!')
@@ -71,7 +71,7 @@ def details(id):
     piped = dot.pipe().decode('utf-8')
     table_preiszus = Preiszusammensetzung(table_of_composition)
     srch = database.SearchProducts()
-    angebot_ = srch.get_angebot_by_id(id)
+    angebot_ = srch.get_offer_by_id(id)
     preise = (angebot_.preis, angebot_.koop_preis)
 
     if request.method == 'POST':
@@ -88,10 +88,10 @@ def details(id):
 @login_required
 def buy(id):
     srch = database.SearchProducts()
-    angebot = srch.get_angebot_by_id(id)
+    angebot = srch.get_offer_by_id(id)
     if request.method == 'POST':  # if user buys
         member.buy_product(
-            "member", database.get_angebot_by_id(id), current_user.id)
+            "member", database.get_offer_by_id(id), current_user.id)
         flash(f"Kauf von '{angebot.angebot_name}' erfolgreich!")
         return redirect('/member/suchen')
 

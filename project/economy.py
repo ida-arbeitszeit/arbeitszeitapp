@@ -22,7 +22,7 @@ class Company:
         database.add_new_worker_to_company(user_id, company_id)
 
     def buy_product(self, buyer_type, product_id, buyer_id):
-        database.kaufen(buyer_type, product_id, buyer_id)
+        database.buy(buyer_type, product_id, buyer_id)
 
     def delete_product(self, product_id):
         """delete own product from catalog."""
@@ -38,7 +38,7 @@ class Company:
 class Member:
     """A regular member/worker."""
     def buy_product(self, buyer_type, product_id, buyer_id):
-        database.kaufen(buyer_type, product_id, buyer_id)
+        database.buy(buyer_type, product_id, buyer_id)
 
     def withdraw(self, user_id, amount):
         """

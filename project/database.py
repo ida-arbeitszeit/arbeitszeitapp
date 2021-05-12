@@ -20,7 +20,7 @@ class SearchProducts():
     Returns non-mutable _collections.result-Objects.
     """
 
-    def get_angebote(self):
+    def get_offers(self):
         """
         returns BaseQuery object with all products available
         (grouped results, active or not),
@@ -66,32 +66,32 @@ class SearchProducts():
 
         return qry
 
-    def get_angebot_by_id(self, angebote_id):
+    def get_offer_by_id(self, angebote_id):
         """returns one angebot filtered by angebote_id."""
-        return self.get_angebote().filter(Angebote.id == angebote_id).one()
+        return self.get_offers().filter(Angebote.id == angebote_id).one()
 
-    def get_angebote_aktiv(self, search_string="", search_field=""):
+    def get_active_offers(self, search_string="", search_field=""):
         """
         returns all aktive angebote.
         search string and search field may be optionally specified.
         """
         if search_string or search_field:
             if search_field == 'Name':
-                angebote = self.get_angebote().filter(
+                angebote = self.get_offers().filter(
                     Angebote.name.contains(search_string)).\
                     all()
 
             elif search_field == 'Beschreibung':
-                angebote = self.get_angebote().filter(
+                angebote = self.get_offers().filter(
                     Angebote.beschreibung.contains(search_string)).\
                         all()
 
             elif search_field == 'Kategorie':
-                angebote = self.get_angebote().filter(
+                angebote = self.get_offers().filter(
                     Angebote.kategorie.contains(search_string)).\
                         all()
         else:
-            angebote = self.get_angebote().filter(Angebote.aktiv == True).all()
+            angebote = self.get_offers().filter(Angebote.aktiv == True).all()
         return angebote
 
 
@@ -270,12 +270,12 @@ Kosten: {current_kosten} Std.")
 
 # Kaufen
 
-def kaufen(kaufender_type, angebot, kaeufer_id):
+def buy(kaufender_type, angebot, kaeufer_id):
     """
     buy product.
     """
     # aktuellen (koop-)preis erhalten:
-    preis = SearchProducts().get_angebot_by_id(angebot.id).koop_preis
+    preis = SearchProducts().get_offer_by_id(angebot.id).koop_preis
 
     # kauefe aktualisieren
     if kaufender_type == "company":
@@ -502,7 +502,7 @@ def add_new_worker_to_company(member_id, company_id):
 
 # Search Angebote
 
-def get_angebot_by_id(id):
+def get_offer_by_id(id):
     """get first angebot, filtered by id"""
     angebot = db.session.query(Angebote).\
         filter(Angebote.id == id).first()

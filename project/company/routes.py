@@ -94,7 +94,7 @@ def suchen():
     """search products in catalog."""
     search_form = ProductSearchForm(request.form)
     srch = database.SearchProducts()
-    results = srch.get_angebote_aktiv()
+    results = srch.get_active_offers()
 
     if request.method == 'POST':
         results = []
@@ -102,9 +102,9 @@ def suchen():
         search_field = search_form.data['select']  # Name, Beschr., Kategorie
 
         if search_string:
-            results = srch.get_angebote_aktiv(search_string, search_field)
+            results = srch.get_active_offers(search_string, search_field)
         else:
-            results = srch.get_angebote_aktiv()
+            results = srch.get_active_offers()
 
         if not results:
             flash('Keine Ergebnisse!')
@@ -127,7 +127,7 @@ def details(id):
     piped = dot.pipe().decode('utf-8')
     table_preiszus = Preiszusammensetzung(table_of_composition)
     srch = database.SearchProducts()
-    angebot_ = srch.get_angebot_by_id(id)
+    angebot_ = srch.get_offer_by_id(id)
     preise = (angebot_.preis, angebot_.koop_preis)
 
     if request.method == 'POST':
@@ -142,10 +142,10 @@ def details(id):
 @login_required
 def buy(id):
     srch = database.SearchProducts()
-    angebot = srch.get_angebot_by_id(id)
+    angebot = srch.get_offer_by_id(id)
     if request.method == 'POST':  # if company buys
         company.buy_product(
-            "company", database.get_angebot_by_id(id), current_user.id)
+            "company", database.get_offer_by_id(id), current_user.id)
         flash(f"Kauf von '{angebot.angebot_name}' erfolgreich!")
         return redirect('/company/suchen')
 
@@ -284,7 +284,7 @@ def new_offer():
 @login_required
 def my_offers():
     srch = database.SearchProducts()
-    qry = srch.get_angebote()
+    qry = srch.get_offers()
     aktuelle_angebote = qry.filter(
         Angebote.aktiv == True, Company.id == current_user.id).all()
     vergangene_angebote = qry.filter(
@@ -326,7 +326,7 @@ def sell_offer():
             else:
                 kaufender_type = "member" if auszahlung.type_member\
                                           else "company"
-                database.kaufen(
+                database.buy(
                     kaufender_type=kaufender_type,
                     angebot=angebot,
                     kaeufer_id=auszahlung.member)
