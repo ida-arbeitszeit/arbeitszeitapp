@@ -1,10 +1,17 @@
 import datetime
+import random
+import string
 from project.models import Nutzer, Betriebe, Arbeiter, Angebote, Arbeit,\
     Produktionsmittel, Kaeufe, Auszahlungen, KooperationenMitglieder
 from sqlalchemy.sql import func, case
 from project.extensions import db
 from graphviz import Graph
 from sqlalchemy.orm import aliased
+
+
+def id_generator(size=10, chars=string.ascii_uppercase + string.digits):
+    """generates money-code for withdrawals."""
+    return ''.join(random.SystemRandom().choice(chars) for _ in range(size))
 
 
 class SearchProducts():
@@ -362,8 +369,12 @@ def get_workplaces(user_id):
     return workplaces
 
 
-def new_withdrawal(user_id, amount, code):
-    """register new withdrawal and withdraw amount from user's account."""
+def withdraw(user_id, amount):
+    """
+    register new withdrawal and withdraw amount from user's account.
+    returns code that can be used like money.
+    """
+    code = id_generator()
     new_withdrawal = Auszahlungen(
         type_nutzer=True,
         nutzer=user_id,
@@ -371,6 +382,7 @@ def new_withdrawal(user_id, amount, code):
         code=code)
     db.session.add(new_withdrawal)
     db.session.commit()
+    return code
 
     # betrag vom guthaben des users abziehen
     nutzer = db.session.query(Nutzer).\

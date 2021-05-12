@@ -1,5 +1,3 @@
-import string
-import random
 from decimal import Decimal
 from flask import Blueprint, render_template, session,\
     redirect, url_for, request, flash
@@ -7,16 +5,13 @@ from flask_login import login_required, current_user
 from project.tables import KaeufeTable, Preiszusammensetzung
 from project.forms import ProductSearchForm
 from project import database
+from project.economy import nutzer
 
 
 main_nutzer = Blueprint(
     'main_nutzer', __name__, template_folder='templates',
     static_folder='static'
     )
-
-
-def id_generator(size=10, chars=string.ascii_uppercase + string.digits):
-    return ''.join(random.SystemRandom().choice(chars) for _ in range(size))
 
 
 @main_nutzer.route('/nutzer/kaeufe')
@@ -95,10 +90,8 @@ def kaufen(id):
     srch = database.SearchProducts()
     angebot = srch.get_angebot_by_id(id)
     if request.method == 'POST':  # if user buys
-        database.kaufen(
-            kaufender_type="nutzer",
-            angebot=database.get_angebot_by_id(id),
-            kaeufer_id=current_user.id)
+        nutzer.buy_product(
+            "nutzer", database.get_angebot_by_id(id), current_user.id)
         flash(f"Kauf von '{angebot.angebot_name}' erfolgreich!")
         return redirect('/nutzer/suchen')
 
@@ -122,8 +115,7 @@ def profile():
 def auszahlung():
     if request.method == 'POST':
         amount = Decimal(request.form["betrag"])
-        code = id_generator()
-        database.new_withdrawal(current_user.id, amount, code)
+        code = nutzer.withdraw(current_user.id, amount)
         # Show code to user
         flash(amount)
         flash(code)

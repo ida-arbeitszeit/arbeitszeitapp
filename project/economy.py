@@ -19,12 +19,12 @@ class Company:
         """add new workers to company."""
         database.add_new_worker_to_company(user_id, company_id)
 
-    def buy_product(self, buyer_type, product, buyer):
-        database.kaufen(buyer_type, product, buyer)
+    def buy_product(self, buyer_type, product_id, buyer_id):
+        database.kaufen(buyer_type, product_id, buyer_id)
 
-    def delete_product(self, product):
+    def delete_product(self, product_id):
         """delete own product from catalog."""
-        database.delete_product(product)
+        database.delete_product(product_id)
 
     def send_plan(self, p, r, a, prd_name, prd_unit, prd_amount, timeframe):
         """send plan."""
@@ -33,5 +33,18 @@ class Company:
         accounting.publish_products()
 
 
+class Nutzer:
+    def buy_product(self, buyer_type, product_id, buyer_id):
+        database.kaufen(buyer_type, product_id, buyer_id)
+
+    def withdraw(self, user_id, amount):
+        """
+        executes withdrawal and returns code that can be used like money.
+        """
+        code = database.withdraw(user_id, amount)
+        return code
+
+
 accounting = SocialAccounting()
 company = Company()
+nutzer = Nutzer()
