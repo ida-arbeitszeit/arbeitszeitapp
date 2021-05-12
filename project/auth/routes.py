@@ -19,23 +19,23 @@ def help():
     return render_template('start_hilfe.html')
 
 
-# Nutzer
-@auth.route('/nutzer/signup')
-def signup_nutzer():
-    return render_template('signup_nutzer.html')
+# Member
+@auth.route('/member/signup')
+def signup_member():
+    return render_template('signup_member.html')
 
 
-@auth.route('/nutzer/signup', methods=['POST'])
-def signup_nutzer_post():
+@auth.route('/member/signup', methods=['POST'])
+def signup_member_post():
     email = request.form.get('email')
     name = request.form.get('name')
     password = request.form.get('password')
 
-    nutzer = database.get_user_by_mail(email=email)
+    member = database.get_user_by_mail(email=email)
 
-    if nutzer:
+    if member:
         flash('Email address already exists')
-        return redirect(url_for('auth.signup_nutzer'))
+        return redirect(url_for('auth.signup_member'))
 
     database.add_new_user(
         email=email,
@@ -43,28 +43,28 @@ def signup_nutzer_post():
         password=generate_password_hash(password, method='sha256')
     )
 
-    return redirect(url_for('auth.login_nutzer'))
+    return redirect(url_for('auth.login_member'))
 
 
-@auth.route('/nutzer/login')
-def login_nutzer():
-    return render_template('login_nutzer.html')
+@auth.route('/member/login')
+def login_member():
+    return render_template('login_member.html')
 
 
-@auth.route('/nutzer/login', methods=['POST'])
-def login_nutzer_post():
+@auth.route('/member/login', methods=['POST'])
+def login_member_post():
     email = request.form.get('email')
     password = request.form.get('password')
     remember = True if request.form.get('remember') else False
-    nutzer = database.get_user_by_mail(email)
+    member = database.get_user_by_mail(email)
 
-    if not nutzer or not check_password_hash(nutzer.password, password):
+    if not member or not check_password_hash(member.password, password):
         flash('Please check your login details and try again.')
-        return redirect(url_for('auth.login_nutzer'))
+        return redirect(url_for('auth.login_member'))
 
-    session["user_type"] = "nutzer"
-    login_user(nutzer, remember=remember)
-    return redirect(url_for('main_nutzer.profile'))
+    session["user_type"] = "member"
+    login_user(member, remember=remember)
+    return redirect(url_for('main_member.profile'))
 
 
 # Betriebe

@@ -1,4 +1,4 @@
-{% extends "base_nutzer.html" %}
+{% extends "base_member.html" %}
 
 {% block content2 %}
 
@@ -35,7 +35,7 @@
             <p>{{ current_user.guthaben|round(2) }} Stunden</p>
           </div>
           <div class="level-item">
-            <a class="button is-primary" href="{{ url_for('main_nutzer.auszahlung') }}">Auszahlen</a>
+            <a class="button is-primary" href="{{ url_for('main_member.auszahlung') }}">Auszahlen</a>
           </div>
         </div>
       </div>
@@ -75,7 +75,7 @@
         <div class="content">
           <p><div class="icon-text"><i class="fas fa-exclamation-triangle"></i></div>
             Du bist noch in keinem Betrieb als Mitarbeiter registriert.<br>
-            Teile deinem Betrieb deine Nutzer-ID mit, um dich registrieren zu lassen oder
+            Teile deinem Betrieb deine Mitglieder-ID mit, um dich registrieren zu lassen oder
             gründe <a href="{{ url_for('auth.start') }}">hier</a> deinen eigenen Betrieb.</p>
         </div>
       {% endif %}

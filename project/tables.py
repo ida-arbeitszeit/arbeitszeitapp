@@ -55,11 +55,11 @@ class KaeufeTable(Table):
 
 
 class WorkersTable(Table):
-    id = Col('Nutzer-Id')
+    id = Col('Mitglieder-Id')
     name = Col('Name')
 
 
 class HoursTable(Table):
-    id = Col('Nutzer-Id')
+    id = Col('Mitglieder-Id')
     name = Col('Name')
     summe_stunden = Col('Arbeitsstunden')

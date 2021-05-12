@@ -1,4 +1,4 @@
-{% extends "base_nutzer.html" %}
+{% extends "base_member.html" %}
 
 {% block content2 %}
 <div class="column is-4 is-offset-4">
@@ -11,7 +11,7 @@
           </div>
         {% endif %}
         {% endwith %}
-        <form method="POST" action="/nutzer/login">
+        <form method="POST" action="/member/login">
             <div class="field">
                 <div class="control">
                     <input class="input is-large" type="email" name="email" placeholder="Your Email" autofocus="">

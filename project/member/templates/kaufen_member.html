@@ -1,4 +1,4 @@
-{% extends "base_nutzer.html" %}
+{% extends "base_member.html" %}
 
 {% block content2 %}
 
@@ -18,7 +18,7 @@
 
   <form method="post">
     <input class="button  is-primary" type="submit" value="Bestätigen">
-    <a class="button  is-light" href="{{  url_for('main_nutzer.suchen') }}">
+    <a class="button  is-light" href="{{  url_for('main_member.suchen') }}">
       Abbrechen
     </a>
   </form>

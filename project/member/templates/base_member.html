@@ -6,7 +6,7 @@
           <nav class="navbar is-light" role="navigation" aria-label="main navigation">
             <div class="navbar-brand">
               <div class="navbar-item has-background-primary	has-text-white">
-                Nutzer-Ansicht
+                Mitglieder-Ansicht
               </div>
 
               <a role="button" class="navbar-burger" onclick="expandMenu()" aria-label="menu" aria-expanded="false" data-target="navbarOnTop">
@@ -20,13 +20,13 @@
               <div class="navbar-start">
 
                   {% if current_user.is_authenticated %}
-                  <a href="{{ url_for('main_nutzer.suchen') }}" class="navbar-item">
+                  <a href="{{ url_for('main_member.suchen') }}" class="navbar-item">
                       Angebote suchen
                   </a>
-                  <a href="{{ url_for('main_nutzer.meine_kaeufe') }}" class="navbar-item">
+                  <a href="{{ url_for('main_member.meine_kaeufe') }}" class="navbar-item">
                       Meine Käufe
                   </a>
-                  <a href="{{ url_for('main_nutzer.profile') }}" class="navbar-item">
+                  <a href="{{ url_for('main_member.profile') }}" class="navbar-item">
                       Meine Daten
                   </a>
                   {% endif %}
@@ -37,10 +37,10 @@
                   <div class="navbar-item">
                     <div class="buttons">
                       {% if not current_user.is_authenticated %}
-                      <a class="button" href="{{ url_for('auth.login_nutzer') }}">
+                      <a class="button" href="{{ url_for('auth.login_member') }}">
                           Anmelden
                       </a>
-                      <a class="button" href="{{ url_for('auth.signup_nutzer') }}">
+                      <a class="button" href="{{ url_for('auth.signup_member') }}">
                           Registrieren
                       </a>
                       <a class="button" href="{{ url_for('auth.zurueck') }}">
@@ -51,7 +51,7 @@
                       <a class="button" href="{{ url_for('auth.logout') }}">
                           Logout
                       </a>
-                      <a class="button" href="{{ url_for('main_nutzer.hilfe') }}">
+                      <a class="button" href="{{ url_for('main_member.hilfe') }}">
                           ?
                       </a>
                       {% endif %}

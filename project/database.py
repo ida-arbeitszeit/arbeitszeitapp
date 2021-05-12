@@ -1,7 +1,7 @@
 import datetime
 import random
 import string
-from project.models import Nutzer, Betriebe, Arbeiter, Angebote, Arbeit,\
+from project.models import Member, Betriebe, Arbeiter, Angebote, Arbeit,\
     Produktionsmittel, Kaeufe, Auszahlungen, KooperationenMitglieder
 from sqlalchemy.sql import func, case
 from project.extensions import db
@@ -282,19 +282,19 @@ def kaufen(kaufender_type, angebot, kaeufer_id):
         kaufender = Betriebe
         new_kauf = Kaeufe(kauf_date=datetime.datetime.now(),
                           angebot=angebot.id,
-                          type_nutzer=False,
+                          type_member=False,
                           betrieb=kaeufer_id,
-                          nutzer=None,
+                          member=None,
                           kaufpreis=preis)
         db.session.add(new_kauf)
         db.session.commit()
-    elif kaufender_type == "nutzer":
-        kaufender = Nutzer
+    elif kaufender_type == "member":
+        kaufender = Member
         new_kauf = Kaeufe(kauf_date=datetime.datetime.now(),
                           angebot=angebot.id,
-                          type_nutzer=True,
+                          type_member=True,
                           betrieb=None,
-                          nutzer=kaeufer_id,
+                          member=kaeufer_id,
                           kaufpreis=preis)
         db.session.add(new_kauf)
         db.session.commit()
@@ -321,21 +321,21 @@ def kaufen(kaufender_type, angebot, kaeufer_id):
 
 def get_user_by_mail(email):
     """returns first user in User, filtered by email."""
-    nutzer = Nutzer.query.filter_by(email=email).first()
-    return nutzer
+    member = Member.query.filter_by(email=email).first()
+    return member
 
 
 def get_user_by_id(id):
     """returns first user in User, filtered by id."""
-    nutzer = Nutzer.query.filter_by(id=id).first()
-    return nutzer
+    member = Member.query.filter_by(id=id).first()
+    return member
 
 
 def add_new_user(email, name, password):
     """
     adds a new user to User.
     """
-    new_user = Nutzer(
+    new_user = Member(
         email=email,
         name=name,
         password=password)
@@ -353,7 +353,7 @@ def get_purchases(user_id):
         label("preis")
         ).\
         select_from(Kaeufe).\
-        filter_by(nutzer=user_id).\
+        filter_by(member=user_id).\
         join(Angebote, Kaeufe.angebot == Angebote.id).\
         all()
     return purchases
@@ -363,7 +363,7 @@ def get_workplaces(user_id):
     """returns all workplaces the user is assigned to."""
     workplaces = db.session.query(Betriebe)\
         .select_from(Arbeiter).\
-        filter_by(nutzer=user_id).\
+        filter_by(member=user_id).\
         join(Betriebe, Arbeiter.betrieb == Betriebe.id).\
         all()
     return workplaces
@@ -376,8 +376,8 @@ def withdraw(user_id, amount):
     """
     code = id_generator()
     new_withdrawal = Auszahlungen(
-        type_nutzer=True,
-        nutzer=user_id,
+        type_member=True,
+        member=user_id,
         betrag=amount,
         code=code)
     db.session.add(new_withdrawal)
@@ -385,10 +385,10 @@ def withdraw(user_id, amount):
     return code
 
     # betrag vom guthaben des users abziehen
-    nutzer = db.session.query(Nutzer).\
-        filter(Nutzer.id == user_id).\
+    member = db.session.query(Member).\
+        filter(Member.id == user_id).\
         first()
-    nutzer.guthaben -= amount
+    member.guthaben -= amount
     db.session.commit()
 
 
@@ -414,16 +414,16 @@ def add_new_company(email, name, password):
 
 def get_workers(betrieb_id):
     """get all workers working in a company."""
-    workers = db.session.query(Nutzer.id, Nutzer.name).\
-        select_from(Arbeiter).join(Nutzer).\
-        filter(Arbeiter.betrieb == betrieb_id).group_by(Nutzer.id).all()
+    workers = db.session.query(Member.id, Member.name).\
+        select_from(Arbeiter).join(Member).\
+        filter(Arbeiter.betrieb == betrieb_id).group_by(Member.id).all()
     return workers
 
 
 def get_worker_in_company(worker_id, company_id):
     """get specific worker in a company."""
     arbeiter = Arbeiter.query.filter_by(
-        nutzer=worker_id, betrieb=company_id).\
+        member=worker_id, betrieb=company_id).\
         first()
     return arbeiter
 
@@ -431,12 +431,12 @@ def get_worker_in_company(worker_id, company_id):
 def get_hours_worked(betrieb_id):
     """get all hours worked in a company."""
     hours_worked = db.session.query(
-        Nutzer.id, Nutzer.name,
+        Member.id, Member.name,
         func.concat(func.sum(Arbeit.stunden), " Std.").
         label('summe_stunden')
         ).select_from(Angebote).\
         filter(Angebote.betrieb == betrieb_id).\
-        join(Arbeit).join(Nutzer).group_by(Nutzer.id).\
+        join(Arbeit).join(Member).group_by(Member.id).\
         order_by(func.sum(Arbeit.stunden).desc()).all()
     return hours_worked
 
@@ -489,12 +489,12 @@ def get_first_worker(betrieb_id):
     return worker
 
 
-def add_new_worker_to_company(nutzer_id, betrieb_id):
+def add_new_worker_to_company(member_id, betrieb_id):
     """
     adds a new worker to Company.
     """
     new_worker = Arbeiter(
-        nutzer=nutzer_id,
+        member=member_id,
         betrieb=betrieb_id)
     db.session.add(new_worker)
     db.session.commit()

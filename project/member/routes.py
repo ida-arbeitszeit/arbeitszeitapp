@@ -5,34 +5,34 @@ from flask_login import login_required, current_user
 from project.tables import KaeufeTable, Preiszusammensetzung
 from project.forms import ProductSearchForm
 from project import database
-from project.economy import nutzer
+from project.economy import member
 
 
-main_nutzer = Blueprint(
-    'main_nutzer', __name__, template_folder='templates',
+main_member = Blueprint(
+    'main_member', __name__, template_folder='templates',
     static_folder='static'
     )
 
 
-@main_nutzer.route('/nutzer/kaeufe')
+@main_member.route('/member/kaeufe')
 @login_required
 def meine_kaeufe():
     try:
         user_type = session["user_type"]
     except:
-        user_type = "nutzer"
+        user_type = "member"
 
     if user_type == "betrieb":
         return redirect(url_for('auth.zurueck'))
     else:
-        session["user_type"] = "nutzer"
+        session["user_type"] = "member"
 
         purchases = database.get_purchases(current_user.id)
         kaufh_table = KaeufeTable(purchases, no_items="(Noch keine Käufe.)")
         return render_template('meine_kaeufe.html', kaufh_table=kaufh_table)
 
 
-@main_nutzer.route('/nutzer/suchen', methods=['GET', 'POST'])
+@main_member.route('/member/suchen', methods=['GET', 'POST'])
 @login_required
 def suchen():
     """search products in catalog."""
@@ -54,13 +54,13 @@ def suchen():
             flash('Keine Ergebnisse!')
         else:
             return render_template(
-                'suchen_nutzer.html', form=search_form, results=results)
+                'suchen_member.html', form=search_form, results=results)
 
     return render_template(
-        'suchen_nutzer.html', form=search_form, results=results)
+        'suchen_member.html', form=search_form, results=results)
 
 
-@main_nutzer.route('/nutzer/details/<int:id>', methods=['GET', 'POST'])
+@main_member.route('/member/details/<int:id>', methods=['GET', 'POST'])
 @login_required
 def details(id):
     """show details of selected product."""
@@ -75,56 +75,56 @@ def details(id):
     preise = (angebot_.preis, angebot_.koop_preis)
 
     if request.method == 'POST':
-        return redirect('/nutzer/suchen')
+        return redirect('/member/suchen')
 
     return render_template(
-        'details_nutzer.html',
+        'details_member.html',
         table_preiszus=table_preiszus,
         piped=piped,
         preise=preise)
 
 
-@main_nutzer.route('/nutzer/kaufen/<int:id>', methods=['GET', 'POST'])
+@main_member.route('/member/kaufen/<int:id>', methods=['GET', 'POST'])
 @login_required
 def kaufen(id):
     srch = database.SearchProducts()
     angebot = srch.get_angebot_by_id(id)
     if request.method == 'POST':  # if user buys
-        nutzer.buy_product(
-            "nutzer", database.get_angebot_by_id(id), current_user.id)
+        member.buy_product(
+            "member", database.get_angebot_by_id(id), current_user.id)
         flash(f"Kauf von '{angebot.angebot_name}' erfolgreich!")
-        return redirect('/nutzer/suchen')
+        return redirect('/member/suchen')
 
-    return render_template('kaufen_nutzer.html', angebot=angebot)
+    return render_template('kaufen_member.html', angebot=angebot)
 
 
-@main_nutzer.route('/nutzer/profile')
+@main_member.route('/member/profile')
 @login_required
 def profile():
     user_type = session["user_type"]
-    if user_type == "nutzer":
+    if user_type == "member":
         workplaces = database.get_workplaces(current_user.id)
-        return render_template('profile_nutzer.html',
+        return render_template('profile_member.html',
                                arbeitsstellen=workplaces)
     elif user_type == "betrieb":
         return redirect(url_for('auth.zurueck'))
 
 
-@main_nutzer.route('/nutzer/auszahlung', methods=['GET', 'POST'])
+@main_member.route('/member/auszahlung', methods=['GET', 'POST'])
 @login_required
 def auszahlung():
     if request.method == 'POST':
         amount = Decimal(request.form["betrag"])
-        code = nutzer.withdraw(current_user.id, amount)
+        code = member.withdraw(current_user.id, amount)
         # Show code to user
         flash(amount)
         flash(code)
-        return render_template('auszahlung_nutzer.html')
+        return render_template('auszahlung_member.html')
 
-    return render_template('auszahlung_nutzer.html')
+    return render_template('auszahlung_member.html')
 
 
-@main_nutzer.route('/nutzer/hilfe')
+@main_member.route('/member/hilfe')
 @login_required
 def hilfe():
-    return render_template('nutzer_hilfe.html')
+    return render_template('member_hilfe.html')

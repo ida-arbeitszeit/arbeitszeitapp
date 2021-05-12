@@ -19,15 +19,8 @@ def create_app():
     login_manager.init_app(app)
 
     with app.app_context():
-
-        # imports like the following may be necessary in order to
-        # update changes made to tables in models.
-        from .models import Nutzer
+        from .models import Member
         from .models import Betriebe
-        from .models import Auszahlungen
-        from .models import Kaeufe
-        from .models import Kooperationen
-        from .models import KooperationenMitglieder
 
         @login_manager.user_loader
         def load_user(user_id):
@@ -36,18 +29,18 @@ def create_app():
             stored in the session.
             """
             user_type = session["user_type"]
-            if user_type == "nutzer":
-                return Nutzer.query.get(int(user_id))
+            if user_type == "member":
+                return Member.query.get(int(user_id))
             elif user_type == "betrieb":
                 return Betriebe.query.get(int(user_id))
 
         # register blueprints
         from .auth import routes as auth_routes
         from .betriebe import routes as betriebe_routes
-        from .nutzer import routes as nutzer_routes
+        from .member import routes as member_routes
         app.register_blueprint(auth_routes.auth)
         app.register_blueprint(betriebe_routes.main_betriebe)
-        app.register_blueprint(nutzer_routes.main_nutzer)
+        app.register_blueprint(member_routes.main_member)
 
         # create the initial database
         db.create_all()

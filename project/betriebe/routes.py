@@ -5,7 +5,7 @@ from flask import Blueprint, render_template, session, redirect, url_for,\
     request, flash
 from flask_login import login_required, current_user
 from sqlalchemy.sql import func
-from project.models import Angebote, Kaeufe, Betriebe, Nutzer,\
+from project.models import Angebote, Kaeufe, Betriebe, Member,\
     Produktionsmittel, Arbeit, Auszahlungen, Kooperationen,\
     KooperationenMitglieder
 from project.tables import ProduktionsmittelTable, WorkersTable, HoursTable,\
@@ -31,7 +31,7 @@ def profile():
             having_workers = False
         return render_template('profile_betriebe.html',
                                having_workers=having_workers)
-    elif user_type == "nutzer":
+    elif user_type == "member":
         return redirect(url_for('auth.zurueck'))
 
 
@@ -48,18 +48,18 @@ def arbeit():
         hours_worked, no_items='(Noch keine Stunden gearbeitet.)')
 
     if request.method == 'POST':  # (add worker to company)
-        # check if nutzer exists, if not flash warning
-        if not database.get_user_by_id(request.form['nutzer']):
-            flash("Nutzer existiert nicht.")
+        # check if member exists, if not flash warning
+        if not database.get_user_by_id(request.form['member']):
+            flash("Mitglied existiert nicht.")
             return redirect(url_for('main_betriebe.arbeit'))
 
         # check if user already works in company
         req_arbeiter = database.get_worker_in_company(
-            request.form['nutzer'], current_user.id)
+            request.form['member'], current_user.id)
         if req_arbeiter:
-            flash("Nutzer ist bereits in diesem Betrieb beschäftigt.")
+            flash("Mitglied ist bereits in diesem Betrieb beschäftigt.")
         else:
-            company.add_new_worker(request.form['nutzer'], current_user.id)
+            company.add_new_worker(request.form['member'], current_user.id)
 
         return redirect(url_for('main_betriebe.arbeit'))
 
@@ -166,7 +166,7 @@ def neues_angebot():
         # arbeit
         # dict with arbeit values
         arbeit_dict = dict(
-            filter(lambda elem: elem[0][:7] == 'nutzer_',
+            filter(lambda elem: elem[0][:7] == 'member_',
                    request_dict.items()))
         # arbeit dict entries that are not zero
         arbeit_dict_not_zero = dict(
@@ -174,13 +174,13 @@ def neues_angebot():
         kosten_arbeit = 0
         if arbeit_dict_not_zero:
             # calculate kosten arbeit
-            nutzer_id_list = []
+            member_id_list = []
             stunden_list = []
             for key in list(arbeit_dict_not_zero.keys()):
-                nutzer_id_list.append(key[7:])
+                member_id_list.append(key[7:])
             for value in list(arbeit_dict_not_zero.values()):
                 stunden_list.append(Decimal(value))
-            assert len(nutzer_id_list) == len(stunden_list)
+            assert len(member_id_list) == len(stunden_list)
             kosten_arbeit = sum(stunden_list) / quantity
 
         # produktionsmittel
@@ -236,17 +236,17 @@ def neues_angebot():
 
             # create rows in table "arbeit"
             if arbeit_dict_not_zero:
-                assert len(nutzer_id_list) == len(stunden_list)
-                for count, i in enumerate(nutzer_id_list):
+                assert len(member_id_list) == len(stunden_list)
+                for count, i in enumerate(member_id_list):
                     new_arbeit = Arbeit(
                         angebot=new_angebot.id,
-                        nutzer=i,
+                        member=i,
                         stunden=stunden_list[count] / quantity)
                     db.session.add(new_arbeit)
                     # guthaben der arbeiter erhöhen
                     # TO DO: check if it's inefficient
                     # doing this for every quant
-                    Nutzer.query.filter_by(id=i).\
+                    Member.query.filter_by(id=i).\
                         first().guthaben += stunden_list[count] / quantity
 
             # create new row in produktionsmittel (um gesamten verbrauch
@@ -321,12 +321,12 @@ def angebot_verkaufen():
             if round(angebot.preis, 2) != round(value_code, 2):
                 flash("Wert des Codes entspricht nicht dem Preis.")
             else:
-                kaufender_type = "nutzer" if auszahlung.type_nutzer\
+                kaufender_type = "member" if auszahlung.type_member\
                                           else "betriebe"
                 database.kaufen(
                     kaufender_type=kaufender_type,
                     angebot=angebot,
-                    kaeufer_id=auszahlung.nutzer)
+                    kaeufer_id=auszahlung.member)
                 auszahlung.entwertet = True
                 db.session.commit()
                 flash("Verkauf erfolgreich")

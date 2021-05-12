@@ -10,7 +10,7 @@ from flask_login import UserMixin
 from project.extensions import db
 
 
-class Nutzer(UserMixin, db.Model):
+class Member(UserMixin, db.Model):
     # primary keys are required by SQLAlchemy
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), unique=True, nullable=False)
@@ -60,10 +60,10 @@ class Kaeufe(UserMixin, db.Model):
     kauf_date = db.Column(db.DateTime, nullable=False)
     angebot = db.Column(
         db.Integer, db.ForeignKey("angebote.id"), nullable=False)
-    type_nutzer = db.Column(db.Boolean, nullable=False)
+    type_member = db.Column(db.Boolean, nullable=False)
     betrieb = db.Column(
         db.Integer, db.ForeignKey("betriebe.id"), nullable=True)
-    nutzer = db.Column(db.Integer, db.ForeignKey("nutzer.id"), nullable=True)
+    member = db.Column(db.Integer, db.ForeignKey("member.id"), nullable=True)
     kaufpreis = db.Column(db.Numeric(), nullable=False)
 
 
@@ -71,14 +71,14 @@ class Arbeit(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     angebot = db.Column(
         db.Integer, db.ForeignKey("angebote.id"), nullable=False)
-    nutzer = db.Column(db.Integer, db.ForeignKey("nutzer.id"), nullable=False)
+    member = db.Column(db.Integer, db.ForeignKey("member.id"), nullable=False)
     stunden = db.Column(db.Numeric(), nullable=False)
     # ausbezahlt = db.Column(db.Boolean, nullable=False, default=False)
 
 
 class Arbeiter(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    nutzer = db.Column(db.Integer, db.ForeignKey("nutzer.id"), nullable=False)
+    member = db.Column(db.Integer, db.ForeignKey("member.id"), nullable=False)
     betrieb = db.Column(
         db.Integer, db.ForeignKey("betriebe.id"), nullable=False)
 
@@ -98,19 +98,19 @@ prozent_gebraucht='%s')>" % (
 
 class Bewertungen(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    # either betrieb or nutzer:
-    type_nutzer = db.Column(db.Boolean, nullable=False)
+    # either betrieb or member:
+    type_member = db.Column(db.Boolean, nullable=False)
     betrieb = db.Column(
         db.Integer, db.ForeignKey("betriebe.id"), nullable=True)
-    nutzer = db.Column(db.Integer, db.ForeignKey("nutzer.id"), nullable=True)
+    member = db.Column(db.Integer, db.ForeignKey("member.id"), nullable=True)
     kauf = db.Column(db.Integer, db.ForeignKey("kaeufe.id"), nullable=False)
     bewertung = db.Column(db.Integer, nullable=False)
 
 
 class Auszahlungen(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    type_nutzer = db.Column(db.Boolean, nullable=False)
-    nutzer = db.Column(db.Integer, db.ForeignKey("nutzer.id"), nullable=False)
+    type_member = db.Column(db.Boolean, nullable=False)
+    member = db.Column(db.Integer, db.ForeignKey("member.id"), nullable=False)
     betrag = db.Column(db.Numeric(), nullable=False)
     code = db.Column(db.String(100), nullable=False)
     entwertet = db.Column(db.Boolean, nullable=False, default=False)

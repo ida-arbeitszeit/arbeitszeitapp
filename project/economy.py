@@ -33,7 +33,7 @@ class Company:
         accounting.publish_products()
 
 
-class Nutzer:
+class Member:
     def buy_product(self, buyer_type, product_id, buyer_id):
         database.kaufen(buyer_type, product_id, buyer_id)
 
@@ -47,4 +47,4 @@ class Nutzer:
 
 accounting = SocialAccounting()
 company = Company()
-nutzer = Nutzer()
+member = Member()

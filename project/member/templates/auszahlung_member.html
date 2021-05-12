@@ -1,4 +1,4 @@
-{% extends "base_nutzer.html" %}
+{% extends "base_member.html" %}
 
 {% block content2 %}
 
@@ -31,7 +31,7 @@
           </div>
         </div>
           <div class="block">
-            <a class="button is-light" href="{{ url_for('main_nutzer.profile') }}">Abbrechen</a>
+            <a class="button is-light" href="{{ url_for('main_member.profile') }}">Abbrechen</a>
           </div>
       </form>
     {% else %}
@@ -39,7 +39,7 @@
         <p>Du hast leider kein Guthaben zum Auszahlen.</p>
       </div>
       <div class="block">
-        <a class="button is-light" href="{{ url_for('main_nutzer.profile') }}">Zurück</a>
+        <a class="button is-light" href="{{ url_for('main_member.profile') }}">Zurück</a>
       </div>
     {% endif %}
 
