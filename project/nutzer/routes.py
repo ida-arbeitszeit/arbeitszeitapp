@@ -4,9 +4,9 @@ from decimal import Decimal
 from flask import Blueprint, render_template, session,\
     redirect, url_for, request, flash
 from flask_login import login_required, current_user
-from ..tables import KaeufeTable, Preiszusammensetzung
-from ..forms import ProductSearchForm
-from .. import database
+from project.tables import KaeufeTable, Preiszusammensetzung
+from project.forms import ProductSearchForm
+from project import database
 
 
 main_nutzer = Blueprint(

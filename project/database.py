@@ -1,8 +1,8 @@
 import datetime
-from .models import Nutzer, Betriebe, Arbeiter, Angebote, Arbeit,\
+from project.models import Nutzer, Betriebe, Arbeiter, Angebote, Arbeit,\
     Produktionsmittel, Kaeufe, Auszahlungen, KooperationenMitglieder
 from sqlalchemy.sql import func, case
-from .extensions import db
+from project.extensions import db
 from graphviz import Graph
 from sqlalchemy.orm import aliased
 

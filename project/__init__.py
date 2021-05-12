@@ -1,6 +1,6 @@
 from flask import Flask, session
 from flask_table import Table, Col  # Do not delete
-from .extensions import db, login_manager
+from project.extensions import db, login_manager
 
 
 def create_app():

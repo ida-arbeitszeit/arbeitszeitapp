@@ -1,18 +1,19 @@
 import datetime
-from ..extensions import db
+from project.extensions import db
 from decimal import Decimal
 from flask import Blueprint, render_template, session, redirect, url_for,\
     request, flash
 from flask_login import login_required, current_user
 from sqlalchemy.sql import func
-from ..models import Angebote, Kaeufe, Betriebe, Nutzer, Produktionsmittel,\
-    Arbeit, Auszahlungen, Kooperationen, KooperationenMitglieder
-from ..tables import ProduktionsmittelTable, WorkersTable, HoursTable,\
+from project.models import Angebote, Kaeufe, Betriebe, Nutzer,\
+    Produktionsmittel, Arbeit, Auszahlungen, Kooperationen,\
+    KooperationenMitglieder
+from project.tables import ProduktionsmittelTable, WorkersTable, HoursTable,\
     Preiszusammensetzung
-from ..forms import ProductSearchForm
+from project.forms import ProductSearchForm
 
-from .. import database
-from ..economy import company
+from project import database
+from project.economy import company
 
 main_betriebe = Blueprint('main_betriebe', __name__,
                           template_folder='templates', static_folder='static')

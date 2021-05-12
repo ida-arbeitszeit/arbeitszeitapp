@@ -1,6 +1,6 @@
 """Business logic"""
 
-from . import database
+from project import database
 
 
 class SocialAccounting:
