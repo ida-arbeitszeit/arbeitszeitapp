@@ -346,16 +346,16 @@ def buy(kaufender_type, angebot, kaeufer_id) -> None:
     """
     buy product.
     """
-    buyer_model = Company if kaufender_type == "company" else Member
     datetime_service = DatetimeService()
+    buyer_model = Company if kaufender_type == "company" else Member
     buyer_orm = db.session.query(buyer_model).filter(buyer_model.id == kaeufer_id).first()
-
-    product_offer = product_offer_from_orm(angebot)
     buyer: Union[entities.Member, entities.Company = (
         company_from_orm(buyer_orm)
         if kaufender_type == "company"
         else member_from_orm(buyer_orm)
     )
+
+    product_offer = product_offer_from_orm(angebot)
     purchase_factory = PurchaseFactory()
     purchase = purchase_product(
         datetime_service,
