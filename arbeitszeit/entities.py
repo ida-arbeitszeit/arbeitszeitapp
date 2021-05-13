@@ -1,16 +1,16 @@
-from decimal import Decimal
-from datetime import datetime
 from dataclasses import dataclass
+from datetime import datetime
+from decimal import Decimal
 from typing import Callable, Union
 
 
 class Member:
-    def __init__(self, id: int, reduce_credit_in_db: Callable[[Decimal], None]) -> None:
-        self._reduce_credit_in_db = reduce_credit_in_db
+    def __init__(self, id: int, change_credit: Callable[[Decimal], None]) -> None:
+        self._change_credit = change_credit
         self._id = id
 
     def reduce_credit(self, amount: Decimal) -> None:
-        self._reduce_credit_in_db(amount)
+        self._change_credit(-amount)
 
     @property
     def id(self):
@@ -18,9 +18,7 @@ class Member:
 
 
 class ProductOffer:
-    def __init__(
-        self, id: int, deactivate_offer_in_db: Callable[[], None]
-    ) -> None:
+    def __init__(self, id: int, deactivate_offer_in_db: Callable[[], None]) -> None:
         self._id = id
         self._deactivate = deactivate_offer_in_db
 
@@ -33,12 +31,15 @@ class ProductOffer:
 
 
 class Company:
-    def __init__(self, id: int, increase_credit: Callable[[Decimal], None]) -> None:
+    def __init__(self, id: int, change_credit: Callable[[Decimal], None]) -> None:
         self._id = id
-        self._increase_credit = increase_credit
+        self._change_credit = change_credit
 
     def increase_credit(self, amount: Decimal) -> None:
-        self._increase_credit(amount)
+        self._change_credit(amount)
+
+    def reduce_credit(self, amount: Decimal) -> None:
+        self._change_credit(amount)
 
     @property
     def id(self):

@@ -8,7 +8,7 @@ from project.extensions import db
 from graphviz import Graph
 from sqlalchemy.orm import aliased
 
-from arbeitszeit.use_cases import privat_product_purchase
+from arbeitszeit.use_cases import purchase_product
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.purchase_factory import PurchaseFactory
 from arbeitszeit import entities
@@ -46,7 +46,7 @@ def company_to_orm(company: entities.Company) -> Company:
 def company_from_orm(company_orm: Company) -> entities.Company:
     return entities.Company(
         id=company_orm.id,
-        increase_credit=lambda amount: setattr(company_orm, "guthaben", company_orm.guthaben + amount)
+        change_credit=lambda amount: setattr(company_orm, "guthaben", company_orm.guthaben + amount)
     )
 
 
@@ -68,7 +68,7 @@ def member_to_orm(member: entities.Member) -> Member:
 def member_from_orm(member: Member) -> entities.Member:
     return entities.Member(
         id=member.id,
-        reduce_credit_in_db=lambda amount: setattr(member, "guthaben", member.guthaben - amount),
+        change_credit=lambda amount: setattr(member, "guthaben", member.guthaben + amount),
     )
 
 
@@ -346,13 +346,18 @@ def buy(kaufender_type, angebot, kaeufer_id) -> None:
     """
     buy product.
     """
+    buyer_model = Company if kaufender_type == "company" else Member
     datetime_service = DatetimeService()
-    buyer_orm = db.session.query(Member).filter(Member.id == kaeufer_id).first()
+    buyer_orm = db.session.query(buyer_model).filter(buyer_model.id == kaeufer_id).first()
 
     product_offer = product_offer_from_orm(angebot)
-    buyer = member_from_orm(buyer_orm)
+    buyer: Union[entities.Member, entities.Company = (
+        company_from_orm(buyer_orm)
+        if kaufender_type == "company"
+        else member_from_orm(buyer_orm)
+    )
     purchase_factory = PurchaseFactory()
-    purchase = privat_product_purchase(
+    purchase = purchase_product(
         datetime_service,
         lookup_koop_price,
         lookup_product_provider,
@@ -360,7 +365,8 @@ def buy(kaufender_type, angebot, kaeufer_id) -> None:
         buyer,
         purchase_factory,
     )
-    purchase_orm_from_purchase(purchase)  # this needs to be executed to create the actual db model
+    purchase_orm_from_purchase(purchase)  # this needs to be executed to
+                                          # create the actual db model
     db.session.commit()
 
 

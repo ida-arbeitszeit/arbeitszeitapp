@@ -1,7 +1,8 @@
 from datetime import datetime
-from arbeitszeit.entities import ProductOffer, Member, Company, Purchase
 from decimal import Decimal
 from typing import Union
+
+from arbeitszeit.entities import Company, Member, ProductOffer, Purchase
 
 
 class PurchaseFactory:
