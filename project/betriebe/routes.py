@@ -5,7 +5,7 @@ from flask import Blueprint, render_template, session, redirect, url_for,\
     request, flash
 from flask_login import login_required, current_user
 from sqlalchemy.sql import func
-from ..models import Angebote, Kaeufe, Betriebe, Nutzer, Produktionsmittel,\
+from ..models import Angebote, Kaeufe, Company, Member, Produktionsmittel,\
     Arbeit, Auszahlungen, Kooperationen, KooperationenMitglieder
 from ..tables import ProduktionsmittelTable, WorkersTable, HoursTable,\
     Preiszusammensetzung
@@ -242,7 +242,7 @@ def neues_angebot():
                     # guthaben der arbeiter erhöhen
                     # TO DO: check if it's inefficient
                     # doing this for every quant
-                    Nutzer.query.filter_by(id=i).\
+                    Member.query.filter_by(id=i).\
                         first().guthaben += stunden_list[count] / quantity
 
             # create new row in produktionsmittel (um gesamten verbrauch
@@ -277,9 +277,9 @@ def meine_angebote():
     srch = sql.SearchProducts()
     qry = srch.get_angebote()
     aktuelle_angebote = qry.filter(
-        Angebote.aktiv == True, Betriebe.id == current_user.id).all()
+        Angebote.aktiv == True, Company.id == current_user.id).all()
     vergangene_angebote = qry.filter(
-        Angebote.aktiv == False, Betriebe.id == current_user.id).all()
+        Angebote.aktiv == False, Company.id == current_user.id).all()
     return render_template('meine_angebote.html',
                            aktuelle_angebote=aktuelle_angebote,
                            vergangene_angebote=vergangene_angebote)
