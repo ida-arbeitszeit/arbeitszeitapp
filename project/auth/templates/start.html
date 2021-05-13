@@ -34,8 +34,8 @@
               Eine Plattform für Arbeitszeitrechnung.
             </h2>
             <div class="buttons is-centered">
-              <a class="button" href="{{ url_for('auth.login_nutzer') }}">Nutzer</a>
-              <a class="button" href="{{ url_for('auth.login_betriebe') }}">Betrieb</a>
+              <a class="button" href="{{ url_for('auth.login_member') }}">Mitglied</a>
+              <a class="button" href="{{ url_for('auth.login_company') }}">Betrieb</a>
             </div>
             {% with messages = get_flashed_messages() %}
             {% if messages %}

@@ -1,0 +1,27 @@
+{% extends "base_company.html" %}
+
+{% block content2 %}
+
+<div class="columns is-centered">
+    <div class="column is-three-fifths">
+        <h1 class="title">
+          Vorhandene Produktionsmittel
+        </h1>
+        <div class="table-container">
+          <div class="content">
+                {{ table_aktiv }}
+          </div>
+        </div>
+
+        <h1 class="title">
+          Verbrauchte Produktionsmittel
+        </h1>
+
+        <div class="table-container">
+          <div class="content">
+                {{ table_inaktiv }}
+          </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

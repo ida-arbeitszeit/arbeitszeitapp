@@ -1,0 +1,35 @@
+{% extends "base_company.html" %}
+
+{% block content2 %}
+    <div class="columns is-centered">
+      <div class="column is-two-thirds">
+
+        <h1 class="title">Angebot löschen</h1>
+        <div class="block">
+          <p>
+            Willst du das Angebot <strong>"{{ angebot.name }}"</strong> wirklich löschen?<br>
+            Deine Kosten für Arbeit und Produktionsmittel werden <strong>nicht</strong> ersetzt.
+          </p>
+        </div>
+
+
+
+          <form method="post">
+            <div class="field">
+              <div class="control">
+                <div class="field is-grouped is-grouped-centered">
+                  <input class="button is-primary" type="submit" value="Angebot löschen">
+                  <a class="button is-light" href="{{  url_for('main_company.my_offers') }}">
+                    Abbrechen
+                  </a>
+                </div>
+
+              </div>
+              <br>
+            </div>
+          </form>
+
+      </div>
+    </div>
+
+{% endblock %}

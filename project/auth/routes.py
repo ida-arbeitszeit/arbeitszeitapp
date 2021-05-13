@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, request,\
     flash, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required
-from .. import sql
+from project import database
 
 auth = Blueprint(
     'auth', __name__, template_folder='templates', static_folder='static')
@@ -19,99 +19,99 @@ def help():
     return render_template('start_hilfe.html')
 
 
-# Nutzer
-@auth.route('/nutzer/signup')
-def signup_nutzer():
-    return render_template('signup_nutzer.html')
+# Member
+@auth.route('/member/signup')
+def signup_member():
+    return render_template('signup_member.html')
 
 
-@auth.route('/nutzer/signup', methods=['POST'])
-def signup_nutzer_post():
+@auth.route('/member/signup', methods=['POST'])
+def signup_member_post():
     email = request.form.get('email')
     name = request.form.get('name')
     password = request.form.get('password')
 
-    nutzer = sql.get_user_by_mail(email=email)
+    member = database.get_user_by_mail(email=email)
 
-    if nutzer:
+    if member:
         flash('Email address already exists')
-        return redirect(url_for('auth.signup_nutzer'))
+        return redirect(url_for('auth.signup_member'))
 
-    sql.add_new_user(
+    database.add_new_user(
         email=email,
         name=name,
         password=generate_password_hash(password, method='sha256')
     )
 
-    return redirect(url_for('auth.login_nutzer'))
+    return redirect(url_for('auth.login_member'))
 
 
-@auth.route('/nutzer/login')
-def login_nutzer():
-    return render_template('login_nutzer.html')
+@auth.route('/member/login')
+def login_member():
+    return render_template('login_member.html')
 
 
-@auth.route('/nutzer/login', methods=['POST'])
-def login_nutzer_post():
+@auth.route('/member/login', methods=['POST'])
+def login_member_post():
     email = request.form.get('email')
     password = request.form.get('password')
     remember = True if request.form.get('remember') else False
-    nutzer = sql.get_user_by_mail(email)
+    member = database.get_user_by_mail(email)
 
-    if not nutzer or not check_password_hash(nutzer.password, password):
+    if not member or not check_password_hash(member.password, password):
         flash('Please check your login details and try again.')
-        return redirect(url_for('auth.login_nutzer'))
+        return redirect(url_for('auth.login_member'))
 
-    session["user_type"] = "nutzer"
-    login_user(nutzer, remember=remember)
-    return redirect(url_for('main_nutzer.profile'))
-
-
-# Betriebe
-@auth.route('/betriebe/login')
-def login_betriebe():
-    return render_template('login_betriebe.html')
+    session["user_type"] = "member"
+    login_user(member, remember=remember)
+    return redirect(url_for('main_member.profile'))
 
 
-@auth.route('/betriebe/login', methods=['POST'])
-def login_betriebe_post():
+# Company
+@auth.route('/company/login')
+def login_company():
+    return render_template('login_company.html')
+
+
+@auth.route('/company/login', methods=['POST'])
+def login_company_post():
     email = request.form.get('email')
     password = request.form.get('password')
     remember = True if request.form.get('remember') else False
-    betrieb = sql.get_company_by_mail(email)
+    company = database.get_company_by_mail(email)
 
-    if not betrieb or not check_password_hash(betrieb.password, password):
+    if not company or not check_password_hash(company.password, password):
         flash('Please check your login details and try again.')
-        return redirect(url_for('auth.login_betriebe'))
+        return redirect(url_for('auth.login_company'))
 
-    session["user_type"] = "betrieb"
-    login_user(betrieb, remember=remember)
-    return redirect(url_for('main_betriebe.profile'))
-
-
-@auth.route('/betriebe/signup')
-def signup_betriebe():
-    return render_template('signup_betriebe.html')
+    session["user_type"] = "company"
+    login_user(company, remember=remember)
+    return redirect(url_for('main_company.profile'))
 
 
-@auth.route('/betriebe/signup', methods=['POST'])
-def signup_betriebe_post():
+@auth.route('/company/signup')
+def signup_company():
+    return render_template('signup_company.html')
+
+
+@auth.route('/company/signup', methods=['POST'])
+def signup_company_post():
     email = request.form.get('email')
     name = request.form.get('name')
     password = request.form.get('password')
 
-    betrieb = sql.get_company_by_mail(email)
+    company = database.get_company_by_mail(email)
 
-    if betrieb:
+    if company:
         flash('Email address already exists')
-        return redirect(url_for('auth.signup_betriebe'))
+        return redirect(url_for('auth.signup_company'))
 
-    sql.add_new_company(
+    database.add_new_company(
         email=email,
         name=name,
         password=generate_password_hash(password, method='sha256'))
 
-    return redirect(url_for('auth.login_betriebe'))
+    return redirect(url_for('auth.login_company'))
 
 
 # logout

@@ -1,0 +1,86 @@
+{% extends "base_member.html" %}
+
+{% block content2 %}
+
+<div class="columns is-centered">
+  <div class="column is-half">
+    <div class="content">
+      <h1 class="title">
+        Willkommen, {{ current_user.name }}!
+      </h1>
+    </div>
+
+      <br>
+
+      <div class="level">
+        <div class="level-left">
+          <div class="level-item">
+            <p class="has-text-weight-semibold">Deine ID:</p>
+          </div>
+        </div>
+        <div class="level-right">
+          <div class="level-item">
+            <p>{{ current_user.id }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="level">
+        <div class="level-left">
+          <div class="level-item">
+            <p class="has-text-weight-semibold">Dein Guthaben:</p>
+          </div>
+        </div>
+        <div class="level-right">
+          <div class="level-item">
+            <p>{{ current_user.guthaben|round(2) }} Stunden</p>
+          </div>
+          <div class="level-item">
+            <a class="button is-primary" href="{{ url_for('main_member.auszahlung') }}">Auszahlen</a>
+          </div>
+        </div>
+      </div>
+      <div class="level">
+        <div class="level-left">
+          <div class="level-item">
+            <p class="has-text-weight-semibold">Deine Email:</p>
+          </div>
+        </div>
+        <div class="level-right">
+          <div class="level-item">
+            <p>{{ current_user.email }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="level">
+        <div class="level-left">
+          <div class="level-item">
+            <p class="has-text-weight-semibold">Deine Arbeit:</p>
+          </div>
+        </div>
+        <div class="level-right has-text-right-tablet">
+          <div class="level-item">
+            {% if arbeitsstellen is defined and arbeitsstellen|length %}
+              <ul>
+                {% for arbeit in arbeitsstellen %}
+                  <li>{{ arbeit.name }} ({{ arbeit.email }})</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      {% if arbeitsstellen is defined and arbeitsstellen|length %}
+      {% else %}
+        <div class="content">
+          <p><div class="icon-text"><i class="fas fa-exclamation-triangle"></i></div>
+            Du bist noch in keinem Betrieb als Mitarbeiter registriert.<br>
+            Teile deinem Betrieb deine Mitglieder-ID mit, um dich registrieren zu lassen oder
+            gründe <a href="{{ url_for('auth.start') }}">hier</a> deinen eigenen Betrieb.</p>
+        </div>
+      {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}
