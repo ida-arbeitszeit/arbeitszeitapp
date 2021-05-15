@@ -1,5 +1,6 @@
 import random
 from decimal import Decimal
+from typing import Union
 import string
 from project.models import Member, Company, Arbeiter, Angebote, Arbeit,\
     Produktionsmittel, Kaeufe, Auszahlungen, KooperationenMitglieder
@@ -22,7 +23,7 @@ def id_generator(size=10, chars=string.ascii_uppercase + string.digits):
 def purchase_orm_from_purchase(purchase: entities.Purchase) -> Kaeufe:
     product_offer = product_offer_to_orm(purchase.product_offer)
     return Kaeufe(
-        kaufe_date=purchase.purchase_date,
+        kauf_date=purchase.purchase_date,
         angebot=product_offer.id,
         type_member=isinstance(purchase, entities.Member),
         company=(
@@ -81,8 +82,8 @@ def lookup_koop_price(product_offer: entities.ProductOffer) -> Decimal:
 def lookup_product_provider(
     product_offer: entities.ProductOffer
 ) -> entities.Company:
-    company_orm = Company.query.filter_by(
-        id=product_offer.id).first()
+    company_orm = db.session.query(Company).\
+        join(Angebote).filter(Angebote.id == product_offer.id).first()
     return company_from_orm(company_orm)
 
 
@@ -349,7 +350,7 @@ def buy(kaufender_type, angebot, kaeufer_id) -> None:
     datetime_service = DatetimeService()
     buyer_model = Company if kaufender_type == "company" else Member
     buyer_orm = db.session.query(buyer_model).filter(buyer_model.id == kaeufer_id).first()
-    buyer: Union[entities.Member, entities.Company = (
+    buyer: Union[entities.Member, entities.Company] = (
         company_from_orm(buyer_orm)
         if kaufender_type == "company"
         else member_from_orm(buyer_orm)
