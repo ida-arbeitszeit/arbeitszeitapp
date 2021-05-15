@@ -17,10 +17,7 @@ main_member = Blueprint(
 @main_member.route('/member/kaeufe')
 @login_required
 def my_purchases():
-    try:
-        user_type = session["user_type"]
-    except:
-        user_type = "member"
+    user_type = session["user_type"]
 
     if user_type == "company":
         return redirect(url_for('auth.zurueck'))
