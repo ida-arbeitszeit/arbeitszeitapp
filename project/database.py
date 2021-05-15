@@ -1,5 +1,5 @@
-import datetime
 import random
+from decimal import Decimal
 import string
 from project.models import Member, Company, Arbeiter, Angebote, Arbeit,\
     Produktionsmittel, Kaeufe, Auszahlungen, KooperationenMitglieder
@@ -8,10 +8,82 @@ from project.extensions import db
 from graphviz import Graph
 from sqlalchemy.orm import aliased
 
+from arbeitszeit.use_cases import purchase_product
+from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.purchase_factory import PurchaseFactory
+from arbeitszeit import entities
+
 
 def id_generator(size=10, chars=string.ascii_uppercase + string.digits):
     """generates money-code for withdrawals."""
     return ''.join(random.SystemRandom().choice(chars) for _ in range(size))
+
+
+def purchase_orm_from_purchase(purchase: entities.Purchase) -> Kaeufe:
+    product_offer = product_offer_to_orm(purchase.product_offer)
+    return Kaeufe(
+        kaufe_date=purchase.purchase_date,
+        angebot=product_offer.id,
+        type_member=isinstance(purchase, entities.Member),
+        company=(
+            company_to_orm(purchase.buyer)
+            if isinstance(purchase.buyer, entities.Company)
+            else None
+        ),
+        member=(
+            member_to_orm(purchase.buyer)
+            if isinstance(purchase.buyer, entities.Member)
+            else None
+        ),
+        kaufpreis=float(purchase.price),
+    )
+
+
+def company_to_orm(company: entities.Company) -> Company:
+    return Company.query.get(company.id)
+
+
+def company_from_orm(company_orm: Company) -> entities.Company:
+    return entities.Company(
+        id=company_orm.id,
+        change_credit=lambda amount: setattr(company_orm, "guthaben", company_orm.guthaben + amount)
+    )
+
+
+def product_offer_to_orm(product_offer: entities.ProductOffer) -> Angebote:
+    return Angebote.query.get(product_offer.id)
+
+
+def product_offer_from_orm(offer_orm: Angebote) -> entities.ProductOffer:
+    return entities.ProductOffer(
+        id=offer_orm.id,
+        deactivate_offer_in_db=lambda: setattr(offer_orm, "aktiv", False),
+    )
+
+
+def member_to_orm(member: entities.Member) -> Member:
+    return Member.query.get(member.id)
+
+
+def member_from_orm(member: Member) -> entities.Member:
+    return entities.Member(
+        id=member.id,
+        change_credit=lambda amount: setattr(member, "guthaben", member.guthaben + amount),
+    )
+
+
+def lookup_koop_price(product_offer: entities.ProductOffer) -> Decimal:
+    return Decimal(
+        SearchProducts().get_offer_by_id(product_offer.id).koop_preis
+    )
+
+
+def lookup_product_provider(
+    product_offer: entities.ProductOffer
+) -> entities.Company:
+    company_orm = Company.query.filter_by(
+        id=product_offer.id).first()
+    return company_from_orm(company_orm)
 
 
 class SearchProducts():
@@ -270,50 +342,31 @@ Kosten: {current_kosten} Std.")
 
 # Kaufen
 
-def buy(kaufender_type, angebot, kaeufer_id):
+def buy(kaufender_type, angebot, kaeufer_id) -> None:
     """
     buy product.
     """
-    # aktuellen (koop-)preis erhalten:
-    preis = SearchProducts().get_offer_by_id(angebot.id).koop_preis
+    datetime_service = DatetimeService()
+    buyer_model = Company if kaufender_type == "company" else Member
+    buyer_orm = db.session.query(buyer_model).filter(buyer_model.id == kaeufer_id).first()
+    buyer: Union[entities.Member, entities.Company = (
+        company_from_orm(buyer_orm)
+        if kaufender_type == "company"
+        else member_from_orm(buyer_orm)
+    )
 
-    # kauefe aktualisieren
-    if kaufender_type == "company":
-        kaufender = Company
-        new_kauf = Kaeufe(kauf_date=datetime.datetime.now(),
-                          angebot=angebot.id,
-                          type_member=False,
-                          company=kaeufer_id,
-                          member=None,
-                          kaufpreis=preis)
-        db.session.add(new_kauf)
-        db.session.commit()
-    elif kaufender_type == "member":
-        kaufender = Member
-        new_kauf = Kaeufe(kauf_date=datetime.datetime.now(),
-                          angebot=angebot.id,
-                          type_member=True,
-                          company=None,
-                          member=kaeufer_id,
-                          kaufpreis=preis)
-        db.session.add(new_kauf)
-        db.session.commit()
-
-    # angebote aktiv = False
-    angebot.aktiv = False
-    db.session.commit()
-
-    # guthaben käufer verringern
-    kaeufer = db.session.query(kaufender).\
-        filter(kaufender.id == kaeufer_id).first()
-    kaeufer.guthaben -= preis
-    db.session.commit()
-
-    # guthaben des anbietenden betriebes erhöhen
-    anbietender_betrieb_id = angebot.company
-    anbietender_betrieb = Company.query.filter_by(
-        id=anbietender_betrieb_id).first()
-    anbietender_betrieb.guthaben += preis  # angebot.p_kosten
+    product_offer = product_offer_from_orm(angebot)
+    purchase_factory = PurchaseFactory()
+    purchase = purchase_product(
+        datetime_service,
+        lookup_koop_price,
+        lookup_product_provider,
+        product_offer,
+        buyer,
+        purchase_factory,
+    )
+    purchase_orm_from_purchase(purchase)  # this needs to be executed to
+                                          # create the actual db model
     db.session.commit()
 
 
@@ -485,7 +538,7 @@ def delete_product(angebot_id):
 
 def get_first_worker(betrieb_id):
     """get first worker in Worker."""
-    worker = Arbeiter.query.filter_by(company=company_id).first()
+    worker = Arbeiter.query.filter_by(company=betrieb_id).first()
     return worker
 
 
