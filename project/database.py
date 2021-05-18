@@ -2,7 +2,7 @@ import random
 from decimal import Decimal
 from typing import Union
 import string
-from project.models import Member, Company, Arbeiter, Angebote, Arbeit,\
+from project.models import Member, Company, Worker, Angebote, Arbeit,\
     Produktionsmittel, Kaeufe, Auszahlungen, KooperationenMitglieder
 from sqlalchemy.sql import func, case
 from project.extensions import db
@@ -417,9 +417,9 @@ def get_purchases(user_id):
 def get_workplaces(user_id):
     """returns all workplaces the user is assigned to."""
     workplaces = db.session.query(Company)\
-        .select_from(Arbeiter).\
-        filter_by(member=user_id).\
-        join(Company, Arbeiter.company == Company.id).\
+        .select_from(Worker).\
+        filter_by(member_id=user_id).\
+        join(Company, Worker.company_id == Company.id).\
         all()
     return workplaces
 
@@ -469,18 +469,16 @@ def add_new_company(email, name, password):
 
 def get_workers(company_id):
     """get all workers working in a company."""
-    workers = db.session.query(Member.id, Member.name).\
-        select_from(Arbeiter).join(Member).\
-        filter(Arbeiter.company == company_id).group_by(Member.id).all()
+    workers = Worker.query.filter(Worker.company_id == company_id).all()
     return workers
 
 
 def get_worker_in_company(worker_id, company_id):
     """get specific worker in a company."""
-    arbeiter = Arbeiter.query.filter_by(
-        member=worker_id, company=company_id).\
+    worker = Worker.query.filter_by(
+        member_id=worker_id, company_id=company_id).\
         first()
-    return arbeiter
+    return worker
 
 
 def get_hours_worked(company_id):
@@ -540,7 +538,7 @@ def delete_product(angebot_id):
 
 def get_first_worker(betrieb_id):
     """get first worker in Worker."""
-    worker = Arbeiter.query.filter_by(company=betrieb_id).first()
+    worker = Worker.query.filter_by(company_id=betrieb_id).first()
     return worker
 
 
@@ -548,9 +546,9 @@ def add_new_worker_to_company(member_id, company_id):
     """
     adds a new worker to Company.
     """
-    new_worker = Arbeiter(
-        member=member_id,
-        company=company_id)
+    new_worker = Worker(
+        member_id=member_id,
+        company_id=company_id)
     db.session.add(new_worker)
     db.session.commit()
 

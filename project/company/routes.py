@@ -24,8 +24,8 @@ main_company = Blueprint('main_company', __name__,
 def profile():
     user_type = session["user_type"]
     if user_type == "company":
-        arbeiter = database.get_first_worker(current_user.id)
-        if arbeiter:
+        worker = database.get_first_worker(current_user.id)
+        if worker:
             having_workers = True
         else:
             having_workers = False
@@ -40,8 +40,9 @@ def profile():
 def arbeit():
     """shows workers and worked hours."""
     workers = database.get_workers(current_user.id)
+    workers_list = [w.member for w in workers]
     workers_table = WorkersTable(
-        workers, no_items='(Noch keine Mitarbeiter.)')
+        workers_list, no_items='(Noch keine Mitarbeiter.)')
 
     hours_worked = database.get_hours_worked(current_user.id)
     hours_table = HoursTable(
@@ -54,9 +55,9 @@ def arbeit():
             return redirect(url_for('main_company.arbeit'))
 
         # check if user already works in company
-        req_arbeiter = database.get_worker_in_company(
+        req_worker = database.get_worker_in_company(
             request.form['member'], current_user.id)
-        if req_arbeiter:
+        if req_worker:
             flash("Mitglied ist bereits in diesem Betrieb beschäftigt.")
         else:
             company.add_new_worker(request.form['member'], current_user.id)
@@ -159,7 +160,8 @@ def new_offer():
     Ein neues Angebot hinzufügen
     """
     produktionsmittel_aktiv, _ = database.get_means_of_prod(current_user.id)
-    arbeiter_all = database.get_workers(current_user.id)
+    workers = database.get_workers(current_user.id)
+    workers_list = [w.member for w in workers]
 
     if request.method == 'POST':
         quantity = int(request.form["quantity"])
@@ -276,7 +278,7 @@ def new_offer():
     return render_template(
         'company/new_offer.html',
         produktionsmittel_aktiv=produktionsmittel_aktiv,
-        arbeiter_all=arbeiter_all,
+        workers_list=workers_list,
         categ=categ)
 
 

@@ -8,6 +8,7 @@ with “CamelCase” converted to “camel_case”.
 
 from flask_login import UserMixin
 from project.extensions import db
+from sqlalchemy.orm import relationship
 
 
 class Member(UserMixin, db.Model):
@@ -18,6 +19,8 @@ class Member(UserMixin, db.Model):
     name = db.Column(db.String(1000), nullable=False)
     guthaben = db.Column(db.Numeric(), default=0, nullable=False)
 
+    workers = db.relationship("Worker", backref="member", lazy=True)
+
 
 class Company(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -26,6 +29,8 @@ class Company(UserMixin, db.Model):
     name = db.Column(db.String(1000), nullable=False)
     guthaben = db.Column(db.Numeric(), default=0)
     fik = db.Column(db.Numeric(), nullable=False, default=1)
+
+    workers = db.relationship("Worker", backref="company", lazy=True)
 
     def __repr__(self):
         return "<Company(email='%s', name='%s', guthaben='%s', fik='%s')>" % (
@@ -76,10 +81,10 @@ class Arbeit(UserMixin, db.Model):
     # ausbezahlt = db.Column(db.Boolean, nullable=False, default=False)
 
 
-class Arbeiter(UserMixin, db.Model):
+class Worker(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    member = db.Column(db.Integer, db.ForeignKey("member.id"), nullable=False)
-    company = db.Column(
+    member_id = db.Column(db.Integer, db.ForeignKey("member.id"), nullable=False)
+    company_id = db.Column(
         db.Integer, db.ForeignKey("company.id"), nullable=False)
 
 
