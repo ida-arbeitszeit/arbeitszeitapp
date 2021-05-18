@@ -552,7 +552,5 @@ def add_new_worker_to_company(member_id, company_id):
 # Search Angebote
 
 def get_offer_by_id(id):
-    """get first angebot, filtered by id"""
-    angebot = db.session.query(Angebote).\
-        filter(Angebote.id == id).first()
-    return angebot
+    """get offer, filtered by id"""
+    return Angebote.query.get(id)

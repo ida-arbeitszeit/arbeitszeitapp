@@ -146,7 +146,10 @@ def buy(id):
     angebot = srch.get_offer_by_id(id)
     if request.method == 'POST':  # if company buys
         company.buy_product(
-            "company", database.get_offer_by_id(id), current_user.id)
+            "company",
+            database.get_offer_by_id(id),
+            current_user.id
+            )
         flash(f"Kauf von '{angebot.angebot_name}' erfolgreich!")
         return redirect('/company/suchen')
 
