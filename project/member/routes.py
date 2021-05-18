@@ -102,7 +102,7 @@ def profile():
     if user_type == "member":
         workplaces = database.get_workplaces(current_user.id)
         return render_template('member/profile.html',
-                               arbeitsstellen=workplaces)
+                               workplaces=workplaces)
     elif user_type == "company":
         return redirect(url_for('auth.zurueck'))
 

@@ -290,13 +290,13 @@ def new_offer():
 def my_offers():
     srch = database.SearchProducts()
     qry = srch.get_offers()
-    aktuelle_angebote = qry.filter(
+    current_offers = qry.filter(
         Angebote.aktiv == True, Company.id == current_user.id).all()
-    vergangene_angebote = qry.filter(
+    past_offers = qry.filter(
         Angebote.aktiv == False, Company.id == current_user.id).all()
     return render_template('company/my_offers.html',
-                           aktuelle_angebote=aktuelle_angebote,
-                           vergangene_angebote=vergangene_angebote)
+                           current_offers=current_offers,
+                           past_offers=past_offers)
 
 
 @main_company.route('/company/delete_offer', methods=['GET', 'POST'])

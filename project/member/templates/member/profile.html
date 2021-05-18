@@ -59,9 +59,9 @@
         </div>
         <div class="level-right has-text-right-tablet">
           <div class="level-item">
-            {% if arbeitsstellen is defined and arbeitsstellen|length %}
+            {% if workplaces is defined and workplaces|length %}
               <ul>
-                {% for arbeit in arbeitsstellen %}
+                {% for arbeit in workplaces %}
                   <li>{{ arbeit.name }} ({{ arbeit.email }})</li>
                 {% endfor %}
               </ul>
@@ -70,7 +70,7 @@
         </div>
       </div>
 
-      {% if arbeitsstellen is defined and arbeitsstellen|length %}
+      {% if workplaces is defined and workplaces|length %}
       {% else %}
         <div class="content">
           <p><div class="icon-text"><i class="fas fa-exclamation-triangle"></i></div>

@@ -107,9 +107,10 @@ class SearchProducts():
         subq = db.session.query(
             func.avg(Angebote.preis)).\
             select_from(km).\
-            join(Angebote, km.mitglied == Angebote.id).\
-            filter(Angebote.aktiv == True).\
-            filter(km.kooperation == km2.kooperation).\
+            join(Angebote).\
+            filter(
+                Angebote.aktiv == True,
+                km.kooperation == km2.kooperation).\
             group_by(km.kooperation).\
             as_scalar()
 
