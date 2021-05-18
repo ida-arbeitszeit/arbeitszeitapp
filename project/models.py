@@ -19,7 +19,8 @@ class Member(UserMixin, db.Model):
     name = db.Column(db.String(1000), nullable=False)
     guthaben = db.Column(db.Numeric(), default=0, nullable=False)
 
-    workers = db.relationship("Worker", backref="member", lazy=True)
+    worker = db.relationship(
+        "Worker", backref="member", lazy=True, uselist=False)
 
 
 class Company(UserMixin, db.Model):
@@ -83,7 +84,8 @@ class Arbeit(UserMixin, db.Model):
 
 class Worker(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    member_id = db.Column(db.Integer, db.ForeignKey("member.id"), nullable=False)
+    member_id = db.Column(
+        db.Integer, db.ForeignKey("member.id"), nullable=False, unique=True)
     company_id = db.Column(
         db.Integer, db.ForeignKey("company.id"), nullable=False)
 
