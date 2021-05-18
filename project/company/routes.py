@@ -24,7 +24,7 @@ main_company = Blueprint('main_company', __name__,
 def profile():
     user_type = session["user_type"]
     if user_type == "company":
-        worker = database.get_first_worker(current_user.id)
+        worker = database.get_workers(current_user.id)
         if worker:
             having_workers = True
         else:

@@ -414,14 +414,11 @@ def get_purchases(user_id):
     return purchases
 
 
-def get_workplaces(user_id):
+def get_workplaces(member_id):
     """returns all workplaces the user is assigned to."""
-    workplaces = db.session.query(Company)\
-        .select_from(Worker).\
-        filter_by(member_id=user_id).\
-        join(Company, Worker.company_id == Company.id).\
-        all()
-    return workplaces
+    worker = Worker.query.filter_by(member_id=member_id).first()
+    companies = worker.companies.all() if worker else []
+    return companies
 
 
 def withdraw(user_id, amount):
@@ -469,15 +466,15 @@ def add_new_company(email, name, password):
 
 def get_workers(company_id):
     """get all workers working in a company."""
-    workers = Worker.query.filter(Worker.company_id == company_id).all()
+    company = Company.query.filter_by(id=company_id).first()
+    workers = company.workers
     return workers
 
 
 def get_worker_in_company(worker_id, company_id):
     """get specific worker in a company."""
-    worker = Worker.query.filter_by(
-        member_id=worker_id, company_id=company_id).\
-        first()
+    company = Company.query.filter_by(id=company_id).first()
+    worker = company.workers.filter_by(member_id=worker_id).all()
     return worker
 
 
@@ -536,20 +533,19 @@ def delete_product(angebot_id):
 
 # Worker
 
-def get_first_worker(betrieb_id):
-    """get first worker in Worker."""
-    worker = Worker.query.filter_by(company_id=betrieb_id).first()
-    return worker
-
-
 def add_new_worker_to_company(member_id, company_id):
     """
-    adds a new worker to Company.
+    registers member as worker, if necessary, and adds worker to Company.
     """
-    new_worker = Worker(
-        member_id=member_id,
-        company_id=company_id)
-    db.session.add(new_worker)
+    worker = Worker.query.filter_by(member_id=member_id).first()
+    company = Company.query.get(company_id)
+    if not worker:
+        worker = Worker(
+            member_id=member_id
+            )
+        db.session.add(worker)
+
+    company.workers.append(worker)
     db.session.commit()
 
 

@@ -1,18 +1,12 @@
 """
 Definition of database tables.
-
-The table name is automatically set by Flask-SQLAlchemy unless overridden.
-It’s derived from the class name converted to lowercase and
-with “CamelCase” converted to “camel_case”.
 """
 
 from flask_login import UserMixin
 from project.extensions import db
-from sqlalchemy.orm import relationship
 
 
 class Member(UserMixin, db.Model):
-    # primary keys are required by SQLAlchemy
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
@@ -23,6 +17,14 @@ class Member(UserMixin, db.Model):
         "Worker", backref="member", lazy=True, uselist=False)
 
 
+# Association table Company - Worker
+jobs = db.Table(
+    "jobs",
+    db.Column("company_id", db.Integer, db.ForeignKey("company.id")),
+    db.Column("worker_id", db.Integer, db.ForeignKey("worker.id"))
+)
+
+
 class Company(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), unique=True, nullable=False)
@@ -31,7 +33,12 @@ class Company(UserMixin, db.Model):
     guthaben = db.Column(db.Numeric(), default=0)
     fik = db.Column(db.Numeric(), nullable=False, default=1)
 
-    workers = db.relationship("Worker", backref="company", lazy=True)
+    workers = db.relationship(
+        "Worker",
+        secondary=jobs,
+        lazy="dynamic",
+        backref=db.backref("companies", lazy="dynamic")
+        )
 
     def __repr__(self):
         return "<Company(email='%s', name='%s', guthaben='%s', fik='%s')>" % (
@@ -83,11 +90,10 @@ class Arbeit(UserMixin, db.Model):
 
 
 class Worker(UserMixin, db.Model):
+    """Members that are workers."""
     id = db.Column(db.Integer, primary_key=True)
     member_id = db.Column(
         db.Integer, db.ForeignKey("member.id"), nullable=False, unique=True)
-    company_id = db.Column(
-        db.Integer, db.ForeignKey("company.id"), nullable=False)
 
 
 class Produktionsmittel(UserMixin, db.Model):
