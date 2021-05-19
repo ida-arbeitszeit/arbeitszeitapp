@@ -39,8 +39,7 @@ def profile():
 @login_required
 def arbeit():
     """shows workers and worked hours."""
-    workers = database.get_workers(current_user.id)
-    workers_list = [w.member for w in workers]
+    workers_list = database.get_workers(current_user.id)
     workers_table = WorkersTable(
         workers_list, no_items='(Noch keine Mitarbeiter.)')
 
@@ -163,8 +162,7 @@ def new_offer():
     Ein neues Angebot hinzufügen
     """
     produktionsmittel_aktiv, _ = database.get_means_of_prod(current_user.id)
-    workers = database.get_workers(current_user.id)
-    workers_list = [w.member for w in workers]
+    workers_list = database.get_workers(current_user.id)
 
     if request.method == 'POST':
         quantity = int(request.form["quantity"])

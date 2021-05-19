@@ -2,7 +2,7 @@ import random
 from decimal import Decimal
 from typing import Union
 import string
-from project.models import Member, Company, Worker, Angebote, Arbeit,\
+from project.models import Member, Company, Angebote, Arbeit,\
     Produktionsmittel, Kaeufe, Auszahlungen, KooperationenMitglieder
 from sqlalchemy.sql import func, case
 from project.extensions import db
@@ -417,9 +417,9 @@ def get_purchases(user_id):
 
 def get_workplaces(member_id):
     """returns all workplaces the user is assigned to."""
-    worker = Worker.query.filter_by(member_id=member_id).first()
-    companies = worker.companies.all() if worker else []
-    return companies
+    member = Member.query.filter_by(id=member_id).first()
+    workplaces = member.workplaces.all()
+    return workplaces
 
 
 def withdraw(user_id, amount):
@@ -468,14 +468,14 @@ def add_new_company(email, name, password):
 def get_workers(company_id):
     """get all workers working in a company."""
     company = Company.query.filter_by(id=company_id).first()
-    workers = company.workers
+    workers = company.workers.all()
     return workers
 
 
 def get_worker_in_company(worker_id, company_id):
     """get specific worker in a company."""
     company = Company.query.filter_by(id=company_id).first()
-    worker = company.workers.filter_by(member_id=worker_id).all()
+    worker = company.workers.filter_by(id=worker_id).all()
     return worker
 
 
@@ -536,16 +536,10 @@ def delete_product(angebot_id):
 
 def add_new_worker_to_company(member_id, company_id):
     """
-    registers member as worker, if necessary, and adds worker to Company.
+    Add member as workers to Company.
     """
-    worker = Worker.query.filter_by(member_id=member_id).first()
-    company = Company.query.get(company_id)
-    if not worker:
-        worker = Worker(
-            member_id=member_id
-            )
-        db.session.add(worker)
-
+    worker = Member.query.filter_by(id=member_id).first()
+    company = Company.query.filter_by(id=company_id).first()
     company.workers.append(worker)
     db.session.commit()
 

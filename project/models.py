@@ -6,6 +6,14 @@ from flask_login import UserMixin
 from project.extensions import db
 
 
+# Association table Company - Member
+jobs = db.Table(
+    "jobs",
+    db.Column("member_id", db.Integer, db.ForeignKey("member.id")),
+    db.Column("company_id", db.Integer, db.ForeignKey("company.id"))
+)
+
+
 class Member(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), unique=True, nullable=False)
@@ -13,18 +21,14 @@ class Member(UserMixin, db.Model):
     name = db.Column(db.String(1000), nullable=False)
     guthaben = db.Column(db.Numeric(), default=0, nullable=False)
 
-    worker = db.relationship(
-        "Worker", backref="member", lazy=True, uselist=False)
-
-
-# Association table Company - Worker
-jobs = db.Table(
-    "jobs",
-    db.Column("company_id", db.Integer, db.ForeignKey("company.id")),
-    db.Column("worker_id", db.Integer, db.ForeignKey("worker.id"))
-)
-
-
+    workplaces = db.relationship(
+        "Company",
+        secondary=jobs,
+        lazy="dynamic",
+        backref=db.backref("workers", lazy="dynamic")
+        )
+        
+        
 class Company(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), unique=True, nullable=False)
@@ -32,13 +36,6 @@ class Company(UserMixin, db.Model):
     name = db.Column(db.String(1000), nullable=False)
     guthaben = db.Column(db.Numeric(), default=0)
     fik = db.Column(db.Numeric(), nullable=False, default=1)
-
-    workers = db.relationship(
-        "Worker",
-        secondary=jobs,
-        lazy="dynamic",
-        backref=db.backref("companies", lazy="dynamic")
-        )
 
     def __repr__(self):
         return "<Company(email='%s', name='%s', guthaben='%s', fik='%s')>" % (
@@ -87,13 +84,6 @@ class Arbeit(UserMixin, db.Model):
     member = db.Column(db.Integer, db.ForeignKey("member.id"), nullable=False)
     stunden = db.Column(db.Numeric(), nullable=False)
     # ausbezahlt = db.Column(db.Boolean, nullable=False, default=False)
-
-
-class Worker(UserMixin, db.Model):
-    """Members that are workers."""
-    id = db.Column(db.Integer, primary_key=True)
-    member_id = db.Column(
-        db.Integer, db.ForeignKey("member.id"), nullable=False, unique=True)
 
 
 class Produktionsmittel(UserMixin, db.Model):
