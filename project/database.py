@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import Union
 import string
 from project.models import Member, Company, Angebote, Arbeit,\
-    Produktionsmittel, Kaeufe, Auszahlungen, KooperationenMitglieder
+    Produktionsmittel, Kaeufe, Withdrawal, KooperationenMitglieder
 from sqlalchemy.sql import func, case
 from project.extensions import db
 from graphviz import Graph
@@ -375,19 +375,19 @@ def buy(kaufender_type, angebot, kaeufer_id) -> None:
 
 # User
 
-def get_user_by_mail(email):
+def get_user_by_mail(email) -> Member:
     """returns first user in User, filtered by email."""
     member = Member.query.filter_by(email=email).first()
     return member
 
 
-def get_user_by_id(id):
+def get_user_by_id(id) -> Member:
     """returns first user in User, filtered by id."""
     member = Member.query.filter_by(id=id).first()
     return member
 
 
-def add_new_user(email, name, password):
+def add_new_user(email, name, password) -> None:
     """
     adds a new user to User.
     """
@@ -399,7 +399,7 @@ def add_new_user(email, name, password):
     db.session.commit()
 
 
-def get_purchases(user_id):
+def get_purchases(user_id) -> list:
     """returns all purchases made by user."""
     purchases = db.session.query(
         Kaeufe.id,
@@ -415,45 +415,46 @@ def get_purchases(user_id):
     return purchases
 
 
-def get_workplaces(member_id):
+def get_workplaces(member_id) -> list:
     """returns all workplaces the user is assigned to."""
     member = Member.query.filter_by(id=member_id).first()
     workplaces = member.workplaces.all()
     return workplaces
 
 
-def withdraw(user_id, amount):
+def withdraw(user_id, amount) -> str:
     """
     register new withdrawal and withdraw amount from user's account.
     returns code that can be used like money.
     """
     code = id_generator()
-    new_withdrawal = Auszahlungen(
+    new_withdrawal = Withdrawal(
         type_member=True,
         member=user_id,
         betrag=amount,
         code=code)
     db.session.add(new_withdrawal)
     db.session.commit()
-    return code
-
+    
     # betrag vom guthaben des users abziehen
     member = db.session.query(Member).\
         filter(Member.id == user_id).\
         first()
     member.guthaben -= amount
     db.session.commit()
+    
+    return code
 
 
 # Company
 
-def get_company_by_mail(email):
+def get_company_by_mail(email) -> Company:
     """returns first company in Company, filtered by mail."""
     company = Company.query.filter_by(email=email).first()
     return company
 
 
-def add_new_company(email, name, password):
+def add_new_company(email, name, password) -> None:
     """
     adds a new company to Company.
     """
@@ -465,34 +466,38 @@ def add_new_company(email, name, password):
     db.session.commit()
 
 
-def get_workers(company_id):
+def get_workers(company_id) -> list:
     """get all workers working in a company."""
     company = Company.query.filter_by(id=company_id).first()
     workers = company.workers.all()
     return workers
 
 
-def get_worker_in_company(worker_id, company_id):
-    """get specific worker in a company."""
+def get_worker_in_company(worker_id, company_id) -> Union[Member, None]:
+    """get specific worker in a company, if exists."""
     company = Company.query.filter_by(id=company_id).first()
-    worker = company.workers.filter_by(id=worker_id).all()
+    worker = company.workers.filter_by(id=worker_id).first()
     return worker
 
 
-def get_hours_worked(company_id):
-    """get all hours worked in a company."""
+def get_hours_worked(company_id) -> list:
+    """get all hours worked in a company, grouped by workers."""
     hours_worked = db.session.query(
-        Member.id, Member.name,
-        func.concat(func.sum(Arbeit.stunden), " Std.").
-        label('summe_stunden')
-        ).select_from(Angebote).\
+        Member.id,
+        Member.name,
+        func.sum(Arbeit.stunden).label('summe_stunden')
+        ).\
+        select_from(Angebote).\
         filter(Angebote.company == company_id).\
-        join(Arbeit).join(Member).group_by(Member.id).\
-        order_by(func.sum(Arbeit.stunden).desc()).all()
+        join(Arbeit).join(Member).\
+        group_by(Member.id).\
+        order_by(func.sum(Arbeit.stunden).\
+        desc()).\
+        all()
     return hours_worked
 
 
-def get_means_of_prod(company_id):
+def get_means_of_prod(company_id) -> tuple:
     """
     returns tuple of active and inactive means of prouction of company.
     """
@@ -525,7 +530,7 @@ def get_means_of_prod(company_id):
     return (produktionsmittel_aktiv, produktionsmittel_inaktiv)
 
 
-def delete_product(angebot_id):
+def delete_product(angebot_id) -> None:
     """delete product."""
     angebot = Angebote.query.filter_by(id=angebot_id).first()
     angebot.aktiv = False
@@ -534,7 +539,7 @@ def delete_product(angebot_id):
 
 # Worker
 
-def add_new_worker_to_company(member_id, company_id):
+def add_new_worker_to_company(member_id, company_id) -> None:
     """
     Add member as workers to Company.
     """
@@ -546,6 +551,7 @@ def add_new_worker_to_company(member_id, company_id):
 
 # Search Angebote
 
-def get_offer_by_id(id):
+def get_offer_by_id(id) -> Angebote:
     """get offer, filtered by id"""
-    return Angebote.query.get(id)
+    offer = Angebote.query.filter_by(id=id).first()
+    return offer

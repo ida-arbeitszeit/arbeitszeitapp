@@ -107,9 +107,9 @@ def profile():
         return redirect(url_for('auth.zurueck'))
 
 
-@main_member.route('/member/auszahlung', methods=['GET', 'POST'])
+@main_member.route('/member/withdrawal', methods=['GET', 'POST'])
 @login_required
-def auszahlung():
+def withdrawal():
     if request.method == 'POST':
         amount = Decimal(request.form["betrag"])
         code = member.withdraw(current_user.id, amount)

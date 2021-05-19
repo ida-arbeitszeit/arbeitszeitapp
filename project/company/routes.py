@@ -6,7 +6,7 @@ from flask import Blueprint, render_template, session, redirect, url_for,\
 from flask_login import login_required, current_user
 from sqlalchemy.sql import func
 from project.models import Angebote, Kaeufe, Company, Member,\
-    Produktionsmittel, Arbeit, Auszahlungen, Kooperationen,\
+    Produktionsmittel, Arbeit, Withdrawal, Kooperationen,\
     KooperationenMitglieder
 from project.tables import ProduktionsmittelTable, WorkersTable, HoursTable,\
     Preiszusammensetzung
@@ -318,22 +318,22 @@ def sell_offer():
 
     if request.method == 'POST':
         code_input = request.form["code"]
-        auszahlung = Auszahlungen.query.\
+        withdrawal = Withdrawal.query.\
             filter_by(code=code_input, entwertet=False).first()
-        if not auszahlung:
+        if not withdrawal:
             flash("Code nicht korrekt oder schon entwertet.")
         else:
-            value_code = auszahlung.betrag
+            value_code = withdrawal.betrag
             if round(angebot.preis, 2) != round(value_code, 2):
                 flash("Wert des Codes entspricht nicht dem Preis.")
             else:
-                kaufender_type = "member" if auszahlung.type_member\
+                kaufender_type = "member" if withdrawal.type_member\
                                           else "company"
                 database.buy(
                     kaufender_type=kaufender_type,
                     angebot=angebot,
-                    kaeufer_id=auszahlung.member)
-                auszahlung.entwertet = True
+                    kaeufer_id=withdrawal.member)
+                withdrawal.entwertet = True
                 db.session.commit()
                 flash("Verkauf erfolgreich")
                 return redirect(url_for("main_company.my_offers"))

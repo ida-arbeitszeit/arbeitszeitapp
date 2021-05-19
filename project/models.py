@@ -99,7 +99,7 @@ prozent_gebraucht='%s')>" % (
                              self.angebot, self.kauf, self.prozent_gebraucht)
 
 
-class Auszahlungen(UserMixin, db.Model):
+class Withdrawal(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     type_member = db.Column(db.Boolean, nullable=False)
     member = db.Column(db.Integer, db.ForeignKey("member.id"), nullable=False)
