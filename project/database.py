@@ -25,14 +25,14 @@ def purchase_orm_from_purchase(purchase: entities.Purchase) -> Kaeufe:
     return Kaeufe(
         kauf_date=purchase.purchase_date,
         angebot=product_offer.id,
-        type_member=isinstance(purchase, entities.Member),
+        type_member=isinstance(purchase.buyer, entities.Member),
         company=(
-            company_to_orm(purchase.buyer)
+            company_to_orm(purchase.buyer).id
             if isinstance(purchase.buyer, entities.Company)
             else None
         ),
         member=(
-            member_to_orm(purchase.buyer)
+            member_to_orm(purchase.buyer).id
             if isinstance(purchase.buyer, entities.Member)
             else None
         ),
@@ -366,8 +366,9 @@ def buy(kaufender_type, angebot, kaeufer_id) -> None:
         buyer,
         purchase_factory,
     )
-    purchase_orm_from_purchase(purchase)  # this needs to be executed to
-                                          # create the actual db model
+    # this needs to be executed to create the actual db model
+    purchase_orm = purchase_orm_from_purchase(purchase)
+    db.session.add(purchase_orm)
     db.session.commit()
 
 
