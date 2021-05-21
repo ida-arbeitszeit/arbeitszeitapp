@@ -2,9 +2,9 @@ import random
 from decimal import Decimal
 from typing import Union
 import string
-from arbeitszeit import plan_factory
 from project.models import Member, Company, Angebote, Arbeit,\
-    Produktionsmittel, Kaeufe, Withdrawal, KooperationenMitglieder
+    Produktionsmittel, Kaeufe, Withdrawal, KooperationenMitglieder,\
+    Plan
 from sqlalchemy.sql import func, case
 from project.extensions import db
 from graphviz import Graph
@@ -39,6 +39,21 @@ def purchase_orm_from_purchase(purchase: entities.Purchase) -> Kaeufe:
             else None
         ),
         kaufpreis=float(purchase.price),
+    )
+
+
+def plan_orm_from_plan(plan: entities.Plan) -> Plan:
+    return Plan(
+        plan_creation_date = plan.plan_creation_date,
+        planner = company_to_orm(plan.planner).id,
+        costs_p = plan.costs_p,
+        costs_r = plan.costs_r,
+        costs_a = plan.costs_a,
+        prd_name = plan.prd_name,
+        prd_unit = plan.prd_unit,
+        prd_amount = plan.prd_amount,
+        description = plan.description,
+        timeframe = plan.timeframe,
     )
 
 
@@ -367,7 +382,7 @@ def buy(kaufender_type, angebot, kaeufer_id) -> None:
         buyer,
         purchase_factory,
     )
-    # this needs to be executed to create the actual db model
+
     purchase_orm = purchase_orm_from_purchase(purchase)
     db.session.add(purchase_orm)
     db.session.commit()
@@ -377,7 +392,6 @@ def planning(planner_id, costs_p, costs_r, costs_a, prd_name, prd_unit, prd_amou
     """
     create plan.
     """
-    social_accounting = ...
     datetime_service = DatetimeService()
     plan_factory = PlanFactory()
     planner_orm = Company.query.filter_by(id=planner_id).first()
@@ -386,7 +400,6 @@ def planning(planner_id, costs_p, costs_r, costs_a, prd_name, prd_unit, prd_amou
     plan = create_plan(
         datetime_service,
         planner,
-        social_accounting,
         costs_p,
         costs_r, 
         costs_a,  
@@ -398,9 +411,10 @@ def planning(planner_id, costs_p, costs_r, costs_a, prd_name, prd_unit, prd_amou
         plan_factory,
     )
 
-    print("xxx", plan)
+    plan_orm = plan_orm_from_plan(plan)
+    db.session.add(plan_orm)
+    db.session.commit()
     
-
 
 # User
 

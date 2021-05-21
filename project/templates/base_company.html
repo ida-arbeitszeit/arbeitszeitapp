@@ -25,8 +25,11 @@
                       </a>
 
                       <div class="navbar-dropdown">
+                          <a href="{{ url_for('main_company.create_plan') }}" class="navbar-item">
+                            Neuer Plan
+                          </a>
                           <a href="{{ url_for('main_company.suchen') }}" class="navbar-item">
-                              Angebote suchen
+                            Angebote suchen
                           </a>
                           <a href="{{ url_for('main_company.my_offers') }}" class="navbar-item">
                             Meine Angebote

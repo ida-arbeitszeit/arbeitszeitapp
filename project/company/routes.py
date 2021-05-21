@@ -6,8 +6,7 @@ from flask import Blueprint, render_template, session, redirect, url_for,\
 from flask_login import login_required, current_user
 from sqlalchemy.sql import func
 from project.models import Angebote, Kaeufe, Company, Member,\
-    Produktionsmittel, Arbeit, Withdrawal, Kooperationen,\
-    KooperationenMitglieder
+    Produktionsmittel, Arbeit, Withdrawal
 from project.tables import ProduktionsmittelTable, WorkersTable, HoursTable,\
     Preiszusammensetzung
 from project.forms import ProductSearchForm

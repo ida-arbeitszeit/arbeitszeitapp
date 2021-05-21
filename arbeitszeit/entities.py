@@ -54,7 +54,6 @@ class SocialAccounting:
 class Plan:
     plan_creation_date: datetime
     planner: Company
-    social_accounting: SocialAccounting
     costs_p: Decimal 
     costs_r: Decimal 
     costs_a: Decimal  

@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 
-from arbeitszeit.entities import Plan, Company, SocialAccounting
+from arbeitszeit.entities import Plan, Company
 
 
 class PlanFactory:
@@ -9,7 +9,6 @@ class PlanFactory:
         self, 
         plan_creation_date: datetime,
         planner: Company,
-        social_accounting: SocialAccounting,
         costs_p: Decimal,
         costs_r: Decimal, 
         costs_a: Decimal,  
@@ -22,7 +21,6 @@ class PlanFactory:
         return Plan(
             plan_creation_date=plan_creation_date,
             planner=planner,
-            social_accounting=social_accounting,
             costs_p=costs_p,
             costs_r=costs_r, 
             costs_a=costs_a,  

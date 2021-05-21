@@ -32,7 +32,6 @@ class Company:
             self,
             plan_creation_date,
             planner,
-            social_accounting,
             costs_p,
             costs_r,
             costs_a,
