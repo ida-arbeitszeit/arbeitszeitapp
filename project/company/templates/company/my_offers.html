@@ -22,7 +22,7 @@
   <div class="table-container">
 
 
-    {% if aktuelle_angebote is defined and aktuelle_angebote|length %}
+    {% if current_offers is defined and current_offers|length %}
     <table class="table is-fullwidth">
       <thead>
         <tr>
@@ -42,7 +42,7 @@
         </tr>
       </thead>
       <tbody>
-        {% for res in aktuelle_angebote %}
+        {% for res in current_offers %}
           <tr>
             <td>{{ res.id }}</td>
             <td>{{ res.angebot_name }}</td>
@@ -72,7 +72,7 @@
     Meine vergangenen Angebote
   </h1>
   <div class="table-container">
-    {% if vergangene_angebote is defined and vergangene_angebote|length %}
+    {% if past_offers is defined and past_offers|length %}
     <table class="table is-fullwidth">
       <thead>
         <tr>
@@ -89,7 +89,7 @@
         </tr>
       </thead>
         <tbody>
-          {% for res in vergangene_angebote %}
+          {% for res in past_offers %}
             <tr>
               <td>{{ res.id }}</td>
               <td>{{ res.angebot_name }}</td>

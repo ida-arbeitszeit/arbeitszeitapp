@@ -6,7 +6,7 @@ from flask import Blueprint, render_template, session, redirect, url_for,\
 from flask_login import login_required, current_user
 from sqlalchemy.sql import func
 from project.models import Angebote, Kaeufe, Company, Member,\
-    Produktionsmittel, Arbeit, Auszahlungen, Kooperationen,\
+    Produktionsmittel, Arbeit, Withdrawal, Kooperationen,\
     KooperationenMitglieder
 from project.tables import ProduktionsmittelTable, WorkersTable, HoursTable,\
     Preiszusammensetzung
@@ -24,8 +24,8 @@ main_company = Blueprint('main_company', __name__,
 def profile():
     user_type = session["user_type"]
     if user_type == "company":
-        arbeiter = database.get_first_worker(current_user.id)
-        if arbeiter:
+        worker = database.get_workers(current_user.id)
+        if worker:
             having_workers = True
         else:
             having_workers = False
@@ -39,9 +39,9 @@ def profile():
 @login_required
 def arbeit():
     """shows workers and worked hours."""
-    workers = database.get_workers(current_user.id)
+    workers_list = database.get_workers(current_user.id)
     workers_table = WorkersTable(
-        workers, no_items='(Noch keine Mitarbeiter.)')
+        workers_list, no_items='(Noch keine Mitarbeiter.)')
 
     hours_worked = database.get_hours_worked(current_user.id)
     hours_table = HoursTable(
@@ -54,9 +54,9 @@ def arbeit():
             return redirect(url_for('main_company.arbeit'))
 
         # check if user already works in company
-        req_arbeiter = database.get_worker_in_company(
+        req_worker = database.get_worker_in_company(
             request.form['member'], current_user.id)
-        if req_arbeiter:
+        if req_worker:
             flash("Mitglied ist bereits in diesem Betrieb beschäftigt.")
         else:
             company.add_new_worker(request.form['member'], current_user.id)
@@ -145,7 +145,10 @@ def buy(id):
     angebot = srch.get_offer_by_id(id)
     if request.method == 'POST':  # if company buys
         company.buy_product(
-            "company", database.get_offer_by_id(id), current_user.id)
+            "company",
+            database.get_offer_by_id(id),
+            current_user.id
+            )
         flash(f"Kauf von '{angebot.angebot_name}' erfolgreich!")
         return redirect('/company/suchen')
 
@@ -159,7 +162,7 @@ def new_offer():
     Ein neues Angebot hinzufügen
     """
     produktionsmittel_aktiv, _ = database.get_means_of_prod(current_user.id)
-    arbeiter_all = database.get_workers(current_user.id)
+    workers_list = database.get_workers(current_user.id)
 
     if request.method == 'POST':
         quantity = int(request.form["quantity"])
@@ -276,7 +279,7 @@ def new_offer():
     return render_template(
         'company/new_offer.html',
         produktionsmittel_aktiv=produktionsmittel_aktiv,
-        arbeiter_all=arbeiter_all,
+        workers_list=workers_list,
         categ=categ)
 
 
@@ -285,13 +288,13 @@ def new_offer():
 def my_offers():
     srch = database.SearchProducts()
     qry = srch.get_offers()
-    aktuelle_angebote = qry.filter(
+    current_offers = qry.filter(
         Angebote.aktiv == True, Company.id == current_user.id).all()
-    vergangene_angebote = qry.filter(
+    past_offers = qry.filter(
         Angebote.aktiv == False, Company.id == current_user.id).all()
     return render_template('company/my_offers.html',
-                           aktuelle_angebote=aktuelle_angebote,
-                           vergangene_angebote=vergangene_angebote)
+                           current_offers=current_offers,
+                           past_offers=past_offers)
 
 
 @main_company.route('/company/delete_offer', methods=['GET', 'POST'])
@@ -315,22 +318,22 @@ def sell_offer():
 
     if request.method == 'POST':
         code_input = request.form["code"]
-        auszahlung = Auszahlungen.query.\
+        withdrawal = Withdrawal.query.\
             filter_by(code=code_input, entwertet=False).first()
-        if not auszahlung:
+        if not withdrawal:
             flash("Code nicht korrekt oder schon entwertet.")
         else:
-            value_code = auszahlung.betrag
+            value_code = withdrawal.betrag
             if round(angebot.preis, 2) != round(value_code, 2):
                 flash("Wert des Codes entspricht nicht dem Preis.")
             else:
-                kaufender_type = "member" if auszahlung.type_member\
+                kaufender_type = "member" if withdrawal.type_member\
                                           else "company"
                 database.buy(
                     kaufender_type=kaufender_type,
                     angebot=angebot,
-                    kaeufer_id=auszahlung.member)
-                auszahlung.entwertet = True
+                    kaeufer_id=withdrawal.member)
+                withdrawal.entwertet = True
                 db.session.commit()
                 flash("Verkauf erfolgreich")
                 return redirect(url_for("main_company.my_offers"))
