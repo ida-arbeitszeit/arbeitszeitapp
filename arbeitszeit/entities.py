@@ -39,7 +39,7 @@ class Company:
         self._change_credit(amount)
 
     def reduce_credit(self, amount: Decimal) -> None:
-        self._change_credit(amount)
+        self._change_credit(-amount)
 
     @property
     def id(self):
