@@ -155,6 +155,34 @@ def buy(id):
     return render_template('company/buy.html', angebot=angebot)
 
 
+@main_company.route('/company/create_plan', methods=['GET', 'POST'])
+@login_required
+def create_plan():
+    if request.method == 'POST':
+        costs_p = float(request.form["costs_p"])
+        costs_r = float(request.form["costs_r"])
+        costs_a = float(request.form["costs_a"])
+        prd_name = request.form["prd_name"]
+        prd_unit = request.form["prd_unit"]
+        prd_amount = int(request.form["prd_amount"])
+        description = request.form["description"]
+        timeframe = int(request.form["timeframe"])
+
+        database.planning(
+            current_user.id,
+            costs_p,
+            costs_r,
+            costs_a,
+            prd_name,
+            prd_unit,
+            prd_amount,
+            description,
+            timeframe,
+        )
+    
+    return render_template('company/create_plan.html')
+
+
 @main_company.route('/company/anbieten', methods=['GET', 'POST'])
 @login_required
 def new_offer():

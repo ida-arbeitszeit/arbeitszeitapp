@@ -28,8 +28,25 @@ class Company:
         """delete own product from catalog."""
         database.delete_product(product_id)
 
-    def send_plan(self, p, r, a, prd_name, prd_unit, prd_amount, timeframe):
-        """send plan."""
+    def create_plan(
+            self,
+            plan_creation_date,
+            planner,
+            social_accounting,
+            costs_p,
+            costs_r,
+            costs_a,
+            prd_name,
+            prd_unit,
+            prd_amount,
+            description,
+            timeframe
+        ):
+        """create plan."""
+        database.planning(
+            ...
+        )
+        
         accounting.check_plan()
         accounting.grant_credits_to_company()
         accounting.publish_products()

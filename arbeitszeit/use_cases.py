@@ -2,8 +2,9 @@ from decimal import Decimal
 from typing import Callable, Union
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Company, Member, ProductOffer, Purchase
+from arbeitszeit.entities import Company, Member, Plan, ProductOffer, Purchase, SocialAccounting
 from arbeitszeit.purchase_factory import PurchaseFactory
+from arbeitszeit.plan_factory import PlanFactory
 
 
 def purchase_product(
@@ -26,3 +27,33 @@ def purchase_product(
     provider.increase_credit(price)
     buyer.reduce_credit(price)
     return purchase
+
+
+def create_plan(
+    datetime_service: DatetimeService,
+    planner: Company,
+    social_accounting: SocialAccounting,
+    costs_p: Decimal,
+    costs_r: Decimal, 
+    costs_a: Decimal,  
+    prd_name: str,
+    prd_unit: str,
+    prd_amount: int, 
+    description: str,
+    timeframe: int,
+    plan_factory: PlanFactory,
+) -> Plan:
+    plan = plan_factory.create_plan(
+        plan_creation_date=datetime_service.now(),
+        planner=planner,
+        social_accounting=social_accounting,
+        costs_p=costs_p,
+        costs_r=costs_r, 
+        costs_a=costs_a,  
+        prd_name=prd_name,
+        prd_unit=prd_unit,
+        prd_amount=prd_amount, 
+        description=description,
+        timeframe=timeframe,
+    )
+    return plan

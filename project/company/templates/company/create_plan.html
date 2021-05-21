@@ -1,0 +1,113 @@
+{% extends "base_company.html" %}
+
+{% block content2 %}
+
+
+    <div class="columns is-centered">
+        <div class="column is-two-fifths">
+          <div class="box has-background-danger-light has-text-danger-dark">
+            <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <p>
+              XXXX.<br>
+            </p>
+          </div>
+        </div>
+      </div>
+
+    <form method="post">
+        <div class="field">
+          <div class="control">
+            <label for="name">Name des Produkts</label>
+            <input class="input is-large", type="text", name="prd_name" required>
+          </div>
+        </div>
+        <div class="block"></div>
+
+        <hr>
+
+        <div class="field">
+          <div class="control">
+            <label for="description">Beschreibung des Produkts</label>
+            <textarea class="textarea is-large", name="description" required></textarea>
+            <p class="help">(Verfügbarkeit, Kontaktmöglichkeiten, etc.)</p>
+          </div>
+
+        </div>
+        <div class="block"></div>
+
+        <hr>
+
+        <div class="field">
+          <div class="control">
+            <label for="description">Product Unit</label>
+            <textarea class="input is-large", type="text", name="prd_unit" required></textarea>
+            <p class="help">(Kg, Liter, Meter, etc.)</p>
+          </div>
+
+        </div>
+        <div class="block"></div>
+
+
+        <hr>
+
+        <div class="field">
+            <div class="control">
+            <label for="prd_amount">Stückzahl:</label>
+            <input class="input is-large" type="number" name="prd_amount" min=1 max=100 value=1>
+            </div>
+        </div>
+        <div class="block"></div>
+
+        <hr>
+
+        <div class="field">
+            <div class="control">
+            <label for="prd_amount">Costs_p:</label>
+            <input class="input is-large" type="number" name="costs_p" value=0>
+            </div>
+        </div>
+        <div class="block"></div>
+
+        <hr>
+
+        <div class="field">
+            <div class="control">
+            <label for="prd_amount">Costs_r:</label>
+            <input class="input is-large" type="number" name="costs_r" value=0>
+            </div>
+        </div>
+        <div class="block"></div>
+
+        <hr>
+
+        <div class="field">
+            <div class="control">
+            <label for="prd_amount">Costs_a:</label>
+            <input class="input is-large" type="number" name="costs_a" value=0>
+            </div>
+        </div>
+        <div class="block"></div>
+
+        <hr>
+
+        <div class="field">
+            <div class="control">
+            <label for="prd_amount">Timeframe:</label>
+            <input class="input is-large" type="number" name="timeframe" min=1 max=356 value=1>
+            </div>
+        </div>
+        <div class="block"></div>
+
+
+
+    <div class="field is-grouped is-grouped-centered">
+      <div class="control">
+        <button class="button is-primary">
+          Angebot erstellen
+        </button>
+      </div>
+    </div>
+
+    </form>
+
+{% endblock %}

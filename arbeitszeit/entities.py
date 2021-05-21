@@ -46,6 +46,25 @@ class Company:
         return self._id
 
 
+class SocialAccounting:
+    ...
+
+
+@dataclass
+class Plan:
+    plan_creation_date: datetime
+    planner: Company
+    social_accounting: SocialAccounting
+    costs_p: Decimal 
+    costs_r: Decimal 
+    costs_a: Decimal  
+    prd_name: str
+    prd_unit: str
+    prd_amount: int 
+    description: str
+    timeframe: int
+
+
 @dataclass
 class Purchase:
     purchase_date: datetime

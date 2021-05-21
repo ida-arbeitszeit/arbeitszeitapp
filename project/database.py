@@ -2,6 +2,7 @@ import random
 from decimal import Decimal
 from typing import Union
 import string
+from arbeitszeit import plan_factory
 from project.models import Member, Company, Angebote, Arbeit,\
     Produktionsmittel, Kaeufe, Withdrawal, KooperationenMitglieder
 from sqlalchemy.sql import func, case
@@ -9,9 +10,10 @@ from project.extensions import db
 from graphviz import Graph
 from sqlalchemy.orm import aliased
 
-from arbeitszeit.use_cases import purchase_product
+from arbeitszeit.use_cases import purchase_product, create_plan
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.purchase_factory import PurchaseFactory
+from arbeitszeit.plan_factory import PlanFactory
 from arbeitszeit import entities
 
 
@@ -342,8 +344,6 @@ Kosten: {current_kosten} Std.")
         return dot
 
 
-# Kaufen
-
 def buy(kaufender_type, angebot, kaeufer_id) -> None:
     """
     buy product.
@@ -371,6 +371,35 @@ def buy(kaufender_type, angebot, kaeufer_id) -> None:
     purchase_orm = purchase_orm_from_purchase(purchase)
     db.session.add(purchase_orm)
     db.session.commit()
+
+
+def planning(planner_id, costs_p, costs_r, costs_a, prd_name, prd_unit, prd_amount, description, timeframe) -> None:
+    """
+    create plan.
+    """
+    social_accounting = ...
+    datetime_service = DatetimeService()
+    plan_factory = PlanFactory()
+    planner_orm = Company.query.filter_by(id=planner_id).first()
+    planner = company_from_orm(planner_orm)
+
+    plan = create_plan(
+        datetime_service,
+        planner,
+        social_accounting,
+        costs_p,
+        costs_r, 
+        costs_a,  
+        prd_name,
+        prd_unit,
+        prd_amount, 
+        description,
+        timeframe,
+        plan_factory,
+    )
+
+    print("xxx", plan)
+    
 
 
 # User
