@@ -1,12 +1,14 @@
 from datetime import datetime
 from decimal import Decimal
+from typing import Callable
 
 from arbeitszeit.entities import Plan, Company
 
 
 class PlanFactory:
     def create_plan(
-        self, 
+        self,
+        id: int, 
         plan_creation_date: datetime,
         planner: Company,
         costs_p: Decimal,
@@ -17,8 +19,11 @@ class PlanFactory:
         prd_amount: int, 
         description: str,
         timeframe: int,
+        approved: bool,
+        approve_plan: Callable[[], None],
         ) -> Plan:
         return Plan(
+            id=id,
             plan_creation_date=plan_creation_date,
             planner=planner,
             costs_p=costs_p,
@@ -29,4 +34,6 @@ class PlanFactory:
             prd_amount=prd_amount, 
             description=description,
             timeframe=timeframe,
+            approved=approved,
+            approve_plan=approve_plan
         )

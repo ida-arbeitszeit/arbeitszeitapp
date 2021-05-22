@@ -4,6 +4,15 @@ from decimal import Decimal
 from typing import Callable, Union
 
 
+class SocialAccounting:
+    def __init__(self, id: int) -> None:
+        self._id = id
+
+    @property
+    def id(self):
+        return self._id
+
+
 class Member:
     def __init__(self, id: int, change_credit: Callable[[Decimal], None]) -> None:
         self._change_credit = change_credit
@@ -46,22 +55,48 @@ class Company:
         return self._id
 
 
-class SocialAccounting:
-    ...
+class Plan:
+    def __init__(
+        self,
+        id: int,
+        plan_creation_date: datetime,
+        planner: Company,
+        costs_p: Decimal, 
+        costs_r: Decimal, 
+        costs_a: Decimal,  
+        prd_name: str,
+        prd_unit: str,
+        prd_amount: int, 
+        description: str,
+        timeframe: int,
+        approved: bool,
+        approve_plan: Callable[[], None],   
+        ) -> None:
+        self.id = id
+        self.plan_creation_date = plan_creation_date
+        self.planner = planner
+        self.costs_p = costs_p
+        self.costs_r = costs_r
+        self.costs_a = costs_a
+        self.prd_name = prd_name
+        self.prd_unit = prd_unit
+        self.prd_amount = prd_amount
+        self.description = description
+        self.timeframe = timeframe
+        self.approved = approved
+        self._approve = approve_plan
+
+    def approve(self) -> None:
+        self._approve()
 
 
 @dataclass
-class Plan:
-    plan_creation_date: datetime
-    planner: Company
-    costs_p: Decimal 
-    costs_r: Decimal 
-    costs_a: Decimal  
-    prd_name: str
-    prd_unit: str
-    prd_amount: int 
-    description: str
-    timeframe: int
+class PlanApproval:
+    approval_date: datetime
+    social_accounting: SocialAccounting
+    plan: Plan
+    approved: bool
+    reason: Union[str, None]
 
 
 @dataclass

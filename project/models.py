@@ -7,6 +7,10 @@ from sqlalchemy.orm import backref
 from project.extensions import db
 
 
+class SocialAccounting(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+
 # Association table Company - Member
 jobs = db.Table(
     "jobs",
@@ -60,6 +64,17 @@ class Plan(UserMixin, db.Model):
     prd_amount = db.Column(db.Numeric(), nullable=False) 
     description = db.Column(db.String(2000), nullable=False)
     timeframe = db.Column(db.Numeric(), nullable=False)
+    approved = db.Column(db.Boolean, nullable=False, default=False)
+
+
+class PlanApproval(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    approval_date = db.Column(db.DateTime, nullable=False)
+    social_accounting = db.Column(db.Integer, nullable=False)
+    plan = db.Column(
+        db.Integer, db.ForeignKey("plan.id"), nullable=False)
+    approved = db.Column(db.Boolean, nullable=False)
+    reason = db.Column(db.String(1000), nullable=True)
 
 
 class Angebote(UserMixin, db.Model):

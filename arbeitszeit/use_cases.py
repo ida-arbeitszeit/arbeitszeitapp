@@ -2,9 +2,10 @@ from decimal import Decimal
 from typing import Callable, Union
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Company, Member, Plan, ProductOffer, Purchase
+from arbeitszeit.entities import Company, Member, Plan, ProductOffer, Purchase, PlanApproval, SocialAccounting
 from arbeitszeit.purchase_factory import PurchaseFactory
 from arbeitszeit.plan_factory import PlanFactory
+from arbeitszeit.approval_factory import ApprovalFactory
 
 
 def purchase_product(
@@ -30,6 +31,7 @@ def purchase_product(
 
 
 def create_plan(
+    id: int,
     datetime_service: DatetimeService,
     planner: Company,
     costs_p: Decimal,
@@ -41,8 +43,11 @@ def create_plan(
     description: str,
     timeframe: int,
     plan_factory: PlanFactory,
+    approved: bool,
+    approve_plan: Callable[[], None]
 ) -> Plan:
     plan = plan_factory.create_plan(
+        id=id,
         plan_creation_date=datetime_service.now(),
         planner=planner,
         costs_p=costs_p,
@@ -53,5 +58,31 @@ def create_plan(
         prd_amount=prd_amount, 
         description=description,
         timeframe=timeframe,
+        approved=approved,
+        approve_plan=approve_plan,
     )
     return plan
+
+
+def seeking_approval(
+    datetime_service: DatetimeService,
+    plan: Plan,
+    approval_factory: ApprovalFactory,
+    social_accounting: SocialAccounting,
+    lookup_plan_approval_seeker: Callable[[Plan], Company],
+) -> PlanApproval:
+    approval_seeker = lookup_plan_approval_seeker(plan)
+    approved = True if True else False  # criteria for approval_seeker to be defined
+    reason = None if approved else "Nicht genug Kredit."
+    plan_approval = approval_factory.create_plan_approval(
+         approval_date=datetime_service.now(),
+         social_accounting=social_accounting,
+         plan=plan,
+         approved=approved,
+         reason=reason,
+    )
+    if plan_approval.approved:
+        plan.approve()
+
+    return plan_approval
+ 

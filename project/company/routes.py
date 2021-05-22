@@ -12,7 +12,7 @@ from project.tables import ProduktionsmittelTable, WorkersTable, HoursTable,\
 from project.forms import ProductSearchForm
 
 from project import database
-from project.economy import company
+from project.economy import company, accounting
 
 main_company = Blueprint('main_company', __name__,
                           template_folder='templates', static_folder='static')
@@ -167,7 +167,7 @@ def create_plan():
         description = request.form["description"]
         timeframe = int(request.form["timeframe"])
 
-        database.planning(
+        plan = database.planning(
             current_user.id,
             costs_p,
             costs_r,
@@ -178,6 +178,15 @@ def create_plan():
             description,
             timeframe,
         )
+
+        plan_approval = database.seek_approval(plan, accounting.id)
+        
+        if plan_approval.approved:
+            flash("Plan erfolgreich erstellt und genehmigt.")
+        else:
+            flash(f"Plan nicht genehmigt wegen:\n{plan_approval.reason}")
+        
+        return redirect('/company/suchen')
     
     return render_template('company/create_plan.html')
 
