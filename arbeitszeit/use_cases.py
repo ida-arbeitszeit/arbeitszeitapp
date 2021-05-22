@@ -3,10 +3,13 @@ from typing import Callable, Union
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Company, Member, ProductOffer, Purchase
+from arbeitszeit.errors import WorkerAlreadyAtCompany
 from arbeitszeit.purchase_factory import PurchaseFactory
+from arbeitszeit.repositories import CompanyWorkerRepository, PurchaseRepository
 
 
 def purchase_product(
+    purchase_repository: PurchaseRepository,
     datetime_service: DatetimeService,
     lookup_koop_price: Callable[[ProductOffer], Decimal],
     lookup_product_provider: Callable[[ProductOffer], Company],
@@ -25,4 +28,21 @@ def purchase_product(
     provider = lookup_product_provider(product_offer)
     provider.increase_credit(price)
     buyer.reduce_credit(price)
+    purchase_repository.add(purchase)
     return purchase
+
+
+def add_worker_to_company(
+    company_worker_repository: CompanyWorkerRepository,
+    company: Company,
+    worker: Member,
+) -> None:
+    """This function may raise a WorkerAlreadyAtCompany exception if the
+    worker is already employed at the company."""
+    company_workers = company_worker_repository.get_company_workers(company)
+    if worker in company_workers:
+        raise WorkerAlreadyAtCompany(
+            worker=worker,
+            company=company,
+        )
+    company_worker_repository.add_worker_to_company(company, worker)
