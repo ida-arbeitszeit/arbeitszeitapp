@@ -66,10 +66,14 @@ def plan_from_orm(plan: Plan) -> entities.Plan:
     )
 
 
-def plan_orm_from_plan(plan: entities.Plan) -> Plan:
+@with_injection
+def plan_orm_from_plan(
+    plan: entities.Plan,
+    company_repository: CompanyRepository,
+) -> Plan:
     return Plan(
         plan_creation_date = plan.plan_creation_date,
-        planner = CompanyRepository.object_to_orm(plan.planner).id,
+        planner = company_repository.object_to_orm(plan.planner).id,
         costs_p = plan.costs_p,
         costs_r = plan.costs_r,
         costs_a = plan.costs_a,
@@ -424,6 +428,7 @@ def buy(
     commit_changes()
 
 
+@with_injection
 def planning(
     planner_id,
     costs_p,
@@ -433,14 +438,15 @@ def planning(
     prd_unit, 
     prd_amount, 
     description, 
-    timeframe
+    timeframe,
+    company_repository: CompanyRepository,
     ) -> Plan:
     """
     create plan.
     """
     plan_factory = PlanFactory()
     planner_orm = Company.query.filter_by(id=planner_id).first()
-    planner = CompanyRepository.object_from_orm(planner_orm)
+    planner = company_repository.object_from_orm(planner_orm)
 
     plan = create_plan(
         0,
