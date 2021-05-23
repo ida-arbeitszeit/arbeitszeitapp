@@ -40,6 +40,10 @@ def add_worker_to_company(
     """This function may raise a WorkerAlreadyAtCompany exception if the
     worker is already employed at the company."""
     company_workers = company_worker_repository.get_company_workers(company)
+    # bug: does not raise error.
+    print("xx", company_workers)
+    print("xx", worker)
+    print("xx", (worker in company_workers))
     if worker in company_workers:
         raise WorkerAlreadyAtCompany(
             worker=worker,

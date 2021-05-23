@@ -53,7 +53,7 @@ def arbeit(
         if not company:
             flash("Angemeldeter Betrieb konnte nicht ermittelt werden.")
             return redirect(url_for('auth.start'))
-        member = database.get_user_by_id(request.form['member'])
+        member = member_repository.get_member_by_id(request.form['member'])
         if not member:
             flash("Mitglied existiert nicht.")
             return redirect(url_for('main_company.arbeit'))
