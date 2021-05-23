@@ -4,6 +4,15 @@ from decimal import Decimal
 from typing import Callable, Union
 
 
+class SocialAccounting:
+    def __init__(self, id: int) -> None:
+        self._id = id
+
+    @property
+    def id(self):
+        return self._id
+
+
 class Member:
     def __init__(self, id: int, change_credit: Callable[[Decimal], None]) -> None:
         self._change_credit = change_credit
@@ -39,11 +48,36 @@ class Company:
         self._change_credit(amount)
 
     def reduce_credit(self, amount: Decimal) -> None:
-        self._change_credit(amount)
+        self._change_credit(-amount)
 
     @property
     def id(self):
         return self._id
+
+
+@dataclass
+class Plan:
+    id: int
+    plan_creation_date: datetime
+    planner: Company
+    costs_p: Decimal 
+    costs_r: Decimal 
+    costs_a: Decimal  
+    prd_name: str
+    prd_unit: str
+    prd_amount: int 
+    description: str
+    timeframe: int
+    approved: bool
+
+
+@dataclass
+class PlanApproval:
+    approval_date: datetime
+    social_accounting: SocialAccounting
+    plan: Plan
+    approved: bool
+    reason: Union[str, None]
 
 
 @dataclass

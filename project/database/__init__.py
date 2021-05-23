@@ -5,18 +5,20 @@ import random
 from decimal import Decimal
 from typing import Union, Type
 import string
-
 from sqlalchemy.sql import func, case
 from graphviz import Graph
 from sqlalchemy.orm import aliased
 from injector import Injector, inject
 
-from arbeitszeit.use_cases import purchase_product
+from arbeitszeit.use_cases import purchase_product, create_plan, seeking_approval
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.purchase_factory import PurchaseFactory
+from arbeitszeit.plan_factory import PlanFactory
+from arbeitszeit.approval_factory import ApprovalFactory
 from arbeitszeit import entities
 from project.models import Member, Company, Angebote, Arbeit,\
-    Produktionsmittel, Kaeufe, Withdrawal, KooperationenMitglieder
+    Produktionsmittel, Kaeufe, Withdrawal, KooperationenMitglieder,\
+    Plan, PlanApproval, SocialAccounting
 from project.extensions import db
 
 from .repositories import CompanyRepository, MemberRepository, ProductOfferRepository, PurchaseRepository
@@ -47,6 +49,64 @@ def id_generator(size=10, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.SystemRandom().choice(chars) for _ in range(size))
 
 
+def plan_from_orm(plan: Plan) -> entities.Plan:
+    return entities.Plan(
+        id = plan.id,
+        plan_creation_date = plan.plan_creation_date,
+        planner = plan.planner,
+        costs_p = plan.costs_p,
+        costs_r = plan.costs_r,
+        costs_a = plan.costs_a, 
+        prd_name = plan.prd_name,
+        prd_unit = plan.prd_unit,
+        prd_amount = plan.prd_amount,
+        description = plan.description,
+        timeframe = plan.timeframe,
+        approved = plan.approved,
+    )
+
+
+def plan_orm_from_plan(plan: entities.Plan) -> Plan:
+    return Plan(
+        plan_creation_date = plan.plan_creation_date,
+        planner = CompanyRepository.object_to_orm(plan.planner).id,
+        costs_p = plan.costs_p,
+        costs_r = plan.costs_r,
+        costs_a = plan.costs_a,
+        prd_name = plan.prd_name,
+        prd_unit = plan.prd_unit,
+        prd_amount = plan.prd_amount,
+        description = plan.description,
+        timeframe = plan.timeframe,
+    )
+
+
+def plan_to_orm(plan: entities.Plan) -> Plan:
+    return Plan.query.get(plan.id)
+
+
+def plan_approval_orm_from_plan_approval(
+    plan_approval: entities.PlanApproval
+) -> PlanApproval:
+    return PlanApproval(
+        approval_date = plan_approval.approval_date,
+        social_accounting = social_accounting_to_orm(plan_approval.social_accounting).id,
+        plan = plan_to_orm(plan_approval.plan).id,
+        approved = plan_approval.approved,
+        reason = plan_approval.reason,
+    )
+
+
+def social_accounting_from_orm(social_accounting: SocialAccounting) -> entities.SocialAccounting:
+    return entities.SocialAccounting(
+        id = social_accounting.id
+    )
+
+
+def social_accounting_to_orm(social_accounting: entities.SocialAccounting) -> SocialAccounting:
+    return SocialAccounting.query.get(social_accounting.id)
+
+
 def lookup_koop_price(product_offer: entities.ProductOffer) -> Decimal:
     return Decimal(
         SearchProducts().get_offer_by_id(product_offer.id).koop_preis
@@ -61,6 +121,12 @@ def lookup_product_provider(
     company_orm = db.session.query(Company).\
         join(Angebote).filter(Angebote.id == product_offer.id).first()
     return company_repository.object_from_orm(company_orm)
+
+
+def lookup_plan_approval_seeker(
+    plan: entities.Plan
+) -> entities.Company: 
+    return plan.planner 
 
 
 class SearchProducts():
@@ -358,6 +424,76 @@ def buy(
     commit_changes()
 
 
+def planning(
+    planner_id,
+    costs_p,
+    costs_r, 
+    costs_a, 
+    prd_name, 
+    prd_unit, 
+    prd_amount, 
+    description, 
+    timeframe
+    ) -> Plan:
+    """
+    create plan.
+    """
+    plan_factory = PlanFactory()
+    planner_orm = Company.query.filter_by(id=planner_id).first()
+    planner = CompanyRepository.object_from_orm(planner_orm)
+
+    plan = create_plan(
+        0,
+        DatetimeService(),
+        planner,
+        costs_p,
+        costs_r, 
+        costs_a,  
+        prd_name,
+        prd_unit,
+        prd_amount, 
+        description,
+        timeframe,
+        plan_factory,
+        False,
+    )
+
+    plan_orm = plan_orm_from_plan(plan)
+    db.session.add(plan_orm)
+    db.session.commit()
+
+    # update plan.id
+    plan.id = plan_orm.id
+
+    return plan_orm
+
+
+def seek_approval(plan_orm: Plan, accounting_id: int) -> entities.PlanApproval:
+    datetime_service = DatetimeService()
+    approval_factory = ApprovalFactory
+    social_accounting_orm = SocialAccounting.query.filter_by(id=accounting_id).first()
+    social_accounting = social_accounting_from_orm(social_accounting_orm)
+    plan = plan_from_orm(plan_orm)
+    plan_approval = seeking_approval(
+        datetime_service,
+        plan,
+        approval_factory,
+        social_accounting,
+        lookup_plan_approval_seeker,
+        )
+
+    plan_approval_orm = plan_approval_orm_from_plan_approval(plan_approval)
+    db.session.add(plan_approval_orm)
+    db.session.commit()
+
+    if plan_approval.approved:
+        plan_to_orm(plan_approval.plan).approved = True
+        db.session.commit()
+
+    return plan_approval
+    
+    
+
 # User
 
 def get_user_by_mail(email) -> Member:
@@ -540,3 +676,12 @@ def get_offer_by_id(id) -> Angebote:
     """get offer, filtered by id"""
     offer = Angebote.query.filter_by(id=id).first()
     return offer
+
+
+# create social accounting
+def create_social_accounting_in_db(accounting_id: int) -> None:
+    social_accounting = SocialAccounting.query.filter_by(id=accounting_id).first()
+    if not social_accounting:
+        social_accounting = SocialAccounting(id=accounting_id)
+        db.session.add(social_accounting)
+        db.session.commit()

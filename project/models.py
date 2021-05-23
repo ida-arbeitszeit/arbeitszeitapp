@@ -3,7 +3,12 @@ Definition of database tables.
 """
 
 from flask_login import UserMixin
+from sqlalchemy.orm import backref
 from project.extensions import db
+
+
+class SocialAccounting(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
 
 
 # Association table Company - Member
@@ -37,9 +42,39 @@ class Company(UserMixin, db.Model):
     guthaben = db.Column(db.Numeric(), default=0)
     fik = db.Column(db.Numeric(), nullable=False, default=1)
 
+    plans = db.relationship(
+        "Plan", lazy=True, backref="company"
+    )
+
     def __repr__(self):
         return "<Company(email='%s', name='%s', guthaben='%s', fik='%s')>" % (
                              self.email, self.name, self.guthaben, self.fik)
+
+
+class Plan(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    plan_creation_date = db.Column(db.DateTime, nullable=False)
+    planner = db.Column(
+        db.Integer, db.ForeignKey("company.id"), nullable=False)
+    costs_p = db.Column(db.Numeric(), nullable=False)
+    costs_r = db.Column(db.Numeric(), nullable=False)
+    costs_a = db.Column(db.Numeric(), nullable=False)
+    prd_name = db.Column(db.String(100), nullable=False)
+    prd_unit = db.Column(db.String(20), nullable=False)
+    prd_amount = db.Column(db.Numeric(), nullable=False) 
+    description = db.Column(db.String(2000), nullable=False)
+    timeframe = db.Column(db.Numeric(), nullable=False)
+    approved = db.Column(db.Boolean, nullable=False, default=False)
+
+
+class PlanApproval(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    approval_date = db.Column(db.DateTime, nullable=False)
+    social_accounting = db.Column(db.Integer, nullable=False)
+    plan = db.Column(
+        db.Integer, db.ForeignKey("plan.id"), nullable=False)
+    approved = db.Column(db.Boolean, nullable=False)
+    reason = db.Column(db.String(1000), nullable=True)
 
 
 class Angebote(UserMixin, db.Model):

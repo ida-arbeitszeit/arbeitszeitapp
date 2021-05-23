@@ -9,7 +9,7 @@ from sqlalchemy.sql import func
 from arbeitszeit import errors, use_cases
 from project import database
 from project.database import with_injection
-from project.economy import company
+from project.economy import company, accounting
 from project.extensions import db
 from project.forms import ProductSearchForm
 from project.models import (Angebote, Arbeit, Company, Kaeufe, Kooperationen,
@@ -164,6 +164,43 @@ def buy(id):
         return redirect('/company/suchen')
 
     return render_template('company/buy.html', angebot=angebot)
+
+
+@main_company.route('/company/create_plan', methods=['GET', 'POST'])
+@login_required
+def create_plan():
+    if request.method == 'POST':
+        costs_p = float(request.form["costs_p"])
+        costs_r = float(request.form["costs_r"])
+        costs_a = float(request.form["costs_a"])
+        prd_name = request.form["prd_name"]
+        prd_unit = request.form["prd_unit"]
+        prd_amount = int(request.form["prd_amount"])
+        description = request.form["description"]
+        timeframe = int(request.form["timeframe"])
+
+        plan = database.planning(
+            current_user.id,
+            costs_p,
+            costs_r,
+            costs_a,
+            prd_name,
+            prd_unit,
+            prd_amount,
+            description,
+            timeframe,
+        )
+
+        plan_approval = database.seek_approval(plan, accounting.id)
+        
+        if plan_approval.approved:
+            flash("Plan erfolgreich erstellt und genehmigt.")
+        else:
+            flash(f"Plan nicht genehmigt wegen:\n{plan_approval.reason}")
+        
+        return redirect('/company/suchen')
+    
+    return render_template('company/create_plan.html')
 
 
 @main_company.route('/company/anbieten', methods=['GET', 'POST'])

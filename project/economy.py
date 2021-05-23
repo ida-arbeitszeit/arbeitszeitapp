@@ -5,6 +5,9 @@ from project import database
 
 class SocialAccounting:
     """A social accounting institution."""
+    def __init__(self, id) -> None:
+        self.id = id
+    
     def check_plan(self):
         pass
 
@@ -28,8 +31,24 @@ class Company:
         """delete own product from catalog."""
         database.delete_product(product_id)
 
-    def send_plan(self, p, r, a, prd_name, prd_unit, prd_amount, timeframe):
-        """send plan."""
+    def create_plan(
+            self,
+            plan_creation_date,
+            planner,
+            costs_p,
+            costs_r,
+            costs_a,
+            prd_name,
+            prd_unit,
+            prd_amount,
+            description,
+            timeframe
+        ):
+        """create plan."""
+        database.planning(
+            ...
+        )
+        
         accounting.check_plan()
         accounting.grant_credits_to_company()
         accounting.publish_products()
@@ -48,6 +67,10 @@ class Member:
         return code
 
 
-accounting = SocialAccounting()
+# create one accounting instance in economy and in database
+accounting_id = 1
+accounting = SocialAccounting(accounting_id)
+database.create_social_accounting_in_db(accounting_id)
+
 company = Company()
 member = Member()
