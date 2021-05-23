@@ -105,7 +105,6 @@ def plan_from_orm(plan: Plan) -> entities.Plan:
         description = plan.description,
         timeframe = plan.timeframe,
         approved = plan.approved,
-        approve_plan=lambda: setattr(plan, "approved", True),
     )
 
 
@@ -456,8 +455,6 @@ def planning(
     plan_factory = PlanFactory()
     planner_orm = Company.query.filter_by(id=planner_id).first()
     planner = company_from_orm(planner_orm)
-    # not sure if this is correct
-    approve_plan = lambda: setattr(self, "approved", True)
 
     plan = create_plan(
         0,
@@ -473,7 +470,6 @@ def planning(
         timeframe,
         plan_factory,
         False,
-        approve_plan,
     )
 
     plan_orm = plan_orm_from_plan(plan)

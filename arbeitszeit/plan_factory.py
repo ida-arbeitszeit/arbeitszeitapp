@@ -20,7 +20,6 @@ class PlanFactory:
         description: str,
         timeframe: int,
         approved: bool,
-        approve_plan: Callable[[], None],
         ) -> Plan:
         return Plan(
             id=id,
@@ -35,5 +34,4 @@ class PlanFactory:
             description=description,
             timeframe=timeframe,
             approved=approved,
-            approve_plan=approve_plan
         )

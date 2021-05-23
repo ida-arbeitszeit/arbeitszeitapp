@@ -44,7 +44,6 @@ def create_plan(
     timeframe: int,
     plan_factory: PlanFactory,
     approved: bool,
-    approve_plan: Callable[[], None]
 ) -> Plan:
     plan = plan_factory.create_plan(
         id=id,
@@ -59,7 +58,6 @@ def create_plan(
         description=description,
         timeframe=timeframe,
         approved=approved,
-        approve_plan=approve_plan,
     )
     return plan
 
@@ -81,8 +79,6 @@ def seeking_approval(
          approved=approved,
          reason=reason,
     )
-    if plan_approval.approved:
-        plan.approve()
 
     return plan_approval
  

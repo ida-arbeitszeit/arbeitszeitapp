@@ -55,39 +55,20 @@ class Company:
         return self._id
 
 
+@dataclass
 class Plan:
-    def __init__(
-        self,
-        id: int,
-        plan_creation_date: datetime,
-        planner: Company,
-        costs_p: Decimal, 
-        costs_r: Decimal, 
-        costs_a: Decimal,  
-        prd_name: str,
-        prd_unit: str,
-        prd_amount: int, 
-        description: str,
-        timeframe: int,
-        approved: bool,
-        approve_plan: Callable[[], None],   
-        ) -> None:
-        self.id = id
-        self.plan_creation_date = plan_creation_date
-        self.planner = planner
-        self.costs_p = costs_p
-        self.costs_r = costs_r
-        self.costs_a = costs_a
-        self.prd_name = prd_name
-        self.prd_unit = prd_unit
-        self.prd_amount = prd_amount
-        self.description = description
-        self.timeframe = timeframe
-        self.approved = approved
-        self._approve = approve_plan
-
-    def approve(self) -> None:
-        self._approve()
+    id: int
+    plan_creation_date: datetime
+    planner: Company
+    costs_p: Decimal 
+    costs_r: Decimal 
+    costs_a: Decimal  
+    prd_name: str
+    prd_unit: str
+    prd_amount: int 
+    description: str
+    timeframe: int
+    approved: bool
 
 
 @dataclass
