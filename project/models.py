@@ -11,6 +11,11 @@ from project.extensions import db
 class SocialAccounting(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
+    transactions =  db.relationship(
+        "TransactionsAccountingToCompany",
+        lazy="dynamic",
+    )
+
 
 # Association table Company - Member
 jobs = db.Table(
@@ -41,15 +46,18 @@ class Company(UserMixin, db.Model):
     password = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(1000), nullable=False)
     guthaben = db.Column(db.Numeric(), default=0)
-    fik = db.Column(db.Numeric(), nullable=False, default=1)
+    balance_p = db.Column(db.Numeric(), default=0)
+    balance_r = db.Column(db.Numeric(), default=0)
+    balance_a = db.Column(db.Numeric(), default=0)
+    balance_prd = db.Column(db.Numeric(), default=0)
 
     plans = db.relationship(
         "Plan", lazy=True, backref="company"
     )
 
     def __repr__(self):
-        return "<Company(email='%s', name='%s', guthaben='%s', fik='%s')>" % (
-                             self.email, self.name, self.guthaben, self.fik)
+        return "<Company(email='%s', name='%s', guthaben='%s')>" % (
+                             self.email, self.name, self.guthaben)
 
 
 class Plan(UserMixin, db.Model):
@@ -78,88 +86,57 @@ class PlanApproval(UserMixin, db.Model):
     reason = db.Column(db.String(1000), nullable=True)
 
 
-
-class AccountingReceiverTypes(enum.Enum):
-    """Where accounting can send money to."""
-    member = "member"
-    company = "company"
-
-
-class AccountingReceiverAccountTypes(enum.Enum):
-    """To which account types accounting can send money."""
+class CompanyAccountTypes(enum.Enum):
     p = "p"
     r = "r"
     a = "a"
     prd = "prd"
 
 
-class CompanyOwnerAccountTypes(enum.Enum):
-    """From which account types companies can send money."""
-    p = "p"
-    r = "r"
-    a = "a"
-
-
-class CompanyReceiverTypes(enum.Enum):
-    """Where companies can send money to."""
-    member = "member"
-    company = "company"
-
-
-class CompanyReceiverAccountTypes(enum.Enum):
-    """To which account types companies can send money."""
-    a = "a"
-    prd = "prd"
-
-
-class MemberReceiverTypes(enum.Enum):
-    """Where members can send money to."""
-    member = "member"
-    company = "company"
-
-
-class MemberReceiverAccountTypes(enum.Enum):
-    """To which account types members can send money."""
-    a = "a"
-    prd = "prd"
-
-
-class TransactionsAccounting(UserMixin, db.Model):
-    """Transactions made by social accounting institutions."""
+class TransactionsAccountingToCompany(UserMixin, db.Model):
+    """Transactions made by social accounting institutions to companies."""
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.DateTime, nullable=False)
     account_owner = db.Column(
         db.Integer, db.ForeignKey("social_accounting.id"), nullable=False)
-    receiver_type = db.Column(db.Enum(AccountingReceiverTypes), nullable=False)
-    receiver_id = db.Column(db.Integer, nullable=False)
-    receiver_account_type = db.Column(db.Enum(AccountingReceiverAccountTypes), nullable=False)
+    receiver_id = db.Column(db.Integer, db.ForeignKey("company.id"), nullable=False)
+    receiver_account_type = db.Column(db.Enum(CompanyAccountTypes), nullable=False)
     amount = db.Column(db.Numeric(), nullable=False)
     purpose = db.Column(db.String(1000), nullable=True)
 
 
-class TransactionsCompany(UserMixin, db.Model):
-    """Transactions made by companies."""
+class TransactionsCompanyToMember(UserMixin, db.Model):
+    """Transactions made by companies to members. E.g. salaries."""
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.DateTime, nullable=False)
     account_owner = db.Column(
         db.Integer, db.ForeignKey("company.id"), nullable=False)
-    owner_account_type = db.Column(db.Enum(CompanyOwnerAccountTypes), nullable=False)
-    receiver_type = db.Column(db.Enum(CompanyReceiverTypes), nullable=False)
-    receiver_id = db.Column(db.Integer, nullable=False)
-    receiver_account_type = db.Column(db.Enum(CompanyReceiverAccountTypes), nullable=False)
+    receiver_id = db.Column(db.Integer, db.ForeignKey("member.id"), nullable=False)
     amount = db.Column(db.Numeric(), nullable=False)
     purpose = db.Column(db.String(1000), nullable=True)
 
 
-class TransactionsMember(UserMixin, db.Model):
-    """Transactions made by members."""
+class TransactionsCompanyToCompany(UserMixin, db.Model):
+    """Transactions made by companies to companies. E.g. purchase of means of production."""
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.DateTime, nullable=False)
+    account_owner = db.Column(
+        db.Integer, db.ForeignKey("company.id"), nullable=False)
+    receiver_id = db.Column(db.Integer, db.ForeignKey("company.id"), nullable=False)
+    owner_account_type = db.Column(db.Enum(CompanyAccountTypes), nullable=False)
+    receiver_account_type = db.Column(db.Enum(CompanyAccountTypes), nullable=False)
+    amount = db.Column(db.Numeric(), nullable=False)
+    purpose = db.Column(db.String(1000), nullable=True)
+
+
+class TransactionsMemberToCompany(UserMixin, db.Model):
+    """Transactions made by members to companies. E.g. purchases."""
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.DateTime, nullable=False)
     account_owner = db.Column(
         db.Integer, db.ForeignKey("member.id"), nullable=False)
-    receiver_type = db.Column(db.Enum(MemberReceiverTypes), nullable=False)
-    receiver_id = db.Column(db.Integer, nullable=False)
-    receiver_account_type = db.Column(db.Enum(MemberReceiverAccountTypes), nullable=False)
+    receiver_id = db.Column(
+        db.Integer, db.ForeignKey("company.id"), nullable=False)
     amount = db.Column(db.Numeric(), nullable=False)
     purpose = db.Column(db.String(1000), nullable=True)
 

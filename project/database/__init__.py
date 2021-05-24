@@ -1,4 +1,5 @@
 from __future__ import annotations
+from datetime import date, datetime
 from functools import wraps
 
 import random
@@ -10,7 +11,8 @@ from graphviz import Graph
 from sqlalchemy.orm import aliased
 from injector import Injector, inject
 
-from arbeitszeit.use_cases import purchase_product, create_plan, seeking_approval
+from arbeitszeit.use_cases import (purchase_product, create_plan,
+    seeking_approval)
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.purchase_factory import PurchaseFactory
 from arbeitszeit.plan_factory import PlanFactory
@@ -18,7 +20,7 @@ from arbeitszeit.approval_factory import ApprovalFactory
 from arbeitszeit import entities
 from project.models import Member, Company, Angebote, Arbeit,\
     Produktionsmittel, Kaeufe, Withdrawal, KooperationenMitglieder,\
-    Plan, PlanApproval, SocialAccounting
+    Plan, PlanApproval, SocialAccounting, TransactionsAccountingToCompany
 from project.extensions import db
 
 from .repositories import CompanyRepository, MemberRepository, ProductOfferRepository, PurchaseRepository
@@ -49,11 +51,15 @@ def id_generator(size=10, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.SystemRandom().choice(chars) for _ in range(size))
 
 
-def plan_from_orm(plan: Plan) -> entities.Plan:
+@with_injection
+def plan_from_orm(
+    plan: Plan,
+    company_repository: CompanyRepository,
+) -> entities.Plan:
     return entities.Plan(
         id = plan.id,
         plan_creation_date = plan.plan_creation_date,
-        planner = plan.planner,
+        planner = company_repository.get_by_id(plan.planner),
         costs_p = plan.costs_p,
         costs_r = plan.costs_r,
         costs_a = plan.costs_a, 
@@ -466,7 +472,7 @@ def planning(
 
     plan_orm = plan_orm_from_plan(plan)
     db.session.add(plan_orm)
-    db.session.commit()
+    commit_changes()
 
     # update plan.id
     plan.id = plan_orm.id
@@ -475,6 +481,7 @@ def planning(
 
 
 def seek_approval(plan_orm: Plan, accounting_id: int) -> entities.PlanApproval:
+    """Company seeks plan approval from Social Accounting."""
     datetime_service = DatetimeService()
     approval_factory = ApprovalFactory
     social_accounting_orm = SocialAccounting.query.filter_by(id=accounting_id).first()
@@ -490,15 +497,46 @@ def seek_approval(plan_orm: Plan, accounting_id: int) -> entities.PlanApproval:
 
     plan_approval_orm = plan_approval_orm_from_plan_approval(plan_approval)
     db.session.add(plan_approval_orm)
-    db.session.commit()
+    commit_changes()
 
     if plan_approval.approved:
         plan_to_orm(plan_approval.plan).approved = True
-        db.session.commit()
+        commit_changes()
 
     return plan_approval
     
-    
+
+def grant_credit(plan_approval: entities.PlanApproval) -> None:
+    """Social Accounting grants credit after approving of plan."""
+    plan = plan_approval.plan
+    costs_p = plan.costs_p
+    costs_r = plan.costs_r
+    costs_a = plan.costs_a
+    prd = costs_p + costs_r + costs_a
+    planner = plan.planner
+
+    # adjust company balances
+    planner_orm = CompanyRepository().object_to_orm(planner)
+    planner_orm.balance_p += costs_p
+    planner_orm.balance_r += costs_r
+    planner_orm.balance_a += costs_a
+    planner_orm.balance_prd -= prd
+    commit_changes()
+
+    # add four type of accounting transactions to db
+    for cost_tuple in [("p", costs_p), ("r", costs_r), ("a", costs_a), ("prd", -prd)]:
+        db.session.add(
+            TransactionsAccountingToCompany(
+            date=datetime.now(),
+            account_owner=plan_approval.social_accounting.id,
+            receiver_id=planner_orm.id,
+            receiver_account_type=cost_tuple[0],
+            amount=cost_tuple[1],
+            purpose=f"Plan-Id: {plan.id}",
+            )
+        )
+    commit_changes()
+        
 
 # User
 

@@ -99,6 +99,8 @@ def seeking_approval(
          approved=approved,
          reason=reason,
     )
-
     return plan_approval
  
+
+def granting_credit():
+    ...

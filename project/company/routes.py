@@ -12,8 +12,8 @@ from project.database import with_injection
 from project.economy import company, accounting
 from project.extensions import db
 from project.forms import ProductSearchForm
-from project.models import (Angebote, Arbeit, Company, Kaeufe, Kooperationen,
-                            KooperationenMitglieder, Member, Produktionsmittel,
+from project.models import (Angebote, Arbeit, Company, Kaeufe,
+                            Member, Produktionsmittel,
                             Withdrawal)
 from project.tables import (HoursTable, Preiszusammensetzung,
                             ProduktionsmittelTable, WorkersTable)
@@ -192,9 +192,10 @@ def create_plan():
         )
 
         plan_approval = database.seek_approval(plan, accounting.id)
-        
         if plan_approval.approved:
             flash("Plan erfolgreich erstellt und genehmigt.")
+            database.grant_credit(plan_approval)
+            flash("Kredit wurde gewährt.")
         else:
             flash(f"Plan nicht genehmigt wegen:\n{plan_approval.reason}")
         
