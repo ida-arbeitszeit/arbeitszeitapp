@@ -2,6 +2,7 @@
 Definition of database tables.
 """
 
+import enum
 from flask_login import UserMixin
 from sqlalchemy.orm import backref
 from project.extensions import db
@@ -75,6 +76,92 @@ class PlanApproval(UserMixin, db.Model):
         db.Integer, db.ForeignKey("plan.id"), nullable=False)
     approved = db.Column(db.Boolean, nullable=False)
     reason = db.Column(db.String(1000), nullable=True)
+
+
+
+class AccountingReceiverTypes(enum.Enum):
+    """Where accounting can send money to."""
+    member = "member"
+    company = "company"
+
+
+class AccountingReceiverAccountTypes(enum.Enum):
+    """To which account types accounting can send money."""
+    p = "p"
+    r = "r"
+    a = "a"
+    prd = "prd"
+
+
+class CompanyOwnerAccountTypes(enum.Enum):
+    """From which account types companies can send money."""
+    p = "p"
+    r = "r"
+    a = "a"
+
+
+class CompanyReceiverTypes(enum.Enum):
+    """Where companies can send money to."""
+    member = "member"
+    company = "company"
+
+
+class CompanyReceiverAccountTypes(enum.Enum):
+    """To which account types companies can send money."""
+    a = "a"
+    prd = "prd"
+
+
+class MemberReceiverTypes(enum.Enum):
+    """Where members can send money to."""
+    member = "member"
+    company = "company"
+
+
+class MemberReceiverAccountTypes(enum.Enum):
+    """To which account types members can send money."""
+    a = "a"
+    prd = "prd"
+
+
+class TransactionsAccounting(UserMixin, db.Model):
+    """Transactions made by social accounting institutions."""
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.DateTime, nullable=False)
+    account_owner = db.Column(
+        db.Integer, db.ForeignKey("social_accounting.id"), nullable=False)
+    receiver_type = db.Column(db.Enum(AccountingReceiverTypes), nullable=False)
+    receiver_id = db.Column(db.Integer, nullable=False)
+    receiver_account_type = db.Column(db.Enum(AccountingReceiverAccountTypes), nullable=False)
+    amount = db.Column(db.Numeric(), nullable=False)
+    purpose = db.Column(db.String(1000), nullable=True)
+
+
+class TransactionsCompany(UserMixin, db.Model):
+    """Transactions made by companies."""
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.DateTime, nullable=False)
+    account_owner = db.Column(
+        db.Integer, db.ForeignKey("company.id"), nullable=False)
+    owner_account_type = db.Column(db.Enum(CompanyOwnerAccountTypes), nullable=False)
+    receiver_type = db.Column(db.Enum(CompanyReceiverTypes), nullable=False)
+    receiver_id = db.Column(db.Integer, nullable=False)
+    receiver_account_type = db.Column(db.Enum(CompanyReceiverAccountTypes), nullable=False)
+    amount = db.Column(db.Numeric(), nullable=False)
+    purpose = db.Column(db.String(1000), nullable=True)
+
+
+class TransactionsMember(UserMixin, db.Model):
+    """Transactions made by members."""
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.DateTime, nullable=False)
+    account_owner = db.Column(
+        db.Integer, db.ForeignKey("member.id"), nullable=False)
+    receiver_type = db.Column(db.Enum(MemberReceiverTypes), nullable=False)
+    receiver_id = db.Column(db.Integer, nullable=False)
+    receiver_account_type = db.Column(db.Enum(MemberReceiverAccountTypes), nullable=False)
+    amount = db.Column(db.Numeric(), nullable=False)
+    purpose = db.Column(db.String(1000), nullable=True)
 
 
 class Angebote(UserMixin, db.Model):
