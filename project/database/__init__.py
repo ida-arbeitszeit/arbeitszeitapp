@@ -490,7 +490,6 @@ def planning(
         approved,
         approval_date,
         approval_reason,
-        plan_repository,
     )
     plan_orm = plan_repository.add(plan)
     commit_changes()
@@ -522,6 +521,7 @@ def seek_approval(
 
 def grant_credit(plan: Plan) -> None:
     """Social Accounting grants credit after plan has been approved."""
+    assert plan.approved == True
     costs_p = plan.costs_p
     costs_r = plan.costs_r
     costs_a = plan.costs_a

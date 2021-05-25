@@ -69,31 +69,12 @@ def create_plan(
     approved: bool,
     approval_date: DatetimeService,
     approval_reason: str,
-    plan_repository: PlanRepository,
 ) -> Plan:
-    (
-        costs_p,
-        costs_r,
-        costs_a,
-        prd_name,
-        prd_unit,
-        prd_amount,
-        description,
-        timeframe,
-    ) = plan_details
-
     plan = plan_factory.create_plan(
         id=None,
         plan_creation_date=datetime_service.now(),
         planner=planner,
-        costs_p=costs_p,
-        costs_r=costs_r,
-        costs_a=costs_a,
-        prd_name=prd_name,
-        prd_unit=prd_unit,
-        prd_amount=prd_amount,
-        description=description,
-        timeframe=timeframe,
+        plan_details=plan_details,
         social_accounting=social_accounting,
         approved=approved,
         approval_date=approval_date,

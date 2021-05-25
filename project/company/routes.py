@@ -222,7 +222,7 @@ def create_plan():
             database.grant_credit(plan)
             flash("Kredit wurde gewährt.")
         else:
-            flash(f"Plan nicht genehmigt wegen:\n{plan.approval_reason}")
+            flash(f"Plan nicht genehmigt. Grund:\n{plan.approval_reason}")
 
         return redirect("/company/suchen")
 
