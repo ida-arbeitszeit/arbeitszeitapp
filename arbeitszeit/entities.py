@@ -80,3 +80,10 @@ class Purchase:
     product_offer: ProductOffer
     buyer: Union[Member, Company]
     price: Decimal
+
+
+@dataclass
+class Transaction:
+    account_owner: Union[SocialAccounting, Member, Company]
+    receiver: Union[Member, Company]
+    amount: Decimal

@@ -11,7 +11,12 @@ from graphviz import Graph
 from sqlalchemy.orm import aliased
 from injector import Injector, inject
 
-from arbeitszeit.use_cases import purchase_product, create_plan, seeking_approval
+from arbeitszeit.use_cases import (
+    purchase_product,
+    create_plan,
+    seeking_approval,
+    granting_credit,
+)
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.purchase_factory import PurchaseFactory
 from arbeitszeit.plan_factory import PlanFactory
@@ -64,33 +69,6 @@ def commit_changes():
 def id_generator(size=10, chars=string.ascii_uppercase + string.digits):
     """generates money-code for withdrawals."""
     return "".join(random.SystemRandom().choice(chars) for _ in range(size))
-
-
-@with_injection
-def plan_from_orm(
-    plan: Plan,
-    company_repository: CompanyRepository,
-) -> entities.Plan:
-    return entities.Plan(
-        plan_creation_date=plan.plan_creation_date,
-        planner=company_repository.get_by_id(plan.planner),
-        costs_p=plan.costs_p,
-        costs_r=plan.costs_r,
-        costs_a=plan.costs_a,
-        prd_name=plan.prd_name,
-        prd_unit=plan.prd_unit,
-        prd_amount=plan.prd_amount,
-        description=plan.description,
-        timeframe=plan.timeframe,
-        social_accounting=plan.social_accounting,
-        approved=plan.approved,
-        approval_date=plan.approval_date,
-        approval_reason=plan.approval_reason,
-    )
-
-
-def plan_to_orm(plan: entities.Plan) -> Plan:
-    return Plan.query.get(plan.id)
 
 
 def social_accounting_from_orm(
@@ -519,9 +497,17 @@ def seek_approval(
     return plan_orm
 
 
-def grant_credit(plan: Plan) -> None:
+@with_injection
+def grant_credit(
+    plan: Plan,
+    plan_repository: PlanRepository,
+) -> None:
     """Social Accounting grants credit after plan has been approved."""
     assert plan.approved == True
+    plan = plan_repository.object_from_orm(plan)
+    plan = granting_credit(plan)
+    plan = plan_repository.object_to_orm(plan)
+
     costs_p = plan.costs_p
     costs_r = plan.costs_r
     costs_a = plan.costs_a
@@ -537,6 +523,8 @@ def grant_credit(plan: Plan) -> None:
 
     # add four type of accounting transactions to db
     for cost_tuple in [("p", costs_p), ("r", costs_r), ("a", costs_a), ("prd", -prd)]:
+        if cost_tuple[1] == 0:
+            continue
         db.session.add(
             TransactionsAccountingToCompany(
                 date=datetime.now(),

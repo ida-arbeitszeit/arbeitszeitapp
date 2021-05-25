@@ -7,7 +7,6 @@ from arbeitszeit.purchase_factory import PurchaseFactory
 from arbeitszeit.repositories import (
     CompanyWorkerRepository,
     PurchaseRepository,
-    PlanRepository,
 )
 from arbeitszeit.entities import (
     Company,
@@ -87,13 +86,19 @@ def seeking_approval(
     datetime_service: DatetimeService,
     plan: Plan,
 ) -> Plan:
-    decision = True if True else False  # criteria to be defined
+    decision = True  # criteria to be defined
     reason = None if decision else "Nicht genug Kredit."
     plan.approved = decision
-    plan.approval_date = datetime_service.now()
     plan.approval_reason = reason
+    if decision:
+        plan.approval_date = datetime_service.now()
+
     return plan
 
 
-def granting_credit():
-    ...
+def granting_credit(
+    plan: Plan,
+) -> None:
+    # increase/reduce company balances
+    # register transcations
+    return plan
