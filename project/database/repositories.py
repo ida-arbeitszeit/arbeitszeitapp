@@ -7,7 +7,7 @@ from injector import inject
 
 from arbeitszeit import entities, repositories
 from project.extensions import db
-from project.models import Angebote, Company, Kaeufe, Member
+from project.models import Angebote, Company, Kaeufe, Member, Plan
 
 
 @inject
@@ -108,3 +108,60 @@ class ProductOfferRepository:
             id=offer_orm.id,
             deactivate_offer_in_db=lambda: setattr(offer_orm, "aktiv", False),
         )
+
+
+@inject
+@dataclass
+class PlanRepository(repositories.PlanRepository):
+    company_repository: CompanyRepository
+
+    def create_orm_from_object(self, plan: entities.Plan) -> Plan:
+        planner = self.company_repository.object_to_orm(plan.planner).id
+        return Plan(
+            plan_creation_date=plan.plan_creation_date,
+            planner=planner,
+            costs_p=plan.costs_p,
+            costs_r=plan.costs_r,
+            costs_a=plan.costs_a,
+            prd_name=plan.prd_name,
+            prd_unit=plan.prd_unit,
+            prd_amount=plan.prd_amount,
+            description=plan.description,
+            timeframe=plan.timeframe,
+            social_accounting=plan.social_accounting.id,  # not ideal
+            approved=plan.approved,
+            approval_date=plan.approval_date,
+            approval_reason=plan.approval_reason,
+        )
+
+    def object_from_orm(self, plan: Plan) -> entities.Plan:
+        planner = self.company_repository.get_by_id(plan.planner)
+        return entities.Plan(
+            id=plan.id,
+            plan_creation_date=plan.plan_creation_date,
+            planner=planner,
+            costs_p=plan.costs_p,
+            costs_r=plan.costs_r,
+            costs_a=plan.costs_a,
+            prd_name=plan.prd_name,
+            prd_unit=plan.prd_unit,
+            prd_amount=plan.prd_amount,
+            description=plan.description,
+            timeframe=plan.timeframe,
+            social_accounting=plan.social_accounting,
+            approved=plan.approved,
+            approval_date=plan.approval_date,
+            approval_reason=plan.approval_reason,
+        )
+
+    def object_to_orm(self, plan: entities.Plan) -> Plan:
+        return Plan.query.get(plan.id)
+
+    def get_by_id(self, id: int) -> Optional[entities.Plan]:
+        plan_orm = Plan.query.filter_by(id=id).first()
+        return self.object_from_orm(plan_orm) if plan_orm else None
+
+    def add(self, plan: entities.Plan) -> Plan:
+        plan_orm = self.create_orm_from_object(plan)
+        db.session.add(plan_orm)
+        return plan_orm

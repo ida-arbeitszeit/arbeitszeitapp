@@ -1,11 +1,22 @@
 from decimal import Decimal
-from typing import Callable, Union
+from typing import Callable, Union, Tuple
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.errors import WorkerAlreadyAtCompany
 from arbeitszeit.purchase_factory import PurchaseFactory
-from arbeitszeit.repositories import CompanyWorkerRepository, PurchaseRepository
-from arbeitszeit.entities import Company, Member, Plan, ProductOffer, Purchase, SocialAccounting
+from arbeitszeit.repositories import (
+    CompanyWorkerRepository,
+    PurchaseRepository,
+    PlanRepository,
+)
+from arbeitszeit.entities import (
+    Company,
+    Member,
+    Plan,
+    ProductOffer,
+    Purchase,
+    SocialAccounting,
+)
 from arbeitszeit.plan_factory import PlanFactory
 
 
@@ -48,35 +59,39 @@ def add_worker_to_company(
         )
     company_worker_repository.add_worker_to_company(company, worker)
 
-    
+
 def create_plan(
-    id: int,
     datetime_service: DatetimeService,
     planner: Company,
-    costs_p: Decimal,
-    costs_r: Decimal, 
-    costs_a: Decimal,  
-    prd_name: str,
-    prd_unit: str,
-    prd_amount: int, 
-    description: str,
-    timeframe: int,
+    plan_details: Tuple[Decimal, Decimal, Decimal, str, str, int, str, int],
     plan_factory: PlanFactory,
     social_accounting: SocialAccounting,
     approved: bool,
     approval_date: DatetimeService,
     approval_reason: str,
+    plan_repository: PlanRepository,
 ) -> Plan:
+    (
+        costs_p,
+        costs_r,
+        costs_a,
+        prd_name,
+        prd_unit,
+        prd_amount,
+        description,
+        timeframe,
+    ) = plan_details
+
     plan = plan_factory.create_plan(
-        id=id,
+        id=None,
         plan_creation_date=datetime_service.now(),
         planner=planner,
         costs_p=costs_p,
-        costs_r=costs_r, 
-        costs_a=costs_a,  
+        costs_r=costs_r,
+        costs_a=costs_a,
         prd_name=prd_name,
         prd_unit=prd_unit,
-        prd_amount=prd_amount, 
+        prd_amount=prd_amount,
         description=description,
         timeframe=timeframe,
         social_accounting=social_accounting,
@@ -91,14 +106,13 @@ def seeking_approval(
     datetime_service: DatetimeService,
     plan: Plan,
 ) -> Plan:
-    approval_seeker = plan.planner
-    approved = True if True else False  # criteria for approval_seeker to be defined
-    reason = None if approved else "Nicht genug Kredit."
-    plan.approved = True
+    decision = True if True else False  # criteria to be defined
+    reason = None if decision else "Nicht genug Kredit."
+    plan.approved = decision
     plan.approval_date = datetime_service.now()
     plan.approval_reason = reason
     return plan
- 
+
 
 def granting_credit():
     ...

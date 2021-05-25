@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Callable, Union
+from typing import Callable, Union, Optional
 
 
 class SocialAccounting:
@@ -57,21 +57,21 @@ class Company:
 
 @dataclass
 class Plan:
-    id: int
+    id: Optional[int]
     plan_creation_date: datetime
     planner: Company
-    costs_p: Decimal 
-    costs_r: Decimal 
-    costs_a: Decimal  
+    costs_p: Decimal
+    costs_r: Decimal
+    costs_a: Decimal
     prd_name: str
     prd_unit: str
-    prd_amount: int 
+    prd_amount: int
     description: str
     timeframe: int
     social_accounting: SocialAccounting
     approved: bool
     approval_date: datetime
-    approval_reason: Union[str, None]
+    approval_reason: Optional[str]
 
 
 @dataclass
