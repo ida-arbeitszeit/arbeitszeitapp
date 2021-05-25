@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Callable
 
-from arbeitszeit.entities import Plan, Company
+from arbeitszeit.entities import Plan, Company, SocialAccounting
 
 
 class PlanFactory:
@@ -19,7 +19,10 @@ class PlanFactory:
         prd_amount: int, 
         description: str,
         timeframe: int,
+        social_accounting: SocialAccounting,
         approved: bool,
+        approval_date: datetime,
+        approval_reason: str,
         ) -> Plan:
         return Plan(
             id=id,
@@ -33,5 +36,8 @@ class PlanFactory:
             prd_amount=prd_amount, 
             description=description,
             timeframe=timeframe,
+            social_accounting=social_accounting,
             approved=approved,
+            approval_date=approval_date,
+            approval_reason=approval_reason,
         )

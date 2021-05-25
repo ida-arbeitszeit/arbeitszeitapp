@@ -5,9 +5,8 @@ from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.errors import WorkerAlreadyAtCompany
 from arbeitszeit.purchase_factory import PurchaseFactory
 from arbeitszeit.repositories import CompanyWorkerRepository, PurchaseRepository
-from arbeitszeit.entities import Company, Member, Plan, ProductOffer, Purchase, PlanApproval, SocialAccounting
+from arbeitszeit.entities import Company, Member, Plan, ProductOffer, Purchase, SocialAccounting
 from arbeitszeit.plan_factory import PlanFactory
-from arbeitszeit.approval_factory import ApprovalFactory
 
 
 def purchase_product(
@@ -63,7 +62,10 @@ def create_plan(
     description: str,
     timeframe: int,
     plan_factory: PlanFactory,
+    social_accounting: SocialAccounting,
     approved: bool,
+    approval_date: DatetimeService,
+    approval_reason: str,
 ) -> Plan:
     plan = plan_factory.create_plan(
         id=id,
@@ -77,7 +79,10 @@ def create_plan(
         prd_amount=prd_amount, 
         description=description,
         timeframe=timeframe,
+        social_accounting=social_accounting,
         approved=approved,
+        approval_date=approval_date,
+        approval_reason=approval_reason,
     )
     return plan
 
@@ -85,21 +90,14 @@ def create_plan(
 def seeking_approval(
     datetime_service: DatetimeService,
     plan: Plan,
-    approval_factory: ApprovalFactory,
-    social_accounting: SocialAccounting,
-    lookup_plan_approval_seeker: Callable[[Plan], Company],
-) -> PlanApproval:
-    approval_seeker = lookup_plan_approval_seeker(plan)
+) -> Plan:
+    approval_seeker = plan.planner
     approved = True if True else False  # criteria for approval_seeker to be defined
     reason = None if approved else "Nicht genug Kredit."
-    plan_approval = approval_factory.create_plan_approval(
-         approval_date=datetime_service.now(),
-         social_accounting=social_accounting,
-         plan=plan,
-         approved=approved,
-         reason=reason,
-    )
-    return plan_approval
+    plan.approved = True
+    plan.approval_date = datetime_service.now()
+    plan.approval_reason = reason
+    return plan
  
 
 def granting_credit():

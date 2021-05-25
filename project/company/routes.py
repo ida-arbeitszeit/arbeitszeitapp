@@ -178,26 +178,31 @@ def create_plan():
         prd_amount = int(request.form["prd_amount"])
         description = request.form["description"]
         timeframe = int(request.form["timeframe"])
+        social_accounting_id = accounting.id
 
         plan = database.planning(
-            current_user.id,
-            costs_p,
-            costs_r,
-            costs_a,
-            prd_name,
-            prd_unit,
-            prd_amount,
-            description,
-            timeframe,
+            planner_id=current_user.id,
+            costs_p=costs_p,
+            costs_r=costs_r,
+            costs_a=costs_a,
+            prd_name=prd_name,
+            prd_unit=prd_unit,
+            prd_amount=prd_amount,
+            description=description,
+            timeframe=timeframe,
+            social_accounting_id=social_accounting_id,
+            approved=False, 
+            approval_date=None,
+            approval_reason="",
         )
 
-        plan_approval = database.seek_approval(plan, accounting.id)
-        if plan_approval.approved:
+        plan = database.seek_approval(plan)
+        if plan.approved:
             flash("Plan erfolgreich erstellt und genehmigt.")
-            database.grant_credit(plan_approval)
+            database.grant_credit(plan)
             flash("Kredit wurde gewährt.")
         else:
-            flash(f"Plan nicht genehmigt wegen:\n{plan_approval.reason}")
+            flash(f"Plan nicht genehmigt wegen:\n{plan.approval_reason}")
         
         return redirect('/company/suchen')
     

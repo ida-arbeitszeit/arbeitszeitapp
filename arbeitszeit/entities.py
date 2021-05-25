@@ -68,16 +68,10 @@ class Plan:
     prd_amount: int 
     description: str
     timeframe: int
-    approved: bool
-
-
-@dataclass
-class PlanApproval:
-    approval_date: datetime
     social_accounting: SocialAccounting
-    plan: Plan
     approved: bool
-    reason: Union[str, None]
+    approval_date: datetime
+    approval_reason: Union[str, None]
 
 
 @dataclass
