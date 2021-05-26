@@ -1,103 +1,118 @@
 {% extends "base.html" %}
 {% block content1 %}
 <section class="hero">
-      <div class="hero-head">
+  <div class="hero-head">
 
-        <nav class="navbar is-light" role="navigation" aria-label="main navigation">
-          <div class="navbar-brand">
-            <div class="navbar-item has-background-primary	has-text-white">
-              Betriebs-Ansicht
-            </div>
-
-            <a role="button" class="navbar-burger" onclick="expandMenu()" aria-label="menu" aria-expanded="false" data-target="navbarOnTop">
-              <span aria-hidden="true"></span>
-              <span aria-hidden="true"></span>
-              <span aria-hidden="true"></span>
-            </a>
-          </div>
-
-          <div id="navbarOnTop" class="navbar-menu">
-            <div class="navbar-start">
-                {% if current_user.is_authenticated %}
-                <div class="navbar-item has-dropdown is-hoverable">
-                      <a class="navbar-link">
-                        Angebote
-                      </a>
-
-                      <div class="navbar-dropdown">
-                          <a href="{{ url_for('main_company.create_plan') }}" class="navbar-item">
-                            Neuer Plan
-                          </a>
-                          <a href="{{ url_for('main_company.suchen') }}" class="navbar-item">
-                            Angebote suchen
-                          </a>
-                          <a href="{{ url_for('main_company.my_offers') }}" class="navbar-item">
-                            Meine Angebote
-                          </a>
-                          <a href="{{ url_for('main_company.new_offer') }}" class="navbar-item">
-                            Neues Angebot erstellen
-                          </a>
-                      </div>
-                </div>
-
-
-                <a href="{{ url_for('main_company.produktionsmittel') }}" class="navbar-item">
-                    Produktionsmittel
-                </a>
-
-                <a href="{{ url_for('main_company.arbeit') }}" class="navbar-item">
-                    Arbeit
-                </a>
-
-                <a href="{{ url_for('main_company.cooperate') }}" class="navbar-item">
-                    Kooperation
-                </a>
-
-                <a href="{{ url_for('main_company.profile') }}" class="navbar-item">
-                    Meine Daten
-                </a>
-                {% endif %}
-
-            </div>
-            <div class="navbar-end">
-                <div class="navbar-item">
-                  <div class="buttons">
-                    {% if not current_user.is_authenticated %}
-                    <a class="button" href="{{ url_for('auth.login_company') }}">
-                        Anmelden
-                    </a>
-                    <a class="button" href="{{ url_for('auth.signup_company') }}">
-                        Registrieren
-                    </a>
-                    <a class="button" href="{{ url_for('auth.zurueck') }}">
-                        Zurück
-                    </a>
-                    {% endif %}
-                    {% if current_user.is_authenticated %}
-                    <a class="button" href="{{ url_for('auth.logout') }}">
-                        Logout
-                    </a>
-                    <a class="button" href="{{ url_for('main_company.hilfe') }}">
-                        ?
-                    </a>
-                    {% endif %}
-
-                  </div>
-                </div>
-            </div>
-
-          </div>
-        </nav>
-      </div>
-
-      <div class="hero-body has-text-centered">
-        <div class="section">
-            <div class="container">
-             {% block content2 %}
-             {% endblock %}
-            </div>
+    <nav class="navbar is-light" role="navigation" aria-label="main navigation">
+      <div class="navbar-brand">
+        <div class="navbar-item has-background-primary	has-text-white">
+          Betriebs-Ansicht
         </div>
+
+        <a role="button" class="navbar-burger" onclick="expandMenu()" aria-label="menu" aria-expanded="false"
+          data-target="navbarOnTop">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
       </div>
+
+      <div id="navbarOnTop" class="navbar-menu">
+        <div class="navbar-start">
+          {% if current_user.is_authenticated %}
+          <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link">
+              Pläne und Angebote
+            </a>
+
+            <div class="navbar-dropdown">
+              <a href="{{ url_for('main_company.create_plan') }}" class="navbar-item">
+                Neuer Plan
+              </a>
+              <a href="{{ url_for('main_company.my_plans') }}" class="navbar-item">
+                Meine Pläne
+              </a>
+              <a href="{{ url_for('main_company.new_offer') }}" class="navbar-item">
+                Neues Angebot erstellen
+              </a>
+              <a href="{{ url_for('main_company.my_offers') }}" class="navbar-item">
+                Meine Angebote
+              </a>
+              <a href="{{ url_for('main_company.suchen') }}" class="navbar-item">
+                Angebote suchen
+              </a>
+            </div>
+          </div>
+
+
+          <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link">
+              Konten und Überweisungen
+            </a>
+
+            <div class="navbar-dropdown">
+              <a class="navbar-item">
+                Kontenübersicht
+              </a>
+              <a class="navbar-item">
+                Neue Übeweisung
+              </a>
+            </div>
+          </div>
+
+          <a href="{{ url_for('main_company.produktionsmittel') }}" class="navbar-item">
+            Produktionsmittel
+          </a>
+
+          <a href="{{ url_for('main_company.arbeit') }}" class="navbar-item">
+            Arbeit
+          </a>
+
+          <a href="{{ url_for('main_company.profile') }}" class="navbar-item">
+            Meine Daten
+          </a>
+          {% endif %}
+
+        </div>
+        <div class="navbar-end">
+          <div class="navbar-item">
+            <div class="buttons">
+              {% if not current_user.is_authenticated %}
+              <a class="button" href="{{ url_for('auth.login_company') }}">
+                Anmelden
+              </a>
+              <a class="button" href="{{ url_for('auth.signup_company') }}">
+                Registrieren
+              </a>
+              <a class="button" href="{{ url_for('auth.zurueck') }}">
+                Zurück
+              </a>
+              {% endif %}
+              {% if current_user.is_authenticated %}
+              <a class="button" href="{{ url_for('auth.logout') }}">
+                Logout
+              </a>
+              <a class="button" href="{{ url_for('main_company.hilfe') }}">
+                ?
+              </a>
+              {% endif %}
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </nav>
+  </div>
+
+  <div class="hero-body has-text-centered">
+    <div class="section">
+      <div class="container">
+        {% block content2 %}
+        {% endblock %}
+      </div>
+    </div>
+  </div>
 
 
 

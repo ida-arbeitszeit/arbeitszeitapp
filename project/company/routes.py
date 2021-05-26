@@ -215,15 +215,23 @@ def create_plan():
 
         plan = database.seek_approval(plan)
         if plan.approved:
-            flash("Plan erfolgreich erstellt und genehmigt.")
             database.grant_credit(plan)
-            flash("Kredit wurde gewährt.")
+            flash("Plan erfolgreich erstellt und genehmigt. Kredit wurde gewährt.")
+            return redirect("/company/my_plans")
+
         else:
             flash(f"Plan nicht genehmigt. Grund:\n{plan.approval_reason}")
-
-        return redirect("/company/suchen")
+            return redirect("/company/create_plan")
 
     return render_template("company/create_plan.html")
+
+
+@main_company.route("/company/my_plans")
+@login_required
+def my_plans():
+    my_company = Company.query.get(current_user.id)
+    plans = my_company.plans.filter_by(approved=True).all()
+    return render_template("company/my_plans.html", plans=plans)
 
 
 @main_company.route("/company/anbieten", methods=["GET", "POST"])
