@@ -24,3 +24,7 @@ class PlanRepository(ABC):
     @abstractmethod
     def add(self, plan: Plan) -> None:
         pass
+
+
+class TransactionRepository(ABC):
+    ...

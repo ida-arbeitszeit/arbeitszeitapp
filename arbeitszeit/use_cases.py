@@ -14,7 +14,7 @@ from arbeitszeit.entities import (
     Plan,
     ProductOffer,
     Purchase,
-    SocialAccounting,
+    Transaction,
 )
 
 
@@ -58,46 +58,6 @@ def add_worker_to_company(
     company_worker_repository.add_worker_to_company(company, worker)
 
 
-# def create_plan(
-#     datetime_service: DatetimeService,
-#     planner: Company,
-#     plan_details: Tuple[Decimal, Decimal, Decimal, str, str, int, str, int],
-#     social_accounting: SocialAccounting,
-#     approved: bool,
-#     approval_date: DatetimeService,
-#     approval_reason: str,
-# ) -> Plan:
-#     (
-#         costs_p,
-#         costs_r,
-#         costs_a,
-#         prd_name,
-#         prd_unit,
-#         prd_amount,
-#         description,
-#         timeframe,
-#     ) = plan_details
-#     plan = Plan(
-#         id=None,
-#         plan_creation_date=datetime_service.now(),
-#         planner=planner,
-#         costs_p=costs_p,
-#         costs_r=costs_r,
-#         costs_a=costs_a,
-#         prd_name=prd_name,
-#         prd_unit=prd_unit,
-#         prd_amount=prd_amount,
-#         description=description,
-#         timeframe=timeframe,
-#         social_accounting=social_accounting,
-#         approved=approved,
-#         approval_date=approval_date,
-#         approval_reason=approval_reason,
-#         approve=None,
-#     )
-#     return plan
-
-
 def seeking_approval(
     datetime_service: DatetimeService,
     plan: Plan,
@@ -108,10 +68,6 @@ def seeking_approval(
     approval_date = datetime_service.now() if decision else None
 
     plan.approve(decision, reason, approval_date)
-
-    # plan.approved = decision
-    # plan.approval_reason = reason
-
     return plan
 
 

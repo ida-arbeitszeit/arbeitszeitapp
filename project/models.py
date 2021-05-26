@@ -69,7 +69,7 @@ class Plan(UserMixin, db.Model):
     costs_r = db.Column(db.Numeric(), nullable=False)
     costs_a = db.Column(db.Numeric(), nullable=False)
     prd_name = db.Column(db.String(100), nullable=False)
-    prd_unit = db.Column(db.String(20), nullable=False)
+    prd_unit = db.Column(db.String(100), nullable=False)
     prd_amount = db.Column(db.Numeric(), nullable=False)
     description = db.Column(db.String(2000), nullable=False)
     timeframe = db.Column(db.Numeric(), nullable=False)

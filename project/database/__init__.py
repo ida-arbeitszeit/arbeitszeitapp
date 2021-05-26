@@ -31,6 +31,7 @@ from project.models import (
     Plan,
     SocialAccounting,
     TransactionsAccountingToCompany,
+    TransactionsCompanyToMember,
 )
 from project.extensions import db
 
@@ -40,6 +41,7 @@ from .repositories import (
     PlanRepository,
     ProductOfferRepository,
     PurchaseRepository,
+    TransactionRepository,
 )
 
 _injector = Injector()
@@ -493,9 +495,6 @@ def seek_approval(
         datetime_service,
         plan,
     )
-    # plan_orm.approved = plan.approved
-    # plan_orm.approval_date = plan.approval_date
-    # plan_orm.approval_reason = plan.approval_reason
     commit_changes()
     plan_orm = plan_repository.object_to_orm(plan)
     return plan_orm
@@ -540,6 +539,28 @@ def grant_credit(
             )
         )
     commit_changes()
+
+
+@with_injection
+def send_wages(
+    sender: Company,
+    receiver: Member,
+    amount,
+    transaction_repository: TransactionRepository,
+):
+    transaction_orm = TransactionsCompanyToMember(
+        date=datetime.now(),
+        account_owner=sender.id,
+        receiver_id=receiver.id,
+        amount=amount,
+        purpose="Lohn",
+    )
+    db.session.add(transaction_orm)
+    commit_changes()
+
+    transaction = transaction_repository.object_from_orm(transaction_orm)
+    # transaction.account_owner.reduce_credit()
+    # transaction.receiver.increase_credit()
 
 
 # User

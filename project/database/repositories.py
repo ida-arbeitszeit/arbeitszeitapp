@@ -1,13 +1,24 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from injector import inject
 
 from arbeitszeit import entities, repositories
 from project.extensions import db
-from project.models import Angebote, Company, Kaeufe, Member, Plan
+from project.models import (
+    Angebote,
+    SocialAccounting,
+    Company,
+    Kaeufe,
+    Member,
+    Plan,
+    TransactionsCompanyToMember,
+    TransactionsAccountingToCompany,
+    TransactionsCompanyToCompany,
+    TransactionsMemberToCompany,
+)
 
 
 @inject
@@ -66,6 +77,19 @@ class CompanyRepository:
         return self.object_from_orm(company_orm) if company_orm else None
 
 
+class AccountingRepository:
+    def object_from_orm(
+        self, accounting_orm: SocialAccounting
+    ) -> entities.SocialAccounting:
+        return entities.SocialAccounting(
+            id=accounting_orm.id,
+        )
+
+    def get_by_id(self, id: int) -> Optional[entities.SocialAccounting]:
+        accounting_orm = SocialAccounting.query.filter_by(id=id).first()
+        return self.object_from_orm(accounting_orm) if accounting_orm else None
+
+
 @inject
 @dataclass
 class PurchaseRepository(repositories.PurchaseRepository):
@@ -121,7 +145,6 @@ class PlanRepository(repositories.PlanRepository):
         setattr(plan, "approval_date", approval_date)
 
     def object_from_orm(self, plan: Plan) -> entities.Plan:
-        planner = self.company_repository.get_by_id(plan.planner)
         return entities.Plan(
             id=plan.id,
             approve=lambda decision, reason, approval_date: self._approve(
@@ -138,3 +161,41 @@ class PlanRepository(repositories.PlanRepository):
 
     def add(self, plan_orm: Plan) -> None:
         db.session.add(plan_orm)
+
+
+@inject
+@dataclass
+class TransactionRepository(repositories.TransactionRepository):
+    company_repository: CompanyRepository
+    member_repository: MemberRepository
+    accounting_repository: AccountingRepository
+
+    def object_from_orm(
+        self,
+        transaction: Union[
+            TransactionsMemberToCompany,
+            TransactionsAccountingToCompany,
+            TransactionsCompanyToCompany,
+            TransactionsCompanyToMember,
+        ],
+    ) -> entities.Transaction:
+        if isinstance(transaction, TransactionsMemberToCompany):
+            account_owner = self.member_repository.get_member_by_id(
+                transaction.account_owner
+            )
+        elif isinstance(transaction, TransactionsAccountingToCompany):
+            account_owner = self.accounting_repository.get_by_id(
+                transaction.account_owner
+            )
+        elif isinstance(
+            transaction, (TransactionsCompanyToCompany, TransactionsCompanyToMember)
+        ):
+            account_owner = self.company_repository.get_by_id(transaction.account_owner)
+
+        return entities.Transaction(
+            account_owner=account_owner,
+            receiver=self.member_repository.get_member_by_id(transaction.receiver_id)
+            if isinstance(transaction, TransactionsCompanyToMember)
+            else self.company_repository.get_by_id(transaction.receiver_id),
+            amount=transaction.amount,
+        )

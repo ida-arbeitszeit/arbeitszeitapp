@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
-from sqlalchemy.sql import func
+from sqlalchemy.sql import desc
 
 from arbeitszeit import errors, use_cases
 from project import database
@@ -18,7 +18,9 @@ from project.models import (
     Kaeufe,
     Member,
     Produktionsmittel,
+    TransactionsAccountingToCompany,
     Withdrawal,
+    Plan,
 )
 from project.tables import (
     HoursTable,
@@ -230,8 +232,41 @@ def create_plan():
 @login_required
 def my_plans():
     my_company = Company.query.get(current_user.id)
-    plans = my_company.plans.filter_by(approved=True).all()
+    plans = (
+        my_company.plans.filter_by(approved=True)
+        .order_by(desc(Plan.plan_creation_date))
+        .all()
+    )
     return render_template("company/my_plans.html", plans=plans)
+
+
+@main_company.route("/company/my_accounts")
+@login_required
+def my_accounts():
+    my_company = Company.query.get(current_user.id)
+    received_from_accounting = (
+        TransactionsAccountingToCompany.query.filter_by(receiver_id=current_user.id)
+        .order_by(desc(TransactionsAccountingToCompany.date))
+        .all()
+    )
+    return render_template(
+        "company/my_accounts.html",
+        my_company=my_company,
+        received_from_accounting=received_from_accounting,
+    )
+
+
+@main_company.route("/company/transfer", methods=["GET", "POST"])
+@login_required
+def transfer():
+    if request.method == "POST":
+        receiver_id = request.form["member_id"]
+        amount = request.form["amount"]
+        sender = Company.query.get(current_user.id)
+        receiver = Member.query.get(receiver_id)
+        database.send_wages(sender, receiver, amount)
+
+    return render_template("company/transfer.html")
 
 
 @main_company.route("/company/anbieten", methods=["GET", "POST"])

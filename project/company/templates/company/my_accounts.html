@@ -1,0 +1,90 @@
+{% extends "base_company.html" %}
+
+{% block content2 %}
+
+
+<h1 class="title">
+    Meine Konten
+</h1>
+<div class="box has-background-info-light has-text-info-dark">
+    <div class="icon"><i class="fas fa-info-circle"></i></div>
+    <p>Hier sind deine Konten und Umsätze.<br>
+        In der ersten Zeile siehst du deine Kontostände.
+        Wenn du gut geplant hast, sollten sie am Ende des Planungszeitraums ausgeglichen sein. <br>
+        (Das Konto p ist erst ausgeglichen, wenn die Produktionsmittel vernutzt sind.)
+    </p>
+</div>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+<div class="notification is-danger is-light">{{ message }}</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<div class="table-container">
+    <table class="table is-fullwidth">
+        <thead>
+            <tr>
+                <th>Datum</th>
+                <th>Sender</th>
+                <th>Empfänger</th>
+                <th>p</th>
+                <th>r</th>
+                <th>a</th>
+                <th><abbr title="xxxx xxx x">prd</abbr></th>
+                <th>Verw.zweck</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="is-selected">
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><b>{{ my_company.balance_p }}</b></td>
+                <td><b>{{ my_company.balance_r }}</b></td>
+                <td><b>{{ my_company.balance_a }}</b></td>
+                <td><b>{{ my_company.balance_prd }}</b></td>
+                <td></td>
+            </tr>
+
+            {% if received_from_accounting is defined and received_from_accounting|length %}
+            {% for transaction in received_from_accounting %}
+            <tr>
+                <td>{{ transaction.date }}</td>
+                <td>Öff. Buchhaltung</td>
+                <td>Ich</td>
+                {% if transaction.receiver_account_type.value == "p" %}
+                <td>{{ transaction.amount }}</td>
+                {% else %}
+                <td></td>
+                {% endif %}
+
+                {% if transaction.receiver_account_type.value == "r" %}
+                <td>{{ transaction.amount }}</td>
+                {% else %}
+                <td></td>
+                {% endif %}
+
+                {% if transaction.receiver_account_type.value == "a" %}
+                <td>{{ transaction.amount }}</td>
+                {% else %}
+                <td></td>
+                {% endif %}
+
+                {% if transaction.receiver_account_type.value == "prd" %}
+                <td>{{ transaction.amount }}</td>
+                {% else %}
+                <td></td>
+                {% endif %}
+
+                <td>{{ transaction.purpose }}</td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

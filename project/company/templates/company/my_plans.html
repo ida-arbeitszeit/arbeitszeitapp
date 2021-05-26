@@ -25,7 +25,6 @@
     <table class="table is-fullwidth">
         <thead>
             <tr>
-                <th><abbr title="Plan-ID">ID</abbr></th>
                 <th>Produkt</th>
                 <th>Beschreibung</th>
                 <th>Einheiten</th>
@@ -36,7 +35,6 @@
         <tbody>
             {% for plan in plans %}
             <tr>
-                <td>{{ plan.id }}</td>
                 <td>{{ plan.prd_name }}</td>
                 <td>{{ plan.description }}</td>
                 <td>{{ plan.prd_amount }}</td>
