@@ -16,7 +16,6 @@ from arbeitszeit.entities import (
     Purchase,
     SocialAccounting,
 )
-from arbeitszeit.plan_factory import PlanFactory
 
 
 def purchase_product(
@@ -59,39 +58,59 @@ def add_worker_to_company(
     company_worker_repository.add_worker_to_company(company, worker)
 
 
-def create_plan(
-    datetime_service: DatetimeService,
-    planner: Company,
-    plan_details: Tuple[Decimal, Decimal, Decimal, str, str, int, str, int],
-    plan_factory: PlanFactory,
-    social_accounting: SocialAccounting,
-    approved: bool,
-    approval_date: DatetimeService,
-    approval_reason: str,
-) -> Plan:
-    plan = plan_factory.create_plan(
-        id=None,
-        plan_creation_date=datetime_service.now(),
-        planner=planner,
-        plan_details=plan_details,
-        social_accounting=social_accounting,
-        approved=approved,
-        approval_date=approval_date,
-        approval_reason=approval_reason,
-    )
-    return plan
+# def create_plan(
+#     datetime_service: DatetimeService,
+#     planner: Company,
+#     plan_details: Tuple[Decimal, Decimal, Decimal, str, str, int, str, int],
+#     social_accounting: SocialAccounting,
+#     approved: bool,
+#     approval_date: DatetimeService,
+#     approval_reason: str,
+# ) -> Plan:
+#     (
+#         costs_p,
+#         costs_r,
+#         costs_a,
+#         prd_name,
+#         prd_unit,
+#         prd_amount,
+#         description,
+#         timeframe,
+#     ) = plan_details
+#     plan = Plan(
+#         id=None,
+#         plan_creation_date=datetime_service.now(),
+#         planner=planner,
+#         costs_p=costs_p,
+#         costs_r=costs_r,
+#         costs_a=costs_a,
+#         prd_name=prd_name,
+#         prd_unit=prd_unit,
+#         prd_amount=prd_amount,
+#         description=description,
+#         timeframe=timeframe,
+#         social_accounting=social_accounting,
+#         approved=approved,
+#         approval_date=approval_date,
+#         approval_reason=approval_reason,
+#         approve=None,
+#     )
+#     return plan
 
 
 def seeking_approval(
     datetime_service: DatetimeService,
     plan: Plan,
 ) -> Plan:
-    decision = True  # criteria to be defined
+    # criteria to be defined
+    decision = True
     reason = None if decision else "Nicht genug Kredit."
-    plan.approved = decision
-    plan.approval_reason = reason
-    if decision:
-        plan.approval_date = datetime_service.now()
+    approval_date = datetime_service.now() if decision else None
+
+    plan.approve(decision, reason, approval_date)
+
+    # plan.approved = decision
+    # plan.approval_reason = reason
 
     return plan
 

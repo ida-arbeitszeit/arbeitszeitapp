@@ -13,13 +13,11 @@ from injector import Injector, inject
 
 from arbeitszeit.use_cases import (
     purchase_product,
-    create_plan,
     seeking_approval,
     granting_credit,
 )
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.purchase_factory import PurchaseFactory
-from arbeitszeit.plan_factory import PlanFactory
 from arbeitszeit import entities
 from project.models import (
     Member,
@@ -446,30 +444,39 @@ def planning(
     planner_id,
     plan_details,
     social_accounting_id,
-    approved,
-    approval_date,
-    approval_reason,
     company_repository: CompanyRepository,
     plan_repository: PlanRepository,
 ) -> Plan:
     """
     create plan.
     """
-    plan_factory = PlanFactory()
-    planner = company_repository.get_by_id(planner_id)
-    social_accounting = get_social_accounting_by_id(social_accounting_id)
 
-    plan = create_plan(
-        DatetimeService(),
-        planner,
-        plan_details,
-        plan_factory,
-        social_accounting,
-        approved,
-        approval_date,
-        approval_reason,
+    (
+        costs_p,
+        costs_r,
+        costs_a,
+        prd_name,
+        prd_unit,
+        prd_amount,
+        description,
+        timeframe,
+    ) = plan_details
+
+    plan_orm = Plan(
+        plan_creation_date=datetime.now(),
+        planner=planner_id,
+        costs_p=costs_p,
+        costs_r=costs_r,
+        costs_a=costs_a,
+        prd_name=prd_name,
+        prd_unit=prd_unit,
+        prd_amount=prd_amount,
+        description=description,
+        timeframe=timeframe,
+        social_accounting=social_accounting_id,
     )
-    plan_orm = plan_repository.add(plan)
+
+    plan_repository.add(plan_orm)
     commit_changes()
     return plan_orm
 
@@ -486,14 +493,11 @@ def seek_approval(
         datetime_service,
         plan,
     )
-
-    # persist changes
-    plan_orm = plan_repository.object_to_orm(plan)
-    plan_orm.approved = plan.approved
-    plan_orm.approval_date = plan.approval_date
-    plan_orm.approval_reason = plan.approval_reason
+    # plan_orm.approved = plan.approved
+    # plan_orm.approval_date = plan.approval_date
+    # plan_orm.approval_reason = plan.approval_reason
     commit_changes()
-
+    plan_orm = plan_repository.object_to_orm(plan)
     return plan_orm
 
 
@@ -504,9 +508,9 @@ def grant_credit(
 ) -> None:
     """Social Accounting grants credit after plan has been approved."""
     assert plan.approved == True
-    plan = plan_repository.object_from_orm(plan)
-    plan = granting_credit(plan)
-    plan = plan_repository.object_to_orm(plan)
+    # plan = plan_repository.object_from_orm(plan)
+    # plan = granting_credit(plan)
+    # plan = plan_repository.object_to_orm(plan)
 
     costs_p = plan.costs_p
     costs_r = plan.costs_r

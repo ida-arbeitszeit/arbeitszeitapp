@@ -211,9 +211,6 @@ def create_plan():
             planner_id=current_user.id,
             plan_details=plan_details,
             social_accounting_id=social_accounting_id,
-            approved=False,
-            approval_date=None,
-            approval_reason="",
         )
 
         plan = database.seek_approval(plan)

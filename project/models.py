@@ -76,8 +76,8 @@ class Plan(UserMixin, db.Model):
     social_accounting = db.Column(
         db.Integer, db.ForeignKey("social_accounting.id"), nullable=False)
     approved = db.Column(db.Boolean, nullable=False, default=False)
-    approval_date = db.Column(db.DateTime, nullable=True)
-    approval_reason = db.Column(db.String(1000), nullable=True)
+    approval_date = db.Column(db.DateTime, nullable=True, default=None)
+    approval_reason = db.Column(db.String(1000), nullable=True, default=None)
 
 
 class CompanyAccountTypes(enum.Enum):

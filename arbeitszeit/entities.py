@@ -57,7 +57,7 @@ class Company:
 
 @dataclass
 class Plan:
-    id: Optional[int]
+    id: int
     plan_creation_date: datetime
     planner: Company
     costs_p: Decimal
@@ -72,6 +72,7 @@ class Plan:
     approved: bool
     approval_date: datetime
     approval_reason: Optional[str]
+    approve: Callable[[bool, str, datetime], None]
 
 
 @dataclass
