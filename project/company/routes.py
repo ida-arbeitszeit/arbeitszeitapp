@@ -1,19 +1,23 @@
 import datetime
-from project.extensions import db
 from decimal import Decimal
-from flask import Blueprint, render_template, session, redirect, url_for,\
-    request, flash
-from flask_login import login_required, current_user
-from sqlalchemy.sql import func
-from project.models import Angebote, Kaeufe, Company, Member,\
-    Produktionsmittel, Arbeit, Withdrawal, Kooperationen,\
-    KooperationenMitglieder
-from project.tables import ProduktionsmittelTable, WorkersTable, HoursTable,\
-    Preiszusammensetzung
-from project.forms import ProductSearchForm
 
+from flask import (Blueprint, flash, redirect, render_template, request,
+                   session, url_for)
+from flask_login import current_user, login_required
+from sqlalchemy.sql import func
+
+from arbeitszeit import errors, use_cases
 from project import database
+from project.database import with_injection
 from project.economy import company
+from project.extensions import db
+from project.forms import ProductSearchForm
+from project.models import (Angebote, Arbeit, Company, Kaeufe, Kooperationen,
+                            KooperationenMitglieder, Member, Produktionsmittel,
+                            Withdrawal)
+from project.tables import (HoursTable, Preiszusammensetzung,
+                            ProduktionsmittelTable, WorkersTable)
+from project.database.repositories import CompanyRepository, MemberRepository, CompanyWorkerRepository
 
 main_company = Blueprint('main_company', __name__,
                           template_folder='templates', static_folder='static')
@@ -37,35 +41,42 @@ def profile():
 
 @main_company.route('/company/work', methods=['GET', 'POST'])
 @login_required
-def arbeit():
+@with_injection
+def arbeit(
+        company_repository: CompanyRepository,
+        member_repository: MemberRepository,
+        company_worker_repository: CompanyWorkerRepository,
+):
     """shows workers and worked hours."""
-    workers_list = database.get_workers(current_user.id)
-    workers_table = WorkersTable(
-        workers_list, no_items='(Noch keine Mitarbeiter.)')
-
-    hours_worked = database.get_hours_worked(current_user.id)
-    hours_table = HoursTable(
-        hours_worked, no_items='(Noch keine Stunden gearbeitet.)')
-
     if request.method == 'POST':  # (add worker to company)
-        # check if member exists, if not flash warning
-        if not database.get_user_by_id(request.form['member']):
+        company = company_repository.get_by_id(current_user.id)
+        if not company:
+            flash("Angemeldeter Betrieb konnte nicht ermittelt werden.")
+            return redirect(url_for('auth.start'))
+        member = database.get_user_by_id(request.form['member'])
+        if not member:
             flash("Mitglied existiert nicht.")
             return redirect(url_for('main_company.arbeit'))
-
-        # check if user already works in company
-        req_worker = database.get_worker_in_company(
-            request.form['member'], current_user.id)
-        if req_worker:
+        try:
+            use_cases.add_worker_to_company(
+                company_worker_repository,
+                company,
+                member,
+            )
+        except errors.WorkerAlreadyAtCompany:
             flash("Mitglied ist bereits in diesem Betrieb beschäftigt.")
-        else:
-            company.add_new_worker(request.form['member'], current_user.id)
-
+        database.commit_changes()
         return redirect(url_for('main_company.arbeit'))
-
-    return render_template(
-        "company/work.html",
-        workers_table=workers_table, hours_table=hours_table)
+    elif request.method == 'GET':
+        workers_list = database.get_workers(current_user.id)
+        workers_table = WorkersTable(
+            workers_list, no_items='(Noch keine Mitarbeiter.)')
+        hours_worked = database.get_hours_worked(current_user.id)
+        hours_table = HoursTable(
+            hours_worked, no_items='(Noch keine Stunden gearbeitet.)')
+        return render_template(
+            "company/work.html",
+            workers_table=workers_table, hours_table=hours_table)
 
 
 @main_company.route('/company/produktionsmittel')

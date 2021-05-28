@@ -1,76 +1,50 @@
+from __future__ import annotations
+from functools import wraps
+
 import random
 from decimal import Decimal
-from typing import Union
+from typing import Union, Type
 import string
-from project.models import Member, Company, Angebote, Arbeit,\
-    Produktionsmittel, Kaeufe, Withdrawal, KooperationenMitglieder
+
 from sqlalchemy.sql import func, case
-from project.extensions import db
 from graphviz import Graph
 from sqlalchemy.orm import aliased
+from injector import Injector, inject
 
 from arbeitszeit.use_cases import purchase_product
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.purchase_factory import PurchaseFactory
 from arbeitszeit import entities
+from project.models import Member, Company, Angebote, Arbeit,\
+    Produktionsmittel, Kaeufe, Withdrawal, KooperationenMitglieder
+from project.extensions import db
+
+from .repositories import CompanyRepository, MemberRepository, ProductOfferRepository, PurchaseRepository
+
+_injector = Injector()
+
+
+def with_injection(original_function):
+    """When you wrap a function, make sure that the parameters to be
+    injected come after the the parameters that the caller should
+    provide.
+    """
+    @wraps(original_function)
+    def wrapped_function(*args, **kwargs):
+        return _injector.call_with_injection(
+            inject(original_function), args=args, kwargs=kwargs
+        )
+
+    return wrapped_function
+
+
+def commit_changes():
+    db.session.commit()
 
 
 def id_generator(size=10, chars=string.ascii_uppercase + string.digits):
     """generates money-code for withdrawals."""
     return ''.join(random.SystemRandom().choice(chars) for _ in range(size))
-
-
-def purchase_orm_from_purchase(purchase: entities.Purchase) -> Kaeufe:
-    product_offer = product_offer_to_orm(purchase.product_offer)
-    return Kaeufe(
-        kauf_date=purchase.purchase_date,
-        angebot=product_offer.id,
-        type_member=isinstance(purchase.buyer, entities.Member),
-        company=(
-            company_to_orm(purchase.buyer).id
-            if isinstance(purchase.buyer, entities.Company)
-            else None
-        ),
-        member=(
-            member_to_orm(purchase.buyer).id
-            if isinstance(purchase.buyer, entities.Member)
-            else None
-        ),
-        kaufpreis=float(purchase.price),
-    )
-
-
-def company_to_orm(company: entities.Company) -> Company:
-    return Company.query.get(company.id)
-
-
-def company_from_orm(company_orm: Company) -> entities.Company:
-    return entities.Company(
-        id=company_orm.id,
-        change_credit=lambda amount: setattr(company_orm, "guthaben", company_orm.guthaben + amount)
-    )
-
-
-def product_offer_to_orm(product_offer: entities.ProductOffer) -> Angebote:
-    return Angebote.query.get(product_offer.id)
-
-
-def product_offer_from_orm(offer_orm: Angebote) -> entities.ProductOffer:
-    return entities.ProductOffer(
-        id=offer_orm.id,
-        deactivate_offer_in_db=lambda: setattr(offer_orm, "aktiv", False),
-    )
-
-
-def member_to_orm(member: entities.Member) -> Member:
-    return Member.query.get(member.id)
-
-
-def member_from_orm(member: Member) -> entities.Member:
-    return entities.Member(
-        id=member.id,
-        change_credit=lambda amount: setattr(member, "guthaben", member.guthaben + amount),
-    )
 
 
 def lookup_koop_price(product_offer: entities.ProductOffer) -> Decimal:
@@ -79,12 +53,14 @@ def lookup_koop_price(product_offer: entities.ProductOffer) -> Decimal:
     )
 
 
+@with_injection
 def lookup_product_provider(
-    product_offer: entities.ProductOffer
+    product_offer: entities.ProductOffer,
+    company_repository: CompanyRepository,
 ) -> entities.Company:
     company_orm = db.session.query(Company).\
         join(Angebote).filter(Angebote.id == product_offer.id).first()
-    return company_from_orm(company_orm)
+    return company_repository.object_from_orm(company_orm)
 
 
 class SearchProducts():
@@ -344,22 +320,34 @@ Kosten: {current_kosten} Std.")
 
 # Kaufen
 
-def buy(kaufender_type, angebot, kaeufer_id) -> None:
+@with_injection
+def buy(
+        kaufender_type,
+        angebot,
+        kaeufer_id,
+        company_repository: CompanyRepository,
+        member_repository: MemberRepository,
+        product_offer_repository: ProductOfferRepository,
+        purchase_repository: PurchaseRepository,
+) -> None:
     """
     buy product.
     """
     datetime_service = DatetimeService()
-    buyer_model = Company if kaufender_type == "company" else Member
+    buyer_model: Union[Type[Company], Type[Member]] = (
+        Company if kaufender_type == "company" else Member
+    )
     buyer_orm = db.session.query(buyer_model).filter(buyer_model.id == kaeufer_id).first()
     buyer: Union[entities.Member, entities.Company] = (
-        company_from_orm(buyer_orm)
+        company_repository.object_from_orm(buyer_orm)
         if kaufender_type == "company"
-        else member_from_orm(buyer_orm)
+        else member_repository.object_from_orm(buyer_orm)
     )
 
-    product_offer = product_offer_from_orm(angebot)
+    product_offer = product_offer_repository.object_from_orm(angebot)
     purchase_factory = PurchaseFactory()
-    purchase = purchase_product(
+    purchase_product(
+        purchase_repository,
         datetime_service,
         lookup_koop_price,
         lookup_product_provider,
@@ -367,10 +355,7 @@ def buy(kaufender_type, angebot, kaeufer_id) -> None:
         buyer,
         purchase_factory,
     )
-    # this needs to be executed to create the actual db model
-    purchase_orm = purchase_orm_from_purchase(purchase)
-    db.session.add(purchase_orm)
-    db.session.commit()
+    commit_changes()
 
 
 # User
@@ -435,14 +420,14 @@ def withdraw(user_id, amount) -> str:
         code=code)
     db.session.add(new_withdrawal)
     db.session.commit()
-    
+
     # betrag vom guthaben des users abziehen
     member = db.session.query(Member).\
         filter(Member.id == user_id).\
         first()
     member.guthaben -= amount
     db.session.commit()
-    
+
     return code
 
 
