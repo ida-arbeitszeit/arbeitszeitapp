@@ -1,0 +1,33 @@
+{% extends "base_company.html" %}
+
+{% block content2 %}
+
+
+<h1 class="title">Produkt wurde veröffentlicht!</h1>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+<div class="notification is-danger">{{ message }} </div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<div class="columns is-centered">
+    <div class="column is-two-fifths">
+        <p>
+            Dein Angebot wurde in unserem Marketplace veröffentlicht.
+        </p>
+        <br>
+        <ul>
+            <li>Name: {{ offer.plan.prd_name }}</li>
+            <li>Beschreibung: {{ offer.plan.description }}</li>
+        </ul>
+        <br>
+        <p>
+            Du findest das Angebot unter "Meine Angebote".
+        </p>
+    </div>
+</div>
+
+{% endblock %}

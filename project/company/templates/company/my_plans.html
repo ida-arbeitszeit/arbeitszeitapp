@@ -25,21 +25,26 @@
     <table class="table is-fullwidth">
         <thead>
             <tr>
+                <th>Plan-ID</th>
                 <th>Produkt</th>
                 <th>Beschreibung</th>
                 <th>Einheiten</th>
                 <th>Plan vom</th>
                 <th>Ende Planzeitraum</th>
+                <th>Produkt anbieten</th>
             </tr>
         </thead>
         <tbody>
             {% for plan in plans %}
             <tr>
+                <td>{{ plan.id }}</td>
                 <td>{{ plan.prd_name }}</td>
                 <td>{{ plan.description }}</td>
                 <td>{{ plan.prd_amount }}</td>
                 <td>{{ plan.plan_creation_date }}</td>
                 <td>...</td>
+                <td><a href="{{ url_for('main_company.create_offer', plan_id=plan.id) }}"><i
+                            class="fas fa-store"></i></a></td>
             </tr>
             {% endfor %}
         </tbody>

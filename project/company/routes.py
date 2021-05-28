@@ -21,6 +21,7 @@ from project.models import (
     TransactionsAccountingToCompany,
     Withdrawal,
     Plan,
+    Offer,
 )
 from project.tables import (
     HoursTable,
@@ -228,7 +229,7 @@ def create_plan():
     return render_template("company/create_plan.html")
 
 
-@main_company.route("/company/my_plans")
+@main_company.route("/company/my_plans", methods=["GET", "POST"])
 @login_required
 def my_plans():
     my_company = Company.query.get(current_user.id)
@@ -238,6 +239,31 @@ def my_plans():
         .all()
     )
     return render_template("company/my_plans.html", plans=plans)
+
+
+@main_company.route("/company/create_offer/<int:plan_id>", methods=["GET", "POST"])
+@login_required
+def create_offer(plan_id):
+    if request.method == "POST":  # create offer
+        name = request.form["name"]
+        description = request.form["description"]
+        prd_amount = int(request.form["prd_amount"])
+
+        new_offer = Offer(
+            plan_id=plan_id,
+            cr_date=datetime.datetime.now(),
+            name=name,
+            description=description,
+            amount_available=prd_amount,
+            active=True,
+        )
+
+        db.session.add(new_offer)
+        db.session.commit()
+        return render_template("company/create_offer_in_app.html", offer=new_offer)
+
+    plan = Plan.query.filter_by(id=plan_id).first()
+    return render_template("company/create_offer.html", plan=plan)
 
 
 @main_company.route("/company/my_accounts")

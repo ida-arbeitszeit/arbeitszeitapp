@@ -80,6 +80,8 @@ class Plan(UserMixin, db.Model):
     approval_date = db.Column(db.DateTime, nullable=True, default=None)
     approval_reason = db.Column(db.String(1000), nullable=True, default=None)
 
+    offers = db.relationship("Offer", lazy="dynamic", backref="plan")
+
 
 class CompanyAccountTypes(enum.Enum):
     p = "p"
@@ -135,6 +137,18 @@ class TransactionsMemberToCompany(UserMixin, db.Model):
     receiver_id = db.Column(db.Integer, db.ForeignKey("company.id"), nullable=False)
     amount = db.Column(db.Numeric(), nullable=False)
     purpose = db.Column(db.String(1000), nullable=True)
+
+
+class Offer(UserMixin, db.Model):
+    """will substitute model "Angebote"."""
+
+    id = db.Column(db.Integer, primary_key=True)
+    plan_id = db.Column(db.Integer, db.ForeignKey("plan.id"), nullable=False)
+    cr_date = db.Column(db.DateTime, nullable=False)
+    name = db.Column(db.String(1000), nullable=False)
+    description = db.Column(db.String(1000), nullable=False)
+    amount_available = db.Column(db.Numeric(), nullable=False)
+    active = db.Column(db.Boolean, nullable=False, default=True)
 
 
 class Angebote(UserMixin, db.Model):
