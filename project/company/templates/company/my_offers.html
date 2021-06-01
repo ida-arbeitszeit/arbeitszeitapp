@@ -3,112 +3,62 @@
 {% block content2 %}
 
 
-  <h1 class="title">
-    Meine Angebote
-  </h1>
-  <div class="box has-background-info-light has-text-info-dark">
-    <div class="icon"><i class="fas fa-info-circle"></i></div>
-    <p>Hier sind deine aktuellen Angebote.<br>
-      Bei Bedarf kannst du sie löschen, mit einem Code verkaufen oder eine Kooperation starten.</p>
-  </div>
+<h1 class="title">
+  Meine Angebote
+</h1>
+<div class="box has-background-info-light has-text-info-dark">
+  <div class="icon"><i class="fas fa-info-circle"></i></div>
+  <p>Hier sind deine aktuellen Angebote.<br>
+    Bei Bedarf kannst du sie löschen oder mit einem Code verkaufen.</p>
+</div>
 
-  {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      {% for message in messages %}
-        <div class="notification is-danger is-light">{{ message }}</div>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+<div class="notification is-danger is-light">{{ message }}</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+<div class="table-container">
+
+
+  {% if offers is defined and offers|length %}
+  <table class="table is-fullwidth">
+    <thead>
+      <tr>
+        <th><abbr title="Angebot-ID">ID</abbr></th>
+        <th>Produktname</th>
+        <th>Beschreibung</th>
+        <th><abbr title="Kosten Produktionsmittel">p</abbr></th>
+        <th><abbr title="Kosten Rohstoffe">r</abbr></th>
+        <th><abbr title="Kosten Arbeit">a</abbr></th>
+        <th>Preis</th>
+        <th><abbr title="Noch vorhanden">Vorh.</abbr></th>
+        <th><abbr title="Löschen">Del.</abbr></th>
+        <th><abbr title="Offline-Verkauf mit Code">Offl.-Verk.</abbr></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for offer in offers %}
+      <tr>
+        <td>{{ offer.id }}</td>
+        <td>{{ offer.name }}</td>
+        <td>{{ offer.description }}</td>
+        <td>{{ offer.plan.costs_p }}</td>
+        <td>{{ offer.plan.costs_r }}</td>
+        <td>{{ offer.plan.costs_a }}</td>
+        <td>{{ offer.plan.costs_p + offer.plan.costs_r + offer.plan.costs_a }} Std.</td>
+        <td>{{ offer.amount_available }}</td>
+        <td><a href="{{ url_for('main_company.delete_offer', id=offer.id) }}"><u>Del.</u></a></td>
+        <td><a href="{{ url_for('main_company.sell_offer', id=offer.id) }}"><u>Offl.-Verk.</u></a>
+        </td>
+      </tr>
       {% endfor %}
-    {% endif %}
-  {% endwith %}
-  <div class="table-container">
-
-
-    {% if current_offers is defined and current_offers|length %}
-    <table class="table is-fullwidth">
-      <thead>
-        <tr>
-          <th><abbr title="Angebot-ID">ID</abbr></th>
-          <th>Produktname</th>
-          <th>Beschreibung</th>
-          <th>Kategorie</th>
-          <th><abbr title="Kosten Produktionsmittel">p</abbr></th>
-          <th><abbr title="Kosten Arbeit">v</abbr></th>
-          <th>Preis</th>
-          <th><abbr title="Kooperations-ID">Koop</abbr></th>
-          <th>Koop-Preis</th>
-          <th><abbr title="Noch vorhanden">Vorh.</abbr></th>
-          <th><abbr title="Kooperation starten/ändern">Koop.</abbr></th>
-          <th><abbr title="Löschen">Del.</abbr></th>
-          <th><abbr title="Offline-Verkauf mit Code">Offl.-Verk.</abbr></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for res in current_offers %}
-          <tr>
-            <td>{{ res.id }}</td>
-            <td>{{ res.angebot_name }}</td>
-            <td>{{ res.beschreibung }}</td>
-            <td>{{ res.kategorie }}</td>
-            <td>{{ res.p_kosten|round(2) }}</td>
-            <td>{{ res.v_kosten|round(2) }}</td>
-            <td>{{ res.preis|round(2) }} Std.</td>
-            <td>{{ res.kooperation if res.kooperation else '-' }}</td>
-            <td>{{ res.koop_preis|round(2) }} Std.
-            </td>
-            <td>{{ res.vorhanden }}</td>
-            <td><a href="{{ url_for('main_company.cooperate', id=res.id) }}"><u>Koop.</u></a></td>
-            <td><a href="{{ url_for('main_company.delete_offer', id=res.id) }}"><u>Del.</u></a></td>
-            <td><a href="{{ url_for('main_company.sell_offer', id=res.id) }}"><u>Offl.-Verk.</u></a>
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {% else %}
-    <p>(Du hast keine aktuellen Angebote.)</p>
-    {% endif %}
-  </div>
-
-  <h1 class="title">
-    Meine vergangenen Angebote
-  </h1>
-  <div class="table-container">
-    {% if past_offers is defined and past_offers|length %}
-    <table class="table is-fullwidth">
-      <thead>
-        <tr>
-          <th><abbr title="Angebot-ID">ID</abbr></th>
-          <th>Produktname</th>
-          <th>Beschreibung</th>
-          <th>Kategorie</th>
-          <th><abbr title="Kosten Produktionsmittel">p</abbr></th>
-          <th><abbr title="Kosten Arbeit">v</abbr></th>
-          <th>Preis</th>
-          <th><abbr title="Kooperations-ID">Koop</abbr></th>
-          <th>Koop-Preis</th>
-          <th>Menge</th>
-        </tr>
-      </thead>
-        <tbody>
-          {% for res in past_offers %}
-            <tr>
-              <td>{{ res.id }}</td>
-              <td>{{ res.angebot_name }}</td>
-              <td>{{ res.beschreibung }}</td>
-              <td>{{ res.kategorie }}</td>
-              <td>{{ res.p_kosten|round(2) }}</td>
-              <td>{{ res.v_kosten|round(2) }}</td>
-              <td>{{ res.preis|round(2) }} Std.</td>
-              <td>{{ res.kooperation if res.kooperation else '-' }}</td>
-              <td>{{ res.koop_preis|round(2) }} Std.</td>
-              <td>{{ res.vorhanden }}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p>(Keine vergangenen Angebote vorhanden.)</p>
-
-    {% endif %}
-  </div>
+    </tbody>
+  </table>
+  {% else %}
+  <p>(Du hast keine aktuellen Angebote.)</p>
+  {% endif %}
+</div>
 
 {% endblock %}

@@ -19,6 +19,8 @@ from project.models import (
     Member,
     Produktionsmittel,
     TransactionsAccountingToCompany,
+    TransactionsCompanyToCompany,
+    TransactionsCompanyToMember,
     Withdrawal,
     Plan,
     Offer,
@@ -123,19 +125,30 @@ def produktionsmittel():
 @login_required
 def suchen():
     """search products in catalog."""
+
     search_form = ProductSearchForm(request.form)
-    srch = database.SearchProducts()
-    results = srch.get_active_offers()
+    # srch = database.SearchProducts()
+    results = Offer.query.filter_by(active=True).all()
+    # results = srch.get_active_offers()
 
     if request.method == "POST":
         results = []
         search_string = search_form.data["search"]
         search_field = search_form.data["select"]  # Name, Beschr., Kategorie
 
-        if search_string:
-            results = srch.get_active_offers(search_string, search_field)
+        if search_string or search_field:
+            if search_field == "Name":
+                results = Offer.query.filter(
+                    Offer.name.contains(search_string), Offer.active == True
+                ).all()
+
+            elif search_field == "Beschreibung":
+                results = Offer.query.filter(
+                    Offer.description.contains(search_string), Offer.active == True
+                ).all()
+
         else:
-            results = srch.get_active_offers()
+            results = Offer.query.filter_by(active=True).all()
 
         if not results:
             flash("Keine Ergebnisse!")
@@ -175,14 +188,20 @@ def details(id):
 @main_company.route("/company/buy/<int:id>", methods=["GET", "POST"])
 @login_required
 def buy(id):
-    srch = database.SearchProducts()
-    angebot = srch.get_offer_by_id(id)
+    offer = Offer.query.filter_by(id=id).first()
+
     if request.method == "POST":  # if company buys
-        company.buy_product("company", database.get_offer_by_id(id), current_user.id)
-        flash(f"Kauf von '{angebot.angebot_name}' erfolgreich!")
+        purpose = (
+            "means_of_prod"
+            if request.form["category"] == "Produktionsmittel"
+            else "raw_materials"
+        )
+        amount = int(request.form["amount"])
+        company.buy_product("company", offer, amount, purpose, current_user.id)
+        flash(f"Kauf von '{amount}'x '{offer.name}' erfolgreich!")
         return redirect("/company/suchen")
 
-    return render_template("company/buy.html", angebot=angebot)
+    return render_template("company/buy.html", offer=offer)
 
 
 @main_company.route("/company/create_plan", methods=["GET", "POST"])
@@ -270,15 +289,38 @@ def create_offer(plan_id):
 @login_required
 def my_accounts():
     my_company = Company.query.get(current_user.id)
+
     received_from_accounting = (
         TransactionsAccountingToCompany.query.filter_by(receiver_id=current_user.id)
         .order_by(desc(TransactionsAccountingToCompany.date))
         .all()
     )
+
+    sent_to_company = (
+        TransactionsCompanyToCompany.query.filter_by(account_owner=current_user.id)
+        .order_by(desc(TransactionsCompanyToCompany.date))
+        .all()
+    )
+
+    received_from_company = (
+        TransactionsCompanyToCompany.query.filter_by(receiver_id=current_user.id)
+        .order_by(desc(TransactionsCompanyToCompany.date))
+        .all()
+    )
+
+    sent_to_workers = (
+        TransactionsCompanyToMember.query.filter_by(account_owner=current_user.id)
+        .order_by(desc(TransactionsCompanyToMember.date))
+        .all()
+    )
+
     return render_template(
         "company/my_accounts.html",
         my_company=my_company,
         received_from_accounting=received_from_accounting,
+        sent_to_company=sent_to_company,
+        received_from_company=received_from_company,
+        sent_to_workers=sent_to_workers,
     )
 
 
@@ -287,7 +329,7 @@ def my_accounts():
 def transfer():
     if request.method == "POST":
         receiver_id = request.form["member_id"]
-        amount = request.form["amount"]
+        amount = Decimal(request.form["amount"])
         sender = Company.query.get(current_user.id)
         receiver = Member.query.get(receiver_id)
         database.send_wages(sender, receiver, amount)
@@ -443,37 +485,35 @@ def new_offer():
 @main_company.route("/company/my_offers")
 @login_required
 def my_offers():
-    srch = database.SearchProducts()
-    qry = srch.get_offers()
-    current_offers = qry.filter(
-        Angebote.aktiv == True, Company.id == current_user.id
-    ).all()
-    past_offers = qry.filter(
-        Angebote.aktiv == False, Company.id == current_user.id
-    ).all()
-    return render_template(
-        "company/my_offers.html", current_offers=current_offers, past_offers=past_offers
-    )
+    my_company = Company.query.filter_by(id=current_user.id).first()
+    my_plans = my_company.plans.all()
+    my_offers = []
+    for plan in my_plans:
+        for offer in plan.offers.all():
+            if offer.active == True:
+                my_offers.append(offer)
+
+    return render_template("company/my_offers.html", offers=my_offers)
 
 
 @main_company.route("/company/delete_offer", methods=["GET", "POST"])
 @login_required
 def delete_offer():
-    angebot_id = request.args.get("id")
-    angebot = Angebote.query.filter_by(id=angebot_id).first()
+    offer_id = request.args.get("id")
+    offer = Offer.query.filter_by(id=offer_id).first()
     if request.method == "POST":
-        company.delete_product(angebot_id)
+        company.delete_product(offer_id)
         flash("Löschen des Angebots erfolgreich.")
         return redirect(url_for("main_company.my_offers"))
 
-    return render_template("company/delete_offer.html", angebot=angebot)
+    return render_template("company/delete_offer.html", offer=offer)
 
 
 @main_company.route("/company/sell_offer", methods=["GET", "POST"])
 @login_required
 def sell_offer():
-    angebot_id = request.args.get("id")
-    angebot = Angebote.query.filter_by(id=angebot_id).first()
+    offer_id = request.args.get("id")
+    offer = Offer.query.filter_by(id=offer_id).first()
 
     if request.method == "POST":
         code_input = request.form["code"]
@@ -484,13 +524,15 @@ def sell_offer():
             flash("Code nicht korrekt oder schon entwertet.")
         else:
             value_code = withdrawal.betrag
-            if round(angebot.preis, 2) != round(value_code, 2):
+            if round(
+                (offer.plan.costs_p + offer.plan.costs_r + offer.plan.costs_a), 2
+            ) != round(value_code, 2):
                 flash("Wert des Codes entspricht nicht dem Preis.")
             else:
                 kaufender_type = "member" if withdrawal.type_member else "company"
                 database.buy(
                     kaufender_type=kaufender_type,
-                    angebot=angebot,
+                    angebot=offer,
                     kaeufer_id=withdrawal.member,
                 )
                 withdrawal.entwertet = True
@@ -498,7 +540,7 @@ def sell_offer():
                 flash("Verkauf erfolgreich")
                 return redirect(url_for("main_company.my_offers"))
 
-    return render_template("company/sell_offer.html", angebot=angebot)
+    return render_template("company/sell_offer.html", offer=offer)
 
 
 @main_company.route("/company/cooperate", methods=["GET", "POST"])

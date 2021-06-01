@@ -9,6 +9,7 @@ from arbeitszeit import entities, repositories
 from project.extensions import db
 from project.models import (
     Angebote,
+    Offer,
     SocialAccounting,
     Company,
     Kaeufe,
@@ -67,8 +68,8 @@ class CompanyRepository:
     def object_from_orm(self, company_orm: Company) -> entities.Company:
         return entities.Company(
             id=company_orm.id,
-            change_credit=lambda amount: setattr(
-                company_orm, "guthaben", company_orm.guthaben + amount
+            change_credit=lambda amount, account_type: setattr(
+                company_orm, account_type, getattr(company_orm, account_type) + amount
             ),
         )
 
@@ -116,6 +117,8 @@ class PurchaseRepository(repositories.PurchaseRepository):
                 else None
             ),
             kaufpreis=float(purchase.price),
+            amount=purchase.amount,
+            purpose=purchase.purpose,
         )
 
     def add(self, purchase: entities.Purchase) -> None:
@@ -124,13 +127,19 @@ class PurchaseRepository(repositories.PurchaseRepository):
 
 
 class ProductOfferRepository:
-    def object_to_orm(self, product_offer: entities.ProductOffer) -> Angebote:
-        return Angebote.query.get(product_offer.id)
+    def object_to_orm(self, product_offer: entities.ProductOffer) -> Offer:
+        return Offer.query.get(product_offer.id)
 
-    def object_from_orm(self, offer_orm: Angebote) -> entities.ProductOffer:
+    def object_from_orm(self, offer_orm: Offer) -> entities.ProductOffer:
         return entities.ProductOffer(
             id=offer_orm.id,
-            deactivate_offer_in_db=lambda: setattr(offer_orm, "aktiv", False),
+            amount_available=offer_orm.amount_available,
+            deactivate_offer_in_db=lambda: setattr(offer_orm, "active", False),
+            decrease_amount_available=lambda amount: setattr(
+                offer_orm,
+                "amount_available",
+                getattr(offer_orm, "amount_available") - amount,
+            ),
         )
 
 

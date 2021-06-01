@@ -22,27 +22,18 @@
           {% if current_user.is_authenticated %}
           <div class="navbar-item has-dropdown is-hoverable">
             <a class="navbar-link">
-              Pläne und Angebote
+              Produktionspläne
             </a>
-
             <div class="navbar-dropdown">
               <a href="{{ url_for('main_company.create_plan') }}" class="navbar-item">
-                Neuer Plan
+                Neuen Plan erstellen
               </a>
               <a href="{{ url_for('main_company.my_plans') }}" class="navbar-item">
                 Meine Pläne
               </a>
-              <a href="{{ url_for('main_company.new_offer') }}" class="navbar-item">
-                Neues Angebot erstellen
-              </a>
-              <a href="{{ url_for('main_company.my_offers') }}" class="navbar-item">
-                Meine Angebote
-              </a>
-              <a href="{{ url_for('main_company.suchen') }}" class="navbar-item">
-                Angebote suchen
-              </a>
             </div>
           </div>
+
 
 
           <div class="navbar-item has-dropdown is-hoverable">
@@ -60,9 +51,32 @@
             </div>
           </div>
 
+
+
+          <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link">
+              Marketplace
+            </a>
+            <div class="navbar-dropdown">
+              <!-- <a href="{{ url_for('main_company.new_offer') }}" class="navbar-item">
+                Neues Angebot erstellen
+              </a> -->
+              <a href="{{ url_for('main_company.suchen') }}" class="navbar-item">
+                Angebote suchen und kaufen
+              </a>
+              <a href="{{ url_for('main_company.my_offers') }}" class="navbar-item">
+                Meine Angebote
+              </a>
+            </div>
+          </div>
+
+
+
+
+          <!-- 
           <a href="{{ url_for('main_company.produktionsmittel') }}" class="navbar-item">
             Produktionsmittel
-          </a>
+          </a> -->
 
           <a href="{{ url_for('main_company.arbeit') }}" class="navbar-item">
             Arbeit

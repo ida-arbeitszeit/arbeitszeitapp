@@ -26,8 +26,8 @@ class Company:
         """add new workers to company."""
         database.add_new_worker_to_company(user_id, company_id)
 
-    def buy_product(self, buyer_type, product_id, buyer_id):
-        database.buy(buyer_type, product_id, buyer_id)
+    def buy_product(self, buyer_type, product_id, amount, purpose, buyer_id):
+        database.buy(buyer_type, product_id, amount, purpose, buyer_id)
 
     def delete_product(self, product_id):
         """delete own product from catalog."""
@@ -50,6 +50,5 @@ class Member:
 
 # create one accounting instance in economy and in database
 accounting = SocialAccounting()
-database.create_social_accounting_in_db()
 company = Company()
 member = Member()

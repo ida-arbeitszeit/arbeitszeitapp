@@ -1,66 +1,66 @@
 company{% macro start_hilfe() %}
 
 <div class="hero-body">
-    <div class="container has-text-centered">
-        <h1 class="title">
-          Was ist das hier?
-        </h1>
-        <div class="block content has-text-left">
-          <ul>
-            <li>Diese Plattform ist ein gemeinschaftlicher Marktplatz, um Produkte
-              und Dienstleistungen auszutauschen.</li>
-            <li>Teilnehmer bekommen für geleistete Arbeit Arbeitszeitgeld,
-              mit dem sie Angebote bezahlen können.</li>
-              <li>Produkte kosten soviel Arbeitszeit,
-              wie sie zur Herstellung brauchen. Je mehr Arbeitszeit in einem Produkt steckt, desto "teurer" wird es.</li>
-              <li>Einzige Einnahmequelle ist die geleistete Arbeit, jenseits davon ist
-                kein Profit möglich. Diese Plattform richtet sich deshalb besonders
-                an Genossenschaften, Kooperativen und nicht-kommerzielle Anbieter.</li>
-          </ul>
-        </div>
-
-        <h1 class="title">
-          Wie funktioniert es?
-        </h1>
-
-        <div class="block content has-text-left">
-          <ul>
-            <li>Es gibt "Mitglieder"-Accounts und "Betriebe"-Accounts.</li>
-            <ul>
-              <li>Als Arbeiter und Konsument brauchst du einen <strong>Mitglieder-Account</strong>.<br>
-              Für deine geleistete Arbeit bekommst du von deinem Betrieb Arbeitszeit überwiesen,
-              die du gegen Dienstleistungen oder Produkte
-              eintauschen kannst. </li>
-              <li>Wer Dienstleistungen oder Produkte anbieten will,
-              braucht einen <strong>Betriebe-Account</strong>.<br>
-              Mit diesem Account kannst du Mitarbeiter mit Hilfe
-              ihrer Mitglieder-ID registrieren und berechnen, wieviel Arbeit in deinen Produkten steckt.</li>
-              <li>Gelegenheitsverkäufer, Freelancer oder Solo-Selbstständige
-                registrieren sowohl einen Mitglieder- als auch
-              einen Betriebe-Account und fügen sich selbst als (einzigen) Mitarbeiter hinzu.</li>
-            </ul>
-          </ul>
-        </div>
-
-
-        <hr>
-
-        <p class="title">
-          FAQ
-        </p>
-        <div class="block content has-text-left">
-        <ul>
-          <li>xxx1?</li>
-          <ul>
-            <li>xxx</li>
-          </ul>
-          <li>xxx2?</li>
-          <ul>
-            <li>xxx</li>
-          </ul>
-        </ul>
-      </div>
+  <div class="container has-text-centered">
+    <h1 class="title">
+      Was ist das hier?
+    </h1>
+    <div class="block content has-text-left">
+      <ul>
+        <li>Diese Plattform ist ein gemeinschaftlicher Marktplatz, um Produkte
+          und Dienstleistungen auszutauschen.</li>
+        <li>Teilnehmer bekommen für geleistete Arbeit Arbeitszeitgeld,
+          mit dem sie Angebote bezahlen können.</li>
+        <li>Produkte kosten soviel Arbeitszeit,
+          wie sie zur Herstellung brauchen. Je mehr Arbeitszeit in einem Produkt steckt, desto "teurer" wird es.</li>
+        <li>Einzige Einnahmequelle ist die geleistete Arbeit, jenseits davon ist
+          kein Profit möglich. Diese Plattform richtet sich deshalb besonders
+          an Genossenschaften, Kooperativen und nicht-kommerzielle Anbieter.</li>
+      </ul>
     </div>
+
+    <h1 class="title">
+      Wie funktioniert es?
+    </h1>
+
+    <div class="block content has-text-left">
+      <ul>
+        <li>Es gibt "Mitglieder"-Accounts und "Betriebe"-Accounts.</li>
+        <ul>
+          <li>Als Arbeiter und Konsument brauchst du einen <strong>Mitglieder-Account</strong>.<br>
+            Für deine geleistete Arbeit bekommst du von deinem Betrieb Arbeitszeit überwiesen,
+            die du gegen Dienstleistungen oder Produkte
+            eintauschen kannst. </li>
+          <li>Wer Dienstleistungen oder Produkte anbieten will,
+            braucht einen <strong>Betriebe-Account</strong>.<br>
+            Mit diesem Account kannst du Mitarbeiter mit Hilfe
+            ihrer Mitglieder-ID registrieren und berechnen, wieviel Arbeit in deinen Produkten steckt.</li>
+          <li>Gelegenheitsverkäufer, Freelancer oder Solo-Selbstständige
+            registrieren sowohl einen Mitglieder- als auch
+            einen Betriebe-Account und fügen sich selbst als (einzigen) Mitarbeiter hinzu.</li>
+        </ul>
+      </ul>
+    </div>
+
+
+    <hr>
+
+    <p class="title">
+      FAQ
+    </p>
+    <div class="block content has-text-left">
+      <ul>
+        <li>xxx1?</li>
+        <ul>
+          <li>xxx</li>
+        </ul>
+        <li>xxx2?</li>
+        <ul>
+          <li>xxx</li>
+        </ul>
+      </ul>
+    </div>
+  </div>
 </div>
 
 {% endmacro %}
@@ -76,26 +76,26 @@ company{% macro start_hilfe() %}
     </h1>
     <div class="box">
       {% with messages = get_flashed_messages() %}
-        {% if messages %}
-          {% for message in messages %}
-            <div class="notification is-danger">{{ message }}  </div>
-          {% endfor %}
-        {% endif %}
+      {% if messages %}
+      {% for message in messages %}
+      <div class="notification is-danger">{{ message }} </div>
+      {% endfor %}
+      {% endif %}
       {% endwith %}
 
       <form method="post">
         <div class="field">
 
-            <div class="control">
-              <div class="select is-large is-fullwidth">
-                {{ form.select }}
-              </div>
+          <div class="control">
+            <div class="select is-large is-fullwidth">
+              {{ form.select }}
             </div>
-            <p class="help">Suche in Name/Beschreibung/Kategorie</p>
+          </div>
+          <p class="help">Suche in Name/Beschreibung/Kategorie</p>
         </div>
         <div class="field">
           <div class="control">
-              {{ form.search(class_="input is-large") }}
+            {{ form.search(class_="input is-large") }}
           </div>
           <p class="help">Suchbegriff</p>
         </div>
@@ -119,39 +119,37 @@ company{% macro start_hilfe() %}
         <th>Betrieb</th>
         <th>Mail</th>
         <th>Beschreibung</th>
-        <th>Kategorie</th>
-        <th><abbr title="Kooperations-ID">Koop</abbr></th>
         <th>Preis</th>
         <th><abbr title="Noch vorhanden">Vorh.</abbr> </th>
         <th>Kaufen</th>
       </tr>
     </thead>
-      <tbody>
-        {% for res in results %}
-          <tr>
-            <td>{{ res.id }}</td><td>{{ res.angebot_name }}</td>
-            <td>{{ res.company_name }}</td>
-            <td>
-              <a href="mailto:{{ res.email }}">
-                <u><span class="icon has-text-grey"><i class="far fa-envelope"></i></span></u>
-              </a>
-            </td>
-            <td>{{ res.beschreibung }}</td><td>{{ res.kategorie }}</td>
-            <td>{{ res.kooperation if res.kooperation else '-' }}</td>
-            <td>{{ res.koop_preis|round(2) }} Std.
-              <a href="{{ url_for('%s.details' % (request.blueprint), id=res.id) }}">
-                <u><span class="icon has-text-grey"><i class="far fa-question-circle"></i></span></u>
-              </a>
-            </td>
-            <td>{{ res.vorhanden }}</td>
-            <td>
-              <a href="{{ url_for('%s.buy' % (request.blueprint), id=res.id) }}">
-                <u><u><span class="icon has-text-grey"><i class="fas fa-shopping-cart"></i></span></u></u>
-              </a>
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
+    <tbody>
+      {% for res in results %}
+      <tr>
+        <td>{{ res.id }}</td>
+        <td>{{ res.name }}</td>
+        <td>{{ res.plan.planner }}</td>
+        <td>
+          <a href="mailto:{{ XXX }}">
+            <u><span class="icon has-text-grey"><i class="far fa-envelope"></i></span></u>
+          </a>
+        </td>
+        <td>{{ res.description }}</td>
+        <td>{{ res.plan.costs_p + res.plan.costs_r + res.plan.costs_a|round(2) }} Std.
+          <a href="{{ url_for('%s.details' % (request.blueprint), id=res.id) }}">
+            <u><span class="icon has-text-grey"><i class="far fa-question-circle"></i></span></u>
+          </a>
+        </td>
+        <td>{{ res.amount_available }}</td>
+        <td>
+          <a href="{{ url_for('%s.buy' % (request.blueprint), id=res.id) }}">
+            <u><u><span class="icon has-text-grey"><i class="fas fa-shopping-cart"></i></span></u></u>
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
   </table>
 </div>
 {% endif %}
@@ -162,39 +160,39 @@ company{% macro start_hilfe() %}
 {% macro details(piped, table_preiszus, preise) %}
 <h1 class="subtitle">PREIS VOR UND NACH KOOPERATION</h1>
 <div class="columns is-centered">
-    <div class="column is-two-fifths">
-      <div class="level">
-        <div class="level-left">
-          <div class="level-item">
-            <p class="has-text-weight-semibold">Preis vor Kooperation (betrieblich):</p>
-          </div>
-        </div>
-        <div class="level-right">
-          <div class="level-item">
-            <p>{{ preise[0]|round(2) }} Stunden</p>
-          </div>
+  <div class="column is-two-fifths">
+    <div class="level">
+      <div class="level-left">
+        <div class="level-item">
+          <p class="has-text-weight-semibold">Preis vor Kooperation (betrieblich):</p>
         </div>
       </div>
-      <div class="level">
-        <div class="level-left">
-          <div class="level-item">
-            <p class="has-text-weight-semibold">Preis nach Kooperation (Durchschnittspreis):</p>
-          </div>
-        </div>
-        <div class="level-right">
-          <div class="level-item">
-            <p>{{ preise[1]|round(2) }} Stunden</p>
-          </div>
+      <div class="level-right">
+        <div class="level-item">
+          <p>{{ preise[0]|round(2) }} Stunden</p>
         </div>
       </div>
     </div>
+    <div class="level">
+      <div class="level-left">
+        <div class="level-item">
+          <p class="has-text-weight-semibold">Preis nach Kooperation (Durchschnittspreis):</p>
+        </div>
+      </div>
+      <div class="level-right">
+        <div class="level-item">
+          <p>{{ preise[1]|round(2) }} Stunden</p>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <h1 class="subtitle">PREISZUSAMMENSETZUNG</h1>
 <div class="table-container">
-    <figure class="image">
-      {{ piped|safe }}
-    </figure>
+  <figure class="image">
+    {{ piped|safe }}
+  </figure>
 </div>
 
 <!-- <h1 class="subtitle">DETAILS PREISZUSAMMENSETZUNG</h1>
@@ -205,8 +203,8 @@ company{% macro start_hilfe() %}
 </div> -->
 
 <form method="post">
-    <a class="button is-primary" href="{{  url_for('%s.suchen' % (request.blueprint)) }}">
-      Zurück
-    </a>
+  <a class="button is-primary" href="{{  url_for('%s.suchen' % (request.blueprint)) }}">
+    Zurück
+  </a>
 </form>
 {% endmacro %}

@@ -32,6 +32,8 @@ from project.models import (
     SocialAccounting,
     TransactionsAccountingToCompany,
     TransactionsCompanyToMember,
+    TransactionsCompanyToCompany,
+    Offer,
 )
 from project.extensions import db
 
@@ -92,8 +94,10 @@ def get_social_accounting_by_id(id: int) -> Optional[entities.SocialAccounting]:
     )
 
 
-def lookup_koop_price(product_offer: entities.ProductOffer) -> Decimal:
-    return Decimal(SearchProducts().get_offer_by_id(product_offer.id).koop_preis)
+def lookup_price(product_offer: entities.ProductOffer) -> Decimal:
+    plan = ProductOfferRepository().object_to_orm(product_offer).plan
+    price = plan.costs_p + plan.costs_r + plan.costs_a
+    return Decimal(price)
 
 
 @with_injection
@@ -101,12 +105,9 @@ def lookup_product_provider(
     product_offer: entities.ProductOffer,
     company_repository: CompanyRepository,
 ) -> entities.Company:
-    company_orm = (
-        db.session.query(Company)
-        .join(Angebote)
-        .filter(Angebote.id == product_offer.id)
-        .first()
-    )
+    offer_orm = Offer.query.filter_by(id=product_offer.id).first()
+    plan_orm = offer_orm.plan
+    company_orm = plan_orm.company
     return company_repository.object_from_orm(company_orm)
 
 
@@ -404,7 +405,9 @@ Kosten: {current_kosten} Std.",
 @with_injection
 def buy(
     kaufender_type,
-    angebot,
+    offer: Offer,
+    amount,
+    purpose,
     kaeufer_id,
     company_repository: CompanyRepository,
     member_repository: MemberRepository,
@@ -426,18 +429,34 @@ def buy(
         if kaufender_type == "company"
         else member_repository.object_from_orm(buyer_orm)
     )
-
-    product_offer = product_offer_repository.object_from_orm(angebot)
+    product_offer = product_offer_repository.object_from_orm(offer)
     purchase_factory = PurchaseFactory()
+
     purchase_product(
         purchase_repository,
         datetime_service,
-        lookup_koop_price,
+        lookup_price,
         lookup_product_provider,
         product_offer,
+        amount,
+        purpose,
         buyer,
         purchase_factory,
     )
+    # change: make it work on object level
+    if kaufender_type == "company":
+        transaction_orm = TransactionsCompanyToCompany(
+            date=datetime.now(),
+            account_owner=kaeufer_id,
+            receiver_id=offer.plan.planner,
+            owner_account_type="p" if purpose == "means_of_prod" else "r",
+            receiver_account_type="prd",
+            amount=amount
+            * (offer.plan.costs_p + offer.plan.costs_r + offer.plan.costs_a),
+            purpose=f"Angebot-Id: {offer.id}",
+        )
+        db.session.add(transaction_orm)
+
     commit_changes()
 
 
@@ -543,24 +562,27 @@ def grant_credit(
 
 @with_injection
 def send_wages(
-    sender: Company,
-    receiver: Member,
+    sender_orm: Company,
+    receiver_orm: Member,
     amount,
-    transaction_repository: TransactionRepository,
+    company_repository: CompanyRepository,
+    member_repository: MemberRepository,
 ):
     transaction_orm = TransactionsCompanyToMember(
         date=datetime.now(),
-        account_owner=sender.id,
-        receiver_id=receiver.id,
+        account_owner=sender_orm.id,
+        receiver_id=receiver_orm.id,
         amount=amount,
         purpose="Lohn",
     )
     db.session.add(transaction_orm)
     commit_changes()
 
-    transaction = transaction_repository.object_from_orm(transaction_orm)
-    # transaction.account_owner.reduce_credit()
-    # transaction.receiver.increase_credit()
+    sender = company_repository.object_from_orm(sender_orm)
+    sender.reduce_credit(amount, "balance_a")
+    receiver = member_repository.object_from_orm(receiver_orm)
+    receiver.increase_credit(amount)
+    commit_changes()
 
 
 # User
@@ -717,10 +739,10 @@ def get_means_of_prod(company_id) -> tuple:
     return (produktionsmittel_aktiv, produktionsmittel_inaktiv)
 
 
-def delete_product(angebot_id) -> None:
+def delete_product(offer_id) -> None:
     """delete product."""
-    angebot = Angebote.query.filter_by(id=angebot_id).first()
-    angebot.aktiv = False
+    offer = Offer.query.filter_by(id=offer_id).first()
+    offer.active = False
     db.session.commit()
 
 

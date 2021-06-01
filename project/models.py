@@ -150,6 +150,8 @@ class Offer(UserMixin, db.Model):
     amount_available = db.Column(db.Numeric(), nullable=False)
     active = db.Column(db.Boolean, nullable=False, default=True)
 
+    purchases = db.relationship("Kaeufe", lazy="dynamic", backref="offer")
+
 
 class Angebote(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -182,11 +184,13 @@ p_kosten='%s', v_kosten='%s', preis='%s', aktiv='%s')>" % (
 class Kaeufe(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     kauf_date = db.Column(db.DateTime, nullable=False)
-    angebot = db.Column(db.Integer, db.ForeignKey("angebote.id"), nullable=False)
+    angebot = db.Column(db.Integer, db.ForeignKey("offer.id"), nullable=False)
     type_member = db.Column(db.Boolean, nullable=False)
     company = db.Column(db.Integer, db.ForeignKey("company.id"), nullable=True)
     member = db.Column(db.Integer, db.ForeignKey("member.id"), nullable=True)
     kaufpreis = db.Column(db.Numeric(), nullable=False)
+    amount = db.Column(db.Integer, nullable=False)
+    purpose = db.Column(db.String(100), nullable=False)
 
 
 class Arbeit(UserMixin, db.Model):
