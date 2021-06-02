@@ -9,15 +9,15 @@ from arbeitszeit import entities, repositories
 from project.extensions import db
 from project.models import (
     Angebote,
-    Offer,
-    SocialAccounting,
     Company,
     Kaeufe,
     Member,
+    Offer,
     Plan,
-    TransactionsCompanyToMember,
+    SocialAccounting,
     TransactionsAccountingToCompany,
     TransactionsCompanyToCompany,
+    TransactionsCompanyToMember,
     TransactionsMemberToCompany,
 )
 

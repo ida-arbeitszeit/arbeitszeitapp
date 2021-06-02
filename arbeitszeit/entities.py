@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Callable, Union, Optional
+from typing import Callable, Union
 
 
 class SocialAccounting:
@@ -36,11 +38,15 @@ class ProductOffer:
         amount_available: int,
         deactivate_offer_in_db: Callable[[], None],
         decrease_amount_available: Callable[[int], None],
+        price_per_unit: Decimal,
+        provider: Company,
     ) -> None:
         self._id = id
         self._amount_available = amount_available
         self._deactivate = deactivate_offer_in_db
         self._decrease_amount = decrease_amount_available
+        self.price_per_unit = price_per_unit
+        self.provider = provider
 
     def deactivate(self) -> None:
         self._deactivate()
