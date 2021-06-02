@@ -4,7 +4,11 @@ from project import database
 
 
 class SocialAccounting:
-    """A social accounting institution."""
+    """One social accounting institution, with id=1."""
+
+    def __init__(self) -> None:
+        self.id = 1
+
     def check_plan(self):
         pass
 
@@ -17,26 +21,22 @@ class SocialAccounting:
 
 class Company:
     """A company."""
+
     def add_new_worker(self, user_id, company_id):
         """add new workers to company."""
         database.add_new_worker_to_company(user_id, company_id)
 
-    def buy_product(self, buyer_type, product_id, buyer_id):
-        database.buy(buyer_type, product_id, buyer_id)
+    def buy_product(self, buyer_type, product_id, amount, purpose, buyer_id):
+        database.buy(buyer_type, product_id, amount, purpose, buyer_id)
 
     def delete_product(self, product_id):
         """delete own product from catalog."""
         database.delete_product(product_id)
 
-    def send_plan(self, p, r, a, prd_name, prd_unit, prd_amount, timeframe):
-        """send plan."""
-        accounting.check_plan()
-        accounting.grant_credits_to_company()
-        accounting.publish_products()
-
 
 class Member:
     """A regular member/worker."""
+
     def buy_product(self, buyer_type, product_id, buyer_id):
         database.buy(buyer_type, product_id, buyer_id)
 
@@ -48,6 +48,7 @@ class Member:
         return code
 
 
+# create one accounting instance in economy and in database
 accounting = SocialAccounting()
 company = Company()
 member = Member()

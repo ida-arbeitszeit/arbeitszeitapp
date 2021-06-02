@@ -12,10 +12,14 @@ class PurchaseFactory:
         product_offer: ProductOffer,
         buyer: Union[Member, Company],
         price: Decimal,
+        amount: int,
+        purpose: str,
     ) -> Purchase:
         return Purchase(
             purchase_date=purchase_date,
             product_offer=product_offer,
             buyer=buyer,
             price=price,
+            amount=amount,
+            purpose=purpose,
         )

@@ -1,0 +1,140 @@
+{% extends "base_company.html" %}
+
+{% block content2 %}
+
+
+<div class="columns is-centered">
+  <div class="column is-three-fifths">
+    <div class="box has-background-info-light has-text-info-dark">
+      <div class="icon"><i class="fas fa-info-circle"></i></div>
+      <p>
+        Erstelle hier deinen Plan. <br><br>
+        Ein Plan besteht zunächst aus dem <b>Namen des Produktes</b>,
+        der <b>Beschreibung des Produktes</b> und dem <b>Planungszeitraum</b>.
+        In diesem Zeitraum planst du, eine bestimmte <b>Menge</b> an <b>Einheiten</b>
+        eines bestimmten Produktes herzustellen und zu verkaufen. <br> Gib außerdem an, wieviele
+        <b>Kosten für Produktionsmittel</b>, <b>Roh- und Hilfsstoffe</b> und <b>Arbeitskraft</b>
+        du für das (gesamte) Produkt in diesem Zeitraum aufwenden wirst.
+      </p>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <div class="notification is-danger">{{ message }} </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <form method="post">
+      <div class="field">
+        <div class="control">
+          <label for="name">Name des Produkts</label>
+          <input class="input is-large" , type="text" , name="prd_name" required>
+        </div>
+      </div>
+      <div class="block"></div>
+
+      <hr>
+
+      <div class="field">
+        <div class="control">
+          <label for="description">Beschreibung des Produkts</label>
+          <textarea class="textarea is-large" , name="description" required></textarea>
+          <p class="help">(Verfügbarkeit, Kontaktmöglichkeiten, etc.)</p>
+        </div>
+
+      </div>
+      <div class="block"></div>
+
+
+      <hr>
+
+      <div class="field">
+        <div class="control">
+          <label for="prd_amount">Planungszeitraum:</label>
+          <input class="input is-large" type="number" name="timeframe" min=1 max=365 value=1 required>
+          <p class="help">(Wieviele Tage umfasst der Planungszeitraum?)</p>
+        </div>
+      </div>
+      <div class="block"></div>
+
+
+      <hr>
+
+      <div class="field">
+        <div class="control">
+          <label for="description">Kleinste Abgabeeinheit</label>
+          <textarea class="input is-large" , type="text" , name="prd_unit" required>Kg</textarea>
+          <p class="help">(1 Packung à 100 Stück, 1 Kilogramm, 1 Flasche à 0,5 Liter, 1 Meter, Unterrichtseinheit à 1,5
+            Stunde,
+            etc.)</p>
+        </div>
+
+      </div>
+      <div class="block"></div>
+
+
+      <hr>
+
+      <div class="field">
+        <div class="control">
+          <label for="prd_amount">Menge:</label>
+          <input class="input is-large" type="number" name="prd_amount" min=1 value=1 required>
+          <p class="help">(Wieviele Einheiten werden produziert und verkauft?)</p>
+        </div>
+      </div>
+      <div class="block"></div>
+
+      <hr>
+
+      <div class="field">
+        <div class="control">
+          <label for="prd_amount">Kosten für Produktionsmittel:</label>
+          <input class="input is-large" type="number" name="costs_p" value=0 required>
+        </div>
+      </div>
+      <div class="block"></div>
+
+      <hr>
+
+      <div class="field">
+        <div class="control">
+          <label for="prd_amount">Kosten für Roh- und Hilfsstoffe:</label>
+          <input class="input is-large" type="number" name="costs_r" value=0 required>
+        </div>
+      </div>
+      <div class="block"></div>
+
+      <hr>
+
+      <div class="field">
+        <div class="control">
+          <label for="prd_amount">Enthaltene Arbeitsstunden:</label>
+          <input class="input is-large" type="number" name="costs_a" value=0 required>
+        </div>
+      </div>
+      <div class="block"></div>
+
+      <div class="box has-background-danger-light has-text-danger-dark">
+        <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
+        <p>
+          Der Plan bestimmt den Preis deiner Produkte und lässt
+          sich deshalb nachträglich nicht ändern!
+          <br>
+        </p>
+      </div>
+  </div>
+</div>
+
+<div class="field is-grouped is-grouped-centered">
+  <div class="control">
+    <button class="button is-danger">
+      Plan erstellen
+    </button>
+  </div>
+</div>
+
+</form>
+
+{% endblock %}

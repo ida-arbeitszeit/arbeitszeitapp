@@ -1,0 +1,76 @@
+{% extends "base_company.html" %}
+
+{% block content2 %}
+
+
+<h1 class="title">Produkt anbieten</h1>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+<div class="notification is-danger">{{ message }} </div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<div class="columns is-centered">
+    <div class="column is-two-fifths">
+        <div>
+            <p>
+                Du kannst dieses Produkt selbst anbieten, wo und wie du willst. Solange der dazugehörige Plan aktuell
+                ist, können Kunden das Produkt in ihrem Mitglieds-Konto unter folgender Adresse bezahlen: <br>
+                <a href="">www.arbeitszeitapp.de/überweisung/plan_id_xy</a>
+            </p>
+            <hr>
+            <p>
+                Wir empfehlen dir, dein Produkt in jedem Fall auch auf unserem Marketplace anzubieten. Es geht einfach,
+                schnell und ist kostenlos. Passe bei Bedarf Details des Angebots an und klicke dann auf
+                den Button "Angebot erstellen".
+            </p>
+        </div>
+    </div>
+</div>
+
+<hr>
+
+<form method="POST">
+    <div class="field">
+        <div class="control">
+            <label for="name">Name des Produkts</label>
+            <input class="input is-large" , type="text" , name="name" , value="{{ plan.prd_name }}" , required>
+        </div>
+    </div>
+    <div class="block"></div>
+    <div class="field">
+        <div class="control">
+            <label for="description">Beschreibung</label>
+            <input class="input is-large" , type="text" , name="description" , value="{{ plan.description }}" ,
+                required>
+        </div>
+    </div>
+    <div class="block"></div>
+    <div class="field">
+        <div class="control">
+            <label for="prd_amount">Menge:</label>
+            <input class="input is-large" type="number" name="prd_amount" min=1 value="{{ plan.prd_amount }}" required>
+            <p class="help">(Sollte nicht die im Plan angegebene Menge überschreiten.)</p>
+        </div>
+    </div>
+    <div class="block"></div>
+
+
+    <div class="field">
+        <div class="control">
+            <button class="button is-primary">
+                Angebot erstellen
+            </button>
+            <a class="button is-light" href="{{  url_for('main_company.my_plans') }}">
+                Abbrechen
+            </a>
+        </div>
+    </div>
+
+
+</form>
+
+{% endblock %}
