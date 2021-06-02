@@ -39,10 +39,13 @@ class PurchaseProduct:
         ), "Amount ordered exceeds available products!"
         if product_offer.amount_available == amount:
             product_offer.deactivate()
-
-        product_offer.provider.increase_credit(price * amount, "balance_prd")
+        price_total = price * amount
+        product_offer.provider.increase_credit(price_total, "balance_prd")
         account_type = "balance_p" if purpose == "means_of_prod" else "balance_r"
-        buyer.reduce_credit(price * amount, account_type)
+        if isinstance(buyer, Member):
+            buyer.reduce_credit(price_total)
+        else:
+            buyer.reduce_credit(price_total, account_type)
         self.purchase_repository.add(purchase)
         return purchase
 
@@ -67,12 +70,13 @@ def seeking_approval(
     datetime_service: DatetimeService,
     plan: Plan,
 ) -> Plan:
-    # criteria to be defined
-    decision = True
-    reason = None if decision else "Nicht genug Kredit."
-    approval_date = datetime_service.now() if decision else None
-
-    plan.approve(decision, reason, approval_date)
+    # This is just a place holder
+    is_approval = True
+    approval_date = datetime_service.now()
+    if is_approval:
+        plan.approve(approval_date)
+    else:
+        plan.deny("Some reason", approval_date)
     return plan
 
 
@@ -81,4 +85,4 @@ def granting_credit(
 ) -> None:
     # increase/reduce company balances
     # register transcations
-    return plan
+    pass

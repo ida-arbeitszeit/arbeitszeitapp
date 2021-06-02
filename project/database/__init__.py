@@ -12,7 +12,7 @@ from sqlalchemy.orm import aliased
 from injector import Injector, inject
 
 from arbeitszeit.use_cases import (
-    purchase_product,
+    PurchaseProduct,
     seeking_approval,
     granting_credit,
 )
@@ -92,12 +92,6 @@ def get_social_accounting_by_id(id: int) -> Optional[entities.SocialAccounting]:
         if social_accounting_orm
         else None
     )
-
-
-def lookup_price(product_offer: entities.ProductOffer) -> Decimal:
-    plan = ProductOfferRepository().object_to_orm(product_offer).plan
-    price = plan.costs_p + plan.costs_r + plan.costs_a
-    return Decimal(price)
 
 
 @with_injection
@@ -409,6 +403,7 @@ def buy(
     amount,
     purpose,
     kaeufer_id,
+    purchase_product: PurchaseProduct,
     company_repository: CompanyRepository,
     member_repository: MemberRepository,
     product_offer_repository: ProductOfferRepository,
@@ -417,7 +412,6 @@ def buy(
     """
     buy product.
     """
-    datetime_service = DatetimeService()
     buyer_model: Union[Type[Company], Type[Member]] = (
         Company if kaufender_type == "company" else Member
     )
@@ -430,18 +424,12 @@ def buy(
         else member_repository.object_from_orm(buyer_orm)
     )
     product_offer = product_offer_repository.object_from_orm(offer)
-    purchase_factory = PurchaseFactory()
 
     purchase_product(
-        purchase_repository,
-        datetime_service,
-        lookup_price,
-        lookup_product_provider,
         product_offer,
         amount,
         purpose,
         buyer,
-        purchase_factory,
     )
     # change: make it work on object level
     if kaufender_type == "company":

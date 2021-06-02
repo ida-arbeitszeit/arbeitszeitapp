@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Optional, Union
+from decimal import Decimal
+from typing import List, Optional, TypeVar, Union
 
 from injector import inject
 
@@ -20,6 +21,13 @@ from project.models import (
     TransactionsCompanyToMember,
     TransactionsMemberToCompany,
 )
+
+T = TypeVar("T")
+
+
+def assert_is_not_none(candidate: Optional[T]) -> T:
+    assert candidate is not None
+    return candidate
 
 
 @inject
@@ -126,11 +134,17 @@ class PurchaseRepository(repositories.PurchaseRepository):
         db.session.add(purchase_orm)
 
 
+@inject
+@dataclass
 class ProductOfferRepository:
+    company_repository: CompanyRepository
+
     def object_to_orm(self, product_offer: entities.ProductOffer) -> Offer:
         return Offer.query.get(product_offer.id)
 
     def object_from_orm(self, offer_orm: Offer) -> entities.ProductOffer:
+        plan = offer_orm.plan
+        price_per_unit = Decimal(plan.costs_p + plan.costs_r + plan.costs_a)
         return entities.ProductOffer(
             id=offer_orm.id,
             amount_available=offer_orm.amount_available,
@@ -140,6 +154,8 @@ class ProductOfferRepository:
                 "amount_available",
                 getattr(offer_orm, "amount_available") - amount,
             ),
+            price_per_unit=price_per_unit,
+            provider=self.company_repository.object_from_orm(plan.company),
         )
 
 
@@ -168,8 +184,8 @@ class PlanRepository(repositories.PlanRepository):
         plan_orm = Plan.query.filter_by(id=id).first()
         return self.object_from_orm(plan_orm) if plan_orm else None
 
-    def add(self, plan_orm: Plan) -> None:
-        db.session.add(plan_orm)
+    def add(self, plan: entities.Plan) -> None:
+        db.session.add(self.object_to_orm(plan))
 
 
 @inject
@@ -188,23 +204,35 @@ class TransactionRepository(repositories.TransactionRepository):
             TransactionsCompanyToMember,
         ],
     ) -> entities.Transaction:
+        account_owner: Union[
+            entities.Member, entities.Company, entities.SocialAccounting
+        ]
         if isinstance(transaction, TransactionsMemberToCompany):
-            account_owner = self.member_repository.get_member_by_id(
-                transaction.account_owner
+            account_owner = assert_is_not_none(
+                self.member_repository.get_member_by_id(transaction.account_owner)
             )
         elif isinstance(transaction, TransactionsAccountingToCompany):
-            account_owner = self.accounting_repository.get_by_id(
-                transaction.account_owner
+            account_owner = assert_is_not_none(
+                self.accounting_repository.get_by_id(transaction.account_owner)
             )
         elif isinstance(
             transaction, (TransactionsCompanyToCompany, TransactionsCompanyToMember)
         ):
-            account_owner = self.company_repository.get_by_id(transaction.account_owner)
+            account_owner = assert_is_not_none(
+                self.company_repository.get_by_id(transaction.account_owner)
+            )
 
+        receiver: Union[entities.Member, entities.Company]
+        if isinstance(transaction, TransactionsCompanyToMember):
+            receiver = assert_is_not_none(
+                self.member_repository.get_member_by_id(transaction.receiver_id)
+            )
+        else:
+            receiver = assert_is_not_none(
+                self.company_repository.get_by_id(transaction.receiver_id)
+            )
         return entities.Transaction(
             account_owner=account_owner,
-            receiver=self.member_repository.get_member_by_id(transaction.receiver_id)
-            if isinstance(transaction, TransactionsCompanyToMember)
-            else self.company_repository.get_by_id(transaction.receiver_id),
+            receiver=receiver,
             amount=transaction.amount,
         )

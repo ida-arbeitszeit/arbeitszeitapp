@@ -79,10 +79,16 @@ class Company:
         return self._id
 
 
-@dataclass
 class Plan:
-    id: int
-    approve: Callable[[bool, str, datetime], None]
+    def __init__(self, id: int, approve: Callable[[bool, str, datetime], None]) -> None:
+        self.id = id
+        self._approve_call = approve
+
+    def approve(self, approval_date: datetime) -> None:
+        self._approve_call(True, "approved", approval_date)
+
+    def deny(self, reason: str, denial_date: datetime) -> None:
+        self._approve_call(False, reason, denial_date)
 
 
 @dataclass
