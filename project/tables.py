@@ -1,14 +1,6 @@
 from flask_table import Table, Col
 
 
-class ProduktionsmittelTable(Table):
-    id = Col('Kauf-Id')
-    name = Col('Name')
-    beschreibung = Col('Beschreibung')
-    kaufpreis = Col('Kaufpreis')
-    prozent_gebraucht = Col('Prozent Gebraucht')
-
-
 class Preiszusammensetzung(Table):
     angebot1 = Col("angebot1")
     name1 = Col("name1")
@@ -48,18 +40,12 @@ class Preiszusammensetzung(Table):
 
 
 class KaeufeTable(Table):
-    id = Col('Kauf-Id')
-    name = Col('Name')
-    beschreibung = Col('Beschreibung')
-    preis = Col('Preis')
+    id = Col("Kauf-Id")
+    name = Col("Name")
+    beschreibung = Col("Beschreibung")
+    preis = Col("Preis")
 
 
 class WorkersTable(Table):
-    id = Col('Mitglieder-Id')
-    name = Col('Name')
-
-
-class HoursTable(Table):
-    id = Col('Mitglieder-Id')
-    name = Col('Name')
-    summe_stunden = Col('Arbeitsstunden')
+    id = Col("Mitglieder-Id")
+    name = Col("Name")

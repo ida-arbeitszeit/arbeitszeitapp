@@ -12,12 +12,9 @@ from project.economy import company, accounting
 from project.extensions import db
 from project.forms import ProductSearchForm
 from project.models import (
-    Angebote,
-    Arbeit,
     Company,
     Kaeufe,
     Member,
-    Produktionsmittel,
     TransactionsAccountingToCompany,
     TransactionsCompanyToCompany,
     TransactionsCompanyToMember,
@@ -26,9 +23,7 @@ from project.models import (
     Offer,
 )
 from project.tables import (
-    HoursTable,
     Preiszusammensetzung,
-    ProduktionsmittelTable,
     WorkersTable,
 )
 from project.database.repositories import (
@@ -88,37 +83,7 @@ def arbeit(
     elif request.method == "GET":
         workers_list = database.get_workers(current_user.id)
         workers_table = WorkersTable(workers_list, no_items="(Noch keine Mitarbeiter.)")
-        hours_worked = database.get_hours_worked(current_user.id)
-        hours_table = HoursTable(
-            hours_worked, no_items="(Noch keine Stunden gearbeitet.)"
-        )
-        return render_template(
-            "company/work.html", workers_table=workers_table, hours_table=hours_table
-        )
-
-
-@main_company.route("/company/produktionsmittel")
-@login_required
-def produktionsmittel():
-    """shows means of production."""
-    (
-        means_of_production_in_use,
-        means_of_production_consumed,
-    ) = database.get_means_of_prod(current_user.id)
-
-    table_in_use = ProduktionsmittelTable(
-        means_of_production_in_use, no_items="(Keine Produktionsmittel vorhanden.)"
-    )
-    table_consumed = ProduktionsmittelTable(
-        means_of_production_consumed,
-        no_items="(Noch keine Produktionsmittel verbraucht.)",
-    )
-
-    return render_template(
-        "company/means_of_production.html",
-        table_aktiv=table_in_use,
-        table_inaktiv=table_consumed,
-    )
+        return render_template("company/work.html", workers_table=workers_table)
 
 
 @main_company.route("/company/suchen", methods=["GET", "POST"])
@@ -335,151 +300,6 @@ def transfer():
         database.send_wages(sender, receiver, amount)
 
     return render_template("company/transfer.html")
-
-
-@main_company.route("/company/anbieten", methods=["GET", "POST"])
-@login_required
-def new_offer():
-    """
-    Ein neues Angebot hinzufügen
-    """
-    produktionsmittel_aktiv, _ = database.get_means_of_prod(current_user.id)
-    workers_list = database.get_workers(current_user.id)
-
-    if request.method == "POST":
-        quantity = int(request.form["quantity"])
-        # create request dictionary
-        request_dict = request.form.to_dict()
-
-        # arbeit
-        # dict with arbeit values
-        arbeit_dict = dict(
-            filter(lambda elem: elem[0][:7] == "member_", request_dict.items())
-        )
-        # arbeit dict entries that are not zero
-        arbeit_dict_not_zero = dict(
-            filter(lambda elem: Decimal(elem[1]) != 0, arbeit_dict.items())
-        )
-        kosten_arbeit = 0
-        if arbeit_dict_not_zero:
-            # calculate kosten arbeit
-            member_id_list = []
-            stunden_list = []
-            for key in list(arbeit_dict_not_zero.keys()):
-                member_id_list.append(key[7:])
-            for value in list(arbeit_dict_not_zero.values()):
-                stunden_list.append(Decimal(value))
-            assert len(member_id_list) == len(stunden_list)
-            kosten_arbeit = sum(stunden_list) / quantity
-
-        # produktionsmittel
-        # dict with produktionsmittel values
-        pm_dict = dict(filter(lambda elem: elem[0][:3] == "id_", request_dict.items()))
-        # pm dict entries that are not zero
-        pm_dict_not_zero = dict(
-            filter(lambda elem: Decimal(elem[1]) != 0, pm_dict.items())
-        )
-        kosten_pm = 0
-        if pm_dict_not_zero:
-            # calculate kosten pm
-            # turning pm-dict into two lists
-            kauf_id_list = []
-            prozent_list = []
-            for key in list(pm_dict_not_zero.keys()):
-                kauf_id_list.append(key[3:])
-            for value in list(pm_dict_not_zero.values()):
-                prozent_list.append(Decimal(value) / 100)
-
-            # preise
-            preise_list = []
-            for idx in kauf_id_list:
-                # HIER WERDEN DIE ORIGINALEN KAUFPREISE ANGERECHNET,
-                # NICHT DIE AKTUELLEN MARKTPREISE!
-                qry = (
-                    db.session.query(Kaeufe.kaufpreis)
-                    .select_from(Kaeufe)
-                    .filter(Kaeufe.id == idx)
-                    .first()
-                )
-                preise_list.append(Decimal(qry.kaufpreis))
-            kosten_einzeln = []
-            for num1, num2 in zip(prozent_list, preise_list):
-                kosten_einzeln.append(num1 * num2)
-            kosten_pm = sum(kosten_einzeln) / quantity
-
-        # TO DO LATER: validate input/check if enough guthaben
-        # if current_user.guthaben < sum(stunden_list):
-        #     flash("Dein Guthaben reicht nicht aus, um die Arbeit zu bezahlen.")
-
-        # save new angebot(e), pay workers and register arbeit
-        # and produktionsmittel
-        current_time = datetime.datetime.now()
-        for quant in range(quantity):
-            new_angebot = Angebote(
-                name=request.form["name"],
-                cr_date=current_time,
-                company=current_user.id,
-                beschreibung=request.form["beschreibung"],
-                kategorie=request.form["kategorie"],
-                p_kosten=kosten_pm,
-                v_kosten=kosten_arbeit,
-                preis=kosten_arbeit + kosten_pm,
-            )
-            db.session.add(new_angebot)
-            db.session.commit()
-
-            # create rows in table "arbeit"
-            if arbeit_dict_not_zero:
-                assert len(member_id_list) == len(stunden_list)
-                for count, i in enumerate(member_id_list):
-                    new_arbeit = Arbeit(
-                        angebot=new_angebot.id,
-                        member=i,
-                        stunden=stunden_list[count] / quantity,
-                    )
-                    db.session.add(new_arbeit)
-                    # guthaben der arbeiter erhöhen
-                    # TO DO: check if it's inefficient
-                    # doing this for every quant
-                    Member.query.filter_by(id=i).first().guthaben += (
-                        stunden_list[count] / quantity
-                    )
-
-            # create new row in produktionsmittel (um gesamten verbrauch
-            # zu erhalten, muss gruppiert/summiert werden!)
-            if pm_dict_not_zero:
-                assert len(kauf_id_list) == len(prozent_list)
-                for count, i in enumerate(kauf_id_list):
-                    new_produktionsmittel_prd = Produktionsmittel(
-                        angebot=new_angebot.id,
-                        kauf=i,
-                        prozent_gebraucht=(prozent_list[count] * 100 / quantity),
-                    )
-                    db.session.add(new_produktionsmittel_prd)
-            db.session.commit()
-
-        # TO DO: kosten zusammenfassen und bestätigen lassen!
-        flash("Angebot erfolgreich gespeichert!")
-        return redirect(url_for("main_company.my_offers"))
-
-    categ = [
-        "Dienstleistungen",
-        "Elektronik",
-        "Freizeit & Hobby",
-        "Haus & Garten",
-        "Haustiere",
-        "Nahrungsmittel",
-        "Musik, Filme und Bücher",
-        "Nachbarschaftshilfe",
-        "Unterricht und Kurse",
-    ]
-
-    return render_template(
-        "company/new_offer.html",
-        produktionsmittel_aktiv=produktionsmittel_aktiv,
-        workers_list=workers_list,
-        categ=categ,
-    )
 
 
 @main_company.route("/company/my_offers")

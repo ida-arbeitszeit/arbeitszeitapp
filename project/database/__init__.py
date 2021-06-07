@@ -22,12 +22,8 @@ from arbeitszeit import entities
 from project.models import (
     Member,
     Company,
-    Angebote,
-    Arbeit,
-    Produktionsmittel,
     Kaeufe,
     Withdrawal,
-    KooperationenMitglieder,
     Plan,
     SocialAccounting,
     TransactionsAccountingToCompany,
@@ -103,104 +99,6 @@ def lookup_product_provider(
     plan_orm = offer_orm.plan
     company_orm = plan_orm.company
     return company_repository.object_from_orm(company_orm)
-
-
-class SearchProducts:
-    """
-    All SQL-requests around searching in the catalog.
-    Returns non-mutable _collections.result-Objects.
-    """
-
-    def get_offers(self):
-        """
-        returns BaseQuery object with all products available
-        (grouped results, active or not),
-        with several columns, including the coop-price.
-        """
-
-        km = aliased(KooperationenMitglieder)
-        km2 = aliased(KooperationenMitglieder)
-
-        # subquery returns koop-preis
-        subq = (
-            db.session.query(func.avg(Angebote.preis))
-            .select_from(km)
-            .join(Angebote)
-            .filter(Angebote.aktiv == True, km.kooperation == km2.kooperation)
-            .group_by(km.kooperation)
-            .as_scalar()
-        )
-
-        qry = (
-            db.session.query(
-                func.min(Angebote.id).label("id"),
-                Angebote.name.label("angebot_name"),
-                func.min(Angebote.p_kosten).label("p_kosten"),
-                func.min(Angebote.v_kosten).label("v_kosten"),
-                Company.name.label("company_name"),
-                Company.id.label("company_id"),
-                Company.email,
-                Angebote.beschreibung,
-                Angebote.kategorie,
-                Angebote.preis,
-                func.count(Angebote.id).label("vorhanden"),
-                km2.kooperation,
-                case(
-                    [
-                        (km2.kooperation == None, Angebote.preis),
-                    ],
-                    else_=subq,
-                ).label("koop_preis"),
-            )
-            .select_from(Angebote)
-            .join(Company, Angebote.company == Company.id)
-            .outerjoin(km2, Angebote.id == km2.mitglied)
-            .group_by(
-                Company,
-                Angebote.cr_date,
-                "angebot_name",
-                Angebote.beschreibung,
-                Angebote.kategorie,
-                Angebote.preis,
-                km2.kooperation,
-            )
-        )
-
-        return qry
-
-    def get_offer_by_id(self, angebote_id):
-        """returns one angebot filtered by angebote_id."""
-        return self.get_offers().filter(Angebote.id == angebote_id).one()
-
-    def get_active_offers(self, search_string="", search_field=""):
-        """
-        returns all aktive angebote.
-        search string and search field may be optionally specified.
-        """
-        if search_string or search_field:
-            if search_field == "Name":
-                angebote = (
-                    self.get_offers()
-                    .filter(Angebote.name.contains(search_string))
-                    .all()
-                )
-
-            elif search_field == "Beschreibung":
-                angebote = (
-                    self.get_offers()
-                    .filter(Angebote.beschreibung.contains(search_string))
-                    .all()
-                )
-
-            elif search_field == "Kategorie":
-                angebote = (
-                    self.get_offers()
-                    .filter(Angebote.kategorie.contains(search_string))
-                    .all()
-                )
-        else:
-            angebote = self.get_offers().filter(Angebote.aktiv == True).all()
-        return angebote
 
 
 class CompositionOfPrices:
@@ -485,7 +383,7 @@ def planning(
         social_accounting=social_accounting_id,
     )
 
-    plan_repository.add(plan_orm)
+    db.session.add(plan_orm)
     commit_changes()
     return plan_orm
 
@@ -602,13 +500,13 @@ def get_purchases(user_id) -> list:
     purchases = (
         db.session.query(
             Kaeufe.id,
-            Angebote.name,
-            Angebote.beschreibung,
-            func.round(Angebote.preis, 2).label("preis"),
+            Offer.name,
+            Offer.description,
+            func.round(Kaeufe.kaufpreis, 2).label("preis"),
         )
         .select_from(Kaeufe)
         .filter_by(member=user_id)
-        .join(Angebote, Kaeufe.angebot == Angebote.id)
+        .join(Offer, Kaeufe.angebot == Offer.id)
         .all()
     )
     return purchases
@@ -673,60 +571,6 @@ def get_worker_in_company(worker_id, company_id) -> Union[Member, None]:
     return worker
 
 
-def get_hours_worked(company_id) -> list:
-    """get all hours worked in a company, grouped by workers."""
-    hours_worked = (
-        db.session.query(
-            Member.id, Member.name, func.sum(Arbeit.stunden).label("summe_stunden")
-        )
-        .select_from(Angebote)
-        .filter(Angebote.company == company_id)
-        .join(Arbeit)
-        .join(Member)
-        .group_by(Member.id)
-        .order_by(func.sum(Arbeit.stunden).desc())
-        .all()
-    )
-    return hours_worked
-
-
-def get_means_of_prod(company_id) -> tuple:
-    """
-    returns tuple of active and inactive means of prouction of company.
-    """
-    produktionsmittel_qry = (
-        db.session.query(
-            Kaeufe.id,
-            Angebote.name,
-            Angebote.beschreibung,
-            func.round(Kaeufe.kaufpreis, 2).label("kaufpreis"),
-            func.round(
-                func.coalesce(func.sum(Produktionsmittel.prozent_gebraucht), 0), 2
-            ).label("prozent_gebraucht"),
-        )
-        .select_from(Kaeufe)
-        .filter(Kaeufe.company == company_id)
-        .outerjoin(Produktionsmittel, Kaeufe.id == Produktionsmittel.kauf)
-        .join(Angebote, Kaeufe.angebot == Angebote.id)
-        .group_by(Kaeufe, Angebote, Produktionsmittel.kauf)
-    )
-
-    produktionsmittel_aktiv = produktionsmittel_qry.having(
-        func.coalesce(
-            func.sum(Produktionsmittel.prozent_gebraucht).label("prozent_gebraucht"), 0
-        ).label("prozent_gebraucht")
-        < 100
-    ).all()
-    produktionsmittel_inaktiv = produktionsmittel_qry.having(
-        func.coalesce(
-            func.sum(Produktionsmittel.prozent_gebraucht).label("prozent_gebraucht"), 0
-        ).label("prozent_gebraucht")
-        == 100
-    ).all()
-
-    return (produktionsmittel_aktiv, produktionsmittel_inaktiv)
-
-
 def delete_product(offer_id) -> None:
     """delete product."""
     offer = Offer.query.filter_by(id=offer_id).first()
@@ -747,12 +591,12 @@ def add_new_worker_to_company(member_id, company_id) -> None:
     db.session.commit()
 
 
-# Search Angebote
+# Search Offers
 
 
-def get_offer_by_id(id) -> Angebote:
+def get_offer_by_id(id) -> Offer:
     """get offer, filtered by id"""
-    offer = Angebote.query.filter_by(id=id).first()
+    offer = Offer.query.filter_by(id=id).first()
     return offer
 
 

@@ -9,7 +9,6 @@ from injector import inject
 from arbeitszeit import entities, repositories
 from project.extensions import db
 from project.models import (
-    Angebote,
     Company,
     Kaeufe,
     Member,
