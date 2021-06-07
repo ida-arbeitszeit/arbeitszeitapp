@@ -33,10 +33,10 @@ class PurchaseProduct:
             amount=amount,
             purpose=purpose,
         )
-        product_offer.decrease_amount_available(amount)
         assert (
             product_offer.amount_available >= amount
         ), "Amount ordered exceeds available products!"
+        product_offer.decrease_amount_available(amount)
         if product_offer.amount_available == amount:
             product_offer.deactivate()
         price_total = price * amount
@@ -58,7 +58,7 @@ def add_worker_to_company(
     """This function may raise a WorkerAlreadyAtCompany exception if the
     worker is already employed at the company."""
     company_workers = company_worker_repository.get_company_workers(company)
-    if worker.id in [worker.id for worker in company_workers]:
+    if worker in company_workers:
         raise WorkerAlreadyAtCompany(
             worker=worker,
             company=company,
@@ -66,7 +66,7 @@ def add_worker_to_company(
     company_worker_repository.add_worker_to_company(company, worker)
 
 
-def seeking_approval(
+def approve_plan(
     datetime_service: DatetimeService,
     plan: Plan,
 ) -> Plan:

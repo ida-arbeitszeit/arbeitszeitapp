@@ -45,7 +45,6 @@ class Company(UserMixin, db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(1000), nullable=False)
-    guthaben = db.Column(db.Numeric(), default=0)
     balance_p = db.Column(db.Numeric(), default=0)
     balance_r = db.Column(db.Numeric(), default=0)
     balance_a = db.Column(db.Numeric(), default=0)
@@ -54,10 +53,9 @@ class Company(UserMixin, db.Model):
     plans = db.relationship("Plan", lazy="dynamic", backref="company")
 
     def __repr__(self):
-        return "<Company(email='%s', name='%s', guthaben='%s')>" % (
+        return "<Company(email='%s', name='%s')>" % (
             self.email,
             self.name,
-            self.guthaben,
         )
 
 

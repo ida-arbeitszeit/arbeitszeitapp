@@ -3,21 +3,17 @@ from datetime import date, datetime
 from functools import wraps
 
 import random
-from decimal import Decimal
 from typing import Optional, Union, Type
 import string
-from sqlalchemy.sql import func, case
-from graphviz import Graph
-from sqlalchemy.orm import aliased
+from sqlalchemy.sql import func
 from injector import Injector, inject
 
 from arbeitszeit.use_cases import (
     PurchaseProduct,
-    seeking_approval,
+    approve_plan,
     granting_credit,
 )
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.purchase_factory import PurchaseFactory
 from arbeitszeit import entities
 from project.models import (
     Member,
@@ -39,7 +35,6 @@ from .repositories import (
     PlanRepository,
     ProductOfferRepository,
     PurchaseRepository,
-    TransactionRepository,
 )
 
 _injector = Injector()
@@ -67,27 +62,6 @@ def commit_changes():
 def id_generator(size=10, chars=string.ascii_uppercase + string.digits):
     """generates money-code for withdrawals."""
     return "".join(random.SystemRandom().choice(chars) for _ in range(size))
-
-
-def social_accounting_from_orm(
-    social_accounting: SocialAccounting,
-) -> entities.SocialAccounting:
-    return entities.SocialAccounting(id=social_accounting.id)
-
-
-def social_accounting_to_orm(
-    social_accounting: entities.SocialAccounting,
-) -> SocialAccounting:
-    return SocialAccounting.query.get(social_accounting.id)
-
-
-def get_social_accounting_by_id(id: int) -> Optional[entities.SocialAccounting]:
-    social_accounting_orm = SocialAccounting.query.filter_by(id=id).first()
-    return (
-        social_accounting_from_orm(social_accounting_orm)
-        if social_accounting_orm
-        else None
-    )
 
 
 @with_injection
@@ -206,7 +180,7 @@ def seek_approval(
     """Company seeks plan approval from Social Accounting."""
     datetime_service = DatetimeService()
     plan = plan_repository.object_from_orm(plan_orm)
-    plan = seeking_approval(
+    plan = approve_plan(
         datetime_service,
         plan,
     )

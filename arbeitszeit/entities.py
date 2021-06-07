@@ -7,12 +7,7 @@ from typing import Callable, Union
 
 
 class SocialAccounting:
-    def __init__(self, id: int) -> None:
-        self._id = id
-
-    @property
-    def id(self):
-        return self._id
+    pass
 
 
 class Member:
@@ -29,6 +24,12 @@ class Member:
     @property
     def id(self):
         return self._id
+
+    def __eq__(self, other: Member) -> bool:
+        if isinstance(other, Member):
+            return self.id == other.id
+
+        return False
 
 
 class ProductOffer:
@@ -52,6 +53,7 @@ class ProductOffer:
         self._deactivate()
 
     def decrease_amount_available(self, amount: int) -> None:
+        self._amount_available -= amount
         self._decrease_amount(amount)
 
     @property
