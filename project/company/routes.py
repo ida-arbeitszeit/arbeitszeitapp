@@ -23,7 +23,6 @@ from project.models import (
     Offer,
 )
 from project.tables import (
-    Preiszusammensetzung,
     WorkersTable,
 )
 from project.database.repositories import (
@@ -123,31 +122,6 @@ def suchen():
             )
 
     return render_template("company/search.html", form=search_form, results=results)
-
-
-@main_company.route("/company/details/<int:id>", methods=["GET", "POST"])
-@login_required
-def details(id):
-    """show details of selected product."""
-    comp = database.CompositionOfPrices()
-    table_of_composition = comp.get_table_of_composition(id)
-    cols_dict = comp.get_positions_in_table(table_of_composition)
-    dot = comp.create_dots(cols_dict, table_of_composition)
-    piped = dot.pipe().decode("utf-8")
-    table_preiszus = Preiszusammensetzung(table_of_composition)
-    srch = database.SearchProducts()
-    angebot_ = srch.get_offer_by_id(id)
-    preise = (angebot_.preis, angebot_.koop_preis)
-
-    if request.method == "POST":
-        return redirect("/company/suchen")
-
-    return render_template(
-        "company/details.html",
-        table_preiszus=table_preiszus,
-        piped=piped,
-        preise=preise,
-    )
 
 
 @main_company.route("/company/buy/<int:id>", methods=["GET", "POST"])

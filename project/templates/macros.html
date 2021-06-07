@@ -137,9 +137,6 @@ company{% macro start_hilfe() %}
         </td>
         <td>{{ res.description }}</td>
         <td>{{ res.plan.costs_p + res.plan.costs_r + res.plan.costs_a|round(2) }} Std.
-          <a href="{{ url_for('%s.details' % (request.blueprint), id=res.id) }}">
-            <u><span class="icon has-text-grey"><i class="far fa-question-circle"></i></span></u>
-          </a>
         </td>
         <td>{{ res.amount_available }}</td>
         <td>
@@ -154,57 +151,4 @@ company{% macro start_hilfe() %}
 </div>
 {% endif %}
 
-{% endmacro %}
-
-
-{% macro details(piped, table_preiszus, preise) %}
-<h1 class="subtitle">PREIS VOR UND NACH KOOPERATION</h1>
-<div class="columns is-centered">
-  <div class="column is-two-fifths">
-    <div class="level">
-      <div class="level-left">
-        <div class="level-item">
-          <p class="has-text-weight-semibold">Preis vor Kooperation (betrieblich):</p>
-        </div>
-      </div>
-      <div class="level-right">
-        <div class="level-item">
-          <p>{{ preise[0]|round(2) }} Stunden</p>
-        </div>
-      </div>
-    </div>
-    <div class="level">
-      <div class="level-left">
-        <div class="level-item">
-          <p class="has-text-weight-semibold">Preis nach Kooperation (Durchschnittspreis):</p>
-        </div>
-      </div>
-      <div class="level-right">
-        <div class="level-item">
-          <p>{{ preise[1]|round(2) }} Stunden</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<h1 class="subtitle">PREISZUSAMMENSETZUNG</h1>
-<div class="table-container">
-  <figure class="image">
-    {{ piped|safe }}
-  </figure>
-</div>
-
-<!-- <h1 class="subtitle">DETAILS PREISZUSAMMENSETZUNG</h1>
-<div class="table-container">
-    <div class="content">
-      {{ table_preiszus }}
-    </div>
-</div> -->
-
-<form method="post">
-  <a class="button is-primary" href="{{  url_for('%s.suchen' % (request.blueprint)) }}">
-    Zurück
-  </a>
-</form>
 {% endmacro %}
