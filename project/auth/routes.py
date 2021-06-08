@@ -106,11 +106,13 @@ def signup_company_post():
         flash("Email address already exists")
         return redirect(url_for("auth.signup_company"))
 
-    database.add_new_company(
+    new_company = database.add_new_company(
         email=email,
         name=name,
         password=generate_password_hash(password, method="sha256"),
     )
+
+    database.add_new_accounts_for_company(new_company.id)
 
     return redirect(url_for("auth.login_company"))
 

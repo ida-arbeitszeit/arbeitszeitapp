@@ -5,6 +5,7 @@ from functools import wraps
 import random
 from typing import Optional, Union, Type
 import string
+from enum import Enum
 from sqlalchemy.sql import func
 from injector import Injector, inject
 
@@ -12,6 +13,8 @@ from arbeitszeit.use_cases import (
     PurchaseProduct,
     approve_plan,
     granting_credit,
+    register_transaction,
+    adjust_balance,
 )
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit import entities
@@ -22,10 +25,8 @@ from project.models import (
     Withdrawal,
     Plan,
     SocialAccounting,
-    TransactionsAccountingToCompany,
-    TransactionsCompanyToMember,
-    TransactionsCompanyToCompany,
     Offer,
+    Account,
 )
 from project.extensions import db
 
@@ -34,7 +35,7 @@ from .repositories import (
     MemberRepository,
     PlanRepository,
     ProductOfferRepository,
-    PurchaseRepository,
+    TransactionRepository,
 )
 
 _injector = Injector()
@@ -78,22 +79,27 @@ def lookup_product_provider(
 # Kaufen
 
 
+class PurposesOfPurchases(Enum):
+    means_of_prod = "means_of_prod"
+    raw_materials = "raw_materials"
+
+
 @with_injection
 def buy(
     kaufender_type,
     offer: Offer,
-    amount,
-    purpose,
+    amount: int,
+    purpose: PurposesOfPurchases,
     kaeufer_id,
     purchase_product: PurchaseProduct,
     company_repository: CompanyRepository,
     member_repository: MemberRepository,
     product_offer_repository: ProductOfferRepository,
-    purchase_repository: PurchaseRepository,
 ) -> None:
     """
     buy product.
     """
+    # register purchase
     buyer_model: Union[Type[Company], Type[Member]] = (
         Company if kaufender_type == "company" else Member
     )
@@ -113,19 +119,49 @@ def buy(
         purpose,
         buyer,
     )
-    # change: make it work on object level
-    if kaufender_type == "company":
-        transaction_orm = TransactionsCompanyToCompany(
-            date=datetime.now(),
-            account_owner=kaeufer_id,
-            receiver_id=offer.plan.planner,
-            owner_account_type="p" if purpose == "means_of_prod" else "r",
-            receiver_account_type="prd",
-            amount=amount
-            * (offer.plan.costs_p + offer.plan.costs_r + offer.plan.costs_a),
-            purpose=f"Angebot-Id: {offer.id}",
+
+    # reduce balance of buyer account
+    price = product_offer.price_per_unit
+    price_total = price * amount
+    if isinstance(buyer, Member):
+        adjust_balance(
+            buyer.account,
+            -price_total,
         )
-        db.session.add(transaction_orm)
+    else:
+        if purpose == "means_of_prod":
+            adjust_balance(
+                buyer.accounts.filter_by(account_type, "p").first(),
+                -price_total,
+            )
+        else:
+            adjust_balance(
+                buyer.accounts.filter_by(account_type, "r").first(),
+                -price_total,
+            )
+
+    # increase balance of seller prd account
+    adjust_balance(product_offer.provider.product_account, price_total)
+    commit_changes()
+
+    # register transactions
+    if isinstance(buyer, entities.Member):
+        account_from = buyer.account
+    else:
+        if purpose == "means_of_prod":
+            account_from = buyer.accounts.filter_by(account_type="p").first()
+        else:
+            account_from = buyer.accounts.filter_by(account_type="r").first()
+
+    send_to = product_offer.provider.product_account
+
+    register_transaction(
+        transaction_repository=TransactionRepository,
+        account_from=account_from,
+        account_to=send_to,
+        amount=product_offer.price_per_unit * amount,
+        purpose=f"Angebot-Id: {offer.id}",
+    )
 
     commit_changes()
 
@@ -135,8 +171,6 @@ def planning(
     planner_id,
     plan_details,
     social_accounting_id,
-    company_repository: CompanyRepository,
-    plan_repository: PlanRepository,
 ) -> Plan:
     """
     create plan.
@@ -191,45 +225,17 @@ def seek_approval(
 
 @with_injection
 def grant_credit(
-    plan: Plan,
+    plan_orm: Plan,
     plan_repository: PlanRepository,
 ) -> None:
     """Social Accounting grants credit after plan has been approved."""
-    assert plan.approved == True
-    # plan = plan_repository.object_from_orm(plan)
-    # plan = granting_credit(plan)
-    # plan = plan_repository.object_to_orm(plan)
-
-    costs_p = plan.costs_p
-    costs_r = plan.costs_r
-    costs_a = plan.costs_a
-    prd = costs_p + costs_r + costs_a
-    planner = plan.company
-
-    # adjust company balances
-    planner.balance_p += costs_p
-    planner.balance_r += costs_r
-    planner.balance_a += costs_a
-    planner.balance_prd -= prd
-    commit_changes()
-
-    # add four type of accounting transactions to db
-    for cost_tuple in [("p", costs_p), ("r", costs_r), ("a", costs_a), ("prd", -prd)]:
-        if cost_tuple[1] == 0:
-            continue
-        db.session.add(
-            TransactionsAccountingToCompany(
-                date=datetime.now(),
-                account_owner=plan.social_accounting,
-                receiver_id=planner.id,
-                receiver_account_type=cost_tuple[0],
-                amount=cost_tuple[1],
-                purpose=f"Plan-Id: {plan.id}",
-            )
-        )
+    assert plan_orm.approved == True
+    plan = plan_repository.object_from_orm(plan_orm)
+    granting_credit(plan)
     commit_changes()
 
 
+# to be changed!
 @with_injection
 def send_wages(
     sender_orm: Company,
@@ -332,13 +338,24 @@ def get_company_by_mail(email) -> Company:
     return company
 
 
-def add_new_company(email, name, password) -> None:
+def add_new_company(email, name, password) -> Company:
     """
     adds a new company to Company.
     """
     new_company = Company(email=email, name=name, password=password)
     db.session.add(new_company)
     db.session.commit()
+    return new_company
+
+
+def add_new_accounts_for_company(company_id):
+    for type in ["p", "r", "a", "prd"]:
+        new_account = Account(
+            account_owner_company=company_id,
+            account_type=type,
+        )
+        db.session.add(new_account)
+        db.session.commit()
 
 
 def get_workers(company_id) -> list:
