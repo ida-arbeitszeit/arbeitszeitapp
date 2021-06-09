@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import List, Optional, TypeVar, Union
+from datetime import datetime
 
 from injector import inject
 
@@ -15,10 +16,8 @@ from project.models import (
     Offer,
     Plan,
     SocialAccounting,
-    TransactionsAccountingToCompany,
-    TransactionsCompanyToCompany,
-    TransactionsCompanyToMember,
-    TransactionsMemberToCompany,
+    Account,
+    Transaction,
 )
 
 T = TypeVar("T")
@@ -51,38 +50,99 @@ class CompanyWorkerRepository(repositories.CompanyWorkerRepository):
         ]
 
 
+@inject
+@dataclass
 class MemberRepository:
+    account_repository: AccountRepository
+
     def get_member_by_id(self, id: int) -> Optional[entities.Member]:
         orm_object = Member.query.filter_by(id=id).first()
         return self.object_from_orm(orm_object) if orm_object else None
 
     def object_from_orm(self, orm_object: Member) -> entities.Member:
-        return entities.Member(
-            id=orm_object.id,
-            change_credit=lambda amount: setattr(
-                orm_object, "guthaben", orm_object.guthaben + amount
-            ),
-        )
+        member_account = self.account_repository.object_from_orm(orm_object.account)
+        return entities.Member(id=orm_object.id, account=member_account)
 
     def object_to_orm(self, member: entities.Member) -> Member:
         return Member.query.get(member.id)
 
 
+@inject
+@dataclass
 class CompanyRepository:
+    account_repository: AccountRepository
+
     def object_to_orm(self, company: entities.Company) -> Company:
         return Company.query.get(company.id)
 
     def object_from_orm(self, company_orm: Company) -> entities.Company:
+        means_account_orm = company_orm.accounts.filter_by(account_type="p").first()
+        raw_material_account_orm = company_orm.accounts.filter_by(
+            account_type="r"
+        ).first()
+        work_account_orm = company_orm.accounts.filter_by(account_type="a").first()
+        product_account_orm = company_orm.accounts.filter_by(account_type="prd").first()
         return entities.Company(
             id=company_orm.id,
-            change_credit=lambda amount, account_type: setattr(
-                company_orm, account_type, getattr(company_orm, account_type) + amount
+            means_account=self.account_repository.object_from_orm(means_account_orm),
+            raw_material_account=self.account_repository.object_from_orm(
+                raw_material_account_orm
+            ),
+            work_account=self.account_repository.object_from_orm(work_account_orm),
+            product_account=self.account_repository.object_from_orm(
+                product_account_orm
             ),
         )
 
     def get_by_id(self, id: int) -> Optional[entities.Company]:
         company_orm = Company.query.filter_by(id=id).first()
         return self.object_from_orm(company_orm) if company_orm else None
+
+
+@inject
+@dataclass
+class AccountRepository(repositories.AccountRepository):
+    def object_from_orm(self, account_orm: Account) -> entities.Account:
+        if account_orm.account_owner_social_accounting:
+            account_owner_id = account_orm.account_owner_social_accounting
+        elif account_orm.account_owner_company:
+            account_owner_id = account_orm.account_owner_company
+        else:
+            account_owner_id = account_orm.account_owner_member
+        return entities.Account(
+            id=account_orm.id,
+            account_owner_id=account_owner_id,
+            account_type=account_orm.account_type,
+            balance=account_orm.balance,
+            change_credit=lambda amount: setattr(
+                account_orm, "balance", account_orm.balance + amount
+            ),
+        )
+
+    def object_to_orm(self, account: entities.Account) -> Account:
+        account_owner_social_accounting, account_owner_member, account_owner_company = (
+            None,
+            None,
+            None,
+        )
+        if account.account_type == "accounting":
+            account_owner_social_accounting = 1
+        elif account.account_type == "member":
+            account_owner_member = account.account_owner_id
+        else:  # if Company (p, r, a or prd)
+            account_owner_company = account.account_owner_id
+
+        return Account(
+            account_owner_social_accounting=account_owner_social_accounting,
+            account_owner_company=account_owner_company,
+            account_owner_member=account_owner_member,
+            account_type=account.account_type,
+            balance=account.balance,
+        )
+
+    def add(self, account: entities.Account) -> None:
+        account_orm = self.object_to_orm(account)
+        db.session.add(account_orm)
 
 
 class AccountingRepository:
@@ -169,6 +229,10 @@ class PlanRepository(repositories.PlanRepository):
     def object_from_orm(self, plan: Plan) -> entities.Plan:
         return entities.Plan(
             id=plan.id,
+            planner=self.company_repository.get_by_id(plan.planner),
+            costs_p=plan.costs_p,
+            costs_r=plan.costs_r,
+            costs_a=plan.costs_a,
             approve=lambda decision, reason, approval_date: self._approve(
                 plan, decision, reason, approval_date
             ),
@@ -185,51 +249,15 @@ class PlanRepository(repositories.PlanRepository):
         db.session.add(self.object_to_orm(plan))
 
 
-@inject
-@dataclass
 class TransactionRepository(repositories.TransactionRepository):
-    company_repository: CompanyRepository
-    member_repository: MemberRepository
-    accounting_repository: AccountingRepository
-
-    def object_from_orm(
-        self,
-        transaction: Union[
-            TransactionsMemberToCompany,
-            TransactionsAccountingToCompany,
-            TransactionsCompanyToCompany,
-            TransactionsCompanyToMember,
-        ],
-    ) -> entities.Transaction:
-        account_owner: Union[
-            entities.Member, entities.Company, entities.SocialAccounting
-        ]
-        if isinstance(transaction, TransactionsMemberToCompany):
-            account_owner = assert_is_not_none(
-                self.member_repository.get_member_by_id(transaction.account_owner)
-            )
-        elif isinstance(transaction, TransactionsAccountingToCompany):
-            account_owner = assert_is_not_none(
-                self.accounting_repository.get_by_id(transaction.account_owner)
-            )
-        elif isinstance(
-            transaction, (TransactionsCompanyToCompany, TransactionsCompanyToMember)
-        ):
-            account_owner = assert_is_not_none(
-                self.company_repository.get_by_id(transaction.account_owner)
-            )
-
-        receiver: Union[entities.Member, entities.Company]
-        if isinstance(transaction, TransactionsCompanyToMember):
-            receiver = assert_is_not_none(
-                self.member_repository.get_member_by_id(transaction.receiver_id)
-            )
-        else:
-            receiver = assert_is_not_none(
-                self.company_repository.get_by_id(transaction.receiver_id)
-            )
-        return entities.Transaction(
-            account_owner=account_owner,
-            receiver=receiver,
+    def object_to_orm(self, transaction: entities.Transaction) -> Transaction:
+        return Transaction(
+            date=datetime.now(),
+            account_from=transaction.account_from.id,
+            account_to=transaction.account_to.id,
             amount=transaction.amount,
+            purpose=transaction.purpose,
         )
+
+    def add(self, transaction: entities.Transaction) -> None:
+        db.session.add(self.object_to_orm(transaction))

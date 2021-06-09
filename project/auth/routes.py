@@ -10,6 +10,7 @@ auth = Blueprint("auth", __name__, template_folder="templates", static_folder="s
 def start():
     # not sure if this is the best place to create database instance
     database.create_social_accounting_in_db()
+    database.add_new_account_for_social_accounting()
     session["user_type"] = None
     return render_template("start.html")
 
@@ -37,11 +38,13 @@ def signup_member_post():
         flash("Email address already exists")
         return redirect(url_for("auth.signup_member"))
 
-    database.add_new_user(
+    new_user = database.add_new_user(
         email=email,
         name=name,
         password=generate_password_hash(password, method="sha256"),
     )
+
+    database.add_new_account_for_member(new_user.id)
 
     return redirect(url_for("auth.login_member"))
 
@@ -106,11 +109,13 @@ def signup_company_post():
         flash("Email address already exists")
         return redirect(url_for("auth.signup_company"))
 
-    database.add_new_company(
+    new_company = database.add_new_company(
         email=email,
         name=name,
         password=generate_password_hash(password, method="sha256"),
     )
+
+    database.add_new_accounts_for_company(new_company.id)
 
     return redirect(url_for("auth.login_company"))
 

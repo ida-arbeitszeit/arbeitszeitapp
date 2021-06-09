@@ -1,13 +1,34 @@
 from dataclasses import dataclass
 from typing import Union
+from decimal import Decimal
+from enum import Enum
 
 from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Company, Member, Plan, ProductOffer, Purchase
+from arbeitszeit.entities import (
+    Company,
+    Member,
+    SocialAccounting,
+    Plan,
+    ProductOffer,
+    Purchase,
+    Account,
+    Transaction,
+)
 from arbeitszeit.errors import WorkerAlreadyAtCompany
 from arbeitszeit.purchase_factory import PurchaseFactory
-from arbeitszeit.repositories import CompanyWorkerRepository, PurchaseRepository
+from arbeitszeit.repositories import (
+    CompanyWorkerRepository,
+    PurchaseRepository,
+    TransactionRepository,
+    AccountRepository,
+)
+
+
+class PurposesOfPurchases(Enum):
+    means_of_prod = "means_of_prod"
+    raw_materials = "raw_materials"
 
 
 @inject
@@ -21,7 +42,7 @@ class PurchaseProduct:
         self,
         product_offer: ProductOffer,
         amount: int,
-        purpose: str,
+        purpose: PurposesOfPurchases,
         buyer: Union[Member, Company],
     ) -> Purchase:
         price = product_offer.price_per_unit
@@ -39,15 +60,25 @@ class PurchaseProduct:
         product_offer.decrease_amount_available(amount)
         if product_offer.amount_available == amount:
             product_offer.deactivate()
-        price_total = price * amount
-        product_offer.provider.increase_credit(price_total, "balance_prd")
-        account_type = "balance_p" if purpose == "means_of_prod" else "balance_r"
-        if isinstance(buyer, Member):
-            buyer.reduce_credit(price_total)
-        else:
-            buyer.reduce_credit(price_total, account_type)
+
         self.purchase_repository.add(purchase)
         return purchase
+
+
+def adjust_balance(account: Account, amount: Decimal) -> Account:
+    """changes the balance of specified accounts."""
+    account.change_credit(amount)
+    return account
+
+
+def register_transaction(
+    account_from: Account,
+    account_to: Account,
+    amount: Decimal,
+    purpose: str,
+) -> Transaction:
+    transaction = Transaction(account_from, account_to, amount, purpose)
+    return transaction
 
 
 def add_worker_to_company(
@@ -70,6 +101,7 @@ def approve_plan(
     datetime_service: DatetimeService,
     plan: Plan,
 ) -> Plan:
+    """Company seeks plan approval from Social Accounting."""
     # This is just a place holder
     is_approval = True
     approval_date = datetime_service.now()
@@ -83,6 +115,10 @@ def approve_plan(
 def granting_credit(
     plan: Plan,
 ) -> None:
-    # increase/reduce company balances
-    # register transcations
-    pass
+    """Social Accounting grants credit after plan has been approved."""
+    # adjust company balances
+    adjust_balance(plan.planner.means_account, plan.costs_p)
+    adjust_balance(plan.planner.raw_material_account, plan.costs_r)
+    adjust_balance(plan.planner.work_account, plan.costs_a)
+    prd = plan.costs_p + plan.costs_r + plan.costs_a
+    adjust_balance(plan.planner.product_account, -prd)

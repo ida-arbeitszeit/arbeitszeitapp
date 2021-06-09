@@ -15,9 +15,6 @@ from project.models import (
     Company,
     Kaeufe,
     Member,
-    TransactionsAccountingToCompany,
-    TransactionsCompanyToCompany,
-    TransactionsCompanyToMember,
     Withdrawal,
     Plan,
     Offer,
@@ -155,7 +152,7 @@ def create_plan():
         prd_amount = int(request.form["prd_amount"])
         description = request.form["description"]
         timeframe = int(request.form["timeframe"])
-        social_accounting_id = accounting.id
+        social_accounting_id = 1
 
         plan_details = (
             costs_p,
@@ -171,7 +168,7 @@ def create_plan():
         plan = database.planning(
             planner_id=current_user.id,
             plan_details=plan_details,
-            social_accounting_id=social_accounting_id,
+            social_accounting_id=1,
         )
 
         plan = database.seek_approval(plan)
@@ -228,30 +225,21 @@ def create_offer(plan_id):
 @login_required
 def my_accounts():
     my_company = Company.query.get(current_user.id)
+    my_accounts = my_company.accounts.all()
+    for acc in my_accounts:
+        # print(acc.account_type.name)
+        print("transactions_sent_by_me", acc.transactions_sent.all())
+        print("transactions_received_by_me", acc.transactions_received.all())
 
-    received_from_accounting = (
-        TransactionsAccountingToCompany.query.filter_by(receiver_id=current_user.id)
-        .order_by(desc(TransactionsAccountingToCompany.date))
-        .all()
-    )
-
-    sent_to_company = (
-        TransactionsCompanyToCompany.query.filter_by(account_owner=current_user.id)
-        .order_by(desc(TransactionsCompanyToCompany.date))
-        .all()
-    )
-
-    received_from_company = (
-        TransactionsCompanyToCompany.query.filter_by(receiver_id=current_user.id)
-        .order_by(desc(TransactionsCompanyToCompany.date))
-        .all()
-    )
-
-    sent_to_workers = (
-        TransactionsCompanyToMember.query.filter_by(account_owner=current_user.id)
-        .order_by(desc(TransactionsCompanyToMember.date))
-        .all()
-    )
+    received_from_accounting = []
+    # received_from_accounting = (
+    #     TransactionsAccountingToCompany.query.filter_by(receiver_id=current_user.id)
+    #     .order_by(desc(TransactionsAccountingToCompany.date))
+    #     .all()
+    # )
+    sent_to_company = []
+    received_from_company = []
+    sent_to_workers = []
 
     return render_template(
         "company/my_accounts.html",
@@ -267,10 +255,11 @@ def my_accounts():
 @login_required
 def transfer():
     if request.method == "POST":
+        # to implement: check in html, if user exists and if worker in company
         receiver_id = request.form["member_id"]
         amount = Decimal(request.form["amount"])
         sender = Company.query.get(current_user.id)
-        receiver = Member.query.get(receiver_id)
+        receiver = Member.query.filter_by(id=receiver_id).first()
         database.send_wages(sender, receiver, amount)
 
     return render_template("company/transfer.html")
