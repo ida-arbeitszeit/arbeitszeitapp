@@ -38,106 +38,34 @@
             </tr>
         </thead>
         <tbody>
+            {% if my_balances is defined and my_balances|length %}
             <tr class="is-selected">
                 <td></td>
                 <td></td>
                 <td></td>
-                <td><b>{{ my_company.balance_p }}</b></td>
-                <td><b>{{ my_company.balance_r }}</b></td>
-                <td><b>{{ my_company.balance_a }}</b></td>
-                <td><b>{{ my_company.balance_prd }}</b></td>
+                <td><b>{{ my_balances[0] }}</b></td>
+                <td><b>{{ my_balances[1] }}</b></td>
+                <td><b>{{ my_balances[2] }}</b></td>
+                <td><b>{{ my_balances[3] }}</b></td>
                 <td></td>
             </tr>
+            {% endif %}
 
-            {% if sent_to_workers is defined and sent_to_workers|length %}
-            {% for transaction in sent_to_workers %}
+            {% if all_transactions is defined and all_transactions|length %}
+            {% for transaction in all_transactions %}
             <tr>
-                <td>{{ transaction.date }}</td>
-                <td>Ich</td>
-                <td>Member-ID {{ transaction.receiver_id }}</td>
-                <td></td>
-                <td></td>
-                <td>-{{ transaction.amount }}</td>
-                <td></td>
-                <td>{{ transaction.purpose }}</td>
+                <td>{{ transaction[0] }}</td>
+                <td>{{ transaction[1] }}</td>
+                <td>{{ transaction[2] }}</td>
+                <td>{{ transaction[3] }}</td>
+                <td>{{ transaction[4] }}</td>
+                <td>{{ transaction[5] }}</td>
+                <td>{{ transaction[6] }}</td>
+                <td>{{ transaction[7] }}</td>
             </tr>
             {% endfor %}
             {% endif %}
 
-            {% if received_from_company is defined and received_from_company|length %}
-            {% for transaction in received_from_company %}
-            <tr>
-                <td>{{ transaction.date }}</td>
-                <td>Company-ID {{ transaction.account_owner }}</td>
-                <td>Ich</td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td>{{ transaction.amount }}</td>
-                <td>{{ transaction.purpose }}</td>
-            </tr>
-            {% endfor %}
-            {% endif %}
-
-            {% if sent_to_company is defined and sent_to_company|length %}
-            {% for transaction in sent_to_company %}
-            <tr>
-                <td>{{ transaction.date }}</td>
-                <td>Ich</td>
-                <td>Company-ID {{ transaction.receiver_id }}</td>
-                {% if transaction.owner_account_type.value == "p" %}
-                <td>-{{ transaction.amount }}</td>
-                {% else %}
-                <td></td>
-                {% endif %}
-
-                {% if transaction.owner_account_type.value == "r" %}
-                <td>-{{ transaction.amount }}</td>
-                {% else %}
-                <td></td>
-                {% endif %}
-
-                <td></td>
-                <td></td>
-                <td>{{ transaction.purpose }}</td>
-            </tr>
-            {% endfor %}
-            {% endif %}
-
-            {% if received_from_accounting is defined and received_from_accounting|length %}
-            {% for transaction in received_from_accounting %}
-            <tr>
-                <td>{{ transaction.date }}</td>
-                <td>Öff. Buchhaltung</td>
-                <td>Ich</td>
-                {% if transaction.receiver_account_type.value == "p" %}
-                <td>{{ transaction.amount }}</td>
-                {% else %}
-                <td></td>
-                {% endif %}
-
-                {% if transaction.receiver_account_type.value == "r" %}
-                <td>{{ transaction.amount }}</td>
-                {% else %}
-                <td></td>
-                {% endif %}
-
-                {% if transaction.receiver_account_type.value == "a" %}
-                <td>{{ transaction.amount }}</td>
-                {% else %}
-                <td></td>
-                {% endif %}
-
-                {% if transaction.receiver_account_type.value == "prd" %}
-                <td>{{ transaction.amount }}</td>
-                {% else %}
-                <td></td>
-                {% endif %}
-
-                <td>{{ transaction.purpose }}</td>
-            </tr>
-            {% endfor %}
-            {% endif %}
         </tbody>
     </table>
 </div>

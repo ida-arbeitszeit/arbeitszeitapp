@@ -26,7 +26,7 @@ class Member(UserMixin, db.Model):
     password = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(1000), nullable=False)
 
-    account = db.relationship("Account", uselist=False, lazy=True)
+    account = db.relationship("Account", uselist=False, lazy=True, backref="member")
 
     workplaces = db.relationship(
         "Company",
@@ -43,7 +43,7 @@ class Company(UserMixin, db.Model):
     name = db.Column(db.String(1000), nullable=False)
 
     plans = db.relationship("Plan", lazy="dynamic", backref="company")
-    accounts = db.relationship("Account", lazy="dynamic")
+    accounts = db.relationship("Account", lazy="dynamic", backref="company")
 
     def __repr__(self):
         return "<Company(email='%s', name='%s')>" % (
@@ -98,10 +98,16 @@ class Account(UserMixin, db.Model):
     balance = db.Column(db.Numeric(), default=0)
 
     transactions_sent = db.relationship(
-        "Transaction", foreign_keys="Transaction.account_from", lazy="dynamic"
+        "Transaction",
+        foreign_keys="Transaction.account_from",
+        lazy="dynamic",
+        backref="sending_account",
     )
     transactions_received = db.relationship(
-        "Transaction", foreign_keys="Transaction.account_to", lazy="dynamic"
+        "Transaction",
+        foreign_keys="Transaction.account_to",
+        lazy="dynamic",
+        backref="receiving_account",
     )
 
 
