@@ -8,12 +8,11 @@ from sqlalchemy.sql import desc
 from arbeitszeit import errors, use_cases
 from project import database
 from project.database import with_injection
-from project.economy import company, accounting
+from project.economy import company
 from project.extensions import db
 from project.forms import ProductSearchForm
 from project.models import (
     Company,
-    Kaeufe,
     Member,
     Withdrawal,
     Plan,
@@ -88,9 +87,7 @@ def suchen():
     """search products in catalog."""
 
     search_form = ProductSearchForm(request.form)
-    # srch = database.SearchProducts()
     results = Offer.query.filter_by(active=True).all()
-    # results = srch.get_active_offers()
 
     if request.method == "POST":
         results = []
@@ -152,7 +149,6 @@ def create_plan():
         prd_amount = int(request.form["prd_amount"])
         description = request.form["description"]
         timeframe = int(request.form["timeframe"])
-        social_accounting_id = 1
 
         plan_details = (
             costs_p,
@@ -246,13 +242,13 @@ def my_accounts():
 
             change_p, change_r, change_a, change_prd = ("", "", "", "")
             if my_account.account_type.name == "p":
-                change_p = sent_trans.amount
+                change_p = -sent_trans.amount
             elif my_account.account_type.name == "r":
-                change_r = sent_trans.amount
+                change_r = -sent_trans.amount
             elif my_account.account_type.name == "a":
-                change_a = sent_trans.amount
+                change_a = -sent_trans.amount
             elif my_account.account_type.name == "prd":
-                change_prd = sent_trans.amount
+                change_prd = -sent_trans.amount
 
             all_transactions.append(
                 [

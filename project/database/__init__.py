@@ -1,9 +1,9 @@
 from __future__ import annotations
-from datetime import date, datetime
+from datetime import datetime
 from functools import wraps
 
 import random
-from typing import Optional, Union, Type
+from typing import Union, Type
 import string
 from enum import Enum
 from sqlalchemy.sql import func
@@ -37,6 +37,7 @@ from .repositories import (
     ProductOfferRepository,
     TransactionRepository,
     AccountRepository,
+    PurchaseRepository,
 )
 
 _injector = Injector()
@@ -97,6 +98,7 @@ def buy(
     member_repository: MemberRepository,
     product_offer_repository: ProductOfferRepository,
     transaction_repository: TransactionRepository,
+    purchase_repository: PurchaseRepository,
 ) -> None:
     """
     buy product.
@@ -115,17 +117,22 @@ def buy(
     )
     product_offer = product_offer_repository.object_from_orm(offer)
 
-    purchase_product(
+    purchase = purchase_product(
         product_offer,
         amount,
         purpose,
         buyer,
     )
 
+    purchase_repository.add(purchase)
+    commit_changes()
+
+    print(":::", buyer)
+
     # reduce balance of buyer account
     price = product_offer.price_per_unit
     price_total = price * amount
-    if isinstance(buyer, Member):
+    if isinstance(buyer, entities.Member):
         adjust_balance(
             buyer.account,
             -price_total,
@@ -133,12 +140,12 @@ def buy(
     else:
         if purpose == "means_of_prod":
             adjust_balance(
-                buyer.accounts.filter_by(account_type, "p").first(),
+                buyer.means_account,
                 -price_total,
             )
         else:
             adjust_balance(
-                buyer.accounts.filter_by(account_type, "r").first(),
+                buyer.raw_material_account,
                 -price_total,
             )
 
@@ -151,9 +158,9 @@ def buy(
         account_from = buyer.account
     else:
         if purpose == "means_of_prod":
-            account_from = buyer.accounts.filter_by(account_type="p").first()
+            account_from = buyer.means_account
         else:
-            account_from = buyer.accounts.filter_by(account_type="r").first()
+            account_from = buyer.raw_material_account
 
     send_to = product_offer.provider.product_account
 

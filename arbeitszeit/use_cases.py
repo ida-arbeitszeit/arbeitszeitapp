@@ -9,7 +9,6 @@ from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import (
     Company,
     Member,
-    SocialAccounting,
     Plan,
     ProductOffer,
     Purchase,
@@ -20,9 +19,6 @@ from arbeitszeit.errors import WorkerAlreadyAtCompany
 from arbeitszeit.purchase_factory import PurchaseFactory
 from arbeitszeit.repositories import (
     CompanyWorkerRepository,
-    PurchaseRepository,
-    TransactionRepository,
-    AccountRepository,
 )
 
 
@@ -34,7 +30,6 @@ class PurposesOfPurchases(Enum):
 @inject
 @dataclass
 class PurchaseProduct:
-    purchase_repository: PurchaseRepository
     datetime_service: DatetimeService
     purchase_factory: PurchaseFactory
 
@@ -58,10 +53,9 @@ class PurchaseProduct:
             product_offer.amount_available >= amount
         ), "Amount ordered exceeds available products!"
         product_offer.decrease_amount_available(amount)
-        if product_offer.amount_available == amount:
+        if product_offer.amount_available == 0:
             product_offer.deactivate()
 
-        self.purchase_repository.add(purchase)
         return purchase
 
 
