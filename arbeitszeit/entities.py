@@ -113,6 +113,7 @@ class ProductOffer:
         decrease_amount_available: Callable[[int], None],
         price_per_unit: Decimal,
         provider: Company,
+        active: bool,
     ) -> None:
         self._id = id
         self._amount_available = amount_available
@@ -120,8 +121,10 @@ class ProductOffer:
         self._decrease_amount = decrease_amount_available
         self.price_per_unit = price_per_unit
         self.provider = provider
+        self.active = active
 
     def deactivate(self) -> None:
+        self.active = False
         self._deactivate()
 
     def decrease_amount_available(self, amount: int) -> None:

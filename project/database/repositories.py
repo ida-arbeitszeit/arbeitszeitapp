@@ -213,6 +213,7 @@ class ProductOfferRepository:
             ),
             price_per_unit=price_per_unit,
             provider=self.company_repository.object_from_orm(plan.company),
+            active=offer_orm.active,
         )
 
 
