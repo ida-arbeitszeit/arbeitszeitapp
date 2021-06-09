@@ -279,6 +279,7 @@ def grant_credit(
     commit_changes()
 
 
+# to be changed!
 @with_injection
 def send_wages(
     sender_orm: Company,
