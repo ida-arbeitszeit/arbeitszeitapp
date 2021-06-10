@@ -2,25 +2,38 @@
 
 {% block content2 %}
 
-  <h1 class="title">Kauf bestätigen?</h1>
-  <div class="block">
-    Möchtest du <b>{{ angebot.angebot_name }}</b> wirklich kaufen?
-  </div>
-  <div class="block">
-    Der Preis beträgt <strong>{{ angebot.koop_preis|round(2) }} Stunden</strong>.
-  </div>
-  <div class="block">
-    Der Betrag wird dir von deinem Guthaben abgezogen.
-  </div>
-  <div class="block">
-    Dein Guthaben beträgt momentan {{ current_user.guthaben|round(2) }} Stunden.
-  </div>
+<div class="columns is-centered">
+  <div class="column is-two-fifths">
 
-  <form method="post">
-    <input class="button  is-primary" type="submit" value="Bestätigen">
-    <a class="button  is-light" href="{{  url_for('main_member.suchen') }}">
-      Abbrechen
-    </a>
-  </form>
+    <form method="post">
+      <h1 class="title">Kauf bestätigen?</h1>
+      <div class="block">
+        Möchtest du <b>{{ offer.name }}</b> wirklich kaufen?
+      </div>
+      <div class="block">
+        Der Preis beträgt <strong>{{ offer.plan.costs_p + offer.plan.costs_r + offer.plan.costs_a }} Stunden</strong>.
+      </div>
+
+      <div class="block">
+        Der Betrag wird dir von deinem Guthaben abgezogen.
+      </div>
+
+      <div class="field">
+        <div class="control">
+          <label for="amount">Welche Menge willst du kaufen?</label>
+          <input class="input" type="number" name="amount" min=1 max="{{ offer.amount_available }}" value=1 required>
+        </div>
+      </div>
+      <div class="block"></div>
+
+
+      <input class="button is-primary" type="submit" value="Kauf bestätigen">
+      <a class="button is-light" href="{{  url_for('main_company.suchen') }}">
+        Abbrechen
+      </a>
+    </form>
+
+  </div>
+</div>
 
 {% endblock %}

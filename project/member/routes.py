@@ -1,7 +1,7 @@
 from decimal import Decimal
 from flask import Blueprint, render_template, session, redirect, url_for, request, flash
 from flask_login import login_required, current_user
-from project.tables import KaeufeTable
+from project.models import Offer
 from project.forms import ProductSearchForm
 from project import database
 from project.economy import member
@@ -21,35 +21,42 @@ def my_purchases():
         return redirect(url_for("auth.zurueck"))
     else:
         session["user_type"] = "member"
-
-        purchases = database.get_purchases(current_user.id)
-        kaufh_table = KaeufeTable(purchases, no_items="(Noch keine Käufe.)")
-        return render_template("member/my_purchases.html", kaufh_table=kaufh_table)
+        purchases = current_user.purchases.all()
+        return render_template("member/my_purchases.html", purchases=purchases)
 
 
 @main_member.route("/member/suchen", methods=["GET", "POST"])
 @login_required
 def suchen():
     """search products in catalog."""
+
     search_form = ProductSearchForm(request.form)
-    srch = database.SearchProducts()
-    results = srch.get_active_offers()
+    results = Offer.query.filter_by(active=True).all()
 
     if request.method == "POST":
         results = []
         search_string = search_form.data["search"]
         search_field = search_form.data["select"]  # Name, Beschr., Kategorie
 
-        if search_string:
-            results = srch.get_active_offers(search_string, search_field)
+        if search_string or search_field:
+            if search_field == "Name":
+                results = Offer.query.filter(
+                    Offer.name.contains(search_string), Offer.active == True
+                ).all()
+
+            elif search_field == "Beschreibung":
+                results = Offer.query.filter(
+                    Offer.description.contains(search_string), Offer.active == True
+                ).all()
+
         else:
-            results = srch.get_active_offers()
+            results = Offer.query.filter_by(active=True).all()
 
         if not results:
             flash("Keine Ergebnisse!")
         else:
             return render_template(
-                "member/search.html", form=search_form, results=results
+                "company/search.html", form=search_form, results=results
             )
 
     return render_template("member/search.html", form=search_form, results=results)
@@ -58,14 +65,16 @@ def suchen():
 @main_member.route("/member/buy/<int:id>", methods=["GET", "POST"])
 @login_required
 def buy(id):
-    srch = database.SearchProducts()
-    angebot = srch.get_offer_by_id(id)
+    offer = Offer.query.filter_by(id=id).first()
+
     if request.method == "POST":  # if user buys
-        member.buy_product("member", database.get_offer_by_id(id), current_user.id)
-        flash(f"Kauf von '{angebot.angebot_name}' erfolgreich!")
+        purpose = "consumption"
+        amount = int(request.form["amount"])
+        database.buy("member", offer, amount, purpose, current_user.id)
+        flash(f"Kauf von '{offer.name}' erfolgreich!")
         return redirect("/member/suchen")
 
-    return render_template("member/buy.html", angebot=angebot)
+    return render_template("member/buy.html", offer=offer)
 
 
 @main_member.route("/member/profile")
@@ -73,10 +82,77 @@ def buy(id):
 def profile():
     user_type = session["user_type"]
     if user_type == "member":
-        workplaces = database.get_workplaces(current_user.id)
+        workplaces = current_user.workplaces.all()
         return render_template("member/profile.html", workplaces=workplaces)
     elif user_type == "company":
         return redirect(url_for("auth.zurueck"))
+
+
+@main_member.route("/member/my_account")
+@login_required
+def my_account():
+
+    my_account = current_user.account
+
+    all_transactions = []  # date, sender, receiver, amount, purpose
+
+    # all my sent transactions
+    for sent_trans in my_account.transactions_sent.all():
+        if sent_trans.receiving_account.account_type.name == "member":
+            receiver_name = f"Mitglied: {sent_trans.receiving_account.member.name} ({sent_trans.receiving_account.member.id})"
+        elif sent_trans.receiving_account.account_type.name in [
+            "p",
+            "r",
+            "a",
+            "prd",
+        ]:
+            receiver_name = f"Betrieb: {sent_trans.receiving_account.company.name} ({sent_trans.receiving_account.company.id})"
+        else:
+            receiver_name = "Öff. Buchhaltung"
+
+        all_transactions.append(
+            [
+                sent_trans.date,
+                "Ich",
+                receiver_name,
+                -sent_trans.amount,
+                sent_trans.purpose,
+            ]
+        )
+
+    # all my received transactions
+    for received_trans in my_account.transactions_received.all():
+        if received_trans.sending_account.account_type.name == "accounting":
+            sender_name = "Öff. Buchhaltung"
+        elif received_trans.sending_account.account_type.name == "member":
+            sender_name = f"Mitglied: {received_trans.sending_account.member.name} (received_trans.sending_account.member.id)"
+        elif received_trans.sending_account.account_type.name in [
+            "p",
+            "r",
+            "a",
+            "prd",
+        ]:
+            sender_name = f"Betrieb: {received_trans.sending_account.company.name} ({received_trans.sending_account.company.id})"
+
+        all_transactions.append(
+            [
+                received_trans.date,
+                sender_name,
+                "Ich",
+                received_trans.amount,
+                received_trans.purpose,
+            ]
+        )
+
+    all_transactions_sorted = sorted(all_transactions, reverse=True)
+
+    my_balance = current_user.account.balance
+
+    return render_template(
+        "member/my_account.html",
+        all_transactions=all_transactions_sorted,
+        my_balance=my_balance,
+    )
 
 
 @main_member.route("/member/withdrawal", methods=["GET", "POST"])
@@ -84,7 +160,7 @@ def profile():
 def withdrawal():
     if request.method == "POST":
         amount = Decimal(request.form["betrag"])
-        code = member.withdraw(current_user.id, amount)
+        code = member.withdraw(current_user, amount)
         # Show code to user
         flash(amount)
         flash(code)

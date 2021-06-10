@@ -27,6 +27,7 @@ class Member(UserMixin, db.Model):
     name = db.Column(db.String(1000), nullable=False)
 
     account = db.relationship("Account", uselist=False, lazy=True, backref="member")
+    purchases = db.relationship("Kaeufe", lazy="dynamic")
 
     workplaces = db.relationship(
         "Company",
@@ -135,6 +136,7 @@ class Offer(UserMixin, db.Model):
 class PurposesOfPurchases(Enum):
     means_of_prod = "means_of_prod"
     raw_materials = "raw_materials"
+    consumption = "consumption"
 
 
 class Kaeufe(UserMixin, db.Model):

@@ -41,8 +41,8 @@
                 <td>{{ plan.prd_name }}</td>
                 <td>{{ plan.description }}</td>
                 <td>{{ plan.prd_amount }}</td>
-                <td>{{ plan.plan_creation_date }}</td>
-                <td>...</td>
+                <td>{{ plan.plan_creation_date.strftime("%c") }}</td>
+                <td>{{ end_of_plan_cycles[loop.index-1].strftime("%c") }}</td>
                 <td><a href="{{ url_for('main_company.create_offer', plan_id=plan.id) }}"><i
                             class="fas fa-store"></i></a></td>
             </tr>

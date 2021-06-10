@@ -5,6 +5,7 @@ from functools import wraps
 import random
 from typing import Union, Type
 import string
+from decimal import Decimal
 from enum import Enum
 from sqlalchemy.sql import func
 from injector import Injector, inject
@@ -84,6 +85,7 @@ def lookup_product_provider(
 class PurposesOfPurchases(Enum):
     means_of_prod = "means_of_prod"
     raw_materials = "raw_materials"
+    consumption = "consumption"
 
 
 @with_injection
@@ -343,47 +345,35 @@ def add_new_account_for_member(member_id):
     db.session.commit()
 
 
-def get_purchases(user_id) -> list:
-    """returns all purchases made by user."""
-    purchases = (
-        db.session.query(
-            Kaeufe.id,
-            Offer.name,
-            Offer.description,
-            func.round(Kaeufe.kaufpreis, 2).label("preis"),
-        )
-        .select_from(Kaeufe)
-        .filter_by(member=user_id)
-        .join(Offer, Kaeufe.angebot == Offer.id)
-        .all()
-    )
-    return purchases
-
-
-def get_workplaces(member_id) -> list:
-    """returns all workplaces the user is assigned to."""
-    member = Member.query.filter_by(id=member_id).first()
-    workplaces = member.workplaces.all()
-    return workplaces
-
-
-def withdraw(user_id, amount) -> str:
+@with_injection
+def withdraw(
+    member: Member,
+    amount: Decimal,
+    account_repository: AccountRepository,
+    transaction_repository: TransactionRepository,
+) -> str:
     """
     register new withdrawal and withdraw amount from user's account.
     returns code that can be used like money.
     """
     code = id_generator()
     new_withdrawal = Withdrawal(
-        type_member=True, member=user_id, betrag=amount, code=code
+        type_member=True, member=member.id, betrag=amount, code=code
     )
     db.session.add(new_withdrawal)
     db.session.commit()
 
-    # betrag vom guthaben des users abziehen
-    member = db.session.query(Member).filter(Member.id == user_id).first()
-    member.guthaben -= amount
-    db.session.commit()
+    # register transaction
+    member_account = account_repository.object_from_orm(member.account)
+    transaction = register_transaction(
+        member_account, None, amount, f"Abhebung ({new_withdrawal.id})"
+    )
+    transaction_repository.add(transaction)
 
+    # betrag vom guthaben des users abziehen
+
+    adjust_balance(member_account, -amount)
+    commit_changes()
     return code
 
 
@@ -448,15 +438,6 @@ def add_new_worker_to_company(member_id, company_id) -> None:
     company = Company.query.filter_by(id=company_id).first()
     company.workers.append(worker)
     db.session.commit()
-
-
-# Search Offers
-
-
-def get_offer_by_id(id) -> Offer:
-    """get offer, filtered by id"""
-    offer = Offer.query.filter_by(id=id).first()
-    return offer
 
 
 # create one social accounting with id=1

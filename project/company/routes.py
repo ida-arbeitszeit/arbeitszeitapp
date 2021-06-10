@@ -183,13 +183,22 @@ def create_plan():
 @main_company.route("/company/my_plans", methods=["GET", "POST"])
 @login_required
 def my_plans():
-    my_company = Company.query.get(current_user.id)
+
     plans = (
-        my_company.plans.filter_by(approved=True)
+        current_user.plans.filter_by(approved=True)
         .order_by(desc(Plan.plan_creation_date))
         .all()
     )
-    return render_template("company/my_plans.html", plans=plans)
+
+    end_of_plan_cycles = []
+    for plan in plans:
+        end_of_plan_cycles.append(
+            plan.plan_creation_date + datetime.timedelta(days=int(plan.timeframe))
+        )
+
+    return render_template(
+        "company/my_plans.html", plans=plans, end_of_plan_cycles=end_of_plan_cycles
+    )
 
 
 @main_company.route("/company/create_offer/<int:plan_id>", methods=["GET", "POST"])
