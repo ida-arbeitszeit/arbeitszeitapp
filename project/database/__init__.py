@@ -13,7 +13,6 @@ from injector import Injector, inject
 from arbeitszeit.use_cases import (
     PurchaseProduct,
     approve_plan,
-    granting_credit,
     register_transaction,
     adjust_balance,
 )
@@ -249,46 +248,27 @@ def grant_credit(
     social_accounting_account = account_repository.object_from_orm(
         social_accounting_account_orm
     )
-    granting_credit(plan)
-
-    # register transactions
-    transaction_1 = register_transaction(
-        account_from=social_accounting_account,
-        account_to=plan.planner.means_account,
-        amount=plan.costs_p,
-        purpose=f"Plan-Id: {plan.id}",
-    )
-    transaction_repository.add(transaction_1)
-
-    transaction_2 = register_transaction(
-        account_from=social_accounting_account,
-        account_to=plan.planner.raw_material_account,
-        amount=plan.costs_r,
-        purpose=f"Plan-Id: {plan.id}",
-    )
-    transaction_repository.add(transaction_2)
-
-    transaction_3 = register_transaction(
-        account_from=social_accounting_account,
-        account_to=plan.planner.work_account,
-        amount=plan.costs_a,
-        purpose=f"Plan-Id: {plan.id}",
-    )
-    transaction_repository.add(transaction_3)
 
     prd = plan.costs_p + plan.costs_r + plan.costs_a
+    accounts_and_amounts = [
+        (plan.planner.means_account, plan.costs_p),
+        (plan.planner.raw_material_account, plan.costs_r),
+        (plan.planner.work_account, plan.costs_a),
+        (plan.planner.product_account, -prd),
+    ]
 
-    transaction_4 = register_transaction(
-        account_from=social_accounting_account,
-        account_to=plan.planner.product_account,
-        amount=-prd,
-        purpose=f"Plan-Id: {plan.id}",
-    )
-    transaction_repository.add(transaction_4)
+    for account, amount in accounts_and_amounts:
+        adjust_balance(account, amount)
+        transaction = register_transaction(
+            account_from=social_accounting_account,
+            account_to=account,
+            amount=amount,
+            purpose=f"Plan-Id: {plan.id}",
+        )
+        transaction_repository.add(transaction)
     commit_changes()
 
 
-# to be changed!
 @with_injection
 def send_wages(
     sender_orm: Company,

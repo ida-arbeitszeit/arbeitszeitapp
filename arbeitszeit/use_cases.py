@@ -105,15 +105,3 @@ def approve_plan(
     else:
         plan.deny("Some reason", approval_date)
     return plan
-
-
-def granting_credit(
-    plan: Plan,
-) -> None:
-    """Social Accounting grants credit after plan has been approved."""
-    # adjust company balances
-    adjust_balance(plan.planner.means_account, plan.costs_p)
-    adjust_balance(plan.planner.raw_material_account, plan.costs_r)
-    adjust_balance(plan.planner.work_account, plan.costs_a)
-    prd = plan.costs_p + plan.costs_r + plan.costs_a
-    adjust_balance(plan.planner.product_account, -prd)
