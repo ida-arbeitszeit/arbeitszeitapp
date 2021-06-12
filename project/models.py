@@ -11,6 +11,8 @@ from project.extensions import db
 class SocialAccounting(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
+    account = db.relationship("Account", uselist=False, lazy=True)
+
 
 # Association table Company - Member
 jobs = db.Table(

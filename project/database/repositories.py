@@ -145,11 +145,19 @@ class AccountRepository(repositories.AccountRepository):
         db.session.add(account_orm)
 
 
+@inject
+@dataclass
 class AccountingRepository:
+    account_repository: AccountRepository
+
     def object_from_orm(
         self, accounting_orm: SocialAccounting
     ) -> entities.SocialAccounting:
-        return entities.SocialAccounting()
+        accounting_account_orm = accounting_orm.account
+        accounting_account = self.account_repository.object_from_orm(
+            accounting_account_orm
+        )
+        return entities.SocialAccounting(account=accounting_account)
 
     def get_by_id(self, id: int) -> Optional[entities.SocialAccounting]:
         accounting_orm = SocialAccounting.query.filter_by(id=id).first()
@@ -234,6 +242,8 @@ class PlanRepository(repositories.PlanRepository):
             costs_p=plan.costs_p,
             costs_r=plan.costs_r,
             costs_a=plan.costs_a,
+            approved=plan.approved,
+            approval_reason=plan.approval_reason,
             approve=lambda decision, reason, approval_date: self._approve(
                 plan, decision, reason, approval_date
             ),

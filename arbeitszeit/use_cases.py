@@ -13,12 +13,14 @@ from arbeitszeit.entities import (
     ProductOffer,
     Purchase,
     Account,
-    Transaction,
+    SocialAccounting,
 )
 from arbeitszeit.errors import WorkerAlreadyAtCompany
 from arbeitszeit.purchase_factory import PurchaseFactory
+from arbeitszeit.transaction_factory import TransactionFactory
 from arbeitszeit.repositories import (
     CompanyWorkerRepository,
+    TransactionRepository,
 )
 
 
@@ -66,16 +68,6 @@ def adjust_balance(account: Account, amount: Decimal) -> Account:
     return account
 
 
-def register_transaction(
-    account_from: Account,
-    account_to: Account,
-    amount: Decimal,
-    purpose: str,
-) -> Transaction:
-    transaction = Transaction(account_from, account_to, amount, purpose)
-    return transaction
-
-
 def add_worker_to_company(
     company_worker_repository: CompanyWorkerRepository,
     company: Company,
@@ -92,7 +84,7 @@ def add_worker_to_company(
     company_worker_repository.add_worker_to_company(company, worker)
 
 
-def approve_plan(
+def seek_approval(
     datetime_service: DatetimeService,
     plan: Plan,
 ) -> Plan:
@@ -105,3 +97,32 @@ def approve_plan(
     else:
         plan.deny("Some reason", approval_date)
     return plan
+
+
+def grant_credit(
+    plan: Plan,
+    social_accounting: SocialAccounting,
+    transaction_repository: TransactionRepository,
+    transaction_factory: TransactionFactory,
+) -> None:
+    """Social Accounting grants credit after plan has been approved."""
+    assert plan.approved == True, "Plan has not been approved!"
+    social_accounting_account = social_accounting.account
+
+    prd = plan.costs_p + plan.costs_r + plan.costs_a
+    accounts_and_amounts = [
+        (plan.planner.means_account, plan.costs_p),
+        (plan.planner.raw_material_account, plan.costs_r),
+        (plan.planner.work_account, plan.costs_a),
+        (plan.planner.product_account, -prd),
+    ]
+
+    for account, amount in accounts_and_amounts:
+        adjust_balance(account, amount)
+        transaction = transaction_factory.create_transaction(
+            account_from=social_accounting_account,
+            account_to=account,
+            amount=amount,
+            purpose=f"Plan-Id: {plan.id}",
+        )
+        transaction_repository.add(transaction)

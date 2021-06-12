@@ -6,6 +6,8 @@ from flask_login import current_user, login_required
 from sqlalchemy.sql import desc
 
 from arbeitszeit import errors, use_cases
+from arbeitszeit.transaction_factory import TransactionFactory
+from arbeitszeit.datetime_service import DatetimeService
 from project import database
 from project.database import with_injection
 from project.economy import company
@@ -25,6 +27,9 @@ from project.database.repositories import (
     CompanyRepository,
     MemberRepository,
     CompanyWorkerRepository,
+    PlanRepository,
+    AccountingRepository,
+    TransactionRepository,
 )
 
 main_company = Blueprint(
@@ -139,7 +144,13 @@ def buy(id):
 
 @main_company.route("/company/create_plan", methods=["GET", "POST"])
 @login_required
-def create_plan():
+@with_injection
+def create_plan(
+    plan_repository: PlanRepository,
+    accounting_repository: AccountingRepository,
+    transaction_repository: TransactionRepository,
+    transaction_factory: TransactionFactory,
+):
     if request.method == "POST":
         costs_p = float(request.form["costs_p"])
         costs_r = float(request.form["costs_r"])
@@ -150,26 +161,31 @@ def create_plan():
         description = request.form["description"]
         timeframe = int(request.form["timeframe"])
 
-        plan_details = (
-            costs_p,
-            costs_r,
-            costs_a,
-            prd_name,
-            prd_unit,
-            prd_amount,
-            description,
-            timeframe,
+        plan_orm = Plan(
+            plan_creation_date=DatetimeService().now(),
+            planner=current_user.id,
+            costs_p=costs_p,
+            costs_r=costs_r,
+            costs_a=costs_a,
+            prd_name=prd_name,
+            prd_unit=prd_unit,
+            prd_amount=prd_amount,
+            description=description,
+            timeframe=timeframe,
+            social_accounting=1,
         )
+        db.session.add(plan_orm)
+        database.commit_changes()
 
-        plan = database.planning(
-            planner_id=current_user.id,
-            plan_details=plan_details,
-            social_accounting_id=1,
-        )
-
-        plan = database.seek_approval(plan)
+        plan = plan_repository.object_from_orm(plan_orm)
+        plan = use_cases.seek_approval(DatetimeService(), plan)
+        database.commit_changes()
         if plan.approved:
-            database.grant_credit(plan)
+            social_accounting = accounting_repository.get_by_id(1)
+            use_cases.grant_credit(
+                plan, social_accounting, transaction_repository, transaction_factory
+            )
+            database.commit_changes()
             flash("Plan erfolgreich erstellt und genehmigt. Kredit wurde gewährt.")
             return redirect("/company/my_plans")
 
@@ -211,7 +227,7 @@ def create_offer(plan_id):
 
         new_offer = Offer(
             plan_id=plan_id,
-            cr_date=datetime.datetime.now(),
+            cr_date=DatetimeService().now(),
             name=name,
             description=description,
             amount_available=prd_amount,

@@ -7,8 +7,9 @@ from typing import Callable, Union
 from enum import Enum
 
 
+@dataclass
 class SocialAccounting:
-    pass
+    account: Account
 
 
 class Member:
@@ -88,6 +89,8 @@ class Plan:
         costs_p: Decimal,
         costs_r: Decimal,
         costs_a: Decimal,
+        approved: bool,
+        approval_reason: str,
         approve: Callable[[bool, str, datetime], None],
     ) -> None:
         self.id = id
@@ -95,12 +98,16 @@ class Plan:
         self.costs_p = costs_p
         self.costs_r = costs_r
         self.costs_a = costs_a
+        self.approved = approved
+        self.approval_reason = approval_reason
         self._approve_call = approve
 
     def approve(self, approval_date: datetime) -> None:
+        self.approved = True
         self._approve_call(True, "approved", approval_date)
 
     def deny(self, reason: str, denial_date: datetime) -> None:
+        self.approved = False
         self._approve_call(False, reason, denial_date)
 
 

@@ -12,16 +12,14 @@ from injector import Injector, inject
 
 from arbeitszeit.use_cases import (
     PurchaseProduct,
-    approve_plan,
-    register_transaction,
     adjust_balance,
 )
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit import entities
+from arbeitszeit.transaction_factory import TransactionFactory
 from project.models import (
     Member,
     Company,
-    Kaeufe,
     Withdrawal,
     Plan,
     SocialAccounting,
@@ -100,6 +98,7 @@ def buy(
     product_offer_repository: ProductOfferRepository,
     transaction_repository: TransactionRepository,
     purchase_repository: PurchaseRepository,
+    transaction_factory: TransactionFactory,
 ) -> None:
     """
     buy product.
@@ -127,8 +126,6 @@ def buy(
 
     purchase_repository.add(purchase)
     commit_changes()
-
-    print(":::", buyer)
 
     # reduce balance of buyer account
     price = product_offer.price_per_unit
@@ -165,107 +162,13 @@ def buy(
 
     send_to = product_offer.provider.product_account
 
-    transaction = register_transaction(
+    transaction = transaction_factory.create_transaction(
         account_from=account_from,
         account_to=send_to,
         amount=product_offer.price_per_unit * amount,
         purpose=f"Angebot-Id: {offer.id}",
     )
     transaction_repository.add(transaction)
-    commit_changes()
-
-
-@with_injection
-def planning(
-    planner_id,
-    plan_details,
-    social_accounting_id,
-) -> Plan:
-    """
-    create plan.
-    """
-
-    (
-        costs_p,
-        costs_r,
-        costs_a,
-        prd_name,
-        prd_unit,
-        prd_amount,
-        description,
-        timeframe,
-    ) = plan_details
-
-    plan_orm = Plan(
-        plan_creation_date=datetime.now(),
-        planner=planner_id,
-        costs_p=costs_p,
-        costs_r=costs_r,
-        costs_a=costs_a,
-        prd_name=prd_name,
-        prd_unit=prd_unit,
-        prd_amount=prd_amount,
-        description=description,
-        timeframe=timeframe,
-        social_accounting=social_accounting_id,
-    )
-
-    db.session.add(plan_orm)
-    commit_changes()
-    return plan_orm
-
-
-@with_injection
-def seek_approval(
-    plan_orm: Plan,
-    plan_repository: PlanRepository,
-) -> Plan:
-    """Company seeks plan approval from Social Accounting."""
-    datetime_service = DatetimeService()
-    plan = plan_repository.object_from_orm(plan_orm)
-    plan = approve_plan(
-        datetime_service,
-        plan,
-    )
-    commit_changes()
-    plan_orm = plan_repository.object_to_orm(plan)
-    return plan_orm
-
-
-@with_injection
-def grant_credit(
-    plan_orm: Plan,
-    plan_repository: PlanRepository,
-    account_repository: AccountRepository,
-    transaction_repository: TransactionRepository,
-) -> None:
-    """Social Accounting grants credit after plan has been approved."""
-    assert plan_orm.approved == True
-    plan = plan_repository.object_from_orm(plan_orm)
-    social_accounting_account_orm = Account.query.filter_by(
-        account_type="accounting"
-    ).first()
-    social_accounting_account = account_repository.object_from_orm(
-        social_accounting_account_orm
-    )
-
-    prd = plan.costs_p + plan.costs_r + plan.costs_a
-    accounts_and_amounts = [
-        (plan.planner.means_account, plan.costs_p),
-        (plan.planner.raw_material_account, plan.costs_r),
-        (plan.planner.work_account, plan.costs_a),
-        (plan.planner.product_account, -prd),
-    ]
-
-    for account, amount in accounts_and_amounts:
-        adjust_balance(account, amount)
-        transaction = register_transaction(
-            account_from=social_accounting_account,
-            account_to=account,
-            amount=amount,
-            purpose=f"Plan-Id: {plan.id}",
-        )
-        transaction_repository.add(transaction)
     commit_changes()
 
 
@@ -277,6 +180,7 @@ def send_wages(
     company_repository: CompanyRepository,
     member_repository: MemberRepository,
     transaction_repository: TransactionRepository,
+    transaction_factory: TransactionFactory,
 ):
     sender = company_repository.object_from_orm(sender_orm)
     sender_account = sender.work_account
@@ -286,7 +190,9 @@ def send_wages(
     adjust_balance(sender_account, -amount)
     adjust_balance(receiver_account, amount)
     # register transaction
-    transaction = register_transaction(sender_account, receiver_account, amount, "Lohn")
+    transaction = transaction_factory.create_transaction(
+        sender_account, receiver_account, amount, "Lohn"
+    )
     transaction_repository.add(transaction)
     commit_changes()
 
@@ -331,6 +237,7 @@ def withdraw(
     amount: Decimal,
     account_repository: AccountRepository,
     transaction_repository: TransactionRepository,
+    transaction_factory: TransactionFactory,
 ) -> str:
     """
     register new withdrawal and withdraw amount from user's account.
@@ -345,7 +252,7 @@ def withdraw(
 
     # register transaction
     member_account = account_repository.object_from_orm(member.account)
-    transaction = register_transaction(
+    transaction = transaction_factory.create_transaction(
         member_account, None, amount, f"Abhebung ({new_withdrawal.id})"
     )
     transaction_repository.add(transaction)
