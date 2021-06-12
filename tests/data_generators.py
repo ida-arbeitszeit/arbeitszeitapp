@@ -17,6 +17,7 @@ class OfferGenerator:
     def create_offer(self, *, amount=1, provider=None):
         return ProductOffer(
             id=self.id_generator.get_id(),
+            name="Product name",
             amount_available=amount,
             deactivate_offer_in_db=lambda: None,
             decrease_amount_available=lambda _: None,

@@ -245,15 +245,23 @@ class PlanRepository(repositories.PlanRepository):
     def object_from_orm(self, plan: Plan) -> entities.Plan:
         return entities.Plan(
             id=plan.id,
+            plan_creation_date=plan.plan_creation_date,
             planner=self.company_repository.get_by_id(plan.planner),
             costs_p=plan.costs_p,
             costs_r=plan.costs_r,
             costs_a=plan.costs_a,
+            prd_name=plan.prd_name,
+            prd_amount=plan.prd_amount,
+            description=plan.description,
+            timeframe=plan.timeframe,
             approved=plan.approved,
+            approval_date=plan.approval_date,
             approval_reason=plan.approval_reason,
             approve=lambda decision, reason, approval_date: self._approve(
                 plan, decision, reason, approval_date
             ),
+            expired=plan.expired,
+            set_as_expired=lambda: setattr(plan, "expired", True),
         )
 
     def object_to_orm(self, plan: entities.Plan) -> Plan:

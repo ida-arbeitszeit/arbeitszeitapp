@@ -198,22 +198,46 @@ def create_plan(
 
 @main_company.route("/company/my_plans", methods=["GET", "POST"])
 @login_required
-def my_plans():
+@with_injection
+def my_plans(
+    plan_repository: PlanRepository,
+):
+    plans_orm = current_user.plans.filter_by(approved=True, expired=False).all()
+    plans = [plan_repository.object_from_orm(plan) for plan in plans_orm]
 
-    plans = (
-        current_user.plans.filter_by(approved=True)
-        .order_by(desc(Plan.plan_creation_date))
-        .all()
-    )
+    plans = use_cases.check_plans_for_expiration(plans)
+    database.commit_changes()
 
-    end_of_plan_cycles = []
+    plans_orm_expired = current_user.plans.filter_by(approved=True, expired=True).all()
+    plans_expired = [
+        plan_repository.object_from_orm(plan) for plan in plans_orm_expired
+    ]
+
     for plan in plans:
-        end_of_plan_cycles.append(
-            plan.plan_creation_date + datetime.timedelta(days=int(plan.timeframe))
+        expiration_date = plan.plan_creation_date + datetime.timedelta(
+            days=int(plan.timeframe)
         )
+        expiration_relative = DatetimeService().now() - expiration_date
+        seconds_until_exp = abs(expiration_relative.total_seconds())
+        # days
+        days = int(seconds_until_exp // 86400)
+        # remaining seconds
+        seconds_until_exp = seconds_until_exp - (days * 86400)
+        # hours
+        hours = int(seconds_until_exp // 3600)
+        # remaining seconds
+        seconds_until_exp = seconds_until_exp - (hours * 3600)
+        # minutes
+        minutes = int(seconds_until_exp // 60)
+
+        exp_string = f"{days} T. {hours} Std. {minutes} Min."
+        plan.expiration_relative = exp_string
+        plan.expiration_date = expiration_date
 
     return render_template(
-        "company/my_plans.html", plans=plans, end_of_plan_cycles=end_of_plan_cycles
+        "company/my_plans.html",
+        plans=plans,
+        plans_expired=plans_expired,
     )
 
 

@@ -2,14 +2,13 @@
 
 {% block content2 %}
 
-
-<h1 class="title">
-    Meine Pläne
-</h1>
 <div class="box has-background-info-light has-text-info-dark">
     <div class="icon"><i class="fas fa-info-circle"></i></div>
     <p>Hier sind deine genehmigten Pläne.</p>
 </div>
+<h1 class="title">
+    Aktuelle Pläne
+</h1>
 
 {% with messages = get_flashed_messages() %}
 {% if messages %}
@@ -18,9 +17,8 @@
 {% endfor %}
 {% endif %}
 {% endwith %}
+
 <div class="table-container">
-
-
     {% if plans is defined and plans|length %}
     <table class="table is-fullwidth">
         <thead>
@@ -31,6 +29,7 @@
                 <th>Einheiten</th>
                 <th>Plan vom</th>
                 <th>Ende Planzeitraum</th>
+                <th>Ende in</th>
                 <th>Produkt anbieten</th>
             </tr>
         </thead>
@@ -41,8 +40,9 @@
                 <td>{{ plan.prd_name }}</td>
                 <td>{{ plan.description }}</td>
                 <td>{{ plan.prd_amount }}</td>
-                <td>{{ plan.plan_creation_date.strftime("%c") }}</td>
-                <td>{{ end_of_plan_cycles[loop.index-1].strftime("%c") }}</td>
+                <td>{{ plan.plan_creation_date.strftime("%d.%m.%y") }}</td>
+                <td>{{ plan.expiration_date.strftime("%d.%m.%y") }}</td>
+                <td>{{ plan.expiration_relative }}</td>
                 <td><a href="{{ url_for('main_company.create_offer', plan_id=plan.id) }}"><i
                             class="fas fa-store"></i></a></td>
             </tr>
@@ -53,6 +53,42 @@
     <p>(Du hast keine Pläne.)</p>
     {% endif %}
 </div>
+
+
+
+<h1 class="title">
+    Abgelaufene Pläne
+</h1>
+
+<div class="table-container">
+    {% if plans_expired is defined and plans_expired|length %}
+    <table class="table is-fullwidth">
+        <thead>
+            <tr>
+                <th>Plan-ID</th>
+                <th>Produkt</th>
+                <th>Beschreibung</th>
+                <th>Einheiten</th>
+                <th>Plan vom</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for plan in plans_expired %}
+            <tr>
+                <td>{{ plan.id }}</td>
+                <td>{{ plan.prd_name }}</td>
+                <td>{{ plan.description }}</td>
+                <td>{{ plan.prd_amount }}</td>
+                <td>{{ plan.plan_creation_date.strftime("%d.%m.%y") }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>(Du hast keine abgelaufenen Pläne.)</p>
+    {% endif %}
+</div>
+
 
 
 {% endblock %}

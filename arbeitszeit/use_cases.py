@@ -1,7 +1,8 @@
 from dataclasses import dataclass
-from typing import Union
+from typing import Union, List
 from decimal import Decimal
 from enum import Enum
+import datetime
 
 from injector import inject
 
@@ -131,3 +132,20 @@ def grant_credit(
             purpose=f"Plan-Id: {plan.id}",
         )
         transaction_repository.add(transaction)
+
+
+def check_plans_for_expiration(plans: List[Plan]) -> List[Plan]:
+    """
+    checks if plans are expired and sets them as expired, if so.
+    """
+
+    for plan in plans:
+        expiration_date = plan.plan_creation_date + datetime.timedelta(
+            days=int(plan.timeframe)
+        )
+        expiration_relative = DatetimeService().now() - expiration_date
+        seconds = expiration_relative.total_seconds()
+        if seconds > 0:
+            plan.set_as_expired()
+
+    return plans
