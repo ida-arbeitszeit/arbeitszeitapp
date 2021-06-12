@@ -20,9 +20,7 @@ from project.models import (
     Plan,
     Offer,
 )
-from project.tables import (
-    WorkersTable,
-)
+
 from project.database.repositories import (
     CompanyRepository,
     MemberRepository,
@@ -30,6 +28,7 @@ from project.database.repositories import (
     PlanRepository,
     AccountingRepository,
     TransactionRepository,
+    ProductOfferRepository,
 )
 
 main_company = Blueprint(
@@ -81,9 +80,10 @@ def arbeit(
         database.commit_changes()
         return redirect(url_for("main_company.arbeit"))
     elif request.method == "GET":
-        workers_list = database.get_workers(current_user.id)
-        workers_table = WorkersTable(workers_list, no_items="(Noch keine Mitarbeiter.)")
-        return render_template("company/work.html", workers_table=workers_table)
+        workers_list = company_worker_repository.get_company_workers(
+            company_repository.get_by_id(current_user.id)
+        )
+        return render_template("company/work.html", workers_list=workers_list)
 
 
 @main_company.route("/company/suchen", methods=["GET", "POST"])
@@ -369,15 +369,19 @@ def my_offers():
 
 @main_company.route("/company/delete_offer", methods=["GET", "POST"])
 @login_required
-def delete_offer():
+@with_injection
+def delete_offer(
+    product_offer_repository: ProductOfferRepository,
+):
     offer_id = request.args.get("id")
-    offer = Offer.query.filter_by(id=offer_id).first()
+    product_offer = product_offer_repository.get_by_id(offer_id)
     if request.method == "POST":
-        company.delete_product(offer_id)
+        use_cases.deactivate_offer(product_offer)
+        database.commit_changes()
         flash("Löschen des Angebots erfolgreich.")
         return redirect(url_for("main_company.my_offers"))
 
-    return render_template("company/delete_offer.html", offer=offer)
+    return render_template("company/delete_offer.html", offer=product_offer)
 
 
 @main_company.route("/company/sell_offer", methods=["GET", "POST"])

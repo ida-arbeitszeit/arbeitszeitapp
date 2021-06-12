@@ -293,27 +293,6 @@ def add_new_accounts_for_company(company_id):
         db.session.commit()
 
 
-def get_workers(company_id) -> list:
-    """get all workers working in a company."""
-    company = Company.query.filter_by(id=company_id).first()
-    workers = company.workers.all()
-    return workers
-
-
-def get_worker_in_company(worker_id, company_id) -> Union[Member, None]:
-    """get specific worker in a company, if exists."""
-    company = Company.query.filter_by(id=company_id).first()
-    worker = company.workers.filter_by(id=worker_id).first()
-    return worker
-
-
-def delete_product(offer_id) -> None:
-    """delete product."""
-    offer = Offer.query.filter_by(id=offer_id).first()
-    offer.active = False
-    db.session.commit()
-
-
 # Worker
 
 

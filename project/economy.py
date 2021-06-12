@@ -19,10 +19,6 @@ class Company:
     def buy_product(self, buyer_type, product_id, amount, purpose, buyer_id):
         database.buy(buyer_type, product_id, amount, purpose, buyer_id)
 
-    def delete_product(self, product_id):
-        """delete own product from catalog."""
-        database.delete_product(product_id)
-
 
 class Member:
     """A regular member/worker."""

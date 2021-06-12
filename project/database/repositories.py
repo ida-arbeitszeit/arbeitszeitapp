@@ -61,7 +61,9 @@ class MemberRepository:
 
     def object_from_orm(self, orm_object: Member) -> entities.Member:
         member_account = self.account_repository.object_from_orm(orm_object.account)
-        return entities.Member(id=orm_object.id, account=member_account)
+        return entities.Member(
+            id=orm_object.id, name=orm_object.name, account=member_account
+        )
 
     def object_to_orm(self, member: entities.Member) -> Member:
         return Member.query.get(member.id)
@@ -212,6 +214,7 @@ class ProductOfferRepository:
         price_per_unit = Decimal(plan.costs_p + plan.costs_r + plan.costs_a)
         return entities.ProductOffer(
             id=offer_orm.id,
+            name=offer_orm.name,
             amount_available=offer_orm.amount_available,
             deactivate_offer_in_db=lambda: setattr(offer_orm, "active", False),
             decrease_amount_available=lambda amount: setattr(
@@ -223,6 +226,10 @@ class ProductOfferRepository:
             provider=self.company_repository.object_from_orm(plan.company),
             active=offer_orm.active,
         )
+
+    def get_by_id(self, id: int) -> Optional[entities.ProductOffer]:
+        offer_orm = Offer.query.filter_by(id=id).first()
+        return self.object_from_orm(offer_orm) if offer_orm else None
 
 
 @inject

@@ -16,9 +16,11 @@ class Member:
     def __init__(
         self,
         id: int,
+        name: str,
         account: Account,
     ) -> None:
         self._id = id
+        self.name = name
         self.account = account
 
     @property
@@ -115,6 +117,7 @@ class ProductOffer:
     def __init__(
         self,
         id: int,
+        name: str,
         amount_available: int,
         deactivate_offer_in_db: Callable[[], None],
         decrease_amount_available: Callable[[int], None],
@@ -123,6 +126,7 @@ class ProductOffer:
         active: bool,
     ) -> None:
         self._id = id
+        self.name = name
         self._amount_available = amount_available
         self._deactivate = deactivate_offer_in_db
         self._decrease_amount = decrease_amount_available

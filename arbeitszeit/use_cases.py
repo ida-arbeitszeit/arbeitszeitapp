@@ -57,9 +57,14 @@ class PurchaseProduct:
         ), "Amount ordered exceeds available products!"
         product_offer.decrease_amount_available(amount)
         if product_offer.amount_available == 0:
-            product_offer.deactivate()
+            deactivate_offer(product_offer)
 
         return purchase
+
+
+def deactivate_offer(product_offer: ProductOffer) -> ProductOffer:
+    product_offer.deactivate()
+    return product_offer
 
 
 def adjust_balance(account: Account, amount: Decimal) -> Account:

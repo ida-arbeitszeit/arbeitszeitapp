@@ -7,10 +7,31 @@
       Mitarbeiter
     </h1>
 
-    <div class="content">
-      {{ workers_table }}
 
+    <div class="table-container">
+      {% if workers_list is defined and workers_list|length %}
+      <table class="table is-fullwidth">
+        <thead>
+          <tr>
+            <th>Mitglieder-ID</th>
+            <th>Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for worker in workers_list %}
+          <tr>
+            <td>{{ worker.id }}</td>
+            <td>{{ worker.name }}</td>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p>(Noch keine Mitarbeiter.)</p>
+      {% endif %}
     </div>
+
 
     <div class="content">
       <form method="post">
