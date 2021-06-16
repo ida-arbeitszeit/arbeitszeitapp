@@ -75,11 +75,11 @@ class IdGenerator:
 class AccountGenerator:
     id_generator: IdGenerator
 
-    def create_account(self, account_type="p", balance=0) -> Account:
+    def create_account(self, account_type="p") -> Account:
         return Account(
             id=self.id_generator.get_id(),
             account_owner_id=self.id_generator.get_id(),
             account_type=account_type,
-            balance=balance,
+            balance=0,
             change_credit=lambda amount: None,
         )

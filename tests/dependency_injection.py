@@ -8,6 +8,10 @@ def configure_injector(binder: Binder) -> None:
     binder.bind(
         interfaces.PurchaseRepository, ClassProvider(repositories.PurchaseRepository)
     )
+    binder.bind(
+        interfaces.TransactionRepository,
+        ClassProvider(repositories.TransactionRepository),
+    )
 
 
 injector = Injector(configure_injector)
