@@ -141,7 +141,6 @@ def buy(
     purchase_repository: PurchaseRepository,
     transaction_repository: TransactionRepository,
 ):
-    # offer = Offer.query.filter_by(id=id).first()
     product_offer = product_offer_repository.get_by_id(id=id)
     buyer = company_repository.get_by_id(current_user.id)
 
@@ -152,39 +151,15 @@ def buy(
             else "raw_materials"
         )
         amount = int(request.form["amount"])
-        purchase, transaction = purchase_product(product_offer, amount, purpose, buyer)
-        purchase_repository.add(purchase)
-        transaction_repository.add(transaction)
+        purchase_product(
+            purchase_repository,
+            transaction_repository,
+            product_offer,
+            amount,
+            purpose,
+            buyer,
+        )
         database.commit_changes()
-
-        # # reduce my balance
-        # price_total = purchase.price * purchase.amount
-        # if purpose == "means_of_prod":
-        #     use_cases.adjust_balance(
-        #         buyer.means_account,
-        #         -price_total,
-        #     )
-        # elif purpose == "raw_materials":
-        #     use_cases.adjust_balance(
-        #         buyer.raw_material_account,
-        #         -price_total,
-        #     )
-
-        # # increase balance of seller prd account
-        # use_cases.adjust_balance(product_offer.provider.product_account, price_total)
-        # database.commit_changes()
-
-        # # register transaction
-        # transaction = transaction_factory.create_transaction(
-        #     account_from=buyer.means_account
-        #     if purpose == "means_of_prod"
-        #     else buyer.raw_material_account,
-        #     account_to=product_offer.provider.product_account,
-        #     amount=price_total,
-        #     purpose=f"Angebot-Id: {product_offer.id}",
-        # )
-        # transaction_repository.add(transaction)
-        # database.commit_changes()
 
         flash(f"Kauf von '{amount}'x '{product_offer.name}' erfolgreich!")
         return redirect("/company/suchen")
@@ -367,7 +342,7 @@ def my_accounts():
             if received_trans.sending_account.account_type.name == "accounting":
                 sender_name = "Öff. Buchhaltung"
             elif received_trans.sending_account.account_type.name == "member":
-                sender_name = f"Mitglied: {received_trans.sending_account.member.name} (received_trans.sending_account.member.id)"
+                sender_name = f"Mitglied: {received_trans.sending_account.member.name} ({received_trans.sending_account.member.id})"
             elif received_trans.sending_account.account_type.name in [
                 "p",
                 "r",
@@ -415,14 +390,69 @@ def my_accounts():
 
 @main_company.route("/company/transfer", methods=["GET", "POST"])
 @login_required
-def transfer():
+@with_injection
+def transfer(
+    transaction_repository: TransactionRepository,
+    company_repository: CompanyRepository,
+    member_repository: MemberRepository,
+    company_worker_repository: CompanyWorkerRepository,
+    plan_repository: PlanRepository,
+):
     if request.method == "POST":
-        # to implement: check in html, if user exists and if worker in company
-        receiver_id = request.form["member_id"]
-        amount = Decimal(request.form["amount"])
-        sender = Company.query.get(current_user.id)
-        receiver = Member.query.filter_by(id=receiver_id).first()
-        database.send_wages(sender, receiver, amount)
+        transfer_type = request.form["transfer_type"]
+        if transfer_type == "transfer_to_worker":
+            sender = company_repository.get_by_id(current_user.id)
+            receiver = member_repository.get_member_by_id(request.form["member_id"])
+            amount = Decimal(request.form["amount"])
+
+            try:
+                use_cases.send_work_certificates_to_worker(
+                    company_worker_repository,
+                    transaction_repository,
+                    sender,
+                    receiver,
+                    amount,
+                )
+                database.commit_changes()
+                flash("Erfolgreich überwiesen.", "transfer_to_worker")
+            except errors.WorkerNotAtCompany:
+                flash(
+                    "Mitglied ist nicht in diesem Betrieb beschäftigt.",
+                    "transfer_to_worker",
+                )
+            except errors.WorkerDoesNotExist:
+                flash("Mitglied existiert nicht.", "transfer_to_worker")
+
+        elif transfer_type == "transfer_to_company":
+            sender = company_repository.get_by_id(current_user.id)
+            plan = plan_repository.get_by_id(request.form["plan_id"])
+            receiver = company_repository.get_by_id(request.form["company_id"])
+            amount = Decimal(request.form["amount"])
+            purpose = (
+                "means_of_prod"
+                if request.form["category"] == "Produktionsmittel"
+                else "raw_materials"
+            )
+            try:
+                use_cases.pay_means_of_production(
+                    transaction_repository,
+                    sender,
+                    receiver,
+                    plan,
+                    amount,
+                    purpose,
+                )
+                database.commit_changes()
+                flash("Erfolgreich bezahlt.")
+            except errors.CompanyIsNotPlanner:
+                flash(
+                    "Der angegebene Plan gehört nicht zum angegebenen Betrieb.",
+                    "transfer_to_company",
+                )
+            except errors.CompanyDoesNotExist:
+                flash("Der Betrieb existiert nicht.", "transfer_to_company")
+            except errors.PlanDoesNotExist:
+                flash("Der Plan existiert nicht.", "transfer_to_company")
 
     return render_template("company/transfer.html")
 

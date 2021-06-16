@@ -15,13 +15,16 @@ from arbeitszeit.entities import (
     Purchase,
     Account,
     SocialAccounting,
+    Transaction,
 )
-from arbeitszeit.errors import WorkerAlreadyAtCompany
+from arbeitszeit import errors
+
 from arbeitszeit.purchase_factory import PurchaseFactory
 from arbeitszeit.transaction_factory import TransactionFactory
 from arbeitszeit.repositories import (
     CompanyWorkerRepository,
     TransactionRepository,
+    PurchaseRepository,
 )
 
 
@@ -40,12 +43,13 @@ class PurchaseProduct:
 
     def __call__(
         self,
+        purchase_repository: PurchaseRepository,
+        transaction_repository: TransactionRepository,
         product_offer: ProductOffer,
         amount: int,
         purpose: PurposesOfPurchases,
         buyer: Union[Member, Company],
-    ) -> Purchase:
-        """returns purchase and transaction."""
+    ) -> None:
 
         assert (
             product_offer.amount_available >= amount
@@ -109,7 +113,9 @@ class PurchaseProduct:
             purpose=f"Angebot-Id: {product_offer.id}",
         )
 
-        return purchase, transaction
+        # add purchase and transaction to database
+        purchase_repository.add(purchase)
+        transaction_repository.add(transaction)
 
 
 def deactivate_offer(product_offer: ProductOffer) -> ProductOffer:
@@ -132,7 +138,7 @@ def add_worker_to_company(
     worker is already employed at the company."""
     company_workers = company_worker_repository.get_company_workers(company)
     if worker in company_workers:
-        raise WorkerAlreadyAtCompany(
+        raise errors.WorkerAlreadyAtCompany(
             worker=worker,
             company=company,
         )
@@ -198,3 +204,95 @@ def check_plans_for_expiration(plans: List[Plan]) -> List[Plan]:
             plan.set_as_expired()
 
     return plans
+
+
+def send_work_certificates_to_worker(
+    company_worker_repository: CompanyWorkerRepository,
+    transaction_repository: TransactionRepository,
+    company: Company,
+    worker: Member,
+    amount: Decimal,
+) -> None:
+    """This function may raise a WorkerNotAtCompany or a WorkerDoesNotExist exception if the
+    worker does not exist/is not employed at the company."""
+    company_workers = company_worker_repository.get_company_workers(company)
+    if not worker:
+        raise errors.WorkerDoesNotExist(
+            worker=worker,
+        )
+    if worker not in company_workers:
+        raise errors.WorkerNotAtCompany(
+            worker=worker,
+            company=company,
+        )
+
+    # adjust balances
+    adjust_balance(company.work_account, -amount)
+    adjust_balance(worker.account, amount)
+    # create transaction
+    transaction_factory = TransactionFactory()
+    transaction = transaction_factory.create_transaction(
+        account_from=company.work_account,
+        account_to=worker.account,
+        amount=amount,
+        purpose="Lohn",
+    )
+    transaction_repository.add(transaction)
+
+
+def pay_means_of_production(
+    transaction_repository: TransactionRepository,
+    sender: Company,
+    receiver: Company,
+    plan: Plan,
+    amount: int,
+    purpose: PurposesOfPurchases,
+) -> None:
+    """payment of means of production or raw materials which were not offered/bought on the app's marketplace."""
+    if not receiver:
+        raise errors.CompanyDoesNotExist(
+            company=receiver,
+        )
+    if not plan:
+        raise errors.PlanDoesNotExist(
+            plan=plan,
+        )
+    if plan.planner != receiver:
+        raise errors.CompanyIsNotPlanner(
+            company=receiver,
+            planner=plan.planner,
+        )
+    # no purchase!
+
+    # reduce balance of buyer
+    price_total = amount * (plan.costs_p + plan.costs_r + plan.costs_a)
+    if purpose == "means_of_prod":
+        adjust_balance(
+            sender.means_account,
+            -price_total,
+        )
+    elif purpose == "raw_materials":
+        adjust_balance(
+            sender.raw_material_account,
+            -price_total,
+        )
+
+    # increase balance of seller
+    adjust_balance(plan.planner.product_account, price_total)
+
+    # create transaction
+    if purpose == "means_of_prod":
+        account_from = sender.means_account
+    elif purpose == "raw_materials":
+        account_from = sender.raw_material_account
+
+    transaction_factory = TransactionFactory()
+    transaction = transaction_factory.create_transaction(
+        account_from=account_from,
+        account_to=plan.planner.product_account,
+        amount=price_total,
+        purpose=f"Plan-Id: {plan.id}",
+    )
+
+    # add transaction to database
+    transaction_repository.add(transaction)

@@ -53,6 +53,12 @@ class Company:
     def id(self):
         return self._id
 
+    def __eq__(self, other: Company) -> bool:
+        if isinstance(other, Company):
+            return self.id == other.id
+
+        return False
+
 
 class AccountTypes(Enum):
     p = "p"

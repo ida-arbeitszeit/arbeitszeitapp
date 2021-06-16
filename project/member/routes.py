@@ -87,9 +87,14 @@ def buy(
     if request.method == "POST":  # if user buys
         purpose = "consumption"
         amount = int(request.form["amount"])
-        purchase, transaction = purchase_product(product_offer, amount, purpose, buyer)
-        purchase_repository.add(purchase)
-        transaction_repository.add(transaction)
+        purchase_product(
+            purchase_repository,
+            transaction_repository,
+            product_offer,
+            amount,
+            purpose,
+            buyer,
+        )
         database.commit_changes()
         flash(f"Kauf von '{product_offer.name}' erfolgreich!")
         return redirect("/member/suchen")
@@ -145,7 +150,7 @@ def my_account():
         if received_trans.sending_account.account_type.name == "accounting":
             sender_name = "Öff. Buchhaltung"
         elif received_trans.sending_account.account_type.name == "member":
-            sender_name = f"Mitglied: {received_trans.sending_account.member.name} (received_trans.sending_account.member.id)"
+            sender_name = f"Mitglied: {received_trans.sending_account.member.name} ({received_trans.sending_account.member.id})"
         elif received_trans.sending_account.account_type.name in [
             "p",
             "r",

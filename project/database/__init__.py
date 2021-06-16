@@ -76,31 +76,6 @@ def lookup_product_provider(
     return company_repository.object_from_orm(company_orm)
 
 
-@with_injection
-def send_wages(
-    sender_orm: Company,
-    receiver_orm: Member,
-    amount,
-    company_repository: CompanyRepository,
-    member_repository: MemberRepository,
-    transaction_repository: TransactionRepository,
-    transaction_factory: TransactionFactory,
-):
-    sender = company_repository.object_from_orm(sender_orm)
-    sender_account = sender.work_account
-    receiver = member_repository.object_from_orm(receiver_orm)
-    receiver_account = receiver.account
-    # adjust balance of both
-    adjust_balance(sender_account, -amount)
-    adjust_balance(receiver_account, amount)
-    # register transaction
-    transaction = transaction_factory.create_transaction(
-        sender_account, receiver_account, amount, "Lohn"
-    )
-    transaction_repository.add(transaction)
-    commit_changes()
-
-
 # User
 
 
