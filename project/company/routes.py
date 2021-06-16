@@ -29,6 +29,8 @@ from project.database.repositories import (
     AccountingRepository,
     TransactionRepository,
     ProductOfferRepository,
+    ProductOfferRepository,
+    PurchaseRepository,
 )
 
 main_company = Blueprint(
@@ -130,8 +132,18 @@ def suchen():
 
 @main_company.route("/company/buy/<int:id>", methods=["GET", "POST"])
 @login_required
-def buy(id):
-    offer = Offer.query.filter_by(id=id).first()
+@with_injection
+def buy(
+    id: int,
+    purchase_product: use_cases.PurchaseProduct,
+    product_offer_repository: ProductOfferRepository,
+    company_repository: CompanyRepository,
+    purchase_repository: PurchaseRepository,
+    transaction_repository: TransactionRepository,
+):
+    # offer = Offer.query.filter_by(id=id).first()
+    product_offer = product_offer_repository.get_by_id(id=id)
+    buyer = company_repository.get_by_id(current_user.id)
 
     if request.method == "POST":  # if company buys
         purpose = (
@@ -140,11 +152,44 @@ def buy(id):
             else "raw_materials"
         )
         amount = int(request.form["amount"])
-        company.buy_product("company", offer, amount, purpose, current_user.id)
-        flash(f"Kauf von '{amount}'x '{offer.name}' erfolgreich!")
+        purchase, transaction = purchase_product(product_offer, amount, purpose, buyer)
+        purchase_repository.add(purchase)
+        transaction_repository.add(transaction)
+        database.commit_changes()
+
+        # # reduce my balance
+        # price_total = purchase.price * purchase.amount
+        # if purpose == "means_of_prod":
+        #     use_cases.adjust_balance(
+        #         buyer.means_account,
+        #         -price_total,
+        #     )
+        # elif purpose == "raw_materials":
+        #     use_cases.adjust_balance(
+        #         buyer.raw_material_account,
+        #         -price_total,
+        #     )
+
+        # # increase balance of seller prd account
+        # use_cases.adjust_balance(product_offer.provider.product_account, price_total)
+        # database.commit_changes()
+
+        # # register transaction
+        # transaction = transaction_factory.create_transaction(
+        #     account_from=buyer.means_account
+        #     if purpose == "means_of_prod"
+        #     else buyer.raw_material_account,
+        #     account_to=product_offer.provider.product_account,
+        #     amount=price_total,
+        #     purpose=f"Angebot-Id: {product_offer.id}",
+        # )
+        # transaction_repository.add(transaction)
+        # database.commit_changes()
+
+        flash(f"Kauf von '{amount}'x '{product_offer.name}' erfolgreich!")
         return redirect("/company/suchen")
 
-    return render_template("company/buy.html", offer=offer)
+    return render_template("company/buy.html", offer=product_offer)
 
 
 @main_company.route("/company/create_plan", methods=["GET", "POST"])
@@ -416,6 +461,7 @@ def delete_offer(
 @main_company.route("/company/sell_offer", methods=["GET", "POST"])
 @login_required
 def sell_offer():
+    # HAS TO BE CHANGED
     offer_id = request.args.get("id")
     offer = Offer.query.filter_by(id=offer_id).first()
 

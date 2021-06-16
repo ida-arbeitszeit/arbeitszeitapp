@@ -36,6 +36,7 @@ class PurposesOfPurchases(Enum):
 class PurchaseProduct:
     datetime_service: DatetimeService
     purchase_factory: PurchaseFactory
+    transaction_factory: TransactionFactory
 
     def __call__(
         self,
@@ -44,6 +45,13 @@ class PurchaseProduct:
         purpose: PurposesOfPurchases,
         buyer: Union[Member, Company],
     ) -> Purchase:
+        """returns purchase and transaction."""
+
+        assert (
+            product_offer.amount_available >= amount
+        ), "Amount ordered exceeds available products!"
+
+        # create purchase
         price = product_offer.price_per_unit
         purchase = self.purchase_factory.create_private_purchase(
             purchase_date=self.datetime_service.now(),
@@ -53,14 +61,55 @@ class PurchaseProduct:
             amount=amount,
             purpose=purpose,
         )
-        assert (
-            product_offer.amount_available >= amount
-        ), "Amount ordered exceeds available products!"
+
+        # decrease amount available
         product_offer.decrease_amount_available(amount)
+
+        # deactivate offer if amount is zero
         if product_offer.amount_available == 0:
             deactivate_offer(product_offer)
 
-        return purchase
+        # reduce balance of buyer
+        price_total = purchase.price * purchase.amount
+        if isinstance(buyer, Member):
+            adjust_balance(
+                buyer.account,
+                -price_total,
+            )
+        else:
+            if purpose == "means_of_prod":
+                adjust_balance(
+                    buyer.means_account,
+                    -price_total,
+                )
+            else:
+                adjust_balance(
+                    buyer.raw_material_account,
+                    -price_total,
+                )
+
+        # increase balance of seller
+        adjust_balance(product_offer.provider.product_account, price_total)
+
+        # create transaction
+        if isinstance(buyer, Member):
+            account_from = buyer.account
+        else:
+            if purpose == "means_of_prod":
+                account_from = buyer.means_account
+            else:
+                account_from = buyer.raw_material_account
+
+        send_to = product_offer.provider.product_account
+
+        transaction = self.transaction_factory.create_transaction(
+            account_from=account_from,
+            account_to=send_to,
+            amount=price_total,
+            purpose=f"Angebot-Id: {product_offer.id}",
+        )
+
+        return purchase, transaction
 
 
 def deactivate_offer(product_offer: ProductOffer) -> ProductOffer:

@@ -29,9 +29,18 @@ class OfferGenerator:
         )
 
 
+@inject
+@dataclass
 class MemberGenerator:
+    id_generator: IdGenerator
+    account_generator: AccountGenerator
+
     def create_member(self) -> Member:
-        pass
+        return Member(
+            id=self.id_generator.get_id(),
+            name="Member name",
+            account=self.account_generator.create_account(account_type="member"),
+        )
 
 
 @inject

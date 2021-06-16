@@ -4,7 +4,15 @@ from flask_login import login_required, current_user
 from project.models import Offer
 from project.forms import ProductSearchForm
 from project import database
+from project.database import with_injection
 from project.economy import member
+from project.database.repositories import (
+    ProductOfferRepository,
+    MemberRepository,
+    PurchaseRepository,
+    TransactionRepository,
+)
+from arbeitszeit import use_cases
 
 
 main_member = Blueprint(
@@ -64,17 +72,29 @@ def suchen():
 
 @main_member.route("/member/buy/<int:id>", methods=["GET", "POST"])
 @login_required
-def buy(id):
-    offer = Offer.query.filter_by(id=id).first()
+@with_injection
+def buy(
+    id,
+    product_offer_repository: ProductOfferRepository,
+    member_repository: MemberRepository,
+    purchase_product: use_cases.PurchaseProduct,
+    purchase_repository: PurchaseRepository,
+    transaction_repository: TransactionRepository,
+):
+    product_offer = product_offer_repository.get_by_id(id=id)
+    buyer = member_repository.get_member_by_id(current_user.id)
 
     if request.method == "POST":  # if user buys
         purpose = "consumption"
         amount = int(request.form["amount"])
-        database.buy("member", offer, amount, purpose, current_user.id)
-        flash(f"Kauf von '{offer.name}' erfolgreich!")
+        purchase, transaction = purchase_product(product_offer, amount, purpose, buyer)
+        purchase_repository.add(purchase)
+        transaction_repository.add(transaction)
+        database.commit_changes()
+        flash(f"Kauf von '{product_offer.name}' erfolgreich!")
         return redirect("/member/suchen")
 
-    return render_template("member/buy.html", offer=offer)
+    return render_template("member/buy.html", offer=product_offer)
 
 
 @main_member.route("/member/profile")
