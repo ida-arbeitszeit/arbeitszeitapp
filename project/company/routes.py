@@ -38,10 +38,15 @@ main_company = Blueprint(
 
 @main_company.route("/company/profile")
 @login_required
-def profile():
+@with_injection
+def profile(
+    company_repository: CompanyRepository,
+    company_worker_repository: CompanyWorkerRepository,
+):
     user_type = session["user_type"]
     if user_type == "company":
-        worker = database.get_workers(current_user.id)
+        company = company_repository.get_by_id(current_user.id)
+        worker = company_worker_repository.get_company_workers(company)
         if worker:
             having_workers = True
         else:
