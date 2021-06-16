@@ -87,22 +87,38 @@ class Plan:
     def __init__(
         self,
         id: int,
+        plan_creation_date: datetime,
         planner: Company,
         costs_p: Decimal,
         costs_r: Decimal,
         costs_a: Decimal,
+        prd_name: str,
+        prd_amount: int,
+        description: str,
+        timeframe: Decimal,
         approved: bool,
+        approval_date: datetime,
         approval_reason: str,
         approve: Callable[[bool, str, datetime], None],
+        expired: bool,
+        set_as_expired: Callable[[], None],
     ) -> None:
         self.id = id
+        self.plan_creation_date = plan_creation_date
         self.planner = planner
         self.costs_p = costs_p
         self.costs_r = costs_r
         self.costs_a = costs_a
+        self.prd_name = prd_name
+        self.prd_amount = prd_amount
+        self.description = description
+        self.timeframe = timeframe
         self.approved = approved
+        self.approval_date = approval_date
         self.approval_reason = approval_reason
         self._approve_call = approve
+        self.expired = expired
+        self._set_as_expired = set_as_expired
 
     def approve(self, approval_date: datetime) -> None:
         self.approved = True
@@ -111,6 +127,10 @@ class Plan:
     def deny(self, reason: str, denial_date: datetime) -> None:
         self.approved = False
         self._approve_call(False, reason, denial_date)
+
+    def set_as_expired(self) -> None:
+        self.expired = True
+        self._set_as_expired()
 
 
 class ProductOffer:
