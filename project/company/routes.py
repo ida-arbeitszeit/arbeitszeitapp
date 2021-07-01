@@ -5,7 +5,7 @@ from flask import Blueprint, flash, redirect, render_template, request, session,
 from flask_login import current_user, login_required
 from sqlalchemy.sql import desc
 
-from arbeitszeit import errors, use_cases
+from arbeitszeit import errors, use_cases, entities
 from arbeitszeit.transaction_factory import TransactionFactory
 from arbeitszeit.datetime_service import DatetimeService
 from project import database
@@ -176,6 +176,13 @@ def create_plan(
     transaction_repository: TransactionRepository,
     transaction_factory: TransactionFactory,
 ):
+
+    if request.args.get("renew"):
+        plan_id = request.args.get("renew")
+        plan_to_renew = plan_repository.get_by_id(plan_id)
+    else:
+        plan_to_renew = None
+
     if request.method == "POST":
         costs_p = float(request.form["costs_p"])
         costs_r = float(request.form["costs_r"])
@@ -203,7 +210,31 @@ def create_plan(
         database.commit_changes()
 
         plan = plan_repository.object_from_orm(plan_orm)
-        plan = use_cases.seek_approval(DatetimeService(), plan)
+
+        if plan_to_renew:
+            # check if there have been made modifications to the plan by the user
+            if (
+                (costs_p == plan_to_renew.costs_p)
+                and (costs_r == plan_to_renew.costs_r)
+                and (costs_a == plan_to_renew.costs_a)
+                and (prd_name == plan_to_renew.prd_name)
+                and (prd_unit == plan_to_renew.prd_unit)
+                and (prd_amount == plan_to_renew.prd_amount)
+                and (description == plan_to_renew.description)
+                and (timeframe == plan_to_renew.timeframe)
+            ):
+                plan_modifications = False
+            else:
+                plan_modifications = True
+
+            plan_renewal = entities.PlanRenewal(
+                original_plan=plan_to_renew,
+                modifications=plan_modifications,
+            )
+        else:
+            plan_renewal = None
+
+        plan = use_cases.seek_approval(DatetimeService(), plan, plan_renewal)
         database.commit_changes()
         if plan.approved:
             social_accounting = accounting_repository.get_by_id(1)
@@ -218,7 +249,7 @@ def create_plan(
             flash(f"Plan nicht genehmigt. Grund:\n{plan.approval_reason}")
             return redirect("/company/create_plan")
 
-    return render_template("company/create_plan.html")
+    return render_template("company/create_plan.html", plan_to_renew=plan_to_renew)
 
 
 @main_company.route("/company/my_plans", methods=["GET", "POST"])

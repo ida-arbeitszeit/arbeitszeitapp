@@ -99,6 +99,7 @@ class Plan:
         costs_r: Decimal,
         costs_a: Decimal,
         prd_name: str,
+        prd_unit: str,
         prd_amount: int,
         description: str,
         timeframe: Decimal,
@@ -107,7 +108,9 @@ class Plan:
         approval_reason: str,
         approve: Callable[[bool, str, datetime], None],
         expired: bool,
+        renewed: bool,
         set_as_expired: Callable[[], None],
+        set_as_renewed: Callable[[], None],
     ) -> None:
         self.id = id
         self.plan_creation_date = plan_creation_date
@@ -116,6 +119,7 @@ class Plan:
         self.costs_r = costs_r
         self.costs_a = costs_a
         self.prd_name = prd_name
+        self.prd_unit = prd_unit
         self.prd_amount = prd_amount
         self.description = description
         self.timeframe = timeframe
@@ -124,7 +128,9 @@ class Plan:
         self.approval_reason = approval_reason
         self._approve_call = approve
         self.expired = expired
+        self.renewed = renewed
         self._set_as_expired = set_as_expired
+        self._set_as_renewed = set_as_renewed
 
     def approve(self, approval_date: datetime) -> None:
         self.approved = True
@@ -137,6 +143,16 @@ class Plan:
     def set_as_expired(self) -> None:
         self.expired = True
         self._set_as_expired()
+
+    def set_as_renewed(self) -> None:
+        self.renewed = True
+        self._set_as_renewed()
+
+
+@dataclass
+class PlanRenewal:
+    original_plan: Plan
+    modifications: bool
 
 
 class ProductOffer:

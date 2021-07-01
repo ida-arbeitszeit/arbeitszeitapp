@@ -74,6 +74,7 @@ class Plan(UserMixin, db.Model):
     approval_date = db.Column(db.DateTime, nullable=True, default=None)
     approval_reason = db.Column(db.String(1000), nullable=True, default=None)
     expired = db.Column(db.Boolean, nullable=False, default=False)
+    renewed = db.Column(db.Boolean, nullable=False, default=False)
 
     offers = db.relationship("Offer", lazy="dynamic", backref="plan")
 

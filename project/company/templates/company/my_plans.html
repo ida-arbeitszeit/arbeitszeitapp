@@ -4,7 +4,8 @@
 
 <div class="box has-background-info-light has-text-info-dark">
     <div class="icon"><i class="fas fa-info-circle"></i></div>
-    <p>Hier sind deine genehmigten Pläne.</p>
+    <p>Hier sind deine genehmigten Pläne.<br>Aktuelle Pläne kannst du im Marketplace anbieten, abgelaufene Pläne kannst
+        du erneuern.</p>
 </div>
 <h1 class="title">
     Aktuelle Pläne
@@ -70,6 +71,7 @@
                 <th>Beschreibung</th>
                 <th>Einheiten</th>
                 <th>Plan vom</th>
+                <th><abbr title="Nur einmal möglich.">Plan erneuern</abbr></th>
             </tr>
         </thead>
         <tbody>
@@ -80,6 +82,15 @@
                 <td>{{ plan.description }}</td>
                 <td>{{ plan.prd_amount }}</td>
                 <td>{{ plan.plan_creation_date.strftime("%d.%m.%y") }}</td>
+
+                {% if plan.renewed %}
+                <td><a><i class="{{ 'fas fa-redo not-active' }}"></i></a>
+                </td>
+                {% else %}
+                <td><a href="{{ url_for('main_company.create_plan', renew=plan.id) }}"><i
+                            class="{{ 'fas fa-redo' }}"></i></a>
+                </td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>

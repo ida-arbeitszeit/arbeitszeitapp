@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Union, List
+from typing import Union, List, Optional
 from decimal import Decimal
 from enum import Enum
 import datetime
@@ -12,10 +12,9 @@ from arbeitszeit.entities import (
     Member,
     Plan,
     ProductOffer,
-    Purchase,
     Account,
     SocialAccounting,
-    Transaction,
+    PlanRenewal,
 )
 from arbeitszeit import errors
 
@@ -148,6 +147,7 @@ def add_worker_to_company(
 def seek_approval(
     datetime_service: DatetimeService,
     plan: Plan,
+    plan_renewal: Optional[PlanRenewal],
 ) -> Plan:
     """Company seeks plan approval from Social Accounting."""
     # This is just a place holder
@@ -155,6 +155,8 @@ def seek_approval(
     approval_date = datetime_service.now()
     if is_approval:
         plan.approve(approval_date)
+        if plan_renewal and (plan_renewal.modifications == False):
+            plan_renewal.original_plan.set_as_renewed()
     else:
         plan.deny("Some reason", approval_date)
     return plan

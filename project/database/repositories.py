@@ -251,6 +251,7 @@ class PlanRepository(repositories.PlanRepository):
             costs_r=plan.costs_r,
             costs_a=plan.costs_a,
             prd_name=plan.prd_name,
+            prd_unit=plan.prd_unit,
             prd_amount=plan.prd_amount,
             description=plan.description,
             timeframe=plan.timeframe,
@@ -261,7 +262,9 @@ class PlanRepository(repositories.PlanRepository):
                 plan, decision, reason, approval_date
             ),
             expired=plan.expired,
+            renewed=plan.renewed,
             set_as_expired=lambda: setattr(plan, "expired", True),
+            set_as_renewed=lambda: setattr(plan, "renewed", True),
         )
 
     def object_to_orm(self, plan: entities.Plan) -> Plan:

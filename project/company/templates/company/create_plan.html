@@ -5,6 +5,20 @@
 
 <div class="columns is-centered">
   <div class="column is-three-fifths">
+
+    {% if plan_to_renew %}
+
+    <div class="box has-background-info-light has-text-info-dark">
+      <div class="icon"><i class="fas fa-info-circle"></i></div>
+      <p>
+        Planerneuerung. <br><br>
+        Wenn du keine Änderungen vornimmst, wird der Plan automatisch erneuert, ansonsten wird eventuell ein
+        Genehmigungsprozess nötig.
+      </p>
+    </div>
+
+    {% else %}
+
     <div class="box has-background-info-light has-text-info-dark">
       <div class="icon"><i class="fas fa-info-circle"></i></div>
       <p>
@@ -18,6 +32,8 @@
       </p>
     </div>
 
+    {% endif %}
+
     {% with messages = get_flashed_messages() %}
     {% if messages %}
     {% for message in messages %}
@@ -30,7 +46,8 @@
       <div class="field">
         <div class="control">
           <label for="name">Name des Produkts</label>
-          <input class="input is-large" , type="text" , name="prd_name" required>
+          <input class="input is-large" , type="text" , name="prd_name" ,
+            value="{{ plan_to_renew.prd_name if plan_to_renew else '' }}" required>
         </div>
       </div>
       <div class="block"></div>
@@ -40,7 +57,8 @@
       <div class="field">
         <div class="control">
           <label for="description">Beschreibung des Produkts</label>
-          <textarea class="textarea is-large" , name="description" required></textarea>
+          <textarea class="textarea is-large" , name="description"
+            required>{{ plan_to_renew.description if plan_to_renew else '' }}</textarea>
           <p class="help">(Verfügbarkeit, Kontaktmöglichkeiten, etc.)</p>
         </div>
 
@@ -52,8 +70,9 @@
 
       <div class="field">
         <div class="control">
-          <label for="prd_amount">Planungszeitraum:</label>
-          <input class="input is-large" type="number" name="timeframe" min=1 max=365 value=1 required>
+          <label for="timeframe">Planungszeitraum:</label>
+          <input class="input is-large" type="number" name="timeframe" min=1 max=365
+            value="{{ plan_to_renew.timeframe if plan_to_renew else 1 }}" required>
           <p class="help">(Wieviele Tage umfasst der Planungszeitraum?)</p>
         </div>
       </div>
@@ -64,8 +83,9 @@
 
       <div class="field">
         <div class="control">
-          <label for="description">Kleinste Abgabeeinheit</label>
-          <textarea class="input is-large" , type="text" , name="prd_unit" required>Kg</textarea>
+          <label for="prd_unit">Kleinste Abgabeeinheit</label>
+          <input class="input is-large" , type="text" , name="prd_unit" ,
+            value="{{ plan_to_renew.prd_unit if plan_to_renew else 'Kg' }}" , required>
           <p class="help">(1 Packung à 100 Stück, 1 Kilogramm, 1 Flasche à 0,5 Liter, 1 Meter, Unterrichtseinheit à 1,5
             Stunde,
             etc.)</p>
@@ -80,7 +100,8 @@
       <div class="field">
         <div class="control">
           <label for="prd_amount">Menge:</label>
-          <input class="input is-large" type="number" name="prd_amount" min=1 value=1 required>
+          <input class="input is-large" type="number" name="prd_amount" min=1
+            value="{{ plan_to_renew.prd_amount if plan_to_renew else 1 }}" required>
           <p class="help">(Wieviele Einheiten werden produziert und verkauft?)</p>
         </div>
       </div>
@@ -90,8 +111,9 @@
 
       <div class="field">
         <div class="control">
-          <label for="prd_amount">Kosten für Produktionsmittel:</label>
-          <input class="input is-large" type="number" name="costs_p" value=0 required>
+          <label for="costs_p">Kosten für Produktionsmittel:</label>
+          <input class="input is-large" type="number" name="costs_p"
+            value="{{ plan_to_renew.costs_p if plan_to_renew else 0 }}" required>
         </div>
       </div>
       <div class="block"></div>
@@ -100,8 +122,9 @@
 
       <div class="field">
         <div class="control">
-          <label for="prd_amount">Kosten für Roh- und Hilfsstoffe:</label>
-          <input class="input is-large" type="number" name="costs_r" value=0 required>
+          <label for="costs_r">Kosten für Roh- und Hilfsstoffe:</label>
+          <input class="input is-large" type="number" name="costs_r"
+            value="{{ plan_to_renew.costs_r if plan_to_renew else 0 }}" required>
         </div>
       </div>
       <div class="block"></div>
@@ -110,8 +133,9 @@
 
       <div class="field">
         <div class="control">
-          <label for="prd_amount">Enthaltene Arbeitsstunden:</label>
-          <input class="input is-large" type="number" name="costs_a" value=0 required>
+          <label for="costs_a">Enthaltene Arbeitsstunden:</label>
+          <input class="input is-large" type="number" name="costs_a"
+            value="{{ plan_to_renew.costs_a if plan_to_renew else 0 }}" required>
         </div>
       </div>
       <div class="block"></div>
