@@ -388,73 +388,75 @@ def my_accounts():
     )
 
 
-@main_company.route("/company/transfer", methods=["GET", "POST"])
+@main_company.route("/company/transfer_to_worker", methods=["GET", "POST"])
 @login_required
 @with_injection
-def transfer(
+def transfer_to_worker(
     transaction_repository: TransactionRepository,
     company_repository: CompanyRepository,
     member_repository: MemberRepository,
     company_worker_repository: CompanyWorkerRepository,
+):
+    if request.method == "POST":
+        sender = company_repository.get_by_id(current_user.id)
+        receiver = member_repository.get_member_by_id(request.form["member_id"])
+        amount = Decimal(request.form["amount"])
+
+        try:
+            use_cases.send_work_certificates_to_worker(
+                company_worker_repository,
+                transaction_repository,
+                sender,
+                receiver,
+                amount,
+            )
+            database.commit_changes()
+            flash("Erfolgreich überwiesen.")
+        except errors.WorkerNotAtCompany:
+            flash("Mitglied ist nicht in diesem Betrieb beschäftigt.")
+        except errors.WorkerDoesNotExist:
+            flash("Mitglied existiert nicht.")
+
+    return render_template("company/transfer_to_worker.html")
+
+
+@main_company.route("/company/transfer_to_company", methods=["GET", "POST"])
+@login_required
+@with_injection
+def transfer_to_company(
+    transaction_repository: TransactionRepository,
+    company_repository: CompanyRepository,
     plan_repository: PlanRepository,
 ):
     if request.method == "POST":
-        transfer_type = request.form["transfer_type"]
-        if transfer_type == "transfer_to_worker":
-            sender = company_repository.get_by_id(current_user.id)
-            receiver = member_repository.get_member_by_id(request.form["member_id"])
-            amount = Decimal(request.form["amount"])
-
-            try:
-                use_cases.send_work_certificates_to_worker(
-                    company_worker_repository,
-                    transaction_repository,
-                    sender,
-                    receiver,
-                    amount,
-                )
-                database.commit_changes()
-                flash("Erfolgreich überwiesen.", "transfer_to_worker")
-            except errors.WorkerNotAtCompany:
-                flash(
-                    "Mitglied ist nicht in diesem Betrieb beschäftigt.",
-                    "transfer_to_worker",
-                )
-            except errors.WorkerDoesNotExist:
-                flash("Mitglied existiert nicht.", "transfer_to_worker")
-
-        elif transfer_type == "transfer_to_company":
-            sender = company_repository.get_by_id(current_user.id)
-            plan = plan_repository.get_by_id(request.form["plan_id"])
-            receiver = company_repository.get_by_id(request.form["company_id"])
-            amount = Decimal(request.form["amount"])
-            purpose = (
-                "means_of_prod"
-                if request.form["category"] == "Produktionsmittel"
-                else "raw_materials"
+        sender = company_repository.get_by_id(current_user.id)
+        plan = plan_repository.get_by_id(request.form["plan_id"])
+        receiver = company_repository.get_by_id(request.form["company_id"])
+        amount = Decimal(request.form["amount"])
+        purpose = (
+            "means_of_prod"
+            if request.form["category"] == "Produktionsmittel"
+            else "raw_materials"
+        )
+        try:
+            use_cases.pay_means_of_production(
+                transaction_repository,
+                sender,
+                receiver,
+                plan,
+                amount,
+                purpose,
             )
-            try:
-                use_cases.pay_means_of_production(
-                    transaction_repository,
-                    sender,
-                    receiver,
-                    plan,
-                    amount,
-                    purpose,
-                )
-                database.commit_changes()
-                flash("Erfolgreich bezahlt.")
-            except errors.CompanyIsNotPlanner:
-                flash(
-                    "Der angegebene Plan gehört nicht zum angegebenen Betrieb.",
-                    "transfer_to_company",
-                )
-            except errors.CompanyDoesNotExist:
-                flash("Der Betrieb existiert nicht.", "transfer_to_company")
-            except errors.PlanDoesNotExist:
-                flash("Der Plan existiert nicht.", "transfer_to_company")
+            database.commit_changes()
+            flash("Erfolgreich bezahlt.")
+        except errors.CompanyIsNotPlanner:
+            flash("Der angegebene Plan gehört nicht zum angegebenen Betrieb.")
+        except errors.CompanyDoesNotExist:
+            flash("Der Betrieb existiert nicht.")
+        except errors.PlanDoesNotExist:
+            flash("Der Plan existiert nicht.")
 
-    return render_template("company/transfer.html")
+    return render_template("company/transfer_to_company.html")
 
 
 @main_company.route("/company/my_offers")
