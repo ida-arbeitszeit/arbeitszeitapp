@@ -26,12 +26,16 @@
             <tr>
                 <th>Plan-ID</th>
                 <th>Produkt</th>
-                <th>Beschreibung</th>
-                <th>Einheiten</th>
+                <th>Beschr.</th>
+                <th><abbr title="Kosten Produktionsmittel">p</abbr></th>
+                <th><abbr title="Kosten Rohstoffe">r</abbr></th>
+                <th><abbr title="Kosten Arbeit">a</abbr></th>
+                <th><abbr title="Einheiten">Einh.</abbr></th>
+                <th>Stückpr.</th>
                 <th>Plan vom</th>
-                <th>Ende Planzeitraum</th>
-                <th>Ende in</th>
-                <th>Produkt anbieten</th>
+                <th>Plan-Ende</th>
+                <th>Endet in</th>
+                <th><abbr title="Produkt im Marketplace anbieten.">Anb.</abbr></th>
             </tr>
         </thead>
         <tbody>
@@ -39,8 +43,12 @@
             <tr>
                 <td>{{ plan.id }}</td>
                 <td>{{ plan.prd_name }}</td>
-                <td>{{ plan.description }}</td>
+                <td><abbr title="{{ plan.description }}">{{ plan.description[:5] }}...</abbr></td>
+                <td>{{ plan.costs_p }}</td>
+                <td>{{ plan.costs_r }}</td>
+                <td>{{ plan.costs_a }}</td>
                 <td>{{ plan.prd_amount }}</td>
+                <td>{{ (plan.costs_p + plan.costs_r + plan.costs_a)/plan.prd_amount }} Std.</td>
                 <td>{{ plan.plan_creation_date.strftime("%d.%m.%y") }}</td>
                 <td>{{ plan.expiration_date.strftime("%d.%m.%y") }}</td>
                 <td>{{ plan.expiration_relative }}</td>
@@ -69,7 +77,11 @@
                 <th>Plan-ID</th>
                 <th>Produkt</th>
                 <th>Beschreibung</th>
+                <th><abbr title="Kosten Produktionsmittel">p</abbr></th>
+                <th><abbr title="Kosten Rohstoffe">r</abbr></th>
+                <th><abbr title="Kosten Arbeit">a</abbr></th>
                 <th>Einheiten</th>
+                <th>Stückpreis</th>
                 <th>Plan vom</th>
                 <th><abbr title="Nur einmal möglich.">Plan erneuern</abbr></th>
             </tr>
@@ -80,7 +92,11 @@
                 <td>{{ plan.id }}</td>
                 <td>{{ plan.prd_name }}</td>
                 <td>{{ plan.description }}</td>
+                <td>{{ plan.costs_p }}</td>
+                <td>{{ plan.costs_r }}</td>
+                <td>{{ plan.costs_a }}</td>
                 <td>{{ plan.prd_amount }}</td>
+                <td>{{ (plan.costs_p + plan.costs_r + plan.costs_a)/plan.prd_amount }} Std.</td>
                 <td>{{ plan.plan_creation_date.strftime("%d.%m.%y") }}</td>
 
                 {% if plan.renewed %}

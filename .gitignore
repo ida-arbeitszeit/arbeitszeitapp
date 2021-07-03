@@ -1,6 +1,7 @@
 # my own
 my_database_key.py
 *.pyc
+*.png
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

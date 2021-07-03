@@ -26,13 +26,10 @@
   <table class="table is-fullwidth">
     <thead>
       <tr>
-        <th><abbr title="Angebot-ID">ID</abbr></th>
+        <th>Plan-ID</th>
         <th>Produktname</th>
         <th>Beschreibung</th>
-        <th><abbr title="Kosten Produktionsmittel">p</abbr></th>
-        <th><abbr title="Kosten Rohstoffe">r</abbr></th>
-        <th><abbr title="Kosten Arbeit">a</abbr></th>
-        <th>Preis</th>
+        <th>Stückpreis</th>
         <th><abbr title="Noch vorhanden">Vorh.</abbr></th>
         <th><abbr title="Löschen">Del.</abbr></th>
         <th><abbr title="Offline-Verkauf mit Code">Offl.-Verk.</abbr></th>
@@ -41,13 +38,10 @@
     <tbody>
       {% for offer in offers %}
       <tr>
-        <td>{{ offer.id }}</td>
+        <td>{{ offer.plan.id }}</td>
         <td>{{ offer.name }}</td>
         <td>{{ offer.description }}</td>
-        <td>{{ offer.plan.costs_p }}</td>
-        <td>{{ offer.plan.costs_r }}</td>
-        <td>{{ offer.plan.costs_a }}</td>
-        <td>{{ offer.plan.costs_p + offer.plan.costs_r + offer.plan.costs_a }} Std.</td>
+        <td>{{ (offer.plan.costs_p + offer.plan.costs_r + offer.plan.costs_a)/offer.plan.prd_amount }} Std.</td>
         <td>{{ offer.amount_available }}</td>
         <td><a href="{{ url_for('main_company.delete_offer', id=offer.id) }}"><u>Del.</u></a></td>
         <td><a href="{{ url_for('main_company.sell_offer', id=offer.id) }}"><u>Offl.-Verk.</u></a>
