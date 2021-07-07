@@ -193,7 +193,7 @@ class PurchaseRepository(repositories.PurchaseRepository):
             ),
             kaufpreis=float(purchase.price),
             amount=purchase.amount,
-            purpose=purchase.purpose,
+            purpose=purchase.purpose.value,
         )
 
     def add(self, purchase: entities.Purchase) -> None:

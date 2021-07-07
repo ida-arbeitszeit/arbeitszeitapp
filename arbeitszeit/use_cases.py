@@ -14,6 +14,7 @@ from arbeitszeit.entities import (
     Plan,
     PlanRenewal,
     ProductOffer,
+    PurposesOfPurchases,
     SocialAccounting,
 )
 from arbeitszeit.purchase_factory import PurchaseFactory
@@ -23,8 +24,6 @@ from arbeitszeit.repositories import (
     TransactionRepository,
 )
 from arbeitszeit.transaction_factory import TransactionFactory
-
-from .entities import PurposesOfPurchases
 
 
 @inject
@@ -74,7 +73,7 @@ class PurchaseProduct:
                 -price_total,
             )
         else:
-            if purpose == "means_of_prod":
+            if purpose.value == "means_of_prod":
                 adjust_balance(
                     buyer.means_account,
                     -price_total,
@@ -92,7 +91,7 @@ class PurchaseProduct:
         if isinstance(buyer, Member):
             account_from = buyer.account
         else:
-            if purpose == "means_of_prod":
+            if purpose.value == "means_of_prod":
                 account_from = buyer.means_account
             else:
                 account_from = buyer.raw_material_account

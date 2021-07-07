@@ -12,7 +12,7 @@ from project.database.repositories import (
     PurchaseRepository,
     TransactionRepository,
 )
-from arbeitszeit import use_cases
+from arbeitszeit import use_cases, entities
 
 
 main_member = Blueprint(
@@ -85,7 +85,7 @@ def buy(
     buyer = member_repository.get_member_by_id(current_user.id)
 
     if request.method == "POST":  # if user buys
-        purpose = "consumption"
+        purpose = entities.PurposesOfPurchases.consumption
         amount = int(request.form["amount"])
         purchase_product(
             purchase_repository,
