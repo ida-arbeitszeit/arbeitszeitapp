@@ -1,3 +1,9 @@
 /* .table__wrapper {
   overflow-x: auto;
 } */
+
+.not-active {
+  pointer-events: none;
+  cursor: not-allowed;
+  opacity: 0.6;
+}

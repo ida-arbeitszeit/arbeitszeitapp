@@ -7,39 +7,42 @@ company{% macro start_hilfe() %}
     </h1>
     <div class="block content has-text-left">
       <ul>
-        <li>Diese Plattform ist ein gemeinschaftlicher Marktplatz, um Produkte
-          und Dienstleistungen auszutauschen.</li>
-        <li>Teilnehmer bekommen für geleistete Arbeit Arbeitszeitgeld,
-          mit dem sie Angebote bezahlen können.</li>
-        <li>Produkte kosten soviel Arbeitszeit,
-          wie sie zur Herstellung brauchen. Je mehr Arbeitszeit in einem Produkt steckt, desto "teurer" wird es.</li>
-        <li>Einzige Einnahmequelle ist die geleistete Arbeit, jenseits davon ist
-          kein Profit möglich. Diese Plattform richtet sich deshalb besonders
-          an Genossenschaften, Kooperativen und nicht-kommerzielle Anbieter.</li>
+        <li>Dies ist eine Plattform für solidarisches Wirtschaften.</li>
+        <li>Produkte und Dienstleistungen werden ausgetauscht, wobei die gemeinsame „Währung“ die Arbeitszeit ist.</li>
+        <li>ArbeiterInnen bekommen für geleistete Arbeit Arbeitszeitgeld, mit dem sie Produkte erwerben können.</li>
+        <li>Produkte kosten soviel Arbeitszeit, wie sie zur Herstellung benötigen.</li>
+        <li>Die Plattform richtet sich an Kollektivbetriebe, Genossenschaften und sonstige Betriebe und Einzelpersonen,
+          die eine Alternative zu kapitalistischem Markt, Privateigentum an Produktionsmitteln und Geld suchen.</li>
       </ul>
     </div>
 
     <h1 class="title">
-      Wie funktioniert es?
+      Was muss ich als ArbeiterIn tun?
     </h1>
 
     <div class="block content has-text-left">
       <ul>
-        <li>Es gibt "Mitglieder"-Accounts und "Betriebe"-Accounts.</li>
-        <ul>
-          <li>Als Arbeiter und Konsument brauchst du einen <strong>Mitglieder-Account</strong>.<br>
-            Für deine geleistete Arbeit bekommst du von deinem Betrieb Arbeitszeit überwiesen,
-            die du gegen Dienstleistungen oder Produkte
-            eintauschen kannst. </li>
-          <li>Wer Dienstleistungen oder Produkte anbieten will,
-            braucht einen <strong>Betriebe-Account</strong>.<br>
-            Mit diesem Account kannst du Mitarbeiter mit Hilfe
-            ihrer Mitglieder-ID registrieren und berechnen, wieviel Arbeit in deinen Produkten steckt.</li>
-          <li>Gelegenheitsverkäufer, Freelancer oder Solo-Selbstständige
-            registrieren sowohl einen Mitglieder- als auch
-            einen Betriebe-Account und fügen sich selbst als (einzigen) Mitarbeiter hinzu.</li>
-        </ul>
+        <li>Als ArbeiterIn brauchst du nur einen „Nutzer-Account“. Auf diesen Account wird dir vom Betrieb das
+          Arbeitszeitgeld überwiesen und du kannst Produkte auf dem gemeinsamen Marktplatz suchen und erwerben.</li>
       </ul>
+    </div>
+
+    <h1 class="title">
+      Was muss ich als Betrieb/Kollektiv tun?
+    </h1>
+
+    <div class="block content has-text-left">
+      <ol>
+        <li>Stelle dich und deinen Betrieb beim Plenum vor. </li>
+        <li>Registriere in der App einen „Betriebe-Account“.</li>
+        <li>Veröffentliche in der App einen Plan für jedes Produkt, das du anbieten möchtest. In diesem Plan musst du
+          angeben, wie viel Arbeitszeit die Herstellung dieses Produkts kostet.</li>
+        <li>Du erhältst Arbeitszeit-Guthaben, um die Beschäftigten zu bezahlen und ein Konto, um Produktionsmittel von
+          anderen teilnehmenden Betrieben zu erwerben.</li>
+        <li>Veröffentliche das Produkt auf unserem Marktplatz oder wo immer du willst (deine Kunden brauchen nur
+          Arbeitszeitgeld auf ihrem Konto und den Link zum Produkt). Der „Preis“ des Produktes entspricht immer genau
+          der im Plan angegebenen Arbeitszeit.</li>
+      </ol>
     </div>
 
 
@@ -114,12 +117,12 @@ company{% macro start_hilfe() %}
   <table class="table is-fullwidth">
     <thead>
       <tr>
-        <th><abbr title="Angebot-ID">ID</abbr></th>
+        <th>Plan-ID</th>
         <th>Produktname</th>
         <th>Betrieb</th>
         <th>Mail</th>
         <th>Beschreibung</th>
-        <th>Preis</th>
+        <th>Stückpreis</th>
         <th><abbr title="Noch vorhanden">Vorh.</abbr> </th>
         <th>Kaufen</th>
       </tr>
@@ -127,21 +130,21 @@ company{% macro start_hilfe() %}
     <tbody>
       {% for res in results %}
       <tr>
-        <td>{{ res.id }}</td>
+        <td>{{ res.plan.id }}</td>
         <td>{{ res.name }}</td>
         <td>{{ res.plan.planner }}</td>
         <td>
-          <a href="mailto:{{ XXX }}">
-            <u><span class="icon has-text-grey"><i class="far fa-envelope"></i></span></u>
+          <a href="mailto:{{ res.plan.company.email }}">
+            <u><span class="icon"><i class="far fa-envelope"></i></span></u>
           </a>
         </td>
         <td>{{ res.description }}</td>
-        <td>{{ res.plan.costs_p + res.plan.costs_r + res.plan.costs_a|round(2) }} Std.
+        <td>{{ ((res.plan.costs_p + res.plan.costs_r + res.plan.costs_a)/res.plan.prd_amount)|round(2) }} Std.
         </td>
         <td>{{ res.amount_available }}</td>
         <td>
           <a href="{{ url_for('%s.buy' % (request.blueprint), id=res.id) }}">
-            <u><u><span class="icon has-text-grey"><i class="fas fa-shopping-cart"></i></span></u></u>
+            <u><u><span class="icon"><i class="fas fa-shopping-cart"></i></span></u></u>
           </a>
         </td>
       </tr>

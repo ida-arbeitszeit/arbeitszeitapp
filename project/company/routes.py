@@ -5,7 +5,7 @@ from flask import Blueprint, flash, redirect, render_template, request, session,
 from flask_login import current_user, login_required
 from sqlalchemy.sql import desc
 
-from arbeitszeit import errors, use_cases
+from arbeitszeit import errors, use_cases, entities
 from arbeitszeit.transaction_factory import TransactionFactory
 from arbeitszeit.datetime_service import DatetimeService
 from project import database
@@ -141,7 +141,6 @@ def buy(
     purchase_repository: PurchaseRepository,
     transaction_repository: TransactionRepository,
 ):
-    # offer = Offer.query.filter_by(id=id).first()
     product_offer = product_offer_repository.get_by_id(id=id)
     buyer = company_repository.get_by_id(current_user.id)
 
@@ -152,39 +151,15 @@ def buy(
             else "raw_materials"
         )
         amount = int(request.form["amount"])
-        purchase, transaction = purchase_product(product_offer, amount, purpose, buyer)
-        purchase_repository.add(purchase)
-        transaction_repository.add(transaction)
+        purchase_product(
+            purchase_repository,
+            transaction_repository,
+            product_offer,
+            amount,
+            purpose,
+            buyer,
+        )
         database.commit_changes()
-
-        # # reduce my balance
-        # price_total = purchase.price * purchase.amount
-        # if purpose == "means_of_prod":
-        #     use_cases.adjust_balance(
-        #         buyer.means_account,
-        #         -price_total,
-        #     )
-        # elif purpose == "raw_materials":
-        #     use_cases.adjust_balance(
-        #         buyer.raw_material_account,
-        #         -price_total,
-        #     )
-
-        # # increase balance of seller prd account
-        # use_cases.adjust_balance(product_offer.provider.product_account, price_total)
-        # database.commit_changes()
-
-        # # register transaction
-        # transaction = transaction_factory.create_transaction(
-        #     account_from=buyer.means_account
-        #     if purpose == "means_of_prod"
-        #     else buyer.raw_material_account,
-        #     account_to=product_offer.provider.product_account,
-        #     amount=price_total,
-        #     purpose=f"Angebot-Id: {product_offer.id}",
-        # )
-        # transaction_repository.add(transaction)
-        # database.commit_changes()
 
         flash(f"Kauf von '{amount}'x '{product_offer.name}' erfolgreich!")
         return redirect("/company/suchen")
@@ -201,6 +176,13 @@ def create_plan(
     transaction_repository: TransactionRepository,
     transaction_factory: TransactionFactory,
 ):
+
+    if request.args.get("renew"):
+        plan_id = request.args.get("renew")
+        plan_to_renew = plan_repository.get_by_id(plan_id)
+    else:
+        plan_to_renew = None
+
     if request.method == "POST":
         costs_p = float(request.form["costs_p"])
         costs_r = float(request.form["costs_r"])
@@ -228,7 +210,31 @@ def create_plan(
         database.commit_changes()
 
         plan = plan_repository.object_from_orm(plan_orm)
-        plan = use_cases.seek_approval(DatetimeService(), plan)
+
+        if plan_to_renew:
+            # check if there have been made modifications to the plan by the user
+            if (
+                (costs_p == plan_to_renew.costs_p)
+                and (costs_r == plan_to_renew.costs_r)
+                and (costs_a == plan_to_renew.costs_a)
+                and (prd_name == plan_to_renew.prd_name)
+                and (prd_unit == plan_to_renew.prd_unit)
+                and (prd_amount == plan_to_renew.prd_amount)
+                and (description == plan_to_renew.description)
+                and (timeframe == plan_to_renew.timeframe)
+            ):
+                plan_modifications = False
+            else:
+                plan_modifications = True
+
+            plan_renewal = entities.PlanRenewal(
+                original_plan=plan_to_renew,
+                modifications=plan_modifications,
+            )
+        else:
+            plan_renewal = None
+
+        plan = use_cases.seek_approval(DatetimeService(), plan, plan_renewal)
         database.commit_changes()
         if plan.approved:
             social_accounting = accounting_repository.get_by_id(1)
@@ -243,7 +249,7 @@ def create_plan(
             flash(f"Plan nicht genehmigt. Grund:\n{plan.approval_reason}")
             return redirect("/company/create_plan")
 
-    return render_template("company/create_plan.html")
+    return render_template("company/create_plan.html", plan_to_renew=plan_to_renew)
 
 
 @main_company.route("/company/my_plans", methods=["GET", "POST"])
@@ -367,7 +373,7 @@ def my_accounts():
             if received_trans.sending_account.account_type.name == "accounting":
                 sender_name = "Öff. Buchhaltung"
             elif received_trans.sending_account.account_type.name == "member":
-                sender_name = f"Mitglied: {received_trans.sending_account.member.name} (received_trans.sending_account.member.id)"
+                sender_name = f"Mitglied: {received_trans.sending_account.member.name} ({received_trans.sending_account.member.id})"
             elif received_trans.sending_account.account_type.name in [
                 "p",
                 "r",
@@ -413,18 +419,75 @@ def my_accounts():
     )
 
 
-@main_company.route("/company/transfer", methods=["GET", "POST"])
+@main_company.route("/company/transfer_to_worker", methods=["GET", "POST"])
 @login_required
-def transfer():
+@with_injection
+def transfer_to_worker(
+    transaction_repository: TransactionRepository,
+    company_repository: CompanyRepository,
+    member_repository: MemberRepository,
+    company_worker_repository: CompanyWorkerRepository,
+):
     if request.method == "POST":
-        # to implement: check in html, if user exists and if worker in company
-        receiver_id = request.form["member_id"]
+        sender = company_repository.get_by_id(current_user.id)
+        receiver = member_repository.get_member_by_id(request.form["member_id"])
         amount = Decimal(request.form["amount"])
-        sender = Company.query.get(current_user.id)
-        receiver = Member.query.filter_by(id=receiver_id).first()
-        database.send_wages(sender, receiver, amount)
 
-    return render_template("company/transfer.html")
+        try:
+            use_cases.send_work_certificates_to_worker(
+                company_worker_repository,
+                transaction_repository,
+                sender,
+                receiver,
+                amount,
+            )
+            database.commit_changes()
+            flash("Erfolgreich überwiesen.")
+        except errors.WorkerNotAtCompany:
+            flash("Mitglied ist nicht in diesem Betrieb beschäftigt.")
+        except errors.WorkerDoesNotExist:
+            flash("Mitglied existiert nicht.")
+
+    return render_template("company/transfer_to_worker.html")
+
+
+@main_company.route("/company/transfer_to_company", methods=["GET", "POST"])
+@login_required
+@with_injection
+def transfer_to_company(
+    transaction_repository: TransactionRepository,
+    company_repository: CompanyRepository,
+    plan_repository: PlanRepository,
+):
+    if request.method == "POST":
+        sender = company_repository.get_by_id(current_user.id)
+        plan = plan_repository.get_by_id(request.form["plan_id"])
+        receiver = company_repository.get_by_id(request.form["company_id"])
+        amount = Decimal(request.form["amount"])
+        purpose = (
+            "means_of_prod"
+            if request.form["category"] == "Produktionsmittel"
+            else "raw_materials"
+        )
+        try:
+            use_cases.pay_means_of_production(
+                transaction_repository,
+                sender,
+                receiver,
+                plan,
+                amount,
+                purpose,
+            )
+            database.commit_changes()
+            flash("Erfolgreich bezahlt.")
+        except errors.CompanyIsNotPlanner:
+            flash("Der angegebene Plan gehört nicht zum angegebenen Betrieb.")
+        except errors.CompanyDoesNotExist:
+            flash("Der Betrieb existiert nicht.")
+        except errors.PlanDoesNotExist:
+            flash("Der Plan existiert nicht.")
+
+    return render_template("company/transfer_to_company.html")
 
 
 @main_company.route("/company/my_offers")

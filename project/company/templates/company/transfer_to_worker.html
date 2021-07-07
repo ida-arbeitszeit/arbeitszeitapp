@@ -1,49 +1,41 @@
 {% extends "base_company.html" %}
 
 {% block content2 %}
-<div class="columns is-centered">
-    <div class="column is-half">
+<div class="columns has-text-left">
+    <div class="column is-two-third">
         <h1 class="title">
-            Überweisung an Mitarbeiter
+            Überweisung Arbeitszertifikate an Mitarbeiter
         </h1>
 
         <div class="content">
             <form method="post">
                 <div class="field has-addons">
-                    <div class="control is-expanded">
+                    <div class="control">
                         <input class="input" type="text" placeholder="Mitglieder-ID" , name="member_id" required>
                     </div>
-                    <div class="control is-expanded">
-                        <input class="input" type="text" placeholder="Summe" , name="amount" required>
+                    <div class="control">
+                        <input class="input" type="number" placeholder="Summe" , name="amount" required>
                     </div>
                     <div class="control">
-                        <button class="button is-primary" type="submit">Arbeitsgeld überweisen</button>
+                        <button class="button is-primary" name="transfer_type" value="transfer_to_worker"
+                            type="submit">Überweisen</button>
                     </div>
                 </div>
-                <p class="help">xxx.</p>
+                <p class="help">Mitarbeiter müssen unter <a href="{{url_for('main_company.arbeit')}}">"Arbeit"</a>
+                    registriert werden.</p>
             </form>
         </div>
         {% with messages = get_flashed_messages() %}
         {% if messages %}
         <div class="block"></div>
+        {% for message in messages %}
         <div class="notification is-danger">
-            {{ messages[0] }}
+            {{ message }}
         </div>
+        {% endfor %}
         {% endif %}
         {% endwith %}
 
-
-        <hr>
-        <br>
-
-        <br>
-
-        <div class="content">
-            <h1 class="title">
-                Überweisung an anderen Betrieb
-            </h1>
-
-        </div>
 
 
     </div>

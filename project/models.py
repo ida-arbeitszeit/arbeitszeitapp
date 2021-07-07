@@ -65,7 +65,7 @@ class Plan(UserMixin, db.Model):
     prd_name = db.Column(db.String(100), nullable=False)
     prd_unit = db.Column(db.String(100), nullable=False)
     prd_amount = db.Column(db.Integer, nullable=False)
-    description = db.Column(db.String(2000), nullable=False)
+    description = db.Column(db.String(5000), nullable=False)
     timeframe = db.Column(db.Numeric(), nullable=False)
     social_accounting = db.Column(
         db.Integer, db.ForeignKey("social_accounting.id"), nullable=False
@@ -74,6 +74,7 @@ class Plan(UserMixin, db.Model):
     approval_date = db.Column(db.DateTime, nullable=True, default=None)
     approval_reason = db.Column(db.String(1000), nullable=True, default=None)
     expired = db.Column(db.Boolean, nullable=False, default=False)
+    renewed = db.Column(db.Boolean, nullable=False, default=False)
 
     offers = db.relationship("Offer", lazy="dynamic", backref="plan")
 
@@ -129,7 +130,7 @@ class Offer(UserMixin, db.Model):
     plan_id = db.Column(db.Integer, db.ForeignKey("plan.id"), nullable=False)
     cr_date = db.Column(db.DateTime, nullable=False)
     name = db.Column(db.String(1000), nullable=False)
-    description = db.Column(db.String(1000), nullable=False)
+    description = db.Column(db.String(5000), nullable=False)
     amount_available = db.Column(db.Numeric(), nullable=False)
     active = db.Column(db.Boolean, nullable=False, default=True)
 
