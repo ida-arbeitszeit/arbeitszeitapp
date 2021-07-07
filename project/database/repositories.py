@@ -9,7 +9,6 @@ from injector import inject
 from arbeitszeit import entities, repositories
 from project.extensions import db
 from project.models import (
-    Angebote,
     Company,
     Kaeufe,
     Member,
@@ -90,9 +89,7 @@ class AccountingRepository:
     def object_from_orm(
         self, accounting_orm: SocialAccounting
     ) -> entities.SocialAccounting:
-        return entities.SocialAccounting(
-            id=accounting_orm.id,
-        )
+        return entities.SocialAccounting()
 
     def get_by_id(self, id: int) -> Optional[entities.SocialAccounting]:
         accounting_orm = SocialAccounting.query.filter_by(id=id).first()
@@ -165,9 +162,9 @@ class PlanRepository(repositories.PlanRepository):
     company_repository: CompanyRepository
 
     def _approve(self, plan, decision, reason, approval_date):
-        setattr(plan, "approved", decision)
-        setattr(plan, "approval_reason", reason)
-        setattr(plan, "approval_date", approval_date)
+        plan.approved = decision
+        plan.approval_reason = reason
+        plan.approval_date = approval_date
 
     def object_from_orm(self, plan: Plan) -> entities.Plan:
         return entities.Plan(

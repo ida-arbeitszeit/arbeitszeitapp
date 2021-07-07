@@ -4,19 +4,9 @@ from project import database
 
 
 class SocialAccounting:
-    """One social accounting institution, with id=1."""
+    """One social accounting institution."""
 
-    def __init__(self) -> None:
-        self.id = 1
-
-    def check_plan(self):
-        pass
-
-    def grant_credits_to_company(self):
-        pass
-
-    def publish_products(self):
-        pass
+    pass
 
 
 class Company:
@@ -48,7 +38,6 @@ class Member:
         return code
 
 
-# create one accounting instance in economy and in database
 accounting = SocialAccounting()
 company = Company()
 member = Member()
