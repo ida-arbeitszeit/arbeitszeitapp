@@ -6,29 +6,31 @@ from flask_login import current_user, login_required
 from sqlalchemy.sql import desc
 
 from arbeitszeit import errors, use_cases
+from arbeitszeit.transaction_factory import TransactionFactory
+from arbeitszeit.datetime_service import DatetimeService
 from project import database
 from project.database import with_injection
-from project.economy import company, accounting
+from project.economy import company
 from project.extensions import db
 from project.forms import ProductSearchForm
 from project.models import (
     Company,
-    Kaeufe,
     Member,
-    TransactionsAccountingToCompany,
-    TransactionsCompanyToCompany,
-    TransactionsCompanyToMember,
     Withdrawal,
     Plan,
     Offer,
 )
-from project.tables import (
-    WorkersTable,
-)
+
 from project.database.repositories import (
     CompanyRepository,
     MemberRepository,
     CompanyWorkerRepository,
+    PlanRepository,
+    AccountingRepository,
+    TransactionRepository,
+    ProductOfferRepository,
+    ProductOfferRepository,
+    PurchaseRepository,
 )
 
 main_company = Blueprint(
@@ -38,10 +40,15 @@ main_company = Blueprint(
 
 @main_company.route("/company/profile")
 @login_required
-def profile():
+@with_injection
+def profile(
+    company_repository: CompanyRepository,
+    company_worker_repository: CompanyWorkerRepository,
+):
     user_type = session["user_type"]
     if user_type == "company":
-        worker = database.get_workers(current_user.id)
+        company = company_repository.get_by_id(current_user.id)
+        worker = company_worker_repository.get_company_workers(company)
         if worker:
             having_workers = True
         else:
@@ -80,9 +87,10 @@ def arbeit(
         database.commit_changes()
         return redirect(url_for("main_company.arbeit"))
     elif request.method == "GET":
-        workers_list = database.get_workers(current_user.id)
-        workers_table = WorkersTable(workers_list, no_items="(Noch keine Mitarbeiter.)")
-        return render_template("company/work.html", workers_table=workers_table)
+        workers_list = company_worker_repository.get_company_workers(
+            company_repository.get_by_id(current_user.id)
+        )
+        return render_template("company/work.html", workers_list=workers_list)
 
 
 @main_company.route("/company/suchen", methods=["GET", "POST"])
@@ -91,9 +99,7 @@ def suchen():
     """search products in catalog."""
 
     search_form = ProductSearchForm(request.form)
-    # srch = database.SearchProducts()
     results = Offer.query.filter_by(active=True).all()
-    # results = srch.get_active_offers()
 
     if request.method == "POST":
         results = []
@@ -126,8 +132,18 @@ def suchen():
 
 @main_company.route("/company/buy/<int:id>", methods=["GET", "POST"])
 @login_required
-def buy(id):
-    offer = Offer.query.filter_by(id=id).first()
+@with_injection
+def buy(
+    id: int,
+    purchase_product: use_cases.PurchaseProduct,
+    product_offer_repository: ProductOfferRepository,
+    company_repository: CompanyRepository,
+    purchase_repository: PurchaseRepository,
+    transaction_repository: TransactionRepository,
+):
+    # offer = Offer.query.filter_by(id=id).first()
+    product_offer = product_offer_repository.get_by_id(id=id)
+    buyer = company_repository.get_by_id(current_user.id)
 
     if request.method == "POST":  # if company buys
         purpose = (
@@ -136,16 +152,55 @@ def buy(id):
             else "raw_materials"
         )
         amount = int(request.form["amount"])
-        company.buy_product("company", offer, amount, purpose, current_user.id)
-        flash(f"Kauf von '{amount}'x '{offer.name}' erfolgreich!")
+        purchase, transaction = purchase_product(product_offer, amount, purpose, buyer)
+        purchase_repository.add(purchase)
+        transaction_repository.add(transaction)
+        database.commit_changes()
+
+        # # reduce my balance
+        # price_total = purchase.price * purchase.amount
+        # if purpose == "means_of_prod":
+        #     use_cases.adjust_balance(
+        #         buyer.means_account,
+        #         -price_total,
+        #     )
+        # elif purpose == "raw_materials":
+        #     use_cases.adjust_balance(
+        #         buyer.raw_material_account,
+        #         -price_total,
+        #     )
+
+        # # increase balance of seller prd account
+        # use_cases.adjust_balance(product_offer.provider.product_account, price_total)
+        # database.commit_changes()
+
+        # # register transaction
+        # transaction = transaction_factory.create_transaction(
+        #     account_from=buyer.means_account
+        #     if purpose == "means_of_prod"
+        #     else buyer.raw_material_account,
+        #     account_to=product_offer.provider.product_account,
+        #     amount=price_total,
+        #     purpose=f"Angebot-Id: {product_offer.id}",
+        # )
+        # transaction_repository.add(transaction)
+        # database.commit_changes()
+
+        flash(f"Kauf von '{amount}'x '{product_offer.name}' erfolgreich!")
         return redirect("/company/suchen")
 
-    return render_template("company/buy.html", offer=offer)
+    return render_template("company/buy.html", offer=product_offer)
 
 
 @main_company.route("/company/create_plan", methods=["GET", "POST"])
 @login_required
-def create_plan():
+@with_injection
+def create_plan(
+    plan_repository: PlanRepository,
+    accounting_repository: AccountingRepository,
+    transaction_repository: TransactionRepository,
+    transaction_factory: TransactionFactory,
+):
     if request.method == "POST":
         costs_p = float(request.form["costs_p"])
         costs_r = float(request.form["costs_r"])
@@ -155,28 +210,32 @@ def create_plan():
         prd_amount = int(request.form["prd_amount"])
         description = request.form["description"]
         timeframe = int(request.form["timeframe"])
-        social_accounting_id = accounting.id
 
-        plan_details = (
-            costs_p,
-            costs_r,
-            costs_a,
-            prd_name,
-            prd_unit,
-            prd_amount,
-            description,
-            timeframe,
+        plan_orm = Plan(
+            plan_creation_date=DatetimeService().now(),
+            planner=current_user.id,
+            costs_p=costs_p,
+            costs_r=costs_r,
+            costs_a=costs_a,
+            prd_name=prd_name,
+            prd_unit=prd_unit,
+            prd_amount=prd_amount,
+            description=description,
+            timeframe=timeframe,
+            social_accounting=1,
         )
+        db.session.add(plan_orm)
+        database.commit_changes()
 
-        plan = database.planning(
-            planner_id=current_user.id,
-            plan_details=plan_details,
-            social_accounting_id=social_accounting_id,
-        )
-
-        plan = database.seek_approval(plan)
+        plan = plan_repository.object_from_orm(plan_orm)
+        plan = use_cases.seek_approval(DatetimeService(), plan)
+        database.commit_changes()
         if plan.approved:
-            database.grant_credit(plan)
+            social_accounting = accounting_repository.get_by_id(1)
+            use_cases.grant_credit(
+                plan, social_accounting, transaction_repository, transaction_factory
+            )
+            database.commit_changes()
             flash("Plan erfolgreich erstellt und genehmigt. Kredit wurde gewährt.")
             return redirect("/company/my_plans")
 
@@ -189,14 +248,47 @@ def create_plan():
 
 @main_company.route("/company/my_plans", methods=["GET", "POST"])
 @login_required
-def my_plans():
-    my_company = Company.query.get(current_user.id)
-    plans = (
-        my_company.plans.filter_by(approved=True)
-        .order_by(desc(Plan.plan_creation_date))
-        .all()
+@with_injection
+def my_plans(
+    plan_repository: PlanRepository,
+):
+    plans_orm = current_user.plans.filter_by(approved=True, expired=False).all()
+    plans = [plan_repository.object_from_orm(plan) for plan in plans_orm]
+
+    plans = use_cases.check_plans_for_expiration(plans)
+    database.commit_changes()
+
+    plans_orm_expired = current_user.plans.filter_by(approved=True, expired=True).all()
+    plans_expired = [
+        plan_repository.object_from_orm(plan) for plan in plans_orm_expired
+    ]
+
+    for plan in plans:
+        expiration_date = plan.plan_creation_date + datetime.timedelta(
+            days=int(plan.timeframe)
+        )
+        expiration_relative = DatetimeService().now() - expiration_date
+        seconds_until_exp = abs(expiration_relative.total_seconds())
+        # days
+        days = int(seconds_until_exp // 86400)
+        # remaining seconds
+        seconds_until_exp = seconds_until_exp - (days * 86400)
+        # hours
+        hours = int(seconds_until_exp // 3600)
+        # remaining seconds
+        seconds_until_exp = seconds_until_exp - (hours * 3600)
+        # minutes
+        minutes = int(seconds_until_exp // 60)
+
+        exp_string = f"{days} T. {hours} Std. {minutes} Min."
+        plan.expiration_relative = exp_string
+        plan.expiration_date = expiration_date
+
+    return render_template(
+        "company/my_plans.html",
+        plans=plans,
+        plans_expired=plans_expired,
     )
-    return render_template("company/my_plans.html", plans=plans)
 
 
 @main_company.route("/company/create_offer/<int:plan_id>", methods=["GET", "POST"])
@@ -209,7 +301,7 @@ def create_offer(plan_id):
 
         new_offer = Offer(
             plan_id=plan_id,
-            cr_date=datetime.datetime.now(),
+            cr_date=DatetimeService().now(),
             name=name,
             description=description,
             amount_available=prd_amount,
@@ -228,38 +320,96 @@ def create_offer(plan_id):
 @login_required
 def my_accounts():
     my_company = Company.query.get(current_user.id)
+    my_accounts = my_company.accounts.all()
 
-    received_from_accounting = (
-        TransactionsAccountingToCompany.query.filter_by(receiver_id=current_user.id)
-        .order_by(desc(TransactionsAccountingToCompany.date))
-        .all()
-    )
+    all_transactions = []  # date, sender, receiver, p, r, a, prd, purpose
 
-    sent_to_company = (
-        TransactionsCompanyToCompany.query.filter_by(account_owner=current_user.id)
-        .order_by(desc(TransactionsCompanyToCompany.date))
-        .all()
-    )
+    for my_account in my_accounts:
+        # all my sent transactions
+        for sent_trans in my_account.transactions_sent.all():
+            if sent_trans.receiving_account.account_type.name == "member":
+                receiver_name = f"Mitglied: {sent_trans.receiving_account.member.name} ({sent_trans.receiving_account.member.id})"
+            elif sent_trans.receiving_account.account_type.name in [
+                "p",
+                "r",
+                "a",
+                "prd",
+            ]:
+                receiver_name = f"Betrieb: {sent_trans.receiving_account.company.name} ({sent_trans.receiving_account.company.id})"
+            else:
+                receiver_name = "Öff. Buchhaltung"
 
-    received_from_company = (
-        TransactionsCompanyToCompany.query.filter_by(receiver_id=current_user.id)
-        .order_by(desc(TransactionsCompanyToCompany.date))
-        .all()
-    )
+            change_p, change_r, change_a, change_prd = ("", "", "", "")
+            if my_account.account_type.name == "p":
+                change_p = -sent_trans.amount
+            elif my_account.account_type.name == "r":
+                change_r = -sent_trans.amount
+            elif my_account.account_type.name == "a":
+                change_a = -sent_trans.amount
+            elif my_account.account_type.name == "prd":
+                change_prd = -sent_trans.amount
 
-    sent_to_workers = (
-        TransactionsCompanyToMember.query.filter_by(account_owner=current_user.id)
-        .order_by(desc(TransactionsCompanyToMember.date))
-        .all()
-    )
+            all_transactions.append(
+                [
+                    sent_trans.date,
+                    "Ich",
+                    receiver_name,
+                    change_p,
+                    change_r,
+                    change_a,
+                    change_prd,
+                    sent_trans.purpose,
+                ]
+            )
+
+        # all my received transactions
+        for received_trans in my_account.transactions_received.all():
+            if received_trans.sending_account.account_type.name == "accounting":
+                sender_name = "Öff. Buchhaltung"
+            elif received_trans.sending_account.account_type.name == "member":
+                sender_name = f"Mitglied: {received_trans.sending_account.member.name} (received_trans.sending_account.member.id)"
+            elif received_trans.sending_account.account_type.name in [
+                "p",
+                "r",
+                "a",
+                "prd",
+            ]:
+                sender_name = f"Betrieb: {received_trans.sending_account.company.name} ({received_trans.sending_account.company.id})"
+
+            change_p, change_r, change_a, change_prd = ("", "", "", "")
+            if my_account.account_type.name == "p":
+                change_p = received_trans.amount
+            elif my_account.account_type.name == "r":
+                change_r = received_trans.amount
+            elif my_account.account_type.name == "a":
+                change_a = received_trans.amount
+            elif my_account.account_type.name == "prd":
+                change_prd = received_trans.amount
+
+            all_transactions.append(
+                [
+                    received_trans.date,
+                    sender_name,
+                    "Ich",
+                    change_p,
+                    change_r,
+                    change_a,
+                    change_prd,
+                    received_trans.purpose,
+                ]
+            )
+
+    all_transactions_sorted = sorted(all_transactions, reverse=True)
+
+    my_balances = []
+    for type in ["p", "r", "a", "prd"]:
+        balance = my_company.accounts.filter_by(account_type=type).first().balance
+        my_balances.append(balance)
 
     return render_template(
         "company/my_accounts.html",
-        my_company=my_company,
-        received_from_accounting=received_from_accounting,
-        sent_to_company=sent_to_company,
-        received_from_company=received_from_company,
-        sent_to_workers=sent_to_workers,
+        my_balances=my_balances,
+        all_transactions=all_transactions_sorted,
     )
 
 
@@ -267,10 +417,11 @@ def my_accounts():
 @login_required
 def transfer():
     if request.method == "POST":
+        # to implement: check in html, if user exists and if worker in company
         receiver_id = request.form["member_id"]
         amount = Decimal(request.form["amount"])
         sender = Company.query.get(current_user.id)
-        receiver = Member.query.get(receiver_id)
+        receiver = Member.query.filter_by(id=receiver_id).first()
         database.send_wages(sender, receiver, amount)
 
     return render_template("company/transfer.html")
@@ -292,20 +443,25 @@ def my_offers():
 
 @main_company.route("/company/delete_offer", methods=["GET", "POST"])
 @login_required
-def delete_offer():
+@with_injection
+def delete_offer(
+    product_offer_repository: ProductOfferRepository,
+):
     offer_id = request.args.get("id")
-    offer = Offer.query.filter_by(id=offer_id).first()
+    product_offer = product_offer_repository.get_by_id(offer_id)
     if request.method == "POST":
-        company.delete_product(offer_id)
+        use_cases.deactivate_offer(product_offer)
+        database.commit_changes()
         flash("Löschen des Angebots erfolgreich.")
         return redirect(url_for("main_company.my_offers"))
 
-    return render_template("company/delete_offer.html", offer=offer)
+    return render_template("company/delete_offer.html", offer=product_offer)
 
 
 @main_company.route("/company/sell_offer", methods=["GET", "POST"])
 @login_required
 def sell_offer():
+    # HAS TO BE CHANGED
     offer_id = request.args.get("id")
     offer = Offer.query.filter_by(id=offer_id).first()
 

@@ -2,7 +2,7 @@
 Definition of database tables.
 """
 
-import enum
+from enum import Enum
 from flask_login import UserMixin
 from sqlalchemy.orm import backref
 from project.extensions import db
@@ -11,10 +11,7 @@ from project.extensions import db
 class SocialAccounting(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
-    transactions = db.relationship(
-        "TransactionsAccountingToCompany",
-        lazy="dynamic",
-    )
+    account = db.relationship("Account", uselist=False, lazy=True)
 
 
 # Association table Company - Member
@@ -30,7 +27,9 @@ class Member(UserMixin, db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(1000), nullable=False)
-    guthaben = db.Column(db.Numeric(), default=0, nullable=False)
+
+    account = db.relationship("Account", uselist=False, lazy=True, backref="member")
+    purchases = db.relationship("Kaeufe", lazy="dynamic")
 
     workplaces = db.relationship(
         "Company",
@@ -45,12 +44,9 @@ class Company(UserMixin, db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(1000), nullable=False)
-    balance_p = db.Column(db.Numeric(), default=0)
-    balance_r = db.Column(db.Numeric(), default=0)
-    balance_a = db.Column(db.Numeric(), default=0)
-    balance_prd = db.Column(db.Numeric(), default=0)
 
     plans = db.relationship("Plan", lazy="dynamic", backref="company")
+    accounts = db.relationship("Account", lazy="dynamic", backref="company")
 
     def __repr__(self):
         return "<Company(email='%s', name='%s')>" % (
@@ -68,7 +64,7 @@ class Plan(UserMixin, db.Model):
     costs_a = db.Column(db.Numeric(), nullable=False)
     prd_name = db.Column(db.String(100), nullable=False)
     prd_unit = db.Column(db.String(100), nullable=False)
-    prd_amount = db.Column(db.Numeric(), nullable=False)
+    prd_amount = db.Column(db.Integer, nullable=False)
     description = db.Column(db.String(2000), nullable=False)
     timeframe = db.Column(db.Numeric(), nullable=False)
     social_accounting = db.Column(
@@ -77,64 +73,55 @@ class Plan(UserMixin, db.Model):
     approved = db.Column(db.Boolean, nullable=False, default=False)
     approval_date = db.Column(db.DateTime, nullable=True, default=None)
     approval_reason = db.Column(db.String(1000), nullable=True, default=None)
+    expired = db.Column(db.Boolean, nullable=False, default=False)
 
     offers = db.relationship("Offer", lazy="dynamic", backref="plan")
 
 
-class CompanyAccountTypes(enum.Enum):
+class AccountTypes(Enum):
     p = "p"
     r = "r"
     a = "a"
     prd = "prd"
+    member = "member"
+    accounting = "accounting"
 
 
-class TransactionsAccountingToCompany(UserMixin, db.Model):
-    """Transactions made by social accounting institutions to companies."""
-
+class Account(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.DateTime, nullable=False)
-    account_owner = db.Column(
-        db.Integer, db.ForeignKey("social_accounting.id"), nullable=False
+    account_owner_social_accounting = db.Column(
+        db.Integer, db.ForeignKey("social_accounting.id"), nullable=True
     )
-    receiver_id = db.Column(db.Integer, db.ForeignKey("company.id"), nullable=False)
-    receiver_account_type = db.Column(db.Enum(CompanyAccountTypes), nullable=False)
-    amount = db.Column(db.Numeric(), nullable=False)
-    purpose = db.Column(db.String(1000), nullable=True)
+    account_owner_company = db.Column(
+        db.Integer, db.ForeignKey("company.id"), nullable=True
+    )
+    account_owner_member = db.Column(
+        db.Integer, db.ForeignKey("member.id"), nullable=True
+    )
+    account_type = db.Column(db.Enum(AccountTypes), nullable=False)
+    balance = db.Column(db.Numeric(), default=0)
+
+    transactions_sent = db.relationship(
+        "Transaction",
+        foreign_keys="Transaction.account_from",
+        lazy="dynamic",
+        backref="sending_account",
+    )
+    transactions_received = db.relationship(
+        "Transaction",
+        foreign_keys="Transaction.account_to",
+        lazy="dynamic",
+        backref="receiving_account",
+    )
 
 
-class TransactionsCompanyToMember(UserMixin, db.Model):
-    """Transactions made by companies to members. E.g. salaries."""
-
+class Transaction(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.DateTime, nullable=False)
-    account_owner = db.Column(db.Integer, db.ForeignKey("company.id"), nullable=False)
-    receiver_id = db.Column(db.Integer, db.ForeignKey("member.id"), nullable=False)
+    account_from = db.Column(db.Integer, db.ForeignKey("account.id"), nullable=False)
+    account_to = db.Column(db.Integer, db.ForeignKey("account.id"), nullable=False)
     amount = db.Column(db.Numeric(), nullable=False)
-    purpose = db.Column(db.String(1000), nullable=True)
-
-
-class TransactionsCompanyToCompany(UserMixin, db.Model):
-    """Transactions made by companies to companies. E.g. purchase of means of production."""
-
-    id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.DateTime, nullable=False)
-    account_owner = db.Column(db.Integer, db.ForeignKey("company.id"), nullable=False)
-    receiver_id = db.Column(db.Integer, db.ForeignKey("company.id"), nullable=False)
-    owner_account_type = db.Column(db.Enum(CompanyAccountTypes), nullable=False)
-    receiver_account_type = db.Column(db.Enum(CompanyAccountTypes), nullable=False)
-    amount = db.Column(db.Numeric(), nullable=False)
-    purpose = db.Column(db.String(1000), nullable=True)
-
-
-class TransactionsMemberToCompany(UserMixin, db.Model):
-    """Transactions made by members to companies. E.g. purchases."""
-
-    id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.DateTime, nullable=False)
-    account_owner = db.Column(db.Integer, db.ForeignKey("member.id"), nullable=False)
-    receiver_id = db.Column(db.Integer, db.ForeignKey("company.id"), nullable=False)
-    amount = db.Column(db.Numeric(), nullable=False)
-    purpose = db.Column(db.String(1000), nullable=True)
+    purpose = db.Column(db.String(1000), nullable=True)  # Verwendungszweck
 
 
 class Offer(UserMixin, db.Model):
@@ -149,6 +136,12 @@ class Offer(UserMixin, db.Model):
     purchases = db.relationship("Kaeufe", lazy="dynamic", backref="offer")
 
 
+class PurposesOfPurchases(Enum):
+    means_of_prod = "means_of_prod"
+    raw_materials = "raw_materials"
+    consumption = "consumption"
+
+
 class Kaeufe(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     kauf_date = db.Column(db.DateTime, nullable=False)
@@ -158,7 +151,7 @@ class Kaeufe(UserMixin, db.Model):
     member = db.Column(db.Integer, db.ForeignKey("member.id"), nullable=True)
     kaufpreis = db.Column(db.Numeric(), nullable=False)
     amount = db.Column(db.Integer, nullable=False)
-    purpose = db.Column(db.String(100), nullable=False)
+    purpose = db.Column(db.Enum(PurposesOfPurchases), nullable=False)
 
 
 class Withdrawal(UserMixin, db.Model):

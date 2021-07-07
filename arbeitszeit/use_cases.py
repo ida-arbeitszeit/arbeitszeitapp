@@ -1,29 +1,57 @@
 from dataclasses import dataclass
-from typing import Union
+from typing import Union, List
+from decimal import Decimal
+from enum import Enum
+import datetime
 
 from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Company, Member, Plan, ProductOffer, Purchase
+from arbeitszeit.entities import (
+    Company,
+    Member,
+    Plan,
+    ProductOffer,
+    Purchase,
+    Account,
+    SocialAccounting,
+)
 from arbeitszeit.errors import WorkerAlreadyAtCompany
 from arbeitszeit.purchase_factory import PurchaseFactory
-from arbeitszeit.repositories import CompanyWorkerRepository, PurchaseRepository
+from arbeitszeit.transaction_factory import TransactionFactory
+from arbeitszeit.repositories import (
+    CompanyWorkerRepository,
+    TransactionRepository,
+)
+
+
+class PurposesOfPurchases(Enum):
+    means_of_prod = "means_of_prod"
+    raw_materials = "raw_materials"
+    consumption = "consumption"
 
 
 @inject
 @dataclass
 class PurchaseProduct:
-    purchase_repository: PurchaseRepository
     datetime_service: DatetimeService
     purchase_factory: PurchaseFactory
+    transaction_factory: TransactionFactory
 
     def __call__(
         self,
         product_offer: ProductOffer,
         amount: int,
-        purpose: str,
+        purpose: PurposesOfPurchases,
         buyer: Union[Member, Company],
     ) -> Purchase:
+        """returns purchase and transaction."""
+
+        assert (
+            product_offer.amount_available >= amount
+        ), "Amount ordered exceeds available products!"
+
+        # create purchase
         price = product_offer.price_per_unit
         purchase = self.purchase_factory.create_private_purchase(
             purchase_date=self.datetime_service.now(),
@@ -33,21 +61,66 @@ class PurchaseProduct:
             amount=amount,
             purpose=purpose,
         )
-        assert (
-            product_offer.amount_available >= amount
-        ), "Amount ordered exceeds available products!"
+
+        # decrease amount available
         product_offer.decrease_amount_available(amount)
-        if product_offer.amount_available == amount:
-            product_offer.deactivate()
-        price_total = price * amount
-        product_offer.provider.increase_credit(price_total, "balance_prd")
-        account_type = "balance_p" if purpose == "means_of_prod" else "balance_r"
+
+        # deactivate offer if amount is zero
+        if product_offer.amount_available == 0:
+            deactivate_offer(product_offer)
+
+        # reduce balance of buyer
+        price_total = purchase.price * purchase.amount
         if isinstance(buyer, Member):
-            buyer.reduce_credit(price_total)
+            adjust_balance(
+                buyer.account,
+                -price_total,
+            )
         else:
-            buyer.reduce_credit(price_total, account_type)
-        self.purchase_repository.add(purchase)
-        return purchase
+            if purpose == "means_of_prod":
+                adjust_balance(
+                    buyer.means_account,
+                    -price_total,
+                )
+            else:
+                adjust_balance(
+                    buyer.raw_material_account,
+                    -price_total,
+                )
+
+        # increase balance of seller
+        adjust_balance(product_offer.provider.product_account, price_total)
+
+        # create transaction
+        if isinstance(buyer, Member):
+            account_from = buyer.account
+        else:
+            if purpose == "means_of_prod":
+                account_from = buyer.means_account
+            else:
+                account_from = buyer.raw_material_account
+
+        send_to = product_offer.provider.product_account
+
+        transaction = self.transaction_factory.create_transaction(
+            account_from=account_from,
+            account_to=send_to,
+            amount=price_total,
+            purpose=f"Angebot-Id: {product_offer.id}",
+        )
+
+        return purchase, transaction
+
+
+def deactivate_offer(product_offer: ProductOffer) -> ProductOffer:
+    product_offer.deactivate()
+    return product_offer
+
+
+def adjust_balance(account: Account, amount: Decimal) -> Account:
+    """changes the balance of specified accounts."""
+    account.change_credit(amount)
+    return account
 
 
 def add_worker_to_company(
@@ -66,10 +139,11 @@ def add_worker_to_company(
     company_worker_repository.add_worker_to_company(company, worker)
 
 
-def approve_plan(
+def seek_approval(
     datetime_service: DatetimeService,
     plan: Plan,
 ) -> Plan:
+    """Company seeks plan approval from Social Accounting."""
     # This is just a place holder
     is_approval = True
     approval_date = datetime_service.now()
@@ -80,9 +154,47 @@ def approve_plan(
     return plan
 
 
-def granting_credit(
+def grant_credit(
     plan: Plan,
+    social_accounting: SocialAccounting,
+    transaction_repository: TransactionRepository,
+    transaction_factory: TransactionFactory,
 ) -> None:
-    # increase/reduce company balances
-    # register transcations
-    pass
+    """Social Accounting grants credit after plan has been approved."""
+    assert plan.approved == True, "Plan has not been approved!"
+    social_accounting_account = social_accounting.account
+
+    prd = plan.costs_p + plan.costs_r + plan.costs_a
+    accounts_and_amounts = [
+        (plan.planner.means_account, plan.costs_p),
+        (plan.planner.raw_material_account, plan.costs_r),
+        (plan.planner.work_account, plan.costs_a),
+        (plan.planner.product_account, -prd),
+    ]
+
+    for account, amount in accounts_and_amounts:
+        adjust_balance(account, amount)
+        transaction = transaction_factory.create_transaction(
+            account_from=social_accounting_account,
+            account_to=account,
+            amount=amount,
+            purpose=f"Plan-Id: {plan.id}",
+        )
+        transaction_repository.add(transaction)
+
+
+def check_plans_for_expiration(plans: List[Plan]) -> List[Plan]:
+    """
+    checks if plans are expired and sets them as expired, if so.
+    """
+
+    for plan in plans:
+        expiration_date = plan.plan_creation_date + datetime.timedelta(
+            days=int(plan.timeframe)
+        )
+        expiration_relative = DatetimeService().now() - expiration_date
+        seconds = expiration_relative.total_seconds()
+        if seconds > 0:
+            plan.set_as_expired()
+
+    return plans

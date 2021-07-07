@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from arbeitszeit.entities import Company, Member, Plan, Purchase
+from arbeitszeit.entities import Company, Member, Plan, Purchase, Account, Transaction
 
 
 class CompanyWorkerRepository(ABC):
@@ -27,4 +27,12 @@ class PlanRepository(ABC):
 
 
 class TransactionRepository(ABC):
-    ...
+    @abstractmethod
+    def add(self, transaction: Transaction) -> None:
+        pass
+
+
+class AccountRepository(ABC):
+    @abstractmethod
+    def add(self, account: Account) -> None:
+        pass

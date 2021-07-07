@@ -2,19 +2,40 @@
 
 {% block content2 %}
 
-  <h1 class="title">
-    Meine vergangenen Käufe:
-  </h1>
-  <div class="columns is-centered">
-    <div class="column is-three-fifths">
-      <div class="table-container">
-        <div class="content">
-          {{ kaufh_table }}
-        </div>
-      </div>
-    </div>
+<h1 class="title">
+  Meine vergangenen Käufe:
+</h1>
 
-  </div>
+<div class="table-container">
+  <table class="table is-fullwidth">
+    <thead>
+      <tr>
+        <th>Kauf-Id</th>
+        <th>Name</th>
+        <th>Beschreibung</th>
+        <th>Einzelpreis</th>
+        <th>Menge</th>
+        <th>Gesamtpreis</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% if purchases is defined and purchases|length %}
+      {% for purchase in purchases %}
+      <tr>
+        <td>{{ purchase.id }}</td>
+        <td>{{ purchase.offer.name }}</td>
+        <td>{{ purchase.offer.description }}</td>
+        <td>{{ purchase.kaufpreis }}</td>
+        <th>{{ purchase.amount }}</th>
+        <th>{{ purchase.kaufpreis * purchase.amount }}</th>
+      </tr>
+      {% endfor %}
+      {% else %}
+      <div>Du hast noch keine Käufe.</div>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
 
 
 {% endblock %}
