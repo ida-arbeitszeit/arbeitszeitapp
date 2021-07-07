@@ -80,6 +80,6 @@ class AccountGenerator:
             id=self.id_generator.get_id(),
             account_owner_id=self.id_generator.get_id(),
             account_type=account_type,
-            balance=0,
+            balance=Decimal(0),
             change_credit=lambda amount: None,
         )

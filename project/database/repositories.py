@@ -1,22 +1,22 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 from decimal import Decimal
 from typing import List, Optional, TypeVar, Union
-from datetime import datetime
 
 from injector import inject
 
 from arbeitszeit import entities, repositories
 from project.extensions import db
 from project.models import (
+    Account,
     Company,
     Kaeufe,
     Member,
     Offer,
     Plan,
     SocialAccounting,
-    Account,
     Transaction,
 )
 

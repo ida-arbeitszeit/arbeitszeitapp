@@ -1,36 +1,30 @@
-from dataclasses import dataclass
-from typing import Union, List, Optional
-from decimal import Decimal
-from enum import Enum
 import datetime
+from dataclasses import dataclass
+from decimal import Decimal
+from typing import List, Optional, Union
 
 from injector import inject
 
+from arbeitszeit import errors
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import (
+    Account,
     Company,
     Member,
     Plan,
-    ProductOffer,
-    Account,
-    SocialAccounting,
     PlanRenewal,
+    ProductOffer,
+    SocialAccounting,
 )
-from arbeitszeit import errors
-
 from arbeitszeit.purchase_factory import PurchaseFactory
-from arbeitszeit.transaction_factory import TransactionFactory
 from arbeitszeit.repositories import (
     CompanyWorkerRepository,
-    TransactionRepository,
     PurchaseRepository,
+    TransactionRepository,
 )
+from arbeitszeit.transaction_factory import TransactionFactory
 
-
-class PurposesOfPurchases(Enum):
-    means_of_prod = "means_of_prod"
-    raw_materials = "raw_materials"
-    consumption = "consumption"
+from .entities import PurposesOfPurchases
 
 
 @inject
@@ -155,7 +149,7 @@ def seek_approval(
     approval_date = datetime_service.now()
     if is_approval:
         plan.approve(approval_date)
-        if plan_renewal and (plan_renewal.modifications == False):
+        if plan_renewal and (not plan_renewal.modifications):
             plan_renewal.original_plan.set_as_renewed()
     else:
         plan.deny("Some reason", approval_date)
@@ -169,7 +163,7 @@ def grant_credit(
     transaction_factory: TransactionFactory,
 ) -> None:
     """Social Accounting grants credit after plan has been approved."""
-    assert plan.approved == True, "Plan has not been approved!"
+    assert plan.approved, "Plan has not been approved!"
     social_accounting_account = social_accounting.account
 
     prd = plan.costs_p + plan.costs_r + plan.costs_a

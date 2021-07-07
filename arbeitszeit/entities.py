@@ -3,8 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Callable, Union
 from enum import Enum
+from typing import Callable, Union
 
 
 @dataclass
@@ -27,7 +27,7 @@ class Member:
     def id(self):
         return self._id
 
-    def __eq__(self, other: Member) -> bool:
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, Member):
             return self.id == other.id
 
@@ -53,7 +53,7 @@ class Company:
     def id(self):
         return self._id
 
-    def __eq__(self, other: Company) -> bool:
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, Company):
             return self.id == other.id
 

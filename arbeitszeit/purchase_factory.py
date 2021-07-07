@@ -1,15 +1,8 @@
 from datetime import datetime
 from decimal import Decimal
 from typing import Union
-from enum import Enum
 
-from arbeitszeit.entities import Company, Member, ProductOffer, Purchase
-
-
-class PurposesOfPurchases(Enum):
-    means_of_prod = "means_of_prod"
-    raw_materials = "raw_materials"
-    consumption = "consumption"
+from .entities import Company, Member, ProductOffer, Purchase, PurposesOfPurchases
 
 
 class PurchaseFactory:
