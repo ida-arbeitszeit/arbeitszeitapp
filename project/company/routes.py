@@ -146,9 +146,9 @@ def buy(
 
     if request.method == "POST":  # if company buys
         purpose = (
-            "means_of_prod"
+            entities.PurposesOfPurchases.means_of_prod
             if request.form["category"] == "Produktionsmittel"
-            else "raw_materials"
+            else entities.PurposesOfPurchases.raw_materials
         )
         amount = int(request.form["amount"])
         purchase_product(
