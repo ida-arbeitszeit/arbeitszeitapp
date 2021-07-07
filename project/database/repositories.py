@@ -211,7 +211,9 @@ class ProductOfferRepository:
 
     def object_from_orm(self, offer_orm: Offer) -> entities.ProductOffer:
         plan = offer_orm.plan
-        price_per_unit = Decimal(plan.costs_p + plan.costs_r + plan.costs_a)
+        price_per_unit = Decimal(
+            (plan.costs_p + plan.costs_r + plan.costs_a) / plan.prd_amount
+        )
         return entities.ProductOffer(
             id=offer_orm.id,
             name=offer_orm.name,
