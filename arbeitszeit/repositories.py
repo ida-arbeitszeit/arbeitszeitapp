@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from arbeitszeit.entities import Company, Member, Plan, Purchase, Account, Transaction
+from arbeitszeit.entities import Account, Company, Member, Plan, Purchase, Transaction
 
 
 class CompanyWorkerRepository(ABC):
