@@ -111,19 +111,6 @@ def add_new_accounts_for_company(company_id):
         db.session.commit()
 
 
-# Worker
-
-
-def add_new_worker_to_company(member_id, company_id) -> None:
-    """
-    Add member as workers to Company.
-    """
-    worker = Member.query.filter_by(id=member_id).first()
-    company = Company.query.filter_by(id=company_id).first()
-    company.workers.append(worker)
-    db.session.commit()
-
-
 # create one social accounting with id=1
 def create_social_accounting_in_db() -> None:
     social_accounting = SocialAccounting.query.filter_by(id=1).first()
