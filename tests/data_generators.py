@@ -7,11 +7,13 @@ from injector import inject
 
 from arbeitszeit.entities import (
     Account,
+    AccountTypes,
     Company,
     Member,
     Plan,
     PlanRenewal,
     ProductOffer,
+    SocialAccounting,
 )
 from arbeitszeit.datetime_service import DatetimeService
 
@@ -80,6 +82,19 @@ class IdGenerator:
 
 @inject
 @dataclass
+class SocialAccountingGenerator:
+    account_generator: AccountGenerator
+
+    def create_social_accounting(self) -> SocialAccounting:
+        return SocialAccounting(
+            account=self.account_generator.create_account(
+                account_type=AccountTypes.accounting
+            ),
+        )
+
+
+@inject
+@dataclass
 class AccountGenerator:
     id_generator: IdGenerator
 
@@ -100,7 +115,7 @@ class PlanGenerator:
     company_generator: CompanyGenerator
     datetime_service: DatetimeService
 
-    def create_plan(self, plan_creation_date=None) -> Plan:
+    def create_plan(self, plan_creation_date=None, approved=False) -> Plan:
         return Plan(
             id=self.id_generator.get_id(),
             plan_creation_date=self.datetime_service.now()
@@ -115,7 +130,7 @@ class PlanGenerator:
             prd_amount=100,
             description="Beschreibung für Produkt A.",
             timeframe=Decimal(14),
-            approved=False,
+            approved=approved,
             approval_date=None,
             approval_reason=None,
             approve=lambda _1, _2, _3: None,
