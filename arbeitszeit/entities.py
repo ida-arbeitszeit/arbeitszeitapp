@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
-from typing import Callable, Union
+from typing import Callable, Union, Optional
 
 
 @dataclass
@@ -105,7 +105,7 @@ class Plan:
         timeframe: Decimal,
         approved: bool,
         approval_date: datetime,
-        approval_reason: str,
+        approval_reason: Optional[str],
         approve: Callable[[bool, str, datetime], None],
         expired: bool,
         renewed: bool,
