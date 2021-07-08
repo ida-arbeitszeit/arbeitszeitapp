@@ -26,13 +26,6 @@ class Member:
     def buy_product(self, buyer_type, product_id, buyer_id):
         ...
 
-    def withdraw(self, user_id, amount):
-        """
-        executes withdrawal and returns code that can be used like money.
-        """
-        code = database.withdraw(user_id, amount)
-        return code
-
 
 accounting = SocialAccounting()
 company = Company()

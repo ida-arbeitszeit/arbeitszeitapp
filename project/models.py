@@ -4,7 +4,6 @@ Definition of database tables.
 
 from enum import Enum
 from flask_login import UserMixin
-from sqlalchemy.orm import backref
 from project.extensions import db
 
 
@@ -153,12 +152,3 @@ class Kaeufe(UserMixin, db.Model):
     kaufpreis = db.Column(db.Numeric(), nullable=False)
     amount = db.Column(db.Integer, nullable=False)
     purpose = db.Column(db.Enum(PurposesOfPurchases), nullable=False)
-
-
-class Withdrawal(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    type_member = db.Column(db.Boolean, nullable=False)
-    member = db.Column(db.Integer, db.ForeignKey("member.id"), nullable=False)
-    betrag = db.Column(db.Numeric(), nullable=False)
-    code = db.Column(db.String(100), nullable=False)
-    entwertet = db.Column(db.Boolean, nullable=False, default=False)
