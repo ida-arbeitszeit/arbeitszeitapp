@@ -1,11 +1,9 @@
-from decimal import Decimal
 from flask import Blueprint, render_template, session, redirect, url_for, request, flash
 from flask_login import login_required, current_user
 from project.models import Offer
 from project.forms import ProductSearchForm
 from project import database
 from project.database import with_injection
-from project.economy import member
 from project.database.repositories import (
     ProductOfferRepository,
     MemberRepository,
@@ -178,20 +176,6 @@ def my_account():
         all_transactions=all_transactions_sorted,
         my_balance=my_balance,
     )
-
-
-@main_member.route("/member/withdrawal", methods=["GET", "POST"])
-@login_required
-def withdrawal():
-    if request.method == "POST":
-        amount = Decimal(request.form["betrag"])
-        code = member.withdraw(current_user, amount)
-        # Show code to user
-        flash(amount)
-        flash(code)
-        return render_template("member/withdrawal.html")
-
-    return render_template("member/withdrawal.html")
 
 
 @main_member.route("/member/hilfe")

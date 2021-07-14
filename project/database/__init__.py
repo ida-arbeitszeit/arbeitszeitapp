@@ -1,42 +1,19 @@
 from __future__ import annotations
-from datetime import datetime
 from functools import wraps
 
-import random
-from typing import Union, Type
-import string
-from decimal import Decimal
-from enum import Enum
-from sqlalchemy.sql import func
 from injector import Injector, inject
 
-from arbeitszeit.use_cases import (
-    PurchaseProduct,
-    adjust_balance,
-)
-from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit import entities
-from arbeitszeit.transaction_factory import TransactionFactory
 from project.models import (
     Member,
     Company,
-    Withdrawal,
-    Plan,
     SocialAccounting,
     Offer,
     Account,
 )
 from project.extensions import db
 
-from .repositories import (
-    CompanyRepository,
-    MemberRepository,
-    PlanRepository,
-    ProductOfferRepository,
-    TransactionRepository,
-    AccountRepository,
-    PurchaseRepository,
-)
+from .repositories import CompanyRepository
 
 _injector = Injector()
 
@@ -58,11 +35,6 @@ def with_injection(original_function):
 
 def commit_changes():
     db.session.commit()
-
-
-def id_generator(size=10, chars=string.ascii_uppercase + string.digits):
-    """generates money-code for withdrawals."""
-    return "".join(random.SystemRandom().choice(chars) for _ in range(size))
 
 
 @with_injection
@@ -110,39 +82,6 @@ def add_new_account_for_member(member_id):
     db.session.commit()
 
 
-@with_injection
-def withdraw(
-    member: Member,
-    amount: Decimal,
-    account_repository: AccountRepository,
-    transaction_repository: TransactionRepository,
-    transaction_factory: TransactionFactory,
-) -> str:
-    """
-    register new withdrawal and withdraw amount from user's account.
-    returns code that can be used like money.
-    """
-    code = id_generator()
-    new_withdrawal = Withdrawal(
-        type_member=True, member=member.id, betrag=amount, code=code
-    )
-    db.session.add(new_withdrawal)
-    db.session.commit()
-
-    # register transaction
-    member_account = account_repository.object_from_orm(member.account)
-    transaction = transaction_factory.create_transaction(
-        member_account, None, amount, f"Abhebung ({new_withdrawal.id})"
-    )
-    transaction_repository.add(transaction)
-
-    # betrag vom guthaben des users abziehen
-
-    adjust_balance(member_account, -amount)
-    commit_changes()
-    return code
-
-
 # Company
 
 
@@ -170,19 +109,6 @@ def add_new_accounts_for_company(company_id):
         )
         db.session.add(new_account)
         db.session.commit()
-
-
-# Worker
-
-
-def add_new_worker_to_company(member_id, company_id) -> None:
-    """
-    Add member as workers to Company.
-    """
-    worker = Member.query.filter_by(id=member_id).first()
-    company = Company.query.filter_by(id=company_id).first()
-    company.workers.append(worker)
-    db.session.commit()
 
 
 # create one social accounting with id=1

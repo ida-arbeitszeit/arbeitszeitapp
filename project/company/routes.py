@@ -3,20 +3,16 @@ from decimal import Decimal
 
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
-from sqlalchemy.sql import desc
 
 from arbeitszeit import errors, use_cases, entities
 from arbeitszeit.transaction_factory import TransactionFactory
 from arbeitszeit.datetime_service import DatetimeService
 from project import database
 from project.database import with_injection
-from project.economy import company
 from project.extensions import db
 from project.forms import ProductSearchForm
 from project.models import (
     Company,
-    Member,
-    Withdrawal,
     Plan,
     Offer,
 )
@@ -519,41 +515,6 @@ def delete_offer(
         return redirect(url_for("main_company.my_offers"))
 
     return render_template("company/delete_offer.html", offer=product_offer)
-
-
-@main_company.route("/company/sell_offer", methods=["GET", "POST"])
-@login_required
-def sell_offer():
-    # HAS TO BE CHANGED
-    offer_id = request.args.get("id")
-    offer = Offer.query.filter_by(id=offer_id).first()
-
-    if request.method == "POST":
-        code_input = request.form["code"]
-        withdrawal = Withdrawal.query.filter_by(
-            code=code_input, entwertet=False
-        ).first()
-        if not withdrawal:
-            flash("Code nicht korrekt oder schon entwertet.")
-        else:
-            value_code = withdrawal.betrag
-            if round(
-                (offer.plan.costs_p + offer.plan.costs_r + offer.plan.costs_a), 2
-            ) != round(value_code, 2):
-                flash("Wert des Codes entspricht nicht dem Preis.")
-            else:
-                kaufender_type = "member" if withdrawal.type_member else "company"
-                database.buy(
-                    kaufender_type=kaufender_type,
-                    angebot=offer,
-                    kaeufer_id=withdrawal.member,
-                )
-                withdrawal.entwertet = True
-                db.session.commit()
-                flash("Verkauf erfolgreich")
-                return redirect(url_for("main_company.my_offers"))
-
-    return render_template("company/sell_offer.html", offer=offer)
 
 
 @main_company.route("/company/cooperate", methods=["GET", "POST"])
