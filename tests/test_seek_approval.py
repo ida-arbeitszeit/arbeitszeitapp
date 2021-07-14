@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 from typing import Optional
-from arbeitszeit.use_cases import seek_approval
+
 from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.use_cases import seek_approval
 from tests.data_generators import PlanGenerator, PlanRenewalGenerator
 from tests.dependency_injection import injection_test
 

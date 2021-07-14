@@ -1,23 +1,23 @@
 from flask import Flask, session
-from flask_table import Table, Col  # Do not delete
+from flask_table import Col, Table  # Do not delete
+
 from project.extensions import db, login_manager
 
 
 def create_app():
     app = Flask(__name__, instance_relative_config=False)
-    app.config.from_envvar('ARBEITSZEIT_APP_CONFIGURATION')
+    app.config.from_envvar("ARBEITSZEIT_APP_CONFIGURATION")
 
     # Where to redirect the user when he attempts to access a login_required
     # view without being logged in.
-    login_manager.login_view = 'auth.start'
+    login_manager.login_view = "auth.start"
 
     # init flask extensions
     db.init_app(app)
     login_manager.init_app(app)
 
     with app.app_context():
-        from .models import Member
-        from .models import Company
+        from .models import Company, Member
 
         @login_manager.user_loader
         def load_user(user_id):
@@ -35,6 +35,7 @@ def create_app():
         from .auth import routes as auth_routes
         from .company import routes as company_routes
         from .member import routes as member_routes
+
         app.register_blueprint(auth_routes.auth)
         app.register_blueprint(company_routes.main_company)
         app.register_blueprint(member_routes.main_member)

@@ -1,4 +1,4 @@
-from wtforms import Form, StringField, SelectField
+from wtforms import Form, SelectField, StringField
 
 
 class ProductSearchForm(Form):

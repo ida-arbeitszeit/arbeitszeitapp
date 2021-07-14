@@ -4,30 +4,24 @@ from decimal import Decimal
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
 
-from arbeitszeit import errors, use_cases, entities
-from arbeitszeit.transaction_factory import TransactionFactory
+from arbeitszeit import entities, errors, use_cases
 from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.transaction_factory import TransactionFactory
 from project import database
 from project.database import with_injection
-from project.extensions import db
-from project.forms import ProductSearchForm
-from project.models import (
-    Company,
-    Plan,
-    Offer,
-)
-
 from project.database.repositories import (
-    CompanyRepository,
-    MemberRepository,
-    CompanyWorkerRepository,
-    PlanRepository,
     AccountingRepository,
-    TransactionRepository,
-    ProductOfferRepository,
+    CompanyRepository,
+    CompanyWorkerRepository,
+    MemberRepository,
+    PlanRepository,
     ProductOfferRepository,
     PurchaseRepository,
+    TransactionRepository,
 )
+from project.extensions import db
+from project.forms import ProductSearchForm
+from project.models import Company, Offer, Plan
 
 main_company = Blueprint(
     "main_company", __name__, template_folder="templates", static_folder="static"

@@ -3,7 +3,9 @@ Definition of database tables.
 """
 
 from enum import Enum
+
 from flask_login import UserMixin
+
 from project.extensions import db
 
 

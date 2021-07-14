@@ -11,7 +11,7 @@ import subprocess
 def main():
     format_python_files(
         # Add your path here if you want to apply autoformatting to it
-        ["arbeitszeit/", "tests/", "project/database/repositories.py", "format_code.py"]
+        ["arbeitszeit/", "tests/", "project/", "format_code.py"]
     )
 
 

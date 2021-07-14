@@ -1,9 +1,11 @@
 import pytest
-from .dependency_injection import injection_test
-from arbeitszeit.use_cases import grant_credit
+
 from arbeitszeit.transaction_factory import TransactionFactory
-from .data_generators import PlanGenerator, SocialAccountingGenerator
+from arbeitszeit.use_cases import grant_credit
 from tests.repositories import TransactionRepository
+
+from .data_generators import PlanGenerator, SocialAccountingGenerator
+from .dependency_injection import injection_test
 
 
 @injection_test

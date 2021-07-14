@@ -1,17 +1,12 @@
 from __future__ import annotations
+
 from functools import wraps
 
 from injector import Injector, inject
 
 from arbeitszeit import entities
-from project.models import (
-    Member,
-    Company,
-    SocialAccounting,
-    Offer,
-    Account,
-)
 from project.extensions import db
+from project.models import Account, Company, Member, Offer, SocialAccounting
 
 from .repositories import CompanyRepository
 
