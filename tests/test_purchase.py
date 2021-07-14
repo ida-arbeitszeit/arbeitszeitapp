@@ -1,6 +1,6 @@
 import pytest
 
-from arbeitszeit.entities import PurposesOfPurchases
+from arbeitszeit.entities import PurposesOfPurchases, AccountTypes
 from arbeitszeit.use_cases import PurchaseProduct
 from tests.data_generators import CompanyGenerator, MemberGenerator, OfferGenerator
 from tests.dependency_injection import injection_test
@@ -144,9 +144,11 @@ def test_correct_transaction_added_to_repo(
     purchase_product(
         purchase_repository, transaction_repository, offer1, 3, purpose1, buyer1
     )
-    assert (
-        transaction_repository.transactions.pop().account_from.account_type == "member"
+    added_transaction_account_type = (
+        transaction_repository.transactions.pop().account_from.account_type
     )
+    member_account_type = AccountTypes.member.value
+    assert added_transaction_account_type == member_account_type
 
     # company, means of production
     offer2 = offer_generator.create_offer(amount=3)
@@ -155,7 +157,11 @@ def test_correct_transaction_added_to_repo(
     purchase_product(
         purchase_repository, transaction_repository, offer2, 3, purpose2, buyer2
     )
-    assert transaction_repository.transactions.pop().account_from.account_type == "p"
+    added_transaction_account_type = (
+        transaction_repository.transactions.pop().account_from.account_type
+    )
+    means_account_type = AccountTypes.p.value
+    assert added_transaction_account_type == means_account_type
 
     # company, raw materials
     offer3 = offer_generator.create_offer(amount=3)
@@ -164,4 +170,9 @@ def test_correct_transaction_added_to_repo(
     purchase_product(
         purchase_repository, transaction_repository, offer3, 3, purpose3, buyer3
     )
-    assert transaction_repository.transactions.pop().account_from.account_type == "r"
+
+    added_transaction_account_type = (
+        transaction_repository.transactions.pop().account_from.account_type
+    )
+    raw_material_account_type = AccountTypes.r.value
+    assert added_transaction_account_type == raw_material_account_type

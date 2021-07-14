@@ -5,7 +5,17 @@ from decimal import Decimal
 
 from injector import inject
 
-from arbeitszeit.entities import Account, Company, Member, ProductOffer
+from arbeitszeit.entities import (
+    Account,
+    AccountTypes,
+    Company,
+    Member,
+    Plan,
+    PlanRenewal,
+    ProductOffer,
+    SocialAccounting,
+)
+from arbeitszeit.datetime_service import DatetimeService
 
 
 @inject
@@ -72,6 +82,19 @@ class IdGenerator:
 
 @inject
 @dataclass
+class SocialAccountingGenerator:
+    account_generator: AccountGenerator
+
+    def create_social_accounting(self) -> SocialAccounting:
+        return SocialAccounting(
+            account=self.account_generator.create_account(
+                account_type=AccountTypes.accounting
+            ),
+        )
+
+
+@inject
+@dataclass
 class AccountGenerator:
     id_generator: IdGenerator
 
@@ -82,4 +105,53 @@ class AccountGenerator:
             account_type=account_type,
             balance=Decimal(0),
             change_credit=lambda amount: None,
+        )
+
+
+@inject
+@dataclass
+class PlanGenerator:
+    id_generator: IdGenerator
+    company_generator: CompanyGenerator
+    datetime_service: DatetimeService
+
+    def create_plan(self, plan_creation_date=None, approved=False) -> Plan:
+        return Plan(
+            id=self.id_generator.get_id(),
+            plan_creation_date=self.datetime_service.now()
+            if plan_creation_date is None
+            else plan_creation_date,
+            planner=self.company_generator.create_company(),
+            costs_p=Decimal(10),
+            costs_r=Decimal(20),
+            costs_a=Decimal(30),
+            prd_name="Produkt A",
+            prd_unit="500 Gramm",
+            prd_amount=100,
+            description="Beschreibung für Produkt A.",
+            timeframe=Decimal(14),
+            approved=approved,
+            approval_date=None,
+            approval_reason=None,
+            approve=lambda _1, _2, _3: None,
+            expired=False,
+            renewed=False,
+            set_as_expired=lambda: None,
+            set_as_renewed=lambda: None,
+        )
+
+
+@inject
+@dataclass
+class PlanRenewalGenerator:
+    plan_generator: PlanGenerator
+
+    def create_plan_renewal(
+        self, original_plan=None, modifications=False
+    ) -> PlanRenewal:
+        return PlanRenewal(
+            original_plan=self.plan_generator.create_plan()
+            if original_plan is None
+            else original_plan,
+            modifications=modifications,
         )

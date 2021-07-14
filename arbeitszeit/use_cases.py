@@ -142,13 +142,16 @@ def seek_approval(
     plan: Plan,
     plan_renewal: Optional[PlanRenewal],
 ) -> Plan:
-    """Company seeks plan approval from Social Accounting."""
+    """
+    Company seeks plan approval.
+    It can be a new plan or a plan renewal, in which case the original plan will be set as "renewed".
+    """
     # This is just a place holder
     is_approval = True
     approval_date = datetime_service.now()
     if is_approval:
         plan.approve(approval_date)
-        if plan_renewal and (not plan_renewal.modifications):
+        if plan_renewal:
             plan_renewal.original_plan.set_as_renewed()
     else:
         plan.deny("Some reason", approval_date)
