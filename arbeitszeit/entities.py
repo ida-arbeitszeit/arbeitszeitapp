@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
-from typing import Callable, Union, Optional
+from typing import Callable, Optional, Union
 
 
 @dataclass

@@ -1,17 +1,17 @@
-from flask import Blueprint, render_template, session, redirect, url_for, request, flash
-from flask_login import login_required, current_user
-from project.models import Offer
-from project.forms import ProductSearchForm
+from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+from flask_login import current_user, login_required
+
+from arbeitszeit import entities, use_cases
 from project import database
 from project.database import with_injection
 from project.database.repositories import (
-    ProductOfferRepository,
     MemberRepository,
+    ProductOfferRepository,
     PurchaseRepository,
     TransactionRepository,
 )
-from arbeitszeit import use_cases, entities
-
+from project.forms import ProductSearchForm
+from project.models import Offer
 
 main_member = Blueprint(
     "main_member", __name__, template_folder="templates", static_folder="static"

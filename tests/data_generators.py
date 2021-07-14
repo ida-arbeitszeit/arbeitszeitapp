@@ -5,6 +5,7 @@ from decimal import Decimal
 
 from injector import inject
 
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import (
     Account,
     AccountTypes,
@@ -15,7 +16,6 @@ from arbeitszeit.entities import (
     ProductOffer,
     SocialAccounting,
 )
-from arbeitszeit.datetime_service import DatetimeService
 
 
 @inject

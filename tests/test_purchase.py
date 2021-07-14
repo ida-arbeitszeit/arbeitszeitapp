@@ -1,6 +1,6 @@
 import pytest
 
-from arbeitszeit.entities import PurposesOfPurchases, AccountTypes
+from arbeitszeit.entities import AccountTypes, PurposesOfPurchases
 from arbeitszeit.use_cases import PurchaseProduct
 from tests.data_generators import CompanyGenerator, MemberGenerator, OfferGenerator
 from tests.dependency_injection import injection_test
