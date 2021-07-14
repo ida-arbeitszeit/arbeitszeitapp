@@ -7,7 +7,7 @@ from tests.repositories import TransactionRepository
 
 
 @injection_test
-def test_plan_is_approved(
+def test_that_assertion_error_is_raised_if_plan_has_not_been_approved(
     plan_generator: PlanGenerator,
     social_accounting_generator: SocialAccountingGenerator,
     transaction_repository: TransactionRepository,
