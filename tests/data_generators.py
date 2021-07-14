@@ -24,10 +24,12 @@ class OfferGenerator:
     id_generator: IdGenerator
     company_generator: CompanyGenerator
 
-    def create_offer(self, *, amount=1, provider=None):
+    def create_offer(
+        self, *, name="Product name", amount=1, provider=None, description=""
+    ):
         return ProductOffer(
             id=self.id_generator.get_id(),
-            name="Product name",
+            name=name,
             amount_available=amount,
             deactivate_offer_in_db=lambda: None,
             decrease_amount_available=lambda _: None,
@@ -36,6 +38,7 @@ class OfferGenerator:
             if provider is None
             else provider,
             active=True,
+            description=description,
         )
 
 

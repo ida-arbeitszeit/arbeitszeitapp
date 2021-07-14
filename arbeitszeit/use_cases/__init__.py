@@ -25,6 +25,8 @@ from arbeitszeit.repositories import (
 )
 from arbeitszeit.transaction_factory import TransactionFactory
 
+from .query_products import ProductFilter, QueryProducts
+
 
 @inject
 @dataclass

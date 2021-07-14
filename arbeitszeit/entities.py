@@ -166,6 +166,7 @@ class ProductOffer:
         price_per_unit: Decimal,
         provider: Company,
         active: bool,
+        description: str,
     ) -> None:
         self._id = id
         self.name = name
@@ -175,6 +176,7 @@ class ProductOffer:
         self.price_per_unit = price_per_unit
         self.provider = provider
         self.active = active
+        self.description = description
 
     def deactivate(self) -> None:
         self.active = False

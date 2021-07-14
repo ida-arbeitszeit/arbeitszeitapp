@@ -1,7 +1,15 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import Iterator, List
 
-from arbeitszeit.entities import Account, Company, Member, Plan, Purchase, Transaction
+from arbeitszeit.entities import (
+    Account,
+    Company,
+    Member,
+    Plan,
+    ProductOffer,
+    Purchase,
+    Transaction,
+)
 
 
 class CompanyWorkerRepository(ABC):
@@ -35,4 +43,18 @@ class TransactionRepository(ABC):
 class AccountRepository(ABC):
     @abstractmethod
     def add(self, account: Account) -> None:
+        pass
+
+
+class OfferRepository(ABC):
+    @abstractmethod
+    def query_offers_by_name(self, query: str) -> Iterator[ProductOffer]:
+        pass
+
+    @abstractmethod
+    def query_offers_by_description(self, query: str) -> Iterator[ProductOffer]:
+        pass
+
+    @abstractmethod
+    def all_active_offers(self) -> Iterator[ProductOffer]:
         pass

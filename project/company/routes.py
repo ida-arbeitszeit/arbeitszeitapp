@@ -1,5 +1,6 @@
 import datetime
 from decimal import Decimal
+from typing import Optional
 
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
@@ -85,38 +86,28 @@ def arbeit(
 
 @main_company.route("/company/suchen", methods=["GET", "POST"])
 @login_required
-def suchen():
+@with_injection
+def suchen(
+    query_products: use_cases.QueryProducts, offer_repository: ProductOfferRepository
+):
     """search products in catalog."""
-
     search_form = ProductSearchForm(request.form)
-    results = Offer.query.filter_by(active=True).all()
+    query: Optional[str] = None
+    product_filter = use_cases.ProductFilter.by_name
 
     if request.method == "POST":
-        results = []
-        search_string = search_form.data["search"]
+        query = search_form.data["search"] or None
         search_field = search_form.data["select"]  # Name, Beschr., Kategorie
-
-        if search_string or search_field:
-            if search_field == "Name":
-                results = Offer.query.filter(
-                    Offer.name.contains(search_string), Offer.active == True
-                ).all()
-
-            elif search_field == "Beschreibung":
-                results = Offer.query.filter(
-                    Offer.description.contains(search_string), Offer.active == True
-                ).all()
-
-        else:
-            results = Offer.query.filter_by(active=True).all()
-
-        if not results:
-            flash("Keine Ergebnisse!")
-        else:
-            return render_template(
-                "company/search.html", form=search_form, results=results
-            )
-
+        if search_field == "Name":
+            product_filter = use_cases.ProductFilter.by_name
+        elif search_field == "Beschreibung":
+            product_filter = use_cases.ProductFilter.by_description
+    results = [
+        offer_repository.object_to_orm(offer)
+        for offer in query_products(query, product_filter)
+    ]
+    if not results:
+        flash("Keine Ergebnisse!")
     return render_template("company/search.html", form=search_form, results=results)
 
 
