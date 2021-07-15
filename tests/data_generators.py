@@ -79,6 +79,7 @@ class CompanyGenerator:
             product_account=self.account_generator.create_account(
                 account_type=AccountTypes.prd
             ),
+            workers=[],
         )
 
 

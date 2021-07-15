@@ -3,7 +3,7 @@ from typing import Iterator, List
 from injector import inject, singleton
 
 import arbeitszeit.repositories as interfaces
-from arbeitszeit.entities import ProductOffer, Purchase, Transaction
+from arbeitszeit.entities import Company, Member, ProductOffer, Purchase, Transaction
 
 
 @singleton
@@ -47,3 +47,13 @@ class OfferRepository(interfaces.OfferRepository):
 
     def add_offer(self, offer: ProductOffer) -> None:
         self.offers.append(offer)
+
+
+@singleton
+class CompanyWorkerRepository(interfaces.CompanyWorkerRepository):
+    def add_worker_to_company(self, company: Company, worker: Member) -> None:
+        if worker not in company.workers:
+            company.workers.append(worker)
+
+    def get_company_workers(self, company: Company) -> List[Member]:
+        return company.workers

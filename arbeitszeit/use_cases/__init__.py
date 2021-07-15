@@ -229,6 +229,7 @@ def send_work_certificates_to_worker(
     # adjust balances
     adjust_balance(company.work_account, -amount)
     adjust_balance(worker.account, amount)
+
     # create transaction
     transaction_factory = TransactionFactory()
     transaction = transaction_factory.create_transaction(
