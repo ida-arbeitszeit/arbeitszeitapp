@@ -102,7 +102,7 @@ class Plan:
         prd_unit: str,
         prd_amount: int,
         description: str,
-        timeframe: Decimal,
+        timeframe: int,
         approved: bool,
         approval_date: datetime,
         approval_reason: Optional[str],
