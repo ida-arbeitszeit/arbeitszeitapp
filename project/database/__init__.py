@@ -2,15 +2,24 @@ from __future__ import annotations
 
 from functools import wraps
 
-from injector import Injector, inject
+from injector import Binder, ClassProvider, Injector, inject
 
 from arbeitszeit import entities
+from arbeitszeit import repositories as interfaces
 from project.extensions import db
 from project.models import Account, Company, Member, Offer, SocialAccounting
 
-from .repositories import CompanyRepository
+from .repositories import CompanyRepository, ProductOfferRepository
 
-_injector = Injector()
+
+def configure_injector(binder: Binder) -> None:
+    binder.bind(
+        interfaces.OfferRepository,
+        to=ClassProvider(ProductOfferRepository),
+    )
+
+
+_injector = Injector(configure_injector)
 
 
 def with_injection(original_function):

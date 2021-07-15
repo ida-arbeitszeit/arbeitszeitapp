@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import List, Optional, TypeVar
+from typing import Iterator, List, Optional, TypeVar
 
 from injector import inject
 
@@ -203,7 +203,7 @@ class PurchaseRepository(repositories.PurchaseRepository):
 
 @inject
 @dataclass
-class ProductOfferRepository:
+class ProductOfferRepository(repositories.OfferRepository):
     company_repository: CompanyRepository
 
     def object_to_orm(self, product_offer: entities.ProductOffer) -> Offer:
@@ -227,11 +227,36 @@ class ProductOfferRepository:
             price_per_unit=price_per_unit,
             provider=self.company_repository.object_from_orm(plan.company),
             active=offer_orm.active,
+            description=offer_orm.description,
         )
 
     def get_by_id(self, id: int) -> Optional[entities.ProductOffer]:
         offer_orm = Offer.query.filter_by(id=id).first()
         return self.object_from_orm(offer_orm) if offer_orm else None
+
+    def all_active_offers(self) -> Iterator[entities.ProductOffer]:
+        return (
+            self.object_from_orm(offer)
+            for offer in Offer.query.filter_by(active=True).all()
+        )
+
+    def query_offers_by_name(self, query: str) -> Iterator[entities.ProductOffer]:
+        return (
+            self.object_from_orm(offer)
+            for offer in Offer.query.filter(
+                Offer.name.contains(query), Offer.active == True
+            ).all()
+        )
+
+    def query_offers_by_description(
+        self, query: str
+    ) -> Iterator[entities.ProductOffer]:
+        return (
+            self.object_from_orm(offer)
+            for offer in Offer.query.filter(
+                Offer.description.contains(query), Offer.active == True
+            ).all()
+        )
 
 
 @inject
