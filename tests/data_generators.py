@@ -52,7 +52,9 @@ class MemberGenerator:
         return Member(
             id=self.id_generator.get_id(),
             name="Member name",
-            account=self.account_generator.create_account(account_type="member"),
+            account=self.account_generator.create_account(
+                account_type=AccountTypes.member
+            ),
         )
 
 
@@ -65,12 +67,18 @@ class CompanyGenerator:
     def create_company(self) -> Company:
         return Company(
             id=self.id_generator.get_id(),
-            means_account=self.account_generator.create_account(account_type="p"),
-            raw_material_account=self.account_generator.create_account(
-                account_type="r"
+            means_account=self.account_generator.create_account(
+                account_type=AccountTypes.p
             ),
-            work_account=self.account_generator.create_account(account_type="a"),
-            product_account=self.account_generator.create_account(account_type="prd"),
+            raw_material_account=self.account_generator.create_account(
+                account_type=AccountTypes.r
+            ),
+            work_account=self.account_generator.create_account(
+                account_type=AccountTypes.a
+            ),
+            product_account=self.account_generator.create_account(
+                account_type=AccountTypes.prd
+            ),
         )
 
 
@@ -101,7 +109,7 @@ class SocialAccountingGenerator:
 class AccountGenerator:
     id_generator: IdGenerator
 
-    def create_account(self, account_type="p") -> Account:
+    def create_account(self, account_type=AccountTypes.p) -> Account:
         return Account(
             id=self.id_generator.get_id(),
             account_owner_id=self.id_generator.get_id(),
