@@ -4,59 +4,60 @@
 
 
 <section class="hero is-fullheight">
-    <div class="hero-head">
-      <nav class="navbar is-light" role="navigation" aria-label="main navigation">
-        <div class="navbar-brand">
-          <a role="button" class="navbar-burger" onclick="expandMenu()" aria-label="menu" aria-expanded="false" data-target="navbarOnTop">
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-          </a>
-        </div>
-        <div id="navbarOnTop" class="navbar-menu">
-            <div class="navbar-end">
-                <div class="navbar-item">
-                  <a class="button is-primary" href="{{ url_for('auth.help') }}">
-                      Hilfe
-                  </a>
-                </div>
-            </div>
-        </div>
-      </nav>
+  <div class="hero-head">
+    <nav class="navbar is-light" role="navigation" aria-label="main navigation">
+      <div class="navbar-brand">
+        <a role="button" class="navbar-burger" onclick="expandMenu()" aria-label="menu" aria-expanded="false"
+          data-target="navbarOnTop">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
       </div>
-
-      <div class="hero-body">
-          <div class="container has-text-centered">
-            <h1 class="title">
-              Betriebe 2020
-            </h1>
-            <h2 class="subtitle">
-              Eine Plattform für Arbeitszeitrechnung.
-            </h2>
-            <div class="buttons is-centered">
-              <a class="button" href="{{ url_for('auth.login_member') }}">Mitglied</a>
-              <a class="button" href="{{ url_for('auth.login_company') }}">Betrieb</a>
-            </div>
-            {% with messages = get_flashed_messages() %}
-            {% if messages %}
-              <div class="notification is-danger">
-                  {{ messages[0] }}
-              </div>
-            {% endif %}
-            {% endwith %}
-
+      <div id="navbarOnTop" class="navbar-menu">
+        <div class="navbar-end">
+          <div class="navbar-item">
+            <a class="button is-primary" href="{{ url_for('auth.help') }}">
+              Hilfe
+            </a>
           </div>
-
+        </div>
       </div>
-
-
-<footer class="footer">
-  <div class="content has-text-centered">
-    <p>
-      App-Version: 14/02/2021
-    </p>
+    </nav>
   </div>
-</footer>
+
+  <div class="hero-body">
+    <div class="container has-text-centered">
+      <h1 class="title">
+        Betriebe 2020
+      </h1>
+      <h2 class="subtitle">
+        Eine Plattform für Arbeitszeitrechnung.
+      </h2>
+      <div class="buttons is-centered">
+        <a class="button" href="{{ url_for('auth.login_member') }}">Mitglied</a>
+        <a class="button" href="{{ url_for('auth.login_company') }}">Betrieb</a>
+      </div>
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      <div class="notification is-danger">
+        {{ messages[0] }}
+      </div>
+      {% endif %}
+      {% endwith %}
+
+    </div>
+
+  </div>
+
+
+  <footer class="footer">
+    <div class="content has-text-centered">
+      <p>
+        App-Version: 15/07/2021
+      </p>
+    </div>
+  </footer>
 
 
 </section>

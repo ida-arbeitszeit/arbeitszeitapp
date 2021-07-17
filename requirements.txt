@@ -25,7 +25,6 @@ injector==0.18.4
 itsdangerous==1.1.0
 jedi==0.18.0
 Jinja2==2.11.2
-pandas==1.1.5
 parso==0.8.1
 passlib==1.7.4
 pexpect==4.8.0
