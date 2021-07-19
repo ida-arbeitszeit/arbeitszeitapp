@@ -20,3 +20,11 @@ need to do is to open the "index" view of the application. That is
 usually ``http://localhost:5000/``. The reason for that is that
 currently there is some database initialization being run when the
 view is rendered for the first time.
+
+Database Migration
+==================
+
+We use Flask-Migrate for database migration. Run ``flask db migrate`` to 
+autodetect changes to the models. Run ``flask db upgrade`` 
+to upgrade the database. See https://flask-migrate.readthedocs.io/en/latest/ 
+for more info about Flask-Migrate.
