@@ -22,6 +22,11 @@ class RepositoryModule(Module):
     ) -> interfaces.TransactionRepository:
         return repo
 
+    def provide_company_worker_repo(
+        self, repo: repositories.CompanyWorkerRepository
+    ) -> interfaces.CompanyWorkerRepository:
+        return repo
+
 
 def injection_test(original_test):
     injector = Injector(RepositoryModule())
