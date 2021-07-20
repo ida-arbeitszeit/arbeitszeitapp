@@ -39,15 +39,15 @@ class CompanyWorkerRepository(repositories.CompanyWorkerRepository):
     ) -> None:
         company_orm = self.company_repository.object_to_orm(company)
         worker_orm = self.member_repository.object_to_orm(worker)
+        # add in database
         if worker_orm not in company_orm.workers:
             company_orm.workers.append(worker_orm)
+        # add in object
+        if worker not in company.workers:
+            company.workers.append(worker)
 
     def get_company_workers(self, company: entities.Company) -> List[entities.Member]:
-        company_orm = self.company_repository.object_to_orm(company)
-        return [
-            self.member_repository.object_from_orm(member_orm)
-            for member_orm in company_orm.workers
-        ]
+        return company.workers
 
 
 @inject
@@ -73,6 +73,7 @@ class MemberRepository:
 @dataclass
 class CompanyRepository:
     account_repository: AccountRepository
+    member_repository: MemberRepository
 
     def object_to_orm(self, company: entities.Company) -> Company:
         return Company.query.get(company.id)
@@ -94,6 +95,10 @@ class CompanyRepository:
             product_account=self.account_repository.object_from_orm(
                 product_account_orm
             ),
+            workers=[
+                self.member_repository.object_from_orm(worker_orm)
+                for worker_orm in company_orm.workers
+            ],
         )
 
     def get_by_id(self, id: int) -> Optional[entities.Company]:

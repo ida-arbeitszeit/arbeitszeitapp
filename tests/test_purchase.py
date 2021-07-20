@@ -147,7 +147,7 @@ def test_correct_transaction_added_to_repo(
     added_transaction_account_type = (
         transaction_repository.transactions.pop().account_from.account_type
     )
-    member_account_type = AccountTypes.member.value
+    member_account_type = AccountTypes.member
     assert added_transaction_account_type == member_account_type
 
     # company, means of production
@@ -160,7 +160,7 @@ def test_correct_transaction_added_to_repo(
     added_transaction_account_type = (
         transaction_repository.transactions.pop().account_from.account_type
     )
-    means_account_type = AccountTypes.p.value
+    means_account_type = AccountTypes.p
     assert added_transaction_account_type == means_account_type
 
     # company, raw materials
@@ -174,5 +174,5 @@ def test_correct_transaction_added_to_repo(
     added_transaction_account_type = (
         transaction_repository.transactions.pop().account_from.account_type
     )
-    raw_material_account_type = AccountTypes.r.value
+    raw_material_account_type = AccountTypes.r
     assert added_transaction_account_type == raw_material_account_type

@@ -57,24 +57,23 @@ def arbeit(
     member_repository: MemberRepository,
     company_worker_repository: CompanyWorkerRepository,
 ):
-    """shows workers and worked hours."""
-    if request.method == "POST":  # (add worker to company)
+    """shows workers and add workers to company."""
+    if request.method == "POST":  # add worker to company
         company = company_repository.get_by_id(current_user.id)
-        if not company:
-            flash("Angemeldeter Betrieb konnte nicht ermittelt werden.")
-            return redirect(url_for("auth.start"))
         member = member_repository.get_member_by_id(request.form["member"])
-        if not member:
-            flash("Mitglied existiert nicht.")
-            return redirect(url_for("main_company.arbeit"))
         try:
             use_cases.add_worker_to_company(
                 company_worker_repository,
                 company,
                 member,
             )
+        except errors.CompanyDoesNotExist:
+            flash("Angemeldeter Betrieb konnte nicht ermittelt werden.")
+            return redirect(url_for("auth.start"))
         except errors.WorkerAlreadyAtCompany:
             flash("Mitglied ist bereits in diesem Betrieb beschäftigt.")
+        except errors.WorkerDoesNotExist:
+            flash("Mitglied existiert nicht.")
         database.commit_changes()
         return redirect(url_for("main_company.arbeit"))
     elif request.method == "GET":

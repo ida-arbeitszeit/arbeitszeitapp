@@ -52,7 +52,9 @@ class MemberGenerator:
         return Member(
             id=self.id_generator.get_id(),
             name="Member name",
-            account=self.account_generator.create_account(account_type="member"),
+            account=self.account_generator.create_account(
+                account_type=AccountTypes.member
+            ),
         )
 
 
@@ -65,12 +67,19 @@ class CompanyGenerator:
     def create_company(self) -> Company:
         return Company(
             id=self.id_generator.get_id(),
-            means_account=self.account_generator.create_account(account_type="p"),
-            raw_material_account=self.account_generator.create_account(
-                account_type="r"
+            means_account=self.account_generator.create_account(
+                account_type=AccountTypes.p
             ),
-            work_account=self.account_generator.create_account(account_type="a"),
-            product_account=self.account_generator.create_account(account_type="prd"),
+            raw_material_account=self.account_generator.create_account(
+                account_type=AccountTypes.r
+            ),
+            work_account=self.account_generator.create_account(
+                account_type=AccountTypes.a
+            ),
+            product_account=self.account_generator.create_account(
+                account_type=AccountTypes.prd
+            ),
+            workers=[],
         )
 
 
@@ -101,7 +110,7 @@ class SocialAccountingGenerator:
 class AccountGenerator:
     id_generator: IdGenerator
 
-    def create_account(self, account_type="p") -> Account:
+    def create_account(self, account_type=AccountTypes.p) -> Account:
         return Account(
             id=self.id_generator.get_id(),
             account_owner_id=self.id_generator.get_id(),
@@ -118,7 +127,9 @@ class PlanGenerator:
     company_generator: CompanyGenerator
     datetime_service: DatetimeService
 
-    def create_plan(self, plan_creation_date=None, approved=False) -> Plan:
+    def create_plan(
+        self, plan_creation_date=None, timeframe=14, approved=False
+    ) -> Plan:
         return Plan(
             id=self.id_generator.get_id(),
             plan_creation_date=self.datetime_service.now()
@@ -132,7 +143,7 @@ class PlanGenerator:
             prd_unit="500 Gramm",
             prd_amount=100,
             description="Beschreibung für Produkt A.",
-            timeframe=Decimal(14),
+            timeframe=int(timeframe),
             approved=approved,
             approval_date=None,
             approval_reason=None,

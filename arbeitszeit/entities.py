@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
-from typing import Callable, Optional, Union
+from typing import Callable, List, Optional, Union
 
 
 @dataclass
@@ -42,12 +42,14 @@ class Company:
         raw_material_account: Account,
         work_account: Account,
         product_account: Account,
+        workers: List[Member],
     ) -> None:
         self._id = id
         self.means_account = means_account
         self.raw_material_account = raw_material_account
         self.work_account = work_account
         self.product_account = product_account
+        self.workers = workers
 
     @property
     def id(self):
@@ -102,7 +104,7 @@ class Plan:
         prd_unit: str,
         prd_amount: int,
         description: str,
-        timeframe: Decimal,
+        timeframe: int,
         approved: bool,
         approval_date: datetime,
         approval_reason: Optional[str],
