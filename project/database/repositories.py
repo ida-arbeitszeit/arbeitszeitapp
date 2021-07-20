@@ -281,7 +281,7 @@ class PlanRepository(repositories.PlanRepository):
             prd_unit=plan.prd_unit,
             prd_amount=plan.prd_amount,
             description=plan.description,
-            timeframe=plan.timeframe,
+            timeframe_in_days=plan.timeframe_in_days,
             approved=plan.approved,
             approval_date=plan.approval_date,
             approval_reason=plan.approval_reason,

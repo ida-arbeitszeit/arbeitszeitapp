@@ -172,7 +172,7 @@ def create_plan(
         prd_unit = request.form["prd_unit"]
         prd_amount = int(request.form["prd_amount"])
         description = request.form["description"]
-        timeframe = int(request.form["timeframe"])
+        timeframe_in_days = int(request.form["timeframe_in_days"])
 
         plan_orm = Plan(
             plan_creation_date=DatetimeService().now(),
@@ -184,7 +184,7 @@ def create_plan(
             prd_unit=prd_unit,
             prd_amount=prd_amount,
             description=description,
-            timeframe=timeframe,
+            timeframe_in_days=timeframe_in_days,
             social_accounting=1,
         )
         db.session.add(plan_orm)
@@ -202,7 +202,7 @@ def create_plan(
                 and (prd_unit == plan_to_renew.prd_unit)
                 and (prd_amount == plan_to_renew.prd_amount)
                 and (description == plan_to_renew.description)
-                and (timeframe == plan_to_renew.timeframe)
+                and (timeframe_in_days == plan_to_renew.timeframe_in_days)
             ):
                 plan_modifications = False
             else:
@@ -252,7 +252,7 @@ def my_plans(
 
     for plan in plans:
         expiration_date = plan.plan_creation_date + datetime.timedelta(
-            days=int(plan.timeframe)
+            days=int(plan.timeframe_in_days)
         )
         expiration_relative = DatetimeService().now() - expiration_date
         seconds_until_exp = abs(expiration_relative.total_seconds())

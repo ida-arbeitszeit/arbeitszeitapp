@@ -132,7 +132,7 @@ class PlanGenerator:
             prd_unit="500 Gramm",
             prd_amount=100,
             description="Beschreibung für Produkt A.",
-            timeframe=Decimal(14),
+            timeframe_in_days=int(14),
             approved=approved,
             approval_date=None,
             approval_reason=None,

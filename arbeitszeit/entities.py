@@ -102,7 +102,7 @@ class Plan:
         prd_unit: str,
         prd_amount: int,
         description: str,
-        timeframe: Decimal,
+        timeframe_in_days: int,
         approved: bool,
         approval_date: datetime,
         approval_reason: Optional[str],
@@ -122,7 +122,7 @@ class Plan:
         self.prd_unit = prd_unit
         self.prd_amount = prd_amount
         self.description = description
-        self.timeframe = timeframe
+        self.timeframe_in_days = timeframe_in_days
         self.approved = approved
         self.approval_date = approval_date
         self.approval_reason = approval_reason

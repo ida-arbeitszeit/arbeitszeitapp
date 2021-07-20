@@ -67,7 +67,7 @@ class Plan(UserMixin, db.Model):
     prd_unit = db.Column(db.String(100), nullable=False)
     prd_amount = db.Column(db.Integer, nullable=False)
     description = db.Column(db.String(5000), nullable=False)
-    timeframe = db.Column(db.Numeric(), nullable=False)
+    timeframe_in_days = db.Column(db.Integer(), nullable=False)
     social_accounting = db.Column(
         db.Integer, db.ForeignKey("social_accounting.id"), nullable=False
     )

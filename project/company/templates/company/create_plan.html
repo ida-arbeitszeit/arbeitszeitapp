@@ -70,9 +70,9 @@
 
       <div class="field">
         <div class="control">
-          <label for="timeframe">Planungszeitraum:</label>
-          <input class="input is-large" type="number" name="timeframe" min=1 max=365
-            value="{{ plan_to_renew.timeframe if plan_to_renew else 1 }}" required>
+          <label for="timeframe_in_days">Planungszeitraum:</label>
+          <input class="input is-large" type="number" name="timeframe_in_days" min=1 max=365
+            value="{{ plan_to_renew.timeframe_in_days if plan_to_renew else 1 }}" required>
           <p class="help">(Wieviele Tage umfasst der Planungszeitraum?)</p>
         </div>
       </div>

@@ -196,7 +196,7 @@ def check_plans_for_expiration(plans: List[Plan]) -> List[Plan]:
 
     for plan in plans:
         expiration_date = plan.plan_creation_date + datetime.timedelta(
-            days=int(plan.timeframe)
+            days=int(plan.timeframe_in_days)
         )
         expiration_relative = DatetimeService().now() - expiration_date
         seconds = expiration_relative.total_seconds()
