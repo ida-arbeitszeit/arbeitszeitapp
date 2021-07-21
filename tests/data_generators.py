@@ -128,14 +128,16 @@ class PlanGenerator:
     datetime_service: DatetimeService
 
     def create_plan(
-        self, plan_creation_date=None, timeframe=14, approved=False
+        self, plan_creation_date=None, planner=None, timeframe=14, approved=False
     ) -> Plan:
         return Plan(
             id=self.id_generator.get_id(),
             plan_creation_date=self.datetime_service.now()
             if plan_creation_date is None
             else plan_creation_date,
-            planner=self.company_generator.create_company(),
+            planner=self.company_generator.create_company()
+            if planner is None
+            else planner,
             costs_p=Decimal(10),
             costs_r=Decimal(20),
             costs_a=Decimal(30),

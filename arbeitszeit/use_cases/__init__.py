@@ -252,10 +252,16 @@ def pay_means_of_production(
     sender: Company,
     receiver: Company,
     plan: Plan,
-    amount: int,
+    pieces: int,
     purpose: PurposesOfPurchases,
 ) -> None:
-    """payment of means of production or raw materials which were not offered/bought on the app's marketplace."""
+    """payment of means of production or raw materials which
+    were not offered/bought on the app's marketplace."""
+    assert purpose in (
+        PurposesOfPurchases.means_of_prod,
+        PurposesOfPurchases.raw_materials,
+    ), "Not a valid purpose for this operation."
+
     if not receiver:
         raise errors.CompanyDoesNotExist(
             company=receiver,
@@ -269,16 +275,15 @@ def pay_means_of_production(
             company=receiver,
             planner=plan.planner,
         )
-    # no purchase!
 
     # reduce balance of buyer
-    price_total = amount * (plan.costs_p + plan.costs_r + plan.costs_a)
-    if purpose == "means_of_prod":
+    price_total = pieces * (plan.costs_p + plan.costs_r + plan.costs_a)
+    if purpose == PurposesOfPurchases.means_of_prod:
         adjust_balance(
             sender.means_account,
             -price_total,
         )
-    elif purpose == "raw_materials":
+    elif purpose == PurposesOfPurchases.raw_materials:
         adjust_balance(
             sender.raw_material_account,
             -price_total,
@@ -288,9 +293,9 @@ def pay_means_of_production(
     adjust_balance(plan.planner.product_account, price_total)
 
     # create transaction
-    if purpose == "means_of_prod":
+    if purpose == PurposesOfPurchases.means_of_prod:
         account_from = sender.means_account
-    elif purpose == "raw_materials":
+    elif purpose == PurposesOfPurchases.raw_materials:
         account_from = sender.raw_material_account
 
     transaction_factory = TransactionFactory()
