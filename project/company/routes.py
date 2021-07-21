@@ -443,11 +443,11 @@ def transfer_to_company(
         sender = company_repository.get_by_id(current_user.id)
         plan = plan_repository.get_by_id(request.form["plan_id"])
         receiver = company_repository.get_by_id(request.form["company_id"])
-        amount = Decimal(request.form["amount"])
+        pieces = int(request.form["amount"])
         purpose = (
-            "means_of_prod"
+            entities.PurposesOfPurchases.means_of_prod
             if request.form["category"] == "Produktionsmittel"
-            else "raw_materials"
+            else entities.PurposesOfPurchases.raw_materials
         )
         try:
             use_cases.pay_means_of_production(
@@ -455,7 +455,7 @@ def transfer_to_company(
                 sender,
                 receiver,
                 plan,
-                amount,
+                pieces,
                 purpose,
             )
             database.commit_changes()
