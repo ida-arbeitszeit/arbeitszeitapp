@@ -15,6 +15,14 @@ of this project.
 Caveats
 =======
 
+To run the app in development mode you first have to define some environment variables::
+
+    $ export FLASK_ENV=development
+    $ export ARBEITSZEIT_APP_CONFIGURATION="$PWD/development-settings.py"
+    $ export DEV_DATABASE_URI="sqlite:///$(pwd)/db.sqlite3" 
+    $ export DEV_SECRET_KEY=my_secret_key
+
+Afterwards you can start the development server with ``flask run``.
 When you are starting from a "fresh" database the first thing that you
 need to do is to open the "index" view of the application. That is
 usually ``http://localhost:5000/``. The reason for that is that
