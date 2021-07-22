@@ -151,10 +151,8 @@ def buy(
 @login_required
 @with_injection
 def create_plan(
+    grant_credit: use_cases.GrantCredit,
     plan_repository: PlanRepository,
-    accounting_repository: AccountingRepository,
-    transaction_repository: TransactionRepository,
-    transaction_factory: TransactionFactory,
 ):
 
     if request.args.get("renew"):
@@ -217,10 +215,7 @@ def create_plan(
         plan = use_cases.seek_approval(DatetimeService(), plan, plan_renewal)
         database.commit_changes()
         if plan.approved:
-            social_accounting = accounting_repository.get_by_id(1)
-            use_cases.grant_credit(
-                plan, social_accounting, transaction_repository, transaction_factory
-            )
+            grant_credit(plan)
             database.commit_changes()
             flash("Plan erfolgreich erstellt und genehmigt. Kredit wurde gewährt.")
             return redirect("/company/my_plans")

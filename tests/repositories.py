@@ -19,10 +19,10 @@ class PurchaseRepository(interfaces.PurchaseRepository):
 @singleton
 class TransactionRepository(interfaces.TransactionRepository):
     @inject
-    def __init__(self):
-        self.transactions = []
+    def __init__(self) -> None:
+        self.transactions: List[Transaction] = []
 
-    def add(self, transaction: Transaction):
+    def add(self, transaction: Transaction) -> None:
         self.transactions.append(transaction)
 
 
