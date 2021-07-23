@@ -27,6 +27,7 @@ from arbeitszeit.transaction_factory import TransactionFactory
 from .adjust_balance import adjust_balance
 from .grant_credit import GrantCredit
 from .query_products import ProductFilter, QueryProducts
+from .send_work_certificates_to_worker import SendWorkCertificatesToWorker
 
 
 @inject
@@ -176,41 +177,6 @@ def check_plans_for_expiration(plans: List[Plan]) -> List[Plan]:
             plan.set_as_expired()
 
     return plans
-
-
-def send_work_certificates_to_worker(
-    company_worker_repository: CompanyWorkerRepository,
-    transaction_repository: TransactionRepository,
-    company: Company,
-    worker: Member,
-    amount: Decimal,
-) -> None:
-    """This function may raise a WorkerNotAtCompany or a WorkerDoesNotExist exception if the
-    worker does not exist/is not employed at the company."""
-    company_workers = company_worker_repository.get_company_workers(company)
-    if not worker:
-        raise errors.WorkerDoesNotExist(
-            worker=worker,
-        )
-    if worker not in company_workers:
-        raise errors.WorkerNotAtCompany(
-            worker=worker,
-            company=company,
-        )
-
-    # adjust balances
-    adjust_balance(company.work_account, -amount)
-    adjust_balance(worker.account, amount)
-
-    # create transaction
-    transaction_factory = TransactionFactory()
-    transaction = transaction_factory.create_transaction(
-        account_from=company.work_account,
-        account_to=worker.account,
-        amount=amount,
-        purpose="Lohn",
-    )
-    transaction_repository.add(transaction)
 
 
 def pay_means_of_production(

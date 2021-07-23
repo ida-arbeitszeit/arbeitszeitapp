@@ -11,7 +11,6 @@ from arbeitszeit.transaction_factory import TransactionFactory
 from project import database
 from project.database import with_injection
 from project.database.repositories import (
-    AccountingRepository,
     CompanyRepository,
     CompanyWorkerRepository,
     MemberRepository,
@@ -398,22 +397,19 @@ def my_accounts():
 @login_required
 @with_injection
 def transfer_to_worker(
-    transaction_repository: TransactionRepository,
+    send_work_certificates_to_worker: use_cases.SendWorkCertificatesToWorker,
     company_repository: CompanyRepository,
     member_repository: MemberRepository,
-    company_worker_repository: CompanyWorkerRepository,
 ):
     if request.method == "POST":
-        sender = company_repository.get_by_id(current_user.id)
-        receiver = member_repository.get_member_by_id(request.form["member_id"])
+        company = company_repository.get_by_id(current_user.id)
+        worker = member_repository.get_member_by_id(request.form["member_id"])
         amount = Decimal(request.form["amount"])
 
         try:
-            use_cases.send_work_certificates_to_worker(
-                company_worker_repository,
-                transaction_repository,
-                sender,
-                receiver,
+            send_work_certificates_to_worker(
+                company,
+                worker,
                 amount,
             )
             database.commit_changes()
