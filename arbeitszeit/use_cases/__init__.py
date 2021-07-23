@@ -8,14 +8,12 @@ from injector import inject
 from arbeitszeit import errors
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import (
-    Account,
     Company,
     Member,
     Plan,
     PlanRenewal,
     ProductOffer,
     PurposesOfPurchases,
-    SocialAccounting,
 )
 from arbeitszeit.purchase_factory import PurchaseFactory
 from arbeitszeit.repositories import (
@@ -25,7 +23,10 @@ from arbeitszeit.repositories import (
 )
 from arbeitszeit.transaction_factory import TransactionFactory
 
+# do not delete
 from .query_products import ProductFilter, QueryProducts
+from .adjust_balance import adjust_balance
+from .grant_credit import GrantCredit
 
 
 @inject
@@ -117,12 +118,6 @@ def deactivate_offer(product_offer: ProductOffer) -> ProductOffer:
     return product_offer
 
 
-def adjust_balance(account: Account, amount: Decimal) -> Account:
-    """changes the balance of specified accounts."""
-    account.change_credit(amount)
-    return account
-
-
 def add_worker_to_company(
     company_worker_repository: CompanyWorkerRepository,
     company: Company,
@@ -164,37 +159,6 @@ def seek_approval(
     else:
         plan.deny("Some reason", approval_date)
     return plan
-
-
-@inject
-@dataclass
-class GrantCredit:
-    transaction_repository: TransactionRepository
-    transaction_factory: TransactionFactory
-    social_accounting: SocialAccounting
-
-    def __call__(self, plan: Plan):
-        """Social Accounting grants credit after plan has been approved."""
-        assert plan.approved, "Plan has not been approved!"
-        social_accounting_account = self.social_accounting.account
-
-        prd = plan.costs_p + plan.costs_r + plan.costs_a
-        accounts_and_amounts = [
-            (plan.planner.means_account, plan.costs_p),
-            (plan.planner.raw_material_account, plan.costs_r),
-            (plan.planner.work_account, plan.costs_a),
-            (plan.planner.product_account, -prd),
-        ]
-
-        for account, amount in accounts_and_amounts:
-            adjust_balance(account, amount)
-            transaction = self.transaction_factory.create_transaction(
-                account_from=social_accounting_account,
-                account_to=account,
-                amount=amount,
-                purpose=f"Plan-Id: {plan.id}",
-            )
-            self.transaction_repository.add(transaction)
 
 
 def check_plans_for_expiration(plans: List[Plan]) -> List[Plan]:
