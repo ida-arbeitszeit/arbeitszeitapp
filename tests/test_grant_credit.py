@@ -1,11 +1,11 @@
 import pytest
 
-from arbeitszeit.use_cases import GrantCredit
 from arbeitszeit.entities import AccountTypes
+from arbeitszeit.use_cases import GrantCredit
+from tests.dependency_injection import injection_test
 from tests.repositories import TransactionRepository
 
 from .data_generators import PlanGenerator, SocialAccountingGenerator
-from tests.dependency_injection import injection_test
 
 
 @injection_test

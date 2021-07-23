@@ -1,8 +1,11 @@
-from injector import inject
 from dataclasses import dataclass
-from arbeitszeit.transaction_factory import TransactionFactory
-from arbeitszeit.repositories import TransactionRepository
+
+from injector import inject
+
 from arbeitszeit.entities import Plan, SocialAccounting
+from arbeitszeit.repositories import TransactionRepository
+from arbeitszeit.transaction_factory import TransactionFactory
+
 from .adjust_balance import adjust_balance
 
 

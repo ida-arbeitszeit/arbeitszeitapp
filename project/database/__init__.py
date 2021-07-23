@@ -10,11 +10,11 @@ from project.extensions import db
 from project.models import Account, Company, Member, Offer, SocialAccounting
 
 from .repositories import (
+    AccountingRepository,
+    AccountRepository,
     CompanyRepository,
     ProductOfferRepository,
     TransactionRepository,
-    AccountRepository,
-    AccountingRepository,
 )
 
 

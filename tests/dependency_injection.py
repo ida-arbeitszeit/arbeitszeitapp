@@ -2,8 +2,7 @@ from injector import Injector, Module, inject, provider
 
 import arbeitszeit.repositories as interfaces
 from arbeitszeit import entities
-from tests import repositories
-from tests import data_generators
+from tests import data_generators, repositories
 
 
 class RepositoryModule(Module):

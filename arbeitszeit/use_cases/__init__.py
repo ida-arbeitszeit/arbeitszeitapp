@@ -24,9 +24,9 @@ from arbeitszeit.repositories import (
 from arbeitszeit.transaction_factory import TransactionFactory
 
 # do not delete
-from .query_products import ProductFilter, QueryProducts
 from .adjust_balance import adjust_balance
 from .grant_credit import GrantCredit
+from .query_products import ProductFilter, QueryProducts
 
 
 @inject

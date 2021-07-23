@@ -1,7 +1,8 @@
-from .dependency_injection import injection_test
 from arbeitszeit.use_cases import check_plans_for_expiration
 from tests.data_generators import PlanGenerator
 from tests.datetime_service import TestDatetimeService
+
+from .dependency_injection import injection_test
 
 
 @injection_test

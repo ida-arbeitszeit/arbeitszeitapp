@@ -1,4 +1,5 @@
 from decimal import Decimal
+
 from arbeitszeit.entities import Account
 
 

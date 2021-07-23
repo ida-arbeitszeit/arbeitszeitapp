@@ -1,13 +1,14 @@
 import pytest
-from arbeitszeit.use_cases import add_worker_to_company
-from tests.dependency_injection import injection_test
-from tests.repositories import CompanyWorkerRepository
-from tests.data_generators import CompanyGenerator, MemberGenerator
+
 from arbeitszeit.errors import (
     CompanyDoesNotExist,
-    WorkerDoesNotExist,
     WorkerAlreadyAtCompany,
+    WorkerDoesNotExist,
 )
+from arbeitszeit.use_cases import add_worker_to_company
+from tests.data_generators import CompanyGenerator, MemberGenerator
+from tests.dependency_injection import injection_test
+from tests.repositories import CompanyWorkerRepository
 
 
 @injection_test

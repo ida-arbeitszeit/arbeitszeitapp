@@ -1,10 +1,11 @@
 import pytest
-from arbeitszeit.use_cases import send_work_certificates_to_worker
+
 from arbeitszeit.entities import AccountTypes
+from arbeitszeit.errors import WorkerDoesNotExist, WorkerNotAtCompany
+from arbeitszeit.use_cases import send_work_certificates_to_worker
+from tests.data_generators import CompanyGenerator, MemberGenerator
 from tests.dependency_injection import injection_test
 from tests.repositories import CompanyWorkerRepository, TransactionRepository
-from tests.data_generators import CompanyGenerator, MemberGenerator
-from arbeitszeit.errors import WorkerDoesNotExist, WorkerNotAtCompany
 
 
 @injection_test
