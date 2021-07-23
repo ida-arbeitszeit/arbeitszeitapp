@@ -26,6 +26,7 @@ from arbeitszeit.transaction_factory import TransactionFactory
 # do not delete
 from .adjust_balance import adjust_balance
 from .grant_credit import GrantCredit
+from .pay_means_of_production import PayMeansOfProduction
 from .query_products import ProductFilter, QueryProducts
 from .send_work_certificates_to_worker import SendWorkCertificatesToWorker
 
@@ -177,61 +178,3 @@ def check_plans_for_expiration(plans: List[Plan]) -> List[Plan]:
             plan.set_as_expired()
 
     return plans
-
-
-def pay_means_of_production(
-    transaction_repository: TransactionRepository,
-    sender: Company,
-    receiver: Company,
-    plan: Plan,
-    amount: int,
-    purpose: PurposesOfPurchases,
-) -> None:
-    """payment of means of production or raw materials which were not offered/bought on the app's marketplace."""
-    if not receiver:
-        raise errors.CompanyDoesNotExist(
-            company=receiver,
-        )
-    if not plan:
-        raise errors.PlanDoesNotExist(
-            plan=plan,
-        )
-    if plan.planner != receiver:
-        raise errors.CompanyIsNotPlanner(
-            company=receiver,
-            planner=plan.planner,
-        )
-    # no purchase!
-
-    # reduce balance of buyer
-    price_total = amount * (plan.costs_p + plan.costs_r + plan.costs_a)
-    if purpose == "means_of_prod":
-        adjust_balance(
-            sender.means_account,
-            -price_total,
-        )
-    elif purpose == "raw_materials":
-        adjust_balance(
-            sender.raw_material_account,
-            -price_total,
-        )
-
-    # increase balance of seller
-    adjust_balance(plan.planner.product_account, price_total)
-
-    # create transaction
-    if purpose == "means_of_prod":
-        account_from = sender.means_account
-    elif purpose == "raw_materials":
-        account_from = sender.raw_material_account
-
-    transaction_factory = TransactionFactory()
-    transaction = transaction_factory.create_transaction(
-        account_from=account_from,
-        account_to=plan.planner.product_account,
-        amount=price_total,
-        purpose=f"Plan-Id: {plan.id}",
-    )
-
-    # add transaction to database
-    transaction_repository.add(transaction)
