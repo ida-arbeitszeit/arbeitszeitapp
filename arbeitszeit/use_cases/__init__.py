@@ -24,7 +24,6 @@ from arbeitszeit.repositories import (
 from arbeitszeit.transaction_factory import TransactionFactory
 
 # do not delete
-from .adjust_balance import adjust_balance
 from .grant_credit import GrantCredit
 from .pay_means_of_production import PayMeansOfProduction
 from .query_products import ProductFilter, QueryProducts
@@ -70,29 +69,9 @@ class PurchaseProduct:
         if product_offer.amount_available == 0:
             deactivate_offer(product_offer)
 
-        # reduce balance of buyer
-        price_total = purchase.price * purchase.amount
-        if isinstance(buyer, Member):
-            adjust_balance(
-                buyer.account,
-                -price_total,
-            )
-        else:
-            if purpose.value == "means_of_prod":
-                adjust_balance(
-                    buyer.means_account,
-                    -price_total,
-                )
-            else:
-                adjust_balance(
-                    buyer.raw_material_account,
-                    -price_total,
-                )
-
-        # increase balance of seller
-        adjust_balance(product_offer.provider.product_account, price_total)
-
         # create transaction
+        price_total = purchase.price * purchase.amount
+
         if isinstance(buyer, Member):
             account_from = buyer.account
         else:
@@ -113,6 +92,9 @@ class PurchaseProduct:
         # add purchase and transaction to database
         purchase_repository.add(purchase)
         transaction_repository.add(transaction)
+
+        # adjust balances of buyer and seller
+        transaction.adjust_balances()
 
 
 def deactivate_offer(product_offer: ProductOffer) -> ProductOffer:

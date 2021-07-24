@@ -8,8 +8,6 @@ from arbeitszeit.entities import Company, Member
 from arbeitszeit.repositories import CompanyWorkerRepository, TransactionRepository
 from arbeitszeit.transaction_factory import TransactionFactory
 
-from .adjust_balance import adjust_balance
-
 
 @inject
 @dataclass
@@ -40,10 +38,6 @@ class SendWorkCertificatesToWorker:
                 company=company,
             )
 
-        # adjust balances
-        adjust_balance(company.work_account, -amount)
-        adjust_balance(worker.account, amount)
-
         # create transaction
         transaction = self.transaction_factory.create_transaction(
             account_from=company.work_account,
@@ -52,3 +46,6 @@ class SendWorkCertificatesToWorker:
             purpose="Lohn",
         )
         self.transaction_repository.add(transaction)
+
+        # adjust balances
+        transaction.adjust_balances()
