@@ -25,6 +25,7 @@ from arbeitszeit.transaction_factory import TransactionFactory
 
 # do not delete
 from .grant_credit import GrantCredit
+from .pay_consumer_product import PayConsumerProduct
 from .pay_means_of_production import PayMeansOfProduction
 from .query_products import ProductFilter, QueryProducts
 from .send_work_certificates_to_worker import SendWorkCertificatesToWorker

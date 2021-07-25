@@ -2,12 +2,15 @@ from typing import Optional
 
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
+from sqlalchemy import desc
 
-from arbeitszeit import entities, use_cases
+from arbeitszeit import entities, errors, use_cases
 from project import database
 from project.database import with_injection
 from project.database.repositories import (
+    CompanyRepository,
     MemberRepository,
+    PlanRepository,
     ProductOfferRepository,
     PurchaseRepository,
     TransactionRepository,
@@ -28,7 +31,7 @@ def my_purchases():
         return redirect(url_for("auth.zurueck"))
     else:
         session["user_type"] = "member"
-        purchases = current_user.purchases.all()
+        purchases = current_user.purchases.order_by(desc("kauf_date")).all()
         return render_template("member/my_purchases.html", purchases=purchases)
 
 
@@ -89,6 +92,42 @@ def buy(
         return redirect("/member/suchen")
 
     return render_template("member/buy.html", offer=product_offer)
+
+
+@main_member.route("/member/pay_consumer_product", methods=["GET", "POST"])
+@login_required
+@with_injection
+def pay_consumer_product(
+    pay_consumer_product: use_cases.PayConsumerProduct,
+    company_repository: CompanyRepository,
+    member_repository: MemberRepository,
+    plan_repository: PlanRepository,
+):
+    if request.method == "POST":
+        sender = member_repository.get_member_by_id(current_user.id)
+        plan = plan_repository.get_by_id(request.form["plan_id"])
+        receiver = company_repository.get_by_id(request.form["company_id"])
+        pieces = int(request.form["amount"])
+        try:
+            pay_consumer_product(
+                sender,
+                receiver,
+                plan,
+                pieces,
+            )
+            database.commit_changes()
+            flash("Produkt erfolgreich bezahlt.")
+        except errors.CompanyIsNotPlanner:
+            flash("Der angegebene Plan gehört nicht zum angegebenen Betrieb.")
+        except errors.CompanyDoesNotExist:
+            flash("Der Betrieb existiert nicht.")
+        except errors.PlanDoesNotExist:
+            flash("Der Plan existiert nicht.")
+        except errors.PlanIsExpired:
+            flash(
+                "Der angegebene Plan ist nicht mehr aktuell. Bitte wende dich an den Verkäufer, um eine aktuelle Plan-ID zu erhalten."
+            )
+    return render_template("member/pay_consumer_product.html")
 
 
 @main_member.route("/member/profile")
