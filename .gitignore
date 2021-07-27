@@ -2,6 +2,7 @@
 my_database_key.py
 *.pyc
 *.png
+.vscode/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

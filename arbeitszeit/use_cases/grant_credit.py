@@ -6,8 +6,6 @@ from arbeitszeit.entities import Plan, SocialAccounting
 from arbeitszeit.repositories import TransactionRepository
 from arbeitszeit.transaction_factory import TransactionFactory
 
-from .adjust_balance import adjust_balance
-
 
 @inject
 @dataclass
@@ -30,7 +28,6 @@ class GrantCredit:
         ]
 
         for account, amount in accounts_and_amounts:
-            adjust_balance(account, amount)
             transaction = self.transaction_factory.create_transaction(
                 account_from=social_accounting_account,
                 account_to=account,
@@ -38,3 +35,4 @@ class GrantCredit:
                 purpose=f"Plan-Id: {plan.id}",
             )
             self.transaction_repository.add(transaction)
+            transaction.adjust_balances()

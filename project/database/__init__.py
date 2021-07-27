@@ -13,6 +13,7 @@ from .repositories import (
     AccountingRepository,
     AccountRepository,
     CompanyRepository,
+    CompanyWorkerRepository,
     ProductOfferRepository,
     TransactionRepository,
 )
@@ -27,6 +28,11 @@ def configure_injector(binder: Binder) -> None:
     binder.bind(
         interfaces.TransactionRepository,
         to=ClassProvider(TransactionRepository),
+    )
+
+    binder.bind(
+        interfaces.CompanyWorkerRepository,
+        to=ClassProvider(CompanyWorkerRepository),
     )
 
     binder.bind(

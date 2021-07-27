@@ -1,0 +1,64 @@
+{% extends "base_member.html" %}
+
+{% block content2 %}
+<div class="columns has-text-left">
+    <div class="column is-two-third">
+
+
+        <div class="content">
+            <h1 class="title">
+                Bezahlung Produkt
+            </h1>
+            <div class="box has-background-info-light has-text-info-dark has-text-centered">
+                <div class="icon"><i class="fas fa-info-circle"></i></div>
+                <p>
+                    Hier kannst du Produkte bezahlen, die du außerhalb der App erworben hast. <br>
+                    (Käufe aus dem Marketplace musst du hier <b>nicht</b> bezahlen, da diese automatisch bezahlt
+                    werden.)
+                </p>
+            </div>
+        </div>
+
+        <div class="content">
+            <form method="post">
+                <div class="field has-addons">
+                    <div class="control">
+                        <input class="input" type="text" placeholder="Betriebs-ID" , name="company_id" required>
+                    </div>
+                    <div class="control">
+                        <input class="input" type="text" placeholder="Plan-ID" , name="plan_id" required>
+                    </div>
+                    <div class="control">
+                        <input class="input" type="number" placeholder="Menge" , name="amount" required>
+                    </div>
+                    <div class="control">
+                        <button class="button is-primary" name="transfer_type" value="transfer_to_company"
+                            type="submit">Überweisen</button>
+                    </div>
+                </div>
+                <p class="help">Der verkaufende Betrieb muss dir seine Betriebs-ID und die zum Produkt gehörige Plan-ID
+                    nennen.</p>
+
+            </form>
+        </div>
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="block"></div>
+        {% for message in messages %}
+        <div class="notification is-danger">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+
+
+
+
+    </div>
+</div>
+
+
+{% endblock %}

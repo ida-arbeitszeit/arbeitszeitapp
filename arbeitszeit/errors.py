@@ -38,3 +38,9 @@ class PlanDoesNotExist(Exception):
     def __init__(self, plan: Plan) -> None:
         self.plan = plan
         super().__init__()
+
+
+class PlanIsExpired(Exception):
+    def __init__(self, plan: Plan) -> None:
+        self.plan = plan
+        super().__init__()
