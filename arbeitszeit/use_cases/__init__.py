@@ -24,7 +24,6 @@ from arbeitszeit.repositories import (
 from arbeitszeit.transaction_factory import TransactionFactory
 
 # do not delete, these imports make imports of use cases module more convenient.
-from .adjust_balance import adjust_balance
 from .grant_credit import GrantCredit
 from .pay_consumer_product import PayConsumerProduct
 from .pay_means_of_production import PayMeansOfProduction
@@ -162,4 +161,3 @@ def check_plans_for_expiration(plans: List[Plan]) -> List[Plan]:
             plan.set_as_expired()
 
     return plans
-
