@@ -2,15 +2,24 @@
 
 {% block content2 %}
 
-<h1 class="title">
-  Meine vergangenen Käufe:
-</h1>
+<div class="content">
+  <h1 class="title">
+    Meine vergangenen Käufe (In-App):
+  </h1>
+  <div class="box has-background-info-light has-text-info-dark has-text-centered">
+    <div class="icon"><i class="fas fa-info-circle"></i></div>
+    <p>
+      Hier siehst du deine vergangenen In-App-Käufe.<br>
+      Käufe von Produkten, die du nicht über den App-Marketplace erworben hast, werden hier nicht angezeigt.
+    </p>
+  </div>
+</div>
 
 <div class="table-container">
   <table class="table is-fullwidth">
     <thead>
       <tr>
-        <th>Kauf-Id</th>
+        <th>Datum</th>
         <th>Name</th>
         <th>Beschreibung</th>
         <th>Einzelpreis</th>
@@ -22,7 +31,7 @@
       {% if purchases is defined and purchases|length %}
       {% for purchase in purchases %}
       <tr>
-        <td>{{ purchase.id }}</td>
+        <td>{{ purchase.kauf_date.strftime("%x") }}</td>
         <td>{{ purchase.offer.name }}</td>
         <td>{{ purchase.offer.description }}</td>
         <td>{{ purchase.kaufpreis }}</td>

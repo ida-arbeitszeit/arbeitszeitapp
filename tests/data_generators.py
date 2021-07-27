@@ -128,7 +128,7 @@ class PlanGenerator:
     datetime_service: DatetimeService
 
     def create_plan(
-        self, plan_creation_date=None, planner=None, timeframe=14, approved=False
+        self, plan_creation_date=None, planner=None, timeframe=None, approved=False
     ) -> Plan:
         return Plan(
             id=self.id_generator.get_id(),
@@ -145,7 +145,7 @@ class PlanGenerator:
             prd_unit="500 Gramm",
             prd_amount=100,
             description="Beschreibung für Produkt A.",
-            timeframe=int(timeframe),
+            timeframe=int(14) if timeframe is None else int(timeframe),
             approved=approved,
             approval_date=None,
             approval_reason=None,

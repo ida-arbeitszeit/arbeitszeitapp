@@ -11,7 +11,6 @@ from arbeitszeit.transaction_factory import TransactionFactory
 from project import database
 from project.database import with_injection
 from project.database.repositories import (
-    AccountingRepository,
     CompanyRepository,
     CompanyWorkerRepository,
     MemberRepository,
@@ -151,10 +150,8 @@ def buy(
 @login_required
 @with_injection
 def create_plan(
+    grant_credit: use_cases.GrantCredit,
     plan_repository: PlanRepository,
-    accounting_repository: AccountingRepository,
-    transaction_repository: TransactionRepository,
-    transaction_factory: TransactionFactory,
 ):
 
     if request.args.get("renew"):
@@ -217,10 +214,7 @@ def create_plan(
         plan = use_cases.seek_approval(DatetimeService(), plan, plan_renewal)
         database.commit_changes()
         if plan.approved:
-            social_accounting = accounting_repository.get_by_id(1)
-            use_cases.grant_credit(
-                plan, social_accounting, transaction_repository, transaction_factory
-            )
+            grant_credit(plan)
             database.commit_changes()
             flash("Plan erfolgreich erstellt und genehmigt. Kredit wurde gewährt.")
             return redirect("/company/my_plans")
@@ -403,22 +397,19 @@ def my_accounts():
 @login_required
 @with_injection
 def transfer_to_worker(
-    transaction_repository: TransactionRepository,
+    send_work_certificates_to_worker: use_cases.SendWorkCertificatesToWorker,
     company_repository: CompanyRepository,
     member_repository: MemberRepository,
-    company_worker_repository: CompanyWorkerRepository,
 ):
     if request.method == "POST":
-        sender = company_repository.get_by_id(current_user.id)
-        receiver = member_repository.get_member_by_id(request.form["member_id"])
+        company = company_repository.get_by_id(current_user.id)
+        worker = member_repository.get_member_by_id(request.form["member_id"])
         amount = Decimal(request.form["amount"])
 
         try:
-            use_cases.send_work_certificates_to_worker(
-                company_worker_repository,
-                transaction_repository,
-                sender,
-                receiver,
+            send_work_certificates_to_worker(
+                company,
+                worker,
                 amount,
             )
             database.commit_changes()
@@ -435,7 +426,7 @@ def transfer_to_worker(
 @login_required
 @with_injection
 def transfer_to_company(
-    transaction_repository: TransactionRepository,
+    pay_means_of_production: use_cases.PayMeansOfProduction,
     company_repository: CompanyRepository,
     plan_repository: PlanRepository,
 ):
@@ -450,8 +441,7 @@ def transfer_to_company(
             else entities.PurposesOfPurchases.raw_materials
         )
         try:
-            use_cases.pay_means_of_production(
-                transaction_repository,
+            pay_means_of_production(
                 sender,
                 receiver,
                 plan,

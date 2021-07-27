@@ -219,3 +219,9 @@ class Transaction:
     account_to: Account
     amount: Decimal
     purpose: str
+
+    def adjust_balances(self) -> None:
+        """this method adjusts the balances of the two accounts
+        that are involved in this transaction."""
+        self.account_from.change_credit(-self.amount)
+        self.account_to.change_credit(self.amount)

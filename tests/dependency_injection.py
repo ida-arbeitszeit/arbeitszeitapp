@@ -1,7 +1,8 @@
 from injector import Injector, Module, inject, provider
 
 import arbeitszeit.repositories as interfaces
-from tests import repositories
+from arbeitszeit import entities
+from tests import data_generators, repositories
 
 
 class RepositoryModule(Module):
@@ -17,15 +18,23 @@ class RepositoryModule(Module):
     ) -> interfaces.PurchaseRepository:
         return repo
 
+    @provider
     def provide_transaction_repo(
         self, repo: repositories.TransactionRepository
     ) -> interfaces.TransactionRepository:
         return repo
 
+    @provider
     def provide_company_worker_repo(
         self, repo: repositories.CompanyWorkerRepository
     ) -> interfaces.CompanyWorkerRepository:
         return repo
+
+    @provider
+    def provide_social_accounting_instance(self) -> entities.SocialAccounting:
+        return data_generators.SocialAccountingGenerator(
+            data_generators.AccountGenerator(data_generators.IdGenerator())
+        ).create_social_accounting()
 
 
 def injection_test(original_test):
