@@ -42,6 +42,6 @@ def create_app():
         app.register_blueprint(member_routes.main_member)
 
         # create the initial database
-        db.create_all()
+        # db.create_all()
 
         return app
