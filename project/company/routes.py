@@ -211,7 +211,7 @@ def create_plan(
         else:
             plan_renewal = None
 
-        plan = use_cases.seek_approval(DatetimeService(), plan, plan_renewal)
+        plan = use_cases.seek_approval(plan, plan_renewal)
         database.commit_changes()
         if plan.approved:
             grant_credit(plan)

@@ -126,7 +126,6 @@ def add_worker_to_company(
 
 
 def seek_approval(
-    datetime_service: DatetimeService,
     plan: Plan,
     plan_renewal: Optional[PlanRenewal],
 ) -> Plan:
@@ -136,7 +135,7 @@ def seek_approval(
     """
     # This is just a place holder
     is_approval = True
-    approval_date = datetime_service.now()
+    approval_date = DatetimeService().now()
     if is_approval:
         plan.approve(approval_date)
         if plan_renewal:
