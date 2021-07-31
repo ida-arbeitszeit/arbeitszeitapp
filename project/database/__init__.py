@@ -9,7 +9,6 @@ from injector import (
     Injector,
     InstanceProvider,
     inject,
-    singleton,
 )
 
 from arbeitszeit import entities
@@ -46,7 +45,6 @@ def configure_injector(binder: Binder) -> None:
     binder.bind(
         entities.SocialAccounting,
         to=CallableProvider(get_social_accounting),
-        scope=singleton,
     )
 
 
