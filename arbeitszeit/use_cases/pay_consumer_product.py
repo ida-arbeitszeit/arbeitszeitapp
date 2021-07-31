@@ -24,8 +24,8 @@ class PayConsumerProduct:
         pass
 
         """
-        This function enables the payment of consumer products which were *not* bought 
-        on the app's marketplace. Apart from sender and receiver it has to be specified 
+        This function enables the payment of consumer products which were *not* bought
+        on the app's marketplace. Apart from sender and receiver it has to be specified
         the seller's plan and the amount of pieces to be paid.
 
         This function

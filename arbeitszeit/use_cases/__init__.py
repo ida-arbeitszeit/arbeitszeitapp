@@ -23,12 +23,25 @@ from arbeitszeit.repositories import (
 )
 from arbeitszeit.transaction_factory import TransactionFactory
 
-# do not delete, these imports make imports of use cases module more convenient.
 from .grant_credit import GrantCredit
 from .pay_consumer_product import PayConsumerProduct
 from .pay_means_of_production import PayMeansOfProduction
 from .query_products import ProductFilter, QueryProducts
 from .send_work_certificates_to_worker import SendWorkCertificatesToWorker
+
+__all__ = [
+    "GrantCredit",
+    "PayConsumerProduct",
+    "PayMeansOfProduction",
+    "ProductFilter",
+    "QueryProducts",
+    "SendWorkCertificatesToWorker",
+    "PurchaseProduct",
+    "deactivate_offer",
+    "add_worker_to_company",
+    "seek_approval",
+    "check_plans_for_expiration",
+]
 
 
 @inject

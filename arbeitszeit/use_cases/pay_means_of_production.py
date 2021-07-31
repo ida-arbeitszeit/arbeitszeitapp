@@ -22,12 +22,10 @@ class PayMeansOfProduction:
         pieces: int,
         purpose: PurposesOfPurchases,
     ) -> None:
-        pass
-
         """
         This function enables the payment of means of production
         or raw materials which were *not* bought on the app's marketplace.
-        Apart from sender and receiver it has to be specified the amount 
+        Apart from sender and receiver it has to be specified the amount
         of pieces to be paid, the seller's plan and the purpose of the purchase.
 
         What this function does:
