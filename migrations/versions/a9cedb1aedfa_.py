@@ -1,7 +1,7 @@
-"""empty message
+"""Create intial database scheme
 
 Revision ID: a9cedb1aedfa
-Revises: 
+Revises:
 Create Date: 2021-07-28 22:22:32.373501
 
 """
