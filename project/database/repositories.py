@@ -170,6 +170,14 @@ class AccountingRepository:
         accounting_orm = SocialAccounting.query.filter_by(id=id).first()
         return self.object_from_orm(accounting_orm) if accounting_orm else None
 
+    def get_or_create_social_accounting(self) -> entities.SocialAccounting:
+        social_accounting = SocialAccounting.query.filter_by(id=1).first()
+        if not social_accounting:
+            social_accounting = SocialAccounting(id=1)
+            db.session.add(social_accounting)
+            db.session.commit()
+        return self.object_from_orm(social_accounting)
+
 
 @inject
 @dataclass
