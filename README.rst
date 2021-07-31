@@ -1,3 +1,9 @@
+Development setup
+=================
+
+After configuring the database connection you need to run the database
+migrations via ``flask db upgrade``.
+
 Code formatting
 ===============
 
