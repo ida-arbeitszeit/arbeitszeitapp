@@ -6,7 +6,7 @@
 <div class="columns is-centered">
   <div class="column is-three-fifths">
 
-    {% if plan_to_renew %}
+    {% if original_plan %}
 
     <div class="box has-background-info-light has-text-info-dark">
       <div class="icon"><i class="fas fa-info-circle"></i></div>
@@ -47,7 +47,7 @@
         <div class="control">
           <label for="name">Name des Produkts</label>
           <input class="input is-large" , type="text" , name="prd_name" ,
-            value="{{ plan_to_renew.prd_name if plan_to_renew else '' }}" required>
+            value="{{ original_plan.prd_name if original_plan else '' }}" required>
         </div>
       </div>
       <div class="block"></div>
@@ -58,7 +58,7 @@
         <div class="control">
           <label for="description">Beschreibung des Produkts</label>
           <textarea class="textarea is-large" , name="description"
-            required>{{ plan_to_renew.description if plan_to_renew else '' }}</textarea>
+            required>{{ original_plan.description if original_plan else '' }}</textarea>
           <p class="help">(Verfügbarkeit, Kontaktmöglichkeiten, etc.)</p>
         </div>
 
@@ -72,7 +72,7 @@
         <div class="control">
           <label for="timeframe">Planungszeitraum:</label>
           <input class="input is-large" type="number" name="timeframe" min=1 max=365
-            value="{{ plan_to_renew.timeframe if plan_to_renew else 1 }}" required>
+            value="{{ original_plan.timeframe if original_plan else 1 }}" required>
           <p class="help">(Wieviele Tage umfasst der Planungszeitraum?)</p>
         </div>
       </div>
@@ -85,7 +85,7 @@
         <div class="control">
           <label for="prd_unit">Kleinste Abgabeeinheit</label>
           <input class="input is-large" , type="text" , name="prd_unit" ,
-            value="{{ plan_to_renew.prd_unit if plan_to_renew else '1 Kg' }}" , required>
+            value="{{ original_plan.prd_unit if original_plan else '1 Kg' }}" , required>
           <p class="help">(1 Packung à 100 Stück, 1 Kilogramm, 1 Flasche à 0,5 Liter, 1 Meter, Unterrichtseinheit à 1,5
             Stunde,
             etc.)</p>
@@ -101,7 +101,7 @@
         <div class="control">
           <label for="prd_amount">Menge:</label>
           <input class="input is-large" type="number" name="prd_amount" min=1
-            value="{{ plan_to_renew.prd_amount if plan_to_renew else 1 }}" required>
+            value="{{ original_plan.prd_amount if original_plan else 1 }}" required>
           <p class="help">(Wieviele Einheiten werden produziert und verkauft?)</p>
         </div>
       </div>
@@ -113,7 +113,7 @@
         <div class="control">
           <label for="costs_p">Kosten für Produktionsmittel:</label>
           <input class="input is-large" type="number" name="costs_p"
-            value="{{ plan_to_renew.costs_p if plan_to_renew else 0 }}" required>
+            value="{{ original_plan.costs_p if original_plan else 0 }}" required>
         </div>
       </div>
       <div class="block"></div>
@@ -124,7 +124,7 @@
         <div class="control">
           <label for="costs_r">Kosten für Roh- und Hilfsstoffe:</label>
           <input class="input is-large" type="number" name="costs_r"
-            value="{{ plan_to_renew.costs_r if plan_to_renew else 0 }}" required>
+            value="{{ original_plan.costs_r if original_plan else 0 }}" required>
         </div>
       </div>
       <div class="block"></div>
@@ -135,7 +135,7 @@
         <div class="control">
           <label for="costs_a">Enthaltene Arbeitsstunden:</label>
           <input class="input is-large" type="number" name="costs_a"
-            value="{{ plan_to_renew.costs_a if plan_to_renew else 0 }}" required>
+            value="{{ original_plan.costs_a if original_plan else 0 }}" required>
         </div>
       </div>
       <div class="block"></div>

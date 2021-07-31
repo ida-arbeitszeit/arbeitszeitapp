@@ -11,7 +11,6 @@ from arbeitszeit.entities import (
     Company,
     Member,
     Plan,
-    PlanRenewal,
     ProductOffer,
     PurposesOfPurchases,
 )
@@ -126,23 +125,26 @@ def add_worker_to_company(
 
 
 def seek_approval(
-    plan: Plan,
-    plan_renewal: Optional[PlanRenewal],
-) -> Plan:
+    new_plan: Plan,
+    original_plan: Optional[Plan],
+) -> bool:
     """
-    Company seeks plan approval.
-    It can be a new plan or a plan renewal, in which case the original plan will be set as "renewed".
+    Company seeks plan approval. Either for a new plan or for a plan reneweal.
+
+    If it's a plan renewal, the original plan will be set to "renewed".
+
+    Returns a boolian value.
     """
     # This is just a place holder
     is_approval = True
     approval_date = DatetimeService().now()
     if is_approval:
-        plan.approve(approval_date)
-        if plan_renewal:
-            plan_renewal.original_plan.set_as_renewed()
+        new_plan.approve(approval_date)
+        if original_plan:
+            original_plan.set_as_renewed()
     else:
-        plan.deny("Some reason", approval_date)
-    return plan
+        new_plan.deny(approval_date)
+    return is_approval
 
 
 def check_plans_for_expiration(plans: List[Plan]) -> List[Plan]:

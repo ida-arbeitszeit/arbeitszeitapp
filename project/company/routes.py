@@ -150,80 +150,50 @@ def buy(
 @login_required
 @with_injection
 def create_plan(
+    original_plan_id: Optional[int],
     grant_credit: use_cases.GrantCredit,
     plan_repository: PlanRepository,
 ):
+    original_plan_id = request.args.get("original_plan_id")
+    original_plan = (
+        plan_repository.get_by_id(original_plan_id) if original_plan_id else None
+    )
 
-    if request.args.get("renew"):
-        plan_id = request.args.get("renew")
-        plan_to_renew = plan_repository.get_by_id(plan_id)
-    else:
-        plan_to_renew = None
+    if request.method == "POST":  # Button "Plan erstellen"
+        plan_data = dict(request.form)
 
-    if request.method == "POST":
-        costs_p = float(request.form["costs_p"])
-        costs_r = float(request.form["costs_r"])
-        costs_a = float(request.form["costs_a"])
-        prd_name = request.form["prd_name"]
-        prd_unit = request.form["prd_unit"]
-        prd_amount = int(request.form["prd_amount"])
-        description = request.form["description"]
-        timeframe = int(request.form["timeframe"])
-
-        plan_orm = Plan(
+        new_plan_orm = Plan(
             plan_creation_date=DatetimeService().now(),
             planner=current_user.id,
-            costs_p=costs_p,
-            costs_r=costs_r,
-            costs_a=costs_a,
-            prd_name=prd_name,
-            prd_unit=prd_unit,
-            prd_amount=prd_amount,
-            description=description,
-            timeframe=timeframe,
+            costs_p=float(plan_data["costs_p"]),
+            costs_r=float(plan_data["costs_r"]),
+            costs_a=float(plan_data["costs_a"]),
+            prd_name=plan_data["prd_name"],
+            prd_unit=plan_data["prd_unit"],
+            prd_amount=int(plan_data["prd_amount"]),
+            description=plan_data["description"],
+            timeframe=int(plan_data["timeframe"]),
             social_accounting=1,
         )
-        db.session.add(plan_orm)
+        db.session.add(new_plan_orm)
+        database.commit_changes()
+        new_plan = plan_repository.object_from_orm(new_plan_orm)
+
+        is_approved = use_cases.seek_approval(new_plan, original_plan)
         database.commit_changes()
 
-        plan = plan_repository.object_from_orm(plan_orm)
-
-        if plan_to_renew:
-            # check if there have been made modifications to the plan by the user
-            if (
-                (costs_p == plan_to_renew.costs_p)
-                and (costs_r == plan_to_renew.costs_r)
-                and (costs_a == plan_to_renew.costs_a)
-                and (prd_name == plan_to_renew.prd_name)
-                and (prd_unit == plan_to_renew.prd_unit)
-                and (prd_amount == plan_to_renew.prd_amount)
-                and (description == plan_to_renew.description)
-                and (timeframe == plan_to_renew.timeframe)
-            ):
-                plan_modifications = False
-            else:
-                plan_modifications = True
-
-            plan_renewal = entities.PlanRenewal(
-                original_plan=plan_to_renew,
-                modifications=plan_modifications,
-            )
-        else:
-            plan_renewal = None
-
-        plan = use_cases.seek_approval(plan, plan_renewal)
-        database.commit_changes()
-        if plan.approved:
-            grant_credit(plan)
+        if is_approved:
+            grant_credit(new_plan)
             database.commit_changes()
             flash("Plan erfolgreich erstellt und genehmigt. Kredit wurde gewährt.")
             return redirect("/company/my_plans")
-
         else:
-            flash(f"Plan nicht genehmigt. Grund:\n{plan.approval_reason}")
-            return redirect("/company/create_plan")
+            flash(f"Plan nicht genehmigt. Grund:\n{new_plan.approval_reason}")
+            return redirect(
+                url_for("main_company.create_plan", original_plan_id=original_plan_id)
+            )
 
-    return render_template("company/create_plan.html", plan_to_renew=plan_to_renew)
+    return render_template("company/create_plan.html", original_plan=original_plan)
 
 
 @main_company.route("/company/my_plans", methods=["GET", "POST"])

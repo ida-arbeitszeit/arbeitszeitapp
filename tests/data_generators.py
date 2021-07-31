@@ -12,7 +12,6 @@ from arbeitszeit.entities import (
     Company,
     Member,
     Plan,
-    PlanRenewal,
     ProductOffer,
     SocialAccounting,
 )
@@ -154,20 +153,4 @@ class PlanGenerator:
             renewed=False,
             set_as_expired=lambda: None,
             set_as_renewed=lambda: None,
-        )
-
-
-@inject
-@dataclass
-class PlanRenewalGenerator:
-    plan_generator: PlanGenerator
-
-    def create_plan_renewal(
-        self, original_plan=None, modifications=False
-    ) -> PlanRenewal:
-        return PlanRenewal(
-            original_plan=self.plan_generator.create_plan()
-            if original_plan is None
-            else original_plan,
-            modifications=modifications,
         )

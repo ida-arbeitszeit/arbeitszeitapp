@@ -136,11 +136,15 @@ class Plan:
 
     def approve(self, approval_date: datetime) -> None:
         self.approved = True
+        self.approval_date = approval_date
+        self.approval_reason = "approved"
         self._approve_call(True, "approved", approval_date)
 
-    def deny(self, reason: str, denial_date: datetime) -> None:
+    def deny(self, denial_date: datetime) -> None:
         self.approved = False
-        self._approve_call(False, reason, denial_date)
+        self.approval_date = denial_date
+        self.approval_reason = "not approved"
+        self._approve_call(False, "not approved", denial_date)
 
     def set_as_expired(self) -> None:
         self.expired = True
