@@ -7,7 +7,6 @@ from injector import (
     CallableProvider,
     ClassProvider,
     Injector,
-    InstanceProvider,
     inject,
 )
 
@@ -18,10 +17,10 @@ from project.models import Account, Company, Member, Offer, SocialAccounting
 
 from .repositories import (
     AccountingRepository,
-    AccountRepository,
     CompanyRepository,
     CompanyWorkerRepository,
     ProductOfferRepository,
+    PurchaseRepository,
     TransactionRepository,
 )
 
@@ -40,6 +39,11 @@ def configure_injector(binder: Binder) -> None:
     binder.bind(
         interfaces.CompanyWorkerRepository,
         to=ClassProvider(CompanyWorkerRepository),
+    )
+
+    binder.bind(
+        interfaces.PurchaseRepository,
+        to=ClassProvider(PurchaseRepository),
     )
 
     binder.bind(
