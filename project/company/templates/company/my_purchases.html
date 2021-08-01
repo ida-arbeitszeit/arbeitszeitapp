@@ -1,0 +1,52 @@
+{% extends "base_company.html" %}
+
+{% block content2 %}
+
+<div class="content">
+  <h1 class="title">
+    Meine vergangenen Käufe (In-App):
+  </h1>
+  <div class="box has-background-info-light has-text-info-dark has-text-centered">
+    <div class="icon"><i class="fas fa-info-circle"></i></div>
+    <p>
+      Hier siehst du deine vergangenen In-App-Käufe.<br>
+      Käufe von Produkten, die du nicht über den App-Marketplace erworben hast, werden hier nicht angezeigt.
+    </p>
+  </div>
+</div>
+
+<div class="table-container">
+  <table class="table is-fullwidth">
+    <thead>
+      <tr>
+        <th>Datum</th>
+        <th>Name</th>
+        <th>Beschreibung</th>
+        <th>Zweck</th>
+        <th>Einzelpreis</th>
+        <th>Menge</th>
+        <th>Gesamtpreis</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% if purchases is defined and purchases|length %}
+      {% for purchase in purchases %}
+      <tr>
+        <td>{{ purchase.kauf_date.strftime("%x") }}</td>
+        <td>{{ purchase.offer.name }}</td>
+        <td>{{ purchase.offer.description }}</td>
+        <td>{{ 'Prod.mittel' if (purchase.purpose.value == 'means_of_prod') else 'Rohmat.' }}</td>
+        <td>{{ purchase.kaufpreis }}</td>
+        <th>{{ purchase.amount }}</th>
+        <th>{{ purchase.kaufpreis * purchase.amount }}</th>
+      </tr>
+      {% endfor %}
+      {% else %}
+      <div>Du hast noch keine Käufe.</div>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+
+
+{% endblock %}

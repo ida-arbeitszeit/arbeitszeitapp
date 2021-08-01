@@ -4,6 +4,7 @@ from typing import Optional
 
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
+from sqlalchemy import desc
 
 from arbeitszeit import entities, errors, use_cases
 from arbeitszeit.datetime_service import DatetimeService
@@ -144,6 +145,19 @@ def buy(
         return redirect("/company/suchen")
 
     return render_template("company/buy.html", offer=product_offer)
+
+
+@main_company.route("/company/kaeufe")
+@login_required
+def my_purchases():
+    user_type = session["user_type"]
+
+    if user_type == "member":
+        return redirect(url_for("auth.zurueck"))
+    else:
+        session["user_type"] = "company"
+        purchases = current_user.purchases.order_by(desc("kauf_date")).all()
+        return render_template("company/my_purchases.html", purchases=purchases)
 
 
 @main_company.route("/company/create_plan", methods=["GET", "POST"])
