@@ -4,10 +4,10 @@ from typing import Optional
 
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
+from sqlalchemy import desc
 
 from arbeitszeit import entities, errors, use_cases
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.transaction_factory import TransactionFactory
 from project import database
 from project.database import with_injection
 from project.database.repositories import (
@@ -16,8 +16,6 @@ from project.database.repositories import (
     MemberRepository,
     PlanRepository,
     ProductOfferRepository,
-    PurchaseRepository,
-    TransactionRepository,
 )
 from project.extensions import db
 from project.forms import ProductSearchForm
@@ -117,8 +115,6 @@ def buy(
     purchase_product: use_cases.PurchaseProduct,
     product_offer_repository: ProductOfferRepository,
     company_repository: CompanyRepository,
-    purchase_repository: PurchaseRepository,
-    transaction_repository: TransactionRepository,
 ):
     product_offer = product_offer_repository.get_by_id(id=id)
     buyer = company_repository.get_by_id(current_user.id)
@@ -131,8 +127,6 @@ def buy(
         )
         amount = int(request.form["amount"])
         purchase_product(
-            purchase_repository,
-            transaction_repository,
             product_offer,
             amount,
             purpose,
@@ -144,6 +138,22 @@ def buy(
         return redirect("/company/suchen")
 
     return render_template("company/buy.html", offer=product_offer)
+
+
+@main_company.route("/company/kaeufe")
+@login_required
+@with_injection
+def my_purchases(
+    query_purchases: use_cases.QueryPurchases,
+):
+    user_type = session["user_type"]
+
+    if user_type == "member":
+        return redirect(url_for("auth.zurueck"))
+    else:
+        session["user_type"] = "company"
+        purchases = list(query_purchases(current_user))
+        return render_template("company/my_purchases.html", purchases=purchases)
 
 
 @main_company.route("/company/create_plan", methods=["GET", "POST"])

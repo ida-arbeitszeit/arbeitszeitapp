@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Iterator, List
+from typing import Iterator, List, Union
 
 from arbeitszeit.entities import (
     Account,
@@ -26,6 +26,12 @@ class CompanyWorkerRepository(ABC):
 class PurchaseRepository(ABC):
     @abstractmethod
     def add(self, purchase: Purchase) -> None:
+        pass
+
+    @abstractmethod
+    def get_purchases_descending_by_date(
+        self, user: Union[Member, Company]
+    ) -> Iterator[Purchase]:
         pass
 
 

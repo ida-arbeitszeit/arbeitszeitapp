@@ -12,8 +12,6 @@ from project.database.repositories import (
     MemberRepository,
     PlanRepository,
     ProductOfferRepository,
-    PurchaseRepository,
-    TransactionRepository,
 )
 from project.forms import ProductSearchForm
 
@@ -24,14 +22,17 @@ main_member = Blueprint(
 
 @main_member.route("/member/kaeufe")
 @login_required
-def my_purchases():
+@with_injection
+def my_purchases(
+    query_purchases: use_cases.QueryPurchases,
+):
     user_type = session["user_type"]
 
     if user_type == "company":
         return redirect(url_for("auth.zurueck"))
     else:
         session["user_type"] = "member"
-        purchases = current_user.purchases.order_by(desc("kauf_date")).all()
+        purchases = list(query_purchases(current_user))
         return render_template("member/my_purchases.html", purchases=purchases)
 
 
@@ -70,8 +71,6 @@ def buy(
     product_offer_repository: ProductOfferRepository,
     member_repository: MemberRepository,
     purchase_product: use_cases.PurchaseProduct,
-    purchase_repository: PurchaseRepository,
-    transaction_repository: TransactionRepository,
 ):
     product_offer = product_offer_repository.get_by_id(id=id)
     buyer = member_repository.get_member_by_id(current_user.id)
@@ -80,8 +79,6 @@ def buy(
         purpose = entities.PurposesOfPurchases.consumption
         amount = int(request.form["amount"])
         purchase_product(
-            purchase_repository,
-            transaction_repository,
             product_offer,
             amount,
             purpose,

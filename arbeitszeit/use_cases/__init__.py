@@ -1,6 +1,5 @@
 import datetime
 from dataclasses import dataclass
-from decimal import Decimal
 from typing import List, Optional, Union
 
 from injector import inject
@@ -27,6 +26,7 @@ from .grant_credit import GrantCredit
 from .pay_consumer_product import PayConsumerProduct
 from .pay_means_of_production import PayMeansOfProduction
 from .query_products import ProductFilter, QueryProducts
+from .query_purchases import QueryPurchases
 from .register_member import RegisterMember
 from .send_work_certificates_to_worker import SendWorkCertificatesToWorker
 
@@ -37,6 +37,7 @@ __all__ = [
     "ProductFilter",
     "PurchaseProduct",
     "QueryProducts",
+    "QueryPurchases",
     "RegisterMember",
     "SendWorkCertificatesToWorker",
     "add_worker_to_company",
@@ -52,11 +53,11 @@ class PurchaseProduct:
     datetime_service: DatetimeService
     purchase_factory: PurchaseFactory
     transaction_factory: TransactionFactory
+    purchase_repository: PurchaseRepository
+    transaction_repository: TransactionRepository
 
     def __call__(
         self,
-        purchase_repository: PurchaseRepository,
-        transaction_repository: TransactionRepository,
         product_offer: ProductOffer,
         amount: int,
         purpose: PurposesOfPurchases,
@@ -106,8 +107,8 @@ class PurchaseProduct:
         )
 
         # add purchase and transaction to database
-        purchase_repository.add(purchase)
-        transaction_repository.add(transaction)
+        self.purchase_repository.add(purchase)
+        self.transaction_repository.add(transaction)
 
         # adjust balances of buyer and seller
         transaction.adjust_balances()
