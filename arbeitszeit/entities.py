@@ -17,11 +17,13 @@ class Member:
         self,
         id: int,
         name: str,
+        email: str,
         account: Account,
     ) -> None:
         self._id = id
         self.name = name
         self.account = account
+        self.email = email
 
     @property
     def id(self):
@@ -75,13 +77,11 @@ class Account:
     def __init__(
         self,
         id: int,
-        account_owner_id: int,
         account_type: AccountTypes,
         balance: Decimal,
         change_credit: Callable[[Decimal], None],
     ) -> None:
         self.id = id
-        self.account_owner_id = account_owner_id
         self.account_type = account_type
         self.balance = balance
         self._change_credit = change_credit

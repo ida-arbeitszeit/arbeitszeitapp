@@ -27,6 +27,7 @@ from .grant_credit import GrantCredit
 from .pay_consumer_product import PayConsumerProduct
 from .pay_means_of_production import PayMeansOfProduction
 from .query_products import ProductFilter, QueryProducts
+from .register_member import RegisterMember
 from .send_work_certificates_to_worker import SendWorkCertificatesToWorker
 
 __all__ = [
@@ -34,13 +35,14 @@ __all__ = [
     "PayConsumerProduct",
     "PayMeansOfProduction",
     "ProductFilter",
-    "QueryProducts",
-    "SendWorkCertificatesToWorker",
     "PurchaseProduct",
-    "deactivate_offer",
+    "QueryProducts",
+    "RegisterMember",
+    "SendWorkCertificatesToWorker",
     "add_worker_to_company",
-    "seek_approval",
     "check_plans_for_expiration",
+    "deactivate_offer",
+    "seek_approval",
 ]
 
 
