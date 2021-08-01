@@ -22,14 +22,17 @@ main_member = Blueprint(
 
 @main_member.route("/member/kaeufe")
 @login_required
-def my_purchases():
+@with_injection
+def my_purchases(
+    query_purchases: use_cases.QueryPurchases,
+):
     user_type = session["user_type"]
 
     if user_type == "company":
         return redirect(url_for("auth.zurueck"))
     else:
         session["user_type"] = "member"
-        purchases = current_user.purchases.order_by(desc("kauf_date")).all()
+        purchases = list(query_purchases(current_user))
         return render_template("member/my_purchases.html", purchases=purchases)
 
 

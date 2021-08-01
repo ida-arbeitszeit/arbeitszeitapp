@@ -3,9 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterator, List, Optional, TypeVar
+from typing import Iterator, List, Optional, TypeVar, Union
 
 from injector import inject
+from sqlalchemy import desc
 
 from arbeitszeit import entities, repositories
 from project.extensions import db
@@ -209,9 +210,29 @@ class PurchaseRepository(repositories.PurchaseRepository):
             purpose=purchase.purpose.value,
         )
 
+    def object_from_orm(self, purchase: Kaeufe) -> entities.Purchase:
+        return entities.Purchase(
+            purchase_date=purchase.kauf_date,
+            product_offer=self.product_offer_repository.get_by_id(purchase.angebot),
+            buyer=self.member_repository.get_member_by_id(purchase.member)
+            if purchase.type_member
+            else self.company_repository.get_by_id(purchase.company),
+            price=purchase.kaufpreis,
+            amount=purchase.amount,
+            purpose=purchase.purpose,
+        )
+
     def add(self, purchase: entities.Purchase) -> None:
         purchase_orm = self.object_to_orm(purchase)
         db.session.add(purchase_orm)
+
+    def get_purchases_descending_by_date(
+        self, user: Union[Member, Company]
+    ) -> Iterator[entities.Purchase]:
+        return (
+            self.object_from_orm(purchase)
+            for purchase in user.purchases.order_by(desc("kauf_date")).all()
+        )
 
 
 @inject

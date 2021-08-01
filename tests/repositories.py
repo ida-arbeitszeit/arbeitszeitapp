@@ -1,4 +1,4 @@
-from typing import Iterator, List
+from typing import Iterator, List, Union
 
 from injector import inject, singleton
 
@@ -14,6 +14,16 @@ class PurchaseRepository(interfaces.PurchaseRepository):
 
     def add(self, purchase: Purchase):
         self.purchases.append(purchase)
+
+    def get_purchases_descending_by_date(self, user: Union[Member, Company]):
+        # order purchases by purchase_date
+        self.purchases = sorted(
+            self.purchases, key=lambda x: x.purchase_date, reverse=True
+        )
+
+        for purchase in self.purchases:
+            if purchase.buyer is user:
+                yield purchase
 
 
 @singleton

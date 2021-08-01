@@ -51,6 +51,11 @@ def configure_injector(binder: Binder) -> None:
         to=CallableProvider(get_social_accounting),
     )
 
+    binder.bind(
+        interfaces.PurchaseRepository,
+        to=ClassProvider(PurchaseRepository),
+    )
+
 
 @inject
 def get_social_accounting(

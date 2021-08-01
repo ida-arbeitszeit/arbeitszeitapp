@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from decimal import Decimal
+from typing import Union
 
 from injector import inject
 
@@ -14,8 +15,11 @@ from arbeitszeit.entities import (
     Plan,
     PlanRenewal,
     ProductOffer,
+    Purchase,
+    PurposesOfPurchases,
     SocialAccounting,
 )
+from tests.datetime_service import TestDatetimeService
 
 
 @inject
@@ -170,4 +174,27 @@ class PlanRenewalGenerator:
             if original_plan is None
             else original_plan,
             modifications=modifications,
+        )
+
+
+@inject
+@dataclass
+class PurchaseGenerator:
+    offer_generator: OfferGenerator
+    member_generator: MemberGenerator
+    company_generator: CompanyGenerator
+
+    def create_purchase(
+        self,
+        buyer: Union[Member, Company],
+        purchase_date=TestDatetimeService().now_minus_one_day(),
+        amount=1,
+    ) -> Purchase:
+        return Purchase(
+            purchase_date=purchase_date,
+            product_offer=self.offer_generator.create_offer(),
+            buyer=buyer,
+            price=10,
+            amount=amount,
+            purpose=None,
         )
