@@ -110,12 +110,6 @@ def add_worker_to_company(
 ) -> None:
     """This function may raise a WorkerAlreadyAtCompany exception if the
     worker is already employed at the company."""
-    if not company:
-        raise errors.CompanyDoesNotExist(company=company)
-    if not worker:
-        raise errors.WorkerDoesNotExist(
-            worker=worker,
-        )
     company_workers = company_worker_repository.get_company_workers(company)
     if worker in company_workers:
         raise errors.WorkerAlreadyAtCompany(

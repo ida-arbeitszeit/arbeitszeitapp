@@ -14,7 +14,7 @@ def test_that_plans_are_not_set_to_expired_if_still_in_timeframe(
     )
     plans = [plan]
     plans = check_plans_for_expiration(plans)
-    assert plans[0].expired == False
+    assert not plans[0].expired
 
 
 @injection_test
@@ -26,7 +26,7 @@ def test_that_plans_are_set_to_expired_if_timeframe_is_expired(
     )
     plans = [plan]
     plans = check_plans_for_expiration(plans)
-    assert plans[0].expired == True
+    assert plans[0].expired
 
 
 @injection_test
@@ -41,5 +41,5 @@ def test_that_plans_are_only_set_to_expired_if_timeframe_is_expired(
     )
     plans = [plan1, plan2]
     plans = check_plans_for_expiration(plans)
-    assert plans[0].expired == True
-    assert plans[1].expired == False
+    assert plans[0].expired
+    assert not plans[1].expired

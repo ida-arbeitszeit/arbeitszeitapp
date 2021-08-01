@@ -28,10 +28,6 @@ class SendWorkCertificatesToWorker:
         or a WorkerDoesNotExist exception if the worker does not exist.
         """
         company_workers = self.company_worker_repository.get_company_workers(company)
-        if not worker:
-            raise errors.WorkerDoesNotExist(
-                worker=worker,
-            )
         if worker not in company_workers:
             raise errors.WorkerNotAtCompany(
                 worker=worker,

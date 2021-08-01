@@ -27,7 +27,7 @@ class PayMeansOfProduction:
         """
         This function enables the payment of means of production
         or raw materials which were *not* bought on the app's marketplace.
-        Apart from sender and receiver it has to be specified the amount 
+        Apart from sender and receiver it has to be specified the amount
         of pieces to be paid, the seller's plan and the purpose of the purchase.
 
         What this function does:
@@ -39,14 +39,6 @@ class PayMeansOfProduction:
             PurposesOfPurchases.raw_materials,
         ), "Not a valid purpose for this operation."
 
-        if not receiver:
-            raise errors.CompanyDoesNotExist(
-                company=receiver,
-            )
-        if not plan:
-            raise errors.PlanDoesNotExist(
-                plan=plan,
-            )
         if plan.planner != receiver:
             raise errors.CompanyIsNotPlanner(
                 company=receiver,

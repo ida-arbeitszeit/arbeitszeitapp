@@ -10,34 +10,6 @@ from .repositories import TransactionRepository
 
 
 @injection_test
-def test_error_is_raised_if_company_does_not_exist(
-    pay_consumer_product: PayConsumerProduct,
-    member_generator: MemberGenerator,
-    plan_generator: PlanGenerator,
-):
-    sender = member_generator.create_member()
-    receiver = None
-    plan = plan_generator.create_plan()
-    pieces = 3
-    with pytest.raises(errors.CompanyDoesNotExist):
-        pay_consumer_product(sender, receiver, plan, pieces)
-
-
-@injection_test
-def test_error_is_raised_if_plan_does_not_exist(
-    pay_consumer_product: PayConsumerProduct,
-    member_generator: MemberGenerator,
-    company_generator: CompanyGenerator,
-):
-    sender = member_generator.create_member()
-    receiver = company_generator.create_company()
-    plan = None
-    pieces = 3
-    with pytest.raises(errors.PlanDoesNotExist):
-        pay_consumer_product(sender, receiver, plan, pieces)
-
-
-@injection_test
 def test_error_is_raised_if_company_is_not_planner(
     pay_consumer_product: PayConsumerProduct,
     member_generator: MemberGenerator,
