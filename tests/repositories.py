@@ -17,7 +17,9 @@ class PurchaseRepository(interfaces.PurchaseRepository):
 
     def get_purchases_descending_by_date(self, user: Union[Member, Company]):
         # order purchases by purchase_date
-        self.purchases.sort(key=lambda x: x.purchase_date, reverse=True)
+        self.purchases = sorted(
+            self.purchases, key=lambda x: x.purchase_date, reverse=True
+        )
 
         for purchase in self.purchases:
             if purchase.buyer is user:

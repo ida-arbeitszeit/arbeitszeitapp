@@ -20,7 +20,7 @@ def test_that_no_purchase_is_returned_when_searching_an_empty_repo(
 
 
 @injection_test
-def test_that_no_purchase_is_returned_when_no_user_is_specified(
+def test_that_no_purchases_are_returned_when_no_user_is_specified(
     query_purchases: QueryPurchases,
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
