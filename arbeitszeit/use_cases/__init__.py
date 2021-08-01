@@ -10,7 +10,6 @@ from arbeitszeit.entities import (
     Company,
     Member,
     Plan,
-    PlanRenewal,
     ProductOffer,
     PurposesOfPurchases,
 )
@@ -27,6 +26,7 @@ from .grant_credit import GrantCredit
 from .pay_consumer_product import PayConsumerProduct
 from .pay_means_of_production import PayMeansOfProduction
 from .query_products import ProductFilter, QueryProducts
+from .seek_approval import SeekApproval
 from .query_purchases import QueryPurchases
 from .send_work_certificates_to_worker import SendWorkCertificatesToWorker
 
@@ -123,27 +123,6 @@ def add_worker_to_company(
             company=company,
         )
     company_worker_repository.add_worker_to_company(company, worker)
-
-
-def seek_approval(
-    datetime_service: DatetimeService,
-    plan: Plan,
-    plan_renewal: Optional[PlanRenewal],
-) -> Plan:
-    """
-    Company seeks plan approval.
-    It can be a new plan or a plan renewal, in which case the original plan will be set as "renewed".
-    """
-    # This is just a place holder
-    is_approval = True
-    approval_date = datetime_service.now()
-    if is_approval:
-        plan.approve(approval_date)
-        if plan_renewal:
-            plan_renewal.original_plan.set_as_renewed()
-    else:
-        plan.deny("Some reason", approval_date)
-    return plan
 
 
 def check_plans_for_expiration(plans: List[Plan]) -> List[Plan]:
