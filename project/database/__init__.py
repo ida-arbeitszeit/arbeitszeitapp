@@ -42,6 +42,11 @@ def configure_injector(binder: Binder) -> None:
     )
 
     binder.bind(
+        interfaces.PurchaseRepository,
+        to=ClassProvider(PurchaseRepository),
+    )
+
+    binder.bind(
         entities.SocialAccounting,
         to=CallableProvider(get_social_accounting),
     )
