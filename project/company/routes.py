@@ -149,14 +149,17 @@ def buy(
 
 @main_company.route("/company/kaeufe")
 @login_required
-def my_purchases():
+@with_injection
+def my_purchases(
+    query_purchases: use_cases.QueryPurchases,
+):
     user_type = session["user_type"]
 
     if user_type == "member":
         return redirect(url_for("auth.zurueck"))
     else:
         session["user_type"] = "company"
-        purchases = current_user.purchases.order_by(desc("kauf_date")).all()
+        purchases = list(query_purchases(current_user))
         return render_template("company/my_purchases.html", purchases=purchases)
 
 

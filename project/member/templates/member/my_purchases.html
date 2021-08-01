@@ -31,12 +31,12 @@
       {% if purchases is defined and purchases|length %}
       {% for purchase in purchases %}
       <tr>
-        <td>{{ purchase.kauf_date.strftime("%x") }}</td>
-        <td>{{ purchase.offer.name }}</td>
-        <td>{{ purchase.offer.description }}</td>
-        <td>{{ purchase.kaufpreis }}</td>
+        <td>{{ purchase.purchase_date.strftime("%x") }}</td>
+        <td>{{ purchase.product_offer.name }}</td>
+        <td>{{ purchase.product_offer.description }}</td>
+        <td>{{ purchase.price }}</td>
         <th>{{ purchase.amount }}</th>
-        <th>{{ purchase.kaufpreis * purchase.amount }}</th>
+        <th>{{ purchase.price * purchase.amount }}</th>
       </tr>
       {% endfor %}
       {% else %}
