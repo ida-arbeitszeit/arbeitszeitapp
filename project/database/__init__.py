@@ -2,13 +2,7 @@ from __future__ import annotations
 
 from functools import wraps
 
-from injector import (
-    Binder,
-    CallableProvider,
-    ClassProvider,
-    Injector,
-    inject,
-)
+from injector import Binder, CallableProvider, ClassProvider, Injector, inject
 
 from arbeitszeit import entities
 from arbeitszeit import repositories as interfaces
