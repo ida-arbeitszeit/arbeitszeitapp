@@ -2,7 +2,14 @@ from __future__ import annotations
 
 from functools import wraps
 
-from injector import Binder, ClassProvider, Injector, InstanceProvider, inject
+from injector import (
+    Binder,
+    CallableProvider,
+    ClassProvider,
+    Injector,
+    InstanceProvider,
+    inject,
+)
 
 from arbeitszeit import entities
 from arbeitszeit import repositories as interfaces
@@ -37,8 +44,15 @@ def configure_injector(binder: Binder) -> None:
 
     binder.bind(
         entities.SocialAccounting,
-        to=InstanceProvider(AccountingRepository(AccountRepository()).get_by_id(1)),
+        to=CallableProvider(get_social_accounting),
     )
+
+
+@inject
+def get_social_accounting(
+    accounting_repo: AccountingRepository,
+) -> entities.SocialAccounting:
+    return accounting_repo.get_or_create_social_accounting()
 
 
 _injector = Injector(configure_injector)
