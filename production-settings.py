@@ -10,3 +10,7 @@ TESTING = False
 SQLALCHEMY_DATABASE_URI = environ.get("DATABASE_URL")
 # setting secret key from bash with: heroku config:set MY_SECRET_KEY=...
 SECRET_KEY = environ.get("MY_SECRET_KEY")
+
+SESSION_COOKIE_SECURE=True
+SESSION_COOKIE_HTTPONLY=True
+SESSION_COOKIE_SAMESITE='Lax'

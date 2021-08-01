@@ -1,7 +1,7 @@
 from flask import Flask, session
 from flask_table import Col, Table  # Do not delete
 
-from project.extensions import db, login_manager
+from project.extensions import db, login_manager, migrate
 
 
 def create_app():
@@ -15,6 +15,7 @@ def create_app():
     # init flask extensions
     db.init_app(app)
     login_manager.init_app(app)
+    migrate.init_app(app, db)
 
     with app.app_context():
         from .models import Company, Member
@@ -39,8 +40,5 @@ def create_app():
         app.register_blueprint(auth_routes.auth)
         app.register_blueprint(company_routes.main_company)
         app.register_blueprint(member_routes.main_member)
-
-        # create the initial database
-        db.create_all()
 
         return app
