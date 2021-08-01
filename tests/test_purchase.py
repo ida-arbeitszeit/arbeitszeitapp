@@ -4,7 +4,7 @@ from arbeitszeit.entities import AccountTypes, PurposesOfPurchases
 from arbeitszeit.use_cases import PurchaseProduct
 from tests.data_generators import CompanyGenerator, MemberGenerator, OfferGenerator
 from tests.dependency_injection import injection_test
-from tests.repositories import PurchaseRepository, TransactionRepository
+from tests.repositories import TransactionRepository
 
 
 @injection_test
@@ -12,15 +12,11 @@ def test_purchase_amount_can_not_exceed_supply(
     purchase_product: PurchaseProduct,
     offer_generator: OfferGenerator,
     member_generator: MemberGenerator,
-    transaction_repository: TransactionRepository,
-    purchase_repository: PurchaseRepository,
 ):
     offer = offer_generator.create_offer(amount=1)
     buyer = member_generator.create_member()
     with pytest.raises(AssertionError):
         purchase_product(
-            purchase_repository,
-            transaction_repository,
             offer,
             2,
             PurposesOfPurchases.consumption,
@@ -33,14 +29,10 @@ def test_product_offer_decreased_after_purchase(
     purchase_product: PurchaseProduct,
     offer_generator: OfferGenerator,
     member_generator: MemberGenerator,
-    transaction_repository: TransactionRepository,
-    purchase_repository: PurchaseRepository,
 ):
     offer = offer_generator.create_offer(amount=5)
     buyer = member_generator.create_member()
     purchase_product(
-        purchase_repository,
-        transaction_repository,
         offer,
         2,
         PurposesOfPurchases.consumption,
@@ -54,14 +46,10 @@ def test_product_offer_deactivated_if_amount_zero(
     purchase_product: PurchaseProduct,
     offer_generator: OfferGenerator,
     member_generator: MemberGenerator,
-    transaction_repository: TransactionRepository,
-    purchase_repository: PurchaseRepository,
 ):
     offer = offer_generator.create_offer(amount=3)
     buyer = member_generator.create_member()
     purchase_product(
-        purchase_repository,
-        transaction_repository,
         offer,
         3,
         PurposesOfPurchases.consumption,
@@ -75,35 +63,27 @@ def test_balance_of_buyer_reduced(
     purchase_product: PurchaseProduct,
     offer_generator: OfferGenerator,
     member_generator: MemberGenerator,
-    transaction_repository: TransactionRepository,
-    purchase_repository: PurchaseRepository,
     company_generator: CompanyGenerator,
 ):
     # member, consumption
     offer1 = offer_generator.create_offer(amount=3)
     buyer1 = member_generator.create_member()
     purpose1 = PurposesOfPurchases.consumption
-    purchase_product(
-        purchase_repository, transaction_repository, offer1, 3, purpose1, buyer1
-    )
+    purchase_product(offer1, 3, purpose1, buyer1)
     assert buyer1.account.balance == -3
 
     # company, means of production
     offer2 = offer_generator.create_offer(amount=3)
     buyer2 = company_generator.create_company()
     purpose2 = PurposesOfPurchases.means_of_prod
-    purchase_product(
-        purchase_repository, transaction_repository, offer2, 3, purpose2, buyer2
-    )
+    purchase_product(offer2, 3, purpose2, buyer2)
     assert buyer2.means_account.balance == -3
 
     # company, raw materials
     offer3 = offer_generator.create_offer(amount=3)
     buyer3 = company_generator.create_company()
     purpose3 = PurposesOfPurchases.raw_materials
-    purchase_product(
-        purchase_repository, transaction_repository, offer3, 3, purpose3, buyer3
-    )
+    purchase_product(offer3, 3, purpose3, buyer3)
     assert buyer3.raw_material_account.balance == -3
 
 
@@ -112,14 +92,10 @@ def test_balance_of_seller_increased(
     purchase_product: PurchaseProduct,
     offer_generator: OfferGenerator,
     member_generator: MemberGenerator,
-    transaction_repository: TransactionRepository,
-    purchase_repository: PurchaseRepository,
 ):
     offer = offer_generator.create_offer(amount=3)
     buyer = member_generator.create_member()
     purchase_product(
-        purchase_repository,
-        transaction_repository,
         offer,
         3,
         PurposesOfPurchases.consumption,
@@ -134,16 +110,13 @@ def test_correct_transaction_added_to_repo(
     offer_generator: OfferGenerator,
     member_generator: MemberGenerator,
     transaction_repository: TransactionRepository,
-    purchase_repository: PurchaseRepository,
     company_generator: CompanyGenerator,
 ):
     # member, consumption
     offer1 = offer_generator.create_offer(amount=3)
     buyer1 = member_generator.create_member()
     purpose1 = PurposesOfPurchases.consumption
-    purchase_product(
-        purchase_repository, transaction_repository, offer1, 3, purpose1, buyer1
-    )
+    purchase_product(offer1, 3, purpose1, buyer1)
     added_transaction_account_type = (
         transaction_repository.transactions.pop().account_from.account_type
     )
@@ -154,9 +127,7 @@ def test_correct_transaction_added_to_repo(
     offer2 = offer_generator.create_offer(amount=3)
     buyer2 = company_generator.create_company()
     purpose2 = PurposesOfPurchases.means_of_prod
-    purchase_product(
-        purchase_repository, transaction_repository, offer2, 3, purpose2, buyer2
-    )
+    purchase_product(offer2, 3, purpose2, buyer2)
     added_transaction_account_type = (
         transaction_repository.transactions.pop().account_from.account_type
     )
@@ -167,9 +138,7 @@ def test_correct_transaction_added_to_repo(
     offer3 = offer_generator.create_offer(amount=3)
     buyer3 = company_generator.create_company()
     purpose3 = PurposesOfPurchases.raw_materials
-    purchase_product(
-        purchase_repository, transaction_repository, offer3, 3, purpose3, buyer3
-    )
+    purchase_product(offer3, 3, purpose3, buyer3)
 
     added_transaction_account_type = (
         transaction_repository.transactions.pop().account_from.account_type
