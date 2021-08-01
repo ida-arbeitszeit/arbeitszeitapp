@@ -7,7 +7,6 @@ from flask_login import current_user, login_required
 
 from arbeitszeit import entities, errors, use_cases
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.transaction_factory import TransactionFactory
 from project import database
 from project.database import with_injection
 from project.database.repositories import (
@@ -151,7 +150,7 @@ def buy(
 @with_injection
 def create_plan(
     original_plan_id: Optional[int],
-    grant_credit: use_cases.GrantCredit,
+    seek_approval: use_cases.SeekApproval,
     plan_repository: PlanRepository,
 ):
     original_plan_id = request.args.get("original_plan_id")
@@ -179,12 +178,10 @@ def create_plan(
         database.commit_changes()
         new_plan = plan_repository.object_from_orm(new_plan_orm)
 
-        is_approved = use_cases.seek_approval(new_plan, original_plan)
+        is_approved = seek_approval(new_plan, original_plan)
         database.commit_changes()
 
         if is_approved:
-            grant_credit(new_plan)
-            database.commit_changes()
             flash("Plan erfolgreich erstellt und genehmigt. Kredit wurde gewährt.")
             return redirect("/company/my_plans")
         else:

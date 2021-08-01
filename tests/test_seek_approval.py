@@ -1,4 +1,4 @@
-from arbeitszeit.use_cases import seek_approval
+from arbeitszeit.use_cases import SeekApproval
 from tests.data_generators import PlanGenerator
 from tests.datetime_service import TestDatetimeService
 from tests.dependency_injection import injection_test
@@ -7,6 +7,7 @@ from tests.dependency_injection import injection_test
 @injection_test
 def test_that_any_plan_will_be_approved(
     plan_generator: PlanGenerator,
+    seek_approval: SeekApproval,
 ):
     new_plan = plan_generator.create_plan()
     original_plan = plan_generator.create_plan(
@@ -19,6 +20,7 @@ def test_that_any_plan_will_be_approved(
 @injection_test
 def test_that_any_plan_will_be_approved_and_original_plan_renewed(
     plan_generator: PlanGenerator,
+    seek_approval: SeekApproval,
 ):
     new_plan = plan_generator.create_plan()
     original_plan = plan_generator.create_plan(
@@ -32,6 +34,7 @@ def test_that_any_plan_will_be_approved_and_original_plan_renewed(
 @injection_test
 def test_that_true_is_returned(
     plan_generator: PlanGenerator,
+    seek_approval: SeekApproval,
 ):
     new_plan = plan_generator.create_plan()
     original_plan = plan_generator.create_plan(
@@ -44,6 +47,7 @@ def test_that_true_is_returned(
 @injection_test
 def test_that_approval_date_has_correct_day_of_month(
     plan_generator: PlanGenerator,
+    seek_approval: SeekApproval,
 ):
     new_plan = plan_generator.create_plan()
     original_plan = plan_generator.create_plan(

@@ -1,10 +1,8 @@
 from datetime import datetime, timedelta
+from arbeitszeit.datetime_service import DatetimeService
 
 
-class TestDatetimeService:
-    def now(self) -> datetime:
-        return datetime.now()
-
+class TestDatetimeService(DatetimeService):
     def now_minus_one_day(self) -> datetime:
         return datetime.now() - timedelta(days=1)
 

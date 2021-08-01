@@ -27,6 +27,7 @@ from .grant_credit import GrantCredit
 from .pay_consumer_product import PayConsumerProduct
 from .pay_means_of_production import PayMeansOfProduction
 from .query_products import ProductFilter, QueryProducts
+from .seek_approval import SeekApproval
 from .send_work_certificates_to_worker import SendWorkCertificatesToWorker
 
 
@@ -122,29 +123,6 @@ def add_worker_to_company(
             company=company,
         )
     company_worker_repository.add_worker_to_company(company, worker)
-
-
-def seek_approval(
-    new_plan: Plan,
-    original_plan: Optional[Plan],
-) -> bool:
-    """
-    Company seeks plan approval. Either for a new plan or for a plan reneweal.
-
-    If it's a plan renewal, the original plan will be set to "renewed".
-
-    Returns a boolian value.
-    """
-    # This is just a place holder
-    is_approval = True
-    approval_date = DatetimeService().now()
-    if is_approval:
-        new_plan.approve(approval_date)
-        if original_plan:
-            original_plan.set_as_renewed()
-    else:
-        new_plan.deny(approval_date)
-    return is_approval
 
 
 def check_plans_for_expiration(plans: List[Plan]) -> List[Plan]:
