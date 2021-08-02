@@ -11,6 +11,7 @@ from project.models import Account, Company, Member, Offer, SocialAccounting
 
 from .repositories import (
     AccountingRepository,
+    AccountRepository,
     CompanyRepository,
     CompanyWorkerRepository,
     MemberRepository,
