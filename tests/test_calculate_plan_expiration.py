@@ -51,5 +51,7 @@ def test_that_expiration_date_is_correctly_calculated(
         TestDatetimeService().now() + datetime.timedelta(days=1)
     ).strftime("%x")
     calculate_plan_expiration(plan)
-    calculated_expiration_date = plan.expiration_date.strftime("%x")
+    calculated_expiration_date = (
+        plan.expiration_date.strftime("%x") if plan.expiration_date else None
+    )
     assert expected_expiration_date == calculated_expiration_date

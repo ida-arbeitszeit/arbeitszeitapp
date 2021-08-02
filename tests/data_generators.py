@@ -172,6 +172,8 @@ class PlanGenerator:
             renewed=False,
             set_as_expired=lambda: None,
             set_as_renewed=lambda: None,
+            expiration_relative=None,
+            expiration_date=None,
         )
 
 

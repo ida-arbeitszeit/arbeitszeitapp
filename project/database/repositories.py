@@ -338,6 +338,8 @@ class PlanRepository(repositories.PlanRepository):
             renewed=plan.renewed,
             set_as_expired=lambda: setattr(plan, "expired", True),
             set_as_renewed=lambda: setattr(plan, "renewed", True),
+            expiration_relative=None,
+            expiration_date=None,
         )
 
     def object_to_orm(self, plan: entities.Plan) -> Plan:
