@@ -1,8 +1,14 @@
+"""The classes in this module should only provide instances of
+entities. Never should these entities automatically be added to a
+repository.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Union
+from typing import Optional, Union
+from uuid import uuid4
 
 from injector import inject
 
@@ -13,7 +19,6 @@ from arbeitszeit.entities import (
     Company,
     Member,
     Plan,
-    PlanRenewal,
     ProductOffer,
     Purchase,
     PurposesOfPurchases,
@@ -51,11 +56,16 @@ class OfferGenerator:
 class MemberGenerator:
     id_generator: IdGenerator
     account_generator: AccountGenerator
+    email_generator: EmailGenerator
 
-    def create_member(self) -> Member:
+    def create_member(self, *, email: Optional[str] = None) -> Member:
+        if not email:
+            email = self.email_generator.get_random_email()
+        assert email is not None
         return Member(
             id=self.id_generator.get_id(),
             name="Member name",
+            email=email,
             account=self.account_generator.create_account(
                 account_type=AccountTypes.member
             ),
@@ -117,11 +127,15 @@ class AccountGenerator:
     def create_account(self, account_type=AccountTypes.p) -> Account:
         return Account(
             id=self.id_generator.get_id(),
-            account_owner_id=self.id_generator.get_id(),
             account_type=account_type,
             balance=Decimal(0),
             change_credit=lambda amount: None,
         )
+
+
+class EmailGenerator:
+    def get_random_email(self):
+        return str(uuid4()) + "@cp.org"
 
 
 @inject
@@ -158,22 +172,6 @@ class PlanGenerator:
             renewed=False,
             set_as_expired=lambda: None,
             set_as_renewed=lambda: None,
-        )
-
-
-@inject
-@dataclass
-class PlanRenewalGenerator:
-    plan_generator: PlanGenerator
-
-    def create_plan_renewal(
-        self, original_plan=None, modifications=False
-    ) -> PlanRenewal:
-        return PlanRenewal(
-            original_plan=self.plan_generator.create_plan()
-            if original_plan is None
-            else original_plan,
-            modifications=modifications,
         )
 
 
