@@ -36,6 +36,18 @@ class RepositoryModule(Module):
             data_generators.AccountGenerator(data_generators.IdGenerator())
         ).create_social_accounting()
 
+    @provider
+    def provide_account_repository(
+        self, repo: repositories.AccountRepository
+    ) -> interfaces.AccountRepository:
+        return repo
+
+    @provider
+    def provide_member_repository(
+        self, repo: repositories.MemberRepository
+    ) -> interfaces.MemberRepository:
+        return repo
+
 
 def injection_test(original_test):
     injector = Injector(RepositoryModule())

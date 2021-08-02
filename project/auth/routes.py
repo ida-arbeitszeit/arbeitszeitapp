@@ -2,7 +2,10 @@ from flask import Blueprint, flash, redirect, render_template, request, session,
 from flask_login import login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from arbeitszeit.errors import MemberAlreadyExists
+from arbeitszeit.use_cases import RegisterMember
 from project import database
+from project.database import with_injection
 
 auth = Blueprint("auth", __name__, template_folder="templates", static_folder="static")
 
@@ -28,24 +31,17 @@ def signup_member():
 
 
 @auth.route("/member/signup", methods=["POST"])
-def signup_member_post():
+@with_injection
+def signup_member_post(register_member: RegisterMember):
     email = request.form.get("email")
     name = request.form.get("name")
     password = request.form.get("password")
 
-    member = database.get_user_by_mail(email=email)
-
-    if member:
+    try:
+        register_member(email, name, password)
+    except MemberAlreadyExists:
         flash("Email address already exists")
         return redirect(url_for("auth.signup_member"))
-
-    new_user = database.add_new_user(
-        email=email,
-        name=name,
-        password=generate_password_hash(password, method="sha256"),
-    )
-
-    database.add_new_account_for_member(new_user.id)
 
     return redirect(url_for("auth.login_member"))
 

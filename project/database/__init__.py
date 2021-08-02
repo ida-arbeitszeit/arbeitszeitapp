@@ -2,13 +2,7 @@ from __future__ import annotations
 
 from functools import wraps
 
-from injector import (
-    Binder,
-    CallableProvider,
-    ClassProvider,
-    Injector,
-    inject,
-)
+from injector import Binder, CallableProvider, ClassProvider, Injector, inject
 
 from arbeitszeit import entities
 from arbeitszeit import repositories as interfaces
@@ -19,6 +13,7 @@ from .repositories import (
     AccountingRepository,
     CompanyRepository,
     CompanyWorkerRepository,
+    MemberRepository,
     ProductOfferRepository,
     PurchaseRepository,
     TransactionRepository,
@@ -30,17 +25,14 @@ def configure_injector(binder: Binder) -> None:
         interfaces.OfferRepository,
         to=ClassProvider(ProductOfferRepository),
     )
-
     binder.bind(
         interfaces.TransactionRepository,
         to=ClassProvider(TransactionRepository),
     )
-
     binder.bind(
         interfaces.CompanyWorkerRepository,
         to=ClassProvider(CompanyWorkerRepository),
     )
-
     binder.bind(
         interfaces.PurchaseRepository,
         to=ClassProvider(PurchaseRepository),
@@ -49,6 +41,14 @@ def configure_injector(binder: Binder) -> None:
     binder.bind(
         entities.SocialAccounting,
         to=CallableProvider(get_social_accounting),
+    )
+    binder.bind(
+        interfaces.AccountRepository,
+        to=ClassProvider(AccountRepository),
+    )
+    binder.bind(
+        interfaces.MemberRepository,
+        to=ClassProvider(MemberRepository),
     )
 
     binder.bind(
@@ -104,31 +104,6 @@ def get_user_by_mail(email) -> Member:
     """returns first user in User, filtered by email."""
     member = Member.query.filter_by(email=email).first()
     return member
-
-
-def get_user_by_id(id) -> Member:
-    """returns first user in User, filtered by id."""
-    member = Member.query.filter_by(id=id).first()
-    return member
-
-
-def add_new_user(email, name, password) -> None:
-    """
-    adds a new user to User.
-    """
-    new_user = Member(email=email, name=name, password=password)
-    db.session.add(new_user)
-    db.session.commit()
-    return new_user
-
-
-def add_new_account_for_member(member_id):
-    new_account = Account(
-        account_owner_member=member_id,
-        account_type="member",
-    )
-    db.session.add(new_account)
-    db.session.commit()
 
 
 # Company
