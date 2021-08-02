@@ -20,24 +20,6 @@ def test_that_no_purchase_is_returned_when_searching_an_empty_repo(
 
 
 @injection_test
-def test_that_no_purchases_are_returned_when_no_user_is_specified(
-    query_purchases: QueryPurchases,
-    member_generator: MemberGenerator,
-    company_generator: CompanyGenerator,
-    purchase_generator: PurchaseGenerator,
-    repository: PurchaseRepository,
-):
-    member = member_generator.create_member()
-    company = company_generator.create_company()
-    purchase_member = purchase_generator.create_purchase(buyer=member)
-    purchase_company = purchase_generator.create_purchase(buyer=company)
-    repository.add(purchase_member)
-    repository.add(purchase_company)
-    results = list(query_purchases(None))
-    assert not results
-
-
-@injection_test
 def test_that_correct_purchases_are_returned(
     query_purchases: QueryPurchases,
     member_generator: MemberGenerator,

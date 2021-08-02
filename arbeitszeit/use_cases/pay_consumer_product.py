@@ -32,14 +32,6 @@ class PayConsumerProduct:
             - adjusts the balances of the buying member and the selling company
             - adds the transaction to the repository
         """
-        if not receiver:
-            raise errors.CompanyDoesNotExist(
-                company=receiver,
-            )
-        if not plan:
-            raise errors.PlanDoesNotExist(
-                plan=plan,
-            )
         if plan.planner != receiver:
             raise errors.CompanyIsNotPlanner(
                 company=receiver,

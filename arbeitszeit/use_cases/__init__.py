@@ -25,9 +25,9 @@ from .grant_credit import GrantCredit
 from .pay_consumer_product import PayConsumerProduct
 from .pay_means_of_production import PayMeansOfProduction
 from .query_products import ProductFilter, QueryProducts
-from .seek_approval import SeekApproval
 from .query_purchases import QueryPurchases
 from .register_member import RegisterMember
+from .seek_approval import SeekApproval
 from .send_work_certificates_to_worker import SendWorkCertificatesToWorker
 
 __all__ = [
@@ -126,12 +126,6 @@ def add_worker_to_company(
 ) -> None:
     """This function may raise a WorkerAlreadyAtCompany exception if the
     worker is already employed at the company."""
-    if not company:
-        raise errors.CompanyDoesNotExist(company=company)
-    if not worker:
-        raise errors.WorkerDoesNotExist(
-            worker=worker,
-        )
     company_workers = company_worker_repository.get_company_workers(company)
     if worker in company_workers:
         raise errors.WorkerAlreadyAtCompany(

@@ -106,7 +106,7 @@ class Plan:
         description: str,
         timeframe: int,
         approved: bool,
-        approval_date: datetime,
+        approval_date: Optional[datetime],
         approval_reason: Optional[str],
         approve: Callable[[bool, str, datetime], None],
         expired: bool,

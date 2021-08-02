@@ -192,7 +192,7 @@ class PurchaseGenerator:
             purchase_date=purchase_date,
             product_offer=self.offer_generator.create_offer(),
             buyer=buyer,
-            price=10,
+            price=Decimal(10),
             amount=amount,
-            purpose=None,
+            purpose=PurposesOfPurchases.consumption,
         )

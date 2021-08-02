@@ -55,5 +55,6 @@ def test_that_approval_date_has_correct_day_of_month(
     )
     seek_approval(new_plan, original_plan)
     expected_day_of_month = TestDatetimeService().now().strftime("%d")
+    assert new_plan.approval_date
     day_of_month = new_plan.approval_date.strftime("%d")
     assert expected_day_of_month == day_of_month

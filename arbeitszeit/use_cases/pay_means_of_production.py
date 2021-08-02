@@ -37,14 +37,6 @@ class PayMeansOfProduction:
             PurposesOfPurchases.raw_materials,
         ), "Not a valid purpose for this operation."
 
-        if not receiver:
-            raise errors.CompanyDoesNotExist(
-                company=receiver,
-            )
-        if not plan:
-            raise errors.PlanDoesNotExist(
-                plan=plan,
-            )
         if plan.planner != receiver:
             raise errors.CompanyIsNotPlanner(
                 company=receiver,

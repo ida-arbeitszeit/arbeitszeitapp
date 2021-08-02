@@ -12,6 +12,17 @@ isort for that purpose.  Currently this script only applies auto
 formatting to a limited selection of paths.  You can add more paths by
 following the instructions provided inside the script file.
 
+Code analysis
+=============
+
+We use type hints.  You can check the consistency of the type hints
+via the ``mypy`` command.
+
+Furthermore ``flake8`` is employed to prevent certain mistakes like
+for example unused imports or uninitialized variables.
+
+Invoke both commands without arguments to test all the eligable code.
+
 Testing
 =======
 

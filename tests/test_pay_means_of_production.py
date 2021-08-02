@@ -1,7 +1,7 @@
 import pytest
 
 from arbeitszeit import errors
-from arbeitszeit.entities import AccountTypes, PurposesOfPurchases
+from arbeitszeit.entities import PurposesOfPurchases
 from arbeitszeit.use_cases import PayMeansOfProduction
 from tests.data_generators import CompanyGenerator, PlanGenerator
 from tests.dependency_injection import injection_test
@@ -20,35 +20,6 @@ def test_assertion_error_is_raised_if_purpose_is_other_than_means_or_raw_materia
     purpose = PurposesOfPurchases.consumption
     pieces = 5
     with pytest.raises(AssertionError):
-        pay_means_of_production(sender, receiver, plan, pieces, purpose)
-
-
-@injection_test
-def test_error_is_raised_if_money_is_sent_to_nonexisting_company(
-    pay_means_of_production: PayMeansOfProduction,
-    company_generator: CompanyGenerator,
-    plan_generator: PlanGenerator,
-):
-    sender = company_generator.create_company()
-    receiver = None
-    plan = plan_generator.create_plan()
-    purpose = PurposesOfPurchases.means_of_prod
-    pieces = 5
-    with pytest.raises(errors.CompanyDoesNotExist):
-        pay_means_of_production(sender, receiver, plan, pieces, purpose)
-
-
-@injection_test
-def test_error_is_raised_if_specified_plan_does_not_exist(
-    pay_means_of_production: PayMeansOfProduction,
-    company_generator: CompanyGenerator,
-):
-    sender = company_generator.create_company()
-    receiver = company_generator.create_company()
-    plan = None
-    purpose = PurposesOfPurchases.means_of_prod
-    pieces = 5
-    with pytest.raises(errors.PlanDoesNotExist):
         pay_means_of_production(sender, receiver, plan, pieces, purpose)
 
 
