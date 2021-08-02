@@ -1,7 +1,14 @@
+"""The classes in this module should only provide instances of
+entities. Never should these entities automatically be added to a
+repository.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 from decimal import Decimal
+from typing import Optional, Union
+from uuid import uuid4
 
 from injector import inject
 
@@ -12,10 +19,12 @@ from arbeitszeit.entities import (
     Company,
     Member,
     Plan,
-    PlanRenewal,
     ProductOffer,
+    Purchase,
+    PurposesOfPurchases,
     SocialAccounting,
 )
+from tests.datetime_service import TestDatetimeService
 
 
 @inject
@@ -47,11 +56,16 @@ class OfferGenerator:
 class MemberGenerator:
     id_generator: IdGenerator
     account_generator: AccountGenerator
+    email_generator: EmailGenerator
 
-    def create_member(self) -> Member:
+    def create_member(self, *, email: Optional[str] = None) -> Member:
+        if not email:
+            email = self.email_generator.get_random_email()
+        assert email is not None
         return Member(
             id=self.id_generator.get_id(),
             name="Member name",
+            email=email,
             account=self.account_generator.create_account(
                 account_type=AccountTypes.member
             ),
@@ -113,11 +127,15 @@ class AccountGenerator:
     def create_account(self, account_type=AccountTypes.p) -> Account:
         return Account(
             id=self.id_generator.get_id(),
-            account_owner_id=self.id_generator.get_id(),
             account_type=account_type,
             balance=Decimal(0),
             change_credit=lambda amount: None,
         )
+
+
+class EmailGenerator:
+    def get_random_email(self):
+        return str(uuid4()) + "@cp.org"
 
 
 @inject
@@ -159,15 +177,22 @@ class PlanGenerator:
 
 @inject
 @dataclass
-class PlanRenewalGenerator:
-    plan_generator: PlanGenerator
+class PurchaseGenerator:
+    offer_generator: OfferGenerator
+    member_generator: MemberGenerator
+    company_generator: CompanyGenerator
 
-    def create_plan_renewal(
-        self, original_plan=None, modifications=False
-    ) -> PlanRenewal:
-        return PlanRenewal(
-            original_plan=self.plan_generator.create_plan()
-            if original_plan is None
-            else original_plan,
-            modifications=modifications,
+    def create_purchase(
+        self,
+        buyer: Union[Member, Company],
+        purchase_date=TestDatetimeService().now_minus_one_day(),
+        amount=1,
+    ) -> Purchase:
+        return Purchase(
+            purchase_date=purchase_date,
+            product_offer=self.offer_generator.create_offer(),
+            buyer=buyer,
+            price=Decimal(10),
+            amount=amount,
+            purpose=PurposesOfPurchases.consumption,
         )

@@ -1,4 +1,4 @@
-{% extends "base_member.html" %}
+{% extends "base_company.html" %}
 
 {% block content2 %}
 
@@ -22,6 +22,7 @@
         <th>Datum</th>
         <th>Name</th>
         <th>Beschreibung</th>
+        <th>Zweck</th>
         <th>Einzelpreis</th>
         <th>Menge</th>
         <th>Gesamtpreis</th>
@@ -34,6 +35,7 @@
         <td>{{ purchase.purchase_date.strftime("%x") }}</td>
         <td>{{ purchase.product_offer.name }}</td>
         <td>{{ purchase.product_offer.description }}</td>
+        <td>{{ 'Prod.mittel' if (purchase.purpose.value == 'means_of_prod') else 'Rohmat.' }}</td>
         <td>{{ purchase.price }}</td>
         <th>{{ purchase.amount }}</th>
         <th>{{ purchase.price * purchase.amount }}</th>

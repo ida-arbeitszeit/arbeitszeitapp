@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Iterator, List
+from typing import Iterator, List, Union
 
 from arbeitszeit.entities import (
     Account,
+    AccountTypes,
     Company,
     Member,
     Plan,
@@ -27,6 +28,12 @@ class PurchaseRepository(ABC):
     def add(self, purchase: Purchase) -> None:
         pass
 
+    @abstractmethod
+    def get_purchases_descending_by_date(
+        self, user: Union[Member, Company]
+    ) -> Iterator[Purchase]:
+        pass
+
 
 class PlanRepository(ABC):
     @abstractmethod
@@ -45,6 +52,10 @@ class AccountRepository(ABC):
     def add(self, account: Account) -> None:
         pass
 
+    @abstractmethod
+    def create_account(self, account_type: AccountTypes) -> Account:
+        pass
+
 
 class OfferRepository(ABC):
     @abstractmethod
@@ -57,4 +68,16 @@ class OfferRepository(ABC):
 
     @abstractmethod
     def all_active_offers(self) -> Iterator[ProductOffer]:
+        pass
+
+
+class MemberRepository(ABC):
+    @abstractmethod
+    def create_member(
+        self, email: str, name: str, password: str, account: Account
+    ) -> Member:
+        pass
+
+    @abstractmethod
+    def has_member_with_email(self, email: str) -> bool:
         pass

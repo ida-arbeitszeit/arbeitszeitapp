@@ -1,9 +1,18 @@
-from typing import Iterator, List
+from decimal import Decimal
+from typing import Iterator, List, Union
 
 from injector import inject, singleton
 
 import arbeitszeit.repositories as interfaces
-from arbeitszeit.entities import Company, Member, ProductOffer, Purchase, Transaction
+from arbeitszeit.entities import (
+    Account,
+    AccountTypes,
+    Company,
+    Member,
+    ProductOffer,
+    Purchase,
+    Transaction,
+)
 
 
 @singleton
@@ -14,6 +23,16 @@ class PurchaseRepository(interfaces.PurchaseRepository):
 
     def add(self, purchase: Purchase):
         self.purchases.append(purchase)
+
+    def get_purchases_descending_by_date(self, user: Union[Member, Company]):
+        # order purchases by purchase_date
+        self.purchases = sorted(
+            self.purchases, key=lambda x: x.purchase_date, reverse=True
+        )
+
+        for purchase in self.purchases:
+            if purchase.buyer is user:
+                yield purchase
 
 
 @singleton
@@ -57,3 +76,58 @@ class CompanyWorkerRepository(interfaces.CompanyWorkerRepository):
 
     def get_company_workers(self, company: Company) -> List[Member]:
         return company.workers
+
+
+@singleton
+class AccountRepository(interfaces.AccountRepository):
+    @inject
+    def __init__(self):
+        self.accounts = []
+        self.latest_id = 0
+
+    def __contains__(self, account: object) -> bool:
+        if not isinstance(account, Account):
+            return False
+        return account in self.accounts
+
+    def add(self, account: Account) -> None:
+        assert account not in self
+        self.accounts.append(account)
+
+    def create_account(self, account_type: AccountTypes) -> Account:
+        account = Account(
+            id=self.latest_id,
+            balance=Decimal(0),
+            account_type=account_type,
+            change_credit=lambda _: None,
+        )
+        self.latest_id += 1
+        self.accounts.append(account)
+        return account
+
+
+@singleton
+class MemberRepository(interfaces.MemberRepository):
+    @inject
+    def __init__(self):
+        self.members = []
+        self.last_id = 0
+
+    def create_member(
+        self, email: str, name: str, password: str, account: Account
+    ) -> Member:
+        self.last_id += 1
+        member = Member(
+            id=self.last_id,
+            name=name,
+            email=email,
+            account=account,
+        )
+        self.members.append(member)
+        return member
+
+    def has_member_with_email(self, email: str) -> bool:
+        for member in self.members:
+            if member.email == email:
+                return True
+        return False

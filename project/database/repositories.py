@@ -3,9 +3,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterator, List, Optional, TypeVar
+from typing import Iterator, List, Optional, TypeVar, Union
 
 from injector import inject
+from sqlalchemy import desc
+from werkzeug.security import generate_password_hash
 
 from arbeitszeit import entities, repositories
 from project.extensions import db
@@ -52,7 +54,7 @@ class CompanyWorkerRepository(repositories.CompanyWorkerRepository):
 
 @inject
 @dataclass
-class MemberRepository:
+class MemberRepository(repositories.MemberRepository):
     account_repository: AccountRepository
 
     def get_member_by_id(self, id: int) -> Optional[entities.Member]:
@@ -62,11 +64,32 @@ class MemberRepository:
     def object_from_orm(self, orm_object: Member) -> entities.Member:
         member_account = self.account_repository.object_from_orm(orm_object.account)
         return entities.Member(
-            id=orm_object.id, name=orm_object.name, account=member_account
+            id=orm_object.id,
+            name=orm_object.name,
+            account=member_account,
+            email=orm_object.email,
         )
 
     def object_to_orm(self, member: entities.Member) -> Member:
         return Member.query.get(member.id)
+
+    def create_member(
+        self, email: str, name: str, password: str, account: entities.Account
+    ) -> entities.Member:
+        orm_account = self.account_repository.object_to_orm(account)
+        orm_member = Member(
+            email=email,
+            name=name,
+            password=generate_password_hash(password, method="sha256"),
+            account=orm_account,
+        )
+        orm_account.account_owner_member = orm_member.id
+        db.session.add(orm_member)
+        db.session.commit()
+        return self.object_from_orm(orm_member)
+
+    def has_member_with_email(self, email: str) -> bool:
+        return Member.query.filter_by(email=email).count()
 
 
 @inject
@@ -110,15 +133,8 @@ class CompanyRepository:
 @dataclass
 class AccountRepository(repositories.AccountRepository):
     def object_from_orm(self, account_orm: Account) -> entities.Account:
-        if account_orm.account_owner_social_accounting:
-            account_owner_id = account_orm.account_owner_social_accounting
-        elif account_orm.account_owner_company:
-            account_owner_id = account_orm.account_owner_company
-        else:
-            account_owner_id = account_orm.account_owner_member
         return entities.Account(
             id=account_orm.id,
-            account_owner_id=account_owner_id,
             account_type=account_orm.account_type,
             balance=account_orm.balance,
             change_credit=lambda amount: setattr(
@@ -127,29 +143,26 @@ class AccountRepository(repositories.AccountRepository):
         )
 
     def object_to_orm(self, account: entities.Account) -> Account:
-        account_owner_social_accounting, account_owner_member, account_owner_company = (
-            None,
-            None,
-            None,
-        )
-        if account.account_type == "accounting":
-            account_owner_social_accounting = 1
-        elif account.account_type == "member":
-            account_owner_member = account.account_owner_id
-        else:  # if Company (p, r, a or prd)
-            account_owner_company = account.account_owner_id
+        account_orm = Account.query.filter_by(id=account.id).first()
+        assert account_orm
+        return account_orm
 
-        return Account(
-            account_owner_social_accounting=account_owner_social_accounting,
-            account_owner_company=account_owner_company,
-            account_owner_member=account_owner_member,
+    def add(self, account: entities.Account) -> None:
+        account_orm = Account(
+            account_owner_social_accounting=None,
+            account_owner_company=None,
+            account_owner_member=None,
             account_type=account.account_type,
             balance=account.balance,
         )
-
-    def add(self, account: entities.Account) -> None:
-        account_orm = self.object_to_orm(account)
         db.session.add(account_orm)
+        db.session.commit()
+
+    def create_account(self, account_type: entities.AccountTypes):
+        account = Account(account_type=account_type.value)
+        db.session.add(account)
+        db.session.commit()
+        return self.object_from_orm(account)
 
 
 @inject
@@ -209,9 +222,29 @@ class PurchaseRepository(repositories.PurchaseRepository):
             purpose=purchase.purpose.value,
         )
 
+    def object_from_orm(self, purchase: Kaeufe) -> entities.Purchase:
+        return entities.Purchase(
+            purchase_date=purchase.kauf_date,
+            product_offer=self.product_offer_repository.get_by_id(purchase.angebot),
+            buyer=self.member_repository.get_member_by_id(purchase.member)
+            if purchase.type_member
+            else self.company_repository.get_by_id(purchase.company),
+            price=purchase.kaufpreis,
+            amount=purchase.amount,
+            purpose=purchase.purpose,
+        )
+
     def add(self, purchase: entities.Purchase) -> None:
         purchase_orm = self.object_to_orm(purchase)
         db.session.add(purchase_orm)
+
+    def get_purchases_descending_by_date(
+        self, user: Union[Member, Company]
+    ) -> Iterator[entities.Purchase]:
+        return (
+            self.object_from_orm(purchase)
+            for purchase in user.purchases.order_by(desc("kauf_date")).all()
+        )
 
 
 @inject

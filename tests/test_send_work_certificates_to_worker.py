@@ -1,6 +1,8 @@
+from decimal import Decimal
+
 import pytest
 
-from arbeitszeit.errors import WorkerDoesNotExist, WorkerNotAtCompany
+from arbeitszeit.errors import WorkerNotAtCompany
 from arbeitszeit.use_cases import SendWorkCertificatesToWorker
 from tests.data_generators import CompanyGenerator, MemberGenerator
 from tests.dependency_injection import injection_test
@@ -17,7 +19,7 @@ def test_that_after_transfer_balances_of_worker_and_company_are_correct(
     company = company_generator.create_company()
     worker = member_generator.create_member()
     company_worker_repository.add_worker_to_company(company, worker)
-    amount_to_transfer = 50
+    amount_to_transfer = Decimal(50)
     send_work_certificates_to_worker(
         company,
         worker,
@@ -25,22 +27,6 @@ def test_that_after_transfer_balances_of_worker_and_company_are_correct(
     )
     assert company.work_account.balance == -amount_to_transfer
     assert worker.account.balance == amount_to_transfer
-
-
-@injection_test
-def test_that_error_is_raised_if_money_is_sent_to_nonexisting_worker(
-    send_work_certificates_to_worker: SendWorkCertificatesToWorker,
-    company_generator: CompanyGenerator,
-):
-    company = company_generator.create_company()
-    worker = None
-    amount_to_transfer = 50
-    with pytest.raises(WorkerDoesNotExist):
-        send_work_certificates_to_worker(
-            company,
-            worker,
-            amount_to_transfer,
-        )
 
 
 @injection_test
@@ -54,7 +40,7 @@ def test_that_error_is_raised_if_money_is_sent_to_worker_not_working_in_company(
     worker1 = member_generator.create_member()
     company_worker_repository.add_worker_to_company(company, worker1)
     worker2 = member_generator.create_member()
-    amount_to_transfer = 50
+    amount_to_transfer = Decimal(50)
     with pytest.raises(WorkerNotAtCompany):
         send_work_certificates_to_worker(
             company,
@@ -74,7 +60,7 @@ def test_that_after_transfer_one_transaction_is_added(
     company = company_generator.create_company()
     worker = member_generator.create_member()
     company_worker_repository.add_worker_to_company(company, worker)
-    amount_to_transfer = 50
+    amount_to_transfer = Decimal(50)
     send_work_certificates_to_worker(
         company,
         worker,
@@ -94,7 +80,7 @@ def test_that_after_transfer_correct_transaction_is_added(
     company = company_generator.create_company()
     worker = member_generator.create_member()
     company_worker_repository.add_worker_to_company(company, worker)
-    amount_to_transfer = 50
+    amount_to_transfer = Decimal(50)
     send_work_certificates_to_worker(
         company,
         worker,

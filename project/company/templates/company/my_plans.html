@@ -104,7 +104,7 @@
                 <td><a><i class="{{ 'fas fa-redo not-active' }}"></i></a>
                 </td>
                 {% else %}
-                <td><a href="{{ url_for('main_company.create_plan', renew=plan.id) }}"><i
+                <td><a href="{{ url_for('main_company.create_plan', original_plan_id=plan.id) }}"><i
                             class="{{ 'fas fa-redo' }}"></i></a>
                 </td>
                 {% endif %}

@@ -17,11 +17,13 @@ class Member:
         self,
         id: int,
         name: str,
+        email: str,
         account: Account,
     ) -> None:
         self._id = id
         self.name = name
         self.account = account
+        self.email = email
 
     @property
     def id(self):
@@ -75,13 +77,11 @@ class Account:
     def __init__(
         self,
         id: int,
-        account_owner_id: int,
         account_type: AccountTypes,
         balance: Decimal,
         change_credit: Callable[[Decimal], None],
     ) -> None:
         self.id = id
-        self.account_owner_id = account_owner_id
         self.account_type = account_type
         self.balance = balance
         self._change_credit = change_credit
@@ -106,7 +106,7 @@ class Plan:
         description: str,
         timeframe: int,
         approved: bool,
-        approval_date: datetime,
+        approval_date: Optional[datetime],
         approval_reason: Optional[str],
         approve: Callable[[bool, str, datetime], None],
         expired: bool,
@@ -136,11 +136,15 @@ class Plan:
 
     def approve(self, approval_date: datetime) -> None:
         self.approved = True
+        self.approval_date = approval_date
+        self.approval_reason = "approved"
         self._approve_call(True, "approved", approval_date)
 
-    def deny(self, reason: str, denial_date: datetime) -> None:
+    def deny(self, denial_date: datetime) -> None:
         self.approved = False
-        self._approve_call(False, reason, denial_date)
+        self.approval_date = denial_date
+        self.approval_reason = "not approved"
+        self._approve_call(False, "not approved", denial_date)
 
     def set_as_expired(self) -> None:
         self.expired = True

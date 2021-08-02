@@ -10,7 +10,6 @@ from arbeitszeit.entities import (
     Company,
     Member,
     Plan,
-    PlanRenewal,
     ProductOffer,
     PurposesOfPurchases,
 )
@@ -22,12 +21,30 @@ from arbeitszeit.repositories import (
 )
 from arbeitszeit.transaction_factory import TransactionFactory
 
-# do not delete, these imports make imports of use cases module more convenient.
 from .grant_credit import GrantCredit
 from .pay_consumer_product import PayConsumerProduct
 from .pay_means_of_production import PayMeansOfProduction
 from .query_products import ProductFilter, QueryProducts
+from .query_purchases import QueryPurchases
+from .register_member import RegisterMember
+from .seek_approval import SeekApproval
 from .send_work_certificates_to_worker import SendWorkCertificatesToWorker
+
+__all__ = [
+    "GrantCredit",
+    "PayConsumerProduct",
+    "PayMeansOfProduction",
+    "ProductFilter",
+    "PurchaseProduct",
+    "QueryProducts",
+    "QueryPurchases",
+    "RegisterMember",
+    "SendWorkCertificatesToWorker",
+    "add_worker_to_company",
+    "check_plans_for_expiration",
+    "deactivate_offer",
+    "seek_approval",
+]
 
 
 @inject
@@ -36,11 +53,11 @@ class PurchaseProduct:
     datetime_service: DatetimeService
     purchase_factory: PurchaseFactory
     transaction_factory: TransactionFactory
+    purchase_repository: PurchaseRepository
+    transaction_repository: TransactionRepository
 
     def __call__(
         self,
-        purchase_repository: PurchaseRepository,
-        transaction_repository: TransactionRepository,
         product_offer: ProductOffer,
         amount: int,
         purpose: PurposesOfPurchases,
@@ -90,8 +107,8 @@ class PurchaseProduct:
         )
 
         # add purchase and transaction to database
-        purchase_repository.add(purchase)
-        transaction_repository.add(transaction)
+        self.purchase_repository.add(purchase)
+        self.transaction_repository.add(transaction)
 
         # adjust balances of buyer and seller
         transaction.adjust_balances()
@@ -109,12 +126,6 @@ def add_worker_to_company(
 ) -> None:
     """This function may raise a WorkerAlreadyAtCompany exception if the
     worker is already employed at the company."""
-    if not company:
-        raise errors.CompanyDoesNotExist(company=company)
-    if not worker:
-        raise errors.WorkerDoesNotExist(
-            worker=worker,
-        )
     company_workers = company_worker_repository.get_company_workers(company)
     if worker in company_workers:
         raise errors.WorkerAlreadyAtCompany(
@@ -122,27 +133,6 @@ def add_worker_to_company(
             company=company,
         )
     company_worker_repository.add_worker_to_company(company, worker)
-
-
-def seek_approval(
-    datetime_service: DatetimeService,
-    plan: Plan,
-    plan_renewal: Optional[PlanRenewal],
-) -> Plan:
-    """
-    Company seeks plan approval.
-    It can be a new plan or a plan renewal, in which case the original plan will be set as "renewed".
-    """
-    # This is just a place holder
-    is_approval = True
-    approval_date = datetime_service.now()
-    if is_approval:
-        plan.approve(approval_date)
-        if plan_renewal:
-            plan_renewal.original_plan.set_as_renewed()
-    else:
-        plan.deny("Some reason", approval_date)
-    return plan
 
 
 def check_plans_for_expiration(plans: List[Plan]) -> List[Plan]:
