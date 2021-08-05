@@ -7,13 +7,13 @@ from flask_login import current_user, login_required
 from arbeitszeit import entities, errors, use_cases
 from arbeitszeit.datetime_service import DatetimeService
 from project import database
-from project.database import with_injection
-from project.database.repositories import (
+from project.database import (
     CompanyRepository,
     CompanyWorkerRepository,
     MemberRepository,
     PlanRepository,
     ProductOfferRepository,
+    with_injection,
 )
 from project.extensions import db
 from project.forms import ProductSearchForm
