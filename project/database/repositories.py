@@ -10,7 +10,12 @@ from sqlalchemy import desc
 from werkzeug.security import generate_password_hash
 
 from arbeitszeit import entities, repositories
-from project.error import CompanyNotFound, MemberNotFound, ProductOfferNotFound
+from project.error import (
+    CompanyNotFound,
+    MemberNotFound,
+    PlanNotFound,
+    ProductOfferNotFound,
+)
 from project.extensions import db
 from project.models import (
     Account,
@@ -360,9 +365,12 @@ class PlanRepository(repositories.PlanRepository):
     def object_to_orm(self, plan: entities.Plan) -> Plan:
         return Plan.query.get(plan.id)
 
-    def get_by_id(self, id: int) -> Optional[entities.Plan]:
+    def get_by_id(self, id: int) -> entities.Plan:
         plan_orm = Plan.query.filter_by(id=id).first()
-        return self.object_from_orm(plan_orm) if plan_orm else None
+        if plan_orm is None:
+            raise PlanNotFound()
+        else:
+            return self.object_from_orm(plan_orm)
 
     def add(self, plan: entities.Plan) -> None:
         db.session.add(self.object_to_orm(plan))

@@ -12,3 +12,7 @@ class MemberNotFound(ObjectNotFound):
 
 class CompanyNotFound(ObjectNotFound):
     pass
+
+
+class PlanNotFound(ObjectNotFound):
+    pass
