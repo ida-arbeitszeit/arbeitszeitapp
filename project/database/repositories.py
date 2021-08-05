@@ -10,6 +10,7 @@ from sqlalchemy import desc
 from werkzeug.security import generate_password_hash
 
 from arbeitszeit import entities, repositories
+from project.error import CompanyNotFound, MemberNotFound, ProductOfferNotFound
 from project.extensions import db
 from project.models import (
     Account,
@@ -57,9 +58,12 @@ class CompanyWorkerRepository(repositories.CompanyWorkerRepository):
 class MemberRepository(repositories.MemberRepository):
     account_repository: AccountRepository
 
-    def get_member_by_id(self, id: int) -> Optional[entities.Member]:
+    def get_member_by_id(self, id: int) -> entities.Member:
         orm_object = Member.query.filter_by(id=id).first()
-        return self.object_from_orm(orm_object) if orm_object else None
+        if orm_object is None:
+            raise MemberNotFound()
+        else:
+            return self.object_from_orm(orm_object)
 
     def object_from_orm(self, orm_object: Member) -> entities.Member:
         member_account = self.account_repository.object_from_orm(orm_object.account)
@@ -124,9 +128,12 @@ class CompanyRepository:
             ],
         )
 
-    def get_by_id(self, id: int) -> Optional[entities.Company]:
+    def get_by_id(self, id: int) -> entities.Company:
         company_orm = Company.query.filter_by(id=id).first()
-        return self.object_from_orm(company_orm) if company_orm else None
+        if company_orm is None:
+            raise CompanyNotFound()
+        else:
+            return self.object_from_orm(company_orm)
 
 
 @inject
@@ -239,11 +246,16 @@ class PurchaseRepository(repositories.PurchaseRepository):
         db.session.add(purchase_orm)
 
     def get_purchases_descending_by_date(
-        self, user: Union[Member, Company]
+        self, user: Union[entities.Member, entities.Company]
     ) -> Iterator[entities.Purchase]:
+        user_orm: Union[Member, Company]
+        if isinstance(user, entities.Company):
+            user_orm = self.company_repository.object_to_orm(user)
+        else:
+            user_orm = self.member_repository.object_to_orm(user)
         return (
             self.object_from_orm(purchase)
-            for purchase in user.purchases.order_by(desc("kauf_date")).all()
+            for purchase in user_orm.purchases.order_by(desc("kauf_date")).all()
         )
 
 
@@ -276,9 +288,12 @@ class ProductOfferRepository(repositories.OfferRepository):
             description=offer_orm.description,
         )
 
-    def get_by_id(self, id: int) -> Optional[entities.ProductOffer]:
+    def get_by_id(self, id: int) -> entities.ProductOffer:
         offer_orm = Offer.query.filter_by(id=id).first()
-        return self.object_from_orm(offer_orm) if offer_orm else None
+        if offer_orm is None:
+            raise ProductOfferNotFound()
+        else:
+            return self.object_from_orm(offer_orm)
 
     def all_active_offers(self) -> Iterator[entities.ProductOffer]:
         return (

@@ -23,19 +23,19 @@ from .repositories import (
 
 def configure_injector(binder: Binder) -> None:
     binder.bind(
-        interfaces.OfferRepository,
+        interfaces.OfferRepository,  # type: ignore
         to=ClassProvider(ProductOfferRepository),
     )
     binder.bind(
-        interfaces.TransactionRepository,
+        interfaces.TransactionRepository,  # type: ignore
         to=ClassProvider(TransactionRepository),
     )
     binder.bind(
-        interfaces.CompanyWorkerRepository,
+        interfaces.CompanyWorkerRepository,  # type: ignore
         to=ClassProvider(CompanyWorkerRepository),
     )
     binder.bind(
-        interfaces.PurchaseRepository,
+        interfaces.PurchaseRepository,  # type: ignore
         to=ClassProvider(PurchaseRepository),
     )
 
@@ -44,16 +44,16 @@ def configure_injector(binder: Binder) -> None:
         to=CallableProvider(get_social_accounting),
     )
     binder.bind(
-        interfaces.AccountRepository,
+        interfaces.AccountRepository,  # type: ignore
         to=ClassProvider(AccountRepository),
     )
     binder.bind(
-        interfaces.MemberRepository,
+        interfaces.MemberRepository,  # type: ignore
         to=ClassProvider(MemberRepository),
     )
 
     binder.bind(
-        interfaces.PurchaseRepository,
+        interfaces.PurchaseRepository,  # type: ignore
         to=ClassProvider(PurchaseRepository),
     )
 
