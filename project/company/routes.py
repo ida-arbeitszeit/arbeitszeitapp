@@ -1,4 +1,3 @@
-import datetime
 from decimal import Decimal
 from typing import Optional
 
@@ -216,31 +215,13 @@ def my_plans(
     plans = use_cases.check_plans_for_expiration(plans)
     database.commit_changes()
 
+    for plan in plans:
+        plan = use_cases.calculate_plan_expiration(plan)
+
     plans_orm_expired = current_user.plans.filter_by(approved=True, expired=True).all()
     plans_expired = [
         plan_repository.object_from_orm(plan) for plan in plans_orm_expired
     ]
-
-    for plan in plans:
-        expiration_date = plan.plan_creation_date + datetime.timedelta(
-            days=int(plan.timeframe)
-        )
-        expiration_relative = DatetimeService().now() - expiration_date
-        seconds_until_exp = abs(expiration_relative.total_seconds())
-        # days
-        days = int(seconds_until_exp // 86400)
-        # remaining seconds
-        seconds_until_exp = seconds_until_exp - (days * 86400)
-        # hours
-        hours = int(seconds_until_exp // 3600)
-        # remaining seconds
-        seconds_until_exp = seconds_until_exp - (hours * 3600)
-        # minutes
-        minutes = int(seconds_until_exp // 60)
-
-        exp_string = f"{days} T. {hours} Std. {minutes} Min."
-        plan.expiration_relative = exp_string
-        plan.expiration_date = expiration_date
 
     return render_template(
         "company/my_plans.html",

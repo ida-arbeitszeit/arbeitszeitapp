@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
-from typing import Callable, List, Optional, Union
+from typing import Callable, List, Optional, Tuple, Union
 
 
 @dataclass
@@ -113,6 +113,8 @@ class Plan:
         renewed: bool,
         set_as_expired: Callable[[], None],
         set_as_renewed: Callable[[], None],
+        expiration_relative: Optional[Tuple[int, int, int]],
+        expiration_date: Optional[datetime],
     ) -> None:
         self.id = id
         self.plan_creation_date = plan_creation_date
@@ -133,6 +135,8 @@ class Plan:
         self.renewed = renewed
         self._set_as_expired = set_as_expired
         self._set_as_renewed = set_as_renewed
+        self.expiration_relative = expiration_relative
+        self.expiration_date = expiration_date
 
     def approve(self, approval_date: datetime) -> None:
         self.approved = True
