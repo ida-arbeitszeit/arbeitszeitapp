@@ -7,7 +7,7 @@ from injector import Binder, CallableProvider, ClassProvider, Injector, inject
 from arbeitszeit import entities
 from arbeitszeit import repositories as interfaces
 from project.extensions import db
-from project.models import Account, Company, Member, Offer, SocialAccounting
+from project.models import Account, Company, Member, SocialAccounting
 
 from .repositories import (
     AccountingRepository,
@@ -15,27 +15,47 @@ from .repositories import (
     CompanyRepository,
     CompanyWorkerRepository,
     MemberRepository,
+    PlanRepository,
     ProductOfferRepository,
     PurchaseRepository,
     TransactionRepository,
 )
 
+__all__ = [
+    "AccountRepository",
+    "AccountingRepository",
+    "CompanyRepository",
+    "CompanyWorkerRepository",
+    "MemberRepository",
+    "PlanRepository",
+    "ProductOfferRepository",
+    "PurchaseRepository",
+    "TransactionRepository",
+    "add_new_account_for_social_accounting",
+    "add_new_accounts_for_company",
+    "add_new_company",
+    "commit_changes",
+    "create_social_accounting_in_db",
+    "get_company_by_mail",
+    "with_injection",
+]
+
 
 def configure_injector(binder: Binder) -> None:
     binder.bind(
-        interfaces.OfferRepository,
+        interfaces.OfferRepository,  # type: ignore
         to=ClassProvider(ProductOfferRepository),
     )
     binder.bind(
-        interfaces.TransactionRepository,
+        interfaces.TransactionRepository,  # type: ignore
         to=ClassProvider(TransactionRepository),
     )
     binder.bind(
-        interfaces.CompanyWorkerRepository,
+        interfaces.CompanyWorkerRepository,  # type: ignore
         to=ClassProvider(CompanyWorkerRepository),
     )
     binder.bind(
-        interfaces.PurchaseRepository,
+        interfaces.PurchaseRepository,  # type: ignore
         to=ClassProvider(PurchaseRepository),
     )
 
@@ -44,16 +64,16 @@ def configure_injector(binder: Binder) -> None:
         to=CallableProvider(get_social_accounting),
     )
     binder.bind(
-        interfaces.AccountRepository,
+        interfaces.AccountRepository,  # type: ignore
         to=ClassProvider(AccountRepository),
     )
     binder.bind(
-        interfaces.MemberRepository,
+        interfaces.MemberRepository,  # type: ignore
         to=ClassProvider(MemberRepository),
     )
 
     binder.bind(
-        interfaces.PurchaseRepository,
+        interfaces.PurchaseRepository,  # type: ignore
         to=ClassProvider(PurchaseRepository),
     )
 
@@ -85,17 +105,6 @@ def with_injection(original_function):
 
 def commit_changes():
     db.session.commit()
-
-
-@with_injection
-def lookup_product_provider(
-    product_offer: entities.ProductOffer,
-    company_repository: CompanyRepository,
-) -> entities.Company:
-    offer_orm = Offer.query.filter_by(id=product_offer.id).first()
-    plan_orm = offer_orm.plan
-    company_orm = plan_orm.company
-    return company_repository.object_from_orm(company_orm)
 
 
 # User

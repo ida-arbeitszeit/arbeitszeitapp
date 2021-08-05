@@ -1,6 +1,6 @@
 import datetime
 from dataclasses import dataclass
-from typing import List, Optional, Union
+from typing import List, Union
 
 from injector import inject
 
@@ -39,11 +39,11 @@ __all__ = [
     "QueryProducts",
     "QueryPurchases",
     "RegisterMember",
+    "SeekApproval",
     "SendWorkCertificatesToWorker",
     "add_worker_to_company",
     "check_plans_for_expiration",
     "deactivate_offer",
-    "seek_approval",
 ]
 
 

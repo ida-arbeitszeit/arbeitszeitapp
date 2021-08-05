@@ -36,6 +36,7 @@ def signup_member_post(register_member: RegisterMember):
     email = request.form.get("email")
     name = request.form.get("name")
     password = request.form.get("password")
+    assert email and name and password
 
     try:
         register_member(email, name, password)
