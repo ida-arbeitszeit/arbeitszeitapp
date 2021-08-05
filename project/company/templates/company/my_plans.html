@@ -51,7 +51,8 @@
                 <td>{{ (plan.costs_p + plan.costs_r + plan.costs_a)/plan.prd_amount }} Std.</td>
                 <td>{{ plan.plan_creation_date.strftime("%d.%m.%y") }}</td>
                 <td>{{ plan.expiration_date.strftime("%d.%m.%y") }}</td>
-                <td>{{ plan.expiration_relative }}</td>
+                <td>{{ plan.expiration_relative[0] }}d {{ plan.expiration_relative[1] }}h {{
+                    plan.expiration_relative[2] }}min</td>
                 <td><a href="{{ url_for('main_company.create_offer', plan_id=plan.id) }}"><i
                             class="fas fa-store"></i></a></td>
             </tr>

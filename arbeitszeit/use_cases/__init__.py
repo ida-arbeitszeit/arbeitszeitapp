@@ -150,3 +150,29 @@ def check_plans_for_expiration(plans: List[Plan]) -> List[Plan]:
             plan.set_as_expired()
 
     return plans
+
+
+def calculate_plan_expiration(plan: Plan) -> Plan:
+    """
+    Based on a plan's creation date and timeframe this function
+    calculates the plan's expiration date and days, hours, minutes
+    missing until expiration.
+
+    It stores these informations as attributes of the given Plan instance.
+    """
+    assert not plan.expired, "Plan is already expired"
+
+    expiration_date = plan.plan_creation_date + datetime.timedelta(
+        days=int(plan.timeframe)
+    )
+    expiration_relative = DatetimeService().now() - expiration_date
+    seconds_until_exp = abs(expiration_relative.total_seconds())
+    days = int(seconds_until_exp // 86400)
+    seconds_until_exp = seconds_until_exp - (days * 86400)
+    hours = int(seconds_until_exp // 3600)
+    seconds_until_exp = seconds_until_exp - (hours * 3600)
+    minutes = int(seconds_until_exp // 60)
+
+    plan.expiration_relative = (days, hours, minutes)
+    plan.expiration_date = expiration_date
+    return plan
