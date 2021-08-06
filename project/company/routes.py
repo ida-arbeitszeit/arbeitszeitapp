@@ -209,23 +209,23 @@ def create_plan(
 def my_plans(
     plan_repository: PlanRepository,
 ):
-    plans_orm = current_user.plans.filter_by(approved=True, expired=False).all()
-    plans = [plan_repository.object_from_orm(plan) for plan in plans_orm]
+    plans_approved = [
+        plan_repository.object_from_orm(plan)
+        for plan in current_user.plans.filter_by(
+            approved=True,
+        ).all()
+    ]
 
-    plans = use_cases.check_plans_for_expiration(plans)
+    for plan in plans_approved:
+        use_cases.calculate_plan_expiration_and_check_if_expired(plan)
     database.commit_changes()
 
-    for plan in plans:
-        plan = use_cases.calculate_plan_expiration(plan)
-
-    plans_orm_expired = current_user.plans.filter_by(approved=True, expired=True).all()
-    plans_expired = [
-        plan_repository.object_from_orm(plan) for plan in plans_orm_expired
-    ]
+    plans_expired = [plan for plan in plans_approved if plan.expired]
+    plans_not_expired = [plan for plan in plans_approved if not plan.expired]
 
     return render_template(
         "company/my_plans.html",
-        plans=plans,
+        plans=plans_not_expired,
         plans_expired=plans_expired,
     )
 
