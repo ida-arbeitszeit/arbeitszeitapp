@@ -3,18 +3,17 @@ from typing import Optional
 
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
-from sqlalchemy import desc
 
 from arbeitszeit import entities, errors, use_cases
 from arbeitszeit.datetime_service import DatetimeService
 from project import database
-from project.database import with_injection
-from project.database.repositories import (
+from project.database import (
     CompanyRepository,
     CompanyWorkerRepository,
     MemberRepository,
     PlanRepository,
     ProductOfferRepository,
+    with_injection,
 )
 from project.extensions import db
 from project.forms import ProductSearchForm
@@ -440,6 +439,7 @@ def delete_offer(
     product_offer_repository: ProductOfferRepository,
 ):
     offer_id = request.args.get("id")
+    assert offer_id
     product_offer = product_offer_repository.get_by_id(offer_id)
     if request.method == "POST":
         use_cases.deactivate_offer(product_offer)
