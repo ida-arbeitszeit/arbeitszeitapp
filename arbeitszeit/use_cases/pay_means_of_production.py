@@ -44,7 +44,7 @@ class PayMeansOfProduction:
             )
 
         # create transaction
-        price_total = pieces * (plan.costs_p + plan.costs_r + plan.costs_a)
+        price_total = pieces * plan.production_costs.total_cost()
         if purpose == PurposesOfPurchases.means_of_prod:
             account_from = sender.means_account
         elif purpose == PurposesOfPurchases.raw_materials:
