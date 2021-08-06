@@ -1,6 +1,6 @@
 import datetime
 from dataclasses import dataclass
-from typing import List, Union
+from typing import Union
 
 from injector import inject
 
