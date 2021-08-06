@@ -25,12 +25,12 @@ def test_account_balances_adjusted(
 ):
     plan = plan_generator.create_plan(approved=True)
     grant_credit(plan)
-    assert plan.planner.means_account.balance == plan.costs_p
-    assert plan.planner.raw_material_account.balance == plan.costs_r
-    assert plan.planner.work_account.balance == plan.costs_a
-    assert plan.planner.product_account.balance == -(
-        plan.costs_p + plan.costs_r + plan.costs_a
+    assert plan.planner.means_account.balance == plan.production_costs.means_cost
+    assert (
+        plan.planner.raw_material_account.balance == plan.production_costs.resource_cost
     )
+    assert plan.planner.work_account.balance == plan.production_costs.labour_cost
+    assert plan.planner.product_account.balance == -(plan.production_costs.total_cost())
 
 
 @injection_test
@@ -74,10 +74,10 @@ def test_that_added_transactions_have_correct_amounts(
 ):
     plan = plan_generator.create_plan(approved=True)
     expected_amount_p, expected_amount_r, expected_amount_a, expected_amount_prd = (
-        plan.costs_p,
-        plan.costs_r,
-        plan.costs_a,
-        -(plan.costs_p + plan.costs_r + plan.costs_a),
+        plan.production_costs.means_cost,
+        plan.production_costs.resource_cost,
+        plan.production_costs.labour_cost,
+        -plan.production_costs.total_cost(),
     )
     grant_credit(plan)
     for trans in transaction_repository.transactions:

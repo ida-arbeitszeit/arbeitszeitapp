@@ -196,12 +196,15 @@ class AccountingRepository:
         return self.object_from_orm(accounting_orm) if accounting_orm else None
 
     def get_or_create_social_accounting(self) -> entities.SocialAccounting:
+        return self.object_from_orm(self.get_or_create_social_accounting_orm())
+
+    def get_or_create_social_accounting_orm(self) -> SocialAccounting:
         social_accounting = SocialAccounting.query.filter_by(id=1).first()
         if not social_accounting:
             social_accounting = SocialAccounting(id=1)
             db.session.add(social_accounting)
             db.session.commit()
-        return self.object_from_orm(social_accounting)
+        return social_accounting
 
 
 @inject
@@ -329,6 +332,7 @@ class ProductOfferRepository(repositories.OfferRepository):
 @dataclass
 class PlanRepository(repositories.PlanRepository):
     company_repository: CompanyRepository
+    accounting_repository: AccountingRepository
 
     def _approve(self, plan, decision, reason, approval_date):
         plan.approved = decision
@@ -336,13 +340,16 @@ class PlanRepository(repositories.PlanRepository):
         plan.approval_date = approval_date
 
     def object_from_orm(self, plan: Plan) -> entities.Plan:
+        production_costs = entities.ProductionCosts(
+            labour_cost=plan.costs_a,
+            resource_cost=plan.costs_r,
+            means_cost=plan.costs_p,
+        )
         return entities.Plan(
             id=plan.id,
             plan_creation_date=plan.plan_creation_date,
             planner=self.company_repository.get_by_id(plan.planner),
-            costs_p=plan.costs_p,
-            costs_r=plan.costs_r,
-            costs_a=plan.costs_a,
+            production_costs=production_costs,
             prd_name=plan.prd_name,
             prd_unit=plan.prd_unit,
             prd_amount=plan.prd_amount,
@@ -373,7 +380,27 @@ class PlanRepository(repositories.PlanRepository):
             return self.object_from_orm(plan_orm)
 
     def add(self, plan: entities.Plan) -> None:
-        db.session.add(self.object_to_orm(plan))
+        orm_plan = Plan(
+            id=plan.id,
+            plan_creation_date=plan.plan_creation_date,
+            planner=plan.planner.id,
+            costs_p=plan.production_costs.means_cost,
+            costs_r=plan.production_costs.resource_cost,
+            costs_a=plan.production_costs.labour_cost,
+            prd_name=plan.prd_name,
+            prd_unit=plan.prd_unit,
+            prd_amount=plan.prd_amount,
+            description=plan.description,
+            timeframe=plan.timeframe,
+            social_accounting=self.accounting_repository.get_or_create_social_accounting_orm().id,
+            approved=plan.approved,
+            approval_date=plan.approval_date,
+            approval_reason=plan.approval_reason,
+            expired=plan.expired,
+            renewed=plan.renewed,
+        )
+        db.session.add(orm_plan)
+        db.session.commit()
 
 
 class TransactionRepository(repositories.TransactionRepository):
