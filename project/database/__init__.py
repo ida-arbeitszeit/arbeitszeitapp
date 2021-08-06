@@ -32,8 +32,6 @@ __all__ = [
     "PurchaseRepository",
     "TransactionRepository",
     "add_new_account_for_social_accounting",
-    "add_new_accounts_for_company",
-    "add_new_company",
     "commit_changes",
     "create_social_accounting_in_db",
     "get_company_by_mail",
@@ -58,7 +56,6 @@ def configure_injector(binder: Binder) -> None:
         interfaces.PurchaseRepository,  # type: ignore
         to=ClassProvider(PurchaseRepository),
     )
-
     binder.bind(
         entities.SocialAccounting,
         to=CallableProvider(get_social_accounting),
@@ -71,7 +68,10 @@ def configure_injector(binder: Binder) -> None:
         interfaces.MemberRepository,  # type: ignore
         to=ClassProvider(MemberRepository),
     )
-
+    binder.bind(
+        interfaces.CompanyRepository,  # type: ignore
+        to=ClassProvider(CompanyRepository),
+    )
     binder.bind(
         interfaces.PurchaseRepository,  # type: ignore
         to=ClassProvider(PurchaseRepository),
@@ -123,26 +123,6 @@ def get_company_by_mail(email) -> Company:
     """returns first company in Company, filtered by mail."""
     company = Company.query.filter_by(email=email).first()
     return company
-
-
-def add_new_company(email, name, password) -> Company:
-    """
-    adds a new company to Company.
-    """
-    new_company = Company(email=email, name=name, password=password)
-    db.session.add(new_company)
-    db.session.commit()
-    return new_company
-
-
-def add_new_accounts_for_company(company_id):
-    for type in ["p", "r", "a", "prd"]:
-        new_account = Account(
-            account_owner_company=company_id,
-            account_type=type,
-        )
-        db.session.add(new_account)
-        db.session.commit()
 
 
 # create one social accounting with id=1

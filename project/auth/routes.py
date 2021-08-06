@@ -1,9 +1,9 @@
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import login_required, login_user, logout_user
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import check_password_hash
 
-from arbeitszeit.errors import MemberAlreadyExists
-from arbeitszeit.use_cases import RegisterMember
+from arbeitszeit.errors import CompanyAlreadyExists, MemberAlreadyExists
+from arbeitszeit.use_cases import RegisterCompany, RegisterMember
 from project import database
 from project.database import with_injection
 
@@ -96,25 +96,17 @@ def signup_company():
 
 
 @auth.route("/company/signup", methods=["POST"])
-def signup_company_post():
+@with_injection
+def signup_company_post(register_company: RegisterCompany):
     email = request.form.get("email")
     name = request.form.get("name")
     password = request.form.get("password")
-
-    company = database.get_company_by_mail(email)
-
-    if company:
+    assert email and name and password
+    try:
+        register_company(email, name, password)
+    except CompanyAlreadyExists:
         flash("Email address already exists")
         return redirect(url_for("auth.signup_company"))
-
-    new_company = database.add_new_company(
-        email=email,
-        name=name,
-        password=generate_password_hash(password, method="sha256"),
-    )
-
-    database.add_new_accounts_for_company(new_company.id)
-
     return redirect(url_for("auth.login_company"))
 
 
