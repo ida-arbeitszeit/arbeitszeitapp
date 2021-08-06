@@ -4,6 +4,7 @@ from decimal import Decimal
 from injector import inject
 
 from arbeitszeit import errors
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Company, Member
 from arbeitszeit.repositories import CompanyWorkerRepository, TransactionRepository
 from arbeitszeit.transaction_factory import TransactionFactory
@@ -15,6 +16,7 @@ class SendWorkCertificatesToWorker:
     company_worker_repository: CompanyWorkerRepository
     transaction_repository: TransactionRepository
     transaction_factory: TransactionFactory
+    datetime_service: DatetimeService
 
     def __call__(self, company: Company, worker: Member, amount: Decimal) -> None:
         """
@@ -36,6 +38,7 @@ class SendWorkCertificatesToWorker:
 
         # create transaction
         transaction = self.transaction_factory.create_transaction(
+            date=self.datetime_service.now(),
             account_from=company.work_account,
             account_to=worker.account,
             amount=amount,

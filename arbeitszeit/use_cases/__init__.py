@@ -21,6 +21,7 @@ from arbeitszeit.repositories import (
 )
 from arbeitszeit.transaction_factory import TransactionFactory
 
+from .get_transaction_infos import GetTransactionInfos
 from .grant_credit import GrantCredit
 from .pay_consumer_product import PayConsumerProduct
 from .pay_means_of_production import PayMeansOfProduction
@@ -43,7 +44,8 @@ __all__ = [
     "add_worker_to_company",
     "check_plans_for_expiration",
     "deactivate_offer",
-    "seek_approval",
+    "SeekApproval",
+    "GetTransactionInfos",
 ]
 
 
@@ -100,6 +102,7 @@ class PurchaseProduct:
         send_to = product_offer.provider.product_account
 
         transaction = self.transaction_factory.create_transaction(
+            date=self.datetime_service.now(),
             account_from=account_from,
             account_to=send_to,
             amount=price_total,

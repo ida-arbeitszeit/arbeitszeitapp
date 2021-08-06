@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from injector import inject
 
 from arbeitszeit import errors
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Company, Plan, PurposesOfPurchases
 from arbeitszeit.repositories import TransactionRepository
 from arbeitszeit.transaction_factory import TransactionFactory
@@ -13,6 +14,7 @@ from arbeitszeit.transaction_factory import TransactionFactory
 class PayMeansOfProduction:
     transaction_repository: TransactionRepository
     transaction_factory: TransactionFactory
+    datetime_service: DatetimeService
 
     def __call__(
         self,
@@ -51,6 +53,7 @@ class PayMeansOfProduction:
             account_from = sender.raw_material_account
 
         transaction = self.transaction_factory.create_transaction(
+            date=self.datetime_service.now(),
             account_from=account_from,
             account_to=plan.planner.product_account,
             amount=price_total,

@@ -44,6 +44,12 @@ class TransactionRepository(interfaces.TransactionRepository):
     def add(self, transaction: Transaction) -> None:
         self.transactions.append(transaction)
 
+    def all_transactions_sent_by_account(self):
+        pass
+
+    def all_transactions_received_by_account(self):
+        pass
+
 
 @singleton
 class OfferRepository(interfaces.OfferRepository):

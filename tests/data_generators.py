@@ -81,6 +81,7 @@ class CompanyGenerator:
     def create_company(self) -> Company:
         return Company(
             id=self.id_generator.get_id(),
+            name="Company name",
             means_account=self.account_generator.create_account(
                 account_type=AccountTypes.p
             ),

@@ -40,6 +40,7 @@ class Company:
     def __init__(
         self,
         id: int,
+        name: str,
         means_account: Account,
         raw_material_account: Account,
         work_account: Account,
@@ -47,6 +48,7 @@ class Company:
         workers: List[Member],
     ) -> None:
         self._id = id
+        self.name = name
         self.means_account = means_account
         self.raw_material_account = raw_material_account
         self.work_account = work_account
@@ -89,6 +91,12 @@ class Account:
     def change_credit(self, amount: Decimal) -> None:
         self.balance += amount
         self._change_credit(amount)
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, Account):
+            return self.id == other.id
+
+        return False
 
 
 class Plan:
@@ -155,12 +163,6 @@ class Plan:
         self._set_as_renewed()
 
 
-@dataclass
-class PlanRenewal:
-    original_plan: Plan
-    modifications: bool
-
-
 class ProductOffer:
     def __init__(
         self,
@@ -219,6 +221,7 @@ class Purchase:
 
 @dataclass
 class Transaction:
+    date: datetime
     account_from: Account
     account_to: Account
     amount: Decimal

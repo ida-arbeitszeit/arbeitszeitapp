@@ -9,6 +9,7 @@ from arbeitszeit.entities import (
     Plan,
     ProductOffer,
     Purchase,
+    SocialAccounting,
     Transaction,
 )
 
@@ -46,6 +47,18 @@ class TransactionRepository(ABC):
     def add(self, transaction: Transaction) -> None:
         pass
 
+    @abstractmethod
+    def all_transactions_sent_by_account(
+        self, account: Account
+    ) -> Iterator[Transaction]:
+        pass
+
+    @abstractmethod
+    def all_transactions_received_by_account(
+        self, account: Account
+    ) -> Iterator[Transaction]:
+        pass
+
 
 class AccountRepository(ABC):
     @abstractmethod
@@ -80,4 +93,12 @@ class MemberRepository(ABC):
 
     @abstractmethod
     def has_member_with_email(self, email: str) -> bool:
+        pass
+
+
+class AccountOwnerRepository(ABC):
+    @abstractmethod
+    def get_account_owner(
+        self, account: Account
+    ) -> Union[Member, Company, SocialAccounting]:
         pass

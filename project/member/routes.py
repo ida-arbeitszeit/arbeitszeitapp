@@ -1,3 +1,4 @@
+from itertools import chain
 from typing import Optional
 
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
@@ -8,10 +9,14 @@ from arbeitszeit import entities, errors, use_cases
 from project import database
 from project.database import with_injection
 from project.database.repositories import (
+    AccountingRepository,
+    AccountOwnerRepository,
+    AccountRepository,
     CompanyRepository,
     MemberRepository,
     PlanRepository,
     ProductOfferRepository,
+    TransactionRepository,
 )
 from project.forms import ProductSearchForm
 
@@ -140,68 +145,33 @@ def profile():
 
 @main_member.route("/member/my_account")
 @login_required
-def my_account():
-
-    my_account = current_user.account
-
-    all_transactions = []  # date, sender, receiver, amount, purpose
-
-    # all my sent transactions
-    for sent_trans in my_account.transactions_sent.all():
-        if sent_trans.receiving_account.account_type.name == "member":
-            receiver_name = f"Mitglied: {sent_trans.receiving_account.member.name} ({sent_trans.receiving_account.member.id})"
-        elif sent_trans.receiving_account.account_type.name in [
-            "p",
-            "r",
-            "a",
-            "prd",
-        ]:
-            receiver_name = f"Betrieb: {sent_trans.receiving_account.company.name} ({sent_trans.receiving_account.company.id})"
-        else:
-            receiver_name = "Öff. Buchhaltung"
-
-        all_transactions.append(
-            [
-                sent_trans.date,
-                "Ich",
-                receiver_name,
-                -sent_trans.amount,
-                sent_trans.purpose,
-            ]
+@with_injection
+def my_account(
+    member_repository: MemberRepository,
+    transaction_repository: TransactionRepository,
+    get_transaction_infos: use_cases.GetTransactionInfos,
+):
+    member = member_repository.object_from_orm(current_user)
+    all_transactions = list(
+        chain(
+            transaction_repository.all_transactions_sent_by_account(member.account),
+            transaction_repository.all_transactions_received_by_account(member.account),
         )
+    )
+    all_transactions_sorted = sorted(
+        all_transactions, key=lambda x: x.date, reverse=True
+    )
 
-    # all my received transactions
-    for received_trans in my_account.transactions_received.all():
-        if received_trans.sending_account.account_type.name == "accounting":
-            sender_name = "Öff. Buchhaltung"
-        elif received_trans.sending_account.account_type.name == "member":
-            sender_name = f"Mitglied: {received_trans.sending_account.member.name} ({received_trans.sending_account.member.id})"
-        elif received_trans.sending_account.account_type.name in [
-            "p",
-            "r",
-            "a",
-            "prd",
-        ]:
-            sender_name = f"Betrieb: {received_trans.sending_account.company.name} ({received_trans.sending_account.company.id})"
-
-        all_transactions.append(
-            [
-                received_trans.date,
-                sender_name,
-                "Ich",
-                received_trans.amount,
-                received_trans.purpose,
-            ]
-        )
-
-    all_transactions_sorted = sorted(all_transactions, reverse=True)
-
-    my_balance = current_user.account.balance
+    list_of_trans_infos = []
+    for transaction in all_transactions_sorted:
+        trans_info = get_transaction_infos(transaction)
+        list_of_trans_infos.append(trans_info)
 
     return render_template(
         "member/my_account.html",
-        all_transactions=all_transactions_sorted,
-        my_balance=my_balance,
+        user=member,
+        all_transactions_info=list_of_trans_infos,
+        my_balance=member.account.balance,
     )
 
 
