@@ -21,12 +21,11 @@ class GrantCredit:
         assert plan.approved, "Plan has not been approved!"
         social_accounting_account = self.social_accounting.account
 
-        prd = plan.costs_p + plan.costs_r + plan.costs_a
         accounts_and_amounts = [
-            (plan.planner.means_account, plan.costs_p),
-            (plan.planner.raw_material_account, plan.costs_r),
-            (plan.planner.work_account, plan.costs_a),
-            (plan.planner.product_account, -prd),
+            (plan.planner.means_account, plan.production_costs.means_cost),
+            (plan.planner.raw_material_account, plan.production_costs.resource_cost),
+            (plan.planner.work_account, plan.production_costs.labour_cost),
+            (plan.planner.product_account, -plan.production_costs.total_cost()),
         ]
 
         for account, amount in accounts_and_amounts:

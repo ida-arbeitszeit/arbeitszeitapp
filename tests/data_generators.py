@@ -19,6 +19,7 @@ from arbeitszeit.entities import (
     Company,
     Member,
     Plan,
+    ProductionCosts,
     ProductOffer,
     Purchase,
     PurposesOfPurchases,
@@ -149,6 +150,11 @@ class PlanGenerator:
     def create_plan(
         self, plan_creation_date=None, planner=None, timeframe=None, approved=False
     ) -> Plan:
+        costs = ProductionCosts(
+            means_cost=Decimal(10),
+            resource_cost=Decimal(20),
+            labour_cost=Decimal(30),
+        )
         return Plan(
             id=self.id_generator.get_id(),
             plan_creation_date=self.datetime_service.now()
@@ -157,12 +163,10 @@ class PlanGenerator:
             planner=self.company_generator.create_company()
             if planner is None
             else planner,
-            costs_p=Decimal(10),
-            costs_r=Decimal(20),
-            costs_a=Decimal(30),
             prd_name="Produkt A",
             prd_unit="500 Gramm",
             prd_amount=100,
+            production_costs=costs,
             description="Beschreibung für Produkt A.",
             timeframe=int(14) if timeframe is None else int(timeframe),
             approved=approved,
@@ -173,6 +177,8 @@ class PlanGenerator:
             renewed=False,
             set_as_expired=lambda: None,
             set_as_renewed=lambda: None,
+            expiration_relative=None,
+            expiration_date=None,
         )
 
 

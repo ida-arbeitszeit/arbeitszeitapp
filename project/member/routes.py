@@ -3,15 +3,11 @@ from typing import Optional
 
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
-from sqlalchemy import desc
 
 from arbeitszeit import entities, errors, use_cases
 from project import database
 from project.database import with_injection
 from project.database.repositories import (
-    AccountingRepository,
-    AccountOwnerRepository,
-    AccountRepository,
     CompanyRepository,
     MemberRepository,
     PlanRepository,

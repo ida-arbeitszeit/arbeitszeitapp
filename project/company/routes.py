@@ -1,21 +1,19 @@
-import datetime
 from decimal import Decimal
 from typing import Optional
 
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
-from sqlalchemy import desc
 
 from arbeitszeit import entities, errors, use_cases
 from arbeitszeit.datetime_service import DatetimeService
 from project import database
-from project.database import with_injection
-from project.database.repositories import (
+from project.database import (
     CompanyRepository,
     CompanyWorkerRepository,
     MemberRepository,
     PlanRepository,
     ProductOfferRepository,
+    with_injection,
 )
 from project.extensions import db
 from project.forms import ProductSearchForm
@@ -210,41 +208,23 @@ def create_plan(
 def my_plans(
     plan_repository: PlanRepository,
 ):
-    plans_orm = current_user.plans.filter_by(approved=True, expired=False).all()
-    plans = [plan_repository.object_from_orm(plan) for plan in plans_orm]
-
-    plans = use_cases.check_plans_for_expiration(plans)
-    database.commit_changes()
-
-    plans_orm_expired = current_user.plans.filter_by(approved=True, expired=True).all()
-    plans_expired = [
-        plan_repository.object_from_orm(plan) for plan in plans_orm_expired
+    plans_approved = [
+        plan_repository.object_from_orm(plan)
+        for plan in current_user.plans.filter_by(
+            approved=True,
+        ).all()
     ]
 
-    for plan in plans:
-        expiration_date = plan.plan_creation_date + datetime.timedelta(
-            days=int(plan.timeframe)
-        )
-        expiration_relative = DatetimeService().now() - expiration_date
-        seconds_until_exp = abs(expiration_relative.total_seconds())
-        # days
-        days = int(seconds_until_exp // 86400)
-        # remaining seconds
-        seconds_until_exp = seconds_until_exp - (days * 86400)
-        # hours
-        hours = int(seconds_until_exp // 3600)
-        # remaining seconds
-        seconds_until_exp = seconds_until_exp - (hours * 3600)
-        # minutes
-        minutes = int(seconds_until_exp // 60)
+    for plan in plans_approved:
+        use_cases.calculate_plan_expiration_and_check_if_expired(plan)
+    database.commit_changes()
 
-        exp_string = f"{days} T. {hours} Std. {minutes} Min."
-        plan.expiration_relative = exp_string
-        plan.expiration_date = expiration_date
+    plans_expired = [plan for plan in plans_approved if plan.expired]
+    plans_not_expired = [plan for plan in plans_approved if not plan.expired]
 
     return render_template(
         "company/my_plans.html",
-        plans=plans,
+        plans=plans_not_expired,
         plans_expired=plans_expired,
     )
 
@@ -459,6 +439,7 @@ def delete_offer(
     product_offer_repository: ProductOfferRepository,
 ):
     offer_id = request.args.get("id")
+    assert offer_id
     product_offer = product_offer_repository.get_by_id(offer_id)
     if request.method == "POST":
         use_cases.deactivate_offer(product_offer)

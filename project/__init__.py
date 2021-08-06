@@ -1,5 +1,5 @@
 from flask import Flask, session
-from flask_table import Col, Table  # Do not delete
+from flask_table import Col, Table  # noqa: Do not delete
 
 from project.extensions import db, login_manager, migrate
 

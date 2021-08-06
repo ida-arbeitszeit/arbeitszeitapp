@@ -1,6 +1,6 @@
 import datetime
 from dataclasses import dataclass
-from typing import List, Optional, Union
+from typing import Union
 
 from injector import inject
 
@@ -40,11 +40,11 @@ __all__ = [
     "QueryProducts",
     "QueryPurchases",
     "RegisterMember",
+    "SeekApproval",
     "SendWorkCertificatesToWorker",
     "add_worker_to_company",
     "check_plans_for_expiration",
     "deactivate_offer",
-    "SeekApproval",
     "GetTransactionInfos",
 ]
 
@@ -138,18 +138,33 @@ def add_worker_to_company(
     company_worker_repository.add_worker_to_company(company, worker)
 
 
-def check_plans_for_expiration(plans: List[Plan]) -> List[Plan]:
+def calculate_plan_expiration_and_check_if_expired(plan: Plan) -> None:
     """
-    checks if plans are expired and sets them as expired, if so.
-    """
+    Based on a plan's creation date and timeframe this function
+    calculates the plan's expiration date and days, hours, minutes
+    missing until expiration.
 
-    for plan in plans:
+    It stores these informations as attributes of the given Plan instance.
+    It sets the Plan to "expired", if that's the case.
+
+    This function ignores already expired plans for performance reasons.
+    """
+    if plan.expired:
+        # not necessary to check, because plan is already expired
+        pass
+    else:
         expiration_date = plan.plan_creation_date + datetime.timedelta(
             days=int(plan.timeframe)
         )
         expiration_relative = DatetimeService().now() - expiration_date
-        seconds = expiration_relative.total_seconds()
-        if seconds > 0:
-            plan.set_as_expired()
+        seconds_until_exp = abs(expiration_relative.total_seconds())
+        days = int(seconds_until_exp // 86400)
+        seconds_until_exp = seconds_until_exp - (days * 86400)
+        hours = int(seconds_until_exp // 3600)
+        seconds_until_exp = seconds_until_exp - (hours * 3600)
+        minutes = int(seconds_until_exp // 60)
 
-    return plans
+        plan.expiration_relative = (days, hours, minutes)
+        plan.expiration_date = expiration_date
+        if expiration_relative.total_seconds() > 0:
+            plan.set_as_expired()

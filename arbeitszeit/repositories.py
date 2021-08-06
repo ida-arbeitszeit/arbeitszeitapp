@@ -48,15 +48,13 @@ class TransactionRepository(ABC):
         pass
 
     @abstractmethod
-    def all_transactions_sent_by_account(
-        self, account: Account
-    ) -> Iterator[Transaction]:
+    def all_transactions_sent_by_account(self, account: Account) -> List[Transaction]:
         pass
 
     @abstractmethod
     def all_transactions_received_by_account(
         self, account: Account
-    ) -> Iterator[Transaction]:
+    ) -> List[Transaction]:
         pass
 
 
