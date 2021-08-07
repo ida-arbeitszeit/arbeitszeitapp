@@ -48,3 +48,7 @@ class PlanIsExpired(Exception):
 
 class MemberAlreadyExists(Exception):
     pass
+
+
+class CompanyAlreadyExists(Exception):
+    pass

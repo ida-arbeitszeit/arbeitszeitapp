@@ -26,6 +26,7 @@ from .pay_consumer_product import PayConsumerProduct
 from .pay_means_of_production import PayMeansOfProduction
 from .query_products import ProductFilter, QueryProducts
 from .query_purchases import QueryPurchases
+from .register_company import RegisterCompany
 from .register_member import RegisterMember
 from .seek_approval import SeekApproval
 from .send_work_certificates_to_worker import SendWorkCertificatesToWorker
@@ -38,11 +39,11 @@ __all__ = [
     "PurchaseProduct",
     "QueryProducts",
     "QueryPurchases",
+    "RegisterCompany",
     "RegisterMember",
     "SeekApproval",
     "SendWorkCertificatesToWorker",
     "add_worker_to_company",
-    "check_plans_for_expiration",
     "deactivate_offer",
 ]
 
