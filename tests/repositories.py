@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Iterator, List, Union
+from typing import Dict, Iterator, List, Union
 
 from injector import inject, singleton
 
@@ -137,3 +137,40 @@ class MemberRepository(interfaces.MemberRepository):
             if member.email == email:
                 return True
         return False
+
+
+@singleton
+class CompanyRepository(interfaces.CompanyRepository):
+    @inject
+    def __init__(self) -> None:
+        self.previous_id = 0
+        self.companies: Dict[str, Company] = {}
+
+    def create_company(
+        self,
+        email: str,
+        name: str,
+        password: str,
+        means_account: Account,
+        labour_account: Account,
+        resources_account: Account,
+        products_account: Account,
+    ) -> Company:
+        new_company = Company(
+            id=self._get_id(),
+            name=name,
+            means_account=means_account,
+            raw_material_account=resources_account,
+            work_account=labour_account,
+            product_account=products_account,
+            workers=[],
+        )
+        self.companies[email] = new_company
+        return new_company
+
+    def has_company_with_email(self, email: str) -> bool:
+        return email in self.companies
+
+    def _get_id(self) -> int:
+        self.previous_id += 1
+        return self.previous_id

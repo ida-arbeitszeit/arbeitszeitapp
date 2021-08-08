@@ -100,3 +100,22 @@ class AccountOwnerRepository(ABC):
         self, account: Account
     ) -> Union[Member, Company, SocialAccounting]:
         pass
+
+
+class CompanyRepository(ABC):
+    @abstractmethod
+    def create_company(
+        self,
+        email: str,
+        name: str,
+        password: str,
+        means_account: Account,
+        labour_account: Account,
+        resource_account: Account,
+        products_account: Account,
+    ) -> Company:
+        pass
+
+    @abstractmethod
+    def has_company_with_email(self, email: str) -> bool:
+        pass

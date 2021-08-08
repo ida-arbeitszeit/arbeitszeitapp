@@ -103,7 +103,7 @@ class MemberRepository(repositories.MemberRepository):
 
 @inject
 @dataclass
-class CompanyRepository:
+class CompanyRepository(repositories.CompanyRepository):
     account_repository: AccountRepository
     member_repository: MemberRepository
 
@@ -111,28 +111,46 @@ class CompanyRepository:
         return Company.query.get(company.id)
 
     def object_from_orm(self, company_orm: Company) -> entities.Company:
-        means_account_orm = company_orm.accounts.filter_by(account_type="p").first()
-        raw_material_account_orm = company_orm.accounts.filter_by(
-            account_type="r"
-        ).first()
-        work_account_orm = company_orm.accounts.filter_by(account_type="a").first()
-        product_account_orm = company_orm.accounts.filter_by(account_type="prd").first()
         return entities.Company(
             id=company_orm.id,
             name=company_orm.name,
-            means_account=self.account_repository.object_from_orm(means_account_orm),
-            raw_material_account=self.account_repository.object_from_orm(
-                raw_material_account_orm
+            means_account=self.account_repository.object_from_orm(
+                self._get_means_account(company_orm)
             ),
-            work_account=self.account_repository.object_from_orm(work_account_orm),
+            raw_material_account=self.account_repository.object_from_orm(
+                self._get_resources_account(company_orm)
+            ),
+            work_account=self.account_repository.object_from_orm(
+                self._get_labour_account(company_orm)
+            ),
             product_account=self.account_repository.object_from_orm(
-                product_account_orm
+                self._get_products_account(company_orm)
             ),
             workers=[
                 self.member_repository.object_from_orm(worker_orm)
                 for worker_orm in company_orm.workers
             ],
         )
+
+    def _get_means_account(self, company: Company) -> Account:
+        account = company.accounts.filter_by(account_type="p").first()
+        assert account
+        return account
+
+    def _get_resources_account(self, company: Company) -> Account:
+        account = company.accounts.filter_by(account_type="r").first()
+        assert account
+        return account
+
+    def _get_labour_account(self, company: Company) -> Account:
+        account = company.accounts.filter_by(account_type="a").first()
+        assert account
+        return account
+
+    def _get_products_account(self, company: Company) -> Account:
+        account = company.accounts.filter_by(account_type="prd").first()
+        assert account
+        return account
 
     def get_by_id(self, id: int) -> entities.Company:
         company_orm = Company.query.filter_by(id=id).first()
@@ -141,11 +159,43 @@ class CompanyRepository:
         else:
             return self.object_from_orm(company_orm)
 
+    def create_company(
+        self,
+        email: str,
+        name: str,
+        password: str,
+        means_account: entities.Account,
+        labour_account: entities.Account,
+        resource_account: entities.Account,
+        products_account: entities.Account,
+    ) -> entities.Company:
+        company = Company(
+            email=email,
+            name=name,
+            password=generate_password_hash(password, method="sha256"),
+        )
+        db.session.add(company)
+        db.session.commit()
+        for account in [
+            means_account,
+            labour_account,
+            resource_account,
+            products_account,
+        ]:
+            account_orm = self.account_repository.object_to_orm(account)
+            account_orm.account_owner_company = company.id
+        db.session.commit()
+        return self.object_from_orm(company)
+
+    def has_company_with_email(self, email: str) -> bool:
+        return Company.query.filter_by(email=email).first() is not None
+
 
 @inject
 @dataclass
 class AccountRepository(repositories.AccountRepository):
     def object_from_orm(self, account_orm: Account) -> entities.Account:
+        assert account_orm
         return entities.Account(
             id=account_orm.id,
             account_type=account_orm.account_type,
