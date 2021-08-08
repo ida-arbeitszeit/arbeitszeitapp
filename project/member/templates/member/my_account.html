@@ -45,15 +45,11 @@
             {% if all_transactions_info is defined and all_transactions_info|length %}
             {% for trans_info in all_transactions_info %}
             <tr>
-                <td>{{ trans_info["transaction"].date.strftime("%c") }}</td>
-                <td>{{ "Mir" if user == trans_info["sender"] else trans_info["sender"].name }}</td>
-                <td>{{ "Mich" if user == trans_info["receiver"] else trans_info["receiver"].name }}</td>
-                {% if user == trans_info["receiver"] %}
-                <td>{{ trans_info["transaction"].amount }}</td>
-                {% elif user == trans_info["sender"] %}
-                <td>{{ -trans_info["transaction"].amount }}</td>
-                {% endif %}
-                <td>{{ trans_info["transaction"].purpose }}</td>
+                <td>{{ trans_info[0].strftime("%c") }}</td>
+                <td>{{ trans_info[1] }}</td>
+                <td>{{ trans_info[2] }}</td>
+                <td>{{ trans_info[3] }}</td>
+                <td>{{ trans_info[4] }}</td>
             </tr>
             {% endfor %}
             {% endif %}

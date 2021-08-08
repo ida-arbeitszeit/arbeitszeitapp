@@ -52,16 +52,16 @@
             {% endif %}
 
             {% if all_transactions is defined and all_transactions|length %}
-            {% for transaction in all_transactions %}
+            {% for trans_info in all_transactions %}
             <tr>
-                <td>{{ transaction[0].strftime("%c") }}</td>
-                <td>{{ transaction[1] }}</td>
-                <td>{{ transaction[2] }}</td>
-                <td>{{ transaction[3] }}</td>
-                <td>{{ transaction[4] }}</td>
-                <td>{{ transaction[5] }}</td>
-                <td>{{ transaction[6] }}</td>
-                <td>{{ transaction[7] }}</td>
+                <td>{{ trans_info[0].strftime("%c") }}</td>
+                <td>{{ trans_info[1] }}</td>
+                <td>{{ trans_info[2] }}</td>
+                <td>{{ trans_info[3] }}</td>
+                <td>{{ trans_info[4] }}</td>
+                <td>{{ trans_info[5] }}</td>
+                <td>{{ trans_info[6] }}</td>
+                <td>{{ trans_info[7] }}</td>
             </tr>
             {% endfor %}
             {% endif %}

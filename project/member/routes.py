@@ -160,12 +160,11 @@ def my_account(
 
     list_of_trans_infos = []
     for transaction in all_transactions_sorted:
-        trans_info = get_transaction_infos(transaction)
+        trans_info = get_transaction_infos(member, transaction)
         list_of_trans_infos.append(trans_info)
 
     return render_template(
         "member/my_account.html",
-        user=member,
         all_transactions_info=list_of_trans_infos,
         my_balance=member.account.balance,
     )

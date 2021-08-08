@@ -194,16 +194,12 @@ class AccountOwnerRepository(repositories.AccountOwnerRepository):
         ]
         account_orm = self.account_repository.object_to_orm(account)
         if account_orm.account_owner_member:
-            account_owner = self.member_repository.get_member_by_id(
-                account_orm.account_owner_member
-            )
+            account_owner = self.member_repository.object_from_orm(account_orm.member)
         elif account_orm.account_owner_company:
-            account_owner = self.company_repository.get_by_id(
-                account_orm.account_owner_company
-            )
+            account_owner = self.company_repository.object_from_orm(account_orm.company)
         elif account_orm.account_owner_social_accounting:
-            account_owner = (
-                self.social_accounting_repository.get_or_create_social_accounting()
+            account_owner = self.social_accounting_repository.object_from_orm(
+                account_orm.social_accounting
             )
 
         assert account_owner
