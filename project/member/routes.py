@@ -1,4 +1,3 @@
-from itertools import chain
 from typing import Optional
 
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
@@ -12,7 +11,6 @@ from project.database.repositories import (
     MemberRepository,
     PlanRepository,
     ProductOfferRepository,
-    TransactionRepository,
 )
 from project.forms import ProductSearchForm
 
@@ -144,24 +142,10 @@ def profile():
 @with_injection
 def my_account(
     member_repository: MemberRepository,
-    transaction_repository: TransactionRepository,
     get_transaction_infos: use_cases.GetTransactionInfos,
 ):
     member = member_repository.object_from_orm(current_user)
-    all_transactions = list(
-        chain(
-            transaction_repository.all_transactions_sent_by_account(member.account),
-            transaction_repository.all_transactions_received_by_account(member.account),
-        )
-    )
-    all_transactions_sorted = sorted(
-        all_transactions, key=lambda x: x.date, reverse=True
-    )
-
-    list_of_trans_infos = []
-    for transaction in all_transactions_sorted:
-        trans_info = get_transaction_infos(member, transaction)
-        list_of_trans_infos.append(trans_info)
+    list_of_trans_infos = get_transaction_infos(member)
 
     return render_template(
         "member/my_account.html",

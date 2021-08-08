@@ -1,6 +1,5 @@
 from decimal import Decimal
 from typing import Optional
-from itertools import chain
 
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
@@ -14,7 +13,6 @@ from project.database import (
     MemberRepository,
     PlanRepository,
     ProductOfferRepository,
-    TransactionRepository,
     with_injection,
 )
 from project.extensions import db
@@ -261,49 +259,11 @@ def create_offer(plan_id):
 @with_injection
 def my_accounts(
     company_repository: CompanyRepository,
-    transaction_repository: TransactionRepository,
     get_transaction_infos: use_cases.GetTransactionInfos,
 ):
     company = company_repository.object_from_orm(current_user)
-    # get all transactions where company is involved in
-    all_transactions = list(
-        chain(
-            transaction_repository.all_transactions_sent_by_account(
-                company.means_account
-            ),
-            transaction_repository.all_transactions_sent_by_account(
-                company.raw_material_account
-            ),
-            transaction_repository.all_transactions_sent_by_account(
-                company.work_account
-            ),
-            transaction_repository.all_transactions_sent_by_account(
-                company.product_account
-            ),
-            transaction_repository.all_transactions_received_by_account(
-                company.means_account
-            ),
-            transaction_repository.all_transactions_received_by_account(
-                company.raw_material_account
-            ),
-            transaction_repository.all_transactions_received_by_account(
-                company.work_account
-            ),
-            transaction_repository.all_transactions_received_by_account(
-                company.product_account
-            ),
-        )
-    )
 
-    all_transactions_sorted = sorted(
-        all_transactions, key=lambda x: x.date, reverse=True
-    )
-
-    # get infos on every transaction company is involved in
-    all_trans_infos = []
-    for transaction in all_transactions_sorted:
-        trans_info = get_transaction_infos(company, transaction)
-        all_trans_infos.append(trans_info)
+    all_trans_infos = get_transaction_infos(company)
 
     my_balances = []
     for account in [

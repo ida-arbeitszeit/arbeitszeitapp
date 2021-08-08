@@ -94,7 +94,7 @@ class Account:
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, Account):
-            return self.id == other.id
+            return (self.id == other.id) and (self.account_type == other.account_type)
 
         return False
 

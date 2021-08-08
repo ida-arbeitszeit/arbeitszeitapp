@@ -54,6 +54,12 @@ class RepositoryModule(Module):
     ) -> interfaces.CompanyRepository:
         return repo
 
+    @provider
+    def provide_account_owner_repository(
+        self, repo: repositories.AccountOwnerRepository
+    ) -> interfaces.AccountOwnerRepository:
+        return repo
+
 
 def injection_test(original_test):
     injector = Injector(RepositoryModule())

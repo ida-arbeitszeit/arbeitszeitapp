@@ -1,9 +1,10 @@
 from dataclasses import dataclass
+from itertools import chain
 from typing import List, Union
 
 from injector import inject
 
-from arbeitszeit.entities import Company, Member, SocialAccounting, Transaction
+from arbeitszeit.entities import Company, Member, SocialAccounting
 from arbeitszeit.repositories import (
     AccountOwnerRepository,
     MemberRepository,
@@ -147,12 +148,9 @@ class GetTransactionInfos:
     member_repository: MemberRepository
     acount_owner_repository: AccountOwnerRepository
 
-    def __call__(self, user: Union[Member, Company], transaction: Transaction) -> List:
+    def __call__(self, user: Union[Member, Company]) -> List[List]:
         """
-        This function returns transaction information in the form of a list.
-
-        It takes into account which user is requesting this information in order to
-        reduce the database requests to a minimum.
+        This function returns a user's transaction information.
         """
 
         sender: Union[Member, Company, SocialAccounting]
@@ -160,69 +158,136 @@ class GetTransactionInfos:
         user_is_sender: bool = False
         user_is_receiver: bool = False
 
-        sending_account = transaction.account_from
-        # defining sender
         if isinstance(user, Company):
-            if sending_account in [
-                user.means_account,
-                user.raw_material_account,
-                user.work_account,
-                user.product_account,
-            ]:
-                sender = user
-                user_is_sender = True
-            else:
-                sender = self.acount_owner_repository.get_account_owner(sending_account)
-        elif isinstance(user, Member):
-            if sending_account == user.account:
-                sender = user
-                user_is_sender = True
-            else:
-                sender = self.acount_owner_repository.get_account_owner(sending_account)
-
-        receiving_account = transaction.account_to
-        # defining receiver
-        if isinstance(user, Company):
-            if receiving_account in [
-                user.means_account,
-                user.raw_material_account,
-                user.work_account,
-                user.product_account,
-            ]:
-                receiver = user
-                user_is_receiver = True
-            else:
-                receiver = self.acount_owner_repository.get_account_owner(
-                    receiving_account
+            # get all transactions where company is involved in
+            all_transactions = list(
+                chain(
+                    self.transaction_repository.all_transactions_sent_by_account(
+                        user.means_account
+                    ),
+                    self.transaction_repository.all_transactions_sent_by_account(
+                        user.raw_material_account
+                    ),
+                    self.transaction_repository.all_transactions_sent_by_account(
+                        user.work_account
+                    ),
+                    self.transaction_repository.all_transactions_sent_by_account(
+                        user.product_account
+                    ),
+                    self.transaction_repository.all_transactions_received_by_account(
+                        user.means_account
+                    ),
+                    self.transaction_repository.all_transactions_received_by_account(
+                        user.raw_material_account
+                    ),
+                    self.transaction_repository.all_transactions_received_by_account(
+                        user.work_account
+                    ),
+                    self.transaction_repository.all_transactions_received_by_account(
+                        user.product_account
+                    ),
                 )
-        elif isinstance(user, Member):
-            if receiving_account == user.account:
-                receiver = user
-                user_is_receiver = True
-            else:
-                receiver = self.acount_owner_repository.get_account_owner(
-                    receiving_account
-                )
-
-        # creating info
-        if isinstance(user, Company):
-            info = _create_company_info(
-                user,
-                transaction,
-                sender,
-                sending_account,
-                receiver,
-                receiving_account,
-                user_is_sender,
-                user_is_receiver,
-            )
-        elif isinstance(user, Member):
-            info = _create_member_info(
-                transaction,
-                sender,
-                receiver,
-                user_is_sender,
-                user_is_receiver,
             )
 
-        return info
+            # sort transactions
+            all_transactions_sorted = sorted(
+                all_transactions, key=lambda x: x.date, reverse=True
+            )
+
+            # get infos on every transaction company is involved in
+            all_trans_infos = []
+            for transaction in all_transactions_sorted:
+                sending_account = transaction.account_from
+                # defining sender
+                if sending_account in [
+                    user.means_account,
+                    user.raw_material_account,
+                    user.work_account,
+                    user.product_account,
+                ]:
+                    sender = user
+                    user_is_sender = True
+                else:
+                    sender = self.acount_owner_repository.get_account_owner(
+                        sending_account
+                    )
+
+                # defining receiver
+                receiving_account = transaction.account_to
+                if receiving_account in [
+                    user.means_account,
+                    user.raw_material_account,
+                    user.work_account,
+                    user.product_account,
+                ]:
+                    receiver = user
+                    user_is_receiver = True
+                else:
+                    receiver = self.acount_owner_repository.get_account_owner(
+                        receiving_account
+                    )
+
+                info = _create_company_info(
+                    user,
+                    transaction,
+                    sender,
+                    sending_account,
+                    receiver,
+                    receiving_account,
+                    user_is_sender,
+                    user_is_receiver,
+                )
+                all_trans_infos.append(info)
+
+        elif isinstance(user, Member):
+            all_transactions = list(
+                chain(
+                    self.transaction_repository.all_transactions_sent_by_account(
+                        user.account
+                    ),
+                    self.transaction_repository.all_transactions_received_by_account(
+                        user.account
+                    ),
+                )
+            )
+            all_transactions_sorted = sorted(
+                all_transactions, key=lambda x: x.date, reverse=True
+            )
+
+            all_trans_infos = []
+            for transaction in all_transactions_sorted:
+                sending_account = transaction.account_from
+                # defining sender
+                if sending_account == user.account:
+                    sender = user
+                    user_is_sender = True
+                else:
+                    sender = self.acount_owner_repository.get_account_owner(
+                        sending_account
+                    )
+
+                receiving_account = transaction.account_to
+                # defining receiver
+                if receiving_account == user.account:
+                    receiver = user
+                    user_is_receiver = True
+                else:
+                    receiver = self.acount_owner_repository.get_account_owner(
+                        receiving_account
+                    )
+
+                info = _create_member_info(
+                    transaction,
+                    sender,
+                    receiver,
+                    user_is_sender,
+                    user_is_receiver,
+                )
+
+                all_trans_infos.append(info)
+
+        if all_transactions:
+            assert (
+                user_is_sender or user_is_receiver
+            ), "User is neither sender nor receiver of the transaction"
+        return all_trans_infos

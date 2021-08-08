@@ -24,6 +24,7 @@ from arbeitszeit.entities import (
     Purchase,
     PurposesOfPurchases,
     SocialAccounting,
+    Transaction,
 )
 from tests.datetime_service import TestDatetimeService
 
@@ -202,4 +203,33 @@ class PurchaseGenerator:
             price=Decimal(10),
             amount=amount,
             purpose=PurposesOfPurchases.consumption,
+        )
+
+
+@inject
+@dataclass
+class TransactionGenerator:
+    account_generator: AccountGenerator
+
+    def create_transaction(
+        self,
+        sending_account_type=AccountTypes.p,
+        receiving_account_type=AccountTypes.prd,
+        account_from=None,
+        account_to=None,
+    ) -> Transaction:
+        return Transaction(
+            date=TestDatetimeService().now_minus_one_day(),
+            account_from=self.account_generator.create_account(
+                account_type=sending_account_type
+            )
+            if None
+            else account_from,
+            account_to=self.account_generator.create_account(
+                account_type=receiving_account_type
+            )
+            if None
+            else account_to,
+            amount=Decimal(10),
+            purpose="Test Verw.zweck",
         )

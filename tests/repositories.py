@@ -11,6 +11,7 @@ from arbeitszeit.entities import (
     Member,
     ProductOffer,
     Purchase,
+    SocialAccounting,
     Transaction,
 )
 
@@ -44,11 +45,21 @@ class TransactionRepository(interfaces.TransactionRepository):
     def add(self, transaction: Transaction) -> None:
         self.transactions.append(transaction)
 
-    def all_transactions_sent_by_account(self):
-        pass
+    def all_transactions_sent_by_account(self, account: Account) -> List[Transaction]:
+        all_sent = []
+        for transaction in self.transactions:
+            if transaction.account_from == account:
+                all_sent.append(transaction)
+        return all_sent
 
-    def all_transactions_received_by_account(self):
-        pass
+    def all_transactions_received_by_account(
+        self, account: Account
+    ) -> List[Transaction]:
+        all_received = []
+        for transaction in self.transactions:
+            if transaction.account_to == account:
+                all_received.append(transaction)
+        return all_received
 
 
 @singleton
@@ -110,6 +121,38 @@ class AccountRepository(interfaces.AccountRepository):
         self.latest_id += 1
         self.accounts.append(account)
         return account
+
+
+@singleton
+class AccountOwnerRepository(interfaces.AccountOwnerRepository):
+    @inject
+    def __init__(self):
+        self.account_owner = []
+
+    def add(self, owner: Union[Member, Company, SocialAccounting]) -> None:
+        self.account_owner.append(owner)
+
+    def get_account_owner(
+        self, account: Account
+    ) -> Union[Member, Company, SocialAccounting]:
+        account_owner: Union[Member, Company, SocialAccounting]
+        for owner in self.account_owner:
+            if isinstance(owner, Member):
+                if account == owner.account:
+                    account_owner = owner
+            elif isinstance(owner, Company):
+                if account in [
+                    owner.means_account,
+                    owner.raw_material_account,
+                    owner.work_account,
+                    owner.product_account,
+                ]:
+                    account_owner = owner
+            elif isinstance(owner, SocialAccounting):
+                if account == owner.account:
+                    account_owner = owner
+
+        return account_owner
 
 
 @singleton
