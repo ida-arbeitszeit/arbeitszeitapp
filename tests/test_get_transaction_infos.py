@@ -1,10 +1,10 @@
 from datetime import datetime
 
+from arbeitszeit.entities import SocialAccounting
 from arbeitszeit.use_cases import GetTransactionInfos
 from tests.data_generators import (
     CompanyGenerator,
     MemberGenerator,
-    SocialAccountingGenerator,
     TransactionGenerator,
 )
 from tests.dependency_injection import injection_test
@@ -19,10 +19,7 @@ def test_that_no_info_is_generated_when_no_transaction_took_place(
     account_owner_repository: AccountOwnerRepository,
 ):
     member = member_generator.create_member()
-    company = company_generator.create_company()
-
-    account_owner_repository.add(member)
-    account_owner_repository.add(company)
+    company_generator.create_company()
 
     info = get_transaction_infos(member)
     assert not info
@@ -39,9 +36,6 @@ def test_that_info_is_generated_after_transaction_between_member_and_company(
 ):
     member = member_generator.create_member()
     company = company_generator.create_company()
-
-    account_owner_repository.add(member)
-    account_owner_repository.add(company)
 
     trans_sent_by_member_to_company = transaction_generator.create_transaction(
         account_from=member.account, account_to=company.product_account
@@ -65,9 +59,6 @@ def test_that_correct_info_for_sender_is_generated_after_transaction_between_com
 ):
     company1 = company_generator.create_company()
     company2 = company_generator.create_company()
-
-    account_owner_repository.add(company1)
-    account_owner_repository.add(company2)
 
     trans_sent_by_company_to_company = transaction_generator.create_transaction(
         account_from=company1.means_account, account_to=company2.product_account
@@ -94,9 +85,6 @@ def test_that_correct_info_for_receiver_is_generated_after_transaction_between_c
     company1 = company_generator.create_company()
     company2 = company_generator.create_company()
 
-    account_owner_repository.add(company1)
-    account_owner_repository.add(company2)
-
     trans_sent_by_company_to_company = transaction_generator.create_transaction(
         account_from=company1.means_account, account_to=company2.product_account
     )
@@ -118,13 +106,9 @@ def test_that_correct_info_for_receiver_is_generated_after_transaction_between_s
     transaction_generator: TransactionGenerator,
     account_owner_repository: AccountOwnerRepository,
     transaction_repository: TransactionRepository,
-    social_accounting_generator: SocialAccountingGenerator,
+    social_accounting: SocialAccounting,
 ):
-    social_accounting = social_accounting_generator.create_social_accounting()
     company = company_generator.create_company()
-
-    account_owner_repository.add(social_accounting)
-    account_owner_repository.add(company)
 
     trans_sent_by_social_accounting_to_company = (
         transaction_generator.create_transaction(

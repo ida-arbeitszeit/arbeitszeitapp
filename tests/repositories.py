@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from decimal import Decimal
 from typing import Dict, Iterator, List, Union
 
@@ -126,33 +128,35 @@ class AccountRepository(interfaces.AccountRepository):
 @singleton
 class AccountOwnerRepository(interfaces.AccountOwnerRepository):
     @inject
-    def __init__(self):
-        self.account_owner = []
-
-    def add(self, owner: Union[Member, Company, SocialAccounting]) -> None:
-        self.account_owner.append(owner)
+    def __init__(
+        self,
+        company_repository: CompanyRepository,
+        member_repository: MemberRepository,
+        social_accounting: SocialAccounting,
+    ):
+        self.member_repository = member_repository
+        self.company_repository = company_repository
+        self.social_accounting = social_accounting
 
     def get_account_owner(
         self, account: Account
     ) -> Union[Member, Company, SocialAccounting]:
-        account_owner: Union[Member, Company, SocialAccounting]
-        for owner in self.account_owner:
-            if isinstance(owner, Member):
-                if account == owner.account:
-                    account_owner = owner
-            elif isinstance(owner, Company):
-                if account in [
-                    owner.means_account,
-                    owner.raw_material_account,
-                    owner.work_account,
-                    owner.product_account,
-                ]:
-                    account_owner = owner
-            elif isinstance(owner, SocialAccounting):
-                if account == owner.account:
-                    account_owner = owner
-
-        return account_owner
+        if self.social_accounting.account == account:
+            return self.social_accounting
+        for member in self.member_repository.members:
+            if account == member.account:
+                return member
+        for company in self.company_repository.companies.values():
+            if account in [
+                company.means_account,
+                company.raw_material_account,
+                company.work_account,
+                company.product_account,
+            ]:
+                return company
+        # This exception is not meant to be caught. That's why we
+        # raise a base exception
+        raise Exception("Owner not found")
 
 
 @singleton
