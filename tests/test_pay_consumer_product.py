@@ -36,7 +36,9 @@ def test_error_is_raised_if_plan_is_expired(
     sender = member_generator.create_member()
     receiver = company_generator.create_company()
     plan = plan_generator.create_plan(
-        plan_creation_date=datetime_service.now_minus_two_days, timeframe=1
+        plan_creation_date=datetime_service.now_minus_two_days,
+        timeframe=1,
+        planner=receiver,
     )
     pieces = 3
     plan.expired = True

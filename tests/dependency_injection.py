@@ -1,4 +1,4 @@
-from injector import Injector, Module, inject, provider
+from injector import Injector, Module, inject, provider, singleton
 
 import arbeitszeit.repositories as interfaces
 from arbeitszeit import entities
@@ -31,10 +31,11 @@ class RepositoryModule(Module):
         return repo
 
     @provider
-    def provide_social_accounting_instance(self) -> entities.SocialAccounting:
-        return data_generators.SocialAccountingGenerator(
-            data_generators.AccountGenerator(data_generators.IdGenerator())
-        ).create_social_accounting()
+    @singleton
+    def provide_social_accounting_instance(
+        self, generator: data_generators.SocialAccountingGenerator
+    ) -> entities.SocialAccounting:
+        return generator.create_social_accounting()
 
     @provider
     def provide_account_repository(
