@@ -5,6 +5,7 @@ from arbeitszeit.use_cases import GetTransactionInfos
 from tests.data_generators import (
     CompanyGenerator,
     MemberGenerator,
+    SocialAccountingGenerator,
     TransactionGenerator,
 )
 from tests.dependency_injection import injection_test
@@ -167,5 +168,71 @@ def test_that_correct_info_for_receiver_is_generated_after_transaction_between_s
     assert info[0].transaction_volumes[AccountTypes.p.value] == expected_amount_p
 
 
-# test_correct_info_for_several_transactions_of_different_kind
-# test_that_transactions_are_returned_in_correct_order
+@injection_test
+def test_that_correct_info_for_company_is_generated_in_correct_order_after_several_transactions_of_different_kind(
+    get_transaction_infos: GetTransactionInfos,
+    company_generator: CompanyGenerator,
+    transaction_generator: TransactionGenerator,
+    member_generator: MemberGenerator,
+    transaction_repository: TransactionRepository,
+    social_accounting_generator: SocialAccountingGenerator,
+):
+    company1 = company_generator.create_company()
+    company2 = company_generator.create_company()
+    member = member_generator.create_member()
+    social_accounting = social_accounting_generator.create_social_accounting()
+
+    trans1 = transaction_generator.create_transaction(
+        account_from=company1.means_account, account_to=company2.product_account
+    )
+    trans2 = transaction_generator.create_transaction(
+        account_from=company2.means_account, account_to=company1.product_account
+    )
+    trans3 = transaction_generator.create_transaction(
+        account_from=company1.means_account, account_to=company2.product_account
+    )
+    trans4 = transaction_generator.create_transaction(
+        account_from=member.account, account_to=company1.product_account
+    )
+    trans5 = transaction_generator.create_transaction(
+        account_from=social_accounting.account, account_to=company1.product_account
+    )
+
+    transaction_repository.add(trans1)
+    transaction_repository.add(trans2)
+    transaction_repository.add(trans3)
+    transaction_repository.add(trans4)
+    transaction_repository.add(trans5)
+
+    info = get_transaction_infos(company1)
+    assert len(info) == 5
+
+    # trans1
+    expected_sender_name = "Mir"
+    expected_receiver_name = company2.name
+    assert info[4].sender_name == expected_sender_name
+    assert info[4].receiver_name == expected_receiver_name
+
+    # trans2
+    expected_sender_name = company2.name
+    expected_receiver_name = "Mich"
+    assert info[3].sender_name == expected_sender_name
+    assert info[3].receiver_name == expected_receiver_name
+
+    # trans3
+    expected_sender_name = "Mir"
+    expected_receiver_name = company2.name
+    assert info[2].sender_name == expected_sender_name
+    assert info[2].receiver_name == expected_receiver_name
+
+    # trans4
+    expected_sender_name = member.name
+    expected_receiver_name = "Mich"
+    assert info[1].sender_name == expected_sender_name
+    assert info[1].receiver_name == expected_receiver_name
+
+    # trans5
+    expected_sender_name = "Öff. Buchhaltung"
+    expected_receiver_name = "Mich"
+    assert info[0].sender_name == expected_sender_name
+    assert info[0].receiver_name == expected_receiver_name

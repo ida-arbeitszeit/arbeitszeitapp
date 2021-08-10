@@ -141,7 +141,7 @@ class AccountOwnerRepository(interfaces.AccountOwnerRepository):
     def get_account_owner(
         self, account: Account
     ) -> Union[Member, Company, SocialAccounting]:
-        if self.social_accounting.account == account:
+        if account.account_type == AccountTypes.accounting:
             return self.social_accounting
         for member in self.member_repository.members:
             if account == member.account:
