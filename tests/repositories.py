@@ -147,12 +147,7 @@ class AccountOwnerRepository(interfaces.AccountOwnerRepository):
             if account == member.account:
                 return member
         for company in self.company_repository.companies.values():
-            if account in [
-                company.means_account,
-                company.raw_material_account,
-                company.work_account,
-                company.product_account,
-            ]:
+            if account in company.accounts():
                 return company
         # This exception is not meant to be caught. That's why we
         # raise a base exception

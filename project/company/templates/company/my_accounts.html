@@ -54,14 +54,14 @@
             {% if all_transactions is defined and all_transactions|length %}
             {% for trans_info in all_transactions %}
             <tr>
-                <td>{{ trans_info[0].strftime("%c") }}</td>
-                <td>{{ trans_info[1] }}</td>
-                <td>{{ trans_info[2] }}</td>
-                <td>{{ trans_info[3] }}</td>
-                <td>{{ trans_info[4] }}</td>
-                <td>{{ trans_info[5] }}</td>
-                <td>{{ trans_info[6] }}</td>
-                <td>{{ trans_info[7] }}</td>
+                <td>{{ trans_info.date.strftime("%c") }}</td>
+                <td>{{ trans_info.sender_name }}</td>
+                <td>{{ trans_info.receiver_name }}</td>
+                <td>{{ trans_info.transaction_volumes["p"] }}</td>
+                <td>{{ trans_info.transaction_volumes["r"] }}</td>
+                <td>{{ trans_info.transaction_volumes["a"] }}</td>
+                <td>{{ trans_info.transaction_volumes["prd"] }}</td>
+                <td>{{ trans_info.purpose }}</td>
             </tr>
             {% endfor %}
             {% endif %}

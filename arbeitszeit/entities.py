@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
-from typing import Callable, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 
 @dataclass
@@ -35,6 +35,9 @@ class Member:
 
         return False
 
+    def accounts(self) -> List[Account]:
+        return [self.account]
+
 
 class Company:
     def __init__(
@@ -64,6 +67,14 @@ class Company:
             return self.id == other.id
 
         return False
+
+    def accounts(self) -> List[Account]:
+        return [
+            self.means_account,
+            self.raw_material_account,
+            self.work_account,
+            self.product_account,
+        ]
 
 
 class AccountTypes(Enum):
@@ -227,6 +238,15 @@ class Purchase:
     price: Decimal
     amount: int
     purpose: PurposesOfPurchases
+
+
+@dataclass
+class TransactionInfo:
+    date: datetime
+    sender_name: str
+    receiver_name: str
+    transaction_volumes: Dict[AccountTypes.value, Decimal]
+    purpose: str
 
 
 @dataclass

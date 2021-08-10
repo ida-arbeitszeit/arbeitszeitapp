@@ -266,12 +266,7 @@ def my_accounts(
     all_trans_infos = get_transaction_infos(company)
 
     my_balances = []
-    for account in [
-        company.means_account,
-        company.raw_material_account,
-        company.work_account,
-        company.product_account,
-    ]:
+    for account in company.accounts():
         my_balances.append(account.balance)
 
     return render_template(
