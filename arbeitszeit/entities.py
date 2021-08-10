@@ -251,6 +251,7 @@ class TransactionInfo:
 
 @dataclass
 class Transaction:
+    id: int
     date: datetime
     account_from: Account
     account_to: Account

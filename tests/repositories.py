@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from decimal import Decimal
 from typing import Dict, Iterator, List, Union
 
@@ -43,9 +44,31 @@ class TransactionRepository(interfaces.TransactionRepository):
     @inject
     def __init__(self) -> None:
         self.transactions: List[Transaction] = []
+        self.latest_id = 0
 
     def add(self, transaction: Transaction) -> None:
+        assert transaction not in self.transactions
         self.transactions.append(transaction)
+
+    def create_transaction(
+        self,
+        date: datetime,
+        account_from: Account,
+        account_to: Account,
+        amount: Decimal,
+        purpose: str,
+    ) -> Transaction:
+        transaction = Transaction(
+            id=self.latest_id,
+            date=date,
+            account_from=account_from,
+            account_to=account_to,
+            amount=amount,
+            purpose=purpose,
+        )
+        self.latest_id += 1
+        self.transactions.append(transaction)
+        return transaction
 
     def all_transactions_sent_by_account(self, account: Account) -> List[Transaction]:
         all_sent = []

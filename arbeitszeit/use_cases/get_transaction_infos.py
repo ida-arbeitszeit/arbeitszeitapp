@@ -78,8 +78,19 @@ class GetTransactionInfos:
                     account
                 )
             )
+
+        # delete duplicate transactions, where user is sender and receiver
+        transactions_without_duplicates = []
+        transactions_checked = set()
+        for trans in all_transactions:
+            if trans.id in transactions_checked:
+                pass
+            else:
+                transactions_without_duplicates.append(trans)
+                transactions_checked.add(trans.id)
+
         all_transactions_sorted = sorted(
-            all_transactions, key=lambda x: x.date, reverse=True
+            transactions_without_duplicates, key=lambda x: x.date, reverse=True
         )
         return all_transactions_sorted
 

@@ -488,16 +488,11 @@ class TransactionRepository(repositories.TransactionRepository):
     account_repository: AccountRepository
 
     def object_to_orm(self, transaction: entities.Transaction) -> Transaction:
-        return Transaction(
-            date=datetime.now(),
-            account_from=transaction.account_from.id,
-            account_to=transaction.account_to.id,
-            amount=transaction.amount,
-            purpose=transaction.purpose,
-        )
+        return Transaction.query.get(transaction.id)
 
     def object_from_orm(self, transaction: Transaction) -> entities.Transaction:
         return entities.Transaction(
+            id=transaction.id,
             date=transaction.date,
             account_from=self.account_repository.object_from_orm(
                 transaction.sending_account
@@ -508,6 +503,19 @@ class TransactionRepository(repositories.TransactionRepository):
             amount=Decimal(transaction.amount),
             purpose=transaction.purpose,
         )
+
+    def create_transaction(
+        self,
+        date: datetime,
+        account_from: entities.Account,
+        account_to: entities.Account,
+        amount: Decimal,
+        purpose: str,
+    ) -> entities.Transaction:
+        transaction = Transaction(date, account_from, account_to, amount, purpose)
+        db.session.add(transaction)
+        db.session.commit()
+        return self.object_from_orm(transaction)
 
     def add(self, transaction: entities.Transaction) -> None:
         db.session.add(self.object_to_orm(transaction))

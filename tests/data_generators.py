@@ -27,7 +27,12 @@ from arbeitszeit.entities import (
     Transaction,
 )
 from tests.datetime_service import TestDatetimeService
-from tests.repositories import AccountRepository, CompanyRepository, MemberRepository
+from tests.repositories import (
+    AccountRepository,
+    CompanyRepository,
+    MemberRepository,
+    TransactionRepository,
+)
 
 
 @inject
@@ -207,6 +212,7 @@ class PurchaseGenerator:
 @dataclass
 class TransactionGenerator:
     account_generator: AccountGenerator
+    transaction_repository: TransactionRepository
 
     def create_transaction(
         self,
@@ -215,7 +221,7 @@ class TransactionGenerator:
         account_from=None,
         account_to=None,
     ) -> Transaction:
-        return Transaction(
+        return self.transaction_repository.create_transaction(
             date=TestDatetimeService().now_minus_one_day(),
             account_from=self.account_generator.create_account(
                 account_type=sending_account_type

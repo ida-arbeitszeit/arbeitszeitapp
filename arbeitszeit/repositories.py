@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+from datetime import datetime
+from decimal import Decimal
 from typing import Iterator, List, Union
 
 from arbeitszeit.entities import (
@@ -43,6 +45,17 @@ class PlanRepository(ABC):
 
 
 class TransactionRepository(ABC):
+    @abstractmethod
+    def create_transaction(
+        self,
+        date: datetime,
+        account_from: Account,
+        account_to: Account,
+        amount: Decimal,
+        purpose: str,
+    ) -> Transaction:
+        pass
+
     @abstractmethod
     def add(self, transaction: Transaction) -> None:
         pass
