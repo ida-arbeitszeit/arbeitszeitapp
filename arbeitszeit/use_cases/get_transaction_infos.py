@@ -26,15 +26,10 @@ class GetTransactionInfos:
     acount_owner_repository: AccountOwnerRepository
 
     def __call__(self, user: Union[Member, Company]) -> List[TransactionInfo]:
-        all_trans_infos = []
-        all_transactions_sorted = self._get_all_transactions_sorted(user)
-        for transaction in all_transactions_sorted:
-            info = self._create_info(
-                user,
-                transaction,
-            )
-            all_trans_infos.append(info)
-        return all_trans_infos
+        return [
+            self._create_info(user, transaction)
+            for transaction in self._get_all_transactions_sorted(user)
+        ]
 
     def _create_info(
         self,
@@ -58,14 +53,13 @@ class GetTransactionInfos:
                 transaction, user_is_sender, user_is_receiver
             )
 
-        info = TransactionInfo(
+        return TransactionInfo(
             transaction.date,
             sender_name,
             receiver_name,
             transaction_volumes,
             transaction.purpose,
         )
-        return info
 
     def _get_all_transactions_sorted(self, user):
         all_transactions = []
