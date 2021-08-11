@@ -256,98 +256,23 @@ def create_offer(plan_id):
 
 @main_company.route("/company/my_accounts")
 @login_required
-def my_accounts():
-    my_company = Company.query.get(current_user.id)
-    my_accounts = my_company.accounts.all()
+@with_injection
+def my_accounts(
+    company_repository: CompanyRepository,
+    get_transaction_infos: use_cases.GetTransactionInfos,
+):
+    company = company_repository.object_from_orm(current_user)
 
-    all_transactions = []  # date, sender, receiver, p, r, a, prd, purpose
-
-    for my_account in my_accounts:
-        # all my sent transactions
-        for sent_trans in my_account.transactions_sent.all():
-            if sent_trans.receiving_account.account_type.name == "member":
-                receiver_name = f"Mitglied: {sent_trans.receiving_account.member.name} ({sent_trans.receiving_account.member.id})"
-            elif sent_trans.receiving_account.account_type.name in [
-                "p",
-                "r",
-                "a",
-                "prd",
-            ]:
-                receiver_name = f"Betrieb: {sent_trans.receiving_account.company.name} ({sent_trans.receiving_account.company.id})"
-            else:
-                receiver_name = "Öff. Buchhaltung"
-
-            change_p, change_r, change_a, change_prd = ("", "", "", "")
-            if my_account.account_type.name == "p":
-                change_p = -sent_trans.amount
-            elif my_account.account_type.name == "r":
-                change_r = -sent_trans.amount
-            elif my_account.account_type.name == "a":
-                change_a = -sent_trans.amount
-            elif my_account.account_type.name == "prd":
-                change_prd = -sent_trans.amount
-
-            all_transactions.append(
-                [
-                    sent_trans.date,
-                    "Ich",
-                    receiver_name,
-                    change_p,
-                    change_r,
-                    change_a,
-                    change_prd,
-                    sent_trans.purpose,
-                ]
-            )
-
-        # all my received transactions
-        for received_trans in my_account.transactions_received.all():
-            if received_trans.sending_account.account_type.name == "accounting":
-                sender_name = "Öff. Buchhaltung"
-            elif received_trans.sending_account.account_type.name == "member":
-                sender_name = f"Mitglied: {received_trans.sending_account.member.name} ({received_trans.sending_account.member.id})"
-            elif received_trans.sending_account.account_type.name in [
-                "p",
-                "r",
-                "a",
-                "prd",
-            ]:
-                sender_name = f"Betrieb: {received_trans.sending_account.company.name} ({received_trans.sending_account.company.id})"
-
-            change_p, change_r, change_a, change_prd = ("", "", "", "")
-            if my_account.account_type.name == "p":
-                change_p = received_trans.amount
-            elif my_account.account_type.name == "r":
-                change_r = received_trans.amount
-            elif my_account.account_type.name == "a":
-                change_a = received_trans.amount
-            elif my_account.account_type.name == "prd":
-                change_prd = received_trans.amount
-
-            all_transactions.append(
-                [
-                    received_trans.date,
-                    sender_name,
-                    "Ich",
-                    change_p,
-                    change_r,
-                    change_a,
-                    change_prd,
-                    received_trans.purpose,
-                ]
-            )
-
-    all_transactions_sorted = sorted(all_transactions, reverse=True)
+    all_trans_infos = get_transaction_infos(company)
 
     my_balances = []
-    for type in ["p", "r", "a", "prd"]:
-        balance = my_company.accounts.filter_by(account_type=type).first().balance
-        my_balances.append(balance)
+    for account in company.accounts():
+        my_balances.append(account.balance)
 
     return render_template(
         "company/my_accounts.html",
         my_balances=my_balances,
-        all_transactions=all_transactions_sorted,
+        all_transactions=all_trans_infos,
     )
 
 

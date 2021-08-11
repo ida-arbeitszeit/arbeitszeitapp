@@ -3,16 +3,16 @@ from dataclasses import dataclass
 from injector import inject
 
 from arbeitszeit import errors
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Company, Plan, PurposesOfPurchases
 from arbeitszeit.repositories import TransactionRepository
-from arbeitszeit.transaction_factory import TransactionFactory
 
 
 @inject
 @dataclass
 class PayMeansOfProduction:
     transaction_repository: TransactionRepository
-    transaction_factory: TransactionFactory
+    datetime_service: DatetimeService
 
     def __call__(
         self,
@@ -50,15 +50,13 @@ class PayMeansOfProduction:
         elif purpose == PurposesOfPurchases.raw_materials:
             account_from = sender.raw_material_account
 
-        transaction = self.transaction_factory.create_transaction(
+        transaction = self.transaction_repository.create_transaction(
+            date=self.datetime_service.now(),
             account_from=account_from,
             account_to=plan.planner.product_account,
             amount=price_total,
             purpose=f"Plan-Id: {plan.id}",
         )
-
-        # add transaction to database
-        self.transaction_repository.add(transaction)
 
         # adjust balances
         transaction.adjust_balances()

@@ -24,8 +24,15 @@ from arbeitszeit.entities import (
     Purchase,
     PurposesOfPurchases,
     SocialAccounting,
+    Transaction,
 )
 from tests.datetime_service import TestDatetimeService
+from tests.repositories import (
+    AccountRepository,
+    CompanyRepository,
+    MemberRepository,
+    TransactionRepository,
+)
 
 
 @inject
@@ -55,18 +62,18 @@ class OfferGenerator:
 @inject
 @dataclass
 class MemberGenerator:
-    id_generator: IdGenerator
     account_generator: AccountGenerator
     email_generator: EmailGenerator
+    member_repository: MemberRepository
 
     def create_member(self, *, email: Optional[str] = None) -> Member:
         if not email:
             email = self.email_generator.get_random_email()
         assert email is not None
-        return Member(
-            id=self.id_generator.get_id(),
-            name="Member name",
+        return self.member_repository.create_member(
             email=email,
+            name="Member name",
+            password="password",
             account=self.account_generator.create_account(
                 account_type=AccountTypes.member
             ),
@@ -76,25 +83,27 @@ class MemberGenerator:
 @inject
 @dataclass
 class CompanyGenerator:
-    id_generator: IdGenerator
     account_generator: AccountGenerator
+    company_repository: CompanyRepository
+    email_generator: EmailGenerator
 
     def create_company(self) -> Company:
-        return Company(
-            id=self.id_generator.get_id(),
+        return self.company_repository.create_company(
+            email=self.email_generator.get_random_email(),
+            name="Company name",
+            password="password",
             means_account=self.account_generator.create_account(
                 account_type=AccountTypes.p
             ),
-            raw_material_account=self.account_generator.create_account(
+            resources_account=self.account_generator.create_account(
                 account_type=AccountTypes.r
             ),
-            work_account=self.account_generator.create_account(
+            labour_account=self.account_generator.create_account(
                 account_type=AccountTypes.a
             ),
-            product_account=self.account_generator.create_account(
+            products_account=self.account_generator.create_account(
                 account_type=AccountTypes.prd
             ),
-            workers=[],
         )
 
 
@@ -123,15 +132,10 @@ class SocialAccountingGenerator:
 @inject
 @dataclass
 class AccountGenerator:
-    id_generator: IdGenerator
+    account_repository: AccountRepository
 
-    def create_account(self, account_type=AccountTypes.p) -> Account:
-        return Account(
-            id=self.id_generator.get_id(),
-            account_type=account_type,
-            balance=Decimal(0),
-            change_credit=lambda amount: None,
-        )
+    def create_account(self, account_type) -> Account:
+        return self.account_repository.create_account(account_type)
 
 
 class EmailGenerator:
@@ -201,4 +205,34 @@ class PurchaseGenerator:
             price=Decimal(10),
             amount=amount,
             purpose=PurposesOfPurchases.consumption,
+        )
+
+
+@inject
+@dataclass
+class TransactionGenerator:
+    account_generator: AccountGenerator
+    transaction_repository: TransactionRepository
+
+    def create_transaction(
+        self,
+        sending_account_type=AccountTypes.p,
+        receiving_account_type=AccountTypes.prd,
+        account_from=None,
+        account_to=None,
+    ) -> Transaction:
+        return self.transaction_repository.create_transaction(
+            date=TestDatetimeService().now_minus_one_day(),
+            account_from=self.account_generator.create_account(
+                account_type=sending_account_type
+            )
+            if None
+            else account_from,
+            account_to=self.account_generator.create_account(
+                account_type=receiving_account_type
+            )
+            if None
+            else account_to,
+            amount=Decimal(10),
+            purpose="Test Verw.zweck",
         )

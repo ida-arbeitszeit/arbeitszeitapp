@@ -12,7 +12,9 @@ from project.extensions import db
 class SocialAccounting(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
-    account = db.relationship("Account", uselist=False, lazy=True)
+    account = db.relationship(
+        "Account", uselist=False, lazy=True, backref="social_accounting"
+    )
 
 
 # Association table Company - Member

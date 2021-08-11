@@ -11,6 +11,7 @@ from project.models import Account, Company, Member, SocialAccounting
 
 from .repositories import (
     AccountingRepository,
+    AccountOwnerRepository,
     AccountRepository,
     CompanyRepository,
     CompanyWorkerRepository,
@@ -75,6 +76,11 @@ def configure_injector(binder: Binder) -> None:
     binder.bind(
         interfaces.PurchaseRepository,  # type: ignore
         to=ClassProvider(PurchaseRepository),
+    )
+
+    binder.bind(
+        interfaces.AccountOwnerRepository,  # type: ignore
+        to=ClassProvider(AccountOwnerRepository),
     )
 
 

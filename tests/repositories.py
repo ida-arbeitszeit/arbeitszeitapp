@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from datetime import datetime
 from decimal import Decimal
 from typing import Dict, Iterator, List, Union
 
@@ -11,6 +14,7 @@ from arbeitszeit.entities import (
     Member,
     ProductOffer,
     Purchase,
+    SocialAccounting,
     Transaction,
 )
 
@@ -40,9 +44,47 @@ class TransactionRepository(interfaces.TransactionRepository):
     @inject
     def __init__(self) -> None:
         self.transactions: List[Transaction] = []
+        self.latest_id = 0
 
     def add(self, transaction: Transaction) -> None:
+        assert transaction not in self.transactions
         self.transactions.append(transaction)
+
+    def create_transaction(
+        self,
+        date: datetime,
+        account_from: Account,
+        account_to: Account,
+        amount: Decimal,
+        purpose: str,
+    ) -> Transaction:
+        transaction = Transaction(
+            id=self.latest_id,
+            date=date,
+            account_from=account_from,
+            account_to=account_to,
+            amount=amount,
+            purpose=purpose,
+        )
+        self.latest_id += 1
+        self.transactions.append(transaction)
+        return transaction
+
+    def all_transactions_sent_by_account(self, account: Account) -> List[Transaction]:
+        all_sent = []
+        for transaction in self.transactions:
+            if transaction.account_from == account:
+                all_sent.append(transaction)
+        return all_sent
+
+    def all_transactions_received_by_account(
+        self, account: Account
+    ) -> List[Transaction]:
+        all_received = []
+        for transaction in self.transactions:
+            if transaction.account_to == account:
+                all_received.append(transaction)
+        return all_received
 
 
 @singleton
@@ -107,6 +149,35 @@ class AccountRepository(interfaces.AccountRepository):
 
 
 @singleton
+class AccountOwnerRepository(interfaces.AccountOwnerRepository):
+    @inject
+    def __init__(
+        self,
+        company_repository: CompanyRepository,
+        member_repository: MemberRepository,
+        social_accounting: SocialAccounting,
+    ):
+        self.member_repository = member_repository
+        self.company_repository = company_repository
+        self.social_accounting = social_accounting
+
+    def get_account_owner(
+        self, account: Account
+    ) -> Union[Member, Company, SocialAccounting]:
+        if account.account_type == AccountTypes.accounting:
+            return self.social_accounting
+        for member in self.member_repository.members:
+            if account == member.account:
+                return member
+        for company in self.company_repository.companies.values():
+            if account in company.accounts():
+                return company
+        # This exception is not meant to be caught. That's why we
+        # raise a base exception
+        raise Exception("Owner not found")
+
+
+@singleton
 class MemberRepository(interfaces.MemberRepository):
     @inject
     def __init__(self):
@@ -152,6 +223,7 @@ class CompanyRepository(interfaces.CompanyRepository):
     ) -> Company:
         new_company = Company(
             id=self._get_id(),
+            name=name,
             means_account=means_account,
             raw_material_account=resources_account,
             work_account=labour_account,

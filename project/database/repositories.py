@@ -113,6 +113,7 @@ class CompanyRepository(repositories.CompanyRepository):
     def object_from_orm(self, company_orm: Company) -> entities.Company:
         return entities.Company(
             id=company_orm.id,
+            name=company_orm.name,
             means_account=self.account_repository.object_from_orm(
                 self._get_means_account(company_orm)
             ),
@@ -225,6 +226,34 @@ class AccountRepository(repositories.AccountRepository):
         db.session.add(account)
         db.session.commit()
         return self.object_from_orm(account)
+
+
+@inject
+@dataclass
+class AccountOwnerRepository(repositories.AccountOwnerRepository):
+    account_repository: AccountRepository
+    member_repository: MemberRepository
+    company_repository: CompanyRepository
+    social_accounting_repository: AccountingRepository
+
+    def get_account_owner(
+        self, account: entities.Account
+    ) -> Union[entities.Member, entities.Company, entities.SocialAccounting]:
+        account_owner: Union[
+            entities.Member, entities.Company, entities.SocialAccounting
+        ]
+        account_orm = self.account_repository.object_to_orm(account)
+        if account_orm.account_owner_member:
+            account_owner = self.member_repository.object_from_orm(account_orm.member)
+        elif account_orm.account_owner_company:
+            account_owner = self.company_repository.object_from_orm(account_orm.company)
+        elif account_orm.account_owner_social_accounting:
+            account_owner = self.social_accounting_repository.object_from_orm(
+                account_orm.social_accounting
+            )
+
+        assert account_owner
+        return account_owner
 
 
 @inject
@@ -453,15 +482,64 @@ class PlanRepository(repositories.PlanRepository):
         db.session.commit()
 
 
+@inject
+@dataclass
 class TransactionRepository(repositories.TransactionRepository):
+    account_repository: AccountRepository
+
     def object_to_orm(self, transaction: entities.Transaction) -> Transaction:
-        return Transaction(
-            date=datetime.now(),
-            account_from=transaction.account_from.id,
-            account_to=transaction.account_to.id,
-            amount=transaction.amount,
+        return Transaction.query.get(transaction.id)
+
+    def object_from_orm(self, transaction: Transaction) -> entities.Transaction:
+        return entities.Transaction(
+            id=transaction.id,
+            date=transaction.date,
+            account_from=self.account_repository.object_from_orm(
+                transaction.sending_account
+            ),
+            account_to=self.account_repository.object_from_orm(
+                transaction.receiving_account
+            ),
+            amount=Decimal(transaction.amount),
             purpose=transaction.purpose,
         )
 
+    def create_transaction(
+        self,
+        date: datetime,
+        account_from: entities.Account,
+        account_to: entities.Account,
+        amount: Decimal,
+        purpose: str,
+    ) -> entities.Transaction:
+        transaction = Transaction(
+            date=date,
+            account_from=account_from.id,
+            account_to=account_to.id,
+            amount=amount,
+            purpose=purpose,
+        )
+        db.session.add(transaction)
+        db.session.commit()
+        return self.object_from_orm(transaction)
+
     def add(self, transaction: entities.Transaction) -> None:
         db.session.add(self.object_to_orm(transaction))
+
+    def all_transactions_sent_by_account(
+        self, account: entities.Account
+    ) -> List[entities.Transaction]:
+        account_orm = self.account_repository.object_to_orm(account)
+        return [
+            self.object_from_orm(transaction)
+            for transaction in account_orm.transactions_sent.all()
+        ]
+
+    def all_transactions_received_by_account(
+        self, account: entities.Account
+    ) -> List[entities.Transaction]:
+        account_orm = self.account_repository.object_to_orm(account)
+        return [
+            self.object_from_orm(transaction)
+            for transaction in account_orm.transactions_received.all()
+        ]

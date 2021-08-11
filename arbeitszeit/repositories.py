@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+from datetime import datetime
+from decimal import Decimal
 from typing import Iterator, List, Union
 
 from arbeitszeit.entities import (
@@ -9,6 +11,7 @@ from arbeitszeit.entities import (
     Plan,
     ProductOffer,
     Purchase,
+    SocialAccounting,
     Transaction,
 )
 
@@ -43,7 +46,28 @@ class PlanRepository(ABC):
 
 class TransactionRepository(ABC):
     @abstractmethod
+    def create_transaction(
+        self,
+        date: datetime,
+        account_from: Account,
+        account_to: Account,
+        amount: Decimal,
+        purpose: str,
+    ) -> Transaction:
+        pass
+
+    @abstractmethod
     def add(self, transaction: Transaction) -> None:
+        pass
+
+    @abstractmethod
+    def all_transactions_sent_by_account(self, account: Account) -> List[Transaction]:
+        pass
+
+    @abstractmethod
+    def all_transactions_received_by_account(
+        self, account: Account
+    ) -> List[Transaction]:
         pass
 
 
@@ -80,6 +104,14 @@ class MemberRepository(ABC):
 
     @abstractmethod
     def has_member_with_email(self, email: str) -> bool:
+        pass
+
+
+class AccountOwnerRepository(ABC):
+    @abstractmethod
+    def get_account_owner(
+        self, account: Account
+    ) -> Union[Member, Company, SocialAccounting]:
         pass
 
 

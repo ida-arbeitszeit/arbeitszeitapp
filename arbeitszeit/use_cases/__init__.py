@@ -19,8 +19,8 @@ from arbeitszeit.repositories import (
     PurchaseRepository,
     TransactionRepository,
 )
-from arbeitszeit.transaction_factory import TransactionFactory
 
+from .get_transaction_infos import GetTransactionInfos
 from .grant_credit import GrantCredit
 from .pay_consumer_product import PayConsumerProduct
 from .pay_means_of_production import PayMeansOfProduction
@@ -45,6 +45,7 @@ __all__ = [
     "SendWorkCertificatesToWorker",
     "add_worker_to_company",
     "deactivate_offer",
+    "GetTransactionInfos",
 ]
 
 
@@ -53,7 +54,6 @@ __all__ = [
 class PurchaseProduct:
     datetime_service: DatetimeService
     purchase_factory: PurchaseFactory
-    transaction_factory: TransactionFactory
     purchase_repository: PurchaseRepository
     transaction_repository: TransactionRepository
 
@@ -100,16 +100,16 @@ class PurchaseProduct:
 
         send_to = product_offer.provider.product_account
 
-        transaction = self.transaction_factory.create_transaction(
+        transaction = self.transaction_repository.create_transaction(
+            date=self.datetime_service.now(),
             account_from=account_from,
             account_to=send_to,
             amount=price_total,
             purpose=f"Angebot-Id: {product_offer.id}",
         )
 
-        # add purchase and transaction to database
+        # add purchase to database
         self.purchase_repository.add(purchase)
-        self.transaction_repository.add(transaction)
 
         # adjust balances of buyer and seller
         transaction.adjust_balances()

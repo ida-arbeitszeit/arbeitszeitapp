@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
-from typing import Callable, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 
 @dataclass
@@ -35,11 +35,15 @@ class Member:
 
         return False
 
+    def accounts(self) -> List[Account]:
+        return [self.account]
+
 
 class Company:
     def __init__(
         self,
         id: int,
+        name: str,
         means_account: Account,
         raw_material_account: Account,
         work_account: Account,
@@ -47,6 +51,7 @@ class Company:
         workers: List[Member],
     ) -> None:
         self._id = id
+        self.name = name
         self.means_account = means_account
         self.raw_material_account = raw_material_account
         self.work_account = work_account
@@ -62,6 +67,14 @@ class Company:
             return self.id == other.id
 
         return False
+
+    def accounts(self) -> List[Account]:
+        return [
+            self.means_account,
+            self.raw_material_account,
+            self.work_account,
+            self.product_account,
+        ]
 
 
 class AccountTypes(Enum):
@@ -89,6 +102,12 @@ class Account:
     def change_credit(self, amount: Decimal) -> None:
         self.balance += amount
         self._change_credit(amount)
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, Account):
+            return (self.id == other.id) and (self.account_type == other.account_type)
+
+        return False
 
 
 @dataclass
@@ -165,12 +184,6 @@ class Plan:
         self._set_as_renewed()
 
 
-@dataclass
-class PlanRenewal:
-    original_plan: Plan
-    modifications: bool
-
-
 class ProductOffer:
     def __init__(
         self,
@@ -228,7 +241,18 @@ class Purchase:
 
 
 @dataclass
+class TransactionInfo:
+    date: datetime
+    sender_name: str
+    receiver_name: str
+    transaction_volumes: Dict[AccountTypes.value, Decimal]
+    purpose: str
+
+
+@dataclass
 class Transaction:
+    id: int
+    date: datetime
     account_from: Account
     account_to: Account
     amount: Decimal
