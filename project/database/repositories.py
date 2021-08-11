@@ -512,7 +512,13 @@ class TransactionRepository(repositories.TransactionRepository):
         amount: Decimal,
         purpose: str,
     ) -> entities.Transaction:
-        transaction = Transaction(date, account_from, account_to, amount, purpose)
+        transaction = Transaction(
+            date=date,
+            account_from=account_from.id,
+            account_to=account_to.id,
+            amount=amount,
+            purpose=purpose,
+        )
         db.session.add(transaction)
         db.session.commit()
         return self.object_from_orm(transaction)
