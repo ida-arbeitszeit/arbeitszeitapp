@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterator, List, Optional, TypeVar, Union, Any
+from typing import Iterator, List, Optional, TypeVar, Union
 from uuid import UUID
 
 from injector import inject

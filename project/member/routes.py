@@ -23,8 +23,7 @@ main_member = Blueprint(
 @login_required
 @with_injection
 def my_purchases(
-    query_purchases: use_cases.QueryPurchases,
-    member_repository: MemberRepository
+    query_purchases: use_cases.QueryPurchases, member_repository: MemberRepository
 ):
     user_type = session["user_type"]
 

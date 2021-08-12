@@ -38,7 +38,6 @@ from tests.repositories import (
 @inject
 @dataclass
 class OfferGenerator:
-    id_generator: IdGenerator
     company_generator: CompanyGenerator
 
     def create_offer(
@@ -105,15 +104,6 @@ class CompanyGenerator:
                 account_type=AccountTypes.prd
             ),
         )
-
-
-class IdGenerator:
-    def __init__(self):
-        self.current = 0
-
-    def get_id(self) -> int:
-        self.current += 1
-        return self.current
 
 
 @inject
