@@ -161,6 +161,7 @@ class PlanGenerator:
             production_costs=costs,
             description="Beschreibung für Produkt A.",
             timeframe=int(14) if timeframe is None else int(timeframe),
+            is_public_service=False,
             approved=approved,
             approval_date=None,
             approval_reason=None,

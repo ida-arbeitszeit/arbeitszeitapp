@@ -185,6 +185,9 @@ def create_plan(
             prd_amount=int(plan_data["prd_amount"]),
             description=plan_data["description"],
             timeframe=int(plan_data["timeframe"]),
+            is_public_service=True
+            if plan_data["productive_or_public"] == "public"
+            else False,
             social_accounting=social_accounting_repository.get_or_create_social_accounting_orm().id,
         )
         db.session.add(new_plan_orm)

@@ -1,4 +1,4 @@
-company{% macro start_hilfe() %}
+{% macro start_hilfe() %}
 
 <div class="hero-body">
   <div class="container has-text-centered">
@@ -123,6 +123,7 @@ company{% macro start_hilfe() %}
         <th>Mail</th>
         <th>Beschreibung</th>
         <th>Stückpreis</th>
+        <th>Public Service</th>
         <th><abbr title="Noch vorhanden">Vorh.</abbr> </th>
         <th>Kaufen</th>
       </tr>
@@ -141,6 +142,7 @@ company{% macro start_hilfe() %}
         <td>{{ res.description }}</td>
         <td>{{ ((res.plan.costs_p + res.plan.costs_r + res.plan.costs_a)/res.plan.prd_amount)|round(2) }} Std.
         </td>
+        <td>{{ res.plan.is_public_service }}</td>
         <td>{{ res.amount_available }}</td>
         <td>
           <a href="{{ url_for('%s.buy' % (request.blueprint), id=res.id) }}">

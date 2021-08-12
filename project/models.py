@@ -76,6 +76,7 @@ class Plan(UserMixin, db.Model):
     prd_amount = db.Column(db.Integer, nullable=False)
     description = db.Column(db.String(5000), nullable=False)
     timeframe = db.Column(db.Numeric(), nullable=False)
+    is_public_service = db.Column(db.Boolean, nullable=False, default=False)
     social_accounting = db.Column(
         db.String, db.ForeignKey("social_accounting.id"), nullable=False
     )
