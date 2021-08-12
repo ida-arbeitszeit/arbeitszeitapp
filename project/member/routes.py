@@ -33,7 +33,6 @@ def my_purchases(
         member = member_repository.get_member_by_id(current_user.id)
         session["user_type"] = "member"
         purchases = list(query_purchases(member))
-        print(purchases)
         return render_template("member/my_purchases.html", purchases=purchases)
 
 

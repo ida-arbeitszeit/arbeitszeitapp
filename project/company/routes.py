@@ -162,7 +162,7 @@ def my_purchases(
 @login_required
 @with_injection
 def create_plan(
-    original_plan_id: Optional[int],
+    original_plan_id: Optional[UUID],
     seek_approval: use_cases.SeekApproval,
     plan_repository: PlanRepository,
     social_accounting_repository: AccountingRepository,
