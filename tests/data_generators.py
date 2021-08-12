@@ -38,14 +38,13 @@ from tests.repositories import (
 @inject
 @dataclass
 class OfferGenerator:
-    id_generator: IdGenerator
     company_generator: CompanyGenerator
 
     def create_offer(
         self, *, name="Product name", amount=1, provider=None, description=""
     ):
         return ProductOffer(
-            id=self.id_generator.get_id(),
+            id=uuid4(),
             name=name,
             amount_available=amount,
             deactivate_offer_in_db=lambda: None,
@@ -107,15 +106,6 @@ class CompanyGenerator:
         )
 
 
-class IdGenerator:
-    def __init__(self):
-        self.current = 0
-
-    def get_id(self) -> int:
-        self.current += 1
-        return self.current
-
-
 @inject
 @dataclass
 class SocialAccountingGenerator:
@@ -146,7 +136,6 @@ class EmailGenerator:
 @inject
 @dataclass
 class PlanGenerator:
-    id_generator: IdGenerator
     company_generator: CompanyGenerator
     datetime_service: DatetimeService
 
@@ -159,7 +148,7 @@ class PlanGenerator:
             labour_cost=Decimal(30),
         )
         return Plan(
-            id=self.id_generator.get_id(),
+            id=uuid4(),
             plan_creation_date=self.datetime_service.now()
             if plan_creation_date is None
             else plan_creation_date,

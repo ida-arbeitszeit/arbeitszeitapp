@@ -2,6 +2,7 @@
 Definition of database tables.
 """
 
+import uuid
 from enum import Enum
 
 from flask_login import UserMixin
@@ -9,8 +10,12 @@ from flask_login import UserMixin
 from project.extensions import db
 
 
+def generate_uuid() -> str:
+    return str(uuid.uuid4())
+
+
 class SocialAccounting(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
 
     account = db.relationship(
         "Account", uselist=False, lazy=True, backref="social_accounting"
@@ -20,13 +25,13 @@ class SocialAccounting(UserMixin, db.Model):
 # Association table Company - Member
 jobs = db.Table(
     "jobs",
-    db.Column("member_id", db.Integer, db.ForeignKey("member.id")),
-    db.Column("company_id", db.Integer, db.ForeignKey("company.id")),
+    db.Column("member_id", db.String, db.ForeignKey("member.id")),
+    db.Column("company_id", db.String, db.ForeignKey("company.id")),
 )
 
 
 class Member(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(1000), nullable=False)
@@ -43,7 +48,7 @@ class Member(UserMixin, db.Model):
 
 
 class Company(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(1000), nullable=False)
@@ -60,9 +65,9 @@ class Company(UserMixin, db.Model):
 
 
 class Plan(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
     plan_creation_date = db.Column(db.DateTime, nullable=False)
-    planner = db.Column(db.Integer, db.ForeignKey("company.id"), nullable=False)
+    planner = db.Column(db.String, db.ForeignKey("company.id"), nullable=False)
     costs_p = db.Column(db.Numeric(), nullable=False)
     costs_r = db.Column(db.Numeric(), nullable=False)
     costs_a = db.Column(db.Numeric(), nullable=False)
@@ -72,7 +77,7 @@ class Plan(UserMixin, db.Model):
     description = db.Column(db.String(5000), nullable=False)
     timeframe = db.Column(db.Numeric(), nullable=False)
     social_accounting = db.Column(
-        db.Integer, db.ForeignKey("social_accounting.id"), nullable=False
+        db.String, db.ForeignKey("social_accounting.id"), nullable=False
     )
     approved = db.Column(db.Boolean, nullable=False, default=False)
     approval_date = db.Column(db.DateTime, nullable=True, default=None)
@@ -93,15 +98,15 @@ class AccountTypes(Enum):
 
 
 class Account(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
     account_owner_social_accounting = db.Column(
-        db.Integer, db.ForeignKey("social_accounting.id"), nullable=True
+        db.String, db.ForeignKey("social_accounting.id"), nullable=True
     )
     account_owner_company = db.Column(
-        db.Integer, db.ForeignKey("company.id"), nullable=True
+        db.String, db.ForeignKey("company.id"), nullable=True
     )
     account_owner_member = db.Column(
-        db.Integer, db.ForeignKey("member.id"), nullable=True
+        db.String, db.ForeignKey("member.id"), nullable=True
     )
     account_type = db.Column(db.Enum(AccountTypes), nullable=False)
     balance = db.Column(db.Numeric(), default=0)
@@ -121,17 +126,17 @@ class Account(UserMixin, db.Model):
 
 
 class Transaction(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
     date = db.Column(db.DateTime, nullable=False)
-    account_from = db.Column(db.Integer, db.ForeignKey("account.id"), nullable=False)
-    account_to = db.Column(db.Integer, db.ForeignKey("account.id"), nullable=False)
+    account_from = db.Column(db.String, db.ForeignKey("account.id"), nullable=False)
+    account_to = db.Column(db.String, db.ForeignKey("account.id"), nullable=False)
     amount = db.Column(db.Numeric(), nullable=False)
     purpose = db.Column(db.String(1000), nullable=True)  # Verwendungszweck
 
 
 class Offer(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    plan_id = db.Column(db.Integer, db.ForeignKey("plan.id"), nullable=False)
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
+    plan_id = db.Column(db.String, db.ForeignKey("plan.id"), nullable=False)
     cr_date = db.Column(db.DateTime, nullable=False)
     name = db.Column(db.String(1000), nullable=False)
     description = db.Column(db.String(5000), nullable=False)
@@ -148,12 +153,12 @@ class PurposesOfPurchases(Enum):
 
 
 class Kaeufe(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
     kauf_date = db.Column(db.DateTime, nullable=False)
-    angebot = db.Column(db.Integer, db.ForeignKey("offer.id"), nullable=False)
+    angebot = db.Column(db.String, db.ForeignKey("offer.id"), nullable=False)
     type_member = db.Column(db.Boolean, nullable=False)
-    company = db.Column(db.Integer, db.ForeignKey("company.id"), nullable=True)
-    member = db.Column(db.Integer, db.ForeignKey("member.id"), nullable=True)
+    company = db.Column(db.String, db.ForeignKey("company.id"), nullable=True)
+    member = db.Column(db.String, db.ForeignKey("member.id"), nullable=True)
     kaufpreis = db.Column(db.Numeric(), nullable=False)
     amount = db.Column(db.Integer, nullable=False)
     purpose = db.Column(db.Enum(PurposesOfPurchases), nullable=False)

@@ -5,6 +5,7 @@ from datetime import datetime
 from decimal import Decimal
 from enum import Enum
 from typing import Callable, Dict, List, Optional, Tuple, Union
+from uuid import UUID
 
 
 @dataclass
@@ -15,7 +16,7 @@ class SocialAccounting:
 class Member:
     def __init__(
         self,
-        id: int,
+        id: UUID,
         name: str,
         email: str,
         account: Account,
@@ -42,7 +43,7 @@ class Member:
 class Company:
     def __init__(
         self,
-        id: int,
+        id: UUID,
         name: str,
         means_account: Account,
         raw_material_account: Account,
@@ -59,7 +60,7 @@ class Company:
         self.workers = workers
 
     @property
-    def id(self):
+    def id(self) -> UUID:
         return self._id
 
     def __eq__(self, other: object) -> bool:
@@ -89,7 +90,7 @@ class AccountTypes(Enum):
 class Account:
     def __init__(
         self,
-        id: int,
+        id: UUID,
         account_type: AccountTypes,
         balance: Decimal,
         change_credit: Callable[[Decimal], None],
@@ -123,7 +124,7 @@ class ProductionCosts:
 class Plan:
     def __init__(
         self,
-        id: int,
+        id: UUID,
         plan_creation_date: datetime,
         planner: Company,
         production_costs: ProductionCosts,
@@ -187,7 +188,7 @@ class Plan:
 class ProductOffer:
     def __init__(
         self,
-        id: int,
+        id: UUID,
         name: str,
         amount_available: int,
         deactivate_offer_in_db: Callable[[], None],
@@ -216,7 +217,7 @@ class ProductOffer:
         self._decrease_amount(amount)
 
     @property
-    def id(self) -> int:
+    def id(self) -> UUID:
         return self._id
 
     @property
@@ -251,7 +252,7 @@ class TransactionInfo:
 
 @dataclass
 class Transaction:
-    id: int
+    id: UUID
     date: datetime
     account_from: Account
     account_to: Account

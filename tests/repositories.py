@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import uuid
 from datetime import datetime
 from decimal import Decimal
 from typing import Dict, Iterator, List, Union
@@ -44,7 +45,6 @@ class TransactionRepository(interfaces.TransactionRepository):
     @inject
     def __init__(self) -> None:
         self.transactions: List[Transaction] = []
-        self.latest_id = 0
 
     def add(self, transaction: Transaction) -> None:
         assert transaction not in self.transactions
@@ -59,14 +59,13 @@ class TransactionRepository(interfaces.TransactionRepository):
         purpose: str,
     ) -> Transaction:
         transaction = Transaction(
-            id=self.latest_id,
+            id=uuid.uuid4(),
             date=date,
             account_from=account_from,
             account_to=account_to,
             amount=amount,
             purpose=purpose,
         )
-        self.latest_id += 1
         self.transactions.append(transaction)
         return transaction
 
@@ -208,7 +207,6 @@ class MemberRepository(interfaces.MemberRepository):
 class CompanyRepository(interfaces.CompanyRepository):
     @inject
     def __init__(self) -> None:
-        self.previous_id = 0
         self.companies: Dict[str, Company] = {}
 
     def create_company(
@@ -222,7 +220,7 @@ class CompanyRepository(interfaces.CompanyRepository):
         products_account: Account,
     ) -> Company:
         new_company = Company(
-            id=self._get_id(),
+            id=uuid.uuid4(),
             name=name,
             means_account=means_account,
             raw_material_account=resources_account,
@@ -235,7 +233,3 @@ class CompanyRepository(interfaces.CompanyRepository):
 
     def has_company_with_email(self, email: str) -> bool:
         return email in self.companies
-
-    def _get_id(self) -> int:
-        self.previous_id += 1
-        return self.previous_id

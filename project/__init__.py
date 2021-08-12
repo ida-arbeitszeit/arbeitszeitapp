@@ -28,9 +28,9 @@ def create_app():
             """
             user_type = session["user_type"]
             if user_type == "member":
-                return Member.query.get(int(user_id))
+                return Member.query.get(user_id)
             elif user_type == "company":
-                return Company.query.get(int(user_id))
+                return Company.query.get(user_id)
 
         # register blueprints
         from .auth import routes as auth_routes

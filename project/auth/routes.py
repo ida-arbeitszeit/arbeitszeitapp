@@ -12,9 +12,6 @@ auth = Blueprint("auth", __name__, template_folder="templates", static_folder="s
 
 @auth.route("/")
 def start():
-    # not sure if this is the best place to create database instance
-    database.create_social_accounting_in_db()
-    database.add_new_account_for_social_accounting()
     session["user_type"] = None
     return render_template("start.html")
 
