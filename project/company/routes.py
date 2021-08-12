@@ -162,14 +162,13 @@ def my_purchases(
 @login_required
 @with_injection
 def create_plan(
-    original_plan_id: Optional[UUID],
     seek_approval: use_cases.SeekApproval,
     plan_repository: PlanRepository,
     social_accounting_repository: AccountingRepository,
 ):
-    original_plan_id = request.args.get("original_plan_id")
+    original_plan_id: Optional[str] = request.args.get("original_plan_id")
     original_plan = (
-        plan_repository.get_by_id(original_plan_id) if original_plan_id else None
+        plan_repository.get_by_id(UUID(original_plan_id)) if original_plan_id else None
     )
 
     if request.method == "POST":  # Button "Plan erstellen"
