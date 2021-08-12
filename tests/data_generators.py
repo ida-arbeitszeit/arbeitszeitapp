@@ -45,7 +45,7 @@ class OfferGenerator:
         self, *, name="Product name", amount=1, provider=None, description=""
     ):
         return ProductOffer(
-            id=self.id_generator.get_id(),
+            id=uuid4(),
             name=name,
             amount_available=amount,
             deactivate_offer_in_db=lambda: None,
@@ -146,7 +146,6 @@ class EmailGenerator:
 @inject
 @dataclass
 class PlanGenerator:
-    id_generator: IdGenerator
     company_generator: CompanyGenerator
     datetime_service: DatetimeService
 
@@ -159,7 +158,7 @@ class PlanGenerator:
             labour_cost=Decimal(30),
         )
         return Plan(
-            id=self.id_generator.get_id(),
+            id=uuid4(),
             plan_creation_date=self.datetime_service.now()
             if plan_creation_date is None
             else plan_creation_date,

@@ -24,14 +24,17 @@ main_member = Blueprint(
 @with_injection
 def my_purchases(
     query_purchases: use_cases.QueryPurchases,
+    member_repository: MemberRepository
 ):
     user_type = session["user_type"]
 
     if user_type == "company":
         return redirect(url_for("auth.zurueck"))
     else:
+        member = member_repository.get_member_by_id(current_user.id)
         session["user_type"] = "member"
-        purchases = list(query_purchases(current_user))
+        purchases = list(query_purchases(member))
+        print(purchases)
         return render_template("member/my_purchases.html", purchases=purchases)
 
 
@@ -62,7 +65,7 @@ def suchen(
     return render_template("member/search.html", form=search_form, results=results)
 
 
-@main_member.route("/member/buy/<int:id>", methods=["GET", "POST"])
+@main_member.route("/member/buy/<uuid:id>", methods=["GET", "POST"])
 @login_required
 @with_injection
 def buy(

@@ -1,5 +1,6 @@
 from decimal import Decimal
 from typing import Optional
+from uuid import UUID
 
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
@@ -8,6 +9,7 @@ from arbeitszeit import entities, errors, use_cases
 from arbeitszeit.datetime_service import DatetimeService
 from project import database
 from project.database import (
+    AccountingRepository,
     CompanyRepository,
     CompanyWorkerRepository,
     MemberRepository,
@@ -105,11 +107,11 @@ def suchen(
     return render_template("company/search.html", form=search_form, results=results)
 
 
-@main_company.route("/company/buy/<int:id>", methods=["GET", "POST"])
+@main_company.route("/company/buy/<uuid:id>", methods=["GET", "POST"])
 @login_required
 @with_injection
 def buy(
-    id: int,
+    id: UUID,
     purchase_product: use_cases.PurchaseProduct,
     product_offer_repository: ProductOfferRepository,
     company_repository: CompanyRepository,
@@ -143,14 +145,16 @@ def buy(
 @with_injection
 def my_purchases(
     query_purchases: use_cases.QueryPurchases,
+    company_repository: CompanyRepository,
 ):
     user_type = session["user_type"]
 
     if user_type == "member":
         return redirect(url_for("auth.zurueck"))
     else:
+        company = company_repository.get_by_id(current_user.id)
         session["user_type"] = "company"
-        purchases = list(query_purchases(current_user))
+        purchases = list(query_purchases(company))
         return render_template("company/my_purchases.html", purchases=purchases)
 
 
@@ -161,6 +165,7 @@ def create_plan(
     original_plan_id: Optional[int],
     seek_approval: use_cases.SeekApproval,
     plan_repository: PlanRepository,
+    social_accounting_repository: AccountingRepository,
 ):
     original_plan_id = request.args.get("original_plan_id")
     original_plan = (
@@ -181,7 +186,7 @@ def create_plan(
             prd_amount=int(plan_data["prd_amount"]),
             description=plan_data["description"],
             timeframe=int(plan_data["timeframe"]),
-            social_accounting=1,
+            social_accounting=social_accounting_repository.get_or_create_social_accounting_orm().id,
         )
         db.session.add(new_plan_orm)
         database.commit_changes()
@@ -229,7 +234,7 @@ def my_plans(
     )
 
 
-@main_company.route("/company/create_offer/<int:plan_id>", methods=["GET", "POST"])
+@main_company.route("/company/create_offer/<uuid:plan_id>", methods=["GET", "POST"])
 @login_required
 def create_offer(plan_id):
     if request.method == "POST":  # create offer
@@ -238,7 +243,7 @@ def create_offer(plan_id):
         prd_amount = int(request.form["prd_amount"])
 
         new_offer = Offer(
-            plan_id=plan_id,
+            plan_id=str(plan_id),
             cr_date=DatetimeService().now(),
             name=name,
             description=description,
@@ -250,7 +255,7 @@ def create_offer(plan_id):
         db.session.commit()
         return render_template("company/create_offer_in_app.html", offer=new_offer)
 
-    plan = Plan.query.filter_by(id=plan_id).first()
+    plan = Plan.query.filter_by(id=str(plan_id)).first()
     return render_template("company/create_offer.html", plan=plan)
 
 

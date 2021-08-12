@@ -3,7 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterator, List, Optional, TypeVar, Union
+from typing import Iterator, List, Optional, TypeVar, Union, Any
+from uuid import UUID
 
 from injector import inject
 from sqlalchemy import desc
@@ -63,8 +64,8 @@ class CompanyWorkerRepository(repositories.CompanyWorkerRepository):
 class MemberRepository(repositories.MemberRepository):
     account_repository: AccountRepository
 
-    def get_member_by_id(self, id: int) -> entities.Member:
-        orm_object = Member.query.filter_by(id=id).first()
+    def get_member_by_id(self, id: UUID) -> entities.Member:
+        orm_object = Member.query.filter_by(id=str(id)).first()
         if orm_object is None:
             raise MemberNotFound()
         else:
@@ -73,14 +74,14 @@ class MemberRepository(repositories.MemberRepository):
     def object_from_orm(self, orm_object: Member) -> entities.Member:
         member_account = self.account_repository.object_from_orm(orm_object.account)
         return entities.Member(
-            id=orm_object.id,
+            id=UUID(orm_object.id),
             name=orm_object.name,
             account=member_account,
             email=orm_object.email,
         )
 
     def object_to_orm(self, member: entities.Member) -> Member:
-        return Member.query.get(member.id)
+        return Member.query.get(str(member.id))
 
     def create_member(
         self, email: str, name: str, password: str, account: entities.Account
@@ -108,11 +109,11 @@ class CompanyRepository(repositories.CompanyRepository):
     member_repository: MemberRepository
 
     def object_to_orm(self, company: entities.Company) -> Company:
-        return Company.query.get(company.id)
+        return Company.query.get(str(company.id))
 
     def object_from_orm(self, company_orm: Company) -> entities.Company:
         return entities.Company(
-            id=company_orm.id,
+            id=UUID(company_orm.id),
             name=company_orm.name,
             means_account=self.account_repository.object_from_orm(
                 self._get_means_account(company_orm)
@@ -152,8 +153,8 @@ class CompanyRepository(repositories.CompanyRepository):
         assert account
         return account
 
-    def get_by_id(self, id: int) -> entities.Company:
-        company_orm = Company.query.filter_by(id=id).first()
+    def get_by_id(self, id: UUID) -> entities.Company:
+        company_orm = Company.query.filter_by(id=str(id)).first()
         if company_orm is None:
             raise CompanyNotFound()
         else:
@@ -197,7 +198,7 @@ class AccountRepository(repositories.AccountRepository):
     def object_from_orm(self, account_orm: Account) -> entities.Account:
         assert account_orm
         return entities.Account(
-            id=account_orm.id,
+            id=UUID(account_orm.id),
             account_type=account_orm.account_type,
             balance=account_orm.balance,
             change_credit=lambda amount: setattr(
@@ -206,7 +207,7 @@ class AccountRepository(repositories.AccountRepository):
         )
 
     def object_to_orm(self, account: entities.Account) -> Account:
-        account_orm = Account.query.filter_by(id=account.id).first()
+        account_orm = Account.query.filter_by(id=str(account.id)).first()
         assert account_orm
         return account_orm
 
@@ -270,18 +271,23 @@ class AccountingRepository:
         )
         return entities.SocialAccounting(account=accounting_account)
 
-    def get_by_id(self, id: int) -> Optional[entities.SocialAccounting]:
-        accounting_orm = SocialAccounting.query.filter_by(id=id).first()
+    def get_by_id(self, id: UUID) -> Optional[entities.SocialAccounting]:
+        accounting_orm = SocialAccounting.query.filter_by(id=str(id)).first()
         return self.object_from_orm(accounting_orm) if accounting_orm else None
 
     def get_or_create_social_accounting(self) -> entities.SocialAccounting:
         return self.object_from_orm(self.get_or_create_social_accounting_orm())
 
     def get_or_create_social_accounting_orm(self) -> SocialAccounting:
-        social_accounting = SocialAccounting.query.filter_by(id=1).first()
+        social_accounting = SocialAccounting.query.first()
         if not social_accounting:
-            social_accounting = SocialAccounting(id=1)
-            db.session.add(social_accounting)
+            social_accounting = SocialAccounting()
+            account = Account(
+                account_owner_social_accounting=social_accounting.id,
+                account_type="accounting",
+            )
+            social_accounting.account = account
+            db.session.add(social_accounting, account)
             db.session.commit()
         return social_accounting
 
@@ -299,7 +305,7 @@ class PurchaseRepository(repositories.PurchaseRepository):
         )
         return Kaeufe(
             kauf_date=purchase.purchase_date,
-            angebot=product_offer.id,
+            angebot=str(product_offer.id),
             type_member=isinstance(purchase.buyer, entities.Member),
             company=(
                 self.company_repository.object_to_orm(purchase.buyer).id
@@ -352,7 +358,7 @@ class ProductOfferRepository(repositories.OfferRepository):
     company_repository: CompanyRepository
 
     def object_to_orm(self, product_offer: entities.ProductOffer) -> Offer:
-        return Offer.query.get(product_offer.id)
+        return Offer.query.get(str(product_offer.id))
 
     def object_from_orm(self, offer_orm: Offer) -> entities.ProductOffer:
         plan = offer_orm.plan
@@ -360,7 +366,7 @@ class ProductOfferRepository(repositories.OfferRepository):
             (plan.costs_p + plan.costs_r + plan.costs_a) / plan.prd_amount
         )
         return entities.ProductOffer(
-            id=offer_orm.id,
+            id=UUID(offer_orm.id),
             name=offer_orm.name,
             amount_available=offer_orm.amount_available,
             deactivate_offer_in_db=lambda: setattr(offer_orm, "active", False),
@@ -375,8 +381,8 @@ class ProductOfferRepository(repositories.OfferRepository):
             description=offer_orm.description,
         )
 
-    def get_by_id(self, id: int) -> entities.ProductOffer:
-        offer_orm = Offer.query.filter_by(id=id).first()
+    def get_by_id(self, id: UUID) -> entities.ProductOffer:
+        offer_orm = Offer.query.filter_by(id=str(id)).first()
         if offer_orm is None:
             raise ProductOfferNotFound()
         else:
@@ -425,9 +431,9 @@ class PlanRepository(repositories.PlanRepository):
             means_cost=plan.costs_p,
         )
         return entities.Plan(
-            id=plan.id,
+            id=UUID(plan.id),
             plan_creation_date=plan.plan_creation_date,
-            planner=self.company_repository.get_by_id(plan.planner),
+            planner=self.company_repository.get_by_id(UUID(plan.planner)),
             production_costs=production_costs,
             prd_name=plan.prd_name,
             prd_unit=plan.prd_unit,
@@ -449,10 +455,10 @@ class PlanRepository(repositories.PlanRepository):
         )
 
     def object_to_orm(self, plan: entities.Plan) -> Plan:
-        return Plan.query.get(plan.id)
+        return Plan.query.get(str(plan.id))
 
-    def get_by_id(self, id: int) -> entities.Plan:
-        plan_orm = Plan.query.filter_by(id=id).first()
+    def get_by_id(self, id: UUID) -> entities.Plan:
+        plan_orm = Plan.query.filter_by(id=str(id)).first()
         if plan_orm is None:
             raise PlanNotFound()
         else:
@@ -460,9 +466,9 @@ class PlanRepository(repositories.PlanRepository):
 
     def add(self, plan: entities.Plan) -> None:
         orm_plan = Plan(
-            id=plan.id,
+            id=str(plan.id),
             plan_creation_date=plan.plan_creation_date,
-            planner=plan.planner.id,
+            planner=str(plan.planner.id),
             costs_p=plan.production_costs.means_cost,
             costs_r=plan.production_costs.resource_cost,
             costs_a=plan.production_costs.labour_cost,
@@ -488,11 +494,11 @@ class TransactionRepository(repositories.TransactionRepository):
     account_repository: AccountRepository
 
     def object_to_orm(self, transaction: entities.Transaction) -> Transaction:
-        return Transaction.query.get(transaction.id)
+        return Transaction.query.get(str(transaction.id))
 
     def object_from_orm(self, transaction: Transaction) -> entities.Transaction:
         return entities.Transaction(
-            id=transaction.id,
+            id=UUID(transaction.id),
             date=transaction.date,
             account_from=self.account_repository.object_from_orm(
                 transaction.sending_account
@@ -514,8 +520,8 @@ class TransactionRepository(repositories.TransactionRepository):
     ) -> entities.Transaction:
         transaction = Transaction(
             date=date,
-            account_from=account_from.id,
-            account_to=account_to.id,
+            account_from=str(account_from.id),
+            account_to=str(account_to.id),
             amount=amount,
             purpose=purpose,
         )
