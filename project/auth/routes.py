@@ -12,7 +12,6 @@ auth = Blueprint("auth", __name__, template_folder="templates", static_folder="s
 
 @auth.route("/")
 def start():
-    # not sure if this is the best place to create database instance
     session["user_type"] = None
     return render_template("start.html")
 
