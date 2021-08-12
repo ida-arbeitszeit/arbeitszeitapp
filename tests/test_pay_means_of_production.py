@@ -52,7 +52,7 @@ def test_balance_of_buyer_of_means_of_prod_reduced(
 
     pay_means_of_production(sender, receiver, plan, pieces, purpose)
 
-    price_total = pieces * plan.production_costs.total_cost()
+    price_total = pieces * plan.cost_per_unit()
     assert sender.means_account.balance == -price_total
 
 
@@ -70,7 +70,7 @@ def test_balance_of_buyer_of_raw_materials_reduced(
 
     pay_means_of_production(sender, receiver, plan, pieces, purpose)
 
-    price_total = pieces * plan.production_costs.total_cost()
+    price_total = pieces * plan.cost_per_unit()
     assert sender.raw_material_account.balance == -price_total
 
 
@@ -88,7 +88,7 @@ def test_balance_of_seller_increased(
 
     pay_means_of_production(sender, receiver, plan, pieces, purpose)
 
-    price_total = pieces * plan.production_costs.total_cost()
+    price_total = pieces * plan.cost_per_unit()
     assert receiver.product_account.balance == price_total
 
 
@@ -105,7 +105,7 @@ def test_correct_transaction_added_if_means_of_production_were_paid(
     purpose = PurposesOfPurchases.means_of_prod
     pieces = 5
     pay_means_of_production(sender, receiver, plan, pieces, purpose)
-    price_total = pieces * plan.production_costs.total_cost()
+    price_total = pieces * plan.cost_per_unit()
     assert len(transaction_repository.transactions) == 1
     assert transaction_repository.transactions[0].account_from == sender.means_account
     assert (
@@ -128,7 +128,7 @@ def test_correct_transaction_added_if_raw_materials_were_paid(
     purpose = PurposesOfPurchases.raw_materials
     pieces = 5
     pay_means_of_production(sender, receiver, plan, pieces, purpose)
-    price_total = pieces * plan.production_costs.total_cost()
+    price_total = pieces * plan.cost_per_unit()
     assert len(transaction_repository.transactions) == 1
     assert (
         transaction_repository.transactions[0].account_from

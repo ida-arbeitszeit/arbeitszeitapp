@@ -61,7 +61,7 @@ def test_that_correct_transaction_is_added(
     pay_consumer_product(sender, receiver, plan, pieces)
     assert len(transaction_repository.transactions) == 1
     transaction_added = transaction_repository.transactions[0]
-    expected_amount = pieces * plan.production_costs.total_cost()
+    expected_amount = pieces * plan.cost_per_unit()
     assert transaction_added.account_from == sender.account
     assert transaction_added.account_to == receiver.product_account
     assert transaction_added.amount == expected_amount
@@ -79,6 +79,6 @@ def test_balances_are_adjusted_correctly(
     plan = plan_generator.create_plan(planner=receiver)
     pieces = 3
     pay_consumer_product(sender, receiver, plan, pieces)
-    costs = pieces * plan.production_costs.total_cost()
+    costs = pieces * plan.cost_per_unit()
     assert sender.account.balance == -costs
     assert receiver.product_account.balance == costs
