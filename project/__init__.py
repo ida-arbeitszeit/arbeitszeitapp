@@ -25,6 +25,7 @@ def create_app(config=None, db=None, migrate=None):
     # init flask extensions
     db.init_app(app)
     login_manager.init_app(app)
+    migrate.init_app(app, db)
 
     with app.app_context():
         from .models import Company, Member
