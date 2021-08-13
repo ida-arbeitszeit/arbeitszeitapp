@@ -1,12 +1,22 @@
 from flask import Flask, session
 from flask_table import Col, Table  # noqa: Do not delete
 
-from project.extensions import db, login_manager, migrate
+import project.extensions
+from project.extensions import login_manager
 
 
-def create_app():
+def create_app(config=None, db=None, migrate=None):
     app = Flask(__name__, instance_relative_config=False)
-    app.config.from_envvar("ARBEITSZEIT_APP_CONFIGURATION")
+    if config:
+        app.config.update(**config)
+    else:
+        app.config.from_envvar("ARBEITSZEIT_APP_CONFIGURATION")
+
+    if db is None:
+        db = project.extensions.db
+
+    if migrate is None:
+        migrate = project.extensions.migrate
 
     # Where to redirect the user when he attempts to access a login_required
     # view without being logged in.
@@ -15,7 +25,6 @@ def create_app():
     # init flask extensions
     db.init_app(app)
     login_manager.init_app(app)
-    migrate.init_app(app, db)
 
     with app.app_context():
         from .models import Company, Member
