@@ -70,6 +70,7 @@ class RepositoryModule(Module):
         db = SQLAlchemy(model_class=project.models.db.Model)
         config = {
             "SQLALCHEMY_DATABASE_URI": "sqlite://",
+            "SQLALCHEMY_TRACK_MODIFICATIONS": False,
         }
         app = create_app(config=config, db=db)
         with app.app_context():
