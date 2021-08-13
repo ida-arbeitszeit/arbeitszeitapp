@@ -19,21 +19,22 @@ main_member = Blueprint(
 )
 
 
+def user_is_member():
+    return True if session["user_type"] == "member" else False
+
+
 @main_member.route("/member/kaeufe")
 @login_required
 @with_injection
 def my_purchases(
     query_purchases: use_cases.QueryPurchases, member_repository: MemberRepository
 ):
-    user_type = session["user_type"]
-
-    if user_type == "company":
+    if not user_is_member():
         return redirect(url_for("auth.zurueck"))
-    else:
-        member = member_repository.get_member_by_id(current_user.id)
-        session["user_type"] = "member"
-        purchases = list(query_purchases(member))
-        return render_template("member/my_purchases.html", purchases=purchases)
+
+    member = member_repository.get_member_by_id(current_user.id)
+    purchases = list(query_purchases(member))
+    return render_template("member/my_purchases.html", purchases=purchases)
 
 
 @main_member.route("/member/suchen", methods=["GET", "POST"])
@@ -42,7 +43,9 @@ def my_purchases(
 def suchen(
     query_products: use_cases.QueryProducts, offer_repository: ProductOfferRepository
 ):
-    """search products in catalog."""
+    if not user_is_member():
+        return redirect(url_for("auth.zurueck"))
+
     search_form = ProductSearchForm(request.form)
     query: Optional[str] = None
     product_filter = use_cases.ProductFilter.by_name
@@ -72,6 +75,9 @@ def buy(
     member_repository: MemberRepository,
     purchase_product: use_cases.PurchaseProduct,
 ):
+    if not user_is_member():
+        return redirect(url_for("auth.zurueck"))
+
     product_offer = product_offer_repository.get_by_id(id=id)
     buyer = member_repository.get_member_by_id(current_user.id)
 
@@ -100,6 +106,9 @@ def pay_consumer_product(
     member_repository: MemberRepository,
     plan_repository: PlanRepository,
 ):
+    if not user_is_member():
+        return redirect(url_for("auth.zurueck"))
+
     if request.method == "POST":
         sender = member_repository.get_member_by_id(current_user.id)
         plan = plan_repository.get_by_id(request.form["plan_id"])
@@ -130,12 +139,11 @@ def pay_consumer_product(
 @main_member.route("/member/profile")
 @login_required
 def profile():
-    user_type = session["user_type"]
-    if user_type == "member":
-        workplaces = current_user.workplaces.all()
-        return render_template("member/profile.html", workplaces=workplaces)
-    elif user_type == "company":
+    if not user_is_member():
         return redirect(url_for("auth.zurueck"))
+
+    workplaces = current_user.workplaces.all()
+    return render_template("member/profile.html", workplaces=workplaces)
 
 
 @main_member.route("/member/my_account")
@@ -145,6 +153,9 @@ def my_account(
     member_repository: MemberRepository,
     get_transaction_infos: use_cases.GetTransactionInfos,
 ):
+    if not user_is_member():
+        return redirect(url_for("auth.zurueck"))
+
     member = member_repository.object_from_orm(current_user)
     list_of_trans_infos = get_transaction_infos(member)
 
@@ -158,4 +169,7 @@ def my_account(
 @main_member.route("/member/hilfe")
 @login_required
 def hilfe():
+    if not user_is_member():
+        return redirect(url_for("auth.zurueck"))
+
     return render_template("member/help.html")

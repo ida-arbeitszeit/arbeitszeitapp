@@ -26,6 +26,10 @@ main_company = Blueprint(
 )
 
 
+def user_is_company():
+    return True if session["user_type"] == "company" else False
+
+
 @main_company.route("/company/profile")
 @login_required
 @with_injection
@@ -33,17 +37,16 @@ def profile(
     company_repository: CompanyRepository,
     company_worker_repository: CompanyWorkerRepository,
 ):
-    user_type = session["user_type"]
-    if user_type == "company":
-        company = company_repository.get_by_id(current_user.id)
-        worker = company_worker_repository.get_company_workers(company)
-        if worker:
-            having_workers = True
-        else:
-            having_workers = False
-        return render_template("company/profile.html", having_workers=having_workers)
-    elif user_type == "member":
+    if not user_is_company():
         return redirect(url_for("auth.zurueck"))
+
+    company = company_repository.get_by_id(current_user.id)
+    worker = company_worker_repository.get_company_workers(company)
+    if worker:
+        having_workers = True
+    else:
+        having_workers = False
+    return render_template("company/profile.html", having_workers=having_workers)
 
 
 @main_company.route("/company/work", methods=["GET", "POST"])
@@ -55,6 +58,9 @@ def arbeit(
     company_worker_repository: CompanyWorkerRepository,
 ):
     """shows workers and add workers to company."""
+    if not user_is_company():
+        return redirect(url_for("auth.zurueck"))
+
     if request.method == "POST":  # add worker to company
         company = company_repository.get_by_id(current_user.id)
         member = member_repository.get_member_by_id(request.form["member"])
@@ -87,6 +93,9 @@ def suchen(
     query_products: use_cases.QueryProducts, offer_repository: ProductOfferRepository
 ):
     """search products in catalog."""
+    if not user_is_company():
+        return redirect(url_for("auth.zurueck"))
+
     search_form = ProductSearchForm(request.form)
     query: Optional[str] = None
     product_filter = use_cases.ProductFilter.by_name
@@ -116,6 +125,9 @@ def buy(
     product_offer_repository: ProductOfferRepository,
     company_repository: CompanyRepository,
 ):
+    if not user_is_company():
+        return redirect(url_for("auth.zurueck"))
+
     product_offer = product_offer_repository.get_by_id(id=id)
     buyer = company_repository.get_by_id(current_user.id)
 
@@ -147,15 +159,12 @@ def my_purchases(
     query_purchases: use_cases.QueryPurchases,
     company_repository: CompanyRepository,
 ):
-    user_type = session["user_type"]
-
-    if user_type == "member":
+    if not user_is_company():
         return redirect(url_for("auth.zurueck"))
-    else:
-        company = company_repository.get_by_id(current_user.id)
-        session["user_type"] = "company"
-        purchases = list(query_purchases(company))
-        return render_template("company/my_purchases.html", purchases=purchases)
+
+    company = company_repository.get_by_id(current_user.id)
+    purchases = list(query_purchases(company))
+    return render_template("company/my_purchases.html", purchases=purchases)
 
 
 @main_company.route("/company/create_plan", methods=["GET", "POST"])
@@ -166,6 +175,9 @@ def create_plan(
     plan_repository: PlanRepository,
     social_accounting_repository: AccountingRepository,
 ):
+    if not user_is_company():
+        return redirect(url_for("auth.zurueck"))
+
     original_plan_id: Optional[str] = request.args.get("original_plan_id")
     original_plan = (
         plan_repository.get_by_id(UUID(original_plan_id)) if original_plan_id else None
@@ -212,6 +224,9 @@ def create_plan(
 def my_plans(
     plan_repository: PlanRepository,
 ):
+    if not user_is_company():
+        return redirect(url_for("auth.zurueck"))
+
     plans_approved = [
         plan_repository.object_from_orm(plan)
         for plan in current_user.plans.filter_by(
@@ -236,6 +251,9 @@ def my_plans(
 @main_company.route("/company/create_offer/<uuid:plan_id>", methods=["GET", "POST"])
 @login_required
 def create_offer(plan_id):
+    if not user_is_company():
+        return redirect(url_for("auth.zurueck"))
+
     if request.method == "POST":  # create offer
         name = request.form["name"]
         description = request.form["description"]
@@ -265,13 +283,12 @@ def my_accounts(
     company_repository: CompanyRepository,
     get_transaction_infos: use_cases.GetTransactionInfos,
 ):
+    if not user_is_company():
+        return redirect(url_for("auth.zurueck"))
+
     company = company_repository.object_from_orm(current_user)
-
     all_trans_infos = get_transaction_infos(company)
-
-    my_balances = []
-    for account in company.accounts():
-        my_balances.append(account.balance)
+    my_balances = [account.balance for account in company.accounts()]
 
     return render_template(
         "company/my_accounts.html",
@@ -288,6 +305,9 @@ def transfer_to_worker(
     company_repository: CompanyRepository,
     member_repository: MemberRepository,
 ):
+    if not user_is_company():
+        return redirect(url_for("auth.zurueck"))
+
     if request.method == "POST":
         company = company_repository.get_by_id(current_user.id)
         worker = member_repository.get_member_by_id(request.form["member_id"])
@@ -317,6 +337,9 @@ def transfer_to_company(
     company_repository: CompanyRepository,
     plan_repository: PlanRepository,
 ):
+    if not user_is_company():
+        return redirect(url_for("auth.zurueck"))
+
     if request.method == "POST":
         sender = company_repository.get_by_id(current_user.id)
         plan = plan_repository.get_by_id(request.form["plan_id"])
@@ -350,6 +373,9 @@ def transfer_to_company(
 @main_company.route("/company/my_offers")
 @login_required
 def my_offers():
+    if not user_is_company():
+        return redirect(url_for("auth.zurueck"))
+
     my_company = Company.query.filter_by(id=current_user.id).first()
     my_plans = my_company.plans.all()
     my_offers = []
@@ -367,6 +393,9 @@ def my_offers():
 def delete_offer(
     product_offer_repository: ProductOfferRepository,
 ):
+    if not user_is_company():
+        return redirect(url_for("auth.zurueck"))
+
     offer_id = request.args.get("id")
     assert offer_id
     product_offer = product_offer_repository.get_by_id(offer_id)
@@ -390,4 +419,7 @@ def cooperate():
 @main_company.route("/company/hilfe")
 @login_required
 def hilfe():
+    if not user_is_company():
+        return redirect(url_for("auth.zurueck"))
+
     return render_template("company/help.html")
