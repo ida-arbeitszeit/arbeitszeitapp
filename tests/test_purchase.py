@@ -1,6 +1,7 @@
 import pytest
 
 from arbeitszeit.entities import AccountTypes, PurposesOfPurchases
+from arbeitszeit.errors import CompanyCantBuyPublicServices
 from arbeitszeit.use_cases import PurchaseProduct
 from tests.data_generators import CompanyGenerator, MemberGenerator, OfferGenerator
 from tests.dependency_injection import injection_test
@@ -20,6 +21,23 @@ def test_purchase_amount_can_not_exceed_supply(
             offer,
             2,
             PurposesOfPurchases.consumption,
+            buyer,
+        )
+
+
+@injection_test
+def test_company_cant_buy_public_service(
+    purchase_product: PurchaseProduct,
+    offer_generator: OfferGenerator,
+    company_generator: CompanyGenerator,
+):
+    offer = offer_generator.create_offer(amount=1, is_public_service=True)
+    buyer = company_generator.create_company()
+    with pytest.raises(CompanyCantBuyPublicServices):
+        purchase_product(
+            offer,
+            2,
+            PurposesOfPurchases.raw_materials,
             buyer,
         )
 
@@ -91,6 +109,20 @@ def test_balance_of_buyer_reduced(
 
 
 @injection_test
+def test_balance_of_buyer_not_reduced_when_buying_public_service(
+    purchase_product: PurchaseProduct,
+    offer_generator: OfferGenerator,
+    member_generator: MemberGenerator,
+):
+    offer1 = offer_generator.create_offer(amount=3, is_public_service=True)
+    buyer1 = member_generator.create_member()
+    purpose1 = PurposesOfPurchases.consumption
+    purchase_product(offer1, 3, purpose1, buyer1)
+    expected_reduction = 0
+    assert buyer1.account.balance == expected_reduction
+
+
+@injection_test
 def test_balance_of_seller_increased(
     purchase_product: PurchaseProduct,
     offer_generator: OfferGenerator,
@@ -109,43 +141,39 @@ def test_balance_of_seller_increased(
 
 
 @injection_test
-def test_correct_transaction_added_to_repo(
+def test_balance_of_planner_not_increased_when_offering_public_service(
+    purchase_product: PurchaseProduct,
+    offer_generator: OfferGenerator,
+    member_generator: MemberGenerator,
+    company_generator: CompanyGenerator,
+):
+    planner = company_generator.create_company()
+    offer = offer_generator.create_offer(
+        amount=3, planner=planner, is_public_service=True
+    )
+    buyer = member_generator.create_member()
+    purchase_product(
+        offer,
+        3,
+        PurposesOfPurchases.consumption,
+        buyer,
+    )
+    expected_increase = 0
+    assert offer.plan.planner.product_account.balance == expected_increase
+
+
+@injection_test
+def test_correct_transaction_added_to_repo_when_buying_public_service(
     purchase_product: PurchaseProduct,
     offer_generator: OfferGenerator,
     member_generator: MemberGenerator,
     transaction_repository: TransactionRepository,
-    company_generator: CompanyGenerator,
 ):
-    # member, consumption
-    offer1 = offer_generator.create_offer(amount=3)
+    offer1 = offer_generator.create_offer(amount=3, is_public_service=True)
     buyer1 = member_generator.create_member()
     purpose1 = PurposesOfPurchases.consumption
     purchase_product(offer1, 3, purpose1, buyer1)
     added_transaction_account_type = (
         transaction_repository.transactions.pop().account_from.account_type
     )
-    member_account_type = AccountTypes.member
-    assert added_transaction_account_type == member_account_type
-
-    # company, means of production
-    offer2 = offer_generator.create_offer(amount=3)
-    buyer2 = company_generator.create_company()
-    purpose2 = PurposesOfPurchases.means_of_prod
-    purchase_product(offer2, 3, purpose2, buyer2)
-    added_transaction_account_type = (
-        transaction_repository.transactions.pop().account_from.account_type
-    )
-    means_account_type = AccountTypes.p
-    assert added_transaction_account_type == means_account_type
-
-    # company, raw materials
-    offer3 = offer_generator.create_offer(amount=3)
-    buyer3 = company_generator.create_company()
-    purpose3 = PurposesOfPurchases.raw_materials
-    purchase_product(offer3, 3, purpose3, buyer3)
-
-    added_transaction_account_type = (
-        transaction_repository.transactions.pop().account_from.account_type
-    )
-    raw_material_account_type = AccountTypes.r
-    assert added_transaction_account_type == raw_material_account_type
+    assert added_transaction_account_type == AccountTypes.member

@@ -42,7 +42,13 @@ class OfferGenerator:
     plan_generator: PlanGenerator
 
     def create_offer(
-        self, *, name="Product name", amount=1, planner=None, description=""
+        self,
+        *,
+        name="Product name",
+        amount=1,
+        planner=None,
+        is_public_service=False,
+        description=""
     ):
         planner = (
             self.company_generator.create_company() if planner is None else planner
@@ -55,7 +61,9 @@ class OfferGenerator:
             decrease_amount_available=lambda _: None,
             active=True,
             description=description,
-            plan=self.plan_generator.create_plan(planner=planner),
+            plan=self.plan_generator.create_plan(
+                planner=planner, is_public_service=is_public_service
+            ),
         )
 
 

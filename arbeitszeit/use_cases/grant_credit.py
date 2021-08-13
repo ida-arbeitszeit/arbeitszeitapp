@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 
 from injector import inject
-from decimal import Decimal
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan, SocialAccounting

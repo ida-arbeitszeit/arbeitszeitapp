@@ -39,6 +39,21 @@ def test_error_is_raised_if_receiver_is_not_equal_to_planner(
 
 
 @injection_test
+def test_error_is_raised_if_trying_to_pay_public_service(
+    pay_means_of_production: PayMeansOfProduction,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+):
+    sender = company_generator.create_company()
+    receiver = company_generator.create_company()
+    plan = plan_generator.create_plan(planner=receiver, is_public_service=True)
+    purpose = PurposesOfPurchases.means_of_prod
+    pieces = 5
+    with pytest.raises(errors.CompanyCantBuyPublicServices):
+        pay_means_of_production(sender, receiver, plan, pieces, purpose)
+
+
+@injection_test
 def test_balance_of_buyer_of_means_of_prod_reduced(
     pay_means_of_production: PayMeansOfProduction,
     company_generator: CompanyGenerator,

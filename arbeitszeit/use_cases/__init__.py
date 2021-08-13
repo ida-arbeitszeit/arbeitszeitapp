@@ -65,6 +65,9 @@ class PurchaseProduct:
         buyer: Union[Member, Company],
     ) -> None:
 
+        if isinstance(buyer, Company) and product_offer.plan.is_public_service:
+            raise errors.CompanyCantBuyPublicServices(buyer, product_offer.plan)
+
         assert (
             product_offer.amount_available >= amount
         ), "Amount ordered exceeds available products!"
