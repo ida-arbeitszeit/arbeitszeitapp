@@ -471,29 +471,6 @@ class PlanRepository(repositories.PlanRepository):
         else:
             return self.object_from_orm(plan_orm)
 
-    def add(self, plan: entities.Plan) -> None:
-        orm_plan = Plan(
-            id=str(plan.id),
-            plan_creation_date=plan.plan_creation_date,
-            planner=str(plan.planner.id),
-            costs_p=plan.production_costs.means_cost,
-            costs_r=plan.production_costs.resource_cost,
-            costs_a=plan.production_costs.labour_cost,
-            prd_name=plan.prd_name,
-            prd_unit=plan.prd_unit,
-            prd_amount=plan.prd_amount,
-            description=plan.description,
-            timeframe=plan.timeframe,
-            social_accounting=self.accounting_repository.get_or_create_social_accounting_orm().id,
-            approved=plan.approved,
-            approval_date=plan.approval_date,
-            approval_reason=plan.approval_reason,
-            expired=plan.expired,
-            renewed=plan.renewed,
-        )
-        self.db.session.add(orm_plan)
-        self.db.session.commit()
-
     def create_plan(
         self,
         planner: entities.Company,
@@ -518,8 +495,8 @@ class PlanRepository(repositories.PlanRepository):
             timeframe=timeframe_in_days,
             social_accounting=self.accounting_repository.get_or_create_social_accounting_orm().id,
         )
-        db.session.add(plan)
-        db.session.commit()
+        self.db.session.add(plan)
+        self.db.session.commit()
         return self.object_from_orm(plan)
 
 
