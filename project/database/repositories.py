@@ -6,6 +6,7 @@ from decimal import Decimal
 from typing import Iterator, List, Optional, TypeVar, Union
 from uuid import UUID
 
+from flask_sqlalchemy import SQLAlchemy
 from injector import inject
 from sqlalchemy import desc
 from werkzeug.security import generate_password_hash
@@ -17,7 +18,6 @@ from project.error import (
     PlanNotFound,
     ProductOfferNotFound,
 )
-from project.extensions import db
 from project.models import (
     Account,
     Company,
@@ -63,6 +63,7 @@ class CompanyWorkerRepository(repositories.CompanyWorkerRepository):
 @dataclass
 class MemberRepository(repositories.MemberRepository):
     account_repository: AccountRepository
+    db: SQLAlchemy
 
     def get_member_by_id(self, id: UUID) -> entities.Member:
         orm_object = Member.query.filter_by(id=str(id)).first()
@@ -94,8 +95,8 @@ class MemberRepository(repositories.MemberRepository):
             account=orm_account,
         )
         orm_account.account_owner_member = orm_member.id
-        db.session.add(orm_member)
-        db.session.commit()
+        self.db.session.add(orm_member)
+        self.db.session.commit()
         return self.object_from_orm(orm_member)
 
     def has_member_with_email(self, email: str) -> bool:
@@ -107,6 +108,7 @@ class MemberRepository(repositories.MemberRepository):
 class CompanyRepository(repositories.CompanyRepository):
     account_repository: AccountRepository
     member_repository: MemberRepository
+    db: SQLAlchemy
 
     def object_to_orm(self, company: entities.Company) -> Company:
         return Company.query.get(str(company.id))
@@ -175,8 +177,8 @@ class CompanyRepository(repositories.CompanyRepository):
             name=name,
             password=generate_password_hash(password, method="sha256"),
         )
-        db.session.add(company)
-        db.session.commit()
+        self.db.session.add(company)
+        self.db.session.commit()
         for account in [
             means_account,
             labour_account,
@@ -185,7 +187,7 @@ class CompanyRepository(repositories.CompanyRepository):
         ]:
             account_orm = self.account_repository.object_to_orm(account)
             account_orm.account_owner_company = company.id
-        db.session.commit()
+        self.db.session.commit()
         return self.object_from_orm(company)
 
     def has_company_with_email(self, email: str) -> bool:
@@ -195,6 +197,8 @@ class CompanyRepository(repositories.CompanyRepository):
 @inject
 @dataclass
 class AccountRepository(repositories.AccountRepository):
+    db: SQLAlchemy
+
     def object_from_orm(self, account_orm: Account) -> entities.Account:
         assert account_orm
         return entities.Account(
@@ -219,13 +223,13 @@ class AccountRepository(repositories.AccountRepository):
             account_type=account.account_type,
             balance=account.balance,
         )
-        db.session.add(account_orm)
-        db.session.commit()
+        self.db.session.add(account_orm)
+        self.db.session.commit()
 
     def create_account(self, account_type: entities.AccountTypes):
         account = Account(account_type=account_type.value)
-        db.session.add(account)
-        db.session.commit()
+        self.db.session.add(account)
+        self.db.session.commit()
         return self.object_from_orm(account)
 
 
@@ -261,6 +265,7 @@ class AccountOwnerRepository(repositories.AccountOwnerRepository):
 @dataclass
 class AccountingRepository:
     account_repository: AccountRepository
+    db: SQLAlchemy
 
     def object_from_orm(
         self, accounting_orm: SocialAccounting
@@ -287,8 +292,8 @@ class AccountingRepository:
                 account_type="accounting",
             )
             social_accounting.account = account
-            db.session.add(social_accounting, account)
-            db.session.commit()
+            self.db.session.add(social_accounting, account)
+            self.db.session.commit()
         return social_accounting
 
 
@@ -298,6 +303,7 @@ class PurchaseRepository(repositories.PurchaseRepository):
     member_repository: MemberRepository
     company_repository: CompanyRepository
     product_offer_repository: ProductOfferRepository
+    db: SQLAlchemy
 
     def object_to_orm(self, purchase: entities.Purchase) -> Kaeufe:
         product_offer = self.product_offer_repository.object_to_orm(
@@ -336,7 +342,7 @@ class PurchaseRepository(repositories.PurchaseRepository):
 
     def add(self, purchase: entities.Purchase) -> None:
         purchase_orm = self.object_to_orm(purchase)
-        db.session.add(purchase_orm)
+        self.db.session.add(purchase_orm)
 
     def get_purchases_descending_by_date(
         self, user: Union[entities.Member, entities.Company]
@@ -418,6 +424,7 @@ class ProductOfferRepository(repositories.OfferRepository):
 class PlanRepository(repositories.PlanRepository):
     company_repository: CompanyRepository
     accounting_repository: AccountingRepository
+    db: SQLAlchemy
 
     def _approve(self, plan, decision, reason, approval_date):
         plan.approved = decision
@@ -484,8 +491,8 @@ class PlanRepository(repositories.PlanRepository):
             expired=plan.expired,
             renewed=plan.renewed,
         )
-        db.session.add(orm_plan)
-        db.session.commit()
+        self.db.session.add(orm_plan)
+        self.db.session.commit()
 
     def create_plan(
         self,
@@ -520,6 +527,7 @@ class PlanRepository(repositories.PlanRepository):
 @dataclass
 class TransactionRepository(repositories.TransactionRepository):
     account_repository: AccountRepository
+    db: SQLAlchemy
 
     def object_to_orm(self, transaction: entities.Transaction) -> Transaction:
         return Transaction.query.get(str(transaction.id))
@@ -553,12 +561,12 @@ class TransactionRepository(repositories.TransactionRepository):
             amount=amount,
             purpose=purpose,
         )
-        db.session.add(transaction)
-        db.session.commit()
+        self.db.session.add(transaction)
+        self.db.session.commit()
         return self.object_from_orm(transaction)
 
     def add(self, transaction: entities.Transaction) -> None:
-        db.session.add(self.object_to_orm(transaction))
+        self.db.session.add(self.object_to_orm(transaction))
 
     def all_transactions_sent_by_account(
         self, account: entities.Account

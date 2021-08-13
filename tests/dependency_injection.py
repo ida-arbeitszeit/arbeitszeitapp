@@ -1,7 +1,10 @@
+from flask_sqlalchemy import SQLAlchemy
 from injector import Injector, Module, inject, provider, singleton
 
 import arbeitszeit.repositories as interfaces
+import project.models
 from arbeitszeit import entities
+from project import create_app
 from tests import data_generators, repositories
 
 
@@ -66,6 +69,19 @@ class RepositoryModule(Module):
         self, repo: repositories.AccountOwnerRepository
     ) -> interfaces.AccountOwnerRepository:
         return repo
+
+    @provider
+    @singleton
+    def provide_sqlalchemy(self) -> SQLAlchemy:
+        db = SQLAlchemy(model_class=project.models.db.Model)
+        config = {
+            "SQLALCHEMY_DATABASE_URI": "sqlite://",
+        }
+        app = create_app(config=config, db=db)
+        with app.app_context():
+            db.create_all()
+        app.app_context().push()
+        return db
 
 
 def injection_test(original_test):
