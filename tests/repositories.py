@@ -221,6 +221,7 @@ class CompanyRepository(interfaces.CompanyRepository):
     ) -> Company:
         new_company = Company(
             id=uuid.uuid4(),
+            email=email,
             name=name,
             means_account=means_account,
             raw_material_account=resources_account,

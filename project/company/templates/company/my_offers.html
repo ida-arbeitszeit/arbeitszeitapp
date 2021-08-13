@@ -40,7 +40,7 @@
         <td>{{ offer.plan.id }}</td>
         <td>{{ offer.name }}</td>
         <td>{{ offer.description }}</td>
-        <td>{{ (offer.plan.costs_p + offer.plan.costs_r + offer.plan.costs_a)/offer.plan.prd_amount }} Std.</td>
+        <td>{{ offer.price_per_unit() }} Std.</td>
         <td>{{ offer.amount_available }}</td>
         <td><a href="{{ url_for('main_company.delete_offer', id=offer.id) }}"><u>Del.</u></a></td>
         </td>

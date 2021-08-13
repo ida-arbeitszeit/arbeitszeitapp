@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from injector import inject
+from decimal import Decimal
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan, SocialAccounting
@@ -15,7 +16,7 @@ class GrantCredit:
     datetime_service: DatetimeService
 
     def __call__(self, plan: Plan):
-        """Social Accounting grants credit after plan has been approved."""
+        """Social Accounting grants credit to Company after plan has been approved."""
         assert plan.approved, "Plan has not been approved!"
         social_accounting_account = self.social_accounting.account
 
@@ -23,7 +24,10 @@ class GrantCredit:
             (plan.planner.means_account, plan.production_costs.means_cost),
             (plan.planner.raw_material_account, plan.production_costs.resource_cost),
             (plan.planner.work_account, plan.production_costs.labour_cost),
-            (plan.planner.product_account, -plan.production_costs.total_cost()),
+            (
+                plan.planner.product_account,
+                -plan.expected_sales_value(),
+            ),
         ]
 
         for account, amount in accounts_and_amounts:

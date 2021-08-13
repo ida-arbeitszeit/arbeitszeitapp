@@ -43,7 +43,7 @@ class PayConsumerProduct:
             )
 
         # create transaction
-        price_total = pieces * plan.cost_per_unit()
+        price_total = pieces * plan.price_per_unit()
         account_from = sender.account
 
         transaction = self.transaction_repository.create_transaction(

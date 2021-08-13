@@ -39,22 +39,23 @@ from tests.repositories import (
 @dataclass
 class OfferGenerator:
     company_generator: CompanyGenerator
+    plan_generator: PlanGenerator
 
     def create_offer(
-        self, *, name="Product name", amount=1, provider=None, description=""
+        self, *, name="Product name", amount=1, planner=None, description=""
     ):
+        planner = (
+            self.company_generator.create_company() if planner is None else planner
+        )
         return ProductOffer(
             id=uuid4(),
             name=name,
             amount_available=amount,
             deactivate_offer_in_db=lambda: None,
             decrease_amount_available=lambda _: None,
-            price_per_unit=Decimal(1),
-            provider=self.company_generator.create_company()
-            if provider is None
-            else provider,
             active=True,
             description=description,
+            plan=self.plan_generator.create_plan(planner=planner),
         )
 
 
@@ -140,7 +141,12 @@ class PlanGenerator:
     datetime_service: DatetimeService
 
     def create_plan(
-        self, plan_creation_date=None, planner=None, timeframe=None, approved=False
+        self,
+        plan_creation_date=None,
+        planner=None,
+        timeframe=None,
+        is_public_service=False,
+        approved=False,
     ) -> Plan:
         costs = ProductionCosts(
             means_cost=Decimal(10),
@@ -161,7 +167,7 @@ class PlanGenerator:
             production_costs=costs,
             description="Beschreibung für Produkt A.",
             timeframe=int(14) if timeframe is None else int(timeframe),
-            is_public_service=False,
+            is_public_service=is_public_service,
             approved=approved,
             approval_date=None,
             approval_reason=None,
