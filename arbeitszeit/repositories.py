@@ -9,6 +9,7 @@ from arbeitszeit.entities import (
     Company,
     Member,
     Plan,
+    ProductionCosts,
     ProductOffer,
     Purchase,
     SocialAccounting,
@@ -40,7 +41,17 @@ class PurchaseRepository(ABC):
 
 class PlanRepository(ABC):
     @abstractmethod
-    def add(self, plan: Plan) -> None:
+    def create_plan(
+        self,
+        planner: Company,
+        costs: ProductionCosts,
+        product_name: str,
+        production_unit: str,
+        amount: int,
+        description: str,
+        timeframe_in_days: int,
+        creation_timestamp: datetime,
+    ) -> Plan:
         pass
 
 

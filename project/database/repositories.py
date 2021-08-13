@@ -487,6 +487,34 @@ class PlanRepository(repositories.PlanRepository):
         db.session.add(orm_plan)
         db.session.commit()
 
+    def create_plan(
+        self,
+        planner: entities.Company,
+        costs: entities.ProductionCosts,
+        product_name: str,
+        production_unit: str,
+        amount: int,
+        description: str,
+        timeframe_in_days: int,
+        creation_timestamp: datetime,
+    ) -> entities.Plan:
+        plan = Plan(
+            plan_creation_date=creation_timestamp,
+            planner=self.company_repository.object_to_orm(planner).id,
+            costs_p=costs.means_cost,
+            costs_r=costs.resource_cost,
+            costs_a=costs.labour_cost,
+            prd_name=product_name,
+            prd_unit=production_unit,
+            prd_amount=amount,
+            description=description,
+            timeframe=timeframe_in_days,
+            social_accounting=self.accounting_repository.get_or_create_social_accounting_orm().id,
+        )
+        db.session.add(plan)
+        db.session.commit()
+        return self.object_from_orm(plan)
+
 
 @inject
 @dataclass

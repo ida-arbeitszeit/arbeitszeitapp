@@ -7,6 +7,7 @@ from flask_login import current_user, login_required
 
 from arbeitszeit import entities, errors, use_cases
 from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.use_cases import CreatePlan, PlanProposal
 from project import database
 from project.database import (
     AccountingRepository,
@@ -171,9 +172,11 @@ def my_purchases(
 @login_required
 @with_injection
 def create_plan(
+    create_plan_from_proposal: CreatePlan,
     seek_approval: use_cases.SeekApproval,
     plan_repository: PlanRepository,
     social_accounting_repository: AccountingRepository,
+    company_repository: CompanyRepository,
 ):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
@@ -185,26 +188,21 @@ def create_plan(
 
     if request.method == "POST":  # Button "Plan erstellen"
         plan_data = dict(request.form)
-
-        new_plan_orm = Plan(
-            plan_creation_date=DatetimeService().now(),
-            planner=current_user.id,
-            costs_p=float(plan_data["costs_p"]),
-            costs_r=float(plan_data["costs_r"]),
-            costs_a=float(plan_data["costs_a"]),
-            prd_name=plan_data["prd_name"],
-            prd_unit=plan_data["prd_unit"],
-            prd_amount=int(plan_data["prd_amount"]),
+        proposal = PlanProposal(
+            costs=entities.ProductionCosts(
+                labour_cost=Decimal(plan_data["costs_a"]),
+                resource_cost=Decimal(plan_data["costs_r"]),
+                means_cost=Decimal(plan_data["costs_p"]),
+            ),
+            product_name=plan_data["prd_name"],
+            production_unit=plan_data["prd_unit"],
+            production_amount=int(plan_data["prd_amount"]),
             description=plan_data["description"],
-            timeframe=int(plan_data["timeframe"]),
-            social_accounting=social_accounting_repository.get_or_create_social_accounting_orm().id,
+            timeframe_in_days=plan_data["timeframe"],
         )
-        db.session.add(new_plan_orm)
-        database.commit_changes()
-        new_plan = plan_repository.object_from_orm(new_plan_orm)
-
+        planner = company_repository.get_by_id(current_user.id)
+        new_plan = create_plan_from_proposal(planner, proposal)
         is_approved = seek_approval(new_plan, original_plan)
-        database.commit_changes()
 
         if is_approved:
             flash("Plan erfolgreich erstellt und genehmigt. Kredit wurde gewährt.")

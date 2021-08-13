@@ -56,6 +56,12 @@ class RepositoryModule(Module):
         return repo
 
     @provider
+    def provide_plan_repository(
+        self, repo: repositories.PlanRepository
+    ) -> interfaces.PlanRepository:
+        return repo
+
+    @provider
     def provide_account_owner_repository(
         self, repo: repositories.AccountOwnerRepository
     ) -> interfaces.AccountOwnerRepository:
