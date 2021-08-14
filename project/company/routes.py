@@ -203,6 +203,7 @@ def create_plan(
         planner = company_repository.get_by_id(current_user.id)
         new_plan = create_plan_from_proposal(planner, proposal)
         is_approved = seek_approval(new_plan, original_plan)
+        database.commit_changes()
 
         if is_approved:
             flash("Plan erfolgreich erstellt und genehmigt. Kredit wurde gewährt.")
