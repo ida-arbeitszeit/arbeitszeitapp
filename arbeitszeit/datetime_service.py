@@ -1,6 +1,8 @@
+from abc import ABC, abstractmethod
 from datetime import datetime
 
 
-class DatetimeService:
+class DatetimeService(ABC):
+    @abstractmethod
     def now(self) -> datetime:
-        return datetime.now()
+        pass

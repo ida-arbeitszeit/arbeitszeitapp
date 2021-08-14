@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 from functools import wraps
 
 from flask_sqlalchemy import SQLAlchemy
@@ -14,6 +15,7 @@ from injector import (
 
 from arbeitszeit import entities
 from arbeitszeit import repositories as interfaces
+from arbeitszeit.datetime_service import DatetimeService
 from project.extensions import db
 from project.models import Account, Company, Member, SocialAccounting
 
@@ -94,9 +96,22 @@ def configure_injector(binder: Binder) -> None:
         to=ClassProvider(AccountOwnerRepository),
     )
     binder.bind(
+        interfaces.OfferRepository,  # type: ignore
+        to=ClassProvider(ProductOfferRepository),
+    )
+    binder.bind(
+        DatetimeService,  # type: ignore
+        to=ClassProvider(RealtimeDatetimeService),
+    )
+    binder.bind(
         SQLAlchemy,
         to=InstanceProvider(db),
     )
+
+
+class RealtimeDatetimeService(DatetimeService):
+    def now(self):
+        return datetime.now()
 
 
 @inject

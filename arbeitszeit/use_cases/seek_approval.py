@@ -12,6 +12,7 @@ from arbeitszeit.use_cases import GrantCredit
 @dataclass
 class SeekApproval:
     grant_credit: GrantCredit
+    datetime_service: DatetimeService
 
     def __call__(self, new_plan: Plan, original_plan: Optional[Plan]) -> bool:
         """
@@ -22,7 +23,7 @@ class SeekApproval:
         """
         # This is just a place holder
         is_approval = True
-        approval_date = DatetimeService().now()
+        approval_date = self.datetime_service.now()
         if is_approval:
             new_plan.approve(approval_date)
             self.grant_credit(new_plan)

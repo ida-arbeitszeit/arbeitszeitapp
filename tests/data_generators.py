@@ -12,7 +12,6 @@ from uuid import uuid4
 
 from injector import inject
 
-from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import (
     Account,
     AccountTypes,
@@ -26,35 +25,44 @@ from arbeitszeit.entities import (
     SocialAccounting,
     Transaction,
 )
-from tests.datetime_service import TestDatetimeService
-from tests.repositories import (
+from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
     MemberRepository,
+    OfferRepository,
+    PlanRepository,
     TransactionRepository,
 )
+from arbeitszeit.use_cases import SeekApproval
+from tests.datetime_service import FakeDatetimeService
 
 
 @inject
 @dataclass
 class OfferGenerator:
-    company_generator: CompanyGenerator
+    plan_generator: PlanGenerator
+    offer_repository: OfferRepository
+    datetime_service: FakeDatetimeService
 
     def create_offer(
-        self, *, name="Product name", amount=1, provider=None, description=""
-    ):
-        return ProductOffer(
-            id=uuid4(),
+        self,
+        *,
+        name="Product name",
+        amount=1,
+        description="",
+        plan=None,
+        creation_timestamp=None
+    ) -> ProductOffer:
+        if plan is None:
+            plan = self.plan_generator.create_plan(amount=amount)
+        if creation_timestamp is None:
+            creation_timestamp = self.datetime_service.now()
+        return self.offer_repository.create_offer(
+            plan=plan,
+            creation_datetime=creation_timestamp,
             name=name,
-            amount_available=amount,
-            deactivate_offer_in_db=lambda: None,
-            decrease_amount_available=lambda _: None,
-            price_per_unit=Decimal(1),
-            provider=self.company_generator.create_company()
-            if provider is None
-            else provider,
-            active=True,
             description=description,
+            amount_available=amount,
         )
 
 
@@ -94,7 +102,7 @@ class CompanyGenerator:
             means_account=self.account_generator.create_account(
                 account_type=AccountTypes.p
             ),
-            resources_account=self.account_generator.create_account(
+            resource_account=self.account_generator.create_account(
                 account_type=AccountTypes.r
             ),
             labour_account=self.account_generator.create_account(
@@ -137,41 +145,45 @@ class EmailGenerator:
 @dataclass
 class PlanGenerator:
     company_generator: CompanyGenerator
-    datetime_service: DatetimeService
+    datetime_service: FakeDatetimeService
+    plan_repository: PlanRepository
+    seek_approval: SeekApproval
 
     def create_plan(
-        self, plan_creation_date=None, planner=None, timeframe=None, approved=False
+        self,
+        plan_creation_date=None,
+        planner=None,
+        timeframe=None,
+        approved=False,
+        amount: int = 100,
+        total_cost: Optional[Decimal] = None,
     ) -> Plan:
+        if total_cost is None:
+            total_cost = Decimal(3)
         costs = ProductionCosts(
-            means_cost=Decimal(10),
-            resource_cost=Decimal(20),
-            labour_cost=Decimal(30),
+            labour_cost=total_cost / Decimal(3),
+            resource_cost=total_cost / Decimal(3),
+            means_cost=total_cost / Decimal(3),
         )
-        return Plan(
-            id=uuid4(),
-            plan_creation_date=self.datetime_service.now()
-            if plan_creation_date is None
-            else plan_creation_date,
-            planner=self.company_generator.create_company()
-            if planner is None
-            else planner,
-            prd_name="Produkt A",
-            prd_unit="500 Gramm",
-            prd_amount=100,
-            production_costs=costs,
+        if plan_creation_date is None:
+            plan_creation_date = self.datetime_service.now()
+        if planner is None:
+            planner = self.company_generator.create_company()
+        if timeframe is None:
+            timeframe = 14
+        plan = self.plan_repository.create_plan(
+            planner=planner,
+            costs=costs,
+            product_name="Produkt A",
+            production_unit="500 Gramm",
+            amount=amount,
             description="Beschreibung für Produkt A.",
-            timeframe=int(14) if timeframe is None else int(timeframe),
-            approved=approved,
-            approval_date=None,
-            approval_reason=None,
-            approve=lambda _1, _2, _3: None,
-            expired=False,
-            renewed=False,
-            set_as_expired=lambda: None,
-            set_as_renewed=lambda: None,
-            expiration_relative=None,
-            expiration_date=None,
+            timeframe_in_days=timeframe,
+            creation_timestamp=plan_creation_date,
         )
+        if approved:
+            self.seek_approval(plan, None)
+        return plan
 
 
 @inject
@@ -180,13 +192,16 @@ class PurchaseGenerator:
     offer_generator: OfferGenerator
     member_generator: MemberGenerator
     company_generator: CompanyGenerator
+    datetime_service: FakeDatetimeService
 
     def create_purchase(
         self,
         buyer: Union[Member, Company],
-        purchase_date=TestDatetimeService().now_minus_one_day(),
+        purchase_date=None,
         amount=1,
     ) -> Purchase:
+        if purchase_date is None:
+            purchase_date = self.datetime_service.now_minus_one_day()
         return Purchase(
             purchase_date=purchase_date,
             product_offer=self.offer_generator.create_offer(),
@@ -202,6 +217,7 @@ class PurchaseGenerator:
 class TransactionGenerator:
     account_generator: AccountGenerator
     transaction_repository: TransactionRepository
+    datetime_service: FakeDatetimeService
 
     def create_transaction(
         self,
@@ -211,7 +227,7 @@ class TransactionGenerator:
         account_to=None,
     ) -> Transaction:
         return self.transaction_repository.create_transaction(
-            date=TestDatetimeService().now_minus_one_day(),
+            date=self.datetime_service.now_minus_one_day(),
             account_from=self.account_generator.create_account(
                 account_type=sending_account_type
             )

@@ -5,7 +5,8 @@ import pytest
 from arbeitszeit.entities import AccountTypes
 from project.database.repositories import AccountRepository, MemberRepository
 from project.error import MemberNotFound
-from tests.dependency_injection import injection_test
+
+from .dependency_injection import injection_test
 
 
 @injection_test

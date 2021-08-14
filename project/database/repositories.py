@@ -226,7 +226,7 @@ class AccountRepository(repositories.AccountRepository):
         self.db.session.add(account_orm)
         self.db.session.commit()
 
-    def create_account(self, account_type: entities.AccountTypes):
+    def create_account(self, account_type: entities.AccountTypes) -> entities.Account:
         account = Account(account_type=account_type.value)
         self.db.session.add(account)
         self.db.session.commit()
@@ -362,6 +362,8 @@ class PurchaseRepository(repositories.PurchaseRepository):
 @dataclass
 class ProductOfferRepository(repositories.OfferRepository):
     company_repository: CompanyRepository
+    plan_repository: PlanRepository
+    db: SQLAlchemy
 
     def object_to_orm(self, product_offer: entities.ProductOffer) -> Offer:
         return Offer.query.get(str(product_offer.id))
@@ -418,6 +420,28 @@ class ProductOfferRepository(repositories.OfferRepository):
             ).all()
         )
 
+    def create_offer(
+        self,
+        plan: entities.Plan,
+        creation_datetime: datetime,
+        name: str,
+        description: str,
+        amount_available: int,
+    ) -> entities.ProductOffer:
+        offer = Offer(
+            plan_id=self.plan_repository.object_to_orm(plan).id,
+            cr_date=creation_datetime,
+            name=name,
+            description=description,
+            amount_available=amount_available,
+        )
+        self.db.session.add(offer)
+        self.db.session.commit()
+        return self.object_from_orm(offer)
+
+    def __len__(self) -> int:
+        return len(Offer.query.all())
+
 
 @inject
 @dataclass
@@ -464,7 +488,7 @@ class PlanRepository(repositories.PlanRepository):
     def object_to_orm(self, plan: entities.Plan) -> Plan:
         return Plan.query.get(str(plan.id))
 
-    def get_by_id(self, id: UUID) -> entities.Plan:
+    def get_plan_by_id(self, id: UUID) -> entities.Plan:
         plan_orm = Plan.query.filter_by(id=str(id)).first()
         if plan_orm is None:
             raise PlanNotFound()

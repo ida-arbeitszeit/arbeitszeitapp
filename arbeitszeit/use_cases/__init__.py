@@ -20,6 +20,7 @@ from arbeitszeit.repositories import (
     TransactionRepository,
 )
 
+from .create_offer import CreateOffer, Offer
 from .create_production_plan import CreatePlan, PlanProposal
 from .get_transaction_infos import GetTransactionInfos
 from .grant_credit import GrantCredit
@@ -49,6 +50,8 @@ __all__ = [
     "add_worker_to_company",
     "deactivate_offer",
     "GetTransactionInfos",
+    "CreateOffer",
+    "Offer",
 ]
 
 
@@ -139,33 +142,38 @@ def add_worker_to_company(
     company_worker_repository.add_worker_to_company(company, worker)
 
 
-def calculate_plan_expiration_and_check_if_expired(plan: Plan) -> None:
-    """
-    Based on a plan's creation date and timeframe this function
-    calculates the plan's expiration date and days, hours, minutes
-    missing until expiration.
+@inject
+@dataclass
+class CalculatePlanExpirationAndCheckIfExpired:
+    datetime_service: DatetimeService
 
-    It stores these informations as attributes of the given Plan instance.
-    It sets the Plan to "expired", if that's the case.
+    def __call__(self, plan: Plan) -> None:
+        """
+        Based on a plan's creation date and timeframe this function
+        calculates the plan's expiration date and days, hours, minutes
+        missing until expiration.
 
-    This function ignores already expired plans for performance reasons.
-    """
-    if plan.expired:
-        # not necessary to check, because plan is already expired
-        pass
-    else:
-        expiration_date = plan.plan_creation_date + datetime.timedelta(
-            days=int(plan.timeframe)
-        )
-        expiration_relative = DatetimeService().now() - expiration_date
-        seconds_until_exp = abs(expiration_relative.total_seconds())
-        days = int(seconds_until_exp // 86400)
-        seconds_until_exp = seconds_until_exp - (days * 86400)
-        hours = int(seconds_until_exp // 3600)
-        seconds_until_exp = seconds_until_exp - (hours * 3600)
-        minutes = int(seconds_until_exp // 60)
+        It stores these informations as attributes of the given Plan instance.
+        It sets the Plan to "expired", if that's the case.
 
-        plan.expiration_relative = (days, hours, minutes)
-        plan.expiration_date = expiration_date
-        if expiration_relative.total_seconds() > 0:
-            plan.set_as_expired()
+        This function ignores already expired plans for performance reasons.
+        """
+        if plan.expired:
+            # not necessary to check, because plan is already expired
+            pass
+        else:
+            expiration_date = plan.plan_creation_date + datetime.timedelta(
+                days=int(plan.timeframe)
+            )
+            expiration_relative = self.datetime_service.now() - expiration_date
+            seconds_until_exp = abs(expiration_relative.total_seconds())
+            days = int(seconds_until_exp // 86400)
+            seconds_until_exp = seconds_until_exp - (days * 86400)
+            hours = int(seconds_until_exp // 3600)
+            seconds_until_exp = seconds_until_exp - (hours * 3600)
+            minutes = int(seconds_until_exp // 60)
+
+            plan.expiration_relative = (days, hours, minutes)
+            plan.expiration_date = expiration_date
+            if expiration_relative.total_seconds() > 0:
+                plan.set_as_expired()

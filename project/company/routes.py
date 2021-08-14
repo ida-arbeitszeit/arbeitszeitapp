@@ -6,8 +6,7 @@ from flask import Blueprint, flash, redirect, render_template, request, session,
 from flask_login import current_user, login_required
 
 from arbeitszeit import entities, errors, use_cases
-from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.use_cases import CreatePlan, PlanProposal
+from arbeitszeit.use_cases import CreateOffer, CreatePlan, Offer, PlanProposal
 from project import database
 from project.database import (
     AccountingRepository,
@@ -18,9 +17,8 @@ from project.database import (
     ProductOfferRepository,
     with_injection,
 )
-from project.extensions import db
 from project.forms import ProductSearchForm
-from project.models import Company, Offer, Plan
+from project.models import Company, Plan
 
 main_company = Blueprint(
     "main_company", __name__, template_folder="templates", static_folder="static"
@@ -183,7 +181,9 @@ def create_plan(
 
     original_plan_id: Optional[str] = request.args.get("original_plan_id")
     original_plan = (
-        plan_repository.get_by_id(UUID(original_plan_id)) if original_plan_id else None
+        plan_repository.get_plan_by_id(UUID(original_plan_id))
+        if original_plan_id
+        else None
     )
 
     if request.method == "POST":  # Button "Plan erstellen"
@@ -222,6 +222,7 @@ def create_plan(
 @with_injection
 def my_plans(
     plan_repository: PlanRepository,
+    calculate_expiration: use_cases.CalculatePlanExpirationAndCheckIfExpired,
 ):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
@@ -234,7 +235,7 @@ def my_plans(
     ]
 
     for plan in plans_approved:
-        use_cases.calculate_plan_expiration_and_check_if_expired(plan)
+        calculate_expiration(plan)
     database.commit_changes()
 
     plans_expired = [plan for plan in plans_approved if plan.expired]
@@ -249,7 +250,8 @@ def my_plans(
 
 @main_company.route("/company/create_offer/<uuid:plan_id>", methods=["GET", "POST"])
 @login_required
-def create_offer(plan_id):
+@with_injection
+def create_offer(plan_id: UUID, create_offer: CreateOffer):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
@@ -258,18 +260,14 @@ def create_offer(plan_id):
         description = request.form["description"]
         prd_amount = int(request.form["prd_amount"])
 
-        new_offer = Offer(
-            plan_id=str(plan_id),
-            cr_date=DatetimeService().now(),
+        offer = Offer(
             name=name,
             description=description,
+            plan_id=plan_id,
             amount_available=prd_amount,
-            active=True,
         )
-
-        db.session.add(new_offer)
-        db.session.commit()
-        return render_template("company/create_offer_in_app.html", offer=new_offer)
+        create_offer(offer)
+        return render_template("company/create_offer_in_app.html", offer=offer)
 
     plan = Plan.query.filter_by(id=str(plan_id)).first()
     return render_template("company/create_offer.html", plan=plan)
@@ -341,7 +339,7 @@ def transfer_to_company(
 
     if request.method == "POST":
         sender = company_repository.get_by_id(current_user.id)
-        plan = plan_repository.get_by_id(request.form["plan_id"])
+        plan = plan_repository.get_plan_by_id(request.form["plan_id"])
         receiver = company_repository.get_by_id(request.form["company_id"])
         pieces = int(request.form["amount"])
         purpose = (
