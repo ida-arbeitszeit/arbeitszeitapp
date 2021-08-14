@@ -85,7 +85,10 @@ def configure_injector(binder: Binder) -> None:
         interfaces.PurchaseRepository,  # type: ignore
         to=ClassProvider(PurchaseRepository),
     )
-
+    binder.bind(
+        interfaces.PlanRepository,  # type: ignore
+        to=ClassProvider(PlanRepository),
+    )
     binder.bind(
         interfaces.AccountOwnerRepository,  # type: ignore
         to=ClassProvider(AccountOwnerRepository),

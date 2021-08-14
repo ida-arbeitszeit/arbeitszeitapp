@@ -471,28 +471,33 @@ class PlanRepository(repositories.PlanRepository):
         else:
             return self.object_from_orm(plan_orm)
 
-    def add(self, plan: entities.Plan) -> None:
-        orm_plan = Plan(
-            id=str(plan.id),
-            plan_creation_date=plan.plan_creation_date,
-            planner=str(plan.planner.id),
-            costs_p=plan.production_costs.means_cost,
-            costs_r=plan.production_costs.resource_cost,
-            costs_a=plan.production_costs.labour_cost,
-            prd_name=plan.prd_name,
-            prd_unit=plan.prd_unit,
-            prd_amount=plan.prd_amount,
-            description=plan.description,
-            timeframe=plan.timeframe,
+    def create_plan(
+        self,
+        planner: entities.Company,
+        costs: entities.ProductionCosts,
+        product_name: str,
+        production_unit: str,
+        amount: int,
+        description: str,
+        timeframe_in_days: int,
+        creation_timestamp: datetime,
+    ) -> entities.Plan:
+        plan = Plan(
+            plan_creation_date=creation_timestamp,
+            planner=self.company_repository.object_to_orm(planner).id,
+            costs_p=costs.means_cost,
+            costs_r=costs.resource_cost,
+            costs_a=costs.labour_cost,
+            prd_name=product_name,
+            prd_unit=production_unit,
+            prd_amount=amount,
+            description=description,
+            timeframe=timeframe_in_days,
             social_accounting=self.accounting_repository.get_or_create_social_accounting_orm().id,
-            approved=plan.approved,
-            approval_date=plan.approval_date,
-            approval_reason=plan.approval_reason,
-            expired=plan.expired,
-            renewed=plan.renewed,
         )
-        self.db.session.add(orm_plan)
+        self.db.session.add(plan)
         self.db.session.commit()
+        return self.object_from_orm(plan)
 
 
 @inject

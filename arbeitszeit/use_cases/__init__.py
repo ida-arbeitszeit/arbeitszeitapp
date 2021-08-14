@@ -20,6 +20,7 @@ from arbeitszeit.repositories import (
     TransactionRepository,
 )
 
+from .create_production_plan import CreatePlan, PlanProposal
 from .get_transaction_infos import GetTransactionInfos
 from .grant_credit import GrantCredit
 from .pay_consumer_product import PayConsumerProduct
@@ -32,9 +33,11 @@ from .seek_approval import SeekApproval
 from .send_work_certificates_to_worker import SendWorkCertificatesToWorker
 
 __all__ = [
+    "CreatePlan",
     "GrantCredit",
     "PayConsumerProduct",
     "PayMeansOfProduction",
+    "PlanProposal",
     "ProductFilter",
     "PurchaseProduct",
     "QueryProducts",

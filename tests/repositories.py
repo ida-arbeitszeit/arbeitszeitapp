@@ -13,6 +13,8 @@ from arbeitszeit.entities import (
     AccountTypes,
     Company,
     Member,
+    Plan,
+    ProductionCosts,
     ProductOffer,
     Purchase,
     SocialAccounting,
@@ -233,3 +235,47 @@ class CompanyRepository(interfaces.CompanyRepository):
 
     def has_company_with_email(self, email: str) -> bool:
         return email in self.companies
+
+
+@singleton
+class PlanRepository(interfaces.PlanRepository):
+    def __init__(self) -> None:
+        self.plans: Dict[uuid.UUID, Plan] = {}
+
+    def create_plan(
+        self,
+        planner: Company,
+        costs: ProductionCosts,
+        product_name: str,
+        production_unit: str,
+        amount: int,
+        description: str,
+        timeframe_in_days: int,
+        creation_timestamp: datetime,
+    ) -> Plan:
+        plan = Plan(
+            id=uuid.uuid4(),
+            plan_creation_date=creation_timestamp,
+            planner=planner,
+            production_costs=costs,
+            prd_name=product_name,
+            prd_unit=production_unit,
+            prd_amount=amount,
+            description=description,
+            timeframe=timeframe_in_days,
+            approved=False,
+            approval_date=None,
+            approval_reason=None,
+            approve=lambda _1, _2, _3: None,
+            expired=False,
+            renewed=False,
+            set_as_expired=lambda: None,
+            set_as_renewed=lambda: None,
+            expiration_relative=None,
+            expiration_date=None,
+        )
+        self.plans[planner.id] = plan
+        return plan
+
+    def __len__(self) -> int:
+        return len(self.plans)
