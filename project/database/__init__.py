@@ -2,7 +2,15 @@ from __future__ import annotations
 
 from functools import wraps
 
-from injector import Binder, CallableProvider, ClassProvider, Injector, inject
+from flask_sqlalchemy import SQLAlchemy
+from injector import (
+    Binder,
+    CallableProvider,
+    ClassProvider,
+    Injector,
+    InstanceProvider,
+    inject,
+)
 
 from arbeitszeit import entities
 from arbeitszeit import repositories as interfaces
@@ -81,6 +89,10 @@ def configure_injector(binder: Binder) -> None:
     binder.bind(
         interfaces.AccountOwnerRepository,  # type: ignore
         to=ClassProvider(AccountOwnerRepository),
+    )
+    binder.bind(
+        SQLAlchemy,
+        to=InstanceProvider(db),
     )
 
 
