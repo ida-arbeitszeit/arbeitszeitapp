@@ -4,7 +4,7 @@ from arbeitszeit import errors
 from arbeitszeit.use_cases import PayConsumerProduct
 
 from .data_generators import CompanyGenerator, MemberGenerator, PlanGenerator
-from .datetime_service import TestDatetimeService
+from .datetime_service import FakeDatetimeService
 from .dependency_injection import injection_test
 from .repositories import TransactionRepository
 
@@ -31,7 +31,7 @@ def test_error_is_raised_if_plan_is_expired(
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
-    datetime_service: TestDatetimeService,
+    datetime_service: FakeDatetimeService,
 ):
     sender = member_generator.create_member()
     receiver = company_generator.create_company()

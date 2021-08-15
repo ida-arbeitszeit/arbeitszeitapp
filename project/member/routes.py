@@ -111,7 +111,7 @@ def pay_consumer_product(
 
     if request.method == "POST":
         sender = member_repository.get_member_by_id(current_user.id)
-        plan = plan_repository.get_by_id(request.form["plan_id"])
+        plan = plan_repository.get_plan_by_id(request.form["plan_id"])
         receiver = company_repository.get_by_id(request.form["company_id"])
         pieces = int(request.form["amount"])
         try:

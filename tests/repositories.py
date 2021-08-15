@@ -91,8 +91,9 @@ class TransactionRepository(interfaces.TransactionRepository):
 @singleton
 class OfferRepository(interfaces.OfferRepository):
     @inject
-    def __init__(self) -> None:
+    def __init__(self, plan_repository: PlanRepository) -> None:
         self.offers: List[ProductOffer] = []
+        self.plan_repository = plan_repository
 
     def all_active_offers(self) -> Iterator[ProductOffer]:
         yield from self.offers
@@ -107,8 +108,29 @@ class OfferRepository(interfaces.OfferRepository):
             if query in offer.description:
                 yield offer
 
-    def add_offer(self, offer: ProductOffer) -> None:
+    def create_offer(
+        self,
+        plan: Plan,
+        creation_datetime: datetime,
+        name: str,
+        description: str,
+        amount_available: int,
+    ) -> ProductOffer:
+        total_cost = plan.production_costs.total_cost()
+        planned_amount = plan.prd_amount
+        offer = ProductOffer(
+            id=uuid.uuid4(),
+            name=name,
+            amount_available=amount_available,
+            deactivate_offer_in_db=lambda: None,
+            decrease_amount_available=lambda _: None,
+            price_per_unit=total_cost / planned_amount,
+            provider=plan.planner,
+            active=True,
+            description=description,
+        )
         self.offers.append(offer)
+        return offer
 
 
 @singleton
@@ -218,14 +240,14 @@ class CompanyRepository(interfaces.CompanyRepository):
         password: str,
         means_account: Account,
         labour_account: Account,
-        resources_account: Account,
+        resource_account: Account,
         products_account: Account,
     ) -> Company:
         new_company = Company(
             id=uuid.uuid4(),
             name=name,
             means_account=means_account,
-            raw_material_account=resources_account,
+            raw_material_account=resource_account,
             work_account=labour_account,
             product_account=products_account,
             workers=[],
@@ -276,6 +298,9 @@ class PlanRepository(interfaces.PlanRepository):
         )
         self.plans[planner.id] = plan
         return plan
+
+    def get_plan_by_id(self, id: uuid.UUID) -> Plan:
+        return self.plans[id]
 
     def __len__(self) -> int:
         return len(self.plans)

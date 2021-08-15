@@ -1,8 +1,15 @@
+from decimal import Decimal
+
 import pytest
 
 from arbeitszeit.entities import AccountTypes, PurposesOfPurchases
 from arbeitszeit.use_cases import PurchaseProduct
-from tests.data_generators import CompanyGenerator, MemberGenerator, OfferGenerator
+from tests.data_generators import (
+    CompanyGenerator,
+    MemberGenerator,
+    OfferGenerator,
+    PlanGenerator,
+)
 from tests.dependency_injection import injection_test
 from tests.repositories import TransactionRepository
 
@@ -64,9 +71,11 @@ def test_balance_of_buyer_reduced(
     offer_generator: OfferGenerator,
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
 ):
     # member, consumption
-    offer1 = offer_generator.create_offer(amount=3)
+    plan = plan_generator.create_plan(total_cost=Decimal(3), amount=3)
+    offer1 = offer_generator.create_offer(amount=3, plan=plan)
     buyer1 = member_generator.create_member()
     purpose1 = PurposesOfPurchases.consumption
     purchase_product(offer1, 3, purpose1, buyer1)
@@ -92,8 +101,10 @@ def test_balance_of_seller_increased(
     purchase_product: PurchaseProduct,
     offer_generator: OfferGenerator,
     member_generator: MemberGenerator,
+    plan_generator: PlanGenerator,
 ):
-    offer = offer_generator.create_offer(amount=3)
+    plan = plan_generator.create_plan(total_cost=Decimal(3), amount=3)
+    offer = offer_generator.create_offer(amount=3, plan=plan)
     buyer = member_generator.create_member()
     purchase_product(
         offer,

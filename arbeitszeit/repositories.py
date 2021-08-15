@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from decimal import Decimal
 from typing import Iterator, List, Union
+from uuid import UUID
 
 from arbeitszeit.entities import (
     Account,
@@ -54,6 +55,10 @@ class PlanRepository(ABC):
     ) -> Plan:
         pass
 
+    @abstractmethod
+    def get_plan_by_id(self, id: UUID) -> Plan:
+        pass
+
 
 class TransactionRepository(ABC):
     @abstractmethod
@@ -103,6 +108,17 @@ class OfferRepository(ABC):
 
     @abstractmethod
     def all_active_offers(self) -> Iterator[ProductOffer]:
+        pass
+
+    @abstractmethod
+    def create_offer(
+        self,
+        plan: Plan,
+        creation_datetime: datetime,
+        name: str,
+        description: str,
+        amount_available: int,
+    ) -> ProductOffer:
         pass
 
 

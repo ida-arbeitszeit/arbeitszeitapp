@@ -1,14 +1,13 @@
-from flask_sqlalchemy import SQLAlchemy
 from injector import Injector, Module, inject, provider, singleton
 
 import arbeitszeit.repositories as interfaces
-import project.models
 from arbeitszeit import entities
-from project import create_app
+from arbeitszeit.datetime_service import DatetimeService
 from tests import data_generators, repositories
+from tests.datetime_service import FakeDatetimeService
 
 
-class RepositoryModule(Module):
+class InMemoryModule(Module):
     @provider
     def provide_offer_repository(
         self, repo: repositories.OfferRepository
@@ -72,21 +71,12 @@ class RepositoryModule(Module):
 
     @provider
     @singleton
-    def provide_sqlalchemy(self) -> SQLAlchemy:
-        db = SQLAlchemy(model_class=project.models.db.Model)
-        config = {
-            "SQLALCHEMY_DATABASE_URI": "sqlite://",
-            "SQLALCHEMY_TRACK_MODIFICATIONS": False,
-        }
-        app = create_app(config=config, db=db)
-        with app.app_context():
-            db.create_all()
-        app.app_context().push()
-        return db
+    def provide_datetime_service(self, service: FakeDatetimeService) -> DatetimeService:
+        return service
 
 
 def injection_test(original_test):
-    injector = Injector(RepositoryModule())
+    injector = Injector(InMemoryModule())
 
     def wrapper(*args, **kwargs):
         return injector.call_with_injection(

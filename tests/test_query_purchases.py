@@ -1,6 +1,6 @@
 from arbeitszeit.use_cases import QueryPurchases
 from tests.data_generators import CompanyGenerator, MemberGenerator, PurchaseGenerator
-from tests.datetime_service import TestDatetimeService
+from tests.datetime_service import FakeDatetimeService
 from tests.dependency_injection import injection_test
 from tests.repositories import PurchaseRepository
 
@@ -49,13 +49,14 @@ def test_that_purchases_are_returned_in_correct_order_when_member_queries(
     member_generator: MemberGenerator,
     purchase_generator: PurchaseGenerator,
     repository: PurchaseRepository,
+    datetime_service: FakeDatetimeService,
 ):
     member = member_generator.create_member()
     expected_recent_purchase = purchase_generator.create_purchase(
-        buyer=member, purchase_date=TestDatetimeService().now_minus_one_day()
+        buyer=member, purchase_date=datetime_service.now_minus_one_day()
     )
     expected_older_purchase = purchase_generator.create_purchase(
-        buyer=member, purchase_date=TestDatetimeService().now_minus_two_days()
+        buyer=member, purchase_date=datetime_service.now_minus_two_days()
     )
     repository.add(expected_older_purchase)  # adding older purchase first
     repository.add(expected_recent_purchase)
@@ -69,13 +70,14 @@ def test_that_purchases_are_returned_in_correct_order_when_company_queries(
     purchase_generator: PurchaseGenerator,
     company_generator: CompanyGenerator,
     repository: PurchaseRepository,
+    datetime_service: FakeDatetimeService,
 ):
     company = company_generator.create_company()
     expected_recent_purchase = purchase_generator.create_purchase(
-        buyer=company, purchase_date=TestDatetimeService().now_minus_one_day()
+        buyer=company, purchase_date=datetime_service.now_minus_one_day()
     )
     expected_older_purchase = purchase_generator.create_purchase(
-        buyer=company, purchase_date=TestDatetimeService().now_minus_two_days()
+        buyer=company, purchase_date=datetime_service.now_minus_two_days()
     )
     repository.add(expected_older_purchase)  # adding older purchase first
     repository.add(expected_recent_purchase)
