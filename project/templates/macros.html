@@ -129,23 +129,23 @@
       </tr>
     </thead>
     <tbody>
-      {% for res in results %}
+      {% for offer in results %}
       <tr>
-        <td>{{ res.plan.id }}</td>
-        <td>{{ res.name }}</td>
-        <td>{{ res.plan.planner }}</td>
+        <td>{{ offer.plan.id }}</td>
+        <td>{{ offer.name }}</td>
+        <td>{{ offer.plan.planner.name }}</td>
         <td>
-          <a href="mailto:{{ res.plan.company.email }}">
+          <a href="mailto:{{ offer.plan.planner.email }}">
             <u><span class="icon"><i class="far fa-envelope"></i></span></u>
           </a>
         </td>
-        <td>{{ res.description }}</td>
-        <td>{{ ((res.plan.costs_p + res.plan.costs_r + res.plan.costs_a)/res.plan.prd_amount)|round(2) }} Std.
+        <td>{{ offer.description }}</td>
+        <td>{{ offer.price_per_unit()|round(2) }} Std.
         </td>
-        <td>{{ res.plan.is_public_service }}</td>
-        <td>{{ res.amount_available }}</td>
+        <td>{{ offer.plan.is_public_service }}</td>
+        <td>{{ offer.amount_available }}</td>
         <td>
-          <a href="{{ url_for('%s.buy' % (request.blueprint), id=res.id) }}">
+          <a href="{{ url_for('%s.buy' % (request.blueprint), id=offer.id) }}">
             <u><u><span class="icon"><i class="fas fa-shopping-cart"></i></span></u></u>
           </a>
         </td>

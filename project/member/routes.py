@@ -57,10 +57,8 @@ def suchen(
             product_filter = use_cases.ProductFilter.by_name
         elif search_field == "Beschreibung":
             product_filter = use_cases.ProductFilter.by_description
-    results = [
-        offer_repository.object_to_orm(offer)
-        for offer in query_products(query, product_filter)
-    ]
+    results = list(query_products(query, product_filter))
+
     if not results:
         flash("Keine Ergebnisse!")
     return render_template("member/search.html", form=search_form, results=results)

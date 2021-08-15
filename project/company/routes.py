@@ -88,9 +88,7 @@ def arbeit(
 @main_company.route("/company/suchen", methods=["GET", "POST"])
 @login_required
 @with_injection
-def suchen(
-    query_products: use_cases.QueryProducts, offer_repository: ProductOfferRepository
-):
+def suchen(query_products: use_cases.QueryProducts):
     """search products in catalog."""
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
@@ -106,10 +104,8 @@ def suchen(
             product_filter = use_cases.ProductFilter.by_name
         elif search_field == "Beschreibung":
             product_filter = use_cases.ProductFilter.by_description
-    results = [
-        offer_repository.object_to_orm(offer)
-        for offer in query_products(query, product_filter)
-    ]
+    results = list(query_products(query, product_filter))
+
     if not results:
         flash("Keine Ergebnisse!")
     return render_template("company/search.html", form=search_form, results=results)
@@ -372,7 +368,8 @@ def transfer_to_company(
 
 @main_company.route("/company/my_offers")
 @login_required
-def my_offers():
+@with_injection
+def my_offers(offer_repository: ProductOfferRepository):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
@@ -380,9 +377,10 @@ def my_offers():
     my_plans = my_company.plans.all()
     my_offers = []
     for plan in my_plans:
-        for offer in plan.offers.all():
-            if offer.active == True:
-                my_offers.append(offer)
+        active_offers = plan.offers.filter_by(active=True).all()
+        for offer in active_offers:
+            my_offers.append(offer)
+    my_offers = [offer_repository.object_from_orm(offer) for offer in my_offers]
 
     return render_template("company/my_offers.html", offers=my_offers)
 

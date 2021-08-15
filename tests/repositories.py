@@ -116,18 +116,15 @@ class OfferRepository(interfaces.OfferRepository):
         description: str,
         amount_available: int,
     ) -> ProductOffer:
-        total_cost = plan.production_costs.total_cost()
-        planned_amount = plan.prd_amount
         offer = ProductOffer(
             id=uuid.uuid4(),
             name=name,
             amount_available=amount_available,
             deactivate_offer_in_db=lambda: None,
             decrease_amount_available=lambda _: None,
-            price_per_unit=total_cost / planned_amount,
-            provider=plan.planner,
             active=True,
             description=description,
+            plan=plan,
         )
         self.offers.append(offer)
         return offer
@@ -245,6 +242,7 @@ class CompanyRepository(interfaces.CompanyRepository):
     ) -> Company:
         new_company = Company(
             id=uuid.uuid4(),
+            email=email,
             name=name,
             means_account=means_account,
             raw_material_account=resource_account,

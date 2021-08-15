@@ -157,6 +157,7 @@ class PlanGenerator:
         approved=False,
         amount: int = 100,
         total_cost: Optional[Decimal] = None,
+        is_public_service=False,
     ) -> Plan:
         if total_cost is None:
             total_cost = Decimal(3)
@@ -179,7 +180,7 @@ class PlanGenerator:
             amount=amount,
             description="Beschreibung für Produkt A.",
             timeframe_in_days=timeframe,
-            is_public_service=False,
+            is_public_service=is_public_service,
             creation_timestamp=plan_creation_date,
         )
         if approved:

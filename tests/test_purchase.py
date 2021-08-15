@@ -79,21 +79,24 @@ def test_balance_of_buyer_reduced(
     buyer1 = member_generator.create_member()
     purpose1 = PurposesOfPurchases.consumption
     purchase_product(offer1, 3, purpose1, buyer1)
-    assert buyer1.account.balance == -3
+    expected_reduction = -3 * offer1.price_per_unit()
+    assert buyer1.account.balance == expected_reduction
 
     # company, means of production
     offer2 = offer_generator.create_offer(amount=3)
     buyer2 = company_generator.create_company()
     purpose2 = PurposesOfPurchases.means_of_prod
     purchase_product(offer2, 3, purpose2, buyer2)
-    assert buyer2.means_account.balance == -3
+    expected_reduction = -3 * offer2.price_per_unit()
+    assert buyer2.means_account.balance == expected_reduction
 
     # company, raw materials
     offer3 = offer_generator.create_offer(amount=3)
     buyer3 = company_generator.create_company()
     purpose3 = PurposesOfPurchases.raw_materials
     purchase_product(offer3, 3, purpose3, buyer3)
-    assert buyer3.raw_material_account.balance == -3
+    expected_reduction = -3 * offer3.price_per_unit()
+    assert buyer3.raw_material_account.balance == expected_reduction
 
 
 @injection_test
@@ -112,7 +115,8 @@ def test_balance_of_seller_increased(
         PurposesOfPurchases.consumption,
         buyer,
     )
-    assert offer.provider.product_account.balance == 3
+    expected_increase = offer.price_per_unit() * 3
+    assert offer.plan.planner.product_account.balance == expected_increase
 
 
 @injection_test

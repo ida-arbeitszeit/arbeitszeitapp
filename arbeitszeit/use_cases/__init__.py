@@ -76,7 +76,7 @@ class PurchaseProduct:
         ), "Amount ordered exceeds available products!"
 
         # create purchase
-        price = product_offer.price_per_unit
+        price = product_offer.price_per_unit()
         purchase = self.purchase_factory.create_private_purchase(
             purchase_date=self.datetime_service.now(),
             product_offer=product_offer,
@@ -104,7 +104,7 @@ class PurchaseProduct:
             else:
                 account_from = buyer.raw_material_account
 
-        send_to = product_offer.provider.product_account
+        send_to = product_offer.plan.planner.product_account
 
         transaction = self.transaction_repository.create_transaction(
             date=self.datetime_service.now(),

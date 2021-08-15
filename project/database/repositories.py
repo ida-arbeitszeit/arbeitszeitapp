@@ -116,6 +116,7 @@ class CompanyRepository(repositories.CompanyRepository):
     def object_from_orm(self, company_orm: Company) -> entities.Company:
         return entities.Company(
             id=UUID(company_orm.id),
+            email=company_orm.email,
             name=company_orm.name,
             means_account=self.account_repository.object_from_orm(
                 self._get_means_account(company_orm)
@@ -369,10 +370,7 @@ class ProductOfferRepository(repositories.OfferRepository):
         return Offer.query.get(str(product_offer.id))
 
     def object_from_orm(self, offer_orm: Offer) -> entities.ProductOffer:
-        plan = offer_orm.plan
-        price_per_unit = Decimal(
-            (plan.costs_p + plan.costs_r + plan.costs_a) / plan.prd_amount
-        )
+        plan = self.plan_repository.object_from_orm(offer_orm.plan)
         return entities.ProductOffer(
             id=UUID(offer_orm.id),
             name=offer_orm.name,
@@ -383,10 +381,9 @@ class ProductOfferRepository(repositories.OfferRepository):
                 "amount_available",
                 getattr(offer_orm, "amount_available") - amount,
             ),
-            price_per_unit=price_per_unit,
-            provider=self.company_repository.object_from_orm(plan.company),
             active=offer_orm.active,
             description=offer_orm.description,
+            plan=plan,
         )
 
     def get_by_id(self, id: UUID) -> entities.ProductOffer:
