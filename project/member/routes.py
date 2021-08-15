@@ -123,10 +123,6 @@ def pay_consumer_product(
             flash("Produkt erfolgreich bezahlt.")
         except errors.CompanyIsNotPlanner:
             flash("Der angegebene Plan gehört nicht zum angegebenen Betrieb.")
-        except errors.CompanyDoesNotExist:
-            flash("Der Betrieb existiert nicht.")
-        except errors.PlanDoesNotExist:
-            flash("Der Plan existiert nicht.")
         except errors.PlanIsExpired:
             flash(
                 "Der angegebene Plan ist nicht mehr aktuell. Bitte wende dich an den Verkäufer, um eine aktuelle Plan-ID zu erhalten."

@@ -6,8 +6,9 @@ from flask import Blueprint, flash, redirect, render_template, request, session,
 from flask_login import current_user, login_required
 
 from arbeitszeit import entities, errors, use_cases
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.use_cases import CreateOffer, CreatePlan, Offer, PlanProposal
-from project import database
+from project import database, error
 from project.database import (
     AccountingRepository,
     CompanyRepository,
@@ -69,13 +70,8 @@ def arbeit(
                 company,
                 member,
             )
-        except errors.CompanyDoesNotExist:
-            flash("Angemeldeter Betrieb konnte nicht ermittelt werden.")
-            return redirect(url_for("auth.start"))
         except errors.WorkerAlreadyAtCompany:
             flash("Mitglied ist bereits in diesem Betrieb beschäftigt.")
-        except errors.WorkerDoesNotExist:
-            flash("Mitglied existiert nicht.")
         database.commit_changes()
         return redirect(url_for("main_company.arbeit"))
     elif request.method == "GET":
@@ -133,16 +129,21 @@ def buy(
             else entities.PurposesOfPurchases.raw_materials
         )
         amount = int(request.form["amount"])
-        purchase_product(
-            product_offer,
-            amount,
-            purpose,
-            buyer,
-        )
-        database.commit_changes()
-
-        flash(f"Kauf von '{amount}'x '{product_offer.name}' erfolgreich!")
-        return redirect("/company/suchen")
+        try:
+            purchase_product(
+                product_offer,
+                amount,
+                purpose,
+                buyer,
+            )
+            database.commit_changes()
+            flash(f"Kauf von '{amount}'x '{product_offer.name}' erfolgreich!")
+            return redirect("/company/suchen")
+        except (errors.CompanyCantBuyPublicServices):
+            flash(
+                "Kauf nicht erfolgreich. Betriebe können keine öffentlichen Dienstleistungen oder Produkte erwerben."
+            )
+            return redirect("/company/suchen")
 
     return render_template("company/buy.html", offer=product_offer)
 
@@ -306,7 +307,11 @@ def transfer_to_worker(
 
     if request.method == "POST":
         company = company_repository.get_by_id(current_user.id)
-        worker = member_repository.get_member_by_id(request.form["member_id"])
+        try:
+            worker = member_repository.get_member_by_id(request.form["member_id"])
+        except error.MemberNotFound:
+            flash("Mitglied existiert nicht.")
+            redirect(url_for("main_company.transfer_to_work"))
         amount = Decimal(request.form["amount"])
 
         try:
@@ -319,8 +324,6 @@ def transfer_to_worker(
             flash("Erfolgreich überwiesen.")
         except errors.WorkerNotAtCompany:
             flash("Mitglied ist nicht in diesem Betrieb beschäftigt.")
-        except errors.WorkerDoesNotExist:
-            flash("Mitglied existiert nicht.")
 
     return render_template("company/transfer_to_worker.html")
 
@@ -338,8 +341,16 @@ def transfer_to_company(
 
     if request.method == "POST":
         sender = company_repository.get_by_id(current_user.id)
-        plan = plan_repository.get_plan_by_id(request.form["plan_id"])
-        receiver = company_repository.get_by_id(request.form["company_id"])
+        try:
+            plan = plan_repository.get_plan_by_id(request.form["plan_id"])
+        except error.PlanNotFound:
+            flash("Plan existiert nicht.")
+            return redirect(url_for("main_company.transfer_to_company"))
+        try:
+            receiver = company_repository.get_by_id(request.form["company_id"])
+        except error.CompanyNotFound:
+            flash("Betrieb existiert nicht.")
+            return redirect(url_for("main_company.transfer_to_company"))
         pieces = int(request.form["amount"])
         purpose = (
             entities.PurposesOfPurchases.means_of_prod
@@ -358,10 +369,10 @@ def transfer_to_company(
             flash("Erfolgreich bezahlt.")
         except errors.CompanyIsNotPlanner:
             flash("Der angegebene Plan gehört nicht zum angegebenen Betrieb.")
-        except errors.CompanyDoesNotExist:
-            flash("Der Betrieb existiert nicht.")
-        except errors.PlanDoesNotExist:
-            flash("Der Plan existiert nicht.")
+        except errors.CompanyCantBuyPublicServices:
+            flash(
+                "Bezahlung nicht erfolgreich. Betriebe können keine öffentlichen Dienstleistungen oder Produkte erwerben."
+            )
 
     return render_template("company/transfer_to_company.html")
 

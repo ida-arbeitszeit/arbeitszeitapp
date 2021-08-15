@@ -37,6 +37,9 @@ class PayMeansOfProduction:
             PurposesOfPurchases.raw_materials,
         ), "Not a valid purpose for this operation."
 
+        if plan.is_public_service:
+            raise errors.CompanyCantBuyPublicServices(sender, plan)
+
         if plan.planner != receiver:
             raise errors.CompanyIsNotPlanner(
                 company=receiver,
