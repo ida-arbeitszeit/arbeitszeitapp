@@ -186,6 +186,9 @@ class Plan:
         self.renewed = True
         self._set_as_renewed()
 
+    def cost_per_unit(self) -> Decimal:
+        return self.production_costs.total_cost() / self.prd_amount
+
 
 class ProductOffer:
     def __init__(
