@@ -471,6 +471,7 @@ class PlanRepository(repositories.PlanRepository):
             prd_amount=plan.prd_amount,
             description=plan.description,
             timeframe=plan.timeframe,
+            is_public_service=plan.is_public_service,
             approved=plan.approved,
             approval_date=plan.approval_date,
             approval_reason=plan.approval_reason,
@@ -504,6 +505,7 @@ class PlanRepository(repositories.PlanRepository):
         amount: int,
         description: str,
         timeframe_in_days: int,
+        is_public_service: bool,
         creation_timestamp: datetime,
     ) -> entities.Plan:
         plan = Plan(
@@ -517,8 +519,10 @@ class PlanRepository(repositories.PlanRepository):
             prd_amount=amount,
             description=description,
             timeframe=timeframe_in_days,
+            is_public_service=is_public_service,
             social_accounting=self.accounting_repository.get_or_create_social_accounting_orm().id,
         )
+
         self.db.session.add(plan)
         self.db.session.commit()
         return self.object_from_orm(plan)

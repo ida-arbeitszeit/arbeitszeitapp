@@ -51,6 +51,7 @@ class PlanRepository(ABC):
         amount: int,
         description: str,
         timeframe_in_days: int,
+        is_public_service: bool,
         creation_timestamp: datetime,
     ) -> Plan:
         pass

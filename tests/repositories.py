@@ -273,6 +273,7 @@ class PlanRepository(interfaces.PlanRepository):
         amount: int,
         description: str,
         timeframe_in_days: int,
+        is_public_service: bool,
         creation_timestamp: datetime,
     ) -> Plan:
         plan = Plan(
@@ -285,6 +286,7 @@ class PlanRepository(interfaces.PlanRepository):
             prd_amount=amount,
             description=description,
             timeframe=timeframe_in_days,
+            is_public_service=is_public_service,
             approved=False,
             approval_date=None,
             approval_reason=None,

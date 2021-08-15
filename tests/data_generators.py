@@ -179,6 +179,7 @@ class PlanGenerator:
             amount=amount,
             description="Beschreibung für Produkt A.",
             timeframe_in_days=timeframe,
+            is_public_service=False,
             creation_timestamp=plan_creation_date,
         )
         if approved:

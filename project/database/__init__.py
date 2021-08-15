@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import datetime
+from datetime import datetime
 from functools import wraps
 
 from flask_sqlalchemy import SQLAlchemy

@@ -199,6 +199,9 @@ def create_plan(
             production_amount=int(plan_data["prd_amount"]),
             description=plan_data["description"],
             timeframe_in_days=plan_data["timeframe"],
+            is_public_service=True
+            if plan_data["productive_or_public"] == "public"
+            else False,
         )
         planner = company_repository.get_by_id(current_user.id)
         new_plan = create_plan_from_proposal(planner, proposal)

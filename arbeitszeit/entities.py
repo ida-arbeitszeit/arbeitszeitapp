@@ -133,6 +133,7 @@ class Plan:
         prd_amount: int,
         description: str,
         timeframe: int,
+        is_public_service: bool,
         approved: bool,
         approval_date: Optional[datetime],
         approval_reason: Optional[str],
@@ -153,6 +154,7 @@ class Plan:
         self.prd_amount = prd_amount
         self.description = description
         self.timeframe = timeframe
+        self.is_public_service = is_public_service
         self.approved = approved
         self.approval_date = approval_date
         self.approval_reason = approval_reason
