@@ -6,7 +6,6 @@ from flask import Blueprint, flash, redirect, render_template, request, session,
 from flask_login import current_user, login_required
 
 from arbeitszeit import entities, errors, use_cases
-from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.use_cases import CreateOffer, CreatePlan, Offer, PlanProposal
 from project import database, error
 from project.database import (

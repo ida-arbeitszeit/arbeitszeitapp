@@ -524,6 +524,22 @@ class PlanRepository(repositories.PlanRepository):
         self.db.session.commit()
         return self.object_from_orm(plan)
 
+    def all_productive_plans_approved_and_not_expired(self) -> Iterator[entities.Plan]:
+        return (
+            self.object_from_orm(plan_orm)
+            for plan_orm in Plan.query.filter_by(
+                approved=True, expired=False, is_public_service=False
+            ).all()
+        )
+
+    def all_public_plans_approved_and_not_expired(self) -> Iterator[entities.Plan]:
+        return (
+            self.object_from_orm(plan_orm)
+            for plan_orm in Plan.query.filter_by(
+                approved=True, expired=False, is_public_service=True
+            ).all()
+        )
+
 
 @inject
 @dataclass

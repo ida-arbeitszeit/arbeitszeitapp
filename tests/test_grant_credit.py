@@ -20,8 +20,7 @@ def test_that_assertion_error_is_raised_if_plan_has_not_been_approved(
 
 @injection_test
 def test_account_balances_adjusted_if_productive_plan(
-    grant_credit: GrantCredit,
-    plan_generator: PlanGenerator,
+    grant_credit: GrantCredit, plan_generator: PlanGenerator
 ):
     plan = plan_generator.create_plan(approved=True, is_public_service=False)
     # grant_credit(plan)
@@ -35,8 +34,7 @@ def test_account_balances_adjusted_if_productive_plan(
 
 @injection_test
 def test_account_balances_adjusted_if_public_service_plan(
-    grant_credit: GrantCredit,
-    plan_generator: PlanGenerator,
+    grant_credit: GrantCredit, plan_generator: PlanGenerator
 ):
     plan = plan_generator.create_plan(approved=True, is_public_service=True)
     # grant_credit(plan)
@@ -44,7 +42,10 @@ def test_account_balances_adjusted_if_public_service_plan(
     assert (
         plan.planner.raw_material_account.balance == plan.production_costs.resource_cost
     )
-    assert plan.planner.work_account.balance == plan.production_costs.labour_cost
+    assert (
+        plan.planner.work_account.balance
+        == plan.production_costs.labour_cost * grant_credit._calculate_payout_factor()
+    )
     assert plan.planner.product_account.balance == -(plan.expected_sales_value())
 
 
@@ -121,7 +122,7 @@ def test_that_added_transactions_have_correct_amounts_if_public_service_plan(
     expected_amount_p, expected_amount_r, expected_amount_a, expected_amount_prd = (
         plan.production_costs.means_cost,
         plan.production_costs.resource_cost,
-        plan.production_costs.labour_cost,
+        plan.production_costs.labour_cost * grant_credit._calculate_payout_factor(),
         -plan.expected_sales_value(),
     )
     grant_credit(plan)

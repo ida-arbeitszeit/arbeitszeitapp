@@ -60,6 +60,14 @@ class PlanRepository(ABC):
     def get_plan_by_id(self, id: UUID) -> Plan:
         pass
 
+    @abstractmethod
+    def all_productive_plans_approved_and_not_expired(self) -> Iterator[Plan]:
+        pass
+
+    @abstractmethod
+    def all_public_plans_approved_and_not_expired(self) -> Iterator[Plan]:
+        pass
+
 
 class TransactionRepository(ABC):
     @abstractmethod

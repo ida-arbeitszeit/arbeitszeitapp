@@ -304,3 +304,13 @@ class PlanRepository(interfaces.PlanRepository):
 
     def __len__(self) -> int:
         return len(self.plans)
+
+    def all_productive_plans_approved_and_not_expired(self) -> Iterator[Plan]:
+        for plan in self.plans.values():
+            if not plan.is_public_service and plan.approved and not plan.expired:
+                yield plan
+
+    def all_public_plans_approved_and_not_expired(self) -> Iterator[Plan]:
+        for plan in self.plans.values():
+            if plan.is_public_service and plan.approved and not plan.expired:
+                yield plan
