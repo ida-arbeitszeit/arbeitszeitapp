@@ -10,6 +10,7 @@ from arbeitszeit.use_cases import CreateOffer, CreatePlan, Offer, PlanProposal
 from project import database
 from project.database import (
     AccountingRepository,
+    AccountRepository,
     CompanyRepository,
     CompanyWorkerRepository,
     MemberRepository,
@@ -279,13 +280,17 @@ def create_offer(plan_id: UUID, create_offer: CreateOffer):
 def my_accounts(
     company_repository: CompanyRepository,
     get_transaction_infos: use_cases.GetTransactionInfos,
+    account_repository: AccountRepository,
 ):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
     company = company_repository.object_from_orm(current_user)
     all_trans_infos = get_transaction_infos(company)
-    my_balances = [account.balance for account in company.accounts()]
+    my_balances = [
+        account_repository.get_account_balance(account)
+        for account in company.accounts()
+    ]
 
     return render_template(
         "company/my_accounts.html",

@@ -89,11 +89,11 @@ class TransactionRepository(ABC):
 
 class AccountRepository(ABC):
     @abstractmethod
-    def add(self, account: Account) -> None:
+    def create_account(self, account_type: AccountTypes) -> Account:
         pass
 
     @abstractmethod
-    def create_account(self, account_type: AccountTypes) -> Account:
+    def get_account_balance(self, account: Account) -> Decimal:
         pass
 
 

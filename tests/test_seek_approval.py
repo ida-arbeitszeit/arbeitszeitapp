@@ -5,7 +5,7 @@ from arbeitszeit.use_cases import SeekApproval
 from tests.data_generators import PlanGenerator
 from tests.datetime_service import FakeDatetimeService
 from tests.dependency_injection import injection_test
-from tests.repositories import TransactionRepository
+from tests.repositories import AccountRepository, TransactionRepository
 
 
 @injection_test
@@ -60,15 +60,25 @@ def test_that_approval_date_has_correct_day_of_month(
 def test_account_balances_adjusted(
     seek_approval: SeekApproval,
     plan_generator: PlanGenerator,
+    account_repository: AccountRepository,
 ):
     plan = plan_generator.create_plan()
     seek_approval(plan, None)
-    assert plan.planner.means_account.balance == plan.production_costs.means_cost
     assert (
-        plan.planner.raw_material_account.balance == plan.production_costs.resource_cost
+        account_repository.get_account_balance(plan.planner.means_account)
+        == plan.production_costs.means_cost
     )
-    assert plan.planner.work_account.balance == plan.production_costs.labour_cost
-    assert plan.planner.product_account.balance == -(plan.production_costs.total_cost())
+    assert (
+        account_repository.get_account_balance(plan.planner.raw_material_account)
+        == plan.production_costs.resource_cost
+    )
+    assert (
+        account_repository.get_account_balance(plan.planner.work_account)
+        == plan.production_costs.labour_cost
+    )
+    assert account_repository.get_account_balance(plan.planner.product_account) == -(
+        plan.production_costs.total_cost()
+    )
 
 
 @injection_test

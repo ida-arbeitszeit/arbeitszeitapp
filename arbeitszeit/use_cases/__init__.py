@@ -105,20 +105,14 @@ class PurchaseProduct:
                 account_from = buyer.raw_material_account
 
         send_to = product_offer.provider.product_account
-
-        transaction = self.transaction_repository.create_transaction(
+        self.transaction_repository.create_transaction(
             date=self.datetime_service.now(),
             account_from=account_from,
             account_to=send_to,
             amount=price_total,
             purpose=f"Angebot-Id: {product_offer.id}",
         )
-
-        # add purchase to database
         self.purchase_repository.add(purchase)
-
-        # adjust balances of buyer and seller
-        transaction.adjust_balances()
 
 
 def deactivate_offer(product_offer: ProductOffer) -> ProductOffer:

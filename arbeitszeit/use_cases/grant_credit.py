@@ -27,11 +27,10 @@ class GrantCredit:
         ]
 
         for account, amount in accounts_and_amounts:
-            transaction = self.transaction_repository.create_transaction(
+            self.transaction_repository.create_transaction(
                 date=self.datetime_service.now(),
                 account_from=social_accounting_account,
                 account_to=account,
                 amount=amount,
                 purpose=f"Plan-Id: {plan.id}",
             )
-            transaction.adjust_balances()

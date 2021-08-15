@@ -6,7 +6,11 @@ from arbeitszeit.errors import WorkerNotAtCompany
 from arbeitszeit.use_cases import SendWorkCertificatesToWorker
 from tests.data_generators import CompanyGenerator, MemberGenerator
 from tests.dependency_injection import injection_test
-from tests.repositories import CompanyWorkerRepository, TransactionRepository
+from tests.repositories import (
+    AccountRepository,
+    CompanyWorkerRepository,
+    TransactionRepository,
+)
 
 
 @injection_test
@@ -15,6 +19,7 @@ def test_that_after_transfer_balances_of_worker_and_company_are_correct(
     company_worker_repository: CompanyWorkerRepository,
     company_generator: CompanyGenerator,
     member_generator: MemberGenerator,
+    account_repository: AccountRepository,
 ):
     company = company_generator.create_company()
     worker = member_generator.create_member()
@@ -25,8 +30,11 @@ def test_that_after_transfer_balances_of_worker_and_company_are_correct(
         worker,
         amount_to_transfer,
     )
-    assert company.work_account.balance == -amount_to_transfer
-    assert worker.account.balance == amount_to_transfer
+    assert (
+        account_repository.get_account_balance(company.work_account)
+        == -amount_to_transfer
+    )
+    assert account_repository.get_account_balance(worker.account) == amount_to_transfer
 
 
 @injection_test
