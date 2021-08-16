@@ -33,7 +33,7 @@
                 <th><abbr title="Einheiten">Einh.</abbr></th>
                 <th>Stückpr.</th>
                 <th>Public Service</th>
-                <th>Plan vom</th>
+                <th>Plan aktiv seit</th>
                 <th>Plan-Ende</th>
                 <th>Endet in</th>
                 <th><abbr title="Produkt im Marketplace anbieten.">Anb.</abbr></th>
@@ -51,10 +51,9 @@
                 <td>{{ plan.prd_amount }}</td>
                 <td>{{ plan.price_per_unit() }} Std.</td>
                 <td>{{ plan.is_public_service }}</td>
-                <td>{{ plan.plan_creation_date.strftime("%d.%m.%y") }}</td>
+                <td>{{ plan.activation_date.strftime("%d.%m.%y") }}</td>
                 <td>{{ plan.expiration_date.strftime("%d.%m.%y") }}</td>
-                <td>{{ plan.expiration_relative[0] }}d {{ plan.expiration_relative[1] }}h {{
-                    plan.expiration_relative[2] }}min</td>
+                <td>{{ plan.expiration_relative }}d</td>
                 <td><a href="{{ url_for('main_company.create_offer', plan_id=plan.id) }}"><i
                             class="fas fa-store"></i></a></td>
             </tr>
@@ -63,6 +62,50 @@
     </table>
     {% else %}
     <p>(Du hast keine Pläne.)</p>
+    {% endif %}
+</div>
+
+
+
+
+<h1 class="title">
+    Pläne, die auf Aktivierung warten
+</h1>
+
+<div class="table-container">
+    {% if plans_waiting_for_activation is defined and plans_waiting_for_activation|length %}
+    <table class="table is-fullwidth">
+        <thead>
+            <tr>
+                <th>Plan-ID</th>
+                <th>Produkt</th>
+                <th>Beschreibung</th>
+                <th><abbr title="Kosten Produktionsmittel">p</abbr></th>
+                <th><abbr title="Kosten Rohstoffe">r</abbr></th>
+                <th><abbr title="Kosten Arbeit">a</abbr></th>
+                <th>Einheiten</th>
+                <th>Stückpreis</th>
+                <th>Plan vom</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for plan in plans_waiting_for_activation %}
+            <tr>
+                <td>{{ plan.id }}</td>
+                <td>{{ plan.prd_name }}</td>
+                <td>{{ plan.description }}</td>
+                <td>{{ plan.production_costs.means_cost }}</td>
+                <td>{{ plan.production_costs.resource_cost }}</td>
+                <td>{{ plan.production_costs.labour_cost }}</td>
+                <td>{{ plan.prd_amount }}</td>
+                <td>{{ plan.price_per_unit() }} Std.</td>
+                <td>{{ plan.plan_creation_date.strftime("%d.%m.%y") }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>(Du hast keine Pläne, die auf Aktivierung warten.)</p>
     {% endif %}
 </div>
 
@@ -99,7 +142,7 @@
                 <td>{{ plan.production_costs.resource_cost }}</td>
                 <td>{{ plan.production_costs.labour_cost }}</td>
                 <td>{{ plan.prd_amount }}</td>
-                <td>{{ plan.production_costs.total_cost()/plan.prd_amount }} Std.</td>
+                <td>{{ plan.price_per_unit() }} Std.</td>
                 <td>{{ plan.plan_creation_date.strftime("%d.%m.%y") }}</td>
 
                 {% if plan.renewed %}
@@ -118,6 +161,8 @@
     <p>(Du hast keine abgelaufenen Pläne.)</p>
     {% endif %}
 </div>
+
+
 
 
 

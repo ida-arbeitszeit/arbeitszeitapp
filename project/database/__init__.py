@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from functools import wraps
 
 from flask_sqlalchemy import SQLAlchemy
@@ -112,6 +112,25 @@ def configure_injector(binder: Binder) -> None:
 class RealtimeDatetimeService(DatetimeService):
     def now(self):
         return datetime.now()
+
+    def past_plan_activation_date(self, timedelta_days: int = 1) -> datetime:
+        if self.now().hour < self.time_of_plan_activation:
+            past_day = date.today() - timedelta(days=timedelta_days)
+            past_date = datetime(
+                past_day.year,
+                past_day.month,
+                past_day.day,
+                hour=self.time_of_plan_activation,
+            )
+        else:
+            past_day = date.today() - timedelta(days=timedelta_days - 1)
+            past_date = datetime(
+                past_day.year,
+                past_day.month,
+                past_day.day,
+                hour=self.time_of_plan_activation,
+            )
+        return past_date
 
 
 @inject

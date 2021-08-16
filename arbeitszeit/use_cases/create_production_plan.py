@@ -16,6 +16,7 @@ class PlanProposal:
     description: str
     timeframe_in_days: int
     is_public_service: bool
+    is_active: bool
 
 
 @inject
@@ -34,5 +35,7 @@ class CreatePlan:
             description=plan_proposal.description,
             timeframe_in_days=plan_proposal.timeframe_in_days,
             is_public_service=plan_proposal.is_public_service,
+            is_active=plan_proposal.is_active,
             creation_timestamp=self.datetime_service.now(),
+            activation_timestamp=None,
         )

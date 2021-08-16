@@ -272,7 +272,9 @@ class PlanRepository(interfaces.PlanRepository):
         description: str,
         timeframe_in_days: int,
         is_public_service: bool,
+        is_active: bool,
         creation_timestamp: datetime,
+        activation_timestamp: datetime,
     ) -> Plan:
         plan = Plan(
             id=uuid.uuid4(),
@@ -285,6 +287,8 @@ class PlanRepository(interfaces.PlanRepository):
             description=description,
             timeframe=timeframe_in_days,
             is_public_service=is_public_service,
+            is_active=is_active,
+            activation_date=activation_timestamp,
             approved=False,
             approval_date=None,
             approval_reason=None,
@@ -293,8 +297,14 @@ class PlanRepository(interfaces.PlanRepository):
             renewed=False,
             set_as_expired=lambda: None,
             set_as_renewed=lambda: None,
+            set_as_active=lambda activation_date: None,
+            set_as_non_active=lambda: None,
             expiration_relative=None,
             expiration_date=None,
+            last_certificate_payout=None,
+            set_last_certificate_payout=lambda last_payout: None,
+            set_expiration_date=lambda expiration_date: None,
+            set_expiration_relative=lambda days: None,
         )
         self.plans[planner.id] = plan
         return plan
@@ -305,6 +315,21 @@ class PlanRepository(interfaces.PlanRepository):
     def __len__(self) -> int:
         return len(self.plans)
 
+    def all_active_plans(self) -> Iterator[Plan]:
+        for plan in self.plans.values():
+            if plan.is_active:
+                yield plan
+
+    def all_plans_approved_and_not_expired(self) -> Iterator[Plan]:
+        for plan in self.plans.values():
+            if plan.approved and not plan.expired:
+                yield plan
+
+    def all_plans_approved_active_and_not_expired(self) -> Iterator[Plan]:
+        for plan in self.plans.values():
+            if plan.approved and plan.is_active and not plan.expired:
+                yield plan
+
     def all_productive_plans_approved_and_not_expired(self) -> Iterator[Plan]:
         for plan in self.plans.values():
             if not plan.is_public_service and plan.approved and not plan.expired:
@@ -313,4 +338,9 @@ class PlanRepository(interfaces.PlanRepository):
     def all_public_plans_approved_and_not_expired(self) -> Iterator[Plan]:
         for plan in self.plans.values():
             if plan.is_public_service and plan.approved and not plan.expired:
+                yield plan
+
+    def all_plans_approved_not_active_not_expired(self) -> Iterator[Plan]:
+        for plan in self.plans.values():
+            if plan.approved and not plan.is_active and not plan.expired:
                 yield plan

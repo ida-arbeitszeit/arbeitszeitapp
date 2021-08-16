@@ -52,7 +52,9 @@ class PlanRepository(ABC):
         description: str,
         timeframe_in_days: int,
         is_public_service: bool,
+        is_active: bool,
         creation_timestamp: datetime,
+        activation_timestamp: datetime,
     ) -> Plan:
         pass
 
@@ -61,11 +63,29 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
+    def all_active_plans(self) -> Iterator[Plan]:
+        pass
+
+    @abstractmethod
+    def all_plans_approved_and_not_expired(self) -> Iterator[Plan]:
+        pass
+
+    @abstractmethod
+    def all_plans_approved_active_and_not_expired(self) -> Iterator[Plan]:
+        pass
+
+    @abstractmethod
     def all_productive_plans_approved_and_not_expired(self) -> Iterator[Plan]:
         pass
 
     @abstractmethod
     def all_public_plans_approved_and_not_expired(self) -> Iterator[Plan]:
+        pass
+
+    @abstractmethod
+    def all_plans_approved_not_active_not_expired(
+        self,
+    ) -> Iterator[Plan]:
         pass
 
 

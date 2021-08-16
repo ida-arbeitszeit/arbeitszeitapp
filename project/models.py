@@ -83,8 +83,13 @@ class Plan(UserMixin, db.Model):
     approved = db.Column(db.Boolean, nullable=False, default=False)
     approval_date = db.Column(db.DateTime, nullable=True, default=None)
     approval_reason = db.Column(db.String(1000), nullable=True, default=None)
+    is_active = db.Column(db.Boolean, nullable=False, default=False)
+    activation_date = db.Column(db.DateTime, nullable=True)
     expired = db.Column(db.Boolean, nullable=False, default=False)
     renewed = db.Column(db.Boolean, nullable=False, default=False)
+    last_certificate_payout = db.Column(db.DateTime, nullable=True)
+    expiration_date = db.Column(db.DateTime, nullable=True)
+    expiration_relative = db.Column(db.Integer, nullable=True)
 
     offers = db.relationship("Offer", lazy="dynamic", backref="plan")
 

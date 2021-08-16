@@ -452,6 +452,10 @@ class PlanRepository(repositories.PlanRepository):
         plan.approval_reason = reason
         plan.approval_date = approval_date
 
+    def _set_as_active(self, plan, activation_date):
+        plan.is_active = True
+        plan.activation_date = activation_date
+
     def object_from_orm(self, plan: Plan) -> entities.Plan:
         production_costs = entities.ProductionCosts(
             labour_cost=plan.costs_a,
@@ -475,12 +479,28 @@ class PlanRepository(repositories.PlanRepository):
             approve=lambda decision, reason, approval_date: self._approve(
                 plan, decision, reason, approval_date
             ),
+            is_active=plan.is_active,
             expired=plan.expired,
             renewed=plan.renewed,
             set_as_expired=lambda: setattr(plan, "expired", True),
             set_as_renewed=lambda: setattr(plan, "renewed", True),
-            expiration_relative=None,
-            expiration_date=None,
+            set_as_active=lambda activation_date: self._set_as_active(
+                plan, activation_date
+            ),
+            set_as_non_active=lambda: setattr(plan, "is_active", False),
+            set_last_certificate_payout=lambda last_payout: setattr(
+                plan, "last_certificate_payout", last_payout
+            ),
+            set_expiration_date=lambda expiration_date: setattr(
+                plan, "expiration_date", expiration_date
+            ),
+            set_expiration_relative=lambda days: setattr(
+                plan, "expiration_relative", days
+            ),
+            expiration_relative=plan.expiration_relative,
+            expiration_date=plan.expiration_date,
+            last_certificate_payout=plan.last_certificate_payout,
+            activation_date=plan.activation_date,
         )
 
     def object_to_orm(self, plan: entities.Plan) -> Plan:
@@ -503,7 +523,9 @@ class PlanRepository(repositories.PlanRepository):
         description: str,
         timeframe_in_days: int,
         is_public_service: bool,
+        is_active: bool,
         creation_timestamp: datetime,
+        activation_timestamp: datetime,
     ) -> entities.Plan:
         plan = Plan(
             plan_creation_date=creation_timestamp,
@@ -517,12 +539,27 @@ class PlanRepository(repositories.PlanRepository):
             description=description,
             timeframe=timeframe_in_days,
             is_public_service=is_public_service,
+            is_active=is_active,
+            activation_date=activation_timestamp,
+            expiration_date=None,
             social_accounting=self.accounting_repository.get_or_create_social_accounting_orm().id,
         )
 
         self.db.session.add(plan)
         self.db.session.commit()
         return self.object_from_orm(plan)
+
+    def all_active_plans(self) -> Iterator[entities.Plan]:
+        return (
+            self.object_from_orm(plan_orm)
+            for plan_orm in Plan.query.filter_by(is_active=True).all()
+        )
+
+    def all_plans_approved_and_not_expired(self) -> Iterator[entities.Plan]:
+        return (
+            self.object_from_orm(plan_orm)
+            for plan_orm in Plan.query.filter_by(approved=True, expired=False).all()
+        )
 
     def all_productive_plans_approved_and_not_expired(self) -> Iterator[entities.Plan]:
         return (
@@ -537,6 +574,26 @@ class PlanRepository(repositories.PlanRepository):
             self.object_from_orm(plan_orm)
             for plan_orm in Plan.query.filter_by(
                 approved=True, expired=False, is_public_service=True
+            ).all()
+        )
+
+    def all_plans_approved_active_and_not_expired(self) -> Iterator[entities.Plan]:
+        return (
+            self.object_from_orm(plan_orm)
+            for plan_orm in Plan.query.filter_by(
+                approved=True,
+                is_active=True,
+                expired=False,
+            ).all()
+        )
+
+    def all_plans_approved_not_active_not_expired(
+        self,
+    ) -> Iterator[entities.Plan]:
+        return (
+            self.object_from_orm(plan_orm)
+            for plan_orm in Plan.query.filter_by(
+                approved=True, is_active=False, expired=False
             ).all()
         )
 

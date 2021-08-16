@@ -25,6 +25,7 @@ def test_that_create_plan_creates_a_plan(
         production_amount=10,
         description="test description",
         is_public_service=False,
+        is_active=False,
         timeframe_in_days=7,
     )
 

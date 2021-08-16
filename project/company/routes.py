@@ -9,7 +9,6 @@ from arbeitszeit import entities, errors, use_cases
 from arbeitszeit.use_cases import CreateOffer, CreatePlan, Offer, PlanProposal
 from project import database, error
 from project.database import (
-    AccountingRepository,
     CompanyRepository,
     CompanyWorkerRepository,
     MemberRepository,
@@ -169,7 +168,6 @@ def create_plan(
     create_plan_from_proposal: CreatePlan,
     seek_approval: use_cases.SeekApproval,
     plan_repository: PlanRepository,
-    social_accounting_repository: AccountingRepository,
     company_repository: CompanyRepository,
 ):
     if not user_is_company():
@@ -198,6 +196,7 @@ def create_plan(
             is_public_service=True
             if plan_data["productive_or_public"] == "public"
             else False,
+            is_active=False,
         )
         planner = company_repository.get_by_id(current_user.id)
         new_plan = create_plan_from_proposal(planner, proposal)
@@ -205,7 +204,9 @@ def create_plan(
         database.commit_changes()
 
         if is_approved:
-            flash("Plan erfolgreich erstellt und genehmigt. Kredit wurde gewährt.")
+            flash(
+                "Plan erfolgreich erstellt und genehmigt. Die Aktivierung des Plans und Gewährung der Kredite erfolgt um 10 Uhr morgens."
+            )
             return redirect("/company/my_plans")
         else:
             flash(f"Plan nicht genehmigt. Grund:\n{new_plan.approval_reason}")
@@ -221,7 +222,6 @@ def create_plan(
 @with_injection
 def my_plans(
     plan_repository: PlanRepository,
-    calculate_expiration: use_cases.CalculatePlanExpirationAndCheckIfExpired,
 ):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
@@ -233,16 +233,18 @@ def my_plans(
         ).all()
     ]
 
-    for plan in plans_approved:
-        calculate_expiration(plan)
-    database.commit_changes()
-
+    plans_not_expired_and_active = [
+        plan for plan in plans_approved if (not plan.expired and plan.is_active)
+    ]
+    plans_not_expired_and_inactive = [
+        plan for plan in plans_approved if (not plan.expired and not plan.is_active)
+    ]
     plans_expired = [plan for plan in plans_approved if plan.expired]
-    plans_not_expired = [plan for plan in plans_approved if not plan.expired]
 
     return render_template(
         "company/my_plans.html",
-        plans=plans_not_expired,
+        plans=plans_not_expired_and_active,
+        plans_waiting_for_activation=plans_not_expired_and_inactive,
         plans_expired=plans_expired,
     )
 

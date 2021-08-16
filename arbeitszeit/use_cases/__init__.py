@@ -1,4 +1,3 @@
-import datetime
 from dataclasses import dataclass
 from typing import Union
 
@@ -6,13 +5,7 @@ from injector import inject
 
 from arbeitszeit import errors
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import (
-    Company,
-    Member,
-    Plan,
-    ProductOffer,
-    PurposesOfPurchases,
-)
+from arbeitszeit.entities import Company, Member, ProductOffer, PurposesOfPurchases
 from arbeitszeit.purchase_factory import PurchaseFactory
 from arbeitszeit.repositories import (
     CompanyWorkerRepository,
@@ -20,10 +13,10 @@ from arbeitszeit.repositories import (
     TransactionRepository,
 )
 
+from .calculate_plan_expiration import CalculatePlanExpirationAndCheckIfExpired
 from .create_offer import CreateOffer, Offer
 from .create_production_plan import CreatePlan, PlanProposal
 from .get_transaction_infos import GetTransactionInfos
-from .grant_credit import GrantCredit
 from .pay_consumer_product import PayConsumerProduct
 from .pay_means_of_production import PayMeansOfProduction
 from .query_products import ProductFilter, QueryProducts
@@ -32,10 +25,10 @@ from .register_company import RegisterCompany
 from .register_member import RegisterMember
 from .seek_approval import SeekApproval
 from .send_work_certificates_to_worker import SendWorkCertificatesToWorker
+from .synchronized_plan_activation import SynchronizedPlanActivation
 
 __all__ = [
     "CreatePlan",
-    "GrantCredit",
     "PayConsumerProduct",
     "PayMeansOfProduction",
     "PlanProposal",
@@ -52,6 +45,8 @@ __all__ = [
     "GetTransactionInfos",
     "CreateOffer",
     "Offer",
+    "SynchronizedPlanActivation",
+    "CalculatePlanExpirationAndCheckIfExpired",
 ]
 
 
@@ -143,40 +138,3 @@ def add_worker_to_company(
             company=company,
         )
     company_worker_repository.add_worker_to_company(company, worker)
-
-
-@inject
-@dataclass
-class CalculatePlanExpirationAndCheckIfExpired:
-    datetime_service: DatetimeService
-
-    def __call__(self, plan: Plan) -> None:
-        """
-        Based on a plan's creation date and timeframe this function
-        calculates the plan's expiration date and days, hours, minutes
-        missing until expiration.
-
-        It stores these informations as attributes of the given Plan instance.
-        It sets the Plan to "expired", if that's the case.
-
-        This function ignores already expired plans for performance reasons.
-        """
-        if plan.expired:
-            # not necessary to check, because plan is already expired
-            pass
-        else:
-            expiration_date = plan.plan_creation_date + datetime.timedelta(
-                days=int(plan.timeframe)
-            )
-            expiration_relative = self.datetime_service.now() - expiration_date
-            seconds_until_exp = abs(expiration_relative.total_seconds())
-            days = int(seconds_until_exp // 86400)
-            seconds_until_exp = seconds_until_exp - (days * 86400)
-            hours = int(seconds_until_exp // 3600)
-            seconds_until_exp = seconds_until_exp - (hours * 3600)
-            minutes = int(seconds_until_exp // 60)
-
-            plan.expiration_relative = (days, hours, minutes)
-            plan.expiration_date = expiration_date
-            if expiration_relative.total_seconds() > 0:
-                plan.set_as_expired()

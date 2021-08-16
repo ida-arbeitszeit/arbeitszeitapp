@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional, Union
 from uuid import UUID
 
 
@@ -140,12 +140,20 @@ class Plan:
         approval_date: Optional[datetime],
         approval_reason: Optional[str],
         approve: Callable[[bool, str, datetime], None],
+        is_active: bool,
         expired: bool,
         renewed: bool,
         set_as_expired: Callable[[], None],
         set_as_renewed: Callable[[], None],
-        expiration_relative: Optional[Tuple[int, int, int]],
+        set_as_active: Callable[[datetime], None],
+        set_as_non_active: Callable[[], None],
+        activation_date: datetime,
+        expiration_relative: Optional[int],
         expiration_date: Optional[datetime],
+        set_expiration_date: Callable[[datetime], None],
+        set_expiration_relative: Callable[[int], None],
+        last_certificate_payout: Optional[datetime],
+        set_last_certificate_payout: Callable[[datetime], None],
     ) -> None:
         self.id = id
         self.plan_creation_date = plan_creation_date
@@ -161,12 +169,20 @@ class Plan:
         self.approval_date = approval_date
         self.approval_reason = approval_reason
         self._approve_call = approve
+        self.is_active = is_active
         self.expired = expired
         self.renewed = renewed
         self._set_as_expired = set_as_expired
         self._set_as_renewed = set_as_renewed
+        self._set_as_active = set_as_active
+        self._set_as_non_active = set_as_non_active
         self.expiration_relative = expiration_relative
         self.expiration_date = expiration_date
+        self.activation_date = activation_date
+        self.last_certificate_payout = last_certificate_payout
+        self._set_last_certificate_payout = set_last_certificate_payout
+        self._set_expiration_date = set_expiration_date
+        self._set_expiration_relative = set_expiration_relative
 
     def approve(self, approval_date: datetime) -> None:
         self.approved = True
@@ -182,11 +198,30 @@ class Plan:
 
     def set_as_expired(self) -> None:
         self.expired = True
+        self.is_active = False
         self._set_as_expired()
+        self._set_as_non_active()
 
     def set_as_renewed(self) -> None:
         self.renewed = True
         self._set_as_renewed()
+
+    def set_as_active(self, activation_date: datetime) -> None:
+        self.is_active = True
+        self.activation_date = activation_date
+        self._set_as_active(activation_date)
+
+    def set_last_certificate_payout(self, last_payout=datetime) -> None:
+        self.last_certificate_payout = last_payout
+        self._set_last_certificate_payout(last_payout)
+
+    def set_expiration_date(self, expiration_date: datetime) -> None:
+        self.expiration_date = expiration_date
+        self._set_expiration_date(expiration_date)
+
+    def set_expiration_relative(self, days: int) -> None:
+        self.expiration_relative = days
+        self._set_expiration_relative(days)
 
     def price_per_unit(self) -> Decimal:
         cost_per_unit = self.production_costs.total_cost() / self.prd_amount
