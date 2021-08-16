@@ -5,12 +5,14 @@ from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan
+from arbeitszeit.repositories import PlanRepository
 
 
 @inject
 @dataclass
 class SeekApproval:
     datetime_service: DatetimeService
+    plan_repository: PlanRepository
 
     def __call__(self, new_plan: Plan, original_plan: Optional[Plan]) -> bool:
         """
@@ -26,7 +28,7 @@ class SeekApproval:
         if is_approval:
             new_plan.approve(approval_date)
             if original_plan:
-                original_plan.set_as_renewed()
+                self.plan_repository.renew_plan(original_plan)
         else:
             new_plan.deny(approval_date)
         return is_approval

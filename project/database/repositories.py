@@ -452,10 +452,6 @@ class PlanRepository(repositories.PlanRepository):
         plan.approval_reason = reason
         plan.approval_date = approval_date
 
-    def _set_as_active(self, plan, activation_date):
-        plan.is_active = True
-        plan.activation_date = activation_date
-
     def object_from_orm(self, plan: Plan) -> entities.Plan:
         production_costs = entities.ProductionCosts(
             labour_cost=plan.costs_a,
@@ -482,21 +478,6 @@ class PlanRepository(repositories.PlanRepository):
             is_active=plan.is_active,
             expired=plan.expired,
             renewed=plan.renewed,
-            set_as_expired=lambda: setattr(plan, "expired", True),
-            set_as_renewed=lambda: setattr(plan, "renewed", True),
-            set_as_active=lambda activation_date: self._set_as_active(
-                plan, activation_date
-            ),
-            set_as_non_active=lambda: setattr(plan, "is_active", False),
-            set_last_certificate_payout=lambda last_payout: setattr(
-                plan, "last_certificate_payout", last_payout
-            ),
-            set_expiration_date=lambda expiration_date: setattr(
-                plan, "expiration_date", expiration_date
-            ),
-            set_expiration_relative=lambda days: setattr(
-                plan, "expiration_relative", days
-            ),
             expiration_relative=plan.expiration_relative,
             expiration_date=plan.expiration_date,
             last_certificate_payout=plan.last_certificate_payout,
@@ -548,6 +529,56 @@ class PlanRepository(repositories.PlanRepository):
         self.db.session.add(plan)
         self.db.session.commit()
         return self.object_from_orm(plan)
+
+    def activate_plan(self, plan: entities.Plan, activation_date: datetime) -> None:
+        plan.is_active = True
+        plan.activation_date = activation_date
+
+        plan_orm = self.object_to_orm(plan)
+        plan_orm.is_active = True
+        plan_orm.activation_date = activation_date
+        self.db.session.commit()
+
+    def set_plan_as_expired(self, plan: entities.Plan) -> None:
+        plan.expired = True
+        plan.is_active = False
+
+        plan_orm = self.object_to_orm(plan)
+        plan_orm.expired = True
+        plan_orm.is_active = False
+        self.db.session.commit()
+
+    def renew_plan(self, plan: entities.Plan) -> None:
+        plan.renewed = True
+
+        plan_orm = self.object_to_orm(plan)
+        plan_orm.renewed = True
+        self.db.session.commit()
+
+    def set_expiration_date(
+        self, plan: entities.Plan, expiration_date: datetime
+    ) -> None:
+        plan.expiration_date = expiration_date
+
+        plan_orm = self.object_to_orm(plan)
+        plan_orm.expiration_date = expiration_date
+        self.db.session.commit()
+
+    def set_expiration_relative(self, plan: entities.Plan, days: int) -> None:
+        plan.expiration_relative = days
+
+        plan_orm = self.object_to_orm(plan)
+        plan_orm.expiration_relative = days
+        self.db.session.commit()
+
+    def set_last_certificate_payout(
+        self, plan: entities.Plan, last_payout: datetime
+    ) -> None:
+        plan.last_certificate_payout = last_payout
+
+        plan_orm = self.object_to_orm(plan)
+        plan_orm.last_certificate_payout = last_payout
+        self.db.session.commit()
 
     def all_active_plans(self) -> Iterator[entities.Plan]:
         return (

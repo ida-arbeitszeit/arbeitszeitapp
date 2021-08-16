@@ -295,16 +295,9 @@ class PlanRepository(interfaces.PlanRepository):
             approve=lambda _1, _2, _3: None,
             expired=False,
             renewed=False,
-            set_as_expired=lambda: None,
-            set_as_renewed=lambda: None,
-            set_as_active=lambda activation_date: None,
-            set_as_non_active=lambda: None,
             expiration_relative=None,
             expiration_date=None,
             last_certificate_payout=None,
-            set_last_certificate_payout=lambda last_payout: None,
-            set_expiration_date=lambda expiration_date: None,
-            set_expiration_relative=lambda days: None,
         )
         self.plans[planner.id] = plan
         return plan
@@ -314,6 +307,26 @@ class PlanRepository(interfaces.PlanRepository):
 
     def __len__(self) -> int:
         return len(self.plans)
+
+    def activate_plan(self, plan: Plan, activation_date: datetime) -> None:
+        plan.is_active = True
+        plan.activation_date = activation_date
+
+    def set_plan_as_expired(self, plan: Plan) -> None:
+        plan.expired = True
+        plan.is_active = False
+
+    def renew_plan(self, plan: Plan) -> None:
+        plan.renewed = True
+
+    def set_expiration_date(self, plan: Plan, expiration_date: datetime) -> None:
+        plan.expiration_date = expiration_date
+
+    def set_expiration_relative(self, plan: Plan, days: int) -> None:
+        plan.expiration_relative = days
+
+    def set_last_certificate_payout(self, plan: Plan, last_payout) -> None:
+        plan.last_certificate_payout = last_payout
 
     def all_active_plans(self) -> Iterator[Plan]:
         for plan in self.plans.values():

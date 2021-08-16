@@ -5,12 +5,14 @@ from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan
+from arbeitszeit.repositories import PlanRepository
 
 
 @inject
 @dataclass
 class CalculatePlanExpirationAndCheckIfExpired:
     datetime_service: DatetimeService
+    plan_repository: PlanRepository
 
     def __call__(self, plan: Plan) -> None:
         if not plan.is_active:
@@ -31,8 +33,8 @@ class CalculatePlanExpirationAndCheckIfExpired:
                 self.datetime_service.time_of_plan_activation,
             )
             days_relative = expiration_day - activation_day
-            plan.set_expiration_relative(days_relative.days)
-            plan.set_expiration_date(expiration_time)
+            self.plan_repository.set_expiration_relative(plan, days_relative.days)
+            self.plan_repository.set_expiration_date(plan, expiration_time)
 
             if self.datetime_service.now() > plan.expiration_date:
-                plan.set_as_expired()
+                self.plan_repository.set_plan_as_expired(plan)

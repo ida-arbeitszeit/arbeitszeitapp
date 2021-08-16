@@ -59,6 +59,30 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
+    def activate_plan(self, plan: Plan, activation_date: datetime) -> None:
+        pass
+
+    @abstractmethod
+    def set_plan_as_expired(self, plan: Plan) -> None:
+        pass
+
+    @abstractmethod
+    def renew_plan(self, plan: Plan) -> None:
+        pass
+
+    @abstractmethod
+    def set_expiration_relative(self, plan: Plan, days: int) -> None:
+        pass
+
+    @abstractmethod
+    def set_expiration_date(self, plan: Plan, expiration_date: datetime) -> None:
+        pass
+
+    @abstractmethod
+    def set_last_certificate_payout(self, plan: Plan, last_payout: datetime) -> None:
+        pass
+
+    @abstractmethod
     def get_plan_by_id(self, id: UUID) -> Plan:
         pass
 

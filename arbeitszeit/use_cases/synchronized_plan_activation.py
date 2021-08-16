@@ -68,7 +68,7 @@ class SynchronizedPlanActivation:
                 )
                 transaction.adjust_balances()
 
-            plan.set_as_active(self.datetime_service.now())
+            self.plan_repository.activate_plan(plan, self.datetime_service.now())
 
     def _calculate_payout_factor(self) -> Decimal:
         """
@@ -141,4 +141,6 @@ class SynchronizedPlanActivation:
             )
             transaction.adjust_balances()
 
-            plan.set_last_certificate_payout(self.datetime_service.now())
+            self.plan_repository.set_last_certificate_payout(
+                plan, self.datetime_service.now()
+            )
