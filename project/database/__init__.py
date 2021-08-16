@@ -110,8 +110,8 @@ def configure_injector(binder: Binder) -> None:
 
 
 class RealtimeDatetimeService(DatetimeService):
-    def now(self):
-        return datetime.now()
+    def now(self) -> datetime.datetime:
+        return datetime.datetime.now()
 
 
 @inject
