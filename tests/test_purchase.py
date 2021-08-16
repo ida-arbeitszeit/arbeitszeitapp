@@ -11,7 +11,7 @@ from tests.data_generators import (
     PlanGenerator,
 )
 from tests.dependency_injection import injection_test
-from tests.repositories import TransactionRepository
+from tests.repositories import AccountRepository, TransactionRepository
 
 
 @injection_test
@@ -72,6 +72,7 @@ def test_balance_of_buyer_reduced(
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
+    account_repository: AccountRepository,
 ):
     # member, consumption
     plan = plan_generator.create_plan(total_cost=Decimal(3), amount=3)
@@ -79,21 +80,21 @@ def test_balance_of_buyer_reduced(
     buyer1 = member_generator.create_member()
     purpose1 = PurposesOfPurchases.consumption
     purchase_product(offer1, 3, purpose1, buyer1)
-    assert buyer1.account.balance == -3
+    assert account_repository.get_account_balance(buyer1.account) == -3
 
     # company, means of production
     offer2 = offer_generator.create_offer(amount=3)
     buyer2 = company_generator.create_company()
     purpose2 = PurposesOfPurchases.means_of_prod
     purchase_product(offer2, 3, purpose2, buyer2)
-    assert buyer2.means_account.balance == -3
+    assert account_repository.get_account_balance(buyer2.means_account) == -3
 
     # company, raw materials
     offer3 = offer_generator.create_offer(amount=3)
     buyer3 = company_generator.create_company()
     purpose3 = PurposesOfPurchases.raw_materials
     purchase_product(offer3, 3, purpose3, buyer3)
-    assert buyer3.raw_material_account.balance == -3
+    assert account_repository.get_account_balance(buyer3.raw_material_account) == -3
 
 
 @injection_test
@@ -102,6 +103,7 @@ def test_balance_of_seller_increased(
     offer_generator: OfferGenerator,
     member_generator: MemberGenerator,
     plan_generator: PlanGenerator,
+    account_repository: AccountRepository,
 ):
     plan = plan_generator.create_plan(total_cost=Decimal(3), amount=3)
     offer = offer_generator.create_offer(amount=3, plan=plan)
@@ -112,7 +114,7 @@ def test_balance_of_seller_increased(
         PurposesOfPurchases.consumption,
         buyer,
     )
-    assert offer.provider.product_account.balance == 3
+    assert account_repository.get_account_balance(offer.provider.product_account) == 3
 
 
 @injection_test

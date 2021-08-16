@@ -92,17 +92,9 @@ class Account:
         self,
         id: UUID,
         account_type: AccountTypes,
-        balance: Decimal,
-        change_credit: Callable[[Decimal], None],
     ) -> None:
         self.id = id
         self.account_type = account_type
-        self.balance = balance
-        self._change_credit = change_credit
-
-    def change_credit(self, amount: Decimal) -> None:
-        self.balance += amount
-        self._change_credit(amount)
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, Account):
@@ -258,9 +250,3 @@ class Transaction:
     account_to: Account
     amount: Decimal
     purpose: str
-
-    def adjust_balances(self) -> None:
-        """this method adjusts the balances of the two accounts
-        that are involved in this transaction."""
-        self.account_from.change_credit(-self.amount)
-        self.account_to.change_credit(self.amount)
