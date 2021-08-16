@@ -8,6 +8,7 @@ from typing import Dict, Iterator, List, Union
 from injector import inject, singleton
 
 import arbeitszeit.repositories as interfaces
+from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.entities import (
     Account,
     AccountTypes,
@@ -143,29 +144,54 @@ class CompanyWorkerRepository(interfaces.CompanyWorkerRepository):
 @singleton
 class AccountRepository(interfaces.AccountRepository):
     @inject
-    def __init__(self):
-        self.accounts = []
-        self.latest_id = 0
+    def __init__(self, transaction_repository: TransactionRepository):
+        self.accounts: List[Account] = []
+        self.transaction_repository = transaction_repository
 
     def __contains__(self, account: object) -> bool:
         if not isinstance(account, Account):
             return False
         return account in self.accounts
 
-    def add(self, account: Account) -> None:
-        assert account not in self
-        self.accounts.append(account)
-
     def create_account(self, account_type: AccountTypes) -> Account:
         account = Account(
-            id=self.latest_id,
-            balance=Decimal(0),
+            id=uuid.uuid4(),
             account_type=account_type,
-            change_credit=lambda _: None,
         )
-        self.latest_id += 1
         self.accounts.append(account)
         return account
+
+    def get_account_balance(self, account: Account) -> Decimal:
+        received_transactions = (
+            self.transaction_repository.all_transactions_received_by_account(account)
+        )
+        sent_transactions = (
+            self.transaction_repository.all_transactions_sent_by_account(account)
+        )
+        self._remove_intersection(received_transactions, sent_transactions)
+        return decimal_sum(
+            transaction.amount for transaction in received_transactions
+        ) - decimal_sum(transaction.amount for transaction in sent_transactions)
+
+    @classmethod
+    def _remove_intersection(
+        cls,
+        transactions_received: List[Transaction],
+        transactions_sent: List[Transaction],
+    ) -> None:
+        intersection = {transaction.id for transaction in transactions_received} & {
+            transaction.id for transaction in transactions_sent
+        }
+        transactions_received[:] = [
+            transaction
+            for transaction in transactions_received
+            if transaction.id not in intersection
+        ]
+        transactions_sent[:] = [
+            transaction
+            for transaction in transactions_sent
+            if transaction.id not in intersection
+        ]
 
 
 @singleton

@@ -5,7 +5,7 @@ from arbeitszeit.entities import PurposesOfPurchases
 from arbeitszeit.use_cases import PayMeansOfProduction
 from tests.data_generators import CompanyGenerator, PlanGenerator
 from tests.dependency_injection import injection_test
-from tests.repositories import TransactionRepository
+from tests.repositories import AccountRepository, TransactionRepository
 
 
 @injection_test
@@ -58,6 +58,7 @@ def test_balance_of_buyer_of_means_of_prod_reduced(
     pay_means_of_production: PayMeansOfProduction,
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
+    account_repository: AccountRepository,
 ):
     sender = company_generator.create_company()
     receiver = company_generator.create_company()
@@ -68,7 +69,7 @@ def test_balance_of_buyer_of_means_of_prod_reduced(
     pay_means_of_production(sender, receiver, plan, pieces, purpose)
 
     price_total = pieces * plan.price_per_unit()
-    assert sender.means_account.balance == -price_total
+    assert account_repository.get_account_balance(sender.means_account) == -price_total
 
 
 @injection_test
@@ -76,6 +77,7 @@ def test_balance_of_buyer_of_raw_materials_reduced(
     pay_means_of_production: PayMeansOfProduction,
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
+    account_repository: AccountRepository,
 ):
     sender = company_generator.create_company()
     receiver = company_generator.create_company()
@@ -86,7 +88,10 @@ def test_balance_of_buyer_of_raw_materials_reduced(
     pay_means_of_production(sender, receiver, plan, pieces, purpose)
 
     price_total = pieces * plan.price_per_unit()
-    assert sender.raw_material_account.balance == -price_total
+    assert (
+        account_repository.get_account_balance(sender.raw_material_account)
+        == -price_total
+    )
 
 
 @injection_test
@@ -94,6 +99,7 @@ def test_balance_of_seller_increased(
     pay_means_of_production: PayMeansOfProduction,
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
+    account_repository: AccountRepository,
 ):
     sender = company_generator.create_company()
     receiver = company_generator.create_company()
@@ -104,7 +110,9 @@ def test_balance_of_seller_increased(
     pay_means_of_production(sender, receiver, plan, pieces, purpose)
 
     price_total = pieces * plan.price_per_unit()
-    assert receiver.product_account.balance == price_total
+    assert (
+        account_repository.get_account_balance(receiver.product_account) == price_total
+    )
 
 
 @injection_test

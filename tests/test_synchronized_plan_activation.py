@@ -3,7 +3,7 @@ from arbeitszeit.use_cases import SynchronizedPlanActivation
 from tests.data_generators import PlanGenerator
 from tests.datetime_service import FakeDatetimeService
 from tests.dependency_injection import injection_test
-from tests.repositories import TransactionRepository
+from tests.repositories import AccountRepository, TransactionRepository
 
 
 @injection_test
@@ -21,15 +21,22 @@ def test_that_plan_gets_set_active(
 def test_account_balances_adjusted_for_p_and_r(
     plan_generator: PlanGenerator,
     synchronized_plan_activation: SynchronizedPlanActivation,
+    account_repository: AccountRepository,
 ):
     plan = plan_generator.create_plan(approved=True)
     synchronized_plan_activation()
-    assert plan.planner.means_account.balance == plan.production_costs.means_cost
     assert (
-        plan.planner.raw_material_account.balance == plan.production_costs.resource_cost
+        account_repository.get_account_balance(plan.planner.means_account)
+        == plan.production_costs.means_cost
+    )
+    assert (
+        account_repository.get_account_balance(plan.planner.raw_material_account)
+        == plan.production_costs.resource_cost
     )
     # assert plan.planner.work_account.balance == plan.production_costs.labour_cost
-    assert plan.planner.product_account.balance == -(plan.expected_sales_value())
+    assert account_repository.get_account_balance(plan.planner.product_account) == -(
+        plan.expected_sales_value()
+    )
 
 
 @injection_test
@@ -37,6 +44,7 @@ def test_account_balances_adjusted_for_a(
     plan_generator: PlanGenerator,
     synchronized_plan_activation: SynchronizedPlanActivation,
     datetime_service: FakeDatetimeService,
+    account_repository: AccountRepository,
 ):
     plan = plan_generator.create_plan(
         approved=True,
@@ -47,7 +55,10 @@ def test_account_balances_adjusted_for_a(
     expected_payout = expected_payout_factor * plan.production_costs.labour_cost / 5
     synchronized_plan_activation()
 
-    assert plan.planner.work_account.balance == expected_payout
+    assert (
+        account_repository.get_account_balance(plan.planner.work_account)
+        == expected_payout
+    )
 
 
 @injection_test

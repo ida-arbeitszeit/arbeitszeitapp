@@ -6,7 +6,7 @@ from arbeitszeit.use_cases import PayConsumerProduct
 from .data_generators import CompanyGenerator, MemberGenerator, PlanGenerator
 from .datetime_service import FakeDatetimeService
 from .dependency_injection import injection_test
-from .repositories import TransactionRepository
+from .repositories import AccountRepository, TransactionRepository
 
 
 @injection_test
@@ -94,6 +94,7 @@ def test_balances_are_adjusted_correctly(
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
+    account_repository: AccountRepository,
 ):
     sender = member_generator.create_member()
     receiver = company_generator.create_company()
@@ -101,8 +102,8 @@ def test_balances_are_adjusted_correctly(
     pieces = 3
     pay_consumer_product(sender, receiver, plan, pieces)
     costs = pieces * plan.price_per_unit()
-    assert sender.account.balance == -costs
-    assert receiver.product_account.balance == costs
+    assert account_repository.get_account_balance(sender.account) == -costs
+    assert account_repository.get_account_balance(receiver.product_account) == costs
 
 
 @injection_test
@@ -111,6 +112,7 @@ def test_balances_are_adjusted_correctly_when_plan_is_public_service(
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
+    account_repository: AccountRepository,
 ):
     sender = member_generator.create_member()
     receiver = company_generator.create_company()
@@ -118,5 +120,5 @@ def test_balances_are_adjusted_correctly_when_plan_is_public_service(
     pieces = 3
     pay_consumer_product(sender, receiver, plan, pieces)
     costs = pieces * plan.price_per_unit()
-    assert sender.account.balance == -costs
-    assert receiver.product_account.balance == costs
+    assert account_repository.get_account_balance(sender.account) == -costs
+    assert account_repository.get_account_balance(receiver.product_account) == costs

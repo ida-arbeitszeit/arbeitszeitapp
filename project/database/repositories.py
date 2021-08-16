@@ -12,6 +12,7 @@ from sqlalchemy import desc
 from werkzeug.security import generate_password_hash
 
 from arbeitszeit import entities, repositories
+from arbeitszeit.decimal import decimal_sum
 from project.error import (
     CompanyNotFound,
     MemberNotFound,
@@ -205,10 +206,6 @@ class AccountRepository(repositories.AccountRepository):
         return entities.Account(
             id=UUID(account_orm.id),
             account_type=account_orm.account_type,
-            balance=account_orm.balance,
-            change_credit=lambda amount: setattr(
-                account_orm, "balance", account_orm.balance + amount
-            ),
         )
 
     def object_to_orm(self, account: entities.Account) -> Account:
@@ -216,22 +213,22 @@ class AccountRepository(repositories.AccountRepository):
         assert account_orm
         return account_orm
 
-    def add(self, account: entities.Account) -> None:
-        account_orm = Account(
-            account_owner_social_accounting=None,
-            account_owner_company=None,
-            account_owner_member=None,
-            account_type=account.account_type,
-            balance=account.balance,
-        )
-        self.db.session.add(account_orm)
-        self.db.session.commit()
-
     def create_account(self, account_type: entities.AccountTypes) -> entities.Account:
         account = Account(account_type=account_type.value)
         self.db.session.add(account)
         self.db.session.commit()
         return self.object_from_orm(account)
+
+    def get_account_balance(self, account: entities.Account) -> Decimal:
+        account_orm = self.object_to_orm(account)
+        received = set(account_orm.transactions_received)
+        sent = set(account_orm.transactions_sent)
+        intersection = received & sent
+        received -= intersection
+        sent -= intersection
+        return decimal_sum(t.amount for t in received) - decimal_sum(
+            t.amount for t in sent
+        )
 
 
 @inject

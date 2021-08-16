@@ -110,7 +110,7 @@ def configure_injector(binder: Binder) -> None:
 
 
 class RealtimeDatetimeService(DatetimeService):
-    def now(self):
+    def now(self) -> datetime:
         return datetime.now()
 
     def past_plan_activation_date(self, timedelta_days: int = 1) -> datetime:

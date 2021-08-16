@@ -115,8 +115,6 @@ class Account(UserMixin, db.Model):
         db.String, db.ForeignKey("member.id"), nullable=True
     )
     account_type = db.Column(db.Enum(AccountTypes), nullable=False)
-    balance = db.Column(db.Numeric(), default=0)
-
     transactions_sent = db.relationship(
         "Transaction",
         foreign_keys="Transaction.account_from",

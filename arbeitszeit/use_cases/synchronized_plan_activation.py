@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import List
 
 from injector import inject
 
@@ -59,14 +58,13 @@ class SynchronizedPlanActivation:
             ]
 
             for account, amount in accounts_and_amounts:
-                transaction = self.transaction_repository.create_transaction(
+                self.transaction_repository.create_transaction(
                     date=self.datetime_service.now(),
                     account_from=self.social_accounting.account,
                     account_to=account,
                     amount=round(amount, 2),
                     purpose=f"Plan-Id: {plan.id}",
                 )
-                transaction.adjust_balances()
 
             self.plan_repository.activate_plan(plan, self.datetime_service.now())
 
@@ -132,14 +130,13 @@ class SynchronizedPlanActivation:
             account_to = plan.planner.work_account
             amount = payout_factor * plan.production_costs.labour_cost / plan.timeframe
 
-            transaction = self.transaction_repository.create_transaction(
+            self.transaction_repository.create_transaction(
                 date=self.datetime_service.now(),
                 account_from=self.social_accounting.account,
                 account_to=account_to,
                 amount=round(amount, 2),
                 purpose=f"Plan-Id: {plan.id}",
             )
-            transaction.adjust_balances()
 
             self.plan_repository.set_last_certificate_payout(
                 plan, self.datetime_service.now()

@@ -7,6 +7,7 @@ from arbeitszeit import entities, errors, use_cases
 from project import database
 from project.database import with_injection
 from project.database.repositories import (
+    AccountRepository,
     CompanyRepository,
     MemberRepository,
     PlanRepository,
@@ -146,6 +147,7 @@ def profile():
 def my_account(
     member_repository: MemberRepository,
     get_transaction_infos: use_cases.GetTransactionInfos,
+    account_repository: AccountRepository,
 ):
     if not user_is_member():
         return redirect(url_for("auth.zurueck"))
@@ -156,7 +158,7 @@ def my_account(
     return render_template(
         "member/my_account.html",
         all_transactions_info=list_of_trans_infos,
-        my_balance=member.account.balance,
+        my_balance=account_repository.get_account_balance(member.account),
     )
 
 

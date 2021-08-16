@@ -1,4 +1,3 @@
-import datetime
 import pytest
 
 from arbeitszeit.use_cases import CalculatePlanExpirationAndCheckIfExpired
