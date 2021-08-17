@@ -9,12 +9,12 @@ from tests.dependency_injection import injection_test
 
 
 @injection_test
-def test_that_exception_is_raised_when_plan_is_inactive(
+def test_that_assertion_error_is_raised_when_plan_is_inactive(
     plan_generator: PlanGenerator,
     calculate_plan_expiration_and_check_if_expired: CalculatePlanExpirationAndCheckIfExpired,
 ):
     plan = plan_generator.create_plan(is_active=False)
-    with pytest.raises(Exception, match="Plan is not active!"):
+    with pytest.raises(AssertionError, match="Plan is not active!"):
         calculate_plan_expiration_and_check_if_expired(plan)
 
 

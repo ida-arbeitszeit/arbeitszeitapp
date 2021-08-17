@@ -505,7 +505,7 @@ class PlanRepository(repositories.PlanRepository):
         is_public_service: bool,
         is_active: bool,
         creation_timestamp: datetime,
-        activation_timestamp: datetime,
+        activation_timestamp: Optional[datetime],
     ) -> entities.Plan:
         plan = Plan(
             plan_creation_date=creation_timestamp,

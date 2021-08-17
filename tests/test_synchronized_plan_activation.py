@@ -1,12 +1,12 @@
+import datetime
+from decimal import Decimal
+
 from arbeitszeit.entities import AccountTypes
 from arbeitszeit.use_cases import SynchronizedPlanActivation
 from tests.data_generators import PlanGenerator
 from tests.datetime_service import FakeDatetimeService
 from tests.dependency_injection import injection_test
 from tests.repositories import AccountRepository, TransactionRepository
-import pytest
-import datetime
-from decimal import Decimal
 
 
 @injection_test
@@ -193,11 +193,11 @@ def test_account_balances_correctly_adjusted_for_work_accounts_with_two_plans(
     account_repository: AccountRepository,
 ):
     plan1 = plan_generator.create_plan(
-        approved=True, is_public_service=False, timeframe=5, total_cost=3
+        approved=True, is_public_service=False, timeframe=5, total_cost=Decimal(3)
     )
 
     plan2 = plan_generator.create_plan(
-        approved=True, is_public_service=False, timeframe=2, total_cost=9
+        approved=True, is_public_service=False, timeframe=2, total_cost=Decimal(9)
     )
 
     expected_payout_factor = 1
@@ -222,11 +222,11 @@ def test_account_balances_correctly_adjusted_for_work_accounts_with_public_and_p
     account_repository: AccountRepository,
 ):
     plan1 = plan_generator.create_plan(
-        approved=True, is_public_service=False, timeframe=2, total_cost=3
+        approved=True, is_public_service=False, timeframe=2, total_cost=Decimal(3)
     )
 
     plan2 = plan_generator.create_plan(
-        approved=True, is_public_service=True, timeframe=5, total_cost=9
+        approved=True, is_public_service=True, timeframe=5, total_cost=Decimal(9)
     )
     # (A − ( P o + R o )) / (A + A o) =
     # (1/2 - (3/5 + 3/5)) / (1/2 + 3/5) =

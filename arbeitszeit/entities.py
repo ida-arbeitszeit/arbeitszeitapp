@@ -135,7 +135,7 @@ class Plan:
         is_active: bool,
         expired: bool,
         renewed: bool,
-        activation_date: datetime,
+        activation_date: Optional[datetime],
         expiration_relative: Optional[int],
         expiration_date: Optional[datetime],
         last_certificate_payout: Optional[datetime],
