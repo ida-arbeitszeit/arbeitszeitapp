@@ -253,6 +253,50 @@ def test_account_balances_correctly_adjusted_for_work_accounts_with_public_and_p
 
 
 @injection_test
+def test_account_balances_correctly_adjusted_with_public_plan_not_yet_activated(
+    plan_generator: PlanGenerator,
+    synchronized_plan_activation: SynchronizedPlanActivation,
+    account_repository: AccountRepository,
+    datetime_service: FakeDatetimeService,
+):
+
+    plan1 = plan_generator.create_plan(
+        approved=True,
+        is_public_service=False,
+        timeframe=2,
+        total_cost=Decimal(3),
+    )
+
+    # plan 2 is created after last activation date, and should not influence payout factor
+    plan2 = plan_generator.create_plan(
+        approved=True,
+        is_public_service=True,
+        timeframe=5,
+        total_cost=Decimal(9),
+        plan_creation_date=datetime_service.past_plan_activation_date()
+        + datetime.timedelta(hours=1),
+        is_active=False,
+    )
+
+    expected_payout_factor = Decimal(1)
+    expected_payout1 = round(
+        (expected_payout_factor * plan1.production_costs.labour_cost / plan1.timeframe),
+        2,
+    )
+    expected_payout2 = 0
+    synchronized_plan_activation()
+
+    assert (
+        account_repository.get_account_balance(plan1.planner.work_account)
+        == expected_payout1
+    )
+    assert (
+        account_repository.get_account_balance(plan2.planner.work_account)
+        == expected_payout2
+    )
+
+
+@injection_test
 def test_that_wages_are_paid_out_only_once_per_day(
     synchronized_plan_activation: SynchronizedPlanActivation,
     plan_generator: PlanGenerator,

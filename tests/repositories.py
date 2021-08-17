@@ -372,14 +372,24 @@ class PlanRepository(interfaces.PlanRepository):
             if plan.approved and plan.is_active and not plan.expired:
                 yield plan
 
-    def all_productive_plans_approved_and_not_expired(self) -> Iterator[Plan]:
+    def all_productive_plans_approved_active_and_not_expired(self) -> Iterator[Plan]:
         for plan in self.plans.values():
-            if not plan.is_public_service and plan.approved and not plan.expired:
+            if (
+                not plan.is_public_service
+                and plan.is_active
+                and plan.approved
+                and not plan.expired
+            ):
                 yield plan
 
-    def all_public_plans_approved_and_not_expired(self) -> Iterator[Plan]:
+    def all_public_plans_approved_active_and_not_expired(self) -> Iterator[Plan]:
         for plan in self.plans.values():
-            if plan.is_public_service and plan.approved and not plan.expired:
+            if (
+                plan.is_public_service
+                and plan.is_active
+                and plan.approved
+                and not plan.expired
+            ):
                 yield plan
 
     def get_plans_suitable_for_activation(self) -> Iterator[Plan]:

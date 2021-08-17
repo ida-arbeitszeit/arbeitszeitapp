@@ -62,7 +62,7 @@ class SynchronizedPlanActivation:
         """
         # A
         productive_plans = (
-            self.plan_repository.all_productive_plans_approved_and_not_expired()
+            self.plan_repository.all_productive_plans_approved_active_and_not_expired()
         )
         sum_of_productive_work_per_day = Decimal(0)
         for p in productive_plans:
@@ -70,21 +70,27 @@ class SynchronizedPlanActivation:
             sum_of_productive_work_per_day += work_per_day
 
         # A_o
-        public_plans = self.plan_repository.all_public_plans_approved_and_not_expired()
+        public_plans = (
+            self.plan_repository.all_public_plans_approved_active_and_not_expired()
+        )
         sum_of_public_work_per_day = Decimal(0)
         for p in public_plans:
             work_per_day = p.production_costs.labour_cost / p.timeframe
             sum_of_public_work_per_day += work_per_day
 
         # P_o
-        public_plans = self.plan_repository.all_public_plans_approved_and_not_expired()
+        public_plans = (
+            self.plan_repository.all_public_plans_approved_active_and_not_expired()
+        )
         sum_of_public_means_of_production_per_day = Decimal(0)
         for p in public_plans:
             means_of_production_per_day = p.production_costs.means_cost / p.timeframe
             sum_of_public_means_of_production_per_day += means_of_production_per_day
 
         # R_o
-        public_plans = self.plan_repository.all_public_plans_approved_and_not_expired()
+        public_plans = (
+            self.plan_repository.all_public_plans_approved_active_and_not_expired()
+        )
         sum_of_public_raw_materials_per_day = Decimal(0)
         for p in public_plans:
             raw_materials_per_day = p.production_costs.resource_cost / p.timeframe
@@ -97,6 +103,7 @@ class SynchronizedPlanActivation:
         )
         denominator = (sum_of_productive_work_per_day + sum_of_public_work_per_day) or 1
         payout_factor = numerator / denominator
+        print(payout_factor)
         return Decimal(payout_factor)
 
     def _payout_work_certificates(self, payout_factor: Decimal) -> None:

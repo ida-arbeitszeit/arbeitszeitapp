@@ -591,19 +591,23 @@ class PlanRepository(repositories.PlanRepository):
             for plan_orm in Plan.query.filter_by(approved=True, expired=False).all()
         )
 
-    def all_productive_plans_approved_and_not_expired(self) -> Iterator[entities.Plan]:
+    def all_productive_plans_approved_active_and_not_expired(
+        self,
+    ) -> Iterator[entities.Plan]:
         return (
             self.object_from_orm(plan_orm)
             for plan_orm in Plan.query.filter_by(
-                approved=True, expired=False, is_public_service=False
+                approved=True, is_active=True, expired=False, is_public_service=False
             ).all()
         )
 
-    def all_public_plans_approved_and_not_expired(self) -> Iterator[entities.Plan]:
+    def all_public_plans_approved_active_and_not_expired(
+        self,
+    ) -> Iterator[entities.Plan]:
         return (
             self.object_from_orm(plan_orm)
             for plan_orm in Plan.query.filter_by(
-                approved=True, expired=False, is_public_service=True
+                approved=True, is_active=True, expired=False, is_public_service=True
             ).all()
         )
 

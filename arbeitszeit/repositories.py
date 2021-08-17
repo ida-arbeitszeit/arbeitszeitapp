@@ -99,11 +99,11 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def all_productive_plans_approved_and_not_expired(self) -> Iterator[Plan]:
+    def all_productive_plans_approved_active_and_not_expired(self) -> Iterator[Plan]:
         pass
 
     @abstractmethod
-    def all_public_plans_approved_and_not_expired(self) -> Iterator[Plan]:
+    def all_public_plans_approved_active_and_not_expired(self) -> Iterator[Plan]:
         pass
 
     @abstractmethod
