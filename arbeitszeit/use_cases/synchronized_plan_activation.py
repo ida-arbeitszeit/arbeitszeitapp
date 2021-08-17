@@ -3,6 +3,7 @@ from decimal import Decimal
 
 from injector import inject
 
+from datetime import date
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import SocialAccounting
 from arbeitszeit.repositories import PlanRepository, TransactionRepository
@@ -108,9 +109,14 @@ class SynchronizedPlanActivation:
 
             if plan.last_certificate_payout:
                 # if last payout was today
-                if plan.last_certificate_payout.strftime(
-                    "%d/%m/%Y"
-                ) == self.datetime_service.now().strftime("%d/%m/%Y"):
+                if (
+                    date(
+                        plan.last_certificate_payout.year,
+                        plan.last_certificate_payout.month,
+                        plan.last_certificate_payout.day,
+                    )
+                    == self.datetime_service.today()
+                ):
                     continue
 
             account_to = plan.planner.work_account
