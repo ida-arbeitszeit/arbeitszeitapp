@@ -1,7 +1,7 @@
 """adding is_public_service column
 
 Revision ID: 7b6cc29bf897
-Revises: a9cedb1aedfa
+Revises: b4fea8010fd6
 Create Date: 2021-08-11 23:06:41.879745
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "7b6cc29bf897"
-down_revision = "a8906c6f44bc"
+down_revision = "b4fea8010fd6"
 branch_labels = None
 depends_on = None
 
