@@ -3,7 +3,7 @@ from arbeitszeit.use_cases import (
     CalculatePlanExpirationAndCheckIfExpired,
 )
 from project.database.repositories import PlanRepository
-from project.database import with_injection, commit_changes
+from project.database import with_injection
 from project import create_app
 
 

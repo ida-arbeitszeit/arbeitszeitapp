@@ -7,8 +7,8 @@ from typing import Dict, Iterator, List, Union
 
 from injector import inject, singleton
 
-from arbeitszeit.datetime_service import DatetimeService
 import arbeitszeit.repositories as interfaces
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.entities import (
     Account,

@@ -32,8 +32,12 @@ class CalculatePlanExpirationAndCheckIfExpired:
                 expiration_day.day,
                 self.datetime_service.time_of_plan_activation,
             )
-            days_relative = expiration_day - activation_day
-            self.plan_repository.set_expiration_relative(plan, days_relative.days)
+            days_relative = (
+                0
+                if expiration_day == self.datetime_service.today()
+                else (expiration_day - activation_day).days
+            )
+            self.plan_repository.set_expiration_relative(plan, days_relative)
             self.plan_repository.set_expiration_date(plan, expiration_time)
 
             if self.datetime_service.now() > plan.expiration_date:

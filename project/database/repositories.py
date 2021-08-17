@@ -11,8 +11,8 @@ from injector import inject
 from sqlalchemy import desc
 from werkzeug.security import generate_password_hash
 
-from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit import entities, repositories
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
 from project.error import (
     CompanyNotFound,
