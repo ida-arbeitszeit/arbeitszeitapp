@@ -77,12 +77,14 @@ class SynchronizedPlanActivation:
             sum_of_public_work_per_day += work_per_day
 
         # P_o
+        public_plans = self.plan_repository.all_public_plans_approved_and_not_expired()
         sum_of_public_means_of_production_per_day = Decimal(0)
         for p in public_plans:
             means_of_production_per_day = p.production_costs.means_cost / p.timeframe
             sum_of_public_means_of_production_per_day += means_of_production_per_day
 
         # R_o
+        public_plans = self.plan_repository.all_public_plans_approved_and_not_expired()
         sum_of_public_raw_materials_per_day = Decimal(0)
         for p in public_plans:
             raw_materials_per_day = p.production_costs.resource_cost / p.timeframe
