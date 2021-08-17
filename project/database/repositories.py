@@ -11,6 +11,7 @@ from injector import inject
 from sqlalchemy import desc
 from werkzeug.security import generate_password_hash
 
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit import entities, repositories
 from arbeitszeit.decimal import decimal_sum
 from project.error import (
@@ -442,6 +443,7 @@ class ProductOfferRepository(repositories.OfferRepository):
 class PlanRepository(repositories.PlanRepository):
     company_repository: CompanyRepository
     accounting_repository: AccountingRepository
+    datetime_service: DatetimeService
     db: SQLAlchemy
 
     def _approve(self, plan, decision, reason, approval_date):
@@ -615,7 +617,7 @@ class PlanRepository(repositories.PlanRepository):
             ).all()
         )
 
-    def all_plans_approved_not_active_not_expired(
+    def get_plans_suitable_for_activation(
         self,
     ) -> Iterator[entities.Plan]:
         return (
@@ -623,6 +625,8 @@ class PlanRepository(repositories.PlanRepository):
             for plan_orm in Plan.query.filter_by(
                 approved=True, is_active=False, expired=False
             ).all()
+            if plan_orm.plan_creation_date
+            < self.datetime_service.past_plan_activation_date()
         )
 
 

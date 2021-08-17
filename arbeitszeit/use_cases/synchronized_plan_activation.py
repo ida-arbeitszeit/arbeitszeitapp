@@ -17,28 +17,15 @@ class SynchronizedPlanActivation:
     social_accounting: SocialAccounting
 
     def __call__(self) -> None:
-        """
-        this function should run once per day, at or shortly after the time agreed on (e.g. 10 a.m.).
-        this garantees transparency in regards to the calculation of the payout factor.
-        """
         self._grant_credit_and_activate_new_plans()
         self._payout_work_certificates(self._calculate_payout_factor())
 
     def _grant_credit_and_activate_new_plans(self) -> None:
         """
-        Grant credit to planners of new plans.
-
-        "New plans" are plans that are approved, not active, not expired and got
-        created before the past activation date, e.g. before 10 a.m.
-
-        Set new plans as active.
+        Grant credit to planners of plans suitable for activation.
+        Set these plans as active.
         """
-        new_plans = (
-            plan
-            for plan in self.plan_repository.all_plans_approved_not_active_not_expired()
-            if plan.plan_creation_date
-            < self.datetime_service.past_plan_activation_date()
-        )
+        new_plans = self.plan_repository.get_plans_suitable_for_activation()
 
         for plan in new_plans:
             assert plan.approved, "Plan has not been approved!"
@@ -111,7 +98,6 @@ class SynchronizedPlanActivation:
 
     def _payout_work_certificates(self, payout_factor: Decimal) -> None:
         """
-        Pay out daily work certificates (once per day).
         The payout amount equals to payout factor times labour costs per day.
         """
 

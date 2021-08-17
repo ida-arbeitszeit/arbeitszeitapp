@@ -7,6 +7,7 @@ from typing import Dict, Iterator, List, Union
 
 from injector import inject, singleton
 
+from arbeitszeit.datetime_service import DatetimeService
 import arbeitszeit.repositories as interfaces
 from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.entities import (
@@ -285,8 +286,10 @@ class CompanyRepository(interfaces.CompanyRepository):
 
 @singleton
 class PlanRepository(interfaces.PlanRepository):
-    def __init__(self) -> None:
+    @inject
+    def __init__(self, datetime_service: DatetimeService) -> None:
         self.plans: Dict[uuid.UUID, Plan] = {}
+        self.datetime_service = datetime_service
 
     def create_plan(
         self,
@@ -379,7 +382,13 @@ class PlanRepository(interfaces.PlanRepository):
             if plan.is_public_service and plan.approved and not plan.expired:
                 yield plan
 
-    def all_plans_approved_not_active_not_expired(self) -> Iterator[Plan]:
+    def get_plans_suitable_for_activation(self) -> Iterator[Plan]:
         for plan in self.plans.values():
-            if plan.approved and not plan.is_active and not plan.expired:
+            if (
+                plan.approved
+                and not plan.is_active
+                and not plan.expired
+                and plan.plan_creation_date
+                < self.datetime_service.past_plan_activation_date()
+            ):
                 yield plan

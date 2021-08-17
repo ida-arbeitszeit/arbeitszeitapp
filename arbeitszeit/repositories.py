@@ -107,9 +107,11 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def all_plans_approved_not_active_not_expired(
+    def get_plans_suitable_for_activation(
         self,
     ) -> Iterator[Plan]:
+        """Plans suitable for activation" are plans that are approved, not active, not expired and got
+        created before the past activation date, e.g. before 10 a.m."""
         pass
 
 

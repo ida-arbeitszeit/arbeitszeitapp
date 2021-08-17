@@ -19,15 +19,12 @@ def activate_database_plans(
     all_active_plans = plan_repository.all_active_plans()
     for plan in all_active_plans:
         calculate_expiration(plan)
-    commit_changes()
 
     synchronized_plan_activation()
-    commit_changes()
 
     all_active_plans = plan_repository.all_active_plans()
     for plan in all_active_plans:
         calculate_expiration(plan)
-    commit_changes()
 
 
 app = create_app()
