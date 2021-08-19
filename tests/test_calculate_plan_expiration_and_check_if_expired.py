@@ -5,7 +5,6 @@ import pytest
 from arbeitszeit.use_cases import CalculatePlanExpirationAndCheckIfExpired
 from tests.data_generators import PlanGenerator
 from tests.datetime_service import FakeDatetimeService
-from tests.repositories import PlanRepository
 from tests.dependency_injection import injection_test
 
 

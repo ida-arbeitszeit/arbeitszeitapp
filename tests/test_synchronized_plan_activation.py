@@ -1,7 +1,7 @@
 import datetime
 from decimal import Decimal
 
-from arbeitszeit.entities import AccountTypes
+from arbeitszeit.entities import AccountTypes, ProductionCosts
 from arbeitszeit.use_cases import SynchronizedPlanActivation
 from tests.data_generators import PlanGenerator
 from tests.datetime_service import FakeDatetimeService
@@ -193,11 +193,17 @@ def test_account_balances_correctly_adjusted_for_work_accounts_with_two_plans(
     account_repository: AccountRepository,
 ):
     plan1 = plan_generator.create_plan(
-        approved=True, is_public_service=False, timeframe=5, total_cost=Decimal(3)
+        approved=True,
+        is_public_service=False,
+        timeframe=5,
+        costs=ProductionCosts(Decimal(1), Decimal(1), Decimal(1)),
     )
 
     plan2 = plan_generator.create_plan(
-        approved=True, is_public_service=False, timeframe=2, total_cost=Decimal(9)
+        approved=True,
+        is_public_service=False,
+        timeframe=2,
+        costs=ProductionCosts(Decimal(3), Decimal(3), Decimal(3)),
     )
 
     expected_payout_factor = 1
@@ -222,11 +228,17 @@ def test_account_balances_correctly_adjusted_for_work_accounts_with_public_and_p
     account_repository: AccountRepository,
 ):
     plan1 = plan_generator.create_plan(
-        approved=True, is_public_service=False, timeframe=2, total_cost=Decimal(3)
+        approved=True,
+        is_public_service=False,
+        timeframe=2,
+        costs=ProductionCosts(Decimal(1), Decimal(1), Decimal(1)),
     )
 
     plan2 = plan_generator.create_plan(
-        approved=True, is_public_service=True, timeframe=5, total_cost=Decimal(9)
+        approved=True,
+        is_public_service=True,
+        timeframe=5,
+        costs=ProductionCosts(Decimal(3), Decimal(3), Decimal(3)),
     )
     # (A − ( P o + R o )) / (A + A o) =
     # (1/2 - (3/5 + 3/5)) / (1/2 + 3/5) =
@@ -264,7 +276,7 @@ def test_account_balances_correctly_adjusted_with_public_plan_not_yet_activated(
         approved=True,
         is_public_service=False,
         timeframe=2,
-        total_cost=Decimal(3),
+        costs=ProductionCosts(Decimal(1), Decimal(1), Decimal(1)),
     )
 
     # plan 2 is created after last activation date, and should not influence payout factor
@@ -272,7 +284,7 @@ def test_account_balances_correctly_adjusted_with_public_plan_not_yet_activated(
         approved=True,
         is_public_service=True,
         timeframe=5,
-        total_cost=Decimal(9),
+        costs=ProductionCosts(Decimal(3), Decimal(3), Decimal(3)),
         plan_creation_date=datetime_service.past_plan_activation_date()
         + datetime.timedelta(hours=1),
     )

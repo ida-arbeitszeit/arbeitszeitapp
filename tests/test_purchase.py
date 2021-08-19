@@ -2,7 +2,7 @@ from decimal import Decimal
 
 import pytest
 
-from arbeitszeit.entities import AccountTypes, PurposesOfPurchases
+from arbeitszeit.entities import AccountTypes, ProductionCosts, PurposesOfPurchases
 from arbeitszeit.errors import CompanyCantBuyPublicServices
 from arbeitszeit.use_cases import PurchaseProduct
 from tests.data_generators import (
@@ -95,7 +95,9 @@ def test_balance_of_buyer_reduced(
     account_repository: AccountRepository,
 ):
     # member, consumption
-    plan = plan_generator.create_plan(total_cost=Decimal(3), amount=3)
+    plan = plan_generator.create_plan(
+        costs=ProductionCosts(Decimal(1), Decimal(1), Decimal(1)), amount=3
+    )
     offer1 = offer_generator.create_offer(amount=3, plan=plan)
     buyer1 = member_generator.create_member()
     purpose1 = PurposesOfPurchases.consumption
@@ -151,7 +153,9 @@ def test_balance_of_seller_increased(
     plan_generator: PlanGenerator,
     account_repository: AccountRepository,
 ):
-    plan = plan_generator.create_plan(total_cost=Decimal(3), amount=3)
+    plan = plan_generator.create_plan(
+        costs=ProductionCosts(Decimal(1), Decimal(1), Decimal(1)), amount=3
+    )
     offer = offer_generator.create_offer(amount=3, plan=plan)
     buyer = member_generator.create_member()
     purchase_product(
