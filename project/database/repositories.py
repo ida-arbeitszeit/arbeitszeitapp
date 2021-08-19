@@ -503,9 +503,7 @@ class PlanRepository(repositories.PlanRepository):
         description: str,
         timeframe_in_days: int,
         is_public_service: bool,
-        is_active: bool,
         creation_timestamp: datetime,
-        activation_timestamp: Optional[datetime],
     ) -> entities.Plan:
         plan = Plan(
             plan_creation_date=creation_timestamp,
@@ -519,8 +517,8 @@ class PlanRepository(repositories.PlanRepository):
             description=description,
             timeframe=timeframe_in_days,
             is_public_service=is_public_service,
-            is_active=is_active,
-            activation_date=activation_timestamp,
+            is_active=False,
+            activation_date=None,
             expiration_date=None,
             social_accounting=self.accounting_repository.get_or_create_social_accounting_orm().id,
         )

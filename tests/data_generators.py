@@ -160,8 +160,6 @@ class PlanGenerator:
         amount: int = 100,
         total_cost: Optional[Decimal] = None,
         is_public_service=False,
-        is_active=False,
-        activation_date=None,
     ) -> Plan:
         if total_cost is None:
             total_cost = Decimal(3)
@@ -172,8 +170,6 @@ class PlanGenerator:
         )
         if plan_creation_date is None:
             plan_creation_date = self.datetime_service.now_minus_two_days()
-        if activation_date is None:
-            activation_date = self.datetime_service.now_minus_one_day()
         if planner is None:
             planner = self.company_generator.create_company()
         if timeframe is None:
@@ -187,9 +183,7 @@ class PlanGenerator:
             description="Beschreibung für Produkt A.",
             timeframe_in_days=timeframe,
             is_public_service=is_public_service,
-            is_active=is_active,
             creation_timestamp=plan_creation_date,
-            activation_timestamp=activation_date,
         )
         if approved:
             self.seek_approval(plan, None)

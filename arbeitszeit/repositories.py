@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterator, List, Optional, Union
+from typing import Iterator, List, Union
 from uuid import UUID
 
 from arbeitszeit.entities import (
@@ -52,9 +52,7 @@ class PlanRepository(ABC):
         description: str,
         timeframe_in_days: int,
         is_public_service: bool,
-        is_active: bool,
         creation_timestamp: datetime,
-        activation_timestamp: Optional[datetime],
     ) -> Plan:
         pass
 

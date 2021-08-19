@@ -5,6 +5,7 @@ import pytest
 from arbeitszeit.use_cases import CalculatePlanExpirationAndCheckIfExpired
 from tests.data_generators import PlanGenerator
 from tests.datetime_service import FakeDatetimeService
+from tests.repositories import PlanRepository
 from tests.dependency_injection import injection_test
 
 
@@ -13,7 +14,7 @@ def test_that_assertion_error_is_raised_when_plan_is_inactive(
     plan_generator: PlanGenerator,
     calculate_plan_expiration_and_check_if_expired: CalculatePlanExpirationAndCheckIfExpired,
 ):
-    plan = plan_generator.create_plan(is_active=False)
+    plan = plan_generator.create_plan()
     with pytest.raises(AssertionError, match="Plan is not active!"):
         calculate_plan_expiration_and_check_if_expired(plan)
 
@@ -21,14 +22,15 @@ def test_that_assertion_error_is_raised_when_plan_is_inactive(
 @injection_test
 def test_that_expiration_time_is_set_if_plan_is_active(
     plan_generator: PlanGenerator,
+    plan_repository: PlanRepository,
     datetime_service: FakeDatetimeService,
     calculate_plan_expiration_and_check_if_expired: CalculatePlanExpirationAndCheckIfExpired,
 ):
     plan = plan_generator.create_plan(
-        activation_date=datetime_service.now(),
-        is_active=True,
         timeframe=2,
     )
+    plan_repository.activate_plan(plan, datetime_service.now())
+
     assert not plan.expiration_date
     assert not plan.expiration_relative
     calculate_plan_expiration_and_check_if_expired(plan)
@@ -39,6 +41,7 @@ def test_that_expiration_time_is_set_if_plan_is_active(
 @injection_test
 def test_that_expiration_date_is_correctly_calculated_after_fixed_activation_time(
     plan_generator: PlanGenerator,
+    plan_repository: PlanRepository,
     datetime_service: FakeDatetimeService,
     calculate_plan_expiration_and_check_if_expired: CalculatePlanExpirationAndCheckIfExpired,
 ):
@@ -49,10 +52,9 @@ def test_that_expiration_date_is_correctly_calculated_after_fixed_activation_tim
 
     # plan was activated 1 day before
     plan = plan_generator.create_plan(
-        is_active=True,
-        activation_date=datetime_service.now_minus_one_day(),
         timeframe=1,
     )
+    plan_repository.activate_plan(plan, datetime_service.now_minus_one_day())
     calculate_plan_expiration_and_check_if_expired(plan)
 
     # expected to expire today
@@ -68,6 +70,7 @@ def test_that_expiration_date_is_correctly_calculated_after_fixed_activation_tim
 @injection_test
 def test_that_expiration_date_is_correctly_calculated_before_fixed_activation_time(
     plan_generator: PlanGenerator,
+    plan_repository: PlanRepository,
     datetime_service: FakeDatetimeService,
     calculate_plan_expiration_and_check_if_expired: CalculatePlanExpirationAndCheckIfExpired,
 ):
@@ -78,10 +81,9 @@ def test_that_expiration_date_is_correctly_calculated_before_fixed_activation_ti
 
     # plan was activated 1 day before
     plan = plan_generator.create_plan(
-        is_active=True,
-        activation_date=datetime_service.now_minus_one_day(),
         timeframe=1,
     )
+    plan_repository.activate_plan(plan, datetime_service.now_minus_one_day())
     calculate_plan_expiration_and_check_if_expired(plan)
 
     # expected to expire today
@@ -97,6 +99,7 @@ def test_that_expiration_date_is_correctly_calculated_before_fixed_activation_ti
 @injection_test
 def test_that_expiration_relative_is_correctly_calculated(
     plan_generator: PlanGenerator,
+    plan_repository: PlanRepository,
     datetime_service: FakeDatetimeService,
     calculate_plan_expiration_and_check_if_expired: CalculatePlanExpirationAndCheckIfExpired,
 ):
@@ -105,10 +108,9 @@ def test_that_expiration_relative_is_correctly_calculated(
     )
 
     plan = plan_generator.create_plan(
-        is_active=True,
-        activation_date=datetime_service.now_minus_one_day(),
         timeframe=1,
     )
+    plan_repository.activate_plan(plan, datetime_service.now_minus_one_day())
     calculate_plan_expiration_and_check_if_expired(plan)
 
     expected_expiration_relative = 0
@@ -118,6 +120,7 @@ def test_that_expiration_relative_is_correctly_calculated(
 @injection_test
 def test_that_plan_is_not_set_to_expired_if_still_in_timeframe(
     plan_generator: PlanGenerator,
+    plan_repository: PlanRepository,
     datetime_service: FakeDatetimeService,
     calculate_plan_expiration_and_check_if_expired: CalculatePlanExpirationAndCheckIfExpired,
 ):
@@ -126,10 +129,9 @@ def test_that_plan_is_not_set_to_expired_if_still_in_timeframe(
     )
 
     plan = plan_generator.create_plan(
-        is_active=True,
-        activation_date=datetime_service.now_minus_one_day(),
         timeframe=1,
     )
+    plan_repository.activate_plan(plan, datetime_service.now_minus_one_day())
     calculate_plan_expiration_and_check_if_expired(plan)
     assert not plan.expired
 
@@ -137,6 +139,7 @@ def test_that_plan_is_not_set_to_expired_if_still_in_timeframe(
 @injection_test
 def test_that_plan_is_set_to_expired_if_timeframe_is_expired(
     plan_generator: PlanGenerator,
+    plan_repository: PlanRepository,
     datetime_service: FakeDatetimeService,
     calculate_plan_expiration_and_check_if_expired: CalculatePlanExpirationAndCheckIfExpired,
 ):
@@ -145,9 +148,8 @@ def test_that_plan_is_set_to_expired_if_timeframe_is_expired(
     )
 
     plan = plan_generator.create_plan(
-        is_active=True,
-        activation_date=datetime_service.now_minus_one_day(),
         timeframe=1,
     )
+    plan_repository.activate_plan(plan, datetime_service.now_minus_one_day())
     calculate_plan_expiration_and_check_if_expired(plan)
     assert plan.expired

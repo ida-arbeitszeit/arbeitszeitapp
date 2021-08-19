@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 from decimal import Decimal
-from typing import Dict, Iterator, List, Optional, Union
+from typing import Dict, Iterator, List, Union
 
 from injector import inject, singleton
 
@@ -301,9 +301,7 @@ class PlanRepository(interfaces.PlanRepository):
         description: str,
         timeframe_in_days: int,
         is_public_service: bool,
-        is_active: bool,
         creation_timestamp: datetime,
-        activation_timestamp: Optional[datetime],
     ) -> Plan:
         plan = Plan(
             id=uuid.uuid4(),
@@ -316,8 +314,8 @@ class PlanRepository(interfaces.PlanRepository):
             description=description,
             timeframe=timeframe_in_days,
             is_public_service=is_public_service,
-            is_active=is_active,
-            activation_date=activation_timestamp,
+            is_active=False,
+            activation_date=None,
             approved=False,
             approval_date=None,
             approval_reason=None,

@@ -197,7 +197,6 @@ def create_plan(
             is_public_service=True
             if plan_data["productive_or_public"] == "public"
             else False,
-            is_active=False,
         )
         planner = company_repository.get_by_id(current_user.id)
         new_plan = create_plan_from_proposal(planner, proposal)

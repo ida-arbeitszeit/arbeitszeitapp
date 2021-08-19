@@ -275,7 +275,6 @@ def test_account_balances_correctly_adjusted_with_public_plan_not_yet_activated(
         total_cost=Decimal(9),
         plan_creation_date=datetime_service.past_plan_activation_date()
         + datetime.timedelta(hours=1),
-        is_active=False,
     )
 
     expected_payout_factor = Decimal(1)
