@@ -23,9 +23,18 @@ def create_app(config=None, db=None, migrate=None):
     # view without being logged in.
     login_manager.login_view = "auth.start"
 
-    # init flask extensions
+    # Init Flask-Talisman
     if app.config['ENV'] == 'production':
-        Talisman(app)
+        csp = {
+            'default-src': [
+                '\'self\'',
+                '\'unsafe-inline\'',
+                '*.fontawesome.com'
+            ]
+        }
+        Talisman(app, content_security_policy=csp)
+
+    # init flask extensions
     db.init_app(app)
     login_manager.init_app(app)
     migrate.init_app(app, db)
