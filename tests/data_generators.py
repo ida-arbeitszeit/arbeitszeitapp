@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import Optional, Union
 from uuid import uuid4
+from datetime import datetime
 
 from injector import inject
 
@@ -157,6 +158,7 @@ class PlanGenerator:
         planner=None,
         timeframe=None,
         approved=False,
+        activation_date: Optional[datetime] = None,
         amount: int = 100,
         total_cost: Optional[Decimal] = None,
         is_public_service=False,
@@ -187,6 +189,8 @@ class PlanGenerator:
         )
         if approved:
             self.seek_approval(plan, None)
+        if activation_date:
+            self.plan_repository.activate_plan(plan, activation_date)
         return plan
 
 
