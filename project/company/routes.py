@@ -7,9 +7,8 @@ from flask_login import current_user, login_required
 
 from arbeitszeit import entities, errors, use_cases
 from arbeitszeit.use_cases import CreateOffer, CreatePlan, Offer, PlanProposal
-from project import database
+from project import database, error
 from project.database import (
-    AccountingRepository,
     AccountRepository,
     CompanyRepository,
     CompanyWorkerRepository,
@@ -70,13 +69,8 @@ def arbeit(
                 company,
                 member,
             )
-        except errors.CompanyDoesNotExist:
-            flash("Angemeldeter Betrieb konnte nicht ermittelt werden.")
-            return redirect(url_for("auth.start"))
         except errors.WorkerAlreadyAtCompany:
             flash("Mitglied ist bereits in diesem Betrieb beschäftigt.")
-        except errors.WorkerDoesNotExist:
-            flash("Mitglied existiert nicht.")
         database.commit_changes()
         return redirect(url_for("main_company.arbeit"))
     elif request.method == "GET":
@@ -89,9 +83,7 @@ def arbeit(
 @main_company.route("/company/suchen", methods=["GET", "POST"])
 @login_required
 @with_injection
-def suchen(
-    query_products: use_cases.QueryProducts, offer_repository: ProductOfferRepository
-):
+def suchen(query_products: use_cases.QueryProducts):
     """search products in catalog."""
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
@@ -107,10 +99,8 @@ def suchen(
             product_filter = use_cases.ProductFilter.by_name
         elif search_field == "Beschreibung":
             product_filter = use_cases.ProductFilter.by_description
-    results = [
-        offer_repository.object_to_orm(offer)
-        for offer in query_products(query, product_filter)
-    ]
+    results = list(query_products(query, product_filter))
+
     if not results:
         flash("Keine Ergebnisse!")
     return render_template("company/search.html", form=search_form, results=results)
@@ -138,16 +128,21 @@ def buy(
             else entities.PurposesOfPurchases.raw_materials
         )
         amount = int(request.form["amount"])
-        purchase_product(
-            product_offer,
-            amount,
-            purpose,
-            buyer,
-        )
-        database.commit_changes()
-
-        flash(f"Kauf von '{amount}'x '{product_offer.name}' erfolgreich!")
-        return redirect("/company/suchen")
+        try:
+            purchase_product(
+                product_offer,
+                amount,
+                purpose,
+                buyer,
+            )
+            database.commit_changes()
+            flash(f"Kauf von '{amount}'x '{product_offer.name}' erfolgreich!")
+            return redirect("/company/suchen")
+        except (errors.CompanyCantBuyPublicServices):
+            flash(
+                "Kauf nicht erfolgreich. Betriebe können keine öffentlichen Dienstleistungen oder Produkte erwerben."
+            )
+            return redirect("/company/suchen")
 
     return render_template("company/buy.html", offer=product_offer)
 
@@ -174,7 +169,6 @@ def create_plan(
     create_plan_from_proposal: CreatePlan,
     seek_approval: use_cases.SeekApproval,
     plan_repository: PlanRepository,
-    social_accounting_repository: AccountingRepository,
     company_repository: CompanyRepository,
 ):
     if not user_is_company():
@@ -200,6 +194,9 @@ def create_plan(
             production_amount=int(plan_data["prd_amount"]),
             description=plan_data["description"],
             timeframe_in_days=plan_data["timeframe"],
+            is_public_service=True
+            if plan_data["productive_or_public"] == "public"
+            else False,
         )
         planner = company_repository.get_by_id(current_user.id)
         new_plan = create_plan_from_proposal(planner, proposal)
@@ -207,7 +204,9 @@ def create_plan(
         database.commit_changes()
 
         if is_approved:
-            flash("Plan erfolgreich erstellt und genehmigt. Kredit wurde gewährt.")
+            flash(
+                "Plan erfolgreich erstellt und genehmigt. Die Aktivierung des Plans und Gewährung der Kredite erfolgt um 10 Uhr morgens."
+            )
             return redirect("/company/my_plans")
         else:
             flash(f"Plan nicht genehmigt. Grund:\n{new_plan.approval_reason}")
@@ -223,7 +222,6 @@ def create_plan(
 @with_injection
 def my_plans(
     plan_repository: PlanRepository,
-    calculate_expiration: use_cases.CalculatePlanExpirationAndCheckIfExpired,
 ):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
@@ -235,16 +233,18 @@ def my_plans(
         ).all()
     ]
 
-    for plan in plans_approved:
-        calculate_expiration(plan)
-    database.commit_changes()
-
+    plans_not_expired_and_active = [
+        plan for plan in plans_approved if (not plan.expired and plan.is_active)
+    ]
+    plans_not_expired_and_inactive = [
+        plan for plan in plans_approved if (not plan.expired and not plan.is_active)
+    ]
     plans_expired = [plan for plan in plans_approved if plan.expired]
-    plans_not_expired = [plan for plan in plans_approved if not plan.expired]
 
     return render_template(
         "company/my_plans.html",
-        plans=plans_not_expired,
+        plans=plans_not_expired_and_active,
+        plans_waiting_for_activation=plans_not_expired_and_inactive,
         plans_expired=plans_expired,
     )
 
@@ -312,7 +312,11 @@ def transfer_to_worker(
 
     if request.method == "POST":
         company = company_repository.get_by_id(current_user.id)
-        worker = member_repository.get_member_by_id(request.form["member_id"])
+        try:
+            worker = member_repository.get_member_by_id(request.form["member_id"])
+        except error.MemberNotFound:
+            flash("Mitglied existiert nicht.")
+            redirect(url_for("main_company.transfer_to_work"))
         amount = Decimal(request.form["amount"])
 
         try:
@@ -325,8 +329,6 @@ def transfer_to_worker(
             flash("Erfolgreich überwiesen.")
         except errors.WorkerNotAtCompany:
             flash("Mitglied ist nicht in diesem Betrieb beschäftigt.")
-        except errors.WorkerDoesNotExist:
-            flash("Mitglied existiert nicht.")
 
     return render_template("company/transfer_to_worker.html")
 
@@ -344,8 +346,16 @@ def transfer_to_company(
 
     if request.method == "POST":
         sender = company_repository.get_by_id(current_user.id)
-        plan = plan_repository.get_plan_by_id(request.form["plan_id"])
-        receiver = company_repository.get_by_id(request.form["company_id"])
+        try:
+            plan = plan_repository.get_plan_by_id(request.form["plan_id"])
+        except error.PlanNotFound:
+            flash("Plan existiert nicht.")
+            return redirect(url_for("main_company.transfer_to_company"))
+        try:
+            receiver = company_repository.get_by_id(request.form["company_id"])
+        except error.CompanyNotFound:
+            flash("Betrieb existiert nicht.")
+            return redirect(url_for("main_company.transfer_to_company"))
         pieces = int(request.form["amount"])
         purpose = (
             entities.PurposesOfPurchases.means_of_prod
@@ -364,17 +374,18 @@ def transfer_to_company(
             flash("Erfolgreich bezahlt.")
         except errors.CompanyIsNotPlanner:
             flash("Der angegebene Plan gehört nicht zum angegebenen Betrieb.")
-        except errors.CompanyDoesNotExist:
-            flash("Der Betrieb existiert nicht.")
-        except errors.PlanDoesNotExist:
-            flash("Der Plan existiert nicht.")
+        except errors.CompanyCantBuyPublicServices:
+            flash(
+                "Bezahlung nicht erfolgreich. Betriebe können keine öffentlichen Dienstleistungen oder Produkte erwerben."
+            )
 
     return render_template("company/transfer_to_company.html")
 
 
 @main_company.route("/company/my_offers")
 @login_required
-def my_offers():
+@with_injection
+def my_offers(offer_repository: ProductOfferRepository):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
@@ -382,9 +393,10 @@ def my_offers():
     my_plans = my_company.plans.all()
     my_offers = []
     for plan in my_plans:
-        for offer in plan.offers.all():
-            if offer.active == True:
-                my_offers.append(offer)
+        active_offers = plan.offers.filter_by(active=True).all()
+        for offer in active_offers:
+            my_offers.append(offer)
+    my_offers = [offer_repository.object_from_orm(offer) for offer in my_offers]
 
     return render_template("company/my_offers.html", offers=my_offers)
 

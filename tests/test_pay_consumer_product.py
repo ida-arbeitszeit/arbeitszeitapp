@@ -61,7 +61,28 @@ def test_that_correct_transaction_is_added(
     pay_consumer_product(sender, receiver, plan, pieces)
     assert len(transaction_repository.transactions) == 1
     transaction_added = transaction_repository.transactions[0]
-    expected_amount = pieces * plan.production_costs.total_cost()
+    expected_amount = pieces * plan.price_per_unit()
+    assert transaction_added.account_from == sender.account
+    assert transaction_added.account_to == receiver.product_account
+    assert transaction_added.amount == expected_amount
+
+
+@injection_test
+def test_that_correct_transaction_is_added_when_plan_is_public_service(
+    pay_consumer_product: PayConsumerProduct,
+    member_generator: MemberGenerator,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+    transaction_repository: TransactionRepository,
+):
+    sender = member_generator.create_member()
+    receiver = company_generator.create_company()
+    plan = plan_generator.create_plan(planner=receiver, is_public_service=True)
+    pieces = 3
+    pay_consumer_product(sender, receiver, plan, pieces)
+    assert len(transaction_repository.transactions) == 1
+    transaction_added = transaction_repository.transactions[0]
+    expected_amount = pieces * plan.price_per_unit()
     assert transaction_added.account_from == sender.account
     assert transaction_added.account_to == receiver.product_account
     assert transaction_added.amount == expected_amount
@@ -80,6 +101,24 @@ def test_balances_are_adjusted_correctly(
     plan = plan_generator.create_plan(planner=receiver)
     pieces = 3
     pay_consumer_product(sender, receiver, plan, pieces)
-    costs = pieces * plan.production_costs.total_cost()
+    costs = pieces * plan.price_per_unit()
+    assert account_repository.get_account_balance(sender.account) == -costs
+    assert account_repository.get_account_balance(receiver.product_account) == costs
+
+
+@injection_test
+def test_balances_are_adjusted_correctly_when_plan_is_public_service(
+    pay_consumer_product: PayConsumerProduct,
+    member_generator: MemberGenerator,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+    account_repository: AccountRepository,
+):
+    sender = member_generator.create_member()
+    receiver = company_generator.create_company()
+    plan = plan_generator.create_plan(planner=receiver, is_public_service=True)
+    pieces = 3
+    pay_consumer_product(sender, receiver, plan, pieces)
+    costs = pieces * plan.price_per_unit()
     assert account_repository.get_account_balance(sender.account) == -costs
     assert account_repository.get_account_balance(receiver.product_account) == costs

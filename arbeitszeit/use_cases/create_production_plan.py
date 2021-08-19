@@ -15,6 +15,7 @@ class PlanProposal:
     production_amount: int
     description: str
     timeframe_in_days: int
+    is_public_service: bool
 
 
 @inject
@@ -32,5 +33,6 @@ class CreatePlan:
             amount=plan_proposal.production_amount,
             description=plan_proposal.description,
             timeframe_in_days=plan_proposal.timeframe_in_days,
+            is_public_service=plan_proposal.is_public_service,
             creation_timestamp=self.datetime_service.now(),
         )

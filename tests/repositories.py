@@ -8,6 +8,7 @@ from typing import Dict, Iterator, List, Union
 from injector import inject, singleton
 
 import arbeitszeit.repositories as interfaces
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.entities import (
     Account,
@@ -117,18 +118,15 @@ class OfferRepository(interfaces.OfferRepository):
         description: str,
         amount_available: int,
     ) -> ProductOffer:
-        total_cost = plan.production_costs.total_cost()
-        planned_amount = plan.prd_amount
         offer = ProductOffer(
             id=uuid.uuid4(),
             name=name,
             amount_available=amount_available,
             deactivate_offer_in_db=lambda: None,
             decrease_amount_available=lambda _: None,
-            price_per_unit=total_cost / planned_amount,
-            provider=plan.planner,
             active=True,
             description=description,
+            plan=plan,
         )
         self.offers.append(offer)
         return offer
@@ -271,6 +269,7 @@ class CompanyRepository(interfaces.CompanyRepository):
     ) -> Company:
         new_company = Company(
             id=uuid.uuid4(),
+            email=email,
             name=name,
             means_account=means_account,
             raw_material_account=resource_account,
@@ -287,8 +286,10 @@ class CompanyRepository(interfaces.CompanyRepository):
 
 @singleton
 class PlanRepository(interfaces.PlanRepository):
-    def __init__(self) -> None:
+    @inject
+    def __init__(self, datetime_service: DatetimeService) -> None:
         self.plans: Dict[uuid.UUID, Plan] = {}
+        self.datetime_service = datetime_service
 
     def create_plan(
         self,
@@ -299,6 +300,7 @@ class PlanRepository(interfaces.PlanRepository):
         amount: int,
         description: str,
         timeframe_in_days: int,
+        is_public_service: bool,
         creation_timestamp: datetime,
     ) -> Plan:
         plan = Plan(
@@ -311,16 +313,18 @@ class PlanRepository(interfaces.PlanRepository):
             prd_amount=amount,
             description=description,
             timeframe=timeframe_in_days,
+            is_public_service=is_public_service,
+            is_active=False,
+            activation_date=None,
             approved=False,
             approval_date=None,
             approval_reason=None,
             approve=lambda _1, _2, _3: None,
             expired=False,
             renewed=False,
-            set_as_expired=lambda: None,
-            set_as_renewed=lambda: None,
             expiration_relative=None,
             expiration_date=None,
+            last_certificate_payout=None,
         )
         self.plans[planner.id] = plan
         return plan
@@ -330,3 +334,69 @@ class PlanRepository(interfaces.PlanRepository):
 
     def __len__(self) -> int:
         return len(self.plans)
+
+    def activate_plan(self, plan: Plan, activation_date: datetime) -> None:
+        plan.is_active = True
+        plan.activation_date = activation_date
+
+    def set_plan_as_expired(self, plan: Plan) -> None:
+        plan.expired = True
+        plan.is_active = False
+
+    def renew_plan(self, plan: Plan) -> None:
+        plan.renewed = True
+
+    def set_expiration_date(self, plan: Plan, expiration_date: datetime) -> None:
+        plan.expiration_date = expiration_date
+
+    def set_expiration_relative(self, plan: Plan, days: int) -> None:
+        plan.expiration_relative = days
+
+    def set_last_certificate_payout(self, plan: Plan, last_payout) -> None:
+        plan.last_certificate_payout = last_payout
+
+    def all_active_plans(self) -> Iterator[Plan]:
+        for plan in self.plans.values():
+            if plan.is_active:
+                yield plan
+
+    def all_plans_approved_and_not_expired(self) -> Iterator[Plan]:
+        for plan in self.plans.values():
+            if plan.approved and not plan.expired:
+                yield plan
+
+    def all_plans_approved_active_and_not_expired(self) -> Iterator[Plan]:
+        for plan in self.plans.values():
+            if plan.approved and plan.is_active and not plan.expired:
+                yield plan
+
+    def all_productive_plans_approved_active_and_not_expired(self) -> Iterator[Plan]:
+        for plan in self.plans.values():
+            if (
+                not plan.is_public_service
+                and plan.is_active
+                and plan.approved
+                and not plan.expired
+            ):
+                yield plan
+
+    def all_public_plans_approved_active_and_not_expired(self) -> Iterator[Plan]:
+        for plan in self.plans.values():
+            if (
+                plan.is_public_service
+                and plan.is_active
+                and plan.approved
+                and not plan.expired
+            ):
+                yield plan
+
+    def get_plans_suitable_for_activation(self) -> Iterator[Plan]:
+        for plan in self.plans.values():
+            if (
+                plan.approved
+                and not plan.is_active
+                and not plan.expired
+                and plan.plan_creation_date
+                < self.datetime_service.past_plan_activation_date()
+            ):
+                yield plan
