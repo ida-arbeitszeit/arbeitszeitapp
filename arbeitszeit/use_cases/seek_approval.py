@@ -5,7 +5,6 @@ from uuid import UUID
 from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Plan
 from arbeitszeit.repositories import PlanRepository
 
 
