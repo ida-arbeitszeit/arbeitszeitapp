@@ -76,14 +76,20 @@ class Plan(UserMixin, db.Model):
     prd_amount = db.Column(db.Integer, nullable=False)
     description = db.Column(db.String(5000), nullable=False)
     timeframe = db.Column(db.Numeric(), nullable=False)
+    is_public_service = db.Column(db.Boolean, nullable=False, default=False)
     social_accounting = db.Column(
         db.String, db.ForeignKey("social_accounting.id"), nullable=False
     )
     approved = db.Column(db.Boolean, nullable=False, default=False)
     approval_date = db.Column(db.DateTime, nullable=True, default=None)
     approval_reason = db.Column(db.String(1000), nullable=True, default=None)
+    is_active = db.Column(db.Boolean, nullable=False, default=False)
+    activation_date = db.Column(db.DateTime, nullable=True)
     expired = db.Column(db.Boolean, nullable=False, default=False)
     renewed = db.Column(db.Boolean, nullable=False, default=False)
+    last_certificate_payout = db.Column(db.DateTime, nullable=True)
+    expiration_date = db.Column(db.DateTime, nullable=True)
+    expiration_relative = db.Column(db.Integer, nullable=True)
 
     offers = db.relationship("Offer", lazy="dynamic", backref="plan")
 

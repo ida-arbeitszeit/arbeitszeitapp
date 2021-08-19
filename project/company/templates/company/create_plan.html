@@ -26,9 +26,10 @@
         Ein Plan besteht zunächst aus dem <b>Namen des Produktes</b>,
         der <b>Beschreibung des Produktes</b> und dem <b>Planungszeitraum</b>.
         In diesem Zeitraum planst du, eine bestimmte <b>Menge</b> an <b>Einheiten</b>
-        eines bestimmten Produktes herzustellen und zu verkaufen. <br> Gib außerdem an, wieviele
-        <b>Kosten für Produktionsmittel</b>, <b>Roh- und Hilfsstoffe</b> und <b>Arbeitskraft</b>
-        du für das (gesamte) Produkt in diesem Zeitraum aufwenden wirst.
+        eines bestimmten Produktes herzustellen und zu verkaufen. <br>
+        Gib an, wieviele <b>Kosten für Produktionsmittel</b>, <b>Roh- und Hilfsstoffe</b> und <b>Arbeitskraft</b>
+        du für das (gesamte) Produkt in diesem Zeitraum aufwenden wirst. <br>
+        Wähle, ob es sich um einen <b>produktiven oder öffentlichen Plan</b> handelt.
       </p>
     </div>
 
@@ -44,46 +45,40 @@
 
     <form method="post">
       <div class="field">
+        <label class="label">Name des Produkts</label>
         <div class="control">
-          <label for="name">Name des Produkts</label>
           <input class="input is-large" , type="text" , name="prd_name" ,
             value="{{ original_plan.prd_name if original_plan else '' }}" required>
         </div>
       </div>
       <div class="block"></div>
 
-      <hr>
 
       <div class="field">
+        <label class="label">Beschreibung des Produkts</label>
         <div class="control">
-          <label for="description">Beschreibung des Produkts</label>
           <textarea class="textarea is-large" , name="description"
             required>{{ original_plan.description if original_plan else '' }}</textarea>
-          <p class="help">(Verfügbarkeit, Kontaktmöglichkeiten, etc.)</p>
         </div>
 
       </div>
       <div class="block"></div>
 
 
-      <hr>
-
       <div class="field">
+        <label class="label">Planungszeitraum (Tage)</label>
         <div class="control">
-          <label for="timeframe">Planungszeitraum:</label>
           <input class="input is-large" type="number" name="timeframe" min=1 max=365
             value="{{ original_plan.timeframe if original_plan else 1 }}" required>
-          <p class="help">(Wieviele Tage umfasst der Planungszeitraum?)</p>
         </div>
       </div>
       <div class="block"></div>
 
 
-      <hr>
 
       <div class="field">
+        <label class="label">Kleinste Abgabeeinheit</label>
         <div class="control">
-          <label for="prd_unit">Kleinste Abgabeeinheit</label>
           <input class="input is-large" , type="text" , name="prd_unit" ,
             value="{{ original_plan.prd_unit if original_plan else '1 Kg' }}" , required>
           <p class="help">(1 Packung à 100 Stück, 1 Kilogramm, 1 Flasche à 0,5 Liter, 1 Meter, Unterrichtseinheit à 1,5
@@ -95,11 +90,10 @@
       <div class="block"></div>
 
 
-      <hr>
 
       <div class="field">
+        <label class="label">Menge</label>
         <div class="control">
-          <label for="prd_amount">Menge:</label>
           <input class="input is-large" type="number" name="prd_amount" min=1
             value="{{ original_plan.prd_amount if original_plan else 1 }}" required>
           <p class="help">(Wieviele Einheiten werden produziert und verkauft?)</p>
@@ -107,38 +101,54 @@
       </div>
       <div class="block"></div>
 
-      <hr>
 
       <div class="field">
+        <label class="label">Kosten für Produktionsmittel</label>
         <div class="control">
-          <label for="costs_p">Kosten für Produktionsmittel:</label>
           <input class="input is-large" type="number" name="costs_p"
             value="{{ original_plan.costs_p if original_plan else 0 }}" required>
         </div>
       </div>
       <div class="block"></div>
 
-      <hr>
 
       <div class="field">
+        <label class="label">Kosten für Roh- und Hilfsstoffe:</label>
         <div class="control">
-          <label for="costs_r">Kosten für Roh- und Hilfsstoffe:</label>
           <input class="input is-large" type="number" name="costs_r"
             value="{{ original_plan.costs_r if original_plan else 0 }}" required>
         </div>
       </div>
       <div class="block"></div>
 
-      <hr>
 
       <div class="field">
+        <label class="label">Enthaltene Arbeitsstunden:</label>
         <div class="control">
-          <label for="costs_a">Enthaltene Arbeitsstunden:</label>
           <input class="input is-large" type="number" name="costs_a"
             value="{{ original_plan.costs_a if original_plan else 0 }}" required>
         </div>
       </div>
       <div class="block"></div>
+
+
+      <div class="field">
+        <label class="label">Art des Plans</label>
+        <div class="control">
+          <label class="radio">
+            <input type="radio" name="productive_or_public" value="productive" required>
+            Produktiv
+          </label>
+          <label class="radio">
+            <input type="radio" name="productive_or_public" value="public">
+            Öffentlich
+          </label>
+          <p class="help">Produktive Pläne sind der Regelfall. <br>
+            Öffentliche Pläne müssen vom Plenum genehmigt sein.
+          </p>
+        </div>
+      </div>
+
 
       <div class="box has-background-danger-light has-text-danger-dark">
         <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>

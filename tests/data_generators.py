@@ -6,6 +6,7 @@ repository.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 from decimal import Decimal
 from typing import Optional, Union
 from uuid import uuid4
@@ -157,18 +158,16 @@ class PlanGenerator:
         planner=None,
         timeframe=None,
         approved=False,
+        activation_date: Optional[datetime] = None,
         amount: int = 100,
-        total_cost: Optional[Decimal] = None,
+        costs: Optional[ProductionCosts] = None,
+        is_public_service=False,
     ) -> Plan:
-        if total_cost is None:
-            total_cost = Decimal(3)
-        costs = ProductionCosts(
-            labour_cost=total_cost / Decimal(3),
-            resource_cost=total_cost / Decimal(3),
-            means_cost=total_cost / Decimal(3),
-        )
+        if costs is None:
+            costs = ProductionCosts(Decimal(1), Decimal(1), Decimal(1))
+        costs = costs
         if plan_creation_date is None:
-            plan_creation_date = self.datetime_service.now()
+            plan_creation_date = self.datetime_service.now_minus_two_days()
         if planner is None:
             planner = self.company_generator.create_company()
         if timeframe is None:
@@ -181,10 +180,13 @@ class PlanGenerator:
             amount=amount,
             description="Beschreibung für Produkt A.",
             timeframe_in_days=timeframe,
+            is_public_service=is_public_service,
             creation_timestamp=plan_creation_date,
         )
         if approved:
             self.seek_approval(plan, None)
+        if activation_date:
+            self.plan_repository.activate_plan(plan, activation_date)
         return plan
 
 

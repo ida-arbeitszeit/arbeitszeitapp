@@ -39,6 +39,21 @@ def test_error_is_raised_if_receiver_is_not_equal_to_planner(
 
 
 @injection_test
+def test_error_is_raised_if_trying_to_pay_public_service(
+    pay_means_of_production: PayMeansOfProduction,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+):
+    sender = company_generator.create_company()
+    receiver = company_generator.create_company()
+    plan = plan_generator.create_plan(planner=receiver, is_public_service=True)
+    purpose = PurposesOfPurchases.means_of_prod
+    pieces = 5
+    with pytest.raises(errors.CompanyCantBuyPublicServices):
+        pay_means_of_production(sender, receiver, plan, pieces, purpose)
+
+
+@injection_test
 def test_balance_of_buyer_of_means_of_prod_reduced(
     pay_means_of_production: PayMeansOfProduction,
     company_generator: CompanyGenerator,
@@ -53,7 +68,7 @@ def test_balance_of_buyer_of_means_of_prod_reduced(
 
     pay_means_of_production(sender, receiver, plan, pieces, purpose)
 
-    price_total = pieces * plan.production_costs.total_cost()
+    price_total = pieces * plan.price_per_unit()
     assert account_repository.get_account_balance(sender.means_account) == -price_total
 
 
@@ -72,7 +87,7 @@ def test_balance_of_buyer_of_raw_materials_reduced(
 
     pay_means_of_production(sender, receiver, plan, pieces, purpose)
 
-    price_total = pieces * plan.production_costs.total_cost()
+    price_total = pieces * plan.price_per_unit()
     assert (
         account_repository.get_account_balance(sender.raw_material_account)
         == -price_total
@@ -94,7 +109,7 @@ def test_balance_of_seller_increased(
 
     pay_means_of_production(sender, receiver, plan, pieces, purpose)
 
-    price_total = pieces * plan.production_costs.total_cost()
+    price_total = pieces * plan.price_per_unit()
     assert (
         account_repository.get_account_balance(receiver.product_account) == price_total
     )
@@ -113,7 +128,7 @@ def test_correct_transaction_added_if_means_of_production_were_paid(
     purpose = PurposesOfPurchases.means_of_prod
     pieces = 5
     pay_means_of_production(sender, receiver, plan, pieces, purpose)
-    price_total = pieces * plan.production_costs.total_cost()
+    price_total = pieces * plan.price_per_unit()
     assert len(transaction_repository.transactions) == 1
     assert transaction_repository.transactions[0].account_from == sender.means_account
     assert (
@@ -136,7 +151,7 @@ def test_correct_transaction_added_if_raw_materials_were_paid(
     purpose = PurposesOfPurchases.raw_materials
     pieces = 5
     pay_means_of_production(sender, receiver, plan, pieces, purpose)
-    price_total = pieces * plan.production_costs.total_cost()
+    price_total = pieces * plan.price_per_unit()
     assert len(transaction_repository.transactions) == 1
     assert (
         transaction_repository.transactions[0].account_from

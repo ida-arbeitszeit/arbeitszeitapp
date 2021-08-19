@@ -58,10 +58,8 @@ def suchen(
             product_filter = use_cases.ProductFilter.by_name
         elif search_field == "Beschreibung":
             product_filter = use_cases.ProductFilter.by_description
-    results = [
-        offer_repository.object_to_orm(offer)
-        for offer in query_products(query, product_filter)
-    ]
+    results = list(query_products(query, product_filter))
+
     if not results:
         flash("Keine Ergebnisse!")
     return render_template("member/search.html", form=search_form, results=results)
@@ -126,10 +124,6 @@ def pay_consumer_product(
             flash("Produkt erfolgreich bezahlt.")
         except errors.CompanyIsNotPlanner:
             flash("Der angegebene Plan gehört nicht zum angegebenen Betrieb.")
-        except errors.CompanyDoesNotExist:
-            flash("Der Betrieb existiert nicht.")
-        except errors.PlanDoesNotExist:
-            flash("Der Plan existiert nicht.")
         except errors.PlanIsExpired:
             flash(
                 "Der angegebene Plan ist nicht mehr aktuell. Bitte wende dich an den Verkäufer, um eine aktuelle Plan-ID zu erhalten."

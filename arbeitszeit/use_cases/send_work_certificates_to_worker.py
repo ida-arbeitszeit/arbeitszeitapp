@@ -24,8 +24,7 @@ class SendWorkCertificatesToWorker:
         - It adjusts the balances of the company and employee accounts
         - It adds the transaction to the repository
 
-        This function may raise a WorkerNotAtCompany if the worker is not employed at the company
-        or a WorkerDoesNotExist exception if the worker does not exist.
+        This function may raise a WorkerNotAtCompany if the worker is not employed at the company.
         """
         company_workers = self.company_worker_repository.get_company_workers(company)
         if worker not in company_workers:

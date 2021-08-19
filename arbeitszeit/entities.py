@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional, Union
 from uuid import UUID
 
 
@@ -44,6 +44,7 @@ class Company:
     def __init__(
         self,
         id: UUID,
+        email: str,
         name: str,
         means_account: Account,
         raw_material_account: Account,
@@ -52,6 +53,7 @@ class Company:
         workers: List[Member],
     ) -> None:
         self._id = id
+        self.email = email
         self.name = name
         self.means_account = means_account
         self.raw_material_account = raw_material_account
@@ -125,16 +127,18 @@ class Plan:
         prd_amount: int,
         description: str,
         timeframe: int,
+        is_public_service: bool,
         approved: bool,
         approval_date: Optional[datetime],
         approval_reason: Optional[str],
         approve: Callable[[bool, str, datetime], None],
+        is_active: bool,
         expired: bool,
         renewed: bool,
-        set_as_expired: Callable[[], None],
-        set_as_renewed: Callable[[], None],
-        expiration_relative: Optional[Tuple[int, int, int]],
+        activation_date: Optional[datetime],
+        expiration_relative: Optional[int],
         expiration_date: Optional[datetime],
+        last_certificate_payout: Optional[datetime],
     ) -> None:
         self.id = id
         self.plan_creation_date = plan_creation_date
@@ -145,16 +149,18 @@ class Plan:
         self.prd_amount = prd_amount
         self.description = description
         self.timeframe = timeframe
+        self.is_public_service = is_public_service
         self.approved = approved
         self.approval_date = approval_date
         self.approval_reason = approval_reason
         self._approve_call = approve
+        self.is_active = is_active
         self.expired = expired
         self.renewed = renewed
-        self._set_as_expired = set_as_expired
-        self._set_as_renewed = set_as_renewed
         self.expiration_relative = expiration_relative
         self.expiration_date = expiration_date
+        self.activation_date = activation_date
+        self.last_certificate_payout = last_certificate_payout
 
     def approve(self, approval_date: datetime) -> None:
         self.approved = True
@@ -168,13 +174,21 @@ class Plan:
         self.approval_reason = "not approved"
         self._approve_call(False, "not approved", denial_date)
 
-    def set_as_expired(self) -> None:
-        self.expired = True
-        self._set_as_expired()
+    def price_per_unit(self) -> Decimal:
+        cost_per_unit = self.production_costs.total_cost() / self.prd_amount
+        return cost_per_unit if not self.is_public_service else Decimal(0)
 
-    def set_as_renewed(self) -> None:
-        self.renewed = True
-        self._set_as_renewed()
+    def expected_sales_value(self) -> Decimal:
+        """
+        For productive plans, sales value should equal total cost.
+        Public services are not expected to sell,
+        they give away their product for free.
+        """
+        return (
+            self.production_costs.total_cost()
+            if not self.is_public_service
+            else Decimal(0)
+        )
 
 
 class ProductOffer:
@@ -185,20 +199,18 @@ class ProductOffer:
         amount_available: int,
         deactivate_offer_in_db: Callable[[], None],
         decrease_amount_available: Callable[[int], None],
-        price_per_unit: Decimal,
-        provider: Company,
         active: bool,
         description: str,
+        plan: Plan,
     ) -> None:
         self._id = id
         self.name = name
         self._amount_available = amount_available
         self._deactivate = deactivate_offer_in_db
         self._decrease_amount = decrease_amount_available
-        self.price_per_unit = price_per_unit
-        self.provider = provider
         self.active = active
         self.description = description
+        self.plan = plan
 
     def deactivate(self) -> None:
         self.active = False
@@ -207,6 +219,9 @@ class ProductOffer:
     def decrease_amount_available(self, amount: int) -> None:
         self._amount_available -= amount
         self._decrease_amount(amount)
+
+    def price_per_unit(self) -> Decimal:
+        return self.plan.price_per_unit()
 
     @property
     def id(self) -> UUID:

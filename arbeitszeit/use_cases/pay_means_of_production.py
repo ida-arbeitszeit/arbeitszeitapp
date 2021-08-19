@@ -37,6 +37,9 @@ class PayMeansOfProduction:
             PurposesOfPurchases.raw_materials,
         ), "Not a valid purpose for this operation."
 
+        if plan.is_public_service:
+            raise errors.CompanyCantBuyPublicServices(sender, plan)
+
         if plan.planner != receiver:
             raise errors.CompanyIsNotPlanner(
                 company=receiver,
@@ -44,7 +47,7 @@ class PayMeansOfProduction:
             )
 
         # create transaction
-        price_total = pieces * plan.production_costs.total_cost()
+        price_total = pieces * plan.price_per_unit()
         if purpose == PurposesOfPurchases.means_of_prod:
             account_from = sender.means_account
         elif purpose == PurposesOfPurchases.raw_materials:

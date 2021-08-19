@@ -12,6 +12,7 @@ from sqlalchemy import desc
 from werkzeug.security import generate_password_hash
 
 from arbeitszeit import entities, repositories
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
 from project.error import (
     CompanyNotFound,
@@ -117,6 +118,7 @@ class CompanyRepository(repositories.CompanyRepository):
     def object_from_orm(self, company_orm: Company) -> entities.Company:
         return entities.Company(
             id=UUID(company_orm.id),
+            email=company_orm.email,
             name=company_orm.name,
             means_account=self.account_repository.object_from_orm(
                 self._get_means_account(company_orm)
@@ -366,10 +368,7 @@ class ProductOfferRepository(repositories.OfferRepository):
         return Offer.query.get(str(product_offer.id))
 
     def object_from_orm(self, offer_orm: Offer) -> entities.ProductOffer:
-        plan = offer_orm.plan
-        price_per_unit = Decimal(
-            (plan.costs_p + plan.costs_r + plan.costs_a) / plan.prd_amount
-        )
+        plan = self.plan_repository.object_from_orm(offer_orm.plan)
         return entities.ProductOffer(
             id=UUID(offer_orm.id),
             name=offer_orm.name,
@@ -380,10 +379,9 @@ class ProductOfferRepository(repositories.OfferRepository):
                 "amount_available",
                 getattr(offer_orm, "amount_available") - amount,
             ),
-            price_per_unit=price_per_unit,
-            provider=self.company_repository.object_from_orm(plan.company),
             active=offer_orm.active,
             description=offer_orm.description,
+            plan=plan,
         )
 
     def get_by_id(self, id: UUID) -> entities.ProductOffer:
@@ -445,6 +443,7 @@ class ProductOfferRepository(repositories.OfferRepository):
 class PlanRepository(repositories.PlanRepository):
     company_repository: CompanyRepository
     accounting_repository: AccountingRepository
+    datetime_service: DatetimeService
     db: SQLAlchemy
 
     def _approve(self, plan, decision, reason, approval_date):
@@ -468,18 +467,20 @@ class PlanRepository(repositories.PlanRepository):
             prd_amount=plan.prd_amount,
             description=plan.description,
             timeframe=plan.timeframe,
+            is_public_service=plan.is_public_service,
             approved=plan.approved,
             approval_date=plan.approval_date,
             approval_reason=plan.approval_reason,
             approve=lambda decision, reason, approval_date: self._approve(
                 plan, decision, reason, approval_date
             ),
+            is_active=plan.is_active,
             expired=plan.expired,
             renewed=plan.renewed,
-            set_as_expired=lambda: setattr(plan, "expired", True),
-            set_as_renewed=lambda: setattr(plan, "renewed", True),
-            expiration_relative=None,
-            expiration_date=None,
+            expiration_relative=plan.expiration_relative,
+            expiration_date=plan.expiration_date,
+            last_certificate_payout=plan.last_certificate_payout,
+            activation_date=plan.activation_date,
         )
 
     def object_to_orm(self, plan: entities.Plan) -> Plan:
@@ -501,6 +502,7 @@ class PlanRepository(repositories.PlanRepository):
         amount: int,
         description: str,
         timeframe_in_days: int,
+        is_public_service: bool,
         creation_timestamp: datetime,
     ) -> entities.Plan:
         plan = Plan(
@@ -514,11 +516,120 @@ class PlanRepository(repositories.PlanRepository):
             prd_amount=amount,
             description=description,
             timeframe=timeframe_in_days,
+            is_public_service=is_public_service,
+            is_active=False,
+            activation_date=None,
+            expiration_date=None,
             social_accounting=self.accounting_repository.get_or_create_social_accounting_orm().id,
         )
+
         self.db.session.add(plan)
         self.db.session.commit()
         return self.object_from_orm(plan)
+
+    def activate_plan(self, plan: entities.Plan, activation_date: datetime) -> None:
+        plan.is_active = True
+        plan.activation_date = activation_date
+
+        plan_orm = self.object_to_orm(plan)
+        plan_orm.is_active = True
+        plan_orm.activation_date = activation_date
+        self.db.session.commit()
+
+    def set_plan_as_expired(self, plan: entities.Plan) -> None:
+        plan.expired = True
+        plan.is_active = False
+
+        plan_orm = self.object_to_orm(plan)
+        plan_orm.expired = True
+        plan_orm.is_active = False
+        self.db.session.commit()
+
+    def renew_plan(self, plan: entities.Plan) -> None:
+        plan.renewed = True
+
+        plan_orm = self.object_to_orm(plan)
+        plan_orm.renewed = True
+        self.db.session.commit()
+
+    def set_expiration_date(
+        self, plan: entities.Plan, expiration_date: datetime
+    ) -> None:
+        plan.expiration_date = expiration_date
+
+        plan_orm = self.object_to_orm(plan)
+        plan_orm.expiration_date = expiration_date
+        self.db.session.commit()
+
+    def set_expiration_relative(self, plan: entities.Plan, days: int) -> None:
+        plan.expiration_relative = days
+
+        plan_orm = self.object_to_orm(plan)
+        plan_orm.expiration_relative = days
+        self.db.session.commit()
+
+    def set_last_certificate_payout(
+        self, plan: entities.Plan, last_payout: datetime
+    ) -> None:
+        plan.last_certificate_payout = last_payout
+
+        plan_orm = self.object_to_orm(plan)
+        plan_orm.last_certificate_payout = last_payout
+        self.db.session.commit()
+
+    def all_active_plans(self) -> Iterator[entities.Plan]:
+        return (
+            self.object_from_orm(plan_orm)
+            for plan_orm in Plan.query.filter_by(is_active=True).all()
+        )
+
+    def all_plans_approved_and_not_expired(self) -> Iterator[entities.Plan]:
+        return (
+            self.object_from_orm(plan_orm)
+            for plan_orm in Plan.query.filter_by(approved=True, expired=False).all()
+        )
+
+    def all_productive_plans_approved_active_and_not_expired(
+        self,
+    ) -> Iterator[entities.Plan]:
+        return (
+            self.object_from_orm(plan_orm)
+            for plan_orm in Plan.query.filter_by(
+                approved=True, is_active=True, expired=False, is_public_service=False
+            ).all()
+        )
+
+    def all_public_plans_approved_active_and_not_expired(
+        self,
+    ) -> Iterator[entities.Plan]:
+        return (
+            self.object_from_orm(plan_orm)
+            for plan_orm in Plan.query.filter_by(
+                approved=True, is_active=True, expired=False, is_public_service=True
+            ).all()
+        )
+
+    def all_plans_approved_active_and_not_expired(self) -> Iterator[entities.Plan]:
+        return (
+            self.object_from_orm(plan_orm)
+            for plan_orm in Plan.query.filter_by(
+                approved=True,
+                is_active=True,
+                expired=False,
+            ).all()
+        )
+
+    def get_plans_suitable_for_activation(
+        self,
+    ) -> Iterator[entities.Plan]:
+        return (
+            self.object_from_orm(plan_orm)
+            for plan_orm in Plan.query.filter_by(
+                approved=True, is_active=False, expired=False
+            ).all()
+            if plan_orm.plan_creation_date
+            < self.datetime_service.past_plan_activation_date()
+        )
 
 
 @inject
