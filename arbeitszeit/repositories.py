@@ -212,3 +212,7 @@ class CompanyRepository(ABC):
     @abstractmethod
     def has_company_with_email(self, email: str) -> bool:
         pass
+
+    @abstractmethod
+    def get_by_id(self, id: UUID) -> Company:
+        pass

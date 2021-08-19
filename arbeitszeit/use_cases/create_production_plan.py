@@ -1,10 +1,11 @@
 from dataclasses import dataclass
+from uuid import UUID
 
 from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Company, Plan, ProductionCosts
-from arbeitszeit.repositories import PlanRepository
+from arbeitszeit.repositories import CompanyRepository, PlanRepository
 
 
 @dataclass
@@ -23,10 +24,11 @@ class PlanProposal:
 class CreatePlan:
     plan_repository: PlanRepository
     datetime_service: DatetimeService
+    company_repository: CompanyRepository
 
-    def __call__(self, company: Company, plan_proposal: PlanProposal) -> Plan:
+    def __call__(self, planner: UUID, plan_proposal: PlanProposal) -> Plan:
         return self.plan_repository.create_plan(
-            planner=company,
+            planner=self.company_repository.get_by_id(planner),
             costs=plan_proposal.costs,
             product_name=plan_proposal.product_name,
             production_unit=plan_proposal.production_unit,
