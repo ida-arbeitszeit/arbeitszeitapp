@@ -14,7 +14,7 @@ def activate_database_plans(
     plan_repository: PlanRepository,
 ):
     """
-    run once per day at time stored in DatetimeService().time_of_plan_activation.
+    run once per day on the production server at time stored in DatetimeService().time_of_plan_activation.
     """
     all_active_plans = plan_repository.all_active_plans()
     for plan in all_active_plans:
