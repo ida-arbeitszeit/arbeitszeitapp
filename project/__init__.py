@@ -1,5 +1,6 @@
 from flask import Flask, session
 from flask_table import Col, Table  # noqa: Do not delete
+from flask_talisman import Talisman
 
 import project.extensions
 from project.extensions import login_manager
@@ -21,6 +22,17 @@ def create_app(config=None, db=None, migrate=None):
     # Where to redirect the user when he attempts to access a login_required
     # view without being logged in.
     login_manager.login_view = "auth.start"
+
+    # Init Flask-Talisman
+    if app.config['ENV'] == 'production':
+        csp = {
+            'default-src': [
+                '\'self\'',
+                '\'unsafe-inline\'',
+                '*.fontawesome.com'
+            ]
+        }
+        Talisman(app, content_security_policy=csp)
 
     # init flask extensions
     db.init_app(app)
