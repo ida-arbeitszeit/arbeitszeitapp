@@ -30,11 +30,10 @@ from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
     MemberRepository,
-    OfferRepository,
     PlanRepository,
     TransactionRepository,
 )
-from arbeitszeit.use_cases import SeekApproval
+from arbeitszeit.use_cases import CreateOffer, Offer, SeekApproval
 from tests.datetime_service import FakeDatetimeService
 
 
@@ -42,8 +41,8 @@ from tests.datetime_service import FakeDatetimeService
 @dataclass
 class OfferGenerator:
     plan_generator: PlanGenerator
-    offer_repository: OfferRepository
     datetime_service: FakeDatetimeService
+    _create_offer: CreateOffer
 
     def create_offer(
         self,
@@ -58,12 +57,13 @@ class OfferGenerator:
             plan = self.plan_generator.create_plan(amount=amount)
         if creation_timestamp is None:
             creation_timestamp = self.datetime_service.now()
-        return self.offer_repository.create_offer(
-            plan=plan,
-            creation_datetime=creation_timestamp,
-            name=name,
-            description=description,
-            amount_available=amount,
+        return self._create_offer(
+            Offer(
+                name=name,
+                description=description,
+                plan_id=plan.id,
+                amount_available=amount,
+            )
         )
 
 
