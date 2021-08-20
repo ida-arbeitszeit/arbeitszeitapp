@@ -52,7 +52,7 @@ class OfferGenerator:
         amount=1,
         description="",
         plan=None,
-        creation_timestamp=None
+        creation_timestamp=None,
     ) -> ProductOffer:
         if plan is None:
             plan = self.plan_generator.create_plan(amount=amount)
@@ -154,6 +154,7 @@ class PlanGenerator:
 
     def create_plan(
         self,
+        *,
         plan_creation_date=None,
         planner=None,
         timeframe=None,
@@ -162,6 +163,9 @@ class PlanGenerator:
         amount: int = 100,
         costs: Optional[ProductionCosts] = None,
         is_public_service=False,
+        product_name="Produkt A",
+        description="Beschreibung für Produkt A.",
+        production_unit="500 Gramm",
     ) -> Plan:
         if costs is None:
             costs = ProductionCosts(Decimal(1), Decimal(1), Decimal(1))
@@ -175,16 +179,16 @@ class PlanGenerator:
         plan = self.plan_repository.create_plan(
             planner=planner,
             costs=costs,
-            product_name="Produkt A",
-            production_unit="500 Gramm",
+            product_name=product_name,
+            production_unit=production_unit,
             amount=amount,
-            description="Beschreibung für Produkt A.",
+            description=description,
             timeframe_in_days=timeframe,
             is_public_service=is_public_service,
             creation_timestamp=plan_creation_date,
         )
         if approved:
-            self.seek_approval(plan, None)
+            self.seek_approval(plan.id, None)
         if activation_date:
             self.plan_repository.activate_plan(plan, activation_date)
         return plan

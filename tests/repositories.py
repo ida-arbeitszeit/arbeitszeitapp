@@ -283,6 +283,12 @@ class CompanyRepository(interfaces.CompanyRepository):
     def has_company_with_email(self, email: str) -> bool:
         return email in self.companies
 
+    def get_by_id(self, id: uuid.UUID) -> Company:
+        for company in self.companies.values():
+            if company.id == id:
+                return company
+        raise Exception("Company not found, this exception is not meant to be caught")
+
 
 @singleton
 class PlanRepository(interfaces.PlanRepository):
@@ -326,7 +332,7 @@ class PlanRepository(interfaces.PlanRepository):
             expiration_date=None,
             last_certificate_payout=None,
         )
-        self.plans[planner.id] = plan
+        self.plans[plan.id] = plan
         return plan
 
     def get_plan_by_id(self, id: uuid.UUID) -> Plan:

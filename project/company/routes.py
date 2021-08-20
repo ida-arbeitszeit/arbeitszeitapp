@@ -6,7 +6,13 @@ from flask import Blueprint, flash, redirect, render_template, request, session,
 from flask_login import current_user, login_required
 
 from arbeitszeit import entities, errors, use_cases
-from arbeitszeit.use_cases import CreateOffer, CreatePlan, Offer, PlanProposal
+from arbeitszeit.use_cases import (
+    CreateOffer,
+    CreatePlan,
+    GetPlanSummary,
+    Offer,
+    PlanProposal,
+)
 from project import database, error
 from project.database import (
     AccountRepository,
@@ -167,18 +173,15 @@ def my_purchases(
 @with_injection
 def create_plan(
     create_plan_from_proposal: CreatePlan,
+    get_plan_summary: GetPlanSummary,
     seek_approval: use_cases.SeekApproval,
-    plan_repository: PlanRepository,
-    company_repository: CompanyRepository,
 ):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
     original_plan_id: Optional[str] = request.args.get("original_plan_id")
-    original_plan = (
-        plan_repository.get_plan_by_id(UUID(original_plan_id))
-        if original_plan_id
-        else None
+    original_plan_uuid: Optional[UUID] = (
+        UUID(original_plan_id) if original_plan_id else None
     )
 
     if request.method == "POST":  # Button "Plan erstellen"
@@ -198,9 +201,8 @@ def create_plan(
             if plan_data["productive_or_public"] == "public"
             else False,
         )
-        planner = company_repository.get_by_id(current_user.id)
-        new_plan = create_plan_from_proposal(planner, proposal)
-        is_approved = seek_approval(new_plan, original_plan)
+        new_plan = create_plan_from_proposal(current_user.id, proposal)
+        is_approved = seek_approval(new_plan.id, original_plan_uuid)
         database.commit_changes()
 
         if is_approved:
@@ -214,6 +216,9 @@ def create_plan(
                 url_for("main_company.create_plan", original_plan_id=original_plan_id)
             )
 
+    original_plan = (
+        None if original_plan_uuid is None else get_plan_summary(original_plan_uuid)
+    )
     return render_template("company/create_plan.html", original_plan=original_plan)
 
 
