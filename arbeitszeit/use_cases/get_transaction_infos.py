@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import List, Union
+from decimal import Decimal
+from typing import Dict, List, Tuple, Union
 
 from injector import inject
 
@@ -17,6 +18,9 @@ from arbeitszeit.repositories import (
     TransactionRepository,
 )
 
+User = Union[Member, Company]
+UserOrSocialAccounting = Union[User, SocialAccounting]
+
 
 @inject
 @dataclass
@@ -25,7 +29,7 @@ class GetTransactionInfos:
     member_repository: MemberRepository
     acount_owner_repository: AccountOwnerRepository
 
-    def __call__(self, user: Union[Member, Company]) -> List[TransactionInfo]:
+    def __call__(self, user: User) -> List[TransactionInfo]:
         return [
             self._create_info(user, transaction)
             for transaction in self._get_all_transactions_sorted(user)
@@ -61,34 +65,26 @@ class GetTransactionInfos:
             transaction.purpose,
         )
 
-    def _get_all_transactions_sorted(self, user):
-        all_transactions = []
+    def _get_all_transactions_sorted(self, user: User) -> List[Transaction]:
+        all_transactions = set()
         for account in user.accounts():
-            all_transactions.extend(
+            all_transactions.update(
                 self.transaction_repository.all_transactions_sent_by_account(account)
             )
-            all_transactions.extend(
+            all_transactions.update(
                 self.transaction_repository.all_transactions_received_by_account(
                     account
                 )
             )
-
-        # delete duplicate transactions, where user is sender and receiver
-        transactions_without_duplicates = []
-        transactions_checked = set()
-        for trans in all_transactions:
-            if trans.id in transactions_checked:
-                pass
-            else:
-                transactions_without_duplicates.append(trans)
-                transactions_checked.add(trans.id)
-
         all_transactions_sorted = sorted(
-            transactions_without_duplicates, key=lambda x: x.date, reverse=True
+            all_transactions, key=lambda x: x.date, reverse=True
         )
         return all_transactions_sorted
 
-    def _get_sender(self, transaction, user):
+    def _get_sender(
+        self, transaction: Transaction, user: User
+    ) -> Tuple[UserOrSocialAccounting, bool]:
+        sender: UserOrSocialAccounting
         if transaction.account_from in user.accounts():
             sender = user
             user_is_sender = True
@@ -99,7 +95,10 @@ class GetTransactionInfos:
             user_is_sender = False
         return sender, user_is_sender
 
-    def _get_receiver(self, transaction, user):
+    def _get_receiver(
+        self, transaction: Transaction, user: User
+    ) -> Tuple[UserOrSocialAccounting, bool]:
+        receiver: UserOrSocialAccounting
         if transaction.account_to in user.accounts():
             receiver = user
             user_is_receiver = True
@@ -110,30 +109,36 @@ class GetTransactionInfos:
             user_is_receiver = False
         return receiver, user_is_receiver
 
-    def _get_sender_name(self, sender, user_is_sender):
+    def _get_sender_name(
+        self, sender: UserOrSocialAccounting, user_is_sender: bool
+    ) -> str:
         if user_is_sender:
             sender_name = "Mir"
-        elif isinstance(sender, Company) or isinstance(sender, Member):
+        elif isinstance(sender, (Company, Member)):
             sender_name = sender.name
         elif isinstance(sender, SocialAccounting):
             sender_name = "Öff. Buchhaltung"
 
         return sender_name
 
-    def _get_receiver_name(self, receiver, user_is_receiver):
+    def _get_receiver_name(
+        self, receiver: UserOrSocialAccounting, user_is_receiver: bool
+    ) -> str:
         if user_is_receiver:
             receiver_name = "Mich"
-        else:
+        elif isinstance(receiver, (Company, Member)):
             receiver_name = receiver.name
+        else:
+            receiver_name = "Öff. Buchführung"
         return receiver_name
 
     def _get_volumes_for_company_transaction(
         self,
-        transaction,
-        user,
-        user_is_sender,
-        user_is_receiver,
-    ):
+        transaction: Transaction,
+        user: Company,
+        user_is_sender: bool,
+        user_is_receiver: bool,
+    ) -> Dict:
         if user_is_sender and user_is_receiver:  # company buys from itself
             transaction_volumes = self._get_volumes_for_company_transaction_if_company_is_sender_and_receiver(
                 transaction,
@@ -159,85 +164,91 @@ class GetTransactionInfos:
         return transaction_volumes
 
     def _get_volumes_for_company_transaction_if_company_is_sender_and_receiver(
-        self, transaction, user
-    ):
-        transaction_volumes = {}
+        self, transaction: Transaction, user: Company
+    ) -> Dict[str, Decimal]:
+        transaction_volumes: Dict[str, Decimal] = {}
         transaction_volumes[AccountTypes.p.value] = (
             -1 * transaction.amount
             if transaction.account_from == user.means_account
-            else ""
+            else Decimal(0)
         )
         transaction_volumes[AccountTypes.r.value] = (
             -1 * transaction.amount
             if transaction.account_from == user.raw_material_account
-            else ""
+            else Decimal(0)
         )
         transaction_volumes[AccountTypes.a.value] = (
             -1 * transaction.amount
             if transaction.account_from == user.work_account
-            else ""
+            else Decimal(0)
         )
         transaction_volumes[AccountTypes.prd.value] = (
             1 * transaction.amount
             if transaction.account_to == user.product_account
-            else ""
+            else Decimal(0)
         )
         return transaction_volumes
 
     def _get_volumes_for_company_transaction_if_company_is_sender(
         self,
-        transaction,
-        user,
-    ):
-        transaction_volumes = {}
+        transaction: Transaction,
+        user: Company,
+    ) -> Dict[str, Decimal]:
+        transaction_volumes: Dict[str, Decimal] = {}
         factor = -1
         transaction_volumes[AccountTypes.p.value] = (
             factor * transaction.amount
             if transaction.account_from == user.means_account
-            else ""
+            else Decimal(0)
         )
         transaction_volumes[AccountTypes.r.value] = (
             factor * transaction.amount
             if transaction.account_from == user.raw_material_account
-            else ""
+            else Decimal(0)
         )
         transaction_volumes[AccountTypes.a.value] = (
             factor * transaction.amount
             if transaction.account_from == user.work_account
-            else ""
+            else Decimal(0)
         )
         transaction_volumes[AccountTypes.prd.value] = (
             factor * transaction.amount
             if transaction.account_from == user.product_account
-            else ""
+            else Decimal(0)
         )
         return transaction_volumes
 
     def _get_volumes_for_company_transaction_if_company_is_receiver(
         self,
-        transaction,
-        user,
-    ):
-        transaction_volumes = {}
+        transaction: Transaction,
+        user: Company,
+    ) -> Dict[str, Decimal]:
+        transaction_volumes: Dict[str, Decimal] = {}
         transaction_volumes[AccountTypes.p.value] = (
-            transaction.amount if transaction.account_to == user.means_account else ""
+            transaction.amount
+            if transaction.account_to == user.means_account
+            else Decimal(0)
         )
         transaction_volumes[AccountTypes.r.value] = (
             transaction.amount
             if transaction.account_to == user.raw_material_account
-            else ""
+            else Decimal(0)
         )
         transaction_volumes[AccountTypes.a.value] = (
-            transaction.amount if transaction.account_to == user.work_account else ""
+            transaction.amount
+            if transaction.account_to == user.work_account
+            else Decimal(0)
         )
         transaction_volumes[AccountTypes.prd.value] = (
-            transaction.amount if transaction.account_to == user.product_account else ""
+            transaction.amount
+            if transaction.account_to == user.product_account
+            else Decimal(0)
         )
         return transaction_volumes
 
     def __get_volume_for_member_transaction(
-        self, transaction, user_is_sender, user_is_receiver
-    ):
+        self, transaction: Transaction, user_is_sender: bool, user_is_receiver: bool
+    ) -> Dict[str, Decimal]:
         transaction_volumes = {}
         if user_is_sender:
             transaction_volumes[AccountTypes.member.value] = -transaction.amount

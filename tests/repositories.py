@@ -229,14 +229,12 @@ class MemberRepository(interfaces.MemberRepository):
     @inject
     def __init__(self):
         self.members = []
-        self.last_id = 0
 
     def create_member(
         self, email: str, name: str, password: str, account: Account
     ) -> Member:
-        self.last_id += 1
         member = Member(
-            id=self.last_id,
+            id=uuid.uuid4(),
             name=name,
             email=email,
             account=account,

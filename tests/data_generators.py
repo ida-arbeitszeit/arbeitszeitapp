@@ -41,7 +41,6 @@ from tests.datetime_service import FakeDatetimeService
 @dataclass
 class OfferGenerator:
     plan_generator: PlanGenerator
-    datetime_service: FakeDatetimeService
     _create_offer: CreateOffer
 
     def create_offer(
