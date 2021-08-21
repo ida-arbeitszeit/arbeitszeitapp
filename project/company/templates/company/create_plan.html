@@ -48,7 +48,7 @@
         <label class="label">Name des Produkts</label>
         <div class="control">
           <input class="input is-large" , type="text" , name="prd_name" ,
-            value="{{ original_plan.prd_name if original_plan else '' }}" required>
+            value="{{ original_plan.product_name if original_plan else '' }}" required>
         </div>
       </div>
       <div class="block"></div>
@@ -80,7 +80,7 @@
         <label class="label">Kleinste Abgabeeinheit</label>
         <div class="control">
           <input class="input is-large" , type="text" , name="prd_unit" ,
-            value="{{ original_plan.prd_unit if original_plan else '1 Kg' }}" , required>
+            value="{{ original_plan.production_unit if original_plan else '1 Kg' }}" , required>
           <p class="help">(1 Packung à 100 Stück, 1 Kilogramm, 1 Flasche à 0,5 Liter, 1 Meter, Unterrichtseinheit à 1,5
             Stunde,
             etc.)</p>
@@ -95,7 +95,7 @@
         <label class="label">Menge</label>
         <div class="control">
           <input class="input is-large" type="number" name="prd_amount" min=1
-            value="{{ original_plan.prd_amount if original_plan else 1 }}" required>
+            value="{{ original_plan.amount if original_plan else 1 }}" required>
           <p class="help">(Wieviele Einheiten werden produziert und verkauft?)</p>
         </div>
       </div>
@@ -106,7 +106,7 @@
         <label class="label">Kosten für Produktionsmittel</label>
         <div class="control">
           <input class="input is-large" type="number" name="costs_p"
-            value="{{ original_plan.costs_p if original_plan else 0 }}" required>
+            value="{{ original_plan.means_cost if original_plan else 0 }}" required>
         </div>
       </div>
       <div class="block"></div>
@@ -116,7 +116,7 @@
         <label class="label">Kosten für Roh- und Hilfsstoffe:</label>
         <div class="control">
           <input class="input is-large" type="number" name="costs_r"
-            value="{{ original_plan.costs_r if original_plan else 0 }}" required>
+            value="{{ original_plan.resources_cost if original_plan else 0 }}" required>
         </div>
       </div>
       <div class="block"></div>
@@ -126,7 +126,7 @@
         <label class="label">Enthaltene Arbeitsstunden:</label>
         <div class="control">
           <input class="input is-large" type="number" name="costs_a"
-            value="{{ original_plan.costs_a if original_plan else 0 }}" required>
+            value="{{ original_plan.labour_cost if original_plan else 0 }}" required>
         </div>
       </div>
       <div class="block"></div>

@@ -8,6 +8,7 @@ from project.extensions import login_manager
 
 def create_app(config=None, db=None, migrate=None):
     app = Flask(__name__, instance_relative_config=False)
+
     if config:
         app.config.update(**config)
     else:
@@ -24,14 +25,8 @@ def create_app(config=None, db=None, migrate=None):
     login_manager.login_view = "auth.start"
 
     # Init Flask-Talisman
-    if app.config['ENV'] == 'production':
-        csp = {
-            'default-src': [
-                '\'self\'',
-                '\'unsafe-inline\'',
-                '*.fontawesome.com'
-            ]
-        }
+    if app.config["ENV"] == "production":
+        csp = {"default-src": ["'self'", "'unsafe-inline'", "*.fontawesome.com"]}
         Talisman(app, content_security_policy=csp)
 
     # init flask extensions
@@ -40,6 +35,10 @@ def create_app(config=None, db=None, migrate=None):
     migrate.init_app(app, db)
 
     with app.app_context():
+        from project.commands import activate_database_plans
+
+        app.cli.command("activate-plans")(activate_database_plans)
+
         from .models import Company, Member
 
         @login_manager.user_loader

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
-from typing import Callable, Dict, List, Optional, Union
+from typing import Callable, List, Optional, Union
 from uuid import UUID
 
 
@@ -27,7 +27,7 @@ class Member:
         self.email = email
 
     @property
-    def id(self):
+    def id(self) -> UUID:
         return self._id
 
     def __eq__(self, other: object) -> bool:
@@ -256,3 +256,6 @@ class Transaction:
     account_to: Account
     amount: Decimal
     purpose: str
+
+    def __hash__(self) -> int:
+        return hash(self.id)

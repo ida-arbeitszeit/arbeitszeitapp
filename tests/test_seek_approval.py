@@ -13,7 +13,7 @@ def test_that_any_plan_will_be_approved(
 ):
     new_plan = plan_generator.create_plan()
     original_plan = plan_generator.create_plan()
-    seek_approval(new_plan, original_plan)
+    seek_approval(new_plan.id, original_plan.id)
     assert new_plan.approved
 
 
@@ -24,7 +24,7 @@ def test_that_any_plan_will_be_approved_and_original_plan_renewed(
 ):
     new_plan = plan_generator.create_plan()
     original_plan = plan_generator.create_plan()
-    seek_approval(new_plan, original_plan)
+    seek_approval(new_plan.id, original_plan.id)
     assert new_plan.approved
     assert original_plan.renewed
 
@@ -36,7 +36,7 @@ def test_that_true_is_returned(
 ):
     new_plan = plan_generator.create_plan()
     original_plan = plan_generator.create_plan()
-    is_approval = seek_approval(new_plan, original_plan)
+    is_approval = seek_approval(new_plan.id, original_plan.id)
     assert is_approval is True
 
 
@@ -49,6 +49,6 @@ def test_that_approval_date_has_correct_day_of_month(
     datetime_service.freeze_time(datetime(year=2021, month=5, day=3))
     new_plan = plan_generator.create_plan()
     original_plan = plan_generator.create_plan()
-    seek_approval(new_plan, original_plan)
+    seek_approval(new_plan.id, original_plan.id)
     assert new_plan.approval_date
     assert 3 == new_plan.approval_date.day

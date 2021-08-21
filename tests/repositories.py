@@ -229,14 +229,12 @@ class MemberRepository(interfaces.MemberRepository):
     @inject
     def __init__(self):
         self.members = []
-        self.last_id = 0
 
     def create_member(
         self, email: str, name: str, password: str, account: Account
     ) -> Member:
-        self.last_id += 1
         member = Member(
-            id=self.last_id,
+            id=uuid.uuid4(),
             name=name,
             email=email,
             account=account,
@@ -283,6 +281,12 @@ class CompanyRepository(interfaces.CompanyRepository):
     def has_company_with_email(self, email: str) -> bool:
         return email in self.companies
 
+    def get_by_id(self, id: uuid.UUID) -> Company:
+        for company in self.companies.values():
+            if company.id == id:
+                return company
+        raise Exception("Company not found, this exception is not meant to be caught")
+
 
 @singleton
 class PlanRepository(interfaces.PlanRepository):
@@ -326,7 +330,7 @@ class PlanRepository(interfaces.PlanRepository):
             expiration_date=None,
             last_certificate_payout=None,
         )
-        self.plans[planner.id] = plan
+        self.plans[plan.id] = plan
         return plan
 
     def get_plan_by_id(self, id: uuid.UUID) -> Plan:

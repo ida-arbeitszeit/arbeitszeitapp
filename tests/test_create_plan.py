@@ -29,5 +29,5 @@ def test_that_create_plan_creates_a_plan(
     )
 
     assert not len(plan_repository)
-    create_plan(planner, proposal)
+    create_plan(planner.id, proposal)
     assert len(plan_repository) == 1
