@@ -20,7 +20,7 @@ from .get_plan_summary import GetPlanSummary
 from .get_transaction_infos import GetTransactionInfos
 from .pay_consumer_product import PayConsumerProduct
 from .pay_means_of_production import PayMeansOfProduction
-from .query_products import ProductFilter, QueryProducts
+from .query_products import ProductFilter, ProductQueryResponse, QueryProducts
 from .query_purchases import QueryPurchases
 from .register_company import RegisterCompany
 from .register_member import RegisterMember
@@ -39,6 +39,7 @@ __all__ = [
     "PayMeansOfProduction",
     "PlanProposal",
     "ProductFilter",
+    "ProductQueryResponse",
     "PurchaseProduct",
     "QueryProducts",
     "QueryPurchases",

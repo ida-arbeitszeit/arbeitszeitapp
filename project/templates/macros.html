@@ -130,18 +130,18 @@
     <tbody>
       {% for offer in results %}
       <tr>
-        <td>{{ offer.plan.id }}</td>
-        <td>{{ offer.name }}</td>
-        <td>{{ offer.plan.planner.name }}</td>
+        <td>{{ offer.plan_id }}</td>
+        <td>{{ offer.product_name }}</td>
+        <td>{{ offer.seller_name }}</td>
         <td>
-          <a href="mailto:{{ offer.plan.planner.email }}">
+          <a href="mailto:{{ offer.seller_email }}">
             <u><span class="icon"><i class="far fa-envelope"></i></span></u>
           </a>
         </td>
         <td>{{ offer.description }}</td>
-        <td>{{ offer.price_per_unit()|round(2) }} Std.
+        <td>{{ offer.price_per_unit|round(2) }} Std.
         </td>
-        <td>{{ offer.plan.is_public_service }}</td>
+        <td>{{ offer.is_public_service }}</td>
         <td>{{ offer.amount_available }}</td>
         <td>
           <a href="{{ url_for('%s.buy' % (request.blueprint), id=offer.id) }}">
