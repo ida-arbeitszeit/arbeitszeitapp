@@ -4,7 +4,7 @@ from datetime import date, datetime
 
 class DatetimeService(ABC):
     def __init__(self) -> None:
-        self.time_of_plan_activation = 10
+        self.time_of_synchronized_plan_activation = 10
 
     @abstractmethod
     def today(self) -> date:
