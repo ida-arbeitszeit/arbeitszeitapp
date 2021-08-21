@@ -265,3 +265,6 @@ class Transaction:
     account_to: Account
     amount: Decimal
     purpose: str
+
+    def __hash__(self) -> int:
+        return hash(self.id)

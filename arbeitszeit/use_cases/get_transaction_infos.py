@@ -66,29 +66,18 @@ class GetTransactionInfos:
         )
 
     def _get_all_transactions_sorted(self, user: User) -> List[Transaction]:
-        all_transactions = []
+        all_transactions = set()
         for account in user.accounts():
-            all_transactions.extend(
+            all_transactions.update(
                 self.transaction_repository.all_transactions_sent_by_account(account)
             )
-            all_transactions.extend(
+            all_transactions.update(
                 self.transaction_repository.all_transactions_received_by_account(
                     account
                 )
             )
-
-        # delete duplicate transactions, where user is sender and receiver
-        transactions_without_duplicates = []
-        transactions_checked = set()
-        for trans in all_transactions:
-            if trans.id in transactions_checked:
-                pass
-            else:
-                transactions_without_duplicates.append(trans)
-                transactions_checked.add(trans.id)
-
         all_transactions_sorted = sorted(
-            transactions_without_duplicates, key=lambda x: x.date, reverse=True
+            all_transactions, key=lambda x: x.date, reverse=True
         )
         return all_transactions_sorted
 
@@ -125,7 +114,7 @@ class GetTransactionInfos:
     ) -> str:
         if user_is_sender:
             sender_name = "Mir"
-        elif isinstance(sender, Company) or isinstance(sender, Member):
+        elif isinstance(sender, (Company, Member)):
             sender_name = sender.name
         elif isinstance(sender, SocialAccounting):
             sender_name = "Öff. Buchhaltung"
@@ -137,11 +126,10 @@ class GetTransactionInfos:
     ) -> str:
         if user_is_receiver:
             receiver_name = "Mich"
+        elif isinstance(receiver, (Company, Member)):
+            receiver_name = receiver.name
         else:
-            if isinstance(receiver, (Company, Member)):
-                receiver_name = receiver.name
-            else:
-                receiver_name = "Öffentliche Buchführung"
+            receiver_name = "Öff. Buchführung"
         return receiver_name
 
     def _get_volumes_for_company_transaction(
