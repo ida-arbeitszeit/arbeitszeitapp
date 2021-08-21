@@ -17,7 +17,7 @@ from .calculate_plan_expiration import CalculatePlanExpirationAndCheckIfExpired
 from .create_offer import CreateOffer, Offer
 from .create_production_plan import CreatePlan, PlanProposal
 from .get_plan_summary import GetPlanSummary
-from .get_transaction_infos import GetTransactionInfos
+from .get_transaction_infos import GetTransactionInfos, TransactionInfo
 from .pay_consumer_product import PayConsumerProduct
 from .pay_means_of_production import PayMeansOfProduction
 from .query_products import ProductFilter, ProductQueryResponse, QueryProducts
@@ -48,6 +48,7 @@ __all__ = [
     "SeekApproval",
     "SendWorkCertificatesToWorker",
     "SynchronizedPlanActivation",
+    "TransactionInfo",
     "add_worker_to_company",
     "deactivate_offer",
 ]

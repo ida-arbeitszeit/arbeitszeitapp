@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 from decimal import Decimal
 from typing import Dict, List, Tuple, Union
 
@@ -10,7 +11,6 @@ from arbeitszeit.entities import (
     Member,
     SocialAccounting,
     Transaction,
-    TransactionInfo,
 )
 from arbeitszeit.repositories import (
     AccountOwnerRepository,
@@ -20,6 +20,15 @@ from arbeitszeit.repositories import (
 
 User = Union[Member, Company]
 UserOrSocialAccounting = Union[User, SocialAccounting]
+
+
+@dataclass
+class TransactionInfo:
+    date: datetime
+    sender_name: str
+    receiver_name: str
+    transaction_volumes: Dict[str, Decimal]
+    purpose: str
 
 
 @inject
