@@ -17,7 +17,7 @@ from arbeitszeit import entities
 from arbeitszeit import repositories as interfaces
 from arbeitszeit.datetime_service import DatetimeService
 from project.extensions import db
-from project.models import Account, Company, Member, SocialAccounting
+from project.models import Company, Member
 
 from .repositories import (
     AccountingRepository,
@@ -42,9 +42,7 @@ __all__ = [
     "ProductOfferRepository",
     "PurchaseRepository",
     "TransactionRepository",
-    "add_new_account_for_social_accounting",
     "commit_changes",
-    "create_social_accounting_in_db",
     "get_company_by_mail",
     "with_injection",
 ]
@@ -181,23 +179,3 @@ def get_company_by_mail(email) -> Company:
     """returns first company in Company, filtered by mail."""
     company = Company.query.filter_by(email=email).first()
     return company
-
-
-# create one social accounting with id=1
-def create_social_accounting_in_db() -> None:
-    social_accounting = SocialAccounting.query.filter_by(id=1).first()
-    if not social_accounting:
-        social_accounting = SocialAccounting(id=1)
-        db.session.add(social_accounting)
-        db.session.commit()
-
-
-def add_new_account_for_social_accounting():
-    account = Account.query.filter_by(account_owner_social_accounting=1).first()
-    if not account:
-        account = Account(
-            account_owner_social_accounting=1,
-            account_type="accounting",
-        )
-        db.session.add(account)
-        db.session.commit()
