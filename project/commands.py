@@ -1,10 +1,9 @@
 from arbeitszeit.use_cases import (
-    SynchronizedPlanActivation,
     CalculatePlanExpirationAndCheckIfExpired,
+    SynchronizedPlanActivation,
 )
-from project.database.repositories import PlanRepository
 from project.database import with_injection
-from project import create_app
+from project.database.repositories import PlanRepository
 
 
 @with_injection
@@ -25,8 +24,3 @@ def activate_database_plans(
     all_active_plans = plan_repository.all_active_plans()
     for plan in all_active_plans:
         calculate_expiration(plan)
-
-
-app = create_app()
-with app.app_context():
-    activate_database_plans()
