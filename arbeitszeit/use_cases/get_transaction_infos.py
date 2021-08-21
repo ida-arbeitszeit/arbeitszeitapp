@@ -1,5 +1,7 @@
 from dataclasses import dataclass
-from typing import List, Union
+from typing import List, Union, Dict
+from datetime import datetime
+from decimal import Decimal
 
 from injector import inject
 
@@ -9,13 +11,21 @@ from arbeitszeit.entities import (
     Member,
     SocialAccounting,
     Transaction,
-    TransactionInfo,
 )
 from arbeitszeit.repositories import (
     AccountOwnerRepository,
     MemberRepository,
     TransactionRepository,
 )
+
+
+@dataclass
+class TransactionInfo:
+    date: datetime
+    sender_name: str
+    receiver_name: str
+    transaction_volumes: Dict[str, Decimal]
+    purpose: str
 
 
 @inject

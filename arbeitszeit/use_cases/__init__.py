@@ -16,7 +16,7 @@ from arbeitszeit.repositories import (
 from .calculate_plan_expiration import CalculatePlanExpirationAndCheckIfExpired
 from .create_offer import CreateOffer, Offer
 from .create_production_plan import CreatePlan, PlanProposal
-from .get_transaction_infos import GetTransactionInfos
+from .get_transaction_infos import GetTransactionInfos, TransactionInfo
 from .pay_consumer_product import PayConsumerProduct
 from .pay_means_of_production import PayMeansOfProduction
 from .query_products import ProductFilter, QueryProducts
@@ -47,6 +47,7 @@ __all__ = [
     "Offer",
     "SynchronizedPlanActivation",
     "CalculatePlanExpirationAndCheckIfExpired",
+    "TransactionInfo",
 ]
 
 

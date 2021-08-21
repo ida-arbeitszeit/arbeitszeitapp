@@ -249,15 +249,6 @@ class Purchase:
 
 
 @dataclass
-class TransactionInfo:
-    date: datetime
-    sender_name: str
-    receiver_name: str
-    transaction_volumes: Dict[AccountTypes.value, Decimal]
-    purpose: str
-
-
-@dataclass
 class Transaction:
     id: UUID
     date: datetime
