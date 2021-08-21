@@ -51,12 +51,9 @@ class OfferGenerator:
         amount=1,
         description="",
         plan=None,
-        creation_timestamp=None,
     ) -> ProductOffer:
         if plan is None:
             plan = self.plan_generator.create_plan(amount=amount)
-        if creation_timestamp is None:
-            creation_timestamp = self.datetime_service.now()
         return self._create_offer(
             Offer(
                 name=name,
