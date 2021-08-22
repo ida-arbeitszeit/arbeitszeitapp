@@ -16,6 +16,7 @@ from arbeitszeit.repositories import (
 from .calculate_plan_expiration import CalculatePlanExpirationAndCheckIfExpired
 from .create_offer import CreateOffer, Offer
 from .create_production_plan import CreatePlan, PlanProposal
+from .get_member_workplaces import GetMemberWorkplaces, WorkplacesResponse
 from .get_plan_summary import GetPlanSummary
 from .get_transaction_infos import GetTransactionInfos, TransactionInfo
 from .pay_consumer_product import PayConsumerProduct
@@ -32,6 +33,7 @@ __all__ = [
     "CalculatePlanExpirationAndCheckIfExpired",
     "CreateOffer",
     "CreatePlan",
+    "GetMemberWorkplaces",
     "GetPlanSummary",
     "GetTransactionInfos",
     "Offer",
@@ -50,6 +52,7 @@ __all__ = [
     "SendWorkCertificatesToWorker",
     "SynchronizedPlanActivation",
     "TransactionInfo",
+    "WorkplacesResponse",
     "add_worker_to_company",
     "deactivate_offer",
 ]

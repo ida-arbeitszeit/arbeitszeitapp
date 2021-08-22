@@ -134,12 +134,16 @@ def pay_consumer_product(
 @main_member.route("/member/profile")
 @login_required
 @with_injection
-def profile(account_repository: AccountRepository, member_repository: MemberRepository):
+def profile(
+    account_repository: AccountRepository,
+    member_repository: MemberRepository,
+    get_member_workplaces: use_cases.GetMemberWorkplaces,
+):
     if not user_is_member():
         return redirect(url_for("auth.zurueck"))
 
-    workplaces = current_user.workplaces.all()
     member = member_repository.object_from_orm(current_user)
+    workplaces = get_member_workplaces(member)
     return render_template(
         "member/profile.html",
         workplaces=workplaces,

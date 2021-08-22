@@ -134,12 +134,23 @@ class OfferRepository(interfaces.OfferRepository):
 
 @singleton
 class CompanyWorkerRepository(interfaces.CompanyWorkerRepository):
+    @inject
+    def __init__(self, company_repository: CompanyRepository) -> None:
+        self.company_repository = company_repository
+
     def add_worker_to_company(self, company: Company, worker: Member) -> None:
         if worker not in company.workers:
             company.workers.append(worker)
 
     def get_company_workers(self, company: Company) -> List[Member]:
         return company.workers
+
+    def get_member_workplaces(self, member: Member) -> List[Company]:
+        workplaces = []
+        for company in self.company_repository.companies.values():
+            if member in company.workers:
+                workplaces.append(company)
+        return workplaces
 
 
 @singleton
