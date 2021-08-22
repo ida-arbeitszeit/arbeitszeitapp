@@ -92,12 +92,10 @@ class CompanyGenerator:
     email_generator: EmailGenerator
 
     def create_company(
-        self, *, email: Optional[str] = None, name: Optional[str] = None
+        self, *, email: Optional[str] = None, name: str = "Company Name"
     ) -> Company:
         if email is None:
             email = self.email_generator.get_random_email()
-        if name is None:
-            name = "Company name"
         return self.company_repository.create_company(
             email=email,
             name=name,
