@@ -58,8 +58,8 @@
         <div class="level-item">
           {% if workplaces is defined and workplaces|length %}
           <ul>
-            {% for arbeit in workplaces %}
-            <li>{{ arbeit.name }} ({{ arbeit.email }})</li>
+            {% for workplace in workplaces %}
+            <li>{{ workplace.workplace_name }} ({{ workplace.workplace_email }})</li>
             {% endfor %}
           </ul>
           {% endif %}

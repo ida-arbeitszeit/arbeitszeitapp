@@ -60,6 +60,14 @@ class CompanyWorkerRepository(repositories.CompanyWorkerRepository):
     def get_company_workers(self, company: entities.Company) -> List[entities.Member]:
         return company.workers
 
+    def get_member_workplaces(self, member: entities.Member) -> List[entities.Company]:
+        member_orm = self.member_repository.object_to_orm(member)
+        workplaces_orm = member_orm.workplaces.all()
+        return [
+            self.company_repository.object_from_orm(workplace_orm)
+            for workplace_orm in workplaces_orm
+        ]
+
 
 @inject
 @dataclass

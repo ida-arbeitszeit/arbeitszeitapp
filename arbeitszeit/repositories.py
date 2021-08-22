@@ -27,6 +27,10 @@ class CompanyWorkerRepository(ABC):
     def get_company_workers(self, company: Company) -> List[Member]:
         pass
 
+    @abstractmethod
+    def get_member_workplaces(self, member: Member) -> List[Company]:
+        pass
+
 
 class PurchaseRepository(ABC):
     @abstractmethod
