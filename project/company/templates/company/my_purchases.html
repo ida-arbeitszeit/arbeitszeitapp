@@ -35,7 +35,7 @@
         <td>{{ purchase.purchase_date.strftime("%x") }}</td>
         <td>{{ purchase.product_name }}</td>
         <td>{{ purchase.product_description }}</td>
-        <td>{{ 'Prod.mittel' if (purchase.purpose.value == 'means_of_prod') else 'Rohmat.' }}</td>
+        <td>{{ purchase.purpose }}</td>
         <td>{{ purchase.price_per_unit }}</td>
         <th>{{ purchase.amount }}</th>
         <th>{{ purchase.price_total }}</th>

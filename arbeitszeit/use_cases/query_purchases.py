@@ -16,7 +16,7 @@ class PurchaseQueryResponse:
     offer_id: UUID
     product_name: str
     product_description: str
-    purpose: PurposesOfPurchases
+    purpose: str
     price_per_unit: Decimal
     amount: int
     price_total: Decimal
@@ -39,12 +39,18 @@ class QueryPurchases:
         )
 
     def _purchase_to_response_model(self, purchase: Purchase) -> PurchaseQueryResponse:
+        if purchase.purpose == PurposesOfPurchases.means_of_prod:
+            purpose = "Prod.mittel"
+        elif purchase.purpose == PurposesOfPurchases.raw_materials:
+            purpose = "Rohmat."
+        else:
+            purpose = "Konsum"
         return PurchaseQueryResponse(
             purchase_date=purchase.purchase_date,
             offer_id=purchase.product_offer.id,
             product_name=purchase.product_offer.name,
             product_description=purchase.product_offer.description,
-            purpose=purchase.purpose,
+            purpose=purpose,
             price_per_unit=purchase.price_per_unit,
             amount=purchase.amount,
             price_total=purchase.price_per_unit * purchase.amount,
