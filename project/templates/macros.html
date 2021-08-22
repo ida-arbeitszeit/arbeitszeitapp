@@ -138,13 +138,13 @@
             <u><span class="icon"><i class="far fa-envelope"></i></span></u>
           </a>
         </td>
-        <td>{{ offer.description }}</td>
+        <td>{{ offer.product_description }}</td>
         <td>{{ offer.price_per_unit|round(2) }} Std.
         </td>
         <td>{{ offer.is_public_service }}</td>
         <td>{{ offer.amount_available }}</td>
         <td>
-          <a href="{{ url_for('%s.buy' % (request.blueprint), id=offer.id) }}">
+          <a href="{{ url_for('%s.buy' % (request.blueprint), id=offer.offer_id) }}">
             <u><u><span class="icon"><i class="fas fa-shopping-cart"></i></span></u></u>
           </a>
         </td>

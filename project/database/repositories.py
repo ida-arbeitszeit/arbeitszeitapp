@@ -322,7 +322,7 @@ class PurchaseRepository(repositories.PurchaseRepository):
                 if isinstance(purchase.buyer, entities.Member)
                 else None
             ),
-            kaufpreis=float(purchase.price),
+            kaufpreis=float(purchase.price_per_unit),
             amount=purchase.amount,
             purpose=purchase.purpose.value,
         )
@@ -334,7 +334,7 @@ class PurchaseRepository(repositories.PurchaseRepository):
             buyer=self.member_repository.get_member_by_id(purchase.member)
             if purchase.type_member
             else self.company_repository.get_by_id(purchase.company),
-            price=purchase.kaufpreis,
+            price_per_unit=purchase.kaufpreis,
             amount=purchase.amount,
             purpose=purchase.purpose,
         )

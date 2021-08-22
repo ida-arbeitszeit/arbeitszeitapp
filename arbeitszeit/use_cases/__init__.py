@@ -21,7 +21,7 @@ from .get_transaction_infos import GetTransactionInfos, TransactionInfo
 from .pay_consumer_product import PayConsumerProduct
 from .pay_means_of_production import PayMeansOfProduction
 from .query_products import ProductFilter, ProductQueryResponse, QueryProducts
-from .query_purchases import QueryPurchases
+from .query_purchases import PurchaseQueryResponse, QueryPurchases
 from .register_company import RegisterCompany
 from .register_member import RegisterMember
 from .seek_approval import SeekApproval
@@ -41,6 +41,7 @@ __all__ = [
     "ProductFilter",
     "ProductQueryResponse",
     "PurchaseProduct",
+    "PurchaseQueryResponse",
     "QueryProducts",
     "QueryPurchases",
     "RegisterCompany",
@@ -78,12 +79,12 @@ class PurchaseProduct:
         ), "Amount ordered exceeds available products!"
 
         # create purchase
-        price = product_offer.price_per_unit()
+        price_per_unit = product_offer.price_per_unit()
         purchase = self.purchase_factory.create_private_purchase(
             purchase_date=self.datetime_service.now(),
             product_offer=product_offer,
             buyer=buyer,
-            price=price,
+            price_per_unit=price_per_unit,
             amount=amount,
             purpose=purpose,
         )
@@ -96,7 +97,7 @@ class PurchaseProduct:
             deactivate_offer(product_offer)
 
         # create transaction
-        price_total = purchase.price * purchase.amount
+        price_total = purchase.price_per_unit * purchase.amount
 
         if isinstance(buyer, Member):
             account_from = buyer.account

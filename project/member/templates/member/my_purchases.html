@@ -32,11 +32,11 @@
       {% for purchase in purchases %}
       <tr>
         <td>{{ purchase.purchase_date.strftime("%x") }}</td>
-        <td>{{ purchase.product_offer.name }}</td>
-        <td>{{ purchase.product_offer.description }}</td>
-        <td>{{ purchase.price }}</td>
+        <td>{{ purchase.product_name }}</td>
+        <td>{{ purchase.product_description }}</td>
+        <td>{{ purchase.price_per_unit }}</td>
         <th>{{ purchase.amount }}</th>
-        <th>{{ purchase.price * purchase.amount }}</th>
+        <th>{{ purchase.price_total }}</th>
       </tr>
       {% endfor %}
       {% else %}

@@ -1,8 +1,17 @@
-from arbeitszeit.use_cases import QueryPurchases
+from typing import Iterable
+
+from arbeitszeit.entities import Purchase
+from arbeitszeit.use_cases import PurchaseQueryResponse, QueryPurchases
 from tests.data_generators import CompanyGenerator, MemberGenerator, PurchaseGenerator
 from tests.datetime_service import FakeDatetimeService
 from tests.dependency_injection import injection_test
 from tests.repositories import PurchaseRepository
+
+
+def purchase_in_results(
+    purchase: Purchase, results: Iterable[PurchaseQueryResponse]
+) -> bool:
+    return purchase.product_offer.id in [result.offer_id for result in results]
 
 
 @injection_test
@@ -35,12 +44,12 @@ def test_that_correct_purchases_are_returned(
     repository.add(expected_purchase_company)
     results = list(query_purchases(member))
     assert len(results) == 1
-    assert expected_purchase_member in results
-    assert expected_purchase_company not in results
+    assert purchase_in_results(expected_purchase_member, results)
+    assert not purchase_in_results(expected_purchase_company, results)
     results = list(query_purchases(company))
     assert len(results) == 1
-    assert expected_purchase_company in results
-    assert expected_purchase_member not in results
+    assert purchase_in_results(expected_purchase_company, results)
+    assert not purchase_in_results(expected_purchase_member, results)
 
 
 @injection_test
@@ -61,7 +70,9 @@ def test_that_purchases_are_returned_in_correct_order_when_member_queries(
     repository.add(expected_older_purchase)  # adding older purchase first
     repository.add(expected_recent_purchase)
     results = list(query_purchases(member))
-    assert results[0] == expected_recent_purchase  # more recent purchase is first
+    assert purchase_in_results(
+        expected_recent_purchase, [results[0]]
+    )  # more recent purchase is first
 
 
 @injection_test
@@ -82,4 +93,6 @@ def test_that_purchases_are_returned_in_correct_order_when_company_queries(
     repository.add(expected_older_purchase)  # adding older purchase first
     repository.add(expected_recent_purchase)
     results = list(query_purchases(company))
-    assert results[0] == expected_recent_purchase  # more recent purchase is first
+    assert purchase_in_results(
+        expected_recent_purchase, [results[0]]
+    )  # more recent purchase is first
