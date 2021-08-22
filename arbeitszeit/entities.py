@@ -243,7 +243,7 @@ class Purchase:
     purchase_date: datetime
     product_offer: ProductOffer
     buyer: Union[Member, Company]
-    price: Decimal
+    price_per_unit: Decimal
     amount: int
     purpose: PurposesOfPurchases
 

@@ -78,12 +78,12 @@ class PurchaseProduct:
         ), "Amount ordered exceeds available products!"
 
         # create purchase
-        price = product_offer.price_per_unit()
+        price_per_unit = product_offer.price_per_unit()
         purchase = self.purchase_factory.create_private_purchase(
             purchase_date=self.datetime_service.now(),
             product_offer=product_offer,
             buyer=buyer,
-            price=price,
+            price_per_unit=price_per_unit,
             amount=amount,
             purpose=purpose,
         )
@@ -96,7 +96,7 @@ class PurchaseProduct:
             deactivate_offer(product_offer)
 
         # create transaction
-        price_total = purchase.price * purchase.amount
+        price_total = purchase.price_per_unit * purchase.amount
 
         if isinstance(buyer, Member):
             account_from = buyer.account

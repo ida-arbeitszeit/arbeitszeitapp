@@ -36,9 +36,9 @@
         <td>{{ purchase.product_offer.name }}</td>
         <td>{{ purchase.product_offer.description }}</td>
         <td>{{ 'Prod.mittel' if (purchase.purpose.value == 'means_of_prod') else 'Rohmat.' }}</td>
-        <td>{{ purchase.price }}</td>
+        <td>{{ purchase.price_per_unit }}</td>
         <th>{{ purchase.amount }}</th>
-        <th>{{ purchase.price * purchase.amount }}</th>
+        <th>{{ purchase.price_per_unit * purchase.amount }}</th>
       </tr>
       {% endfor %}
       {% else %}

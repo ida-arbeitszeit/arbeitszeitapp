@@ -11,7 +11,7 @@ class PurchaseFactory:
         purchase_date: datetime,
         product_offer: ProductOffer,
         buyer: Union[Member, Company],
-        price: Decimal,
+        price_per_unit: Decimal,
         amount: int,
         purpose: PurposesOfPurchases,
     ) -> Purchase:
@@ -19,7 +19,7 @@ class PurchaseFactory:
             purchase_date=purchase_date,
             product_offer=product_offer,
             buyer=buyer,
-            price=price,
+            price_per_unit=price_per_unit,
             amount=amount,
             purpose=purpose,
         )
