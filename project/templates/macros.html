@@ -196,6 +196,7 @@
         </div>
       </div>
     </div>
+    <br>
     <div class="level">
       <div class="level-left">
         <div class="level-item">
@@ -220,6 +221,70 @@
         </div>
       </div>
     </div>
+    <div class="level">
+      <div class="level-left">
+        <div class="level-item">
+          <p class="has-text-weight-semibold">Durchschnittliche Plandauer:</p>
+        </div>
+      </div>
+      <div class="level-right has-text-right-tablet">
+        <div class="level-item">
+          <p>{{ stats.avg_timeframe|round(2) }} Tage</p>
+        </div>
+      </div>
+    </div>
+    <br>
+    <div class="level">
+      <div class="level-left">
+        <div class="level-item">
+          <p class="has-text-weight-semibold">Produkte auf Marketplace:</p>
+        </div>
+      </div>
+      <div class="level-right has-text-right-tablet">
+        <div class="level-item">
+          <p>{{ stats.products_on_marketplace_count }}</p>
+        </div>
+      </div>
+    </div>
+    <br>
+    <div class="level">
+      <div class="level-left">
+        <div class="level-item">
+          <p class="has-text-weight-semibold">Aktuell geplante Arbeitsstunden:</p>
+        </div>
+      </div>
+      <div class="level-right has-text-right-tablet">
+        <div class="level-item">
+          <p>{{ stats.planned_work|round(2) }} Stunden</p>
+        </div>
+      </div>
+    </div>
+    <div class="level">
+      <div class="level-left">
+        <div class="level-item">
+          <p class="has-text-weight-semibold">Aktuell geplante Rohstoffe:</p>
+        </div>
+      </div>
+      <div class="level-right has-text-right-tablet">
+        <div class="level-item">
+          <p>{{ stats.planned_resources|round(2) }} Stunden</p>
+        </div>
+      </div>
+    </div>
+    <div class="level">
+      <div class="level-left">
+        <div class="level-item">
+          <p class="has-text-weight-semibold">Aktuell geplante Produktionsmittel:</p>
+        </div>
+      </div>
+      <div class="level-right has-text-right-tablet">
+        <div class="level-item">
+          <p>{{ stats.planned_means|round(2) }} Stunden</p>
+        </div>
+      </div>
+    </div>
+
+
 
   </div>
 </div>

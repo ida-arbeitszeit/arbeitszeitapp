@@ -4,6 +4,7 @@ import uuid
 from datetime import datetime
 from decimal import Decimal
 from typing import Dict, Iterator, List, Union
+from statistics import mean, StatisticsError
 
 from injector import inject, singleton
 
@@ -99,6 +100,17 @@ class OfferRepository(interfaces.OfferRepository):
 
     def all_active_offers(self) -> Iterator[ProductOffer]:
         yield from self.offers
+
+    def count_active_offers_without_plan_duplicates(self) -> int:
+        offers = []
+        plans_associated = []
+        for offer in self.offers:
+            if offer.plan in plans_associated or not offer.active:
+                pass
+            else:
+                offers.append(offer)
+                plans_associated.append(offer.plan)
+        return len(offers)
 
     def query_offers_by_name(self, query: str) -> Iterator[ProductOffer]:
         for offer in self.offers:
@@ -391,6 +403,42 @@ class PlanRepository(interfaces.PlanRepository):
                 for plan in self.plans.values()
                 if (plan.is_active and plan.is_public_service)
             ]
+        )
+
+    def avg_timeframe_of_active_plans(self) -> Decimal:
+        try:
+            avg_timeframe = mean(
+                (plan.timeframe for plan in self.plans.values() if plan.is_active)
+            )
+        except StatisticsError:
+            avg_timeframe = 0
+        return avg_timeframe
+
+    def sum_of_active_planned_work(self) -> Decimal:
+        return sum(
+            (
+                plan.production_costs.labour_cost
+                for plan in self.plans.values()
+                if plan.is_active
+            )
+        )
+
+    def sum_of_active_planned_resources(self) -> Decimal:
+        return sum(
+            (
+                plan.production_costs.resource_cost
+                for plan in self.plans.values()
+                if plan.is_active
+            )
+        )
+
+    def sum_of_active_planned_means(self) -> Decimal:
+        return sum(
+            (
+                plan.production_costs.means_cost
+                for plan in self.plans.values()
+                if plan.is_active
+            )
         )
 
     def all_plans_approved_and_not_expired(self) -> Iterator[Plan]:

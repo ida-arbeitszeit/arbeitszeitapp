@@ -8,7 +8,7 @@ from uuid import UUID
 
 from flask_sqlalchemy import SQLAlchemy
 from injector import inject
-from sqlalchemy import desc, func
+from sqlalchemy import desc, func, distinct
 from werkzeug.security import generate_password_hash
 
 from arbeitszeit import entities, repositories
@@ -411,6 +411,13 @@ class ProductOfferRepository(repositories.OfferRepository):
             for offer in Offer.query.filter_by(active=True).all()
         )
 
+    def count_active_offers_without_plan_duplicates(self) -> int:
+        return int(
+            self.db.session.query(func.count(distinct(Offer.plan_id)))
+            .filter_by(active=True)
+            .one()[0]
+        )
+
     def query_offers_by_name(self, query: str) -> Iterator[entities.ProductOffer]:
         return (
             self.object_from_orm(offer)
@@ -608,6 +615,34 @@ class PlanRepository(repositories.PlanRepository):
         return int(
             self.db.session.query(func.count(Plan.id))
             .filter_by(is_active=True, is_public_service=True)
+            .one()[0]
+        )
+
+    def avg_timeframe_of_active_plans(self) -> Decimal:
+        return Decimal(
+            self.db.session.query(func.avg(Plan.timeframe))
+            .filter_by(is_active=True)
+            .one()[0]
+        )
+
+    def sum_of_active_planned_work(self) -> Decimal:
+        return Decimal(
+            self.db.session.query(func.sum(Plan.costs_a))
+            .filter_by(is_active=True)
+            .one()[0]
+        )
+
+    def sum_of_active_planned_resources(self) -> Decimal:
+        return Decimal(
+            self.db.session.query(func.sum(Plan.costs_r))
+            .filter_by(is_active=True)
+            .one()[0]
+        )
+
+    def sum_of_active_planned_means(self) -> Decimal:
+        return Decimal(
+            self.db.session.query(func.sum(Plan.costs_p))
+            .filter_by(is_active=True)
             .one()[0]
         )
 

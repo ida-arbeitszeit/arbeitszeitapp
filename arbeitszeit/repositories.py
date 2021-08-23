@@ -101,6 +101,22 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
+    def avg_timeframe_of_active_plans(self) -> Decimal:
+        pass
+
+    @abstractmethod
+    def sum_of_active_planned_work(self) -> Decimal:
+        pass
+
+    @abstractmethod
+    def sum_of_active_planned_resources(self) -> Decimal:
+        pass
+
+    @abstractmethod
+    def sum_of_active_planned_means(self) -> Decimal:
+        pass
+
+    @abstractmethod
     def all_plans_approved_and_not_expired(self) -> Iterator[Plan]:
         pass
 
@@ -184,6 +200,10 @@ class OfferRepository(ABC):
         description: str,
         amount_available: int,
     ) -> ProductOffer:
+        pass
+
+    @abstractmethod
+    def count_active_offers_without_plan_duplicates(self) -> int:
         pass
 
 
