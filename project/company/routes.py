@@ -202,16 +202,16 @@ def create_plan(
             else False,
         )
         new_plan = create_plan_from_proposal(current_user.id, proposal)
-        is_approved = seek_approval(new_plan.id, original_plan_uuid)
+        approval_response = seek_approval(new_plan.plan_id, original_plan_uuid)
         database.commit_changes()
 
-        if is_approved:
+        if approval_response.is_approved:
             flash(
                 "Plan erfolgreich erstellt und genehmigt. Die Aktivierung des Plans und Gewährung der Kredite erfolgt um 10 Uhr morgens."
             )
             return redirect("/company/my_plans")
         else:
-            flash(f"Plan nicht genehmigt. Grund:\n{new_plan.approval_reason}")
+            flash(f"Plan nicht genehmigt. Grund:\n{approval_response.reason}")
             return redirect(
                 url_for("main_company.create_plan", original_plan_id=original_plan_id)
             )

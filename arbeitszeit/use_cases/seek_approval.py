@@ -8,13 +8,21 @@ from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.repositories import PlanRepository
 
 
+@dataclass
+class SeekApprovalResponse:
+    is_approved: bool
+    reason: str
+
+
 @inject
 @dataclass
 class SeekApproval:
     datetime_service: DatetimeService
     plan_repository: PlanRepository
 
-    def __call__(self, new_plan_id: UUID, original_plan_id: Optional[UUID]) -> bool:
+    def __call__(
+        self, new_plan_id: UUID, original_plan_id: Optional[UUID]
+    ) -> SeekApprovalResponse:
         """
         Company seeks plan approval. Either for a new plan or for a plan reneweal.
         Sets approved either to True or False, sets approval_date and approval_reason.
@@ -36,4 +44,8 @@ class SeekApproval:
                 self.plan_repository.renew_plan(original_plan)
         else:
             new_plan.deny(approval_date)
-        return is_approval
+        assert new_plan.approval_reason
+        return SeekApprovalResponse(
+            is_approved=is_approval,
+            reason=new_plan.approval_reason,
+        )
