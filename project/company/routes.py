@@ -427,6 +427,17 @@ def delete_offer(
     return render_template("company/delete_offer.html", offer=product_offer)
 
 
+@main_company.route("/company/statistics")
+@login_required
+@with_injection
+def statistics(get_statistics: use_cases.GetStatistics):
+    if not user_is_company():
+        return redirect(url_for("auth.zurueck"))
+
+    stats = get_statistics()
+    return render_template("company/statistics.html", stats=stats)
+
+
 @main_company.route("/company/cooperate", methods=["GET", "POST"])
 @login_required
 def cooperate():

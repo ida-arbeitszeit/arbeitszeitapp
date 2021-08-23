@@ -259,6 +259,9 @@ class MemberRepository(interfaces.MemberRepository):
                 return True
         return False
 
+    def get_number_of_members_registered(self) -> int:
+        return len(self.members)
+
 
 @singleton
 class CompanyRepository(interfaces.CompanyRepository):
@@ -297,6 +300,9 @@ class CompanyRepository(interfaces.CompanyRepository):
             if company.id == id:
                 return company
         raise Exception("Company not found, this exception is not meant to be caught")
+
+    def get_number_of_companies_registered(self) -> int:
+        return len(self.companies)
 
 
 @singleton
@@ -374,6 +380,18 @@ class PlanRepository(interfaces.PlanRepository):
         for plan in self.plans.values():
             if plan.is_active:
                 yield plan
+
+    def get_number_of_active_plans(self) -> int:
+        return len([plan for plan in self.plans.values() if plan.is_active])
+
+    def get_number_of_active_public_plans(self) -> int:
+        return len(
+            [
+                plan
+                for plan in self.plans.values()
+                if (plan.is_active and plan.is_public_service)
+            ]
+        )
 
     def all_plans_approved_and_not_expired(self) -> Iterator[Plan]:
         for plan in self.plans.values():

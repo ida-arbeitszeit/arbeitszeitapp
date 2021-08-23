@@ -8,7 +8,7 @@ from uuid import UUID
 
 from flask_sqlalchemy import SQLAlchemy
 from injector import inject
-from sqlalchemy import desc
+from sqlalchemy import desc, func
 from werkzeug.security import generate_password_hash
 
 from arbeitszeit import entities, repositories
@@ -112,6 +112,9 @@ class MemberRepository(repositories.MemberRepository):
     def has_member_with_email(self, email: str) -> bool:
         return Member.query.filter_by(email=email).count()
 
+    def get_number_of_members_registered(self) -> int:
+        return int(self.db.session.query(func.count(Member.id)).one()[0])
+
 
 @inject
 @dataclass
@@ -203,6 +206,9 @@ class CompanyRepository(repositories.CompanyRepository):
 
     def has_company_with_email(self, email: str) -> bool:
         return Company.query.filter_by(email=email).first() is not None
+
+    def get_number_of_companies_registered(self) -> int:
+        return int(self.db.session.query(func.count(Company.id)).one()[0])
 
 
 @inject
@@ -589,6 +595,20 @@ class PlanRepository(repositories.PlanRepository):
         return (
             self.object_from_orm(plan_orm)
             for plan_orm in Plan.query.filter_by(is_active=True).all()
+        )
+
+    def get_number_of_active_plans(self) -> int:
+        return int(
+            self.db.session.query(func.count(Plan.id))
+            .filter_by(is_active=True)
+            .one()[0]
+        )
+
+    def get_number_of_active_public_plans(self) -> int:
+        return int(
+            self.db.session.query(func.count(Plan.id))
+            .filter_by(is_active=True, is_public_service=True)
+            .one()[0]
         )
 
     def all_plans_approved_and_not_expired(self) -> Iterator[entities.Plan]:

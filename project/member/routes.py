@@ -172,6 +172,17 @@ def my_account(
     )
 
 
+@main_member.route("/member/statistics")
+@login_required
+@with_injection
+def statistics(get_statistics: use_cases.GetStatistics):
+    if not user_is_member():
+        return redirect(url_for("auth.zurueck"))
+
+    stats = get_statistics()
+    return render_template("member/statistics.html", stats=stats)
+
+
 @main_member.route("/member/hilfe")
 @login_required
 def hilfe():
