@@ -93,6 +93,14 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
+    def count_active_plans(self) -> int:
+        pass
+
+    @abstractmethod
+    def count_active_public_plans(self) -> int:
+        pass
+
+    @abstractmethod
     def all_plans_approved_and_not_expired(self) -> Iterator[Plan]:
         pass
 
@@ -190,6 +198,10 @@ class MemberRepository(ABC):
     def has_member_with_email(self, email: str) -> bool:
         pass
 
+    @abstractmethod
+    def count_registered_members(self) -> int:
+        pass
+
 
 class AccountOwnerRepository(ABC):
     @abstractmethod
@@ -219,4 +231,8 @@ class CompanyRepository(ABC):
 
     @abstractmethod
     def get_by_id(self, id: UUID) -> Company:
+        pass
+
+    @abstractmethod
+    def count_registered_companies(self) -> int:
         pass

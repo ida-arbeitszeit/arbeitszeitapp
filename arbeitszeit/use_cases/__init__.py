@@ -18,6 +18,7 @@ from .create_offer import CreateOffer, Offer
 from .create_production_plan import CreatePlan, PlanProposal
 from .get_member_workplaces import GetMemberWorkplaces, WorkplacesResponse
 from .get_plan_summary import GetPlanSummary
+from .get_statistics import GetStatistics, StatisticsResponse
 from .get_transaction_infos import GetTransactionInfos, TransactionInfo
 from .pay_consumer_product import PayConsumerProduct
 from .pay_means_of_production import PayMeansOfProduction
@@ -55,6 +56,8 @@ __all__ = [
     "WorkplacesResponse",
     "add_worker_to_company",
     "deactivate_offer",
+    "GetStatistics",
+    "StatisticsResponse",
 ]
 
 
