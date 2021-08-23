@@ -259,7 +259,7 @@ class MemberRepository(interfaces.MemberRepository):
                 return True
         return False
 
-    def get_number_of_members_registered(self) -> int:
+    def count_registered_members(self) -> int:
         return len(self.members)
 
 
@@ -301,7 +301,7 @@ class CompanyRepository(interfaces.CompanyRepository):
                 return company
         raise Exception("Company not found, this exception is not meant to be caught")
 
-    def get_number_of_companies_registered(self) -> int:
+    def count_registered_companies(self) -> int:
         return len(self.companies)
 
 
@@ -381,10 +381,10 @@ class PlanRepository(interfaces.PlanRepository):
             if plan.is_active:
                 yield plan
 
-    def get_number_of_active_plans(self) -> int:
+    def count_active_plans(self) -> int:
         return len([plan for plan in self.plans.values() if plan.is_active])
 
-    def get_number_of_active_public_plans(self) -> int:
+    def count_active_public_plans(self) -> int:
         return len(
             [
                 plan

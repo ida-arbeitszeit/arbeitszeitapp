@@ -22,8 +22,8 @@ class GetStatistics:
 
     def __call__(self) -> StatisticsResponse:
         return StatisticsResponse(
-            registered_companies_count=self.company_repository.get_number_of_companies_registered(),
-            registered_members_count=self.member_repository.get_number_of_members_registered(),
-            active_plans_count=self.plan_repository.get_number_of_active_plans(),
-            active_plans_public_count=self.plan_repository.get_number_of_active_public_plans(),
+            registered_companies_count=self.company_repository.count_registered_companies(),
+            registered_members_count=self.member_repository.count_registered_members(),
+            active_plans_count=self.plan_repository.count_active_plans(),
+            active_plans_public_count=self.plan_repository.count_active_public_plans(),
         )

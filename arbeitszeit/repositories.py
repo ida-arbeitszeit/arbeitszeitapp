@@ -93,11 +93,11 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def get_number_of_active_plans(self) -> int:
+    def count_active_plans(self) -> int:
         pass
 
     @abstractmethod
-    def get_number_of_active_public_plans(self) -> int:
+    def count_active_public_plans(self) -> int:
         pass
 
     @abstractmethod
@@ -199,7 +199,7 @@ class MemberRepository(ABC):
         pass
 
     @abstractmethod
-    def get_number_of_members_registered(self) -> int:
+    def count_registered_members(self) -> int:
         pass
 
 
@@ -234,5 +234,5 @@ class CompanyRepository(ABC):
         pass
 
     @abstractmethod
-    def get_number_of_companies_registered(self) -> int:
+    def count_registered_companies(self) -> int:
         pass

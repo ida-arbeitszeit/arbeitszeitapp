@@ -112,7 +112,7 @@ class MemberRepository(repositories.MemberRepository):
     def has_member_with_email(self, email: str) -> bool:
         return Member.query.filter_by(email=email).count()
 
-    def get_number_of_members_registered(self) -> int:
+    def count_registered_members(self) -> int:
         return int(self.db.session.query(func.count(Member.id)).one()[0])
 
 
@@ -207,7 +207,7 @@ class CompanyRepository(repositories.CompanyRepository):
     def has_company_with_email(self, email: str) -> bool:
         return Company.query.filter_by(email=email).first() is not None
 
-    def get_number_of_companies_registered(self) -> int:
+    def count_registered_companies(self) -> int:
         return int(self.db.session.query(func.count(Company.id)).one()[0])
 
 
@@ -597,14 +597,14 @@ class PlanRepository(repositories.PlanRepository):
             for plan_orm in Plan.query.filter_by(is_active=True).all()
         )
 
-    def get_number_of_active_plans(self) -> int:
+    def count_active_plans(self) -> int:
         return int(
             self.db.session.query(func.count(Plan.id))
             .filter_by(is_active=True)
             .one()[0]
         )
 
-    def get_number_of_active_public_plans(self) -> int:
+    def count_active_public_plans(self) -> int:
         return int(
             self.db.session.query(func.count(Plan.id))
             .filter_by(is_active=True, is_public_service=True)
