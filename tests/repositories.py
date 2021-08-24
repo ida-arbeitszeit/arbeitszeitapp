@@ -412,10 +412,10 @@ class PlanRepository(interfaces.PlanRepository):
             )
         except StatisticsError:
             avg_timeframe = 0
-        return avg_timeframe
+        return Decimal(avg_timeframe)
 
     def sum_of_active_planned_work(self) -> Decimal:
-        return sum(
+        return decimal_sum(
             (
                 plan.production_costs.labour_cost
                 for plan in self.plans.values()
@@ -424,7 +424,7 @@ class PlanRepository(interfaces.PlanRepository):
         )
 
     def sum_of_active_planned_resources(self) -> Decimal:
-        return sum(
+        return decimal_sum(
             (
                 plan.production_costs.resource_cost
                 for plan in self.plans.values()
@@ -433,7 +433,7 @@ class PlanRepository(interfaces.PlanRepository):
         )
 
     def sum_of_active_planned_means(self) -> Decimal:
-        return sum(
+        return decimal_sum(
             (
                 plan.production_costs.means_cost
                 for plan in self.plans.values()
