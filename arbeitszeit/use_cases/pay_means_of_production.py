@@ -17,34 +17,20 @@ class PayMeansOfProduction:
     def __call__(
         self,
         sender: Company,
-        receiver: Company,
         plan: Plan,
         pieces: int,
         purpose: PurposesOfPurchases,
     ) -> None:
-        """
-        This function enables the payment of means of production
-        or raw materials which were *not* bought on the app's marketplace.
-        Apart from sender and receiver it has to be specified the amount
-        of pieces to be paid, the seller's plan and the purpose of the purchase.
-
-        What this function does:
-            - It adjusts the balances of the buying company and the selling company
-            - It adds the transaction to the repository
-        """
         assert purpose in (
             PurposesOfPurchases.means_of_prod,
             PurposesOfPurchases.raw_materials,
         ), "Not a valid purpose for this operation."
-
+        if plan.expired:
+            raise errors.PlanIsExpired(
+                plan=plan,
+            )
         if plan.is_public_service:
             raise errors.CompanyCantBuyPublicServices(sender, plan)
-
-        if plan.planner != receiver:
-            raise errors.CompanyIsNotPlanner(
-                company=receiver,
-                planner=plan.planner,
-            )
 
         # create transaction
         price_total = pieces * plan.price_per_unit()

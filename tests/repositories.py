@@ -3,8 +3,8 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 from decimal import Decimal
+from statistics import StatisticsError, mean
 from typing import Dict, Iterator, List, Union
-from statistics import mean, StatisticsError
 
 from injector import inject, singleton
 

@@ -9,33 +9,32 @@ from tests.repositories import AccountRepository, TransactionRepository
 
 
 @injection_test
+def test_error_is_raised_if_plan_is_expired(
+    pay_means_of_production: PayMeansOfProduction,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+):
+    sender = company_generator.create_company()
+    plan = plan_generator.create_plan()
+    purpose = PurposesOfPurchases.means_of_prod
+    pieces = 5
+    plan.expired = True
+    with pytest.raises(errors.PlanIsExpired):
+        pay_means_of_production(sender, plan, pieces, purpose)
+
+
+@injection_test
 def test_assertion_error_is_raised_if_purpose_is_other_than_means_or_raw_materials(
     pay_means_of_production: PayMeansOfProduction,
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
 ):
     sender = company_generator.create_company()
-    receiver = company_generator.create_company()
     plan = plan_generator.create_plan()
     purpose = PurposesOfPurchases.consumption
     pieces = 5
     with pytest.raises(AssertionError):
-        pay_means_of_production(sender, receiver, plan, pieces, purpose)
-
-
-@injection_test
-def test_error_is_raised_if_receiver_is_not_equal_to_planner(
-    pay_means_of_production: PayMeansOfProduction,
-    company_generator: CompanyGenerator,
-    plan_generator: PlanGenerator,
-):
-    sender = company_generator.create_company()
-    receiver = company_generator.create_company()
-    plan = plan_generator.create_plan()
-    purpose = PurposesOfPurchases.means_of_prod
-    pieces = 5
-    with pytest.raises(errors.CompanyIsNotPlanner):
-        pay_means_of_production(sender, receiver, plan, pieces, purpose)
+        pay_means_of_production(sender, plan, pieces, purpose)
 
 
 @injection_test
@@ -45,12 +44,11 @@ def test_error_is_raised_if_trying_to_pay_public_service(
     plan_generator: PlanGenerator,
 ):
     sender = company_generator.create_company()
-    receiver = company_generator.create_company()
-    plan = plan_generator.create_plan(planner=receiver, is_public_service=True)
+    plan = plan_generator.create_plan(is_public_service=True)
     purpose = PurposesOfPurchases.means_of_prod
     pieces = 5
     with pytest.raises(errors.CompanyCantBuyPublicServices):
-        pay_means_of_production(sender, receiver, plan, pieces, purpose)
+        pay_means_of_production(sender, plan, pieces, purpose)
 
 
 @injection_test
@@ -61,12 +59,11 @@ def test_balance_of_buyer_of_means_of_prod_reduced(
     account_repository: AccountRepository,
 ):
     sender = company_generator.create_company()
-    receiver = company_generator.create_company()
-    plan = plan_generator.create_plan(planner=receiver)
+    plan = plan_generator.create_plan()
     purpose = PurposesOfPurchases.means_of_prod
     pieces = 5
 
-    pay_means_of_production(sender, receiver, plan, pieces, purpose)
+    pay_means_of_production(sender, plan, pieces, purpose)
 
     price_total = pieces * plan.price_per_unit()
     assert account_repository.get_account_balance(sender.means_account) == -price_total
@@ -80,12 +77,11 @@ def test_balance_of_buyer_of_raw_materials_reduced(
     account_repository: AccountRepository,
 ):
     sender = company_generator.create_company()
-    receiver = company_generator.create_company()
-    plan = plan_generator.create_plan(planner=receiver)
+    plan = plan_generator.create_plan()
     purpose = PurposesOfPurchases.raw_materials
     pieces = 5
 
-    pay_means_of_production(sender, receiver, plan, pieces, purpose)
+    pay_means_of_production(sender, plan, pieces, purpose)
 
     price_total = pieces * plan.price_per_unit()
     assert (
@@ -102,16 +98,16 @@ def test_balance_of_seller_increased(
     account_repository: AccountRepository,
 ):
     sender = company_generator.create_company()
-    receiver = company_generator.create_company()
-    plan = plan_generator.create_plan(planner=receiver)
+    plan = plan_generator.create_plan()
     purpose = PurposesOfPurchases.raw_materials
     pieces = 5
 
-    pay_means_of_production(sender, receiver, plan, pieces, purpose)
+    pay_means_of_production(sender, plan, pieces, purpose)
 
     price_total = pieces * plan.price_per_unit()
     assert (
-        account_repository.get_account_balance(receiver.product_account) == price_total
+        account_repository.get_account_balance(plan.planner.product_account)
+        == price_total
     )
 
 
@@ -123,11 +119,10 @@ def test_correct_transaction_added_if_means_of_production_were_paid(
     plan_generator: PlanGenerator,
 ):
     sender = company_generator.create_company()
-    receiver = company_generator.create_company()
-    plan = plan_generator.create_plan(planner=receiver)
+    plan = plan_generator.create_plan()
     purpose = PurposesOfPurchases.means_of_prod
     pieces = 5
-    pay_means_of_production(sender, receiver, plan, pieces, purpose)
+    pay_means_of_production(sender, plan, pieces, purpose)
     price_total = pieces * plan.price_per_unit()
     assert len(transaction_repository.transactions) == 1
     assert transaction_repository.transactions[0].account_from == sender.means_account
@@ -146,11 +141,10 @@ def test_correct_transaction_added_if_raw_materials_were_paid(
     plan_generator: PlanGenerator,
 ):
     sender = company_generator.create_company()
-    receiver = company_generator.create_company()
-    plan = plan_generator.create_plan(planner=receiver)
+    plan = plan_generator.create_plan()
     purpose = PurposesOfPurchases.raw_materials
     pieces = 5
-    pay_means_of_production(sender, receiver, plan, pieces, purpose)
+    pay_means_of_production(sender, plan, pieces, purpose)
     price_total = pieces * plan.price_per_unit()
     assert len(transaction_repository.transactions) == 1
     assert (

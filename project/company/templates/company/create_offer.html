@@ -3,7 +3,7 @@
 {% block content2 %}
 
 
-<h1 class="title">Produkt anbieten</h1>
+<h1 class="title">Produkt im Marketplace anbieten</h1>
 
 {% with messages = get_flashed_messages() %}
 {% if messages %}
@@ -17,18 +17,17 @@
     <div class="column is-two-fifths">
         <div>
             <p>
-                [<i>to be implemented:</i>] [<i>Du kannst dieses Produkt selbst anbieten, wo und wie du willst. Solange
-                    der
-                    dazugehörige Plan aktuell
-                    ist, können Kunden das Produkt in ihrem Mitglieds-Konto mit Hinweis auf die Plan-ID (<b>{{ plan.id
-                        }}</b>) bezahlen.</i>]
+                Auf dieser Seite kannst du dein Produkt auf unserem Marketplace anbieten.
+                Passe das Angebot bei Bedarf an.
             </p>
-            <hr>
+            <br>
             <p>
-                Du solltest dein Produkt in jedem Fall auch auf unserem Marketplace anbieten.
-                Passe bei Bedarf Details des Angebots an und klicke dann auf
-                den Button "Angebot erstellen".
+                Du kannst dieses Produkt übrigens auch woanders anbieten.
+                Die Käufer müssen dann die Bezahlung manuell in der App vornehmen.
+                Dazu brauchen sie die Plan-ID (<b>{{ plan.id
+                    }}</b>).
             </p>
+
         </div>
     </div>
 </div>
@@ -64,7 +63,7 @@
     <div class="field">
         <div class="control">
             <button class="button is-primary">
-                Angebot erstellen
+                Im Marketplace anbieten
             </button>
             <a class="button is-light" href="{{  url_for('main_company.my_plans') }}">
                 Abbrechen

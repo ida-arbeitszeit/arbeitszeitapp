@@ -8,7 +8,7 @@ from uuid import UUID
 
 from flask_sqlalchemy import SQLAlchemy
 from injector import inject
-from sqlalchemy import desc, func, distinct
+from sqlalchemy import desc, distinct, func
 from werkzeug.security import generate_password_hash
 
 from arbeitszeit import entities, repositories
