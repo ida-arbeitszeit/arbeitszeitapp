@@ -1,4 +1,5 @@
 from arbeitszeit.use_cases import GetStatistics
+from decimal import Decimal
 from tests.data_generators import (
     CompanyGenerator,
     MemberGenerator,
@@ -8,6 +9,18 @@ from tests.data_generators import (
 from tests.datetime_service import FakeDatetimeService
 from tests.dependency_injection import injection_test
 from arbeitszeit.entities import ProductionCosts
+from typing import Union
+
+
+Number = Union[int, Decimal]
+
+
+def production_costs(p: Number, r: Number, a: Number) -> ProductionCosts:
+    return ProductionCosts(
+        Decimal(p),
+        Decimal(r),
+        Decimal(a),
+    )
 
 
 @injection_test
@@ -128,11 +141,11 @@ def test_adding_up_work_of_two_plans(
 ):
     plan_generator.create_plan(
         activation_date=datetime_service.now_minus_one_day(),
-        costs=ProductionCosts(3, 1, 1),
+        costs=production_costs(3, 1, 1),
     )
     plan_generator.create_plan(
         activation_date=datetime_service.now_minus_one_day(),
-        costs=ProductionCosts(2, 1, 1),
+        costs=production_costs(2, 1, 1),
     )
     stats = get_statistics()
     assert stats.planned_work == 5
@@ -144,10 +157,10 @@ def test_that_inactive_plans_are_ignored_when_adding_up_work(
     plan_generator: PlanGenerator,
     datetime_service: FakeDatetimeService,
 ):
-    plan_generator.create_plan(activation_date=None, costs=ProductionCosts(10, 1, 1))
+    plan_generator.create_plan(activation_date=None, costs=production_costs(10, 1, 1))
     plan_generator.create_plan(
         activation_date=datetime_service.now_minus_one_day(),
-        costs=ProductionCosts(3, 1, 1),
+        costs=production_costs(3, 1, 1),
     )
     stats = get_statistics()
     assert stats.planned_work == 3
@@ -161,11 +174,11 @@ def test_adding_up_resources_of_two_plans(
 ):
     plan_generator.create_plan(
         activation_date=datetime_service.now_minus_one_day(),
-        costs=ProductionCosts(1, 3, 1),
+        costs=production_costs(1, 3, 1),
     )
     plan_generator.create_plan(
         activation_date=datetime_service.now_minus_one_day(),
-        costs=ProductionCosts(1, 2, 1),
+        costs=production_costs(1, 2, 1),
     )
     stats = get_statistics()
     assert stats.planned_resources == 5
@@ -177,10 +190,10 @@ def test_that_inactive_plans_are_ignored_when_adding_up_resources(
     plan_generator: PlanGenerator,
     datetime_service: FakeDatetimeService,
 ):
-    plan_generator.create_plan(activation_date=None, costs=ProductionCosts(1, 10, 1))
+    plan_generator.create_plan(activation_date=None, costs=production_costs(1, 10, 1))
     plan_generator.create_plan(
         activation_date=datetime_service.now_minus_one_day(),
-        costs=ProductionCosts(1, 3, 1),
+        costs=production_costs(1, 3, 1),
     )
     stats = get_statistics()
     assert stats.planned_resources == 3
@@ -194,11 +207,11 @@ def test_adding_up_means_of_two_plans(
 ):
     plan_generator.create_plan(
         activation_date=datetime_service.now_minus_one_day(),
-        costs=ProductionCosts(1, 1, 3),
+        costs=production_costs(1, 1, 3),
     )
     plan_generator.create_plan(
         activation_date=datetime_service.now_minus_one_day(),
-        costs=ProductionCosts(1, 1, 2),
+        costs=production_costs(1, 1, 2),
     )
     stats = get_statistics()
     assert stats.planned_means == 5
@@ -210,10 +223,10 @@ def test_that_inactive_plans_are_ignored_when_adding_up_means(
     plan_generator: PlanGenerator,
     datetime_service: FakeDatetimeService,
 ):
-    plan_generator.create_plan(activation_date=None, costs=ProductionCosts(1, 1, 10))
+    plan_generator.create_plan(activation_date=None, costs=production_costs(1, 1, 10))
     plan_generator.create_plan(
         activation_date=datetime_service.now_minus_one_day(),
-        costs=ProductionCosts(1, 1, 3),
+        costs=production_costs(1, 1, 3),
     )
     stats = get_statistics()
     assert stats.planned_means == 3
