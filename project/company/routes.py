@@ -356,11 +356,6 @@ def transfer_to_company(
         except error.PlanNotFound:
             flash("Plan existiert nicht.")
             return redirect(url_for("main_company.transfer_to_company"))
-        try:
-            receiver = company_repository.get_by_id(request.form["company_id"])
-        except error.CompanyNotFound:
-            flash("Betrieb existiert nicht.")
-            return redirect(url_for("main_company.transfer_to_company"))
         pieces = int(request.form["amount"])
         purpose = (
             entities.PurposesOfPurchases.means_of_prod
@@ -370,15 +365,16 @@ def transfer_to_company(
         try:
             pay_means_of_production(
                 sender,
-                receiver,
                 plan,
                 pieces,
                 purpose,
             )
             database.commit_changes()
             flash("Erfolgreich bezahlt.")
-        except errors.CompanyIsNotPlanner:
-            flash("Der angegebene Plan gehört nicht zum angegebenen Betrieb.")
+        except errors.PlanIsExpired:
+            flash(
+                "Der angegebene Plan ist nicht mehr aktuell. Bitte wende dich an den Verkäufer, um eine aktuelle Plan-ID zu erhalten."
+            )
         except errors.CompanyCantBuyPublicServices:
             flash(
                 "Bezahlung nicht erfolgreich. Betriebe können keine öffentlichen Dienstleistungen oder Produkte erwerben."

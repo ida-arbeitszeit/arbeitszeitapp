@@ -15,13 +15,6 @@ class WorkerNotAtCompany(Exception):
         super().__init__()
 
 
-class CompanyIsNotPlanner(Exception):
-    def __init__(self, company: Company, planner: Company) -> None:
-        self.company = company
-        self.planner = planner
-        super().__init__()
-
-
 class PlanIsExpired(Exception):
     def __init__(self, plan: Plan) -> None:
         self.plan = plan

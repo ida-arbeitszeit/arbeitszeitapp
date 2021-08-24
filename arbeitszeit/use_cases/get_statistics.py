@@ -1,12 +1,13 @@
 from dataclasses import dataclass
 from decimal import Decimal
+
 from injector import inject
 
 from arbeitszeit.repositories import (
     CompanyRepository,
     MemberRepository,
-    PlanRepository,
     OfferRepository,
+    PlanRepository,
 )
 
 

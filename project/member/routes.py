@@ -111,19 +111,15 @@ def pay_consumer_product(
     if request.method == "POST":
         sender = member_repository.get_member_by_id(current_user.id)
         plan = plan_repository.get_plan_by_id(request.form["plan_id"])
-        receiver = company_repository.get_by_id(request.form["company_id"])
         pieces = int(request.form["amount"])
         try:
             pay_consumer_product(
                 sender,
-                receiver,
                 plan,
                 pieces,
             )
             database.commit_changes()
             flash("Produkt erfolgreich bezahlt.")
-        except errors.CompanyIsNotPlanner:
-            flash("Der angegebene Plan gehört nicht zum angegebenen Betrieb.")
         except errors.PlanIsExpired:
             flash(
                 "Der angegebene Plan ist nicht mehr aktuell. Bitte wende dich an den Verkäufer, um eine aktuelle Plan-ID zu erhalten."
