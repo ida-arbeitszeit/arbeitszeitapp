@@ -9,6 +9,21 @@ from tests.repositories import AccountRepository, TransactionRepository
 
 
 @injection_test
+def test_error_is_raised_if_plan_is_expired(
+    pay_means_of_production: PayMeansOfProduction,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+):
+    sender = company_generator.create_company()
+    plan = plan_generator.create_plan()
+    purpose = PurposesOfPurchases.means_of_prod
+    pieces = 5
+    plan.expired = True
+    with pytest.raises(errors.PlanIsExpired):
+        pay_means_of_production(sender, plan, pieces, purpose)
+
+
+@injection_test
 def test_assertion_error_is_raised_if_purpose_is_other_than_means_or_raw_materials(
     pay_means_of_production: PayMeansOfProduction,
     company_generator: CompanyGenerator,
