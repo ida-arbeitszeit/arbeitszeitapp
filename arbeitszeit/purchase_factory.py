@@ -2,14 +2,14 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Union
 
-from .entities import Company, Member, ProductOffer, Purchase, PurposesOfPurchases
+from .entities import Company, Member, Plan, Purchase, PurposesOfPurchases
 
 
 class PurchaseFactory:
-    def create_private_purchase(
+    def create_purchase(
         self,
         purchase_date: datetime,
-        product_offer: ProductOffer,
+        plan: Plan,
         buyer: Union[Member, Company],
         price_per_unit: Decimal,
         amount: int,
@@ -17,7 +17,7 @@ class PurchaseFactory:
     ) -> Purchase:
         return Purchase(
             purchase_date=purchase_date,
-            product_offer=product_offer,
+            plan=plan,
             buyer=buyer,
             price_per_unit=price_per_unit,
             amount=amount,

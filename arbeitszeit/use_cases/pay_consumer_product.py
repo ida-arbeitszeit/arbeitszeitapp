@@ -4,8 +4,9 @@ from injector import inject
 
 from arbeitszeit import errors
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Member, Plan
-from arbeitszeit.repositories import TransactionRepository
+from arbeitszeit.entities import Member, Plan, PurposesOfPurchases
+from arbeitszeit.purchase_factory import PurchaseFactory
+from arbeitszeit.repositories import PurchaseRepository, TransactionRepository
 
 
 @inject
@@ -13,6 +14,8 @@ from arbeitszeit.repositories import TransactionRepository
 class PayConsumerProduct:
     transaction_repository: TransactionRepository
     datetime_service: DatetimeService
+    purchase_factory: PurchaseFactory
+    purchase_repository: PurchaseRepository
 
     def __call__(
         self,
@@ -24,6 +27,18 @@ class PayConsumerProduct:
             raise errors.PlanIsExpired(
                 plan=plan,
             )
+
+        # create purchase
+        price_per_unit = plan.price_per_unit()
+        purchase = self.purchase_factory.create_purchase(
+            purchase_date=self.datetime_service.now(),
+            plan=plan,
+            buyer=sender,
+            price_per_unit=price_per_unit,
+            amount=pieces,
+            purpose=PurposesOfPurchases.consumption,
+        )
+        self.purchase_repository.add(purchase)
 
         # create transaction
         price_total = pieces * plan.price_per_unit()

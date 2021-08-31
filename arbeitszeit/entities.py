@@ -196,18 +196,14 @@ class ProductOffer:
         self,
         id: UUID,
         name: str,
-        amount_available: int,
         deactivate_offer_in_db: Callable[[], None],
-        decrease_amount_available: Callable[[int], None],
         active: bool,
         description: str,
         plan: Plan,
     ) -> None:
         self._id = id
         self.name = name
-        self._amount_available = amount_available
         self._deactivate = deactivate_offer_in_db
-        self._decrease_amount = decrease_amount_available
         self.active = active
         self.description = description
         self.plan = plan
@@ -216,20 +212,12 @@ class ProductOffer:
         self.active = False
         self._deactivate()
 
-    def decrease_amount_available(self, amount: int) -> None:
-        self._amount_available -= amount
-        self._decrease_amount(amount)
-
     def price_per_unit(self) -> Decimal:
         return self.plan.price_per_unit()
 
     @property
     def id(self) -> UUID:
         return self._id
-
-    @property
-    def amount_available(self) -> int:
-        return self._amount_available
 
 
 class PurposesOfPurchases(Enum):
@@ -241,7 +229,7 @@ class PurposesOfPurchases(Enum):
 @dataclass
 class Purchase:
     purchase_date: datetime
-    product_offer: ProductOffer
+    plan: Plan
     buyer: Union[Member, Company]
     price_per_unit: Decimal
     amount: int

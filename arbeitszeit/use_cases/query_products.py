@@ -25,7 +25,6 @@ class ProductQueryResponse:
     product_description: str
     price_per_unit: Decimal
     is_public_service: bool
-    amount_available: int
 
 
 @inject
@@ -54,5 +53,4 @@ class QueryProducts:
             product_description=offer.description,
             price_per_unit=offer.price_per_unit(),
             is_public_service=offer.plan.is_public_service,
-            amount_available=offer.amount_available,
         )
