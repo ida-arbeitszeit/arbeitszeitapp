@@ -222,6 +222,10 @@ class MemberRepository(ABC):
     def count_registered_members(self) -> int:
         pass
 
+    @abstractmethod
+    def get_by_id(self, id: UUID) -> Member:
+        pass
+
 
 class AccountOwnerRepository(ABC):
     @abstractmethod
