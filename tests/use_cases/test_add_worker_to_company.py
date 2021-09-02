@@ -3,8 +3,9 @@ import pytest
 from arbeitszeit.errors import WorkerAlreadyAtCompany
 from arbeitszeit.use_cases import add_worker_to_company
 from tests.data_generators import CompanyGenerator, MemberGenerator
-from tests.dependency_injection import injection_test
-from tests.repositories import CompanyWorkerRepository
+
+from .dependency_injection import injection_test
+from .repositories import CompanyWorkerRepository
 
 
 @injection_test

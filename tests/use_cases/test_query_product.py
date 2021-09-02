@@ -3,8 +3,9 @@ from typing import Iterable
 from arbeitszeit.entities import ProductOffer
 from arbeitszeit.use_cases import ProductFilter, ProductQueryResponse, QueryProducts
 from tests.data_generators import OfferGenerator
-from tests.dependency_injection import injection_test
-from tests.repositories import OfferRepository
+
+from .dependency_injection import injection_test
+from .repositories import OfferRepository
 
 
 def offer_in_results(

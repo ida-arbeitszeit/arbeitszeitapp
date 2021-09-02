@@ -11,8 +11,9 @@ from tests.data_generators import (
     OfferGenerator,
     PlanGenerator,
 )
-from tests.dependency_injection import injection_test
-from tests.repositories import AccountRepository, TransactionRepository
+
+from .dependency_injection import injection_test
+from .repositories import AccountRepository, TransactionRepository
 
 
 @injection_test
