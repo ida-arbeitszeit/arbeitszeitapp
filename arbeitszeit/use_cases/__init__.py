@@ -34,7 +34,6 @@ __all__ = [
     "PlanProposal",
     "ProductFilter",
     "ProductQueryResponse",
-    "PurchaseProduct",
     "PurchaseQueryResponse",
     "QueryProducts",
     "QueryPurchases",

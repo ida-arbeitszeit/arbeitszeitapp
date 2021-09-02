@@ -13,7 +13,7 @@ from arbeitszeit.repositories import PurchaseRepository
 @dataclass
 class PurchaseQueryResponse:
     purchase_date: datetime
-    offer_id: UUID
+    plan_id: UUID
     product_name: str
     product_description: str
     purpose: str
@@ -47,9 +47,9 @@ class QueryPurchases:
             purpose = "Konsum"
         return PurchaseQueryResponse(
             purchase_date=purchase.purchase_date,
-            offer_id=purchase.product_offer.id,
-            product_name=purchase.product_offer.name,
-            product_description=purchase.product_offer.description,
+            plan_id=purchase.plan.id,
+            product_name=purchase.plan.prd_name,
+            product_description=purchase.plan.description,
             purpose=purpose,
             price_per_unit=purchase.price_per_unit,
             amount=purchase.amount,
