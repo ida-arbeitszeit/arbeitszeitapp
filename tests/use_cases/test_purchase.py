@@ -103,7 +103,7 @@ def test_balance_of_buyer_reduced(
     buyer1 = member_generator.create_member()
     purpose1 = PurposesOfPurchases.consumption
     purchase_product(offer1, 3, purpose1, buyer1)
-    expected_reduction = -3 * offer1.price_per_unit()
+    expected_reduction = -3 * offer1.plan.price_per_unit()
     assert account_repository.get_account_balance(buyer1.account) == expected_reduction
 
     # company, means of production
@@ -111,7 +111,7 @@ def test_balance_of_buyer_reduced(
     buyer2 = company_generator.create_company()
     purpose2 = PurposesOfPurchases.means_of_prod
     purchase_product(offer2, 3, purpose2, buyer2)
-    expected_reduction = -3 * offer2.price_per_unit()
+    expected_reduction = -3 * offer2.plan.price_per_unit()
     assert (
         account_repository.get_account_balance(buyer2.means_account)
         == expected_reduction
@@ -122,7 +122,7 @@ def test_balance_of_buyer_reduced(
     buyer3 = company_generator.create_company()
     purpose3 = PurposesOfPurchases.raw_materials
     purchase_product(offer3, 3, purpose3, buyer3)
-    expected_reduction = -3 * offer3.price_per_unit()
+    expected_reduction = -3 * offer3.plan.price_per_unit()
     assert (
         account_repository.get_account_balance(buyer3.raw_material_account)
         == expected_reduction
@@ -165,7 +165,7 @@ def test_balance_of_seller_increased(
         PurposesOfPurchases.consumption,
         buyer,
     )
-    expected_increase = offer.price_per_unit() * 3
+    expected_increase = offer.plan.price_per_unit() * 3
     assert (
         account_repository.get_account_balance(offer.plan.planner.product_account)
         == expected_increase

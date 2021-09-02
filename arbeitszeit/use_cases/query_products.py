@@ -51,6 +51,6 @@ class QueryProducts:
             plan_id=offer.plan.id,
             product_name=offer.name,
             product_description=offer.description,
-            price_per_unit=offer.price_per_unit(),
+            price_per_unit=offer.plan.price_per_unit(),
             is_public_service=offer.plan.is_public_service,
         )

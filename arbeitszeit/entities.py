@@ -210,9 +210,6 @@ class ProductOffer:
         self.active = False
         self._deactivate()
 
-    def price_per_unit(self) -> Decimal:
-        return self.plan.price_per_unit()
-
     @property
     def id(self) -> UUID:
         return self._id
