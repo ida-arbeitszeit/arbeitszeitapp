@@ -3,8 +3,10 @@ from injector import Injector, Module, inject, provider, singleton
 import arbeitszeit.repositories as interfaces
 from arbeitszeit import entities
 from arbeitszeit.datetime_service import DatetimeService
-from tests import data_generators, repositories
+from tests import data_generators
 from tests.datetime_service import FakeDatetimeService
+
+from . import repositories
 
 
 class InMemoryModule(Module):

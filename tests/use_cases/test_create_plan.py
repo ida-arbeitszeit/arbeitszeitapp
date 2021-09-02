@@ -3,8 +3,9 @@ from decimal import Decimal
 from arbeitszeit.entities import ProductionCosts
 from arbeitszeit.use_cases import CreatePlan, PlanProposal
 from tests.data_generators import CompanyGenerator
-from tests.dependency_injection import injection_test
-from tests.repositories import PlanRepository
+
+from .dependency_injection import injection_test
+from .repositories import PlanRepository
 
 
 @injection_test

@@ -5,8 +5,9 @@ from arbeitszeit.entities import AccountTypes, ProductionCosts
 from arbeitszeit.use_cases import SynchronizedPlanActivation
 from tests.data_generators import PlanGenerator
 from tests.datetime_service import FakeDatetimeService
-from tests.dependency_injection import injection_test
-from tests.repositories import AccountRepository, TransactionRepository
+
+from .dependency_injection import injection_test
+from .repositories import AccountRepository, TransactionRepository
 
 
 @injection_test
