@@ -15,7 +15,7 @@ def test_that_correct_workplace_email_is_shown(
     workplace = company_generator.create_company(email="companyname@mail.com")
     company_worker_repository.add_worker_to_company(workplace, worker)
 
-    workplaces = get_member_workplaces(worker)
+    workplaces = get_member_workplaces(worker.id)
     assert workplaces[0].workplace_email == "companyname@mail.com"
 
 
@@ -30,5 +30,5 @@ def test_that_correct_workplace_name_is_shown(
     workplace = company_generator.create_company(name="SomeCompanyNameXY")
     company_worker_repository.add_worker_to_company(workplace, worker)
 
-    workplaces = get_member_workplaces(worker)
+    workplaces = get_member_workplaces(worker.id)
     assert workplaces[0].workplace_name == "SomeCompanyNameXY"

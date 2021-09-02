@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from typing import List
+from uuid import UUID
 
 from injector import inject
 
-from arbeitszeit.entities import Member
 from arbeitszeit.repositories import CompanyWorkerRepository
 
 
@@ -18,7 +18,7 @@ class WorkplacesResponse:
 class GetMemberWorkplaces:
     company_worker_repository: CompanyWorkerRepository
 
-    def __call__(self, member: Member) -> List[WorkplacesResponse]:
+    def __call__(self, member: UUID) -> List[WorkplacesResponse]:
         workplaces = [
             WorkplacesResponse(
                 workplace_name=workplace.name,

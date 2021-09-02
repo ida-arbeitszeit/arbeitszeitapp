@@ -138,7 +138,7 @@ def profile(
     if not user_is_member():
         return redirect(url_for("auth.zurueck"))
 
-    member = member_repository.object_from_orm(current_user)
+    member = current_user.id
     workplaces = get_member_workplaces(member)
     return render_template(
         "member/profile.html",

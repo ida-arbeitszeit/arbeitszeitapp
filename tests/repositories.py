@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import uuid
+from collections import defaultdict
 from datetime import datetime
 from decimal import Decimal
 from statistics import StatisticsError, mean
-from typing import Dict, Iterator, List, Union
+from typing import Dict, Iterator, List, Set, Union
 
 from injector import inject, singleton
 
@@ -147,22 +148,30 @@ class OfferRepository(interfaces.OfferRepository):
 @singleton
 class CompanyWorkerRepository(interfaces.CompanyWorkerRepository):
     @inject
-    def __init__(self, company_repository: CompanyRepository) -> None:
+    def __init__(
+        self, company_repository: CompanyRepository, member_repository: MemberRepository
+    ) -> None:
         self.company_repository = company_repository
+        self.member_repository = member_repository
+        self.company_workers: Dict[uuid.UUID, Set[uuid.UUID]] = defaultdict(
+            lambda: set()
+        )
 
     def add_worker_to_company(self, company: Company, worker: Member) -> None:
-        if worker not in company.workers:
-            company.workers.append(worker)
+        self.company_workers[company.id].add(worker.id)
 
     def get_company_workers(self, company: Company) -> List[Member]:
-        return company.workers
+        return [
+            self.member_repository.get_by_id(member)
+            for member in self.company_workers[company.id]
+        ]
 
-    def get_member_workplaces(self, member: Member) -> List[Company]:
-        workplaces = []
-        for company in self.company_repository.companies.values():
-            if member in company.workers:
-                workplaces.append(company)
-        return workplaces
+    def get_member_workplaces(self, member: uuid.UUID) -> List[Company]:
+        return [
+            self.company_repository.get_by_id(company)
+            for company, workers in self.company_workers.items()
+            if member in workers
+        ]
 
 
 @singleton
@@ -236,7 +245,7 @@ class AccountOwnerRepository(interfaces.AccountOwnerRepository):
     ) -> Union[Member, Company, SocialAccounting]:
         if account.account_type == AccountTypes.accounting:
             return self.social_accounting
-        for member in self.member_repository.members:
+        for member in self.member_repository.members.values():
             if account == member.account:
                 return member
         for company in self.company_repository.companies.values():
@@ -251,28 +260,32 @@ class AccountOwnerRepository(interfaces.AccountOwnerRepository):
 class MemberRepository(interfaces.MemberRepository):
     @inject
     def __init__(self):
-        self.members = []
+        self.members: Dict[uuid.UUID, Member] = {}
 
     def create_member(
         self, email: str, name: str, password: str, account: Account
     ) -> Member:
+        id = uuid.uuid4()
         member = Member(
-            id=uuid.uuid4(),
+            id=id,
             name=name,
             email=email,
             account=account,
         )
-        self.members.append(member)
+        self.members[id] = member
         return member
 
     def has_member_with_email(self, email: str) -> bool:
-        for member in self.members:
+        for member in self.members.values():
             if member.email == email:
                 return True
         return False
 
     def count_registered_members(self) -> int:
         return len(self.members)
+
+    def get_by_id(self, id: uuid.UUID) -> Member:
+        return self.members[id]
 
 
 @singleton
@@ -299,7 +312,6 @@ class CompanyRepository(interfaces.CompanyRepository):
             raw_material_account=resource_account,
             work_account=labour_account,
             product_account=products_account,
-            workers=[],
         )
         self.companies[email] = new_company
         return new_company
