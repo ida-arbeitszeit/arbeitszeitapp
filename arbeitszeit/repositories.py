@@ -28,7 +28,7 @@ class CompanyWorkerRepository(ABC):
         pass
 
     @abstractmethod
-    def get_member_workplaces(self, member: Member) -> List[Company]:
+    def get_member_workplaces(self, member: UUID) -> List[Company]:
         pass
 
 
