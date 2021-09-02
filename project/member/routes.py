@@ -5,14 +5,14 @@ from flask_login import current_user, login_required
 
 from arbeitszeit import entities, errors, use_cases
 from project import database
-from project.database import with_injection
-from project.database.repositories import (
+from project.database import (
     AccountRepository,
     CompanyRepository,
     MemberRepository,
     PlanRepository,
     ProductOfferRepository,
 )
+from project.dependency_injection import with_injection
 from project.forms import ProductSearchForm
 
 main_member = Blueprint(
@@ -131,19 +131,17 @@ def pay_consumer_product(
 @login_required
 @with_injection
 def profile(
-    account_repository: AccountRepository,
-    member_repository: MemberRepository,
-    get_member_workplaces: use_cases.GetMemberWorkplaces,
+    get_member_profile: use_cases.GetMemberProfileInfo,
 ):
     if not user_is_member():
         return redirect(url_for("auth.zurueck"))
 
-    member = member_repository.object_from_orm(current_user)
-    workplaces = get_member_workplaces(member)
+    member = current_user.id
+    member_profile = get_member_profile(member)
     return render_template(
         "member/profile.html",
-        workplaces=workplaces,
-        account_balance=account_repository.get_account_balance(member.account),
+        workplaces=member_profile.workplaces,
+        account_balance=member_profile.account_balance,
     )
 
 

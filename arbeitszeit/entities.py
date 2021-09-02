@@ -50,7 +50,6 @@ class Company:
         raw_material_account: Account,
         work_account: Account,
         product_account: Account,
-        workers: List[Member],
     ) -> None:
         self._id = id
         self.email = email
@@ -59,7 +58,6 @@ class Company:
         self.raw_material_account = raw_material_account
         self.work_account = work_account
         self.product_account = product_account
-        self.workers = workers
 
     @property
     def id(self) -> UUID:

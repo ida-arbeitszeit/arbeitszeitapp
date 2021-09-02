@@ -34,11 +34,6 @@ from project.models import (
 T = TypeVar("T")
 
 
-def assert_is_not_none(candidate: Optional[T]) -> T:
-    assert candidate is not None
-    return candidate
-
-
 @inject
 @dataclass
 class CompanyWorkerRepository(repositories.CompanyWorkerRepository):
@@ -50,18 +45,20 @@ class CompanyWorkerRepository(repositories.CompanyWorkerRepository):
     ) -> None:
         company_orm = self.company_repository.object_to_orm(company)
         worker_orm = self.member_repository.object_to_orm(worker)
-        # add in database
         if worker_orm not in company_orm.workers:
             company_orm.workers.append(worker_orm)
-        # add in object
-        if worker not in company.workers:
-            company.workers.append(worker)
 
     def get_company_workers(self, company: entities.Company) -> List[entities.Member]:
-        return company.workers
+        company_orm = self.company_repository.object_to_orm(company)
+        return [
+            self.member_repository.object_from_orm(member)
+            for member in company_orm.workers
+        ]
 
-    def get_member_workplaces(self, member: entities.Member) -> List[entities.Company]:
-        member_orm = self.member_repository.object_to_orm(member)
+    def get_member_workplaces(self, member: UUID) -> List[entities.Company]:
+        member_orm = Member.query.filter_by(id=str(member)).first()
+        if member_orm is None:
+            return []
         workplaces_orm = member_orm.workplaces.all()
         return [
             self.company_repository.object_from_orm(workplace_orm)
@@ -81,6 +78,8 @@ class MemberRepository(repositories.MemberRepository):
             raise MemberNotFound()
         else:
             return self.object_from_orm(orm_object)
+
+    get_by_id = get_member_by_id
 
     def object_from_orm(self, orm_object: Member) -> entities.Member:
         member_account = self.account_repository.object_from_orm(orm_object.account)
@@ -143,10 +142,6 @@ class CompanyRepository(repositories.CompanyRepository):
             product_account=self.account_repository.object_from_orm(
                 self._get_products_account(company_orm)
             ),
-            workers=[
-                self.member_repository.object_from_orm(worker_orm)
-                for worker_orm in company_orm.workers
-            ],
         )
 
     def _get_means_account(self, company: Company) -> Account:

@@ -3,7 +3,8 @@ from datetime import datetime
 from arbeitszeit.use_cases import SeekApproval
 from tests.data_generators import PlanGenerator
 from tests.datetime_service import FakeDatetimeService
-from tests.dependency_injection import injection_test
+
+from .dependency_injection import injection_test
 
 
 @injection_test

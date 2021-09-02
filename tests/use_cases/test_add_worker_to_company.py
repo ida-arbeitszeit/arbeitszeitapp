@@ -3,8 +3,9 @@ import pytest
 from arbeitszeit.errors import WorkerAlreadyAtCompany
 from arbeitszeit.use_cases import add_worker_to_company
 from tests.data_generators import CompanyGenerator, MemberGenerator
-from tests.dependency_injection import injection_test
-from tests.repositories import CompanyWorkerRepository
+
+from .dependency_injection import injection_test
+from .repositories import CompanyWorkerRepository
 
 
 @injection_test
@@ -29,4 +30,4 @@ def test_that_worker_is_added_to_company_worker_repo(
     company = company_generator.create_company()
     worker = member_generator.create_member()
     add_worker_to_company(company_worker_repository, company, worker)
-    assert worker in company.workers
+    assert worker in company_worker_repository.get_company_workers(company)
