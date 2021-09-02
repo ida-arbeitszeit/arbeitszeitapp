@@ -3,7 +3,7 @@ from injector import Injector, Module, inject, provider, singleton
 
 import project.models
 from project import create_app
-from project.database import configure_injector
+from project.dependency_injection import configure_injector
 
 
 class SqliteModule(Module):
