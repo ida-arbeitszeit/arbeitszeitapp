@@ -79,6 +79,8 @@ class MemberRepository(repositories.MemberRepository):
         else:
             return self.object_from_orm(orm_object)
 
+    get_by_id = get_member_by_id
+
     def object_from_orm(self, orm_object: Member) -> entities.Member:
         member_account = self.account_repository.object_from_orm(orm_object.account)
         return entities.Member(

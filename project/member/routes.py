@@ -131,19 +131,17 @@ def pay_consumer_product(
 @login_required
 @with_injection
 def profile(
-    account_repository: AccountRepository,
-    member_repository: MemberRepository,
-    get_member_workplaces: use_cases.GetMemberWorkplaces,
+    get_member_profile: use_cases.GetMemberProfileInfo,
 ):
     if not user_is_member():
         return redirect(url_for("auth.zurueck"))
 
     member = current_user.id
-    workplaces = get_member_workplaces(member)
+    member_profile = get_member_profile(member)
     return render_template(
         "member/profile.html",
-        workplaces=workplaces,
-        account_balance=account_repository.get_account_balance(member.account),
+        workplaces=member_profile.workplaces,
+        account_balance=member_profile.account_balance,
     )
 
 
