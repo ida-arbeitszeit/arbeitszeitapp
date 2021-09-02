@@ -21,8 +21,8 @@ from project.database import (
     MemberRepository,
     PlanRepository,
     ProductOfferRepository,
-    with_injection,
 )
+from project.dependency_injection import with_injection
 from project.forms import ProductSearchForm
 from project.models import Company, Plan
 
