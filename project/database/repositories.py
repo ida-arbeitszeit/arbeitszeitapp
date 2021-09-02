@@ -34,11 +34,6 @@ from project.models import (
 T = TypeVar("T")
 
 
-def assert_is_not_none(candidate: Optional[T]) -> T:
-    assert candidate is not None
-    return candidate
-
-
 @inject
 @dataclass
 class CompanyWorkerRepository(repositories.CompanyWorkerRepository):
