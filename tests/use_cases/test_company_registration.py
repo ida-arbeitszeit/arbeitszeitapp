@@ -2,8 +2,9 @@ import pytest
 
 from arbeitszeit.errors import CompanyAlreadyExists
 from arbeitszeit.use_cases import RegisterCompany
-from tests.dependency_injection import injection_test
-from tests.repositories import AccountRepository
+
+from .dependency_injection import injection_test
+from .repositories import AccountRepository
 
 
 @injection_test
