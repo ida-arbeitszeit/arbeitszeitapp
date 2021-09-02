@@ -4,8 +4,9 @@ from arbeitszeit.entities import Purchase
 from arbeitszeit.use_cases import PurchaseQueryResponse, QueryPurchases
 from tests.data_generators import CompanyGenerator, MemberGenerator, PurchaseGenerator
 from tests.datetime_service import FakeDatetimeService
-from tests.dependency_injection import injection_test
-from tests.repositories import PurchaseRepository
+
+from .dependency_injection import injection_test
+from .repositories import PurchaseRepository
 
 
 def purchase_in_results(

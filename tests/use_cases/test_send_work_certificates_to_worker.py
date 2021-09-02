@@ -5,8 +5,9 @@ import pytest
 from arbeitszeit.errors import WorkerNotAtCompany
 from arbeitszeit.use_cases import SendWorkCertificatesToWorker
 from tests.data_generators import CompanyGenerator, MemberGenerator
-from tests.dependency_injection import injection_test
-from tests.repositories import (
+
+from .dependency_injection import injection_test
+from .repositories import (
     AccountRepository,
     CompanyWorkerRepository,
     TransactionRepository,

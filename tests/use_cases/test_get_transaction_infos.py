@@ -8,7 +8,8 @@ from tests.data_generators import (
     SocialAccountingGenerator,
     TransactionGenerator,
 )
-from tests.dependency_injection import injection_test
+
+from .dependency_injection import injection_test
 
 
 @injection_test
