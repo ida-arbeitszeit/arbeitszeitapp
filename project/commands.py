@@ -2,8 +2,8 @@ from arbeitszeit.use_cases import (
     CalculatePlanExpirationAndCheckIfExpired,
     SynchronizedPlanActivation,
 )
-from project.database import with_injection
 from project.database.repositories import PlanRepository
+from project.dependency_injection import with_injection
 
 
 @with_injection

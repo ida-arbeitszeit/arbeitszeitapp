@@ -5,7 +5,7 @@ from werkzeug.security import check_password_hash
 from arbeitszeit.errors import CompanyAlreadyExists, MemberAlreadyExists
 from arbeitszeit.use_cases import RegisterCompany, RegisterMember
 from project import database
-from project.database import with_injection
+from project.dependency_injection import with_injection
 
 auth = Blueprint("auth", __name__, template_folder="templates", static_folder="static")
 
