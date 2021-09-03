@@ -6,7 +6,7 @@ from arbeitszeit.use_cases import PayMeansOfProduction
 from tests.data_generators import CompanyGenerator, PlanGenerator
 
 from .dependency_injection import injection_test
-from .repositories import AccountRepository, TransactionRepository
+from .repositories import AccountRepository, PurchaseRepository, TransactionRepository
 
 
 @injection_test
@@ -157,3 +157,47 @@ def test_correct_transaction_added_if_raw_materials_were_paid(
         == plan.planner.product_account
     )
     assert transaction_repository.transactions[0].amount == price_total
+
+
+@injection_test
+def test_correct_purchase_added_if_means_of_production_were_paid(
+    pay_means_of_production: PayMeansOfProduction,
+    purchase_repository: PurchaseRepository,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+):
+    sender = company_generator.create_company()
+    plan = plan_generator.create_plan()
+    purpose = PurposesOfPurchases.means_of_prod
+    pieces = 5
+    pay_means_of_production(sender, plan, pieces, purpose)
+    purchase_added = purchase_repository.purchases[0]
+    assert len(purchase_repository.purchases) == 1
+    assert purchase_added.plan == plan
+    assert purchase_added.price_per_unit == plan.price_per_unit()
+    assert purchase_added.amount == pieces
+    assert purchase_added.purpose == PurposesOfPurchases.means_of_prod
+    assert purchase_added.buyer == sender
+    assert purchase_added.plan == plan
+
+
+@injection_test
+def test_correct_purchase_added_if_raw_materials_were_paid(
+    pay_means_of_production: PayMeansOfProduction,
+    purchase_repository: PurchaseRepository,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+):
+    sender = company_generator.create_company()
+    plan = plan_generator.create_plan()
+    purpose = PurposesOfPurchases.raw_materials
+    pieces = 5
+    pay_means_of_production(sender, plan, pieces, purpose)
+    purchase_added = purchase_repository.purchases[0]
+    assert len(purchase_repository.purchases) == 1
+    assert purchase_added.plan == plan
+    assert purchase_added.price_per_unit == plan.price_per_unit()
+    assert purchase_added.amount == pieces
+    assert purchase_added.purpose == PurposesOfPurchases.raw_materials
+    assert purchase_added.buyer == sender
+    assert purchase_added.plan == plan
