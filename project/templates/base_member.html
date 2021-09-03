@@ -22,16 +22,16 @@
 
           {% if current_user.is_authenticated %}
           <a href="{{ url_for('main_member.suchen') }}" class="navbar-item">
-            Marketplace
-          </a>
-          <a href="{{ url_for('main_member.my_purchases') }}" class="navbar-item">
-            Meine Käufe
+            Kleinanzeigen
           </a>
           <a href="{{ url_for('main_member.pay_consumer_product') }}" class="navbar-item">
             Bezahlen Produkt
           </a>
           <a href="{{ url_for('main_member.my_account') }}" class="navbar-item">
             Mein Konto
+          </a>
+          <a href="{{ url_for('main_member.my_purchases') }}" class="navbar-item">
+            Meine Käufe
           </a>
           <a href="{{ url_for('main_member.statistics') }}" class="navbar-item">
             Statistiken
