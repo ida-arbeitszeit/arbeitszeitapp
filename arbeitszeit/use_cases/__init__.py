@@ -107,18 +107,18 @@ class PurchaseProduct:
         price_total = purchase.price_per_unit * purchase.amount
 
         if isinstance(buyer, Member):
-            account_from = buyer.account
+            sending_account = buyer.account
         else:
             if purpose.value == "means_of_prod":
-                account_from = buyer.means_account
+                sending_account = buyer.means_account
             else:
-                account_from = buyer.raw_material_account
+                sending_account = buyer.raw_material_account
 
         send_to = product_offer.plan.planner.product_account
         self.transaction_repository.create_transaction(
             date=self.datetime_service.now(),
-            account_from=account_from,
-            account_to=send_to,
+            sending_account=sending_account,
+            receiving_account=send_to,
             amount=price_total,
             purpose=f"Angebot-Id: {product_offer.id}",
         )

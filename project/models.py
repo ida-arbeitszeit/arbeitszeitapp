@@ -37,7 +37,7 @@ class Member(UserMixin, db.Model):
     name = db.Column(db.String(1000), nullable=False)
 
     account = db.relationship("Account", uselist=False, lazy=True, backref="member")
-    purchases = db.relationship("Kaeufe", lazy="dynamic")
+    purchases = db.relationship("Purchase", lazy="dynamic")
 
     workplaces = db.relationship(
         "Company",
@@ -55,7 +55,7 @@ class Company(UserMixin, db.Model):
 
     plans = db.relationship("Plan", lazy="dynamic", backref="company")
     accounts = db.relationship("Account", lazy="dynamic", backref="company")
-    purchases = db.relationship("Kaeufe", lazy="dynamic")
+    purchases = db.relationship("Purchase", lazy="dynamic")
 
     def __repr__(self):
         return "<Company(email='%s', name='%s')>" % (
@@ -117,23 +117,25 @@ class Account(UserMixin, db.Model):
     account_type = db.Column(db.Enum(AccountTypes), nullable=False)
     transactions_sent = db.relationship(
         "Transaction",
-        foreign_keys="Transaction.account_from",
+        foreign_keys="Transaction.sending_account",
         lazy="dynamic",
-        backref="sending_account",
+        backref="account_from",
     )
     transactions_received = db.relationship(
         "Transaction",
-        foreign_keys="Transaction.account_to",
+        foreign_keys="Transaction.receiving_account",
         lazy="dynamic",
-        backref="receiving_account",
+        backref="account_to",
     )
 
 
 class Transaction(UserMixin, db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
     date = db.Column(db.DateTime, nullable=False)
-    account_from = db.Column(db.String, db.ForeignKey("account.id"), nullable=False)
-    account_to = db.Column(db.String, db.ForeignKey("account.id"), nullable=False)
+    sending_account = db.Column(db.String, db.ForeignKey("account.id"), nullable=False)
+    receiving_account = db.Column(
+        db.String, db.ForeignKey("account.id"), nullable=False
+    )
     amount = db.Column(db.Numeric(), nullable=False)
     purpose = db.Column(db.String(1000), nullable=True)  # Verwendungszweck
 
@@ -147,7 +149,7 @@ class Offer(UserMixin, db.Model):
     amount_available = db.Column(db.Numeric(), nullable=False)
     active = db.Column(db.Boolean, nullable=False, default=True)
 
-    purchases = db.relationship("Kaeufe", lazy="dynamic", backref="offer")
+    purchases = db.relationship("Purchase", lazy="dynamic", backref="offer")
 
 
 class PurposesOfPurchases(Enum):
@@ -156,13 +158,13 @@ class PurposesOfPurchases(Enum):
     consumption = "consumption"
 
 
-class Kaeufe(UserMixin, db.Model):
+class Purchase(UserMixin, db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
-    kauf_date = db.Column(db.DateTime, nullable=False)
+    purchase_date = db.Column(db.DateTime, nullable=False)
     angebot = db.Column(db.String, db.ForeignKey("offer.id"), nullable=False)
     type_member = db.Column(db.Boolean, nullable=False)
     company = db.Column(db.String, db.ForeignKey("company.id"), nullable=True)
     member = db.Column(db.String, db.ForeignKey("member.id"), nullable=True)
-    kaufpreis = db.Column(db.Numeric(), nullable=False)
+    price_per_unit = db.Column(db.Numeric(), nullable=False)
     amount = db.Column(db.Integer, nullable=False)
     purpose = db.Column(db.Enum(PurposesOfPurchases), nullable=False)

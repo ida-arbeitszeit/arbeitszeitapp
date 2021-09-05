@@ -35,14 +35,14 @@ class PayMeansOfProduction:
         # create transaction
         price_total = pieces * plan.price_per_unit()
         if purpose == PurposesOfPurchases.means_of_prod:
-            account_from = sender.means_account
+            sending_account = sender.means_account
         elif purpose == PurposesOfPurchases.raw_materials:
-            account_from = sender.raw_material_account
+            sending_account = sender.raw_material_account
 
         self.transaction_repository.create_transaction(
             date=self.datetime_service.now(),
-            account_from=account_from,
-            account_to=plan.planner.product_account,
+            sending_account=sending_account,
+            receiving_account=plan.planner.product_account,
             amount=price_total,
             purpose=f"Plan-Id: {plan.id}",
         )

@@ -146,8 +146,8 @@ class TransactionRepository(ABC):
     def create_transaction(
         self,
         date: datetime,
-        account_from: Account,
-        account_to: Account,
+        sending_account: Account,
+        receiving_account: Account,
         amount: Decimal,
         purpose: str,
     ) -> Transaction:

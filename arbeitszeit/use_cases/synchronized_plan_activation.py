@@ -48,8 +48,8 @@ class SynchronizedPlanActivation:
             for account, amount in accounts_and_amounts:
                 self.transaction_repository.create_transaction(
                     date=self.datetime_service.now(),
-                    account_from=self.social_accounting.account,
-                    account_to=account,
+                    sending_account=self.social_accounting.account,
+                    receiving_account=account,
                     amount=round(amount, 2),
                     purpose=f"Plan-Id: {plan.id}",
                 )
@@ -128,13 +128,13 @@ class SynchronizedPlanActivation:
                 ):
                     continue
 
-            account_to = plan.planner.work_account
+            receiving_account = plan.planner.work_account
             amount = payout_factor * plan.production_costs.labour_cost / plan.timeframe
 
             self.transaction_repository.create_transaction(
                 date=self.datetime_service.now(),
-                account_from=self.social_accounting.account,
-                account_to=account_to,
+                sending_account=self.social_accounting.account,
+                receiving_account=receiving_account,
                 amount=round(amount, 2),
                 purpose=f"Plan-Id: {plan.id}",
             )

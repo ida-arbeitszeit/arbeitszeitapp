@@ -211,6 +211,6 @@ def test_correct_transaction_added_to_repo_when_buying_public_service(
     purpose1 = PurposesOfPurchases.consumption
     purchase_product(offer1, 3, purpose1, buyer1)
     added_transaction_account_type = (
-        transaction_repository.transactions.pop().account_from.account_type
+        transaction_repository.transactions.pop().sending_account.account_type
     )
     assert added_transaction_account_type == AccountTypes.member

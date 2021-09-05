@@ -126,9 +126,11 @@ def test_correct_transaction_added_if_means_of_production_were_paid(
     pay_means_of_production(sender, plan, pieces, purpose)
     price_total = pieces * plan.price_per_unit()
     assert len(transaction_repository.transactions) == 1
-    assert transaction_repository.transactions[0].account_from == sender.means_account
     assert (
-        transaction_repository.transactions[0].account_to
+        transaction_repository.transactions[0].sending_account == sender.means_account
+    )
+    assert (
+        transaction_repository.transactions[0].receiving_account
         == plan.planner.product_account
     )
     assert transaction_repository.transactions[0].amount == price_total
@@ -149,11 +151,11 @@ def test_correct_transaction_added_if_raw_materials_were_paid(
     price_total = pieces * plan.price_per_unit()
     assert len(transaction_repository.transactions) == 1
     assert (
-        transaction_repository.transactions[0].account_from
+        transaction_repository.transactions[0].sending_account
         == sender.raw_material_account
     )
     assert (
-        transaction_repository.transactions[0].account_to
+        transaction_repository.transactions[0].receiving_account
         == plan.planner.product_account
     )
     assert transaction_repository.transactions[0].amount == price_total

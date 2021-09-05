@@ -34,8 +34,8 @@ class SendWorkCertificatesToWorker:
             )
         self.transaction_repository.create_transaction(
             date=self.datetime_service.now(),
-            account_from=company.work_account,
-            account_to=worker.account,
+            sending_account=company.work_account,
+            receiving_account=worker.account,
             amount=amount,
             purpose="Lohn",
         )

@@ -27,12 +27,12 @@ class PayConsumerProduct:
 
         # create transaction
         price_total = pieces * plan.price_per_unit()
-        account_from = sender.account
+        sending_account = sender.account
 
         self.transaction_repository.create_transaction(
             date=self.datetime_service.now(),
-            account_from=account_from,
-            account_to=plan.planner.product_account,
+            sending_account=sending_account,
+            receiving_account=plan.planner.product_account,
             amount=price_total,
             purpose=f"Plan-Id: {plan.id}",
         )

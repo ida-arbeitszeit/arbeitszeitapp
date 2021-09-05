@@ -94,12 +94,12 @@ class GetTransactionInfos:
         self, transaction: Transaction, user: User
     ) -> Tuple[UserOrSocialAccounting, bool]:
         sender: UserOrSocialAccounting
-        if transaction.account_from in user.accounts():
+        if transaction.sending_account in user.accounts():
             sender = user
             user_is_sender = True
         else:
             sender = self.acount_owner_repository.get_account_owner(
-                transaction.account_from
+                transaction.sending_account
             )
             user_is_sender = False
         return sender, user_is_sender
@@ -108,12 +108,12 @@ class GetTransactionInfos:
         self, transaction: Transaction, user: User
     ) -> Tuple[UserOrSocialAccounting, bool]:
         receiver: UserOrSocialAccounting
-        if transaction.account_to in user.accounts():
+        if transaction.receiving_account in user.accounts():
             receiver = user
             user_is_receiver = True
         else:
             receiver = self.acount_owner_repository.get_account_owner(
-                transaction.account_to
+                transaction.receiving_account
             )
             user_is_receiver = False
         return receiver, user_is_receiver
@@ -178,22 +178,22 @@ class GetTransactionInfos:
         transaction_volumes: Dict[str, Decimal] = {}
         transaction_volumes[AccountTypes.p.value] = (
             -1 * transaction.amount
-            if transaction.account_from == user.means_account
+            if transaction.sending_account == user.means_account
             else Decimal(0)
         )
         transaction_volumes[AccountTypes.r.value] = (
             -1 * transaction.amount
-            if transaction.account_from == user.raw_material_account
+            if transaction.sending_account == user.raw_material_account
             else Decimal(0)
         )
         transaction_volumes[AccountTypes.a.value] = (
             -1 * transaction.amount
-            if transaction.account_from == user.work_account
+            if transaction.sending_account == user.work_account
             else Decimal(0)
         )
         transaction_volumes[AccountTypes.prd.value] = (
             1 * transaction.amount
-            if transaction.account_to == user.product_account
+            if transaction.receiving_account == user.product_account
             else Decimal(0)
         )
         return transaction_volumes
@@ -207,22 +207,22 @@ class GetTransactionInfos:
         factor = -1
         transaction_volumes[AccountTypes.p.value] = (
             factor * transaction.amount
-            if transaction.account_from == user.means_account
+            if transaction.sending_account == user.means_account
             else Decimal(0)
         )
         transaction_volumes[AccountTypes.r.value] = (
             factor * transaction.amount
-            if transaction.account_from == user.raw_material_account
+            if transaction.sending_account == user.raw_material_account
             else Decimal(0)
         )
         transaction_volumes[AccountTypes.a.value] = (
             factor * transaction.amount
-            if transaction.account_from == user.work_account
+            if transaction.sending_account == user.work_account
             else Decimal(0)
         )
         transaction_volumes[AccountTypes.prd.value] = (
             factor * transaction.amount
-            if transaction.account_from == user.product_account
+            if transaction.sending_account == user.product_account
             else Decimal(0)
         )
         return transaction_volumes
@@ -235,22 +235,22 @@ class GetTransactionInfos:
         transaction_volumes: Dict[str, Decimal] = {}
         transaction_volumes[AccountTypes.p.value] = (
             transaction.amount
-            if transaction.account_to == user.means_account
+            if transaction.receiving_account == user.means_account
             else Decimal(0)
         )
         transaction_volumes[AccountTypes.r.value] = (
             transaction.amount
-            if transaction.account_to == user.raw_material_account
+            if transaction.receiving_account == user.raw_material_account
             else Decimal(0)
         )
         transaction_volumes[AccountTypes.a.value] = (
             transaction.amount
-            if transaction.account_to == user.work_account
+            if transaction.receiving_account == user.work_account
             else Decimal(0)
         )
         transaction_volumes[AccountTypes.prd.value] = (
             transaction.amount
-            if transaction.account_to == user.product_account
+            if transaction.receiving_account == user.product_account
             else Decimal(0)
         )
         return transaction_volumes

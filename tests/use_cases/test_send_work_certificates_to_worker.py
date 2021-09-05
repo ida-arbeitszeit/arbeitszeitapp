@@ -97,5 +97,5 @@ def test_that_after_transfer_correct_transaction_is_added(
     )
     transaction = transaction_repository.transactions[0]
     assert transaction.amount == amount_to_transfer
-    assert transaction.account_from == company.work_account
-    assert transaction.account_to == worker.account
+    assert transaction.sending_account == company.work_account
+    assert transaction.receiving_account == worker.account
