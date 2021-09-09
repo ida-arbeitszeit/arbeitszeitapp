@@ -129,14 +129,11 @@ class OfferRepository(interfaces.OfferRepository):
         creation_datetime: datetime,
         name: str,
         description: str,
-        amount_available: int,
     ) -> ProductOffer:
         offer = ProductOffer(
             id=uuid.uuid4(),
             name=name,
-            amount_available=amount_available,
             deactivate_offer_in_db=lambda: None,
-            decrease_amount_available=lambda _: None,
             active=True,
             description=description,
             plan=plan,

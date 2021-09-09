@@ -5,7 +5,8 @@ from injector import inject
 from arbeitszeit import errors
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Company, Plan, PurposesOfPurchases
-from arbeitszeit.repositories import TransactionRepository
+from arbeitszeit.purchase_factory import PurchaseFactory
+from arbeitszeit.repositories import PurchaseRepository, TransactionRepository
 
 
 @inject
@@ -13,6 +14,8 @@ from arbeitszeit.repositories import TransactionRepository
 class PayMeansOfProduction:
     transaction_repository: TransactionRepository
     datetime_service: DatetimeService
+    purchase_factory: PurchaseFactory
+    purchase_repository: PurchaseRepository
 
     def __call__(
         self,
@@ -31,6 +34,18 @@ class PayMeansOfProduction:
             )
         if plan.is_public_service:
             raise errors.CompanyCantBuyPublicServices(sender, plan)
+
+        # create purchase
+        price_per_unit = plan.price_per_unit()
+        purchase = self.purchase_factory.create_purchase(
+            purchase_date=self.datetime_service.now(),
+            plan=plan,
+            buyer=sender,
+            price_per_unit=price_per_unit,
+            amount=pieces,
+            purpose=purpose,
+        )
+        self.purchase_repository.add(purchase)
 
         # create transaction
         price_total = pieces * plan.price_per_unit()

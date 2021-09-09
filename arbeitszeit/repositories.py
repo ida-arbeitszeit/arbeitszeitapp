@@ -198,7 +198,6 @@ class OfferRepository(ABC):
         creation_datetime: datetime,
         name: str,
         description: str,
-        amount_available: int,
     ) -> ProductOffer:
         pass
 

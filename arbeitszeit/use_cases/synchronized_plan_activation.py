@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import date
+import datetime
 from decimal import Decimal
 
 from injector import inject
@@ -118,13 +118,12 @@ class SynchronizedPlanActivation:
 
             if plan.last_certificate_payout:
                 # if last payout was today
-                if (
-                    date(
-                        plan.last_certificate_payout.year,
-                        plan.last_certificate_payout.month,
-                        plan.last_certificate_payout.day,
-                    )
-                    == self.datetime_service.today()
+                last_payout = plan.last_certificate_payout
+                today = self.datetime_service.today()
+                if (last_payout.year, last_payout.month, last_payout.day) == (
+                    today.year,
+                    today.month,
+                    today.day,
                 ):
                     continue
 

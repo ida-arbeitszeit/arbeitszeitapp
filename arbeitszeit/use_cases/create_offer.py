@@ -13,7 +13,6 @@ class Offer:
     name: str
     description: str
     plan_id: UUID
-    amount_available: int
 
 
 @inject
@@ -30,5 +29,4 @@ class CreateOffer:
             self.datetime_service.now(),
             offer.name,
             offer.description,
-            offer.amount_available,
         )

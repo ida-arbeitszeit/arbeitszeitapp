@@ -309,17 +309,15 @@ class AccountingRepository:
 @dataclass
 class PurchaseRepository(repositories.PurchaseRepository):
     member_repository: MemberRepository
+    plan_repository: PlanRepository
     company_repository: CompanyRepository
     product_offer_repository: ProductOfferRepository
     db: SQLAlchemy
 
     def object_to_orm(self, purchase: entities.Purchase) -> Purchase:
-        product_offer = self.product_offer_repository.object_to_orm(
-            purchase.product_offer
-        )
         return Purchase(
             purchase_date=purchase.purchase_date,
-            angebot=str(product_offer.id),
+            plan_id=str(purchase.plan.id),
             type_member=isinstance(purchase.buyer, entities.Member),
             company=(
                 self.company_repository.object_to_orm(purchase.buyer).id
@@ -337,9 +335,10 @@ class PurchaseRepository(repositories.PurchaseRepository):
         )
 
     def object_from_orm(self, purchase: Purchase) -> entities.Purchase:
+        plan = self.plan_repository.get_plan_by_id(purchase.plan_id)
         return entities.Purchase(
             purchase_date=purchase.purchase_date,
-            product_offer=self.product_offer_repository.get_by_id(purchase.angebot),
+            plan=plan,
             buyer=self.member_repository.get_member_by_id(purchase.member)
             if purchase.type_member
             else self.company_repository.get_by_id(purchase.company),
@@ -381,13 +380,7 @@ class ProductOfferRepository(repositories.OfferRepository):
         return entities.ProductOffer(
             id=UUID(offer_orm.id),
             name=offer_orm.name,
-            amount_available=offer_orm.amount_available,
             deactivate_offer_in_db=lambda: setattr(offer_orm, "active", False),
-            decrease_amount_available=lambda amount: setattr(
-                offer_orm,
-                "amount_available",
-                getattr(offer_orm, "amount_available") - amount,
-            ),
             active=offer_orm.active,
             description=offer_orm.description,
             plan=plan,
@@ -437,14 +430,12 @@ class ProductOfferRepository(repositories.OfferRepository):
         creation_datetime: datetime,
         name: str,
         description: str,
-        amount_available: int,
     ) -> entities.ProductOffer:
         offer = Offer(
             plan_id=self.plan_repository.object_to_orm(plan).id,
             cr_date=creation_datetime,
             name=name,
             description=description,
-            amount_available=amount_available,
         )
         self.db.session.add(offer)
         self.db.session.commit()
@@ -618,6 +609,7 @@ class PlanRepository(repositories.PlanRepository):
             self.db.session.query(func.avg(Plan.timeframe))
             .filter_by(is_active=True)
             .one()[0]
+            or 0
         )
 
     def sum_of_active_planned_work(self) -> Decimal:
@@ -625,6 +617,7 @@ class PlanRepository(repositories.PlanRepository):
             self.db.session.query(func.sum(Plan.costs_a))
             .filter_by(is_active=True)
             .one()[0]
+            or 0
         )
 
     def sum_of_active_planned_resources(self) -> Decimal:
@@ -632,6 +625,7 @@ class PlanRepository(repositories.PlanRepository):
             self.db.session.query(func.sum(Plan.costs_r))
             .filter_by(is_active=True)
             .one()[0]
+            or 0
         )
 
     def sum_of_active_planned_means(self) -> Decimal:
@@ -639,6 +633,7 @@ class PlanRepository(repositories.PlanRepository):
             self.db.session.query(func.sum(Plan.costs_p))
             .filter_by(is_active=True)
             .one()[0]
+            or 0
         )
 
     def all_plans_approved_and_not_expired(self) -> Iterator[entities.Plan]:

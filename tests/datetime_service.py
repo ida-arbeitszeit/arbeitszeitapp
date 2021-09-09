@@ -30,6 +30,9 @@ class FakeDatetimeService(DatetimeService):
     def now_minus_two_days(self) -> datetime:
         return self.now() - timedelta(days=2)
 
+    def now_minus_ten_days(self) -> datetime:
+        return self.now() - timedelta(days=10)
+
     def past_plan_activation_date(self, timedelta_days: int = 1) -> datetime:
         if self.now().hour < self.time_of_synchronized_plan_activation:
             past_day = self.today() - timedelta(days=timedelta_days)

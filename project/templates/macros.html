@@ -119,12 +119,10 @@
         <th>Plan-ID</th>
         <th>Produktname</th>
         <th>Betrieb</th>
-        <th>Mail</th>
         <th>Beschreibung</th>
         <th>Stückpreis</th>
         <th>Public Service</th>
-        <th><abbr title="Noch vorhanden">Vorh.</abbr> </th>
-        <th>Kaufen</th>
+        <th>Kontakt</th>
       </tr>
     </thead>
     <tbody>
@@ -133,19 +131,13 @@
         <td>{{ offer.plan_id }}</td>
         <td>{{ offer.product_name }}</td>
         <td>{{ offer.seller_name }}</td>
-        <td>
-          <a href="mailto:{{ offer.seller_email }}">
-            <u><span class="icon"><i class="far fa-envelope"></i></span></u>
-          </a>
-        </td>
         <td>{{ offer.product_description }}</td>
         <td>{{ offer.price_per_unit|round(2) }} Std.
         </td>
         <td>{{ offer.is_public_service }}</td>
-        <td>{{ offer.amount_available }}</td>
         <td>
-          <a href="{{ url_for('%s.buy' % (request.blueprint), id=offer.offer_id) }}">
-            <u><u><span class="icon"><i class="fas fa-shopping-cart"></i></span></u></u>
+          <a href="mailto:{{ offer.seller_email }}">
+            <u><span class="icon"><i class="far fa-envelope"></i></span></u>
           </a>
         </td>
       </tr>

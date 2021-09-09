@@ -47,18 +47,16 @@ class OfferGenerator:
         self,
         *,
         name="Product name",
-        amount=1,
         description="",
         plan=None,
     ) -> ProductOffer:
         if plan is None:
-            plan = self.plan_generator.create_plan(amount=amount)
+            plan = self.plan_generator.create_plan()
         return self._create_offer(
             Offer(
                 name=name,
                 description=description,
                 plan_id=plan.id,
-                amount_available=amount,
             )
         )
 
@@ -195,7 +193,7 @@ class PlanGenerator:
 @inject
 @dataclass
 class PurchaseGenerator:
-    offer_generator: OfferGenerator
+    plan_generator: PlanGenerator
     member_generator: MemberGenerator
     company_generator: CompanyGenerator
     datetime_service: FakeDatetimeService
@@ -210,7 +208,7 @@ class PurchaseGenerator:
             purchase_date = self.datetime_service.now_minus_one_day()
         return Purchase(
             purchase_date=purchase_date,
-            product_offer=self.offer_generator.create_offer(),
+            plan=self.plan_generator.create_plan(),
             buyer=buyer,
             price_per_unit=Decimal(10),
             amount=amount,
