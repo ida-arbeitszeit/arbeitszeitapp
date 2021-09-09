@@ -112,47 +112,6 @@ def suchen(query_products: use_cases.QueryProducts):
     return render_template("company/search.html", form=search_form, results=results)
 
 
-@main_company.route("/company/buy/<uuid:id>", methods=["GET", "POST"])
-@login_required
-@with_injection
-def buy(
-    id: UUID,
-    purchase_product: use_cases.PurchaseProduct,
-    product_offer_repository: ProductOfferRepository,
-    company_repository: CompanyRepository,
-):
-    if not user_is_company():
-        return redirect(url_for("auth.zurueck"))
-
-    product_offer = product_offer_repository.get_by_id(id=id)
-    buyer = company_repository.get_by_id(current_user.id)
-
-    if request.method == "POST":  # if company buys
-        purpose = (
-            entities.PurposesOfPurchases.means_of_prod
-            if request.form["category"] == "Produktionsmittel"
-            else entities.PurposesOfPurchases.raw_materials
-        )
-        amount = int(request.form["amount"])
-        try:
-            purchase_product(
-                product_offer,
-                amount,
-                purpose,
-                buyer,
-            )
-            database.commit_changes()
-            flash(f"Kauf von '{amount}'x '{product_offer.name}' erfolgreich!")
-            return redirect("/company/suchen")
-        except (errors.CompanyCantBuyPublicServices):
-            flash(
-                "Kauf nicht erfolgreich. Betriebe können keine öffentlichen Dienstleistungen oder Produkte erwerben."
-            )
-            return redirect("/company/suchen")
-
-    return render_template("company/buy.html", offer=product_offer)
-
-
 @main_company.route("/company/kaeufe")
 @login_required
 @with_injection
@@ -264,13 +223,11 @@ def create_offer(plan_id: UUID, create_offer: CreateOffer):
     if request.method == "POST":  # create offer
         name = request.form["name"]
         description = request.form["description"]
-        prd_amount = int(request.form["prd_amount"])
 
         offer = Offer(
             name=name,
             description=description,
             plan_id=plan_id,
-            amount_available=prd_amount,
         )
         create_offer(offer)
         return render_template("company/create_offer_in_app.html", offer=offer)

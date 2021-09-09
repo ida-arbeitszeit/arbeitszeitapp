@@ -12,7 +12,7 @@ from .repositories import PurchaseRepository
 def purchase_in_results(
     purchase: Purchase, results: Iterable[PurchaseQueryResponse]
 ) -> bool:
-    return purchase.product_offer.id in [result.offer_id for result in results]
+    return purchase.plan.id in [result.plan_id for result in results]
 
 
 @injection_test

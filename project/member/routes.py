@@ -3,7 +3,7 @@ from typing import Optional
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
 
-from arbeitszeit import entities, errors, use_cases
+from arbeitszeit import errors, use_cases
 from project import database
 from project.database import (
     AccountRepository,
@@ -63,37 +63,6 @@ def suchen(
     if not results:
         flash("Keine Ergebnisse!")
     return render_template("member/search.html", form=search_form, results=results)
-
-
-@main_member.route("/member/buy/<uuid:id>", methods=["GET", "POST"])
-@login_required
-@with_injection
-def buy(
-    id,
-    product_offer_repository: ProductOfferRepository,
-    member_repository: MemberRepository,
-    purchase_product: use_cases.PurchaseProduct,
-):
-    if not user_is_member():
-        return redirect(url_for("auth.zurueck"))
-
-    product_offer = product_offer_repository.get_by_id(id=id)
-    buyer = member_repository.get_member_by_id(current_user.id)
-
-    if request.method == "POST":  # if user buys
-        purpose = entities.PurposesOfPurchases.consumption
-        amount = int(request.form["amount"])
-        purchase_product(
-            product_offer,
-            amount,
-            purpose,
-            buyer,
-        )
-        database.commit_changes()
-        flash(f"Kauf von '{product_offer.name}' erfolgreich!")
-        return redirect("/member/suchen")
-
-    return render_template("member/buy.html", offer=product_offer)
 
 
 @main_member.route("/member/pay_consumer_product", methods=["GET", "POST"])

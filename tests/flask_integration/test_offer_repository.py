@@ -17,6 +17,5 @@ def tests_offers_can_be_created(
         creation_datetime=datetime.now(),
         name="testname",
         description="testdescription",
-        amount_available=1,
     )
     assert len(offer_repository)
