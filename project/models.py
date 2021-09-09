@@ -144,10 +144,7 @@ class Offer(UserMixin, db.Model):
     cr_date = db.Column(db.DateTime, nullable=False)
     name = db.Column(db.String(1000), nullable=False)
     description = db.Column(db.String(5000), nullable=False)
-    amount_available = db.Column(db.Numeric(), nullable=False)
     active = db.Column(db.Boolean, nullable=False, default=True)
-
-    purchases = db.relationship("Kaeufe", lazy="dynamic", backref="offer")
 
 
 class PurposesOfPurchases(Enum):
@@ -159,7 +156,7 @@ class PurposesOfPurchases(Enum):
 class Kaeufe(UserMixin, db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
     kauf_date = db.Column(db.DateTime, nullable=False)
-    angebot = db.Column(db.String, db.ForeignKey("offer.id"), nullable=False)
+    plan_id = db.Column(db.String, db.ForeignKey("plan.id"), nullable=False)
     type_member = db.Column(db.Boolean, nullable=False)
     company = db.Column(db.String, db.ForeignKey("company.id"), nullable=True)
     member = db.Column(db.String, db.ForeignKey("member.id"), nullable=True)

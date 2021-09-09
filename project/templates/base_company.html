@@ -22,7 +22,7 @@
           {% if current_user.is_authenticated %}
           <div class="navbar-item has-dropdown is-hoverable">
             <a class="navbar-link">
-              Produktionspläne
+              Pläne
             </a>
             <div class="navbar-dropdown">
               <a href="{{ url_for('main_company.create_plan') }}" class="navbar-item">
@@ -38,7 +38,7 @@
 
           <div class="navbar-item has-dropdown is-hoverable">
             <a class="navbar-link">
-              Konten und Überweisungen
+              Konten und Käufe
             </a>
 
             <div class="navbar-dropdown">
@@ -51,6 +51,9 @@
               <a href="{{ url_for('main_company.transfer_to_company') }}" class="navbar-item">
                 Bezahlen Produktionsmittel
               </a>
+              <a href="{{ url_for('main_company.my_purchases') }}" class="navbar-item">
+                Meine Käufe
+              </a>
             </div>
           </div>
 
@@ -58,7 +61,7 @@
 
           <div class="navbar-item has-dropdown is-hoverable">
             <a class="navbar-link">
-              Marketplace
+              Kleinanzeigen
             </a>
             <div class="navbar-dropdown">
               <a href="{{ url_for('main_company.suchen') }}" class="navbar-item">
@@ -67,9 +70,7 @@
               <a href="{{ url_for('main_company.my_offers') }}" class="navbar-item">
                 Meine Angebote
               </a>
-              <a href="{{ url_for('main_company.my_purchases') }}" class="navbar-item">
-                Meine Käufe
-              </a>
+
             </div>
           </div>
 
