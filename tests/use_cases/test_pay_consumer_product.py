@@ -42,8 +42,8 @@ def test_that_correct_transaction_is_added(
     assert len(transaction_repository.transactions) == 1
     transaction_added = transaction_repository.transactions[0]
     expected_amount = pieces * plan.price_per_unit()
-    assert transaction_added.account_from == sender.account
-    assert transaction_added.account_to == plan.planner.product_account
+    assert transaction_added.sending_account == sender.account
+    assert transaction_added.receiving_account == plan.planner.product_account
     assert transaction_added.amount == expected_amount
 
 
@@ -61,8 +61,8 @@ def test_that_correct_transaction_is_added_when_plan_is_public_service(
     assert len(transaction_repository.transactions) == 1
     transaction_added = transaction_repository.transactions[0]
     expected_amount = 0
-    assert transaction_added.account_from == sender.account
-    assert transaction_added.account_to == plan.planner.product_account
+    assert transaction_added.sending_account == sender.account
+    assert transaction_added.receiving_account == plan.planner.product_account
     assert transaction_added.amount == expected_amount
 
 

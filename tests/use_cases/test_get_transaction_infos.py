@@ -36,7 +36,7 @@ def test_that_info_is_generated_after_transaction_between_member_and_company(
     company = company_generator.create_company()
 
     transaction_generator.create_transaction(
-        account_from=member.account, account_to=company.product_account
+        sending_account=member.account, receiving_account=company.product_account
     )
 
     info = get_transaction_infos(member)
@@ -56,7 +56,8 @@ def test_that_correct_info_for_sender_is_generated_after_transaction_between_com
     company2 = company_generator.create_company()
 
     trans = transaction_generator.create_transaction(
-        account_from=company1.means_account, account_to=company2.product_account
+        sending_account=company1.means_account,
+        receiving_account=company2.product_account,
     )
 
     info = get_transaction_infos(company1)
@@ -78,7 +79,8 @@ def test_that_correct_info_for_receiver_is_generated_after_transaction_between_c
     company2 = company_generator.create_company()
 
     trans = transaction_generator.create_transaction(
-        account_from=company1.means_account, account_to=company2.product_account
+        sending_account=company1.means_account,
+        receiving_account=company2.product_account,
     )
 
     info = get_transaction_infos(company2)
@@ -100,13 +102,16 @@ def test_that_correct_info_for_sender_is_generated_after_several_transactions_be
     company2 = company_generator.create_company()
 
     transaction_generator.create_transaction(
-        account_from=company1.means_account, account_to=company2.product_account
+        sending_account=company1.means_account,
+        receiving_account=company2.product_account,
     )
     transaction_generator.create_transaction(
-        account_from=company2.means_account, account_to=company1.product_account
+        sending_account=company2.means_account,
+        receiving_account=company1.product_account,
     )
     transaction_generator.create_transaction(
-        account_from=company1.means_account, account_to=company2.product_account
+        sending_account=company1.means_account,
+        receiving_account=company2.product_account,
     )
 
     info = get_transaction_infos(company1)
@@ -142,7 +147,8 @@ def test_that_correct_info_for_receiver_is_generated_after_transaction_between_s
     company = company_generator.create_company()
 
     trans = transaction_generator.create_transaction(
-        account_from=social_accounting.account, account_to=company.means_account
+        sending_account=social_accounting.account,
+        receiving_account=company.means_account,
     )
 
     info = get_transaction_infos(company)
@@ -168,19 +174,23 @@ def test_that_correct_info_for_company_is_generated_in_correct_order_after_sever
     social_accounting = social_accounting_generator.create_social_accounting()
 
     transaction_generator.create_transaction(
-        account_from=company1.means_account, account_to=company2.product_account
+        sending_account=company1.means_account,
+        receiving_account=company2.product_account,
     )
     transaction_generator.create_transaction(
-        account_from=company2.means_account, account_to=company1.product_account
+        sending_account=company2.means_account,
+        receiving_account=company1.product_account,
     )
     transaction_generator.create_transaction(
-        account_from=company1.means_account, account_to=company2.product_account
+        sending_account=company1.means_account,
+        receiving_account=company2.product_account,
     )
     transaction_generator.create_transaction(
-        account_from=member.account, account_to=company1.product_account
+        sending_account=member.account, receiving_account=company1.product_account
     )
     transaction_generator.create_transaction(
-        account_from=social_accounting.account, account_to=company1.product_account
+        sending_account=social_accounting.account,
+        receiving_account=company1.product_account,
     )
 
     info = get_transaction_infos(company1)

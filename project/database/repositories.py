@@ -23,7 +23,7 @@ from project.error import (
 from project.models import (
     Account,
     Company,
-    Kaeufe,
+    Purchase,
     Member,
     Offer,
     Plan,
@@ -314,9 +314,9 @@ class PurchaseRepository(repositories.PurchaseRepository):
     product_offer_repository: ProductOfferRepository
     db: SQLAlchemy
 
-    def object_to_orm(self, purchase: entities.Purchase) -> Kaeufe:
-        return Kaeufe(
-            kauf_date=purchase.purchase_date,
+    def object_to_orm(self, purchase: entities.Purchase) -> Purchase:
+        return Purchase(
+            purchase_date=purchase.purchase_date,
             plan_id=str(purchase.plan.id),
             type_member=isinstance(purchase.buyer, entities.Member),
             company=(
@@ -329,20 +329,20 @@ class PurchaseRepository(repositories.PurchaseRepository):
                 if isinstance(purchase.buyer, entities.Member)
                 else None
             ),
-            kaufpreis=float(purchase.price_per_unit),
+            price_per_unit=float(purchase.price_per_unit),
             amount=purchase.amount,
             purpose=purchase.purpose.value,
         )
 
-    def object_from_orm(self, purchase: Kaeufe) -> entities.Purchase:
+    def object_from_orm(self, purchase: Purchase) -> entities.Purchase:
         plan = self.plan_repository.get_plan_by_id(purchase.plan_id)
         return entities.Purchase(
-            purchase_date=purchase.kauf_date,
+            purchase_date=purchase.purchase_date,
             plan=plan,
             buyer=self.member_repository.get_member_by_id(purchase.member)
             if purchase.type_member
             else self.company_repository.get_by_id(purchase.company),
-            price_per_unit=purchase.kaufpreis,
+            price_per_unit=purchase.price_per_unit,
             amount=purchase.amount,
             purpose=purchase.purpose,
         )
@@ -361,7 +361,7 @@ class PurchaseRepository(repositories.PurchaseRepository):
             user_orm = self.member_repository.object_to_orm(user)
         return (
             self.object_from_orm(purchase)
-            for purchase in user_orm.purchases.order_by(desc("kauf_date")).all()
+            for purchase in user_orm.purchases.order_by(desc("purchase_date")).all()
         )
 
 
@@ -698,10 +698,10 @@ class TransactionRepository(repositories.TransactionRepository):
         return entities.Transaction(
             id=UUID(transaction.id),
             date=transaction.date,
-            account_from=self.account_repository.object_from_orm(
+            sending_account=self.account_repository.object_from_orm(
                 transaction.sending_account
             ),
-            account_to=self.account_repository.object_from_orm(
+            receiving_account=self.account_repository.object_from_orm(
                 transaction.receiving_account
             ),
             amount=Decimal(transaction.amount),
@@ -711,15 +711,15 @@ class TransactionRepository(repositories.TransactionRepository):
     def create_transaction(
         self,
         date: datetime,
-        account_from: entities.Account,
-        account_to: entities.Account,
+        sending_account: entities.Account,
+        receiving_account: entities.Account,
         amount: Decimal,
         purpose: str,
     ) -> entities.Transaction:
         transaction = Transaction(
             date=date,
-            account_from=str(account_from.id),
-            account_to=str(account_to.id),
+            sending_account=str(sending_account.id),
+            receiving_account=str(receiving_account.id),
             amount=amount,
             purpose=purpose,
         )

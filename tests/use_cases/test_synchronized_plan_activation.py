@@ -74,7 +74,7 @@ def test_that_all_transactions_have_accounting_as_sender(
     plan_generator.create_plan(approved=True)
     synchronized_plan_activation()
     for transaction in transaction_repository.transactions:
-        assert transaction.account_from.account_type == AccountTypes.accounting
+        assert transaction.sending_account.account_type == AccountTypes.accounting
 
 
 @injection_test
@@ -86,7 +86,7 @@ def test_that_transactions_with_all_four_account_types_as_receivers_are_added_to
     plan_generator.create_plan(approved=True)
     synchronized_plan_activation()
     added_account_types = [
-        transaction.account_to.account_type
+        transaction.receiving_account.account_type
         for transaction in transaction_repository.transactions
     ]
     for expected_account_type in (
@@ -113,11 +113,11 @@ def test_that_added_transactions_for_p_r_and_prd_have_correct_amounts(
     synchronized_plan_activation()
 
     for trans in transaction_repository.transactions:
-        if trans.account_to.account_type == AccountTypes.p:
+        if trans.receiving_account.account_type == AccountTypes.p:
             added_amount_p = trans.amount
-        elif trans.account_to.account_type == AccountTypes.r:
+        elif trans.receiving_account.account_type == AccountTypes.r:
             added_amount_r = trans.amount
-        elif trans.account_to.account_type == AccountTypes.prd:
+        elif trans.receiving_account.account_type == AccountTypes.prd:
             added_amount_prd = trans.amount
 
     assert expected_amount_p == added_amount_p
@@ -140,11 +140,11 @@ def test_that_added_transactions_for_p_r_and_prd_have_correct_amounts_if_public_
     synchronized_plan_activation()
 
     for trans in transaction_repository.transactions:
-        if trans.account_to.account_type == AccountTypes.p:
+        if trans.receiving_account.account_type == AccountTypes.p:
             added_amount_p = trans.amount
-        elif trans.account_to.account_type == AccountTypes.r:
+        elif trans.receiving_account.account_type == AccountTypes.r:
             added_amount_r = trans.amount
-        elif trans.account_to.account_type == AccountTypes.prd:
+        elif trans.receiving_account.account_type == AccountTypes.prd:
             added_amount_prd = trans.amount
 
     assert expected_amount_p == added_amount_p
@@ -162,7 +162,7 @@ def test_that_wages_are_paid_out(
     assert plan.production_costs.labour_cost
     synchronized_plan_activation()
     for trans in transaction_repository.transactions:
-        if trans.account_to.account_type == AccountTypes.a:
+        if trans.receiving_account.account_type == AccountTypes.a:
             assert trans.amount
 
 
@@ -327,7 +327,7 @@ def test_that_wages_are_paid_out_only_once_per_day(
     synchronized_plan_activation()
 
     for trans in transaction_repository.transactions:
-        if trans.account_to.account_type == AccountTypes.a:
+        if trans.receiving_account.account_type == AccountTypes.a:
             wages_transactions += 1
     assert wages_transactions == expected_wages_transactions
 
@@ -351,6 +351,6 @@ def test_that_wages_are_paid_out_twice_after_two_days(
     synchronized_plan_activation()
 
     for trans in transaction_repository.transactions:
-        if trans.account_to.account_type == AccountTypes.a:
+        if trans.receiving_account.account_type == AccountTypes.a:
             wages_transactions += 1
     assert wages_transactions == expected_wages_transactions

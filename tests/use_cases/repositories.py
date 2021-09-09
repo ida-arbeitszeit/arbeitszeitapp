@@ -59,16 +59,16 @@ class TransactionRepository(interfaces.TransactionRepository):
     def create_transaction(
         self,
         date: datetime,
-        account_from: Account,
-        account_to: Account,
+        sending_account: Account,
+        receiving_account: Account,
         amount: Decimal,
         purpose: str,
     ) -> Transaction:
         transaction = Transaction(
             id=uuid.uuid4(),
             date=date,
-            account_from=account_from,
-            account_to=account_to,
+            sending_account=sending_account,
+            receiving_account=receiving_account,
             amount=amount,
             purpose=purpose,
         )
@@ -78,7 +78,7 @@ class TransactionRepository(interfaces.TransactionRepository):
     def all_transactions_sent_by_account(self, account: Account) -> List[Transaction]:
         all_sent = []
         for transaction in self.transactions:
-            if transaction.account_from == account:
+            if transaction.sending_account == account:
                 all_sent.append(transaction)
         return all_sent
 
@@ -87,7 +87,7 @@ class TransactionRepository(interfaces.TransactionRepository):
     ) -> List[Transaction]:
         all_received = []
         for transaction in self.transactions:
-            if transaction.account_to == account:
+            if transaction.receiving_account == account:
                 all_received.append(transaction)
         return all_received
 
