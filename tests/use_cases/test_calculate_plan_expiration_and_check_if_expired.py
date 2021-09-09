@@ -35,7 +35,7 @@ def test_that_expiration_time_is_set_if_plan_is_active(
 
 
 @injection_test
-def test_that_expiration_date_is_correctly_calculated_after_fixed_activation_time(
+def test_that_expiration_date_is_correctly_calculated_if_freezed_after_fixed_activation_time(
     plan_generator: PlanGenerator,
     datetime_service: FakeDatetimeService,
     calculate_plan_expiration_and_check_if_expired: CalculatePlanExpirationAndCheckIfExpired,
@@ -47,7 +47,7 @@ def test_that_expiration_date_is_correctly_calculated_after_fixed_activation_tim
         )
     )
 
-    # plan was activated 1 day before
+    # plan was activated 1 day before (after fixed activation date)
     plan = plan_generator.create_plan(
         timeframe=1, activation_date=datetime_service.now_minus_one_day()
     )
@@ -62,9 +62,24 @@ def test_that_expiration_date_is_correctly_calculated_after_fixed_activation_tim
     )
     assert plan.expiration_date == expected_expiration_date
 
+    # plan was activated 10 days before (after fixed activation date)
+    plan = plan_generator.create_plan(
+        timeframe=1, activation_date=datetime_service.now_minus_ten_days()
+    )
+    calculate_plan_expiration_and_check_if_expired()
+
+    # expected to expire 9 days ago
+    expected_expiration_date = datetime.datetime(
+        datetime_service.today().year,
+        datetime_service.today().month,
+        datetime_service.today().day - 9,
+        datetime_service.time_of_synchronized_plan_activation,
+    )
+    assert plan.expiration_date == expected_expiration_date
+
 
 @injection_test
-def test_that_expiration_date_is_correctly_calculated_before_fixed_activation_time(
+def test_that_expiration_date_is_correctly_calculated_if_freezed_before_fixed_activation_time(
     plan_generator: PlanGenerator,
     datetime_service: FakeDatetimeService,
     calculate_plan_expiration_and_check_if_expired: CalculatePlanExpirationAndCheckIfExpired,
@@ -76,7 +91,7 @@ def test_that_expiration_date_is_correctly_calculated_before_fixed_activation_ti
         )
     )
 
-    # plan was activated 1 day before
+    # plan was activated 1 day before (before fixed activation date)
     plan = plan_generator.create_plan(
         timeframe=1, activation_date=datetime_service.now_minus_one_day()
     )
@@ -91,9 +106,24 @@ def test_that_expiration_date_is_correctly_calculated_before_fixed_activation_ti
     )
     assert plan.expiration_date == expected_expiration_date
 
+    # plan was activated 10 days before (before fixed activation date)
+    plan = plan_generator.create_plan(
+        timeframe=1, activation_date=datetime_service.now_minus_ten_days()
+    )
+    calculate_plan_expiration_and_check_if_expired()
+
+    # expected to expire 9 days ago
+    expected_expiration_date = datetime.datetime(
+        datetime_service.today().year,
+        datetime_service.today().month,
+        datetime_service.today().day - 9,
+        datetime_service.time_of_synchronized_plan_activation,
+    )
+    assert plan.expiration_date == expected_expiration_date
+
 
 @injection_test
-def test_that_expiration_relative_is_correctly_calculated(
+def test_that_expiration_relative_is_correctly_calculated_if_freezed_after_fixed_activation_time(
     plan_generator: PlanGenerator,
     datetime_service: FakeDatetimeService,
     calculate_plan_expiration_and_check_if_expired: CalculatePlanExpirationAndCheckIfExpired,
@@ -108,8 +138,41 @@ def test_that_expiration_relative_is_correctly_calculated(
         timeframe=1, activation_date=datetime_service.now_minus_one_day()
     )
     calculate_plan_expiration_and_check_if_expired()
+    expected_expiration_relative = -1
+    assert plan.expiration_relative == expected_expiration_relative
 
+    plan = plan_generator.create_plan(
+        timeframe=1, activation_date=datetime_service.now_minus_ten_days()
+    )
+    calculate_plan_expiration_and_check_if_expired()
+    expected_expiration_relative = -10
+    assert plan.expiration_relative == expected_expiration_relative
+
+
+@injection_test
+def test_that_expiration_relative_is_correctly_calculated_if_freezed_before_fixed_activation_time(
+    plan_generator: PlanGenerator,
+    datetime_service: FakeDatetimeService,
+    calculate_plan_expiration_and_check_if_expired: CalculatePlanExpirationAndCheckIfExpired,
+):
+    datetime_service.freeze_time(
+        datetime.datetime(
+            2021, 8, 17, datetime_service.time_of_synchronized_plan_activation - 1
+        )
+    )
+
+    plan = plan_generator.create_plan(
+        timeframe=1, activation_date=datetime_service.now_minus_one_day()
+    )
+    calculate_plan_expiration_and_check_if_expired()
     expected_expiration_relative = 0
+    assert plan.expiration_relative == expected_expiration_relative
+
+    plan = plan_generator.create_plan(
+        timeframe=1, activation_date=datetime_service.now_minus_ten_days()
+    )
+    calculate_plan_expiration_and_check_if_expired()
+    expected_expiration_relative = -9
     assert plan.expiration_relative == expected_expiration_relative
 
 
