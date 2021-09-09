@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-import datetime
 from decimal import Decimal
 
 from injector import inject
