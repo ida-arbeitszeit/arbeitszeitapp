@@ -491,5 +491,5 @@ class PlanRepository(interfaces.PlanRepository):
             ):
                 yield plan
 
-    def delete_plan(self, plan: Plan) -> None:
-        del self.plans[plan.id]
+    def delete_plan(self, plan_id: uuid.UUID) -> None:
+        del self.plans[plan_id]

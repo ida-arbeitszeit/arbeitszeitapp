@@ -34,7 +34,3 @@ class CompanyCantBuyPublicServices(Exception):
         self.company = company
         self.plan = plan
         super().__init__()
-
-
-class PlanIsActive(Exception):
-    pass

@@ -684,8 +684,8 @@ class PlanRepository(repositories.PlanRepository):
             < self.datetime_service.past_plan_activation_date()
         )
 
-    def delete_plan(self, plan: entities.Plan) -> None:
-        plan_orm = self.object_to_orm(plan)
+    def delete_plan(self, plan_id: UUID) -> None:
+        plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
         if plan_orm is None:
             raise PlanNotFound()
         else:

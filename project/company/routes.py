@@ -217,13 +217,13 @@ def my_plans(
 @main_company.route("/company/delete_plan/<uuid:plan_id>", methods=["GET", "POST"])
 @login_required
 @with_injection
-def delete_plan(plan_id: UUID, delete_offer: DeletePlan, plan_repo: PlanRepository):
+def delete_plan(plan_id: UUID, delete_offer: DeletePlan):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
-    plan = plan_repo.get_plan_by_id(plan_id)
-    response = delete_offer(plan)
-    flash(f"Löschen des Plans {response.plan_id} erfolgreich.")
+    response = delete_offer(plan_id)
+    if response.is_success:
+        flash(f"Löschen des Plans {response.plan_id} erfolgreich.")
     return redirect(url_for("main_company.my_plans"))
 
 
