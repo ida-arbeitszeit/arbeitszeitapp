@@ -11,7 +11,7 @@ from .repositories import AccountRepository, PurchaseRepository, TransactionRepo
 
 
 @injection_test
-def test_error_is_raised_if_plan_is_inactive(
+def test_error_is_raised_if_plan_is_not_active_yet(
     pay_means_of_production: PayMeansOfProduction,
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
@@ -20,6 +20,24 @@ def test_error_is_raised_if_plan_is_inactive(
     plan = plan_generator.create_plan()
     purpose = PurposesOfPurchases.means_of_prod
     pieces = 5
+    with pytest.raises(errors.PlanIsInactive):
+        pay_means_of_production(sender, plan, pieces, purpose)
+
+
+@injection_test
+def test_error_is_raised_if_plan_is_expired(
+    pay_means_of_production: PayMeansOfProduction,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+    datetime_service: FakeDatetimeService,
+):
+    sender = company_generator.create_company()
+    plan = plan_generator.create_plan(
+        plan_creation_date=datetime_service.now_minus_ten_days(), timeframe=1
+    )
+    purpose = PurposesOfPurchases.means_of_prod
+    pieces = 5
+    plan.expired = True
     with pytest.raises(errors.PlanIsInactive):
         pay_means_of_production(sender, plan, pieces, purpose)
 

@@ -11,7 +11,7 @@ from .repositories import AccountRepository, PurchaseRepository, TransactionRepo
 
 
 @injection_test
-def test_error_is_raised_if_plan_is_inactive(
+def test_error_is_raised_if_plan_is_not_active_yet(
     pay_consumer_product: PayConsumerProduct,
     member_generator: MemberGenerator,
     plan_generator: PlanGenerator,
@@ -19,6 +19,24 @@ def test_error_is_raised_if_plan_is_inactive(
     sender = member_generator.create_member()
     plan = plan_generator.create_plan()
     pieces = 3
+    with pytest.raises(errors.PlanIsInactive):
+        pay_consumer_product(sender, plan, pieces)
+
+
+@injection_test
+def test_error_is_raised_if_plan_is_expired(
+    pay_consumer_product: PayConsumerProduct,
+    member_generator: MemberGenerator,
+    plan_generator: PlanGenerator,
+    datetime_service: FakeDatetimeService,
+):
+    sender = member_generator.create_member()
+    plan = plan_generator.create_plan(
+        plan_creation_date=datetime_service.now_minus_ten_days(),
+        timeframe=1,
+    )
+    pieces = 3
+    plan.expired = True
     with pytest.raises(errors.PlanIsInactive):
         pay_consumer_product(sender, plan, pieces)
 
