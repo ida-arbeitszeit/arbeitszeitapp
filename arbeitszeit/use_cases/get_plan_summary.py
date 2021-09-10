@@ -17,6 +17,7 @@ class PlanSummaryResponse:
     means_cost: Decimal
     resources_cost: Decimal
     labour_cost: Decimal
+    is_public_service: bool
 
 
 @inject
@@ -35,4 +36,5 @@ class GetPlanSummary:
             means_cost=plan.production_costs.means_cost,
             resources_cost=plan.production_costs.resource_cost,
             labour_cost=plan.production_costs.labour_cost,
+            is_public_service=plan.is_public_service,
         )

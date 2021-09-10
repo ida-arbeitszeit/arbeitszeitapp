@@ -136,11 +136,13 @@
         <label class="label">Art des Plans</label>
         <div class="control">
           <label class="radio">
-            <input type="radio" name="productive_or_public" value="productive" required>
+            <input type="radio" name="productive_or_public" value="productive" required {% if original_plan and not
+              original_plan.is_public_service %} checked {% endif %}>
             Produktiv
           </label>
           <label class="radio">
-            <input type="radio" name="productive_or_public" value="public">
+            <input type="radio" name="productive_or_public" value="public" {% if original_plan and
+              original_plan.is_public_service %} checked {% endif %}>
             Öffentlich
           </label>
           <p class="help">Produktive Pläne sind der Regelfall. <br>

@@ -63,3 +63,13 @@ def test_that_correct_amount_is_shown(
     plan = plan_generator.create_plan(amount=123)
     summary = get_plan_summary(plan.id)
     assert summary.amount == 123
+
+
+@injection_test
+def test_that_correct_public_service_is_shown(
+    plan_generator: PlanGenerator,
+    get_plan_summary: GetPlanSummary,
+):
+    plan = plan_generator.create_plan(is_public_service=True)
+    summary = get_plan_summary(plan.id)
+    assert summary.is_public_service == True
