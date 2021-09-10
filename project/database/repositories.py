@@ -699,10 +699,10 @@ class TransactionRepository(repositories.TransactionRepository):
             id=UUID(transaction.id),
             date=transaction.date,
             sending_account=self.account_repository.object_from_orm(
-                transaction.sending_account
+                transaction.account_from
             ),
             receiving_account=self.account_repository.object_from_orm(
-                transaction.receiving_account
+                transaction.account_to
             ),
             amount=Decimal(transaction.amount),
             purpose=transaction.purpose,
