@@ -25,7 +25,10 @@ class SynchronizedPlanActivation:
         Grant credit to planners of plans suitable for activation.
         Set these plans as active.
         """
-        new_plans = self.plan_repository.get_plans_suitable_for_activation()
+        past_plan_activation_date = self.datetime_service.past_plan_activation_date()
+        new_plans = self.plan_repository.get_approved_plans_created_before(
+            past_plan_activation_date
+        )
 
         for plan in new_plans:
             assert plan.approved, "Plan has not been approved!"

@@ -480,14 +480,13 @@ class PlanRepository(interfaces.PlanRepository):
             ):
                 yield plan
 
-    def get_plans_suitable_for_activation(self) -> Iterator[Plan]:
+    def get_approved_plans_created_before(self, timestamp: datetime) -> Iterator[Plan]:
         for plan in self.plans.values():
             if (
                 plan.approved
                 and not plan.is_active
                 and not plan.expired
-                and plan.plan_creation_date
-                < self.datetime_service.past_plan_activation_date()
+                and plan.plan_creation_date < timestamp
             ):
                 yield plan
 

@@ -450,7 +450,6 @@ class ProductOfferRepository(repositories.OfferRepository):
 class PlanRepository(repositories.PlanRepository):
     company_repository: CompanyRepository
     accounting_repository: AccountingRepository
-    datetime_service: DatetimeService
     db: SQLAlchemy
 
     def _approve(self, plan, decision, reason, approval_date):
@@ -672,16 +671,17 @@ class PlanRepository(repositories.PlanRepository):
             ).all()
         )
 
-    def get_plans_suitable_for_activation(
-        self,
+    def get_approved_plans_created_before(
+        self, timestamp: datetime
     ) -> Iterator[entities.Plan]:
         return (
             self.object_from_orm(plan_orm)
-            for plan_orm in Plan.query.filter_by(
-                approved=True, is_active=False, expired=False
-            ).all()
-            if plan_orm.plan_creation_date
-            < self.datetime_service.past_plan_activation_date()
+            for plan_orm in Plan.query.filter(
+                Plan.plan_creation_date < timestamp,
+                Plan.approved == True,
+                Plan.is_active == False,
+                Plan.expired == False,
+            )
         )
 
     def delete_plan(self, plan_id: UUID) -> None:
