@@ -33,7 +33,7 @@ def test_approved_plans_created_are_not_returned_when_querying_for_datetime_mini
 
 
 @injection_test
-def test_approved_plans_created_not_returned_when_querying_for_datetime_maximum(
+def test_approved_plans_created_are_returned_when_querying_for_datetime_maximum(
     repo: PlanRepository, generator: PlanGenerator
 ) -> None:
     generator.create_plan(approved=True)
