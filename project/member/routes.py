@@ -58,7 +58,7 @@ def suchen(
             product_filter = use_cases.ProductFilter.by_name
         elif search_field == "Beschreibung":
             product_filter = use_cases.ProductFilter.by_description
-    results = list(query_products(query, product_filter))
+    results = query_products(query, product_filter).results
 
     if not results:
         flash("Keine Ergebnisse!")
