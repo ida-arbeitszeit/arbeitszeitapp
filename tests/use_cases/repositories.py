@@ -490,3 +490,6 @@ class PlanRepository(interfaces.PlanRepository):
                 < self.datetime_service.past_plan_activation_date()
             ):
                 yield plan
+
+    def delete_plan(self, plan: Plan) -> None:
+        del self.plans[plan.id]

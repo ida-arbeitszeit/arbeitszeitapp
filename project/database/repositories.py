@@ -23,10 +23,10 @@ from project.error import (
 from project.models import (
     Account,
     Company,
-    Purchase,
     Member,
     Offer,
     Plan,
+    Purchase,
     SocialAccounting,
     Transaction,
 )
@@ -683,6 +683,14 @@ class PlanRepository(repositories.PlanRepository):
             if plan_orm.plan_creation_date
             < self.datetime_service.past_plan_activation_date()
         )
+
+    def delete_plan(self, plan: entities.Plan) -> None:
+        plan_orm = self.object_to_orm(plan)
+        if plan_orm is None:
+            raise PlanNotFound()
+        else:
+            self.db.session.delete(plan_orm)
+            self.db.session.commit()
 
 
 @inject

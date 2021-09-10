@@ -86,6 +86,7 @@
                 <th>Einheiten</th>
                 <th>Stückpreis</th>
                 <th>Plan vom</th>
+                <th>Del.</th>
             </tr>
         </thead>
         <tbody>
@@ -100,6 +101,8 @@
                 <td>{{ plan.prd_amount }}</td>
                 <td>{{ plan.price_per_unit() }} Std.</td>
                 <td>{{ plan.plan_creation_date.strftime("%d.%m.%y") }}</td>
+                <td><a href="{{ url_for('main_company.delete_plan', plan_id=plan.id) }}"><i
+                            class="fas fa-trash"></i></a></td>
             </tr>
             {% endfor %}
         </tbody>
@@ -130,6 +133,7 @@
                 <th>Stückpreis</th>
                 <th>Plan vom</th>
                 <th><abbr title="Nur einmal möglich.">Plan erneuern</abbr></th>
+                <th>Del.</th>
             </tr>
         </thead>
         <tbody>
@@ -153,6 +157,8 @@
                             class="{{ 'fas fa-redo' }}"></i></a>
                 </td>
                 {% endif %}
+                <td><a href="{{ url_for('main_company.delete_plan', plan_id=plan.id) }}"><i
+                            class="fas fa-trash"></i></a></td>
             </tr>
             {% endfor %}
         </tbody>
