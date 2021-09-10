@@ -140,6 +140,10 @@ class PlanRepository(ABC):
         created before the past activation date, e.g. before 10 a.m."""
         pass
 
+    @abstractmethod
+    def delete_plan(self, plan_id: UUID) -> None:
+        pass
+
 
 class TransactionRepository(ABC):
     @abstractmethod

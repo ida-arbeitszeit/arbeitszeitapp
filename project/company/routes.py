@@ -9,6 +9,7 @@ from arbeitszeit import entities, errors, use_cases
 from arbeitszeit.use_cases import (
     CreateOffer,
     CreatePlan,
+    DeletePlan,
     GetPlanSummary,
     Offer,
     PlanProposal,
@@ -211,6 +212,19 @@ def my_plans(
         plans_waiting_for_activation=plans_not_expired_and_inactive,
         plans_expired=plans_expired,
     )
+
+
+@main_company.route("/company/delete_plan/<uuid:plan_id>", methods=["GET", "POST"])
+@login_required
+@with_injection
+def delete_plan(plan_id: UUID, delete_offer: DeletePlan):
+    if not user_is_company():
+        return redirect(url_for("auth.zurueck"))
+
+    response = delete_offer(plan_id)
+    if response.is_success:
+        flash(f"Löschen des Plans {response.plan_id} erfolgreich.")
+    return redirect(url_for("main_company.my_plans"))
 
 
 @main_company.route("/company/create_offer/<uuid:plan_id>", methods=["GET", "POST"])

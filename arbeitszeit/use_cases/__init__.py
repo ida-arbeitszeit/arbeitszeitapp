@@ -5,6 +5,7 @@ from arbeitszeit.repositories import CompanyWorkerRepository
 from .calculate_plan_expiration import CalculatePlanExpirationAndCheckIfExpired
 from .create_offer import CreateOffer, Offer
 from .create_production_plan import CreatePlan, PlanProposal
+from .delete_plan import DeletePlan, DeletePlanResponse
 from .get_member_profile_info import GetMemberProfileInfo, MemberProfileInfo, Workplace
 from .get_plan_summary import GetPlanSummary
 from .get_statistics import GetStatistics, StatisticsResponse
@@ -23,6 +24,8 @@ __all__ = [
     "CalculatePlanExpirationAndCheckIfExpired",
     "CreateOffer",
     "CreatePlan",
+    "DeletePlan",
+    "DeletePlanResponse",
     "GetMemberProfileInfo",
     "GetPlanSummary",
     "GetStatistics",
