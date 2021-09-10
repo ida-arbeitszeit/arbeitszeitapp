@@ -102,7 +102,6 @@ class SynchronizedPlanActivation:
         )
         denominator = (sum_of_productive_work_per_day + sum_of_public_work_per_day) or 1
         payout_factor = numerator / denominator
-        print(payout_factor)
         return Decimal(payout_factor)
 
     def _payout_work_certificates(self, payout_factor: Decimal) -> None:
