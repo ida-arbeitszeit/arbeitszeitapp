@@ -11,6 +11,19 @@ from .repositories import AccountRepository, PurchaseRepository, TransactionRepo
 
 
 @injection_test
+def test_error_is_raised_if_plan_is_not_active_yet(
+    pay_consumer_product: PayConsumerProduct,
+    member_generator: MemberGenerator,
+    plan_generator: PlanGenerator,
+):
+    sender = member_generator.create_member()
+    plan = plan_generator.create_plan()
+    pieces = 3
+    with pytest.raises(errors.PlanIsInactive):
+        pay_consumer_product(sender, plan, pieces)
+
+
+@injection_test
 def test_error_is_raised_if_plan_is_expired(
     pay_consumer_product: PayConsumerProduct,
     member_generator: MemberGenerator,
@@ -19,12 +32,12 @@ def test_error_is_raised_if_plan_is_expired(
 ):
     sender = member_generator.create_member()
     plan = plan_generator.create_plan(
-        plan_creation_date=datetime_service.now_minus_two_days,
+        plan_creation_date=datetime_service.now_minus_ten_days(),
         timeframe=1,
     )
     pieces = 3
     plan.expired = True
-    with pytest.raises(errors.PlanIsExpired):
+    with pytest.raises(errors.PlanIsInactive):
         pay_consumer_product(sender, plan, pieces)
 
 
@@ -34,9 +47,12 @@ def test_that_correct_transaction_is_added(
     member_generator: MemberGenerator,
     plan_generator: PlanGenerator,
     transaction_repository: TransactionRepository,
+    datetime_service: FakeDatetimeService,
 ):
     sender = member_generator.create_member()
-    plan = plan_generator.create_plan()
+    plan = plan_generator.create_plan(
+        activation_date=datetime_service.now_minus_one_day()
+    )
     pieces = 3
     pay_consumer_product(sender, plan, pieces)
     assert len(transaction_repository.transactions) == 1
@@ -53,9 +69,12 @@ def test_that_correct_transaction_is_added_when_plan_is_public_service(
     member_generator: MemberGenerator,
     plan_generator: PlanGenerator,
     transaction_repository: TransactionRepository,
+    datetime_service: FakeDatetimeService,
 ):
     sender = member_generator.create_member()
-    plan = plan_generator.create_plan(is_public_service=True)
+    plan = plan_generator.create_plan(
+        is_public_service=True, activation_date=datetime_service.now_minus_one_day()
+    )
     pieces = 3
     pay_consumer_product(sender, plan, pieces)
     assert len(transaction_repository.transactions) == 1
@@ -72,9 +91,12 @@ def test_balances_are_adjusted_correctly(
     member_generator: MemberGenerator,
     plan_generator: PlanGenerator,
     account_repository: AccountRepository,
+    datetime_service: FakeDatetimeService,
 ):
     sender = member_generator.create_member()
-    plan = plan_generator.create_plan()
+    plan = plan_generator.create_plan(
+        activation_date=datetime_service.now_minus_one_day()
+    )
     pieces = 3
     pay_consumer_product(sender, plan, pieces)
     costs = pieces * plan.price_per_unit()
@@ -88,9 +110,12 @@ def test_balances_are_adjusted_correctly_when_plan_is_public_service(
     member_generator: MemberGenerator,
     plan_generator: PlanGenerator,
     account_repository: AccountRepository,
+    datetime_service: FakeDatetimeService,
 ):
     sender = member_generator.create_member()
-    plan = plan_generator.create_plan(is_public_service=True)
+    plan = plan_generator.create_plan(
+        is_public_service=True, activation_date=datetime_service.now_minus_one_day()
+    )
     pieces = 3
     pay_consumer_product(sender, plan, pieces)
     costs = pieces * plan.price_per_unit()
@@ -104,9 +129,12 @@ def test_correct_purchase_is_added(
     member_generator: MemberGenerator,
     plan_generator: PlanGenerator,
     purchase_repository: PurchaseRepository,
+    datetime_service: FakeDatetimeService,
 ):
     sender = member_generator.create_member()
-    plan = plan_generator.create_plan()
+    plan = plan_generator.create_plan(
+        activation_date=datetime_service.now_minus_one_day()
+    )
     pieces = 3
     pay_consumer_product(sender, plan, pieces)
     assert len(purchase_repository.purchases) == 1
@@ -124,9 +152,12 @@ def test_correct_purchase_is_added_when_plan_is_public_service(
     member_generator: MemberGenerator,
     plan_generator: PlanGenerator,
     purchase_repository: PurchaseRepository,
+    datetime_service: FakeDatetimeService,
 ):
     sender = member_generator.create_member()
-    plan = plan_generator.create_plan(is_public_service=True)
+    plan = plan_generator.create_plan(
+        is_public_service=True, activation_date=datetime_service.now_minus_one_day()
+    )
     pieces = 3
     pay_consumer_product(sender, plan, pieces)
     assert len(purchase_repository.purchases) == 1

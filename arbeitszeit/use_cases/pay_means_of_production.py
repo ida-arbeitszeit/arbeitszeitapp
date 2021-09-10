@@ -28,8 +28,8 @@ class PayMeansOfProduction:
             PurposesOfPurchases.means_of_prod,
             PurposesOfPurchases.raw_materials,
         ), "Not a valid purpose for this operation."
-        if plan.expired:
-            raise errors.PlanIsExpired(
+        if not plan.is_active:
+            raise errors.PlanIsInactive(
                 plan=plan,
             )
         if plan.is_public_service:

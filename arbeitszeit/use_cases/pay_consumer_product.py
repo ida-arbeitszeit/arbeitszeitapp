@@ -23,8 +23,8 @@ class PayConsumerProduct:
         plan: Plan,
         pieces: int,
     ) -> None:
-        if plan.expired:
-            raise errors.PlanIsExpired(
+        if not plan.is_active:
+            raise errors.PlanIsInactive(
                 plan=plan,
             )
 
