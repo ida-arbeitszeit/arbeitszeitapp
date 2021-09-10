@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterator, List, Optional, TypeVar, Union
+from typing import Iterator, List, Optional, Union
 from uuid import UUID
 
 from flask_sqlalchemy import SQLAlchemy
@@ -12,7 +12,6 @@ from sqlalchemy import desc, distinct, func
 from werkzeug.security import generate_password_hash
 
 from arbeitszeit import entities, repositories
-from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
 from project.error import (
     CompanyNotFound,
@@ -30,8 +29,6 @@ from project.models import (
     SocialAccounting,
     Transaction,
 )
-
-T = TypeVar("T")
 
 
 @inject

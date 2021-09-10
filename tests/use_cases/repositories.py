@@ -10,7 +10,6 @@ from typing import Dict, Iterator, List, Set, Union
 from injector import inject, singleton
 
 import arbeitszeit.repositories as interfaces
-from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.entities import (
     Account,
@@ -329,9 +328,8 @@ class CompanyRepository(interfaces.CompanyRepository):
 @singleton
 class PlanRepository(interfaces.PlanRepository):
     @inject
-    def __init__(self, datetime_service: DatetimeService) -> None:
+    def __init__(self) -> None:
         self.plans: Dict[uuid.UUID, Plan] = {}
-        self.datetime_service = datetime_service
 
     def create_plan(
         self,
