@@ -1,13 +1,25 @@
-from arbeitszeit.entities import ProductOffer
-from arbeitszeit.use_cases import ProductFilter, ProductQueryResponse, QueryProducts
+from arbeitszeit.use_cases import (
+    CreateOfferResponse,
+    ProductFilter,
+    ProductQueryResponse,
+    QueryProducts,
+)
 from tests.data_generators import OfferGenerator
 
 from .dependency_injection import injection_test
 from .repositories import OfferRepository
 
 
-def offer_in_results(offer: ProductOffer, response: ProductQueryResponse) -> bool:
-    return offer.id in [result.offer_id for result in response.results]
+def offer_in_results(
+    offer: CreateOfferResponse, response: ProductQueryResponse
+) -> bool:
+    return any(
+        (
+            offer.description == result.product_description
+            and offer.name == result.product_name
+            for result in response.results
+        )
+    )
 
 
 @injection_test

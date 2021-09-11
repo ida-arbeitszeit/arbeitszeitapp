@@ -14,6 +14,7 @@ from arbeitszeit.use_cases import (
     GetPlanSummary,
     PlanProposal,
 )
+from arbeitszeit_web.create_offer import CreateOfferPresenter
 from arbeitszeit_web.query_products import QueryProductsPresenter
 from project import database, error
 from project.database import (
@@ -233,7 +234,9 @@ def delete_plan(plan_id: UUID, delete_offer: DeletePlan):
 @main_company.route("/company/create_offer/<uuid:plan_id>", methods=["GET", "POST"])
 @login_required
 @with_injection
-def create_offer(plan_id: UUID, create_offer: CreateOffer):
+def create_offer(
+    plan_id: UUID, create_offer: CreateOffer, presenter: CreateOfferPresenter
+):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
@@ -246,8 +249,11 @@ def create_offer(plan_id: UUID, create_offer: CreateOffer):
             description=description,
             plan_id=plan_id,
         )
-        create_offer(offer)
-        return render_template("company/create_offer_in_app.html", offer=offer)
+        use_case_response = create_offer(offer)
+        view_model = presenter.present(use_case_response)
+        return render_template(
+            "company/create_offer_in_app.html", view_model=view_model
+        )
 
     plan = Plan.query.filter_by(id=str(plan_id)).first()
     return render_template("company/create_offer.html", plan=plan)

@@ -4,7 +4,6 @@ from uuid import UUID
 from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import ProductOffer
 from arbeitszeit.repositories import OfferRepository, PlanRepository
 
 
@@ -15,6 +14,12 @@ class CreateOfferRequest:
     plan_id: UUID
 
 
+@dataclass
+class CreateOfferResponse:
+    name: str
+    description: str
+
+
 @inject
 @dataclass
 class CreateOffer:
@@ -22,11 +27,15 @@ class CreateOffer:
     plan_repository: PlanRepository
     datetime_service: DatetimeService
 
-    def __call__(self, offer: CreateOfferRequest) -> ProductOffer:
+    def __call__(self, offer: CreateOfferRequest) -> CreateOfferResponse:
         plan = self.plan_repository.get_plan_by_id(offer.plan_id)
-        return self.offer_repository.create_offer(
+        self.offer_repository.create_offer(
             plan,
             self.datetime_service.now(),
             offer.name,
             offer.description,
+        )
+        return CreateOfferResponse(
+            name=offer.name,
+            description=offer.description,
         )

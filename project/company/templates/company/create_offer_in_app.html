@@ -1,17 +1,7 @@
 {% extends "base_company.html" %}
 
 {% block content2 %}
-
-
 <h1 class="title">Produkt wurde veröffentlicht!</h1>
-
-{% with messages = get_flashed_messages() %}
-{% if messages %}
-{% for message in messages %}
-<div class="notification is-danger">{{ message }} </div>
-{% endfor %}
-{% endif %}
-{% endwith %}
 
 <div class="columns is-centered">
     <div class="column is-two-fifths">
@@ -20,8 +10,8 @@
         </p>
         <br>
         <ul>
-            <li>Name: {{ offer.name }}</li>
-            <li>Beschreibung: {{ offer.description }}</li>
+            <li>Name: {{ view_model.name }}</li>
+            <li>Beschreibung: {{ view_model.description }}</li>
         </ul>
         <br>
         <p>
