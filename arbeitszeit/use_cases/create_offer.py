@@ -9,7 +9,7 @@ from arbeitszeit.repositories import OfferRepository, PlanRepository
 
 
 @dataclass
-class Offer:
+class CreateOfferRequest:
     name: str
     description: str
     plan_id: UUID
@@ -22,7 +22,7 @@ class CreateOffer:
     plan_repository: PlanRepository
     datetime_service: DatetimeService
 
-    def __call__(self, offer: Offer) -> ProductOffer:
+    def __call__(self, offer: CreateOfferRequest) -> ProductOffer:
         plan = self.plan_repository.get_plan_by_id(offer.plan_id)
         return self.offer_repository.create_offer(
             plan,

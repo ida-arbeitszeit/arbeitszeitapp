@@ -3,7 +3,7 @@ from arbeitszeit.entities import Company, Member, ProductOffer
 from arbeitszeit.repositories import CompanyWorkerRepository
 
 from .calculate_plan_expiration import CalculatePlanExpirationAndCheckIfExpired
-from .create_offer import CreateOffer, Offer
+from .create_offer import CreateOffer, CreateOfferRequest
 from .create_production_plan import CreatePlan, PlanProposal
 from .delete_plan import DeletePlan, DeletePlanResponse
 from .get_member_profile_info import GetMemberProfileInfo, MemberProfileInfo, Workplace
@@ -23,6 +23,7 @@ from .synchronized_plan_activation import SynchronizedPlanActivation
 __all__ = [
     "CalculatePlanExpirationAndCheckIfExpired",
     "CreateOffer",
+    "CreateOfferRequest",
     "CreatePlan",
     "DeletePlan",
     "DeletePlanResponse",
@@ -31,7 +32,6 @@ __all__ = [
     "GetStatistics",
     "GetTransactionInfos",
     "MemberProfileInfo",
-    "Offer",
     "PayConsumerProduct",
     "PayMeansOfProduction",
     "PlanProposal",

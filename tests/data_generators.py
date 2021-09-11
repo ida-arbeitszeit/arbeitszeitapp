@@ -33,7 +33,7 @@ from arbeitszeit.repositories import (
     PlanRepository,
     TransactionRepository,
 )
-from arbeitszeit.use_cases import CreateOffer, Offer, SeekApproval
+from arbeitszeit.use_cases import CreateOffer, CreateOfferRequest, SeekApproval
 from tests.datetime_service import FakeDatetimeService
 
 
@@ -53,7 +53,7 @@ class OfferGenerator:
         if plan is None:
             plan = self.plan_generator.create_plan()
         return self._create_offer(
-            Offer(
+            CreateOfferRequest(
                 name=name,
                 description=description,
                 plan_id=plan.id,

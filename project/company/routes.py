@@ -8,10 +8,10 @@ from flask_login import current_user, login_required
 from arbeitszeit import entities, errors, use_cases
 from arbeitszeit.use_cases import (
     CreateOffer,
+    CreateOfferRequest,
     CreatePlan,
     DeletePlan,
     GetPlanSummary,
-    Offer,
     PlanProposal,
 )
 from arbeitszeit_web.query_products import QueryProductsPresenter
@@ -241,7 +241,7 @@ def create_offer(plan_id: UUID, create_offer: CreateOffer):
         name = request.form["name"]
         description = request.form["description"]
 
-        offer = Offer(
+        offer = CreateOfferRequest(
             name=name,
             description=description,
             plan_id=plan_id,
