@@ -345,9 +345,9 @@ def transfer_to_company(
             )
             database.commit_changes()
             flash("Erfolgreich bezahlt.")
-        except errors.PlanIsExpired:
+        except errors.PlanIsInactive:
             flash(
-                "Der angegebene Plan ist nicht mehr aktuell. Bitte wende dich an den Verkäufer, um eine aktuelle Plan-ID zu erhalten."
+                "Der angegebene Plan ist nicht aktuell. Bitte wende dich an den Verkäufer, um eine aktuelle Plan-ID zu erhalten."
             )
         except errors.CompanyCantBuyPublicServices:
             flash(

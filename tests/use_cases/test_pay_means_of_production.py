@@ -4,13 +4,14 @@ from arbeitszeit import errors
 from arbeitszeit.entities import PurposesOfPurchases
 from arbeitszeit.use_cases import PayMeansOfProduction
 from tests.data_generators import CompanyGenerator, PlanGenerator
+from tests.datetime_service import FakeDatetimeService
 
 from .dependency_injection import injection_test
 from .repositories import AccountRepository, PurchaseRepository, TransactionRepository
 
 
 @injection_test
-def test_error_is_raised_if_plan_is_expired(
+def test_error_is_raised_if_plan_is_not_active_yet(
     pay_means_of_production: PayMeansOfProduction,
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
@@ -19,8 +20,25 @@ def test_error_is_raised_if_plan_is_expired(
     plan = plan_generator.create_plan()
     purpose = PurposesOfPurchases.means_of_prod
     pieces = 5
+    with pytest.raises(errors.PlanIsInactive):
+        pay_means_of_production(sender, plan, pieces, purpose)
+
+
+@injection_test
+def test_error_is_raised_if_plan_is_expired(
+    pay_means_of_production: PayMeansOfProduction,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+    datetime_service: FakeDatetimeService,
+):
+    sender = company_generator.create_company()
+    plan = plan_generator.create_plan(
+        plan_creation_date=datetime_service.now_minus_ten_days(), timeframe=1
+    )
+    purpose = PurposesOfPurchases.means_of_prod
+    pieces = 5
     plan.expired = True
-    with pytest.raises(errors.PlanIsExpired):
+    with pytest.raises(errors.PlanIsInactive):
         pay_means_of_production(sender, plan, pieces, purpose)
 
 
@@ -43,9 +61,12 @@ def test_error_is_raised_if_trying_to_pay_public_service(
     pay_means_of_production: PayMeansOfProduction,
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
+    datetime_service: FakeDatetimeService,
 ):
     sender = company_generator.create_company()
-    plan = plan_generator.create_plan(is_public_service=True)
+    plan = plan_generator.create_plan(
+        is_public_service=True, activation_date=datetime_service.now_minus_one_day()
+    )
     purpose = PurposesOfPurchases.means_of_prod
     pieces = 5
     with pytest.raises(errors.CompanyCantBuyPublicServices):
@@ -58,9 +79,12 @@ def test_balance_of_buyer_of_means_of_prod_reduced(
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
     account_repository: AccountRepository,
+    datetime_service: FakeDatetimeService,
 ):
     sender = company_generator.create_company()
-    plan = plan_generator.create_plan()
+    plan = plan_generator.create_plan(
+        activation_date=datetime_service.now_minus_one_day()
+    )
     purpose = PurposesOfPurchases.means_of_prod
     pieces = 5
 
@@ -76,9 +100,12 @@ def test_balance_of_buyer_of_raw_materials_reduced(
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
     account_repository: AccountRepository,
+    datetime_service: FakeDatetimeService,
 ):
     sender = company_generator.create_company()
-    plan = plan_generator.create_plan()
+    plan = plan_generator.create_plan(
+        activation_date=datetime_service.now_minus_one_day()
+    )
     purpose = PurposesOfPurchases.raw_materials
     pieces = 5
 
@@ -97,9 +124,12 @@ def test_balance_of_seller_increased(
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
     account_repository: AccountRepository,
+    datetime_service: FakeDatetimeService,
 ):
     sender = company_generator.create_company()
-    plan = plan_generator.create_plan()
+    plan = plan_generator.create_plan(
+        activation_date=datetime_service.now_minus_one_day()
+    )
     purpose = PurposesOfPurchases.raw_materials
     pieces = 5
 
@@ -118,9 +148,12 @@ def test_correct_transaction_added_if_means_of_production_were_paid(
     transaction_repository: TransactionRepository,
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
+    datetime_service: FakeDatetimeService,
 ):
     sender = company_generator.create_company()
-    plan = plan_generator.create_plan()
+    plan = plan_generator.create_plan(
+        activation_date=datetime_service.now_minus_one_day()
+    )
     purpose = PurposesOfPurchases.means_of_prod
     pieces = 5
     pay_means_of_production(sender, plan, pieces, purpose)
@@ -142,9 +175,12 @@ def test_correct_transaction_added_if_raw_materials_were_paid(
     transaction_repository: TransactionRepository,
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
+    datetime_service: FakeDatetimeService,
 ):
     sender = company_generator.create_company()
-    plan = plan_generator.create_plan()
+    plan = plan_generator.create_plan(
+        activation_date=datetime_service.now_minus_one_day()
+    )
     purpose = PurposesOfPurchases.raw_materials
     pieces = 5
     pay_means_of_production(sender, plan, pieces, purpose)
@@ -167,9 +203,12 @@ def test_correct_purchase_added_if_means_of_production_were_paid(
     purchase_repository: PurchaseRepository,
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
+    datetime_service: FakeDatetimeService,
 ):
     sender = company_generator.create_company()
-    plan = plan_generator.create_plan()
+    plan = plan_generator.create_plan(
+        activation_date=datetime_service.now_minus_one_day()
+    )
     purpose = PurposesOfPurchases.means_of_prod
     pieces = 5
     pay_means_of_production(sender, plan, pieces, purpose)
@@ -189,9 +228,12 @@ def test_correct_purchase_added_if_raw_materials_were_paid(
     purchase_repository: PurchaseRepository,
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
+    datetime_service: FakeDatetimeService,
 ):
     sender = company_generator.create_company()
-    plan = plan_generator.create_plan()
+    plan = plan_generator.create_plan(
+        activation_date=datetime_service.now_minus_one_day()
+    )
     purpose = PurposesOfPurchases.raw_materials
     pieces = 5
     pay_means_of_production(sender, plan, pieces, purpose)

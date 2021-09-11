@@ -86,9 +86,9 @@ def pay_consumer_product(
             )
             database.commit_changes()
             flash("Produkt erfolgreich bezahlt.")
-        except errors.PlanIsExpired:
+        except errors.PlanIsInactive:
             flash(
-                "Der angegebene Plan ist nicht mehr aktuell. Bitte wende dich an den Verkäufer, um eine aktuelle Plan-ID zu erhalten."
+                "Der angegebene Plan ist nicht aktuell. Bitte wende dich an den Verkäufer, um eine aktuelle Plan-ID zu erhalten."
             )
     return render_template("member/pay_consumer_product.html")
 
