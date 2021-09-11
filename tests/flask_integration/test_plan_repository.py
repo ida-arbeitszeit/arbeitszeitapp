@@ -1,10 +1,109 @@
 from datetime import datetime
+from decimal import Decimal
+from typing import Union
 
+from arbeitszeit.entities import ProductionCosts
 from project.database.repositories import PlanRepository
 
 from ..data_generators import PlanGenerator
 from ..datetime_service import FakeDatetimeService
 from .dependency_injection import injection_test
+
+Number = Union[int, Decimal]
+
+
+def production_costs(a: Number, r: Number, p: Number) -> ProductionCosts:
+    return ProductionCosts(
+        Decimal(a),
+        Decimal(r),
+        Decimal(p),
+    )
+
+
+@injection_test
+def test_active_plans_are_counted_correctly(
+    plan_repository: PlanRepository,
+    plan_generator: PlanGenerator,
+):
+    assert plan_repository.count_active_plans() == 0
+    plan_generator.create_plan(activation_date=datetime.min)
+    plan_generator.create_plan(activation_date=datetime.min)
+    assert plan_repository.count_active_plans() == 2
+
+
+@injection_test
+def test_active_public_plans_are_counted_correctly(
+    plan_repository: PlanRepository,
+    plan_generator: PlanGenerator,
+):
+    assert plan_repository.count_active_public_plans() == 0
+    plan_generator.create_plan(activation_date=datetime.min, is_public_service=True)
+    plan_generator.create_plan(activation_date=datetime.min, is_public_service=True)
+    plan_generator.create_plan(activation_date=datetime.min, is_public_service=False)
+    assert plan_repository.count_active_public_plans() == 2
+
+
+@injection_test
+def test_avg_timeframe_of_active_plans_is_calculated_correctly(
+    plan_repository: PlanRepository,
+    plan_generator: PlanGenerator,
+):
+    assert plan_repository.avg_timeframe_of_active_plans() == 0
+    plan_generator.create_plan(activation_date=datetime.min, timeframe=5)
+    plan_generator.create_plan(activation_date=datetime.min, timeframe=3)
+    plan_generator.create_plan(activation_date=None, timeframe=20)
+    assert plan_repository.avg_timeframe_of_active_plans() == 4
+
+
+@injection_test
+def test_sum_of_active_planned_work_calculated_correctly(
+    plan_repository: PlanRepository,
+    plan_generator: PlanGenerator,
+):
+    assert plan_repository.sum_of_active_planned_work() == 0
+    plan_generator.create_plan(
+        activation_date=datetime.min,
+        costs=production_costs(2, 0, 0),
+    )
+    plan_generator.create_plan(
+        activation_date=datetime.min,
+        costs=production_costs(3, 0, 0),
+    )
+    assert plan_repository.sum_of_active_planned_work() == 5
+
+
+@injection_test
+def test_sum_of_active_planned_resources_calculated_correctly(
+    plan_repository: PlanRepository,
+    plan_generator: PlanGenerator,
+):
+    assert plan_repository.sum_of_active_planned_resources() == 0
+    plan_generator.create_plan(
+        activation_date=datetime.min,
+        costs=production_costs(0, 2, 0),
+    )
+    plan_generator.create_plan(
+        activation_date=datetime.min,
+        costs=production_costs(0, 3, 0),
+    )
+    assert plan_repository.sum_of_active_planned_resources() == 5
+
+
+@injection_test
+def test_sum_of_active_planned_means_calculated_correctly(
+    plan_repository: PlanRepository,
+    plan_generator: PlanGenerator,
+):
+    assert plan_repository.sum_of_active_planned_means() == 0
+    plan_generator.create_plan(
+        activation_date=datetime.min,
+        costs=production_costs(0, 0, 2),
+    )
+    plan_generator.create_plan(
+        activation_date=datetime.min,
+        costs=production_costs(0, 0, 3),
+    )
+    assert plan_repository.sum_of_active_planned_means() == 5
 
 
 @injection_test

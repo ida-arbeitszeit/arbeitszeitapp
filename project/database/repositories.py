@@ -689,6 +689,9 @@ class PlanRepository(repositories.PlanRepository):
             self.db.session.delete(plan_orm)
             self.db.session.commit()
 
+    def __len__(self) -> int:
+        return len(Plan.query.all())
+
 
 @inject
 @dataclass
