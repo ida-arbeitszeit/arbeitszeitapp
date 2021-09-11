@@ -1,0 +1,6 @@
+{% extends "base_member.html" %}
+
+{% block content2 %}
+{% from 'macros.html' import query_products %}
+{{ query_products(form, view_model) }}
+{% endblock %}

@@ -1,16 +1,14 @@
-from typing import Optional
-
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
 
 from arbeitszeit import errors, use_cases
+from arbeitszeit_web.query_products import QueryProductsPresenter
 from project import database
 from project.database import (
     AccountRepository,
     CompanyRepository,
     MemberRepository,
     PlanRepository,
-    ProductOfferRepository,
 )
 from project.dependency_injection import with_injection
 from project.forms import ProductSearchForm
@@ -42,15 +40,13 @@ def my_purchases(
 @login_required
 @with_injection
 def suchen(
-    query_products: use_cases.QueryProducts, offer_repository: ProductOfferRepository
+    query_products: use_cases.QueryProducts,
+    presenter: QueryProductsPresenter,
 ):
     if not user_is_member():
         return redirect(url_for("auth.zurueck"))
-
+    template_name = "member/query_products.html"
     search_form = ProductSearchForm(request.form)
-    query: Optional[str] = None
-    product_filter = use_cases.ProductFilter.by_name
-
     if request.method == "POST":
         query = search_form.data["search"] or None
         search_field = search_form.data["select"]  # Name, Beschr., Kategorie
@@ -58,11 +54,12 @@ def suchen(
             product_filter = use_cases.ProductFilter.by_name
         elif search_field == "Beschreibung":
             product_filter = use_cases.ProductFilter.by_description
-    results = query_products(query, product_filter).results
-
-    if not results:
-        flash("Keine Ergebnisse!")
-    return render_template("member/search.html", form=search_form, results=results)
+        response = query_products(query, product_filter)
+        view_model = presenter.present(response)
+        return render_template(template_name, form=search_form, view_model=view_model)
+    else:
+        view_model = presenter.get_empty_view_model()
+        return render_template(template_name, form=search_form, view_model=view_model)
 
 
 @main_member.route("/member/pay_consumer_product", methods=["GET", "POST"])

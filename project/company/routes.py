@@ -14,6 +14,7 @@ from arbeitszeit.use_cases import (
     Offer,
     PlanProposal,
 )
+from arbeitszeit_web.query_products import QueryProductsPresenter
 from project import database, error
 from project.database import (
     AccountRepository,
@@ -90,15 +91,16 @@ def arbeit(
 @main_company.route("/company/suchen", methods=["GET", "POST"])
 @login_required
 @with_injection
-def suchen(query_products: use_cases.QueryProducts):
+def suchen(
+    query_products: use_cases.QueryProducts,
+    presenter: QueryProductsPresenter,
+):
     """search products in catalog."""
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
+    template_name = "company/query_products.html"
     search_form = ProductSearchForm(request.form)
-    query: Optional[str] = None
-    product_filter = use_cases.ProductFilter.by_name
-
     if request.method == "POST":
         query = search_form.data["search"] or None
         search_field = search_form.data["select"]  # Name, Beschr., Kategorie
@@ -106,11 +108,12 @@ def suchen(query_products: use_cases.QueryProducts):
             product_filter = use_cases.ProductFilter.by_name
         elif search_field == "Beschreibung":
             product_filter = use_cases.ProductFilter.by_description
-    results = query_products(query, product_filter).results
-
-    if not results:
-        flash("Keine Ergebnisse!")
-    return render_template("company/search.html", form=search_form, results=results)
+        response = query_products(query, product_filter)
+        view_model = presenter.present(response)
+        return render_template(template_name, form=search_form, view_model=view_model)
+    else:
+        view_model = presenter.get_empty_view_model()
+        return render_template(template_name, form=search_form, view_model=view_model)
 
 
 @main_company.route("/company/kaeufe")

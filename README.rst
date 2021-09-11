@@ -29,6 +29,10 @@ Testing
 You can run the tests via by executing ``pytest`` in the root folder
 of this project.
 
+You are encouraged to use the ``./run-checks`` command before you
+submit changes in a pull pull request.  This program runs ``flake8``,
+``mypy`` and the test suite.
+
 Caveats
 =======
 
