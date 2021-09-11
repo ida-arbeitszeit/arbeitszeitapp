@@ -76,7 +76,7 @@
         </h1>
         {% if view_model.notifications %}
         <div class="box">
-            {% for notification in view_models.notifications %}
+            {% for notification in view_model.notifications %}
             <div class="notification is-danger">{{ notification.text }} </div>
             {% endfor %}
         </div>
