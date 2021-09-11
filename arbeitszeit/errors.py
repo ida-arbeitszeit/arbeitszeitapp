@@ -15,7 +15,7 @@ class WorkerNotAtCompany(Exception):
         super().__init__()
 
 
-class PlanIsExpired(Exception):
+class PlanIsInactive(Exception):
     def __init__(self, plan: Plan) -> None:
         self.plan = plan
         super().__init__()

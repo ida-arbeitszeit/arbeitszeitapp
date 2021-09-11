@@ -25,7 +25,10 @@ class SynchronizedPlanActivation:
         Grant credit to planners of plans suitable for activation.
         Set these plans as active.
         """
-        new_plans = self.plan_repository.get_plans_suitable_for_activation()
+        past_plan_activation_date = self.datetime_service.past_plan_activation_date()
+        new_plans = self.plan_repository.get_approved_plans_created_before(
+            past_plan_activation_date
+        )
 
         for plan in new_plans:
             assert plan.approved, "Plan has not been approved!"
@@ -102,7 +105,6 @@ class SynchronizedPlanActivation:
         )
         denominator = (sum_of_productive_work_per_day + sum_of_public_work_per_day) or 1
         payout_factor = numerator / denominator
-        print(payout_factor)
         return Decimal(payout_factor)
 
     def _payout_work_certificates(self, payout_factor: Decimal) -> None:
