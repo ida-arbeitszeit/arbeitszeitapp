@@ -1,11 +1,23 @@
 from datetime import datetime
+from decimal import Decimal
+from typing import Union
 
-from project.database.repositories import PlanRepository
 from arbeitszeit.entities import ProductionCosts
+from project.database.repositories import PlanRepository
 
 from ..data_generators import PlanGenerator
 from ..datetime_service import FakeDatetimeService
 from .dependency_injection import injection_test
+
+Number = Union[int, Decimal]
+
+
+def production_costs(a: Number, r: Number, p: Number) -> ProductionCosts:
+    return ProductionCosts(
+        Decimal(a),
+        Decimal(r),
+        Decimal(p),
+    )
 
 
 @injection_test
@@ -51,11 +63,11 @@ def test_sum_of_active_planned_work_calculated_correctly(
     assert plan_repository.sum_of_active_planned_work() == 0
     plan_generator.create_plan(
         activation_date=datetime.min,
-        costs=ProductionCosts(labour_cost=2, resource_cost=0, means_cost=0),
+        costs=production_costs(2, 0, 0),
     )
     plan_generator.create_plan(
         activation_date=datetime.min,
-        costs=ProductionCosts(labour_cost=3, resource_cost=0, means_cost=0),
+        costs=production_costs(3, 0, 0),
     )
     assert plan_repository.sum_of_active_planned_work() == 5
 
@@ -68,11 +80,11 @@ def test_sum_of_active_planned_resources_calculated_correctly(
     assert plan_repository.sum_of_active_planned_resources() == 0
     plan_generator.create_plan(
         activation_date=datetime.min,
-        costs=ProductionCosts(labour_cost=0, resource_cost=2, means_cost=0),
+        costs=production_costs(0, 2, 0),
     )
     plan_generator.create_plan(
         activation_date=datetime.min,
-        costs=ProductionCosts(labour_cost=0, resource_cost=3, means_cost=0),
+        costs=production_costs(0, 3, 0),
     )
     assert plan_repository.sum_of_active_planned_resources() == 5
 
@@ -85,11 +97,11 @@ def test_sum_of_active_planned_means_calculated_correctly(
     assert plan_repository.sum_of_active_planned_means() == 0
     plan_generator.create_plan(
         activation_date=datetime.min,
-        costs=ProductionCosts(labour_cost=0, resource_cost=0, means_cost=2),
+        costs=production_costs(0, 0, 2),
     )
     plan_generator.create_plan(
         activation_date=datetime.min,
-        costs=ProductionCosts(labour_cost=0, resource_cost=0, means_cost=3),
+        costs=production_costs(0, 0, 3),
     )
     assert plan_repository.sum_of_active_planned_means() == 5
 
