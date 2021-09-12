@@ -361,7 +361,6 @@ class PlanRepository(interfaces.PlanRepository):
             approval_reason=None,
             approve=lambda _1, _2, _3: None,
             expired=False,
-            renewed=False,
             expiration_relative=None,
             expiration_date=None,
             last_certificate_payout=None,
@@ -382,9 +381,6 @@ class PlanRepository(interfaces.PlanRepository):
     def set_plan_as_expired(self, plan: Plan) -> None:
         plan.expired = True
         plan.is_active = False
-
-    def renew_plan(self, plan: Plan) -> None:
-        plan.renewed = True
 
     def set_expiration_date(self, plan: Plan, expiration_date: datetime) -> None:
         plan.expiration_date = expiration_date

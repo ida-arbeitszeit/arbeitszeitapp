@@ -86,7 +86,6 @@ class Plan(UserMixin, db.Model):
     is_active = db.Column(db.Boolean, nullable=False, default=False)
     activation_date = db.Column(db.DateTime, nullable=True)
     expired = db.Column(db.Boolean, nullable=False, default=False)
-    renewed = db.Column(db.Boolean, nullable=False, default=False)
     last_certificate_payout = db.Column(db.DateTime, nullable=True)
     expiration_date = db.Column(db.DateTime, nullable=True)
     expiration_relative = db.Column(db.Integer, nullable=True)

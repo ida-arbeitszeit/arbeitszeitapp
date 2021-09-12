@@ -69,10 +69,6 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def renew_plan(self, plan: Plan) -> None:
-        pass
-
-    @abstractmethod
     def set_expiration_relative(self, plan: Plan, days: int) -> None:
         pass
 

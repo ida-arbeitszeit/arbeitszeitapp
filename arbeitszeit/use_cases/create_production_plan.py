@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from uuid import UUID
+from typing import Optional
 
 from injector import inject
 
@@ -32,9 +33,16 @@ class CreatePlan:
     company_repository: CompanyRepository
 
     def __call__(
-        self, planner: UUID, plan_proposal: PlanProposal
+        self,
+        planner: UUID,
+        plan_proposal: PlanProposal,
+        original_plan_id: Optional[UUID],
     ) -> CreatePlanResponse:
+        if original_plan_id:
+            self.plan_repository.delete_plan(original_plan_id)
+
         plan = self.plan_repository.create_plan(
+            id=original_plan_id or None,
             planner=self.company_repository.get_by_id(planner),
             costs=plan_proposal.costs,
             product_name=plan_proposal.product_name,

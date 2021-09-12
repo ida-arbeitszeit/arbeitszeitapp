@@ -148,15 +148,9 @@
                 <td>{{ plan.prd_amount }}</td>
                 <td>{{ plan.price_per_unit() }} Std.</td>
                 <td>{{ plan.plan_creation_date.strftime("%d.%m.%y") }}</td>
-
-                {% if plan.renewed %}
-                <td><a><i class="{{ 'fas fa-redo not-active' }}"></i></a>
-                </td>
-                {% else %}
                 <td><a href="{{ url_for('main_company.create_plan', original_plan_id=plan.id) }}"><i
                             class="{{ 'fas fa-redo' }}"></i></a>
                 </td>
-                {% endif %}
                 <td><a href="{{ url_for('main_company.delete_plan', plan_id=plan.id) }}"><i
                             class="fas fa-trash"></i></a></td>
             </tr>

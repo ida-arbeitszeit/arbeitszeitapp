@@ -132,7 +132,6 @@ class Plan:
         approve: Callable[[bool, str, datetime], None],
         is_active: bool,
         expired: bool,
-        renewed: bool,
         activation_date: Optional[datetime],
         expiration_relative: Optional[int],
         expiration_date: Optional[datetime],
@@ -154,7 +153,6 @@ class Plan:
         self._approve_call = approve
         self.is_active = is_active
         self.expired = expired
-        self.renewed = renewed
         self.expiration_relative = expiration_relative
         self.expiration_date = expiration_date
         self.activation_date = activation_date

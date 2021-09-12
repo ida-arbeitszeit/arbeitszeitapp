@@ -165,8 +165,10 @@ def create_plan(
             if plan_data["productive_or_public"] == "public"
             else False,
         )
-        new_plan = create_plan_from_proposal(current_user.id, proposal)
-        approval_response = seek_approval(new_plan.plan_id, original_plan_uuid)
+        new_plan = create_plan_from_proposal(
+            current_user.id, proposal, original_plan_id
+        )
+        approval_response = seek_approval(new_plan.plan_id)
         database.commit_changes()
 
         if approval_response.is_approved:

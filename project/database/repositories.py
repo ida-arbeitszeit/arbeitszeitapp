@@ -479,7 +479,6 @@ class PlanRepository(repositories.PlanRepository):
             ),
             is_active=plan.is_active,
             expired=plan.expired,
-            renewed=plan.renewed,
             expiration_relative=plan.expiration_relative,
             expiration_date=plan.expiration_date,
             last_certificate_payout=plan.last_certificate_payout,
@@ -498,6 +497,7 @@ class PlanRepository(repositories.PlanRepository):
 
     def create_plan(
         self,
+        id: Optional[UUID],
         planner: entities.Company,
         costs: entities.ProductionCosts,
         product_name: str,
@@ -509,6 +509,7 @@ class PlanRepository(repositories.PlanRepository):
         creation_timestamp: datetime,
     ) -> entities.Plan:
         plan = Plan(
+            id=id or None,
             plan_creation_date=creation_timestamp,
             planner=self.company_repository.object_to_orm(planner).id,
             costs_p=costs.means_cost,
@@ -546,13 +547,6 @@ class PlanRepository(repositories.PlanRepository):
         plan_orm = self.object_to_orm(plan)
         plan_orm.expired = True
         plan_orm.is_active = False
-        self.db.session.commit()
-
-    def renew_plan(self, plan: entities.Plan) -> None:
-        plan.renewed = True
-
-        plan_orm = self.object_to_orm(plan)
-        plan_orm.renewed = True
         self.db.session.commit()
 
     def set_expiration_date(

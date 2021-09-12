@@ -9,6 +9,7 @@ from arbeitszeit.repositories import PlanRepository
 
 @dataclass
 class PlanSummaryResponse:
+    id: UUID
     product_name: str
     description: str
     timeframe: int
@@ -28,6 +29,7 @@ class GetPlanSummary:
     def __call__(self, plan_id: UUID) -> PlanSummaryResponse:
         plan = self.plan_repository.get_plan_by_id(plan_id)
         return PlanSummaryResponse(
+            id=plan_id,
             product_name=plan.prd_name,
             description=plan.description,
             timeframe=plan.timeframe,
