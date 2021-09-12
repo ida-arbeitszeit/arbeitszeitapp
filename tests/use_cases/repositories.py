@@ -94,9 +94,12 @@ class TransactionRepository(interfaces.TransactionRepository):
 @singleton
 class OfferRepository(interfaces.OfferRepository):
     @inject
-    def __init__(self, plan_repository: PlanRepository) -> None:
+    def __init__(
+        self, plan_repository: PlanRepository, company_repository: CompanyRepository
+    ) -> None:
         self.offers: List[ProductOffer] = []
         self.plan_repository = plan_repository
+        self.company_repository = company_repository
 
     def all_active_offers(self) -> Iterator[ProductOffer]:
         yield from self.offers
@@ -143,6 +146,12 @@ class OfferRepository(interfaces.OfferRepository):
         )
         self.offers.append(offer)
         return offer
+
+    def get_seller(self, offer_id: uuid.UUID) -> Company:
+        for offer in self.offers:
+            if offer.id == offer_id:
+                seller_id = offer.seller
+        return self.company_repository.get_by_id(seller_id)
 
 
 @singleton

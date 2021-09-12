@@ -446,6 +446,11 @@ class ProductOfferRepository(repositories.OfferRepository):
     def __len__(self) -> int:
         return len(Offer.query.all())
 
+    def get_seller(self, offer_id: UUID) -> entities.Company:
+        offer_orm = Offer.query.filter_by(id=str(offer_id)).first()
+        seller_orm = offer_orm.seller
+        return self.company_repository.object_from_orm(seller_orm)
+
 
 @inject
 @dataclass

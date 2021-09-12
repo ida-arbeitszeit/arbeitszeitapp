@@ -204,6 +204,10 @@ class OfferRepository(ABC):
     def count_active_offers_without_plan_duplicates(self) -> int:
         pass
 
+    @abstractmethod
+    def get_seller(self, offer_id: UUID) -> Company:
+        pass
+
 
 class MemberRepository(ABC):
     @abstractmethod

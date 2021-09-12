@@ -54,7 +54,7 @@ class QueryProducts:
         )
 
     def _offer_to_response_model(self, offer: ProductOffer) -> QueriedProduct:
-        seller = self.company_repository.get_by_id(offer.seller)
+        seller = self.offer_repository.get_seller(offer.id)
         return QueriedProduct(
             offer_id=offer.id,
             seller_name=seller.name,
