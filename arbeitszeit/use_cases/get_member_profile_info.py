@@ -19,9 +19,12 @@ class Workplace:
 
 
 @dataclass
-class MemberProfileInfo:
+class GetMemberProfileInfoResponse:
     workplaces: List[Workplace]
     account_balance: Decimal
+    name: str
+    email: str
+    id: UUID
 
 
 @inject
@@ -31,7 +34,7 @@ class GetMemberProfileInfo:
     account_repository: AccountRepository
     member_repository: MemberRepository
 
-    def __call__(self, member: UUID) -> MemberProfileInfo:
+    def __call__(self, member: UUID) -> GetMemberProfileInfoResponse:
         _member = self.member_repository.get_by_id(member)
         workplaces = [
             Workplace(
@@ -42,9 +45,12 @@ class GetMemberProfileInfo:
                 member
             )
         ]
-        return MemberProfileInfo(
+        return GetMemberProfileInfoResponse(
             workplaces=workplaces,
             account_balance=self.account_repository.get_account_balance(
                 _member.account
             ),
+            name=_member.name,
+            email=_member.email,
+            id=_member.id,
         )

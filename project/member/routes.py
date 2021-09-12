@@ -2,6 +2,7 @@ from flask import Blueprint, flash, redirect, render_template, request, session,
 from flask_login import current_user, login_required
 
 from arbeitszeit import errors, use_cases
+from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
 from arbeitszeit_web.query_products import QueryProductsPresenter
 from project import database
 from project.database import (
@@ -98,16 +99,15 @@ def pay_consumer_product(
 @with_injection
 def profile(
     get_member_profile: use_cases.GetMemberProfileInfo,
+    presenter: GetMemberProfileInfoPresenter,
 ):
     if not user_is_member():
         return redirect(url_for("auth.zurueck"))
-
-    member = current_user.id
-    member_profile = get_member_profile(member)
+    member_profile = get_member_profile(current_user.id)
+    view_model = presenter.present(member_profile)
     return render_template(
         "member/profile.html",
-        workplaces=member_profile.workplaces,
-        account_balance=member_profile.account_balance,
+        view_model=view_model,
     )
 
 
