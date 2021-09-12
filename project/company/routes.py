@@ -15,6 +15,7 @@ from arbeitszeit.use_cases import (
     PlanProposal,
 )
 from arbeitszeit_web.create_offer import CreateOfferPresenter
+from arbeitszeit_web.delete_plan import DeletePlanPresenter
 from arbeitszeit_web.query_products import QueryProductsPresenter
 from project import database, error
 from project.database import (
@@ -223,13 +224,16 @@ def my_plans(
 @main_company.route("/company/delete_plan/<uuid:plan_id>", methods=["GET", "POST"])
 @login_required
 @with_injection
-def delete_plan(plan_id: UUID, delete_offer: DeletePlan):
+def delete_plan(
+    plan_id: UUID, delete_offer: DeletePlan, presenter: DeletePlanPresenter
+):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
     response = delete_offer(plan_id)
-    if response.is_success:
-        flash(f"Löschen des Plans {response.plan_id} erfolgreich.")
+    view_model = presenter.present(response)
+    for notification in view_model.notifications:
+        flash(notification)
     return redirect(url_for("main_company.my_plans"))
 
 
@@ -309,12 +313,7 @@ def transfer_to_worker(
         company = company_repository.get_by_id(current_user.id)
         try:
             worker = member_repository.get_member_by_id(request.form["member_id"])
-        except error.MemberNotFound:
-            flash("Mitglied existiert nicht.")
-            redirect(url_for("main_company.transfer_to_work"))
-        amount = Decimal(request.form["amount"])
-
-        try:
+            amount = Decimal(request.form["amount"])
             send_work_certificates_to_worker(
                 company,
                 worker,
@@ -322,8 +321,11 @@ def transfer_to_worker(
             )
             database.commit_changes()
             flash("Erfolgreich überwiesen.")
+
         except errors.WorkerNotAtCompany:
             flash("Mitglied ist nicht in diesem Betrieb beschäftigt.")
+        except error.MemberNotFound:
+            flash("Mitglied existiert nicht.")
 
     return render_template("company/transfer_to_worker.html")
 
