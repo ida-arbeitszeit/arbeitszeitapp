@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from decimal import Decimal
 from uuid import UUID
 
 from injector import inject
@@ -12,6 +13,8 @@ class CreateOfferRequest:
     name: str
     description: str
     plan_id: UUID
+    seller: UUID
+    price_per_unit: Decimal
 
 
 @dataclass
@@ -28,12 +31,13 @@ class CreateOffer:
     datetime_service: DatetimeService
 
     def __call__(self, offer: CreateOfferRequest) -> CreateOfferResponse:
-        plan = self.plan_repository.get_plan_by_id(offer.plan_id)
         self.offer_repository.create_offer(
-            plan,
+            offer.plan_id,
             self.datetime_service.now(),
             offer.name,
             offer.description,
+            offer.seller,
+            offer.price_per_unit,
         )
         return CreateOfferResponse(
             name=offer.name,

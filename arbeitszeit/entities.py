@@ -195,14 +195,18 @@ class ProductOffer:
         deactivate_offer_in_db: Callable[[], None],
         active: bool,
         description: str,
-        plan: Plan,
+        plan_id: UUID,
+        seller: UUID,
+        price_per_unit: Decimal,
     ) -> None:
         self._id = id
         self.name = name
         self._deactivate = deactivate_offer_in_db
         self.active = active
         self.description = description
-        self.plan = plan
+        self.plan_id = plan_id
+        self.seller = seller
+        self.price_per_unit = price_per_unit
 
     def deactivate(self) -> None:
         self.active = False

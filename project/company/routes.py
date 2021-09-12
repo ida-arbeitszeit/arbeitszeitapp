@@ -27,7 +27,7 @@ from project.database import (
 )
 from project.dependency_injection import with_injection
 from project.forms import ProductSearchForm
-from project.models import Company, Plan
+from project.models import Plan
 
 main_company = Blueprint(
     "main_company", __name__, template_folder="templates", static_folder="static"
@@ -166,7 +166,7 @@ def create_plan(
             else False,
         )
         new_plan = create_plan_from_proposal(
-            current_user.id, proposal, original_plan_id
+            current_user.id, proposal, original_plan_uuid
         )
         approval_response = seek_approval(new_plan.plan_id)
         database.commit_changes()
@@ -237,19 +237,26 @@ def delete_plan(plan_id: UUID, delete_offer: DeletePlan):
 @login_required
 @with_injection
 def create_offer(
-    plan_id: UUID, create_offer: CreateOffer, presenter: CreateOfferPresenter
+    plan_id: UUID,
+    create_offer: CreateOffer,
+    presenter: CreateOfferPresenter,
+    plan_repository: PlanRepository,
 ):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
     if request.method == "POST":  # create offer
+        plan_id = request.form["plan_id"]
         name = request.form["name"]
         description = request.form["description"]
+        price_per_unit = request.form["price_per_unit"]
 
         offer = CreateOfferRequest(
             name=name,
             description=description,
             plan_id=plan_id,
+            seller=current_user.id,
+            price_per_unit=price_per_unit,
         )
         use_case_response = create_offer(offer)
         view_model = presenter.present(use_case_response)
@@ -257,7 +264,8 @@ def create_offer(
             "company/create_offer_in_app.html", view_model=view_model
         )
 
-    plan = Plan.query.filter_by(id=str(plan_id)).first()
+    plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
+    plan = plan_repository.object_from_orm(plan_orm) if plan_orm else None
     return render_template("company/create_offer.html", plan=plan)
 
 
@@ -372,13 +380,10 @@ def my_offers(offer_repository: ProductOfferRepository):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
-    my_company = Company.query.filter_by(id=current_user.id).first()
-    my_plans = my_company.plans.all()
     my_offers = []
-    for plan in my_plans:
-        active_offers = plan.offers.filter_by(active=True).all()
-        for offer in active_offers:
-            my_offers.append(offer)
+    active_offers = current_user.offers.filter_by(active=True).all()
+    for offer in active_offers:
+        my_offers.append(offer)
     my_offers = [offer_repository.object_from_orm(offer) for offer in my_offers]
 
     return render_template("company/my_offers.html", offers=my_offers)

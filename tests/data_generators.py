@@ -45,6 +45,7 @@ from tests.datetime_service import FakeDatetimeService
 @dataclass
 class OfferGenerator:
     plan_generator: PlanGenerator
+    company_generator: CompanyGenerator
     _create_offer: CreateOffer
 
     def create_offer(
@@ -52,15 +53,19 @@ class OfferGenerator:
         *,
         name="Product name",
         description="",
-        plan=None,
+        plan_id=uuid4(),
+        seller=None,
+        price_per_unit=3,
     ) -> CreateOfferResponse:
-        if plan is None:
-            plan = self.plan_generator.create_plan()
+        if seller is None:
+            seller = self.company_generator.create_company().id
         return self._create_offer(
             CreateOfferRequest(
                 name=name,
                 description=description,
-                plan_id=plan.id,
+                plan_id=plan_id,
+                seller=seller,
+                price_per_unit=price_per_unit,
             )
         )
 
@@ -155,6 +160,7 @@ class PlanGenerator:
     def create_plan(
         self,
         *,
+        id=None,
         plan_creation_date=None,
         planner=None,
         timeframe=None,
@@ -177,6 +183,7 @@ class PlanGenerator:
         if timeframe is None:
             timeframe = 14
         plan = self.plan_repository.create_plan(
+            id=id,
             planner=planner,
             costs=costs,
             product_name=product_name,
@@ -188,7 +195,7 @@ class PlanGenerator:
             creation_timestamp=plan_creation_date,
         )
         if approved:
-            self.seek_approval(plan.id, None)
+            self.seek_approval(plan.id)
         if activation_date:
             self.plan_repository.activate_plan(plan, activation_date)
         return plan

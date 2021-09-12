@@ -56,6 +56,7 @@ class Company(UserMixin, db.Model):
     plans = db.relationship("Plan", lazy="dynamic", backref="company")
     accounts = db.relationship("Account", lazy="dynamic", backref="company")
     purchases = db.relationship("Purchase", lazy="dynamic")
+    offers = db.relationship("Offer", lazy="dynamic", backref="seller")
 
     def __repr__(self):
         return "<Company(email='%s', name='%s')>" % (
@@ -89,8 +90,6 @@ class Plan(UserMixin, db.Model):
     last_certificate_payout = db.Column(db.DateTime, nullable=True)
     expiration_date = db.Column(db.DateTime, nullable=True)
     expiration_relative = db.Column(db.Integer, nullable=True)
-
-    offers = db.relationship("Offer", lazy="dynamic", backref="plan")
 
 
 class AccountTypes(Enum):
@@ -141,11 +140,13 @@ class Transaction(UserMixin, db.Model):
 
 class Offer(UserMixin, db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
-    plan_id = db.Column(db.String, db.ForeignKey("plan.id"), nullable=False)
+    plan_id = db.Column(db.String, nullable=False)
     cr_date = db.Column(db.DateTime, nullable=False)
     name = db.Column(db.String(1000), nullable=False)
     description = db.Column(db.String(5000), nullable=False)
     active = db.Column(db.Boolean, nullable=False, default=True)
+    company = db.Column(db.String, db.ForeignKey("company.id"), nullable=True)
+    price_per_unit = db.Column(db.Numeric(), nullable=False)
 
 
 class PurposesOfPurchases(Enum):
@@ -157,7 +158,7 @@ class PurposesOfPurchases(Enum):
 class Purchase(UserMixin, db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
     purchase_date = db.Column(db.DateTime, nullable=False)
-    plan_id = db.Column(db.String, db.ForeignKey("plan.id"), nullable=False)
+    plan_id = db.Column(db.String, nullable=False)
     type_member = db.Column(db.Boolean, nullable=False)
     company = db.Column(db.String, db.ForeignKey("company.id"), nullable=True)
     member = db.Column(db.String, db.ForeignKey("member.id"), nullable=True)

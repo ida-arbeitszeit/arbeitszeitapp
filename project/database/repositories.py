@@ -373,14 +373,15 @@ class ProductOfferRepository(repositories.OfferRepository):
         return Offer.query.get(str(product_offer.id))
 
     def object_from_orm(self, offer_orm: Offer) -> entities.ProductOffer:
-        plan = self.plan_repository.object_from_orm(offer_orm.plan)
         return entities.ProductOffer(
             id=UUID(offer_orm.id),
             name=offer_orm.name,
             deactivate_offer_in_db=lambda: setattr(offer_orm, "active", False),
             active=offer_orm.active,
             description=offer_orm.description,
-            plan=plan,
+            plan_id=offer_orm.plan_id,
+            seller=offer_orm.seller,
+            price_per_unit=offer_orm.price_per_unit,
         )
 
     def get_by_id(self, id: UUID) -> entities.ProductOffer:
@@ -423,16 +424,20 @@ class ProductOfferRepository(repositories.OfferRepository):
 
     def create_offer(
         self,
-        plan: entities.Plan,
+        plan_id: UUID,
         creation_datetime: datetime,
         name: str,
         description: str,
+        seller: UUID,
+        price_per_unit: Decimal,
     ) -> entities.ProductOffer:
         offer = Offer(
-            plan_id=self.plan_repository.object_to_orm(plan).id,
+            plan_id=plan_id,
             cr_date=creation_datetime,
             name=name,
             description=description,
+            company=seller,
+            price_per_unit=price_per_unit,
         )
         self.db.session.add(offer)
         self.db.session.commit()

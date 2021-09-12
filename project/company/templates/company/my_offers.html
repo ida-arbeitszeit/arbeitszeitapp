@@ -30,17 +30,17 @@
         <th>Produktname</th>
         <th>Beschreibung</th>
         <th>Stückpreis</th>
-        <th><abbr title="Löschen">Del.</abbr></th>
+        <th>Del.</th>
       </tr>
     </thead>
     <tbody>
       {% for offer in offers %}
       <tr>
-        <td>{{ offer.plan.id }}</td>
+        <td>{{ offer.plan_id }}</td>
         <td>{{ offer.name }}</td>
         <td>{{ offer.description }}</td>
-        <td>{{ offer.plan.price_per_unit() }} Std.</td>
-        <td><a href="{{ url_for('main_company.delete_offer', id=offer.id) }}"><u>Del.</u></a></td>
+        <td>{{ offer.price_per_unit }} Std.</td>
+        <td><a href="{{ url_for('main_company.delete_offer', id=offer.id) }}"><i class="fas fa-trash"></i></a></td>
         </td>
       </tr>
       {% endfor %}

@@ -9,7 +9,7 @@ from uuid import UUID
 from injector import inject
 
 from arbeitszeit.entities import ProductOffer
-from arbeitszeit.repositories import OfferRepository
+from arbeitszeit.repositories import CompanyRepository, OfferRepository
 
 
 class ProductFilter(enum.Enum):
@@ -31,13 +31,13 @@ class QueriedProduct:
     product_name: str
     product_description: str
     price_per_unit: Decimal
-    is_public_service: bool
 
 
 @inject
 @dataclass
 class QueryProducts:
     offer_repository: OfferRepository
+    company_repository: CompanyRepository
 
     def __call__(
         self, query: Optional[str], filter_by: ProductFilter
@@ -54,13 +54,13 @@ class QueryProducts:
         )
 
     def _offer_to_response_model(self, offer: ProductOffer) -> QueriedProduct:
+        seller = self.company_repository.get_by_id(offer.seller)
         return QueriedProduct(
             offer_id=offer.id,
-            seller_name=offer.plan.planner.name,
-            seller_email=offer.plan.planner.email,
-            plan_id=offer.plan.id,
+            seller_name=seller.name,
+            seller_email=seller.email,
+            plan_id=offer.plan_id,
             product_name=offer.name,
             product_description=offer.description,
-            price_per_unit=offer.plan.price_per_unit(),
-            is_public_service=offer.plan.is_public_service,
+            price_per_unit=offer.price_per_unit,
         )

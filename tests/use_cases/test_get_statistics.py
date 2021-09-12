@@ -239,8 +239,8 @@ def test_counting_of_marketplace_products(
     plan_generator: PlanGenerator,
     offer_generator: OfferGenerator,
 ):
-    offer_generator.create_offer(plan=plan_generator.create_plan())
-    offer_generator.create_offer(plan=plan_generator.create_plan())
+    offer_generator.create_offer(plan_id=plan_generator.create_plan().id)
+    offer_generator.create_offer(plan_id=plan_generator.create_plan().id)
     stats = get_statistics()
     assert stats.products_on_marketplace_count == 2
 
@@ -252,7 +252,7 @@ def test_that_plan_duplicates_are_ignored_when_counting_marketplace_products(
     offer_generator: OfferGenerator,
 ):
     plan = plan_generator.create_plan()
-    offer_generator.create_offer(plan=plan)
-    offer_generator.create_offer(plan=plan)
+    offer_generator.create_offer(plan_id=plan.id)
+    offer_generator.create_offer(plan_id=plan.id)
     stats = get_statistics()
     assert stats.products_on_marketplace_count == 1

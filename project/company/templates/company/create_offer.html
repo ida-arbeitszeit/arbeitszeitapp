@@ -24,8 +24,7 @@
             <p>
                 Du kannst dieses Produkt übrigens auch woanders anbieten.
                 Die Käufer müssen dann die Bezahlung manuell in der App vornehmen.
-                Dazu brauchen sie die Plan-ID (<b>{{ plan.id
-                    }}</b>).
+                Dazu brauchen sie nur die Plan-ID.
             </p>
 
         </div>
@@ -37,15 +36,33 @@
 <form method="POST">
     <div class="field">
         <div class="control">
+            <label for="name">Plan-ID</label>
+            <input class="input is-large" , type="text" , name="plan_id" , value="{{ plan.id if plan else '' }}" ,
+                required>
+        </div>
+    </div>
+    <div class="field">
+        <div class="control">
             <label for="name">Name des Produkts</label>
-            <input class="input is-large" , type="text" , name="name" , value="{{ plan.prd_name }}" , required>
+            <input class="input is-large" , type="text" , name="name" , value="{{ plan.prd_name if plan else '' }}" ,
+                required>
         </div>
     </div>
     <div class="block"></div>
     <div class="field">
         <div class="control">
             <label for="description">Beschreibung</label>
-            <textarea class="textarea is-large" , name="description" , required>{{ plan.description }}</textarea>
+            <textarea class="textarea is-large" , name="description" ,
+                required>{{ plan.description if plan else '' }}</textarea>
+
+        </div>
+    </div>
+    <div class="block"></div>
+    <div class="field">
+        <div class="control">
+            <label for="description">Preis pro Einheit</label>
+            <input class="input is-large" , type="number" , name="price_per_unit" value={{ plan.price_per_unit() if plan
+                else None }} required>
 
         </div>
     </div>

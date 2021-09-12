@@ -16,7 +16,6 @@ class ResultTableRow:
     seller_name: str
     product_description: str
     price_per_unit: str
-    is_public_service: str
     contact_email: str
 
 
@@ -52,7 +51,6 @@ class QueryProductsPresenter:
                         seller_name=result.seller_name,
                         product_description=result.product_description,
                         price_per_unit=f"{result.price_per_unit} Std.",
-                        is_public_service="Ja" if result.is_public_service else "Nein",
                         contact_email=f"mailto:{result.seller_email}",
                     )
                     for result in response.results

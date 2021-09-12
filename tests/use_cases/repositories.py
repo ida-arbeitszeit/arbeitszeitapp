@@ -5,7 +5,7 @@ from collections import defaultdict
 from datetime import datetime
 from decimal import Decimal
 from statistics import StatisticsError, mean
-from typing import Dict, Iterator, List, Set, Union
+from typing import Dict, Iterator, List, Optional, Set, Union
 
 from injector import inject, singleton
 
@@ -105,11 +105,11 @@ class OfferRepository(interfaces.OfferRepository):
         offers = []
         plans_associated = []
         for offer in self.offers:
-            if offer.plan in plans_associated or not offer.active:
+            if offer.plan_id in plans_associated or not offer.active:
                 pass
             else:
                 offers.append(offer)
-                plans_associated.append(offer.plan)
+                plans_associated.append(offer.plan_id)
         return len(offers)
 
     def query_offers_by_name(self, query: str) -> Iterator[ProductOffer]:
@@ -124,10 +124,12 @@ class OfferRepository(interfaces.OfferRepository):
 
     def create_offer(
         self,
-        plan: Plan,
+        plan_id: uuid.UUID,
         creation_datetime: datetime,
         name: str,
         description: str,
+        seller: uuid.UUID,
+        price_per_unit: Decimal,
     ) -> ProductOffer:
         offer = ProductOffer(
             id=uuid.uuid4(),
@@ -135,7 +137,9 @@ class OfferRepository(interfaces.OfferRepository):
             deactivate_offer_in_db=lambda: None,
             active=True,
             description=description,
-            plan=plan,
+            plan_id=plan_id,
+            seller=seller,
+            price_per_unit=price_per_unit,
         )
         self.offers.append(offer)
         return offer
@@ -333,6 +337,7 @@ class PlanRepository(interfaces.PlanRepository):
 
     def create_plan(
         self,
+        id: Optional[uuid.UUID],
         planner: Company,
         costs: ProductionCosts,
         product_name: str,
