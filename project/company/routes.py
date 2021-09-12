@@ -15,6 +15,7 @@ from arbeitszeit.use_cases import (
     PlanProposal,
 )
 from arbeitszeit_web.create_offer import CreateOfferPresenter
+from arbeitszeit_web.delete_plan import DeletePlanPresenter
 from arbeitszeit_web.query_products import QueryProductsPresenter
 from project import database, error
 from project.database import (
@@ -221,13 +222,16 @@ def my_plans(
 @main_company.route("/company/delete_plan/<uuid:plan_id>", methods=["GET", "POST"])
 @login_required
 @with_injection
-def delete_plan(plan_id: UUID, delete_offer: DeletePlan):
+def delete_plan(
+    plan_id: UUID, delete_offer: DeletePlan, presenter: DeletePlanPresenter
+):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
     response = delete_offer(plan_id)
-    if response.is_success:
-        flash(f"Löschen des Plans {response.plan_id} erfolgreich.")
+    view_model = presenter.present(response)
+    for notification in view_model.notifications:
+        flash(notification)
     return redirect(url_for("main_company.my_plans"))
 
 
