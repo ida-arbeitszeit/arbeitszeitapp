@@ -303,12 +303,7 @@ def transfer_to_worker(
         company = company_repository.get_by_id(current_user.id)
         try:
             worker = member_repository.get_member_by_id(request.form["member_id"])
-        except error.MemberNotFound:
-            flash("Mitglied existiert nicht.")
-            redirect(url_for("main_company.transfer_to_work"))
-        amount = Decimal(request.form["amount"])
-
-        try:
+            amount = Decimal(request.form["amount"])
             send_work_certificates_to_worker(
                 company,
                 worker,
@@ -316,8 +311,11 @@ def transfer_to_worker(
             )
             database.commit_changes()
             flash("Erfolgreich überwiesen.")
+
         except errors.WorkerNotAtCompany:
             flash("Mitglied ist nicht in diesem Betrieb beschäftigt.")
+        except error.MemberNotFound:
+            flash("Mitglied existiert nicht.")
 
     return render_template("company/transfer_to_worker.html")
 
