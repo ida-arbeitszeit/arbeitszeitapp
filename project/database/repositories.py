@@ -432,11 +432,11 @@ class ProductOfferRepository(repositories.OfferRepository):
         price_per_unit: Decimal,
     ) -> entities.ProductOffer:
         offer = Offer(
-            plan_id=plan_id,
+            plan_id=str(plan_id),
             cr_date=creation_datetime,
             name=name,
             description=description,
-            company=seller,
+            company=str(seller),
             price_per_unit=price_per_unit,
         )
         self.db.session.add(offer)
@@ -514,7 +514,7 @@ class PlanRepository(repositories.PlanRepository):
         creation_timestamp: datetime,
     ) -> entities.Plan:
         plan = Plan(
-            id=id or None,
+            id=str(id) if id else None,
             plan_creation_date=creation_timestamp,
             planner=self.company_repository.object_to_orm(planner).id,
             costs_p=costs.means_cost,

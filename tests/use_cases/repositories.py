@@ -349,7 +349,7 @@ class PlanRepository(interfaces.PlanRepository):
         creation_timestamp: datetime,
     ) -> Plan:
         plan = Plan(
-            id=uuid.uuid4(),
+            id=id if id else uuid.uuid4(),
             plan_creation_date=creation_timestamp,
             planner=planner,
             production_costs=costs,
@@ -490,4 +490,5 @@ class PlanRepository(interfaces.PlanRepository):
                 yield plan
 
     def delete_plan(self, plan_id: uuid.UUID) -> None:
+        assert plan_id in self.plans.keys(), "Plan not found"
         del self.plans[plan_id]
