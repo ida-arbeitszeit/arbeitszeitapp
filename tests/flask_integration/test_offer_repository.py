@@ -13,7 +13,7 @@ def tests_offers_can_be_created(
 ):
     assert not len(offer_repository)
     offer_repository.create_offer(
-        plan_id=uuid4(),
+        plan_id=str(uuid4()),
         creation_datetime=datetime.now(),
         name="testname",
         description="testdescription",

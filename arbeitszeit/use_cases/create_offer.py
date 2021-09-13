@@ -12,7 +12,7 @@ from arbeitszeit.repositories import OfferRepository, PlanRepository
 class CreateOfferRequest:
     name: str
     description: str
-    plan_id: UUID
+    plan_id: str
     seller: UUID
     price_per_unit: Decimal
 

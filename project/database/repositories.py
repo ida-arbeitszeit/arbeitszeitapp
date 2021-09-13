@@ -424,7 +424,7 @@ class ProductOfferRepository(repositories.OfferRepository):
 
     def create_offer(
         self,
-        plan_id: UUID,
+        plan_id: str,
         creation_datetime: datetime,
         name: str,
         description: str,
@@ -432,7 +432,7 @@ class ProductOfferRepository(repositories.OfferRepository):
         price_per_unit: Decimal,
     ) -> entities.ProductOffer:
         offer = Offer(
-            plan_id=str(plan_id),
+            plan_id=plan_id,
             cr_date=creation_datetime,
             name=name,
             description=description,

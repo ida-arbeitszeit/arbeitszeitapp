@@ -27,7 +27,7 @@ class QueriedProduct:
     offer_id: UUID
     seller_name: str
     seller_email: str
-    plan_id: UUID
+    plan_id: str
     product_name: str
     product_description: str
     price_per_unit: Decimal

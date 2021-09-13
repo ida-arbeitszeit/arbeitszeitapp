@@ -191,7 +191,7 @@ class OfferRepository(ABC):
     @abstractmethod
     def create_offer(
         self,
-        plan_id: UUID,
+        plan_id: str,
         creation_datetime: datetime,
         name: str,
         description: str,

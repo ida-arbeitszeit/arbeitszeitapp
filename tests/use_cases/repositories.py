@@ -127,7 +127,7 @@ class OfferRepository(interfaces.OfferRepository):
 
     def create_offer(
         self,
-        plan_id: uuid.UUID,
+        plan_id: str,
         creation_datetime: datetime,
         name: str,
         description: str,

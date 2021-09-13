@@ -53,7 +53,7 @@ class OfferGenerator:
         *,
         name="Product name",
         description="",
-        plan_id=uuid4(),
+        plan_id=str(uuid4()),
         seller=None,
         price_per_unit=3,
     ) -> CreateOfferResponse:

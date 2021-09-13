@@ -14,7 +14,7 @@ def test_that_create_offer_creates_an_offer(
     offer_request = CreateOfferRequest(
         name="testname",
         description="offer for test",
-        plan_id=uuid.uuid4(),
+        plan_id=str(uuid.uuid4()),
         seller=uuid.uuid4(),
         price_per_unit=Decimal(5),
     )

@@ -224,24 +224,22 @@ def my_plans(
 @main_company.route("/company/delete_plan/<uuid:plan_id>", methods=["GET", "POST"])
 @login_required
 @with_injection
-def delete_plan(
-    plan_id: UUID, delete_offer: DeletePlan, presenter: DeletePlanPresenter
-):
+def delete_plan(plan_id: UUID, delete_plan: DeletePlan, presenter: DeletePlanPresenter):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
-    response = delete_offer(plan_id)
+    response = delete_plan(plan_id)
     view_model = presenter.present(response)
     for notification in view_model.notifications:
         flash(notification)
     return redirect(url_for("main_company.my_plans"))
 
 
-@main_company.route("/company/create_offer/<uuid:plan_id>", methods=["GET", "POST"])
+@main_company.route("/company/create_offer/<string:plan_id>", methods=["GET", "POST"])
 @login_required
 @with_injection
 def create_offer(
-    plan_id: UUID,
+    plan_id: str,
     create_offer: CreateOffer,
     presenter: CreateOfferPresenter,
     plan_repository: PlanRepository,

@@ -195,7 +195,7 @@ class ProductOffer:
         deactivate_offer_in_db: Callable[[], None],
         active: bool,
         description: str,
-        plan_id: UUID,
+        plan_id: str,
         seller: UUID,
         price_per_unit: Decimal,
     ) -> None:
