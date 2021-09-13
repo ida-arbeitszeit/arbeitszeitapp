@@ -145,7 +145,7 @@ class Offer(UserMixin, db.Model):
     name = db.Column(db.String(1000), nullable=False)
     description = db.Column(db.String(5000), nullable=False)
     active = db.Column(db.Boolean, nullable=False, default=True)
-    company = db.Column(db.String, db.ForeignKey("company.id"), nullable=True)
+    company = db.Column(db.String, db.ForeignKey("company.id"), nullable=False)
     price_per_unit = db.Column(db.Numeric(), nullable=False)
 
 
