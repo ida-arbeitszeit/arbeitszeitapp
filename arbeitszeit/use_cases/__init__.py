@@ -6,7 +6,11 @@ from .calculate_plan_expiration import CalculatePlanExpirationAndCheckIfExpired
 from .create_offer import CreateOffer, CreateOfferRequest, CreateOfferResponse
 from .create_production_plan import CreatePlan, PlanProposal
 from .delete_plan import DeletePlan, DeletePlanResponse
-from .get_member_profile_info import GetMemberProfileInfo, MemberProfileInfo, Workplace
+from .get_member_profile_info import (
+    GetMemberProfileInfo,
+    GetMemberProfileInfoResponse,
+    Workplace,
+)
 from .get_plan_summary import GetPlanSummary
 from .get_statistics import GetStatistics, StatisticsResponse
 from .get_transaction_infos import GetTransactionInfos, TransactionInfo
@@ -23,16 +27,16 @@ from .synchronized_plan_activation import SynchronizedPlanActivation
 __all__ = [
     "CalculatePlanExpirationAndCheckIfExpired",
     "CreateOffer",
-    "CreateOfferResponse",
     "CreateOfferRequest",
+    "CreateOfferResponse",
     "CreatePlan",
     "DeletePlan",
     "DeletePlanResponse",
     "GetMemberProfileInfo",
+    "GetMemberProfileInfoResponse",
     "GetPlanSummary",
     "GetStatistics",
     "GetTransactionInfos",
-    "MemberProfileInfo",
     "PayConsumerProduct",
     "PayMeansOfProduction",
     "PlanProposal",

@@ -6,7 +6,7 @@
   <div class="column is-half">
     <div class="content">
       <h1 class="title">
-        Willkommen, {{ current_user.name }}!
+        Willkommen, {{ view_model.name }}!
       </h1>
     </div>
 
@@ -20,7 +20,7 @@
       </div>
       <div class="level-right">
         <div class="level-item">
-          <p>{{ current_user.id }}</p>
+          <p>{{ view_model.member_id }}</p>
         </div>
       </div>
     </div>
@@ -32,7 +32,7 @@
       </div>
       <div class="level-right">
         <div class="level-item">
-          <p>{{ account_balance|round(2) }} Stunden</p>
+          <p>{{ view_model.account_balance }} Stunden</p>
         </div>
       </div>
     </div>
@@ -44,7 +44,7 @@
       </div>
       <div class="level-right">
         <div class="level-item">
-          <p>{{ current_user.email }}</p>
+          <p>{{ view_model.email }}</p>
         </div>
       </div>
     </div>
@@ -56,10 +56,10 @@
       </div>
       <div class="level-right has-text-right-tablet">
         <div class="level-item">
-          {% if workplaces is defined and workplaces|length %}
+          {% if view_model.show_workplaces %}
           <ul>
-            {% for workplace in workplaces %}
-            <li>{{ workplace.workplace_name }} ({{ workplace.workplace_email }})</li>
+            {% for workplace in view_model.workplaces %}
+            <li>{{ workplace.name }} ({{ workplace.email }})</li>
             {% endfor %}
           </ul>
           {% endif %}
@@ -67,8 +67,7 @@
       </div>
     </div>
 
-    {% if workplaces is defined and workplaces|length %}
-    {% else %}
+    {% if view_model.show_workplace_registration_info %}
     <div class="content">
       <p>
       <div class="icon-text"><i class="fas fa-exclamation-triangle"></i></div>
