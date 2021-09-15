@@ -33,6 +33,18 @@ You are encouraged to use the ``./run-checks`` command before you
 submit changes in a pull pull request.  This program runs ``flake8``,
 ``mypy`` and the test suite.
 
+Repository layout
+=================
+
+We practice clean architecture and our code is organized thusly.
+Business logic related code is found in the ``arbeitszeit`` folder.
+presenters are located under ``arbeitszeit_web`` and the flask related
+code is found in ``project``.  Tests are stored in the ``tests``
+folder. Inside the tests folder the code is organized similarly to the
+root folder: business logic tests live in ``tests/use_cases``,
+presenter tests can be found in ``tests/presenters`` and flask
+specific code is tested under ``tests/flask_integration``.
+
 Caveats
 =======
 
