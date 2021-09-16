@@ -16,6 +16,7 @@ from arbeitszeit.use_cases import (
 )
 from arbeitszeit_web.create_offer import CreateOfferPresenter
 from arbeitszeit_web.delete_plan import DeletePlanPresenter
+from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.query_products import QueryProductsPresenter
 from project import database, error
 from project.database import (
@@ -408,12 +409,16 @@ def delete_offer(
 @main_company.route("/company/statistics")
 @login_required
 @with_injection
-def statistics(get_statistics: use_cases.GetStatistics):
+def statistics(
+    get_statistics: use_cases.GetStatistics,
+    presenter: GetStatisticsPresenter,
+):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
-    stats = get_statistics()
-    return render_template("company/statistics.html", stats=stats)
+    use_case_response = get_statistics()
+    view_model = presenter.present(use_case_response)
+    return render_template("company/statistics.html", view_model=view_model)
 
 
 @main_company.route("/company/cooperate", methods=["GET", "POST"])

@@ -3,6 +3,7 @@ from flask_login import current_user, login_required
 
 from arbeitszeit import errors, use_cases
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
+from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.query_products import QueryProductsPresenter
 from project import database
 from project.database import (
@@ -135,12 +136,16 @@ def my_account(
 @main_member.route("/member/statistics")
 @login_required
 @with_injection
-def statistics(get_statistics: use_cases.GetStatistics):
+def statistics(
+    get_statistics: use_cases.GetStatistics,
+    presenter: GetStatisticsPresenter,
+):
     if not user_is_member():
         return redirect(url_for("auth.zurueck"))
 
-    stats = get_statistics()
-    return render_template("member/statistics.html", stats=stats)
+    use_case_response = get_statistics()
+    view_model = presenter.present(use_case_response)
+    return render_template("member/statistics.html", view_model=view_model)
 
 
 @main_member.route("/member/hilfe")

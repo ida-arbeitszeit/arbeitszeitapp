@@ -142,7 +142,7 @@
 {% endmacro %}
 
 
-{% macro statistics(stats) %}
+{% macro statistics(view_model) %}
 
 <div class="columns is-centered">
   <div class="column is-half">
@@ -162,7 +162,7 @@
       </div>
       <div class="level-right">
         <div class="level-item">
-          <p>{{ stats.registered_companies_count }}</p>
+          <p>{{ view_model.registered_companies_count }}</p>
         </div>
       </div>
     </div>
@@ -174,7 +174,7 @@
       </div>
       <div class="level-right">
         <div class="level-item">
-          <p>{{ stats.registered_members_count }}</p>
+          <p>{{ view_model.registered_members_count }}</p>
         </div>
       </div>
     </div>
@@ -187,7 +187,7 @@
       </div>
       <div class="level-right">
         <div class="level-item">
-          <p>{{ stats.active_plans_count }}</p>
+          <p>{{ view_model.active_plans_count }}</p>
         </div>
       </div>
     </div>
@@ -199,7 +199,7 @@
       </div>
       <div class="level-right has-text-right-tablet">
         <div class="level-item">
-          <p>{{ stats.active_plans_public_count }}</p>
+          <p>{{ view_model.active_plans_public_count }}</p>
         </div>
       </div>
     </div>
@@ -211,7 +211,7 @@
       </div>
       <div class="level-right has-text-right-tablet">
         <div class="level-item">
-          <p>{{ stats.avg_timeframe|round(2) }} Tage</p>
+          <p>{{ view_model.average_timeframe_days }} Tage</p>
         </div>
       </div>
     </div>
@@ -224,7 +224,7 @@
       </div>
       <div class="level-right has-text-right-tablet">
         <div class="level-item">
-          <p>{{ stats.products_on_marketplace_count }}</p>
+          <p>{{ view_model.products_on_marketplace_count }}</p>
         </div>
       </div>
     </div>
@@ -237,7 +237,7 @@
       </div>
       <div class="level-right has-text-right-tablet">
         <div class="level-item">
-          <p>{{ stats.planned_work|round(2) }} Stunden</p>
+          <p>{{ view_model.planned_work_hours }} Stunden</p>
         </div>
       </div>
     </div>
@@ -249,7 +249,7 @@
       </div>
       <div class="level-right has-text-right-tablet">
         <div class="level-item">
-          <p>{{ stats.planned_resources|round(2) }} Stunden</p>
+          <p>{{ view_model.planned_resources_hours }} Stunden</p>
         </div>
       </div>
     </div>
@@ -261,7 +261,7 @@
       </div>
       <div class="level-right has-text-right-tablet">
         <div class="level-item">
-          <p>{{ stats.planned_means|round(2) }} Stunden</p>
+          <p>{{ view_model.planned_means_hours }} Stunden</p>
         </div>
       </div>
     </div>
