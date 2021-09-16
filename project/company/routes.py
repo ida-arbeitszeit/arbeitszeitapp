@@ -10,11 +10,13 @@ from arbeitszeit.use_cases import (
     CreateOffer,
     CreateOfferRequest,
     CreatePlan,
+    DeleteOffer,
     DeletePlan,
     GetPlanSummary,
     PlanProposal,
 )
 from arbeitszeit_web.create_offer import CreateOfferPresenter
+from arbeitszeit_web.delete_offer import DeleteOfferPresenter
 from arbeitszeit_web.delete_plan import DeletePlanPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.query_products import QueryProductsPresenter
@@ -223,13 +225,11 @@ def my_plans(
 @main_company.route("/company/delete_plan/<uuid:plan_id>", methods=["GET", "POST"])
 @login_required
 @with_injection
-def delete_plan(
-    plan_id: UUID, delete_offer: DeletePlan, presenter: DeletePlanPresenter
-):
+def delete_plan(plan_id: UUID, delete_plan: DeletePlan, presenter: DeletePlanPresenter):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
-    response = delete_offer(plan_id)
+    response = delete_plan(plan_id)
     view_model = presenter.present(response)
     for notification in view_model.notifications:
         flash(notification)
@@ -385,25 +385,27 @@ def my_offers(offer_repository: ProductOfferRepository):
     return render_template("company/my_offers.html", offers=my_offers)
 
 
-@main_company.route("/company/delete_offer", methods=["GET", "POST"])
+@main_company.route("/company/delete_offer/<uuid:offer_id>", methods=["GET", "POST"])
 @login_required
 @with_injection
 def delete_offer(
+    offer_id: UUID,
     product_offer_repository: ProductOfferRepository,
+    delete_offer: DeleteOffer,
+    presenter: DeleteOfferPresenter,
 ):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
-    offer_id = request.args.get("id")
-    assert offer_id
-    product_offer = product_offer_repository.get_by_id(offer_id)
     if request.method == "POST":
-        use_cases.deactivate_offer(product_offer)
-        database.commit_changes()
-        flash("Löschen des Angebots erfolgreich.")
+        response = delete_offer(offer_id)
+        view_model = presenter.present(response)
+        for notification in view_model.notifications:
+            flash(notification)
         return redirect(url_for("main_company.my_offers"))
 
-    return render_template("company/delete_offer.html", offer=product_offer)
+    offer = product_offer_repository.get_by_id(offer_id)
+    return render_template("company/delete_offer.html", offer=offer)
 
 
 @main_company.route("/company/statistics")

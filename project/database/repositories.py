@@ -377,7 +377,6 @@ class ProductOfferRepository(repositories.OfferRepository):
         return entities.ProductOffer(
             id=UUID(offer_orm.id),
             name=offer_orm.name,
-            deactivate_offer_in_db=lambda: setattr(offer_orm, "active", False),
             active=offer_orm.active,
             description=offer_orm.description,
             plan=plan,
@@ -437,6 +436,14 @@ class ProductOfferRepository(repositories.OfferRepository):
         self.db.session.add(offer)
         self.db.session.commit()
         return self.object_from_orm(offer)
+
+    def delete_offer(self, id: UUID) -> None:
+        offer_orm = Offer.query.filter_by(id=str(id)).first()
+        if offer_orm is None:
+            raise ProductOfferNotFound()
+        else:
+            self.db.session.delete(offer_orm)
+            self.db.session.commit()
 
     def __len__(self) -> int:
         return len(Offer.query.all())

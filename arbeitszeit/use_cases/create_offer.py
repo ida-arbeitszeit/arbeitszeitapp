@@ -16,6 +16,7 @@ class CreateOfferRequest:
 
 @dataclass
 class CreateOfferResponse:
+    id: UUID
     name: str
     description: str
 
@@ -27,15 +28,16 @@ class CreateOffer:
     plan_repository: PlanRepository
     datetime_service: DatetimeService
 
-    def __call__(self, offer: CreateOfferRequest) -> CreateOfferResponse:
-        plan = self.plan_repository.get_plan_by_id(offer.plan_id)
-        self.offer_repository.create_offer(
+    def __call__(self, offer_request: CreateOfferRequest) -> CreateOfferResponse:
+        plan = self.plan_repository.get_plan_by_id(offer_request.plan_id)
+        offer = self.offer_repository.create_offer(
             plan,
             self.datetime_service.now(),
-            offer.name,
-            offer.description,
+            offer_request.name,
+            offer_request.description,
         )
         return CreateOfferResponse(
+            id=offer.id,
             name=offer.name,
             description=offer.description,
         )
