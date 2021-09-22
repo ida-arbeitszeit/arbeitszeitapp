@@ -212,3 +212,7 @@ def test_that_plan_is_set_to_expired_if_timeframe_is_expired(
     )
     calculate_plan_expiration_and_check_if_expired()
     assert plan.expired
+
+
+def test_that_associated_offers_are_deleted_when_plan_is_expired():
+    pass
