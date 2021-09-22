@@ -1,7 +1,7 @@
 from flask import Flask, session
 from flask_table import Col, Table  # noqa: Do not delete
 from flask_talisman import Talisman
-from flask_seasurf import SeaSurf
+from flask_wtf.csrf import CSRFProtect
 
 import project.extensions
 from project.extensions import login_manager
@@ -31,7 +31,7 @@ def create_app(config=None, db=None, migrate=None):
         Talisman(app, content_security_policy=csp)
 
     # init flask extensions
-    SeaSurf(app)
+    CSRFProtect(app)
     db.init_app(app)
     login_manager.init_app(app)
     migrate.init_app(app, db)
