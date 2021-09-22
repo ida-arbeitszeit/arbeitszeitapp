@@ -44,7 +44,7 @@ def test_that_correct_offer_gets_deleted(
 
 
 @injection_test
-def test_that_correct_response_gets_returned(
+def test_that_correct_offer_id_is_shown_after_deletion_of_offer(
     delete_offer: DeleteOffer,
     offer_generator: OfferGenerator,
 ):
