@@ -40,7 +40,7 @@
         <td>{{ offer.name }}</td>
         <td>{{ offer.description }}</td>
         <td>{{ offer.plan.price_per_unit() }} Std.</td>
-        <td><a href="{{ url_for('main_company.delete_offer', id=offer.id) }}"><u>Del.</u></a></td>
+        <td><a href="{{ url_for('main_company.delete_offer', offer_id=offer.id) }}"><u>Del.</u></a></td>
         </td>
       </tr>
       {% endfor %}

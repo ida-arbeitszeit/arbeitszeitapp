@@ -132,13 +132,22 @@ class OfferRepository(interfaces.OfferRepository):
         offer = ProductOffer(
             id=uuid.uuid4(),
             name=name,
-            deactivate_offer_in_db=lambda: None,
             active=True,
             description=description,
             plan=plan,
         )
         self.offers.append(offer)
         return offer
+
+    def get_by_id(self, id: uuid.UUID) -> ProductOffer:
+        for offer in self.offers:
+            if offer.id == id:
+                return offer
+        raise Exception("Offer not found, this exception is not meant to be caught")
+
+    def delete_offer(self, id: uuid.UUID) -> None:
+        offer = self.get_by_id(id)
+        self.offers.remove(offer)
 
 
 @singleton

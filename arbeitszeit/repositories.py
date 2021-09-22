@@ -180,6 +180,10 @@ class AccountRepository(ABC):
 
 class OfferRepository(ABC):
     @abstractmethod
+    def get_by_id(self, id: UUID) -> ProductOffer:
+        pass
+
+    @abstractmethod
     def query_offers_by_name(self, query: str) -> Iterator[ProductOffer]:
         pass
 
@@ -203,6 +207,10 @@ class OfferRepository(ABC):
 
     @abstractmethod
     def count_active_offers_without_plan_duplicates(self) -> int:
+        pass
+
+    @abstractmethod
+    def delete_offer(self, id: UUID) -> None:
         pass
 
 

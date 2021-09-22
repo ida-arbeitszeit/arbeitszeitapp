@@ -1,10 +1,11 @@
 from arbeitszeit import errors
-from arbeitszeit.entities import Company, Member, ProductOffer
+from arbeitszeit.entities import Company, Member
 from arbeitszeit.repositories import CompanyWorkerRepository
 
 from .calculate_plan_expiration import CalculatePlanExpirationAndCheckIfExpired
 from .create_offer import CreateOffer, CreateOfferRequest, CreateOfferResponse
 from .create_production_plan import CreatePlan, PlanProposal
+from .delete_offer import DeleteOffer, DeleteOfferResponse
 from .delete_plan import DeletePlan, DeletePlanResponse
 from .get_member_profile_info import (
     GetMemberProfileInfo,
@@ -30,6 +31,8 @@ __all__ = [
     "CreateOfferRequest",
     "CreateOfferResponse",
     "CreatePlan",
+    "DeleteOffer",
+    "DeleteOfferResponse",
     "DeletePlan",
     "DeletePlanResponse",
     "GetMemberProfileInfo",
@@ -54,13 +57,7 @@ __all__ = [
     "TransactionInfo",
     "Workplace",
     "add_worker_to_company",
-    "deactivate_offer",
 ]
-
-
-def deactivate_offer(product_offer: ProductOffer) -> ProductOffer:
-    product_offer.deactivate()
-    return product_offer
 
 
 def add_worker_to_company(
