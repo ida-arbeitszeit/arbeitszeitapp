@@ -17,7 +17,12 @@ from .get_statistics import GetStatistics, StatisticsResponse
 from .get_transaction_infos import GetTransactionInfos, TransactionInfo
 from .pay_consumer_product import PayConsumerProduct
 from .pay_means_of_production import PayMeansOfProduction
-from .query_products import ProductFilter, ProductQueryResponse, QueryProducts
+from .query_products import (
+    ProductFilter,
+    ProductQueryResponse,
+    QueryProducts,
+    QueryProductsRequest,
+)
 from .query_purchases import PurchaseQueryResponse, QueryPurchases
 from .register_company import RegisterCompany
 from .register_member import RegisterMember
@@ -47,6 +52,7 @@ __all__ = [
     "ProductQueryResponse",
     "PurchaseQueryResponse",
     "QueryProducts",
+    "QueryProductsRequest",
     "QueryPurchases",
     "RegisterCompany",
     "RegisterMember",

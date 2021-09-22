@@ -1,8 +1,12 @@
+from dataclasses import dataclass
+from typing import Optional
+
 from arbeitszeit.use_cases import (
     CreateOfferResponse,
     ProductFilter,
     ProductQueryResponse,
     QueryProducts,
+    QueryProductsRequest,
 )
 from tests.data_generators import OfferGenerator
 
@@ -26,9 +30,9 @@ def offer_in_results(
 def test_that_no_offer_is_returned_when_searching_an_empty_repository(
     query_products: QueryProducts,
 ):
-    response = query_products(None, ProductFilter.by_name)
+    response = query_products(make_request(None, ProductFilter.by_name))
     assert not response.results
-    response = query_products(None, ProductFilter.by_description)
+    response = query_products(make_request(None, ProductFilter.by_description))
     assert not response.results
 
 
@@ -39,7 +43,7 @@ def test_that_offers_where_name_is_exact_match_are_returned(
     offer_generator: OfferGenerator,
 ):
     expected_offer = offer_generator.create_offer(name="My Product")
-    response = query_products("My Product", ProductFilter.by_name)
+    response = query_products(make_request("My Product", ProductFilter.by_name))
     assert offer_in_results(expected_offer, response)
 
 
@@ -50,7 +54,7 @@ def test_query_substring_of_name_returns_correct_result(
     offer_generator: OfferGenerator,
 ):
     expected_offer = offer_generator.create_offer(name="My Product")
-    response = query_products("Product", ProductFilter.by_name)
+    response = query_products(make_request("Product", ProductFilter.by_name))
     assert offer_in_results(expected_offer, response)
 
 
@@ -62,7 +66,7 @@ def test_that_offers_where_description_is_exact_match_are_returned(
 ):
     description = "my description"
     expected_offer = offer_generator.create_offer(description=description)
-    response = query_products(description, ProductFilter.by_description)
+    response = query_products(make_request(description, ProductFilter.by_description))
     assert offer_in_results(expected_offer, response)
 
 
@@ -73,5 +77,24 @@ def test_query_substrin_of_description_returns_correct_result(
     offer_generator: OfferGenerator,
 ):
     expected_offer = offer_generator.create_offer(description="my description")
-    response = query_products("description", ProductFilter.by_description)
+    response = query_products(make_request("description", ProductFilter.by_description))
     assert offer_in_results(expected_offer, response)
+
+
+def make_request(query: Optional[str], category: ProductFilter):
+    return QueryProductsRequestTestImpl(
+        query=query,
+        filter_category=category,
+    )
+
+
+@dataclass
+class QueryProductsRequestTestImpl(QueryProductsRequest):
+    query: Optional[str]
+    filter_category: ProductFilter
+
+    def get_query_string(self) -> Optional[str]:
+        return self.query
+
+    def get_filter_category(self) -> ProductFilter:
+        return self.filter_category
