@@ -12,9 +12,14 @@ class DeleteOfferViewModel:
 class DeleteOfferPresenter:
     def present(self, use_case_response: DeleteOfferResponse) -> DeleteOfferViewModel:
         notifications: List[str] = []
-        notifications.append(
-            f"Löschen des Angebots {use_case_response.offer_id} erfolgreich."
-        )
+        if use_case_response.is_success:
+            notifications.append(
+                f"Löschen des Angebots {use_case_response.offer_id} erfolgreich."
+            )
+        else:
+            notifications.append(
+                f"Löschen des Angebots {use_case_response.offer_id} nicht erfolgreich."
+            )
         return DeleteOfferViewModel(
             notifications=notifications,
         )
