@@ -11,6 +11,7 @@ from arbeitszeit.use_cases import (
     CreateOfferRequest,
     CreatePlan,
     DeleteOffer,
+    DeleteOfferRequest,
     DeletePlan,
     GetPlanSummary,
     PlanProposal,
@@ -397,7 +398,11 @@ def delete_offer(
         return redirect(url_for("auth.zurueck"))
 
     if request.method == "POST":
-        response = delete_offer(offer_id)
+        deletion_request = DeleteOfferRequest(
+            requesting_company_id=current_user.id,
+            offer_id=offer_id,
+        )
+        response = delete_offer(deletion_request)
         view_model = presenter.present(response)
         for notification in view_model.notifications:
             flash(notification)
