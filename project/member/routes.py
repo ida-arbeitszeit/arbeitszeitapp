@@ -1,3 +1,6 @@
+from dataclasses import dataclass
+from uuid import UUID
+
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
 
@@ -77,14 +80,13 @@ def pay_consumer_product(
         return redirect(url_for("auth.zurueck"))
 
     if request.method == "POST":
-        sender = member_repository.get_member_by_id(current_user.id)
-        plan = plan_repository.get_plan_by_id(request.form["plan_id"])
-        pieces = int(request.form["amount"])
         try:
             pay_consumer_product(
-                sender,
-                plan,
-                pieces,
+                PayConsumerProductRequestImpl(
+                    current_user.id,
+                    request.form["plan_id"],
+                    request.form["amount"],
+                )
             )
             database.commit_changes()
             flash("Produkt erfolgreich bezahlt.")
@@ -93,6 +95,22 @@ def pay_consumer_product(
                 "Der angegebene Plan ist nicht aktuell. Bitte wende dich an den Verkäufer, um eine aktuelle Plan-ID zu erhalten."
             )
     return render_template("member/pay_consumer_product.html")
+
+
+@dataclass
+class PayConsumerProductRequestImpl:
+    user: str
+    plan: str
+    amount: str
+
+    def get_buyer_id(self) -> UUID:
+        return UUID(self.user)
+
+    def get_plan_id(self) -> UUID:
+        return UUID(self.plan)
+
+    def get_amount(self) -> int:
+        return int(self.amount)
 
 
 @main_member.route("/member/profile")

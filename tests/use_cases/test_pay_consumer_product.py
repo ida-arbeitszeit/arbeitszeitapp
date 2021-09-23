@@ -1,3 +1,8 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+from uuid import UUID
+
 import pytest
 
 from arbeitszeit import errors
@@ -20,7 +25,7 @@ def test_error_is_raised_if_plan_is_not_active_yet(
     plan = plan_generator.create_plan()
     pieces = 3
     with pytest.raises(errors.PlanIsInactive):
-        pay_consumer_product(sender, plan, pieces)
+        pay_consumer_product(make_request(sender.id, plan.id, pieces))
 
 
 @injection_test
@@ -38,7 +43,7 @@ def test_error_is_raised_if_plan_is_expired(
     pieces = 3
     plan.expired = True
     with pytest.raises(errors.PlanIsInactive):
-        pay_consumer_product(sender, plan, pieces)
+        pay_consumer_product(make_request(sender.id, plan.id, pieces))
 
 
 @injection_test
@@ -54,7 +59,7 @@ def test_that_correct_transaction_is_added(
         activation_date=datetime_service.now_minus_one_day()
     )
     pieces = 3
-    pay_consumer_product(sender, plan, pieces)
+    pay_consumer_product(make_request(sender.id, plan.id, pieces))
     assert len(transaction_repository.transactions) == 1
     transaction_added = transaction_repository.transactions[0]
     expected_amount = pieces * plan.price_per_unit()
@@ -76,7 +81,7 @@ def test_that_correct_transaction_is_added_when_plan_is_public_service(
         is_public_service=True, activation_date=datetime_service.now_minus_one_day()
     )
     pieces = 3
-    pay_consumer_product(sender, plan, pieces)
+    pay_consumer_product(make_request(sender.id, plan.id, pieces))
     assert len(transaction_repository.transactions) == 1
     transaction_added = transaction_repository.transactions[0]
     expected_amount = 0
@@ -98,7 +103,7 @@ def test_balances_are_adjusted_correctly(
         activation_date=datetime_service.now_minus_one_day()
     )
     pieces = 3
-    pay_consumer_product(sender, plan, pieces)
+    pay_consumer_product(make_request(sender.id, plan.id, pieces))
     costs = pieces * plan.price_per_unit()
     assert account_repository.get_account_balance(sender.account) == -costs
     assert account_repository.get_account_balance(plan.planner.product_account) == costs
@@ -117,7 +122,7 @@ def test_balances_are_adjusted_correctly_when_plan_is_public_service(
         is_public_service=True, activation_date=datetime_service.now_minus_one_day()
     )
     pieces = 3
-    pay_consumer_product(sender, plan, pieces)
+    pay_consumer_product(make_request(sender.id, plan.id, pieces))
     costs = pieces * plan.price_per_unit()
     assert account_repository.get_account_balance(sender.account) == -costs
     assert account_repository.get_account_balance(plan.planner.product_account) == costs
@@ -136,7 +141,7 @@ def test_correct_purchase_is_added(
         activation_date=datetime_service.now_minus_one_day()
     )
     pieces = 3
-    pay_consumer_product(sender, plan, pieces)
+    pay_consumer_product(make_request(sender.id, plan.id, pieces))
     assert len(purchase_repository.purchases) == 1
     purchase_added = purchase_repository.purchases[0]
     assert purchase_added.price_per_unit == plan.price_per_unit()
@@ -159,8 +164,34 @@ def test_correct_purchase_is_added_when_plan_is_public_service(
         is_public_service=True, activation_date=datetime_service.now_minus_one_day()
     )
     pieces = 3
-    pay_consumer_product(sender, plan, pieces)
+    pay_consumer_product(make_request(sender.id, plan.id, pieces))
     assert len(purchase_repository.purchases) == 1
     purchase_added = purchase_repository.purchases[0]
     assert purchase_added.price_per_unit == 0
     assert purchase_added.plan == plan
+
+
+def make_request(
+    buyer: UUID, plan: UUID, amount: int
+) -> PayConsumerProductRequestTestImpl:
+    return PayConsumerProductRequestTestImpl(
+        buyer=buyer,
+        plan=plan,
+        amount=amount,
+    )
+
+
+@dataclass
+class PayConsumerProductRequestTestImpl:
+    buyer: UUID
+    plan: UUID
+    amount: int
+
+    def get_amount(self) -> int:
+        return self.amount
+
+    def get_plan_id(self) -> UUID:
+        return self.plan
+
+    def get_buyer_id(self) -> UUID:
+        return self.buyer
