@@ -1,8 +1,9 @@
+from typing import List
+
 from arbeitszeit.entities import ProductOffer
-from arbeitszeit.use_cases import DeleteOffer, CreateOfferResponse
+from arbeitszeit.use_cases import CreateOfferResponse, DeleteOffer
 from tests.data_generators import OfferGenerator
 
-from typing import List
 from .dependency_injection import injection_test
 from .repositories import OfferRepository
 

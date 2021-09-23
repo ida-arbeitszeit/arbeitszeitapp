@@ -25,7 +25,7 @@ def test_company_repository_can_convert_to_and_from_orm_without_changing_the_obj
 
 
 @injection_test
-def test_cannot_retriev_company_from_arbitrary_uuid(
+def test_cannot_retrieve_company_from_arbitrary_uuid(
     company_repository: CompanyRepository,
 ):
     with pytest.raises(CompanyNotFound):
@@ -33,7 +33,7 @@ def test_cannot_retriev_company_from_arbitrary_uuid(
 
 
 @injection_test
-def test_can_retriev_a_company_by_its_uuid(
+def test_can_retrieve_a_company_by_its_uuid(
     company_generator: CompanyGenerator,
     company_repository: CompanyRepository,
 ):
@@ -72,3 +72,19 @@ def test_can_detect_if_company_with_email_is_already_present(
     assert not company_repository.has_company_with_email(expected_email)
     company_generator.create_company(email=expected_email)
     assert company_repository.has_company_with_email(expected_email)
+
+
+@injection_test
+def test_count_no_registered_company_if_none_was_created(
+    repository: CompanyRepository,
+) -> None:
+    assert repository.count_registered_companies() == 0
+
+
+@injection_test
+def test_count_one_registered_company_if_one_was_created(
+    repository: CompanyRepository,
+    generator: CompanyGenerator,
+) -> None:
+    generator.create_company()
+    assert repository.count_registered_companies() == 1

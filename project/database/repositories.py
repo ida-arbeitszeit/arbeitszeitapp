@@ -3,8 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterator, List, Optional, Union
-from uuid import UUID
+from typing import Iterator, List, Union
+from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
 from injector import inject
@@ -95,6 +95,7 @@ class MemberRepository(repositories.MemberRepository):
     ) -> entities.Member:
         orm_account = self.account_repository.object_to_orm(account)
         orm_member = Member(
+            id=str(uuid4()),
             email=email,
             name=name,
             password=generate_password_hash(password, method="sha256"),
@@ -102,7 +103,6 @@ class MemberRepository(repositories.MemberRepository):
         )
         orm_account.account_owner_member = orm_member.id
         self.db.session.add(orm_member)
-        self.db.session.commit()
         return self.object_from_orm(orm_member)
 
     def has_member_with_email(self, email: str) -> bool:
@@ -179,12 +179,12 @@ class CompanyRepository(repositories.CompanyRepository):
         products_account: entities.Account,
     ) -> entities.Company:
         company = Company(
+            id=str(uuid4()),
             email=email,
             name=name,
             password=generate_password_hash(password, method="sha256"),
         )
         self.db.session.add(company)
-        self.db.session.commit()
         for account in [
             means_account,
             labour_account,
@@ -193,7 +193,6 @@ class CompanyRepository(repositories.CompanyRepository):
         ]:
             account_orm = self.account_repository.object_to_orm(account)
             account_orm.account_owner_company = company.id
-        self.db.session.commit()
         return self.object_from_orm(company)
 
     def has_company_with_email(self, email: str) -> bool:
@@ -221,9 +220,8 @@ class AccountRepository(repositories.AccountRepository):
         return account_orm
 
     def create_account(self, account_type: entities.AccountTypes) -> entities.Account:
-        account = Account(account_type=account_type.value)
+        account = Account(id=str(uuid4()), account_type=account_type.value)
         self.db.session.add(account)
-        self.db.session.commit()
         return self.object_from_orm(account)
 
     def get_account_balance(self, account: entities.Account) -> Decimal:
@@ -281,24 +279,22 @@ class AccountingRepository:
         )
         return entities.SocialAccounting(account=accounting_account)
 
-    def get_by_id(self, id: UUID) -> Optional[entities.SocialAccounting]:
-        accounting_orm = SocialAccounting.query.filter_by(id=str(id)).first()
-        return self.object_from_orm(accounting_orm) if accounting_orm else None
-
     def get_or_create_social_accounting(self) -> entities.SocialAccounting:
         return self.object_from_orm(self.get_or_create_social_accounting_orm())
 
     def get_or_create_social_accounting_orm(self) -> SocialAccounting:
         social_accounting = SocialAccounting.query.first()
         if not social_accounting:
-            social_accounting = SocialAccounting()
+            social_accounting = SocialAccounting(
+                id=str(uuid4()),
+            )
             account = Account(
+                id=str(uuid4()),
                 account_owner_social_accounting=social_accounting.id,
                 account_type="accounting",
             )
             social_accounting.account = account
             self.db.session.add(social_accounting, account)
-            self.db.session.commit()
         return social_accounting
 
 
@@ -373,7 +369,7 @@ class ProductOfferRepository(repositories.OfferRepository):
         return Offer.query.get(str(product_offer.id))
 
     def object_from_orm(self, offer_orm: Offer) -> entities.ProductOffer:
-        plan = self.plan_repository.object_from_orm(offer_orm.plan)
+        plan = self.plan_repository.get_plan_by_id(UUID(offer_orm.plan_id))
         return entities.ProductOffer(
             id=UUID(offer_orm.id),
             name=offer_orm.name,
@@ -428,13 +424,13 @@ class ProductOfferRepository(repositories.OfferRepository):
         description: str,
     ) -> entities.ProductOffer:
         offer = Offer(
+            id=str(uuid4()),
             plan_id=self.plan_repository.object_to_orm(plan).id,
             cr_date=creation_datetime,
             name=name,
             description=description,
         )
         self.db.session.add(offer)
-        self.db.session.commit()
         return self.object_from_orm(offer)
 
     def delete_offer(self, id: UUID) -> None:
@@ -443,7 +439,6 @@ class ProductOfferRepository(repositories.OfferRepository):
             raise ProductOfferNotFound()
         else:
             self.db.session.delete(offer_orm)
-            self.db.session.commit()
 
     def __len__(self) -> int:
         return len(Offer.query.all())
@@ -516,6 +511,7 @@ class PlanRepository(repositories.PlanRepository):
         creation_timestamp: datetime,
     ) -> entities.Plan:
         plan = Plan(
+            id=str(uuid4()),
             plan_creation_date=creation_timestamp,
             planner=self.company_repository.object_to_orm(planner).id,
             costs_p=costs.means_cost,
@@ -532,9 +528,7 @@ class PlanRepository(repositories.PlanRepository):
             expiration_date=None,
             social_accounting=self.accounting_repository.get_or_create_social_accounting_orm().id,
         )
-
         self.db.session.add(plan)
-        self.db.session.commit()
         return self.object_from_orm(plan)
 
     def activate_plan(self, plan: entities.Plan, activation_date: datetime) -> None:
@@ -544,7 +538,6 @@ class PlanRepository(repositories.PlanRepository):
         plan_orm = self.object_to_orm(plan)
         plan_orm.is_active = True
         plan_orm.activation_date = activation_date
-        self.db.session.commit()
 
     def set_plan_as_expired(self, plan: entities.Plan) -> None:
         plan.expired = True
@@ -553,14 +546,12 @@ class PlanRepository(repositories.PlanRepository):
         plan_orm = self.object_to_orm(plan)
         plan_orm.expired = True
         plan_orm.is_active = False
-        self.db.session.commit()
 
     def renew_plan(self, plan: entities.Plan) -> None:
         plan.renewed = True
 
         plan_orm = self.object_to_orm(plan)
         plan_orm.renewed = True
-        self.db.session.commit()
 
     def set_expiration_date(
         self, plan: entities.Plan, expiration_date: datetime
@@ -569,14 +560,12 @@ class PlanRepository(repositories.PlanRepository):
 
         plan_orm = self.object_to_orm(plan)
         plan_orm.expiration_date = expiration_date
-        self.db.session.commit()
 
     def set_expiration_relative(self, plan: entities.Plan, days: int) -> None:
         plan.expiration_relative = days
 
         plan_orm = self.object_to_orm(plan)
         plan_orm.expiration_relative = days
-        self.db.session.commit()
 
     def set_last_certificate_payout(
         self, plan: entities.Plan, last_payout: datetime
@@ -585,7 +574,6 @@ class PlanRepository(repositories.PlanRepository):
 
         plan_orm = self.object_to_orm(plan)
         plan_orm.last_certificate_payout = last_payout
-        self.db.session.commit()
 
     def all_active_plans(self) -> Iterator[entities.Plan]:
         return (
@@ -694,7 +682,6 @@ class PlanRepository(repositories.PlanRepository):
             raise PlanNotFound()
         else:
             self.db.session.delete(plan_orm)
-            self.db.session.commit()
 
     def __len__(self) -> int:
         return len(Plan.query.all())
@@ -732,6 +719,7 @@ class TransactionRepository(repositories.TransactionRepository):
         purpose: str,
     ) -> entities.Transaction:
         transaction = Transaction(
+            id=str(uuid4()),
             date=date,
             sending_account=str(sending_account.id),
             receiving_account=str(receiving_account.id),
@@ -739,7 +727,6 @@ class TransactionRepository(repositories.TransactionRepository):
             purpose=purpose,
         )
         self.db.session.add(transaction)
-        self.db.session.commit()
         return self.object_from_orm(transaction)
 
     def add(self, transaction: entities.Transaction) -> None:
