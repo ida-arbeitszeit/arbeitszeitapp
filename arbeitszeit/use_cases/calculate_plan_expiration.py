@@ -5,7 +5,7 @@ from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan
-from arbeitszeit.repositories import PlanRepository
+from arbeitszeit.repositories import OfferRepository, PlanRepository
 
 
 @inject
@@ -13,6 +13,7 @@ from arbeitszeit.repositories import PlanRepository
 class CalculatePlanExpirationAndCheckIfExpired:
     datetime_service: DatetimeService
     plan_repository: PlanRepository
+    offer_repository: OfferRepository
 
     def __call__(self) -> None:
         for plan in self.plan_repository.all_active_plans():
@@ -40,3 +41,6 @@ class CalculatePlanExpirationAndCheckIfExpired:
         assert plan.expiration_date
         if self.datetime_service.now() > plan.expiration_date:
             self.plan_repository.set_plan_as_expired(plan)
+            expired_offers = self.offer_repository.get_all_offers_belonging_to(plan.id)
+            for offer in expired_offers:
+                self.offer_repository.delete_offer(offer.id)

@@ -443,6 +443,10 @@ class ProductOfferRepository(repositories.OfferRepository):
     def __len__(self) -> int:
         return len(Offer.query.all())
 
+    def get_all_offers_belonging_to(self, plan_id: UUID) -> List[entities.ProductOffer]:
+        plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
+        return [self.object_from_orm(offer) for offer in plan_orm.offers.all()]
+
 
 @inject
 @dataclass
