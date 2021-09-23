@@ -49,7 +49,7 @@ def suchen(
         return redirect(url_for("auth.zurueck"))
     template_name = "member/query_products.html"
     search_form = ProductSearchForm(request.form)
-    if request.method == "POST":
+    if request.method == "POST" and search_form.validate():
         query = search_form.data["search"] or None
         search_field = search_form.data["select"]  # Name, Beschr., Kategorie
         if search_field == "Name":

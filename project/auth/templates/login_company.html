@@ -2,43 +2,35 @@
 
 {% block content2 %}
 <div class="section">
-<div class="container">
+    <div class="container">
+        <div class="column is-4 is-offset-4">
+            <h3 class="title">Login</h3>
+            <div class="box">
+                {% for field_name, field_errors in form.errors|dictsort if field_errors %}
+                    {% for error in field_errors %}
+                        <div class="notification is-danger">{{ error }}</div>
+                    {% endfor %}
+                {% endfor %}
+                <form method="POST" action="/company/login">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="field">
+                        <div class="control">
+                            {{ form.email(class_="input is-large", placeholder="Email") }}
+                        </div>
+                    </div>
 
-<div class="column is-4 is-offset-4">
-    <h3 class="title">Login</h3>
-    <div class="box">
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-          <div class="notification is-danger">
-              {{ messages[0] }}
-          </div>
-        {% endif %}
-        {% endwith %}
-        <form method="POST" action="/company/login">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div class="field">
-                <div class="control">
-                    <input class="input is-large" type="email" name="email" placeholder="Your Email" autofocus="">
-                </div>
+                    <div class="field">
+                        <div class="control">
+                            {{ form.password(class_="input is-large", placeholder="Passwort") }}
+                        </div>
+                    </div>
+                    <div class="field">
+                        {{ form.remember }} {{ form.remember.label }}
+                    </div>
+                    <button class="button is-block is-primary is-large is-fullwidth">Login</button>
+                </form>
             </div>
-
-            <div class="field">
-                <div class="control">
-                    <input class="input is-large" type="password" name="password" placeholder="Your Password">
-                </div>
-            </div>
-            <div class="field">
-                <label class="checkbox">
-                    <input type="checkbox">
-                    Remember me
-                </label>
-            </div>
-            <button class="button is-block is-primary is-large is-fullwidth">Login</button>
-        </form>
+        </div>
     </div>
-</div>
-
-</div>
-
 </div>
 {% endblock %}
