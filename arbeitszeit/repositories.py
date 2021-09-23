@@ -213,6 +213,10 @@ class OfferRepository(ABC):
     def delete_offer(self, id: UUID) -> None:
         pass
 
+    @abstractmethod
+    def get_all_offers_belonging_to(self, plan_id: UUID) -> List[ProductOffer]:
+        pass
+
 
 class MemberRepository(ABC):
     @abstractmethod
