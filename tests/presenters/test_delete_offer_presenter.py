@@ -5,11 +5,11 @@ from arbeitszeit.use_cases.delete_offer import DeleteOfferResponse
 from arbeitszeit_web.delete_offer import DeleteOfferPresenter
 
 SUCCESSFUL_DELETE_RESPONSE = DeleteOfferResponse(
-    plan_id=uuid4(),
+    offer_id=uuid4(),
     is_success=True,
 )
 FAILED_DELETE_RESPONSE = DeleteOfferResponse(
-    plan_id=uuid4(),
+    offer_id=uuid4(),
     is_success=False,
 )
 
