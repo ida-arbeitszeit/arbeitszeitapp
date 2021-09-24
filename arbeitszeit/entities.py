@@ -190,9 +190,7 @@ class Plan:
 
     @property
     def type_of_plan(self) -> str:
-        if self.is_public_service:
-            return "Öffentlich"
-        return "Produktiv"
+        return "Öffentlich" if self.is_public_service else "Produktiv"
 
 
 class ProductOffer:
