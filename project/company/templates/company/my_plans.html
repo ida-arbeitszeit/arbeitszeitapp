@@ -32,7 +32,7 @@
                 <th><abbr title="Kosten Arbeit">a</abbr></th>
                 <th><abbr title="Einheiten">Einh.</abbr></th>
                 <th>Stückpr.</th>
-                <th>Public Service</th>
+                <th>Art des Plans</th>
                 <th>Plan aktiv seit</th>
                 <th>Plan-Ende</th>
                 <th>Endet in</th>
@@ -50,7 +50,7 @@
                 <td>{{ plan.production_costs.labour_cost }}</td>
                 <td>{{ plan.prd_amount }}</td>
                 <td>{{ plan.price_per_unit() }} Std.</td>
-                <td>{{ plan.is_public_service }}</td>
+                <td>{{ plan.type_of_plan }}</td>
                 <td>{{ plan.activation_date.strftime("%d.%m.%y") }}</td>
                 <td>{{ plan.expiration_date.strftime("%d.%m.%y") }}</td>
                 <td>{{ plan.expiration_relative }}d</td>
@@ -85,6 +85,7 @@
                 <th><abbr title="Kosten Arbeit">a</abbr></th>
                 <th>Einheiten</th>
                 <th>Stückpreis</th>
+                <th>Art des Plans</th>
                 <th>Plan vom</th>
                 <th>Del.</th>
             </tr>
@@ -100,6 +101,7 @@
                 <td>{{ plan.production_costs.labour_cost }}</td>
                 <td>{{ plan.prd_amount }}</td>
                 <td>{{ plan.price_per_unit() }} Std.</td>
+                <td>{{ plan.type_of_plan }}</td>
                 <td>{{ plan.plan_creation_date.strftime("%d.%m.%y") }}</td>
                 <td><a href="{{ url_for('main_company.delete_plan', plan_id=plan.id) }}"><i
                             class="fas fa-trash"></i></a></td>
@@ -131,6 +133,7 @@
                 <th><abbr title="Kosten Arbeit">a</abbr></th>
                 <th>Einheiten</th>
                 <th>Stückpreis</th>
+                <th>Art des Plans</th>
                 <th>Plan vom</th>
                 <th><abbr title="Nur einmal möglich.">Plan erneuern</abbr></th>
                 <th>Del.</th>
@@ -147,6 +150,7 @@
                 <td>{{ plan.production_costs.labour_cost }}</td>
                 <td>{{ plan.prd_amount }}</td>
                 <td>{{ plan.price_per_unit() }} Std.</td>
+                <td>{{ plan.type_of_plan }}</td>
                 <td>{{ plan.plan_creation_date.strftime("%d.%m.%y") }}</td>
 
                 {% if plan.renewed %}

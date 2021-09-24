@@ -188,6 +188,12 @@ class Plan:
             else Decimal(0)
         )
 
+    @property
+    def type_of_plan(self) -> str:
+        if self.is_public_service:
+            return "Öffentlich"
+        return "Produktiv"
+
 
 class ProductOffer:
     def __init__(

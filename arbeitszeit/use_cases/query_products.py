@@ -31,7 +31,7 @@ class QueriedProduct:
     product_name: str
     product_description: str
     price_per_unit: Decimal
-    is_public_service: bool
+    type_of_plan: str
 
 
 @inject
@@ -62,5 +62,5 @@ class QueryProducts:
             product_name=offer.name,
             product_description=offer.description,
             price_per_unit=offer.plan.price_per_unit(),
-            is_public_service=offer.plan.is_public_service,
+            type_of_plan=offer.plan.type_of_plan,
         )
