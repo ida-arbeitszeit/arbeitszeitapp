@@ -51,10 +51,6 @@ class TransactionRepository(interfaces.TransactionRepository):
     def __init__(self) -> None:
         self.transactions: List[Transaction] = []
 
-    def add(self, transaction: Transaction) -> None:
-        assert transaction not in self.transactions
-        self.transactions.append(transaction)
-
     def create_transaction(
         self,
         date: datetime,

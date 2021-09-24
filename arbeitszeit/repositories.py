@@ -154,10 +154,6 @@ class TransactionRepository(ABC):
         pass
 
     @abstractmethod
-    def add(self, transaction: Transaction) -> None:
-        pass
-
-    @abstractmethod
     def all_transactions_sent_by_account(self, account: Account) -> List[Transaction]:
         pass
 

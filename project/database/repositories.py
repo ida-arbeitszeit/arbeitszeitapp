@@ -235,6 +235,9 @@ class AccountRepository(repositories.AccountRepository):
             t.amount for t in sent
         )
 
+    def get_by_id(self, id: UUID) -> entities.Account:
+        return self.object_from_orm(Account.query.get(str(id)))
+
 
 @inject
 @dataclass
@@ -704,11 +707,11 @@ class TransactionRepository(repositories.TransactionRepository):
         return entities.Transaction(
             id=UUID(transaction.id),
             date=transaction.date,
-            sending_account=self.account_repository.object_from_orm(
-                transaction.account_from
+            sending_account=self.account_repository.get_by_id(
+                transaction.sending_account
             ),
-            receiving_account=self.account_repository.object_from_orm(
-                transaction.account_to
+            receiving_account=self.account_repository.get_by_id(
+                transaction.receiving_account
             ),
             amount=Decimal(transaction.amount),
             purpose=transaction.purpose,
@@ -732,9 +735,6 @@ class TransactionRepository(repositories.TransactionRepository):
         )
         self.db.session.add(transaction)
         return self.object_from_orm(transaction)
-
-    def add(self, transaction: entities.Transaction) -> None:
-        self.db.session.add(self.object_to_orm(transaction))
 
     def all_transactions_sent_by_account(
         self, account: entities.Account
