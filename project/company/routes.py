@@ -20,7 +20,10 @@ from arbeitszeit_web.create_offer import CreateOfferPresenter
 from arbeitszeit_web.delete_offer import DeleteOfferPresenter
 from arbeitszeit_web.delete_plan import DeletePlanPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
-from arbeitszeit_web.query_products import QueryProductsPresenter
+from arbeitszeit_web.query_products import (
+    QueryProductsController,
+    QueryProductsPresenter,
+)
 from project import database, error
 from project.database import (
     AccountRepository,
@@ -100,6 +103,7 @@ def arbeit(
 def suchen(
     query_products: use_cases.QueryProducts,
     presenter: QueryProductsPresenter,
+    controller: QueryProductsController,
 ):
     """search products in catalog."""
     if not user_is_company():
@@ -108,13 +112,8 @@ def suchen(
     template_name = "company/query_products.html"
     search_form = ProductSearchForm(request.form)
     if request.method == "POST":
-        query = search_form.data["search"] or None
-        search_field = search_form.data["select"]  # Name, Beschr., Kategorie
-        if search_field == "Name":
-            product_filter = use_cases.ProductFilter.by_name
-        elif search_field == "Beschreibung":
-            product_filter = use_cases.ProductFilter.by_description
-        response = query_products(query, product_filter)
+        use_case_request = controller.import_form_data(search_form)
+        response = query_products(use_case_request)
         view_model = presenter.present(response)
         return render_template(template_name, form=search_form, view_model=view_model)
     else:
