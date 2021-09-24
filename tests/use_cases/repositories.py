@@ -149,6 +149,13 @@ class OfferRepository(interfaces.OfferRepository):
         offer = self.get_by_id(id)
         self.offers.remove(offer)
 
+    def get_all_offers_belonging_to(self, plan_id: uuid.UUID) -> List[ProductOffer]:
+        offers = []
+        for offer in self.offers:
+            if offer.plan.id == plan_id:
+                offers.append(offer)
+        return offers
+
 
 @singleton
 class CompanyWorkerRepository(interfaces.CompanyWorkerRepository):
