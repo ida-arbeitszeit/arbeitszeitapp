@@ -458,11 +458,6 @@ class PlanRepository(repositories.PlanRepository):
     accounting_repository: AccountingRepository
     db: SQLAlchemy
 
-    def _approve(self, plan, decision, reason, approval_date):
-        plan.approved = decision
-        plan.approval_reason = reason
-        plan.approval_date = approval_date
-
     def object_from_orm(self, plan: Plan) -> entities.Plan:
         production_costs = entities.ProductionCosts(
             labour_cost=plan.costs_a,
@@ -483,9 +478,6 @@ class PlanRepository(repositories.PlanRepository):
             approved=plan.approved,
             approval_date=plan.approval_date,
             approval_reason=plan.approval_reason,
-            approve=lambda decision, reason, approval_date: self._approve(
-                plan, decision, reason, approval_date
-            ),
             is_active=plan.is_active,
             expired=plan.expired,
             renewed=plan.renewed,
@@ -537,6 +529,15 @@ class PlanRepository(repositories.PlanRepository):
         )
         self.db.session.add(plan)
         return self.object_from_orm(plan)
+
+    def approve_plan(self, plan: entities.Plan, approval_timestamp: datetime) -> None:
+        orm_object = self.object_to_orm(plan)
+        plan.approved = True
+        orm_object.approved = True
+        plan.approval_reason = "approved"
+        orm_object.approval_reason = "approved"
+        orm_object.approval_date = approval_timestamp
+        plan.approval_date = approval_timestamp
 
     def activate_plan(self, plan: entities.Plan, activation_date: datetime) -> None:
         plan.is_active = True

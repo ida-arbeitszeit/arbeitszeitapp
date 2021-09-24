@@ -371,7 +371,6 @@ class PlanRepository(interfaces.PlanRepository):
             approved=False,
             approval_date=None,
             approval_reason=None,
-            approve=lambda _1, _2, _3: None,
             expired=False,
             renewed=False,
             expiration_relative=None,
@@ -383,6 +382,11 @@ class PlanRepository(interfaces.PlanRepository):
 
     def get_plan_by_id(self, id: uuid.UUID) -> Plan:
         return self.plans[id]
+
+    def approve_plan(self, plan: Plan, approval_timestamp: datetime) -> None:
+        plan.approval_date = approval_timestamp
+        plan.approved = True
+        plan.approval_reason = "approved"
 
     def __len__(self) -> int:
         return len(self.plans)

@@ -36,16 +36,12 @@ class SeekApproval:
             if original_plan_id is None
             else self.plan_repository.get_plan_by_id(original_plan_id)
         )
-        is_approval = True
         approval_date = self.datetime_service.now()
-        if is_approval:
-            new_plan.approve(approval_date)
-            if original_plan:
-                self.plan_repository.renew_plan(original_plan)
-        else:
-            new_plan.deny(approval_date)
+        self.plan_repository.approve_plan(new_plan, approval_date)
+        if original_plan:
+            self.plan_repository.renew_plan(original_plan)
         assert new_plan.approval_reason
         return SeekApprovalResponse(
-            is_approved=is_approval,
+            is_approved=True,
             reason=new_plan.approval_reason,
         )
