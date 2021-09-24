@@ -61,6 +61,10 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
+    def approve_plan(self, plan: Plan, approval_timestamp: datetime) -> None:
+        pass
+
+    @abstractmethod
     def activate_plan(self, plan: Plan, activation_date: datetime) -> None:
         pass
 
@@ -151,10 +155,6 @@ class TransactionRepository(ABC):
         amount: Decimal,
         purpose: str,
     ) -> Transaction:
-        pass
-
-    @abstractmethod
-    def add(self, transaction: Transaction) -> None:
         pass
 
     @abstractmethod

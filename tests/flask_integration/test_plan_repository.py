@@ -160,3 +160,15 @@ def test_when_querying_for_plans_created_before_date_then_plans_created_after_th
     )
     assert len(plans) == 1
     assert plans[0].id == first_plan.id
+
+
+@injection_test
+def test_plans_that_were_set_to_expired_dont_show_up_in_active_plans(
+    repository: PlanRepository,
+    generator: PlanGenerator,
+) -> None:
+    plan = generator.create_plan()
+    repository.activate_plan(plan, datetime.now())
+    assert plan in list(repository.all_active_plans())
+    repository.set_plan_as_expired(plan)
+    assert plan not in list(repository.all_active_plans())

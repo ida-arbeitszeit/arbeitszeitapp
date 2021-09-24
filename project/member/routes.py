@@ -8,12 +8,12 @@ from arbeitszeit_web.query_products import (
     QueryProductsController,
     QueryProductsPresenter,
 )
-from project import database
 from project.database import (
     AccountRepository,
     CompanyRepository,
     MemberRepository,
     PlanRepository,
+    commit_changes,
 )
 from project.dependency_injection import with_injection
 from project.forms import ProductSearchForm
@@ -64,6 +64,7 @@ def suchen(
 
 
 @main_member.route("/member/pay_consumer_product", methods=["GET", "POST"])
+@commit_changes
 @login_required
 @with_injection
 def pay_consumer_product(
@@ -85,7 +86,6 @@ def pay_consumer_product(
                 plan,
                 pieces,
             )
-            database.commit_changes()
             flash("Produkt erfolgreich bezahlt.")
         except errors.PlanIsInactive:
             flash(
