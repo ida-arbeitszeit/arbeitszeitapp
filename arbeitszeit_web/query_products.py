@@ -51,7 +51,7 @@ class QueryProductsPresenter:
                         product_name=result.product_name,
                         seller_name=result.seller_name,
                         product_description=result.product_description,
-                        price_per_unit=f"{result.price_per_unit} Std.",
+                        price_per_unit=result.price_per_unit,
                         is_public_service="Ja" if result.is_public_service else "Nein",
                         contact_email=f"mailto:{result.seller_email}",
                     )
