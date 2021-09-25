@@ -5,7 +5,7 @@ from collections import defaultdict
 from datetime import datetime
 from decimal import Decimal
 from statistics import StatisticsError, mean
-from typing import Dict, Iterator, List, Set, Union
+from typing import Dict, Iterator, List, Optional, Set, Union
 
 from injector import inject, singleton
 
@@ -380,8 +380,8 @@ class PlanRepository(interfaces.PlanRepository):
         self.plans[plan.id] = plan
         return plan
 
-    def get_plan_by_id(self, id: uuid.UUID) -> Plan:
-        return self.plans[id]
+    def get_plan_by_id(self, id: uuid.UUID) -> Optional[Plan]:
+        return self.plans.get(id)
 
     def approve_plan(self, plan: Plan, approval_timestamp: datetime) -> None:
         plan.approval_date = approval_timestamp

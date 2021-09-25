@@ -27,6 +27,7 @@ class GetPlanSummary:
 
     def __call__(self, plan_id: UUID) -> PlanSummaryResponse:
         plan = self.plan_repository.get_plan_by_id(plan_id)
+        assert plan is not None
         return PlanSummaryResponse(
             product_name=plan.prd_name,
             description=plan.description,

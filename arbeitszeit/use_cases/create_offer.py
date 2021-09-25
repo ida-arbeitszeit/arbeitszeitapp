@@ -30,6 +30,7 @@ class CreateOffer:
 
     def __call__(self, offer_request: CreateOfferRequest) -> CreateOfferResponse:
         plan = self.plan_repository.get_plan_by_id(offer_request.plan_id)
+        assert plan is not None
         offer = self.offer_repository.create_offer(
             plan,
             self.datetime_service.now(),

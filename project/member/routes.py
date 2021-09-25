@@ -7,6 +7,7 @@ from flask_login import current_user, login_required
 from arbeitszeit import use_cases
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
+from arbeitszeit_web.pay_consumer_product import PayConsumerProductPresenter
 from arbeitszeit_web.query_products import (
     QueryProductsController,
     QueryProductsPresenter,
@@ -75,6 +76,7 @@ def pay_consumer_product(
     company_repository: CompanyRepository,
     member_repository: MemberRepository,
     plan_repository: PlanRepository,
+    presenter: PayConsumerProductPresenter,
 ):
     if not user_is_member():
         return redirect(url_for("auth.zurueck"))
@@ -87,12 +89,9 @@ def pay_consumer_product(
                 request.form["amount"],
             )
         )
-        if response.is_success:
-            flash("Produkt erfolgreich bezahlt.")
-        else:
-            flash(
-                "Der angegebene Plan ist nicht aktuell. Bitte wende dich an den Verkäufer, um eine aktuelle Plan-ID zu erhalten."
-            )
+        view_model = presenter.present(response)
+        for notification in view_model.notifications:
+            flash(notification)
     return render_template("member/pay_consumer_product.html")
 
 

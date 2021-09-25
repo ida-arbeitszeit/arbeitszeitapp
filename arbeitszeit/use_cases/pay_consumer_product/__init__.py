@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Optional, Protocol
 from uuid import UUID
 
 from injector import inject
@@ -14,6 +14,7 @@ from .consumer_product_transaction import (
     ConsumerProductTransaction,
     ConsumerProductTransactionFactory,
 )
+from .rejection_reason import RejectionReason
 
 
 class PayConsumerProductRequest(Protocol):
@@ -29,7 +30,11 @@ class PayConsumerProductRequest(Protocol):
 
 @dataclass
 class PayConsumerProductResponse:
-    is_success: bool
+    rejection_reason: Optional[RejectionReason]
+
+    @property
+    def is_accepted(self) -> bool:
+        return self.rejection_reason is None
 
 
 @inject
@@ -45,23 +50,32 @@ class PayConsumerProduct:
         try:
             return self._perform_buying_process(request)
         except errors.PlanIsInactive:
-            return PayConsumerProductResponse(is_success=False)
+            return PayConsumerProductResponse(
+                rejection_reason=RejectionReason.plan_inactive
+            )
+        except self.PlanNotFound:
+            return PayConsumerProductResponse(
+                rejection_reason=RejectionReason.plan_not_found
+            )
 
     def _perform_buying_process(
         self, request: PayConsumerProductRequest
     ) -> PayConsumerProductResponse:
-        plan = self.plan_repository.get_plan_by_id(request.get_plan_id())
-        self._ensure_plan_is_active(plan)
+        plan = self._get_active_plan(request)
         transaction = self._create_product_transaction(plan, request)
         transaction.record_purchase()
         transaction.exchange_currency()
-        return PayConsumerProductResponse(is_success=True)
+        return PayConsumerProductResponse(rejection_reason=None)
 
-    def _ensure_plan_is_active(self, plan: Plan) -> None:
+    def _get_active_plan(self, request: PayConsumerProductRequest) -> Plan:
+        plan = self.plan_repository.get_plan_by_id(request.get_plan_id())
+        if plan is None:
+            raise self.PlanNotFound("Plan could not be found")
         if not plan.is_active:
             raise errors.PlanIsInactive(
                 plan=plan,
             )
+        return plan
 
     def _create_product_transaction(
         self, plan: Plan, request: PayConsumerProductRequest
@@ -71,3 +85,6 @@ class PayConsumerProduct:
             plan=plan,
             amount=request.get_amount(),
         )
+
+    class PlanNotFound(ValueError):
+        pass

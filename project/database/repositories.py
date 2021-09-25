@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterator, List, Union
+from typing import Iterator, List, Optional, Union
 from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
@@ -332,6 +332,7 @@ class PurchaseRepository(repositories.PurchaseRepository):
 
     def object_from_orm(self, purchase: Purchase) -> entities.Purchase:
         plan = self.plan_repository.get_plan_by_id(purchase.plan_id)
+        assert plan is not None
         return entities.Purchase(
             purchase_date=purchase.purchase_date,
             plan=plan,
@@ -373,6 +374,7 @@ class ProductOfferRepository(repositories.OfferRepository):
 
     def object_from_orm(self, offer_orm: Offer) -> entities.ProductOffer:
         plan = self.plan_repository.get_plan_by_id(UUID(offer_orm.plan_id))
+        assert plan is not None
         return entities.ProductOffer(
             id=UUID(offer_orm.id),
             name=offer_orm.name,
@@ -490,10 +492,10 @@ class PlanRepository(repositories.PlanRepository):
     def object_to_orm(self, plan: entities.Plan) -> Plan:
         return Plan.query.get(str(plan.id))
 
-    def get_plan_by_id(self, id: UUID) -> entities.Plan:
+    def get_plan_by_id(self, id: UUID) -> Optional[entities.Plan]:
         plan_orm = Plan.query.filter_by(id=str(id)).first()
         if plan_orm is None:
-            raise PlanNotFound()
+            return None
         else:
             return self.object_from_orm(plan_orm)
 
