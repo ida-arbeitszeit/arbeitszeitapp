@@ -72,17 +72,22 @@ class MemberGenerator:
     email_generator: EmailGenerator
     member_repository: MemberRepository
 
-    def create_member(self, *, email: Optional[str] = None) -> Member:
+    def create_member(
+        self, *, email: Optional[str] = None, account: Optional[Account] = None
+    ) -> Member:
         if not email:
             email = self.email_generator.get_random_email()
         assert email is not None
+        if account is None:
+            account = self.account_generator.create_account(
+                account_type=AccountTypes.member
+            )
+
         return self.member_repository.create_member(
             email=email,
             name="Member name",
             password="password",
-            account=self.account_generator.create_account(
-                account_type=AccountTypes.member
-            ),
+            account=account,
         )
 
 
@@ -94,10 +99,18 @@ class CompanyGenerator:
     email_generator: EmailGenerator
 
     def create_company(
-        self, *, email: Optional[str] = None, name: str = "Company Name"
+        self,
+        *,
+        email: Optional[str] = None,
+        name: str = "Company Name",
+        labour_account: Optional[Account] = None,
     ) -> Company:
         if email is None:
             email = self.email_generator.get_random_email()
+        if labour_account is None:
+            labour_account = self.account_generator.create_account(
+                account_type=AccountTypes.a
+            )
         return self.company_repository.create_company(
             email=email,
             name=name,
@@ -108,12 +121,10 @@ class CompanyGenerator:
             resource_account=self.account_generator.create_account(
                 account_type=AccountTypes.r
             ),
-            labour_account=self.account_generator.create_account(
-                account_type=AccountTypes.a
-            ),
             products_account=self.account_generator.create_account(
                 account_type=AccountTypes.prd
             ),
+            labour_account=labour_account,
         )
 
 
@@ -135,7 +146,7 @@ class SocialAccountingGenerator:
 class AccountGenerator:
     account_repository: AccountRepository
 
-    def create_account(self, account_type) -> Account:
+    def create_account(self, account_type: AccountTypes = AccountTypes.a) -> Account:
         return self.account_repository.create_account(account_type)
 
 
