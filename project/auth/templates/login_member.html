@@ -4,30 +4,26 @@
 <div class="column is-4 is-offset-4">
     <h3 class="title">Login</h3>
     <div class="box">
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-          <div class="notification is-danger">
-              {{ messages[0] }}
-          </div>
-        {% endif %}
-        {% endwith %}
+        {% for field_name, field_errors in form.errors|dictsort if field_errors %}
+            {% for error in field_errors %}
+                <div class="notification is-danger">{{ error }}</div>
+            {% endfor %}
+        {% endfor %}
         <form method="POST" action="/member/login">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="field">
                 <div class="control">
-                    <input class="input is-large" type="email" name="email" placeholder="Your Email" autofocus="">
+                    {{ form.email(class_="input is-large", placeholder="Email") }}
                 </div>
             </div>
 
             <div class="field">
                 <div class="control">
-                    <input class="input is-large" type="password" name="password" placeholder="Your Password">
+                    {{ form.password(class_="input is-large", placeholder="Passwort") }}
                 </div>
             </div>
             <div class="field">
-                <label class="checkbox">
-                    <input type="checkbox">
-                    Remember me
-                </label>
+                {{ form.remember }} {{ form.remember.label }}
             </div>
             <button class="button is-block is-primary is-large is-fullwidth">Login</button>
         </form>

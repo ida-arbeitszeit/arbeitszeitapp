@@ -61,6 +61,10 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
+    def approve_plan(self, plan: Plan, approval_timestamp: datetime) -> None:
+        pass
+
+    @abstractmethod
     def activate_plan(self, plan: Plan, activation_date: datetime) -> None:
         pass
 
@@ -154,10 +158,6 @@ class TransactionRepository(ABC):
         pass
 
     @abstractmethod
-    def add(self, transaction: Transaction) -> None:
-        pass
-
-    @abstractmethod
     def all_transactions_sent_by_account(self, account: Account) -> List[Transaction]:
         pass
 
@@ -211,6 +211,10 @@ class OfferRepository(ABC):
 
     @abstractmethod
     def delete_offer(self, id: UUID) -> None:
+        pass
+
+    @abstractmethod
+    def get_all_offers_belonging_to(self, plan_id: UUID) -> List[ProductOffer]:
         pass
 
 

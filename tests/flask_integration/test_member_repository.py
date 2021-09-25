@@ -5,6 +5,7 @@ import pytest
 from arbeitszeit.entities import AccountTypes
 from project.database.repositories import AccountRepository, MemberRepository
 from project.error import MemberNotFound
+from tests.data_generators import MemberGenerator
 
 from .dependency_injection import injection_test
 
@@ -34,6 +35,15 @@ def test_that_members_cannot_be_retrieved_when_db_is_empty(
 
 
 @injection_test
+def test_that_member_can_be_retrieved_by_its_id(
+    repository: MemberRepository,
+    member_generator: MemberGenerator,
+):
+    expected_member = member_generator.create_member()
+    assert repository.get_member_by_id(expected_member.id) == expected_member
+
+
+@injection_test
 def test_cannot_find_member_by_email_before_it_was_added(
     member_repository: MemberRepository,
     account_repository: AccountRepository,
@@ -42,3 +52,19 @@ def test_cannot_find_member_by_email_before_it_was_added(
     account = account_repository.create_account(AccountTypes.member)
     member_repository.create_member("member@cp.org", "karl", "password", account)
     assert member_repository.has_member_with_email("member@cp.org")
+
+
+@injection_test
+def test_member_count_is_0_when_none_were_created(
+    repository: MemberRepository,
+) -> None:
+    assert repository.count_registered_members() == 0
+
+
+@injection_test
+def test_count_one_registered_member_when_one_was_created(
+    generator: MemberGenerator,
+    repository: MemberRepository,
+) -> None:
+    generator.create_member()
+    assert repository.count_registered_members() == 1

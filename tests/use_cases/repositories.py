@@ -51,10 +51,6 @@ class TransactionRepository(interfaces.TransactionRepository):
     def __init__(self) -> None:
         self.transactions: List[Transaction] = []
 
-    def add(self, transaction: Transaction) -> None:
-        assert transaction not in self.transactions
-        self.transactions.append(transaction)
-
     def create_transaction(
         self,
         date: datetime,
@@ -148,6 +144,13 @@ class OfferRepository(interfaces.OfferRepository):
     def delete_offer(self, id: uuid.UUID) -> None:
         offer = self.get_by_id(id)
         self.offers.remove(offer)
+
+    def get_all_offers_belonging_to(self, plan_id: uuid.UUID) -> List[ProductOffer]:
+        offers = []
+        for offer in self.offers:
+            if offer.plan.id == plan_id:
+                offers.append(offer)
+        return offers
 
 
 @singleton
@@ -368,7 +371,6 @@ class PlanRepository(interfaces.PlanRepository):
             approved=False,
             approval_date=None,
             approval_reason=None,
-            approve=lambda _1, _2, _3: None,
             expired=False,
             renewed=False,
             expiration_relative=None,
@@ -380,6 +382,11 @@ class PlanRepository(interfaces.PlanRepository):
 
     def get_plan_by_id(self, id: uuid.UUID) -> Plan:
         return self.plans[id]
+
+    def approve_plan(self, plan: Plan, approval_timestamp: datetime) -> None:
+        plan.approval_date = approval_timestamp
+        plan.approved = True
+        plan.approval_reason = "approved"
 
     def __len__(self) -> int:
         return len(self.plans)
