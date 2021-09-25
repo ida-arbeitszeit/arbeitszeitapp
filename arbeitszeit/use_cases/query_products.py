@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import enum
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import List, Optional
@@ -34,14 +35,24 @@ class QueriedProduct:
     is_public_service: bool
 
 
+class QueryProductsRequest(ABC):
+    @abstractmethod
+    def get_query_string(self) -> Optional[str]:
+        pass
+
+    @abstractmethod
+    def get_filter_category(self) -> ProductFilter:
+        pass
+
+
 @inject
 @dataclass
 class QueryProducts:
     offer_repository: OfferRepository
 
-    def __call__(
-        self, query: Optional[str], filter_by: ProductFilter
-    ) -> ProductQueryResponse:
+    def __call__(self, request: QueryProductsRequest) -> ProductQueryResponse:
+        query = request.get_query_string()
+        filter_by = request.get_filter_category()
         if query is None:
             found_offers = self.offer_repository.all_active_offers()
         elif filter_by == ProductFilter.by_name:

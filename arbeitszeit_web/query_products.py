@@ -1,7 +1,41 @@
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Protocol
 
-from arbeitszeit.use_cases.query_products import ProductQueryResponse
+from arbeitszeit.use_cases.query_products import (
+    ProductFilter,
+    ProductQueryResponse,
+    QueryProductsRequest,
+)
+
+
+class QueryProductsFormData(Protocol):
+    def get_query_string(self) -> str:
+        ...
+
+    def get_category_string(self) -> str:
+        ...
+
+
+@dataclass
+class QueryProductsRequestImpl(QueryProductsRequest):
+    query: Optional[str]
+    filter_category: ProductFilter
+
+    def get_query_string(self) -> Optional[str]:
+        return self.query
+
+    def get_filter_category(self) -> ProductFilter:
+        return self.filter_category
+
+
+class QueryProductsController:
+    def import_form_data(self, form: QueryProductsFormData) -> QueryProductsRequest:
+        query = form.get_query_string().strip() or None
+        if form.get_category_string() == "Beschreibung":
+            filter_category = ProductFilter.by_description
+        else:
+            filter_category = ProductFilter.by_name
+        return QueryProductsRequestImpl(query=query, filter_category=filter_category)
 
 
 @dataclass
