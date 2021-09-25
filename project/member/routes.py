@@ -4,7 +4,7 @@ from uuid import UUID
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
 
-from arbeitszeit import errors, use_cases
+from arbeitszeit import use_cases
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.query_products import (
@@ -80,16 +80,16 @@ def pay_consumer_product(
         return redirect(url_for("auth.zurueck"))
 
     if request.method == "POST":
-        try:
-            pay_consumer_product(
-                PayConsumerProductRequestImpl(
-                    current_user.id,
-                    request.form["plan_id"],
-                    request.form["amount"],
-                )
+        response = pay_consumer_product(
+            PayConsumerProductRequestImpl(
+                current_user.id,
+                request.form["plan_id"],
+                request.form["amount"],
             )
+        )
+        if response.is_success:
             flash("Produkt erfolgreich bezahlt.")
-        except errors.PlanIsInactive:
+        else:
             flash(
                 "Der angegebene Plan ist nicht aktuell. Bitte wende dich an den Verkäufer, um eine aktuelle Plan-ID zu erhalten."
             )

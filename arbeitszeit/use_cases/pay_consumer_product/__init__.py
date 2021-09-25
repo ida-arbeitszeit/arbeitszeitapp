@@ -27,8 +27,9 @@ class PayConsumerProductRequest(Protocol):
         ...
 
 
+@dataclass
 class PayConsumerProductResponse:
-    pass
+    is_success: bool
 
 
 @inject
@@ -41,12 +42,20 @@ class PayConsumerProduct:
     def __call__(
         self, request: PayConsumerProductRequest
     ) -> PayConsumerProductResponse:
+        try:
+            return self._perform_buying_process(request)
+        except errors.PlanIsInactive:
+            return PayConsumerProductResponse(is_success=False)
+
+    def _perform_buying_process(
+        self, request: PayConsumerProductRequest
+    ) -> PayConsumerProductResponse:
         plan = self.plan_repository.get_plan_by_id(request.get_plan_id())
         self._ensure_plan_is_active(plan)
         transaction = self._create_product_transaction(plan, request)
         transaction.record_purchase()
         transaction.exchange_currency()
-        return PayConsumerProductResponse()
+        return PayConsumerProductResponse(is_success=True)
 
     def _ensure_plan_is_active(self, plan: Plan) -> None:
         if not plan.is_active:

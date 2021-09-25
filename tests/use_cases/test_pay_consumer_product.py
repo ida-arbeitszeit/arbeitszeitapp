@@ -3,9 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from uuid import UUID
 
-import pytest
-
-from arbeitszeit import errors
 from arbeitszeit.entities import PurposesOfPurchases
 from arbeitszeit.use_cases import PayConsumerProduct
 from tests.data_generators import MemberGenerator, PlanGenerator
@@ -16,7 +13,7 @@ from .repositories import AccountRepository, PurchaseRepository, TransactionRepo
 
 
 @injection_test
-def test_error_is_raised_if_plan_is_not_active_yet(
+def test_payment_fails_if_plan_isnt_active_yet(
     pay_consumer_product: PayConsumerProduct,
     member_generator: MemberGenerator,
     plan_generator: PlanGenerator,
@@ -24,12 +21,12 @@ def test_error_is_raised_if_plan_is_not_active_yet(
     sender = member_generator.create_member()
     plan = plan_generator.create_plan()
     pieces = 3
-    with pytest.raises(errors.PlanIsInactive):
-        pay_consumer_product(make_request(sender.id, plan.id, pieces))
+    response = pay_consumer_product(make_request(sender.id, plan.id, pieces))
+    assert not response.is_success
 
 
 @injection_test
-def test_error_is_raised_if_plan_is_expired(
+def test_payment_is_unsuccessful_if_plan_is_expired(
     pay_consumer_product: PayConsumerProduct,
     member_generator: MemberGenerator,
     plan_generator: PlanGenerator,
@@ -42,8 +39,8 @@ def test_error_is_raised_if_plan_is_expired(
     )
     pieces = 3
     plan.expired = True
-    with pytest.raises(errors.PlanIsInactive):
-        pay_consumer_product(make_request(sender.id, plan.id, pieces))
+    response = pay_consumer_product(make_request(sender.id, plan.id, pieces))
+    assert not response.is_success
 
 
 @injection_test
