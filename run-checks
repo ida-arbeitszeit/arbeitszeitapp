@@ -2,6 +2,6 @@
 
 set -e
 
-flake8
-mypy
-pytest
+echo "Running: flake8 ..."; flake8
+echo "Running: mypy ..."; mypy
+echo "Running: pytest ..."; pytest
