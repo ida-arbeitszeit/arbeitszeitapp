@@ -18,6 +18,12 @@ class ProductSearchForm(Form):
         validators=[validators.InputRequired(message="Suchbegriff erforderlich")],
     )
 
+    def get_query_string(self) -> str:
+        return self.data["search"]
+
+    def get_category_string(self) -> str:
+        return self.data["select"]
+
 
 class RegisterForm(Form):
     email = StringField(

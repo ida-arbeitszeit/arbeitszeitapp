@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
-from typing import Callable, List, Optional, Union
+from typing import List, Optional, Union
 from uuid import UUID
 
 
@@ -113,64 +113,28 @@ class ProductionCosts:
         return self.labour_cost + self.resource_cost + self.means_cost
 
 
+@dataclass
 class Plan:
-    def __init__(
-        self,
-        id: UUID,
-        plan_creation_date: datetime,
-        planner: Company,
-        production_costs: ProductionCosts,
-        prd_name: str,
-        prd_unit: str,
-        prd_amount: int,
-        description: str,
-        timeframe: int,
-        is_public_service: bool,
-        approved: bool,
-        approval_date: Optional[datetime],
-        approval_reason: Optional[str],
-        approve: Callable[[bool, str, datetime], None],
-        is_active: bool,
-        expired: bool,
-        renewed: bool,
-        activation_date: Optional[datetime],
-        expiration_relative: Optional[int],
-        expiration_date: Optional[datetime],
-        last_certificate_payout: Optional[datetime],
-    ) -> None:
-        self.id = id
-        self.plan_creation_date = plan_creation_date
-        self.planner = planner
-        self.production_costs = production_costs
-        self.prd_name = prd_name
-        self.prd_unit = prd_unit
-        self.prd_amount = prd_amount
-        self.description = description
-        self.timeframe = timeframe
-        self.is_public_service = is_public_service
-        self.approved = approved
-        self.approval_date = approval_date
-        self.approval_reason = approval_reason
-        self._approve_call = approve
-        self.is_active = is_active
-        self.expired = expired
-        self.renewed = renewed
-        self.expiration_relative = expiration_relative
-        self.expiration_date = expiration_date
-        self.activation_date = activation_date
-        self.last_certificate_payout = last_certificate_payout
-
-    def approve(self, approval_date: datetime) -> None:
-        self.approved = True
-        self.approval_date = approval_date
-        self.approval_reason = "approved"
-        self._approve_call(True, "approved", approval_date)
-
-    def deny(self, denial_date: datetime) -> None:
-        self.approved = False
-        self.approval_date = denial_date
-        self.approval_reason = "not approved"
-        self._approve_call(False, "not approved", denial_date)
+    id: UUID
+    plan_creation_date: datetime
+    planner: Company
+    production_costs: ProductionCosts
+    prd_name: str
+    prd_unit: str
+    prd_amount: int
+    description: str
+    timeframe: int
+    is_public_service: bool
+    approved: bool
+    approval_date: Optional[datetime]
+    approval_reason: Optional[str]
+    is_active: bool
+    expired: bool
+    renewed: bool
+    activation_date: Optional[datetime]
+    expiration_relative: Optional[int]
+    expiration_date: Optional[datetime]
+    last_certificate_payout: Optional[datetime]
 
     def price_per_unit(self) -> Decimal:
         cost_per_unit = self.production_costs.total_cost() / self.prd_amount

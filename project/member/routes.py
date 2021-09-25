@@ -4,13 +4,16 @@ from flask_login import current_user, login_required
 from arbeitszeit import errors, use_cases
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
-from arbeitszeit_web.query_products import QueryProductsPresenter
-from project import database
+from arbeitszeit_web.query_products import (
+    QueryProductsController,
+    QueryProductsPresenter,
+)
 from project.database import (
     AccountRepository,
     CompanyRepository,
     MemberRepository,
     PlanRepository,
+    commit_changes,
 )
 from project.dependency_injection import with_injection
 from project.forms import ProductSearchForm
@@ -44,19 +47,15 @@ def my_purchases(
 def suchen(
     query_products: use_cases.QueryProducts,
     presenter: QueryProductsPresenter,
+    controller: QueryProductsController,
 ):
     if not user_is_member():
         return redirect(url_for("auth.zurueck"))
     template_name = "member/query_products.html"
     search_form = ProductSearchForm(request.form)
     if request.method == "POST" and search_form.validate():
-        query = search_form.data["search"] or None
-        search_field = search_form.data["select"]  # Name, Beschr., Kategorie
-        if search_field == "Name":
-            product_filter = use_cases.ProductFilter.by_name
-        elif search_field == "Beschreibung":
-            product_filter = use_cases.ProductFilter.by_description
-        response = query_products(query, product_filter)
+        use_case_request = controller.import_form_data(search_form)
+        response = query_products(use_case_request)
         view_model = presenter.present(response)
         return render_template(template_name, form=search_form, view_model=view_model)
     else:
@@ -65,6 +64,7 @@ def suchen(
 
 
 @main_member.route("/member/pay_consumer_product", methods=["GET", "POST"])
+@commit_changes
 @login_required
 @with_injection
 def pay_consumer_product(
@@ -86,7 +86,6 @@ def pay_consumer_product(
                 plan,
                 pieces,
             )
-            database.commit_changes()
             flash("Produkt erfolgreich bezahlt.")
         except errors.PlanIsInactive:
             flash(

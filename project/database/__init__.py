@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from functools import wraps
+from typing import Any, Callable
+
 from injector import inject
 
 from arbeitszeit import entities
@@ -42,8 +45,14 @@ def get_social_accounting(
     return accounting_repo.get_or_create_social_accounting()
 
 
-def commit_changes():
-    db.session.commit()
+def commit_changes(function: Callable) -> Callable:
+    @wraps(function)
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
+        result = function(*args, **kwargs)
+        db.session.commit()
+        return result
+
+    return wrapper
 
 
 def get_user_by_mail(email) -> Member:
