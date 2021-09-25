@@ -2,6 +2,7 @@
 
 set -e
 
-flake8
-mypy
-pytest
+echo "Running: black ..."; black . --check
+echo "Running: flake8 ..."; flake8
+echo "Running: mypy ..."; mypy
+echo "Running: pytest ..."; pytest
