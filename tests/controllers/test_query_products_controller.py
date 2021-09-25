@@ -52,6 +52,12 @@ class QueryProductsControllerTests(TestCase):
         )
         self.assertEqual(request.get_filter_category(), ProductFilter.by_name)
 
+    def test_that_default_request_model_includes_no_search_query(
+        self,
+    ) -> None:
+        request = self.controller.import_form_data(form=None)
+        self.assertTrue(request.get_query_string() is None)
+
 
 def make_fake_form(
     query: Optional[str] = None, filter_category: Optional[str] = None
