@@ -8,6 +8,24 @@ from wtforms import (
 )
 
 
+class FieldMustExist:
+    def __init__(self, message: str) -> None:
+        self.message = message
+
+    def __call__(self, form, field):
+        if not self._field_has_data(field):
+            if self.message is None:
+                message = field.gettext("This field is required.")
+            else:
+                message = self.message
+
+            field.errors[:] = []
+            raise validators.StopValidation(message)
+
+    def _field_has_data(self, field):
+        return field.raw_data
+
+
 class ProductSearchForm(Form):
     choices = [("Name", "Name"), ("Beschreibung", "Beschreibung")]
     select = SelectField(
@@ -16,7 +34,7 @@ class ProductSearchForm(Form):
     search = StringField(
         "Suchbegriff",
         validators=[
-            validators.InputRequired(message="Angabe erforderlich"),
+            FieldMustExist(message="Angabe erforderlich"),
         ],
     )
 

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from flask import Response, render_template_string
+from flask import Response, render_template
 
 from arbeitszeit import use_cases
 from arbeitszeit_web.query_products import (
@@ -44,6 +44,6 @@ class QueryProductsView:
         return Response(self._render_response_content(view_model))
 
     def _render_response_content(self, view_model: QueryProductsViewModel) -> Response:
-        return render_template_string(
+        return render_template(
             self.template_name, form=self.search_form, view_model=view_model
         )
