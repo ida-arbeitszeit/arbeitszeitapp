@@ -13,7 +13,12 @@ class ProductSearchForm(Form):
     select = SelectField(
         "Nach Produkten suchen", choices=choices, validators=[validators.DataRequired()]
     )
-    search = StringField("Suchbegriff")
+    search = StringField(
+        "Suchbegriff",
+        validators=[
+            validators.InputRequired(message="Angabe erforderlich"),
+        ],
+    )
 
     def get_query_string(self) -> str:
         return self.data["search"]
