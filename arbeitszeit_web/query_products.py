@@ -1,4 +1,5 @@
 from dataclasses import asdict, dataclass
+from decimal import Decimal
 from typing import Any, Dict, List, Optional, Protocol
 
 from arbeitszeit.use_cases.query_products import (
@@ -49,7 +50,7 @@ class ResultTableRow:
     product_name: str
     seller_name: str
     product_description: str
-    price_per_unit: str
+    price_per_unit: Decimal
     is_public_service: str
     contact_email: str
 
