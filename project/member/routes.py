@@ -53,7 +53,7 @@ def suchen(
         return redirect(url_for("auth.zurueck"))
     template_name = "member/query_products.html"
     search_form = ProductSearchForm(request.form)
-    if request.method == "POST":
+    if request.method == "POST" and search_form.validate():
         use_case_request = controller.import_form_data(search_form)
         response = query_products(use_case_request)
         view_model = presenter.present(response)
