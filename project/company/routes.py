@@ -20,8 +20,11 @@ from arbeitszeit_web.create_offer import CreateOfferPresenter
 from arbeitszeit_web.delete_offer import DeleteOfferPresenter
 from arbeitszeit_web.delete_plan import DeletePlanPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
-from arbeitszeit_web.query_products import QueryProductsPresenter
-from project import database, error
+from arbeitszeit_web.query_products import (
+    QueryProductsController,
+    QueryProductsPresenter,
+)
+from project import error
 from project.database import (
     AccountRepository,
     CompanyRepository,
@@ -29,6 +32,7 @@ from project.database import (
     MemberRepository,
     PlanRepository,
     ProductOfferRepository,
+    commit_changes,
 )
 from project.dependency_injection import with_injection
 from project.forms import ProductSearchForm
@@ -63,6 +67,7 @@ def profile(
 
 
 @main_company.route("/company/work", methods=["GET", "POST"])
+@commit_changes
 @login_required
 @with_injection
 def arbeit(
@@ -85,7 +90,6 @@ def arbeit(
             )
         except errors.WorkerAlreadyAtCompany:
             flash("Mitglied ist bereits in diesem Betrieb beschäftigt.")
-        database.commit_changes()
         return redirect(url_for("main_company.arbeit"))
     elif request.method == "GET":
         workers_list = company_worker_repository.get_company_workers(
@@ -100,6 +104,7 @@ def arbeit(
 def suchen(
     query_products: use_cases.QueryProducts,
     presenter: QueryProductsPresenter,
+    controller: QueryProductsController,
 ):
     """search products in catalog."""
     if not user_is_company():
@@ -108,13 +113,8 @@ def suchen(
     template_name = "company/query_products.html"
     search_form = ProductSearchForm(request.form)
     if request.method == "POST":
-        query = search_form.data["search"] or None
-        search_field = search_form.data["select"]  # Name, Beschr., Kategorie
-        if search_field == "Name":
-            product_filter = use_cases.ProductFilter.by_name
-        elif search_field == "Beschreibung":
-            product_filter = use_cases.ProductFilter.by_description
-        response = query_products(query, product_filter)
+        use_case_request = controller.import_form_data(search_form)
+        response = query_products(use_case_request)
         view_model = presenter.present(response)
         return render_template(template_name, form=search_form, view_model=view_model)
     else:
@@ -138,6 +138,7 @@ def my_purchases(
 
 
 @main_company.route("/company/create_plan", methods=["GET", "POST"])
+@commit_changes
 @login_required
 @with_injection
 def create_plan(
@@ -172,7 +173,6 @@ def create_plan(
         )
         new_plan = create_plan_from_proposal(current_user.id, proposal)
         approval_response = seek_approval(new_plan.plan_id, original_plan_uuid)
-        database.commit_changes()
 
         if approval_response.is_approved:
             flash(
@@ -225,6 +225,7 @@ def my_plans(
 
 @main_company.route("/company/delete_plan/<uuid:plan_id>", methods=["GET", "POST"])
 @login_required
+@commit_changes
 @with_injection
 def delete_plan(plan_id: UUID, delete_plan: DeletePlan, presenter: DeletePlanPresenter):
     if not user_is_company():
@@ -238,6 +239,7 @@ def delete_plan(plan_id: UUID, delete_plan: DeletePlan, presenter: DeletePlanPre
 
 
 @main_company.route("/company/create_offer/<uuid:plan_id>", methods=["GET", "POST"])
+@commit_changes
 @login_required
 @with_injection
 def create_offer(
@@ -291,6 +293,7 @@ def my_accounts(
 
 
 @main_company.route("/company/transfer_to_worker", methods=["GET", "POST"])
+@commit_changes
 @login_required
 @with_injection
 def transfer_to_worker(
@@ -311,7 +314,6 @@ def transfer_to_worker(
                 worker,
                 amount,
             )
-            database.commit_changes()
             flash("Erfolgreich überwiesen.")
 
         except errors.WorkerNotAtCompany:
@@ -323,6 +325,7 @@ def transfer_to_worker(
 
 
 @main_company.route("/company/transfer_to_company", methods=["GET", "POST"])
+@commit_changes
 @login_required
 @with_injection
 def transfer_to_company(
@@ -353,7 +356,6 @@ def transfer_to_company(
                 pieces,
                 purpose,
             )
-            database.commit_changes()
             flash("Erfolgreich bezahlt.")
         except errors.PlanIsInactive:
             flash(
@@ -387,6 +389,7 @@ def my_offers(offer_repository: ProductOfferRepository):
 
 
 @main_company.route("/company/delete_offer/<uuid:offer_id>", methods=["GET", "POST"])
+@commit_changes
 @login_required
 @with_injection
 def delete_offer(

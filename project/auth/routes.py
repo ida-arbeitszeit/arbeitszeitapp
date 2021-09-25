@@ -1,4 +1,4 @@
-from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+from flask import Blueprint, redirect, render_template, request, session, url_for
 from flask_login import login_required, login_user, logout_user
 from werkzeug.security import check_password_hash
 
@@ -6,6 +6,7 @@ from arbeitszeit.errors import CompanyAlreadyExists, MemberAlreadyExists
 from arbeitszeit.use_cases import RegisterCompany, RegisterMember
 from project import database
 from project.dependency_injection import with_injection
+from project.forms import LoginForm, RegisterForm
 
 auth = Blueprint("auth", __name__, template_folder="templates", static_folder="static")
 
@@ -22,89 +23,81 @@ def help():
 
 
 # Member
-@auth.route("/member/signup")
-def signup_member():
-    return render_template("signup_member.html")
-
-
-@auth.route("/member/signup", methods=["POST"])
+@auth.route("/member/signup", methods=["GET", "POST"])
 @with_injection
-def signup_member_post(register_member: RegisterMember):
-    email = request.form.get("email")
-    name = request.form.get("name")
-    password = request.form.get("password")
-    assert email and name and password
+def signup_member(register_member: RegisterMember):
+    register_form = RegisterForm(request.form)
+    if request.method == "POST" and register_form.validate():
+        email = register_form.data["email"]
+        name = register_form.data["name"]
+        password = register_form.data["password"]
+        try:
+            register_member(email, name, password)
+            return redirect(url_for("auth.login_member"))
+        except MemberAlreadyExists:
+            register_form.email.errors.append("Emailadresse existiert bereits")
 
-    try:
-        register_member(email, name, password)
-    except MemberAlreadyExists:
-        flash("Email address already exists")
-        return redirect(url_for("auth.signup_member"))
-
-    return redirect(url_for("auth.login_member"))
+    return render_template("signup_member.html", form=register_form)
 
 
-@auth.route("/member/login")
+@auth.route("/member/login", methods=["GET", "POST"])
 def login_member():
-    return render_template("login_member.html")
+    login_form = LoginForm(request.form)
+    if request.method == "POST" and login_form.validate():
+        email = login_form.data["email"]
+        password = login_form.data["password"]
+        remember = True if login_form.data["remember"] else False
 
+        member = database.get_user_by_mail(email)
+        if not member:
+            login_form.email.errors.append("Emailadresse nicht korrekt")
+        elif not check_password_hash(member.password, password):
+            login_form.password.errors.append("Passwort nicht korrekt")
+        else:
+            session["user_type"] = "member"
+            login_user(member, remember=remember)
+            return redirect(url_for("main_member.profile"))
 
-@auth.route("/member/login", methods=["POST"])
-def login_member_post():
-    email = request.form.get("email")
-    password = request.form.get("password")
-    remember = True if request.form.get("remember") else False
-    member = database.get_user_by_mail(email)
-
-    if not member or not check_password_hash(member.password, password):
-        flash("Please check your login details and try again.")
-        return redirect(url_for("auth.login_member"))
-
-    session["user_type"] = "member"
-    login_user(member, remember=remember)
-    return redirect(url_for("main_member.profile"))
+    return render_template("login_member.html", form=login_form)
 
 
 # Company
-@auth.route("/company/login")
+@auth.route("/company/login", methods=["GET", "POST"])
 def login_company():
-    return render_template("login_company.html")
+    login_form = LoginForm(request.form)
+    if request.method == "POST" and login_form.validate():
+        email = login_form.data["email"]
+        password = login_form.data["password"]
+        remember = True if login_form.data["remember"] else False
+
+        company = database.get_company_by_mail(email)
+        if not company:
+            login_form.email.errors.append("Emailadresse nicht korrekt")
+        elif not check_password_hash(company.password, password):
+            login_form.password.errors.append("Passwort nicht korrekt")
+        else:
+            session["user_type"] = "company"
+            login_user(company, remember=remember)
+            return redirect(url_for("main_company.profile"))
+
+    return render_template("login_company.html", form=login_form)
 
 
-@auth.route("/company/login", methods=["POST"])
-def login_company_post():
-    email = request.form.get("email")
-    password = request.form.get("password")
-    remember = True if request.form.get("remember") else False
-    company = database.get_company_by_mail(email)
-
-    if not company or not check_password_hash(company.password, password):
-        flash("Please check your login details and try again.")
-        return redirect(url_for("auth.login_company"))
-
-    session["user_type"] = "company"
-    login_user(company, remember=remember)
-    return redirect(url_for("main_company.profile"))
-
-
-@auth.route("/company/signup")
-def signup_company():
-    return render_template("signup_company.html")
-
-
-@auth.route("/company/signup", methods=["POST"])
+@auth.route("/company/signup", methods=["GET", "POST"])
 @with_injection
-def signup_company_post(register_company: RegisterCompany):
-    email = request.form.get("email")
-    name = request.form.get("name")
-    password = request.form.get("password")
-    assert email and name and password
-    try:
-        register_company(email, name, password)
-    except CompanyAlreadyExists:
-        flash("Email address already exists")
-        return redirect(url_for("auth.signup_company"))
-    return redirect(url_for("auth.login_company"))
+def signup_company(register_company: RegisterCompany):
+    register_form = RegisterForm(request.form)
+    if request.method == "POST" and register_form.validate():
+        email = register_form.data["email"]
+        name = register_form.data["name"]
+        password = register_form.data["password"]
+        try:
+            register_company(email, name, password)
+            return redirect(url_for("auth.login_company"))
+        except CompanyAlreadyExists:
+            register_form.email.errors.append("Emailadresse existiert bereits")
+
+    return render_template("signup_company.html", form=register_form)
 
 
 # logout
