@@ -29,12 +29,18 @@ class QueryProductsRequestImpl(QueryProductsRequest):
 
 
 class QueryProductsController:
-    def import_form_data(self, form: QueryProductsFormData) -> QueryProductsRequest:
-        query = form.get_query_string().strip() or None
-        if form.get_category_string() == "Beschreibung":
-            filter_category = ProductFilter.by_description
-        else:
+    def import_form_data(
+        self, form: Optional[QueryProductsFormData]
+    ) -> QueryProductsRequest:
+        if form is None:
             filter_category = ProductFilter.by_name
+            query = None
+        else:
+            query = form.get_query_string().strip() or None
+            if form.get_category_string() == "Beschreibung":
+                filter_category = ProductFilter.by_description
+            else:
+                filter_category = ProductFilter.by_name
         return QueryProductsRequestImpl(query=query, filter_category=filter_category)
 
 

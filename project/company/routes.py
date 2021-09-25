@@ -106,20 +106,19 @@ def suchen(
     presenter: QueryProductsPresenter,
     controller: QueryProductsController,
 ):
-    """search products in catalog."""
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
     template_name = "company/query_products.html"
     search_form = ProductSearchForm(request.form)
     if request.method == "POST":
+        search_form.validate()
         use_case_request = controller.import_form_data(search_form)
-        response = query_products(use_case_request)
-        view_model = presenter.present(response)
-        return render_template(template_name, form=search_form, view_model=view_model)
     else:
-        view_model = presenter.get_empty_view_model()
-        return render_template(template_name, form=search_form, view_model=view_model)
+        use_case_request = controller.import_form_data(None)
+    response = query_products(use_case_request)
+    view_model = presenter.present(response)
+    return render_template(template_name, form=search_form, view_model=view_model)
 
 
 @main_company.route("/company/kaeufe")
