@@ -21,6 +21,7 @@ from project.database import (
 )
 from project.dependency_injection import with_injection
 from project.forms import ProductSearchForm
+from project.views import QueryProductsView
 
 main_member = Blueprint(
     "main_member", __name__, template_folder="templates", static_folder="static"
@@ -57,14 +58,13 @@ def suchen(
         return redirect(url_for("auth.zurueck"))
     template_name = "member/query_products.html"
     search_form = ProductSearchForm(request.form)
-    if request.method == "POST" and search_form.validate():
-        use_case_request = controller.import_form_data(search_form)
-        response = query_products(use_case_request)
-        view_model = presenter.present(response)
-        return render_template(template_name, form=search_form, view_model=view_model)
+    view = QueryProductsView(
+        search_form, query_products, presenter, controller, template_name
+    )
+    if request.method == "POST":
+        return view.respond_to_post()
     else:
-        view_model = presenter.get_empty_view_model()
-        return render_template(template_name, form=search_form, view_model=view_model)
+        return view.respond_to_get()
 
 
 @main_member.route("/member/pay_consumer_product", methods=["GET", "POST"])

@@ -73,7 +73,11 @@ class MemberGenerator:
     member_repository: MemberRepository
 
     def create_member(
-        self, *, email: Optional[str] = None, account: Optional[Account] = None
+        self,
+        *,
+        email: Optional[str] = None,
+        account: Optional[Account] = None,
+        password: str = "password",
     ) -> Member:
         if not email:
             email = self.email_generator.get_random_email()
@@ -86,7 +90,7 @@ class MemberGenerator:
         return self.member_repository.create_member(
             email=email,
             name="Member name",
-            password="password",
+            password=password,
             account=account,
         )
 
@@ -104,6 +108,7 @@ class CompanyGenerator:
         email: Optional[str] = None,
         name: str = "Company Name",
         labour_account: Optional[Account] = None,
+        password: str = "password",
     ) -> Company:
         if email is None:
             email = self.email_generator.get_random_email()
@@ -114,7 +119,7 @@ class CompanyGenerator:
         return self.company_repository.create_company(
             email=email,
             name=name,
-            password="password",
+            password=password,
             means_account=self.account_generator.create_account(
                 account_type=AccountTypes.p
             ),

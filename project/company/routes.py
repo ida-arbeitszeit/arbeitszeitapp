@@ -37,6 +37,7 @@ from project.database import (
 from project.dependency_injection import with_injection
 from project.forms import ProductSearchForm
 from project.models import Company, Plan
+from project.views import QueryProductsView
 
 main_company = Blueprint(
     "main_company", __name__, template_folder="templates", static_folder="static"
@@ -106,20 +107,18 @@ def suchen(
     presenter: QueryProductsPresenter,
     controller: QueryProductsController,
 ):
-    """search products in catalog."""
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
     template_name = "company/query_products.html"
     search_form = ProductSearchForm(request.form)
+    view = QueryProductsView(
+        search_form, query_products, presenter, controller, template_name
+    )
     if request.method == "POST":
-        use_case_request = controller.import_form_data(search_form)
-        response = query_products(use_case_request)
-        view_model = presenter.present(response)
-        return render_template(template_name, form=search_form, view_model=view_model)
+        return view.respond_to_post()
     else:
-        view_model = presenter.get_empty_view_model()
-        return render_template(template_name, form=search_form, view_model=view_model)
+        return view.respond_to_get()
 
 
 @main_company.route("/company/kaeufe")
