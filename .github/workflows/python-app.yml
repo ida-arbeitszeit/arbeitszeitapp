@@ -11,20 +11,27 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.9
       uses: actions/setup-python@v2
       with:
         python-version: 3.9
+    - uses: actions/cache@v2
     - name: Install dependencies
-      run: |
+      id: cache-venv
+      with:
+        path: ./.venv/
+        key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements*.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-venv-    
+    - run: |
+        python -m venv ./.venv && . ./.venv/bin/activate
         python -m pip install --upgrade pip
         pip install black flake8 mypy pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      if: steps.cache-venv.outputs.cache-hit != 'true'
     - name: Test with ./run-checks
       run: |
-        ./run-checks
+        . ./.venv/bin/activate && ./run-checks
