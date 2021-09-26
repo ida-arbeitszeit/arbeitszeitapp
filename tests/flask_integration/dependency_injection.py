@@ -33,6 +33,7 @@ class ViewTestCase(TestCase):
             "SQLALCHEMY_TRACK_MODIFICATIONS": False,
             "SECRET_KEY": "dev secret key",
             "WTF_CSRF_ENABLED": False,
+            "ENV": "development",
         }
         self.app = create_app(config=config, db=db)
         with self.app.app_context():
