@@ -94,14 +94,14 @@ class OfferRepository(interfaces.OfferRepository):
         self.offers: List[ProductOffer] = []
         self.plan_repository = plan_repository
 
-    def all_active_offers(self) -> Iterator[ProductOffer]:
+    def get_all_offers(self) -> Iterator[ProductOffer]:
         yield from self.offers
 
-    def count_active_offers_without_plan_duplicates(self) -> int:
+    def count_all_offers_without_plan_duplicates(self) -> int:
         offers = []
         plans_associated = []
         for offer in self.offers:
-            if offer.plan in plans_associated or not offer.active:
+            if offer.plan in plans_associated:
                 pass
             else:
                 offers.append(offer)
@@ -128,7 +128,6 @@ class OfferRepository(interfaces.OfferRepository):
         offer = ProductOffer(
             id=uuid.uuid4(),
             name=name,
-            active=True,
             description=description,
             plan=plan,
         )

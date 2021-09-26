@@ -1,6 +1,6 @@
+from datetime import datetime
 from decimal import Decimal
 from typing import Union
-from datetime import datetime
 
 from arbeitszeit.entities import ProductionCosts
 from arbeitszeit.use_cases import GetStatistics
