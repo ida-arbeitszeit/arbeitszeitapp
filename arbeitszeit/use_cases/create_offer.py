@@ -5,7 +5,6 @@ from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.repositories import OfferRepository, PlanRepository
-from arbeitszeit.errors import PlanIsInactive
 
 
 @dataclass
@@ -31,8 +30,7 @@ class CreateOffer:
 
     def __call__(self, offer_request: CreateOfferRequest) -> CreateOfferResponse:
         plan = self.plan_repository.get_plan_by_id(offer_request.plan_id)
-        if not plan.is_active:
-            raise PlanIsInactive(plan)
+        assert plan.is_active, "Plan is inactive."
         offer = self.offer_repository.create_offer(
             plan,
             self.datetime_service.now(),
