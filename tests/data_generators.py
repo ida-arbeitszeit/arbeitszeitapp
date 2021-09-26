@@ -55,7 +55,7 @@ class OfferGenerator:
         plan=None,
     ) -> CreateOfferResponse:
         if plan is None:
-            plan = self.plan_generator.create_plan()
+            plan = self.plan_generator.create_plan(activation_date=datetime.min)
         return self._create_offer(
             CreateOfferRequest(
                 name=name,
