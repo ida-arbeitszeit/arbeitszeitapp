@@ -29,6 +29,7 @@ def test_that_offer_gets_deleted(
     plan = plan_generator.create_plan(activation_date=datetime.min)
     offer = offer_generator.create_offer(plan=plan)
     assert len(offer_repo.offers) == 1
+    assert offer.id
     delete_offer(DeleteOfferRequest(plan.planner.id, offer.id))
     assert len(offer_repo.offers) == 0
 
@@ -45,6 +46,7 @@ def test_that_correct_offer_gets_deleted(
     offer2 = offer_generator.create_offer(plan=plan)
     offer3 = offer_generator.create_offer(plan=plan)
     assert len(offer_repo.offers) == 3
+    assert offer1.id
     delete_offer(DeleteOfferRequest(plan.planner.id, offer1.id))
     assert len(offer_repo.offers) == 2
     assert not offer_in_offers(offer1, offer_repo.offers)
@@ -63,6 +65,7 @@ def test_that_offer_does_not_get_deleted_when_planner_is_not_equal_to_requester_
     plan2 = plan_generator.create_plan(activation_date=datetime.min)
     offer = offer_generator.create_offer(plan=plan2)
     assert len(offer_repository.offers) == 1
+    assert offer.id
     delete_offer(DeleteOfferRequest(plan1.planner.id, offer.id))
     assert len(offer_repository.offers) == 1
 
@@ -75,6 +78,7 @@ def test_that_correct_offer_id_is_shown_after_deletion_of_offer(
 ):
     plan = plan_generator.create_plan(activation_date=datetime.min)
     offer = offer_generator.create_offer(plan=plan)
+    assert offer.id
     response = delete_offer(DeleteOfferRequest(plan.planner.id, offer.id))
     assert response.offer_id == offer.id
 
@@ -87,6 +91,7 @@ def test_that_success_is_true_is_shown_when_offer_gets_deleted(
 ):
     plan = plan_generator.create_plan(activation_date=datetime.min)
     offer = offer_generator.create_offer(plan=plan)
+    assert offer.id
     response = delete_offer(DeleteOfferRequest(plan.planner.id, offer.id))
     assert response.is_success == True
 
@@ -100,6 +105,7 @@ def test_that_success_is_false_is_shown_when_offer_does_not_get_deleted(
     plan1 = plan_generator.create_plan(activation_date=datetime.min)
     plan2 = plan_generator.create_plan(activation_date=datetime.min)
     offer = offer_generator.create_offer(plan=plan2)
+    assert offer.id
     response = delete_offer(DeleteOfferRequest(plan1.planner.id, offer.id))
     assert response.is_success == False
 
