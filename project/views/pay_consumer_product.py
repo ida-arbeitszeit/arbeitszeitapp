@@ -23,6 +23,8 @@ class PayConsumerProductView:
         return Response(self._render_template())
 
     def respond_to_post(self) -> Response:
+        if not self.form.validate():
+            return self._handle_invalid_form()
         use_case_request = self.controller.import_form_data(
             self.current_user, self.form
         )
@@ -42,4 +44,7 @@ class PayConsumerProductView:
     ) -> Response:
         field = getattr(self.form, result.field)
         field.errors += (result.message,)
-        return Response(self._render_template())
+        return Response(self._render_template(), status=400)
+
+    def _handle_invalid_form(self) -> Response:
+        return Response(self._render_template(), status=400)
