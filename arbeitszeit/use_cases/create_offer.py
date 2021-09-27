@@ -49,6 +49,7 @@ class CreateOffer:
         self, offer_request: CreateOfferRequest
     ) -> CreateOfferResponse:
         plan = self.plan_repository.get_plan_by_id(offer_request.plan_id)
+        assert plan is not None
         if not plan.is_active:
             raise PlanIsInactive(plan)
         self.offer_repository.create_offer(

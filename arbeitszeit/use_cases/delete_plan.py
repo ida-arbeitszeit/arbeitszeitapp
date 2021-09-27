@@ -19,6 +19,7 @@ class DeletePlan:
 
     def __call__(self, plan_id: UUID) -> DeletePlanResponse:
         plan = self.plan_repository.get_plan_by_id(plan_id)
+        assert plan is not None
         if plan.is_active:
             return DeletePlanResponse(plan_id=plan_id, is_success=False)
         self.plan_repository.delete_plan(plan_id)

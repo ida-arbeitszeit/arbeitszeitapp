@@ -337,9 +337,8 @@ def transfer_to_company(
 
     if request.method == "POST":
         sender = company_repository.get_by_id(current_user.id)
-        try:
-            plan = plan_repository.get_plan_by_id(request.form["plan_id"])
-        except error.PlanNotFound:
+        plan = plan_repository.get_plan_by_id(request.form["plan_id"])
+        if plan is None:
             flash("Plan existiert nicht.")
             return redirect(url_for("main_company.transfer_to_company"))
         pieces = int(request.form["amount"])

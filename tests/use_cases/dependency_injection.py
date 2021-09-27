@@ -77,8 +77,12 @@ class InMemoryModule(Module):
         return service
 
 
+def get_dependency_injector() -> Injector:
+    return Injector(InMemoryModule())
+
+
 def injection_test(original_test):
-    injector = Injector(InMemoryModule())
+    injector = get_dependency_injector()
 
     def wrapper(*args, **kwargs):
         return injector.call_with_injection(
