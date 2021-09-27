@@ -1,14 +1,11 @@
 from unittest import TestCase
-from uuid import uuid4
 
 from arbeitszeit.use_cases.create_offer import CreateOfferResponse, RejectionReason
 from arbeitszeit_web.create_offer import CreateOfferPresenter
 
-SUCCESSFUL_CREATION_RESPONSE = CreateOfferResponse(
-    id=uuid4(), name="testname", description="testdescription", rejection_reason=None
-)
+SUCCESSFUL_CREATION_RESPONSE = CreateOfferResponse(rejection_reason=None)
 FAILED_CREATION_RESPONSE = CreateOfferResponse(
-    id=None, name=None, description=None, rejection_reason=RejectionReason.plan_inactive
+    rejection_reason=RejectionReason.plan_inactive
 )
 
 

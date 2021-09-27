@@ -23,9 +23,6 @@ class CreateOfferRequest:
 
 @dataclass
 class CreateOfferResponse:
-    id: Optional[UUID]
-    name: Optional[str]
-    description: Optional[str]
     rejection_reason: Optional[RejectionReason]
 
     @property
@@ -45,9 +42,6 @@ class CreateOffer:
             return self._perform_create_offer(offer_request)
         except PlanIsInactive:
             return CreateOfferResponse(
-                id=None,
-                name=None,
-                description=None,
                 rejection_reason=RejectionReason.plan_inactive,
             )
 
@@ -57,15 +51,12 @@ class CreateOffer:
         plan = self.plan_repository.get_plan_by_id(offer_request.plan_id)
         if not plan.is_active:
             raise PlanIsInactive(plan)
-        offer = self.offer_repository.create_offer(
+        self.offer_repository.create_offer(
             plan,
             self.datetime_service.now(),
             offer_request.name,
             offer_request.description,
         )
         return CreateOfferResponse(
-            id=offer.id,
-            name=offer.name,
-            description=offer.description,
             rejection_reason=None,
         )
