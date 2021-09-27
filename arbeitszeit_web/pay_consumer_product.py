@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import List, Protocol, Union
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from arbeitszeit.use_cases.pay_consumer_product import (
     PayConsumerProductResponse,

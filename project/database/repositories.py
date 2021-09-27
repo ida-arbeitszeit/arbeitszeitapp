@@ -378,7 +378,6 @@ class ProductOfferRepository(repositories.OfferRepository):
         return entities.ProductOffer(
             id=UUID(offer_orm.id),
             name=offer_orm.name,
-            active=offer_orm.active,
             description=offer_orm.description,
             plan=plan,
         )
@@ -390,25 +389,16 @@ class ProductOfferRepository(repositories.OfferRepository):
         else:
             return self.object_from_orm(offer_orm)
 
-    def all_active_offers(self) -> Iterator[entities.ProductOffer]:
-        return (
-            self.object_from_orm(offer)
-            for offer in Offer.query.filter_by(active=True).all()
-        )
+    def get_all_offers(self) -> Iterator[entities.ProductOffer]:
+        return (self.object_from_orm(offer) for offer in Offer.query.all())
 
-    def count_active_offers_without_plan_duplicates(self) -> int:
-        return int(
-            self.db.session.query(func.count(distinct(Offer.plan_id)))
-            .filter_by(active=True)
-            .one()[0]
-        )
+    def count_all_offers_without_plan_duplicates(self) -> int:
+        return int(self.db.session.query(func.count(distinct(Offer.plan_id))).one()[0])
 
     def query_offers_by_name(self, query: str) -> Iterator[entities.ProductOffer]:
         return (
             self.object_from_orm(offer)
-            for offer in Offer.query.filter(
-                Offer.name.contains(query), Offer.active == True
-            ).all()
+            for offer in Offer.query.filter(Offer.name.contains(query)).all()
         )
 
     def query_offers_by_description(
@@ -416,9 +406,7 @@ class ProductOfferRepository(repositories.OfferRepository):
     ) -> Iterator[entities.ProductOffer]:
         return (
             self.object_from_orm(offer)
-            for offer in Offer.query.filter(
-                Offer.description.contains(query), Offer.active == True
-            ).all()
+            for offer in Offer.query.filter(Offer.description.contains(query)).all()
         )
 
     def create_offer(

@@ -1,3 +1,4 @@
+from datetime import datetime
 from decimal import Decimal
 from typing import Union
 
@@ -239,8 +240,12 @@ def test_counting_of_marketplace_products(
     plan_generator: PlanGenerator,
     offer_generator: OfferGenerator,
 ):
-    offer_generator.create_offer(plan=plan_generator.create_plan())
-    offer_generator.create_offer(plan=plan_generator.create_plan())
+    offer_generator.create_offer(
+        plan=plan_generator.create_plan(activation_date=datetime.min)
+    )
+    offer_generator.create_offer(
+        plan=plan_generator.create_plan(activation_date=datetime.min)
+    )
     stats = get_statistics()
     assert stats.products_on_marketplace_count == 2
 
@@ -251,7 +256,7 @@ def test_that_plan_duplicates_are_ignored_when_counting_marketplace_products(
     plan_generator: PlanGenerator,
     offer_generator: OfferGenerator,
 ):
-    plan = plan_generator.create_plan()
+    plan = plan_generator.create_plan(activation_date=datetime.min)
     offer_generator.create_offer(plan=plan)
     offer_generator.create_offer(plan=plan)
     stats = get_statistics()

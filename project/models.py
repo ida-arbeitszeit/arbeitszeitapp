@@ -146,7 +146,6 @@ class Offer(UserMixin, db.Model):
     cr_date = db.Column(db.DateTime, nullable=False)
     name = db.Column(db.String(1000), nullable=False)
     description = db.Column(db.String(5000), nullable=False)
-    active = db.Column(db.Boolean, nullable=False, default=True)
 
 
 class PurposesOfPurchases(Enum):
