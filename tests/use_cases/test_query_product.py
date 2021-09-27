@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from typing import Optional
 
+from arbeitszeit.entities import ProductOffer
+
 from arbeitszeit.use_cases import (
-    CreateOfferResponse,
     ProductFilter,
     ProductQueryResponse,
     QueryProducts,
@@ -11,12 +12,9 @@ from arbeitszeit.use_cases import (
 from tests.data_generators import OfferGenerator
 
 from .dependency_injection import injection_test
-from .repositories import OfferRepository
 
 
-def offer_in_results(
-    offer: CreateOfferResponse, response: ProductQueryResponse
-) -> bool:
+def offer_in_results(offer: ProductOffer, response: ProductQueryResponse) -> bool:
     return any(
         (
             offer.description == result.product_description
@@ -39,7 +37,6 @@ def test_that_no_offer_is_returned_when_searching_an_empty_repository(
 @injection_test
 def test_that_offers_where_name_is_exact_match_are_returned(
     query_products: QueryProducts,
-    repository: OfferRepository,
     offer_generator: OfferGenerator,
 ):
     expected_offer = offer_generator.create_offer(name="My Product")
@@ -50,7 +47,6 @@ def test_that_offers_where_name_is_exact_match_are_returned(
 @injection_test
 def test_query_substring_of_name_returns_correct_result(
     query_products: QueryProducts,
-    repository: OfferRepository,
     offer_generator: OfferGenerator,
 ):
     expected_offer = offer_generator.create_offer(name="My Product")
@@ -61,7 +57,6 @@ def test_query_substring_of_name_returns_correct_result(
 @injection_test
 def test_that_offers_where_description_is_exact_match_are_returned(
     query_products: QueryProducts,
-    repository: OfferRepository,
     offer_generator: OfferGenerator,
 ):
     description = "my description"
@@ -71,9 +66,8 @@ def test_that_offers_where_description_is_exact_match_are_returned(
 
 
 @injection_test
-def test_query_substrin_of_description_returns_correct_result(
+def test_query_substring_of_description_returns_correct_result(
     query_products: QueryProducts,
-    repository: OfferRepository,
     offer_generator: OfferGenerator,
 ):
     expected_offer = offer_generator.create_offer(description="my description")

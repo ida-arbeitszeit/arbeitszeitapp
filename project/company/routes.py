@@ -258,9 +258,9 @@ def create_offer(
         )
         use_case_response = create_offer(offer)
         view_model = presenter.present(use_case_response)
-        return render_template(
-            "company/create_offer_in_app.html", view_model=view_model
-        )
+        for notification in view_model.notifications:
+            flash(notification)
+        return redirect(url_for("main_company.my_offers"))
 
     plan = Plan.query.filter_by(id=str(plan_id)).first()
     return render_template("company/create_offer.html", plan=plan)

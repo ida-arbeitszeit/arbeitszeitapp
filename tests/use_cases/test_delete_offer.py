@@ -5,14 +5,14 @@ from uuid import uuid4
 import pytest
 
 from arbeitszeit.entities import ProductOffer
-from arbeitszeit.use_cases import CreateOfferResponse, DeleteOffer, DeleteOfferRequest
+from arbeitszeit.use_cases import DeleteOffer, DeleteOfferRequest
 from tests.data_generators import OfferGenerator, PlanGenerator
 
 from .dependency_injection import injection_test
 from .repositories import OfferRepository
 
 
-def offer_in_offers(offer: CreateOfferResponse, offers: List[ProductOffer]) -> bool:
+def offer_in_offers(offer: ProductOffer, offers: List[ProductOffer]) -> bool:
     for o in offers:
         if o.id == offer.id:
             return True
