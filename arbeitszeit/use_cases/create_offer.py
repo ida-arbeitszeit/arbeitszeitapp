@@ -1,13 +1,13 @@
 from dataclasses import dataclass
-from uuid import UUID
+from enum import Enum, auto
 from typing import Optional
+from uuid import UUID
 
 from injector import inject
-from arbeitszeit.errors import PlanIsInactive
 
 from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.errors import PlanIsInactive
 from arbeitszeit.repositories import OfferRepository, PlanRepository
-from enum import Enum, auto
 
 
 class RejectionReason(Enum):
