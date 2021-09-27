@@ -74,3 +74,22 @@ class LoginForm(Form):
         validators=[validators.InputRequired(message="Passwort erforderlich")],
     )
     remember = BooleanField("Angemeldet bleiben?")
+
+
+class PayConsumerProductForm(Form):
+    plan_id = StringField(
+        "Plan-ID",
+        render_kw={"placeholder": "Plan-ID"},
+        validators=[validators.InputRequired()],
+    )
+    amount = StringField(
+        "Menge",
+        render_kw={"placeholder": "Menge"},
+        validators=[validators.InputRequired()],
+    )
+
+    def get_amount_field(self) -> str:
+        return self.data["amount"]
+
+    def get_plan_id_field(self) -> str:
+        return self.data["plan_id"]
