@@ -26,6 +26,7 @@ class SeekApproval:
         self, new_plan_id: UUID, original_plan_id: Optional[UUID]
     ) -> SeekApprovalResponse:
         plan = self.plan_repository.get_plan_by_id(new_plan_id)
+        assert plan is not None
         if original_plan_id:
             reason = self.renew_plan(plan, original_plan_id)
         else:
@@ -37,6 +38,7 @@ class SeekApproval:
 
     def renew_plan(self, plan: Plan, original_plan_id: UUID) -> str:
         original_plan = self.plan_repository.get_plan_by_id(original_plan_id)
+        assert original_plan is not None
         self.plan_repository.renew_plan(original_plan)
         return self.approve_plan(plan)
 

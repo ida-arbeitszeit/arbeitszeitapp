@@ -1,6 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 from typing import Union
+from uuid import uuid4
 
 from arbeitszeit.entities import ProductionCosts
 from project.database.repositories import PlanRepository
@@ -172,3 +173,19 @@ def test_plans_that_were_set_to_expired_dont_show_up_in_active_plans(
     assert plan in list(repository.all_active_plans())
     repository.set_plan_as_expired(plan)
     assert plan not in list(repository.all_active_plans())
+
+
+@injection_test
+def test_get_plan_by_id_with_unnkown_id_results_in_none(
+    repository: PlanRepository,
+) -> None:
+    assert repository.get_plan_by_id(uuid4()) is None
+
+
+@injection_test
+def test_that_existing_plan_can_be_retrieved_by_id(
+    repository: PlanRepository,
+    generator: PlanGenerator,
+) -> None:
+    expected_plan = generator.create_plan()
+    assert expected_plan == repository.get_plan_by_id(expected_plan.id)

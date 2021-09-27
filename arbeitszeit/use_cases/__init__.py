@@ -15,7 +15,11 @@ from .get_member_profile_info import (
 from .get_plan_summary import GetPlanSummary
 from .get_statistics import GetStatistics, StatisticsResponse
 from .get_transaction_infos import GetTransactionInfos, TransactionInfo
-from .pay_consumer_product import PayConsumerProduct
+from .pay_consumer_product import (
+    PayConsumerProduct,
+    PayConsumerProductRequest,
+    PayConsumerProductResponse,
+)
 from .pay_means_of_production import PayMeansOfProduction
 from .query_products import (
     ProductFilter,
@@ -47,6 +51,8 @@ __all__ = [
     "GetStatistics",
     "GetTransactionInfos",
     "PayConsumerProduct",
+    "PayConsumerProductRequest",
+    "PayConsumerProductResponse",
     "PayMeansOfProduction",
     "PlanProposal",
     "ProductFilter",

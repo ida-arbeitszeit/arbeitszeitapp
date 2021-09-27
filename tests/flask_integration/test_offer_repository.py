@@ -1,6 +1,6 @@
 from datetime import datetime
-
 from typing import List
+
 from arbeitszeit.entities import ProductOffer
 from project.database.repositories import ProductOfferRepository
 from tests.data_generators import PlanGenerator
