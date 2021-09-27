@@ -2,7 +2,7 @@ import pytest
 
 from arbeitszeit import errors
 from arbeitszeit.entities import PurposesOfPurchases
-from arbeitszeit.use_cases import PayMeansOfProduction
+from arbeitszeit.use_cases import PayMeansOfProduction, PayMeansOfProductionRequest
 from tests.data_generators import CompanyGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
 
@@ -21,7 +21,9 @@ def test_error_is_raised_if_plan_is_not_active_yet(
     purpose = PurposesOfPurchases.means_of_prod
     pieces = 5
     with pytest.raises(errors.PlanIsInactive):
-        pay_means_of_production(sender, plan, pieces, purpose)
+        pay_means_of_production(
+            PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
+        )
 
 
 @injection_test
@@ -39,7 +41,9 @@ def test_error_is_raised_if_plan_is_expired(
     pieces = 5
     plan.expired = True
     with pytest.raises(errors.PlanIsInactive):
-        pay_means_of_production(sender, plan, pieces, purpose)
+        pay_means_of_production(
+            PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
+        )
 
 
 @injection_test
@@ -53,7 +57,9 @@ def test_assertion_error_is_raised_if_purpose_is_other_than_means_or_raw_materia
     purpose = PurposesOfPurchases.consumption
     pieces = 5
     with pytest.raises(AssertionError):
-        pay_means_of_production(sender, plan, pieces, purpose)
+        pay_means_of_production(
+            PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
+        )
 
 
 @injection_test
@@ -70,7 +76,9 @@ def test_error_is_raised_if_trying_to_pay_public_service(
     purpose = PurposesOfPurchases.means_of_prod
     pieces = 5
     with pytest.raises(errors.CompanyCantBuyPublicServices):
-        pay_means_of_production(sender, plan, pieces, purpose)
+        pay_means_of_production(
+            PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
+        )
 
 
 @injection_test
@@ -88,7 +96,9 @@ def test_balance_of_buyer_of_means_of_prod_reduced(
     purpose = PurposesOfPurchases.means_of_prod
     pieces = 5
 
-    pay_means_of_production(sender, plan, pieces, purpose)
+    pay_means_of_production(
+        PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
+    )
 
     price_total = pieces * plan.price_per_unit()
     assert account_repository.get_account_balance(sender.means_account) == -price_total
@@ -109,7 +119,9 @@ def test_balance_of_buyer_of_raw_materials_reduced(
     purpose = PurposesOfPurchases.raw_materials
     pieces = 5
 
-    pay_means_of_production(sender, plan, pieces, purpose)
+    pay_means_of_production(
+        PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
+    )
 
     price_total = pieces * plan.price_per_unit()
     assert (
@@ -133,7 +145,9 @@ def test_balance_of_seller_increased(
     purpose = PurposesOfPurchases.raw_materials
     pieces = 5
 
-    pay_means_of_production(sender, plan, pieces, purpose)
+    pay_means_of_production(
+        PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
+    )
 
     price_total = pieces * plan.price_per_unit()
     assert (
@@ -156,7 +170,9 @@ def test_correct_transaction_added_if_means_of_production_were_paid(
     )
     purpose = PurposesOfPurchases.means_of_prod
     pieces = 5
-    pay_means_of_production(sender, plan, pieces, purpose)
+    pay_means_of_production(
+        PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
+    )
     price_total = pieces * plan.price_per_unit()
     assert len(transaction_repository.transactions) == 1
     assert (
@@ -183,7 +199,9 @@ def test_correct_transaction_added_if_raw_materials_were_paid(
     )
     purpose = PurposesOfPurchases.raw_materials
     pieces = 5
-    pay_means_of_production(sender, plan, pieces, purpose)
+    pay_means_of_production(
+        PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
+    )
     price_total = pieces * plan.price_per_unit()
     assert len(transaction_repository.transactions) == 1
     assert (
@@ -211,7 +229,9 @@ def test_correct_purchase_added_if_means_of_production_were_paid(
     )
     purpose = PurposesOfPurchases.means_of_prod
     pieces = 5
-    pay_means_of_production(sender, plan, pieces, purpose)
+    pay_means_of_production(
+        PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
+    )
     purchase_added = purchase_repository.purchases[0]
     assert len(purchase_repository.purchases) == 1
     assert purchase_added.plan == plan
@@ -236,7 +256,9 @@ def test_correct_purchase_added_if_raw_materials_were_paid(
     )
     purpose = PurposesOfPurchases.raw_materials
     pieces = 5
-    pay_means_of_production(sender, plan, pieces, purpose)
+    pay_means_of_production(
+        PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
+    )
     purchase_added = purchase_repository.purchases[0]
     assert len(purchase_repository.purchases) == 1
     assert purchase_added.plan == plan

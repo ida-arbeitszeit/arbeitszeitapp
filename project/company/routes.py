@@ -336,26 +336,16 @@ def transfer_to_company(
         return redirect(url_for("auth.zurueck"))
 
     if request.method == "POST":
-        sender = company_repository.get_by_id(current_user.id)
-        try:
-            plan = plan_repository.get_plan_by_id(request.form["plan_id"])
-        except error.PlanNotFound:
-            flash("Plan existiert nicht.")
-            return redirect(url_for("main_company.transfer_to_company"))
-        pieces = int(request.form["amount"])
-        purpose = (
-            entities.PurposesOfPurchases.means_of_prod
+        use_case_request = use_cases.PayMeansOfProductionRequest(
+            buyer=current_user.id,
+            plan=request.form["plan_id"],
+            amount=int(request.form["amount"]),
+            purpose=entities.PurposesOfPurchases.means_of_prod
             if request.form["category"] == "Produktionsmittel"
-            else entities.PurposesOfPurchases.raw_materials
+            else entities.PurposesOfPurchases.raw_materials,
         )
         try:
-            pay_means_of_production(
-                sender,
-                plan,
-                pieces,
-                purpose,
-            )
-            flash("Erfolgreich bezahlt.")
+            pay_means_of_production(use_case_request)
         except errors.PlanIsInactive:
             flash(
                 "Der angegebene Plan ist nicht aktuell. Bitte wende dich an den Verkäufer, um eine aktuelle Plan-ID zu erhalten."
@@ -364,6 +354,11 @@ def transfer_to_company(
             flash(
                 "Bezahlung nicht erfolgreich. Betriebe können keine öffentlichen Dienstleistungen oder Produkte erwerben."
             )
+        except error.PlanNotFound:
+            flash("Plan existiert nicht.")
+            return redirect(url_for("main_company.transfer_to_company"))
+        else:
+            flash("Erfolgreich bezahlt.")
 
     return render_template("company/transfer_to_company.html")
 
@@ -433,8 +428,6 @@ def statistics(
 @main_company.route("/company/cooperate", methods=["GET", "POST"])
 @login_required
 def cooperate():
-    # under construction
-    pass
     return render_template("company/cooperate.html")
 
 

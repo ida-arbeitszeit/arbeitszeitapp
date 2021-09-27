@@ -1,12 +1,26 @@
 from dataclasses import dataclass
+from uuid import UUID
 
 from injector import inject
 
 from arbeitszeit import errors
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Company, Plan, PurposesOfPurchases
+from arbeitszeit.entities import PurposesOfPurchases
 from arbeitszeit.purchase_factory import PurchaseFactory
-from arbeitszeit.repositories import PurchaseRepository, TransactionRepository
+from arbeitszeit.repositories import (
+    CompanyRepository,
+    PlanRepository,
+    PurchaseRepository,
+    TransactionRepository,
+)
+
+
+@dataclass
+class PayMeansOfProductionRequest:
+    buyer: UUID
+    plan: UUID
+    amount: int
+    purpose: PurposesOfPurchases
 
 
 @inject
@@ -16,14 +30,14 @@ class PayMeansOfProduction:
     datetime_service: DatetimeService
     purchase_factory: PurchaseFactory
     purchase_repository: PurchaseRepository
+    plan_repository: PlanRepository
+    company_repository: CompanyRepository
 
-    def __call__(
-        self,
-        sender: Company,
-        plan: Plan,
-        pieces: int,
-        purpose: PurposesOfPurchases,
-    ) -> None:
+    def __call__(self, request: PayMeansOfProductionRequest) -> None:
+        plan = self.plan_repository.get_plan_by_id(request.plan)
+        sender = self.company_repository.get_by_id(request.buyer)
+        purpose = request.purpose
+        pieces = request.amount
         assert purpose in (
             PurposesOfPurchases.means_of_prod,
             PurposesOfPurchases.raw_materials,
