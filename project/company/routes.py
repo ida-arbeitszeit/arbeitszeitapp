@@ -379,8 +379,7 @@ def my_offers(offer_repository: ProductOfferRepository):
     my_plans = my_company.plans.all()
     my_offers = []
     for plan in my_plans:
-        active_offers = plan.offers.filter_by(active=True).all()
-        for offer in active_offers:
+        for offer in plan.offers.all():
             my_offers.append(offer)
     my_offers = [offer_repository.object_from_orm(offer) for offer in my_offers]
 
