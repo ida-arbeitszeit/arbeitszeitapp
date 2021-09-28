@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import Optional
 
 from arbeitszeit.entities import ProductOffer
-
 from arbeitszeit.use_cases import (
     ProductFilter,
     ProductQueryResponse,
