@@ -5,12 +5,12 @@ from arbeitszeit.use_cases import CreatePlan, PlanProposal
 from tests.data_generators import CompanyGenerator
 
 from .dependency_injection import injection_test
-from .repositories import PlanRepository
+from .repositories import PlanDraftRepository
 
 
 @injection_test
-def test_that_create_plan_creates_a_plan(
-    plan_repository: PlanRepository,
+def test_that_create_plan_creates_a_plan_draft(
+    plan_draft_repository: PlanDraftRepository,
     create_plan: CreatePlan,
     company_generator: CompanyGenerator,
 ):
@@ -29,6 +29,6 @@ def test_that_create_plan_creates_a_plan(
         timeframe_in_days=7,
     )
 
-    assert not len(plan_repository)
+    assert not len(plan_draft_repository)
     create_plan(planner.id, proposal)
-    assert len(plan_repository) == 1
+    assert len(plan_draft_repository) == 1

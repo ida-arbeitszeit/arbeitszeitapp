@@ -19,6 +19,7 @@ from arbeitszeit.entities import (
     Company,
     Member,
     Plan,
+    PlanDraft,
     ProductionCosts,
     ProductOffer,
     Purchase,
@@ -31,6 +32,7 @@ from arbeitszeit.repositories import (
     CompanyRepository,
     MemberRepository,
     OfferRepository,
+    PlanDraftRepository,
     PlanRepository,
     TransactionRepository,
 )
@@ -163,47 +165,76 @@ class PlanGenerator:
     datetime_service: FakeDatetimeService
     plan_repository: PlanRepository
     seek_approval: SeekApproval
+    draft_repository: PlanDraftRepository
 
     def create_plan(
         self,
         *,
-        plan_creation_date=None,
-        planner=None,
-        timeframe=None,
-        approved=False,
         activation_date: Optional[datetime] = None,
         amount: int = 100,
+        approved: bool = True,
         costs: Optional[ProductionCosts] = None,
-        is_public_service=False,
-        product_name="Produkt A",
         description="Beschreibung für Produkt A.",
+        is_public_service: bool = False,
+        plan_creation_date=None,
+        planner: Optional[Company] = None,
+        product_name="Produkt A",
         production_unit="500 Gramm",
+        timeframe=None,
     ) -> Plan:
-        if costs is None:
-            costs = ProductionCosts(Decimal(1), Decimal(1), Decimal(1))
-        costs = costs
-        if plan_creation_date is None:
-            plan_creation_date = self.datetime_service.now_minus_two_days()
-        if planner is None:
-            planner = self.company_generator.create_company()
-        if timeframe is None:
-            timeframe = 14
-        plan = self.plan_repository.create_plan(
+        assert approved, "Currently the application does not support plan rejection"
+        draft = self.draft_plan(
             planner=planner,
             costs=costs,
             product_name=product_name,
             production_unit=production_unit,
             amount=amount,
             description=description,
+            timeframe=timeframe,
+            is_public_service=is_public_service,
+            plan_creation_date=plan_creation_date,
+        )
+        self.seek_approval(draft.id, None)
+        plan = self.plan_repository.get_plan_by_id(draft.id)
+        assert plan
+        assert plan.approved
+        if activation_date:
+            self.plan_repository.activate_plan(plan, activation_date)
+        return plan
+
+    def draft_plan(
+        self,
+        plan_creation_date: Optional[datetime] = None,
+        planner: Optional[Company] = None,
+        timeframe=None,
+        amount: int = 100,
+        costs: Optional[ProductionCosts] = None,
+        is_public_service: bool = False,
+        product_name="Produkt A",
+        description="Beschreibung für Produkt A.",
+        production_unit="500 Gramm",
+    ) -> PlanDraft:
+        if plan_creation_date is None:
+            plan_creation_date = self.datetime_service.now_minus_two_days()
+        if costs is None:
+            costs = ProductionCosts(Decimal(1), Decimal(1), Decimal(1))
+        if planner is None:
+            planner = self.company_generator.create_company()
+        if timeframe is None:
+            timeframe = 14
+        planner = self.company_generator.create_company()
+        draft = self.draft_repository.create_plan_draft(
+            planner=planner.id,
+            product_name=product_name,
+            description=description,
+            costs=costs,
+            production_unit=production_unit,
+            amount=amount,
             timeframe_in_days=timeframe,
             is_public_service=is_public_service,
             creation_timestamp=plan_creation_date,
         )
-        if approved:
-            self.seek_approval(plan.id, None)
-        if activation_date:
-            self.plan_repository.activate_plan(plan, activation_date)
-        return plan
+        return draft
 
 
 @inject

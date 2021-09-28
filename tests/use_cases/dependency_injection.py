@@ -66,6 +66,13 @@ class InMemoryModule(Module):
         return repo
 
     @provider
+    def proved_plan_draft_repository(
+        self,
+        repo: repositories.PlanDraftRepository,
+    ) -> interfaces.PlanDraftRepository:
+        return repo
+
+    @provider
     def provide_account_owner_repository(
         self, repo: repositories.AccountOwnerRepository
     ) -> interfaces.AccountOwnerRepository:

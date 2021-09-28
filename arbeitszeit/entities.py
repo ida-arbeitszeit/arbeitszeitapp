@@ -114,6 +114,20 @@ class ProductionCosts:
 
 
 @dataclass
+class PlanDraft:
+    id: UUID
+    creation_date: datetime
+    planner: Company
+    production_costs: ProductionCosts
+    product_name: str
+    unit_of_distribution: str
+    amount_produced: int
+    description: str
+    timeframe: int
+    is_public_service: bool
+
+
+@dataclass
 class Plan:
     id: UUID
     plan_creation_date: datetime

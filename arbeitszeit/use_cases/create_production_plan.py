@@ -5,7 +5,7 @@ from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import ProductionCosts
-from arbeitszeit.repositories import CompanyRepository, PlanRepository
+from arbeitszeit.repositories import CompanyRepository, PlanDraftRepository
 
 
 @dataclass
@@ -27,15 +27,15 @@ class CreatePlanResponse:
 @inject
 @dataclass
 class CreatePlan:
-    plan_repository: PlanRepository
+    plan_draft_repository: PlanDraftRepository
     datetime_service: DatetimeService
     company_repository: CompanyRepository
 
     def __call__(
         self, planner: UUID, plan_proposal: PlanProposal
     ) -> CreatePlanResponse:
-        plan = self.plan_repository.create_plan(
-            planner=self.company_repository.get_by_id(planner),
+        plan = self.plan_draft_repository.create_plan_draft(
+            planner=planner,
             costs=plan_proposal.costs,
             product_name=plan_proposal.product_name,
             production_unit=plan_proposal.production_unit,

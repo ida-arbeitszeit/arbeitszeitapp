@@ -20,6 +20,7 @@ from project.database.repositories import (
     CompanyRepository,
     CompanyWorkerRepository,
     MemberRepository,
+    PlanDraftRepository,
     PlanRepository,
     ProductOfferRepository,
     PurchaseRepository,
@@ -77,6 +78,10 @@ def configure_injector(binder: Binder) -> None:
     binder.bind(
         interfaces.OfferRepository,  # type: ignore
         to=ClassProvider(ProductOfferRepository),
+    )
+    binder.bind(
+        interfaces.PlanDraftRepository,  # type: ignore
+        to=ClassProvider(PlanDraftRepository),
     )
     binder.bind(
         DatetimeService,  # type: ignore
