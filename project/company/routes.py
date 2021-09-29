@@ -37,6 +37,7 @@ from project.database import (
 from project.dependency_injection import with_injection
 from project.forms import ProductSearchForm
 from project.models import Company, Plan
+from project.views import QueryProductsView
 
 main_company = Blueprint(
     "main_company", __name__, template_folder="templates", static_folder="static"
@@ -106,20 +107,18 @@ def suchen(
     presenter: QueryProductsPresenter,
     controller: QueryProductsController,
 ):
-    """search products in catalog."""
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
     template_name = "company/query_products.html"
     search_form = ProductSearchForm(request.form)
+    view = QueryProductsView(
+        search_form, query_products, presenter, controller, template_name
+    )
     if request.method == "POST":
-        use_case_request = controller.import_form_data(search_form)
-        response = query_products(use_case_request)
-        view_model = presenter.present(response)
-        return render_template(template_name, form=search_form, view_model=view_model)
+        return view.respond_to_post()
     else:
-        view_model = presenter.get_empty_view_model()
-        return render_template(template_name, form=search_form, view_model=view_model)
+        return view.respond_to_get()
 
 
 @main_company.route("/company/kaeufe")
@@ -259,9 +258,9 @@ def create_offer(
         )
         use_case_response = create_offer(offer)
         view_model = presenter.present(use_case_response)
-        return render_template(
-            "company/create_offer_in_app.html", view_model=view_model
-        )
+        for notification in view_model.notifications:
+            flash(notification)
+        return redirect(url_for("main_company.my_offers"))
 
     plan = Plan.query.filter_by(id=str(plan_id)).first()
     return render_template("company/create_offer.html", plan=plan)
@@ -338,9 +337,8 @@ def transfer_to_company(
 
     if request.method == "POST":
         sender = company_repository.get_by_id(current_user.id)
-        try:
-            plan = plan_repository.get_plan_by_id(request.form["plan_id"])
-        except error.PlanNotFound:
+        plan = plan_repository.get_plan_by_id(request.form["plan_id"])
+        if plan is None:
             flash("Plan existiert nicht.")
             return redirect(url_for("main_company.transfer_to_company"))
         pieces = int(request.form["amount"])
@@ -380,8 +378,7 @@ def my_offers(offer_repository: ProductOfferRepository):
     my_plans = my_company.plans.all()
     my_offers = []
     for plan in my_plans:
-        active_offers = plan.offers.filter_by(active=True).all()
-        for offer in active_offers:
+        for offer in plan.offers.all():
             my_offers.append(offer)
     my_offers = [offer_repository.object_from_orm(offer) for offer in my_offers]
 

@@ -5,7 +5,7 @@ from collections import defaultdict
 from datetime import datetime
 from decimal import Decimal
 from statistics import StatisticsError, mean
-from typing import Dict, Iterator, List, Set, Union
+from typing import Dict, Iterator, List, Optional, Set, Union
 
 from injector import inject, singleton
 
@@ -94,14 +94,14 @@ class OfferRepository(interfaces.OfferRepository):
         self.offers: List[ProductOffer] = []
         self.plan_repository = plan_repository
 
-    def all_active_offers(self) -> Iterator[ProductOffer]:
+    def get_all_offers(self) -> Iterator[ProductOffer]:
         yield from self.offers
 
-    def count_active_offers_without_plan_duplicates(self) -> int:
+    def count_all_offers_without_plan_duplicates(self) -> int:
         offers = []
         plans_associated = []
         for offer in self.offers:
-            if offer.plan in plans_associated or not offer.active:
+            if offer.plan in plans_associated:
                 pass
             else:
                 offers.append(offer)
@@ -128,7 +128,6 @@ class OfferRepository(interfaces.OfferRepository):
         offer = ProductOffer(
             id=uuid.uuid4(),
             name=name,
-            active=True,
             description=description,
             plan=plan,
         )
@@ -380,8 +379,8 @@ class PlanRepository(interfaces.PlanRepository):
         self.plans[plan.id] = plan
         return plan
 
-    def get_plan_by_id(self, id: uuid.UUID) -> Plan:
-        return self.plans[id]
+    def get_plan_by_id(self, id: uuid.UUID) -> Optional[Plan]:
+        return self.plans.get(id)
 
     def approve_plan(self, plan: Plan, approval_timestamp: datetime) -> None:
         plan.approval_date = approval_timestamp

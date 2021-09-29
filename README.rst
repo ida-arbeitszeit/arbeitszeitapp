@@ -33,6 +33,12 @@ You are encouraged to use the ``./run-checks`` command before you
 submit changes in a pull pull request.  This program runs ``flake8``,
 ``mypy`` and the test suite.
 
+You can generate a code coverage report at ``htmlcov/index.html`` via
+the command::
+
+    coverage run --source project,arbeitszeit,arbeitszeit_web  -m pytest && coverage html
+
+
 Repository layout
 =================
 

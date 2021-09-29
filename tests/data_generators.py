@@ -20,6 +20,7 @@ from arbeitszeit.entities import (
     Member,
     Plan,
     ProductionCosts,
+    ProductOffer,
     Purchase,
     PurposesOfPurchases,
     SocialAccounting,
@@ -29,15 +30,11 @@ from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
     MemberRepository,
+    OfferRepository,
     PlanRepository,
     TransactionRepository,
 )
-from arbeitszeit.use_cases import (
-    CreateOffer,
-    CreateOfferRequest,
-    CreateOfferResponse,
-    SeekApproval,
-)
+from arbeitszeit.use_cases import SeekApproval
 from tests.datetime_service import FakeDatetimeService
 
 
@@ -45,7 +42,7 @@ from tests.datetime_service import FakeDatetimeService
 @dataclass
 class OfferGenerator:
     plan_generator: PlanGenerator
-    _create_offer: CreateOffer
+    offer_repository: OfferRepository
 
     def create_offer(
         self,
@@ -53,15 +50,14 @@ class OfferGenerator:
         name="Product name",
         description="",
         plan=None,
-    ) -> CreateOfferResponse:
+    ) -> ProductOffer:
         if plan is None:
-            plan = self.plan_generator.create_plan()
-        return self._create_offer(
-            CreateOfferRequest(
-                name=name,
-                description=description,
-                plan_id=plan.id,
-            )
+            plan = self.plan_generator.create_plan(activation_date=datetime.min)
+        return self.offer_repository.create_offer(
+            plan=plan,
+            creation_datetime=datetime.now(),
+            name=name,
+            description=description,
         )
 
 
@@ -73,7 +69,11 @@ class MemberGenerator:
     member_repository: MemberRepository
 
     def create_member(
-        self, *, email: Optional[str] = None, account: Optional[Account] = None
+        self,
+        *,
+        email: Optional[str] = None,
+        account: Optional[Account] = None,
+        password: str = "password",
     ) -> Member:
         if not email:
             email = self.email_generator.get_random_email()
@@ -86,7 +86,7 @@ class MemberGenerator:
         return self.member_repository.create_member(
             email=email,
             name="Member name",
-            password="password",
+            password=password,
             account=account,
         )
 
@@ -104,6 +104,7 @@ class CompanyGenerator:
         email: Optional[str] = None,
         name: str = "Company Name",
         labour_account: Optional[Account] = None,
+        password: str = "password",
     ) -> Company:
         if email is None:
             email = self.email_generator.get_random_email()
@@ -114,7 +115,7 @@ class CompanyGenerator:
         return self.company_repository.create_company(
             email=email,
             name=name,
-            password="password",
+            password=password,
             means_account=self.account_generator.create_account(
                 account_type=AccountTypes.p
             ),

@@ -1,9 +1,13 @@
-from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+from flask import Blueprint, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
 
-from arbeitszeit import errors, use_cases
+from arbeitszeit import use_cases
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
+from arbeitszeit_web.pay_consumer_product import (
+    PayConsumerProductController,
+    PayConsumerProductPresenter,
+)
 from arbeitszeit_web.query_products import (
     QueryProductsController,
     QueryProductsPresenter,
@@ -16,7 +20,8 @@ from project.database import (
     commit_changes,
 )
 from project.dependency_injection import with_injection
-from project.forms import ProductSearchForm
+from project.forms import PayConsumerProductForm, ProductSearchForm
+from project.views import PayConsumerProductView, QueryProductsView
 
 main_member = Blueprint(
     "main_member", __name__, template_folder="templates", static_folder="static"
@@ -53,14 +58,13 @@ def suchen(
         return redirect(url_for("auth.zurueck"))
     template_name = "member/query_products.html"
     search_form = ProductSearchForm(request.form)
-    if request.method == "POST" and search_form.validate():
-        use_case_request = controller.import_form_data(search_form)
-        response = query_products(use_case_request)
-        view_model = presenter.present(response)
-        return render_template(template_name, form=search_form, view_model=view_model)
+    view = QueryProductsView(
+        search_form, query_products, presenter, controller, template_name
+    )
+    if request.method == "POST":
+        return view.respond_to_post()
     else:
-        view_model = presenter.get_empty_view_model()
-        return render_template(template_name, form=search_form, view_model=view_model)
+        return view.respond_to_get()
 
 
 @main_member.route("/member/pay_consumer_product", methods=["GET", "POST"])
@@ -72,26 +76,23 @@ def pay_consumer_product(
     company_repository: CompanyRepository,
     member_repository: MemberRepository,
     plan_repository: PlanRepository,
+    presenter: PayConsumerProductPresenter,
+    controller: PayConsumerProductController,
 ):
     if not user_is_member():
         return redirect(url_for("auth.zurueck"))
 
+    view = PayConsumerProductView(
+        form=PayConsumerProductForm(request.form),
+        current_user=current_user.id,
+        pay_consumer_product=pay_consumer_product,
+        controller=controller,
+        presenter=presenter,
+    )
     if request.method == "POST":
-        sender = member_repository.get_member_by_id(current_user.id)
-        plan = plan_repository.get_plan_by_id(request.form["plan_id"])
-        pieces = int(request.form["amount"])
-        try:
-            pay_consumer_product(
-                sender,
-                plan,
-                pieces,
-            )
-            flash("Produkt erfolgreich bezahlt.")
-        except errors.PlanIsInactive:
-            flash(
-                "Der angegebene Plan ist nicht aktuell. Bitte wende dich an den Verkäufer, um eine aktuelle Plan-ID zu erhalten."
-            )
-    return render_template("member/pay_consumer_product.html")
+        return view.respond_to_post()
+    else:
+        return view.respond_to_get()
 
 
 @main_member.route("/member/profile")

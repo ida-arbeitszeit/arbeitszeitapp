@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterator, List, Union
+from typing import Iterator, List, Optional, Union
 from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
@@ -332,6 +332,7 @@ class PurchaseRepository(repositories.PurchaseRepository):
 
     def object_from_orm(self, purchase: Purchase) -> entities.Purchase:
         plan = self.plan_repository.get_plan_by_id(purchase.plan_id)
+        assert plan is not None
         return entities.Purchase(
             purchase_date=purchase.purchase_date,
             plan=plan,
@@ -373,10 +374,10 @@ class ProductOfferRepository(repositories.OfferRepository):
 
     def object_from_orm(self, offer_orm: Offer) -> entities.ProductOffer:
         plan = self.plan_repository.get_plan_by_id(UUID(offer_orm.plan_id))
+        assert plan is not None
         return entities.ProductOffer(
             id=UUID(offer_orm.id),
             name=offer_orm.name,
-            active=offer_orm.active,
             description=offer_orm.description,
             plan=plan,
         )
@@ -388,25 +389,16 @@ class ProductOfferRepository(repositories.OfferRepository):
         else:
             return self.object_from_orm(offer_orm)
 
-    def all_active_offers(self) -> Iterator[entities.ProductOffer]:
-        return (
-            self.object_from_orm(offer)
-            for offer in Offer.query.filter_by(active=True).all()
-        )
+    def get_all_offers(self) -> Iterator[entities.ProductOffer]:
+        return (self.object_from_orm(offer) for offer in Offer.query.all())
 
-    def count_active_offers_without_plan_duplicates(self) -> int:
-        return int(
-            self.db.session.query(func.count(distinct(Offer.plan_id)))
-            .filter_by(active=True)
-            .one()[0]
-        )
+    def count_all_offers_without_plan_duplicates(self) -> int:
+        return int(self.db.session.query(func.count(distinct(Offer.plan_id))).one()[0])
 
     def query_offers_by_name(self, query: str) -> Iterator[entities.ProductOffer]:
         return (
             self.object_from_orm(offer)
-            for offer in Offer.query.filter(
-                Offer.name.contains(query), Offer.active == True
-            ).all()
+            for offer in Offer.query.filter(Offer.name.contains(query)).all()
         )
 
     def query_offers_by_description(
@@ -414,9 +406,7 @@ class ProductOfferRepository(repositories.OfferRepository):
     ) -> Iterator[entities.ProductOffer]:
         return (
             self.object_from_orm(offer)
-            for offer in Offer.query.filter(
-                Offer.description.contains(query), Offer.active == True
-            ).all()
+            for offer in Offer.query.filter(Offer.description.contains(query)).all()
         )
 
     def create_offer(
@@ -448,7 +438,10 @@ class ProductOfferRepository(repositories.OfferRepository):
 
     def get_all_offers_belonging_to(self, plan_id: UUID) -> List[entities.ProductOffer]:
         plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
-        return [self.object_from_orm(offer) for offer in plan_orm.offers.all()]
+        if plan_orm is None:
+            raise PlanNotFound()
+        else:
+            return [self.object_from_orm(offer) for offer in plan_orm.offers.all()]
 
 
 @inject
@@ -490,10 +483,10 @@ class PlanRepository(repositories.PlanRepository):
     def object_to_orm(self, plan: entities.Plan) -> Plan:
         return Plan.query.get(str(plan.id))
 
-    def get_plan_by_id(self, id: UUID) -> entities.Plan:
+    def get_plan_by_id(self, id: UUID) -> Optional[entities.Plan]:
         plan_orm = Plan.query.filter_by(id=str(id)).first()
         if plan_orm is None:
-            raise PlanNotFound()
+            return None
         else:
             return self.object_from_orm(plan_orm)
 

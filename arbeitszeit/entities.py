@@ -162,13 +162,11 @@ class ProductOffer:
         self,
         id: UUID,
         name: str,
-        active: bool,
         description: str,
         plan: Plan,
     ) -> None:
         self._id = id
         self.name = name
-        self.active = active
         self.description = description
         self.plan = plan
 
