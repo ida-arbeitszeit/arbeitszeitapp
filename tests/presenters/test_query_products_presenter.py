@@ -16,7 +16,7 @@ RESPONSE_WITH_ONE_RESULT = ProductQueryResponse(
             product_name="Bread",
             product_description="For eating",
             price_per_unit=Decimal(0.001),
-            type_of_plan="Produktiv",
+            is_public_service=True,
         )
     ]
 )

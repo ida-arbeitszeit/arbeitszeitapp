@@ -32,7 +32,7 @@ class QueriedProduct:
     product_name: str
     product_description: str
     price_per_unit: Decimal
-    type_of_plan: str
+    is_public_service: bool
 
 
 class QueryProductsRequest(ABC):
@@ -73,5 +73,5 @@ class QueryProducts:
             product_name=offer.name,
             product_description=offer.description,
             price_per_unit=offer.plan.price_per_unit(),
-            type_of_plan=offer.plan.type_of_plan,
+            is_public_service=offer.plan.is_public_service,
         )
