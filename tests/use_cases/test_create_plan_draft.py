@@ -11,7 +11,7 @@ from .repositories import PlanDraftRepository
 @injection_test
 def test_that_create_plan_creates_a_plan_draft(
     plan_draft_repository: PlanDraftRepository,
-    create_plan: CreatePlanDraft,
+    create_plan_draft: CreatePlanDraft,
     company_generator: CompanyGenerator,
 ):
     planner = company_generator.create_company()
@@ -31,5 +31,5 @@ def test_that_create_plan_creates_a_plan_draft(
     )
 
     assert not len(plan_draft_repository)
-    create_plan(request)
+    create_plan_draft(request)
     assert len(plan_draft_repository) == 1

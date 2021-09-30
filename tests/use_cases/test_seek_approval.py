@@ -13,9 +13,9 @@ def test_that_any_plan_will_be_approved(
     plan_generator: PlanGenerator,
     seek_approval: SeekApproval,
 ):
-    new_plan = plan_generator.draft_plan()
+    plan_draft = plan_generator.draft_plan()
     original_plan = plan_generator.create_plan()
-    approval_response = seek_approval(new_plan.id, original_plan.id)
+    approval_response = seek_approval(plan_draft.id, original_plan.id)
     assert approval_response.is_approved
 
 
@@ -36,9 +36,9 @@ def test_that_any_plan_will_be_approved_and_original_plan_renewed(
     plan_generator: PlanGenerator,
     seek_approval: SeekApproval,
 ):
-    new_plan = plan_generator.draft_plan()
+    plan_draft = plan_generator.draft_plan()
     original_plan = plan_generator.create_plan()
-    approval_response = seek_approval(new_plan.id, original_plan.id)
+    approval_response = seek_approval(plan_draft.id, original_plan.id)
     assert approval_response.is_approved
     assert original_plan.renewed
 
@@ -48,9 +48,9 @@ def test_that_true_is_returned(
     plan_generator: PlanGenerator,
     seek_approval: SeekApproval,
 ):
-    new_plan = plan_generator.draft_plan()
+    plan_draft = plan_generator.draft_plan()
     original_plan = plan_generator.create_plan()
-    approval_response = seek_approval(new_plan.id, original_plan.id)
+    approval_response = seek_approval(plan_draft.id, original_plan.id)
     assert approval_response.is_approved is True
 
 
