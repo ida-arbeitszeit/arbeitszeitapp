@@ -176,11 +176,11 @@ class PlanGenerator:
         costs: Optional[ProductionCosts] = None,
         description="Beschreibung für Produkt A.",
         is_public_service: bool = False,
-        plan_creation_date=None,
+        plan_creation_date: Optional[datetime] = None,
         planner: Optional[Company] = None,
-        product_name="Produkt A",
-        production_unit="500 Gramm",
-        timeframe=None,
+        product_name: str = "Produkt A",
+        production_unit: str = "500 Gramm",
+        timeframe: Optional[int] = None,
     ) -> Plan:
         assert approved, "Currently the application does not support plan rejection"
         draft = self.draft_plan(

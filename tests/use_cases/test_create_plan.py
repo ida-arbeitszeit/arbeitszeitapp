@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from arbeitszeit.entities import ProductionCosts
-from arbeitszeit.use_cases import CreatePlan, PlanProposal
+from arbeitszeit.use_cases import CreatePlanDraft, CreatePlanDraftRequest
 from tests.data_generators import CompanyGenerator
 
 from .dependency_injection import injection_test
@@ -11,11 +11,12 @@ from .repositories import PlanDraftRepository
 @injection_test
 def test_that_create_plan_creates_a_plan_draft(
     plan_draft_repository: PlanDraftRepository,
-    create_plan: CreatePlan,
+    create_plan: CreatePlanDraft,
     company_generator: CompanyGenerator,
 ):
     planner = company_generator.create_company()
-    proposal = PlanProposal(
+    request = CreatePlanDraftRequest(
+        planner=planner.id,
         costs=ProductionCosts(
             Decimal(1),
             Decimal(1),
@@ -30,5 +31,5 @@ def test_that_create_plan_creates_a_plan_draft(
     )
 
     assert not len(plan_draft_repository)
-    create_plan(planner.id, proposal)
+    create_plan(request)
     assert len(plan_draft_repository) == 1

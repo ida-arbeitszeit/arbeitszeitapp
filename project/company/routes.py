@@ -9,12 +9,12 @@ from arbeitszeit import entities, errors, use_cases
 from arbeitszeit.use_cases import (
     CreateOffer,
     CreateOfferRequest,
-    CreatePlan,
+    CreatePlanDraft,
+    CreatePlanDraftRequest,
     DeleteOffer,
     DeleteOfferRequest,
     DeletePlan,
     GetPlanSummary,
-    PlanProposal,
 )
 from arbeitszeit_web.create_offer import CreateOfferPresenter
 from arbeitszeit_web.delete_offer import DeleteOfferPresenter
@@ -141,7 +141,7 @@ def my_purchases(
 @login_required
 @with_injection
 def create_plan(
-    create_plan_from_proposal: CreatePlan,
+    create_plan_from_proposal: CreatePlanDraft,
     get_plan_summary: GetPlanSummary,
     seek_approval: use_cases.SeekApproval,
 ):
@@ -155,7 +155,8 @@ def create_plan(
 
     if request.method == "POST":  # Button "Plan erstellen"
         plan_data = dict(request.form)
-        proposal = PlanProposal(
+        use_case_request = CreatePlanDraftRequest(
+            planner=current_user.id,
             costs=entities.ProductionCosts(
                 labour_cost=Decimal(plan_data["costs_a"]),
                 resource_cost=Decimal(plan_data["costs_r"]),
@@ -170,7 +171,7 @@ def create_plan(
             if plan_data["productive_or_public"] == "public"
             else False,
         )
-        new_plan = create_plan_from_proposal(current_user.id, proposal)
+        new_plan = create_plan_from_proposal(use_case_request)
         approval_response = seek_approval(new_plan.plan_id, original_plan_uuid)
 
         if approval_response.is_approved:

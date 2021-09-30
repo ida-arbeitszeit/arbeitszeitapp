@@ -4,7 +4,7 @@ from arbeitszeit.repositories import CompanyWorkerRepository
 
 from .calculate_plan_expiration import CalculatePlanExpirationAndCheckIfExpired
 from .create_offer import CreateOffer, CreateOfferRequest, CreateOfferResponse
-from .create_production_plan import CreatePlan, PlanProposal
+from .create_plan_draft import CreatePlanDraft, CreatePlanDraftRequest
 from .delete_offer import DeleteOffer, DeleteOfferRequest, DeleteOfferResponse
 from .delete_plan import DeletePlan, DeletePlanResponse
 from .get_member_profile_info import (
@@ -39,7 +39,7 @@ __all__ = [
     "CreateOffer",
     "CreateOfferRequest",
     "CreateOfferResponse",
-    "CreatePlan",
+    "CreatePlanDraft",
     "DeleteOffer",
     "DeleteOfferRequest",
     "DeleteOfferResponse",
@@ -54,7 +54,8 @@ __all__ = [
     "PayConsumerProductRequest",
     "PayConsumerProductResponse",
     "PayMeansOfProduction",
-    "PlanProposal",
+    "CreatePlanDraftRequest",
+    "CreatePlanDraftResponse",
     "ProductFilter",
     "ProductQueryResponse",
     "PurchaseQueryResponse",
