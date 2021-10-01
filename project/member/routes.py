@@ -1,9 +1,12 @@
 from flask import Blueprint, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
+from uuid import UUID
+
 
 from arbeitszeit import use_cases
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
+from arbeitszeit_web.get_plan_summary import GetPlanSummaryPresenter
 from arbeitszeit_web.pay_consumer_product import (
     PayConsumerProductController,
     PayConsumerProductPresenter,
@@ -146,6 +149,23 @@ def statistics(
     use_case_response = get_statistics()
     view_model = presenter.present(use_case_response)
     return render_template("member/statistics.html", view_model=view_model)
+
+
+@main_member.route("/member/plan_summary/<uuid:plan_id>")
+@login_required
+@with_injection
+def plan_summary(
+    plan_id: UUID,
+    get_plan_summary: use_cases.GetPlanSummary,
+    presenter: GetPlanSummaryPresenter,
+):
+    if not user_is_member():
+        return redirect(url_for("auth.zurueck"))
+
+    use_case_response = get_plan_summary(plan_id)
+    view_model = presenter.present(use_case_response)
+
+    return render_template("member/plan_summary.html", view_model=view_model)
 
 
 @main_member.route("/member/hilfe")
