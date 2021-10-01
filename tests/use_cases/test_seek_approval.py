@@ -2,7 +2,7 @@ from datetime import datetime
 
 from arbeitszeit.repositories import PlanDraftRepository, PlanRepository
 from arbeitszeit.use_cases import SeekApproval
-from tests.data_generators import PlanGenerator
+from tests.data_generators import CompanyGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
 
 from .dependency_injection import injection_test
@@ -69,3 +69,13 @@ def test_that_approval_date_has_correct_day_of_month(
     assert new_plan
     assert new_plan.approval_date
     assert 3 == new_plan.approval_date.day
+
+
+@injection_test
+def test_that_approved_plan_has_same_planner_as_draft(
+    plan_generator: PlanGenerator,
+    company_generator: CompanyGenerator,
+):
+    planner = company_generator.create_company()
+    plan_draft = plan_generator.draft_plan(planner=planner)
+    assert plan_draft.planner.id == planner.id
