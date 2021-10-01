@@ -9,6 +9,9 @@ from arbeitszeit.repositories import PlanRepository
 
 @dataclass
 class PlanSummaryResponse:
+    plan_id: UUID
+    is_active: bool
+    planner_id: UUID
     product_name: str
     description: str
     timeframe: int
@@ -18,6 +21,7 @@ class PlanSummaryResponse:
     resources_cost: Decimal
     labour_cost: Decimal
     is_public_service: bool
+    price_per_unit: Decimal
 
 
 @inject
@@ -29,6 +33,9 @@ class GetPlanSummary:
         plan = self.plan_repository.get_plan_by_id(plan_id)
         assert plan is not None
         return PlanSummaryResponse(
+            plan_id=plan.id,
+            is_active=plan.is_active,
+            planner_id=plan.planner.id,
             product_name=plan.prd_name,
             description=plan.description,
             timeframe=plan.timeframe,
@@ -38,4 +45,5 @@ class GetPlanSummary:
             resources_cost=plan.production_costs.resource_cost,
             labour_cost=plan.production_costs.labour_cost,
             is_public_service=plan.is_public_service,
+            price_per_unit=plan.price_per_unit(),
         )

@@ -289,45 +289,21 @@
         Planinformationen
       </h1>
     </div>
-
     <br>
-
+    {% for key in view_model %}
     <div class="level">
       <div class="level-left">
         <div class="level-item">
-          <p class="has-text-weight-semibold">Plan-ID</p>
+          <p class="has-text-weight-semibold">{{ view_model[key][0] }}</p>
         </div>
       </div>
       <div class="level-right">
         <div class="level-item">
-          <p>???</p>
+          <p>{{ view_model[key][1] }}</p>
         </div>
       </div>
     </div>
-    <div class="level">
-      <div class="level-left">
-        <div class="level-item">
-          <p class="has-text-weight-semibold">Name</p>
-        </div>
-      </div>
-      <div class="level-right">
-        <div class="level-item">
-          <p>{{ view_model.product_name }}</p>
-        </div>
-      </div>
-    </div>
-    <div class="level">
-      <div class="level-left">
-        <div class="level-item">
-          <p class="has-text-weight-semibold">Beschreibung</p>
-        </div>
-      </div>
-      <div class="level-right">
-        <div class="level-item">
-          <p>xx</p>
-        </div>
-      </div>
-    </div>
+    {% endfor %}
 
   </div>
 </div>
