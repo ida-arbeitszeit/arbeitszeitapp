@@ -2,7 +2,7 @@ from datetime import datetime
 
 from arbeitszeit.repositories import PlanDraftRepository, PlanRepository
 from arbeitszeit.use_cases import SeekApproval
-from tests.data_generators import PlanGenerator, CompanyGenerator
+from tests.data_generators import CompanyGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
 
 from .dependency_injection import injection_test
@@ -77,5 +77,5 @@ def test_that_approved_plan_has_same_planner_as_draft(
     company_generator: CompanyGenerator,
 ):
     planner = company_generator.create_company()
-    plan_draft = plan_generator.draft_plan(planner)
+    plan_draft = plan_generator.draft_plan(planner=planner)
     assert plan_draft.planner.id == planner.id

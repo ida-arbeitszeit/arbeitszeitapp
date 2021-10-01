@@ -222,7 +222,6 @@ class PlanGenerator:
             planner = self.company_generator.create_company()
         if timeframe is None:
             timeframe = 14
-        planner = self.company_generator.create_company()
         draft = self.draft_repository.create_plan_draft(
             planner=planner.id,
             product_name=product_name,
