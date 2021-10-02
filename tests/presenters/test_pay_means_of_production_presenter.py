@@ -14,7 +14,7 @@ class PayMeansOfProductionTests(TestCase):
         )
         self.assertIn("Erfolgreich bezahlt.", view_model.notifications)
 
-    def test_missing_plan(self) -> None:
+    def test_missing_plan_show_correct_notification(self) -> None:
         presenter = PayMeansOfProductionPresenter()
         view_model = presenter.present(
             PayMeansOfProductionResponse(
@@ -22,3 +22,14 @@ class PayMeansOfProductionTests(TestCase):
             )
         )
         self.assertIn("Plan existiert nicht.", view_model.notifications)
+
+    def test_invalid_purpose_shows_correct_notification(self) -> None:
+        presenter = PayMeansOfProductionPresenter()
+        view_model = presenter.present(
+            PayMeansOfProductionResponse(
+                rejection_reason=PayMeansOfProductionResponse.RejectionReason.invalid_purpose,
+            )
+        )
+        self.assertIn(
+            "Der angegebene Verwendungszweck is ungültig.", view_model.notifications
+        )

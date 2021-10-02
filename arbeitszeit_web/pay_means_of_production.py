@@ -13,11 +13,13 @@ class PayMeansOfProductionPresenter:
     def present(
         self, use_case_response: PayMeansOfProductionResponse
     ) -> PayMeansOfProductionViewModel:
-        notifications = (
-            ["Erfolgreich bezahlt."]
-            if use_case_response.rejection_reason is None
-            else ["Plan existiert nicht."]
-        )
+        reasons = use_case_response.RejectionReason
+        if use_case_response.rejection_reason is None:
+            notifications = ["Erfolgreich bezahlt."]
+        elif use_case_response.rejection_reason == reasons.plan_not_found:
+            notifications = ["Plan existiert nicht."]
+        else:
+            notifications = ["Der angegebene Verwendungszweck is ungültig."]
         return PayMeansOfProductionViewModel(
             notifications=notifications,
         )

@@ -29,6 +29,7 @@ class PayMeansOfProductionRequest:
 class PayMeansOfProductionResponse:
     class RejectionReason(Enum):
         plan_not_found = auto()
+        invalid_purpose = auto()
 
     rejection_reason: Optional[RejectionReason]
 
@@ -58,10 +59,13 @@ class PayMeansOfProduction:
         sender = self.company_repository.get_by_id(request.buyer)
         purpose = request.purpose
         pieces = request.amount
-        assert purpose in (
+        if purpose not in (
             PurposesOfPurchases.means_of_prod,
             PurposesOfPurchases.raw_materials,
-        ), "Not a valid purpose for this operation."
+        ):
+            return PayMeansOfProductionResponse(
+                rejection_reason=PayMeansOfProductionResponse.RejectionReason.invalid_purpose
+            )
         if not plan.is_active:
             raise errors.PlanIsInactive(
                 plan=plan,

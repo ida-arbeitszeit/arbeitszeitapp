@@ -50,7 +50,7 @@ def test_error_is_raised_if_plan_is_expired(
 
 
 @injection_test
-def test_assertion_error_is_raised_if_purpose_is_other_than_means_or_raw_materials(
+def test_payment_is_rejected_when_purpose_is_consumption(
     pay_means_of_production: PayMeansOfProduction,
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
@@ -58,11 +58,11 @@ def test_assertion_error_is_raised_if_purpose_is_other_than_means_or_raw_materia
     sender = company_generator.create_company()
     plan = plan_generator.create_plan()
     purpose = PurposesOfPurchases.consumption
-    pieces = 5
-    with pytest.raises(AssertionError):
-        pay_means_of_production(
-            PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
-        )
+    response = pay_means_of_production(
+        PayMeansOfProductionRequest(sender.id, plan.id, 5, purpose)
+    )
+    assert response.is_rejected
+    assert response.rejection_reason == response.RejectionReason.invalid_purpose
 
 
 @injection_test
