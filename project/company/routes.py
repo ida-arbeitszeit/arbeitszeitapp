@@ -339,7 +339,6 @@ def transfer_to_company(
         return redirect(url_for("auth.zurueck"))
 
     if request.method == "POST":
-
         use_case_request = use_cases.PayMeansOfProductionRequest(
             buyer=current_user.id,
             plan=request.form["plan_id"],
@@ -348,21 +347,10 @@ def transfer_to_company(
             if request.form["category"] == "Produktionsmittel"
             else entities.PurposesOfPurchases.raw_materials,
         )
-        try:
-            use_case_response = pay_means_of_production(use_case_request)
-        except errors.PlanIsInactive:
-            flash(
-                "Der angegebene Plan ist nicht aktuell. Bitte wende dich an den Verkäufer, um eine aktuelle Plan-ID zu erhalten."
-            )
-        except errors.CompanyCantBuyPublicServices:
-            flash(
-                "Bezahlung nicht erfolgreich. Betriebe können keine öffentlichen Dienstleistungen oder Produkte erwerben."
-            )
-        else:
-            view_model = presenter.present(use_case_response)
-            for notification in view_model.notifications:
-                flash(notification)
-
+        use_case_response = pay_means_of_production(use_case_request)
+        view_model = presenter.present(use_case_response)
+        for notification in view_model.notifications:
+            flash(notification)
     return render_template("company/transfer_to_company.html")
 
 

@@ -1,9 +1,6 @@
 from datetime import datetime
 from uuid import uuid4
 
-import pytest
-
-from arbeitszeit import errors
 from arbeitszeit.entities import PurposesOfPurchases
 from arbeitszeit.use_cases import PayMeansOfProduction, PayMeansOfProductionRequest
 from tests.data_generators import CompanyGenerator, PlanGenerator
@@ -23,14 +20,15 @@ def test_error_is_raised_if_plan_is_not_active_yet(
     plan = plan_generator.create_plan()
     purpose = PurposesOfPurchases.means_of_prod
     pieces = 5
-    with pytest.raises(errors.PlanIsInactive):
-        pay_means_of_production(
-            PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
-        )
+    response = pay_means_of_production(
+        PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
+    )
+    assert response.is_rejected
+    assert response.rejection_reason == response.RejectionReason.plan_is_not_active
 
 
 @injection_test
-def test_error_is_raised_if_plan_is_expired(
+def test_reject_payment_if_plan_is_expired(
     pay_means_of_production: PayMeansOfProduction,
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
@@ -43,10 +41,11 @@ def test_error_is_raised_if_plan_is_expired(
     purpose = PurposesOfPurchases.means_of_prod
     pieces = 5
     plan.expired = True
-    with pytest.raises(errors.PlanIsInactive):
-        pay_means_of_production(
-            PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
-        )
+    response = pay_means_of_production(
+        PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
+    )
+    assert response.is_rejected
+    assert response.rejection_reason == response.RejectionReason.plan_is_not_active
 
 
 @injection_test
@@ -56,7 +55,7 @@ def test_payment_is_rejected_when_purpose_is_consumption(
     plan_generator: PlanGenerator,
 ):
     sender = company_generator.create_company()
-    plan = plan_generator.create_plan()
+    plan = plan_generator.create_plan(activation_date=datetime.min)
     purpose = PurposesOfPurchases.consumption
     response = pay_means_of_production(
         PayMeansOfProductionRequest(sender.id, plan.id, 5, purpose)
@@ -66,7 +65,7 @@ def test_payment_is_rejected_when_purpose_is_consumption(
 
 
 @injection_test
-def test_error_is_raised_if_trying_to_pay_public_service(
+def test_reject_payment_trying_to_pay_public_service(
     pay_means_of_production: PayMeansOfProduction,
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
@@ -77,11 +76,13 @@ def test_error_is_raised_if_trying_to_pay_public_service(
         is_public_service=True, activation_date=datetime_service.now_minus_one_day()
     )
     purpose = PurposesOfPurchases.means_of_prod
-    pieces = 5
-    with pytest.raises(errors.CompanyCantBuyPublicServices):
-        pay_means_of_production(
-            PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
-        )
+    response = pay_means_of_production(
+        PayMeansOfProductionRequest(sender.id, plan.id, 5, purpose)
+    )
+    assert response.is_rejected
+    assert (
+        response.rejection_reason == response.RejectionReason.cannot_buy_public_service
+    )
 
 
 @injection_test
