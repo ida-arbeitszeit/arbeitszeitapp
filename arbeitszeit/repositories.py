@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterator, List, Union
+from typing import Iterator, List, Optional, Union
 from uuid import UUID
 
 from arbeitszeit.entities import (
@@ -10,6 +10,7 @@ from arbeitszeit.entities import (
     Company,
     Member,
     Plan,
+    PlanDraft,
     ProductionCosts,
     ProductOffer,
     Purchase,
@@ -46,22 +47,7 @@ class PurchaseRepository(ABC):
 
 class PlanRepository(ABC):
     @abstractmethod
-    def create_plan(
-        self,
-        planner: Company,
-        costs: ProductionCosts,
-        product_name: str,
-        production_unit: str,
-        amount: int,
-        description: str,
-        timeframe_in_days: int,
-        is_public_service: bool,
-        creation_timestamp: datetime,
-    ) -> Plan:
-        pass
-
-    @abstractmethod
-    def approve_plan(self, plan: Plan, approval_timestamp: datetime) -> None:
+    def approve_plan(self, plan: PlanDraft, approval_timestamp: datetime) -> Plan:
         pass
 
     @abstractmethod
@@ -89,7 +75,7 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def get_plan_by_id(self, id: UUID) -> Plan:
+    def get_plan_by_id(self, id: UUID) -> Optional[Plan]:
         pass
 
     @abstractmethod
@@ -192,7 +178,7 @@ class OfferRepository(ABC):
         pass
 
     @abstractmethod
-    def all_active_offers(self) -> Iterator[ProductOffer]:
+    def get_all_offers(self) -> Iterator[ProductOffer]:
         pass
 
     @abstractmethod
@@ -206,7 +192,7 @@ class OfferRepository(ABC):
         pass
 
     @abstractmethod
-    def count_active_offers_without_plan_duplicates(self) -> int:
+    def count_all_offers_without_plan_duplicates(self) -> int:
         pass
 
     @abstractmethod
@@ -270,4 +256,29 @@ class CompanyRepository(ABC):
 
     @abstractmethod
     def count_registered_companies(self) -> int:
+        pass
+
+
+class PlanDraftRepository(ABC):
+    @abstractmethod
+    def create_plan_draft(
+        self,
+        planner: UUID,
+        product_name: str,
+        description: str,
+        costs: ProductionCosts,
+        production_unit: str,
+        amount: int,
+        timeframe_in_days: int,
+        is_public_service: bool,
+        creation_timestamp: datetime,
+    ) -> PlanDraft:
+        pass
+
+    @abstractmethod
+    def get_by_id(self, id: UUID) -> Optional[PlanDraft]:
+        pass
+
+    @abstractmethod
+    def delete_draft(self, id: UUID) -> None:
         pass

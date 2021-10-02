@@ -40,34 +40,15 @@ class Member:
         return [self.account]
 
 
+@dataclass
 class Company:
-    def __init__(
-        self,
-        id: UUID,
-        email: str,
-        name: str,
-        means_account: Account,
-        raw_material_account: Account,
-        work_account: Account,
-        product_account: Account,
-    ) -> None:
-        self._id = id
-        self.email = email
-        self.name = name
-        self.means_account = means_account
-        self.raw_material_account = raw_material_account
-        self.work_account = work_account
-        self.product_account = product_account
-
-    @property
-    def id(self) -> UUID:
-        return self._id
-
-    def __eq__(self, other: object) -> bool:
-        if isinstance(other, Company):
-            return self.id == other.id
-
-        return False
+    id: UUID
+    email: str
+    name: str
+    means_account: Account
+    raw_material_account: Account
+    work_account: Account
+    product_account: Account
 
     def accounts(self) -> List[Account]:
         return [
@@ -111,6 +92,20 @@ class ProductionCosts:
 
     def total_cost(self) -> Decimal:
         return self.labour_cost + self.resource_cost + self.means_cost
+
+
+@dataclass
+class PlanDraft:
+    id: UUID
+    creation_date: datetime
+    planner: Company
+    production_costs: ProductionCosts
+    product_name: str
+    unit_of_distribution: str
+    amount_produced: int
+    description: str
+    timeframe: int
+    is_public_service: bool
 
 
 @dataclass
@@ -158,13 +153,11 @@ class ProductOffer:
         self,
         id: UUID,
         name: str,
-        active: bool,
         description: str,
         plan: Plan,
     ) -> None:
         self._id = id
         self.name = name
-        self.active = active
         self.description = description
         self.plan = plan
 

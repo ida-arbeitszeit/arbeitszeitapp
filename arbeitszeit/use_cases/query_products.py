@@ -54,7 +54,7 @@ class QueryProducts:
         query = request.get_query_string()
         filter_by = request.get_filter_category()
         if query is None:
-            found_offers = self.offer_repository.all_active_offers()
+            found_offers = self.offer_repository.get_all_offers()
         elif filter_by == ProductFilter.by_name:
             found_offers = self.offer_repository.query_offers_by_name(query)
         else:

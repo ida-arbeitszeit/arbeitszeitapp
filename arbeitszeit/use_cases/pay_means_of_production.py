@@ -50,9 +50,8 @@ class PayMeansOfProduction:
     def __call__(
         self, request: PayMeansOfProductionRequest
     ) -> PayMeansOfProductionResponse:
-        try:
-            plan = self.plan_repository.get_plan_by_id(request.plan)
-        except KeyError:
+        plan = self.plan_repository.get_plan_by_id(request.plan)
+        if plan is None:
             return PayMeansOfProductionResponse(
                 rejection_reason=PayMeansOfProductionResponse.RejectionReason.plan_not_found,
             )

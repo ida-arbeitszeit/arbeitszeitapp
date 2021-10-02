@@ -66,6 +66,13 @@ class InMemoryModule(Module):
         return repo
 
     @provider
+    def proved_plan_draft_repository(
+        self,
+        repo: repositories.PlanDraftRepository,
+    ) -> interfaces.PlanDraftRepository:
+        return repo
+
+    @provider
     def provide_account_owner_repository(
         self, repo: repositories.AccountOwnerRepository
     ) -> interfaces.AccountOwnerRepository:
@@ -77,8 +84,12 @@ class InMemoryModule(Module):
         return service
 
 
+def get_dependency_injector() -> Injector:
+    return Injector(InMemoryModule())
+
+
 def injection_test(original_test):
-    injector = Injector(InMemoryModule())
+    injector = get_dependency_injector()
 
     def wrapper(*args, **kwargs):
         return injector.call_with_injection(

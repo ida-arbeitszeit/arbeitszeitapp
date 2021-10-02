@@ -5,11 +5,12 @@ from collections import defaultdict
 from datetime import datetime
 from decimal import Decimal
 from statistics import StatisticsError, mean
-from typing import Dict, Iterator, List, Set, Union
+from typing import Dict, Iterator, List, Optional, Set, Union
 
 from injector import inject, singleton
 
 import arbeitszeit.repositories as interfaces
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.entities import (
     Account,
@@ -17,6 +18,7 @@ from arbeitszeit.entities import (
     Company,
     Member,
     Plan,
+    PlanDraft,
     ProductionCosts,
     ProductOffer,
     Purchase,
@@ -94,14 +96,14 @@ class OfferRepository(interfaces.OfferRepository):
         self.offers: List[ProductOffer] = []
         self.plan_repository = plan_repository
 
-    def all_active_offers(self) -> Iterator[ProductOffer]:
+    def get_all_offers(self) -> Iterator[ProductOffer]:
         yield from self.offers
 
-    def count_active_offers_without_plan_duplicates(self) -> int:
+    def count_all_offers_without_plan_duplicates(self) -> int:
         offers = []
         plans_associated = []
         for offer in self.offers:
-            if offer.plan in plans_associated or not offer.active:
+            if offer.plan in plans_associated:
                 pass
             else:
                 offers.append(offer)
@@ -128,7 +130,6 @@ class OfferRepository(interfaces.OfferRepository):
         offer = ProductOffer(
             id=uuid.uuid4(),
             name=name,
-            active=True,
             description=description,
             plan=plan,
         )
@@ -340,53 +341,37 @@ class CompanyRepository(interfaces.CompanyRepository):
 @singleton
 class PlanRepository(interfaces.PlanRepository):
     @inject
-    def __init__(self) -> None:
-        self.plans: Dict[uuid.UUID, Plan] = {}
-
-    def create_plan(
+    def __init__(
         self,
-        planner: Company,
-        costs: ProductionCosts,
-        product_name: str,
-        production_unit: str,
-        amount: int,
-        description: str,
-        timeframe_in_days: int,
-        is_public_service: bool,
-        creation_timestamp: datetime,
-    ) -> Plan:
-        plan = Plan(
-            id=uuid.uuid4(),
-            plan_creation_date=creation_timestamp,
+        draft_repository: PlanDraftRepository,
+        company_repository: CompanyRepository,
+    ) -> None:
+        self.plans: Dict[uuid.UUID, Plan] = {}
+        self.draft_repository = draft_repository
+        self.company_repository = company_repository
+
+    def get_plan_by_id(self, id: uuid.UUID) -> Optional[Plan]:
+        return self.plans.get(id)
+
+    def approve_plan(self, draft: PlanDraft, approval_timestamp: datetime) -> Plan:
+        planner = self.company_repository.get_by_id(draft.planner.id)
+        assert planner
+        plan = self._create_plan(
+            id=draft.id,
             planner=planner,
-            production_costs=costs,
-            prd_name=product_name,
-            prd_unit=production_unit,
-            prd_amount=amount,
-            description=description,
-            timeframe=timeframe_in_days,
-            is_public_service=is_public_service,
-            is_active=False,
-            activation_date=None,
-            approved=False,
-            approval_date=None,
-            approval_reason=None,
-            expired=False,
-            renewed=False,
-            expiration_relative=None,
-            expiration_date=None,
-            last_certificate_payout=None,
+            costs=draft.production_costs,
+            product_name=draft.product_name,
+            production_unit=draft.unit_of_distribution,
+            amount=draft.amount_produced,
+            description=draft.description,
+            timeframe_in_days=draft.timeframe,
+            is_public_service=draft.is_public_service,
+            creation_timestamp=draft.creation_date,
         )
-        self.plans[plan.id] = plan
-        return plan
-
-    def get_plan_by_id(self, id: uuid.UUID) -> Plan:
-        return self.plans[id]
-
-    def approve_plan(self, plan: Plan, approval_timestamp: datetime) -> None:
         plan.approval_date = approval_timestamp
         plan.approved = True
         plan.approval_reason = "approved"
+        return plan
 
     def __len__(self) -> int:
         return len(self.plans)
@@ -506,3 +491,94 @@ class PlanRepository(interfaces.PlanRepository):
 
     def delete_plan(self, plan_id: uuid.UUID) -> None:
         del self.plans[plan_id]
+
+    def _create_plan(
+        self,
+        id: uuid.UUID,
+        planner: Company,
+        costs: ProductionCosts,
+        product_name: str,
+        production_unit: str,
+        amount: int,
+        description: str,
+        timeframe_in_days: int,
+        is_public_service: bool,
+        creation_timestamp: datetime,
+    ) -> Plan:
+        plan = Plan(
+            id=id,
+            plan_creation_date=creation_timestamp,
+            planner=planner,
+            production_costs=costs,
+            prd_name=product_name,
+            prd_unit=production_unit,
+            prd_amount=amount,
+            description=description,
+            timeframe=timeframe_in_days,
+            is_public_service=is_public_service,
+            is_active=False,
+            activation_date=None,
+            approved=False,
+            approval_date=None,
+            approval_reason=None,
+            expired=False,
+            renewed=False,
+            expiration_relative=None,
+            expiration_date=None,
+            last_certificate_payout=None,
+        )
+        self.plans[plan.id] = plan
+        return plan
+
+
+@singleton
+class PlanDraftRepository(interfaces.PlanDraftRepository):
+    @inject
+    def __init__(
+        self,
+        datetime_service: DatetimeService,
+        company_repository: interfaces.CompanyRepository,
+    ) -> None:
+        self.drafts: List[PlanDraft] = []
+        self.datetime_service = datetime_service
+        self.company_repository = company_repository
+
+    def create_plan_draft(
+        self,
+        planner: uuid.UUID,
+        product_name: str,
+        description: str,
+        costs: ProductionCosts,
+        production_unit: str,
+        amount: int,
+        timeframe_in_days: int,
+        is_public_service: bool,
+        creation_timestamp: datetime,
+    ) -> PlanDraft:
+        company = self.company_repository.get_by_id(planner)
+        draft = PlanDraft(
+            id=uuid.uuid4(),
+            creation_date=creation_timestamp,
+            planner=company,
+            product_name=product_name,
+            production_costs=costs,
+            unit_of_distribution=production_unit,
+            amount_produced=amount,
+            description=description,
+            timeframe=timeframe_in_days,
+            is_public_service=is_public_service,
+        )
+        self.drafts.append(draft)
+        return draft
+
+    def get_by_id(self, id: uuid.UUID) -> Optional[PlanDraft]:
+        for draft in self.drafts:
+            if draft.id == id:
+                return draft
+        return None
+
+    def __len__(self) -> int:
+        return len(self.drafts)
+
+    def delete_draft(self, id: uuid.UUID) -> None:
+        self.drafts = [draft for draft in self.drafts if draft.id != id]
