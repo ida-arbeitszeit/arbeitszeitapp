@@ -20,6 +20,7 @@ from arbeitszeit_web.create_offer import CreateOfferPresenter
 from arbeitszeit_web.delete_offer import DeleteOfferPresenter
 from arbeitszeit_web.delete_plan import DeletePlanPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
+from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from arbeitszeit_web.query_products import (
     QueryProductsController,
     QueryProductsPresenter,
@@ -331,6 +332,7 @@ def transfer_to_company(
     pay_means_of_production: use_cases.PayMeansOfProduction,
     company_repository: CompanyRepository,
     plan_repository: PlanRepository,
+    presenter: PayMeansOfProductionPresenter,
 ):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
@@ -345,7 +347,7 @@ def transfer_to_company(
             else entities.PurposesOfPurchases.raw_materials,
         )
         try:
-            pay_means_of_production(use_case_request)
+            use_case_response = pay_means_of_production(use_case_request)
         except errors.PlanIsInactive:
             flash(
                 "Der angegebene Plan ist nicht aktuell. Bitte wende dich an den Verkäufer, um eine aktuelle Plan-ID zu erhalten."
@@ -354,11 +356,10 @@ def transfer_to_company(
             flash(
                 "Bezahlung nicht erfolgreich. Betriebe können keine öffentlichen Dienstleistungen oder Produkte erwerben."
             )
-        except error.PlanNotFound:
-            flash("Plan existiert nicht.")
-            return redirect(url_for("main_company.transfer_to_company"))
         else:
-            flash("Erfolgreich bezahlt.")
+            view_model = presenter.present(use_case_response)
+            for notification in view_model.notifications:
+                flash(notification)
 
     return render_template("company/transfer_to_company.html")
 

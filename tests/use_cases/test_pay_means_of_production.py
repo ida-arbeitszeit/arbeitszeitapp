@@ -1,3 +1,6 @@
+from datetime import datetime
+from uuid import uuid4
+
 import pytest
 
 from arbeitszeit import errors
@@ -267,3 +270,41 @@ def test_correct_purchase_added_if_raw_materials_were_paid(
     assert purchase_added.purpose == PurposesOfPurchases.raw_materials
     assert purchase_added.buyer == sender
     assert purchase_added.plan == plan
+
+
+@injection_test
+def test_plan_not_found_rejects_payment(
+    pay_means_of_production: PayMeansOfProduction,
+    company_generator: CompanyGenerator,
+) -> None:
+    buyer = company_generator.create_company()
+    response = pay_means_of_production(
+        PayMeansOfProductionRequest(
+            buyer=buyer.id,
+            plan=uuid4(),
+            amount=1,
+            purpose=PurposesOfPurchases.means_of_prod,
+        )
+    )
+    assert response.is_rejected
+    assert response.rejection_reason == response.RejectionReason.plan_not_found
+
+
+@injection_test
+def test_plan_found_accepts_payment(
+    pay_means_of_production: PayMeansOfProduction,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+) -> None:
+    buyer = company_generator.create_company()
+    plan = plan_generator.create_plan(activation_date=datetime.min)
+    response = pay_means_of_production(
+        PayMeansOfProductionRequest(
+            buyer=buyer.id,
+            plan=plan.id,
+            amount=1,
+            purpose=PurposesOfPurchases.means_of_prod,
+        )
+    )
+    assert not response.is_rejected
+    assert response.rejection_reason is None

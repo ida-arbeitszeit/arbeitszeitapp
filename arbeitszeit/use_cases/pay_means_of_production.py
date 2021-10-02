@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from enum import Enum, auto
+from typing import Optional
 from uuid import UUID
 
 from injector import inject
@@ -23,6 +25,18 @@ class PayMeansOfProductionRequest:
     purpose: PurposesOfPurchases
 
 
+@dataclass
+class PayMeansOfProductionResponse:
+    class RejectionReason(Enum):
+        plan_not_found = auto()
+
+    rejection_reason: Optional[RejectionReason]
+
+    @property
+    def is_rejected(self) -> bool:
+        return self.rejection_reason is not None
+
+
 @inject
 @dataclass
 class PayMeansOfProduction:
@@ -33,8 +47,15 @@ class PayMeansOfProduction:
     plan_repository: PlanRepository
     company_repository: CompanyRepository
 
-    def __call__(self, request: PayMeansOfProductionRequest) -> None:
-        plan = self.plan_repository.get_plan_by_id(request.plan)
+    def __call__(
+        self, request: PayMeansOfProductionRequest
+    ) -> PayMeansOfProductionResponse:
+        try:
+            plan = self.plan_repository.get_plan_by_id(request.plan)
+        except KeyError:
+            return PayMeansOfProductionResponse(
+                rejection_reason=PayMeansOfProductionResponse.RejectionReason.plan_not_found,
+            )
         sender = self.company_repository.get_by_id(request.buyer)
         purpose = request.purpose
         pieces = request.amount
@@ -75,3 +96,4 @@ class PayMeansOfProduction:
             amount=price_total,
             purpose=f"Plan-Id: {plan.id}",
         )
+        return PayMeansOfProductionResponse(rejection_reason=None)
