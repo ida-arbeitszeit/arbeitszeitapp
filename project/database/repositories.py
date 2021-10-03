@@ -677,6 +677,22 @@ class PlanRepository(repositories.PlanRepository):
         else:
             self.db.session.delete(plan_orm)
 
+    def query_active_plans_by_product_name(self, query: str) -> Iterator[entities.Plan]:
+        return (
+            self.object_from_orm(plan)
+            for plan in Plan.query.filter(
+                Plan.is_active == True, Plan.prd_name.contains(query)
+            ).all()
+        )
+
+    def query_active_plans_by_plan_id(self, query: str) -> Iterator[entities.Plan]:
+        return (
+            self.object_from_orm(plan)
+            for plan in Plan.query.filter(
+                Plan.is_active == True, Plan.id.contains(query)
+            ).all()
+        )
+
     def __len__(self) -> int:
         return len(Plan.query.all())
 

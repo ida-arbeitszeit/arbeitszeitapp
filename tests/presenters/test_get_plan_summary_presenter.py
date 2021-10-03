@@ -1,6 +1,6 @@
 from decimal import Decimal
-from uuid import uuid4
 from unittest import TestCase
+from uuid import uuid4
 
 from arbeitszeit.use_cases.get_plan_summary import PlanSummaryResponse
 from arbeitszeit_web.get_plan_summary import GetPlanSummaryPresenter

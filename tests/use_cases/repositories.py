@@ -530,6 +530,16 @@ class PlanRepository(interfaces.PlanRepository):
         self.plans[plan.id] = plan
         return plan
 
+    def query_active_plans_by_product_name(self, query: str) -> Iterator[Plan]:
+        for plan in self.plans.values():
+            if plan.is_active and (query in plan.prd_name):
+                yield plan
+
+    def query_active_plans_by_plan_id(self, query: str) -> Iterator[Plan]:
+        for plan in self.plans.values():
+            if plan.is_active and (query in str(plan.id)):
+                yield plan
+
 
 @singleton
 class PlanDraftRepository(interfaces.PlanDraftRepository):

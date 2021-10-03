@@ -130,6 +130,14 @@ class PlanRepository(ABC):
     def delete_plan(self, plan_id: UUID) -> None:
         pass
 
+    @abstractmethod
+    def query_active_plans_by_product_name(self, query: str) -> Iterator[Plan]:
+        pass
+
+    @abstractmethod
+    def query_active_plans_by_plan_id(self, query: str) -> Iterator[Plan]:
+        pass
+
 
 class TransactionRepository(ABC):
     @abstractmethod
