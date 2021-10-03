@@ -20,7 +20,7 @@ from .pay_consumer_product import (
     PayConsumerProductRequest,
     PayConsumerProductResponse,
 )
-from .pay_means_of_production import PayMeansOfProduction
+from .pay_means_of_production import PayMeansOfProduction, PayMeansOfProductionRequest
 from .query_products import (
     ProductFilter,
     ProductQueryResponse,
@@ -54,6 +54,8 @@ __all__ = [
     "PayConsumerProductRequest",
     "PayConsumerProductResponse",
     "PayMeansOfProduction",
+    "PayMeansOfProductionRequest",
+    "PlanProposal",
     "CreatePlanDraftRequest",
     "CreatePlanDraftResponse",
     "ProductFilter",
