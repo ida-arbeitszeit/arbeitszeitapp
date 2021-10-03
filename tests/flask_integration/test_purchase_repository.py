@@ -20,6 +20,4 @@ def test_repository(
         buyer=user, purchase_date=datetime(2001, 2, 2)
     )
     result = list(repository.get_purchases_descending_by_date(user))
-    assert later_purchase.purpose == result[0].purpose
-    assert later_purchase == result[0]
     assert [later_purchase, earlier_purchase] == result
