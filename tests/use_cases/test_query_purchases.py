@@ -41,8 +41,6 @@ def test_that_correct_purchases_are_returned(
     company = company_generator.create_company()
     expected_purchase_member = purchase_generator.create_purchase(buyer=member)
     expected_purchase_company = purchase_generator.create_purchase(buyer=company)
-    repository.add(expected_purchase_member)
-    repository.add(expected_purchase_company)
     results = list(query_purchases(member))
     assert len(results) == 1
     assert purchase_in_results(expected_purchase_member, results)
@@ -65,11 +63,9 @@ def test_that_purchases_are_returned_in_correct_order_when_member_queries(
     expected_recent_purchase = purchase_generator.create_purchase(
         buyer=member, purchase_date=datetime_service.now_minus_one_day()
     )
-    expected_older_purchase = purchase_generator.create_purchase(
+    purchase_generator.create_purchase(
         buyer=member, purchase_date=datetime_service.now_minus_two_days()
     )
-    repository.add(expected_older_purchase)  # adding older purchase first
-    repository.add(expected_recent_purchase)
     results = list(query_purchases(member))
     assert purchase_in_results(
         expected_recent_purchase, [results[0]]
@@ -88,11 +84,9 @@ def test_that_purchases_are_returned_in_correct_order_when_company_queries(
     expected_recent_purchase = purchase_generator.create_purchase(
         buyer=company, purchase_date=datetime_service.now_minus_one_day()
     )
-    expected_older_purchase = purchase_generator.create_purchase(
+    purchase_generator.create_purchase(
         buyer=company, purchase_date=datetime_service.now_minus_two_days()
     )
-    repository.add(expected_older_purchase)  # adding older purchase first
-    repository.add(expected_recent_purchase)
     results = list(query_purchases(company))
     assert purchase_in_results(
         expected_recent_purchase, [results[0]]

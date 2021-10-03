@@ -13,28 +13,12 @@ class SocialAccounting:
     account: Account
 
 
+@dataclass
 class Member:
-    def __init__(
-        self,
-        id: UUID,
-        name: str,
-        email: str,
-        account: Account,
-    ) -> None:
-        self._id = id
-        self.name = name
-        self.account = account
-        self.email = email
-
-    @property
-    def id(self) -> UUID:
-        return self._id
-
-    def __eq__(self, other: object) -> bool:
-        if isinstance(other, Member):
-            return self.id == other.id
-
-        return False
+    id: UUID
+    name: str
+    email: str
+    account: Account
 
     def accounts(self) -> List[Account]:
         return [self.account]
@@ -68,20 +52,10 @@ class AccountTypes(Enum):
     accounting = "accounting"
 
 
+@dataclass
 class Account:
-    def __init__(
-        self,
-        id: UUID,
-        account_type: AccountTypes,
-    ) -> None:
-        self.id = id
-        self.account_type = account_type
-
-    def __eq__(self, other: object) -> bool:
-        if isinstance(other, Account):
-            return (self.id == other.id) and (self.account_type == other.account_type)
-
-        return False
+    id: UUID
+    account_type: AccountTypes
 
 
 @dataclass
@@ -148,22 +122,12 @@ class Plan:
         )
 
 
+@dataclass
 class ProductOffer:
-    def __init__(
-        self,
-        id: UUID,
-        name: str,
-        description: str,
-        plan: Plan,
-    ) -> None:
-        self._id = id
-        self.name = name
-        self.description = description
-        self.plan = plan
-
-    @property
-    def id(self) -> UUID:
-        return self._id
+    id: UUID
+    name: str
+    description: str
+    plan: Plan
 
 
 class PurposesOfPurchases(Enum):

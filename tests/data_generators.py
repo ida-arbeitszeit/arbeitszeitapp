@@ -34,6 +34,7 @@ from arbeitszeit.repositories import (
     OfferRepository,
     PlanDraftRepository,
     PlanRepository,
+    PurchaseRepository,
     TransactionRepository,
 )
 from arbeitszeit.use_cases import SeekApproval
@@ -243,6 +244,7 @@ class PurchaseGenerator:
     member_generator: MemberGenerator
     company_generator: CompanyGenerator
     datetime_service: FakeDatetimeService
+    purchase_repository: PurchaseRepository
 
     def create_purchase(
         self,
@@ -252,7 +254,7 @@ class PurchaseGenerator:
     ) -> Purchase:
         if purchase_date is None:
             purchase_date = self.datetime_service.now_minus_one_day()
-        return Purchase(
+        return self.purchase_repository.create_purchase(
             purchase_date=purchase_date,
             plan=self.plan_generator.create_plan(),
             buyer=buyer,

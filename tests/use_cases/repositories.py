@@ -22,6 +22,7 @@ from arbeitszeit.entities import (
     ProductionCosts,
     ProductOffer,
     Purchase,
+    PurposesOfPurchases,
     SocialAccounting,
     Transaction,
 )
@@ -33,8 +34,25 @@ class PurchaseRepository(interfaces.PurchaseRepository):
     def __init__(self):
         self.purchases = []
 
-    def add(self, purchase: Purchase):
+    def create_purchase(
+        self,
+        purchase_date: datetime,
+        plan: Plan,
+        buyer: Union[Member, Company],
+        price_per_unit: Decimal,
+        amount: int,
+        purpose: PurposesOfPurchases,
+    ) -> Purchase:
+        purchase = Purchase(
+            purchase_date=purchase_date,
+            plan=plan,
+            buyer=buyer,
+            price_per_unit=price_per_unit,
+            amount=amount,
+            purpose=purpose,
+        )
         self.purchases.append(purchase)
+        return purchase
 
     def get_purchases_descending_by_date(self, user: Union[Member, Company]):
         # order purchases by purchase_date
