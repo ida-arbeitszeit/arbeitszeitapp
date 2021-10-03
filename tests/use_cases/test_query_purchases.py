@@ -60,11 +60,12 @@ def test_that_purchases_are_returned_in_correct_order_when_member_queries(
     datetime_service: FakeDatetimeService,
 ):
     member = member_generator.create_member()
-    expected_recent_purchase = purchase_generator.create_purchase(
-        buyer=member, purchase_date=datetime_service.now_minus_one_day()
-    )
+    # Creating older purchase first to test correct ordering
     purchase_generator.create_purchase(
         buyer=member, purchase_date=datetime_service.now_minus_two_days()
+    )
+    expected_recent_purchase = purchase_generator.create_purchase(
+        buyer=member, purchase_date=datetime_service.now_minus_one_day()
     )
     results = list(query_purchases(member))
     assert purchase_in_results(
@@ -81,11 +82,12 @@ def test_that_purchases_are_returned_in_correct_order_when_company_queries(
     datetime_service: FakeDatetimeService,
 ):
     company = company_generator.create_company()
-    expected_recent_purchase = purchase_generator.create_purchase(
-        buyer=company, purchase_date=datetime_service.now_minus_one_day()
-    )
+    # Creating older purchase first to test correct ordering
     purchase_generator.create_purchase(
         buyer=company, purchase_date=datetime_service.now_minus_two_days()
+    )
+    expected_recent_purchase = purchase_generator.create_purchase(
+        buyer=company, purchase_date=datetime_service.now_minus_one_day()
     )
     results = list(query_purchases(company))
     assert purchase_in_results(
