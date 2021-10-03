@@ -1,5 +1,5 @@
-from decimal import Decimal
 from datetime import datetime
+from decimal import Decimal
 
 from arbeitszeit.entities import ProductionCosts
 from arbeitszeit.use_cases import GetPlanSummary
