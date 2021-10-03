@@ -70,78 +70,79 @@
 
 {% macro query_products(form, view_model) %}
 <div class="columns is-centered">
-    <div class="column is-one-third">
-        <h1 class="title">
-            Produktsuche
-        </h1>
-        {% if view_model.notifications or form.errors %}
-        <div class="box">
-            {% for notification in view_model.notifications %}
-              <div class="notification is-danger">{{ notification.text }}</div>
-            {% endfor %}
-            {% for field_name, field_errors in form.errors|dictsort if field_errors %}
-              {% for error in field_errors %}
-                <div class="notification is-danger">{{ form[field_name].label }} {{ error }}</div>
-              {% endfor %}
-            {% endfor %}
-        </div>
-        {% endif %}
-        <form method="post">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div class="field">
-                <div class="control">
-                    <div class="select is-large is-fullwidth">
-                        {{ form.select }}
-                    </div>
-                </div>
-                <p class="help">Suche in Name oder Beschreibung</p>
-            </div>
-            <div class="field">
-                <div class="control">
-                    {{ form.search(class_="input is-large") }}
-                </div>
-            </div>
-            <button class="button is-block is-primary is-large is-fullwidth">
-                Suche
-            </button>
-        </form>
+  <div class="column is-one-third">
+    <h1 class="title">
+      Produktsuche
+    </h1>
+    {% if view_model.notifications or form.errors %}
+    <div class="box">
+      {% for notification in view_model.notifications %}
+      <div class="notification is-danger">{{ notification.text }}</div>
+      {% endfor %}
+      {% for field_name, field_errors in form.errors|dictsort if field_errors %}
+      {% for error in field_errors %}
+      <div class="notification is-danger">{{ form[field_name].label }} {{ error }}</div>
+      {% endfor %}
+      {% endfor %}
     </div>
+    {% endif %}
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="field">
+        <div class="control">
+          <div class="select is-large is-fullwidth">
+            {{ form.select }}
+          </div>
+        </div>
+        <p class="help">Suche in Name oder Beschreibung</p>
+      </div>
+      <div class="field">
+        <div class="control">
+          {{ form.search(class_="input is-large") }}
+        </div>
+      </div>
+      <button class="button is-block is-primary is-large is-fullwidth">
+        Suche
+      </button>
+    </form>
+  </div>
 </div>
 {% if view_model.show_results %}
 <h1 class="title">
-    Ergebnisse
+  Ergebnisse
 </h1>
 <div class="table-container">
-    <table class="table is-fullwidth">
-        <thead>
-            <tr>
-                <th>Plan-ID</th>
-                <th>Produktname</th>
-                <th>Betrieb</th>
-                <th>Beschreibung</th>
-                <th>Stückpreis</th>
-                <th>Public Service</th>
-                <th>Kontakt</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for column in view_model.results.rows %}
-            <tr>
-                <td>{{ column.plan_id }}</td>
-                <td>{{ column.product_name }}</td>
-                <td>{{ column.seller_name }}</td>
-                <td>{{ column.product_description }}</td>
-                <td>{{ column.price_per_unit }}</td>
-                <td>{{ column.is_public_service }}</td>
-                <td>
-                    <a href="{{ column.contact_email }}">
-                        <u><span class="icon"><i class="far fa-envelope"></i></span></u>
-                    </a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+  <table class="table is-fullwidth">
+    <thead>
+      <tr>
+        <th>Plan-ID</th>
+        <th>Produktname</th>
+        <th>Betrieb</th>
+        <th>Beschreibung</th>
+        <th>Stückpreis</th>
+        <th>Public Service</th>
+        <th>Kontakt</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for column in view_model.results.rows %}
+      <tr>
+        <td><a href="{{ url_for(request.blueprint+'.plan_summary', plan_id=column.plan_id) }}">{{ column.plan_id }}</a>
+        </td>
+        <td>{{ column.product_name }}</td>
+        <td>{{ column.seller_name }}</td>
+        <td>{{ column.product_description }}</td>
+        <td>{{ column.price_per_unit }}</td>
+        <td>{{ column.is_public_service }}</td>
+        <td>
+          <a href="{{ column.contact_email }}">
+            <u><span class="icon"><i class="far fa-envelope"></i></span></u>
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 {% endif %}
 {% endmacro %}
@@ -272,6 +273,37 @@
     </div>
 
 
+
+  </div>
+</div>
+
+{% endmacro %}
+
+
+{% macro plan_summary(view_model) %}
+
+<div class="columns is-centered">
+  <div class="column is-half">
+    <div class="content">
+      <h1 class="title">
+        Planinformationen
+      </h1>
+    </div>
+    <br>
+    {% for key in view_model %}
+    <div class="level">
+      <div class="level-left">
+        <div class="level-item">
+          <p class="has-text-weight-semibold">{{ view_model[key][0] }}</p>
+        </div>
+      </div>
+      <div class="level-right">
+        <div class="level-item">
+          <p>{{ view_model[key][1] }}</p>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
 
   </div>
 </div>
