@@ -75,7 +75,11 @@ def test_that_approval_date_has_correct_day_of_month(
 def test_that_approved_plan_has_same_planner_as_draft(
     plan_generator: PlanGenerator,
     company_generator: CompanyGenerator,
+    seek_approval: SeekApproval,
+    plan_repository: PlanRepository,
 ):
-    planner = company_generator.create_company()
-    plan_draft = plan_generator.draft_plan(planner=planner)
-    assert plan_draft.planner.id == planner.id
+    draft = plan_generator.draft_plan()
+    seek_approval(draft.id, None)
+    new_plan = plan_repository.get_plan_by_id(draft.id)
+    assert new_plan
+    assert new_plan.planner == draft.planner
