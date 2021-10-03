@@ -19,6 +19,7 @@ from arbeitszeit.use_cases import (
 from arbeitszeit_web.create_offer import CreateOfferPresenter
 from arbeitszeit_web.delete_offer import DeleteOfferPresenter
 from arbeitszeit_web.delete_plan import DeletePlanPresenter
+from arbeitszeit_web.get_plan_summary import GetPlanSummaryPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from arbeitszeit_web.query_products import (
@@ -415,10 +416,21 @@ def statistics(
     return render_template("company/statistics.html", view_model=view_model)
 
 
-@main_company.route("/company/cooperate", methods=["GET", "POST"])
+@main_company.route("/company/plan_summary/<uuid:plan_id>")
 @login_required
-def cooperate():
-    return render_template("company/cooperate.html")
+@with_injection
+def plan_summary(
+    plan_id: UUID,
+    get_plan_summary: use_cases.GetPlanSummary,
+    presenter: GetPlanSummaryPresenter,
+):
+    if not user_is_company():
+        return redirect(url_for("auth.zurueck"))
+
+    use_case_response = get_plan_summary(plan_id)
+    view_model = presenter.present(use_case_response)
+
+    return render_template("company/plan_summary.html", view_model=view_model.to_dict())
 
 
 @main_company.route("/company/hilfe")
