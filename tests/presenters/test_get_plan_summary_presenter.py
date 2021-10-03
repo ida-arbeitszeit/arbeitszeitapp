@@ -2,6 +2,7 @@ from dataclasses import replace
 from decimal import Decimal
 from unittest import TestCase
 from uuid import uuid4
+from typing import Dict
 
 from arbeitszeit.use_cases.get_plan_summary import PlanSummaryResponse
 from arbeitszeit_web.get_plan_summary import GetPlanSummaryPresenter
@@ -158,4 +159,16 @@ class GetPlanSummaryPresenterTests(TestCase):
                 "Preis (pro Einheit)",
                 str(TESTING_RESPONSE_MODEL.price_per_unit),
             ),
+        )
+
+    def test_that_to_dict_method_returns_a_dictionary(self):
+        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        dictionary = view_model.to_dict()
+        self.assertIsInstance(dictionary, Dict)
+
+    def test_that_to_dict_method_returns_a_dictionary_with_plan_id_tuple(self):
+        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        dictionary = view_model.to_dict()
+        self.assertEqual(
+            dictionary["plan_id"], ("Plan-ID", str(TESTING_RESPONSE_MODEL.plan_id))
         )
