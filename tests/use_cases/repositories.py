@@ -510,7 +510,7 @@ class PlanRepository(interfaces.PlanRepository):
 
     def get_all_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
         for plan in self.plans.values():
-            if str(plan.planner.id) == company_id:
+            if str(plan.planner.id) == str(company_id):
                 yield plan
 
     def get_approved_non_active_plans_for_company(

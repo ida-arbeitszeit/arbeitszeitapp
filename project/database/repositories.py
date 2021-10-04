@@ -697,7 +697,7 @@ class PlanRepository(repositories.PlanRepository):
     def get_all_plans_for_company(self, company_id: UUID) -> Iterator[entities.Plan]:
         return (
             self.object_from_orm(plan_orm)
-            for plan_orm in Plan.query.filter(Plan.planner == company_id)
+            for plan_orm in Plan.query.filter(Plan.planner == str(company_id))
         )
 
     def get_approved_non_active_plans_for_company(
@@ -706,7 +706,7 @@ class PlanRepository(repositories.PlanRepository):
         return (
             self.object_from_orm(plan_orm)
             for plan_orm in Plan.query.filter(
-                Plan.planner == company_id,
+                Plan.planner == str(company_id),
                 Plan.approved == True,
                 Plan.is_active == False,
                 Plan.expired == False,
@@ -717,7 +717,7 @@ class PlanRepository(repositories.PlanRepository):
         return (
             self.object_from_orm(plan_orm)
             for plan_orm in Plan.query.filter(
-                Plan.planner == company_id,
+                Plan.planner == str(company_id),
                 Plan.approved == True,
                 Plan.is_active == True,
                 Plan.expired == False,
@@ -730,7 +730,7 @@ class PlanRepository(repositories.PlanRepository):
         return (
             self.object_from_orm(plan_orm)
             for plan_orm in Plan.query.filter(
-                Plan.planner == company_id,
+                Plan.planner == str(company_id),
                 Plan.expired == True,
                 Plan.is_active == False,
             )
