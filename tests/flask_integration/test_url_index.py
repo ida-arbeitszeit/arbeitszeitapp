@@ -1,5 +1,3 @@
-from uuid import uuid4
-
 from project.url_index import CompanyUrlIndex, MemberUrlIndex
 from tests.data_generators import CompanyGenerator, MemberGenerator, PlanGenerator
 
