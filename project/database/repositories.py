@@ -700,7 +700,7 @@ class PlanRepository(repositories.PlanRepository):
             for plan_orm in Plan.query.filter(Plan.planner == str(company_id))
         )
 
-    def get_approved_non_active_plans_for_company(
+    def get_non_active_plans_for_company(
         self, company_id: UUID
     ) -> Iterator[entities.Plan]:
         return (

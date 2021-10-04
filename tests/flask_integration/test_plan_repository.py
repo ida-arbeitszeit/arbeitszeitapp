@@ -216,7 +216,7 @@ def test_that_approved_non_active_plan_for_company_is_returned(
     company = company_generator.create_company()
     expected_plan = plan_generator.create_plan(approved=True, planner=company)
     returned_plan = list(
-        repository.get_approved_non_active_plans_for_company(company_id=company.id)
+        repository.get_non_active_plans_for_company(company_id=company.id)
     )[0]
     assert (
         expected_plan.id == returned_plan.id

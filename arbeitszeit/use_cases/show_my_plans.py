@@ -16,6 +16,9 @@ class ShowMyPlansRequest:
 @dataclass
 class ShowMyPlansResponse:
     all_plans: List[Plan]
+    non_active_plans: List[Plan]
+    active_plans: List[Plan]
+    expired_plans: List[Plan]
 
 
 @inject
@@ -30,4 +33,27 @@ class ShowMyPlansUseCase:
                 request.company_id
             )
         ]
-        return ShowMyPlansResponse(all_plans=all_plans)
+        non_active_plans = [
+            plan
+            for plan in self.plan_repository.get_non_active_plans_for_company(
+                request.company_id
+            )
+        ]
+        active_plans = [
+            plan
+            for plan in self.plan_repository.get_active_plans_for_company(
+                request.company_id
+            )
+        ]
+        expired_plans = [
+            plan
+            for plan in self.plan_repository.get_expired_plans_for_company(
+                request.company_id
+            )
+        ]
+        return ShowMyPlansResponse(
+            all_plans=all_plans,
+            non_active_plans=non_active_plans,
+            active_plans=active_plans,
+            expired_plans=expired_plans,
+        )
