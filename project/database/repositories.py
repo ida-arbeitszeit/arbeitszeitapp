@@ -732,7 +732,6 @@ class PlanRepository(repositories.PlanRepository):
             for plan_orm in Plan.query.filter(
                 Plan.planner == str(company_id),
                 Plan.expired == True,
-                Plan.is_active == False,
             )
         )
 

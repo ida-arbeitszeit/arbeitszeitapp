@@ -83,7 +83,7 @@ class ShowMyPlansPresenter:
     def present(self, response: ShowMyPlansResponse) -> ShowMyPlansViewModel:
 
         if not response.all_plans:
-            notifications = ["Keine Ergebnisse!"]
+            notifications = ["Du hast keine Pläne."]
         else:
             notifications = []
 

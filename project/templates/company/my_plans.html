@@ -15,7 +15,7 @@ messages %}
 {% endfor %} {% endif %} {% endwith %}
 
 <div class="table-container">
-  {% if plans is defined and plans|length %}
+  {% if show_active_plans %}
   <table class="table is-fullwidth">
     <thead>
       <tr>
@@ -27,7 +27,7 @@ messages %}
         <th><abbr title="Kosten Arbeit">a</abbr></th>
         <th><abbr title="Einheiten">Einh.</abbr></th>
         <th>Stückpr.</th>
-        <th>Öffentlicher Dienst</th>
+        <th>Art</th>
         <th>Plan aktiv seit</th>
         <th>Plan-Ende</th>
         <th>Endet in</th>
@@ -35,23 +35,21 @@ messages %}
       </tr>
     </thead>
     <tbody>
-      {% for plan in plans %}
+      {% for plan in active_plans.rows %}
       <tr>
         <td>{{ plan.id }}</td>
         <td>{{ plan.prd_name }}</td>
         <td>
-          <abbr title="{{ plan.description }}"
-            >{{ plan.description[:5] }}...</abbr
-          >
+          <abbr title="{{ plan.description }}">{{ plan.description }}</abbr>
         </td>
-        <td>{{ plan.production_costs.means_cost }}</td>
-        <td>{{ plan.production_costs.resource_cost }}</td>
-        <td>{{ plan.production_costs.labour_cost }}</td>
+        <td>{{ plan.production_costs_means_cost }}</td>
+        <td>{{ plan.production_costs_resource_cost }}</td>
+        <td>{{ plan.production_costs_labour_cost }}</td>
         <td>{{ plan.prd_amount }}</td>
-        <td>{{ plan.price_per_unit }} Std.</td>
-        <td>{{ plan.is_public_service }}</td>
-        <td>{{ plan.activation_date.strftime("%d.%m.%y") }}</td>
-        <td>{{ plan.expiration_date.strftime("%d.%m.%y") }}</td>
+        <td>{{ plan.price_per_unit }}</td>
+        <td>{{ plan.type_of_plan }}</td>
+        <td>{{ plan.activation_date }}</td>
+        <td>{{ plan.expiration_date }}</td>
         <td>{{ plan.expiration_relative }}d</td>
         <td>
           <a href="{{ url_for('main_company.create_offer', plan_id=plan.id) }}"
@@ -63,15 +61,14 @@ messages %}
     </tbody>
   </table>
   {% else %}
-  <p>(Du hast keine Pläne.)</p>
+  <p>(Du hast keine aktiven Pläne.)</p>
   {% endif %}
 </div>
 
 <h1 class="title">Pläne, die auf Aktivierung warten</h1>
 
 <div class="table-container">
-  {% if plans_waiting_for_activation is defined and
-  plans_waiting_for_activation|length %}
+  {% if show_non_active_plans %}
   <table class="table is-fullwidth">
     <thead>
       <tr>
@@ -83,24 +80,24 @@ messages %}
         <th><abbr title="Kosten Arbeit">a</abbr></th>
         <th>Einheiten</th>
         <th>Stückpreis</th>
-        <th>Öffentlicher Dienst</th>
+        <th>Art</th>
         <th>Plan vom</th>
         <th>Del.</th>
       </tr>
     </thead>
     <tbody>
-      {% for plan in plans_waiting_for_activation %}
+      {% for plan in non_active_plans.rows %}
       <tr>
         <td>{{ plan.id }}</td>
         <td>{{ plan.prd_name }}</td>
         <td>{{ plan.description }}</td>
-        <td>{{ plan.production_costs.means_cost }}</td>
-        <td>{{ plan.production_costs.resource_cost }}</td>
-        <td>{{ plan.production_costs.labour_cost }}</td>
+        <td>{{ plan.production_costs_means_cost }}</td>
+        <td>{{ plan.production_costs_resource_cost }}</td>
+        <td>{{ plan.production_costs_labour_cost }}</td>
         <td>{{ plan.prd_amount }}</td>
-        <td>{{ plan.price_per_unit }} Std.</td>
-        <td>{{ plan.is_public_service }}</td>
-        <td>{{ plan.plan_creation_date.strftime("%d.%m.%y") }}</td>
+        <td>{{ plan.price_per_unit }}</td>
+        <td>{{ plan.type_of_plan }}</td>
+        <td>{{ plan.plan_creation_date }}</td>
         <td>
           <a href="{{ url_for('main_company.delete_plan', plan_id=plan.id) }}"
             ><i class="fas fa-trash"></i
@@ -118,7 +115,7 @@ messages %}
 <h1 class="title">Abgelaufene Pläne</h1>
 
 <div class="table-container">
-  {% if plans_expired is defined and plans_expired|length %}
+  {% if show_expired_plans %}
   <table class="table is-fullwidth">
     <thead>
       <tr>
@@ -130,25 +127,25 @@ messages %}
         <th><abbr title="Kosten Arbeit">a</abbr></th>
         <th>Einheiten</th>
         <th>Stückpreis</th>
-        <th>Öffentlicher Dienst</th>
+        <th>Art</th>
         <th>Plan vom</th>
         <th><abbr title="Nur einmal möglich.">Plan erneuern</abbr></th>
         <th>Del.</th>
       </tr>
     </thead>
     <tbody>
-      {% for plan in plans_expired %}
+      {% for plan in expired_plans.rows %}
       <tr>
         <td>{{ plan.id }}</td>
         <td>{{ plan.prd_name }}</td>
         <td>{{ plan.description }}</td>
-        <td>{{ plan.production_costs.means_cost }}</td>
-        <td>{{ plan.production_costs.resource_cost }}</td>
-        <td>{{ plan.production_costs.labour_cost }}</td>
+        <td>{{ plan.production_costs_means_cost }}</td>
+        <td>{{ plan.production_costs_resource_cost }}</td>
+        <td>{{ plan.production_costs_labour_cost }}</td>
         <td>{{ plan.prd_amount }}</td>
-        <td>{{ plan.price_per_unit }} Std.</td>
-        <td>{{ plan.is_public_service }}</td>
-        <td>{{ plan.plan_creation_date.strftime("%d.%m.%y") }}</td>
+        <td>{{ plan.price_per_unit }}</td>
+        <td>{{ plan.type_of_plan }}</td>
+        <td>{{ plan.plan_creation_date }}</td>
 
         {% if plan.renewed %}
         <td>

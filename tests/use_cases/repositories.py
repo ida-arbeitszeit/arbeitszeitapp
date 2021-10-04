@@ -535,7 +535,7 @@ class PlanRepository(interfaces.PlanRepository):
 
     def get_expired_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
         for plan in self.plans.values():
-            if plan.planner == company_id and plan.expired and not plan.is_active:
+            if plan.planner == company_id and plan.expired:
                 yield plan
 
     def _create_plan(
