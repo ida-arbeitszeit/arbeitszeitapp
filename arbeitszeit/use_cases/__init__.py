@@ -32,6 +32,7 @@ from .register_company import RegisterCompany
 from .register_member import RegisterMember
 from .seek_approval import SeekApproval
 from .send_work_certificates_to_worker import SendWorkCertificatesToWorker
+from .show_my_plans import ShowMyPlansRequest, ShowMyPlansResponse, ShowMyPlansUseCase
 from .synchronized_plan_activation import SynchronizedPlanActivation
 
 __all__ = [
@@ -65,6 +66,9 @@ __all__ = [
     "RegisterMember",
     "SeekApproval",
     "SendWorkCertificatesToWorker",
+    "ShowMyPlansRequest",
+    "ShowMyPlansResponse",
+    "ShowMyPlansUseCase",
     "StatisticsResponse",
     "SynchronizedPlanActivation",
     "TransactionInfo",

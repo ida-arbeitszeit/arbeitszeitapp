@@ -684,6 +684,46 @@ class PlanRepository(repositories.PlanRepository):
         else:
             self.db.session.delete(plan_orm)
 
+    def get_all_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
+        return (
+            self.object_from_orm(plan_orm)
+            for plan_orm in Plan.query.filter(Plan.planner == company_id)
+        )
+
+    def get_approved_non_active_plans_for_company(
+        self, company_id: UUID
+    ) -> Iterator[Plan]:
+        return (
+            self.object_from_orm(plan_orm)
+            for plan_orm in Plan.query.filter(
+                Plan.planner == company_id,
+                Plan.approved == True,
+                Plan.is_active == False,
+                Plan.expired == False,
+            )
+        )
+
+    def get_active_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
+        return (
+            self.object_from_orm(plan_orm)
+            for plan_orm in Plan.query.filter(
+                Plan.planner == company_id,
+                Plan.approved == True,
+                Plan.is_active == True,
+                Plan.expired == False,
+            )
+        )
+
+    def get_expired_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
+        return (
+            self.object_from_orm(plan_orm)
+            for plan_orm in Plan.query.filter(
+                Plan.planner == company_id,
+                Plan.expired == True,
+                Plan.is_active == False,
+            )
+        )
+
     def __len__(self) -> int:
         return len(Plan.query.all())
 

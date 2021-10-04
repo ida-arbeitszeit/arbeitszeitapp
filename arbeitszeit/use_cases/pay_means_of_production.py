@@ -36,7 +36,7 @@ class PayMeansOfProduction:
             raise errors.CompanyCantBuyPublicServices(sender, plan)
 
         # create purchase
-        price_per_unit = plan.price_per_unit()
+        price_per_unit = plan.price_per_unit
         purchase = self.purchase_factory.create_purchase(
             purchase_date=self.datetime_service.now(),
             plan=plan,
@@ -48,7 +48,7 @@ class PayMeansOfProduction:
         self.purchase_repository.add(purchase)
 
         # create transaction
-        price_total = pieces * plan.price_per_unit()
+        price_total = pieces * plan.price_per_unit
         if purpose == PurposesOfPurchases.means_of_prod:
             sending_account = sender.means_account
         elif purpose == PurposesOfPurchases.raw_materials:

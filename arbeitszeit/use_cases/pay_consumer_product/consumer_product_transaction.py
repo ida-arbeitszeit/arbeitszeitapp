@@ -46,7 +46,7 @@ class ConsumerProductTransaction:
     transaction_repository: TransactionRepository
 
     def record_purchase(self) -> None:
-        price_per_unit = self.plan.price_per_unit()
+        price_per_unit = self.plan.price_per_unit
         purchase = self.purchase_factory.create_purchase(
             purchase_date=self.datetime_service.now(),
             plan=self.plan,
@@ -58,7 +58,7 @@ class ConsumerProductTransaction:
         self.purchase_repository.add(purchase)
 
     def exchange_currency(self) -> None:
-        price_total = self.amount * self.plan.price_per_unit()
+        price_total = self.amount * self.plan.price_per_unit
         sending_account = self.buyer.account
 
         self.transaction_repository.create_transaction(

@@ -178,6 +178,7 @@ class PlanGenerator:
         product_name="Produkt A",
         description="Beschreibung für Produkt A.",
         production_unit="500 Gramm",
+        expired=False,
     ) -> Plan:
         if costs is None:
             costs = ProductionCosts(Decimal(1), Decimal(1), Decimal(1))
@@ -203,6 +204,8 @@ class PlanGenerator:
             self.seek_approval(plan.id, None)
         if activation_date:
             self.plan_repository.activate_plan(plan, activation_date)
+        if expired:
+            self.plan_repository.set_plan_as_expired(plan)
         return plan
 
 
