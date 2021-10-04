@@ -7,6 +7,7 @@ from enum import Enum
 
 from flask_login import UserMixin
 
+from arbeitszeit import entities
 from project.extensions import db
 
 
@@ -64,6 +65,21 @@ class Company(UserMixin, db.Model):
         )
 
 
+class PlanDraft(UserMixin, db.Model):
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
+    plan_creation_date = db.Column(db.DateTime, nullable=False)
+    planner = db.Column(db.String, db.ForeignKey("company.id"), nullable=False)
+    costs_p = db.Column(db.Numeric(), nullable=False)
+    costs_r = db.Column(db.Numeric(), nullable=False)
+    costs_a = db.Column(db.Numeric(), nullable=False)
+    prd_name = db.Column(db.String(100), nullable=False)
+    prd_unit = db.Column(db.String(100), nullable=False)
+    prd_amount = db.Column(db.Integer, nullable=False)
+    description = db.Column(db.String(5000), nullable=False)
+    timeframe = db.Column(db.Numeric(), nullable=False)
+    is_public_service = db.Column(db.Boolean, nullable=False, default=False)
+
+
 class Plan(UserMixin, db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
     plan_creation_date = db.Column(db.DateTime, nullable=False)
@@ -77,9 +93,6 @@ class Plan(UserMixin, db.Model):
     description = db.Column(db.String(5000), nullable=False)
     timeframe = db.Column(db.Numeric(), nullable=False)
     is_public_service = db.Column(db.Boolean, nullable=False, default=False)
-    social_accounting = db.Column(
-        db.String, db.ForeignKey("social_accounting.id"), nullable=False
-    )
     approved = db.Column(db.Boolean, nullable=False, default=False)
     approval_date = db.Column(db.DateTime, nullable=True, default=None)
     approval_reason = db.Column(db.String(1000), nullable=True, default=None)
@@ -148,12 +161,6 @@ class Offer(UserMixin, db.Model):
     description = db.Column(db.String(5000), nullable=False)
 
 
-class PurposesOfPurchases(Enum):
-    means_of_prod = "means_of_prod"
-    raw_materials = "raw_materials"
-    consumption = "consumption"
-
-
 class Purchase(UserMixin, db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
     purchase_date = db.Column(db.DateTime, nullable=False)
@@ -163,4 +170,4 @@ class Purchase(UserMixin, db.Model):
     member = db.Column(db.String, db.ForeignKey("member.id"), nullable=True)
     price_per_unit = db.Column(db.Numeric(), nullable=False)
     amount = db.Column(db.Integer, nullable=False)
-    purpose = db.Column(db.Enum(PurposesOfPurchases), nullable=False)
+    purpose = db.Column(db.Enum(entities.PurposesOfPurchases), nullable=False)

@@ -1,10 +1,10 @@
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List
 from uuid import UUID
 
 from injector import inject
-from arbeitszeit.entities import Plan
 
+from arbeitszeit.entities import Plan
 from arbeitszeit.repositories import PlanRepository
 
 

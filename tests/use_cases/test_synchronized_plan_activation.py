@@ -22,18 +22,6 @@ def test_that_plan_gets_set_active(
 
 
 @injection_test
-def test_that_only_approved_plans_get_set_active(
-    plan_generator: PlanGenerator,
-    synchronized_plan_activation: SynchronizedPlanActivation,
-):
-    plan1 = plan_generator.create_plan(approved=False)
-    plan2 = plan_generator.create_plan(approved=True)
-    synchronized_plan_activation()
-    assert not plan1.is_active
-    assert plan2.is_active
-
-
-@injection_test
 def test_that_attribute_last_certificate_payout_gets_set(
     plan_generator: PlanGenerator,
     synchronized_plan_activation: SynchronizedPlanActivation,

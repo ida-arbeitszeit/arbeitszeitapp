@@ -9,17 +9,19 @@ from arbeitszeit import entities, errors, use_cases
 from arbeitszeit.use_cases import (
     CreateOffer,
     CreateOfferRequest,
-    CreatePlan,
+    CreatePlanDraft,
+    CreatePlanDraftRequest,
     DeleteOffer,
     DeleteOfferRequest,
     DeletePlan,
     GetPlanSummary,
-    PlanProposal,
 )
 from arbeitszeit_web.create_offer import CreateOfferPresenter
 from arbeitszeit_web.delete_offer import DeleteOfferPresenter
 from arbeitszeit_web.delete_plan import DeletePlanPresenter
+from arbeitszeit_web.get_plan_summary import GetPlanSummaryPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
+from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from arbeitszeit_web.query_products import (
     QueryProductsController,
     QueryProductsPresenter,
@@ -141,7 +143,7 @@ def my_purchases(
 @login_required
 @with_injection
 def create_plan(
-    create_plan_from_proposal: CreatePlan,
+    create_plan_from_proposal: CreatePlanDraft,
     get_plan_summary: GetPlanSummary,
     seek_approval: use_cases.SeekApproval,
 ):
@@ -155,7 +157,8 @@ def create_plan(
 
     if request.method == "POST":  # Button "Plan erstellen"
         plan_data = dict(request.form)
-        proposal = PlanProposal(
+        use_case_request = CreatePlanDraftRequest(
+            planner=current_user.id,
             costs=entities.ProductionCosts(
                 labour_cost=Decimal(plan_data["costs_a"]),
                 resource_cost=Decimal(plan_data["costs_r"]),
@@ -170,7 +173,7 @@ def create_plan(
             if plan_data["productive_or_public"] == "public"
             else False,
         )
-        new_plan = create_plan_from_proposal(current_user.id, proposal)
+        new_plan = create_plan_from_proposal(use_case_request)
         approval_response = seek_approval(new_plan.plan_id, original_plan_uuid)
 
         if approval_response.is_approved:
@@ -331,39 +334,24 @@ def transfer_to_company(
     pay_means_of_production: use_cases.PayMeansOfProduction,
     company_repository: CompanyRepository,
     plan_repository: PlanRepository,
+    presenter: PayMeansOfProductionPresenter,
 ):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
     if request.method == "POST":
-        sender = company_repository.get_by_id(current_user.id)
-        plan = plan_repository.get_plan_by_id(request.form["plan_id"])
-        if plan is None:
-            flash("Plan existiert nicht.")
-            return redirect(url_for("main_company.transfer_to_company"))
-        pieces = int(request.form["amount"])
-        purpose = (
-            entities.PurposesOfPurchases.means_of_prod
+        use_case_request = use_cases.PayMeansOfProductionRequest(
+            buyer=current_user.id,
+            plan=request.form["plan_id"],
+            amount=int(request.form["amount"]),
+            purpose=entities.PurposesOfPurchases.means_of_prod
             if request.form["category"] == "Produktionsmittel"
-            else entities.PurposesOfPurchases.raw_materials
+            else entities.PurposesOfPurchases.raw_materials,
         )
-        try:
-            pay_means_of_production(
-                sender,
-                plan,
-                pieces,
-                purpose,
-            )
-            flash("Erfolgreich bezahlt.")
-        except errors.PlanIsInactive:
-            flash(
-                "Der angegebene Plan ist nicht aktuell. Bitte wende dich an den Verkäufer, um eine aktuelle Plan-ID zu erhalten."
-            )
-        except errors.CompanyCantBuyPublicServices:
-            flash(
-                "Bezahlung nicht erfolgreich. Betriebe können keine öffentlichen Dienstleistungen oder Produkte erwerben."
-            )
-
+        use_case_response = pay_means_of_production(use_case_request)
+        view_model = presenter.present(use_case_response)
+        for notification in view_model.notifications:
+            flash(notification)
     return render_template("company/transfer_to_company.html")
 
 
@@ -428,12 +416,21 @@ def statistics(
     return render_template("company/statistics.html", view_model=view_model)
 
 
-@main_company.route("/company/cooperate", methods=["GET", "POST"])
+@main_company.route("/company/plan_summary/<uuid:plan_id>")
 @login_required
-def cooperate():
-    # under construction
-    pass
-    return render_template("company/cooperate.html")
+@with_injection
+def plan_summary(
+    plan_id: UUID,
+    get_plan_summary: use_cases.GetPlanSummary,
+    presenter: GetPlanSummaryPresenter,
+):
+    if not user_is_company():
+        return redirect(url_for("auth.zurueck"))
+
+    use_case_response = get_plan_summary(plan_id)
+    view_model = presenter.present(use_case_response)
+
+    return render_template("company/plan_summary.html", view_model=view_model.to_dict())
 
 
 @main_company.route("/company/hilfe")

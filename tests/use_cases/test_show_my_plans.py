@@ -22,7 +22,7 @@ def test_that_one_approved_plan_is_returned_after_one_plan_was_created(
 ):
     company = company_generator.create_company()
     plan_generator.create_plan(approved=True, planner=company)
-    response = use_case(request=ShowMyPlansRequest(company_id=str(company.id)))
+    response = use_case(request=ShowMyPlansRequest(company_id=company.id))
     assert len(response.all_plans) == 1
 
 

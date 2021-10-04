@@ -25,6 +25,7 @@ from project.models import (
     Member,
     Offer,
     Plan,
+    PlanDraft,
     Purchase,
     SocialAccounting,
     Transaction,
@@ -344,9 +345,26 @@ class PurchaseRepository(repositories.PurchaseRepository):
             purpose=purchase.purpose,
         )
 
-    def add(self, purchase: entities.Purchase) -> None:
+    def create_purchase(
+        self,
+        purchase_date: datetime,
+        plan: entities.Plan,
+        buyer: Union[entities.Member, entities.Company],
+        price_per_unit: Decimal,
+        amount: int,
+        purpose: entities.PurposesOfPurchases,
+    ) -> entities.Purchase:
+        purchase = entities.Purchase(
+            purchase_date=purchase_date,
+            plan=plan,
+            buyer=buyer,
+            price_per_unit=price_per_unit,
+            amount=amount,
+            purpose=purpose,
+        )
         purchase_orm = self.object_to_orm(purchase)
         self.db.session.add(purchase_orm)
+        return purchase
 
     def get_purchases_descending_by_date(
         self, user: Union[entities.Member, entities.Company]
@@ -490,47 +508,39 @@ class PlanRepository(repositories.PlanRepository):
         else:
             return self.object_from_orm(plan_orm)
 
-    def create_plan(
+    def _create_plan_from_draft(
         self,
-        planner: entities.Company,
-        costs: entities.ProductionCosts,
-        product_name: str,
-        production_unit: str,
-        amount: int,
-        description: str,
-        timeframe_in_days: int,
-        is_public_service: bool,
-        creation_timestamp: datetime,
-    ) -> entities.Plan:
+        plan: entities.PlanDraft,
+    ) -> Plan:
+        costs = plan.production_costs
         plan = Plan(
-            id=str(uuid4()),
-            plan_creation_date=creation_timestamp,
-            planner=self.company_repository.object_to_orm(planner).id,
+            id=plan.id,
+            plan_creation_date=plan.creation_date,
+            planner=self.company_repository.object_to_orm(plan.planner).id,
             costs_p=costs.means_cost,
             costs_r=costs.resource_cost,
             costs_a=costs.labour_cost,
-            prd_name=product_name,
-            prd_unit=production_unit,
-            prd_amount=amount,
-            description=description,
-            timeframe=timeframe_in_days,
-            is_public_service=is_public_service,
+            prd_name=plan.product_name,
+            prd_unit=plan.unit_of_distribution,
+            prd_amount=plan.amount_produced,
+            description=plan.description,
+            timeframe=plan.timeframe,
+            is_public_service=plan.is_public_service,
             is_active=False,
             activation_date=None,
             expiration_date=None,
-            social_accounting=self.accounting_repository.get_or_create_social_accounting_orm().id,
         )
         self.db.session.add(plan)
-        return self.object_from_orm(plan)
+        return plan
 
-    def approve_plan(self, plan: entities.Plan, approval_timestamp: datetime) -> None:
-        orm_object = self.object_to_orm(plan)
-        plan.approved = True
+    def approve_plan(
+        self, plan: entities.PlanDraft, approval_timestamp: datetime
+    ) -> entities.Plan:
+        orm_object = self._create_plan_from_draft(plan)
         orm_object.approved = True
-        plan.approval_reason = "approved"
         orm_object.approval_reason = "approved"
         orm_object.approval_date = approval_timestamp
-        plan.approval_date = approval_timestamp
+        return self.object_from_orm(orm_object)
 
     def activate_plan(self, plan: entities.Plan, activation_date: datetime) -> None:
         plan.is_active = True
@@ -684,7 +694,7 @@ class PlanRepository(repositories.PlanRepository):
         else:
             self.db.session.delete(plan_orm)
 
-    def get_all_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
+    def get_all_plans_for_company(self, company_id: UUID) -> Iterator[entities.Plan]:
         return (
             self.object_from_orm(plan_orm)
             for plan_orm in Plan.query.filter(Plan.planner == company_id)
@@ -692,7 +702,7 @@ class PlanRepository(repositories.PlanRepository):
 
     def get_approved_non_active_plans_for_company(
         self, company_id: UUID
-    ) -> Iterator[Plan]:
+    ) -> Iterator[entities.Plan]:
         return (
             self.object_from_orm(plan_orm)
             for plan_orm in Plan.query.filter(
@@ -703,7 +713,7 @@ class PlanRepository(repositories.PlanRepository):
             )
         )
 
-    def get_active_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
+    def get_active_plans_for_company(self, company_id: UUID) -> Iterator[entities.Plan]:
         return (
             self.object_from_orm(plan_orm)
             for plan_orm in Plan.query.filter(
@@ -714,7 +724,9 @@ class PlanRepository(repositories.PlanRepository):
             )
         )
 
-    def get_expired_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
+    def get_expired_plans_for_company(
+        self, company_id: UUID
+    ) -> Iterator[entities.Plan]:
         return (
             self.object_from_orm(plan_orm)
             for plan_orm in Plan.query.filter(
@@ -787,3 +799,67 @@ class TransactionRepository(repositories.TransactionRepository):
             self.object_from_orm(transaction)
             for transaction in account_orm.transactions_received.all()
         ]
+
+
+@inject
+@dataclass
+class PlanDraftRepository(repositories.PlanDraftRepository):
+    db: SQLAlchemy
+    company_repository: CompanyRepository
+
+    def create_plan_draft(
+        self,
+        planner: UUID,
+        product_name: str,
+        description: str,
+        costs: entities.ProductionCosts,
+        production_unit: str,
+        amount: int,
+        timeframe_in_days: int,
+        is_public_service: bool,
+        creation_timestamp: datetime,
+    ) -> entities.PlanDraft:
+        orm = PlanDraft(
+            id=str(uuid4()),
+            plan_creation_date=creation_timestamp,
+            planner=str(planner),
+            costs_p=costs.means_cost,
+            costs_r=costs.resource_cost,
+            costs_a=costs.labour_cost,
+            prd_name=product_name,
+            prd_unit=production_unit,
+            prd_amount=amount,
+            description=description,
+            timeframe=timeframe_in_days,
+            is_public_service=is_public_service,
+        )
+        self.db.session.add(orm)
+        return self._object_from_orm(orm)
+
+    def get_by_id(self, id: UUID) -> Optional[entities.PlanDraft]:
+        orm = PlanDraft.query.get(str(id))
+        if orm is None:
+            return None
+        else:
+            return self._object_from_orm(orm)
+
+    def delete_draft(self, id: UUID) -> None:
+        PlanDraft.query.filter_by(id=str(id)).delete()
+
+    def _object_from_orm(self, orm: PlanDraft) -> entities.PlanDraft:
+        return entities.PlanDraft(
+            id=orm.id,
+            creation_date=orm.plan_creation_date,
+            planner=self.company_repository.get_by_id(orm.planner),
+            production_costs=entities.ProductionCosts(
+                labour_cost=orm.costs_a,
+                resource_cost=orm.costs_r,
+                means_cost=orm.costs_p,
+            ),
+            product_name=orm.prd_name,
+            unit_of_distribution=orm.prd_unit,
+            amount_produced=orm.prd_amount,
+            description=orm.description,
+            timeframe=orm.timeframe,
+            is_public_service=orm.is_public_service,
+        )

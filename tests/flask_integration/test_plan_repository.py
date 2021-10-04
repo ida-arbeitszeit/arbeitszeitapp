@@ -203,13 +203,8 @@ def test_that_all_plan_for_a_company_are_returned(
     plan_generator.create_plan(
         approved=True, activation_date=datetime.now(), planner=company
     )
-    plan_generator.create_plan(
-        approved=False, activation_date=datetime.now(), expired=True, planner=company
-    )
-    returned_plans = list(
-        repository.get_all_plans_for_company(company_id=str(company.id))
-    )
-    assert len(returned_plans) == 4
+    returned_plans = list(repository.get_all_plans_for_company(company_id=company.id))
+    assert len(returned_plans) == 3
 
 
 @injection_test
@@ -221,7 +216,7 @@ def test_that_approved_non_active_plan_for_company_is_returned(
     company = company_generator.create_company()
     expected_plan = plan_generator.create_plan(approved=True, planner=company)
     returned_plan = list(
-        repository.get_approved_non_active_plans_for_company(company_id=str(company.id))
+        repository.get_approved_non_active_plans_for_company(company_id=company.id)
     )[0]
     assert (
         expected_plan.id == returned_plan.id
@@ -242,7 +237,7 @@ def test_that_approved_and_active_plan_for_company_is_returned(
         approved=True, activation_date=datetime.now(), planner=company
     )
     returned_plan = list(
-        repository.get_active_plans_for_company(company_id=str(company.id))
+        repository.get_active_plans_for_company(company_id=company.id)
     )[0]
     assert (
         expected_plan.id == returned_plan.id
@@ -259,10 +254,8 @@ def test_that_expired_plan_for_company_is_returned(
     company_generator: CompanyGenerator,
 ) -> None:
     company = company_generator.create_company()
-    expected_plan = plan_generator.create_plan(
-        approved=False, activation_date=datetime.now(), expired=True, planner=company
-    )
+    expected_plan = plan_generator.create_plan(expired=True, planner=company)
     returned_plan = list(
-        repository.get_expired_plans_for_company(company_id=str(company.id))
+        repository.get_expired_plans_for_company(company_id=company.id)
     )[0]
     assert expected_plan.id == returned_plan.id and returned_plan.expired
