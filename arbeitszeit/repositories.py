@@ -14,6 +14,7 @@ from arbeitszeit.entities import (
     ProductionCosts,
     ProductOffer,
     Purchase,
+    PurposesOfPurchases,
     SocialAccounting,
     Transaction,
 )
@@ -35,7 +36,15 @@ class CompanyWorkerRepository(ABC):
 
 class PurchaseRepository(ABC):
     @abstractmethod
-    def add(self, purchase: Purchase) -> None:
+    def create_purchase(
+        self,
+        purchase_date: datetime,
+        plan: Plan,
+        buyer: Union[Member, Company],
+        price_per_unit: Decimal,
+        amount: int,
+        purpose: PurposesOfPurchases,
+    ) -> Purchase:
         pass
 
     @abstractmethod
