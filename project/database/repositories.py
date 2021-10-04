@@ -345,9 +345,26 @@ class PurchaseRepository(repositories.PurchaseRepository):
             purpose=purchase.purpose,
         )
 
-    def add(self, purchase: entities.Purchase) -> None:
+    def create_purchase(
+        self,
+        purchase_date: datetime,
+        plan: entities.Plan,
+        buyer: Union[entities.Member, entities.Company],
+        price_per_unit: Decimal,
+        amount: int,
+        purpose: entities.PurposesOfPurchases,
+    ) -> entities.Purchase:
+        purchase = entities.Purchase(
+            purchase_date=purchase_date,
+            plan=plan,
+            buyer=buyer,
+            price_per_unit=price_per_unit,
+            amount=amount,
+            purpose=purpose,
+        )
         purchase_orm = self.object_to_orm(purchase)
         self.db.session.add(purchase_orm)
+        return purchase
 
     def get_purchases_descending_by_date(
         self, user: Union[entities.Member, entities.Company]
