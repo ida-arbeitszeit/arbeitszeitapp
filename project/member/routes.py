@@ -24,6 +24,7 @@ from project.database import (
 )
 from project.dependency_injection import with_injection
 from project.forms import PayConsumerProductForm, ProductSearchForm
+from project.url_index import MemberUrlIndex
 from project.views import PayConsumerProductView, QueryProductsView
 
 main_member = Blueprint(
@@ -54,13 +55,15 @@ def my_purchases(
 @with_injection
 def suchen(
     query_products: use_cases.QueryProducts,
-    presenter: QueryProductsPresenter,
     controller: QueryProductsController,
 ):
     if not user_is_member():
         return redirect(url_for("auth.zurueck"))
     template_name = "member/query_products.html"
     search_form = ProductSearchForm(request.form)
+    presenter = QueryProductsPresenter(
+        MemberUrlIndex(),
+    )
     view = QueryProductsView(
         search_form, query_products, presenter, controller, template_name
     )

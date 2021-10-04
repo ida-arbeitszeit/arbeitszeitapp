@@ -39,6 +39,7 @@ from project.database import (
 from project.dependency_injection import with_injection
 from project.forms import ProductSearchForm
 from project.models import Company, Plan
+from project.url_index import CompanyUrlIndex
 from project.views import QueryProductsView
 
 main_company = Blueprint(
@@ -106,12 +107,14 @@ def arbeit(
 @with_injection
 def suchen(
     query_products: use_cases.QueryProducts,
-    presenter: QueryProductsPresenter,
     controller: QueryProductsController,
 ):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
+    presenter = QueryProductsPresenter(
+        CompanyUrlIndex(),
+    )
     template_name = "company/query_products.html"
     search_form = ProductSearchForm(request.form)
     view = QueryProductsView(
@@ -362,6 +365,7 @@ def my_offers(offer_repository: ProductOfferRepository):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
+    url_index = CompanyUrlIndex()
     my_company = Company.query.filter_by(id=current_user.id).first()
     my_plans = my_company.plans.all()
     my_offers = []
@@ -370,7 +374,11 @@ def my_offers(offer_repository: ProductOfferRepository):
             my_offers.append(offer)
     my_offers = [offer_repository.object_from_orm(offer) for offer in my_offers]
 
-    return render_template("company/my_offers.html", offers=my_offers)
+    return render_template(
+        "company/my_offers.html",
+        offers=my_offers,
+        get_plan_summary_url=url_index.get_plan_summary_url,
+    )
 
 
 @main_company.route("/company/delete_offer/<uuid:offer_id>", methods=["GET", "POST"])

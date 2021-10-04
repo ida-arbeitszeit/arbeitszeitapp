@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from flask import _app_ctx_stack
+from flask import Flask, _app_ctx_stack, current_app
 from flask_sqlalchemy import SQLAlchemy
 from injector import Injector, Module, inject, provider, singleton
 
@@ -17,6 +17,10 @@ class SqliteModule(Module):
         config = {
             "SQLALCHEMY_DATABASE_URI": "sqlite://",
             "SQLALCHEMY_TRACK_MODIFICATIONS": False,
+            "SECRET_KEY": "dev secret key",
+            "WTF_CSRF_ENABLED": False,
+            "SERVER_NAME": "test.name",
+            "ENV": "development",
         }
         app = create_app(config=config, db=db)
         with app.app_context():
@@ -24,23 +28,17 @@ class SqliteModule(Module):
         app.app_context().push()
         return db
 
+    @provider
+    @singleton
+    def provide_app(self, _: SQLAlchemy) -> Flask:
+        return current_app
+
 
 class ViewTestCase(TestCase):
     def setUp(self) -> None:
-        db = SQLAlchemy(model_class=project.models.db.Model)
-        config = {
-            "SQLALCHEMY_DATABASE_URI": "sqlite://",
-            "SQLALCHEMY_TRACK_MODIFICATIONS": False,
-            "SECRET_KEY": "dev secret key",
-            "WTF_CSRF_ENABLED": False,
-            "ENV": "development",
-        }
-        self.app = create_app(config=config, db=db)
-        with self.app.app_context():
-            db.create_all()
-        self.app.app_context().push()
-        self.client = self.app.test_client()
         self.injector = get_dependency_injector()
+        self.app = self.injector.get(Flask)
+        self.client = self.app.test_client()
 
     def tearDown(self) -> None:
         _app_ctx_stack.pop()
