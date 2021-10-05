@@ -197,7 +197,7 @@ def create_plan(
     return render_template("company/create_plan.html", original_plan=original_plan)
 
 
-@main_company.route("/company/my_plans", methods=["GET", "POST"])
+@main_company.route("/company/my_plans", methods=["GET"])
 @login_required
 @with_injection
 def my_plans(
