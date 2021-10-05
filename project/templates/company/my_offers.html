@@ -36,7 +36,7 @@
     <tbody>
       {% for offer in offers %}
       <tr>
-        <td><a href="{{ url_for(request.blueprint+'.plan_summary', plan_id=offer.plan.id) }}">{{ offer.plan.id }}</a>
+        <td><a href="{{ get_plan_summary_url(offer.plan.id) }}">{{ offer.plan.id }}</a>
         </td>
         <td>{{ offer.name }}</td>
         <td>{{ offer.description }}</td>

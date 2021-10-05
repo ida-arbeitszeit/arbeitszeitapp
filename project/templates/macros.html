@@ -140,7 +140,7 @@
     <tbody>
       {% for column in view_model.results.rows %}
       <tr>
-        <td><a href="{{ url_for(request.blueprint+'.plan_summary', plan_id=column.plan_id) }}">{{ column.plan_id }}</a>
+        <td><a href="{{ column.plan_summary_url }}">{{ column.plan_id }}</a>
         </td>
         <td>{{ column.product_name }}</td>
         <td>{{ column.seller_name }}</td>

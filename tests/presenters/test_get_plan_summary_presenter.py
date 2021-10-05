@@ -1,6 +1,5 @@
 from dataclasses import replace
 from decimal import Decimal
-from typing import Dict
 from unittest import TestCase
 from uuid import uuid4
 
@@ -164,7 +163,7 @@ class GetPlanSummaryPresenterTests(TestCase):
     def test_that_to_dict_method_returns_a_dictionary(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
         dictionary = view_model.to_dict()
-        self.assertIsInstance(dictionary, Dict)
+        self.assertIsInstance(dictionary, dict)
 
     def test_that_to_dict_method_returns_a_dictionary_with_plan_id_tuple(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
