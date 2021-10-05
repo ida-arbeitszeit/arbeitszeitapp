@@ -5,7 +5,7 @@ from flask_login import current_user, login_required
 
 from arbeitszeit import use_cases
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
-from arbeitszeit_web.get_plan_summary import GetPlanSummaryPresenter
+from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.pay_consumer_product import (
     PayConsumerProductController,
@@ -25,7 +25,7 @@ from project.database import (
 from project.dependency_injection import with_injection
 from project.forms import PayConsumerProductForm, ProductSearchForm
 from project.url_index import MemberUrlIndex
-from project.views import PayConsumerProductView, QueryProductsView
+from project.views import Http404View, PayConsumerProductView, QueryProductsView
 
 main_member = Blueprint(
     "main_member", __name__, template_folder="templates", static_folder="static"
@@ -160,15 +160,19 @@ def statistics(
 def plan_summary(
     plan_id: UUID,
     get_plan_summary: use_cases.GetPlanSummary,
-    presenter: GetPlanSummaryPresenter,
+    presenter: GetPlanSummarySuccessPresenter,
 ):
     if not user_is_member():
         return redirect(url_for("auth.zurueck"))
 
     use_case_response = get_plan_summary(plan_id)
-    view_model = presenter.present(use_case_response)
-
-    return render_template("member/plan_summary.html", view_model=view_model.to_dict())
+    if isinstance(use_case_response, use_cases.PlanSummarySuccess):
+        view_model = presenter.present(use_case_response)
+        return render_template(
+            "member/plan_summary.html", view_model=view_model.to_dict()
+        )
+    else:
+        return Http404View(template="member/404.html").get_response()
 
 
 @main_member.route("/member/hilfe")
