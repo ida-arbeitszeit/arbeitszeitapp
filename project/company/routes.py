@@ -41,8 +41,8 @@ from project.database import (
 from project.dependency_injection import with_injection
 from project.forms import PlanSearchForm, ProductSearchForm
 from project.models import Company, Plan
-from project.views import QueryPlansView, QueryProductsView
 from project.url_index import CompanyUrlIndex
+from project.views import QueryPlansView, QueryProductsView
 
 main_company = Blueprint(
     "main_company", __name__, template_folder="templates", static_folder="static"
@@ -133,12 +133,12 @@ def suchen(
 @with_injection
 def query_plans(
     query_plans: use_cases.QueryPlans,
-    presenter: QueryPlansPresenter,
     controller: QueryPlansController,
 ):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
+    presenter = QueryPlansPresenter(CompanyUrlIndex())
     template_name = "company/query_plans.html"
     search_form = PlanSearchForm(request.form)
     view = QueryPlansView(

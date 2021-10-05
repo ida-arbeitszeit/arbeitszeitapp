@@ -1,11 +1,17 @@
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional, Protocol
+from uuid import UUID
 
 from arbeitszeit.use_cases.query_plans import (
     PlanFilter,
     PlanQueryResponse,
     QueryPlansRequest,
 )
+
+
+class PlanSummaryUrlIndex(Protocol):
+    def get_plan_summary_url(self, plan_id: UUID) -> str:
+        ...
 
 
 class QueryPlansFormData(Protocol):
@@ -50,6 +56,7 @@ class Notification:
 @dataclass
 class ResultTableRow:
     plan_id: str
+    plan_summary_url: str
     company_name: str
     product_name: str
     description: str
@@ -70,7 +77,10 @@ class QueryPlansViewModel:
         return asdict(self)
 
 
+@dataclass
 class QueryPlansPresenter:
+    plan_summary_url_index: PlanSummaryUrlIndex
+
     def present(self, response: PlanQueryResponse) -> QueryPlansViewModel:
         if response.results:
             notifications = []
@@ -83,6 +93,9 @@ class QueryPlansPresenter:
                 rows=[
                     ResultTableRow(
                         plan_id=str(result.plan_id),
+                        plan_summary_url=self.plan_summary_url_index.get_plan_summary_url(
+                            result.plan_id
+                        ),
                         company_name=result.company_name,
                         product_name=result.product_name,
                         description=result.description,
