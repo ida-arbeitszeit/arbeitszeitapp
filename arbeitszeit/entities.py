@@ -105,10 +105,12 @@ class Plan:
     expiration_date: Optional[datetime]
     last_certificate_payout: Optional[datetime]
 
+    @property
     def price_per_unit(self) -> Decimal:
         cost_per_unit = self.production_costs.total_cost() / self.prd_amount
         return cost_per_unit if not self.is_public_service else Decimal(0)
 
+    @property
     def expected_sales_value(self) -> Decimal:
         """
         For productive plans, sales value should equal total cost.

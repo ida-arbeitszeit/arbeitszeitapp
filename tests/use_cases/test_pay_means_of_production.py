@@ -104,7 +104,7 @@ def test_balance_of_buyer_of_means_of_prod_reduced(
         PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
     )
 
-    price_total = pieces * plan.price_per_unit()
+    price_total = pieces * plan.price_per_unit
     assert account_repository.get_account_balance(sender.means_account) == -price_total
 
 
@@ -127,7 +127,7 @@ def test_balance_of_buyer_of_raw_materials_reduced(
         PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
     )
 
-    price_total = pieces * plan.price_per_unit()
+    price_total = pieces * plan.price_per_unit
     assert (
         account_repository.get_account_balance(sender.raw_material_account)
         == -price_total
@@ -153,7 +153,7 @@ def test_balance_of_seller_increased(
         PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
     )
 
-    price_total = pieces * plan.price_per_unit()
+    price_total = pieces * plan.price_per_unit
     assert (
         account_repository.get_account_balance(plan.planner.product_account)
         == price_total
@@ -177,7 +177,7 @@ def test_correct_transaction_added_if_means_of_production_were_paid(
     pay_means_of_production(
         PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
     )
-    price_total = pieces * plan.price_per_unit()
+    price_total = pieces * plan.price_per_unit
     assert len(transaction_repository.transactions) == 1
     assert (
         transaction_repository.transactions[0].sending_account == sender.means_account
@@ -206,7 +206,7 @@ def test_correct_transaction_added_if_raw_materials_were_paid(
     pay_means_of_production(
         PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
     )
-    price_total = pieces * plan.price_per_unit()
+    price_total = pieces * plan.price_per_unit
     assert len(transaction_repository.transactions) == 1
     assert (
         transaction_repository.transactions[0].sending_account
@@ -239,7 +239,7 @@ def test_correct_purchase_added_if_means_of_production_were_paid(
     purchase_added = purchase_repository.purchases[0]
     assert len(purchase_repository.purchases) == 1
     assert purchase_added.plan == plan
-    assert purchase_added.price_per_unit == plan.price_per_unit()
+    assert purchase_added.price_per_unit == plan.price_per_unit
     assert purchase_added.amount == pieces
     assert purchase_added.purpose == PurposesOfPurchases.means_of_prod
     assert purchase_added.buyer == sender
@@ -266,7 +266,7 @@ def test_correct_purchase_added_if_raw_materials_were_paid(
     purchase_added = purchase_repository.purchases[0]
     assert len(purchase_repository.purchases) == 1
     assert purchase_added.plan == plan
-    assert purchase_added.price_per_unit == plan.price_per_unit()
+    assert purchase_added.price_per_unit == plan.price_per_unit
     assert purchase_added.amount == pieces
     assert purchase_added.purpose == PurposesOfPurchases.raw_materials
     assert purchase_added.buyer == sender

@@ -45,5 +45,5 @@ class GetPlanSummary:
             resources_cost=plan.production_costs.resource_cost,
             labour_cost=plan.production_costs.labour_cost,
             is_public_service=plan.is_public_service,
-            price_per_unit=plan.price_per_unit(),
+            price_per_unit=plan.price_per_unit,
         )

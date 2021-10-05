@@ -43,7 +43,7 @@ class SynchronizedPlanActivation:
                 ),
                 (
                     plan.planner.product_account,
-                    -plan.expected_sales_value(),
+                    -plan.expected_sales_value,
                 ),
             ]
 
