@@ -5,6 +5,7 @@ from werkzeug.security import check_password_hash
 from arbeitszeit.errors import CompanyAlreadyExists, MemberAlreadyExists
 from arbeitszeit.use_cases import RegisterCompany, RegisterMember
 from project import database
+from project.database import commit_changes
 from project.dependency_injection import with_injection
 from project.forms import LoginForm, RegisterForm
 
@@ -24,6 +25,7 @@ def help():
 
 # Member
 @auth.route("/member/signup", methods=["GET", "POST"])
+@commit_changes
 @with_injection
 def signup_member(register_member: RegisterMember):
     register_form = RegisterForm(request.form)
@@ -41,6 +43,7 @@ def signup_member(register_member: RegisterMember):
 
 
 @auth.route("/member/login", methods=["GET", "POST"])
+@commit_changes
 def login_member():
     login_form = LoginForm(request.form)
     if request.method == "POST" and login_form.validate():
@@ -63,6 +66,7 @@ def login_member():
 
 # Company
 @auth.route("/company/login", methods=["GET", "POST"])
+@commit_changes
 def login_company():
     login_form = LoginForm(request.form)
     if request.method == "POST" and login_form.validate():
@@ -84,6 +88,7 @@ def login_company():
 
 
 @auth.route("/company/signup", methods=["GET", "POST"])
+@commit_changes
 @with_injection
 def signup_company(register_company: RegisterCompany):
     register_form = RegisterForm(request.form)
