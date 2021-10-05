@@ -49,7 +49,7 @@ def test_account_balances_adjusted_for_p_r_and_prd(
         == plan.production_costs.resource_cost
     )
     assert account_repository.get_account_balance(plan.planner.product_account) == -(
-        plan.expected_sales_value()
+        plan.expected_sales_value
     )
 
 
@@ -96,7 +96,7 @@ def test_that_added_transactions_for_p_r_and_prd_have_correct_amounts(
     expected_amount_p, expected_amount_r, expected_amount_prd = (
         plan.production_costs.means_cost,
         plan.production_costs.resource_cost,
-        -plan.expected_sales_value(),
+        -plan.expected_sales_value,
     )
     synchronized_plan_activation()
 

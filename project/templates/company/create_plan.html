@@ -114,7 +114,7 @@
 
 
       <div class="field">
-        <label class="label">Kosten für Roh- und Hilfsstoffe:</label>
+        <label class="label">Kosten für Roh- und Hilfsstoffe</label>
         <div class="control">
           <input class="input is-large" type="number" name="costs_r"
             value="{{ original_plan.resources_cost if original_plan else 0 }}" required>
@@ -124,7 +124,7 @@
 
 
       <div class="field">
-        <label class="label">Enthaltene Arbeitsstunden:</label>
+        <label class="label">Enthaltene Arbeitsstunden</label>
         <div class="control">
           <input class="input is-large" type="number" name="costs_a"
             value="{{ original_plan.labour_cost if original_plan else 0 }}" required>
@@ -146,7 +146,7 @@
               original_plan.is_public_service %} checked {% endif %}>
             Öffentlich
           </label>
-          <p class="help">Produktive Pläne sind der Regelfall. <br>
+          <p class="help">Produktive Pläne sind der Regelfall.<br>
             Öffentliche Pläne müssen vom Plenum genehmigt sein.
           </p>
         </div>

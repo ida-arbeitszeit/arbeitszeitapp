@@ -9,7 +9,6 @@ from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Company, Plan, PurposesOfPurchases
-from arbeitszeit.purchase_factory import PurchaseFactory
 from arbeitszeit.repositories import (
     CompanyRepository,
     PlanRepository,
@@ -92,7 +91,6 @@ class PayMeansOfProduction:
 
 @dataclass
 class Payment:
-    purchase_factory: PurchaseFactory
     purchase_repository: PurchaseRepository
     transaction_repository: TransactionRepository
     datetime_service: DatetimeService
@@ -102,8 +100,8 @@ class Payment:
     purpose: PurposesOfPurchases
 
     def record_purchase(self) -> None:
-        price_per_unit = self.plan.price_per_unit()
-        purchase = self.purchase_factory.create_purchase(
+        price_per_unit = self.plan.price_per_unit
+        self.purchase_repository.create_purchase(
             purchase_date=self.datetime_service.now(),
             plan=self.plan,
             buyer=self.buyer,
@@ -111,10 +109,9 @@ class Payment:
             amount=self.amount,
             purpose=self.purpose,
         )
-        self.purchase_repository.add(purchase)
 
     def create_transaction(self) -> None:
-        price_total = self.amount * self.plan.price_per_unit()
+        price_total = self.amount * self.plan.price_per_unit
         if self.purpose == PurposesOfPurchases.means_of_prod:
             sending_account = self.buyer.means_account
         elif self.purpose == PurposesOfPurchases.raw_materials:
@@ -132,7 +129,6 @@ class Payment:
 @inject
 @dataclass
 class PaymentFactory:
-    purchase_factory: PurchaseFactory
     purchase_repository: PurchaseRepository
     transaction_repository: TransactionRepository
     datetime_service: DatetimeService
@@ -141,7 +137,6 @@ class PaymentFactory:
         self, plan: Plan, buyer: Company, amount: int, purpose: PurposesOfPurchases
     ) -> Payment:
         return Payment(
-            self.purchase_factory,
             self.purchase_repository,
             self.transaction_repository,
             self.datetime_service,

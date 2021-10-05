@@ -6,7 +6,6 @@ from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Member, Plan, PurposesOfPurchases
-from arbeitszeit.purchase_factory import PurchaseFactory
 from arbeitszeit.repositories import PurchaseRepository, TransactionRepository
 
 
@@ -14,7 +13,6 @@ from arbeitszeit.repositories import PurchaseRepository, TransactionRepository
 @dataclass
 class ConsumerProductTransactionFactory:
     datetime_service: DatetimeService
-    purchase_factory: PurchaseFactory
     purchase_repository: PurchaseRepository
     transaction_repository: TransactionRepository
 
@@ -29,7 +27,6 @@ class ConsumerProductTransactionFactory:
             plan,
             amount,
             self.datetime_service,
-            self.purchase_factory,
             self.purchase_repository,
             self.transaction_repository,
         )
@@ -41,13 +38,12 @@ class ConsumerProductTransaction:
     plan: Plan
     amount: int
     datetime_service: DatetimeService
-    purchase_factory: PurchaseFactory
     purchase_repository: PurchaseRepository
     transaction_repository: TransactionRepository
 
     def record_purchase(self) -> None:
-        price_per_unit = self.plan.price_per_unit()
-        purchase = self.purchase_factory.create_purchase(
+        price_per_unit = self.plan.price_per_unit
+        self.purchase_repository.create_purchase(
             purchase_date=self.datetime_service.now(),
             plan=self.plan,
             buyer=self.buyer,
@@ -55,12 +51,10 @@ class ConsumerProductTransaction:
             amount=self.amount,
             purpose=PurposesOfPurchases.consumption,
         )
-        self.purchase_repository.add(purchase)
 
     def exchange_currency(self) -> None:
-        price_total = self.amount * self.plan.price_per_unit()
+        price_total = self.amount * self.plan.price_per_unit
         sending_account = self.buyer.account
-
         self.transaction_repository.create_transaction(
             date=self.datetime_service.now(),
             sending_account=sending_account,

@@ -105,7 +105,9 @@ class QueryProductsPresenter:
                         seller_name=result.seller_name,
                         product_description=result.product_description,
                         price_per_unit=f"{result.price_per_unit} Std.",
-                        is_public_service="Ja" if result.is_public_service else "Nein",
+                        is_public_service="Öffentlich"
+                        if result.is_public_service
+                        else "Produktiv",
                         contact_email=f"mailto:{result.seller_email}",
                     )
                     for result in response.results

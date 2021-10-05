@@ -48,7 +48,7 @@ class PayConsumerProductTests(TestCase):
         self.pay_consumer_product(self.make_request(plan.id, pieces))
         assert len(self.transaction_repository.transactions) == 1
         transaction_added = self.transaction_repository.transactions[0]
-        expected_amount = pieces * plan.price_per_unit()
+        expected_amount = pieces * plan.price_per_unit
         assert transaction_added.sending_account == self.buyer.account
         assert transaction_added.receiving_account == plan.planner.product_account
         assert transaction_added.amount == expected_amount
@@ -59,7 +59,7 @@ class PayConsumerProductTests(TestCase):
         )
         pieces = 3
         self.pay_consumer_product(self.make_request(plan.id, pieces))
-        costs = pieces * plan.price_per_unit()
+        costs = pieces * plan.price_per_unit
         assert self.account_repository.get_account_balance(self.buyer.account) == -costs
         assert (
             self.account_repository.get_account_balance(plan.planner.product_account)
@@ -87,7 +87,7 @@ class PayConsumerProductTests(TestCase):
         )
         pieces = 3
         self.pay_consumer_product(self.make_request(plan.id, pieces))
-        costs = pieces * plan.price_per_unit()
+        costs = pieces * plan.price_per_unit
         assert self.account_repository.get_account_balance(self.buyer.account) == -costs
         assert (
             self.account_repository.get_account_balance(plan.planner.product_account)
@@ -102,7 +102,7 @@ class PayConsumerProductTests(TestCase):
         self.pay_consumer_product(self.make_request(plan.id, pieces))
         assert len(self.purchase_repository.purchases) == 1
         purchase_added = self.purchase_repository.purchases[0]
-        assert purchase_added.price_per_unit == plan.price_per_unit()
+        assert purchase_added.price_per_unit == plan.price_per_unit
         assert purchase_added.amount == pieces
         assert purchase_added.purpose == PurposesOfPurchases.consumption
         assert purchase_added.buyer == self.buyer

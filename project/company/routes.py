@@ -16,6 +16,7 @@ from arbeitszeit.use_cases import (
     DeletePlan,
     GetPlanSummary,
 )
+from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_web.create_offer import CreateOfferPresenter
 from arbeitszeit_web.delete_offer import DeleteOfferPresenter
 from arbeitszeit_web.delete_plan import DeletePlanPresenter
@@ -26,13 +27,13 @@ from arbeitszeit_web.query_products import (
     QueryProductsController,
     QueryProductsPresenter,
 )
+from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from project import error
 from project.database import (
     AccountRepository,
     CompanyRepository,
     CompanyWorkerRepository,
     MemberRepository,
-    PlanRepository,
     ProductOfferRepository,
     commit_changes,
 )
@@ -200,31 +201,19 @@ def create_plan(
 @login_required
 @with_injection
 def my_plans(
-    plan_repository: PlanRepository,
+    show_my_plans_use_case: ShowMyPlansUseCase,
+    show_my_plans_presenter: ShowMyPlansPresenter,
 ):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
-    plans_approved = [
-        plan_repository.object_from_orm(plan)
-        for plan in current_user.plans.filter_by(
-            approved=True,
-        ).all()
-    ]
-
-    plans_not_expired_and_active = [
-        plan for plan in plans_approved if (not plan.expired and plan.is_active)
-    ]
-    plans_not_expired_and_inactive = [
-        plan for plan in plans_approved if (not plan.expired and not plan.is_active)
-    ]
-    plans_expired = [plan for plan in plans_approved if plan.expired]
+    request = ShowMyPlansRequest(company_id=current_user.id)
+    response = show_my_plans_use_case(request)
+    view_model = show_my_plans_presenter.present(response)
 
     return render_template(
         "company/my_plans.html",
-        plans=plans_not_expired_and_active,
-        plans_waiting_for_activation=plans_not_expired_and_inactive,
-        plans_expired=plans_expired,
+        **view_model.to_dict(),
     )
 
 
@@ -335,8 +324,6 @@ def transfer_to_worker(
 @with_injection
 def transfer_to_company(
     pay_means_of_production: use_cases.PayMeansOfProduction,
-    company_repository: CompanyRepository,
-    plan_repository: PlanRepository,
     presenter: PayMeansOfProductionPresenter,
 ):
     if not user_is_company():

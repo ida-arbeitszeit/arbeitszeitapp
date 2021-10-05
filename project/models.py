@@ -7,6 +7,7 @@ from enum import Enum
 
 from flask_login import UserMixin
 
+from arbeitszeit import entities
 from project.extensions import db
 
 
@@ -160,12 +161,6 @@ class Offer(UserMixin, db.Model):
     description = db.Column(db.String(5000), nullable=False)
 
 
-class PurposesOfPurchases(Enum):
-    means_of_prod = "means_of_prod"
-    raw_materials = "raw_materials"
-    consumption = "consumption"
-
-
 class Purchase(UserMixin, db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
     purchase_date = db.Column(db.DateTime, nullable=False)
@@ -175,4 +170,4 @@ class Purchase(UserMixin, db.Model):
     member = db.Column(db.String, db.ForeignKey("member.id"), nullable=True)
     price_per_unit = db.Column(db.Numeric(), nullable=False)
     amount = db.Column(db.Integer, nullable=False)
-    purpose = db.Column(db.Enum(PurposesOfPurchases), nullable=False)
+    purpose = db.Column(db.Enum(entities.PurposesOfPurchases), nullable=False)
