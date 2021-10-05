@@ -6,7 +6,7 @@ from uuid import uuid4
 from arbeitszeit.entities import ProductionCosts
 from project.database.repositories import PlanRepository
 
-from ..data_generators import PlanGenerator
+from ..data_generators import CompanyGenerator, PlanGenerator
 from ..datetime_service import FakeDatetimeService
 from .dependency_injection import injection_test
 
@@ -189,3 +189,73 @@ def test_that_existing_plan_can_be_retrieved_by_id(
 ) -> None:
     expected_plan = generator.create_plan()
     assert expected_plan == repository.get_plan_by_id(expected_plan.id)
+
+
+@injection_test
+def test_that_all_plan_for_a_company_are_returned(
+    repository: PlanRepository,
+    plan_generator: PlanGenerator,
+    company_generator: CompanyGenerator,
+) -> None:
+    company = company_generator.create_company()
+    plan_generator.create_plan(planner=company)
+    plan_generator.create_plan(approved=True, planner=company)
+    plan_generator.create_plan(
+        approved=True, activation_date=datetime.now(), planner=company
+    )
+    returned_plans = list(repository.get_all_plans_for_company(company_id=company.id))
+    assert len(returned_plans) == 3
+
+
+@injection_test
+def test_that_approved_non_active_plan_for_company_is_returned(
+    repository: PlanRepository,
+    plan_generator: PlanGenerator,
+    company_generator: CompanyGenerator,
+) -> None:
+    company = company_generator.create_company()
+    expected_plan = plan_generator.create_plan(approved=True, planner=company)
+    returned_plan = list(
+        repository.get_non_active_plans_for_company(company_id=company.id)
+    )[0]
+    assert (
+        expected_plan.id == returned_plan.id
+        and returned_plan.approved
+        and not returned_plan.is_active
+        and not returned_plan.expired
+    )
+
+
+@injection_test
+def test_that_approved_and_active_plan_for_company_is_returned(
+    repository: PlanRepository,
+    plan_generator: PlanGenerator,
+    company_generator: CompanyGenerator,
+) -> None:
+    company = company_generator.create_company()
+    expected_plan = plan_generator.create_plan(
+        approved=True, activation_date=datetime.now(), planner=company
+    )
+    returned_plan = list(
+        repository.get_active_plans_for_company(company_id=company.id)
+    )[0]
+    assert (
+        expected_plan.id == returned_plan.id
+        and returned_plan.approved
+        and returned_plan.is_active
+        and not returned_plan.expired
+    )
+
+
+@injection_test
+def test_that_expired_plan_for_company_is_returned(
+    repository: PlanRepository,
+    plan_generator: PlanGenerator,
+    company_generator: CompanyGenerator,
+) -> None:
+    company = company_generator.create_company()
+    expected_plan = plan_generator.create_plan(expired=True, planner=company)
+    returned_plan = list(
+        repository.get_expired_plans_for_company(company_id=company.id)
+    )[0]
+    assert expected_plan.id == returned_plan.id and returned_plan.expired

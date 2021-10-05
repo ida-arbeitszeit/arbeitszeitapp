@@ -100,7 +100,7 @@ class Payment:
     purpose: PurposesOfPurchases
 
     def record_purchase(self) -> None:
-        price_per_unit = self.plan.price_per_unit()
+        price_per_unit = self.plan.price_per_unit
         self.purchase_repository.create_purchase(
             purchase_date=self.datetime_service.now(),
             plan=self.plan,
@@ -111,7 +111,7 @@ class Payment:
         )
 
     def create_transaction(self) -> None:
-        price_total = self.amount * self.plan.price_per_unit()
+        price_total = self.amount * self.plan.price_per_unit
         if self.purpose == PurposesOfPurchases.means_of_prod:
             sending_account = self.buyer.means_account
         elif self.purpose == PurposesOfPurchases.raw_materials:

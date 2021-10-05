@@ -2,55 +2,70 @@
 
 <div class="hero-body">
   <div class="container has-text-centered">
-    <h1 class="title">
-      Was ist das hier?
-    </h1>
+    <h1 class="title">Was ist das hier?</h1>
     <div class="block content has-text-left">
       <ul>
         <li>Dies ist eine Plattform für solidarisches Wirtschaften.</li>
-        <li>Produkte und Dienstleistungen werden ausgetauscht, wobei die gemeinsame „Währung“ die Arbeitszeit ist.</li>
-        <li>ArbeiterInnen bekommen für geleistete Arbeit Arbeitszeitgeld, mit dem sie Produkte erwerben können.</li>
-        <li>Produkte kosten soviel Arbeitszeit, wie sie zur Herstellung benötigen.</li>
-        <li>Die Plattform richtet sich an Kollektivbetriebe, Genossenschaften und sonstige Betriebe und Einzelpersonen,
-          die eine Alternative zu kapitalistischem Markt, Privateigentum an Produktionsmitteln und Geld suchen.</li>
+        <li>
+          Produkte und Dienstleistungen werden ausgetauscht, wobei die
+          gemeinsame „Währung“ die Arbeitszeit ist.
+        </li>
+        <li>
+          ArbeiterInnen bekommen für geleistete Arbeit Arbeitszeitgeld, mit dem
+          sie Produkte erwerben können.
+        </li>
+        <li>
+          Produkte kosten soviel Arbeitszeit, wie sie zur Herstellung benötigen.
+        </li>
+        <li>
+          Die Plattform richtet sich an Kollektivbetriebe, Genossenschaften und
+          sonstige Betriebe und Einzelpersonen, die eine Alternative zu
+          kapitalistischem Markt, Privateigentum an Produktionsmitteln und Geld
+          suchen.
+        </li>
       </ul>
     </div>
 
-    <h1 class="title">
-      Was muss ich als ArbeiterIn tun?
-    </h1>
+    <h1 class="title">Was muss ich als ArbeiterIn tun?</h1>
 
     <div class="block content has-text-left">
       <ul>
-        <li>Als ArbeiterIn brauchst du nur einen „Nutzer-Account“. Auf diesen Account wird dir vom Betrieb das
-          Arbeitszeitgeld überwiesen und du kannst Produkte auf dem gemeinsamen Marktplatz suchen und erwerben.</li>
+        <li>
+          Als ArbeiterIn brauchst du nur einen „Nutzer-Account“. Auf diesen
+          Account wird dir vom Betrieb das Arbeitszeitgeld überwiesen und du
+          kannst Produkte auf dem gemeinsamen Marktplatz suchen und erwerben.
+        </li>
       </ul>
     </div>
 
-    <h1 class="title">
-      Was muss ich als Betrieb/Kollektiv tun?
-    </h1>
+    <h1 class="title">Was muss ich als Betrieb/Kollektiv tun?</h1>
 
     <div class="block content has-text-left">
       <ol>
-        <li>Stelle dich und deinen Betrieb beim Plenum vor. </li>
+        <li>Stelle dich und deinen Betrieb beim Plenum vor.</li>
         <li>Registriere in der App einen „Betriebe-Account“.</li>
-        <li>Veröffentliche in der App einen Plan für jedes Produkt, das du anbieten möchtest. In diesem Plan musst du
-          angeben, wie viel Arbeitszeit die Herstellung dieses Produkts kostet.</li>
-        <li>Du erhältst Arbeitszeit-Guthaben, um die Beschäftigten zu bezahlen und ein Konto, um Produktionsmittel von
-          anderen teilnehmenden Betrieben zu erwerben.</li>
-        <li>Veröffentliche das Produkt auf unserem Marktplatz oder wo immer du willst (deine Kunden brauchen nur
-          Arbeitszeitgeld auf ihrem Konto und den Link zum Produkt). Der „Preis“ des Produktes entspricht immer genau
-          der im Plan angegebenen Arbeitszeit.</li>
+        <li>
+          Veröffentliche in der App einen Plan für jedes Produkt, das du
+          anbieten möchtest. In diesem Plan musst du angeben, wie viel
+          Arbeitszeit die Herstellung dieses Produkts kostet.
+        </li>
+        <li>
+          Du erhältst Arbeitszeit-Guthaben, um die Beschäftigten zu bezahlen und
+          ein Konto, um Produktionsmittel von anderen teilnehmenden Betrieben zu
+          erwerben.
+        </li>
+        <li>
+          Veröffentliche das Produkt auf unserem Marktplatz oder wo immer du
+          willst (deine Kunden brauchen nur Arbeitszeitgeld auf ihrem Konto und
+          den Link zum Produkt). Der „Preis“ des Produktes entspricht immer
+          genau der im Plan angegebenen Arbeitszeit.
+        </li>
       </ol>
     </div>
 
+    <hr />
 
-    <hr>
-
-    <p class="title">
-      FAQ
-    </p>
+    <p class="title">FAQ</p>
     <div class="block content has-text-left">
       <ul>
         <li>xxx1?</li>
@@ -66,9 +81,7 @@
   </div>
 </div>
 
-{% endmacro %}
-
-{% macro query_products(form, view_model) %}
+{% endmacro %} {% macro query_products(form, view_model) %}
 <div class="columns is-centered">
   <div class="column is-one-third">
     <h1 class="title">
@@ -120,7 +133,7 @@
         <th>Betrieb</th>
         <th>Beschreibung</th>
         <th>Stückpreis</th>
-        <th>Public Service</th>
+        <th>Art</th>
         <th>Kontakt</th>
       </tr>
     </thead>
@@ -144,21 +157,15 @@
     </tbody>
   </table>
 </div>
-{% endif %}
-{% endmacro %}
-
-
-{% macro statistics(view_model) %}
+{% endif %} {% endmacro %} {% macro statistics(view_model) %}
 
 <div class="columns is-centered">
   <div class="column is-half">
     <div class="content">
-      <h1 class="title">
-        Globale Statistiken
-      </h1>
+      <h1 class="title">Globale Statistiken</h1>
     </div>
 
-    <br>
+    <br />
 
     <div class="level">
       <div class="level-left">
@@ -184,7 +191,7 @@
         </div>
       </div>
     </div>
-    <br>
+    <br />
     <div class="level">
       <div class="level-left">
         <div class="level-item">
@@ -221,7 +228,7 @@
         </div>
       </div>
     </div>
-    <br>
+    <br />
     <div class="level">
       <div class="level-left">
         <div class="level-item">
@@ -234,11 +241,13 @@
         </div>
       </div>
     </div>
-    <br>
+    <br />
     <div class="level">
       <div class="level-left">
         <div class="level-item">
-          <p class="has-text-weight-semibold">Aktuell geplante Arbeitsstunden:</p>
+          <p class="has-text-weight-semibold">
+            Aktuell geplante Arbeitsstunden:
+          </p>
         </div>
       </div>
       <div class="level-right has-text-right-tablet">
@@ -262,7 +271,9 @@
     <div class="level">
       <div class="level-left">
         <div class="level-item">
-          <p class="has-text-weight-semibold">Aktuell geplante Produktionsmittel:</p>
+          <p class="has-text-weight-semibold">
+            Aktuell geplante Produktionsmittel:
+          </p>
         </div>
       </div>
       <div class="level-right has-text-right-tablet">
@@ -271,9 +282,6 @@
         </div>
       </div>
     </div>
-
-
-
   </div>
 </div>
 
