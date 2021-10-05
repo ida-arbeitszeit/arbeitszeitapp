@@ -10,9 +10,9 @@ class NonActivePlansRow:
     id: str
     prd_name: str
     description: str
-    production_costs_means_cost: str
-    production_costs_resource_cost: str
-    production_costs_labour_cost: str
+    means_cost: str
+    resource_cost: str
+    labour_cost: str
     prd_amount: str
     price_per_unit: str
     type_of_plan: str
@@ -29,9 +29,9 @@ class ActivePlansRow:
     id: str
     prd_name: str
     description: str
-    production_costs_means_cost: str
-    production_costs_resource_cost: str
-    production_costs_labour_cost: str
+    means_cost: str
+    resource_cost: str
+    labour_cost: str
     prd_amount: str
     price_per_unit: str
     type_of_plan: str
@@ -50,9 +50,9 @@ class ExpiredPlansRow:
     id: str
     prd_name: str
     description: str
-    production_costs_means_cost: str
-    production_costs_resource_cost: str
-    production_costs_labour_cost: str
+    means_cost: str
+    resource_cost: str
+    labour_cost: str
     prd_amount: str
     price_per_unit: str
     type_of_plan: str
@@ -96,9 +96,9 @@ class ShowMyPlansPresenter:
                         id=f"{plan.id}",
                         prd_name=f"{plan.prd_name}",
                         description=f"{plan.description}",
-                        production_costs_means_cost=f"{plan.production_costs.means_cost}",
-                        production_costs_resource_cost=f"{plan.production_costs.resource_cost}",
-                        production_costs_labour_cost=f"{plan.production_costs.labour_cost}",
+                        means_cost=f"{plan.production_costs.means_cost}",
+                        resource_cost=f"{plan.production_costs.resource_cost}",
+                        labour_cost=f"{plan.production_costs.labour_cost}",
                         prd_amount=f"{plan.prd_amount}",
                         price_per_unit=f"{plan.price_per_unit} Std.",
                         type_of_plan=self.__get_type_of_plan(plan.is_public_service),
@@ -114,9 +114,9 @@ class ShowMyPlansPresenter:
                         id=f"{plan.id}",
                         prd_name=f"{plan.prd_name}",
                         description=f"{plan.description}",
-                        production_costs_means_cost=f"{plan.production_costs.means_cost}",
-                        production_costs_resource_cost=f"{plan.production_costs.resource_cost}",
-                        production_costs_labour_cost=f"{plan.production_costs.labour_cost}",
+                        means_cost=f"{plan.production_costs.means_cost}",
+                        resource_cost=f"{plan.production_costs.resource_cost}",
+                        labour_cost=f"{plan.production_costs.labour_cost}",
                         prd_amount=f"{plan.prd_amount}",
                         price_per_unit=f"{plan.price_per_unit} Std.",
                         type_of_plan=self.__get_type_of_plan(plan.is_public_service),
@@ -134,9 +134,9 @@ class ShowMyPlansPresenter:
                         id=f"{plan.id}",
                         prd_name=f"{plan.prd_name}",
                         description=f"{plan.description}",
-                        production_costs_means_cost=f"{plan.production_costs.means_cost}",
-                        production_costs_resource_cost=f"{plan.production_costs.resource_cost}",
-                        production_costs_labour_cost=f"{plan.production_costs.labour_cost}",
+                        means_cost=f"{plan.production_costs.means_cost}",
+                        resource_cost=f"{plan.production_costs.resource_cost}",
+                        labour_cost=f"{plan.production_costs.labour_cost}",
                         prd_amount=f"{plan.prd_amount}",
                         price_per_unit=f"{plan.price_per_unit} Std.",
                         type_of_plan=self.__get_type_of_plan(plan.is_public_service),
