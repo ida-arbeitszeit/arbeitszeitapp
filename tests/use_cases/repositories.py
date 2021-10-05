@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-import uuid
 from collections import defaultdict
 from datetime import datetime
 from decimal import Decimal
 from statistics import StatisticsError, mean
 from typing import Dict, Iterator, List, Optional, Set, Union
+from uuid import UUID, uuid4
 
 from injector import inject, singleton
 
@@ -22,6 +22,7 @@ from arbeitszeit.entities import (
     ProductionCosts,
     ProductOffer,
     Purchase,
+    PurposesOfPurchases,
     SocialAccounting,
     Transaction,
 )
@@ -33,8 +34,25 @@ class PurchaseRepository(interfaces.PurchaseRepository):
     def __init__(self):
         self.purchases = []
 
-    def add(self, purchase: Purchase):
+    def create_purchase(
+        self,
+        purchase_date: datetime,
+        plan: Plan,
+        buyer: Union[Member, Company],
+        price_per_unit: Decimal,
+        amount: int,
+        purpose: PurposesOfPurchases,
+    ) -> Purchase:
+        purchase = Purchase(
+            purchase_date=purchase_date,
+            plan=plan,
+            buyer=buyer,
+            price_per_unit=price_per_unit,
+            amount=amount,
+            purpose=purpose,
+        )
         self.purchases.append(purchase)
+        return purchase
 
     def get_purchases_descending_by_date(self, user: Union[Member, Company]):
         # order purchases by purchase_date
@@ -62,7 +80,7 @@ class TransactionRepository(interfaces.TransactionRepository):
         purpose: str,
     ) -> Transaction:
         transaction = Transaction(
-            id=uuid.uuid4(),
+            id=uuid4(),
             date=date,
             sending_account=sending_account,
             receiving_account=receiving_account,
@@ -128,7 +146,7 @@ class OfferRepository(interfaces.OfferRepository):
         description: str,
     ) -> ProductOffer:
         offer = ProductOffer(
-            id=uuid.uuid4(),
+            id=uuid4(),
             name=name,
             description=description,
             plan=plan,
@@ -136,17 +154,17 @@ class OfferRepository(interfaces.OfferRepository):
         self.offers.append(offer)
         return offer
 
-    def get_by_id(self, id: uuid.UUID) -> ProductOffer:
+    def get_by_id(self, id: UUID) -> ProductOffer:
         for offer in self.offers:
             if offer.id == id:
                 return offer
         raise Exception("Offer not found, this exception is not meant to be caught")
 
-    def delete_offer(self, id: uuid.UUID) -> None:
+    def delete_offer(self, id: UUID) -> None:
         offer = self.get_by_id(id)
         self.offers.remove(offer)
 
-    def get_all_offers_belonging_to(self, plan_id: uuid.UUID) -> List[ProductOffer]:
+    def get_all_offers_belonging_to(self, plan_id: UUID) -> List[ProductOffer]:
         offers = []
         for offer in self.offers:
             if offer.plan.id == plan_id:
@@ -162,9 +180,7 @@ class CompanyWorkerRepository(interfaces.CompanyWorkerRepository):
     ) -> None:
         self.company_repository = company_repository
         self.member_repository = member_repository
-        self.company_workers: Dict[uuid.UUID, Set[uuid.UUID]] = defaultdict(
-            lambda: set()
-        )
+        self.company_workers: Dict[UUID, Set[UUID]] = defaultdict(lambda: set())
 
     def add_worker_to_company(self, company: Company, worker: Member) -> None:
         self.company_workers[company.id].add(worker.id)
@@ -175,7 +191,7 @@ class CompanyWorkerRepository(interfaces.CompanyWorkerRepository):
             for member in self.company_workers[company.id]
         ]
 
-    def get_member_workplaces(self, member: uuid.UUID) -> List[Company]:
+    def get_member_workplaces(self, member: UUID) -> List[Company]:
         return [
             self.company_repository.get_by_id(company)
             for company, workers in self.company_workers.items()
@@ -197,7 +213,7 @@ class AccountRepository(interfaces.AccountRepository):
 
     def create_account(self, account_type: AccountTypes) -> Account:
         account = Account(
-            id=uuid.uuid4(),
+            id=uuid4(),
             account_type=account_type,
         )
         self.accounts.append(account)
@@ -269,12 +285,12 @@ class AccountOwnerRepository(interfaces.AccountOwnerRepository):
 class MemberRepository(interfaces.MemberRepository):
     @inject
     def __init__(self):
-        self.members: Dict[uuid.UUID, Member] = {}
+        self.members: Dict[UUID, Member] = {}
 
     def create_member(
         self, email: str, name: str, password: str, account: Account
     ) -> Member:
-        id = uuid.uuid4()
+        id = uuid4()
         member = Member(
             id=id,
             name=name,
@@ -293,7 +309,7 @@ class MemberRepository(interfaces.MemberRepository):
     def count_registered_members(self) -> int:
         return len(self.members)
 
-    def get_by_id(self, id: uuid.UUID) -> Member:
+    def get_by_id(self, id: UUID) -> Member:
         return self.members[id]
 
 
@@ -314,7 +330,7 @@ class CompanyRepository(interfaces.CompanyRepository):
         products_account: Account,
     ) -> Company:
         new_company = Company(
-            id=uuid.uuid4(),
+            id=uuid4(),
             email=email,
             name=name,
             means_account=means_account,
@@ -328,7 +344,7 @@ class CompanyRepository(interfaces.CompanyRepository):
     def has_company_with_email(self, email: str) -> bool:
         return email in self.companies
 
-    def get_by_id(self, id: uuid.UUID) -> Company:
+    def get_by_id(self, id: UUID) -> Company:
         for company in self.companies.values():
             if company.id == id:
                 return company
@@ -346,11 +362,11 @@ class PlanRepository(interfaces.PlanRepository):
         draft_repository: PlanDraftRepository,
         company_repository: CompanyRepository,
     ) -> None:
-        self.plans: Dict[uuid.UUID, Plan] = {}
+        self.plans: Dict[UUID, Plan] = {}
         self.draft_repository = draft_repository
         self.company_repository = company_repository
 
-    def get_plan_by_id(self, id: uuid.UUID) -> Optional[Plan]:
+    def get_plan_by_id(self, id: UUID) -> Optional[Plan]:
         return self.plans.get(id)
 
     def approve_plan(self, draft: PlanDraft, approval_timestamp: datetime) -> Plan:
@@ -489,12 +505,42 @@ class PlanRepository(interfaces.PlanRepository):
             ):
                 yield plan
 
-    def delete_plan(self, plan_id: uuid.UUID) -> None:
+    def delete_plan(self, plan_id: UUID) -> None:
         del self.plans[plan_id]
+
+    def get_all_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
+        for plan in self.plans.values():
+            if str(plan.planner.id) == str(company_id):
+                yield plan
+
+    def get_non_active_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
+        for plan in self.plans.values():
+            if (
+                plan.planner == company_id
+                and plan.approved
+                and not plan.is_active
+                and not plan.expired
+            ):
+                yield plan
+
+    def get_active_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
+        for plan in self.plans.values():
+            if (
+                plan.planner == company_id
+                and plan.approved
+                and plan.is_active
+                and not plan.expired
+            ):
+                yield plan
+
+    def get_expired_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
+        for plan in self.plans.values():
+            if plan.planner == company_id and plan.expired:
+                yield plan
 
     def _create_plan(
         self,
-        id: uuid.UUID,
+        id: UUID,
         planner: Company,
         costs: ProductionCosts,
         product_name: str,
@@ -555,7 +601,7 @@ class PlanDraftRepository(interfaces.PlanDraftRepository):
 
     def create_plan_draft(
         self,
-        planner: uuid.UUID,
+        planner: UUID,
         product_name: str,
         description: str,
         costs: ProductionCosts,
@@ -567,7 +613,7 @@ class PlanDraftRepository(interfaces.PlanDraftRepository):
     ) -> PlanDraft:
         company = self.company_repository.get_by_id(planner)
         draft = PlanDraft(
-            id=uuid.uuid4(),
+            id=uuid4(),
             creation_date=creation_timestamp,
             planner=company,
             product_name=product_name,
@@ -581,7 +627,7 @@ class PlanDraftRepository(interfaces.PlanDraftRepository):
         self.drafts.append(draft)
         return draft
 
-    def get_by_id(self, id: uuid.UUID) -> Optional[PlanDraft]:
+    def get_by_id(self, id: UUID) -> Optional[PlanDraft]:
         for draft in self.drafts:
             if draft.id == id:
                 return draft
@@ -590,5 +636,5 @@ class PlanDraftRepository(interfaces.PlanDraftRepository):
     def __len__(self) -> int:
         return len(self.drafts)
 
-    def delete_draft(self, id: uuid.UUID) -> None:
+    def delete_draft(self, id: UUID) -> None:
         self.drafts = [draft for draft in self.drafts if draft.id != id]

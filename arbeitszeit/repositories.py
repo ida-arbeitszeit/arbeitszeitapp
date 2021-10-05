@@ -14,6 +14,7 @@ from arbeitszeit.entities import (
     ProductionCosts,
     ProductOffer,
     Purchase,
+    PurposesOfPurchases,
     SocialAccounting,
     Transaction,
 )
@@ -35,7 +36,15 @@ class CompanyWorkerRepository(ABC):
 
 class PurchaseRepository(ABC):
     @abstractmethod
-    def add(self, purchase: Purchase) -> None:
+    def create_purchase(
+        self,
+        purchase_date: datetime,
+        plan: Plan,
+        buyer: Union[Member, Company],
+        price_per_unit: Decimal,
+        amount: int,
+        purpose: PurposesOfPurchases,
+    ) -> Purchase:
         pass
 
     @abstractmethod
@@ -136,6 +145,21 @@ class PlanRepository(ABC):
 
     @abstractmethod
     def query_active_plans_by_plan_id(self, query: str) -> Iterator[Plan]:
+        pass
+
+    def get_all_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
+        pass
+
+    @abstractmethod
+    def get_non_active_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
+        pass
+
+    @abstractmethod
+    def get_active_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
+        pass
+
+    @abstractmethod
+    def get_expired_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
         pass
 
 

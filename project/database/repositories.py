@@ -345,9 +345,26 @@ class PurchaseRepository(repositories.PurchaseRepository):
             purpose=purchase.purpose,
         )
 
-    def add(self, purchase: entities.Purchase) -> None:
+    def create_purchase(
+        self,
+        purchase_date: datetime,
+        plan: entities.Plan,
+        buyer: Union[entities.Member, entities.Company],
+        price_per_unit: Decimal,
+        amount: int,
+        purpose: entities.PurposesOfPurchases,
+    ) -> entities.Purchase:
+        purchase = entities.Purchase(
+            purchase_date=purchase_date,
+            plan=plan,
+            buyer=buyer,
+            price_per_unit=price_per_unit,
+            amount=amount,
+            purpose=purpose,
+        )
         purchase_orm = self.object_to_orm(purchase)
         self.db.session.add(purchase_orm)
+        return purchase
 
     def get_purchases_descending_by_date(
         self, user: Union[entities.Member, entities.Company]
@@ -691,6 +708,47 @@ class PlanRepository(repositories.PlanRepository):
             for plan in Plan.query.filter(
                 Plan.is_active == True, Plan.id.contains(query)
             ).all()
+        )
+
+    def get_all_plans_for_company(self, company_id: UUID) -> Iterator[entities.Plan]:
+        return (
+            self.object_from_orm(plan_orm)
+            for plan_orm in Plan.query.filter(Plan.planner == str(company_id))
+        )
+
+    def get_non_active_plans_for_company(
+        self, company_id: UUID
+    ) -> Iterator[entities.Plan]:
+        return (
+            self.object_from_orm(plan_orm)
+            for plan_orm in Plan.query.filter(
+                Plan.planner == str(company_id),
+                Plan.approved == True,
+                Plan.is_active == False,
+                Plan.expired == False,
+            )
+        )
+
+    def get_active_plans_for_company(self, company_id: UUID) -> Iterator[entities.Plan]:
+        return (
+            self.object_from_orm(plan_orm)
+            for plan_orm in Plan.query.filter(
+                Plan.planner == str(company_id),
+                Plan.approved == True,
+                Plan.is_active == True,
+                Plan.expired == False,
+            )
+        )
+
+    def get_expired_plans_for_company(
+        self, company_id: UUID
+    ) -> Iterator[entities.Plan]:
+        return (
+            self.object_from_orm(plan_orm)
+            for plan_orm in Plan.query.filter(
+                Plan.planner == str(company_id),
+                Plan.expired == True,
+            )
         )
 
     def __len__(self) -> int:

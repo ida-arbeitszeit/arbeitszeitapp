@@ -36,11 +36,11 @@
     <tbody>
       {% for offer in offers %}
       <tr>
-        <td><a href="{{ url_for(request.blueprint+'.plan_summary', plan_id=offer.plan.id) }}">{{ offer.plan.id }}</a>
+        <td><a href="{{ get_plan_summary_url(offer.plan.id) }}">{{ offer.plan.id }}</a>
         </td>
         <td>{{ offer.name }}</td>
         <td>{{ offer.description }}</td>
-        <td>{{ offer.plan.price_per_unit() }} Std.</td>
+        <td>{{ offer.plan.price_per_unit }} Std.</td>
         <td><a href="{{ url_for('main_company.delete_offer', offer_id=offer.id) }}"><u>Del.</u></a></td>
         </td>
       </tr>

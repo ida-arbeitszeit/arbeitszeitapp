@@ -34,6 +34,7 @@ from arbeitszeit.repositories import (
     OfferRepository,
     PlanDraftRepository,
     PlanRepository,
+    PurchaseRepository,
     TransactionRepository,
 )
 from arbeitszeit.use_cases import SeekApproval
@@ -181,6 +182,7 @@ class PlanGenerator:
         product_name: str = "Produkt A",
         production_unit: str = "500 Gramm",
         timeframe: Optional[int] = None,
+        expired: bool = False,
     ) -> Plan:
         assert approved, "Currently the application does not support plan rejection"
         draft = self.draft_plan(
@@ -200,6 +202,8 @@ class PlanGenerator:
         assert plan.approved
         if activation_date:
             self.plan_repository.activate_plan(plan, activation_date)
+        if expired:
+            self.plan_repository.set_plan_as_expired(plan)
         return plan
 
     def draft_plan(
@@ -243,6 +247,7 @@ class PurchaseGenerator:
     member_generator: MemberGenerator
     company_generator: CompanyGenerator
     datetime_service: FakeDatetimeService
+    purchase_repository: PurchaseRepository
 
     def create_purchase(
         self,
@@ -252,7 +257,7 @@ class PurchaseGenerator:
     ) -> Purchase:
         if purchase_date is None:
             purchase_date = self.datetime_service.now_minus_one_day()
-        return Purchase(
+        return self.purchase_repository.create_purchase(
             purchase_date=purchase_date,
             plan=self.plan_generator.create_plan(),
             buyer=buyer,

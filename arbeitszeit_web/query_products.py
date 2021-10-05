@@ -1,11 +1,17 @@
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional, Protocol
+from uuid import UUID
 
 from arbeitszeit.use_cases.query_products import (
     ProductFilter,
     ProductQueryResponse,
     QueryProductsRequest,
 )
+
+
+class PlanSummaryUrlIndex(Protocol):
+    def get_plan_summary_url(self, plan_id: UUID) -> str:
+        ...
 
 
 class QueryProductsFormData(Protocol):
@@ -52,6 +58,7 @@ class Notification:
 @dataclass
 class ResultTableRow:
     plan_id: str
+    plan_summary_url: str
     product_name: str
     seller_name: str
     product_description: str
@@ -75,7 +82,10 @@ class QueryProductsViewModel:
         return asdict(self)
 
 
+@dataclass
 class QueryProductsPresenter:
+    plan_summary_url_index: PlanSummaryUrlIndex
+
     def present(self, response: ProductQueryResponse) -> QueryProductsViewModel:
         if response.results:
             notifications = []
@@ -88,11 +98,16 @@ class QueryProductsPresenter:
                 rows=[
                     ResultTableRow(
                         plan_id=str(result.plan_id),
+                        plan_summary_url=self.plan_summary_url_index.get_plan_summary_url(
+                            result.plan_id
+                        ),
                         product_name=result.product_name,
                         seller_name=result.seller_name,
                         product_description=result.product_description,
                         price_per_unit=f"{result.price_per_unit} Std.",
-                        is_public_service="Ja" if result.is_public_service else "Nein",
+                        is_public_service="Öffentlich"
+                        if result.is_public_service
+                        else "Produktiv",
                         contact_email=f"mailto:{result.seller_email}",
                     )
                     for result in response.results

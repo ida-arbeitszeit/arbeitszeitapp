@@ -16,6 +16,7 @@ from arbeitszeit.use_cases import (
     DeletePlan,
     GetPlanSummary,
 )
+from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_web.create_offer import CreateOfferPresenter
 from arbeitszeit_web.delete_offer import DeleteOfferPresenter
 from arbeitszeit_web.delete_plan import DeletePlanPresenter
@@ -27,13 +28,13 @@ from arbeitszeit_web.query_products import (
     QueryProductsController,
     QueryProductsPresenter,
 )
+from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from project import error
 from project.database import (
     AccountRepository,
     CompanyRepository,
     CompanyWorkerRepository,
     MemberRepository,
-    PlanRepository,
     ProductOfferRepository,
     commit_changes,
 )
@@ -41,6 +42,7 @@ from project.dependency_injection import with_injection
 from project.forms import PlanSearchForm, ProductSearchForm
 from project.models import Company, Plan
 from project.views import QueryPlansView, QueryProductsView
+from project.url_index import CompanyUrlIndex
 
 main_company = Blueprint(
     "main_company", __name__, template_folder="templates", static_folder="static"
@@ -107,12 +109,14 @@ def arbeit(
 @with_injection
 def suchen(
     query_products: use_cases.QueryProducts,
-    presenter: QueryProductsPresenter,
     controller: QueryProductsController,
 ):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
+    presenter = QueryProductsPresenter(
+        CompanyUrlIndex(),
+    )
     template_name = "company/query_products.html"
     search_form = ProductSearchForm(request.form)
     view = QueryProductsView(
@@ -220,31 +224,19 @@ def create_plan(
 @login_required
 @with_injection
 def my_plans(
-    plan_repository: PlanRepository,
+    show_my_plans_use_case: ShowMyPlansUseCase,
+    show_my_plans_presenter: ShowMyPlansPresenter,
 ):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
-    plans_approved = [
-        plan_repository.object_from_orm(plan)
-        for plan in current_user.plans.filter_by(
-            approved=True,
-        ).all()
-    ]
-
-    plans_not_expired_and_active = [
-        plan for plan in plans_approved if (not plan.expired and plan.is_active)
-    ]
-    plans_not_expired_and_inactive = [
-        plan for plan in plans_approved if (not plan.expired and not plan.is_active)
-    ]
-    plans_expired = [plan for plan in plans_approved if plan.expired]
+    request = ShowMyPlansRequest(company_id=current_user.id)
+    response = show_my_plans_use_case(request)
+    view_model = show_my_plans_presenter.present(response)
 
     return render_template(
         "company/my_plans.html",
-        plans=plans_not_expired_and_active,
-        plans_waiting_for_activation=plans_not_expired_and_inactive,
-        plans_expired=plans_expired,
+        **view_model.to_dict(),
     )
 
 
@@ -355,8 +347,6 @@ def transfer_to_worker(
 @with_injection
 def transfer_to_company(
     pay_means_of_production: use_cases.PayMeansOfProduction,
-    company_repository: CompanyRepository,
-    plan_repository: PlanRepository,
     presenter: PayMeansOfProductionPresenter,
 ):
     if not user_is_company():
@@ -385,6 +375,7 @@ def my_offers(offer_repository: ProductOfferRepository):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
+    url_index = CompanyUrlIndex()
     my_company = Company.query.filter_by(id=current_user.id).first()
     my_plans = my_company.plans.all()
     my_offers = []
@@ -393,7 +384,11 @@ def my_offers(offer_repository: ProductOfferRepository):
             my_offers.append(offer)
     my_offers = [offer_repository.object_from_orm(offer) for offer in my_offers]
 
-    return render_template("company/my_offers.html", offers=my_offers)
+    return render_template(
+        "company/my_offers.html",
+        offers=my_offers,
+        get_plan_summary_url=url_index.get_plan_summary_url,
+    )
 
 
 @main_company.route("/company/delete_offer/<uuid:offer_id>", methods=["GET", "POST"])
