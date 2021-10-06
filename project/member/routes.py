@@ -11,6 +11,7 @@ from arbeitszeit_web.pay_consumer_product import (
     PayConsumerProductController,
     PayConsumerProductPresenter,
 )
+from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
 from arbeitszeit_web.query_products import (
     QueryProductsController,
     QueryProductsPresenter,
@@ -23,9 +24,14 @@ from project.database import (
     commit_changes,
 )
 from project.dependency_injection import with_injection
-from project.forms import PayConsumerProductForm, ProductSearchForm
+from project.forms import PayConsumerProductForm, PlanSearchForm, ProductSearchForm
 from project.url_index import MemberUrlIndex
-from project.views import Http404View, PayConsumerProductView, QueryProductsView
+from project.views import (
+    Http404View,
+    PayConsumerProductView,
+    QueryPlansView,
+    QueryProductsView,
+)
 
 main_member = Blueprint(
     "main_member", __name__, template_folder="templates", static_folder="static"
@@ -66,6 +72,28 @@ def suchen(
     )
     view = QueryProductsView(
         search_form, query_products, presenter, controller, template_name
+    )
+    if request.method == "POST":
+        return view.respond_to_post()
+    else:
+        return view.respond_to_get()
+
+
+@main_member.route("/member/query_plans", methods=["GET", "POST"])
+@login_required
+@with_injection
+def query_plans(
+    query_plans: use_cases.QueryPlans,
+    controller: QueryPlansController,
+):
+    if not user_is_member():
+        return redirect(url_for("auth.zurueck"))
+
+    presenter = QueryPlansPresenter(MemberUrlIndex())
+    template_name = "member/query_plans.html"
+    search_form = PlanSearchForm(request.form)
+    view = QueryPlansView(
+        search_form, query_plans, presenter, controller, template_name
     )
     if request.method == "POST":
         return view.respond_to_post()

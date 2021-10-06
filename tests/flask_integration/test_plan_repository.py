@@ -259,3 +259,44 @@ def test_that_expired_plan_for_company_is_returned(
         repository.get_expired_plans_for_company(company_id=company.id)
     )[0]
     assert expected_plan.id == returned_plan.id and returned_plan.expired
+
+
+@injection_test
+def test_that_query_active_plans_by_exact_product_name_returns_plan(
+    repository: PlanRepository,
+    plan_generator: PlanGenerator,
+) -> None:
+    expected_plan = plan_generator.create_plan(
+        activation_date=datetime.min, product_name="Delivery of goods"
+    )
+    returned_plan = list(
+        repository.query_active_plans_by_product_name("Delivery of goods")
+    )
+    assert returned_plan
+    assert returned_plan[0] == expected_plan
+
+
+@injection_test
+def test_that_query_active_plans_by_substring_of_product_name_returns_plan(
+    repository: PlanRepository,
+    plan_generator: PlanGenerator,
+) -> None:
+    expected_plan = plan_generator.create_plan(
+        activation_date=datetime.min, product_name="Delivery of goods"
+    )
+    returned_plan = list(repository.query_active_plans_by_product_name("very of go"))
+    assert returned_plan
+    assert returned_plan[0] == expected_plan
+
+
+@injection_test
+def test_that_query_active_plans_by_substring_of_plan_id_returns_plan(
+    repository: PlanRepository,
+    plan_generator: PlanGenerator,
+) -> None:
+    expected_plan = plan_generator.create_plan(activation_date=datetime.min)
+    expected_plan_id = expected_plan.id
+    query = str(expected_plan_id)[3:8]
+    returned_plan = list(repository.query_active_plans_by_plan_id(query))
+    assert returned_plan
+    assert returned_plan[0] == expected_plan
