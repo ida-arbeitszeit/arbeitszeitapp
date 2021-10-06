@@ -67,6 +67,21 @@ class ProductionCosts:
     def total_cost(self) -> Decimal:
         return self.labour_cost + self.resource_cost + self.means_cost
 
+    def __truediv__(self, other: Union[int, float]) -> ProductionCosts:
+        denominator = Decimal(other)
+        return ProductionCosts(
+            labour_cost=self.labour_cost / denominator,
+            resource_cost=self.resource_cost / denominator,
+            means_cost=self.means_cost / denominator,
+        )
+
+    def __add__(self, other: ProductionCosts) -> ProductionCosts:
+        return ProductionCosts(
+            labour_cost=self.labour_cost + other.labour_cost,
+            resource_cost=self.resource_cost + other.resource_cost,
+            means_cost=self.means_cost + other.means_cost,
+        )
+
 
 @dataclass
 class PlanDraft:
