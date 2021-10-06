@@ -4,7 +4,8 @@ from decimal import Decimal
 from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import SocialAccounting
+from arbeitszeit.decimal import decimal_sum
+from arbeitszeit.entities import Account, Plan, SocialAccounting
 from arbeitszeit.repositories import PlanRepository, TransactionRepository
 
 
@@ -18,7 +19,7 @@ class SynchronizedPlanActivation:
 
     def __call__(self) -> None:
         self._grant_credit_and_activate_new_plans()
-        self._payout_work_certificates(self._calculate_payout_factor())
+        self._payout_work_certificates()
 
     def _grant_credit_and_activate_new_plans(self) -> None:
         """
@@ -29,75 +30,50 @@ class SynchronizedPlanActivation:
         new_plans = self.plan_repository.get_approved_plans_created_before(
             past_plan_activation_date
         )
-
         for plan in new_plans:
-            assert plan.approved, "Plan has not been approved!"
-            assert not plan.is_active, "Plan is already active!"
-            assert not plan.expired, "Plan is already expired!"
-
-            accounts_and_amounts = [
-                (plan.planner.means_account, plan.production_costs.means_cost),
-                (
-                    plan.planner.raw_material_account,
-                    plan.production_costs.resource_cost,
-                ),
-                (
-                    plan.planner.product_account,
-                    -plan.expected_sales_value,
-                ),
-            ]
-
-            for account, amount in accounts_and_amounts:
-                self.transaction_repository.create_transaction(
-                    date=self.datetime_service.now(),
-                    sending_account=self.social_accounting.account,
-                    receiving_account=account,
-                    amount=round(amount, 2),
-                    purpose=f"Plan-Id: {plan.id}",
-                )
-
+            self._credit_production_cost_to_planner(plan)
             self.plan_repository.activate_plan(plan, self.datetime_service.now())
 
+    def _payout_work_certificates(self) -> None:
+        """
+        The payout amount equals to payout factor times labour costs per day.
+        """
+        payout_factor = self._calculate_payout_factor()
+        for plan in self.plan_repository.all_plans_approved_active_and_not_expired():
+            if self._last_certificate_payout_was_today(plan):
+                continue
+            amount = payout_factor * plan.production_costs.labour_cost / plan.timeframe
+            self._create_transaction_from_social_accounting(
+                plan, plan.planner.work_account, amount
+            )
+            self.plan_repository.set_last_certificate_payout(
+                plan, self.datetime_service.now()
+            )
+
     def _calculate_payout_factor(self) -> Decimal:
-        """
-        payout factor = (A − ( P o + R o )) / (A + A o)
-        """
-        # A
+        # payout factor = (A − ( P o + R o )) / (A + A o)
         productive_plans = (
             self.plan_repository.all_productive_plans_approved_active_and_not_expired()
         )
-        sum_of_productive_work_per_day = Decimal(0)
-        for p in productive_plans:
-            work_per_day = p.production_costs.labour_cost / p.timeframe
-            sum_of_productive_work_per_day += work_per_day
-
+        public_plans = list(
+            self.plan_repository.all_public_plans_approved_active_and_not_expired()
+        )
+        # A
+        sum_of_productive_work_per_day = decimal_sum(
+            p.production_costs.labour_cost / p.timeframe for p in productive_plans
+        )
         # A_o
-        public_plans = (
-            self.plan_repository.all_public_plans_approved_active_and_not_expired()
+        sum_of_public_work_per_day = decimal_sum(
+            p.production_costs.labour_cost / p.timeframe for p in public_plans
         )
-        sum_of_public_work_per_day = Decimal(0)
-        for p in public_plans:
-            work_per_day = p.production_costs.labour_cost / p.timeframe
-            sum_of_public_work_per_day += work_per_day
-
         # P_o
-        public_plans = (
-            self.plan_repository.all_public_plans_approved_active_and_not_expired()
+        sum_of_public_means_of_production_per_day = decimal_sum(
+            p.production_costs.means_cost / p.timeframe for p in public_plans
         )
-        sum_of_public_means_of_production_per_day = Decimal(0)
-        for p in public_plans:
-            means_of_production_per_day = p.production_costs.means_cost / p.timeframe
-            sum_of_public_means_of_production_per_day += means_of_production_per_day
-
         # R_o
-        public_plans = (
-            self.plan_repository.all_public_plans_approved_active_and_not_expired()
+        sum_of_public_raw_materials_per_day = decimal_sum(
+            p.production_costs.resource_cost / p.timeframe for p in public_plans
         )
-        sum_of_public_raw_materials_per_day = Decimal(0)
-        for p in public_plans:
-            raw_materials_per_day = p.production_costs.resource_cost / p.timeframe
-            sum_of_public_raw_materials_per_day += raw_materials_per_day
-
         # Payout factor
         numerator = sum_of_productive_work_per_day - (
             sum_of_public_means_of_production_per_day
@@ -107,38 +83,29 @@ class SynchronizedPlanActivation:
         payout_factor = numerator / denominator
         return Decimal(payout_factor)
 
-    def _payout_work_certificates(self, payout_factor: Decimal) -> None:
-        """
-        The payout amount equals to payout factor times labour costs per day.
-        """
+    def _last_certificate_payout_was_today(self, plan: Plan) -> bool:
+        if plan.last_certificate_payout is not None:
+            return plan.last_certificate_payout.date() == self.datetime_service.today()
+        return False
 
-        for plan in self.plan_repository.all_plans_approved_active_and_not_expired():
-            assert plan.approved, "Plan has not been approved!"
-            assert plan.is_active, "Plan is not active"
-            assert not plan.expired, "Plan is expired"
+    def _credit_production_cost_to_planner(self, plan: Plan) -> None:
+        self._create_transaction_from_social_accounting(
+            plan, plan.planner.means_account, plan.production_costs.means_cost
+        )
+        self._create_transaction_from_social_accounting(
+            plan, plan.planner.raw_material_account, plan.production_costs.resource_cost
+        )
+        self._create_transaction_from_social_accounting(
+            plan, plan.planner.product_account, -plan.expected_sales_value
+        )
 
-            if plan.last_certificate_payout:
-                # if last payout was today
-                last_payout = plan.last_certificate_payout
-                today = self.datetime_service.today()
-                if (last_payout.year, last_payout.month, last_payout.day) == (
-                    today.year,
-                    today.month,
-                    today.day,
-                ):
-                    continue
-
-            receiving_account = plan.planner.work_account
-            amount = payout_factor * plan.production_costs.labour_cost / plan.timeframe
-
-            self.transaction_repository.create_transaction(
-                date=self.datetime_service.now(),
-                sending_account=self.social_accounting.account,
-                receiving_account=receiving_account,
-                amount=round(amount, 2),
-                purpose=f"Plan-Id: {plan.id}",
-            )
-
-            self.plan_repository.set_last_certificate_payout(
-                plan, self.datetime_service.now()
-            )
+    def _create_transaction_from_social_accounting(
+        self, plan: Plan, account: Account, amount: Decimal
+    ) -> None:
+        self.transaction_repository.create_transaction(
+            date=self.datetime_service.now(),
+            sending_account=self.social_accounting.account,
+            receiving_account=account,
+            amount=round(amount, 2),
+            purpose=f"Plan-Id: {plan.id}",
+        )
