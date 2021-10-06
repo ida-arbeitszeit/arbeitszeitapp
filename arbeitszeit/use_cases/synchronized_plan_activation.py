@@ -5,7 +5,7 @@ from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
-from arbeitszeit.entities import Account, Plan, SocialAccounting
+from arbeitszeit.entities import Account, Plan, ProductionCosts, SocialAccounting
 from arbeitszeit.repositories import PlanRepository, TransactionRepository
 
 
@@ -55,31 +55,25 @@ class SynchronizedPlanActivation:
         productive_plans = (
             self.plan_repository.all_productive_plans_approved_active_and_not_expired()
         )
-        public_plans = list(
+        public_plans = (
             self.plan_repository.all_public_plans_approved_active_and_not_expired()
+        )
+        # A o, P o, M o
+        public_costs_per_day: ProductionCosts = sum(
+            (p.production_costs / p.timeframe for p in public_plans),
+            start=ProductionCosts(Decimal(0), Decimal(0), Decimal(0)),
         )
         # A
         sum_of_productive_work_per_day = decimal_sum(
             p.production_costs.labour_cost / p.timeframe for p in productive_plans
         )
-        # A_o
-        sum_of_public_work_per_day = decimal_sum(
-            p.production_costs.labour_cost / p.timeframe for p in public_plans
-        )
-        # P_o
-        sum_of_public_means_of_production_per_day = decimal_sum(
-            p.production_costs.means_cost / p.timeframe for p in public_plans
-        )
-        # R_o
-        sum_of_public_raw_materials_per_day = decimal_sum(
-            p.production_costs.resource_cost / p.timeframe for p in public_plans
-        )
-        # Payout factor
         numerator = sum_of_productive_work_per_day - (
-            sum_of_public_means_of_production_per_day
-            + sum_of_public_raw_materials_per_day
+            public_costs_per_day.means_cost + public_costs_per_day.resource_cost
         )
-        denominator = (sum_of_productive_work_per_day + sum_of_public_work_per_day) or 1
+        denominator = (
+            sum_of_productive_work_per_day + public_costs_per_day.labour_cost
+        ) or 1
+        # Payout factor
         payout_factor = numerator / denominator
         return Decimal(payout_factor)
 
