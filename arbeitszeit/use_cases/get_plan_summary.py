@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from decimal import Decimal
+from typing import Optional
 from uuid import UUID
 
 from injector import inject
@@ -8,7 +9,7 @@ from arbeitszeit.repositories import PlanRepository
 
 
 @dataclass
-class PlanSummaryResponse:
+class PlanSummarySuccess:
     plan_id: UUID
     is_active: bool
     planner_id: UUID
@@ -24,6 +25,9 @@ class PlanSummaryResponse:
     price_per_unit: Decimal
 
 
+PlanSummaryResponse = Optional[PlanSummarySuccess]
+
+
 @inject
 @dataclass
 class GetPlanSummary:
@@ -31,8 +35,9 @@ class GetPlanSummary:
 
     def __call__(self, plan_id: UUID) -> PlanSummaryResponse:
         plan = self.plan_repository.get_plan_by_id(plan_id)
-        assert plan is not None
-        return PlanSummaryResponse(
+        if plan is None:
+            return None
+        return PlanSummarySuccess(
             plan_id=plan.id,
             is_active=plan.is_active,
             planner_id=plan.planner.id,

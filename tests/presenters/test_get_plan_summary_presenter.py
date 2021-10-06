@@ -3,10 +3,10 @@ from decimal import Decimal
 from unittest import TestCase
 from uuid import uuid4
 
-from arbeitszeit.use_cases.get_plan_summary import PlanSummaryResponse
-from arbeitszeit_web.get_plan_summary import GetPlanSummaryPresenter
+from arbeitszeit.use_cases.get_plan_summary import PlanSummarySuccess
+from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
 
-TESTING_RESPONSE_MODEL = PlanSummaryResponse(
+TESTING_RESPONSE_MODEL = PlanSummarySuccess(
     plan_id=uuid4(),
     is_active=True,
     planner_id=uuid4(),
@@ -23,9 +23,9 @@ TESTING_RESPONSE_MODEL = PlanSummaryResponse(
 )
 
 
-class GetPlanSummaryPresenterTests(TestCase):
+class GetPlanSummarySuccessPresenterTests(TestCase):
     def setUp(self) -> None:
-        self.presenter = GetPlanSummaryPresenter()
+        self.presenter = GetPlanSummarySuccessPresenter()
 
     def test_plan_id_is_displayed_correctly_as_tuple_of_strings(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
