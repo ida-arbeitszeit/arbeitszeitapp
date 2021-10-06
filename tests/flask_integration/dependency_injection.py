@@ -1,6 +1,4 @@
-from unittest import TestCase
-
-from flask import Flask, _app_ctx_stack, current_app
+from flask import Flask, current_app
 from flask_sqlalchemy import SQLAlchemy
 from injector import Injector, Module, inject, provider, singleton
 
@@ -32,16 +30,6 @@ class SqliteModule(Module):
     @singleton
     def provide_app(self, _: SQLAlchemy) -> Flask:
         return current_app
-
-
-class ViewTestCase(TestCase):
-    def setUp(self) -> None:
-        self.injector = get_dependency_injector()
-        self.app = self.injector.get(Flask)
-        self.client = self.app.test_client()
-
-    def tearDown(self) -> None:
-        _app_ctx_stack.pop()
 
 
 def get_dependency_injector():

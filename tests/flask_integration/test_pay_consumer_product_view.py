@@ -1,28 +1,12 @@
 from uuid import uuid4
 
-from tests.data_generators import MemberGenerator
-
-from .dependency_injection import ViewTestCase
+from .view import ViewTestCase
 
 
 class AuthenticatedMemberTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        email = "member@cp.org"
-        password = "12345"
-        member_generator = self.injector.get(MemberGenerator)
-        member = member_generator.create_member(
-            email=email,
-            password=password,
-        )
-        self.client.post(
-            "/member/login",
-            data=dict(
-                email=member.email,
-                password=password,
-            ),
-            follow_redirects=True,
-        )
+        self.login_member()
 
     def test_get_returns_200_status(self) -> None:
         response = self.client.get("/member/pay_consumer_product")
