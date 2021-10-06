@@ -21,6 +21,7 @@ from .pay_consumer_product import (
     PayConsumerProductResponse,
 )
 from .pay_means_of_production import PayMeansOfProduction, PayMeansOfProductionRequest
+from .query_plans import PlanFilter, PlanQueryResponse, QueryPlans, QueryPlansRequest
 from .query_products import (
     ProductFilter,
     ProductQueryResponse,
@@ -59,9 +60,13 @@ __all__ = [
     "PlanProposal",
     "CreatePlanDraftRequest",
     "CreatePlanDraftResponse",
+    "PlanFilter",
+    "PlanQueryResponse",
     "ProductFilter",
     "ProductQueryResponse",
     "PurchaseQueryResponse",
+    "QueryPlans",
+    "QueryPlansRequest",
     "QueryProducts",
     "QueryProductsRequest",
     "QueryPurchases",
