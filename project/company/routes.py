@@ -20,7 +20,7 @@ from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansU
 from arbeitszeit_web.create_offer import CreateOfferPresenter
 from arbeitszeit_web.delete_offer import DeleteOfferPresenter
 from arbeitszeit_web.delete_plan import DeletePlanPresenter
-from arbeitszeit_web.get_plan_summary import GetPlanSummaryPresenter
+from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
@@ -42,7 +42,7 @@ from project.dependency_injection import with_injection
 from project.forms import PlanSearchForm, ProductSearchForm
 from project.models import Company, Plan
 from project.url_index import CompanyUrlIndex
-from project.views import QueryPlansView, QueryProductsView
+from project.views import Http404View, QueryPlansView, QueryProductsView
 
 main_company = Blueprint(
     "main_company", __name__, template_folder="templates", static_folder="static"
@@ -440,15 +440,19 @@ def statistics(
 def plan_summary(
     plan_id: UUID,
     get_plan_summary: use_cases.GetPlanSummary,
-    presenter: GetPlanSummaryPresenter,
+    presenter: GetPlanSummarySuccessPresenter,
 ):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
     use_case_response = get_plan_summary(plan_id)
-    view_model = presenter.present(use_case_response)
-
-    return render_template("company/plan_summary.html", view_model=view_model.to_dict())
+    if isinstance(use_case_response, use_cases.PlanSummarySuccess):
+        view_model = presenter.present(use_case_response)
+        return render_template(
+            "company/plan_summary.html", view_model=view_model.to_dict()
+        )
+    else:
+        return Http404View("company/404.html").get_response()
 
 
 @main_company.route("/company/hilfe")

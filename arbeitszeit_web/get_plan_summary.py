@@ -1,7 +1,7 @@
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, Tuple
 
-from arbeitszeit.use_cases.get_plan_summary import PlanSummaryResponse
+from arbeitszeit.use_cases.get_plan_summary import PlanSummarySuccess
 
 
 @dataclass
@@ -24,8 +24,8 @@ class GetPlanSummaryViewModel:
         return asdict(self)
 
 
-class GetPlanSummaryPresenter:
-    def present(self, response: PlanSummaryResponse) -> GetPlanSummaryViewModel:
+class GetPlanSummarySuccessPresenter:
+    def present(self, response: PlanSummarySuccess) -> GetPlanSummaryViewModel:
         return GetPlanSummaryViewModel(
             plan_id=("Plan-ID", str(response.plan_id)),
             is_active=("Status", "Aktiv" if response.is_active else "Inaktiv"),
