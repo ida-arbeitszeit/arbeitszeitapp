@@ -58,7 +58,7 @@ class SynchronizedPlanActivation:
         public_plans = (
             self.plan_repository.all_public_plans_approved_active_and_not_expired()
         )
-        # A o, P o, M o
+        # A o, P o, R o
         public_costs_per_day: ProductionCosts = sum(
             (p.production_costs / p.timeframe for p in public_plans),
             start=ProductionCosts(Decimal(0), Decimal(0), Decimal(0)),
