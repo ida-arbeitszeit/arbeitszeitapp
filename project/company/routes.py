@@ -406,7 +406,7 @@ def delete_offer(
 
     if request.method == "POST":
         deletion_request = DeleteOfferRequest(
-            requesting_company_id=current_user.id,
+            requesting_company_id=UUID(current_user.id),
             offer_id=offer_id,
         )
         response = delete_offer(deletion_request)
