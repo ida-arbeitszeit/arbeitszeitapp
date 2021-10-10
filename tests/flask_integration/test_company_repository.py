@@ -1,10 +1,7 @@
 from uuid import uuid4
 
-import pytest
-
 from arbeitszeit.entities import AccountTypes
 from project.database.repositories import AccountRepository, CompanyRepository
-from project.error import CompanyNotFound
 from tests.data_generators import CompanyGenerator
 
 from .dependency_injection import injection_test
@@ -28,8 +25,7 @@ def test_company_repository_can_convert_to_and_from_orm_without_changing_the_obj
 def test_cannot_retrieve_company_from_arbitrary_uuid(
     company_repository: CompanyRepository,
 ):
-    with pytest.raises(CompanyNotFound):
-        company_repository.get_by_id(uuid4())
+    assert company_repository.get_by_id(uuid4()) is None
 
 
 @injection_test

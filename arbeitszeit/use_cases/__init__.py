@@ -66,7 +66,6 @@ __all__ = [
     "PayMeansOfProduction",
     "PayMeansOfProductionRequest",
     "PlanFilter",
-    "PlanProposal",
     "PlanQueryResponse",
     "PlanSummaryResponse",
     "PlanSummarySuccess",

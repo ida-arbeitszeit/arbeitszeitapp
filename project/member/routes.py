@@ -51,7 +51,8 @@ def my_purchases(
     if not user_is_member():
         return redirect(url_for("auth.zurueck"))
 
-    member = member_repository.get_member_by_id(current_user.id)
+    member = member_repository.get_by_id(current_user.id)
+    assert member is not None
     purchases = list(query_purchases(member))
     return render_template("member/my_purchases.html", purchases=purchases)
 

@@ -55,6 +55,7 @@ class PayMeansOfProduction:
         except PayMeansOfProductionResponse.RejectionReason as reason:
             return PayMeansOfProductionResponse(rejection_reason=reason)
         buyer = self.company_repository.get_by_id(request.buyer)
+        assert buyer is not None
         payment = self.payment_factory.get_payment(plan, buyer, request.amount, purpose)
         payment.record_purchase()
         payment.create_transaction()

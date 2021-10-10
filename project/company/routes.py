@@ -29,7 +29,6 @@ from arbeitszeit_web.query_products import (
     QueryProductsPresenter,
 )
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
-from project import error
 from project.database import (
     AccountRepository,
     CompanyRepository,
@@ -64,7 +63,8 @@ def profile(
         return redirect(url_for("auth.zurueck"))
 
     company = company_repository.get_by_id(current_user.id)
-    worker = company_worker_repository.get_company_workers(company)
+    assert company is not None
+    worker = list(company_worker_repository.get_company_workers(company))
     if worker:
         having_workers = True
     else:
@@ -85,9 +85,11 @@ def arbeit(
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
+    company = company_repository.get_by_id(current_user.id)
+    assert company is not None
     if request.method == "POST":  # add worker to company
-        company = company_repository.get_by_id(current_user.id)
-        member = member_repository.get_member_by_id(request.form["member"])
+        member = member_repository.get_by_id(request.form["member"])
+        assert member is not None
         try:
             use_cases.add_worker_to_company(
                 company_worker_repository,
@@ -98,9 +100,7 @@ def arbeit(
             flash("Mitglied ist bereits in diesem Betrieb beschäftigt.")
         return redirect(url_for("main_company.arbeit"))
     elif request.method == "GET":
-        workers_list = company_worker_repository.get_company_workers(
-            company_repository.get_by_id(current_user.id)
-        )
+        workers_list = list(company_worker_repository.get_company_workers(company))
         return render_template("company/work.html", workers_list=workers_list)
 
 
@@ -161,6 +161,7 @@ def my_purchases(
         return redirect(url_for("auth.zurueck"))
 
     company = company_repository.get_by_id(current_user.id)
+    assert company is not None
     purchases = list(query_purchases(company))
     return render_template("company/my_purchases.html", purchases=purchases)
 
@@ -323,20 +324,22 @@ def transfer_to_worker(
 
     if request.method == "POST":
         company = company_repository.get_by_id(current_user.id)
-        try:
-            worker = member_repository.get_member_by_id(request.form["member_id"])
-            amount = Decimal(request.form["amount"])
-            send_work_certificates_to_worker(
-                company,
-                worker,
-                amount,
-            )
-            flash("Erfolgreich überwiesen.")
-
-        except errors.WorkerNotAtCompany:
-            flash("Mitglied ist nicht in diesem Betrieb beschäftigt.")
-        except error.MemberNotFound:
+        assert company is not None
+        worker = member_repository.get_by_id(request.form["member_id"])
+        if worker is None:
             flash("Mitglied existiert nicht.")
+        else:
+            try:
+                amount = Decimal(request.form["amount"])
+                send_work_certificates_to_worker(
+                    company,
+                    worker,
+                    amount,
+                )
+            except errors.WorkerNotAtCompany:
+                flash("Mitglied ist nicht in diesem Betrieb beschäftigt.")
+            else:
+                flash("Erfolgreich überwiesen.")
 
     return render_template("company/transfer_to_worker.html")
 
