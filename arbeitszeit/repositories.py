@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterable, Iterator, List, Optional, Union
+from typing import Iterable, Iterator, List, Optional, Set, Tuple, Union
 from uuid import UUID
+
+from injector import inject, singleton
 
 from arbeitszeit.entities import (
     Account,
@@ -314,3 +316,29 @@ class PlanDraftRepository(ABC):
     @abstractmethod
     def delete_draft(self, id: UUID) -> None:
         pass
+
+
+@singleton
+class WorkerInviteRepository:
+    @inject
+    def __init__(
+        self, company_repository: CompanyRepository, member_repository: MemberRepository
+    ) -> None:
+        self.invites: Set[Tuple[UUID, UUID]] = set()
+        self.company_repository = company_repository
+        self.member_repository = member_repository
+
+    def is_worker_invited_to_company(self, company: UUID, worker: UUID) -> bool:
+        return (company, worker) in self.invites
+
+    def create_company_worker_invite(
+        self,
+        company: UUID,
+        worker: UUID,
+    ) -> None:
+        self.invites.add((company, worker))
+
+    def get_companies_worker_is_invited_to(self, member: UUID) -> Iterable[UUID]:
+        for company, invited_worker in self.invites:
+            if invited_worker == member:
+                yield company

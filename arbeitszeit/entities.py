@@ -13,7 +13,7 @@ class SocialAccounting:
     account: Account
 
 
-@dataclass
+@dataclass(frozen=True)
 class Member:
     id: UUID
     name: str
@@ -24,7 +24,7 @@ class Member:
         return [self.account]
 
 
-@dataclass
+@dataclass(frozen=True)
 class Company:
     id: UUID
     email: str
@@ -52,7 +52,7 @@ class AccountTypes(Enum):
     accounting = "accounting"
 
 
-@dataclass
+@dataclass(frozen=True)
 class Account:
     id: UUID
     account_type: AccountTypes
