@@ -13,12 +13,7 @@ from werkzeug.security import generate_password_hash
 
 from arbeitszeit import entities, repositories
 from arbeitszeit.decimal import decimal_sum
-from project.error import (
-    CompanyNotFound,
-    MemberNotFound,
-    PlanNotFound,
-    ProductOfferNotFound,
-)
+from project.error import PlanNotFound, ProductOfferNotFound
 from project.models import (
     Account,
     Company,
@@ -70,14 +65,11 @@ class MemberRepository(repositories.MemberRepository):
     account_repository: AccountRepository
     db: SQLAlchemy
 
-    def get_member_by_id(self, id: UUID) -> entities.Member:
+    def get_by_id(self, id: UUID) -> Optional[entities.Member]:
         orm_object = Member.query.filter_by(id=str(id)).first()
         if orm_object is None:
-            raise MemberNotFound()
-        else:
-            return self.object_from_orm(orm_object)
-
-    get_by_id = get_member_by_id
+            return None
+        return self.object_from_orm(orm_object)
 
     def object_from_orm(self, orm_object: Member) -> entities.Member:
         member_account = self.account_repository.object_from_orm(orm_object.account)
@@ -162,10 +154,10 @@ class CompanyRepository(repositories.CompanyRepository):
         assert account
         return account
 
-    def get_by_id(self, id: UUID) -> entities.Company:
+    def get_by_id(self, id: UUID) -> Optional[entities.Company]:
         company_orm = Company.query.filter_by(id=str(id)).first()
         if company_orm is None:
-            raise CompanyNotFound()
+            return None
         else:
             return self.object_from_orm(company_orm)
 
@@ -337,13 +329,22 @@ class PurchaseRepository(repositories.PurchaseRepository):
         return entities.Purchase(
             purchase_date=purchase.purchase_date,
             plan=plan,
-            buyer=self.member_repository.get_member_by_id(purchase.member)
-            if purchase.type_member
-            else self.company_repository.get_by_id(purchase.company),
+            buyer=self._get_buyer(purchase),
             price_per_unit=purchase.price_per_unit,
             amount=purchase.amount,
             purpose=purchase.purpose,
         )
+
+    def _get_buyer(
+        self, purchase: Purchase
+    ) -> Union[entities.Company, entities.Member]:
+        buyer: Union[None, entities.Company, entities.Member]
+        if purchase.type_member:
+            buyer = self.member_repository.get_by_id(purchase.member)
+        else:
+            buyer = self.company_repository.get_by_id(purchase.company)
+        assert buyer is not None
+        return buyer
 
     def create_purchase(
         self,
@@ -475,10 +476,12 @@ class PlanRepository(repositories.PlanRepository):
             resource_cost=plan.costs_r,
             means_cost=plan.costs_p,
         )
+        planner = self.company_repository.get_by_id(UUID(plan.planner))
+        assert planner is not None
         return entities.Plan(
             id=UUID(plan.id),
             plan_creation_date=plan.plan_creation_date,
-            planner=self.company_repository.get_by_id(UUID(plan.planner)),
+            planner=planner,
             production_costs=production_costs,
             prd_name=plan.prd_name,
             prd_unit=plan.prd_unit,
@@ -862,10 +865,12 @@ class PlanDraftRepository(repositories.PlanDraftRepository):
         PlanDraft.query.filter_by(id=str(id)).delete()
 
     def _object_from_orm(self, orm: PlanDraft) -> entities.PlanDraft:
+        planner = self.company_repository.get_by_id(orm.planner)
+        assert planner is not None
         return entities.PlanDraft(
             id=orm.id,
             creation_date=orm.plan_creation_date,
-            planner=self.company_repository.get_by_id(orm.planner),
+            planner=planner,
             production_costs=entities.ProductionCosts(
                 labour_cost=orm.costs_a,
                 resource_cost=orm.costs_r,

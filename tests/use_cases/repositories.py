@@ -4,7 +4,7 @@ from collections import defaultdict
 from datetime import datetime
 from decimal import Decimal
 from statistics import StatisticsError, mean
-from typing import Dict, Iterator, List, Optional, Set, Union
+from typing import Dict, Iterable, Iterator, List, Optional, Set, Union
 from uuid import UUID, uuid4
 
 from injector import inject, singleton
@@ -185,18 +185,19 @@ class CompanyWorkerRepository(interfaces.CompanyWorkerRepository):
     def add_worker_to_company(self, company: Company, worker: Member) -> None:
         self.company_workers[company.id].add(worker.id)
 
-    def get_company_workers(self, company: Company) -> List[Member]:
-        return [
-            self.member_repository.get_by_id(member)
-            for member in self.company_workers[company.id]
-        ]
+    def get_company_workers(self, company: Company) -> Iterable[Member]:
+        for member_id in self.company_workers[company.id]:
+            member = self.member_repository.get_by_id(member_id)
+            if member is not None:
+                yield member
 
-    def get_member_workplaces(self, member: UUID) -> List[Company]:
-        return [
-            self.company_repository.get_by_id(company)
-            for company, workers in self.company_workers.items()
-            if member in workers
-        ]
+    def get_member_workplaces(self, member: UUID) -> Iterable[Company]:
+        for company_id, workers in self.company_workers.items():
+            if member not in workers:
+                continue
+            company = self.company_repository.get_by_id(company_id)
+            if company is not None:
+                yield company
 
 
 @singleton
@@ -309,8 +310,8 @@ class MemberRepository(interfaces.MemberRepository):
     def count_registered_members(self) -> int:
         return len(self.members)
 
-    def get_by_id(self, id: UUID) -> Member:
-        return self.members[id]
+    def get_by_id(self, id: UUID) -> Optional[Member]:
+        return self.members.get(id)
 
 
 @singleton
@@ -344,11 +345,11 @@ class CompanyRepository(interfaces.CompanyRepository):
     def has_company_with_email(self, email: str) -> bool:
         return email in self.companies
 
-    def get_by_id(self, id: UUID) -> Company:
+    def get_by_id(self, id: UUID) -> Optional[Company]:
         for company in self.companies.values():
             if company.id == id:
                 return company
-        raise Exception("Company not found, this exception is not meant to be caught")
+        return None
 
     def count_registered_companies(self) -> int:
         return len(self.companies)
@@ -612,6 +613,7 @@ class PlanDraftRepository(interfaces.PlanDraftRepository):
         creation_timestamp: datetime,
     ) -> PlanDraft:
         company = self.company_repository.get_by_id(planner)
+        assert company is not None
         draft = PlanDraft(
             id=uuid4(),
             creation_date=creation_timestamp,

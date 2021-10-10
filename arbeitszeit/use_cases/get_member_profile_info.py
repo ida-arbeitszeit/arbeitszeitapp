@@ -36,6 +36,7 @@ class GetMemberProfileInfo:
 
     def __call__(self, member: UUID) -> GetMemberProfileInfoResponse:
         _member = self.member_repository.get_by_id(member)
+        assert _member is not None
         workplaces = [
             Workplace(
                 workplace_name=workplace.name,

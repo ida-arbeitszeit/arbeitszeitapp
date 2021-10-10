@@ -1,10 +1,7 @@
 from uuid import uuid4
 
-import pytest
-
 from arbeitszeit.entities import AccountTypes
 from project.database.repositories import AccountRepository, MemberRepository
-from project.error import MemberNotFound
 from tests.data_generators import MemberGenerator
 
 from .dependency_injection import injection_test
@@ -27,20 +24,12 @@ def test_that_users_can_be_converted_from_and_to_orm_objects(
 
 
 @injection_test
-def test_that_members_cannot_be_retrieved_when_db_is_empty(
-    member_repository: MemberRepository,
-):
-    with pytest.raises(MemberNotFound):
-        member_repository.get_member_by_id(uuid4())
-
-
-@injection_test
 def test_that_member_can_be_retrieved_by_its_id(
     repository: MemberRepository,
     member_generator: MemberGenerator,
 ):
     expected_member = member_generator.create_member()
-    assert repository.get_member_by_id(expected_member.id) == expected_member
+    assert repository.get_by_id(expected_member.id) == expected_member
 
 
 @injection_test
@@ -68,3 +57,11 @@ def test_count_one_registered_member_when_one_was_created(
 ) -> None:
     generator.create_member()
     assert repository.count_registered_members() == 1
+
+
+@injection_test
+def test_get_by_id_returns_none_when_member_does_not_exist(
+    repository: MemberRepository,
+) -> None:
+    member = repository.get_by_id(uuid4())
+    assert member is None

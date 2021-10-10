@@ -80,8 +80,10 @@ class PayConsumerProduct:
     def _create_product_transaction(
         self, plan: Plan, request: PayConsumerProductRequest
     ) -> ConsumerProductTransaction:
+        buyer = self.member_repository.get_by_id(request.get_buyer_id())
+        assert buyer is not None
         return self.transaction_factory.create_consumer_product_transaction(
-            buyer=self.member_repository.get_by_id(request.get_buyer_id()),
+            buyer=buyer,
             plan=plan,
             amount=request.get_amount(),
         )

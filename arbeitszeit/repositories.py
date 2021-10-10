@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterator, List, Optional, Union
+from typing import Iterable, Iterator, List, Optional, Union
 from uuid import UUID
 
 from arbeitszeit.entities import (
@@ -26,11 +26,11 @@ class CompanyWorkerRepository(ABC):
         pass
 
     @abstractmethod
-    def get_company_workers(self, company: Company) -> List[Member]:
+    def get_company_workers(self, company: Company) -> Iterable[Member]:
         pass
 
     @abstractmethod
-    def get_member_workplaces(self, member: UUID) -> List[Company]:
+    def get_member_workplaces(self, member: UUID) -> Iterable[Company]:
         pass
 
 
@@ -252,7 +252,7 @@ class MemberRepository(ABC):
         pass
 
     @abstractmethod
-    def get_by_id(self, id: UUID) -> Member:
+    def get_by_id(self, id: UUID) -> Optional[Member]:
         pass
 
 
@@ -283,7 +283,7 @@ class CompanyRepository(ABC):
         pass
 
     @abstractmethod
-    def get_by_id(self, id: UUID) -> Company:
+    def get_by_id(self, id: UUID) -> Optional[Company]:
         pass
 
     @abstractmethod
