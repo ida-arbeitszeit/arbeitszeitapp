@@ -1,6 +1,6 @@
 from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Optional,Tuple
 
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansResponse
 
