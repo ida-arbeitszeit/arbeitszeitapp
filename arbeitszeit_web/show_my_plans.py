@@ -1,5 +1,6 @@
 from dataclasses import asdict, dataclass
 from datetime import datetime
+from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansResponse
@@ -38,10 +39,15 @@ class ActivePlansRow:
     activation_date: str
     expiration_date: str
     expiration_relative: str
+    edit_type: str
 
 
 @dataclass
 class ActivePlansTable:
+    title: str
+    show: bool
+    message: str
+    headings: Dict[str, Dict[str, str]]
     rows: List[ActivePlansRow]
 
 
@@ -70,13 +76,44 @@ class ShowMyPlansViewModel:
     notifications: List[str]
     show_non_active_plans: bool
     non_active_plans: NonActivePlansTable
-    show_active_plans: bool
     active_plans: ActivePlansTable
     show_expired_plans: bool
     expired_plans: ExpiredPlansTable
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
+
+
+base_plans_headings_de_DE = {
+    "id": {"text": "Plan-ID", "abbr": ""},
+    "prd_name": {"text": "Produkt", "abbr": ""},
+    "description": {"text": "Beschr.", "abbr": ""},
+    "means_cost": {"text": "p", "abbr": "Kosten Produktionsmittel"},
+    "resource_cost": {"text": "r", "abbr": "Kosten Rohstoffe"},
+    "labour_cost": {"text": "a", "abbr": "Kosten Arbeit"},
+    "prd_amount": {"text": "Einh.", "abbr": "Einheiten"},
+    "price_per_unit": {"text": "Stückpr.", "abbr": ""},
+    "type_of_plan": {"text": "Art", "abbr": ""},
+}
+
+active_plans_title_de_DE = "Aktuelle Pläne"
+active_plans_title = active_plans_title_de_DE
+active_plans_message_de_DE = "Du hast keine aktiven Pläne."
+active_plans_message = active_plans_message_de_DE
+addon_active_plans_headings_de_DE = {
+    "activation_date": {"text": "Plan aktiv seit", "abbr": ""},
+    "expiration_date": {"text": "Plan-Ende", "abbr": ""},
+    "expiration_relative": {"text": "Endet in", "abbr": ""},
+    "edit": {
+        "text": "Anb.",
+        "abbr": "Produkt im Marketplace anbieten",
+    },
+}
+active_plans_headings_de_DE = {
+    **base_plans_headings_de_DE,
+    **addon_active_plans_headings_de_DE,
+}
+active_plans_headings = active_plans_headings_de_DE
 
 
 class ShowMyPlansPresenter:
@@ -107,8 +144,11 @@ class ShowMyPlansPresenter:
                     for plan in response.non_active_plans
                 ],
             ),
-            show_active_plans=bool(response.active_plans),
             active_plans=ActivePlansTable(
+                title=active_plans_title,
+                show=bool(response.active_plans),
+                message=active_plans_message,
+                headings=active_plans_headings,
                 rows=[
                     ActivePlansRow(
                         id=f"{plan.id}",
@@ -123,6 +163,7 @@ class ShowMyPlansPresenter:
                         activation_date=self.__format_date(plan.activation_date),
                         expiration_date=self.__format_date(plan.expiration_date),
                         expiration_relative=f"{plan.expiration_relative}d",
+                        edit_type="CREATE",
                     )
                     for plan in response.active_plans
                 ],

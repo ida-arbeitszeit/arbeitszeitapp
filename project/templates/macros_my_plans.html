@@ -1,0 +1,54 @@
+{% macro plan_table(plans) %}
+
+<h1 class="title">{{ plans.title }}</h1>
+
+<div class="table-container">
+  {% if plans.show %}
+  <table class="table is-fullwidth">
+    <thead>
+      <tr>
+        {% for heading in plans.headings.values() %} {% if heading.abbr %}
+        <th>
+          <abbr title="{{ heading.abbr }}"
+            >{{ heading.text|replace(" ", "&nbsp;")|safe }}</abbr
+          >
+        </th>
+        {% else %}
+        <th>{{ heading.text|replace(" ", "&nbsp;")|safe }}</th>
+        {% endif %} {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for plan in plans.rows %}
+      <tr>
+        <td>{{ plan.id }}</td>
+        <td>{{ plan.prd_name }}</td>
+        <td>
+          <abbr title="{{ plan.description }}">{{ plan.description }}</abbr>
+        </td>
+        <td>{{ plan.means_cost }}</td>
+        <td>{{ plan.resource_cost }}</td>
+        <td>{{ plan.labour_cost }}</td>
+        <td>{{ plan.prd_amount }}</td>
+        <td>{{ plan.price_per_unit }}</td>
+        <td>{{ plan.type_of_plan }}</td>
+        <td>{{ plan.activation_date }}</td>
+        <td>{{ plan.expiration_date }}</td>
+        <td>{{ plan.expiration_relative }}</td>
+        {% if plan.edit_type == "CREATE" %}
+        <td>
+          <a href="{{ url_for('main_company.create_offer', plan_id=plan.id) }}"
+            ><i class="fas fa-store"></i
+          ></a>
+        </td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>({{plan.message}})</p>
+  {% endif %}
+</div>
+
+{% endmacro %}

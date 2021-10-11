@@ -7,63 +7,14 @@
     Marketplace anbieten, abgelaufene Pläne kannst du erneuern.
   </p>
 </div>
-<h1 class="title">Aktuelle Pläne</h1>
 
 {% with messages = get_flashed_messages() %} {% if messages %} {% for message in
 messages %}
 <div class="notification is-danger is-light">{{ message }}</div>
 {% endfor %} {% endif %} {% endwith %}
 
-<div class="table-container">
-  {% if show_active_plans %}
-  <table class="table is-fullwidth">
-    <thead>
-      <tr>
-        <th>Plan-ID</th>
-        <th>Produkt</th>
-        <th>Beschr.</th>
-        <th><abbr title="Kosten Produktionsmittel">p</abbr></th>
-        <th><abbr title="Kosten Rohstoffe">r</abbr></th>
-        <th><abbr title="Kosten Arbeit">a</abbr></th>
-        <th><abbr title="Einheiten">Einh.</abbr></th>
-        <th>Stückpr.</th>
-        <th>Art</th>
-        <th>Plan&nbsp;aktiv&nbsp;seit</th>
-        <th>Plan-Ende</th>
-        <th>Endet&nbsp;in</th>
-        <th><abbr title="Produkt im Marketplace anbieten.">Anb.</abbr></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for plan in active_plans.rows %}
-      <tr>
-        <td>{{ plan.id }}</td>
-        <td>{{ plan.prd_name }}</td>
-        <td>
-          <abbr title="{{ plan.description }}">{{ plan.description }}</abbr>
-        </td>
-        <td>{{ plan.means_cost }}</td>
-        <td>{{ plan.resource_cost }}</td>
-        <td>{{ plan.labour_cost }}</td>
-        <td>{{ plan.prd_amount }}</td>
-        <td>{{ plan.price_per_unit }}</td>
-        <td>{{ plan.type_of_plan }}</td>
-        <td>{{ plan.activation_date }}</td>
-        <td>{{ plan.expiration_date }}</td>
-        <td>{{ plan.expiration_relative }}d</td>
-        <td>
-          <a href="{{ url_for('main_company.create_offer', plan_id=plan.id) }}"
-            ><i class="fas fa-store"></i
-          ></a>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% else %}
-  <p>(Du hast keine aktiven Pläne.)</p>
-  {% endif %}
-</div>
+{% from "macros_my_plans.html" import plan_table %}
+{{ plan_table(active_plans) }}
 
 <h1 class="title">Pläne, die auf Aktivierung warten</h1>
 
