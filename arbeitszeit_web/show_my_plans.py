@@ -148,8 +148,10 @@ class ShowMyPlansPresenter:
             ),
         )
 
-    def __get_type_of_plan(self, is_public_service: bool) -> str:
+    @staticmethod
+    def __get_type_of_plan(is_public_service: bool) -> str:
         return "Öffentlich" if is_public_service else "Produktiv"
 
-    def __format_date(self, date: Optional[datetime]) -> str:
+    @staticmethod
+    def __format_date(date: Optional[datetime]) -> str:
         return f"{date.strftime('%d.%m.%y')}" if date else "–"
