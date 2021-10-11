@@ -36,6 +36,13 @@ class InMemoryModule(Module):
 
     @provider
     @singleton
+    def provide_worker_invite_repo(
+        self, repo: repositories.WorkerInviteRepository
+    ) -> interfaces.WorkerInviteRepository:
+        return repo
+
+    @provider
+    @singleton
     def provide_social_accounting_instance(
         self, generator: data_generators.SocialAccountingGenerator
     ) -> entities.SocialAccounting:
