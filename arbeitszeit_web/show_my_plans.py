@@ -163,29 +163,33 @@ class ShowMyPlansPresenter:
                 ],
             ),
             active_plans=ActivePlansTable(
-                title=active_plans_title,
-                show=bool(response.active_plans),
-                message=active_plans_message,
                 headings=active_plans_headings,
+                message=active_plans_message,
                 rows=[
                     ActivePlansRow(
-                        prd_name=f"{plan.prd_name}",
-                        id=f"{plan.id}",
-                        description=f"{plan.description}",
-                        means_cost=f"{plan.means_cost}",
-                        resource_cost=f"{plan.resource_cost}",
-                        labour_cost=f"{plan.labour_cost}",
-                        prd_amount=f"{plan.prd_amount}",
-                        price_per_unit=f"{plan.price_per_unit} Std.",
+                        prd_name=self.__to_str(plan.prd_name),
+                        id=self.__to_str(plan.id),
+                        description=self.__to_str(plan.description),
+                        means_cost=self.__to_str(plan.means_cost),
+                        resource_cost=self.__to_str(plan.resource_cost),
+                        labour_cost=self.__to_str(plan.labour_cost),
+                        prd_amount=self.__to_str(plan.prd_amount),
+                        price_per_unit=self.__to_str(
+                            plan.price_per_unit, suffix=" Std."
+                        ),
                         type_of_plan=self.__get_type_of_plan(plan.is_public_service),
                         activation_date=self.__format_date(plan.activation_date),
                         expiration_date=self.__format_date(plan.expiration_date),
-                        expiration_relative=f"{plan.expiration_relative}d",
+                        expiration_relative=self.__to_str(
+                            plan.expiration_relative, suffix="d"
+                        ),
                         edit="CREATE",
                     )
                     for plan in response.active_plans
                 ],
                 sequence=active_plans_sequence,
+                show=bool(response.active_plans),
+                title=active_plans_title,
             ),
             show_expired_plans=bool(response.expired_plans),
             expired_plans=ExpiredPlansTable(
@@ -207,6 +211,10 @@ class ShowMyPlansPresenter:
                 ],
             ),
         )
+
+    @staticmethod
+    def __to_str(value, prefix="", suffix="") -> str:
+        return f"{prefix}{value}{suffix}"
 
     @staticmethod
     def __get_type_of_plan(is_public_service: bool) -> str:
