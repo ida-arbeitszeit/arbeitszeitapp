@@ -1,6 +1,6 @@
 from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansResponse
 
@@ -38,6 +38,7 @@ class ActivePlansRow:
     activation_date: str
     expiration_date: str
     expiration_relative: str
+    edit: str
 
 
 @dataclass
@@ -46,8 +47,8 @@ class ActivePlansTable:
     show: bool
     message: str
     headings: Dict[str, Dict[str, str]]
-    edit_type: str
     rows: List[ActivePlansRow]
+    sequence: Tuple[str]
 
 
 @dataclass
@@ -83,6 +84,17 @@ class ShowMyPlansViewModel:
         return asdict(self)
 
 
+base_sequence = (
+    "prd_name",
+    "id",
+    "description",
+    "means_cost",
+    "resource_cost",
+    "labour_cost",
+    "prd_amount",
+    "price_per_unit",
+    "type_of_plan",
+)
 base_plans_headings_de_DE = {
     "prd_name": {"text": "Produkt", "abbr": ""},
     "id": {"text": "Plan-ID", "abbr": ""},
@@ -99,7 +111,7 @@ active_plans_title_de_DE = "Aktuelle Pläne"
 active_plans_title = active_plans_title_de_DE
 active_plans_message_de_DE = "Du hast keine aktiven Pläne."
 active_plans_message = active_plans_message_de_DE
-addon_active_plans_headings_de_DE = {
+active_plans_addon_headings_de_DE = {
     "activation_date": {"text": "Plan aktiv seit", "abbr": ""},
     "expiration_date": {"text": "Plan-Ende", "abbr": ""},
     "expiration_relative": {"text": "Endet in", "abbr": ""},
@@ -110,9 +122,16 @@ addon_active_plans_headings_de_DE = {
 }
 active_plans_headings_de_DE = {
     **base_plans_headings_de_DE,
-    **addon_active_plans_headings_de_DE,
+    **active_plans_addon_headings_de_DE,
 }
 active_plans_headings = active_plans_headings_de_DE
+active_plans_sequence_addon = (
+    "activation_date",
+    "expiration_date",
+    "expiration_relative",
+    "edit",
+)
+active_plans_sequence = (*base_sequence, *active_plans_sequence_addon)
 
 
 class ShowMyPlansPresenter:
@@ -148,7 +167,6 @@ class ShowMyPlansPresenter:
                 show=bool(response.active_plans),
                 message=active_plans_message,
                 headings=active_plans_headings,
-                edit_type="CREATE",
                 rows=[
                     ActivePlansRow(
                         prd_name=f"{plan.prd_name}",
@@ -163,9 +181,11 @@ class ShowMyPlansPresenter:
                         activation_date=self.__format_date(plan.activation_date),
                         expiration_date=self.__format_date(plan.expiration_date),
                         expiration_relative=f"{plan.expiration_relative}d",
+                        edit="CREATE",
                     )
                     for plan in response.active_plans
                 ],
+                sequence=active_plans_sequence,
             ),
             show_expired_plans=bool(response.expired_plans),
             expired_plans=ExpiredPlansTable(

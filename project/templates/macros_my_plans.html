@@ -7,33 +7,31 @@
   <table class="table is-fullwidth">
     <thead>
       <tr>
-        {% for heading in plans.headings.values() %} {% if heading.abbr %}
+        {% for field in plans.sequence %} {% if plans.headings[field].abbr %}
         <th>
-          <abbr title="{{ heading.abbr }}"
-            >{{ heading.text|replace(" ", "&nbsp;")|safe }}</abbr
+          <abbr title="{{ plans.headings[field].abbr }}"
+            >{{ plans.headings[field].text|replace(" ", "&nbsp;")|safe }}</abbr
           >
         </th>
         {% else %}
-        <th>{{ heading.text|replace(" ", "&nbsp;")|safe }}</th>
+        <th>{{ plans.headings[field].text|replace(" ", "&nbsp;")|safe }}</th>
         {% endif %} {% endfor %}
       </tr>
     </thead>
     <tbody>
       {% for plan in plans.rows %}
       <tr>
-        {% for field in plan %}
+        {% for field in plans.sequence %}
         <td>
-          {% if plan[field]|length > 20 %}
-          <abbr title="{{ plan[field] }}">... {{ plan[field][20:] }}</abbr>
-          {%else%}{{ plan[field] }}{%endif%}
-        </td>
-        {% endfor %} {% if plans.edit_type == "CREATE" %}
-        <td>
+          {% if field == "edit" %} {% if plan[field] == "CREATE" %}
           <a href="{{ url_for('main_company.create_offer', plan_id=plan.id) }}"
             ><i class="fas fa-store"></i
           ></a>
+          {% endif %} {% else %} {% if plan[field]|length > 20 %}
+          <abbr title="{{ plan[field] }}">... {{ plan[field][20:] }}</abbr>
+          {%else%}{{ plan[field] }}{%endif%} {% endif %}
         </td>
-        {% endif %}
+        {% endfor %}
       </tr>
       {% endfor %}
     </tbody>
