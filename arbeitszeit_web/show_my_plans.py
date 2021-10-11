@@ -26,8 +26,8 @@ class NonActivePlansTable:
 
 @dataclass
 class ActivePlansRow:
-    id: str
     prd_name: str
+    id: str
     description: str
     means_cost: str
     resource_cost: str
@@ -38,7 +38,6 @@ class ActivePlansRow:
     activation_date: str
     expiration_date: str
     expiration_relative: str
-    edit_type: str
 
 
 @dataclass
@@ -47,6 +46,7 @@ class ActivePlansTable:
     show: bool
     message: str
     headings: Dict[str, Dict[str, str]]
+    edit_type: str
     rows: List[ActivePlansRow]
 
 
@@ -84,8 +84,8 @@ class ShowMyPlansViewModel:
 
 
 base_plans_headings_de_DE = {
-    "id": {"text": "Plan-ID", "abbr": ""},
     "prd_name": {"text": "Produkt", "abbr": ""},
+    "id": {"text": "Plan-ID", "abbr": ""},
     "description": {"text": "Beschr.", "abbr": ""},
     "means_cost": {"text": "p", "abbr": "Kosten Produktionsmittel"},
     "resource_cost": {"text": "r", "abbr": "Kosten Rohstoffe"},
@@ -148,10 +148,11 @@ class ShowMyPlansPresenter:
                 show=bool(response.active_plans),
                 message=active_plans_message,
                 headings=active_plans_headings,
+                edit_type="CREATE",
                 rows=[
                     ActivePlansRow(
-                        id=f"{plan.id}",
                         prd_name=f"{plan.prd_name}",
+                        id=f"{plan.id}",
                         description=f"{plan.description}",
                         means_cost=f"{plan.means_cost}",
                         resource_cost=f"{plan.resource_cost}",
@@ -162,7 +163,6 @@ class ShowMyPlansPresenter:
                         activation_date=self.__format_date(plan.activation_date),
                         expiration_date=self.__format_date(plan.expiration_date),
                         expiration_relative=f"{plan.expiration_relative}d",
-                        edit_type="CREATE",
                     )
                     for plan in response.active_plans
                 ],

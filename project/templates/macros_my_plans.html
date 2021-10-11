@@ -21,21 +21,13 @@
     <tbody>
       {% for plan in plans.rows %}
       <tr>
-        <td>{{ plan.id }}</td>
-        <td>{{ plan.prd_name }}</td>
+        {% for field in plan %}
         <td>
-          <abbr title="{{ plan.description }}">{{ plan.description }}</abbr>
+          {% if plan[field]|length > 20 %}
+          <abbr title="{{ plan[field] }}">... {{ plan[field][20:] }}</abbr>
+          {%else%}{{ plan[field] }}{%endif%}
         </td>
-        <td>{{ plan.means_cost }}</td>
-        <td>{{ plan.resource_cost }}</td>
-        <td>{{ plan.labour_cost }}</td>
-        <td>{{ plan.prd_amount }}</td>
-        <td>{{ plan.price_per_unit }}</td>
-        <td>{{ plan.type_of_plan }}</td>
-        <td>{{ plan.activation_date }}</td>
-        <td>{{ plan.expiration_date }}</td>
-        <td>{{ plan.expiration_relative }}</td>
-        {% if plan.edit_type == "CREATE" %}
+        {% endfor %} {% if plans.edit_type == "CREATE" %}
         <td>
           <a href="{{ url_for('main_company.create_offer', plan_id=plan.id) }}"
             ><i class="fas fa-store"></i
