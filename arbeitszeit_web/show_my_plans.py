@@ -34,7 +34,7 @@ class NonActivePlansTable:
     headings: Dict[str, Dict[str, str]]
     message: str
     rows: List[NonActivePlansRow]
-    sequence: Tuple[str]
+    sequence: Tuple[str, ...]
     show: bool
     title: str
 
@@ -62,7 +62,7 @@ class ActivePlansTable:
     headings: Dict[str, Dict[str, str]]
     message: str
     rows: List[ActivePlansRow]
-    sequence: Tuple[str]
+    sequence: Tuple[str, ...]
     show: bool
     title: str
 
@@ -89,7 +89,7 @@ class ExpiredPlansTable:
     headings: Dict[str, Dict[str, str]]
     message: str
     rows: List[ExpiredPlansRow]
-    sequence: Tuple[str]
+    sequence: Tuple[str, ...]
     show: bool
     title: str
 
@@ -211,7 +211,7 @@ class ShowMyPlansPresenter:
                 "Aktuelle Pläne kannst du im Marketplace anbieten abgelaufene Pläne kannst du erneuern.",
             ],
             active_plans=ActivePlansTable(
-                edit_types=EditTypes,
+                edit_types=EditTypes(),
                 headings=active_plans_headings,
                 message=active_plans_message,
                 rows=[
@@ -241,7 +241,7 @@ class ShowMyPlansPresenter:
                 title=active_plans_title,
             ),
             non_active_plans=NonActivePlansTable(
-                edit_types=EditTypes,
+                edit_types=EditTypes(),
                 headings=non_active_plans_headings,
                 message=non_active_plans_message,
                 rows=[
@@ -267,7 +267,7 @@ class ShowMyPlansPresenter:
                 title=non_active_plans_title,
             ),
             expired_plans=ExpiredPlansTable(
-                edit_types=EditTypes,
+                edit_types=EditTypes(),
                 headings=expired_plans_headings,
                 message=expired_plans_message,
                 rows=[
@@ -298,7 +298,7 @@ class ShowMyPlansPresenter:
         )
 
     @staticmethod
-    def __to_str(value, prefix="", suffix="") -> str:
+    def __to_str(value: Any, prefix: str = "", suffix: str = "") -> str:
         return f"{prefix}{value}{suffix}"
 
     @staticmethod
