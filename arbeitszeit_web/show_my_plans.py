@@ -6,6 +6,14 @@ from arbeitszeit.use_cases.show_my_plans import ShowMyPlansResponse
 
 
 @dataclass
+class EditTypes:
+    CREATE: str = "CREATE"
+    DELETE: str = "DELETE"
+    REDO: str = "REDO"
+    REDO_NOT_ACTIVE: str = "REDO_NOT_ACTIVE"
+
+
+@dataclass
 class NonActivePlansRow:
     id: str
     prd_name: str
@@ -22,12 +30,13 @@ class NonActivePlansRow:
 
 @dataclass
 class NonActivePlansTable:
-    title: str
-    show: bool
-    message: str
+    edit_types: EditTypes
     headings: Dict[str, Dict[str, str]]
+    message: str
     rows: List[NonActivePlansRow]
     sequence: Tuple[str]
+    show: bool
+    title: str
 
 
 @dataclass
@@ -49,12 +58,13 @@ class ActivePlansRow:
 
 @dataclass
 class ActivePlansTable:
-    title: str
-    show: bool
-    message: str
+    edit_types: EditTypes
     headings: Dict[str, Dict[str, str]]
+    message: str
     rows: List[ActivePlansRow]
     sequence: Tuple[str]
+    show: bool
+    title: str
 
 
 @dataclass
@@ -69,20 +79,27 @@ class ExpiredPlansRow:
     price_per_unit: str
     type_of_plan: str
     plan_creation_date: str
-    renewed: bool
+    edit_renew: str
+    edit: str
 
 
 @dataclass
 class ExpiredPlansTable:
+    edit_types: EditTypes
+    headings: Dict[str, Dict[str, str]]
+    message: str
     rows: List[ExpiredPlansRow]
+    sequence: Tuple[str]
+    show: bool
+    title: str
 
 
 @dataclass
 class ShowMyPlansViewModel:
     notifications: List[str]
+    infos: List[str]
     non_active_plans: NonActivePlansTable
     active_plans: ActivePlansTable
-    show_expired_plans: bool
     expired_plans: ExpiredPlansTable
 
     def to_dict(self) -> Dict[str, Any]:
@@ -144,7 +161,7 @@ non_active_plans_message_de_DE = "Du hast keine Pläne, die auf Aktivierung wart
 non_active_plans_message = non_active_plans_message_de_DE
 non_active_plans_addon_headings_de_DE = {
     "plan_creation_date": {"text": "Plan vom", "abbr": ""},
-    "edit": {"text": "Del.","abbr": ""},
+    "edit": {"text": "Del.", "abbr": ""},
 }
 non_active_plans_headings_de_DE = {
     **base_plans_headings_de_DE,
@@ -157,6 +174,27 @@ non_active_plans_sequence_addon = (
 )
 non_active_plans_sequence = (*base_sequence, *non_active_plans_sequence_addon)
 
+expired_plans_title_de_DE = "Abgelaufene Pläne"
+expired_plans_title = expired_plans_title_de_DE
+expired_plans_message_de_DE = "Du hast keine abgelaufenen Pläne."
+expired_plans_message = expired_plans_message_de_DE
+expired_plans_addon_headings_de_DE = {
+    "plan_creation_date": {"text": "Plan vom", "abbr": ""},
+    "edit_renew": {"text": "Plan erneuern", "abbr": "Nur einmal möglich."},
+    "edit": {"text": "Del.", "abbr": ""},
+}
+expired_plans_headings_de_DE = {
+    **base_plans_headings_de_DE,
+    **expired_plans_addon_headings_de_DE,
+}
+expired_plans_headings = expired_plans_headings_de_DE
+expired_plans_sequence_addon = (
+    "plan_creation_date",
+    "edit_renew",
+    "edit",
+)
+expired_plans_sequence = (*base_sequence, *expired_plans_sequence_addon)
+
 
 class ShowMyPlansPresenter:
     def present(self, response: ShowMyPlansResponse) -> ShowMyPlansViewModel:
@@ -168,7 +206,12 @@ class ShowMyPlansPresenter:
 
         return ShowMyPlansViewModel(
             notifications=notifications,
+            infos=[
+                "Hier sind deine genehmigten Pläne.",
+                "Aktuelle Pläne kannst du im Marketplace anbieten abgelaufene Pläne kannst du erneuern.",
+            ],
             active_plans=ActivePlansTable(
+                edit_types=EditTypes,
                 headings=active_plans_headings,
                 message=active_plans_message,
                 rows=[
@@ -189,7 +232,7 @@ class ShowMyPlansPresenter:
                         expiration_relative=self.__to_str(
                             plan.expiration_relative, suffix="d"
                         ),
-                        edit="CREATE",
+                        edit=EditTypes.CREATE,
                     )
                     for plan in response.active_plans
                 ],
@@ -198,21 +241,24 @@ class ShowMyPlansPresenter:
                 title=active_plans_title,
             ),
             non_active_plans=NonActivePlansTable(
+                edit_types=EditTypes,
                 headings=non_active_plans_headings,
                 message=non_active_plans_message,
                 rows=[
                     NonActivePlansRow(
-                        id=f"{plan.id}",
-                        prd_name=f"{plan.prd_name}",
-                        description=f"{plan.description}",
-                        means_cost=f"{plan.means_cost}",
-                        resource_cost=f"{plan.resource_cost}",
-                        labour_cost=f"{plan.labour_cost}",
-                        prd_amount=f"{plan.prd_amount}",
-                        price_per_unit=f"{plan.price_per_unit} Std.",
+                        prd_name=self.__to_str(plan.prd_name),
+                        id=self.__to_str(plan.id),
+                        description=self.__to_str(plan.description),
+                        means_cost=self.__to_str(plan.means_cost),
+                        resource_cost=self.__to_str(plan.resource_cost),
+                        labour_cost=self.__to_str(plan.labour_cost),
+                        prd_amount=self.__to_str(plan.prd_amount),
+                        price_per_unit=self.__to_str(
+                            plan.price_per_unit, suffix=" Std."
+                        ),
                         type_of_plan=self.__get_type_of_plan(plan.is_public_service),
                         plan_creation_date=self.__format_date(plan.plan_creation_date),
-                        edit="DELETE",
+                        edit=EditTypes.DELETE,
                     )
                     for plan in response.non_active_plans
                 ],
@@ -220,24 +266,34 @@ class ShowMyPlansPresenter:
                 show=bool(response.non_active_plans),
                 title=non_active_plans_title,
             ),
-            show_expired_plans=bool(response.expired_plans),
             expired_plans=ExpiredPlansTable(
+                edit_types=EditTypes,
+                headings=expired_plans_headings,
+                message=expired_plans_message,
                 rows=[
                     ExpiredPlansRow(
-                        id=f"{plan.id}",
-                        prd_name=f"{plan.prd_name}",
-                        description=f"{plan.description}",
-                        means_cost=f"{plan.means_cost}",
-                        resource_cost=f"{plan.resource_cost}",
-                        labour_cost=f"{plan.labour_cost}",
-                        prd_amount=f"{plan.prd_amount}",
-                        price_per_unit=f"{plan.price_per_unit} Std.",
+                        prd_name=self.__to_str(plan.prd_name),
+                        id=self.__to_str(plan.id),
+                        description=self.__to_str(plan.description),
+                        means_cost=self.__to_str(plan.means_cost),
+                        resource_cost=self.__to_str(plan.resource_cost),
+                        labour_cost=self.__to_str(plan.labour_cost),
+                        prd_amount=self.__to_str(plan.prd_amount),
+                        price_per_unit=self.__to_str(
+                            plan.price_per_unit, suffix=" Std."
+                        ),
                         type_of_plan=self.__get_type_of_plan(plan.is_public_service),
                         plan_creation_date=self.__format_date(plan.plan_creation_date),
-                        renewed=plan.renewed,
+                        edit_renew=EditTypes.REDO_NOT_ACTIVE
+                        if plan.renewed
+                        else EditTypes.REDO,
+                        edit=EditTypes.DELETE,
                     )
                     for plan in response.expired_plans
                 ],
+                sequence=expired_plans_sequence,
+                show=bool(response.expired_plans),
+                title=expired_plans_title,
             ),
         )
 

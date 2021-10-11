@@ -1,82 +1,15 @@
-{% extends "base_company.html" %} {% block content2 %}
+{% extends "base_company.html" %} {% block content2 %} {% from
+"macros_my_plans.html" import plan_table %}
 
 <div class="box has-background-info-light has-text-info-dark">
   <div class="icon"><i class="fas fa-info-circle"></i></div>
-  <p>
-    Hier sind deine genehmigten Pläne.<br />Aktuelle Pläne kannst du im
-    Marketplace anbieten, abgelaufene Pläne kannst du erneuern.
-  </p>
+  {% for info in infos %}
+  <p>{{info}}</p>
+  {% endfor %}
 </div>
 
 {% with messages = get_flashed_messages() %} {% if messages %} {% for message in
 messages %}
 <div class="notification is-danger is-light">{{ message }}</div>
-{% endfor %} {% endif %} {% endwith %}
-
-{% from "macros_my_plans.html" import plan_table %}
-{{ plan_table(active_plans) }}
-
-{{ plan_table(non_active_plans) }}
-
-<h1 class="title">Abgelaufene Pläne</h1>
-
-<div class="table-container">
-  {% if show_expired_plans %}
-  <table class="table is-fullwidth">
-    <thead>
-      <tr>
-        <th>Plan-ID</th>
-        <th>Produkt</th>
-        <th>Beschreibung</th>
-        <th><abbr title="Kosten Produktionsmittel">p</abbr></th>
-        <th><abbr title="Kosten Rohstoffe">r</abbr></th>
-        <th><abbr title="Kosten Arbeit">a</abbr></th>
-        <th>Einheiten</th>
-        <th>Stückpreis</th>
-        <th>Art</th>
-        <th>Plan&nbsp;vom</th>
-        <th><abbr title="Nur einmal möglich.">Plan erneuern</abbr></th>
-        <th>Del.</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for plan in expired_plans.rows %}
-      <tr>
-        <td>{{ plan.id }}</td>
-        <td>{{ plan.prd_name }}</td>
-        <td>{{ plan.description }}</td>
-        <td>{{ plan.means_cost }}</td>
-        <td>{{ plan.resource_cost }}</td>
-        <td>{{ plan.labour_cost }}</td>
-        <td>{{ plan.prd_amount }}</td>
-        <td>{{ plan.price_per_unit }}</td>
-        <td>{{ plan.type_of_plan }}</td>
-        <td>{{ plan.plan_creation_date }}</td>
-
-        {% if plan.renewed %}
-        <td>
-          <a><i class="{{ 'fas fa-redo not-active' }}"></i></a>
-        </td>
-        {% else %}
-        <td>
-          <a
-            href="{{ url_for('main_company.create_plan', original_plan_id=plan.id) }}"
-            ><i class="{{ 'fas fa-redo' }}"></i
-          ></a>
-        </td>
-        {% endif %}
-        <td>
-          <a href="{{ url_for('main_company.delete_plan', plan_id=plan.id) }}"
-            ><i class="fas fa-trash"></i
-          ></a>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% else %}
-  <p>(Du hast keine abgelaufenen Pläne.)</p>
-  {% endif %}
-</div>
-
-{% endblock %}
+{% endfor %} {% endif %} {% endwith %} {{ plan_table(active_plans) }} {{
+plan_table(non_active_plans) }} {{ plan_table(expired_plans) }} {% endblock %}

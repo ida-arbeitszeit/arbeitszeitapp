@@ -23,13 +23,18 @@
       <tr>
         {% for field in plans.sequence %}
         <td>
-          {% if field == "edit" %}
-            {% if plan[field] == "CREATE" %}
+          {% if field == "edit" or field == "edit_renew" %}
+            {% if plan[field] == plans.edit_types.CREATE %}
             <a href="{{ url_for('main_company.create_offer', plan_id=plan.id) }}"
             ><i class="fas fa-store"></i></a>
-            {% elif plan[field] == "DELETE" %}
+            {% elif plan[field] == plans.edit_types.DELETE %}
             <a href="{{ url_for('main_company.delete_plan', plan_id=plan.id) }}"
             ><i class="fas fa-trash"></i></a>
+            {% elif plan[field] == plans.edit_types.REDO %}
+            <a href="{{ url_for('main_company.create_plan', original_plan_id=plan.id) }}"
+            ><i class="{{ 'fas fa-redo' }}"></i></a>
+            {% elif plan[field] == plans.edit_types.REDO_NOT_ACTIVE %}
+            <a><i class="{{ 'fas fa-redo not-active' }}"></i></a>
             {% endif %}
           {% else %}
             {% if plan[field]|length > 20 %}
