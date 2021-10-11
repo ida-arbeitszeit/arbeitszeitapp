@@ -23,13 +23,21 @@
       <tr>
         {% for field in plans.sequence %}
         <td>
-          {% if field == "edit" %} {% if plan[field] == "CREATE" %}
-          <a href="{{ url_for('main_company.create_offer', plan_id=plan.id) }}"
-            ><i class="fas fa-store"></i
-          ></a>
-          {% endif %} {% else %} {% if plan[field]|length > 20 %}
-          <abbr title="{{ plan[field] }}">... {{ plan[field][20:] }}</abbr>
-          {%else%}{{ plan[field] }}{%endif%} {% endif %}
+          {% if field == "edit" %}
+            {% if plan[field] == "CREATE" %}
+            <a href="{{ url_for('main_company.create_offer', plan_id=plan.id) }}"
+            ><i class="fas fa-store"></i></a>
+            {% elif plan[field] == "DELETE" %}
+            <a href="{{ url_for('main_company.delete_plan', plan_id=plan.id) }}"
+            ><i class="fas fa-trash"></i></a>
+            {% endif %}
+          {% else %}
+            {% if plan[field]|length > 20 %}
+            <abbr title="{{ plan[field] }}">{{ plan[field][:20] }} ...</abbr>
+            {% else %}
+            {{ plan[field] }}
+            {% endif %}
+          {% endif %}
         </td>
         {% endfor %}
       </tr>

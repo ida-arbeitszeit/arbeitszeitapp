@@ -16,52 +16,7 @@ messages %}
 {% from "macros_my_plans.html" import plan_table %}
 {{ plan_table(active_plans) }}
 
-<h1 class="title">Pläne, die auf Aktivierung warten</h1>
-
-<div class="table-container">
-  {% if show_non_active_plans %}
-  <table class="table is-fullwidth">
-    <thead>
-      <tr>
-        <th>Plan-ID</th>
-        <th>Produkt</th>
-        <th>Beschreibung</th>
-        <th><abbr title="Kosten Produktionsmittel">p</abbr></th>
-        <th><abbr title="Kosten Rohstoffe">r</abbr></th>
-        <th><abbr title="Kosten Arbeit">a</abbr></th>
-        <th>Einheiten</th>
-        <th>Stückpreis</th>
-        <th>Art</th>
-        <th>Plan&nbsp;vom</th>
-        <th>Del.</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for plan in non_active_plans.rows %}
-      <tr>
-        <td>{{ plan.id }}</td>
-        <td>{{ plan.prd_name }}</td>
-        <td>{{ plan.description }}</td>
-        <td>{{ plan.means_cost }}</td>
-        <td>{{ plan.resource_cost }}</td>
-        <td>{{ plan.labour_cost }}</td>
-        <td>{{ plan.prd_amount }}</td>
-        <td>{{ plan.price_per_unit }}</td>
-        <td>{{ plan.type_of_plan }}</td>
-        <td>{{ plan.plan_creation_date }}</td>
-        <td>
-          <a href="{{ url_for('main_company.delete_plan', plan_id=plan.id) }}"
-            ><i class="fas fa-trash"></i
-          ></a>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% else %}
-  <p>(Du hast keine Pläne, die auf Aktivierung warten.)</p>
-  {% endif %}
-</div>
+{{ plan_table(non_active_plans) }}
 
 <h1 class="title">Abgelaufene Pläne</h1>
 
