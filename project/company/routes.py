@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Optional
+from typing import Optional, cast
 from uuid import UUID
 
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
@@ -62,7 +62,7 @@ def profile(
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
-    company = company_repository.get_by_id(current_user.id)
+    company = company_repository.get_by_id(UUID(current_user.id))
     assert company is not None
     worker = list(company_worker_repository.get_company_workers(company))
     if worker:
@@ -85,7 +85,7 @@ def arbeit(
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
-    company = company_repository.get_by_id(current_user.id)
+    company = company_repository.get_by_id(UUID(current_user.id))
     assert company is not None
     if request.method == "POST":  # add worker to company
         member = member_repository.get_by_id(request.form["member"])
@@ -160,7 +160,7 @@ def my_purchases(
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
-    company = company_repository.get_by_id(current_user.id)
+    company = company_repository.get_by_id(UUID(current_user.id))
     assert company is not None
     purchases = list(query_purchases(company))
     return render_template("company/my_purchases.html", purchases=purchases)
@@ -186,7 +186,7 @@ def create_plan(
     if request.method == "POST":  # Button "Plan erstellen"
         plan_data = dict(request.form)
         use_case_request = CreatePlanDraftRequest(
-            planner=current_user.id,
+            planner=UUID(current_user.id),
             costs=entities.ProductionCosts(
                 labour_cost=Decimal(plan_data["costs_a"]),
                 resource_cost=Decimal(plan_data["costs_r"]),
@@ -231,7 +231,7 @@ def my_plans(
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
-    request = ShowMyPlansRequest(company_id=current_user.id)
+    request = ShowMyPlansRequest(company_id=UUID(current_user.id))
     response = show_my_plans_use_case(request)
     view_model = show_my_plans_presenter.present(response)
 
@@ -296,7 +296,10 @@ def my_accounts(
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
-    company = company_repository.object_from_orm(current_user)
+    # We can assume current_user to be a LocalProxy object that
+    # delegates to a Company since we did the `user_is_company` check
+    # earlier.
+    company = company_repository.object_from_orm(cast(Company, current_user))
     all_trans_infos = get_transaction_infos(company)
     my_balances = [
         account_repository.get_account_balance(account)
@@ -323,7 +326,7 @@ def transfer_to_worker(
         return redirect(url_for("auth.zurueck"))
 
     if request.method == "POST":
-        company = company_repository.get_by_id(current_user.id)
+        company = company_repository.get_by_id(UUID(current_user.id))
         assert company is not None
         worker = member_repository.get_by_id(request.form["member_id"])
         if worker is None:
@@ -357,7 +360,7 @@ def transfer_to_company(
 
     if request.method == "POST":
         use_case_request = use_cases.PayMeansOfProductionRequest(
-            buyer=current_user.id,
+            buyer=UUID(current_user.id),
             plan=request.form["plan_id"],
             amount=int(request.form["amount"]),
             purpose=entities.PurposesOfPurchases.means_of_prod
@@ -407,6 +410,7 @@ def delete_offer(
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
+    print(current_user.id, type(current_user))
     if request.method == "POST":
         deletion_request = DeleteOfferRequest(
             requesting_company_id=UUID(current_user.id),
