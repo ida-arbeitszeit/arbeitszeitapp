@@ -44,7 +44,7 @@ def test_that_expiration_date_is_correctly_calculated_if_freezed_after_fixed_act
     # time freezed 1 hour after fixed plan activation time
     datetime_service.freeze_time(
         datetime.datetime(
-            2021, 8, 17, datetime_service.time_of_synchronized_plan_activation + 1
+            2021, 8, 17, datetime_service.hour_of_synchronized_plan_activation + 1
         )
     )
 
@@ -59,7 +59,7 @@ def test_that_expiration_date_is_correctly_calculated_if_freezed_after_fixed_act
         datetime_service.today().year,
         datetime_service.today().month,
         datetime_service.today().day,
-        datetime_service.time_of_synchronized_plan_activation,
+        datetime_service.hour_of_synchronized_plan_activation,
     )
     assert plan.expiration_date == expected_expiration_date
 
@@ -74,7 +74,7 @@ def test_that_expiration_date_is_correctly_calculated_if_freezed_after_fixed_act
         datetime_service.today().year,
         datetime_service.today().month,
         datetime_service.today().day - 9,
-        datetime_service.time_of_synchronized_plan_activation,
+        datetime_service.hour_of_synchronized_plan_activation,
     )
     assert plan.expiration_date == expected_expiration_date
 
@@ -88,7 +88,7 @@ def test_that_expiration_date_is_correctly_calculated_if_freezed_before_fixed_ac
     # time freezed 1 hour before fixed plan activation time
     datetime_service.freeze_time(
         datetime.datetime(
-            2021, 8, 17, datetime_service.time_of_synchronized_plan_activation - 1
+            2021, 8, 17, datetime_service.hour_of_synchronized_plan_activation - 1
         )
     )
 
@@ -103,7 +103,7 @@ def test_that_expiration_date_is_correctly_calculated_if_freezed_before_fixed_ac
         datetime_service.today().year,
         datetime_service.today().month,
         datetime_service.today().day,
-        datetime_service.time_of_synchronized_plan_activation,
+        datetime_service.hour_of_synchronized_plan_activation,
     )
     assert plan.expiration_date == expected_expiration_date
 
@@ -118,7 +118,7 @@ def test_that_expiration_date_is_correctly_calculated_if_freezed_before_fixed_ac
         datetime_service.today().year,
         datetime_service.today().month,
         datetime_service.today().day - 9,
-        datetime_service.time_of_synchronized_plan_activation,
+        datetime_service.hour_of_synchronized_plan_activation,
     )
     assert plan.expiration_date == expected_expiration_date
 
@@ -131,7 +131,7 @@ def test_that_expiration_relative_is_correctly_calculated_if_freezed_after_fixed
 ):
     datetime_service.freeze_time(
         datetime.datetime(
-            2021, 8, 17, datetime_service.time_of_synchronized_plan_activation + 1
+            2021, 8, 17, datetime_service.hour_of_synchronized_plan_activation + 1
         )
     )
 
@@ -158,7 +158,7 @@ def test_that_expiration_relative_is_correctly_calculated_if_freezed_before_fixe
 ):
     datetime_service.freeze_time(
         datetime.datetime(
-            2021, 8, 17, datetime_service.time_of_synchronized_plan_activation - 1
+            2021, 8, 17, datetime_service.hour_of_synchronized_plan_activation - 1
         )
     )
 
@@ -185,7 +185,7 @@ def test_that_plan_is_not_set_to_expired_if_still_in_timeframe(
 ):
     datetime_service.freeze_time(
         datetime.datetime(
-            2021, 8, 17, datetime_service.time_of_synchronized_plan_activation - 1
+            2021, 8, 17, datetime_service.hour_of_synchronized_plan_activation - 1
         )
     )
 
@@ -204,7 +204,7 @@ def test_that_plan_is_set_to_expired_if_timeframe_is_expired(
 ):
     datetime_service.freeze_time(
         datetime.datetime(
-            2021, 8, 17, datetime_service.time_of_synchronized_plan_activation + 1
+            2021, 8, 17, datetime_service.hour_of_synchronized_plan_activation + 1
         )
     )
 

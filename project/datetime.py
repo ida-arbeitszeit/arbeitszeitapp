@@ -11,13 +11,13 @@ class RealtimeDatetimeService(DatetimeService):
         return datetime.today()
 
     def past_plan_activation_date(self, timedelta_days: int = 1) -> datetime:
-        if self.now().hour < self.time_of_synchronized_plan_activation:
+        if self.now().hour < self.hour_of_synchronized_plan_activation:
             past_day = self.today() - timedelta(days=timedelta_days)
             past_date = datetime(
                 past_day.year,
                 past_day.month,
                 past_day.day,
-                hour=self.time_of_synchronized_plan_activation,
+                hour=self.hour_of_synchronized_plan_activation,
             )
         else:
             past_day = self.today() - timedelta(days=timedelta_days - 1)
@@ -25,6 +25,6 @@ class RealtimeDatetimeService(DatetimeService):
                 past_day.year,
                 past_day.month,
                 past_day.day,
-                hour=self.time_of_synchronized_plan_activation,
+                hour=self.hour_of_synchronized_plan_activation,
             )
         return past_date
