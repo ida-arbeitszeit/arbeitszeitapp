@@ -16,13 +16,7 @@ from arbeitszeit_web.query_products import (
     QueryProductsController,
     QueryProductsPresenter,
 )
-from project.database import (
-    AccountRepository,
-    CompanyRepository,
-    MemberRepository,
-    PlanRepository,
-    commit_changes,
-)
+from project.database import AccountRepository, MemberRepository, commit_changes
 from project.dependency_injection import with_injection
 from project.forms import PayConsumerProductForm, PlanSearchForm, ProductSearchForm
 from project.url_index import MemberUrlIndex
@@ -107,9 +101,6 @@ def query_plans(
 @with_injection
 def pay_consumer_product(
     pay_consumer_product: use_cases.PayConsumerProduct,
-    company_repository: CompanyRepository,
-    member_repository: MemberRepository,
-    plan_repository: PlanRepository,
     presenter: PayConsumerProductPresenter,
     controller: PayConsumerProductController,
 ):
