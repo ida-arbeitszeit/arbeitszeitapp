@@ -32,7 +32,7 @@ class CalculatePlanExpirationAndCheckIfExpired:
             expiration_day.year,
             expiration_day.month,
             expiration_day.day,
-            self.datetime_service.time_of_synchronized_plan_activation,
+            self.datetime_service.hour_of_synchronized_plan_activation,
         )
         days_relative = (expiration_time - self.datetime_service.now()).days
         self.plan_repository.set_expiration_relative(plan, days_relative)
