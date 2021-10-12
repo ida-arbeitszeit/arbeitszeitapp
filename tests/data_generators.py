@@ -280,19 +280,22 @@ class TransactionGenerator:
         receiving_account_type=AccountTypes.prd,
         sending_account=None,
         receiving_account=None,
+        amount=None,
     ) -> Transaction:
-        return self.transaction_repository.create_transaction(
-            date=self.datetime_service.now_minus_one_day(),
-            sending_account=self.account_generator.create_account(
+        if sending_account is None:
+            sending_account = self.account_generator.create_account(
                 account_type=sending_account_type
             )
-            if None
-            else sending_account,
-            receiving_account=self.account_generator.create_account(
+        if receiving_account is None:
+            receiving_account = self.account_generator.create_account(
                 account_type=receiving_account_type
             )
-            if None
-            else receiving_account,
-            amount=Decimal(10),
+        if amount is None:
+            amount = Decimal(10)
+        return self.transaction_repository.create_transaction(
+            date=self.datetime_service.now_minus_one_day(),
+            sending_account=sending_account,
+            receiving_account=receiving_account,
+            amount=amount,
             purpose="Test Verw.zweck",
         )

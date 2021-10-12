@@ -16,13 +16,6 @@
         </div>
 
         <div class="content">
-            {% for field_name, field_errors in form.errors|dictsort if field_errors %}
-            {% for error in field_errors %}
-            <div class="notification is-danger">
-                {{ form[field_name].label }}: {{ error }}
-            </div>
-            {% endfor %}
-            {% endfor %}
             <form method="post">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="field has-addons">
@@ -34,7 +27,7 @@
                     </div>
                     <div class="control">
                         <button class="button is-primary" name="transfer_type" value="transfer_to_company"
-                                type="submit">Überweisen</button>
+                            type="submit">Überweisen</button>
                     </div>
                 </div>
                 <p class="help">Der verkaufende Betrieb muss dir seine Betriebs-ID und die zum Produkt gehörige Plan-ID
@@ -53,6 +46,14 @@
         {% endfor %}
         {% endif %}
         {% endwith %}
+
+        {% for field_name, field_errors in form.errors|dictsort if field_errors %}
+        {% for error in field_errors %}
+        <div class="notification is-danger">
+            {{ form[field_name].label }}: {{ error }}
+        </div>
+        {% endfor %}
+        {% endfor %}
     </div>
 </div>
 
