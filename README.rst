@@ -62,3 +62,14 @@ To run the app in development mode you first have to define some environment var
     $ export DEV_SECRET_KEY=my_secret_key
 
 Afterwards you can start the development server with ``flask run``.
+
+Synchronized Plan Activation 
+============================
+
+Newly created plans are activated at the same time of the day. 
+This process is called `SynchronizedPlanActivation` and it will activate all 
+new plans created before the hour established in `DatetimeService.hour_of_synchronized_plan_activation`.
+
+This process gets triggered by the command `flask activate-plans`. In production mode, 
+this command is executed by a cron job on a daily basis. In development mode, you
+have to execute it manually in order to activate plans. 
