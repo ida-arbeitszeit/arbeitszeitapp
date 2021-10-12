@@ -1,8 +1,8 @@
-"""empty message
+"""Create model CompanyWorkInvite
 
-Revision ID: d9ddaa4aaac9
+Revision ID: 7198e8c48018
 Revises: be4a64c68826
-Create Date: 2021-10-11 10:41:40.257351
+Create Date: 2021-10-12 23:55:09.971220
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'd9ddaa4aaac9'
+revision = '7198e8c48018'
 down_revision = 'be4a64c68826'
 branch_labels = None
 depends_on = None
