@@ -66,9 +66,10 @@ Afterwards you can start the development server with ``flask run``.
 Synchronized Plan Activation 
 ============================
 
-Newly created plans are activated at the same time of the day. 
-This process is called `SynchronizedPlanActivation` and it will activate all 
-new plans created before the hour established in `DatetimeService.hour_of_synchronized_plan_activation`.
+Newly created plans are getting activated at the same time of the day. 
+This process is called `SynchronizedPlanActivation`. It activates all 
+new plans that have been created before the hour established 
+in `DatetimeService.hour_of_synchronized_plan_activation`.
 
 This process gets triggered by the command `flask activate-plans`. In production mode, 
 this command is executed by a cron job on a daily basis. In development mode, you
