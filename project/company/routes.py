@@ -410,7 +410,6 @@ def delete_offer(
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
-    print(current_user.id, type(current_user))
     if request.method == "POST":
         deletion_request = DeleteOfferRequest(
             requesting_company_id=UUID(current_user.id),
