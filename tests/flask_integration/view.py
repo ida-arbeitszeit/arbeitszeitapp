@@ -4,7 +4,12 @@ from unittest import TestCase
 from flask import Flask, _app_ctx_stack
 
 from arbeitszeit.entities import Company, Member
-from tests.data_generators import CompanyGenerator, EmailGenerator, MemberGenerator
+from tests.data_generators import (
+    CompanyGenerator,
+    EmailGenerator,
+    MemberGenerator,
+    PlanGenerator,
+)
 
 from .dependency_injection import get_dependency_injector
 
@@ -17,6 +22,7 @@ class ViewTestCase(TestCase):
         self.member_generator = self.injector.get(MemberGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.email_generator = self.injector.get(EmailGenerator)
+        self.plan_generator = self.injector.get(PlanGenerator)
 
     def tearDown(self) -> None:
         _app_ctx_stack.pop()

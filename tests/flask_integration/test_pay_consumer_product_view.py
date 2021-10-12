@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import uuid4
 
 from .view import ViewTestCase
@@ -27,6 +28,17 @@ class AuthenticatedMemberTests(ViewTestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_posting_with_valid_form_data_results_in_200(self) -> None:
+        plan = self.plan_generator.create_plan(activation_date=datetime.min)
+        response = self.client.post(
+            "/member/pay_consumer_product",
+            data=dict(
+                plan_id=plan.id,
+                amount=2,
+            ),
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_posting_with_nonexisting_plan_id_results_in_404(self) -> None:
         response = self.client.post(
             "/member/pay_consumer_product",
             data=dict(
@@ -34,7 +46,18 @@ class AuthenticatedMemberTests(ViewTestCase):
                 amount=2,
             ),
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 404)
+
+    def test_posting_with_inactive_plan_results_in_404(self) -> None:
+        plan = self.plan_generator.create_plan(activation_date=None)
+        response = self.client.post(
+            "/member/pay_consumer_product",
+            data=dict(
+                plan_id=plan.id,
+                amount=2,
+            ),
+        )
+        self.assertEqual(response.status_code, 404)
 
 
 class AuthenticatedCompanyTests(ViewTestCase):
