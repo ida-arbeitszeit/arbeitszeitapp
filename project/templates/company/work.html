@@ -35,6 +35,7 @@
 
     <div class="content">
       <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="field has-addons">
           <div class="control is-expanded">
             <input class="input" type="text" placeholder="Mitglieder-ID" , name="member" required>
