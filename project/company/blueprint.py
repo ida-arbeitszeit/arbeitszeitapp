@@ -35,4 +35,4 @@ class CompanyRoute:
 
 
 def user_is_company():
-    return True if session["user_type"] == "company" else False
+    return session["user_type"] == "company"
