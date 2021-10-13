@@ -1,3 +1,4 @@
+from typing import cast
 from uuid import UUID
 
 from flask import Response, render_template, request
@@ -18,6 +19,7 @@ from arbeitszeit_web.query_products import (
 )
 from project.database import AccountRepository, MemberRepository, commit_changes
 from project.forms import PayConsumerProductForm, PlanSearchForm, ProductSearchForm
+from project.models import Member
 from project.url_index import MemberUrlIndex
 from project.views import (
     Http404View,
@@ -33,7 +35,7 @@ from .blueprint import MemberRoute
 def my_purchases(
     query_purchases: use_cases.QueryPurchases, member_repository: MemberRepository
 ) -> Response:
-    member = member_repository.get_by_id(current_user.id)
+    member = member_repository.get_by_id(UUID(current_user.id))
     assert member is not None
     purchases = list(query_purchases(member))
     return Response(render_template("member/my_purchases.html", purchases=purchases))
@@ -84,7 +86,7 @@ def pay_consumer_product(
 ) -> Response:
     view = PayConsumerProductView(
         form=PayConsumerProductForm(request.form),
-        current_user=current_user.id,
+        current_user=UUID(current_user.id),
         pay_consumer_product=pay_consumer_product,
         controller=controller,
         presenter=presenter,
@@ -100,7 +102,7 @@ def profile(
     get_member_profile: use_cases.GetMemberProfileInfo,
     presenter: GetMemberProfileInfoPresenter,
 ) -> Response:
-    member_profile = get_member_profile(current_user.id)
+    member_profile = get_member_profile(UUID(current_user.id))
     view_model = presenter.present(member_profile)
     return Response(
         render_template(
@@ -116,15 +118,14 @@ def my_account(
     get_transaction_infos: use_cases.GetTransactionInfos,
     account_repository: AccountRepository,
 ) -> Response:
-    member = member_repository.object_from_orm(current_user)
+    # We can assume current_user to be a LocalProxy which delegates to
+    # Member since we did a `user_is_member` check earlier
+    member = member_repository.object_from_orm(cast(Member, current_user))
     list_of_trans_infos = get_transaction_infos(member)
-
-    return Response(
-        render_template(
-            "member/my_account.html",
-            all_transactions_info=list_of_trans_infos,
-            my_balance=account_repository.get_account_balance(member.account),
-        )
+    return render_template(
+        "member/my_account.html",
+        all_transactions_info=list_of_trans_infos,
+        my_balance=account_repository.get_account_balance(member.account),
     )
 
 
