@@ -7,7 +7,7 @@ from tests.data_generators import PlanGenerator
 from tests.datetime_service import FakeDatetimeService
 
 from .dependency_injection import injection_test
-from .repositories import AccountRepository, TransactionRepository
+from .repositories import AccountRepository, PlanRepository, TransactionRepository
 
 
 @injection_test
@@ -341,4 +341,41 @@ def test_that_wages_are_paid_out_twice_after_two_days(
     for trans in transaction_repository.transactions:
         if trans.receiving_account.account_type == AccountTypes.a:
             wages_transactions += 1
+    assert wages_transactions == expected_wages_transactions
+
+
+@injection_test
+def test_that_wages_are_paid_out_only_once_and_amount_of_wage_is_correct_if_timeframe_is_one_day(
+    synchronized_plan_activation: SynchronizedPlanActivation,
+    plan_generator: PlanGenerator,
+    transaction_repository: TransactionRepository,
+    datetime_service: FakeDatetimeService,
+    account_repository: AccountRepository,
+    plan_repository: PlanRepository,
+):
+    datetime_service.freeze_time(datetime.datetime(2021, 1, 1, 1))
+    plan = plan_generator.create_plan(
+        approved=True,
+        timeframe=1,
+        costs=ProductionCosts(Decimal(1), Decimal(1), Decimal(1)),
+    )
+    assert plan.production_costs.labour_cost
+    synchronized_plan_activation()
+
+    datetime_service.freeze_time(datetime.datetime(2021, 1, 2, 20))
+    # plan is now expired
+    plan_repository.set_plan_as_expired(plan)
+
+    synchronized_plan_activation()
+
+    expected_wages_transactions = 1
+    wages_transactions = 0
+    expected_balance = 1
+    for trans in transaction_repository.transactions:
+        if trans.receiving_account.account_type == AccountTypes.a:
+            wages_transactions += 1
+    assert (
+        account_repository.get_account_balance(plan.planner.work_account)
+        == expected_balance
+    )
     assert wages_transactions == expected_wages_transactions
