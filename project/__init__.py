@@ -56,12 +56,11 @@ def create_app(config=None, db=None, migrate=None):
                 return Company.query.get(user_id)
 
         # register blueprints
+        from . import company, member
         from .auth import routes as auth_routes
-        from .company import routes as company_routes
-        from .member import routes as member_routes
 
         app.register_blueprint(auth_routes.auth)
-        app.register_blueprint(company_routes.main_company)
-        app.register_blueprint(member_routes.main_member)
+        app.register_blueprint(company.blueprint.main_company)
+        app.register_blueprint(member.blueprint.main_member)
 
         return app
