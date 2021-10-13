@@ -1,3 +1,4 @@
+from typing import cast
 from uuid import UUID
 
 from flask import Blueprint, redirect, render_template, request, session, url_for
@@ -16,15 +17,10 @@ from arbeitszeit_web.query_products import (
     QueryProductsController,
     QueryProductsPresenter,
 )
-from project.database import (
-    AccountRepository,
-    CompanyRepository,
-    MemberRepository,
-    PlanRepository,
-    commit_changes,
-)
+from project.database import AccountRepository, MemberRepository, commit_changes
 from project.dependency_injection import with_injection
 from project.forms import PayConsumerProductForm, PlanSearchForm, ProductSearchForm
+from project.models import Member
 from project.url_index import MemberUrlIndex
 from project.views import (
     Http404View,
@@ -51,7 +47,7 @@ def my_purchases(
     if not user_is_member():
         return redirect(url_for("auth.zurueck"))
 
-    member = member_repository.get_by_id(current_user.id)
+    member = member_repository.get_by_id(UUID(current_user.id))
     assert member is not None
     purchases = list(query_purchases(member))
     return render_template("member/my_purchases.html", purchases=purchases)
@@ -108,9 +104,6 @@ def query_plans(
 @with_injection
 def pay_consumer_product(
     pay_consumer_product: use_cases.PayConsumerProduct,
-    company_repository: CompanyRepository,
-    member_repository: MemberRepository,
-    plan_repository: PlanRepository,
     presenter: PayConsumerProductPresenter,
     controller: PayConsumerProductController,
 ):
@@ -119,7 +112,7 @@ def pay_consumer_product(
 
     view = PayConsumerProductView(
         form=PayConsumerProductForm(request.form),
-        current_user=current_user.id,
+        current_user=UUID(current_user.id),
         pay_consumer_product=pay_consumer_product,
         controller=controller,
         presenter=presenter,
@@ -139,7 +132,7 @@ def profile(
 ):
     if not user_is_member():
         return redirect(url_for("auth.zurueck"))
-    member_profile = get_member_profile(current_user.id)
+    member_profile = get_member_profile(UUID(current_user.id))
     view_model = presenter.present(member_profile)
     return render_template(
         "member/profile.html",
@@ -158,9 +151,10 @@ def my_account(
     if not user_is_member():
         return redirect(url_for("auth.zurueck"))
 
-    member = member_repository.object_from_orm(current_user)
+    # We can assume current_user to be a LocalProxy which delegates to
+    # Member since we did a `user_is_member` check earlier
+    member = member_repository.object_from_orm(cast(Member, current_user))
     list_of_trans_infos = get_transaction_infos(member)
-
     return render_template(
         "member/my_account.html",
         all_transactions_info=list_of_trans_infos,
