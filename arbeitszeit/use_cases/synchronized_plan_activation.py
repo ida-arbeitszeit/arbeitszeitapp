@@ -37,10 +37,13 @@ class SynchronizedPlanActivation:
     def _payout_work_certificates(self) -> None:
         """
         The payout amount equals to payout factor times labour costs per day.
+        Payout takes place once every day of a plan's planning cycle, except the last day.
         """
         payout_factor = self._calculate_payout_factor()
         for plan in self.plan_repository.all_plans_approved_active_and_not_expired():
             if self._last_certificate_payout_was_today(plan):
+                continue
+            if self._plan_expires_today(plan):
                 continue
             amount = payout_factor * plan.production_costs.labour_cost / plan.timeframe
             self._create_transaction_from_social_accounting(
@@ -80,6 +83,11 @@ class SynchronizedPlanActivation:
     def _last_certificate_payout_was_today(self, plan: Plan) -> bool:
         if plan.last_certificate_payout is not None:
             return plan.last_certificate_payout.date() == self.datetime_service.today()
+        return False
+
+    def _plan_expires_today(self, plan: Plan) -> bool:
+        if plan.expiration_date is not None:
+            return plan.expiration_date.date() == self.datetime_service.today()
         return False
 
     def _credit_production_cost_to_planner(self, plan: Plan) -> None:
