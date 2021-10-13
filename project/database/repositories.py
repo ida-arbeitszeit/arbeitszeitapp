@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterator, List, Optional, Union
+from typing import Iterable, Iterator, List, Optional, Union
 from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
@@ -17,6 +17,7 @@ from project.error import PlanNotFound, ProductOfferNotFound
 from project.models import (
     Account,
     Company,
+    CompanyWorkInvite,
     Member,
     Offer,
     Plan,
@@ -883,3 +884,30 @@ class PlanDraftRepository(repositories.PlanDraftRepository):
             timeframe=orm.timeframe,
             is_public_service=orm.is_public_service,
         )
+
+
+@inject
+@dataclass
+class WorkerInviteRepository(repositories.WorkerInviteRepository):
+    db: SQLAlchemy
+
+    def is_worker_invited_to_company(self, company: UUID, worker: UUID) -> bool:
+        return (
+            CompanyWorkInvite.query.filter_by(
+                company=str(company),
+                member=str(worker),
+            ).count()
+            > 0
+        )
+
+    def create_company_worker_invite(self, company: UUID, worker: UUID) -> None:
+        invite = CompanyWorkInvite(
+            id=str(uuid4()),
+            company=str(company),
+            member=str(worker),
+        )
+        self.db.session.add(invite)
+
+    def get_companies_worker_is_invited_to(self, member: UUID) -> Iterable[UUID]:
+        for invite in CompanyWorkInvite.query.filter_by(member=str(member)):
+            yield UUID(invite.company)

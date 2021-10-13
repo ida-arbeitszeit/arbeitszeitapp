@@ -314,3 +314,17 @@ class PlanDraftRepository(ABC):
     @abstractmethod
     def delete_draft(self, id: UUID) -> None:
         pass
+
+
+class WorkerInviteRepository(ABC):
+    @abstractmethod
+    def is_worker_invited_to_company(self, company: UUID, worker: UUID) -> bool:
+        pass
+
+    @abstractmethod
+    def create_company_worker_invite(self, company: UUID, worker: UUID) -> None:
+        pass
+
+    @abstractmethod
+    def get_companies_worker_is_invited_to(self, member: UUID) -> Iterable[UUID]:
+        pass

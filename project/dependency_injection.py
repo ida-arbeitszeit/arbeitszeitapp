@@ -25,6 +25,7 @@ from project.database.repositories import (
     ProductOfferRepository,
     PurchaseRepository,
     TransactionRepository,
+    WorkerInviteRepository,
 )
 from project.datetime import RealtimeDatetimeService
 from project.extensions import db
@@ -86,6 +87,10 @@ def configure_injector(binder: Binder) -> None:
     binder.bind(
         DatetimeService,  # type: ignore
         to=ClassProvider(RealtimeDatetimeService),
+    )
+    binder.bind(
+        interfaces.WorkerInviteRepository,  # type: ignore
+        to=ClassProvider(WorkerInviteRepository),
     )
     binder.bind(
         SQLAlchemy,

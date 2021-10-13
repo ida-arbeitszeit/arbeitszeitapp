@@ -4,7 +4,7 @@ from collections import defaultdict
 from datetime import datetime
 from decimal import Decimal
 from statistics import StatisticsError, mean
-from typing import Dict, Iterable, Iterator, List, Optional, Set, Union
+from typing import Dict, Iterable, Iterator, List, Optional, Set, Tuple, Union
 from uuid import UUID, uuid4
 
 from injector import inject, singleton
@@ -640,3 +640,28 @@ class PlanDraftRepository(interfaces.PlanDraftRepository):
 
     def delete_draft(self, id: UUID) -> None:
         self.drafts = [draft for draft in self.drafts if draft.id != id]
+
+
+class WorkerInviteRepository(interfaces.WorkerInviteRepository):
+    @inject
+    def __init__(
+        self, company_repository: CompanyRepository, member_repository: MemberRepository
+    ) -> None:
+        self.invites: Set[Tuple[UUID, UUID]] = set()
+        self.company_repository = company_repository
+        self.member_repository = member_repository
+
+    def is_worker_invited_to_company(self, company: UUID, worker: UUID) -> bool:
+        return (company, worker) in self.invites
+
+    def create_company_worker_invite(
+        self,
+        company: UUID,
+        worker: UUID,
+    ) -> None:
+        self.invites.add((company, worker))
+
+    def get_companies_worker_is_invited_to(self, member: UUID) -> Iterable[UUID]:
+        for company, invited_worker in self.invites:
+            if invited_worker == member:
+                yield company

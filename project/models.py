@@ -171,3 +171,9 @@ class Purchase(UserMixin, db.Model):
     price_per_unit = db.Column(db.Numeric(), nullable=False)
     amount = db.Column(db.Integer, nullable=False)
     purpose = db.Column(db.Enum(entities.PurposesOfPurchases), nullable=False)
+
+
+class CompanyWorkInvite(db.Model):
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
+    company = db.Column(db.String, db.ForeignKey("company.id"), nullable=False)
+    member = db.Column(db.String, db.ForeignKey("member.id"), nullable=False)
