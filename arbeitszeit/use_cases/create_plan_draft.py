@@ -22,7 +22,7 @@ class CreatePlanDraftRequest:
 
 @dataclass
 class CreatePlanDraftResponse:
-    plan_id: UUID
+    draft_id: UUID
 
 
 @inject
@@ -32,7 +32,7 @@ class CreatePlanDraft:
     datetime_service: DatetimeService
 
     def __call__(self, request: CreatePlanDraftRequest) -> CreatePlanDraftResponse:
-        plan = self.plan_draft_repository.create_plan_draft(
+        draft = self.plan_draft_repository.create_plan_draft(
             planner=request.planner,
             costs=request.costs,
             product_name=request.product_name,
@@ -43,4 +43,4 @@ class CreatePlanDraft:
             is_public_service=request.is_public_service,
             creation_timestamp=self.datetime_service.now(),
         )
-        return CreatePlanDraftResponse(plan_id=plan.id)
+        return CreatePlanDraftResponse(draft_id=draft.id)

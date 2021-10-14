@@ -401,7 +401,7 @@ class PlanRepository(interfaces.PlanRepository):
         plan.expired = True
         plan.is_active = False
 
-    def renew_plan(self, plan: Plan) -> None:
+    def set_plan_as_renewed(self, plan: Plan) -> None:
         plan.renewed = True
 
     def set_expiration_date(self, plan: Plan, expiration_date: datetime) -> None:
