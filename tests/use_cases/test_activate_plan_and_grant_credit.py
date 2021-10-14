@@ -102,3 +102,92 @@ def test_that_product_account_is_adjusted(
     )
     activate_plan(plan.id)
     assert account_repo.get_account_balance(plan.planner.product_account) == -17
+
+
+# TESTS FROM TEST SYNCHRONIZED...
+#
+# @injection_test
+# def test_that_all_transactions_have_accounting_as_sender(
+#     plan_generator: PlanGenerator,
+#     transaction_repository: TransactionRepository,
+#     synchronized_plan_activation: SynchronizedPlanActivation,
+# ):
+#     plan_generator.create_plan(approved=True)
+#     synchronized_plan_activation()
+#     for transaction in transaction_repository.transactions:
+#         assert transaction.sending_account.account_type == AccountTypes.accounting
+
+
+# @injection_test
+# def test_that_transactions_with_all_four_account_types_as_receivers_are_added_to_repo(
+#     synchronized_plan_activation: SynchronizedPlanActivation,
+#     plan_generator: PlanGenerator,
+#     transaction_repository: TransactionRepository,
+# ):
+#     plan_generator.create_plan(approved=True)
+#     synchronized_plan_activation()
+#     added_account_types = [
+#         transaction.receiving_account.account_type
+#         for transaction in transaction_repository.transactions
+#     ]
+#     for expected_account_type in (
+#         AccountTypes.p,
+#         AccountTypes.r,
+#         AccountTypes.a,
+#         AccountTypes.prd,
+#     ):
+#         assert expected_account_type in added_account_types
+
+
+# @injection_test
+# def test_that_added_transactions_for_p_r_and_prd_have_correct_amounts(
+#     synchronized_plan_activation: SynchronizedPlanActivation,
+#     plan_generator: PlanGenerator,
+#     transaction_repository: TransactionRepository,
+# ):
+#     plan = plan_generator.create_plan(approved=True)
+#     expected_amount_p, expected_amount_r, expected_amount_prd = (
+#         plan.production_costs.means_cost,
+#         plan.production_costs.resource_cost,
+#         -plan.expected_sales_value,
+#     )
+#     synchronized_plan_activation()
+
+#     for trans in transaction_repository.transactions:
+#         if trans.receiving_account.account_type == AccountTypes.p:
+#             added_amount_p = trans.amount
+#         elif trans.receiving_account.account_type == AccountTypes.r:
+#             added_amount_r = trans.amount
+#         elif trans.receiving_account.account_type == AccountTypes.prd:
+#             added_amount_prd = trans.amount
+
+#     assert expected_amount_p == added_amount_p
+#     assert expected_amount_r == added_amount_r
+#     assert expected_amount_prd == added_amount_prd
+
+
+# @injection_test
+# def test_that_added_transactions_for_p_r_and_prd_have_correct_amounts_if_public_plan(
+#     synchronized_plan_activation: SynchronizedPlanActivation,
+#     plan_generator: PlanGenerator,
+#     transaction_repository: TransactionRepository,
+# ):
+#     plan = plan_generator.create_plan(approved=True, is_public_service=True)
+#     expected_amount_p, expected_amount_r, expected_amount_prd = (
+#         plan.production_costs.means_cost,
+#         plan.production_costs.resource_cost,
+#         0,
+#     )
+#     synchronized_plan_activation()
+
+#     for trans in transaction_repository.transactions:
+#         if trans.receiving_account.account_type == AccountTypes.p:
+#             added_amount_p = trans.amount
+#         elif trans.receiving_account.account_type == AccountTypes.r:
+#             added_amount_r = trans.amount
+#         elif trans.receiving_account.account_type == AccountTypes.prd:
+#             added_amount_prd = trans.amount
+
+#     assert expected_amount_p == added_amount_p
+#     assert expected_amount_r == added_amount_r
+#     assert expected_amount_prd == added_amount_prd

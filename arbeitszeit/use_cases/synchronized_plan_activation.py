@@ -18,21 +18,7 @@ class SynchronizedPlanActivation:
     social_accounting: SocialAccounting
 
     def __call__(self) -> None:
-        self._grant_credit_and_activate_new_plans()
         self._payout_work_certificates()
-
-    def _grant_credit_and_activate_new_plans(self) -> None:
-        """
-        Grant credit to planners of plans suitable for activation.
-        Set these plans as active.
-        """
-        past_plan_activation_date = self.datetime_service.past_plan_activation_date()
-        new_plans = self.plan_repository.get_approved_plans_created_before(
-            past_plan_activation_date
-        )
-        for plan in new_plans:
-            self._credit_production_cost_to_planner(plan)
-            self.plan_repository.activate_plan(plan, self.datetime_service.now())
 
     def _payout_work_certificates(self) -> None:
         """
@@ -89,17 +75,6 @@ class SynchronizedPlanActivation:
         if plan.expiration_date is not None:
             return plan.expiration_date.date() == self.datetime_service.today()
         return False
-
-    def _credit_production_cost_to_planner(self, plan: Plan) -> None:
-        self._create_transaction_from_social_accounting(
-            plan, plan.planner.means_account, plan.production_costs.means_cost
-        )
-        self._create_transaction_from_social_accounting(
-            plan, plan.planner.raw_material_account, plan.production_costs.resource_cost
-        )
-        self._create_transaction_from_social_accounting(
-            plan, plan.planner.product_account, -plan.expected_sales_value
-        )
 
     def _create_transaction_from_social_accounting(
         self, plan: Plan, account: Account, amount: Decimal

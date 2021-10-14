@@ -496,16 +496,6 @@ class PlanRepository(interfaces.PlanRepository):
             ):
                 yield plan
 
-    def get_approved_plans_created_before(self, timestamp: datetime) -> Iterator[Plan]:
-        for plan in self.plans.values():
-            if (
-                plan.approved
-                and not plan.is_active
-                and not plan.expired
-                and plan.plan_creation_date < timestamp
-            ):
-                yield plan
-
     def delete_plan(self, plan_id: UUID) -> None:
         del self.plans[plan_id]
 
