@@ -2,7 +2,7 @@ from decimal import Decimal
 from typing import Optional, cast
 from uuid import UUID
 
-from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+from flask import flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
 from arbeitszeit import entities, errors, use_cases
@@ -37,31 +37,19 @@ from project.database import (
     ProductOfferRepository,
     commit_changes,
 )
-from project.dependency_injection import with_injection
 from project.forms import PlanSearchForm, ProductSearchForm
 from project.models import Company, Plan
 from project.url_index import CompanyUrlIndex
 from project.views import Http404View, QueryPlansView, QueryProductsView
 
-main_company = Blueprint(
-    "main_company", __name__, template_folder="templates", static_folder="static"
-)
+from .blueprint import CompanyRoute
 
 
-def user_is_company():
-    return True if session["user_type"] == "company" else False
-
-
-@main_company.route("/company/profile")
-@login_required
-@with_injection
+@CompanyRoute("/company/profile")
 def profile(
     company_repository: CompanyRepository,
     company_worker_repository: CompanyWorkerRepository,
 ):
-    if not user_is_company():
-        return redirect(url_for("auth.zurueck"))
-
     company = company_repository.get_by_id(UUID(current_user.id))
     assert company is not None
     worker = list(company_worker_repository.get_company_workers(company))
@@ -72,19 +60,14 @@ def profile(
     return render_template("company/profile.html", having_workers=having_workers)
 
 
-@main_company.route("/company/work", methods=["GET", "POST"])
+@CompanyRoute("/company/work", methods=["GET", "POST"])
 @commit_changes
-@login_required
-@with_injection
 def arbeit(
     company_repository: CompanyRepository,
     member_repository: MemberRepository,
     company_worker_repository: CompanyWorkerRepository,
 ):
     """shows workers and add workers to company."""
-    if not user_is_company():
-        return redirect(url_for("auth.zurueck"))
-
     company = company_repository.get_by_id(UUID(current_user.id))
     assert company is not None
     if request.method == "POST":  # add worker to company
@@ -104,16 +87,11 @@ def arbeit(
         return render_template("company/work.html", workers_list=workers_list)
 
 
-@main_company.route("/company/suchen", methods=["GET", "POST"])
-@login_required
-@with_injection
+@CompanyRoute("/company/suchen", methods=["GET", "POST"])
 def suchen(
     query_products: use_cases.QueryProducts,
     controller: QueryProductsController,
 ):
-    if not user_is_company():
-        return redirect(url_for("auth.zurueck"))
-
     presenter = QueryProductsPresenter(
         CompanyUrlIndex(),
     )
@@ -128,16 +106,11 @@ def suchen(
         return view.respond_to_get()
 
 
-@main_company.route("/company/query_plans", methods=["GET", "POST"])
-@login_required
-@with_injection
+@CompanyRoute("/company/query_plans", methods=["GET", "POST"])
 def query_plans(
     query_plans: use_cases.QueryPlans,
     controller: QueryPlansController,
 ):
-    if not user_is_company():
-        return redirect(url_for("auth.zurueck"))
-
     presenter = QueryPlansPresenter(CompanyUrlIndex())
     template_name = "company/query_plans.html"
     search_form = PlanSearchForm(request.form)
@@ -150,34 +123,24 @@ def query_plans(
         return view.respond_to_get()
 
 
-@main_company.route("/company/kaeufe")
-@login_required
-@with_injection
+@CompanyRoute("/company/kaeufe")
 def my_purchases(
     query_purchases: use_cases.QueryPurchases,
     company_repository: CompanyRepository,
 ):
-    if not user_is_company():
-        return redirect(url_for("auth.zurueck"))
-
     company = company_repository.get_by_id(UUID(current_user.id))
     assert company is not None
     purchases = list(query_purchases(company))
     return render_template("company/my_purchases.html", purchases=purchases)
 
 
-@main_company.route("/company/create_plan", methods=["GET", "POST"])
+@CompanyRoute("/company/create_plan", methods=["GET", "POST"])
 @commit_changes
-@login_required
-@with_injection
 def create_plan(
     create_draft_from_proposal: CreatePlanDraft,
     get_plan_summary: GetPlanSummary,
     seek_approval: use_cases.SeekApproval,
 ):
-    if not user_is_company():
-        return redirect(url_for("auth.zurueck"))
-
     expired_plan_id: Optional[str] = request.args.get("expired_plan_id")
     expired_plan_uuid: Optional[UUID] = (
         UUID(expired_plan_id) if expired_plan_id else None
@@ -221,16 +184,11 @@ def create_plan(
     return render_template("company/create_plan.html", expired_plan=expired_plan)
 
 
-@main_company.route("/company/my_plans", methods=["GET"])
-@login_required
-@with_injection
+@CompanyRoute("/company/my_plans", methods=["GET"])
 def my_plans(
     show_my_plans_use_case: ShowMyPlansUseCase,
     show_my_plans_presenter: ShowMyPlansPresenter,
 ):
-    if not user_is_company():
-        return redirect(url_for("auth.zurueck"))
-
     request = ShowMyPlansRequest(company_id=UUID(current_user.id))
     response = show_my_plans_use_case(request)
     view_model = show_my_plans_presenter.present(response)
@@ -241,14 +199,9 @@ def my_plans(
     )
 
 
-@main_company.route("/company/delete_plan/<uuid:plan_id>", methods=["GET", "POST"])
-@login_required
+@CompanyRoute("/company/delete_plan/<uuid:plan_id>", methods=["GET", "POST"])
 @commit_changes
-@with_injection
 def delete_plan(plan_id: UUID, delete_plan: DeletePlan, presenter: DeletePlanPresenter):
-    if not user_is_company():
-        return redirect(url_for("auth.zurueck"))
-
     response = delete_plan(plan_id)
     view_model = presenter.present(response)
     for notification in view_model.notifications:
@@ -256,16 +209,11 @@ def delete_plan(plan_id: UUID, delete_plan: DeletePlan, presenter: DeletePlanPre
     return redirect(url_for("main_company.my_plans"))
 
 
-@main_company.route("/company/create_offer/<uuid:plan_id>", methods=["GET", "POST"])
+@CompanyRoute("/company/create_offer/<uuid:plan_id>", methods=["GET", "POST"])
 @commit_changes
-@login_required
-@with_injection
 def create_offer(
     plan_id: UUID, create_offer: CreateOffer, presenter: CreateOfferPresenter
 ):
-    if not user_is_company():
-        return redirect(url_for("auth.zurueck"))
-
     if request.method == "POST":  # create offer
         name = request.form["name"]
         description = request.form["description"]
@@ -285,17 +233,12 @@ def create_offer(
     return render_template("company/create_offer.html", plan=plan)
 
 
-@main_company.route("/company/my_accounts")
-@login_required
-@with_injection
+@CompanyRoute("/company/my_accounts")
 def my_accounts(
     company_repository: CompanyRepository,
     get_transaction_infos: use_cases.GetTransactionInfos,
     account_repository: AccountRepository,
 ):
-    if not user_is_company():
-        return redirect(url_for("auth.zurueck"))
-
     # We can assume current_user to be a LocalProxy object that
     # delegates to a Company since we did the `user_is_company` check
     # earlier.
@@ -313,18 +256,13 @@ def my_accounts(
     )
 
 
-@main_company.route("/company/transfer_to_worker", methods=["GET", "POST"])
+@CompanyRoute("/company/transfer_to_worker", methods=["GET", "POST"])
 @commit_changes
-@login_required
-@with_injection
 def transfer_to_worker(
     send_work_certificates_to_worker: use_cases.SendWorkCertificatesToWorker,
     company_repository: CompanyRepository,
     member_repository: MemberRepository,
 ):
-    if not user_is_company():
-        return redirect(url_for("auth.zurueck"))
-
     if request.method == "POST":
         company = company_repository.get_by_id(UUID(current_user.id))
         assert company is not None
@@ -347,17 +285,12 @@ def transfer_to_worker(
     return render_template("company/transfer_to_worker.html")
 
 
-@main_company.route("/company/transfer_to_company", methods=["GET", "POST"])
+@CompanyRoute("/company/transfer_to_company", methods=["GET", "POST"])
 @commit_changes
-@login_required
-@with_injection
 def transfer_to_company(
     pay_means_of_production: use_cases.PayMeansOfProduction,
     presenter: PayMeansOfProductionPresenter,
 ):
-    if not user_is_company():
-        return redirect(url_for("auth.zurueck"))
-
     if request.method == "POST":
         use_case_request = use_cases.PayMeansOfProductionRequest(
             buyer=UUID(current_user.id),
@@ -374,13 +307,8 @@ def transfer_to_company(
     return render_template("company/transfer_to_company.html")
 
 
-@main_company.route("/company/my_offers")
-@login_required
-@with_injection
+@CompanyRoute("/company/my_offers")
 def my_offers(offer_repository: ProductOfferRepository):
-    if not user_is_company():
-        return redirect(url_for("auth.zurueck"))
-
     url_index = CompanyUrlIndex()
     my_company = Company.query.filter_by(id=current_user.id).first()
     my_plans = my_company.plans.all()
@@ -397,19 +325,14 @@ def my_offers(offer_repository: ProductOfferRepository):
     )
 
 
-@main_company.route("/company/delete_offer/<uuid:offer_id>", methods=["GET", "POST"])
+@CompanyRoute("/company/delete_offer/<uuid:offer_id>", methods=["GET", "POST"])
 @commit_changes
-@login_required
-@with_injection
 def delete_offer(
     offer_id: UUID,
     product_offer_repository: ProductOfferRepository,
     delete_offer: DeleteOffer,
     presenter: DeleteOfferPresenter,
 ):
-    if not user_is_company():
-        return redirect(url_for("auth.zurueck"))
-
     if request.method == "POST":
         deletion_request = DeleteOfferRequest(
             requesting_company_id=UUID(current_user.id),
@@ -425,32 +348,22 @@ def delete_offer(
     return render_template("company/delete_offer.html", offer=offer)
 
 
-@main_company.route("/company/statistics")
-@login_required
-@with_injection
+@CompanyRoute("/company/statistics")
 def statistics(
     get_statistics: use_cases.GetStatistics,
     presenter: GetStatisticsPresenter,
 ):
-    if not user_is_company():
-        return redirect(url_for("auth.zurueck"))
-
     use_case_response = get_statistics()
     view_model = presenter.present(use_case_response)
     return render_template("company/statistics.html", view_model=view_model)
 
 
-@main_company.route("/company/plan_summary/<uuid:plan_id>")
-@login_required
-@with_injection
+@CompanyRoute("/company/plan_summary/<uuid:plan_id>")
 def plan_summary(
     plan_id: UUID,
     get_plan_summary: use_cases.GetPlanSummary,
     presenter: GetPlanSummarySuccessPresenter,
 ):
-    if not user_is_company():
-        return redirect(url_for("auth.zurueck"))
-
     use_case_response = get_plan_summary(plan_id)
     if isinstance(use_case_response, use_cases.PlanSummarySuccess):
         view_model = presenter.present(use_case_response)
@@ -461,10 +374,7 @@ def plan_summary(
         return Http404View("company/404.html").get_response()
 
 
-@main_company.route("/company/hilfe")
+@CompanyRoute("/company/hilfe")
 @login_required
 def hilfe():
-    if not user_is_company():
-        return redirect(url_for("auth.zurueck"))
-
     return render_template("company/help.html")
