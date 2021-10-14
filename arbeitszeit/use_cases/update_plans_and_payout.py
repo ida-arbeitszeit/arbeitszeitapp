@@ -1,3 +1,4 @@
+import datetime
 from dataclasses import dataclass
 from decimal import Decimal
 
@@ -6,19 +7,48 @@ from injector import inject
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.entities import Account, Plan, ProductionCosts, SocialAccounting
-from arbeitszeit.repositories import PlanRepository, TransactionRepository
+from arbeitszeit.repositories import (
+    OfferRepository,
+    PlanRepository,
+    TransactionRepository,
+)
 
 
 @inject
 @dataclass
-class SynchronizedPlanActivation:
+class UpdatePlansAndPayout:
     plan_repository: PlanRepository
     datetime_service: DatetimeService
     transaction_repository: TransactionRepository
     social_accounting: SocialAccounting
+    offer_repository: OfferRepository
 
     def __call__(self) -> None:
+        self._calculate_plan_expiration()
         self._payout_work_certificates()
+
+    def _calculate_plan_expiration(self) -> None:
+        """
+        Updates plan expiration dates and deactivates expired plans.
+        Deletes offers associated with expired plans.
+        """
+        for plan in self.plan_repository.all_active_plans():
+            assert plan.is_active, "Plan is not active!"
+            assert plan.activation_date, "Plan has no activation date!"
+            expiration_time = plan.activation_date + datetime.timedelta(
+                days=int(plan.timeframe)
+            )
+            days_relative = (expiration_time - self.datetime_service.now()).days
+            self.plan_repository.set_expiration_relative(plan, days_relative)
+            self.plan_repository.set_expiration_date(plan, expiration_time)
+            assert plan.expiration_date
+            if self.datetime_service.now() > plan.expiration_date:
+                self.plan_repository.set_plan_as_expired(plan)
+                expired_offers = self.offer_repository.get_all_offers_belonging_to(
+                    plan.id
+                )
+                for offer in expired_offers:
+                    self.offer_repository.delete_offer(offer.id)
 
     def _payout_work_certificates(self) -> None:
         """

@@ -7,7 +7,6 @@ from arbeitszeit.entities import ProductionCosts
 from project.database.repositories import PlanRepository
 
 from ..data_generators import CompanyGenerator, PlanGenerator
-from ..datetime_service import FakeDatetimeService
 from .dependency_injection import injection_test
 
 Number = Union[int, Decimal]
