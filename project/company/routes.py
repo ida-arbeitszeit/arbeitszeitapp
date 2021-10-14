@@ -174,6 +174,7 @@ def create_plan(
     create_draft_from_proposal: CreatePlanDraft,
     get_plan_summary: GetPlanSummary,
     seek_approval: use_cases.SeekApproval,
+    activate_plan_and_grant_credit: use_cases.ActivatePlanAndGrantCredit,
 ):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
@@ -205,8 +206,10 @@ def create_plan(
         approval_response = seek_approval(draft.draft_id, expired_plan_uuid)
 
         if approval_response.is_approved:
+            flash("Plan erfolgreich erstellt und genehmigt.")
+            activate_plan_and_grant_credit(approval_response.new_plan_id)
             flash(
-                "Plan erfolgreich erstellt und genehmigt. Die Aktivierung des Plans und Gewährung der Kredite erfolgt um 10 Uhr morgens."
+                "Plan wurde aktiviert. Kredite für Produktionskosten wurden bereits gewährt, Kosten für Arbeit werden täglich ausgezahlt."
             )
             return redirect("/company/my_plans")
         else:
