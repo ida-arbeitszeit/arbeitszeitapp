@@ -68,7 +68,7 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def renew_plan(self, plan: Plan) -> None:
+    def set_plan_as_renewed(self, plan: Plan) -> None:
         pass
 
     @abstractmethod

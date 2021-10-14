@@ -171,16 +171,16 @@ def my_purchases(
 @login_required
 @with_injection
 def create_plan(
-    create_plan_from_proposal: CreatePlanDraft,
+    create_draft_from_proposal: CreatePlanDraft,
     get_plan_summary: GetPlanSummary,
     seek_approval: use_cases.SeekApproval,
 ):
     if not user_is_company():
         return redirect(url_for("auth.zurueck"))
 
-    original_plan_id: Optional[str] = request.args.get("original_plan_id")
-    original_plan_uuid: Optional[UUID] = (
-        UUID(original_plan_id) if original_plan_id else None
+    expired_plan_id: Optional[str] = request.args.get("expired_plan_id")
+    expired_plan_uuid: Optional[UUID] = (
+        UUID(expired_plan_id) if expired_plan_id else None
     )
 
     if request.method == "POST":  # Button "Plan erstellen"
@@ -201,8 +201,8 @@ def create_plan(
             if plan_data["productive_or_public"] == "public"
             else False,
         )
-        new_plan = create_plan_from_proposal(use_case_request)
-        approval_response = seek_approval(new_plan.plan_id, original_plan_uuid)
+        draft = create_draft_from_proposal(use_case_request)
+        approval_response = seek_approval(draft.draft_id, expired_plan_uuid)
 
         if approval_response.is_approved:
             flash(
@@ -212,13 +212,13 @@ def create_plan(
         else:
             flash(f"Plan nicht genehmigt. Grund:\n{approval_response.reason}")
             return redirect(
-                url_for("main_company.create_plan", original_plan_id=original_plan_id)
+                url_for("main_company.create_plan", expired_plan_id=expired_plan_id)
             )
 
-    original_plan = (
-        None if original_plan_uuid is None else get_plan_summary(original_plan_uuid)
+    expired_plan = (
+        None if expired_plan_uuid is None else get_plan_summary(expired_plan_uuid)
     )
-    return render_template("company/create_plan.html", original_plan=original_plan)
+    return render_template("company/create_plan.html", expired_plan=expired_plan)
 
 
 @main_company.route("/company/my_plans", methods=["GET"])

@@ -52,9 +52,7 @@ messages %}
         <td>{{ plan.expiration_date }}</td>
         <td>{{ plan.expiration_relative }}d</td>
         <td>
-          <a href="{{ url_for('main_company.create_offer', plan_id=plan.id) }}"
-            ><i class="fas fa-store"></i
-          ></a>
+          <a href="{{ url_for('main_company.create_offer', plan_id=plan.id) }}"><i class="fas fa-store"></i></a>
         </td>
       </tr>
       {% endfor %}
@@ -99,9 +97,7 @@ messages %}
         <td>{{ plan.type_of_plan }}</td>
         <td>{{ plan.plan_creation_date }}</td>
         <td>
-          <a href="{{ url_for('main_company.delete_plan', plan_id=plan.id) }}"
-            ><i class="fas fa-trash"></i
-          ></a>
+          <a href="{{ url_for('main_company.delete_plan', plan_id=plan.id) }}"><i class="fas fa-trash"></i></a>
         </td>
       </tr>
       {% endfor %}
@@ -153,16 +149,12 @@ messages %}
         </td>
         {% else %}
         <td>
-          <a
-            href="{{ url_for('main_company.create_plan', original_plan_id=plan.id) }}"
-            ><i class="{{ 'fas fa-redo' }}"></i
-          ></a>
+          <a href="{{ url_for('main_company.create_plan', expired_plan_id=plan.id) }}"><i
+              class="{{ 'fas fa-redo' }}"></i></a>
         </td>
         {% endif %}
         <td>
-          <a href="{{ url_for('main_company.delete_plan', plan_id=plan.id) }}"
-            ><i class="fas fa-trash"></i
-          ></a>
+          <a href="{{ url_for('main_company.delete_plan', plan_id=plan.id) }}"><i class="fas fa-trash"></i></a>
         </td>
       </tr>
       {% endfor %}
