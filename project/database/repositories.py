@@ -890,6 +890,8 @@ class PlanDraftRepository(repositories.PlanDraftRepository):
 @dataclass
 class WorkerInviteRepository(repositories.WorkerInviteRepository):
     db: SQLAlchemy
+    company_repository: CompanyRepository
+    member_repository: MemberRepository
 
     def is_worker_invited_to_company(self, company: UUID, worker: UUID) -> bool:
         return (
@@ -900,14 +902,34 @@ class WorkerInviteRepository(repositories.WorkerInviteRepository):
             > 0
         )
 
-    def create_company_worker_invite(self, company: UUID, worker: UUID) -> None:
+    def create_company_worker_invite(self, company: UUID, worker: UUID) -> UUID:
         invite = CompanyWorkInvite(
             id=str(uuid4()),
             company=str(company),
             member=str(worker),
         )
         self.db.session.add(invite)
+        return invite.id
 
     def get_companies_worker_is_invited_to(self, member: UUID) -> Iterable[UUID]:
         for invite in CompanyWorkInvite.query.filter_by(member=str(member)):
             yield UUID(invite.company)
+
+    def get_by_id(self, id: UUID) -> Optional[entities.CompanyWorkInvite]:
+        if (
+            invite_orm := CompanyWorkInvite.query.filter_by(id=str(id)).first()
+        ) is not None:
+            company = self.company_repository.get_by_id(UUID(invite_orm.company))
+            if company is None:
+                return None
+            member = self.member_repository.get_by_id(UUID(invite_orm.member))
+            if member is None:
+                return None
+            return entities.CompanyWorkInvite(
+                company=company,
+                member=member,
+            )
+        return None
+
+    def delete_invite(self, id: UUID) -> None:
+        CompanyWorkInvite.query.filter_by(id=str(id)).delete()

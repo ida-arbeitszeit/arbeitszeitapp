@@ -174,3 +174,9 @@ class Transaction:
 
     def __hash__(self) -> int:
         return hash(self.id)
+
+
+@dataclass
+class CompanyWorkInvite:
+    company: Company
+    member: Member
