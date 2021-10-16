@@ -37,9 +37,9 @@ def create_app(config=None, db=None, migrate=None):
     migrate.init_app(app, db)
 
     with app.app_context():
-        from project.commands import activate_database_plans
+        from project.commands import update_and_payout
 
-        app.cli.command("activate-plans")(activate_database_plans)
+        app.cli.command("payout")(update_and_payout)
 
         from .models import Company, Member
 

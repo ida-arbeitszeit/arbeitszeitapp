@@ -1,3 +1,4 @@
+import datetime
 from dataclasses import dataclass
 from decimal import Decimal
 
@@ -6,33 +7,48 @@ from injector import inject
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.entities import Account, Plan, ProductionCosts, SocialAccounting
-from arbeitszeit.repositories import PlanRepository, TransactionRepository
+from arbeitszeit.repositories import (
+    OfferRepository,
+    PlanRepository,
+    TransactionRepository,
+)
 
 
 @inject
 @dataclass
-class SynchronizedPlanActivation:
+class UpdatePlansAndPayout:
     plan_repository: PlanRepository
     datetime_service: DatetimeService
     transaction_repository: TransactionRepository
     social_accounting: SocialAccounting
+    offer_repository: OfferRepository
 
     def __call__(self) -> None:
-        self._grant_credit_and_activate_new_plans()
+        self._calculate_plan_expiration()
         self._payout_work_certificates()
 
-    def _grant_credit_and_activate_new_plans(self) -> None:
+    def _calculate_plan_expiration(self) -> None:
         """
-        Grant credit to planners of plans suitable for activation.
-        Set these plans as active.
+        Updates plan expiration dates and deactivates expired plans.
+        Deletes offers associated with expired plans.
         """
-        past_plan_activation_date = self.datetime_service.past_plan_activation_date()
-        new_plans = self.plan_repository.get_approved_plans_created_before(
-            past_plan_activation_date
-        )
-        for plan in new_plans:
-            self._credit_production_cost_to_planner(plan)
-            self.plan_repository.activate_plan(plan, self.datetime_service.now())
+        for plan in self.plan_repository.all_active_plans():
+            assert plan.is_active, "Plan is not active!"
+            assert plan.activation_date, "Plan has no activation date!"
+            expiration_time = plan.activation_date + datetime.timedelta(
+                days=int(plan.timeframe)
+            )
+            days_relative = (expiration_time - self.datetime_service.now()).days
+            self.plan_repository.set_expiration_relative(plan, days_relative)
+            self.plan_repository.set_expiration_date(plan, expiration_time)
+            assert plan.expiration_date
+            if self.datetime_service.now() > plan.expiration_date:
+                self.plan_repository.set_plan_as_expired(plan)
+                expired_offers = self.offer_repository.get_all_offers_belonging_to(
+                    plan.id
+                )
+                for offer in expired_offers:
+                    self.offer_repository.delete_offer(offer.id)
 
     def _payout_work_certificates(self) -> None:
         """
@@ -89,17 +105,6 @@ class SynchronizedPlanActivation:
         if plan.expiration_date is not None:
             return plan.expiration_date.date() == self.datetime_service.today()
         return False
-
-    def _credit_production_cost_to_planner(self, plan: Plan) -> None:
-        self._create_transaction_from_social_accounting(
-            plan, plan.planner.means_account, plan.production_costs.means_cost
-        )
-        self._create_transaction_from_social_accounting(
-            plan, plan.planner.raw_material_account, plan.production_costs.resource_cost
-        )
-        self._create_transaction_from_social_accounting(
-            plan, plan.planner.product_account, -plan.expected_sales_value
-        )
 
     def _create_transaction_from_social_accounting(
         self, plan: Plan, account: Account, amount: Decimal

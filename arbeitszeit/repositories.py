@@ -132,10 +132,6 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def get_approved_plans_created_before(self, timestamp: datetime) -> Iterator[Plan]:
-        pass
-
-    @abstractmethod
     def delete_plan(self, plan_id: UUID) -> None:
         pass
 

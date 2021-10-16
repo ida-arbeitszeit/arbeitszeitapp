@@ -678,19 +678,6 @@ class PlanRepository(repositories.PlanRepository):
             ).all()
         )
 
-    def get_approved_plans_created_before(
-        self, timestamp: datetime
-    ) -> Iterator[entities.Plan]:
-        return (
-            self.object_from_orm(plan_orm)
-            for plan_orm in Plan.query.filter(
-                Plan.plan_creation_date < timestamp,
-                Plan.approved == True,
-                Plan.is_active == False,
-                Plan.expired == False,
-            )
-        )
-
     def delete_plan(self, plan_id: UUID) -> None:
         plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
         if plan_orm is None:
