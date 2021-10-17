@@ -402,7 +402,7 @@ class PlanRepository(interfaces.PlanRepository):
         plan.expired = True
         plan.is_active = False
 
-    def renew_plan(self, plan: Plan) -> None:
+    def set_plan_as_renewed(self, plan: Plan) -> None:
         plan.renewed = True
 
     def set_expiration_date(self, plan: Plan, expiration_date: datetime) -> None:
@@ -494,16 +494,6 @@ class PlanRepository(interfaces.PlanRepository):
                 and plan.is_active
                 and plan.approved
                 and not plan.expired
-            ):
-                yield plan
-
-    def get_approved_plans_created_before(self, timestamp: datetime) -> Iterator[Plan]:
-        for plan in self.plans.values():
-            if (
-                plan.approved
-                and not plan.is_active
-                and not plan.expired
-                and plan.plan_creation_date < timestamp
             ):
                 yield plan
 

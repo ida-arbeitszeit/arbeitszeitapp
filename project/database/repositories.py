@@ -538,13 +538,13 @@ class PlanRepository(repositories.PlanRepository):
         return plan
 
     def approve_plan(
-        self, plan: entities.PlanDraft, approval_timestamp: datetime
+        self, draft: entities.PlanDraft, approval_timestamp: datetime
     ) -> entities.Plan:
-        orm_object = self._create_plan_from_draft(plan)
-        orm_object.approved = True
-        orm_object.approval_reason = "approved"
-        orm_object.approval_date = approval_timestamp
-        return self.object_from_orm(orm_object)
+        plan_orm = self._create_plan_from_draft(draft)
+        plan_orm.approved = True
+        plan_orm.approval_reason = "approved"
+        plan_orm.approval_date = approval_timestamp
+        return self.object_from_orm(plan_orm)
 
     def activate_plan(self, plan: entities.Plan, activation_date: datetime) -> None:
         plan.is_active = True
@@ -562,7 +562,7 @@ class PlanRepository(repositories.PlanRepository):
         plan_orm.expired = True
         plan_orm.is_active = False
 
-    def renew_plan(self, plan: entities.Plan) -> None:
+    def set_plan_as_renewed(self, plan: entities.Plan) -> None:
         plan.renewed = True
 
         plan_orm = self.object_to_orm(plan)
@@ -676,19 +676,6 @@ class PlanRepository(repositories.PlanRepository):
                 is_active=True,
                 expired=False,
             ).all()
-        )
-
-    def get_approved_plans_created_before(
-        self, timestamp: datetime
-    ) -> Iterator[entities.Plan]:
-        return (
-            self.object_from_orm(plan_orm)
-            for plan_orm in Plan.query.filter(
-                Plan.plan_creation_date < timestamp,
-                Plan.approved == True,
-                Plan.is_active == False,
-                Plan.expired == False,
-            )
         )
 
     def delete_plan(self, plan_id: UUID) -> None:

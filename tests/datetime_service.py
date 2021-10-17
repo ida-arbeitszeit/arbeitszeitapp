@@ -27,27 +27,17 @@ class FakeDatetimeService(DatetimeService):
     def now_minus_one_day(self) -> datetime:
         return self.now() - timedelta(days=1)
 
+    def now_minus_20_hours(self) -> datetime:
+        return self.now() - timedelta(hours=20)
+
+    def now_minus_25_hours(self) -> datetime:
+        return self.now() - timedelta(hours=25)
+
     def now_minus_two_days(self) -> datetime:
         return self.now() - timedelta(days=2)
 
     def now_minus_ten_days(self) -> datetime:
         return self.now() - timedelta(days=10)
 
-    def past_plan_activation_date(self, timedelta_days: int = 1) -> datetime:
-        if self.now().hour < self.hour_of_synchronized_plan_activation:
-            past_day = self.today() - timedelta(days=timedelta_days)
-            past_date = datetime(
-                past_day.year,
-                past_day.month,
-                past_day.day,
-                hour=self.hour_of_synchronized_plan_activation,
-            )
-        else:
-            past_day = self.today() - timedelta(days=timedelta_days - 1)
-            past_date = datetime(
-                past_day.year,
-                past_day.month,
-                past_day.day,
-                hour=self.hour_of_synchronized_plan_activation,
-            )
-        return past_date
+    def now_plus_one_day(self) -> datetime:
+        return self.now() + timedelta(days=1)

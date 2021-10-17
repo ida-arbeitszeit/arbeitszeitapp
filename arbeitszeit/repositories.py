@@ -69,7 +69,7 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def renew_plan(self, plan: Plan) -> None:
+    def set_plan_as_renewed(self, plan: Plan) -> None:
         pass
 
     @abstractmethod
@@ -130,10 +130,6 @@ class PlanRepository(ABC):
 
     @abstractmethod
     def all_public_plans_approved_active_and_not_expired(self) -> Iterator[Plan]:
-        pass
-
-    @abstractmethod
-    def get_approved_plans_created_before(self, timestamp: datetime) -> Iterator[Plan]:
         pass
 
     @abstractmethod
