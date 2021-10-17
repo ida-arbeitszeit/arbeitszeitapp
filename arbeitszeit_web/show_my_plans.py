@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansResponse
+from .prepare_strings_for_html import text_to_html
 
 
 @dataclass
@@ -95,7 +96,7 @@ class ShowMyPlansPresenter:
                     NonActivePlansRow(
                         id=f"{plan.id}",
                         prd_name=f"{plan.prd_name}",
-                        description=f"{plan.description}",
+                        description=text_to_html(plan.description),
                         means_cost=f"{plan.production_costs.means_cost}",
                         resource_cost=f"{plan.production_costs.resource_cost}",
                         labour_cost=f"{plan.production_costs.labour_cost}",
@@ -113,7 +114,7 @@ class ShowMyPlansPresenter:
                     ActivePlansRow(
                         id=f"{plan.id}",
                         prd_name=f"{plan.prd_name}",
-                        description=f"{plan.description}",
+                        description=text_to_html(plan.description),
                         means_cost=f"{plan.production_costs.means_cost}",
                         resource_cost=f"{plan.production_costs.resource_cost}",
                         labour_cost=f"{plan.production_costs.labour_cost}",
@@ -133,7 +134,7 @@ class ShowMyPlansPresenter:
                     ExpiredPlansRow(
                         id=f"{plan.id}",
                         prd_name=f"{plan.prd_name}",
-                        description=f"{plan.description}",
+                        description=text_to_html(plan.description),
                         means_cost=f"{plan.production_costs.means_cost}",
                         resource_cost=f"{plan.production_costs.resource_cost}",
                         labour_cost=f"{plan.production_costs.labour_cost}",

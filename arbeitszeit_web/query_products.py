@@ -7,6 +7,7 @@ from arbeitszeit.use_cases.query_products import (
     ProductQueryResponse,
     QueryProductsRequest,
 )
+from .prepare_strings_for_html import text_to_html
 
 
 class PlanSummaryUrlIndex(Protocol):
@@ -103,7 +104,7 @@ class QueryProductsPresenter:
                         ),
                         product_name=result.product_name,
                         seller_name=result.seller_name,
-                        product_description=result.product_description,
+                        product_description=text_to_html(result.product_description),
                         price_per_unit=f"{result.price_per_unit} Std.",
                         is_public_service="Öffentlich"
                         if result.is_public_service

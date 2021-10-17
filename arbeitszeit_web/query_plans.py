@@ -1,6 +1,7 @@
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional, Protocol
 from uuid import UUID
+from .prepare_strings_for_html import text_to_html
 
 from arbeitszeit.use_cases.query_plans import (
     PlanFilter,
@@ -98,7 +99,7 @@ class QueryPlansPresenter:
                         ),
                         company_name=result.company_name,
                         product_name=result.product_name,
-                        description=result.description,
+                        description=text_to_html(result.description),
                     )
                     for result in response.results
                 ],

@@ -39,9 +39,7 @@ messages %}
       <tr>
         <td>{{ plan.id }}</td>
         <td>{{ plan.prd_name }}</td>
-        <td>
-          <abbr title="{{ plan.description }}">{{ plan.description }}</abbr>
-        </td>
+        <td>{{ plan.description | safe }}</td>
         <td>{{ plan.means_cost }}</td>
         <td>{{ plan.resource_cost }}</td>
         <td>{{ plan.labour_cost }}</td>
@@ -88,7 +86,7 @@ messages %}
       <tr>
         <td>{{ plan.id }}</td>
         <td>{{ plan.prd_name }}</td>
-        <td>{{ plan.description }}</td>
+        <td>{{ plan.description | safe}}</td>
         <td>{{ plan.means_cost }}</td>
         <td>{{ plan.resource_cost }}</td>
         <td>{{ plan.labour_cost }}</td>
@@ -134,7 +132,7 @@ messages %}
       <tr>
         <td>{{ plan.id }}</td>
         <td>{{ plan.prd_name }}</td>
-        <td>{{ plan.description }}</td>
+        <td>{{ plan.description | safe }}</td>
         <td>{{ plan.means_cost }}</td>
         <td>{{ plan.resource_cost }}</td>
         <td>{{ plan.labour_cost }}</td>
