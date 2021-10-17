@@ -9,7 +9,7 @@ def text_to_html(text: str) -> Markup:
     Converts CR and LF into line break.
     Marks string as safe.
     """
-    safe_text = html.escape(text)
+    safe_text = html.escape(text, quote=False)
     return Markup(
         safe_text.replace("\r\n", "<br>").replace("\n", "<br>").replace("\r", "<br>")
     )
