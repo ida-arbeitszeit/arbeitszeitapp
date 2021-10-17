@@ -2,11 +2,14 @@ from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional, Protocol
 from uuid import UUID
 
+from flask import Markup
+
 from arbeitszeit.use_cases.query_products import (
     ProductFilter,
     ProductQueryResponse,
     QueryProductsRequest,
 )
+
 from .prepare_strings_for_html import text_to_html
 
 
@@ -62,7 +65,7 @@ class ResultTableRow:
     plan_summary_url: str
     product_name: str
     seller_name: str
-    product_description: str
+    product_description: Markup
     price_per_unit: str
     is_public_service: str
     contact_email: str

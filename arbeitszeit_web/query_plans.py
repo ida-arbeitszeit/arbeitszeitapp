@@ -1,13 +1,16 @@
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional, Protocol
 from uuid import UUID
-from .prepare_strings_for_html import text_to_html
+
+from flask import Markup
 
 from arbeitszeit.use_cases.query_plans import (
     PlanFilter,
     PlanQueryResponse,
     QueryPlansRequest,
 )
+
+from .prepare_strings_for_html import text_to_html
 
 
 class PlanSummaryUrlIndex(Protocol):
@@ -60,7 +63,7 @@ class ResultTableRow:
     plan_summary_url: str
     company_name: str
     product_name: str
-    description: str
+    description: Markup
 
 
 @dataclass

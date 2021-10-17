@@ -2,7 +2,10 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
+from flask import Markup
+
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansResponse
+
 from .prepare_strings_for_html import text_to_html
 
 
@@ -10,7 +13,7 @@ from .prepare_strings_for_html import text_to_html
 class NonActivePlansRow:
     id: str
     prd_name: str
-    description: str
+    description: Markup
     means_cost: str
     resource_cost: str
     labour_cost: str
@@ -29,7 +32,7 @@ class NonActivePlansTable:
 class ActivePlansRow:
     id: str
     prd_name: str
-    description: str
+    description: Markup
     means_cost: str
     resource_cost: str
     labour_cost: str
@@ -50,7 +53,7 @@ class ActivePlansTable:
 class ExpiredPlansRow:
     id: str
     prd_name: str
-    description: str
+    description: Markup
     means_cost: str
     resource_cost: str
     labour_cost: str
