@@ -2,7 +2,7 @@ from arbeitszeit import errors
 from arbeitszeit.entities import Company, Member
 from arbeitszeit.repositories import CompanyWorkerRepository
 
-from .calculate_plan_expiration import CalculatePlanExpirationAndCheckIfExpired
+from .activate_plan_and_grant_credit import ActivatePlanAndGrantCredit
 from .create_offer import CreateOffer, CreateOfferRequest, CreateOfferResponse
 from .create_plan_draft import (
     CreatePlanDraft,
@@ -43,10 +43,10 @@ from .seek_approval import SeekApproval
 from .send_work_certificates_to_worker import SendWorkCertificatesToWorker
 from .show_my_plans import ShowMyPlansRequest, ShowMyPlansResponse, ShowMyPlansUseCase
 from .show_work_invites import ShowWorkInvites, ShowWorkInvitesRequest
-from .synchronized_plan_activation import SynchronizedPlanActivation
+from .update_plans_and_payout import UpdatePlansAndPayout
 
 __all__ = [
-    "CalculatePlanExpirationAndCheckIfExpired",
+    "ActivatePlanAndGrantCredit",
     "CreateOffer",
     "CreateOfferRequest",
     "CreateOfferResponse",
@@ -94,10 +94,10 @@ __all__ = [
     "ShowWorkInvites",
     "ShowWorkInvitesRequest",
     "StatisticsResponse",
-    "SynchronizedPlanActivation",
     "TransactionInfo",
     "Workplace",
     "add_worker_to_company",
+    "UpdatePlansAndPayout",
 ]
 
 

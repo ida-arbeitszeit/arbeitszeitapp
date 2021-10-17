@@ -1,4 +1,5 @@
 from datetime import datetime
+from uuid import UUID
 
 from arbeitszeit.repositories import PlanDraftRepository, PlanRepository
 from arbeitszeit.use_cases import SeekApproval
@@ -52,6 +53,17 @@ def test_that_true_is_returned(
     original_plan = plan_generator.create_plan()
     approval_response = seek_approval(plan_draft.id, original_plan.id)
     assert approval_response.is_approved is True
+
+
+@injection_test
+def test_that_returned_new_plan_id_is_uuid(
+    plan_generator: PlanGenerator,
+    seek_approval: SeekApproval,
+):
+    plan_draft = plan_generator.draft_plan()
+    original_plan = plan_generator.create_plan()
+    approval_response = seek_approval(plan_draft.id, original_plan.id)
+    assert isinstance(approval_response.new_plan_id, UUID)
 
 
 @injection_test
