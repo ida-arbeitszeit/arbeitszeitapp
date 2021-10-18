@@ -1,3 +1,5 @@
+import gettext
+
 from flask import Flask, session
 from flask_table import Col, Table  # noqa: Do not delete
 from flask_talisman import Talisman
@@ -5,6 +7,10 @@ from flask_wtf.csrf import CSRFProtect
 
 import project.extensions
 from project.extensions import login_manager
+
+# parse translation files (*.mo) with gettext
+spanish = gettext.translation("arbeitszeitapp", "translations/", ["es_ES"])
+german = gettext.translation("arbeitszeitapp", "translations/", ["de_DE"])
 
 
 def create_app(config=None, db=None, migrate=None):
@@ -29,6 +35,9 @@ def create_app(config=None, db=None, migrate=None):
     if app.config["ENV"] == "production":
         csp = {"default-src": ["'self'", "'unsafe-inline'", "*.fontawesome.com"]}
         Talisman(app, content_security_policy=csp)
+
+    # install gettext's _()-Method for default language (de_DE) in global namespace
+    german.install()
 
     # init flask extensions
     CSRFProtect(app)

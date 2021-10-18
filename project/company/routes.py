@@ -381,3 +381,16 @@ def plan_summary(
 @login_required
 def hilfe():
     return render_template("company/help.html")
+
+
+@CompanyRoute("/company/change_language/<lang>", methods=["GET", "POST"])
+@login_required
+def change_language(lang: str):
+    from project import german, spanish
+
+    if lang == "de_DE":
+        german.install()
+        return "Deine Sprache ist Deutsch. <a href='http://127.0.0.1:5000/company/profile'>profil</a>"
+    elif lang == "es_ES":
+        spanish.install()
+        return "Tu idioma es Español. <a href='http://127.0.0.1:5000/company/profile'>perfil</a>"

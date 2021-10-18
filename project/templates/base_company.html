@@ -88,6 +88,12 @@
           <a href="{{ url_for('main_company.profile') }}" class="navbar-item">
             Meine Daten
           </a>
+          <a href="{{ url_for('main_company.change_language', lang='es_ES') }}" class="navbar-item">
+            SPANISCH
+          </a>
+          <a href="{{ url_for('main_company.change_language', lang='de_DE') }}" class="navbar-item">
+            DEUTSCH
+          </a>
           {% endif %}
 
         </div>
