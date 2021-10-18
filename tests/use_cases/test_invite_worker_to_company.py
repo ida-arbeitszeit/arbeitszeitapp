@@ -87,3 +87,12 @@ class InviteWorkerTests(TestCase):
             )
         )
         self.assertFalse(response.is_success)
+
+    def test_response_uuid_is_not_none_on_successful_invite(self) -> None:
+        response = self.invite_worker_to_company(
+            InviteWorkerToCompanyRequest(
+                company=self.company.id,
+                worker=self.member.id,
+            )
+        )
+        self.assertIsNotNone(response.invite_id)

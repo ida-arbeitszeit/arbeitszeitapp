@@ -16,6 +16,7 @@ from arbeitszeit.entities import (
     Account,
     AccountTypes,
     Company,
+    CompanyWorkInvite,
     Member,
     Plan,
     PlanDraft,
@@ -637,21 +638,42 @@ class WorkerInviteRepository(interfaces.WorkerInviteRepository):
     def __init__(
         self, company_repository: CompanyRepository, member_repository: MemberRepository
     ) -> None:
-        self.invites: Set[Tuple[UUID, UUID]] = set()
+        self.invites: Dict[UUID, Tuple[UUID, UUID]] = dict()
         self.company_repository = company_repository
         self.member_repository = member_repository
 
     def is_worker_invited_to_company(self, company: UUID, worker: UUID) -> bool:
-        return (company, worker) in self.invites
+        return (company, worker) in self.invites.values()
 
     def create_company_worker_invite(
         self,
         company: UUID,
         worker: UUID,
-    ) -> None:
-        self.invites.add((company, worker))
+    ) -> UUID:
+        invite_id = uuid4()
+        self.invites[invite_id] = (company, worker)
+        return invite_id
 
     def get_companies_worker_is_invited_to(self, member: UUID) -> Iterable[UUID]:
-        for company, invited_worker in self.invites:
+        for company, invited_worker in self.invites.values():
             if invited_worker == member:
                 yield company
+
+    def get_by_id(self, id: UUID) -> Optional[CompanyWorkInvite]:
+        try:
+            company_id, worker_id = self.invites[id]
+        except KeyError:
+            return None
+        company = self.company_repository.get_by_id(company_id)
+        if company is None:
+            return None
+        member = self.member_repository.get_by_id(worker_id)
+        if member is None:
+            return None
+        return CompanyWorkInvite(
+            company=company,
+            member=member,
+        )
+
+    def delete_invite(self, id: UUID) -> None:
+        del self.invites[id]

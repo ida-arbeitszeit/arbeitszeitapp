@@ -8,6 +8,7 @@ from arbeitszeit.entities import (
     Account,
     AccountTypes,
     Company,
+    CompanyWorkInvite,
     Member,
     Plan,
     PlanDraft,
@@ -318,9 +319,17 @@ class WorkerInviteRepository(ABC):
         pass
 
     @abstractmethod
-    def create_company_worker_invite(self, company: UUID, worker: UUID) -> None:
+    def create_company_worker_invite(self, company: UUID, worker: UUID) -> UUID:
         pass
 
     @abstractmethod
     def get_companies_worker_is_invited_to(self, member: UUID) -> Iterable[UUID]:
+        pass
+
+    @abstractmethod
+    def get_by_id(self, id: UUID) -> Optional[CompanyWorkInvite]:
+        pass
+
+    @abstractmethod
+    def delete_invite(self, id: UUID) -> None:
         pass

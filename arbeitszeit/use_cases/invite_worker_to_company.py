@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 from uuid import UUID
 
 from injector import inject
@@ -19,6 +20,7 @@ class InviteWorkerToCompanyRequest:
 @dataclass
 class InviteWorkerToCompanyResponse:
     is_success: bool
+    invite_id: Optional[UUID] = None
 
 
 @inject
@@ -40,7 +42,7 @@ class InviteWorkerToCompany:
         ):
             return InviteWorkerToCompanyResponse(is_success=False)
         else:
-            self.worker_invite_repository.create_company_worker_invite(
+            invite_id = self.worker_invite_repository.create_company_worker_invite(
                 request.company, request.worker
             )
-            return InviteWorkerToCompanyResponse(is_success=True)
+            return InviteWorkerToCompanyResponse(is_success=True, invite_id=invite_id)

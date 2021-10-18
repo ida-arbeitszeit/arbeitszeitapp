@@ -3,6 +3,7 @@ from uuid import uuid4
 
 from arbeitszeit import repositories as interfaces
 from project.database.repositories import WorkerInviteRepository
+from tests.data_generators import CompanyGenerator, MemberGenerator
 
 from .dependency_injection import get_dependency_injector
 
@@ -46,8 +47,10 @@ class IsWorkerInvitedToCompanyTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.repository = self.injector.get(WorkerInviteRepository)
-        self.company = uuid4()
-        self.worker = uuid4()
+        company_generator = self.injector.get(CompanyGenerator)
+        member_generator = self.injector.get(MemberGenerator)
+        self.company = company_generator.create_company().id
+        self.worker = member_generator.create_member().id
 
     def test_being_invited_to_a_company_does_not_invite_worker_to_other_company(
         self,
@@ -71,3 +74,33 @@ class IsWorkerInvitedToCompanyTests(TestCase):
         self.assertTrue(
             self.repository.is_worker_invited_to_company(self.company, self.worker)
         )
+
+    def test_get_by_id_returns_invite_if_one_was_created_before(self) -> None:
+        invite_id = self.repository.create_company_worker_invite(
+            self.company, self.worker
+        )
+        invite = self.repository.get_by_id(invite_id)
+        self.assertIsNotNone(invite)
+
+    def test_get_by_id_returns_no_invite_if_random_uuid_is_queried(self) -> None:
+        invite = self.repository.get_by_id(uuid4())
+        self.assertIsNone(invite)
+
+    def test_get_by_id_returns_invite_with_correct_attributes(self) -> None:
+        invite_id = self.repository.create_company_worker_invite(
+            self.company, self.worker
+        )
+        invite = self.repository.get_by_id(invite_id)
+        assert invite is not None
+        self.assertEqual(invite.company.id, self.company)
+        self.assertEqual(invite.member.id, self.worker)
+
+    def test_invite_cannot_be_retrieved_after_deletion(self) -> None:
+        invite_id = self.repository.create_company_worker_invite(
+            self.company, self.worker
+        )
+        self.repository.delete_invite(invite_id)
+        self.assertIsNone(self.repository.get_by_id(invite_id))
+
+    def test_deleting_a_non_existing_invite_does_not_raise(self) -> None:
+        self.repository.delete_invite(uuid4())
