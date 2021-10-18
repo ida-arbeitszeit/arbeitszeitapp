@@ -22,15 +22,20 @@ from arbeitszeit_web.query_products import (
     QueryProductsPresenter,
 )
 from project.database import AccountRepository, MemberRepository, commit_changes
-from project.forms import PayConsumerProductForm, PlanSearchForm, ProductSearchForm, CompanySearchForm
+from project.forms import (
+    CompanySearchForm,
+    PayConsumerProductForm,
+    PlanSearchForm,
+    ProductSearchForm,
+)
 from project.models import Member
 from project.url_index import MemberUrlIndex
 from project.views import (
     Http404View,
     PayConsumerProductView,
+    QueryCompaniesView,
     QueryPlansView,
     QueryProductsView,
-    QueryCompaniesView,
 )
 
 from .blueprint import MemberRoute
