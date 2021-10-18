@@ -23,6 +23,10 @@ from arbeitszeit_web.delete_plan import DeletePlanPresenter
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
+from arbeitszeit_web.query_companies import (
+    QueryCompaniesController,
+    QueryCompaniesPresenter,
+)
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
 from arbeitszeit_web.query_products import (
     QueryProductsController,
@@ -37,10 +41,15 @@ from project.database import (
     ProductOfferRepository,
     commit_changes,
 )
-from project.forms import PlanSearchForm, ProductSearchForm
+from project.forms import CompanySearchForm, PlanSearchForm, ProductSearchForm
 from project.models import Company, Plan
 from project.url_index import CompanyUrlIndex
-from project.views import Http404View, QueryPlansView, QueryProductsView
+from project.views import (
+    Http404View,
+    QueryCompaniesView,
+    QueryPlansView,
+    QueryProductsView,
+)
 
 from .blueprint import CompanyRoute
 
@@ -116,6 +125,23 @@ def query_plans(
     search_form = PlanSearchForm(request.form)
     view = QueryPlansView(
         search_form, query_plans, presenter, controller, template_name
+    )
+    if request.method == "POST":
+        return view.respond_to_post()
+    else:
+        return view.respond_to_get()
+
+
+@CompanyRoute("/company/query_companies", methods=["GET", "POST"])
+def query_companies(
+    query_companies: use_cases.QueryCompanies,
+    controller: QueryCompaniesController,
+):
+    presenter = QueryCompaniesPresenter()
+    template_name = "company/query_companies.html"
+    search_form = CompanySearchForm(request.form)
+    view = QueryCompaniesView(
+        search_form, query_companies, presenter, controller, template_name
     )
     if request.method == "POST":
         return view.respond_to_post()

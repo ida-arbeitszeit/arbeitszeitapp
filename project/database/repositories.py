@@ -198,13 +198,17 @@ class CompanyRepository(repositories.CompanyRepository):
     def query_companies_by_name(self, query: str) -> Iterator[entities.Company]:
         return (
             self.object_from_orm(company)
-            for company in Company.query.filter(Company.name.contains(query)).all()
+            for company in Company.query.filter(
+                Company.name.ilike("%" + query + "%")
+            ).all()
         )
 
     def query_companies_by_email(self, query: str) -> Iterator[entities.Company]:
         return (
             self.object_from_orm(company)
-            for company in Company.query.filter(Company.email.contains(query)).all()
+            for company in Company.query.filter(
+                Company.email.ilike("%" + query + "%")
+            ).all()
         )
 
     def get_all_companies(self) -> Iterator[entities.Company]:

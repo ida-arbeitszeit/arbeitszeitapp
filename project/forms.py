@@ -112,3 +112,22 @@ class PayConsumerProductForm(Form):
 
     def get_plan_id_field(self) -> str:
         return self.data["plan_id"]
+
+
+class CompanySearchForm(Form):
+    choices = [("Name", "Name"), ("Email", "Email")]
+    select = SelectField(
+        "Nach Betrieb suchen", choices=choices, validators=[validators.DataRequired()]
+    )
+    search = StringField(
+        "Suchbegriff",
+        validators=[
+            FieldMustExist(message="Angabe erforderlich"),
+        ],
+    )
+
+    def get_query_string(self) -> str:
+        return self.data["search"]
+
+    def get_category_string(self) -> str:
+        return self.data["select"]

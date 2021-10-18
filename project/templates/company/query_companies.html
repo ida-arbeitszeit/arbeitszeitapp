@@ -1,0 +1,66 @@
+{% extends "base_company.html" %}
+
+{% block content2 %}
+
+<div class="columns is-centered">
+    <div class="column is-one-third">
+        <h1 class="title">
+            Betriebe suchen
+        </h1>
+        {% if view_model.notifications or form.errors %}
+        <div class="box">
+            {% for notification in view_model.notifications %}
+            <div class="notification is-danger">{{ notification.text }}</div>
+            {% endfor %}
+            {% for field_name, field_errors in form.errors|dictsort if field_errors %}
+            {% for error in field_errors %}
+            <div class="notification is-danger">{{ form[field_name].label }} {{ error }}</div>
+            {% endfor %}
+            {% endfor %}
+        </div>
+        {% endif %}
+        <form method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="field">
+                <div class="control">
+                    <div class="select is-large is-fullwidth">
+                        {{ form.select }}
+                    </div>
+                </div>
+                <p class="help">Suche nach Name oder Email</p>
+            </div>
+            <div class="field">
+                <div class="control">
+                    {{ form.search(class_="input is-large") }}
+                </div>
+            </div>
+            <button class="button is-block is-primary is-large is-fullwidth">
+                Suche
+            </button>
+        </form>
+    </div>
+</div>
+{% if view_model.show_results %}
+<h1 class="title">
+    Ergebnisse
+</h1>
+<div class="table-container">
+    <table class="table is-fullwidth">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for column in view_model.results.rows %}
+            <tr>
+                <td>{{ column.company_name }}</td>
+                <td>{{ column.company_email }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %}
