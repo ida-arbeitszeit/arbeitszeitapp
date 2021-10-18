@@ -34,6 +34,12 @@ from .pay_consumer_product import (
     PayConsumerProductResponse,
 )
 from .pay_means_of_production import PayMeansOfProduction, PayMeansOfProductionRequest
+from .query_companies import (
+    CompanyFilter,
+    CompanyQueryResponse,
+    QueryCompanies,
+    QueryCompaniesRequest,
+)
 from .query_plans import PlanFilter, PlanQueryResponse, QueryPlans, QueryPlansRequest
 from .query_products import (
     ProductFilter,
@@ -55,6 +61,8 @@ __all__ = [
     "AnswerCompanyWorkInvite",
     "AnswerCompanyWorkInviteRequest",
     "AnswerCompanyWorkInviteResponse",
+    "CompanyFilter",
+    "CompanyQueryResponse",
     "CreateOffer",
     "CreateOfferRequest",
     "CreateOfferResponse",
@@ -87,6 +95,8 @@ __all__ = [
     "ProductFilter",
     "ProductQueryResponse",
     "PurchaseQueryResponse",
+    "QueryCompanies",
+    "QueryCompaniesRequest",
     "QueryPlans",
     "QueryPlansRequest",
     "QueryProducts",
@@ -106,6 +116,7 @@ __all__ = [
     "UpdatePlansAndPayout",
     "Workplace",
     "add_worker_to_company",
+    "UpdatePlansAndPayout",
 ]
 
 
