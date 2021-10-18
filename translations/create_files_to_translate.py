@@ -12,9 +12,10 @@ def create_file():
     pathes = [os.path.join(current_parent_path, directory) for directory in DIRECTORIES]
     with open("translations/files_to_translate.txt", "w") as f:
         for path in pathes:
-            for file in os.listdir(path):
-                if file.endswith(".py"):
-                    f.write(os.path.join(path, file) + "\n")
+            for root, dirs, files in os.walk(path):
+                for file in files:
+                    if file.endswith(".py"):
+                        f.write(os.path.join(root, file) + "\n")
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-18 17:19+0200\n"
+"POT-Creation-Date: 2021-10-18 22:39+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -35,4 +35,16 @@ msgstr ""
 
 #: /home/sebas/Coding/Projects/arbeitszeitapp/project/forms.py:18
 msgid "This field is required."
+msgstr ""
+
+#: /home/sebas/Coding/Projects/arbeitszeitapp/arbeitszeit_web/get_plan_summary.py:36
+msgid "Kleinste Abgabeeinheit"
+msgstr ""
+
+#: /home/sebas/Coding/Projects/arbeitszeitapp/arbeitszeit_web/get_plan_summary.py:37
+msgid "Menge"
+msgstr ""
+
+#: /home/sebas/Coding/Projects/arbeitszeitapp/arbeitszeit_web/get_plan_summary.py:38
+msgid "Kosten für Produktionsmittel"
 msgstr ""

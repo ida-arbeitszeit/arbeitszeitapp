@@ -33,9 +33,9 @@ class GetPlanSummarySuccessPresenter:
             product_name=(_("Name des Produkts"), response.product_name),
             description=("Beschreibung des Produkts", response.description),
             timeframe=(_("Planungszeitraum (Tage)"), str(response.timeframe)),
-            production_unit=("Kleinste Abgabeeinheit", response.production_unit),
-            amount=("Menge", str(response.amount)),
-            means_cost=("Kosten für Produktionsmittel", str(response.means_cost)),
+            production_unit=(_("Kleinste Abgabeeinheit"), response.production_unit),
+            amount=(_("Menge"), str(response.amount)),
+            means_cost=(_("Kosten für Produktionsmittel"), str(response.means_cost)),
             resources_cost=(
                 "Kosten für Roh- und Hilfststoffe",
                 str(response.resources_cost),

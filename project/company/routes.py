@@ -390,7 +390,7 @@ def change_language(lang: str):
 
     if lang == "de_DE":
         german.install()
-        return "Deine Sprache ist Deutsch. <a href='http://127.0.0.1:5000/company/profile'>profil</a>"
+        return redirect(url_for("main_company.statistics"))
     elif lang == "es_ES":
         spanish.install()
-        return "Tu idioma es Español. <a href='http://127.0.0.1:5000/company/profile'>perfil</a>"
+        return redirect(url_for("main_company.statistics"))
