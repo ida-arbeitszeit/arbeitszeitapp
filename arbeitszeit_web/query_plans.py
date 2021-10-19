@@ -59,7 +59,7 @@ class ResultTableRow:
     plan_summary_url: str
     company_name: str
     product_name: str
-    description: str
+    description: List[str]
 
 
 @dataclass
@@ -98,7 +98,7 @@ class QueryPlansPresenter:
                         ),
                         company_name=result.company_name,
                         product_name=result.product_name,
-                        description=result.description,
+                        description=result.description.splitlines(),
                     )
                     for result in response.results
                 ],
