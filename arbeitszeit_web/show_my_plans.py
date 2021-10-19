@@ -2,18 +2,14 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from flask import Markup
-
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansResponse
-
-from .prepare_strings_for_html import text_to_html
 
 
 @dataclass
 class NonActivePlansRow:
     id: str
     prd_name: str
-    description: Markup
+    description: str
     means_cost: str
     resource_cost: str
     labour_cost: str
@@ -32,7 +28,7 @@ class NonActivePlansTable:
 class ActivePlansRow:
     id: str
     prd_name: str
-    description: Markup
+    description: str
     means_cost: str
     resource_cost: str
     labour_cost: str
@@ -53,7 +49,7 @@ class ActivePlansTable:
 class ExpiredPlansRow:
     id: str
     prd_name: str
-    description: Markup
+    description: str
     means_cost: str
     resource_cost: str
     labour_cost: str
@@ -99,7 +95,7 @@ class ShowMyPlansPresenter:
                     NonActivePlansRow(
                         id=f"{plan.id}",
                         prd_name=f"{plan.prd_name}",
-                        description=text_to_html(plan.description),
+                        description=f"{plan.description}",
                         means_cost=f"{plan.production_costs.means_cost}",
                         resource_cost=f"{plan.production_costs.resource_cost}",
                         labour_cost=f"{plan.production_costs.labour_cost}",
@@ -117,7 +113,7 @@ class ShowMyPlansPresenter:
                     ActivePlansRow(
                         id=f"{plan.id}",
                         prd_name=f"{plan.prd_name}",
-                        description=text_to_html(plan.description),
+                        description=f"{plan.description}",
                         means_cost=f"{plan.production_costs.means_cost}",
                         resource_cost=f"{plan.production_costs.resource_cost}",
                         labour_cost=f"{plan.production_costs.labour_cost}",
@@ -137,7 +133,7 @@ class ShowMyPlansPresenter:
                     ExpiredPlansRow(
                         id=f"{plan.id}",
                         prd_name=f"{plan.prd_name}",
-                        description=text_to_html(plan.description),
+                        description=f"{plan.description}",
                         means_cost=f"{plan.production_costs.means_cost}",
                         resource_cost=f"{plan.production_costs.resource_cost}",
                         labour_cost=f"{plan.production_costs.labour_cost}",

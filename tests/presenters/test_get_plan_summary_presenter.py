@@ -70,19 +70,6 @@ class GetPlanSummarySuccessPresenterTests(TestCase):
             ("Beschreibung des Produkts", TESTING_RESPONSE_MODEL.description),
         )
 
-    def test_description_is_displayed_correctly_as_tuple_of_strings_with_replaced_chars(
-        self,
-    ):
-        response = replace(
-            TESTING_RESPONSE_MODEL,
-            description="test < test > test &",
-        )
-        view_model = self.presenter.present(response)
-        self.assertTupleEqual(
-            view_model.description,
-            ("Beschreibung des Produkts", "test &lt; test &gt; test &amp;"),
-        )
-
     def test_timeframe_is_displayed_correctly_as_tuple_of_strings(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
         self.assertTupleEqual(

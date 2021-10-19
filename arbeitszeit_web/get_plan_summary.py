@@ -1,11 +1,7 @@
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, Tuple
 
-from flask import Markup
-
 from arbeitszeit.use_cases.get_plan_summary import PlanSummarySuccess
-
-from .prepare_strings_for_html import text_to_html
 
 
 @dataclass
@@ -14,7 +10,7 @@ class GetPlanSummaryViewModel:
     is_active: Tuple[str, str]
     planner_id: Tuple[str, str]
     product_name: Tuple[str, str]
-    description: Tuple[str, Markup]
+    description: Tuple[str, str]
     timeframe: Tuple[str, str]
     production_unit: Tuple[str, str]
     amount: Tuple[str, str]
@@ -35,10 +31,7 @@ class GetPlanSummarySuccessPresenter:
             is_active=("Status", "Aktiv" if response.is_active else "Inaktiv"),
             planner_id=("Planender Betrieb", str(response.planner_id)),
             product_name=("Name des Produkts", response.product_name),
-            description=(
-                "Beschreibung des Produkts",
-                text_to_html(response.description),
-            ),
+            description=("Beschreibung des Produkts", response.description),
             timeframe=("Planungszeitraum (Tage)", str(response.timeframe)),
             production_unit=("Kleinste Abgabeeinheit", response.production_unit),
             amount=("Menge", str(response.amount)),
