@@ -61,7 +61,7 @@ class ResultTableRow:
     plan_summary_url: str
     product_name: str
     seller_name: str
-    product_description: str
+    product_description: List[str]
     price_per_unit: str
     is_public_service: str
     contact_email: str
@@ -103,7 +103,7 @@ class QueryProductsPresenter:
                         ),
                         product_name=result.product_name,
                         seller_name=result.seller_name,
-                        product_description=result.product_description,
+                        product_description=result.product_description.splitlines(),
                         price_per_unit=f"{result.price_per_unit} Std.",
                         is_public_service="Öffentlich"
                         if result.is_public_service

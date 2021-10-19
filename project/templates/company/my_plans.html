@@ -39,7 +39,7 @@ messages %}
       <tr>
         <td>{{ plan.id }}</td>
         <td>{{ plan.prd_name }}</td>
-        <td>{{ plan.description }}</td>
+        <td>{% for paragraph in plan.description %}{{ paragraph }}<br>{% endfor %}</td>
         <td>{{ plan.means_cost }}</td>
         <td>{{ plan.resource_cost }}</td>
         <td>{{ plan.labour_cost }}</td>
@@ -86,7 +86,7 @@ messages %}
       <tr>
         <td>{{ plan.id }}</td>
         <td>{{ plan.prd_name }}</td>
-        <td>{{ plan.description }}</td>
+        <td>{% for paragraph in plan.description %}{{ paragraph }}<br>{% endfor %}</td>
         <td>{{ plan.means_cost }}</td>
         <td>{{ plan.resource_cost }}</td>
         <td>{{ plan.labour_cost }}</td>
@@ -132,7 +132,7 @@ messages %}
       <tr>
         <td>{{ plan.id }}</td>
         <td>{{ plan.prd_name }}</td>
-        <td>{{ plan.description }}</td>
+        <td>{% for paragraph in plan.description %}{{ paragraph }}<br>{% endfor %}</td>
         <td>{{ plan.means_cost }}</td>
         <td>{{ plan.resource_cost }}</td>
         <td>{{ plan.labour_cost }}</td>

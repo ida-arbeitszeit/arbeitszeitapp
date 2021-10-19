@@ -9,7 +9,7 @@ from arbeitszeit.use_cases.show_my_plans import ShowMyPlansResponse
 class NonActivePlansRow:
     id: str
     prd_name: str
-    description: str
+    description: List[str]
     means_cost: str
     resource_cost: str
     labour_cost: str
@@ -28,7 +28,7 @@ class NonActivePlansTable:
 class ActivePlansRow:
     id: str
     prd_name: str
-    description: str
+    description: List[str]
     means_cost: str
     resource_cost: str
     labour_cost: str
@@ -49,7 +49,7 @@ class ActivePlansTable:
 class ExpiredPlansRow:
     id: str
     prd_name: str
-    description: str
+    description: List[str]
     means_cost: str
     resource_cost: str
     labour_cost: str
@@ -95,7 +95,7 @@ class ShowMyPlansPresenter:
                     NonActivePlansRow(
                         id=f"{plan.id}",
                         prd_name=f"{plan.prd_name}",
-                        description=f"{plan.description}",
+                        description=plan.description.splitlines(),
                         means_cost=f"{plan.production_costs.means_cost}",
                         resource_cost=f"{plan.production_costs.resource_cost}",
                         labour_cost=f"{plan.production_costs.labour_cost}",
@@ -113,7 +113,7 @@ class ShowMyPlansPresenter:
                     ActivePlansRow(
                         id=f"{plan.id}",
                         prd_name=f"{plan.prd_name}",
-                        description=f"{plan.description}",
+                        description=plan.description.splitlines(),
                         means_cost=f"{plan.production_costs.means_cost}",
                         resource_cost=f"{plan.production_costs.resource_cost}",
                         labour_cost=f"{plan.production_costs.labour_cost}",
@@ -133,7 +133,7 @@ class ShowMyPlansPresenter:
                     ExpiredPlansRow(
                         id=f"{plan.id}",
                         prd_name=f"{plan.prd_name}",
-                        description=f"{plan.description}",
+                        description=plan.description.splitlines(),
                         means_cost=f"{plan.production_costs.means_cost}",
                         resource_cost=f"{plan.production_costs.resource_cost}",
                         labour_cost=f"{plan.production_costs.labour_cost}",
