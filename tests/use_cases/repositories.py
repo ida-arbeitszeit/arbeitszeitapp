@@ -355,6 +355,19 @@ class CompanyRepository(interfaces.CompanyRepository):
     def count_registered_companies(self) -> int:
         return len(self.companies)
 
+    def query_companies_by_name(self, query: str) -> Iterator[Company]:
+        for company in self.companies.values():
+            if query.lower() in company.name.lower():
+                yield company
+
+    def query_companies_by_email(self, query: str) -> Iterator[Company]:
+        for email, company in self.companies.items():
+            if query.lower() in email.lower():
+                yield company
+
+    def get_all_companies(self) -> Iterator[Company]:
+        yield from self.companies.values()
+
 
 @singleton
 class PlanRepository(interfaces.PlanRepository):

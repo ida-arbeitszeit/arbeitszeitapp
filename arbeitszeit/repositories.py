@@ -287,6 +287,18 @@ class CompanyRepository(ABC):
     def count_registered_companies(self) -> int:
         pass
 
+    @abstractmethod
+    def query_companies_by_name(self, query: str) -> Iterator[Company]:
+        pass
+
+    @abstractmethod
+    def query_companies_by_email(self, query: str) -> Iterator[Company]:
+        pass
+
+    @abstractmethod
+    def get_all_companies(self) -> Iterator[Company]:
+        pass
+
 
 class PlanDraftRepository(ABC):
     @abstractmethod
