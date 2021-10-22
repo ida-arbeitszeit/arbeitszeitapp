@@ -126,10 +126,6 @@ class UpdatePlansAndPayout:
         assert plan.expiration_date
         return self.datetime_service.now() > plan.expiration_date
 
-    def _wages_are_overdue(self, plan: Plan) -> bool:
-        assert plan.active_days
-        return plan.payout_count < plan.active_days
-
     def _delete_obsolete_offers(self, plan: Plan) -> None:
         expired_offers = self.offer_repository.get_all_offers_belonging_to(plan.id)
         for offer in expired_offers:
