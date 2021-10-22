@@ -6,7 +6,7 @@ from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
-from arbeitszeit.entities import Account, Plan, ProductionCosts, SocialAccounting
+from arbeitszeit.entities import Plan, ProductionCosts, SocialAccounting
 from arbeitszeit.repositories import (
     OfferRepository,
     PlanRepository,
@@ -24,50 +24,65 @@ class UpdatePlansAndPayout:
     offer_repository: OfferRepository
 
     def __call__(self) -> None:
-        self._calculate_plan_expiration()
-        self._payout_work_certificates()
+        """
+        This function should be called at least once per day,
+        preferably more often (e.g. every hour).
+        """
+        payout_factor = self._calculate_payout_factor()
+        self._calculate_plan_expiration(payout_factor)
+        for plan in self.plan_repository.all_plans_approved_active_and_not_expired():
+            self._payout_work_certificates(plan, payout_factor)
 
-    def _calculate_plan_expiration(self) -> None:
-        """
-        Updates plan expiration dates and deactivates expired plans.
-        Deletes offers associated with expired plans.
-        """
+    def _calculate_plan_expiration(self, payout_factor: Decimal) -> None:
         for plan in self.plan_repository.all_active_plans():
             assert plan.is_active, "Plan is not active!"
             assert plan.activation_date, "Plan has no activation date!"
+
             expiration_time = plan.activation_date + datetime.timedelta(
                 days=int(plan.timeframe)
             )
-            days_relative = (expiration_time - self.datetime_service.now()).days
-            self.plan_repository.set_expiration_relative(plan, days_relative)
-            self.plan_repository.set_expiration_date(plan, expiration_time)
-            assert plan.expiration_date
-            if self.datetime_service.now() > plan.expiration_date:
-                self.plan_repository.set_plan_as_expired(plan)
-                expired_offers = self.offer_repository.get_all_offers_belonging_to(
-                    plan.id
-                )
-                for offer in expired_offers:
-                    self.offer_repository.delete_offer(offer.id)
+            days_until_exp = (expiration_time - self.datetime_service.now()).days
 
-    def _payout_work_certificates(self) -> None:
-        """
-        The payout amount equals to payout factor times labour costs per day.
-        Payout takes place once every day of a plan's planning cycle, except the last day.
-        """
-        payout_factor = self._calculate_payout_factor()
-        for plan in self.plan_repository.all_plans_approved_active_and_not_expired():
-            if self._last_certificate_payout_was_today(plan):
-                continue
-            if self._plan_expires_today(plan):
-                continue
-            amount = payout_factor * plan.production_costs.labour_cost / plan.timeframe
-            self._create_transaction_from_social_accounting(
-                plan, plan.planner.work_account, amount
+            self.plan_repository.set_active_days(
+                plan, self._calculate_active_days(plan)
             )
-            self.plan_repository.set_last_certificate_payout(
-                plan, self.datetime_service.now()
-            )
+            self.plan_repository.set_expiration_relative(plan, days_until_exp)
+            self.plan_repository.set_expiration_date(plan, expiration_time)
+
+            assert plan.expiration_date
+            assert plan.active_days is not None
+            if self._plan_is_expired(plan):
+                """
+                payout overdue wages, if there are any
+                set plan as expired
+                delete obsolete offers
+                """
+                while plan.payout_count < plan.active_days:
+                    self._payout(plan, payout_factor)
+                self.plan_repository.set_plan_as_expired(plan)
+                self._delete_obsolete_offers(plan)
+
+    def _payout_work_certificates(self, plan: Plan, payout_factor: Decimal) -> None:
+        """
+        Plans have an attribute "timeframe", that describe the length of the
+        planning cycle in days.
+
+        Work Certificates ("wages") have to be paid out daily
+        and upfront (approx. at the time of day of the original plan activation) until
+        the plan expires.
+
+        The daily payout amount = current payout factor * total labour costs / plan timeframe.
+
+        Thus, at any point in time, the number of payouts
+        a company has received for a plan must be larger (by one)
+        than the number of full days the plan has been active.
+        (Only after expiration both numbers are equal.)
+
+        If this requirement is not met, a payout is triggered to increase the number of payouts by one.
+        """
+        assert plan.active_days is not None
+        while plan.payout_count <= plan.active_days:
+            self._payout(plan, payout_factor)
 
     def _calculate_payout_factor(self) -> Decimal:
         # payout factor = (A − ( P o + R o )) / (A + A o)
@@ -96,23 +111,36 @@ class UpdatePlansAndPayout:
         payout_factor = numerator / denominator
         return Decimal(payout_factor)
 
-    def _last_certificate_payout_was_today(self, plan: Plan) -> bool:
-        if plan.last_certificate_payout is not None:
-            return plan.last_certificate_payout.date() == self.datetime_service.today()
-        return False
-
-    def _plan_expires_today(self, plan: Plan) -> bool:
-        if plan.expiration_date is not None:
-            return plan.expiration_date.date() == self.datetime_service.today()
-        return False
-
-    def _create_transaction_from_social_accounting(
-        self, plan: Plan, account: Account, amount: Decimal
-    ) -> None:
+    def _payout(self, plan: Plan, payout_factor: Decimal) -> None:
+        amount = payout_factor * plan.production_costs.labour_cost / plan.timeframe
         self.transaction_repository.create_transaction(
             date=self.datetime_service.now(),
             sending_account=self.social_accounting.account,
-            receiving_account=account,
+            receiving_account=plan.planner.work_account,
             amount=round(amount, 2),
             purpose=f"Plan-Id: {plan.id}",
         )
+        self.plan_repository.increase_payout_count_by_one(plan)
+
+    def _plan_is_expired(self, plan: Plan) -> bool:
+        assert plan.expiration_date
+        return self.datetime_service.now() > plan.expiration_date
+
+    def _wages_are_overdue(self, plan: Plan) -> bool:
+        assert plan.active_days
+        return plan.payout_count < plan.active_days
+
+    def _delete_obsolete_offers(self, plan: Plan) -> None:
+        expired_offers = self.offer_repository.get_all_offers_belonging_to(plan.id)
+        for offer in expired_offers:
+            self.offer_repository.delete_offer(offer.id)
+
+    def _calculate_active_days(self, plan: Plan) -> int:
+        """
+        returns the full days a plan has been active,
+        not considering days exceeding it's timeframe
+        """
+        assert plan.activation_date
+        active_days = (self.datetime_service.now() - plan.activation_date).days
+        active_days = plan.timeframe if (plan.timeframe < active_days) else active_days
+        return active_days

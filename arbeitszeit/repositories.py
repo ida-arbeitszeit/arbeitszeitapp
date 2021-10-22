@@ -81,7 +81,11 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def set_last_certificate_payout(self, plan: Plan, last_payout: datetime) -> None:
+    def set_active_days(self, plan: Plan, full_active_days: int) -> None:
+        pass
+
+    @abstractmethod
+    def increase_payout_count_by_one(self, plan: Plan) -> None:
         pass
 
     @abstractmethod
