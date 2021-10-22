@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterable, Iterator, List, Optional, Union
-from uuid import UUID
+from typing import Dict, Iterable, Iterator, List, Optional, Union
+from uuid import UUID, uuid4
+
+from injector import inject, singleton
 
 from arbeitszeit.entities import (
     Account,
@@ -10,6 +12,7 @@ from arbeitszeit.entities import (
     Company,
     CompanyWorkInvite,
     Member,
+    Message,
     Plan,
     PlanDraft,
     ProductionCosts,
@@ -19,6 +22,7 @@ from arbeitszeit.entities import (
     SocialAccounting,
     Transaction,
 )
+from arbeitszeit.user_action import UserAction
 
 
 class CompanyWorkerRepository(ABC):
@@ -333,3 +337,33 @@ class WorkerInviteRepository(ABC):
     @abstractmethod
     def delete_invite(self, id: UUID) -> None:
         pass
+
+
+@singleton
+class MessageRepository:
+    @inject
+    def __init__(self) -> None:
+        self.messages: Dict[UUID, Message] = dict()
+
+    def create_message(
+        self,
+        addressee: UUID,
+        title: str,
+        content: str,
+        sender_remarks: Optional[str],
+        reference: Optional[UserAction],
+    ) -> Message:
+        message_id = uuid4()
+        message = Message(
+            id=message_id,
+            addressee=addressee,
+            title=title,
+            content=content,
+            sender_remarks=sender_remarks,
+            user_action=reference,
+        )
+        self.messages[message_id] = message
+        return message
+
+    def get_by_id(self, id: UUID) -> Optional[Message]:
+        return self.messages.get(id)

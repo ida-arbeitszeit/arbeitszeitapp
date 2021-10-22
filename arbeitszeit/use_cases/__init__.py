@@ -8,6 +8,11 @@ from .answer_company_work_invite import (
     AnswerCompanyWorkInviteRequest,
     AnswerCompanyWorkInviteResponse,
 )
+from .check_for_unread_messages import (
+    CheckForUnreadMessages,
+    CheckForUnreadMessagesRequest,
+    CheckForUnreadMessagesResponse,
+)
 from .create_offer import CreateOffer, CreateOfferRequest, CreateOfferResponse
 from .create_plan_draft import (
     CreatePlanDraft,
@@ -42,6 +47,13 @@ from .query_products import (
     QueryProductsRequest,
 )
 from .query_purchases import PurchaseQueryResponse, QueryPurchases
+from .read_message import (
+    ReadMessage,
+    ReadMessageFailure,
+    ReadMessageRequest,
+    ReadMessageResponse,
+    ReadMessageSuccess,
+)
 from .register_company import RegisterCompany
 from .register_member import RegisterMember
 from .seek_approval import SeekApproval
@@ -55,6 +67,9 @@ __all__ = [
     "AnswerCompanyWorkInvite",
     "AnswerCompanyWorkInviteRequest",
     "AnswerCompanyWorkInviteResponse",
+    "CheckForUnreadMessages",
+    "CheckForUnreadMessagesRequest",
+    "CheckForUnreadMessagesResponse",
     "CreateOffer",
     "CreateOfferRequest",
     "CreateOfferResponse",
@@ -92,6 +107,11 @@ __all__ = [
     "QueryProducts",
     "QueryProductsRequest",
     "QueryPurchases",
+    "ReadMessage",
+    "ReadMessageFailure",
+    "ReadMessageRequest",
+    "ReadMessageResponse",
+    "ReadMessageSuccess",
     "RegisterCompany",
     "RegisterMember",
     "SeekApproval",
