@@ -12,6 +12,7 @@ from arbeitszeit.user_action import UserAction
 
 @dataclass
 class SocialAccounting:
+    id: UUID
     account: Account
 
 
@@ -187,6 +188,7 @@ class CompanyWorkInvite:
 @dataclass
 class Message:
     id: UUID
+    sender: Union[Member, Company, SocialAccounting]
     addressee: Union[Member, Company]
     title: str
     content: str

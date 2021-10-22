@@ -1,11 +1,12 @@
-from typing import Optional
+from typing import Optional, Union
 from unittest import TestCase
 
 from hypothesis import given, strategies
 
 from arbeitszeit import repositories as interfaces
+from arbeitszeit.entities import Company, Member, Message, SocialAccounting
 from arbeitszeit.user_action import UserAction
-from project.database.repositories import MessageRepository
+from project.database.repositories import AccountingRepository, MessageRepository
 from tests import strategies as custom_strategies
 from tests.data_generators import CompanyGenerator, MemberGenerator
 
@@ -15,21 +16,22 @@ from .dependency_injection import get_dependency_injector
 class MessageRepositoryTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
-        self.repo = self.injector.get(interfaces.MessageRepository)
-        self.member = self.injector.get(MemberGenerator).create_member()
+        self.repo: MessageRepository = self.injector.get(interfaces.MessageRepository)
+        self.social_accounting_repository = self.injector.get(AccountingRepository)
+        self.social_accounting = (
+            self.social_accounting_repository.get_or_create_social_accounting()
+        )
+        self.member_generator = self.injector.get(MemberGenerator)
+        self.company_generator = self.injector.get(CompanyGenerator)
+        self.addressee = self.member_generator.create_member()
+        self.sender = self.member_generator.create_member()
 
     def test_dependency_injection_returns_correct_type(self) -> None:
         repo = self.injector.get(interfaces.MessageRepository)
         self.assertIsInstance(repo, MessageRepository)
 
     def test_when_creating_a_message_it_can_be_retrieved_later_by_its_id(self) -> None:
-        expected_message = self.repo.create_message(
-            addressee=self.member,
-            title="test title",
-            content="test content",
-            sender_remarks=None,
-            reference=None,
-        )
+        expected_message = self._create_message()
         self.assertEqual(
             expected_message,
             self.repo.get_by_id(expected_message.id),
@@ -44,12 +46,8 @@ class MessageRepositoryTests(TestCase):
         self,
         expected_user_action: Optional[UserAction],
     ) -> None:
-        message = self.repo.create_message(
-            addressee=self.member,
-            title="test title",
-            content="test content",
-            sender_remarks=None,
-            reference=expected_user_action,
+        message = self._create_message(
+            user_action=expected_user_action,
         )
         self.assertEqual(
             message.user_action,
@@ -63,12 +61,8 @@ class MessageRepositoryTests(TestCase):
         self,
         expected_title: str,
     ) -> None:
-        message = self.repo.create_message(
-            addressee=self.member,
+        message = self._create_message(
             title=expected_title,
-            content="test content",
-            sender_remarks=None,
-            reference=None,
         )
         self.assertEqual(
             message.title,
@@ -82,12 +76,8 @@ class MessageRepositoryTests(TestCase):
         self,
         expected_content: str,
     ) -> None:
-        message = self.repo.create_message(
-            addressee=self.member,
-            title="test title",
+        message = self._create_message(
             content=expected_content,
-            sender_remarks=None,
-            reference=None,
         )
         self.assertEqual(
             message.content,
@@ -101,25 +91,55 @@ class MessageRepositoryTests(TestCase):
         self,
         expected_sender_remarks,
     ) -> None:
-        message = self.repo.create_message(
-            addressee=self.member,
-            title="test title",
-            content="test content",
+        message = self._create_message(
             sender_remarks=expected_sender_remarks,
-            reference=None,
         )
         self.assertEqual(
             message.sender_remarks,
             expected_sender_remarks,
         )
 
-    def test_company(self) -> None:
-        company = self.injector.get(CompanyGenerator).create_company()
-        message = self.repo.create_message(
+    def test_as_addressee_is_correctly_stored(self) -> None:
+        company = self.company_generator.create_company()
+        message = self._create_message(
             addressee=company,
-            title="test title",
-            content="test content",
-            sender_remarks=None,
-            reference=None,
         )
         self.assertEqual(message.addressee, company)
+
+    def test_member_sender_is_stored_correctly(self) -> None:
+        sender = self.member_generator.create_member()
+        message = self._create_message(
+            sender=sender,
+        )
+        self.assertEqual(message.sender, sender)
+
+    def test_social_accounting_sender_is_stored_correctly(self) -> None:
+        message = self._create_message(sender=self.social_accounting)
+        self.assertEqual(message.sender, self.social_accounting)
+
+    def test_company_sender_is_stored_correctly(self) -> None:
+        sender = self.company_generator.create_company()
+        message = self._create_message(sender=sender)
+        self.assertEqual(message.sender, sender)
+
+    def _create_message(
+        self,
+        sender: Union[None, Company, Member, SocialAccounting] = None,
+        addressee: Union[None, Member, Company] = None,
+        title: str = "test title",
+        content: str = "test content",
+        sender_remarks: Optional[str] = None,
+        user_action: Optional[UserAction] = None,
+    ) -> Message:
+        if sender is None:
+            sender = self.sender
+        if addressee is None:
+            addressee = self.addressee
+        return self.repo.create_message(
+            sender=sender,
+            addressee=addressee,
+            title=title,
+            content=content,
+            sender_remarks=sender_remarks,
+            reference=user_action,
+        )

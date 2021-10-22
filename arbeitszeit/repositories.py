@@ -353,6 +353,7 @@ class MessageRepository(ABC):
     @abstractmethod
     def create_message(
         self,
+        sender: Union[Member, Company, SocialAccounting],
         addressee: Union[Member, Company],
         title: str,
         content: str,

@@ -182,6 +182,7 @@ class CompanyWorkInvite(db.Model):
 
 class Message(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
+    sender = db.Column(db.String)
     addressee = db.Column(db.String)
     title = db.Column(db.String)
     content = db.Column(db.String)

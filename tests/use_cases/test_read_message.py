@@ -27,6 +27,7 @@ class ReadMessageTests(TestCase):
         self.message_repository = self.injector.get(MessageRepository)  # type: ignore
         self.addressee = self.member_generator.create_member()
         self.other_member = self.member_generator.create_member()
+        self.sender = self.member_generator.create_member()
 
     def test_reading_non_existing_message_as_non_existing_user_failes(self) -> None:
         response = self.read_message(
@@ -190,6 +191,7 @@ class ReadMessageTests(TestCase):
         if addressee is None:
             addressee = self.addressee
         return self.message_repository.create_message(
+            sender=self.sender,
             addressee=addressee,
             title=title,
             content=content,

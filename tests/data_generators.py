@@ -139,6 +139,7 @@ class SocialAccountingGenerator:
 
     def create_social_accounting(self) -> SocialAccounting:
         return SocialAccounting(
+            id=uuid4(),
             account=self.account_generator.create_account(
                 account_type=AccountTypes.accounting
             ),

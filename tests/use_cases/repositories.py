@@ -702,6 +702,7 @@ class MessageRepository(interfaces.MessageRepository):
 
     def create_message(
         self,
+        sender: Union[Company, Member, SocialAccounting],
         addressee: Union[Member, Company],
         title: str,
         content: str,
@@ -710,6 +711,7 @@ class MessageRepository(interfaces.MessageRepository):
     ) -> Message:
         message_id = uuid4()
         message = Message(
+            sender=sender,
             id=message_id,
             addressee=addressee,
             title=title,
