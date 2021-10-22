@@ -8,6 +8,7 @@ from enum import Enum
 from flask_login import UserMixin
 
 from arbeitszeit import entities
+from arbeitszeit.user_action import UserAction
 from project.extensions import db
 
 
@@ -177,3 +178,12 @@ class CompanyWorkInvite(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
     company = db.Column(db.String, db.ForeignKey("company.id"), nullable=False)
     member = db.Column(db.String, db.ForeignKey("member.id"), nullable=False)
+
+
+class Message(db.Model):
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
+    addressee = db.Column(db.String)
+    title = db.Column(db.String)
+    content = db.Column(db.String)
+    user_action = db.Column(db.Enum(UserAction), nullable=True)
+    sender_remarks = db.Column(db.String, nullable=True)

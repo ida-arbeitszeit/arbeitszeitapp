@@ -24,7 +24,7 @@ class ReadMessageTests(TestCase):
         self.injector = get_dependency_injector()
         self.read_message = self.injector.get(ReadMessage)
         self.member_generator = self.injector.get(MemberGenerator)
-        self.message_repository = self.injector.get(MessageRepository)
+        self.message_repository = self.injector.get(MessageRepository)  # type: ignore
         self.addressee = self.member_generator.create_member()
         self.other_member = self.member_generator.create_member()
 
@@ -190,7 +190,7 @@ class ReadMessageTests(TestCase):
         if addressee is None:
             addressee = self.addressee
         return self.message_repository.create_message(
-            addressee=addressee.id,
+            addressee=addressee,
             title=title,
             content=content,
             sender_remarks=sender_remarks,

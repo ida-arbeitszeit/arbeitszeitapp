@@ -41,7 +41,7 @@ class ReadMessage:
         message = self.message_repository.get_by_id(request.message_id)
         if message is None:
             raise ReadMessageFailure()
-        if message.addressee != reader.id:
+        if message.addressee != reader:
             raise ReadMessageFailure()
         return message
 

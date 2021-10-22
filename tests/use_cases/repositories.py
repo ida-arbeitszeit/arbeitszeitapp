@@ -18,6 +18,7 @@ from arbeitszeit.entities import (
     Company,
     CompanyWorkInvite,
     Member,
+    Message,
     Plan,
     PlanDraft,
     ProductionCosts,
@@ -27,6 +28,7 @@ from arbeitszeit.entities import (
     SocialAccounting,
     Transaction,
 )
+from arbeitszeit.user_action import UserAction
 
 
 @singleton
@@ -690,3 +692,33 @@ class WorkerInviteRepository(interfaces.WorkerInviteRepository):
 
     def delete_invite(self, id: UUID) -> None:
         del self.invites[id]
+
+
+@singleton
+class MessageRepository(interfaces.MessageRepository):
+    @inject
+    def __init__(self) -> None:
+        self.messages: Dict[UUID, Message] = dict()
+
+    def create_message(
+        self,
+        addressee: Union[Member, Company],
+        title: str,
+        content: str,
+        sender_remarks: Optional[str],
+        reference: Optional[UserAction],
+    ) -> Message:
+        message_id = uuid4()
+        message = Message(
+            id=message_id,
+            addressee=addressee,
+            title=title,
+            content=content,
+            sender_remarks=sender_remarks,
+            user_action=reference,
+        )
+        self.messages[message_id] = message
+        return message
+
+    def get_by_id(self, id: UUID) -> Optional[Message]:
+        return self.messages.get(id)

@@ -13,12 +13,14 @@ from werkzeug.security import generate_password_hash
 
 from arbeitszeit import entities, repositories
 from arbeitszeit.decimal import decimal_sum
+from arbeitszeit.user_action import UserAction
 from project.error import PlanNotFound, ProductOfferNotFound
 from project.models import (
     Account,
     Company,
     CompanyWorkInvite,
     Member,
+    Message,
     Offer,
     Plan,
     PlanDraft,
@@ -939,3 +941,55 @@ class WorkerInviteRepository(repositories.WorkerInviteRepository):
 
     def delete_invite(self, id: UUID) -> None:
         CompanyWorkInvite.query.filter_by(id=str(id)).delete()
+
+
+@inject
+@dataclass
+class MessageRepository(repositories.MessageRepository):
+    db: SQLAlchemy
+    member_repository: MemberRepository
+    company_repository: CompanyRepository
+
+    def get_by_id(self, id: UUID) -> Optional[entities.Message]:
+        orm_message = Message.query.filter_by(id=str(id)).first()
+        if orm_message is None:
+            return None
+        return self.object_from_orm(orm_message)
+
+    def object_from_orm(self, message: Message) -> entities.Message:
+        addressee = self._get_user(UUID(message.addressee))
+        if addressee is None:
+            raise Exception(
+                "Internal error, addressee of message could not be retrieved"
+            )
+        return entities.Message(
+            id=UUID(message.id),
+            title=message.title,
+            content=message.content,
+            addressee=addressee,
+            sender_remarks=message.sender_remarks,
+            user_action=message.user_action,
+        )
+
+    def _get_user(self, id: UUID) -> Union[None, entities.Member, entities.Company]:
+        member = self.member_repository.get_by_id(id)
+        return member or self.company_repository.get_by_id(id)
+
+    def create_message(
+        self,
+        addressee: Union[entities.Member, entities.Company],
+        title: str,
+        content: str,
+        sender_remarks: Optional[str],
+        reference: Optional[UserAction],
+    ) -> entities.Message:
+        message = Message(
+            id=str(uuid4()),
+            addressee=str(addressee.id),
+            title=title,
+            content=content,
+            user_action=reference,
+            sender_remarks=sender_remarks,
+        )
+        self.db.session.add(message)
+        return self.object_from_orm(message)

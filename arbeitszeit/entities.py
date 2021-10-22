@@ -187,7 +187,7 @@ class CompanyWorkInvite:
 @dataclass
 class Message:
     id: UUID
-    addressee: UUID
+    addressee: Union[Member, Company]
     title: str
     content: str
     sender_remarks: Optional[str]
