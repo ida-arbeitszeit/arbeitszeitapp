@@ -195,6 +195,25 @@ class CompanyRepository(repositories.CompanyRepository):
     def count_registered_companies(self) -> int:
         return int(self.db.session.query(func.count(Company.id)).one()[0])
 
+    def query_companies_by_name(self, query: str) -> Iterator[entities.Company]:
+        return (
+            self.object_from_orm(company)
+            for company in Company.query.filter(
+                Company.name.ilike("%" + query + "%")
+            ).all()
+        )
+
+    def query_companies_by_email(self, query: str) -> Iterator[entities.Company]:
+        return (
+            self.object_from_orm(company)
+            for company in Company.query.filter(
+                Company.email.ilike("%" + query + "%")
+            ).all()
+        )
+
+    def get_all_companies(self) -> Iterator[entities.Company]:
+        return (self.object_from_orm(company) for company in Company.query.all())
+
 
 @inject
 @dataclass

@@ -63,11 +63,26 @@ class GetPlanSummarySuccessPresenterTests(TestCase):
             ("Name des Produkts", TESTING_RESPONSE_MODEL.product_name),
         )
 
-    def test_description_is_displayed_correctly_as_tuple_of_strings(self):
+    def test_description_is_displayed_correctly_as_tuple_of_string_and_list_of_string(
+        self,
+    ):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
         self.assertTupleEqual(
             view_model.description,
-            ("Beschreibung des Produkts", TESTING_RESPONSE_MODEL.description),
+            ("Beschreibung des Produkts", [TESTING_RESPONSE_MODEL.description]),
+        )
+
+    def test_description_is_splitted_correctly_at_carriage_return_in_list_of_strings(
+        self,
+    ):
+        response = replace(
+            TESTING_RESPONSE_MODEL,
+            description="first paragraph\rsecond paragraph",
+        )
+        view_model = self.presenter.present(response)
+        self.assertTupleEqual(
+            view_model.description,
+            ("Beschreibung des Produkts", ["first paragraph", "second paragraph"]),
         )
 
     def test_timeframe_is_displayed_correctly_as_tuple_of_strings(self):

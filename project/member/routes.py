@@ -12,18 +12,28 @@ from arbeitszeit_web.pay_consumer_product import (
     PayConsumerProductController,
     PayConsumerProductPresenter,
 )
+from arbeitszeit_web.query_companies import (
+    QueryCompaniesController,
+    QueryCompaniesPresenter,
+)
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
 from arbeitszeit_web.query_products import (
     QueryProductsController,
     QueryProductsPresenter,
 )
 from project.database import AccountRepository, MemberRepository, commit_changes
-from project.forms import PayConsumerProductForm, PlanSearchForm, ProductSearchForm
+from project.forms import (
+    CompanySearchForm,
+    PayConsumerProductForm,
+    PlanSearchForm,
+    ProductSearchForm,
+)
 from project.models import Member
 from project.url_index import MemberUrlIndex
 from project.views import (
     Http404View,
     PayConsumerProductView,
+    QueryCompaniesView,
     QueryPlansView,
     QueryProductsView,
 )
@@ -70,6 +80,23 @@ def query_plans(
     search_form = PlanSearchForm(request.form)
     view = QueryPlansView(
         search_form, query_plans, presenter, controller, template_name
+    )
+    if request.method == "POST":
+        return view.respond_to_post()
+    else:
+        return view.respond_to_get()
+
+
+@MemberRoute("/member/query_companies", methods=["GET", "POST"])
+def query_companies(
+    query_companies: use_cases.QueryCompanies,
+    controller: QueryCompaniesController,
+):
+    presenter = QueryCompaniesPresenter()
+    template_name = "member/query_companies.html"
+    search_form = CompanySearchForm(request.form)
+    view = QueryCompaniesView(
+        search_form, query_companies, presenter, controller, template_name
     )
     if request.method == "POST":
         return view.respond_to_post()

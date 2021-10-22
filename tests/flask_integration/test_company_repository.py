@@ -1,10 +1,18 @@
+from typing import List
 from uuid import uuid4
 
-from arbeitszeit.entities import AccountTypes
+from pytest import raises
+from sqlalchemy.exc import IntegrityError
+
+from arbeitszeit.entities import AccountTypes, Company
 from project.database.repositories import AccountRepository, CompanyRepository
 from tests.data_generators import CompanyGenerator
 
 from .dependency_injection import injection_test
+
+
+def company_in_companies(company: Company, companies: List[Company]) -> bool:
+    return company.id in [c.id for c in companies]
 
 
 @injection_test
@@ -84,3 +92,105 @@ def test_count_one_registered_company_if_one_was_created(
 ) -> None:
     generator.create_company()
     assert repository.count_registered_companies() == 1
+
+
+@injection_test
+def test_that_can_not_register_company_with_same_email_twice(
+    repository: CompanyRepository,
+    generator: CompanyGenerator,
+):
+    with raises(IntegrityError):
+        generator.create_company(email="company@provider.de")
+        generator.create_company(email="company@provider.de")
+
+
+@injection_test
+def test_that_get_all_companies_returns_all_companies(
+    repository: CompanyRepository,
+    generator: CompanyGenerator,
+):
+    expected_company1 = generator.create_company(email="company1@provider.de")
+    expected_company2 = generator.create_company(email="company2@provider.de")
+    all_companies = list(repository.get_all_companies())
+    assert company_in_companies(expected_company1, all_companies)
+    assert company_in_companies(expected_company2, all_companies)
+
+
+@injection_test
+def test_query_companies_by_name_matching_exactly(
+    repository: CompanyRepository,
+    generator: CompanyGenerator,
+):
+    expected_company = generator.create_company(
+        name="Company1", email="company1@provider.de"
+    )
+    unexpected_company = generator.create_company(
+        name="Company2", email="company2@provider.de"
+    )
+    companies_by_name = list(repository.query_companies_by_name("Company1"))
+    assert company_in_companies(expected_company, companies_by_name)
+    assert not company_in_companies(unexpected_company, companies_by_name)
+
+
+@injection_test
+def test_query_companies_by_name_with_matching_substring(
+    repository: CompanyRepository,
+    generator: CompanyGenerator,
+):
+    expected_company = generator.create_company(
+        name="Company One", email="company1@provider.de"
+    )
+    unexpected_company = generator.create_company(
+        name="Company Two", email="company2@provider.de"
+    )
+    companies_by_name = list(repository.query_companies_by_name("One"))
+    assert company_in_companies(expected_company, companies_by_name)
+    assert not company_in_companies(unexpected_company, companies_by_name)
+
+
+@injection_test
+def test_query_companies_by_name_with_capitalization(
+    repository: CompanyRepository,
+    generator: CompanyGenerator,
+):
+    expected_company = generator.create_company(
+        name="COMPANY", email="company@provider.de"
+    )
+    companies_result = list(repository.query_companies_by_name("company"))
+    assert company_in_companies(expected_company, companies_result)
+
+
+@injection_test
+def test_query_companies_by_email_matching_exactly(
+    repository: CompanyRepository,
+    generator: CompanyGenerator,
+):
+    expected_company = generator.create_company(email="company1@provider.de")
+    unexpected_company = generator.create_company(email="company2@provider.de")
+    companies_by_email = list(
+        repository.query_companies_by_email("company1@provider.de")
+    )
+    assert company_in_companies(expected_company, companies_by_email)
+    assert not company_in_companies(unexpected_company, companies_by_email)
+
+
+@injection_test
+def test_query_companies_by_email_with_matching_substring(
+    repository: CompanyRepository,
+    generator: CompanyGenerator,
+):
+    expected_company = generator.create_company(email="company.one@provider.de")
+    unexpected_company = generator.create_company(email="company.two@provider.de")
+    companies_by_email = list(repository.query_companies_by_email("one"))
+    assert company_in_companies(expected_company, companies_by_email)
+    assert not company_in_companies(unexpected_company, companies_by_email)
+
+
+@injection_test
+def test_query_companies_by_email_with_capitalization(
+    repository: CompanyRepository,
+    generator: CompanyGenerator,
+):
+    expected_company = generator.create_company(email="company@provider.de")
+    companies_result = list(repository.query_companies_by_email("COMPANY"))
+    assert company_in_companies(expected_company, companies_result)

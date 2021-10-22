@@ -144,7 +144,8 @@
         </td>
         <td>{{ column.product_name }}</td>
         <td>{{ column.seller_name }}</td>
-        <td>{{ column.product_description }}</td>
+        <td>{% for paragraph in column.product_description %}{{ paragraph }}<br>{% endfor %}
+        </td>
         <td>{{ column.price_per_unit }}</td>
         <td>{{ column.is_public_service }}</td>
         <td>
@@ -291,31 +292,38 @@
 {% macro plan_summary(view_model) %}
 
 <div class="columns is-centered">
-  <div class="column is-half">
+  <div class="column is-two-thirds">
     <div class="content">
       <h1 class="title">
         Planinformationen
       </h1>
     </div>
     <br>
-    {% for key in view_model %}
-    <div class="level">
-      <div class="level-left">
-        <div class="level-item">
-          <p class="has-text-weight-semibold">{{ view_model[key][0] }}</p>
-        </div>
-      </div>
-      <div class="level-right">
-        <div class="level-item">
-          <p>{{ view_model[key][1] }}</p>
-        </div>
-      </div>
+    <div class="table-container">
+      <table class="table is-fullwidth">
+        <tbody>
+          {% for key in view_model %}
+          <tr>
+            <td class="has-text-left has-text-weight-semibold">{{ view_model[key][0] }}</td>
+            {% if key == "description" %}
+            <td class="has-text-left">{% for paragraph in view_model[key][1] %}{{ paragraph }}<br>{% endfor %}
+            </td>
+            {% else %}
+            <td class="has-text-left">{{ view_model[key][1] }}
+            </td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-    {% endfor %}
+
+
+
+
 
   </div>
 </div>
-
 {% endmacro %}
 
 
@@ -379,11 +387,76 @@
         </td>
         <td>{{ column.company_name }}</td>
         <td>{{ column.product_name }}</td>
-        <td>{{ column.description }}</td>
+        <td>{% for paragraph in column.description %}{{ paragraph }}<br>{% endfor %}</td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
+</div>
+{% endif %}
+{% endmacro %}
+
+
+{% macro query_companies(form, view_model) %}
+<div class="columns is-centered">
+    <div class="column is-one-third">
+        <h1 class="title">
+            Betriebe suchen
+        </h1>
+        {% if view_model.notifications or form.errors %}
+        <div class="box">
+            {% for notification in view_model.notifications %}
+            <div class="notification is-danger">{{ notification.text }}</div>
+            {% endfor %}
+            {% for field_name, field_errors in form.errors|dictsort if field_errors %}
+            {% for error in field_errors %}
+            <div class="notification is-danger">{{ form[field_name].label }} {{ error }}</div>
+            {% endfor %}
+            {% endfor %}
+        </div>
+        {% endif %}
+        <form method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="field">
+                <div class="control">
+                    <div class="select is-large is-fullwidth">
+                        {{ form.select }}
+                    </div>
+                </div>
+                <p class="help">Suche nach Name oder Email</p>
+            </div>
+            <div class="field">
+                <div class="control">
+                    {{ form.search(class_="input is-large") }}
+                </div>
+            </div>
+            <button class="button is-block is-primary is-large is-fullwidth">
+                Suche
+            </button>
+        </form>
+    </div>
+</div>
+{% if view_model.show_results %}
+<h1 class="title">
+    Ergebnisse
+</h1>
+<div class="table-container">
+    <table class="table is-fullwidth">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for column in view_model.results.rows %}
+            <tr>
+                <td>{{ column.company_name }}</td>
+                <td>{{ column.company_email }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endif %}
 {% endmacro %}
