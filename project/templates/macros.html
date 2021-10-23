@@ -144,7 +144,8 @@
         </td>
         <td>{{ column.product_name }}</td>
         <td>{{ column.seller_name }}</td>
-        <td>{{ column.product_description }}</td>
+        <td>{% for paragraph in column.product_description %}{{ paragraph }}<br>{% endfor %}
+        </td>
         <td>{{ column.price_per_unit }}</td>
         <td>{{ column.is_public_service }}</td>
         <td>
@@ -291,27 +292,35 @@
 {% macro plan_summary(view_model) %}
 
 <div class="columns is-centered">
-  <div class="column is-half">
+  <div class="column is-two-thirds">
     <div class="content">
       <h1 class="title">
         Planinformationen
       </h1>
     </div>
     <br>
-    {% for key in view_model %}
-    <div class="level">
-      <div class="level-left">
-        <div class="level-item">
-          <p class="has-text-weight-semibold">{{ view_model[key][0] }}</p>
-        </div>
-      </div>
-      <div class="level-right">
-        <div class="level-item">
-          <p>{{ view_model[key][1] }}</p>
-        </div>
-      </div>
+    <div class="table-container">
+      <table class="table is-fullwidth">
+        <tbody>
+          {% for key in view_model %}
+          <tr>
+            <td class="has-text-left has-text-weight-semibold">{{ view_model[key][0] }}</td>
+            {% if key == "description" %}
+            <td class="has-text-left">{% for paragraph in view_model[key][1] %}{{ paragraph }}<br>{% endfor %}
+            </td>
+            {% else %}
+            <td class="has-text-left">{{ view_model[key][1] }}
+            </td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-    {% endfor %}
+
+
+
+
 
   </div>
 </div>
@@ -378,7 +387,7 @@
         </td>
         <td>{{ column.company_name }}</td>
         <td>{{ column.product_name }}</td>
-        <td>{{ column.description }}</td>
+        <td>{% for paragraph in column.description %}{{ paragraph }}<br>{% endfor %}</td>
       </tr>
       {% endfor %}
     </tbody>
