@@ -52,15 +52,7 @@ class UpdatePlansAndPayout:
             assert plan.expiration_date
             assert plan.active_days is not None
             if self._plan_is_expired(plan):
-                """
-                payout overdue wages, if there are any
-                set plan as expired
-                delete obsolete offers
-                """
-                while plan.payout_count < plan.active_days:
-                    self._payout(plan, payout_factor)
-                self.plan_repository.set_plan_as_expired(plan)
-                self._delete_obsolete_offers(plan)
+                self._handle_expired_plan(plan, payout_factor)
 
     def _payout_work_certificates(self, plan: Plan, payout_factor: Decimal) -> None:
         """
@@ -126,6 +118,18 @@ class UpdatePlansAndPayout:
         assert plan.expiration_date
         return self.datetime_service.now() > plan.expiration_date
 
+    def _handle_expired_plan(self, plan: Plan, payout_factor: Decimal) -> None:
+        """
+        payout overdue wages, if there are any
+        set plan as expired
+        delete obsolete offers
+        """
+        assert plan.active_days
+        while plan.payout_count < plan.active_days:
+            self._payout(plan, payout_factor)
+        self.plan_repository.set_plan_as_expired(plan)
+        self._delete_obsolete_offers(plan)
+
     def _delete_obsolete_offers(self, plan: Plan) -> None:
         expired_offers = self.offer_repository.get_all_offers_belonging_to(plan.id)
         for offer in expired_offers:
@@ -137,6 +141,13 @@ class UpdatePlansAndPayout:
         not considering days exceeding it's timeframe
         """
         assert plan.activation_date
-        active_days = (self.datetime_service.now() - plan.activation_date).days
-        active_days = plan.timeframe if (plan.timeframe < active_days) else active_days
+        days_passed_since_activation = (
+            self.datetime_service.now() - plan.activation_date
+        ).days
+
+        active_days = (
+            plan.timeframe
+            if (plan.timeframe < days_passed_since_activation)
+            else days_passed_since_activation
+        )
         return active_days

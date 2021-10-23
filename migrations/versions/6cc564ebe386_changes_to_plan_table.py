@@ -18,9 +18,33 @@ depends_on = None
 
 def upgrade():
     op.add_column("plan", sa.Column("active_days", sa.Integer(), nullable=True))
+    # the following calculation of active_days will work with postgres, not with sqlite
+    # (because of the DATE_PART function.)
+    # this update-statement is equivalent to the _calculate_active_days() in Use Case UpdatePlansAndPayout
+    op.execute(
+        """
+    UPDATE plan SET active_days = 
+        CASE
+            WHEN timeframe < DATE_PART('day', now() - activation_date) THEN timeframe
+            ELSE DATE_PART('day', now() - activation_date) 
+        END
+    where is_active
+    """
+    )
 
+    # the payout_count can only be calculated from the active_days column.
+    # there is no guarantee that this calculation of payout_count is in fact correct
+    # because it might be that payouts have been skipped in the past
     op.add_column("plan", sa.Column("payout_count", sa.Integer(), nullable=True))
-    op.execute("UPDATE plan SET payout_count = 0")
+    op.execute(
+        """
+        UPDATE plan SET payout_count = 
+            CASE
+                WHEN active_days IS NOT NULL THEN active_days + 1
+                ELSE 0
+            END
+        """
+    )
     op.alter_column("plan", "payout_count", nullable=False)
 
     op.drop_column("plan", "last_certificate_payout")
