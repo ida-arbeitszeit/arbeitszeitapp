@@ -424,8 +424,11 @@ class PlanRepository(interfaces.PlanRepository):
     def set_expiration_relative(self, plan: Plan, days: int) -> None:
         plan.expiration_relative = days
 
-    def set_last_certificate_payout(self, plan: Plan, last_payout) -> None:
-        plan.last_certificate_payout = last_payout
+    def set_active_days(self, plan: Plan, full_active_days: int) -> None:
+        plan.active_days = full_active_days
+
+    def increase_payout_count_by_one(self, plan: Plan) -> None:
+        plan.payout_count += 1
 
     def all_active_plans(self) -> Iterator[Plan]:
         for plan in self.plans.values():
@@ -576,7 +579,8 @@ class PlanRepository(interfaces.PlanRepository):
             renewed=False,
             expiration_relative=None,
             expiration_date=None,
-            last_certificate_payout=None,
+            active_days=None,
+            payout_count=0,
         )
         self.plans[plan.id] = plan
         return plan

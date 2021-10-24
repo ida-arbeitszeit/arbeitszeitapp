@@ -118,7 +118,8 @@ class Plan:
     activation_date: Optional[datetime]
     expiration_relative: Optional[int]
     expiration_date: Optional[datetime]
-    last_certificate_payout: Optional[datetime]
+    active_days: Optional[int]
+    payout_count: int
 
     @property
     def price_per_unit(self) -> Decimal:
