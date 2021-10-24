@@ -718,9 +718,13 @@ class MessageRepository(interfaces.MessageRepository):
             content=content,
             sender_remarks=sender_remarks,
             user_action=reference,
+            is_read=False,
         )
         self.messages[message_id] = message
         return message
 
     def get_by_id(self, id: UUID) -> Optional[Message]:
         return self.messages.get(id)
+
+    def mark_as_read(self, message: Message) -> None:
+        message.is_read = True

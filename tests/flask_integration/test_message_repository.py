@@ -122,6 +122,19 @@ class MessageRepositoryTests(TestCase):
         message = self._create_message(sender=sender)
         self.assertEqual(message.sender, sender)
 
+    def test_that_message_can_be_marked_as_read(self) -> None:
+        message = self._create_message()
+        self.assertFalse(message.is_read)
+        self.repo.mark_as_read(message)
+        self.assertTrue(message.is_read)
+
+    def test_marking_a_message_as_read_is_persisted(self) -> None:
+        message = self._create_message()
+        self.repo.mark_as_read(message)
+        message_from_db = self.repo.get_by_id(message.id)
+        assert message_from_db
+        self.assertTrue(message_from_db.is_read)
+
     def _create_message(
         self,
         sender: Union[None, Company, Member, SocialAccounting] = None,

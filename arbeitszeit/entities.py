@@ -194,3 +194,4 @@ class Message:
     content: str
     sender_remarks: Optional[str]
     user_action: Optional[UserAction]
+    is_read: bool

@@ -981,6 +981,7 @@ class MessageRepository(repositories.MessageRepository):
             addressee=addressee,
             sender_remarks=message.sender_remarks,
             user_action=message.user_action,
+            is_read=message.is_read,
         )
 
     def _get_user(self, id: UUID) -> Union[None, entities.Member, entities.Company]:
@@ -1012,6 +1013,11 @@ class MessageRepository(repositories.MessageRepository):
             content=content,
             user_action=reference,
             sender_remarks=sender_remarks,
+            is_read=False,
         )
         self.db.session.add(message)
         return self.object_from_orm(message)
+
+    def mark_as_read(self, message: entities.Message) -> None:
+        message.is_read = True
+        Message.query.filter_by(id=str(message.id)).update({Message.is_read: True})

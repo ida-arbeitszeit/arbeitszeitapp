@@ -188,3 +188,4 @@ class Message(db.Model):
     content = db.Column(db.String)
     user_action = db.Column(db.Enum(UserAction), nullable=True)
     sender_remarks = db.Column(db.String, nullable=True)
+    is_read = db.Column(db.Boolean)

@@ -365,3 +365,7 @@ class MessageRepository(ABC):
     @abstractmethod
     def get_by_id(self, id: UUID) -> Optional[Message]:
         pass
+
+    @abstractmethod
+    def mark_as_read(self, message: Message) -> None:
+        pass

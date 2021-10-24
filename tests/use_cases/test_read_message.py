@@ -172,6 +172,17 @@ class ReadMessageTests(TestCase):
         )
         self.assertSuccess(response, lambda r: r.user_action is None)
 
+    def test_that_a_message_counts_as_being_read_after_the_user_reads_it(self) -> None:
+        message = self._create_message()
+        self.assertFalse(message.is_read)
+        self.read_message(
+            ReadMessageRequest(
+                reader_id=self.addressee.id,
+                message_id=message.id,
+            )
+        )
+        self.assertTrue(message.is_read)
+
     def assertSuccess(
         self,
         response: ReadMessageResponse,
