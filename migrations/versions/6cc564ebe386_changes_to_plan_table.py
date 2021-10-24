@@ -17,19 +17,27 @@ depends_on = None
 
 
 def upgrade():
+    bind = op.get_bind()
+
     op.add_column("plan", sa.Column("active_days", sa.Integer(), nullable=True))
-    # the following calculation of active_days will work with postgres, not with sqlite
-    # (because of the DATE_PART function.)
+    # the following calculation of active_days works with postgres and sqlite
     # this update-statement is equivalent to the _calculate_active_days() in Use Case UpdatePlansAndPayout
+    if bind.engine.name == "sqlite":
+        days_passed_since_activation = (
+            "Cast ((JulianDay('now') - JulianDay(activation_date)) As Integer"
+        )
+    else:
+        days_passed_since_activation = "DATE_PART('day', now() - activation_date)"
+
     op.execute(
+        f"""
+        UPDATE plan SET active_days = 
+            CASE
+                WHEN timeframe < {days_passed_since_activation} THEN timeframe
+                ELSE {days_passed_since_activation} 
+            END
+        WHERE is_active
         """
-    UPDATE plan SET active_days = 
-        CASE
-            WHEN timeframe < DATE_PART('day', now() - activation_date) THEN timeframe
-            ELSE DATE_PART('day', now() - activation_date) 
-        END
-    where is_active
-    """
     )
 
     # the payout_count can only be calculated from the active_days column.
