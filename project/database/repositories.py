@@ -526,8 +526,9 @@ class PlanRepository(repositories.PlanRepository):
             renewed=plan.renewed,
             expiration_relative=plan.expiration_relative,
             expiration_date=plan.expiration_date,
-            last_certificate_payout=plan.last_certificate_payout,
             activation_date=plan.activation_date,
+            active_days=plan.active_days,
+            payout_count=plan.payout_count,
         )
 
     def object_to_orm(self, plan: entities.Plan) -> Plan:
@@ -561,6 +562,8 @@ class PlanRepository(repositories.PlanRepository):
             is_active=False,
             activation_date=None,
             expiration_date=None,
+            active_days=None,
+            payout_count=0,
         )
         self.db.session.add(plan)
         return plan
@@ -610,13 +613,17 @@ class PlanRepository(repositories.PlanRepository):
         plan_orm = self.object_to_orm(plan)
         plan_orm.expiration_relative = days
 
-    def set_last_certificate_payout(
-        self, plan: entities.Plan, last_payout: datetime
-    ) -> None:
-        plan.last_certificate_payout = last_payout
+    def set_active_days(self, plan: entities.Plan, full_active_days: int) -> None:
+        plan.active_days = full_active_days
 
         plan_orm = self.object_to_orm(plan)
-        plan_orm.last_certificate_payout = last_payout
+        plan_orm.active_days = full_active_days
+
+    def increase_payout_count_by_one(self, plan: entities.Plan) -> None:
+        plan.payout_count += 1
+
+        plan_orm = self.object_to_orm(plan)
+        plan_orm.payout_count += 1
 
     def all_active_plans(self) -> Iterator[entities.Plan]:
         return (

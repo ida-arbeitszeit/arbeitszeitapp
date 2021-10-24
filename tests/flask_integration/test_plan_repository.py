@@ -243,3 +243,25 @@ def test_that_query_active_plans_by_substring_of_plan_id_returns_plan(
     returned_plan = list(repository.query_active_plans_by_plan_id(query))
     assert returned_plan
     assert returned_plan[0] == expected_plan
+
+
+@injection_test
+def test_that_active_days_are_set(
+    repository: PlanRepository,
+    plan_generator: PlanGenerator,
+) -> None:
+    plan = plan_generator.create_plan(activation_date=datetime.min)
+    assert plan.active_days is None
+    repository.set_active_days(plan, 3)
+    assert plan.active_days == 3
+
+
+@injection_test
+def test_that_payout_count_is_increased_by_one(
+    repository: PlanRepository,
+    plan_generator: PlanGenerator,
+) -> None:
+    plan = plan_generator.create_plan(activation_date=datetime.min)
+    assert plan.payout_count == 0
+    repository.increase_payout_count_by_one(plan)
+    assert plan.payout_count == 1
