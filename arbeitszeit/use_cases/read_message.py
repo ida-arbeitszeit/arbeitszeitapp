@@ -27,7 +27,7 @@ class ReadMessage:
             message = self._validate_request(request)
         except ReadMessageFailure as failure:
             return failure
-        message.is_read = True
+        self.message_repository.mark_as_read(message)
         return ReadMessageSuccess(
             message_title=message.title,
             message_content=message.content,

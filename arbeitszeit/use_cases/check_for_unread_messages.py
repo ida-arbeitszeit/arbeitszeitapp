@@ -3,7 +3,7 @@ from uuid import UUID
 
 from injector import inject
 
-from arbeitszeit.repositories import MemberRepository
+from arbeitszeit.repositories import MemberRepository, MessageRepository
 
 
 @dataclass
@@ -20,6 +20,7 @@ class CheckForUnreadMessagesResponse:
 @dataclass
 class CheckForUnreadMessages:
     member_repository: MemberRepository
+    message_repository: MessageRepository
 
     def __call__(
         self, request: CheckForUnreadMessagesRequest
@@ -27,4 +28,9 @@ class CheckForUnreadMessages:
         if self.member_repository.get_by_id(request.user) is None:
             return CheckForUnreadMessagesResponse(has_unread_messages=False)
         else:
-            return CheckForUnreadMessagesResponse(has_unread_messages=True)
+            has_unread_messages = self.message_repository.has_unread_messages_for_user(
+                request.user
+            )
+            return CheckForUnreadMessagesResponse(
+                has_unread_messages=has_unread_messages
+            )

@@ -369,3 +369,11 @@ class MessageRepository(ABC):
     @abstractmethod
     def mark_as_read(self, message: Message) -> None:
         pass
+
+    @abstractmethod
+    def has_unread_messages_for_user(self, user: UUID) -> bool:
+        pass
+
+    @abstractmethod
+    def get_messages_to_user(self, user: UUID) -> Iterable[Message]:
+        pass

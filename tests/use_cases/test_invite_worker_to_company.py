@@ -1,6 +1,7 @@
 from unittest import TestCase
 from uuid import uuid4
 
+from arbeitszeit.repositories import MessageRepository
 from arbeitszeit.use_cases import (
     CheckForUnreadMessages,
     CheckForUnreadMessagesRequest,
@@ -116,3 +117,21 @@ class InviteWorkerTests(TestCase):
             )
         )
         self.assertTrue(response.has_unread_messages)
+
+    def test_after_being_invited_the_member_has_received_a_message_with_the_correct_title(
+        self,
+    ) -> None:
+        message_repository: MessageRepository
+        self.invite_worker_to_company(
+            InviteWorkerToCompanyRequest(
+                company=self.company.id,
+                worker=self.member.id,
+            )
+        )
+        message_repository = self.injector.get(MessageRepository)  # type: ignore
+        messages = list(message_repository.get_messages_to_user(self.member.id))
+        self.assertEqual(len(messages), 1)
+        message = messages[0]
+        self.assertEqual(
+            message.title, f"Company {self.company.name} invited you to join them"
+        )

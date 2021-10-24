@@ -728,3 +728,14 @@ class MessageRepository(interfaces.MessageRepository):
 
     def mark_as_read(self, message: Message) -> None:
         message.is_read = True
+
+    def has_unread_messages_for_user(self, user: UUID) -> bool:
+        return any(
+            message.addressee.id == user and not message.is_read
+            for message in self.messages.values()
+        )
+
+    def get_messages_to_user(self, user: UUID) -> Iterable[Message]:
+        for message in self.messages.values():
+            if message.addressee.id == user:
+                yield message

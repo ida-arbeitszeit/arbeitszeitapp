@@ -1021,3 +1021,12 @@ class MessageRepository(repositories.MessageRepository):
     def mark_as_read(self, message: entities.Message) -> None:
         message.is_read = True
         Message.query.filter_by(id=str(message.id)).update({Message.is_read: True})
+
+    def has_unread_messages_for_user(self, user: UUID) -> bool:
+        return bool(Message.query.filter_by(addressee=str(user), is_read=False).count())
+
+    def get_messages_to_user(self, user: UUID) -> Iterable[entities.Message]:
+        return (
+            self.object_from_orm(m)
+            for m in Message.query.filter_by(addressee=str(user))
+        )
