@@ -38,7 +38,7 @@ the command::
 
     coverage run --source project,arbeitszeit,arbeitszeit_web  -m pytest && coverage html
 
-In some circumstances we use ``hytpothesis`` to check for edge cases.
+In some circumstances we use ``hypothesis`` to check for edge cases.
 By default ``hypothesis`` generates only 10 examples per test to keep
 testing times reasonably low. However if you want to run more examples
 you can configure ``hypothesis`` for "CI mode" where at least 1000
