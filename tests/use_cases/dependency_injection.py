@@ -29,6 +29,12 @@ class InMemoryModule(Module):
         return repo
 
     @provider
+    def provide_message_repo(
+        self, repo: repositories.MessageRepository
+    ) -> interfaces.MessageRepository:
+        return repo
+
+    @provider
     def provide_company_worker_repo(
         self, repo: repositories.CompanyWorkerRepository
     ) -> interfaces.CompanyWorkerRepository:

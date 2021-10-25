@@ -20,6 +20,7 @@ from project.database.repositories import (
     CompanyRepository,
     CompanyWorkerRepository,
     MemberRepository,
+    MessageRepository,
     PlanDraftRepository,
     PlanRepository,
     ProductOfferRepository,
@@ -95,6 +96,10 @@ def configure_injector(binder: Binder) -> None:
     binder.bind(
         SQLAlchemy,
         to=InstanceProvider(db),
+    )
+    binder.bind(
+        interfaces.MessageRepository,  # type: ignore
+        to=ClassProvider(MessageRepository),
     )
 
 

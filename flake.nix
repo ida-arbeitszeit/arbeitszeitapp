@@ -7,8 +7,7 @@
         let pkgs = import nixpkgs { inherit system; };
         in {
           devShell = pkgs.mkShell {
-            buildInputs = (with pkgs; [ pkgs.gcc postgresql ])
-              ++ (with pkgs.python39.pkgs; [ flake8 ]);
+            buildInputs = with pkgs; [ pkgs.gcc postgresql python39 ];
           };
         });
       systemIndependent = { };

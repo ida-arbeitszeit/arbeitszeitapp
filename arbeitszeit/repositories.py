@@ -10,6 +10,7 @@ from arbeitszeit.entities import (
     Company,
     CompanyWorkInvite,
     Member,
+    Message,
     Plan,
     PlanDraft,
     ProductionCosts,
@@ -19,6 +20,7 @@ from arbeitszeit.entities import (
     SocialAccounting,
     Transaction,
 )
+from arbeitszeit.user_action import UserAction
 
 
 class CompanyWorkerRepository(ABC):
@@ -348,4 +350,34 @@ class WorkerInviteRepository(ABC):
 
     @abstractmethod
     def delete_invite(self, id: UUID) -> None:
+        pass
+
+
+class MessageRepository(ABC):
+    @abstractmethod
+    def create_message(
+        self,
+        sender: Union[Member, Company, SocialAccounting],
+        addressee: Union[Member, Company],
+        title: str,
+        content: str,
+        sender_remarks: Optional[str],
+        reference: Optional[UserAction],
+    ) -> Message:
+        pass
+
+    @abstractmethod
+    def get_by_id(self, id: UUID) -> Optional[Message]:
+        pass
+
+    @abstractmethod
+    def mark_as_read(self, message: Message) -> None:
+        pass
+
+    @abstractmethod
+    def has_unread_messages_for_user(self, user: UUID) -> bool:
+        pass
+
+    @abstractmethod
+    def get_messages_to_user(self, user: UUID) -> Iterable[Message]:
         pass
