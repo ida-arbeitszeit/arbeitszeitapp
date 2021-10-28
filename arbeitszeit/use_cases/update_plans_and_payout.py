@@ -7,11 +7,7 @@ from injector import inject
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.entities import Plan, ProductionCosts, SocialAccounting
-from arbeitszeit.repositories import (
-    OfferRepository,
-    PlanRepository,
-    TransactionRepository,
-)
+from arbeitszeit.repositories import PlanRepository, TransactionRepository
 
 
 @inject
@@ -21,7 +17,6 @@ class UpdatePlansAndPayout:
     datetime_service: DatetimeService
     transaction_repository: TransactionRepository
     social_accounting: SocialAccounting
-    offer_repository: OfferRepository
 
     def __call__(self) -> None:
         """

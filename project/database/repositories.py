@@ -8,20 +8,19 @@ from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
 from injector import inject
-from sqlalchemy import desc, distinct, func
+from sqlalchemy import desc, func
 from werkzeug.security import generate_password_hash
 
 from arbeitszeit import entities, repositories
 from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.user_action import UserAction
-from project.error import PlanNotFound, ProductOfferNotFound
+from project.error import PlanNotFound
 from project.models import (
     Account,
     Company,
     CompanyWorkInvite,
     Member,
     Message,
-    Offer,
     Plan,
     PlanDraft,
     Purchase,
@@ -329,7 +328,6 @@ class PurchaseRepository(repositories.PurchaseRepository):
     member_repository: MemberRepository
     plan_repository: PlanRepository
     company_repository: CompanyRepository
-    product_offer_repository: ProductOfferRepository
     db: SQLAlchemy
 
     def object_to_orm(self, purchase: entities.Purchase) -> Purchase:
@@ -408,88 +406,6 @@ class PurchaseRepository(repositories.PurchaseRepository):
             self.object_from_orm(purchase)
             for purchase in user_orm.purchases.order_by(desc("purchase_date")).all()
         )
-
-
-@inject
-@dataclass
-class ProductOfferRepository(repositories.OfferRepository):
-    company_repository: CompanyRepository
-    plan_repository: PlanRepository
-    db: SQLAlchemy
-
-    def object_to_orm(self, product_offer: entities.ProductOffer) -> Offer:
-        return Offer.query.get(str(product_offer.id))
-
-    def object_from_orm(self, offer_orm: Offer) -> entities.ProductOffer:
-        plan = self.plan_repository.get_plan_by_id(UUID(offer_orm.plan_id))
-        assert plan is not None
-        return entities.ProductOffer(
-            id=UUID(offer_orm.id),
-            name=offer_orm.name,
-            description=offer_orm.description,
-            plan=plan,
-        )
-
-    def get_by_id(self, id: UUID) -> entities.ProductOffer:
-        offer_orm = Offer.query.filter_by(id=str(id)).first()
-        if offer_orm is None:
-            raise ProductOfferNotFound()
-        else:
-            return self.object_from_orm(offer_orm)
-
-    def get_all_offers(self) -> Iterator[entities.ProductOffer]:
-        return (self.object_from_orm(offer) for offer in Offer.query.all())
-
-    def count_all_offers_without_plan_duplicates(self) -> int:
-        return int(self.db.session.query(func.count(distinct(Offer.plan_id))).one()[0])
-
-    def query_offers_by_name(self, query: str) -> Iterator[entities.ProductOffer]:
-        return (
-            self.object_from_orm(offer)
-            for offer in Offer.query.filter(Offer.name.contains(query)).all()
-        )
-
-    def query_offers_by_description(
-        self, query: str
-    ) -> Iterator[entities.ProductOffer]:
-        return (
-            self.object_from_orm(offer)
-            for offer in Offer.query.filter(Offer.description.contains(query)).all()
-        )
-
-    def create_offer(
-        self,
-        plan: entities.Plan,
-        creation_datetime: datetime,
-        name: str,
-        description: str,
-    ) -> entities.ProductOffer:
-        offer = Offer(
-            id=str(uuid4()),
-            plan_id=self.plan_repository.object_to_orm(plan).id,
-            cr_date=creation_datetime,
-            name=name,
-            description=description,
-        )
-        self.db.session.add(offer)
-        return self.object_from_orm(offer)
-
-    def delete_offer(self, id: UUID) -> None:
-        offer_orm = Offer.query.filter_by(id=str(id)).first()
-        if offer_orm is None:
-            raise ProductOfferNotFound()
-        else:
-            self.db.session.delete(offer_orm)
-
-    def __len__(self) -> int:
-        return len(Offer.query.all())
-
-    def get_all_offers_belonging_to(self, plan_id: UUID) -> List[entities.ProductOffer]:
-        plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
-        if plan_orm is None:
-            raise PlanNotFound()
-        else:
-            return [self.object_from_orm(offer) for offer in plan_orm.offers.all()]
 
 
 @inject

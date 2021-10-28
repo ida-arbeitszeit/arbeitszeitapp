@@ -3,11 +3,7 @@ from typing import Union
 
 from arbeitszeit.entities import ProductionCosts
 from arbeitszeit.use_cases import GetStatistics
-from tests.data_generators import (
-    CompanyGenerator,
-    MemberGenerator,
-    PlanGenerator,
-)
+from tests.data_generators import CompanyGenerator, MemberGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
 
 from .dependency_injection import injection_test

@@ -3,11 +3,7 @@ from decimal import Decimal
 
 from injector import inject
 
-from arbeitszeit.repositories import (
-    CompanyRepository,
-    MemberRepository,
-    PlanRepository,
-)
+from arbeitszeit.repositories import CompanyRepository, MemberRepository, PlanRepository
 
 
 @dataclass

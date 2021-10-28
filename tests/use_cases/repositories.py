@@ -22,7 +22,6 @@ from arbeitszeit.entities import (
     Plan,
     PlanDraft,
     ProductionCosts,
-    ProductOffer,
     Purchase,
     PurposesOfPurchases,
     SocialAccounting,
@@ -108,71 +107,6 @@ class TransactionRepository(interfaces.TransactionRepository):
             if transaction.receiving_account == account:
                 all_received.append(transaction)
         return all_received
-
-
-@singleton
-class OfferRepository(interfaces.OfferRepository):
-    @inject
-    def __init__(self, plan_repository: PlanRepository) -> None:
-        self.offers: List[ProductOffer] = []
-        self.plan_repository = plan_repository
-
-    def get_all_offers(self) -> Iterator[ProductOffer]:
-        yield from self.offers
-
-    def count_all_offers_without_plan_duplicates(self) -> int:
-        offers = []
-        plans_associated = []
-        for offer in self.offers:
-            if offer.plan in plans_associated:
-                pass
-            else:
-                offers.append(offer)
-                plans_associated.append(offer.plan)
-        return len(offers)
-
-    def query_offers_by_name(self, query: str) -> Iterator[ProductOffer]:
-        for offer in self.offers:
-            if query in offer.name:
-                yield offer
-
-    def query_offers_by_description(self, query: str) -> Iterator[ProductOffer]:
-        for offer in self.offers:
-            if query in offer.description:
-                yield offer
-
-    def create_offer(
-        self,
-        plan: Plan,
-        creation_datetime: datetime,
-        name: str,
-        description: str,
-    ) -> ProductOffer:
-        offer = ProductOffer(
-            id=uuid4(),
-            name=name,
-            description=description,
-            plan=plan,
-        )
-        self.offers.append(offer)
-        return offer
-
-    def get_by_id(self, id: UUID) -> ProductOffer:
-        for offer in self.offers:
-            if offer.id == id:
-                return offer
-        raise Exception("Offer not found, this exception is not meant to be caught")
-
-    def delete_offer(self, id: UUID) -> None:
-        offer = self.get_by_id(id)
-        self.offers.remove(offer)
-
-    def get_all_offers_belonging_to(self, plan_id: UUID) -> List[ProductOffer]:
-        offers = []
-        for offer in self.offers:
-            if offer.plan.id == plan_id:
-                offers.append(offer)
-        return offers
 
 
 @singleton
