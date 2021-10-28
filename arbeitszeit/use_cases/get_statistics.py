@@ -6,7 +6,6 @@ from injector import inject
 from arbeitszeit.repositories import (
     CompanyRepository,
     MemberRepository,
-    OfferRepository,
     PlanRepository,
 )
 
@@ -21,7 +20,6 @@ class StatisticsResponse:
     planned_work: Decimal
     planned_resources: Decimal
     planned_means: Decimal
-    products_on_marketplace_count: int
 
 
 @inject
@@ -30,7 +28,6 @@ class GetStatistics:
     company_repository: CompanyRepository
     member_repository: MemberRepository
     plan_repository: PlanRepository
-    offer_repository: OfferRepository
 
     def __call__(self) -> StatisticsResponse:
         return StatisticsResponse(
@@ -42,5 +39,4 @@ class GetStatistics:
             planned_work=self.plan_repository.sum_of_active_planned_work(),
             planned_resources=self.plan_repository.sum_of_active_planned_resources(),
             planned_means=self.plan_repository.sum_of_active_planned_means(),
-            products_on_marketplace_count=self.offer_repository.count_all_offers_without_plan_duplicates(),
         )
