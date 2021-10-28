@@ -46,12 +46,7 @@ from .query_companies import (
     QueryCompaniesRequest,
 )
 from .query_plans import PlanFilter, PlanQueryResponse, QueryPlans, QueryPlansRequest
-from .query_products import (
-    ProductFilter,
-    ProductQueryResponse,
-    QueryProducts,
-    QueryProductsRequest,
-)
+
 from .query_purchases import PurchaseQueryResponse, QueryPurchases
 from .read_message import (
     ReadMessage,
@@ -107,15 +102,11 @@ __all__ = [
     "PlanQueryResponse",
     "PlanSummaryResponse",
     "PlanSummarySuccess",
-    "ProductFilter",
-    "ProductQueryResponse",
     "PurchaseQueryResponse",
     "QueryCompanies",
     "QueryCompaniesRequest",
     "QueryPlans",
     "QueryPlansRequest",
-    "QueryProducts",
-    "QueryProductsRequest",
     "QueryPurchases",
     "ReadMessage",
     "ReadMessageFailure",

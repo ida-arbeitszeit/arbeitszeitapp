@@ -28,10 +28,7 @@ from arbeitszeit_web.query_companies import (
     QueryCompaniesPresenter,
 )
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
-from arbeitszeit_web.query_products import (
-    QueryProductsController,
-    QueryProductsPresenter,
-)
+
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from project.database import (
     AccountRepository,
@@ -41,14 +38,13 @@ from project.database import (
     ProductOfferRepository,
     commit_changes,
 )
-from project.forms import CompanySearchForm, PlanSearchForm, ProductSearchForm
+from project.forms import CompanySearchForm, PlanSearchForm
 from project.models import Company, Plan
 from project.url_index import CompanyUrlIndex
 from project.views import (
     Http404View,
     QueryCompaniesView,
     QueryPlansView,
-    QueryProductsView,
 )
 
 from .blueprint import CompanyRoute
@@ -94,25 +90,6 @@ def arbeit(
     elif request.method == "GET":
         workers_list = list(company_worker_repository.get_company_workers(company))
         return render_template("company/work.html", workers_list=workers_list)
-
-
-@CompanyRoute("/company/suchen", methods=["GET", "POST"])
-def suchen(
-    query_products: use_cases.QueryProducts,
-    controller: QueryProductsController,
-):
-    presenter = QueryProductsPresenter(
-        CompanyUrlIndex(),
-    )
-    template_name = "company/query_products.html"
-    search_form = ProductSearchForm(request.form)
-    view = QueryProductsView(
-        search_form, query_products, presenter, controller, template_name
-    )
-    if request.method == "POST":
-        return view.respond_to_post()
-    else:
-        return view.respond_to_get()
 
 
 @CompanyRoute("/company/query_plans", methods=["GET", "POST"])

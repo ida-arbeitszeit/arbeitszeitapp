@@ -21,9 +21,6 @@
         <div class="navbar-start">
 
           {% if current_user.is_authenticated %}
-          <a href="{{ url_for('main_member.suchen') }}" class="navbar-item">
-            Kleinanzeigen
-          </a>
           <a href="{{ url_for('main_member.query_plans') }}" class="navbar-item">
             Alle Pläne
           </a>
