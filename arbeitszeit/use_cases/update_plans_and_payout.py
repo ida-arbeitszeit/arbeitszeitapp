@@ -122,18 +122,11 @@ class UpdatePlansAndPayout:
         """
         payout overdue wages, if there are any
         set plan as expired
-        delete obsolete offers
         """
         assert plan.active_days
         while plan.payout_count < plan.active_days:
             self._payout(plan, payout_factor)
         self.plan_repository.set_plan_as_expired(plan)
-        self._delete_obsolete_offers(plan)
-
-    def _delete_obsolete_offers(self, plan: Plan) -> None:
-        expired_offers = self.offer_repository.get_all_offers_belonging_to(plan.id)
-        for offer in expired_offers:
-            self.offer_repository.delete_offer(offer.id)
 
     def _calculate_active_days(self, plan: Plan) -> int:
         """
