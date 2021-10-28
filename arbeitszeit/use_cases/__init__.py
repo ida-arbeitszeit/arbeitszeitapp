@@ -13,7 +13,6 @@ from .check_for_unread_messages import (
     CheckForUnreadMessagesRequest,
     CheckForUnreadMessagesResponse,
 )
-from .create_offer import CreateOffer, CreateOfferRequest, CreateOfferResponse
 from .create_plan_draft import (
     CreatePlanDraft,
     CreatePlanDraftRequest,
@@ -71,9 +70,6 @@ __all__ = [
     "CheckForUnreadMessagesResponse",
     "CompanyFilter",
     "CompanyQueryResponse",
-    "CreateOffer",
-    "CreateOfferRequest",
-    "CreateOfferResponse",
     "CreatePlanDraft",
     "CreatePlanDraftRequest",
     "CreatePlanDraftRequest",

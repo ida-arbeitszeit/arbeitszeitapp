@@ -3,8 +3,7 @@
 <div class="box has-background-info-light has-text-info-dark">
   <div class="icon"><i class="fas fa-info-circle"></i></div>
   <p>
-    Hier sind deine genehmigten Pläne.<br />Aktuelle Pläne kannst du im
-    Marketplace anbieten, abgelaufene Pläne kannst du erneuern.
+    Hier sind deine genehmigten Pläne.<br />Abgelaufene Pläne kannst du erneuern.
   </p>
 </div>
 <h1 class="title">Aktuelle Pläne</h1>
@@ -31,7 +30,6 @@ messages %}
         <th>Plan&nbsp;aktiv&nbsp;seit</th>
         <th>Plan-Ende</th>
         <th>Endet&nbsp;in</th>
-        <th><abbr title="Produkt im Marketplace anbieten.">Anb.</abbr></th>
       </tr>
     </thead>
     <tbody>
@@ -49,9 +47,6 @@ messages %}
         <td>{{ plan.activation_date }}</td>
         <td>{{ plan.expiration_date }}</td>
         <td>{{ plan.expiration_relative }}d</td>
-        <td>
-          <a href="{{ url_for('main_company.create_offer', plan_id=plan.id) }}"><i class="fas fa-store"></i></a>
-        </td>
       </tr>
       {% endfor %}
     </tbody>

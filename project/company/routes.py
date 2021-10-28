@@ -7,15 +7,12 @@ from flask_login import current_user, login_required
 
 from arbeitszeit import entities, errors, use_cases
 from arbeitszeit.use_cases import (
-    CreateOffer,
-    CreateOfferRequest,
     CreatePlanDraft,
     CreatePlanDraftRequest,
     DeletePlan,
     GetPlanSummary,
 )
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
-from arbeitszeit_web.create_offer import CreateOfferPresenter
 from arbeitszeit_web.delete_plan import DeletePlanPresenter
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
@@ -34,7 +31,7 @@ from project.database import (
     commit_changes,
 )
 from project.forms import CompanySearchForm, PlanSearchForm
-from project.models import Company, Plan
+from project.models import Company
 from project.url_index import CompanyUrlIndex
 from project.views import Http404View, QueryCompaniesView, QueryPlansView
 
@@ -204,30 +201,6 @@ def delete_plan(plan_id: UUID, delete_plan: DeletePlan, presenter: DeletePlanPre
     for notification in view_model.notifications:
         flash(notification)
     return redirect(url_for("main_company.my_plans"))
-
-
-@CompanyRoute("/company/create_offer/<uuid:plan_id>", methods=["GET", "POST"])
-@commit_changes
-def create_offer(
-    plan_id: UUID, create_offer: CreateOffer, presenter: CreateOfferPresenter
-):
-    if request.method == "POST":  # create offer
-        name = request.form["name"]
-        description = request.form["description"]
-
-        offer = CreateOfferRequest(
-            name=name,
-            description=description,
-            plan_id=plan_id,
-        )
-        use_case_response = create_offer(offer)
-        view_model = presenter.present(use_case_response)
-        for notification in view_model.notifications:
-            flash(notification)
-        return redirect(url_for("main_company.my_offers"))
-
-    plan = Plan.query.filter_by(id=str(plan_id)).first()
-    return render_template("company/create_offer.html", plan=plan)
 
 
 @CompanyRoute("/company/my_accounts")
