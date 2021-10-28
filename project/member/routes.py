@@ -17,13 +17,8 @@ from arbeitszeit_web.query_companies import (
     QueryCompaniesPresenter,
 )
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
-
 from project.database import AccountRepository, MemberRepository, commit_changes
-from project.forms import (
-    CompanySearchForm,
-    PayConsumerProductForm,
-    PlanSearchForm,
-)
+from project.forms import CompanySearchForm, PayConsumerProductForm, PlanSearchForm
 from project.models import Member
 from project.url_index import MemberUrlIndex
 from project.views import (

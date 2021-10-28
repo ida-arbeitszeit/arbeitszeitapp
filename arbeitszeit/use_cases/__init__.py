@@ -19,7 +19,6 @@ from .create_plan_draft import (
     CreatePlanDraftRequest,
     CreatePlanDraftResponse,
 )
-from .delete_offer import DeleteOffer, DeleteOfferRequest, DeleteOfferResponse
 from .delete_plan import DeletePlan, DeletePlanResponse
 from .get_member_profile_info import (
     GetMemberProfileInfo,
@@ -46,7 +45,6 @@ from .query_companies import (
     QueryCompaniesRequest,
 )
 from .query_plans import PlanFilter, PlanQueryResponse, QueryPlans, QueryPlansRequest
-
 from .query_purchases import PurchaseQueryResponse, QueryPurchases
 from .read_message import (
     ReadMessage,
@@ -81,9 +79,6 @@ __all__ = [
     "CreatePlanDraftRequest",
     "CreatePlanDraftResponse",
     "CreatePlanDraftResponse",
-    "DeleteOffer",
-    "DeleteOfferRequest",
-    "DeleteOfferResponse",
     "DeletePlan",
     "DeletePlanResponse",
     "GetMemberProfileInfo",
