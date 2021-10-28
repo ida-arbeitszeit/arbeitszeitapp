@@ -313,24 +313,6 @@ def transfer_to_company(
     return render_template("company/transfer_to_company.html")
 
 
-@CompanyRoute("/company/my_offers")
-def my_offers(offer_repository: ProductOfferRepository):
-    url_index = CompanyUrlIndex()
-    my_company = Company.query.filter_by(id=current_user.id).first()
-    my_plans = my_company.plans.all()
-    my_offers = []
-    for plan in my_plans:
-        for offer in plan.offers.all():
-            my_offers.append(offer)
-    my_offers = [offer_repository.object_from_orm(offer) for offer in my_offers]
-
-    return render_template(
-        "company/my_offers.html",
-        offers=my_offers,
-        get_plan_summary_url=url_index.get_plan_summary_url,
-    )
-
-
 @CompanyRoute("/company/delete_offer/<uuid:offer_id>", methods=["GET", "POST"])
 @commit_changes
 def delete_offer(
