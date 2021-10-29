@@ -696,7 +696,10 @@ class PlanRepository(repositories.PlanRepository):
         )
 
     def toggle_product_availability(self, plan: entities.Plan) -> None:
-        pass
+        plan.is_available = True if (plan.is_available == False) else False
+
+        plan_orm = self.object_to_orm(plan)
+        plan_orm.is_available = True if (plan.is_available == False) else False
 
     def __len__(self) -> int:
         return len(Plan.query.all())

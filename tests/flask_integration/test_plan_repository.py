@@ -265,3 +265,26 @@ def test_that_payout_count_is_increased_by_one(
     assert plan.payout_count == 0
     repository.increase_payout_count_by_one(plan)
     assert plan.payout_count == 1
+
+
+@injection_test
+def test_that_availability_is_toggled_to_false(
+    repository: PlanRepository,
+    plan_generator: PlanGenerator,
+) -> None:
+    plan = plan_generator.create_plan()
+    assert plan.is_available == True
+    repository.toggle_product_availability(plan)
+    assert plan.is_available == False
+
+
+@injection_test
+def test_that_availability_is_toggled_to_true(
+    repository: PlanRepository,
+    plan_generator: PlanGenerator,
+) -> None:
+    plan = plan_generator.create_plan()
+    plan.is_available = False
+    assert plan.is_available == False
+    repository.toggle_product_availability(plan)
+    assert plan.is_available == True
