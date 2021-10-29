@@ -105,6 +105,7 @@ class Plan(UserMixin, db.Model):
     expiration_relative = db.Column(db.Integer, nullable=True)
     active_days = db.Column(db.Integer, nullable=True)
     payout_count = db.Column(db.Integer, nullable=False, default=0)
+    is_available = db.Column(db.Boolean, nullable=False, default=True)
 
     offers = db.relationship("Offer", lazy="dynamic", backref="plan")
 

@@ -58,6 +58,10 @@ from .seek_approval import SeekApproval
 from .send_work_certificates_to_worker import SendWorkCertificatesToWorker
 from .show_my_plans import ShowMyPlansRequest, ShowMyPlansResponse, ShowMyPlansUseCase
 from .show_work_invites import ShowWorkInvites, ShowWorkInvitesRequest
+from .toggle_product_availablity import (
+    ToggleProductAvailability,
+    ToggleProductAvailabilityResponse,
+)
 from .update_plans_and_payout import UpdatePlansAndPayout
 
 __all__ = [
@@ -72,8 +76,6 @@ __all__ = [
     "CompanyQueryResponse",
     "CreatePlanDraft",
     "CreatePlanDraftRequest",
-    "CreatePlanDraftRequest",
-    "CreatePlanDraftResponse",
     "CreatePlanDraftResponse",
     "DeletePlan",
     "DeletePlanResponse",
@@ -114,6 +116,8 @@ __all__ = [
     "ShowWorkInvites",
     "ShowWorkInvitesRequest",
     "StatisticsResponse",
+    "ToggleProductAvailability",
+    "ToggleProductAvailabilityResponse",
     "TransactionInfo",
     "UpdatePlansAndPayout",
     "UpdatePlansAndPayout",

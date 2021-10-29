@@ -164,6 +164,10 @@ class PlanRepository(ABC):
     def get_expired_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
         pass
 
+    @abstractmethod
+    def toggle_product_availability(self, plan: Plan) -> None:
+        pass
+
 
 class TransactionRepository(ABC):
     @abstractmethod
