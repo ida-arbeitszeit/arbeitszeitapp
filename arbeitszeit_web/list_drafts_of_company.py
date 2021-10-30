@@ -2,7 +2,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from arbeitszeit.use_cases import DraftQueryResponse
+from arbeitszeit.use_cases import ListDraftsResponse
 
 
 @dataclass
@@ -19,7 +19,7 @@ class ResultsTable:
 
 
 @dataclass
-class QueryDraftsViewModel:
+class ListDraftsViewModel:
     results: ResultsTable
     show_results: bool
 
@@ -28,8 +28,8 @@ class QueryDraftsViewModel:
 
 
 @dataclass
-class QueryDraftsPresenter:
-    def present(self, response: DraftQueryResponse) -> QueryDraftsViewModel:
+class ListDraftsPresenter:
+    def present(self, response: ListDraftsResponse) -> ListDraftsViewModel:
         show_results = bool(response.results)
         results = ResultsTable(
             rows=[
@@ -42,7 +42,7 @@ class QueryDraftsPresenter:
                 for result in response.results
             ]
         )
-        return QueryDraftsViewModel(results=results, show_results=show_results)
+        return ListDraftsViewModel(results=results, show_results=show_results)
 
     def __format_date(self, date: Optional[datetime]) -> str:
         return f"{date.strftime('%d.%m.%y')}" if date else "–"

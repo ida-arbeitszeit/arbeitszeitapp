@@ -50,7 +50,7 @@ from .query_companies import (
     QueryCompanies,
     QueryCompaniesRequest,
 )
-from .query_drafts import DraftQueryResponse, QueryDrafts
+from .list_drafts_of_company import ListDraftsResponse, ListDraftsOfCompany
 from .query_plans import PlanFilter, PlanQueryResponse, QueryPlans, QueryPlansRequest
 from .query_products import (
     ProductFilter,
@@ -108,7 +108,6 @@ __all__ = [
     "GetTransactionInfos",
     "InviteWorkerToCompany",
     "InviteWorkerToCompanyRequest",
-    "QueryDrafts",
     "PayConsumerProduct",
     "PayConsumerProductRequest",
     "PayConsumerProductResponse",
@@ -128,6 +127,8 @@ __all__ = [
     "QueryProducts",
     "QueryProductsRequest",
     "QueryPurchases",
+    "ListDraftsResponse",
+    "ListDraftsOfCompany",
     "ReadMessage",
     "ReadMessageFailure",
     "ReadMessageRequest",

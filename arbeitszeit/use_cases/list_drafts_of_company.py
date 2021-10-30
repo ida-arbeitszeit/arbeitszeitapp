@@ -10,7 +10,7 @@ from arbeitszeit.repositories import PlanDraftRepository
 
 
 @dataclass
-class QueriedDraft:
+class ListedDraft:
     id: UUID
     creation_date: datetime
     product_name: str
@@ -18,27 +18,27 @@ class QueriedDraft:
 
 
 @dataclass
-class DraftQueryResponse:
-    results: List[QueriedDraft]
+class ListDraftsResponse:
+    results: List[ListedDraft]
 
 
 @inject
 @dataclass
-class QueryDrafts:
+class ListDraftsOfCompany:
     draft_repository: PlanDraftRepository
 
     def __call__(
         self,
         company_id: UUID,
-    ) -> DraftQueryResponse:
+    ) -> ListDraftsResponse:
         results = [
             self._draft_to_response_model(draft)
             for draft in self.draft_repository.all_drafts_of_company(company_id)
         ]
-        return DraftQueryResponse(results=results)
+        return ListDraftsResponse(results=results)
 
-    def _draft_to_response_model(self, draft: PlanDraft) -> QueriedDraft:
-        return QueriedDraft(
+    def _draft_to_response_model(self, draft: PlanDraft) -> ListedDraft:
+        return ListedDraft(
             id=draft.id,
             creation_date=draft.creation_date,
             product_name=draft.product_name,

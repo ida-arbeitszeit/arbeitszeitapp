@@ -29,7 +29,7 @@ from arbeitszeit_web.query_companies import (
     QueryCompaniesController,
     QueryCompaniesPresenter,
 )
-from arbeitszeit_web.query_drafts import QueryDraftsPresenter
+from arbeitszeit_web.list_drafts_of_company import ListDraftsPresenter
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
 from arbeitszeit_web.query_products import (
     QueryProductsController,
@@ -292,10 +292,11 @@ def create_plan(
 
 @CompanyRoute("/company/my_drafts", methods=["GET"])
 def my_drafts(
-    query_drafts: use_cases.QueryDrafts, query_drafts_presenter: QueryDraftsPresenter
+    list_drafts: use_cases.ListDraftsOfCompany,
+    list_drafts_presenter: ListDraftsPresenter,
 ):
-    response = query_drafts(UUID(current_user.id))
-    view_model = query_drafts_presenter.present(response)
+    response = list_drafts(UUID(current_user.id))
+    view_model = list_drafts_presenter.present(response)
     return render_template("company/my_drafts.html", **view_model.to_dict())
 
 
