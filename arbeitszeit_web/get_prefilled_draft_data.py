@@ -18,8 +18,8 @@ class PrefilledDraftData:
     is_public_service: bool
 
 
-class GetPrefilledDraftData:
-    def __call__(
+class GetPrefilledDraftDataPresenter:
+    def present(
         self,
         summary_data: Union[PlanSummarySuccess, DraftSummarySuccess],
         from_expired_plan: bool,

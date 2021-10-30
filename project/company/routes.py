@@ -22,7 +22,7 @@ from arbeitszeit_web.create_offer import CreateOfferPresenter
 from arbeitszeit_web.delete_offer import DeleteOfferPresenter
 from arbeitszeit_web.delete_plan import DeletePlanPresenter
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
-from arbeitszeit_web.get_prefilled_draft_data import GetPrefilledDraftData
+from arbeitszeit_web.get_prefilled_draft_data import GetPrefilledDraftDataPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from arbeitszeit_web.query_companies import (
@@ -168,7 +168,7 @@ def my_purchases(
 def create_draft_from_expired_plan(
     create_draft: CreatePlanDraft,
     get_plan_summary: GetPlanSummary,
-    get_prefilled_draft_data: GetPrefilledDraftData,
+    get_prefilled_draft_data_presenter: GetPrefilledDraftDataPresenter,
 ):
     expired_plan_id: Optional[str] = request.args.get("expired_plan_id")
     expired_plan_uuid: Optional[UUID] = (
@@ -209,7 +209,7 @@ def create_draft_from_expired_plan(
 
     plan_summary = get_plan_summary(expired_plan_uuid) if expired_plan_uuid else None
     prefilled_draft_data = (
-        get_prefilled_draft_data(plan_summary, from_expired_plan=True)
+        get_prefilled_draft_data_presenter.present(plan_summary, from_expired_plan=True)
         if plan_summary
         else None
     )
@@ -221,7 +221,7 @@ def create_draft_from_expired_plan(
 def create_draft(
     create_draft: CreatePlanDraft,
     get_draft_summary: GetDraftSummary,
-    get_prefilled_draft_data: GetPrefilledDraftData,
+    get_prefilled_draft_data_presenter: GetPrefilledDraftDataPresenter,
 ):
     saved_draft_id: Optional[str] = request.args.get("saved_draft_id")
     saved_draft_uuid: Optional[UUID] = UUID(saved_draft_id) if saved_draft_id else None
@@ -260,7 +260,9 @@ def create_draft(
 
     draft_summary = get_draft_summary(saved_draft_uuid) if saved_draft_uuid else None
     prefilled_draft_data = (
-        get_prefilled_draft_data(draft_summary, from_expired_plan=False)
+        get_prefilled_draft_data_presenter.present(
+            draft_summary, from_expired_plan=False
+        )
         if draft_summary
         else None
     )

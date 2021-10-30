@@ -2,7 +2,7 @@ from decimal import Decimal
 from uuid import uuid4
 
 from arbeitszeit.use_cases import DraftSummarySuccess, PlanSummarySuccess
-from arbeitszeit_web.get_prefilled_draft_data import GetPrefilledDraftData
+from arbeitszeit_web.get_prefilled_draft_data import GetPrefilledDraftDataPresenter
 
 TEST_PLAN_SUMMARY_SUCCESS = PlanSummarySuccess(
     plan_id=uuid4(),
@@ -36,8 +36,8 @@ TEST_DRAFT_SUMMARY_SUCCESS = DraftSummarySuccess(
 
 
 def test_correct_refilled_data_is_returned_for_plan_summary():
-    get_prefilled_data = GetPrefilledDraftData()
-    result = get_prefilled_data(TEST_PLAN_SUMMARY_SUCCESS, True)
+    get_prefilled_data = GetPrefilledDraftDataPresenter()
+    result = get_prefilled_data.present(TEST_PLAN_SUMMARY_SUCCESS, True)
     assert result.from_expired_plan == True
     assert result.product_name == TEST_PLAN_SUMMARY_SUCCESS.product_name
     assert result.description == TEST_PLAN_SUMMARY_SUCCESS.description
@@ -51,8 +51,8 @@ def test_correct_refilled_data_is_returned_for_plan_summary():
 
 
 def test_correct_refilled_data_is_returned_for_draft_summary():
-    get_prefilled_data = GetPrefilledDraftData()
-    result = get_prefilled_data(TEST_DRAFT_SUMMARY_SUCCESS, False)
+    get_prefilled_data = GetPrefilledDraftDataPresenter()
+    result = get_prefilled_data.present(TEST_DRAFT_SUMMARY_SUCCESS, False)
     assert result.from_expired_plan == False
     assert result.product_name == TEST_DRAFT_SUMMARY_SUCCESS.product_name
     assert result.description == TEST_DRAFT_SUMMARY_SUCCESS.description
