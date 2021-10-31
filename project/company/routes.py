@@ -10,7 +10,6 @@ from arbeitszeit.use_cases import (
     CreateOffer,
     CreateOfferRequest,
     CreatePlanDraft,
-    CreatePlanDraftRequest,
     DeleteOffer,
     DeleteOfferRequest,
     DeletePlan,
@@ -22,7 +21,10 @@ from arbeitszeit_web.create_offer import CreateOfferPresenter
 from arbeitszeit_web.delete_offer import DeleteOfferPresenter
 from arbeitszeit_web.delete_plan import DeletePlanPresenter
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
-from arbeitszeit_web.get_prefilled_draft_data import GetPrefilledDraftDataPresenter
+from arbeitszeit_web.get_prefilled_draft_data import (
+    GetPrefilledDraftDataPresenter,
+    PrefilledDraftDataController,
+)
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from arbeitszeit_web.query_companies import (
@@ -44,7 +46,12 @@ from project.database import (
     ProductOfferRepository,
     commit_changes,
 )
-from project.forms import CompanySearchForm, PlanSearchForm, ProductSearchForm
+from project.forms import (
+    CompanySearchForm,
+    PlanSearchForm,
+    ProductSearchForm,
+    CreateDraftForm,
+)
 from project.models import Company, Plan
 from project.url_index import CompanyUrlIndex
 from project.views import (
@@ -169,6 +176,7 @@ def create_draft_from_expired_plan(
     create_draft: CreatePlanDraft,
     get_plan_summary: GetPlanSummary,
     get_prefilled_draft_data_presenter: GetPrefilledDraftDataPresenter,
+    controller: PrefilledDraftDataController,
 ):
     expired_plan_id: Optional[str] = request.args.get("expired_plan_id")
     expired_plan_uuid: Optional[UUID] = (
@@ -176,24 +184,12 @@ def create_draft_from_expired_plan(
     )
 
     if request.method == "POST":
-        plan_data = dict(request.form)
-        use_case_request = CreatePlanDraftRequest(
-            planner=UUID(current_user.id),
-            costs=entities.ProductionCosts(
-                labour_cost=Decimal(plan_data["costs_a"]),
-                resource_cost=Decimal(plan_data["costs_r"]),
-                means_cost=Decimal(plan_data["costs_p"]),
-            ),
-            product_name=plan_data["prd_name"],
-            production_unit=plan_data["prd_unit"],
-            production_amount=int(plan_data["prd_amount"]),
-            description=plan_data["description"],
-            timeframe_in_days=plan_data["timeframe"],
-            is_public_service=True
-            if plan_data["productive_or_public"] == "public"
-            else False,
+        draft_form = CreateDraftForm(request.form)
+        use_case_request = controller.import_form_data(
+            UUID(current_user.id), draft_form
         )
-        button = plan_data["action"]
+
+        button = request.form["action"]
         if button == "save_draft":
             create_draft(use_case_request)
             return redirect(url_for("main_company.my_drafts"))
@@ -222,29 +218,18 @@ def create_draft(
     create_draft: CreatePlanDraft,
     get_draft_summary: GetDraftSummary,
     get_prefilled_draft_data_presenter: GetPrefilledDraftDataPresenter,
+    controller: PrefilledDraftDataController,
 ):
     saved_draft_id: Optional[str] = request.args.get("saved_draft_id")
     saved_draft_uuid: Optional[UUID] = UUID(saved_draft_id) if saved_draft_id else None
 
     if request.method == "POST":
-        plan_data = dict(request.form)
-        use_case_request = CreatePlanDraftRequest(
-            planner=UUID(current_user.id),
-            costs=entities.ProductionCosts(
-                labour_cost=Decimal(plan_data["costs_a"]),
-                resource_cost=Decimal(plan_data["costs_r"]),
-                means_cost=Decimal(plan_data["costs_p"]),
-            ),
-            product_name=plan_data["prd_name"],
-            production_unit=plan_data["prd_unit"],
-            production_amount=int(plan_data["prd_amount"]),
-            description=plan_data["description"],
-            timeframe_in_days=plan_data["timeframe"],
-            is_public_service=True
-            if plan_data["productive_or_public"] == "public"
-            else False,
+        draft_form = CreateDraftForm(request.form)
+        use_case_request = controller.import_form_data(
+            UUID(current_user.id), draft_form
         )
-        button = plan_data["action"]
+
+        button = request.form["action"]
         if button == "save_draft":
             create_draft(use_case_request)
             return redirect(url_for("main_company.my_drafts"))

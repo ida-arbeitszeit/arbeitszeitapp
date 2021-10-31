@@ -1,7 +1,68 @@
 from dataclasses import dataclass
-from typing import Union
+from typing import Union, Protocol
+from decimal import Decimal
+from uuid import UUID
 
-from arbeitszeit.use_cases import DraftSummarySuccess, PlanSummarySuccess
+from arbeitszeit.use_cases import (
+    DraftSummarySuccess,
+    PlanSummarySuccess,
+    CreatePlanDraftRequest,
+)
+from arbeitszeit.entities import ProductionCosts
+
+
+class CreateDraftForm(Protocol):
+    def get_prd_name_string(self) -> str:
+        ...
+
+    def get_description_string(self) -> str:
+        ...
+
+    def get_timeframe_string(self) -> str:
+        ...
+
+    def get_prd_unit_string(self) -> str:
+        ...
+
+    def get_prd_amount_string(self) -> str:
+        ...
+
+    def get_costs_p_string(self) -> str:
+        ...
+
+    def get_costs_r_string(self) -> str:
+        ...
+
+    def get_costs_a_string(self) -> str:
+        ...
+
+    def get_productive_or_public_string(self) -> str:
+        ...
+
+    def get_action_string(self) -> str:
+        ...
+
+
+class PrefilledDraftDataController:
+    def import_form_data(
+        self, planner: UUID, draft_form: CreateDraftForm
+    ) -> CreatePlanDraftRequest:
+        return CreatePlanDraftRequest(
+            costs=ProductionCosts(
+                labour_cost=Decimal(draft_form.get_costs_a_string()),
+                resource_cost=Decimal(draft_form.get_costs_r_string()),
+                means_cost=Decimal(draft_form.get_costs_p_string()),
+            ),
+            product_name=draft_form.get_prd_name_string(),
+            production_unit=draft_form.get_prd_unit_string(),
+            production_amount=int(draft_form.get_prd_amount_string()),
+            description=draft_form.get_description_string(),
+            timeframe_in_days=int(draft_form.get_timeframe_string()),
+            is_public_service=True
+            if draft_form.get_productive_or_public_string() == "public"
+            else False,
+            planner=planner,
+        )
 
 
 @dataclass
