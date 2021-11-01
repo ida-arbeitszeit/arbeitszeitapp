@@ -907,6 +907,12 @@ class PlanDraftRepository(repositories.PlanDraftRepository):
             is_public_service=orm.is_public_service,
         )
 
+    def all_drafts_of_company(self, id: UUID) -> Iterable[entities.PlanDraft]:
+        draft_owner = Company.query.filter_by(id=str(id)).first()
+        assert draft_owner is not None
+        drafts = draft_owner.drafts.all()
+        return (self._object_from_orm(draft) for draft in drafts)
+
 
 @inject
 @dataclass
