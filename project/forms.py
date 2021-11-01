@@ -112,3 +112,46 @@ class CompanySearchForm(Form):
 
     def get_category_string(self) -> str:
         return self.data["select"]
+
+
+class CreateDraftForm(Form):
+    prd_name = StringField()
+    description = StringField()
+    timeframe = StringField()
+    prd_unit = StringField()
+    prd_amount = StringField()
+    costs_p = StringField()
+    costs_r = StringField()
+    costs_a = StringField()
+    productive_or_public = StringField()
+    action = StringField()
+
+    def get_prd_name_string(self) -> str:
+        return self.data["prd_name"]
+
+    def get_description_string(self) -> str:
+        return self.data["description"]
+
+    def get_timeframe_string(self) -> str:
+        return self.data["timeframe"]
+
+    def get_prd_unit_string(self) -> str:
+        return self.data["prd_unit"]
+
+    def get_prd_amount_string(self) -> str:
+        return self.data["prd_amount"]
+
+    def get_costs_p_string(self) -> str:
+        return self.data["costs_p"]
+
+    def get_costs_r_string(self) -> str:
+        return self.data["costs_r"]
+
+    def get_costs_a_string(self) -> str:
+        return self.data["costs_a"]
+
+    def get_productive_or_public_string(self) -> str:
+        return self.data["productive_or_public"]
+
+    def get_action_string(self) -> str:
+        return self.data["action"]

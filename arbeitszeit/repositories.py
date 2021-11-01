@@ -289,6 +289,10 @@ class PlanDraftRepository(ABC):
     def delete_draft(self, id: UUID) -> None:
         pass
 
+    @abstractmethod
+    def all_drafts_of_company(self, id: UUID) -> Iterable[PlanDraft]:
+        pass
+
 
 class WorkerInviteRepository(ABC):
     @abstractmethod

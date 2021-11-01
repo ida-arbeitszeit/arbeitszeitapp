@@ -585,6 +585,13 @@ class PlanDraftRepository(interfaces.PlanDraftRepository):
     def delete_draft(self, id: UUID) -> None:
         self.drafts = [draft for draft in self.drafts if draft.id != id]
 
+    def all_drafts_of_company(self, id: UUID) -> Iterable[PlanDraft]:
+        result = []
+        for draft in self.drafts:
+            if draft.planner.id == id:
+                result.append(draft)
+        return result
+
 
 class WorkerInviteRepository(interfaces.WorkerInviteRepository):
     @inject

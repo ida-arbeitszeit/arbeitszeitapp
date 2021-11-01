@@ -58,6 +58,7 @@ class Company(UserMixin, db.Model):
     plans = db.relationship("Plan", lazy="dynamic", backref="company")
     accounts = db.relationship("Account", lazy="dynamic", backref="company")
     purchases = db.relationship("Purchase", lazy="dynamic")
+    drafts = db.relationship("PlanDraft", lazy="dynamic")
 
     def __repr__(self):
         return "<Company(email='%s', name='%s')>" % (
