@@ -7,18 +7,12 @@ from flask_login import current_user, login_required
 
 from arbeitszeit import entities, errors, use_cases
 from arbeitszeit.use_cases import (
-    CreateOffer,
-    CreateOfferRequest,
     CreatePlanDraft,
-    DeleteOffer,
-    DeleteOfferRequest,
     DeletePlan,
     GetDraftSummary,
     GetPlanSummary,
 )
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
-from arbeitszeit_web.create_offer import CreateOfferPresenter
-from arbeitszeit_web.delete_offer import DeleteOfferPresenter
 from arbeitszeit_web.delete_plan import DeletePlanPresenter
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.get_prefilled_draft_data import (
@@ -33,33 +27,18 @@ from arbeitszeit_web.query_companies import (
     QueryCompaniesPresenter,
 )
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
-from arbeitszeit_web.query_products import (
-    QueryProductsController,
-    QueryProductsPresenter,
-)
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from project.database import (
     AccountRepository,
     CompanyRepository,
     CompanyWorkerRepository,
     MemberRepository,
-    ProductOfferRepository,
     commit_changes,
 )
-from project.forms import (
-    CompanySearchForm,
-    CreateDraftForm,
-    PlanSearchForm,
-    ProductSearchForm,
-)
-from project.models import Company, Plan
+from project.forms import CompanySearchForm, CreateDraftForm, PlanSearchForm
+from project.models import Company
 from project.url_index import CompanyUrlIndex
-from project.views import (
-    Http404View,
-    QueryCompaniesView,
-    QueryPlansView,
-    QueryProductsView,
-)
+from project.views import Http404View, QueryCompaniesView, QueryPlansView
 
 from .blueprint import CompanyRoute
 
@@ -104,25 +83,6 @@ def arbeit(
     elif request.method == "GET":
         workers_list = list(company_worker_repository.get_company_workers(company))
         return render_template("company/work.html", workers_list=workers_list)
-
-
-@CompanyRoute("/company/suchen", methods=["GET", "POST"])
-def suchen(
-    query_products: use_cases.QueryProducts,
-    controller: QueryProductsController,
-):
-    presenter = QueryProductsPresenter(
-        CompanyUrlIndex(),
-    )
-    template_name = "company/query_products.html"
-    search_form = ProductSearchForm(request.form)
-    view = QueryProductsView(
-        search_form, query_products, presenter, controller, template_name
-    )
-    if request.method == "POST":
-        return view.respond_to_post()
-    else:
-        return view.respond_to_get()
 
 
 @CompanyRoute("/company/query_plans", methods=["GET", "POST"])
@@ -312,30 +272,6 @@ def delete_plan(plan_id: UUID, delete_plan: DeletePlan, presenter: DeletePlanPre
     return redirect(url_for("main_company.my_plans"))
 
 
-@CompanyRoute("/company/create_offer/<uuid:plan_id>", methods=["GET", "POST"])
-@commit_changes
-def create_offer(
-    plan_id: UUID, create_offer: CreateOffer, presenter: CreateOfferPresenter
-):
-    if request.method == "POST":  # create offer
-        name = request.form["name"]
-        description = request.form["description"]
-
-        offer = CreateOfferRequest(
-            name=name,
-            description=description,
-            plan_id=plan_id,
-        )
-        use_case_response = create_offer(offer)
-        view_model = presenter.present(use_case_response)
-        for notification in view_model.notifications:
-            flash(notification)
-        return redirect(url_for("main_company.my_offers"))
-
-    plan = Plan.query.filter_by(id=str(plan_id)).first()
-    return render_template("company/create_offer.html", plan=plan)
-
-
 @CompanyRoute("/company/my_accounts")
 def my_accounts(
     company_repository: CompanyRepository,
@@ -408,47 +344,6 @@ def transfer_to_company(
         for notification in view_model.notifications:
             flash(notification)
     return render_template("company/transfer_to_company.html")
-
-
-@CompanyRoute("/company/my_offers")
-def my_offers(offer_repository: ProductOfferRepository):
-    url_index = CompanyUrlIndex()
-    my_company = Company.query.filter_by(id=current_user.id).first()
-    my_plans = my_company.plans.all()
-    my_offers = []
-    for plan in my_plans:
-        for offer in plan.offers.all():
-            my_offers.append(offer)
-    my_offers = [offer_repository.object_from_orm(offer) for offer in my_offers]
-
-    return render_template(
-        "company/my_offers.html",
-        offers=my_offers,
-        get_plan_summary_url=url_index.get_plan_summary_url,
-    )
-
-
-@CompanyRoute("/company/delete_offer/<uuid:offer_id>", methods=["GET", "POST"])
-@commit_changes
-def delete_offer(
-    offer_id: UUID,
-    product_offer_repository: ProductOfferRepository,
-    delete_offer: DeleteOffer,
-    presenter: DeleteOfferPresenter,
-):
-    if request.method == "POST":
-        deletion_request = DeleteOfferRequest(
-            requesting_company_id=UUID(current_user.id),
-            offer_id=offer_id,
-        )
-        response = delete_offer(deletion_request)
-        view_model = presenter.present(response)
-        for notification in view_model.notifications:
-            flash(notification)
-        return redirect(url_for("main_company.my_offers"))
-
-    offer = product_offer_repository.get_by_id(offer_id)
-    return render_template("company/delete_offer.html", offer=offer)
 
 
 @CompanyRoute("/company/statistics")

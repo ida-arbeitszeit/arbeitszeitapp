@@ -14,7 +14,6 @@ from arbeitszeit.entities import (
     Plan,
     PlanDraft,
     ProductionCosts,
-    ProductOffer,
     Purchase,
     PurposesOfPurchases,
     SocialAccounting,
@@ -196,46 +195,6 @@ class AccountRepository(ABC):
 
     @abstractmethod
     def get_account_balance(self, account: Account) -> Decimal:
-        pass
-
-
-class OfferRepository(ABC):
-    @abstractmethod
-    def get_by_id(self, id: UUID) -> ProductOffer:
-        pass
-
-    @abstractmethod
-    def query_offers_by_name(self, query: str) -> Iterator[ProductOffer]:
-        pass
-
-    @abstractmethod
-    def query_offers_by_description(self, query: str) -> Iterator[ProductOffer]:
-        pass
-
-    @abstractmethod
-    def get_all_offers(self) -> Iterator[ProductOffer]:
-        pass
-
-    @abstractmethod
-    def create_offer(
-        self,
-        plan: Plan,
-        creation_datetime: datetime,
-        name: str,
-        description: str,
-    ) -> ProductOffer:
-        pass
-
-    @abstractmethod
-    def count_all_offers_without_plan_duplicates(self) -> int:
-        pass
-
-    @abstractmethod
-    def delete_offer(self, id: UUID) -> None:
-        pass
-
-    @abstractmethod
-    def get_all_offers_belonging_to(self, plan_id: UUID) -> List[ProductOffer]:
         pass
 
 

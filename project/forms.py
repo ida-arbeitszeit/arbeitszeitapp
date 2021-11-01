@@ -26,25 +26,6 @@ class FieldMustExist:
         return field.raw_data
 
 
-class ProductSearchForm(Form):
-    choices = [("Name", "Name"), ("Beschreibung", "Beschreibung")]
-    select = SelectField(
-        "Nach Produkten suchen", choices=choices, validators=[validators.DataRequired()]
-    )
-    search = StringField(
-        "Suchbegriff",
-        validators=[
-            FieldMustExist(message="Angabe erforderlich"),
-        ],
-    )
-
-    def get_query_string(self) -> str:
-        return self.data["search"]
-
-    def get_category_string(self) -> str:
-        return self.data["select"]
-
-
 class PlanSearchForm(Form):
     choices = [("Plan-ID", "Plan-ID"), ("Produktname", "Produktname")]
     select = SelectField(

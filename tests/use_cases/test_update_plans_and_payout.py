@@ -3,11 +3,11 @@ from decimal import Decimal
 
 from arbeitszeit.entities import AccountTypes, ProductionCosts
 from arbeitszeit.use_cases import UpdatePlansAndPayout
-from tests.data_generators import OfferGenerator, PlanGenerator
+from tests.data_generators import PlanGenerator
 from tests.datetime_service import FakeDatetimeService
 
 from .dependency_injection import injection_test
-from .repositories import AccountRepository, OfferRepository, TransactionRepository
+from .repositories import AccountRepository, TransactionRepository
 
 
 def count_transactions_of_type_a(transaction_repository: TransactionRepository) -> int:
@@ -184,65 +184,6 @@ def test_that_expiration_relative_is_correctly_calculated_when_plan_expires_in_e
     )
     payout()
     assert plan.expiration_relative == 1
-
-
-@injection_test
-def test_that_all_associated_offers_are_deleted_when_plan_is_expired(
-    plan_generator: PlanGenerator,
-    offer_generator: OfferGenerator,
-    offer_repository: OfferRepository,
-    datetime_service: FakeDatetimeService,
-    payout: UpdatePlansAndPayout,
-):
-    plan = plan_generator.create_plan(
-        activation_date=datetime_service.now_minus_ten_days(), timeframe=1
-    )
-    offer_generator.create_offer(plan=plan)
-    offer_generator.create_offer(plan=plan)
-    assert len(offer_repository.offers) == 2
-    payout()
-    assert len(offer_repository.offers) == 0
-
-
-@injection_test
-def test_that_associated_offers_are_not_deleted_when_plan_is_not_expired(
-    plan_generator: PlanGenerator,
-    offer_generator: OfferGenerator,
-    offer_repository: OfferRepository,
-    datetime_service: FakeDatetimeService,
-    payout: UpdatePlansAndPayout,
-):
-    plan = plan_generator.create_plan(
-        activation_date=datetime_service.now_minus_one_day(), timeframe=3
-    )
-    offer_generator.create_offer(plan=plan)
-    offer_generator.create_offer(plan=plan)
-    assert len(offer_repository.offers) == 2
-    payout()
-    assert len(offer_repository.offers) == 2
-
-
-@injection_test
-def test_that_only_offers_associated_with_expired_plans_are_deleted(
-    plan_generator: PlanGenerator,
-    offer_generator: OfferGenerator,
-    offer_repository: OfferRepository,
-    datetime_service: FakeDatetimeService,
-    payout: UpdatePlansAndPayout,
-):
-    active_plan = plan_generator.create_plan(
-        activation_date=datetime_service.now_minus_one_day(), timeframe=3
-    )
-    expired_plan = plan_generator.create_plan(
-        activation_date=datetime_service.now_minus_ten_days(), timeframe=1
-    )
-    active_offer = offer_generator.create_offer(plan=active_plan)
-    offer_generator.create_offer(plan=expired_plan)
-
-    assert len(offer_repository.offers) == 2
-    payout()
-    assert len(offer_repository.offers) == 1
-    assert offer_repository.offers[0].id == active_offer.id
 
 
 @injection_test

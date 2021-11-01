@@ -21,7 +21,6 @@ from arbeitszeit.entities import (
     Plan,
     PlanDraft,
     ProductionCosts,
-    ProductOffer,
     Purchase,
     PurposesOfPurchases,
     SocialAccounting,
@@ -31,7 +30,6 @@ from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
     MemberRepository,
-    OfferRepository,
     PlanDraftRepository,
     PlanRepository,
     PurchaseRepository,
@@ -39,29 +37,6 @@ from arbeitszeit.repositories import (
 )
 from arbeitszeit.use_cases import SeekApproval
 from tests.datetime_service import FakeDatetimeService
-
-
-@inject
-@dataclass
-class OfferGenerator:
-    plan_generator: PlanGenerator
-    offer_repository: OfferRepository
-
-    def create_offer(
-        self,
-        *,
-        name="Product name",
-        description="",
-        plan=None,
-    ) -> ProductOffer:
-        if plan is None:
-            plan = self.plan_generator.create_plan(activation_date=datetime.min)
-        return self.offer_repository.create_offer(
-            plan=plan,
-            creation_datetime=datetime.now(),
-            name=name,
-            description=description,
-        )
 
 
 @inject

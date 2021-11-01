@@ -23,7 +23,6 @@ from project.database.repositories import (
     MessageRepository,
     PlanDraftRepository,
     PlanRepository,
-    ProductOfferRepository,
     PurchaseRepository,
     TransactionRepository,
     WorkerInviteRepository,
@@ -33,10 +32,6 @@ from project.extensions import db
 
 
 def configure_injector(binder: Binder) -> None:
-    binder.bind(
-        interfaces.OfferRepository,  # type: ignore
-        to=ClassProvider(ProductOfferRepository),
-    )
     binder.bind(
         interfaces.TransactionRepository,  # type: ignore
         to=ClassProvider(TransactionRepository),
@@ -76,10 +71,6 @@ def configure_injector(binder: Binder) -> None:
     binder.bind(
         interfaces.AccountOwnerRepository,  # type: ignore
         to=ClassProvider(AccountOwnerRepository),
-    )
-    binder.bind(
-        interfaces.OfferRepository,  # type: ignore
-        to=ClassProvider(ProductOfferRepository),
     )
     binder.bind(
         interfaces.PlanDraftRepository,  # type: ignore

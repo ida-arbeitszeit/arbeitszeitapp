@@ -17,17 +17,8 @@ from arbeitszeit_web.query_companies import (
     QueryCompaniesPresenter,
 )
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
-from arbeitszeit_web.query_products import (
-    QueryProductsController,
-    QueryProductsPresenter,
-)
 from project.database import AccountRepository, MemberRepository, commit_changes
-from project.forms import (
-    CompanySearchForm,
-    PayConsumerProductForm,
-    PlanSearchForm,
-    ProductSearchForm,
-)
+from project.forms import CompanySearchForm, PayConsumerProductForm, PlanSearchForm
 from project.models import Member
 from project.url_index import MemberUrlIndex
 from project.views import (
@@ -35,7 +26,6 @@ from project.views import (
     PayConsumerProductView,
     QueryCompaniesView,
     QueryPlansView,
-    QueryProductsView,
 )
 
 from .blueprint import MemberRoute
@@ -49,25 +39,6 @@ def my_purchases(
     assert member is not None
     purchases = list(query_purchases(member))
     return Response(render_template("member/my_purchases.html", purchases=purchases))
-
-
-@MemberRoute("/member/suchen", methods=["GET", "POST"])
-def suchen(
-    query_products: use_cases.QueryProducts,
-    controller: QueryProductsController,
-) -> Response:
-    template_name = "member/query_products.html"
-    search_form = ProductSearchForm(request.form)
-    presenter = QueryProductsPresenter(
-        MemberUrlIndex(),
-    )
-    view = QueryProductsView(
-        search_form, query_products, presenter, controller, template_name
-    )
-    if request.method == "POST":
-        return view.respond_to_post()
-    else:
-        return view.respond_to_get()
 
 
 @MemberRoute("/member/query_plans", methods=["GET", "POST"])

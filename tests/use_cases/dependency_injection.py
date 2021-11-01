@@ -11,12 +11,6 @@ from . import repositories
 
 class InMemoryModule(Module):
     @provider
-    def provide_offer_repository(
-        self, repo: repositories.OfferRepository
-    ) -> interfaces.OfferRepository:
-        return repo
-
-    @provider
     def provide_purchase_repo(
         self, repo: repositories.PurchaseRepository
     ) -> interfaces.PurchaseRepository:

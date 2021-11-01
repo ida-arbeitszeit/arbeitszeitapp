@@ -1,15 +1,9 @@
-from datetime import datetime
 from decimal import Decimal
 from typing import Union
 
 from arbeitszeit.entities import ProductionCosts
 from arbeitszeit.use_cases import GetStatistics
-from tests.data_generators import (
-    CompanyGenerator,
-    MemberGenerator,
-    OfferGenerator,
-    PlanGenerator,
-)
+from tests.data_generators import CompanyGenerator, MemberGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
 
 from .dependency_injection import injection_test
@@ -36,7 +30,6 @@ def test_that_values_are_zero_if_repositories_are_empty(get_statistics: GetStati
     assert stats.planned_work == 0
     assert stats.planned_resources == 0
     assert stats.planned_means == 0
-    assert stats.products_on_marketplace_count == 0
 
 
 @injection_test
@@ -232,32 +225,3 @@ def test_that_inactive_plans_are_ignored_when_adding_up_means(
     )
     stats = get_statistics()
     assert stats.planned_means == 3
-
-
-@injection_test
-def test_counting_of_marketplace_products(
-    get_statistics: GetStatistics,
-    plan_generator: PlanGenerator,
-    offer_generator: OfferGenerator,
-):
-    offer_generator.create_offer(
-        plan=plan_generator.create_plan(activation_date=datetime.min)
-    )
-    offer_generator.create_offer(
-        plan=plan_generator.create_plan(activation_date=datetime.min)
-    )
-    stats = get_statistics()
-    assert stats.products_on_marketplace_count == 2
-
-
-@injection_test
-def test_that_plan_duplicates_are_ignored_when_counting_marketplace_products(
-    get_statistics: GetStatistics,
-    plan_generator: PlanGenerator,
-    offer_generator: OfferGenerator,
-):
-    plan = plan_generator.create_plan(activation_date=datetime.min)
-    offer_generator.create_offer(plan=plan)
-    offer_generator.create_offer(plan=plan)
-    stats = get_statistics()
-    assert stats.products_on_marketplace_count == 1
