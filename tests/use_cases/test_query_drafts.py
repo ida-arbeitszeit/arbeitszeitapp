@@ -1,5 +1,5 @@
 from arbeitszeit.entities import PlanDraft
-from arbeitszeit.use_cases import ListDraftsResponse, ListDraftsOfCompany
+from arbeitszeit.use_cases import ListDraftsOfCompany, ListDraftsResponse
 from tests.data_generators import CompanyGenerator, PlanGenerator
 
 from .dependency_injection import injection_test

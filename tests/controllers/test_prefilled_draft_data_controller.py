@@ -1,8 +1,9 @@
-from arbeitszeit_web.get_prefilled_draft_data import PrefilledDraftDataController
 from dataclasses import dataclass, replace
-from arbeitszeit.use_cases import CreatePlanDraftRequest
 from decimal import Decimal
 from uuid import uuid4
+
+from arbeitszeit.use_cases import CreatePlanDraftRequest
+from arbeitszeit_web.get_prefilled_draft_data import PrefilledDraftDataController
 
 
 @dataclass
@@ -85,7 +86,7 @@ def test_import_of_data_transforms_description_string_to_correct_string():
 def test_import_of_data_transforms_timeframe_string_to_correct_integer():
     assert isinstance(fake_form.timeframe, str)
     request = controller.import_form_data(uuid4(), fake_form)
-    assert request.timeframe_in_days == int(14)
+    assert request.timeframe_in_days == 14
 
 
 def test_import_of_data_transforms_prd_unit_string_to_correct_string():
@@ -97,7 +98,7 @@ def test_import_of_data_transforms_prd_unit_string_to_correct_string():
 def test_import_of_data_transforms_prd_amount_string_to_correct_integer():
     assert isinstance(fake_form.prd_amount, str)
     request = controller.import_form_data(uuid4(), fake_form)
-    assert request.production_amount == int(10)
+    assert request.production_amount == 10
 
 
 def test_import_of_data_transforms_cost_strings_to_correct_decimal():

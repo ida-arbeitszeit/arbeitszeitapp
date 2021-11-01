@@ -38,6 +38,7 @@ from .invite_worker_to_company import (
     InviteWorkerToCompany,
     InviteWorkerToCompanyRequest,
 )
+from .list_drafts_of_company import ListDraftsOfCompany, ListDraftsResponse
 from .pay_consumer_product import (
     PayConsumerProduct,
     PayConsumerProductRequest,
@@ -50,7 +51,6 @@ from .query_companies import (
     QueryCompanies,
     QueryCompaniesRequest,
 )
-from .list_drafts_of_company import ListDraftsResponse, ListDraftsOfCompany
 from .query_plans import PlanFilter, PlanQueryResponse, QueryPlans, QueryPlansRequest
 from .query_products import (
     ProductFilter,
