@@ -36,7 +36,7 @@ submit changes in a pull pull request.  This program runs ``flake8``,
 You can generate a code coverage report at ``htmlcov/index.html`` via
 the command::
 
-    coverage run --source project,arbeitszeit,arbeitszeit_web  -m pytest && coverage html
+    coverage run --source project,arbeitszeit,arbeitszeit_web -m pytest && coverage html
 
 In some circumstances we use ``hypothesis`` to check for edge cases.
 By default ``hypothesis`` generates only 10 examples per test to keep
