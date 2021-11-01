@@ -35,11 +35,7 @@ from project.database import (
     MemberRepository,
     commit_changes,
 )
-from project.forms import (
-    CompanySearchForm,
-    CreateDraftForm,
-    PlanSearchForm,
-)
+from project.forms import CompanySearchForm, CreateDraftForm, PlanSearchForm
 from project.models import Company
 from project.url_index import CompanyUrlIndex
 from project.views import Http404View, QueryCompaniesView, QueryPlansView
