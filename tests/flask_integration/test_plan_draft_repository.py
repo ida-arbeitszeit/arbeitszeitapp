@@ -79,3 +79,16 @@ class PlanDraftRepositoryTests(TestCase):
         draft = self.repo.create_plan_draft(**self.DEFAULT_CREATE_ARGUMENTS)
         self.repo.delete_draft(draft.id)
         self.assertIsNone(self.repo.get_by_id(draft.id))
+
+    def test_all_drafts_can_be_retrieved(self) -> None:
+        expected_draft1 = self.repo.create_plan_draft(**self.DEFAULT_CREATE_ARGUMENTS)
+        expected_draft2 = self.repo.create_plan_draft(**self.DEFAULT_CREATE_ARGUMENTS)
+        drafts = self.repo.all_drafts_of_company(self.planner.id)
+        self.assertIn(expected_draft1, drafts)
+        self.assertIn(expected_draft2, drafts)
+
+    def test_that_nothing_is_returned_when_repo_is_empty_and_querying_all_drafts(
+        self,
+    ) -> None:
+        drafts = self.repo.all_drafts_of_company(self.planner.id)
+        self.assertFalse(list(drafts))

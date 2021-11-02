@@ -25,11 +25,14 @@
               Pläne
             </a>
             <div class="navbar-dropdown">
-              <a href="{{ url_for('main_company.create_plan') }}" class="navbar-item">
-                Neuen Plan erstellen
+              <a href="{{ url_for('main_company.create_draft') }}" class="navbar-item">
+                Neuer Plan
               </a>
               <a href="{{ url_for('main_company.my_plans') }}" class="navbar-item">
                 Meine Pläne
+              </a>
+              <a href="{{ url_for('main_company.my_drafts') }}" class="navbar-item">
+                Meine Entwürfe
               </a>
               <a href="{{ url_for('main_company.query_plans') }}" class="navbar-item">
                 Alle Pläne

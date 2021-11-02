@@ -58,6 +58,7 @@ class Company(UserMixin, db.Model):
     plans = db.relationship("Plan", lazy="dynamic", backref="company")
     accounts = db.relationship("Account", lazy="dynamic", backref="company")
     purchases = db.relationship("Purchase", lazy="dynamic")
+    drafts = db.relationship("PlanDraft", lazy="dynamic")
 
     def __repr__(self):
         return "<Company(email='%s', name='%s')>" % (
@@ -107,8 +108,6 @@ class Plan(UserMixin, db.Model):
     payout_count = db.Column(db.Integer, nullable=False, default=0)
     is_available = db.Column(db.Boolean, nullable=False, default=True)
 
-    offers = db.relationship("Offer", lazy="dynamic", backref="plan")
-
 
 class AccountTypes(Enum):
     p = "p"
@@ -154,14 +153,6 @@ class Transaction(UserMixin, db.Model):
     )
     amount = db.Column(db.Numeric(), nullable=False)
     purpose = db.Column(db.String(1000), nullable=True)  # Verwendungszweck
-
-
-class Offer(UserMixin, db.Model):
-    id = db.Column(db.String, primary_key=True, default=generate_uuid)
-    plan_id = db.Column(db.String, db.ForeignKey("plan.id"), nullable=False)
-    cr_date = db.Column(db.DateTime, nullable=False)
-    name = db.Column(db.String(1000), nullable=False)
-    description = db.Column(db.String(5000), nullable=False)
 
 
 class Purchase(UserMixin, db.Model):

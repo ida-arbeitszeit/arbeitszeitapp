@@ -142,7 +142,7 @@ messages %}
         </td>
         {% else %}
         <td>
-          <a href="{{ url_for('main_company.create_plan', expired_plan_id=plan.id) }}"><i
+          <a href="{{ url_for('main_company.create_draft_from_expired_plan', expired_plan_id=plan.id) }}"><i
               class="{{ 'fas fa-redo' }}"></i></a>
         </td>
         {% endif %}
