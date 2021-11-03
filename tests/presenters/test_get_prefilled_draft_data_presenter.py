@@ -18,6 +18,7 @@ TEST_PLAN_SUMMARY_SUCCESS = PlanSummarySuccess(
     labour_cost=Decimal(5),
     is_public_service=False,
     price_per_unit=Decimal(10),
+    is_available=True,
 )
 
 TEST_DRAFT_SUMMARY_SUCCESS = DraftSummarySuccess(
