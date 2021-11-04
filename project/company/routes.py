@@ -266,7 +266,7 @@ def my_plans(
 @CompanyRoute("/company/toggle_availability/<uuid:plan_id>", methods=["GET"])
 @commit_changes
 def toggle_availability(plan_id: UUID, toggle_availability: ToggleProductAvailability):
-    toggle_availability(plan_id)
+    toggle_availability(UUID(current_user.id), plan_id)
     return redirect(url_for("main_company.my_plans"))
 
 
