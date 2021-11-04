@@ -3,7 +3,8 @@
 <div class="box has-background-info-light has-text-info-dark">
   <div class="icon"><i class="fas fa-info-circle"></i></div>
   <p>
-    Hier sind deine genehmigten Pläne.<br />Abgelaufene Pläne kannst du erneuern.
+    Aktuelle Pläne kannst du als (nicht) verfügbar kennzeichnen. <br />
+    Abgelaufene Pläne kannst du erneuern oder löschen.
   </p>
 </div>
 <h1 class="title">Aktuelle Pläne</h1>
@@ -42,15 +43,18 @@ messages %}
         <td>{{ plan.expiration_relative }}</td>
         {% if plan.is_available %}
         <td>
-          <span style="color: green"><i class="fas fa-circle"></i></span>
+          <span style="color: green"><a style="text-decoration: none; color: inherit;"
+              href="{{ url_for('main_company.toggle_availability', plan_id=plan.id) }}"><i
+                class="fas fa-toggle-on"></i></a></span>
         </td>
         {% else %}
         <td>
-          <span style="color: red"><i class="fas fa-circle"></i></span>
+          <span style="color: red"><a style="text-decoration: none; color: inherit;"
+              href="{{ url_for('main_company.toggle_availability', plan_id=plan.id) }}"><i
+                class="fas fa-toggle-off"></i></a></span>
         </td>
         {% endif %}
-      </tr>
-      {% endfor %}
+        {% endfor %}
     </tbody>
   </table>
   {% else %}
