@@ -107,7 +107,7 @@ class QueryPlansPresenter:
                         type_of_plan="Öffentlich"
                         if result.is_public_service
                         else "Produktiv",
-                        ends_in=f"{result.expiration_relative} Tage"
+                        ends_in=f"{result.expiration_relative} Tagen"
                         if result.expiration_relative is not None
                         else "–",
                         is_available=result.is_available,

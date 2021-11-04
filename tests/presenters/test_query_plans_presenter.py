@@ -1,6 +1,6 @@
+from decimal import Decimal
 from unittest import TestCase
 from uuid import UUID, uuid4
-from decimal import Decimal
 
 from arbeitszeit.use_cases.query_plans import PlanQueryResponse, QueriedPlan
 from arbeitszeit_web.query_plans import QueryPlansPresenter
