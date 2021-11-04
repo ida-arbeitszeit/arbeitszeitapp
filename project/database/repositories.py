@@ -699,7 +699,7 @@ class PlanRepository(repositories.PlanRepository):
         plan.is_available = True if (plan.is_available == False) else False
 
         plan_orm = self.object_to_orm(plan)
-        plan_orm.is_available = True if (plan.is_available == False) else False
+        plan_orm.is_available = True if (plan_orm.is_available == False) else False
 
     def __len__(self) -> int:
         return len(Plan.query.all())

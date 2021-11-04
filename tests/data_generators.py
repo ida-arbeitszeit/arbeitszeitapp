@@ -159,6 +159,7 @@ class PlanGenerator:
         production_unit: str = "500 Gramm",
         timeframe: Optional[int] = None,
         expired: bool = False,
+        is_available: bool = True,
     ) -> Plan:
         assert approved, "Currently the application does not support plan rejection"
         draft = self.draft_plan(
@@ -180,6 +181,8 @@ class PlanGenerator:
             self.plan_repository.activate_plan(plan, activation_date)
         if expired:
             self.plan_repository.set_plan_as_expired(plan)
+        if not is_available:
+            self.plan_repository.toggle_product_availability(plan)
         return plan
 
     def draft_plan(
