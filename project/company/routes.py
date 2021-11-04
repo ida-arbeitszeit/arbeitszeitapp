@@ -250,8 +250,8 @@ def my_drafts(
 @CompanyRoute("/company/my_plans", methods=["GET"])
 def my_plans(
     show_my_plans_use_case: ShowMyPlansUseCase,
-    show_my_plans_presenter: ShowMyPlansPresenter,
 ):
+    show_my_plans_presenter = ShowMyPlansPresenter(CompanyUrlIndex())
     request = ShowMyPlansRequest(company_id=UUID(current_user.id))
     response = show_my_plans_use_case(request)
     view_model = show_my_plans_presenter.present(response)
