@@ -60,6 +60,10 @@ class ResultTableRow:
     company_name: str
     product_name: str
     description: List[str]
+    price_per_unit: str
+    type_of_plan: str
+    ends_in: str
+    is_available: bool
 
 
 @dataclass
@@ -99,6 +103,14 @@ class QueryPlansPresenter:
                         company_name=result.company_name,
                         product_name=result.product_name,
                         description=result.description.splitlines(),
+                        price_per_unit=str(round(result.price_per_unit, 2)),
+                        type_of_plan="Öffentlich"
+                        if result.is_public_service
+                        else "Produktiv",
+                        ends_in=f"{result.expiration_relative} Tage"
+                        if result.expiration_relative is not None
+                        else "–",
+                        is_available=result.is_available,
                     )
                     for result in response.results
                 ],

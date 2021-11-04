@@ -39,6 +39,7 @@ class ActivePlansRow:
     activation_date: str
     expiration_date: str
     expiration_relative: str
+    is_available: bool
 
 
 @dataclass
@@ -124,6 +125,7 @@ class ShowMyPlansPresenter:
                         expiration_relative=f"{plan.expiration_relative} Tagen"
                         if plan.expiration_relative is not None
                         else "–",
+                        is_available=plan.is_available,
                     )
                     for plan in response.active_plans
                 ],

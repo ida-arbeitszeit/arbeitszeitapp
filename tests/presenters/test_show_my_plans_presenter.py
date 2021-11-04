@@ -1,12 +1,12 @@
+from datetime import datetime
 from unittest import TestCase
-from uuid import UUID, uuid4
+from uuid import UUID
 
+from arbeitszeit.entities import Plan
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansResponse
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from tests.data_generators import PlanGenerator
 from tests.use_cases.dependency_injection import get_dependency_injector
-from datetime import datetime
-from arbeitszeit.entities import Plan
 
 
 def response_with_one_plan(plan: Plan) -> ShowMyPlansResponse:

@@ -26,6 +26,7 @@ messages %}
         <th>Plan&nbsp;aktiv&nbsp;seit</th>
         <th>Plan-Ende</th>
         <th>Endet&nbsp;in</th>
+        <th>Verfügbar</th>
       </tr>
     </thead>
     <tbody>
@@ -39,6 +40,15 @@ messages %}
         <td>{{ plan.activation_date }}</td>
         <td>{{ plan.expiration_date }}</td>
         <td>{{ plan.expiration_relative }}</td>
+        {% if plan.is_available %}
+        <td>
+          <span style="color: green"><i class="fas fa-circle"></i></span>
+        </td>
+        {% else %}
+        <td>
+          <span style="color: red"><i class="fas fa-circle"></i></span>
+        </td>
+        {% endif %}
       </tr>
       {% endfor %}
     </tbody>
