@@ -7,6 +7,7 @@ from enum import Enum
 from typing import List, Optional, Union
 from uuid import UUID
 
+from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.user_action import UserAction
 
 
@@ -59,6 +60,22 @@ class AccountTypes(Enum):
 class Account:
     id: UUID
     account_type: AccountTypes
+
+
+@dataclass
+class MetaProduct:
+    creation_date: datetime
+    name: str
+    definition: str
+    coordinator: Company
+    plans: List[Plan]
+
+    @property
+    def meta_price_per_unit(self) -> Decimal:
+        meta_price_per_unit = (
+            decimal_sum([plan.price_per_unit for plan in self.plans])
+        ) / (len(self.plans) or 1)
+        return meta_price_per_unit
 
 
 @dataclass
@@ -123,6 +140,7 @@ class Plan:
     expiration_date: Optional[datetime]
     active_days: Optional[int]
     payout_count: int
+    meta_product: Optional[MetaProduct]
 
     @property
     def price_per_unit(self) -> Decimal:

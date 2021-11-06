@@ -517,6 +517,7 @@ class PlanRepository(interfaces.PlanRepository):
             expiration_date=None,
             active_days=None,
             payout_count=0,
+            meta_product=None,
         )
         self.plans[plan.id] = plan
         return plan
