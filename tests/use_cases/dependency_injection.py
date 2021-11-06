@@ -86,6 +86,12 @@ class InMemoryModule(Module):
         return repo
 
     @provider
+    def provide_meta_product_repository(
+        self, repo: repositories.MetaProductRepository
+    ) -> interfaces.MetaProductRepository:
+        return repo
+
+    @provider
     @singleton
     def provide_datetime_service(self, service: FakeDatetimeService) -> DatetimeService:
         return service

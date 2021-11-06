@@ -1,6 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 from unittest import TestCase
+from uuid import uuid4
 
 from arbeitszeit.entities import MetaProduct, ProductionCosts
 from tests.data_generators import CompanyGenerator, PlanGenerator
@@ -15,6 +16,7 @@ class TestMetaPricePerUnit(TestCase):
 
     def test_price_is_zero_when_no_plans_are_associated_with_product(self) -> None:
         product = MetaProduct(
+            id=uuid4(),
             creation_date=datetime.min,
             name="product name",
             definition="usefull info",
@@ -30,6 +32,7 @@ class TestMetaPricePerUnit(TestCase):
             costs=ProductionCosts(Decimal(0), Decimal(0), Decimal(0))
         )
         product = MetaProduct(
+            id=uuid4(),
             creation_date=datetime.min,
             name="product name",
             definition="usefull info",
@@ -55,6 +58,7 @@ class TestMetaPricePerUnit(TestCase):
         exp_price3 = Decimal("1.5")
         exp_average_of_prices = sum([exp_price1, exp_price2, exp_price3]) / 3
         product = MetaProduct(
+            id=uuid4(),
             creation_date=datetime.min,
             name="product name",
             definition="usefull info",

@@ -64,6 +64,7 @@ class Account:
 
 @dataclass
 class MetaProduct:
+    id: UUID
     creation_date: datetime
     name: str
     definition: str
@@ -73,7 +74,7 @@ class MetaProduct:
     @property
     def meta_price_per_unit(self) -> Decimal:
         meta_price_per_unit = (
-            decimal_sum([plan.price_per_unit for plan in self.plans])
+            decimal_sum([plan.individual_price_per_unit for plan in self.plans])
         ) / (len(self.plans) or 1)
         return meta_price_per_unit
 
@@ -143,9 +144,20 @@ class Plan:
     meta_product: Optional[MetaProduct]
 
     @property
+    def individual_price_per_unit(self) -> Decimal:
+        return (
+            self.production_costs.total_cost() / self.prd_amount
+            if not self.is_public_service
+            else Decimal(0)
+        )
+
+    @property
     def price_per_unit(self) -> Decimal:
-        cost_per_unit = self.production_costs.total_cost() / self.prd_amount
-        return cost_per_unit if not self.is_public_service else Decimal(0)
+        if self.meta_product is None:
+            price_per_unit = self.individual_price_per_unit
+        else:
+            price_per_unit = self.meta_product.meta_price_per_unit
+        return price_per_unit
 
     @property
     def expected_sales_value(self) -> Decimal:

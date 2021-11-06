@@ -19,6 +19,7 @@ from arbeitszeit.entities import (
     CompanyWorkInvite,
     Member,
     Message,
+    MetaProduct,
     Plan,
     PlanDraft,
     ProductionCosts,
@@ -685,3 +686,44 @@ class MessageRepository(interfaces.MessageRepository):
         for message in self.messages.values():
             if message.addressee.id == user:
                 yield message
+
+
+@singleton
+class MetaProductRepository(interfaces.MetaProductRepository):
+    @inject
+    def __init__(self, plan_repository: PlanRepository) -> None:
+        self.meta_products: Dict[UUID, MetaProduct] = dict()
+        self.plan_repository = plan_repository
+
+    def create_meta_product(
+        self,
+        creation_timestamp: datetime,
+        name: str,
+        definition: str,
+        coordinator: Company,
+    ) -> MetaProduct:
+        meta_product_id = uuid4()
+        meta_product = MetaProduct(
+            id=meta_product_id,
+            creation_date=creation_timestamp,
+            name=name,
+            definition=definition,
+            coordinator=coordinator,
+            plans=[],
+        )
+        self.meta_products[meta_product_id] = meta_product
+        return meta_product
+
+    def get_by_id(self, id: UUID) -> Optional[MetaProduct]:
+        return self.meta_products.get(id)
+
+    def add_plan_to_meta_product(self, plan_id: UUID, meta_product_id: UUID) -> None:
+        plan = self.plan_repository.get_plan_by_id(plan_id)
+        meta_product = self.get_by_id(meta_product_id)
+        assert plan
+        assert meta_product
+        plan.meta_product = meta_product
+        meta_product.plans.append(plan)
+
+    def __len__(self) -> int:
+        return len(self.meta_products)

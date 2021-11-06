@@ -18,6 +18,7 @@ from arbeitszeit.entities import (
     AccountTypes,
     Company,
     Member,
+    MetaProduct,
     Plan,
     PlanDraft,
     ProductionCosts,
@@ -159,6 +160,7 @@ class PlanGenerator:
         production_unit: str = "500 Gramm",
         timeframe: Optional[int] = None,
         expired: bool = False,
+        meta_product: Optional[MetaProduct] = None,
     ) -> Plan:
         assert approved, "Currently the application does not support plan rejection"
         draft = self.draft_plan(
@@ -180,6 +182,8 @@ class PlanGenerator:
             self.plan_repository.activate_plan(plan, activation_date)
         if expired:
             self.plan_repository.set_plan_as_expired(plan)
+        if meta_product:
+            plan.meta_product = meta_product
         return plan
 
     def draft_plan(

@@ -13,6 +13,11 @@ from .check_for_unread_messages import (
     CheckForUnreadMessagesRequest,
     CheckForUnreadMessagesResponse,
 )
+from .create_meta_product import (
+    CreateMetaProduct,
+    CreateMetaProductRequest,
+    CreateMetaProductResponse,
+)
 from .create_plan_draft import (
     CreatePlanDraft,
     CreatePlanDraftRequest,
@@ -76,6 +81,9 @@ __all__ = [
     "CheckForUnreadMessagesResponse",
     "CompanyFilter",
     "CompanyQueryResponse",
+    "CreateMetaProduct",
+    "CreateMetaProductRequest",
+    "CreateMetaProductResponse",
     "CreatePlanDraft",
     "CreatePlanDraftRequest",
     "CreatePlanDraftRequest",

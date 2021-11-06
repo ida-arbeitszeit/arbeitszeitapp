@@ -11,6 +11,7 @@ from arbeitszeit.entities import (
     CompanyWorkInvite,
     Member,
     Message,
+    MetaProduct,
     Plan,
     PlanDraft,
     ProductionCosts,
@@ -343,4 +344,24 @@ class MessageRepository(ABC):
 
     @abstractmethod
     def get_messages_to_user(self, user: UUID) -> Iterable[Message]:
+        pass
+
+
+class MetaProductRepository(ABC):
+    @abstractmethod
+    def create_meta_product(
+        self,
+        creation_timestamp: datetime,
+        name: str,
+        definition: str,
+        coordinator: Company,
+    ) -> MetaProduct:
+        pass
+
+    @abstractmethod
+    def get_by_id(self, id: UUID) -> Optional[MetaProduct]:
+        pass
+
+    @abstractmethod
+    def add_plan_to_meta_product(self, plan_id: UUID, meta_product_id: UUID) -> None:
         pass
