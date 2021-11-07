@@ -372,3 +372,13 @@
 </div>
 {% endif %}
 {% endmacro %}
+
+{% macro show_notifications(notifications) %}
+{% if notifications %}
+<div class="box">
+  {% for notification in notifications %}
+  <div class="notification is-danger">{{ notification }}</div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endmacro %}

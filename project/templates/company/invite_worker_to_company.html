@@ -1,0 +1,13 @@
+{% extends "base_company.html" %}
+
+{% block content2 %}
+<div>
+  {% from 'macros.html' import show_notifications %}
+  {{ show_notifications(view_model.notifications) }}
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {{ form.member_id }}
+    <button>Einladen</button>
+  </form>
+</div>
+{% endblock %}

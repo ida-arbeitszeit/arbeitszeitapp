@@ -1,7 +1,11 @@
-from typing import Optional, Protocol
+from dataclasses import dataclass
+from typing import List, Optional, Protocol
 from uuid import UUID
 
-from arbeitszeit.use_cases import InviteWorkerToCompanyRequest
+from arbeitszeit.use_cases import (
+    InviteWorkerToCompanyRequest,
+    InviteWorkerToCompanyResponse,
+)
 
 
 class InviteWorkerToCompanyForm(Protocol):
@@ -22,4 +26,20 @@ class InviteWorkerToCompanyController:
         return InviteWorkerToCompanyRequest(
             company=current_user,
             worker=worker_uuid,
+        )
+
+
+@dataclass
+class ViewModel:
+    notifications: List[str]
+
+
+class InviteWorkerToCompanyPresenter:
+    def present(self, use_case_response: InviteWorkerToCompanyResponse) -> ViewModel:
+        if use_case_response.is_success:
+            notifications = ["Arbeiter*in erfolgreich eingeladen."]
+        else:
+            notifications = ["Arbeiter*in konnte nicht eingeladen werden."]
+        return ViewModel(
+            notifications=notifications,
         )

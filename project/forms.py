@@ -155,3 +155,14 @@ class CreateDraftForm(Form):
 
     def get_action_string(self) -> str:
         return self.data["action"]
+
+
+class InviteWorkerToCompanyForm(Form):
+    member_id = StringField(
+        validators=[
+            FieldMustExist(message="Angabe erforderlich"),
+        ],
+    )
+
+    def get_worker_id(self) -> str:
+        return self.data["member_id"]

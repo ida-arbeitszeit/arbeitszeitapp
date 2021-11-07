@@ -2,7 +2,7 @@ from decimal import Decimal
 from typing import Optional, cast
 from uuid import UUID
 
-from flask import flash, redirect, render_template, request, url_for
+from flask import Response, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
 from arbeitszeit import entities, errors, use_cases
@@ -11,6 +11,7 @@ from arbeitszeit.use_cases import (
     DeletePlan,
     GetDraftSummary,
     GetPlanSummary,
+    InviteWorkerToCompany,
 )
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_web.delete_plan import DeletePlanPresenter
@@ -20,6 +21,10 @@ from arbeitszeit_web.get_prefilled_draft_data import (
     PrefilledDraftDataController,
 )
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
+from arbeitszeit_web.invite_worker_to_company import (
+    InviteWorkerToCompanyController,
+    InviteWorkerToCompanyPresenter,
+)
 from arbeitszeit_web.list_drafts_of_company import ListDraftsPresenter
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from arbeitszeit_web.query_companies import (
@@ -35,10 +40,20 @@ from project.database import (
     MemberRepository,
     commit_changes,
 )
-from project.forms import CompanySearchForm, CreateDraftForm, PlanSearchForm
+from project.forms import (
+    CompanySearchForm,
+    CreateDraftForm,
+    InviteWorkerToCompanyForm,
+    PlanSearchForm,
+)
 from project.models import Company
 from project.url_index import CompanyUrlIndex
-from project.views import Http404View, QueryCompaniesView, QueryPlansView
+from project.views import (
+    Http404View,
+    InviteWorkerToCompanyView,
+    QueryCompaniesView,
+    QueryPlansView,
+)
 
 from .blueprint import CompanyRoute
 
@@ -376,3 +391,22 @@ def plan_summary(
 @login_required
 def hilfe():
     return render_template("company/help.html")
+
+
+@CompanyRoute("/company/invite_worker_to_company", methods=["GET", "POST"])
+def invite_worker_to_company(
+    invite_worker: InviteWorkerToCompany,
+    presenter: InviteWorkerToCompanyPresenter,
+    controller: InviteWorkerToCompanyController,
+) -> Response:
+    view = InviteWorkerToCompanyView(
+        invite_worker,
+        presenter,
+        controller,
+        template_name="company/invite_worker_to_company.html",
+    )
+    form = InviteWorkerToCompanyForm(request.form)
+    if request.method == "POST":
+        return view.respond_to_post(UUID(current_user.id), form)
+    else:
+        return view.respond_to_get(form)
