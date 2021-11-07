@@ -20,6 +20,7 @@ TESTING_RESPONSE_MODEL = PlanSummarySuccess(
     labour_cost=Decimal(3),
     is_public_service=False,
     price_per_unit=Decimal(0.06),
+    is_available=True,
 )
 
 
@@ -185,4 +186,14 @@ class GetPlanSummarySuccessPresenterTests(TestCase):
         dictionary = view_model.to_dict()
         self.assertEqual(
             dictionary["plan_id"], ("Plan-ID", str(TESTING_RESPONSE_MODEL.plan_id))
+        )
+
+    def test_availability_is_displayed_correctly_as_tuple_of_strings(self):
+        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        self.assertTupleEqual(
+            view_model.is_available,
+            (
+                "Produkt aktuell verfügbar",
+                "Ja",
+            ),
         )

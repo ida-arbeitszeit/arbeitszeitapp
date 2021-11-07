@@ -519,6 +519,7 @@ class PlanRepository(interfaces.PlanRepository):
             active_days=None,
             payout_count=0,
             cooperation=None,
+            is_available=True,
         )
         self.plans[plan.id] = plan
         return plan
@@ -532,6 +533,9 @@ class PlanRepository(interfaces.PlanRepository):
         for plan in self.plans.values():
             if plan.is_active and (query in str(plan.id)):
                 yield plan
+
+    def toggle_product_availability(self, plan: Plan) -> None:
+        plan.is_available = True if (plan.is_available == False) else False
 
 
 @singleton

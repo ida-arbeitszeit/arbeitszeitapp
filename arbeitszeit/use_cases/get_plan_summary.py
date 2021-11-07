@@ -23,6 +23,7 @@ class PlanSummarySuccess:
     labour_cost: Decimal
     is_public_service: bool
     price_per_unit: Decimal
+    is_available: bool
 
 
 PlanSummaryResponse = Optional[PlanSummarySuccess]
@@ -51,4 +52,5 @@ class GetPlanSummary:
             labour_cost=plan.production_costs.labour_cost,
             is_public_service=plan.is_public_service,
             price_per_unit=plan.price_per_unit,
+            is_available=plan.is_available,
         )

@@ -142,6 +142,7 @@ class Plan:
     active_days: Optional[int]
     payout_count: int
     cooperation: Optional[Cooperation]
+    is_available: bool
 
     @property
     def individual_price_per_unit(self) -> Decimal:

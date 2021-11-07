@@ -162,6 +162,7 @@ class PlanGenerator:
         timeframe: Optional[int] = None,
         expired: bool = False,
         cooperation: Optional[Cooperation] = None,
+        is_available: bool = True,
     ) -> Plan:
         assert approved, "Currently the application does not support plan rejection"
         draft = self.draft_plan(
@@ -185,6 +186,8 @@ class PlanGenerator:
             self.plan_repository.set_plan_as_expired(plan)
         if cooperation:
             plan.cooperation = cooperation
+        if not is_available:
+            self.plan_repository.toggle_product_availability(plan)
         return plan
 
     def draft_plan(
