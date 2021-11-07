@@ -163,6 +163,17 @@ def test_that_none_is_returned_when_plan_does_not_exist(
     assert get_plan_summary(uuid4()) is None
 
 
+@injection_test
+def test_that_correct_availability_is_shown(
+    plan_generator: PlanGenerator,
+    get_plan_summary: GetPlanSummary,
+):
+    plan = plan_generator.create_plan()
+    assert plan.is_available
+    summary = get_plan_summary(plan.id)
+    assert_success(summary, lambda s: s.is_available == True)
+
+
 def assert_success(
     response: PlanSummaryResponse, assertion: Callable[[PlanSummarySuccess], bool]
 ) -> None:

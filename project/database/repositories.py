@@ -445,6 +445,7 @@ class PlanRepository(repositories.PlanRepository):
             activation_date=plan.activation_date,
             active_days=plan.active_days,
             payout_count=plan.payout_count,
+            is_available=plan.is_available,
         )
 
     def object_to_orm(self, plan: entities.Plan) -> Plan:
@@ -480,6 +481,7 @@ class PlanRepository(repositories.PlanRepository):
             expiration_date=None,
             active_days=None,
             payout_count=0,
+            is_available=True,
         )
         self.db.session.add(plan)
         return plan
@@ -692,6 +694,12 @@ class PlanRepository(repositories.PlanRepository):
                 Plan.expired == True,
             )
         )
+
+    def toggle_product_availability(self, plan: entities.Plan) -> None:
+        plan.is_available = True if (plan.is_available == False) else False
+
+        plan_orm = self.object_to_orm(plan)
+        plan_orm.is_available = True if (plan_orm.is_available == False) else False
 
     def __len__(self) -> int:
         return len(Plan.query.all())

@@ -19,6 +19,7 @@ class GetPlanSummaryViewModel:
     labour_cost: Tuple[str, str]
     type_of_plan: Tuple[str, str]
     price_per_unit: Tuple[str, str]
+    is_available: Tuple[str, str]
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -49,4 +50,8 @@ class GetPlanSummarySuccessPresenter:
                 "Öffentlich" if response.is_public_service else "Produktiv",
             ),
             price_per_unit=("Preis (pro Einheit)", str(response.price_per_unit)),
+            is_available=(
+                "Produkt aktuell verfügbar",
+                "Ja" if response.is_available else "Nein",
+            ),
         )

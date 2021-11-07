@@ -253,7 +253,9 @@ def test_that_active_days_are_set(
     plan = plan_generator.create_plan(activation_date=datetime.min)
     assert plan.active_days is None
     repository.set_active_days(plan, 3)
-    assert plan.active_days == 3
+    plan_from_repo = repository.get_plan_by_id(plan.id)
+    assert plan_from_repo
+    assert plan_from_repo.active_days == 3
 
 
 @injection_test
@@ -264,4 +266,32 @@ def test_that_payout_count_is_increased_by_one(
     plan = plan_generator.create_plan(activation_date=datetime.min)
     assert plan.payout_count == 0
     repository.increase_payout_count_by_one(plan)
-    assert plan.payout_count == 1
+    plan_from_repo = repository.get_plan_by_id(plan.id)
+    assert plan_from_repo
+    assert plan_from_repo.payout_count == 1
+
+
+@injection_test
+def test_that_availability_is_toggled_to_false(
+    repository: PlanRepository,
+    plan_generator: PlanGenerator,
+) -> None:
+    plan = plan_generator.create_plan()
+    assert plan.is_available == True
+    repository.toggle_product_availability(plan)
+    plan_from_repo = repository.get_plan_by_id(plan.id)
+    assert plan_from_repo
+    assert plan_from_repo.is_available == False
+
+
+@injection_test
+def test_that_availability_is_toggled_to_true(
+    repository: PlanRepository,
+    plan_generator: PlanGenerator,
+) -> None:
+    plan = plan_generator.create_plan(is_available=False)
+    assert plan.is_available == False
+    repository.toggle_product_availability(plan)
+    plan_from_repo = repository.get_plan_by_id(plan.id)
+    assert plan_from_repo
+    assert plan_from_repo.is_available == True
