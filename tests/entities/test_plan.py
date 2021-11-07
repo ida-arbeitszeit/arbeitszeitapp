@@ -1,4 +1,3 @@
-from datetime import datetime
 from decimal import Decimal
 from unittest import TestCase
 
@@ -28,48 +27,6 @@ class TestPlanEntity(TestCase):
             is_public_service=True,
         )
         self.assertEqual(plan.price_per_unit, Decimal(0))
-
-    def test_prices_of_two_associated_plans_are_equal(
-        self,
-    ) -> None:
-        company = self.company_generator.create_company()
-        plan1 = self.plan_generator.create_plan(
-            planner=company,
-            costs=ProductionCosts(Decimal(10), Decimal(5), Decimal(5)),
-            amount=10,
-        )
-        plan2 = self.plan_generator.create_plan(
-            costs=ProductionCosts(Decimal(5), Decimal(3), Decimal(2)),
-            amount=5,
-        )
-
-        meta_product = self.meta_product_repository.create_meta_product(
-            datetime.now(), name="test", definition="test info", coordinator=company
-        )
-        self.meta_product_repository.add_plan_to_meta_product(plan1.id, meta_product.id)
-        self.meta_product_repository.add_plan_to_meta_product(plan2.id, meta_product.id)
-        self.assertEqual(plan1.price_per_unit, plan2.price_per_unit)
-
-    def test_price_is_average_of_prices_of_cooperating_plans(
-        self,
-    ) -> None:
-        company = self.company_generator.create_company()
-        plan1 = self.plan_generator.create_plan(
-            planner=company,
-            costs=ProductionCosts(Decimal(10), Decimal(5), Decimal(5)),
-            amount=10,
-        )
-        plan2 = self.plan_generator.create_plan(
-            costs=ProductionCosts(Decimal(5), Decimal(3), Decimal(2)),
-            amount=10,
-        )
-
-        meta_product = self.meta_product_repository.create_meta_product(
-            datetime.now(), name="test", definition="test info", coordinator=company
-        )
-        self.meta_product_repository.add_plan_to_meta_product(plan1.id, meta_product.id)
-        self.meta_product_repository.add_plan_to_meta_product(plan2.id, meta_product.id)
-        self.assertEqual(plan1.price_per_unit, Decimal("1.5"))
 
     def test_expected_sales_value_is_zero_for_public_plan(self) -> None:
         plan = self.plan_generator.create_plan(is_public_service=True)

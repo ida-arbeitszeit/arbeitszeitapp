@@ -5,10 +5,7 @@ from uuid import UUID
 from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.repositories import (
-    CompanyRepository,
-    MetaProductRepository,
-)
+from arbeitszeit.repositories import CompanyRepository, MetaProductRepository
 
 
 @dataclass

@@ -3,6 +3,11 @@ from arbeitszeit.entities import Company, Member
 from arbeitszeit.repositories import CompanyWorkerRepository
 
 from .activate_plan_and_grant_credit import ActivatePlanAndGrantCredit
+from .add_plan_to_meta_product import (
+    AddPlanToMetaProduct,
+    AddPlanToMetaProductRequest,
+    AddPlanToMetaProductResponse,
+)
 from .answer_company_work_invite import (
     AnswerCompanyWorkInvite,
     AnswerCompanyWorkInviteRequest,
@@ -73,6 +78,9 @@ from .update_plans_and_payout import UpdatePlansAndPayout
 
 __all__ = [
     "ActivatePlanAndGrantCredit",
+    "AddPlanToMetaProduct",
+    "AddPlanToMetaProductRequest",
+    "AddPlanToMetaProductResponse",
     "AnswerCompanyWorkInvite",
     "AnswerCompanyWorkInviteRequest",
     "AnswerCompanyWorkInviteResponse",

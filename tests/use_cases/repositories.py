@@ -722,8 +722,14 @@ class MetaProductRepository(interfaces.MetaProductRepository):
         meta_product = self.get_by_id(meta_product_id)
         assert plan
         assert meta_product
-        plan.meta_product = meta_product
         meta_product.plans.append(plan)
+
+    def add_meta_product_to_plan(self, plan_id: UUID, meta_product_id: UUID) -> None:
+        plan = self.plan_repository.get_plan_by_id(plan_id)
+        meta_product = self.get_by_id(meta_product_id)
+        assert plan
+        assert meta_product
+        plan.meta_product = meta_product
 
     def __len__(self) -> int:
         return len(self.meta_products)

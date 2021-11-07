@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Optional, Union
+from typing import List, Optional, Union
 from uuid import uuid4
 
 from injector import inject
@@ -31,6 +31,7 @@ from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
     MemberRepository,
+    MetaProductRepository,
     PlanDraftRepository,
     PlanRepository,
     PurchaseRepository,
@@ -279,3 +280,29 @@ class TransactionGenerator:
             amount=amount,
             purpose="Test Verw.zweck",
         )
+
+
+@inject
+@dataclass
+class MetaProductGenerator:
+    meta_product_repository: MetaProductRepository
+    datetime_service: FakeDatetimeService
+    company_generator: CompanyGenerator
+
+    def create_meta_product(
+        self, coordinator: Optional[Company] = None, plans: List[Plan] = []
+    ) -> MetaProduct:
+        if coordinator is None:
+            coordinator = self.company_generator.create_company()
+        meta_product = self.meta_product_repository.create_meta_product(
+            self.datetime_service.now(),
+            name="test name",
+            definition="test info",
+            coordinator=coordinator,
+        )
+        if plans is not None:
+            for plan in plans:
+                self.meta_product_repository.add_plan_to_meta_product(
+                    plan.id, meta_product.id
+                )
+        return meta_product

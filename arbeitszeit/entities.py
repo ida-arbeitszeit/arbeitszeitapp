@@ -69,13 +69,13 @@ class MetaProduct:
     name: str
     definition: str
     coordinator: Company
-    plans: List[Plan]
+    plans: List[Plan]  # should not include public plans
 
     @property
     def meta_price_per_unit(self) -> Decimal:
         meta_price_per_unit = (
-            decimal_sum([plan.individual_price_per_unit for plan in self.plans])
-        ) / (len(self.plans) or 1)
+            decimal_sum([plan.production_costs.total_cost() for plan in self.plans])
+        ) / (sum([plan.prd_amount for plan in self.plans]) or 1)
         return meta_price_per_unit
 
 

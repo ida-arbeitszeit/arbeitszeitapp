@@ -365,3 +365,7 @@ class MetaProductRepository(ABC):
     @abstractmethod
     def add_plan_to_meta_product(self, plan_id: UUID, meta_product_id: UUID) -> None:
         pass
+
+    @abstractmethod
+    def add_meta_product_to_plan(self, plan_id: UUID, meta_product_id: UUID) -> None:
+        pass
