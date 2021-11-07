@@ -4,7 +4,7 @@ from unittest import TestCase
 from arbeitszeit.entities import ProductionCosts
 from tests.data_generators import CompanyGenerator, PlanGenerator
 from tests.use_cases.dependency_injection import get_dependency_injector
-from tests.use_cases.repositories import MetaProductRepository
+from tests.use_cases.repositories import CooperationRepository
 
 
 class TestPlanEntity(TestCase):
@@ -12,9 +12,9 @@ class TestPlanEntity(TestCase):
         self.injector = get_dependency_injector()
         self.company_generator = self.injector.get(CompanyGenerator)
         self.plan_generator = self.injector.get(PlanGenerator)
-        self.meta_product_repository = self.injector.get(MetaProductRepository)
+        self.cooperation_repository = self.injector.get(CooperationRepository)
 
-    def test_price_equals_costs_when_productive_plan_and_no_meta_product(self) -> None:
+    def test_price_equals_costs_when_productive_plan_and_no_cooperation(self) -> None:
         plan = self.plan_generator.create_plan(
             costs=ProductionCosts(Decimal(10), Decimal(5), Decimal(5)), amount=10
         )

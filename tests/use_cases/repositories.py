@@ -17,9 +17,9 @@ from arbeitszeit.entities import (
     AccountTypes,
     Company,
     CompanyWorkInvite,
+    Cooperation,
     Member,
     Message,
-    MetaProduct,
     Plan,
     PlanDraft,
     ProductionCosts,
@@ -518,7 +518,7 @@ class PlanRepository(interfaces.PlanRepository):
             expiration_date=None,
             active_days=None,
             payout_count=0,
-            meta_product=None,
+            cooperation=None,
         )
         self.plans[plan.id] = plan
         return plan
@@ -689,47 +689,47 @@ class MessageRepository(interfaces.MessageRepository):
 
 
 @singleton
-class MetaProductRepository(interfaces.MetaProductRepository):
+class CooperationRepository(interfaces.CooperationRepository):
     @inject
     def __init__(self, plan_repository: PlanRepository) -> None:
-        self.meta_products: Dict[UUID, MetaProduct] = dict()
+        self.cooperations: Dict[UUID, Cooperation] = dict()
         self.plan_repository = plan_repository
 
-    def create_meta_product(
+    def create_cooperation(
         self,
         creation_timestamp: datetime,
         name: str,
         definition: str,
         coordinator: Company,
-    ) -> MetaProduct:
-        meta_product_id = uuid4()
-        meta_product = MetaProduct(
-            id=meta_product_id,
+    ) -> Cooperation:
+        cooperation_id = uuid4()
+        cooperation = Cooperation(
+            id=cooperation_id,
             creation_date=creation_timestamp,
             name=name,
             definition=definition,
             coordinator=coordinator,
             plans=[],
         )
-        self.meta_products[meta_product_id] = meta_product
-        return meta_product
+        self.cooperations[cooperation_id] = cooperation
+        return cooperation
 
-    def get_by_id(self, id: UUID) -> Optional[MetaProduct]:
-        return self.meta_products.get(id)
+    def get_by_id(self, id: UUID) -> Optional[Cooperation]:
+        return self.cooperations.get(id)
 
-    def add_plan_to_meta_product(self, plan_id: UUID, meta_product_id: UUID) -> None:
+    def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         plan = self.plan_repository.get_plan_by_id(plan_id)
-        meta_product = self.get_by_id(meta_product_id)
+        cooperation = self.get_by_id(cooperation_id)
         assert plan
-        assert meta_product
-        meta_product.plans.append(plan)
+        assert cooperation
+        cooperation.plans.append(plan)
 
-    def add_meta_product_to_plan(self, plan_id: UUID, meta_product_id: UUID) -> None:
+    def add_cooperation_to_plan(self, plan_id: UUID, cooperation_id: UUID) -> None:
         plan = self.plan_repository.get_plan_by_id(plan_id)
-        meta_product = self.get_by_id(meta_product_id)
+        cooperation = self.get_by_id(cooperation_id)
         assert plan
-        assert meta_product
-        plan.meta_product = meta_product
+        assert cooperation
+        plan.cooperation = cooperation
 
     def __len__(self) -> int:
-        return len(self.meta_products)
+        return len(self.cooperations)

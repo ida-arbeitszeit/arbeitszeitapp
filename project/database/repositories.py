@@ -445,7 +445,7 @@ class PlanRepository(repositories.PlanRepository):
             activation_date=plan.activation_date,
             active_days=plan.active_days,
             payout_count=plan.payout_count,
-            meta_product=None,
+            cooperation=None,
         )
 
     def object_to_orm(self, plan: entities.Plan) -> Plan:

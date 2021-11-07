@@ -3,10 +3,10 @@ from arbeitszeit.entities import Company, Member
 from arbeitszeit.repositories import CompanyWorkerRepository
 
 from .activate_plan_and_grant_credit import ActivatePlanAndGrantCredit
-from .add_plan_to_meta_product import (
-    AddPlanToMetaProduct,
-    AddPlanToMetaProductRequest,
-    AddPlanToMetaProductResponse,
+from .add_plan_to_cooperation import (
+    AddPlanToCooperation,
+    AddPlanToCooperationRequest,
+    AddPlanToCooperationResponse,
 )
 from .answer_company_work_invite import (
     AnswerCompanyWorkInvite,
@@ -18,10 +18,10 @@ from .check_for_unread_messages import (
     CheckForUnreadMessagesRequest,
     CheckForUnreadMessagesResponse,
 )
-from .create_meta_product import (
-    CreateMetaProduct,
-    CreateMetaProductRequest,
-    CreateMetaProductResponse,
+from .create_cooperation import (
+    CreateCooperation,
+    CreateCooperationRequest,
+    CreateCooperationResponse,
 )
 from .create_plan_draft import (
     CreatePlanDraft,
@@ -78,9 +78,9 @@ from .update_plans_and_payout import UpdatePlansAndPayout
 
 __all__ = [
     "ActivatePlanAndGrantCredit",
-    "AddPlanToMetaProduct",
-    "AddPlanToMetaProductRequest",
-    "AddPlanToMetaProductResponse",
+    "AddPlanToCooperation",
+    "AddPlanToCooperationRequest",
+    "AddPlanToCooperationResponse",
     "AnswerCompanyWorkInvite",
     "AnswerCompanyWorkInviteRequest",
     "AnswerCompanyWorkInviteResponse",
@@ -89,9 +89,9 @@ __all__ = [
     "CheckForUnreadMessagesResponse",
     "CompanyFilter",
     "CompanyQueryResponse",
-    "CreateMetaProduct",
-    "CreateMetaProductRequest",
-    "CreateMetaProductResponse",
+    "CreateCooperation",
+    "CreateCooperationRequest",
+    "CreateCooperationResponse",
     "CreatePlanDraft",
     "CreatePlanDraftRequest",
     "CreatePlanDraftRequest",

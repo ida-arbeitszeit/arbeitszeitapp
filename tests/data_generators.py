@@ -17,8 +17,8 @@ from arbeitszeit.entities import (
     Account,
     AccountTypes,
     Company,
+    Cooperation,
     Member,
-    MetaProduct,
     Plan,
     PlanDraft,
     ProductionCosts,
@@ -30,8 +30,8 @@ from arbeitszeit.entities import (
 from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
+    CooperationRepository,
     MemberRepository,
-    MetaProductRepository,
     PlanDraftRepository,
     PlanRepository,
     PurchaseRepository,
@@ -161,7 +161,7 @@ class PlanGenerator:
         production_unit: str = "500 Gramm",
         timeframe: Optional[int] = None,
         expired: bool = False,
-        meta_product: Optional[MetaProduct] = None,
+        cooperation: Optional[Cooperation] = None,
     ) -> Plan:
         assert approved, "Currently the application does not support plan rejection"
         draft = self.draft_plan(
@@ -183,8 +183,8 @@ class PlanGenerator:
             self.plan_repository.activate_plan(plan, activation_date)
         if expired:
             self.plan_repository.set_plan_as_expired(plan)
-        if meta_product:
-            plan.meta_product = meta_product
+        if cooperation:
+            plan.cooperation = cooperation
         return plan
 
     def draft_plan(
@@ -284,17 +284,17 @@ class TransactionGenerator:
 
 @inject
 @dataclass
-class MetaProductGenerator:
-    meta_product_repository: MetaProductRepository
+class CooperationGenerator:
+    cooperation_repository: CooperationRepository
     datetime_service: FakeDatetimeService
     company_generator: CompanyGenerator
 
-    def create_meta_product(
+    def create_cooperation(
         self, coordinator: Optional[Company] = None, plans: List[Plan] = []
-    ) -> MetaProduct:
+    ) -> Cooperation:
         if coordinator is None:
             coordinator = self.company_generator.create_company()
-        meta_product = self.meta_product_repository.create_meta_product(
+        cooperation = self.cooperation_repository.create_cooperation(
             self.datetime_service.now(),
             name="test name",
             definition="test info",
@@ -302,7 +302,7 @@ class MetaProductGenerator:
         )
         if plans is not None:
             for plan in plans:
-                self.meta_product_repository.add_plan_to_meta_product(
-                    plan.id, meta_product.id
+                self.cooperation_repository.add_plan_to_cooperation(
+                    plan.id, cooperation.id
                 )
-        return meta_product
+        return cooperation

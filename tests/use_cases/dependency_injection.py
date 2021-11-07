@@ -86,9 +86,9 @@ class InMemoryModule(Module):
         return repo
 
     @provider
-    def provide_meta_product_repository(
-        self, repo: repositories.MetaProductRepository
-    ) -> interfaces.MetaProductRepository:
+    def provide_cooperation_repository(
+        self, repo: repositories.CooperationRepository
+    ) -> interfaces.CooperationRepository:
         return repo
 
     @provider

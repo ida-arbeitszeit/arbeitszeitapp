@@ -9,9 +9,9 @@ from arbeitszeit.entities import (
     AccountTypes,
     Company,
     CompanyWorkInvite,
+    Cooperation,
     Member,
     Message,
-    MetaProduct,
     Plan,
     PlanDraft,
     ProductionCosts,
@@ -347,25 +347,25 @@ class MessageRepository(ABC):
         pass
 
 
-class MetaProductRepository(ABC):
+class CooperationRepository(ABC):
     @abstractmethod
-    def create_meta_product(
+    def create_cooperation(
         self,
         creation_timestamp: datetime,
         name: str,
         definition: str,
         coordinator: Company,
-    ) -> MetaProduct:
+    ) -> Cooperation:
         pass
 
     @abstractmethod
-    def get_by_id(self, id: UUID) -> Optional[MetaProduct]:
+    def get_by_id(self, id: UUID) -> Optional[Cooperation]:
         pass
 
     @abstractmethod
-    def add_plan_to_meta_product(self, plan_id: UUID, meta_product_id: UUID) -> None:
+    def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         pass
 
     @abstractmethod
-    def add_meta_product_to_plan(self, plan_id: UUID, meta_product_id: UUID) -> None:
+    def add_cooperation_to_plan(self, plan_id: UUID, cooperation_id: UUID) -> None:
         pass

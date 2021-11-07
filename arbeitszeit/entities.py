@@ -63,7 +63,7 @@ class Account:
 
 
 @dataclass
-class MetaProduct:
+class Cooperation:
     id: UUID
     creation_date: datetime
     name: str
@@ -72,11 +72,11 @@ class MetaProduct:
     plans: List[Plan]  # should not include public plans
 
     @property
-    def meta_price_per_unit(self) -> Decimal:
-        meta_price_per_unit = (
+    def coop_price_per_unit(self) -> Decimal:
+        coop_price_per_unit = (
             decimal_sum([plan.production_costs.total_cost() for plan in self.plans])
         ) / (sum([plan.prd_amount for plan in self.plans]) or 1)
-        return meta_price_per_unit
+        return coop_price_per_unit
 
 
 @dataclass
@@ -141,7 +141,7 @@ class Plan:
     expiration_date: Optional[datetime]
     active_days: Optional[int]
     payout_count: int
-    meta_product: Optional[MetaProduct]
+    cooperation: Optional[Cooperation]
 
     @property
     def individual_price_per_unit(self) -> Decimal:
@@ -153,10 +153,10 @@ class Plan:
 
     @property
     def price_per_unit(self) -> Decimal:
-        if self.meta_product is None:
+        if self.cooperation is None:
             price_per_unit = self.individual_price_per_unit
         else:
-            price_per_unit = self.meta_product.meta_price_per_unit
+            price_per_unit = self.cooperation.coop_price_per_unit
         return price_per_unit
 
     @property
