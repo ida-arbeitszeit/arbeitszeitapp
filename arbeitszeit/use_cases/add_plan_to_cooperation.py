@@ -5,11 +5,16 @@ from uuid import UUID
 
 from injector import inject
 
-from arbeitszeit.repositories import CooperationRepository, PlanRepository
+from arbeitszeit.repositories import (
+    CompanyRepository,
+    CooperationRepository,
+    PlanRepository,
+)
 
 
 @dataclass
 class AddPlanToCooperationRequest:
+    requester_id: UUID
     plan_id: UUID
     cooperation_id: UUID
 
@@ -23,6 +28,7 @@ class AddPlanToCooperationResponse:
         plan_has_cooperation = auto()
         plan_already_part_of_cooperation = auto()
         plan_is_public_service = auto()
+        requester_is_not_coordinator = auto()
 
     rejection_reason: Optional[RejectionReason]
 
@@ -36,6 +42,7 @@ class AddPlanToCooperationResponse:
 class AddPlanToCooperation:
     plan_repository: PlanRepository
     cooperation_repository: CooperationRepository
+    company_repository: CompanyRepository
 
     def __call__(
         self, request: AddPlanToCooperationRequest
@@ -54,6 +61,7 @@ class AddPlanToCooperation:
         return AddPlanToCooperationResponse(rejection_reason=None)
 
     def _validate_request(self, request: AddPlanToCooperationRequest) -> None:
+        requester = self.company_repository.get_by_id(request.requester_id)
         plan = self.plan_repository.get_plan_by_id(request.plan_id)
         cooperation = self.cooperation_repository.get_by_id(request.cooperation_id)
         if plan is None:
@@ -68,3 +76,5 @@ class AddPlanToCooperation:
             raise AddPlanToCooperationResponse.RejectionReason.plan_already_part_of_cooperation
         if plan.is_public_service:
             raise AddPlanToCooperationResponse.RejectionReason.plan_is_public_service
+        if requester != cooperation.coordinator:
+            raise AddPlanToCooperationResponse.RejectionReason.requester_is_not_coordinator
