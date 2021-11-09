@@ -38,6 +38,7 @@ from .invite_worker_to_company import (
     InviteWorkerToCompanyResponse,
 )
 from .list_drafts_of_company import ListDraftsOfCompany, ListDraftsResponse
+from .list_messages import ListMessages, ListMessagesRequest, ListMessagesResponse
 from .pay_consumer_product import (
     PayConsumerProduct,
     PayConsumerProductRequest,
@@ -100,6 +101,9 @@ __all__ = [
     "InviteWorkerToCompanyResponse",
     "ListDraftsOfCompany",
     "ListDraftsResponse",
+    "ListMessages",
+    "ListMessagesRequest",
+    "ListMessagesResponse",
     "PayConsumerProduct",
     "PayConsumerProductRequest",
     "PayConsumerProductResponse",
