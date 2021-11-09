@@ -1,3 +1,4 @@
+from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases import (
@@ -5,121 +6,163 @@ from arbeitszeit.use_cases import (
     EndCooperationRequest,
     EndCooperationResponse,
 )
-from tests.data_generators import CooperationGenerator, PlanGenerator
+from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
 
-from .dependency_injection import injection_test
+from .dependency_injection import get_dependency_injector
 from .repositories import CooperationRepository
 
 
-@injection_test
-def test_error_is_raised_when_plan_does_not_exist(
-    end_cooperation: EndCooperation, coop_generator: CooperationGenerator
-):
-    cooperation = coop_generator.create_cooperation()
-    request = EndCooperationRequest(plan_id=uuid4(), cooperation_id=cooperation.id)
-    response = end_cooperation(request)
-    assert response.is_rejected
-    assert (
-        response.rejection_reason
-        == EndCooperationResponse.RejectionReason.plan_not_found
-    )
+class TestEndCooperation(TestCase):
+    def setUp(self) -> None:
+        self.injector = get_dependency_injector()
+        self.end_cooperation = self.injector.get(EndCooperation)
+        self.coop_generator = self.injector.get(CooperationGenerator)
+        self.plan_generator = self.injector.get(PlanGenerator)
+        self.company_generator = self.injector.get(CompanyGenerator)
+        self.cooperation_repository = self.injector.get(CooperationRepository)
+        self.requester = self.company_generator.create_company()
 
+    def test_error_is_raised_when_plan_does_not_exist(self) -> None:
+        cooperation = self.coop_generator.create_cooperation()
+        request = EndCooperationRequest(
+            requester_id=self.requester.id,
+            plan_id=uuid4(),
+            cooperation_id=cooperation.id,
+        )
+        response = self.end_cooperation(request)
+        assert response.is_rejected
+        assert (
+            response.rejection_reason
+            == EndCooperationResponse.RejectionReason.plan_not_found
+        )
 
-@injection_test
-def test_error_is_raised_when_cooperation_does_not_exist(
-    end_cooperation: EndCooperation, plan_generator: PlanGenerator
-):
-    plan = plan_generator.create_plan()
-    request = EndCooperationRequest(plan_id=plan.id, cooperation_id=uuid4())
-    response = end_cooperation(request)
-    assert response.is_rejected
-    assert (
-        response.rejection_reason
-        == EndCooperationResponse.RejectionReason.cooperation_not_found
-    )
+    def test_error_is_raised_when_cooperation_does_not_exist(self) -> None:
+        plan = self.plan_generator.create_plan()
+        request = EndCooperationRequest(
+            requester_id=self.requester.id, plan_id=plan.id, cooperation_id=uuid4()
+        )
+        response = self.end_cooperation(request)
+        assert response.is_rejected
+        assert (
+            response.rejection_reason
+            == EndCooperationResponse.RejectionReason.cooperation_not_found
+        )
 
+    def test_error_is_raised_when_plan_has_no_cooperation(self) -> None:
+        cooperation = self.coop_generator.create_cooperation()
+        plan = self.plan_generator.create_plan(cooperation=None)
+        request = EndCooperationRequest(
+            requester_id=self.requester.id,
+            plan_id=plan.id,
+            cooperation_id=cooperation.id,
+        )
+        response = self.end_cooperation(request)
+        assert response.is_rejected
+        assert (
+            response.rejection_reason
+            == EndCooperationResponse.RejectionReason.plan_has_no_cooperation
+        )
 
-@injection_test
-def test_error_is_raised_when_plan_has_no_cooperation(
-    end_cooperation: EndCooperation,
-    plan_generator: PlanGenerator,
-    coop_generator: CooperationGenerator,
-):
-    cooperation = coop_generator.create_cooperation()
-    plan = plan_generator.create_plan(cooperation=None)
-    request = EndCooperationRequest(plan_id=plan.id, cooperation_id=cooperation.id)
-    response = end_cooperation(request)
-    assert response.is_rejected
-    assert (
-        response.rejection_reason
-        == EndCooperationResponse.RejectionReason.plan_has_no_cooperation
-    )
+    def test_error_is_raised_when_plan_is_not_registered_in_cooperation(self) -> None:
+        plan = self.plan_generator.create_plan(
+            cooperation=self.coop_generator.create_cooperation()
+        )
+        cooperation = self.coop_generator.create_cooperation(plans=[])
+        request = EndCooperationRequest(
+            requester_id=self.requester.id,
+            plan_id=plan.id,
+            cooperation_id=cooperation.id,
+        )
+        response = self.end_cooperation(request)
+        assert response.is_rejected
+        assert (
+            response.rejection_reason
+            == EndCooperationResponse.RejectionReason.plan_not_in_cooperation
+        )
 
+    def test_error_is_raised_when_requester_is_neither_coordinator_nor_planner(
+        self,
+    ) -> None:
+        plan = self.plan_generator.create_plan(
+            cooperation=self.coop_generator.create_cooperation()
+        )
+        cooperation = self.coop_generator.create_cooperation(plans=[plan])
+        self.cooperation_repository.add_cooperation_to_plan(plan.id, cooperation.id)
 
-@injection_test
-def test_error_is_raised_when_plan_is_not_registered_in_cooperation(
-    end_cooperation: EndCooperation,
-    plan_generator: PlanGenerator,
-    coop_generator: CooperationGenerator,
-):
-    plan = plan_generator.create_plan(cooperation=coop_generator.create_cooperation())
-    cooperation = coop_generator.create_cooperation(plans=[])
-    request = EndCooperationRequest(plan_id=plan.id, cooperation_id=cooperation.id)
-    response = end_cooperation(request)
-    assert response.is_rejected
-    assert (
-        response.rejection_reason
-        == EndCooperationResponse.RejectionReason.plan_not_in_cooperation
-    )
+        request = EndCooperationRequest(
+            requester_id=self.requester.id,
+            plan_id=plan.id,
+            cooperation_id=cooperation.id,
+        )
+        response = self.end_cooperation(request)
+        assert response.is_rejected
+        assert (
+            response.rejection_reason
+            == EndCooperationResponse.RejectionReason.requester_is_not_entitled
+        )
 
+    def test_ending_of_cooperation_is_successful_when_requester_is_planner(
+        self,
+    ) -> None:
+        plan = self.plan_generator.create_plan(planner=self.requester)
+        cooperation = self.coop_generator.create_cooperation(plans=[plan])
+        self.cooperation_repository.add_cooperation_to_plan(plan.id, cooperation.id)
 
-@injection_test
-def test_ending_of_cooperation_is_successful(
-    end_cooperation: EndCooperation,
-    plan_generator: PlanGenerator,
-    coop_generator: CooperationGenerator,
-    coop_repo: CooperationRepository,
-):
-    plan = plan_generator.create_plan()
-    cooperation = coop_generator.create_cooperation(plans=[plan])
-    coop_repo.add_cooperation_to_plan(plan.id, cooperation.id)
+        request = EndCooperationRequest(
+            requester_id=self.requester.id,
+            plan_id=plan.id,
+            cooperation_id=cooperation.id,
+        )
+        response = self.end_cooperation(request)
+        assert not response.is_rejected
 
-    request = EndCooperationRequest(plan_id=plan.id, cooperation_id=cooperation.id)
-    response = end_cooperation(request)
-    assert not response.is_rejected
+    def test_ending_of_cooperation_is_successful_when_requester_is_coordinator(
+        self,
+    ) -> None:
+        plan = self.plan_generator.create_plan()
+        cooperation = self.coop_generator.create_cooperation(
+            plans=[plan], coordinator=self.requester
+        )
+        self.cooperation_repository.add_cooperation_to_plan(plan.id, cooperation.id)
 
+        request = EndCooperationRequest(
+            requester_id=self.requester.id,
+            plan_id=plan.id,
+            cooperation_id=cooperation.id,
+        )
+        response = self.end_cooperation(request)
+        assert not response.is_rejected
 
-@injection_test
-def test_ending_of_cooperation_is_successful_and_plan_deleted_from_coop(
-    end_cooperation: EndCooperation,
-    plan_generator: PlanGenerator,
-    coop_generator: CooperationGenerator,
-    coop_repo: CooperationRepository,
-):
-    plan = plan_generator.create_plan()
-    cooperation = coop_generator.create_cooperation(plans=[plan])
-    coop_repo.add_cooperation_to_plan(plan.id, cooperation.id)
-    assert plan in cooperation.plans
+    def test_ending_of_cooperation_is_successful_and_plan_deleted_from_coop(
+        self,
+    ) -> None:
+        plan = self.plan_generator.create_plan(planner=self.requester)
+        cooperation = self.coop_generator.create_cooperation(plans=[plan])
+        self.cooperation_repository.add_cooperation_to_plan(plan.id, cooperation.id)
+        assert plan in cooperation.plans
 
-    request = EndCooperationRequest(plan_id=plan.id, cooperation_id=cooperation.id)
-    response = end_cooperation(request)
-    assert not response.is_rejected
-    assert plan not in cooperation.plans
+        request = EndCooperationRequest(
+            requester_id=self.requester.id,
+            plan_id=plan.id,
+            cooperation_id=cooperation.id,
+        )
+        response = self.end_cooperation(request)
+        assert not response.is_rejected
+        assert plan not in cooperation.plans
 
+    def test_ending_of_cooperation_is_successful_and_coop_deleted_from_plan(
+        self,
+    ) -> None:
+        plan = self.plan_generator.create_plan(planner=self.requester)
+        cooperation = self.coop_generator.create_cooperation(plans=[plan])
+        self.cooperation_repository.add_cooperation_to_plan(plan.id, cooperation.id)
+        assert plan.cooperation == cooperation
 
-@injection_test
-def test_ending_of_cooperation_is_successful_and_coop_deleted_from_plan(
-    end_cooperation: EndCooperation,
-    plan_generator: PlanGenerator,
-    coop_generator: CooperationGenerator,
-    coop_repo: CooperationRepository,
-):
-    plan = plan_generator.create_plan()
-    cooperation = coop_generator.create_cooperation(plans=[plan])
-    coop_repo.add_cooperation_to_plan(plan.id, cooperation.id)
-    assert plan.cooperation == cooperation
-
-    request = EndCooperationRequest(plan_id=plan.id, cooperation_id=cooperation.id)
-    response = end_cooperation(request)
-    assert not response.is_rejected
-    assert plan.cooperation is None
+        request = EndCooperationRequest(
+            requester_id=self.requester.id,
+            plan_id=plan.id,
+            cooperation_id=cooperation.id,
+        )
+        response = self.end_cooperation(request)
+        assert not response.is_rejected
+        assert plan.cooperation is None
