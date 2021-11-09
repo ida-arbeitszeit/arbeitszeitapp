@@ -18,6 +18,7 @@ from arbeitszeit.entities import (
     AccountTypes,
     Company,
     Member,
+    Message,
     Plan,
     PlanDraft,
     ProductionCosts,
@@ -30,6 +31,7 @@ from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
     MemberRepository,
+    MessageRepository,
     PlanDraftRepository,
     PlanRepository,
     PurchaseRepository,
@@ -50,6 +52,7 @@ class MemberGenerator:
         self,
         *,
         email: Optional[str] = None,
+        name: str = "test member name",
         account: Optional[Account] = None,
         password: str = "password",
     ) -> Member:
@@ -63,7 +66,7 @@ class MemberGenerator:
 
         return self.member_repository.create_member(
             email=email,
-            name="Member name",
+            name=name,
             password=password,
             account=account,
         )
@@ -277,4 +280,31 @@ class TransactionGenerator:
             receiving_account=receiving_account,
             amount=amount,
             purpose="Test Verw.zweck",
+        )
+
+
+@inject
+@dataclass
+class MessageGenerator:
+    message_repository: MessageRepository
+    company_generator: CompanyGenerator
+
+    def create_message(
+        self,
+        *,
+        sender: Union[None, SocialAccounting, Member, Company] = None,
+        addressee: Union[None, Member, Company],
+        title: str = "test title",
+    ) -> Message:
+        if addressee is None:
+            addressee = self.company_generator.create_company()
+        if sender is None:
+            sender = self.company_generator.create_company()
+        return self.message_repository.create_message(
+            sender=sender,
+            addressee=addressee,
+            title=title,
+            content="test message content",
+            sender_remarks=None,
+            reference=None,
         )

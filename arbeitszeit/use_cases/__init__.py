@@ -37,6 +37,7 @@ from .invite_worker_to_company import (
     InviteWorkerToCompanyRequest,
 )
 from .list_drafts_of_company import ListDraftsOfCompany, ListDraftsResponse
+from .list_messages import ListMessages, ListMessagesRequest, ListMessagesResponse
 from .pay_consumer_product import (
     PayConsumerProduct,
     PayConsumerProductRequest,
@@ -88,14 +89,19 @@ __all__ = [
     "DraftQueryResponse",
     "DraftSummaryResponse",
     "DraftSummarySuccess",
+    "GetDraftSummary",
     "GetMemberProfileInfo",
     "GetMemberProfileInfoResponse",
-    "GetDraftSummary",
     "GetPlanSummary",
     "GetStatistics",
     "GetTransactionInfos",
     "InviteWorkerToCompany",
     "InviteWorkerToCompanyRequest",
+    "ListDraftsOfCompany",
+    "ListDraftsResponse",
+    "ListMessages",
+    "ListMessagesRequest",
+    "ListMessagesResponse",
     "PayConsumerProduct",
     "PayConsumerProductRequest",
     "PayConsumerProductResponse",
@@ -111,8 +117,6 @@ __all__ = [
     "QueryPlans",
     "QueryPlansRequest",
     "QueryPurchases",
-    "ListDraftsResponse",
-    "ListDraftsOfCompany",
     "ReadMessage",
     "ReadMessageFailure",
     "ReadMessageRequest",
