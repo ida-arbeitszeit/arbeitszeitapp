@@ -29,6 +29,11 @@ from .create_plan_draft import (
     CreatePlanDraftResponse,
 )
 from .delete_plan import DeletePlan, DeletePlanResponse
+from .end_cooperation import (
+    EndCooperation,
+    EndCooperationRequest,
+    EndCooperationResponse,
+)
 from .get_draft_summary import (
     DraftSummaryResponse,
     DraftSummarySuccess,
@@ -104,6 +109,9 @@ __all__ = [
     "DraftQueryResponse",
     "DraftSummaryResponse",
     "DraftSummarySuccess",
+    "EndCooperation",
+    "EndCooperationResponse",
+    "EndCooperationRequest",
     "GetMemberProfileInfo",
     "GetMemberProfileInfoResponse",
     "GetDraftSummary",
