@@ -13,14 +13,14 @@ from arbeitszeit.repositories import (
 
 
 @dataclass
-class AddPlanToCooperationRequest:
+class StartCooperationRequest:
     requester_id: UUID
     plan_id: UUID
     cooperation_id: UUID
 
 
 @dataclass
-class AddPlanToCooperationResponse:
+class StartCooperationResponse:
     class RejectionReason(Exception, Enum):
         plan_not_found = auto()
         cooperation_not_found = auto()
@@ -39,18 +39,16 @@ class AddPlanToCooperationResponse:
 
 @inject
 @dataclass
-class AddPlanToCooperation:
+class StartCooperation:
     plan_repository: PlanRepository
     cooperation_repository: CooperationRepository
     company_repository: CompanyRepository
 
-    def __call__(
-        self, request: AddPlanToCooperationRequest
-    ) -> AddPlanToCooperationResponse:
+    def __call__(self, request: StartCooperationRequest) -> StartCooperationResponse:
         try:
             self._validate_request(request)
-        except AddPlanToCooperationResponse.RejectionReason as reason:
-            return AddPlanToCooperationResponse(rejection_reason=reason)
+        except StartCooperationResponse.RejectionReason as reason:
+            return StartCooperationResponse(rejection_reason=reason)
 
         self.cooperation_repository.add_plan_to_cooperation(
             request.plan_id, request.cooperation_id
@@ -58,23 +56,23 @@ class AddPlanToCooperation:
         self.cooperation_repository.add_cooperation_to_plan(
             request.plan_id, request.cooperation_id
         )
-        return AddPlanToCooperationResponse(rejection_reason=None)
+        return StartCooperationResponse(rejection_reason=None)
 
-    def _validate_request(self, request: AddPlanToCooperationRequest) -> None:
+    def _validate_request(self, request: StartCooperationRequest) -> None:
         requester = self.company_repository.get_by_id(request.requester_id)
         plan = self.plan_repository.get_plan_by_id(request.plan_id)
         cooperation = self.cooperation_repository.get_by_id(request.cooperation_id)
         if plan is None:
-            raise AddPlanToCooperationResponse.RejectionReason.plan_not_found
+            raise StartCooperationResponse.RejectionReason.plan_not_found
         if cooperation is None:
-            raise AddPlanToCooperationResponse.RejectionReason.cooperation_not_found
+            raise StartCooperationResponse.RejectionReason.cooperation_not_found
         if not plan.is_active:
-            raise AddPlanToCooperationResponse.RejectionReason.plan_inactive
+            raise StartCooperationResponse.RejectionReason.plan_inactive
         if plan.cooperation:
-            raise AddPlanToCooperationResponse.RejectionReason.plan_has_cooperation
+            raise StartCooperationResponse.RejectionReason.plan_has_cooperation
         if plan in cooperation.plans:
-            raise AddPlanToCooperationResponse.RejectionReason.plan_already_part_of_cooperation
+            raise StartCooperationResponse.RejectionReason.plan_already_part_of_cooperation
         if plan.is_public_service:
-            raise AddPlanToCooperationResponse.RejectionReason.plan_is_public_service
+            raise StartCooperationResponse.RejectionReason.plan_is_public_service
         if requester != cooperation.coordinator:
-            raise AddPlanToCooperationResponse.RejectionReason.requester_is_not_coordinator
+            raise StartCooperationResponse.RejectionReason.requester_is_not_coordinator

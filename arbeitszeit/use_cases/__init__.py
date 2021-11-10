@@ -3,11 +3,6 @@ from arbeitszeit.entities import Company, Member
 from arbeitszeit.repositories import CompanyWorkerRepository
 
 from .activate_plan_and_grant_credit import ActivatePlanAndGrantCredit
-from .add_plan_to_cooperation import (
-    AddPlanToCooperation,
-    AddPlanToCooperationRequest,
-    AddPlanToCooperationResponse,
-)
 from .answer_company_work_invite import (
     AnswerCompanyWorkInvite,
     AnswerCompanyWorkInviteRequest,
@@ -84,6 +79,11 @@ from .seek_approval import SeekApproval
 from .send_work_certificates_to_worker import SendWorkCertificatesToWorker
 from .show_my_plans import ShowMyPlansRequest, ShowMyPlansResponse, ShowMyPlansUseCase
 from .show_work_invites import ShowWorkInvites, ShowWorkInvitesRequest
+from .start_cooperation import (
+    StartCooperation,
+    StartCooperationRequest,
+    StartCooperationResponse,
+)
 from .toggle_product_availablity import (
     ToggleProductAvailability,
     ToggleProductAvailabilityResponse,
@@ -92,9 +92,9 @@ from .update_plans_and_payout import UpdatePlansAndPayout
 
 __all__ = [
     "ActivatePlanAndGrantCredit",
-    "AddPlanToCooperation",
-    "AddPlanToCooperationRequest",
-    "AddPlanToCooperationResponse",
+    "StartCooperation",
+    "StartCooperationRequest",
+    "StartCooperationResponse",
     "AnswerCompanyWorkInvite",
     "AnswerCompanyWorkInviteRequest",
     "AnswerCompanyWorkInviteResponse",

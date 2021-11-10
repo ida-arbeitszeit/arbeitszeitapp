@@ -3,7 +3,7 @@ from decimal import Decimal
 from uuid import uuid4
 
 from arbeitszeit.entities import ProductionCosts
-from arbeitszeit.use_cases import AddPlanToCooperation, AddPlanToCooperationRequest
+from arbeitszeit.use_cases import StartCooperation, StartCooperationRequest
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
 
 from .dependency_injection import injection_test
@@ -11,13 +11,13 @@ from .dependency_injection import injection_test
 
 @injection_test
 def test_error_is_raised_when_plan_does_not_exist(
-    add_plan: AddPlanToCooperation,
+    add_plan: StartCooperation,
     cooperation_generator: CooperationGenerator,
     company_generator: CompanyGenerator,
 ):
     requester = company_generator.create_company()
     cooperation = cooperation_generator.create_cooperation(coordinator=requester)
-    request = AddPlanToCooperationRequest(
+    request = StartCooperationRequest(
         requester_id=requester.id, plan_id=uuid4(), cooperation_id=cooperation.id
     )
     response = add_plan(request)
@@ -27,13 +27,13 @@ def test_error_is_raised_when_plan_does_not_exist(
 
 @injection_test
 def test_error_is_raised_when_cooperation_does_not_exist(
-    add_plan: AddPlanToCooperation,
+    add_plan: StartCooperation,
     plan_generator: PlanGenerator,
     company_generator: CompanyGenerator,
 ):
     requester = company_generator.create_company()
     plan = plan_generator.create_plan()
-    request = AddPlanToCooperationRequest(
+    request = StartCooperationRequest(
         requester_id=requester.id, plan_id=plan.id, cooperation_id=uuid4()
     )
     response = add_plan(request)
@@ -43,7 +43,7 @@ def test_error_is_raised_when_cooperation_does_not_exist(
 
 @injection_test
 def test_error_is_raised_when_plan_is_not_active(
-    add_plan: AddPlanToCooperation,
+    add_plan: StartCooperation,
     cooperation_generator: CooperationGenerator,
     plan_generator: PlanGenerator,
     company_generator: CompanyGenerator,
@@ -51,7 +51,7 @@ def test_error_is_raised_when_plan_is_not_active(
     requester = company_generator.create_company()
     cooperation = cooperation_generator.create_cooperation(coordinator=requester)
     plan = plan_generator.create_plan(activation_date=None)
-    request = AddPlanToCooperationRequest(
+    request = StartCooperationRequest(
         requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation.id
     )
     response = add_plan(request)
@@ -61,7 +61,7 @@ def test_error_is_raised_when_plan_is_not_active(
 
 @injection_test
 def test_error_is_raised_when_plan_is_already_in_cooperation(
-    add_plan: AddPlanToCooperation,
+    add_plan: StartCooperation,
     cooperation_generator: CooperationGenerator,
     plan_generator: PlanGenerator,
     company_generator: CompanyGenerator,
@@ -72,7 +72,7 @@ def test_error_is_raised_when_plan_is_already_in_cooperation(
     plan = plan_generator.create_plan(
         activation_date=datetime.now(), cooperation=cooperation1
     )
-    request = AddPlanToCooperationRequest(
+    request = StartCooperationRequest(
         requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation2.id
     )
     response = add_plan(request)
@@ -82,7 +82,7 @@ def test_error_is_raised_when_plan_is_already_in_cooperation(
 
 @injection_test
 def test_error_is_raised_when_plan_is_already_in_the_list_of_associated_plans(
-    add_plan: AddPlanToCooperation,
+    add_plan: StartCooperation,
     cooperation_generator: CooperationGenerator,
     plan_generator: PlanGenerator,
     company_generator: CompanyGenerator,
@@ -92,7 +92,7 @@ def test_error_is_raised_when_plan_is_already_in_the_list_of_associated_plans(
     cooperation = cooperation_generator.create_cooperation(
         coordinator=requester, plans=[plan]
     )
-    request = AddPlanToCooperationRequest(
+    request = StartCooperationRequest(
         requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation.id
     )
     response = add_plan(request)
@@ -105,7 +105,7 @@ def test_error_is_raised_when_plan_is_already_in_the_list_of_associated_plans(
 
 @injection_test
 def test_error_is_raised_when_plan_is_public_plan(
-    add_plan: AddPlanToCooperation,
+    add_plan: StartCooperation,
     cooperation_generator: CooperationGenerator,
     plan_generator: PlanGenerator,
     company_generator: CompanyGenerator,
@@ -115,7 +115,7 @@ def test_error_is_raised_when_plan_is_public_plan(
         activation_date=datetime.now(), is_public_service=True
     )
     cooperation = cooperation_generator.create_cooperation(coordinator=requester)
-    request = AddPlanToCooperationRequest(
+    request = StartCooperationRequest(
         requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation.id
     )
     response = add_plan(request)
@@ -125,7 +125,7 @@ def test_error_is_raised_when_plan_is_public_plan(
 
 @injection_test
 def test_error_is_raised_when_requester_is_not_coordinator_of_cooperation(
-    add_plan: AddPlanToCooperation,
+    add_plan: StartCooperation,
     cooperation_generator: CooperationGenerator,
     plan_generator: PlanGenerator,
     company_generator: CompanyGenerator,
@@ -134,7 +134,7 @@ def test_error_is_raised_when_requester_is_not_coordinator_of_cooperation(
     coordinator = company_generator.create_company()
     plan = plan_generator.create_plan(activation_date=datetime.now())
     cooperation = cooperation_generator.create_cooperation(coordinator=coordinator)
-    request = AddPlanToCooperationRequest(
+    request = StartCooperationRequest(
         requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation.id
     )
     response = add_plan(request)
@@ -147,7 +147,7 @@ def test_error_is_raised_when_requester_is_not_coordinator_of_cooperation(
 
 @injection_test
 def test_possible_to_add_plan_to_cooperation(
-    add_plan: AddPlanToCooperation,
+    add_plan: StartCooperation,
     cooperation_generator: CooperationGenerator,
     plan_generator: PlanGenerator,
     company_generator: CompanyGenerator,
@@ -155,7 +155,7 @@ def test_possible_to_add_plan_to_cooperation(
     requester = company_generator.create_company()
     cooperation = cooperation_generator.create_cooperation(coordinator=requester)
     plan = plan_generator.create_plan(activation_date=datetime.now())
-    request = AddPlanToCooperationRequest(
+    request = StartCooperationRequest(
         requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation.id
     )
     response = add_plan(request)
@@ -164,7 +164,7 @@ def test_possible_to_add_plan_to_cooperation(
 
 @injection_test
 def test_cooperation_is_added_to_plan(
-    add_plan: AddPlanToCooperation,
+    add_plan: StartCooperation,
     cooperation_generator: CooperationGenerator,
     plan_generator: PlanGenerator,
     company_generator: CompanyGenerator,
@@ -172,7 +172,7 @@ def test_cooperation_is_added_to_plan(
     requester = company_generator.create_company()
     cooperation = cooperation_generator.create_cooperation(coordinator=requester)
     plan = plan_generator.create_plan(activation_date=datetime.now())
-    request = AddPlanToCooperationRequest(
+    request = StartCooperationRequest(
         requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation.id
     )
     add_plan(request)
@@ -181,7 +181,7 @@ def test_cooperation_is_added_to_plan(
 
 @injection_test
 def test_plan_is_added_to_cooperation(
-    add_plan: AddPlanToCooperation,
+    add_plan: StartCooperation,
     cooperation_generator: CooperationGenerator,
     plan_generator: PlanGenerator,
     company_generator: CompanyGenerator,
@@ -189,7 +189,7 @@ def test_plan_is_added_to_cooperation(
     requester = company_generator.create_company()
     cooperation = cooperation_generator.create_cooperation(coordinator=requester)
     plan = plan_generator.create_plan(activation_date=datetime.now())
-    request = AddPlanToCooperationRequest(
+    request = StartCooperationRequest(
         requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation.id
     )
     add_plan(request)
@@ -198,7 +198,7 @@ def test_plan_is_added_to_cooperation(
 
 @injection_test
 def test_two_cooperating_plans_have_same_prices(
-    add_plan: AddPlanToCooperation,
+    add_plan: StartCooperation,
     cooperation_generator: CooperationGenerator,
     plan_generator: PlanGenerator,
     company_generator: CompanyGenerator,
@@ -213,10 +213,10 @@ def test_two_cooperating_plans_have_same_prices(
         activation_date=datetime.now(),
         costs=ProductionCosts(Decimal(1), Decimal(2), Decimal(3)),
     )
-    request1 = AddPlanToCooperationRequest(
+    request1 = StartCooperationRequest(
         requester_id=requester.id, plan_id=plan1.id, cooperation_id=cooperation.id
     )
-    request2 = AddPlanToCooperationRequest(
+    request2 = StartCooperationRequest(
         requester_id=requester.id, plan_id=plan2.id, cooperation_id=cooperation.id
     )
     add_plan(request1)
@@ -226,7 +226,7 @@ def test_two_cooperating_plans_have_same_prices(
 
 @injection_test
 def test_price_of_cooperating_plans_is_correctly_calculated(
-    add_plan: AddPlanToCooperation,
+    add_plan: StartCooperation,
     cooperation_generator: CooperationGenerator,
     plan_generator: PlanGenerator,
     company_generator: CompanyGenerator,
@@ -243,10 +243,10 @@ def test_price_of_cooperating_plans_is_correctly_calculated(
         costs=ProductionCosts(Decimal(5), Decimal(3), Decimal(2)),
         amount=10,
     )
-    request1 = AddPlanToCooperationRequest(
+    request1 = StartCooperationRequest(
         requester_id=requester.id, plan_id=plan1.id, cooperation_id=cooperation.id
     )
-    request2 = AddPlanToCooperationRequest(
+    request2 = StartCooperationRequest(
         requester_id=requester.id, plan_id=plan2.id, cooperation_id=cooperation.id
     )
     add_plan(request1)
