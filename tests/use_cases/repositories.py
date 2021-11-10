@@ -756,5 +756,10 @@ class CooperationRepository(interfaces.CooperationRepository):
         assert plan
         plan.requested_cooperation = cooperation
 
+    def set_requested_cooperation_to_none(self, plan_id: UUID) -> None:
+        plan = self.plan_repository.get_plan_by_id(plan_id)
+        assert plan
+        plan.requested_cooperation = None
+
     def __len__(self) -> int:
         return len(self.cooperations)

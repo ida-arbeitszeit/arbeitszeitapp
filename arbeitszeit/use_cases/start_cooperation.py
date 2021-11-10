@@ -28,6 +28,7 @@ class StartCooperationResponse:
         plan_has_cooperation = auto()
         plan_already_part_of_cooperation = auto()
         plan_is_public_service = auto()
+        cooperation_was_not_requested = auto()
         requester_is_not_coordinator = auto()
 
     rejection_reason: Optional[RejectionReason]
@@ -56,6 +57,7 @@ class StartCooperation:
         self.cooperation_repository.add_cooperation_to_plan(
             request.plan_id, request.cooperation_id
         )
+        self.cooperation_repository.set_requested_cooperation_to_none(request.plan_id)
         return StartCooperationResponse(rejection_reason=None)
 
     def _validate_request(self, request: StartCooperationRequest) -> None:
@@ -74,5 +76,7 @@ class StartCooperation:
             raise StartCooperationResponse.RejectionReason.plan_already_part_of_cooperation
         if plan.is_public_service:
             raise StartCooperationResponse.RejectionReason.plan_is_public_service
+        if plan.requested_cooperation != cooperation:
+            raise StartCooperationResponse.RejectionReason.cooperation_was_not_requested
         if requester != cooperation.coordinator:
             raise StartCooperationResponse.RejectionReason.requester_is_not_coordinator

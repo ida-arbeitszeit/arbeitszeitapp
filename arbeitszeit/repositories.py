@@ -386,3 +386,7 @@ class CooperationRepository(ABC):
     @abstractmethod
     def set_requested_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         pass
+
+    @abstractmethod
+    def set_requested_cooperation_to_none(self, plan_id: UUID) -> None:
+        pass
