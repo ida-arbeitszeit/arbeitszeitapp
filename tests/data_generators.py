@@ -161,6 +161,7 @@ class PlanGenerator:
         production_unit: str = "500 Gramm",
         timeframe: Optional[int] = None,
         expired: bool = False,
+        requested_cooperation: Optional[Cooperation] = None,
         cooperation: Optional[Cooperation] = None,
         is_available: bool = True,
     ) -> Plan:
@@ -184,6 +185,8 @@ class PlanGenerator:
             self.plan_repository.activate_plan(plan, activation_date)
         if expired:
             self.plan_repository.set_plan_as_expired(plan)
+        if requested_cooperation:
+            plan.requested_cooperation = requested_cooperation
         if cooperation:
             plan.cooperation = cooperation
         if not is_available:

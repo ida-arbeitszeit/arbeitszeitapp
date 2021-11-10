@@ -150,6 +150,7 @@ class PlanRepository(ABC):
     def query_active_plans_by_plan_id(self, query: str) -> Iterator[Plan]:
         pass
 
+    @abstractmethod
     def get_all_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
         pass
 
@@ -380,4 +381,8 @@ class CooperationRepository(ABC):
 
     @abstractmethod
     def delete_cooperation_from_plan(self, plan_id: UUID, cooperation_id: UUID) -> None:
+        pass
+
+    @abstractmethod
+    def set_requested_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         pass

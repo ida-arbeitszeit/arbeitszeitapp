@@ -445,6 +445,7 @@ class PlanRepository(repositories.PlanRepository):
             activation_date=plan.activation_date,
             active_days=plan.active_days,
             payout_count=plan.payout_count,
+            requested_cooperation=None,
             cooperation=None,
             is_available=plan.is_available,
         )

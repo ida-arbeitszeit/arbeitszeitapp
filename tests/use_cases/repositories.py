@@ -518,6 +518,7 @@ class PlanRepository(interfaces.PlanRepository):
             expiration_date=None,
             active_days=None,
             payout_count=0,
+            requested_cooperation=None,
             cooperation=None,
             is_available=True,
         )
@@ -748,6 +749,12 @@ class CooperationRepository(interfaces.CooperationRepository):
         assert plan
         assert cooperation
         plan.cooperation = None
+
+    def set_requested_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
+        plan = self.plan_repository.get_plan_by_id(plan_id)
+        cooperation = self.get_by_id(cooperation_id)
+        assert plan
+        plan.requested_cooperation = cooperation
 
     def __len__(self) -> int:
         return len(self.cooperations)

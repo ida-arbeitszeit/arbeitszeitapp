@@ -75,6 +75,11 @@ from .read_message import (
 )
 from .register_company import RegisterCompany
 from .register_member import RegisterMember
+from .request_cooperation import (
+    RequestCooperation,
+    RequestCooperationRequest,
+    RequestCooperationResponse,
+)
 from .seek_approval import SeekApproval
 from .send_work_certificates_to_worker import SendWorkCertificatesToWorker
 from .show_my_plans import ShowMyPlansRequest, ShowMyPlansResponse, ShowMyPlansUseCase
@@ -135,6 +140,9 @@ __all__ = [
     "QueryPlans",
     "QueryPlansRequest",
     "QueryPurchases",
+    "RequestCooperation",
+    "RequestCooperationRequest",
+    "RequestCooperationResponse",
     "ListDraftsResponse",
     "ListDraftsOfCompany",
     "ReadMessage",
