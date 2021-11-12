@@ -3,6 +3,7 @@ from __future__ import annotations
 import enum
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from decimal import Decimal
 from typing import List, Optional
 from uuid import UUID
 
@@ -28,6 +29,10 @@ class QueriedPlan:
     company_name: str
     product_name: str
     description: str
+    price_per_unit: Decimal
+    is_public_service: bool
+    expiration_relative: Optional[int]
+    is_available: bool
 
 
 class QueryPlansRequest(ABC):
@@ -65,4 +70,8 @@ class QueryPlans:
             company_name=plan.planner.name,
             product_name=plan.prd_name,
             description=plan.description,
+            price_per_unit=plan.price_per_unit,
+            is_public_service=plan.is_public_service,
+            expiration_relative=plan.expiration_relative,
+            is_available=plan.is_available,
         )

@@ -149,6 +149,7 @@ class PlanRepository(ABC):
     def query_active_plans_by_plan_id(self, query: str) -> Iterator[Plan]:
         pass
 
+    @abstractmethod
     def get_all_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
         pass
 
