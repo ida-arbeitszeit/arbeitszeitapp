@@ -11,6 +11,7 @@ from arbeitszeit.use_cases import (
     DeletePlan,
     GetDraftSummary,
     GetPlanSummary,
+    ToggleProductAvailability,
 )
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_web.delete_plan import DeletePlanPresenter
@@ -250,8 +251,8 @@ def my_drafts(
 @CompanyRoute("/company/my_plans", methods=["GET"])
 def my_plans(
     show_my_plans_use_case: ShowMyPlansUseCase,
-    show_my_plans_presenter: ShowMyPlansPresenter,
 ):
+    show_my_plans_presenter = ShowMyPlansPresenter(CompanyUrlIndex())
     request = ShowMyPlansRequest(company_id=UUID(current_user.id))
     response = show_my_plans_use_case(request)
     view_model = show_my_plans_presenter.present(response)
@@ -260,6 +261,13 @@ def my_plans(
         "company/my_plans.html",
         **view_model.to_dict(),
     )
+
+
+@CompanyRoute("/company/toggle_availability/<uuid:plan_id>", methods=["GET"])
+@commit_changes
+def toggle_availability(plan_id: UUID, toggle_availability: ToggleProductAvailability):
+    toggle_availability(UUID(current_user.id), plan_id)
+    return redirect(url_for("main_company.my_plans"))
 
 
 @CompanyRoute("/company/delete_plan/<uuid:plan_id>", methods=["GET", "POST"])
