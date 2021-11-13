@@ -5,6 +5,8 @@ from arbeitszeit.use_cases import (
     RequestCooperation,
     RequestCooperationRequest,
     RequestCooperationResponse,
+    StartCooperation,
+    StartCooperationRequest,
 )
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
@@ -17,6 +19,7 @@ class RequestCooperationTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.request_cooperation = self.injector.get(RequestCooperation)
+        self.start_cooperation = self.injector.get(StartCooperation)
         self.coop_generator = self.injector.get(CooperationGenerator)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
@@ -167,19 +170,23 @@ class RequestCooperationTests(TestCase):
         response = self.request_cooperation(request)
         assert not response.is_rejected
 
-    def test_succesfully_requesting_cooperation_sets_attribute_of_plan_entity_correctly(
+    def test_succesfully_requesting_cooperation_makes_it_possible_to_start_cooperation(
         self,
     ) -> None:
         requester = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(
             activation_date=self.datetime_service.now(), planner=requester
         )
-        assert not plan.requested_cooperation
-
         cooperation = self.coop_generator.create_cooperation(coordinator=requester)
         request = RequestCooperationRequest(
             requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation.id
         )
-        response = self.request_cooperation(request)
-        assert not response.is_rejected
-        assert plan.requested_cooperation == cooperation
+        self.request_cooperation(request)
+        assert plan.requested_cooperation
+
+        start_cooperation_response = self.start_cooperation(
+            StartCooperationRequest(
+                requester.id, plan.id, plan.requested_cooperation.id
+            )
+        )
+        assert not start_cooperation_response.is_rejected

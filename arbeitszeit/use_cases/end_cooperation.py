@@ -26,7 +26,7 @@ class EndCooperationResponse:
         cooperation_not_found = auto()
         plan_has_no_cooperation = auto()
         plan_not_in_cooperation = auto()
-        requester_is_not_entitled = auto()
+        requester_is_not_authorized = auto()
 
     rejection_reason: Optional[RejectionReason]
 
@@ -68,4 +68,4 @@ class EndCooperation:
         if plan not in cooperation.plans:
             raise EndCooperationResponse.RejectionReason.plan_not_in_cooperation
         if (requester != cooperation.coordinator) and (requester != plan.planner):
-            raise EndCooperationResponse.RejectionReason.requester_is_not_entitled
+            raise EndCooperationResponse.RejectionReason.requester_is_not_authorized

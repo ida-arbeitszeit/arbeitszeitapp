@@ -124,7 +124,7 @@ def test_error_is_raised_when_plan_is_public_plan(
 
 
 @injection_test
-def test_error_is_raised_when_cooeration_was_not_requested(
+def test_error_is_raised_when_cooperation_was_not_requested(
     start_cooperation: StartCooperation,
     cooperation_generator: CooperationGenerator,
     plan_generator: PlanGenerator,

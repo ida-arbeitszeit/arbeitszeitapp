@@ -98,7 +98,7 @@ class TestEndCooperation(TestCase):
         assert response.is_rejected
         assert (
             response.rejection_reason
-            == EndCooperationResponse.RejectionReason.requester_is_not_entitled
+            == EndCooperationResponse.RejectionReason.requester_is_not_authorized
         )
 
     def test_ending_of_cooperation_is_successful_when_requester_is_planner(

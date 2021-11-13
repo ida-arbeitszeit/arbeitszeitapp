@@ -92,9 +92,6 @@ from .update_plans_and_payout import UpdatePlansAndPayout
 
 __all__ = [
     "ActivatePlanAndGrantCredit",
-    "StartCooperation",
-    "StartCooperationRequest",
-    "StartCooperationResponse",
     "AnswerCompanyWorkInvite",
     "AnswerCompanyWorkInviteRequest",
     "AnswerCompanyWorkInviteResponse",
@@ -159,6 +156,9 @@ __all__ = [
     "ShowMyPlansUseCase",
     "ShowWorkInvites",
     "ShowWorkInvitesRequest",
+    "StartCooperation",
+    "StartCooperationRequest",
+    "StartCooperationResponse",
     "StatisticsResponse",
     "ToggleProductAvailability",
     "ToggleProductAvailabilityResponse",

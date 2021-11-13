@@ -146,7 +146,7 @@ class Plan:
     is_available: bool
 
     @property
-    def individual_price_per_unit(self) -> Decimal:
+    def _individual_price_per_unit(self) -> Decimal:
         return (
             self.production_costs.total_cost() / self.prd_amount
             if not self.is_public_service
@@ -156,7 +156,7 @@ class Plan:
     @property
     def price_per_unit(self) -> Decimal:
         if self.cooperation is None:
-            price_per_unit = self.individual_price_per_unit
+            price_per_unit = self._individual_price_per_unit
         else:
             price_per_unit = self.cooperation.coop_price_per_unit
         return price_per_unit
