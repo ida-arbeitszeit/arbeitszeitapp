@@ -1,3 +1,4 @@
+from decimal import Decimal
 from unittest import TestCase
 from uuid import UUID, uuid4
 
@@ -12,6 +13,10 @@ RESPONSE_WITH_ONE_RESULT = PlanQueryResponse(
             company_name="Planner name",
             product_name="Bread",
             description="For eating",
+            price_per_unit=Decimal(5),
+            is_public_service=False,
+            expiration_relative=14,
+            is_available=True,
         )
     ]
 )

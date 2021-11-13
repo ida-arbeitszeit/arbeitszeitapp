@@ -1,19 +1,23 @@
 from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from decimal import Decimal
+from typing import Any, Dict, List, Optional, Protocol
+from uuid import UUID
 
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansResponse
+
+
+class PlanSummaryUrlIndex(Protocol):
+    def get_plan_summary_url(self, plan_id: UUID) -> str:
+        ...
 
 
 @dataclass
 class NonActivePlansRow:
     id: str
+    plan_summary_url: str
     prd_name: str
     description: List[str]
-    means_cost: str
-    resource_cost: str
-    labour_cost: str
-    prd_amount: str
     price_per_unit: str
     type_of_plan: str
     plan_creation_date: str
@@ -27,17 +31,15 @@ class NonActivePlansTable:
 @dataclass
 class ActivePlansRow:
     id: str
+    plan_summary_url: str
     prd_name: str
     description: List[str]
-    means_cost: str
-    resource_cost: str
-    labour_cost: str
-    prd_amount: str
     price_per_unit: str
     type_of_plan: str
     activation_date: str
     expiration_date: str
     expiration_relative: str
+    is_available: bool
 
 
 @dataclass
@@ -48,12 +50,9 @@ class ActivePlansTable:
 @dataclass
 class ExpiredPlansRow:
     id: str
+    plan_summary_url: str
     prd_name: str
     description: List[str]
-    means_cost: str
-    resource_cost: str
-    labour_cost: str
-    prd_amount: str
     price_per_unit: str
     type_of_plan: str
     plan_creation_date: str
@@ -79,7 +78,10 @@ class ShowMyPlansViewModel:
         return asdict(self)
 
 
+@dataclass
 class ShowMyPlansPresenter:
+    plan_summary_url_index: PlanSummaryUrlIndex
+
     def present(self, response: ShowMyPlansResponse) -> ShowMyPlansViewModel:
 
         if not response.all_plans:
@@ -94,13 +96,12 @@ class ShowMyPlansPresenter:
                 rows=[
                     NonActivePlansRow(
                         id=f"{plan.id}",
+                        plan_summary_url=self.plan_summary_url_index.get_plan_summary_url(
+                            plan.id
+                        ),
                         prd_name=f"{plan.prd_name}",
                         description=plan.description.splitlines(),
-                        means_cost=f"{plan.production_costs.means_cost}",
-                        resource_cost=f"{plan.production_costs.resource_cost}",
-                        labour_cost=f"{plan.production_costs.labour_cost}",
-                        prd_amount=f"{plan.prd_amount}",
-                        price_per_unit=f"{plan.price_per_unit} Std.",
+                        price_per_unit=self.__format_price(plan.price_per_unit),
                         type_of_plan=self.__get_type_of_plan(plan.is_public_service),
                         plan_creation_date=self.__format_date(plan.plan_creation_date),
                     )
@@ -112,17 +113,19 @@ class ShowMyPlansPresenter:
                 rows=[
                     ActivePlansRow(
                         id=f"{plan.id}",
+                        plan_summary_url=self.plan_summary_url_index.get_plan_summary_url(
+                            plan.id
+                        ),
                         prd_name=f"{plan.prd_name}",
                         description=plan.description.splitlines(),
-                        means_cost=f"{plan.production_costs.means_cost}",
-                        resource_cost=f"{plan.production_costs.resource_cost}",
-                        labour_cost=f"{plan.production_costs.labour_cost}",
-                        prd_amount=f"{plan.prd_amount}",
-                        price_per_unit=f"{plan.price_per_unit} Std.",
+                        price_per_unit=self.__format_price(plan.price_per_unit),
                         type_of_plan=self.__get_type_of_plan(plan.is_public_service),
                         activation_date=self.__format_date(plan.activation_date),
                         expiration_date=self.__format_date(plan.expiration_date),
-                        expiration_relative=f"{plan.expiration_relative}d",
+                        expiration_relative=f"{plan.expiration_relative} Tagen"
+                        if plan.expiration_relative is not None
+                        else "–",
+                        is_available=plan.is_available,
                     )
                     for plan in response.active_plans
                 ],
@@ -132,13 +135,12 @@ class ShowMyPlansPresenter:
                 rows=[
                     ExpiredPlansRow(
                         id=f"{plan.id}",
+                        plan_summary_url=self.plan_summary_url_index.get_plan_summary_url(
+                            plan.id
+                        ),
                         prd_name=f"{plan.prd_name}",
                         description=plan.description.splitlines(),
-                        means_cost=f"{plan.production_costs.means_cost}",
-                        resource_cost=f"{plan.production_costs.resource_cost}",
-                        labour_cost=f"{plan.production_costs.labour_cost}",
-                        prd_amount=f"{plan.prd_amount}",
-                        price_per_unit=f"{plan.price_per_unit} Std.",
+                        price_per_unit=self.__format_price(plan.price_per_unit),
                         type_of_plan=self.__get_type_of_plan(plan.is_public_service),
                         plan_creation_date=self.__format_date(plan.plan_creation_date),
                         renewed=plan.renewed,
@@ -153,3 +155,6 @@ class ShowMyPlansPresenter:
 
     def __format_date(self, date: Optional[datetime]) -> str:
         return f"{date.strftime('%d.%m.%y')}" if date else "–"
+
+    def __format_price(self, price_per_unit: Decimal) -> str:
+        return f"{round(price_per_unit, 2)}"
