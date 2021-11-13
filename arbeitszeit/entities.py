@@ -16,6 +16,9 @@ class SocialAccounting:
     id: UUID
     account: Account
 
+    def get_name(self) -> str:
+        return "Social Accounting"
+
 
 @dataclass
 class Member:
@@ -26,6 +29,9 @@ class Member:
 
     def accounts(self) -> List[Account]:
         return [self.account]
+
+    def get_name(self) -> str:
+        return self.name
 
 
 @dataclass
@@ -45,6 +51,9 @@ class Company:
             self.work_account,
             self.product_account,
         ]
+
+    def get_name(self) -> str:
+        return self.name
 
 
 class AccountTypes(Enum):
@@ -146,7 +155,7 @@ class Plan:
     is_available: bool
 
     @property
-    def individual_price_per_unit(self) -> Decimal:
+    def _individual_price_per_unit(self) -> Decimal:
         return (
             self.production_costs.total_cost() / self.prd_amount
             if not self.is_public_service
@@ -156,7 +165,7 @@ class Plan:
     @property
     def price_per_unit(self) -> Decimal:
         if self.cooperation is None:
-            price_per_unit = self.individual_price_per_unit
+            price_per_unit = self._individual_price_per_unit
         else:
             price_per_unit = self.cooperation.coop_price_per_unit
         return price_per_unit

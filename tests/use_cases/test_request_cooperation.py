@@ -2,6 +2,8 @@ from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases import (
+    AcceptCooperationRequest,
+    AcceptCooperationRequestRequest,
     RequestCooperation,
     RequestCooperationRequest,
     RequestCooperationResponse,
@@ -17,6 +19,7 @@ class RequestCooperationTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.request_cooperation = self.injector.get(RequestCooperation)
+        self.accept_cooperation_request = self.injector.get(AcceptCooperationRequest)
         self.coop_generator = self.injector.get(CooperationGenerator)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
@@ -96,6 +99,7 @@ class RequestCooperationTests(TestCase):
         cooperation = self.coop_generator.create_cooperation(
             coordinator=requester, plans=[plan]
         )
+        plan.cooperation = None
         request = RequestCooperationRequest(
             requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation.id
         )
@@ -167,19 +171,23 @@ class RequestCooperationTests(TestCase):
         response = self.request_cooperation(request)
         assert not response.is_rejected
 
-    def test_succesfully_requesting_cooperation_sets_attribute_of_plan_entity_correctly(
+    def test_succesfully_requesting_cooperation_makes_it_possible_to_accept_cooperation_request(
         self,
     ) -> None:
         requester = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(
             activation_date=self.datetime_service.now(), planner=requester
         )
-        assert not plan.requested_cooperation
-
         cooperation = self.coop_generator.create_cooperation(coordinator=requester)
         request = RequestCooperationRequest(
             requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation.id
         )
-        response = self.request_cooperation(request)
-        assert not response.is_rejected
-        assert plan.requested_cooperation == cooperation
+        self.request_cooperation(request)
+        assert plan.requested_cooperation
+
+        accept_cooperation_request_response = self.accept_cooperation_request(
+            AcceptCooperationRequestRequest(
+                requester.id, plan.id, plan.requested_cooperation.id
+            )
+        )
+        assert not accept_cooperation_request_response.is_rejected
