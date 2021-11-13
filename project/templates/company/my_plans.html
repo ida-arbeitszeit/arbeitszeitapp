@@ -3,7 +3,8 @@
 <div class="box has-background-info-light has-text-info-dark">
   <div class="icon"><i class="fas fa-info-circle"></i></div>
   <p>
-    Hier sind deine genehmigten Pläne.<br />Abgelaufene Pläne kannst du erneuern.
+    Aktuelle Pläne kannst du als (nicht) verfügbar kennzeichnen. <br />
+    Abgelaufene Pläne kannst du erneuern oder löschen.
   </p>
 </div>
 <h1 class="title">Aktuelle Pläne</h1>
@@ -21,34 +22,39 @@ messages %}
         <th>Plan-ID</th>
         <th>Produkt</th>
         <th>Beschr.</th>
-        <th><abbr title="Kosten Produktionsmittel">p</abbr></th>
-        <th><abbr title="Kosten Rohstoffe">r</abbr></th>
-        <th><abbr title="Kosten Arbeit">a</abbr></th>
-        <th><abbr title="Einheiten">Einh.</abbr></th>
         <th>Stückpr.</th>
         <th>Art</th>
         <th>Plan&nbsp;aktiv&nbsp;seit</th>
         <th>Plan-Ende</th>
         <th>Endet&nbsp;in</th>
+        <th>Verfügbar</th>
       </tr>
     </thead>
     <tbody>
       {% for plan in active_plans.rows %}
       <tr>
-        <td>{{ plan.id }}</td>
+        <td><a href="{{ plan.plan_summary_url }}">{{ plan.id }}</a></td>
         <td>{{ plan.prd_name }}</td>
         <td>{% for paragraph in plan.description %}{{ paragraph }}<br>{% endfor %}</td>
-        <td>{{ plan.means_cost }}</td>
-        <td>{{ plan.resource_cost }}</td>
-        <td>{{ plan.labour_cost }}</td>
-        <td>{{ plan.prd_amount }}</td>
         <td>{{ plan.price_per_unit }}</td>
         <td>{{ plan.type_of_plan }}</td>
         <td>{{ plan.activation_date }}</td>
         <td>{{ plan.expiration_date }}</td>
-        <td>{{ plan.expiration_relative }}d</td>
-      </tr>
-      {% endfor %}
+        <td>{{ plan.expiration_relative }}</td>
+        {% if plan.is_available %}
+        <td>
+          <span style="color: green"><a style="text-decoration: none; color: inherit;"
+              href="{{ url_for('main_company.toggle_availability', plan_id=plan.id) }}"><i
+                class="fas fa-toggle-on"></i></a></span>
+        </td>
+        {% else %}
+        <td>
+          <span style="color: red"><a style="text-decoration: none; color: inherit;"
+              href="{{ url_for('main_company.toggle_availability', plan_id=plan.id) }}"><i
+                class="fas fa-toggle-off"></i></a></span>
+        </td>
+        {% endif %}
+        {% endfor %}
     </tbody>
   </table>
   {% else %}
@@ -66,10 +72,6 @@ messages %}
         <th>Plan-ID</th>
         <th>Produkt</th>
         <th>Beschreibung</th>
-        <th><abbr title="Kosten Produktionsmittel">p</abbr></th>
-        <th><abbr title="Kosten Rohstoffe">r</abbr></th>
-        <th><abbr title="Kosten Arbeit">a</abbr></th>
-        <th>Einheiten</th>
         <th>Stückpreis</th>
         <th>Art</th>
         <th>Plan&nbsp;vom</th>
@@ -79,13 +81,9 @@ messages %}
     <tbody>
       {% for plan in non_active_plans.rows %}
       <tr>
-        <td>{{ plan.id }}</td>
+        <td><a href="{{ plan.plan_summary_url }}">{{ plan.id }}</a></td>
         <td>{{ plan.prd_name }}</td>
         <td>{% for paragraph in plan.description %}{{ paragraph }}<br>{% endfor %}</td>
-        <td>{{ plan.means_cost }}</td>
-        <td>{{ plan.resource_cost }}</td>
-        <td>{{ plan.labour_cost }}</td>
-        <td>{{ plan.prd_amount }}</td>
         <td>{{ plan.price_per_unit }}</td>
         <td>{{ plan.type_of_plan }}</td>
         <td>{{ plan.plan_creation_date }}</td>
@@ -111,10 +109,6 @@ messages %}
         <th>Plan-ID</th>
         <th>Produkt</th>
         <th>Beschreibung</th>
-        <th><abbr title="Kosten Produktionsmittel">p</abbr></th>
-        <th><abbr title="Kosten Rohstoffe">r</abbr></th>
-        <th><abbr title="Kosten Arbeit">a</abbr></th>
-        <th>Einheiten</th>
         <th>Stückpreis</th>
         <th>Art</th>
         <th>Plan&nbsp;vom</th>
@@ -125,13 +119,9 @@ messages %}
     <tbody>
       {% for plan in expired_plans.rows %}
       <tr>
-        <td>{{ plan.id }}</td>
+        <td><a href="{{ plan.plan_summary_url }}">{{ plan.id }}</a></td>
         <td>{{ plan.prd_name }}</td>
         <td>{% for paragraph in plan.description %}{{ paragraph }}<br>{% endfor %}</td>
-        <td>{{ plan.means_cost }}</td>
-        <td>{{ plan.resource_cost }}</td>
-        <td>{{ plan.labour_cost }}</td>
-        <td>{{ plan.prd_amount }}</td>
         <td>{{ plan.price_per_unit }}</td>
         <td>{{ plan.type_of_plan }}</td>
         <td>{{ plan.plan_creation_date }}</td>

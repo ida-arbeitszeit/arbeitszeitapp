@@ -86,3 +86,5 @@ There is a command `flask payout`. It does the following things:
 
 This command is executed every hour on the production server. 
 In development mode you can run it manually in the CLI. 
+
+
