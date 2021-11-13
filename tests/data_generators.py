@@ -296,13 +296,18 @@ class CooperationGenerator:
     company_generator: CompanyGenerator
 
     def create_cooperation(
-        self, coordinator: Optional[Company] = None, plans: List[Plan] = []
+        self,
+        name: str = None,
+        coordinator: Optional[Company] = None,
+        plans: List[Plan] = [],
     ) -> Cooperation:
+        if name is None:
+            name = "test name"
         if coordinator is None:
             coordinator = self.company_generator.create_company()
         cooperation = self.cooperation_repository.create_cooperation(
             self.datetime_service.now(),
-            name="test name",
+            name=name,
             definition="test info",
             coordinator=coordinator,
         )
