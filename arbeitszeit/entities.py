@@ -16,6 +16,9 @@ class SocialAccounting:
     id: UUID
     account: Account
 
+    def get_name(self) -> str:
+        return "Social Accounting"
+
 
 @dataclass
 class Member:
@@ -26,6 +29,9 @@ class Member:
 
     def accounts(self) -> List[Account]:
         return [self.account]
+
+    def get_name(self) -> str:
+        return self.name
 
 
 @dataclass
@@ -45,6 +51,9 @@ class Company:
             self.work_account,
             self.product_account,
         ]
+
+    def get_name(self) -> str:
+        return self.name
 
 
 class AccountTypes(Enum):
