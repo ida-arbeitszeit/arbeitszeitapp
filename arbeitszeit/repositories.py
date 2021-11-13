@@ -376,11 +376,7 @@ class CooperationRepository(ABC):
         pass
 
     @abstractmethod
-    def delete_plan_from_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
-        pass
-
-    @abstractmethod
-    def delete_cooperation_from_plan(self, plan_id: UUID, cooperation_id: UUID) -> None:
+    def remove_plan_from_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         pass
 
     @abstractmethod

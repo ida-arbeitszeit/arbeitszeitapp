@@ -47,10 +47,7 @@ class EndCooperation:
             self._validate_request(request)
         except EndCooperationResponse.RejectionReason as reason:
             return EndCooperationResponse(rejection_reason=reason)
-        self.cooperation_repository.delete_plan_from_cooperation(
-            request.plan_id, request.cooperation_id
-        )
-        self.cooperation_repository.delete_cooperation_from_plan(
+        self.cooperation_repository.remove_plan_from_cooperation(
             request.plan_id, request.cooperation_id
         )
         return EndCooperationResponse(rejection_reason=None)

@@ -736,18 +736,12 @@ class CooperationRepository(interfaces.CooperationRepository):
         assert cooperation
         plan.cooperation = cooperation
 
-    def delete_plan_from_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
+    def remove_plan_from_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         plan = self.plan_repository.get_plan_by_id(plan_id)
         cooperation = self.get_by_id(cooperation_id)
         assert plan
         assert cooperation
         cooperation.plans.remove(plan)
-
-    def delete_cooperation_from_plan(self, plan_id: UUID, cooperation_id: UUID) -> None:
-        plan = self.plan_repository.get_plan_by_id(plan_id)
-        cooperation = self.get_by_id(cooperation_id)
-        assert plan
-        assert cooperation
         plan.cooperation = None
 
     def set_requested_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
