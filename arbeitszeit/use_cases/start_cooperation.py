@@ -54,9 +54,6 @@ class StartCooperation:
         self.cooperation_repository.add_plan_to_cooperation(
             request.plan_id, request.cooperation_id
         )
-        self.cooperation_repository.add_cooperation_to_plan(
-            request.plan_id, request.cooperation_id
-        )
         self.cooperation_repository.set_requested_cooperation_to_none(request.plan_id)
         return StartCooperationResponse(rejection_reason=None)
 

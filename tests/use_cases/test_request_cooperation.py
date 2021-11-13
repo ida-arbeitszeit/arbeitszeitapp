@@ -99,6 +99,7 @@ class RequestCooperationTests(TestCase):
         cooperation = self.coop_generator.create_cooperation(
             coordinator=requester, plans=[plan]
         )
+        plan.cooperation = None
         request = RequestCooperationRequest(
             requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation.id
         )

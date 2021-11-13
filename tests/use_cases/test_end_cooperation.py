@@ -87,7 +87,6 @@ class TestEndCooperation(TestCase):
             cooperation=self.coop_generator.create_cooperation()
         )
         cooperation = self.coop_generator.create_cooperation(plans=[plan])
-        self.cooperation_repository.add_cooperation_to_plan(plan.id, cooperation.id)
 
         request = EndCooperationRequest(
             requester_id=self.requester.id,
@@ -106,7 +105,6 @@ class TestEndCooperation(TestCase):
     ) -> None:
         plan = self.plan_generator.create_plan(planner=self.requester)
         cooperation = self.coop_generator.create_cooperation(plans=[plan])
-        self.cooperation_repository.add_cooperation_to_plan(plan.id, cooperation.id)
 
         request = EndCooperationRequest(
             requester_id=self.requester.id,
@@ -123,7 +121,6 @@ class TestEndCooperation(TestCase):
         cooperation = self.coop_generator.create_cooperation(
             plans=[plan], coordinator=self.requester
         )
-        self.cooperation_repository.add_cooperation_to_plan(plan.id, cooperation.id)
 
         request = EndCooperationRequest(
             requester_id=self.requester.id,
@@ -138,7 +135,6 @@ class TestEndCooperation(TestCase):
     ) -> None:
         plan = self.plan_generator.create_plan(planner=self.requester)
         cooperation = self.coop_generator.create_cooperation(plans=[plan])
-        self.cooperation_repository.add_cooperation_to_plan(plan.id, cooperation.id)
         assert plan in cooperation.plans
 
         request = EndCooperationRequest(
@@ -155,7 +151,6 @@ class TestEndCooperation(TestCase):
     ) -> None:
         plan = self.plan_generator.create_plan(planner=self.requester)
         cooperation = self.coop_generator.create_cooperation(plans=[plan])
-        self.cooperation_repository.add_cooperation_to_plan(plan.id, cooperation.id)
         assert plan.cooperation == cooperation
 
         request = EndCooperationRequest(

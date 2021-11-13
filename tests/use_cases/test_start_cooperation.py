@@ -92,6 +92,7 @@ def test_error_is_raised_when_plan_is_already_in_the_list_of_associated_plans(
     cooperation = cooperation_generator.create_cooperation(
         coordinator=requester, plans=[plan]
     )
+    plan.cooperation = None
     request = StartCooperationRequest(
         requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation.id
     )
