@@ -2,11 +2,11 @@ from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases import (
+    AcceptCooperationRequest,
+    AcceptCooperationRequestRequest,
     RequestCooperation,
     RequestCooperationRequest,
     RequestCooperationResponse,
-    StartCooperation,
-    StartCooperationRequest,
 )
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
@@ -19,7 +19,7 @@ class RequestCooperationTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.request_cooperation = self.injector.get(RequestCooperation)
-        self.start_cooperation = self.injector.get(StartCooperation)
+        self.accept_cooperation_request = self.injector.get(AcceptCooperationRequest)
         self.coop_generator = self.injector.get(CooperationGenerator)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
@@ -171,7 +171,7 @@ class RequestCooperationTests(TestCase):
         response = self.request_cooperation(request)
         assert not response.is_rejected
 
-    def test_succesfully_requesting_cooperation_makes_it_possible_to_start_cooperation(
+    def test_succesfully_requesting_cooperation_makes_it_possible_to_accept_cooperation_request(
         self,
     ) -> None:
         requester = self.company_generator.create_company()
@@ -185,9 +185,9 @@ class RequestCooperationTests(TestCase):
         self.request_cooperation(request)
         assert plan.requested_cooperation
 
-        start_cooperation_response = self.start_cooperation(
-            StartCooperationRequest(
+        accept_cooperation_request_response = self.accept_cooperation_request(
+            AcceptCooperationRequestRequest(
                 requester.id, plan.id, plan.requested_cooperation.id
             )
         )
-        assert not start_cooperation_response.is_rejected
+        assert not accept_cooperation_request_response.is_rejected
