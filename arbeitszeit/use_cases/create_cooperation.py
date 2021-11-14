@@ -61,7 +61,6 @@ class CreateCooperation:
         coop_with_name_exists = (
             len(list(self.cooperation_repository.get_by_name(request.name))) > 0
         )
-
         if coordinator is None:
             raise CreateCooperationResponse.RejectionReason.coordinator_not_found
         if coop_with_name_exists:
