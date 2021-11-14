@@ -2,10 +2,10 @@ from arbeitszeit import errors
 from arbeitszeit.entities import Company, Member
 from arbeitszeit.repositories import CompanyWorkerRepository
 
-from .accept_cooperation_request import (
+from .accept_cooperation import (
+    AcceptCooperation,
     AcceptCooperationRequest,
-    AcceptCooperationRequestRequest,
-    AcceptCooperationRequestResponse,
+    AcceptCooperationResponse,
 )
 from .activate_plan_and_grant_credit import ActivatePlanAndGrantCredit
 from .answer_company_work_invite import (
@@ -92,9 +92,9 @@ from .toggle_product_availablity import (
 from .update_plans_and_payout import UpdatePlansAndPayout
 
 __all__ = [
+    "AcceptCooperation",
     "AcceptCooperationRequest",
-    "AcceptCooperationRequestRequest",
-    "AcceptCooperationRequestResponse",
+    "AcceptCooperationResponse",
     "ActivatePlanAndGrantCredit",
     "AnswerCompanyWorkInvite",
     "AnswerCompanyWorkInviteRequest",
