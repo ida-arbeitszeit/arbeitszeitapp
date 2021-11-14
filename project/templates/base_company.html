@@ -2,7 +2,6 @@
 {% block content1 %}
 <section class="hero">
   <div class="hero-head">
-
     <nav class="navbar is-light" role="navigation" aria-label="main navigation">
       <div class="navbar-brand">
         <div class="navbar-item has-background-primary	has-text-white">
@@ -10,7 +9,7 @@
         </div>
 
         <a role="button" class="navbar-burger" onclick="expandMenu()" aria-label="menu" aria-expanded="false"
-          data-target="navbarOnTop">
+           data-target="navbarOnTop">
           <span aria-hidden="true"></span>
           <span aria-hidden="true"></span>
           <span aria-hidden="true"></span>
@@ -96,8 +95,10 @@
               <a class="button" href="{{ url_for('auth.zurueck') }}">
                 Zurück
               </a>
-              {% endif %}
-              {% if current_user.is_authenticated %}
+	      {% else %}
+	      {% if message_indicator.show_unread_messages_indicator %}
+	      <span> test </span>
+	      {% endif %}
               <a class="button" href="{{ url_for('auth.logout') }}">
                 Logout
               </a>

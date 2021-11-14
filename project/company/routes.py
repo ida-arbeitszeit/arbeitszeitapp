@@ -2,7 +2,7 @@ from decimal import Decimal
 from typing import Optional, cast
 from uuid import UUID
 
-from flask import flash, redirect, render_template, request, url_for
+from flask import flash, redirect, request, url_for
 from flask_login import current_user, login_required
 
 from arbeitszeit import entities, errors, use_cases
@@ -38,6 +38,7 @@ from project.database import (
 )
 from project.forms import CompanySearchForm, CreateDraftForm, PlanSearchForm
 from project.models import Company
+from project.template import UserTemplateRenderer
 from project.url_index import CompanyUrlIndex
 from project.views import Http404View, QueryCompaniesView, QueryPlansView
 
@@ -48,6 +49,7 @@ from .blueprint import CompanyRoute
 def profile(
     company_repository: CompanyRepository,
     company_worker_repository: CompanyWorkerRepository,
+    template_renderer: UserTemplateRenderer,
 ):
     company = company_repository.get_by_id(UUID(current_user.id))
     assert company is not None
@@ -56,7 +58,9 @@ def profile(
         having_workers = True
     else:
         having_workers = False
-    return render_template("company/profile.html", having_workers=having_workers)
+    return template_renderer.render_template(
+        "company/profile.html", context=dict(having_workers=having_workers)
+    )
 
 
 @CompanyRoute("/company/work", methods=["GET", "POST"])
@@ -65,6 +69,7 @@ def arbeit(
     company_repository: CompanyRepository,
     member_repository: MemberRepository,
     company_worker_repository: CompanyWorkerRepository,
+    template_renderer: UserTemplateRenderer,
 ):
     """shows workers and add workers to company."""
     company = company_repository.get_by_id(UUID(current_user.id))
@@ -83,19 +88,27 @@ def arbeit(
         return redirect(url_for("main_company.arbeit"))
     elif request.method == "GET":
         workers_list = list(company_worker_repository.get_company_workers(company))
-        return render_template("company/work.html", workers_list=workers_list)
+        return template_renderer.render_template(
+            "company/work.html", context=dict(workers_list=workers_list)
+        )
 
 
 @CompanyRoute("/company/query_plans", methods=["GET", "POST"])
 def query_plans(
     query_plans: use_cases.QueryPlans,
     controller: QueryPlansController,
+    template_renderer: UserTemplateRenderer,
 ):
     presenter = QueryPlansPresenter(CompanyUrlIndex())
     template_name = "company/query_plans.html"
     search_form = PlanSearchForm(request.form)
     view = QueryPlansView(
-        search_form, query_plans, presenter, controller, template_name
+        search_form,
+        query_plans,
+        presenter,
+        controller,
+        template_name,
+        template_renderer,
     )
     if request.method == "POST":
         return view.respond_to_post()
@@ -107,12 +120,18 @@ def query_plans(
 def query_companies(
     query_companies: use_cases.QueryCompanies,
     controller: QueryCompaniesController,
+    template_renderer: UserTemplateRenderer,
 ):
     presenter = QueryCompaniesPresenter()
     template_name = "company/query_companies.html"
     search_form = CompanySearchForm(request.form)
     view = QueryCompaniesView(
-        search_form, query_companies, presenter, controller, template_name
+        search_form,
+        query_companies,
+        presenter,
+        controller,
+        template_name,
+        template_renderer,
     )
     if request.method == "POST":
         return view.respond_to_post()
@@ -124,11 +143,14 @@ def query_companies(
 def my_purchases(
     query_purchases: use_cases.QueryPurchases,
     company_repository: CompanyRepository,
+    template_renderer: UserTemplateRenderer,
 ):
     company = company_repository.get_by_id(UUID(current_user.id))
     assert company is not None
     purchases = list(query_purchases(company))
-    return render_template("company/my_purchases.html", purchases=purchases)
+    return template_renderer.render_template(
+        "company/my_purchases.html", context=dict(purchases=purchases)
+    )
 
 
 @CompanyRoute("/company/create_draft_from_expired_plan", methods=["GET", "POST"])
@@ -138,6 +160,7 @@ def create_draft_from_expired_plan(
     get_plan_summary: GetPlanSummary,
     get_prefilled_draft_data_presenter: GetPrefilledDraftDataPresenter,
     controller: PrefilledDraftDataController,
+    template_renderer: UserTemplateRenderer,
 ):
     expired_plan_id: Optional[str] = request.args.get("expired_plan_id")
     expired_plan_uuid: Optional[UUID] = (
@@ -170,7 +193,9 @@ def create_draft_from_expired_plan(
         if plan_summary
         else None
     )
-    return render_template("company/create_draft.html", prefilled=prefilled_draft_data)
+    return template_renderer.render_template(
+        "company/create_draft.html", context=dict(prefilled=prefilled_draft_data)
+    )
 
 
 @CompanyRoute("/company/create_draft", methods=["GET", "POST"])
@@ -180,6 +205,7 @@ def create_draft(
     get_draft_summary: GetDraftSummary,
     get_prefilled_draft_data_presenter: GetPrefilledDraftDataPresenter,
     controller: PrefilledDraftDataController,
+    template_renderer: UserTemplateRenderer,
 ):
     saved_draft_id: Optional[str] = request.args.get("saved_draft_id")
     saved_draft_uuid: Optional[UUID] = UUID(saved_draft_id) if saved_draft_id else None
@@ -212,7 +238,9 @@ def create_draft(
         if draft_summary
         else None
     )
-    return render_template("company/create_draft.html", prefilled=prefilled_draft_data)
+    return template_renderer.render_template(
+        "company/create_draft.html", context=dict(prefilled=prefilled_draft_data)
+    )
 
 
 @CompanyRoute("/company/create_plan", methods=["GET", "POST"])
@@ -220,6 +248,7 @@ def create_draft(
 def create_plan(
     seek_approval: use_cases.SeekApproval,
     activate_plan_and_grant_credit: use_cases.ActivatePlanAndGrantCredit,
+    template_renderer: UserTemplateRenderer,
 ):
     draft_uuid: UUID = request.args.get("draft_uuid")
     expired_plan_uuid: Optional[UUID] = request.args.get("expired_plan_uuid")
@@ -235,31 +264,35 @@ def create_plan(
     else:
         flash(f"Plan nicht genehmigt. Grund:\n{approval_response.reason}")
 
-    return render_template("/company/create_plan_response.html")
+    return template_renderer.render_template("/company/create_plan_response.html")
 
 
 @CompanyRoute("/company/my_drafts", methods=["GET"])
 def my_drafts(
     list_drafts: use_cases.ListDraftsOfCompany,
     list_drafts_presenter: ListDraftsPresenter,
+    template_renderer: UserTemplateRenderer,
 ):
     response = list_drafts(UUID(current_user.id))
     view_model = list_drafts_presenter.present(response)
-    return render_template("company/my_drafts.html", **view_model.to_dict())
+    return template_renderer.render_template(
+        "company/my_drafts.html", context=view_model.to_dict()
+    )
 
 
 @CompanyRoute("/company/my_plans", methods=["GET"])
 def my_plans(
     show_my_plans_use_case: ShowMyPlansUseCase,
+    template_renderer: UserTemplateRenderer,
 ):
     show_my_plans_presenter = ShowMyPlansPresenter(CompanyUrlIndex())
     request = ShowMyPlansRequest(company_id=UUID(current_user.id))
     response = show_my_plans_use_case(request)
     view_model = show_my_plans_presenter.present(response)
 
-    return render_template(
+    return template_renderer.render_template(
         "company/my_plans.html",
-        **view_model.to_dict(),
+        context=view_model.to_dict(),
     )
 
 
@@ -285,6 +318,7 @@ def my_accounts(
     company_repository: CompanyRepository,
     get_transaction_infos: use_cases.GetTransactionInfos,
     account_repository: AccountRepository,
+    template_renderer: UserTemplateRenderer,
 ):
     # We can assume current_user to be a LocalProxy object that
     # delegates to a Company since we did the `user_is_company` check
@@ -296,10 +330,12 @@ def my_accounts(
         for account in company.accounts()
     ]
 
-    return render_template(
+    return template_renderer.render_template(
         "company/my_accounts.html",
-        my_balances=my_balances,
-        all_transactions=all_trans_infos,
+        context=dict(
+            my_balances=my_balances,
+            all_transactions=all_trans_infos,
+        ),
     )
 
 
@@ -309,6 +345,7 @@ def transfer_to_worker(
     send_work_certificates_to_worker: use_cases.SendWorkCertificatesToWorker,
     company_repository: CompanyRepository,
     member_repository: MemberRepository,
+    template_renderer: UserTemplateRenderer,
 ):
     if request.method == "POST":
         company = company_repository.get_by_id(UUID(current_user.id))
@@ -329,7 +366,7 @@ def transfer_to_worker(
             else:
                 flash("Erfolgreich überwiesen.")
 
-    return render_template("company/transfer_to_worker.html")
+    return template_renderer.render_template("company/transfer_to_worker.html")
 
 
 @CompanyRoute("/company/transfer_to_company", methods=["GET", "POST"])
@@ -337,6 +374,7 @@ def transfer_to_worker(
 def transfer_to_company(
     pay_means_of_production: use_cases.PayMeansOfProduction,
     presenter: PayMeansOfProductionPresenter,
+    template_renderer: UserTemplateRenderer,
 ):
     if request.method == "POST":
         use_case_request = use_cases.PayMeansOfProductionRequest(
@@ -351,17 +389,20 @@ def transfer_to_company(
         view_model = presenter.present(use_case_response)
         for notification in view_model.notifications:
             flash(notification)
-    return render_template("company/transfer_to_company.html")
+    return template_renderer.render_template("company/transfer_to_company.html")
 
 
 @CompanyRoute("/company/statistics")
 def statistics(
     get_statistics: use_cases.GetStatistics,
     presenter: GetStatisticsPresenter,
+    template_renderer: UserTemplateRenderer,
 ):
     use_case_response = get_statistics()
     view_model = presenter.present(use_case_response)
-    return render_template("company/statistics.html", view_model=view_model)
+    return template_renderer.render_template(
+        "company/statistics.html", context=dict(view_model=view_model)
+    )
 
 
 @CompanyRoute("/company/plan_summary/<uuid:plan_id>")
@@ -369,18 +410,19 @@ def plan_summary(
     plan_id: UUID,
     get_plan_summary: use_cases.GetPlanSummary,
     presenter: GetPlanSummarySuccessPresenter,
+    template_renderer: UserTemplateRenderer,
 ):
     use_case_response = get_plan_summary(plan_id)
     if isinstance(use_case_response, use_cases.PlanSummarySuccess):
         view_model = presenter.present(use_case_response)
-        return render_template(
-            "company/plan_summary.html", view_model=view_model.to_dict()
+        return template_renderer.render_template(
+            "company/plan_summary.html", context=dict(view_model=view_model.to_dict())
         )
     else:
-        return Http404View("company/404.html").get_response()
+        return Http404View("company/404.html", template_renderer).get_response()
 
 
 @CompanyRoute("/company/hilfe")
 @login_required
-def hilfe():
-    return render_template("company/help.html")
+def hilfe(template_renderer: UserTemplateRenderer):
+    return template_renderer.render_template("company/help.html")

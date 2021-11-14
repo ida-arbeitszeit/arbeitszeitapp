@@ -7,8 +7,12 @@ import project.extensions
 from project.extensions import login_manager
 
 
-def create_app(config=None, db=None, migrate=None):
-    app = Flask(__name__, instance_relative_config=False)
+def create_app(config=None, db=None, migrate=None, template_folder=None):
+    if template_folder is None:
+        template_folder = "templates"
+    app = Flask(
+        __name__, instance_relative_config=False, template_folder=template_folder
+    )
 
     if config:
         app.config.update(**config)
