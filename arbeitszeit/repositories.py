@@ -9,6 +9,7 @@ from arbeitszeit.entities import (
     AccountTypes,
     Company,
     CompanyWorkInvite,
+    Cooperation,
     Member,
     Message,
     Plan,
@@ -348,4 +349,36 @@ class MessageRepository(ABC):
 
     @abstractmethod
     def get_messages_to_user(self, user: UUID) -> Iterable[Message]:
+        pass
+
+
+class CooperationRepository(ABC):
+    @abstractmethod
+    def create_cooperation(
+        self,
+        creation_timestamp: datetime,
+        name: str,
+        definition: str,
+        coordinator: Company,
+    ) -> Cooperation:
+        pass
+
+    @abstractmethod
+    def get_by_id(self, id: UUID) -> Optional[Cooperation]:
+        pass
+
+    @abstractmethod
+    def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
+        pass
+
+    @abstractmethod
+    def remove_plan_from_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
+        pass
+
+    @abstractmethod
+    def set_requested_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
+        pass
+
+    @abstractmethod
+    def set_requested_cooperation_to_none(self, plan_id: UUID) -> None:
         pass
