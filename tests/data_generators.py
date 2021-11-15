@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Optional, Union
+from typing import List, Optional, Union
 from uuid import uuid4
 
 from injector import inject
@@ -17,6 +17,7 @@ from arbeitszeit.entities import (
     Account,
     AccountTypes,
     Company,
+    Cooperation,
     Member,
     Message,
     Plan,
@@ -30,6 +31,7 @@ from arbeitszeit.entities import (
 from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
+    CooperationRepository,
     MemberRepository,
     MessageRepository,
     PlanDraftRepository,
@@ -162,6 +164,8 @@ class PlanGenerator:
         production_unit: str = "500 Gramm",
         timeframe: Optional[int] = None,
         expired: bool = False,
+        requested_cooperation: Optional[Cooperation] = None,
+        cooperation: Optional[Cooperation] = None,
         is_available: bool = True,
     ) -> Plan:
         assert approved, "Currently the application does not support plan rejection"
@@ -184,6 +188,10 @@ class PlanGenerator:
             self.plan_repository.activate_plan(plan, activation_date)
         if expired:
             self.plan_repository.set_plan_as_expired(plan)
+        if requested_cooperation:
+            plan.requested_cooperation = requested_cooperation
+        if cooperation:
+            plan.cooperation = cooperation
         if not is_available:
             self.plan_repository.toggle_product_availability(plan)
         return plan
@@ -281,6 +289,32 @@ class TransactionGenerator:
             amount=amount,
             purpose="Test Verw.zweck",
         )
+
+
+@inject
+@dataclass
+class CooperationGenerator:
+    cooperation_repository: CooperationRepository
+    datetime_service: FakeDatetimeService
+    company_generator: CompanyGenerator
+
+    def create_cooperation(
+        self, coordinator: Optional[Company] = None, plans: List[Plan] = []
+    ) -> Cooperation:
+        if coordinator is None:
+            coordinator = self.company_generator.create_company()
+        cooperation = self.cooperation_repository.create_cooperation(
+            self.datetime_service.now(),
+            name="test name",
+            definition="test info",
+            coordinator=coordinator,
+        )
+        if plans is not None:
+            for plan in plans:
+                self.cooperation_repository.add_plan_to_cooperation(
+                    plan.id, cooperation.id
+                )
+        return cooperation
 
 
 @inject
