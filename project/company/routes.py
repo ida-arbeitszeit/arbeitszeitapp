@@ -2,7 +2,7 @@ from decimal import Decimal
 from typing import Optional, cast
 from uuid import UUID
 
-from flask import flash, redirect, request, url_for
+from flask import Response, flash, redirect, request, url_for
 from flask_login import current_user, login_required
 
 from arbeitszeit import entities, errors, use_cases
@@ -11,6 +11,7 @@ from arbeitszeit.use_cases import (
     DeletePlan,
     GetDraftSummary,
     GetPlanSummary,
+    ListMessages,
     ToggleProductAvailability,
 )
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
@@ -22,6 +23,7 @@ from arbeitszeit_web.get_prefilled_draft_data import (
 )
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.list_drafts_of_company import ListDraftsPresenter
+from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from arbeitszeit_web.query_companies import (
     QueryCompaniesController,
@@ -40,7 +42,12 @@ from project.forms import CompanySearchForm, CreateDraftForm, PlanSearchForm
 from project.models import Company
 from project.template import UserTemplateRenderer
 from project.url_index import CompanyUrlIndex
-from project.views import Http404View, QueryCompaniesView, QueryPlansView
+from project.views import (
+    Http404View,
+    ListMessagesView,
+    QueryCompaniesView,
+    QueryPlansView,
+)
 
 from .blueprint import CompanyRoute
 
@@ -426,3 +433,22 @@ def plan_summary(
 @login_required
 def hilfe(template_renderer: UserTemplateRenderer):
     return template_renderer.render_template("company/help.html")
+
+
+@CompanyRoute("/company/messages")
+def list_messages(
+    template_renderer: UserTemplateRenderer,
+    controller: ListMessagesController,
+    presenter: ListMessagesPresenter,
+    use_case: ListMessages,
+) -> Response:
+    http_404_view = Http404View("company/404.html", template_renderer)
+    view = ListMessagesView(
+        template_renderer=template_renderer,
+        presenter=presenter,
+        controller=controller,
+        list_messages=use_case,
+        not_found_view=http_404_view,
+        template_name="company/list_messages.html",
+    )
+    return view.respond_to_get()

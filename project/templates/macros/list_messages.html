@@ -1,0 +1,14 @@
+{% macro list_messages(view_model) %}
+
+<h1 class="title">Nachtichten</h1>
+<ul>
+  {% for message in view_model.messages %}
+  <li {% if message.show_unrad_message_indicator %}class="unread-message"{% endif %}>
+    "{{ message.title }}" from {{ message.sender_name }}
+  </li>
+  {% else %}
+  Keine Nachtichten empfangen.
+  {% endfor %}
+</ul>
+
+{% endmacro %}

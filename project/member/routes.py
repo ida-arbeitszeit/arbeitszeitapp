@@ -5,9 +5,11 @@ from flask import Response, request
 from flask_login import current_user
 
 from arbeitszeit import use_cases
+from arbeitszeit.use_cases import ListMessages
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
+from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 from arbeitszeit_web.pay_consumer_product import (
     PayConsumerProductController,
     PayConsumerProductPresenter,
@@ -24,6 +26,7 @@ from project.template import UserTemplateRenderer
 from project.url_index import MemberUrlIndex
 from project.views import (
     Http404View,
+    ListMessagesView,
     PayConsumerProductView,
     QueryCompaniesView,
     QueryPlansView,
@@ -190,3 +193,22 @@ def plan_summary(
 @MemberRoute("/member/hilfe")
 def hilfe(template_renderer: UserTemplateRenderer) -> Response:
     return Response(template_renderer.render_template("member/help.html"))
+
+
+@MemberRoute("/member/messages")
+def list_messages(
+    template_renderer: UserTemplateRenderer,
+    controller: ListMessagesController,
+    presenter: ListMessagesPresenter,
+    use_case: ListMessages,
+) -> Response:
+    http_404_view = Http404View("member/404.html", template_renderer)
+    view = ListMessagesView(
+        template_renderer=template_renderer,
+        presenter=presenter,
+        controller=controller,
+        list_messages=use_case,
+        not_found_view=http_404_view,
+        template_name="member/list_messages.html",
+    )
+    return view.respond_to_get()
