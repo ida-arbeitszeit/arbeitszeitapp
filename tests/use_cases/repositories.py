@@ -17,6 +17,7 @@ from arbeitszeit.entities import (
     AccountTypes,
     Company,
     CompanyWorkInvite,
+    Cooperation,
     Member,
     Message,
     Plan,
@@ -517,6 +518,8 @@ class PlanRepository(interfaces.PlanRepository):
             expiration_date=None,
             active_days=None,
             payout_count=0,
+            requested_cooperation=None,
+            cooperation=None,
             is_available=True,
         )
         self.plans[plan.id] = plan
@@ -688,3 +691,63 @@ class MessageRepository(interfaces.MessageRepository):
         for message in self.messages.values():
             if message.addressee.id == user:
                 yield message
+
+
+@singleton
+class CooperationRepository(interfaces.CooperationRepository):
+    @inject
+    def __init__(self, plan_repository: PlanRepository) -> None:
+        self.cooperations: Dict[UUID, Cooperation] = dict()
+        self.plan_repository = plan_repository
+
+    def create_cooperation(
+        self,
+        creation_timestamp: datetime,
+        name: str,
+        definition: str,
+        coordinator: Company,
+    ) -> Cooperation:
+        cooperation_id = uuid4()
+        cooperation = Cooperation(
+            id=cooperation_id,
+            creation_date=creation_timestamp,
+            name=name,
+            definition=definition,
+            coordinator=coordinator,
+            plans=[],
+        )
+        self.cooperations[cooperation_id] = cooperation
+        return cooperation
+
+    def get_by_id(self, id: UUID) -> Optional[Cooperation]:
+        return self.cooperations.get(id)
+
+    def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
+        plan = self.plan_repository.get_plan_by_id(plan_id)
+        cooperation = self.get_by_id(cooperation_id)
+        assert plan
+        assert cooperation
+        cooperation.plans.append(plan)
+        plan.cooperation = cooperation
+
+    def remove_plan_from_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
+        plan = self.plan_repository.get_plan_by_id(plan_id)
+        cooperation = self.get_by_id(cooperation_id)
+        assert plan
+        assert cooperation
+        cooperation.plans.remove(plan)
+        plan.cooperation = None
+
+    def set_requested_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
+        plan = self.plan_repository.get_plan_by_id(plan_id)
+        cooperation = self.get_by_id(cooperation_id)
+        assert plan
+        plan.requested_cooperation = cooperation
+
+    def set_requested_cooperation_to_none(self, plan_id: UUID) -> None:
+        plan = self.plan_repository.get_plan_by_id(plan_id)
+        assert plan
+        plan.requested_cooperation = None
+
+    def __len__(self) -> int:
+        return len(self.cooperations)

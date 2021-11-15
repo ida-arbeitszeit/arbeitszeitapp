@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from flask import Response, flash, render_template
+from flask import Response, flash
 
 from arbeitszeit.use_cases import InviteWorkerToCompany
 from arbeitszeit_web.invite_worker_to_company import (
@@ -9,6 +9,7 @@ from arbeitszeit_web.invite_worker_to_company import (
     InviteWorkerToCompanyPresenter,
     ViewModel,
 )
+from arbeitszeit_web.template import TemplateRenderer
 from project.forms import InviteWorkerToCompanyForm
 
 
@@ -18,11 +19,14 @@ class InviteWorkerToCompanyView:
     presenter: InviteWorkerToCompanyPresenter
     controller: InviteWorkerToCompanyController
     template_name: str
+    template_renderer: TemplateRenderer
 
     def respond_to_get(self, form: InviteWorkerToCompanyForm) -> Response:
         view_model = ViewModel(notifications=[])
         return Response(
-            render_template(self.template_name, form=form, view_model=view_model)
+            self.template_renderer.render_template(
+                self.template_name, context=dict(form=form, view_model=view_model)
+            )
         )
 
     def respond_to_post(
@@ -41,13 +45,17 @@ class InviteWorkerToCompanyView:
         for notification in view_model.notifications:
             flash(notification)
         return Response(
-            render_template(self.template_name, form=form, view_model=view_model),
+            self.template_renderer.render_template(
+                self.template_name, context=dict(form=form, view_model=view_model)
+            ),
             status=200,
         )
 
     def _display_form_errors(self, form: InviteWorkerToCompanyForm) -> Response:
         view_model = ViewModel(notifications=["Ungültiges Formular"])
         return Response(
-            render_template(self.template_name, form=form, view_model=view_model),
+            self.template_renderer.render_template(
+                self.template_name, context=dict(form=form, view_model=view_model)
+            ),
             status=400,
         )

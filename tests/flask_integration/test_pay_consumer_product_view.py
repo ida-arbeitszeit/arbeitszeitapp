@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import uuid4
 
-from .view import ViewTestCase
+from .flask import ViewTestCase
 
 
 class AuthenticatedMemberTests(ViewTestCase):
