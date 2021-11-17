@@ -30,7 +30,8 @@ jobs:
       with:
         path: ./venv/
         key: ${{ runner.os }}-venv2-${{ hashFiles('**/requirements*.txt') }}
-        restore-keys: ${{ runner.os }}-venv2-
+        restore-keys: |
+          ${{ runner.os }}-venv2-
     
     - name: Install dependencies        
       run: |
