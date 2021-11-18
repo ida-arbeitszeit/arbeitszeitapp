@@ -39,7 +39,13 @@ from arbeitszeit.repositories import (
     PurchaseRepository,
     TransactionRepository,
 )
-from arbeitszeit.use_cases import SeekApproval
+from arbeitszeit.use_cases import (
+    AcceptCooperation,
+    AcceptCooperationRequest,
+    RequestCooperation,
+    RequestCooperationRequest,
+    SeekApproval,
+)
 from tests.datetime_service import FakeDatetimeService
 
 
@@ -147,6 +153,8 @@ class PlanGenerator:
     datetime_service: FakeDatetimeService
     plan_repository: PlanRepository
     seek_approval: SeekApproval
+    request_cooperation: RequestCooperation
+    accept_cooperation: AcceptCooperation
     draft_repository: PlanDraftRepository
 
     def create_plan(
@@ -189,9 +197,20 @@ class PlanGenerator:
         if expired:
             self.plan_repository.set_plan_as_expired(plan)
         if requested_cooperation:
-            plan.requested_cooperation = requested_cooperation
+            self.request_cooperation(
+                RequestCooperationRequest(
+                    plan.planner.id, plan.id, requested_cooperation.id
+                )
+            )
         if cooperation:
-            plan.cooperation = cooperation
+            self.request_cooperation(
+                RequestCooperationRequest(plan.planner.id, plan.id, cooperation.id)
+            )
+            self.accept_cooperation(
+                AcceptCooperationRequest(
+                    cooperation.coordinator.id, plan.id, cooperation.id
+                )
+            )
         if not is_available:
             self.plan_repository.toggle_product_availability(plan)
         return plan

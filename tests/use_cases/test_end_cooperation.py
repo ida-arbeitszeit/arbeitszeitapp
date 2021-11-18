@@ -1,3 +1,4 @@
+from datetime import datetime
 from unittest import TestCase
 from uuid import uuid4
 
@@ -65,7 +66,8 @@ class TestEndCooperation(TestCase):
 
     def test_error_is_raised_when_plan_is_not_registered_in_cooperation(self) -> None:
         plan = self.plan_generator.create_plan(
-            cooperation=self.coop_generator.create_cooperation()
+            cooperation=self.coop_generator.create_cooperation(),
+            activation_date=datetime.min,
         )
         cooperation = self.coop_generator.create_cooperation(plans=[])
         request = EndCooperationRequest(
