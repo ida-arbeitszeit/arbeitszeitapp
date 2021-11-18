@@ -19,6 +19,7 @@ from project.database.repositories import (
     AccountRepository,
     CompanyRepository,
     CompanyWorkerRepository,
+    CooperationRepository,
     MemberRepository,
     MessageRepository,
     PlanDraftRepository,
@@ -91,6 +92,10 @@ def configure_injector(binder: Binder) -> None:
     binder.bind(
         interfaces.MessageRepository,  # type: ignore
         to=ClassProvider(MessageRepository),
+    )
+    binder.bind(
+        interfaces.CooperationRepository,  # type: ignore
+        to=ClassProvider(CooperationRepository),
     )
 
 

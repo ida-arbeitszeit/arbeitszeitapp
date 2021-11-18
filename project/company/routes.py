@@ -14,6 +14,7 @@ from arbeitszeit.use_cases import (
     ToggleProductAvailability,
 )
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
+from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
 from arbeitszeit_web.delete_plan import DeletePlanPresenter
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.get_prefilled_draft_data import (
@@ -378,6 +379,25 @@ def plan_summary(
         )
     else:
         return Http404View("company/404.html").get_response()
+
+
+@CompanyRoute("/company/create_cooperation", methods=["GET", "POST"])
+@commit_changes
+def create_cooperation(
+    create_cooperation: use_cases.CreateCooperation,
+    presenter: CreateCooperationPresenter,
+):
+    if request.method == "POST":
+        name = request.form["name"]
+        definition = request.form["definition"]
+        use_case_request = use_cases.CreateCooperationRequest(
+            UUID(current_user.id), name, definition
+        )
+        use_case_response = create_cooperation(use_case_request)
+        view_model = presenter.present(use_case_response)
+        return render_template("company/create_cooperation.html", view_model=view_model)
+    elif request.method == "GET":
+        return render_template("company/create_cooperation.html")
 
 
 @CompanyRoute("/company/hilfe")

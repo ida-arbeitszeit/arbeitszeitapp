@@ -23,9 +23,15 @@ class CreateCooperationPresenterTests(TestCase):
     def setUp(self) -> None:
         self.presenter = CreateCooperationPresenter()
 
-    def test_no_notifications_are_returned_when_creation_was_successful(self):
+    def test_notification_returned_when_creation_was_successful(self):
         presentation = self.presenter.present(SUCCESSFUL_CREATE_RESPONSE)
-        self.assertFalse(presentation.notifications)
+        self.assertTrue(presentation.notifications)
+
+    def test_correct_notification_returned_when_creation_was_successful(self):
+        presentation = self.presenter.present(SUCCESSFUL_CREATE_RESPONSE)
+        self.assertEqual(
+            presentation.notifications[0], "Kooperation erfolgreich erstellt."
+        )
 
     def test_notification_returned_when_creation_was_rejected_because_coop_name_existed(
         self,
@@ -33,8 +39,26 @@ class CreateCooperationPresenterTests(TestCase):
         presentation = self.presenter.present(REJECTED_RESPONSE_NAME_EXISTS)
         self.assertTrue(presentation.notifications)
 
+    def test_correct_notification_is_returned_when_creation_was_rejected_because_coop_name_existed(
+        self,
+    ):
+        presentation = self.presenter.present(REJECTED_RESPONSE_NAME_EXISTS)
+        self.assertEqual(
+            presentation.notifications[0],
+            "Es existiert bereits eine Kooperation mit diesem Namen.",
+        )
+
     def test_notification_returned_when_creation_was_rejected_because_coordinator_not_found(
         self,
     ):
         presentation = self.presenter.present(REJECTED_RESPONSE_COORDINATOR_NOT_FOUND)
         self.assertTrue(presentation.notifications)
+
+    def test_correct_notification_is_returned_when_creation_was_rejected_because_coordinator_not_found(
+        self,
+    ):
+        presentation = self.presenter.present(REJECTED_RESPONSE_COORDINATOR_NOT_FOUND)
+        self.assertEqual(
+            presentation.notifications[0],
+            "Interner Fehler: Koordinator nicht gefunden.",
+        )

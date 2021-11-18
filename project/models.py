@@ -107,6 +107,10 @@ class Plan(UserMixin, db.Model):
     active_days = db.Column(db.Integer, nullable=True)
     payout_count = db.Column(db.Integer, nullable=False, default=0)
     is_available = db.Column(db.Boolean, nullable=False, default=True)
+    requested_cooperation = db.Column(
+        db.String, db.ForeignKey("cooperation.id"), nullable=True
+    )
+    cooperation = db.Column(db.String, db.ForeignKey("cooperation.id"), nullable=True)
 
 
 class AccountTypes(Enum):
@@ -182,3 +186,13 @@ class Message(db.Model):
     user_action = db.Column(db.Enum(UserAction), nullable=True)
     sender_remarks = db.Column(db.String, nullable=True)
     is_read = db.Column(db.Boolean)
+
+
+class Cooperation(db.Model):
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
+    creation_date = db.Column(db.DateTime, nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    definition = db.Column(db.String(5000), nullable=False)
+    coordinator = db.Column(db.String, db.ForeignKey("company.id"), nullable=False)
+
+    plans = db.relationship("Plan", foreign_keys="Plan.cooperation", lazy="dynamic")

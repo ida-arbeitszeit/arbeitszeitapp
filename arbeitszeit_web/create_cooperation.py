@@ -15,7 +15,7 @@ class CreateCooperationPresenter:
     ) -> CreateCooperationViewModel:
         notifications = []
         if not use_case_response.is_rejected:
-            pass
+            notifications.append("Kooperation erfolgreich erstellt.")
         elif (
             use_case_response.rejection_reason
             == CreateCooperationResponse.RejectionReason.cooperation_with_name_exists
