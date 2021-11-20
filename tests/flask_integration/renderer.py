@@ -8,7 +8,7 @@ class FakeTemplateRenderer:
 
     def __init__(self) -> None:
         self._templates: Dict[str, str] = dict()
-        self.previouse_render_context: Set[str] = set()
+        self.previous_render_context: Set[str] = set()
 
     def register_template(self, name: str, content: str = "test content") -> None:
         self._templates[name] = content
