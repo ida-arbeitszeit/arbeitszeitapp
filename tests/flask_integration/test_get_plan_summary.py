@@ -2,7 +2,7 @@ from uuid import uuid4
 
 from tests.data_generators import PlanGenerator
 
-from .view import ViewTestCase
+from .flask import ViewTestCase
 
 
 class AuthenticatedMemberTests(ViewTestCase):

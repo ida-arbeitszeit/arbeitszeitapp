@@ -1,4 +1,4 @@
-from .view import ViewTestCase
+from .flask import ViewTestCase
 
 
 class AuthenticatedMemberTests(ViewTestCase):
