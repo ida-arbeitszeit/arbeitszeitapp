@@ -53,6 +53,12 @@ class FlaskModule(Module):
         return FlaskTemplateRenderer()
 
     @provider
+    def provide_check_for_unread_messages_controller(
+        self, session: FlaskSession
+    ) -> CheckForUnreadMessagesController:
+        return CheckForUnreadMessagesController(session)
+
+    @provider
     def provide_user_template_renderer(
         self,
         flask_template_renderer: FlaskTemplateRenderer,

@@ -1,9 +1,9 @@
 from project.template import UserTemplateRenderer
 from tests.data_generators import CompanyGenerator
+from tests.session import FakeSession
 
 from .flask import FlaskTestCase
 from .renderer import FakeTemplateRenderer
-from .session import FakeSession
 
 
 class CompanyTemplateRendererTests(FlaskTestCase):
