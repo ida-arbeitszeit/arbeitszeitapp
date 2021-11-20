@@ -1,10 +1,11 @@
 from dataclasses import dataclass
-from uuid import UUID
 
 from arbeitszeit.use_cases import (
     CheckForUnreadMessagesRequest,
     CheckForUnreadMessagesResponse,
 )
+
+from .session import Session
 
 
 @dataclass
@@ -20,6 +21,12 @@ class CheckForUnreadMessagesPresenter:
         return ViewModel(show_unread_messages_indicator=False)
 
 
+@dataclass
 class CheckForUnreadMessagesController:
-    def create_use_case_request(self, user_id: UUID) -> CheckForUnreadMessagesRequest:
+    session: Session
+
+    def create_use_case_request(self) -> CheckForUnreadMessagesRequest:
+        user_id = self.session.get_current_user()
+        if user_id is None:
+            raise ValueError("User is not authenticated")
         return CheckForUnreadMessagesRequest(user=user_id)
