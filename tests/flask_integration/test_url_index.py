@@ -1,7 +1,7 @@
 from project.url_index import CompanyUrlIndex, MemberUrlIndex
 from tests.data_generators import PlanGenerator
 
-from .view import ViewTestCase
+from .flask import ViewTestCase
 
 
 class CompanyUrlIndexTests(ViewTestCase):

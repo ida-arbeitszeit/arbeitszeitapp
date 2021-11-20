@@ -1,13 +1,14 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from flask import Response, flash, render_template
+from flask import Response, flash
 
 from arbeitszeit.use_cases import PayConsumerProduct, PayConsumerProductResponse
 from arbeitszeit_web.pay_consumer_product import (
     PayConsumerProductController,
     PayConsumerProductPresenter,
 )
+from arbeitszeit_web.template import TemplateRenderer
 from project.forms import PayConsumerProductForm
 
 
@@ -18,6 +19,7 @@ class PayConsumerProductView:
     pay_consumer_product: PayConsumerProduct
     controller: PayConsumerProductController
     presenter: PayConsumerProductPresenter
+    template_renderer: TemplateRenderer
 
     def respond_to_get(self) -> Response:
         return Response(self._render_template())
@@ -39,7 +41,9 @@ class PayConsumerProductView:
         return Response(self._render_template())
 
     def _render_template(self) -> str:
-        return render_template("member/pay_consumer_product.html", form=self.form)
+        return self.template_renderer.render_template(
+            "member/pay_consumer_product.html", context=dict(form=self.form)
+        )
 
     def _handle_malformed_data(
         self, result: PayConsumerProductController.MalformedInputData

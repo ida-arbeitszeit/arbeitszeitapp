@@ -52,7 +52,12 @@ from .invite_worker_to_company import (
     InviteWorkerToCompanyRequest,
 )
 from .list_drafts_of_company import ListDraftsOfCompany, ListDraftsResponse
-from .list_messages import ListMessages, ListMessagesRequest, ListMessagesResponse
+from .list_messages import (
+    ListedMessage,
+    ListMessages,
+    ListMessagesRequest,
+    ListMessagesResponse,
+)
 from .pay_consumer_product import (
     PayConsumerProduct,
     PayConsumerProductRequest,
@@ -112,7 +117,6 @@ __all__ = [
     "CreatePlanDraftResponse",
     "DeletePlan",
     "DeletePlanResponse",
-    "DraftQueryResponse",
     "DraftSummaryResponse",
     "DraftSummarySuccess",
     "EndCooperation",
@@ -131,6 +135,7 @@ __all__ = [
     "ListMessages",
     "ListMessagesRequest",
     "ListMessagesResponse",
+    "ListedMessage",
     "PayConsumerProduct",
     "PayConsumerProductRequest",
     "PayConsumerProductResponse",
@@ -167,7 +172,6 @@ __all__ = [
     "ToggleProductAvailability",
     "ToggleProductAvailabilityResponse",
     "TransactionInfo",
-    "UpdatePlansAndPayout",
     "UpdatePlansAndPayout",
     "Workplace",
     "add_worker_to_company",

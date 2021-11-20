@@ -1,7 +1,8 @@
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 from unittest import TestCase
 
 from flask import Flask, _app_ctx_stack
+from injector import Module
 
 from arbeitszeit.entities import Company, Member
 from tests.data_generators import (
@@ -14,18 +15,26 @@ from tests.data_generators import (
 from .dependency_injection import get_dependency_injector
 
 
-class ViewTestCase(TestCase):
+class FlaskTestCase(TestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        self.injector = get_dependency_injector(self.get_injection_modules())
         self.app = self.injector.get(Flask)
+
+    def tearDown(self) -> None:
+        _app_ctx_stack.pop()
+
+    def get_injection_modules(self) -> List[Module]:
+        return []
+
+
+class ViewTestCase(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
         self.client = self.app.test_client()
         self.member_generator = self.injector.get(MemberGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.email_generator = self.injector.get(EmailGenerator)
         self.plan_generator = self.injector.get(PlanGenerator)
-
-    def tearDown(self) -> None:
-        _app_ctx_stack.pop()
 
     def login_member(
         self,

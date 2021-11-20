@@ -1,15 +1,11 @@
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Any, Dict, List, Optional, Protocol
-from uuid import UUID
+from typing import Any, Dict, List, Optional
 
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansResponse
 
-
-class PlanSummaryUrlIndex(Protocol):
-    def get_plan_summary_url(self, plan_id: UUID) -> str:
-        ...
+from .url_index import UrlIndex
 
 
 @dataclass
@@ -80,7 +76,7 @@ class ShowMyPlansViewModel:
 
 @dataclass
 class ShowMyPlansPresenter:
-    plan_summary_url_index: PlanSummaryUrlIndex
+    url_index: UrlIndex
 
     def present(self, response: ShowMyPlansResponse) -> ShowMyPlansViewModel:
 
@@ -96,9 +92,7 @@ class ShowMyPlansPresenter:
                 rows=[
                     NonActivePlansRow(
                         id=f"{plan.id}",
-                        plan_summary_url=self.plan_summary_url_index.get_plan_summary_url(
-                            plan.id
-                        ),
+                        plan_summary_url=self.url_index.get_plan_summary_url(plan.id),
                         prd_name=f"{plan.prd_name}",
                         description=plan.description.splitlines(),
                         price_per_unit=self.__format_price(plan.price_per_unit),
@@ -113,9 +107,7 @@ class ShowMyPlansPresenter:
                 rows=[
                     ActivePlansRow(
                         id=f"{plan.id}",
-                        plan_summary_url=self.plan_summary_url_index.get_plan_summary_url(
-                            plan.id
-                        ),
+                        plan_summary_url=self.url_index.get_plan_summary_url(plan.id),
                         prd_name=f"{plan.prd_name}",
                         description=plan.description.splitlines(),
                         price_per_unit=self.__format_price(plan.price_per_unit),
@@ -135,9 +127,7 @@ class ShowMyPlansPresenter:
                 rows=[
                     ExpiredPlansRow(
                         id=f"{plan.id}",
-                        plan_summary_url=self.plan_summary_url_index.get_plan_summary_url(
-                            plan.id
-                        ),
+                        plan_summary_url=self.url_index.get_plan_summary_url(plan.id),
                         prd_name=f"{plan.prd_name}",
                         description=plan.description.splitlines(),
                         price_per_unit=self.__format_price(plan.price_per_unit),
