@@ -446,8 +446,8 @@ class PlanRepository(repositories.PlanRepository):
             activation_date=plan.activation_date,
             active_days=plan.active_days,
             payout_count=plan.payout_count,
-            requested_cooperation=None,
-            cooperation=None,
+            requested_cooperation=plan.requested_cooperation,
+            cooperation=plan.cooperation,
             is_available=plan.is_available,
         )
 
@@ -1028,7 +1028,9 @@ class CooperationRepository(repositories.CooperationRepository):
         ...
 
     def set_requested_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
-        ...
+        plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
+        assert plan_orm
+        plan_orm.requested_cooperation = str(cooperation_id)
 
     def set_requested_cooperation_to_none(self, plan_id: UUID) -> None:
         ...

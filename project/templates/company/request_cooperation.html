@@ -1,0 +1,71 @@
+{% extends "base_company.html" %}
+
+{% block content2 %}
+<div class="columns is-centered">
+    <div class="column is-three-fifth">
+
+
+        <div class="content">
+            <h1 class="title">
+                Kooperation anfragen
+            </h1>
+        </div>
+
+        <div class="box has-background-info-light has-text-info-dark">
+            <div class="icon"><i class="fas fa-info-circle"></i></div>
+            <p>
+                Frage hier eine Kooperation an. <br><br>
+                Der "Koordinator" der Kooperation entscheidet dann darüber, ob er deinen
+                Plan zur Kooperation hinzufügt.<br>
+                Alle Pläne in einer Kooperation sollten das gleiche oder ein ähnliches Produkt anbieten.
+            </p>
+        </div>
+
+        {% if view_model %}
+        <div class="box">
+            {% for notification in view_model.notifications %}
+            <div {% if view_model.is_error %}class="notification is-danger" {% else %}class="notification is-primary" {%
+                endif %}>{{ notification }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if form %}
+        {% for field_name, field_errors in form.errors|dictsort if field_errors %}
+        {% for error in field_errors %}
+        <div class="notification is-danger">
+            {{ error }}
+        </div>
+        {% endfor %}
+        {% endfor %}
+        {% endif %}
+
+        <div class="content">
+            <form method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="field has-addons">
+                    <div class="control">
+                        <input class="input" type="text" placeholder="Plan-ID" , name="plan_id" required>
+                    </div>
+                    <div class="control">
+                        <input class="input" type="text" placeholder="Kooperation-ID" , name="cooperation_id" required>
+                    </div>
+                    <div class="field">
+                        <div class="control">
+                            <button class="button is-primary" name="request_coop" value="request_coop"
+                                type="submit">Kooperation anfragen</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+
+
+
+
+    </div>
+</div>
+
+
+{% endblock %}

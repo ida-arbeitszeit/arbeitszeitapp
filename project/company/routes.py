@@ -12,6 +12,7 @@ from arbeitszeit.use_cases import (
     GetDraftSummary,
     GetPlanSummary,
     ListMessages,
+    RequestCooperation,
     ToggleProductAvailability,
 )
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
@@ -31,6 +32,10 @@ from arbeitszeit_web.query_companies import (
     QueryCompaniesPresenter,
 )
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
+from arbeitszeit_web.request_cooperation import (
+    RequestCooperationController,
+    RequestCooperationPresenter,
+)
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from project.database import (
     AccountRepository,
@@ -39,7 +44,12 @@ from project.database import (
     MemberRepository,
     commit_changes,
 )
-from project.forms import CompanySearchForm, CreateDraftForm, PlanSearchForm
+from project.forms import (
+    CompanySearchForm,
+    CreateDraftForm,
+    PlanSearchForm,
+    RequestCooperationForm,
+)
 from project.models import Company
 from project.template import UserTemplateRenderer
 from project.url_index import CompanyUrlIndex
@@ -48,6 +58,7 @@ from project.views import (
     ListMessagesView,
     QueryCompaniesView,
     QueryPlansView,
+    RequestCooperationView,
 )
 
 from .blueprint import CompanyRoute
@@ -450,6 +461,33 @@ def create_cooperation(
         )
     elif request.method == "GET":
         return template_renderer.render_template("company/create_cooperation.html")
+
+
+@CompanyRoute("/company/request_cooperation", methods=["GET", "POST"])
+@commit_changes
+def request_cooperation(
+    use_case: RequestCooperation,
+    controller: RequestCooperationController,
+    presenter: RequestCooperationPresenter,
+    template_renderer: UserTemplateRenderer,
+):
+    http_404_view = Http404View("company/404.html", template_renderer)
+    form = RequestCooperationForm(request.form)
+    view = RequestCooperationView(
+        form=form,
+        request_cooperation=use_case,
+        controller=controller,
+        presenter=presenter,
+        not_found_view=http_404_view,
+        template_name="company/request_cooperation.html",
+        template_renderer=template_renderer,
+    )
+
+    if request.method == "POST":
+        return view.respond_to_post()
+
+    elif request.method == "GET":
+        return view.respond_to_get()
 
 
 @CompanyRoute("/company/hilfe")

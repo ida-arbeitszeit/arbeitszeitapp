@@ -3,8 +3,8 @@ from unittest import TestCase
 
 import arbeitszeit.repositories
 from arbeitszeit.entities import Cooperation
-from project.database.repositories import CooperationRepository
-from tests.data_generators import CompanyGenerator
+from project.database.repositories import CooperationRepository, PlanRepository
+from tests.data_generators import CompanyGenerator, PlanGenerator
 
 from .dependency_injection import get_dependency_injector
 
@@ -13,7 +13,9 @@ class CooperationRepositoryTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.company_generator = self.injector.get(CompanyGenerator)
+        self.plan_generator = self.injector.get(PlanGenerator)
         self.repo = self.injector.get(CooperationRepository)
+        self.plan_repo = self.injector.get(PlanRepository)
         self.DEFAULT_CREATE_ARGUMENTS = dict(
             creation_timestamp=datetime.now(),
             name="test name",
@@ -68,3 +70,12 @@ class CooperationRepositoryTests(TestCase):
         self.repo.create_cooperation(**self.DEFAULT_CREATE_ARGUMENTS)
         query = "test"
         self.assertFalse(list(self.repo.get_by_name(query)))
+
+    def test_possible_to_set_requested_cooperation_attribute(self):
+        cooperation = self.repo.create_cooperation(**self.DEFAULT_CREATE_ARGUMENTS)
+        plan = self.plan_generator.create_plan()
+
+        self.repo.set_requested_cooperation(plan.id, cooperation.id)
+
+        plan_from_orm = self.plan_repo.get_plan_by_id(plan.id)
+        self.assertTrue(plan_from_orm.requested_cooperation)
