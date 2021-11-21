@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from uuid import UUID
 
 from flask import Response, flash
 
@@ -29,15 +28,11 @@ class InviteWorkerToCompanyView:
             )
         )
 
-    def respond_to_post(
-        self, current_user_id: UUID, form: InviteWorkerToCompanyForm
-    ) -> Response:
+    def respond_to_post(self, form: InviteWorkerToCompanyForm) -> Response:
         if not form.validate():
             return self._display_form_errors(form)
         try:
-            use_case_request = self.controller.import_request_data(
-                current_user_id, form
-            )
+            use_case_request = self.controller.import_request_data(form)
         except ValueError:
             return self._display_form_errors(form)
         use_case_response = self.invite_worker(use_case_request)

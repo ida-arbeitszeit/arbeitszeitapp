@@ -1,7 +1,3 @@
-from arbeitszeit import errors
-from arbeitszeit.entities import Company, Member
-from arbeitszeit.repositories import CompanyWorkerRepository
-
 from .accept_cooperation import (
     AcceptCooperation,
     AcceptCooperationRequest,
@@ -176,21 +172,4 @@ __all__ = [
     "TransactionInfo",
     "UpdatePlansAndPayout",
     "Workplace",
-    "add_worker_to_company",
 ]
-
-
-def add_worker_to_company(
-    company_worker_repository: CompanyWorkerRepository,
-    company: Company,
-    worker: Member,
-) -> None:
-    """This function may raise a WorkerAlreadyAtCompany exception if the
-    worker is already employed at the company."""
-    company_workers = company_worker_repository.get_company_workers(company)
-    if worker in company_workers:
-        raise errors.WorkerAlreadyAtCompany(
-            worker=worker,
-            company=company,
-        )
-    company_worker_repository.add_worker_to_company(company, worker)

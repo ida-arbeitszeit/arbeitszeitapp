@@ -81,36 +81,6 @@ def profile(
     )
 
 
-@CompanyRoute("/company/work", methods=["GET", "POST"])
-@commit_changes
-def arbeit(
-    company_repository: CompanyRepository,
-    member_repository: MemberRepository,
-    company_worker_repository: CompanyWorkerRepository,
-    template_renderer: UserTemplateRenderer,
-):
-    """shows workers and add workers to company."""
-    company = company_repository.get_by_id(UUID(current_user.id))
-    assert company is not None
-    if request.method == "POST":  # add worker to company
-        member = member_repository.get_by_id(request.form["member"])
-        assert member is not None
-        try:
-            use_cases.add_worker_to_company(
-                company_worker_repository,
-                company,
-                member,
-            )
-        except errors.WorkerAlreadyAtCompany:
-            flash("Mitglied ist bereits in diesem Betrieb beschäftigt.")
-        return redirect(url_for("main_company.arbeit"))
-    elif request.method == "GET":
-        workers_list = list(company_worker_repository.get_company_workers(company))
-        return template_renderer.render_template(
-            "company/work.html", context=dict(workers_list=workers_list)
-        )
-
-
 @CompanyRoute("/company/query_plans", methods=["GET", "POST"])
 def query_plans(
     query_plans: use_cases.QueryPlans,
@@ -466,6 +436,7 @@ def list_messages(
 
 
 @CompanyRoute("/company/invite_worker_to_company", methods=["GET", "POST"])
+@commit_changes
 def invite_worker_to_company(
     invite_worker: InviteWorkerToCompany,
     presenter: InviteWorkerToCompanyPresenter,
@@ -481,6 +452,6 @@ def invite_worker_to_company(
     )
     form = InviteWorkerToCompanyForm(request.form)
     if request.method == "POST":
-        return view.respond_to_post(UUID(current_user.id), form)
+        return view.respond_to_post(form)
     else:
         return view.respond_to_get(form)

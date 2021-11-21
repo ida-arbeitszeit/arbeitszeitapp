@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Optional, Protocol
+from typing import List, Protocol
 from uuid import UUID
 
 from arbeitszeit.use_cases import (
@@ -7,26 +7,37 @@ from arbeitszeit.use_cases import (
     InviteWorkerToCompanyResponse,
 )
 
+from .session import Session
+
 
 class InviteWorkerToCompanyForm(Protocol):
     def get_worker_id(self) -> str:
         ...
 
 
+@dataclass
 class InviteWorkerToCompanyController:
+    session: Session
+
     def import_request_data(
-        self, current_user: Optional[UUID], form: InviteWorkerToCompanyForm
+        self, form: InviteWorkerToCompanyForm
     ) -> InviteWorkerToCompanyRequest:
+        return InviteWorkerToCompanyRequest(
+            company=self._get_current_user_id(),
+            worker=self._get_worker_id(form),
+        )
+
+    def _get_current_user_id(self) -> UUID:
+        current_user = self.session.get_current_user()
         if current_user is None:
             raise ValueError("User is not logged in")
+        return current_user
+
+    def _get_worker_id(self, form: InviteWorkerToCompanyForm) -> UUID:
         try:
-            worker_uuid = UUID(form.get_worker_id())
+            return UUID(form.get_worker_id())
         except ValueError:
             raise ValueError("worker_id is not a valid UUID")
-        return InviteWorkerToCompanyRequest(
-            company=current_user,
-            worker=worker_uuid,
-        )
 
 
 @dataclass

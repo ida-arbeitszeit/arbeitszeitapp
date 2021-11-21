@@ -20,6 +20,7 @@ from arbeitszeit_web.check_for_unread_message import (
     CheckForUnreadMessagesController,
     CheckForUnreadMessagesPresenter,
 )
+from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyController
 from arbeitszeit_web.list_messages import ListMessagesController
 from project.database import get_social_accounting
 from project.database.repositories import (
@@ -57,6 +58,12 @@ class FlaskModule(Module):
         self, session: FlaskSession
     ) -> CheckForUnreadMessagesController:
         return CheckForUnreadMessagesController(session)
+
+    @provider
+    def provide_invite_worker_to_company_controller(
+        self, session: FlaskSession
+    ) -> InviteWorkerToCompanyController:
+        return InviteWorkerToCompanyController(session)
 
     @provider
     def provide_user_template_renderer(
