@@ -29,7 +29,7 @@ jobs:
       id: cache-venv
       with:
         path: ./venv/
-        key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements*.txt') }}
+        key: ${{ runner.os }}-env-${{ hashFiles('**/requirements*.txt') }}
     
     - name: Install dependencies        
       run: |
