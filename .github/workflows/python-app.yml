@@ -29,15 +29,15 @@ jobs:
       id: cache-venv
       with:
         path: ./venv/
-        key: ${{ runner.os }}-venv4-${{ hashFiles('**/requirements*.txt') }}
+        key: ${{ runner.os }}-venv5-${{ hashFiles('**/requirements*.txt') }}
         restore-keys: |
-          ${{ runner.os }}-venv4-
+          ${{ runner.os }}-venv5-
     
     - name: Install dependencies        
       run: |
         python -m venv ./venv && . ./venv/bin/activate
         python -m pip install --upgrade pip
-        pip install black flake8 mypy pytest
+        pip install flake8 mypy pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       if: steps.cache-venv.outputs.cache-hit != 'true'
     
