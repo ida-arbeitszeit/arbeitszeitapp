@@ -14,6 +14,8 @@ from arbeitszeit.use_cases import (
     ListMessages,
     RequestCooperation,
     ToggleProductAvailability,
+    ListCoordinations,
+    ListCoordinationsRequest,
 )
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
@@ -37,6 +39,7 @@ from arbeitszeit_web.request_cooperation import (
     RequestCooperationPresenter,
 )
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
+from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from project.database import (
     AccountRepository,
     CompanyRepository,
@@ -488,6 +491,23 @@ def request_cooperation(
 
     elif request.method == "GET":
         return view.respond_to_get()
+
+
+@CompanyRoute("/company/my_cooperations", methods=["GET", "POST"])
+@commit_changes
+def my_cooperations(
+    template_renderer: UserTemplateRenderer,
+    presenter: ShowMyCooperationsPresenter,
+    list_coordinations: ListCoordinations,
+):
+    list_coop_response = list_coordinations(
+        ListCoordinationsRequest(UUID(current_user.id))
+    )
+    view_model = presenter.present(list_coop_response)
+
+    return template_renderer.render_template(
+        "company/my_cooperations.html", context=view_model.to_dict()
+    )
 
 
 @CompanyRoute("/company/hilfe")

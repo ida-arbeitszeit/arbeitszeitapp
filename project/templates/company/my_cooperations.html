@@ -1,0 +1,73 @@
+{% extends "base_company.html" %}
+
+{% block content2 %}
+
+<div class="content">
+    <h1 class="title">
+        Kooperationen, die ich kooordiniere
+    </h1>
+</div>
+
+<div class="table-container">
+    {% if list_of_coordinations %}
+    <table class="table is-fullwidth">
+        <thead>
+            <tr>
+                <th>Kooperation</th>
+                <th>Name</th>
+                <th>Definition</th>
+                <th>Anzahl Pläne</th>
+                <th>Bearbeiten</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for coop in list_of_coordinations.rows %}
+            <tr>
+                <td>{{ coop.coop_id }}</td>
+                <td>{{ coop.coop_name }}</td>
+                <td>{% for paragraph in coop.coop_definition %}{{ paragraph }}<br>{% endfor %}</td>
+                <td>{{ coop.count_plans_in_coop }}</td>
+                <td>[X]</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>(Du koordinierst keine Kooperationen.)</p>
+    {% endif %}
+</div>
+
+
+
+
+<div class="content">
+    <h1 class="title">
+        Eingehende Kooperationsanfragen (von anderen)
+    </h1>
+</div>
+
+<p>(to do)</p>
+
+
+
+
+<div class="content">
+    <h1 class="title">
+        Ausgehende Kooperationsanfragen (eigene)
+    </h1>
+</div>
+
+
+<p>(to do)</p>
+
+
+<div class="content">
+    <h1 class="title">
+        Meine kooperierenden Pläne
+    </h1>
+</div>
+
+
+<p>(to do)</p>
+
+{% endblock %}
