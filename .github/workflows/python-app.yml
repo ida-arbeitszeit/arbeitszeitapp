@@ -29,9 +29,9 @@ jobs:
       id: cache-venv
       with:
         path: ./venv/
-        key: ${{ runner.os }}-venv3-${{ hashFiles('**/requirements*.txt') }}
+        key: ${{ runner.os }}-venv4-${{ hashFiles('**/requirements*.txt') }}
         restore-keys: |
-          ${{ runner.os }}-venv3-
+          ${{ runner.os }}-venv4-
     
     - name: Install dependencies        
       run: |
