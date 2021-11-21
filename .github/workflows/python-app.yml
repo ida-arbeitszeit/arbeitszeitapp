@@ -42,4 +42,4 @@ jobs:
       if: steps.cache-venv.outputs.cache-hit != 'true'
     
     - name: Test with ./run-checks
-      run: . ./venv/bin/activate # && ./run-checks
+      run: . ./venv/bin/activate && ./run-checks
