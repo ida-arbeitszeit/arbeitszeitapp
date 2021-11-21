@@ -372,6 +372,12 @@ class CooperationRepository(ABC):
         pass
 
     @abstractmethod
+    def get_cooperations_coordinated_by_company(
+        self, company_id: UUID
+    ) -> Iterator[Cooperation]:
+        pass
+
+    @abstractmethod
     def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         pass
 

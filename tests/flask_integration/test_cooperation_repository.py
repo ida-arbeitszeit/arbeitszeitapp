@@ -79,3 +79,23 @@ class CooperationRepositoryTests(TestCase):
 
         plan_from_orm = self.plan_repo.get_plan_by_id(plan.id)
         self.assertTrue(plan_from_orm.requested_cooperation)
+
+    def test_only_cooperations_coordinated_by_company_are_returned(self):
+        company = self.company_generator.create_company()
+        expected_cooperation = self.repo.create_cooperation(
+            creation_timestamp=datetime.now(),
+            name="test name",
+            definition="test description",
+            coordinator=company,
+        )
+        self.repo.create_cooperation(
+            creation_timestamp=datetime.now(),
+            name="test name",
+            definition="test description",
+            coordinator=self.company_generator.create_company(),
+        )
+        cooperations = list(
+            self.repo.get_cooperations_coordinated_by_company(company.id)
+        )
+        self.assertEqual(len(cooperations), 1)
+        self.assertIn(expected_cooperation, cooperations)

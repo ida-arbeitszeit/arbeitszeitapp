@@ -1021,6 +1021,16 @@ class CooperationRepository(repositories.CooperationRepository):
             ).all()
         )
 
+    def get_cooperations_coordinated_by_company(
+        self, company_id: UUID
+    ) -> Iterator[entities.Cooperation]:
+        return (
+            self.object_from_orm(cooperation)
+            for cooperation in Cooperation.query.filter_by(
+                coordinator=str(company_id)
+            ).all()
+        )
+
     def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         ...
 

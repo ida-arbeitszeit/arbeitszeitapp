@@ -727,6 +727,13 @@ class CooperationRepository(interfaces.CooperationRepository):
             if cooperation.name.lower() == name.lower():
                 yield cooperation
 
+    def get_cooperations_coordinated_by_company(
+        self, company_id: UUID
+    ) -> Iterator[Cooperation]:
+        for cooperation in self.cooperations.values():
+            if cooperation.coordinator.id == company_id:
+                yield cooperation
+
     def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         plan = self.plan_repository.get_plan_by_id(plan_id)
         cooperation = self.get_by_id(cooperation_id)
