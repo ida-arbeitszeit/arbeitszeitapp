@@ -19,6 +19,7 @@ from project.models import (
     Account,
     Company,
     CompanyWorkInvite,
+    Cooperation,
     Member,
     Message,
     Plan,
@@ -969,3 +970,65 @@ class MessageRepository(repositories.MessageRepository):
             self.object_from_orm(m)
             for m in Message.query.filter_by(addressee=str(user))
         )
+
+
+@inject
+@dataclass
+class CooperationRepository(repositories.CooperationRepository):
+    db: SQLAlchemy
+    company_repository: CompanyRepository
+
+    def create_cooperation(
+        self,
+        creation_timestamp: datetime,
+        name: str,
+        definition: str,
+        coordinator: entities.Company,
+    ) -> entities.Cooperation:
+        cooperation = Cooperation(
+            id=str(uuid4()),
+            creation_date=creation_timestamp,
+            name=name,
+            definition=definition,
+            coordinator=str(coordinator.id),
+        )
+        self.db.session.add(cooperation)
+        return self.object_from_orm(cooperation)
+
+    def object_from_orm(self, cooperation_orm: Cooperation) -> entities.Cooperation:
+        coordinator = self.company_repository.get_by_id(cooperation_orm.coordinator)
+        assert coordinator is not None
+        return entities.Cooperation(
+            id=UUID(cooperation_orm.id),
+            creation_date=cooperation_orm.creation_date,
+            name=cooperation_orm.name,
+            definition=cooperation_orm.definition,
+            coordinator=coordinator,
+            plans=cooperation_orm.plans.all(),
+        )
+
+    def get_by_id(self, id: UUID) -> Optional[entities.Cooperation]:
+        cooperation_orm = Cooperation.query.filter_by(id=str(id)).first()
+        if cooperation_orm is None:
+            return None
+        return self.object_from_orm(cooperation_orm)
+
+    def get_by_name(self, name: str) -> Iterator[entities.Cooperation]:
+        return (
+            self.object_from_orm(cooperation)
+            for cooperation in Cooperation.query.filter(
+                Cooperation.name.ilike(name)
+            ).all()
+        )
+
+    def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
+        ...
+
+    def remove_plan_from_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
+        ...
+
+    def set_requested_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
+        ...
+
+    def set_requested_cooperation_to_none(self, plan_id: UUID) -> None:
+        ...

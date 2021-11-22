@@ -28,6 +28,7 @@ from project.database.repositories import (
     AccountRepository,
     CompanyRepository,
     CompanyWorkerRepository,
+    CooperationRepository,
     MemberRepository,
     MessageRepository,
     PlanDraftRepository,
@@ -138,6 +139,10 @@ class FlaskModule(Module):
         binder.bind(
             interfaces.MessageRepository,  # type: ignore
             to=ClassProvider(MessageRepository),
+        )
+        binder.bind(
+            interfaces.CooperationRepository,  # type: ignore
+            to=ClassProvider(CooperationRepository),
         )
 
 
