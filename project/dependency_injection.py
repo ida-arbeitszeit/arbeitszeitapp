@@ -21,6 +21,7 @@ from arbeitszeit_web.check_for_unread_message import (
     CheckForUnreadMessagesPresenter,
 )
 from arbeitszeit_web.list_messages import ListMessagesController
+from arbeitszeit_web.read_message import ReadMessageController
 from project.database import get_social_accounting
 from project.database.repositories import (
     AccountOwnerRepository,
@@ -75,6 +76,12 @@ class FlaskModule(Module):
         self, session: FlaskSession
     ) -> ListMessagesController:
         return ListMessagesController(session)
+
+    @provider
+    def provide_read_message_controller(
+        self, session: FlaskSession
+    ) -> ReadMessageController:
+        return ReadMessageController(session)
 
     def configure(self, binder: Binder) -> None:
         binder.bind(

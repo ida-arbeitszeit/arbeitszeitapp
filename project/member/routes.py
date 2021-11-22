@@ -5,7 +5,7 @@ from flask import Response, request
 from flask_login import current_user
 
 from arbeitszeit import use_cases
-from arbeitszeit.use_cases import ListMessages
+from arbeitszeit.use_cases import ListMessages, ReadMessage
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
@@ -19,6 +19,7 @@ from arbeitszeit_web.query_companies import (
     QueryCompaniesPresenter,
 )
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
+from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
 from project.database import AccountRepository, MemberRepository, commit_changes
 from project.forms import CompanySearchForm, PayConsumerProductForm, PlanSearchForm
 from project.models import Member
@@ -30,6 +31,7 @@ from project.views import (
     PayConsumerProductView,
     QueryCompaniesView,
     QueryPlansView,
+    ReadMessageView,
 )
 
 from .blueprint import MemberRoute
@@ -199,10 +201,10 @@ def hilfe(template_renderer: UserTemplateRenderer) -> Response:
 def list_messages(
     template_renderer: UserTemplateRenderer,
     controller: ListMessagesController,
-    presenter: ListMessagesPresenter,
     use_case: ListMessages,
 ) -> Response:
     http_404_view = Http404View("member/404.html", template_renderer)
+    presenter = ListMessagesPresenter(MemberUrlIndex())
     view = ListMessagesView(
         template_renderer=template_renderer,
         presenter=presenter,
@@ -212,3 +214,24 @@ def list_messages(
         template_name="member/list_messages.html",
     )
     return view.respond_to_get()
+
+
+@MemberRoute("/member/messages/<uuid:message_id>")
+@commit_changes
+def read_message(
+    message_id: UUID,
+    read_message: ReadMessage,
+    controller: ReadMessageController,
+    presenter: ReadMessagePresenter,
+    template_renderer: UserTemplateRenderer,
+) -> Response:
+    http_404_view = Http404View("member/404.html", template_renderer)
+    view = ReadMessageView(
+        read_message,
+        controller,
+        presenter,
+        template_renderer,
+        template_name="member/read_message.html",
+        http_404_view=http_404_view,
+    )
+    return view.respond_to_get(message_id)
