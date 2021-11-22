@@ -6,6 +6,7 @@ from uuid import UUID
 from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.entities import Company
 from arbeitszeit.repositories import CompanyRepository, CooperationRepository
 
 
@@ -39,13 +40,11 @@ class CreateCooperation:
 
     def __call__(self, request: CreateCooperationRequest) -> CreateCooperationResponse:
         try:
-            self._validate_request(request)
+            coordinator = self._validate_request(request)
         except CreateCooperationResponse.RejectionReason as reason:
             return CreateCooperationResponse(
                 rejection_reason=reason, cooperation_id=None
             )
-        coordinator = self.company_repository.get_by_id(request.coordinator_id)
-        assert coordinator
         cooperation = self.cooperation_repository.create_cooperation(
             self.datetime_service.now(),
             request.name,
@@ -56,7 +55,7 @@ class CreateCooperation:
             rejection_reason=None, cooperation_id=cooperation.id
         )
 
-    def _validate_request(self, request: CreateCooperationRequest) -> None:
+    def _validate_request(self, request: CreateCooperationRequest) -> Company:
         coordinator = self.company_repository.get_by_id(request.coordinator_id)
         coop_with_name_exists = (
             len(list(self.cooperation_repository.get_by_name(request.name))) > 0
@@ -65,3 +64,4 @@ class CreateCooperation:
             raise CreateCooperationResponse.RejectionReason.coordinator_not_found
         if coop_with_name_exists:
             raise CreateCooperationResponse.RejectionReason.cooperation_with_name_exists
+        return coordinator

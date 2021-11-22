@@ -321,7 +321,7 @@ class CooperationGenerator:
         self,
         name: str = None,
         coordinator: Optional[Company] = None,
-        plans: List[Plan] = [],
+        plans: List[Plan] = None,
     ) -> Cooperation:
         if name is None:
             name = "test name"
