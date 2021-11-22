@@ -39,7 +39,13 @@ from arbeitszeit.repositories import (
     PurchaseRepository,
     TransactionRepository,
 )
-from arbeitszeit.use_cases import SeekApproval
+from arbeitszeit.use_cases import (
+    AcceptCooperation,
+    AcceptCooperationRequest,
+    RequestCooperation,
+    RequestCooperationRequest,
+    SeekApproval,
+)
 from tests.datetime_service import FakeDatetimeService
 
 
@@ -147,6 +153,8 @@ class PlanGenerator:
     datetime_service: FakeDatetimeService
     plan_repository: PlanRepository
     seek_approval: SeekApproval
+    request_cooperation: RequestCooperation
+    accept_cooperation: AcceptCooperation
     draft_repository: PlanDraftRepository
 
     def create_plan(
@@ -189,9 +197,20 @@ class PlanGenerator:
         if expired:
             self.plan_repository.set_plan_as_expired(plan)
         if requested_cooperation:
-            plan.requested_cooperation = requested_cooperation
+            self.request_cooperation(
+                RequestCooperationRequest(
+                    plan.planner.id, plan.id, requested_cooperation.id
+                )
+            )
         if cooperation:
-            plan.cooperation = cooperation
+            self.request_cooperation(
+                RequestCooperationRequest(plan.planner.id, plan.id, cooperation.id)
+            )
+            self.accept_cooperation(
+                AcceptCooperationRequest(
+                    cooperation.coordinator.id, plan.id, cooperation.id
+                )
+            )
         if not is_available:
             self.plan_repository.toggle_product_availability(plan)
         return plan
@@ -299,13 +318,18 @@ class CooperationGenerator:
     company_generator: CompanyGenerator
 
     def create_cooperation(
-        self, coordinator: Optional[Company] = None, plans: List[Plan] = []
+        self,
+        name: str = None,
+        coordinator: Optional[Company] = None,
+        plans: List[Plan] = None,
     ) -> Cooperation:
+        if name is None:
+            name = "test name"
         if coordinator is None:
             coordinator = self.company_generator.create_company()
         cooperation = self.cooperation_repository.create_cooperation(
             self.datetime_service.now(),
-            name="test name",
+            name=name,
             definition="test info",
             coordinator=coordinator,
         )
@@ -329,6 +353,7 @@ class MessageGenerator:
         sender: Union[None, SocialAccounting, Member, Company] = None,
         addressee: Union[None, Member, Company],
         title: str = "test title",
+        content: str = "test message content",
     ) -> Message:
         if addressee is None:
             addressee = self.company_generator.create_company()
@@ -338,7 +363,7 @@ class MessageGenerator:
             sender=sender,
             addressee=addressee,
             title=title,
-            content="test message content",
+            content=content,
             sender_remarks=None,
             reference=None,
         )

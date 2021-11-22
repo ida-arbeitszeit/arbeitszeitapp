@@ -13,9 +13,11 @@ from arbeitszeit.use_cases import (
     GetPlanSummary,
     InviteWorkerToCompany,
     ListMessages,
+    ReadMessage,
     ToggleProductAvailability,
 )
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
+from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
 from arbeitszeit_web.delete_plan import DeletePlanPresenter
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.get_prefilled_draft_data import (
@@ -35,6 +37,7 @@ from arbeitszeit_web.query_companies import (
     QueryCompaniesPresenter,
 )
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
+from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from project.database import (
     AccountRepository,
@@ -58,6 +61,7 @@ from project.views import (
     ListMessagesView,
     QueryCompaniesView,
     QueryPlansView,
+    ReadMessageView,
 )
 
 from .blueprint import CompanyRoute
@@ -410,6 +414,28 @@ def plan_summary(
         return Http404View("company/404.html", template_renderer).get_response()
 
 
+@CompanyRoute("/company/create_cooperation", methods=["GET", "POST"])
+@commit_changes
+def create_cooperation(
+    create_cooperation: use_cases.CreateCooperation,
+    presenter: CreateCooperationPresenter,
+    template_renderer: UserTemplateRenderer,
+):
+    if request.method == "POST":
+        name = request.form["name"]
+        definition = request.form["definition"]
+        use_case_request = use_cases.CreateCooperationRequest(
+            UUID(current_user.id), name, definition
+        )
+        use_case_response = create_cooperation(use_case_request)
+        view_model = presenter.present(use_case_response)
+        return template_renderer.render_template(
+            "company/create_cooperation.html", context=dict(view_model=view_model)
+        )
+    elif request.method == "GET":
+        return template_renderer.render_template("company/create_cooperation.html")
+
+
 @CompanyRoute("/company/hilfe")
 @login_required
 def hilfe(template_renderer: UserTemplateRenderer):
@@ -420,10 +446,10 @@ def hilfe(template_renderer: UserTemplateRenderer):
 def list_messages(
     template_renderer: UserTemplateRenderer,
     controller: ListMessagesController,
-    presenter: ListMessagesPresenter,
     use_case: ListMessages,
 ) -> Response:
     http_404_view = Http404View("company/404.html", template_renderer)
+    presenter = ListMessagesPresenter(CompanyUrlIndex())
     view = ListMessagesView(
         template_renderer=template_renderer,
         presenter=presenter,
@@ -455,3 +481,24 @@ def invite_worker_to_company(
         return view.respond_to_post(form)
     else:
         return view.respond_to_get(form)
+
+
+@CompanyRoute("/company/messages/<uuid:message_id>")
+@commit_changes
+def read_message(
+    message_id: UUID,
+    read_message: ReadMessage,
+    controller: ReadMessageController,
+    presenter: ReadMessagePresenter,
+    template_renderer: UserTemplateRenderer,
+) -> Response:
+    http_404_view = Http404View("company/404.html", template_renderer)
+    view = ReadMessageView(
+        read_message,
+        controller,
+        presenter,
+        template_renderer,
+        template_name="company/read_message.html",
+        http_404_view=http_404_view,
+    )
+    return view.respond_to_get(message_id)

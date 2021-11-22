@@ -22,12 +22,14 @@ from arbeitszeit_web.check_for_unread_message import (
 )
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyController
 from arbeitszeit_web.list_messages import ListMessagesController
+from arbeitszeit_web.read_message import ReadMessageController
 from project.database import get_social_accounting
 from project.database.repositories import (
     AccountOwnerRepository,
     AccountRepository,
     CompanyRepository,
     CompanyWorkerRepository,
+    CooperationRepository,
     MemberRepository,
     MessageRepository,
     PlanDraftRepository,
@@ -88,6 +90,12 @@ class FlaskModule(Module):
     ) -> ListMessagesController:
         return ListMessagesController(session)
 
+    @provider
+    def provide_read_message_controller(
+        self, session: FlaskSession
+    ) -> ReadMessageController:
+        return ReadMessageController(session)
+
     def configure(self, binder: Binder) -> None:
         binder.bind(
             interfaces.CompanyWorkerRepository,  # type: ignore
@@ -144,6 +152,10 @@ class FlaskModule(Module):
         binder.bind(
             interfaces.MessageRepository,  # type: ignore
             to=ClassProvider(MessageRepository),
+        )
+        binder.bind(
+            interfaces.CooperationRepository,  # type: ignore
+            to=ClassProvider(CooperationRepository),
         )
 
 
