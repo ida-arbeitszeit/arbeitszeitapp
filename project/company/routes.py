@@ -12,6 +12,7 @@ from arbeitszeit.use_cases import (
     GetDraftSummary,
     GetPlanSummary,
     ListMessages,
+    ReadMessage,
     ToggleProductAvailability,
 )
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
@@ -30,6 +31,7 @@ from arbeitszeit_web.query_companies import (
     QueryCompaniesPresenter,
 )
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
+from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from project.database import (
     AccountRepository,
@@ -47,6 +49,7 @@ from project.views import (
     ListMessagesView,
     QueryCompaniesView,
     QueryPlansView,
+    ReadMessageView,
 )
 
 from .blueprint import CompanyRoute
@@ -439,10 +442,10 @@ def hilfe(template_renderer: UserTemplateRenderer):
 def list_messages(
     template_renderer: UserTemplateRenderer,
     controller: ListMessagesController,
-    presenter: ListMessagesPresenter,
     use_case: ListMessages,
 ) -> Response:
     http_404_view = Http404View("company/404.html", template_renderer)
+    presenter = ListMessagesPresenter(CompanyUrlIndex())
     view = ListMessagesView(
         template_renderer=template_renderer,
         presenter=presenter,
@@ -452,3 +455,24 @@ def list_messages(
         template_name="company/list_messages.html",
     )
     return view.respond_to_get()
+
+
+@CompanyRoute("/company/messages/<uuid:message_id>")
+@commit_changes
+def read_message(
+    message_id: UUID,
+    read_message: ReadMessage,
+    controller: ReadMessageController,
+    presenter: ReadMessagePresenter,
+    template_renderer: UserTemplateRenderer,
+) -> Response:
+    http_404_view = Http404View("company/404.html", template_renderer)
+    view = ReadMessageView(
+        read_message,
+        controller,
+        presenter,
+        template_renderer,
+        template_name="company/read_message.html",
+        http_404_view=http_404_view,
+    )
+    return view.respond_to_get(message_id)

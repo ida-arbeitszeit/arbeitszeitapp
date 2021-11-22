@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional
 
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansResponse
 
-from .url_index import UrlIndex
+from .url_index import PlanSummaryUrlIndex
 
 
 @dataclass
@@ -76,7 +76,7 @@ class ShowMyPlansViewModel:
 
 @dataclass
 class ShowMyPlansPresenter:
-    url_index: UrlIndex
+    url_index: PlanSummaryUrlIndex
 
     def present(self, response: ShowMyPlansResponse) -> ShowMyPlansViewModel:
 
