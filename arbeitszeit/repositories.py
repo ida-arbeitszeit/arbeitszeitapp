@@ -368,6 +368,10 @@ class CooperationRepository(ABC):
         pass
 
     @abstractmethod
+    def get_by_name(self, name: str) -> Iterator[Cooperation]:
+        pass
+
+    @abstractmethod
     def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         pass
 

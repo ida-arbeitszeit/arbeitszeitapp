@@ -722,6 +722,11 @@ class CooperationRepository(interfaces.CooperationRepository):
     def get_by_id(self, id: UUID) -> Optional[Cooperation]:
         return self.cooperations.get(id)
 
+    def get_by_name(self, name: str) -> Iterator[Cooperation]:
+        for cooperation in self.cooperations.values():
+            if cooperation.name.lower() == name.lower():
+                yield cooperation
+
     def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         plan = self.plan_repository.get_plan_by_id(plan_id)
         cooperation = self.get_by_id(cooperation_id)
