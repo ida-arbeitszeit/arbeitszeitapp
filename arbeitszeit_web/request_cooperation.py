@@ -17,10 +17,16 @@ class RequestCooperationPresenter:
     def present(
         self, use_case_response: RequestCooperationResponse
     ) -> RequestCooperationViewModel:
+        view_model = self._create_view_model(use_case_response)
+        return view_model
+
+    def _create_view_model(
+        self, use_case_response: RequestCooperationResponse
+    ) -> RequestCooperationViewModel:
         notifications = []
         if not use_case_response.is_rejected:
-            notifications.append("Anfrage wurde gestellt.")
             is_error = False
+            notifications.append("Anfrage wurde gestellt.")
         else:
             is_error = True
             if (

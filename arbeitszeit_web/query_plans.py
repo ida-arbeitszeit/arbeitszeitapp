@@ -7,7 +7,7 @@ from arbeitszeit.use_cases.query_plans import (
     QueryPlansRequest,
 )
 
-from .url_index import UrlIndex
+from .url_index import PlanSummaryUrlIndex
 
 
 class QueryPlansFormData(Protocol):
@@ -79,7 +79,7 @@ class QueryPlansViewModel:
 
 @dataclass
 class QueryPlansPresenter:
-    url_index: UrlIndex
+    url_index: PlanSummaryUrlIndex
 
     def present(self, response: PlanQueryResponse) -> QueryPlansViewModel:
         if response.results:

@@ -321,7 +321,7 @@ class CooperationGenerator:
         self,
         name: str = None,
         coordinator: Optional[Company] = None,
-        plans: List[Plan] = [],
+        plans: List[Plan] = None,
     ) -> Cooperation:
         if name is None:
             name = "test name"
@@ -353,6 +353,7 @@ class MessageGenerator:
         sender: Union[None, SocialAccounting, Member, Company] = None,
         addressee: Union[None, Member, Company],
         title: str = "test title",
+        content: str = "test message content",
     ) -> Message:
         if addressee is None:
             addressee = self.company_generator.create_company()
@@ -362,7 +363,7 @@ class MessageGenerator:
             sender=sender,
             addressee=addressee,
             title=title,
-            content="test message content",
+            content=content,
             sender_remarks=None,
             reference=None,
         )
