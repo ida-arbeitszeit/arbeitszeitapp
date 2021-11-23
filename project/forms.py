@@ -155,3 +155,14 @@ class CreateDraftForm(Form):
 
     def get_action_string(self) -> str:
         return self.data["action"]
+
+
+class RequestCooperationForm(Form):
+    plan_id = StringField()
+    cooperation_id = StringField()
+
+    def get_plan_id_string(self) -> str:
+        return self.data["plan_id"]
+
+    def get_cooperation_id_string(self) -> str:
+        return self.data["cooperation_id"]

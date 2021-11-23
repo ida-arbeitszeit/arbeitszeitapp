@@ -9,7 +9,7 @@
         </div>
 
         <a role="button" class="navbar-burger" onclick="expandMenu()" aria-label="menu" aria-expanded="false"
-           data-target="navbarOnTop">
+          data-target="navbarOnTop">
           <span aria-hidden="true"></span>
           <span aria-hidden="true"></span>
           <span aria-hidden="true"></span>
@@ -41,17 +41,20 @@
 
           <div class="navbar-item has-dropdown is-hoverable">
             <a class="navbar-link">
-              Kooperationen (BETA)
+              Kooperationen
             </a>
             <div class="navbar-dropdown">
               <a href="{{ url_for('main_company.create_cooperation') }}" class="navbar-item">
-                Neue Kooperation (BETA)
+                Neue Kooperation
               </a>
-              <a href="" class="navbar-item">
-                Kooperation beitreten (BETA)
+              <a href="{{ url_for('main_company.request_cooperation') }}" class="navbar-item">
+                Kooperation beitreten
               </a>
               <a href="" class="navbar-item">
                 Meine Kooperationen (BETA)
+              </a>
+              <a href="" class="navbar-item">
+                Alle Kooperationen (BETA)
               </a>
             </div>
           </div>
@@ -97,10 +100,10 @@
             Meine Daten
           </a>
 
-	  <a href="{{ url_for('main_company.list_messages') }}"
-	     class="navbar-item {% if message_indicator.show_unread_messages_indicator %}unread-messages-indicator{% endif %}">
-	    Nachrichten
-	  </a>
+          <a href="{{ url_for('main_company.list_messages') }}"
+            class="navbar-item {% if message_indicator.show_unread_messages_indicator %}unread-messages-indicator{% endif %}">
+            Nachrichten
+          </a>
           {% endif %}
 
         </div>
@@ -117,7 +120,7 @@
               <a class="button" href="{{ url_for('auth.zurueck') }}">
                 Zurück
               </a>
-	      {% else %}
+              {% else %}
               <a class="button" href="{{ url_for('auth.logout') }}">
                 Logout
               </a>
