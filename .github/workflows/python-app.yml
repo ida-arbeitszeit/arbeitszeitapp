@@ -42,6 +42,7 @@ jobs:
     - name: Test with ./run-checks
       run: |
         source ./venv/bin/activate
-        python -m pip list
+        python -m pip list -v
+        ls -la
         ./run-checks
         deactivate
