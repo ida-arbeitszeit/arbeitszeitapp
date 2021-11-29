@@ -38,15 +38,42 @@
 </div>
 
 
-
-
 <div class="content">
     <h1 class="title">
         Eingehende Kooperationsanfragen (von anderen)
     </h1>
 </div>
 
-<p>(to do)</p>
+<div class="table-container">
+    {% if list_of_cooperation_requests %}
+    <table class="table is-fullwidth">
+        <thead>
+            <tr>
+                <th>Kooperation</th>
+                <th>Anfragender Betrieb</th>
+                <th>Plan</th>
+                <th>Akzeptieren</th>
+                <th>Ablehnen</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for req in list_of_cooperation_requests.rows %}
+            <tr>
+                <td>{{ req.coop_name }}</td>
+                <td>{{ req.planner_name }}</td>
+                <td>{{ req.plan_name }}</td>
+                <td>[X]</td>
+                <td>[X]</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>(Du hast keine offenen Anfragen.)</p>
+    {% endif %}
+</div>
+
+
 
 
 

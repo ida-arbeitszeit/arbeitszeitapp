@@ -11,12 +11,14 @@ from arbeitszeit.use_cases import (
     DeletePlan,
     GetDraftSummary,
     GetPlanSummary,
+    ListCooperationRequests,
+    ListCooperationRequestsRequest,
+    ListCoordinations,
+    ListCoordinationsRequest,
     ListMessages,
     ReadMessage,
     RequestCooperation,
     ToggleProductAvailability,
-    ListCoordinations,
-    ListCoordinationsRequest,
 )
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
@@ -40,8 +42,8 @@ from arbeitszeit_web.request_cooperation import (
     RequestCooperationController,
     RequestCooperationPresenter,
 )
-from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
+from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from project.database import (
     AccountRepository,
     CompanyRepository,
@@ -502,11 +504,17 @@ def my_cooperations(
     template_renderer: UserTemplateRenderer,
     presenter: ShowMyCooperationsPresenter,
     list_coordinations: ListCoordinations,
+    list_cooperation_requests: ListCooperationRequests,
 ):
     list_coop_response = list_coordinations(
         ListCoordinationsRequest(UUID(current_user.id))
     )
-    view_model = presenter.present(list_coop_response)
+    list_cooperation_requests_response = list_cooperation_requests(
+        ListCooperationRequestsRequest(UUID(current_user.id))
+    )
+    view_model = presenter.present(
+        list_coop_response, list_cooperation_requests_response
+    )
 
     return template_renderer.render_template(
         "company/my_cooperations.html", context=view_model.to_dict()

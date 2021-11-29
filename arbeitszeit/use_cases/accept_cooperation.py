@@ -8,6 +8,7 @@ from injector import inject
 from arbeitszeit.repositories import (
     CompanyRepository,
     CooperationRepository,
+    PlanCooperationRepository,
     PlanRepository,
 )
 
@@ -44,6 +45,7 @@ class AcceptCooperation:
     plan_repository: PlanRepository
     cooperation_repository: CooperationRepository
     company_repository: CompanyRepository
+    plan_cooperation_repository: PlanCooperationRepository
 
     def __call__(self, request: AcceptCooperationRequest) -> AcceptCooperationResponse:
         try:
@@ -51,10 +53,12 @@ class AcceptCooperation:
         except AcceptCooperationResponse.RejectionReason as reason:
             return AcceptCooperationResponse(rejection_reason=reason)
 
-        self.cooperation_repository.add_plan_to_cooperation(
+        self.plan_cooperation_repository.add_plan_to_cooperation(
             request.plan_id, request.cooperation_id
         )
-        self.cooperation_repository.set_requested_cooperation_to_none(request.plan_id)
+        self.plan_cooperation_repository.set_requested_cooperation_to_none(
+            request.plan_id
+        )
         return AcceptCooperationResponse(rejection_reason=None)
 
     def _validate_request(self, request: AcceptCooperationRequest) -> None:

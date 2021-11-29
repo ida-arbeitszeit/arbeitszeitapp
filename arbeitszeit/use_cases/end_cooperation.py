@@ -8,6 +8,7 @@ from injector import inject
 from arbeitszeit.repositories import (
     CompanyRepository,
     CooperationRepository,
+    PlanCooperationRepository,
     PlanRepository,
 )
 
@@ -41,13 +42,14 @@ class EndCooperation:
     plan_repository: PlanRepository
     cooperation_repository: CooperationRepository
     company_repository: CompanyRepository
+    plan_cooperation_repository: PlanCooperationRepository
 
     def __call__(self, request: EndCooperationRequest) -> EndCooperationResponse:
         try:
             self._validate_request(request)
         except EndCooperationResponse.RejectionReason as reason:
             return EndCooperationResponse(rejection_reason=reason)
-        self.cooperation_repository.remove_plan_from_cooperation(
+        self.plan_cooperation_repository.remove_plan_from_cooperation(
             request.plan_id, request.cooperation_id
         )
         return EndCooperationResponse(rejection_reason=None)

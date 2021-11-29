@@ -112,7 +112,6 @@ class MemberRepository(repositories.MemberRepository):
 @dataclass
 class CompanyRepository(repositories.CompanyRepository):
     account_repository: AccountRepository
-    member_repository: MemberRepository
     db: SQLAlchemy
 
     def object_to_orm(self, company: entities.Company) -> Company:
@@ -414,6 +413,7 @@ class PurchaseRepository(repositories.PurchaseRepository):
 class PlanRepository(repositories.PlanRepository):
     company_repository: CompanyRepository
     accounting_repository: AccountingRepository
+    cooperation_repository: CooperationRepository
     db: SQLAlchemy
 
     def object_from_orm(self, plan: Plan) -> entities.Plan:
@@ -446,8 +446,14 @@ class PlanRepository(repositories.PlanRepository):
             activation_date=plan.activation_date,
             active_days=plan.active_days,
             payout_count=plan.payout_count,
-            requested_cooperation=plan.requested_cooperation,
-            cooperation=plan.cooperation,
+            requested_cooperation=self.cooperation_repository.get_by_id(
+                UUID(plan.requested_cooperation)
+            )
+            if plan.requested_cooperation
+            else None,
+            cooperation=self.cooperation_repository.get_by_id(UUID(plan.cooperation))
+            if plan.cooperation
+            else None,
             is_available=plan.is_available,
         )
 
@@ -1030,6 +1036,30 @@ class CooperationRepository(repositories.CooperationRepository):
                 coordinator=str(company_id)
             ).all()
         )
+
+
+@inject
+@dataclass
+class PlanCooperationRepository(repositories.PlanCooperationRepository):
+    plan_repository: PlanRepository
+    cooperation_repository: CooperationRepository
+
+    def get_requests(self, coordinator_id: UUID) -> Iterator[entities.Plan]:
+        all_plans = list(self.plan_repository.all_active_plans())
+        ids_of_coops_of_company = self._ids_of_coops_of_company(coordinator_id)
+        for plan in all_plans:
+            if plan.requested_cooperation:
+                if str(plan.requested_cooperation.id) in ids_of_coops_of_company:
+                    yield plan
+
+    def _ids_of_coops_of_company(self, coordinator_id) -> List[str]:
+        coops_of_company = (
+            self.cooperation_repository.get_cooperations_coordinated_by_company(
+                coordinator_id
+            )
+        )
+        ids_of_coops_of_company = [str(coop.id) for coop in coops_of_company]
+        return ids_of_coops_of_company
 
     def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         ...

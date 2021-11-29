@@ -311,11 +311,9 @@ class PlanRepository(interfaces.PlanRepository):
     @inject
     def __init__(
         self,
-        draft_repository: PlanDraftRepository,
         company_repository: CompanyRepository,
     ) -> None:
         self.plans: Dict[UUID, Plan] = {}
-        self.draft_repository = draft_repository
         self.company_repository = company_repository
 
     def get_plan_by_id(self, id: UUID) -> Optional[Plan]:
@@ -696,9 +694,8 @@ class MessageRepository(interfaces.MessageRepository):
 @singleton
 class CooperationRepository(interfaces.CooperationRepository):
     @inject
-    def __init__(self, plan_repository: PlanRepository) -> None:
+    def __init__(self) -> None:
         self.cooperations: Dict[UUID, Cooperation] = dict()
-        self.plan_repository = plan_repository
 
     def create_cooperation(
         self,
@@ -734,9 +731,34 @@ class CooperationRepository(interfaces.CooperationRepository):
             if cooperation.coordinator.id == company_id:
                 yield cooperation
 
+    def __len__(self) -> int:
+        return len(self.cooperations)
+
+
+@singleton
+class PlanCooperationRepository(interfaces.PlanCooperationRepository):
+    @inject
+    def __init__(
+        self,
+        plan_repository: PlanRepository,
+        cooperation_repository: CooperationRepository,
+    ) -> None:
+        self.plan_repository = plan_repository
+        self.cooperation_repository = cooperation_repository
+
+    def get_requests(self, coordinator_id: UUID) -> Iterator[Plan]:
+        coops_of_company = list(
+            self.cooperation_repository.get_cooperations_coordinated_by_company(
+                coordinator_id
+            )
+        )
+        for plan in self.plan_repository.plans.values():
+            if plan.requested_cooperation in coops_of_company:
+                yield plan
+
     def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         plan = self.plan_repository.get_plan_by_id(plan_id)
-        cooperation = self.get_by_id(cooperation_id)
+        cooperation = self.cooperation_repository.get_by_id(cooperation_id)
         assert plan
         assert cooperation
         cooperation.plans.append(plan)
@@ -744,7 +766,7 @@ class CooperationRepository(interfaces.CooperationRepository):
 
     def remove_plan_from_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         plan = self.plan_repository.get_plan_by_id(plan_id)
-        cooperation = self.get_by_id(cooperation_id)
+        cooperation = self.cooperation_repository.get_by_id(cooperation_id)
         assert plan
         assert cooperation
         cooperation.plans.remove(plan)
@@ -752,7 +774,7 @@ class CooperationRepository(interfaces.CooperationRepository):
 
     def set_requested_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         plan = self.plan_repository.get_plan_by_id(plan_id)
-        cooperation = self.get_by_id(cooperation_id)
+        cooperation = self.cooperation_repository.get_by_id(cooperation_id)
         assert plan
         plan.requested_cooperation = cooperation
 
@@ -760,6 +782,3 @@ class CooperationRepository(interfaces.CooperationRepository):
         plan = self.plan_repository.get_plan_by_id(plan_id)
         assert plan
         plan.requested_cooperation = None
-
-    def __len__(self) -> int:
-        return len(self.cooperations)

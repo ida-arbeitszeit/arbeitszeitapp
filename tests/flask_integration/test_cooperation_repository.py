@@ -71,15 +71,6 @@ class CooperationRepositoryTests(TestCase):
         query = "test"
         self.assertFalse(list(self.repo.get_by_name(query)))
 
-    def test_possible_to_set_requested_cooperation_attribute(self):
-        cooperation = self.repo.create_cooperation(**self.DEFAULT_CREATE_ARGUMENTS)
-        plan = self.plan_generator.create_plan()
-
-        self.repo.set_requested_cooperation(plan.id, cooperation.id)
-
-        plan_from_orm = self.plan_repo.get_plan_by_id(plan.id)
-        self.assertTrue(plan_from_orm.requested_cooperation)
-
     def test_only_cooperations_coordinated_by_company_are_returned(self):
         company = self.company_generator.create_company()
         expected_cooperation = self.repo.create_cooperation(
