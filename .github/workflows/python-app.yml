@@ -28,8 +28,8 @@ jobs:
       uses: actions/cache@v2
       id: cache-venv
       with:
-        path: ${{ github.workspace }}/venv/lib/*
-        key: ${{ runner.os }}-py3.9-venv-${{ hashFiles('requirements.txt') }}
+        path: ${{ github.workspace }}/venv/*
+        key: ${{ runner.os }}-python3.9-venv-${{ hashFiles('requirements.txt') }}
     
     - name: Install dependencies        
       run: |
