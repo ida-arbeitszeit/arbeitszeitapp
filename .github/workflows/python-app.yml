@@ -28,8 +28,8 @@ jobs:
       uses: actions/cache@v2
       id: cache-venv
       with:
-        path: ./venv/
-        key: ${{ runner.os }}-env2-${{ hashFiles('**/requirements*.txt') }}
+        path: ${{ env.pythonLocation }}
+        key: ${{ env.pythonLocation }}-venv-${{ hashFiles('dev-requirements.txt') }}
     
     - name: Install dependencies        
       run: |
