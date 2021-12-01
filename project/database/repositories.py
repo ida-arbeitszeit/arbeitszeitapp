@@ -1029,10 +1029,11 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
 
     def get_price_per_unit(self, plan_id: UUID) -> Decimal:
         plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
+        assert plan_orm
         coop_orm = plan_orm.coop
-        plan = self.plan_repository.get_plan_by_id(plan_id)
-        assert plan
         if coop_orm is None:
+            plan = self.plan_repository.get_plan_by_id(plan_id)
+            assert plan
             price = plan.individual_price_per_unit
         else:
             price = self._calculate_coop_price_per_unit(coop_orm)
@@ -1043,17 +1044,11 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
         associated_plans = [
             self.plan_repository.object_from_orm(plan) for plan in associated_plans_orm
         ]
-
-        if len(associated_plans) == 1:
-            price = associated_plans[0].individual_price_per_unit
-        elif len(associated_plans) > 1:
-            price = (
-                decimal_sum(
-                    [plan.production_costs.total_cost() for plan in associated_plans]
-                )
-            ) / (sum([plan.prd_amount for plan in associated_plans]) or 1)
-        else:
-            price = Decimal(0)
+        price = (
+            decimal_sum(
+                [plan.production_costs.total_cost() for plan in associated_plans]
+            )
+        ) / (sum([plan.prd_amount for plan in associated_plans]) or 1)
         return price
 
     def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:

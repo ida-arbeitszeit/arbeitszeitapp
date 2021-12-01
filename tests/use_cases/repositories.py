@@ -743,19 +743,11 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
             price = plan.individual_price_per_unit
         else:
             associated_plans = self._get_associated_plans(plan)
-            if len(associated_plans) == 1:
-                price = associated_plans[0].individual_price_per_unit
-            elif len(associated_plans) > 1:
-                price = (
-                    decimal_sum(
-                        [
-                            plan.production_costs.total_cost()
-                            for plan in associated_plans
-                        ]
-                    )
-                ) / (sum([plan.prd_amount for plan in associated_plans]) or 1)
-            else:
-                price = Decimal(0)
+            price = (
+                decimal_sum(
+                    [plan.production_costs.total_cost() for plan in associated_plans]
+                )
+            ) / (sum([plan.prd_amount for plan in associated_plans]) or 1)
         return price
 
     def _get_associated_plans(self, plan: Plan) -> List[Plan]:

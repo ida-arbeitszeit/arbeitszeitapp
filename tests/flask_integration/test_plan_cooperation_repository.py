@@ -24,7 +24,7 @@ def production_costs(a: Number, r: Number, p: Number) -> ProductionCosts:
 
 
 @injection_test
-def test_that_correct_price_is_returned_without_cooperation(
+def test_that_correct_price_for_plan_is_returned_without_cooperation(
     repository: PlanCooperationRepository, plan_generator: PlanGenerator
 ):
     plan = plan_generator.create_plan()
@@ -33,7 +33,24 @@ def test_that_correct_price_is_returned_without_cooperation(
 
 
 @injection_test
-def test_that_correct_price_is_returned_with_cooperation(
+def test_that_correct_price_for_plan_is_returned_with_1_cooperating_plan(
+    repository: PlanCooperationRepository,
+    plan_generator: PlanGenerator,
+    cooperation_generator: CooperationGenerator,
+):
+    coop = cooperation_generator.create_cooperation()
+    plan = plan_generator.create_plan(
+        activation_date=datetime.min,
+        cooperation=coop,
+        costs=production_costs(1, 1, 1),
+        amount=10,
+    )
+    calculated_price = repository.get_price_per_unit(plan.id)
+    assert calculated_price == plan.individual_price_per_unit
+
+
+@injection_test
+def test_that_correct_price_for_plan_is_returned_with_2_cooperating_plans(
     repository: PlanCooperationRepository,
     plan_generator: PlanGenerator,
     cooperation_generator: CooperationGenerator,
@@ -56,7 +73,7 @@ def test_that_correct_price_is_returned_with_cooperation(
 
 
 @injection_test
-def test_possible_to_set_requested_cooperation_attribute(
+def test_possible_to_set_and_unset_requested_cooperation_attribute(
     repository: PlanCooperationRepository,
     plan_repository: PlanRepository,
     plan_generator: PlanGenerator,
@@ -73,7 +90,39 @@ def test_possible_to_set_requested_cooperation_attribute(
     plan = plan_generator.create_plan()
 
     repository.set_requested_cooperation(plan.id, cooperation.id)
-
     plan_from_orm = plan_repository.get_plan_by_id(plan.id)
     assert plan_from_orm
     assert plan_from_orm.requested_cooperation
+
+    repository.set_requested_cooperation_to_none(plan.id)
+    plan_from_orm = plan_repository.get_plan_by_id(plan.id)
+    assert plan_from_orm
+    assert plan_from_orm.requested_cooperation is None
+
+
+@injection_test
+def test_possible_to_add_and_to_remove_plan_to_cooperation(
+    repository: PlanCooperationRepository,
+    plan_repository: PlanRepository,
+    plan_generator: PlanGenerator,
+    cooperation_repository: CooperationRepository,
+    company_generator: CompanyGenerator,
+):
+
+    cooperation = cooperation_repository.create_cooperation(
+        creation_timestamp=datetime.now(),
+        name="test name",
+        definition="test description",
+        coordinator=company_generator.create_company(),
+    )
+    plan = plan_generator.create_plan()
+
+    repository.add_plan_to_cooperation(plan.id, cooperation.id)
+    plan_from_orm = plan_repository.get_plan_by_id(plan.id)
+    assert plan_from_orm
+    assert plan_from_orm.cooperation == cooperation.id
+
+    repository.remove_plan_from_cooperation(plan.id)
+    plan_from_orm = plan_repository.get_plan_by_id(plan.id)
+    assert plan_from_orm
+    assert plan_from_orm.cooperation is None
