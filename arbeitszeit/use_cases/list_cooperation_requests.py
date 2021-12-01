@@ -5,7 +5,11 @@ from uuid import UUID
 from injector import inject
 
 from arbeitszeit.entities import Plan
-from arbeitszeit.repositories import CompanyRepository, PlanCooperationRepository
+from arbeitszeit.repositories import (
+    CompanyRepository,
+    CooperationRepository,
+    PlanCooperationRepository,
+)
 
 
 @dataclass
@@ -32,6 +36,7 @@ class ListCooperationRequestsResponse:
 class ListCooperationRequests:
     company_repository: CompanyRepository
     plan_cooperation_repository: PlanCooperationRepository
+    cooperation_repository: CooperationRepository
 
     def __call__(
         self, request: ListCooperationRequestsRequest
@@ -54,9 +59,13 @@ class ListCooperationRequests:
 
     def _plan_to_response_model(self, plan: Plan) -> ListedCoopRequest:
         assert plan.requested_cooperation
+        requested_cooperation = self.cooperation_repository.get_by_id(
+            plan.requested_cooperation
+        )
+        assert requested_cooperation
         return ListedCoopRequest(
             coop_id=plan.requested_cooperation,
-            coop_name=plan.requested_cooperation.name,
+            coop_name=requested_cooperation.name,
             plan_id=plan.id,
             plan_name=plan.prd_name,
             planner_name=plan.planner.name,

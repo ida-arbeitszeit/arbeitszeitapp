@@ -402,3 +402,7 @@ class PlanCooperationRepository(ABC):
     @abstractmethod
     def set_requested_cooperation_to_none(self, plan_id: UUID) -> None:
         pass
+
+    @abstractmethod
+    def count_plans_in_cooperation(self, cooperation_id: UUID) -> int:
+        pass

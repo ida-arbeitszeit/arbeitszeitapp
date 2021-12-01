@@ -1038,21 +1038,15 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
     cooperation_repository: CooperationRepository
 
     def get_requests(self, coordinator_id: UUID) -> Iterator[entities.Plan]:
-        all_plans = list(self.plan_repository.all_active_plans())
-        ids_of_coops_of_company = self._ids_of_coops_of_company(coordinator_id)
-        for plan in all_plans:
+        for plan in self.plan_repository.all_active_plans():
             if plan.requested_cooperation:
-                if str(plan.requested_cooperation) in ids_of_coops_of_company:
+                if plan.requested_cooperation in [
+                    coop.id
+                    for coop in self.cooperation_repository.get_cooperations_coordinated_by_company(
+                        coordinator_id
+                    )
+                ]:
                     yield plan
-
-    def _ids_of_coops_of_company(self, coordinator_id) -> List[str]:
-        coops_of_company = (
-            self.cooperation_repository.get_cooperations_coordinated_by_company(
-                coordinator_id
-            )
-        )
-        ids_of_coops_of_company = [str(coop.id) for coop in coops_of_company]
-        return ids_of_coops_of_company
 
     def get_price_per_unit(self, plan_id: UUID) -> Decimal:
         plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
@@ -1097,3 +1091,7 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
         plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
         assert plan_orm
         plan_orm.requested_cooperation = None
+
+    def count_plans_in_cooperation(self, cooperation_id: UUID) -> int:
+        count = Plan.query.filter_by(cooperation=str(cooperation_id)).count()
+        return count

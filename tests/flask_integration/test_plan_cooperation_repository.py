@@ -138,7 +138,6 @@ def test_possible_to_add_and_to_remove_plan_to_cooperation(
 @injection_test
 def test_only_requesting_plans_for_cooperation_are_returned(
     repository: PlanCooperationRepository,
-    plan_repository: PlanRepository,
     plan_generator: PlanGenerator,
     cooperation_repository: CooperationRepository,
     company_generator: CompanyGenerator,
@@ -160,3 +159,23 @@ def test_only_requesting_plans_for_cooperation_are_returned(
     assert len(requesting_plans) == 2
     assert plan_in_list(requesting_plan1, requesting_plans)
     assert plan_in_list(requesting_plan2, requesting_plans)
+
+
+@injection_test
+def test_plans_in_cooperation_correctly_counted(
+    repository: PlanCooperationRepository,
+    plan_generator: PlanGenerator,
+    cooperation_repository: CooperationRepository,
+    company_generator: CompanyGenerator,
+):
+    coop = cooperation_repository.create_cooperation(
+        creation_timestamp=datetime.now(),
+        name="test name",
+        definition="test description",
+        coordinator=company_generator.create_company(),
+    )
+    plan_generator.create_plan(activation_date=datetime.min, cooperation=coop)
+    plan_generator.create_plan(activation_date=datetime.min, cooperation=coop)
+    plan_generator.create_plan(activation_date=datetime.min, requested_cooperation=None)
+    count = repository.count_plans_in_cooperation(coop.id)
+    assert count == 2

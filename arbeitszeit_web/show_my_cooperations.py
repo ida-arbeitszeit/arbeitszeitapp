@@ -13,7 +13,7 @@ class ListOfCoordinationsRow:
     coop_creation_date: str
     coop_name: str
     coop_definition: List[str]
-    count_plans_in_coop: int
+    count_plans_in_coop: str
 
 
 @dataclass
@@ -54,13 +54,13 @@ class ShowMyCooperationsPresenter:
         list_of_coordinations = ListOfCoordinationsTable(
             rows=[
                 ListOfCoordinationsRow(
-                    coop_id=str(cooperation.id),
-                    coop_creation_date=str(cooperation.creation_date),
-                    coop_name=cooperation.name,
-                    coop_definition=cooperation.definition.splitlines(),
-                    count_plans_in_coop=len(cooperation.plans),
+                    coop_id=str(coop.id),
+                    coop_creation_date=str(coop.creation_date),
+                    coop_name=coop.name,
+                    coop_definition=coop.definition.splitlines(),
+                    count_plans_in_coop=str(coop.count_plans_in_coop),
                 )
-                for cooperation in list_coop_response.coordinations
+                for coop in list_coop_response.coordinations
             ]
         )
         list_of_cooperation_requests = ListOfCooperationRequestsTable(

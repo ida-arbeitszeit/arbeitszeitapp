@@ -752,7 +752,7 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
             )
         )
         for plan in self.plan_repository.plans.values():
-            if plan.requested_cooperation in coops_of_company:
+            if plan.requested_cooperation in [coop.id for coop in coops_of_company]:
                 yield plan
 
     def get_price_per_unit(self, plan_id: UUID) -> Decimal:
@@ -795,3 +795,10 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
         plan = self.plan_repository.get_plan_by_id(plan_id)
         assert plan
         plan.requested_cooperation = None
+
+    def count_plans_in_cooperation(self, cooperation_id: UUID) -> int:
+        count = 0
+        for plan in self.plan_repository.plans.values():
+            if plan.cooperation == cooperation_id:
+                count += 1
+        return count
