@@ -41,6 +41,6 @@ jobs:
     
     - name: Test with ./run-checks
       run: |
-        . ./venv/bin/activate
+        source ./venv/bin/activate
         ./run-checks
         deactivate
