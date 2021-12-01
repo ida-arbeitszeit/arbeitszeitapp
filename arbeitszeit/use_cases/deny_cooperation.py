@@ -8,6 +8,7 @@ from injector import inject
 from arbeitszeit.repositories import (
     CompanyRepository,
     CooperationRepository,
+    PlanCooperationRepository,
     PlanRepository,
 )
 
@@ -40,6 +41,7 @@ class DenyCooperation:
     plan_repository: PlanRepository
     cooperation_repository: CooperationRepository
     company_repository: CompanyRepository
+    plan_cooperation_repository: PlanCooperationRepository
 
     def __call__(self, request: DenyCooperationRequest) -> DenyCooperationResponse:
         try:
@@ -47,7 +49,9 @@ class DenyCooperation:
         except DenyCooperationResponse.RejectionReason as reason:
             return DenyCooperationResponse(rejection_reason=reason)
 
-        self.cooperation_repository.set_requested_cooperation_to_none(request.plan_id)
+        self.plan_cooperation_repository.set_requested_cooperation_to_none(
+            request.plan_id
+        )
         return DenyCooperationResponse(rejection_reason=None)
 
     def _validate_request(self, request: DenyCooperationRequest) -> None:
@@ -58,7 +62,7 @@ class DenyCooperation:
             raise DenyCooperationResponse.RejectionReason.plan_not_found
         if cooperation is None:
             raise DenyCooperationResponse.RejectionReason.cooperation_not_found
-        if plan.requested_cooperation != cooperation:
+        if plan.requested_cooperation != cooperation.id:
             raise DenyCooperationResponse.RejectionReason.cooperation_was_not_requested
         if requester != cooperation.coordinator:
             raise DenyCooperationResponse.RejectionReason.requester_is_not_coordinator

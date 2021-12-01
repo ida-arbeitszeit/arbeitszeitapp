@@ -311,11 +311,9 @@ class PlanRepository(interfaces.PlanRepository):
     @inject
     def __init__(
         self,
-        draft_repository: PlanDraftRepository,
         company_repository: CompanyRepository,
     ) -> None:
         self.plans: Dict[UUID, Plan] = {}
-        self.draft_repository = draft_repository
         self.company_repository = company_repository
 
     def get_plan_by_id(self, id: UUID) -> Optional[Plan]:
@@ -696,9 +694,8 @@ class MessageRepository(interfaces.MessageRepository):
 @singleton
 class CooperationRepository(interfaces.CooperationRepository):
     @inject
-    def __init__(self, plan_repository: PlanRepository) -> None:
+    def __init__(self) -> None:
         self.cooperations: Dict[UUID, Cooperation] = dict()
-        self.plan_repository = plan_repository
 
     def create_cooperation(
         self,
@@ -714,7 +711,6 @@ class CooperationRepository(interfaces.CooperationRepository):
             name=name,
             definition=definition,
             coordinator=coordinator,
-            plans=[],
         )
         self.cooperations[cooperation_id] = cooperation
         return cooperation
@@ -727,32 +723,64 @@ class CooperationRepository(interfaces.CooperationRepository):
             if cooperation.name.lower() == name.lower():
                 yield cooperation
 
+    def __len__(self) -> int:
+        return len(self.cooperations)
+
+
+@singleton
+class PlanCooperationRepository(interfaces.PlanCooperationRepository):
+    @inject
+    def __init__(
+        self,
+        plan_repository: PlanRepository,
+    ) -> None:
+        self.plan_repository = plan_repository
+
+    def get_price_per_unit(self, plan_id: UUID) -> Decimal:
+        plan = self.plan_repository.get_plan_by_id(plan_id)
+        assert plan
+        if plan.cooperation is None:
+            price = plan.individual_price_per_unit
+        else:
+            associated_plans = self._get_associated_plans(plan)
+            if len(associated_plans) == 1:
+                price = associated_plans[0].individual_price_per_unit
+            elif len(associated_plans) > 1:
+                price = (
+                    decimal_sum(
+                        [
+                            plan.production_costs.total_cost()
+                            for plan in associated_plans
+                        ]
+                    )
+                ) / (sum([plan.prd_amount for plan in associated_plans]) or 1)
+            else:
+                price = Decimal(0)
+        return price
+
+    def _get_associated_plans(self, plan: Plan) -> List[Plan]:
+        associated_plans = []
+        for p in self.plan_repository.plans.values():
+            if p.cooperation == plan.cooperation:
+                associated_plans.append(p)
+        return associated_plans
+
     def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         plan = self.plan_repository.get_plan_by_id(plan_id)
-        cooperation = self.get_by_id(cooperation_id)
         assert plan
-        assert cooperation
-        cooperation.plans.append(plan)
-        plan.cooperation = cooperation
+        plan.cooperation = cooperation_id
 
-    def remove_plan_from_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
+    def remove_plan_from_cooperation(self, plan_id: UUID) -> None:
         plan = self.plan_repository.get_plan_by_id(plan_id)
-        cooperation = self.get_by_id(cooperation_id)
         assert plan
-        assert cooperation
-        cooperation.plans.remove(plan)
         plan.cooperation = None
 
     def set_requested_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         plan = self.plan_repository.get_plan_by_id(plan_id)
-        cooperation = self.get_by_id(cooperation_id)
         assert plan
-        plan.requested_cooperation = cooperation
+        plan.requested_cooperation = cooperation_id
 
     def set_requested_cooperation_to_none(self, plan_id: UUID) -> None:
         plan = self.plan_repository.get_plan_by_id(plan_id)
         assert plan
         plan.requested_cooperation = None
-
-    def __len__(self) -> int:
-        return len(self.cooperations)

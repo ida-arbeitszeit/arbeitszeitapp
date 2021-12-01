@@ -10,7 +10,7 @@ from uuid import UUID
 from injector import inject
 
 from arbeitszeit.entities import Plan
-from arbeitszeit.repositories import PlanRepository
+from arbeitszeit.repositories import PlanCooperationRepository, PlanRepository
 
 
 class PlanFilter(enum.Enum):
@@ -49,6 +49,7 @@ class QueryPlansRequest(ABC):
 @dataclass
 class QueryPlans:
     plan_repository: PlanRepository
+    plan_cooperation_repository: PlanCooperationRepository
 
     def __call__(self, request: QueryPlansRequest) -> PlanQueryResponse:
         query = request.get_query_string()
@@ -65,12 +66,13 @@ class QueryPlans:
         )
 
     def _plan_to_response_model(self, plan: Plan) -> QueriedPlan:
+        price_per_unit = self.plan_cooperation_repository.get_price_per_unit(plan.id)
         return QueriedPlan(
             plan_id=plan.id,
             company_name=plan.planner.name,
             product_name=plan.prd_name,
             description=plan.description,
-            price_per_unit=plan.price_per_unit,
+            price_per_unit=price_per_unit,
             is_public_service=plan.is_public_service,
             expiration_relative=plan.expiration_relative,
             is_available=plan.is_available,

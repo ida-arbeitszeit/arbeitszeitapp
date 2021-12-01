@@ -84,7 +84,6 @@ class ShowMyPlansPresenter:
             notifications = ["Du hast keine Pläne."]
         else:
             notifications = []
-
         return ShowMyPlansViewModel(
             notifications=notifications,
             show_non_active_plans=bool(response.non_active_plans),

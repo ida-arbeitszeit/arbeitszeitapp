@@ -1,17 +1,35 @@
 from datetime import datetime
+from decimal import Decimal
 from unittest import TestCase
 from uuid import UUID
 
 from arbeitszeit.entities import Plan
-from arbeitszeit.use_cases.show_my_plans import ShowMyPlansResponse
+from arbeitszeit.use_cases.show_my_plans import PlanInfo, ShowMyPlansResponse
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from tests.data_generators import PlanGenerator
 from tests.use_cases.dependency_injection import get_dependency_injector
 
 
+def _convert_into_plan_info(plan: Plan) -> PlanInfo:
+    return PlanInfo(
+        id=plan.id,
+        prd_name=plan.prd_name,
+        description=plan.description,
+        price_per_unit=Decimal("10.001"),
+        is_public_service=plan.is_public_service,
+        plan_creation_date=plan.plan_creation_date,
+        activation_date=plan.activation_date,
+        expiration_date=plan.expiration_date,
+        expiration_relative=plan.expiration_relative,
+        is_available=plan.is_available,
+        renewed=plan.renewed,
+    )
+
+
 def response_with_one_plan(plan: Plan) -> ShowMyPlansResponse:
+    plan_info = _convert_into_plan_info(plan)
     return ShowMyPlansResponse(
-        all_plans=[plan],
+        all_plans=[plan_info],
         non_active_plans=[],
         active_plans=[],
         expired_plans=[],
@@ -19,27 +37,30 @@ def response_with_one_plan(plan: Plan) -> ShowMyPlansResponse:
 
 
 def response_with_one_active_plan(plan: Plan) -> ShowMyPlansResponse:
+    plan_info = _convert_into_plan_info(plan)
     return ShowMyPlansResponse(
-        all_plans=[plan],
+        all_plans=[plan_info],
         non_active_plans=[],
-        active_plans=[plan],
+        active_plans=[plan_info],
         expired_plans=[],
     )
 
 
 def response_with_one_expired_plan(plan: Plan) -> ShowMyPlansResponse:
+    plan_info = _convert_into_plan_info(plan)
     return ShowMyPlansResponse(
-        all_plans=[plan],
+        all_plans=[plan_info],
         non_active_plans=[],
         active_plans=[],
-        expired_plans=[plan],
+        expired_plans=[plan_info],
     )
 
 
 def response_with_one_non_active_plan(plan: Plan) -> ShowMyPlansResponse:
+    plan_info = _convert_into_plan_info(plan)
     return ShowMyPlansResponse(
-        all_plans=[plan],
-        non_active_plans=[plan],
+        all_plans=[plan_info],
+        non_active_plans=[plan_info],
         active_plans=[],
         expired_plans=[],
     )
@@ -89,7 +110,7 @@ class ShowMyPlansPresenterTests(TestCase):
         )
         self.assertEqual(
             presentation.active_plans.rows[0].price_per_unit,
-            str(round(plan.price_per_unit, 2)),
+            str("10.00"),
         )
         self.assertEqual(
             presentation.active_plans.rows[0].type_of_plan,

@@ -34,6 +34,7 @@ from arbeitszeit.repositories import (
     CooperationRepository,
     MemberRepository,
     MessageRepository,
+    PlanCooperationRepository,
     PlanDraftRepository,
     PlanRepository,
     PurchaseRepository,
@@ -316,6 +317,7 @@ class CooperationGenerator:
     cooperation_repository: CooperationRepository
     datetime_service: FakeDatetimeService
     company_generator: CompanyGenerator
+    plan_cooperation_repository: PlanCooperationRepository
 
     def create_cooperation(
         self,
@@ -335,7 +337,7 @@ class CooperationGenerator:
         )
         if plans is not None:
             for plan in plans:
-                self.cooperation_repository.add_plan_to_cooperation(
+                self.plan_cooperation_repository.add_plan_to_cooperation(
                     plan.id, cooperation.id
                 )
         return cooperation

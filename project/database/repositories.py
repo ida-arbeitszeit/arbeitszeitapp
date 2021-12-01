@@ -413,7 +413,6 @@ class PurchaseRepository(repositories.PurchaseRepository):
 @dataclass
 class PlanRepository(repositories.PlanRepository):
     company_repository: CompanyRepository
-    accounting_repository: AccountingRepository
     db: SQLAlchemy
 
     def object_from_orm(self, plan: Plan) -> entities.Plan:
@@ -446,8 +445,10 @@ class PlanRepository(repositories.PlanRepository):
             activation_date=plan.activation_date,
             active_days=plan.active_days,
             payout_count=plan.payout_count,
-            requested_cooperation=plan.requested_cooperation,
-            cooperation=plan.cooperation,
+            requested_cooperation=UUID(plan.requested_cooperation)
+            if plan.requested_cooperation
+            else None,
+            cooperation=UUID(plan.cooperation) if plan.cooperation else None,
             is_available=plan.is_available,
         )
 
@@ -1004,7 +1005,6 @@ class CooperationRepository(repositories.CooperationRepository):
             name=cooperation_orm.name,
             definition=cooperation_orm.definition,
             coordinator=coordinator,
-            plans=cooperation_orm.plans.all(),
         )
 
     def get_by_id(self, id: UUID) -> Optional[entities.Cooperation]:
@@ -1021,11 +1021,50 @@ class CooperationRepository(repositories.CooperationRepository):
             ).all()
         )
 
-    def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
-        ...
 
-    def remove_plan_from_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
-        ...
+@inject
+@dataclass
+class PlanCooperationRepository(repositories.PlanCooperationRepository):
+    plan_repository: PlanRepository
+
+    def get_price_per_unit(self, plan_id: UUID) -> Decimal:
+        plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
+        coop_orm = plan_orm.coop
+        plan = self.plan_repository.get_plan_by_id(plan_id)
+        assert plan
+        if coop_orm is None:
+            price = plan.individual_price_per_unit
+        else:
+            price = self._calculate_coop_price_per_unit(coop_orm)
+        return price
+
+    def _calculate_coop_price_per_unit(self, coop_orm: Cooperation) -> Decimal:
+        associated_plans_orm = coop_orm.plans.all()
+        associated_plans = [
+            self.plan_repository.object_from_orm(plan) for plan in associated_plans_orm
+        ]
+
+        if len(associated_plans) == 1:
+            price = associated_plans[0].individual_price_per_unit
+        elif len(associated_plans) > 1:
+            price = (
+                decimal_sum(
+                    [plan.production_costs.total_cost() for plan in associated_plans]
+                )
+            ) / (sum([plan.prd_amount for plan in associated_plans]) or 1)
+        else:
+            price = Decimal(0)
+        return price
+
+    def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
+        plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
+        assert plan_orm
+        plan_orm.cooperation = str(cooperation_id)
+
+    def remove_plan_from_cooperation(self, plan_id: UUID) -> None:
+        plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
+        assert plan_orm
+        plan_orm.cooperation = None
 
     def set_requested_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
@@ -1033,4 +1072,6 @@ class CooperationRepository(repositories.CooperationRepository):
         plan_orm.requested_cooperation = str(cooperation_id)
 
     def set_requested_cooperation_to_none(self, plan_id: UUID) -> None:
-        ...
+        plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
+        assert plan_orm
+        plan_orm.requested_cooperation = None

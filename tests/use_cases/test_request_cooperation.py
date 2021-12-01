@@ -89,27 +89,6 @@ class RequestCooperationTests(TestCase):
             == RequestCooperationResponse.RejectionReason.plan_has_cooperation
         )
 
-    def test_error_is_raised_when_plan_is_already_in_the_list_of_associated_plans(
-        self,
-    ) -> None:
-        requester = self.company_generator.create_company()
-        plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now()
-        )
-        cooperation = self.coop_generator.create_cooperation(
-            coordinator=requester, plans=[plan]
-        )
-        plan.cooperation = None
-        request = RequestCooperationRequest(
-            requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation.id
-        )
-        response = self.request_cooperation(request)
-        assert response.is_rejected
-        assert (
-            response.rejection_reason
-            == response.RejectionReason.plan_already_part_of_cooperation
-        )
-
     def test_error_is_raised_when_plan_is_already_requesting_cooperation(self) -> None:
         requester = self.company_generator.create_company()
         cooperation1 = self.coop_generator.create_cooperation()
@@ -186,8 +165,6 @@ class RequestCooperationTests(TestCase):
         assert plan.requested_cooperation
 
         accept_cooperation_response = self.accept_cooperation(
-            AcceptCooperationRequest(
-                requester.id, plan.id, plan.requested_cooperation.id
-            )
+            AcceptCooperationRequest(requester.id, plan.id, plan.requested_cooperation)
         )
         assert not accept_cooperation_response.is_rejected
