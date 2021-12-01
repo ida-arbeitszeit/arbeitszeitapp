@@ -27,7 +27,6 @@ class RequestCooperationResponse:
         cooperation_not_found = auto()
         plan_inactive = auto()
         plan_has_cooperation = auto()
-        plan_already_part_of_cooperation = auto()
         plan_is_already_requesting_cooperation = auto()
         plan_is_public_service = auto()
         requester_is_not_planner = auto()
@@ -44,8 +43,8 @@ class RequestCooperationResponse:
 class RequestCooperation:
     plan_repository: PlanRepository
     cooperation_repository: CooperationRepository
-    company_repository: CompanyRepository
     plan_cooperation_repository: PlanCooperationRepository
+    company_repository: CompanyRepository
 
     def __call__(
         self, request: RequestCooperationRequest
@@ -71,8 +70,6 @@ class RequestCooperation:
             raise RequestCooperationResponse.RejectionReason.plan_inactive
         if plan.cooperation:
             raise RequestCooperationResponse.RejectionReason.plan_has_cooperation
-        if plan in cooperation.plans:
-            raise RequestCooperationResponse.RejectionReason.plan_already_part_of_cooperation
         if plan.requested_cooperation:
             raise RequestCooperationResponse.RejectionReason.plan_is_already_requesting_cooperation
         if plan.is_public_service:

@@ -55,7 +55,7 @@ class ListCooperationRequests:
     def _plan_to_response_model(self, plan: Plan) -> ListedCoopRequest:
         assert plan.requested_cooperation
         return ListedCoopRequest(
-            coop_id=plan.requested_cooperation.id,
+            coop_id=plan.requested_cooperation,
             coop_name=plan.requested_cooperation.name,
             plan_id=plan.id,
             plan_name=plan.prd_name,

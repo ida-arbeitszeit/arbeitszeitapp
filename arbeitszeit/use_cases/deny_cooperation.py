@@ -62,7 +62,7 @@ class DenyCooperation:
             raise DenyCooperationResponse.RejectionReason.plan_not_found
         if cooperation is None:
             raise DenyCooperationResponse.RejectionReason.cooperation_not_found
-        if plan.requested_cooperation != cooperation:
+        if plan.requested_cooperation != cooperation.id:
             raise DenyCooperationResponse.RejectionReason.cooperation_was_not_requested
         if requester != cooperation.coordinator:
             raise DenyCooperationResponse.RejectionReason.requester_is_not_coordinator

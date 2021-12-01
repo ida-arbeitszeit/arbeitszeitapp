@@ -380,6 +380,10 @@ class CooperationRepository(ABC):
 
 class PlanCooperationRepository(ABC):
     @abstractmethod
+    def get_price_per_unit(self, plan_id: UUID) -> Decimal:
+        pass
+
+    @abstractmethod
     def get_requests(self, coordinator_id: UUID) -> Iterator[Plan]:
         pass
 
@@ -388,7 +392,7 @@ class PlanCooperationRepository(ABC):
         pass
 
     @abstractmethod
-    def remove_plan_from_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
+    def remove_plan_from_cooperation(self, plan_id: UUID) -> None:
         pass
 
     @abstractmethod

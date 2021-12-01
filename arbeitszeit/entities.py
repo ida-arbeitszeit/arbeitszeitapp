@@ -7,7 +7,6 @@ from enum import Enum
 from typing import List, Optional, Union
 from uuid import UUID
 
-from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.user_action import UserAction
 
 
@@ -78,14 +77,6 @@ class Cooperation:
     name: str
     definition: str
     coordinator: Company
-    plans: List[Plan]  # should not include public plans
-
-    @property
-    def coop_price_per_unit(self) -> Decimal:
-        coop_price_per_unit = (
-            decimal_sum([plan.production_costs.total_cost() for plan in self.plans])
-        ) / (sum([plan.prd_amount for plan in self.plans]) or 1)
-        return coop_price_per_unit
 
 
 @dataclass
@@ -150,25 +141,17 @@ class Plan:
     expiration_date: Optional[datetime]
     active_days: Optional[int]
     payout_count: int
-    requested_cooperation: Optional[Cooperation]
-    cooperation: Optional[Cooperation]
+    requested_cooperation: Optional[UUID]
+    cooperation: Optional[UUID]
     is_available: bool
 
     @property
-    def _individual_price_per_unit(self) -> Decimal:
+    def individual_price_per_unit(self) -> Decimal:
         return (
             self.production_costs.total_cost() / self.prd_amount
             if not self.is_public_service
             else Decimal(0)
         )
-
-    @property
-    def price_per_unit(self) -> Decimal:
-        if self.cooperation is None:
-            price_per_unit = self._individual_price_per_unit
-        else:
-            price_per_unit = self.cooperation.coop_price_per_unit
-        return price_per_unit
 
     @property
     def expected_sales_value(self) -> Decimal:
