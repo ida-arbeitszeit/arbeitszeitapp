@@ -59,13 +59,13 @@ class ListInboundCoopRequests:
 
     def _plan_to_response_model(self, plan: Plan) -> ListedInboundCoopRequest:
         assert plan.requested_cooperation
-        requested_cooperation = self.cooperation_repository.get_by_id(
+        requested_cooperation_name = self.cooperation_repository.get_cooperation_name(
             plan.requested_cooperation
         )
-        assert requested_cooperation
+        assert requested_cooperation_name
         return ListedInboundCoopRequest(
             coop_id=plan.requested_cooperation,
-            coop_name=requested_cooperation.name,
+            coop_name=requested_cooperation_name,
             plan_id=plan.id,
             plan_name=plan.prd_name,
             planner_name=plan.planner.name,
