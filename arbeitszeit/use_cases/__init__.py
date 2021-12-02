@@ -56,10 +56,10 @@ from .invite_worker_to_company import (
     InviteWorkerToCompany,
     InviteWorkerToCompanyRequest,
 )
-from .list_cooperation_requests import (
-    ListCooperationRequests,
-    ListCooperationRequestsRequest,
-    ListCooperationRequestsResponse,
+from .list_inbound_coop_requests import (
+    ListInboundCoopRequests,
+    ListInboundCoopRequestsRequest,
+    ListInboundCoopRequestsResponse,
     ListedCoopRequest,
 )
 from .list_coordinations import (
@@ -152,9 +152,9 @@ __all__ = [
     "GetTransactionInfos",
     "InviteWorkerToCompany",
     "InviteWorkerToCompanyRequest",
-    "ListCooperationRequests",
-    "ListCooperationRequestsRequest",
-    "ListCooperationRequestsResponse",
+    "ListInboundCoopRequests",
+    "ListInboundCoopRequestsRequest",
+    "ListInboundCoopRequestsResponse",
     "ListCoordinations",
     "ListCoordinationsRequest",
     "ListCoordinationsResponse",

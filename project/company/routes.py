@@ -14,8 +14,8 @@ from arbeitszeit.use_cases import (
     DeletePlan,
     GetDraftSummary,
     GetPlanSummary,
-    ListCooperationRequests,
-    ListCooperationRequestsRequest,
+    ListInboundCoopRequests,
+    ListInboundCoopRequestsRequest,
     ListCoordinations,
     ListCoordinationsRequest,
     ListMessages,
@@ -507,7 +507,7 @@ def my_cooperations(
     template_renderer: UserTemplateRenderer,
     presenter: ShowMyCooperationsPresenter,
     list_coordinations: ListCoordinations,
-    list_cooperation_requests: ListCooperationRequests,
+    list_inbound_coop_requests: ListInboundCoopRequests,
     accept_cooperation: AcceptCooperation,
 ):
     accept_cooperation_response: Optional[AcceptCooperationResponse]
@@ -525,13 +525,13 @@ def my_cooperations(
     list_coord_response = list_coordinations(
         ListCoordinationsRequest(UUID(current_user.id))
     )
-    list_cooperation_requests_response = list_cooperation_requests(
-        ListCooperationRequestsRequest(UUID(current_user.id))
+    list_inbound_coop_requests_response = list_inbound_coop_requests(
+        ListInboundCoopRequestsRequest(UUID(current_user.id))
     )
 
     view_model = presenter.present(
         list_coord_response,
-        list_cooperation_requests_response,
+        list_inbound_coop_requests_response,
         accept_cooperation_response,
     )
     return template_renderer.render_template(

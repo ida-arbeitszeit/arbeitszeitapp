@@ -2,7 +2,7 @@ from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional
 
 from arbeitszeit.use_cases import (
-    ListCooperationRequestsResponse,
+    ListInboundCoopRequestsResponse,
     ListCoordinationsResponse,
     AcceptCooperationResponse,
 )
@@ -51,7 +51,7 @@ class ShowMyCooperationsPresenter:
     def present(
         self,
         list_coord_response: ListCoordinationsResponse,
-        list_coop_requests_response: ListCooperationRequestsResponse,
+        list_inbound_coop_requests_response: ListInboundCoopRequestsResponse,
         accept_cooperation_response: Optional[AcceptCooperationResponse],
     ) -> ShowMyCooperationsViewModel:
         list_of_coordinations = ListOfCoordinationsTable(
@@ -75,7 +75,7 @@ class ShowMyCooperationsPresenter:
                     plan_name=plan.plan_name,
                     planner_name=plan.planner_name,
                 )
-                for plan in list_coop_requests_response.cooperation_requests
+                for plan in list_inbound_coop_requests_response.cooperation_requests
             ]
         )
         accept_message = (

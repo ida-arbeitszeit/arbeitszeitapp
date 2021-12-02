@@ -3,7 +3,7 @@ from unittest import TestCase
 from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from arbeitszeit.use_cases import (
     ListCoordinationsResponse,
-    ListCooperationRequestsResponse,
+    ListInboundCoopRequestsResponse,
     AcceptCooperationResponse,
     CooperationInfo,
     ListedCoopRequest,
@@ -23,7 +23,7 @@ LIST_COORDINATIONS_RESPONSE_LEN_1 = ListCoordinationsResponse(
     ]
 )
 
-LIST_COOPERATION_REQUESTS_RESPONSE_LEN_1 = ListCooperationRequestsResponse(
+LIST_INBD_COOP_REQUESTS_RESPONSE_LEN_1 = ListInboundCoopRequestsResponse(
     cooperation_requests=[
         ListedCoopRequest(
             coop_id=uuid4(),
@@ -43,7 +43,7 @@ class ShowMyCooperationsPresenterTests(TestCase):
     def test_coordinations_are_presented_correctly(self):
         presentation = self.presenter.present(
             LIST_COORDINATIONS_RESPONSE_LEN_1,
-            LIST_COOPERATION_REQUESTS_RESPONSE_LEN_1,
+            LIST_INBD_COOP_REQUESTS_RESPONSE_LEN_1,
             AcceptCooperationResponse(rejection_reason=None),
         )
         self.assertEqual(len(presentation.list_of_coordinations.rows), 1)
@@ -71,41 +71,35 @@ class ShowMyCooperationsPresenterTests(TestCase):
     def test_cooperation_requests_are_presented_correctly(self):
         presentation = self.presenter.present(
             LIST_COORDINATIONS_RESPONSE_LEN_1,
-            LIST_COOPERATION_REQUESTS_RESPONSE_LEN_1,
+            LIST_INBD_COOP_REQUESTS_RESPONSE_LEN_1,
             AcceptCooperationResponse(rejection_reason=None),
         )
         self.assertEqual(len(presentation.list_of_cooperation_requests.rows), 1)
         self.assertEqual(
             presentation.list_of_cooperation_requests.rows[0].coop_name,
-            LIST_COOPERATION_REQUESTS_RESPONSE_LEN_1.cooperation_requests[0].coop_name,
+            LIST_INBD_COOP_REQUESTS_RESPONSE_LEN_1.cooperation_requests[0].coop_name,
         )
         self.assertEqual(
             presentation.list_of_cooperation_requests.rows[0].coop_id,
-            str(
-                LIST_COOPERATION_REQUESTS_RESPONSE_LEN_1.cooperation_requests[0].coop_id
-            ),
+            str(LIST_INBD_COOP_REQUESTS_RESPONSE_LEN_1.cooperation_requests[0].coop_id),
         )
         self.assertEqual(
             presentation.list_of_cooperation_requests.rows[0].plan_id,
-            str(
-                LIST_COOPERATION_REQUESTS_RESPONSE_LEN_1.cooperation_requests[0].plan_id
-            ),
+            str(LIST_INBD_COOP_REQUESTS_RESPONSE_LEN_1.cooperation_requests[0].plan_id),
         )
         self.assertEqual(
             presentation.list_of_cooperation_requests.rows[0].plan_name,
-            LIST_COOPERATION_REQUESTS_RESPONSE_LEN_1.cooperation_requests[0].plan_name,
+            LIST_INBD_COOP_REQUESTS_RESPONSE_LEN_1.cooperation_requests[0].plan_name,
         )
         self.assertEqual(
             presentation.list_of_cooperation_requests.rows[0].planner_name,
-            LIST_COOPERATION_REQUESTS_RESPONSE_LEN_1.cooperation_requests[
-                0
-            ].planner_name,
+            LIST_INBD_COOP_REQUESTS_RESPONSE_LEN_1.cooperation_requests[0].planner_name,
         )
 
     def test_successfull_accept_request_response_is_presented_correctly(self):
         presentation_success = self.presenter.present(
             LIST_COORDINATIONS_RESPONSE_LEN_1,
-            LIST_COOPERATION_REQUESTS_RESPONSE_LEN_1,
+            LIST_INBD_COOP_REQUESTS_RESPONSE_LEN_1,
             AcceptCooperationResponse(rejection_reason=None),
         )
         self.assertEqual(
@@ -120,7 +114,7 @@ class ShowMyCooperationsPresenterTests(TestCase):
     def test_failed_accept_request_response_is_presented_correctly(self):
         presentation_failure = self.presenter.present(
             LIST_COORDINATIONS_RESPONSE_LEN_1,
-            LIST_COOPERATION_REQUESTS_RESPONSE_LEN_1,
+            LIST_INBD_COOP_REQUESTS_RESPONSE_LEN_1,
             AcceptCooperationResponse(
                 rejection_reason=AcceptCooperationResponse.RejectionReason.plan_not_found
             ),

@@ -13,7 +13,7 @@ from arbeitszeit.repositories import (
 
 
 @dataclass
-class ListCooperationRequestsRequest:
+class ListInboundCoopRequestsRequest:
     coordinator_id: UUID
 
 
@@ -27,33 +27,33 @@ class ListedCoopRequest:
 
 
 @dataclass
-class ListCooperationRequestsResponse:
+class ListInboundCoopRequestsResponse:
     cooperation_requests: List[ListedCoopRequest]
 
 
 @inject
 @dataclass
-class ListCooperationRequests:
+class ListInboundCoopRequests:
     company_repository: CompanyRepository
     plan_cooperation_repository: PlanCooperationRepository
     cooperation_repository: CooperationRepository
 
     def __call__(
-        self, request: ListCooperationRequestsRequest
-    ) -> ListCooperationRequestsResponse:
+        self, request: ListInboundCoopRequestsRequest
+    ) -> ListInboundCoopRequestsResponse:
         if not self._coordinator_exists(request):
-            return ListCooperationRequestsResponse(cooperation_requests=[])
+            return ListInboundCoopRequestsResponse(cooperation_requests=[])
         cooperation_requests = [
             self._plan_to_response_model(plan)
             for plan in self.plan_cooperation_repository.get_requests(
                 request.coordinator_id
             )
         ]
-        return ListCooperationRequestsResponse(
+        return ListInboundCoopRequestsResponse(
             cooperation_requests=cooperation_requests
         )
 
-    def _coordinator_exists(self, request: ListCooperationRequestsRequest) -> bool:
+    def _coordinator_exists(self, request: ListInboundCoopRequestsRequest) -> bool:
         coordinator = self.company_repository.get_by_id(request.coordinator_id)
         return bool(coordinator)
 
