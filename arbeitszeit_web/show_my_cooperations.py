@@ -1,9 +1,10 @@
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from arbeitszeit.use_cases import (
     ListCooperationRequestsResponse,
     ListCoordinationsResponse,
+    AcceptCooperationResponse,
 )
 
 
@@ -39,6 +40,7 @@ class ListOfCooperationRequestsTable:
 class ShowMyCooperationsViewModel:
     list_of_coordinations: ListOfCoordinationsTable
     list_of_cooperation_requests: ListOfCooperationRequestsTable
+    accept_message: List[str]
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -50,6 +52,7 @@ class ShowMyCooperationsPresenter:
         self,
         list_coop_response: ListCoordinationsResponse,
         list_coop_requests_response: ListCooperationRequestsResponse,
+        accept_cooperation_response: Optional[AcceptCooperationResponse],
     ) -> ShowMyCooperationsViewModel:
         list_of_coordinations = ListOfCoordinationsTable(
             rows=[
@@ -75,7 +78,37 @@ class ShowMyCooperationsPresenter:
                 for plan in list_coop_requests_response.cooperation_requests
             ]
         )
-        return ShowMyCooperationsViewModel(
-            list_of_coordinations,
-            list_of_cooperation_requests,
+        accept_message = (
+            self._create_accept_message(accept_cooperation_response)
+            if accept_cooperation_response
+            else None
         )
+
+        return ShowMyCooperationsViewModel(
+            list_of_coordinations, list_of_cooperation_requests, accept_message
+        )
+
+    def _create_accept_message(self, accept_cooperation_response) -> List[str]:
+        if not accept_cooperation_response.is_rejected:
+            accept_message = ["Kooperationsanfrage wurde angenommen."]
+        else:
+            if (
+                accept_cooperation_response.rejection_reason.plan_not_found
+                or accept_cooperation_response.rejection_reason.cooperation_not_found
+            ):
+                accept_message = ["Plan oder Kooperation nicht gefunden."]
+            elif (
+                accept_cooperation_response.rejection_reason.plan_inactive
+                or accept_cooperation_response.rejection_reason.plan_has_cooperation
+                or accept_cooperation_response.rejection_reason.plan_is_public_service
+            ):
+                accept_message = ["Mit dem Plan stimmt etwas nicht."]
+            elif (
+                accept_cooperation_response.rejection_reason.cooperation_was_not_requested
+            ):
+                accept_message = ["Diese Kooperationsanfrage existiert nicht."]
+            elif (
+                accept_cooperation_response.rejection_reason.requester_is_not_coordinator
+            ):
+                accept_message = ["Du bist nicht Koordinator dieser Kooperation."]
+        return accept_message

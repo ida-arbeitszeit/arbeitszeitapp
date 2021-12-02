@@ -7,6 +7,8 @@ from flask_login import current_user, login_required
 
 from arbeitszeit import entities, errors, use_cases
 from arbeitszeit.use_cases import (
+    AcceptCooperation,
+    AcceptCooperationRequest,
     CreatePlanDraft,
     DeletePlan,
     GetDraftSummary,
@@ -505,17 +507,31 @@ def my_cooperations(
     presenter: ShowMyCooperationsPresenter,
     list_coordinations: ListCoordinations,
     list_cooperation_requests: ListCooperationRequests,
+    accept_cooperation: AcceptCooperation,
 ):
+    if request.method == "POST":
+        if request.form["accept"]:
+            coop_id, plan_id = [id.strip() for id in request.form["accept"].split(",")]
+            accept_cooperation_response = accept_cooperation(
+                AcceptCooperationRequest(
+                    UUID(current_user.id), UUID(plan_id), UUID(coop_id)
+                )
+            )
+    else:
+        accept_cooperation_response = None
+
     list_coop_response = list_coordinations(
         ListCoordinationsRequest(UUID(current_user.id))
     )
     list_cooperation_requests_response = list_cooperation_requests(
         ListCooperationRequestsRequest(UUID(current_user.id))
     )
-    view_model = presenter.present(
-        list_coop_response, list_cooperation_requests_response
-    )
 
+    view_model = presenter.present(
+        list_coop_response,
+        list_cooperation_requests_response,
+        accept_cooperation_response,
+    )
     return template_renderer.render_template(
         "company/my_cooperations.html", context=view_model.to_dict()
     )

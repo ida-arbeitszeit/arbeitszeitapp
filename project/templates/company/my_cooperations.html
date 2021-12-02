@@ -9,7 +9,7 @@
 </div>
 
 <div class="table-container">
-    {% if list_of_coordinations %}
+    {% if list_of_coordinations.rows %}
     <table class="table is-fullwidth">
         <thead>
             <tr>
@@ -17,7 +17,7 @@
                 <th>Name</th>
                 <th>Definition</th>
                 <th>Anzahl Pläne</th>
-                <th>Bearbeiten</th>
+                <th>Bearbeiten/Details</th>
             </tr>
         </thead>
         <tbody>
@@ -44,15 +44,24 @@
     </h1>
 </div>
 
+{% if accept_message %}
+<div class="block"></div>
+{% for message in accept_message %}
+<div class="notification is-danger">
+    {{ message }}
+</div>
+{% endfor %}
+{% endif %}
+
 <div class="table-container">
-    {% if list_of_cooperation_requests %}
+    {% if list_of_cooperation_requests.rows %}
     <table class="table is-fullwidth">
         <thead>
             <tr>
-                <th>Kooperation</th>
+                <th>Meine Kooperation</th>
                 <th>Anfragender Betrieb</th>
-                <th>Plan</th>
-                <th>Akzeptieren</th>
+                <th>Anfragender Plan</th>
+                <th>Anfrage akzeptieren</th>
                 <th>Ablehnen</th>
             </tr>
         </thead>
@@ -62,8 +71,23 @@
                 <td>{{ req.coop_name }}</td>
                 <td>{{ req.planner_name }}</td>
                 <td>{{ req.plan_name }}</td>
-                <td>[X]</td>
-                <td>[X]</td>
+                <td>
+                    <form action="" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="control">
+                            <button class="button is-success" name="accept" value="{{ req.coop_id }},{{ req.plan_id }}"
+                                type="submit">
+                                <span class="icon is-small">
+                                    <i class="fas fa-check"></i>
+                                </span>
+                                <span>Akzeptieren</span>
+                            </button>
+                        </div>
+                    </form>
+                </td>
+                <td>
+                    [X]
+                </td>
             </tr>
             {% endfor %}
         </tbody>
