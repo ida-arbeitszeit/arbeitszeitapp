@@ -377,6 +377,10 @@ class CooperationRepository(ABC):
     ) -> Iterator[Cooperation]:
         pass
 
+    @abstractmethod
+    def get_cooperation_name(self, coop_id: UUID) -> Optional[str]:
+        pass
+
 
 class PlanCooperationRepository(ABC):
     @abstractmethod
@@ -384,7 +388,11 @@ class PlanCooperationRepository(ABC):
         pass
 
     @abstractmethod
-    def get_requests(self, coordinator_id: UUID) -> Iterator[Plan]:
+    def get_inbound_requests(self, coordinator_id: UUID) -> Iterator[Plan]:
+        pass
+
+    @abstractmethod
+    def get_outbound_requests(self, requester_id: UUID) -> Iterator[Plan]:
         pass
 
     @abstractmethod

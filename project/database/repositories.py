@@ -1030,6 +1030,12 @@ class CooperationRepository(repositories.CooperationRepository):
             ).all()
         )
 
+    def get_cooperation_name(self, coop_id: UUID) -> Optional[str]:
+        coop_orm = Cooperation.query.filter_by(id=str(coop_id)).first()
+        if coop_orm is None:
+            return None
+        return coop_orm.name
+
 
 @inject
 @dataclass
@@ -1037,7 +1043,7 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
     plan_repository: PlanRepository
     cooperation_repository: CooperationRepository
 
-    def get_requests(self, coordinator_id: UUID) -> Iterator[entities.Plan]:
+    def get_inbound_requests(self, coordinator_id: UUID) -> Iterator[entities.Plan]:
         for plan in self.plan_repository.all_active_plans():
             if plan.requested_cooperation:
                 if plan.requested_cooperation in [
@@ -1047,6 +1053,12 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
                     )
                 ]:
                     yield plan
+
+    def get_outbound_requests(self, requester_id: UUID) -> Iterator[entities.Plan]:
+        plans_of_company = self.plan_repository.get_all_plans_for_company(requester_id)
+        for plan in plans_of_company:
+            if plan.requested_cooperation:
+                yield plan
 
     def get_price_per_unit(self, plan_id: UUID) -> Decimal:
         plan_orm = Plan.query.filter_by(id=str(plan_id)).first()

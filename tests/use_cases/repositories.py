@@ -730,6 +730,12 @@ class CooperationRepository(interfaces.CooperationRepository):
             if cooperation.coordinator.id == company_id:
                 yield cooperation
 
+    def get_cooperation_name(self, coop_id: UUID) -> Optional[str]:
+        coop = self.cooperations.get(coop_id)
+        if coop is None:
+            return None
+        return coop.name
+
     def __len__(self) -> int:
         return len(self.cooperations)
 
@@ -745,7 +751,7 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
         self.plan_repository = plan_repository
         self.cooperation_repository = cooperation_repository
 
-    def get_requests(self, coordinator_id: UUID) -> Iterator[Plan]:
+    def get_inbound_requests(self, coordinator_id: UUID) -> Iterator[Plan]:
         coops_of_company = list(
             self.cooperation_repository.get_cooperations_coordinated_by_company(
                 coordinator_id
@@ -753,6 +759,12 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
         )
         for plan in self.plan_repository.plans.values():
             if plan.requested_cooperation in [coop.id for coop in coops_of_company]:
+                yield plan
+
+    def get_outbound_requests(self, requester_id: UUID) -> Iterator[Plan]:
+        plans_of_company = self.plan_repository.get_all_plans_for_company(requester_id)
+        for plan in plans_of_company:
+            if plan.requested_cooperation:
                 yield plan
 
     def get_price_per_unit(self, plan_id: UUID) -> Decimal:

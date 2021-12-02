@@ -1,15 +1,17 @@
+from datetime import datetime
 from unittest import TestCase
+from uuid import uuid4
 
-from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from arbeitszeit.use_cases import (
-    ListCoordinationsResponse,
-    ListInboundCoopRequestsResponse,
     AcceptCooperationResponse,
     CooperationInfo,
-    ListedCoopRequest,
+    ListCoordinationsResponse,
+    ListedInboundCoopRequest,
+    ListedOutboundCoopRequest,
+    ListInboundCoopRequestsResponse,
+    ListOutboundCoopRequestsResponse,
 )
-from uuid import uuid4
-from datetime import datetime
+from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 
 LIST_COORDINATIONS_RESPONSE_LEN_1 = ListCoordinationsResponse(
     coordinations=[
@@ -25,12 +27,23 @@ LIST_COORDINATIONS_RESPONSE_LEN_1 = ListCoordinationsResponse(
 
 LIST_INBD_COOP_REQUESTS_RESPONSE_LEN_1 = ListInboundCoopRequestsResponse(
     cooperation_requests=[
-        ListedCoopRequest(
+        ListedInboundCoopRequest(
             coop_id=uuid4(),
             coop_name="coop name",
             plan_id=uuid4(),
             plan_name="plan name",
             planner_name="planner name",
+        )
+    ]
+)
+
+LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1 = ListOutboundCoopRequestsResponse(
+    cooperation_requests=[
+        ListedOutboundCoopRequest(
+            plan_id=uuid4(),
+            plan_name="plan name",
+            coop_id=uuid4(),
+            coop_name="coop name",
         )
     ]
 )
@@ -45,6 +58,7 @@ class ShowMyCooperationsPresenterTests(TestCase):
             LIST_COORDINATIONS_RESPONSE_LEN_1,
             LIST_INBD_COOP_REQUESTS_RESPONSE_LEN_1,
             AcceptCooperationResponse(rejection_reason=None),
+            LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1,
         )
         self.assertEqual(len(presentation.list_of_coordinations.rows), 1)
         self.assertEqual(
@@ -68,31 +82,32 @@ class ShowMyCooperationsPresenterTests(TestCase):
             str(LIST_COORDINATIONS_RESPONSE_LEN_1.coordinations[0].count_plans_in_coop),
         )
 
-    def test_cooperation_requests_are_presented_correctly(self):
+    def test_inbound_cooperation_requests_are_presented_correctly(self):
         presentation = self.presenter.present(
             LIST_COORDINATIONS_RESPONSE_LEN_1,
             LIST_INBD_COOP_REQUESTS_RESPONSE_LEN_1,
             AcceptCooperationResponse(rejection_reason=None),
+            LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1,
         )
-        self.assertEqual(len(presentation.list_of_cooperation_requests.rows), 1)
+        self.assertEqual(len(presentation.list_of_inbound_coop_requests.rows), 1)
         self.assertEqual(
-            presentation.list_of_cooperation_requests.rows[0].coop_name,
+            presentation.list_of_inbound_coop_requests.rows[0].coop_name,
             LIST_INBD_COOP_REQUESTS_RESPONSE_LEN_1.cooperation_requests[0].coop_name,
         )
         self.assertEqual(
-            presentation.list_of_cooperation_requests.rows[0].coop_id,
+            presentation.list_of_inbound_coop_requests.rows[0].coop_id,
             str(LIST_INBD_COOP_REQUESTS_RESPONSE_LEN_1.cooperation_requests[0].coop_id),
         )
         self.assertEqual(
-            presentation.list_of_cooperation_requests.rows[0].plan_id,
+            presentation.list_of_inbound_coop_requests.rows[0].plan_id,
             str(LIST_INBD_COOP_REQUESTS_RESPONSE_LEN_1.cooperation_requests[0].plan_id),
         )
         self.assertEqual(
-            presentation.list_of_cooperation_requests.rows[0].plan_name,
+            presentation.list_of_inbound_coop_requests.rows[0].plan_name,
             LIST_INBD_COOP_REQUESTS_RESPONSE_LEN_1.cooperation_requests[0].plan_name,
         )
         self.assertEqual(
-            presentation.list_of_cooperation_requests.rows[0].planner_name,
+            presentation.list_of_inbound_coop_requests.rows[0].planner_name,
             LIST_INBD_COOP_REQUESTS_RESPONSE_LEN_1.cooperation_requests[0].planner_name,
         )
 
@@ -101,6 +116,7 @@ class ShowMyCooperationsPresenterTests(TestCase):
             LIST_COORDINATIONS_RESPONSE_LEN_1,
             LIST_INBD_COOP_REQUESTS_RESPONSE_LEN_1,
             AcceptCooperationResponse(rejection_reason=None),
+            LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1,
         )
         self.assertEqual(
             len(presentation_success.accept_message),
@@ -118,6 +134,7 @@ class ShowMyCooperationsPresenterTests(TestCase):
             AcceptCooperationResponse(
                 rejection_reason=AcceptCooperationResponse.RejectionReason.plan_not_found
             ),
+            LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1,
         )
         self.assertEqual(
             len(presentation_failure.accept_message),
@@ -126,4 +143,33 @@ class ShowMyCooperationsPresenterTests(TestCase):
         self.assertEqual(
             presentation_failure.accept_message[0],
             "Plan oder Kooperation nicht gefunden.",
+        )
+
+    def test_outbound_cooperation_requests_are_presented_correctly(self):
+        presentation = self.presenter.present(
+            LIST_COORDINATIONS_RESPONSE_LEN_1,
+            LIST_INBD_COOP_REQUESTS_RESPONSE_LEN_1,
+            AcceptCooperationResponse(rejection_reason=None),
+            LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1,
+        )
+        self.assertEqual(len(presentation.list_of_outbound_coop_requests.rows), 1)
+        self.assertEqual(
+            presentation.list_of_outbound_coop_requests.rows[0].plan_id,
+            str(
+                LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1.cooperation_requests[0].plan_id
+            ),
+        )
+        self.assertEqual(
+            presentation.list_of_outbound_coop_requests.rows[0].plan_name,
+            LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1.cooperation_requests[0].plan_name,
+        )
+        self.assertEqual(
+            presentation.list_of_outbound_coop_requests.rows[0].coop_name,
+            LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1.cooperation_requests[0].coop_name,
+        )
+        self.assertEqual(
+            presentation.list_of_outbound_coop_requests.rows[0].coop_id,
+            str(
+                LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1.cooperation_requests[0].coop_id
+            ),
         )

@@ -90,3 +90,8 @@ class CooperationRepositoryTests(TestCase):
         )
         self.assertEqual(len(cooperations), 1)
         self.assertIn(expected_cooperation, cooperations)
+
+    def test_name_of_cooperation_is_returned(self):
+        cooperation = self.repo.create_cooperation(**self.DEFAULT_CREATE_ARGUMENTS)
+        returned_name = self.repo.get_cooperation_name(cooperation.id)
+        self.assertEqual(returned_name, "test name")

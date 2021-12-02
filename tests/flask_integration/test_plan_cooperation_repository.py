@@ -136,7 +136,7 @@ def test_possible_to_add_and_to_remove_plan_to_cooperation(
 
 
 @injection_test
-def test_only_requesting_plans_for_cooperation_are_returned(
+def test_correct_inbound_requests_are_returned(
     repository: PlanCooperationRepository,
     plan_generator: PlanGenerator,
     cooperation_repository: CooperationRepository,
@@ -155,10 +155,39 @@ def test_only_requesting_plans_for_cooperation_are_returned(
         activation_date=datetime.min, requested_cooperation=coop
     )
     plan_generator.create_plan(activation_date=datetime.min, requested_cooperation=None)
-    requesting_plans = list(repository.get_requests(coop.coordinator.id))
-    assert len(requesting_plans) == 2
-    assert plan_in_list(requesting_plan1, requesting_plans)
-    assert plan_in_list(requesting_plan2, requesting_plans)
+    inbound_requests = list(repository.get_inbound_requests(coop.coordinator.id))
+    assert len(inbound_requests) == 2
+    assert plan_in_list(requesting_plan1, inbound_requests)
+    assert plan_in_list(requesting_plan2, inbound_requests)
+
+
+@injection_test
+def test_correct_outbound_requests_are_returned(
+    repository: PlanCooperationRepository,
+    plan_generator: PlanGenerator,
+    cooperation_repository: CooperationRepository,
+    company_generator: CompanyGenerator,
+):
+    planner = company_generator.create_company()
+    coop = cooperation_repository.create_cooperation(
+        creation_timestamp=datetime.now(),
+        name="test name",
+        definition="test description",
+        coordinator=company_generator.create_company(),
+    )
+    requesting_plan1 = plan_generator.create_plan(
+        activation_date=datetime.min, requested_cooperation=coop, planner=planner
+    )
+    requesting_plan2 = plan_generator.create_plan(
+        activation_date=datetime.min, requested_cooperation=coop, planner=planner
+    )
+    plan_generator.create_plan(
+        activation_date=datetime.min, requested_cooperation=None, planner=planner
+    )
+    outbound_requests = list(repository.get_outbound_requests(planner.id))
+    assert len(outbound_requests) == 2
+    assert plan_in_list(requesting_plan1, outbound_requests)
+    assert plan_in_list(requesting_plan2, outbound_requests)
 
 
 @injection_test

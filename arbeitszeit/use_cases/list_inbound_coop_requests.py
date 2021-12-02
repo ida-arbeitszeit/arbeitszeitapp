@@ -18,7 +18,7 @@ class ListInboundCoopRequestsRequest:
 
 
 @dataclass
-class ListedCoopRequest:
+class ListedInboundCoopRequest:
     coop_id: UUID
     coop_name: str
     plan_id: UUID
@@ -28,7 +28,7 @@ class ListedCoopRequest:
 
 @dataclass
 class ListInboundCoopRequestsResponse:
-    cooperation_requests: List[ListedCoopRequest]
+    cooperation_requests: List[ListedInboundCoopRequest]
 
 
 @inject
@@ -45,7 +45,7 @@ class ListInboundCoopRequests:
             return ListInboundCoopRequestsResponse(cooperation_requests=[])
         cooperation_requests = [
             self._plan_to_response_model(plan)
-            for plan in self.plan_cooperation_repository.get_requests(
+            for plan in self.plan_cooperation_repository.get_inbound_requests(
                 request.coordinator_id
             )
         ]
@@ -57,13 +57,13 @@ class ListInboundCoopRequests:
         coordinator = self.company_repository.get_by_id(request.coordinator_id)
         return bool(coordinator)
 
-    def _plan_to_response_model(self, plan: Plan) -> ListedCoopRequest:
+    def _plan_to_response_model(self, plan: Plan) -> ListedInboundCoopRequest:
         assert plan.requested_cooperation
         requested_cooperation = self.cooperation_repository.get_by_id(
             plan.requested_cooperation
         )
         assert requested_cooperation
-        return ListedCoopRequest(
+        return ListedInboundCoopRequest(
             coop_id=plan.requested_cooperation,
             coop_name=requested_cooperation.name,
             plan_id=plan.id,

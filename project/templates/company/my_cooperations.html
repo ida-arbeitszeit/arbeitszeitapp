@@ -54,7 +54,7 @@
 {% endif %}
 
 <div class="table-container">
-    {% if list_of_cooperation_requests.rows %}
+    {% if list_of_inbound_coop_requests.rows %}
     <table class="table is-fullwidth">
         <thead>
             <tr>
@@ -66,7 +66,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for req in list_of_cooperation_requests.rows %}
+            {% for req in list_of_inbound_coop_requests.rows %}
             <tr>
                 <td>{{ req.coop_name }}</td>
                 <td>{{ req.planner_name }}</td>
@@ -108,8 +108,34 @@
     </h1>
 </div>
 
+<div class="table-container">
+    {% if list_of_outbound_coop_requests.rows %}
+    <table class="table is-fullwidth">
+        <thead>
+            <tr>
+                <th>Mein anfragender Plan</th>
+                <th>Angefragte Kooperation</th>
+                <th>Anfrage abbrechen</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for req in list_of_outbound_coop_requests.rows %}
+            <tr>
+                <td>{{ req.plan_name }}</td>
+                <td>{{ req.coop_name }}</td>
+                <td>[X]</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>(Du hast keine Kooperationsanfragen gestellt.)</p>
+    {% endif %}
+</div>
 
-<p>(to do)</p>
+
+
+
 
 
 <div class="content">

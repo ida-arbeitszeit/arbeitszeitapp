@@ -14,11 +14,13 @@ from arbeitszeit.use_cases import (
     DeletePlan,
     GetDraftSummary,
     GetPlanSummary,
-    ListInboundCoopRequests,
-    ListInboundCoopRequestsRequest,
     ListCoordinations,
     ListCoordinationsRequest,
+    ListInboundCoopRequests,
+    ListInboundCoopRequestsRequest,
     ListMessages,
+    ListOutboundCoopRequests,
+    ListOutboundCoopRequestsRequest,
     ReadMessage,
     RequestCooperation,
     ToggleProductAvailability,
@@ -509,6 +511,7 @@ def my_cooperations(
     list_coordinations: ListCoordinations,
     list_inbound_coop_requests: ListInboundCoopRequests,
     accept_cooperation: AcceptCooperation,
+    list_outbound_coop_requests: ListOutboundCoopRequests,
 ):
     accept_cooperation_response: Optional[AcceptCooperationResponse]
     if request.method == "POST":
@@ -528,11 +531,15 @@ def my_cooperations(
     list_inbound_coop_requests_response = list_inbound_coop_requests(
         ListInboundCoopRequestsRequest(UUID(current_user.id))
     )
+    list_outbound_coop_requests_response = list_outbound_coop_requests(
+        ListOutboundCoopRequestsRequest(UUID(current_user.id))
+    )
 
     view_model = presenter.present(
         list_coord_response,
         list_inbound_coop_requests_response,
         accept_cooperation_response,
+        list_outbound_coop_requests_response,
     )
     return template_renderer.render_template(
         "company/my_cooperations.html", context=view_model.to_dict()

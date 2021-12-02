@@ -2,9 +2,10 @@ from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional
 
 from arbeitszeit.use_cases import (
-    ListInboundCoopRequestsResponse,
-    ListCoordinationsResponse,
     AcceptCooperationResponse,
+    ListCoordinationsResponse,
+    ListInboundCoopRequestsResponse,
+    ListOutboundCoopRequestsResponse,
 )
 
 
@@ -18,7 +19,7 @@ class ListOfCoordinationsRow:
 
 
 @dataclass
-class ListOfCooperationRequestsRow:
+class ListOfInboundCooperationRequestsRow:
     coop_id: str
     coop_name: str
     plan_id: str
@@ -27,20 +28,34 @@ class ListOfCooperationRequestsRow:
 
 
 @dataclass
+class ListOfOutboundCooperationRequestsRow:
+    plan_id: str
+    plan_name: str
+    coop_id: str
+    coop_name: str
+
+
+@dataclass
 class ListOfCoordinationsTable:
     rows: List[ListOfCoordinationsRow]
 
 
 @dataclass
-class ListOfCooperationRequestsTable:
-    rows: List[ListOfCooperationRequestsRow]
+class ListOfInboundCooperationRequestsTable:
+    rows: List[ListOfInboundCooperationRequestsRow]
+
+
+@dataclass
+class ListOfOutboundCooperationRequestsTable:
+    rows: List[ListOfOutboundCooperationRequestsRow]
 
 
 @dataclass
 class ShowMyCooperationsViewModel:
     list_of_coordinations: ListOfCoordinationsTable
-    list_of_cooperation_requests: ListOfCooperationRequestsTable
+    list_of_inbound_coop_requests: ListOfInboundCooperationRequestsTable
     accept_message: List[str]
+    list_of_outbound_coop_requests: ListOfOutboundCooperationRequestsTable
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -53,6 +68,7 @@ class ShowMyCooperationsPresenter:
         list_coord_response: ListCoordinationsResponse,
         list_inbound_coop_requests_response: ListInboundCoopRequestsResponse,
         accept_cooperation_response: Optional[AcceptCooperationResponse],
+        list_outbound_coop_requests_response: ListOutboundCoopRequestsResponse,
     ) -> ShowMyCooperationsViewModel:
         list_of_coordinations = ListOfCoordinationsTable(
             rows=[
@@ -66,9 +82,9 @@ class ShowMyCooperationsPresenter:
                 for coop in list_coord_response.coordinations
             ]
         )
-        list_of_cooperation_requests = ListOfCooperationRequestsTable(
+        list_of_inbound_coop_requests = ListOfInboundCooperationRequestsTable(
             rows=[
-                ListOfCooperationRequestsRow(
+                ListOfInboundCooperationRequestsRow(
                     coop_id=str(plan.coop_id),
                     coop_name=plan.coop_name,
                     plan_id=str(plan.plan_id),
@@ -78,14 +94,30 @@ class ShowMyCooperationsPresenter:
                 for plan in list_inbound_coop_requests_response.cooperation_requests
             ]
         )
+
         accept_message = (
             self._create_accept_message(accept_cooperation_response)
             if accept_cooperation_response
             else []
         )
 
+        list_of_outbound_coop_requests = ListOfOutboundCooperationRequestsTable(
+            rows=[
+                ListOfOutboundCooperationRequestsRow(
+                    plan_id=str(plan.plan_id),
+                    plan_name=plan.plan_name,
+                    coop_id=str(plan.coop_id),
+                    coop_name=plan.coop_name,
+                )
+                for plan in list_outbound_coop_requests_response.cooperation_requests
+            ]
+        )
+
         return ShowMyCooperationsViewModel(
-            list_of_coordinations, list_of_cooperation_requests, accept_message
+            list_of_coordinations,
+            list_of_inbound_coop_requests,
+            accept_message,
+            list_of_outbound_coop_requests,
         )
 
     def _create_accept_message(
