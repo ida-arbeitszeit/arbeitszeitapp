@@ -60,11 +60,13 @@ from .list_cooperation_requests import (
     ListCooperationRequests,
     ListCooperationRequestsRequest,
     ListCooperationRequestsResponse,
+    ListedCoopRequest,
 )
 from .list_coordinations import (
     ListCoordinations,
     ListCoordinationsRequest,
     ListCoordinationsResponse,
+    CooperationInfo,
 )
 from .list_drafts_of_company import ListDraftsOfCompany, ListDraftsResponse
 from .list_messages import (
@@ -124,6 +126,7 @@ __all__ = [
     "CheckForUnreadMessagesResponse",
     "CompanyFilter",
     "CompanyQueryResponse",
+    "CooperationInfo",
     "CreateCooperation",
     "CreateCooperationRequest",
     "CreateCooperationResponse",
@@ -157,6 +160,7 @@ __all__ = [
     "ListCoordinationsResponse",
     "ListDraftsOfCompany",
     "ListDraftsResponse",
+    "ListedCoopRequest",
     "ListMessages",
     "ListMessagesRequest",
     "ListMessagesResponse",

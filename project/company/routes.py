@@ -9,6 +9,7 @@ from arbeitszeit import entities, errors, use_cases
 from arbeitszeit.use_cases import (
     AcceptCooperation,
     AcceptCooperationRequest,
+    AcceptCooperationResponse,
     CreatePlanDraft,
     DeletePlan,
     GetDraftSummary,
@@ -509,6 +510,7 @@ def my_cooperations(
     list_cooperation_requests: ListCooperationRequests,
     accept_cooperation: AcceptCooperation,
 ):
+    accept_cooperation_response: Optional[AcceptCooperationResponse]
     if request.method == "POST":
         if request.form["accept"]:
             coop_id, plan_id = [id.strip() for id in request.form["accept"].split(",")]
@@ -520,7 +522,7 @@ def my_cooperations(
     else:
         accept_cooperation_response = None
 
-    list_coop_response = list_coordinations(
+    list_coord_response = list_coordinations(
         ListCoordinationsRequest(UUID(current_user.id))
     )
     list_cooperation_requests_response = list_cooperation_requests(
@@ -528,7 +530,7 @@ def my_cooperations(
     )
 
     view_model = presenter.present(
-        list_coop_response,
+        list_coord_response,
         list_cooperation_requests_response,
         accept_cooperation_response,
     )
