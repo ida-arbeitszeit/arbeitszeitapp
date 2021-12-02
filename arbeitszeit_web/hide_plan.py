@@ -14,7 +14,7 @@ class HidePlanPresenter:
         notifications: List[str] = []
         if use_case_response.is_success:
             notifications.append(
-                f"Löschen des Plans {use_case_response.plan_id} erfolgreich."
+                f"Abgelaufener Plan {use_case_response.plan_id} wird dir nicht mehr angezeigt."
             )
         return HidePlanViewModel(
             notifications=notifications,

@@ -448,6 +448,7 @@ class PlanRepository(repositories.PlanRepository):
             else None,
             cooperation=UUID(plan.cooperation) if plan.cooperation else None,
             is_available=plan.is_available,
+            hidden_by_user=plan.hidden_by_user,
         )
 
     def object_to_orm(self, plan: entities.Plan) -> Plan:
@@ -636,7 +637,7 @@ class PlanRepository(repositories.PlanRepository):
     def hide_plan(self, plan_id: UUID) -> None:
         plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
         assert plan_orm
-        self.db.session.delete(plan_orm)
+        plan_orm.hidden_by_user = True
 
     def query_active_plans_by_product_name(self, query: str) -> Iterator[entities.Plan]:
         return (
@@ -692,6 +693,7 @@ class PlanRepository(repositories.PlanRepository):
             for plan_orm in Plan.query.filter(
                 Plan.planner == str(company_id),
                 Plan.expired == True,
+                Plan.hidden_by_user == False,
             )
         )
 

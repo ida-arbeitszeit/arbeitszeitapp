@@ -176,6 +176,7 @@ class PlanGenerator:
         requested_cooperation: Optional[Cooperation] = None,
         cooperation: Optional[Cooperation] = None,
         is_available: bool = True,
+        hidden_by_user: bool = False,
     ) -> Plan:
         assert approved, "Currently the application does not support plan rejection"
         draft = self.draft_plan(
@@ -212,6 +213,8 @@ class PlanGenerator:
                     cooperation.coordinator.id, plan.id, cooperation.id
                 )
             )
+        if hidden_by_user:
+            self.plan_repository.hide_plan(plan.id)
         if not is_available:
             self.plan_repository.toggle_product_availability(plan)
         return plan

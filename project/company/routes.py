@@ -11,9 +11,9 @@ from arbeitszeit.use_cases import (
     AcceptCooperationRequest,
     AcceptCooperationResponse,
     CreatePlanDraft,
-    HidePlan,
     GetDraftSummary,
     GetPlanSummary,
+    HidePlan,
     ListCoordinations,
     ListCoordinationsRequest,
     ListInboundCoopRequests,
@@ -27,13 +27,13 @@ from arbeitszeit.use_cases import (
 )
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
-from arbeitszeit_web.hide_plan import HidePlanPresenter
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.get_prefilled_draft_data import (
     GetPrefilledDraftDataPresenter,
     PrefilledDraftDataController,
 )
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
+from arbeitszeit_web.hide_plan import HidePlanPresenter
 from arbeitszeit_web.list_drafts_of_company import ListDraftsPresenter
 from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
