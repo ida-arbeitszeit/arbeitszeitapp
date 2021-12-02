@@ -28,7 +28,7 @@ from .create_plan_draft import (
     CreatePlanDraftRequest,
     CreatePlanDraftResponse,
 )
-from .delete_plan import DeletePlan, DeletePlanResponse
+from .hide_plan import HidePlan, HidePlanResponse
 from .deny_cooperation import (
     DenyCooperation,
     DenyCooperationRequest,
@@ -139,8 +139,8 @@ __all__ = [
     "CreatePlanDraft",
     "CreatePlanDraftRequest",
     "CreatePlanDraftResponse",
-    "DeletePlan",
-    "DeletePlanResponse",
+    "HidePlan",
+    "HidePlanResponse",
     "DenyCooperation",
     "DenyCooperationRequest",
     "DenyCooperationResponse",

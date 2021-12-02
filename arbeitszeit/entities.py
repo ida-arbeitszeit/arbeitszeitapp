@@ -144,6 +144,7 @@ class Plan:
     requested_cooperation: Optional[UUID]
     cooperation: Optional[UUID]
     is_available: bool
+    # hidden_by_user: bool
 
     @property
     def individual_price_per_unit(self) -> Decimal:

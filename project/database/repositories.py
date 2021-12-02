@@ -14,7 +14,6 @@ from werkzeug.security import generate_password_hash
 from arbeitszeit import entities, repositories
 from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.user_action import UserAction
-from project.error import PlanNotFound
 from project.models import (
     Account,
     Company,
@@ -634,12 +633,10 @@ class PlanRepository(repositories.PlanRepository):
             ).all()
         )
 
-    def delete_plan(self, plan_id: UUID) -> None:
+    def hide_plan(self, plan_id: UUID) -> None:
         plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
-        if plan_orm is None:
-            raise PlanNotFound()
-        else:
-            self.db.session.delete(plan_orm)
+        assert plan_orm
+        self.db.session.delete(plan_orm)
 
     def query_active_plans_by_product_name(self, query: str) -> Iterator[entities.Plan]:
         return (

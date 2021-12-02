@@ -448,7 +448,7 @@ class PlanRepository(interfaces.PlanRepository):
             ):
                 yield plan
 
-    def delete_plan(self, plan_id: UUID) -> None:
+    def hide_plan(self, plan_id: UUID) -> None:
         del self.plans[plan_id]
 
     def get_all_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
