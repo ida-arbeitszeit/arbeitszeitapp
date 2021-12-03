@@ -220,6 +220,9 @@
             {% if key == "description" %}
             <td class="has-text-left">{% for paragraph in view_model[key][1] %}{{ paragraph }}<br>{% endfor %}
             </td>
+            {% elif key == "price_per_unit" %}
+            <td class="has-text-left">{{ view_model[key][1] }}{% if view_model[key][2] %} <span style="color: red"><i
+                  class="fas fa-globe"></i></span>{% endif %}</td>
             {% else %}
             <td class="has-text-left">{{ view_model[key][1] }}
             </td>
@@ -304,7 +307,8 @@
         <td>{{ column.company_name }}</td>
         <td>{{ column.product_name }}</td>
         <td>{% for paragraph in column.description %}{{ paragraph }}<br>{% endfor %}</td>
-        <td>{{ column.price_per_unit }}</td>
+        <td>{{ column.price_per_unit }} {% if column.is_cooperating %} <span style="color: red"><i
+              class="fas fa-globe"></i></span>{% endif %} </td>
         <td>{{ column.type_of_plan }}</td>
         <td>{{ column.ends_in }}</td>
         {% if column.is_available %}

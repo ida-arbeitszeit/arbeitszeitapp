@@ -23,6 +23,7 @@ def _convert_into_plan_info(plan: Plan) -> PlanInfo:
         expiration_relative=plan.expiration_relative,
         is_available=plan.is_available,
         renewed=plan.renewed,
+        is_cooperating=bool(plan.cooperation),
     )
 
 

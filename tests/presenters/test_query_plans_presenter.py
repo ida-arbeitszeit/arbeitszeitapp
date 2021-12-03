@@ -17,6 +17,7 @@ RESPONSE_WITH_ONE_RESULT = PlanQueryResponse(
             is_public_service=False,
             expiration_relative=14,
             is_available=True,
+            is_cooperating=False,
         )
     ]
 )

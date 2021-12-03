@@ -17,6 +17,7 @@ class NonActivePlansRow:
     price_per_unit: str
     type_of_plan: str
     plan_creation_date: str
+    is_cooperating: bool
 
 
 @dataclass
@@ -36,6 +37,7 @@ class ActivePlansRow:
     expiration_date: str
     expiration_relative: str
     is_available: bool
+    is_cooperating: bool
 
 
 @dataclass
@@ -97,6 +99,7 @@ class ShowMyPlansPresenter:
                         price_per_unit=self.__format_price(plan.price_per_unit),
                         type_of_plan=self.__get_type_of_plan(plan.is_public_service),
                         plan_creation_date=self.__format_date(plan.plan_creation_date),
+                        is_cooperating=plan.is_cooperating,
                     )
                     for plan in response.non_active_plans
                 ],
@@ -117,6 +120,7 @@ class ShowMyPlansPresenter:
                         if plan.expiration_relative is not None
                         else "–",
                         is_available=plan.is_available,
+                        is_cooperating=plan.is_cooperating,
                     )
                     for plan in response.active_plans
                 ],

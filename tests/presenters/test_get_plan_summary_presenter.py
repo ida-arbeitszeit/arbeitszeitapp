@@ -21,6 +21,7 @@ TESTING_RESPONSE_MODEL = PlanSummarySuccess(
     is_public_service=False,
     price_per_unit=Decimal(0.06),
     is_available=True,
+    is_cooperating=True,
 )
 
 
@@ -166,14 +167,11 @@ class GetPlanSummarySuccessPresenterTests(TestCase):
             ),
         )
 
-    def test_price_per_unit_is_displayed_correctly_as_tuple_of_strings(self):
+    def test_price_per_unit_is_displayed_correctly_as_tuple_of_strings_and_bool(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
         self.assertTupleEqual(
             view_model.price_per_unit,
-            (
-                "Preis (pro Einheit)",
-                str(TESTING_RESPONSE_MODEL.price_per_unit),
-            ),
+            ("Preis (pro Einheit)", str(TESTING_RESPONSE_MODEL.price_per_unit), True),
         )
 
     def test_that_to_dict_method_returns_a_dictionary(self):

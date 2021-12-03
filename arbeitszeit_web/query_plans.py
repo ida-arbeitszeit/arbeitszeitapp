@@ -60,6 +60,7 @@ class ResultTableRow:
     type_of_plan: str
     ends_in: str
     is_available: bool
+    is_cooperating: bool
 
 
 @dataclass
@@ -107,6 +108,7 @@ class QueryPlansPresenter:
                         if result.expiration_relative is not None
                         else "–",
                         is_available=result.is_available,
+                        is_cooperating=result.is_cooperating,
                     )
                     for result in response.results
                 ],
