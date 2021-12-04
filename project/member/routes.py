@@ -149,12 +149,14 @@ def my_account(
     # Member since we did a `user_is_member` check earlier
     member = member_repository.object_from_orm(cast(Member, current_user))
     list_of_trans_infos = get_transaction_infos(member)
-    return template_renderer.render_template(
-        "member/my_account.html",
-        context=dict(
-            all_transactions_info=list_of_trans_infos,
-            my_balance=account_repository.get_account_balance(member.account),
-        ),
+    return Response(
+        template_renderer.render_template(
+            "member/my_account.html",
+            context=dict(
+                all_transactions_info=list_of_trans_infos,
+                my_balance=account_repository.get_account_balance(member.account),
+            ),
+        )
     )
 
 

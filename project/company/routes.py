@@ -108,7 +108,7 @@ def arbeit(
     company = company_repository.get_by_id(UUID(current_user.id))
     assert company is not None
     if request.method == "POST":  # add worker to company
-        member = member_repository.get_by_id(request.form["member"])
+        member = member_repository.get_by_id(UUID(str(request.form["member"]).strip()))
         assert member is not None
         try:
             use_cases.add_worker_to_company(
@@ -283,8 +283,13 @@ def create_plan(
     activate_plan_and_grant_credit: use_cases.ActivatePlanAndGrantCredit,
     template_renderer: UserTemplateRenderer,
 ):
-    draft_uuid: UUID = request.args.get("draft_uuid")
-    expired_plan_uuid: Optional[UUID] = request.args.get("expired_plan_uuid")
+    draft_uuid: UUID = UUID(request.args.get("draft_uuid"))
+    expired_plan_optional = request.args.get("expired_plan_uuid")
+    expired_plan_uuid: Optional[UUID] = (
+        UUID(expired_plan_optional.strip())
+        if expired_plan_optional is not None
+        else None
+    )
 
     approval_response = seek_approval(draft_uuid, expired_plan_uuid)
 
@@ -383,7 +388,9 @@ def transfer_to_worker(
     if request.method == "POST":
         company = company_repository.get_by_id(UUID(current_user.id))
         assert company is not None
-        worker = member_repository.get_by_id(request.form["member_id"])
+        worker = member_repository.get_by_id(
+            UUID(str(request.form["member_id"]).strip())
+        )
         if worker is None:
             flash("Mitglied existiert nicht.")
         else:
@@ -412,7 +419,7 @@ def transfer_to_company(
     if request.method == "POST":
         use_case_request = use_cases.PayMeansOfProductionRequest(
             buyer=UUID(current_user.id),
-            plan=request.form["plan_id"],
+            plan=UUID(str(request.form["plan_id"]).strip()),
             amount=int(request.form["amount"]),
             purpose=entities.PurposesOfPurchases.means_of_prod
             if request.form["category"] == "Produktionsmittel"
