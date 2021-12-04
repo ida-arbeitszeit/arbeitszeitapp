@@ -2,5 +2,8 @@
 
 <h1 class="title">{{ view_model.title }}</h1>
 <p>{{ view_model.content }}</p>
+{% if view_model.show_action_link %}
+<a href={{ view_model.user_action_reference }}>{{ view_model.user_action_label }}</a>
+{% endif %}
 
 {% endmacro %}
