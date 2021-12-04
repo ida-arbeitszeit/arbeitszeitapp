@@ -92,7 +92,7 @@ class PayConsumerProductForm(Form):
         return self.data["amount"]
 
     def get_plan_id_field(self) -> str:
-        return self.data["plan_id"]
+        return self.data["plan_id"].strip()
 
 
 class CompanySearchForm(Form):
