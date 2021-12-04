@@ -8,6 +8,7 @@ from injector import inject
 from arbeitszeit.repositories import (
     CompanyRepository,
     CooperationRepository,
+    PlanCooperationRepository,
     PlanRepository,
 )
 
@@ -26,7 +27,6 @@ class AcceptCooperationResponse:
         cooperation_not_found = auto()
         plan_inactive = auto()
         plan_has_cooperation = auto()
-        plan_already_part_of_cooperation = auto()
         plan_is_public_service = auto()
         cooperation_was_not_requested = auto()
         requester_is_not_coordinator = auto()
@@ -43,6 +43,7 @@ class AcceptCooperationResponse:
 class AcceptCooperation:
     plan_repository: PlanRepository
     cooperation_repository: CooperationRepository
+    plan_cooperation_repository: PlanCooperationRepository
     company_repository: CompanyRepository
 
     def __call__(self, request: AcceptCooperationRequest) -> AcceptCooperationResponse:
@@ -51,10 +52,12 @@ class AcceptCooperation:
         except AcceptCooperationResponse.RejectionReason as reason:
             return AcceptCooperationResponse(rejection_reason=reason)
 
-        self.cooperation_repository.add_plan_to_cooperation(
+        self.plan_cooperation_repository.add_plan_to_cooperation(
             request.plan_id, request.cooperation_id
         )
-        self.cooperation_repository.set_requested_cooperation_to_none(request.plan_id)
+        self.plan_cooperation_repository.set_requested_cooperation_to_none(
+            request.plan_id
+        )
         return AcceptCooperationResponse(rejection_reason=None)
 
     def _validate_request(self, request: AcceptCooperationRequest) -> None:
@@ -69,11 +72,9 @@ class AcceptCooperation:
             raise AcceptCooperationResponse.RejectionReason.plan_inactive
         if plan.cooperation:
             raise AcceptCooperationResponse.RejectionReason.plan_has_cooperation
-        if plan in cooperation.plans:
-            raise AcceptCooperationResponse.RejectionReason.plan_already_part_of_cooperation
         if plan.is_public_service:
             raise AcceptCooperationResponse.RejectionReason.plan_is_public_service
-        if plan.requested_cooperation != cooperation:
+        if plan.requested_cooperation != cooperation.id:
             raise AcceptCooperationResponse.RejectionReason.cooperation_was_not_requested
         if requester != cooperation.coordinator:
             raise AcceptCooperationResponse.RejectionReason.requester_is_not_coordinator

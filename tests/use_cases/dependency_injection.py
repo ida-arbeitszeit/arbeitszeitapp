@@ -92,6 +92,12 @@ class InMemoryModule(Module):
         return repo
 
     @provider
+    def provide_plan_cooperation_repository(
+        self, repo: repositories.PlanCooperationRepository
+    ) -> interfaces.PlanCooperationRepository:
+        return repo
+
+    @provider
     @singleton
     def provide_datetime_service(self, service: FakeDatetimeService) -> DatetimeService:
         return service
