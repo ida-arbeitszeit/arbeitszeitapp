@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional
 
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansResponse
 
-from .url_index import PlanSummaryUrlIndex
+from .url_index import CoopSummaryUrlIndex, PlanSummaryUrlIndex
 
 
 @dataclass
@@ -29,6 +29,7 @@ class NonActivePlansTable:
 class ActivePlansRow:
     id: str
     plan_summary_url: str
+    coop_summary_url: Optional[str]
     prd_name: str
     description: List[str]
     price_per_unit: str
@@ -79,6 +80,7 @@ class ShowMyPlansViewModel:
 @dataclass
 class ShowMyPlansPresenter:
     url_index: PlanSummaryUrlIndex
+    coop_url_index: CoopSummaryUrlIndex
 
     def present(self, response: ShowMyPlansResponse) -> ShowMyPlansViewModel:
 
@@ -110,6 +112,11 @@ class ShowMyPlansPresenter:
                     ActivePlansRow(
                         id=f"{plan.id}",
                         plan_summary_url=self.url_index.get_plan_summary_url(plan.id),
+                        coop_summary_url=self.coop_url_index.get_coop_summary_url(
+                            plan.cooperation
+                        )
+                        if plan.cooperation
+                        else None,
                         prd_name=f"{plan.prd_name}",
                         description=plan.description.splitlines(),
                         price_per_unit=self.__format_price(plan.price_per_unit),

@@ -1106,3 +1106,8 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
     def count_plans_in_cooperation(self, cooperation_id: UUID) -> int:
         count = Plan.query.filter_by(cooperation=str(cooperation_id)).count()
         return count
+
+    def get_plans_in_cooperation(self, cooperation_id: UUID) -> Iterable[entities.Plan]:
+        plans = Plan.query.filter_by(cooperation=str(cooperation_id)).all()
+        for plan in plans:
+            yield self.plan_repository.object_from_orm(plan)

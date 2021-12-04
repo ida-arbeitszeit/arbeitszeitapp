@@ -1,0 +1,6 @@
+{% extends "base_company.html" %}
+
+{% block content2 %}
+{% from 'macros.html' import coop_summary %}
+{{ coop_summary(view_model) }}
+{% endblock %}

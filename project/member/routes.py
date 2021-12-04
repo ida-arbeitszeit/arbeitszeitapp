@@ -6,6 +6,7 @@ from flask_login import current_user
 
 from arbeitszeit import use_cases
 from arbeitszeit.use_cases import ListMessages, ReadMessage
+from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
@@ -59,7 +60,7 @@ def query_plans(
     controller: QueryPlansController,
     template_renderer: UserTemplateRenderer,
 ) -> Response:
-    presenter = QueryPlansPresenter(MemberUrlIndex())
+    presenter = QueryPlansPresenter(MemberUrlIndex(), MemberUrlIndex())
     template_name = "member/query_plans.html"
     search_form = PlanSearchForm(request.form)
     view = QueryPlansView(
@@ -187,6 +188,25 @@ def plan_summary(
                 "member/plan_summary.html",
                 context=dict(view_model=view_model.to_dict()),
             )
+        )
+    else:
+        return Http404View("member/404.html", template_renderer).get_response()
+
+
+@MemberRoute("/member/cooperation_summary/<uuid:coop_id>")
+def coop_summary(
+    coop_id: UUID,
+    get_coop_summary: use_cases.GetCoopSummary,
+    presenter: GetCoopSummarySuccessPresenter,
+    template_renderer: UserTemplateRenderer,
+):
+    use_case_response = get_coop_summary(
+        use_cases.GetCoopSummaryRequest(UUID(current_user.id), coop_id)
+    )
+    if isinstance(use_case_response, use_cases.GetCoopSummarySuccess):
+        view_model = presenter.present(use_case_response)
+        return template_renderer.render_template(
+            "member/coop_summary.html", context=dict(view_model=view_model.to_dict())
         )
     else:
         return Http404View("member/404.html", template_renderer).get_response()

@@ -414,3 +414,7 @@ class PlanCooperationRepository(ABC):
     @abstractmethod
     def count_plans_in_cooperation(self, cooperation_id: UUID) -> int:
         pass
+
+    @abstractmethod
+    def get_plans_in_cooperation(self, cooperation_id: UUID) -> Iterable[Plan]:
+        pass

@@ -24,6 +24,7 @@ def _convert_into_plan_info(plan: Plan) -> PlanInfo:
         is_available=plan.is_available,
         renewed=plan.renewed,
         is_cooperating=bool(plan.cooperation),
+        cooperation=plan.cooperation,
     )
 
 
@@ -69,8 +70,9 @@ def response_with_one_non_active_plan(plan: Plan) -> ShowMyPlansResponse:
 
 class ShowMyPlansPresenterTests(TestCase):
     def setUp(self):
-        self.url_index = PlanSummaryUrlIndex()
-        self.presenter = ShowMyPlansPresenter(self.url_index)
+        self.plan_url_index = PlanSummaryUrlIndex()
+        self.coop_url_index = CoopSummaryUrlIndex()
+        self.presenter = ShowMyPlansPresenter(self.plan_url_index, self.coop_url_index)
         self.injector = get_dependency_injector()
         self.plan_generator = self.injector.get(PlanGenerator)
 
@@ -103,7 +105,7 @@ class ShowMyPlansPresenterTests(TestCase):
         self.assertEqual(presentation.active_plans.rows[0].id, str(plan.id))
         self.assertEqual(
             presentation.active_plans.rows[0].plan_summary_url,
-            self.url_index.get_plan_summary_url(plan.id),
+            self.plan_url_index.get_plan_summary_url(plan.id),
         )
         self.assertEqual(presentation.active_plans.rows[0].prd_name, plan.prd_name)
         self.assertEqual(
@@ -134,3 +136,8 @@ class ShowMyPlansPresenterTests(TestCase):
 class PlanSummaryUrlIndex:
     def get_plan_summary_url(self, plan_id: UUID) -> str:
         return f"fake_plan_url:{plan_id}"
+
+
+class CoopSummaryUrlIndex:
+    def get_coop_summary_url(self, coop_id: UUID) -> str:
+        return f"fake_coop_url:{coop_id}"
