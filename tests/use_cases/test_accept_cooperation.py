@@ -7,6 +7,7 @@ from arbeitszeit.use_cases import AcceptCooperation, AcceptCooperationRequest
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
 
 from .dependency_injection import injection_test
+from .repositories import PlanCooperationRepository
 
 
 @injection_test
@@ -78,30 +79,6 @@ def test_error_is_raised_when_plan_is_already_in_cooperation(
     response = accept_cooperation(request)
     assert response.is_rejected
     assert response.rejection_reason == response.RejectionReason.plan_has_cooperation
-
-
-@injection_test
-def test_error_is_raised_when_plan_is_already_in_the_list_of_associated_plans(
-    accept_cooperation: AcceptCooperation,
-    cooperation_generator: CooperationGenerator,
-    plan_generator: PlanGenerator,
-    company_generator: CompanyGenerator,
-):
-    requester = company_generator.create_company()
-    plan = plan_generator.create_plan(activation_date=datetime.now())
-    cooperation = cooperation_generator.create_cooperation(
-        coordinator=requester, plans=[plan]
-    )
-    plan.cooperation = None
-    request = AcceptCooperationRequest(
-        requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation.id
-    )
-    response = accept_cooperation(request)
-    assert response.is_rejected
-    assert (
-        response.rejection_reason
-        == response.RejectionReason.plan_already_part_of_cooperation
-    )
 
 
 @injection_test
@@ -204,26 +181,7 @@ def test_cooperation_is_added_to_plan(
         requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation.id
     )
     accept_cooperation(request)
-    assert plan.cooperation == cooperation
-
-
-@injection_test
-def test_plan_is_added_to_cooperation(
-    accept_cooperation: AcceptCooperation,
-    cooperation_generator: CooperationGenerator,
-    plan_generator: PlanGenerator,
-    company_generator: CompanyGenerator,
-):
-    requester = company_generator.create_company()
-    cooperation = cooperation_generator.create_cooperation(coordinator=requester)
-    plan = plan_generator.create_plan(
-        activation_date=datetime.now(), requested_cooperation=cooperation
-    )
-    request = AcceptCooperationRequest(
-        requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation.id
-    )
-    accept_cooperation(request)
-    assert cooperation.plans[0] == plan
+    assert plan.cooperation == cooperation.id
 
 
 @injection_test
@@ -232,6 +190,7 @@ def test_two_cooperating_plans_have_same_prices(
     cooperation_generator: CooperationGenerator,
     plan_generator: PlanGenerator,
     company_generator: CompanyGenerator,
+    plan_cooperation_repository: PlanCooperationRepository,
 ):
     requester = company_generator.create_company()
     cooperation = cooperation_generator.create_cooperation(coordinator=requester)
@@ -253,7 +212,9 @@ def test_two_cooperating_plans_have_same_prices(
     )
     accept_cooperation(request1)
     accept_cooperation(request2)
-    assert plan1.price_per_unit == plan2.price_per_unit
+    assert plan_cooperation_repository.get_price_per_unit(
+        plan1.id
+    ) == plan_cooperation_repository.get_price_per_unit(plan2.id)
 
 
 @injection_test
@@ -262,6 +223,7 @@ def test_price_of_cooperating_plans_is_correctly_calculated(
     cooperation_generator: CooperationGenerator,
     plan_generator: PlanGenerator,
     company_generator: CompanyGenerator,
+    plan_cooperation_repository: PlanCooperationRepository,
 ):
     requester = company_generator.create_company()
     cooperation = cooperation_generator.create_cooperation(coordinator=requester)
@@ -286,7 +248,11 @@ def test_price_of_cooperating_plans_is_correctly_calculated(
     accept_cooperation(request1)
     accept_cooperation(request2)
     # In total costs of 30h and 20 units -> price should be 1.5h per unit
-    assert plan1.price_per_unit == plan2.price_per_unit == Decimal("1.5")
+    assert (
+        plan_cooperation_repository.get_price_per_unit(plan1.id)
+        == plan_cooperation_repository.get_price_per_unit(plan2.id)
+        == Decimal("1.5")
+    )
 
 
 @injection_test
@@ -304,6 +270,6 @@ def test_that_attribute_requested_cooperation_is_set_to_none_after_start_of_coop
     request = AcceptCooperationRequest(
         requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation.id
     )
-    assert plan.requested_cooperation == cooperation
+    assert plan.requested_cooperation == cooperation.id
     accept_cooperation(request)
     assert plan.requested_cooperation is None

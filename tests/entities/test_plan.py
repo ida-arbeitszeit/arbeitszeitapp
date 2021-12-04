@@ -15,7 +15,7 @@ class TestPlanEntity(TestCase):
         plan = self.plan_generator.create_plan(
             costs=ProductionCosts(Decimal(10), Decimal(5), Decimal(5)), amount=10
         )
-        self.assertEqual(plan.price_per_unit, Decimal(2))
+        self.assertEqual(plan.individual_price_per_unit, Decimal(2))
 
     def test_price_equals_zero_when_public_plan(self) -> None:
         plan = self.plan_generator.create_plan(
@@ -23,7 +23,7 @@ class TestPlanEntity(TestCase):
             amount=10,
             is_public_service=True,
         )
-        self.assertEqual(plan.price_per_unit, Decimal(0))
+        self.assertEqual(plan.individual_price_per_unit, Decimal(0))
 
     def test_expected_sales_value_is_zero_for_public_plan(self) -> None:
         plan = self.plan_generator.create_plan(is_public_service=True)

@@ -1,4 +1,3 @@
-from datetime import datetime
 from unittest import TestCase
 from uuid import uuid4
 
@@ -64,24 +63,6 @@ class TestEndCooperation(TestCase):
             == EndCooperationResponse.RejectionReason.plan_has_no_cooperation
         )
 
-    def test_error_is_raised_when_plan_is_not_registered_in_cooperation(self) -> None:
-        plan = self.plan_generator.create_plan(
-            cooperation=self.coop_generator.create_cooperation(),
-            activation_date=datetime.min,
-        )
-        cooperation = self.coop_generator.create_cooperation(plans=[])
-        request = EndCooperationRequest(
-            requester_id=self.requester.id,
-            plan_id=plan.id,
-            cooperation_id=cooperation.id,
-        )
-        response = self.end_cooperation(request)
-        assert response.is_rejected
-        assert (
-            response.rejection_reason
-            == EndCooperationResponse.RejectionReason.plan_not_in_cooperation
-        )
-
     def test_error_is_raised_when_requester_is_neither_coordinator_nor_planner(
         self,
     ) -> None:
@@ -137,7 +118,7 @@ class TestEndCooperation(TestCase):
     ) -> None:
         plan = self.plan_generator.create_plan(planner=self.requester)
         cooperation = self.coop_generator.create_cooperation(plans=[plan])
-        assert plan in cooperation.plans
+        assert plan.cooperation == cooperation.id
 
         request = EndCooperationRequest(
             requester_id=self.requester.id,
@@ -146,14 +127,14 @@ class TestEndCooperation(TestCase):
         )
         response = self.end_cooperation(request)
         assert not response.is_rejected
-        assert plan not in cooperation.plans
+        assert plan.cooperation is None
 
     def test_ending_of_cooperation_is_successful_and_coop_deleted_from_plan(
         self,
     ) -> None:
         plan = self.plan_generator.create_plan(planner=self.requester)
         cooperation = self.coop_generator.create_cooperation(plans=[plan])
-        assert plan.cooperation == cooperation
+        assert plan.cooperation == cooperation.id
 
         request = EndCooperationRequest(
             requester_id=self.requester.id,

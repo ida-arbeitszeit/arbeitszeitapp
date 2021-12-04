@@ -8,6 +8,7 @@ from injector import inject
 from arbeitszeit.repositories import (
     CompanyRepository,
     CooperationRepository,
+    PlanCooperationRepository,
     PlanRepository,
 )
 
@@ -25,7 +26,6 @@ class EndCooperationResponse:
         plan_not_found = auto()
         cooperation_not_found = auto()
         plan_has_no_cooperation = auto()
-        plan_not_in_cooperation = auto()
         requester_is_not_authorized = auto()
 
     rejection_reason: Optional[RejectionReason]
@@ -41,15 +41,14 @@ class EndCooperation:
     plan_repository: PlanRepository
     cooperation_repository: CooperationRepository
     company_repository: CompanyRepository
+    plan_cooperation_repository: PlanCooperationRepository
 
     def __call__(self, request: EndCooperationRequest) -> EndCooperationResponse:
         try:
             self._validate_request(request)
         except EndCooperationResponse.RejectionReason as reason:
             return EndCooperationResponse(rejection_reason=reason)
-        self.cooperation_repository.remove_plan_from_cooperation(
-            request.plan_id, request.cooperation_id
-        )
+        self.plan_cooperation_repository.remove_plan_from_cooperation(request.plan_id)
         return EndCooperationResponse(rejection_reason=None)
 
     def _validate_request(self, request: EndCooperationRequest) -> None:
@@ -62,7 +61,5 @@ class EndCooperation:
             raise EndCooperationResponse.RejectionReason.cooperation_not_found
         if plan.cooperation is None:
             raise EndCooperationResponse.RejectionReason.plan_has_no_cooperation
-        if plan not in cooperation.plans:
-            raise EndCooperationResponse.RejectionReason.plan_not_in_cooperation
         if (requester != cooperation.coordinator) and (requester != plan.planner):
             raise EndCooperationResponse.RejectionReason.requester_is_not_authorized
