@@ -23,6 +23,7 @@ from arbeitszeit_web.check_for_unread_message import (
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyController
 from arbeitszeit_web.list_messages import ListMessagesController
 from arbeitszeit_web.read_message import ReadMessageController
+from arbeitszeit_web.request_cooperation import RequestCooperationController
 from project.database import get_social_accounting
 from project.database.repositories import (
     AccountOwnerRepository,
@@ -89,6 +90,12 @@ class FlaskModule(Module):
         self, session: FlaskSession
     ) -> ListMessagesController:
         return ListMessagesController(session)
+
+    @provider
+    def provide_request_cooperation_controller(
+        self, session: FlaskSession
+    ) -> RequestCooperationController:
+        return RequestCooperationController(session)
 
     @provider
     def provide_read_message_controller(

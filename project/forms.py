@@ -92,7 +92,7 @@ class PayConsumerProductForm(Form):
         return self.data["amount"]
 
     def get_plan_id_field(self) -> str:
-        return self.data["plan_id"]
+        return self.data["plan_id"].strip()
 
 
 class CompanySearchForm(Form):
@@ -166,3 +166,14 @@ class InviteWorkerToCompanyForm(Form):
 
     def get_worker_id(self) -> str:
         return self.data["member_id"]
+
+
+class RequestCooperationForm(Form):
+    plan_id = StringField()
+    cooperation_id = StringField()
+
+    def get_plan_id_string(self) -> str:
+        return self.data["plan_id"]
+
+    def get_cooperation_id_string(self) -> str:
+        return self.data["cooperation_id"]

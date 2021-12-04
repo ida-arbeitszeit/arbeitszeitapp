@@ -14,6 +14,7 @@ from arbeitszeit.use_cases import (
     InviteWorkerToCompany,
     ListMessages,
     ReadMessage,
+    RequestCooperation,
     ToggleProductAvailability,
 )
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
@@ -38,6 +39,10 @@ from arbeitszeit_web.query_companies import (
 )
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
 from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
+from arbeitszeit_web.request_cooperation import (
+    RequestCooperationController,
+    RequestCooperationPresenter,
+)
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from project.database import (
     AccountRepository,
@@ -51,6 +56,7 @@ from project.forms import (
     CreateDraftForm,
     InviteWorkerToCompanyForm,
     PlanSearchForm,
+    RequestCooperationForm,
 )
 from project.models import Company
 from project.template import UserTemplateRenderer
@@ -62,6 +68,7 @@ from project.views import (
     QueryCompaniesView,
     QueryPlansView,
     ReadMessageView,
+    RequestCooperationView,
 )
 
 from .blueprint import CompanyRoute
@@ -242,8 +249,13 @@ def create_plan(
     activate_plan_and_grant_credit: use_cases.ActivatePlanAndGrantCredit,
     template_renderer: UserTemplateRenderer,
 ):
-    draft_uuid: UUID = request.args.get("draft_uuid")
-    expired_plan_uuid: Optional[UUID] = request.args.get("expired_plan_uuid")
+    draft_uuid: UUID = UUID(request.args.get("draft_uuid"))
+    expired_plan_optional = request.args.get("expired_plan_uuid")
+    expired_plan_uuid: Optional[UUID] = (
+        UUID(expired_plan_optional.strip())
+        if expired_plan_optional is not None
+        else None
+    )
 
     approval_response = seek_approval(draft_uuid, expired_plan_uuid)
 
@@ -342,7 +354,9 @@ def transfer_to_worker(
     if request.method == "POST":
         company = company_repository.get_by_id(UUID(current_user.id))
         assert company is not None
-        worker = member_repository.get_by_id(request.form["member_id"])
+        worker = member_repository.get_by_id(
+            UUID(str(request.form["member_id"]).strip())
+        )
         if worker is None:
             flash("Mitglied existiert nicht.")
         else:
@@ -371,7 +385,7 @@ def transfer_to_company(
     if request.method == "POST":
         use_case_request = use_cases.PayMeansOfProductionRequest(
             buyer=UUID(current_user.id),
-            plan=request.form["plan_id"],
+            plan=UUID(str(request.form["plan_id"]).strip()),
             amount=int(request.form["amount"]),
             purpose=entities.PurposesOfPurchases.means_of_prod
             if request.form["category"] == "Produktionsmittel"
@@ -434,6 +448,33 @@ def create_cooperation(
         )
     elif request.method == "GET":
         return template_renderer.render_template("company/create_cooperation.html")
+
+
+@CompanyRoute("/company/request_cooperation", methods=["GET", "POST"])
+@commit_changes
+def request_cooperation(
+    use_case: RequestCooperation,
+    controller: RequestCooperationController,
+    presenter: RequestCooperationPresenter,
+    template_renderer: UserTemplateRenderer,
+):
+    http_404_view = Http404View("company/404.html", template_renderer)
+    form = RequestCooperationForm(request.form)
+    view = RequestCooperationView(
+        form=form,
+        request_cooperation=use_case,
+        controller=controller,
+        presenter=presenter,
+        not_found_view=http_404_view,
+        template_name="company/request_cooperation.html",
+        template_renderer=template_renderer,
+    )
+
+    if request.method == "POST":
+        return view.respond_to_post()
+
+    elif request.method == "GET":
+        return view.respond_to_get()
 
 
 @CompanyRoute("/company/hilfe")
