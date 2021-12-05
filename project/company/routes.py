@@ -283,13 +283,14 @@ def create_plan(
     approval_response = seek_approval(draft_uuid, expired_plan_uuid)
 
     if approval_response.is_approved:
-        flash("Plan erfolgreich erstellt und genehmigt.")
+        flash("Plan erfolgreich erstellt und genehmigt.", "is-success")
         activate_plan_and_grant_credit(approval_response.new_plan_id)
         flash(
-            "Plan wurde aktiviert. Kredite für Produktionskosten wurden bereits gewährt, Kosten für Arbeit werden täglich ausgezahlt."
+            "Plan wurde aktiviert. Kredite für Produktionskosten wurden bereits gewährt, Kosten für Arbeit werden täglich ausgezahlt.",
+            "is-success",
         )
     else:
-        flash(f"Plan nicht genehmigt. Grund:\n{approval_response.reason}")
+        flash(f"Plan nicht genehmigt. Grund:\n{approval_response.reason}", "is-danger")
 
     return template_renderer.render_template("/company/create_plan_response.html")
 
