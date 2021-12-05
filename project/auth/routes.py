@@ -1,5 +1,5 @@
 from flask import Blueprint, redirect, render_template, request, session, url_for
-from flask_login import login_required, login_user, logout_user
+from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.security import check_password_hash
 
 from arbeitszeit.errors import CompanyAlreadyExists, MemberAlreadyExists
@@ -14,7 +14,8 @@ auth = Blueprint("auth", __name__, template_folder="templates", static_folder="s
 
 @auth.route("/")
 def start():
-    session["user_type"] = None
+    if "user_type" not in session:
+        session["user_type"] = None
     return render_template("start.html")
 
 
@@ -61,6 +62,13 @@ def login_member():
             login_user(member, remember=remember)
             return redirect(url_for("main_member.profile"))
 
+    if current_user.is_authenticated:
+        if session.get("user_type") == "member":
+            return redirect(url_for("main_member.profile"))
+        else:
+            session["user_type"] = None
+            logout_user()
+
     return render_template("login_member.html", form=login_form)
 
 
@@ -83,6 +91,13 @@ def login_company():
             session["user_type"] = "company"
             login_user(company, remember=remember)
             return redirect(url_for("main_company.profile"))
+
+    if current_user.is_authenticated:
+        if session.get("user_type") == "company":
+            return redirect(url_for("main_company.profile"))
+        else:
+            session["user_type"] = None
+            logout_user()
 
     return render_template("login_company.html", form=login_form)
 
