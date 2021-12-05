@@ -93,6 +93,7 @@ def arbeit(
     list_workers: ListWorkers,
     company_repository: CompanyRepository,
     member_repository: MemberRepository,
+    company_worker_repository: CompanyWorkerRepository,
     template_renderer: UserTemplateRenderer,
 ):
     """shows workers and add workers to company."""
