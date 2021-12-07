@@ -26,8 +26,9 @@ RESPONSE_WITH_ONE_RESULT = PlanQueryResponse(
 
 class QueryPlansPresenterTests(TestCase):
     def setUp(self):
-        self.url_index = PlanSummaryUrlIndex()
-        self.presenter = QueryPlansPresenter(self.url_index)
+        self.plan_url_index = PlanSummaryUrlIndex()
+        self.coop_url_index = CoopSummaryUrlIndex()
+        self.presenter = QueryPlansPresenter(self.plan_url_index, self.coop_url_index)
 
     def test_presenting_empty_response_leads_to_not_showing_results(self):
         presentation = self.presenter.present(RESPONSE_WITHOUT_RESULTS)
@@ -49,15 +50,21 @@ class QueryPlansPresenterTests(TestCase):
         presentation = self.presenter.present(RESPONSE_WITH_ONE_RESULT)
         self.assertFalse(presentation.notifications)
 
-    def test_url(self) -> None:
+    def test_plan_url(self) -> None:
         presentation = self.presenter.present(RESPONSE_WITH_ONE_RESULT)
         plan_id = RESPONSE_WITH_ONE_RESULT.results[0].plan_id
         table_row = presentation.results.rows[0]
         self.assertEqual(
-            table_row.plan_summary_url, self.url_index.get_plan_summary_url(plan_id)
+            table_row.plan_summary_url,
+            self.plan_url_index.get_plan_summary_url(plan_id),
         )
 
 
 class PlanSummaryUrlIndex:
     def get_plan_summary_url(self, plan_id: UUID) -> str:
         return f"fake_plan_url:{plan_id}"
+
+
+class CoopSummaryUrlIndex:
+    def get_coop_summary_url(self, coop_id: UUID) -> str:
+        return f"fake_coop_url:{coop_id}"

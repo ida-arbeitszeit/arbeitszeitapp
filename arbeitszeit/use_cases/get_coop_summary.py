@@ -15,7 +15,7 @@ class GetCoopSummaryRequest:
 
 
 @dataclass
-class AssociatedPlans:
+class AssociatedPlan:
     plan_id: UUID
     plan_name: str
     plan_total_costs: Decimal
@@ -32,7 +32,7 @@ class GetCoopSummarySuccess:
     coop_definition: str
     coordinator_id: UUID
 
-    plans: List[AssociatedPlans]
+    plans: List[AssociatedPlan]
 
 
 GetCoopSummaryResponse = Optional[GetCoopSummarySuccess]
@@ -49,7 +49,7 @@ class GetCoopSummary:
         if coop is None:
             return None
         plans = [
-            AssociatedPlans(
+            AssociatedPlan(
                 plan_id=plan.id,
                 plan_name=plan.prd_name,
                 plan_total_costs=plan.production_costs.total_cost(),

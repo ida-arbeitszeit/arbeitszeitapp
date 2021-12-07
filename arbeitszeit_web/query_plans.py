@@ -7,7 +7,7 @@ from arbeitszeit.use_cases.query_plans import (
     QueryPlansRequest,
 )
 
-from .url_index import PlanSummaryUrlIndex, CoopSummaryUrlIndex
+from .url_index import CoopSummaryUrlIndex, PlanSummaryUrlIndex
 
 
 class QueryPlansFormData(Protocol):
@@ -53,7 +53,7 @@ class Notification:
 class ResultTableRow:
     plan_id: str
     plan_summary_url: str
-    coop_summary_url: str
+    coop_summary_url: Optional[str]
     company_name: str
     product_name: str
     description: List[str]

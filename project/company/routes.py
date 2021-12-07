@@ -534,7 +534,6 @@ def request_cooperation(
 @commit_changes
 def my_cooperations(
     template_renderer: UserTemplateRenderer,
-    presenter: ShowMyCooperationsPresenter,
     list_coordinations: ListCoordinations,
     list_inbound_coop_requests: ListInboundCoopRequests,
     accept_cooperation: AcceptCooperation,
@@ -562,6 +561,7 @@ def my_cooperations(
         ListOutboundCoopRequestsRequest(UUID(current_user.id))
     )
 
+    presenter = ShowMyCooperationsPresenter(CompanyUrlIndex())
     view_model = presenter.present(
         list_coord_response,
         list_inbound_coop_requests_response,

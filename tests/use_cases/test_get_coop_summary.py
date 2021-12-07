@@ -1,7 +1,9 @@
 from datetime import datetime
+from decimal import Decimal
 from typing import Callable
 from uuid import uuid4
 
+from arbeitszeit.entities import ProductionCosts
 from arbeitszeit.use_cases import (
     GetCoopSummary,
     GetCoopSummaryRequest,
@@ -64,6 +66,21 @@ def test_that_correct_amount_of_associated_plans_are_shown(
 
 
 @injection_test
+def test_that_correct_coordinator_id_is_shown(
+    get_coop_summary: GetCoopSummary,
+    company_generator: CompanyGenerator,
+    cooperation_generator: CooperationGenerator,
+    plan_generator: PlanGenerator,
+):
+    requester = company_generator.create_company()
+    plan1 = plan_generator.create_plan(activation_date=datetime.min)
+    plan2 = plan_generator.create_plan(activation_date=datetime.min)
+    coop = cooperation_generator.create_cooperation(plans=[plan1, plan2])
+    summary = get_coop_summary(GetCoopSummaryRequest(requester.id, coop.id))
+    assert_success(summary, lambda s: s.coordinator_id == coop.coordinator.id)
+
+
+@injection_test
 def test_that_correct_info_of_associated_plan_is_shown(
     get_coop_summary: GetCoopSummary,
     company_generator: CompanyGenerator,
@@ -72,19 +89,28 @@ def test_that_correct_info_of_associated_plan_is_shown(
     plan_cooperation_repository: PlanCooperationRepository,
 ):
     requester = company_generator.create_company()
-    plan = plan_generator.create_plan(activation_date=datetime.min)
-    coop = cooperation_generator.create_cooperation(plans=[plan])
+    plan1 = plan_generator.create_plan(
+        activation_date=datetime.min,
+        costs=ProductionCosts(Decimal(2), Decimal(2), Decimal(1)),
+        amount=10,
+    )
+    plan2 = plan_generator.create_plan(
+        activation_date=datetime.min,
+        costs=ProductionCosts(Decimal(4), Decimal(4), Decimal(2)),
+        amount=10,
+    )
+    coop = cooperation_generator.create_cooperation(plans=[plan1, plan2])
     summary = get_coop_summary(GetCoopSummaryRequest(requester.id, coop.id))
-    assert_success(summary, lambda s: len(s.plans) == 1)
+    assert_success(summary, lambda s: len(s.plans) == 2)
     assert summary is not None
-    assert summary.plans[0].plan_id == plan.id
-    assert summary.plans[0].plan_name == plan.prd_name
-    assert summary.plans[0].plan_total_costs == plan.production_costs.total_cost()
-    assert summary.plans[0].plan_amount == plan.prd_amount
-    assert summary.plans[0].plan_individual_price == plan.individual_price_per_unit
+    assert summary.plans[0].plan_id == plan1.id
+    assert summary.plans[0].plan_name == plan1.prd_name
+    assert summary.plans[0].plan_total_costs == plan1.production_costs.total_cost()
+    assert summary.plans[0].plan_amount == plan1.prd_amount
+    assert summary.plans[0].plan_individual_price == plan1.individual_price_per_unit
     assert summary.plans[
         0
-    ].plan_coop_price == plan_cooperation_repository.get_price_per_unit(plan.id)
+    ].plan_coop_price == plan_cooperation_repository.get_price_per_unit(plan1.id)
 
 
 def assert_success(

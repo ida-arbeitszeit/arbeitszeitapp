@@ -8,6 +8,8 @@ from arbeitszeit.use_cases import (
     ListOutboundCoopRequestsResponse,
 )
 
+from .url_index import CoopSummaryUrlIndex
+
 
 @dataclass
 class ListOfCoordinationsRow:
@@ -16,6 +18,7 @@ class ListOfCoordinationsRow:
     coop_name: str
     coop_definition: List[str]
     count_plans_in_coop: str
+    coop_summary_url: str
 
 
 @dataclass
@@ -63,6 +66,8 @@ class ShowMyCooperationsViewModel:
 
 @dataclass
 class ShowMyCooperationsPresenter:
+    coop_url_index: CoopSummaryUrlIndex
+
     def present(
         self,
         list_coord_response: ListCoordinationsResponse,
@@ -78,6 +83,7 @@ class ShowMyCooperationsPresenter:
                     coop_name=coop.name,
                     coop_definition=coop.definition.splitlines(),
                     count_plans_in_coop=str(coop.count_plans_in_coop),
+                    coop_summary_url=self.coop_url_index.get_coop_summary_url(coop.id),
                 )
                 for coop in list_coord_response.coordinations
             ]
