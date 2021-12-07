@@ -23,6 +23,23 @@ RESPONSE_WITH_ONE_RESULT = PlanQueryResponse(
     ]
 )
 
+RESPONSE_WITH_ONE_COOPERATING_RESULT = PlanQueryResponse(
+    results=[
+        QueriedPlan(
+            plan_id=uuid4(),
+            company_name="Planner name",
+            product_name="Bread",
+            description="For eating",
+            price_per_unit=Decimal(5),
+            is_public_service=False,
+            expiration_relative=14,
+            is_available=True,
+            is_cooperating=True,
+            cooperation=uuid4(),
+        )
+    ]
+)
+
 
 class QueryPlansPresenterTests(TestCase):
     def setUp(self):
@@ -57,6 +74,24 @@ class QueryPlansPresenterTests(TestCase):
         self.assertEqual(
             table_row.plan_summary_url,
             self.plan_url_index.get_plan_summary_url(plan_id),
+        )
+
+    def test_no_coop_url_is_shown_with_one_non_cooperating_plan(self) -> None:
+        presentation = self.presenter.present(RESPONSE_WITH_ONE_RESULT)
+        table_row = presentation.results.rows[0]
+        self.assertEqual(
+            table_row.coop_summary_url,
+            None,
+        )
+
+    def test_coop_url_is_shown_with_one_cooperating_plan(self) -> None:
+        coop_id = RESPONSE_WITH_ONE_COOPERATING_RESULT.results[0].cooperation
+        assert coop_id
+        presentation = self.presenter.present(RESPONSE_WITH_ONE_COOPERATING_RESULT)
+        table_row = presentation.results.rows[0]
+        self.assertEqual(
+            table_row.coop_summary_url,
+            self.coop_url_index.get_coop_summary_url(coop_id),
         )
 
 

@@ -6,7 +6,7 @@ from uuid import UUID
 from arbeitszeit.entities import Plan
 from arbeitszeit.use_cases.show_my_plans import PlanInfo, ShowMyPlansResponse
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
-from tests.data_generators import PlanGenerator
+from tests.data_generators import CooperationGenerator, PlanGenerator
 from tests.use_cases.dependency_injection import get_dependency_injector
 
 
@@ -75,14 +75,16 @@ class ShowMyPlansPresenterTests(TestCase):
         self.presenter = ShowMyPlansPresenter(self.plan_url_index, self.coop_url_index)
         self.injector = get_dependency_injector()
         self.plan_generator = self.injector.get(PlanGenerator)
+        self.coop_generator = self.injector.get(CooperationGenerator)
 
-    def test_show_notification_when_user_has_no_plans(self):
+    def test_show_correct_notification_when_user_has_no_plans(self):
         presentation = self.presenter.present(
             ShowMyPlansResponse(
                 all_plans=[], non_active_plans=[], active_plans=[], expired_plans=[]
             )
         )
         self.assertTrue(presentation.notifications)
+        self.assertEqual(presentation.notifications, ["Du hast keine Pläne."])
 
     def test_do_not_show_notification_when_user_has_one_plan(self):
         plan = self.plan_generator.create_plan()
@@ -99,7 +101,9 @@ class ShowMyPlansPresenterTests(TestCase):
         self.assertFalse(presentation.show_non_active_plans)
 
     def test_presenter_shows_correct_info_of_one_single_active_plan(self):
-        plan = self.plan_generator.create_plan(activation_date=datetime.min)
+        plan = self.plan_generator.create_plan(
+            activation_date=datetime.min, cooperation=None, is_available=True
+        )
         RESPONSE_WITH_ONE_ACTIVE_PLAN = response_with_one_active_plan(plan)
         presentation = self.presenter.present(RESPONSE_WITH_ONE_ACTIVE_PLAN)
         self.assertEqual(presentation.active_plans.rows[0].id, str(plan.id))
@@ -107,6 +111,7 @@ class ShowMyPlansPresenterTests(TestCase):
             presentation.active_plans.rows[0].plan_summary_url,
             self.plan_url_index.get_plan_summary_url(plan.id),
         )
+        self.assertEqual(presentation.active_plans.rows[0].coop_summary_url, None)
         self.assertEqual(presentation.active_plans.rows[0].prd_name, plan.prd_name)
         self.assertEqual(
             presentation.active_plans.rows[0].description, plan.description.splitlines()
@@ -118,6 +123,31 @@ class ShowMyPlansPresenterTests(TestCase):
         self.assertEqual(
             presentation.active_plans.rows[0].type_of_plan,
             "Öffentlich" if plan.is_public_service else "Produktiv",
+        )
+        self.assertEqual(
+            presentation.active_plans.rows[0].is_available,
+            True,
+        )
+        self.assertEqual(
+            presentation.active_plans.rows[0].is_cooperating,
+            False,
+        )
+
+    def test_presenter_shows_correct_info_of_one_single_plan_that_is_cooperating(self):
+        coop = self.coop_generator.create_cooperation()
+        plan = self.plan_generator.create_plan(
+            activation_date=datetime.min, cooperation=coop, is_available=True
+        )
+
+        RESPONSE_WITH_COOPERATING_PLAN = response_with_one_active_plan(plan)
+        presentation = self.presenter.present(RESPONSE_WITH_COOPERATING_PLAN)
+        self.assertEqual(
+            presentation.active_plans.rows[0].coop_summary_url,
+            self.coop_url_index.get_coop_summary_url(coop.id),
+        )
+        self.assertEqual(
+            presentation.active_plans.rows[0].is_cooperating,
+            True,
         )
 
     def test_presenter_shows_correct_plan_id_of_one_single_expired_plan(self):

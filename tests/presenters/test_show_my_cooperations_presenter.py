@@ -51,7 +51,8 @@ LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1 = ListOutboundCoopRequestsResponse(
 
 class ShowMyCooperationsPresenterTests(TestCase):
     def setUp(self) -> None:
-        self.presenter = ShowMyCooperationsPresenter(CoopSummaryUrlIndex())
+        self.coop_url_index = CoopSummaryUrlIndex()
+        self.presenter = ShowMyCooperationsPresenter(self.coop_url_index)
 
     def test_coordinations_are_presented_correctly(self):
         presentation = self.presenter.present(
@@ -64,6 +65,11 @@ class ShowMyCooperationsPresenterTests(TestCase):
         self.assertEqual(
             presentation.list_of_coordinations.rows[0].coop_id,
             str(LIST_COORDINATIONS_RESPONSE_LEN_1.coordinations[0].id),
+        )
+        coop_id = LIST_COORDINATIONS_RESPONSE_LEN_1.coordinations[0].id
+        self.assertEqual(
+            presentation.list_of_coordinations.rows[0].coop_summary_url,
+            self.coop_url_index.get_coop_summary_url(coop_id),
         )
         self.assertEqual(
             presentation.list_of_coordinations.rows[0].coop_creation_date,
