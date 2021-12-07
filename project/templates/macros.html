@@ -221,8 +221,8 @@
             <td class="has-text-left">{% for paragraph in view_model[key][1] %}{{ paragraph }}<br>{% endfor %}
             </td>
             {% elif key == "price_per_unit" %}
-            <td class="has-text-left">{{ view_model[key][1] }}{% if view_model[key][2] %} <span><i
-                  class="fas fa-hands-helping"></i></span>{% endif %}</td>
+            <td class="has-text-left">{{ view_model[key][1] }}{% if view_model[key][2] %} <span><a
+                  href="{{ view_model[key][3] }}"><i class="fas fa-hands-helping"></i></a></span>{% endif %}</td>
             {% else %}
             <td class="has-text-left">{{ view_model[key][1] }}
             </td>

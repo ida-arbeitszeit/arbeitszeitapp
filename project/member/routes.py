@@ -179,9 +179,9 @@ def statistics(
 def plan_summary(
     plan_id: UUID,
     get_plan_summary: use_cases.GetPlanSummary,
-    presenter: GetPlanSummarySuccessPresenter,
     template_renderer: UserTemplateRenderer,
 ) -> Response:
+    presenter = GetPlanSummarySuccessPresenter(MemberUrlIndex())
     use_case_response = get_plan_summary(plan_id)
     if isinstance(use_case_response, use_cases.PlanSummarySuccess):
         view_model = presenter.present(use_case_response)

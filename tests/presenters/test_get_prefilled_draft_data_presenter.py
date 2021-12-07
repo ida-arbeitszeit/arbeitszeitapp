@@ -20,6 +20,7 @@ TEST_PLAN_SUMMARY_SUCCESS = PlanSummarySuccess(
     price_per_unit=Decimal(10),
     is_available=True,
     is_cooperating=False,
+    cooperation=None,
 )
 
 TEST_DRAFT_SUMMARY_SUCCESS = DraftSummarySuccess(

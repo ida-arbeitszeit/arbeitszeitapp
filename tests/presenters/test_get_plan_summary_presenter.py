@@ -1,7 +1,7 @@
 from dataclasses import replace
 from decimal import Decimal
 from unittest import TestCase
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.get_plan_summary import PlanSummarySuccess
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
@@ -19,15 +19,17 @@ TESTING_RESPONSE_MODEL = PlanSummarySuccess(
     resources_cost=Decimal(2),
     labour_cost=Decimal(3),
     is_public_service=False,
-    price_per_unit=Decimal(0.06),
+    price_per_unit=Decimal("0.061"),
     is_available=True,
     is_cooperating=True,
+    cooperation=uuid4(),
 )
 
 
 class GetPlanSummarySuccessPresenterTests(TestCase):
     def setUp(self) -> None:
-        self.presenter = GetPlanSummarySuccessPresenter()
+        self.coop_url_index = CoopSummaryUrlIndex()
+        self.presenter = GetPlanSummarySuccessPresenter(self.coop_url_index)
 
     def test_plan_id_is_displayed_correctly_as_tuple_of_strings(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
@@ -169,9 +171,16 @@ class GetPlanSummarySuccessPresenterTests(TestCase):
 
     def test_price_per_unit_is_displayed_correctly_as_tuple_of_strings_and_bool(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        coop_id = TESTING_RESPONSE_MODEL.cooperation
+        assert coop_id
         self.assertTupleEqual(
             view_model.price_per_unit,
-            ("Preis (pro Einheit)", str(TESTING_RESPONSE_MODEL.price_per_unit), True),
+            (
+                "Preis (pro Einheit)",
+                "0.06",
+                True,
+                self.coop_url_index.get_coop_summary_url(coop_id),
+            ),
         )
 
     def test_that_to_dict_method_returns_a_dictionary(self):
@@ -195,3 +204,8 @@ class GetPlanSummarySuccessPresenterTests(TestCase):
                 "Ja",
             ),
         )
+
+
+class CoopSummaryUrlIndex:
+    def get_coop_summary_url(self, coop_id: UUID) -> str:
+        return f"fake_coop_url:{coop_id}"
