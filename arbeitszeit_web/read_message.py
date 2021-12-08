@@ -35,7 +35,6 @@ class ReadMessagePresenter:
     action_link_resolver: UserActionResolver
 
     def present(self, use_case_response: ReadMessageSuccess) -> ViewModel:
-        print(use_case_response)
         action_link_reference: str
         action_link_label: str
         if use_case_response.user_action is None:
