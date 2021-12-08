@@ -41,7 +41,7 @@
 
           <div class="navbar-item has-dropdown is-hoverable">
             <a class="navbar-link">
-              Kooperationen
+              Kooperation
             </a>
             <div class="navbar-dropdown">
               <a href="{{ url_for('main_company.create_cooperation') }}" class="navbar-item">
@@ -50,11 +50,8 @@
               <a href="{{ url_for('main_company.request_cooperation') }}" class="navbar-item">
                 Kooperation beitreten
               </a>
-              <a href="" class="navbar-item">
-                Meine Kooperationen (BETA)
-              </a>
-              <a href="" class="navbar-item">
-                Alle Kooperationen (BETA)
+              <a href="{{ url_for('main_company.my_cooperations') }}" class="navbar-item">
+                Meine Kooperationen
               </a>
             </div>
           </div>

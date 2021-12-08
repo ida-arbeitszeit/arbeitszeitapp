@@ -7,12 +7,21 @@ from flask_login import current_user, login_required
 
 from arbeitszeit import entities, errors, use_cases
 from arbeitszeit.use_cases import (
+    AcceptCooperation,
+    AcceptCooperationRequest,
+    AcceptCooperationResponse,
     CreatePlanDraft,
     DeletePlan,
     GetDraftSummary,
     GetPlanSummary,
+    ListCoordinations,
+    ListCoordinationsRequest,
+    ListInboundCoopRequests,
+    ListInboundCoopRequestsRequest,
     ListMessages,
     ListWorkers,
+    ListOutboundCoopRequests,
+    ListOutboundCoopRequestsRequest,
     ReadMessage,
     RequestCooperation,
     SendWorkCertificatesToWorker,
@@ -40,6 +49,7 @@ from arbeitszeit_web.request_cooperation import (
     RequestCooperationController,
     RequestCooperationPresenter,
 )
+from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from project.database import (
     AccountRepository,
@@ -509,6 +519,49 @@ def request_cooperation(
 
     elif request.method == "GET":
         return view.respond_to_get()
+
+
+@CompanyRoute("/company/my_cooperations", methods=["GET", "POST"])
+@commit_changes
+def my_cooperations(
+    template_renderer: UserTemplateRenderer,
+    presenter: ShowMyCooperationsPresenter,
+    list_coordinations: ListCoordinations,
+    list_inbound_coop_requests: ListInboundCoopRequests,
+    accept_cooperation: AcceptCooperation,
+    list_outbound_coop_requests: ListOutboundCoopRequests,
+):
+    accept_cooperation_response: Optional[AcceptCooperationResponse]
+    if request.method == "POST":
+        if request.form["accept"]:
+            coop_id, plan_id = [id.strip() for id in request.form["accept"].split(",")]
+            accept_cooperation_response = accept_cooperation(
+                AcceptCooperationRequest(
+                    UUID(current_user.id), UUID(plan_id), UUID(coop_id)
+                )
+            )
+    else:
+        accept_cooperation_response = None
+
+    list_coord_response = list_coordinations(
+        ListCoordinationsRequest(UUID(current_user.id))
+    )
+    list_inbound_coop_requests_response = list_inbound_coop_requests(
+        ListInboundCoopRequestsRequest(UUID(current_user.id))
+    )
+    list_outbound_coop_requests_response = list_outbound_coop_requests(
+        ListOutboundCoopRequestsRequest(UUID(current_user.id))
+    )
+
+    view_model = presenter.present(
+        list_coord_response,
+        list_inbound_coop_requests_response,
+        accept_cooperation_response,
+        list_outbound_coop_requests_response,
+    )
+    return template_renderer.render_template(
+        "company/my_cooperations.html", context=view_model.to_dict()
+    )
 
 
 @CompanyRoute("/company/hilfe")

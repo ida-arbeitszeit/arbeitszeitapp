@@ -371,10 +371,28 @@ class CooperationRepository(ABC):
     def get_by_name(self, name: str) -> Iterator[Cooperation]:
         pass
 
+    @abstractmethod
+    def get_cooperations_coordinated_by_company(
+        self, company_id: UUID
+    ) -> Iterator[Cooperation]:
+        pass
+
+    @abstractmethod
+    def get_cooperation_name(self, coop_id: UUID) -> Optional[str]:
+        pass
+
 
 class PlanCooperationRepository(ABC):
     @abstractmethod
     def get_price_per_unit(self, plan_id: UUID) -> Decimal:
+        pass
+
+    @abstractmethod
+    def get_inbound_requests(self, coordinator_id: UUID) -> Iterator[Plan]:
+        pass
+
+    @abstractmethod
+    def get_outbound_requests(self, requester_id: UUID) -> Iterator[Plan]:
         pass
 
     @abstractmethod
@@ -391,4 +409,8 @@ class PlanCooperationRepository(ABC):
 
     @abstractmethod
     def set_requested_cooperation_to_none(self, plan_id: UUID) -> None:
+        pass
+
+    @abstractmethod
+    def count_plans_in_cooperation(self, cooperation_id: UUID) -> int:
         pass

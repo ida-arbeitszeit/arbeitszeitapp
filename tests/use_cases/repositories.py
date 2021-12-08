@@ -723,6 +723,19 @@ class CooperationRepository(interfaces.CooperationRepository):
             if cooperation.name.lower() == name.lower():
                 yield cooperation
 
+    def get_cooperations_coordinated_by_company(
+        self, company_id: UUID
+    ) -> Iterator[Cooperation]:
+        for cooperation in self.cooperations.values():
+            if cooperation.coordinator.id == company_id:
+                yield cooperation
+
+    def get_cooperation_name(self, coop_id: UUID) -> Optional[str]:
+        coop = self.cooperations.get(coop_id)
+        if coop is None:
+            return None
+        return coop.name
+
     def __len__(self) -> int:
         return len(self.cooperations)
 
@@ -733,8 +746,26 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
     def __init__(
         self,
         plan_repository: PlanRepository,
+        cooperation_repository: CooperationRepository,
     ) -> None:
         self.plan_repository = plan_repository
+        self.cooperation_repository = cooperation_repository
+
+    def get_inbound_requests(self, coordinator_id: UUID) -> Iterator[Plan]:
+        coops_of_company = list(
+            self.cooperation_repository.get_cooperations_coordinated_by_company(
+                coordinator_id
+            )
+        )
+        for plan in self.plan_repository.plans.values():
+            if plan.requested_cooperation in [coop.id for coop in coops_of_company]:
+                yield plan
+
+    def get_outbound_requests(self, requester_id: UUID) -> Iterator[Plan]:
+        plans_of_company = self.plan_repository.get_all_plans_for_company(requester_id)
+        for plan in plans_of_company:
+            if plan.requested_cooperation:
+                yield plan
 
     def get_price_per_unit(self, plan_id: UUID) -> Decimal:
         plan = self.plan_repository.get_plan_by_id(plan_id)
@@ -776,3 +807,10 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
         plan = self.plan_repository.get_plan_by_id(plan_id)
         assert plan
         plan.requested_cooperation = None
+
+    def count_plans_in_cooperation(self, cooperation_id: UUID) -> int:
+        count = 0
+        for plan in self.plan_repository.plans.values():
+            if plan.cooperation == cooperation_id:
+                count += 1
+        return count

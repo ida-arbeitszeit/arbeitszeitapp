@@ -112,7 +112,6 @@ class MemberRepository(repositories.MemberRepository):
 @dataclass
 class CompanyRepository(repositories.CompanyRepository):
     account_repository: AccountRepository
-    member_repository: MemberRepository
     db: SQLAlchemy
 
     def object_to_orm(self, company: entities.Company) -> Company:
@@ -1021,11 +1020,45 @@ class CooperationRepository(repositories.CooperationRepository):
             ).all()
         )
 
+    def get_cooperations_coordinated_by_company(
+        self, company_id: UUID
+    ) -> Iterator[entities.Cooperation]:
+        return (
+            self.object_from_orm(cooperation)
+            for cooperation in Cooperation.query.filter_by(
+                coordinator=str(company_id)
+            ).all()
+        )
+
+    def get_cooperation_name(self, coop_id: UUID) -> Optional[str]:
+        coop_orm = Cooperation.query.filter_by(id=str(coop_id)).first()
+        if coop_orm is None:
+            return None
+        return coop_orm.name
+
 
 @inject
 @dataclass
 class PlanCooperationRepository(repositories.PlanCooperationRepository):
     plan_repository: PlanRepository
+    cooperation_repository: CooperationRepository
+
+    def get_inbound_requests(self, coordinator_id: UUID) -> Iterator[entities.Plan]:
+        for plan in self.plan_repository.all_active_plans():
+            if plan.requested_cooperation:
+                if plan.requested_cooperation in [
+                    coop.id
+                    for coop in self.cooperation_repository.get_cooperations_coordinated_by_company(
+                        coordinator_id
+                    )
+                ]:
+                    yield plan
+
+    def get_outbound_requests(self, requester_id: UUID) -> Iterator[entities.Plan]:
+        plans_of_company = self.plan_repository.get_all_plans_for_company(requester_id)
+        for plan in plans_of_company:
+            if plan.requested_cooperation:
+                yield plan
 
     def get_price_per_unit(self, plan_id: UUID) -> Decimal:
         plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
@@ -1070,3 +1103,7 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
         plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
         assert plan_orm
         plan_orm.requested_cooperation = None
+
+    def count_plans_in_cooperation(self, cooperation_id: UUID) -> int:
+        count = Plan.query.filter_by(cooperation=str(cooperation_id)).count()
+        return count
