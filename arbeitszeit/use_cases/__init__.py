@@ -56,12 +56,30 @@ from .invite_worker_to_company import (
     InviteWorkerToCompany,
     InviteWorkerToCompanyRequest,
 )
+from .list_coordinations import (
+    CooperationInfo,
+    ListCoordinations,
+    ListCoordinationsRequest,
+    ListCoordinationsResponse,
+)
 from .list_drafts_of_company import ListDraftsOfCompany, ListDraftsResponse
+from .list_inbound_coop_requests import (
+    ListedInboundCoopRequest,
+    ListInboundCoopRequests,
+    ListInboundCoopRequestsRequest,
+    ListInboundCoopRequestsResponse,
+)
 from .list_messages import (
     ListedMessage,
     ListMessages,
     ListMessagesRequest,
     ListMessagesResponse,
+)
+from .list_outbound_coop_requests import (
+    ListedOutboundCoopRequest,
+    ListOutboundCoopRequests,
+    ListOutboundCoopRequestsRequest,
+    ListOutboundCoopRequestsResponse,
 )
 from .pay_consumer_product import (
     PayConsumerProduct,
@@ -114,6 +132,7 @@ __all__ = [
     "CheckForUnreadMessagesResponse",
     "CompanyFilter",
     "CompanyQueryResponse",
+    "CooperationInfo",
     "CreateCooperation",
     "CreateCooperationRequest",
     "CreateCooperationResponse",
@@ -139,11 +158,22 @@ __all__ = [
     "GetTransactionInfos",
     "InviteWorkerToCompany",
     "InviteWorkerToCompanyRequest",
+    "ListInboundCoopRequests",
+    "ListInboundCoopRequestsRequest",
+    "ListInboundCoopRequestsResponse",
+    "ListCoordinations",
+    "ListCoordinationsRequest",
+    "ListCoordinationsResponse",
     "ListDraftsOfCompany",
     "ListDraftsResponse",
+    "ListedInboundCoopRequest",
+    "ListedOutboundCoopRequest",
     "ListMessages",
     "ListMessagesRequest",
     "ListMessagesResponse",
+    "ListOutboundCoopRequests",
+    "ListOutboundCoopRequestsRequest",
+    "ListOutboundCoopRequestsResponse",
     "ListedMessage",
     "PayConsumerProduct",
     "PayConsumerProductRequest",
