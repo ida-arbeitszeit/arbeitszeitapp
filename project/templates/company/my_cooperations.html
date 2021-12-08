@@ -8,6 +8,15 @@
     </h1>
 </div>
 
+{% if accept_message %}
+<div class="block"></div>
+{% for message in accept_message %}
+<div class="notification is-danger">
+    {{ message }}
+</div>
+{% endfor %}
+{% endif %}
+
 <div class="table-container">
     {% if list_of_coordinations.rows %}
     <table class="table is-fullwidth">
@@ -44,14 +53,6 @@
     </h1>
 </div>
 
-{% if accept_message %}
-<div class="block"></div>
-{% for message in accept_message %}
-<div class="notification is-danger">
-    {{ message }}
-</div>
-{% endfor %}
-{% endif %}
 
 <div class="table-container">
     {% if list_of_inbound_coop_requests.rows %}
