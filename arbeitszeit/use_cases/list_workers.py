@@ -9,8 +9,15 @@ from arbeitszeit.repositories import CompanyRepository, CompanyWorkerRepository
 
 
 @dataclass
+class ListedWorker:
+    id: UUID
+    name: str
+    email: str
+
+
+@dataclass
 class ListWorkersResponse:
-    workers: List[Member]
+    workers: List[ListedWorker]
 
 
 @inject
@@ -23,5 +30,14 @@ class ListWorkers:
         company = self.company_repository.get_by_id(company_id)
         if company is None:
             return ListWorkersResponse(workers=[])
-        workers = self.company_worker_repository.get_company_workers(company)
-        return ListWorkersResponse(workers=[worker for worker in workers])
+        members = self.company_worker_repository.get_company_workers(company)
+        return ListWorkersResponse(
+            workers=[self._create_worker_response_model(member) for member in members]
+        )
+
+    def _create_worker_response_model(self, member: Member) -> ListedWorker:
+        return ListedWorker(
+            id=member.id,
+            name=member.name,
+            email=member.email,
+        )

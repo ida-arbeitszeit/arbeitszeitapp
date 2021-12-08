@@ -7,6 +7,17 @@ from tests.data_generators import CompanyGenerator, MemberGenerator
 from .dependency_injection import injection_test
 
 
+def worker_in_results(worker: Member, response: ListWorkersResponse) -> bool:
+    return any(
+        (
+            worker.id == result.id
+            and worker.name == result.name
+            and worker.email == result.email
+            for result in response.workers
+        )
+    )
+
+
 @injection_test
 def test_list_workers_response_is_empty_for_nonexisting_company(
     list_workers: ListWorkers,
@@ -34,7 +45,7 @@ def test_list_workers_response_includes_single_company_worker(
     worker: Member = member_generator.create_member()
     company: Company = company_generator.create_company(workers=[worker])
     response: ListWorkersResponse = list_workers(company_id=company.id)
-    assert worker in response.workers
+    assert worker_in_results(worker, response)
 
 
 @injection_test
@@ -47,4 +58,4 @@ def test_list_workers_response_includes_multiple_company_workers(
     worker2: Member = member_generator.create_member()
     company: Company = company_generator.create_company(workers=[worker1, worker2])
     response: ListWorkersResponse = list_workers(company_id=company.id)
-    assert (worker1 in response.workers) and (worker2 in response.workers)
+    assert worker_in_results(worker1, response) and worker_in_results(worker2, response)
