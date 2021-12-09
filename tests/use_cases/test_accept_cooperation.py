@@ -3,6 +3,7 @@ from decimal import Decimal
 from uuid import uuid4
 
 from arbeitszeit.entities import ProductionCosts
+from arbeitszeit.price_calculator import calculate_price
 from arbeitszeit.use_cases import AcceptCooperation, AcceptCooperationRequest
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
 
@@ -212,9 +213,9 @@ def test_two_cooperating_plans_have_same_prices(
     )
     accept_cooperation(request1)
     accept_cooperation(request2)
-    assert plan_cooperation_repository.get_price_per_unit(
-        plan1.id
-    ) == plan_cooperation_repository.get_price_per_unit(plan2.id)
+    assert calculate_price(
+        plan_cooperation_repository.get_cooperating_plans(plan1.id)
+    ) == calculate_price(plan_cooperation_repository.get_cooperating_plans(plan2.id))
 
 
 @injection_test
@@ -249,8 +250,8 @@ def test_price_of_cooperating_plans_is_correctly_calculated(
     accept_cooperation(request2)
     # In total costs of 30h and 20 units -> price should be 1.5h per unit
     assert (
-        plan_cooperation_repository.get_price_per_unit(plan1.id)
-        == plan_cooperation_repository.get_price_per_unit(plan2.id)
+        calculate_price(plan_cooperation_repository.get_cooperating_plans(plan1.id))
+        == calculate_price(plan_cooperation_repository.get_cooperating_plans(plan2.id))
         == Decimal("1.5")
     )
 

@@ -146,14 +146,6 @@ class Plan:
     is_available: bool
 
     @property
-    def individual_price_per_unit(self) -> Decimal:
-        return (
-            self.production_costs.total_cost() / self.prd_amount
-            if not self.is_public_service
-            else Decimal(0)
-        )
-
-    @property
     def expected_sales_value(self) -> Decimal:
         """
         For productive plans, sales value should equal total cost.

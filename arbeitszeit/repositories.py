@@ -384,7 +384,7 @@ class CooperationRepository(ABC):
 
 class PlanCooperationRepository(ABC):
     @abstractmethod
-    def get_price_per_unit(self, plan_id: UUID) -> Decimal:
+    def get_cooperating_plans(self, plan_id: UUID) -> List[Plan]:
         pass
 
     @abstractmethod

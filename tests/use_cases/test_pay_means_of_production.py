@@ -2,6 +2,7 @@ from datetime import datetime
 from uuid import uuid4
 
 from arbeitszeit.entities import PurposesOfPurchases
+from arbeitszeit.price_calculator import calculate_price
 from arbeitszeit.use_cases import PayMeansOfProduction, PayMeansOfProductionRequest
 from tests.data_generators import CompanyGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
@@ -110,7 +111,9 @@ def test_balance_of_buyer_of_means_of_prod_reduced(
         PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
     )
 
-    price_total = pieces * plan_cooperation_repository.get_price_per_unit(plan.id)
+    price_total = pieces * calculate_price(
+        plan_cooperation_repository.get_cooperating_plans(plan.id)
+    )
     assert account_repository.get_account_balance(sender.means_account) == -price_total
 
 
@@ -134,7 +137,9 @@ def test_balance_of_buyer_of_raw_materials_reduced(
         PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
     )
 
-    price_total = pieces * plan_cooperation_repository.get_price_per_unit(plan.id)
+    price_total = pieces * calculate_price(
+        plan_cooperation_repository.get_cooperating_plans(plan.id)
+    )
     assert (
         account_repository.get_account_balance(sender.raw_material_account)
         == -price_total
@@ -161,7 +166,9 @@ def test_balance_of_seller_increased(
         PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
     )
 
-    price_total = pieces * plan_cooperation_repository.get_price_per_unit(plan.id)
+    price_total = pieces * calculate_price(
+        plan_cooperation_repository.get_cooperating_plans(plan.id)
+    )
     assert (
         account_repository.get_account_balance(plan.planner.product_account)
         == price_total
@@ -186,7 +193,9 @@ def test_correct_transaction_added_if_means_of_production_were_paid(
     pay_means_of_production(
         PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
     )
-    price_total = pieces * plan_cooperation_repository.get_price_per_unit(plan.id)
+    price_total = pieces * calculate_price(
+        plan_cooperation_repository.get_cooperating_plans(plan.id)
+    )
     assert len(transaction_repository.transactions) == 1
     assert (
         transaction_repository.transactions[0].sending_account == sender.means_account
@@ -216,7 +225,9 @@ def test_correct_transaction_added_if_raw_materials_were_paid(
     pay_means_of_production(
         PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
     )
-    price_total = pieces * plan_cooperation_repository.get_price_per_unit(plan.id)
+    price_total = pieces * calculate_price(
+        plan_cooperation_repository.get_cooperating_plans(plan.id)
+    )
     assert len(transaction_repository.transactions) == 1
     assert (
         transaction_repository.transactions[0].sending_account
@@ -250,9 +261,8 @@ def test_correct_purchase_added_if_means_of_production_were_paid(
     purchase_added = purchase_repository.purchases[0]
     assert len(purchase_repository.purchases) == 1
     assert purchase_added.plan == plan
-    assert (
-        purchase_added.price_per_unit
-        == plan_cooperation_repository.get_price_per_unit(plan.id)
+    assert purchase_added.price_per_unit == calculate_price(
+        plan_cooperation_repository.get_cooperating_plans(plan.id)
     )
     assert purchase_added.amount == pieces
     assert purchase_added.purpose == PurposesOfPurchases.means_of_prod
@@ -281,9 +291,8 @@ def test_correct_purchase_added_if_raw_materials_were_paid(
     purchase_added = purchase_repository.purchases[0]
     assert len(purchase_repository.purchases) == 1
     assert purchase_added.plan == plan
-    assert (
-        purchase_added.price_per_unit
-        == plan_cooperation_repository.get_price_per_unit(plan.id)
+    assert purchase_added.price_per_unit == calculate_price(
+        plan_cooperation_repository.get_cooperating_plans(plan.id)
     )
     assert purchase_added.amount == pieces
     assert purchase_added.purpose == PurposesOfPurchases.raw_materials
