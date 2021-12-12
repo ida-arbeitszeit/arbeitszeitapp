@@ -663,41 +663,6 @@ class PlanRepository(repositories.PlanRepository):
             for plan_orm in Plan.query.filter(Plan.planner == str(company_id))
         )
 
-    def get_non_active_plans_for_company(
-        self, company_id: UUID
-    ) -> Iterator[entities.Plan]:
-        return (
-            self.object_from_orm(plan_orm)
-            for plan_orm in Plan.query.filter(
-                Plan.planner == str(company_id),
-                Plan.approved == True,
-                Plan.is_active == False,
-                Plan.expired == False,
-            )
-        )
-
-    def get_active_plans_for_company(self, company_id: UUID) -> Iterator[entities.Plan]:
-        return (
-            self.object_from_orm(plan_orm)
-            for plan_orm in Plan.query.filter(
-                Plan.planner == str(company_id),
-                Plan.approved == True,
-                Plan.is_active == True,
-                Plan.expired == False,
-            )
-        )
-
-    def get_expired_plans_for_company(
-        self, company_id: UUID
-    ) -> Iterator[entities.Plan]:
-        return (
-            self.object_from_orm(plan_orm)
-            for plan_orm in Plan.query.filter(
-                Plan.planner == str(company_id),
-                Plan.expired == True,
-            )
-        )
-
     def toggle_product_availability(self, plan: entities.Plan) -> None:
         plan.is_available = True if (plan.is_available == False) else False
 
