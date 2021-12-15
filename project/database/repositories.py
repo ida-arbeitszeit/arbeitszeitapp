@@ -1062,11 +1062,13 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
 
     def get_cooperating_plans(self, plan_id: UUID) -> List[entities.Plan]:
         plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
-        assert plan_orm
+        if plan_orm is None:
+            return []
         coop_orm = plan_orm.coop
         if coop_orm is None:
             plan = self.plan_repository.get_plan_by_id(plan_id)
-            assert plan
+            if plan is None:
+                return []
             return [plan]
 
         else:
