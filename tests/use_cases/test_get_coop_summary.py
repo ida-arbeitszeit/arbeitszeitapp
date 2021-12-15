@@ -14,6 +14,7 @@ from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGe
 
 from .dependency_injection import injection_test
 from .repositories import PlanCooperationRepository
+from arbeitszeit.price_calculator import calculate_price
 
 
 @injection_test
@@ -86,7 +87,6 @@ def test_that_correct_info_of_associated_plan_is_shown(
     company_generator: CompanyGenerator,
     cooperation_generator: CooperationGenerator,
     plan_generator: PlanGenerator,
-    plan_cooperation_repository: PlanCooperationRepository,
 ):
     requester = company_generator.create_company()
     plan1 = plan_generator.create_plan(
@@ -107,10 +107,8 @@ def test_that_correct_info_of_associated_plan_is_shown(
     assert summary.plans[0].plan_name == plan1.prd_name
     assert summary.plans[0].plan_total_costs == plan1.production_costs.total_cost()
     assert summary.plans[0].plan_amount == plan1.prd_amount
-    assert summary.plans[0].plan_individual_price == plan1.individual_price_per_unit
-    assert summary.plans[
-        0
-    ].plan_coop_price == plan_cooperation_repository.get_price_per_unit(plan1.id)
+    assert summary.plans[0].plan_individual_price == calculate_price([plan1])
+    assert summary.plans[0].plan_coop_price == calculate_price([plan1, plan2])
 
 
 def assert_success(
