@@ -25,6 +25,8 @@ class PlanSummarySuccess:
     is_public_service: bool
     price_per_unit: Decimal
     is_available: bool
+    is_cooperating: bool
+    cooperation: Optional[UUID]
 
 
 PlanSummaryResponse = Optional[PlanSummarySuccess]
@@ -58,4 +60,6 @@ class GetPlanSummary:
             is_public_service=plan.is_public_service,
             price_per_unit=price_per_unit,
             is_available=plan.is_available,
+            is_cooperating=bool(plan.cooperation),
+            cooperation=plan.cooperation or None,
         )

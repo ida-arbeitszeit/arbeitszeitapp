@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import List, Optional, Union
+from typing import Iterable, List, Optional, Union
 from uuid import uuid4
 
 from injector import inject
@@ -31,6 +31,7 @@ from arbeitszeit.entities import (
 from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
+    CompanyWorkerRepository,
     CooperationRepository,
     MemberRepository,
     MessageRepository,
@@ -86,6 +87,7 @@ class MemberGenerator:
 class CompanyGenerator:
     account_generator: AccountGenerator
     company_repository: CompanyRepository
+    company_worker_repository: CompanyWorkerRepository
     email_generator: EmailGenerator
 
     def create_company(
@@ -95,6 +97,7 @@ class CompanyGenerator:
         name: str = "Company Name",
         labour_account: Optional[Account] = None,
         password: str = "password",
+        workers: Optional[Iterable[Member]] = None,
     ) -> Company:
         if email is None:
             email = self.email_generator.get_random_email()
@@ -102,7 +105,7 @@ class CompanyGenerator:
             labour_account = self.account_generator.create_account(
                 account_type=AccountTypes.a
             )
-        return self.company_repository.create_company(
+        company = self.company_repository.create_company(
             email=email,
             name=name,
             password=password,
@@ -117,6 +120,10 @@ class CompanyGenerator:
             ),
             labour_account=labour_account,
         )
+        if workers is not None:
+            for worker in workers:
+                self.company_worker_repository.add_worker_to_company(company, worker)
+        return company
 
 
 @inject
@@ -176,6 +183,7 @@ class PlanGenerator:
         requested_cooperation: Optional[Cooperation] = None,
         cooperation: Optional[Cooperation] = None,
         is_available: bool = True,
+        hidden_by_user: bool = False,
     ) -> Plan:
         assert approved, "Currently the application does not support plan rejection"
         draft = self.draft_plan(
@@ -212,6 +220,8 @@ class PlanGenerator:
                     cooperation.coordinator.id, plan.id, cooperation.id
                 )
             )
+        if hidden_by_user:
+            self.plan_repository.hide_plan(plan.id)
         if not is_available:
             self.plan_repository.toggle_product_availability(plan)
         return plan

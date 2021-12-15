@@ -26,17 +26,15 @@
                 <th>Name</th>
                 <th>Definition</th>
                 <th>Anzahl Pläne</th>
-                <th>Bearbeiten/Details</th>
             </tr>
         </thead>
         <tbody>
             {% for coop in list_of_coordinations.rows %}
             <tr>
-                <td>{{ coop.coop_id }}</td>
+                <td><a href="{{ coop.coop_summary_url }}">{{ coop.coop_id }}</a></td>
                 <td>{{ coop.coop_name }}</td>
                 <td>{% for paragraph in coop.coop_definition %}{{ paragraph }}<br>{% endfor %}</td>
                 <td>{{ coop.count_plans_in_coop }}</td>
-                <td>[X]</td>
             </tr>
             {% endfor %}
         </tbody>

@@ -14,7 +14,6 @@ from werkzeug.security import generate_password_hash
 from arbeitszeit import entities, repositories
 from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.user_action import UserAction
-from project.error import PlanNotFound
 from project.models import (
     Account,
     Company,
@@ -449,6 +448,7 @@ class PlanRepository(repositories.PlanRepository):
             else None,
             cooperation=UUID(plan.cooperation) if plan.cooperation else None,
             is_available=plan.is_available,
+            hidden_by_user=plan.hidden_by_user,
         )
 
     def object_to_orm(self, plan: entities.Plan) -> Plan:
@@ -634,12 +634,10 @@ class PlanRepository(repositories.PlanRepository):
             ).all()
         )
 
-    def delete_plan(self, plan_id: UUID) -> None:
+    def hide_plan(self, plan_id: UUID) -> None:
         plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
-        if plan_orm is None:
-            raise PlanNotFound()
-        else:
-            self.db.session.delete(plan_orm)
+        assert plan_orm
+        plan_orm.hidden_by_user = True
 
     def query_active_plans_by_product_name(self, query: str) -> Iterator[entities.Plan]:
         return (
@@ -695,6 +693,7 @@ class PlanRepository(repositories.PlanRepository):
             for plan_orm in Plan.query.filter(
                 Plan.planner == str(company_id),
                 Plan.expired == True,
+                Plan.hidden_by_user == False,
             )
         )
 
@@ -1100,3 +1099,8 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
     def count_plans_in_cooperation(self, cooperation_id: UUID) -> int:
         count = Plan.query.filter_by(cooperation=str(cooperation_id)).count()
         return count
+
+    def get_plans_in_cooperation(self, cooperation_id: UUID) -> Iterable[entities.Plan]:
+        plans = Plan.query.filter_by(cooperation=str(cooperation_id)).all()
+        for plan in plans:
+            yield self.plan_repository.object_from_orm(plan)

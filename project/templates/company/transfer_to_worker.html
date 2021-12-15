@@ -8,11 +8,22 @@
         </h1>
 
         <div class="content">
+            {% if workers_list is defined and workers_list|length %}
             <form method="post">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="field has-addons">
-                    <div class="control">
-                        <input class="input" type="text" placeholder="Mitglieder-ID" name="member_id" required>
+                    <div class="control has-icons-left">
+                        <div class="select has-icons-left">
+                            <select name="member_id" required>
+                                <option>Mitarbeiter ...</option>
+                                {% for worker in workers_list %}
+                                    <option value="{{ worker.id }}">{{ worker.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <span class="icon is-left">
+                            <i class="fas fa-user"></i>
+                        </span>
                     </div>
                     <div class="control">
                         <input class="input" type="number" step="0.01" placeholder="Summe" name="amount" required>
@@ -25,12 +36,15 @@
                 <p class="help">Mitarbeiter müssen unter <a href="{{url_for('main_company.arbeit')}}">"Arbeit"</a>
                     registriert werden.</p>
             </form>
+            {% else %}
+                <p>(Noch keine Mitarbeiter.)</p>
+            {% endif %}
         </div>
-        {% with messages = get_flashed_messages() %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         <div class="block"></div>
-        {% for message in messages %}
-        <div class="notification is-danger">
+        {% for category, message in messages %}
+        <div class="notification {{ category }}">
             {{ message }}
         </div>
         {% endfor %}

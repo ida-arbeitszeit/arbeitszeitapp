@@ -448,8 +448,10 @@ class PlanRepository(interfaces.PlanRepository):
             ):
                 yield plan
 
-    def delete_plan(self, plan_id: UUID) -> None:
-        del self.plans[plan_id]
+    def hide_plan(self, plan_id: UUID) -> None:
+        plan = self.plans.get(plan_id)
+        assert plan
+        plan.hidden_by_user = True
 
     def get_all_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
         for plan in self.plans.values():
@@ -519,6 +521,7 @@ class PlanRepository(interfaces.PlanRepository):
             requested_cooperation=None,
             cooperation=None,
             is_available=True,
+            hidden_by_user=False,
         )
         self.plans[plan.id] = plan
         return plan
@@ -806,3 +809,9 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
             if plan.cooperation == cooperation_id:
                 count += 1
         return count
+
+    def get_plans_in_cooperation(self, cooperation_id: UUID) -> Iterable[Plan]:
+        plans = self.plan_repository.plans.values()
+        for plan in plans:
+            if plan.cooperation == cooperation_id:
+                yield plan

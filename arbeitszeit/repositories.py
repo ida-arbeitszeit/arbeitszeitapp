@@ -139,7 +139,7 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def delete_plan(self, plan_id: UUID) -> None:
+    def hide_plan(self, plan_id: UUID) -> None:
         pass
 
     @abstractmethod
@@ -413,4 +413,8 @@ class PlanCooperationRepository(ABC):
 
     @abstractmethod
     def count_plans_in_cooperation(self, cooperation_id: UUID) -> int:
+        pass
+
+    @abstractmethod
+    def get_plans_in_cooperation(self, cooperation_id: UUID) -> Iterable[Plan]:
         pass
