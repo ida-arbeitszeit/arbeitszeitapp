@@ -5,6 +5,7 @@ from uuid import UUID
 
 from injector import inject
 
+from arbeitszeit.price_calculator import calculate_price
 from arbeitszeit.repositories import PlanCooperationRepository, PlanRepository
 
 
@@ -24,6 +25,8 @@ class PlanSummarySuccess:
     is_public_service: bool
     price_per_unit: Decimal
     is_available: bool
+    is_cooperating: bool
+    cooperation: Optional[UUID]
 
 
 PlanSummaryResponse = Optional[PlanSummarySuccess]
@@ -39,7 +42,9 @@ class GetPlanSummary:
         plan = self.plan_repository.get_plan_by_id(plan_id)
         if plan is None:
             return None
-        price_per_unit = self.plan_cooperation_repository.get_price_per_unit(plan.id)
+        price_per_unit = calculate_price(
+            self.plan_cooperation_repository.get_cooperating_plans(plan.id)
+        )
         return PlanSummarySuccess(
             plan_id=plan.id,
             is_active=plan.is_active,
@@ -55,4 +60,6 @@ class GetPlanSummary:
             is_public_service=plan.is_public_service,
             price_per_unit=price_per_unit,
             is_available=plan.is_available,
+            is_cooperating=bool(plan.cooperation),
+            cooperation=plan.cooperation or None,
         )

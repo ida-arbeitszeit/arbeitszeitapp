@@ -3,13 +3,15 @@ from typing import Any, Dict, List, Optional
 
 from arbeitszeit.use_cases import (
     AcceptCooperationResponse,
-    ListCoordinationsResponse,
-    ListInboundCoopRequestsResponse,
-    ListOutboundCoopRequestsResponse,
     CooperationInfo,
+    ListCoordinationsResponse,
     ListedInboundCoopRequest,
     ListedOutboundCoopRequest,
+    ListInboundCoopRequestsResponse,
+    ListOutboundCoopRequestsResponse,
 )
+
+from .url_index import CoopSummaryUrlIndex
 
 
 @dataclass
@@ -19,6 +21,7 @@ class ListOfCoordinationsRow:
     coop_name: str
     coop_definition: List[str]
     count_plans_in_coop: str
+    coop_summary_url: str
 
 
 @dataclass
@@ -66,6 +69,8 @@ class ShowMyCooperationsViewModel:
 
 @dataclass
 class ShowMyCooperationsPresenter:
+    coop_url_index: CoopSummaryUrlIndex
+
     def present(
         self,
         list_coord_response: ListCoordinationsResponse,
@@ -115,6 +120,7 @@ class ShowMyCooperationsPresenter:
             coop_name=coop.name,
             coop_definition=coop.definition.splitlines(),
             count_plans_in_coop=str(coop.count_plans_in_coop),
+            coop_summary_url=self.coop_url_index.get_coop_summary_url(coop.id),
         )
 
     def _display_inbound_coop_requests(

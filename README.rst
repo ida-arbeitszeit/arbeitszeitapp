@@ -23,6 +23,11 @@ for example unused imports or uninitialized variables.
 
 Invoke both commands without arguments to test all the eligable code.
 
+You can print profiling info to the terminal by setting the following
+environment variable::
+
+    $ export DEBUG_DETAILS=true
+
 Testing
 =======
 
@@ -79,6 +84,7 @@ Cronjob
 =======
 
 There is a command `flask payout`. It does the following things:
+
 - Check if plans have expired and deactivate them
 - Calculate the payout factor
 - Check which plans are applicable for wage payout

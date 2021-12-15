@@ -7,20 +7,20 @@ from arbeitszeit.repositories import PlanRepository
 
 
 @dataclass
-class DeletePlanResponse:
+class HidePlanResponse:
     plan_id: UUID
     is_success: bool
 
 
 @inject
 @dataclass
-class DeletePlan:
+class HidePlan:
     plan_repository: PlanRepository
 
-    def __call__(self, plan_id: UUID) -> DeletePlanResponse:
+    def __call__(self, plan_id: UUID) -> HidePlanResponse:
         plan = self.plan_repository.get_plan_by_id(plan_id)
         assert plan is not None
         if plan.is_active:
-            return DeletePlanResponse(plan_id=plan_id, is_success=False)
-        self.plan_repository.delete_plan(plan_id)
-        return DeletePlanResponse(plan_id=plan_id, is_success=True)
+            return HidePlanResponse(plan_id=plan_id, is_success=False)
+        self.plan_repository.hide_plan(plan_id)
+        return HidePlanResponse(plan_id=plan_id, is_success=True)

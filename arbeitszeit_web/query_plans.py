@@ -7,7 +7,7 @@ from arbeitszeit.use_cases.query_plans import (
     QueryPlansRequest,
 )
 
-from .url_index import PlanSummaryUrlIndex
+from .url_index import CoopSummaryUrlIndex, PlanSummaryUrlIndex
 
 
 class QueryPlansFormData(Protocol):
@@ -53,6 +53,7 @@ class Notification:
 class ResultTableRow:
     plan_id: str
     plan_summary_url: str
+    coop_summary_url: Optional[str]
     company_name: str
     product_name: str
     description: List[str]
@@ -60,6 +61,7 @@ class ResultTableRow:
     type_of_plan: str
     ends_in: str
     is_available: bool
+    is_cooperating: bool
 
 
 @dataclass
@@ -79,7 +81,8 @@ class QueryPlansViewModel:
 
 @dataclass
 class QueryPlansPresenter:
-    url_index: PlanSummaryUrlIndex
+    plan_url_index: PlanSummaryUrlIndex
+    coop_url_index: CoopSummaryUrlIndex
 
     def present(self, response: PlanQueryResponse) -> QueryPlansViewModel:
         if response.results:
@@ -93,9 +96,14 @@ class QueryPlansPresenter:
                 rows=[
                     ResultTableRow(
                         plan_id=str(result.plan_id),
-                        plan_summary_url=self.url_index.get_plan_summary_url(
+                        plan_summary_url=self.plan_url_index.get_plan_summary_url(
                             result.plan_id
                         ),
+                        coop_summary_url=self.coop_url_index.get_coop_summary_url(
+                            result.cooperation
+                        )
+                        if result.cooperation
+                        else None,
                         company_name=result.company_name,
                         product_name=result.product_name,
                         description=result.description.splitlines(),
@@ -107,6 +115,7 @@ class QueryPlansPresenter:
                         if result.expiration_relative is not None
                         else "–",
                         is_available=result.is_available,
+                        is_cooperating=result.is_cooperating,
                     )
                     for result in response.results
                 ],

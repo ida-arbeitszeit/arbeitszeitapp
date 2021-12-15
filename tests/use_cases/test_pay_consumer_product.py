@@ -5,6 +5,7 @@ from unittest import TestCase
 from uuid import UUID, uuid4
 
 from arbeitszeit.entities import PurposesOfPurchases
+from arbeitszeit.price_calculator import calculate_price
 from arbeitszeit.use_cases import PayConsumerProduct
 from arbeitszeit.use_cases.pay_consumer_product import RejectionReason
 from tests.data_generators import MemberGenerator, PlanGenerator
@@ -54,8 +55,8 @@ class PayConsumerProductTests(TestCase):
         self.pay_consumer_product(self.make_request(plan.id, pieces))
         assert len(self.transaction_repository.transactions) == 1
         transaction_added = self.transaction_repository.transactions[0]
-        expected_amount = pieces * self.plan_cooperation_repository.get_price_per_unit(
-            plan.id
+        expected_amount = pieces * calculate_price(
+            self.plan_cooperation_repository.get_cooperating_plans(plan.id)
         )
         assert transaction_added.sending_account == self.buyer.account
         assert transaction_added.receiving_account == plan.planner.product_account
@@ -67,7 +68,9 @@ class PayConsumerProductTests(TestCase):
         )
         pieces = 3
         self.pay_consumer_product(self.make_request(plan.id, pieces))
-        costs = pieces * self.plan_cooperation_repository.get_price_per_unit(plan.id)
+        costs = pieces * calculate_price(
+            self.plan_cooperation_repository.get_cooperating_plans(plan.id)
+        )
         assert self.account_repository.get_account_balance(self.buyer.account) == -costs
         assert (
             self.account_repository.get_account_balance(plan.planner.product_account)
@@ -95,7 +98,9 @@ class PayConsumerProductTests(TestCase):
         )
         pieces = 3
         self.pay_consumer_product(self.make_request(plan.id, pieces))
-        costs = pieces * self.plan_cooperation_repository.get_price_per_unit(plan.id)
+        costs = pieces * calculate_price(
+            self.plan_cooperation_repository.get_cooperating_plans(plan.id)
+        )
         assert self.account_repository.get_account_balance(self.buyer.account) == -costs
         assert (
             self.account_repository.get_account_balance(plan.planner.product_account)
@@ -110,9 +115,8 @@ class PayConsumerProductTests(TestCase):
         self.pay_consumer_product(self.make_request(plan.id, pieces))
         assert len(self.purchase_repository.purchases) == 1
         purchase_added = self.purchase_repository.purchases[0]
-        assert (
-            purchase_added.price_per_unit
-            == self.plan_cooperation_repository.get_price_per_unit(plan.id)
+        assert purchase_added.price_per_unit == calculate_price(
+            self.plan_cooperation_repository.get_cooperating_plans(plan.id)
         )
         assert purchase_added.amount == pieces
         assert purchase_added.purpose == PurposesOfPurchases.consumption

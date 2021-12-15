@@ -448,8 +448,10 @@ class PlanRepository(interfaces.PlanRepository):
             ):
                 yield plan
 
-    def delete_plan(self, plan_id: UUID) -> None:
-        del self.plans[plan_id]
+    def hide_plan(self, plan_id: UUID) -> None:
+        plan = self.plans.get(plan_id)
+        assert plan
+        plan.hidden_by_user = True
 
     def get_all_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
         for plan in self.plans.values():
@@ -494,6 +496,7 @@ class PlanRepository(interfaces.PlanRepository):
             requested_cooperation=None,
             cooperation=None,
             is_available=True,
+            hidden_by_user=False,
         )
         self.plans[plan.id] = plan
         return plan
@@ -742,26 +745,18 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
             if plan.requested_cooperation:
                 yield plan
 
-    def get_price_per_unit(self, plan_id: UUID) -> Decimal:
+    def get_cooperating_plans(self, plan_id: UUID) -> List[Plan]:
+        cooperating_plans = []
         plan = self.plan_repository.get_plan_by_id(plan_id)
         assert plan
-        if plan.cooperation is None:
-            price = plan.individual_price_per_unit
+        cooperation_id = plan.cooperation
+        if cooperation_id:
+            for p in self.plan_repository.plans.values():
+                if p.cooperation == cooperation_id:
+                    cooperating_plans.append(p)
+            return cooperating_plans
         else:
-            associated_plans = self._get_associated_plans(plan)
-            price = (
-                decimal_sum(
-                    [plan.production_costs.total_cost() for plan in associated_plans]
-                )
-            ) / (sum([plan.prd_amount for plan in associated_plans]) or 1)
-        return price
-
-    def _get_associated_plans(self, plan: Plan) -> List[Plan]:
-        associated_plans = []
-        for p in self.plan_repository.plans.values():
-            if p.cooperation == plan.cooperation:
-                associated_plans.append(p)
-        return associated_plans
+            return [plan]
 
     def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         plan = self.plan_repository.get_plan_by_id(plan_id)
@@ -789,3 +784,9 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
             if plan.cooperation == cooperation_id:
                 count += 1
         return count
+
+    def get_plans_in_cooperation(self, cooperation_id: UUID) -> Iterable[Plan]:
+        plans = self.plan_repository.plans.values()
+        for plan in plans:
+            if plan.cooperation == cooperation_id:
+                yield plan
