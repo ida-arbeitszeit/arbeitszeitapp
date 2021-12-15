@@ -2,19 +2,14 @@
 
 {% block content2 %}
 
-
 <div class="columns is-centered">
   <div class="column is-three-fifths">
-
-
-
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    {% for message in messages %}
-    <div class="notification is-danger">{{ message }} </div>
-    {% endfor %}
-    {% endif %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="notification {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
     {% endwith %}
 
-
-    {% endblock %}
+{% endblock %}
