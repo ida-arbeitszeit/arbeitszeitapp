@@ -9,7 +9,7 @@ from project.database.repositories import (
     PlanRepository,
 )
 
-from ..data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
+from ..data_generators import CompanyGenerator, PlanGenerator
 from .dependency_injection import injection_test
 
 Number = Union[int, Decimal]
@@ -28,55 +28,6 @@ def plan_in_list(plan: Plan, plan_list: List[Plan]) -> bool:
         if p.id == plan.id:
             return True
     return False
-
-
-@injection_test
-def test_that_correct_price_for_plan_is_returned_without_cooperation(
-    repository: PlanCooperationRepository, plan_generator: PlanGenerator
-):
-    plan = plan_generator.create_plan()
-    price = repository.get_price_per_unit(plan.id)
-    assert price == plan.individual_price_per_unit
-
-
-@injection_test
-def test_that_correct_price_for_plan_is_returned_with_1_cooperating_plan(
-    repository: PlanCooperationRepository,
-    plan_generator: PlanGenerator,
-    cooperation_generator: CooperationGenerator,
-):
-    coop = cooperation_generator.create_cooperation()
-    plan = plan_generator.create_plan(
-        activation_date=datetime.min,
-        cooperation=coop,
-        costs=production_costs(1, 1, 1),
-        amount=10,
-    )
-    calculated_price = repository.get_price_per_unit(plan.id)
-    assert calculated_price == plan.individual_price_per_unit
-
-
-@injection_test
-def test_that_correct_price_for_plan_is_returned_with_2_cooperating_plans(
-    repository: PlanCooperationRepository,
-    plan_generator: PlanGenerator,
-    cooperation_generator: CooperationGenerator,
-):
-    coop = cooperation_generator.create_cooperation()
-    plan1 = plan_generator.create_plan(
-        activation_date=datetime.min,
-        cooperation=coop,
-        costs=production_costs(1, 1, 1),
-        amount=10,
-    )
-    plan_generator.create_plan(
-        activation_date=datetime.min,
-        cooperation=coop,
-        costs=production_costs(2, 2, 2),
-        amount=10,
-    )
-    price1 = repository.get_price_per_unit(plan1.id)
-    assert price1 == Decimal("0.45")  # costs/amount = 9/20
 
 
 @injection_test
@@ -208,3 +159,79 @@ def test_plans_in_cooperation_correctly_counted(
     plan_generator.create_plan(activation_date=datetime.min, requested_cooperation=None)
     count = repository.count_plans_in_cooperation(coop.id)
     assert count == 2
+
+
+@injection_test
+def test_only_cooperating_plans_are_returned(
+    repository: PlanCooperationRepository,
+    plan_generator: PlanGenerator,
+    cooperation_repository: CooperationRepository,
+    company_generator: CompanyGenerator,
+):
+    coop = cooperation_repository.create_cooperation(
+        creation_timestamp=datetime.now(),
+        name="test name",
+        definition="test description",
+        coordinator=company_generator.create_company(),
+    )
+    plan1 = plan_generator.create_plan(activation_date=datetime.min, cooperation=coop)
+    plan2 = plan_generator.create_plan(activation_date=datetime.min, cooperation=coop)
+    plan_generator.create_plan(activation_date=datetime.min, requested_cooperation=None)
+    cooperating_plans = repository.get_cooperating_plans(plan1.id)
+    assert len(cooperating_plans) == 2
+    assert plan_in_list(plan1, cooperating_plans)
+    assert plan_in_list(plan2, cooperating_plans)
+
+
+@injection_test
+def test_correct_plans_in_cooperation_returned(
+    repository: PlanCooperationRepository,
+    plan_generator: PlanGenerator,
+    cooperation_repository: CooperationRepository,
+    company_generator: CompanyGenerator,
+):
+    coop = cooperation_repository.create_cooperation(
+        creation_timestamp=datetime.now(),
+        name="test name",
+        definition="test description",
+        coordinator=company_generator.create_company(),
+    )
+    plan1 = plan_generator.create_plan(activation_date=datetime.min, cooperation=coop)
+    plan2 = plan_generator.create_plan(activation_date=datetime.min, cooperation=coop)
+    plan3 = plan_generator.create_plan(
+        activation_date=datetime.min, requested_cooperation=None
+    )
+    plans = list(repository.get_plans_in_cooperation(coop.id))
+    assert len(plans) == 2
+    assert plan_in_list(plan1, plans)
+    assert plan_in_list(plan2, plans)
+    assert not plan_in_list(plan3, plans)
+
+
+@injection_test
+def test_single_plan_is_returned_as_a_1_plan_cooperation(
+    repository: PlanCooperationRepository,
+    plan_generator: PlanGenerator,
+):
+    plan = plan_generator.create_plan(activation_date=datetime.min, cooperation=None)
+    cooperating_plans = repository.get_cooperating_plans(plan.id)
+    assert len(cooperating_plans) == 1
+    assert plan_in_list(plan, cooperating_plans)
+
+
+@injection_test
+def test_nothing_returned_when_no_plans_in_cooperation(
+    repository: PlanCooperationRepository,
+    plan_generator: PlanGenerator,
+    cooperation_repository: CooperationRepository,
+    company_generator: CompanyGenerator,
+):
+    coop = cooperation_repository.create_cooperation(
+        creation_timestamp=datetime.now(),
+        name="test name",
+        definition="test description",
+        coordinator=company_generator.create_company(),
+    )
+    plan_generator.create_plan(activation_date=datetime.min, requested_cooperation=None)
+    plans = list(repository.get_plans_in_cooperation(coop.id))
+    assert len(plans) == 0

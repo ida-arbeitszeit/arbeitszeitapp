@@ -119,7 +119,7 @@ def test_plans_that_were_set_to_expired_dont_show_up_in_active_plans(
 
 
 @injection_test
-def test_get_plan_by_id_with_unnkown_id_results_in_none(
+def test_get_plan_by_id_with_unkown_id_results_in_none(
     repository: PlanRepository,
 ) -> None:
     assert repository.get_plan_by_id(uuid4()) is None
@@ -202,6 +202,32 @@ def test_that_expired_plan_for_company_is_returned(
         repository.get_expired_plans_for_company(company_id=company.id)
     )[0]
     assert expected_plan.id == returned_plan.id and returned_plan.expired
+
+
+@injection_test
+def test_that_plan_gets_hidden(
+    repository: PlanRepository,
+    plan_generator: PlanGenerator,
+) -> None:
+    plan = plan_generator.create_plan()
+    repository.hide_plan(plan.id)
+    plan_from_repo = repository.get_plan_by_id(plan.id)
+    assert plan_from_repo
+    assert plan_from_repo.hidden_by_user
+
+
+@injection_test
+def test_that_hidden_plans_are_not_returned(
+    repository: PlanRepository,
+    plan_generator: PlanGenerator,
+    company_generator: CompanyGenerator,
+) -> None:
+    company = company_generator.create_company()
+    plan_generator.create_plan(expired=True, hidden_by_user=True, planner=company)
+    returned_plans = list(
+        repository.get_expired_plans_for_company(company_id=company.id)
+    )
+    assert len(returned_plans) == 0
 
 
 @injection_test

@@ -144,14 +144,7 @@ class Plan:
     requested_cooperation: Optional[UUID]
     cooperation: Optional[UUID]
     is_available: bool
-
-    @property
-    def individual_price_per_unit(self) -> Decimal:
-        return (
-            self.production_costs.total_cost() / self.prd_amount
-            if not self.is_public_service
-            else Decimal(0)
-        )
+    hidden_by_user: bool
 
     @property
     def expected_sales_value(self) -> Decimal:

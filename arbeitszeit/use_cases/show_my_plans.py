@@ -6,6 +6,7 @@ from uuid import UUID
 
 from injector import inject
 
+from arbeitszeit.price_calculator import calculate_price
 from arbeitszeit.repositories import PlanCooperationRepository, PlanRepository
 
 
@@ -27,6 +28,8 @@ class PlanInfo:
     expiration_relative: Optional[int]
     is_available: bool
     renewed: bool
+    is_cooperating: bool
+    cooperation: Optional[UUID]
 
 
 @dataclass
@@ -49,8 +52,8 @@ class ShowMyPlansUseCase:
                 id=plan.id,
                 prd_name=plan.prd_name,
                 description=plan.description,
-                price_per_unit=self.plan_cooperation_repository.get_price_per_unit(
-                    plan.id
+                price_per_unit=calculate_price(
+                    self.plan_cooperation_repository.get_cooperating_plans(plan.id)
                 ),
                 is_public_service=plan.is_public_service,
                 plan_creation_date=plan.plan_creation_date,
@@ -59,6 +62,8 @@ class ShowMyPlansUseCase:
                 expiration_relative=plan.expiration_relative,
                 is_available=plan.is_available,
                 renewed=plan.renewed,
+                is_cooperating=bool(plan.cooperation),
+                cooperation=plan.cooperation,
             )
             for plan in self.plan_repository.get_all_plans_for_company(
                 request.company_id
@@ -69,8 +74,8 @@ class ShowMyPlansUseCase:
                 id=plan.id,
                 prd_name=plan.prd_name,
                 description=plan.description,
-                price_per_unit=self.plan_cooperation_repository.get_price_per_unit(
-                    plan.id
+                price_per_unit=calculate_price(
+                    self.plan_cooperation_repository.get_cooperating_plans(plan.id)
                 ),
                 is_public_service=plan.is_public_service,
                 plan_creation_date=plan.plan_creation_date,
@@ -79,6 +84,8 @@ class ShowMyPlansUseCase:
                 expiration_relative=plan.expiration_relative,
                 is_available=plan.is_available,
                 renewed=plan.renewed,
+                is_cooperating=bool(plan.cooperation),
+                cooperation=plan.cooperation,
             )
             for plan in self.plan_repository.get_non_active_plans_for_company(
                 request.company_id
@@ -89,8 +96,8 @@ class ShowMyPlansUseCase:
                 id=plan.id,
                 prd_name=plan.prd_name,
                 description=plan.description,
-                price_per_unit=self.plan_cooperation_repository.get_price_per_unit(
-                    plan.id
+                price_per_unit=calculate_price(
+                    self.plan_cooperation_repository.get_cooperating_plans(plan.id)
                 ),
                 is_public_service=plan.is_public_service,
                 plan_creation_date=plan.plan_creation_date,
@@ -99,6 +106,8 @@ class ShowMyPlansUseCase:
                 expiration_relative=plan.expiration_relative,
                 is_available=plan.is_available,
                 renewed=plan.renewed,
+                is_cooperating=bool(plan.cooperation),
+                cooperation=plan.cooperation,
             )
             for plan in self.plan_repository.get_active_plans_for_company(
                 request.company_id
@@ -109,8 +118,8 @@ class ShowMyPlansUseCase:
                 id=plan.id,
                 prd_name=plan.prd_name,
                 description=plan.description,
-                price_per_unit=self.plan_cooperation_repository.get_price_per_unit(
-                    plan.id
+                price_per_unit=calculate_price(
+                    self.plan_cooperation_repository.get_cooperating_plans(plan.id)
                 ),
                 is_public_service=plan.is_public_service,
                 plan_creation_date=plan.plan_creation_date,
@@ -119,6 +128,8 @@ class ShowMyPlansUseCase:
                 expiration_relative=plan.expiration_relative,
                 is_available=plan.is_available,
                 renewed=plan.renewed,
+                is_cooperating=bool(plan.cooperation),
+                cooperation=plan.cooperation,
             )
             for plan in self.plan_repository.get_expired_plans_for_company(
                 request.company_id
