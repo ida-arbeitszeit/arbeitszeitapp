@@ -28,6 +28,7 @@ FLASK_TESTING_CONFIGURATION = FlaskConfiguration(
         "WTF_CSRF_ENABLED": False,
         "SERVER_NAME": "test.name",
         "ENV": "development",
+        "DEBUG_DETAILS": False,
     }
 )
 

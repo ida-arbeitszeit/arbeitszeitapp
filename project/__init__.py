@@ -5,6 +5,7 @@ from flask_wtf.csrf import CSRFProtect
 
 import project.extensions
 from project.extensions import login_manager
+from project.profiling import show_profile_info, show_sql_queries
 
 
 def create_app(config=None, db=None, migrate=None, template_folder=None):
@@ -67,5 +68,11 @@ def create_app(config=None, db=None, migrate=None, template_folder=None):
         app.register_blueprint(auth_routes.auth)
         app.register_blueprint(company.blueprint.main_company)
         app.register_blueprint(member.blueprint.main_member)
+
+        if app.config["ENV"] == "development":
+            if app.config["DEBUG_DETAILS"] == True:
+                # print profiling info to sys.stout
+                show_profile_info(app)
+                show_sql_queries(app)
 
         return app
