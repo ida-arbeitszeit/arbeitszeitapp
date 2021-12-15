@@ -13,7 +13,6 @@ from arbeitszeit.use_cases import (
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
 
 from .dependency_injection import injection_test
-from .repositories import PlanCooperationRepository
 from arbeitszeit.price_calculator import calculate_price
 
 
