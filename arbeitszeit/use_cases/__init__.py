@@ -28,7 +28,6 @@ from .create_plan_draft import (
     CreatePlanDraftRequest,
     CreatePlanDraftResponse,
 )
-from .delete_plan import DeletePlan, DeletePlanResponse
 from .deny_cooperation import (
     DenyCooperation,
     DenyCooperationRequest,
@@ -52,6 +51,7 @@ from .get_member_profile_info import (
 from .get_plan_summary import GetPlanSummary, PlanSummaryResponse, PlanSummarySuccess
 from .get_statistics import GetStatistics, StatisticsResponse
 from .get_transaction_infos import GetTransactionInfos, TransactionInfo
+from .hide_plan import HidePlan, HidePlanResponse
 from .invite_worker_to_company import (
     InviteWorkerToCompany,
     InviteWorkerToCompanyRequest,
@@ -140,8 +140,8 @@ __all__ = [
     "CreatePlanDraft",
     "CreatePlanDraftRequest",
     "CreatePlanDraftResponse",
-    "DeletePlan",
-    "DeletePlanResponse",
+    "HidePlan",
+    "HidePlanResponse",
     "DenyCooperation",
     "DenyCooperationRequest",
     "DenyCooperationResponse",

@@ -11,9 +11,9 @@ from arbeitszeit.use_cases import (
     AcceptCooperationRequest,
     AcceptCooperationResponse,
     CreatePlanDraft,
-    DeletePlan,
     GetDraftSummary,
     GetPlanSummary,
+    HidePlan,
     ListCoordinations,
     ListCoordinationsRequest,
     ListInboundCoopRequests,
@@ -29,13 +29,13 @@ from arbeitszeit.use_cases import (
 )
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
-from arbeitszeit_web.delete_plan import DeletePlanPresenter
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.get_prefilled_draft_data import (
     GetPrefilledDraftDataPresenter,
     PrefilledDraftDataController,
 )
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
+from arbeitszeit_web.hide_plan import HidePlanPresenter
 from arbeitszeit_web.list_drafts_of_company import ListDraftsPresenter
 from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
@@ -344,10 +344,10 @@ def toggle_availability(plan_id: UUID, toggle_availability: ToggleProductAvailab
     return redirect(url_for("main_company.my_plans"))
 
 
-@CompanyRoute("/company/delete_plan/<uuid:plan_id>", methods=["GET", "POST"])
+@CompanyRoute("/company/hide_plan/<uuid:plan_id>", methods=["GET", "POST"])
 @commit_changes
-def delete_plan(plan_id: UUID, delete_plan: DeletePlan, presenter: DeletePlanPresenter):
-    response = delete_plan(plan_id)
+def hide_plan(plan_id: UUID, hide_plan: HidePlan, presenter: HidePlanPresenter):
+    response = hide_plan(plan_id)
     view_model = presenter.present(response)
     for notification in view_model.notifications:
         flash(notification)

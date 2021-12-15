@@ -139,7 +139,7 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def delete_plan(self, plan_id: UUID) -> None:
+    def hide_plan(self, plan_id: UUID) -> None:
         pass
 
     @abstractmethod

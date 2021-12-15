@@ -88,7 +88,7 @@ messages %}
         <td>{{ plan.type_of_plan }}</td>
         <td>{{ plan.plan_creation_date }}</td>
         <td>
-          <a href="{{ url_for('main_company.delete_plan', plan_id=plan.id) }}"><i class="fas fa-trash"></i></a>
+          <a href="{{ url_for('main_company.hide_plan', plan_id=plan.id) }}"><i class="fas fa-trash"></i></a>
         </td>
       </tr>
       {% endfor %}
@@ -137,7 +137,7 @@ messages %}
         </td>
         {% endif %}
         <td>
-          <a href="{{ url_for('main_company.delete_plan', plan_id=plan.id) }}"><i class="fas fa-trash"></i></a>
+          <a href="{{ url_for('main_company.hide_plan', plan_id=plan.id) }}"><i class="fas fa-trash"></i></a>
         </td>
       </tr>
       {% endfor %}
