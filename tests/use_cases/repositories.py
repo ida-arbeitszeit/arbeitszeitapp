@@ -817,3 +817,9 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
             if plan.cooperation == cooperation_id:
                 count += 1
         return count
+
+    def get_plans_in_cooperation(self, cooperation_id: UUID) -> Iterable[Plan]:
+        plans = self.plan_repository.plans.values()
+        for plan in plans:
+            if plan.cooperation == cooperation_id:
+                yield plan

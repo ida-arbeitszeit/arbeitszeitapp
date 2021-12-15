@@ -29,6 +29,7 @@ from arbeitszeit.use_cases import (
 )
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
+from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.get_prefilled_draft_data import (
     GetPrefilledDraftDataPresenter,
@@ -134,7 +135,7 @@ def query_plans(
     controller: QueryPlansController,
     template_renderer: UserTemplateRenderer,
 ):
-    presenter = QueryPlansPresenter(CompanyUrlIndex())
+    presenter = QueryPlansPresenter(CompanyUrlIndex(), CompanyUrlIndex())
     template_name = "company/query_plans.html"
     search_form = PlanSearchForm(request.form)
     view = QueryPlansView(
@@ -326,7 +327,7 @@ def my_plans(
     show_my_plans_use_case: ShowMyPlansUseCase,
     template_renderer: UserTemplateRenderer,
 ):
-    show_my_plans_presenter = ShowMyPlansPresenter(CompanyUrlIndex())
+    show_my_plans_presenter = ShowMyPlansPresenter(CompanyUrlIndex(), CompanyUrlIndex())
     request = ShowMyPlansRequest(company_id=UUID(current_user.id))
     response = show_my_plans_use_case(request)
     view_model = show_my_plans_presenter.present(response)
@@ -460,14 +461,33 @@ def statistics(
 def plan_summary(
     plan_id: UUID,
     get_plan_summary: use_cases.GetPlanSummary,
-    presenter: GetPlanSummarySuccessPresenter,
     template_renderer: UserTemplateRenderer,
 ):
+    presenter = GetPlanSummarySuccessPresenter(CompanyUrlIndex())
     use_case_response = get_plan_summary(plan_id)
     if isinstance(use_case_response, use_cases.PlanSummarySuccess):
         view_model = presenter.present(use_case_response)
         return template_renderer.render_template(
             "company/plan_summary.html", context=dict(view_model=view_model.to_dict())
+        )
+    else:
+        return Http404View("company/404.html", template_renderer).get_response()
+
+
+@CompanyRoute("/company/cooperation_summary/<uuid:coop_id>")
+def coop_summary(
+    coop_id: UUID,
+    get_coop_summary: use_cases.GetCoopSummary,
+    presenter: GetCoopSummarySuccessPresenter,
+    template_renderer: UserTemplateRenderer,
+):
+    use_case_response = get_coop_summary(
+        use_cases.GetCoopSummaryRequest(UUID(current_user.id), coop_id)
+    )
+    if isinstance(use_case_response, use_cases.GetCoopSummarySuccess):
+        view_model = presenter.present(use_case_response)
+        return template_renderer.render_template(
+            "company/coop_summary.html", context=dict(view_model=view_model.to_dict())
         )
     else:
         return Http404View("company/404.html", template_renderer).get_response()
@@ -526,7 +546,6 @@ def request_cooperation(
 @commit_changes
 def my_cooperations(
     template_renderer: UserTemplateRenderer,
-    presenter: ShowMyCooperationsPresenter,
     list_coordinations: ListCoordinations,
     list_inbound_coop_requests: ListInboundCoopRequests,
     accept_cooperation: AcceptCooperation,
@@ -554,6 +573,7 @@ def my_cooperations(
         ListOutboundCoopRequestsRequest(UUID(current_user.id))
     )
 
+    presenter = ShowMyCooperationsPresenter(CompanyUrlIndex())
     view_model = presenter.present(
         list_coord_response,
         list_inbound_coop_requests_response,

@@ -1,6 +1,6 @@
 from datetime import datetime
 from unittest import TestCase
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases import (
     AcceptCooperationResponse,
@@ -51,7 +51,8 @@ LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1 = ListOutboundCoopRequestsResponse(
 
 class ShowMyCooperationsPresenterTests(TestCase):
     def setUp(self) -> None:
-        self.presenter = ShowMyCooperationsPresenter()
+        self.coop_url_index = CoopSummaryUrlIndex()
+        self.presenter = ShowMyCooperationsPresenter(self.coop_url_index)
 
     def test_coordinations_are_presented_correctly(self):
         presentation = self.presenter.present(
@@ -64,6 +65,11 @@ class ShowMyCooperationsPresenterTests(TestCase):
         self.assertEqual(
             presentation.list_of_coordinations.rows[0].coop_id,
             str(LIST_COORDINATIONS_RESPONSE_LEN_1.coordinations[0].id),
+        )
+        coop_id = LIST_COORDINATIONS_RESPONSE_LEN_1.coordinations[0].id
+        self.assertEqual(
+            presentation.list_of_coordinations.rows[0].coop_summary_url,
+            self.coop_url_index.get_coop_summary_url(coop_id),
         )
         self.assertEqual(
             presentation.list_of_coordinations.rows[0].coop_creation_date,
@@ -173,3 +179,8 @@ class ShowMyCooperationsPresenterTests(TestCase):
                 LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1.cooperation_requests[0].coop_id
             ),
         )
+
+
+class CoopSummaryUrlIndex:
+    def get_coop_summary_url(self, coop_id: UUID) -> str:
+        return f"fake_coop_url:{coop_id}"

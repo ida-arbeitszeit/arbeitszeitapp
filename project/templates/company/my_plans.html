@@ -19,7 +19,7 @@ messages %}
   <table class="table is-fullwidth">
     <thead>
       <tr>
-        <th>Plan-ID</th>
+        <th>ID</th>
         <th>Produkt</th>
         <th>Beschr.</th>
         <th>Stückpr.</th>
@@ -36,7 +36,10 @@ messages %}
         <td><a href="{{ plan.plan_summary_url }}">{{ plan.id }}</a></td>
         <td>{{ plan.prd_name }}</td>
         <td>{% for paragraph in plan.description %}{{ paragraph }}<br>{% endfor %}</td>
-        <td>{{ plan.price_per_unit }}</td>
+        <td>{{ plan.price_per_unit }} {% if plan.is_cooperating %} <span><a href="{{ plan.coop_summary_url }}"><i
+                class="fas fa-hands-helping"></i></a></span>{%
+          endif %}
+        </td>
         <td>{{ plan.type_of_plan }}</td>
         <td>{{ plan.activation_date }}</td>
         <td>{{ plan.expiration_date }}</td>
@@ -69,7 +72,7 @@ messages %}
   <table class="table is-fullwidth">
     <thead>
       <tr>
-        <th>Plan-ID</th>
+        <th>ID</th>
         <th>Produkt</th>
         <th>Beschreibung</th>
         <th>Stückpreis</th>
@@ -106,7 +109,7 @@ messages %}
   <table class="table is-fullwidth">
     <thead>
       <tr>
-        <th>Plan-ID</th>
+        <th>ID</th>
         <th>Produkt</th>
         <th>Beschreibung</th>
         <th>Stückpreis</th>

@@ -9,7 +9,7 @@ from arbeitszeit.use_cases import (
     PlanSummaryResponse,
     PlanSummarySuccess,
 )
-from tests.data_generators import CompanyGenerator, PlanGenerator
+from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
 
 from .dependency_injection import injection_test
 
@@ -172,6 +172,30 @@ def test_that_correct_availability_is_shown(
     assert plan.is_available
     summary = get_plan_summary(plan.id)
     assert_success(summary, lambda s: s.is_available == True)
+
+
+@injection_test
+def test_that_no_cooperation_is_shown_when_plan_is_not_cooperating(
+    plan_generator: PlanGenerator,
+    get_plan_summary: GetPlanSummary,
+):
+    plan = plan_generator.create_plan(activation_date=datetime.min, cooperation=None)
+    summary = get_plan_summary(plan.id)
+    assert_success(summary, lambda s: s.is_cooperating == False)
+    assert_success(summary, lambda s: s.cooperation is None)
+
+
+@injection_test
+def test_that_correct_cooperation_is_shown(
+    plan_generator: PlanGenerator,
+    get_plan_summary: GetPlanSummary,
+    coop_generator: CooperationGenerator,
+):
+    coop = coop_generator.create_cooperation()
+    plan = plan_generator.create_plan(activation_date=datetime.min, cooperation=coop)
+    summary = get_plan_summary(plan.id)
+    assert_success(summary, lambda s: s.is_cooperating == True)
+    assert_success(summary, lambda s: s.cooperation == coop.id)
 
 
 def assert_success(

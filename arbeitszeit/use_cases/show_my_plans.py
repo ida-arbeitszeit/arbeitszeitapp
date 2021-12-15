@@ -27,6 +27,8 @@ class PlanInfo:
     expiration_relative: Optional[int]
     is_available: bool
     renewed: bool
+    is_cooperating: bool
+    cooperation: Optional[UUID]
 
 
 @dataclass
@@ -59,6 +61,8 @@ class ShowMyPlansUseCase:
                 expiration_relative=plan.expiration_relative,
                 is_available=plan.is_available,
                 renewed=plan.renewed,
+                is_cooperating=bool(plan.cooperation),
+                cooperation=plan.cooperation,
             )
             for plan in self.plan_repository.get_all_plans_for_company(
                 request.company_id
@@ -79,6 +83,8 @@ class ShowMyPlansUseCase:
                 expiration_relative=plan.expiration_relative,
                 is_available=plan.is_available,
                 renewed=plan.renewed,
+                is_cooperating=bool(plan.cooperation),
+                cooperation=plan.cooperation,
             )
             for plan in self.plan_repository.get_non_active_plans_for_company(
                 request.company_id
@@ -99,6 +105,8 @@ class ShowMyPlansUseCase:
                 expiration_relative=plan.expiration_relative,
                 is_available=plan.is_available,
                 renewed=plan.renewed,
+                is_cooperating=bool(plan.cooperation),
+                cooperation=plan.cooperation,
             )
             for plan in self.plan_repository.get_active_plans_for_company(
                 request.company_id
@@ -119,6 +127,8 @@ class ShowMyPlansUseCase:
                 expiration_relative=plan.expiration_relative,
                 is_available=plan.is_available,
                 renewed=plan.renewed,
+                is_cooperating=bool(plan.cooperation),
+                cooperation=plan.cooperation,
             )
             for plan in self.plan_repository.get_expired_plans_for_company(
                 request.company_id
