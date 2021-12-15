@@ -81,6 +81,7 @@ from .list_outbound_coop_requests import (
     ListOutboundCoopRequestsRequest,
     ListOutboundCoopRequestsResponse,
 )
+from .list_workers import ListedWorker, ListWorkers, ListWorkersResponse
 from .pay_consumer_product import (
     PayConsumerProduct,
     PayConsumerProductRequest,
@@ -175,6 +176,9 @@ __all__ = [
     "ListOutboundCoopRequestsRequest",
     "ListOutboundCoopRequestsResponse",
     "ListedMessage",
+    "ListWorkers",
+    "ListWorkersResponse",
+    "ListedWorker",
     "PayConsumerProduct",
     "PayConsumerProductRequest",
     "PayConsumerProductResponse",

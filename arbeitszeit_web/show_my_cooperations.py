@@ -3,12 +3,12 @@ from typing import Any, Dict, List, Optional
 
 from arbeitszeit.use_cases import (
     AcceptCooperationResponse,
-    ListCoordinationsResponse,
-    ListInboundCoopRequestsResponse,
-    ListOutboundCoopRequestsResponse,
     CooperationInfo,
+    ListCoordinationsResponse,
     ListedInboundCoopRequest,
     ListedOutboundCoopRequest,
+    ListInboundCoopRequestsResponse,
+    ListOutboundCoopRequestsResponse,
 )
 
 
