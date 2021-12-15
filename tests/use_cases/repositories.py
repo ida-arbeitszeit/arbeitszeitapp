@@ -458,31 +458,6 @@ class PlanRepository(interfaces.PlanRepository):
             if str(plan.planner.id) == str(company_id):
                 yield plan
 
-    def get_non_active_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
-        for plan in self.plans.values():
-            if (
-                plan.planner == company_id
-                and plan.approved
-                and not plan.is_active
-                and not plan.expired
-            ):
-                yield plan
-
-    def get_active_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
-        for plan in self.plans.values():
-            if (
-                plan.planner == company_id
-                and plan.approved
-                and plan.is_active
-                and not plan.expired
-            ):
-                yield plan
-
-    def get_expired_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
-        for plan in self.plans.values():
-            if plan.planner == company_id and plan.expired:
-                yield plan
-
     def _create_plan(
         self,
         id: UUID,

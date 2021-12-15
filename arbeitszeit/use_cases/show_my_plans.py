@@ -34,7 +34,7 @@ class PlanInfo:
 
 @dataclass
 class ShowMyPlansResponse:
-    all_plans: List[PlanInfo]
+    count_all_plans: int
     non_active_plans: List[PlanInfo]
     active_plans: List[PlanInfo]
     expired_plans: List[PlanInfo]
@@ -47,28 +47,14 @@ class ShowMyPlansUseCase:
     plan_cooperation_repository: PlanCooperationRepository
 
     def __call__(self, request: ShowMyPlansRequest) -> ShowMyPlansResponse:
-        all_plans = [
-            PlanInfo(
-                id=plan.id,
-                prd_name=plan.prd_name,
-                description=plan.description,
-                price_per_unit=calculate_price(
-                    self.plan_cooperation_repository.get_cooperating_plans(plan.id)
-                ),
-                is_public_service=plan.is_public_service,
-                plan_creation_date=plan.plan_creation_date,
-                activation_date=plan.activation_date,
-                expiration_date=plan.expiration_date,
-                expiration_relative=plan.expiration_relative,
-                is_available=plan.is_available,
-                renewed=plan.renewed,
-                is_cooperating=bool(plan.cooperation),
-                cooperation=plan.cooperation,
-            )
+        all_plans_of_company = [
+            plan
             for plan in self.plan_repository.get_all_plans_for_company(
                 request.company_id
             )
         ]
+        count_all_plans = len(all_plans_of_company)
+
         non_active_plans = [
             PlanInfo(
                 id=plan.id,
@@ -87,9 +73,8 @@ class ShowMyPlansUseCase:
                 is_cooperating=bool(plan.cooperation),
                 cooperation=plan.cooperation,
             )
-            for plan in self.plan_repository.get_non_active_plans_for_company(
-                request.company_id
-            )
+            for plan in all_plans_of_company
+            if (plan.approved and not plan.is_active and not plan.expired)
         ]
         active_plans = [
             PlanInfo(
@@ -109,9 +94,8 @@ class ShowMyPlansUseCase:
                 is_cooperating=bool(plan.cooperation),
                 cooperation=plan.cooperation,
             )
-            for plan in self.plan_repository.get_active_plans_for_company(
-                request.company_id
-            )
+            for plan in all_plans_of_company
+            if (plan.approved and plan.is_active and not plan.expired)
         ]
         expired_plans = [
             PlanInfo(
@@ -131,12 +115,11 @@ class ShowMyPlansUseCase:
                 is_cooperating=bool(plan.cooperation),
                 cooperation=plan.cooperation,
             )
-            for plan in self.plan_repository.get_expired_plans_for_company(
-                request.company_id
-            )
+            for plan in all_plans_of_company
+            if plan.expired and (not plan.hidden_by_user)
         ]
         return ShowMyPlansResponse(
-            all_plans=all_plans,
+            count_all_plans=count_all_plans,
             non_active_plans=non_active_plans,
             active_plans=active_plans,
             expired_plans=expired_plans,

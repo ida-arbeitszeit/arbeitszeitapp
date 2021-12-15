@@ -29,9 +29,8 @@ def _convert_into_plan_info(plan: Plan) -> PlanInfo:
 
 
 def response_with_one_plan(plan: Plan) -> ShowMyPlansResponse:
-    plan_info = _convert_into_plan_info(plan)
     return ShowMyPlansResponse(
-        all_plans=[plan_info],
+        count_all_plans=1,
         non_active_plans=[],
         active_plans=[],
         expired_plans=[],
@@ -41,7 +40,7 @@ def response_with_one_plan(plan: Plan) -> ShowMyPlansResponse:
 def response_with_one_active_plan(plan: Plan) -> ShowMyPlansResponse:
     plan_info = _convert_into_plan_info(plan)
     return ShowMyPlansResponse(
-        all_plans=[plan_info],
+        count_all_plans=1,
         non_active_plans=[],
         active_plans=[plan_info],
         expired_plans=[],
@@ -51,7 +50,7 @@ def response_with_one_active_plan(plan: Plan) -> ShowMyPlansResponse:
 def response_with_one_expired_plan(plan: Plan) -> ShowMyPlansResponse:
     plan_info = _convert_into_plan_info(plan)
     return ShowMyPlansResponse(
-        all_plans=[plan_info],
+        count_all_plans=1,
         non_active_plans=[],
         active_plans=[],
         expired_plans=[plan_info],
@@ -61,7 +60,7 @@ def response_with_one_expired_plan(plan: Plan) -> ShowMyPlansResponse:
 def response_with_one_non_active_plan(plan: Plan) -> ShowMyPlansResponse:
     plan_info = _convert_into_plan_info(plan)
     return ShowMyPlansResponse(
-        all_plans=[plan_info],
+        count_all_plans=1,
         non_active_plans=[plan_info],
         active_plans=[],
         expired_plans=[],
@@ -80,7 +79,10 @@ class ShowMyPlansPresenterTests(TestCase):
     def test_show_correct_notification_when_user_has_no_plans(self):
         presentation = self.presenter.present(
             ShowMyPlansResponse(
-                all_plans=[], non_active_plans=[], active_plans=[], expired_plans=[]
+                count_all_plans=0,
+                non_active_plans=[],
+                active_plans=[],
+                expired_plans=[],
             )
         )
         self.assertTrue(presentation.notifications)
