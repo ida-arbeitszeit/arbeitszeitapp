@@ -10,6 +10,7 @@ from uuid import UUID
 from injector import inject
 
 from arbeitszeit.entities import Plan
+from arbeitszeit.price_calculator import calculate_price
 from arbeitszeit.repositories import PlanCooperationRepository, PlanRepository
 
 
@@ -68,7 +69,9 @@ class QueryPlans:
         )
 
     def _plan_to_response_model(self, plan: Plan) -> QueriedPlan:
-        price_per_unit = self.plan_cooperation_repository.get_price_per_unit(plan.id)
+        price_per_unit = calculate_price(
+            self.plan_cooperation_repository.get_cooperating_plans(plan.id)
+        )
         return QueriedPlan(
             plan_id=plan.id,
             company_name=plan.planner.name,

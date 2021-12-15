@@ -6,6 +6,7 @@ from uuid import UUID
 
 from injector import inject
 
+from arbeitszeit.price_calculator import calculate_price
 from arbeitszeit.repositories import PlanCooperationRepository, PlanRepository
 
 
@@ -51,8 +52,8 @@ class ShowMyPlansUseCase:
                 id=plan.id,
                 prd_name=plan.prd_name,
                 description=plan.description,
-                price_per_unit=self.plan_cooperation_repository.get_price_per_unit(
-                    plan.id
+                price_per_unit=calculate_price(
+                    self.plan_cooperation_repository.get_cooperating_plans(plan.id)
                 ),
                 is_public_service=plan.is_public_service,
                 plan_creation_date=plan.plan_creation_date,
@@ -73,8 +74,8 @@ class ShowMyPlansUseCase:
                 id=plan.id,
                 prd_name=plan.prd_name,
                 description=plan.description,
-                price_per_unit=self.plan_cooperation_repository.get_price_per_unit(
-                    plan.id
+                price_per_unit=calculate_price(
+                    self.plan_cooperation_repository.get_cooperating_plans(plan.id)
                 ),
                 is_public_service=plan.is_public_service,
                 plan_creation_date=plan.plan_creation_date,
@@ -95,8 +96,8 @@ class ShowMyPlansUseCase:
                 id=plan.id,
                 prd_name=plan.prd_name,
                 description=plan.description,
-                price_per_unit=self.plan_cooperation_repository.get_price_per_unit(
-                    plan.id
+                price_per_unit=calculate_price(
+                    self.plan_cooperation_repository.get_cooperating_plans(plan.id)
                 ),
                 is_public_service=plan.is_public_service,
                 plan_creation_date=plan.plan_creation_date,
@@ -117,8 +118,8 @@ class ShowMyPlansUseCase:
                 id=plan.id,
                 prd_name=plan.prd_name,
                 description=plan.description,
-                price_per_unit=self.plan_cooperation_repository.get_price_per_unit(
-                    plan.id
+                price_per_unit=calculate_price(
+                    self.plan_cooperation_repository.get_cooperating_plans(plan.id)
                 ),
                 is_public_service=plan.is_public_service,
                 plan_creation_date=plan.plan_creation_date,

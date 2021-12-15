@@ -11,20 +11,6 @@ class TestPlanEntity(TestCase):
         self.injector = get_dependency_injector()
         self.plan_generator = self.injector.get(PlanGenerator)
 
-    def test_price_equals_costs_when_productive_plan_and_no_cooperation(self) -> None:
-        plan = self.plan_generator.create_plan(
-            costs=ProductionCosts(Decimal(10), Decimal(5), Decimal(5)), amount=10
-        )
-        self.assertEqual(plan.individual_price_per_unit, Decimal(2))
-
-    def test_price_equals_zero_when_public_plan(self) -> None:
-        plan = self.plan_generator.create_plan(
-            costs=ProductionCosts(Decimal(10), Decimal(5), Decimal(5)),
-            amount=10,
-            is_public_service=True,
-        )
-        self.assertEqual(plan.individual_price_per_unit, Decimal(0))
-
     def test_expected_sales_value_is_zero_for_public_plan(self) -> None:
         plan = self.plan_generator.create_plan(is_public_service=True)
         self.assertEqual(plan.expected_sales_value, Decimal(0))

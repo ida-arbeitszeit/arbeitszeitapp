@@ -9,6 +9,7 @@ from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Company, Plan, PurposesOfPurchases
+from arbeitszeit.price_calculator import calculate_price
 from arbeitszeit.repositories import (
     CompanyRepository,
     PlanCooperationRepository,
@@ -103,8 +104,8 @@ class Payment:
     purpose: PurposesOfPurchases
 
     def record_purchase(self) -> None:
-        price_per_unit = self.plan_cooperation_repository.get_price_per_unit(
-            self.plan.id
+        price_per_unit = calculate_price(
+            self.plan_cooperation_repository.get_cooperating_plans(self.plan.id)
         )
         self.purchase_repository.create_purchase(
             purchase_date=self.datetime_service.now(),
@@ -116,8 +117,8 @@ class Payment:
         )
 
     def create_transaction(self) -> None:
-        price_total = self.amount * self.plan_cooperation_repository.get_price_per_unit(
-            self.plan.id
+        price_total = self.amount * calculate_price(
+            self.plan_cooperation_repository.get_cooperating_plans(self.plan.id)
         )
         if self.purpose == PurposesOfPurchases.means_of_prod:
             sending_account = self.buyer.means_account

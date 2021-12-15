@@ -770,26 +770,18 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
             if plan.requested_cooperation:
                 yield plan
 
-    def get_price_per_unit(self, plan_id: UUID) -> Decimal:
+    def get_cooperating_plans(self, plan_id: UUID) -> List[Plan]:
+        cooperating_plans = []
         plan = self.plan_repository.get_plan_by_id(plan_id)
         assert plan
-        if plan.cooperation is None:
-            price = plan.individual_price_per_unit
+        cooperation_id = plan.cooperation
+        if cooperation_id:
+            for p in self.plan_repository.plans.values():
+                if p.cooperation == cooperation_id:
+                    cooperating_plans.append(p)
+            return cooperating_plans
         else:
-            associated_plans = self._get_associated_plans(plan)
-            price = (
-                decimal_sum(
-                    [plan.production_costs.total_cost() for plan in associated_plans]
-                )
-            ) / (sum([plan.prd_amount for plan in associated_plans]) or 1)
-        return price
-
-    def _get_associated_plans(self, plan: Plan) -> List[Plan]:
-        associated_plans = []
-        for p in self.plan_repository.plans.values():
-            if p.cooperation == plan.cooperation:
-                associated_plans.append(p)
-        return associated_plans
+            return [plan]
 
     def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         plan = self.plan_repository.get_plan_by_id(plan_id)

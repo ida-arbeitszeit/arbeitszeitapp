@@ -6,6 +6,7 @@ from uuid import UUID
 from injector import inject
 
 from arbeitszeit.repositories import CooperationRepository, PlanCooperationRepository
+from arbeitszeit.price_calculator import calculate_price
 
 
 @dataclass
@@ -54,9 +55,12 @@ class GetCoopSummary:
                 plan_name=plan.prd_name,
                 plan_total_costs=plan.production_costs.total_cost(),
                 plan_amount=plan.prd_amount,
-                plan_individual_price=plan.individual_price_per_unit,
-                plan_coop_price=self.plan_cooperation_repository.get_price_per_unit(
-                    plan.id
+                plan_individual_price=plan.production_costs.total_cost()
+                / plan.prd_amount
+                if not plan.is_public_service
+                else Decimal(0),
+                plan_coop_price=calculate_price(
+                    self.plan_cooperation_repository.get_cooperating_plans(plan.id)
                 ),
             )
             for plan in self.plan_cooperation_repository.get_plans_in_cooperation(

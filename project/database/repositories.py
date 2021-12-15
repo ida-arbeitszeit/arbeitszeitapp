@@ -1059,29 +1059,22 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
             if plan.requested_cooperation:
                 yield plan
 
-    def get_price_per_unit(self, plan_id: UUID) -> Decimal:
+    def get_cooperating_plans(self, plan_id: UUID) -> List[entities.Plan]:
         plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
-        assert plan_orm
+        if plan_orm is None:
+            return []
         coop_orm = plan_orm.coop
         if coop_orm is None:
             plan = self.plan_repository.get_plan_by_id(plan_id)
-            assert plan
-            price = plan.individual_price_per_unit
-        else:
-            price = self._calculate_coop_price_per_unit(coop_orm)
-        return price
+            if plan is None:
+                return []
+            return [plan]
 
-    def _calculate_coop_price_per_unit(self, coop_orm: Cooperation) -> Decimal:
-        associated_plans_orm = coop_orm.plans.all()
-        associated_plans = [
-            self.plan_repository.object_from_orm(plan) for plan in associated_plans_orm
-        ]
-        price = (
-            decimal_sum(
-                [plan.production_costs.total_cost() for plan in associated_plans]
-            )
-        ) / (sum([plan.prd_amount for plan in associated_plans]) or 1)
-        return price
+        else:
+            return [
+                self.plan_repository.object_from_orm(plan)
+                for plan in coop_orm.plans.all()
+            ]
 
     def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
