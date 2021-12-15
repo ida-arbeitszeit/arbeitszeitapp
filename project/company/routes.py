@@ -21,8 +21,10 @@ from arbeitszeit.use_cases import (
     ListMessages,
     ListOutboundCoopRequests,
     ListOutboundCoopRequestsRequest,
+    ListWorkers,
     ReadMessage,
     RequestCooperation,
+    SendWorkCertificatesToWorker,
     ToggleProductAvailability,
 )
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
@@ -99,6 +101,7 @@ def profile(
 @CompanyRoute("/company/work", methods=["GET", "POST"])
 @commit_changes
 def arbeit(
+    list_workers: ListWorkers,
     company_repository: CompanyRepository,
     member_repository: MemberRepository,
     company_worker_repository: CompanyWorkerRepository,
@@ -119,11 +122,11 @@ def arbeit(
         except errors.WorkerAlreadyAtCompany:
             flash("Mitglied ist bereits in diesem Betrieb beschäftigt.")
         return redirect(url_for("main_company.arbeit"))
-    elif request.method == "GET":
-        workers_list = list(company_worker_repository.get_company_workers(company))
-        return template_renderer.render_template(
-            "company/work.html", context=dict(workers_list=workers_list)
-        )
+
+    workers_list = list_workers(company.id)
+    return template_renderer.render_template(
+        "company/work.html", context=dict(workers_list=workers_list.workers)
+    )
 
 
 @CompanyRoute("/company/query_plans", methods=["GET", "POST"])
@@ -294,13 +297,14 @@ def create_plan(
     approval_response = seek_approval(draft_uuid, expired_plan_uuid)
 
     if approval_response.is_approved:
-        flash("Plan erfolgreich erstellt und genehmigt.")
+        flash("Plan erfolgreich erstellt und genehmigt.", "is-success")
         activate_plan_and_grant_credit(approval_response.new_plan_id)
         flash(
-            "Plan wurde aktiviert. Kredite für Produktionskosten wurden bereits gewährt, Kosten für Arbeit werden täglich ausgezahlt."
+            "Plan wurde aktiviert. Kredite für Produktionskosten wurden bereits gewährt, Kosten für Arbeit werden täglich ausgezahlt.",
+            "is-success",
         )
     else:
-        flash(f"Plan nicht genehmigt. Grund:\n{approval_response.reason}")
+        flash(f"Plan nicht genehmigt. Grund:\n{approval_response.reason}", "is-danger")
 
     return template_renderer.render_template("/company/create_plan_response.html")
 
@@ -380,33 +384,41 @@ def my_accounts(
 @CompanyRoute("/company/transfer_to_worker", methods=["GET", "POST"])
 @commit_changes
 def transfer_to_worker(
-    send_work_certificates_to_worker: use_cases.SendWorkCertificatesToWorker,
+    send_work_certificates_to_worker: SendWorkCertificatesToWorker,
+    list_workers: ListWorkers,
     company_repository: CompanyRepository,
     member_repository: MemberRepository,
     template_renderer: UserTemplateRenderer,
 ):
+    company = company_repository.get_by_id(UUID(current_user.id))
+    assert company is not None
+
     if request.method == "POST":
-        company = company_repository.get_by_id(UUID(current_user.id))
-        assert company is not None
-        worker = member_repository.get_by_id(
-            UUID(str(request.form["member_id"]).strip())
-        )
-        if worker is None:
-            flash("Mitglied existiert nicht.")
-        else:
-            try:
+        try:
+            worker = member_repository.get_by_id(
+                UUID(str(request.form["member_id"]).strip())
+            )
+            if worker is None:
+                flash("Mitglied existiert nicht.", "is-danger")
+            else:
                 amount = Decimal(request.form["amount"])
                 send_work_certificates_to_worker(
                     company,
                     worker,
                     amount,
                 )
-            except errors.WorkerNotAtCompany:
-                flash("Mitglied ist nicht in diesem Betrieb beschäftigt.")
-            else:
-                flash("Erfolgreich überwiesen.")
+        except ValueError:
+            flash("Bitte Mitarbeiter wählen!", "is-danger")
+        except errors.WorkerNotAtCompany:
+            flash("Mitglied ist nicht in diesem Betrieb beschäftigt.", "is-danger")
+        else:
+            flash("Erfolgreich überwiesen.", "is-success")
 
-    return template_renderer.render_template("company/transfer_to_worker.html")
+    workers_list = list_workers(company.id)
+    return template_renderer.render_template(
+        "company/transfer_to_worker.html",
+        context=dict(workers_list=workers_list.workers),
+    )
 
 
 @CompanyRoute("/company/transfer_to_company", methods=["GET", "POST"])

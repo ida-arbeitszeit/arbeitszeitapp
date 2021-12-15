@@ -3,7 +3,10 @@ from typing import Any, Dict, List, Optional
 
 from arbeitszeit.use_cases import (
     AcceptCooperationResponse,
+    CooperationInfo,
     ListCoordinationsResponse,
+    ListedInboundCoopRequest,
+    ListedOutboundCoopRequest,
     ListInboundCoopRequestsResponse,
     ListOutboundCoopRequestsResponse,
 )
@@ -77,26 +80,13 @@ class ShowMyCooperationsPresenter:
     ) -> ShowMyCooperationsViewModel:
         list_of_coordinations = ListOfCoordinationsTable(
             rows=[
-                ListOfCoordinationsRow(
-                    coop_id=str(coop.id),
-                    coop_creation_date=str(coop.creation_date),
-                    coop_name=coop.name,
-                    coop_definition=coop.definition.splitlines(),
-                    count_plans_in_coop=str(coop.count_plans_in_coop),
-                    coop_summary_url=self.coop_url_index.get_coop_summary_url(coop.id),
-                )
+                self._display_coordination_table_row(coop)
                 for coop in list_coord_response.coordinations
             ]
         )
         list_of_inbound_coop_requests = ListOfInboundCooperationRequestsTable(
             rows=[
-                ListOfInboundCooperationRequestsRow(
-                    coop_id=str(plan.coop_id),
-                    coop_name=plan.coop_name,
-                    plan_id=str(plan.plan_id),
-                    plan_name=plan.plan_name,
-                    planner_name=plan.planner_name,
-                )
+                self._display_inbound_coop_requests(plan)
                 for plan in list_inbound_coop_requests_response.cooperation_requests
             ]
         )
@@ -109,12 +99,7 @@ class ShowMyCooperationsPresenter:
 
         list_of_outbound_coop_requests = ListOfOutboundCooperationRequestsTable(
             rows=[
-                ListOfOutboundCooperationRequestsRow(
-                    plan_id=str(plan.plan_id),
-                    plan_name=plan.plan_name,
-                    coop_id=str(plan.coop_id),
-                    coop_name=plan.coop_name,
-                )
+                self._display_outbound_coop_requests(plan)
                 for plan in list_outbound_coop_requests_response.cooperation_requests
             ]
         )
@@ -124,6 +109,39 @@ class ShowMyCooperationsPresenter:
             list_of_inbound_coop_requests,
             accept_message,
             list_of_outbound_coop_requests,
+        )
+
+    def _display_coordination_table_row(
+        self, coop: CooperationInfo
+    ) -> ListOfCoordinationsRow:
+        return ListOfCoordinationsRow(
+            coop_id=str(coop.id),
+            coop_creation_date=str(coop.creation_date),
+            coop_name=coop.name,
+            coop_definition=coop.definition.splitlines(),
+            count_plans_in_coop=str(coop.count_plans_in_coop),
+            coop_summary_url=self.coop_url_index.get_coop_summary_url(coop.id),
+        )
+
+    def _display_inbound_coop_requests(
+        self, plan: ListedInboundCoopRequest
+    ) -> ListOfInboundCooperationRequestsRow:
+        return ListOfInboundCooperationRequestsRow(
+            coop_id=str(plan.coop_id),
+            coop_name=plan.coop_name,
+            plan_id=str(plan.plan_id),
+            plan_name=plan.plan_name,
+            planner_name=plan.planner_name,
+        )
+
+    def _display_outbound_coop_requests(
+        self, plan: ListedOutboundCoopRequest
+    ) -> ListOfOutboundCooperationRequestsRow:
+        return ListOfOutboundCooperationRequestsRow(
+            plan_id=str(plan.plan_id),
+            plan_name=plan.plan_name,
+            coop_id=str(plan.coop_id),
+            coop_name=plan.coop_name,
         )
 
     def _create_accept_message(
