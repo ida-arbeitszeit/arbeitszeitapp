@@ -139,7 +139,7 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def delete_plan(self, plan_id: UUID) -> None:
+    def hide_plan(self, plan_id: UUID) -> None:
         pass
 
     @abstractmethod
@@ -152,18 +152,6 @@ class PlanRepository(ABC):
 
     @abstractmethod
     def get_all_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
-        pass
-
-    @abstractmethod
-    def get_non_active_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
-        pass
-
-    @abstractmethod
-    def get_active_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
-        pass
-
-    @abstractmethod
-    def get_expired_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
         pass
 
     @abstractmethod
@@ -372,11 +360,35 @@ class CooperationRepository(ABC):
         pass
 
     @abstractmethod
+    def get_cooperations_coordinated_by_company(
+        self, company_id: UUID
+    ) -> Iterator[Cooperation]:
+        pass
+
+    @abstractmethod
+    def get_cooperation_name(self, coop_id: UUID) -> Optional[str]:
+        pass
+
+
+class PlanCooperationRepository(ABC):
+    @abstractmethod
+    def get_cooperating_plans(self, plan_id: UUID) -> List[Plan]:
+        pass
+
+    @abstractmethod
+    def get_inbound_requests(self, coordinator_id: UUID) -> Iterator[Plan]:
+        pass
+
+    @abstractmethod
+    def get_outbound_requests(self, requester_id: UUID) -> Iterator[Plan]:
+        pass
+
+    @abstractmethod
     def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         pass
 
     @abstractmethod
-    def remove_plan_from_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
+    def remove_plan_from_cooperation(self, plan_id: UUID) -> None:
         pass
 
     @abstractmethod
@@ -385,4 +397,12 @@ class CooperationRepository(ABC):
 
     @abstractmethod
     def set_requested_cooperation_to_none(self, plan_id: UUID) -> None:
+        pass
+
+    @abstractmethod
+    def count_plans_in_cooperation(self, cooperation_id: UUID) -> int:
+        pass
+
+    @abstractmethod
+    def get_plans_in_cooperation(self, cooperation_id: UUID) -> Iterable[Plan]:
         pass

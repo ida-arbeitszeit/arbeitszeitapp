@@ -1,22 +1,22 @@
 from unittest import TestCase
 from uuid import uuid4
 
-from arbeitszeit.use_cases.delete_plan import DeletePlanResponse
-from arbeitszeit_web.delete_plan import DeletePlanPresenter
+from arbeitszeit.use_cases.hide_plan import HidePlanResponse
+from arbeitszeit_web.hide_plan import HidePlanPresenter
 
-SUCCESSFUL_DELETE_RESPONSE = DeletePlanResponse(
+SUCCESSFUL_DELETE_RESPONSE = HidePlanResponse(
     plan_id=uuid4(),
     is_success=True,
 )
-FAILED_DELETE_RESPONSE = DeletePlanResponse(
+FAILED_DELETE_RESPONSE = HidePlanResponse(
     plan_id=uuid4(),
     is_success=False,
 )
 
 
-class DeletePlanPresenterTests(TestCase):
+class HidePlanPresenterTests(TestCase):
     def setUp(self):
-        self.presenter = DeletePlanPresenter()
+        self.presenter = HidePlanPresenter()
 
     def test_that_a_notification_is_shown_when_deletion_was_successful(self):
         presentation = self.presenter.present(SUCCESSFUL_DELETE_RESPONSE)

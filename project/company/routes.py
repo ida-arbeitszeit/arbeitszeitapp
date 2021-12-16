@@ -7,25 +7,37 @@ from flask_login import current_user, login_required
 
 from arbeitszeit import entities, errors, use_cases
 from arbeitszeit.use_cases import (
+    AcceptCooperation,
+    AcceptCooperationRequest,
+    AcceptCooperationResponse,
     CreatePlanDraft,
-    DeletePlan,
     GetDraftSummary,
     GetPlanSummary,
+    HidePlan,
     InviteWorkerToCompany,
+    ListCoordinations,
+    ListCoordinationsRequest,
+    ListInboundCoopRequests,
+    ListInboundCoopRequestsRequest,
     ListMessages,
+    ListOutboundCoopRequests,
+    ListOutboundCoopRequestsRequest,
+    ListWorkers,
     ReadMessage,
     RequestCooperation,
+    SendWorkCertificatesToWorker,
     ToggleProductAvailability,
 )
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
-from arbeitszeit_web.delete_plan import DeletePlanPresenter
+from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.get_prefilled_draft_data import (
     GetPrefilledDraftDataPresenter,
     PrefilledDraftDataController,
 )
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
+from arbeitszeit_web.hide_plan import HidePlanPresenter
 from arbeitszeit_web.invite_worker_to_company import (
     InviteWorkerToCompanyController,
     InviteWorkerToCompanyPresenter,
@@ -43,6 +55,7 @@ from arbeitszeit_web.request_cooperation import (
     RequestCooperationController,
     RequestCooperationPresenter,
 )
+from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from project.database import (
     AccountRepository,
@@ -98,7 +111,7 @@ def query_plans(
     controller: QueryPlansController,
     template_renderer: UserTemplateRenderer,
 ):
-    presenter = QueryPlansPresenter(CompanyUrlIndex())
+    presenter = QueryPlansPresenter(CompanyUrlIndex(), CompanyUrlIndex())
     template_name = "company/query_plans.html"
     search_form = PlanSearchForm(request.form)
     view = QueryPlansView(
@@ -260,13 +273,14 @@ def create_plan(
     approval_response = seek_approval(draft_uuid, expired_plan_uuid)
 
     if approval_response.is_approved:
-        flash("Plan erfolgreich erstellt und genehmigt.")
+        flash("Plan erfolgreich erstellt und genehmigt.", "is-success")
         activate_plan_and_grant_credit(approval_response.new_plan_id)
         flash(
-            "Plan wurde aktiviert. Kredite für Produktionskosten wurden bereits gewährt, Kosten für Arbeit werden täglich ausgezahlt."
+            "Plan wurde aktiviert. Kredite für Produktionskosten wurden bereits gewährt, Kosten für Arbeit werden täglich ausgezahlt.",
+            "is-success",
         )
     else:
-        flash(f"Plan nicht genehmigt. Grund:\n{approval_response.reason}")
+        flash(f"Plan nicht genehmigt. Grund:\n{approval_response.reason}", "is-danger")
 
     return template_renderer.render_template("/company/create_plan_response.html")
 
@@ -289,7 +303,7 @@ def my_plans(
     show_my_plans_use_case: ShowMyPlansUseCase,
     template_renderer: UserTemplateRenderer,
 ):
-    show_my_plans_presenter = ShowMyPlansPresenter(CompanyUrlIndex())
+    show_my_plans_presenter = ShowMyPlansPresenter(CompanyUrlIndex(), CompanyUrlIndex())
     request = ShowMyPlansRequest(company_id=UUID(current_user.id))
     response = show_my_plans_use_case(request)
     view_model = show_my_plans_presenter.present(response)
@@ -307,10 +321,10 @@ def toggle_availability(plan_id: UUID, toggle_availability: ToggleProductAvailab
     return redirect(url_for("main_company.my_plans"))
 
 
-@CompanyRoute("/company/delete_plan/<uuid:plan_id>", methods=["GET", "POST"])
+@CompanyRoute("/company/hide_plan/<uuid:plan_id>", methods=["GET", "POST"])
 @commit_changes
-def delete_plan(plan_id: UUID, delete_plan: DeletePlan, presenter: DeletePlanPresenter):
-    response = delete_plan(plan_id)
+def hide_plan(plan_id: UUID, hide_plan: HidePlan, presenter: HidePlanPresenter):
+    response = hide_plan(plan_id)
     view_model = presenter.present(response)
     for notification in view_model.notifications:
         flash(notification)
@@ -346,33 +360,41 @@ def my_accounts(
 @CompanyRoute("/company/transfer_to_worker", methods=["GET", "POST"])
 @commit_changes
 def transfer_to_worker(
-    send_work_certificates_to_worker: use_cases.SendWorkCertificatesToWorker,
+    send_work_certificates_to_worker: SendWorkCertificatesToWorker,
+    list_workers: ListWorkers,
     company_repository: CompanyRepository,
     member_repository: MemberRepository,
     template_renderer: UserTemplateRenderer,
 ):
+    company = company_repository.get_by_id(UUID(current_user.id))
+    assert company is not None
+
     if request.method == "POST":
-        company = company_repository.get_by_id(UUID(current_user.id))
-        assert company is not None
-        worker = member_repository.get_by_id(
-            UUID(str(request.form["member_id"]).strip())
-        )
-        if worker is None:
-            flash("Mitglied existiert nicht.")
-        else:
-            try:
+        try:
+            worker = member_repository.get_by_id(
+                UUID(str(request.form["member_id"]).strip())
+            )
+            if worker is None:
+                flash("Mitglied existiert nicht.", "is-danger")
+            else:
                 amount = Decimal(request.form["amount"])
                 send_work_certificates_to_worker(
                     company,
                     worker,
                     amount,
                 )
-            except errors.WorkerNotAtCompany:
-                flash("Mitglied ist nicht in diesem Betrieb beschäftigt.")
-            else:
-                flash("Erfolgreich überwiesen.")
+        except ValueError:
+            flash("Bitte Mitarbeiter wählen!", "is-danger")
+        except errors.WorkerNotAtCompany:
+            flash("Mitglied ist nicht in diesem Betrieb beschäftigt.", "is-danger")
+        else:
+            flash("Erfolgreich überwiesen.", "is-success")
 
-    return template_renderer.render_template("company/transfer_to_worker.html")
+    workers_list = list_workers(company.id)
+    return template_renderer.render_template(
+        "company/transfer_to_worker.html",
+        context=dict(workers_list=workers_list.workers),
+    )
 
 
 @CompanyRoute("/company/transfer_to_company", methods=["GET", "POST"])
@@ -415,14 +437,33 @@ def statistics(
 def plan_summary(
     plan_id: UUID,
     get_plan_summary: use_cases.GetPlanSummary,
-    presenter: GetPlanSummarySuccessPresenter,
     template_renderer: UserTemplateRenderer,
 ):
+    presenter = GetPlanSummarySuccessPresenter(CompanyUrlIndex())
     use_case_response = get_plan_summary(plan_id)
     if isinstance(use_case_response, use_cases.PlanSummarySuccess):
         view_model = presenter.present(use_case_response)
         return template_renderer.render_template(
             "company/plan_summary.html", context=dict(view_model=view_model.to_dict())
+        )
+    else:
+        return Http404View("company/404.html", template_renderer).get_response()
+
+
+@CompanyRoute("/company/cooperation_summary/<uuid:coop_id>")
+def coop_summary(
+    coop_id: UUID,
+    get_coop_summary: use_cases.GetCoopSummary,
+    presenter: GetCoopSummarySuccessPresenter,
+    template_renderer: UserTemplateRenderer,
+):
+    use_case_response = get_coop_summary(
+        use_cases.GetCoopSummaryRequest(UUID(current_user.id), coop_id)
+    )
+    if isinstance(use_case_response, use_cases.GetCoopSummarySuccess):
+        view_model = presenter.present(use_case_response)
+        return template_renderer.render_template(
+            "company/coop_summary.html", context=dict(view_model=view_model.to_dict())
         )
     else:
         return Http404View("company/404.html", template_renderer).get_response()
@@ -475,6 +516,49 @@ def request_cooperation(
 
     elif request.method == "GET":
         return view.respond_to_get()
+
+
+@CompanyRoute("/company/my_cooperations", methods=["GET", "POST"])
+@commit_changes
+def my_cooperations(
+    template_renderer: UserTemplateRenderer,
+    list_coordinations: ListCoordinations,
+    list_inbound_coop_requests: ListInboundCoopRequests,
+    accept_cooperation: AcceptCooperation,
+    list_outbound_coop_requests: ListOutboundCoopRequests,
+):
+    accept_cooperation_response: Optional[AcceptCooperationResponse]
+    if request.method == "POST":
+        if request.form["accept"]:
+            coop_id, plan_id = [id.strip() for id in request.form["accept"].split(",")]
+            accept_cooperation_response = accept_cooperation(
+                AcceptCooperationRequest(
+                    UUID(current_user.id), UUID(plan_id), UUID(coop_id)
+                )
+            )
+    else:
+        accept_cooperation_response = None
+
+    list_coord_response = list_coordinations(
+        ListCoordinationsRequest(UUID(current_user.id))
+    )
+    list_inbound_coop_requests_response = list_inbound_coop_requests(
+        ListInboundCoopRequestsRequest(UUID(current_user.id))
+    )
+    list_outbound_coop_requests_response = list_outbound_coop_requests(
+        ListOutboundCoopRequestsRequest(UUID(current_user.id))
+    )
+
+    presenter = ShowMyCooperationsPresenter(CompanyUrlIndex())
+    view_model = presenter.present(
+        list_coord_response,
+        list_inbound_coop_requests_response,
+        accept_cooperation_response,
+        list_outbound_coop_requests_response,
+    )
+    return template_renderer.render_template(
+        "company/my_cooperations.html", context=view_model.to_dict()
+    )
 
 
 @CompanyRoute("/company/hilfe")

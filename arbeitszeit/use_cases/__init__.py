@@ -24,7 +24,6 @@ from .create_plan_draft import (
     CreatePlanDraftRequest,
     CreatePlanDraftResponse,
 )
-from .delete_plan import DeletePlan, DeletePlanResponse
 from .deny_cooperation import (
     DenyCooperation,
     DenyCooperationRequest,
@@ -34,6 +33,12 @@ from .end_cooperation import (
     EndCooperation,
     EndCooperationRequest,
     EndCooperationResponse,
+)
+from .get_coop_summary import (
+    GetCoopSummary,
+    GetCoopSummaryRequest,
+    GetCoopSummaryResponse,
+    GetCoopSummarySuccess,
 )
 from .get_draft_summary import (
     DraftSummaryResponse,
@@ -48,18 +53,38 @@ from .get_member_profile_info import (
 from .get_plan_summary import GetPlanSummary, PlanSummaryResponse, PlanSummarySuccess
 from .get_statistics import GetStatistics, StatisticsResponse
 from .get_transaction_infos import GetTransactionInfos, TransactionInfo
+from .hide_plan import HidePlan, HidePlanResponse
 from .invite_worker_to_company import (
     InviteWorkerToCompany,
     InviteWorkerToCompanyRequest,
     InviteWorkerToCompanyResponse,
 )
+from .list_coordinations import (
+    CooperationInfo,
+    ListCoordinations,
+    ListCoordinationsRequest,
+    ListCoordinationsResponse,
+)
 from .list_drafts_of_company import ListDraftsOfCompany, ListDraftsResponse
+from .list_inbound_coop_requests import (
+    ListedInboundCoopRequest,
+    ListInboundCoopRequests,
+    ListInboundCoopRequestsRequest,
+    ListInboundCoopRequestsResponse,
+)
 from .list_messages import (
     ListedMessage,
     ListMessages,
     ListMessagesRequest,
     ListMessagesResponse,
 )
+from .list_outbound_coop_requests import (
+    ListedOutboundCoopRequest,
+    ListOutboundCoopRequests,
+    ListOutboundCoopRequestsRequest,
+    ListOutboundCoopRequestsResponse,
+)
+from .list_workers import ListedWorker, ListWorkers, ListWorkersResponse
 from .pay_consumer_product import (
     PayConsumerProduct,
     PayConsumerProductRequest,
@@ -111,38 +136,56 @@ __all__ = [
     "CheckForUnreadMessagesResponse",
     "CompanyFilter",
     "CompanyQueryResponse",
+    "CooperationInfo",
     "CreateCooperation",
     "CreateCooperationRequest",
     "CreateCooperationResponse",
     "CreatePlanDraft",
     "CreatePlanDraftRequest",
     "CreatePlanDraftResponse",
-    "DeletePlan",
-    "DeletePlanResponse",
     "DenyCooperation",
     "DenyCooperationRequest",
     "DenyCooperationResponse",
-    "DraftQueryResponse",
     "DraftSummaryResponse",
     "DraftSummarySuccess",
     "EndCooperation",
-    "EndCooperationResponse",
     "EndCooperationRequest",
+    "EndCooperationResponse",
+    "GetCoopSummary",
+    "GetCoopSummaryRequest",
+    "GetCoopSummaryResponse",
+    "GetCoopSummarySuccess",
     "GetDraftSummary",
     "GetMemberProfileInfo",
     "GetMemberProfileInfoResponse",
     "GetPlanSummary",
     "GetStatistics",
     "GetTransactionInfos",
+    "HidePlan",
+    "HidePlanResponse",
     "InviteWorkerToCompany",
     "InviteWorkerToCompanyRequest",
     "InviteWorkerToCompanyResponse",
+    "ListCoordinations",
+    "ListCoordinationsRequest",
+    "ListCoordinationsResponse",
     "ListDraftsOfCompany",
     "ListDraftsResponse",
+    "ListInboundCoopRequests",
+    "ListInboundCoopRequestsRequest",
+    "ListInboundCoopRequestsResponse",
     "ListMessages",
     "ListMessagesRequest",
     "ListMessagesResponse",
+    "ListOutboundCoopRequests",
+    "ListOutboundCoopRequestsRequest",
+    "ListOutboundCoopRequestsResponse",
+    "ListWorkers",
+    "ListWorkersResponse",
+    "ListedInboundCoopRequest",
     "ListedMessage",
+    "ListedOutboundCoopRequest",
+    "ListedWorker",
     "PayConsumerProduct",
     "PayConsumerProductRequest",
     "PayConsumerProductResponse",

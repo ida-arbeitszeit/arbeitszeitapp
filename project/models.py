@@ -111,6 +111,7 @@ class Plan(UserMixin, db.Model):
         db.String, db.ForeignKey("cooperation.id"), nullable=True
     )
     cooperation = db.Column(db.String, db.ForeignKey("cooperation.id"), nullable=True)
+    hidden_by_user = db.Column(db.Boolean, nullable=False, default=False)
 
 
 class AccountTypes(Enum):
@@ -195,4 +196,6 @@ class Cooperation(db.Model):
     definition = db.Column(db.String(5000), nullable=False)
     coordinator = db.Column(db.String, db.ForeignKey("company.id"), nullable=False)
 
-    plans = db.relationship("Plan", foreign_keys="Plan.cooperation", lazy="dynamic")
+    plans = db.relationship(
+        "Plan", foreign_keys="Plan.cooperation", lazy="dynamic", backref="coop"
+    )

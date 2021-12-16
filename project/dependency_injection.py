@@ -22,8 +22,12 @@ from arbeitszeit_web.check_for_unread_message import (
 )
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyController
 from arbeitszeit_web.list_messages import ListMessagesController
-from arbeitszeit_web.read_message import ReadMessageController
+from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
 from arbeitszeit_web.request_cooperation import RequestCooperationController
+from arbeitszeit_web.user_action_resolver import (
+    UserActionResolver,
+    UserActionResolverImpl,
+)
 from project.database import get_social_accounting
 from project.database.repositories import (
     AccountOwnerRepository,
@@ -33,6 +37,7 @@ from project.database.repositories import (
     CooperationRepository,
     MemberRepository,
     MessageRepository,
+    PlanCooperationRepository,
     PlanDraftRepository,
     PlanRepository,
     PurchaseRepository,
@@ -46,6 +51,10 @@ from project.template import FlaskTemplateRenderer, UserTemplateRenderer
 
 
 class FlaskModule(Module):
+    @provider
+    def provide_user_action_resolver(self) -> UserActionResolver:
+        return UserActionResolverImpl()
+
     @provider
     def provide_transaction_repository(
         self, instance: TransactionRepository
@@ -102,6 +111,12 @@ class FlaskModule(Module):
         self, session: FlaskSession
     ) -> ReadMessageController:
         return ReadMessageController(session)
+
+    @provider
+    def provide_read_message_presenter(
+        self, user_action_resolver: UserActionResolver
+    ) -> ReadMessagePresenter:
+        return ReadMessagePresenter(user_action_resolver)
 
     def configure(self, binder: Binder) -> None:
         binder.bind(
@@ -163,6 +178,10 @@ class FlaskModule(Module):
         binder.bind(
             interfaces.CooperationRepository,  # type: ignore
             to=ClassProvider(CooperationRepository),
+        )
+        binder.bind(
+            interfaces.PlanCooperationRepository,  # type: ignore
+            to=ClassProvider(PlanCooperationRepository),
         )
 
 

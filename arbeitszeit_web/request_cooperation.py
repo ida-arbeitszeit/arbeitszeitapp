@@ -46,7 +46,6 @@ class RequestCooperationPresenter:
                 notifications.append("Plan nicht aktiv.")
             elif use_case_response.rejection_reason in (
                 RequestCooperationResponse.RejectionReason.plan_has_cooperation,
-                RequestCooperationResponse.RejectionReason.plan_already_part_of_cooperation,
                 RequestCooperationResponse.RejectionReason.plan_is_already_requesting_cooperation,
             ):
                 notifications.append(

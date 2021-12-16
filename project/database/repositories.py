@@ -14,7 +14,6 @@ from werkzeug.security import generate_password_hash
 from arbeitszeit import entities, repositories
 from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.user_action import UserAction
-from project.error import PlanNotFound
 from project.models import (
     Account,
     Company,
@@ -112,7 +111,6 @@ class MemberRepository(repositories.MemberRepository):
 @dataclass
 class CompanyRepository(repositories.CompanyRepository):
     account_repository: AccountRepository
-    member_repository: MemberRepository
     db: SQLAlchemy
 
     def object_to_orm(self, company: entities.Company) -> Company:
@@ -413,7 +411,6 @@ class PurchaseRepository(repositories.PurchaseRepository):
 @dataclass
 class PlanRepository(repositories.PlanRepository):
     company_repository: CompanyRepository
-    accounting_repository: AccountingRepository
     db: SQLAlchemy
 
     def object_from_orm(self, plan: Plan) -> entities.Plan:
@@ -446,9 +443,12 @@ class PlanRepository(repositories.PlanRepository):
             activation_date=plan.activation_date,
             active_days=plan.active_days,
             payout_count=plan.payout_count,
-            requested_cooperation=plan.requested_cooperation,
-            cooperation=plan.cooperation,
+            requested_cooperation=UUID(plan.requested_cooperation)
+            if plan.requested_cooperation
+            else None,
+            cooperation=UUID(plan.cooperation) if plan.cooperation else None,
             is_available=plan.is_available,
+            hidden_by_user=plan.hidden_by_user,
         )
 
     def object_to_orm(self, plan: entities.Plan) -> Plan:
@@ -634,12 +634,10 @@ class PlanRepository(repositories.PlanRepository):
             ).all()
         )
 
-    def delete_plan(self, plan_id: UUID) -> None:
+    def hide_plan(self, plan_id: UUID) -> None:
         plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
-        if plan_orm is None:
-            raise PlanNotFound()
-        else:
-            self.db.session.delete(plan_orm)
+        assert plan_orm
+        plan_orm.hidden_by_user = True
 
     def query_active_plans_by_product_name(self, query: str) -> Iterator[entities.Plan]:
         return (
@@ -661,41 +659,6 @@ class PlanRepository(repositories.PlanRepository):
         return (
             self.object_from_orm(plan_orm)
             for plan_orm in Plan.query.filter(Plan.planner == str(company_id))
-        )
-
-    def get_non_active_plans_for_company(
-        self, company_id: UUID
-    ) -> Iterator[entities.Plan]:
-        return (
-            self.object_from_orm(plan_orm)
-            for plan_orm in Plan.query.filter(
-                Plan.planner == str(company_id),
-                Plan.approved == True,
-                Plan.is_active == False,
-                Plan.expired == False,
-            )
-        )
-
-    def get_active_plans_for_company(self, company_id: UUID) -> Iterator[entities.Plan]:
-        return (
-            self.object_from_orm(plan_orm)
-            for plan_orm in Plan.query.filter(
-                Plan.planner == str(company_id),
-                Plan.approved == True,
-                Plan.is_active == True,
-                Plan.expired == False,
-            )
-        )
-
-    def get_expired_plans_for_company(
-        self, company_id: UUID
-    ) -> Iterator[entities.Plan]:
-        return (
-            self.object_from_orm(plan_orm)
-            for plan_orm in Plan.query.filter(
-                Plan.planner == str(company_id),
-                Plan.expired == True,
-            )
         )
 
     def toggle_product_availability(self, plan: entities.Plan) -> None:
@@ -1004,7 +967,6 @@ class CooperationRepository(repositories.CooperationRepository):
             name=cooperation_orm.name,
             definition=cooperation_orm.definition,
             coordinator=coordinator,
-            plans=cooperation_orm.plans.all(),
         )
 
     def get_by_id(self, id: UUID) -> Optional[entities.Cooperation]:
@@ -1021,11 +983,72 @@ class CooperationRepository(repositories.CooperationRepository):
             ).all()
         )
 
-    def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
-        ...
+    def get_cooperations_coordinated_by_company(
+        self, company_id: UUID
+    ) -> Iterator[entities.Cooperation]:
+        return (
+            self.object_from_orm(cooperation)
+            for cooperation in Cooperation.query.filter_by(
+                coordinator=str(company_id)
+            ).all()
+        )
 
-    def remove_plan_from_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
-        ...
+    def get_cooperation_name(self, coop_id: UUID) -> Optional[str]:
+        coop_orm = Cooperation.query.filter_by(id=str(coop_id)).first()
+        if coop_orm is None:
+            return None
+        return coop_orm.name
+
+
+@inject
+@dataclass
+class PlanCooperationRepository(repositories.PlanCooperationRepository):
+    plan_repository: PlanRepository
+    cooperation_repository: CooperationRepository
+
+    def get_inbound_requests(self, coordinator_id: UUID) -> Iterator[entities.Plan]:
+        for plan in self.plan_repository.all_active_plans():
+            if plan.requested_cooperation:
+                if plan.requested_cooperation in [
+                    coop.id
+                    for coop in self.cooperation_repository.get_cooperations_coordinated_by_company(
+                        coordinator_id
+                    )
+                ]:
+                    yield plan
+
+    def get_outbound_requests(self, requester_id: UUID) -> Iterator[entities.Plan]:
+        plans_of_company = self.plan_repository.get_all_plans_for_company(requester_id)
+        for plan in plans_of_company:
+            if plan.requested_cooperation:
+                yield plan
+
+    def get_cooperating_plans(self, plan_id: UUID) -> List[entities.Plan]:
+        plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
+        if plan_orm is None:
+            return []
+        coop_orm = plan_orm.coop
+        if coop_orm is None:
+            plan = self.plan_repository.get_plan_by_id(plan_id)
+            if plan is None:
+                return []
+            return [plan]
+
+        else:
+            return [
+                self.plan_repository.object_from_orm(plan)
+                for plan in coop_orm.plans.all()
+            ]
+
+    def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
+        plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
+        assert plan_orm
+        plan_orm.cooperation = str(cooperation_id)
+
+    def remove_plan_from_cooperation(self, plan_id: UUID) -> None:
+        plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
+        assert plan_orm
+        plan_orm.cooperation = None
 
     def set_requested_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
@@ -1033,4 +1056,15 @@ class CooperationRepository(repositories.CooperationRepository):
         plan_orm.requested_cooperation = str(cooperation_id)
 
     def set_requested_cooperation_to_none(self, plan_id: UUID) -> None:
-        ...
+        plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
+        assert plan_orm
+        plan_orm.requested_cooperation = None
+
+    def count_plans_in_cooperation(self, cooperation_id: UUID) -> int:
+        count = Plan.query.filter_by(cooperation=str(cooperation_id)).count()
+        return count
+
+    def get_plans_in_cooperation(self, cooperation_id: UUID) -> Iterable[entities.Plan]:
+        plans = Plan.query.filter_by(cooperation=str(cooperation_id)).all()
+        for plan in plans:
+            yield self.plan_repository.object_from_orm(plan)

@@ -220,6 +220,9 @@
             {% if key == "description" %}
             <td class="has-text-left">{% for paragraph in view_model[key][1] %}{{ paragraph }}<br>{% endfor %}
             </td>
+            {% elif key == "price_per_unit" %}
+            <td class="has-text-left">{{ view_model[key][1] }}{% if view_model[key][2] %} <span><a
+                  href="{{ view_model[key][3] }}"><i class="fas fa-hands-helping"></i></a></span>{% endif %}</td>
             {% else %}
             <td class="has-text-left">{{ view_model[key][1] }}
             </td>
@@ -229,172 +232,228 @@
         </tbody>
       </table>
     </div>
+    {% endmacro %}
 
 
+    {% macro coop_summary(view_model) %}
 
+    <div class="columns is-centered">
+      <div class="column is-two-thirds">
+        <div class="content">
+          <h1 class="title">
+            Kooperation
+          </h1>
+        </div>
 
+        <br>
+        <div class="table-container">
+          <table class="table is-fullwidth">
+            <tbody>
+              <tr>
+                <td class="has-text-left has-text-weight-semibold">ID:</td>
+                <td class="has-text-left">{{ view_model.coop_id }}</td>
+              </tr>
+              <tr>
+                <td class="has-text-left has-text-weight-semibold">Name:</td>
+                <td class="has-text-left">{{ view_model.coop_name }}</td>
+              </tr>
+              <tr>
+                <td class="has-text-left has-text-weight-semibold">Definition:</td>
+                <td class="has-text-left">{% for parag in view_model.coop_definition %} {{ parag }} {% endfor %}</td>
+              </tr>
+              <tr>
+                <td class="has-text-left has-text-weight-semibold">Koordinator:</td>
+                <td class="has-text-left">{{ view_model.coordinator_id }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <h1 class="title is-4">
+            Pläne in Kooperation
+          </h1>
+          <table class="table is-fullwidth">
+            <thead>
+              <tr>
+                <th>Plan-ID</th>
+                <th>Plan-Name</th>
+                <th>Gesamte Kosten</th>
+                <th>Produktionsmenge</th>
+                <th>Individueller Preis</th>
+                <th>Kooperationspreis</th>
+                {% if view_model.show_end_coop_button %}
+                <th>Kooperation beenden</th>
+                {% endif %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for plan in view_model.plans %}
+              <tr>
+                <td>{{ plan.plan_id }}</td>
+                <td>{{ plan.plan_name }}</td>
+                <td>{{ plan.plan_total_costs }}</td>
+                <td>{{ plan.plan_amount }}</td>
+                <td>{{ plan.plan_individual_price }}</td>
+                <td>{{ plan.plan_coop_price }}</td>
+                {% if view_model.show_end_coop_button %}
+                <td>[X]</td>
+                {% endif %}
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
 
-  </div>
-</div>
-{% endmacro %}
-
-
-{% macro query_plans(form, view_model) %}
-<div class="columns is-centered">
-  <div class="column is-one-third">
-    <h1 class="title">
-      Plansuche
-    </h1>
-    {% if view_model.notifications or form.errors %}
-    <div class="box">
-      {% for notification in view_model.notifications %}
-      <div class="notification is-danger">{{ notification.text }}</div>
-      {% endfor %}
-      {% for field_name, field_errors in form.errors|dictsort if field_errors %}
-      {% for error in field_errors %}
-      <div class="notification is-danger">{{ form[field_name].label }} {{ error }}</div>
-      {% endfor %}
-      {% endfor %}
+      </div>
     </div>
-    {% endif %}
-    <form method="post">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <div class="field">
-        <div class="control">
-          <div class="select is-large is-fullwidth">
-            {{ form.select }}
-          </div>
+    {% endmacro %}
+
+
+    {% macro query_plans(form, view_model) %}
+    <div class="columns is-centered">
+      <div class="column is-one-third">
+        <h1 class="title">
+          Plansuche
+        </h1>
+        {% if view_model.notifications or form.errors %}
+        <div class="box">
+          {% for notification in view_model.notifications %}
+          <div class="notification is-danger">{{ notification.text }}</div>
+          {% endfor %}
+          {% for field_name, field_errors in form.errors|dictsort if field_errors %}
+          {% for error in field_errors %}
+          <div class="notification is-danger">{{ form[field_name].label }} {{ error }}</div>
+          {% endfor %}
+          {% endfor %}
         </div>
-        <p class="help">Suche in Plan-ID oder Produktname</p>
-      </div>
-      <div class="field">
-        <div class="control">
-          {{ form.search(class_="input is-large") }}
-        </div>
-      </div>
-      <button class="button is-block is-primary is-large is-fullwidth">
-        Suche
-      </button>
-    </form>
-  </div>
-</div>
-{% if view_model.show_results %}
-<h1 class="title">
-  Ergebnisse
-</h1>
-<div class="table-container">
-  <table class="table is-fullwidth">
-    <thead>
-      <tr>
-        <th>Plan-ID</th>
-        <th>Betrieb</th>
-        <th>Produktname</th>
-        <th>Beschreibung</th>
-        <th>Stückpr.</th>
-        <th>Art</th>
-        <th>Endet in</th>
-        <th>Verfügbar</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for column in view_model.results.rows %}
-      <tr>
-        <td><a href="{{ column.plan_summary_url }}">{{ column.plan_id }}</a>
-        </td>
-        <td>{{ column.company_name }}</td>
-        <td>{{ column.product_name }}</td>
-        <td>{% for paragraph in column.description %}{{ paragraph }}<br>{% endfor %}</td>
-        <td>{{ column.price_per_unit }}</td>
-        <td>{{ column.type_of_plan }}</td>
-        <td>{{ column.ends_in }}</td>
-        {% if column.is_available %}
-        <td>
-          <span style="color: green"><i class="fas fa-circle"></i></span>
-        </td>
-        {% else %}
-        <td>
-          <span style="color: red"><i class="fas fa-circle"></i></span>
-        </td>
         {% endif %}
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-{% endif %}
-{% endmacro %}
-
-
-{% macro query_companies(form, view_model) %}
-<div class="columns is-centered">
-  <div class="column is-one-third">
+        <form method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="field">
+            <div class="control">
+              <div class="select is-large is-fullwidth">
+                {{ form.select }}
+              </div>
+            </div>
+            <p class="help">Suche in Plan-ID oder Produktname</p>
+          </div>
+          <div class="field">
+            <div class="control">
+              {{ form.search(class_="input is-large") }}
+            </div>
+          </div>
+          <button class="button is-block is-primary is-large is-fullwidth">
+            Suche
+          </button>
+        </form>
+      </div>
+    </div>
+    {% if view_model.show_results %}
     <h1 class="title">
-      Betriebe suchen
+      Ergebnisse
     </h1>
-    {% if view_model.notifications or form.errors %}
-    <div class="box">
-      {% for notification in view_model.notifications %}
-      <div class="notification is-danger">{{ notification.text }}</div>
-      {% endfor %}
-      {% for field_name, field_errors in form.errors|dictsort if field_errors %}
-      {% for error in field_errors %}
-      <div class="notification is-danger">{{ form[field_name].label }} {{ error }}</div>
-      {% endfor %}
-      {% endfor %}
+    <div class="table-container">
+      <table class="table is-fullwidth">
+        <thead>
+          <tr>
+            <th>Plan-ID</th>
+            <th>Betrieb</th>
+            <th>Produktname</th>
+            <th>Beschreibung</th>
+            <th>Stückpr.</th>
+            <th>Art</th>
+            <th>Endet in</th>
+            <th>Verfügbar</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for column in view_model.results.rows %}
+          <tr>
+            <td><a href="{{ column.plan_summary_url }}">{{ column.plan_id }}</a>
+            </td>
+            <td>{{ column.company_name }}</td>
+            <td>{{ column.product_name }}</td>
+            <td>{% for paragraph in column.description %}{{ paragraph }}<br>{% endfor %}</td>
+            <td>{{ column.price_per_unit }} {% if column.is_cooperating %} <span><a
+                  href="{{ column.coop_summary_url }}"><i class="fas fa-hands-helping"></i></a></span>{% endif %} </td>
+            <td>{{ column.type_of_plan }}</td>
+            <td>{{ column.ends_in }}</td>
+            {% if column.is_available %}
+            <td>
+              <span style="color: green"><i class="fas fa-circle"></i></span>
+            </td>
+            {% else %}
+            <td>
+              <span style="color: red"><i class="fas fa-circle"></i></span>
+            </td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
     {% endif %}
-    <form method="post">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <div class="field">
-        <div class="control">
-          <div class="select is-large is-fullwidth">
-            {{ form.select }}
-          </div>
-        </div>
-        <p class="help">Suche nach Name oder Email</p>
-      </div>
-      <div class="field">
-        <div class="control">
-          {{ form.search(class_="input is-large") }}
-        </div>
-      </div>
-      <button class="button is-block is-primary is-large is-fullwidth">
-        Suche
-      </button>
-    </form>
-  </div>
-</div>
-{% if view_model.show_results %}
-<h1 class="title">
-  Ergebnisse
-</h1>
-<div class="table-container">
-  <table class="table is-fullwidth">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Email</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for column in view_model.results.rows %}
-      <tr>
-        <td>{{ column.company_name }}</td>
-        <td>{{ column.company_email }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-{% endif %}
-{% endmacro %}
+    {% endmacro %}
 
-{% macro show_notifications(notifications) %}
-{% if notifications %}
-<div class="box">
-  {% for notification in notifications %}
-  <div class="notification is-danger">{{ notification }}</div>
-  {% endfor %}
-</div>
-{% endif %}
-{% endmacro %}
+
+    {% macro query_companies(form, view_model) %}
+    <div class="columns is-centered">
+      <div class="column is-one-third">
+        <h1 class="title">
+          Betriebe suchen
+        </h1>
+        {% if view_model.notifications or form.errors %}
+        <div class="box">
+          {% for notification in view_model.notifications %}
+          <div class="notification is-danger">{{ notification.text }}</div>
+          {% endfor %}
+          {% for field_name, field_errors in form.errors|dictsort if field_errors %}
+          {% for error in field_errors %}
+          <div class="notification is-danger">{{ form[field_name].label }} {{ error }}</div>
+          {% endfor %}
+          {% endfor %}
+        </div>
+        {% endif %}
+        <form method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="field">
+            <div class="control">
+              <div class="select is-large is-fullwidth">
+                {{ form.select }}
+              </div>
+            </div>
+            <p class="help">Suche nach Name oder Email</p>
+          </div>
+          <div class="field">
+            <div class="control">
+              {{ form.search(class_="input is-large") }}
+            </div>
+          </div>
+          <button class="button is-block is-primary is-large is-fullwidth">
+            Suche
+          </button>
+        </form>
+      </div>
+    </div>
+    {% if view_model.show_results %}
+    <h1 class="title">
+      Ergebnisse
+    </h1>
+    <div class="table-container">
+      <table class="table is-fullwidth">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for column in view_model.results.rows %}
+          <tr>
+            <td>{{ column.company_name }}</td>
+            <td>{{ column.company_email }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+    {% endmacro %}

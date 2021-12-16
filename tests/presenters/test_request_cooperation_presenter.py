@@ -51,19 +51,6 @@ class RequestCooperationPresenterTests(TestCase):
             "Plan kooperiert bereits oder hat Kooperation angefragt.",
         )
 
-    def test_correct_notification_when_rejected_because_plan_part_of_cooperation(
-        self,
-    ):
-        presentation = self.presenter.present(
-            RequestCooperationResponse(
-                rejection_reason=rr.plan_already_part_of_cooperation
-            )
-        )
-        self.assertEqual(
-            presentation.notifications[0],
-            "Plan kooperiert bereits oder hat Kooperation angefragt.",
-        )
-
     def test_correct_notification_when_rejected_because_plan_is_requesting_cooperation(
         self,
     ):
