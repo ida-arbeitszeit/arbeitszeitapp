@@ -1,0 +1,7 @@
+arbeitszeit/
+arbeitszeit_web/
+tests/
+project/
+format_code.py
+type_stubs
+run-checks
