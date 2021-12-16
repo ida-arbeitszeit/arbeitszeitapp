@@ -1,18 +1,18 @@
 from dataclasses import dataclass
+from uuid import UUID
 
 from flask import Response
 
-from arbeitszeit.use_cases import RequestCooperation, ListPlans
+from arbeitszeit.use_cases import ListPlans, RequestCooperation
+from arbeitszeit_web.list_plans import ListPlansPresenter
 from arbeitszeit_web.request_cooperation import (
     RequestCooperationController,
     RequestCooperationPresenter,
 )
 from arbeitszeit_web.template import TemplateRenderer
-from arbeitszeit_web.list_plans import ListPlansPresenter
 from project.forms import RequestCooperationForm
 
 from .http_404_view import Http404View
-from uuid import UUID
 
 
 @dataclass

@@ -36,11 +36,11 @@ from arbeitszeit_web.get_prefilled_draft_data import (
     GetPrefilledDraftDataPresenter,
     PrefilledDraftDataController,
 )
-from arbeitszeit_web.list_plans import ListPlansPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.hide_plan import HidePlanPresenter
 from arbeitszeit_web.list_drafts_of_company import ListDraftsPresenter
 from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
+from arbeitszeit_web.list_plans import ListPlansPresenter
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from arbeitszeit_web.query_companies import (
     QueryCompaniesController,

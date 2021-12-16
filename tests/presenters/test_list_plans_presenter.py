@@ -1,6 +1,7 @@
-from arbeitszeit_web.list_plans import ListPlansPresenter, ListPlansResponse
-from arbeitszeit.use_cases import ListedPlan
 from uuid import uuid4
+
+from arbeitszeit.use_cases import ListedPlan
+from arbeitszeit_web.list_plans import ListPlansPresenter, ListPlansResponse
 
 fake_response_with_one_plan = ListPlansResponse(
     plans=[ListedPlan(id=uuid4(), prd_name="fake prd name")]

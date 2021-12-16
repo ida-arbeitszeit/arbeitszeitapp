@@ -1,6 +1,7 @@
-from arbeitszeit.use_cases import ListPlansResponse
-from typing import List
 from dataclasses import dataclass
+from typing import List
+
+from arbeitszeit.use_cases import ListPlansResponse
 
 
 @dataclass

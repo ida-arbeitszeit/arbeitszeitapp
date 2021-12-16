@@ -1,7 +1,7 @@
+from datetime import datetime
 from uuid import uuid4
 
 from .flask import ViewTestCase
-from datetime import datetime
 
 
 class LoggedInMemberTests(ViewTestCase):

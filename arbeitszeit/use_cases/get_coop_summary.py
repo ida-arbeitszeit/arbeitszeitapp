@@ -5,8 +5,8 @@ from uuid import UUID
 
 from injector import inject
 
-from arbeitszeit.repositories import CooperationRepository, PlanCooperationRepository
 from arbeitszeit.price_calculator import calculate_price
+from arbeitszeit.repositories import CooperationRepository, PlanCooperationRepository
 
 
 @dataclass

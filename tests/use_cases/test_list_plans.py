@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import uuid4
 
 from arbeitszeit.entities import Company, Plan
@@ -5,7 +6,6 @@ from arbeitszeit.use_cases import ListPlans, ListPlansResponse
 from tests.data_generators import CompanyGenerator, PlanGenerator
 
 from .dependency_injection import injection_test
-from datetime import datetime
 
 
 def plan_in_results(plan: Plan, response: ListPlansResponse) -> bool:

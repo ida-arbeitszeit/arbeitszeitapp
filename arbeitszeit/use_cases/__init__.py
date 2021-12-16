@@ -87,6 +87,7 @@ from .list_outbound_coop_requests import (
     ListOutboundCoopRequestsRequest,
     ListOutboundCoopRequestsResponse,
 )
+from .list_plans import ListedPlan, ListPlans, ListPlansResponse
 from .list_workers import ListedWorker, ListWorkers, ListWorkersResponse
 from .pay_consumer_product import (
     PayConsumerProduct,
@@ -125,7 +126,6 @@ from .toggle_product_availablity import (
     ToggleProductAvailabilityResponse,
 )
 from .update_plans_and_payout import UpdatePlansAndPayout
-from .list_plans import ListPlans, ListPlansResponse, ListedPlan
 
 __all__ = [
     "AcceptCooperation",
