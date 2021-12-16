@@ -41,8 +41,8 @@ class LoggedInCompanyTests(ViewTestCase):
         )
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
-        self.assertIn(plan.prd_name[:3], response.get_data(as_text=True))
-        self.assertIn(str(plan.id)[:3], response.get_data(as_text=True))
+        self.assertIn(plan.prd_name[:10], response.get_data(as_text=True))
+        self.assertIn(str(plan.id)[:6], response.get_data(as_text=True))
 
     def test_get_request_shows_message_if_company_has_no_plans(self) -> None:
         response = self.client.get(self.url)
