@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 from .flask import ViewTestCase
+from datetime import datetime
 
 
 class LoggedInMemberTests(ViewTestCase):
@@ -33,6 +34,20 @@ class LoggedInCompanyTests(ViewTestCase):
     def test_company_gets_200_status_when_opening_view(self) -> None:
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
+
+    def test_get_request_shows_truncated_plan_name_and_id_of_company_plan(self) -> None:
+        plan = self.plan_generator.create_plan(
+            activation_date=datetime.min, planner=self.company
+        )
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(plan.prd_name[:3], response.get_data(as_text=True))
+        self.assertIn(str(plan.id)[:3], response.get_data(as_text=True))
+
+    def test_get_request_shows_message_if_company_has_no_plans(self) -> None:
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("(Noch keine Pläne.)", response.get_data(as_text=True))
 
     def test_posting_without_data_results_in_400(self) -> None:
         response = self.client.post(self.url)

@@ -2,20 +2,25 @@ from dataclasses import dataclass
 
 from flask import Response
 
-from arbeitszeit.use_cases import RequestCooperation
+from arbeitszeit.use_cases import RequestCooperation, ListPlans
 from arbeitszeit_web.request_cooperation import (
     RequestCooperationController,
     RequestCooperationPresenter,
 )
 from arbeitszeit_web.template import TemplateRenderer
+from arbeitszeit_web.list_plans import ListPlansPresenter
 from project.forms import RequestCooperationForm
 
 from .http_404_view import Http404View
+from uuid import UUID
 
 
 @dataclass
 class RequestCooperationView:
+    current_user_id: UUID
     form: RequestCooperationForm
+    list_plans: ListPlans
+    list_plans_presenter: ListPlansPresenter
     request_cooperation: RequestCooperation
     controller: RequestCooperationController
     presenter: RequestCooperationPresenter
@@ -24,9 +29,16 @@ class RequestCooperationView:
     template_renderer: TemplateRenderer
 
     def respond_to_get(self) -> Response:
-        return Response(self.template_renderer.render_template(self.template_name))
+        list_plans_view_model = self._get_list_plans_view_model()
+        return Response(
+            self.template_renderer.render_template(
+                self.template_name,
+                context=dict(list_plans_view_model=list_plans_view_model),
+            )
+        )
 
     def respond_to_post(self) -> Response:
+        list_plans_view_model = self._get_list_plans_view_model()
         use_case_request = self.controller.import_form_data(self.form)
         if use_case_request is None:
             return self.not_found_view.get_response()
@@ -36,7 +48,10 @@ class RequestCooperationView:
         view_model = self.presenter.present(use_case_response)
         return Response(
             self.template_renderer.render_template(
-                self.template_name, context=dict(view_model=view_model)
+                self.template_name,
+                context=dict(
+                    view_model=view_model, list_plans_view_model=list_plans_view_model
+                ),
             )
         )
 
@@ -51,3 +66,8 @@ class RequestCooperationView:
             ),
             status=400,
         )
+
+    def _get_list_plans_view_model(self):
+        plans_list_response = self.list_plans(self.current_user_id)
+        list_plans_view_model = self.list_plans_presenter.present(plans_list_response)
+        return list_plans_view_model

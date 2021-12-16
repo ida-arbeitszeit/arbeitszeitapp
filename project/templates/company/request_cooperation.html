@@ -40,13 +40,30 @@
         {% endfor %}
         {% endif %}
 
+
         <div class="content">
+            {% if list_plans_view_model is defined and list_plans_view_model.plans|length %}
             <form method="post">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="field has-addons">
-                    <div class="control">
-                        <input class="input" type="text" placeholder="Plan-ID" , name="plan_id" required>
+                    <div class="control has-icons-left">
+                        <div class="select has-icons-left">
+                            <select name="plan_id" required>
+                                <option>Mein Plan...</option>
+                                {% for plan in list_plans_view_model.plans %}
+                                <option value="{{ plan.id }}">{{ plan.prd_name|truncate(10) }} ({{
+                                    plan.id|truncate(6)
+                                    }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <span class="icon is-left">
+                            <i class="far fa-file"></i>
+                        </span>
                     </div>
+
+
                     <div class="control">
                         <input class="input" type="text" placeholder="Kooperation-ID" , name="cooperation_id" required>
                     </div>
@@ -58,7 +75,11 @@
                     </div>
                 </div>
             </form>
+            {% else %}
+            <p>(Noch keine Pläne.)</p>
+            {% endif %}
         </div>
+
 
 
 
