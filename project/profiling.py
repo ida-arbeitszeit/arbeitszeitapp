@@ -1,6 +1,7 @@
-from werkzeug.middleware.profiler import ProfilerMiddleware
-from flask_sqlalchemy import get_debug_queries
 from typing import Dict
+
+from flask_sqlalchemy import get_debug_queries
+from werkzeug.middleware.profiler import ProfilerMiddleware
 
 
 def show_profile_info(app):
