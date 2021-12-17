@@ -7,7 +7,11 @@ from injector import inject
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.entities import Plan, ProductionCosts, SocialAccounting
-from arbeitszeit.repositories import PlanRepository, TransactionRepository
+from arbeitszeit.repositories import (
+    PlanRepository,
+    TransactionRepository,
+    PlanCooperationRepository,
+)
 
 
 @inject
@@ -17,6 +21,7 @@ class UpdatePlansAndPayout:
     datetime_service: DatetimeService
     transaction_repository: TransactionRepository
     social_accounting: SocialAccounting
+    plan_cooperation_repository: PlanCooperationRepository
 
     def __call__(self) -> None:
         """
@@ -116,11 +121,13 @@ class UpdatePlansAndPayout:
     def _handle_expired_plan(self, plan: Plan, payout_factor: Decimal) -> None:
         """
         payout overdue wages, if there are any
+        delete plan's cooperation and coop request, if there is any
         set plan as expired
         """
         assert plan.active_days
         while plan.payout_count < plan.active_days:
             self._payout(plan, payout_factor)
+        self._delete_cooperation_and_coop_request_from_plan(plan)
         self.plan_repository.set_plan_as_expired(plan)
 
     def _calculate_active_days(self, plan: Plan) -> int:
@@ -139,3 +146,9 @@ class UpdatePlansAndPayout:
             else days_passed_since_activation
         )
         return active_days
+
+    def _delete_cooperation_and_coop_request_from_plan(self, plan: Plan) -> None:
+        if plan.requested_cooperation:
+            self.plan_cooperation_repository.set_requested_cooperation_to_none(plan.id)
+        if plan.cooperation:
+            self.plan_cooperation_repository.remove_plan_from_cooperation(plan.id)
