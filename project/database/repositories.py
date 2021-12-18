@@ -999,6 +999,11 @@ class CooperationRepository(repositories.CooperationRepository):
             return None
         return coop_orm.name
 
+    def get_all_cooperations(self) -> Iterator[entities.Cooperation]:
+        return (
+            self.object_from_orm(cooperation) for cooperation in Cooperation.query.all()
+        )
+
 
 @inject
 @dataclass

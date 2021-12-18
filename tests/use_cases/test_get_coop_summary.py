@@ -4,6 +4,7 @@ from typing import Callable
 from uuid import uuid4
 
 from arbeitszeit.entities import ProductionCosts
+from arbeitszeit.price_calculator import calculate_price
 from arbeitszeit.use_cases import (
     GetCoopSummary,
     GetCoopSummaryRequest,
@@ -13,7 +14,6 @@ from arbeitszeit.use_cases import (
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
 
 from .dependency_injection import injection_test
-from arbeitszeit.price_calculator import calculate_price
 
 
 @injection_test

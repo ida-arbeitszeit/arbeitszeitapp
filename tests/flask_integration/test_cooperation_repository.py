@@ -95,3 +95,11 @@ class CooperationRepositoryTests(TestCase):
         cooperation = self.repo.create_cooperation(**self.DEFAULT_CREATE_ARGUMENTS)
         returned_name = self.repo.get_cooperation_name(cooperation.id)
         self.assertEqual(returned_name, "test name")
+
+    def test_all_cooperations_are_returned(self):
+        cooperation1 = self.repo.create_cooperation(**self.DEFAULT_CREATE_ARGUMENTS)
+        cooperation2 = self.repo.create_cooperation(**self.DEFAULT_CREATE_ARGUMENTS)
+        returned_coops = list(self.repo.get_all_cooperations())
+        self.assertEqual(len(returned_coops), 2)
+        self.assertIn(cooperation1, returned_coops)
+        self.assertIn(cooperation2, returned_coops)
