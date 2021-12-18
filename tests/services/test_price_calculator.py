@@ -40,4 +40,40 @@ class TestPriceCalculator(TestCase):
             costs=ProductionCosts(Decimal(1), Decimal(1), Decimal(1)), amount=6
         )
         price = calculate_price([plan1, plan2])
-        self.assertEqual(price, Decimal("0.8125"))  # 13/16
+        self.assertEqual(round(price, 4), Decimal(0.8125))  # 13/16
+
+    def test_that_two_productive_plans_with_different_timeframes_return_correct_coop_price_1(
+        self,
+    ):
+        plan1 = self.plan_generator.create_plan(
+            costs=ProductionCosts(Decimal(10), Decimal(0), Decimal(0)),
+            amount=10,
+            timeframe=10,
+        )  # 1 piece/day, 1 costs/day
+        plan2 = self.plan_generator.create_plan(
+            costs=ProductionCosts(Decimal(20), Decimal(0), Decimal(0)),
+            amount=5,
+            timeframe=1,
+        )  # 5 piece/day, 20 costs/day
+        price = calculate_price([plan1, plan2])
+        self.assertEqual(
+            price, Decimal(3.5)
+        )  # coop price = 21 costs/day / 6 pieces/day = 3,5h/piece
+
+    def test_that_two_productive_plans_with_different_timeframes_return_correct_coop_price_2(
+        self,
+    ):
+        plan1 = self.plan_generator.create_plan(
+            costs=ProductionCosts(Decimal(300), Decimal(10), Decimal(0)),
+            amount=20,
+            timeframe=90,
+        )
+        plan2 = self.plan_generator.create_plan(
+            costs=ProductionCosts(Decimal(25), Decimal(0), Decimal(0)),
+            amount=5,
+            timeframe=45,
+        )
+        price = calculate_price([plan1, plan2])
+        self.assertEqual(
+            price, Decimal(12)
+        )  # coop price = 4h/day / 0,3333 pieces/day = 12h/piece
