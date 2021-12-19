@@ -6,20 +6,16 @@ apropriate comment below.
 """
 
 import subprocess
+from typing import List
 
 
 def main():
-    format_python_files(
-        # Add your path here if you want to apply autoformatting to it
-        [
-            "arbeitszeit/",
-            "arbeitszeit_web/",
-            "tests/",
-            "project/",
-            "format_code.py",
-            "type_stubs",
-        ]
-    )
+    format_python_files(read_autoformat_target_paths())
+
+
+def read_autoformat_target_paths() -> List[str]:
+    with open(".autoformattingrc") as handle:
+        return [line.strip() for line in handle.read().splitlines() if line.strip()]
 
 
 def format_python_files(python_files):

@@ -458,6 +458,11 @@ class PlanRepository(interfaces.PlanRepository):
             if str(plan.planner.id) == str(company_id):
                 yield plan
 
+    def get_all_active_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
+        for plan in self.plans.values():
+            if (str(plan.planner.id) == str(company_id)) and plan.is_active:
+                yield plan
+
     def _create_plan(
         self,
         id: UUID,

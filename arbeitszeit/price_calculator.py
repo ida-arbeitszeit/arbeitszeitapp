@@ -9,14 +9,18 @@ from arbeitszeit.entities import Plan
 @dataclass
 class PriceComponents:
     total_cost: Decimal
-    amount: int
+    amount: Decimal
+    timeframe: Decimal
     is_public_service: bool
 
 
 def calculate_price(cooperating_plans: List[Plan]) -> Decimal:
     components = [
         PriceComponents(
-            plan.production_costs.total_cost(), plan.prd_amount, plan.is_public_service
+            plan.production_costs.total_cost(),
+            Decimal(plan.prd_amount),
+            Decimal(plan.timeframe),
+            plan.is_public_service,
         )
         for plan in cooperating_plans
     ]
@@ -39,12 +43,13 @@ def _calculate_individual_price(components: List[PriceComponents]) -> Decimal:
 
 
 def _calculate_coop_price(components: List[PriceComponents]) -> Decimal:
+
     for comp in components:
         assert (
             not comp.is_public_service
         ), "Public plans are not allowed in cooperations."
 
-    coop_price = (decimal_sum([plan.total_cost for plan in components])) / (
-        sum([plan.amount for plan in components]) or 1
-    )
+    coop_price = (
+        decimal_sum([plan.total_cost / plan.timeframe for plan in components])
+    ) / (decimal_sum([plan.amount / plan.timeframe for plan in components]) or 1)
     return coop_price

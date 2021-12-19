@@ -22,6 +22,7 @@ from arbeitszeit.use_cases import (
     ListMessages,
     ListOutboundCoopRequests,
     ListOutboundCoopRequestsRequest,
+    ListPlans,
     ListWorkers,
     ReadMessage,
     RequestCooperation,
@@ -41,6 +42,7 @@ from arbeitszeit_web.hide_plan import HidePlanPresenter
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_drafts_of_company import ListDraftsPresenter
 from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
+from arbeitszeit_web.list_plans import ListPlansPresenter
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from arbeitszeit_web.query_companies import (
     QueryCompaniesController,
@@ -520,7 +522,9 @@ def create_cooperation(
 @CompanyRoute("/company/request_cooperation", methods=["GET", "POST"])
 @commit_changes
 def request_cooperation(
-    use_case: RequestCooperation,
+    list_plans: ListPlans,
+    list_plans_presenter: ListPlansPresenter,
+    request_cooperation: RequestCooperation,
     controller: RequestCooperationController,
     presenter: RequestCooperationPresenter,
     template_renderer: UserTemplateRenderer,
@@ -528,8 +532,11 @@ def request_cooperation(
     http_404_view = Http404View("company/404.html", template_renderer)
     form = RequestCooperationForm(request.form)
     view = RequestCooperationView(
+        current_user_id=UUID(current_user.id),
         form=form,
-        request_cooperation=use_case,
+        list_plans=list_plans,
+        list_plans_presenter=list_plans_presenter,
+        request_cooperation=request_cooperation,
         controller=controller,
         presenter=presenter,
         not_found_view=http_404_view,
