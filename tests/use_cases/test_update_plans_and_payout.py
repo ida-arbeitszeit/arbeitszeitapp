@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from arbeitszeit.entities import AccountTypes, ProductionCosts
 from arbeitszeit.use_cases import UpdatePlansAndPayout
-from tests.data_generators import PlanGenerator
+from tests.data_generators import PlanGenerator, CooperationGenerator
 from tests.datetime_service import FakeDatetimeService
 
 from .dependency_injection import injection_test
@@ -184,6 +184,46 @@ def test_that_expiration_relative_is_correctly_calculated_when_plan_expires_in_e
     )
     payout()
     assert plan.expiration_relative == 1
+
+
+@injection_test
+def test_that_plan_with_requested_cooperation_has_no_requested_cooperation_after_expiration(
+    plan_generator: PlanGenerator,
+    datetime_service: FakeDatetimeService,
+    payout: UpdatePlansAndPayout,
+    cooperation_generator: CooperationGenerator,
+):
+    requested_coop = cooperation_generator.create_cooperation()
+    plan = plan_generator.create_plan(
+        timeframe=5,
+        activation_date=datetime_service.now_minus_ten_days(),
+        requested_cooperation=requested_coop,
+    )
+    assert plan.requested_cooperation
+    payout()
+    assert plan.expired
+    assert not plan.is_active
+    assert not plan.requested_cooperation
+
+
+@injection_test
+def test_that_cooperating_plan_is_not_cooperating_after_expiration(
+    plan_generator: PlanGenerator,
+    datetime_service: FakeDatetimeService,
+    payout: UpdatePlansAndPayout,
+    cooperation_generator: CooperationGenerator,
+):
+    cooperation = cooperation_generator.create_cooperation()
+    plan = plan_generator.create_plan(
+        timeframe=5,
+        activation_date=datetime_service.now_minus_ten_days(),
+        cooperation=cooperation,
+    )
+    assert plan.cooperation
+    payout()
+    assert plan.expired
+    assert not plan.is_active
+    assert not plan.cooperation
 
 
 @injection_test
