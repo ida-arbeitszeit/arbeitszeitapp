@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from arbeitszeit.entities import AccountTypes, ProductionCosts
 from arbeitszeit.use_cases import UpdatePlansAndPayout
-from tests.data_generators import PlanGenerator, CooperationGenerator
+from tests.data_generators import CooperationGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
 
 from .dependency_injection import injection_test
