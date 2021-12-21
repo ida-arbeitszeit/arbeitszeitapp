@@ -11,6 +11,9 @@ from arbeitszeit.use_cases import (
     AcceptCooperationRequest,
     AcceptCooperationResponse,
     CreatePlanDraft,
+    DenyCooperation,
+    DenyCooperationRequest,
+    DenyCooperationResponse,
     GetDraftSummary,
     GetPlanSummary,
     HidePlan,
@@ -556,19 +559,26 @@ def my_cooperations(
     list_coordinations: ListCoordinations,
     list_inbound_coop_requests: ListInboundCoopRequests,
     accept_cooperation: AcceptCooperation,
+    deny_cooperation: DenyCooperation,
     list_outbound_coop_requests: ListOutboundCoopRequests,
 ):
-    accept_cooperation_response: Optional[AcceptCooperationResponse]
+    accept_cooperation_response: Optional[AcceptCooperationResponse] = None
+    deny_cooperation_response: Optional[DenyCooperationResponse] = None
     if request.method == "POST":
-        if request.form["accept"]:
+        if request.form.get("accept"):
             coop_id, plan_id = [id.strip() for id in request.form["accept"].split(",")]
             accept_cooperation_response = accept_cooperation(
                 AcceptCooperationRequest(
                     UUID(current_user.id), UUID(plan_id), UUID(coop_id)
                 )
             )
-    else:
-        accept_cooperation_response = None
+        else:
+            coop_id, plan_id = [id.strip() for id in request.form["deny"].split(",")]
+            deny_cooperation_response = deny_cooperation(
+                DenyCooperationRequest(
+                    UUID(current_user.id), UUID(plan_id), UUID(coop_id)
+                )
+            )
 
     list_coord_response = list_coordinations(
         ListCoordinationsRequest(UUID(current_user.id))
@@ -585,6 +595,7 @@ def my_cooperations(
         list_coord_response,
         list_inbound_coop_requests_response,
         accept_cooperation_response,
+        deny_cooperation_response,
         list_outbound_coop_requests_response,
     )
     return template_renderer.render_template(
