@@ -155,6 +155,10 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
+    def get_all_active_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
+        pass
+
+    @abstractmethod
     def toggle_product_availability(self, plan: Plan) -> None:
         pass
 

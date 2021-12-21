@@ -135,19 +135,33 @@ def test_that_existing_plan_can_be_retrieved_by_id(
 
 
 @injection_test
-def test_that_all_plan_for_a_company_are_returned(
+def test_that_all_plans_for_a_company_are_returned(
     repository: PlanRepository,
     plan_generator: PlanGenerator,
     company_generator: CompanyGenerator,
 ) -> None:
     company = company_generator.create_company()
-    plan_generator.create_plan(planner=company)
-    plan_generator.create_plan(approved=True, planner=company)
-    plan_generator.create_plan(
-        approved=True, activation_date=datetime.now(), planner=company
-    )
+    plan_generator.create_plan(planner=company, activation_date=None)
+    plan_generator.create_plan(planner=company, is_public_service=True)
+    plan_generator.create_plan(planner=company, is_available=False)
     returned_plans = list(repository.get_all_plans_for_company(company_id=company.id))
     assert len(returned_plans) == 3
+
+
+@injection_test
+def test_that_all_active_plan_for_a_company_are_returned(
+    repository: PlanRepository,
+    plan_generator: PlanGenerator,
+    company_generator: CompanyGenerator,
+) -> None:
+    company = company_generator.create_company()
+    plan_generator.create_plan(planner=company, activation_date=datetime.min)
+    plan_generator.create_plan(planner=company, activation_date=datetime.min)
+    plan_generator.create_plan(planner=company)
+    returned_plans = list(
+        repository.get_all_active_plans_for_company(company_id=company.id)
+    )
+    assert len(returned_plans) == 2
 
 
 @injection_test

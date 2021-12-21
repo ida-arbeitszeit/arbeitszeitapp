@@ -661,6 +661,16 @@ class PlanRepository(repositories.PlanRepository):
             for plan_orm in Plan.query.filter(Plan.planner == str(company_id))
         )
 
+    def get_all_active_plans_for_company(
+        self, company_id: UUID
+    ) -> Iterator[entities.Plan]:
+        return (
+            self.object_from_orm(plan_orm)
+            for plan_orm in Plan.query.filter(
+                Plan.planner == str(company_id), Plan.is_active == True
+            )
+        )
+
     def toggle_product_availability(self, plan: entities.Plan) -> None:
         plan.is_available = True if (plan.is_available == False) else False
 
