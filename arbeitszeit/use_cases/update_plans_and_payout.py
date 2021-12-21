@@ -8,9 +8,9 @@ from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.entities import Plan, ProductionCosts, SocialAccounting
 from arbeitszeit.repositories import (
+    PlanCooperationRepository,
     PlanRepository,
     TransactionRepository,
-    PlanCooperationRepository,
 )
 
 
