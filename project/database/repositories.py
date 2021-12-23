@@ -80,6 +80,9 @@ class MemberRepository(repositories.MemberRepository):
             name=orm_object.name,
             account=member_account,
             email=orm_object.email,
+            registered_on=orm_object.registered_on,
+            confirmed=orm_object.confirmed,
+            confirmed_on=orm_object.confirmed_on,
         )
 
     def object_to_orm(self, member: entities.Member) -> Member:
@@ -95,6 +98,9 @@ class MemberRepository(repositories.MemberRepository):
             name=name,
             password=generate_password_hash(password, method="sha256"),
             account=orm_account,
+            registered_on=datetime.now(),
+            confirmed=False,
+            confirmed_on=None,
         )
         orm_account.account_owner_member = orm_member.id
         self.db.session.add(orm_member)

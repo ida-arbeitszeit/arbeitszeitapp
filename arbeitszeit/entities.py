@@ -25,6 +25,9 @@ class Member:
     name: str
     email: str
     account: Account
+    registered_on: datetime
+    confirmed: bool
+    confirmed_on: Optional[datetime]
 
     def accounts(self) -> List[Account]:
         return [self.account]

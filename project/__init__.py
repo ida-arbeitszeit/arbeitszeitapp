@@ -4,7 +4,7 @@ from flask_talisman import Talisman
 from flask_wtf.csrf import CSRFProtect
 
 import project.extensions
-from project.extensions import login_manager
+from project.extensions import login_manager, mail
 from project.profiling import show_profile_info, show_sql_queries
 
 
@@ -40,8 +40,10 @@ def create_app(config=None, db=None, migrate=None, template_folder=None):
     db.init_app(app)
     login_manager.init_app(app)
     migrate.init_app(app, db)
+    mail.init_app(app)
 
     with app.app_context():
+
         from project.commands import update_and_payout
 
         app.cli.command("payout")(update_and_payout)

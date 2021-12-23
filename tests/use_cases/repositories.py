@@ -223,8 +223,9 @@ class AccountOwnerRepository(interfaces.AccountOwnerRepository):
 @singleton
 class MemberRepository(interfaces.MemberRepository):
     @inject
-    def __init__(self):
+    def __init__(self, datetime_service: DatetimeService):
         self.members: Dict[UUID, Member] = {}
+        self.datetime_service = datetime_service
 
     def create_member(
         self, email: str, name: str, password: str, account: Account
@@ -235,6 +236,9 @@ class MemberRepository(interfaces.MemberRepository):
             name=name,
             email=email,
             account=account,
+            registered_on=self.datetime_service.now(),
+            confirmed=False,
+            confirmed_on=None,
         )
         self.members[id] = member
         return member
