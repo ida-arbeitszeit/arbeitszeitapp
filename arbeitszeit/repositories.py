@@ -10,6 +10,7 @@ from arbeitszeit.entities import (
     Company,
     CompanyWorkInvite,
     Cooperation,
+    ExternalMessage,
     Member,
     Message,
     Plan,
@@ -409,4 +410,12 @@ class PlanCooperationRepository(ABC):
 
     @abstractmethod
     def get_plans_in_cooperation(self, cooperation_id: UUID) -> Iterable[Plan]:
+        pass
+
+
+class ExternalMessageRepository(ABC):
+    @abstractmethod
+    def create_message(
+        self, sender_adress: str, receiver_adress: str, title: str, content: str
+    ) -> ExternalMessage:
         pass

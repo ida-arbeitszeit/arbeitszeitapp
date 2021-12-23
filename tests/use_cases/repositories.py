@@ -18,6 +18,7 @@ from arbeitszeit.entities import (
     Company,
     CompanyWorkInvite,
     Cooperation,
+    ExternalMessage,
     Member,
     Message,
     Plan,
@@ -795,3 +796,24 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
         for plan in plans:
             if plan.cooperation == cooperation_id:
                 yield plan
+
+
+@singleton
+class ExternalMessageRepository(interfaces.ExternalMessageRepository):
+    @inject
+    def __init__(self) -> None:
+        self.messages: Dict[UUID, ExternalMessage] = dict()
+
+    def create_message(
+        self, sender_adress: str, receiver_adress: str, title: str, content: str
+    ) -> ExternalMessage:
+        message_id = uuid4()
+        ext_message = ExternalMessage(
+            id=message_id,
+            sender_adress=sender_adress,
+            receiver_adress=receiver_adress,
+            title=title,
+            content=content,
+        )
+        self.messages[ext_message.id] = ext_message
+        return ext_message
