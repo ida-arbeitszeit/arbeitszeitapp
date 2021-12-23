@@ -419,3 +419,11 @@ class ExternalMessageRepository(ABC):
         self, sender_adress: str, receiver_adress: str, title: str, content: str
     ) -> ExternalMessage:
         pass
+
+    @abstractmethod
+    def get_by_id(self, message_id: UUID) -> Optional[ExternalMessage]:
+        pass
+
+    @abstractmethod
+    def send_message(self, message_id: UUID) -> Optional[UUID]:
+        pass
