@@ -38,7 +38,8 @@ class MemberUrlIndexTests(ViewTestCase):
         self.url_index = MemberUrlIndex()
         self.plan_generator = self.injector.get(PlanGenerator)
         self.message_generator = self.injector.get(MessageGenerator)
-        self.member, _ = self.login_member()
+        self.member, _, self.email = self.login_member()
+        self.member = self.confirm_member(member=self.member, email=self.email)
         self.cooperation_generator = self.injector.get(CooperationGenerator)
 
     def test_plan_summary_url_for_existing_plan_leads_to_functional_url(self) -> None:

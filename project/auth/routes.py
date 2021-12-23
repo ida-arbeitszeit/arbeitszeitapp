@@ -3,7 +3,7 @@ from urllib.parse import urlparse
 
 from flask import (
     Blueprint,
-    abort,
+    current_app,
     flash,
     redirect,
     render_template,
@@ -61,7 +61,11 @@ def signup_member(register_member: RegisterMember):
 
         member = database.get_user_by_mail(email)
 
-        token = generate_confirmation_token(member.email)
+        token = generate_confirmation_token(
+            member.email,
+            current_app.config["SECRET_KEY"],
+            current_app.config["SECURITY_PASSWORD_SALT"],
+        )
         confirm_url = url_for("auth.confirm_email", token=token, _external=True)
         html = render_template("activate.html", confirm_url=confirm_url)
         subject = "Bitte bestätige dein Konto"
@@ -81,7 +85,11 @@ def unconfirmed_member():
 @commit_changes
 def confirm_email(token):
     try:
-        email = confirm_token(token)
+        email = confirm_token(
+            token,
+            current_app.config["SECRET_KEY"],
+            current_app.config["SECURITY_PASSWORD_SALT"],
+        )
     except Exception:
         flash("Der Bestätigungslink ist ungültig oder ist abgelaufen.")
         return redirect(url_for("auth.unconfirmed_member"))
@@ -134,7 +142,11 @@ def login_member():
 @login_required
 def resend_confirmation():
 
-    token = generate_confirmation_token(current_user.email)
+    token = generate_confirmation_token(
+        current_user.email,
+        current_app.config["SECRET_KEY"],
+        current_app.config["SECURITY_PASSWORD_SALT"],
+    )
     confirm_url = url_for("auth.confirm_email", token=token, _external=True)
     html = render_template("activate.html", confirm_url=confirm_url)
     subject = "Bitte bestätige dein Konto"

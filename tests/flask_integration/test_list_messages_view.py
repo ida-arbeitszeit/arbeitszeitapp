@@ -6,7 +6,8 @@ from .flask import ViewTestCase
 class LoggedInMemberTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.member, _ = self.login_member()
+        self.member, _, self.email = self.login_member()
+        self.member = self.confirm_member(member=self.member, email=self.email)
         self.url = "/member/messages"
 
     def test_member_gets_200_status_when_opening_view(self) -> None:
