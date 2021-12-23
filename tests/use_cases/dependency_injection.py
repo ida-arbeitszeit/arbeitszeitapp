@@ -98,6 +98,12 @@ class InMemoryModule(Module):
         return repo
 
     @provider
+    def provide_external_message_repository(
+        self, repo: repositories.ExternalMessageRepository
+    ) -> interfaces.ExternalMessageRepository:
+        return repo
+
+    @provider
     @singleton
     def provide_datetime_service(self, service: FakeDatetimeService) -> DatetimeService:
         return service

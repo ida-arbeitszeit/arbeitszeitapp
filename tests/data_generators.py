@@ -18,6 +18,7 @@ from arbeitszeit.entities import (
     AccountTypes,
     Company,
     Cooperation,
+    ExternalMessage,
     Member,
     Message,
     Plan,
@@ -33,6 +34,7 @@ from arbeitszeit.repositories import (
     CompanyRepository,
     CompanyWorkerRepository,
     CooperationRepository,
+    ExternalMessageRepository,
     MemberRepository,
     MessageRepository,
     PlanCooperationRepository,
@@ -378,4 +380,25 @@ class MessageGenerator:
             content=content,
             sender_remarks=None,
             reference=None,
+        )
+
+
+@inject
+@dataclass
+class ExternalMessageGenerator:
+    external_message_repository: ExternalMessageRepository
+
+    def create_message(
+        self,
+        *,
+        sender_adress: str = "test sender adress",
+        receiver_adress: str = "test receiver adress",
+        title: str = "test title",
+        content: str = "test message content",
+    ) -> ExternalMessage:
+        return self.external_message_repository.create_message(
+            sender_adress=sender_adress,
+            receiver_adress=receiver_adress,
+            title=title,
+            content=content,
         )

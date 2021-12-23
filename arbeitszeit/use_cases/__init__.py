@@ -23,6 +23,11 @@ from .create_cooperation import (
     CreateCooperationRequest,
     CreateCooperationResponse,
 )
+from .create_ext_message import (
+    CreateExtMessage,
+    CreateExtMessageRequest,
+    CreateExtMessageResponse,
+)
 from .create_plan_draft import (
     CreatePlanDraft,
     CreatePlanDraftRequest,
@@ -118,6 +123,11 @@ from .request_cooperation import (
     RequestCooperationResponse,
 )
 from .seek_approval import SeekApproval
+from .send_ext_message import (
+    SendExtMessage,
+    SendExtMessageRequest,
+    SendExtMessageResponse,
+)
 from .send_work_certificates_to_worker import SendWorkCertificatesToWorker
 from .show_my_plans import ShowMyPlansRequest, ShowMyPlansResponse, ShowMyPlansUseCase
 from .show_work_invites import ShowWorkInvites, ShowWorkInvitesRequest
@@ -144,6 +154,9 @@ __all__ = [
     "CreateCooperation",
     "CreateCooperationRequest",
     "CreateCooperationResponse",
+    "CreateExtMessage",
+    "CreateExtMessageRequest",
+    "CreateExtMessageResponse",
     "CreatePlanDraft",
     "CreatePlanDraftRequest",
     "CreatePlanDraftResponse",
@@ -219,6 +232,9 @@ __all__ = [
     "RequestCooperationRequest",
     "RequestCooperationResponse",
     "SeekApproval",
+    "SendExtMessage",
+    "SendExtMessageRequest",
+    "SendExtMessageResponse",
     "SendWorkCertificatesToWorker",
     "ShowMyPlansRequest",
     "ShowMyPlansResponse",
