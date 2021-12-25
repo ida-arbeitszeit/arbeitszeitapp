@@ -12,7 +12,7 @@ def login_required(callable: T) -> T: ...
 
 class CurrentUser:
     id: str
-    ...
+    email: str
 
 current_user: CurrentUser
 

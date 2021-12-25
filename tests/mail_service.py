@@ -14,4 +14,4 @@ class FakeMailService(MailService):
         html: str,
         sender: str,
     ) -> None:
-        print(f"\n{subject}\n{recipients}\n{html}\n{sender}")
+        pass

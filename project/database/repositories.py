@@ -1094,17 +1094,17 @@ class SentExternalMessageRepository(repositories.SentExternalMessageRepository):
 
     def save_sent_message(
         self, sender_adress: str, receiver_adress: str, title: str, content_html: str
-    ) -> entities.ExternalMessage:
+    ) -> UUID:
         msg = SentExternalMessage(
             id=str(uuid4()),
-            creation_date=datetime.now(),
+            sent_date=datetime.now(),
             sender_adress=sender_adress,
             receiver_adress=receiver_adress,
             title=title,
             content_html=content_html,
         )
         self.db.session.add(msg)
-        return self.object_from_orm(msg)
+        return UUID(msg.id)
 
     def object_from_orm(self, orm: SentExternalMessage) -> entities.ExternalMessage:
         return entities.ExternalMessage(

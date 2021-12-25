@@ -65,7 +65,7 @@ def signup_member(
 
         member = database.get_user_by_mail(email)
 
-        # send ext message
+        # send mail
         subject = "Bitte bestätige dein Konto"
         token = generate_confirmation_token(
             member.email,
@@ -81,12 +81,8 @@ def signup_member(
             content_html=html,
         )
         send_ext_message_response = send_ext_message(send_email_request)
-
-        if not send_ext_message_response.is_rejected:
-            pass
-        else:
+        if send_ext_message_response.is_rejected:
             flash("Bestätigungsmail konnte nicht gesendet werden!")
-
         return redirect(url_for("auth.unconfirmed_member"))
 
     return render_template("signup_member.html", form=register_form)
@@ -155,20 +151,33 @@ def login_member():
 
 
 @auth.route("/resend")
+@with_injection
 @login_required
-def resend_confirmation():
-
-    # token = generate_confirmation_token(
-    #     current_user.email,
-    #     current_app.config["SECRET_KEY"],
-    #     current_app.config["SECURITY_PASSWORD_SALT"],
-    # )
-    # confirm_url = url_for("auth.confirm_email", token=token, _external=True)
-    # html = render_template("activate.html", confirm_url=confirm_url)
-    # subject = "Bitte bestätige dein Konto"
-    # send_email(current_user.email, subject, html)
-
-    # flash("Eine neue Bestätigungsmail wurde gesendet.")
+def resend_confirmation(
+    send_email_controller: SendEmailController, send_ext_message: SendExtMessage
+):
+    assert (
+        current_user.email
+    )  # current user must have email because he/she is logged in
+    subject = "Bitte bestätige dein Konto"
+    token = generate_confirmation_token(
+        current_user.email,
+        current_app.config["SECRET_KEY"],
+        current_app.config["SECURITY_PASSWORD_SALT"],
+    )
+    confirm_url = url_for("auth.confirm_email", token=token, _external=True)
+    html = render_template("activate.html", confirm_url=confirm_url)
+    send_email_request = send_email_controller(
+        sender_email=current_app.config["MAIL_DEFAULT_SENDER"],
+        receiver_email=current_user.email,
+        title=subject,
+        content_html=html,
+    )
+    send_ext_message_response = send_ext_message(send_email_request)
+    if send_ext_message_response.is_rejected:
+        flash("Bestätigungsmail konnte nicht gesendet werden!")
+    else:
+        flash("Eine neue Bestätigungsmail wurde gesendet.")
     return redirect(url_for("auth.unconfirmed_member"))
 
 

@@ -806,11 +806,11 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
 class SentExternalMessageRepository(interfaces.SentExternalMessageRepository):
     @inject
     def __init__(self) -> None:
-        self.messages: Dict[UUID, ExternalMessage] = dict()
+        self.sent_messages: Dict[UUID, ExternalMessage] = dict()
 
     def save_sent_message(
         self, sender_adress: str, receiver_adress: str, title: str, content_html: str
-    ) -> ExternalMessage:
+    ) -> UUID:
         message_id = uuid4()
         ext_message = ExternalMessage(
             id=message_id,
@@ -819,8 +819,8 @@ class SentExternalMessageRepository(interfaces.SentExternalMessageRepository):
             title=title,
             content_html=content_html,
         )
-        self.messages[ext_message.id] = ext_message
-        return ext_message
+        self.sent_messages[ext_message.id] = ext_message
+        return ext_message.id
 
     def get_by_id(self, message_id: UUID) -> Optional[ExternalMessage]:
-        return self.messages.get(message_id)
+        return self.sent_messages.get(message_id)

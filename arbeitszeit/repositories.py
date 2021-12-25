@@ -417,7 +417,7 @@ class SentExternalMessageRepository(ABC):
     @abstractmethod
     def save_sent_message(
         self, sender_adress: str, receiver_adress: str, title: str, content_html: str
-    ) -> ExternalMessage:
+    ) -> UUID:
         pass
 
     @abstractmethod
