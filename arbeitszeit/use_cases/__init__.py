@@ -23,11 +23,6 @@ from .create_cooperation import (
     CreateCooperationRequest,
     CreateCooperationResponse,
 )
-from .create_ext_message import (
-    CreateExtMessage,
-    CreateExtMessageRequest,
-    CreateExtMessageResponse,
-)
 from .create_plan_draft import (
     CreatePlanDraft,
     CreatePlanDraftRequest,
@@ -154,9 +149,6 @@ __all__ = [
     "CreateCooperation",
     "CreateCooperationRequest",
     "CreateCooperationResponse",
-    "CreateExtMessage",
-    "CreateExtMessageRequest",
-    "CreateExtMessageResponse",
     "CreatePlanDraft",
     "CreatePlanDraftRequest",
     "CreatePlanDraftResponse",

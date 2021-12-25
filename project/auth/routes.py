@@ -16,13 +16,7 @@ from is_safe_url import is_safe_url
 from werkzeug.security import check_password_hash
 
 from arbeitszeit.errors import CompanyAlreadyExists, MemberAlreadyExists
-from arbeitszeit.use_cases import (
-    CreateExtMessage,
-    RegisterCompany,
-    RegisterMember,
-    SendExtMessage,
-)
-from arbeitszeit_web.create_email import CreateEmailController
+from arbeitszeit.use_cases import RegisterCompany, RegisterMember, SendExtMessage
 from arbeitszeit_web.send_email import SendEmailController
 from project import database
 from project.database import commit_changes
@@ -55,8 +49,6 @@ def help():
 @with_injection
 def signup_member(
     register_member: RegisterMember,
-    create_email_controller: CreateEmailController,
-    create_ext_message: CreateExtMessage,
     send_email_controller: SendEmailController,
     send_ext_message: SendExtMessage,
 ):
@@ -73,7 +65,7 @@ def signup_member(
 
         member = database.get_user_by_mail(email)
 
-        # create message
+        # send ext message
         subject = "Bitte bestätige dein Konto"
         token = generate_confirmation_token(
             member.email,
@@ -82,18 +74,13 @@ def signup_member(
         )
         confirm_url = url_for("auth.confirm_email", token=token, _external=True)
         html = render_template("activate.html", confirm_url=confirm_url)
-        create_email_request = create_email_controller(
+        send_email_request = send_email_controller(
             sender_email=current_app.config["MAIL_DEFAULT_SENDER"],
             receiver_email=member.email,
             title=subject,
             content_html=html,
         )
-        create_ext_message_response = create_ext_message(create_email_request)
-
-        # send message
-        ext_message_id = create_ext_message_response.message_id
-        send_ext_message_request = send_email_controller(ext_message_id)
-        send_ext_message_response = send_ext_message(send_ext_message_request)
+        send_ext_message_response = send_ext_message(send_email_request)
 
         if not send_ext_message_response.is_rejected:
             pass

@@ -19,12 +19,12 @@ from project.models import (
     Company,
     CompanyWorkInvite,
     Cooperation,
-    ExternalMessage,
     Member,
     Message,
     Plan,
     PlanDraft,
     Purchase,
+    SentExternalMessage,
     SocialAccounting,
     Transaction,
 )
@@ -1089,26 +1089,24 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
 
 @inject
 @dataclass
-class ExternalMessageRepository(repositories.ExternalMessageRepository):
+class SentExternalMessageRepository(repositories.SentExternalMessageRepository):
     db: SQLAlchemy
 
-    def create_message(
+    def save_sent_message(
         self, sender_adress: str, receiver_adress: str, title: str, content_html: str
     ) -> entities.ExternalMessage:
-        msg = ExternalMessage(
+        msg = SentExternalMessage(
             id=str(uuid4()),
             creation_date=datetime.now(),
             sender_adress=sender_adress,
             receiver_adress=receiver_adress,
             title=title,
             content_html=content_html,
-            sent=False,
-            sent_date=None,
         )
         self.db.session.add(msg)
         return self.object_from_orm(msg)
 
-    def object_from_orm(self, orm: ExternalMessage) -> entities.ExternalMessage:
+    def object_from_orm(self, orm: SentExternalMessage) -> entities.ExternalMessage:
         return entities.ExternalMessage(
             id=UUID(orm.id),
             sender_adress=orm.sender_adress,
@@ -1118,7 +1116,9 @@ class ExternalMessageRepository(repositories.ExternalMessageRepository):
         )
 
     def get_by_id(self, message_id: UUID) -> Optional[entities.ExternalMessage]:
-        ext_message_orm = ExternalMessage.query.filter_by(id=str(message_id)).first()
+        ext_message_orm = SentExternalMessage.query.filter_by(
+            id=str(message_id)
+        ).first()
         if ext_message_orm is None:
             return None
         return self.object_from_orm(ext_message_orm)

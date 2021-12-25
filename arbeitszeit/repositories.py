@@ -413,9 +413,9 @@ class PlanCooperationRepository(ABC):
         pass
 
 
-class ExternalMessageRepository(ABC):
+class SentExternalMessageRepository(ABC):
     @abstractmethod
-    def create_message(
+    def save_sent_message(
         self, sender_adress: str, receiver_adress: str, title: str, content_html: str
     ) -> ExternalMessage:
         pass

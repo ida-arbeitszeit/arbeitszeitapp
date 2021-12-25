@@ -803,13 +803,12 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
 
 
 @singleton
-class ExternalMessageRepository(interfaces.ExternalMessageRepository):
+class SentExternalMessageRepository(interfaces.SentExternalMessageRepository):
     @inject
     def __init__(self) -> None:
         self.messages: Dict[UUID, ExternalMessage] = dict()
-        self.sent_messages: Dict[UUID, ExternalMessage] = dict()
 
-    def create_message(
+    def save_sent_message(
         self, sender_adress: str, receiver_adress: str, title: str, content_html: str
     ) -> ExternalMessage:
         message_id = uuid4()

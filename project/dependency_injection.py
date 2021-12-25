@@ -35,13 +35,13 @@ from project.database.repositories import (
     CompanyRepository,
     CompanyWorkerRepository,
     CooperationRepository,
-    ExternalMessageRepository,
     MemberRepository,
     MessageRepository,
     PlanCooperationRepository,
     PlanDraftRepository,
     PlanRepository,
     PurchaseRepository,
+    SentExternalMessageRepository,
     TransactionRepository,
     WorkerInviteRepository,
 )
@@ -174,8 +174,8 @@ class FlaskModule(Module):
             to=ClassProvider(PlanCooperationRepository),
         )
         binder.bind(
-            interfaces.ExternalMessageRepository,  # type: ignore
-            to=ClassProvider(ExternalMessageRepository),
+            interfaces.SentExternalMessageRepository,  # type: ignore
+            to=ClassProvider(SentExternalMessageRepository),
         )
         binder.bind(
             MailService,  # type: ignore

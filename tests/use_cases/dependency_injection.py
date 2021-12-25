@@ -101,8 +101,8 @@ class InMemoryModule(Module):
 
     @provider
     def provide_external_message_repository(
-        self, repo: repositories.ExternalMessageRepository
-    ) -> interfaces.ExternalMessageRepository:
+        self, repo: repositories.SentExternalMessageRepository
+    ) -> interfaces.SentExternalMessageRepository:
         return repo
 
     @provider
