@@ -810,7 +810,7 @@ class ExternalMessageRepository(interfaces.ExternalMessageRepository):
         self.sent_messages: Dict[UUID, ExternalMessage] = dict()
 
     def create_message(
-        self, sender_adress: str, receiver_adress: str, title: str, content: str
+        self, sender_adress: str, receiver_adress: str, title: str, content_html: str
     ) -> ExternalMessage:
         message_id = uuid4()
         ext_message = ExternalMessage(
@@ -818,17 +818,10 @@ class ExternalMessageRepository(interfaces.ExternalMessageRepository):
             sender_adress=sender_adress,
             receiver_adress=receiver_adress,
             title=title,
-            content=content,
+            content_html=content_html,
         )
         self.messages[ext_message.id] = ext_message
         return ext_message
 
     def get_by_id(self, message_id: UUID) -> Optional[ExternalMessage]:
         return self.messages.get(message_id)
-
-    def send_message(self, message_id: UUID) -> Optional[UUID]:
-        ext_message = self.get_by_id(message_id)
-        if ext_message is None:
-            return None
-        self.sent_messages[ext_message.id] = ext_message
-        return ext_message.id

@@ -6,7 +6,7 @@ DEFAULT_CREATE_ARGUMENTS = dict(
     sender_adress="test sender adress",
     receiver_adress="test receiver adress",
     title="test title",
-    content="some text",
+    content_html="some text",
 )
 
 

@@ -30,6 +30,7 @@ FLASK_TESTING_CONFIGURATION = FlaskConfiguration(
         "ENV": "development",
         "DEBUG_DETAILS": False,
         "SECURITY_PASSWORD_SALT": "dev password salt",
+        "TESTING": True,
     }
 )
 

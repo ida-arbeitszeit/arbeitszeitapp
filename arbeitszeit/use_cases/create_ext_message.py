@@ -13,7 +13,7 @@ class CreateExtMessageRequest:
     sender_adress: str
     receiver_adress: str
     title: str
-    content: str
+    content_html: str
 
 
 @dataclass
@@ -39,6 +39,6 @@ class CreateExtMessage:
             sender_adress=request.sender_adress,
             receiver_adress=request.receiver_adress,
             title=request.title,
-            content=request.content,
+            content_html=request.content_html,
         )
         return CreateExtMessageResponse(rejection_reason=None, message_id=message.id)

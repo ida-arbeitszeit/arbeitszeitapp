@@ -216,4 +216,4 @@ class ExternalMessage:
     sender_adress: str
     receiver_adress: str
     title: str
-    content: str
+    content_html: str

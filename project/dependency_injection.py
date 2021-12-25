@@ -15,6 +15,7 @@ from injector import (
 from arbeitszeit import entities
 from arbeitszeit import repositories as interfaces
 from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.mail_service import MailService
 from arbeitszeit.use_cases import CheckForUnreadMessages
 from arbeitszeit_web.check_for_unread_message import (
     CheckForUnreadMessagesController,
@@ -34,6 +35,7 @@ from project.database.repositories import (
     CompanyRepository,
     CompanyWorkerRepository,
     CooperationRepository,
+    ExternalMessageRepository,
     MemberRepository,
     MessageRepository,
     PlanCooperationRepository,
@@ -46,6 +48,7 @@ from project.database.repositories import (
 from project.datetime import RealtimeDatetimeService
 from project.extensions import db
 from project.flask_session import FlaskSession
+from project.mail_service import FlaskMailService
 from project.template import FlaskTemplateRenderer, UserTemplateRenderer
 
 
@@ -169,6 +172,14 @@ class FlaskModule(Module):
         binder.bind(
             interfaces.PlanCooperationRepository,  # type: ignore
             to=ClassProvider(PlanCooperationRepository),
+        )
+        binder.bind(
+            interfaces.ExternalMessageRepository,  # type: ignore
+            to=ClassProvider(ExternalMessageRepository),
+        )
+        binder.bind(
+            MailService,  # type: ignore
+            to=ClassProvider(FlaskMailService),
         )
 
 

@@ -9,12 +9,12 @@ DEFAULT_CREATE_ARGUMENTS = dict(
     sender_adress="test sender adress",
     receiver_adress="test receiver adress",
     title="test title",
-    content="some text",
+    content_html="<p>some text</p>",
 )
 
 
 @injection_test
-def test_message_with_random_id_cannot_be_sent(send_message: SendExtMessage):
+def test_message_with_random_id_gets_rejected(send_message: SendExtMessage):
     response = send_message(SendExtMessageRequest(message_id=uuid4()))
     assert response.is_rejected
 

@@ -202,3 +202,14 @@ class Cooperation(db.Model):
     plans = db.relationship(
         "Plan", foreign_keys="Plan.cooperation", lazy="dynamic", backref="coop"
     )
+
+
+class ExternalMessage(db.Model):
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
+    creation_date = db.Column(db.DateTime, nullable=False)
+    sender_adress = db.Column(db.String(500), nullable=False)
+    receiver_adress = db.Column(db.String(500), nullable=False)
+    title = db.Column(db.String(500), nullable=False)
+    content_html = db.Column(db.String, nullable=False)
+    sent = db.Column(db.Boolean, nullable=False, default=False)
+    sent_date = db.Column(db.DateTime, nullable=True)

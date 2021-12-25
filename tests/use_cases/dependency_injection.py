@@ -3,8 +3,10 @@ from injector import Injector, Module, inject, provider, singleton
 import arbeitszeit.repositories as interfaces
 from arbeitszeit import entities
 from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.mail_service import MailService
 from tests import data_generators
 from tests.datetime_service import FakeDatetimeService
+from tests.mail_service import FakeMailService
 
 from . import repositories
 
@@ -107,6 +109,11 @@ class InMemoryModule(Module):
     @singleton
     def provide_datetime_service(self, service: FakeDatetimeService) -> DatetimeService:
         return service
+
+    @provider
+    @singleton
+    def provide_mail_service(self, mail_service: FakeMailService) -> MailService:
+        return mail_service
 
 
 def get_dependency_injector() -> Injector:

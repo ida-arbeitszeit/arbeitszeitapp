@@ -19,6 +19,7 @@ from project.models import (
     Company,
     CompanyWorkInvite,
     Cooperation,
+    ExternalMessage,
     Member,
     Message,
     Plan,
@@ -1084,3 +1085,40 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
         plans = Plan.query.filter_by(cooperation=str(cooperation_id)).all()
         for plan in plans:
             yield self.plan_repository.object_from_orm(plan)
+
+
+@inject
+@dataclass
+class ExternalMessageRepository(repositories.ExternalMessageRepository):
+    db: SQLAlchemy
+
+    def create_message(
+        self, sender_adress: str, receiver_adress: str, title: str, content_html: str
+    ) -> entities.ExternalMessage:
+        msg = ExternalMessage(
+            id=str(uuid4()),
+            creation_date=datetime.now(),
+            sender_adress=sender_adress,
+            receiver_adress=receiver_adress,
+            title=title,
+            content_html=content_html,
+            sent=False,
+            sent_date=None,
+        )
+        self.db.session.add(msg)
+        return self.object_from_orm(msg)
+
+    def object_from_orm(self, orm: ExternalMessage) -> entities.ExternalMessage:
+        return entities.ExternalMessage(
+            id=UUID(orm.id),
+            sender_adress=orm.sender_adress,
+            receiver_adress=orm.receiver_adress,
+            title=orm.title,
+            content_html=orm.content_html,
+        )
+
+    def get_by_id(self, message_id: UUID) -> Optional[entities.ExternalMessage]:
+        ext_message_orm = ExternalMessage.query.filter_by(id=str(message_id)).first()
+        if ext_message_orm is None:
+            return None
+        return self.object_from_orm(ext_message_orm)

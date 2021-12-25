@@ -394,11 +394,11 @@ class ExternalMessageGenerator:
         sender_adress: str = "test sender adress",
         receiver_adress: str = "test receiver adress",
         title: str = "test title",
-        content: str = "test message content",
+        content_html: str = "test message content",
     ) -> ExternalMessage:
         return self.external_message_repository.create_message(
             sender_adress=sender_adress,
             receiver_adress=receiver_adress,
             title=title,
-            content=content,
+            content_html=content_html,
         )
