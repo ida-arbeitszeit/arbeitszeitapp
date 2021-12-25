@@ -1,5 +1,4 @@
 from datetime import datetime
-from urllib.parse import urlparse
 
 from flask import (
     Blueprint,
@@ -12,7 +11,6 @@ from flask import (
     url_for,
 )
 from flask_login import current_user, login_required, login_user, logout_user
-from is_safe_url import is_safe_url
 from werkzeug.security import check_password_hash
 
 from arbeitszeit.errors import CompanyAlreadyExists, MemberAlreadyExists
@@ -22,6 +20,7 @@ from project import database
 from project.database import commit_changes
 from project.dependency_injection import with_injection
 from project.forms import LoginForm, RegisterForm
+from project.next_url import get_next_url_from_session, save_next_url_in_session
 from project.token import confirm_token, generate_confirmation_token
 
 auth = Blueprint("auth", __name__, template_folder="templates", static_folder="static")
@@ -29,18 +28,23 @@ auth = Blueprint("auth", __name__, template_folder="templates", static_folder="s
 
 @auth.route("/")
 def start():
-    hostname = urlparse(request.base_url).hostname
     if "user_type" not in session:
         session["user_type"] = None
-    next = request.args.get("next")
-    if next is not None and is_safe_url(next, {hostname}):
-        session["next"] = next
+    save_next_url_in_session(request)
     return render_template("start.html")
 
 
 @auth.route("/help")
 def help():
     return render_template("start_hilfe.html")
+
+
+@auth.route("/unconfirmed")
+@login_required
+def unconfirmed_user():
+    if current_user.confirmed:
+        return redirect(url_for("auth.start"))
+    return render_template("unconfirmed.html")
 
 
 # Member
@@ -64,14 +68,12 @@ def signup_member(
             return render_template("signup_member.html", form=register_form)
 
         member = database.get_user_by_mail(email)
+        session["user_type"] = "member"
+        login_user(member)
 
-        # send mail
+        # send confirmation mail
         subject = "Bitte bestätige dein Konto"
-        token = generate_confirmation_token(
-            member.email,
-            current_app.config["SECRET_KEY"],
-            current_app.config["SECURITY_PASSWORD_SALT"],
-        )
+        token = generate_confirmation_token(member.email)
         confirm_url = url_for("auth.confirm_email", token=token, _external=True)
         html = render_template("activate.html", confirm_url=confirm_url)
         send_email_request = send_email_controller(
@@ -83,28 +85,19 @@ def signup_member(
         send_ext_message_response = send_ext_message(send_email_request)
         if send_ext_message_response.is_rejected:
             flash("Bestätigungsmail konnte nicht gesendet werden!")
-        return redirect(url_for("auth.unconfirmed_member"))
+        return redirect(url_for("auth.unconfirmed_user"))
 
     return render_template("signup_member.html", form=register_form)
-
-
-@auth.route("/member/unconfirmed")
-def unconfirmed_member():
-    return render_template("unconfirmed_member.html")
 
 
 @auth.route("/member/confirm/<token>")
 @commit_changes
 def confirm_email(token):
     try:
-        email = confirm_token(
-            token,
-            current_app.config["SECRET_KEY"],
-            current_app.config["SECURITY_PASSWORD_SALT"],
-        )
+        email = confirm_token(token)
     except Exception:
         flash("Der Bestätigungslink ist ungültig oder ist abgelaufen.")
-        return redirect(url_for("auth.unconfirmed_member"))
+        return redirect(url_for("auth.unconfirmed_user"))
     member = database.get_user_by_mail(email)
     if member.confirmed:
         flash("Konto ist bereits bestätigt.")
@@ -134,10 +127,7 @@ def login_member():
         else:
             session["user_type"] = "member"
             login_user(member, remember=remember)
-            try:
-                next = session.pop("next")
-            except KeyError:
-                next = None
+            next = get_next_url_from_session()
             return redirect(next or url_for("main_member.profile"))
 
     if current_user.is_authenticated:
@@ -158,13 +148,9 @@ def resend_confirmation(
 ):
     assert (
         current_user.email
-    )  # current user must have email because he/she is logged in
+    )  # current user object must have email because it is logged in
     subject = "Bitte bestätige dein Konto"
-    token = generate_confirmation_token(
-        current_user.email,
-        current_app.config["SECRET_KEY"],
-        current_app.config["SECURITY_PASSWORD_SALT"],
-    )
+    token = generate_confirmation_token(current_user.email)
     confirm_url = url_for("auth.confirm_email", token=token, _external=True)
     html = render_template("activate.html", confirm_url=confirm_url)
     send_email_request = send_email_controller(
@@ -178,7 +164,7 @@ def resend_confirmation(
         flash("Bestätigungsmail konnte nicht gesendet werden!")
     else:
         flash("Eine neue Bestätigungsmail wurde gesendet.")
-    return redirect(url_for("auth.unconfirmed_member"))
+    return redirect(url_for("auth.unconfirmed_user"))
 
 
 # Company

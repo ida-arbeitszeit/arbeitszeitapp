@@ -69,11 +69,7 @@ class ViewTestCase(FlaskTestCase):
             email = self.email_generator.get_random_email()
         if member is None:
             member = self.member_generator.create_member(email=email)
-        token = generate_confirmation_token(
-            email,
-            self.app.config["SECRET_KEY"],
-            self.app.config["SECURITY_PASSWORD_SALT"],
-        )
+        token = generate_confirmation_token(email)
         response = self.client.get(
             f"/member/confirm/{token}",
             follow_redirects=True,

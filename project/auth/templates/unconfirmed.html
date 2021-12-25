@@ -2,8 +2,6 @@
 
 {% block content1 %}
 
-
-
 <section class="hero is-fullheight">
     <div class="hero-head">
         <nav class="navbar is-light" role="navigation" aria-label="main navigation">
@@ -18,9 +16,14 @@
             <div id="navbarOnTop" class="navbar-menu">
                 <div class="navbar-end">
                     <div class="navbar-item">
-                        <a class="button is-primary" href="{{ url_for('auth.help') }}">
-                            Hilfe
-                        </a>
+                        <div class="buttons">
+                            <a class="button" href="{{ url_for('auth.logout') }}">
+                                Logout
+                            </a>
+                            <a class="button is-primary" href="{{ url_for('auth.help') }}">
+                                Hilfe
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -52,22 +55,9 @@
                 <p>Du hast keine Email bekommen? <a href="{{ url_for('auth.resend_confirmation') }}">Erneut senden</a>.
                 </p>
             </div>
-
-
-
         </div>
 
     </div>
-
-
-
-
 </section>
-
-
-
-
-
-
 
 {% endblock %}

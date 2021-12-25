@@ -2,7 +2,7 @@ from typing import Any, TypeVar
 
 T = TypeVar("T")
 
-def login_user() -> None:
+def login_user(user) -> None:
     pass
 
 def logout_user() -> None:

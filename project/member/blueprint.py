@@ -42,7 +42,7 @@ def check_confirmed(func):
     @wraps(func)
     def decorated_function(*args, **kwargs):
         if not user_is_confirmed(current_user):
-            return redirect(url_for("auth.unconfirmed_member"))
+            return redirect(url_for("auth.unconfirmed_user"))
         return func(*args, **kwargs)
 
     return decorated_function
