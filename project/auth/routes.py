@@ -17,7 +17,7 @@ from arbeitszeit.errors import CompanyAlreadyExists, MemberAlreadyExists
 from arbeitszeit.use_cases import RegisterCompany, RegisterMember, SendExtMessage
 from arbeitszeit_web.send_email import SendEmailController
 from project import database
-from project.database import commit_changes
+from project.database import MemberRepository, commit_changes
 from project.dependency_injection import with_injection
 from project.forms import LoginForm, RegisterForm
 from project.next_url import get_next_url_from_session, save_next_url_in_session
@@ -49,12 +49,13 @@ def unconfirmed_user():
 
 # Member
 @auth.route("/member/signup", methods=["GET", "POST"])
-@commit_changes
 @with_injection
+@commit_changes
 def signup_member(
     register_member: RegisterMember,
     send_email_controller: SendEmailController,
     send_ext_message: SendExtMessage,
+    member_repository: MemberRepository,
 ):
     register_form = RegisterForm(request.form)
     if request.method == "POST" and register_form.validate():
@@ -66,8 +67,7 @@ def signup_member(
         except MemberAlreadyExists:
             register_form.email.errors.append("Emailadresse existiert bereits")
             return render_template("signup_member.html", form=register_form)
-
-        member = database.get_user_by_mail(email)
+        member = member_repository.get_member_orm_by_mail(email)
         session["user_type"] = "member"
         login_user(member)
 

@@ -74,6 +74,13 @@ class MemberRepository(repositories.MemberRepository):
             return None
         return self.object_from_orm(orm_object)
 
+    def get_member_orm_by_mail(self, email: str) -> Member:
+        # member_orm = Member.query.filter_by(email=email).first()
+        # workaround 1
+        member_orm = self.db.session.query(Member).filter_by(email=email).first()
+        assert member_orm
+        return member_orm
+
     def object_from_orm(self, orm_object: Member) -> entities.Member:
         member_account = self.account_repository.object_from_orm(orm_object.account)
         return entities.Member(
@@ -236,6 +243,11 @@ class AccountRepository(repositories.AccountRepository):
 
     def object_to_orm(self, account: entities.Account) -> Account:
         account_orm = Account.query.filter_by(id=str(account.id)).first()
+        # workaround 2
+        if account_orm is None:
+            account_orm = (
+                self.db.session.query(Account).filter_by(id=str(account.id)).first()
+            )
         assert account_orm
         return account_orm
 

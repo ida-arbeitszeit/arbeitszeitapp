@@ -31,6 +31,7 @@ FLASK_TESTING_CONFIGURATION = FlaskConfiguration(
         "DEBUG_DETAILS": False,
         "SECURITY_PASSWORD_SALT": "dev password salt",
         "TESTING": True,
+        "MAIL_DEFAULT_SENDER": "test_sender@cp.org",
     }
 )
 
