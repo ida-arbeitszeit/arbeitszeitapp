@@ -4,9 +4,9 @@ from flask import Flask, current_app
 from flask_sqlalchemy import SQLAlchemy
 from injector import Injector, Module, inject, provider, singleton
 
-import project.models
 from project import create_app
 from project.dependency_injection import FlaskModule
+from project.extensions import db
 
 
 class FlaskConfiguration(dict):
@@ -40,12 +40,12 @@ class SqliteModule(Module):
     @provider
     @singleton
     def provide_sqlalchemy(self, config: FlaskConfiguration) -> SQLAlchemy:
-        db = SQLAlchemy(model_class=project.models.db.Model)
-        app = create_app(config=config, db=db, template_folder=config.template_folder)
+        _db = db
+        app = create_app(config=config, db=_db, template_folder=config.template_folder)
         with app.app_context():
-            db.create_all()
+            _db.create_all()
         app.app_context().push()
-        return db
+        return _db
 
     @provider
     @singleton
