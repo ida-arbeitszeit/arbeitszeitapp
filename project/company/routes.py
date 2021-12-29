@@ -14,6 +14,7 @@ from arbeitszeit.use_cases import (
     GetDraftSummary,
     GetPlanSummary,
     HidePlan,
+    ListAllCooperations,
     ListCoordinations,
     ListCoordinationsRequest,
     ListInboundCoopRequests,
@@ -38,6 +39,7 @@ from arbeitszeit_web.get_prefilled_draft_data import (
 )
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.hide_plan import HidePlanPresenter
+from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_drafts_of_company import ListDraftsPresenter
 from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 from arbeitszeit_web.list_plans import ListPlansPresenter
@@ -589,6 +591,20 @@ def my_cooperations(
     )
     return template_renderer.render_template(
         "company/my_cooperations.html", context=view_model.to_dict()
+    )
+
+
+@CompanyRoute("/company/list_all_cooperations")
+@commit_changes
+def list_all_cooperations(
+    use_case: ListAllCooperations,
+    template_renderer: UserTemplateRenderer,
+):
+    response = use_case()
+    presenter = ListAllCooperationsPresenter(CompanyUrlIndex())
+    view_model = presenter.present(response)
+    return template_renderer.render_template(
+        "company/list_all_cooperations.html", context=dict(view_model=view_model)
     )
 
 
