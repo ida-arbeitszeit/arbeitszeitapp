@@ -5,6 +5,7 @@ from uuid import UUID, uuid4
 from arbeitszeit.use_cases import (
     AcceptCooperationResponse,
     CooperationInfo,
+    DenyCooperationResponse,
     ListCoordinationsResponse,
     ListedInboundCoopRequest,
     ListedOutboundCoopRequest,
@@ -59,6 +60,7 @@ class ShowMyCooperationsPresenterTests(TestCase):
             LIST_COORDINATIONS_RESPONSE_LEN_1,
             LIST_INBD_COOP_REQUESTS_RESPONSE_LEN_1,
             AcceptCooperationResponse(rejection_reason=None),
+            DenyCooperationResponse(rejection_reason=None),
             LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1,
         )
         self.assertEqual(len(presentation.list_of_coordinations.rows), 1)
@@ -93,6 +95,7 @@ class ShowMyCooperationsPresenterTests(TestCase):
             LIST_COORDINATIONS_RESPONSE_LEN_1,
             LIST_INBD_COOP_REQUESTS_RESPONSE_LEN_1,
             AcceptCooperationResponse(rejection_reason=None),
+            DenyCooperationResponse(rejection_reason=None),
             LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1,
         )
         self.assertEqual(len(presentation.list_of_inbound_coop_requests.rows), 1)
@@ -122,8 +125,11 @@ class ShowMyCooperationsPresenterTests(TestCase):
             LIST_COORDINATIONS_RESPONSE_LEN_1,
             LIST_INBD_COOP_REQUESTS_RESPONSE_LEN_1,
             AcceptCooperationResponse(rejection_reason=None),
+            None,
             LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1,
         )
+        self.assertTrue(presentation_success.accept_message_success)
+        self.assertFalse(presentation_success.deny_message_success)
         self.assertEqual(
             len(presentation_success.accept_message),
             1,
@@ -133,6 +139,25 @@ class ShowMyCooperationsPresenterTests(TestCase):
             "Kooperationsanfrage wurde angenommen.",
         )
 
+    def test_successfull_deny_request_response_is_presented_correctly(self):
+        presentation_success = self.presenter.present(
+            LIST_COORDINATIONS_RESPONSE_LEN_1,
+            LIST_INBD_COOP_REQUESTS_RESPONSE_LEN_1,
+            None,
+            DenyCooperationResponse(rejection_reason=None),
+            LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1,
+        )
+        self.assertTrue(presentation_success.deny_message_success)
+        self.assertFalse(presentation_success.accept_message_success)
+        self.assertEqual(
+            len(presentation_success.deny_message),
+            1,
+        )
+        self.assertEqual(
+            presentation_success.deny_message[0],
+            "Kooperationsanfrage wurde abgelehnt.",
+        )
+
     def test_failed_accept_request_response_is_presented_correctly(self):
         presentation_failure = self.presenter.present(
             LIST_COORDINATIONS_RESPONSE_LEN_1,
@@ -140,8 +165,11 @@ class ShowMyCooperationsPresenterTests(TestCase):
             AcceptCooperationResponse(
                 rejection_reason=AcceptCooperationResponse.RejectionReason.plan_not_found
             ),
+            None,
             LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1,
         )
+        self.assertFalse(presentation_failure.accept_message_success)
+        self.assertFalse(presentation_failure.deny_message_success)
         self.assertEqual(
             len(presentation_failure.accept_message),
             1,
@@ -151,11 +179,33 @@ class ShowMyCooperationsPresenterTests(TestCase):
             "Plan oder Kooperation nicht gefunden.",
         )
 
+    def test_failed_deny_request_response_is_presented_correctly(self):
+        presentation_failure = self.presenter.present(
+            LIST_COORDINATIONS_RESPONSE_LEN_1,
+            LIST_INBD_COOP_REQUESTS_RESPONSE_LEN_1,
+            None,
+            DenyCooperationResponse(
+                rejection_reason=DenyCooperationResponse.RejectionReason.plan_not_found
+            ),
+            LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1,
+        )
+        self.assertFalse(presentation_failure.deny_message_success)
+        self.assertFalse(presentation_failure.accept_message_success)
+        self.assertEqual(
+            len(presentation_failure.deny_message),
+            1,
+        )
+        self.assertEqual(
+            presentation_failure.deny_message[0],
+            "Plan oder Kooperation nicht gefunden.",
+        )
+
     def test_outbound_cooperation_requests_are_presented_correctly(self):
         presentation = self.presenter.present(
             LIST_COORDINATIONS_RESPONSE_LEN_1,
             LIST_INBD_COOP_REQUESTS_RESPONSE_LEN_1,
             AcceptCooperationResponse(rejection_reason=None),
+            DenyCooperationResponse(rejection_reason=None),
             LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1,
         )
         self.assertEqual(len(presentation.list_of_outbound_coop_requests.rows), 1)

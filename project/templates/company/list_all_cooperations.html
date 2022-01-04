@@ -1,0 +1,37 @@
+{% extends "base_company.html" %}
+
+{% block content2 %}
+
+<div class="columns is-centered">
+    <div class="column is-one-third">
+        <h1 class="title">
+            Alle Kooperationen
+        </h1>
+
+    </div>
+</div>
+{% if view_model.show_results %}
+<div class="table-container">
+    <table class="table is-fullwidth">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Anzahl Pläne</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for coop in view_model.cooperations %}
+            <tr>
+                <td><a href="{{ coop.coop_summary_url }}">{{ coop.name }}</a>
+                </td>
+                <td>{{ coop.plan_count }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p>(Keine Kooperationen vorhanden.)</p>
+{% endif %}
+
+{% endblock %}
