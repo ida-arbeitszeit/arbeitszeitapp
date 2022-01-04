@@ -117,9 +117,10 @@ class Payment:
         )
 
     def create_transaction(self) -> None:
-        price_total = self.amount * calculate_price(
+        coop_price = self.amount * calculate_price(
             self.plan_cooperation_repository.get_cooperating_plans(self.plan.id)
         )
+        individual_price = self.amount * calculate_price([self.plan])
         if self.purpose == PurposesOfPurchases.means_of_prod:
             sending_account = self.buyer.means_account
         elif self.purpose == PurposesOfPurchases.raw_materials:
@@ -129,7 +130,8 @@ class Payment:
             date=self.datetime_service.now(),
             sending_account=sending_account,
             receiving_account=self.plan.planner.product_account,
-            amount=price_total,
+            amount_sent=coop_price,
+            amount_received=individual_price,
             purpose=f"Plan-Id: {self.plan.id}",
         )
 

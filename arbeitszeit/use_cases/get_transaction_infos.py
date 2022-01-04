@@ -177,22 +177,22 @@ class GetTransactionInfos:
     ) -> Dict[str, Decimal]:
         transaction_volumes: Dict[str, Decimal] = {}
         transaction_volumes[AccountTypes.p.value] = (
-            -1 * transaction.amount
+            -1 * transaction.amount_sent
             if transaction.sending_account == user.means_account
             else Decimal(0)
         )
         transaction_volumes[AccountTypes.r.value] = (
-            -1 * transaction.amount
+            -1 * transaction.amount_sent
             if transaction.sending_account == user.raw_material_account
             else Decimal(0)
         )
         transaction_volumes[AccountTypes.a.value] = (
-            -1 * transaction.amount
+            -1 * transaction.amount_sent
             if transaction.sending_account == user.work_account
             else Decimal(0)
         )
         transaction_volumes[AccountTypes.prd.value] = (
-            1 * transaction.amount
+            1 * transaction.amount_received
             if transaction.receiving_account == user.product_account
             else Decimal(0)
         )
@@ -206,22 +206,22 @@ class GetTransactionInfos:
         transaction_volumes: Dict[str, Decimal] = {}
         factor = -1
         transaction_volumes[AccountTypes.p.value] = (
-            factor * transaction.amount
+            factor * transaction.amount_sent
             if transaction.sending_account == user.means_account
             else Decimal(0)
         )
         transaction_volumes[AccountTypes.r.value] = (
-            factor * transaction.amount
+            factor * transaction.amount_sent
             if transaction.sending_account == user.raw_material_account
             else Decimal(0)
         )
         transaction_volumes[AccountTypes.a.value] = (
-            factor * transaction.amount
+            factor * transaction.amount_sent
             if transaction.sending_account == user.work_account
             else Decimal(0)
         )
         transaction_volumes[AccountTypes.prd.value] = (
-            factor * transaction.amount
+            factor * transaction.amount_sent
             if transaction.sending_account == user.product_account
             else Decimal(0)
         )
@@ -234,22 +234,22 @@ class GetTransactionInfos:
     ) -> Dict[str, Decimal]:
         transaction_volumes: Dict[str, Decimal] = {}
         transaction_volumes[AccountTypes.p.value] = (
-            transaction.amount
+            transaction.amount_received
             if transaction.receiving_account == user.means_account
             else Decimal(0)
         )
         transaction_volumes[AccountTypes.r.value] = (
-            transaction.amount
+            transaction.amount_received
             if transaction.receiving_account == user.raw_material_account
             else Decimal(0)
         )
         transaction_volumes[AccountTypes.a.value] = (
-            transaction.amount
+            transaction.amount_received
             if transaction.receiving_account == user.work_account
             else Decimal(0)
         )
         transaction_volumes[AccountTypes.prd.value] = (
-            transaction.amount
+            transaction.amount_received
             if transaction.receiving_account == user.product_account
             else Decimal(0)
         )
@@ -260,8 +260,8 @@ class GetTransactionInfos:
     ) -> Dict[str, Decimal]:
         transaction_volumes = {}
         if user_is_sender:
-            transaction_volumes[AccountTypes.member.value] = -transaction.amount
+            transaction_volumes[AccountTypes.member.value] = -transaction.amount_sent
         elif user_is_receiver:
-            transaction_volumes[AccountTypes.member.value] = transaction.amount
+            transaction_volumes[AccountTypes.member.value] = transaction.amount_received
 
         return transaction_volumes
