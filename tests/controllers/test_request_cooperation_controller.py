@@ -3,6 +3,7 @@ from unittest import TestCase
 from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases import RequestCooperationRequest
+from arbeitszeit_web.malformed_input_data import MalformedInputData
 from arbeitszeit_web.request_cooperation import RequestCooperationController
 from tests.session import FakeSession
 
@@ -52,9 +53,7 @@ class RequestCooperationControllerTests(TestCase):
         self.session.set_current_user_id(uuid4())
         use_case_request = self.controller.import_form_data(form=malformed_form)
         assert use_case_request is not None
-        assert isinstance(
-            use_case_request, RequestCooperationController.MalformedInputData
-        )
+        assert isinstance(use_case_request, MalformedInputData)
         self.assertEqual(use_case_request.field, "plan_id")
         self.assertEqual(use_case_request.message, "Plan-ID ist ungültig.")
 
@@ -65,9 +64,7 @@ class RequestCooperationControllerTests(TestCase):
         self.session.set_current_user_id(uuid4())
         use_case_request = self.controller.import_form_data(form=malformed_form)
         assert use_case_request is not None
-        assert isinstance(
-            use_case_request, RequestCooperationController.MalformedInputData
-        )
+        assert isinstance(use_case_request, MalformedInputData)
         self.assertEqual(use_case_request.field, "cooperation_id")
         self.assertEqual(use_case_request.message, "Kooperations-ID ist ungültig.")
 

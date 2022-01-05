@@ -5,6 +5,7 @@ from flask import Response
 
 from arbeitszeit.use_cases import ListPlans, RequestCooperation
 from arbeitszeit_web.list_plans import ListPlansPresenter
+from arbeitszeit_web.malformed_input_data import MalformedInputData
 from arbeitszeit_web.request_cooperation import (
     RequestCooperationController,
     RequestCooperationPresenter,
@@ -42,7 +43,7 @@ class RequestCooperationView:
         use_case_request = self.controller.import_form_data(self.form)
         if use_case_request is None:
             return self.not_found_view.get_response()
-        if isinstance(use_case_request, self.controller.MalformedInputData):
+        if isinstance(use_case_request, MalformedInputData):
             return self._handle_malformed_data(use_case_request)
         use_case_response = self.request_cooperation(use_case_request)
         view_model = self.presenter.present(use_case_response)
@@ -55,9 +56,7 @@ class RequestCooperationView:
             )
         )
 
-    def _handle_malformed_data(
-        self, result: RequestCooperationController.MalformedInputData
-    ) -> Response:
+    def _handle_malformed_data(self, result: MalformedInputData) -> Response:
         field = getattr(self.form, result.field)
         field.errors += (result.message,)
         return Response(
