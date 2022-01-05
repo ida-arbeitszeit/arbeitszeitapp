@@ -32,6 +32,14 @@ class AnwerCompanyWorkInviteTests(TestCase):
         )
         self.assertFalse(response.is_success)
 
+    def test_trying_to_answer_non_existing_invite_marks_response_as_rejected(
+        self,
+    ) -> None:
+        response = self.answer_company_work_invite(
+            self._create_request(is_accepted=True, invite_id=uuid4())
+        )
+        self.assertFalse(response.is_accepted)
+
     def test_rejecting_existing_invite_is_successful(self) -> None:
         invite_id = self._invite_worker()
         response = self.answer_company_work_invite(
@@ -41,6 +49,16 @@ class AnwerCompanyWorkInviteTests(TestCase):
             )
         )
         self.assertTrue(response.is_success)
+
+    def test_that_rejecting_an_invite_marks_response_as_rejected(self) -> None:
+        invite_id = self._invite_worker()
+        response = self.answer_company_work_invite(
+            self._create_request(
+                is_accepted=False,
+                invite_id=invite_id,
+            )
+        )
+        self.assertFalse(response.is_accepted)
 
     def test_accepting_an_invite_adds_member_to_company_workers(self) -> None:
         invite_id = self._invite_worker()
@@ -53,6 +71,16 @@ class AnwerCompanyWorkInviteTests(TestCase):
         repository = self.injector.get(CompanyWorkerRepository)  # type: ignore
         self.assertIn(self.member, repository.get_company_workers(self.company))
         self.assertTrue(response.is_success)
+
+    def test_accepting_an_invite_marks_response_as_accepted(self) -> None:
+        invite_id = self._invite_worker()
+        response = self.answer_company_work_invite(
+            self._create_request(
+                is_accepted=True,
+                invite_id=invite_id,
+            )
+        )
+        self.assertTrue(response.is_accepted)
 
     def test_rejecting_an_invite_does_not_add_member_to_company_workers(self) -> None:
         invite_id = self._invite_worker()
@@ -90,6 +118,19 @@ class AnwerCompanyWorkInviteTests(TestCase):
             )
         )
         self.assertFalse(response.is_success)
+
+    def test_answer_invite_as_non_existing_member_marks_response_as_rejected(
+        self,
+    ) -> None:
+        invite_id = self._invite_worker()
+        response = self.answer_company_work_invite(
+            self._create_request(
+                is_accepted=True,
+                invite_id=invite_id,
+                user=uuid4(),
+            )
+        )
+        self.assertFalse(response.is_accepted)
 
     def test_answer_invite_as_member_that_was_not_invited_returns_negative_reponse(
         self,

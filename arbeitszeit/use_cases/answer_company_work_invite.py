@@ -20,6 +20,7 @@ class AnswerCompanyWorkInviteRequest:
 @dataclass
 class AnswerCompanyWorkInviteResponse:
     is_success: bool
+    is_accepted: bool
 
 
 @inject
@@ -34,13 +35,18 @@ class AnswerCompanyWorkInvite:
     ) -> AnswerCompanyWorkInviteResponse:
         invite = self.worker_invite_repository.get_by_id(request.invite_id)
         if invite is None:
-            return AnswerCompanyWorkInviteResponse(is_success=False)
+            return self._create_failure_response()
         if invite.member.id != request.user:
-            return AnswerCompanyWorkInviteResponse(is_success=False)
+            return self._create_failure_response()
         elif request.is_accepted:
             self.company_worker_repository.add_worker_to_company(
                 invite.company,
                 invite.member,
             )
         self.worker_invite_repository.delete_invite(request.invite_id)
-        return AnswerCompanyWorkInviteResponse(is_success=True)
+        return AnswerCompanyWorkInviteResponse(
+            is_success=True, is_accepted=request.is_accepted
+        )
+
+    def _create_failure_response(self) -> AnswerCompanyWorkInviteResponse:
+        return AnswerCompanyWorkInviteResponse(is_success=False, is_accepted=False)
