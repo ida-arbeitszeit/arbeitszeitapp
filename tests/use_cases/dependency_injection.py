@@ -111,7 +111,6 @@ class InMemoryModule(Module):
         return service
 
     @provider
-    @singleton
     def provide_mail_service(self, mail_service: FakeMailService) -> MailService:
         return mail_service
 
