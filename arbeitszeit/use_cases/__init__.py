@@ -121,6 +121,11 @@ from .request_cooperation import (
     RequestCooperationRequest,
     RequestCooperationResponse,
 )
+from .resend_confirmation_mail import (
+    ResendConfirmationMail,
+    ResendConfirmationMailRequest,
+    ResendConfirmationMailResponse,
+)
 from .seek_approval import SeekApproval
 from .send_work_certificates_to_worker import SendWorkCertificatesToWorker
 from .show_my_plans import ShowMyPlansRequest, ShowMyPlansResponse, ShowMyPlansUseCase
@@ -224,6 +229,9 @@ __all__ = [
     "RequestCooperation",
     "RequestCooperationRequest",
     "RequestCooperationResponse",
+    "ResendConfirmationMail",
+    "ResendConfirmationMailResponse",
+    "ResendConfirmationMailRequest",
     "SeekApproval",
     "SendWorkCertificatesToWorker",
     "ShowMyPlansRequest",

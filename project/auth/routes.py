@@ -18,13 +18,14 @@ from arbeitszeit.use_cases import (
     RegisterCompany,
     RegisterMember,
     RegisterMemberResponse,
+    ResendConfirmationMail,
+    ResendConfirmationMailRequest,
 )
 from arbeitszeit_web.register_member import RegisterMemberController
 from project import database
 from project.database import MemberRepository, commit_changes
 from project.dependency_injection import with_injection
 from project.forms import LoginForm, RegisterForm
-from project.mail_service import FlaskMailService
 from project.next_url import get_next_url_from_session, save_next_url_in_session
 from project.token import confirm_token, generate_confirmation_token
 
@@ -154,7 +155,7 @@ def login_member():
 @auth.route("/resend")
 @with_injection
 @login_required
-def resend_confirmation(mail_service: FlaskMailService):
+def resend_confirmation(use_case: ResendConfirmationMail):
     assert (
         current_user.email
     )  # current user object must have email because it is logged in
@@ -163,16 +164,17 @@ def resend_confirmation(mail_service: FlaskMailService):
     confirm_url = url_for("auth.confirm_email", token=token, _external=True)
     html = render_template("activate.html", confirm_url=confirm_url)
 
-    try:
-        mail_service.send_message(
-            subject=subject,
-            recipients=[current_user.email],
-            html=html,
-            sender=current_app.config["MAIL_DEFAULT_SENDER"],
-        )
-        flash("Eine neue Bestätigungsmail wurde gesendet.")
-    except Exception:
+    request = ResendConfirmationMailRequest(
+        subject=subject,
+        html=html,
+        recipient=current_user.email,
+        sender=current_app.config["MAIL_DEFAULT_SENDER"],
+    )
+    response = use_case(request)
+    if response.is_rejected:
         flash("Bestätigungsmail konnte nicht gesendet werden!")
+    else:
+        flash("Eine neue Bestätigungsmail wurde gesendet.")
 
     return redirect(url_for("auth.unconfirmed_user"))
 
