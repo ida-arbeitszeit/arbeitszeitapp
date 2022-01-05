@@ -643,7 +643,7 @@ class PlanRepository(repositories.PlanRepository):
         return (
             self.object_from_orm(plan)
             for plan in Plan.query.filter(
-                Plan.is_active == True, Plan.prd_name.contains(query)
+                Plan.is_active == True, Plan.prd_name.ilike(f"%{query}%")
             ).all()
         )
 
