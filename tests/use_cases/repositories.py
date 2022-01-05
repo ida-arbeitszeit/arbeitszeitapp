@@ -228,7 +228,12 @@ class MemberRepository(interfaces.MemberRepository):
         self.datetime_service = datetime_service
 
     def create_member(
-        self, email: str, name: str, password: str, account: Account
+        self,
+        email: str,
+        name: str,
+        password: str,
+        account: Account,
+        registered_on: datetime,
     ) -> Member:
         id = uuid4()
         member = Member(
@@ -236,7 +241,7 @@ class MemberRepository(interfaces.MemberRepository):
             name=name,
             email=email,
             account=account,
-            registered_on=self.datetime_service.now(),
+            registered_on=registered_on,
             confirmed=False,
             confirmed_on=None,
         )

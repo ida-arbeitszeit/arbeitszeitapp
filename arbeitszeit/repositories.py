@@ -199,7 +199,12 @@ class AccountRepository(ABC):
 class MemberRepository(ABC):
     @abstractmethod
     def create_member(
-        self, email: str, name: str, password: str, account: Account
+        self,
+        email: str,
+        name: str,
+        password: str,
+        account: Account,
+        registered_on: datetime,
     ) -> Member:
         pass
 

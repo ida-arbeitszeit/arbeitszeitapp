@@ -94,7 +94,12 @@ class MemberRepository(repositories.MemberRepository):
         return Member.query.get(str(member.id))
 
     def create_member(
-        self, email: str, name: str, password: str, account: entities.Account
+        self,
+        email: str,
+        name: str,
+        password: str,
+        account: entities.Account,
+        registered_on: datetime,
     ) -> entities.Member:
         orm_account = self.account_repository.object_to_orm(account)
         orm_member = Member(
@@ -103,7 +108,7 @@ class MemberRepository(repositories.MemberRepository):
             name=name,
             password=generate_password_hash(password, method="sha256"),
             account=orm_account,
-            registered_on=datetime.now(),
+            registered_on=registered_on,
             confirmed=False,
             confirmed_on=None,
         )

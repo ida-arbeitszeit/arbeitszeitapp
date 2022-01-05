@@ -57,6 +57,7 @@ class MemberGenerator:
     account_generator: AccountGenerator
     email_generator: EmailGenerator
     member_repository: MemberRepository
+    datetime_service: FakeDatetimeService
 
     def create_member(
         self,
@@ -65,6 +66,7 @@ class MemberGenerator:
         name: str = "test member name",
         account: Optional[Account] = None,
         password: str = "password",
+        registered_on: datetime = None,
     ) -> Member:
         if not email:
             email = self.email_generator.get_random_email()
@@ -73,12 +75,15 @@ class MemberGenerator:
             account = self.account_generator.create_account(
                 account_type=AccountTypes.member
             )
+        if registered_on is None:
+            registered_on = self.datetime_service.now()
 
         return self.member_repository.create_member(
             email=email,
             name=name,
             password=password,
             account=account,
+            registered_on=registered_on,
         )
 
 
