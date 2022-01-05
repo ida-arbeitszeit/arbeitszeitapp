@@ -14,12 +14,12 @@ from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.security import check_password_hash
 
 from arbeitszeit.errors import CompanyAlreadyExists, MemberAlreadyExists
-from arbeitszeit.use_cases import RegisterCompany, RegisterMember, SendExtMessage
-from arbeitszeit_web.send_email import SendEmailController
+from arbeitszeit.use_cases import RegisterCompany, RegisterMember
 from project import database
 from project.database import MemberRepository, commit_changes
 from project.dependency_injection import with_injection
 from project.forms import LoginForm, RegisterForm
+from project.mail_service import FlaskMailService
 from project.next_url import get_next_url_from_session, save_next_url_in_session
 from project.token import confirm_token, generate_confirmation_token
 
@@ -53,9 +53,8 @@ def unconfirmed_user():
 @commit_changes
 def signup_member(
     register_member: RegisterMember,
-    send_email_controller: SendEmailController,
-    send_ext_message: SendExtMessage,
     member_repository: MemberRepository,
+    mail_service: FlaskMailService,
 ):
     register_form = RegisterForm(request.form)
     if request.method == "POST" and register_form.validate():
@@ -76,14 +75,14 @@ def signup_member(
         token = generate_confirmation_token(member.email)
         confirm_url = url_for("auth.confirm_email", token=token, _external=True)
         html = render_template("activate.html", confirm_url=confirm_url)
-        send_email_request = send_email_controller(
-            sender_email=current_app.config["MAIL_DEFAULT_SENDER"],
-            receiver_email=member.email,
-            title=subject,
-            content_html=html,
-        )
-        send_ext_message_response = send_ext_message(send_email_request)
-        if send_ext_message_response.is_rejected:
+        try:
+            mail_service.send_message(
+                subject=subject,
+                recipients=[member.email],
+                html=html,
+                sender=current_app.config["MAIL_DEFAULT_SENDER"],
+            )
+        except Exception:
             flash("Bestätigungsmail konnte nicht gesendet werden!")
         return redirect(url_for("auth.unconfirmed_user"))
 
@@ -143,9 +142,7 @@ def login_member():
 @auth.route("/resend")
 @with_injection
 @login_required
-def resend_confirmation(
-    send_email_controller: SendEmailController, send_ext_message: SendExtMessage
-):
+def resend_confirmation(mail_service: FlaskMailService):
     assert (
         current_user.email
     )  # current user object must have email because it is logged in
@@ -153,17 +150,18 @@ def resend_confirmation(
     token = generate_confirmation_token(current_user.email)
     confirm_url = url_for("auth.confirm_email", token=token, _external=True)
     html = render_template("activate.html", confirm_url=confirm_url)
-    send_email_request = send_email_controller(
-        sender_email=current_app.config["MAIL_DEFAULT_SENDER"],
-        receiver_email=current_user.email,
-        title=subject,
-        content_html=html,
-    )
-    send_ext_message_response = send_ext_message(send_email_request)
-    if send_ext_message_response.is_rejected:
-        flash("Bestätigungsmail konnte nicht gesendet werden!")
-    else:
+
+    try:
+        mail_service.send_message(
+            subject=subject,
+            recipients=[current_user.email],
+            html=html,
+            sender=current_app.config["MAIL_DEFAULT_SENDER"],
+        )
         flash("Eine neue Bestätigungsmail wurde gesendet.")
+    except Exception:
+        flash("Bestätigungsmail konnte nicht gesendet werden!")
+
     return redirect(url_for("auth.unconfirmed_user"))
 
 
