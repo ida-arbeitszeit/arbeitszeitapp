@@ -21,6 +21,7 @@ from arbeitszeit_web.check_for_unread_message import (
     CheckForUnreadMessagesPresenter,
 )
 from arbeitszeit_web.list_messages import ListMessagesController
+from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
 from arbeitszeit_web.request_cooperation import RequestCooperationController
 from arbeitszeit_web.user_action_resolver import (
@@ -46,6 +47,7 @@ from project.database.repositories import (
 from project.datetime import RealtimeDatetimeService
 from project.extensions import db
 from project.flask_session import FlaskSession
+from project.notifications import FlaskFlashNotifier
 from project.template import FlaskTemplateRenderer, UserTemplateRenderer
 
 
@@ -104,6 +106,10 @@ class FlaskModule(Module):
         self, user_action_resolver: UserActionResolver
     ) -> ReadMessagePresenter:
         return ReadMessagePresenter(user_action_resolver)
+
+    @provider
+    def provide_notifier(self) -> Notifier:
+        return FlaskFlashNotifier()
 
     def configure(self, binder: Binder) -> None:
         binder.bind(
