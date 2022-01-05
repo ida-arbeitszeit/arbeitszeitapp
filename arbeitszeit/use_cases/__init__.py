@@ -111,7 +111,11 @@ from .read_message import (
     ReadMessageSuccess,
 )
 from .register_company import RegisterCompany
-from .register_member import RegisterMember
+from .register_member import (
+    RegisterMember,
+    RegisterMemberRequest,
+    RegisterMemberResponse,
+)
 from .request_cooperation import (
     RequestCooperation,
     RequestCooperationRequest,
@@ -215,6 +219,8 @@ __all__ = [
     "ReadMessageSuccess",
     "RegisterCompany",
     "RegisterMember",
+    "RegisterMemberRequest",
+    "RegisterMemberResponse",
     "RequestCooperation",
     "RequestCooperationRequest",
     "RequestCooperationResponse",

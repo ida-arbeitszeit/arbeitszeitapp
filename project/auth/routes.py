@@ -13,8 +13,13 @@ from flask import (
 from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.security import check_password_hash
 
-from arbeitszeit.errors import CompanyAlreadyExists, MemberAlreadyExists
-from arbeitszeit.use_cases import RegisterCompany, RegisterMember
+from arbeitszeit.errors import CompanyAlreadyExists
+from arbeitszeit.use_cases import (
+    RegisterCompany,
+    RegisterMember,
+    RegisterMemberResponse,
+)
+from arbeitszeit_web.register_member import RegisterMemberController
 from project import database
 from project.database import MemberRepository, commit_changes
 from project.dependency_injection import with_injection
@@ -54,36 +59,43 @@ def unconfirmed_user():
 def signup_member(
     register_member: RegisterMember,
     member_repository: MemberRepository,
-    mail_service: FlaskMailService,
+    controller: RegisterMemberController,
 ):
     register_form = RegisterForm(request.form)
     if request.method == "POST" and register_form.validate():
         email = register_form.data["email"]
         name = register_form.data["name"]
         password = register_form.data["password"]
-        try:
-            register_member(email, name, password)
-        except MemberAlreadyExists:
-            register_form.email.errors.append("Emailadresse existiert bereits")
-            return render_template("signup_member.html", form=register_form)
+        subject = "Bitte bestätige dein Konto"
+        token = generate_confirmation_token(email)
+        confirm_url = url_for("auth.confirm_email", token=token, _external=True)
+        html = render_template("activate.html", confirm_url=confirm_url)
+
+        use_case_request = controller.create_request(
+            email=email,
+            name=name,
+            password=password,
+            email_subject=subject,
+            email_html=html,
+            email_sender=current_app.config["MAIL_DEFAULT_SENDER"],
+        )
+        response = register_member(use_case_request)
+        if response.is_rejected:
+            if (
+                response.rejection_reason
+                == RegisterMemberResponse.RejectionReason.member_already_exists
+            ):
+                register_form.email.errors.append("Emailadresse existiert bereits")
+                return render_template("signup_member.html", form=register_form)
+            elif (
+                response.rejection_reason
+                == RegisterMemberResponse.RejectionReason.sending_mail_failed
+            ):
+                flash("Bestätigungsmail konnte nicht gesendet werden!")
+
         member = member_repository.get_member_orm_by_mail(email)
         session["user_type"] = "member"
         login_user(member)
-
-        # send confirmation mail
-        subject = "Bitte bestätige dein Konto"
-        token = generate_confirmation_token(member.email)
-        confirm_url = url_for("auth.confirm_email", token=token, _external=True)
-        html = render_template("activate.html", confirm_url=confirm_url)
-        try:
-            mail_service.send_message(
-                subject=subject,
-                recipients=[member.email],
-                html=html,
-                sender=current_app.config["MAIL_DEFAULT_SENDER"],
-            )
-        except Exception:
-            flash("Bestätigungsmail konnte nicht gesendet werden!")
         return redirect(url_for("auth.unconfirmed_user"))
 
     return render_template("signup_member.html", form=register_form)
