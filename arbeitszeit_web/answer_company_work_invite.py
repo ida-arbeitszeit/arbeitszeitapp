@@ -1,6 +1,6 @@
 from dataclasses import dataclass
-from typing import Any, Optional, Protocol, Union
-from uuid import UUID, uuid4
+from typing import Protocol, Union
+from uuid import UUID
 
 from arbeitszeit.use_cases import AnswerCompanyWorkInviteRequest
 
@@ -10,6 +10,9 @@ from .session import Session
 
 class AnswerCompanyWorkInviteForm(Protocol):
     def get_invite_id_field(self) -> str:
+        ...
+
+    def get_is_accepted_field(self) -> bool:
         ...
 
 
@@ -24,7 +27,10 @@ class AnswerCompanyWorkInviteController:
             invite_id = UUID(form.get_invite_id_field())
         except ValueError:
             return MalformedInputData("", "")
-        if self.session.get_current_user():
-            return AnswerCompanyWorkInviteRequest(True, invite_id, uuid4())
+        requesting_user = self.session.get_current_user()
+        if requesting_user is not None:
+            return AnswerCompanyWorkInviteRequest(
+                form.get_is_accepted_field(), invite_id, requesting_user
+            )
         else:
             return None

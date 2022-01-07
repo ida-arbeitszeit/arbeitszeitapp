@@ -17,10 +17,12 @@ class BaseTestCase(TestCase):
         self.session = FakeSession()
         self.controller = AnswerCompanyWorkInviteController(self.session)
 
-    def _get_request_form(self, invite_id: Optional[str] = None) -> FakeRequestForm:
+    def _get_request_form(
+        self, invite_id: Optional[str] = None, is_accepted: bool = True
+    ) -> FakeRequestForm:
         if invite_id is None:
             invite_id = str(uuid4())
-        return FakeRequestForm(invite_id_field=invite_id)
+        return FakeRequestForm(invite_id_field=invite_id, is_accepted=is_accepted)
 
     def assertSuccess(
         self,
@@ -41,7 +43,8 @@ class AnonymousUserTests(BaseTestCase):
 class LoggedInUsertests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.session.set_current_user_id(uuid4())
+        self.requesting_user = uuid4()
+        self.session.set_current_user_id(self.requesting_user)
 
     def test_controller_returns_not_none_for_logged_in_user_when_importing_form_data(
         self,
@@ -65,10 +68,32 @@ class LoggedInUsertests(BaseTestCase):
         )
         self.assertSuccess(request, lambda r: r.invite_id == expected_uuid)
 
+    def test_when_form_rejects_invite_then_render_request_that_rejects_invite(self):
+        request = self.controller.import_form_data(
+            self._get_request_form(is_accepted=False)
+        )
+        self.assertSuccess(request, lambda r: not r.is_accepted)
+
+    def test_when_form_accepts_invite_then_render_request_that_accepts_invite(
+        self,
+    ) -> None:
+        request = self.controller.import_form_data(
+            self._get_request_form(is_accepted=True)
+        )
+        self.assertSuccess(request, lambda r: r.is_accepted)
+
+    def test_render_user_id_of_requesting_user_in_resulting_response(self) -> None:
+        request = self.controller.import_form_data(self._get_request_form())
+        self.assertSuccess(request, lambda r: r.user == self.requesting_user)
+
 
 @dataclass
 class FakeRequestForm:
     invite_id_field: str
+    is_accepted: bool
 
     def get_invite_id_field(self) -> str:
         return self.invite_id_field
+
+    def get_is_accepted_field(self) -> bool:
+        return self.is_accepted
