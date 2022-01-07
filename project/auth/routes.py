@@ -48,7 +48,7 @@ def help():
 @auth.route("/unconfirmed")
 @login_required
 def unconfirmed_user():
-    if current_user.confirmed:
+    if current_user.confirmed_on is not None:
         return redirect(url_for("auth.start"))
     return render_template("unconfirmed.html")
 
@@ -111,10 +111,9 @@ def confirm_email(token):
         flash("Der Bestätigungslink ist ungültig oder ist abgelaufen.")
         return redirect(url_for("auth.unconfirmed_user"))
     member = database.get_user_by_mail(email)
-    if member.confirmed:
+    if member.confirmed_on is not None:
         flash("Konto ist bereits bestätigt.")
     else:
-        member.confirmed = True
         member.confirmed_on = datetime.now()
         flash("Das Konto wurde bestätigt. Danke!")
     return redirect(url_for("auth.login_member"))

@@ -50,6 +50,6 @@ def check_confirmed(func):
 
 def user_is_confirmed(current_user) -> bool:
     try:
-        return current_user.confirmed
+        return current_user.confirmed_on is not None
     except Exception:
         return False

@@ -242,7 +242,6 @@ class MemberRepository(interfaces.MemberRepository):
             email=email,
             account=account,
             registered_on=registered_on,
-            confirmed=False,
             confirmed_on=None,
         )
         self.members[id] = member

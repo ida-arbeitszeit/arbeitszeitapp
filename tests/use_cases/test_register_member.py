@@ -48,7 +48,7 @@ def test_that_correct_member_attributes_are_registered(
         assert member.email == request.email
         assert member.name == request.name
         assert member.registered_on is not None
-        assert not member.confirmed
+        assert member.confirmed_on is None
 
 
 @injection_test
