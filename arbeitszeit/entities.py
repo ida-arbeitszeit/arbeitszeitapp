@@ -208,12 +208,3 @@ class Message:
     sender_remarks: Optional[str]
     user_action: Optional[UserAction]
     is_read: bool
-
-
-@dataclass
-class ExternalMessage:
-    id: UUID
-    sender_adress: str
-    receiver_adress: str
-    title: str
-    content_html: str
