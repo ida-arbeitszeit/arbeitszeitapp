@@ -6,6 +6,7 @@ from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import AccountTypes
+from arbeitszeit.errors import CannotSendEmail
 from arbeitszeit.mail_service import MailService
 from arbeitszeit.repositories import AccountRepository, MemberRepository
 
@@ -67,5 +68,5 @@ class RegisterMember:
                 html=request.email_html,
                 sender=request.email_sender,
             )
-        except Exception:
+        except CannotSendEmail:
             raise RegisterMemberResponse.RejectionReason.sending_mail_failed

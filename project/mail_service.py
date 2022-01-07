@@ -3,6 +3,7 @@ from typing import List
 from flask_mail import Message
 from injector import singleton
 
+from arbeitszeit.errors import CannotSendEmail
 from arbeitszeit.mail_service import MailService
 from project.extensions import mail
 
@@ -17,4 +18,7 @@ class FlaskMailService(MailService):
         sender: str,
     ) -> None:
         msg = Message(subject=subject, recipients=recipients, html=html, sender=sender)
-        mail.send(msg)
+        try:
+            mail.send(msg)
+        except Exception:
+            raise CannotSendEmail

@@ -4,6 +4,7 @@ from typing import Optional
 
 from injector import inject
 
+from arbeitszeit.errors import CannotSendEmail
 from arbeitszeit.mail_service import MailService
 
 
@@ -42,7 +43,7 @@ class ResendConfirmationMail:
                 html=request.html,
                 sender=request.sender,
             )
-        except Exception:
+        except CannotSendEmail:
             return ResendConfirmationMailResponse(
                 rejection_reason=ResendConfirmationMailResponse.RejectionReason.sending_mail_failed
             )
