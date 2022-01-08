@@ -15,3 +15,8 @@ class FakeMailService(MailService):
         sender: str,
     ) -> None:
         pass
+
+    def create_confirmation_html(
+        self, template_name: str, endpoint: str, token: str
+    ) -> str:
+        pass

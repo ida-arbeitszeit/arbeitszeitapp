@@ -9,6 +9,7 @@ from arbeitszeit.entities import AccountTypes
 from arbeitszeit.errors import CannotSendEmail
 from arbeitszeit.mail_service import MailService
 from arbeitszeit.repositories import AccountRepository, MemberRepository
+from arbeitszeit.token import TokenService
 
 
 @dataclass
@@ -30,8 +31,9 @@ class RegisterMemberRequest:
     name: str
     password: str
     email_subject: str
-    email_html: str
     email_sender: str
+    template_name: str
+    endpoint: str
 
 
 @inject
@@ -41,11 +43,13 @@ class RegisterMember:
     member_repository: MemberRepository
     datetime_service: DatetimeService
     mail_service: MailService
+    token_service: TokenService
 
     def __call__(self, request: RegisterMemberRequest) -> RegisterMemberResponse:
         try:
             self._register_member(request)
-            self._send_confirmation_mail(request)
+            html = self._create_confirmation_mail(request)
+            self._send_confirmation_mail(request, html)
         except RegisterMemberResponse.RejectionReason as reason:
             return RegisterMemberResponse(rejection_reason=reason)
         return RegisterMemberResponse(rejection_reason=None)
@@ -60,12 +64,21 @@ class RegisterMember:
             request.email, request.name, request.password, member_account, registered_on
         )
 
-    def _send_confirmation_mail(self, request: RegisterMemberRequest) -> None:
+    def _create_confirmation_mail(self, request: RegisterMemberRequest) -> str:
+        token = self.token_service.generate_token(request.email)
+        html = self.mail_service.create_confirmation_html(
+            request.template_name, request.endpoint, token
+        )
+        return html
+
+    def _send_confirmation_mail(
+        self, request: RegisterMemberRequest, html: str
+    ) -> None:
         try:
             self.mail_service.send_message(
                 subject=request.email_subject,
                 recipients=[request.email],
-                html=request.email_html,
+                html=html,
                 sender=request.email_sender,
             )
         except CannotSendEmail:

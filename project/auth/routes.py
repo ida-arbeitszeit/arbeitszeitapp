@@ -27,7 +27,7 @@ from project.database import MemberRepository, commit_changes
 from project.dependency_injection import with_injection
 from project.forms import LoginForm, RegisterForm
 from project.next_url import get_next_url_from_session, save_next_url_in_session
-from project.token import confirm_token, generate_confirmation_token
+from project.token import FlaskTokenService
 
 auth = Blueprint("auth", __name__, template_folder="templates", static_folder="static")
 
@@ -64,17 +64,12 @@ def signup_member(
 ):
     register_form = RegisterForm(request.form)
     if request.method == "POST" and register_form.validate():
-        email = register_form.data["email"]
-        subject = "Bitte bestätige dein Konto"
-        token = generate_confirmation_token(email)
-        confirm_url = url_for("auth.confirm_email", token=token, _external=True)
-        html = render_template("activate.html", confirm_url=confirm_url)
-
         use_case_request = controller.create_request(
             register_form,
-            email_subject=subject,
-            email_html=html,
+            email_subject="Bitte bestätige dein Konto",
             email_sender=current_app.config["MAIL_DEFAULT_SENDER"],
+            template_name="activate.html",
+            endpoint="auth.confirm_email",
         )
         response = register_member(use_case_request)
         if response.is_rejected:
@@ -90,6 +85,7 @@ def signup_member(
             ):
                 flash("Bestätigungsmail konnte nicht gesendet werden!")
 
+        email = register_form.data["email"]
         member = member_repository.get_member_orm_by_mail(email)
         session["user_type"] = "member"
         login_user(member)
@@ -102,7 +98,8 @@ def signup_member(
 @commit_changes
 def confirm_email(token):
     try:
-        email = confirm_token(token)
+        token_service = FlaskTokenService()
+        email = token_service.confirm_token(token)
     except Exception:
         flash("Der Bestätigungslink ist ungültig oder ist abgelaufen.")
         return redirect(url_for("auth.unconfirmed_user"))
@@ -154,16 +151,13 @@ def resend_confirmation(use_case: ResendConfirmationMail):
     assert (
         current_user.email
     )  # current user object must have email because it is logged in
-    subject = "Bitte bestätige dein Konto"
-    token = generate_confirmation_token(current_user.email)
-    confirm_url = url_for("auth.confirm_email", token=token, _external=True)
-    html = render_template("activate.html", confirm_url=confirm_url)
 
     request = ResendConfirmationMailRequest(
-        subject=subject,
-        html=html,
+        subject="Bitte bestätige dein Konto",
         recipient=current_user.email,
         sender=current_app.config["MAIL_DEFAULT_SENDER"],
+        template_name="activate.html",
+        endpoint="auth.confirm_email",
     )
     response = use_case(request)
     if response.is_rejected:

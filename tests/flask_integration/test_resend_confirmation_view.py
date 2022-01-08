@@ -1,4 +1,5 @@
 from project.extensions import mail
+from project.token import FlaskTokenService
 
 from .flask import ViewTestCase
 
@@ -23,6 +24,7 @@ class AuthenticatedButUnconfirmedMemberTests(ViewTestCase):
         self,
     ):
         response = self.client.get(self.url)
+        member_token = FlaskTokenService().generate_token(self.email)
         with mail.record_messages() as outbox:
             response = self.client.get(
                 self.url,
@@ -32,3 +34,4 @@ class AuthenticatedButUnconfirmedMemberTests(ViewTestCase):
             assert outbox[0].sender == "test_sender@cp.org"
             assert outbox[0].recipients[0] == self.email
             assert outbox[0].subject == "Bitte bestätige dein Konto"
+            assert member_token in outbox[0].html

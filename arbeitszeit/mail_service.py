@@ -12,3 +12,9 @@ class MailService(ABC):
         sender: str,
     ) -> None:
         ...
+
+    @abstractmethod
+    def create_confirmation_html(
+        self, template_name: str, endpoint: str, token: str
+    ) -> str:
+        ...

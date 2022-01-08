@@ -5,7 +5,7 @@ from flask import Flask, _app_ctx_stack
 from injector import Module
 
 from arbeitszeit.entities import Company, Member
-from project.token import generate_confirmation_token
+from project.token import FlaskTokenService
 from tests.data_generators import (
     CompanyGenerator,
     EmailGenerator,
@@ -69,7 +69,7 @@ class ViewTestCase(FlaskTestCase):
             email = self.email_generator.get_random_email()
         if member is None:
             member = self.member_generator.create_member(email=email)
-        token = generate_confirmation_token(email)
+        token = FlaskTokenService().generate_token(email)
         response = self.client.get(
             f"/member/confirm/{token}",
             follow_redirects=True,

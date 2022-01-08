@@ -14,8 +14,9 @@ DEFAULT = dict(
     name="test name",
     password="super safe",
     email_subject="mail confirmation",
-    email_html="<p>please confirm</p>",
     email_sender="we@cp.org",
+    template_name="email_tenplate.html",
+    endpoint="auth.test",
 )
 
 

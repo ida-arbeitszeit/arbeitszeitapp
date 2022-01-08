@@ -1,5 +1,6 @@
-from arbeitszeit.use_cases import RegisterMemberRequest
 from typing import Protocol
+
+from arbeitszeit.use_cases import RegisterMemberRequest
 
 
 class RegisterForm(Protocol):
@@ -18,14 +19,16 @@ class RegisterMemberController:
         self,
         register_form: RegisterForm,
         email_subject: str,
-        email_html: str,
         email_sender: str,
+        template_name: str,
+        endpoint: str,
     ) -> RegisterMemberRequest:
         return RegisterMemberRequest(
             email=register_form.get_email_string(),
             name=register_form.get_name_string(),
             password=register_form.get_password_string(),
             email_subject=email_subject,
-            email_html=email_html,
             email_sender=email_sender,
+            template_name=template_name,
+            endpoint=endpoint,
         )

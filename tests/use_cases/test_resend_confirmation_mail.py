@@ -5,8 +5,9 @@ from .dependency_injection import injection_test
 DEFAULT = dict(
     recipient="receiver@cp.org",
     subject="mail confirmation",
-    html="<p>please confirm</p>",
     sender="we@cp.org",
+    template_name="test.html",
+    endpoint="auth.test",
 )
 
 
