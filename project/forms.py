@@ -63,6 +63,15 @@ class RegisterForm(Form):
         ],
     )
 
+    def get_email_string(self) -> str:
+        return self.data["email"]
+
+    def get_name_string(self) -> str:
+        return self.data["name"]
+
+    def get_password_string(self) -> str:
+        return self.data["password"]
+
 
 class LoginForm(Form):
     email = StringField(

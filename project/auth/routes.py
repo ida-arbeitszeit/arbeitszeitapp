@@ -65,17 +65,13 @@ def signup_member(
     register_form = RegisterForm(request.form)
     if request.method == "POST" and register_form.validate():
         email = register_form.data["email"]
-        name = register_form.data["name"]
-        password = register_form.data["password"]
         subject = "Bitte bestätige dein Konto"
         token = generate_confirmation_token(email)
         confirm_url = url_for("auth.confirm_email", token=token, _external=True)
         html = render_template("activate.html", confirm_url=confirm_url)
 
         use_case_request = controller.create_request(
-            email=email,
-            name=name,
-            password=password,
+            register_form,
             email_subject=subject,
             email_html=html,
             email_sender=current_app.config["MAIL_DEFAULT_SENDER"],
