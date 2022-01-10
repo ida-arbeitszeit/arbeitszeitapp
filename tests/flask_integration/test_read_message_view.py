@@ -10,7 +10,8 @@ class MemberViewTests(ViewTestCase):
         super().setUp()
         self.message_generator = self.injector.get(MessageGenerator)
         self.member_generator = self.injector.get(MemberGenerator)
-        self.member, _ = self.login_member()
+        self.member, _, self.email = self.login_member()
+        self.member = self.confirm_member(member=self.member, email=self.email)
 
     def test_get_200_when_message_exists(self) -> None:
         message = self.message_generator.create_message(addressee=self.member)

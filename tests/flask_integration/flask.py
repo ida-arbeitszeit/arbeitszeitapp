@@ -5,6 +5,7 @@ from flask import Flask, _app_ctx_stack
 from injector import Module
 
 from arbeitszeit.entities import Company, Member
+from project.token import FlaskTokenService
 from tests.data_generators import (
     CompanyGenerator,
     EmailGenerator,
@@ -41,7 +42,7 @@ class ViewTestCase(FlaskTestCase):
         member: Optional[Member] = None,
         password: Optional[str] = None,
         email: Optional[str] = None,
-    ) -> Tuple[Member, str]:
+    ) -> Tuple[Member, str, str]:
         if password is None:
             password = "password123"
         if email is None:
@@ -57,7 +58,24 @@ class ViewTestCase(FlaskTestCase):
             follow_redirects=True,
         )
         assert response.status_code < 400
-        return member, password
+        return member, password, email
+
+    def confirm_member(
+        self,
+        member: Optional[Member] = None,
+        email: Optional[str] = None,
+    ) -> Member:
+        if email is None:
+            email = self.email_generator.get_random_email()
+        if member is None:
+            member = self.member_generator.create_member(email=email)
+        token = FlaskTokenService().generate_token(email)
+        response = self.client.get(
+            f"/member/confirm/{token}",
+            follow_redirects=True,
+        )
+        assert response.status_code < 400
+        return member
 
     def login_company(
         self,

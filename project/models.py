@@ -37,6 +37,8 @@ class Member(UserMixin, db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(1000), nullable=False)
+    registered_on = db.Column(db.DateTime, nullable=False)
+    confirmed_on = db.Column(db.DateTime, nullable=True)
 
     account = db.relationship("Account", uselist=False, lazy=True, backref="member")
     purchases = db.relationship("Purchase", lazy="dynamic")
