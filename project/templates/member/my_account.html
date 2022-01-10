@@ -45,7 +45,7 @@
             {% if all_transactions_info is defined and all_transactions_info|length %}
             {% for trans_info in all_transactions_info %}
             <tr>
-                <td>{{ trans_info.date.strftime("%c") }}</td>
+                <td>{{ trans_info.date|format_datetime(zone='Europe/Berlin', fmt='%d.%m.%Y %H:%M') }}</td>
                 <td>{{ trans_info.sender_name }}</td>
                 <td>{{ trans_info.receiver_name }}</td>
                 <td>{{ trans_info.transaction_volumes["member"] }}</td>

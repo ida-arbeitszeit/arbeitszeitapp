@@ -7,7 +7,8 @@ from .flask import ViewTestCase
 class AuthenticatedMemberTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.login_member()
+        self.member, _, self.email = self.login_member()
+        self.member = self.confirm_member(member=self.member, email=self.email)
 
     def test_get_returns_200_status(self) -> None:
         response = self.client.get("/member/pay_consumer_product")

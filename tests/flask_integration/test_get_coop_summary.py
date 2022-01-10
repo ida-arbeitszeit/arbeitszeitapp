@@ -9,7 +9,8 @@ class AuthenticatedMemberTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.coop_generator = self.injector.get(CooperationGenerator)
-        self.login_member()
+        self.member, _, self.email = self.login_member()
+        self.member = self.confirm_member(member=self.member, email=self.email)
 
     def test_get_404_when_coop_does_not_exist(self) -> None:
         url = f"/member/cooperation_summary/{uuid4()}"

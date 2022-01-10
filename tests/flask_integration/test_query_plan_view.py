@@ -10,7 +10,8 @@ class AuthenticatedMemberTests(ViewTestCase):
             select="Produktname",
             search="",
         )
-        self.login_member()
+        self.member, _, self.email = self.login_member()
+        self.member = self.confirm_member(member=self.member, email=self.email)
 
     def test_authenticated_users_get_200(self):
         response = self.client.get(self.url)

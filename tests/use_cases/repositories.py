@@ -225,11 +225,17 @@ class AccountOwnerRepository(interfaces.AccountOwnerRepository):
 @singleton
 class MemberRepository(interfaces.MemberRepository):
     @inject
-    def __init__(self):
+    def __init__(self, datetime_service: DatetimeService):
         self.members: Dict[UUID, Member] = {}
+        self.datetime_service = datetime_service
 
     def create_member(
-        self, email: str, name: str, password: str, account: Account
+        self,
+        email: str,
+        name: str,
+        password: str,
+        account: Account,
+        registered_on: datetime,
     ) -> Member:
         id = uuid4()
         member = Member(
@@ -237,6 +243,8 @@ class MemberRepository(interfaces.MemberRepository):
             name=name,
             email=email,
             account=account,
+            registered_on=registered_on,
+            confirmed_on=None,
         )
         self.members[id] = member
         return member
@@ -510,7 +518,7 @@ class PlanRepository(interfaces.PlanRepository):
 
     def query_active_plans_by_product_name(self, query: str) -> Iterator[Plan]:
         for plan in self.plans.values():
-            if plan.is_active and (query in plan.prd_name):
+            if plan.is_active and (query.lower() in plan.prd_name.lower()):
                 yield plan
 
     def query_active_plans_by_plan_id(self, query: str) -> Iterator[Plan]:

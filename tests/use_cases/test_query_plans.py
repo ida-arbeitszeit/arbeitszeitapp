@@ -105,6 +105,19 @@ def test_query_with_substring_of_product_name_returns_correct_result(
     assert plan_in_results(expected_plan, response)
 
 
+@injection_test
+def test_query_with_substring_of_product_is_case_insensitive(
+    query_plans: QueryPlans,
+    plan_generator: PlanGenerator,
+):
+    expected_plan = plan_generator.create_plan(
+        product_name="Name XYZ", activation_date=datetime.min
+    )
+    query = "xyz"
+    response = query_plans(make_request(query, PlanFilter.by_product_name))
+    assert plan_in_results(expected_plan, response)
+
+
 def make_request(query: Optional[str], category: PlanFilter):
     return QueryPlansRequestTestImpl(
         query=query,

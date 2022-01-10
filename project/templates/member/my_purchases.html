@@ -30,7 +30,7 @@
       {% if purchases is defined and purchases|length %}
       {% for purchase in purchases %}
       <tr>
-        <td>{{ purchase.purchase_date.strftime("%x") }}</td>
+        <td>{{ purchase.purchase_date|format_datetime(zone='Europe/Berlin', fmt='%d.%m.%Y') }}</td>
         <td>{{ purchase.product_name }}</td>
         <td>{{ purchase.product_description }}</td>
         <td>{{ purchase.price_per_unit }}</td>
