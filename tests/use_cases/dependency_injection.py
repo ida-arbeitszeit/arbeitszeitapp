@@ -1,10 +1,11 @@
 from injector import Injector, Module, inject, provider, singleton
 
 import arbeitszeit.repositories as interfaces
-from arbeitszeit import entities
+from arbeitszeit import entities, user_action
 from arbeitszeit.datetime_service import DatetimeService
 from tests import data_generators
 from tests.datetime_service import FakeDatetimeService
+from tests.user_action import FakeUserActionFactory
 
 from . import repositories
 
@@ -15,6 +16,12 @@ class InMemoryModule(Module):
         self, repo: repositories.PurchaseRepository
     ) -> interfaces.PurchaseRepository:
         return repo
+
+    @provider
+    def provide_user_action_repo(
+        self, instance: FakeUserActionFactory
+    ) -> user_action.UserActionFactory:
+        return instance
 
     @provider
     def provide_transaction_repo(

@@ -1,8 +1,13 @@
+from test.strategies import user_action
+from test.user_action import FakeUserAction
 from typing import Dict
 from unittest import TestCase
+from uuid import uuid4
+
+from hypothesis import given
 
 from arbeitszeit.use_cases import ReadMessageSuccess
-from arbeitszeit.user_action import UserAction
+from arbeitszeit.user_action import UserAction, UserActionType
 from arbeitszeit_web.read_message import ReadMessagePresenter
 
 
@@ -34,36 +39,51 @@ class ReadMessagePresenterTests(TestCase):
         view_model = self.presenter.present(self.use_case_response)
         self.assertFalse(view_model.show_action_link)
 
-    def test_show_action_link_when_user_action_is_provided(self) -> None:
-        self.use_case_response.user_action = UserAction.answer_invite
+    @given(user_action=user_action())
+    def test_show_action_link_when_user_action_is_provided(
+        self, user_action: UserAction
+    ) -> None:
+        self.use_case_response.user_action = user_action
         view_model = self.presenter.present(self.use_case_response)
         self.assertTrue(view_model.show_action_link)
 
     def test_that_for_worker_invite_action_the_proper_action_link_is_rendered(
         self,
     ) -> None:
-        self.use_case_response.user_action = UserAction.answer_invite
+        self.use_case_response.user_action = FakeUserAction(
+            type=UserActionType.answer_invite,
+            reference=uuid4(),
+        )
         view_model = self.presenter.present(self.use_case_response)
         self.assertEqual(view_model.action_link_reference, "answer invite action")
 
     def test_that_for_anser_cooperation_request_the_proper_action_link_is_rendered(
         self,
     ) -> None:
-        self.use_case_response.user_action = UserAction.answer_cooperation_request
+        self.use_case_response.user_action = FakeUserAction(
+            type=UserActionType.answer_cooperation_request,
+            reference=uuid4(),
+        )
         view_model = self.presenter.present(self.use_case_response)
         self.assertEqual(view_model.action_link_reference, "answer cooperation request")
 
     def test_that_action_link_label_for_invite_action_is_rendered_properly(
         self,
     ) -> None:
-        self.use_case_response.user_action = UserAction.answer_invite
+        self.use_case_response.user_action = FakeUserAction(
+            type=UserActionType.answer_invite,
+            reference=uuid4(),
+        )
         view_model = self.presenter.present(self.use_case_response)
         self.assertEqual(view_model.action_link_label, "answer invite name")
 
     def test_that_action_link_label_for_answer_cooperation_request_is_rendered_properly(
         self,
     ) -> None:
-        self.use_case_response.user_action = UserAction.answer_cooperation_request
+        self.use_case_response.user_action = FakeUserAction(
+            type=UserActionType.answer_cooperation_request,
+            reference=uuid4(),
+        )
         view_model = self.presenter.present(self.use_case_response)
         self.assertEqual(
             view_model.action_link_label, "answer cooperation request name"
@@ -72,15 +92,19 @@ class ReadMessagePresenterTests(TestCase):
 
 class UserActionResolver:
     def resolve_user_action_reference(self, action: UserAction) -> str:
-        action_to_reference: Dict[UserAction, str] = {
-            UserAction.answer_invite: "answer invite action",
-            UserAction.answer_cooperation_request: "answer cooperation request",
-        }
-        return action_to_reference[action]
+        return " ".join(
+            [
+                str(action.get_type()),
+                str(action.get_reference()),
+                "reference",
+            ]
+        )
 
     def resolve_user_action_name(self, action: UserAction) -> str:
-        action_to_name: Dict[UserAction, str] = {
-            UserAction.answer_invite: "answer invite name",
-            UserAction.answer_cooperation_request: "answer cooperation request name",
-        }
-        return action_to_name[action]
+        return " ".join(
+            [
+                str(action.get_type()),
+                str(action.get_reference()),
+                "name",
+            ]
+        )

@@ -8,7 +8,7 @@ from enum import Enum
 from flask_login import UserMixin
 
 from arbeitszeit import entities
-from arbeitszeit.user_action import UserAction
+from arbeitszeit.user_action import UserActionType
 from project.extensions import db
 
 
@@ -184,7 +184,7 @@ class Message(db.Model):
     addressee = db.Column(db.String)
     title = db.Column(db.String)
     content = db.Column(db.String)
-    user_action = db.Column(db.Enum(UserAction), nullable=True)
+    user_action = db.Column(db.Enum(UserActionType), nullable=True)
     sender_remarks = db.Column(db.String, nullable=True)
     is_read = db.Column(db.Boolean)
 
