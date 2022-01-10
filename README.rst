@@ -85,6 +85,9 @@ To run the app in development mode you first have to define some environment var
 
 Afterwards you can start the development server with ``flask run``.
 
+In order to allow flask mail to send mails in development mode, set 
+the variable ``TESTING`` in ``development-settings.py`` to ``False``. 
+
 
 Cronjob
 =======
