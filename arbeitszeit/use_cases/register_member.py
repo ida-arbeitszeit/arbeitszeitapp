@@ -30,7 +30,6 @@ class RegisterMemberRequest:
     email: str
     name: str
     password: str
-    email_subject: str
     email_sender: str
     template_name: str
     endpoint: str
@@ -76,7 +75,7 @@ class RegisterMember:
     ) -> None:
         try:
             self.mail_service.send_message(
-                subject=request.email_subject,
+                subject="Bitte bestätige dein Konto",
                 recipients=[request.email],
                 html=html,
                 sender=request.email_sender,

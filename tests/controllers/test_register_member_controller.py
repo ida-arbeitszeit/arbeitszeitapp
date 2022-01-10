@@ -16,7 +16,6 @@ class RegisterMemberControllerTests(TestCase):
     ) -> None:
         request = self.controller.create_request(
             make_fake_form(email="user@cp.org", name="test_name", password="very_safe"),
-            email_subject="subj",
             email_sender="we@cp.org",
             template_name="template.html",
             endpoint="auth.test",
@@ -24,7 +23,6 @@ class RegisterMemberControllerTests(TestCase):
         self.assertEqual(request.email, "user@cp.org")
         self.assertEqual(request.name, "test_name")
         self.assertEqual(request.password, "very_safe")
-        self.assertEqual(request.email_subject, "subj")
         self.assertEqual(request.email_sender, "we@cp.org")
         self.assertEqual(request.template_name, "template.html")
         self.assertEqual(request.endpoint, "auth.test")

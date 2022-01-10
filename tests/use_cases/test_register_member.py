@@ -5,6 +5,7 @@ from arbeitszeit.use_cases import (
     RegisterMemberResponse,
 )
 from tests.data_generators import MemberGenerator
+from tests.mail_service import FakeMailService
 
 from .dependency_injection import injection_test
 from .repositories import AccountRepository, MemberRepository
@@ -13,9 +14,8 @@ DEFAULT = dict(
     email="test@cp.org",
     name="test name",
     password="super safe",
-    email_subject="mail confirmation",
     email_sender="we@cp.org",
-    template_name="email_tenplate.html",
+    template_name="email_template.html",
     endpoint="auth.test",
 )
 
@@ -40,7 +40,9 @@ def test_that_registering_a_member_does_create_a_member_account(
 
 @injection_test
 def test_that_correct_member_attributes_are_registered(
-    use_case: RegisterMember, member_repo: MemberRepository
+    use_case: RegisterMember,
+    member_repo: MemberRepository,
+    mail_service: FakeMailService,
 ):
     request = RegisterMemberRequest(**DEFAULT)
     use_case(request)
@@ -50,6 +52,18 @@ def test_that_correct_member_attributes_are_registered(
         assert member.name == request.name
         assert member.registered_on is not None
         assert member.confirmed_on is None
+
+
+@injection_test
+def test_that_mail_is_sent(
+    use_case: RegisterMember,
+    mail_service: FakeMailService,
+):
+    request = RegisterMemberRequest(**DEFAULT)
+    use_case(request)
+    assert len(mail_service.sent_mails) == 1
+    assert "Bitte bestätige dein Konto" in mail_service.sent_mails[0]
+    assert DEFAULT["endpoint"] in mail_service.sent_mails[0]
 
 
 @injection_test

@@ -66,7 +66,6 @@ def signup_member(
     if request.method == "POST" and register_form.validate():
         use_case_request = controller.create_request(
             register_form,
-            email_subject="Bitte bestätige dein Konto",
             email_sender=current_app.config["MAIL_DEFAULT_SENDER"],
             template_name="activate.html",
             endpoint="auth.confirm_email",
