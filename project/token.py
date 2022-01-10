@@ -11,13 +11,13 @@ class FlaskTokenService:
             input, salt=current_app.config["SECURITY_PASSWORD_SALT"]
         )
 
-    def confirm_token(self, token: str) -> str:
+    def confirm_token(self, token: str, max_age_in_sec: int = 3600) -> str:
         serializer = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
         try:
             original_string = serializer.loads(
                 token,
                 salt=current_app.config["SECURITY_PASSWORD_SALT"],
-                max_age=3600,  # valid one hour
+                max_age=max_age_in_sec,  # valid 3600 sec = one hour
             )
         except Exception as exc:
             raise exc
