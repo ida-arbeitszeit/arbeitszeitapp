@@ -516,7 +516,7 @@ class PlanRepository(interfaces.PlanRepository):
 
     def query_active_plans_by_product_name(self, query: str) -> Iterator[Plan]:
         for plan in self.plans.values():
-            if plan.is_active and (query in plan.prd_name):
+            if plan.is_active and (query.lower() in plan.prd_name.lower()):
                 yield plan
 
     def query_active_plans_by_plan_id(self, query: str) -> Iterator[Plan]:
@@ -726,6 +726,9 @@ class CooperationRepository(interfaces.CooperationRepository):
         if coop is None:
             return None
         return coop.name
+
+    def get_all_cooperations(self) -> Iterator[Cooperation]:
+        return (cooperation for cooperation in self.cooperations.values())
 
     def __len__(self) -> int:
         return len(self.cooperations)

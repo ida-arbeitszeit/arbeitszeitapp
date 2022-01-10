@@ -1,9 +1,10 @@
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from arbeitszeit.use_cases import (
     AcceptCooperationResponse,
     CooperationInfo,
+    DenyCooperationResponse,
     ListCoordinationsResponse,
     ListedInboundCoopRequest,
     ListedOutboundCoopRequest,
@@ -61,6 +62,9 @@ class ShowMyCooperationsViewModel:
     list_of_coordinations: ListOfCoordinationsTable
     list_of_inbound_coop_requests: ListOfInboundCooperationRequestsTable
     accept_message: List[str]
+    accept_message_success: bool
+    deny_message: List[str]
+    deny_message_success: bool
     list_of_outbound_coop_requests: ListOfOutboundCooperationRequestsTable
 
     def to_dict(self) -> Dict[str, Any]:
@@ -76,6 +80,7 @@ class ShowMyCooperationsPresenter:
         list_coord_response: ListCoordinationsResponse,
         list_inbound_coop_requests_response: ListInboundCoopRequestsResponse,
         accept_cooperation_response: Optional[AcceptCooperationResponse],
+        deny_cooperation_response: Optional[DenyCooperationResponse],
         list_outbound_coop_requests_response: ListOutboundCoopRequestsResponse,
     ) -> ShowMyCooperationsViewModel:
         list_of_coordinations = ListOfCoordinationsTable(
@@ -91,10 +96,12 @@ class ShowMyCooperationsPresenter:
             ]
         )
 
-        accept_message = (
-            self._create_accept_message(accept_cooperation_response)
-            if accept_cooperation_response
-            else []
+        accept_message, accept_message_success = self._accept_message_info(
+            accept_cooperation_response
+        )
+
+        deny_message, deny_message_success = self._deny_message_info(
+            deny_cooperation_response
         )
 
         list_of_outbound_coop_requests = ListOfOutboundCooperationRequestsTable(
@@ -108,6 +115,9 @@ class ShowMyCooperationsPresenter:
             list_of_coordinations,
             list_of_inbound_coop_requests,
             accept_message,
+            accept_message_success,
+            deny_message,
+            deny_message_success,
             list_of_outbound_coop_requests,
         )
 
@@ -144,12 +154,26 @@ class ShowMyCooperationsPresenter:
             coop_name=plan.coop_name,
         )
 
+    def _accept_message_info(
+        self, accept_cooperation_response: Optional[AcceptCooperationResponse]
+    ) -> Tuple[List[str], bool]:
+
+        if accept_cooperation_response:
+            accept_message, accept_message_success = self._create_accept_message(
+                accept_cooperation_response
+            )
+        else:
+            accept_message, accept_message_success = [], False
+        return accept_message, accept_message_success
+
     def _create_accept_message(
         self, accept_cooperation_response: AcceptCooperationResponse
-    ) -> List[str]:
+    ) -> Tuple[List[str], bool]:
         if not accept_cooperation_response.is_rejected:
             accept_message = ["Kooperationsanfrage wurde angenommen."]
+            accept_message_success = True
         else:
+            accept_message_success = False
             if (
                 accept_cooperation_response
                 == AcceptCooperationResponse.RejectionReason.plan_not_found
@@ -173,4 +197,42 @@ class ShowMyCooperationsPresenter:
                 == AcceptCooperationResponse.RejectionReason.requester_is_not_coordinator
             ):
                 accept_message = ["Du bist nicht Koordinator dieser Kooperation."]
-        return accept_message
+        return accept_message, accept_message_success
+
+    def _deny_message_info(
+        self, deny_cooperation_response: Optional[DenyCooperationResponse]
+    ) -> Tuple[List[str], bool]:
+
+        if deny_cooperation_response:
+            deny_message, deny_message_success = self._create_deny_message(
+                deny_cooperation_response
+            )
+        else:
+            deny_message, deny_message_success = [], False
+        return deny_message, deny_message_success
+
+    def _create_deny_message(
+        self, deny_cooperation_response: DenyCooperationResponse
+    ) -> Tuple[List[str], bool]:
+        if not deny_cooperation_response.is_rejected:
+            deny_message = ["Kooperationsanfrage wurde abgelehnt."]
+            deny_message_success = True
+        else:
+            deny_message_success = False
+            if (
+                deny_cooperation_response
+                == DenyCooperationResponse.RejectionReason.plan_not_found
+                or DenyCooperationResponse.RejectionReason.cooperation_not_found
+            ):
+                deny_message = ["Plan oder Kooperation nicht gefunden."]
+            elif (
+                deny_cooperation_response
+                == DenyCooperationResponse.RejectionReason.cooperation_was_not_requested
+            ):
+                deny_message = ["Diese Kooperationsanfrage existiert nicht."]
+            elif (
+                deny_cooperation_response
+                == DenyCooperationResponse.RejectionReason.requester_is_not_coordinator
+            ):
+                deny_message = ["Du bist nicht Koordinator dieser Kooperation."]
+        return deny_message, deny_message_success

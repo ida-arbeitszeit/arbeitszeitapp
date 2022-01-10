@@ -5,6 +5,7 @@ from flask_wtf.csrf import CSRFProtect
 
 import project.extensions
 from project.extensions import login_manager, mail
+from project.filter import format_datetime
 from project.profiling import show_profile_info, show_sql_queries
 
 
@@ -41,6 +42,9 @@ def create_app(config=None, db=None, migrate=None, template_folder=None):
     login_manager.init_app(app)
     migrate.init_app(app, db)
     mail.init_app(app)
+
+    # Setup template filter
+    app.template_filter()(format_datetime)
 
     with app.app_context():
 

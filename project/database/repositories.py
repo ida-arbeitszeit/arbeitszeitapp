@@ -657,7 +657,7 @@ class PlanRepository(repositories.PlanRepository):
         return (
             self.object_from_orm(plan)
             for plan in Plan.query.filter(
-                Plan.is_active == True, Plan.prd_name.contains(query)
+                Plan.is_active == True, Plan.prd_name.ilike(f"%{query}%")
             ).all()
         )
 
@@ -1022,6 +1022,11 @@ class CooperationRepository(repositories.CooperationRepository):
         if coop_orm is None:
             return None
         return coop_orm.name
+
+    def get_all_cooperations(self) -> Iterator[entities.Cooperation]:
+        return (
+            self.object_from_orm(cooperation) for cooperation in Cooperation.query.all()
+        )
 
 
 @inject

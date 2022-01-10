@@ -8,11 +8,15 @@
     </h1>
 </div>
 
-{% if accept_message %}
+{% if accept_message or deny_message %}
 <div class="block"></div>
 {% for message in accept_message %}
-<div class="notification is-danger">
+<div class='{{ "notification is-success" if accept_message_success else "notification is-danger"}}'>
     {{ message }}
+</div>
+{% endfor %}
+{% for message in deny_message %}
+<div class='{{ "notification is-success" if deny_message_success else "notification is-danger"}}'>{{ message }}
 </div>
 {% endfor %}
 {% endif %}
@@ -70,9 +74,9 @@
                 <td>{{ req.coop_name }}</td>
                 <td>{{ req.planner_name }}</td>
                 <td>{{ req.plan_name }}</td>
-                <td>
-                    <form action="" method="post">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <form action="" method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <td>
                         <div class="control">
                             <button class="button is-success" name="accept" value="{{ req.coop_id }},{{ req.plan_id }}"
                                 type="submit">
@@ -82,11 +86,19 @@
                                 <span>Akzeptieren</span>
                             </button>
                         </div>
-                    </form>
-                </td>
-                <td>
-                    [X]
-                </td>
+                    </td>
+                    <td>
+                        <div class="control">
+                            <button class="button is-danger" name="deny" value="{{ req.coop_id }},{{ req.plan_id }}"
+                                type="submit">
+                                <span class="icon is-small">
+                                    <i class="fas fa-times"></i>
+                                </span>
+                                <span>Ablehnen</span>
+                            </button>
+                        </div>
+                    </td>
+                </form>
             </tr>
             {% endfor %}
         </tbody>
@@ -131,19 +143,5 @@
     <p>(Du hast keine Kooperationsanfragen gestellt.)</p>
     {% endif %}
 </div>
-
-
-
-
-
-
-<div class="content">
-    <h1 class="title">
-        Meine kooperierenden Pläne
-    </h1>
-</div>
-
-
-<p>(to do)</p>
 
 {% endblock %}
