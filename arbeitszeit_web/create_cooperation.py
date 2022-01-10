@@ -1,31 +1,39 @@
 from dataclasses import dataclass
-from typing import List
+
+from injector import inject
 
 from arbeitszeit.use_cases import CreateCooperationResponse
+
+from .notification import Notifier
 
 
 @dataclass
 class CreateCooperationViewModel:
-    notifications: List[str]
+    pass
 
 
+@inject
+@dataclass(frozen=True)
 class CreateCooperationPresenter:
+    user_notifier: Notifier
+
     def present(
         self, use_case_response: CreateCooperationResponse
     ) -> CreateCooperationViewModel:
-        notifications = []
         if not use_case_response.is_rejected:
-            notifications.append("Kooperation erfolgreich erstellt.")
+            self.user_notifier.display_info("Kooperation erfolgreich erstellt.")
         elif (
             use_case_response.rejection_reason
             == CreateCooperationResponse.RejectionReason.cooperation_with_name_exists
         ):
-            notifications.append(
+            self.user_notifier.display_warning(
                 "Es existiert bereits eine Kooperation mit diesem Namen."
             )
         elif (
             use_case_response.rejection_reason
             == CreateCooperationResponse.RejectionReason.coordinator_not_found
         ):
-            notifications.append("Interner Fehler: Koordinator nicht gefunden.")
-        return CreateCooperationViewModel(notifications)
+            self.user_notifier.display_warning(
+                "Interner Fehler: Koordinator nicht gefunden."
+            )
+        return CreateCooperationViewModel()
