@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from flask import Response, flash
+from flask import Response
 
-from arbeitszeit.use_cases import PayConsumerProduct, PayConsumerProductResponse
+from arbeitszeit.use_cases import PayConsumerProduct
 from arbeitszeit_web.pay_consumer_product import (
     PayConsumerProductController,
     PayConsumerProductPresenter,
