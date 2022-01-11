@@ -1,4 +1,3 @@
-from typing import Dict
 from unittest import TestCase
 from uuid import uuid4
 

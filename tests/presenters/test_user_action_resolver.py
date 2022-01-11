@@ -1,7 +1,7 @@
 from unittest import TestCase
 from uuid import uuid4
 
-from arbeitszeit.user_action import UserAction, UserActionType
+from arbeitszeit.user_action import UserActionType
 from arbeitszeit_web.user_action import UserActionResolverImpl
 from tests.user_action import FakeUserAction
 
