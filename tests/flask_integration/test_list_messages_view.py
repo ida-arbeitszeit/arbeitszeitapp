@@ -24,7 +24,8 @@ class LoggedInMemberTests(ViewTestCase):
 class LoggedInCompanyTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.company, _ = self.login_company()
+        self.company, _, self.email = self.login_company()
+        self.company = self.confirm_company(company=self.company, email=self.email)
         self.url = "/company/messages"
 
     def test_company_gets_200_status_when_opening_view(self) -> None:

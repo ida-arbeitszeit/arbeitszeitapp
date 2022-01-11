@@ -56,6 +56,8 @@ class Company(UserMixin, db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(1000), nullable=False)
+    registered_on = db.Column(db.DateTime, nullable=False)
+    confirmed_on = db.Column(db.DateTime, nullable=True)
 
     plans = db.relationship("Plan", lazy="dynamic", backref="company")
     accounts = db.relationship("Account", lazy="dynamic", backref="company")

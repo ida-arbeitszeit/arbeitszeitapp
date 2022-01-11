@@ -94,6 +94,7 @@ class CompanyGenerator:
     company_repository: CompanyRepository
     company_worker_repository: CompanyWorkerRepository
     email_generator: EmailGenerator
+    datetime_service: FakeDatetimeService
 
     def create_company(
         self,
@@ -103,6 +104,7 @@ class CompanyGenerator:
         labour_account: Optional[Account] = None,
         password: str = "password",
         workers: Optional[Iterable[Member]] = None,
+        registered_on: datetime = None,
     ) -> Company:
         if email is None:
             email = self.email_generator.get_random_email()
@@ -110,6 +112,8 @@ class CompanyGenerator:
             labour_account = self.account_generator.create_account(
                 account_type=AccountTypes.a
             )
+        if registered_on is None:
+            registered_on = self.datetime_service.now()
         company = self.company_repository.create_company(
             email=email,
             name=name,
@@ -124,6 +128,7 @@ class CompanyGenerator:
                 account_type=AccountTypes.prd
             ),
             labour_account=labour_account,
+            registered_on=registered_on,
         )
         if workers is not None:
             for worker in workers:

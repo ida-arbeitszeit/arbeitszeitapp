@@ -275,6 +275,7 @@ class CompanyRepository(interfaces.CompanyRepository):
         labour_account: Account,
         resource_account: Account,
         products_account: Account,
+        registered_on: datetime,
     ) -> Company:
         new_company = Company(
             id=uuid4(),
@@ -284,6 +285,8 @@ class CompanyRepository(interfaces.CompanyRepository):
             raw_material_account=resource_account,
             work_account=labour_account,
             product_account=products_account,
+            registered_on=registered_on,
+            confirmed_on=None,
         )
         self.companies[email] = new_company
         return new_company

@@ -44,7 +44,8 @@ class CompanyViewTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.message_generator = self.injector.get(MessageGenerator)
-        self.company, _ = self.login_company()
+        self.company, _, self.email = self.login_company()
+        self.company = self.confirm_company(company=self.company, email=self.email)
 
     def test_get_200_when_message_exists(self) -> None:
         message = self.message_generator.create_message(addressee=self.company)
