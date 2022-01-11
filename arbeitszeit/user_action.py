@@ -1,5 +1,5 @@
 import enum
-from typing import Protocol
+from dataclasses import dataclass
 from uuid import UUID
 
 
@@ -8,9 +8,7 @@ class UserActionType(enum.Enum):
     answer_cooperation_request = 2
 
 
-class UserAction(Protocol):
-    def get_type(self) -> UserActionType:
-        ...
-
-    def get_reference(self) -> UUID:
-        ...
+@dataclass
+class UserAction:
+    type: UserActionType
+    reference: UUID

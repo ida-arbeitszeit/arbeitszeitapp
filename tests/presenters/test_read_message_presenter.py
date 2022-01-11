@@ -7,7 +7,6 @@ from arbeitszeit.use_cases import ReadMessageSuccess
 from arbeitszeit.user_action import UserAction, UserActionType
 from arbeitszeit_web.read_message import ReadMessagePresenter
 from tests.strategies import user_actions
-from tests.user_action import FakeUserAction
 
 
 class ReadMessagePresenterTests(TestCase):
@@ -49,8 +48,8 @@ class ReadMessagePresenterTests(TestCase):
     def test_that_for_worker_invite_action_the_proper_action_link_is_rendered(
         self,
     ) -> None:
-        action = FakeUserAction(
-            action_type=UserActionType.answer_invite,
+        action = UserAction(
+            type=UserActionType.answer_invite,
             reference=uuid4(),
         )
         self.use_case_response.user_action = action
@@ -63,8 +62,8 @@ class ReadMessagePresenterTests(TestCase):
     def test_that_for_anser_cooperation_request_the_proper_action_link_is_rendered(
         self,
     ) -> None:
-        action = FakeUserAction(
-            action_type=UserActionType.answer_cooperation_request,
+        action = UserAction(
+            type=UserActionType.answer_cooperation_request,
             reference=uuid4(),
         )
         self.use_case_response.user_action = action
@@ -77,8 +76,8 @@ class ReadMessagePresenterTests(TestCase):
     def test_that_action_link_label_for_invite_action_is_rendered_properly(
         self,
     ) -> None:
-        action = FakeUserAction(
-            action_type=UserActionType.answer_invite,
+        action = UserAction(
+            type=UserActionType.answer_invite,
             reference=uuid4(),
         )
         self.use_case_response.user_action = action
@@ -91,8 +90,8 @@ class ReadMessagePresenterTests(TestCase):
     def test_that_action_link_label_for_answer_cooperation_request_is_rendered_properly(
         self,
     ) -> None:
-        action = FakeUserAction(
-            action_type=UserActionType.answer_cooperation_request,
+        action = UserAction(
+            type=UserActionType.answer_cooperation_request,
             reference=uuid4(),
         )
         self.use_case_response.user_action = action
@@ -107,8 +106,8 @@ class UserActionResolver:
     def resolve_user_action_reference(self, action: UserAction) -> str:
         return " ".join(
             [
-                str(action.get_type()),
-                str(action.get_reference()),
+                str(action.type),
+                str(action.reference),
                 "reference",
             ]
         )
@@ -116,8 +115,8 @@ class UserActionResolver:
     def resolve_user_action_name(self, action: UserAction) -> str:
         return " ".join(
             [
-                str(action.get_type()),
-                str(action.get_reference()),
+                str(action.type),
+                str(action.reference),
                 "name",
             ]
         )
