@@ -91,6 +91,13 @@ def signup_member(
         login_user(member)
         return redirect(url_for("auth.unconfirmed_member"))
 
+    if current_user.is_authenticated:
+        if session.get("user_type") == "member":
+            return redirect(url_for("main_member.profile"))
+        else:
+            session["user_type"] = None
+            logout_user()
+
     return render_template("signup_member.html", form=register_form)
 
 
@@ -244,6 +251,13 @@ def signup_company(
         session["user_type"] = "company"
         login_user(company)
         return redirect(url_for("auth.unconfirmed_company"))
+
+    if current_user.is_authenticated:
+        if session.get("user_type") == "company":
+            return redirect(url_for("main_company.profile"))
+        else:
+            session["user_type"] = None
+            logout_user()
 
     return render_template("signup_company.html", form=register_form)
 
