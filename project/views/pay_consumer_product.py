@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from flask import Response, flash
+from flask import Response
 
-from arbeitszeit.use_cases import PayConsumerProduct, PayConsumerProductResponse
+from arbeitszeit.use_cases import PayConsumerProduct
 from arbeitszeit_web.pay_consumer_product import (
     PayConsumerProductController,
     PayConsumerProductPresenter,
@@ -33,12 +33,8 @@ class PayConsumerProductView:
         if isinstance(use_case_request, self.controller.MalformedInputData):
             return self._handle_malformed_data(use_case_request)
         response = self.pay_consumer_product(use_case_request)
-        if response.rejection_reason:
-            return self._handle_response_error(response)
         view_model = self.presenter.present(response)
-        for notification in view_model.notifications:
-            flash(notification)
-        return Response(self._render_template())
+        return Response(self._render_template(), status=view_model.status_code)
 
     def _render_template(self) -> str:
         return self.template_renderer.render_template(
@@ -54,9 +50,3 @@ class PayConsumerProductView:
 
     def _handle_invalid_form(self) -> Response:
         return Response(self._render_template(), status=400)
-
-    def _handle_response_error(self, response: PayConsumerProductResponse) -> Response:
-        view_model = self.presenter.present(response)
-        for notification in view_model.notifications:
-            flash(notification)
-        return Response(self._render_template(), status=404)
