@@ -77,6 +77,12 @@ To run the app in development mode you first have to define some environment var
     $ export DEV_DATABASE_URI="sqlite:///$(pwd)/db.sqlite3" 
     $ export DEV_SECRET_KEY=my_secret_key
 
+    $ export MAIL_SERVER=my_mail_server 
+    $ export MAIL_PORT=port
+    $ export MAIL_USERNAME=mail_username
+    $ export MAIL_PASSWORD=mail_password
+    $ export MAIL_DEFAULT_SENDER=default_mail_sender_adress
+
 Afterwards you can start the development server with ``flask run``.
 
 

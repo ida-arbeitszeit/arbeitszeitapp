@@ -7,7 +7,8 @@ from .flask import ViewTestCase
 class AuthenticatedMemberTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.login_member()
+        self.member, _, self.email = self.login_member()
+        self.member = self.confirm_member(member=self.member, email=self.email)
 
     def test_get_returns_200_status(self) -> None:
         response = self.client.get("/member/pay_consumer_product")
@@ -43,17 +44,6 @@ class AuthenticatedMemberTests(ViewTestCase):
             "/member/pay_consumer_product",
             data=dict(
                 plan_id=uuid4(),
-                amount=2,
-            ),
-        )
-        self.assertEqual(response.status_code, 404)
-
-    def test_posting_with_inactive_plan_results_in_404(self) -> None:
-        plan = self.plan_generator.create_plan(activation_date=None)
-        response = self.client.post(
-            "/member/pay_consumer_product",
-            data=dict(
-                plan_id=plan.id,
                 amount=2,
             ),
         )

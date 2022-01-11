@@ -13,7 +13,7 @@ from arbeitszeit.use_cases import (
     ReadMessageResponse,
     ReadMessageSuccess,
 )
-from arbeitszeit.user_action import UserAction, UserActionFactory
+from arbeitszeit.user_action import UserAction
 from tests.data_generators import CompanyGenerator, MemberGenerator
 
 from .dependency_injection import get_dependency_injector
@@ -28,7 +28,6 @@ class ReadMessageTests(TestCase):
         self.addressee = self.member_generator.create_member()
         self.other_member = self.member_generator.create_member()
         self.sender = self.member_generator.create_member()
-        self.user_action_factory = self.injector.get(UserActionFactory)  # type: ignore
 
     def test_reading_non_existing_message_as_non_existing_user_failes(self) -> None:
         response = self.read_message(
@@ -146,21 +145,6 @@ class ReadMessageTests(TestCase):
             )
         )
         self.assertSuccess(response, lambda r: r.sender_remarks == expected_remarks)
-
-    def test_user_action_is_answer_invite_then_response_shows_also_answer_invite_user_action(
-        self,
-    ) -> None:
-        user_action = self.user_action_factory.create_answer_company_invite_action(
-            uuid4()
-        )
-        message = self._create_message(user_action=user_action)
-        response = self.read_message(
-            ReadMessageRequest(
-                reader_id=self.addressee.id,
-                message_id=message.id,
-            )
-        )
-        self.assertSuccess(response, lambda r: r.user_action == user_action)
 
     def test_user_action_is_none_then_response_shows_also_user_action_none(
         self,

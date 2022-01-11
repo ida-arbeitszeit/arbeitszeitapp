@@ -1,4 +1,5 @@
 {% extends "base_company.html" %}
+{% from 'macros/show_notifications.html' import show_notifications %}
 
 {% block content2 %}
 <div class="columns is-centered">
@@ -14,13 +15,7 @@
             </p>
         </div>
 
-        {% if view_model %}
-        <div class="box">
-            {% for notification in view_model.notifications %}
-            <div class="notification is-danger">{{ notification }}</div>
-            {% endfor %}
-        </div>
-        {% endif %}
+	{{ show_notifications() }}
 
         <div class="content">
             <form method="post">

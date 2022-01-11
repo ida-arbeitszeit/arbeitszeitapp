@@ -4,7 +4,7 @@ from uuid import UUID
 from arbeitszeit.use_cases import ReadMessageRequest, ReadMessageSuccess
 
 from .session import Session
-from .user_action_resolver import UserActionResolver
+from .user_action import UserActionResolver
 
 
 @dataclass

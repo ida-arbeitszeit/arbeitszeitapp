@@ -3,11 +3,19 @@
 {% block content2 %}
 <div class="column is-4 is-offset-4">
     <h3 class="title">Login</h3>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="notification is-danger">
+        {{ messages[0] }}
+    </div>
+    {% endif %}
+    {% endwith %}
+
     <div class="box">
         {% for field_name, field_errors in form.errors|dictsort if field_errors %}
-            {% for error in field_errors %}
-                <div class="notification is-danger">{{ error }}</div>
-            {% endfor %}
+        {% for error in field_errors %}
+        <div class="notification is-danger">{{ error }}</div>
+        {% endfor %}
         {% endfor %}
         <form method="POST" action="/member/login">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

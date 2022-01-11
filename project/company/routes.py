@@ -332,9 +332,7 @@ def toggle_availability(plan_id: UUID, toggle_availability: ToggleProductAvailab
 @commit_changes
 def hide_plan(plan_id: UUID, hide_plan: HidePlan, presenter: HidePlanPresenter):
     response = hide_plan(plan_id)
-    view_model = presenter.present(response)
-    for notification in view_model.notifications:
-        flash(notification)
+    presenter.present(response)
     return redirect(url_for("main_company.my_plans"))
 
 
@@ -490,9 +488,9 @@ def create_cooperation(
             UUID(current_user.id), name, definition
         )
         use_case_response = create_cooperation(use_case_request)
-        view_model = presenter.present(use_case_response)
+        presenter.present(use_case_response)
         return template_renderer.render_template(
-            "company/create_cooperation.html", context=dict(view_model=view_model)
+            "company/create_cooperation.html", context=dict()
         )
     elif request.method == "GET":
         return template_renderer.render_template("company/create_cooperation.html")

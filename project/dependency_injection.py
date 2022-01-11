@@ -15,6 +15,8 @@ from injector import (
 from arbeitszeit import entities
 from arbeitszeit import repositories as interfaces
 from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.mail_service import MailService
+from arbeitszeit.token import TokenService
 from arbeitszeit.use_cases import CheckForUnreadMessages
 from arbeitszeit_web.check_for_unread_message import (
     CheckForUnreadMessagesController,
@@ -22,12 +24,10 @@ from arbeitszeit_web.check_for_unread_message import (
 )
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyController
 from arbeitszeit_web.list_messages import ListMessagesController
+from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
 from arbeitszeit_web.request_cooperation import RequestCooperationController
-from arbeitszeit_web.user_action_resolver import (
-    UserActionResolver,
-    UserActionResolverImpl,
-)
+from arbeitszeit_web.user_action import UserActionResolver, UserActionResolverImpl
 from project.database import get_social_accounting
 from project.database.repositories import (
     AccountOwnerRepository,
@@ -47,7 +47,10 @@ from project.database.repositories import (
 from project.datetime import RealtimeDatetimeService
 from project.extensions import db
 from project.flask_session import FlaskSession
+from project.mail_service import FlaskMailService
+from project.notifications import FlaskFlashNotifier
 from project.template import FlaskTemplateRenderer, UserTemplateRenderer
+from project.token import FlaskTokenService
 
 
 class FlaskModule(Module):
@@ -118,6 +121,10 @@ class FlaskModule(Module):
     ) -> ReadMessagePresenter:
         return ReadMessagePresenter(user_action_resolver)
 
+    @provider
+    def provide_notifier(self) -> Notifier:
+        return FlaskFlashNotifier()
+
     def configure(self, binder: Binder) -> None:
         binder.bind(
             interfaces.CompanyWorkerRepository,  # type: ignore
@@ -183,6 +190,11 @@ class FlaskModule(Module):
             interfaces.PlanCooperationRepository,  # type: ignore
             to=ClassProvider(PlanCooperationRepository),
         )
+        binder.bind(
+            MailService,  # type: ignore
+            to=ClassProvider(FlaskMailService),
+        )
+        binder.bind(TokenService, to=ClassProvider(FlaskTokenService))  # type: ignore
 
 
 _injector = Injector(FlaskModule)

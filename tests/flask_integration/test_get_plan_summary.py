@@ -9,7 +9,8 @@ class AuthenticatedMemberTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.plan_generator = self.injector.get(PlanGenerator)
-        self.login_member()
+        self.member, _, self.email = self.login_member()
+        self.member = self.confirm_member(member=self.member, email=self.email)
 
     def test_get_404_when_plan_does_not_exist(self) -> None:
         url = f"/member/plan_summary/{uuid4()}"
