@@ -40,6 +40,39 @@ class AnonymousUserTests(BaseTestCase):
         self.assertIsNone(self.controller.import_form_data(self._get_request_form()))
 
 
+class MalformedInviteIdTest(BaseTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.requesting_user = uuid4()
+        self.session.set_current_user_id(self.requesting_user)
+
+    def test_controller_returns_malformed_input_data_with_invalid_uuid_as_invite_id(
+        self,
+    ) -> None:
+        self.assertIsInstance(
+            self.controller.import_form_data(self._get_request_form(invite_id="")),
+            MalformedInputData,
+        )
+
+    def test_malformed_data_points_to_invite_id_field(self) -> None:
+        result = self.controller.import_form_data(self._get_request_form(invite_id=""))
+        self.assertMalformedData(result, lambda m: m.field == "invite_id")
+
+    def test_message_points_out_that_invite_id_must_be_a_uuid(self) -> None:
+        result = self.controller.import_form_data(self._get_request_form(invite_id=""))
+        self.assertMalformedData(
+            result, lambda m: m.message == "Muss eine gültige UUID sein."
+        )
+
+    def assertMalformedData(
+        self, candidate: Any, condition: Callable[[MalformedInputData], bool]
+    ) -> None:
+        self.assertIsInstance(candidate, MalformedInputData)
+        self.assertTrue(
+            condition(cast(MalformedInputData, candidate)),
+        )
+
+
 class LoggedInUsertests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
@@ -50,14 +83,6 @@ class LoggedInUsertests(BaseTestCase):
         self,
     ) -> None:
         self.assertIsNotNone(self.controller.import_form_data(self._get_request_form()))
-
-    def test_controller_returns_malformed_input_data_with_invalid_uuid_as_invite_id(
-        self,
-    ) -> None:
-        self.assertIsInstance(
-            self.controller.import_form_data(self._get_request_form(invite_id="")),
-            MalformedInputData,
-        )
 
     def test_request_contains_correct_uuid_from_form_data(
         self,

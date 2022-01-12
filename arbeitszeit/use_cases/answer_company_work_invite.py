@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 from uuid import UUID
 
 from injector import inject
@@ -21,6 +22,7 @@ class AnswerCompanyWorkInviteRequest:
 class AnswerCompanyWorkInviteResponse:
     is_success: bool
     is_accepted: bool
+    company_name: Optional[str]
 
 
 @inject
@@ -45,8 +47,12 @@ class AnswerCompanyWorkInvite:
             )
         self.worker_invite_repository.delete_invite(request.invite_id)
         return AnswerCompanyWorkInviteResponse(
-            is_success=True, is_accepted=request.is_accepted
+            is_success=True,
+            is_accepted=request.is_accepted,
+            company_name=invite.company.name,
         )
 
     def _create_failure_response(self) -> AnswerCompanyWorkInviteResponse:
-        return AnswerCompanyWorkInviteResponse(is_success=False, is_accepted=False)
+        return AnswerCompanyWorkInviteResponse(
+            is_success=False, is_accepted=False, company_name=None
+        )

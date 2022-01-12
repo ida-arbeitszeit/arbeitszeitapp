@@ -146,6 +146,30 @@ class AnwerCompanyWorkInviteTests(TestCase):
         )
         self.assertFalse(response.is_success)
 
+    def test_successful_response_contains_name_of_inviting_company(self) -> None:
+        invite_id = self._invite_worker()
+        response = self.answer_company_work_invite(
+            self._create_request(invite_id, is_accepted=True)
+        )
+        self.assertEqual(
+            response.company_name,
+            self.company.name,
+        )
+
+    def test_answer_invite_as_member_that_was_not_invited_returns_response_that_does_not_contain_company_name(
+        self,
+    ) -> None:
+        invite_id = self._invite_worker()
+        other_member = self.member_generator.create_member()
+        response = self.answer_company_work_invite(
+            self._create_request(
+                is_accepted=True,
+                invite_id=invite_id,
+                user=other_member.id,
+            )
+        )
+        self.assertIsNone(response.company_name)
+
     def _invite_worker(self) -> UUID:
         invite_response = self.invite_worker_to_company(
             InviteWorkerToCompanyRequest(
