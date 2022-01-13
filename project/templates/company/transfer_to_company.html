@@ -1,18 +1,15 @@
 {% extends "base_company.html" %}
 
+{% from 'macros/show_notifications' import show_notifications
+
 {% block content2 %}
 <div class="columns has-text-left">
     <div class="column is-two-third">
-
-
         <div class="content">
             <h1 class="title">
                 Bezahlung Produktionsmittel und Rohstoffe
             </h1>
         </div>
-
-
-
         <div class="content">
             <form method="post">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -41,24 +38,7 @@
                 </div>
             </form>
         </div>
-
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-        <div class="block"></div>
-        {% for message in messages %}
-        <div class="notification is-danger">
-            {{ message }}
-        </div>
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
-
-
-
-
-
+	{{ show_notifications() }}
     </div>
 </div>
-
-
 {% endblock %}

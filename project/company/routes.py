@@ -442,9 +442,7 @@ def transfer_to_company(
             else entities.PurposesOfPurchases.raw_materials,
         )
         use_case_response = pay_means_of_production(use_case_request)
-        view_model = presenter.present(use_case_response)
-        for notification in view_model.notifications:
-            flash(notification)
+        presenter.present(use_case_response)
     return template_renderer.render_template("company/transfer_to_company.html")
 
 
