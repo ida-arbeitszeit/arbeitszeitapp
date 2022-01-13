@@ -1,4 +1,5 @@
 from functools import wraps
+from typing import List, Optional
 
 from flask_sqlalchemy import SQLAlchemy
 from injector import (
@@ -22,10 +23,20 @@ from arbeitszeit_web.check_for_unread_message import (
     CheckForUnreadMessagesController,
     CheckForUnreadMessagesPresenter,
 )
-from arbeitszeit_web.list_messages import ListMessagesController
+from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
+from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
+from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 from arbeitszeit_web.notification import Notifier
+from arbeitszeit_web.query_plans import QueryPlansPresenter
 from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
 from arbeitszeit_web.request_cooperation import RequestCooperationController
+from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
+from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
+from arbeitszeit_web.url_index import (
+    CoopSummaryUrlIndex,
+    MessageUrlIndex,
+    PlanSummaryUrlIndex,
+)
 from arbeitszeit_web.user_action_resolver import (
     UserActionResolver,
     UserActionResolverImpl,
@@ -53,12 +64,89 @@ from project.mail_service import FlaskMailService
 from project.notifications import FlaskFlashNotifier
 from project.template import FlaskTemplateRenderer, UserTemplateRenderer
 from project.token import FlaskTokenService
+from project.url_index import CompanyUrlIndex, MemberUrlIndex
+
+
+class MemberModule(Module):
+    @provider
+    def provide_plan_summary_url_index(
+        self, member_index: MemberUrlIndex
+    ) -> PlanSummaryUrlIndex:
+        return member_index
+
+    @provider
+    def provide_coop_summary_url_index(
+        self, member_index: MemberUrlIndex
+    ) -> CoopSummaryUrlIndex:
+        return member_index
+
+    @provider
+    def provide_message_url_index(
+        self, member_index: MemberUrlIndex
+    ) -> MessageUrlIndex:
+        return member_index
+
+
+class CompanyModule(Module):
+    @provider
+    def provide_plan_summary_url_index(
+        self, company_index: CompanyUrlIndex
+    ) -> PlanSummaryUrlIndex:
+        return company_index
+
+    @provider
+    def provide_coop_summary_url_index(
+        self, company_index: CompanyUrlIndex
+    ) -> CoopSummaryUrlIndex:
+        return company_index
+
+    @provider
+    def provide_message_url_index(
+        self, company_index: CompanyUrlIndex
+    ) -> MessageUrlIndex:
+        return company_index
 
 
 class FlaskModule(Module):
     @provider
+    def provide_list_all_cooperations_presenter(
+        self, coop_index: CoopSummaryUrlIndex
+    ) -> ListAllCooperationsPresenter:
+        return ListAllCooperationsPresenter(coop_index)
+
+    @provider
+    def provide_show_my_cooperations_presenter(
+        self, coop_index: CoopSummaryUrlIndex
+    ) -> ShowMyCooperationsPresenter:
+        return ShowMyCooperationsPresenter(coop_index)
+
+    @provider
+    def provide_show_my_plans_presenter(
+        self, plan_index: PlanSummaryUrlIndex, coop_index: CoopSummaryUrlIndex
+    ) -> ShowMyPlansPresenter:
+        return ShowMyPlansPresenter(plan_index, coop_index)
+
+    @provider
+    def provide_list_messages_presenter(
+        self, message_index: MessageUrlIndex
+    ) -> ListMessagesPresenter:
+        return ListMessagesPresenter(message_index)
+
+    @provider
+    def provide_query_plans_presenter(
+        self, plan_index: PlanSummaryUrlIndex, coop_index: CoopSummaryUrlIndex
+    ) -> QueryPlansPresenter:
+        return QueryPlansPresenter(plan_index, coop_index)
+
+    @provider
     def provide_user_action_resolver(self) -> UserActionResolver:
         return UserActionResolverImpl()
+
+    @provider
+    def provide_get_plan_summary_success_presenter(
+        self, coop_index: CoopSummaryUrlIndex
+    ) -> GetPlanSummarySuccessPresenter:
+        return GetPlanSummarySuccessPresenter(coop_index)
 
     @provider
     def provide_transaction_repository(
@@ -187,10 +275,10 @@ class FlaskModule(Module):
         binder.bind(TokenService, to=ClassProvider(FlaskTokenService))  # type: ignore
 
 
-_injector = Injector(FlaskModule)
-
-
 class with_injection:
+    def __init__(self, modules: Optional[List[Module]] = None) -> None:
+        self._modules = modules if modules is not None else []
+
     def __call__(self, original_function):
         """When you wrap a function, make sure that the parameters to be
         injected come after the the parameters that the caller should
@@ -199,8 +287,14 @@ class with_injection:
 
         @wraps(original_function)
         def wrapped_function(*args, **kwargs):
-            return _injector.call_with_injection(
+            return self.get_injector().call_with_injection(
                 inject(original_function), args=args, kwargs=kwargs
             )
 
         return wrapped_function
+
+    def get_injector(self) -> Injector:
+        all_modules: List[Module] = []
+        all_modules.append(FlaskModule())
+        all_modules += self._modules
+        return Injector(all_modules)
