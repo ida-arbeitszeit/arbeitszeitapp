@@ -29,6 +29,7 @@ from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyContro
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 from arbeitszeit_web.notification import Notifier
+from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from arbeitszeit_web.query_plans import QueryPlansPresenter
 from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
 from arbeitszeit_web.request_cooperation import RequestCooperationController
@@ -108,6 +109,12 @@ class CompanyModule(Module):
 
 
 class FlaskModule(Module):
+    @provider
+    def provide_pay_means_of_production_presenter(
+        self, notifier: Notifier
+    ) -> PayMeansOfProductionPresenter:
+        return PayMeansOfProductionPresenter(notifier)
+
     @provider
     def provide_list_all_cooperations_presenter(
         self, coop_index: CoopSummaryUrlIndex
