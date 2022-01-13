@@ -74,7 +74,6 @@ from project.forms import (
 )
 from project.models import Company
 from project.template import UserTemplateRenderer
-from project.url_index import CompanyUrlIndex
 from project.views import (
     Http404View,
     ListMessagesView,
@@ -141,8 +140,8 @@ def query_plans(
     query_plans: use_cases.QueryPlans,
     controller: QueryPlansController,
     template_renderer: UserTemplateRenderer,
+    presenter: QueryPlansPresenter,
 ):
-    presenter = QueryPlansPresenter(CompanyUrlIndex(), CompanyUrlIndex())
     template_name = "company/query_plans.html"
     search_form = PlanSearchForm(request.form)
     view = QueryPlansView(
@@ -333,8 +332,8 @@ def my_drafts(
 def my_plans(
     show_my_plans_use_case: ShowMyPlansUseCase,
     template_renderer: UserTemplateRenderer,
+    show_my_plans_presenter: ShowMyPlansPresenter,
 ):
-    show_my_plans_presenter = ShowMyPlansPresenter(CompanyUrlIndex(), CompanyUrlIndex())
     request = ShowMyPlansRequest(company_id=UUID(current_user.id))
     response = show_my_plans_use_case(request)
     view_model = show_my_plans_presenter.present(response)
@@ -467,8 +466,8 @@ def plan_summary(
     plan_id: UUID,
     get_plan_summary: use_cases.GetPlanSummary,
     template_renderer: UserTemplateRenderer,
+    presenter: GetPlanSummarySuccessPresenter,
 ):
-    presenter = GetPlanSummarySuccessPresenter(CompanyUrlIndex())
     use_case_response = get_plan_summary(plan_id)
     if isinstance(use_case_response, use_cases.PlanSummarySuccess):
         view_model = presenter.present(use_case_response)
@@ -561,6 +560,7 @@ def my_cooperations(
     accept_cooperation: AcceptCooperation,
     deny_cooperation: DenyCooperation,
     list_outbound_coop_requests: ListOutboundCoopRequests,
+    presenter: ShowMyCooperationsPresenter,
 ):
     accept_cooperation_response: Optional[AcceptCooperationResponse] = None
     deny_cooperation_response: Optional[DenyCooperationResponse] = None
@@ -590,7 +590,6 @@ def my_cooperations(
         ListOutboundCoopRequestsRequest(UUID(current_user.id))
     )
 
-    presenter = ShowMyCooperationsPresenter(CompanyUrlIndex())
     view_model = presenter.present(
         list_coord_response,
         list_inbound_coop_requests_response,
@@ -608,9 +607,9 @@ def my_cooperations(
 def list_all_cooperations(
     use_case: ListAllCooperations,
     template_renderer: UserTemplateRenderer,
+    presenter: ListAllCooperationsPresenter,
 ):
     response = use_case()
-    presenter = ListAllCooperationsPresenter(CompanyUrlIndex())
     view_model = presenter.present(response)
     return template_renderer.render_template(
         "company/list_all_cooperations.html", context=dict(view_model=view_model)
@@ -628,9 +627,9 @@ def list_messages(
     template_renderer: UserTemplateRenderer,
     controller: ListMessagesController,
     use_case: ListMessages,
+    presenter: ListMessagesPresenter,
 ) -> Response:
     http_404_view = Http404View("company/404.html", template_renderer)
-    presenter = ListMessagesPresenter(CompanyUrlIndex())
     view = ListMessagesView(
         template_renderer=template_renderer,
         presenter=presenter,
