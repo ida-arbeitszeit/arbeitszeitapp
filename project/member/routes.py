@@ -25,7 +25,6 @@ from project.database import AccountRepository, MemberRepository, commit_changes
 from project.forms import CompanySearchForm, PayConsumerProductForm, PlanSearchForm
 from project.models import Member
 from project.template import UserTemplateRenderer
-from project.url_index import MemberUrlIndex
 from project.views import (
     Http404View,
     ListMessagesView,
@@ -59,8 +58,8 @@ def query_plans(
     query_plans: use_cases.QueryPlans,
     controller: QueryPlansController,
     template_renderer: UserTemplateRenderer,
+    presenter: QueryPlansPresenter,
 ) -> Response:
-    presenter = QueryPlansPresenter(MemberUrlIndex(), MemberUrlIndex())
     template_name = "member/query_plans.html"
     search_form = PlanSearchForm(request.form)
     view = QueryPlansView(
@@ -82,8 +81,8 @@ def query_companies(
     query_companies: use_cases.QueryCompanies,
     controller: QueryCompaniesController,
     template_renderer: UserTemplateRenderer,
+    presenter: QueryCompaniesPresenter,
 ):
-    presenter = QueryCompaniesPresenter()
     template_name = "member/query_companies.html"
     search_form = CompanySearchForm(request.form)
     view = QueryCompaniesView(
@@ -180,8 +179,8 @@ def plan_summary(
     plan_id: UUID,
     get_plan_summary: use_cases.GetPlanSummary,
     template_renderer: UserTemplateRenderer,
+    presenter: GetPlanSummarySuccessPresenter,
 ) -> Response:
-    presenter = GetPlanSummarySuccessPresenter(MemberUrlIndex())
     use_case_response = get_plan_summary(plan_id)
     if isinstance(use_case_response, use_cases.PlanSummarySuccess):
         view_model = presenter.present(use_case_response)
@@ -223,10 +222,10 @@ def hilfe(template_renderer: UserTemplateRenderer) -> Response:
 def list_messages(
     template_renderer: UserTemplateRenderer,
     controller: ListMessagesController,
+    presenter: ListMessagesPresenter,
     use_case: ListMessages,
 ) -> Response:
     http_404_view = Http404View("member/404.html", template_renderer)
-    presenter = ListMessagesPresenter(MemberUrlIndex())
     view = ListMessagesView(
         template_renderer=template_renderer,
         presenter=presenter,

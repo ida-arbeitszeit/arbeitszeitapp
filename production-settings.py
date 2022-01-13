@@ -2,7 +2,6 @@ from os import environ
 
 from project.configuration_base import *
 
-
 FLASK_ENV = "production"
 DEBUG = False
 TESTING = False

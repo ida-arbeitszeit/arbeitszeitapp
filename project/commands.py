@@ -4,7 +4,7 @@ from project.dependency_injection import with_injection
 
 
 @commit_changes
-@with_injection
+@with_injection()
 def update_and_payout(
     payout: UpdatePlansAndPayout,
 ):
