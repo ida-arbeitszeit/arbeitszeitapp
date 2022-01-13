@@ -1,5 +1,7 @@
 {% extends "base_member.html" %}
 
+{% from 'macros/show_notifications.html' import show_notifications %}
+
 {% block content2 %}
 <div class="columns has-text-left">
     <div class="column is-two-third">
@@ -36,16 +38,7 @@
             </form>
         </div>
 
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-        <div class="block"></div>
-        {% for message in messages %}
-        <div class="notification is-danger">
-            {{ message }}
-        </div>
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
+	{{ show_notifications() }}
 
         {% for field_name, field_errors in form.errors|dictsort if field_errors %}
         {% for error in field_errors %}

@@ -356,9 +356,7 @@ def toggle_availability(plan_id: UUID, toggle_availability: ToggleProductAvailab
 @commit_changes
 def hide_plan(plan_id: UUID, hide_plan: HidePlan, presenter: HidePlanPresenter):
     response = hide_plan(plan_id)
-    view_model = presenter.present(response)
-    for notification in view_model.notifications:
-        flash(notification)
+    presenter.present(response)
     return redirect(url_for("main_company.my_plans"))
 
 

@@ -1,5 +1,8 @@
-{% extends "base_company.html" %} {% block content2 %}
+{% extends "base_company.html" %}
 
+{% from 'macros/show_notifications.html' import show_notifications %}
+
+{% block content2 %}
 <div class="box has-background-info-light has-text-info-dark">
   <div class="icon"><i class="fas fa-info-circle"></i></div>
   <p>
@@ -9,10 +12,7 @@
 </div>
 <h1 class="title">Aktuelle Pläne</h1>
 
-{% with messages = get_flashed_messages() %} {% if messages %} {% for message in
-messages %}
-<div class="notification is-danger is-light">{{ message }}</div>
-{% endfor %} {% endif %} {% endwith %}
+{{ show_notifications() }}
 
 <div class="table-container">
   {% if show_active_plans %}
