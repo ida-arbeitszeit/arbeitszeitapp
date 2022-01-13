@@ -77,13 +77,23 @@ To run the app in development mode you first have to define some environment var
     $ export DEV_DATABASE_URI="sqlite:///$(pwd)/db.sqlite3" 
     $ export DEV_SECRET_KEY=my_secret_key
 
-    $ export MAIL_SERVER=my_mail_server 
-    $ export MAIL_PORT=port
-    $ export MAIL_USERNAME=mail_username
-    $ export MAIL_PASSWORD=mail_password
-    $ export MAIL_DEFAULT_SENDER=default_mail_sender_adress
-
 Afterwards you can start the development server with ``flask run``.
+
+Email configuration
+===================
+
+There are two email backend implementations available.  One
+implementation meant for production ``flask_mail`` and the other one
+meant for development that is used by default.  To choose the email
+backend set the ``MAIL_BACKEND`` setting in your flask configuration
+appropriately.
+
+* ``MAIL_BACKEND = "flask_mail"`` to use the production backend
+* ``MAIL_BACKEND`` is anything else to use the development backend
+
+See the `flask mail documentation
+<https://pythonhosted.org/Flask-Mail/>` on how to configure the
+production backend.
 
 
 Cronjob
@@ -98,5 +108,3 @@ There is a command `flask payout`. It does the following things:
 
 This command is executed every hour on the production server. 
 In development mode you can run it manually in the CLI. 
-
-

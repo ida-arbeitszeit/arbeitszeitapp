@@ -10,6 +10,7 @@ from injector import (
     Module,
     inject,
     provider,
+    singleton,
 )
 
 from arbeitszeit import entities
@@ -49,7 +50,7 @@ from project.database.repositories import (
 from project.datetime import RealtimeDatetimeService
 from project.extensions import db
 from project.flask_session import FlaskSession
-from project.mail_service import FlaskMailService
+from project.mail_service import get_mail_service
 from project.notifications import FlaskFlashNotifier
 from project.template import FlaskTemplateRenderer, UserTemplateRenderer
 from project.token import FlaskTokenService
@@ -115,6 +116,11 @@ class FlaskModule(Module):
     def provide_notifier(self) -> Notifier:
         return FlaskFlashNotifier()
 
+    @singleton
+    @provider
+    def provide_mail_service(self) -> MailService:
+        return get_mail_service()
+
     def configure(self, binder: Binder) -> None:
         binder.bind(
             interfaces.CompanyWorkerRepository,  # type: ignore
@@ -179,10 +185,6 @@ class FlaskModule(Module):
         binder.bind(
             interfaces.PlanCooperationRepository,  # type: ignore
             to=ClassProvider(PlanCooperationRepository),
-        )
-        binder.bind(
-            MailService,  # type: ignore
-            to=ClassProvider(FlaskMailService),
         )
         binder.bind(TokenService, to=ClassProvider(FlaskTokenService))  # type: ignore
 
