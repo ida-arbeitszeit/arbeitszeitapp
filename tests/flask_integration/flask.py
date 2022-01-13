@@ -82,7 +82,7 @@ class ViewTestCase(FlaskTestCase):
         company: Optional[Company] = None,
         password: Optional[str] = None,
         email: Optional[str] = None,
-    ) -> Tuple[Company, str]:
+    ) -> Tuple[Company, str, str]:
         if password is None:
             password = "password123"
         if email is None:
@@ -100,4 +100,21 @@ class ViewTestCase(FlaskTestCase):
             follow_redirects=True,
         )
         assert response.status_code < 400
-        return company, password
+        return company, password, email
+
+    def confirm_company(
+        self,
+        company: Optional[Company] = None,
+        email: Optional[str] = None,
+    ) -> Company:
+        if email is None:
+            email = self.email_generator.get_random_email()
+        if company is None:
+            company = self.company_generator.create_company(email=email)
+        token = FlaskTokenService().generate_token(email)
+        response = self.client.get(
+            f"/company/confirm/{token}",
+            follow_redirects=True,
+        )
+        assert response.status_code < 400
+        return company

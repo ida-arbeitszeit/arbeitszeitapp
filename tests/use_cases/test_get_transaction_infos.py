@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 
 from arbeitszeit.entities import AccountTypes, SocialAccounting
 from arbeitszeit.use_cases import GetTransactionInfos
@@ -26,7 +27,7 @@ def test_that_no_info_is_generated_when_no_transaction_took_place(
 
 
 @injection_test
-def test_that_info_is_generated_after_transaction_between_member_and_company(
+def test_that_correct_info_is_generated_after_transaction_between_member_and_company(
     get_transaction_infos: GetTransactionInfos,
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
@@ -36,14 +37,23 @@ def test_that_info_is_generated_after_transaction_between_member_and_company(
     company = company_generator.create_company()
 
     transaction_generator.create_transaction(
-        sending_account=member.account, receiving_account=company.product_account
+        sending_account=member.account,
+        receiving_account=company.product_account,
+        amount_sent=Decimal(10),
+        amount_received=Decimal(8.5),
     )
 
-    info = get_transaction_infos(member)
-    expected_sender_name = "Mir"
-    assert len(info) == 1
-    assert type(info[0].date) == datetime
-    assert info[0].sender_name == expected_sender_name
+    info_member = get_transaction_infos(member)
+    assert len(info_member) == 1
+    assert type(info_member[0].date) == datetime
+    assert info_member[0].sender_name == "Mir"
+    assert info_member[0].transaction_volumes["member"] == Decimal(-10)
+
+    info_company = get_transaction_infos(company)
+    assert len(info_company) == 1
+    assert type(info_company[0].date) == datetime
+    assert info_company[0].receiver_name == "Mich"
+    assert info_company[0].transaction_volumes["prd"] == Decimal(8.5)
 
 
 @injection_test
@@ -58,15 +68,39 @@ def test_that_correct_info_for_sender_is_generated_after_transaction_between_com
     trans = transaction_generator.create_transaction(
         sending_account=company1.means_account,
         receiving_account=company2.product_account,
+        amount_sent=Decimal(10),
+        amount_received=Decimal(8.5),
     )
 
-    info = get_transaction_infos(company1)
-    expected_sender_name = "Mir"
-    expected_receiver_name = company2.name
-    expected_amount_p = -trans.amount
-    assert info[0].sender_name == expected_sender_name
-    assert info[0].receiver_name == expected_receiver_name
-    assert info[0].transaction_volumes[AccountTypes.p.value] == expected_amount_p
+    info_sender = get_transaction_infos(company1)
+    assert info_sender[0].sender_name == "Mir"
+    assert info_sender[0].receiver_name == company2.name
+    assert (
+        info_sender[0].transaction_volumes[AccountTypes.p.value] == -trans.amount_sent
+    )
+
+
+@injection_test
+def test_that_correct_info_is_generated_when_the_same_company_is_sender_and_receiver(
+    get_transaction_infos: GetTransactionInfos,
+    company_generator: CompanyGenerator,
+    transaction_generator: TransactionGenerator,
+):
+    company = company_generator.create_company()
+
+    trans = transaction_generator.create_transaction(
+        sending_account=company.means_account,
+        receiving_account=company.product_account,
+        amount_sent=Decimal(10),
+        amount_received=Decimal(8.5),
+    )
+
+    info = get_transaction_infos(company)
+    assert len(info) == 1
+    assert info[0].sender_name == "Mir"
+    assert info[0].receiver_name == "Mich"
+    assert info[0].transaction_volumes[AccountTypes.p.value] == -trans.amount_sent
+    assert info[0].transaction_volumes[AccountTypes.prd.value] == trans.amount_received
 
 
 @injection_test
@@ -81,15 +115,17 @@ def test_that_correct_info_for_receiver_is_generated_after_transaction_between_c
     trans = transaction_generator.create_transaction(
         sending_account=company1.means_account,
         receiving_account=company2.product_account,
+        amount_sent=Decimal(10),
+        amount_received=Decimal(8.5),
     )
 
-    info = get_transaction_infos(company2)
-    expected_sender_name = company1.name
-    expected_receiver_name = "Mich"
-    expected_amount_prd = trans.amount
-    assert info[0].sender_name == expected_sender_name
-    assert info[0].receiver_name == expected_receiver_name
-    assert info[0].transaction_volumes[AccountTypes.prd.value] == expected_amount_prd
+    info_receiver = get_transaction_infos(company2)
+    assert info_receiver[0].sender_name == company1.name
+    assert info_receiver[0].receiver_name == "Mich"
+    assert (
+        info_receiver[0].transaction_volumes[AccountTypes.prd.value]
+        == trans.amount_received
+    )
 
 
 @injection_test
@@ -149,15 +185,17 @@ def test_that_correct_info_for_receiver_is_generated_after_transaction_between_s
     trans = transaction_generator.create_transaction(
         sending_account=social_accounting.account,
         receiving_account=company.means_account,
+        amount_sent=Decimal(10),
+        amount_received=Decimal(8.5),
     )
 
-    info = get_transaction_infos(company)
-    expected_sender_name = "Öff. Buchhaltung"
-    expected_receiver_name = "Mich"
-    expected_amount_p = trans.amount
-    assert info[0].sender_name == expected_sender_name
-    assert info[0].receiver_name == expected_receiver_name
-    assert info[0].transaction_volumes[AccountTypes.p.value] == expected_amount_p
+    info_receiver = get_transaction_infos(company)
+    assert info_receiver[0].sender_name == "Öff. Buchhaltung"
+    assert info_receiver[0].receiver_name == "Mich"
+    assert (
+        info_receiver[0].transaction_volumes[AccountTypes.p.value]
+        == trans.amount_received
+    )
 
 
 @injection_test

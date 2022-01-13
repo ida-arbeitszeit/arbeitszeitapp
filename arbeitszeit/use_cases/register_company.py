@@ -1,10 +1,38 @@
 from dataclasses import dataclass
+from enum import Enum, auto
+from typing import Optional
 
 from injector import inject
 
-from arbeitszeit.entities import AccountTypes, Company
-from arbeitszeit.errors import CompanyAlreadyExists
+from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.entities import AccountTypes
+from arbeitszeit.errors import CannotSendEmail
+from arbeitszeit.mail_service import MailService
 from arbeitszeit.repositories import AccountRepository, CompanyRepository
+from arbeitszeit.token import TokenService
+
+
+@dataclass
+class RegisterCompanyResponse:
+    class RejectionReason(Exception, Enum):
+        company_already_exists = auto()
+        sending_mail_failed = auto()
+
+    rejection_reason: Optional[RejectionReason]
+
+    @property
+    def is_rejected(self) -> bool:
+        return self.rejection_reason is not None
+
+
+@dataclass
+class RegisterCompanyRequest:
+    email: str
+    name: str
+    password: str
+    email_sender: str
+    template_name: str
+    endpoint: str
 
 
 @inject
@@ -12,20 +40,54 @@ from arbeitszeit.repositories import AccountRepository, CompanyRepository
 class RegisterCompany:
     company_repository: CompanyRepository
     account_repository: AccountRepository
+    datetime_service: DatetimeService
+    mail_service: MailService
+    token_service: TokenService
 
-    def __call__(self, email: str, name: str, password: str) -> Company:
-        if self.company_repository.has_company_with_email(email):
-            raise CompanyAlreadyExists()
+    def __call__(self, request: RegisterCompanyRequest) -> RegisterCompanyResponse:
+        try:
+            self._register_company(request)
+            html = self._create_confirmation_mail(request)
+            self._send_confirmation_mail(request, html)
+        except RegisterCompanyResponse.RejectionReason as reason:
+            return RegisterCompanyResponse(rejection_reason=reason)
+        return RegisterCompanyResponse(rejection_reason=None)
+
+    def _register_company(self, request: RegisterCompanyRequest) -> None:
+        if self.company_repository.has_company_with_email(request.email):
+            raise RegisterCompanyResponse.RejectionReason.company_already_exists
         means_account = self.account_repository.create_account(AccountTypes.p)
         resources_account = self.account_repository.create_account(AccountTypes.r)
         labour_account = self.account_repository.create_account(AccountTypes.a)
         products_account = self.account_repository.create_account(AccountTypes.prd)
-        return self.company_repository.create_company(
-            email,
-            name,
-            password,
+        registered_on = self.datetime_service.now()
+        self.company_repository.create_company(
+            request.email,
+            request.name,
+            request.password,
             means_account,
             labour_account,
             resources_account,
             products_account,
+            registered_on,
         )
+
+    def _create_confirmation_mail(self, request: RegisterCompanyRequest) -> str:
+        token = self.token_service.generate_token(request.email)
+        html = self.mail_service.create_confirmation_html(
+            request.template_name, request.endpoint, token
+        )
+        return html
+
+    def _send_confirmation_mail(
+        self, request: RegisterCompanyRequest, html: str
+    ) -> None:
+        try:
+            self.mail_service.send_message(
+                subject="Bitte bestätige dein Konto",
+                recipients=[request.email],
+                html=html,
+                sender=request.email_sender,
+            )
+        except CannotSendEmail:
+            raise RegisterCompanyResponse.RejectionReason.sending_mail_failed

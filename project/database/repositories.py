@@ -148,6 +148,8 @@ class CompanyRepository(repositories.CompanyRepository):
             product_account=self.account_repository.object_from_orm(
                 self._get_products_account(company_orm)
             ),
+            registered_on=company_orm.registered_on,
+            confirmed_on=company_orm.confirmed_on,
         )
 
     def _get_means_account(self, company: Company) -> Account:
@@ -170,6 +172,11 @@ class CompanyRepository(repositories.CompanyRepository):
         assert account
         return account
 
+    def get_company_orm_by_mail(self, email: str) -> Company:
+        company_orm = Company.query.filter_by(email=email).first()
+        assert company_orm
+        return company_orm
+
     def get_by_id(self, id: UUID) -> Optional[entities.Company]:
         company_orm = Company.query.filter_by(id=str(id)).first()
         if company_orm is None:
@@ -186,12 +193,15 @@ class CompanyRepository(repositories.CompanyRepository):
         labour_account: entities.Account,
         resource_account: entities.Account,
         products_account: entities.Account,
+        registered_on: datetime,
     ) -> entities.Company:
         company = Company(
             id=str(uuid4()),
             email=email,
             name=name,
             password=generate_password_hash(password, method="sha256"),
+            registered_on=registered_on,
+            confirmed_on=None,
         )
         self.db.session.add(company)
         for account in [
@@ -259,8 +269,8 @@ class AccountRepository(repositories.AccountRepository):
         intersection = received & sent
         received -= intersection
         sent -= intersection
-        return decimal_sum(t.amount for t in received) - decimal_sum(
-            t.amount for t in sent
+        return decimal_sum(t.amount_received for t in received) - decimal_sum(
+            t.amount_sent for t in sent
         )
 
     def get_by_id(self, id: UUID) -> entities.Account:
@@ -715,7 +725,8 @@ class TransactionRepository(repositories.TransactionRepository):
             receiving_account=self.account_repository.get_by_id(
                 transaction.receiving_account
             ),
-            amount=Decimal(transaction.amount),
+            amount_sent=Decimal(transaction.amount_sent),
+            amount_received=Decimal(transaction.amount_received),
             purpose=transaction.purpose,
         )
 
@@ -724,7 +735,8 @@ class TransactionRepository(repositories.TransactionRepository):
         date: datetime,
         sending_account: entities.Account,
         receiving_account: entities.Account,
-        amount: Decimal,
+        amount_sent: Decimal,
+        amount_received: Decimal,
         purpose: str,
     ) -> entities.Transaction:
         transaction = Transaction(
@@ -732,7 +744,8 @@ class TransactionRepository(repositories.TransactionRepository):
             date=date,
             sending_account=str(sending_account.id),
             receiving_account=str(receiving_account.id),
-            amount=amount,
+            amount_sent=amount_sent,
+            amount_received=amount_received,
             purpose=purpose,
         )
         self.db.session.add(transaction)

@@ -56,6 +56,8 @@ class Company(UserMixin, db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(1000), nullable=False)
+    registered_on = db.Column(db.DateTime, nullable=False)
+    confirmed_on = db.Column(db.DateTime, nullable=True)
 
     plans = db.relationship("Plan", lazy="dynamic", backref="company")
     accounts = db.relationship("Account", lazy="dynamic", backref="company")
@@ -158,7 +160,8 @@ class Transaction(UserMixin, db.Model):
     receiving_account = db.Column(
         db.String, db.ForeignKey("account.id"), nullable=False
     )
-    amount = db.Column(db.Numeric(), nullable=False)
+    amount_sent = db.Column(db.Numeric(), nullable=False)
+    amount_received = db.Column(db.Numeric(), nullable=False)
     purpose = db.Column(db.String(1000), nullable=True)  # Verwendungszweck
 
 

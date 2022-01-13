@@ -94,6 +94,7 @@ class CompanyGenerator:
     company_repository: CompanyRepository
     company_worker_repository: CompanyWorkerRepository
     email_generator: EmailGenerator
+    datetime_service: FakeDatetimeService
 
     def create_company(
         self,
@@ -103,6 +104,7 @@ class CompanyGenerator:
         labour_account: Optional[Account] = None,
         password: str = "password",
         workers: Optional[Iterable[Member]] = None,
+        registered_on: datetime = None,
     ) -> Company:
         if email is None:
             email = self.email_generator.get_random_email()
@@ -110,6 +112,8 @@ class CompanyGenerator:
             labour_account = self.account_generator.create_account(
                 account_type=AccountTypes.a
             )
+        if registered_on is None:
+            registered_on = self.datetime_service.now()
         company = self.company_repository.create_company(
             email=email,
             name=name,
@@ -124,6 +128,7 @@ class CompanyGenerator:
                 account_type=AccountTypes.prd
             ),
             labour_account=labour_account,
+            registered_on=registered_on,
         )
         if workers is not None:
             for worker in workers:
@@ -305,7 +310,8 @@ class TransactionGenerator:
         receiving_account_type=AccountTypes.prd,
         sending_account=None,
         receiving_account=None,
-        amount=None,
+        amount_sent=None,
+        amount_received=None,
     ) -> Transaction:
         if sending_account is None:
             sending_account = self.account_generator.create_account(
@@ -315,13 +321,16 @@ class TransactionGenerator:
             receiving_account = self.account_generator.create_account(
                 account_type=receiving_account_type
             )
-        if amount is None:
-            amount = Decimal(10)
+        if amount_sent is None:
+            amount_sent = Decimal(10)
+        if amount_received is None:
+            amount_received = Decimal(10)
         return self.transaction_repository.create_transaction(
             date=self.datetime_service.now_minus_one_day(),
             sending_account=sending_account,
             receiving_account=receiving_account,
-            amount=amount,
+            amount_sent=amount_sent,
+            amount_received=amount_received,
             purpose="Test Verw.zweck",
         )
 
