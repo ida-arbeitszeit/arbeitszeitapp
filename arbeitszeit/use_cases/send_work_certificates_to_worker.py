@@ -36,6 +36,7 @@ class SendWorkCertificatesToWorker:
             date=self.datetime_service.now(),
             sending_account=company.work_account,
             receiving_account=worker.account,
-            amount=amount,
+            amount_sent=amount,
+            amount_received=amount,
             purpose="Lohn",
         )

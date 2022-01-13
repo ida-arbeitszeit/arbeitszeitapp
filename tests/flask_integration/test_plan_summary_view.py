@@ -18,7 +18,8 @@ class MemberViewTests(ViewTestCase):
 
 class CompanyViewTests(ViewTestCase):
     def test_get_200_when_accessing_view(self) -> None:
-        self.login_company()
+        self.company, _, self.email = self.login_company()
+        self.company = self.confirm_company(company=self.company, email=self.email)
         plan_generator = self.injector.get(PlanGenerator)
         plan = plan_generator.create_plan()
         response = self.client.get(f"/company/plan_summary/{plan.id}")

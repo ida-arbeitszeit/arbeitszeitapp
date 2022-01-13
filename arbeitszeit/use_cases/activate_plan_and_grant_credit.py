@@ -42,6 +42,7 @@ class ActivatePlanAndGrantCredit:
             date=self.datetime_service.now(),
             sending_account=self.social_accounting.account,
             receiving_account=account,
-            amount=round(amount, 2),
+            amount_sent=round(amount, 2),
+            amount_received=round(amount, 2),
             purpose=f"Plan-Id: {plan.id}",
         )

@@ -109,7 +109,8 @@ class UpdatePlansAndPayout:
             date=self.datetime_service.now(),
             sending_account=self.social_accounting.account,
             receiving_account=plan.planner.work_account,
-            amount=round(amount, 2),
+            amount_sent=round(amount, 2),
+            amount_received=round(amount, 2),
             purpose=f"Plan-Id: {plan.id}",
         )
         self.plan_repository.increase_payout_count_by_one(plan)
