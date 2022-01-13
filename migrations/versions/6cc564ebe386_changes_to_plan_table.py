@@ -24,7 +24,7 @@ def upgrade():
     # this update-statement is equivalent to the _calculate_active_days() in Use Case UpdatePlansAndPayout
     if bind.engine.name == "sqlite":
         days_passed_since_activation = (
-            "Cast ((JulianDay('now') - JulianDay(activation_date)) As Integer"
+            "Cast(JulianDay('now') - JulianDay(activation_date) AS Integer)"
         )
     else:
         days_passed_since_activation = "DATE_PART('day', now() - activation_date)"
@@ -53,9 +53,9 @@ def upgrade():
             END
         """
     )
-    op.alter_column("plan", "payout_count", nullable=False)
-
-    op.drop_column("plan", "last_certificate_payout")
+    with op.batch_alter_table("plan") as batch_op:
+        batch_op.alter_column("payout_count", nullable=False)
+        batch_op.drop_column("last_certificate_payout")
 
 
 def downgrade():
@@ -69,6 +69,7 @@ def downgrade():
             nullable=True,
         ),
     )
-    op.drop_column("plan", "payout_count")
-    op.drop_column("plan", "active_days")
+    with op.batch_alter_table("plan") as batch_op:
+        batch_op.drop_column("payout_count")
+        batch_op.drop_column("active_days")
     # ### end Alembic commands ###
