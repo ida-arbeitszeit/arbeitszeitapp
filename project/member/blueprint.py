@@ -30,7 +30,7 @@ class MemberRoute:
 
     def _apply_decorators(self, function):
         return main_member.route(self.route_string, methods=self.methods)(
-            with_injection(login_required(check_confirmed(function)))
+            with_injection()(login_required(check_confirmed(function)))
         )
 
 

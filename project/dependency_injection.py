@@ -190,16 +190,17 @@ class FlaskModule(Module):
 _injector = Injector(FlaskModule)
 
 
-def with_injection(original_function):
-    """When you wrap a function, make sure that the parameters to be
-    injected come after the the parameters that the caller should
-    provide.
-    """
+class with_injection:
+    def __call__(self, original_function):
+        """When you wrap a function, make sure that the parameters to be
+        injected come after the the parameters that the caller should
+        provide.
+        """
 
-    @wraps(original_function)
-    def wrapped_function(*args, **kwargs):
-        return _injector.call_with_injection(
-            inject(original_function), args=args, kwargs=kwargs
-        )
+        @wraps(original_function)
+        def wrapped_function(*args, **kwargs):
+            return _injector.call_with_injection(
+                inject(original_function), args=args, kwargs=kwargs
+            )
 
-    return wrapped_function
+        return wrapped_function

@@ -30,7 +30,7 @@ class CompanyRoute:
 
     def _apply_decorators(self, function):
         return main_company.route(self.route_string, methods=self.methods)(
-            with_injection(login_required(function))
+            with_injection()(login_required(function))
         )
 
 

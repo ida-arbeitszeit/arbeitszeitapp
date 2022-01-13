@@ -55,7 +55,7 @@ def unconfirmed_user():
 
 # Member
 @auth.route("/member/signup", methods=["GET", "POST"])
-@with_injection
+@with_injection()
 @commit_changes
 def signup_member(
     register_member: RegisterMember,
@@ -144,7 +144,7 @@ def login_member():
 
 
 @auth.route("/resend")
-@with_injection
+@with_injection()
 @login_required
 def resend_confirmation(use_case: ResendConfirmationMail):
     assert (
@@ -199,7 +199,7 @@ def login_company():
 
 @auth.route("/company/signup", methods=["GET", "POST"])
 @commit_changes
-@with_injection
+@with_injection()
 def signup_company(register_company: RegisterCompany):
     register_form = RegisterForm(request.form)
     if request.method == "POST" and register_form.validate():
