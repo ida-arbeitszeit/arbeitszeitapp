@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List
 
 from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProductionResponse
 
