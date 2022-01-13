@@ -43,7 +43,6 @@ class UnauthenticatedAndUnconfirmedCompanyTests(ViewTestCase):
 
     def test_correct_posting_makes_that_confirmations_mail_is_sent_to_company(self):
         company_email = "test2@cp.org"
-        company_token = FlaskTokenService().generate_token(company_email)
         with mail.record_messages() as outbox:
             response = self.client.post(
                 self.url,
@@ -56,4 +55,3 @@ class UnauthenticatedAndUnconfirmedCompanyTests(ViewTestCase):
             assert outbox[0].sender == "test_sender@cp.org"
             assert outbox[0].recipients[0] == company_email
             assert outbox[0].subject == "Bitte bestätige dein Konto"
-            assert company_token in outbox[0].html

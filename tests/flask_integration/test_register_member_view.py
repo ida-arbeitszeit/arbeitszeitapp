@@ -43,7 +43,6 @@ class UnauthenticatedAndUnconfirmedMemberTests(ViewTestCase):
 
     def test_correct_posting_makes_that_confirmations_mail_is_sent_to_member(self):
         member_email = "test2@cp.org"
-        member_token = FlaskTokenService().generate_token(member_email)
         with mail.record_messages() as outbox:
             response = self.client.post(
                 self.url,
@@ -56,4 +55,3 @@ class UnauthenticatedAndUnconfirmedMemberTests(ViewTestCase):
             assert outbox[0].sender == "test_sender@cp.org"
             assert outbox[0].recipients[0] == member_email
             assert outbox[0].subject == "Bitte bestätige dein Konto"
-            assert member_token in outbox[0].html
