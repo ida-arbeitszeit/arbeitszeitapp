@@ -1,5 +1,4 @@
 from project.extensions import mail
-from project.token import FlaskTokenService
 
 from .flask import ViewTestCase
 
