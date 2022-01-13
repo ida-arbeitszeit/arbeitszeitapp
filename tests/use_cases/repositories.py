@@ -79,7 +79,8 @@ class TransactionRepository(interfaces.TransactionRepository):
         date: datetime,
         sending_account: Account,
         receiving_account: Account,
-        amount: Decimal,
+        amount_sent: Decimal,
+        amount_received: Decimal,
         purpose: str,
     ) -> Transaction:
         transaction = Transaction(
@@ -87,7 +88,8 @@ class TransactionRepository(interfaces.TransactionRepository):
             date=date,
             sending_account=sending_account,
             receiving_account=receiving_account,
-            amount=amount,
+            amount_sent=amount_sent,
+            amount_received=amount_received,
             purpose=purpose,
         )
         self.transactions.append(transaction)
@@ -167,8 +169,8 @@ class AccountRepository(interfaces.AccountRepository):
         )
         self._remove_intersection(received_transactions, sent_transactions)
         return decimal_sum(
-            transaction.amount for transaction in received_transactions
-        ) - decimal_sum(transaction.amount for transaction in sent_transactions)
+            transaction.amount_received for transaction in received_transactions
+        ) - decimal_sum(transaction.amount_sent for transaction in sent_transactions)
 
     @classmethod
     def _remove_intersection(

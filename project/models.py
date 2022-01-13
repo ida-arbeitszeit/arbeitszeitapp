@@ -158,7 +158,8 @@ class Transaction(UserMixin, db.Model):
     receiving_account = db.Column(
         db.String, db.ForeignKey("account.id"), nullable=False
     )
-    amount = db.Column(db.Numeric(), nullable=False)
+    amount_sent = db.Column(db.Numeric(), nullable=False)
+    amount_received = db.Column(db.Numeric(), nullable=False)
     purpose = db.Column(db.String(1000), nullable=True)  # Verwendungszweck
 
 

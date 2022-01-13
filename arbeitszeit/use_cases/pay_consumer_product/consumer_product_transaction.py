@@ -63,14 +63,16 @@ class ConsumerProductTransaction:
         )
 
     def exchange_currency(self) -> None:
-        price_total = self.amount * calculate_price(
+        coop_price = self.amount * calculate_price(
             self.plan_cooperation_repository.get_cooperating_plans(self.plan.id)
         )
+        individual_price = self.amount * calculate_price([self.plan])
         sending_account = self.buyer.account
         self.transaction_repository.create_transaction(
             date=self.datetime_service.now(),
             sending_account=sending_account,
             receiving_account=self.plan.planner.product_account,
-            amount=price_total,
+            amount_sent=coop_price,
+            amount_received=individual_price,
             purpose=f"Plan-Id: {self.plan.id}",
         )

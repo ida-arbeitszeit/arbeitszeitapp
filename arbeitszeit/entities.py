@@ -180,11 +180,19 @@ class Purchase:
 
 @dataclass
 class Transaction:
+    """
+    The amount received by a transaction can differ from the amount sent.
+    This is e.g. the case when a product is paid. Then the amount sent is defined by
+    the current coop_price, while the amount received (by the prd-account of the company)
+    is defined by the originally planned costs for the product.
+    """
+
     id: UUID
     date: datetime
     sending_account: Account
     receiving_account: Account
-    amount: Decimal
+    amount_sent: Decimal
+    amount_received: Decimal
     purpose: str
 
     def __hash__(self) -> int:

@@ -258,8 +258,8 @@ class AccountRepository(repositories.AccountRepository):
         intersection = received & sent
         received -= intersection
         sent -= intersection
-        return decimal_sum(t.amount for t in received) - decimal_sum(
-            t.amount for t in sent
+        return decimal_sum(t.amount_received for t in received) - decimal_sum(
+            t.amount_sent for t in sent
         )
 
     def get_by_id(self, id: UUID) -> entities.Account:
@@ -714,7 +714,8 @@ class TransactionRepository(repositories.TransactionRepository):
             receiving_account=self.account_repository.get_by_id(
                 transaction.receiving_account
             ),
-            amount=Decimal(transaction.amount),
+            amount_sent=Decimal(transaction.amount_sent),
+            amount_received=Decimal(transaction.amount_received),
             purpose=transaction.purpose,
         )
 
@@ -723,7 +724,8 @@ class TransactionRepository(repositories.TransactionRepository):
         date: datetime,
         sending_account: entities.Account,
         receiving_account: entities.Account,
-        amount: Decimal,
+        amount_sent: Decimal,
+        amount_received: Decimal,
         purpose: str,
     ) -> entities.Transaction:
         transaction = Transaction(
@@ -731,7 +733,8 @@ class TransactionRepository(repositories.TransactionRepository):
             date=date,
             sending_account=str(sending_account.id),
             receiving_account=str(receiving_account.id),
-            amount=amount,
+            amount_sent=amount_sent,
+            amount_received=amount_received,
             purpose=purpose,
         )
         self.db.session.add(transaction)

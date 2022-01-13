@@ -55,12 +55,14 @@ class PayConsumerProductTests(TestCase):
         self.pay_consumer_product(self.make_request(plan.id, pieces))
         assert len(self.transaction_repository.transactions) == 1
         transaction_added = self.transaction_repository.transactions[0]
-        expected_amount = pieces * calculate_price(
+        expected_amount_sent = pieces * calculate_price(
             self.plan_cooperation_repository.get_cooperating_plans(plan.id)
         )
+        expected_amount_received = pieces * calculate_price([plan])
         assert transaction_added.sending_account == self.buyer.account
         assert transaction_added.receiving_account == plan.planner.product_account
-        assert transaction_added.amount == expected_amount
+        assert transaction_added.amount_sent == expected_amount_sent
+        assert transaction_added.amount_received == expected_amount_received
 
     def test_balances_are_adjusted_correctly(self) -> None:
         plan = self.plan_generator.create_plan(
@@ -86,10 +88,9 @@ class PayConsumerProductTests(TestCase):
         self.pay_consumer_product(self.make_request(plan.id, pieces))
         assert len(self.transaction_repository.transactions) == 1
         transaction_added = self.transaction_repository.transactions[0]
-        expected_amount = 0
         assert transaction_added.sending_account == self.buyer.account
         assert transaction_added.receiving_account == plan.planner.product_account
-        assert transaction_added.amount == expected_amount
+        assert transaction_added.amount_sent == transaction_added.amount_received == 0
 
     def test_balances_are_adjusted_correctly_when_plan_is_public_service(self):
         plan = self.plan_generator.create_plan(
