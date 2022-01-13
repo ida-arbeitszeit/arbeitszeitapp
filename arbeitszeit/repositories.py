@@ -170,7 +170,8 @@ class TransactionRepository(ABC):
         date: datetime,
         sending_account: Account,
         receiving_account: Account,
-        amount: Decimal,
+        amount_sent: Decimal,
+        amount_received: Decimal,
         purpose: str,
     ) -> Transaction:
         pass
@@ -240,6 +241,7 @@ class CompanyRepository(ABC):
         labour_account: Account,
         resource_account: Account,
         products_account: Account,
+        registered_on: datetime,
     ) -> Company:
         pass
 

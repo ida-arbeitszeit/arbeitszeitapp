@@ -115,7 +115,11 @@ from .read_message import (
     ReadMessageResponse,
     ReadMessageSuccess,
 )
-from .register_company import RegisterCompany
+from .register_company import (
+    RegisterCompany,
+    RegisterCompanyRequest,
+    RegisterCompanyResponse,
+)
 from .register_member import (
     RegisterMember,
     RegisterMemberRequest,
@@ -231,6 +235,8 @@ __all__ = [
     "ReadMessageResponse",
     "ReadMessageSuccess",
     "RegisterCompany",
+    "RegisterCompanyRequest",
+    "RegisterCompanyResponse",
     "RegisterMember",
     "RegisterMemberRequest",
     "RegisterMemberResponse",
