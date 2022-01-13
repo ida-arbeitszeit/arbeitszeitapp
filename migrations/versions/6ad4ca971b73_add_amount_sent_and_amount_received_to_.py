@@ -21,16 +21,21 @@ def upgrade():
     # Afterwards column 'amount' gets deleted
 
     op.add_column("transaction", sa.Column("amount_sent", sa.Numeric(), nullable=True))
-    op.execute("UPDATE transaction SET amount_sent = amount")
-    op.alter_column("transaction", "amount_sent", nullable=False)
+    with op.batch_alter_table("transaction") as batch_op:
+        batch_op.execute(
+            """UPDATE "transaction" SET amount_sent = amount"""
+        )  # "transaction" is a keyword in sqlite
+        batch_op.alter_column("amount_sent", nullable=False)
 
     op.add_column(
         "transaction", sa.Column("amount_received", sa.Numeric(), nullable=True)
     )
-    op.execute("UPDATE transaction SET amount_received = amount")
-    op.alter_column("transaction", "amount_received", nullable=False)
+    with op.batch_alter_table("transaction") as batch_op:
+        batch_op.execute("""UPDATE "transaction" SET amount_received = amount""")
+        batch_op.alter_column("amount_received", nullable=False)
 
-    op.drop_column("transaction", "amount")
+    with op.batch_alter_table("transaction") as batch_op:
+        batch_op.drop_column("amount")
 
 
 def downgrade():
@@ -40,8 +45,9 @@ def downgrade():
         "transaction",
         sa.Column("amount", sa.NUMERIC(), autoincrement=False, nullable=True),
     )
-    op.execute("UPDATE transaction SET amount = amount_sent")
-    op.alter_column("transaction", "amount", nullable=False)
+    op.execute("""UPDATE "transaction" SET amount = amount_sent""")
 
-    op.drop_column("transaction", "amount_received")
-    op.drop_column("transaction", "amount_sent")
+    with op.batch_alter_table("transaction") as batch_op:
+        batch_op.alter_column("amount", nullable=False)
+        batch_op.drop_column("amount_received")
+        batch_op.drop_column("amount_sent")
