@@ -66,6 +66,8 @@ class ShowMyCooperationsViewModel:
     deny_message: List[str]
     deny_message_success: bool
     list_of_outbound_coop_requests: ListOfOutboundCooperationRequestsTable
+    cancel_message: List[str]
+    cancel_message_success: bool
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -82,6 +84,7 @@ class ShowMyCooperationsPresenter:
         accept_cooperation_response: Optional[AcceptCooperationResponse],
         deny_cooperation_response: Optional[DenyCooperationResponse],
         list_outbound_coop_requests_response: ListOutboundCoopRequestsResponse,
+        cancel_cooperation_request_response: Optional[bool],
     ) -> ShowMyCooperationsViewModel:
         list_of_coordinations = ListOfCoordinationsTable(
             rows=[
@@ -104,6 +107,10 @@ class ShowMyCooperationsPresenter:
             deny_cooperation_response
         )
 
+        cancel_message, cancel_message_success = self._cancel_message_info(
+            cancel_cooperation_request_response
+        )
+
         list_of_outbound_coop_requests = ListOfOutboundCooperationRequestsTable(
             rows=[
                 self._display_outbound_coop_requests(plan)
@@ -119,6 +126,8 @@ class ShowMyCooperationsPresenter:
             deny_message,
             deny_message_success,
             list_of_outbound_coop_requests,
+            cancel_message,
+            cancel_message_success,
         )
 
     def _display_coordination_table_row(
@@ -236,3 +245,13 @@ class ShowMyCooperationsPresenter:
             ):
                 deny_message = ["Du bist nicht Koordinator dieser Kooperation."]
         return deny_message, deny_message_success
+
+    def _cancel_message_info(
+        self, cancel_coop_response: Optional[bool]
+    ) -> Tuple[List[str], bool]:
+        if cancel_coop_response is None:
+            return [], False
+        elif cancel_coop_response == True:
+            return ["Kooperationsanfrage wurde abgebrochen."], True
+        else:
+            return ["Fehler: Anfrage kann nicht abgebrochen werden."], False
