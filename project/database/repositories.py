@@ -147,6 +147,8 @@ class CompanyRepository(repositories.CompanyRepository):
             product_account=self.account_repository.object_from_orm(
                 self._get_products_account(company_orm)
             ),
+            registered_on=company_orm.registered_on,
+            confirmed_on=company_orm.confirmed_on,
         )
 
     def _get_means_account(self, company: Company) -> Account:
@@ -169,6 +171,11 @@ class CompanyRepository(repositories.CompanyRepository):
         assert account
         return account
 
+    def get_company_orm_by_mail(self, email: str) -> Company:
+        company_orm = Company.query.filter_by(email=email).first()
+        assert company_orm
+        return company_orm
+
     def get_by_id(self, id: UUID) -> Optional[entities.Company]:
         company_orm = Company.query.filter_by(id=str(id)).first()
         if company_orm is None:
@@ -185,12 +192,15 @@ class CompanyRepository(repositories.CompanyRepository):
         labour_account: entities.Account,
         resource_account: entities.Account,
         products_account: entities.Account,
+        registered_on: datetime,
     ) -> entities.Company:
         company = Company(
             id=str(uuid4()),
             email=email,
             name=name,
             password=generate_password_hash(password, method="sha256"),
+            registered_on=registered_on,
+            confirmed_on=None,
         )
         self.db.session.add(company)
         for account in [

@@ -13,6 +13,7 @@ def login_required(callable: T) -> T: ...
 class CurrentUser:
     id: str
     email: str
+    is_authenticated: bool
 
 current_user: CurrentUser
 

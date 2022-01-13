@@ -241,6 +241,7 @@ class CompanyRepository(ABC):
         labour_account: Account,
         resource_account: Account,
         products_account: Account,
+        registered_on: datetime,
     ) -> Company:
         pass
 

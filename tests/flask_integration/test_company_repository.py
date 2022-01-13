@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List
 from uuid import uuid4
 
@@ -63,6 +64,7 @@ def test_can_create_company_with_correct_name(
         labour_account=labour_account,
         resource_account=resource_account,
         products_account=products_account,
+        registered_on=datetime.now(),
     )
     assert company.name == expected_name
 

@@ -2,7 +2,7 @@ from functools import wraps
 from typing import Any, Callable
 
 from flask import Blueprint, Response, redirect, session, url_for
-from flask_login import login_required
+from flask_login import current_user, login_required
 
 from project.dependency_injection import with_injection
 
@@ -30,9 +30,26 @@ class CompanyRoute:
 
     def _apply_decorators(self, function):
         return main_company.route(self.route_string, methods=self.methods)(
-            with_injection(login_required(function))
+            with_injection(login_required(check_confirmed(function)))
         )
 
 
 def user_is_company():
     return session["user_type"] == "company"
+
+
+def check_confirmed(func):
+    @wraps(func)
+    def decorated_function(*args, **kwargs):
+        if not user_is_confirmed(current_user):
+            return redirect(url_for("auth.unconfirmed_company"))
+        return func(*args, **kwargs)
+
+    return decorated_function
+
+
+def user_is_confirmed(current_user) -> bool:
+    try:
+        return current_user.confirmed_on is not None
+    except Exception:
+        return False

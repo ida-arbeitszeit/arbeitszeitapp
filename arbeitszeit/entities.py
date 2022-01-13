@@ -44,6 +44,8 @@ class Company:
     raw_material_account: Account
     work_account: Account
     product_account: Account
+    registered_on: datetime
+    confirmed_on: Optional[datetime]
 
     def accounts(self) -> List[Account]:
         return [
