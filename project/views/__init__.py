@@ -1,3 +1,4 @@
+from .answer_company_work_invite import AnswerCompanyWorkInviteView
 from .http_404_view import Http404View
 from .invite_worker_to_company import InviteWorkerToCompanyView
 from .list_messages_view import ListMessagesView
@@ -8,6 +9,7 @@ from .read_message import ReadMessageView
 from .request_cooperation_view import RequestCooperationView
 
 __all__ = [
+    "AnswerCompanyWorkInviteView",
     "Http404View",
     "InviteWorkerToCompanyView",
     "ListMessagesView",

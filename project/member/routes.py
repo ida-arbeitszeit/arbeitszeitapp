@@ -5,7 +5,11 @@ from flask import Response, request
 from flask_login import current_user
 
 from arbeitszeit import use_cases
-from arbeitszeit.use_cases import ListMessages, ReadMessage
+from arbeitszeit.use_cases import AnswerCompanyWorkInvite, ListMessages, ReadMessage
+from arbeitszeit_web.answer_company_work_invite import (
+    AnswerCompanyWorkInviteController,
+    AnswerCompanyWorkInvitePresenter,
+)
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
@@ -22,10 +26,16 @@ from arbeitszeit_web.query_companies import (
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
 from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
 from project.database import AccountRepository, MemberRepository, commit_changes
-from project.forms import CompanySearchForm, PayConsumerProductForm, PlanSearchForm
+from project.forms import (
+    AnswerCompanyWorkInviteForm,
+    CompanySearchForm,
+    PayConsumerProductForm,
+    PlanSearchForm,
+)
 from project.models import Member
 from project.template import UserTemplateRenderer
 from project.views import (
+    AnswerCompanyWorkInviteView,
     Http404View,
     ListMessagesView,
     PayConsumerProductView,
@@ -256,3 +266,9 @@ def read_message(
         http_404_view=http_404_view,
     )
     return view.respond_to_get(message_id)
+
+
+@MemberRoute("/member/answer_invite/<uuid:invite_id>")
+def answer_work_invite(invite_id: UUID, view: AnswerCompanyWorkInviteView) -> Response:
+    form = AnswerCompanyWorkInviteForm(request.form)
+    return view.respond_to_get(form, invite_id)

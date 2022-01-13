@@ -36,6 +36,7 @@ from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from arbeitszeit_web.url_index import (
     CoopSummaryUrlIndex,
+    InviteUrlIndex,
     MessageUrlIndex,
     PlanSummaryUrlIndex,
 )
@@ -138,8 +139,10 @@ class FlaskModule(Module):
         return QueryPlansPresenter(plan_index, coop_index)
 
     @provider
-    def provide_user_action_resolver(self) -> UserActionResolver:
-        return UserActionResolverImpl()
+    def provide_user_action_resolver(
+        self, invite_index: InviteUrlIndex
+    ) -> UserActionResolver:
+        return UserActionResolverImpl(invite_index)
 
     @provider
     def provide_get_plan_summary_success_presenter(
