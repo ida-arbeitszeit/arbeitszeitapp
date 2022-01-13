@@ -2,6 +2,11 @@ from typing import Protocol
 from uuid import UUID
 
 
+class InviteUrlIndex(Protocol):
+    def get_invite_url(self, invite_id: UUID) -> str:
+        ...
+
+
 class PlanSummaryUrlIndex(Protocol):
     def get_plan_summary_url(self, plan_id: UUID) -> str:
         ...
