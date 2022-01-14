@@ -49,6 +49,7 @@ from .get_draft_summary import (
     DraftSummarySuccess,
     GetDraftSummary,
 )
+from .get_member_account import GetMemberAccount, GetMemberAccountResponse
 from .get_member_profile_info import (
     GetMemberProfileInfo,
     GetMemberProfileInfoResponse,
@@ -181,6 +182,8 @@ __all__ = [
     "GetCoopSummaryResponse",
     "GetCoopSummarySuccess",
     "GetDraftSummary",
+    "GetMemberAccount",
+    "GetMemberAccountResponse",
     "GetMemberProfileInfo",
     "GetMemberProfileInfoResponse",
     "GetPlanSummary",
