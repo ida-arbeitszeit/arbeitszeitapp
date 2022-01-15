@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Protocol
 
 from flask import render_template
 from injector import inject
@@ -10,7 +10,28 @@ from arbeitszeit_web.check_for_unread_message import (
     CheckForUnreadMessagesPresenter,
 )
 from arbeitszeit_web.session import Session
-from arbeitszeit_web.template import TemplateRenderer
+
+
+class TemplateRenderer(Protocol):
+    def render_template(
+        self, name: str, context: Optional[Dict[str, Any]] = None
+    ) -> str:
+        pass
+
+
+class TemplateIndex(Protocol):
+    def get_template_by_name(self, name: str) -> str:
+        ...
+
+
+class MemberTemplateIndex:
+    def get_template_by_name(self, name: str) -> str:
+        return f"member/{name}.html"
+
+
+class CompanyTemplateIndex:
+    def get_template_by_name(self, name: str) -> str:
+        return f"company/{name}.html"
 
 
 class FlaskTemplateRenderer:

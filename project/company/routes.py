@@ -28,7 +28,6 @@ from arbeitszeit.use_cases import (
     ListOutboundCoopRequestsRequest,
     ListPlans,
     ListWorkers,
-    ReadMessage,
     RequestCooperation,
     SendWorkCertificatesToWorker,
     ToggleProductAvailability,
@@ -57,7 +56,6 @@ from arbeitszeit_web.query_companies import (
     QueryCompaniesPresenter,
 )
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
-from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
 from arbeitszeit_web.request_cooperation import (
     RequestCooperationController,
     RequestCooperationPresenter,
@@ -441,6 +439,7 @@ def plan_summary(
     get_plan_summary: use_cases.GetPlanSummary,
     template_renderer: UserTemplateRenderer,
     presenter: GetPlanSummarySuccessPresenter,
+    http_404_view: Http404View,
 ):
     use_case_response = get_plan_summary(plan_id)
     if isinstance(use_case_response, use_cases.PlanSummarySuccess):
@@ -449,7 +448,7 @@ def plan_summary(
             "company/plan_summary.html", context=dict(view_model=view_model.to_dict())
         )
     else:
-        return Http404View("company/404.html", template_renderer).get_response()
+        return http_404_view.get_response()
 
 
 @CompanyRoute("/company/cooperation_summary/<uuid:coop_id>")
@@ -458,6 +457,7 @@ def coop_summary(
     get_coop_summary: use_cases.GetCoopSummary,
     presenter: GetCoopSummarySuccessPresenter,
     template_renderer: UserTemplateRenderer,
+    http_404_view: Http404View,
 ):
     use_case_response = get_coop_summary(
         use_cases.GetCoopSummaryRequest(UUID(current_user.id), coop_id)
@@ -468,7 +468,7 @@ def coop_summary(
             "company/coop_summary.html", context=dict(view_model=view_model.to_dict())
         )
     else:
-        return Http404View("company/404.html", template_renderer).get_response()
+        return http_404_view.get_response()
 
 
 @CompanyRoute("/company/create_cooperation", methods=["GET", "POST"])
@@ -502,8 +502,8 @@ def request_cooperation(
     controller: RequestCooperationController,
     presenter: RequestCooperationPresenter,
     template_renderer: UserTemplateRenderer,
+    http_404_view: Http404View,
 ):
-    http_404_view = Http404View("company/404.html", template_renderer)
     form = RequestCooperationForm(request.form)
     view = RequestCooperationView(
         current_user_id=UUID(current_user.id),
@@ -602,8 +602,8 @@ def list_messages(
     controller: ListMessagesController,
     use_case: ListMessages,
     presenter: ListMessagesPresenter,
+    http_404_view: Http404View,
 ) -> Response:
-    http_404_view = Http404View("company/404.html", template_renderer)
     view = ListMessagesView(
         template_renderer=template_renderer,
         presenter=presenter,
@@ -641,18 +641,6 @@ def invite_worker_to_company(
 @commit_changes
 def read_message(
     message_id: UUID,
-    read_message: ReadMessage,
-    controller: ReadMessageController,
-    presenter: ReadMessagePresenter,
-    template_renderer: UserTemplateRenderer,
+    view: ReadMessageView,
 ) -> Response:
-    http_404_view = Http404View("company/404.html", template_renderer)
-    view = ReadMessageView(
-        read_message,
-        controller,
-        presenter,
-        template_renderer,
-        template_name="company/read_message.html",
-        http_404_view=http_404_view,
-    )
     return view.respond_to_get(message_id)
