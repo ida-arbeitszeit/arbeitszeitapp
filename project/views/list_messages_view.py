@@ -4,7 +4,7 @@ from flask import Response
 
 from arbeitszeit.use_cases import ListMessages
 from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
-from arbeitszeit_web.template import TemplateRenderer
+from project.template import TemplateRenderer
 
 from .http_404_view import Http404View
 
