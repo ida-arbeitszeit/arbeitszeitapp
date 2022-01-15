@@ -19,7 +19,15 @@ from arbeitszeit import repositories as interfaces
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.mail_service import MailService
 from arbeitszeit.token import TokenService
-from arbeitszeit.use_cases import CheckForUnreadMessages, ReadMessage
+from arbeitszeit.use_cases import (
+    AnswerCompanyWorkInvite,
+    CheckForUnreadMessages,
+    ReadMessage,
+)
+from arbeitszeit_web.answer_company_work_invite import (
+    AnswerCompanyWorkInviteController,
+    AnswerCompanyWorkInvitePresenter,
+)
 from arbeitszeit_web.check_for_unread_message import (
     CheckForUnreadMessagesController,
     CheckForUnreadMessagesPresenter,
@@ -33,6 +41,7 @@ from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresente
 from arbeitszeit_web.query_plans import QueryPlansPresenter
 from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
 from arbeitszeit_web.request_cooperation import RequestCooperationController
+from arbeitszeit_web.session import Session
 from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from arbeitszeit_web.url_index import (
@@ -73,7 +82,7 @@ from project.template import (
 )
 from project.token import FlaskTokenService
 from project.url_index import CompanyUrlIndex, MemberUrlIndex
-from project.views import Http404View, ReadMessageView
+from project.views import AnswerCompanyWorkInviteView, Http404View, ReadMessageView
 
 
 class MemberModule(Module):
@@ -99,6 +108,10 @@ class MemberModule(Module):
     def provide_template_index(self) -> TemplateIndex:
         return MemberTemplateIndex()
 
+    @provider
+    def provide_invite_url_index(self, index: MemberUrlIndex) -> InviteUrlIndex:
+        return index
+
 
 class CompanyModule(Module):
     @provider
@@ -123,8 +136,39 @@ class CompanyModule(Module):
     def provide_template_index(self) -> TemplateIndex:
         return CompanyTemplateIndex()
 
+    @provider
+    def provide_invite_url_index(self, index: CompanyUrlIndex) -> InviteUrlIndex:
+        return index
+
 
 class FlaskModule(Module):
+    @provider
+    def provide_answer_company_work_invite_view(
+        self,
+        controller: AnswerCompanyWorkInviteController,
+        use_case: AnswerCompanyWorkInvite,
+        presenter: AnswerCompanyWorkInvitePresenter,
+        http_404_view: Http404View,
+    ) -> AnswerCompanyWorkInviteView:
+        return AnswerCompanyWorkInviteView(
+            controller=controller,
+            use_case=use_case,
+            presenter=presenter,
+            http_404_view=http_404_view,
+        )
+
+    @provider
+    def provide_answer_company_work_invite_controller(
+        self, session: Session
+    ) -> AnswerCompanyWorkInviteController:
+        return AnswerCompanyWorkInviteController(session)
+
+    @provider
+    def provide_answer_company_work_invite_presenter(
+        self, notifier: Notifier
+    ) -> AnswerCompanyWorkInvitePresenter:
+        return AnswerCompanyWorkInvitePresenter(notifier)
+
     @provider
     def provide_read_message_view(
         self,
@@ -212,13 +256,13 @@ class FlaskModule(Module):
 
     @provider
     def provide_check_for_unread_messages_controller(
-        self, session: FlaskSession
+        self, session: Session
     ) -> CheckForUnreadMessagesController:
         return CheckForUnreadMessagesController(session)
 
     @provider
     def provide_invite_worker_to_company_controller(
-        self, session: FlaskSession
+        self, session: Session
     ) -> InviteWorkerToCompanyController:
         return InviteWorkerToCompanyController(session)
 
@@ -226,7 +270,7 @@ class FlaskModule(Module):
     def provide_user_template_renderer(
         self,
         flask_template_renderer: FlaskTemplateRenderer,
-        session: FlaskSession,
+        session: Session,
         check_unread_messages_use_case: CheckForUnreadMessages,
         check_unread_messages_controller: CheckForUnreadMessagesController,
         check_unread_messages_presenter: CheckForUnreadMessagesPresenter,
@@ -241,21 +285,25 @@ class FlaskModule(Module):
 
     @provider
     def provide_list_messages_controller(
-        self, session: FlaskSession
+        self, session: Session
     ) -> ListMessagesController:
         return ListMessagesController(session)
 
     @provider
     def provide_request_cooperation_controller(
-        self, session: FlaskSession
+        self, session: Session
     ) -> RequestCooperationController:
         return RequestCooperationController(session)
 
     @provider
     def provide_read_message_controller(
-        self, session: FlaskSession
+        self, session: Session
     ) -> ReadMessageController:
         return ReadMessageController(session)
+
+    @provider
+    def provide_session(self, flask_session: FlaskSession) -> Session:
+        return flask_session
 
     @provider
     def provide_read_message_presenter(

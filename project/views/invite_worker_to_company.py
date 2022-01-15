@@ -8,8 +8,8 @@ from arbeitszeit_web.invite_worker_to_company import (
     InviteWorkerToCompanyPresenter,
     ViewModel,
 )
-from arbeitszeit_web.template import TemplateRenderer
 from project.forms import InviteWorkerToCompanyForm
+from project.template import TemplateRenderer
 
 
 @dataclass

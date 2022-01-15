@@ -6,6 +6,7 @@ from arbeitszeit.repositories import CompanyWorkerRepository, WorkerInviteReposi
 from arbeitszeit.use_cases import (
     AnswerCompanyWorkInvite,
     AnswerCompanyWorkInviteRequest,
+    AnswerCompanyWorkInviteResponse,
     InviteWorkerToCompany,
     InviteWorkerToCompanyRequest,
 )
@@ -39,6 +40,17 @@ class AnwerCompanyWorkInviteTests(TestCase):
             self._create_request(is_accepted=True, invite_id=uuid4())
         )
         self.assertFalse(response.is_accepted)
+
+    def test_trying_to_answer_non_existing_invite_sets_failure_reason_correctly(
+        self,
+    ) -> None:
+        response = self.answer_company_work_invite(
+            self._create_request(is_accepted=True, invite_id=uuid4())
+        )
+        self.assertEqual(
+            response.failure_reason,
+            AnswerCompanyWorkInviteResponse.Failure.invite_not_found,
+        )
 
     def test_rejecting_existing_invite_is_successful(self) -> None:
         invite_id = self._invite_worker()
@@ -145,6 +157,23 @@ class AnwerCompanyWorkInviteTests(TestCase):
             )
         )
         self.assertFalse(response.is_success)
+
+    def test_answer_invite_as_member_that_was_not_invited_returns_proper_rejection_reason(
+        self,
+    ) -> None:
+        invite_id = self._invite_worker()
+        other_member = self.member_generator.create_member()
+        response = self.answer_company_work_invite(
+            self._create_request(
+                is_accepted=True,
+                invite_id=invite_id,
+                user=other_member.id,
+            )
+        )
+        self.assertEqual(
+            response.failure_reason,
+            AnswerCompanyWorkInviteResponse.Failure.member_was_not_invited,
+        )
 
     def test_successful_response_contains_name_of_inviting_company(self) -> None:
         invite_id = self._invite_worker()

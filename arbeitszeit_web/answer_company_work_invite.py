@@ -13,9 +13,6 @@ from .session import Session
 
 
 class AnswerCompanyWorkInviteForm(Protocol):
-    def get_invite_id_field(self) -> str:
-        ...
-
     def get_is_accepted_field(self) -> bool:
         ...
 
@@ -25,12 +22,8 @@ class AnswerCompanyWorkInviteController:
     session: Session
 
     def import_form_data(
-        self, form: AnswerCompanyWorkInviteForm
+        self, form: AnswerCompanyWorkInviteForm, invite_id: UUID
     ) -> Union[None, MalformedInputData, AnswerCompanyWorkInviteRequest]:
-        try:
-            invite_id = UUID(form.get_invite_id_field())
-        except ValueError:
-            return MalformedInputData("invite_id", "Muss eine gültige UUID sein.")
         requesting_user = self.session.get_current_user()
         if requesting_user is not None:
             return AnswerCompanyWorkInviteRequest(

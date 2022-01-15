@@ -14,6 +14,7 @@ def get_response(
     is_accepted: Optional[bool] = None,
     company_name: Optional[str] = None,
 ) -> AnswerCompanyWorkInviteResponse:
+    failure_reason: Optional[AnswerCompanyWorkInviteResponse.Failure] = None
     if is_success is None:
         is_success = True
     if is_accepted is None:
@@ -21,10 +22,13 @@ def get_response(
     if company_name is None:
         if is_success:
             company_name = COMPANY_NAME
+    if not is_success:
+        failure_reason = AnswerCompanyWorkInviteResponse.Failure.invite_not_found
     return AnswerCompanyWorkInviteResponse(
         is_success=is_success,
         is_accepted=is_accepted,
         company_name=company_name,
+        failure_reason=failure_reason,
     )
 
 

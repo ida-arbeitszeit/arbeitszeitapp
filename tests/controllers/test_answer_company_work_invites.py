@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Callable, Optional, cast
+from typing import Any, Callable, cast
 from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases import AnswerCompanyWorkInviteRequest
 from arbeitszeit_web.answer_company_work_invite import AnswerCompanyWorkInviteController
-from arbeitszeit_web.malformed_input_data import MalformedInputData
 
 from ..session import FakeSession
 
@@ -17,12 +16,8 @@ class BaseTestCase(TestCase):
         self.session = FakeSession()
         self.controller = AnswerCompanyWorkInviteController(self.session)
 
-    def _get_request_form(
-        self, invite_id: Optional[str] = None, is_accepted: bool = True
-    ) -> FakeRequestForm:
-        if invite_id is None:
-            invite_id = str(uuid4())
-        return FakeRequestForm(invite_id_field=invite_id, is_accepted=is_accepted)
+    def _get_request_form(self, is_accepted: bool = True) -> FakeRequestForm:
+        return FakeRequestForm(is_accepted=is_accepted)
 
     def assertSuccess(
         self,
@@ -37,39 +32,10 @@ class AnonymousUserTests(BaseTestCase):
     def test_that_controller_returns_none_when_importing_form_data_from_anonymous_user(
         self,
     ) -> None:
-        self.assertIsNone(self.controller.import_form_data(self._get_request_form()))
-
-
-class MalformedInviteIdTest(BaseTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.requesting_user = uuid4()
-        self.session.set_current_user_id(self.requesting_user)
-
-    def test_controller_returns_malformed_input_data_with_invalid_uuid_as_invite_id(
-        self,
-    ) -> None:
-        self.assertIsInstance(
-            self.controller.import_form_data(self._get_request_form(invite_id="")),
-            MalformedInputData,
-        )
-
-    def test_malformed_data_points_to_invite_id_field(self) -> None:
-        result = self.controller.import_form_data(self._get_request_form(invite_id=""))
-        self.assertMalformedData(result, lambda m: m.field == "invite_id")
-
-    def test_message_points_out_that_invite_id_must_be_a_uuid(self) -> None:
-        result = self.controller.import_form_data(self._get_request_form(invite_id=""))
-        self.assertMalformedData(
-            result, lambda m: m.message == "Muss eine gültige UUID sein."
-        )
-
-    def assertMalformedData(
-        self, candidate: Any, condition: Callable[[MalformedInputData], bool]
-    ) -> None:
-        self.assertIsInstance(candidate, MalformedInputData)
-        self.assertTrue(
-            condition(cast(MalformedInputData, candidate)),
+        self.assertIsNone(
+            self.controller.import_form_data(
+                self._get_request_form(), invite_id=uuid4()
+            )
         )
 
 
@@ -82,20 +48,26 @@ class LoggedInUsertests(BaseTestCase):
     def test_controller_returns_not_none_for_logged_in_user_when_importing_form_data(
         self,
     ) -> None:
-        self.assertIsNotNone(self.controller.import_form_data(self._get_request_form()))
+        self.assertIsNotNone(
+            self.controller.import_form_data(
+                self._get_request_form(), invite_id=uuid4()
+            )
+        )
 
     def test_request_contains_correct_uuid_from_form_data(
         self,
     ) -> None:
         expected_uuid = uuid4()
         request = self.controller.import_form_data(
-            self._get_request_form(invite_id=str(expected_uuid))
+            self._get_request_form(),
+            invite_id=expected_uuid,
         )
         self.assertSuccess(request, lambda r: r.invite_id == expected_uuid)
 
     def test_when_form_rejects_invite_then_render_request_that_rejects_invite(self):
         request = self.controller.import_form_data(
-            self._get_request_form(is_accepted=False)
+            self._get_request_form(is_accepted=False),
+            invite_id=uuid4(),
         )
         self.assertSuccess(request, lambda r: not r.is_accepted)
 
@@ -103,22 +75,21 @@ class LoggedInUsertests(BaseTestCase):
         self,
     ) -> None:
         request = self.controller.import_form_data(
-            self._get_request_form(is_accepted=True)
+            self._get_request_form(is_accepted=True),
+            invite_id=uuid4(),
         )
         self.assertSuccess(request, lambda r: r.is_accepted)
 
     def test_render_user_id_of_requesting_user_in_resulting_response(self) -> None:
-        request = self.controller.import_form_data(self._get_request_form())
+        request = self.controller.import_form_data(
+            self._get_request_form(), invite_id=uuid4()
+        )
         self.assertSuccess(request, lambda r: r.user == self.requesting_user)
 
 
 @dataclass
 class FakeRequestForm:
-    invite_id_field: str
     is_accepted: bool
-
-    def get_invite_id_field(self) -> str:
-        return self.invite_id_field
 
     def get_is_accepted_field(self) -> bool:
         return self.is_accepted
