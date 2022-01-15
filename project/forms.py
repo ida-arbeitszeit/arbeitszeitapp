@@ -26,25 +26,6 @@ class FieldMustExist:
         return field.raw_data
 
 
-class ProductSearchForm(Form):
-    choices = [("Name", "Name"), ("Beschreibung", "Beschreibung")]
-    select = SelectField(
-        "Nach Produkten suchen", choices=choices, validators=[validators.DataRequired()]
-    )
-    search = StringField(
-        "Suchbegriff",
-        validators=[
-            FieldMustExist(message="Angabe erforderlich"),
-        ],
-    )
-
-    def get_query_string(self) -> str:
-        return self.data["search"]
-
-    def get_category_string(self) -> str:
-        return self.data["select"]
-
-
 class PlanSearchForm(Form):
     choices = [("Plan-ID", "Plan-ID"), ("Produktname", "Produktname")]
     select = SelectField(
@@ -82,6 +63,15 @@ class RegisterForm(Form):
         ],
     )
 
+    def get_email_string(self) -> str:
+        return self.data["email"]
+
+    def get_name_string(self) -> str:
+        return self.data["name"]
+
+    def get_password_string(self) -> str:
+        return self.data["password"]
+
 
 class LoginForm(Form):
     email = StringField(
@@ -111,4 +101,77 @@ class PayConsumerProductForm(Form):
         return self.data["amount"]
 
     def get_plan_id_field(self) -> str:
+        return self.data["plan_id"].strip()
+
+
+class CompanySearchForm(Form):
+    choices = [("Name", "Name"), ("Email", "Email")]
+    select = SelectField(
+        "Nach Betrieb suchen", choices=choices, validators=[validators.DataRequired()]
+    )
+    search = StringField(
+        "Suchbegriff",
+        validators=[
+            FieldMustExist(message="Angabe erforderlich"),
+        ],
+    )
+
+    def get_query_string(self) -> str:
+        return self.data["search"]
+
+    def get_category_string(self) -> str:
+        return self.data["select"]
+
+
+class CreateDraftForm(Form):
+    prd_name = StringField()
+    description = StringField()
+    timeframe = StringField()
+    prd_unit = StringField()
+    prd_amount = StringField()
+    costs_p = StringField()
+    costs_r = StringField()
+    costs_a = StringField()
+    productive_or_public = StringField()
+    action = StringField()
+
+    def get_prd_name_string(self) -> str:
+        return self.data["prd_name"]
+
+    def get_description_string(self) -> str:
+        return self.data["description"]
+
+    def get_timeframe_string(self) -> str:
+        return self.data["timeframe"]
+
+    def get_prd_unit_string(self) -> str:
+        return self.data["prd_unit"]
+
+    def get_prd_amount_string(self) -> str:
+        return self.data["prd_amount"]
+
+    def get_costs_p_string(self) -> str:
+        return self.data["costs_p"]
+
+    def get_costs_r_string(self) -> str:
+        return self.data["costs_r"]
+
+    def get_costs_a_string(self) -> str:
+        return self.data["costs_a"]
+
+    def get_productive_or_public_string(self) -> str:
+        return self.data["productive_or_public"]
+
+    def get_action_string(self) -> str:
+        return self.data["action"]
+
+
+class RequestCooperationForm(Form):
+    plan_id = StringField()
+    cooperation_id = StringField()
+
+    def get_plan_id_string(self) -> str:
         return self.data["plan_id"]
+
+    def get_cooperation_id_string(self) -> str:
+        return self.data["cooperation_id"]

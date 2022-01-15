@@ -1,7 +1,7 @@
 from dataclasses import replace
 from decimal import Decimal
 from unittest import TestCase
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.get_plan_summary import PlanSummarySuccess
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
@@ -19,13 +19,17 @@ TESTING_RESPONSE_MODEL = PlanSummarySuccess(
     resources_cost=Decimal(2),
     labour_cost=Decimal(3),
     is_public_service=False,
-    price_per_unit=Decimal(0.06),
+    price_per_unit=Decimal("0.061"),
+    is_available=True,
+    is_cooperating=True,
+    cooperation=uuid4(),
 )
 
 
 class GetPlanSummarySuccessPresenterTests(TestCase):
     def setUp(self) -> None:
-        self.presenter = GetPlanSummarySuccessPresenter()
+        self.coop_url_index = CoopSummaryUrlIndex()
+        self.presenter = GetPlanSummarySuccessPresenter(self.coop_url_index)
 
     def test_plan_id_is_displayed_correctly_as_tuple_of_strings(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
@@ -63,11 +67,26 @@ class GetPlanSummarySuccessPresenterTests(TestCase):
             ("Name des Produkts", TESTING_RESPONSE_MODEL.product_name),
         )
 
-    def test_description_is_displayed_correctly_as_tuple_of_strings(self):
+    def test_description_is_displayed_correctly_as_tuple_of_string_and_list_of_string(
+        self,
+    ):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
         self.assertTupleEqual(
             view_model.description,
-            ("Beschreibung des Produkts", TESTING_RESPONSE_MODEL.description),
+            ("Beschreibung des Produkts", [TESTING_RESPONSE_MODEL.description]),
+        )
+
+    def test_description_is_splitted_correctly_at_carriage_return_in_list_of_strings(
+        self,
+    ):
+        response = replace(
+            TESTING_RESPONSE_MODEL,
+            description="first paragraph\rsecond paragraph",
+        )
+        view_model = self.presenter.present(response)
+        self.assertTupleEqual(
+            view_model.description,
+            ("Beschreibung des Produkts", ["first paragraph", "second paragraph"]),
         )
 
     def test_timeframe_is_displayed_correctly_as_tuple_of_strings(self):
@@ -150,13 +169,17 @@ class GetPlanSummarySuccessPresenterTests(TestCase):
             ),
         )
 
-    def test_price_per_unit_is_displayed_correctly_as_tuple_of_strings(self):
+    def test_price_per_unit_is_displayed_correctly_as_tuple_of_strings_and_bool(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        coop_id = TESTING_RESPONSE_MODEL.cooperation
+        assert coop_id
         self.assertTupleEqual(
             view_model.price_per_unit,
             (
                 "Preis (pro Einheit)",
-                str(TESTING_RESPONSE_MODEL.price_per_unit),
+                "0.06",
+                True,
+                self.coop_url_index.get_coop_summary_url(coop_id),
             ),
         )
 
@@ -171,3 +194,18 @@ class GetPlanSummarySuccessPresenterTests(TestCase):
         self.assertEqual(
             dictionary["plan_id"], ("Plan-ID", str(TESTING_RESPONSE_MODEL.plan_id))
         )
+
+    def test_availability_is_displayed_correctly_as_tuple_of_strings(self):
+        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        self.assertTupleEqual(
+            view_model.is_available,
+            (
+                "Produkt aktuell verfügbar",
+                "Ja",
+            ),
+        )
+
+
+class CoopSummaryUrlIndex:
+    def get_coop_summary_url(self, coop_id: UUID) -> str:
+        return f"fake_coop_url:{coop_id}"

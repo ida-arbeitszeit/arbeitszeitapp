@@ -21,9 +21,6 @@
         <div class="navbar-start">
 
           {% if current_user.is_authenticated %}
-          <a href="{{ url_for('main_member.suchen') }}" class="navbar-item">
-            Kleinanzeigen
-          </a>
           <a href="{{ url_for('main_member.query_plans') }}" class="navbar-item">
             Alle Pläne
           </a>
@@ -39,8 +36,15 @@
           <a href="{{ url_for('main_member.statistics') }}" class="navbar-item">
             Statistiken
           </a>
+          <a href="{{ url_for('main_member.query_companies') }}" class="navbar-item">
+            Betriebe
+          </a>
           <a href="{{ url_for('main_member.profile') }}" class="navbar-item">
             Meine Daten
+          </a>
+          <a href="{{ url_for('main_member.list_messages') }}"
+            class="navbar-item {% if message_indicator is defined %}{% if message_indicator.show_unread_messages_indicator %}unread-messages-indicator{% endif %}{% endif %}">
+            Nachrichten
           </a>
           {% endif %}
 

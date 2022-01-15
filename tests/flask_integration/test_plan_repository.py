@@ -119,7 +119,7 @@ def test_plans_that_were_set_to_expired_dont_show_up_in_active_plans(
 
 
 @injection_test
-def test_get_plan_by_id_with_unnkown_id_results_in_none(
+def test_get_plan_by_id_with_unkown_id_results_in_none(
     repository: PlanRepository,
 ) -> None:
     assert repository.get_plan_by_id(uuid4()) is None
@@ -135,73 +135,45 @@ def test_that_existing_plan_can_be_retrieved_by_id(
 
 
 @injection_test
-def test_that_all_plan_for_a_company_are_returned(
+def test_that_all_plans_for_a_company_are_returned(
     repository: PlanRepository,
     plan_generator: PlanGenerator,
     company_generator: CompanyGenerator,
 ) -> None:
     company = company_generator.create_company()
-    plan_generator.create_plan(planner=company)
-    plan_generator.create_plan(approved=True, planner=company)
-    plan_generator.create_plan(
-        approved=True, activation_date=datetime.now(), planner=company
-    )
+    plan_generator.create_plan(planner=company, activation_date=None)
+    plan_generator.create_plan(planner=company, is_public_service=True)
+    plan_generator.create_plan(planner=company, is_available=False)
     returned_plans = list(repository.get_all_plans_for_company(company_id=company.id))
     assert len(returned_plans) == 3
 
 
 @injection_test
-def test_that_approved_non_active_plan_for_company_is_returned(
+def test_that_all_active_plan_for_a_company_are_returned(
     repository: PlanRepository,
     plan_generator: PlanGenerator,
     company_generator: CompanyGenerator,
 ) -> None:
     company = company_generator.create_company()
-    expected_plan = plan_generator.create_plan(approved=True, planner=company)
-    returned_plan = list(
-        repository.get_non_active_plans_for_company(company_id=company.id)
-    )[0]
-    assert (
-        expected_plan.id == returned_plan.id
-        and returned_plan.approved
-        and not returned_plan.is_active
-        and not returned_plan.expired
+    plan_generator.create_plan(planner=company, activation_date=datetime.min)
+    plan_generator.create_plan(planner=company, activation_date=datetime.min)
+    plan_generator.create_plan(planner=company)
+    returned_plans = list(
+        repository.get_all_active_plans_for_company(company_id=company.id)
     )
+    assert len(returned_plans) == 2
 
 
 @injection_test
-def test_that_approved_and_active_plan_for_company_is_returned(
+def test_that_plan_gets_hidden(
     repository: PlanRepository,
     plan_generator: PlanGenerator,
-    company_generator: CompanyGenerator,
 ) -> None:
-    company = company_generator.create_company()
-    expected_plan = plan_generator.create_plan(
-        approved=True, activation_date=datetime.now(), planner=company
-    )
-    returned_plan = list(
-        repository.get_active_plans_for_company(company_id=company.id)
-    )[0]
-    assert (
-        expected_plan.id == returned_plan.id
-        and returned_plan.approved
-        and returned_plan.is_active
-        and not returned_plan.expired
-    )
-
-
-@injection_test
-def test_that_expired_plan_for_company_is_returned(
-    repository: PlanRepository,
-    plan_generator: PlanGenerator,
-    company_generator: CompanyGenerator,
-) -> None:
-    company = company_generator.create_company()
-    expected_plan = plan_generator.create_plan(expired=True, planner=company)
-    returned_plan = list(
-        repository.get_expired_plans_for_company(company_id=company.id)
-    )[0]
-    assert expected_plan.id == returned_plan.id and returned_plan.expired
+    plan = plan_generator.create_plan()
+    repository.hide_plan(plan.id)
+    plan_from_repo = repository.get_plan_by_id(plan.id)
+    assert plan_from_repo
+    assert plan_from_repo.hidden_by_user
 
 
 @injection_test
@@ -243,3 +215,55 @@ def test_that_query_active_plans_by_substring_of_plan_id_returns_plan(
     returned_plan = list(repository.query_active_plans_by_plan_id(query))
     assert returned_plan
     assert returned_plan[0] == expected_plan
+
+
+@injection_test
+def test_that_active_days_are_set(
+    repository: PlanRepository,
+    plan_generator: PlanGenerator,
+) -> None:
+    plan = plan_generator.create_plan(activation_date=datetime.min)
+    assert plan.active_days is None
+    repository.set_active_days(plan, 3)
+    plan_from_repo = repository.get_plan_by_id(plan.id)
+    assert plan_from_repo
+    assert plan_from_repo.active_days == 3
+
+
+@injection_test
+def test_that_payout_count_is_increased_by_one(
+    repository: PlanRepository,
+    plan_generator: PlanGenerator,
+) -> None:
+    plan = plan_generator.create_plan(activation_date=datetime.min)
+    assert plan.payout_count == 0
+    repository.increase_payout_count_by_one(plan)
+    plan_from_repo = repository.get_plan_by_id(plan.id)
+    assert plan_from_repo
+    assert plan_from_repo.payout_count == 1
+
+
+@injection_test
+def test_that_availability_is_toggled_to_false(
+    repository: PlanRepository,
+    plan_generator: PlanGenerator,
+) -> None:
+    plan = plan_generator.create_plan()
+    assert plan.is_available == True
+    repository.toggle_product_availability(plan)
+    plan_from_repo = repository.get_plan_by_id(plan.id)
+    assert plan_from_repo
+    assert plan_from_repo.is_available == False
+
+
+@injection_test
+def test_that_availability_is_toggled_to_true(
+    repository: PlanRepository,
+    plan_generator: PlanGenerator,
+) -> None:
+    plan = plan_generator.create_plan(is_available=False)
+    assert plan.is_available == False
+    repository.toggle_product_availability(plan)
+    plan_from_repo = repository.get_plan_by_id(plan.id)
+    assert plan_from_repo
+    assert plan_from_repo.is_available == True

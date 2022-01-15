@@ -8,16 +8,19 @@ from arbeitszeit.entities import (
     Account,
     AccountTypes,
     Company,
+    CompanyWorkInvite,
+    Cooperation,
     Member,
+    Message,
     Plan,
     PlanDraft,
     ProductionCosts,
-    ProductOffer,
     Purchase,
     PurposesOfPurchases,
     SocialAccounting,
     Transaction,
 )
+from arbeitszeit.user_action import UserAction
 
 
 class CompanyWorkerRepository(ABC):
@@ -80,7 +83,11 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def set_last_certificate_payout(self, plan: Plan, last_payout: datetime) -> None:
+    def set_active_days(self, plan: Plan, full_active_days: int) -> None:
+        pass
+
+    @abstractmethod
+    def increase_payout_count_by_one(self, plan: Plan) -> None:
         pass
 
     @abstractmethod
@@ -132,7 +139,7 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def delete_plan(self, plan_id: UUID) -> None:
+    def hide_plan(self, plan_id: UUID) -> None:
         pass
 
     @abstractmethod
@@ -143,19 +150,16 @@ class PlanRepository(ABC):
     def query_active_plans_by_plan_id(self, query: str) -> Iterator[Plan]:
         pass
 
+    @abstractmethod
     def get_all_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
         pass
 
     @abstractmethod
-    def get_non_active_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
+    def get_all_active_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
         pass
 
     @abstractmethod
-    def get_active_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
-        pass
-
-    @abstractmethod
-    def get_expired_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
+    def toggle_product_availability(self, plan: Plan) -> None:
         pass
 
 
@@ -166,7 +170,8 @@ class TransactionRepository(ABC):
         date: datetime,
         sending_account: Account,
         receiving_account: Account,
-        amount: Decimal,
+        amount_sent: Decimal,
+        amount_received: Decimal,
         purpose: str,
     ) -> Transaction:
         pass
@@ -192,50 +197,15 @@ class AccountRepository(ABC):
         pass
 
 
-class OfferRepository(ABC):
-    @abstractmethod
-    def get_by_id(self, id: UUID) -> ProductOffer:
-        pass
-
-    @abstractmethod
-    def query_offers_by_name(self, query: str) -> Iterator[ProductOffer]:
-        pass
-
-    @abstractmethod
-    def query_offers_by_description(self, query: str) -> Iterator[ProductOffer]:
-        pass
-
-    @abstractmethod
-    def get_all_offers(self) -> Iterator[ProductOffer]:
-        pass
-
-    @abstractmethod
-    def create_offer(
-        self,
-        plan: Plan,
-        creation_datetime: datetime,
-        name: str,
-        description: str,
-    ) -> ProductOffer:
-        pass
-
-    @abstractmethod
-    def count_all_offers_without_plan_duplicates(self) -> int:
-        pass
-
-    @abstractmethod
-    def delete_offer(self, id: UUID) -> None:
-        pass
-
-    @abstractmethod
-    def get_all_offers_belonging_to(self, plan_id: UUID) -> List[ProductOffer]:
-        pass
-
-
 class MemberRepository(ABC):
     @abstractmethod
     def create_member(
-        self, email: str, name: str, password: str, account: Account
+        self,
+        email: str,
+        name: str,
+        password: str,
+        account: Account,
+        registered_on: datetime,
     ) -> Member:
         pass
 
@@ -271,6 +241,7 @@ class CompanyRepository(ABC):
         labour_account: Account,
         resource_account: Account,
         products_account: Account,
+        registered_on: datetime,
     ) -> Company:
         pass
 
@@ -284,6 +255,18 @@ class CompanyRepository(ABC):
 
     @abstractmethod
     def count_registered_companies(self) -> int:
+        pass
+
+    @abstractmethod
+    def query_companies_by_name(self, query: str) -> Iterator[Company]:
+        pass
+
+    @abstractmethod
+    def query_companies_by_email(self, query: str) -> Iterator[Company]:
+        pass
+
+    @abstractmethod
+    def get_all_companies(self) -> Iterator[Company]:
         pass
 
 
@@ -311,6 +294,10 @@ class PlanDraftRepository(ABC):
     def delete_draft(self, id: UUID) -> None:
         pass
 
+    @abstractmethod
+    def all_drafts_of_company(self, id: UUID) -> Iterable[PlanDraft]:
+        pass
+
 
 class WorkerInviteRepository(ABC):
     @abstractmethod
@@ -318,9 +305,119 @@ class WorkerInviteRepository(ABC):
         pass
 
     @abstractmethod
-    def create_company_worker_invite(self, company: UUID, worker: UUID) -> None:
+    def create_company_worker_invite(self, company: UUID, worker: UUID) -> UUID:
         pass
 
     @abstractmethod
     def get_companies_worker_is_invited_to(self, member: UUID) -> Iterable[UUID]:
+        pass
+
+    @abstractmethod
+    def get_by_id(self, id: UUID) -> Optional[CompanyWorkInvite]:
+        pass
+
+    @abstractmethod
+    def delete_invite(self, id: UUID) -> None:
+        pass
+
+
+class MessageRepository(ABC):
+    @abstractmethod
+    def create_message(
+        self,
+        sender: Union[Member, Company, SocialAccounting],
+        addressee: Union[Member, Company],
+        title: str,
+        content: str,
+        sender_remarks: Optional[str],
+        reference: Optional[UserAction],
+    ) -> Message:
+        pass
+
+    @abstractmethod
+    def get_by_id(self, id: UUID) -> Optional[Message]:
+        pass
+
+    @abstractmethod
+    def mark_as_read(self, message: Message) -> None:
+        pass
+
+    @abstractmethod
+    def has_unread_messages_for_user(self, user: UUID) -> bool:
+        pass
+
+    @abstractmethod
+    def get_messages_to_user(self, user: UUID) -> Iterable[Message]:
+        pass
+
+
+class CooperationRepository(ABC):
+    @abstractmethod
+    def create_cooperation(
+        self,
+        creation_timestamp: datetime,
+        name: str,
+        definition: str,
+        coordinator: Company,
+    ) -> Cooperation:
+        pass
+
+    @abstractmethod
+    def get_by_id(self, id: UUID) -> Optional[Cooperation]:
+        pass
+
+    @abstractmethod
+    def get_by_name(self, name: str) -> Iterator[Cooperation]:
+        pass
+
+    @abstractmethod
+    def get_cooperations_coordinated_by_company(
+        self, company_id: UUID
+    ) -> Iterator[Cooperation]:
+        pass
+
+    @abstractmethod
+    def get_cooperation_name(self, coop_id: UUID) -> Optional[str]:
+        pass
+
+    @abstractmethod
+    def get_all_cooperations(self) -> Iterator[Cooperation]:
+        pass
+
+
+class PlanCooperationRepository(ABC):
+    @abstractmethod
+    def get_cooperating_plans(self, plan_id: UUID) -> List[Plan]:
+        pass
+
+    @abstractmethod
+    def get_inbound_requests(self, coordinator_id: UUID) -> Iterator[Plan]:
+        pass
+
+    @abstractmethod
+    def get_outbound_requests(self, requester_id: UUID) -> Iterator[Plan]:
+        pass
+
+    @abstractmethod
+    def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
+        pass
+
+    @abstractmethod
+    def remove_plan_from_cooperation(self, plan_id: UUID) -> None:
+        pass
+
+    @abstractmethod
+    def set_requested_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
+        pass
+
+    @abstractmethod
+    def set_requested_cooperation_to_none(self, plan_id: UUID) -> None:
+        pass
+
+    @abstractmethod
+    def count_plans_in_cooperation(self, cooperation_id: UUID) -> int:
+        pass
+
+    @abstractmethod
+    def get_plans_in_cooperation(self, cooperation_id: UUID) -> Iterable[Plan]:
         pass

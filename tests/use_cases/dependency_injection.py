@@ -3,19 +3,17 @@ from injector import Injector, Module, inject, provider, singleton
 import arbeitszeit.repositories as interfaces
 from arbeitszeit import entities
 from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.mail_service import MailService
+from arbeitszeit.token import TokenService
 from tests import data_generators
 from tests.datetime_service import FakeDatetimeService
+from tests.mail_service import FakeMailService
+from tests.token import FakeTokenService
 
 from . import repositories
 
 
 class InMemoryModule(Module):
-    @provider
-    def provide_offer_repository(
-        self, repo: repositories.OfferRepository
-    ) -> interfaces.OfferRepository:
-        return repo
-
     @provider
     def provide_purchase_repo(
         self, repo: repositories.PurchaseRepository
@@ -26,6 +24,12 @@ class InMemoryModule(Module):
     def provide_transaction_repo(
         self, repo: repositories.TransactionRepository
     ) -> interfaces.TransactionRepository:
+        return repo
+
+    @provider
+    def provide_message_repo(
+        self, repo: repositories.MessageRepository
+    ) -> interfaces.MessageRepository:
         return repo
 
     @provider
@@ -86,9 +90,29 @@ class InMemoryModule(Module):
         return repo
 
     @provider
+    def provide_cooperation_repository(
+        self, repo: repositories.CooperationRepository
+    ) -> interfaces.CooperationRepository:
+        return repo
+
+    @provider
+    def provide_plan_cooperation_repository(
+        self, repo: repositories.PlanCooperationRepository
+    ) -> interfaces.PlanCooperationRepository:
+        return repo
+
+    @provider
     @singleton
     def provide_datetime_service(self, service: FakeDatetimeService) -> DatetimeService:
         return service
+
+    @provider
+    def provide_mail_service(self, mail_service: FakeMailService) -> MailService:
+        return mail_service
+
+    @provider
+    def provide_token_service(self, token_service: FakeTokenService) -> TokenService:
+        return token_service
 
 
 def get_dependency_injector() -> Injector:

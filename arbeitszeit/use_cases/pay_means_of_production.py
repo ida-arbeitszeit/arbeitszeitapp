@@ -9,8 +9,10 @@ from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Company, Plan, PurposesOfPurchases
+from arbeitszeit.price_calculator import calculate_price
 from arbeitszeit.repositories import (
     CompanyRepository,
+    PlanCooperationRepository,
     PlanRepository,
     PurchaseRepository,
     TransactionRepository,
@@ -95,13 +97,16 @@ class Payment:
     purchase_repository: PurchaseRepository
     transaction_repository: TransactionRepository
     datetime_service: DatetimeService
+    plan_cooperation_repository: PlanCooperationRepository
     plan: Plan
     buyer: Company
     amount: int
     purpose: PurposesOfPurchases
 
     def record_purchase(self) -> None:
-        price_per_unit = self.plan.price_per_unit
+        price_per_unit = calculate_price(
+            self.plan_cooperation_repository.get_cooperating_plans(self.plan.id)
+        )
         self.purchase_repository.create_purchase(
             purchase_date=self.datetime_service.now(),
             plan=self.plan,
@@ -112,7 +117,10 @@ class Payment:
         )
 
     def create_transaction(self) -> None:
-        price_total = self.amount * self.plan.price_per_unit
+        coop_price = self.amount * calculate_price(
+            self.plan_cooperation_repository.get_cooperating_plans(self.plan.id)
+        )
+        individual_price = self.amount * calculate_price([self.plan])
         if self.purpose == PurposesOfPurchases.means_of_prod:
             sending_account = self.buyer.means_account
         elif self.purpose == PurposesOfPurchases.raw_materials:
@@ -122,7 +130,8 @@ class Payment:
             date=self.datetime_service.now(),
             sending_account=sending_account,
             receiving_account=self.plan.planner.product_account,
-            amount=price_total,
+            amount_sent=coop_price,
+            amount_received=individual_price,
             purpose=f"Plan-Id: {self.plan.id}",
         )
 
@@ -133,6 +142,7 @@ class PaymentFactory:
     purchase_repository: PurchaseRepository
     transaction_repository: TransactionRepository
     datetime_service: DatetimeService
+    plan_cooperation_repository: PlanCooperationRepository
 
     def get_payment(
         self, plan: Plan, buyer: Company, amount: int, purpose: PurposesOfPurchases
@@ -141,6 +151,7 @@ class PaymentFactory:
             self.purchase_repository,
             self.transaction_repository,
             self.datetime_service,
+            self.plan_cooperation_repository,
             plan,
             buyer,
             amount,

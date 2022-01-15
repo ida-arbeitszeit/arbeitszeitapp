@@ -7,10 +7,16 @@ from enum import Enum
 from typing import List, Optional, Union
 from uuid import UUID
 
+from arbeitszeit.user_action import UserAction
+
 
 @dataclass
 class SocialAccounting:
+    id: UUID
     account: Account
+
+    def get_name(self) -> str:
+        return "Social Accounting"
 
 
 @dataclass
@@ -19,9 +25,14 @@ class Member:
     name: str
     email: str
     account: Account
+    registered_on: datetime
+    confirmed_on: Optional[datetime]
 
     def accounts(self) -> List[Account]:
         return [self.account]
+
+    def get_name(self) -> str:
+        return self.name
 
 
 @dataclass
@@ -33,6 +44,8 @@ class Company:
     raw_material_account: Account
     work_account: Account
     product_account: Account
+    registered_on: datetime
+    confirmed_on: Optional[datetime]
 
     def accounts(self) -> List[Account]:
         return [
@@ -41,6 +54,9 @@ class Company:
             self.work_account,
             self.product_account,
         ]
+
+    def get_name(self) -> str:
+        return self.name
 
 
 class AccountTypes(Enum):
@@ -56,6 +72,15 @@ class AccountTypes(Enum):
 class Account:
     id: UUID
     account_type: AccountTypes
+
+
+@dataclass
+class Cooperation:
+    id: UUID
+    creation_date: datetime
+    name: str
+    definition: str
+    coordinator: Company
 
 
 @dataclass
@@ -118,12 +143,12 @@ class Plan:
     activation_date: Optional[datetime]
     expiration_relative: Optional[int]
     expiration_date: Optional[datetime]
-    last_certificate_payout: Optional[datetime]
-
-    @property
-    def price_per_unit(self) -> Decimal:
-        cost_per_unit = self.production_costs.total_cost() / self.prd_amount
-        return cost_per_unit if not self.is_public_service else Decimal(0)
+    active_days: Optional[int]
+    payout_count: int
+    requested_cooperation: Optional[UUID]
+    cooperation: Optional[UUID]
+    is_available: bool
+    hidden_by_user: bool
 
     @property
     def expected_sales_value(self) -> Decimal:
@@ -137,14 +162,6 @@ class Plan:
             if not self.is_public_service
             else Decimal(0)
         )
-
-
-@dataclass
-class ProductOffer:
-    id: UUID
-    name: str
-    description: str
-    plan: Plan
 
 
 class PurposesOfPurchases(Enum):
@@ -165,12 +182,38 @@ class Purchase:
 
 @dataclass
 class Transaction:
+    """
+    The amount received by a transaction can differ from the amount sent.
+    This is e.g. the case when a product is paid. Then the amount sent is defined by
+    the current coop_price, while the amount received (by the prd-account of the company)
+    is defined by the originally planned costs for the product.
+    """
+
     id: UUID
     date: datetime
     sending_account: Account
     receiving_account: Account
-    amount: Decimal
+    amount_sent: Decimal
+    amount_received: Decimal
     purpose: str
 
     def __hash__(self) -> int:
         return hash(self.id)
+
+
+@dataclass
+class CompanyWorkInvite:
+    company: Company
+    member: Member
+
+
+@dataclass
+class Message:
+    id: UUID
+    sender: Union[Member, Company, SocialAccounting]
+    addressee: Union[Member, Company]
+    title: str
+    content: str
+    sender_remarks: Optional[str]
+    user_action: Optional[UserAction]
+    is_read: bool

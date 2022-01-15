@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Optional, Union
+from typing import Iterable, List, Optional, Union
 from uuid import uuid4
 
 from injector import inject
@@ -17,11 +17,12 @@ from arbeitszeit.entities import (
     Account,
     AccountTypes,
     Company,
+    Cooperation,
     Member,
+    Message,
     Plan,
     PlanDraft,
     ProductionCosts,
-    ProductOffer,
     Purchase,
     PurposesOfPurchases,
     SocialAccounting,
@@ -30,38 +31,24 @@ from arbeitszeit.entities import (
 from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
+    CompanyWorkerRepository,
+    CooperationRepository,
     MemberRepository,
-    OfferRepository,
+    MessageRepository,
+    PlanCooperationRepository,
     PlanDraftRepository,
     PlanRepository,
     PurchaseRepository,
     TransactionRepository,
 )
-from arbeitszeit.use_cases import SeekApproval
+from arbeitszeit.use_cases import (
+    AcceptCooperation,
+    AcceptCooperationRequest,
+    RequestCooperation,
+    RequestCooperationRequest,
+    SeekApproval,
+)
 from tests.datetime_service import FakeDatetimeService
-
-
-@inject
-@dataclass
-class OfferGenerator:
-    plan_generator: PlanGenerator
-    offer_repository: OfferRepository
-
-    def create_offer(
-        self,
-        *,
-        name="Product name",
-        description="",
-        plan=None,
-    ) -> ProductOffer:
-        if plan is None:
-            plan = self.plan_generator.create_plan(activation_date=datetime.min)
-        return self.offer_repository.create_offer(
-            plan=plan,
-            creation_datetime=datetime.now(),
-            name=name,
-            description=description,
-        )
 
 
 @inject
@@ -70,13 +57,16 @@ class MemberGenerator:
     account_generator: AccountGenerator
     email_generator: EmailGenerator
     member_repository: MemberRepository
+    datetime_service: FakeDatetimeService
 
     def create_member(
         self,
         *,
         email: Optional[str] = None,
+        name: str = "test member name",
         account: Optional[Account] = None,
         password: str = "password",
+        registered_on: datetime = None,
     ) -> Member:
         if not email:
             email = self.email_generator.get_random_email()
@@ -85,12 +75,15 @@ class MemberGenerator:
             account = self.account_generator.create_account(
                 account_type=AccountTypes.member
             )
+        if registered_on is None:
+            registered_on = self.datetime_service.now()
 
         return self.member_repository.create_member(
             email=email,
-            name="Member name",
+            name=name,
             password=password,
             account=account,
+            registered_on=registered_on,
         )
 
 
@@ -99,7 +92,9 @@ class MemberGenerator:
 class CompanyGenerator:
     account_generator: AccountGenerator
     company_repository: CompanyRepository
+    company_worker_repository: CompanyWorkerRepository
     email_generator: EmailGenerator
+    datetime_service: FakeDatetimeService
 
     def create_company(
         self,
@@ -108,6 +103,8 @@ class CompanyGenerator:
         name: str = "Company Name",
         labour_account: Optional[Account] = None,
         password: str = "password",
+        workers: Optional[Iterable[Member]] = None,
+        registered_on: datetime = None,
     ) -> Company:
         if email is None:
             email = self.email_generator.get_random_email()
@@ -115,7 +112,9 @@ class CompanyGenerator:
             labour_account = self.account_generator.create_account(
                 account_type=AccountTypes.a
             )
-        return self.company_repository.create_company(
+        if registered_on is None:
+            registered_on = self.datetime_service.now()
+        company = self.company_repository.create_company(
             email=email,
             name=name,
             password=password,
@@ -129,7 +128,12 @@ class CompanyGenerator:
                 account_type=AccountTypes.prd
             ),
             labour_account=labour_account,
+            registered_on=registered_on,
         )
+        if workers is not None:
+            for worker in workers:
+                self.company_worker_repository.add_worker_to_company(company, worker)
+        return company
 
 
 @inject
@@ -139,6 +143,7 @@ class SocialAccountingGenerator:
 
     def create_social_accounting(self) -> SocialAccounting:
         return SocialAccounting(
+            id=uuid4(),
             account=self.account_generator.create_account(
                 account_type=AccountTypes.accounting
             ),
@@ -166,6 +171,8 @@ class PlanGenerator:
     datetime_service: FakeDatetimeService
     plan_repository: PlanRepository
     seek_approval: SeekApproval
+    request_cooperation: RequestCooperation
+    accept_cooperation: AcceptCooperation
     draft_repository: PlanDraftRepository
 
     def create_plan(
@@ -183,6 +190,10 @@ class PlanGenerator:
         production_unit: str = "500 Gramm",
         timeframe: Optional[int] = None,
         expired: bool = False,
+        requested_cooperation: Optional[Cooperation] = None,
+        cooperation: Optional[Cooperation] = None,
+        is_available: bool = True,
+        hidden_by_user: bool = False,
     ) -> Plan:
         assert approved, "Currently the application does not support plan rejection"
         draft = self.draft_plan(
@@ -196,14 +207,33 @@ class PlanGenerator:
             is_public_service=is_public_service,
             plan_creation_date=plan_creation_date,
         )
-        self.seek_approval(draft.id, None)
-        plan = self.plan_repository.get_plan_by_id(draft.id)
+        response = self.seek_approval(draft.id, None)
+        plan = self.plan_repository.get_plan_by_id(response.new_plan_id)
         assert plan
         assert plan.approved
         if activation_date:
             self.plan_repository.activate_plan(plan, activation_date)
         if expired:
             self.plan_repository.set_plan_as_expired(plan)
+        if requested_cooperation:
+            self.request_cooperation(
+                RequestCooperationRequest(
+                    plan.planner.id, plan.id, requested_cooperation.id
+                )
+            )
+        if cooperation:
+            self.request_cooperation(
+                RequestCooperationRequest(plan.planner.id, plan.id, cooperation.id)
+            )
+            self.accept_cooperation(
+                AcceptCooperationRequest(
+                    cooperation.coordinator.id, plan.id, cooperation.id
+                )
+            )
+        if hidden_by_user:
+            self.plan_repository.hide_plan(plan.id)
+        if not is_available:
+            self.plan_repository.toggle_product_availability(plan)
         return plan
 
     def draft_plan(
@@ -280,7 +310,8 @@ class TransactionGenerator:
         receiving_account_type=AccountTypes.prd,
         sending_account=None,
         receiving_account=None,
-        amount=None,
+        amount_sent=None,
+        amount_received=None,
     ) -> Transaction:
         if sending_account is None:
             sending_account = self.account_generator.create_account(
@@ -290,12 +321,75 @@ class TransactionGenerator:
             receiving_account = self.account_generator.create_account(
                 account_type=receiving_account_type
             )
-        if amount is None:
-            amount = Decimal(10)
+        if amount_sent is None:
+            amount_sent = Decimal(10)
+        if amount_received is None:
+            amount_received = Decimal(10)
         return self.transaction_repository.create_transaction(
             date=self.datetime_service.now_minus_one_day(),
             sending_account=sending_account,
             receiving_account=receiving_account,
-            amount=amount,
+            amount_sent=amount_sent,
+            amount_received=amount_received,
             purpose="Test Verw.zweck",
+        )
+
+
+@inject
+@dataclass
+class CooperationGenerator:
+    cooperation_repository: CooperationRepository
+    datetime_service: FakeDatetimeService
+    company_generator: CompanyGenerator
+    plan_cooperation_repository: PlanCooperationRepository
+
+    def create_cooperation(
+        self,
+        name: str = None,
+        coordinator: Optional[Company] = None,
+        plans: List[Plan] = None,
+    ) -> Cooperation:
+        if name is None:
+            name = "test name"
+        if coordinator is None:
+            coordinator = self.company_generator.create_company()
+        cooperation = self.cooperation_repository.create_cooperation(
+            self.datetime_service.now(),
+            name=name,
+            definition="test info",
+            coordinator=coordinator,
+        )
+        if plans is not None:
+            for plan in plans:
+                self.plan_cooperation_repository.add_plan_to_cooperation(
+                    plan.id, cooperation.id
+                )
+        return cooperation
+
+
+@inject
+@dataclass
+class MessageGenerator:
+    message_repository: MessageRepository
+    company_generator: CompanyGenerator
+
+    def create_message(
+        self,
+        *,
+        sender: Union[None, SocialAccounting, Member, Company] = None,
+        addressee: Union[None, Member, Company],
+        title: str = "test title",
+        content: str = "test message content",
+    ) -> Message:
+        if addressee is None:
+            addressee = self.company_generator.create_company()
+        if sender is None:
+            sender = self.company_generator.create_company()
+        return self.message_repository.create_message(
+            sender=sender,
+            addressee=addressee,
+            title=title,
+            content=content,
+            sender_remarks=None,
+            reference=None,
         )

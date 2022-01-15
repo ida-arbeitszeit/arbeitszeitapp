@@ -8,7 +8,7 @@ from arbeitszeit.use_cases import PlanFilter
 from arbeitszeit_web.query_plans import QueryPlansController
 
 
-class QueryProductsControllerTests(TestCase):
+class QueryPlansControllerTests(TestCase):
     def setUp(self) -> None:
         self.controller = QueryPlansController()
 

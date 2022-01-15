@@ -1,3 +1,4 @@
+from decimal import Decimal
 from unittest import TestCase
 from uuid import UUID, uuid4
 
@@ -12,6 +13,29 @@ RESPONSE_WITH_ONE_RESULT = PlanQueryResponse(
             company_name="Planner name",
             product_name="Bread",
             description="For eating",
+            price_per_unit=Decimal(5),
+            is_public_service=False,
+            expiration_relative=14,
+            is_available=True,
+            is_cooperating=False,
+            cooperation=None,
+        )
+    ]
+)
+
+RESPONSE_WITH_ONE_COOPERATING_RESULT = PlanQueryResponse(
+    results=[
+        QueriedPlan(
+            plan_id=uuid4(),
+            company_name="Planner name",
+            product_name="Bread",
+            description="For eating",
+            price_per_unit=Decimal(5),
+            is_public_service=False,
+            expiration_relative=14,
+            is_available=True,
+            is_cooperating=True,
+            cooperation=uuid4(),
         )
     ]
 )
@@ -19,8 +43,9 @@ RESPONSE_WITH_ONE_RESULT = PlanQueryResponse(
 
 class QueryPlansPresenterTests(TestCase):
     def setUp(self):
-        self.url_index = PlanSummaryUrlIndex()
-        self.presenter = QueryPlansPresenter(self.url_index)
+        self.plan_url_index = PlanSummaryUrlIndex()
+        self.coop_url_index = CoopSummaryUrlIndex()
+        self.presenter = QueryPlansPresenter(self.plan_url_index, self.coop_url_index)
 
     def test_presenting_empty_response_leads_to_not_showing_results(self):
         presentation = self.presenter.present(RESPONSE_WITHOUT_RESULTS)
@@ -42,15 +67,39 @@ class QueryPlansPresenterTests(TestCase):
         presentation = self.presenter.present(RESPONSE_WITH_ONE_RESULT)
         self.assertFalse(presentation.notifications)
 
-    def test_url(self) -> None:
+    def test_plan_url(self) -> None:
         presentation = self.presenter.present(RESPONSE_WITH_ONE_RESULT)
         plan_id = RESPONSE_WITH_ONE_RESULT.results[0].plan_id
         table_row = presentation.results.rows[0]
         self.assertEqual(
-            table_row.plan_summary_url, self.url_index.get_plan_summary_url(plan_id)
+            table_row.plan_summary_url,
+            self.plan_url_index.get_plan_summary_url(plan_id),
+        )
+
+    def test_no_coop_url_is_shown_with_one_non_cooperating_plan(self) -> None:
+        presentation = self.presenter.present(RESPONSE_WITH_ONE_RESULT)
+        table_row = presentation.results.rows[0]
+        self.assertEqual(
+            table_row.coop_summary_url,
+            None,
+        )
+
+    def test_coop_url_is_shown_with_one_cooperating_plan(self) -> None:
+        coop_id = RESPONSE_WITH_ONE_COOPERATING_RESULT.results[0].cooperation
+        assert coop_id
+        presentation = self.presenter.present(RESPONSE_WITH_ONE_COOPERATING_RESULT)
+        table_row = presentation.results.rows[0]
+        self.assertEqual(
+            table_row.coop_summary_url,
+            self.coop_url_index.get_coop_summary_url(coop_id),
         )
 
 
 class PlanSummaryUrlIndex:
     def get_plan_summary_url(self, plan_id: UUID) -> str:
         return f"fake_plan_url:{plan_id}"
+
+
+class CoopSummaryUrlIndex:
+    def get_coop_summary_url(self, coop_id: UUID) -> str:
+        return f"fake_coop_url:{coop_id}"

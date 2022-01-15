@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content1 %}
+
+<section class="hero is-fullheight">
+    <div class="hero-head">
+        <nav class="navbar is-light" role="navigation" aria-label="main navigation">
+            <div class="navbar-brand">
+                <a role="button" class="navbar-burger" onclick="expandMenu()" aria-label="menu" aria-expanded="false"
+                    data-target="navbarOnTop">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+            <div id="navbarOnTop" class="navbar-menu">
+                <div class="navbar-end">
+                    <div class="navbar-item">
+                        <div class="buttons">
+                            <a class="button" href="{{ url_for('auth.logout') }}">
+                                Logout
+                            </a>
+                            <a class="button is-primary" href="{{ url_for('auth.help') }}">
+                                Hilfe
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <div class="hero-body">
+        <div class="container has-text-centered">
+            <h1 class="title">
+                Betriebe 2020
+            </h1>
+            <h2 class="subtitle">
+                Eine Plattform für Arbeitszeitrechnung.
+            </h2>
+
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <div class="notification is-danger">
+                {{ messages[0] }}
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            <div class="notification is-success">
+                <h1>Willkommen!</h1>
+                <br>
+                <p>Bitte bestätige dein Konto.<br>Schaue in deine Mailbox (und deinen Spam-Ordner)
+                    - du solltest eine Email mit einem Bestätigungslink erhalten haben.</p>
+                <p>Du hast keine Email bekommen? <a href="{{ url_for('auth.resend_confirmation_company') }}">Erneut
+                        senden</a>.
+                </p>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

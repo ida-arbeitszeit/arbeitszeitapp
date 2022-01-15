@@ -8,18 +8,19 @@ from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
 from injector import inject
-from sqlalchemy import desc, distinct, func
+from sqlalchemy import desc, func
 from werkzeug.security import generate_password_hash
 
 from arbeitszeit import entities, repositories
 from arbeitszeit.decimal import decimal_sum
-from project.error import PlanNotFound, ProductOfferNotFound
+from arbeitszeit.user_action import UserAction
 from project.models import (
     Account,
     Company,
     CompanyWorkInvite,
+    Cooperation,
     Member,
-    Offer,
+    Message,
     Plan,
     PlanDraft,
     Purchase,
@@ -72,6 +73,11 @@ class MemberRepository(repositories.MemberRepository):
             return None
         return self.object_from_orm(orm_object)
 
+    def get_member_orm_by_mail(self, email: str) -> Member:
+        member_orm = Member.query.filter_by(email=email).first()
+        assert member_orm
+        return member_orm
+
     def object_from_orm(self, orm_object: Member) -> entities.Member:
         member_account = self.account_repository.object_from_orm(orm_object.account)
         return entities.Member(
@@ -79,13 +85,20 @@ class MemberRepository(repositories.MemberRepository):
             name=orm_object.name,
             account=member_account,
             email=orm_object.email,
+            registered_on=orm_object.registered_on,
+            confirmed_on=orm_object.confirmed_on,
         )
 
     def object_to_orm(self, member: entities.Member) -> Member:
         return Member.query.get(str(member.id))
 
     def create_member(
-        self, email: str, name: str, password: str, account: entities.Account
+        self,
+        email: str,
+        name: str,
+        password: str,
+        account: entities.Account,
+        registered_on: datetime,
     ) -> entities.Member:
         orm_account = self.account_repository.object_to_orm(account)
         orm_member = Member(
@@ -94,6 +107,8 @@ class MemberRepository(repositories.MemberRepository):
             name=name,
             password=generate_password_hash(password, method="sha256"),
             account=orm_account,
+            registered_on=registered_on,
+            confirmed_on=None,
         )
         orm_account.account_owner_member = orm_member.id
         self.db.session.add(orm_member)
@@ -110,7 +125,6 @@ class MemberRepository(repositories.MemberRepository):
 @dataclass
 class CompanyRepository(repositories.CompanyRepository):
     account_repository: AccountRepository
-    member_repository: MemberRepository
     db: SQLAlchemy
 
     def object_to_orm(self, company: entities.Company) -> Company:
@@ -133,6 +147,8 @@ class CompanyRepository(repositories.CompanyRepository):
             product_account=self.account_repository.object_from_orm(
                 self._get_products_account(company_orm)
             ),
+            registered_on=company_orm.registered_on,
+            confirmed_on=company_orm.confirmed_on,
         )
 
     def _get_means_account(self, company: Company) -> Account:
@@ -155,6 +171,11 @@ class CompanyRepository(repositories.CompanyRepository):
         assert account
         return account
 
+    def get_company_orm_by_mail(self, email: str) -> Company:
+        company_orm = Company.query.filter_by(email=email).first()
+        assert company_orm
+        return company_orm
+
     def get_by_id(self, id: UUID) -> Optional[entities.Company]:
         company_orm = Company.query.filter_by(id=str(id)).first()
         if company_orm is None:
@@ -171,12 +192,15 @@ class CompanyRepository(repositories.CompanyRepository):
         labour_account: entities.Account,
         resource_account: entities.Account,
         products_account: entities.Account,
+        registered_on: datetime,
     ) -> entities.Company:
         company = Company(
             id=str(uuid4()),
             email=email,
             name=name,
             password=generate_password_hash(password, method="sha256"),
+            registered_on=registered_on,
+            confirmed_on=None,
         )
         self.db.session.add(company)
         for account in [
@@ -194,6 +218,25 @@ class CompanyRepository(repositories.CompanyRepository):
 
     def count_registered_companies(self) -> int:
         return int(self.db.session.query(func.count(Company.id)).one()[0])
+
+    def query_companies_by_name(self, query: str) -> Iterator[entities.Company]:
+        return (
+            self.object_from_orm(company)
+            for company in Company.query.filter(
+                Company.name.ilike("%" + query + "%")
+            ).all()
+        )
+
+    def query_companies_by_email(self, query: str) -> Iterator[entities.Company]:
+        return (
+            self.object_from_orm(company)
+            for company in Company.query.filter(
+                Company.email.ilike("%" + query + "%")
+            ).all()
+        )
+
+    def get_all_companies(self) -> Iterator[entities.Company]:
+        return (self.object_from_orm(company) for company in Company.query.all())
 
 
 @inject
@@ -225,8 +268,8 @@ class AccountRepository(repositories.AccountRepository):
         intersection = received & sent
         received -= intersection
         sent -= intersection
-        return decimal_sum(t.amount for t in received) - decimal_sum(
-            t.amount for t in sent
+        return decimal_sum(t.amount_received for t in received) - decimal_sum(
+            t.amount_sent for t in sent
         )
 
     def get_by_id(self, id: UUID) -> entities.Account:
@@ -274,7 +317,10 @@ class AccountingRepository:
         accounting_account = self.account_repository.object_from_orm(
             accounting_account_orm
         )
-        return entities.SocialAccounting(account=accounting_account)
+        return entities.SocialAccounting(
+            account=accounting_account,
+            id=UUID(accounting_orm.id),
+        )
 
     def get_or_create_social_accounting(self) -> entities.SocialAccounting:
         return self.object_from_orm(self.get_or_create_social_accounting_orm())
@@ -285,14 +331,18 @@ class AccountingRepository:
             social_accounting = SocialAccounting(
                 id=str(uuid4()),
             )
-            account = Account(
-                id=str(uuid4()),
-                account_owner_social_accounting=social_accounting.id,
-                account_type="accounting",
+            account = self.account_repository.create_account(
+                entities.AccountTypes.accounting
             )
-            social_accounting.account = account
+            social_accounting.account = self.account_repository.object_to_orm(account)
             self.db.session.add(social_accounting, account)
         return social_accounting
+
+    def get_by_id(self, id: UUID) -> Optional[entities.SocialAccounting]:
+        accounting_orm = SocialAccounting.query.filter_by(id=str(id)).first()
+        if accounting_orm is None:
+            return None
+        return self.object_from_orm(accounting_orm)
 
 
 @inject
@@ -301,7 +351,6 @@ class PurchaseRepository(repositories.PurchaseRepository):
     member_repository: MemberRepository
     plan_repository: PlanRepository
     company_repository: CompanyRepository
-    product_offer_repository: ProductOfferRepository
     db: SQLAlchemy
 
     def object_to_orm(self, purchase: entities.Purchase) -> Purchase:
@@ -384,91 +433,8 @@ class PurchaseRepository(repositories.PurchaseRepository):
 
 @inject
 @dataclass
-class ProductOfferRepository(repositories.OfferRepository):
-    company_repository: CompanyRepository
-    plan_repository: PlanRepository
-    db: SQLAlchemy
-
-    def object_to_orm(self, product_offer: entities.ProductOffer) -> Offer:
-        return Offer.query.get(str(product_offer.id))
-
-    def object_from_orm(self, offer_orm: Offer) -> entities.ProductOffer:
-        plan = self.plan_repository.get_plan_by_id(UUID(offer_orm.plan_id))
-        assert plan is not None
-        return entities.ProductOffer(
-            id=UUID(offer_orm.id),
-            name=offer_orm.name,
-            description=offer_orm.description,
-            plan=plan,
-        )
-
-    def get_by_id(self, id: UUID) -> entities.ProductOffer:
-        offer_orm = Offer.query.filter_by(id=str(id)).first()
-        if offer_orm is None:
-            raise ProductOfferNotFound()
-        else:
-            return self.object_from_orm(offer_orm)
-
-    def get_all_offers(self) -> Iterator[entities.ProductOffer]:
-        return (self.object_from_orm(offer) for offer in Offer.query.all())
-
-    def count_all_offers_without_plan_duplicates(self) -> int:
-        return int(self.db.session.query(func.count(distinct(Offer.plan_id))).one()[0])
-
-    def query_offers_by_name(self, query: str) -> Iterator[entities.ProductOffer]:
-        return (
-            self.object_from_orm(offer)
-            for offer in Offer.query.filter(Offer.name.contains(query)).all()
-        )
-
-    def query_offers_by_description(
-        self, query: str
-    ) -> Iterator[entities.ProductOffer]:
-        return (
-            self.object_from_orm(offer)
-            for offer in Offer.query.filter(Offer.description.contains(query)).all()
-        )
-
-    def create_offer(
-        self,
-        plan: entities.Plan,
-        creation_datetime: datetime,
-        name: str,
-        description: str,
-    ) -> entities.ProductOffer:
-        offer = Offer(
-            id=str(uuid4()),
-            plan_id=self.plan_repository.object_to_orm(plan).id,
-            cr_date=creation_datetime,
-            name=name,
-            description=description,
-        )
-        self.db.session.add(offer)
-        return self.object_from_orm(offer)
-
-    def delete_offer(self, id: UUID) -> None:
-        offer_orm = Offer.query.filter_by(id=str(id)).first()
-        if offer_orm is None:
-            raise ProductOfferNotFound()
-        else:
-            self.db.session.delete(offer_orm)
-
-    def __len__(self) -> int:
-        return len(Offer.query.all())
-
-    def get_all_offers_belonging_to(self, plan_id: UUID) -> List[entities.ProductOffer]:
-        plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
-        if plan_orm is None:
-            raise PlanNotFound()
-        else:
-            return [self.object_from_orm(offer) for offer in plan_orm.offers.all()]
-
-
-@inject
-@dataclass
 class PlanRepository(repositories.PlanRepository):
     company_repository: CompanyRepository
-    accounting_repository: AccountingRepository
     db: SQLAlchemy
 
     def object_from_orm(self, plan: Plan) -> entities.Plan:
@@ -498,8 +464,15 @@ class PlanRepository(repositories.PlanRepository):
             renewed=plan.renewed,
             expiration_relative=plan.expiration_relative,
             expiration_date=plan.expiration_date,
-            last_certificate_payout=plan.last_certificate_payout,
             activation_date=plan.activation_date,
+            active_days=plan.active_days,
+            payout_count=plan.payout_count,
+            requested_cooperation=UUID(plan.requested_cooperation)
+            if plan.requested_cooperation
+            else None,
+            cooperation=UUID(plan.cooperation) if plan.cooperation else None,
+            is_available=plan.is_available,
+            hidden_by_user=plan.hidden_by_user,
         )
 
     def object_to_orm(self, plan: entities.Plan) -> Plan:
@@ -533,6 +506,9 @@ class PlanRepository(repositories.PlanRepository):
             is_active=False,
             activation_date=None,
             expiration_date=None,
+            active_days=None,
+            payout_count=0,
+            is_available=True,
         )
         self.db.session.add(plan)
         return plan
@@ -582,13 +558,17 @@ class PlanRepository(repositories.PlanRepository):
         plan_orm = self.object_to_orm(plan)
         plan_orm.expiration_relative = days
 
-    def set_last_certificate_payout(
-        self, plan: entities.Plan, last_payout: datetime
-    ) -> None:
-        plan.last_certificate_payout = last_payout
+    def set_active_days(self, plan: entities.Plan, full_active_days: int) -> None:
+        plan.active_days = full_active_days
 
         plan_orm = self.object_to_orm(plan)
-        plan_orm.last_certificate_payout = last_payout
+        plan_orm.active_days = full_active_days
+
+    def increase_payout_count_by_one(self, plan: entities.Plan) -> None:
+        plan.payout_count += 1
+
+        plan_orm = self.object_to_orm(plan)
+        plan_orm.payout_count += 1
 
     def all_active_plans(self) -> Iterator[entities.Plan]:
         return (
@@ -678,18 +658,16 @@ class PlanRepository(repositories.PlanRepository):
             ).all()
         )
 
-    def delete_plan(self, plan_id: UUID) -> None:
+    def hide_plan(self, plan_id: UUID) -> None:
         plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
-        if plan_orm is None:
-            raise PlanNotFound()
-        else:
-            self.db.session.delete(plan_orm)
+        assert plan_orm
+        plan_orm.hidden_by_user = True
 
     def query_active_plans_by_product_name(self, query: str) -> Iterator[entities.Plan]:
         return (
             self.object_from_orm(plan)
             for plan in Plan.query.filter(
-                Plan.is_active == True, Plan.prd_name.contains(query)
+                Plan.is_active == True, Plan.prd_name.ilike(f"%{query}%")
             ).all()
         )
 
@@ -707,40 +685,21 @@ class PlanRepository(repositories.PlanRepository):
             for plan_orm in Plan.query.filter(Plan.planner == str(company_id))
         )
 
-    def get_non_active_plans_for_company(
+    def get_all_active_plans_for_company(
         self, company_id: UUID
     ) -> Iterator[entities.Plan]:
         return (
             self.object_from_orm(plan_orm)
             for plan_orm in Plan.query.filter(
-                Plan.planner == str(company_id),
-                Plan.approved == True,
-                Plan.is_active == False,
-                Plan.expired == False,
+                Plan.planner == str(company_id), Plan.is_active == True
             )
         )
 
-    def get_active_plans_for_company(self, company_id: UUID) -> Iterator[entities.Plan]:
-        return (
-            self.object_from_orm(plan_orm)
-            for plan_orm in Plan.query.filter(
-                Plan.planner == str(company_id),
-                Plan.approved == True,
-                Plan.is_active == True,
-                Plan.expired == False,
-            )
-        )
+    def toggle_product_availability(self, plan: entities.Plan) -> None:
+        plan.is_available = True if (plan.is_available == False) else False
 
-    def get_expired_plans_for_company(
-        self, company_id: UUID
-    ) -> Iterator[entities.Plan]:
-        return (
-            self.object_from_orm(plan_orm)
-            for plan_orm in Plan.query.filter(
-                Plan.planner == str(company_id),
-                Plan.expired == True,
-            )
-        )
+        plan_orm = self.object_to_orm(plan)
+        plan_orm.is_available = True if (plan_orm.is_available == False) else False
 
     def __len__(self) -> int:
         return len(Plan.query.all())
@@ -765,7 +724,8 @@ class TransactionRepository(repositories.TransactionRepository):
             receiving_account=self.account_repository.get_by_id(
                 transaction.receiving_account
             ),
-            amount=Decimal(transaction.amount),
+            amount_sent=Decimal(transaction.amount_sent),
+            amount_received=Decimal(transaction.amount_received),
             purpose=transaction.purpose,
         )
 
@@ -774,7 +734,8 @@ class TransactionRepository(repositories.TransactionRepository):
         date: datetime,
         sending_account: entities.Account,
         receiving_account: entities.Account,
-        amount: Decimal,
+        amount_sent: Decimal,
+        amount_received: Decimal,
         purpose: str,
     ) -> entities.Transaction:
         transaction = Transaction(
@@ -782,7 +743,8 @@ class TransactionRepository(repositories.TransactionRepository):
             date=date,
             sending_account=str(sending_account.id),
             receiving_account=str(receiving_account.id),
-            amount=amount,
+            amount_sent=amount_sent,
+            amount_received=amount_received,
             purpose=purpose,
         )
         self.db.session.add(transaction)
@@ -872,11 +834,19 @@ class PlanDraftRepository(repositories.PlanDraftRepository):
             is_public_service=orm.is_public_service,
         )
 
+    def all_drafts_of_company(self, id: UUID) -> Iterable[entities.PlanDraft]:
+        draft_owner = Company.query.filter_by(id=str(id)).first()
+        assert draft_owner is not None
+        drafts = draft_owner.drafts.all()
+        return (self._object_from_orm(draft) for draft in drafts)
+
 
 @inject
 @dataclass
 class WorkerInviteRepository(repositories.WorkerInviteRepository):
     db: SQLAlchemy
+    company_repository: CompanyRepository
+    member_repository: MemberRepository
 
     def is_worker_invited_to_company(self, company: UUID, worker: UUID) -> bool:
         return (
@@ -887,14 +857,256 @@ class WorkerInviteRepository(repositories.WorkerInviteRepository):
             > 0
         )
 
-    def create_company_worker_invite(self, company: UUID, worker: UUID) -> None:
+    def create_company_worker_invite(self, company: UUID, worker: UUID) -> UUID:
         invite = CompanyWorkInvite(
             id=str(uuid4()),
             company=str(company),
             member=str(worker),
         )
         self.db.session.add(invite)
+        return invite.id
 
     def get_companies_worker_is_invited_to(self, member: UUID) -> Iterable[UUID]:
         for invite in CompanyWorkInvite.query.filter_by(member=str(member)):
             yield UUID(invite.company)
+
+    def get_by_id(self, id: UUID) -> Optional[entities.CompanyWorkInvite]:
+        if (
+            invite_orm := CompanyWorkInvite.query.filter_by(id=str(id)).first()
+        ) is not None:
+            company = self.company_repository.get_by_id(UUID(invite_orm.company))
+            if company is None:
+                return None
+            member = self.member_repository.get_by_id(UUID(invite_orm.member))
+            if member is None:
+                return None
+            return entities.CompanyWorkInvite(
+                company=company,
+                member=member,
+            )
+        return None
+
+    def delete_invite(self, id: UUID) -> None:
+        CompanyWorkInvite.query.filter_by(id=str(id)).delete()
+
+
+@inject
+@dataclass
+class MessageRepository(repositories.MessageRepository):
+    db: SQLAlchemy
+    member_repository: MemberRepository
+    company_repository: CompanyRepository
+    social_accounting_repository: AccountingRepository
+
+    def get_by_id(self, id: UUID) -> Optional[entities.Message]:
+        orm_message = Message.query.filter_by(id=str(id)).first()
+        if orm_message is None:
+            return None
+        return self.object_from_orm(orm_message)
+
+    def object_from_orm(self, message: Message) -> entities.Message:
+        addressee = self._get_user(UUID(message.addressee))
+        if addressee is None:
+            raise Exception(
+                "Internal error, addressee of message could not be retrieved"
+            )
+        sender = self._get_user_or_social_accounting(UUID(message.sender))
+        if sender is None:
+            raise Exception("Internal error, sender of message could not be retrieved")
+        return entities.Message(
+            sender=sender,
+            id=UUID(message.id),
+            title=message.title,
+            content=message.content,
+            addressee=addressee,
+            sender_remarks=message.sender_remarks,
+            user_action=message.user_action,
+            is_read=message.is_read,
+        )
+
+    def _get_user(self, id: UUID) -> Union[None, entities.Member, entities.Company]:
+        member = self.member_repository.get_by_id(id)
+        return member or self.company_repository.get_by_id(id)
+
+    def _get_user_or_social_accounting(
+        self, id: UUID
+    ) -> Union[None, entities.Member, entities.Company, entities.SocialAccounting]:
+        user = self._get_user(id)
+        if user is not None:
+            return user
+        return self.social_accounting_repository.get_by_id(id)
+
+    def create_message(
+        self,
+        sender: Union[entities.Company, entities.Member, entities.SocialAccounting],
+        addressee: Union[entities.Member, entities.Company],
+        title: str,
+        content: str,
+        sender_remarks: Optional[str],
+        reference: Optional[UserAction],
+    ) -> entities.Message:
+        message = Message(
+            id=str(uuid4()),
+            sender=str(sender.id),
+            addressee=str(addressee.id),
+            title=title,
+            content=content,
+            user_action=reference,
+            sender_remarks=sender_remarks,
+            is_read=False,
+        )
+        self.db.session.add(message)
+        return self.object_from_orm(message)
+
+    def mark_as_read(self, message: entities.Message) -> None:
+        message.is_read = True
+        Message.query.filter_by(id=str(message.id)).update({Message.is_read: True})
+
+    def has_unread_messages_for_user(self, user: UUID) -> bool:
+        return bool(Message.query.filter_by(addressee=str(user), is_read=False).count())
+
+    def get_messages_to_user(self, user: UUID) -> Iterable[entities.Message]:
+        return (
+            self.object_from_orm(m)
+            for m in Message.query.filter_by(addressee=str(user))
+        )
+
+
+@inject
+@dataclass
+class CooperationRepository(repositories.CooperationRepository):
+    db: SQLAlchemy
+    company_repository: CompanyRepository
+
+    def create_cooperation(
+        self,
+        creation_timestamp: datetime,
+        name: str,
+        definition: str,
+        coordinator: entities.Company,
+    ) -> entities.Cooperation:
+        cooperation = Cooperation(
+            id=str(uuid4()),
+            creation_date=creation_timestamp,
+            name=name,
+            definition=definition,
+            coordinator=str(coordinator.id),
+        )
+        self.db.session.add(cooperation)
+        return self.object_from_orm(cooperation)
+
+    def object_from_orm(self, cooperation_orm: Cooperation) -> entities.Cooperation:
+        coordinator = self.company_repository.get_by_id(cooperation_orm.coordinator)
+        assert coordinator is not None
+        return entities.Cooperation(
+            id=UUID(cooperation_orm.id),
+            creation_date=cooperation_orm.creation_date,
+            name=cooperation_orm.name,
+            definition=cooperation_orm.definition,
+            coordinator=coordinator,
+        )
+
+    def get_by_id(self, id: UUID) -> Optional[entities.Cooperation]:
+        cooperation_orm = Cooperation.query.filter_by(id=str(id)).first()
+        if cooperation_orm is None:
+            return None
+        return self.object_from_orm(cooperation_orm)
+
+    def get_by_name(self, name: str) -> Iterator[entities.Cooperation]:
+        return (
+            self.object_from_orm(cooperation)
+            for cooperation in Cooperation.query.filter(
+                Cooperation.name.ilike(name)
+            ).all()
+        )
+
+    def get_cooperations_coordinated_by_company(
+        self, company_id: UUID
+    ) -> Iterator[entities.Cooperation]:
+        return (
+            self.object_from_orm(cooperation)
+            for cooperation in Cooperation.query.filter_by(
+                coordinator=str(company_id)
+            ).all()
+        )
+
+    def get_cooperation_name(self, coop_id: UUID) -> Optional[str]:
+        coop_orm = Cooperation.query.filter_by(id=str(coop_id)).first()
+        if coop_orm is None:
+            return None
+        return coop_orm.name
+
+    def get_all_cooperations(self) -> Iterator[entities.Cooperation]:
+        return (
+            self.object_from_orm(cooperation) for cooperation in Cooperation.query.all()
+        )
+
+
+@inject
+@dataclass
+class PlanCooperationRepository(repositories.PlanCooperationRepository):
+    plan_repository: PlanRepository
+    cooperation_repository: CooperationRepository
+
+    def get_inbound_requests(self, coordinator_id: UUID) -> Iterator[entities.Plan]:
+        for plan in self.plan_repository.all_active_plans():
+            if plan.requested_cooperation:
+                if plan.requested_cooperation in [
+                    coop.id
+                    for coop in self.cooperation_repository.get_cooperations_coordinated_by_company(
+                        coordinator_id
+                    )
+                ]:
+                    yield plan
+
+    def get_outbound_requests(self, requester_id: UUID) -> Iterator[entities.Plan]:
+        plans_of_company = self.plan_repository.get_all_plans_for_company(requester_id)
+        for plan in plans_of_company:
+            if plan.requested_cooperation:
+                yield plan
+
+    def get_cooperating_plans(self, plan_id: UUID) -> List[entities.Plan]:
+        plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
+        if plan_orm is None:
+            return []
+        coop_orm = plan_orm.coop
+        if coop_orm is None:
+            plan = self.plan_repository.get_plan_by_id(plan_id)
+            if plan is None:
+                return []
+            return [plan]
+
+        else:
+            return [
+                self.plan_repository.object_from_orm(plan)
+                for plan in coop_orm.plans.all()
+            ]
+
+    def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
+        plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
+        assert plan_orm
+        plan_orm.cooperation = str(cooperation_id)
+
+    def remove_plan_from_cooperation(self, plan_id: UUID) -> None:
+        plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
+        assert plan_orm
+        plan_orm.cooperation = None
+
+    def set_requested_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
+        plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
+        assert plan_orm
+        plan_orm.requested_cooperation = str(cooperation_id)
+
+    def set_requested_cooperation_to_none(self, plan_id: UUID) -> None:
+        plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
+        assert plan_orm
+        plan_orm.requested_cooperation = None
+
+    def count_plans_in_cooperation(self, cooperation_id: UUID) -> int:
+        count = Plan.query.filter_by(cooperation=str(cooperation_id)).count()
+        return count
+
+    def get_plans_in_cooperation(self, cooperation_id: UUID) -> Iterable[entities.Plan]:
+        plans = Plan.query.filter_by(cooperation=str(cooperation_id)).all()
+        for plan in plans:
+            yield self.plan_repository.object_from_orm(plan)

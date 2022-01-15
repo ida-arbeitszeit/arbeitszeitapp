@@ -1,0 +1,50 @@
+{% extends "base_company.html" %}
+{% from 'macros/show_notifications.html' import show_notifications %}
+
+{% block content2 %}
+<div class="columns is-centered">
+    <div class="column is-three-fifths">
+
+        <div class="box has-background-info-light has-text-info-dark">
+            <div class="icon"><i class="fas fa-info-circle"></i></div>
+            <p>
+                Erstelle hier eine neue Kooperation. <br><br>
+                Eine Kooperation ist eine Oberkategorie gleichartiger Pläne.
+                Von allen Plänen in einer Kooperation wird ein Durchschnittspreis gebildet,
+                wodurch die Konkurrenz der teilnehmenden Pläne verringert wird.
+            </p>
+        </div>
+
+	{{ show_notifications() }}
+
+        <div class="content">
+            <form method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="field">
+                    <label class="label">Name der Kooperation</label>
+                    <div class="control">
+                        <input class="input is-large" , type="text" , placeholder="Name" , name="name" required>
+                    </div>
+                </div>
+                <div class="block"></div>
+
+                <div class="field">
+                    <label class="label">Definition der Kooperation</label>
+                    <div class="control">
+                        <textarea class="textarea is-large" , name="definition" required></textarea>
+                    </div>
+                </div>
+                <div class="block"></div>
+
+                <div class="field">
+                    <div class="control">
+                        <button class="button is-primary" name="create" value="create" type="submit">Erstellen</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

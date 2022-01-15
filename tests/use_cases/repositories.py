@@ -16,16 +16,19 @@ from arbeitszeit.entities import (
     Account,
     AccountTypes,
     Company,
+    CompanyWorkInvite,
+    Cooperation,
     Member,
+    Message,
     Plan,
     PlanDraft,
     ProductionCosts,
-    ProductOffer,
     Purchase,
     PurposesOfPurchases,
     SocialAccounting,
     Transaction,
 )
+from arbeitszeit.user_action import UserAction
 
 
 @singleton
@@ -76,7 +79,8 @@ class TransactionRepository(interfaces.TransactionRepository):
         date: datetime,
         sending_account: Account,
         receiving_account: Account,
-        amount: Decimal,
+        amount_sent: Decimal,
+        amount_received: Decimal,
         purpose: str,
     ) -> Transaction:
         transaction = Transaction(
@@ -84,7 +88,8 @@ class TransactionRepository(interfaces.TransactionRepository):
             date=date,
             sending_account=sending_account,
             receiving_account=receiving_account,
-            amount=amount,
+            amount_sent=amount_sent,
+            amount_received=amount_received,
             purpose=purpose,
         )
         self.transactions.append(transaction)
@@ -105,71 +110,6 @@ class TransactionRepository(interfaces.TransactionRepository):
             if transaction.receiving_account == account:
                 all_received.append(transaction)
         return all_received
-
-
-@singleton
-class OfferRepository(interfaces.OfferRepository):
-    @inject
-    def __init__(self, plan_repository: PlanRepository) -> None:
-        self.offers: List[ProductOffer] = []
-        self.plan_repository = plan_repository
-
-    def get_all_offers(self) -> Iterator[ProductOffer]:
-        yield from self.offers
-
-    def count_all_offers_without_plan_duplicates(self) -> int:
-        offers = []
-        plans_associated = []
-        for offer in self.offers:
-            if offer.plan in plans_associated:
-                pass
-            else:
-                offers.append(offer)
-                plans_associated.append(offer.plan)
-        return len(offers)
-
-    def query_offers_by_name(self, query: str) -> Iterator[ProductOffer]:
-        for offer in self.offers:
-            if query in offer.name:
-                yield offer
-
-    def query_offers_by_description(self, query: str) -> Iterator[ProductOffer]:
-        for offer in self.offers:
-            if query in offer.description:
-                yield offer
-
-    def create_offer(
-        self,
-        plan: Plan,
-        creation_datetime: datetime,
-        name: str,
-        description: str,
-    ) -> ProductOffer:
-        offer = ProductOffer(
-            id=uuid4(),
-            name=name,
-            description=description,
-            plan=plan,
-        )
-        self.offers.append(offer)
-        return offer
-
-    def get_by_id(self, id: UUID) -> ProductOffer:
-        for offer in self.offers:
-            if offer.id == id:
-                return offer
-        raise Exception("Offer not found, this exception is not meant to be caught")
-
-    def delete_offer(self, id: UUID) -> None:
-        offer = self.get_by_id(id)
-        self.offers.remove(offer)
-
-    def get_all_offers_belonging_to(self, plan_id: UUID) -> List[ProductOffer]:
-        offers = []
-        for offer in self.offers:
-            if offer.plan.id == plan_id:
-                offers.append(offer)
-        return offers
 
 
 @singleton
@@ -229,8 +169,8 @@ class AccountRepository(interfaces.AccountRepository):
         )
         self._remove_intersection(received_transactions, sent_transactions)
         return decimal_sum(
-            transaction.amount for transaction in received_transactions
-        ) - decimal_sum(transaction.amount for transaction in sent_transactions)
+            transaction.amount_received for transaction in received_transactions
+        ) - decimal_sum(transaction.amount_sent for transaction in sent_transactions)
 
     @classmethod
     def _remove_intersection(
@@ -285,11 +225,17 @@ class AccountOwnerRepository(interfaces.AccountOwnerRepository):
 @singleton
 class MemberRepository(interfaces.MemberRepository):
     @inject
-    def __init__(self):
+    def __init__(self, datetime_service: DatetimeService):
         self.members: Dict[UUID, Member] = {}
+        self.datetime_service = datetime_service
 
     def create_member(
-        self, email: str, name: str, password: str, account: Account
+        self,
+        email: str,
+        name: str,
+        password: str,
+        account: Account,
+        registered_on: datetime,
     ) -> Member:
         id = uuid4()
         member = Member(
@@ -297,6 +243,8 @@ class MemberRepository(interfaces.MemberRepository):
             name=name,
             email=email,
             account=account,
+            registered_on=registered_on,
+            confirmed_on=None,
         )
         self.members[id] = member
         return member
@@ -329,6 +277,7 @@ class CompanyRepository(interfaces.CompanyRepository):
         labour_account: Account,
         resource_account: Account,
         products_account: Account,
+        registered_on: datetime,
     ) -> Company:
         new_company = Company(
             id=uuid4(),
@@ -338,6 +287,8 @@ class CompanyRepository(interfaces.CompanyRepository):
             raw_material_account=resource_account,
             work_account=labour_account,
             product_account=products_account,
+            registered_on=registered_on,
+            confirmed_on=None,
         )
         self.companies[email] = new_company
         return new_company
@@ -354,17 +305,28 @@ class CompanyRepository(interfaces.CompanyRepository):
     def count_registered_companies(self) -> int:
         return len(self.companies)
 
+    def query_companies_by_name(self, query: str) -> Iterator[Company]:
+        for company in self.companies.values():
+            if query.lower() in company.name.lower():
+                yield company
+
+    def query_companies_by_email(self, query: str) -> Iterator[Company]:
+        for email, company in self.companies.items():
+            if query.lower() in email.lower():
+                yield company
+
+    def get_all_companies(self) -> Iterator[Company]:
+        yield from self.companies.values()
+
 
 @singleton
 class PlanRepository(interfaces.PlanRepository):
     @inject
     def __init__(
         self,
-        draft_repository: PlanDraftRepository,
         company_repository: CompanyRepository,
     ) -> None:
         self.plans: Dict[UUID, Plan] = {}
-        self.draft_repository = draft_repository
         self.company_repository = company_repository
 
     def get_plan_by_id(self, id: UUID) -> Optional[Plan]:
@@ -410,8 +372,11 @@ class PlanRepository(interfaces.PlanRepository):
     def set_expiration_relative(self, plan: Plan, days: int) -> None:
         plan.expiration_relative = days
 
-    def set_last_certificate_payout(self, plan: Plan, last_payout) -> None:
-        plan.last_certificate_payout = last_payout
+    def set_active_days(self, plan: Plan, full_active_days: int) -> None:
+        plan.active_days = full_active_days
+
+    def increase_payout_count_by_one(self, plan: Plan) -> None:
+        plan.payout_count += 1
 
     def all_active_plans(self) -> Iterator[Plan]:
         for plan in self.plans.values():
@@ -496,37 +461,19 @@ class PlanRepository(interfaces.PlanRepository):
             ):
                 yield plan
 
-    def delete_plan(self, plan_id: UUID) -> None:
-        del self.plans[plan_id]
+    def hide_plan(self, plan_id: UUID) -> None:
+        plan = self.plans.get(plan_id)
+        assert plan
+        plan.hidden_by_user = True
 
     def get_all_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
         for plan in self.plans.values():
             if str(plan.planner.id) == str(company_id):
                 yield plan
 
-    def get_non_active_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
+    def get_all_active_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
         for plan in self.plans.values():
-            if (
-                plan.planner == company_id
-                and plan.approved
-                and not plan.is_active
-                and not plan.expired
-            ):
-                yield plan
-
-    def get_active_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
-        for plan in self.plans.values():
-            if (
-                plan.planner == company_id
-                and plan.approved
-                and plan.is_active
-                and not plan.expired
-            ):
-                yield plan
-
-    def get_expired_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
-        for plan in self.plans.values():
-            if plan.planner == company_id and plan.expired:
+            if (str(plan.planner.id) == str(company_id)) and plan.is_active:
                 yield plan
 
     def _create_plan(
@@ -562,20 +509,28 @@ class PlanRepository(interfaces.PlanRepository):
             renewed=False,
             expiration_relative=None,
             expiration_date=None,
-            last_certificate_payout=None,
+            active_days=None,
+            payout_count=0,
+            requested_cooperation=None,
+            cooperation=None,
+            is_available=True,
+            hidden_by_user=False,
         )
         self.plans[plan.id] = plan
         return plan
 
     def query_active_plans_by_product_name(self, query: str) -> Iterator[Plan]:
         for plan in self.plans.values():
-            if plan.is_active and (query in plan.prd_name):
+            if plan.is_active and (query.lower() in plan.prd_name.lower()):
                 yield plan
 
     def query_active_plans_by_plan_id(self, query: str) -> Iterator[Plan]:
         for plan in self.plans.values():
             if plan.is_active and (query in str(plan.id)):
                 yield plan
+
+    def toggle_product_availability(self, plan: Plan) -> None:
+        plan.is_available = True if (plan.is_available == False) else False
 
 
 @singleton
@@ -631,27 +586,228 @@ class PlanDraftRepository(interfaces.PlanDraftRepository):
     def delete_draft(self, id: UUID) -> None:
         self.drafts = [draft for draft in self.drafts if draft.id != id]
 
+    def all_drafts_of_company(self, id: UUID) -> Iterable[PlanDraft]:
+        result = []
+        for draft in self.drafts:
+            if draft.planner.id == id:
+                result.append(draft)
+        return result
+
 
 class WorkerInviteRepository(interfaces.WorkerInviteRepository):
     @inject
     def __init__(
         self, company_repository: CompanyRepository, member_repository: MemberRepository
     ) -> None:
-        self.invites: Set[Tuple[UUID, UUID]] = set()
+        self.invites: Dict[UUID, Tuple[UUID, UUID]] = dict()
         self.company_repository = company_repository
         self.member_repository = member_repository
 
     def is_worker_invited_to_company(self, company: UUID, worker: UUID) -> bool:
-        return (company, worker) in self.invites
+        return (company, worker) in self.invites.values()
 
     def create_company_worker_invite(
         self,
         company: UUID,
         worker: UUID,
-    ) -> None:
-        self.invites.add((company, worker))
+    ) -> UUID:
+        invite_id = uuid4()
+        self.invites[invite_id] = (company, worker)
+        return invite_id
 
     def get_companies_worker_is_invited_to(self, member: UUID) -> Iterable[UUID]:
-        for company, invited_worker in self.invites:
+        for company, invited_worker in self.invites.values():
             if invited_worker == member:
                 yield company
+
+    def get_by_id(self, id: UUID) -> Optional[CompanyWorkInvite]:
+        try:
+            company_id, worker_id = self.invites[id]
+        except KeyError:
+            return None
+        company = self.company_repository.get_by_id(company_id)
+        if company is None:
+            return None
+        member = self.member_repository.get_by_id(worker_id)
+        if member is None:
+            return None
+        return CompanyWorkInvite(
+            company=company,
+            member=member,
+        )
+
+    def delete_invite(self, id: UUID) -> None:
+        del self.invites[id]
+
+
+@singleton
+class MessageRepository(interfaces.MessageRepository):
+    @inject
+    def __init__(self) -> None:
+        self.messages: Dict[UUID, Message] = dict()
+
+    def create_message(
+        self,
+        sender: Union[Company, Member, SocialAccounting],
+        addressee: Union[Member, Company],
+        title: str,
+        content: str,
+        sender_remarks: Optional[str],
+        reference: Optional[UserAction],
+    ) -> Message:
+        message_id = uuid4()
+        message = Message(
+            sender=sender,
+            id=message_id,
+            addressee=addressee,
+            title=title,
+            content=content,
+            sender_remarks=sender_remarks,
+            user_action=reference,
+            is_read=False,
+        )
+        self.messages[message_id] = message
+        return message
+
+    def get_by_id(self, id: UUID) -> Optional[Message]:
+        return self.messages.get(id)
+
+    def mark_as_read(self, message: Message) -> None:
+        message.is_read = True
+
+    def has_unread_messages_for_user(self, user: UUID) -> bool:
+        return any(
+            message.addressee.id == user and not message.is_read
+            for message in self.messages.values()
+        )
+
+    def get_messages_to_user(self, user: UUID) -> Iterable[Message]:
+        for message in self.messages.values():
+            if message.addressee.id == user:
+                yield message
+
+
+@singleton
+class CooperationRepository(interfaces.CooperationRepository):
+    @inject
+    def __init__(self) -> None:
+        self.cooperations: Dict[UUID, Cooperation] = dict()
+
+    def create_cooperation(
+        self,
+        creation_timestamp: datetime,
+        name: str,
+        definition: str,
+        coordinator: Company,
+    ) -> Cooperation:
+        cooperation_id = uuid4()
+        cooperation = Cooperation(
+            id=cooperation_id,
+            creation_date=creation_timestamp,
+            name=name,
+            definition=definition,
+            coordinator=coordinator,
+        )
+        self.cooperations[cooperation_id] = cooperation
+        return cooperation
+
+    def get_by_id(self, id: UUID) -> Optional[Cooperation]:
+        return self.cooperations.get(id)
+
+    def get_by_name(self, name: str) -> Iterator[Cooperation]:
+        for cooperation in self.cooperations.values():
+            if cooperation.name.lower() == name.lower():
+                yield cooperation
+
+    def get_cooperations_coordinated_by_company(
+        self, company_id: UUID
+    ) -> Iterator[Cooperation]:
+        for cooperation in self.cooperations.values():
+            if cooperation.coordinator.id == company_id:
+                yield cooperation
+
+    def get_cooperation_name(self, coop_id: UUID) -> Optional[str]:
+        coop = self.cooperations.get(coop_id)
+        if coop is None:
+            return None
+        return coop.name
+
+    def get_all_cooperations(self) -> Iterator[Cooperation]:
+        return (cooperation for cooperation in self.cooperations.values())
+
+    def __len__(self) -> int:
+        return len(self.cooperations)
+
+
+@singleton
+class PlanCooperationRepository(interfaces.PlanCooperationRepository):
+    @inject
+    def __init__(
+        self,
+        plan_repository: PlanRepository,
+        cooperation_repository: CooperationRepository,
+    ) -> None:
+        self.plan_repository = plan_repository
+        self.cooperation_repository = cooperation_repository
+
+    def get_inbound_requests(self, coordinator_id: UUID) -> Iterator[Plan]:
+        coops_of_company = list(
+            self.cooperation_repository.get_cooperations_coordinated_by_company(
+                coordinator_id
+            )
+        )
+        for plan in self.plan_repository.plans.values():
+            if plan.requested_cooperation in [coop.id for coop in coops_of_company]:
+                yield plan
+
+    def get_outbound_requests(self, requester_id: UUID) -> Iterator[Plan]:
+        plans_of_company = self.plan_repository.get_all_plans_for_company(requester_id)
+        for plan in plans_of_company:
+            if plan.requested_cooperation:
+                yield plan
+
+    def get_cooperating_plans(self, plan_id: UUID) -> List[Plan]:
+        cooperating_plans = []
+        plan = self.plan_repository.get_plan_by_id(plan_id)
+        assert plan
+        cooperation_id = plan.cooperation
+        if cooperation_id:
+            for p in self.plan_repository.plans.values():
+                if p.cooperation == cooperation_id:
+                    cooperating_plans.append(p)
+            return cooperating_plans
+        else:
+            return [plan]
+
+    def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
+        plan = self.plan_repository.get_plan_by_id(plan_id)
+        assert plan
+        plan.cooperation = cooperation_id
+
+    def remove_plan_from_cooperation(self, plan_id: UUID) -> None:
+        plan = self.plan_repository.get_plan_by_id(plan_id)
+        assert plan
+        plan.cooperation = None
+
+    def set_requested_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
+        plan = self.plan_repository.get_plan_by_id(plan_id)
+        assert plan
+        plan.requested_cooperation = cooperation_id
+
+    def set_requested_cooperation_to_none(self, plan_id: UUID) -> None:
+        plan = self.plan_repository.get_plan_by_id(plan_id)
+        assert plan
+        plan.requested_cooperation = None
+
+    def count_plans_in_cooperation(self, cooperation_id: UUID) -> int:
+        count = 0
+        for plan in self.plan_repository.plans.values():
+            if plan.cooperation == cooperation_id:
+                count += 1
+        return count
+
+    def get_plans_in_cooperation(self, cooperation_id: UUID) -> Iterable[Plan]:
+        plans = self.plan_repository.plans.values()
+        for plan in plans:
+            if plan.cooperation == cooperation_id:
+                yield plan

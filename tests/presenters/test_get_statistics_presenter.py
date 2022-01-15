@@ -14,7 +14,6 @@ TESTING_RESPONSE_MODEL = StatisticsResponse(
     planned_work=Decimal(500.23),
     planned_resources=Decimal(400.1),
     planned_means=Decimal(215.23),
-    products_on_marketplace_count=40,
 )
 
 
@@ -53,17 +52,6 @@ class GetStatisticsPresenterTests(TestCase):
         self.assertEqual(
             view_model.planned_means_hours,
             "123.12",
-        )
-
-    def test_products_on_marketplace_count_is_displayed_correctly_as_number(self):
-        response = replace(
-            TESTING_RESPONSE_MODEL,
-            products_on_marketplace_count=5,
-        )
-        view_model = self.presenter.present(response)
-        self.assertEqual(
-            view_model.products_on_marketplace_count,
-            "5",
         )
 
     def test_registered_companies_count_is_displayed_correctly_as_number(self):

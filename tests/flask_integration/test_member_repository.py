@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import uuid4
 
 from arbeitszeit.entities import AccountTypes
@@ -13,7 +14,7 @@ def test_that_users_can_be_converted_from_and_to_orm_objects(
 ):
     account = account_repository.create_account(AccountTypes.member)
     expected_member = member_repository.create_member(
-        "member@cp.org", "karl", "password", account
+        "member@cp.org", "karl", "password", account, datetime.now()
     )
     converted_member = member_repository.object_from_orm(
         member_repository.object_to_orm(
@@ -39,7 +40,9 @@ def test_cannot_find_member_by_email_before_it_was_added(
 ):
     assert not member_repository.has_member_with_email("member@cp.org")
     account = account_repository.create_account(AccountTypes.member)
-    member_repository.create_member("member@cp.org", "karl", "password", account)
+    member_repository.create_member(
+        "member@cp.org", "karl", "password", account, datetime.now()
+    )
     assert member_repository.has_member_with_email("member@cp.org")
 
 

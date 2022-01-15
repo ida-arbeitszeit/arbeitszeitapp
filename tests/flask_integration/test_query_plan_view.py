@@ -1,4 +1,4 @@
-from .view import ViewTestCase
+from .flask import ViewTestCase
 
 
 class AuthenticatedMemberTests(ViewTestCase):
@@ -10,7 +10,8 @@ class AuthenticatedMemberTests(ViewTestCase):
             select="Produktname",
             search="",
         )
-        self.login_member()
+        self.member, _, self.email = self.login_member()
+        self.member = self.confirm_member(member=self.member, email=self.email)
 
     def test_authenticated_users_get_200(self):
         response = self.client.get(self.url)
@@ -36,7 +37,8 @@ class AuthenticatedCompanyTests(ViewTestCase):
         super().setUp()
         self.member_url = "/member/query_plans"
         self.url = "/company/query_plans"
-        self.login_company()
+        self.company, _, self.email = self.login_company()
+        self.company = self.confirm_company(company=self.company, email=self.email)
 
     def test_company_gets_redirected_when_trying_to_access_member_view(self):
         response = self.client.get(self.member_url)

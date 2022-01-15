@@ -10,7 +10,7 @@ Code formatting
 There is a script that auto formats python files.  It uses black and
 isort for that purpose.  Currently this script only applies auto
 formatting to a limited selection of paths.  You can add more paths by
-following the instructions provided inside the script file.
+adding lines to ".autoformattingrc".
 
 Code analysis
 =============
@@ -22,6 +22,11 @@ Furthermore ``flake8`` is employed to prevent certain mistakes like
 for example unused imports or uninitialized variables.
 
 Invoke both commands without arguments to test all the eligable code.
+
+You can print profiling info to the terminal by setting the following
+environment variable::
+
+    $ export DEBUG_DETAILS=true
 
 Testing
 =======
@@ -37,6 +42,17 @@ You can generate a code coverage report at ``htmlcov/index.html`` via
 the command::
 
     coverage run --source project,arbeitszeit,arbeitszeit_web  -m pytest && coverage html
+
+In some circumstances we use ``hypothesis`` to check for edge cases.
+By default ``hypothesis`` generates only 10 examples per test to keep
+testing times reasonably low. However if you want to run more examples
+you can configure ``hypothesis`` for "CI mode" where at least 1000
+examples are run per test.  This behavior can be controlled via the
+``HYPOTHESIS_PROFILE`` environment variable.::
+
+  # this runs all hypothesis tests with at least 1000 different
+  # examples
+  HYPOTHESIS_PROFILE=ci pytest
 
 
 Repository layout
@@ -63,11 +79,28 @@ To run the app in development mode you first have to define some environment var
 
 Afterwards you can start the development server with ``flask run``.
 
+Email configuration
+===================
+
+There are two email backend implementations available.  One
+implementation meant for production ``flask_mail`` and the other one
+meant for development that is used by default.  To choose the email
+backend set the ``MAIL_BACKEND`` setting in your flask configuration
+appropriately.
+
+* ``MAIL_BACKEND = "flask_mail"`` to use the production backend
+* ``MAIL_BACKEND`` is anything else to use the development backend
+
+See the `flask mail documentation
+<https://pythonhosted.org/Flask-Mail/>` on how to configure the
+production backend.
+
 
 Cronjob
 =======
 
 There is a command `flask payout`. It does the following things:
+
 - Check if plans have expired and deactivate them
 - Calculate the payout factor
 - Check which plans are applicable for wage payout

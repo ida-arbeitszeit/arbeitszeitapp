@@ -1,11 +1,15 @@
 from dataclasses import dataclass
-from typing import List, Protocol, Union
+from typing import Protocol, Union
 from uuid import UUID
+
+from injector import inject
 
 from arbeitszeit.use_cases.pay_consumer_product import (
     PayConsumerProductResponse,
     RejectionReason,
 )
+
+from .notification import Notifier
 
 
 @dataclass
@@ -52,25 +56,30 @@ class PayConsumerProductController:
         return PayConsumerProductRequestImpl(current_user, uuid, amount)
 
 
+@inject
 @dataclass
 class PayConsumerProductViewModel:
-    notifications: List[str]
+    status_code: int
 
 
+@inject
+@dataclass
 class PayConsumerProductPresenter:
+    user_notifier: Notifier
+
     def present(
         self, use_case_response: PayConsumerProductResponse
     ) -> PayConsumerProductViewModel:
         if use_case_response.rejection_reason is None:
-            notifications = ["Produkt erfolgreich bezahlt."]
+            self.user_notifier.display_info("Produkt erfolgreich bezahlt.")
+            return PayConsumerProductViewModel(status_code=200)
         elif use_case_response.rejection_reason == RejectionReason.plan_inactive:
-            notifications = [
+            self.user_notifier.display_warning(
                 "Der angegebene Plan ist nicht aktuell. Bitte wende dich an den Verkäufer, um eine aktuelle Plan-ID zu erhalten."
-            ]
+            )
+            return PayConsumerProductViewModel(status_code=410)
         else:
-            notifications = [
+            self.user_notifier.display_warning(
                 "Ein Plan mit der angegebene ID existiert nicht im System."
-            ]
-        return PayConsumerProductViewModel(
-            notifications=notifications,
-        )
+            )
+            return PayConsumerProductViewModel(status_code=404)

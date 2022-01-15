@@ -153,11 +153,11 @@ def test_that_added_transactions_for_p_r_and_prd_have_correct_amounts(
 
     for trans in transaction_repository.transactions:
         if trans.receiving_account.account_type == AccountTypes.p:
-            added_amount_p = trans.amount
+            added_amount_p = trans.amount_received
         elif trans.receiving_account.account_type == AccountTypes.r:
-            added_amount_r = trans.amount
+            added_amount_r = trans.amount_received
         elif trans.receiving_account.account_type == AccountTypes.prd:
-            added_amount_prd = trans.amount
+            added_amount_prd = trans.amount_received
 
     assert expected_amount_p == added_amount_p
     assert expected_amount_r == added_amount_r
@@ -180,11 +180,11 @@ def test_that_added_transactions_for_p_r_and_prd_have_correct_amounts_if_public_
 
     for trans in transaction_repository.transactions:
         if trans.receiving_account.account_type == AccountTypes.p:
-            added_amount_p = trans.amount
+            added_amount_p = trans.amount_received
         elif trans.receiving_account.account_type == AccountTypes.r:
-            added_amount_r = trans.amount
+            added_amount_r = trans.amount_received
         elif trans.receiving_account.account_type == AccountTypes.prd:
-            added_amount_prd = trans.amount
+            added_amount_prd = trans.amount_received
 
     assert expected_amount_p == added_amount_p
     assert expected_amount_r == added_amount_r

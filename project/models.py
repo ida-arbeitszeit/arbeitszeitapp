@@ -8,6 +8,7 @@ from enum import Enum
 from flask_login import UserMixin
 
 from arbeitszeit import entities
+from arbeitszeit.user_action import UserAction
 from project.extensions import db
 
 
@@ -36,6 +37,8 @@ class Member(UserMixin, db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(1000), nullable=False)
+    registered_on = db.Column(db.DateTime, nullable=False)
+    confirmed_on = db.Column(db.DateTime, nullable=True)
 
     account = db.relationship("Account", uselist=False, lazy=True, backref="member")
     purchases = db.relationship("Purchase", lazy="dynamic")
@@ -53,10 +56,13 @@ class Company(UserMixin, db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(1000), nullable=False)
+    registered_on = db.Column(db.DateTime, nullable=False)
+    confirmed_on = db.Column(db.DateTime, nullable=True)
 
     plans = db.relationship("Plan", lazy="dynamic", backref="company")
     accounts = db.relationship("Account", lazy="dynamic", backref="company")
     purchases = db.relationship("Purchase", lazy="dynamic")
+    drafts = db.relationship("PlanDraft", lazy="dynamic")
 
     def __repr__(self):
         return "<Company(email='%s', name='%s')>" % (
@@ -100,11 +106,16 @@ class Plan(UserMixin, db.Model):
     activation_date = db.Column(db.DateTime, nullable=True)
     expired = db.Column(db.Boolean, nullable=False, default=False)
     renewed = db.Column(db.Boolean, nullable=False, default=False)
-    last_certificate_payout = db.Column(db.DateTime, nullable=True)
     expiration_date = db.Column(db.DateTime, nullable=True)
     expiration_relative = db.Column(db.Integer, nullable=True)
-
-    offers = db.relationship("Offer", lazy="dynamic", backref="plan")
+    active_days = db.Column(db.Integer, nullable=True)
+    payout_count = db.Column(db.Integer, nullable=False, default=0)
+    is_available = db.Column(db.Boolean, nullable=False, default=True)
+    requested_cooperation = db.Column(
+        db.String, db.ForeignKey("cooperation.id"), nullable=True
+    )
+    cooperation = db.Column(db.String, db.ForeignKey("cooperation.id"), nullable=True)
+    hidden_by_user = db.Column(db.Boolean, nullable=False, default=False)
 
 
 class AccountTypes(Enum):
@@ -149,16 +160,9 @@ class Transaction(UserMixin, db.Model):
     receiving_account = db.Column(
         db.String, db.ForeignKey("account.id"), nullable=False
     )
-    amount = db.Column(db.Numeric(), nullable=False)
+    amount_sent = db.Column(db.Numeric(), nullable=False)
+    amount_received = db.Column(db.Numeric(), nullable=False)
     purpose = db.Column(db.String(1000), nullable=True)  # Verwendungszweck
-
-
-class Offer(UserMixin, db.Model):
-    id = db.Column(db.String, primary_key=True, default=generate_uuid)
-    plan_id = db.Column(db.String, db.ForeignKey("plan.id"), nullable=False)
-    cr_date = db.Column(db.DateTime, nullable=False)
-    name = db.Column(db.String(1000), nullable=False)
-    description = db.Column(db.String(5000), nullable=False)
 
 
 class Purchase(UserMixin, db.Model):
@@ -177,3 +181,26 @@ class CompanyWorkInvite(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
     company = db.Column(db.String, db.ForeignKey("company.id"), nullable=False)
     member = db.Column(db.String, db.ForeignKey("member.id"), nullable=False)
+
+
+class Message(db.Model):
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
+    sender = db.Column(db.String)
+    addressee = db.Column(db.String)
+    title = db.Column(db.String)
+    content = db.Column(db.String)
+    user_action = db.Column(db.Enum(UserAction), nullable=True)
+    sender_remarks = db.Column(db.String, nullable=True)
+    is_read = db.Column(db.Boolean)
+
+
+class Cooperation(db.Model):
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
+    creation_date = db.Column(db.DateTime, nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    definition = db.Column(db.String(5000), nullable=False)
+    coordinator = db.Column(db.String, db.ForeignKey("company.id"), nullable=False)
+
+    plans = db.relationship(
+        "Plan", foreign_keys="Plan.cooperation", lazy="dynamic", backref="coop"
+    )
