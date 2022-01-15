@@ -13,9 +13,7 @@ class CreateOfferPresenter:
     def present(self, use_case_response: CreateOfferResponse) -> CreateOfferViewModel:
         if use_case_response.rejection_reason is None:
             notifications = [
-                _(
-                    "Dein Angebot wurde erfolgreich in unserem Marketplace veröffentlicht."
-                )
+                "Dein Angebot wurde erfolgreich in unserem Marketplace veröffentlicht."
             ]
         elif use_case_response.rejection_reason == RejectionReason.plan_inactive:
             notifications = [
