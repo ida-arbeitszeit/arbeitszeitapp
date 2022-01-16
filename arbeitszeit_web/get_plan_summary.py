@@ -36,10 +36,10 @@ class GetPlanSummarySuccessPresenter:
         return GetPlanSummaryViewModel(
             plan_id=("Plan-ID", str(response.plan_id)),
             is_active=("Status", "Aktiv" if response.is_active else "Inaktiv"),
-            planner_id=("Planender Betrieb", str(response.planner_id)),
-            product_name=("Name des Produkts", response.product_name),
+            planner_id=(_("Planender Betrieb"), str(response.planner_id)),
+            product_name=(_("Name des Produkts"), response.product_name),
             description=(
-                "Beschreibung des Produkts",
+                _("Beschreibung des Produkts"),
                 response.description.splitlines(),
             ),
             timeframe=("Planungszeitraum (Tage)", str(response.timeframe)),
