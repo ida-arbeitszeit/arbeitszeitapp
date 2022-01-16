@@ -1,13 +1,21 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+from typing import List
+from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.entities import PurposesOfPurchases
 from arbeitszeit.price_calculator import calculate_price
-from arbeitszeit.use_cases import PayMeansOfProduction, PayMeansOfProductionRequest
+from arbeitszeit.use_cases import (
+    Company,
+    GetTransactionInfos,
+    PayMeansOfProduction,
+    PayMeansOfProductionRequest,
+    TransactionInfo,
+)
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
 
-from .dependency_injection import injection_test
+from .dependency_injection import get_dependency_injector, injection_test
 from .repositories import (
     AccountRepository,
     PlanCooperationRepository,
@@ -373,3 +381,48 @@ def test_plan_found_accepts_payment(
     )
     assert not response.is_rejected
     assert response.rejection_reason is None
+
+
+class TestSuccessfulPayment(TestCase):
+    def setUp(self) -> None:
+        self.injector = get_dependency_injector()
+        self.company_generator = self.injector.get(CompanyGenerator)
+        self.plan_generator = self.injector.get(PlanGenerator)
+        self.buyer = self.company_generator.create_company()
+        self.planner = self.company_generator.create_company()
+        self.plan = self.plan_generator.create_plan(
+            planner=self.planner, activation_date=datetime.min
+        )
+        self.pay_means_of_production = self.injector.get(PayMeansOfProduction)
+        self.get_transaction_infos = self.injector.get(GetTransactionInfos)
+        self.datetime_service = self.injector.get(FakeDatetimeService)
+        self.transaction_time = datetime(2020, 10, 1, 22, 30)
+        self.datetime_service.freeze_time(self.transaction_time)
+        self.response = self.pay_means_of_production(
+            PayMeansOfProductionRequest(
+                buyer=self.buyer.id,
+                plan=self.plan.id,
+                amount=1,
+                purpose=PurposesOfPurchases.means_of_prod,
+            )
+        )
+        self.datetime_service.freeze_time(self.transaction_time + timedelta(days=1))
+
+    def test_transaction_shows_up_in_transaction_listing_for_buyer(self) -> None:
+        transaction_info = self.get_buyer_transaction_infos(self.buyer)
+        self.assertEqual(len(transaction_info), 1)
+
+    def test_transaction_shows_up_in_transaction_listing_for_planner(self) -> None:
+        transaction_info = self.get_transaction_infos(self.planner)
+        self.assertEqual(len(transaction_info), 1)
+
+    def test_transaction_info_of_buyer_shows_transaction_timestamp(self) -> None:
+        transaction_info = self.get_transaction_infos(self.buyer)
+        self.assertEqual(transaction_info[0].date, self.transaction_time)
+
+    def test_transaction_info_of_planner_shows_transaction_timestamp(self) -> None:
+        transaction_info = self.get_transaction_infos(self.planner)
+        self.assertEqual(transaction_info[0].date, self.transaction_time)
+
+    def get_buyer_transaction_infos(self, user: Company) -> List[TransactionInfo]:
+        return self.get_transaction_infos(user)
