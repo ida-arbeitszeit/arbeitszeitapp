@@ -11,19 +11,19 @@ from arbeitszeit.repositories import (
 
 
 @dataclass
-class CancelCooperationRequestRequest:
+class CancelCooperationSolicitationRequest:
     requester_id: UUID
     plan_id: UUID
 
 
 @inject
 @dataclass
-class CancelCooperationRequest:
+class CancelCooperationSolicitation:
     plan_coop_repo: PlanCooperationRepository
     plan_repo: PlanRepository
     company_repo: CompanyRepository
 
-    def __call__(self, request: CancelCooperationRequestRequest) -> bool:
+    def __call__(self, request: CancelCooperationSolicitationRequest) -> bool:
         plan = self.plan_repo.get_plan_by_id(request.plan_id)
         requester = self.company_repo.get_by_id(request.requester_id)
         assert plan

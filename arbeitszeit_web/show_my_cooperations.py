@@ -84,7 +84,7 @@ class ShowMyCooperationsPresenter:
         accept_cooperation_response: Optional[AcceptCooperationResponse],
         deny_cooperation_response: Optional[DenyCooperationResponse],
         list_outbound_coop_requests_response: ListOutboundCoopRequestsResponse,
-        cancel_cooperation_request_response: Optional[bool],
+        cancel_cooperation_solicitation_response: Optional[bool],
     ) -> ShowMyCooperationsViewModel:
         list_of_coordinations = ListOfCoordinationsTable(
             rows=[
@@ -108,7 +108,7 @@ class ShowMyCooperationsPresenter:
         )
 
         cancel_message, cancel_message_success = self._cancel_message_info(
-            cancel_cooperation_request_response
+            cancel_cooperation_solicitation_response
         )
 
         list_of_outbound_coop_requests = ListOfOutboundCooperationRequestsTable(

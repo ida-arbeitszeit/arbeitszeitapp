@@ -13,9 +13,9 @@ from .answer_company_work_invite import (
     AnswerCompanyWorkInviteRequest,
     AnswerCompanyWorkInviteResponse,
 )
-from .cancel_cooperation_request import (
-    CancelCooperationRequest,
-    CancelCooperationRequestRequest,
+from .cancel_cooperation_solicitation import (
+    CancelCooperationSolicitation,
+    CancelCooperationSolicitationRequest,
 )
 from .check_for_unread_messages import (
     CheckForUnreadMessages,
@@ -157,8 +157,8 @@ __all__ = [
     "AnswerCompanyWorkInvite",
     "AnswerCompanyWorkInviteRequest",
     "AnswerCompanyWorkInviteResponse",
-    "CancelCooperationRequest",
-    "CancelCooperationRequestRequest",
+    "CancelCooperationSolicitation",
+    "CancelCooperationSolicitationRequest",
     "CheckForUnreadMessages",
     "CheckForUnreadMessagesRequest",
     "CheckForUnreadMessagesResponse",
