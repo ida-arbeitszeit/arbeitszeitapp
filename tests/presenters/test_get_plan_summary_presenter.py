@@ -5,6 +5,7 @@ from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.get_plan_summary import PlanSummarySuccess
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
+from tests.translator import FakeTranslator
 
 TESTING_RESPONSE_MODEL = PlanSummarySuccess(
     plan_id=uuid4(),
@@ -29,7 +30,10 @@ TESTING_RESPONSE_MODEL = PlanSummarySuccess(
 class GetPlanSummarySuccessPresenterTests(TestCase):
     def setUp(self) -> None:
         self.coop_url_index = CoopSummaryUrlIndex()
-        self.presenter = GetPlanSummarySuccessPresenter(self.coop_url_index)
+        self.translator = FakeTranslator()
+        self.presenter = GetPlanSummarySuccessPresenter(
+            self.coop_url_index, self.translator
+        )
 
     def test_plan_id_is_displayed_correctly_as_tuple_of_strings(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-01-16 22:24+0100\n"
+"POT-Creation-Date: 2022-01-17 12:32+0100\n"
 "PO-Revision-Date: 2022-01-16 19:09+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -18,15 +18,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.9.0\n"
 
-#: arbeitszeit_web/get_plan_summary.py:42
+#: arbeitszeit_web/get_plan_summary.py:41
 msgid "Planning company"
 msgstr ""
 
-#: arbeitszeit_web/get_plan_summary.py:43
+#: arbeitszeit_web/get_plan_summary.py:42
 msgid "Name of product"
 msgstr ""
 
-#: arbeitszeit_web/get_plan_summary.py:45
+#: arbeitszeit_web/get_plan_summary.py:44
 msgid "Description of product"
 msgstr ""
 
@@ -42,35 +42,33 @@ msgstr ""
 msgid "Language"
 msgstr ""
 
-#: project/auth/templates/start.html:25
-msgid "English"
-msgstr ""
-
-#: project/auth/templates/start.html:28
-msgid "German"
-msgstr ""
-
-#: project/auth/templates/start.html:34
+#: project/auth/templates/start.html:35
 msgid "Help"
 msgstr ""
 
-#: project/auth/templates/start.html:45
+#: project/auth/templates/start.html:46
 msgid "Companies 2020"
 msgstr ""
 
-#: project/auth/templates/start.html:48
+#: project/auth/templates/start.html:49
 msgid "A platform for working time calculation."
 msgstr ""
 
-#: project/auth/templates/start.html:51
+#: project/auth/templates/start.html:52
 msgid "Member"
 msgstr ""
 
-#: project/auth/templates/start.html:52
+#: project/auth/templates/start.html:53
 msgid "Company"
 msgstr ""
 
-#: project/auth/templates/start.html:70
+#: project/auth/templates/start.html:71
 msgid "App version"
 msgstr ""
+
+#~ msgid "English"
+#~ msgstr ""
+
+#~ msgid "German"
+#~ msgstr ""
 

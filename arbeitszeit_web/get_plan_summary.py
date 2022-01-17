@@ -4,9 +4,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from arbeitszeit.use_cases.get_plan_summary import PlanSummarySuccess
 
+from .translator import Translator
 from .url_index import CoopSummaryUrlIndex
-
-from flask_babel import lazy_gettext as _l
 
 
 @dataclass
@@ -33,15 +32,19 @@ class GetPlanSummaryViewModel:
 @dataclass
 class GetPlanSummarySuccessPresenter:
     coop_url_index: CoopSummaryUrlIndex
+    trans: Translator
 
     def present(self, response: PlanSummarySuccess) -> GetPlanSummaryViewModel:
         return GetPlanSummaryViewModel(
             plan_id=("Plan-ID", str(response.plan_id)),
             is_active=("Status", "Aktiv" if response.is_active else "Inaktiv"),
-            planner_id=(_l("Planning company"), str(response.planner_id)),
-            product_name=(_l("Name of product"), response.product_name),
+            planner_id=(
+                self.trans.trans_("Planning company"),
+                str(response.planner_id),
+            ),
+            product_name=(self.trans.trans_("Name of product"), response.product_name),
             description=(
-                _l("Description of product"),
+                self.trans.trans_("Description of product"),
                 response.description.splitlines(),
             ),
             timeframe=("Planungszeitraum (Tage)", str(response.timeframe)),

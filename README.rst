@@ -115,11 +115,11 @@ Translation
 
 We use `Flask-Babel <https://flask-babel.tkte.ch/>` for translation. Available languages are set in ``project/configuration_base.py``.
 
-We mark translatable strings with ``_()`` or ``_l()``.
+We mark translatable strings with ``trans_()`` in python files and ``_()`` in jinja templates.
 
 Create or update the ``.pot`` file (parses the source code for gettext-marker)::
 
-    $ pybabel extract -F babel.cfg -k _l -o messages.pot .
+    $ pybabel extract -F babel.cfg -k trans_ -o messages.pot .
 
 Add a new language (create a ``.po``-file for that language)::
 
