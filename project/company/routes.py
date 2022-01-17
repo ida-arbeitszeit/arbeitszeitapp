@@ -161,8 +161,8 @@ def query_companies(
     query_companies: use_cases.QueryCompanies,
     controller: QueryCompaniesController,
     template_renderer: UserTemplateRenderer,
+    presenter: QueryCompaniesPresenter,
 ):
-    presenter = QueryCompaniesPresenter()
     template_name = "company/query_companies.html"
     search_form = CompanySearchForm(request.form)
     view = QueryCompaniesView(

@@ -29,6 +29,7 @@ from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
+from arbeitszeit_web.query_companies import QueryCompaniesPresenter
 from arbeitszeit_web.query_plans import QueryPlansPresenter
 from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
 from arbeitszeit_web.request_cooperation import RequestCooperationController
@@ -154,6 +155,12 @@ class FlaskModule(Module):
         )
 
     @provider
+    def provide_query_companies_presenter(
+        self, notifier: Notifier
+    ) -> QueryCompaniesPresenter:
+        return QueryCompaniesPresenter(user_notifier=notifier)
+
+    @provider
     def provide_pay_means_of_production_presenter(
         self, notifier: Notifier
     ) -> PayMeansOfProductionPresenter:
@@ -185,9 +192,12 @@ class FlaskModule(Module):
 
     @provider
     def provide_query_plans_presenter(
-        self, plan_index: PlanSummaryUrlIndex, coop_index: CoopSummaryUrlIndex
+        self,
+        plan_index: PlanSummaryUrlIndex,
+        coop_index: CoopSummaryUrlIndex,
+        notifier: Notifier,
     ) -> QueryPlansPresenter:
-        return QueryPlansPresenter(plan_index, coop_index)
+        return QueryPlansPresenter(plan_index, coop_index, user_notifier=notifier)
 
     @provider
     def provide_user_action_resolver(self) -> UserActionResolver:
