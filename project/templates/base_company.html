@@ -107,19 +107,7 @@
               class="navbar-item {% if message_indicator is defined %}{% if message_indicator.show_unread_messages_indicator %}unread-messages-indicator{% endif %}{% endif %}">
               Nachrichten
             </a>
-            <div class="navbar-dropdown">
-              <a href="{{ url_for('main_company.change_language', lang='es_ES') }}" class="navbar-item">
-                SPANISCH
-              </a>
-              <a href="{{ url_for('main_company.change_language', lang='de_DE') }}" class="navbar-item">
-                DEUTSCH
-              </a>
-
-            </div>
           </div>
-
-
-
 
           {% endif %}
 

@@ -16,9 +16,23 @@
       </div>
       <div id="navbarOnTop" class="navbar-menu">
         <div class="navbar-end">
+          <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link">
+              {{ _('Language') }}
+            </a>
+            <div class="navbar-dropdown">
+              {% if languages is defined and languages | length %}
+              {% for lang_code, lang_name in languages.items() %}
+              <a href="{{ url_for('auth.set_language', language=lang_code) }}" class="navbar-item">
+                {{ lang_name }}
+              </a>
+              {% endfor %}
+              {% endif %}
+            </div>
+          </div>
           <div class="navbar-item">
             <a class="button is-primary" href="{{ url_for('auth.help') }}">
-              Hilfe
+              {{ _('Help') }}
             </a>
           </div>
         </div>
@@ -29,14 +43,14 @@
   <div class="hero-body">
     <div class="container has-text-centered">
       <h1 class="title">
-        Betriebe 2020
+        {{ _('Companies 2020') }}
       </h1>
       <h2 class="subtitle">
-        Eine Plattform für Arbeitszeitrechnung.
+        {{ _('A platform for working time calculation.') }}
       </h2>
       <div class="buttons is-centered">
-        <a class="button" href="{{ url_for('auth.login_member') }}">Mitglied</a>
-        <a class="button" href="{{ url_for('auth.login_company') }}">Betrieb</a>
+        <a class="button" href="{{ url_for('auth.login_member') }}">{{ _('Member') }}</a>
+        <a class="button" href="{{ url_for('auth.login_company') }}">{{ _('Company') }}</a>
       </div>
       {% with messages = get_flashed_messages() %}
       {% if messages %}
@@ -54,7 +68,7 @@
   <footer class="footer">
     <div class="content has-text-centered">
       <p>
-        App-Version: 13/01/2022
+        {{ _('App version') }}: 13/01/2022
       </p>
     </div>
   </footer>

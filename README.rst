@@ -99,7 +99,7 @@ production backend.
 Cronjob
 =======
 
-There is a command `flask payout`. It does the following things:
+There is a command ``flask payout``. It does the following things:
 
 - Check if plans have expired and deactivate them
 - Calculate the payout factor
@@ -108,3 +108,27 @@ There is a command `flask payout`. It does the following things:
 
 This command is executed every hour on the production server. 
 In development mode you can run it manually in the CLI. 
+
+
+Translation
+===========
+
+We use `Flask-Babel <https://flask-babel.tkte.ch/>` for translation. Available languages are set in ``project/configuration_base.py``.
+
+We mark translatable strings with ``_()`` or ``_l()``.
+
+Create or update the ``.pot`` file (parses the source code for gettext-marker)::
+
+    $ pybabel extract -F babel.cfg -k _l -o messages.pot .
+
+Add a new language (create a ``.po``-file for that language)::
+
+    $ pybabel init -i messages.pot -d project/translations -l LANGUAGE-CODE
+
+Update all existing translation files (intelligent merge)::
+
+    $ pybabel update -i messages.pot -d project/translations
+
+Compile ``.po``-files (create ``.mo``-files)::
+
+    $ pybabel compile -d project/translations

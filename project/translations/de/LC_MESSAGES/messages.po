@@ -1,0 +1,76 @@
+# German translations for PROJECT.
+# Copyright (C) 2022 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2022-01-16 22:24+0100\n"
+"PO-Revision-Date: 2022-01-16 19:09+0100\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: de\n"
+"Language-Team: de <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: arbeitszeit_web/get_plan_summary.py:42
+msgid "Planning company"
+msgstr "Plannender Betrieb"
+
+#: arbeitszeit_web/get_plan_summary.py:43
+msgid "Name of product"
+msgstr "Name des Produkts"
+
+#: arbeitszeit_web/get_plan_summary.py:45
+msgid "Description of product"
+msgstr "Beschreibung des Produkts"
+
+#: project/forms.py:18
+msgid "This field is required."
+msgstr ""
+
+#: project/auth/templates/signup_member.html:5
+msgid "Sign Up"
+msgstr "Registrierung"
+
+#: project/auth/templates/start.html:21
+msgid "Language"
+msgstr "Sprache"
+
+#: project/auth/templates/start.html:25
+msgid "English"
+msgstr "Englisch"
+
+#: project/auth/templates/start.html:28
+msgid "German"
+msgstr "Deutsch"
+
+#: project/auth/templates/start.html:34
+msgid "Help"
+msgstr "Hilfe"
+
+#: project/auth/templates/start.html:45
+msgid "Companies 2020"
+msgstr "Betriebe 2020"
+
+#: project/auth/templates/start.html:48
+msgid "A platform for working time calculation."
+msgstr "Eine Plattform für Arbeitszeitrechnung."
+
+#: project/auth/templates/start.html:51
+msgid "Member"
+msgstr "Mitglied"
+
+#: project/auth/templates/start.html:52
+msgid "Company"
+msgstr "Betrieb"
+
+#: project/auth/templates/start.html:70
+msgid "App version"
+msgstr "App-Version"
+

@@ -6,6 +6,8 @@ from arbeitszeit.use_cases.get_plan_summary import PlanSummarySuccess
 
 from .url_index import CoopSummaryUrlIndex
 
+from flask_babel import lazy_gettext as _l
+
 
 @dataclass
 class GetPlanSummaryViewModel:
@@ -36,10 +38,10 @@ class GetPlanSummarySuccessPresenter:
         return GetPlanSummaryViewModel(
             plan_id=("Plan-ID", str(response.plan_id)),
             is_active=("Status", "Aktiv" if response.is_active else "Inaktiv"),
-            planner_id=(_("Planender Betrieb"), str(response.planner_id)),
-            product_name=(_("Name des Produkts"), response.product_name),
+            planner_id=(_l("Planning company"), str(response.planner_id)),
+            product_name=(_l("Name of product"), response.product_name),
             description=(
-                _("Beschreibung des Produkts"),
+                _l("Description of product"),
                 response.description.splitlines(),
             ),
             timeframe=("Planungszeitraum (Tage)", str(response.timeframe)),

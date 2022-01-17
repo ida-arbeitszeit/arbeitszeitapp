@@ -3,7 +3,7 @@ from typing import Optional, cast
 from uuid import UUID
 
 from flask import Response, flash, redirect, request, url_for
-from flask_login import current_user, login_required
+from flask_login import current_user
 
 from arbeitszeit import entities, errors, use_cases
 from arbeitszeit.use_cases import (
@@ -612,18 +612,6 @@ def list_all_cooperations(
     return template_renderer.render_template(
         "company/list_all_cooperations.html", context=dict(view_model=view_model)
     )
-
-
-@CompanyRoute("/company/change_language/<lang>", methods=["GET", "POST"])
-def change_language(lang: str):
-    from project import german, spanish
-
-    if lang == "de_DE":
-        german.install()
-        return redirect(url_for("main_company.statistics"))
-    elif lang == "es_ES":
-        spanish.install()
-        return redirect(url_for("main_company.statistics"))
 
 
 @CompanyRoute("/company/hilfe")
