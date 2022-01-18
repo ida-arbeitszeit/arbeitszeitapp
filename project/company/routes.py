@@ -10,6 +10,8 @@ from arbeitszeit.use_cases import (
     AcceptCooperation,
     AcceptCooperationRequest,
     AcceptCooperationResponse,
+    CancelCooperationSolicitation,
+    CancelCooperationSolicitationRequest,
     CreatePlanDraft,
     DenyCooperation,
     DenyCooperationRequest,
@@ -559,9 +561,11 @@ def my_cooperations(
     deny_cooperation: DenyCooperation,
     list_outbound_coop_requests: ListOutboundCoopRequests,
     presenter: ShowMyCooperationsPresenter,
+    cancel_cooperation_solicitation: CancelCooperationSolicitation,
 ):
     accept_cooperation_response: Optional[AcceptCooperationResponse] = None
     deny_cooperation_response: Optional[DenyCooperationResponse] = None
+    cancel_cooperation_solicitation_response: Optional[bool] = None
     if request.method == "POST":
         if request.form.get("accept"):
             coop_id, plan_id = [id.strip() for id in request.form["accept"].split(",")]
@@ -570,12 +574,18 @@ def my_cooperations(
                     UUID(current_user.id), UUID(plan_id), UUID(coop_id)
                 )
             )
-        else:
+        elif request.form.get("deny"):
             coop_id, plan_id = [id.strip() for id in request.form["deny"].split(",")]
             deny_cooperation_response = deny_cooperation(
                 DenyCooperationRequest(
                     UUID(current_user.id), UUID(plan_id), UUID(coop_id)
                 )
+            )
+        elif request.form.get("cancel"):
+            plan_id = UUID(request.form["cancel"])
+            requester_id = UUID(current_user.id)
+            cancel_cooperation_solicitation_response = cancel_cooperation_solicitation(
+                CancelCooperationSolicitationRequest(requester_id, plan_id)
             )
 
     list_coord_response = list_coordinations(
@@ -594,6 +604,7 @@ def my_cooperations(
         accept_cooperation_response,
         deny_cooperation_response,
         list_outbound_coop_requests_response,
+        cancel_cooperation_solicitation_response,
     )
     return template_renderer.render_template(
         "company/my_cooperations.html", context=view_model.to_dict()
