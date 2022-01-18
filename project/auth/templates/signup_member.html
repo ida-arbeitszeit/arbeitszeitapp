@@ -2,7 +2,7 @@
 
 {% block content2 %}
 <div class="column is-4 is-offset-4">
-    <h3 class="title">{{ _('Sign Up') }}</h3>
+    <h3 class="title">{{ gettext('Sign Up') }}</h3>
     <div class="box">
         {% for field_name, field_errors in form.errors|dictsort if field_errors %}
         {% for error in field_errors %}
@@ -31,14 +31,14 @@
 
             <div class="field">
                 <div class="control has-icons-left">
-                    {{ form.password(class_="input is-large", placeholder="Passwort") }}
+                    {{ form.password(class_="input is-large", placeholder=gettext("Password")) }}
                     <span class="icon is-small is-left">
                         <i class="fas fa-key"></i>
                     </span>
                 </div>
             </div>
 
-            <button class="button is-block is-primary is-large is-fullwidth">Sign Up</button>
+            <button class="button is-block is-primary is-large is-fullwidth">{{ gettext("Sign Up") }}</button>
         </form>
     </div>
 </div>

@@ -39,12 +39,12 @@ class GetPlanSummarySuccessPresenter:
             plan_id=("Plan-ID", str(response.plan_id)),
             is_active=("Status", "Aktiv" if response.is_active else "Inaktiv"),
             planner_id=(
-                self.trans.trans_("Planning company"),
+                self.trans.pgettext("Test comment", "Planning company"),
                 str(response.planner_id),
             ),
-            product_name=(self.trans.trans_("Name of product"), response.product_name),
+            product_name=(self.trans.gettext("Name of product"), response.product_name),
             description=(
-                self.trans.trans_("Description of product"),
+                self.trans.gettext("Description of product"),
                 response.description.splitlines(),
             ),
             timeframe=("Planungszeitraum (Tage)", str(response.timeframe)),

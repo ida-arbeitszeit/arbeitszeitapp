@@ -3,5 +3,9 @@ from abc import ABC, abstractmethod
 
 class Translator(ABC):
     @abstractmethod
-    def trans_(self, text: str) -> str:
+    def gettext(self, text: str) -> str:
+        ...
+
+    @abstractmethod
+    def pgettext(self, context: str, text: str) -> str:
         ...

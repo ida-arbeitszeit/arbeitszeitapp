@@ -2,5 +2,8 @@ from arbeitszeit_web.translator import Translator
 
 
 class FakeTranslator(Translator):
-    def trans_(self, text: str) -> str:
+    def gettext(self, text: str) -> str:
+        return text
+
+    def pgettext(self, context: str, text: str) -> str:
         return text

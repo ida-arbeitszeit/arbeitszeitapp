@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-01-17 12:32+0100\n"
+"POT-Creation-Date: 2022-01-18 13:39+0100\n"
 "PO-Revision-Date: 2022-01-16 19:09+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: de\n"
@@ -18,15 +18,16 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.9.0\n"
 
-#: arbeitszeit_web/get_plan_summary.py:41
-msgid "Planning company"
-msgstr "Plannender Betrieb"
-
 #: arbeitszeit_web/get_plan_summary.py:42
+msgctxt "Test comment"
+msgid "Planning company"
+msgstr "Planender Betrieb"
+
+#: arbeitszeit_web/get_plan_summary.py:45
 msgid "Name of product"
 msgstr "Name des Produkts"
 
-#: arbeitszeit_web/get_plan_summary.py:44
+#: arbeitszeit_web/get_plan_summary.py:47
 msgid "Description of product"
 msgstr "Beschreibung des Produkts"
 
@@ -36,7 +37,11 @@ msgstr ""
 
 #: project/auth/templates/signup_member.html:5
 msgid "Sign Up"
-msgstr "Registrierung"
+msgstr "Registrieren"
+
+#: project/auth/templates/signup_member.html:34
+msgid "Password"
+msgstr "Passwort"
 
 #: project/auth/templates/start.html:21
 msgid "Language"
@@ -65,10 +70,3 @@ msgstr "Betrieb"
 #: project/auth/templates/start.html:71
 msgid "App version"
 msgstr "App-Version"
-
-#~ msgid "English"
-#~ msgstr "Englisch"
-
-#~ msgid "German"
-#~ msgstr "Deutsch"
-

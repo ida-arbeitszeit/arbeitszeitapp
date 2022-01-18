@@ -115,20 +115,21 @@ Translation
 
 We use `Flask-Babel <https://flask-babel.tkte.ch/>` for translation. Available languages are set in ``project/configuration_base.py``.
 
-We mark translatable strings with ``trans_()`` in python files and ``_()`` in jinja templates.
+You can mark translatable strings in python files with ``translator.gettext(message: str)`` and ``translator.pgettext(comment: str, message: str)``. 
+In jinja templates use ``gettext(message: str)`` and ``ngettext(singular: str, plural: str, n)``.
 
-Create or update the ``.pot`` file (parses the source code for gettext-marker)::
+Parse the code and create a new ``.pot``-file::
 
-    $ pybabel extract -F babel.cfg -k trans_ -o messages.pot .
+    $ pybabel extract -F babel.cfg -o messages.pot .
 
-Add a new language (create a ``.po``-file for that language)::
+Add a new language (create a ``.po``-file for that language from ``.pot``-file)::
 
     $ pybabel init -i messages.pot -d project/translations -l LANGUAGE-CODE
 
-Update all existing translation files (intelligent merge)::
+Update all existing translation files (intelligent merge) from ``.pot``-file::
 
     $ pybabel update -i messages.pot -d project/translations
 
-Compile ``.po``-files (create ``.mo``-files)::
+Compile (create ``.mo``-files from ``.po``-files)::
 
     $ pybabel compile -d project/translations

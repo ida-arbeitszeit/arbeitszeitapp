@@ -18,7 +18,7 @@
         <div class="navbar-end">
           <div class="navbar-item has-dropdown is-hoverable">
             <a class="navbar-link">
-              {{ _('Language') }}
+              {{ gettext('Language') }}
             </a>
             <div class="navbar-dropdown">
               {% if languages is defined and languages | length %}
@@ -32,7 +32,7 @@
           </div>
           <div class="navbar-item">
             <a class="button is-primary" href="{{ url_for('auth.help') }}">
-              {{ _('Help') }}
+              {{ gettext('Help') }}
             </a>
           </div>
         </div>
@@ -43,14 +43,14 @@
   <div class="hero-body">
     <div class="container has-text-centered">
       <h1 class="title">
-        {{ _('Companies 2020') }}
+        {{ gettext('Companies 2020') }}
       </h1>
       <h2 class="subtitle">
-        {{ _('A platform for working time calculation.') }}
+        {{ gettext('A platform for working time calculation.') }}
       </h2>
       <div class="buttons is-centered">
-        <a class="button" href="{{ url_for('auth.login_member') }}">{{ _('Member') }}</a>
-        <a class="button" href="{{ url_for('auth.login_company') }}">{{ _('Company') }}</a>
+        <a class="button" href="{{ url_for('auth.login_member') }}">{{ gettext('Member') }}</a>
+        <a class="button" href="{{ url_for('auth.login_company') }}">{{ gettext('Company') }}</a>
       </div>
       {% with messages = get_flashed_messages() %}
       {% if messages %}
@@ -68,7 +68,7 @@
   <footer class="footer">
     <div class="content has-text-centered">
       <p>
-        {{ _('App version') }}: 13/01/2022
+        {{ gettext('App version') }}: 13/01/2022
       </p>
     </div>
   </footer>
