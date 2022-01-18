@@ -45,7 +45,7 @@ msgstr ""
 
 #: project/auth/templates/start.html:21
 msgid "Language"
-msgstr "Sprache"
+msgstr ""
 
 #: project/auth/templates/start.html:35
 msgid "Help"
