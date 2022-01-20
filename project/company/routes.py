@@ -385,11 +385,11 @@ def my_accounts(
 @CompanyRoute("/company/my_accounts/all_transactions")
 def list_all_transactions(
     company_repository: CompanyRepository,
-    get_transaction_infos: use_cases.GetTransactionInfos,
+    get_company_transactions: use_cases.GetCompanyTransactions,
     template_renderer: UserTemplateRenderer,
 ):
     company = company_repository.object_from_orm(cast(Company, current_user))
-    all_trans_infos = get_transaction_infos(company)
+    all_trans_infos = get_company_transactions(company)
 
     return template_renderer.render_template(
         "company/list_all_transactions.html",

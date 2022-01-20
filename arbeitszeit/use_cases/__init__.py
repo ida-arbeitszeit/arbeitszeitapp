@@ -42,6 +42,7 @@ from .end_cooperation import (
     EndCooperationRequest,
     EndCooperationResponse,
 )
+from .get_company_transactions import GetCompanyTransactions, TransactionInfo
 from .get_coop_summary import (
     GetCoopSummary,
     GetCoopSummaryRequest,
@@ -61,7 +62,6 @@ from .get_member_profile_info import (
 )
 from .get_plan_summary import GetPlanSummary, PlanSummaryResponse, PlanSummarySuccess
 from .get_statistics import GetStatistics, StatisticsResponse
-from .get_transaction_infos import GetTransactionInfos, TransactionInfo
 from .hide_plan import HidePlan, HidePlanResponse
 from .invite_worker_to_company import (
     InviteWorkerToCompany,
@@ -194,7 +194,7 @@ __all__ = [
     "GetMemberProfileInfoResponse",
     "GetPlanSummary",
     "GetStatistics",
-    "GetTransactionInfos",
+    "GetCompanyTransactions",
     "InviteWorkerToCompany",
     "InviteWorkerToCompanyRequest",
     "ListAllCooperations",

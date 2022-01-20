@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 
 from arbeitszeit.entities import AccountTypes, SocialAccounting
-from arbeitszeit.use_cases import GetTransactionInfos
+from arbeitszeit.use_cases import GetCompanyTransactions
 from tests.data_generators import (
     CompanyGenerator,
     MemberGenerator,
@@ -15,20 +15,20 @@ from .dependency_injection import injection_test
 
 @injection_test
 def test_that_no_info_is_generated_when_no_transaction_took_place(
-    get_transaction_infos: GetTransactionInfos,
+    get_company_transactions: GetCompanyTransactions,
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
 ):
     member_generator.create_member()
     company = company_generator.create_company()
 
-    info = get_transaction_infos(company)
+    info = get_company_transactions(company)
     assert not info
 
 
 @injection_test
 def test_that_correct_info_is_generated_after_transaction_between_member_and_company(
-    get_transaction_infos: GetTransactionInfos,
+    get_company_transactions: GetCompanyTransactions,
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
@@ -43,7 +43,7 @@ def test_that_correct_info_is_generated_after_transaction_between_member_and_com
         amount_received=Decimal(8.5),
     )
 
-    info_company = get_transaction_infos(company)
+    info_company = get_company_transactions(company)
     assert len(info_company) == 1
     assert type(info_company[0].date) == datetime
     assert info_company[0].receiver_name == "Mich"
@@ -52,7 +52,7 @@ def test_that_correct_info_is_generated_after_transaction_between_member_and_com
 
 @injection_test
 def test_that_correct_info_for_sender_is_generated_after_transaction_between_company_and_company(
-    get_transaction_infos: GetTransactionInfos,
+    get_company_transactions: GetCompanyTransactions,
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
 ):
@@ -66,7 +66,7 @@ def test_that_correct_info_for_sender_is_generated_after_transaction_between_com
         amount_received=Decimal(8.5),
     )
 
-    info_sender = get_transaction_infos(company1)
+    info_sender = get_company_transactions(company1)
     assert info_sender[0].sender_name == "Mir"
     assert info_sender[0].receiver_name == company2.name
     assert (
@@ -76,7 +76,7 @@ def test_that_correct_info_for_sender_is_generated_after_transaction_between_com
 
 @injection_test
 def test_that_correct_info_is_generated_when_the_same_company_is_sender_and_receiver(
-    get_transaction_infos: GetTransactionInfos,
+    get_company_transactions: GetCompanyTransactions,
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
 ):
@@ -89,7 +89,7 @@ def test_that_correct_info_is_generated_when_the_same_company_is_sender_and_rece
         amount_received=Decimal(8.5),
     )
 
-    info = get_transaction_infos(company)
+    info = get_company_transactions(company)
     assert len(info) == 1
     assert info[0].sender_name == "Mir"
     assert info[0].receiver_name == "Mich"
@@ -99,7 +99,7 @@ def test_that_correct_info_is_generated_when_the_same_company_is_sender_and_rece
 
 @injection_test
 def test_that_correct_info_for_receiver_is_generated_after_transaction_between_company_and_company(
-    get_transaction_infos: GetTransactionInfos,
+    get_company_transactions: GetCompanyTransactions,
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
 ):
@@ -113,7 +113,7 @@ def test_that_correct_info_for_receiver_is_generated_after_transaction_between_c
         amount_received=Decimal(8.5),
     )
 
-    info_receiver = get_transaction_infos(company2)
+    info_receiver = get_company_transactions(company2)
     assert info_receiver[0].sender_name == company1.name
     assert info_receiver[0].receiver_name == "Mich"
     assert (
@@ -124,7 +124,7 @@ def test_that_correct_info_for_receiver_is_generated_after_transaction_between_c
 
 @injection_test
 def test_that_correct_info_for_sender_is_generated_after_several_transactions_between_company_and_company(
-    get_transaction_infos: GetTransactionInfos,
+    get_company_transactions: GetCompanyTransactions,
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
 ):
@@ -144,7 +144,7 @@ def test_that_correct_info_for_sender_is_generated_after_several_transactions_be
         receiving_account=company2.product_account,
     )
 
-    info = get_transaction_infos(company1)
+    info = get_company_transactions(company1)
 
     expected_sender_name1 = "Mir"
     expected_sender_name2 = company2.name
@@ -169,7 +169,7 @@ def test_that_correct_info_for_sender_is_generated_after_several_transactions_be
 
 @injection_test
 def test_that_correct_info_for_receiver_is_generated_after_transaction_between_social_accounting_and_company(
-    get_transaction_infos: GetTransactionInfos,
+    get_company_transactions: GetCompanyTransactions,
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
     social_accounting: SocialAccounting,
@@ -183,7 +183,7 @@ def test_that_correct_info_for_receiver_is_generated_after_transaction_between_s
         amount_received=Decimal(8.5),
     )
 
-    info_receiver = get_transaction_infos(company)
+    info_receiver = get_company_transactions(company)
     assert info_receiver[0].sender_name == "Öff. Buchhaltung"
     assert info_receiver[0].receiver_name == "Mich"
     assert (
@@ -194,7 +194,7 @@ def test_that_correct_info_for_receiver_is_generated_after_transaction_between_s
 
 @injection_test
 def test_that_correct_info_for_company_is_generated_in_correct_order_after_several_transactions_of_different_kind(
-    get_transaction_infos: GetTransactionInfos,
+    get_company_transactions: GetCompanyTransactions,
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
     member_generator: MemberGenerator,
@@ -225,7 +225,7 @@ def test_that_correct_info_for_company_is_generated_in_correct_order_after_sever
         receiving_account=company1.product_account,
     )
 
-    info = get_transaction_infos(company1)
+    info = get_company_transactions(company1)
     assert len(info) == 5
 
     # trans1

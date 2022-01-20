@@ -30,7 +30,7 @@ class TransactionInfo:
 
 @inject
 @dataclass
-class GetTransactionInfos:
+class GetCompanyTransactions:
     accounting_service: UserAccountingService
     acount_owner_repository: AccountOwnerRepository
 

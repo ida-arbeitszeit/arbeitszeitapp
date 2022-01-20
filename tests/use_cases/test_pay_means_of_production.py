@@ -7,7 +7,7 @@ from arbeitszeit.entities import PurposesOfPurchases
 from arbeitszeit.price_calculator import calculate_price
 from arbeitszeit.use_cases import (
     Company,
-    GetTransactionInfos,
+    GetCompanyTransactions,
     PayMeansOfProduction,
     PayMeansOfProductionRequest,
     TransactionInfo,
@@ -394,7 +394,7 @@ class TestSuccessfulPayment(TestCase):
             planner=self.planner, activation_date=datetime.min
         )
         self.pay_means_of_production = self.injector.get(PayMeansOfProduction)
-        self.get_transaction_infos = self.injector.get(GetTransactionInfos)
+        self.get_company_transactions = self.injector.get(GetCompanyTransactions)
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.transaction_time = datetime(2020, 10, 1, 22, 30)
         self.datetime_service.freeze_time(self.transaction_time)
@@ -413,16 +413,16 @@ class TestSuccessfulPayment(TestCase):
         self.assertEqual(len(transaction_info), 1)
 
     def test_transaction_shows_up_in_transaction_listing_for_planner(self) -> None:
-        transaction_info = self.get_transaction_infos(self.planner)
+        transaction_info = self.get_company_transactions(self.planner)
         self.assertEqual(len(transaction_info), 1)
 
     def test_transaction_info_of_buyer_shows_transaction_timestamp(self) -> None:
-        transaction_info = self.get_transaction_infos(self.buyer)
+        transaction_info = self.get_company_transactions(self.buyer)
         self.assertEqual(transaction_info[0].date, self.transaction_time)
 
     def test_transaction_info_of_planner_shows_transaction_timestamp(self) -> None:
-        transaction_info = self.get_transaction_infos(self.planner)
+        transaction_info = self.get_company_transactions(self.planner)
         self.assertEqual(transaction_info[0].date, self.transaction_time)
 
     def get_buyer_transaction_infos(self, user: Company) -> List[TransactionInfo]:
-        return self.get_transaction_infos(user)
+        return self.get_company_transactions(user)
