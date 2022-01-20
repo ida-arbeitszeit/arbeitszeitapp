@@ -44,8 +44,8 @@ from arbeitszeit_web.user_action_resolver import (
     UserActionResolver,
     UserActionResolverImpl,
 )
-from project.database import get_social_accounting
-from project.database.repositories import (
+from arbeitszeit_flask.database import get_social_accounting
+from arbeitszeit_flask.database.repositories import (
     AccountOwnerRepository,
     AccountRepository,
     CompanyRepository,
@@ -60,12 +60,12 @@ from project.database.repositories import (
     TransactionRepository,
     WorkerInviteRepository,
 )
-from project.datetime import RealtimeDatetimeService
-from project.extensions import db
-from project.flask_session import FlaskSession
-from project.mail_service import get_mail_service
-from project.notifications import FlaskFlashNotifier
-from project.template import (
+from arbeitszeit_flask.datetime import RealtimeDatetimeService
+from arbeitszeit_flask.extensions import db
+from arbeitszeit_flask.flask_session import FlaskSession
+from arbeitszeit_flask.mail_service import get_mail_service
+from arbeitszeit_flask.notifications import FlaskFlashNotifier
+from arbeitszeit_flask.template import (
     CompanyTemplateIndex,
     FlaskTemplateRenderer,
     MemberTemplateIndex,
@@ -73,9 +73,9 @@ from project.template import (
     TemplateRenderer,
     UserTemplateRenderer,
 )
-from project.token import FlaskTokenService
-from project.url_index import CompanyUrlIndex, MemberUrlIndex
-from project.views import Http404View, ReadMessageView
+from arbeitszeit_flask.token import FlaskTokenService
+from arbeitszeit_flask.url_index import CompanyUrlIndex, MemberUrlIndex
+from arbeitszeit_flask.views import Http404View, ReadMessageView
 
 
 class MemberModule(Module):

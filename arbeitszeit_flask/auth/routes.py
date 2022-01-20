@@ -23,12 +23,19 @@ from arbeitszeit.use_cases import (
 )
 from arbeitszeit_web.register_company import RegisterCompanyController
 from arbeitszeit_web.register_member import RegisterMemberController
-from project import database
-from project.database import CompanyRepository, MemberRepository, commit_changes
-from project.dependency_injection import with_injection
-from project.forms import LoginForm, RegisterForm
-from project.next_url import get_next_url_from_session, save_next_url_in_session
-from project.token import FlaskTokenService
+from arbeitszeit_flask import database
+from arbeitszeit_flask.database import (
+    CompanyRepository,
+    MemberRepository,
+    commit_changes,
+)
+from arbeitszeit_flask.dependency_injection import with_injection
+from arbeitszeit_flask.forms import LoginForm, RegisterForm
+from arbeitszeit_flask.next_url import (
+    get_next_url_from_session,
+    save_next_url_in_session,
+)
+from arbeitszeit_flask.token import FlaskTokenService
 
 auth = Blueprint("auth", __name__, template_folder="templates", static_folder="static")
 

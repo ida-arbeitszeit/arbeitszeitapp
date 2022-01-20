@@ -9,8 +9,8 @@ from arbeitszeit_web.request_cooperation import (
     RequestCooperationController,
     RequestCooperationPresenter,
 )
-from project.forms import RequestCooperationForm
-from project.template import TemplateRenderer
+from arbeitszeit_flask.forms import RequestCooperationForm
+from arbeitszeit_flask.template import TemplateRenderer
 
 from .http_404_view import Http404View
 

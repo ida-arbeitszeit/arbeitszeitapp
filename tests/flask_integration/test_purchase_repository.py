@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from project.database.repositories import PurchaseRepository
+from arbeitszeit_flask.database.repositories import PurchaseRepository
 from tests.data_generators import MemberGenerator, PurchaseGenerator
 
 from .dependency_injection import injection_test

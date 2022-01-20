@@ -20,11 +20,19 @@ from arbeitszeit_web.query_companies import (
     QueryCompaniesPresenter,
 )
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
-from project.database import AccountRepository, MemberRepository, commit_changes
-from project.forms import CompanySearchForm, PayConsumerProductForm, PlanSearchForm
-from project.models import Member
-from project.template import UserTemplateRenderer
-from project.views import (
+from arbeitszeit_flask.database import (
+    AccountRepository,
+    MemberRepository,
+    commit_changes,
+)
+from arbeitszeit_flask.forms import (
+    CompanySearchForm,
+    PayConsumerProductForm,
+    PlanSearchForm,
+)
+from arbeitszeit_flask.models import Member
+from arbeitszeit_flask.template import UserTemplateRenderer
+from arbeitszeit_flask.views import (
     Http404View,
     ListMessagesView,
     PayConsumerProductView,

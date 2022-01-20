@@ -1,6 +1,6 @@
 from arbeitszeit.use_cases import UpdatePlansAndPayout
-from project.database import commit_changes
-from project.dependency_injection import with_injection
+from arbeitszeit_flask.database import commit_changes
+from arbeitszeit_flask.dependency_injection import with_injection
 
 
 @commit_changes

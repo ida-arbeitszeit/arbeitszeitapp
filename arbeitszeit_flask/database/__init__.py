@@ -6,8 +6,8 @@ from typing import Any, Callable
 from injector import inject
 
 from arbeitszeit import entities
-from project.extensions import db
-from project.models import Company, Member
+from arbeitszeit_flask.extensions import db
+from arbeitszeit_flask.models import Company, Member
 
 from .repositories import (
     AccountingRepository,

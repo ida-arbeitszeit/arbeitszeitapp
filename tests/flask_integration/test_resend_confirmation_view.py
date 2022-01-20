@@ -1,5 +1,5 @@
-from project.extensions import mail
-from project.token import FlaskTokenService
+from arbeitszeit_flask.extensions import mail
+from arbeitszeit_flask.token import FlaskTokenService
 
 from .flask import ViewTestCase
 

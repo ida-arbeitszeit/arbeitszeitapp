@@ -5,7 +5,7 @@ from flask_mail import Message
 
 from arbeitszeit.errors import CannotSendEmail
 from arbeitszeit.mail_service import MailService
-from project.extensions import mail
+from arbeitszeit_flask.extensions import mail
 
 
 def get_mail_service():

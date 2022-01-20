@@ -3,10 +3,10 @@ from flask_table import Col, Table  # noqa: Do not delete
 from flask_talisman import Talisman
 from flask_wtf.csrf import CSRFProtect
 
-import project.extensions
-from project.extensions import login_manager, mail
-from project.filter import format_datetime
-from project.profiling import show_profile_info, show_sql_queries
+import arbeitszeit_flask.extensions
+from arbeitszeit_flask.extensions import login_manager, mail
+from arbeitszeit_flask.filter import format_datetime
+from arbeitszeit_flask.profiling import show_profile_info, show_sql_queries
 
 
 def create_app(config=None, db=None, migrate=None, template_folder=None):
@@ -22,10 +22,10 @@ def create_app(config=None, db=None, migrate=None, template_folder=None):
         app.config.from_envvar("ARBEITSZEIT_APP_CONFIGURATION")
 
     if db is None:
-        db = project.extensions.db
+        db = arbeitszeit_flask.extensions.db
 
     if migrate is None:
-        migrate = project.extensions.migrate
+        migrate = arbeitszeit_flask.extensions.migrate
 
     # Where to redirect the user when he attempts to access a login_required
     # view without being logged in.
@@ -48,7 +48,7 @@ def create_app(config=None, db=None, migrate=None, template_folder=None):
 
     with app.app_context():
 
-        from project.commands import update_and_payout
+        from arbeitszeit_flask.commands import update_and_payout
 
         app.cli.command("payout")(update_and_payout)
 

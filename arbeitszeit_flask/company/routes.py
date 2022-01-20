@@ -59,22 +59,22 @@ from arbeitszeit_web.request_cooperation import (
 )
 from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
-from project.database import (
+from arbeitszeit_flask.database import (
     AccountRepository,
     CompanyRepository,
     CompanyWorkerRepository,
     MemberRepository,
     commit_changes,
 )
-from project.forms import (
+from arbeitszeit_flask.forms import (
     CompanySearchForm,
     CreateDraftForm,
     PlanSearchForm,
     RequestCooperationForm,
 )
-from project.models import Company
-from project.template import UserTemplateRenderer
-from project.views import (
+from arbeitszeit_flask.models import Company
+from arbeitszeit_flask.template import UserTemplateRenderer
+from arbeitszeit_flask.views import (
     Http404View,
     ListMessagesView,
     QueryCompaniesView,

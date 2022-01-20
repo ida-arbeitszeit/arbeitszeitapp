@@ -9,7 +9,7 @@ from flask_login import UserMixin
 
 from arbeitszeit import entities
 from arbeitszeit.user_action import UserAction
-from project.extensions import db
+from arbeitszeit_flask.extensions import db
 
 
 def generate_uuid() -> str:

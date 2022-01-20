@@ -3,21 +3,21 @@ from dataclasses import dataclass
 from flask import Response
 
 from arbeitszeit import use_cases
-from arbeitszeit_web.query_plans import (
-    QueryPlansController,
-    QueryPlansPresenter,
-    QueryPlansViewModel,
+from arbeitszeit_web.query_companies import (
+    QueryCompaniesController,
+    QueryCompaniesPresenter,
+    QueryCompaniesViewModel,
 )
-from project.forms import PlanSearchForm
-from project.template import TemplateRenderer
+from arbeitszeit_flask.forms import CompanySearchForm
+from arbeitszeit_flask.template import TemplateRenderer
 
 
 @dataclass
-class QueryPlansView:
-    search_form: PlanSearchForm
-    query_plans: use_cases.QueryPlans
-    presenter: QueryPlansPresenter
-    controller: QueryPlansController
+class QueryCompaniesView:
+    search_form: CompanySearchForm
+    query_companies: use_cases.QueryCompanies
+    presenter: QueryCompaniesPresenter
+    controller: QueryCompaniesController
     template_name: str
     template_renderer: TemplateRenderer
 
@@ -39,13 +39,13 @@ class QueryPlansView:
         )
 
     def _handle_use_case_request(
-        self, use_case_request: use_cases.QueryPlansRequest
+        self, use_case_request: use_cases.QueryCompaniesRequest
     ) -> Response:
-        response = self.query_plans(use_case_request)
+        response = self.query_companies(use_case_request)
         view_model = self.presenter.present(response)
         return Response(self._render_response_content(view_model))
 
-    def _render_response_content(self, view_model: QueryPlansViewModel) -> Response:
+    def _render_response_content(self, view_model: QueryCompaniesViewModel) -> Response:
         return self.template_renderer.render_template(
             self.template_name,
             context=dict(form=self.search_form, view_model=view_model),

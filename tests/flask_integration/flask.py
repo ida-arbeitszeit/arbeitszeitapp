@@ -5,7 +5,7 @@ from flask import Flask, _app_ctx_stack
 from injector import Module
 
 from arbeitszeit.entities import Company, Member
-from project.token import FlaskTokenService
+from arbeitszeit_flask.token import FlaskTokenService
 from tests.data_generators import (
     CompanyGenerator,
     EmailGenerator,

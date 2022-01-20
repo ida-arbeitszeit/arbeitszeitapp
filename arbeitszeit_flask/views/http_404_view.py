@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from flask import Response
 
-from project.template import TemplateIndex, TemplateRenderer
+from arbeitszeit_flask.template import TemplateIndex, TemplateRenderer
 
 
 @dataclass

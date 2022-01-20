@@ -4,9 +4,9 @@ from flask import Flask, current_app
 from flask_sqlalchemy import SQLAlchemy
 from injector import Injector, Module, inject, provider, singleton
 
-from project import create_app
-from project.dependency_injection import FlaskModule
-from project.extensions import db
+from arbeitszeit_flask import create_app
+from arbeitszeit_flask.dependency_injection import FlaskModule
+from arbeitszeit_flask.extensions import db
 
 
 class FlaskConfiguration(dict):

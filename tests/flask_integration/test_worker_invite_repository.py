@@ -2,7 +2,7 @@ from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit import repositories as interfaces
-from project.database.repositories import WorkerInviteRepository
+from arbeitszeit_flask.database.repositories import WorkerInviteRepository
 from tests.data_generators import CompanyGenerator, MemberGenerator
 
 from .dependency_injection import get_dependency_injector

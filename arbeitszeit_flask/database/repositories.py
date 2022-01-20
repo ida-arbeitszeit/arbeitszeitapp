@@ -14,7 +14,7 @@ from werkzeug.security import generate_password_hash
 from arbeitszeit import entities, repositories
 from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.user_action import UserAction
-from project.models import (
+from arbeitszeit_flask.models import (
     Account,
     Company,
     CompanyWorkInvite,
