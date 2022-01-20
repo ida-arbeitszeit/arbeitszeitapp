@@ -4,15 +4,13 @@
 
 
 <h1 class="title">
-    Meine Konten
+    Accounts
 </h1>
 <div class="box has-background-info-light has-text-info-dark">
     <div class="icon"><i class="fas fa-info-circle"></i></div>
-    <p>Hier sind deine Konten und Umsätze.<br>
-        In der ersten Zeile siehst du deine Kontostände.
-        Wenn du gut geplant hast, sollten sie am Ende des Planungszeitraums ausgeglichen sein. <br>
-        (Das Konto p ist erst ausgeglichen, wenn die Produktionsmittel vernutzt sind.)
-    </p>
+    <p>You have four different accounts.</p>
+    <p>Click on them to see details.</p>
+
 </div>
 
 {% with messages = get_flashed_messages() %}
@@ -23,51 +21,52 @@
 {% endif %}
 {% endwith %}
 
-<div class="table-container">
-    <table class="table is-fullwidth">
-        <thead>
-            <tr>
-                <th>Datum</th>
-                <th>Sender</th>
-                <th>Empfänger</th>
-                <th>p</th>
-                <th>r</th>
-                <th>a</th>
-                <th><abbr title="xxxx xxx x">prd</abbr></th>
-                <th>Verw.zweck</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% if my_balances is defined and my_balances|length %}
-            <tr class="is-selected">
-                <td></td>
-                <td></td>
-                <td></td>
-                <td><b>{{ my_balances[0] }}</b></td>
-                <td><b>{{ my_balances[1] }}</b></td>
-                <td><b>{{ my_balances[2] }}</b></td>
-                <td><b>{{ my_balances[3] }}</b></td>
-                <td></td>
-            </tr>
-            {% endif %}
+<div class="columns">
+    <div class="column"></div>
+    <div class="column">
+        <div class="table-container">
+            <table class="table is-fullwidth">
+                <thead>
+                    <tr>
+                        <th>Account</th>
+                        <th>Balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if my_balances is defined and my_balances|length %}
+                    <tr>
+                        <td class="py-2"><a href="">Account P</a></td>
+                        <td
+                            class="py-2 has-text-weight-bold {{ 'has-text-primary' if my_balances[0] >= 0 else 'has-text-danger' }}">
+                            {{ my_balances[0] | round(2) }}</td>
+                    </tr>
+                    <tr>
+                        <td class="py-2"><a href="">Account R</a></td>
+                        <td
+                            class="py-2 has-text-weight-bold {{ 'has-text-primary' if my_balances[1] >= 0 else 'has-text-danger' }}">
+                            {{ my_balances[1] | round(2) }}</td>
+                    </tr>
+                    <tr>
+                        <td class="py-2"><a href="">Account A</a></td>
+                        <td
+                            class="py-2 has-text-weight-bold {{ 'has-text-primary' if my_balances[2] >= 0 else 'has-text-danger' }}">
+                            {{ my_balances[2] | round(2) }}</td>
+                    </tr>
+                    <tr>
+                        <td class="py-2"><a href="">Account PRD</a></td>
+                        <td
+                            class="py-2 has-text-weight-bold {{ 'has-text-primary' if my_balances[3] >= 0 else 'has-text-danger' }}">
+                            {{ my_balances[3] | round(2) }}</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
 
-            {% if all_transactions is defined and all_transactions|length %}
-            {% for trans_info in all_transactions %}
-            <tr>
-                <td>{{ trans_info.date|format_datetime(zone='Europe/Berlin', fmt='%d.%m.%Y %H:%M') }}</td>
-                <td>{{ trans_info.sender_name }}</td>
-                <td>{{ trans_info.receiver_name }}</td>
-                <td>{{ trans_info.transaction_volumes["p"] }}</td>
-                <td>{{ trans_info.transaction_volumes["r"] }}</td>
-                <td>{{ trans_info.transaction_volumes["a"] }}</td>
-                <td>{{ trans_info.transaction_volumes["prd"] }}</td>
-                <td>{{ trans_info.purpose }}</td>
-            </tr>
-            {% endfor %}
-            {% endif %}
-
-        </tbody>
-    </table>
+            </table>
+        </div>
+        <p><a href="{{ url_for('main_company.list_all_transactions') }}">List all transactions</a></p>
+    </div>
+    <div class="column"></div>
 </div>
+
 
 {% endblock %}

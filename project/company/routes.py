@@ -362,7 +362,6 @@ def hide_plan(plan_id: UUID, hide_plan: HidePlan, presenter: HidePlanPresenter):
 @CompanyRoute("/company/my_accounts")
 def my_accounts(
     company_repository: CompanyRepository,
-    get_transaction_infos: use_cases.GetTransactionInfos,
     account_repository: AccountRepository,
     template_renderer: UserTemplateRenderer,
 ):
@@ -370,7 +369,6 @@ def my_accounts(
     # delegates to a Company since we did the `user_is_company` check
     # earlier.
     company = company_repository.object_from_orm(cast(Company, current_user))
-    all_trans_infos = get_transaction_infos(company)
     my_balances = [
         account_repository.get_account_balance(account)
         for account in company.accounts()
@@ -380,6 +378,22 @@ def my_accounts(
         "company/my_accounts.html",
         context=dict(
             my_balances=my_balances,
+        ),
+    )
+
+
+@CompanyRoute("/company/my_accounts/all_transactions")
+def list_all_transactions(
+    company_repository: CompanyRepository,
+    get_transaction_infos: use_cases.GetTransactionInfos,
+    template_renderer: UserTemplateRenderer,
+):
+    company = company_repository.object_from_orm(cast(Company, current_user))
+    all_trans_infos = get_transaction_infos(company)
+
+    return template_renderer.render_template(
+        "company/list_all_transactions.html",
+        context=dict(
             all_transactions=all_trans_infos,
         ),
     )
