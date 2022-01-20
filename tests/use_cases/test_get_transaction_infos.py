@@ -19,10 +19,10 @@ def test_that_no_info_is_generated_when_no_transaction_took_place(
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
 ):
-    member = member_generator.create_member()
-    company_generator.create_company()
+    member_generator.create_member()
+    company = company_generator.create_company()
 
-    info = get_transaction_infos(member)
+    info = get_transaction_infos(company)
     assert not info
 
 
@@ -42,12 +42,6 @@ def test_that_correct_info_is_generated_after_transaction_between_member_and_com
         amount_sent=Decimal(10),
         amount_received=Decimal(8.5),
     )
-
-    info_member = get_transaction_infos(member)
-    assert len(info_member) == 1
-    assert type(info_member[0].date) == datetime
-    assert info_member[0].sender_name == "Mir"
-    assert info_member[0].transaction_volumes["member"] == Decimal(-10)
 
     info_company = get_transaction_infos(company)
     assert len(info_company) == 1
