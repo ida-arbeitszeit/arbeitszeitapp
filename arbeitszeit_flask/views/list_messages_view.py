@@ -3,8 +3,8 @@ from dataclasses import dataclass
 from flask import Response
 
 from arbeitszeit.use_cases import ListMessages
-from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 from arbeitszeit_flask.template import TemplateRenderer
+from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 
 from .http_404_view import Http404View
 

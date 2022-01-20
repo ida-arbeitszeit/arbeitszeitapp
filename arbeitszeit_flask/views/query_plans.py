@@ -3,13 +3,13 @@ from dataclasses import dataclass
 from flask import Response
 
 from arbeitszeit import use_cases
+from arbeitszeit_flask.forms import PlanSearchForm
+from arbeitszeit_flask.template import TemplateRenderer
 from arbeitszeit_web.query_plans import (
     QueryPlansController,
     QueryPlansPresenter,
     QueryPlansViewModel,
 )
-from arbeitszeit_flask.forms import PlanSearchForm
-from arbeitszeit_flask.template import TemplateRenderer
 
 
 @dataclass

@@ -20,30 +20,6 @@ from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.mail_service import MailService
 from arbeitszeit.token import TokenService
 from arbeitszeit.use_cases import CheckForUnreadMessages, ReadMessage
-from arbeitszeit_web.check_for_unread_message import (
-    CheckForUnreadMessagesController,
-    CheckForUnreadMessagesPresenter,
-)
-from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
-from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
-from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
-from arbeitszeit_web.notification import Notifier
-from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
-from arbeitszeit_web.query_companies import QueryCompaniesPresenter
-from arbeitszeit_web.query_plans import QueryPlansPresenter
-from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
-from arbeitszeit_web.request_cooperation import RequestCooperationController
-from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
-from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
-from arbeitszeit_web.url_index import (
-    CoopSummaryUrlIndex,
-    MessageUrlIndex,
-    PlanSummaryUrlIndex,
-)
-from arbeitszeit_web.user_action_resolver import (
-    UserActionResolver,
-    UserActionResolverImpl,
-)
 from arbeitszeit_flask.database import get_social_accounting
 from arbeitszeit_flask.database.repositories import (
     AccountOwnerRepository,
@@ -76,6 +52,30 @@ from arbeitszeit_flask.template import (
 from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.url_index import CompanyUrlIndex, MemberUrlIndex
 from arbeitszeit_flask.views import Http404View, ReadMessageView
+from arbeitszeit_web.check_for_unread_message import (
+    CheckForUnreadMessagesController,
+    CheckForUnreadMessagesPresenter,
+)
+from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
+from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
+from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
+from arbeitszeit_web.notification import Notifier
+from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
+from arbeitszeit_web.query_companies import QueryCompaniesPresenter
+from arbeitszeit_web.query_plans import QueryPlansPresenter
+from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
+from arbeitszeit_web.request_cooperation import RequestCooperationController
+from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
+from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
+from arbeitszeit_web.url_index import (
+    CoopSummaryUrlIndex,
+    MessageUrlIndex,
+    PlanSummaryUrlIndex,
+)
+from arbeitszeit_web.user_action_resolver import (
+    UserActionResolver,
+    UserActionResolverImpl,
+)
 
 
 class MemberModule(Module):

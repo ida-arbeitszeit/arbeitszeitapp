@@ -21,8 +21,6 @@ from arbeitszeit.use_cases import (
     ResendConfirmationMail,
     ResendConfirmationMailRequest,
 )
-from arbeitszeit_web.register_company import RegisterCompanyController
-from arbeitszeit_web.register_member import RegisterMemberController
 from arbeitszeit_flask import database
 from arbeitszeit_flask.database import (
     CompanyRepository,
@@ -36,6 +34,8 @@ from arbeitszeit_flask.next_url import (
     save_next_url_in_session,
 )
 from arbeitszeit_flask.token import FlaskTokenService
+from arbeitszeit_web.register_company import RegisterCompanyController
+from arbeitszeit_web.register_member import RegisterMemberController
 
 auth = Blueprint("auth", __name__, template_folder="templates", static_folder="static")
 

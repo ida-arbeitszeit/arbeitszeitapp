@@ -6,20 +6,6 @@ from flask_login import current_user
 
 from arbeitszeit import use_cases
 from arbeitszeit.use_cases import ListMessages
-from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
-from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
-from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
-from arbeitszeit_web.get_statistics import GetStatisticsPresenter
-from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
-from arbeitszeit_web.pay_consumer_product import (
-    PayConsumerProductController,
-    PayConsumerProductPresenter,
-)
-from arbeitszeit_web.query_companies import (
-    QueryCompaniesController,
-    QueryCompaniesPresenter,
-)
-from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
 from arbeitszeit_flask.database import (
     AccountRepository,
     MemberRepository,
@@ -40,6 +26,20 @@ from arbeitszeit_flask.views import (
     QueryPlansView,
     ReadMessageView,
 )
+from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
+from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
+from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
+from arbeitszeit_web.get_statistics import GetStatisticsPresenter
+from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
+from arbeitszeit_web.pay_consumer_product import (
+    PayConsumerProductController,
+    PayConsumerProductPresenter,
+)
+from arbeitszeit_web.query_companies import (
+    QueryCompaniesController,
+    QueryCompaniesPresenter,
+)
+from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
 
 from .blueprint import MemberRoute
 

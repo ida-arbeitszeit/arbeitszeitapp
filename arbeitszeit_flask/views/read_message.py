@@ -4,8 +4,8 @@ from uuid import UUID
 from flask import Response
 
 from arbeitszeit.use_cases import ReadMessage, ReadMessageFailure
-from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
 from arbeitszeit_flask.template import TemplateIndex, TemplateRenderer
+from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
 
 from .http_404_view import Http404View
 

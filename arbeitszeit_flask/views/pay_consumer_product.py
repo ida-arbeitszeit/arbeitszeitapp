@@ -4,12 +4,12 @@ from uuid import UUID
 from flask import Response
 
 from arbeitszeit.use_cases import PayConsumerProduct
+from arbeitszeit_flask.forms import PayConsumerProductForm
+from arbeitszeit_flask.template import TemplateRenderer
 from arbeitszeit_web.pay_consumer_product import (
     PayConsumerProductController,
     PayConsumerProductPresenter,
 )
-from arbeitszeit_flask.forms import PayConsumerProductForm
-from arbeitszeit_flask.template import TemplateRenderer
 
 
 @dataclass
