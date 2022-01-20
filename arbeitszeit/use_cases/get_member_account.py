@@ -11,8 +11,8 @@ from arbeitszeit.repositories import (
     AccountOwnerRepository,
     AccountRepository,
     MemberRepository,
-    TransactionRepository,
 )
+from arbeitszeit.transactions import UserAccountingService
 
 User = Union[Member, Company]
 UserOrSocialAccounting = Union[User, SocialAccounting]
@@ -35,7 +35,7 @@ class GetMemberAccountResponse:
 @inject
 @dataclass
 class GetMemberAccount:
-    transaction_repository: TransactionRepository
+    accounting_service: UserAccountingService
     member_repository: MemberRepository
     acount_owner_repository: AccountOwnerRepository
     account_repository: AccountRepository
@@ -45,7 +45,9 @@ class GetMemberAccount:
         assert member
         transaction_info = [
             self._create_info(member, transaction)
-            for transaction in self._get_all_transactions_sorted(member)
+            for transaction in self.accounting_service._get_all_transactions_sorted(
+                member
+            )
         ]
         balance = self.account_repository.get_account_balance(member.account)
         return GetMemberAccountResponse(transaction_info, balance)
@@ -70,22 +72,6 @@ class GetMemberAccount:
             transaction_volume,
             transaction.purpose,
         )
-
-    def _get_all_transactions_sorted(self, user: User) -> List[Transaction]:
-        all_transactions = set()
-        for account in user.accounts():
-            all_transactions.update(
-                self.transaction_repository.all_transactions_sent_by_account(account)
-            )
-            all_transactions.update(
-                self.transaction_repository.all_transactions_received_by_account(
-                    account
-                )
-            )
-        all_transactions_sorted = sorted(
-            all_transactions, key=lambda x: x.date, reverse=True
-        )
-        return all_transactions_sorted
 
     def _user_is_sender(
         self,
