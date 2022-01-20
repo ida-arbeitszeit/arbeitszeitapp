@@ -41,7 +41,7 @@ submit changes in a pull pull request.  This program runs ``flake8``,
 You can generate a code coverage report at ``htmlcov/index.html`` via
 the command::
 
-    coverage run --source project,arbeitszeit,arbeitszeit_web  -m pytest && coverage html
+    coverage run --source arbeitszeit_flask,arbeitszeit,arbeitszeit_web  -m pytest && coverage html
 
 In some circumstances we use ``hypothesis`` to check for edge cases.
 By default ``hypothesis`` generates only 10 examples per test to keep
@@ -61,7 +61,7 @@ Repository layout
 We practice clean architecture and our code is organized thusly.
 Business logic related code is found in the ``arbeitszeit`` folder.
 presenters are located under ``arbeitszeit_web`` and the flask related
-code is found in ``project``.  Tests are stored in the ``tests``
+code is found in ``arbeitszeit_flask``.  Tests are stored in the ``tests``
 folder. Inside the tests folder the code is organized similarly to the
 root folder: business logic tests live in ``tests/use_cases``,
 presenter tests can be found in ``tests/presenters`` and flask
