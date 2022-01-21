@@ -7,6 +7,8 @@ from arbeitszeit.use_cases.query_companies import (
     QueryCompaniesRequest,
 )
 
+from .notification import Notifier
+
 
 class QueryCompaniesFormData(Protocol):
     def get_query_string(self) -> str:
@@ -45,11 +47,6 @@ class QueryCompaniesController:
 
 
 @dataclass
-class Notification:
-    text: str
-
-
-@dataclass
 class ResultTableRow:
     company_id: str
     company_name: str
@@ -63,7 +60,6 @@ class ResultsTable:
 
 @dataclass
 class QueryCompaniesViewModel:
-    notifications: List[Notification]
     results: ResultsTable
     show_results: bool
 
@@ -73,13 +69,12 @@ class QueryCompaniesViewModel:
 
 @dataclass
 class QueryCompaniesPresenter:
+    user_notifier: Notifier
+
     def present(self, response: CompanyQueryResponse) -> QueryCompaniesViewModel:
-        if response.results:
-            notifications = []
-        else:
-            notifications = [Notification(text="Keine Ergebnisse!")]
+        if not response.results:
+            self.user_notifier.display_warning("Keine Ergebnisse!")
         return QueryCompaniesViewModel(
-            notifications=notifications,
             show_results=bool(response.results),
             results=ResultsTable(
                 rows=[
@@ -95,7 +90,6 @@ class QueryCompaniesPresenter:
 
     def get_empty_view_model(self) -> QueryCompaniesViewModel:
         return QueryCompaniesViewModel(
-            notifications=[],
             results=ResultsTable(rows=[]),
             show_results=False,
         )

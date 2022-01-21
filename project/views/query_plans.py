@@ -8,8 +8,8 @@ from arbeitszeit_web.query_plans import (
     QueryPlansPresenter,
     QueryPlansViewModel,
 )
-from arbeitszeit_web.template import TemplateRenderer
 from project.forms import PlanSearchForm
+from project.template import TemplateRenderer
 
 
 @dataclass

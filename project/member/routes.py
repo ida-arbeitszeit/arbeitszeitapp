@@ -4,7 +4,7 @@ from flask import Response, request
 from flask_login import current_user
 
 from arbeitszeit import use_cases
-from arbeitszeit.use_cases import ListMessages, ReadMessage
+from arbeitszeit.use_cases import ListMessages
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
@@ -19,7 +19,6 @@ from arbeitszeit_web.query_companies import (
     QueryCompaniesPresenter,
 )
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
-from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
 from project.database import MemberRepository, commit_changes
 from project.forms import CompanySearchForm, PayConsumerProductForm, PlanSearchForm
 from project.template import UserTemplateRenderer
@@ -173,6 +172,7 @@ def plan_summary(
     get_plan_summary: use_cases.GetPlanSummary,
     template_renderer: UserTemplateRenderer,
     presenter: GetPlanSummarySuccessPresenter,
+    http_404_view: Http404View,
 ) -> Response:
     use_case_response = get_plan_summary(plan_id)
     if isinstance(use_case_response, use_cases.PlanSummarySuccess):
@@ -184,7 +184,7 @@ def plan_summary(
             )
         )
     else:
-        return Http404View("member/404.html", template_renderer).get_response()
+        return http_404_view.get_response()
 
 
 @MemberRoute("/member/cooperation_summary/<uuid:coop_id>")
@@ -193,6 +193,7 @@ def coop_summary(
     get_coop_summary: use_cases.GetCoopSummary,
     presenter: GetCoopSummarySuccessPresenter,
     template_renderer: UserTemplateRenderer,
+    http_404_view: Http404View,
 ):
     use_case_response = get_coop_summary(
         use_cases.GetCoopSummaryRequest(UUID(current_user.id), coop_id)
@@ -203,7 +204,7 @@ def coop_summary(
             "member/coop_summary.html", context=dict(view_model=view_model.to_dict())
         )
     else:
-        return Http404View("member/404.html", template_renderer).get_response()
+        return http_404_view.get_response()
 
 
 @MemberRoute("/member/hilfe")
@@ -217,8 +218,8 @@ def list_messages(
     controller: ListMessagesController,
     presenter: ListMessagesPresenter,
     use_case: ListMessages,
+    http_404_view: Http404View,
 ) -> Response:
-    http_404_view = Http404View("member/404.html", template_renderer)
     view = ListMessagesView(
         template_renderer=template_renderer,
         presenter=presenter,
@@ -234,18 +235,6 @@ def list_messages(
 @commit_changes
 def read_message(
     message_id: UUID,
-    read_message: ReadMessage,
-    controller: ReadMessageController,
-    presenter: ReadMessagePresenter,
-    template_renderer: UserTemplateRenderer,
+    view: ReadMessageView,
 ) -> Response:
-    http_404_view = Http404View("member/404.html", template_renderer)
-    view = ReadMessageView(
-        read_message,
-        controller,
-        presenter,
-        template_renderer,
-        template_name="member/read_message.html",
-        http_404_view=http_404_view,
-    )
     return view.respond_to_get(message_id)

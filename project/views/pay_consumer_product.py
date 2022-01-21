@@ -8,8 +8,8 @@ from arbeitszeit_web.pay_consumer_product import (
     PayConsumerProductController,
     PayConsumerProductPresenter,
 )
-from arbeitszeit_web.template import TemplateRenderer
 from project.forms import PayConsumerProductForm
+from project.template import TemplateRenderer
 
 
 @dataclass

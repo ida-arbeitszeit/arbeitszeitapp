@@ -10,6 +10,8 @@ from arbeitszeit.use_cases import (
     AcceptCooperation,
     AcceptCooperationRequest,
     AcceptCooperationResponse,
+    CancelCooperationSolicitation,
+    CancelCooperationSolicitationRequest,
     CreatePlanDraft,
     DenyCooperation,
     DenyCooperationRequest,
@@ -27,7 +29,6 @@ from arbeitszeit.use_cases import (
     ListOutboundCoopRequestsRequest,
     ListPlans,
     ListWorkers,
-    ReadMessage,
     RequestCooperation,
     SendWorkCertificatesToWorker,
     ToggleProductAvailability,
@@ -52,7 +53,6 @@ from arbeitszeit_web.query_companies import (
     QueryCompaniesPresenter,
 )
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
-from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
 from arbeitszeit_web.request_cooperation import (
     RequestCooperationController,
     RequestCooperationPresenter,
@@ -163,8 +163,8 @@ def query_companies(
     query_companies: use_cases.QueryCompanies,
     controller: QueryCompaniesController,
     template_renderer: UserTemplateRenderer,
+    presenter: QueryCompaniesPresenter,
 ):
-    presenter = QueryCompaniesPresenter()
     template_name = "company/query_companies.html"
     search_form = CompanySearchForm(request.form)
     view = QueryCompaniesView(
@@ -465,6 +465,7 @@ def plan_summary(
     get_plan_summary: use_cases.GetPlanSummary,
     template_renderer: UserTemplateRenderer,
     presenter: GetPlanSummarySuccessPresenter,
+    http_404_view: Http404View,
 ):
     use_case_response = get_plan_summary(plan_id)
     if isinstance(use_case_response, use_cases.PlanSummarySuccess):
@@ -473,7 +474,7 @@ def plan_summary(
             "company/plan_summary.html", context=dict(view_model=view_model.to_dict())
         )
     else:
-        return Http404View("company/404.html", template_renderer).get_response()
+        return http_404_view.get_response()
 
 
 @CompanyRoute("/company/cooperation_summary/<uuid:coop_id>")
@@ -482,6 +483,7 @@ def coop_summary(
     get_coop_summary: use_cases.GetCoopSummary,
     presenter: GetCoopSummarySuccessPresenter,
     template_renderer: UserTemplateRenderer,
+    http_404_view: Http404View,
 ):
     use_case_response = get_coop_summary(
         use_cases.GetCoopSummaryRequest(UUID(current_user.id), coop_id)
@@ -492,7 +494,7 @@ def coop_summary(
             "company/coop_summary.html", context=dict(view_model=view_model.to_dict())
         )
     else:
-        return Http404View("company/404.html", template_renderer).get_response()
+        return http_404_view.get_response()
 
 
 @CompanyRoute("/company/create_cooperation", methods=["GET", "POST"])
@@ -526,8 +528,8 @@ def request_cooperation(
     controller: RequestCooperationController,
     presenter: RequestCooperationPresenter,
     template_renderer: UserTemplateRenderer,
+    http_404_view: Http404View,
 ):
-    http_404_view = Http404View("company/404.html", template_renderer)
     form = RequestCooperationForm(request.form)
     view = RequestCooperationView(
         current_user_id=UUID(current_user.id),
@@ -559,9 +561,11 @@ def my_cooperations(
     deny_cooperation: DenyCooperation,
     list_outbound_coop_requests: ListOutboundCoopRequests,
     presenter: ShowMyCooperationsPresenter,
+    cancel_cooperation_solicitation: CancelCooperationSolicitation,
 ):
     accept_cooperation_response: Optional[AcceptCooperationResponse] = None
     deny_cooperation_response: Optional[DenyCooperationResponse] = None
+    cancel_cooperation_solicitation_response: Optional[bool] = None
     if request.method == "POST":
         if request.form.get("accept"):
             coop_id, plan_id = [id.strip() for id in request.form["accept"].split(",")]
@@ -570,12 +574,18 @@ def my_cooperations(
                     UUID(current_user.id), UUID(plan_id), UUID(coop_id)
                 )
             )
-        else:
+        elif request.form.get("deny"):
             coop_id, plan_id = [id.strip() for id in request.form["deny"].split(",")]
             deny_cooperation_response = deny_cooperation(
                 DenyCooperationRequest(
                     UUID(current_user.id), UUID(plan_id), UUID(coop_id)
                 )
+            )
+        elif request.form.get("cancel"):
+            plan_id = UUID(request.form["cancel"])
+            requester_id = UUID(current_user.id)
+            cancel_cooperation_solicitation_response = cancel_cooperation_solicitation(
+                CancelCooperationSolicitationRequest(requester_id, plan_id)
             )
 
     list_coord_response = list_coordinations(
@@ -594,6 +604,7 @@ def my_cooperations(
         accept_cooperation_response,
         deny_cooperation_response,
         list_outbound_coop_requests_response,
+        cancel_cooperation_solicitation_response,
     )
     return template_renderer.render_template(
         "company/my_cooperations.html", context=view_model.to_dict()
@@ -626,8 +637,8 @@ def list_messages(
     controller: ListMessagesController,
     use_case: ListMessages,
     presenter: ListMessagesPresenter,
+    http_404_view: Http404View,
 ) -> Response:
-    http_404_view = Http404View("company/404.html", template_renderer)
     view = ListMessagesView(
         template_renderer=template_renderer,
         presenter=presenter,
@@ -643,18 +654,6 @@ def list_messages(
 @commit_changes
 def read_message(
     message_id: UUID,
-    read_message: ReadMessage,
-    controller: ReadMessageController,
-    presenter: ReadMessagePresenter,
-    template_renderer: UserTemplateRenderer,
+    view: ReadMessageView,
 ) -> Response:
-    http_404_view = Http404View("company/404.html", template_renderer)
-    view = ReadMessageView(
-        read_message,
-        controller,
-        presenter,
-        template_renderer,
-        template_name="company/read_message.html",
-        http_404_view=http_404_view,
-    )
     return view.respond_to_get(message_id)

@@ -5,6 +5,8 @@ from uuid import UUID, uuid4
 from arbeitszeit.use_cases.query_plans import PlanQueryResponse, QueriedPlan
 from arbeitszeit_web.query_plans import QueryPlansPresenter
 
+from .notifier import NotifierTestImpl
+
 RESPONSE_WITHOUT_RESULTS = PlanQueryResponse(results=[])
 RESPONSE_WITH_ONE_RESULT = PlanQueryResponse(
     results=[
@@ -45,7 +47,10 @@ class QueryPlansPresenterTests(TestCase):
     def setUp(self):
         self.plan_url_index = PlanSummaryUrlIndex()
         self.coop_url_index = CoopSummaryUrlIndex()
-        self.presenter = QueryPlansPresenter(self.plan_url_index, self.coop_url_index)
+        self.notifier = NotifierTestImpl()
+        self.presenter = QueryPlansPresenter(
+            self.plan_url_index, self.coop_url_index, user_notifier=self.notifier
+        )
 
     def test_presenting_empty_response_leads_to_not_showing_results(self):
         presentation = self.presenter.present(RESPONSE_WITHOUT_RESULTS)
@@ -59,13 +64,13 @@ class QueryPlansPresenterTests(TestCase):
         presentation = self.presenter.present(RESPONSE_WITH_ONE_RESULT)
         self.assertTrue(presentation.show_results)
 
-    def test_show_notification_when_no_results_are_found(self):
-        presentation = self.presenter.present(RESPONSE_WITHOUT_RESULTS)
-        self.assertTrue(presentation.notifications)
+    def test_show_warning_when_no_results_are_found(self):
+        self.presenter.present(RESPONSE_WITHOUT_RESULTS)
+        self.assertTrue(self.notifier.warnings)
 
-    def test_dont_show_notifications_when_results_are_found(self):
-        presentation = self.presenter.present(RESPONSE_WITH_ONE_RESULT)
-        self.assertFalse(presentation.notifications)
+    def test_dont_show_warning_when_results_are_found(self):
+        self.presenter.present(RESPONSE_WITH_ONE_RESULT)
+        self.assertFalse(self.notifier.warnings)
 
     def test_plan_url(self) -> None:
         presentation = self.presenter.present(RESPONSE_WITH_ONE_RESULT)
