@@ -45,7 +45,7 @@ class GetMemberAccount:
         assert member
         transaction_info = [
             self._create_info(member, transaction)
-            for transaction in self.accounting_service._get_all_transactions_sorted(
+            for transaction in self.accounting_service.get_all_transactions_sorted(
                 member
             )
         ]

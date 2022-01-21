@@ -25,13 +25,10 @@
         <thead>
             <tr>
                 <th></th>
-                <th>Sender</th>
-                <th>Empfänger</th>
-                <th>p</th>
-                <th>r</th>
-                <th>a</th>
-                <th><abbr title="xxxx xxx x">prd</abbr></th>
-                <th>Verw.zweck</th>
+                <th></th>
+                <th>Account</th>
+                <th>Type</th>
+                <th>Details</th>
             </tr>
         </thead>
         <tbody>
@@ -40,12 +37,11 @@
             {% for trans_info in all_transactions %}
             <tr>
                 <td>{{ trans_info.date|format_datetime(zone='Europe/Berlin', fmt='%d.%m.%Y %H:%M') }}</td>
-                <td>{{ trans_info.sender_name }}</td>
-                <td>{{ trans_info.receiver_name }}</td>
-                <td>{{ trans_info.transaction_volumes["p"] }}</td>
-                <td>{{ trans_info.transaction_volumes["r"] }}</td>
-                <td>{{ trans_info.transaction_volumes["a"] }}</td>
-                <td>{{ trans_info.transaction_volumes["prd"] }}</td>
+                <td class="{{ 'has-text-success' if trans_info.transaction_volume >= 0 else 'has-text-danger' }}">{{
+                    trans_info.transaction_volume }}
+                </td>
+                <td>{{ trans_info.account }}</td>
+                <td>{{ trans_info.transaction_type }}</td>
                 <td>{{ trans_info.purpose }}</td>
             </tr>
             {% endfor %}

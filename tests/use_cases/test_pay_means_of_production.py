@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from typing import List
 from unittest import TestCase
 from uuid import uuid4
 
@@ -10,8 +9,8 @@ from arbeitszeit.use_cases import (
     GetCompanyTransactions,
     PayMeansOfProduction,
     PayMeansOfProductionRequest,
-    TransactionInfo,
 )
+from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsResponse
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
 
@@ -410,19 +409,21 @@ class TestSuccessfulPayment(TestCase):
 
     def test_transaction_shows_up_in_transaction_listing_for_buyer(self) -> None:
         transaction_info = self.get_buyer_transaction_infos(self.buyer)
-        self.assertEqual(len(transaction_info), 1)
+        self.assertEqual(len(transaction_info.transactions), 1)
 
     def test_transaction_shows_up_in_transaction_listing_for_planner(self) -> None:
-        transaction_info = self.get_company_transactions(self.planner)
-        self.assertEqual(len(transaction_info), 1)
+        transaction_info = self.get_company_transactions(self.planner.id)
+        self.assertEqual(len(transaction_info.transactions), 1)
 
     def test_transaction_info_of_buyer_shows_transaction_timestamp(self) -> None:
-        transaction_info = self.get_company_transactions(self.buyer)
-        self.assertEqual(transaction_info[0].date, self.transaction_time)
+        transaction_info = self.get_company_transactions(self.buyer.id)
+        self.assertEqual(transaction_info.transactions[0].date, self.transaction_time)
 
     def test_transaction_info_of_planner_shows_transaction_timestamp(self) -> None:
-        transaction_info = self.get_company_transactions(self.planner)
-        self.assertEqual(transaction_info[0].date, self.transaction_time)
+        transaction_info = self.get_company_transactions(self.planner.id)
+        self.assertEqual(transaction_info.transactions[0].date, self.transaction_time)
 
-    def get_buyer_transaction_infos(self, user: Company) -> List[TransactionInfo]:
-        return self.get_company_transactions(user)
+    def get_buyer_transaction_infos(
+        self, user: Company
+    ) -> GetCompanyTransactionsResponse:
+        return self.get_company_transactions(user.id)

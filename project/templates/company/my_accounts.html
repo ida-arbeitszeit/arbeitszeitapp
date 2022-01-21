@@ -23,40 +23,45 @@
 
 <div class="columns">
     <div class="column"></div>
-    <div class="column">
+    <div class="column is-6">
         <div class="table-container">
             <table class="table is-fullwidth">
                 <thead>
                     <tr>
-                        <th>Account</th>
-                        <th>Balance</th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     {% if my_balances is defined and my_balances|length %}
                     <tr>
-                        <td class="py-2"><a href="">Account P</a></td>
+                        <td class="py-2">Account p</td>
                         <td
                             class="py-2 has-text-weight-bold {{ 'has-text-primary' if my_balances[0] >= 0 else 'has-text-danger' }}">
                             {{ my_balances[0] | round(2) }}</td>
+                        <td class="is-italic">Account for fixed means of production</td>
                     </tr>
                     <tr>
-                        <td class="py-2"><a href="">Account R</a></td>
+                        <td class="py-2">Account r</td>
                         <td
                             class="py-2 has-text-weight-bold {{ 'has-text-primary' if my_balances[1] >= 0 else 'has-text-danger' }}">
                             {{ my_balances[1] | round(2) }}</td>
+                        <td class="is-italic">Account for liquid means of production</td>
                     </tr>
                     <tr>
-                        <td class="py-2"><a href="">Account A</a></td>
+                        <td class="py-2">Account a</td>
                         <td
                             class="py-2 has-text-weight-bold {{ 'has-text-primary' if my_balances[2] >= 0 else 'has-text-danger' }}">
                             {{ my_balances[2] | round(2) }}</td>
+                        <td class="is-italic">Account for work certificates (wages)</td>
                     </tr>
                     <tr>
-                        <td class="py-2"><a href="">Account PRD</a></td>
+                        <td class="py-2">Account prd</td>
                         <td
                             class="py-2 has-text-weight-bold {{ 'has-text-primary' if my_balances[3] >= 0 else 'has-text-danger' }}">
                             {{ my_balances[3] | round(2) }}</td>
+                        <td class="is-italic">Account for product transfers (sales)</td>
                     </tr>
                     {% endif %}
                 </tbody>

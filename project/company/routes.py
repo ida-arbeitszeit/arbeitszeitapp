@@ -35,6 +35,7 @@ from arbeitszeit.use_cases import (
 )
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
+from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.get_prefilled_draft_data import (
@@ -384,17 +385,17 @@ def my_accounts(
 
 @CompanyRoute("/company/my_accounts/all_transactions")
 def list_all_transactions(
-    company_repository: CompanyRepository,
     get_company_transactions: use_cases.GetCompanyTransactions,
     template_renderer: UserTemplateRenderer,
+    presenter: GetCompanyTransactionsPresenter,
 ):
-    company = company_repository.object_from_orm(cast(Company, current_user))
-    all_trans_infos = get_company_transactions(company)
+    response = get_company_transactions(UUID(current_user.id))
+    view_model = presenter.present(response)
 
     return template_renderer.render_template(
         "company/list_all_transactions.html",
         context=dict(
-            all_transactions=all_trans_infos,
+            all_transactions=view_model.transactions,
         ),
     )
 
