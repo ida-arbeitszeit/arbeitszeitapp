@@ -100,6 +100,25 @@ def test_reject_payment_trying_to_pay_public_service(
 
 
 @injection_test
+def test_reject_payment_trying_to_pay_own_product(
+    pay_means_of_production: PayMeansOfProduction,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+    datetime_service: FakeDatetimeService,
+):
+    sender = company_generator.create_company()
+    plan = plan_generator.create_plan(
+        activation_date=datetime_service.now_minus_one_day(), planner=sender
+    )
+    purpose = PurposesOfPurchases.means_of_prod
+    response = pay_means_of_production(
+        PayMeansOfProductionRequest(sender.id, plan.id, 5, purpose)
+    )
+    assert response.is_rejected
+    assert response.rejection_reason == response.RejectionReason.buyer_is_planner
+
+
+@injection_test
 def test_balance_of_buyer_of_means_of_prod_reduced(
     pay_means_of_production: PayMeansOfProduction,
     company_generator: CompanyGenerator,
