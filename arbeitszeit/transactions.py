@@ -46,11 +46,24 @@ class UserAccountingService:
         )
         return all_transactions_sorted
 
+    def get_account_p_transactions_sorted(self, company: Company) -> List[Transaction]:
+        account_p = company.means_account
+        transactions = set()
+        transactions.update(
+            self.transaction_repository.all_transactions_sent_by_account(account_p)
+        )
+        transactions.update(
+            self.transaction_repository.all_transactions_received_by_account(account_p)
+        )
+        transactions_sorted = sorted(transactions, key=lambda x: x.date, reverse=True)
+        return transactions_sorted
+
     def get_transaction_type(
         self, transaction: Transaction, user_is_sender: bool
     ) -> TransactionTypes:
         """
-        Based on wether the user is sender or receiver of a transaction, this method returns the transaction type.
+        Based on wether the user is sender or receiver of a transaction,
+        this method returns the transaction type.
         """
         sending_account = transaction.sending_account.account_type
         receiving_account = transaction.receiving_account.account_type

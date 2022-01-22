@@ -9,8 +9,6 @@
 <div class="box has-background-info-light has-text-info-dark">
     <div class="icon"><i class="fas fa-info-circle"></i></div>
     <p>You have four different accounts.</p>
-    <p>Click on them to see details.</p>
-
 </div>
 
 {% with messages = get_flashed_messages() %}
@@ -36,7 +34,7 @@
                 <tbody>
                     {% if my_balances is defined and my_balances|length %}
                     <tr>
-                        <td class="py-2">Account p</td>
+                        <td class="py-2"><a href="{{ url_for('main_company.account_p') }}">Account p</a></td>
                         <td
                             class="py-2 has-text-weight-bold {{ 'has-text-primary' if my_balances[0] >= 0 else 'has-text-danger' }}">
                             {{ my_balances[0] | round(2) }}</td>

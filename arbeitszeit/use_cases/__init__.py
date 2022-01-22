@@ -42,7 +42,8 @@ from .end_cooperation import (
     EndCooperationRequest,
     EndCooperationResponse,
 )
-from .get_company_transactions import GetCompanyTransactions, TransactionInfo
+from .get_account_p import GetAccountP, GetAccountPResponse
+from .get_company_transactions import GetCompanyTransactions
 from .get_coop_summary import (
     GetCoopSummary,
     GetCoopSummaryRequest,
@@ -183,6 +184,8 @@ __all__ = [
     "EndCooperation",
     "EndCooperationResponse",
     "EndCooperationRequest",
+    "GetAccountP",
+    "GetAccountPResponse",
     "GetCoopSummary",
     "GetCoopSummaryRequest",
     "GetCoopSummaryResponse",
@@ -265,7 +268,6 @@ __all__ = [
     "StatisticsResponse",
     "ToggleProductAvailability",
     "ToggleProductAvailabilityResponse",
-    "TransactionInfo",
     "UpdatePlansAndPayout",
     "Workplace",
     "add_worker_to_company",

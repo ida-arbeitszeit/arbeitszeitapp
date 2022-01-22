@@ -35,6 +35,7 @@ from arbeitszeit.use_cases import (
 )
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
+from arbeitszeit_web.get_account_p import GetAccountPPresenter
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
@@ -397,6 +398,21 @@ def list_all_transactions(
         context=dict(
             all_transactions=view_model.transactions,
         ),
+    )
+
+
+@CompanyRoute("/company/my_accounts/account_p")
+def account_p(
+    get_account_p: use_cases.GetAccountP,
+    template_renderer: UserTemplateRenderer,
+    presenter: GetAccountPPresenter,
+):
+    response = get_account_p(UUID(current_user.id))
+    view_model = presenter.present(response)
+
+    return template_renderer.render_template(
+        "company/account_p.html",
+        context=dict(view_model=view_model),
     )
 
 
