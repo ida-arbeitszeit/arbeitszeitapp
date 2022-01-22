@@ -8,31 +8,19 @@ from .entities import AccountTypes, Company, Member, Transaction
 from .repositories import TransactionRepository
 
 
-class CompanyTransactionTypes(Enum):
+class TransactionTypes(Enum):
     credit_for_wages = "Credit for wages"
     payment_of_wages = "Payment of wages"
+    incoming_wages = "Incoming wages"
     credit_for_fixed_means = "Credit for fixed means of production"
     payment_of_fixed_means = "Payment of fixed means of production"
     credit_for_liquid_means = "Credit for liquid means of production"
     payment_of_liquid_means = "Payment of liquid means of production"
     expected_sales = "Debit expected sales"
     sale_of_consumer_product = "Sale of consumer product"
+    payment_of_consumer_product = "Payment of consumer product"
     sale_of_fixed_means = "Sale of fixed means of production"
     sale_of_liquid_means = "Sale of liquid means of production"
-
-
-transaction_account_dict = {
-    CompanyTransactionTypes.credit_for_wages: AccountTypes.a,
-    CompanyTransactionTypes.payment_of_wages: AccountTypes.a,
-    CompanyTransactionTypes.credit_for_fixed_means: AccountTypes.p,
-    CompanyTransactionTypes.payment_of_fixed_means: AccountTypes.p,
-    CompanyTransactionTypes.credit_for_liquid_means: AccountTypes.r,
-    CompanyTransactionTypes.payment_of_liquid_means: AccountTypes.r,
-    CompanyTransactionTypes.sale_of_consumer_product: AccountTypes.prd,
-    CompanyTransactionTypes.sale_of_fixed_means: AccountTypes.prd,
-    CompanyTransactionTypes.sale_of_liquid_means: AccountTypes.prd,
-    CompanyTransactionTypes.expected_sales: AccountTypes.prd,
-}
 
 
 @inject
@@ -60,35 +48,42 @@ class UserAccountingService:
 
     def get_transaction_type(
         self, transaction: Transaction, user_is_sender: bool
-    ) -> CompanyTransactionTypes:
-        sending_account = transaction.sending_account.account_type.value
-        receiving_account = transaction.receiving_account.account_type.value
+    ) -> TransactionTypes:
+        """
+        Based on wether the user is sender or receiver of a transaction, this method returns the transaction type.
+        """
+        sending_account = transaction.sending_account.account_type
+        receiving_account = transaction.receiving_account.account_type
 
         if user_is_sender:
-            if sending_account == AccountTypes.a.value:
-                tt = CompanyTransactionTypes.payment_of_wages
-            elif sending_account == AccountTypes.p.value:
-                tt = CompanyTransactionTypes.payment_of_fixed_means
-            elif sending_account == AccountTypes.r.value:
-                tt = CompanyTransactionTypes.payment_of_liquid_means
+            if sending_account == AccountTypes.a:
+                transaction_type = TransactionTypes.payment_of_wages
+            elif sending_account == AccountTypes.p:
+                transaction_type = TransactionTypes.payment_of_fixed_means
+            elif sending_account == AccountTypes.r:
+                transaction_type = TransactionTypes.payment_of_liquid_means
+            elif sending_account == AccountTypes.member:
+                transaction_type = TransactionTypes.payment_of_consumer_product
 
         else:
-            if sending_account == AccountTypes.accounting.value:
-                if receiving_account == AccountTypes.a.value:
-                    tt = CompanyTransactionTypes.credit_for_wages
-                elif receiving_account == AccountTypes.p.value:
-                    tt = CompanyTransactionTypes.credit_for_fixed_means
-                elif receiving_account == AccountTypes.r.value:
-                    tt = CompanyTransactionTypes.credit_for_liquid_means
-                elif receiving_account == AccountTypes.prd.value:
-                    tt = CompanyTransactionTypes.expected_sales
+            if sending_account == AccountTypes.accounting:
+                if receiving_account == AccountTypes.a:
+                    transaction_type = TransactionTypes.credit_for_wages
+                elif receiving_account == AccountTypes.p:
+                    transaction_type = TransactionTypes.credit_for_fixed_means
+                elif receiving_account == AccountTypes.r:
+                    transaction_type = TransactionTypes.credit_for_liquid_means
+                elif receiving_account == AccountTypes.prd:
+                    transaction_type = TransactionTypes.expected_sales
+                elif receiving_account == AccountTypes.member:
+                    transaction_type = TransactionTypes.incoming_wages
 
-            elif sending_account == AccountTypes.p.value:
-                tt = CompanyTransactionTypes.sale_of_fixed_means
-            elif sending_account == AccountTypes.r.value:
-                tt = CompanyTransactionTypes.sale_of_liquid_means
-            elif sending_account == AccountTypes.member.value:
-                tt = CompanyTransactionTypes.sale_of_consumer_product
+            elif sending_account == AccountTypes.p:
+                transaction_type = TransactionTypes.sale_of_fixed_means
+            elif sending_account == AccountTypes.r:
+                transaction_type = TransactionTypes.sale_of_liquid_means
+            elif sending_account == AccountTypes.member:
+                transaction_type = TransactionTypes.sale_of_consumer_product
 
-        assert tt
-        return tt
+        assert transaction_type
+        return transaction_type

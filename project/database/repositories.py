@@ -16,6 +16,7 @@ from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.user_action import UserAction
 from project.models import (
     Account,
+    AccountTypes,
     Company,
     CompanyWorkInvite,
     Cooperation,
@@ -248,8 +249,24 @@ class AccountRepository(repositories.AccountRepository):
         assert account_orm
         return entities.Account(
             id=UUID(account_orm.id),
-            account_type=account_orm.account_type,
+            account_type=self._transform_account_type(account_orm.account_type),
         )
+
+    def _transform_account_type(
+        self, orm_account_type: AccountTypes
+    ) -> entities.AccountTypes:
+        if orm_account_type == AccountTypes.p:
+            return entities.AccountTypes.p
+        elif orm_account_type == AccountTypes.r:
+            return entities.AccountTypes.r
+        elif orm_account_type == AccountTypes.a:
+            return entities.AccountTypes.a
+        elif orm_account_type == AccountTypes.prd:
+            return entities.AccountTypes.prd
+        elif orm_account_type == AccountTypes.member:
+            return entities.AccountTypes.member
+        else:
+            return entities.AccountTypes.accounting
 
     def object_to_orm(self, account: entities.Account) -> Account:
         account_orm = Account.query.filter_by(id=str(account.id)).first()

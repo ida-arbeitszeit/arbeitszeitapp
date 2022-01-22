@@ -8,18 +8,13 @@ from injector import inject
 
 from arbeitszeit.entities import AccountTypes, Company, Transaction
 from arbeitszeit.repositories import CompanyRepository
-from arbeitszeit.transactions import (
-    CompanyTransactionTypes,
-    UserAccountingService,
-    transaction_account_dict,
-)
+from arbeitszeit.transactions import TransactionTypes, UserAccountingService
 
 
 @dataclass
 class TransactionInfo:
-    type_of_transaction: CompanyTransactionTypes
+    type_of_transaction: TransactionTypes
     date: datetime
-    user_is_sender: bool
     transaction_volume: Decimal
     account_type: AccountTypes
     purpose: str
@@ -54,7 +49,7 @@ class GetCompanyTransactions:
     ) -> TransactionInfo:
         user_is_sender = self._user_is_sender(transaction, company)
         transaction_type = self._get_transaction_type(transaction, user_is_sender)
-        account_type = self._get_account_type(transaction_type)
+        account_type = self._get_account_type(transaction, user_is_sender)
         transaction_volume = self._get_volume_for_transaction(
             transaction,
             user_is_sender,
@@ -62,7 +57,6 @@ class GetCompanyTransactions:
         return TransactionInfo(
             transaction_type,
             transaction.date,
-            user_is_sender,
             transaction_volume,
             account_type,
             transaction.purpose,
@@ -82,10 +76,17 @@ class GetCompanyTransactions:
 
     def _get_transaction_type(
         self, transaction: Transaction, user_is_sender: bool
-    ) -> CompanyTransactionTypes:
-        return self.accounting_service.get_transaction_type(transaction, user_is_sender)
+    ) -> TransactionTypes:
+        transaction_type = self.accounting_service.get_transaction_type(
+            transaction, user_is_sender
+        )
+        return transaction_type
 
     def _get_account_type(
-        self, transaction_type: CompanyTransactionTypes
+        self, transaction: Transaction, user_is_sender: bool
     ) -> AccountTypes:
-        return transaction_account_dict[transaction_type]
+        if user_is_sender:
+            account_type = transaction.sending_account.account_type
+        else:
+            account_type = transaction.receiving_account.account_type
+        return account_type
