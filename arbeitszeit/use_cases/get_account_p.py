@@ -6,7 +6,7 @@ from uuid import UUID
 
 from injector import inject
 
-from arbeitszeit.entities import Company, Transaction
+from arbeitszeit.entities import AccountTypes, Company, Transaction
 from arbeitszeit.repositories import AccountRepository, CompanyRepository
 from arbeitszeit.transactions import TransactionTypes, UserAccountingService
 
@@ -37,8 +37,8 @@ class GetAccountP:
         assert company
         transactions = [
             self._create_info(company, transaction)
-            for transaction in self.accounting_service.get_account_p_transactions_sorted(
-                company
+            for transaction in self.accounting_service.get_account_transactions_sorted(
+                company, AccountTypes.p
             )
         ]
         account_balance = self.account_repository.get_account_balance(
@@ -53,9 +53,11 @@ class GetAccountP:
         company: Company,
         transaction: Transaction,
     ) -> TransactionInfo:
-        user_is_sender = self._user_is_sender(transaction, company)
-        transaction_type = self._get_transaction_type(transaction, user_is_sender)
-        transaction_volume = self._get_volume_for_transaction(
+        user_is_sender = self.accounting_service.user_is_sender(transaction, company)
+        transaction_type = self.accounting_service.get_transaction_type(
+            transaction, user_is_sender
+        )
+        transaction_volume = self.accounting_service.get_transaction_volume(
             transaction,
             user_is_sender,
         )
@@ -65,23 +67,3 @@ class GetAccountP:
             transaction_volume,
             transaction.purpose,
         )
-
-    def _user_is_sender(self, transaction: Transaction, company: Company) -> bool:
-        return True if transaction.sending_account in company.accounts() else False
-
-    def _get_volume_for_transaction(
-        self,
-        transaction: Transaction,
-        user_is_sender: bool,
-    ) -> Decimal:
-        if user_is_sender:
-            return -1 * transaction.amount_sent
-        return transaction.amount_received
-
-    def _get_transaction_type(
-        self, transaction: Transaction, user_is_sender: bool
-    ) -> TransactionTypes:
-        transaction_type = self.accounting_service.get_transaction_type(
-            transaction, user_is_sender
-        )
-        return transaction_type

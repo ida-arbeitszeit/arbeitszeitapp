@@ -28,25 +28,14 @@ class GetAccountPPresenter:
             self._create_info(transaction)
             for transaction in use_case_response.transactions
         ]
-        account_balance = use_case_response.account_balance
         return GetAccountPResponseViewModel(
-            transactions=transactions, account_balance=account_balance
+            transactions=transactions, account_balance=use_case_response.account_balance
         )
 
     def _create_info(self, transaction: TransactionInfo) -> ViewModelTransactionInfo:
-        transaction_type = self._get_transaction_type(transaction)
-        transaction_volume = self._get_transaction_volume(
-            transaction.transaction_volume
-        )
         return ViewModelTransactionInfo(
-            transaction_type,
+            transaction.type_of_transaction.value,
             transaction.date,
-            transaction_volume,
+            round(transaction.transaction_volume, 2),
             transaction.purpose,
         )
-
-    def _get_transaction_type(self, transaction: TransactionInfo) -> str:
-        return transaction.type_of_transaction.value
-
-    def _get_transaction_volume(self, transaction_volume: Decimal) -> Decimal:
-        return round(transaction_volume, 2)

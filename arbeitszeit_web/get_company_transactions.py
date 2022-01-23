@@ -36,24 +36,14 @@ class GetCompanyTransactionsPresenter:
         return GetCompanyTransactionsViewModel(transactions=transactions)
 
     def _create_info(self, transaction: TransactionInfo) -> ViewModelTransactionInfo:
-        transaction_type = self._get_transaction_type(transaction)
         account = self._get_account(transaction.account_type)
-        transaction_volume = self._get_transaction_volume(
-            transaction.transaction_volume
-        )
         return ViewModelTransactionInfo(
-            transaction_type,
+            transaction.type_of_transaction.value,
             transaction.date,
-            transaction_volume,
+            round(transaction.transaction_volume, 2),
             account,
             transaction.purpose,
         )
-
-    def _get_transaction_type(self, transaction: TransactionInfo) -> str:
-        return transaction.type_of_transaction.value
-
-    def _get_transaction_volume(self, transaction_volume: Decimal) -> Decimal:
-        return round(transaction_volume, 2)
 
     def _get_account(self, account_type: AccountTypes) -> str:
         return type_to_string_dict[account_type]

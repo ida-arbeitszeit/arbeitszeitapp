@@ -47,10 +47,12 @@ class GetCompanyTransactions:
         company: Company,
         transaction: Transaction,
     ) -> TransactionInfo:
-        user_is_sender = self._user_is_sender(transaction, company)
-        transaction_type = self._get_transaction_type(transaction, user_is_sender)
+        user_is_sender = self.accounting_service.user_is_sender(transaction, company)
+        transaction_type = self.accounting_service.get_transaction_type(
+            transaction, user_is_sender
+        )
         account_type = self._get_account_type(transaction, user_is_sender)
-        transaction_volume = self._get_volume_for_transaction(
+        transaction_volume = self.accounting_service.get_transaction_volume(
             transaction,
             user_is_sender,
         )
@@ -61,26 +63,6 @@ class GetCompanyTransactions:
             account_type,
             transaction.purpose,
         )
-
-    def _user_is_sender(self, transaction: Transaction, company: Company) -> bool:
-        return True if transaction.sending_account in company.accounts() else False
-
-    def _get_volume_for_transaction(
-        self,
-        transaction: Transaction,
-        user_is_sender: bool,
-    ) -> Decimal:
-        if user_is_sender:
-            return -1 * transaction.amount_sent
-        return transaction.amount_received
-
-    def _get_transaction_type(
-        self, transaction: Transaction, user_is_sender: bool
-    ) -> TransactionTypes:
-        transaction_type = self.accounting_service.get_transaction_type(
-            transaction, user_is_sender
-        )
-        return transaction_type
 
     def _get_account_type(
         self, transaction: Transaction, user_is_sender: bool

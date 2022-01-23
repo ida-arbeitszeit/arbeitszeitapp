@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from decimal import Decimal
 from enum import Enum
 from typing import List, Union
 
@@ -46,24 +47,37 @@ class UserAccountingService:
         )
         return all_transactions_sorted
 
-    def get_account_p_transactions_sorted(self, company: Company) -> List[Transaction]:
-        account_p = company.means_account
+    def get_account_transactions_sorted(
+        self, user: Union[Member, Company], queried_account_type: AccountTypes
+    ) -> List[Transaction]:
+        for acc in user.accounts():
+            if acc.account_type == queried_account_type:
+                queried_account = acc
         transactions = set()
         transactions.update(
-            self.transaction_repository.all_transactions_sent_by_account(account_p)
+            self.transaction_repository.all_transactions_sent_by_account(
+                queried_account
+            )
         )
         transactions.update(
-            self.transaction_repository.all_transactions_received_by_account(account_p)
+            self.transaction_repository.all_transactions_received_by_account(
+                queried_account
+            )
         )
         transactions_sorted = sorted(transactions, key=lambda x: x.date, reverse=True)
         return transactions_sorted
+
+    def user_is_sender(
+        self, transaction: Transaction, user: Union[Member, Company]
+    ) -> bool:
+        return True if transaction.sending_account in user.accounts() else False
 
     def get_transaction_type(
         self, transaction: Transaction, user_is_sender: bool
     ) -> TransactionTypes:
         """
-        Based on wether the user is sender or receiver of a transaction,
-        this method returns the transaction type.
+        Based on wether the user is sender or receiver,
+        this method returns the 'subjective' transaction type.
         """
         sending_account = transaction.sending_account.account_type
         receiving_account = transaction.receiving_account.account_type
@@ -100,3 +114,16 @@ class UserAccountingService:
 
         assert transaction_type
         return transaction_type
+
+    def get_transaction_volume(
+        self,
+        transaction: Transaction,
+        user_is_sender: bool,
+    ) -> Decimal:
+        """
+        Based on wether the user is sender or receiver,
+        this method returns the 'subjective' transaction volume.
+        """
+        if user_is_sender:
+            return -1 * transaction.amount_sent
+        return transaction.amount_received
