@@ -10,6 +10,10 @@ from .repositories import TransactionRepository
 
 
 class TransactionTypes(Enum):
+    """
+    'Subjective' transaction types, i.e. seen from a concrete user perspective.
+    """
+
     credit_for_wages = "Credit for wages"
     payment_of_wages = "Payment of wages"
     incoming_wages = "Incoming wages"
