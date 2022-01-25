@@ -8,8 +8,8 @@ from arbeitszeit_web.query_companies import (
     QueryCompaniesPresenter,
     QueryCompaniesViewModel,
 )
-from arbeitszeit_web.template import TemplateRenderer
 from project.forms import CompanySearchForm
+from project.template import TemplateRenderer
 
 
 @dataclass

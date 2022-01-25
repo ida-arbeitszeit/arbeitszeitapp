@@ -4,6 +4,8 @@ from uuid import uuid4
 from arbeitszeit.use_cases.query_companies import CompanyQueryResponse, QueriedCompany
 from arbeitszeit_web.query_companies import QueryCompaniesPresenter
 
+from .notifier import NotifierTestImpl
+
 RESPONSE_WITHOUT_RESULTS = CompanyQueryResponse(results=[])
 RESPONSE_WITH_ONE_RESULT = CompanyQueryResponse(
     results=[
@@ -18,7 +20,8 @@ RESPONSE_WITH_ONE_RESULT = CompanyQueryResponse(
 
 class QueryCompaniesPresenterTests(TestCase):
     def setUp(self):
-        self.presenter = QueryCompaniesPresenter()
+        self.notifier = NotifierTestImpl()
+        self.presenter = QueryCompaniesPresenter(user_notifier=self.notifier)
 
     def test_empty_view_model_does_not_show_results(self):
         presentation = self.presenter.get_empty_view_model()
@@ -29,9 +32,9 @@ class QueryCompaniesPresenterTests(TestCase):
         self.assertTrue(presentation.show_results)
 
     def test_show_notification_when_no_results_are_found(self):
-        presentation = self.presenter.present(RESPONSE_WITHOUT_RESULTS)
-        self.assertTrue(presentation.notifications)
+        self.presenter.present(RESPONSE_WITHOUT_RESULTS)
+        self.assertTrue(self.notifier.warnings)
 
     def test_dont_show_notifications_when_results_are_found(self):
-        presentation = self.presenter.present(RESPONSE_WITH_ONE_RESULT)
-        self.assertFalse(presentation.notifications)
+        self.presenter.present(RESPONSE_WITH_ONE_RESULT)
+        self.assertFalse(self.notifier.warnings)

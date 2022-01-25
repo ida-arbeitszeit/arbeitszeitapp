@@ -19,7 +19,7 @@ from arbeitszeit import repositories as interfaces
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.mail_service import MailService
 from arbeitszeit.token import TokenService
-from arbeitszeit.use_cases import CheckForUnreadMessages
+from arbeitszeit.use_cases import CheckForUnreadMessages, ReadMessage
 from arbeitszeit_web.check_for_unread_message import (
     CheckForUnreadMessagesController,
     CheckForUnreadMessagesPresenter,
@@ -29,6 +29,7 @@ from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
+from arbeitszeit_web.query_companies import QueryCompaniesPresenter
 from arbeitszeit_web.query_plans import QueryPlansPresenter
 from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
 from arbeitszeit_web.request_cooperation import RequestCooperationController
@@ -65,9 +66,17 @@ from project.extensions import db
 from project.flask_session import FlaskSession
 from project.mail_service import get_mail_service
 from project.notifications import FlaskFlashNotifier
-from project.template import FlaskTemplateRenderer, UserTemplateRenderer
+from project.template import (
+    CompanyTemplateIndex,
+    FlaskTemplateRenderer,
+    MemberTemplateIndex,
+    TemplateIndex,
+    TemplateRenderer,
+    UserTemplateRenderer,
+)
 from project.token import FlaskTokenService
 from project.url_index import CompanyUrlIndex, MemberUrlIndex
+from project.views import Http404View, ReadMessageView
 
 from .translator import FlaskTranslator
 
@@ -91,6 +100,10 @@ class MemberModule(Module):
     ) -> MessageUrlIndex:
         return member_index
 
+    @provider
+    def provide_template_index(self) -> TemplateIndex:
+        return MemberTemplateIndex()
+
 
 class CompanyModule(Module):
     @provider
@@ -111,8 +124,45 @@ class CompanyModule(Module):
     ) -> MessageUrlIndex:
         return company_index
 
+    @provider
+    def provide_template_index(self) -> TemplateIndex:
+        return CompanyTemplateIndex()
+
 
 class FlaskModule(Module):
+    @provider
+    def provide_read_message_view(
+        self,
+        read_message: ReadMessage,
+        controller: ReadMessageController,
+        presenter: ReadMessagePresenter,
+        template_renderer: TemplateRenderer,
+        template_index: TemplateIndex,
+        http_404_view: Http404View,
+    ) -> ReadMessageView:
+        return ReadMessageView(
+            read_message,
+            controller,
+            presenter,
+            template_renderer,
+            template_index,
+            http_404_view,
+        )
+
+    @provider
+    def provide_http_404_view(
+        self, template_renderer: TemplateRenderer, template_index: TemplateIndex
+    ) -> Http404View:
+        return Http404View(
+            template_index=template_index, template_renderer=template_renderer
+        )
+
+    @provider
+    def provide_query_companies_presenter(
+        self, notifier: Notifier
+    ) -> QueryCompaniesPresenter:
+        return QueryCompaniesPresenter(user_notifier=notifier)
+
     @provider
     def provide_pay_means_of_production_presenter(
         self, notifier: Notifier
@@ -145,9 +195,12 @@ class FlaskModule(Module):
 
     @provider
     def provide_query_plans_presenter(
-        self, plan_index: PlanSummaryUrlIndex, coop_index: CoopSummaryUrlIndex
+        self,
+        plan_index: PlanSummaryUrlIndex,
+        coop_index: CoopSummaryUrlIndex,
+        notifier: Notifier,
     ) -> QueryPlansPresenter:
-        return QueryPlansPresenter(plan_index, coop_index)
+        return QueryPlansPresenter(plan_index, coop_index, user_notifier=notifier)
 
     @provider
     def provide_user_action_resolver(self) -> UserActionResolver:
@@ -166,7 +219,7 @@ class FlaskModule(Module):
         return instance
 
     @provider
-    def provide_flask_template_renderer(self) -> FlaskTemplateRenderer:
+    def provide_template_renderer(self) -> TemplateRenderer:
         return FlaskTemplateRenderer()
 
     @provider

@@ -13,6 +13,10 @@ from .answer_company_work_invite import (
     AnswerCompanyWorkInviteRequest,
     AnswerCompanyWorkInviteResponse,
 )
+from .cancel_cooperation_solicitation import (
+    CancelCooperationSolicitation,
+    CancelCooperationSolicitationRequest,
+)
 from .check_for_unread_messages import (
     CheckForUnreadMessages,
     CheckForUnreadMessagesRequest,
@@ -49,6 +53,7 @@ from .get_draft_summary import (
     DraftSummarySuccess,
     GetDraftSummary,
 )
+from .get_member_account import GetMemberAccount, GetMemberAccountResponse
 from .get_member_profile_info import (
     GetMemberProfileInfo,
     GetMemberProfileInfoResponse,
@@ -153,6 +158,8 @@ __all__ = [
     "AnswerCompanyWorkInvite",
     "AnswerCompanyWorkInviteRequest",
     "AnswerCompanyWorkInviteResponse",
+    "CancelCooperationSolicitation",
+    "CancelCooperationSolicitationRequest",
     "CheckForUnreadMessages",
     "CheckForUnreadMessagesRequest",
     "CheckForUnreadMessagesResponse",
@@ -181,6 +188,8 @@ __all__ = [
     "GetCoopSummaryResponse",
     "GetCoopSummarySuccess",
     "GetDraftSummary",
+    "GetMemberAccount",
+    "GetMemberAccountResponse",
     "GetMemberProfileInfo",
     "GetMemberProfileInfoResponse",
     "GetPlanSummary",
