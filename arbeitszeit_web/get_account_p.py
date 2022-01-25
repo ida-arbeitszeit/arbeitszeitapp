@@ -3,6 +3,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import List
 
+from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.get_account_p import GetAccountPResponse, TransactionInfo
 
 
@@ -33,8 +34,14 @@ class GetAccountPPresenter:
         )
 
     def _create_info(self, transaction: TransactionInfo) -> ViewModelTransactionInfo:
+        transaction_type = (
+            "Payment"
+            if transaction.type_of_transaction
+            == TransactionTypes.payment_of_fixed_means
+            else "Credit"
+        )
         return ViewModelTransactionInfo(
-            transaction.type_of_transaction.value,
+            transaction_type,
             transaction.date,
             round(transaction.transaction_volume, 2),
             transaction.purpose,

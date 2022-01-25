@@ -38,9 +38,7 @@ class CompanyTransactionsPresenterTests(TestCase):
         self.assertTrue(len(view_model.transactions), 1)
         self.assertEqual(view_model.account_balance, Decimal(100))
         trans = view_model.transactions[0]
-        self.assertEqual(
-            trans.transaction_type, DEFAULT_INFO1.type_of_transaction.value
-        )
+        self.assertEqual(trans.transaction_type, "Credit")
         self.assertIsInstance(trans.date, datetime)
         self.assertEqual(trans.transaction_volume, DEFAULT_INFO1.transaction_volume)
         self.assertIsInstance(trans.purpose, str)

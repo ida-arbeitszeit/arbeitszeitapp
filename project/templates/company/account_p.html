@@ -31,9 +31,9 @@
         <thead>
             <tr>
                 <th></th>
-                <th></th>
                 <th>Type</th>
                 <th>Details</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -42,11 +42,15 @@
             {% for trans_info in view_model.transactions %}
             <tr>
                 <td>{{ trans_info.date|format_datetime(zone='Europe/Berlin', fmt='%d.%m.%Y %H:%M') }}</td>
-                <td class="{{ 'has-text-success' if trans_info.transaction_volume >= 0 else 'has-text-danger' }}">{{
+                <td>
+                    {{ trans_info.transaction_type }}
+                </td>
+                <td>{{ trans_info.purpose }}</td>
+                <td
+                    class="has-text-weight-bold {{ 'has-text-success' if trans_info.transaction_volume >= 0 else 'has-text-danger' }}">
+                    {{
                     trans_info.transaction_volume }}
                 </td>
-                <td>{{ trans_info.transaction_type }}</td>
-                <td>{{ trans_info.purpose }}</td>
             </tr>
             {% endfor %}
             {% endif %}

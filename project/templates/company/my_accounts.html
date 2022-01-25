@@ -29,37 +29,48 @@
                         <th></th>
                         <th></th>
                         <th></th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     {% if my_balances is defined and my_balances|length %}
                     <tr>
-                        <td class="py-2"><a href="{{ url_for('main_company.account_p') }}">Account p</a></td>
+                        <td class="py-2  has-text-left"><a href="{{ url_for('main_company.account_p') }}">Account p</a>
+                        </td>
+                        <td><i class="fas fa-industry"></i></td>
+                        <td class="is-italic has-text-left">Account for fixed means of production</td>
                         <td
-                            class="py-2 has-text-weight-bold {{ 'has-text-primary' if my_balances[0] >= 0 else 'has-text-danger' }}">
+                            class="py-2  has-text-right has-text-weight-bold {{ 'has-text-primary' if my_balances[0] >= 0 else 'has-text-danger' }}">
                             {{ my_balances[0] | round(2) }}</td>
-                        <td class="is-italic">Account for fixed means of production</td>
+
                     </tr>
                     <tr>
-                        <td class="py-2"><a href="{{ url_for('main_company.account_r') }}">Account r</a></td>
+                        <td class="py-2  has-text-left"><a href="{{ url_for('main_company.account_r') }}">Account r</a>
+                        </td>
+                        <td><i class="fas fa-oil-can"></i></td>
+                        <td class="is-italic has-text-left">Account for liquid means of production</td>
                         <td
-                            class="py-2 has-text-weight-bold {{ 'has-text-primary' if my_balances[1] >= 0 else 'has-text-danger' }}">
+                            class="py-2 has-text-right has-text-weight-bold {{ 'has-text-primary' if my_balances[1] >= 0 else 'has-text-danger' }}">
                             {{ my_balances[1] | round(2) }}</td>
-                        <td class="is-italic">Account for liquid means of production</td>
+
                     </tr>
                     <tr>
-                        <td class="py-2">Account a</td>
+                        <td class="py-2  has-text-left">Account a</td>
+                        <td><i class="fas fa-users"></i></td>
+                        <td class="is-italic has-text-left">Account for work certificates (wages)</td>
                         <td
-                            class="py-2 has-text-weight-bold {{ 'has-text-primary' if my_balances[2] >= 0 else 'has-text-danger' }}">
+                            class="py-2 has-text-right has-text-weight-bold {{ 'has-text-primary' if my_balances[2] >= 0 else 'has-text-danger' }}">
                             {{ my_balances[2] | round(2) }}</td>
-                        <td class="is-italic">Account for work certificates (wages)</td>
+
                     </tr>
                     <tr>
-                        <td class="py-2">Account prd</td>
+                        <td class="py-2 has-text-left">Account prd</td>
+                        <td><i class="fas fa-warehouse"></i></td>
+                        <td class="is-italic has-text-left">Account for product transfers (sales)</td>
                         <td
-                            class="py-2 has-text-weight-bold {{ 'has-text-primary' if my_balances[3] >= 0 else 'has-text-danger' }}">
+                            class="py-2 has-text-right has-text-weight-bold {{ 'has-text-primary' if my_balances[3] >= 0 else 'has-text-danger' }}">
                             {{ my_balances[3] | round(2) }}</td>
-                        <td class="is-italic">Account for product transfers (sales)</td>
+
                     </tr>
                     {% endif %}
                 </tbody>
