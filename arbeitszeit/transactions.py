@@ -12,7 +12,7 @@ from .repositories import TransactionRepository
 class UserAccountingService:
     transaction_repository: TransactionRepository
 
-    def _get_all_transactions_sorted(
+    def get_all_transactions_sorted(
         self, user: Union[Member, Company]
     ) -> List[Transaction]:
         all_transactions = set()

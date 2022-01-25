@@ -37,9 +37,7 @@ class GetTransactionInfos:
     def __call__(self, user: Company) -> List[TransactionInfo]:
         return [
             self._create_info(user, transaction)
-            for transaction in self.accounting_service._get_all_transactions_sorted(
-                user
-            )
+            for transaction in self.accounting_service.get_all_transactions_sorted(user)
         ]
 
     def _create_info(
