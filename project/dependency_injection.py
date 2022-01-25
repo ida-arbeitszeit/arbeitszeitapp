@@ -19,7 +19,7 @@ from arbeitszeit import repositories as interfaces
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.mail_service import MailService
 from arbeitszeit.token import TokenService
-from arbeitszeit.use_cases import CheckForUnreadMessages, ReadMessage
+from arbeitszeit.use_cases import CheckForUnreadMessages, GetCompanySummary, ReadMessage
 from arbeitszeit_web.check_for_unread_message import (
     CheckForUnreadMessagesController,
     CheckForUnreadMessagesPresenter,
@@ -130,6 +130,14 @@ class CompanyModule(Module):
 
 
 class FlaskModule(Module):
+    @provider
+    def provide_get_company_summary(
+        self,
+        company_repository: interfaces.CompanyRepository,
+        plan_repository: interfaces.PlanRepository,
+    ) -> GetCompanySummary:
+        return GetCompanySummary(company_repository, plan_repository)
+
     @provider
     def provide_read_message_view(
         self,

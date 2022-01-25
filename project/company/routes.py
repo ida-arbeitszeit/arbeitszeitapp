@@ -16,6 +16,7 @@ from arbeitszeit.use_cases import (
     DenyCooperation,
     DenyCooperationRequest,
     DenyCooperationResponse,
+    GetCompanySummary,
     GetDraftSummary,
     GetPlanSummary,
     HidePlan,
@@ -35,6 +36,7 @@ from arbeitszeit.use_cases import (
 )
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
+from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.get_prefilled_draft_data import (
@@ -472,6 +474,25 @@ def plan_summary(
         view_model = presenter.present(use_case_response)
         return template_renderer.render_template(
             "company/plan_summary.html", context=dict(view_model=view_model.to_dict())
+        )
+    else:
+        return http_404_view.get_response()
+
+
+@CompanyRoute("/company/company_summary/<uuid:company_id>")
+def company_summary(
+    company_id: UUID,
+    get_company_summary: GetCompanySummary,
+    template_renderer: UserTemplateRenderer,
+    presenter: GetCompanySummarySuccessPresenter,
+    http_404_view: Http404View,
+):
+    use_case_response = get_company_summary(company_id)
+    if isinstance(use_case_response, use_cases.GetCompanySummarySuccess):
+        view_model = presenter.present(use_case_response)
+        return template_renderer.render_template(
+            "company/company_summary.html",
+            context=dict(view_model=view_model.to_dict()),
         )
     else:
         return http_404_view.get_response()
