@@ -33,8 +33,6 @@ jobs:
     
     - name: Install dependencies        
       run: |
-        pwd
-        ls -la /home/runner/work/arbeitszeitapp/arbeitszeitapp/
         python -m venv ./venv && . ./venv/bin/activate
         python -m pip install --upgrade pip
         pip install black flake8 mypy pytest
@@ -45,5 +43,8 @@ jobs:
     - name: Test with ./run-checks
       run: |
         . ./venv/bin/activate
+        pwd
+        ls -la /home/runner/work/arbeitszeitapp/arbeitszeitapp/
+        pip list
         ./run-checks
         deactivate
