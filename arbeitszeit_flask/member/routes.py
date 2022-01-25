@@ -5,10 +5,7 @@ from flask_login import current_user
 
 from arbeitszeit import use_cases
 from arbeitszeit.use_cases import ListMessages
-from arbeitszeit_flask.database import (
-    MemberRepository,
-    commit_changes,
-)
+from arbeitszeit_flask.database import MemberRepository, commit_changes
 from arbeitszeit_flask.forms import (
     CompanySearchForm,
     PayConsumerProductForm,

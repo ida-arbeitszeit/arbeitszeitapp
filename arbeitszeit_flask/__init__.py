@@ -3,6 +3,7 @@ from flask_table import Col, Table  # noqa: Do not delete
 from flask_talisman import Talisman
 from flask_wtf.csrf import CSRFProtect
 
+import arbeitszeit_flask.extensions
 from arbeitszeit_flask.extensions import babel, login_manager, mail
 from arbeitszeit_flask.filter import format_datetime
 from arbeitszeit_flask.profiling import show_profile_info, show_sql_queries
