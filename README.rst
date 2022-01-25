@@ -113,7 +113,7 @@ In development mode you can run it manually in the CLI.
 Translation
 ===========
 
-We use `Flask-Babel <https://flask-babel.tkte.ch/>` for translation. Available languages are set in ``project/configuration_base.py``.
+We use `Flask-Babel <https://flask-babel.tkte.ch/>` for translation. Available languages are set in ``arbeitszeit_flask/configuration_base.py``.
 
 You can mark translatable strings in python files with ``translator.gettext(message: str)`` and ``translator.pgettext(comment: str, message: str)``. 
 In jinja templates use ``gettext(message: str)`` and ``ngettext(singular: str, plural: str, n)``.
@@ -124,12 +124,12 @@ Parse the code and create a new ``.pot``-file::
 
 Add a new language (create a ``.po``-file for that language from ``.pot``-file)::
 
-    $ pybabel init -i messages.pot -d project/translations -l LANGUAGE-CODE
+    $ pybabel init -i messages.pot -d arbeitszeit_flask/translations -l LANGUAGE-CODE
 
 Update all existing translation files (intelligent merge) from ``.pot``-file::
 
-    $ pybabel update -i messages.pot -d project/translations
+    $ pybabel update -i messages.pot -d arbeitszeit_flask/translations
 
 Compile (create ``.mo``-files from ``.po``-files)::
 
-    $ pybabel compile -d project/translations
+    $ pybabel compile -d arbeitszeit_flask/translations
