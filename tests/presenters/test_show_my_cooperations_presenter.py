@@ -62,6 +62,7 @@ class ShowMyCooperationsPresenterTests(TestCase):
             AcceptCooperationResponse(rejection_reason=None),
             DenyCooperationResponse(rejection_reason=None),
             LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1,
+            None,
         )
         self.assertEqual(len(presentation.list_of_coordinations.rows), 1)
         self.assertEqual(
@@ -97,6 +98,7 @@ class ShowMyCooperationsPresenterTests(TestCase):
             AcceptCooperationResponse(rejection_reason=None),
             DenyCooperationResponse(rejection_reason=None),
             LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1,
+            None,
         )
         self.assertEqual(len(presentation.list_of_inbound_coop_requests.rows), 1)
         self.assertEqual(
@@ -127,6 +129,7 @@ class ShowMyCooperationsPresenterTests(TestCase):
             AcceptCooperationResponse(rejection_reason=None),
             None,
             LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1,
+            None,
         )
         self.assertTrue(presentation_success.accept_message_success)
         self.assertFalse(presentation_success.deny_message_success)
@@ -146,6 +149,7 @@ class ShowMyCooperationsPresenterTests(TestCase):
             None,
             DenyCooperationResponse(rejection_reason=None),
             LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1,
+            None,
         )
         self.assertTrue(presentation_success.deny_message_success)
         self.assertFalse(presentation_success.accept_message_success)
@@ -167,6 +171,7 @@ class ShowMyCooperationsPresenterTests(TestCase):
             ),
             None,
             LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1,
+            None,
         )
         self.assertFalse(presentation_failure.accept_message_success)
         self.assertFalse(presentation_failure.deny_message_success)
@@ -188,6 +193,7 @@ class ShowMyCooperationsPresenterTests(TestCase):
                 rejection_reason=DenyCooperationResponse.RejectionReason.plan_not_found
             ),
             LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1,
+            None,
         )
         self.assertFalse(presentation_failure.deny_message_success)
         self.assertFalse(presentation_failure.accept_message_success)
@@ -207,6 +213,7 @@ class ShowMyCooperationsPresenterTests(TestCase):
             AcceptCooperationResponse(rejection_reason=None),
             DenyCooperationResponse(rejection_reason=None),
             LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1,
+            None,
         )
         self.assertEqual(len(presentation.list_of_outbound_coop_requests.rows), 1)
         self.assertEqual(
@@ -228,6 +235,44 @@ class ShowMyCooperationsPresenterTests(TestCase):
             str(
                 LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1.cooperation_requests[0].coop_id
             ),
+        )
+
+    def test_successfull_cancel_request_response_is_presented_correctly(self):
+        presentation = self.presenter.present(
+            LIST_COORDINATIONS_RESPONSE_LEN_1,
+            LIST_INBD_COOP_REQUESTS_RESPONSE_LEN_1,
+            None,
+            None,
+            LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1,
+            True,
+        )
+        self.assertTrue(presentation.cancel_message_success)
+        self.assertEqual(
+            len(presentation.cancel_message),
+            1,
+        )
+        self.assertEqual(
+            presentation.cancel_message[0],
+            "Kooperationsanfrage wurde abgebrochen.",
+        )
+
+    def test_failed_cancel_request_response_is_presented_correctly(self):
+        presentation = self.presenter.present(
+            LIST_COORDINATIONS_RESPONSE_LEN_1,
+            LIST_INBD_COOP_REQUESTS_RESPONSE_LEN_1,
+            None,
+            None,
+            LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1,
+            False,
+        )
+        self.assertFalse(presentation.cancel_message_success)
+        self.assertEqual(
+            len(presentation.cancel_message),
+            1,
+        )
+        self.assertEqual(
+            presentation.cancel_message[0],
+            "Fehler: Anfrage kann nicht abgebrochen werden.",
         )
 
 
