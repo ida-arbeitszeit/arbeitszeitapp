@@ -5,3 +5,4 @@ STATIC_FOLDER = "static"
 TEMPLATES_FOLDER = "templates"
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 SECURITY_PASSWORD_SALT = environ.get("SECURITY_PASSWORD_SALT")
+LANGUAGES = {"en": "English", "de": "Deutsch"}

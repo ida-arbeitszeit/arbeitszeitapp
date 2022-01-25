@@ -12,11 +12,8 @@ from arbeitszeit.entities import (
     SocialAccounting,
     Transaction,
 )
-from arbeitszeit.repositories import (
-    AccountOwnerRepository,
-    MemberRepository,
-    TransactionRepository,
-)
+from arbeitszeit.repositories import AccountOwnerRepository
+from arbeitszeit.transactions import UserAccountingService
 
 User = Union[Member, Company]
 UserOrSocialAccounting = Union[User, SocialAccounting]
@@ -34,19 +31,18 @@ class TransactionInfo:
 @inject
 @dataclass
 class GetTransactionInfos:
-    transaction_repository: TransactionRepository
-    member_repository: MemberRepository
+    accounting_service: UserAccountingService
     acount_owner_repository: AccountOwnerRepository
 
-    def __call__(self, user: User) -> List[TransactionInfo]:
+    def __call__(self, user: Company) -> List[TransactionInfo]:
         return [
             self._create_info(user, transaction)
-            for transaction in self._get_all_transactions_sorted(user)
+            for transaction in self.accounting_service.get_all_transactions_sorted(user)
         ]
 
     def _create_info(
         self,
-        user: Union[Member, Company],
+        user: Company,
         transaction: Transaction,
     ) -> TransactionInfo:
         sender, user_is_sender = self._get_sender(transaction, user)
@@ -54,17 +50,12 @@ class GetTransactionInfos:
         sender_name = self._get_sender_name(sender, user_is_sender)
         receiver_name = self._get_receiver_name(receiver, user_is_receiver)
 
-        if isinstance(user, Company):
-            transaction_volumes = self._get_volumes_for_company_transaction(
-                transaction,
-                user,
-                user_is_sender,
-                user_is_receiver,
-            )
-        else:
-            transaction_volumes = self.__get_volume_for_member_transaction(
-                transaction, user_is_sender, user_is_receiver
-            )
+        transaction_volumes = self._get_volumes_for_company_transaction(
+            transaction,
+            user,
+            user_is_sender,
+            user_is_receiver,
+        )
 
         return TransactionInfo(
             transaction.date,
@@ -73,22 +64,6 @@ class GetTransactionInfos:
             transaction_volumes,
             transaction.purpose,
         )
-
-    def _get_all_transactions_sorted(self, user: User) -> List[Transaction]:
-        all_transactions = set()
-        for account in user.accounts():
-            all_transactions.update(
-                self.transaction_repository.all_transactions_sent_by_account(account)
-            )
-            all_transactions.update(
-                self.transaction_repository.all_transactions_received_by_account(
-                    account
-                )
-            )
-        all_transactions_sorted = sorted(
-            all_transactions, key=lambda x: x.date, reverse=True
-        )
-        return all_transactions_sorted
 
     def _get_sender(
         self, transaction: Transaction, user: User
@@ -253,15 +228,4 @@ class GetTransactionInfos:
             if transaction.receiving_account == user.product_account
             else Decimal(0)
         )
-        return transaction_volumes
-
-    def __get_volume_for_member_transaction(
-        self, transaction: Transaction, user_is_sender: bool, user_is_receiver: bool
-    ) -> Dict[str, Decimal]:
-        transaction_volumes = {}
-        if user_is_sender:
-            transaction_volumes[AccountTypes.member.value] = -transaction.amount_sent
-        elif user_is_receiver:
-            transaction_volumes[AccountTypes.member.value] = transaction.amount_received
-
         return transaction_volumes

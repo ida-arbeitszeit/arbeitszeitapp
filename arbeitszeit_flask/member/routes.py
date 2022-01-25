@@ -1,4 +1,3 @@
-from typing import cast
 from uuid import UUID
 
 from flask import Response, request
@@ -7,7 +6,6 @@ from flask_login import current_user
 from arbeitszeit import use_cases
 from arbeitszeit.use_cases import ListMessages
 from arbeitszeit_flask.database import (
-    AccountRepository,
     MemberRepository,
     commit_changes,
 )
@@ -16,7 +14,6 @@ from arbeitszeit_flask.forms import (
     PayConsumerProductForm,
     PlanSearchForm,
 )
-from arbeitszeit_flask.models import Member
 from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_flask.views import (
     Http404View,
@@ -146,21 +143,16 @@ def profile(
 
 @MemberRoute("/member/my_account")
 def my_account(
-    member_repository: MemberRepository,
-    get_transaction_infos: use_cases.GetTransactionInfos,
-    account_repository: AccountRepository,
+    get_member_account: use_cases.GetMemberAccount,
     template_renderer: UserTemplateRenderer,
 ) -> Response:
-    # We can assume current_user to be a LocalProxy which delegates to
-    # Member since we did a `user_is_member` check earlier
-    member = member_repository.object_from_orm(cast(Member, current_user))
-    list_of_trans_infos = get_transaction_infos(member)
+    response = get_member_account(UUID(current_user.id))
     return Response(
         template_renderer.render_template(
             "member/my_account.html",
             context=dict(
-                all_transactions_info=list_of_trans_infos,
-                my_balance=account_repository.get_account_balance(member.account),
+                all_transactions_info=response.transactions,
+                my_balance=response.balance,
             ),
         )
     )

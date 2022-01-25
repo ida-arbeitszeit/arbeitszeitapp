@@ -33,6 +33,7 @@ FLASK_TESTING_CONFIGURATION = FlaskConfiguration(
         "TESTING": True,
         "MAIL_DEFAULT_SENDER": "test_sender@cp.org",
         "MAIL_BACKEND": "flask_mail",
+        "LANGUAGES": {"en": "English", "de": "Deutsch"},
     }
 )
 

@@ -67,6 +67,7 @@ from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePrese
 from arbeitszeit_web.request_cooperation import RequestCooperationController
 from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
+from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import (
     CoopSummaryUrlIndex,
     MessageUrlIndex,
@@ -76,6 +77,8 @@ from arbeitszeit_web.user_action_resolver import (
     UserActionResolver,
     UserActionResolverImpl,
 )
+
+from .translator import FlaskTranslator
 
 
 class MemberModule(Module):
@@ -205,9 +208,9 @@ class FlaskModule(Module):
 
     @provider
     def provide_get_plan_summary_success_presenter(
-        self, coop_index: CoopSummaryUrlIndex
+        self, coop_index: CoopSummaryUrlIndex, trans: Translator
     ) -> GetPlanSummarySuccessPresenter:
-        return GetPlanSummarySuccessPresenter(coop_index)
+        return GetPlanSummarySuccessPresenter(coop_index, trans)
 
     @provider
     def provide_transaction_repository(
@@ -268,6 +271,10 @@ class FlaskModule(Module):
     @provider
     def provide_mail_service(self) -> MailService:
         return get_mail_service()
+
+    @provider
+    def provide_translator(self) -> Translator:
+        return FlaskTranslator()
 
     def configure(self, binder: Binder) -> None:
         binder.bind(

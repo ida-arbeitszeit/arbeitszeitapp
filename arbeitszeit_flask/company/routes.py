@@ -3,7 +3,7 @@ from typing import Optional, cast
 from uuid import UUID
 
 from flask import Response, flash, redirect, request, url_for
-from flask_login import current_user, login_required
+from flask_login import current_user
 
 from arbeitszeit import entities, errors, use_cases
 from arbeitszeit.use_cases import (
@@ -626,7 +626,6 @@ def list_all_cooperations(
 
 
 @CompanyRoute("/company/hilfe")
-@login_required
 def hilfe(template_renderer: UserTemplateRenderer):
     return template_renderer.render_template("company/help.html")
 
