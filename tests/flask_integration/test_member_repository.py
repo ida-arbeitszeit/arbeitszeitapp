@@ -2,7 +2,7 @@ from datetime import datetime
 from uuid import uuid4
 
 from arbeitszeit.entities import AccountTypes
-from project.database.repositories import AccountRepository, MemberRepository
+from arbeitszeit_flask.database.repositories import AccountRepository, MemberRepository
 from tests.data_generators import MemberGenerator
 
 from .dependency_injection import injection_test

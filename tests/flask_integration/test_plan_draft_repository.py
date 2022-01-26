@@ -5,7 +5,7 @@ from uuid import uuid4
 
 import arbeitszeit.repositories
 from arbeitszeit.entities import PlanDraft, ProductionCosts
-from project.database.repositories import PlanDraftRepository
+from arbeitszeit_flask.database.repositories import PlanDraftRepository
 from tests.data_generators import CompanyGenerator
 
 from .dependency_injection import get_dependency_injector

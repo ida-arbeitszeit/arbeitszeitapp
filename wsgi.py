@@ -1,4 +1,4 @@
-from project import create_app
+from arbeitszeit_flask import create_app
 
 app = create_app()
 

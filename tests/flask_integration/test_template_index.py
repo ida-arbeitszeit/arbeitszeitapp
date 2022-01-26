@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from project.template import CompanyTemplateIndex, MemberTemplateIndex
+from arbeitszeit_flask.template import CompanyTemplateIndex, MemberTemplateIndex
 
 
 class MemberIndexTests(TestCase):

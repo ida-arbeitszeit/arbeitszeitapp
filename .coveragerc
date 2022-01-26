@@ -1,7 +1,7 @@
 [run]
 source =
     arbeitszeit
-    project
+    arbeitszeit_flask
 
 [report]
 exclude_lines =
