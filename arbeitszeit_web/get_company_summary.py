@@ -16,6 +16,7 @@ class PlanDetailsWeb:
 
 @dataclass
 class GetCompanySummaryViewModel:
+    id: str
     name: str
     email: str
     registered_on: datetime
@@ -31,6 +32,7 @@ class GetCompanySummarySuccessPresenter:
         self, use_case_response: GetCompanySummarySuccess
     ) -> GetCompanySummaryViewModel:
         return GetCompanySummaryViewModel(
+            str(use_case_response.id),
             use_case_response.name,
             use_case_response.email,
             use_case_response.registered_on,

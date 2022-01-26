@@ -9,11 +9,21 @@ from .dependency_injection import injection_test
 
 
 @injection_test
-def test_returns_nothing_when_company_does_not_exist(
+def test_returns_none_when_company_does_not_exist(
     get_company_summary: GetCompanySummary,
 ):
     response = get_company_summary(uuid4())
     assert response is None
+
+
+@injection_test
+def test_returns_id(
+    get_company_summary: GetCompanySummary, company_generator: CompanyGenerator
+):
+    company = company_generator.create_company()
+    response = get_company_summary(company.id)
+    assert response
+    assert response.id == company.id
 
 
 @injection_test

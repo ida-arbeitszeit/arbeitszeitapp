@@ -14,6 +14,7 @@ class PlanDetails:
 
 @dataclass
 class GetCompanySummarySuccess:
+    id: UUID
     name: str
     email: str
     registered_on: datetime
@@ -34,6 +35,7 @@ class GetCompanySummary:
             return None
         plans = self.plan_repository.get_all_active_plans_for_company(company.id)
         return GetCompanySummarySuccess(
+            company.id,
             company.name,
             company.email,
             company.registered_on,

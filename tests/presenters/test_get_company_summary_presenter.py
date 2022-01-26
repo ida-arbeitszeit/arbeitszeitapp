@@ -9,6 +9,7 @@ from arbeitszeit.use_cases.get_company_summary import (
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 
 RESPONSE_WITH_2_PLANS = GetCompanySummarySuccess(
+    id=uuid4(),
     name="Company Name",
     email="comp_mail@cp.org",
     registered_on=datetime(2022, 1, 2),
@@ -19,6 +20,10 @@ RESPONSE_WITH_2_PLANS = GetCompanySummarySuccess(
 class GetGetCompanySummaryPresenterTests(TestCase):
     def setUp(self) -> None:
         self.presenter = GetCompanySummarySuccessPresenter()
+
+    def test_company_id_is_shown(self):
+        view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
+        self.assertEqual(view_model.id, str(RESPONSE_WITH_2_PLANS.id))
 
     def test_company_name_is_shown(self):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
