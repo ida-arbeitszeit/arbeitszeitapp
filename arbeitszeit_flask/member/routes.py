@@ -6,7 +6,6 @@ from flask_login import current_user
 from arbeitszeit import use_cases
 from arbeitszeit.use_cases import ListMessages
 from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
-from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_flask.database import MemberRepository, commit_changes
 from arbeitszeit_flask.forms import (
     CompanySearchForm,
@@ -22,6 +21,7 @@ from arbeitszeit_flask.views import (
     QueryPlansView,
     ReadMessageView,
 )
+from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
