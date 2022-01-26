@@ -4,7 +4,7 @@ from typing import List
 
 from injector import Module, provider
 
-from project.template import FlaskTemplateRenderer
+from arbeitszeit_flask.template import FlaskTemplateRenderer
 
 from ..dependency_injection import FLASK_TESTING_CONFIGURATION, FlaskConfiguration
 from ..flask import FlaskTestCase

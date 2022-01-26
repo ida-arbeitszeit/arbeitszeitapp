@@ -1,4 +1,4 @@
-from project.database.repositories import AccountRepository
+from arbeitszeit_flask.database.repositories import AccountRepository
 from tests.data_generators import AccountGenerator, TransactionGenerator
 
 from .dependency_injection import injection_test

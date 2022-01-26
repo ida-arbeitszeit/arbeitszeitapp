@@ -1,5 +1,8 @@
 from arbeitszeit.entities import AccountTypes
-from project.database.repositories import AccountingRepository, AccountOwnerRepository
+from arbeitszeit_flask.database.repositories import (
+    AccountingRepository,
+    AccountOwnerRepository,
+)
 from tests.data_generators import AccountGenerator, CompanyGenerator, MemberGenerator
 
 from .dependency_injection import injection_test

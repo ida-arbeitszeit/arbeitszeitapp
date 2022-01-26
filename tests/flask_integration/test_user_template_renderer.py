@@ -1,4 +1,4 @@
-from project.template import UserTemplateRenderer
+from arbeitszeit_flask.template import UserTemplateRenderer
 from tests.data_generators import CompanyGenerator
 
 from .flask import FlaskTestCase

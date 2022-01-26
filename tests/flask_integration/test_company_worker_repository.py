@@ -1,6 +1,9 @@
 from uuid import uuid4
 
-from project.database.repositories import CompanyWorkerRepository, MemberRepository
+from arbeitszeit_flask.database.repositories import (
+    CompanyWorkerRepository,
+    MemberRepository,
+)
 from tests.data_generators import CompanyGenerator, MemberGenerator
 from tests.flask_integration.dependency_injection import injection_test
 

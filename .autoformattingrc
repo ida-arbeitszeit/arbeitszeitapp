@@ -1,7 +1,7 @@
 arbeitszeit/
 arbeitszeit_web/
 tests/
-project/
+arbeitszeit_flask/
 format_code.py
 type_stubs
 run-checks

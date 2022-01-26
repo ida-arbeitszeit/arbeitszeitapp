@@ -4,7 +4,7 @@ from typing import Union
 from uuid import uuid4
 
 from arbeitszeit.entities import ProductionCosts
-from project.database.repositories import PlanRepository
+from arbeitszeit_flask.database.repositories import PlanRepository
 
 from ..data_generators import CompanyGenerator, PlanGenerator
 from .dependency_injection import injection_test
