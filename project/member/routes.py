@@ -1,4 +1,3 @@
-from typing import cast
 from uuid import UUID
 
 from flask import Response, request
@@ -20,14 +19,13 @@ from arbeitszeit_web.query_companies import (
     QueryCompaniesPresenter,
 )
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
-from project.database import AccountRepository, MemberRepository, commit_changes
+from project.database import MemberRepository, commit_changes
 from project.forms import (
     AnswerCompanyWorkInviteForm,
     CompanySearchForm,
     PayConsumerProductForm,
     PlanSearchForm,
 )
-from project.models import Member
 from project.template import UserTemplateRenderer
 from project.views import (
     AnswerCompanyWorkInviteView,
@@ -144,21 +142,16 @@ def profile(
 
 @MemberRoute("/member/my_account")
 def my_account(
-    member_repository: MemberRepository,
-    get_transaction_infos: use_cases.GetTransactionInfos,
-    account_repository: AccountRepository,
+    get_member_account: use_cases.GetMemberAccount,
     template_renderer: UserTemplateRenderer,
 ) -> Response:
-    # We can assume current_user to be a LocalProxy which delegates to
-    # Member since we did a `user_is_member` check earlier
-    member = member_repository.object_from_orm(cast(Member, current_user))
-    list_of_trans_infos = get_transaction_infos(member)
+    response = get_member_account(UUID(current_user.id))
     return Response(
         template_renderer.render_template(
             "member/my_account.html",
             context=dict(
-                all_transactions_info=list_of_trans_infos,
-                my_balance=account_repository.get_account_balance(member.account),
+                all_transactions_info=response.transactions,
+                my_balance=response.balance,
             ),
         )
     )

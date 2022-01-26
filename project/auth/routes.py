@@ -38,12 +38,18 @@ def start():
     if "user_type" not in session:
         session["user_type"] = None
     save_next_url_in_session(request)
-    return render_template("start.html")
+    return render_template("start.html", languages=current_app.config["LANGUAGES"])
 
 
 @auth.route("/help")
 def help():
     return render_template("start_hilfe.html")
+
+
+@auth.route("/language=<language>")
+def set_language(language=None):
+    session["language"] = language
+    return redirect(url_for("auth.start"))
 
 
 # Member

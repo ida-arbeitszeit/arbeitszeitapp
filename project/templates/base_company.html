@@ -104,37 +104,39 @@
             class="navbar-item {% if message_indicator is defined %}{% if message_indicator.show_unread_messages_indicator %}unread-messages-indicator{% endif %}{% endif %}">
             Nachrichten
           </a>
-          {% endif %}
-
         </div>
-        <div class="navbar-end">
-          <div class="navbar-item">
-            <div class="buttons">
-              {% if not current_user.is_authenticated %}
-              <a class="button" href="{{ url_for('auth.login_company') }}">
-                Anmelden
-              </a>
-              <a class="button" href="{{ url_for('auth.signup_company') }}">
-                Registrieren
-              </a>
-              <a class="button" href="{{ url_for('auth.zurueck') }}">
-                Zurück
-              </a>
-              {% else %}
-              <a class="button" href="{{ url_for('auth.logout') }}">
-                Logout
-              </a>
-              <a class="button" href="{{ url_for('main_company.hilfe') }}">
-                ?
-              </a>
-              {% endif %}
 
-            </div>
-          </div>
-        </div>
+        {% endif %}
 
       </div>
-    </nav>
+      <div class="navbar-end">
+        <div class="navbar-item">
+          <div class="buttons">
+            {% if not current_user.is_authenticated %}
+            <a class="button" href="{{ url_for('auth.login_company') }}">
+              Anmelden
+            </a>
+            <a class="button" href="{{ url_for('auth.signup_company') }}">
+              Registrieren
+            </a>
+            <a class="button" href="{{ url_for('auth.zurueck') }}">
+              Zurück
+            </a>
+            {% else %}
+            <a class="button" href="{{ url_for('auth.logout') }}">
+              Logout
+            </a>
+            <a class="button" href="{{ url_for('main_company.hilfe') }}">
+              ?
+            </a>
+            {% endif %}
+
+          </div>
+        </div>
+      </div>
+
+  </div>
+  </nav>
   </div>
 
   <div class="hero-body has-text-centered">
