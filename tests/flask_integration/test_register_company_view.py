@@ -1,4 +1,4 @@
-from project.extensions import mail
+from arbeitszeit_flask.extensions import mail
 
 from .flask import ViewTestCase
 

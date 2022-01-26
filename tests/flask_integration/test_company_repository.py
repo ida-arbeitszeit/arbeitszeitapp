@@ -6,7 +6,7 @@ from pytest import raises
 from sqlalchemy.exc import IntegrityError
 
 from arbeitszeit.entities import AccountTypes, Company
-from project.database.repositories import AccountRepository, CompanyRepository
+from arbeitszeit_flask.database.repositories import AccountRepository, CompanyRepository
 from tests.data_generators import CompanyGenerator
 
 from .dependency_injection import injection_test
