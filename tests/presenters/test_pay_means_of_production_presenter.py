@@ -60,3 +60,14 @@ class PayMeansOfProductionTests(TestCase):
             "Bezahlung nicht erfolgreich. Betriebe können keine öffentlichen Dienstleistungen oder Produkte erwerben.",
             self.notifier.warnings,
         )
+
+    def test_trying_to_pay_for_own_product_shows_correct_notification(self) -> None:
+        self.presenter.present(
+            PayMeansOfProductionResponse(
+                rejection_reason=reasons.buyer_is_planner,
+            )
+        )
+        self.assertIn(
+            "Bezahlung nicht erfolgreich. Betriebe können keine eigenen Produkte erwerben.",
+            self.notifier.warnings,
+        )
