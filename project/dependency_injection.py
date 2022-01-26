@@ -37,10 +37,10 @@ from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import (
+    CompanySummaryUrlIndex,
     CoopSummaryUrlIndex,
     MessageUrlIndex,
     PlanSummaryUrlIndex,
-    CompanySummaryUrlIndex,
 )
 from arbeitszeit_web.user_action_resolver import (
     UserActionResolver,

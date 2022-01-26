@@ -1,9 +1,9 @@
 from project.url_index import CompanyUrlIndex, MemberUrlIndex
 from tests.data_generators import (
+    CompanyGenerator,
     CooperationGenerator,
     MessageGenerator,
     PlanGenerator,
-    CompanyGenerator,
 )
 
 from .flask import ViewTestCase

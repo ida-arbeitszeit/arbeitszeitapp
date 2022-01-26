@@ -15,6 +15,18 @@ from .dependency_injection import injection_test
 
 
 @injection_test
+def test_that_correct_planner_name_is_shown(
+    plan_generator: PlanGenerator,
+    get_plan_summary: GetPlanSummary,
+    company_generator: CompanyGenerator,
+):
+    planner = company_generator.create_company()
+    plan = plan_generator.create_plan(planner=planner)
+    summary = get_plan_summary(plan.id)
+    assert_success(summary, lambda s: s.planner_name == plan.planner.name)
+
+
+@injection_test
 def test_that_correct_planner_id_is_shown(
     plan_generator: PlanGenerator,
     get_plan_summary: GetPlanSummary,

@@ -5,14 +5,14 @@ from typing import Any, Dict, List, Optional, Tuple
 from arbeitszeit.use_cases.get_plan_summary import PlanSummarySuccess
 
 from .translator import Translator
-from .url_index import CoopSummaryUrlIndex
+from .url_index import CompanySummaryUrlIndex, CoopSummaryUrlIndex
 
 
 @dataclass
 class GetPlanSummaryViewModel:
     plan_id: Tuple[str, str]
     is_active: Tuple[str, str]
-    planner_id: Tuple[str, str]
+    planner: Tuple[str, str, str, str]
     product_name: Tuple[str, str]
     description: Tuple[str, List[str]]
     timeframe: Tuple[str, str]
@@ -32,15 +32,18 @@ class GetPlanSummaryViewModel:
 @dataclass
 class GetPlanSummarySuccessPresenter:
     coop_url_index: CoopSummaryUrlIndex
+    company_url_index: CompanySummaryUrlIndex
     trans: Translator
 
     def present(self, response: PlanSummarySuccess) -> GetPlanSummaryViewModel:
         return GetPlanSummaryViewModel(
             plan_id=("Plan-ID", str(response.plan_id)),
             is_active=("Status", "Aktiv" if response.is_active else "Inaktiv"),
-            planner_id=(
+            planner=(
                 self.trans.pgettext("Test comment", "Planning company"),
                 str(response.planner_id),
+                self.company_url_index.get_company_summary_url(response.planner_id),
+                response.planner_name,
             ),
             product_name=(self.trans.gettext("Name of product"), response.product_name),
             description=(

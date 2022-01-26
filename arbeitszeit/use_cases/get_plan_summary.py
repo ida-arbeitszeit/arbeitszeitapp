@@ -14,6 +14,7 @@ class PlanSummarySuccess:
     plan_id: UUID
     is_active: bool
     planner_id: UUID
+    planner_name: str
     product_name: str
     description: str
     timeframe: int
@@ -49,6 +50,7 @@ class GetPlanSummary:
             plan_id=plan.id,
             is_active=plan.is_active,
             planner_id=plan.planner.id,
+            planner_name=plan.planner.name,
             product_name=plan.prd_name,
             description=plan.description,
             timeframe=plan.timeframe,
