@@ -2,7 +2,7 @@ from os import environ, path
 
 from dotenv import load_dotenv
 
-from project.configuration_base import *
+from arbeitszeit_flask.configuration_base import *
 
 basedir = path.abspath(path.dirname(__file__))
 load_dotenv(path.join(basedir, ".env"))

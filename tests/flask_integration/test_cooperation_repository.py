@@ -3,7 +3,10 @@ from unittest import TestCase
 
 import arbeitszeit.repositories
 from arbeitszeit.entities import Cooperation
-from project.database.repositories import CooperationRepository, PlanRepository
+from arbeitszeit_flask.database.repositories import (
+    CooperationRepository,
+    PlanRepository,
+)
 from tests.data_generators import CompanyGenerator, PlanGenerator
 
 from .dependency_injection import get_dependency_injector

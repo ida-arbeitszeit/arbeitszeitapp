@@ -7,7 +7,10 @@ from arbeitszeit import repositories as interfaces
 from arbeitszeit.entities import Company, Member, Message, SocialAccounting
 from arbeitszeit.use_cases import ReadMessage, ReadMessageRequest
 from arbeitszeit.user_action import UserAction
-from project.database.repositories import AccountingRepository, MessageRepository
+from arbeitszeit_flask.database.repositories import (
+    AccountingRepository,
+    MessageRepository,
+)
 from tests import strategies as custom_strategies
 from tests.data_generators import CompanyGenerator, MemberGenerator
 

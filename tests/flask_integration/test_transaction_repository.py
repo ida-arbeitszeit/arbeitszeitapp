@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 
-from project.database.repositories import TransactionRepository
+from arbeitszeit_flask.database.repositories import TransactionRepository
 from tests.data_generators import AccountGenerator
 
 from .dependency_injection import injection_test
