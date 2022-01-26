@@ -138,6 +138,11 @@ from .resend_confirmation_mail import (
 )
 from .seek_approval import SeekApproval
 from .send_work_certificates_to_worker import SendWorkCertificatesToWorker
+from .show_company_work_invite_details import (
+    ShowCompanyWorkInviteDetailsRequest,
+    ShowCompanyWorkInviteDetailsResponse,
+    ShowCompanyWorkInviteDetailsUseCase,
+)
 from .show_invitation_details import (
     ShowInvitationDetailsRequest,
     ShowInvitationDetailsUseCase,
@@ -259,6 +264,9 @@ __all__ = [
     "ResendConfirmationMailResponse",
     "SeekApproval",
     "SendWorkCertificatesToWorker",
+    "ShowCompanyWorkInviteDetailsUseCase",
+    "ShowCompanyWorkInviteDetailsRequest",
+    "ShowCompanyWorkInviteDetailsResponse",
     "ShowInvitationDetailsRequest",
     "ShowInvitationDetailsUseCase",
     "ShowMyPlansRequest",
