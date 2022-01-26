@@ -23,6 +23,10 @@ class PayMeansOfProductionPresenter:
             self.user_notifier.display_warning(
                 "Bezahlung nicht erfolgreich. Betriebe können keine öffentlichen Dienstleistungen oder Produkte erwerben."
             )
+        elif use_case_response.rejection_reason == reasons.buyer_is_planner:
+            self.user_notifier.display_warning(
+                "Bezahlung nicht erfolgreich. Betriebe können keine eigenen Produkte erwerben."
+            )
         else:
             self.user_notifier.display_warning(
                 "Der angegebene Verwendungszweck is ungültig."

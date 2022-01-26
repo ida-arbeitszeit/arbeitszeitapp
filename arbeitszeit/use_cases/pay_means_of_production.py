@@ -34,6 +34,7 @@ class PayMeansOfProductionResponse:
         invalid_purpose = auto()
         cannot_buy_public_service = auto()
         plan_is_not_active = auto()
+        buyer_is_planner = auto()
 
     rejection_reason: Optional[RejectionReason]
 
@@ -53,11 +54,9 @@ class PayMeansOfProduction:
         self, request: PayMeansOfProductionRequest
     ) -> PayMeansOfProductionResponse:
         try:
-            plan, purpose = self._validate_request(request)
+            plan, buyer, purpose = self._validate_request(request)
         except PayMeansOfProductionResponse.RejectionReason as reason:
             return PayMeansOfProductionResponse(rejection_reason=reason)
-        buyer = self.company_repository.get_by_id(request.buyer)
-        assert buyer is not None
         payment = self.payment_factory.get_payment(plan, buyer, request.amount, purpose)
         payment.record_purchase()
         payment.create_transaction()
@@ -65,9 +64,11 @@ class PayMeansOfProduction:
 
     def _validate_request(
         self, request: PayMeansOfProductionRequest
-    ) -> Tuple[Plan, PurposesOfPurchases]:
+    ) -> Tuple[Plan, Company, PurposesOfPurchases]:
+        plan = self._validate_plan(request)
         return (
-            self._validate_plan(request),
+            plan,
+            self._validate_buyer_is_not_planner(request, plan),
             self._validate_purpose(request),
         )
 
@@ -80,6 +81,15 @@ class PayMeansOfProduction:
         if plan.is_public_service:
             raise PayMeansOfProductionResponse.RejectionReason.cannot_buy_public_service
         return plan
+
+    def _validate_buyer_is_not_planner(
+        self, request: PayMeansOfProductionRequest, plan: Plan
+    ) -> Company:
+        buyer = self.company_repository.get_by_id(request.buyer)
+        assert buyer is not None
+        if plan.planner == buyer:
+            raise PayMeansOfProductionResponse.RejectionReason.buyer_is_planner
+        return buyer
 
     def _validate_purpose(
         self, request: PayMeansOfProductionRequest
