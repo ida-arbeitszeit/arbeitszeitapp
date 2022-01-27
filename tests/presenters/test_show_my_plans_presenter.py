@@ -14,7 +14,6 @@ def _convert_into_plan_info(plan: Plan) -> PlanInfo:
     return PlanInfo(
         id=plan.id,
         prd_name=plan.prd_name,
-        description=plan.description,
         price_per_unit=Decimal("10.001"),
         is_public_service=plan.is_public_service,
         plan_creation_date=plan.plan_creation_date,
@@ -71,7 +70,16 @@ class ShowMyPlansPresenterTests(TestCase):
     def setUp(self):
         self.plan_url_index = PlanSummaryUrlIndex()
         self.coop_url_index = CoopSummaryUrlIndex()
-        self.presenter = ShowMyPlansPresenter(self.plan_url_index, self.coop_url_index)
+        self.toggle_availability_url_index = TogglePlanAvailabilityUrlIndex()
+        self.renew_plan_url_index = RenewPlanUrlIndex()
+        self.hide_plan_url_index = HidePlanUrlIndex()
+        self.presenter = ShowMyPlansPresenter(
+            self.plan_url_index,
+            self.coop_url_index,
+            self.toggle_availability_url_index,
+            self.renew_plan_url_index,
+            self.hide_plan_url_index,
+        )
         self.injector = get_dependency_injector()
         self.plan_generator = self.injector.get(PlanGenerator)
         self.coop_generator = self.injector.get(CooperationGenerator)
@@ -108,16 +116,12 @@ class ShowMyPlansPresenterTests(TestCase):
         )
         RESPONSE_WITH_ONE_ACTIVE_PLAN = response_with_one_active_plan(plan)
         presentation = self.presenter.present(RESPONSE_WITH_ONE_ACTIVE_PLAN)
-        self.assertEqual(presentation.active_plans.rows[0].id, str(plan.id))
         self.assertEqual(
             presentation.active_plans.rows[0].plan_summary_url,
             self.plan_url_index.get_plan_summary_url(plan.id),
         )
         self.assertEqual(presentation.active_plans.rows[0].coop_summary_url, None)
         self.assertEqual(presentation.active_plans.rows[0].prd_name, plan.prd_name)
-        self.assertEqual(
-            presentation.active_plans.rows[0].description, plan.description.splitlines()
-        )
         self.assertEqual(
             presentation.active_plans.rows[0].price_per_unit,
             str("10.00"),
@@ -133,6 +137,10 @@ class ShowMyPlansPresenterTests(TestCase):
         self.assertEqual(
             presentation.active_plans.rows[0].is_cooperating,
             False,
+        )
+        self.assertEqual(
+            presentation.active_plans.rows[0].toggle_availability_url,
+            self.toggle_availability_url_index.get_toggle_availability_url(plan.id),
         )
 
     def test_presenter_shows_correct_info_of_one_single_plan_that_is_cooperating(self):
@@ -152,17 +160,51 @@ class ShowMyPlansPresenterTests(TestCase):
             True,
         )
 
-    def test_presenter_shows_correct_plan_id_of_one_single_expired_plan(self):
+    def test_presenter_shows_correct_info_of_one_single_expired_plan(self):
         plan = self.plan_generator.create_plan(expired=True)
         RESPONSE_WITH_ONE_EXPIRED_PLAN = response_with_one_expired_plan(plan)
         presentation = self.presenter.present(RESPONSE_WITH_ONE_EXPIRED_PLAN)
-        self.assertEqual(presentation.expired_plans.rows[0].id, str(plan.id))
+        row1 = presentation.expired_plans.rows[0]
+        expected_plan = RESPONSE_WITH_ONE_EXPIRED_PLAN.expired_plans[0]
+        self.assertEqual(
+            row1.plan_summary_url,
+            self.plan_url_index.get_plan_summary_url(plan.id),
+        )
+        self.assertEqual(
+            row1.prd_name,
+            expected_plan.prd_name,
+        )
+        self.assertEqual(row1.type_of_plan, "Produktiv")
+        self.assertEqual(
+            row1.renewed,
+            expected_plan.renewed,
+        )
+        self.assertEqual(
+            row1.renew_plan_url, self.renew_plan_url_index.get_renew_plan_url(plan.id)
+        )
+        self.assertEqual(
+            row1.hide_plan_url, self.hide_plan_url_index.get_hide_plan_url(plan.id)
+        )
 
-    def test_presenter_shows_correct_plan_id_of_one_single_non_active_plan(self):
+    def test_presenter_shows_correct_info_of_one_single_non_active_plan(self):
         plan = self.plan_generator.create_plan(activation_date=None)
-        RESPONSE_WITH_ONE_ON_ACTIVE_PLAN = response_with_one_non_active_plan(plan)
-        presentation = self.presenter.present(RESPONSE_WITH_ONE_ON_ACTIVE_PLAN)
-        self.assertEqual(presentation.non_active_plans.rows[0].id, str(plan.id))
+        RESPONSE_WITH_ONE_NON_ACTIVE_PLAN = response_with_one_non_active_plan(plan)
+        presentation = self.presenter.present(RESPONSE_WITH_ONE_NON_ACTIVE_PLAN)
+        row1 = presentation.non_active_plans.rows[0]
+        expected_plan = RESPONSE_WITH_ONE_NON_ACTIVE_PLAN.non_active_plans[0]
+        self.assertEqual(
+            row1.plan_summary_url,
+            self.plan_url_index.get_plan_summary_url(plan.id),
+        )
+        self.assertEqual(
+            row1.prd_name,
+            expected_plan.prd_name,
+        )
+        self.assertEqual(
+            row1.price_per_unit,
+            format_price(expected_plan.price_per_unit),
+        )
+        self.assertEqual(row1.type_of_plan, "Produktiv")
 
 
 class PlanSummaryUrlIndex:
@@ -173,3 +215,22 @@ class PlanSummaryUrlIndex:
 class CoopSummaryUrlIndex:
     def get_coop_summary_url(self, coop_id: UUID) -> str:
         return f"fake_coop_url:{coop_id}"
+
+
+class TogglePlanAvailabilityUrlIndex:
+    def get_toggle_availability_url(self, plan_id: UUID) -> str:
+        return f"fake_toggle_url:{plan_id}"
+
+
+class RenewPlanUrlIndex:
+    def get_renew_plan_url(self, plan_id: UUID) -> str:
+        return f"fake_renew_url:{plan_id}"
+
+
+class HidePlanUrlIndex:
+    def get_hide_plan_url(self, plan_id: UUID) -> str:
+        return f"fake_hide_plan_url:{plan_id}"
+
+
+def format_price(price_per_unit: Decimal) -> str:
+    return f"{round(price_per_unit, 2)}"

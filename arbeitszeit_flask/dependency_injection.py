@@ -71,8 +71,11 @@ from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import (
     CoopSummaryUrlIndex,
+    HidePlanUrlIndex,
     MessageUrlIndex,
     PlanSummaryUrlIndex,
+    RenewPlanUrlIndex,
+    TogglePlanAvailabilityUrlIndex,
 )
 from arbeitszeit_web.user_action_resolver import (
     UserActionResolver,
@@ -123,6 +126,24 @@ class CompanyModule(Module):
     def provide_message_url_index(
         self, company_index: CompanyUrlIndex
     ) -> MessageUrlIndex:
+        return company_index
+
+    @provider
+    def provide_toggle_plan_availability_url_index(
+        self, company_index: CompanyUrlIndex
+    ) -> TogglePlanAvailabilityUrlIndex:
+        return company_index
+
+    @provider
+    def provide_renew_plan_url_index(
+        self, company_index: CompanyUrlIndex
+    ) -> RenewPlanUrlIndex:
+        return company_index
+
+    @provider
+    def provide_hide_plan_url_index(
+        self, company_index: CompanyUrlIndex
+    ) -> HidePlanUrlIndex:
         return company_index
 
     @provider
@@ -184,9 +205,20 @@ class FlaskModule(Module):
 
     @provider
     def provide_show_my_plans_presenter(
-        self, plan_index: PlanSummaryUrlIndex, coop_index: CoopSummaryUrlIndex
+        self,
+        plan_index: PlanSummaryUrlIndex,
+        coop_index: CoopSummaryUrlIndex,
+        toggle_availability_index: TogglePlanAvailabilityUrlIndex,
+        renew_plan_index: RenewPlanUrlIndex,
+        hide_plan_index: HidePlanUrlIndex,
     ) -> ShowMyPlansPresenter:
-        return ShowMyPlansPresenter(plan_index, coop_index)
+        return ShowMyPlansPresenter(
+            plan_index,
+            coop_index,
+            toggle_availability_index,
+            renew_plan_index,
+            hide_plan_index,
+        )
 
     @provider
     def provide_list_messages_presenter(

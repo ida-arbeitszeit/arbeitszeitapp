@@ -23,3 +23,14 @@ class CompanyUrlIndex:
 
     def get_coop_summary_url(self, coop_id: UUID) -> str:
         return url_for("main_company.coop_summary", coop_id=coop_id)
+
+    def get_toggle_availability_url(self, plan_id: UUID) -> str:
+        return url_for("main_company.toggle_availability", plan_id=plan_id)
+
+    def get_renew_plan_url(self, plan_id: UUID) -> str:
+        return url_for(
+            "main_company.create_draft_from_expired_plan", expired_plan_id=plan_id
+        )
+
+    def get_hide_plan_url(self, plan_id: UUID) -> str:
+        return url_for("main_company.hide_plan", plan_id=plan_id)

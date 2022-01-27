@@ -32,6 +32,30 @@ class CompanyUrlIndexTests(ViewTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
+    def test_toggle_availability_url_for_existing_plan_leads_to_functional_url(
+        self,
+    ) -> None:
+        plan = self.plan_generator.create_plan()
+        url = self.url_index.get_toggle_availability_url(plan.id)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+
+    def test_renew_plan_url_for_existing_plan_leads_to_functional_url(
+        self,
+    ) -> None:
+        plan = self.plan_generator.create_plan()
+        url = self.url_index.get_renew_plan_url(plan.id)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_hide_plan_url_for_existing_plan_leads_to_functional_url(
+        self,
+    ) -> None:
+        plan = self.plan_generator.create_plan()
+        url = self.url_index.get_hide_plan_url(plan.id)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+
 
 class MemberUrlIndexTests(ViewTestCase):
     def setUp(self) -> None:

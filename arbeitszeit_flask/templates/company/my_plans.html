@@ -3,14 +3,17 @@
 {% from 'macros/show_notifications.html' import show_notifications %}
 
 {% block content2 %}
-<div class="box has-background-info-light has-text-info-dark">
-  <div class="icon"><i class="fas fa-info-circle"></i></div>
-  <p>
-    Aktuelle Pläne kannst du als (nicht) verfügbar kennzeichnen. <br />
-    Abgelaufene Pläne kannst du erneuern oder löschen.
-  </p>
+<div class="content">
+  <h1>Eigene Pläne</h1>
+  <div class="box has-background-info-light has-text-info-dark">
+    <div class="icon"><i class="fas fa-info-circle"></i></div>
+    <p>
+      Aktuelle Pläne kannst du als (nicht) verfügbar kennzeichnen. <br />
+      Abgelaufene Pläne kannst du erneuern oder löschen.
+    </p>
+  </div>
 </div>
-<h1 class="title">Aktuelle Pläne</h1>
+<h1 class="title is-4">Aktuell</h1>
 
 {{ show_notifications() }}
 
@@ -19,13 +22,10 @@
   <table class="table is-fullwidth">
     <thead>
       <tr>
-        <th>ID</th>
-        <th>Produkt</th>
-        <th>Beschr.</th>
-        <th>Stückpr.</th>
+        <th></th>
+        <th>Kosten</th>
         <th>Art</th>
-        <th>Plan&nbsp;aktiv&nbsp;seit</th>
-        <th>Plan-Ende</th>
+        <th>Planungszeitraum</th>
         <th>Endet&nbsp;in</th>
         <th>Verfügbar</th>
       </tr>
@@ -33,28 +33,23 @@
     <tbody>
       {% for plan in active_plans.rows %}
       <tr>
-        <td><a href="{{ plan.plan_summary_url }}">{{ plan.id }}</a></td>
-        <td>{{ plan.prd_name }}</td>
-        <td>{% for paragraph in plan.description %}{{ paragraph }}<br>{% endfor %}</td>
+        <td><a href="{{ plan.plan_summary_url }}">{{ plan.prd_name }}</a></td>
         <td>{{ plan.price_per_unit }} {% if plan.is_cooperating %} <span><a href="{{ plan.coop_summary_url }}"><i
                 class="fas fa-hands-helping"></i></a></span>{%
           endif %}
         </td>
         <td>{{ plan.type_of_plan }}</td>
-        <td>{{ plan.activation_date }}</td>
-        <td>{{ plan.expiration_date }}</td>
+        <td>{{ plan.activation_date }} - {{ plan.expiration_date }}</td>
         <td>{{ plan.expiration_relative }}</td>
         {% if plan.is_available %}
         <td>
           <span style="color: green"><a style="text-decoration: none; color: inherit;"
-              href="{{ url_for('main_company.toggle_availability', plan_id=plan.id) }}"><i
-                class="fas fa-toggle-on"></i></a></span>
+              href="{{ plan.toggle_availability_url }}"><i class="fas fa-toggle-on"></i></a></span>
         </td>
         {% else %}
         <td>
           <span style="color: red"><a style="text-decoration: none; color: inherit;"
-              href="{{ url_for('main_company.toggle_availability', plan_id=plan.id) }}"><i
-                class="fas fa-toggle-off"></i></a></span>
+              href="{{ plan.toggle_availability_url }}"><i class="fas fa-toggle-off"></i></a></span>
         </td>
         {% endif %}
         {% endfor %}
@@ -65,34 +60,26 @@
   {% endif %}
 </div>
 
-<h1 class="title">Pläne, die auf Aktivierung warten</h1>
+<h1 class="title is-4">Wartend</h1>
 
 <div class="table-container">
   {% if show_non_active_plans %}
   <table class="table is-fullwidth">
     <thead>
       <tr>
-        <th>ID</th>
-        <th>Produkt</th>
-        <th>Beschreibung</th>
-        <th>Stückpreis</th>
+        <th></th>
+        <th>Kosten</th>
         <th>Art</th>
         <th>Plan&nbsp;vom</th>
-        <th>Del.</th>
       </tr>
     </thead>
     <tbody>
       {% for plan in non_active_plans.rows %}
       <tr>
-        <td><a href="{{ plan.plan_summary_url }}">{{ plan.id }}</a></td>
-        <td>{{ plan.prd_name }}</td>
-        <td>{% for paragraph in plan.description %}{{ paragraph }}<br>{% endfor %}</td>
+        <td><a href="{{ plan.plan_summary_url }}">{{ plan.prd_name }}</a></td>
         <td>{{ plan.price_per_unit }}</td>
         <td>{{ plan.type_of_plan }}</td>
         <td>{{ plan.plan_creation_date }}</td>
-        <td>
-          <a href="{{ url_for('main_company.hide_plan', plan_id=plan.id) }}"><i class="fas fa-trash"></i></a>
-        </td>
       </tr>
       {% endfor %}
     </tbody>
@@ -102,17 +89,14 @@
   {% endif %}
 </div>
 
-<h1 class="title">Abgelaufene Pläne</h1>
+<h1 class="title is-4">Abgelaufen</h1>
 
 <div class="table-container">
   {% if show_expired_plans %}
   <table class="table is-fullwidth">
     <thead>
       <tr>
-        <th>ID</th>
-        <th>Produkt</th>
-        <th>Beschreibung</th>
-        <th>Stückpreis</th>
+        <th></th>
         <th>Art</th>
         <th>Plan&nbsp;vom</th>
         <th><abbr title="Nur einmal möglich.">Plan erneuern</abbr></th>
@@ -122,10 +106,7 @@
     <tbody>
       {% for plan in expired_plans.rows %}
       <tr>
-        <td><a href="{{ plan.plan_summary_url }}">{{ plan.id }}</a></td>
-        <td>{{ plan.prd_name }}</td>
-        <td>{% for paragraph in plan.description %}{{ paragraph }}<br>{% endfor %}</td>
-        <td>{{ plan.price_per_unit }}</td>
+        <td><a href="{{ plan.plan_summary_url }}">{{ plan.prd_name }}</a></td>
         <td>{{ plan.type_of_plan }}</td>
         <td>{{ plan.plan_creation_date }}</td>
 
@@ -135,12 +116,11 @@
         </td>
         {% else %}
         <td>
-          <a href="{{ url_for('main_company.create_draft_from_expired_plan', expired_plan_id=plan.id) }}"><i
-              class="{{ 'fas fa-redo' }}"></i></a>
+          <a href="{{ plan.renew_plan_url }}"><i class="{{ 'fas fa-redo' }}"></i></a>
         </td>
         {% endif %}
         <td>
-          <a href="{{ url_for('main_company.hide_plan', plan_id=plan.id) }}"><i class="fas fa-trash"></i></a>
+          <a href="{{ plan.hide_plan_url }}"><i class="fas fa-trash"></i></a>
         </td>
       </tr>
       {% endfor %}

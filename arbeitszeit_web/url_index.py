@@ -15,3 +15,18 @@ class MessageUrlIndex(Protocol):
 class CoopSummaryUrlIndex(Protocol):
     def get_coop_summary_url(self, coop_id: UUID) -> str:
         ...
+
+
+class TogglePlanAvailabilityUrlIndex(Protocol):
+    def get_toggle_availability_url(self, plan_id: UUID) -> str:
+        ...
+
+
+class RenewPlanUrlIndex(Protocol):
+    def get_renew_plan_url(self, plan_id: UUID) -> str:
+        ...
+
+
+class HidePlanUrlIndex(Protocol):
+    def get_hide_plan_url(self, plan_id: UUID) -> str:
+        ...
