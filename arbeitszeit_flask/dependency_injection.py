@@ -71,6 +71,7 @@ from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import (
     CoopSummaryUrlIndex,
+    EndCoopUrlIndex,
     HidePlanUrlIndex,
     MessageUrlIndex,
     PlanSummaryUrlIndex,
@@ -102,6 +103,12 @@ class MemberModule(Module):
     def provide_message_url_index(
         self, member_index: MemberUrlIndex
     ) -> MessageUrlIndex:
+        return member_index
+
+    @provider
+    def provide_end_coop_url_index(
+        self, member_index: MemberUrlIndex
+    ) -> EndCoopUrlIndex:
         return member_index
 
     @provider
@@ -144,6 +151,12 @@ class CompanyModule(Module):
     def provide_hide_plan_url_index(
         self, company_index: CompanyUrlIndex
     ) -> HidePlanUrlIndex:
+        return company_index
+
+    @provider
+    def provide_end_coop_url_index(
+        self, company_index: CompanyUrlIndex
+    ) -> EndCoopUrlIndex:
         return company_index
 
     @provider
@@ -247,9 +260,9 @@ class FlaskModule(Module):
 
     @provider
     def provide_get_coop_summary_success_presenter(
-        self, plan_index: PlanSummaryUrlIndex
+        self, plan_index: PlanSummaryUrlIndex, end_coop_index: EndCoopUrlIndex
     ) -> GetCoopSummarySuccessPresenter:
-        return GetCoopSummarySuccessPresenter(plan_index)
+        return GetCoopSummarySuccessPresenter(plan_index, end_coop_index)
 
     @provider
     def provide_transaction_repository(

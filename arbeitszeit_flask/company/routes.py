@@ -16,6 +16,8 @@ from arbeitszeit.use_cases import (
     DenyCooperation,
     DenyCooperationRequest,
     DenyCooperationResponse,
+    EndCooperation,
+    EndCooperationRequest,
     GetDraftSummary,
     GetPlanSummary,
     HidePlan,
@@ -656,3 +658,23 @@ def read_message(
     view: ReadMessageView,
 ) -> Response:
     return view.respond_to_get(message_id)
+
+
+@CompanyRoute("/company/end_cooperation")
+@commit_changes
+def end_cooperation(
+    use_case: EndCooperation,
+    http_404_view: Http404View,
+) -> Response:
+    plan_id = request.args.get("plan_id", None)
+    cooperation_id = request.args.get("cooperation_id", None)
+    assert plan_id
+    assert cooperation_id
+    use_case_request = EndCooperationRequest(
+        UUID(current_user.id), UUID(plan_id), UUID(cooperation_id)
+    )
+    response = use_case(use_case_request)
+    if response.is_rejected:
+        return http_404_view.get_response()
+    flash("Kooperation wurde erfolgreich beendet.", "is-success")
+    return redirect(url_for("main_company.coop_summary", coop_id=cooperation_id))

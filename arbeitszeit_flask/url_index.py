@@ -13,6 +13,9 @@ class MemberUrlIndex:
     def get_coop_summary_url(self, coop_id: UUID) -> str:
         return url_for("main_member.coop_summary", coop_id=coop_id)
 
+    def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
+        ...
+
 
 class CompanyUrlIndex:
     def get_plan_summary_url(self, plan_id: UUID) -> str:
@@ -34,3 +37,10 @@ class CompanyUrlIndex:
 
     def get_hide_plan_url(self, plan_id: UUID) -> str:
         return url_for("main_company.hide_plan", plan_id=plan_id)
+
+    def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
+        return url_for(
+            "main_company.end_cooperation",
+            plan_id=plan_id,
+            cooperation_id=cooperation_id,
+        )

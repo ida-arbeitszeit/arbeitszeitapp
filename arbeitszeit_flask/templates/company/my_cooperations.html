@@ -82,9 +82,9 @@
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <td>
                         <div class="control">
-                            <button class="button is-success" name="accept" value="{{ req.coop_id }},{{ req.plan_id }}"
-                                type="submit">
-                                <span class="icon is-small">
+                            <button class="button is-small is-success" name="accept"
+                                value="{{ req.coop_id }},{{ req.plan_id }}" type="submit">
+                                <span class="icon">
                                     <i class="fas fa-check"></i>
                                 </span>
                                 <span>Akzeptieren</span>
@@ -93,9 +93,9 @@
                     </td>
                     <td>
                         <div class="control">
-                            <button class="button is-danger" name="deny" value="{{ req.coop_id }},{{ req.plan_id }}"
-                                type="submit">
-                                <span class="icon is-small">
+                            <button class="button is-small is-danger" name="deny"
+                                value="{{ req.coop_id }},{{ req.plan_id }}" type="submit">
+                                <span class="icon">
                                     <i class="fas fa-times"></i>
                                 </span>
                                 <span>Ablehnen</span>
@@ -142,8 +142,9 @@
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <td>
                         <div class="control">
-                            <button class="button is-danger" name="cancel" value="{{ req.plan_id }}" type="submit">
-                                <span class="icon is-small">
+                            <button class="button is-small is-danger" name="cancel" value="{{ req.plan_id }}"
+                                type="submit">
+                                <span class="icon">
                                     <i class="fas fa-times"></i>
                                 </span>
                                 <span>Abbrechen</span>

@@ -26,7 +26,10 @@ TESTING_RESPONSE_MODEL = GetCoopSummarySuccess(
 class GetCoopSummarySuccessPresenterTests(TestCase):
     def setUp(self) -> None:
         self.plan_url_index = PlanSummaryUrlIndex()
-        self.presenter = GetCoopSummarySuccessPresenter(self.plan_url_index)
+        self.end_coop_url_index = EndCoopUrlIndex()
+        self.presenter = GetCoopSummarySuccessPresenter(
+            self.plan_url_index, self.end_coop_url_index
+        )
 
     def test_end_coop_button_is_shown_when_requester_is_coordinator(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
@@ -58,27 +61,41 @@ class GetCoopSummarySuccessPresenterTests(TestCase):
             view_model.coordinator_id, str(TESTING_RESPONSE_MODEL.coordinator_id)
         )
 
-    def test_first_plan_name_is_displayed_correctly(self):
+    def test_first_plans_name_is_displayed_correctly(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
         self.assertEqual(
             view_model.plans[0].plan_name, TESTING_RESPONSE_MODEL.plans[0].plan_name
         )
 
-    def test_first_plan_individual_price_is_displayed_correctly(self):
+    def test_first_plans_individual_price_is_displayed_correctly(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
         self.assertEqual(
             view_model.plans[0].plan_individual_price,
             "1.00",
         )
 
-    def test_first_plan_coop_price_is_displayed_correctly(self):
+    def test_first_plans_coop_price_is_displayed_correctly(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
         self.assertEqual(
             view_model.plans[0].plan_coop_price,
             "50.01",
         )
 
+    def test_first_plans_end_coop_url_is_displayed_correctly(self):
+        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        self.assertEqual(
+            view_model.plans[0].end_coop_url,
+            self.end_coop_url_index.get_end_coop_url(
+                TESTING_RESPONSE_MODEL.plans[0].plan_id, TESTING_RESPONSE_MODEL.coop_id
+            ),
+        )
+
 
 class PlanSummaryUrlIndex:
     def get_plan_summary_url(self, plan_id: UUID) -> str:
         return f"fake_plan_url:{plan_id}"
+
+
+class EndCoopUrlIndex:
+    def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
+        return f"fake_end_coop_url:{plan_id}, {cooperation_id}"

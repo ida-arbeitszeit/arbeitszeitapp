@@ -1,4 +1,5 @@
 {% macro coop_summary(view_model) %}
+{% from 'macros/show_notifications.html' import show_notifications %}
 
 <div class="columns is-centered">
     <div class="column is-two-thirds">
@@ -7,6 +8,7 @@
                 Kooperation
             </h1>
         </div>
+        {{ show_notifications() }}
 
         <br>
         <div class="table-container">
@@ -52,7 +54,14 @@
                         <td>{{ plan.plan_individual_price }}</td>
                         <td>{{ plan.plan_coop_price }}</td>
                         {% if view_model.show_end_coop_button %}
-                        <td>[X]</td>
+                        <td>
+                            <a class="button is-small is-danger" href="{{ plan.end_coop_url }}">
+                                <span class="icon">
+                                    <i class="fas fa-times"></i>
+                                </span>
+                                <span>Beenden</span>
+                            </a>
+                        </td>
                         {% endif %}
                     </tr>
                     {% endfor %}

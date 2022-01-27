@@ -30,3 +30,8 @@ class RenewPlanUrlIndex(Protocol):
 class HidePlanUrlIndex(Protocol):
     def get_hide_plan_url(self, plan_id: UUID) -> str:
         ...
+
+
+class EndCoopUrlIndex(Protocol):
+    def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
+        ...

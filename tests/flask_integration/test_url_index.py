@@ -56,6 +56,17 @@ class CompanyUrlIndexTests(ViewTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
 
+    def test_end_coop_url_for_existing_plan_and_cooperation_leads_to_functional_url(
+        self,
+    ) -> None:
+        plan = self.plan_generator.create_plan()
+        coop = self.cooperation_generator.create_cooperation(
+            coordinator=self.company, plans=[plan]
+        )
+        url = self.url_index.get_end_coop_url(plan.id, coop.id)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+
 
 class MemberUrlIndexTests(ViewTestCase):
     def setUp(self) -> None:
