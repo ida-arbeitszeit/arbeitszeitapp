@@ -19,8 +19,6 @@ class GetCoopSummaryRequest:
 class AssociatedPlan:
     plan_id: UUID
     plan_name: str
-    plan_total_costs: Decimal
-    plan_amount: int
     plan_individual_price: Decimal
     plan_coop_price: Decimal
 
@@ -53,8 +51,6 @@ class GetCoopSummary:
             AssociatedPlan(
                 plan_id=plan.id,
                 plan_name=plan.prd_name,
-                plan_total_costs=plan.production_costs.total_cost(),
-                plan_amount=plan.prd_amount,
                 plan_individual_price=plan.production_costs.total_cost()
                 / plan.prd_amount
                 if not plan.is_public_service

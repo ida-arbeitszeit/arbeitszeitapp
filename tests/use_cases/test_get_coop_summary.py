@@ -104,8 +104,6 @@ def test_that_correct_info_of_associated_plan_is_shown(
     assert summary is not None
     assert summary.plans[0].plan_id == plan1.id
     assert summary.plans[0].plan_name == plan1.prd_name
-    assert summary.plans[0].plan_total_costs == plan1.production_costs.total_cost()
-    assert summary.plans[0].plan_amount == plan1.prd_amount
     assert summary.plans[0].plan_individual_price == calculate_price([plan1])
     assert summary.plans[0].plan_coop_price == calculate_price([plan1, plan2])
 

@@ -56,6 +56,7 @@ from arbeitszeit_web.check_for_unread_message import (
     CheckForUnreadMessagesController,
     CheckForUnreadMessagesPresenter,
 )
+from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
@@ -211,6 +212,12 @@ class FlaskModule(Module):
         self, coop_index: CoopSummaryUrlIndex, trans: Translator
     ) -> GetPlanSummarySuccessPresenter:
         return GetPlanSummarySuccessPresenter(coop_index, trans)
+
+    @provider
+    def provide_get_coop_summary_success_presenter(
+        self, plan_index: PlanSummaryUrlIndex
+    ) -> GetCoopSummarySuccessPresenter:
+        return GetCoopSummarySuccessPresenter(plan_index)
 
     @provider
     def provide_transaction_repository(
