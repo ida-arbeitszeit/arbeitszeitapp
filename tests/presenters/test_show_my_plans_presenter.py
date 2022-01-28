@@ -70,13 +70,11 @@ class ShowMyPlansPresenterTests(TestCase):
     def setUp(self):
         self.plan_url_index = PlanSummaryUrlIndex()
         self.coop_url_index = CoopSummaryUrlIndex()
-        self.toggle_availability_url_index = TogglePlanAvailabilityUrlIndex()
         self.renew_plan_url_index = RenewPlanUrlIndex()
         self.hide_plan_url_index = HidePlanUrlIndex()
         self.presenter = ShowMyPlansPresenter(
             self.plan_url_index,
             self.coop_url_index,
-            self.toggle_availability_url_index,
             self.renew_plan_url_index,
             self.hide_plan_url_index,
         )
@@ -137,10 +135,6 @@ class ShowMyPlansPresenterTests(TestCase):
         self.assertEqual(
             presentation.active_plans.rows[0].is_cooperating,
             False,
-        )
-        self.assertEqual(
-            presentation.active_plans.rows[0].toggle_availability_url,
-            self.toggle_availability_url_index.get_toggle_availability_url(plan.id),
         )
 
     def test_presenter_shows_correct_info_of_one_single_plan_that_is_cooperating(self):
@@ -215,11 +209,6 @@ class PlanSummaryUrlIndex:
 class CoopSummaryUrlIndex:
     def get_coop_summary_url(self, coop_id: UUID) -> str:
         return f"fake_coop_url:{coop_id}"
-
-
-class TogglePlanAvailabilityUrlIndex:
-    def get_toggle_availability_url(self, plan_id: UUID) -> str:
-        return f"fake_toggle_url:{plan_id}"
 
 
 class RenewPlanUrlIndex:

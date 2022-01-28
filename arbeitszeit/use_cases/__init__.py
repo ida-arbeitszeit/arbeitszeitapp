@@ -60,6 +60,11 @@ from .get_member_profile_info import (
     Workplace,
 )
 from .get_plan_summary import GetPlanSummary, PlanSummaryResponse, PlanSummarySuccess
+from .get_plan_summary_company import (
+    GetPlanSummaryCompany,
+    PlanSummaryCompanyResponse,
+    PlanSummaryCompanySuccess,
+)
 from .get_statistics import GetStatistics, StatisticsResponse
 from .get_transaction_infos import GetTransactionInfos, TransactionInfo
 from .hide_plan import HidePlan, HidePlanResponse
@@ -193,6 +198,7 @@ __all__ = [
     "GetMemberProfileInfo",
     "GetMemberProfileInfoResponse",
     "GetPlanSummary",
+    "GetPlanSummaryCompany",
     "GetStatistics",
     "GetTransactionInfos",
     "InviteWorkerToCompany",
@@ -230,6 +236,8 @@ __all__ = [
     "PayMeansOfProductionRequest",
     "PlanFilter",
     "PlanQueryResponse",
+    "PlanSummaryCompanyResponse",
+    "PlanSummaryCompanySuccess",
     "PlanSummaryResponse",
     "PlanSummarySuccess",
     "PurchaseQueryResponse",

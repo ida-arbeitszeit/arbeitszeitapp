@@ -10,7 +10,6 @@ from .url_index import (
     HidePlanUrlIndex,
     PlanSummaryUrlIndex,
     RenewPlanUrlIndex,
-    TogglePlanAvailabilityUrlIndex,
 )
 
 
@@ -26,7 +25,6 @@ class ActivePlansRow:
     expiration_relative: str
     is_available: bool
     is_cooperating: bool
-    toggle_availability_url: str
 
 
 @dataclass
@@ -82,7 +80,6 @@ class ShowMyPlansViewModel:
 class ShowMyPlansPresenter:
     url_index: PlanSummaryUrlIndex
     coop_url_index: CoopSummaryUrlIndex
-    toggle_availability_url_index: TogglePlanAvailabilityUrlIndex
     renew_plan_url_index: RenewPlanUrlIndex
     hide_plan_url_index: HidePlanUrlIndex
 
@@ -114,9 +111,6 @@ class ShowMyPlansPresenter:
                         else "–",
                         is_available=plan.is_available,
                         is_cooperating=plan.is_cooperating,
-                        toggle_availability_url=self.toggle_availability_url_index.get_toggle_availability_url(
-                            plan.id
-                        ),
                     )
                     for plan in response.active_plans
                 ],

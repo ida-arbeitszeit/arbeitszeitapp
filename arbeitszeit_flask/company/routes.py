@@ -1,5 +1,6 @@
 from decimal import Decimal
 from typing import Optional, cast
+from urllib.parse import urlparse
 from uuid import UUID
 
 from flask import Response, flash, redirect, request, url_for
@@ -61,7 +62,9 @@ from arbeitszeit_flask.views import (
 )
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
-from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
+from arbeitszeit_web.get_plan_summary_company import (
+    GetPlanSummaryCompanySuccessPresenter,
+)
 from arbeitszeit_web.get_prefilled_draft_data import (
     GetPrefilledDraftDataPresenter,
     PrefilledDraftDataController,
@@ -350,7 +353,7 @@ def my_plans(
 @commit_changes
 def toggle_availability(plan_id: UUID, toggle_availability: ToggleProductAvailability):
     toggle_availability(UUID(current_user.id), plan_id)
-    return redirect(url_for("main_company.my_plans"))
+    return redirect(url_for("main_company.plan_summary", plan_id=plan_id))
 
 
 @CompanyRoute("/company/hide_plan/<uuid:plan_id>", methods=["GET", "POST"])
@@ -464,13 +467,13 @@ def statistics(
 @CompanyRoute("/company/plan_summary/<uuid:plan_id>")
 def plan_summary(
     plan_id: UUID,
-    get_plan_summary: use_cases.GetPlanSummary,
+    get_plan_summary: use_cases.GetPlanSummaryCompany,
     template_renderer: UserTemplateRenderer,
-    presenter: GetPlanSummarySuccessPresenter,
+    presenter: GetPlanSummaryCompanySuccessPresenter,
     http_404_view: Http404View,
 ):
     use_case_response = get_plan_summary(plan_id)
-    if isinstance(use_case_response, use_cases.PlanSummarySuccess):
+    if isinstance(use_case_response, use_cases.PlanSummaryCompanySuccess):
         view_model = presenter.present(use_case_response)
         return template_renderer.render_template(
             "company/plan_summary.html", context=dict(view_model=view_model.to_dict())
@@ -677,4 +680,10 @@ def end_cooperation(
     if response.is_rejected:
         return http_404_view.get_response()
     flash("Kooperation wurde erfolgreich beendet.", "is-success")
+    referer: Optional[str]
+    referer = request.environ.get("HTTP_REFERER", None)
+    if referer:
+        referer_path = urlparse(referer).path
+        if referer_path.startswith("/company/plan_summary"):
+            return redirect(url_for("main_company.plan_summary", plan_id=plan_id))
     return redirect(url_for("main_company.coop_summary", coop_id=cooperation_id))

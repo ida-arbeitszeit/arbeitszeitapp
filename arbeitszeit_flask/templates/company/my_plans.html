@@ -43,13 +43,11 @@
         <td>{{ plan.expiration_relative }}</td>
         {% if plan.is_available %}
         <td>
-          <span style="color: green"><a style="text-decoration: none; color: inherit;"
-              href="{{ plan.toggle_availability_url }}"><i class="fas fa-toggle-on"></i></a></span>
+          <span class="icon has-text-success"><i class="fas fa-circle"></i></span>
         </td>
         {% else %}
         <td>
-          <span style="color: red"><a style="text-decoration: none; color: inherit;"
-              href="{{ plan.toggle_availability_url }}"><i class="fas fa-toggle-off"></i></a></span>
+          <span class="icon has-text-danger"><i class="fas fa-circle"></i></span>
         </td>
         {% endif %}
         {% endfor %}

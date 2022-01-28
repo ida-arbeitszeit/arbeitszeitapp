@@ -58,6 +58,9 @@ from arbeitszeit_web.check_for_unread_message import (
 )
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
+from arbeitszeit_web.get_plan_summary_company import (
+    GetPlanSummaryCompanySuccessPresenter,
+)
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 from arbeitszeit_web.notification import Notifier
@@ -221,14 +224,12 @@ class FlaskModule(Module):
         self,
         plan_index: PlanSummaryUrlIndex,
         coop_index: CoopSummaryUrlIndex,
-        toggle_availability_index: TogglePlanAvailabilityUrlIndex,
         renew_plan_index: RenewPlanUrlIndex,
         hide_plan_index: HidePlanUrlIndex,
     ) -> ShowMyPlansPresenter:
         return ShowMyPlansPresenter(
             plan_index,
             coop_index,
-            toggle_availability_index,
             renew_plan_index,
             hide_plan_index,
         )
@@ -257,6 +258,18 @@ class FlaskModule(Module):
         self, coop_index: CoopSummaryUrlIndex, trans: Translator
     ) -> GetPlanSummarySuccessPresenter:
         return GetPlanSummarySuccessPresenter(coop_index, trans)
+
+    @provider
+    def provide_get_plan_summary_company_success_presenter(
+        self,
+        coop_index: CoopSummaryUrlIndex,
+        toggle_availability_index: TogglePlanAvailabilityUrlIndex,
+        end_coop_url_index: EndCoopUrlIndex,
+        trans: Translator,
+    ) -> GetPlanSummaryCompanySuccessPresenter:
+        return GetPlanSummaryCompanySuccessPresenter(
+            coop_index, toggle_availability_index, end_coop_url_index, trans
+        )
 
     @provider
     def provide_get_coop_summary_success_presenter(

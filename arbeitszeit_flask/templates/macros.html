@@ -207,6 +207,7 @@
         Planinformationen
       </h1>
     </div>
+    {{ show_notifications() }}
     <br>
     <div class="table-container">
       <table class="table is-fullwidth">
@@ -297,11 +298,11 @@
         <td>{{ column.ends_in }}</td>
         {% if column.is_available %}
         <td>
-          <span style="color: green"><i class="fas fa-circle"></i></span>
+          <span class="icon has-text-success"><i class="fas fa-circle"></i></span>
         </td>
         {% else %}
         <td>
-          <span style="color: red"><i class="fas fa-circle"></i></span>
+          <span class="icon has-text-danger"><i class="fas fa-circle"></i></span>
         </td>
         {% endif %}
       </tr>
