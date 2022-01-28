@@ -16,6 +16,9 @@ class MemberUrlIndex:
     def get_invite_url(self, invite_id: UUID) -> str:
         raise Exception()
 
+    def get_answer_company_work_invite_url(self, invite_id: UUID) -> str:
+        return ""
+
 
 class CompanyUrlIndex:
     def get_plan_summary_url(self, plan_id: UUID) -> str:

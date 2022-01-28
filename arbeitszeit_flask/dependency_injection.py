@@ -23,6 +23,7 @@ from arbeitszeit.use_cases import (
     AnswerCompanyWorkInvite,
     CheckForUnreadMessages,
     ReadMessage,
+    ShowCompanyWorkInviteDetailsUseCase,
 )
 from arbeitszeit_flask.database import get_social_accounting
 from arbeitszeit_flask.database.repositories import (
@@ -59,6 +60,7 @@ from arbeitszeit_flask.views import (
     AnswerCompanyWorkInviteView,
     Http404View,
     ReadMessageView,
+    ShowCompanyWorkInviteDetailsView,
 )
 from arbeitszeit_web.answer_company_work_invite import (
     AnswerCompanyWorkInviteController,
@@ -68,12 +70,18 @@ from arbeitszeit_web.check_for_unread_message import (
     CheckForUnreadMessagesController,
     CheckForUnreadMessagesPresenter,
 )
+from arbeitszeit_web.controllers.show_company_work_invite_details_controller import (
+    ShowCompanyWorkInviteDetailsController,
+)
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyController
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
+from arbeitszeit_web.presenters.show_company_work_invite_details_presenter import (
+    ShowCompanyWorkInviteDetailsPresenter,
+)
 from arbeitszeit_web.query_companies import QueryCompaniesPresenter
 from arbeitszeit_web.query_plans import QueryPlansPresenter
 from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
@@ -83,6 +91,7 @@ from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import (
+    AnswerCompanyWorkInviteUrlIndex,
     CoopSummaryUrlIndex,
     InviteUrlIndex,
     MessageUrlIndex,
@@ -94,6 +103,12 @@ from .translator import FlaskTranslator
 
 
 class MemberModule(Module):
+    @provider
+    def provide_answer_company_work_invite_url_index(
+        self, url_index: MemberUrlIndex
+    ) -> AnswerCompanyWorkInviteUrlIndex:
+        return url_index
+
     @provider
     def provide_plan_summary_url_index(
         self, member_index: MemberUrlIndex
@@ -150,6 +165,36 @@ class CompanyModule(Module):
 
 
 class FlaskModule(Module):
+    @provider
+    def provide_show_company_work_invite_details_view(
+        self,
+        use_case: ShowCompanyWorkInviteDetailsUseCase,
+        presenter: ShowCompanyWorkInviteDetailsPresenter,
+        controller: ShowCompanyWorkInviteDetailsController,
+        http_404_view: Http404View,
+    ) -> ShowCompanyWorkInviteDetailsView:
+        return ShowCompanyWorkInviteDetailsView(
+            use_case=use_case,
+            presenter=presenter,
+            controller=controller,
+            http_404_view=http_404_view,
+        )
+
+    @provider
+    def provide_show_company_work_invite_details_presenter(
+        self, url_index: AnswerCompanyWorkInviteUrlIndex
+    ) -> ShowCompanyWorkInviteDetailsPresenter:
+        return ShowCompanyWorkInviteDetailsPresenter(url_index)
+
+    @provider
+    def provide_show_company_work_invite_details_controller(
+        self,
+        session: Session,
+    ) -> ShowCompanyWorkInviteDetailsController:
+        return ShowCompanyWorkInviteDetailsController(
+            session=session,
+        )
+
     @provider
     def provide_answer_company_work_invite_view(
         self,

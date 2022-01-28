@@ -2,6 +2,11 @@ from typing import Protocol
 from uuid import UUID
 
 
+class AnswerCompanyWorkInviteUrlIndex(Protocol):
+    def get_answer_company_work_invite_url(self, invite_id: UUID) -> str:
+        ...
+
+
 class InviteUrlIndex(Protocol):
     def get_invite_url(self, invite_id: UUID) -> str:
         ...

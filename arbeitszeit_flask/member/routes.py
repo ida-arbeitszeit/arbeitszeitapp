@@ -21,6 +21,7 @@ from arbeitszeit_flask.views import (
     QueryCompaniesView,
     QueryPlansView,
     ReadMessageView,
+    ShowCompanyWorkInviteDetailsView,
 )
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
@@ -250,3 +251,8 @@ def read_message(
 def answer_work_invite(invite_id: UUID, view: AnswerCompanyWorkInviteView) -> Response:
     form = AnswerCompanyWorkInviteForm(request.form)
     return view.respond_to_get(form, invite_id)
+
+
+@MemberRoute("/member/invite_details/<uuid:invite_id>")
+def show_company_work_invite(invite_id: UUID, view: ShowCompanyWorkInviteDetailsView):
+    return view.respond_to_get(invite_id)

@@ -7,6 +7,7 @@ from .query_companies import QueryCompaniesView
 from .query_plans import QueryPlansView
 from .read_message import ReadMessageView
 from .request_cooperation_view import RequestCooperationView
+from .show_company_work_invite_details_view import ShowCompanyWorkInviteDetailsView
 
 __all__ = [
     "AnswerCompanyWorkInviteView",
@@ -15,7 +16,8 @@ __all__ = [
     "ListMessagesView",
     "PayConsumerProductView",
     "QueryCompaniesView",
-    "RequestCooperationView",
     "QueryPlansView",
     "ReadMessageView",
+    "RequestCooperationView",
+    "ShowCompanyWorkInviteDetailsView",
 ]
