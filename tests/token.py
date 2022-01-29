@@ -1,3 +1,9 @@
+from __future__ import annotations
+
+from typing import List
+
+from arbeitszeit.token import ConfirmationEmail
+
 from .datetime_service import FakeDatetimeService
 
 
@@ -13,4 +19,12 @@ class FakeTokenService:
         if (prefix == "token") and (time_passed < max_age_in_sec):
             return text
         else:
-            raise Exception
+            raise Exception()
+
+
+class TokenDeliveryService:
+    def __init__(self) -> None:
+        self.delivered_tokens: List[ConfirmationEmail] = []
+
+    def deliver_confirmation_token(self, email: ConfirmationEmail) -> None:
+        self.delivered_tokens.append(email)

@@ -6,17 +6,14 @@ from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import AccountTypes
-from arbeitszeit.errors import CannotSendEmail
-from arbeitszeit.mail_service import MailService
 from arbeitszeit.repositories import AccountRepository, MemberRepository
-from arbeitszeit.token import TokenService
+from arbeitszeit.token import ConfirmationEmail, TokenDeliverer, TokenService
 
 
 @dataclass
 class RegisterMemberResponse:
     class RejectionReason(Exception, Enum):
         member_already_exists = auto()
-        sending_mail_failed = auto()
 
     rejection_reason: Optional[RejectionReason]
 
@@ -30,9 +27,6 @@ class RegisterMemberRequest:
     email: str
     name: str
     password: str
-    email_sender: str
-    template_name: str
-    endpoint: str
 
 
 @inject
@@ -41,14 +35,12 @@ class RegisterMember:
     account_repository: AccountRepository
     member_repository: MemberRepository
     datetime_service: DatetimeService
-    mail_service: MailService
     token_service: TokenService
+    token_deliverer: TokenDeliverer
 
     def __call__(self, request: RegisterMemberRequest) -> RegisterMemberResponse:
         try:
             self._register_member(request)
-            html = self._create_confirmation_mail(request)
-            self._send_confirmation_mail(request, html)
         except RegisterMemberResponse.RejectionReason as reason:
             return RegisterMemberResponse(rejection_reason=reason)
         return RegisterMemberResponse(rejection_reason=None)
@@ -62,23 +54,10 @@ class RegisterMember:
         self.member_repository.create_member(
             request.email, request.name, request.password, member_account, registered_on
         )
+        self._create_confirmation_mail(request)
 
-    def _create_confirmation_mail(self, request: RegisterMemberRequest) -> str:
+    def _create_confirmation_mail(self, request: RegisterMemberRequest) -> None:
         token = self.token_service.generate_token(request.email)
-        html = self.mail_service.create_confirmation_html(
-            request.template_name, request.endpoint, token
+        self.token_deliverer.deliver_confirmation_token(
+            ConfirmationEmail(token=token, email=request.email)
         )
-        return html
-
-    def _send_confirmation_mail(
-        self, request: RegisterMemberRequest, html: str
-    ) -> None:
-        try:
-            self.mail_service.send_message(
-                subject="Bitte bestätige dein Konto",
-                recipients=[request.email],
-                html=html,
-                sender=request.email_sender,
-            )
-        except CannotSendEmail:
-            raise RegisterMemberResponse.RejectionReason.sending_mail_failed
