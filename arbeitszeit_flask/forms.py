@@ -189,11 +189,7 @@ class RequestCooperationForm(Form):
 
 
 class AnswerCompanyWorkInviteForm(Form):
-    invite_id = StringField()
     is_accepted = BooleanField()
-
-    def get_invite_id_field(self) -> str:
-        return self.data["invite_id"]
 
     def get_is_accepted_field(self) -> bool:
         return self.data["is_accepted"]

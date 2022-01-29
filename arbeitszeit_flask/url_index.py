@@ -14,10 +14,13 @@ class MemberUrlIndex:
         return url_for("main_member.coop_summary", coop_id=coop_id)
 
     def get_invite_url(self, invite_id: UUID) -> str:
-        raise Exception()
+        return url_for("main_member.show_company_work_invite", invite_id=invite_id)
 
     def get_answer_company_work_invite_url(self, invite_id: UUID) -> str:
-        return ""
+        return url_for("main_member.show_company_work_invite", invite_id=invite_id)
+
+    def get_list_messages_url(self) -> str:
+        return url_for("main_member.list_messages")
 
 
 class CompanyUrlIndex:
@@ -31,4 +34,14 @@ class CompanyUrlIndex:
         return url_for("main_company.coop_summary", coop_id=coop_id)
 
     def get_invite_url(self, invite_id: UUID) -> str:
-        raise Exception()
+        # since invites don't make sense for a company, we redirect
+        # them in this case to their profile page.
+        return url_for("main_company.profile")
+
+    def get_answer_company_work_invite_url(self, invite_id: UUID) -> str:
+        # since invites don't make sense for a company, we redirect
+        # them in this case to their profile page.
+        return url_for("main_company.profile", invite_id=invite_id)
+
+    def get_list_messages_url(self) -> str:
+        return url_for("main_company.list_messages")

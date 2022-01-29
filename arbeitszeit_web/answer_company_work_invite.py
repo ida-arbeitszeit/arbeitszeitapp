@@ -10,6 +10,7 @@ from arbeitszeit.use_cases import (
 from .malformed_input_data import MalformedInputData
 from .notification import Notifier
 from .session import Session
+from .url_index import ListMessagesUrlIndex
 
 
 class AnswerCompanyWorkInviteForm(Protocol):
@@ -35,9 +36,14 @@ class AnswerCompanyWorkInviteController:
 
 @dataclass
 class AnswerCompanyWorkInvitePresenter:
-    user_notifier: Notifier
+    @dataclass
+    class ViewModel:
+        redirect_url: str
 
-    def present(self, response: AnswerCompanyWorkInviteResponse) -> None:
+    user_notifier: Notifier
+    url_index: ListMessagesUrlIndex
+
+    def present(self, response: AnswerCompanyWorkInviteResponse) -> ViewModel:
         if response.is_success:
             if response.is_accepted:
                 self.user_notifier.display_info(
@@ -51,3 +57,4 @@ class AnswerCompanyWorkInvitePresenter:
             self.user_notifier.display_warning(
                 "Annehmen oder Ablehnen dieser Einladung ist nicht möglich"
             )
+        return self.ViewModel(redirect_url=self.url_index.get_list_messages_url())

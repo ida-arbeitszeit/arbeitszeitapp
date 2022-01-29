@@ -35,7 +35,10 @@ def get_response(
 class SuccessfulResponseTests(TestCase):
     def setUp(self) -> None:
         self.notifier = NotifierTestImpl()
-        self.presenter = AnswerCompanyWorkInvitePresenter(user_notifier=self.notifier)
+        self.url_index = MessagesUrlIndex()
+        self.presenter = AnswerCompanyWorkInvitePresenter(
+            user_notifier=self.notifier, url_index=self.url_index
+        )
 
     def test_info_notification_is_displayed_on_success(self) -> None:
         self.presenter.present(get_response(is_success=True))
@@ -71,11 +74,24 @@ class SuccessfulResponseTests(TestCase):
         self.presenter.present(get_response(is_accepted=False))
         self.assertEqual(len(self.notifier.infos), 1)
 
+    def test_view_model_redirect_is_set_when_invitation_was_accepted(self) -> None:
+        view_model = self.presenter.present(get_response(is_accepted=False))
+        self.assertIsNotNone(view_model.redirect_url)
+
+    def test_view_model_redirect_is_set_to_messages_index(self) -> None:
+        view_model = self.presenter.present(get_response(is_accepted=False))
+        self.assertEqual(
+            view_model.redirect_url, self.url_index.get_list_messages_url()
+        )
+
 
 class UnsuccessfulResponseTests(TestCase):
     def setUp(self) -> None:
         self.notifier = NotifierTestImpl()
-        self.presenter = AnswerCompanyWorkInvitePresenter(user_notifier=self.notifier)
+        self.url_index = MessagesUrlIndex()
+        self.presenter = AnswerCompanyWorkInvitePresenter(
+            user_notifier=self.notifier, url_index=self.url_index
+        )
 
     def test_warning_notification_is_displayed_on_failure(self) -> None:
         self.presenter.present(get_response(is_success=False))
@@ -93,3 +109,8 @@ class UnsuccessfulResponseTests(TestCase):
             "Annehmen oder Ablehnen dieser Einladung ist nicht möglich",
             self.notifier.warnings,
         )
+
+
+class MessagesUrlIndex:
+    def get_list_messages_url(self) -> str:
+        return "list messages"

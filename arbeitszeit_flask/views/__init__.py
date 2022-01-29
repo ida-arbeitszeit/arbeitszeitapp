@@ -1,4 +1,4 @@
-from .answer_company_work_invite import AnswerCompanyWorkInviteView
+from .company_work_invite_view import CompanyWorkInviteView
 from .http_404_view import Http404View
 from .invite_worker_to_company import InviteWorkerToCompanyView
 from .list_messages_view import ListMessagesView
@@ -7,10 +7,10 @@ from .query_companies import QueryCompaniesView
 from .query_plans import QueryPlansView
 from .read_message import ReadMessageView
 from .request_cooperation_view import RequestCooperationView
-from .show_company_work_invite_details_view import ShowCompanyWorkInviteDetailsView
 
 __all__ = [
     "AnswerCompanyWorkInviteView",
+    "CompanyWorkInviteView",
     "Http404View",
     "InviteWorkerToCompanyView",
     "ListMessagesView",
@@ -19,5 +19,4 @@ __all__ = [
     "QueryPlansView",
     "ReadMessageView",
     "RequestCooperationView",
-    "ShowCompanyWorkInviteDetailsView",
 ]

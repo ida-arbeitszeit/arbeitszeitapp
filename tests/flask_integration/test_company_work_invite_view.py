@@ -23,6 +23,14 @@ class AuthenticatedTests(ViewTestCase):
         response = self.client.get(self.get_url(uuid4()))
         self.assertEqual(response.status_code, 404)
 
+    def test_when_posting_against_the_view_without_an_invite_get_302(self) -> None:
+        response = self.client.post(self.get_url(uuid4()))
+        self.assertEqual(response.status_code, 302)
+
+    def test_when_posting_against_the_view_with_an_invite_get_302(self) -> None:
+        response = self.client.post(self.get_url(self.invite_member()))
+        self.assertEqual(response.status_code, 302)
+
     def get_url(self, invite_id: UUID) -> str:
         return f"/member/invite_details/{invite_id}"
 

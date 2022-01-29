@@ -25,3 +25,8 @@ class MessageUrlIndex(Protocol):
 class CoopSummaryUrlIndex(Protocol):
     def get_coop_summary_url(self, coop_id: UUID) -> str:
         ...
+
+
+class ListMessagesUrlIndex(Protocol):
+    def get_list_messages_url(self) -> str:
+        ...

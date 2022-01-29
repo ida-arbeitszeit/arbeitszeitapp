@@ -56,12 +56,7 @@ from arbeitszeit_flask.template import (
 )
 from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.url_index import CompanyUrlIndex, MemberUrlIndex
-from arbeitszeit_flask.views import (
-    AnswerCompanyWorkInviteView,
-    Http404View,
-    ReadMessageView,
-    ShowCompanyWorkInviteDetailsView,
-)
+from arbeitszeit_flask.views import CompanyWorkInviteView, Http404View, ReadMessageView
 from arbeitszeit_web.answer_company_work_invite import (
     AnswerCompanyWorkInviteController,
     AnswerCompanyWorkInvitePresenter,
@@ -94,6 +89,7 @@ from arbeitszeit_web.url_index import (
     AnswerCompanyWorkInviteUrlIndex,
     CoopSummaryUrlIndex,
     InviteUrlIndex,
+    ListMessagesUrlIndex,
     MessageUrlIndex,
     PlanSummaryUrlIndex,
 )
@@ -104,10 +100,10 @@ from .translator import FlaskTranslator
 
 class MemberModule(Module):
     @provider
-    def provide_answer_company_work_invite_url_index(
-        self, url_index: MemberUrlIndex
-    ) -> AnswerCompanyWorkInviteUrlIndex:
-        return url_index
+    def provide_list_messages_url_index(
+        self, member_index: MemberUrlIndex
+    ) -> ListMessagesUrlIndex:
+        return member_index
 
     @provider
     def provide_plan_summary_url_index(
@@ -135,8 +131,20 @@ class MemberModule(Module):
     def provide_invite_url_index(self, index: MemberUrlIndex) -> InviteUrlIndex:
         return index
 
+    @provider
+    def provide_answer_company_work_invite_url_index(
+        self, url_index: MemberUrlIndex
+    ) -> AnswerCompanyWorkInviteUrlIndex:
+        return url_index
+
 
 class CompanyModule(Module):
+    @provider
+    def provide_list_messages_url_index(
+        self, company_index: CompanyUrlIndex
+    ) -> ListMessagesUrlIndex:
+        return company_index
+
     @provider
     def provide_plan_summary_url_index(
         self, company_index: CompanyUrlIndex
@@ -163,21 +171,37 @@ class CompanyModule(Module):
     def provide_invite_url_index(self, index: CompanyUrlIndex) -> InviteUrlIndex:
         return index
 
+    @provider
+    def provide_answer_company_work_invite_url_index(
+        self, url_index: CompanyUrlIndex
+    ) -> AnswerCompanyWorkInviteUrlIndex:
+        return url_index
+
 
 class FlaskModule(Module):
     @provider
     def provide_show_company_work_invite_details_view(
         self,
-        use_case: ShowCompanyWorkInviteDetailsUseCase,
-        presenter: ShowCompanyWorkInviteDetailsPresenter,
-        controller: ShowCompanyWorkInviteDetailsController,
+        details_use_case: ShowCompanyWorkInviteDetailsUseCase,
+        details_presenter: ShowCompanyWorkInviteDetailsPresenter,
+        details_controller: ShowCompanyWorkInviteDetailsController,
+        answer_use_case: AnswerCompanyWorkInvite,
+        answer_presenter: AnswerCompanyWorkInvitePresenter,
+        answer_controller: AnswerCompanyWorkInviteController,
         http_404_view: Http404View,
-    ) -> ShowCompanyWorkInviteDetailsView:
-        return ShowCompanyWorkInviteDetailsView(
-            use_case=use_case,
-            presenter=presenter,
-            controller=controller,
+        template_index: TemplateIndex,
+        template_renderer: TemplateRenderer,
+    ) -> CompanyWorkInviteView:
+        return CompanyWorkInviteView(
+            details_use_case=details_use_case,
+            details_presenter=details_presenter,
+            details_controller=details_controller,
             http_404_view=http_404_view,
+            answer_use_case=answer_use_case,
+            answer_presenter=answer_presenter,
+            answer_controller=answer_controller,
+            template_index=template_index,
+            template_renderer=template_renderer,
         )
 
     @provider
@@ -196,21 +220,6 @@ class FlaskModule(Module):
         )
 
     @provider
-    def provide_answer_company_work_invite_view(
-        self,
-        controller: AnswerCompanyWorkInviteController,
-        use_case: AnswerCompanyWorkInvite,
-        presenter: AnswerCompanyWorkInvitePresenter,
-        http_404_view: Http404View,
-    ) -> AnswerCompanyWorkInviteView:
-        return AnswerCompanyWorkInviteView(
-            controller=controller,
-            use_case=use_case,
-            presenter=presenter,
-            http_404_view=http_404_view,
-        )
-
-    @provider
     def provide_answer_company_work_invite_controller(
         self, session: Session
     ) -> AnswerCompanyWorkInviteController:
@@ -218,9 +227,11 @@ class FlaskModule(Module):
 
     @provider
     def provide_answer_company_work_invite_presenter(
-        self, notifier: Notifier
+        self,
+        notifier: Notifier,
+        url_index: ListMessagesUrlIndex,
     ) -> AnswerCompanyWorkInvitePresenter:
-        return AnswerCompanyWorkInvitePresenter(notifier)
+        return AnswerCompanyWorkInvitePresenter(notifier, url_index=url_index)
 
     @provider
     def provide_read_message_view(
