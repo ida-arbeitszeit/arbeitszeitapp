@@ -1,6 +1,6 @@
 from os import environ
 
-from project.configuration_base import *
+from arbeitszeit_flask.configuration_base import *
 
 
 FLASK_ENV = "production"
@@ -18,6 +18,8 @@ REMEMBER_COOKIE_SECURE = True
 REMEMBER_COOKIE_HTTPONLY = True
 
 # mail
+
+MAIL_BACKEND = "flask_mail"
 MAIL_SERVER = environ.get("MAIL_SERVER")
 MAIL_PORT = environ.get("MAIL_PORT")
 MAIL_USERNAME = environ.get("MAIL_USERNAME")

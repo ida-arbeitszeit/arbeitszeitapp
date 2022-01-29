@@ -95,7 +95,10 @@ def test_that_after_transfer_correct_transaction_is_added(
         worker,
         amount_to_transfer,
     )
+
+    assert len(transaction_repository.transactions) == 1
     transaction = transaction_repository.transactions[0]
-    assert transaction.amount == amount_to_transfer
+    assert transaction.amount_sent == amount_to_transfer
+    assert transaction.amount_received == amount_to_transfer
     assert transaction.sending_account == company.work_account
     assert transaction.receiving_account == worker.account

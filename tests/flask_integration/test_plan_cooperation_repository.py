@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import List, Union
 
 from arbeitszeit.entities import Plan, ProductionCosts
-from project.database.repositories import (
+from arbeitszeit_flask.database.repositories import (
     CooperationRepository,
     PlanCooperationRepository,
     PlanRepository,

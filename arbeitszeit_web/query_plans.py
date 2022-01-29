@@ -7,6 +7,7 @@ from arbeitszeit.use_cases.query_plans import (
     QueryPlansRequest,
 )
 
+from .notification import Notifier
 from .url_index import CoopSummaryUrlIndex, PlanSummaryUrlIndex
 
 
@@ -45,11 +46,6 @@ class QueryPlansController:
 
 
 @dataclass
-class Notification:
-    text: str
-
-
-@dataclass
 class ResultTableRow:
     plan_id: str
     plan_summary_url: str
@@ -71,7 +67,6 @@ class ResultsTable:
 
 @dataclass
 class QueryPlansViewModel:
-    notifications: List[Notification]
     results: ResultsTable
     show_results: bool
 
@@ -83,14 +78,12 @@ class QueryPlansViewModel:
 class QueryPlansPresenter:
     plan_url_index: PlanSummaryUrlIndex
     coop_url_index: CoopSummaryUrlIndex
+    user_notifier: Notifier
 
     def present(self, response: PlanQueryResponse) -> QueryPlansViewModel:
-        if response.results:
-            notifications = []
-        else:
-            notifications = [Notification(text="Keine Ergebnisse!")]
+        if not response.results:
+            self.user_notifier.display_warning("Keine Ergebnisse!")
         return QueryPlansViewModel(
-            notifications=notifications,
             show_results=bool(response.results),
             results=ResultsTable(
                 rows=[
@@ -124,7 +117,6 @@ class QueryPlansPresenter:
 
     def get_empty_view_model(self) -> QueryPlansViewModel:
         return QueryPlansViewModel(
-            notifications=[],
             results=ResultsTable(rows=[]),
             show_results=False,
         )

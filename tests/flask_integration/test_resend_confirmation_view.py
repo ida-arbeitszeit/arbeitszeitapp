@@ -1,5 +1,5 @@
-from project.extensions import mail
-from project.token import FlaskTokenService
+from arbeitszeit_flask.extensions import mail
+from arbeitszeit_flask.token import FlaskTokenService
 
 from .flask import ViewTestCase
 
@@ -7,7 +7,7 @@ from .flask import ViewTestCase
 class UnauthenticatedMemberTests(ViewTestCase):
     def setUp(self):
         super().setUp()
-        self.url = "/resend"
+        self.url = "/member/resend"
 
     def test_unauthenticated_users_get_redirected(self):
         response = self.client.get(self.url)
@@ -17,7 +17,7 @@ class UnauthenticatedMemberTests(ViewTestCase):
 class AuthenticatedButUnconfirmedMemberTests(ViewTestCase):
     def setUp(self):
         super().setUp()
-        self.url = "/resend"
+        self.url = "/member/resend"
         self.member, _, self.email = self.login_member()
 
     def test_authenticated_and_unconfirmed_users_get_redirected_and_mail_gets_send(

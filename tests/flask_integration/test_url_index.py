@@ -1,4 +1,4 @@
-from project.url_index import CompanyUrlIndex, MemberUrlIndex
+from arbeitszeit_flask.url_index import CompanyUrlIndex, MemberUrlIndex
 from tests.data_generators import CooperationGenerator, MessageGenerator, PlanGenerator
 
 from .flask import ViewTestCase
@@ -10,7 +10,8 @@ class CompanyUrlIndexTests(ViewTestCase):
         self.url_index = CompanyUrlIndex()
         self.plan_generator = self.injector.get(PlanGenerator)
         self.message_generator = self.injector.get(MessageGenerator)
-        self.company, _ = self.login_company()
+        self.company, _, self.email = self.login_company()
+        self.company = self.confirm_company(company=self.company, email=self.email)
         self.cooperation_generator = self.injector.get(CooperationGenerator)
 
     def test_plan_summary_url_for_existing_plan_leads_to_functional_url(self) -> None:

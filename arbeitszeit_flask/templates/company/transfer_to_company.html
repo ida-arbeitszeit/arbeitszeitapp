@@ -1,0 +1,44 @@
+{% extends "base_company.html" %}
+
+{% from 'macros/show_notifications.html' import show_notifications %}
+
+{% block content2 %}
+<div class="columns has-text-left">
+    <div class="column is-two-third">
+        <div class="content">
+            <h1 class="title">
+                Bezahlung Produktionsmittel und Rohstoffe
+            </h1>
+        </div>
+        <div class="content">
+            <form method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="field has-addons">
+                    <div class="control">
+                        <input class="input" type="text" placeholder="Plan-ID" , name="plan_id" required>
+                    </div>
+                    <div class="control">
+                        <input class="input" type="number" placeholder="Stückzahl" , name="amount" required>
+                    </div>
+                    <div class="control">
+                        <div class="select">
+                            <select name="category" required>
+                                <option value="">Zweck</option>
+                                {% set categ = ["Produktionsmittel", "Rohmaterialien"] %}
+                                {% for cat in categ %}
+                                <option value="{{ cat }}">{{ cat }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="control">
+                        <button class="button is-primary" name="transfer_type" value="transfer_to_company"
+                            type="submit">Überweisen</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+	{{ show_notifications() }}
+    </div>
+</div>
+{% endblock %}

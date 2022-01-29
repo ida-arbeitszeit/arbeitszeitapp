@@ -5,6 +5,7 @@ from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.get_plan_summary import PlanSummarySuccess
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
+from tests.translator import FakeTranslator
 
 TESTING_RESPONSE_MODEL = PlanSummarySuccess(
     plan_id=uuid4(),
@@ -29,7 +30,10 @@ TESTING_RESPONSE_MODEL = PlanSummarySuccess(
 class GetPlanSummarySuccessPresenterTests(TestCase):
     def setUp(self) -> None:
         self.coop_url_index = CoopSummaryUrlIndex()
-        self.presenter = GetPlanSummarySuccessPresenter(self.coop_url_index)
+        self.translator = FakeTranslator()
+        self.presenter = GetPlanSummarySuccessPresenter(
+            self.coop_url_index, self.translator
+        )
 
     def test_plan_id_is_displayed_correctly_as_tuple_of_strings(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
@@ -57,14 +61,14 @@ class GetPlanSummarySuccessPresenterTests(TestCase):
         )
         view_model = self.presenter.present(response)
         self.assertTupleEqual(
-            view_model.planner_id, ("Planender Betrieb", str(expected_planner_id))
+            view_model.planner_id, ("Planning company", str(expected_planner_id))
         )
 
     def test_product_name_is_displayed_correctly_as_tuple_of_strings(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
         self.assertTupleEqual(
             view_model.product_name,
-            ("Name des Produkts", TESTING_RESPONSE_MODEL.product_name),
+            ("Name of product", TESTING_RESPONSE_MODEL.product_name),
         )
 
     def test_description_is_displayed_correctly_as_tuple_of_string_and_list_of_string(
@@ -73,7 +77,7 @@ class GetPlanSummarySuccessPresenterTests(TestCase):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
         self.assertTupleEqual(
             view_model.description,
-            ("Beschreibung des Produkts", [TESTING_RESPONSE_MODEL.description]),
+            ("Description of product", [TESTING_RESPONSE_MODEL.description]),
         )
 
     def test_description_is_splitted_correctly_at_carriage_return_in_list_of_strings(
@@ -86,7 +90,7 @@ class GetPlanSummarySuccessPresenterTests(TestCase):
         view_model = self.presenter.present(response)
         self.assertTupleEqual(
             view_model.description,
-            ("Beschreibung des Produkts", ["first paragraph", "second paragraph"]),
+            ("Description of product", ["first paragraph", "second paragraph"]),
         )
 
     def test_timeframe_is_displayed_correctly_as_tuple_of_strings(self):

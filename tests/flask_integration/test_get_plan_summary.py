@@ -28,7 +28,8 @@ class AuthenticatedCompanyTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.plan_generator = self.injector.get(PlanGenerator)
-        self.login_company()
+        self.company, _, self.email = self.login_company()
+        self.company = self.confirm_company(company=self.company, email=self.email)
 
     def test_get_404_when_plan_does_not_exist(self) -> None:
         url = f"/company/plan_summary/{uuid4()}"

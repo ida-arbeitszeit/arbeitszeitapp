@@ -1,7 +1,27 @@
-from project.extensions import mail
-from project.token import FlaskTokenService
+from arbeitszeit_flask.extensions import mail
 
 from .flask import ViewTestCase
+
+
+class AuthenticatedCompanyTests(ViewTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.company, _, self.email = self.login_company()
+        self.company = self.confirm_company(company=self.company, email=self.email)
+        self.url = "/member/signup"
+
+    def test_authenticated_company_gets_200_when_accessing_member_page(self) -> None:
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_user_type_in_session_is_set_to_none_when_company_accesses_member_page(
+        self,
+    ) -> None:
+        with self.client.session_transaction() as session:
+            self.assertEqual(session["user_type"], "company")
+        self.client.get(self.url)
+        with self.client.session_transaction() as session:
+            self.assertIsNone(session["user_type"])
 
 
 class UnauthenticatedAndUnconfirmedMemberTests(ViewTestCase):
@@ -22,7 +42,6 @@ class UnauthenticatedAndUnconfirmedMemberTests(ViewTestCase):
 
     def test_correct_posting_makes_that_confirmations_mail_is_sent_to_member(self):
         member_email = "test2@cp.org"
-        member_token = FlaskTokenService().generate_token(member_email)
         with mail.record_messages() as outbox:
             response = self.client.post(
                 self.url,
@@ -35,4 +54,3 @@ class UnauthenticatedAndUnconfirmedMemberTests(ViewTestCase):
             assert outbox[0].sender == "test_sender@cp.org"
             assert outbox[0].recipients[0] == member_email
             assert outbox[0].subject == "Bitte bestätige dein Konto"
-            assert member_token in outbox[0].html
