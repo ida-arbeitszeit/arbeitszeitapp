@@ -1,5 +1,6 @@
 from flask import Flask, current_app, request, session
-from flask_table import Col, Table  # noqa: Do not delete
+
+# from flask_table import Col, Table  # noqa: Do not delete
 from flask_talisman import Talisman
 from flask_wtf.csrf import CSRFProtect
 
