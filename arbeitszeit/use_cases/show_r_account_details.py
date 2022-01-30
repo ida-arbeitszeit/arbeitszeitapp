@@ -20,19 +20,19 @@ class TransactionInfo:
 
 
 @dataclass
-class GetAccountRResponse:
+class ShowRAccountDetailsResponse:
     transactions: List[TransactionInfo]
     account_balance: Decimal
 
 
 @inject
 @dataclass
-class GetAccountR:
+class ShowRAccountDetails:
     accounting_service: UserAccountingService
     company_repository: CompanyRepository
     account_repository: AccountRepository
 
-    def __call__(self, company_id: UUID) -> GetAccountRResponse:
+    def __call__(self, company_id: UUID) -> ShowRAccountDetailsResponse:
         company = self.company_repository.get_by_id(company_id)
         assert company
         transactions = [
@@ -44,7 +44,7 @@ class GetAccountR:
         account_balance = self.account_repository.get_account_balance(
             company.raw_material_account
         )
-        return GetAccountRResponse(
+        return ShowRAccountDetailsResponse(
             transactions=transactions, account_balance=account_balance
         )
 

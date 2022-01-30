@@ -58,7 +58,6 @@ from arbeitszeit_flask.views import (
     RequestCooperationView,
 )
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
-from arbeitszeit_web.get_account_r import GetAccountRPresenter
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
@@ -85,6 +84,7 @@ from arbeitszeit_web.request_cooperation import (
 from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from arbeitszeit_web.show_p_account_details import ShowPAccountDetailsPresenter
+from arbeitszeit_web.show_r_account_details import ShowRAccountDetailsPresenter
 
 from .blueprint import CompanyRoute
 
@@ -419,11 +419,11 @@ def account_p(
 
 @CompanyRoute("/company/my_accounts/account_r")
 def account_r(
-    get_account_r: use_cases.GetAccountR,
+    show_r_account_details: use_cases.ShowRAccountDetails,
     template_renderer: UserTemplateRenderer,
-    presenter: GetAccountRPresenter,
+    presenter: ShowRAccountDetailsPresenter,
 ):
-    response = get_account_r(UUID(current_user.id))
+    response = show_r_account_details(UUID(current_user.id))
     view_model = presenter.present(response)
 
     return template_renderer.render_template(
