@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from arbeitszeit.entities import SocialAccounting
 from arbeitszeit.transactions import TransactionTypes
-from arbeitszeit.use_cases import GetAccountP
+from arbeitszeit.use_cases import ShowPAccountDetails
 from tests.data_generators import (
     CompanyGenerator,
     MemberGenerator,
@@ -15,33 +15,33 @@ from .dependency_injection import injection_test
 
 @injection_test
 def test_no_transactions_returned_when_no_transactions_took_place(
-    get_account_p: GetAccountP,
+    show_p_account_details: ShowPAccountDetails,
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
 ):
     member_generator.create_member()
     company = company_generator.create_company()
 
-    response = get_account_p(company.id)
+    response = show_p_account_details(company.id)
     assert not response.transactions
 
 
 @injection_test
 def test_balance_is_zero_when_no_transactions_took_place(
-    get_account_p: GetAccountP,
+    show_p_account_details: ShowPAccountDetails,
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
 ):
     member_generator.create_member()
     company = company_generator.create_company()
 
-    response = get_account_p(company.id)
+    response = show_p_account_details(company.id)
     assert response.account_balance == 0
 
 
 @injection_test
 def test_that_no_info_is_generated_after_selling_of_consumer_product(
-    get_account_p: GetAccountP,
+    show_p_account_details: ShowPAccountDetails,
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
@@ -56,13 +56,13 @@ def test_that_no_info_is_generated_after_selling_of_consumer_product(
         amount_received=Decimal(8.5),
     )
 
-    response = get_account_p(company.id)
+    response = show_p_account_details(company.id)
     assert len(response.transactions) == 0
 
 
 @injection_test
 def test_that_no_info_is_generated_when_company_sells_p(
-    get_account_p: GetAccountP,
+    show_p_account_details: ShowPAccountDetails,
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
 ):
@@ -76,13 +76,13 @@ def test_that_no_info_is_generated_when_company_sells_p(
         amount_received=Decimal(8.5),
     )
 
-    response = get_account_p(company2.id)
+    response = show_p_account_details(company2.id)
     assert not response.transactions
 
 
 @injection_test
 def test_that_no_info_is_generated_when_credit_for_r_is_granted(
-    get_account_p: GetAccountP,
+    show_p_account_details: ShowPAccountDetails,
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
     social_accounting: SocialAccounting,
@@ -96,13 +96,13 @@ def test_that_no_info_is_generated_when_credit_for_r_is_granted(
         amount_received=Decimal(8.5),
     )
 
-    response = get_account_p(company.id)
+    response = show_p_account_details(company.id)
     assert len(response.transactions) == 0
 
 
 @injection_test
 def test_that_correct_info_is_generated_when_credit_for_p_is_granted(
-    get_account_p: GetAccountP,
+    show_p_account_details: ShowPAccountDetails,
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
     social_accounting: SocialAccounting,
@@ -116,7 +116,7 @@ def test_that_correct_info_is_generated_when_credit_for_p_is_granted(
         amount_received=Decimal(8.5),
     )
 
-    response = get_account_p(company.id)
+    response = show_p_account_details(company.id)
     assert len(response.transactions) == 1
     assert response.transactions[0].transaction_volume == Decimal(8.5)
     assert response.transactions[0].purpose is not None
@@ -130,7 +130,7 @@ def test_that_correct_info_is_generated_when_credit_for_p_is_granted(
 
 @injection_test
 def test_that_correct_info_for_is_generated_after_company_buying_p(
-    get_account_p: GetAccountP,
+    show_p_account_details: ShowPAccountDetails,
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
 ):
@@ -144,7 +144,7 @@ def test_that_correct_info_for_is_generated_after_company_buying_p(
         amount_received=Decimal(8.5),
     )
 
-    response = get_account_p(company1.id)
+    response = show_p_account_details(company1.id)
     transaction = response.transactions[0]
     assert transaction.transaction_type == TransactionTypes.payment_of_fixed_means
     assert transaction.transaction_volume == -trans.amount_sent

@@ -3,8 +3,11 @@ from decimal import Decimal
 from unittest import TestCase
 
 from arbeitszeit.transactions import TransactionTypes
-from arbeitszeit.use_cases.get_account_p import GetAccountPResponse, TransactionInfo
-from arbeitszeit_web.get_account_p import GetAccountPPresenter
+from arbeitszeit.use_cases.show_p_account_details import (
+    ShowPAccountDetailsResponse,
+    TransactionInfo,
+)
+from arbeitszeit_web.show_p_account_details import ShowPAccountDetailsPresenter
 
 DEFAULT_INFO1 = TransactionInfo(
     transaction_type=TransactionTypes.credit_for_fixed_means,
@@ -23,15 +26,17 @@ DEFAULT_INFO2 = TransactionInfo(
 
 class CompanyTransactionsPresenterTests(TestCase):
     def setUp(self) -> None:
-        self.presenter = GetAccountPPresenter()
+        self.presenter = ShowPAccountDetailsPresenter()
 
     def test_return_empty_list_when_no_transactions_took_place(self):
-        response = GetAccountPResponse(transactions=[], account_balance=Decimal(0))
+        response = ShowPAccountDetailsResponse(
+            transactions=[], account_balance=Decimal(0)
+        )
         view_model = self.presenter.present(response)
         self.assertEqual(view_model.transactions, [])
 
     def test_return_correct_info_when_one_transaction_took_place(self):
-        response = GetAccountPResponse(
+        response = ShowPAccountDetailsResponse(
             transactions=[DEFAULT_INFO1], account_balance=Decimal(100)
         )
         view_model = self.presenter.present(response)
@@ -44,7 +49,7 @@ class CompanyTransactionsPresenterTests(TestCase):
         self.assertIsInstance(trans.purpose, str)
 
     def test_return_two_transactions_when_two_transactions_took_place(self):
-        response = GetAccountPResponse(
+        response = ShowPAccountDetailsResponse(
             transactions=[DEFAULT_INFO1, DEFAULT_INFO2], account_balance=Decimal(100)
         )
         view_model = self.presenter.present(response)

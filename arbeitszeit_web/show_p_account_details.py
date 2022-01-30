@@ -4,7 +4,10 @@ from decimal import Decimal
 from typing import List
 
 from arbeitszeit.transactions import TransactionTypes
-from arbeitszeit.use_cases.get_account_p import GetAccountPResponse, TransactionInfo
+from arbeitszeit.use_cases.show_p_account_details import (
+    ShowPAccountDetailsResponse,
+    TransactionInfo,
+)
 
 
 @dataclass
@@ -16,20 +19,20 @@ class ViewModelTransactionInfo:
 
 
 @dataclass
-class GetAccountPResponseViewModel:
+class ShowPAccountDetailsResponseViewModel:
     transactions: List[ViewModelTransactionInfo]
     account_balance: Decimal
 
 
-class GetAccountPPresenter:
+class ShowPAccountDetailsPresenter:
     def present(
-        self, use_case_response: GetAccountPResponse
-    ) -> GetAccountPResponseViewModel:
+        self, use_case_response: ShowPAccountDetailsResponse
+    ) -> ShowPAccountDetailsResponseViewModel:
         transactions = [
             self._create_info(transaction)
             for transaction in use_case_response.transactions
         ]
-        return GetAccountPResponseViewModel(
+        return ShowPAccountDetailsResponseViewModel(
             transactions=transactions, account_balance=use_case_response.account_balance
         )
 

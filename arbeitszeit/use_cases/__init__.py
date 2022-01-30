@@ -42,7 +42,6 @@ from .end_cooperation import (
     EndCooperationRequest,
     EndCooperationResponse,
 )
-from .get_account_p import GetAccountP, GetAccountPResponse
 from .get_account_r import GetAccountR, GetAccountRResponse
 from .get_company_transactions import GetCompanyTransactions
 from .get_coop_summary import (
@@ -145,6 +144,7 @@ from .resend_confirmation_mail import (
 from .seek_approval import SeekApproval
 from .send_work_certificates_to_worker import SendWorkCertificatesToWorker
 from .show_my_plans import ShowMyPlansRequest, ShowMyPlansResponse, ShowMyPlansUseCase
+from .show_p_account_details import ShowPAccountDetails, ShowPAccountDetailsResponse
 from .show_work_invites import ShowWorkInvites, ShowWorkInvitesRequest
 from .toggle_product_availablity import (
     ToggleProductAvailability,
@@ -185,8 +185,8 @@ __all__ = [
     "EndCooperation",
     "EndCooperationResponse",
     "EndCooperationRequest",
-    "GetAccountP",
-    "GetAccountPResponse",
+    "ShowPAccountDetails",
+    "ShowPAccountDetailsResponse",
     "GetAccountR",
     "GetAccountRResponse",
     "GetCoopSummary",
