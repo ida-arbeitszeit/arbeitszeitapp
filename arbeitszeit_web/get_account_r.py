@@ -36,8 +36,7 @@ class GetAccountRPresenter:
     def _create_info(self, transaction: TransactionInfo) -> ViewModelTransactionInfo:
         transaction_type = (
             "Payment"
-            if transaction.type_of_transaction
-            == TransactionTypes.payment_of_liquid_means
+            if transaction.transaction_type == TransactionTypes.payment_of_liquid_means
             else "Credit"
         )
         return ViewModelTransactionInfo(

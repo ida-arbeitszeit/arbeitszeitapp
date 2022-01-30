@@ -38,7 +38,7 @@ class GetCompanyTransactionsPresenter:
     def _create_info(self, transaction: TransactionInfo) -> ViewModelTransactionInfo:
         account = self._get_account(transaction.account_type)
         return ViewModelTransactionInfo(
-            transaction.type_of_transaction.value,
+            transaction.transaction_type.value,
             transaction.date,
             round(transaction.transaction_volume, 2),
             account,

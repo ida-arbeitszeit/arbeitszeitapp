@@ -7,14 +7,14 @@ from arbeitszeit.use_cases.get_account_r import GetAccountRResponse, Transaction
 from arbeitszeit_web.get_account_r import GetAccountRPresenter
 
 DEFAULT_INFO1 = TransactionInfo(
-    type_of_transaction=TransactionTypes.credit_for_liquid_means,
+    transaction_type=TransactionTypes.credit_for_liquid_means,
     date=datetime.now(),
     transaction_volume=Decimal(10),
     purpose="Test purpose",
 )
 
 DEFAULT_INFO2 = TransactionInfo(
-    type_of_transaction=TransactionTypes.credit_for_wages,
+    transaction_type=TransactionTypes.credit_for_wages,
     date=datetime.now(),
     transaction_volume=Decimal(20),
     purpose="Test purpose",

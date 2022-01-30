@@ -48,7 +48,7 @@ def test_that_correct_info_is_generated_after_transaction_of_member_buying_consu
     assert len(info_company.transactions) == 1
     transaction = info_company.transactions[0]
     assert type(transaction.date) == datetime
-    assert transaction.type_of_transaction == TransactionTypes.sale_of_consumer_product
+    assert transaction.transaction_type == TransactionTypes.sale_of_consumer_product
     assert transaction.transaction_volume == Decimal(8.5)
     assert transaction.account_type == AccountTypes.prd
 
@@ -71,7 +71,7 @@ def test_that_correct_info_for_sender_is_generated_after_transaction_of_company_
 
     info_sender = get_company_transactions(company1.id)
     transaction = info_sender.transactions[0]
-    assert transaction.type_of_transaction == TransactionTypes.payment_of_fixed_means
+    assert transaction.transaction_type == TransactionTypes.payment_of_fixed_means
     assert transaction.transaction_volume == -trans.amount_sent
     assert transaction.account_type == AccountTypes.p
 
@@ -94,7 +94,7 @@ def test_that_correct_info_for_receiver_is_generated_after_transaction_of_compan
 
     info_receiver = get_company_transactions(company2.id)
     transaction = info_receiver.transactions[0]
-    assert transaction.type_of_transaction == TransactionTypes.sale_of_fixed_means
+    assert transaction.transaction_type == TransactionTypes.sale_of_fixed_means
     assert transaction.transaction_volume == trans.amount_received
     assert transaction.account_type == AccountTypes.prd
 
@@ -118,7 +118,7 @@ def test_that_correct_info_for_company_is_generated_after_transaction_where_cred
     info_receiver = get_company_transactions(company.id)
     assert info_receiver.transactions[0].transaction_volume == trans.amount_received
     assert (
-        info_receiver.transactions[0].type_of_transaction
+        info_receiver.transactions[0].transaction_type
         == TransactionTypes.credit_for_fixed_means
     )
 
@@ -142,7 +142,7 @@ def test_that_correct_info_for_company_is_generated_after_transaction_where_cred
     info_receiver = get_company_transactions(company.id)
     assert info_receiver.transactions[0].transaction_volume == trans.amount_received
     assert (
-        info_receiver.transactions[0].type_of_transaction
+        info_receiver.transactions[0].transaction_type
         == TransactionTypes.credit_for_liquid_means
     )
 
@@ -166,7 +166,7 @@ def test_that_correct_info_for_company_is_generated_after_transaction_where_cred
     info_receiver = get_company_transactions(company.id)
     assert info_receiver.transactions[0].transaction_volume == trans.amount_received
     assert (
-        info_receiver.transactions[0].type_of_transaction
+        info_receiver.transactions[0].transaction_type
         == TransactionTypes.credit_for_wages
     )
 
@@ -197,13 +197,13 @@ def test_correct_info_is_generated_after_several_transactions_where_companies_bu
     assert len(info_company1.transactions) == 3
 
     trans1 = info_company1.transactions.pop()
-    assert trans1.type_of_transaction == TransactionTypes.payment_of_fixed_means
+    assert trans1.transaction_type == TransactionTypes.payment_of_fixed_means
 
     trans2 = info_company1.transactions.pop()
-    assert trans2.type_of_transaction == TransactionTypes.sale_of_fixed_means
+    assert trans2.transaction_type == TransactionTypes.sale_of_fixed_means
 
     trans3 = info_company1.transactions.pop()
-    assert trans3.type_of_transaction == TransactionTypes.payment_of_liquid_means
+    assert trans3.transaction_type == TransactionTypes.payment_of_liquid_means
 
 
 @injection_test
@@ -244,21 +244,21 @@ def test_that_correct_info_for_company_is_generated_in_correct_order_after_sever
 
     # trans1
     trans1 = info.transactions.pop()
-    assert trans1.type_of_transaction == TransactionTypes.payment_of_fixed_means
+    assert trans1.transaction_type == TransactionTypes.payment_of_fixed_means
 
     # trans2
     trans2 = info.transactions.pop()
-    assert trans2.type_of_transaction == TransactionTypes.sale_of_fixed_means
+    assert trans2.transaction_type == TransactionTypes.sale_of_fixed_means
 
     # trans3
     trans3 = info.transactions.pop()
-    assert trans3.type_of_transaction == TransactionTypes.payment_of_liquid_means
+    assert trans3.transaction_type == TransactionTypes.payment_of_liquid_means
 
     # trans4
     trans4 = info.transactions.pop()
-    assert trans4.type_of_transaction == TransactionTypes.sale_of_consumer_product
+    assert trans4.transaction_type == TransactionTypes.sale_of_consumer_product
 
     # trans5
     trans5 = info.transactions.pop()
-    assert trans5.type_of_transaction == TransactionTypes.expected_sales
+    assert trans5.transaction_type == TransactionTypes.expected_sales
     assert trans5.transaction_volume == expected_trans5.amount_received

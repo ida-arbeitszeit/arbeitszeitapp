@@ -13,7 +13,7 @@ from arbeitszeit.transactions import TransactionTypes, UserAccountingService
 
 @dataclass
 class TransactionInfo:
-    type_of_transaction: TransactionTypes
+    transaction_type: TransactionTypes
     date: datetime
     transaction_volume: Decimal
     purpose: str

@@ -11,7 +11,7 @@ from arbeitszeit.use_cases.get_company_transactions import (
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
 
 DEFAULT_INFO1 = TransactionInfo(
-    type_of_transaction=TransactionTypes.credit_for_fixed_means,
+    transaction_type=TransactionTypes.credit_for_fixed_means,
     date=datetime.now(),
     transaction_volume=Decimal(10),
     account_type=AccountTypes.p,
@@ -19,7 +19,7 @@ DEFAULT_INFO1 = TransactionInfo(
 )
 
 DEFAULT_INFO2 = TransactionInfo(
-    type_of_transaction=TransactionTypes.credit_for_wages,
+    transaction_type=TransactionTypes.credit_for_wages,
     date=datetime.now(),
     transaction_volume=Decimal(20),
     account_type=AccountTypes.a,
@@ -41,9 +41,7 @@ class CompanyTransactionsPresenterTests(TestCase):
         view_model = self.presenter.present(response)
         self.assertTrue(len(view_model.transactions), 1)
         trans = view_model.transactions[0]
-        self.assertEqual(
-            trans.transaction_type, DEFAULT_INFO1.type_of_transaction.value
-        )
+        self.assertEqual(trans.transaction_type, DEFAULT_INFO1.transaction_type.value)
         self.assertIsInstance(trans.date, datetime)
         self.assertEqual(trans.transaction_volume, DEFAULT_INFO1.transaction_volume)
         self.assertEqual(

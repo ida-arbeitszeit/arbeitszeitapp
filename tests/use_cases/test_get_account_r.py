@@ -122,7 +122,7 @@ def test_that_correct_info_is_generated_when_credit_for_r_is_granted(
     assert response.transactions[0].purpose is not None
     assert isinstance(response.transactions[0].date, datetime)
     assert (
-        response.transactions[0].type_of_transaction
+        response.transactions[0].transaction_type
         == TransactionTypes.credit_for_liquid_means
     )
     assert response.account_balance == Decimal(8.5)
@@ -146,6 +146,6 @@ def test_that_correct_info_for_is_generated_after_company_buying_r(
 
     response = get_account_r(company1.id)
     transaction = response.transactions[0]
-    assert transaction.type_of_transaction == TransactionTypes.payment_of_liquid_means
+    assert transaction.transaction_type == TransactionTypes.payment_of_liquid_means
     assert transaction.transaction_volume == -trans.amount_sent
     assert response.account_balance == -trans.amount_sent
