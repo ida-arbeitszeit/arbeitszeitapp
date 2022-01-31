@@ -1,7 +1,8 @@
 { buildPythonPackage, pytestCheckHook
 
-, injector, hypothesis, flask, flask-talisman, flask_wtf, flask-babel
-, flask_login, flask_mail, flask_migrate, email_validator, is_safe_url }:
+# python packages
+, email_validator, flask, flask-babel, flask-talisman, flask_login, flask_mail
+, flask_migrate, flask_wtf, hypothesis, injector, is_safe_url }:
 buildPythonPackage {
   pname = "arbeitszeitapp";
   version = "develop";
@@ -9,15 +10,15 @@ buildPythonPackage {
   buildInputs = [ pytestCheckHook ];
   checkInputs = [ hypothesis ];
   propagatedBuildInputs = [
-    injector
+    email_validator
     flask
-    flask-talisman
-    flask_wtf
     flask-babel
+    flask-talisman
     flask_login
     flask_mail
     flask_migrate
-    email_validator
+    flask_wtf
+    injector
     is_safe_url
   ];
 }

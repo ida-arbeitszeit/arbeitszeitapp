@@ -1,5 +1,5 @@
 {
-  description = "A very basic flake";
+  description = "Arbeitszeitapp";
 
   outputs = { self, nixpkgs, flake-utils }:
     let
@@ -11,12 +11,11 @@
           };
           python = pkgs.python3;
         in {
-          devShell = let
-            pythonDeps = with python.pkgs.arbeitszeitapp;
-              requiredPythonModules ++ nativeBuildInputs ++ buildInputs;
-            pythonEnv =
-              python.withPackages (p: with p; [ black isort flake8 mypy ]);
-          in pkgs.mkShell { buildInputs = pythonDeps ++ [ pythonEnv ]; };
+          devShell = pkgs.mkShell {
+            packages = (with python.pkgs; [ black flake8 mypy isort ])
+              ++ (with pkgs; [ nixfmt ]);
+            inputsFrom = [ python.pkgs.arbeitszeitapp ];
+          };
           defaultPackage = pkgs.python3.pkgs.arbeitszeitapp;
         });
       systemIndependent = {
