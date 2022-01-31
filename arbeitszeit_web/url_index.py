@@ -15,3 +15,8 @@ class MessageUrlIndex(Protocol):
 class CoopSummaryUrlIndex(Protocol):
     def get_coop_summary_url(self, coop_id: UUID) -> str:
         ...
+
+
+class ConfirmationUrlIndex(Protocol):
+    def get_confirmation_url(self, token: str) -> str:
+        ...
