@@ -3,18 +3,25 @@ from injector import Injector, Module, inject, provider, singleton
 import arbeitszeit.repositories as interfaces
 from arbeitszeit import entities
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.mail_service import MailService
-from arbeitszeit.token import TokenService
+from arbeitszeit.token import TokenDeliverer, TokenService
 from arbeitszeit.use_cases import GetCompanySummary
 from tests import data_generators
 from tests.datetime_service import FakeDatetimeService
-from tests.mail_service import FakeMailService
-from tests.token import FakeTokenService
+from tests.token import FakeTokenService, TokenDeliveryService
 
 from . import repositories
 
 
 class InMemoryModule(Module):
+    @provider
+    @singleton
+    def provide_token_delivery_service(self) -> TokenDeliveryService:
+        return TokenDeliveryService()
+
+    @provider
+    def provide_token_deliverer(self, service: TokenDeliveryService) -> TokenDeliverer:
+        return service
+
     @provider
     def provide_purchase_repo(
         self, repo: repositories.PurchaseRepository
@@ -106,10 +113,6 @@ class InMemoryModule(Module):
     @singleton
     def provide_datetime_service(self, service: FakeDatetimeService) -> DatetimeService:
         return service
-
-    @provider
-    def provide_mail_service(self, mail_service: FakeMailService) -> MailService:
-        return mail_service
 
     @provider
     def provide_token_service(self, token_service: FakeTokenService) -> TokenService:

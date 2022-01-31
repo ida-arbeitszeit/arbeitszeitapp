@@ -20,3 +20,8 @@ class CoopSummaryUrlIndex(Protocol):
 class CompanySummaryUrlIndex(Protocol):
     def get_company_summary_url(self, company_id: UUID) -> str:
         ...
+
+
+class ConfirmationUrlIndex(Protocol):
+    def get_confirmation_url(self, token: str) -> str:
+        ...
