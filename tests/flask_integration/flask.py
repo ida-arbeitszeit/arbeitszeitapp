@@ -1,17 +1,12 @@
 from typing import List, Optional, Tuple
 from unittest import TestCase
 
-from flask import Flask, _app_ctx_stack
+from flask import Flask
 from injector import Module
 
 from arbeitszeit.entities import Company, Member
 from arbeitszeit_flask.token import FlaskTokenService
-from tests.data_generators import (
-    CompanyGenerator,
-    EmailGenerator,
-    MemberGenerator,
-    PlanGenerator,
-)
+from tests.data_generators import CompanyGenerator, EmailGenerator, MemberGenerator
 
 from .dependency_injection import get_dependency_injector
 
@@ -20,9 +15,6 @@ class FlaskTestCase(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector(self.get_injection_modules())
         self.app = self.injector.get(Flask)
-
-    def tearDown(self) -> None:
-        _app_ctx_stack.pop()
 
     def get_injection_modules(self) -> List[Module]:
         return []
@@ -35,7 +27,6 @@ class ViewTestCase(FlaskTestCase):
         self.member_generator = self.injector.get(MemberGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.email_generator = self.injector.get(EmailGenerator)
-        self.plan_generator = self.injector.get(PlanGenerator)
 
     def login_member(
         self,
