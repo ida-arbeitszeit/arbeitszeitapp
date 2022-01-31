@@ -1,3 +1,5 @@
+from unittest import TestCase
+
 from arbeitszeit.entities import AccountTypes
 from arbeitszeit.use_cases import (
     RegisterCompany,
@@ -5,81 +7,73 @@ from arbeitszeit.use_cases import (
     RegisterCompanyResponse,
 )
 from tests.data_generators import CompanyGenerator
-from tests.mail_service import FakeMailService
+from tests.token import TokenDeliveryService
 
-from .dependency_injection import injection_test
+from .dependency_injection import get_dependency_injector
 from .repositories import AccountRepository, CompanyRepository
 
 DEFAULT = dict(
     email="test@cp.org",
     name="test name",
     password="super safe",
-    email_sender="we@cp.org",
-    template_name="email_template.html",
-    endpoint="auth.test",
 )
 
 
-@injection_test
-def test_that_registering_company_is_possible(
-    use_case: RegisterCompany,
-):
-    request = RegisterCompanyRequest(**DEFAULT)
-    response = use_case(request)
-    assert not response.is_rejected
+class RegisterCompanyTests(TestCase):
+    def setUp(self) -> None:
+        self.injector = get_dependency_injector()
+        self.use_case = self.injector.get(RegisterCompany)
+        self.account_repository = self.injector.get(AccountRepository)
+        self.company_repo = self.injector.get(CompanyRepository)
+        self.company_generator = self.injector.get(CompanyGenerator)
+        self.token_delivery = self.injector.get(TokenDeliveryService)
 
+    def test_that_a_token_is_sent_out_when_a_company_registers(self) -> None:
+        self.use_case(RegisterCompanyRequest(**DEFAULT))
+        self.assertTrue(self.token_delivery.delivered_tokens)
 
-@injection_test
-def test_that_registering_a_company_does_create_all_company_accounts(
-    register_company: RegisterCompany, account_repository: AccountRepository
-) -> None:
-    register_company(RegisterCompanyRequest(**DEFAULT))
-    assert len(account_repository.accounts) == 4
-    for account in account_repository.accounts:
-        assert account.account_type in (
-            AccountTypes.a,
-            AccountTypes.p,
-            AccountTypes.r,
-            AccountTypes.prd,
+    def test_that_token_was_delivered_to_registering_email(self) -> None:
+        expected_mail = "mailtest321@cp.org"
+        request_args = DEFAULT.copy()
+        request_args.pop("email")
+        self.use_case(RegisterCompanyRequest(email=expected_mail, **request_args))
+        self.assertEqual(
+            self.token_delivery.delivered_tokens[0].email,
+            expected_mail,
         )
 
+    def test_that_registering_company_is_possible(self) -> None:
+        request = RegisterCompanyRequest(**DEFAULT)
+        response = self.use_case(request)
+        self.assertFalse(response.is_rejected)
 
-@injection_test
-def test_that_correct_member_attributes_are_registered(
-    use_case: RegisterCompany,
-    company_repo: CompanyRepository,
-):
-    request = RegisterCompanyRequest(**DEFAULT)
-    use_case(request)
-    assert len(company_repo.companies) == 1
-    for company in company_repo.companies.values():
-        assert company.email == request.email
-        assert company.name == request.name
-        assert company.registered_on is not None
-        assert company.confirmed_on is None
+    def test_that_correct_error_is_raised_when_user_with_mail_exists(self) -> None:
+        self.company_generator.create_company(email="test@cp.org")
+        request = RegisterCompanyRequest(**DEFAULT)
+        response = self.use_case(request)
+        self.assertTrue(response.is_rejected)
+        self.assertEqual(
+            response.rejection_reason,
+            RegisterCompanyResponse.RejectionReason.company_already_exists,
+        )
 
+    def test_that_registering_a_company_does_create_all_company_accounts(self) -> None:
+        self.use_case(RegisterCompanyRequest(**DEFAULT))
+        assert len(self.account_repository.accounts) == 4
+        for account in self.account_repository.accounts:
+            assert account.account_type in (
+                AccountTypes.a,
+                AccountTypes.p,
+                AccountTypes.r,
+                AccountTypes.prd,
+            )
 
-@injection_test
-def test_that_mail_is_sent(
-    use_case: RegisterCompany,
-    mail_service: FakeMailService,
-):
-    request = RegisterCompanyRequest(**DEFAULT)
-    use_case(request)
-    assert len(mail_service.sent_mails) == 1
-    assert "Bitte bestätige dein Konto" in mail_service.sent_mails[0]
-    assert DEFAULT["endpoint"] in mail_service.sent_mails[0]
-
-
-@injection_test
-def test_that_correct_error_is_raised_when_company_with_mail_exists(
-    use_case: RegisterCompany, company_generator: CompanyGenerator
-):
-    company_generator.create_company(email="test@cp.org")
-    request = RegisterCompanyRequest(**DEFAULT)
-    response = use_case(request)
-    assert response.is_rejected
-    assert (
-        response.rejection_reason
-        == RegisterCompanyResponse.RejectionReason.company_already_exists
-    )
+    def test_that_correct_member_attributes_are_registered(self):
+        request = RegisterCompanyRequest(**DEFAULT)
+        self.use_case(request)
+        assert len(self.company_repo.companies) == 1
+        for company in self.company_repo.companies.values():
+            assert company.email == request.email
+            assert company.name == request.name
+            assert company.registered_on is not None
+            assert company.confirmed_on is None

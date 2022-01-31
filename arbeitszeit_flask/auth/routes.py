@@ -27,7 +27,11 @@ from arbeitszeit_flask.database import (
     MemberRepository,
     commit_changes,
 )
-from arbeitszeit_flask.dependency_injection import with_injection
+from arbeitszeit_flask.dependency_injection import (
+    CompanyModule,
+    MemberModule,
+    with_injection,
+)
 from arbeitszeit_flask.forms import LoginForm, RegisterForm
 from arbeitszeit_flask.next_url import (
     get_next_url_from_session,
@@ -69,7 +73,7 @@ def unconfirmed_member():
 
 
 @auth.route("/member/signup", methods=["GET", "POST"])
-@with_injection()
+@with_injection(modules=[MemberModule()])
 @commit_changes
 def signup_member(
     register_member: RegisterMember,
@@ -80,9 +84,6 @@ def signup_member(
     if request.method == "POST" and register_form.validate():
         use_case_request = controller.create_request(
             register_form,
-            email_sender=current_app.config["MAIL_DEFAULT_SENDER"],
-            template_name="activate.html",
-            endpoint="auth.confirm_email_member",
         )
         response = register_member(use_case_request)
         if response.is_rejected:
@@ -92,11 +93,6 @@ def signup_member(
             ):
                 register_form.email.errors.append("Emailadresse existiert bereits")
                 return render_template("signup_member.html", form=register_form)
-            elif (
-                response.rejection_reason
-                == RegisterMemberResponse.RejectionReason.sending_mail_failed
-            ):
-                flash("Bestätigungsmail konnte nicht gesendet werden!")
 
         email = register_form.data["email"]
         member = member_repository.get_member_orm_by_mail(email)
@@ -165,7 +161,7 @@ def login_member():
 
 
 @auth.route("/member/resend")
-@with_injection()
+@with_injection(modules=[MemberModule()])
 @login_required
 def resend_confirmation_member(use_case: ResendConfirmationMail):
     assert (
@@ -175,9 +171,6 @@ def resend_confirmation_member(use_case: ResendConfirmationMail):
     request = ResendConfirmationMailRequest(
         subject="Bitte bestätige dein Konto",
         recipient=current_user.email,
-        sender=current_app.config["MAIL_DEFAULT_SENDER"],
-        template_name="activate.html",
-        endpoint="auth.confirm_email_member",
     )
     response = use_case(request)
     if response.is_rejected:
@@ -231,7 +224,7 @@ def login_company():
 
 @auth.route("/company/signup", methods=["GET", "POST"])
 @commit_changes
-@with_injection()
+@with_injection(modules=[CompanyModule()])
 def signup_company(
     register_company: RegisterCompany,
     company_repository: CompanyRepository,
@@ -241,9 +234,6 @@ def signup_company(
     if request.method == "POST" and register_form.validate():
         use_case_request = controller.create_request(
             register_form,
-            email_sender=current_app.config["MAIL_DEFAULT_SENDER"],
-            template_name="activate.html",
-            endpoint="auth.confirm_email_company",
         )
         response = register_company(use_case_request)
         if response.is_rejected:
@@ -253,11 +243,6 @@ def signup_company(
             ):
                 register_form.email.errors.append("Emailadresse existiert bereits")
                 return render_template("signup_company.html", form=register_form)
-            elif (
-                response.rejection_reason
-                == RegisterCompanyResponse.RejectionReason.sending_mail_failed
-            ):
-                flash("Bestätigungsmail konnte nicht gesendet werden!")
 
         email = register_form.data["email"]
         company = company_repository.get_company_orm_by_mail(email)
@@ -294,7 +279,7 @@ def confirm_email_company(token):
 
 
 @auth.route("/company/resend")
-@with_injection()
+@with_injection(modules=[CompanyModule()])
 @login_required
 def resend_confirmation_company(use_case: ResendConfirmationMail):
     assert (
@@ -304,9 +289,6 @@ def resend_confirmation_company(use_case: ResendConfirmationMail):
     request = ResendConfirmationMailRequest(
         subject="Bitte bestätige dein Konto",
         recipient=current_user.email,
-        sender=current_app.config["MAIL_DEFAULT_SENDER"],
-        template_name="activate.html",
-        endpoint="auth.confirm_email_company",
     )
     response = use_case(request)
     if response.is_rejected:
