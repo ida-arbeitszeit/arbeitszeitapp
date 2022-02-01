@@ -35,12 +35,18 @@ class EndCooperationView:
         if response.is_rejected:
             return self.http_404_view.get_response()
         self.notifier.display_info("Kooperation wurde erfolgreich beendet.")
-        referer: Optional[str]
-        referer = request.environ.get("HTTP_REFERER", None)
+        referer = self._get_referer(request)
         if referer:
-            referer_path = urlparse(referer).path
-            if referer_path.startswith("/company/plan_summary"):
-                url = self.plan_summary_index.get_plan_summary_url(plan_id)
+            if self._refers_from_plan_summary(referer):
+                url = self.plan_summary_index.get_plan_summary_url(UUID(plan_id))
                 return redirect(url)
-        url = self.coop_summary_index.get_coop_summary_url(cooperation_id)
+        url = self.coop_summary_index.get_coop_summary_url(UUID(cooperation_id))
         return redirect(url)
+
+    def _get_referer(self, request) -> Optional[str]:
+        referer = request.environ.get("HTTP_REFERER", None)
+        return referer
+
+    def _refers_from_plan_summary(self, referer: str) -> bool:
+        referer_path = urlparse(referer).path
+        return True if referer_path.startswith("/company/plan_summary") else False
