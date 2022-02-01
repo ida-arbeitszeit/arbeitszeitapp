@@ -10,27 +10,27 @@ from arbeitszeit.repositories import PlanCooperationRepository, PlanRepository
 
 
 @dataclass
-class PlanSummaryCompanySuccess:
+class PlanSummarySuccess:
     plan_summary: BusinessPlanSummary
 
 
-PlanSummaryCompanyResponse = Optional[PlanSummaryCompanySuccess]
+PlanSummaryResponse = Optional[PlanSummarySuccess]
 
 
 @inject
 @dataclass
-class GetPlanSummaryCompany:
+class GetPlanSummaryMember:
     plan_repository: PlanRepository
     plan_cooperation_repository: PlanCooperationRepository
 
-    def __call__(self, plan_id: UUID) -> PlanSummaryCompanyResponse:
+    def __call__(self, plan_id: UUID) -> PlanSummaryResponse:
         plan = self.plan_repository.get_plan_by_id(plan_id)
         if plan is None:
             return None
         price_per_unit = calculate_price(
             self.plan_cooperation_repository.get_cooperating_plans(plan.id)
         )
-        return PlanSummaryCompanySuccess(
+        return PlanSummarySuccess(
             plan_summary=BusinessPlanSummary(
                 plan_id=plan.id,
                 is_active=plan.is_active,

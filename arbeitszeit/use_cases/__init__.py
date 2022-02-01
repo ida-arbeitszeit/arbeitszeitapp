@@ -59,11 +59,15 @@ from .get_member_profile_info import (
     GetMemberProfileInfoResponse,
     Workplace,
 )
-from .get_plan_summary import GetPlanSummary, PlanSummaryResponse, PlanSummarySuccess
 from .get_plan_summary_company import (
     GetPlanSummaryCompany,
     PlanSummaryCompanyResponse,
     PlanSummaryCompanySuccess,
+)
+from .get_plan_summary_member import (
+    GetPlanSummaryMember,
+    PlanSummaryResponse,
+    PlanSummarySuccess,
 )
 from .get_statistics import GetStatistics, StatisticsResponse
 from .get_transaction_infos import GetTransactionInfos, TransactionInfo
@@ -197,7 +201,7 @@ __all__ = [
     "GetMemberAccountResponse",
     "GetMemberProfileInfo",
     "GetMemberProfileInfoResponse",
-    "GetPlanSummary",
+    "GetPlanSummaryMember",
     "GetPlanSummaryCompany",
     "GetStatistics",
     "GetTransactionInfos",

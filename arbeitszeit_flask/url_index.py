@@ -13,6 +13,15 @@ class MemberUrlIndex:
     def get_coop_summary_url(self, coop_id: UUID) -> str:
         return url_for("main_member.coop_summary", coop_id=coop_id)
 
+    def get_toggle_availability_url(self, plan_id: UUID) -> str:
+        ...
+
+    def get_renew_plan_url(self, plan_id: UUID) -> str:
+        ...
+
+    def get_hide_plan_url(self, plan_id: UUID) -> str:
+        ...
+
     def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
         ...
 

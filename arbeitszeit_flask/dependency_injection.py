@@ -62,14 +62,15 @@ from arbeitszeit_web.check_for_unread_message import (
 )
 from arbeitszeit_web.email import EmailConfiguration
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
-from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.get_plan_summary_company import (
     GetPlanSummaryCompanySuccessPresenter,
 )
+from arbeitszeit_web.get_plan_summary_member import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
+from arbeitszeit_web.plan_summary_service import PlanSummaryServiceImpl
 from arbeitszeit_web.presenters.send_confirmation_email_presenter import (
     SendConfirmationEmailPresenter,
 )
@@ -235,6 +236,12 @@ class FlaskModule(Module):
         )
 
     @provider
+    def provide_plan_summary_service(
+        self, coop_url_index: CoopSummaryUrlIndex, trans: Translator
+    ) -> PlanSummaryServiceImpl:
+        return PlanSummaryServiceImpl(coop_url_index, trans)
+
+    @provider
     def provide_query_companies_presenter(
         self, notifier: Notifier
     ) -> QueryCompaniesPresenter:
@@ -294,20 +301,22 @@ class FlaskModule(Module):
 
     @provider
     def provide_get_plan_summary_success_presenter(
-        self, coop_index: CoopSummaryUrlIndex, trans: Translator
+        self,
+        trans: Translator,
+        plan_summary_service: PlanSummaryServiceImpl,
     ) -> GetPlanSummarySuccessPresenter:
-        return GetPlanSummarySuccessPresenter(coop_index, trans)
+        return GetPlanSummarySuccessPresenter(trans, plan_summary_service)
 
     @provider
     def provide_get_plan_summary_company_success_presenter(
         self,
-        coop_index: CoopSummaryUrlIndex,
         toggle_availability_index: TogglePlanAvailabilityUrlIndex,
         end_coop_url_index: EndCoopUrlIndex,
         trans: Translator,
+        plan_summary_service: PlanSummaryServiceImpl,
     ) -> GetPlanSummaryCompanySuccessPresenter:
         return GetPlanSummaryCompanySuccessPresenter(
-            coop_index, toggle_availability_index, end_coop_url_index, trans
+            toggle_availability_index, end_coop_url_index, trans, plan_summary_service
         )
 
     @provider
