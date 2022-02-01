@@ -1,6 +1,5 @@
 from decimal import Decimal
 from typing import Optional, cast
-from urllib.parse import urlparse
 from uuid import UUID
 
 from flask import Response, flash, redirect, request, url_for
@@ -17,8 +16,6 @@ from arbeitszeit.use_cases import (
     DenyCooperation,
     DenyCooperationRequest,
     DenyCooperationResponse,
-    EndCooperation,
-    EndCooperationRequest,
     GetDraftSummary,
     GetPlanSummaryMember,
     HidePlan,
@@ -53,6 +50,7 @@ from arbeitszeit_flask.forms import (
 from arbeitszeit_flask.models import Company
 from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_flask.views import (
+    EndCooperationView,
     Http404View,
     ListMessagesView,
     QueryCompaniesView,
@@ -671,24 +669,6 @@ def read_message(
 @CompanyRoute("/company/end_cooperation")
 @commit_changes
 def end_cooperation(
-    use_case: EndCooperation,
-    http_404_view: Http404View,
+    view: EndCooperationView,
 ) -> Response:
-    plan_id = request.args.get("plan_id", None)
-    cooperation_id = request.args.get("cooperation_id", None)
-    assert plan_id
-    assert cooperation_id
-    use_case_request = EndCooperationRequest(
-        UUID(current_user.id), UUID(plan_id), UUID(cooperation_id)
-    )
-    response = use_case(use_case_request)
-    if response.is_rejected:
-        return http_404_view.get_response()
-    flash("Kooperation wurde erfolgreich beendet.", "is-success")
-    referer: Optional[str]
-    referer = request.environ.get("HTTP_REFERER", None)
-    if referer:
-        referer_path = urlparse(referer).path
-        if referer_path.startswith("/company/plan_summary"):
-            return redirect(url_for("main_company.plan_summary", plan_id=plan_id))
-    return redirect(url_for("main_company.coop_summary", coop_id=cooperation_id))
+    return view.respond_to_get(request)

@@ -18,7 +18,7 @@ from arbeitszeit import entities
 from arbeitszeit import repositories as interfaces
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.token import TokenDeliverer, TokenService
-from arbeitszeit.use_cases import CheckForUnreadMessages, ReadMessage
+from arbeitszeit.use_cases import CheckForUnreadMessages, EndCooperation, ReadMessage
 from arbeitszeit_flask.database import get_social_accounting
 from arbeitszeit_flask.database.repositories import (
     AccountOwnerRepository,
@@ -55,7 +55,7 @@ from arbeitszeit_flask.template import (
 )
 from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.url_index import CompanyUrlIndex, MemberUrlIndex
-from arbeitszeit_flask.views import Http404View, ReadMessageView
+from arbeitszeit_flask.views import EndCooperationView, Http404View, ReadMessageView
 from arbeitszeit_web.check_for_unread_message import (
     CheckForUnreadMessagesController,
     CheckForUnreadMessagesPresenter,
@@ -187,6 +187,25 @@ class CompanyModule(Module):
     @provider
     def provide_template_index(self) -> TemplateIndex:
         return CompanyTemplateIndex()
+
+    @provider
+    def provide_end_cooperation_view(
+        self,
+        notifier: Notifier,
+        session: FlaskSession,
+        end_cooperation: EndCooperation,
+        http_404_view: Http404View,
+        plan_summary_index: PlanSummaryUrlIndex,
+        coop_summary_index: CoopSummaryUrlIndex,
+    ) -> EndCooperationView:
+        return EndCooperationView(
+            notifier,
+            session,
+            end_cooperation,
+            http_404_view,
+            plan_summary_index,
+            coop_summary_index,
+        )
 
 
 class FlaskModule(Module):
