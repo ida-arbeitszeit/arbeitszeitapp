@@ -17,8 +17,7 @@ from injector import (
 from arbeitszeit import entities
 from arbeitszeit import repositories as interfaces
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.mail_service import MailService
-from arbeitszeit.token import TokenService
+from arbeitszeit.token import TokenDeliverer, TokenService
 from arbeitszeit.use_cases import CheckForUnreadMessages, ReadMessage
 from arbeitszeit_flask.database import get_social_accounting
 from arbeitszeit_flask.database.repositories import (
@@ -39,7 +38,12 @@ from arbeitszeit_flask.database.repositories import (
 from arbeitszeit_flask.datetime import RealtimeDatetimeService
 from arbeitszeit_flask.extensions import db
 from arbeitszeit_flask.flask_session import FlaskSession
-from arbeitszeit_flask.mail_service import get_mail_service
+from arbeitszeit_flask.mail_service import (
+    FlaskEmailConfiguration,
+    FlaskTokenDeliverer,
+    MailService,
+    get_mail_service,
+)
 from arbeitszeit_flask.notifications import FlaskFlashNotifier
 from arbeitszeit_flask.template import (
     CompanyTemplateIndex,
@@ -56,6 +60,7 @@ from arbeitszeit_web.check_for_unread_message import (
     CheckForUnreadMessagesController,
     CheckForUnreadMessagesPresenter,
 )
+from arbeitszeit_web.email import EmailConfiguration
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.get_plan_summary_company import (
@@ -65,6 +70,9 @@ from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
+from arbeitszeit_web.presenters.send_confirmation_email_presenter import (
+    SendConfirmationEmailPresenter,
+)
 from arbeitszeit_web.query_companies import QueryCompaniesPresenter
 from arbeitszeit_web.query_plans import QueryPlansPresenter
 from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
@@ -73,6 +81,7 @@ from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import (
+    ConfirmationUrlIndex,
     CoopSummaryUrlIndex,
     EndCoopUrlIndex,
     HidePlanUrlIndex,
@@ -90,6 +99,12 @@ from .translator import FlaskTranslator
 
 
 class MemberModule(Module):
+    @provider
+    def provide_confirmation_url_index(
+        self, member_index: MemberUrlIndex
+    ) -> ConfirmationUrlIndex:
+        return member_index
+
     @provider
     def provide_plan_summary_url_index(
         self, member_index: MemberUrlIndex
@@ -120,6 +135,12 @@ class MemberModule(Module):
 
 
 class CompanyModule(Module):
+    @provider
+    def provide_confirmation_url_index(
+        self, company_index: CompanyUrlIndex
+    ) -> ConfirmationUrlIndex:
+        return company_index
+
     @provider
     def provide_plan_summary_url_index(
         self, company_index: CompanyUrlIndex
@@ -168,6 +189,24 @@ class CompanyModule(Module):
 
 
 class FlaskModule(Module):
+    @provider
+    def provide_email_configuration(self) -> EmailConfiguration:
+        return FlaskEmailConfiguration()
+
+    @provider
+    def provide_send_confirmation_email_presenter(
+        self, url_index: ConfirmationUrlIndex, email_configuration: EmailConfiguration
+    ) -> SendConfirmationEmailPresenter:
+        return SendConfirmationEmailPresenter(
+            url_index=url_index, email_configuration=email_configuration
+        )
+
+    @provider
+    def provide_token_deliverer(
+        self, mail_service: MailService, presenter: SendConfirmationEmailPresenter
+    ) -> TokenDeliverer:
+        return FlaskTokenDeliverer(mail_service=mail_service, presenter=presenter)
+
     @provider
     def provide_read_message_view(
         self,

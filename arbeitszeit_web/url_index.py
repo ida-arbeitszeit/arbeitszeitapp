@@ -35,3 +35,8 @@ class HidePlanUrlIndex(Protocol):
 class EndCoopUrlIndex(Protocol):
     def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
         ...
+
+
+class ConfirmationUrlIndex(Protocol):
+    def get_confirmation_url(self, token: str) -> str:
+        ...
