@@ -144,10 +144,6 @@ from .show_company_work_invite_details import (
     ShowCompanyWorkInviteDetailsResponse,
     ShowCompanyWorkInviteDetailsUseCase,
 )
-from .show_invitation_details import (
-    ShowInvitationDetailsRequest,
-    ShowInvitationDetailsUseCase,
-)
 from .show_my_plans import ShowMyPlansRequest, ShowMyPlansResponse, ShowMyPlansUseCase
 from .show_work_invites import ShowWorkInvites, ShowWorkInvitesRequest
 from .toggle_product_availablity import (
@@ -274,8 +270,6 @@ __all__ = [
     "ShowCompanyWorkInviteDetailsRequest",
     "ShowCompanyWorkInviteDetailsResponse",
     "ShowCompanyWorkInviteDetailsUseCase",
-    "ShowInvitationDetailsRequest",
-    "ShowInvitationDetailsUseCase",
     "ShowMyPlansRequest",
     "ShowMyPlansResponse",
     "ShowMyPlansUseCase",
