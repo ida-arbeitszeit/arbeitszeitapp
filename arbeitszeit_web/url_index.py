@@ -30,3 +30,8 @@ class CoopSummaryUrlIndex(Protocol):
 class ListMessagesUrlIndex(Protocol):
     def get_list_messages_url(self) -> str:
         ...
+
+
+class ConfirmationUrlIndex(Protocol):
+    def get_confirmation_url(self, token: str) -> str:
+        ...

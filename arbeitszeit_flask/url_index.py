@@ -22,6 +22,11 @@ class MemberUrlIndex:
     def get_list_messages_url(self) -> str:
         return url_for("main_member.list_messages")
 
+    def get_confirmation_url(self, token: str) -> str:
+        return url_for(
+            endpoint="auth.confirm_email_member", token=token, _external=True
+        )
+
 
 class CompanyUrlIndex:
     def get_plan_summary_url(self, plan_id: UUID) -> str:
@@ -45,3 +50,8 @@ class CompanyUrlIndex:
 
     def get_list_messages_url(self) -> str:
         return url_for("main_company.list_messages")
+
+    def get_confirmation_url(self, token: str) -> str:
+        return url_for(
+            endpoint="auth.confirm_email_company", token=token, _external=True
+        )
