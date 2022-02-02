@@ -346,9 +346,11 @@ class FlaskModule(Module):
 
     @provider
     def provide_user_action_resolver(
-        self, invite_index: InviteUrlIndex
+        self,
+        invite_index: InviteUrlIndex,
+        coop_index: CoopSummaryUrlIndex,
     ) -> UserActionResolver:
-        return UserActionResolverImpl(invite_index)
+        return UserActionResolverImpl(invite_index, coop_index)
 
     @provider
     def provide_get_plan_summary_success_presenter(
