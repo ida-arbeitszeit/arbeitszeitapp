@@ -37,6 +37,7 @@ from arbeitszeit_flask.database.repositories import (
 )
 from arbeitszeit_flask.datetime import RealtimeDatetimeService
 from arbeitszeit_flask.extensions import db
+from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.mail_service import (
     FlaskEmailConfiguration,
@@ -60,6 +61,9 @@ from arbeitszeit_web.check_for_unread_message import (
     CheckForUnreadMessagesController,
     CheckForUnreadMessagesPresenter,
 )
+from arbeitszeit_web.controllers.end_cooperation_controller import (
+    EndCooperationController,
+)
 from arbeitszeit_web.email import EmailConfiguration
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_plan_summary_company import (
@@ -71,6 +75,7 @@ from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPr
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from arbeitszeit_web.plan_summary_service import PlanSummaryServiceImpl
+from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
 from arbeitszeit_web.presenters.send_confirmation_email_presenter import (
     SendConfirmationEmailPresenter,
 )
@@ -191,20 +196,34 @@ class CompanyModule(Module):
     @provider
     def provide_end_cooperation_view(
         self,
-        notifier: Notifier,
-        session: FlaskSession,
         end_cooperation: EndCooperation,
+        controller: EndCooperationController,
+        presenter: EndCooperationPresenter,
         http_404_view: Http404View,
-        plan_summary_index: PlanSummaryUrlIndex,
-        coop_summary_index: CoopSummaryUrlIndex,
     ) -> EndCooperationView:
         return EndCooperationView(
-            notifier,
-            session,
             end_cooperation,
+            controller,
+            presenter,
             http_404_view,
-            plan_summary_index,
-            coop_summary_index,
+        )
+
+    @provider
+    def provide_end_cooperation_controller(
+        self, session: FlaskSession, request: FlaskRequest
+    ) -> EndCooperationController:
+        return EndCooperationController(session, request)
+
+    @provider
+    def provide_end_cooperation_presenter(
+        self,
+        request: FlaskRequest,
+        notifier: Notifier,
+        plan_summary_index: PlanSummaryUrlIndex,
+        coop_summary_index: CoopSummaryUrlIndex,
+    ) -> EndCooperationPresenter:
+        return EndCooperationPresenter(
+            request, notifier, plan_summary_index, coop_summary_index
         )
 
 

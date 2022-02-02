@@ -671,4 +671,4 @@ def read_message(
 def end_cooperation(
     view: EndCooperationView,
 ) -> Response:
-    return view.respond_to_get(request)
+    return view.respond_to_get()
