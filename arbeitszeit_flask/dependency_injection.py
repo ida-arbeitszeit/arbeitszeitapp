@@ -227,9 +227,9 @@ class FlaskModule(Module):
 
     @provider
     def provide_show_company_work_invite_details_presenter(
-        self, url_index: AnswerCompanyWorkInviteUrlIndex
+        self, url_index: AnswerCompanyWorkInviteUrlIndex, translator: Translator
     ) -> ShowCompanyWorkInviteDetailsPresenter:
-        return ShowCompanyWorkInviteDetailsPresenter(url_index)
+        return ShowCompanyWorkInviteDetailsPresenter(url_index, translator)
 
     @provider
     def provide_show_company_work_invite_details_controller(

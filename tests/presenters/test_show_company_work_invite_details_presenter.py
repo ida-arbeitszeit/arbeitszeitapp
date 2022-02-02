@@ -6,13 +6,15 @@ from arbeitszeit.use_cases import ShowCompanyWorkInviteDetailsResponse
 from arbeitszeit_web.presenters.show_company_work_invite_details_presenter import (
     ShowCompanyWorkInviteDetailsPresenter,
 )
+from tests.translator import FakeTranslator
 
 
 class PresenterTests(TestCase):
     def setUp(self) -> None:
         self.invite_url_index = UrlIndexImpl()
         self.presenter = ShowCompanyWorkInviteDetailsPresenter(
-            url_index=self.invite_url_index
+            url_index=self.invite_url_index,
+            translator=FakeTranslator(),
         )
 
     def test_use_case_response_without_details_doesnt_render_to_view_model(
@@ -36,14 +38,26 @@ class PresenterTests(TestCase):
         assert view_model
         self.assertEqual(view_model.answer_invite_url, expected_url)
 
+    def test_that_company_name_shows_up_view_model(self) -> None:
+        view_model = self.presenter.render_response(
+            self.make_response(company_name="test company")
+        )
+        assert view_model
+        self.assertEqual(
+            view_model.explanation_text,
+            'The company "test company" invites you to join them. Do you want to accept this invitation?',
+        )
+
     def make_response(
-        self, invite_id: Optional[UUID] = None
+        self,
+        invite_id: Optional[UUID] = None,
+        company_name: str = "test company name",
     ) -> ShowCompanyWorkInviteDetailsResponse:
         if invite_id is None:
             invite_id = uuid4()
         return ShowCompanyWorkInviteDetailsResponse(
             details=ShowCompanyWorkInviteDetailsResponse.Details(
-                company_name="test company name",
+                company_name=company_name,
                 invite_id=invite_id,
             )
         )

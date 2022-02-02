@@ -5,15 +5,19 @@
 {% from 'macros/show_notifications.html' import show_notifications %}
 {{ show_notifications() }}
 
+<p>
+  {{ view_model.explanation_text }}
+</p>
+
 <form action="{{ view_model.answer_invite_url }}" method="post">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-  <button name="is_accepted" value="true" type="submit">
-    Accept
+  <button name="is_accepted" value="true" type="submit" class="button primary">
+    {{ gettext('Accept') }}
   </button>
 </from>
 <form action="{{ view_model.answer_invite_url }}" method="post">
-  <button name="is_accepted" value="false" type="submit">
-    Reject
+  <button name="is_accepted" value="false" type="submit" class="button is-danger">
+    {{ gettext('Reject') }}
   </button>
 </from>
 
