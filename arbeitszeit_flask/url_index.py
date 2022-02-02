@@ -13,6 +13,11 @@ class MemberUrlIndex:
     def get_coop_summary_url(self, coop_id: UUID) -> str:
         return url_for("main_member.coop_summary", coop_id=coop_id)
 
+    def get_confirmation_url(self, token: str) -> str:
+        return url_for(
+            endpoint="auth.confirm_email_member", token=token, _external=True
+        )
+
 
 class CompanyUrlIndex:
     def get_plan_summary_url(self, plan_id: UUID) -> str:
@@ -23,3 +28,8 @@ class CompanyUrlIndex:
 
     def get_coop_summary_url(self, coop_id: UUID) -> str:
         return url_for("main_company.coop_summary", coop_id=coop_id)
+
+    def get_confirmation_url(self, token: str) -> str:
+        return url_for(
+            endpoint="auth.confirm_email_company", token=token, _external=True
+        )

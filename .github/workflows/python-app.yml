@@ -10,8 +10,7 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
-
+  build-nix:
     runs-on: ubuntu-latest
     env:
       HYPOTHESIS_PROFILE: ci
@@ -22,3 +21,30 @@ jobs:
     - run: nix flake check --print-build-logs
     - run: nix build --print-build-logs
     - run: nix develop --command './run-checks'
+
+  build-pip:
+    runs-on: ubuntu-latest
+    env:
+      HYPOTHESIS_PROFILE: ci
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+        cache: 'pip'
+    
+    - name: Install dependencies        
+      run: |
+        python -m venv ./venv && . ./venv/bin/activate
+        python -m pip install --upgrade pip
+        pip install black flake8 mypy pytest
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    
+    - name: Test with ./run-checks
+      run: |
+        . ./venv/bin/activate
+        ./run-checks
+        deactivate
+
