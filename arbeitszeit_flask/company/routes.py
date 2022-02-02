@@ -93,6 +93,37 @@ from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from .blueprint import CompanyRoute
 
 
+@CompanyRoute("/company/work", methods=["GET", "POST"])
+@commit_changes
+def arbeit(
+    list_workers: ListWorkers,
+    company_repository: CompanyRepository,
+    member_repository: MemberRepository,
+    company_worker_repository: CompanyWorkerRepository,
+    template_renderer: UserTemplateRenderer,
+):
+    """shows workers and add workers to company."""
+    company = company_repository.get_by_id(UUID(current_user.id))
+    assert company is not None
+    if request.method == "POST":  # add worker to company
+        member = member_repository.get_by_id(UUID(str(request.form["member"]).strip()))
+        assert member is not None
+        try:
+            use_cases.add_worker_to_company(
+                company_worker_repository,
+                company,
+                member,
+            )
+        except errors.WorkerAlreadyAtCompany:
+            flash("Mitglied ist bereits in diesem Betrieb beschäftigt.")
+        return redirect(url_for("main_company.arbeit"))
+
+    workers_list = list_workers(company.id)
+    return template_renderer.render_template(
+        "company/work.html", context=dict(workers_list=workers_list.workers)
+    )
+
+
 @CompanyRoute("/company/profile")
 def profile(
     company_repository: CompanyRepository,
