@@ -13,7 +13,8 @@ from typing import List
 
 def main():
     format_python_files(read_autoformat_target_paths())
-    format_nix_files()
+    if is_nixfmt_installed():
+        format_nix_files()
 
 
 def read_autoformat_target_paths() -> List[str]:
@@ -48,6 +49,14 @@ def get_nix_files():
         for file_name in files:
             if file_name.endswith(".nix"):
                 yield path.join(root, file_name)
+
+
+def is_nixfmt_installed():
+    try:
+        subprocess.run(["nixfmt", "--help"], capture_output=True)
+    except FileNotFoundError:
+        return False
+    return True
 
 
 if __name__ == "__main__":
