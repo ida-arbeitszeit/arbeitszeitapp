@@ -13,6 +13,7 @@ from ..flask import FlaskTestCase
 class FlaskTemplateRendererTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
+        self.app.app_context().push()
         self.renderer = self.injector.get(FlaskTemplateRenderer)
 
     def get_injection_modules(self) -> List[Module]:

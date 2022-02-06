@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Optional, cast
+from typing import Optional
 from uuid import UUID
 
 from flask import Response, flash, redirect, request, url_for
@@ -35,7 +35,6 @@ from arbeitszeit.use_cases import (
 )
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_flask.database import (
-    AccountRepository,
     CompanyRepository,
     CompanyWorkerRepository,
     MemberRepository,
@@ -47,7 +46,6 @@ from arbeitszeit_flask.forms import (
     PlanSearchForm,
     RequestCooperationForm,
 )
-from arbeitszeit_flask.models import Company
 from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_flask.views import (
     EndCooperationView,
@@ -58,7 +56,9 @@ from arbeitszeit_flask.views import (
     ReadMessageView,
     RequestCooperationView,
 )
+from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
+from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_plan_summary_company import (
     GetPlanSummaryCompanySuccessPresenter,
@@ -85,6 +85,8 @@ from arbeitszeit_web.request_cooperation import (
 )
 from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
+from arbeitszeit_web.show_p_account_details import ShowPAccountDetailsPresenter
+from arbeitszeit_web.show_r_account_details import ShowRAccountDetailsPresenter
 
 from .blueprint import CompanyRoute
 
@@ -368,28 +370,54 @@ def hide_plan(plan_id: UUID, hide_plan: HidePlan, presenter: HidePlanPresenter):
 
 
 @CompanyRoute("/company/my_accounts")
-def my_accounts(
-    company_repository: CompanyRepository,
-    get_transaction_infos: use_cases.GetTransactionInfos,
-    account_repository: AccountRepository,
+def my_accounts(view: ShowMyAccountsView):
+    return view.respond_to_get()
+
+
+@CompanyRoute("/company/my_accounts/all_transactions")
+def list_all_transactions(
+    get_company_transactions: use_cases.GetCompanyTransactions,
     template_renderer: UserTemplateRenderer,
+    presenter: GetCompanyTransactionsPresenter,
 ):
-    # We can assume current_user to be a LocalProxy object that
-    # delegates to a Company since we did the `user_is_company` check
-    # earlier.
-    company = company_repository.object_from_orm(cast(Company, current_user))
-    all_trans_infos = get_transaction_infos(company)
-    my_balances = [
-        account_repository.get_account_balance(account)
-        for account in company.accounts()
-    ]
+    response = get_company_transactions(UUID(current_user.id))
+    view_model = presenter.present(response)
 
     return template_renderer.render_template(
-        "company/my_accounts.html",
+        "company/list_all_transactions.html",
         context=dict(
-            my_balances=my_balances,
-            all_transactions=all_trans_infos,
+            all_transactions=view_model.transactions,
         ),
+    )
+
+
+@CompanyRoute("/company/my_accounts/account_p")
+def account_p(
+    show_p_account_details: use_cases.ShowPAccountDetails,
+    template_renderer: UserTemplateRenderer,
+    presenter: ShowPAccountDetailsPresenter,
+):
+    response = show_p_account_details(UUID(current_user.id))
+    view_model = presenter.present(response)
+
+    return template_renderer.render_template(
+        "company/account_p.html",
+        context=dict(view_model=view_model),
+    )
+
+
+@CompanyRoute("/company/my_accounts/account_r")
+def account_r(
+    show_r_account_details: use_cases.ShowRAccountDetails,
+    template_renderer: UserTemplateRenderer,
+    presenter: ShowRAccountDetailsPresenter,
+):
+    response = show_r_account_details(UUID(current_user.id))
+    view_model = presenter.present(response)
+
+    return template_renderer.render_template(
+        "company/account_r.html",
+        context=dict(view_model=view_model),
     )
 
 
