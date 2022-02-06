@@ -29,15 +29,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% if my_balances is defined and my_balances|length %}
                     <tr>
                         <td class="py-2  has-text-left"><a href="{{ url_for('main_company.account_p') }}">Account p</a>
                         </td>
                         <td><i class="fas fa-industry"></i></td>
                         <td class="is-italic has-text-left">Account for fixed means of production</td>
                         <td
-                            class="py-2  has-text-right has-text-weight-bold {{ 'has-text-primary' if my_balances[0] >= 0 else 'has-text-danger' }}">
-                            {{ my_balances[0] | round(2) }}</td>
+                            class="py-2  has-text-right has-text-weight-bold {{ 'has-text-primary' if view_model.is_fixed_positive else 'has-text-danger' }}">
+                            {{ view_model.balance_fixed }}</td>
 
                     </tr>
                     <tr>
@@ -46,8 +45,8 @@
                         <td><i class="fas fa-oil-can"></i></td>
                         <td class="is-italic has-text-left">Account for liquid means of production</td>
                         <td
-                            class="py-2 has-text-right has-text-weight-bold {{ 'has-text-primary' if my_balances[1] >= 0 else 'has-text-danger' }}">
-                            {{ my_balances[1] | round(2) }}</td>
+                            class="py-2 has-text-right has-text-weight-bold {{ 'has-text-primary' if view_model.is_liquid_positive else 'has-text-danger' }}">
+                            {{ view_model.balance_liquid }}</td>
 
                     </tr>
                     <tr>
@@ -55,8 +54,8 @@
                         <td><i class="fas fa-users"></i></td>
                         <td class="is-italic has-text-left">Account for work certificates (wages)</td>
                         <td
-                            class="py-2 has-text-right has-text-weight-bold {{ 'has-text-primary' if my_balances[2] >= 0 else 'has-text-danger' }}">
-                            {{ my_balances[2] | round(2) }}</td>
+                            class="py-2 has-text-right has-text-weight-bold {{ 'has-text-primary' if view_model.is_work_positive else 'has-text-danger' }}">
+                            {{ view_model.balance_work }}</td>
 
                     </tr>
                     <tr>
@@ -64,11 +63,10 @@
                         <td><i class="fas fa-warehouse"></i></td>
                         <td class="is-italic has-text-left">Account for product transfers (sales)</td>
                         <td
-                            class="py-2 has-text-right has-text-weight-bold {{ 'has-text-primary' if my_balances[3] >= 0 else 'has-text-danger' }}">
-                            {{ my_balances[3] | round(2) }}</td>
+                            class="py-2 has-text-right has-text-weight-bold {{ 'has-text-primary' if view_model.is_product_positive else 'has-text-danger' }}">
+                            {{ view_model.balance_product }}</td>
 
                     </tr>
-                    {% endif %}
                 </tbody>
 
             </table>

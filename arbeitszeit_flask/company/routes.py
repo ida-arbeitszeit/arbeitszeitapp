@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Optional, cast
+from typing import Optional
 from uuid import UUID
 
 from flask import Response, flash, redirect, request, url_for
@@ -35,7 +35,6 @@ from arbeitszeit.use_cases import (
 )
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_flask.database import (
-    AccountRepository,
     CompanyRepository,
     CompanyWorkerRepository,
     MemberRepository,
@@ -47,7 +46,6 @@ from arbeitszeit_flask.forms import (
     PlanSearchForm,
     RequestCooperationForm,
 )
-from arbeitszeit_flask.models import Company
 from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_flask.views import (
     Http404View,
@@ -57,6 +55,7 @@ from arbeitszeit_flask.views import (
     ReadMessageView,
     RequestCooperationView,
 )
+from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
@@ -363,26 +362,8 @@ def hide_plan(plan_id: UUID, hide_plan: HidePlan, presenter: HidePlanPresenter):
 
 
 @CompanyRoute("/company/my_accounts")
-def my_accounts(
-    company_repository: CompanyRepository,
-    account_repository: AccountRepository,
-    template_renderer: UserTemplateRenderer,
-):
-    # We can assume current_user to be a LocalProxy object that
-    # delegates to a Company since we did the `user_is_company` check
-    # earlier.
-    company = company_repository.object_from_orm(cast(Company, current_user))
-    my_balances = [
-        account_repository.get_account_balance(account)
-        for account in company.accounts()
-    ]
-
-    return template_renderer.render_template(
-        "company/my_accounts.html",
-        context=dict(
-            my_balances=my_balances,
-        ),
-    )
+def my_accounts(view: ShowMyAccountsView):
+    return view.respond_to_get()
 
 
 @CompanyRoute("/company/my_accounts/all_transactions")
