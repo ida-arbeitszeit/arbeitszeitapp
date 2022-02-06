@@ -1,17 +1,12 @@
 {% extends "base_company.html" %}
 
+{% from 'macros/show_notifications.html' import show_notifications %}
+
 {% block content2 %}
 <div>
+  {{ show_notifications }}
+
   <h1 class="title">Arbeiter*in einladen</h1>
-
-  {% with messages = get_flashed_messages() %}
-  {% if messages %}
-  {% for message in messages %}
-  <div class="notification {{ category }}">{{ message }}</div>
-  {% endfor %}
-  {% endif %}
-  {% endwith %}
-
   <form method="post">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     {{ form.member_id }}

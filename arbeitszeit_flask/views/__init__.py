@@ -9,7 +9,6 @@ from .read_message import ReadMessageView
 from .request_cooperation_view import RequestCooperationView
 
 __all__ = [
-    "AnswerCompanyWorkInviteView",
     "CompanyWorkInviteView",
     "Http404View",
     "InviteWorkerToCompanyView",

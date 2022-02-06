@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import cast
 from uuid import UUID
 
 from flask import Response, redirect
@@ -67,4 +68,4 @@ class CompanyWorkInviteView:
         assert isinstance(use_case_request, AnswerCompanyWorkInviteRequest)
         use_case_response = self.answer_use_case(use_case_request)
         view_model = self.answer_presenter.present(use_case_response)
-        return redirect(view_model.redirect_url)
+        return cast(Response, redirect(view_model.redirect_url))

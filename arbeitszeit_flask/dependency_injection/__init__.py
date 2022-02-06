@@ -18,12 +18,7 @@ from arbeitszeit import entities
 from arbeitszeit import repositories as interfaces
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.token import TokenDeliverer, TokenService
-from arbeitszeit.use_cases import (
-    AnswerCompanyWorkInvite,
-    CheckForUnreadMessages,
-    ReadMessage,
-    ShowCompanyWorkInviteDetailsUseCase,
-)
+from arbeitszeit.use_cases import CheckForUnreadMessages
 from arbeitszeit_flask.database import get_social_accounting
 from arbeitszeit_flask.database.repositories import (
     AccountOwnerRepository,
@@ -59,8 +54,8 @@ from arbeitszeit_flask.template import (
     UserTemplateRenderer,
 )
 from arbeitszeit_flask.token import FlaskTokenService
+from arbeitszeit_flask.translator import FlaskTranslator
 from arbeitszeit_flask.url_index import CompanyUrlIndex, MemberUrlIndex
-from arbeitszeit_flask.views import CompanyWorkInviteView, Http404View, ReadMessageView
 from arbeitszeit_web.answer_company_work_invite import (
     AnswerCompanyWorkInviteController,
     AnswerCompanyWorkInvitePresenter,
@@ -104,7 +99,11 @@ from arbeitszeit_web.url_index import (
 )
 from arbeitszeit_web.user_action import UserActionResolver, UserActionResolverImpl
 
-from .translator import FlaskTranslator
+from .views import ViewsModule
+
+__all__ = [
+    "ViewsModule",
+]
 
 
 class MemberModule(Module):
@@ -201,31 +200,6 @@ class CompanyModule(Module):
 
 class FlaskModule(Module):
     @provider
-    def provide_show_company_work_invite_details_view(
-        self,
-        details_use_case: ShowCompanyWorkInviteDetailsUseCase,
-        details_presenter: ShowCompanyWorkInviteDetailsPresenter,
-        details_controller: ShowCompanyWorkInviteDetailsController,
-        answer_use_case: AnswerCompanyWorkInvite,
-        answer_presenter: AnswerCompanyWorkInvitePresenter,
-        answer_controller: AnswerCompanyWorkInviteController,
-        http_404_view: Http404View,
-        template_index: TemplateIndex,
-        template_renderer: TemplateRenderer,
-    ) -> CompanyWorkInviteView:
-        return CompanyWorkInviteView(
-            details_use_case=details_use_case,
-            details_presenter=details_presenter,
-            details_controller=details_controller,
-            http_404_view=http_404_view,
-            answer_use_case=answer_use_case,
-            answer_presenter=answer_presenter,
-            answer_controller=answer_controller,
-            template_index=template_index,
-            template_renderer=template_renderer,
-        )
-
-    @provider
     def provide_show_company_work_invite_details_presenter(
         self, url_index: AnswerCompanyWorkInviteUrlIndex, translator: Translator
     ) -> ShowCompanyWorkInviteDetailsPresenter:
@@ -271,33 +245,6 @@ class FlaskModule(Module):
         self, mail_service: MailService, presenter: SendConfirmationEmailPresenter
     ) -> TokenDeliverer:
         return FlaskTokenDeliverer(mail_service=mail_service, presenter=presenter)
-
-    @provider
-    def provide_read_message_view(
-        self,
-        read_message: ReadMessage,
-        controller: ReadMessageController,
-        presenter: ReadMessagePresenter,
-        template_renderer: TemplateRenderer,
-        template_index: TemplateIndex,
-        http_404_view: Http404View,
-    ) -> ReadMessageView:
-        return ReadMessageView(
-            read_message,
-            controller,
-            presenter,
-            template_renderer,
-            template_index,
-            http_404_view,
-        )
-
-    @provider
-    def provide_http_404_view(
-        self, template_renderer: TemplateRenderer, template_index: TemplateIndex
-    ) -> Http404View:
-        return Http404View(
-            template_index=template_index, template_renderer=template_renderer
-        )
 
     @provider
     def provide_query_companies_presenter(
@@ -527,5 +474,6 @@ class with_injection:
     def get_injector(self) -> Injector:
         all_modules: List[Module] = []
         all_modules.append(FlaskModule())
+        all_modules.append(ViewsModule())
         all_modules += self._modules
         return Injector(all_modules)

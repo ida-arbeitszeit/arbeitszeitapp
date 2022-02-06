@@ -19,7 +19,6 @@ from arbeitszeit.use_cases import (
     GetDraftSummary,
     GetPlanSummary,
     HidePlan,
-    InviteWorkerToCompany,
     ListAllCooperations,
     ListCoordinations,
     ListCoordinationsRequest,
@@ -69,10 +68,6 @@ from arbeitszeit_web.get_prefilled_draft_data import (
 )
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.hide_plan import HidePlanPresenter
-from arbeitszeit_web.invite_worker_to_company import (
-    InviteWorkerToCompanyController,
-    InviteWorkerToCompanyPresenter,
-)
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_drafts_of_company import ListDraftsPresenter
 from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
@@ -641,20 +636,9 @@ def list_messages(
 
 
 @CompanyRoute("/company/invite_worker_to_company", methods=["GET", "POST"])
-@commit_changes
 def invite_worker_to_company(
-    invite_worker: InviteWorkerToCompany,
-    presenter: InviteWorkerToCompanyPresenter,
-    controller: InviteWorkerToCompanyController,
-    template_renderer: UserTemplateRenderer,
+    view: InviteWorkerToCompanyView,
 ) -> Response:
-    view = InviteWorkerToCompanyView(
-        invite_worker,
-        presenter,
-        controller,
-        template_name="company/invite_worker_to_company.html",
-        template_renderer=template_renderer,
-    )
     form = InviteWorkerToCompanyForm(request.form)
     if request.method == "POST":
         return view.respond_to_post(form)
