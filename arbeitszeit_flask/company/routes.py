@@ -33,6 +33,7 @@ from arbeitszeit.use_cases import (
     SendWorkCertificatesToWorker,
     ToggleProductAvailability,
 )
+from arbeitszeit.use_cases.list_workers import ListWorkersRequest
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_flask.database import (
     AccountRepository,
@@ -86,21 +87,6 @@ from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 
 from .blueprint import CompanyRoute
-
-
-@CompanyRoute("/company/work", methods=["GET", "POST"])
-@commit_changes
-def arbeit(
-    list_workers: ListWorkers,
-    company_repository: CompanyRepository,
-    template_renderer: UserTemplateRenderer,
-):
-    company = company_repository.get_by_id(UUID(current_user.id))
-    assert company is not None
-    workers_list = list_workers(company.id)
-    return template_renderer.render_template(
-        "company/work.html", context=dict(workers_list=workers_list.workers)
-    )
 
 
 @CompanyRoute("/company/profile")
@@ -404,7 +390,7 @@ def transfer_to_worker(
         else:
             flash("Erfolgreich überwiesen.", "is-success")
 
-    workers_list = list_workers(company.id)
+    workers_list = list_workers(ListWorkersRequest(company=company.id))
     return template_renderer.render_template(
         "company/transfer_to_worker.html",
         context=dict(workers_list=workers_list.workers),

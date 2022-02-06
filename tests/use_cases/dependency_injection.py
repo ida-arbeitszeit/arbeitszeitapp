@@ -6,6 +6,7 @@ from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.token import TokenDeliverer, TokenService
 from tests import data_generators
 from tests.datetime_service import FakeDatetimeService
+from tests.dependency_injection import TestingModule
 from tests.token import FakeTokenService, TokenDeliveryService
 
 from . import repositories
@@ -119,7 +120,7 @@ class InMemoryModule(Module):
 
 
 def get_dependency_injector() -> Injector:
-    return Injector(InMemoryModule())
+    return Injector([TestingModule(), InMemoryModule()])
 
 
 def injection_test(original_test):

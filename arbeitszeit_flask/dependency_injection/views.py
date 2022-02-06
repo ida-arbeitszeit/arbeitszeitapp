@@ -6,6 +6,7 @@ from arbeitszeit.use_cases import (
     ReadMessage,
     ShowCompanyWorkInviteDetailsUseCase,
 )
+from arbeitszeit.use_cases.list_workers import ListWorkers
 from arbeitszeit_flask.template import TemplateIndex, TemplateRenderer
 from arbeitszeit_flask.views import (
     CompanyWorkInviteView,
@@ -14,12 +15,14 @@ from arbeitszeit_flask.views import (
     ReadMessageView,
 )
 from arbeitszeit_flask.views.invite_worker_to_company import (
+    InviteWorkerGetRequestHandler,
     InviteWorkerPostRequestHandler,
 )
 from arbeitszeit_web.answer_company_work_invite import (
     AnswerCompanyWorkInviteController,
     AnswerCompanyWorkInvitePresenter,
 )
+from arbeitszeit_web.controllers.list_workers_controller import ListWorkersController
 from arbeitszeit_web.controllers.show_company_work_invite_details_controller import (
     ShowCompanyWorkInviteDetailsController,
 )
@@ -27,6 +30,7 @@ from arbeitszeit_web.invite_worker_to_company import (
     InviteWorkerToCompanyController,
     InviteWorkerToCompanyPresenter,
 )
+from arbeitszeit_web.presenters.list_workers_presenter import ListWorkersPresenter
 from arbeitszeit_web.presenters.show_company_work_invite_details_presenter import (
     ShowCompanyWorkInviteDetailsPresenter,
 )
@@ -89,14 +93,12 @@ class ViewsModule(Module):
     @provider
     def provide_invite_worker_to_company_view(
         self,
-        template_index: TemplateIndex,
-        template_renderer: TemplateRenderer,
         post_request_handler: InviteWorkerPostRequestHandler,
+        get_request_handler: InviteWorkerGetRequestHandler,
     ) -> InviteWorkerToCompanyView:
         return InviteWorkerToCompanyView(
-            template_index=template_index,
-            template_renderer=template_renderer,
             post_request_handler=post_request_handler,
+            get_request_handler=get_request_handler,
         )
 
     @provider
@@ -114,4 +116,21 @@ class ViewsModule(Module):
             controller=controller,
             template_renderer=template_renderer,
             template_index=template_index,
+        )
+
+    @provider
+    def provide_invite_worker_get_request_handler(
+        self,
+        use_case: ListWorkers,
+        presenter: ListWorkersPresenter,
+        controller: ListWorkersController,
+        template_index: TemplateIndex,
+        template_renderer: TemplateRenderer,
+    ) -> InviteWorkerGetRequestHandler:
+        return InviteWorkerGetRequestHandler(
+            template_index=template_index,
+            template_renderer=template_renderer,
+            controller=controller,
+            use_case=use_case,
+            presenter=presenter,
         )

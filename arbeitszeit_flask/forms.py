@@ -171,6 +171,7 @@ class InviteWorkerToCompanyForm(Form):
         validators=[
             FieldMustExist(message="Angabe erforderlich"),
         ],
+        render_kw={"placeholder": "Mitglieder-ID"},
     )
 
     def get_worker_id(self) -> str:

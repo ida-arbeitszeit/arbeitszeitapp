@@ -3,14 +3,39 @@
 {% from 'macros/show_notifications.html' import show_notifications %}
 
 {% block content2 %}
-<div>
-  {{ show_notifications }}
 
-  <h1 class="title">Arbeiter*in einladen</h1>
-  <form method="post">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    {{ form.member_id }}
-    <button>Einladen</button>
-  </form>
+<div class="columns is-centered ">
+  <div class="column is-half">
+    {{ show_notifications() }}
+
+    <div class="content">
+    <h1 class="title">Arbeiter*in einladen</h1>
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {{ form.member_id }}
+      <button>Einladen</button>
+    </form>
+    </div>
+
+    <div class="content">
+    {% if view_model.is_show_workers %}
+    <h1 class="title">Mitarbeiter*innen des Betriebs</h1>
+    <div class="table-container">
+      <table class="table is-full-width">
+	<thead>
+	  <th>Mitglieder-ID</th>
+	  <th>Name</th>
+	</thead>
+	{% for worker in view_model.workers %}
+	<tr>
+	  <td>{{ worker.id }}</td>
+	  <td>{{ worker.name}}</td>
+	</tr>
+	{% endfor %}
+      </table>
+    </div>
+    {% endif %}
+    </div>
+  </div>
 </div>
 {% endblock %}

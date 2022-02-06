@@ -64,6 +64,7 @@ from arbeitszeit_web.check_for_unread_message import (
     CheckForUnreadMessagesController,
     CheckForUnreadMessagesPresenter,
 )
+from arbeitszeit_web.controllers.list_workers_controller import ListWorkersController
 from arbeitszeit_web.controllers.show_company_work_invite_details_controller import (
     ShowCompanyWorkInviteDetailsController,
 )
@@ -199,6 +200,12 @@ class CompanyModule(Module):
 
 
 class FlaskModule(Module):
+    @provider
+    def provide_list_workers_controller(
+        self, session: Session
+    ) -> ListWorkersController:
+        return ListWorkersController(session=session)
+
     @provider
     def provide_show_company_work_invite_details_presenter(
         self, url_index: AnswerCompanyWorkInviteUrlIndex, translator: Translator

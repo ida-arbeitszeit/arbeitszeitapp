@@ -48,6 +48,7 @@ from arbeitszeit.use_cases import (
     RequestCooperationRequest,
     SeekApproval,
 )
+from tests.company import CompanyManager
 from tests.datetime_service import FakeDatetimeService
 
 
@@ -92,9 +93,9 @@ class MemberGenerator:
 class CompanyGenerator:
     account_generator: AccountGenerator
     company_repository: CompanyRepository
-    company_worker_repository: CompanyWorkerRepository
     email_generator: EmailGenerator
     datetime_service: FakeDatetimeService
+    company_manager: CompanyManager
 
     def create_company(
         self,
@@ -132,7 +133,7 @@ class CompanyGenerator:
         )
         if workers is not None:
             for worker in workers:
-                self.company_worker_repository.add_worker_to_company(company, worker)
+                self.company_manager.add_worker_to_company(company.id, worker.id)
         return company
 
 

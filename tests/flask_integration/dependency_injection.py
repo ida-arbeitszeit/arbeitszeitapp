@@ -7,6 +7,7 @@ from injector import Injector, Module, inject, provider, singleton
 from arbeitszeit_flask import create_app
 from arbeitszeit_flask.dependency_injection import FlaskModule, ViewsModule
 from arbeitszeit_flask.extensions import db
+from tests.dependency_injection import TestingModule
 
 
 class FlaskConfiguration(dict):
@@ -57,7 +58,12 @@ class SqliteModule(Module):
 
 
 def get_dependency_injector(additional_modules: Optional[List[Module]] = None):
-    modules: List[Module] = [FlaskModule(), ViewsModule(), SqliteModule()]
+    modules: List[Module] = [
+        FlaskModule(),
+        ViewsModule(),
+        TestingModule(),
+        SqliteModule(),
+    ]
     if additional_modules is not None:
         modules.extend(additional_modules)
     return Injector(modules)
