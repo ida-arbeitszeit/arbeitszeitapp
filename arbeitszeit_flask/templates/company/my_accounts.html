@@ -1,4 +1,5 @@
 {% extends "base_company.html" %}
+{% from 'macros/show_notifications.html' import show_notifications %}
 
 {% block content2 %}
 
@@ -11,13 +12,8 @@
     <p>You have four different accounts.</p>
 </div>
 
-{% with messages = get_flashed_messages() %}
-{% if messages %}
-{% for message in messages %}
-<div class="notification is-danger is-light">{{ message }}</div>
-{% endfor %}
-{% endif %}
-{% endwith %}
+{{ show_notifications() }}
+
 
 <div class="columns">
     <div class="column"></div>

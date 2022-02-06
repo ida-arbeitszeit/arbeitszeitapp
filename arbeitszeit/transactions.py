@@ -74,7 +74,7 @@ class UserAccountingService:
     def user_is_sender(
         self, transaction: Transaction, user: Union[Member, Company]
     ) -> bool:
-        return True if transaction.sending_account in user.accounts() else False
+        return transaction.sending_account in user.accounts()
 
     def get_transaction_type(
         self, transaction: Transaction, user_is_sender: bool
