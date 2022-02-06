@@ -19,6 +19,7 @@ from arbeitszeit import repositories as interfaces
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.token import TokenDeliverer, TokenService
 from arbeitszeit.use_cases import CheckForUnreadMessages, GetCompanySummary, ReadMessage
+from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts
 from arbeitszeit_flask.database import get_social_accounting
 from arbeitszeit_flask.database.repositories import (
     AccountOwnerRepository,
@@ -56,9 +57,13 @@ from arbeitszeit_flask.template import (
 from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.url_index import CompanyUrlIndex, MemberUrlIndex
 from arbeitszeit_flask.views import Http404View, ReadMessageView
+from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
 from arbeitszeit_web.check_for_unread_message import (
     CheckForUnreadMessagesController,
     CheckForUnreadMessagesPresenter,
+)
+from arbeitszeit_web.controllers.show_my_accounts_controller import (
+    ShowMyAccountsController,
 )
 from arbeitszeit_web.email import EmailConfiguration
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
@@ -68,6 +73,9 @@ from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from arbeitszeit_web.presenters.send_confirmation_email_presenter import (
     SendConfirmationEmailPresenter,
+)
+from arbeitszeit_web.presenters.show_my_accounts_presenter import (
+    ShowMyAccountsPresenter,
 )
 from arbeitszeit_web.query_companies import QueryCompaniesPresenter
 from arbeitszeit_web.query_plans import QueryPlansPresenter
@@ -338,6 +346,30 @@ class FlaskModule(Module):
     @provider
     def provide_translator(self) -> Translator:
         return FlaskTranslator()
+
+    @provider
+    def provide_show_my_accounts_view(
+        self,
+        template_renderer: UserTemplateRenderer,
+        controller: ShowMyAccountsController,
+        use_case: ShowMyAccounts,
+        presenter: ShowMyAccountsPresenter,
+    ) -> ShowMyAccountsView:
+        return ShowMyAccountsView(template_renderer, controller, use_case, presenter)
+
+    @provider
+    def provide_show_my_accounts_controller(
+        self, session: FlaskSession
+    ) -> ShowMyAccountsController:
+        return ShowMyAccountsController(session)
+
+    @provider
+    def provide_show_my_accounts_use_case(
+        self,
+        company_repository: CompanyRepository,
+        account_repository: AccountRepository,
+    ) -> ShowMyAccounts:
+        return ShowMyAccounts(company_repository, account_repository)
 
     def configure(self, binder: Binder) -> None:
         binder.bind(

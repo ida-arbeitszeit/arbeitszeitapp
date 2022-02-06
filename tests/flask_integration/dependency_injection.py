@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from flask import Flask, current_app
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from injector import Injector, Module, inject, provider, singleton
 
@@ -41,18 +41,15 @@ FLASK_TESTING_CONFIGURATION = FlaskConfiguration(
 class SqliteModule(Module):
     @provider
     @singleton
-    def provide_sqlalchemy(self, config: FlaskConfiguration) -> SQLAlchemy:
-        _db = db
-        app = create_app(config=config, db=_db, template_folder=config.template_folder)
-        with app.app_context():
-            _db.create_all()
+    def provide_sqlalchemy(self, app: Flask) -> SQLAlchemy:
         app.app_context().push()
-        return _db
+        db.create_all()
+        return db
 
     @provider
     @singleton
-    def provide_app(self, _: SQLAlchemy) -> Flask:
-        return current_app
+    def provide_app(self, config: FlaskConfiguration) -> Flask:
+        return create_app(config=config, db=db, template_folder=config.template_folder)
 
     @provider
     def provide_flask_configuration(self) -> FlaskConfiguration:
