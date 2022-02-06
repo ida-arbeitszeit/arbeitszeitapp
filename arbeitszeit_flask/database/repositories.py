@@ -961,6 +961,7 @@ class MessageRepository(repositories.MessageRepository):
                 reference=str(reference.reference),
             )
             self.db.session.add(user_action)
+            self.db.session.flush()
         else:
             user_action = None
         message = Message(

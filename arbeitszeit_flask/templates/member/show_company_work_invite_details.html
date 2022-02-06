@@ -11,7 +11,7 @@
 
 <form action="{{ view_model.answer_invite_url }}" method="post">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-  <button name="is_accepted" value="true" type="submit" class="button primary">
+  <button name="is_accepted" value="true" type="submit" class="button primary is-success">
     {{ gettext('Accept') }}
   </button>
 </from>
