@@ -1,6 +1,8 @@
 from datetime import datetime
 from uuid import uuid4
 
+from tests.data_generators import PlanGenerator
+
 from .flask import ViewTestCase
 
 
@@ -29,6 +31,7 @@ class NotLoggedInCompanyTests(ViewTestCase):
 class LoggedInCompanyTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
+        self.plan_generator = self.injector.get(PlanGenerator)
         self.company, _, self.email = self.login_company()
         self.company = self.confirm_company(company=self.company, email=self.email)
         self.url = "/company/request_cooperation"

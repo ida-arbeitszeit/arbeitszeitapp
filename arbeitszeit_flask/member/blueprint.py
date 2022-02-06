@@ -23,7 +23,7 @@ class MemberRoute:
         @wraps(view_function)
         def _wrapper(*args: Any, **kwargs: Any) -> Response:
             if not user_is_member():
-                return redirect(url_for("auth.zurueck"))
+                return redirect(url_for("auth.zurueck"))  # type: ignore
             return view_function(*args, **kwargs)
 
         return self._apply_decorators(_wrapper)
