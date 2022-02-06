@@ -6,7 +6,13 @@ from uuid import UUID
 
 from injector import inject
 
-from arbeitszeit.entities import Company, Member, SocialAccounting, Transaction
+from arbeitszeit.entities import (
+    AccountTypes,
+    Company,
+    Member,
+    SocialAccounting,
+    Transaction,
+)
 from arbeitszeit.repositories import (
     AccountOwnerRepository,
     AccountRepository,
@@ -45,8 +51,8 @@ class GetMemberAccount:
         assert member
         transaction_info = [
             self._create_info(member, transaction)
-            for transaction in self.accounting_service.get_all_transactions_sorted(
-                member
+            for transaction in self.accounting_service.get_account_transactions_sorted(
+                member, AccountTypes.member
             )
         ]
         balance = self.account_repository.get_account_balance(member.account)
@@ -63,27 +69,17 @@ class GetMemberAccount:
         receiver = self.acount_owner_repository.get_account_owner(
             transaction.receiving_account
         )
-        user_is_sender = self._user_is_sender(sender, receiver, user)
+        user_is_sender = self.accounting_service.user_is_sender(transaction, user)
         peer_name = self._get_peer_name(user_is_sender, sender, receiver)
-        transaction_volume = self._get_volume(user_is_sender, transaction)
+        transaction_volume = self.accounting_service.get_transaction_volume(
+            transaction, user_is_sender
+        )
         return TransactionInfo(
             transaction.date,
             peer_name,
             transaction_volume,
             transaction.purpose,
         )
-
-    def _user_is_sender(
-        self,
-        sender: UserOrSocialAccounting,
-        receiver: UserOrSocialAccounting,
-        user: Member,
-    ) -> bool:
-        assert user in [sender, receiver]
-        if sender == user:
-            return True
-        else:
-            return False
 
     def _get_peer_name(
         self,
@@ -95,9 +91,3 @@ class GetMemberAccount:
             return receiver.get_name()
         else:
             return sender.get_name()
-
-    def _get_volume(self, user_is_sender: bool, transaction: Transaction) -> Decimal:
-        if user_is_sender:
-            return -transaction.amount_sent
-        else:
-            return transaction.amount_received

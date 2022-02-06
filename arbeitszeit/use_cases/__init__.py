@@ -42,6 +42,7 @@ from .end_cooperation import (
     EndCooperationRequest,
     EndCooperationResponse,
 )
+from .get_company_transactions import GetCompanyTransactions
 from .get_coop_summary import (
     GetCoopSummary,
     GetCoopSummaryRequest,
@@ -70,7 +71,6 @@ from .get_plan_summary_member import (
     PlanSummarySuccess,
 )
 from .get_statistics import GetStatistics, StatisticsResponse
-from .get_transaction_infos import GetTransactionInfos, TransactionInfo
 from .hide_plan import HidePlan, HidePlanResponse
 from .invite_worker_to_company import (
     InviteWorkerToCompany,
@@ -152,6 +152,8 @@ from .resend_confirmation_mail import (
 from .seek_approval import SeekApproval
 from .send_work_certificates_to_worker import SendWorkCertificatesToWorker
 from .show_my_plans import ShowMyPlansRequest, ShowMyPlansResponse, ShowMyPlansUseCase
+from .show_p_account_details import ShowPAccountDetails, ShowPAccountDetailsResponse
+from .show_r_account_details import ShowRAccountDetails, ShowRAccountDetailsResponse
 from .show_work_invites import ShowWorkInvites, ShowWorkInvitesRequest
 from .toggle_product_availablity import (
     ToggleProductAvailability,
@@ -204,7 +206,7 @@ __all__ = [
     "GetPlanSummaryMember",
     "GetPlanSummaryCompany",
     "GetStatistics",
-    "GetTransactionInfos",
+    "GetCompanyTransactions",
     "HidePlan",
     "HidePlanResponse",
     "InviteWorkerToCompany",
@@ -271,6 +273,10 @@ __all__ = [
     "ResendConfirmationMailResponse",
     "SeekApproval",
     "SendWorkCertificatesToWorker",
+    "ShowPAccountDetails",
+    "ShowPAccountDetailsResponse",
+    "ShowRAccountDetails",
+    "ShowRAccountDetailsResponse",
     "ShowMyPlansRequest",
     "ShowMyPlansResponse",
     "ShowMyPlansUseCase",
@@ -279,7 +285,6 @@ __all__ = [
     "StatisticsResponse",
     "ToggleProductAvailability",
     "ToggleProductAvailabilityResponse",
-    "TransactionInfo",
     "UpdatePlansAndPayout",
     "Workplace",
     "add_worker_to_company",
