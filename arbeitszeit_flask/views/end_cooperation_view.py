@@ -25,4 +25,4 @@ class EndCooperationView:
         view_model = self.presenter.present(use_case_response)
         if view_model.show_404:
             return self.http_404_view.get_response()
-        return redirect(view_model.redirect_url)
+        return redirect(view_model.redirect_url)  # type: ignore
