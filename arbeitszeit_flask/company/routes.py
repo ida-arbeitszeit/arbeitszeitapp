@@ -57,10 +57,8 @@ from arbeitszeit_flask.views import (
     ReadMessageView,
     RequestCooperationView,
 )
+from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
-from arbeitszeit_web.controllers.pay_means_of_production_controller import (
-    PayMeansOfProductionController,
-)
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
@@ -77,7 +75,6 @@ from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_drafts_of_company import ListDraftsPresenter
 from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 from arbeitszeit_web.list_plans import ListPlansPresenter
-from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from arbeitszeit_web.query_companies import (
     QueryCompaniesController,
     QueryCompaniesPresenter,
@@ -467,27 +464,12 @@ def transfer_to_worker(
 
 @CompanyRoute("/company/transfer_to_company", methods=["GET", "POST"])
 @commit_changes
-def transfer_to_company(
-    controller: PayMeansOfProductionController,
-    pay_means_of_production: use_cases.PayMeansOfProduction,
-    presenter: PayMeansOfProductionPresenter,
-    template_renderer: UserTemplateRenderer,
-):
+def transfer_to_company(view: PayMeansOfProductionView):
     form = PayMeansOfProductionForm(request.form)
-    if request.method == "POST":
-        use_case_request = controller.process_input_data(form)
-        if isinstance(
-            use_case_request, PayMeansOfProductionController.MalformedInputData
-        ):
-            presenter.present_malformed_data_warnings(use_case_request)
-            return template_renderer.render_template(
-                "company/transfer_to_company.html", context=dict(form=form)
-            )
-        use_case_response = pay_means_of_production(use_case_request)
-        presenter.present(use_case_response)
-    return template_renderer.render_template(
-        "company/transfer_to_company.html", context=dict(form=form)
-    )
+    if request.method == "GET":
+        return view.respond_to_get(form)
+    elif request.method == "POST":
+        return view.respond_to_post(form)
 
 
 @CompanyRoute("/company/statistics")

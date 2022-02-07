@@ -19,6 +19,7 @@ from arbeitszeit import repositories as interfaces
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.token import TokenDeliverer, TokenService
 from arbeitszeit.use_cases import CheckForUnreadMessages, EndCooperation, ReadMessage
+from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProduction
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts
 from arbeitszeit_flask.database import get_social_accounting
 from arbeitszeit_flask.database.repositories import (
@@ -58,6 +59,7 @@ from arbeitszeit_flask.template import (
 from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.url_index import CompanyUrlIndex, MemberUrlIndex
 from arbeitszeit_flask.views import EndCooperationView, Http404View, ReadMessageView
+from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
 from arbeitszeit_web.check_for_unread_message import (
     CheckForUnreadMessagesController,
@@ -242,6 +244,18 @@ class CompanyModule(Module):
         self, session: FlaskSession, request: FlaskRequest
     ) -> PayMeansOfProductionController:
         return PayMeansOfProductionController(session, request)
+
+    @provider
+    def provide_pay_means_of_production_view(
+        self,
+        controller: PayMeansOfProductionController,
+        pay_means_of_production: PayMeansOfProduction,
+        presenter: PayMeansOfProductionPresenter,
+        template_renderer: UserTemplateRenderer,
+    ) -> PayMeansOfProductionView:
+        return PayMeansOfProductionView(
+            controller, pay_means_of_production, presenter, template_renderer
+        )
 
 
 class FlaskModule(Module):

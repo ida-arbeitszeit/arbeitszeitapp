@@ -1,7 +1,10 @@
 from unittest import TestCase
 
 from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProductionResponse
-from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
+from arbeitszeit_web.pay_means_of_production import (
+    PayMeansOfProductionController,
+    PayMeansOfProductionPresenter,
+)
 
 from .notifier import NotifierTestImpl
 
@@ -69,5 +72,39 @@ class PayMeansOfProductionTests(TestCase):
         )
         self.assertIn(
             "Bezahlung nicht erfolgreich. Betriebe können keine eigenen Produkte erwerben.",
+            self.notifier.warnings,
+        )
+
+    def test_no_malformed_data_results_in_no_warning(self):
+        self.presenter.present_malformed_data_warnings(
+            PayMeansOfProductionController.MalformedInputData({})
+        )
+        self.assertFalse(self.notifier.warnings)
+
+    def test_one_malformed_field_with_two_messages_results_in_two_warnings_with_correct_messages(
+        self,
+    ):
+        self.presenter.present_malformed_data_warnings(
+            PayMeansOfProductionController.MalformedInputData({"a": ["one", "two"]})
+        )
+        self.assertEqual(len(self.notifier.warnings), 2)
+        self.assertIn("one", self.notifier.warnings)
+        self.assertIn("two", self.notifier.warnings)
+
+    def test_two_malformed_fields_with_one_message_each_results_in_two_warnings_with_correct_messages(
+        self,
+    ):
+        self.presenter.present_malformed_data_warnings(
+            PayMeansOfProductionController.MalformedInputData(
+                {"a": ["one"], "b": ["two"]}
+            )
+        )
+        self.assertEqual(len(self.notifier.warnings), 2)
+        self.assertIn(
+            "one",
+            self.notifier.warnings,
+        )
+        self.assertIn(
+            "two",
             self.notifier.warnings,
         )
