@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-01-25 12:09+0100\n"
+"POT-Creation-Date: 2022-02-07 15:52+0100\n"
 "PO-Revision-Date: 2022-01-16 19:09+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: de\n"
@@ -18,9 +18,25 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.9.0\n"
 
+#: arbeitszeit_flask/forms.py:17
+msgid "Invalid ID."
+msgstr "Ungültige ID."
+
 #: arbeitszeit_flask/forms.py:18
+msgid "Number must be at least 0."
+msgstr "Zahl muss 0 oder größer sein."
+
+#: arbeitszeit_flask/forms.py:29
 msgid "This field is required."
 msgstr ""
+
+#: arbeitszeit_flask/forms.py:207
+msgid "Fixed means of production"
+msgstr "Fixe Produktionsmittel"
+
+#: arbeitszeit_flask/forms.py:208
+msgid "Liquid means of production"
+msgstr "Flüssige Produktionsmittel"
 
 #: arbeitszeit_flask/auth/templates/signup_member.html:5
 #: arbeitszeit_flask/auth/templates/signup_member.html:41
@@ -59,16 +75,15 @@ msgstr "Betrieb"
 msgid "App version"
 msgstr "App-Version"
 
-#: arbeitszeit_web/get_plan_summary_member.py:42
-msgctxt "Test comment"
+#: arbeitszeit_web/plan_summary_service.py:47
 msgid "Planning company"
 msgstr "Planender Betrieb"
 
-#: arbeitszeit_web/get_plan_summary_member.py:45
+#: arbeitszeit_web/plan_summary_service.py:51
 msgid "Name of product"
 msgstr "Name des Produkts"
 
-#: arbeitszeit_web/get_plan_summary_member.py:47
+#: arbeitszeit_web/plan_summary_service.py:55
 msgid "Description of product"
 msgstr "Beschreibung des Produkts"
 

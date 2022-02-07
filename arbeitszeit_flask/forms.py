@@ -1,11 +1,21 @@
 from wtforms import (
     BooleanField,
     Form,
+    IntegerField,
     PasswordField,
     SelectField,
     StringField,
     validators,
 )
+
+from .translator import FlaskTranslator
+
+trans = FlaskTranslator()
+
+error_msgs = {
+    "uuid": trans.lazy_gettext("Invalid ID."),
+    "num_range_min_0": trans.lazy_gettext("Number must be at least 0."),
+}
 
 
 class FieldMustExist:
@@ -175,3 +185,37 @@ class RequestCooperationForm(Form):
 
     def get_cooperation_id_string(self) -> str:
         return self.data["cooperation_id"]
+
+
+class PayMeansOfProductionForm(Form):
+    plan_id = StringField(
+        render_kw={"placeholder": "Plan-ID"},
+        validators=[
+            validators.InputRequired(),
+            validators.UUID(message=error_msgs["uuid"]),
+        ],
+    )
+    amount = IntegerField(
+        render_kw={"placeholder": "Amount"},
+        validators=[
+            validators.InputRequired(),
+            validators.NumberRange(min=0, message=error_msgs["num_range_min_0"]),
+        ],
+    )
+    choices = [
+        ("Fixed", trans.lazy_gettext("Fixed means of production")),
+        (
+            "Liquid",
+            trans.lazy_gettext("Liquid means of production"),
+        ),
+    ]
+    category = SelectField(choices=choices, validators=[validators.DataRequired()])
+
+    def get_amount_field(self) -> int:
+        return self.data["amount"]
+
+    def get_plan_id_field(self) -> str:
+        return self.data["plan_id"].strip()
+
+    def get_category_field(self) -> str:
+        return self.data["category"]

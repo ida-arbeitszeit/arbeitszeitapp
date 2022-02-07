@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 
 from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProductionResponse
+from arbeitszeit_web.controllers.pay_means_of_production_controller import (
+    PayMeansOfProductionController,
+)
 
 from .notification import Notifier
 
@@ -31,3 +34,11 @@ class PayMeansOfProductionPresenter:
             self.user_notifier.display_warning(
                 "Der angegebene Verwendungszweck is ungültig."
             )
+
+    def present_malformed_data_warnings(
+        self, malformed_data: PayMeansOfProductionController.MalformedInputData
+    ) -> None:
+        fields_and_messages = malformed_data.field_messages
+        for field in fields_and_messages:
+            for msg in fields_and_messages[field]:
+                self.user_notifier.display_warning(msg)

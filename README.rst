@@ -120,7 +120,7 @@ In jinja templates use ``gettext(message: str)`` and ``ngettext(singular: str, p
 
 Parse the code and create a new ``.pot``-file::
 
-    $ pybabel extract -F babel.cfg -o messages.pot .
+    $ pybabel extract -F babel.cfg -k lazy_gettext -o messages.pot .
 
 Add a new language (create a ``.po``-file for that language from ``.pot``-file)::
 

@@ -15,21 +15,13 @@
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="field has-addons">
                     <div class="control">
-                        <input class="input" type="text" placeholder="Plan-ID" , name="plan_id" required>
+                        {{ form.plan_id(class_="input") }}
                     </div>
                     <div class="control">
-                        <input class="input" type="number" placeholder="Stückzahl" , name="amount" required>
+                        {{ form.amount(class_="input") }}
                     </div>
                     <div class="control">
-                        <div class="select">
-                            <select name="category" required>
-                                <option value="">Zweck</option>
-                                {% set categ = ["Produktionsmittel", "Rohmaterialien"] %}
-                                {% for cat in categ %}
-                                <option value="{{ cat }}">{{ cat }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
+                        {{ form.category(class_="select") }}
                     </div>
                     <div class="control">
                         <button class="button is-primary" name="transfer_type" value="transfer_to_company"
@@ -38,7 +30,7 @@
                 </div>
             </form>
         </div>
-	{{ show_notifications() }}
+        {{ show_notifications() }}
     </div>
 </div>
 {% endblock %}

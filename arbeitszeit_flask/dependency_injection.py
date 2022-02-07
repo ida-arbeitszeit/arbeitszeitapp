@@ -66,6 +66,9 @@ from arbeitszeit_web.check_for_unread_message import (
 from arbeitszeit_web.controllers.end_cooperation_controller import (
     EndCooperationController,
 )
+from arbeitszeit_web.controllers.pay_means_of_production_controller import (
+    PayMeansOfProductionController,
+)
 from arbeitszeit_web.controllers.show_my_accounts_controller import (
     ShowMyAccountsController,
 )
@@ -233,6 +236,12 @@ class CompanyModule(Module):
         return EndCooperationPresenter(
             request, notifier, plan_summary_index, coop_summary_index
         )
+
+    @provider
+    def provide_pay_means_of_production_controller(
+        self, session: FlaskSession, request: FlaskRequest
+    ) -> PayMeansOfProductionController:
+        return PayMeansOfProductionController(session, request)
 
 
 class FlaskModule(Module):

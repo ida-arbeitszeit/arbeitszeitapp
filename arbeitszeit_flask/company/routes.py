@@ -5,7 +5,7 @@ from uuid import UUID
 from flask import Response, flash, redirect, request, url_for
 from flask_login import current_user
 
-from arbeitszeit import entities, errors, use_cases
+from arbeitszeit import errors, use_cases
 from arbeitszeit.use_cases import (
     AcceptCooperation,
     AcceptCooperationRequest,
@@ -43,6 +43,7 @@ from arbeitszeit_flask.database import (
 from arbeitszeit_flask.forms import (
     CompanySearchForm,
     CreateDraftForm,
+    PayMeansOfProductionForm,
     PlanSearchForm,
     RequestCooperationForm,
 )
@@ -57,6 +58,9 @@ from arbeitszeit_flask.views import (
     RequestCooperationView,
 )
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
+from arbeitszeit_web.controllers.pay_means_of_production_controller import (
+    PayMeansOfProductionController,
+)
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
@@ -464,22 +468,26 @@ def transfer_to_worker(
 @CompanyRoute("/company/transfer_to_company", methods=["GET", "POST"])
 @commit_changes
 def transfer_to_company(
+    controller: PayMeansOfProductionController,
     pay_means_of_production: use_cases.PayMeansOfProduction,
     presenter: PayMeansOfProductionPresenter,
     template_renderer: UserTemplateRenderer,
 ):
+    form = PayMeansOfProductionForm(request.form)
     if request.method == "POST":
-        use_case_request = use_cases.PayMeansOfProductionRequest(
-            buyer=UUID(current_user.id),
-            plan=UUID(str(request.form["plan_id"]).strip()),
-            amount=int(request.form["amount"]),
-            purpose=entities.PurposesOfPurchases.means_of_prod
-            if request.form["category"] == "Produktionsmittel"
-            else entities.PurposesOfPurchases.raw_materials,
-        )
+        use_case_request = controller.process_input_data(form)
+        if isinstance(
+            use_case_request, PayMeansOfProductionController.MalformedInputData
+        ):
+            presenter.present_malformed_data_warnings(use_case_request)
+            return template_renderer.render_template(
+                "company/transfer_to_company.html", context=dict(form=form)
+            )
         use_case_response = pay_means_of_production(use_case_request)
         presenter.present(use_case_response)
-    return template_renderer.render_template("company/transfer_to_company.html")
+    return template_renderer.render_template(
+        "company/transfer_to_company.html", context=dict(form=form)
+    )
 
 
 @CompanyRoute("/company/statistics")
