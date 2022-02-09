@@ -21,7 +21,13 @@
                         {{ form.amount(class_="input") }}
                     </div>
                     <div class="control">
-                        {{ form.category(class_="select") }}
+                        <div class="select">
+                            <select name="category" required>
+                                {% for option in form.category %}
+                                {{ option }}
+                                {% endfor %}
+                            </select>
+                        </div>
                     </div>
                     <div class="control">
                         <button class="button is-primary" name="transfer_type" value="transfer_to_company"

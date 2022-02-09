@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from flask import Response
 
 from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProduction
+from arbeitszeit_flask.forms import PayMeansOfProductionForm
 from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_web.controllers.pay_means_of_production_controller import (
     PayMeansOfProductionController,
@@ -17,10 +18,10 @@ class PayMeansOfProductionView:
     presenter: PayMeansOfProductionPresenter
     template_renderer: UserTemplateRenderer
 
-    def respond_to_get(self, form):
+    def respond_to_get(self, form: PayMeansOfProductionForm):
         return Response(self._render_template(form), status=200)
 
-    def respond_to_post(self, form):
+    def respond_to_post(self, form: PayMeansOfProductionForm):
         data = self.controller.process_input_data(form)
         if isinstance(data, PayMeansOfProductionController.MalformedInputData):
             self.presenter.present_malformed_data_warnings(data)
@@ -29,7 +30,7 @@ class PayMeansOfProductionView:
         self.presenter.present(use_case_response)
         return Response(self._render_template(form), status=200)
 
-    def _render_template(self, form) -> str:
+    def _render_template(self, form: PayMeansOfProductionForm) -> str:
         return self.template_renderer.render_template(
             "company/transfer_to_company.html", context=dict(form=form)
         )
