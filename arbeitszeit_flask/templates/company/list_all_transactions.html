@@ -1,0 +1,49 @@
+{% extends "base_company.html" %}
+{% from 'macros/show_notifications.html' import show_notifications %}
+
+{% block content2 %}
+
+
+<h1 class="title">
+    <a href="{{ url_for('main_company.my_accounts') }}">Accounts</a> > Transactions
+</h1>
+<div class="box has-background-info-light has-text-info-dark">
+    <div class="icon"><i class="fas fa-info-circle"></i></div>
+    <p>Here are all transactions you have made or received so far.</p>
+</div>
+
+{{ show_notifications() }}
+
+
+<div class="table-container">
+    <table class="table is-fullwidth">
+        <thead>
+            <tr>
+                <th></th>
+                <th></th>
+                <th>Account</th>
+                <th>Type</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            {% if all_transactions is defined and all_transactions|length %}
+            {% for trans_info in all_transactions %}
+            <tr>
+                <td>{{ trans_info.date|format_datetime(zone='Europe/Berlin', fmt='%d.%m.%Y %H:%M') }}</td>
+                <td class="{{ 'has-text-success' if trans_info.transaction_volume >= 0 else 'has-text-danger' }}">{{
+                    trans_info.transaction_volume }}
+                </td>
+                <td>{{ trans_info.account }}</td>
+                <td>{{ trans_info.transaction_type }}</td>
+                <td>{{ trans_info.purpose }}</td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

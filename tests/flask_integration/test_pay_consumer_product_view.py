@@ -1,12 +1,15 @@
 from datetime import datetime
 from uuid import uuid4
 
+from tests.data_generators import PlanGenerator
+
 from .flask import ViewTestCase
 
 
 class AuthenticatedMemberTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
+        self.plan_generator = self.injector.get(PlanGenerator)
         self.member, _, self.email = self.login_member()
         self.member = self.confirm_member(member=self.member, email=self.email)
 

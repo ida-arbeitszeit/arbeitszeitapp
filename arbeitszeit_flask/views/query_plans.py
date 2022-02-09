@@ -45,7 +45,7 @@ class QueryPlansView:
         view_model = self.presenter.present(response)
         return Response(self._render_response_content(view_model))
 
-    def _render_response_content(self, view_model: QueryPlansViewModel) -> Response:
+    def _render_response_content(self, view_model: QueryPlansViewModel) -> str:
         return self.template_renderer.render_template(
             self.template_name,
             context=dict(form=self.search_form, view_model=view_model),
