@@ -1,0 +1,6 @@
+{% extends "base_member.html" %}
+
+{% block content2 %}
+{% from 'macros/company_summary.html' import company_summary %}
+{{ company_summary(view_model) }}
+{% endblock %}

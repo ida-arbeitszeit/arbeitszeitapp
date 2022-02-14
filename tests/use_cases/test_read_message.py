@@ -146,20 +146,6 @@ class ReadMessageTests(TestCase):
         )
         self.assertSuccess(response, lambda r: r.sender_remarks == expected_remarks)
 
-    def test_user_action_is_answer_invite_then_response_shows_also_answer_invite_user_action(
-        self,
-    ) -> None:
-        message = self._create_message(user_action=UserAction.answer_invite)
-        response = self.read_message(
-            ReadMessageRequest(
-                reader_id=self.addressee.id,
-                message_id=message.id,
-            )
-        )
-        self.assertSuccess(
-            response, lambda r: r.user_action == UserAction.answer_invite
-        )
-
     def test_user_action_is_none_then_response_shows_also_user_action_none(
         self,
     ) -> None:
@@ -197,7 +183,7 @@ class ReadMessageTests(TestCase):
         title: str = "test title",
         content: str = "test content",
         sender_remarks: Optional[str] = None,
-        user_action: Optional[UserAction] = UserAction.answer_invite,
+        user_action: Optional[UserAction] = None,
     ) -> Message:
         if addressee is None:
             addressee = self.addressee

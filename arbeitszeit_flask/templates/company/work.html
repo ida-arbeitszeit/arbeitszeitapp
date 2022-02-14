@@ -7,7 +7,6 @@
       Mitarbeiter
     </h1>
 
-
     <div class="table-container">
       {% if workers_list is defined and workers_list|length %}
       <table class="table is-fullwidth">
@@ -22,47 +21,42 @@
           <tr>
             <td>{{ worker.id }}</td>
             <td>{{ worker.name }}</td>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      {% else %}
-      <p>(Noch keine Mitarbeiter.)</p>
-      {% endif %}
     </div>
-
-
-    <div class="content">
-      <form method="post">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <div class="field has-addons">
-          <div class="control is-expanded">
-            <input class="input" type="text" placeholder="Mitglieder-ID" , name="member" required>
-          </div>
-          <div class="control">
-            <button class="button is-primary" type="submit">MitarbeiterIn hinzufügen</button>
-          </div>
-        </div>
-        <p class="help">Mitarbeiter finden ihre Mitglieder-Id unter "Meine Daten".</p>
-      </form>
-    </div>
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <div class="block"></div>
-    <div class="notification is-danger">
-      {{ messages[0] }}
-    </div>
-    {% endif %}
-    {% endwith %}
-
-
-    <hr>
-    <br>
-
-
   </div>
 </div>
+</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% else %}
+<p>(Noch keine Mitarbeiter.)</p>
+{% endif %}
+</div>
 
+
+<div class="content">
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="field has-addons">
+      <div class="control is-expanded">
+        <input class="input" type="text" placeholder="Mitglieder-ID" , name="member" required>
+      </div>
+      <div class="control">
+        <button class="button is-primary" type="submit">MitarbeiterIn hinzufügen</button>
+      </div>
+    </div>
+    <p class="help">Mitarbeiter finden ihre Mitglieder-Id unter "Meine Daten".</p>
+  </form>
+</div>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<div class="block"></div>
+<div class="notification is-danger">
+  {{ messages[0] }}
+</div>
+{% endif %}
+{% endwith %}
 
 {% endblock %}

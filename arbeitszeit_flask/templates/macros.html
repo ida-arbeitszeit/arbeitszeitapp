@@ -222,6 +222,9 @@
             <td class="has-text-left">{{ view_model.summary[key][1] }}{% if view_model.summary[key][2] %} <span>
                 <a href="{{ view_model.summary[key][3] }}"><i class="fas fa-hands-helping"></i></a></span>{% endif %}
             </td>
+            {% elif key == "planner" %}
+            <td class="has-text-left"><a href="{{ view_model.summary[key][2] }}">{{ view_model.summary[key][3] }}</a>
+            </td>
             {% else %}
             <td class="has-text-left">{{ view_model.summary[key][1] }}
             </td>

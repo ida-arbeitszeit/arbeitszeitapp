@@ -4,7 +4,7 @@ from uuid import uuid4
 from arbeitszeit_web.controllers.show_my_accounts_controller import (
     ShowMyAccountsController,
 )
-from tests.flask_integration.session import FakeSession
+from tests.session import FakeSession
 
 
 class ControllerTests(TestCase):

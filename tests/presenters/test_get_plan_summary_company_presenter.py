@@ -16,6 +16,7 @@ TESTING_RESPONSE_MODEL = PlanSummaryCompanySuccess(
         plan_id=uuid4(),
         is_active=True,
         planner_id=uuid4(),
+        planner_name="planner name",
         product_name="test product name",
         description="test description",
         timeframe=7,

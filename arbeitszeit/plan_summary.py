@@ -9,6 +9,7 @@ class BusinessPlanSummary:
     plan_id: UUID
     is_active: bool
     planner_id: UUID
+    planner_name: str
     product_name: str
     description: str
     timeframe: int

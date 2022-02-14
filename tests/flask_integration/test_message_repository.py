@@ -1,17 +1,17 @@
 from typing import Optional, Union
 from unittest import TestCase
+from uuid import uuid4
 
 from hypothesis import given, strategies
 
 from arbeitszeit import repositories as interfaces
 from arbeitszeit.entities import Company, Member, Message, SocialAccounting
 from arbeitszeit.use_cases import ReadMessage, ReadMessageRequest
-from arbeitszeit.user_action import UserAction
+from arbeitszeit.user_action import UserAction, UserActionType
 from arbeitszeit_flask.database.repositories import (
     AccountingRepository,
     MessageRepository,
 )
-from tests import strategies as custom_strategies
 from tests.data_generators import CompanyGenerator, MemberGenerator
 
 from .dependency_injection import get_dependency_injector
@@ -42,22 +42,20 @@ class MessageRepositoryTests(TestCase):
             self.repo.get_by_id(expected_message.id),
         )
 
-    @given(
-        expected_user_action=strategies.one_of(
-            strategies.none(), custom_strategies.user_actions()
-        )
-    )
-    def test_user_action_is_stored_correctly(
-        self,
-        expected_user_action: Optional[UserAction],
-    ) -> None:
-        message = self._create_message(
-            user_action=expected_user_action,
-        )
-        self.assertEqual(
-            message.user_action,
-            expected_user_action,
-        )
+    def test_user_action_is_stored_correctly(self) -> None:
+        for action_type in UserActionType:
+            with self.subTest(msg=f"UserActionType={action_type}"):
+                expected_user_action = UserAction(
+                    type=action_type,
+                    reference=uuid4(),
+                )
+                message = self._create_message(
+                    user_action=expected_user_action,
+                )
+                self.assertEqual(
+                    message.user_action,
+                    expected_user_action,
+                )
 
     @given(
         expected_title=strategies.text(),
