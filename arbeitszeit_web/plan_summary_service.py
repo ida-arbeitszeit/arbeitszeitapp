@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import List, Optional, Protocol, Tuple
 
 from arbeitszeit.plan_summary import BusinessPlanSummary
-from arbeitszeit_web.url_index import CoopSummaryUrlIndex
+from arbeitszeit_web.url_index import CompanySummaryUrlIndex, CoopSummaryUrlIndex
 
 from .translator import Translator
 
@@ -12,7 +12,7 @@ from .translator import Translator
 class PlanSummary:
     plan_id: Tuple[str, str]
     is_active: Tuple[str, str]
-    planner_id: Tuple[str, str]
+    planner: Tuple[str, str, str, str]
     product_name: Tuple[str, str]
     description: Tuple[str, List[str]]
     timeframe: Tuple[str, str]
@@ -37,15 +37,18 @@ class PlanSummaryService(Protocol):
 @dataclass
 class PlanSummaryServiceImpl:
     coop_url_index: CoopSummaryUrlIndex
+    company_url_index: CompanySummaryUrlIndex
     trans: Translator
 
     def get_plan_summary_member(self, plan_summary: BusinessPlanSummary) -> PlanSummary:
         return PlanSummary(
             plan_id=("Plan-ID", str(plan_summary.plan_id)),
             is_active=("Status", "Aktiv" if plan_summary.is_active else "Inaktiv"),
-            planner_id=(
+            planner=(
                 self.trans.gettext("Planning company"),
                 str(plan_summary.planner_id),
+                self.company_url_index.get_company_summary_url(plan_summary.planner_id),
+                plan_summary.planner_name,
             ),
             product_name=(
                 self.trans.gettext("Name of product"),

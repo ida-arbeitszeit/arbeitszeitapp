@@ -2,10 +2,9 @@ from datetime import datetime, timedelta
 from unittest import TestCase
 from uuid import uuid4
 
-from arbeitszeit.entities import PurposesOfPurchases
+from arbeitszeit.entities import Company, PurposesOfPurchases
 from arbeitszeit.price_calculator import calculate_price
 from arbeitszeit.use_cases import (
-    Company,
     GetCompanyTransactions,
     PayMeansOfProduction,
     PayMeansOfProductionRequest,

@@ -11,6 +11,7 @@ BUSINESS_PLAN_SUMMARY = BusinessPlanSummary(
     plan_id=uuid4(),
     is_active=True,
     planner_id=uuid4(),
+    planner_name="test planner name",
     product_name="test product name",
     description="test description",
     timeframe=7,
@@ -30,8 +31,11 @@ BUSINESS_PLAN_SUMMARY = BusinessPlanSummary(
 class PlanSummaryServiceTests(TestCase):
     def setUp(self) -> None:
         self.coop_url_index = CoopSummaryUrlIndex()
+        self.company_url_index = CompanySummaryUrlIndex()
         self.translator = FakeTranslator()
-        self.service = PlanSummaryServiceImpl(self.coop_url_index, self.translator)
+        self.service = PlanSummaryServiceImpl(
+            self.coop_url_index, self.company_url_index, self.translator
+        )
 
     def test_plan_id_is_displayed_correctly_as_tuple_of_strings(self):
         plan_summary = self.service.get_plan_summary_member(BUSINESS_PLAN_SUMMARY)
@@ -51,7 +55,7 @@ class PlanSummaryServiceTests(TestCase):
         plan_summary = self.service.get_plan_summary_member(response)
         self.assertTupleEqual(plan_summary.is_active, ("Status", "Inaktiv"))
 
-    def test_planner_id_is_displayed_correctly_as_tuple_of_strings(self):
+    def test_planner_is_displayed_correctly_as_tuple_of_strings(self):
         expected_planner_id = uuid4()
         response = replace(
             BUSINESS_PLAN_SUMMARY,
@@ -59,7 +63,13 @@ class PlanSummaryServiceTests(TestCase):
         )
         plan_summary = self.service.get_plan_summary_member(response)
         self.assertTupleEqual(
-            plan_summary.planner_id, ("Planning company", str(expected_planner_id))
+            plan_summary.planner,
+            (
+                "Planning company",
+                str(expected_planner_id),
+                self.company_url_index.get_company_summary_url(expected_planner_id),
+                BUSINESS_PLAN_SUMMARY.planner_name,
+            ),
         )
 
     def test_product_name_is_displayed_correctly_as_tuple_of_strings(self):
@@ -199,3 +209,8 @@ class PlanSummaryServiceTests(TestCase):
 class CoopSummaryUrlIndex:
     def get_coop_summary_url(self, coop_id: UUID) -> str:
         return f"fake_coop_url:{coop_id}"
+
+
+class CompanySummaryUrlIndex:
+    def get_company_summary_url(self, company_id: UUID) -> str:
+        return f"fake_company_url:{company_id}"

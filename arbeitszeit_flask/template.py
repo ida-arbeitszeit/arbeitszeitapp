@@ -61,13 +61,11 @@ class UserTemplateRenderer:
     def _add_message_indicator_to_context(
         self, context: Dict[str, Any]
     ) -> Dict[str, Any]:
-        user_id = self.session.get_current_user()
-        if user_id is None:
+        try:
+            request = self.check_unread_messages_controller.create_use_case_request()
+        except ValueError:
             view_model = self.check_unread_messages_presenter.anonymous_view_model()
         else:
-            request = self.check_unread_messages_controller.create_use_case_request(
-                user_id
-            )
             response = self.check_unread_messages_use_case(request)
             view_model = self.check_unread_messages_presenter.present(response)
         return dict(context, message_indicator=view_model)

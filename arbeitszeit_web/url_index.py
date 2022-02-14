@@ -2,6 +2,16 @@ from typing import Protocol
 from uuid import UUID
 
 
+class AnswerCompanyWorkInviteUrlIndex(Protocol):
+    def get_answer_company_work_invite_url(self, invite_id: UUID) -> str:
+        ...
+
+
+class InviteUrlIndex(Protocol):
+    def get_invite_url(self, invite_id: UUID) -> str:
+        ...
+
+
 class PlanSummaryUrlIndex(Protocol):
     def get_plan_summary_url(self, plan_id: UUID) -> str:
         ...
@@ -34,6 +44,16 @@ class HidePlanUrlIndex(Protocol):
 
 class EndCoopUrlIndex(Protocol):
     def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
+        ...
+
+
+class CompanySummaryUrlIndex(Protocol):
+    def get_company_summary_url(self, company_id: UUID) -> str:
+        ...
+
+
+class ListMessagesUrlIndex(Protocol):
+    def get_list_messages_url(self) -> str:
         ...
 
 

@@ -8,7 +8,7 @@ from arbeitszeit_web.controllers.pay_means_of_production_controller import (
     PayMeansOfProductionController,
 )
 from tests.flask_integration.request import FakeRequest
-from tests.flask_integration.session import FakeSession
+from tests.session import FakeSession
 
 
 class FakePayMeansForm:

@@ -6,7 +6,7 @@ from arbeitszeit_web.controllers.end_cooperation_controller import (
     EndCooperationController,
 )
 from tests.flask_integration.request import FakeRequest
-from tests.flask_integration.session import FakeSession
+from tests.session import FakeSession
 
 
 class EndCooperationControllerTests(TestCase):

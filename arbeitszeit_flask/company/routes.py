@@ -16,6 +16,7 @@ from arbeitszeit.use_cases import (
     DenyCooperation,
     DenyCooperationRequest,
     DenyCooperationResponse,
+    GetCompanySummary,
     GetDraftSummary,
     GetPlanSummaryMember,
     HidePlan,
@@ -33,6 +34,7 @@ from arbeitszeit.use_cases import (
     SendWorkCertificatesToWorker,
     ToggleProductAvailability,
 )
+from arbeitszeit.use_cases.list_workers import ListWorkersRequest
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_flask.database import (
     CompanyRepository,
@@ -43,6 +45,7 @@ from arbeitszeit_flask.database import (
 from arbeitszeit_flask.forms import (
     CompanySearchForm,
     CreateDraftForm,
+    InviteWorkerToCompanyForm,
     PayMeansOfProductionForm,
     PlanSearchForm,
     RequestCooperationForm,
@@ -51,6 +54,7 @@ from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_flask.views import (
     EndCooperationView,
     Http404View,
+    InviteWorkerToCompanyView,
     ListMessagesView,
     QueryCompaniesView,
     QueryPlansView,
@@ -60,6 +64,7 @@ from arbeitszeit_flask.views import (
 from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
+from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_plan_summary_company import (
@@ -107,37 +112,6 @@ def profile(
         having_workers = False
     return template_renderer.render_template(
         "company/profile.html", context=dict(having_workers=having_workers)
-    )
-
-
-@CompanyRoute("/company/work", methods=["GET", "POST"])
-@commit_changes
-def arbeit(
-    list_workers: ListWorkers,
-    company_repository: CompanyRepository,
-    member_repository: MemberRepository,
-    company_worker_repository: CompanyWorkerRepository,
-    template_renderer: UserTemplateRenderer,
-):
-    """shows workers and add workers to company."""
-    company = company_repository.get_by_id(UUID(current_user.id))
-    assert company is not None
-    if request.method == "POST":  # add worker to company
-        member = member_repository.get_by_id(UUID(str(request.form["member"]).strip()))
-        assert member is not None
-        try:
-            use_cases.add_worker_to_company(
-                company_worker_repository,
-                company,
-                member,
-            )
-        except errors.WorkerAlreadyAtCompany:
-            flash("Mitglied ist bereits in diesem Betrieb beschäftigt.")
-        return redirect(url_for("main_company.arbeit"))
-
-    workers_list = list_workers(company.id)
-    return template_renderer.render_template(
-        "company/work.html", context=dict(workers_list=workers_list.workers)
     )
 
 
@@ -455,7 +429,7 @@ def transfer_to_worker(
         else:
             flash("Erfolgreich überwiesen.", "is-success")
 
-    workers_list = list_workers(company.id)
+    workers_list = list_workers(ListWorkersRequest(company=company.id))
     return template_renderer.render_template(
         "company/transfer_to_worker.html",
         context=dict(workers_list=workers_list.workers),
@@ -498,6 +472,25 @@ def plan_summary(
         view_model = presenter.present(use_case_response)
         return template_renderer.render_template(
             "company/plan_summary.html", context=dict(view_model=view_model.to_dict())
+        )
+    else:
+        return http_404_view.get_response()
+
+
+@CompanyRoute("/company/company_summary/<uuid:company_id>")
+def company_summary(
+    company_id: UUID,
+    get_company_summary: GetCompanySummary,
+    template_renderer: UserTemplateRenderer,
+    presenter: GetCompanySummarySuccessPresenter,
+    http_404_view: Http404View,
+):
+    use_case_response = get_company_summary(company_id)
+    if isinstance(use_case_response, use_cases.GetCompanySummarySuccess):
+        view_model = presenter.present(use_case_response)
+        return template_renderer.render_template(
+            "company/company_summary.html",
+            context=dict(view_model=view_model.to_dict()),
         )
     else:
         return http_404_view.get_response()
@@ -673,6 +666,17 @@ def list_messages(
         template_name="company/list_messages.html",
     )
     return view.respond_to_get()
+
+
+@CompanyRoute("/company/invite_worker_to_company", methods=["GET", "POST"])
+def invite_worker_to_company(
+    view: InviteWorkerToCompanyView,
+) -> Response:
+    form = InviteWorkerToCompanyForm(request.form)
+    if request.method == "POST":
+        return view.respond_to_post(form)
+    else:
+        return view.respond_to_get(form)
 
 
 @CompanyRoute("/company/messages/<uuid:message_id>")

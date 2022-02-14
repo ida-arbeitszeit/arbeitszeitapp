@@ -20,14 +20,19 @@ class ListWorkersResponse:
     workers: List[ListedWorker]
 
 
+@dataclass
+class ListWorkersRequest:
+    company: UUID
+
+
 @inject
 @dataclass
 class ListWorkers:
     company_repository: CompanyRepository
     company_worker_repository: CompanyWorkerRepository
 
-    def __call__(self, company_id: UUID) -> ListWorkersResponse:
-        company = self.company_repository.get_by_id(company_id)
+    def __call__(self, request: ListWorkersRequest) -> ListWorkersResponse:
+        company = self.company_repository.get_by_id(request.company)
         if company is None:
             return ListWorkersResponse(workers=[])
         members = self.company_worker_repository.get_company_workers(company)
