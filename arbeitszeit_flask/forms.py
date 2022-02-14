@@ -166,6 +166,18 @@ class CreateDraftForm(Form):
         return self.data["action"]
 
 
+class InviteWorkerToCompanyForm(Form):
+    member_id = StringField(
+        validators=[
+            FieldMustExist(message="Angabe erforderlich"),
+        ],
+        render_kw={"placeholder": "Mitglieder-ID"},
+    )
+
+    def get_worker_id(self) -> str:
+        return self.data["member_id"]
+
+
 class RequestCooperationForm(Form):
     plan_id = StringField()
     cooperation_id = StringField()
@@ -175,3 +187,10 @@ class RequestCooperationForm(Form):
 
     def get_cooperation_id_string(self) -> str:
         return self.data["cooperation_id"]
+
+
+class AnswerCompanyWorkInviteForm(Form):
+    is_accepted = BooleanField()
+
+    def get_is_accepted_field(self) -> bool:
+        return self.data["is_accepted"]

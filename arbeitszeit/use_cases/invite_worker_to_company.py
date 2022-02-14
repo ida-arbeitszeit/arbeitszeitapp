@@ -10,6 +10,7 @@ from arbeitszeit.repositories import (
     MessageRepository,
     WorkerInviteRepository,
 )
+from arbeitszeit.user_action import UserAction, UserActionType
 
 
 @dataclass
@@ -55,6 +56,9 @@ class InviteWorkerToCompany:
                 title=f"Company {sender.name} invited you to join them",
                 content="",
                 sender_remarks=None,
-                reference=None,
+                reference=UserAction(
+                    type=UserActionType.answer_invite,
+                    reference=invite_id,
+                ),
             )
             return InviteWorkerToCompanyResponse(is_success=True, invite_id=invite_id)

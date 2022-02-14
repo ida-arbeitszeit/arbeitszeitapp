@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from flask import Response
 
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts
-from arbeitszeit_flask.template import UserTemplateRenderer
+from arbeitszeit_flask.template import TemplateRenderer
 from arbeitszeit_web.controllers.show_my_accounts_controller import (
     ShowMyAccountsController,
 )
@@ -14,7 +14,7 @@ from arbeitszeit_web.presenters.show_my_accounts_presenter import (
 
 @dataclass
 class ShowMyAccountsView:
-    template_renderer: UserTemplateRenderer
+    template_renderer: TemplateRenderer
     controller: ShowMyAccountsController
     use_case: ShowMyAccounts
     presenter: ShowMyAccountsPresenter

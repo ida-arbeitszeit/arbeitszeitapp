@@ -34,6 +34,7 @@ from arbeitszeit.use_cases import (
     SendWorkCertificatesToWorker,
     ToggleProductAvailability,
 )
+from arbeitszeit.use_cases.list_workers import ListWorkersRequest
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_flask.database import (
     CompanyRepository,
@@ -44,12 +45,14 @@ from arbeitszeit_flask.database import (
 from arbeitszeit_flask.forms import (
     CompanySearchForm,
     CreateDraftForm,
+    InviteWorkerToCompanyForm,
     PlanSearchForm,
     RequestCooperationForm,
 )
 from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_flask.views import (
     Http404View,
+    InviteWorkerToCompanyView,
     ListMessagesView,
     QueryCompaniesView,
     QueryPlansView,
@@ -105,37 +108,6 @@ def profile(
         having_workers = False
     return template_renderer.render_template(
         "company/profile.html", context=dict(having_workers=having_workers)
-    )
-
-
-@CompanyRoute("/company/work", methods=["GET", "POST"])
-@commit_changes
-def arbeit(
-    list_workers: ListWorkers,
-    company_repository: CompanyRepository,
-    member_repository: MemberRepository,
-    company_worker_repository: CompanyWorkerRepository,
-    template_renderer: UserTemplateRenderer,
-):
-    """shows workers and add workers to company."""
-    company = company_repository.get_by_id(UUID(current_user.id))
-    assert company is not None
-    if request.method == "POST":  # add worker to company
-        member = member_repository.get_by_id(UUID(str(request.form["member"]).strip()))
-        assert member is not None
-        try:
-            use_cases.add_worker_to_company(
-                company_worker_repository,
-                company,
-                member,
-            )
-        except errors.WorkerAlreadyAtCompany:
-            flash("Mitglied ist bereits in diesem Betrieb beschäftigt.")
-        return redirect(url_for("main_company.arbeit"))
-
-    workers_list = list_workers(company.id)
-    return template_renderer.render_template(
-        "company/work.html", context=dict(workers_list=workers_list.workers)
     )
 
 
@@ -448,7 +420,7 @@ def transfer_to_worker(
         else:
             flash("Erfolgreich überwiesen.", "is-success")
 
-    workers_list = list_workers(company.id)
+    workers_list = list_workers(ListWorkersRequest(company=company.id))
     return template_renderer.render_template(
         "company/transfer_to_worker.html",
         context=dict(workers_list=workers_list.workers),
@@ -696,6 +668,17 @@ def list_messages(
         template_name="company/list_messages.html",
     )
     return view.respond_to_get()
+
+
+@CompanyRoute("/company/invite_worker_to_company", methods=["GET", "POST"])
+def invite_worker_to_company(
+    view: InviteWorkerToCompanyView,
+) -> Response:
+    form = InviteWorkerToCompanyForm(request.form)
+    if request.method == "POST":
+        return view.respond_to_post(form)
+    else:
+        return view.respond_to_get(form)
 
 
 @CompanyRoute("/company/messages/<uuid:message_id>")

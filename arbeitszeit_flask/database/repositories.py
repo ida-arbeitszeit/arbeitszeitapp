@@ -14,6 +14,7 @@ from werkzeug.security import generate_password_hash
 from arbeitszeit import entities, repositories
 from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.user_action import UserAction
+from arbeitszeit_flask import models
 from arbeitszeit_flask.models import (
     Account,
     AccountTypes,
@@ -930,6 +931,14 @@ class MessageRepository(repositories.MessageRepository):
         sender = self._get_user_or_social_accounting(UUID(message.sender))
         if sender is None:
             raise Exception("Internal error, sender of message could not be retrieved")
+        if message.user_action is None:
+            user_action = None
+        else:
+            user_action_orm = models.UserAction.query.get(message.user_action)
+            user_action = UserAction(
+                type=user_action_orm.action_type,
+                reference=UUID(user_action_orm.reference),
+            )
         return entities.Message(
             sender=sender,
             id=UUID(message.id),
@@ -937,7 +946,7 @@ class MessageRepository(repositories.MessageRepository):
             content=message.content,
             addressee=addressee,
             sender_remarks=message.sender_remarks,
-            user_action=message.user_action,
+            user_action=user_action,
             is_read=message.is_read,
         )
 
@@ -962,13 +971,23 @@ class MessageRepository(repositories.MessageRepository):
         sender_remarks: Optional[str],
         reference: Optional[UserAction],
     ) -> entities.Message:
+        if reference is not None:
+            user_action: Optional[models.UserAction] = models.UserAction(
+                id=str(uuid4()),
+                action_type=reference.type,
+                reference=str(reference.reference),
+            )
+            self.db.session.add(user_action)
+            self.db.session.flush()
+        else:
+            user_action = None
         message = Message(
             id=str(uuid4()),
             sender=str(sender.id),
             addressee=str(addressee.id),
             title=title,
             content=content,
-            user_action=reference,
+            user_action=user_action.id if user_action is not None else None,
             sender_remarks=sender_remarks,
             is_read=False,
         )

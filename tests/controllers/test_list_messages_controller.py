@@ -2,7 +2,7 @@ from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit_web.list_messages import ListMessagesController
-from tests.flask_integration.session import FakeSession
+from tests.session import FakeSession
 
 
 class ListMessagesControllerTests(TestCase):

@@ -1,3 +1,6 @@
+from uuid import UUID
+
+from arbeitszeit.use_cases import InviteWorkerToCompany, InviteWorkerToCompanyRequest
 from arbeitszeit_flask.url_index import CompanyUrlIndex, MemberUrlIndex
 from tests.data_generators import (
     CompanyGenerator,
@@ -46,6 +49,11 @@ class CompanyUrlIndexTests(ViewTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
+    def test_list_messages_url_leads_to_functions_address(self) -> None:
+        url = self.url_index.get_list_messages_url()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
 
 class MemberUrlIndexTests(ViewTestCase):
     def setUp(self) -> None:
@@ -56,6 +64,8 @@ class MemberUrlIndexTests(ViewTestCase):
         self.member, _, self.email = self.login_member()
         self.member = self.confirm_member(member=self.member, email=self.email)
         self.cooperation_generator = self.injector.get(CooperationGenerator)
+        self.company_generator = self.injector.get(CompanyGenerator)
+        self.invite_worker_to_company = self.injector.get(InviteWorkerToCompany)
 
     def test_plan_summary_url_for_existing_plan_leads_to_functional_url(self) -> None:
         plan = self.plan_generator.create_plan()
@@ -82,3 +92,24 @@ class MemberUrlIndexTests(ViewTestCase):
         url = self.url_index.get_company_summary_url(company.id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
+
+    def test_invite_url_for_existing_invite_leads_to_functional_url(self) -> None:
+        invite_id = self._create_invite()
+        url = self.url_index.get_invite_url(invite_id)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_list_messages_url_leads_to_functions_address(self) -> None:
+        url = self.url_index.get_list_messages_url()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def _create_invite(self) -> UUID:
+        company = self.company_generator.create_company()
+        response = self.invite_worker_to_company(
+            InviteWorkerToCompanyRequest(
+                company=company.id,
+                worker=self.member.id,
+            )
+        )
+        return response.invite_id

@@ -4,6 +4,7 @@ from uuid import UUID
 
 from arbeitszeit.use_cases import RequestCooperationRequest, RequestCooperationResponse
 
+from .malformed_input_data import MalformedInputData
 from .session import Session
 
 
@@ -80,11 +81,6 @@ class RequestCooperationForm(Protocol):
 class RequestCooperationController:
     session: Session
 
-    @dataclass
-    class MalformedInputData:
-        field: str
-        message: str
-
     def import_form_data(
         self, form: RequestCooperationForm
     ) -> Union[RequestCooperationRequest, MalformedInputData, None]:
@@ -94,13 +90,11 @@ class RequestCooperationController:
         try:
             plan_uuid = UUID(form.get_plan_id_string())
         except ValueError:
-            return self.MalformedInputData("plan_id", "Plan-ID ist ungültig.")
+            return MalformedInputData("plan_id", "Plan-ID ist ungültig.")
         try:
             cooperation_uuid = UUID(form.get_cooperation_id_string())
         except ValueError:
-            return self.MalformedInputData(
-                "cooperation_id", "Kooperations-ID ist ungültig."
-            )
+            return MalformedInputData("cooperation_id", "Kooperations-ID ist ungültig.")
         return RequestCooperationRequest(
             requester_id=current_user,
             plan_id=plan_uuid,
