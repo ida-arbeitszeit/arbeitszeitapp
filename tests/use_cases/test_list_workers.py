@@ -1,10 +1,18 @@
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from arbeitszeit.entities import Company, Member
-from arbeitszeit.use_cases import ListWorkers, ListWorkersResponse
+from arbeitszeit.use_cases.list_workers import (
+    ListWorkers,
+    ListWorkersRequest,
+    ListWorkersResponse,
+)
 from tests.data_generators import CompanyGenerator, MemberGenerator
 
 from .dependency_injection import injection_test
+
+
+def make_request(company: UUID) -> ListWorkersRequest:
+    return ListWorkersRequest(company)
 
 
 def worker_in_results(worker: Member, response: ListWorkersResponse) -> bool:
@@ -22,7 +30,7 @@ def worker_in_results(worker: Member, response: ListWorkersResponse) -> bool:
 def test_list_workers_response_is_empty_for_nonexisting_company(
     list_workers: ListWorkers,
 ):
-    response: ListWorkersResponse = list_workers(company_id=uuid4())
+    response: ListWorkersResponse = list_workers(make_request(company=uuid4()))
     assert not response.workers
 
 
@@ -32,7 +40,7 @@ def test_list_workers_response_is_empty_for_company_without_worker(
     company_generator: CompanyGenerator,
 ):
     company: Company = company_generator.create_company()
-    response: ListWorkersResponse = list_workers(company_id=company.id)
+    response: ListWorkersResponse = list_workers(make_request(company=company.id))
     assert not response.workers
 
 
@@ -44,7 +52,7 @@ def test_list_workers_response_includes_single_company_worker(
 ):
     worker: Member = member_generator.create_member()
     company: Company = company_generator.create_company(workers=[worker])
-    response: ListWorkersResponse = list_workers(company_id=company.id)
+    response: ListWorkersResponse = list_workers(make_request(company=company.id))
     assert worker_in_results(worker, response)
 
 
@@ -57,5 +65,5 @@ def test_list_workers_response_includes_multiple_company_workers(
     worker1: Member = member_generator.create_member()
     worker2: Member = member_generator.create_member()
     company: Company = company_generator.create_company(workers=[worker1, worker2])
-    response: ListWorkersResponse = list_workers(company_id=company.id)
+    response: ListWorkersResponse = list_workers(make_request(company=company.id))
     assert worker_in_results(worker1, response) and worker_in_results(worker2, response)

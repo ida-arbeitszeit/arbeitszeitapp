@@ -2,7 +2,6 @@ from os import environ
 
 from arbeitszeit_flask.configuration_base import *
 
-
 FLASK_ENV = "production"
 DEBUG = False
 TESTING = False

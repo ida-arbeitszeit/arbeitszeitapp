@@ -5,14 +5,17 @@ from flask_login import current_user
 
 from arbeitszeit import use_cases
 from arbeitszeit.use_cases import ListMessages
+from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
 from arbeitszeit_flask.database import MemberRepository, commit_changes
 from arbeitszeit_flask.forms import (
+    AnswerCompanyWorkInviteForm,
     CompanySearchForm,
     PayConsumerProductForm,
     PlanSearchForm,
 )
 from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_flask.views import (
+    CompanyWorkInviteView,
     Http404View,
     ListMessagesView,
     PayConsumerProductView,
@@ -20,9 +23,10 @@ from arbeitszeit_flask.views import (
     QueryPlansView,
     ReadMessageView,
 )
+from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
-from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
+from arbeitszeit_web.get_plan_summary_member import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 from arbeitszeit_web.pay_consumer_product import (
@@ -173,12 +177,12 @@ def statistics(
 @MemberRoute("/member/plan_summary/<uuid:plan_id>")
 def plan_summary(
     plan_id: UUID,
-    get_plan_summary: use_cases.GetPlanSummary,
+    get_plan_summary_member: use_cases.GetPlanSummaryMember,
     template_renderer: UserTemplateRenderer,
     presenter: GetPlanSummarySuccessPresenter,
     http_404_view: Http404View,
 ) -> Response:
-    use_case_response = get_plan_summary(plan_id)
+    use_case_response = get_plan_summary_member(plan_id)
     if isinstance(use_case_response, use_cases.PlanSummarySuccess):
         view_model = presenter.present(use_case_response)
         return Response(
@@ -186,6 +190,25 @@ def plan_summary(
                 "member/plan_summary.html",
                 context=dict(view_model=view_model.to_dict()),
             )
+        )
+    else:
+        return http_404_view.get_response()
+
+
+@MemberRoute("/member/company_summary/<uuid:company_id>")
+def company_summary(
+    company_id: UUID,
+    get_company_summary: GetCompanySummary,
+    template_renderer: UserTemplateRenderer,
+    presenter: GetCompanySummarySuccessPresenter,
+    http_404_view: Http404View,
+):
+    use_case_response = get_company_summary(company_id)
+    if isinstance(use_case_response, use_cases.GetCompanySummarySuccess):
+        view_model = presenter.present(use_case_response)
+        return template_renderer.render_template(
+            "member/company_summary.html",
+            context=dict(view_model=view_model.to_dict()),
         )
     else:
         return http_404_view.get_response()
@@ -242,3 +265,12 @@ def read_message(
     view: ReadMessageView,
 ) -> Response:
     return view.respond_to_get(message_id)
+
+
+@MemberRoute("/member/invite_details/<uuid:invite_id>", methods=["GET", "POST"])
+def show_company_work_invite(invite_id: UUID, view: CompanyWorkInviteView):
+    form = AnswerCompanyWorkInviteForm(request.form)
+    if request.method == "POST":
+        return view.respond_to_post(form, invite_id)
+    else:
+        return view.respond_to_get(invite_id)

@@ -1,13 +1,15 @@
 from decimal import Decimal
 from uuid import uuid4
 
-from arbeitszeit.use_cases import DraftSummarySuccess, PlanSummarySuccess
+from arbeitszeit.plan_summary import BusinessPlanSummary
+from arbeitszeit.use_cases import DraftSummarySuccess
 from arbeitszeit_web.get_prefilled_draft_data import GetPrefilledDraftDataPresenter
 
-TEST_PLAN_SUMMARY_SUCCESS = PlanSummarySuccess(
+BUSINESS_PLAN_SUMMARY = BusinessPlanSummary(
     plan_id=uuid4(),
     is_active=True,
     planner_id=uuid4(),
+    planner_name="test name",
     product_name="test",
     description="beschreibung",
     timeframe=10,
@@ -40,17 +42,17 @@ TEST_DRAFT_SUMMARY_SUCCESS = DraftSummarySuccess(
 
 def test_correct_refilled_data_is_returned_for_plan_summary():
     get_prefilled_data = GetPrefilledDraftDataPresenter()
-    result = get_prefilled_data.present(TEST_PLAN_SUMMARY_SUCCESS, True)
+    result = get_prefilled_data.present(BUSINESS_PLAN_SUMMARY, True)
     assert result.from_expired_plan == True
-    assert result.product_name == TEST_PLAN_SUMMARY_SUCCESS.product_name
-    assert result.description == TEST_PLAN_SUMMARY_SUCCESS.description
-    assert result.timeframe == str(TEST_PLAN_SUMMARY_SUCCESS.timeframe)
-    assert result.production_unit == TEST_PLAN_SUMMARY_SUCCESS.production_unit
-    assert result.amount == str(TEST_PLAN_SUMMARY_SUCCESS.amount)
-    assert result.means_cost == str(TEST_PLAN_SUMMARY_SUCCESS.means_cost)
-    assert result.resources_cost == str(TEST_PLAN_SUMMARY_SUCCESS.resources_cost)
-    assert result.labour_cost == str(TEST_PLAN_SUMMARY_SUCCESS.labour_cost)
-    assert result.is_public_service == TEST_PLAN_SUMMARY_SUCCESS.is_public_service
+    assert result.product_name == BUSINESS_PLAN_SUMMARY.product_name
+    assert result.description == BUSINESS_PLAN_SUMMARY.description
+    assert result.timeframe == str(BUSINESS_PLAN_SUMMARY.timeframe)
+    assert result.production_unit == BUSINESS_PLAN_SUMMARY.production_unit
+    assert result.amount == str(BUSINESS_PLAN_SUMMARY.amount)
+    assert result.means_cost == str(BUSINESS_PLAN_SUMMARY.means_cost)
+    assert result.resources_cost == str(BUSINESS_PLAN_SUMMARY.resources_cost)
+    assert result.labour_cost == str(BUSINESS_PLAN_SUMMARY.labour_cost)
+    assert result.is_public_service == BUSINESS_PLAN_SUMMARY.is_public_service
 
 
 def test_correct_refilled_data_is_returned_for_draft_summary():
