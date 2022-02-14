@@ -31,7 +31,6 @@ from arbeitszeit.entities import (
 from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
-    CompanyWorkerRepository,
     CooperationRepository,
     MemberRepository,
     MessageRepository,

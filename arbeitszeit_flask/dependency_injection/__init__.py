@@ -19,6 +19,7 @@ from arbeitszeit import repositories as interfaces
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.token import TokenDeliverer, TokenService
 from arbeitszeit.use_cases import CheckForUnreadMessages
+from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts
 from arbeitszeit_flask.database import get_social_accounting
 from arbeitszeit_flask.database.repositories import (
     AccountOwnerRepository,
@@ -67,6 +68,9 @@ from arbeitszeit_web.check_for_unread_message import (
 from arbeitszeit_web.controllers.list_workers_controller import ListWorkersController
 from arbeitszeit_web.controllers.show_company_work_invite_details_controller import (
     ShowCompanyWorkInviteDetailsController,
+)
+from arbeitszeit_web.controllers.show_my_accounts_controller import (
+    ShowMyAccountsController,
 )
 from arbeitszeit_web.email import EmailConfiguration
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
@@ -391,6 +395,20 @@ class FlaskModule(Module):
     @provider
     def provide_translator(self) -> Translator:
         return FlaskTranslator()
+
+    @provider
+    def provide_show_my_accounts_controller(
+        self, session: FlaskSession
+    ) -> ShowMyAccountsController:
+        return ShowMyAccountsController(session)
+
+    @provider
+    def provide_show_my_accounts_use_case(
+        self,
+        company_repository: CompanyRepository,
+        account_repository: AccountRepository,
+    ) -> ShowMyAccounts:
+        return ShowMyAccounts(company_repository, account_repository)
 
     def configure(self, binder: Binder) -> None:
         binder.bind(

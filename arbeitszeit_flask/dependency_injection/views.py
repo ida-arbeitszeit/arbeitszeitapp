@@ -7,6 +7,7 @@ from arbeitszeit.use_cases import (
     ShowCompanyWorkInviteDetailsUseCase,
 )
 from arbeitszeit.use_cases.list_workers import ListWorkers
+from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts
 from arbeitszeit_flask.template import TemplateIndex, TemplateRenderer
 from arbeitszeit_flask.views import (
     CompanyWorkInviteView,
@@ -18,6 +19,7 @@ from arbeitszeit_flask.views.invite_worker_to_company import (
     InviteWorkerGetRequestHandler,
     InviteWorkerPostRequestHandler,
 )
+from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
 from arbeitszeit_web.answer_company_work_invite import (
     AnswerCompanyWorkInviteController,
     AnswerCompanyWorkInvitePresenter,
@@ -26,6 +28,9 @@ from arbeitszeit_web.controllers.list_workers_controller import ListWorkersContr
 from arbeitszeit_web.controllers.show_company_work_invite_details_controller import (
     ShowCompanyWorkInviteDetailsController,
 )
+from arbeitszeit_web.controllers.show_my_accounts_controller import (
+    ShowMyAccountsController,
+)
 from arbeitszeit_web.invite_worker_to_company import (
     InviteWorkerToCompanyController,
     InviteWorkerToCompanyPresenter,
@@ -33,6 +38,9 @@ from arbeitszeit_web.invite_worker_to_company import (
 from arbeitszeit_web.presenters.list_workers_presenter import ListWorkersPresenter
 from arbeitszeit_web.presenters.show_company_work_invite_details_presenter import (
     ShowCompanyWorkInviteDetailsPresenter,
+)
+from arbeitszeit_web.presenters.show_my_accounts_presenter import (
+    ShowMyAccountsPresenter,
 )
 from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
 
@@ -134,3 +142,13 @@ class ViewsModule(Module):
             use_case=use_case,
             presenter=presenter,
         )
+
+    @provider
+    def provide_show_my_accounts_view(
+        self,
+        template_renderer: TemplateRenderer,
+        controller: ShowMyAccountsController,
+        use_case: ShowMyAccounts,
+        presenter: ShowMyAccountsPresenter,
+    ) -> ShowMyAccountsView:
+        return ShowMyAccountsView(template_renderer, controller, use_case, presenter)
