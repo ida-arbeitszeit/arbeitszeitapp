@@ -12,7 +12,7 @@
           python = pkgs.python3;
         in {
           devShell = pkgs.mkShell {
-            packages = (with python.pkgs; [ black flake8 mypy isort ])
+            packages = (with python.pkgs; [ black flake8 mypy isort psycopg2 ])
               ++ (with pkgs; [ nixfmt ]);
             inputsFrom = [ python.pkgs.arbeitszeitapp ];
           };

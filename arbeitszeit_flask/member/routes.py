@@ -7,12 +7,14 @@ from arbeitszeit import use_cases
 from arbeitszeit.use_cases import ListMessages
 from arbeitszeit_flask.database import MemberRepository, commit_changes
 from arbeitszeit_flask.forms import (
+    AnswerCompanyWorkInviteForm,
     CompanySearchForm,
     PayConsumerProductForm,
     PlanSearchForm,
 )
 from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_flask.views import (
+    CompanyWorkInviteView,
     Http404View,
     ListMessagesView,
     PayConsumerProductView,
@@ -242,3 +244,12 @@ def read_message(
     view: ReadMessageView,
 ) -> Response:
     return view.respond_to_get(message_id)
+
+
+@MemberRoute("/member/invite_details/<uuid:invite_id>", methods=["GET", "POST"])
+def show_company_work_invite(invite_id: UUID, view: CompanyWorkInviteView):
+    form = AnswerCompanyWorkInviteForm(request.form)
+    if request.method == "POST":
+        return view.respond_to_post(form, invite_id)
+    else:
+        return view.respond_to_get(invite_id)
