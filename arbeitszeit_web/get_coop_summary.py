@@ -4,15 +4,16 @@ from typing import Any, Dict, List
 
 from arbeitszeit.use_cases.get_coop_summary import GetCoopSummarySuccess
 
+from .url_index import EndCoopUrlIndex, PlanSummaryUrlIndex
+
 
 @dataclass
 class AssociatedPlanPresentation:
-    plan_id: str
     plan_name: str
-    plan_total_costs: str
-    plan_amount: str
+    plan_url: str
     plan_individual_price: str
     plan_coop_price: str
+    end_coop_url: str
 
 
 @dataclass
@@ -29,7 +30,11 @@ class GetCoopSummaryViewModel:
         return asdict(self)
 
 
+@dataclass
 class GetCoopSummarySuccessPresenter:
+    plan_url_index: PlanSummaryUrlIndex
+    end_coop_url_index: EndCoopUrlIndex
+
     def present(self, response: GetCoopSummarySuccess) -> GetCoopSummaryViewModel:
         return GetCoopSummaryViewModel(
             show_end_coop_button=response.requester_is_coordinator,
@@ -39,14 +44,15 @@ class GetCoopSummarySuccessPresenter:
             coordinator_id=str(response.coordinator_id),
             plans=[
                 AssociatedPlanPresentation(
-                    plan_id=str(plan.plan_id),
                     plan_name=plan.plan_name,
-                    plan_total_costs=str(plan.plan_total_costs),
-                    plan_amount=str(plan.plan_amount),
+                    plan_url=self.plan_url_index.get_plan_summary_url(plan.plan_id),
                     plan_individual_price=self.__format_price(
                         plan.plan_individual_price
                     ),
                     plan_coop_price=self.__format_price(plan.plan_coop_price),
+                    end_coop_url=self.end_coop_url_index.get_end_coop_url(
+                        plan_id=plan.plan_id, cooperation_id=response.coop_id
+                    ),
                 )
                 for plan in response.plans
             ],

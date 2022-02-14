@@ -26,7 +26,7 @@ from arbeitszeit_flask.views import (
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
-from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
+from arbeitszeit_web.get_plan_summary_member import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 from arbeitszeit_web.pay_consumer_product import (
@@ -177,12 +177,12 @@ def statistics(
 @MemberRoute("/member/plan_summary/<uuid:plan_id>")
 def plan_summary(
     plan_id: UUID,
-    get_plan_summary: use_cases.GetPlanSummary,
+    get_plan_summary_member: use_cases.GetPlanSummaryMember,
     template_renderer: UserTemplateRenderer,
     presenter: GetPlanSummarySuccessPresenter,
     http_404_view: Http404View,
 ) -> Response:
-    use_case_response = get_plan_summary(plan_id)
+    use_case_response = get_plan_summary_member(plan_id)
     if isinstance(use_case_response, use_cases.PlanSummarySuccess):
         view_model = presenter.present(use_case_response)
         return Response(

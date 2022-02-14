@@ -18,7 +18,7 @@ from arbeitszeit.use_cases import (
     DenyCooperationResponse,
     GetCompanySummary,
     GetDraftSummary,
-    GetPlanSummary,
+    GetPlanSummaryMember,
     HidePlan,
     ListAllCooperations,
     ListCoordinations,
@@ -51,6 +51,7 @@ from arbeitszeit_flask.forms import (
 )
 from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_flask.views import (
+    EndCooperationView,
     Http404View,
     InviteWorkerToCompanyView,
     ListMessagesView,
@@ -64,7 +65,9 @@ from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
-from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
+from arbeitszeit_web.get_plan_summary_company import (
+    GetPlanSummaryCompanySuccessPresenter,
+)
 from arbeitszeit_web.get_prefilled_draft_data import (
     GetPrefilledDraftDataPresenter,
     PrefilledDraftDataController,
@@ -175,7 +178,7 @@ def my_purchases(
 @commit_changes
 def create_draft_from_expired_plan(
     create_draft: CreatePlanDraft,
-    get_plan_summary: GetPlanSummary,
+    get_plan_summary_member: GetPlanSummaryMember,
     get_prefilled_draft_data_presenter: GetPrefilledDraftDataPresenter,
     controller: PrefilledDraftDataController,
     template_renderer: UserTemplateRenderer,
@@ -205,10 +208,15 @@ def create_draft_from_expired_plan(
                 )
             )
 
-    plan_summary = get_plan_summary(expired_plan_uuid) if expired_plan_uuid else None
+    plan_summary_success = (
+        get_plan_summary_member(expired_plan_uuid) if expired_plan_uuid else None
+    )
+
     prefilled_draft_data = (
-        get_prefilled_draft_data_presenter.present(plan_summary, from_expired_plan=True)
-        if plan_summary
+        get_prefilled_draft_data_presenter.present(
+            plan_summary_success.plan_summary, from_expired_plan=True
+        )
+        if plan_summary_success
         else None
     )
     return template_renderer.render_template(
@@ -324,7 +332,7 @@ def my_plans(
 @commit_changes
 def toggle_availability(plan_id: UUID, toggle_availability: ToggleProductAvailability):
     toggle_availability(UUID(current_user.id), plan_id)
-    return redirect(url_for("main_company.my_plans"))
+    return redirect(url_for("main_company.plan_summary", plan_id=plan_id))
 
 
 @CompanyRoute("/company/hide_plan/<uuid:plan_id>", methods=["GET", "POST"])
@@ -464,13 +472,13 @@ def statistics(
 @CompanyRoute("/company/plan_summary/<uuid:plan_id>")
 def plan_summary(
     plan_id: UUID,
-    get_plan_summary: use_cases.GetPlanSummary,
+    get_plan_summary_member: use_cases.GetPlanSummaryCompany,
     template_renderer: UserTemplateRenderer,
-    presenter: GetPlanSummarySuccessPresenter,
+    presenter: GetPlanSummaryCompanySuccessPresenter,
     http_404_view: Http404View,
 ):
-    use_case_response = get_plan_summary(plan_id)
-    if isinstance(use_case_response, use_cases.PlanSummarySuccess):
+    use_case_response = get_plan_summary_member(plan_id)
+    if isinstance(use_case_response, use_cases.PlanSummaryCompanySuccess):
         view_model = presenter.present(use_case_response)
         return template_renderer.render_template(
             "company/plan_summary.html", context=dict(view_model=view_model.to_dict())
@@ -688,3 +696,11 @@ def read_message(
     view: ReadMessageView,
 ) -> Response:
     return view.respond_to_get(message_id)
+
+
+@CompanyRoute("/company/end_cooperation")
+@commit_changes
+def end_cooperation(
+    view: EndCooperationView,
+) -> Response:
+    return view.respond_to_get()

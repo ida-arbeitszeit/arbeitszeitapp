@@ -27,6 +27,26 @@ class CoopSummaryUrlIndex(Protocol):
         ...
 
 
+class TogglePlanAvailabilityUrlIndex(Protocol):
+    def get_toggle_availability_url(self, plan_id: UUID) -> str:
+        ...
+
+
+class RenewPlanUrlIndex(Protocol):
+    def get_renew_plan_url(self, plan_id: UUID) -> str:
+        ...
+
+
+class HidePlanUrlIndex(Protocol):
+    def get_hide_plan_url(self, plan_id: UUID) -> str:
+        ...
+
+
+class EndCoopUrlIndex(Protocol):
+    def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
+        ...
+
+
 class CompanySummaryUrlIndex(Protocol):
     def get_company_summary_url(self, company_id: UUID) -> str:
         ...
