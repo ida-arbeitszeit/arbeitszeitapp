@@ -4,6 +4,7 @@ import arbeitszeit.repositories as interfaces
 from arbeitszeit import entities
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.token import TokenDeliverer, TokenService
+from arbeitszeit.use_cases import GetCompanySummary
 from tests import data_generators
 from tests.datetime_service import FakeDatetimeService
 from tests.dependency_injection import TestingModule
@@ -117,6 +118,14 @@ class InMemoryModule(Module):
     @provider
     def provide_token_service(self, token_service: FakeTokenService) -> TokenService:
         return token_service
+
+    @provider
+    def provide_get_company_summary(
+        self,
+        company_repository: interfaces.CompanyRepository,
+        plan_repository: interfaces.PlanRepository,
+    ) -> GetCompanySummary:
+        return GetCompanySummary(company_repository, plan_repository)
 
 
 def get_dependency_injector() -> Injector:

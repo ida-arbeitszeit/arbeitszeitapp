@@ -13,6 +13,9 @@ class MemberUrlIndex:
     def get_coop_summary_url(self, coop_id: UUID) -> str:
         return url_for("main_member.coop_summary", coop_id=coop_id)
 
+    def get_company_summary_url(self, company_id: UUID) -> str:
+        return url_for("main_member.company_summary", company_id=company_id)
+
     def get_invite_url(self, invite_id: UUID) -> str:
         return url_for("main_member.show_company_work_invite", invite_id=invite_id)
 
@@ -37,6 +40,9 @@ class CompanyUrlIndex:
 
     def get_coop_summary_url(self, coop_id: UUID) -> str:
         return url_for("main_company.coop_summary", coop_id=coop_id)
+
+    def get_company_summary_url(self, company_id: UUID) -> str:
+        return url_for("main_company.company_summary", company_id=company_id)
 
     def get_invite_url(self, invite_id: UUID) -> str:
         # since invites don't make sense for a company, we redirect

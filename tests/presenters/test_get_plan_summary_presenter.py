@@ -11,6 +11,7 @@ TESTING_RESPONSE_MODEL = PlanSummarySuccess(
     plan_id=uuid4(),
     is_active=True,
     planner_id=uuid4(),
+    planner_name="test planner name",
     product_name="test product name",
     description="test description",
     timeframe=7,
@@ -30,9 +31,10 @@ TESTING_RESPONSE_MODEL = PlanSummarySuccess(
 class GetPlanSummarySuccessPresenterTests(TestCase):
     def setUp(self) -> None:
         self.coop_url_index = CoopSummaryUrlIndex()
+        self.company_url_index = CompanySummaryUrlIndex()
         self.translator = FakeTranslator()
         self.presenter = GetPlanSummarySuccessPresenter(
-            self.coop_url_index, self.translator
+            self.coop_url_index, self.company_url_index, self.translator
         )
 
     def test_plan_id_is_displayed_correctly_as_tuple_of_strings(self):
@@ -53,7 +55,7 @@ class GetPlanSummarySuccessPresenterTests(TestCase):
         view_model = self.presenter.present(response)
         self.assertTupleEqual(view_model.is_active, ("Status", "Inaktiv"))
 
-    def test_planner_id_is_displayed_correctly_as_tuple_of_strings(self):
+    def test_planner_is_displayed_correctly_as_tuple_of_strings(self):
         expected_planner_id = uuid4()
         response = replace(
             TESTING_RESPONSE_MODEL,
@@ -61,7 +63,13 @@ class GetPlanSummarySuccessPresenterTests(TestCase):
         )
         view_model = self.presenter.present(response)
         self.assertTupleEqual(
-            view_model.planner_id, ("Planning company", str(expected_planner_id))
+            view_model.planner,
+            (
+                "Planning company",
+                str(expected_planner_id),
+                self.company_url_index.get_company_summary_url(expected_planner_id),
+                TESTING_RESPONSE_MODEL.planner_name,
+            ),
         )
 
     def test_product_name_is_displayed_correctly_as_tuple_of_strings(self):
@@ -213,3 +221,8 @@ class GetPlanSummarySuccessPresenterTests(TestCase):
 class CoopSummaryUrlIndex:
     def get_coop_summary_url(self, coop_id: UUID) -> str:
         return f"fake_coop_url:{coop_id}"
+
+
+class CompanySummaryUrlIndex:
+    def get_company_summary_url(self, company_id: UUID) -> str:
+        return f"fake_company_url:{company_id}"

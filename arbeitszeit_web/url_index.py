@@ -27,6 +27,11 @@ class CoopSummaryUrlIndex(Protocol):
         ...
 
 
+class CompanySummaryUrlIndex(Protocol):
+    def get_company_summary_url(self, company_id: UUID) -> str:
+        ...
+
+
 class ListMessagesUrlIndex(Protocol):
     def get_list_messages_url(self) -> str:
         ...

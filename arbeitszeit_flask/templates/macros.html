@@ -219,8 +219,10 @@
             </td>
             {% elif key == "price_per_unit" %}
             <td class="has-text-left">{{ view_model[key][1] }}{% if view_model[key][2] %} <span>
-		<a href="{{ view_model[key][3] }}"><i class="fas fa-hands-helping"></i></a></span>{% endif %}
-	    </td>
+                <a href="{{ view_model[key][3] }}"><i class="fas fa-hands-helping"></i></a></span>{% endif %}
+            </td>
+            {% elif key == "planner" %}
+            <td class="has-text-left"><a href="{{ view_model[key][2] }}">{{ view_model[key][3] }}</a> </td>
             {% else %}
             <td class="has-text-left">{{ view_model[key][1] }}
             </td>
@@ -360,7 +362,7 @@
         <td>{{ column.product_name }}</td>
         <td>{% for paragraph in column.description %}{{ paragraph }}<br>{% endfor %}</td>
         <td>{{ column.price_per_unit }} {% if column.is_cooperating %} <span>
-	    <a href="{{ column.coop_summary_url }}"><i class="fas fa-hands-helping"></i></a></span>{% endif %}
+            <a href="{{ column.coop_summary_url }}"><i class="fas fa-hands-helping"></i></a></span>{% endif %}
         </td>
         <td>{{ column.type_of_plan }}</td>
         <td>{{ column.ends_in }}</td>

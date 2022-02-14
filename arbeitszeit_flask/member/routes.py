@@ -5,6 +5,7 @@ from flask_login import current_user
 
 from arbeitszeit import use_cases
 from arbeitszeit.use_cases import ListMessages
+from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
 from arbeitszeit_flask.database import MemberRepository, commit_changes
 from arbeitszeit_flask.forms import (
     AnswerCompanyWorkInviteForm,
@@ -22,6 +23,7 @@ from arbeitszeit_flask.views import (
     QueryPlansView,
     ReadMessageView,
 )
+from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
 from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
@@ -188,6 +190,25 @@ def plan_summary(
                 "member/plan_summary.html",
                 context=dict(view_model=view_model.to_dict()),
             )
+        )
+    else:
+        return http_404_view.get_response()
+
+
+@MemberRoute("/member/company_summary/<uuid:company_id>")
+def company_summary(
+    company_id: UUID,
+    get_company_summary: GetCompanySummary,
+    template_renderer: UserTemplateRenderer,
+    presenter: GetCompanySummarySuccessPresenter,
+    http_404_view: Http404View,
+):
+    use_case_response = get_company_summary(company_id)
+    if isinstance(use_case_response, use_cases.GetCompanySummarySuccess):
+        view_model = presenter.present(use_case_response)
+        return template_renderer.render_template(
+            "member/company_summary.html",
+            context=dict(view_model=view_model.to_dict()),
         )
     else:
         return http_404_view.get_response()

@@ -18,7 +18,7 @@ from arbeitszeit import entities
 from arbeitszeit import repositories as interfaces
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.token import TokenDeliverer, TokenService
-from arbeitszeit.use_cases import CheckForUnreadMessages
+from arbeitszeit.use_cases import CheckForUnreadMessages, GetCompanySummary
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts
 from arbeitszeit_flask.database import get_social_accounting
 from arbeitszeit_flask.database.repositories import (
@@ -95,6 +95,7 @@ from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import (
     AnswerCompanyWorkInviteUrlIndex,
+    CompanySummaryUrlIndex,
     ConfirmationUrlIndex,
     CoopSummaryUrlIndex,
     InviteUrlIndex,
@@ -140,6 +141,12 @@ class MemberModule(Module):
     def provide_message_url_index(
         self, member_index: MemberUrlIndex
     ) -> MessageUrlIndex:
+        return member_index
+
+    @provider
+    def provide_company_url_index(
+        self, member_index: MemberUrlIndex
+    ) -> CompanySummaryUrlIndex:
         return member_index
 
     @provider
@@ -189,6 +196,12 @@ class CompanyModule(Module):
         return company_index
 
     @provider
+    def provide_company_url_index(
+        self, company_index: CompanyUrlIndex
+    ) -> CompanySummaryUrlIndex:
+        return company_index
+
+    @provider
     def provide_template_index(self) -> TemplateIndex:
         return CompanyTemplateIndex()
 
@@ -204,6 +217,14 @@ class CompanyModule(Module):
 
 
 class FlaskModule(Module):
+    @provider
+    def provide_get_company_summary(
+        self,
+        company_repository: interfaces.CompanyRepository,
+        plan_repository: interfaces.PlanRepository,
+    ) -> GetCompanySummary:
+        return GetCompanySummary(company_repository, plan_repository)
+
     @provider
     def provide_list_workers_controller(
         self, session: Session
@@ -312,9 +333,12 @@ class FlaskModule(Module):
 
     @provider
     def provide_get_plan_summary_success_presenter(
-        self, coop_index: CoopSummaryUrlIndex, trans: Translator
+        self,
+        coop_index: CoopSummaryUrlIndex,
+        company_index: CompanySummaryUrlIndex,
+        trans: Translator,
     ) -> GetPlanSummarySuccessPresenter:
-        return GetPlanSummarySuccessPresenter(coop_index, trans)
+        return GetPlanSummarySuccessPresenter(coop_index, company_index, trans)
 
     @provider
     def provide_transaction_repository(

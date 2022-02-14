@@ -8,6 +8,7 @@ TEST_PLAN_SUMMARY_SUCCESS = PlanSummarySuccess(
     plan_id=uuid4(),
     is_active=True,
     planner_id=uuid4(),
+    planner_name="test name",
     product_name="test",
     description="beschreibung",
     timeframe=10,

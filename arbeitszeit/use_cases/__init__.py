@@ -38,6 +38,11 @@ from .end_cooperation import (
     EndCooperationRequest,
     EndCooperationResponse,
 )
+from .get_company_summary import (
+    GetCompanySummary,
+    GetCompanySummaryResponse,
+    GetCompanySummarySuccess,
+)
 from .get_company_transactions import GetCompanyTransactions
 from .get_coop_summary import (
     GetCoopSummary,
@@ -186,6 +191,9 @@ __all__ = [
     "EndCooperation",
     "EndCooperationRequest",
     "EndCooperationResponse",
+    "GetCompanySummary",
+    "GetCompanySummaryResponse",
+    "GetCompanySummarySuccess",
     "GetCompanyTransactions",
     "GetCoopSummary",
     "GetCoopSummaryRequest",

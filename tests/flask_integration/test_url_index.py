@@ -21,6 +21,7 @@ class CompanyUrlIndexTests(ViewTestCase):
         self.company, _, self.email = self.login_company()
         self.company = self.confirm_company(company=self.company, email=self.email)
         self.cooperation_generator = self.injector.get(CooperationGenerator)
+        self.company_generator = self.injector.get(CompanyGenerator)
 
     def test_plan_summary_url_for_existing_plan_leads_to_functional_url(self) -> None:
         plan = self.plan_generator.create_plan()
@@ -37,6 +38,14 @@ class CompanyUrlIndexTests(ViewTestCase):
     def test_coop_summary_url_for_existing_coop_leads_to_functional_url(self) -> None:
         coop = self.cooperation_generator.create_cooperation()
         url = self.url_index.get_coop_summary_url(coop.id)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_company_summary_url_for_existing_company_leads_to_functional_url(
+        self,
+    ) -> None:
+        company = self.company_generator.create_company()
+        url = self.url_index.get_company_summary_url(company.id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -73,6 +82,14 @@ class MemberUrlIndexTests(ViewTestCase):
     def test_coop_summary_url_for_existing_coop_leads_to_functional_url(self) -> None:
         coop = self.cooperation_generator.create_cooperation()
         url = self.url_index.get_coop_summary_url(coop.id)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_company_summary_url_for_existing_company_leads_to_functional_url(
+        self,
+    ) -> None:
+        company = self.company_generator.create_company()
+        url = self.url_index.get_company_summary_url(company.id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
