@@ -19,7 +19,6 @@ class ShowMyPlansRequest:
 class PlanInfo:
     id: UUID
     prd_name: str
-    description: str
     price_per_unit: Decimal
     is_public_service: bool
     plan_creation_date: Optional[datetime]
@@ -59,7 +58,6 @@ class ShowMyPlansUseCase:
             PlanInfo(
                 id=plan.id,
                 prd_name=plan.prd_name,
-                description=plan.description,
                 price_per_unit=calculate_price(
                     self.plan_cooperation_repository.get_cooperating_plans(plan.id)
                 ),
@@ -80,7 +78,6 @@ class ShowMyPlansUseCase:
             PlanInfo(
                 id=plan.id,
                 prd_name=plan.prd_name,
-                description=plan.description,
                 price_per_unit=calculate_price(
                     self.plan_cooperation_repository.get_cooperating_plans(plan.id)
                 ),
@@ -101,7 +98,6 @@ class ShowMyPlansUseCase:
             PlanInfo(
                 id=plan.id,
                 prd_name=plan.prd_name,
-                description=plan.description,
                 price_per_unit=calculate_price(
                     self.plan_cooperation_repository.get_cooperating_plans(plan.id)
                 ),

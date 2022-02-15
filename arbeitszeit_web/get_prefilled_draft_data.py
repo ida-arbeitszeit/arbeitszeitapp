@@ -4,11 +4,8 @@ from typing import Protocol, Union
 from uuid import UUID
 
 from arbeitszeit.entities import ProductionCosts
-from arbeitszeit.use_cases import (
-    CreatePlanDraftRequest,
-    DraftSummarySuccess,
-    PlanSummarySuccess,
-)
+from arbeitszeit.plan_summary import BusinessPlanSummary
+from arbeitszeit.use_cases import CreatePlanDraftRequest, DraftSummarySuccess
 
 
 class CreateDraftForm(Protocol):
@@ -82,7 +79,7 @@ class PrefilledDraftData:
 class GetPrefilledDraftDataPresenter:
     def present(
         self,
-        summary_data: Union[PlanSummarySuccess, DraftSummarySuccess],
+        summary_data: Union[BusinessPlanSummary, DraftSummarySuccess],
         from_expired_plan: bool,
     ) -> PrefilledDraftData:
         return PrefilledDraftData(

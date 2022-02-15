@@ -3,11 +3,11 @@ from decimal import Decimal
 from unittest import TestCase
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases.get_plan_summary import PlanSummarySuccess
-from arbeitszeit_web.get_plan_summary import GetPlanSummarySuccessPresenter
+from arbeitszeit.plan_summary import BusinessPlanSummary
+from arbeitszeit_web.plan_summary_service import PlanSummaryServiceImpl
 from tests.translator import FakeTranslator
 
-TESTING_RESPONSE_MODEL = PlanSummarySuccess(
+BUSINESS_PLAN_SUMMARY = BusinessPlanSummary(
     plan_id=uuid4(),
     is_active=True,
     planner_id=uuid4(),
@@ -28,124 +28,124 @@ TESTING_RESPONSE_MODEL = PlanSummarySuccess(
 )
 
 
-class GetPlanSummarySuccessPresenterTests(TestCase):
+class PlanSummaryServiceTests(TestCase):
     def setUp(self) -> None:
         self.coop_url_index = CoopSummaryUrlIndex()
         self.company_url_index = CompanySummaryUrlIndex()
         self.translator = FakeTranslator()
-        self.presenter = GetPlanSummarySuccessPresenter(
+        self.service = PlanSummaryServiceImpl(
             self.coop_url_index, self.company_url_index, self.translator
         )
 
     def test_plan_id_is_displayed_correctly_as_tuple_of_strings(self):
-        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        plan_summary = self.service.get_plan_summary_member(BUSINESS_PLAN_SUMMARY)
         self.assertTupleEqual(
-            view_model.plan_id, ("Plan-ID", str(TESTING_RESPONSE_MODEL.plan_id))
+            plan_summary.plan_id, ("Plan-ID", str(BUSINESS_PLAN_SUMMARY.plan_id))
         )
 
     def test_active_status_is_displayed_correctly_as_tuple_of_strings(self):
-        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
-        self.assertTupleEqual(view_model.is_active, ("Status", "Aktiv"))
+        plan_summary = self.service.get_plan_summary_member(BUSINESS_PLAN_SUMMARY)
+        self.assertTupleEqual(plan_summary.is_active, ("Status", "Aktiv"))
 
     def test_inactive_status_is_displayed_correctly_as_tuple_of_strings(self):
         response = replace(
-            TESTING_RESPONSE_MODEL,
+            BUSINESS_PLAN_SUMMARY,
             is_active=False,
         )
-        view_model = self.presenter.present(response)
-        self.assertTupleEqual(view_model.is_active, ("Status", "Inaktiv"))
+        plan_summary = self.service.get_plan_summary_member(response)
+        self.assertTupleEqual(plan_summary.is_active, ("Status", "Inaktiv"))
 
     def test_planner_is_displayed_correctly_as_tuple_of_strings(self):
         expected_planner_id = uuid4()
         response = replace(
-            TESTING_RESPONSE_MODEL,
+            BUSINESS_PLAN_SUMMARY,
             planner_id=expected_planner_id,
         )
-        view_model = self.presenter.present(response)
+        plan_summary = self.service.get_plan_summary_member(response)
         self.assertTupleEqual(
-            view_model.planner,
+            plan_summary.planner,
             (
                 "Planning company",
                 str(expected_planner_id),
                 self.company_url_index.get_company_summary_url(expected_planner_id),
-                TESTING_RESPONSE_MODEL.planner_name,
+                BUSINESS_PLAN_SUMMARY.planner_name,
             ),
         )
 
     def test_product_name_is_displayed_correctly_as_tuple_of_strings(self):
-        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        plan_summary = self.service.get_plan_summary_member(BUSINESS_PLAN_SUMMARY)
         self.assertTupleEqual(
-            view_model.product_name,
-            ("Name of product", TESTING_RESPONSE_MODEL.product_name),
+            plan_summary.product_name,
+            ("Name of product", BUSINESS_PLAN_SUMMARY.product_name),
         )
 
     def test_description_is_displayed_correctly_as_tuple_of_string_and_list_of_string(
         self,
     ):
-        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        plan_summary = self.service.get_plan_summary_member(BUSINESS_PLAN_SUMMARY)
         self.assertTupleEqual(
-            view_model.description,
-            ("Description of product", [TESTING_RESPONSE_MODEL.description]),
+            plan_summary.description,
+            ("Description of product", [BUSINESS_PLAN_SUMMARY.description]),
         )
 
     def test_description_is_splitted_correctly_at_carriage_return_in_list_of_strings(
         self,
     ):
         response = replace(
-            TESTING_RESPONSE_MODEL,
+            BUSINESS_PLAN_SUMMARY,
             description="first paragraph\rsecond paragraph",
         )
-        view_model = self.presenter.present(response)
+        plan_summary = self.service.get_plan_summary_member(response)
         self.assertTupleEqual(
-            view_model.description,
+            plan_summary.description,
             ("Description of product", ["first paragraph", "second paragraph"]),
         )
 
     def test_timeframe_is_displayed_correctly_as_tuple_of_strings(self):
-        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        plan_summary = self.service.get_plan_summary_member(BUSINESS_PLAN_SUMMARY)
         self.assertTupleEqual(
-            view_model.timeframe,
-            ("Planungszeitraum (Tage)", str(TESTING_RESPONSE_MODEL.timeframe)),
+            plan_summary.timeframe,
+            ("Planungszeitraum (Tage)", str(BUSINESS_PLAN_SUMMARY.timeframe)),
         )
 
     def test_production_unit_is_displayed_correctly_as_tuple_of_strings(self):
-        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        plan_summary = self.service.get_plan_summary_member(BUSINESS_PLAN_SUMMARY)
         self.assertTupleEqual(
-            view_model.production_unit,
-            ("Kleinste Abgabeeinheit", TESTING_RESPONSE_MODEL.production_unit),
+            plan_summary.production_unit,
+            ("Kleinste Abgabeeinheit", BUSINESS_PLAN_SUMMARY.production_unit),
         )
 
     def test_amount_is_displayed_correctly_as_tuple_of_strings(self):
-        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        plan_summary = self.service.get_plan_summary_member(BUSINESS_PLAN_SUMMARY)
         self.assertTupleEqual(
-            view_model.amount,
-            ("Menge", str(TESTING_RESPONSE_MODEL.amount)),
+            plan_summary.amount,
+            ("Menge", str(BUSINESS_PLAN_SUMMARY.amount)),
         )
 
     def test_means_cost_is_displayed_correctly_as_tuple_of_strings(self):
-        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        plan_summary = self.service.get_plan_summary_member(BUSINESS_PLAN_SUMMARY)
         self.assertTupleEqual(
-            view_model.means_cost,
-            ("Kosten für Produktionsmittel", str(TESTING_RESPONSE_MODEL.means_cost)),
+            plan_summary.means_cost,
+            ("Kosten für Produktionsmittel", str(BUSINESS_PLAN_SUMMARY.means_cost)),
         )
 
     def test_resources_cost_is_displayed_correctly_as_tuple_of_strings(self):
-        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        plan_summary = self.service.get_plan_summary_member(BUSINESS_PLAN_SUMMARY)
         self.assertTupleEqual(
-            view_model.resources_cost,
+            plan_summary.resources_cost,
             (
                 "Kosten für Roh- und Hilfststoffe",
-                str(TESTING_RESPONSE_MODEL.resources_cost),
+                str(BUSINESS_PLAN_SUMMARY.resources_cost),
             ),
         )
 
     def test_labour_cost_is_displayed_correctly_as_tuple_of_strings(self):
-        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        plan_summary = self.service.get_plan_summary_member(BUSINESS_PLAN_SUMMARY)
         self.assertTupleEqual(
-            view_model.labour_cost,
+            plan_summary.labour_cost,
             (
                 "Arbeitsstunden",
-                str(TESTING_RESPONSE_MODEL.labour_cost),
+                str(BUSINESS_PLAN_SUMMARY.labour_cost),
             ),
         )
 
@@ -153,12 +153,12 @@ class GetPlanSummarySuccessPresenterTests(TestCase):
         self,
     ):
         response = replace(
-            TESTING_RESPONSE_MODEL,
+            BUSINESS_PLAN_SUMMARY,
             is_public_service=False,
         )
-        view_model = self.presenter.present(response)
+        plan_summary = self.service.get_plan_summary_member(response)
         self.assertTupleEqual(
-            view_model.type_of_plan,
+            plan_summary.type_of_plan,
             (
                 "Art des Plans",
                 "Produktiv",
@@ -169,12 +169,12 @@ class GetPlanSummarySuccessPresenterTests(TestCase):
         self,
     ):
         response = replace(
-            TESTING_RESPONSE_MODEL,
+            BUSINESS_PLAN_SUMMARY,
             is_public_service=True,
         )
-        view_model = self.presenter.present(response)
+        plan_summary = self.service.get_plan_summary_member(response)
         self.assertTupleEqual(
-            view_model.type_of_plan,
+            plan_summary.type_of_plan,
             (
                 "Art des Plans",
                 "Öffentlich",
@@ -182,11 +182,11 @@ class GetPlanSummarySuccessPresenterTests(TestCase):
         )
 
     def test_price_per_unit_is_displayed_correctly_as_tuple_of_strings_and_bool(self):
-        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
-        coop_id = TESTING_RESPONSE_MODEL.cooperation
+        plan_summary = self.service.get_plan_summary_member(BUSINESS_PLAN_SUMMARY)
+        coop_id = BUSINESS_PLAN_SUMMARY.cooperation
         assert coop_id
         self.assertTupleEqual(
-            view_model.price_per_unit,
+            plan_summary.price_per_unit,
             (
                 "Preis (pro Einheit)",
                 "0.06",
@@ -195,22 +195,10 @@ class GetPlanSummarySuccessPresenterTests(TestCase):
             ),
         )
 
-    def test_that_to_dict_method_returns_a_dictionary(self):
-        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
-        dictionary = view_model.to_dict()
-        self.assertIsInstance(dictionary, dict)
-
-    def test_that_to_dict_method_returns_a_dictionary_with_plan_id_tuple(self):
-        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
-        dictionary = view_model.to_dict()
-        self.assertEqual(
-            dictionary["plan_id"], ("Plan-ID", str(TESTING_RESPONSE_MODEL.plan_id))
-        )
-
     def test_availability_is_displayed_correctly_as_tuple_of_strings(self):
-        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        plan_summary = self.service.get_plan_summary_member(BUSINESS_PLAN_SUMMARY)
         self.assertTupleEqual(
-            view_model.is_available,
+            plan_summary.is_available,
             (
                 "Produkt aktuell verfügbar",
                 "Ja",

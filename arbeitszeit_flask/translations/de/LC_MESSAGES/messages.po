@@ -59,16 +59,16 @@ msgstr "Betrieb"
 msgid "App version"
 msgstr "App-Version"
 
-#: arbeitszeit_web/get_plan_summary.py:42
+#: arbeitszeit_web/get_plan_summary_member.py:42
 msgctxt "Test comment"
 msgid "Planning company"
 msgstr "Planender Betrieb"
 
-#: arbeitszeit_web/get_plan_summary.py:45
+#: arbeitszeit_web/get_plan_summary_member.py:45
 msgid "Name of product"
 msgstr "Name des Produkts"
 
-#: arbeitszeit_web/get_plan_summary.py:47
+#: arbeitszeit_web/get_plan_summary_member.py:47
 msgid "Description of product"
 msgstr "Beschreibung des Produkts"
 

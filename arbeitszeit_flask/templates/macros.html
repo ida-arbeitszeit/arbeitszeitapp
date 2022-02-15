@@ -207,24 +207,26 @@
         Planinformationen
       </h1>
     </div>
+    {{ show_notifications() }}
     <br>
     <div class="table-container">
       <table class="table is-fullwidth">
         <tbody>
-          {% for key in view_model %}
+          {% for key in view_model.summary %}
           <tr>
-            <td class="has-text-left has-text-weight-semibold">{{ view_model[key][0] }}</td>
+            <td class="has-text-left has-text-weight-semibold">{{ view_model.summary[key][0] }}</td>
             {% if key == "description" %}
-            <td class="has-text-left">{% for paragraph in view_model[key][1] %}{{ paragraph }}<br>{% endfor %}
+            <td class="has-text-left">{% for paragraph in view_model.summary[key][1] %}{{ paragraph }}<br>{% endfor %}
             </td>
             {% elif key == "price_per_unit" %}
-            <td class="has-text-left">{{ view_model[key][1] }}{% if view_model[key][2] %} <span>
-                <a href="{{ view_model[key][3] }}"><i class="fas fa-hands-helping"></i></a></span>{% endif %}
+            <td class="has-text-left">{{ view_model.summary[key][1] }}{% if view_model.summary[key][2] %} <span>
+                <a href="{{ view_model.summary[key][3] }}"><i class="fas fa-hands-helping"></i></a></span>{% endif %}
             </td>
             {% elif key == "planner" %}
-            <td class="has-text-left"><a href="{{ view_model[key][2] }}">{{ view_model[key][3] }}</a> </td>
+            <td class="has-text-left"><a href="{{ view_model.summary[key][2] }}">{{ view_model.summary[key][3] }}</a>
+            </td>
             {% else %}
-            <td class="has-text-left">{{ view_model[key][1] }}
+            <td class="has-text-left">{{ view_model.summary[key][1] }}
             </td>
             {% endif %}
           </tr>
@@ -236,75 +238,6 @@
 </div>
 {% endmacro %}
 
-
-{% macro coop_summary(view_model) %}
-<div class="columns is-centered">
-  <div class="column is-two-thirds">
-    <div class="content">
-      <h1 class="title">
-        Kooperation
-      </h1>
-    </div>
-
-    <br>
-    <div class="table-container">
-      <table class="table is-fullwidth">
-        <tbody>
-          <tr>
-            <td class="has-text-left has-text-weight-semibold">ID:</td>
-            <td class="has-text-left">{{ view_model.coop_id }}</td>
-          </tr>
-          <tr>
-            <td class="has-text-left has-text-weight-semibold">Name:</td>
-            <td class="has-text-left">{{ view_model.coop_name }}</td>
-          </tr>
-          <tr>
-            <td class="has-text-left has-text-weight-semibold">Definition:</td>
-            <td class="has-text-left">{% for parag in view_model.coop_definition %} {{ parag }} {% endfor %}</td>
-          </tr>
-          <tr>
-            <td class="has-text-left has-text-weight-semibold">Koordinator:</td>
-            <td class="has-text-left">{{ view_model.coordinator_id }}</td>
-          </tr>
-        </tbody>
-      </table>
-      <h1 class="title is-4">
-        Pläne in Kooperation
-      </h1>
-      <table class="table is-fullwidth">
-        <thead>
-          <tr>
-            <th>Plan-ID</th>
-            <th>Plan-Name</th>
-            <th>Gesamte Kosten</th>
-            <th>Produktionsmenge</th>
-            <th>Individueller Preis</th>
-            <th>Kooperationspreis</th>
-            {% if view_model.show_end_coop_button %}
-            <th>Kooperation beenden</th>
-            {% endif %}
-          </tr>
-        </thead>
-        <tbody>
-          {% for plan in view_model.plans %}
-          <tr>
-            <td>{{ plan.plan_id }}</td>
-            <td>{{ plan.plan_name }}</td>
-            <td>{{ plan.plan_total_costs }}</td>
-            <td>{{ plan.plan_amount }}</td>
-            <td>{{ plan.plan_individual_price }}</td>
-            <td>{{ plan.plan_coop_price }}</td>
-            {% if view_model.show_end_coop_button %}
-            <td>[X]</td>
-            {% endif %}
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-{% endmacro %}
 
 
 {% macro query_plans(form, view_model) %}
@@ -368,11 +301,11 @@
         <td>{{ column.ends_in }}</td>
         {% if column.is_available %}
         <td>
-          <span style="color: green"><i class="fas fa-circle"></i></span>
+          <span class="icon has-text-success"><i class="fas fa-circle"></i></span>
         </td>
         {% else %}
         <td>
-          <span style="color: red"><i class="fas fa-circle"></i></span>
+          <span class="icon has-text-danger"><i class="fas fa-circle"></i></span>
         </td>
         {% endif %}
       </tr>
