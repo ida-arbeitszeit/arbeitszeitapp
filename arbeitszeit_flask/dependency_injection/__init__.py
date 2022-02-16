@@ -24,6 +24,7 @@ from arbeitszeit.use_cases import (
     GetCompanySummary,
     ReadMessage,
 )
+from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProduction
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts
 from arbeitszeit_flask.database import get_social_accounting
 from arbeitszeit_flask.database.repositories import (
@@ -64,6 +65,7 @@ from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.translator import FlaskTranslator
 from arbeitszeit_flask.url_index import CompanyUrlIndex, MemberUrlIndex
 from arbeitszeit_flask.views import EndCooperationView, Http404View, ReadMessageView
+from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
 from arbeitszeit_web.answer_company_work_invite import (
     AnswerCompanyWorkInviteController,
     AnswerCompanyWorkInvitePresenter,
@@ -76,6 +78,9 @@ from arbeitszeit_web.controllers.end_cooperation_controller import (
     EndCooperationController,
 )
 from arbeitszeit_web.controllers.list_workers_controller import ListWorkersController
+from arbeitszeit_web.controllers.pay_means_of_production_controller import (
+    PayMeansOfProductionController,
+)
 from arbeitszeit_web.controllers.show_company_work_invite_details_controller import (
     ShowCompanyWorkInviteDetailsController,
 )
@@ -286,6 +291,24 @@ class CompanyModule(Module):
     ) -> EndCooperationPresenter:
         return EndCooperationPresenter(
             request, notifier, plan_summary_index, coop_summary_index
+        )
+
+    @provider
+    def provide_pay_means_of_production_controller(
+        self, session: FlaskSession, request: FlaskRequest
+    ) -> PayMeansOfProductionController:
+        return PayMeansOfProductionController(session, request)
+
+    @provider
+    def provide_pay_means_of_production_view(
+        self,
+        controller: PayMeansOfProductionController,
+        pay_means_of_production: PayMeansOfProduction,
+        presenter: PayMeansOfProductionPresenter,
+        template_renderer: UserTemplateRenderer,
+    ) -> PayMeansOfProductionView:
+        return PayMeansOfProductionView(
+            controller, pay_means_of_production, presenter, template_renderer
         )
 
     @provider
