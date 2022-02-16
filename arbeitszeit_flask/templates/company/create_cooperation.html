@@ -8,10 +8,9 @@
         <div class="box has-background-info-light has-text-info-dark">
             <div class="icon"><i class="fas fa-info-circle"></i></div>
             <p>
-                Erstelle hier eine neue Kooperation. <br><br>
-                Eine Kooperation ist eine Oberkategorie gleichartiger Pläne.
-                Von allen Plänen in einer Kooperation wird ein Durchschnittspreis gebildet,
-                wodurch die Konkurrenz der teilnehmenden Pläne verringert wird.
+              {{ gettext("Here you can create a new cooperation.") }}
+	      <br><br>
+	      {{ gettext("A cooperation contains similar products.  The prices for all products in a cooperation are averaged to reduce price competition.  All producers still receive the credits on sale corresponding to how they planned production. This means that producers receive the same amount of credit to their account whether they are part of a cooperation or not.") }}
             </p>
         </div>
 
@@ -21,7 +20,7 @@
             <form method="post">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="field">
-                    <label class="label">Name der Kooperation</label>
+                    <label class="label">{{ gettext("Cooperation name") }}</label>
                     <div class="control">
                         <input class="input is-large" , type="text" , placeholder="Name" , name="name" required>
                     </div>
@@ -29,7 +28,7 @@
                 <div class="block"></div>
 
                 <div class="field">
-                    <label class="label">Definition der Kooperation</label>
+                    <label class="label">{{ gettext("Definition of the cooperation") }}</label>
                     <div class="control">
                         <textarea class="textarea is-large" , name="definition" required></textarea>
                     </div>
@@ -38,7 +37,9 @@
 
                 <div class="field">
                     <div class="control">
-                        <button class="button is-primary" name="create" value="create" type="submit">Erstellen</button>
+                      <button class="button is-primary" name="create" value="create" type="submit">
+			{{ gettext("Create cooperation") }}
+		      </button>
                     </div>
                 </div>
             </form>
