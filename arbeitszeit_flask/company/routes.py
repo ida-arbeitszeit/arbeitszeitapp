@@ -5,7 +5,7 @@ from uuid import UUID
 from flask import Response, flash, redirect, request, url_for
 from flask_login import current_user
 
-from arbeitszeit import entities, errors, use_cases
+from arbeitszeit import errors, use_cases
 from arbeitszeit.use_cases import (
     AcceptCooperation,
     AcceptCooperationRequest,
@@ -46,6 +46,7 @@ from arbeitszeit_flask.forms import (
     CompanySearchForm,
     CreateDraftForm,
     InviteWorkerToCompanyForm,
+    PayMeansOfProductionForm,
     PlanSearchForm,
     RequestCooperationForm,
 )
@@ -60,6 +61,7 @@ from arbeitszeit_flask.views import (
     ReadMessageView,
     RequestCooperationView,
 )
+from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
@@ -78,7 +80,6 @@ from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_drafts_of_company import ListDraftsPresenter
 from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 from arbeitszeit_web.list_plans import ListPlansPresenter
-from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from arbeitszeit_web.presenters.show_a_account_details_presenter import (
     ShowAAccountDetailsPresenter,
 )
@@ -455,23 +456,12 @@ def transfer_to_worker(
 
 @CompanyRoute("/company/transfer_to_company", methods=["GET", "POST"])
 @commit_changes
-def transfer_to_company(
-    pay_means_of_production: use_cases.PayMeansOfProduction,
-    presenter: PayMeansOfProductionPresenter,
-    template_renderer: UserTemplateRenderer,
-):
-    if request.method == "POST":
-        use_case_request = use_cases.PayMeansOfProductionRequest(
-            buyer=UUID(current_user.id),
-            plan=UUID(str(request.form["plan_id"]).strip()),
-            amount=int(request.form["amount"]),
-            purpose=entities.PurposesOfPurchases.means_of_prod
-            if request.form["category"] == "Produktionsmittel"
-            else entities.PurposesOfPurchases.raw_materials,
-        )
-        use_case_response = pay_means_of_production(use_case_request)
-        presenter.present(use_case_response)
-    return template_renderer.render_template("company/transfer_to_company.html")
+def transfer_to_company(view: PayMeansOfProductionView):
+    form = PayMeansOfProductionForm(request.form)
+    if request.method == "GET":
+        return view.respond_to_get(form)
+    elif request.method == "POST":
+        return view.respond_to_post(form)
 
 
 @CompanyRoute("/company/statistics")
