@@ -6,7 +6,7 @@ from dateutil import parser, tz
 
 def format_datetime(
     date: Union[str, datetime], zone: Optional[str] = None, fmt: Optional[str] = None
-):
+) -> str:
     if isinstance(date, str):
         date = parser.parse(date)
     if zone is not None:

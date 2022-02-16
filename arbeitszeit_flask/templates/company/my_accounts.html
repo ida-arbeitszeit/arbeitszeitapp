@@ -50,7 +50,8 @@
 
                     </tr>
                     <tr>
-                        <td class="py-2  has-text-left">Account a</td>
+                        <td class="py-2  has-text-left"><a href="{{ url_for('main_company.account_a') }}">Account a</a>
+                        </td>
                         <td><i class="fas fa-users"></i></td>
                         <td class="is-italic has-text-left">Account for work certificates (wages)</td>
                         <td
@@ -60,7 +61,7 @@
                     </tr>
                     <tr>
                         <td class="py-2 has-text-left">Account prd</td>
-                        <td><i class="fas fa-warehouse"></i></td>
+                        <td><i class="fas fa-exchange-alt"></i></td>
                         <td class="is-italic has-text-left">Account for product transfers (sales)</td>
                         <td
                             class="py-2 has-text-right has-text-weight-bold {{ 'has-text-primary' if view_model.is_product_positive else 'has-text-danger' }}">

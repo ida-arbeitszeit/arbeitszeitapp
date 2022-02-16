@@ -80,6 +80,9 @@ from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_drafts_of_company import ListDraftsPresenter
 from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 from arbeitszeit_web.list_plans import ListPlansPresenter
+from arbeitszeit_web.presenters.show_a_account_details_presenter import (
+    ShowAAccountDetailsPresenter,
+)
 from arbeitszeit_web.query_companies import (
     QueryCompaniesController,
     QueryCompaniesPresenter,
@@ -392,6 +395,21 @@ def account_r(
 
     return template_renderer.render_template(
         "company/account_r.html",
+        context=dict(view_model=view_model),
+    )
+
+
+@CompanyRoute("/company/my_accounts/account_a")
+def account_a(
+    show_a_account_details: use_cases.ShowAAccountDetails,
+    template_renderer: UserTemplateRenderer,
+    presenter: ShowAAccountDetailsPresenter,
+):
+    response = show_a_account_details(UUID(current_user.id))
+    view_model = presenter.present(response)
+
+    return template_renderer.render_template(
+        "company/account_a.html",
         context=dict(view_model=view_model),
     )
 
