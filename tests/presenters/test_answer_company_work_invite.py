@@ -3,6 +3,7 @@ from unittest import TestCase
 
 from arbeitszeit.use_cases import AnswerCompanyWorkInviteResponse
 from arbeitszeit_web.answer_company_work_invite import AnswerCompanyWorkInvitePresenter
+from tests.translator import FakeTranslator
 
 from .notifier import NotifierTestImpl
 
@@ -36,8 +37,11 @@ class SuccessfulResponseTests(TestCase):
     def setUp(self) -> None:
         self.notifier = NotifierTestImpl()
         self.url_index = MessagesUrlIndex()
+        self.translator = FakeTranslator()
         self.presenter = AnswerCompanyWorkInvitePresenter(
-            user_notifier=self.notifier, url_index=self.url_index
+            user_notifier=self.notifier,
+            url_index=self.url_index,
+            translator=self.translator,
         )
 
     def test_info_notification_is_displayed_on_success(self) -> None:
@@ -53,7 +57,8 @@ class SuccessfulResponseTests(TestCase):
             get_response(is_accepted=True, company_name=COMPANY_NAME)
         )
         self.assertIn(
-            f'Erfolgreich dem Betrieb "{COMPANY_NAME}" beigetreten',
+            self.translator.gettext('You successfully joined "%(company)s".')
+            % dict(company=COMPANY_NAME),
             self.notifier.infos,
         )
 
@@ -62,7 +67,9 @@ class SuccessfulResponseTests(TestCase):
             get_response(is_accepted=False, company_name=COMPANY_NAME)
         )
         self.assertIn(
-            f'Einladung zum Betrieb "{COMPANY_NAME}" abgelehnt',
+            self.translator.gettext('You rejected the invitation from "%(company)s".')
+            % dict(company=COMPANY_NAME)
+            % dict(company=COMPANY_NAME),
             self.notifier.infos,
         )
 
@@ -89,8 +96,11 @@ class UnsuccessfulResponseTests(TestCase):
     def setUp(self) -> None:
         self.notifier = NotifierTestImpl()
         self.url_index = MessagesUrlIndex()
+        self.translator = FakeTranslator()
         self.presenter = AnswerCompanyWorkInvitePresenter(
-            user_notifier=self.notifier, url_index=self.url_index
+            user_notifier=self.notifier,
+            url_index=self.url_index,
+            translator=self.translator,
         )
 
     def test_warning_notification_is_displayed_on_failure(self) -> None:
@@ -106,7 +116,7 @@ class UnsuccessfulResponseTests(TestCase):
     ) -> None:
         self.presenter.present(get_response(is_success=False))
         self.assertIn(
-            "Annehmen oder Ablehnen dieser Einladung ist nicht möglich",
+            self.translator.gettext("Accepting or rejecting is not possible."),
             self.notifier.warnings,
         )
 
