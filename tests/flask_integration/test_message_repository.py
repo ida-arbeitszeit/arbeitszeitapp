@@ -2,8 +2,6 @@ from typing import Optional, Union
 from unittest import TestCase
 from uuid import uuid4
 
-from hypothesis import given, strategies
-
 from arbeitszeit import repositories as interfaces
 from arbeitszeit.entities import Company, Member, Message, SocialAccounting
 from arbeitszeit.use_cases import ReadMessage, ReadMessageRequest
@@ -57,13 +55,10 @@ class MessageRepositoryTests(TestCase):
                     expected_user_action,
                 )
 
-    @given(
-        expected_title=strategies.text(),
-    )
     def test_title_is_stored_correctly(
         self,
-        expected_title: str,
     ) -> None:
+        expected_title = "test message title"
         message = self._create_message(
             title=expected_title,
         )
@@ -72,13 +67,10 @@ class MessageRepositoryTests(TestCase):
             expected_title,
         )
 
-    @given(
-        expected_content=strategies.text(),
-    )
     def test_content_is_stored_correctly(
         self,
-        expected_content: str,
     ) -> None:
+        expected_content = "test expected content"
         message = self._create_message(
             content=expected_content,
         )
@@ -87,13 +79,22 @@ class MessageRepositoryTests(TestCase):
             expected_content,
         )
 
-    @given(
-        expected_sender_remarks=strategies.one_of(strategies.none(), strategies.text())
-    )
-    def test_sender_remarks_are_stored_correctly(
+    def test_sender_remarks_are_stored_correctly_when_none_is_given(
         self,
-        expected_sender_remarks,
     ) -> None:
+        expected_sender_remarks = None
+        message = self._create_message(
+            sender_remarks=expected_sender_remarks,
+        )
+        self.assertEqual(
+            message.sender_remarks,
+            expected_sender_remarks,
+        )
+
+    def test_sender_remarks_are_stored_correctly_when_string_is_given(
+        self,
+    ) -> None:
+        expected_sender_remarks = "test sender remarks"
         message = self._create_message(
             sender_remarks=expected_sender_remarks,
         )

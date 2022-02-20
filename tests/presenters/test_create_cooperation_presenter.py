@@ -4,6 +4,7 @@ from uuid import uuid4
 
 from arbeitszeit.use_cases import CreateCooperationResponse
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
+from tests.translator import FakeTranslator
 
 from .notifier import NotifierTestImpl
 
@@ -25,7 +26,10 @@ REJECTED_RESPONSE_COORDINATOR_NOT_FOUND = CreateCooperationResponse(
 class CreateCooperationPresenterTests(TestCase):
     def setUp(self) -> None:
         self.notifier = NotifierTestImpl()
-        self.presenter = CreateCooperationPresenter(user_notifier=self.notifier)
+        self.translator = FakeTranslator()
+        self.presenter = CreateCooperationPresenter(
+            user_notifier=self.notifier, translator=self.translator
+        )
 
     def test_notification_returned_when_creation_was_successful(self):
         self.presenter.present(SUCCESSFUL_CREATE_RESPONSE)
@@ -34,7 +38,8 @@ class CreateCooperationPresenterTests(TestCase):
     def test_correct_notification_returned_when_creation_was_successful(self):
         self.presenter.present(SUCCESSFUL_CREATE_RESPONSE)
         self.assertIn(
-            "Kooperation erfolgreich erstellt.", self._get_info_notifications()
+            self.translator.gettext("Successfully created cooperation."),
+            self._get_info_notifications(),
         )
 
     def test_notification_returned_when_creation_was_rejected_because_coop_name_existed(
@@ -48,7 +53,9 @@ class CreateCooperationPresenterTests(TestCase):
     ):
         self.presenter.present(REJECTED_RESPONSE_NAME_EXISTS)
         self.assertIn(
-            "Es existiert bereits eine Kooperation mit diesem Namen.",
+            self.translator.gettext(
+                "There is already a cooperation with the same name."
+            ),
             self._get_warning_notifications(),
         )
 
@@ -63,7 +70,7 @@ class CreateCooperationPresenterTests(TestCase):
     ):
         self.presenter.present(REJECTED_RESPONSE_COORDINATOR_NOT_FOUND)
         self.assertIn(
-            "Interner Fehler: Koordinator nicht gefunden.",
+            self.translator.gettext("Internal error: Coordinator not found."),
             self._get_warning_notifications(),
         )
 
