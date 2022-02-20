@@ -68,7 +68,6 @@ class SuccessfulResponseTests(TestCase):
         )
         self.assertIn(
             self.translator.gettext('You rejected the invitation from "%(company)s".')
-            % dict(company=COMPANY_NAME)
             % dict(company=COMPANY_NAME),
             self.notifier.infos,
         )
