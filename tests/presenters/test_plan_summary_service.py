@@ -65,7 +65,7 @@ class PlanSummaryServiceTests(TestCase):
         self.assertTupleEqual(
             plan_summary.planner,
             (
-                "Planning company",
+                self.translator.gettext("Planning company"),
                 str(expected_planner_id),
                 self.company_url_index.get_company_summary_url(expected_planner_id),
                 BUSINESS_PLAN_SUMMARY.planner_name,
@@ -76,7 +76,10 @@ class PlanSummaryServiceTests(TestCase):
         plan_summary = self.service.get_plan_summary_member(BUSINESS_PLAN_SUMMARY)
         self.assertTupleEqual(
             plan_summary.product_name,
-            ("Name of product", BUSINESS_PLAN_SUMMARY.product_name),
+            (
+                self.translator.gettext("Name of product"),
+                BUSINESS_PLAN_SUMMARY.product_name,
+            ),
         )
 
     def test_description_is_displayed_correctly_as_tuple_of_string_and_list_of_string(
@@ -85,7 +88,10 @@ class PlanSummaryServiceTests(TestCase):
         plan_summary = self.service.get_plan_summary_member(BUSINESS_PLAN_SUMMARY)
         self.assertTupleEqual(
             plan_summary.description,
-            ("Description of product", [BUSINESS_PLAN_SUMMARY.description]),
+            (
+                self.translator.gettext("Description of product"),
+                [BUSINESS_PLAN_SUMMARY.description],
+            ),
         )
 
     def test_description_is_splitted_correctly_at_carriage_return_in_list_of_strings(
@@ -98,7 +104,10 @@ class PlanSummaryServiceTests(TestCase):
         plan_summary = self.service.get_plan_summary_member(response)
         self.assertTupleEqual(
             plan_summary.description,
-            ("Description of product", ["first paragraph", "second paragraph"]),
+            (
+                self.translator.gettext("Description of product"),
+                ["first paragraph", "second paragraph"],
+            ),
         )
 
     def test_timeframe_is_displayed_correctly_as_tuple_of_strings(self):

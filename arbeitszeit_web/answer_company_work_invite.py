@@ -10,6 +10,7 @@ from arbeitszeit.use_cases import (
 from .malformed_input_data import MalformedInputData
 from .notification import Notifier
 from .session import Session
+from .translator import Translator
 from .url_index import ListMessagesUrlIndex
 
 
@@ -42,19 +43,24 @@ class AnswerCompanyWorkInvitePresenter:
 
     user_notifier: Notifier
     url_index: ListMessagesUrlIndex
+    translator: Translator
 
     def present(self, response: AnswerCompanyWorkInviteResponse) -> ViewModel:
         if response.is_success:
             if response.is_accepted:
                 self.user_notifier.display_info(
-                    f'Erfolgreich dem Betrieb "{response.company_name}" beigetreten'
+                    self.translator.gettext('You successfully joined "%(company)s".')
+                    % dict(company=response.company_name)
                 )
             else:
                 self.user_notifier.display_info(
-                    f'Einladung zum Betrieb "{response.company_name}" abgelehnt'
+                    self.translator.gettext(
+                        'You rejected the invitation from "%(company)s".'
+                    )
+                    % dict(company=response.company_name)
                 )
         else:
             self.user_notifier.display_warning(
-                "Annehmen oder Ablehnen dieser Einladung ist nicht möglich"
+                self.translator.gettext("Accepting or rejecting is not possible.")
             )
         return self.ViewModel(redirect_url=self.url_index.get_list_messages_url())

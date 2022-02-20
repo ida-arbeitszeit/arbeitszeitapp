@@ -363,8 +363,11 @@ class FlaskModule(Module):
         self,
         notifier: Notifier,
         url_index: ListMessagesUrlIndex,
+        translator: Translator,
     ) -> AnswerCompanyWorkInvitePresenter:
-        return AnswerCompanyWorkInvitePresenter(notifier, url_index=url_index)
+        return AnswerCompanyWorkInvitePresenter(
+            notifier, url_index=url_index, translator=translator
+        )
 
     @provider
     def provide_email_configuration(self) -> EmailConfiguration:

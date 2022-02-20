@@ -12,9 +12,10 @@ from tests.translator import FakeTranslator
 class PresenterTests(TestCase):
     def setUp(self) -> None:
         self.invite_url_index = UrlIndexImpl()
+        self.translator = FakeTranslator()
         self.presenter = ShowCompanyWorkInviteDetailsPresenter(
             url_index=self.invite_url_index,
-            translator=FakeTranslator(),
+            translator=self.translator,
         )
 
     def test_use_case_response_without_details_doesnt_render_to_view_model(
@@ -45,7 +46,10 @@ class PresenterTests(TestCase):
         assert view_model
         self.assertEqual(
             view_model.explanation_text,
-            'The company "test company" invites you to join them. Do you want to accept this invitation?',
+            self.translator.gettext(
+                'The company "%(company)s" invites you to join them. Do you want to accept this invitation?'
+            )
+            % dict(company="test company"),
         )
 
     def make_response(
