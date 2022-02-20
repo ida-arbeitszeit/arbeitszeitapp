@@ -4,7 +4,7 @@
     <div class="column is-two-thirds">
         <div class="content">
             <h1 class="title">
-                Company
+              {{ gettext("Company") }}
             </h1>
         </div>
         <br>
@@ -12,19 +12,19 @@
             <table class="table is-fullwidth">
                 <tbody>
                     <tr>
-                        <td class="has-text-left has-text-weight-semibold">ID</td>
+                        <td class="has-text-left has-text-weight-semibold">{{ gettext("ID") }}</td>
                         <td class="has-text-left">{{ view_model.id }}</td>
                     </tr>
                     <tr>
-                        <td class="has-text-left has-text-weight-semibold">Name</td>
+                        <td class="has-text-left has-text-weight-semibold">{{ gettext("Name") }}</td>
                         <td class="has-text-left">{{ view_model.name }}</td>
                     </tr>
                     <tr>
-                        <td class="has-text-left has-text-weight-semibold">Email</td>
+                        <td class="has-text-left has-text-weight-semibold">{{ gettext("Email") }}</td>
                         <td class="has-text-left">{{ view_model.email }}</td>
                     </tr>
                     <tr>
-                        <td class="has-text-left has-text-weight-semibold">Registered since</td>
+                        <td class="has-text-left has-text-weight-semibold">{{ gettext("Registered since") }}</td>
                         <td class="has-text-left">{{ view_model.registered_on | format_datetime(zone='Europe/Berlin',
                             fmt='%d.%m.%Y %H:%M') }}</td>
                     </tr>
@@ -33,13 +33,13 @@
         </div>
         <div class="table-container">
             <h1 class="title is-4">
-                Active plans
+              {{ gettext("Active plans") }}
             </h1>
             <table class="table is-fullwidth has-text-left">
                 <thead>
                     <tr>
-                        <th>Plan id</th>
-                        <th>Product name</th>
+                        <th>{{ gettext("Plan-ID") }}</th>
+                        <th>{{ gettext("Product name") }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -47,12 +47,10 @@
                     <tr>
                         <td>{{ plan.id }}</td>
                         <td>{{ plan.name }}</td>
-
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
-
         </div>
     </div>
 </div>
