@@ -133,3 +133,10 @@ Update all existing translation files (intelligent merge) from ``.pot``-file::
 Compile (create ``.mo``-files from ``.po``-files)::
 
     $ pybabel compile -d arbeitszeit_flask/translations
+
+License
+=======
+
+All source code is distributed under the conditions of the APGL.  For
+the full license text see the file ``LICENSE`` contained in this
+repository.

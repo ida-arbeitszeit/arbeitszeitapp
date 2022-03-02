@@ -1,9 +1,10 @@
 from functools import wraps
 from typing import Any, Callable
 
-from flask import Blueprint, Response, redirect, session, url_for
+from flask import Blueprint, redirect, session, url_for
 from flask_login import current_user, login_required
 
+from arbeitszeit_flask import types
 from arbeitszeit_flask.dependency_injection import CompanyModule, with_injection
 
 main_company = Blueprint(
@@ -19,11 +20,11 @@ class CompanyRoute:
         else:
             self.methods = methods
 
-    def __call__(self, view_function: Callable[..., Response]):
+    def __call__(self, view_function: Callable[..., types.Response]):
         @wraps(view_function)
-        def _wrapper(*args: Any, **kwargs: Any) -> Response:
+        def _wrapper(*args: Any, **kwargs: Any) -> types.Response:
             if not user_is_company():
-                return redirect(url_for("auth.zurueck"))  # type: ignore
+                return redirect(url_for("auth.zurueck"))
             return view_function(*args, **kwargs)
 
         return self._apply_decorators(_wrapper)
