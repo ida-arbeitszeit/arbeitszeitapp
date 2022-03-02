@@ -5,6 +5,8 @@ from unittest import TestCase
 from arbeitszeit.use_cases.get_statistics import StatisticsResponse
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 
+from ..translator import FakeTranslator
+
 TESTING_RESPONSE_MODEL = StatisticsResponse(
     registered_companies_count=5,
     registered_members_count=30,
@@ -19,7 +21,8 @@ TESTING_RESPONSE_MODEL = StatisticsResponse(
 
 class GetStatisticsPresenterTests(TestCase):
     def setUp(self) -> None:
-        self.presenter = GetStatisticsPresenter()
+        self.translator = FakeTranslator()
+        self.presenter = GetStatisticsPresenter(translator=self.translator)
 
     def test_planned_resources_hours_are_truncated_at_2_digits_after_comma(self):
         response = replace(
@@ -29,7 +32,7 @@ class GetStatisticsPresenterTests(TestCase):
         view_model = self.presenter.present(response)
         self.assertEqual(
             view_model.planned_resources_hours,
-            "400.13",
+            self.translator.gettext("%.2f hours") % Decimal("400.13"),
         )
 
     def test_planned_work_hours_are_truncated_at_2_digits_after_comma(self):
@@ -40,7 +43,7 @@ class GetStatisticsPresenterTests(TestCase):
         view_model = self.presenter.present(response)
         self.assertEqual(
             view_model.planned_work_hours,
-            "523.12",
+            self.translator.gettext("%.2f hours") % Decimal("523.12"),
         )
 
     def test_planned_means_hours_are_truncated_at_2_digits_after_comma(self):
@@ -51,7 +54,7 @@ class GetStatisticsPresenterTests(TestCase):
         view_model = self.presenter.present(response)
         self.assertEqual(
             view_model.planned_means_hours,
-            "123.12",
+            self.translator.gettext("%s hours") % Decimal("123.12"),
         )
 
     def test_registered_companies_count_is_displayed_correctly_as_number(self):
@@ -106,5 +109,5 @@ class GetStatisticsPresenterTests(TestCase):
         view_model = self.presenter.present(response)
         self.assertEqual(
             view_model.average_timeframe_days,
-            "31.21",
+            self.translator.gettext("%.2f days") % 31.21,
         )

@@ -93,6 +93,7 @@ from arbeitszeit_web.get_plan_summary_company import (
     GetPlanSummaryCompanySuccessPresenter,
 )
 from arbeitszeit_web.get_plan_summary_member import GetPlanSummarySuccessPresenter
+from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyController
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
@@ -323,6 +324,12 @@ class CompanyModule(Module):
 
 
 class FlaskModule(Module):
+    @provider
+    def provide_get_statistics_presenter(
+        self, translator: Translator
+    ) -> GetStatisticsPresenter:
+        return GetStatisticsPresenter(translator=translator)
+
     @provider
     def provide_get_company_summary(
         self,
