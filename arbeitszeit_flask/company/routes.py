@@ -2,7 +2,7 @@ from decimal import Decimal
 from typing import Optional
 from uuid import UUID
 
-from flask import Response, flash, redirect, request, url_for
+from flask import flash, redirect, request, url_for
 from flask_login import current_user
 
 from arbeitszeit import errors, use_cases
@@ -51,6 +51,7 @@ from arbeitszeit_flask.forms import (
     RequestCooperationForm,
 )
 from arbeitszeit_flask.template import UserTemplateRenderer
+from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views import (
     EndCooperationView,
     Http404View,
@@ -605,18 +606,18 @@ def my_cooperations(
     cancel_cooperation_solicitation_response: Optional[bool] = None
     if request.method == "POST":
         if request.form.get("accept"):
-            coop_id, plan_id = [id.strip() for id in request.form["accept"].split(",")]
+            coop_id, plan_id = [
+                UUID(id.strip()) for id in request.form["accept"].split(",")
+            ]
             accept_cooperation_response = accept_cooperation(
-                AcceptCooperationRequest(
-                    UUID(current_user.id), UUID(plan_id), UUID(coop_id)
-                )
+                AcceptCooperationRequest(UUID(current_user.id), plan_id, coop_id)
             )
         elif request.form.get("deny"):
-            coop_id, plan_id = [id.strip() for id in request.form["deny"].split(",")]
+            coop_id, plan_id = [
+                UUID(id.strip()) for id in request.form["deny"].split(",")
+            ]
             deny_cooperation_response = deny_cooperation(
-                DenyCooperationRequest(
-                    UUID(current_user.id), UUID(plan_id), UUID(coop_id)
-                )
+                DenyCooperationRequest(UUID(current_user.id), plan_id, coop_id)
             )
         elif request.form.get("cancel"):
             plan_id = UUID(request.form["cancel"])
