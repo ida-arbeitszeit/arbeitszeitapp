@@ -7,9 +7,11 @@ from itsdangerous import URLSafeTimedSerializer
 class FlaskTokenService:
     def generate_token(self, input: str) -> str:
         serializer = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
-        return serializer.dumps(
+        token = serializer.dumps(
             input, salt=current_app.config["SECURITY_PASSWORD_SALT"]
         )
+        assert isinstance(token, str)
+        return token
 
     def confirm_token(self, token: str, max_age_in_sec: int = 3600) -> str:
         serializer = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
