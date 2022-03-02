@@ -1,0 +1,98 @@
+#!/usr/bin/env python
+from __future__ import annotations
+
+import argparse
+import json
+import subprocess
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, Iterable, Tuple
+
+
+def main() -> None:
+    parse_arguments()
+    controller = RequirementsUpdater(
+        requirements_file=RequirementsFile.from_path(Path("requirements.txt")),
+        python_environment=PythonEnvironment(),
+    )
+    controller.process_requirements_file()
+
+
+@dataclass
+class RequirementsUpdater:
+    requirements_file: RequirementsFile
+    python_environment: PythonEnvironment
+
+    def process_requirements_file(self) -> None:
+        for (
+            package_name,
+            package_version,
+        ) in self.python_environment.get_installed_packages():
+            self.requirements_file.update_package(package_name, package_version)
+        self.requirements_file.save_to_disk()
+
+
+@dataclass
+class RequirementsFile:
+    packages: Dict[str, str]
+    path: Path
+
+    def save_to_disk(self) -> None:
+        with open(self.path, "w") as handle:
+            for name, version in self.packages_sorted_by_name():
+                print(f"{name}=={version}", file=handle)
+
+    def update_package(self, package_name: str, package_version: str) -> None:
+        if package_name in self.packages:
+            self.packages[package_name] = package_version
+
+    @classmethod
+    def from_path(cls, path: Path) -> RequirementsFile:
+        """Construct a RequirementsFile from a path object"""
+        packages: Dict[str, str] = dict()
+        with open(path) as handle:
+            for line in handle:
+                try:
+                    name, version = line.split("==")
+                except ValueError:
+                    continue
+                packages[name.strip()] = version.strip()
+        return cls(
+            packages=packages,
+            path=path,
+        )
+
+    def packages_sorted_by_name(self) -> Iterable[Tuple[str, str]]:
+        return sorted(
+            self.packages.items(),
+            key=lambda item: item[0].lower(),
+        )
+
+
+class PythonEnvironment:
+    def get_installed_packages(self) -> Iterable[Tuple[str, str]]:
+        process_info = subprocess.run(
+            [
+                "pip",
+                "list",
+                "--exclude-editable",
+                "--format",
+                "json",
+            ],
+            capture_output=True,
+            check=True,
+        )
+        packages = json.loads(process_info.stdout)
+        for package in packages:
+            yield package["name"], package["version"]
+
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(
+        description="Synchronize requirements.txt file with nix python environment.  This command must be run in a shell/process environment where the current project dependecies are installed."
+    )
+    parser.parse_args()
+
+
+if __name__ == "__main__":
+    main()

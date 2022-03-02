@@ -5,3 +5,4 @@ arbeitszeit_flask/
 format_code.py
 type_stubs
 run-checks
+update-requirements-from-nix
