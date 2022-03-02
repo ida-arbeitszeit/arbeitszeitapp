@@ -89,7 +89,7 @@ class RequestCooperationController:
             return None
         try:
             plan_uuid = UUID(form.get_plan_id_string())
-        except ValueError:
+        except (ValueError, TypeError):
             return MalformedInputData("plan_id", "Plan-ID ist ungültig.")
         try:
             cooperation_uuid = UUID(form.get_cooperation_id_string())

@@ -1,5 +1,9 @@
 {
   description = "Arbeitszeitapp";
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    flake-utils.url = "github:numtide/flake-utils";
+  };
 
   outputs = { self, nixpkgs, flake-utils }:
     let
@@ -12,11 +16,13 @@
           python = pkgs.python3;
         in {
           devShell = pkgs.mkShell {
-            packages = (with python.pkgs; [ black flake8 mypy isort psycopg2 ])
+            packages =
+              (with python.pkgs; [ black flake8 mypy isort types-dateutil ])
               ++ (with pkgs; [ nixfmt ]);
             inputsFrom = [ python.pkgs.arbeitszeitapp ];
           };
           defaultPackage = pkgs.python3.pkgs.arbeitszeitapp;
+          packages = { inherit python; };
         });
       systemIndependent = {
         overlay = final: prev: {
