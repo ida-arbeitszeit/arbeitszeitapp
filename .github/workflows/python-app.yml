@@ -20,7 +20,8 @@ jobs:
     - uses: cachix/install-nix-action@v16
     - run: nix flake check --print-build-logs
     - run: nix build --print-build-logs
-    - run: nix develop --command './run-checks'
+    # We don't need to run this unittests since they are run as part of 'nix build'
+    - run: nix develop --command ./run-checks --no-unittests
 
   build-pip:
     runs-on: ubuntu-latest

@@ -1,8 +1,40 @@
 #!/usr/bin/env python
 
+import argparse
 import shlex
 import subprocess
+from dataclasses import dataclass
 from typing import List
+
+
+def main():
+    configuration = get_configuration()
+    autoformatted_paths = read_autoformat_target_paths()
+    run_check_command(["black", "--check"] + autoformatted_paths)
+    run_check_command(["flake8"])
+    run_check_command(["mypy"])
+    run_check_command(["mypy", "run-checks"])
+    run_check_command(["mypy", "format_code.py"])
+    run_check_command(["mypy", "update-requirements-from-nix"])
+    if configuration.is_unittests_requested:
+        run_check_command(["pytest"])
+    run_check_command(["isort", "--check"] + autoformatted_paths)
+
+
+@dataclass
+class Configuration:
+    is_unittests_requested: bool
+
+
+def get_configuration() -> Configuration:
+    parser = argparse.ArgumentParser(
+        description="Run automated checks on the code for Arbeitszeitapp"
+    )
+    parser.add_argument(
+        "--no-unittests", dest="unittests", default=True, action="store_false"
+    )
+    arguments = parser.parse_args()
+    return Configuration(is_unittests_requested=arguments.unittests)
 
 
 def run_check_command(command: List[str]) -> None:
@@ -13,15 +45,6 @@ def run_check_command(command: List[str]) -> None:
 def read_autoformat_target_paths() -> List[str]:
     with open(".autoformattingrc") as handle:
         return [line.strip() for line in handle.read().splitlines() if line.strip()]
-
-
-def main():
-    autoformatted_paths = read_autoformat_target_paths()
-    run_check_command(["black", "--check"] + autoformatted_paths)
-    run_check_command(["flake8"])
-    run_check_command(["mypy"])
-    run_check_command(["pytest"])
-    run_check_command(["isort", "--check"] + autoformatted_paths)
 
 
 if __name__ == "__main__":
