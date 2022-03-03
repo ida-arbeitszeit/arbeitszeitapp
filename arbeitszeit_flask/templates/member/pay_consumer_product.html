@@ -7,12 +7,13 @@
     <div class="column is-two-third">
         <div class="content">
             <h1 class="title">
-                Bezahlung Produkt
+                {{ gettext("Pay Consumer Product") }}
             </h1>
             <div class="box has-background-info-light has-text-info-dark has-text-centered">
                 <div class="icon"><i class="fas fa-info-circle"></i></div>
                 <p>
-                    Hier kannst du Produkte bezahlen. <br>
+                  {{ gettext("You can pay consumer products here.") }}
+		  <br>
                 </p>
             </div>
         </div>
@@ -29,12 +30,12 @@
                     </div>
                     <div class="control">
                         <button class="button is-primary" name="transfer_type" value="transfer_to_company"
-                            type="submit">Überweisen</button>
+                            type="submit">{{ gettext("Transfer") }}</button>
                     </div>
                 </div>
-                <p class="help">Der verkaufende Betrieb muss dir seine Betriebs-ID und die zum Produkt gehörige Plan-ID
-                    nennen.</p>
-
+                <p class="help">
+		  {{ gettext("The producer needs to tell you the plan ID for the product you want to pay.") }}
+		</p>
             </form>
         </div>
 
