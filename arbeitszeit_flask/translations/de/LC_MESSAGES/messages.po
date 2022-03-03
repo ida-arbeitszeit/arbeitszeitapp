@@ -7,16 +7,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-03-03 19:00+0100\n"
-"PO-Revision-Date: 2022-01-16 19:09+0100\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2022-03-03 19:30+0100\n"
+"PO-Revision-Date: 2022-03-03 19:42+0100\n"
+"Last-Translator: Sebastian Jordan <sebastian.jordan.mail@googlemail.com>\n"
 "Language: de\n"
 "Language-Team: de <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.9.1\n"
+"X-Generator: Poedit 3.0\n"
 
 #: arbeitszeit_flask/forms.py:16
 msgid "Invalid ID."
@@ -28,7 +29,7 @@ msgstr "Zahl muss 0 oder größer sein."
 
 #: arbeitszeit_flask/forms.py:28
 msgid "This field is required."
-msgstr ""
+msgstr "Dies ist ein Pflichtfeld."
 
 #: arbeitszeit_flask/forms.py:218
 msgid "Fixed means of production"
@@ -81,53 +82,52 @@ msgstr "App-Version"
 #: tests/presenters/test_get_member_profile_info_presenter.py:41
 #, python-format
 msgid "Welcome, %s!"
-msgstr ""
+msgstr "Willkommen, %s!"
 
 #: arbeitszeit_flask/templates/macros.html:90
 msgid "Global statistics"
-msgstr ""
+msgstr "Globale Statistiken"
 
 #: arbeitszeit_flask/templates/macros.html:98
 msgid "Registered companies"
-msgstr ""
+msgstr "Angemeldete Betriebe"
 
 #: arbeitszeit_flask/templates/macros.html:110
 msgid "Registered workers"
-msgstr ""
+msgstr "Angemeldete Arbeiter*innen"
 
 #: arbeitszeit_flask/templates/macros.html:123
 #: arbeitszeit_flask/templates/macros/company_summary.html:36
 msgid "Active plans"
-msgstr ""
+msgstr "Aktive Pläne"
 
 #: arbeitszeit_flask/templates/macros.html:135
 msgid "Public active plans"
-msgstr ""
+msgstr "Öffentliche aktive Pläne"
 
 #: arbeitszeit_flask/templates/macros.html:147
 msgid "Average plan duration"
-msgstr ""
+msgstr "Durchschnittliche Plandauer"
 
 #: arbeitszeit_flask/templates/macros.html:161
 msgid "Currently planned work"
-msgstr ""
+msgstr "Aktuell geplante Arbeit"
 
 #: arbeitszeit_flask/templates/macros.html:174
-msgid "Currently liquid means"
-msgstr ""
+msgid "Currently planned liquid means"
+msgstr "Aktuell geplante flüssige Produktionmittel"
 
 #: arbeitszeit_flask/templates/macros.html:187
 msgid "Currently planned fixed means"
-msgstr ""
+msgstr "Aktuell geplante feste Produktionsmittel"
 
 #: arbeitszeit_flask/templates/macros.html:207
-#, fuzzy
 msgid "Planning information"
-msgstr "Planender Betrieb"
+msgstr "Planungsinformationen"
 
 #: arbeitszeit_flask/templates/company/create_cooperation.html:11
 msgid "Here you can create a new cooperation."
-msgstr ""
+msgstr "Hier kannst du eine neue Kooperation erstellen."
 
 #: arbeitszeit_flask/templates/company/create_cooperation.html:13
 msgid ""
@@ -137,110 +137,120 @@ msgid ""
 "production. This means that producers receive the same amount of credit "
 "to their account whether they are part of a cooperation or not."
 msgstr ""
+"Eine Kooperation beinhaltet ähnliche Produkte.  Um Konkurrenz zu "
+"reduzieren, wird der Durchschnittspreis aller Produkte innerhalb der "
+"Kooperation berechnet.  Alle Produzenten erhalten bei der Warenweitergabe "
+"die von ihnen ursprünglich geplante Anzahl von Arbeitsstunden. Das heißt "
+"insbesondere, dass Produzenten die selbe Gutschrift erhalten unabhängig "
+"davon, ob sie in einer Kooperation sind, oder nicht."
 
 #: arbeitszeit_flask/templates/company/create_cooperation.html:23
 msgid "Cooperation name"
-msgstr ""
+msgstr "Name der Kooperation"
 
 #: arbeitszeit_flask/templates/company/create_cooperation.html:31
 msgid "Definition of the cooperation"
-msgstr ""
+msgstr "Definition der Kooperation"
 
 #: arbeitszeit_flask/templates/company/create_cooperation.html:41
 msgid "Create cooperation"
-msgstr ""
+msgstr "Kooperation erstellen"
 
 #: arbeitszeit_flask/templates/company/profile.html:24
 #: arbeitszeit_flask/templates/member/profile.html:26
 msgid "Your ID"
-msgstr ""
+msgstr "Deine ID"
 
 #: arbeitszeit_flask/templates/company/profile.html:36
 #: arbeitszeit_flask/templates/member/profile.html:50
 msgid "Your email"
-msgstr ""
+msgstr "Deine email"
 
 #: arbeitszeit_flask/templates/company/profile.html:53
 msgid "No workers are registered with your company. Click here to add some."
 msgstr ""
+"Es sind keine Arbeiter*innen bei deiner Firma registriert. Klicke hier, "
+"um welche hinzuzufügen."
 
 #: arbeitszeit_flask/templates/macros/company_summary.html:15
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #: arbeitszeit_flask/templates/macros/company_summary.html:19
 msgid "Name"
-msgstr ""
+msgstr "Name"
 
 #: arbeitszeit_flask/templates/macros/company_summary.html:23
 msgid "Email"
-msgstr ""
+msgstr "email"
 
 #: arbeitszeit_flask/templates/macros/company_summary.html:27
 msgid "Registered since"
-msgstr ""
+msgstr "Angemeldet seit"
 
 #: arbeitszeit_flask/templates/macros/company_summary.html:41
 msgid "Plan-ID"
-msgstr ""
+msgstr "Plan-ID"
 
 #: arbeitszeit_flask/templates/macros/company_summary.html:42
 msgid "Product name"
-msgstr ""
+msgstr "Name des Produkts"
 
 #: arbeitszeit_flask/templates/member/profile.html:38
 msgid "Your credit"
-msgstr ""
+msgstr "Dein Guthaben"
 
 #: arbeitszeit_flask/templates/member/profile.html:62
 msgid "Your workplace"
-msgstr ""
+msgstr "Dein Arbeitsplatz"
 
 #: arbeitszeit_flask/templates/member/profile.html:82
 msgid ""
-"You are not registered with any company. Tell your company your member ID"
-" so that they register you."
+"You are not registered with any company. Tell your company your member ID "
+"so that they register you."
 msgstr ""
+"Du bist bei keinem Betrieb angemeldet. Teile deinem Betrieb deine "
+"Mitglieds-ID mit, so dass sie dich anmelden können."
 
 #: arbeitszeit_flask/templates/member/show_company_work_invite_details.html:15
 msgid "Accept"
-msgstr ""
+msgstr "Annehmen"
 
 #: arbeitszeit_flask/templates/member/show_company_work_invite_details.html:20
 msgid "Reject"
-msgstr ""
+msgstr "Ablehnen"
 
 #: arbeitszeit_web/answer_company_work_invite.py:52
 #: tests/presenters/test_answer_company_work_invite.py:60
 #, python-format
 msgid "You successfully joined \"%(company)s\"."
-msgstr ""
+msgstr "Du bist erfolgreich \"%(company)s\" beigetreten."
 
 #: arbeitszeit_web/answer_company_work_invite.py:57
 #: tests/presenters/test_answer_company_work_invite.py:70
 #, python-format
 msgid "You rejected the invitation from \"%(company)s\"."
-msgstr ""
+msgstr "Du haste die Einladung von \"%(company)s\" abgelehnt."
 
 #: arbeitszeit_web/answer_company_work_invite.py:64
 #: tests/presenters/test_answer_company_work_invite.py:118
 msgid "Accepting or rejecting is not possible."
-msgstr ""
+msgstr "Annehmen oder ablehnen ist nicht möglich."
 
 #: arbeitszeit_web/create_cooperation.py:27
 #: tests/presenters/test_create_cooperation_presenter.py:41
 msgid "Successfully created cooperation."
-msgstr ""
+msgstr "Kooperation erfolgreich erstellt."
 
 #: arbeitszeit_web/create_cooperation.py:34
 #: tests/presenters/test_create_cooperation_presenter.py:56
 msgid "There is already a cooperation with the same name."
-msgstr ""
+msgstr "Es gibt bereits eine Kooperation mit dem selben Namen."
 
 #: arbeitszeit_web/create_cooperation.py:43
 #: tests/presenters/test_create_cooperation_presenter.py:73
 msgid "Internal error: Coordinator not found."
-msgstr ""
+msgstr "Interner Fehler: Koordinator nicht gefunden."
 
 #: arbeitszeit_web/get_member_profile_info.py:34
 #: arbeitszeit_web/get_statistics.py:27 arbeitszeit_web/get_statistics.py:30
@@ -248,15 +258,15 @@ msgstr ""
 #, python-format
 msgid "%(num).2f hour"
 msgid_plural "%(num).2f hours"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(num).2f Stunde"
+msgstr[1] "%(num).2f Stunden"
 
 #: arbeitszeit_web/get_statistics.py:24
 #, python-format
 msgid "%(num).2f day"
 msgid_plural "%(num).2f days"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(num).2f Tag"
+msgstr[1] "%(num).2f Tage"
 
 #: arbeitszeit_web/plan_summary_service.py:48
 #: tests/presenters/test_plan_summary_service.py:68
@@ -277,26 +287,28 @@ msgstr "Beschreibung des Produkts"
 #: arbeitszeit_web/presenters/show_company_work_invite_details_presenter.py:27
 #, python-format
 msgid ""
-"The company \"%(company_name)s\" invites you to join them. Do you want to"
-" accept this invitation?"
+"The company \"%(company_name)s\" invites you to join them. Do you want to "
+"accept this invitation?"
 msgstr ""
+"Der Betrieb \"%(company_name)s\" hat dich zum Beitritt eingeladen. "
+"Möchtest du die Einladung annehmen?"
 
 #: tests/presenters/test_get_member_profile_info_presenter.py:66
 #: tests/presenters/test_get_statistics_presenter.py:35
 #: tests/presenters/test_get_statistics_presenter.py:46
 #, python-format
 msgid "%.2f hours"
-msgstr ""
+msgstr "%.2f Stunden"
 
 #: tests/presenters/test_get_statistics_presenter.py:57
 #, python-format
 msgid "%s hours"
-msgstr ""
+msgstr "%s Stunden"
 
 #: tests/presenters/test_get_statistics_presenter.py:112
 #, python-format
 msgid "%.2f days"
-msgstr ""
+msgstr "%.2f Tage"
 
 #: tests/presenters/test_show_company_work_invite_details_presenter.py:49
 #, python-format
@@ -304,4 +316,5 @@ msgid ""
 "The company \"%(company)s\" invites you to join them. Do you want to "
 "accept this invitation?"
 msgstr ""
-
+"Der Betrieb \"%(company)s\" läd dich zum Beitritt ein. Möchtest du die "
+"Einladung annehmen?"

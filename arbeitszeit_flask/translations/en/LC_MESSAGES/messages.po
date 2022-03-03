@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-03-03 19:00+0100\n"
+"POT-Creation-Date: 2022-03-03 19:30+0100\n"
 "PO-Revision-Date: 2022-01-16 19:09+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -113,7 +113,7 @@ msgid "Currently planned work"
 msgstr ""
 
 #: arbeitszeit_flask/templates/macros.html:174
-msgid "Currently liquid means"
+msgid "Currently planned liquid means"
 msgstr ""
 
 #: arbeitszeit_flask/templates/macros.html:187
@@ -309,5 +309,8 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Invalid UUID."
+#~ msgstr ""
+
+#~ msgid "Currently liquid means"
 #~ msgstr ""
 
