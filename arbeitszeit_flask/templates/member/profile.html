@@ -6,7 +6,7 @@
   <div class="column is-half">
     <div class="content">
       <h1 class="title">
-        Willkommen, {{ view_model.name }}!
+	{{ view_model.welcome_message }}
       </h1>
     </div>
 
@@ -23,7 +23,7 @@
     <div class="level">
       <div class="level-left">
         <div class="level-item">
-          <p class="has-text-weight-semibold">Deine ID:</p>
+          <p class="has-text-weight-semibold">{{ gettext("Your ID") }}:</p>
         </div>
       </div>
       <div class="level-right">
@@ -35,19 +35,19 @@
     <div class="level">
       <div class="level-left">
         <div class="level-item">
-          <p class="has-text-weight-semibold">Dein Guthaben:</p>
+          <p class="has-text-weight-semibold">{{ gettext("Your credit") }}:</p>
         </div>
       </div>
       <div class="level-right">
         <div class="level-item">
-          <p>{{ view_model.account_balance }} Stunden</p>
+          <p>{{ view_model.account_balance }}</p>
         </div>
       </div>
     </div>
     <div class="level">
       <div class="level-left">
         <div class="level-item">
-          <p class="has-text-weight-semibold">Deine Email:</p>
+          <p class="has-text-weight-semibold">{{ gettext("Your email") }}:</p>
         </div>
       </div>
       <div class="level-right">
@@ -59,7 +59,7 @@
     <div class="level">
       <div class="level-left">
         <div class="level-item">
-          <p class="has-text-weight-semibold">Deine Arbeit:</p>
+          <p class="has-text-weight-semibold">{{ gettext("Your workplace") }}:</p>
         </div>
       </div>
       <div class="level-right has-text-right-tablet">
@@ -78,10 +78,8 @@
     {% if view_model.show_workplace_registration_info %}
     <div class="content">
       <p>
-      <div class="icon-text"><i class="fas fa-exclamation-triangle"></i></div>
-      Du bist noch in keinem Betrieb als Mitarbeiter registriert.<br>
-      Teile deinem Betrieb deine Mitglieder-ID mit, um dich registrieren zu lassen oder
-      gründe <a href="{{ url_for('auth.start') }}">hier</a> deinen eigenen Betrieb.</p>
+	<div class="icon-text"><i class="fas fa-exclamation-triangle"></i></div>
+	{{ gettext("You are not registered with any company. Tell your company your member ID so that they register you.") }}
     </div>
     {% endif %}
 

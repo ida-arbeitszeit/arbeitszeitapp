@@ -89,10 +89,12 @@ from arbeitszeit_web.controllers.show_my_accounts_controller import (
 )
 from arbeitszeit_web.email import EmailConfiguration
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
+from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
 from arbeitszeit_web.get_plan_summary_company import (
     GetPlanSummaryCompanySuccessPresenter,
 )
 from arbeitszeit_web.get_plan_summary_member import GetPlanSummarySuccessPresenter
+from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyController
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
@@ -138,6 +140,12 @@ __all__ = [
 
 
 class MemberModule(Module):
+    @provider
+    def provide_get_member_profile_info_presenter(
+        self, translator: Translator
+    ) -> GetMemberProfileInfoPresenter:
+        return GetMemberProfileInfoPresenter(translator=translator)
+
     @provider
     def provide_list_messages_url_index(
         self, member_index: MemberUrlIndex
@@ -323,6 +331,12 @@ class CompanyModule(Module):
 
 
 class FlaskModule(Module):
+    @provider
+    def provide_get_statistics_presenter(
+        self, translator: Translator
+    ) -> GetStatisticsPresenter:
+        return GetStatisticsPresenter(translator=translator)
+
     @provider
     def provide_get_company_summary(
         self,
