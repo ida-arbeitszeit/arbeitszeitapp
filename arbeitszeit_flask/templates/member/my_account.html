@@ -3,7 +3,7 @@
 {% block content2 %}
 
 <h1 class="title">
-    Mein Konto
+  {{ gettext("My Account") }}
 </h1>
 
 {% with messages = get_flashed_messages() %}
@@ -18,9 +18,10 @@
     <div class="column"></div>
     <div class="column">
         <div>
-            <p>Aktueller Kontostand:</p>
-            <p class="py-2 has-text-weight-bold {{ 'has-text-primary' if my_balance >= 0 else 'has-text-danger' }}">{{
-                my_balance }}</p>
+            <p>{{ gettext("Current balance") }}:</p>
+            <p class="py-2 has-text-weight-bold {{ 'has-text-primary' if my_balance >= 0 else 'has-text-danger' }}">
+	      {{ my_balance }}
+	    </p>
         </div>
     </div>
     <div class="column"></div>
