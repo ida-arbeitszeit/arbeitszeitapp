@@ -16,9 +16,14 @@
           python = pkgs.python3;
         in {
           devShell = pkgs.mkShell {
-            packages =
-              (with python.pkgs; [ black flake8 mypy isort types-dateutil ])
-              ++ (with pkgs; [ nixfmt ]);
+            packages = (with python.pkgs; [
+              black
+              flake8
+              mypy
+              isort
+              types-dateutil
+              psycopg2
+            ]) ++ (with pkgs; [ nixfmt ]);
             inputsFrom = [ python.pkgs.arbeitszeitapp ];
           };
           defaultPackage = pkgs.python3.pkgs.arbeitszeitapp;

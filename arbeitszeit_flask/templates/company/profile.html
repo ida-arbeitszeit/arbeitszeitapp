@@ -5,7 +5,7 @@
 <div class="columns is-centered">
   <div class="column is-two-fifths">
     <h1 class="title">
-      Willkommen, {{ current_user.name }}!
+      {{ gettext("Welcome, %s!") % current_user.name }}
     </h1>
 
 
@@ -21,7 +21,7 @@
     <div class="level">
       <div class="level-left">
         <div class="level-item">
-          <p class="has-text-weight-semibold">Deine ID:</p>
+          <p class="has-text-weight-semibold">{{ gettext("Your ID") }}:</p>
         </div>
       </div>
       <div class="level-right">
@@ -33,7 +33,7 @@
     <div class="level">
       <div class="level-left">
         <div class="level-item">
-          <p class="has-text-weight-semibold">Deine Email:</p>
+          <p class="has-text-weight-semibold">{{ gettext("Your email") }}:</p>
         </div>
       </div>
       <div class="level-right">
@@ -49,9 +49,9 @@
       <div class="block">
         <p>
 	  <span class="icon"><i class="fas fa-exclamation-triangle"></i></span>
-          Du hast noch keine Mitarbeiter. Füge sie
-	  <a href="{{ url_for('main_company.invite_worker_to_company') }}">hier</a>
-	  hinzu.
+	  <a href="{{ url_for('main_company.invite_worker_to_company') }}">
+	    {{ gettext("No workers are registered with your company. Click here to add some.") }}
+	  </a>
 	</p>
       </div>
       {% endif %}

@@ -7,6 +7,7 @@ from arbeitszeit.use_cases.get_member_profile_info import (
     Workplace,
 )
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
+from tests.translator import FakeTranslator
 
 RESPONSE_WITHOUT_WORKPLACES = GetMemberProfileInfoResponse(
     workplaces=[],
@@ -30,7 +31,8 @@ RESPONSE_WITH_ONE_WORKPLACE = GetMemberProfileInfoResponse(
 
 class GetMemberProfileInfoPresenterTests(TestCase):
     def setUp(self):
-        self.presenter = GetMemberProfileInfoPresenter()
+        self.translator = FakeTranslator()
+        self.presenter = GetMemberProfileInfoPresenter(translator=self.translator)
 
     def test_that_workplaces_are_not_shown_when_worker_is_not_employed(self):
         presentation = self.presenter.present(RESPONSE_WITHOUT_WORKPLACES)
@@ -52,4 +54,8 @@ class GetMemberProfileInfoPresenterTests(TestCase):
 
     def test_that_account_balance_shows_only_two_digits_after_comma(self):
         presentation = self.presenter.present(RESPONSE_WITH_ONE_WORKPLACE)
-        self.assertEqual(presentation.account_balance, "1.33")
+        self.assertEqual(
+            presentation.account_balance,
+            self.translator.gettext("%.2f hours")
+            % RESPONSE_WITH_ONE_WORKPLACE.account_balance,
+        )
