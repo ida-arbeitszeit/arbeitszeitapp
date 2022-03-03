@@ -89,6 +89,7 @@ from arbeitszeit_web.controllers.show_my_accounts_controller import (
 )
 from arbeitszeit_web.email import EmailConfiguration
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
+from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
 from arbeitszeit_web.get_plan_summary_company import (
     GetPlanSummaryCompanySuccessPresenter,
 )
@@ -139,6 +140,12 @@ __all__ = [
 
 
 class MemberModule(Module):
+    @provider
+    def provide_get_member_profile_info_presenter(
+        self, translator: Translator
+    ) -> GetMemberProfileInfoPresenter:
+        return GetMemberProfileInfoPresenter(translator=translator)
+
     @provider
     def provide_list_messages_url_index(
         self, member_index: MemberUrlIndex
