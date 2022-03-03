@@ -14,6 +14,7 @@ class CurrentUser:
     id: str
     email: str
     is_authenticated: bool
+    name: str
 
 current_user: CurrentUser
 

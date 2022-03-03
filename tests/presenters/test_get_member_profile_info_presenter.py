@@ -30,9 +30,16 @@ RESPONSE_WITH_ONE_WORKPLACE = GetMemberProfileInfoResponse(
 
 
 class GetMemberProfileInfoPresenterTests(TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.translator = FakeTranslator()
         self.presenter = GetMemberProfileInfoPresenter(translator=self.translator)
+
+    def test_that_welcome_line_is_correctly_translated(self) -> None:
+        view_model = self.presenter.present(RESPONSE_WITHOUT_WORKPLACES)
+        self.assertEqual(
+            view_model.welcome_message,
+            self.translator.gettext("Welcome, %s!") % RESPONSE_WITHOUT_WORKPLACES.name,
+        )
 
     def test_that_workplaces_are_not_shown_when_worker_is_not_employed(self):
         presentation = self.presenter.present(RESPONSE_WITHOUT_WORKPLACES)

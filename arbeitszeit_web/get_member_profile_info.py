@@ -13,13 +13,13 @@ class Workplace:
 
 @dataclass
 class GetMemberProfileInfoViewModel:
-    name: str
     member_id: str
     account_balance: str
     email: str
     workplaces: List[Workplace]
     show_workplaces: bool
     show_workplace_registration_info: bool
+    welcome_message: str
 
 
 @dataclass
@@ -30,7 +30,6 @@ class GetMemberProfileInfoPresenter:
         self, use_case_response: GetMemberProfileInfoResponse
     ) -> GetMemberProfileInfoViewModel:
         return GetMemberProfileInfoViewModel(
-            name=use_case_response.name,
             member_id=str(use_case_response.id),
             account_balance=self.translator.ngettext(
                 "%(num).2f hour", "%(num).2f hours", use_case_response.account_balance
@@ -45,4 +44,7 @@ class GetMemberProfileInfoPresenter:
             ],
             show_workplaces=bool(use_case_response.workplaces),
             show_workplace_registration_info=not bool(use_case_response.workplaces),
+            welcome_message=self.translator.gettext(
+                "Welcome, %s!" % use_case_response.name
+            ),
         )
