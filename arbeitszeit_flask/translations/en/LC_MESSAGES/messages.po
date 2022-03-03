@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-03-03 19:30+0100\n"
+"POT-Creation-Date: 2022-03-03 21:38+0100\n"
 "PO-Revision-Date: 2022-01-16 19:09+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -56,6 +56,7 @@ msgid "Help"
 msgstr ""
 
 #: arbeitszeit_flask/auth/templates/start.html:46
+#: arbeitszeit_flask/templates/base.html:8
 msgid "Companies 2020"
 msgstr ""
 
@@ -168,6 +169,7 @@ msgid "ID"
 msgstr ""
 
 #: arbeitszeit_flask/templates/macros/company_summary.html:19
+#: arbeitszeit_flask/templates/member/my_purchases.html:22
 msgid "Name"
 msgstr ""
 
@@ -185,6 +187,64 @@ msgstr ""
 
 #: arbeitszeit_flask/templates/macros/company_summary.html:42
 msgid "Product name"
+msgstr ""
+
+#: arbeitszeit_flask/templates/member/my_account.html:6
+msgid "My Account"
+msgstr ""
+
+#: arbeitszeit_flask/templates/member/my_account.html:21
+msgid "Current balance"
+msgstr ""
+
+#: arbeitszeit_flask/templates/member/my_purchases.html:7
+msgid "My past purchases"
+msgstr ""
+
+#: arbeitszeit_flask/templates/member/my_purchases.html:12
+msgid "Your past purchases are shown here."
+msgstr ""
+
+#: arbeitszeit_flask/templates/member/my_purchases.html:21
+msgid "Date"
+msgstr ""
+
+#: arbeitszeit_flask/templates/member/my_purchases.html:23
+msgid "Description"
+msgstr ""
+
+#: arbeitszeit_flask/templates/member/my_purchases.html:24
+msgid "Price per unit"
+msgstr ""
+
+#: arbeitszeit_flask/templates/member/my_purchases.html:25
+msgid "Amount"
+msgstr ""
+
+#: arbeitszeit_flask/templates/member/my_purchases.html:26
+msgid "Total price"
+msgstr ""
+
+#: arbeitszeit_flask/templates/member/my_purchases.html:42
+msgid "You have not made any purchases yet."
+msgstr ""
+
+#: arbeitszeit_flask/templates/member/pay_consumer_product.html:10
+msgid "Pay Consumer Product"
+msgstr ""
+
+#: arbeitszeit_flask/templates/member/pay_consumer_product.html:15
+msgid "You can pay consumer products here."
+msgstr ""
+
+#: arbeitszeit_flask/templates/member/pay_consumer_product.html:33
+msgid "Transfer"
+msgstr ""
+
+#: arbeitszeit_flask/templates/member/pay_consumer_product.html:37
+msgid ""
+"The producer needs to tell you the plan ID for the product you want to "
+"pay."
 msgstr ""
 
 #: arbeitszeit_flask/templates/member/profile.html:38
@@ -312,5 +372,8 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Currently liquid means"
+#~ msgstr ""
+
+#~ msgid "You past purchases are shown here."
 #~ msgstr ""
 
