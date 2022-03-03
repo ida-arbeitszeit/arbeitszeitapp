@@ -97,6 +97,7 @@ from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from arbeitszeit_web.show_p_account_details import ShowPAccountDetailsPresenter
 from arbeitszeit_web.show_r_account_details import ShowRAccountDetailsPresenter
+from arbeitszeit_web.translator import Translator
 
 from .blueprint import CompanyRoute
 
@@ -106,6 +107,7 @@ def profile(
     company_repository: CompanyRepository,
     company_worker_repository: CompanyWorkerRepository,
     template_renderer: UserTemplateRenderer,
+    translator: Translator,
 ):
     company = company_repository.get_by_id(UUID(current_user.id))
     assert company is not None
@@ -115,7 +117,11 @@ def profile(
     else:
         having_workers = False
     return template_renderer.render_template(
-        "company/profile.html", context=dict(having_workers=having_workers)
+        "company/profile.html",
+        context=dict(
+            having_workers=having_workers,
+            welcome_message=translator.gettext("Welcome, %s!") % current_user.name,
+        ),
     )
 
 

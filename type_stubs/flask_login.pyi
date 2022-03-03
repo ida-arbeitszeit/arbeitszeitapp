@@ -16,6 +16,7 @@ class CurrentUser:
     email: str
     is_authenticated: bool
     confirmed_on: Optional[datetime]
+    name: str
 
 current_user: CurrentUser
 
