@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-03-03 19:30+0100\n"
-"PO-Revision-Date: 2022-03-03 19:42+0100\n"
+"POT-Creation-Date: 2022-03-03 21:38+0100\n"
+"PO-Revision-Date: 2022-03-03 21:41+0100\n"
 "Last-Translator: Sebastian Jordan <sebastian.jordan.mail@googlemail.com>\n"
 "Language: de\n"
 "Language-Team: de <LL@li.org>\n"
@@ -57,6 +57,7 @@ msgid "Help"
 msgstr "Hilfe"
 
 #: arbeitszeit_flask/auth/templates/start.html:46
+#: arbeitszeit_flask/templates/base.html:8
 msgid "Companies 2020"
 msgstr "Betriebe 2020"
 
@@ -177,12 +178,13 @@ msgid "ID"
 msgstr "ID"
 
 #: arbeitszeit_flask/templates/macros/company_summary.html:19
+#: arbeitszeit_flask/templates/member/my_purchases.html:22
 msgid "Name"
 msgstr "Name"
 
 #: arbeitszeit_flask/templates/macros/company_summary.html:23
 msgid "Email"
-msgstr "email"
+msgstr "Email"
 
 #: arbeitszeit_flask/templates/macros/company_summary.html:27
 msgid "Registered since"
@@ -195,6 +197,66 @@ msgstr "Plan-ID"
 #: arbeitszeit_flask/templates/macros/company_summary.html:42
 msgid "Product name"
 msgstr "Name des Produkts"
+
+#: arbeitszeit_flask/templates/member/my_account.html:6
+msgid "My Account"
+msgstr "Mein Konto"
+
+#: arbeitszeit_flask/templates/member/my_account.html:21
+msgid "Current balance"
+msgstr "Aktueller Kontostand"
+
+#: arbeitszeit_flask/templates/member/my_purchases.html:7
+msgid "My past purchases"
+msgstr "Meine vergangenen Käufe"
+
+#: arbeitszeit_flask/templates/member/my_purchases.html:12
+msgid "Your past purchases are shown here."
+msgstr "Hier werden deine vergangenen Käufe angezeigt."
+
+#: arbeitszeit_flask/templates/member/my_purchases.html:21
+msgid "Date"
+msgstr "Datum"
+
+#: arbeitszeit_flask/templates/member/my_purchases.html:23
+msgid "Description"
+msgstr "Beschreibung"
+
+#: arbeitszeit_flask/templates/member/my_purchases.html:24
+msgid "Price per unit"
+msgstr "Einzelpreis"
+
+#: arbeitszeit_flask/templates/member/my_purchases.html:25
+msgid "Amount"
+msgstr "Menge"
+
+#: arbeitszeit_flask/templates/member/my_purchases.html:26
+msgid "Total price"
+msgstr "Gesamtpreis"
+
+#: arbeitszeit_flask/templates/member/my_purchases.html:42
+msgid "You have not made any purchases yet."
+msgstr "Du hast noch keine Käufe getätigt."
+
+#: arbeitszeit_flask/templates/member/pay_consumer_product.html:10
+msgid "Pay Consumer Product"
+msgstr "Konsumgut bezahlen"
+
+#: arbeitszeit_flask/templates/member/pay_consumer_product.html:15
+msgid "You can pay consumer products here."
+msgstr "Hier kannst du Konsumgüter bezahlen."
+
+#: arbeitszeit_flask/templates/member/pay_consumer_product.html:33
+msgid "Transfer"
+msgstr "Überweisen"
+
+#: arbeitszeit_flask/templates/member/pay_consumer_product.html:37
+msgid ""
+"The producer needs to tell you the plan ID for the product you want to "
+"pay."
+msgstr ""
+"Der Produzent muss dir die Plan-ID für das Produkt, das du bezahlen "
+"möchtest, nennen."
 
 #: arbeitszeit_flask/templates/member/profile.html:38
 msgid "Your credit"
