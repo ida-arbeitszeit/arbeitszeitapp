@@ -84,6 +84,9 @@ from arbeitszeit_web.list_plans import ListPlansPresenter
 from arbeitszeit_web.presenters.show_a_account_details_presenter import (
     ShowAAccountDetailsPresenter,
 )
+from arbeitszeit_web.presenters.show_prd_account_details_presenter import (
+    ShowPRDAccountDetailsPresenter,
+)
 from arbeitszeit_web.query_companies import (
     QueryCompaniesController,
     QueryCompaniesPresenter,
@@ -417,6 +420,21 @@ def account_a(
 
     return template_renderer.render_template(
         "company/account_a.html",
+        context=dict(view_model=view_model),
+    )
+
+
+@CompanyRoute("/company/my_accounts/account_prd")
+def account_prd(
+    show_prd_account_details: use_cases.ShowPRDAccountDetails,
+    template_renderer: UserTemplateRenderer,
+    presenter: ShowPRDAccountDetailsPresenter,
+):
+    response = show_prd_account_details(UUID(current_user.id))
+    view_model = presenter.present(response)
+
+    return template_renderer.render_template(
+        "company/account_prd.html",
         context=dict(view_model=view_model),
     )
 

@@ -1,0 +1,56 @@
+{% extends "base_company.html" %}
+{% from 'macros/show_notifications.html' import show_notifications %}
+
+{% block content2 %}
+
+
+<h1 class="title">
+    <a href="{{ url_for('main_company.my_accounts') }}">Accounts</a> > Account prd
+</h1>
+<div class="box has-background-info-light has-text-info-dark">
+    <div class="icon"><i class="fas fa-info-circle"></i></div>
+    <p>Your account for product transfers (sales).</p>
+</div>
+
+{{ show_notifications() }}
+
+<p>Balance:</p>
+<p
+    class="py-2 has-text-weight-bold {{ 'has-text-primary' if view_model.account_balance|float >= 0 else 'has-text-danger' }}">
+    {{ view_model.account_balance }}</p>
+
+
+<div class="table-container">
+    <table class="table is-fullwidth">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Type</th>
+                <th>Details</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+
+            {% if view_model.transactions is defined and view_model.transactions|length %}
+            {% for trans_info in view_model.transactions %}
+            <tr>
+                <td>{{ trans_info.date|format_datetime(zone='Europe/Berlin', fmt='%d.%m.%Y %H:%M') }}</td>
+                <td>
+                    {{ trans_info.transaction_type }}
+                </td>
+                <td>{{ trans_info.purpose }}</td>
+                <td
+                    class="has-text-weight-bold {{ 'has-text-success' if trans_info.transaction_volume|float >= 0 else 'has-text-danger' }}">
+                    {{
+                    trans_info.transaction_volume }}
+                </td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
