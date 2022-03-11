@@ -487,12 +487,12 @@ def statistics(
 @CompanyRoute("/company/plan_summary/<uuid:plan_id>")
 def plan_summary(
     plan_id: UUID,
-    get_plan_summary_member: use_cases.GetPlanSummaryCompany,
+    get_plan_summary_company: use_cases.GetPlanSummaryCompany,
     template_renderer: UserTemplateRenderer,
     presenter: GetPlanSummaryCompanySuccessPresenter,
     http_404_view: Http404View,
 ):
-    use_case_response = get_plan_summary_member(plan_id)
+    use_case_response = get_plan_summary_company(plan_id, UUID(current_user.id))
     if isinstance(use_case_response, use_cases.PlanSummaryCompanySuccess):
         view_model = presenter.present(use_case_response)
         return template_renderer.render_template(

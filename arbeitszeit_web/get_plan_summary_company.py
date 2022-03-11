@@ -19,6 +19,7 @@ class Action:
 @dataclass
 class GetPlanSummaryCompanyViewModel:
     summary: PlanSummary
+    show_action_section: bool
     action: Action
 
     def to_dict(self) -> Dict[str, Any]:
@@ -39,6 +40,7 @@ class GetPlanSummaryCompanySuccessPresenter:
             summary=self.plan_summary_service.get_plan_summary_member(
                 response.plan_summary
             ),
+            show_action_section=response.current_user_is_planner,
             action=Action(
                 is_available=response.plan_summary.is_available,
                 toggle_availability_url=self.toggle_availability_url_index.get_toggle_availability_url(
