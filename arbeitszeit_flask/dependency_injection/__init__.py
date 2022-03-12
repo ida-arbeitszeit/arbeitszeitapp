@@ -108,6 +108,9 @@ from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationP
 from arbeitszeit_web.presenters.send_confirmation_email_presenter import (
     SendConfirmationEmailPresenter,
 )
+from arbeitszeit_web.presenters.send_work_certificates_to_worker_presenter import (
+    SendWorkCertificatesToWorkerPresenter,
+)
 from arbeitszeit_web.presenters.show_company_work_invite_details_presenter import (
     ShowCompanyWorkInviteDetailsPresenter,
 )
@@ -297,6 +300,12 @@ class CompanyModule(Module):
         self, session: FlaskSession, request: FlaskRequest
     ) -> SendWorkCertificatesToWorkerController:
         return SendWorkCertificatesToWorkerController(session, request)
+
+    @provider
+    def provide_send_work_certificates_to_worker_presenter(
+        self, notifier: Notifier, translator: Translator
+    ) -> SendWorkCertificatesToWorkerPresenter:
+        return SendWorkCertificatesToWorkerPresenter(notifier, translator)
 
     @provider
     def provide_end_cooperation_presenter(

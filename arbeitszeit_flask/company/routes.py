@@ -83,6 +83,9 @@ from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_drafts_of_company import ListDraftsPresenter
 from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 from arbeitszeit_web.list_plans import ListPlansPresenter
+from arbeitszeit_web.presenters.send_work_certificates_to_worker_presenter import (
+    SendWorkCertificatesToWorkerPresenter,
+)
 from arbeitszeit_web.presenters.show_a_account_details_presenter import (
     ShowAAccountDetailsPresenter,
 )
@@ -428,15 +431,17 @@ def account_a(
 def transfer_to_worker(
     send_work_certificates_to_worker: SendWorkCertificatesToWorker,
     controller: SendWorkCertificatesToWorkerController,
+    presenter: SendWorkCertificatesToWorkerPresenter,
     list_workers: ListWorkers,
     template_renderer: UserTemplateRenderer,
 ):
     if request.method == "POST":
-        use_case_request = controller.create_use_case_request()
-        if isinstance(use_case_request, ControllerRejection):
-            pass
+        controller_response = controller.create_use_case_request()
+        if isinstance(controller_response, ControllerRejection):
+            presenter.present_controller_warnings(controller_response)
         else:
-            send_work_certificates_to_worker(use_case_request)
+            use_case_response = send_work_certificates_to_worker(controller_response)
+            presenter.present_use_case_response(use_case_response)
 
     workers_list = list_workers(ListWorkersRequest(company=UUID(current_user.id)))
     return template_renderer.render_template(

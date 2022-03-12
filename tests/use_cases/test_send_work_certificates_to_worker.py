@@ -1,11 +1,9 @@
 from decimal import Decimal
 
-import pytest
-
-from arbeitszeit.errors import WorkerNotAtCompany
 from arbeitszeit.use_cases import (
     SendWorkCertificatesToWorker,
     SendWorkCertificatesToWorkerRequest,
+    SendWorkCertificatesToWorkerResponse,
 )
 from tests.data_generators import CompanyGenerator, MemberGenerator
 
@@ -15,6 +13,46 @@ from .repositories import (
     CompanyWorkerRepository,
     TransactionRepository,
 )
+
+
+@injection_test
+def test_that_transfer_is_rejected_if_money_is_sent_to_worker_not_working_in_company(
+    send_work_certificates_to_worker: SendWorkCertificatesToWorker,
+    company_worker_repository: CompanyWorkerRepository,
+    company_generator: CompanyGenerator,
+    member_generator: MemberGenerator,
+):
+    company = company_generator.create_company()
+    worker1 = member_generator.create_member()
+    company_worker_repository.add_worker_to_company(company, worker1)
+    worker2 = member_generator.create_member()
+    amount_to_transfer = Decimal(50)
+
+    response = send_work_certificates_to_worker(
+        SendWorkCertificatesToWorkerRequest(company.id, worker2.id, amount_to_transfer)
+    )
+    assert response.is_rejected
+    assert (
+        response.rejection_reason
+        == SendWorkCertificatesToWorkerResponse.RejectionReason.worker_not_at_company
+    )
+
+
+@injection_test
+def test_that_correct_transfer_does_not_get_rejected(
+    send_work_certificates_to_worker: SendWorkCertificatesToWorker,
+    company_worker_repository: CompanyWorkerRepository,
+    company_generator: CompanyGenerator,
+    member_generator: MemberGenerator,
+):
+    company = company_generator.create_company()
+    worker = member_generator.create_member()
+    company_worker_repository.add_worker_to_company(company, worker)
+    amount_to_transfer = Decimal(50)
+    response = send_work_certificates_to_worker(
+        SendWorkCertificatesToWorkerRequest(company.id, worker.id, amount_to_transfer)
+    )
+    assert not response.is_rejected
 
 
 @injection_test
@@ -37,26 +75,6 @@ def test_that_after_transfer_balances_of_worker_and_company_are_correct(
         == -amount_to_transfer
     )
     assert account_repository.get_account_balance(worker.account) == amount_to_transfer
-
-
-@injection_test
-def test_that_error_is_raised_if_money_is_sent_to_worker_not_working_in_company(
-    send_work_certificates_to_worker: SendWorkCertificatesToWorker,
-    company_worker_repository: CompanyWorkerRepository,
-    company_generator: CompanyGenerator,
-    member_generator: MemberGenerator,
-):
-    company = company_generator.create_company()
-    worker1 = member_generator.create_member()
-    company_worker_repository.add_worker_to_company(company, worker1)
-    worker2 = member_generator.create_member()
-    amount_to_transfer = Decimal(50)
-    with pytest.raises(WorkerNotAtCompany):
-        send_work_certificates_to_worker(
-            SendWorkCertificatesToWorkerRequest(
-                company.id, worker2.id, amount_to_transfer
-            )
-        )
 
 
 @injection_test

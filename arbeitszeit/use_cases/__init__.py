@@ -155,6 +155,7 @@ from .seek_approval import SeekApproval
 from .send_work_certificates_to_worker import (
     SendWorkCertificatesToWorker,
     SendWorkCertificatesToWorkerRequest,
+    SendWorkCertificatesToWorkerResponse,
 )
 from .show_a_account_details import ShowAAccountDetails, ShowAAccountDetailsResponse
 from .show_company_work_invite_details import (
@@ -294,6 +295,7 @@ __all__ = [
     "SeekApproval",
     "SendWorkCertificatesToWorker",
     "SendWorkCertificatesToWorkerRequest",
+    "SendWorkCertificatesToWorkerResponse",
     "ShowAAccountDetails",
     "ShowAAccountDetailsResponse",
     "ShowCompanyWorkInviteDetailsRequest",

@@ -10,6 +10,7 @@
                 Bezahlung Produktionsmittel und Rohstoffe
             </h1>
         </div>
+        {{ show_notifications() }}
         <div class="content">
             <form method="post">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -36,7 +37,6 @@
                 </div>
             </form>
         </div>
-        {{ show_notifications() }}
     </div>
 </div>
 {% endblock %}
