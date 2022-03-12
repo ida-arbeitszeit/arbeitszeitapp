@@ -16,7 +16,7 @@ class SendWorkCertificatesToWorkerPresenter:
 
     def present_use_case_response(
         self, response: SendWorkCertificatesToWorkerResponse
-    ) -> None:
+    ) -> int:
         if response.is_rejected:
             if (
                 response.rejection_reason
@@ -27,10 +27,12 @@ class SendWorkCertificatesToWorkerPresenter:
                         "This worker does not work in your company."
                     )
                 )
+            return 404
         else:
             self.notifier.display_info(
                 self.translator.gettext("Work certificates successfully transferred.")
             )
+            return 200
 
     def present_controller_warnings(
         self, controller_rejection: ControllerRejection

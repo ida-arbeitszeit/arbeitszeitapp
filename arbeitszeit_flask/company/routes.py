@@ -28,12 +28,9 @@ from arbeitszeit.use_cases import (
     ListOutboundCoopRequests,
     ListOutboundCoopRequestsRequest,
     ListPlans,
-    ListWorkers,
     RequestCooperation,
-    SendWorkCertificatesToWorker,
     ToggleProductAvailability,
 )
-from arbeitszeit.use_cases.list_workers import ListWorkersRequest
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_flask.database import (
     CompanyRepository,
@@ -62,10 +59,7 @@ from arbeitszeit_flask.views import (
 )
 from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
-from arbeitszeit_web.controllers.send_work_certificates_to_worker_controller import (
-    ControllerRejection,
-    SendWorkCertificatesToWorkerController,
-)
+from arbeitszeit_flask.views.transfer_to_worker_view import TransferToWorkerView
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
@@ -83,9 +77,6 @@ from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_drafts_of_company import ListDraftsPresenter
 from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 from arbeitszeit_web.list_plans import ListPlansPresenter
-from arbeitszeit_web.presenters.send_work_certificates_to_worker_presenter import (
-    SendWorkCertificatesToWorkerPresenter,
-)
 from arbeitszeit_web.presenters.show_a_account_details_presenter import (
     ShowAAccountDetailsPresenter,
 )
@@ -428,26 +419,11 @@ def account_a(
 
 @CompanyRoute("/company/transfer_to_worker", methods=["GET", "POST"])
 @commit_changes
-def transfer_to_worker(
-    send_work_certificates_to_worker: SendWorkCertificatesToWorker,
-    controller: SendWorkCertificatesToWorkerController,
-    presenter: SendWorkCertificatesToWorkerPresenter,
-    list_workers: ListWorkers,
-    template_renderer: UserTemplateRenderer,
-):
-    if request.method == "POST":
-        controller_response = controller.create_use_case_request()
-        if isinstance(controller_response, ControllerRejection):
-            presenter.present_controller_warnings(controller_response)
-        else:
-            use_case_response = send_work_certificates_to_worker(controller_response)
-            presenter.present_use_case_response(use_case_response)
-
-    workers_list = list_workers(ListWorkersRequest(company=UUID(current_user.id)))
-    return template_renderer.render_template(
-        "company/transfer_to_worker.html",
-        context=dict(workers_list=workers_list.workers),
-    )
+def transfer_to_worker(view: TransferToWorkerView):
+    if request.method == "GET":
+        return view.respond_to_get()
+    elif request.method == "POST":
+        return view.respond_to_post()
 
 
 @CompanyRoute("/company/transfer_to_company", methods=["GET", "POST"])

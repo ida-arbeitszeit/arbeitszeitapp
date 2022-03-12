@@ -41,10 +41,18 @@ class PresentUseCaseResponseTests(TestCase):
         self.assertTrue(self.notifier.warnings)
         self.assertFalse(self.notifier.infos)
 
+    def test_presenter_returns_status_404_if_use_case_response_is_rejected(self):
+        code = self.presenter.present_use_case_response(REJECTED_USE_CASE_RESPONSE)
+        self.assertEqual(code, 404)
+
     def test_presenter_renders_info_if_use_case_response_is_successfull(self):
         self.presenter.present_use_case_response(SUCCESS_USE_CASE_RESPONSE)
         self.assertTrue(self.notifier.infos)
         self.assertFalse(self.notifier.warnings)
+
+    def test_presenter_returns_status_200_if_use_case_response_is_successfull(self):
+        code = self.presenter.present_use_case_response(SUCCESS_USE_CASE_RESPONSE)
+        self.assertEqual(code, 200)
 
 
 class PresentControllerResponseTests(TestCase):
