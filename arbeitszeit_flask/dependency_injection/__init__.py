@@ -81,6 +81,9 @@ from arbeitszeit_web.controllers.list_workers_controller import ListWorkersContr
 from arbeitszeit_web.controllers.pay_means_of_production_controller import (
     PayMeansOfProductionController,
 )
+from arbeitszeit_web.controllers.send_work_certificates_to_worker_controller import (
+    SendWorkCertificatesToWorkerController,
+)
 from arbeitszeit_web.controllers.show_company_work_invite_details_controller import (
     ShowCompanyWorkInviteDetailsController,
 )
@@ -288,6 +291,12 @@ class CompanyModule(Module):
         self, session: FlaskSession, request: FlaskRequest
     ) -> EndCooperationController:
         return EndCooperationController(session, request)
+
+    @provider
+    def provide_send_work_certificates_to_worker_controller(
+        self, session: FlaskSession, request: FlaskRequest
+    ) -> SendWorkCertificatesToWorkerController:
+        return SendWorkCertificatesToWorkerController(session, request)
 
     @provider
     def provide_end_cooperation_presenter(

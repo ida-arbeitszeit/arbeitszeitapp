@@ -3,7 +3,10 @@ from decimal import Decimal
 import pytest
 
 from arbeitszeit.errors import WorkerNotAtCompany
-from arbeitszeit.use_cases import SendWorkCertificatesToWorker
+from arbeitszeit.use_cases import (
+    SendWorkCertificatesToWorker,
+    SendWorkCertificatesToWorkerRequest,
+)
 from tests.data_generators import CompanyGenerator, MemberGenerator
 
 from .dependency_injection import injection_test
@@ -27,9 +30,7 @@ def test_that_after_transfer_balances_of_worker_and_company_are_correct(
     company_worker_repository.add_worker_to_company(company, worker)
     amount_to_transfer = Decimal(50)
     send_work_certificates_to_worker(
-        company,
-        worker,
-        amount_to_transfer,
+        SendWorkCertificatesToWorkerRequest(company.id, worker.id, amount_to_transfer)
     )
     assert (
         account_repository.get_account_balance(company.work_account)
@@ -52,9 +53,9 @@ def test_that_error_is_raised_if_money_is_sent_to_worker_not_working_in_company(
     amount_to_transfer = Decimal(50)
     with pytest.raises(WorkerNotAtCompany):
         send_work_certificates_to_worker(
-            company,
-            worker2,
-            amount_to_transfer,
+            SendWorkCertificatesToWorkerRequest(
+                company.id, worker2.id, amount_to_transfer
+            )
         )
 
 
@@ -71,9 +72,7 @@ def test_that_after_transfer_one_transaction_is_added(
     company_worker_repository.add_worker_to_company(company, worker)
     amount_to_transfer = Decimal(50)
     send_work_certificates_to_worker(
-        company,
-        worker,
-        amount_to_transfer,
+        SendWorkCertificatesToWorkerRequest(company.id, worker.id, amount_to_transfer)
     )
     assert len(transaction_repository.transactions) == 1
 
@@ -91,9 +90,7 @@ def test_that_after_transfer_correct_transaction_is_added(
     company_worker_repository.add_worker_to_company(company, worker)
     amount_to_transfer = Decimal(50)
     send_work_certificates_to_worker(
-        company,
-        worker,
-        amount_to_transfer,
+        SendWorkCertificatesToWorkerRequest(company.id, worker.id, amount_to_transfer)
     )
 
     assert len(transaction_repository.transactions) == 1

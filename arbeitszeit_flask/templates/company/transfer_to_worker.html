@@ -15,9 +15,9 @@
                     <div class="control has-icons-left">
                         <div class="select has-icons-left">
                             <select name="member_id" required>
-                                <option>Mitarbeiter ...</option>
+                                <option value="" disabled selected hidden>Mitarbeiter ...</option>
                                 {% for worker in workers_list %}
-                                    <option value="{{ worker.id }}">{{ worker.name }}</option>
+                                <option value="{{ worker.id }}">{{ worker.name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -33,11 +33,12 @@
                             type="submit">Überweisen</button>
                     </div>
                 </div>
-                <p class="help">Mitarbeiter müssen unter <a href="{{url_for('main_company.invite_worker_to_company')}}">"Arbeit"</a>
+                <p class="help">Mitarbeiter müssen unter <a
+                        href="{{url_for('main_company.invite_worker_to_company')}}">"Arbeit"</a>
                     registriert werden.</p>
             </form>
             {% else %}
-                <p>(Noch keine Mitarbeiter.)</p>
+            <p>(Noch keine Mitarbeiter.)</p>
             {% endif %}
         </div>
         {% with messages = get_flashed_messages(with_categories=true) %}

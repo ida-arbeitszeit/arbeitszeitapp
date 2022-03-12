@@ -1,31 +1,40 @@
 from dataclasses import dataclass
 from decimal import Decimal
+from uuid import UUID
 
 from injector import inject
 
 from arbeitszeit import errors
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Company, Member
-from arbeitszeit.repositories import CompanyWorkerRepository, TransactionRepository
+from arbeitszeit.repositories import (
+    CompanyRepository,
+    CompanyWorkerRepository,
+    MemberRepository,
+    TransactionRepository,
+)
+
+
+@dataclass
+class SendWorkCertificatesToWorkerRequest:
+    company_id: UUID
+    worker_id: UUID
+    amount: Decimal
 
 
 @inject
 @dataclass
 class SendWorkCertificatesToWorker:
     company_worker_repository: CompanyWorkerRepository
+    company_repository: CompanyRepository
+    member_repository: MemberRepository
     transaction_repository: TransactionRepository
     datetime_service: DatetimeService
 
-    def __call__(self, company: Company, worker: Member, amount: Decimal) -> None:
-        """
-        A company sends work certificates to an employee.
-
-        What this function does:
-        - It adjusts the balances of the company and employee accounts
-        - It adds the transaction to the repository
-
-        This function may raise a WorkerNotAtCompany if the worker is not employed at the company.
-        """
+    def __call__(self, use_case_request: SendWorkCertificatesToWorkerRequest) -> None:
+        company = self.company_repository.get_by_id(use_case_request.company_id)
+        worker = self.member_repository.get_by_id(use_case_request.worker_id)
+        assert company
+        assert worker
         company_workers = self.company_worker_repository.get_company_workers(company)
         if worker not in company_workers:
             raise errors.WorkerNotAtCompany(
@@ -36,7 +45,7 @@ class SendWorkCertificatesToWorker:
             date=self.datetime_service.now(),
             sending_account=company.work_account,
             receiving_account=worker.account,
-            amount_sent=amount,
-            amount_received=amount,
+            amount_sent=use_case_request.amount,
+            amount_received=use_case_request.amount,
             purpose="Lohn",
         )
