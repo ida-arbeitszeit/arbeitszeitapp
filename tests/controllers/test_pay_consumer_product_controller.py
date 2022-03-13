@@ -7,6 +7,7 @@ from arbeitszeit_web.pay_consumer_product import (
     PayConsumerProductController,
     PayConsumerProductRequestImpl,
 )
+from tests.translator import FakeTranslator
 
 ControllerResult = Union[
     PayConsumerProductRequestImpl,
@@ -16,7 +17,8 @@ ControllerResult = Union[
 
 class PayConsumerProductControllerTests(TestCase):
     def setUp(self) -> None:
-        self.controller = PayConsumerProductController()
+        self.translator = FakeTranslator()
+        self.controller = PayConsumerProductController(translator=self.translator)
 
     def test_malformed_data_is_returned_when_form_data_is_empty_strings(self) -> None:
         result = self._process_form(plan_id="", amount="")
@@ -25,13 +27,25 @@ class PayConsumerProductControllerTests(TestCase):
     def test_malformed_data_is_returned_when_plan_uuid_is_not_valid(self) -> None:
         result = self._process_form(plan_id="123")
         self._assert_malformed_field(
-            result, field="plan_id", message="Plan-ID ist ungültig"
+            result,
+            field="plan_id",
+            message=self.translator.gettext("Plan ID is invalid."),
         )
 
     def test_malformed_data_is_returned_when_amount_contains_letters(self) -> None:
         result = self._process_form(amount="1a")
         self._assert_malformed_field(
-            result, "amount", message="Das ist keine ganze Zahl"
+            result,
+            "amount",
+            message=self.translator.gettext("This is not an integer."),
+        )
+
+    def test_malformed_data_is_returned_when_amount_is_negative(self) -> None:
+        result = self._process_form(amount="-1")
+        self._assert_malformed_field(
+            result,
+            "amount",
+            message=self.translator.gettext("Negative numbers are not allowed."),
         )
 
     def test_valid_data_returned_when_uuid_is_valid_and_amount_is_number(self):
