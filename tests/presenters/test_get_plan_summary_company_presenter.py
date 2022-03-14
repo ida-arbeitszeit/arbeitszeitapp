@@ -30,7 +30,8 @@ TESTING_RESPONSE_MODEL = PlanSummaryCompanySuccess(
         is_available=True,
         is_cooperating=True,
         cooperation=uuid4(),
-    )
+    ),
+    current_user_is_planner=True,
 )
 
 
@@ -47,6 +48,15 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
             self.translator,
             self.plan_summary_service,
         )
+
+    def test_action_section_is_shown_when_current_user_is_planner(self):
+        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        self.assertTrue(view_model.show_action_section)
+
+    def test_action_section_is_not_shown_when_current_user_is_not_planner(self):
+        response = replace(TESTING_RESPONSE_MODEL, current_user_is_planner=False)
+        view_model = self.presenter.present(response)
+        self.assertFalse(view_model.show_action_section)
 
     def test_url_for_changing_availability_is_displayed_correctly(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
@@ -84,7 +94,9 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
         plan_summary = replace(
             TESTING_RESPONSE_MODEL.plan_summary, is_cooperating=False, cooperation=None
         )
-        response = PlanSummaryCompanySuccess(plan_summary=plan_summary)
+        response = PlanSummaryCompanySuccess(
+            plan_summary=plan_summary, current_user_is_planner=True
+        )
         view_model = self.presenter.present(response)
         self.assertEqual(
             view_model.action.is_cooperating, response.plan_summary.is_cooperating

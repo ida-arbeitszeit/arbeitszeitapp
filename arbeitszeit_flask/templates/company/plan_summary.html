@@ -4,6 +4,9 @@
 {% from 'macros.html' import plan_summary %}
 {{ plan_summary(view_model) }}
 
+
+{% if view_model.show_action_section %}
+
 <div>Verfügbarkeit ändern:</div>
 <div>
     <span class="{{ 'has-text-success' if view_model.action.is_available else 'has-text-danger' }}"><a
@@ -17,6 +20,8 @@
 <a class="button is-danger" href="{{ view_model.action.end_coop_url }}">
     <span>Beenden</span>
 </a>
+{% endif %}
+
 {% endif %}
 
 {% endblock %}
