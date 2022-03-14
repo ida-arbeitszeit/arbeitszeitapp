@@ -19,7 +19,6 @@
     class="py-2 has-text-weight-bold {{ 'has-text-primary' if view_model.account_balance|float >= 0 else 'has-text-danger' }}">
     {{ view_model.account_balance }}</p>
 
-
 <div class="table-container">
     <table class="table is-fullwidth">
         <thead>
@@ -32,7 +31,7 @@
         </thead>
         <tbody>
 
-            {% if view_model.transactions is defined and view_model.transactions|length %}
+            {% if view_model.show_transactions %}
             {% for trans_info in view_model.transactions %}
             <tr>
                 <td>{{ trans_info.date|format_datetime(zone='Europe/Berlin', fmt='%d.%m.%Y %H:%M') }}</td>

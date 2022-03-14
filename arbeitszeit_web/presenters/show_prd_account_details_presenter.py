@@ -20,6 +20,7 @@ class ViewModelTransactionInfo:
 @dataclass
 class ShowPRDAccountDetailsResponseViewModel:
     transactions: List[ViewModelTransactionInfo]
+    show_transactions: bool
     account_balance: str
 
 
@@ -33,6 +34,7 @@ class ShowPRDAccountDetailsPresenter:
         ]
         return ShowPRDAccountDetailsResponseViewModel(
             transactions=transactions,
+            show_transactions=bool(transactions),
             account_balance=str(round(use_case_response.account_balance, 2)),
         )
 

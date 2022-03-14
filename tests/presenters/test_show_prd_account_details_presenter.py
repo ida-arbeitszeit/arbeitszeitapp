@@ -39,6 +39,13 @@ class CompanyTransactionsPresenterTests(TestCase):
         view_model = self.presenter.present(response)
         self.assertEqual(view_model.transactions, [])
 
+    def test_do_not_show_transactions_if_no_transactions_took_place(self):
+        response = ShowPRDAccountDetailsResponse(
+            transactions=[], account_balance=Decimal(0)
+        )
+        view_model = self.presenter.present(response)
+        self.assertFalse(view_model.show_transactions)
+
     def test_return_correct_info_when_one_transaction_of_granting_credit_took_place(
         self,
     ):
