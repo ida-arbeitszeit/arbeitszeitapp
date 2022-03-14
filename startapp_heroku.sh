@@ -1,6 +1,6 @@
-export ARBEITSZEIT_APP_CONFIGURATION="$PWD/production-settings.py"
+export ARBEITSZEIT_APP_CONFIGURATION="$PWD/arbeitszeit_flask/production_settings.py"
 
 echo "Compiling translation files..."
 pybabel compile -d arbeitszeit_flask/translations
 
-gunicorn wsgi:app
+gunicorn arbeitszeit_flask.wsgi:app
