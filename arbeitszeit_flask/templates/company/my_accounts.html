@@ -5,11 +5,11 @@
 
 
 <h1 class="title">
-    Accounts
+    {{ gettext("Accounts") }}
 </h1>
 <div class="box has-background-info-light has-text-info-dark">
     <div class="icon"><i class="fas fa-info-circle"></i></div>
-    <p>You have four different accounts.</p>
+    <p>{{ gettext("You have four different accounts.") }}</p>
 </div>
 
 {{ show_notifications() }}
@@ -30,40 +30,43 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td class="py-2  has-text-left"><a href="{{ url_for('main_company.account_p') }}">Account p</a>
+                        <td class="py-2  has-text-left"><a href="{{ url_for('main_company.account_p') }}">{{
+                                gettext("Account p") }}</a>
                         </td>
                         <td><i class="fas fa-industry"></i></td>
-                        <td class="is-italic has-text-left">Account for fixed means of production</td>
+                        <td class="is-italic has-text-left">{{ gettext("Account for fixed means of production") }}</td>
                         <td
                             class="py-2  has-text-right has-text-weight-bold {{ 'has-text-primary' if view_model.is_fixed_positive else 'has-text-danger' }}">
                             {{ view_model.balance_fixed }}</td>
 
                     </tr>
                     <tr>
-                        <td class="py-2  has-text-left"><a href="{{ url_for('main_company.account_r') }}">Account r</a>
+                        <td class="py-2  has-text-left"><a href="{{ url_for('main_company.account_r') }}">{{
+                                gettext("Account r") }}</a>
                         </td>
                         <td><i class="fas fa-oil-can"></i></td>
-                        <td class="is-italic has-text-left">Account for liquid means of production</td>
+                        <td class="is-italic has-text-left">{{ gettext("Account for liquid means of production")}}</td>
                         <td
                             class="py-2 has-text-right has-text-weight-bold {{ 'has-text-primary' if view_model.is_liquid_positive else 'has-text-danger' }}">
                             {{ view_model.balance_liquid }}</td>
 
                     </tr>
                     <tr>
-                        <td class="py-2  has-text-left"><a href="{{ url_for('main_company.account_a') }}">Account a</a>
+                        <td class="py-2  has-text-left"><a href="{{ url_for('main_company.account_a') }}">{{
+                                gettext("Account a") }}</a>
                         </td>
                         <td><i class="fas fa-users"></i></td>
-                        <td class="is-italic has-text-left">Account for work certificates (wages)</td>
+                        <td class="is-italic has-text-left">{{ gettext("Account for work certificates (wages)") }}</td>
                         <td
                             class="py-2 has-text-right has-text-weight-bold {{ 'has-text-primary' if view_model.is_work_positive else 'has-text-danger' }}">
                             {{ view_model.balance_work }}</td>
 
                     </tr>
                     <tr>
-                        <td class="py-2 has-text-left"><a href="{{ url_for('main_company.account_prd') }}">Account
-                                prd</a></td>
+                        <td class="py-2 has-text-left"><a href="{{ url_for('main_company.account_prd') }}">{{
+                                gettext("Account prd") }}</a></td>
                         <td><i class="fas fa-exchange-alt"></i></td>
-                        <td class="is-italic has-text-left">Account for product transfers (sales)</td>
+                        <td class="is-italic has-text-left">{{ gettext("Account for product transfers (sales)") }}</td>
                         <td
                             class="py-2 has-text-right has-text-weight-bold {{ 'has-text-primary' if view_model.is_product_positive else 'has-text-danger' }}">
                             {{ view_model.balance_product }}</td>
@@ -73,7 +76,7 @@
 
             </table>
         </div>
-        <p><a href="{{ url_for('main_company.list_all_transactions') }}">List all transactions</a></p>
+        <p><a href="{{ url_for('main_company.list_all_transactions') }}">{{ gettext("List all transactions") }}</a></p>
     </div>
     <div class="column"></div>
 </div>

@@ -7,6 +7,7 @@ from arbeitszeit.use_cases.show_prd_account_details import (
     ShowPRDAccountDetailsResponse,
     TransactionInfo,
 )
+from arbeitszeit_web.translator import Translator
 
 
 @dataclass
@@ -24,7 +25,10 @@ class ShowPRDAccountDetailsResponseViewModel:
     account_balance: str
 
 
+@dataclass
 class ShowPRDAccountDetailsPresenter:
+    translator: Translator
+
     def present(
         self, use_case_response: ShowPRDAccountDetailsResponse
     ) -> ShowPRDAccountDetailsResponseViewModel:
@@ -46,9 +50,9 @@ class ShowPRDAccountDetailsPresenter:
             TransactionTypes.expected_sales,
         ]
         transaction_type = (
-            "Debit expected sales"
+            self.translator.gettext("Debit expected sales")
             if transaction.transaction_type == TransactionTypes.expected_sales
-            else "Sale"
+            else self.translator.gettext("Sale")
         )
         return ViewModelTransactionInfo(
             transaction_type,

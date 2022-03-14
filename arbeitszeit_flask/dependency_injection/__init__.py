@@ -108,6 +108,9 @@ from arbeitszeit_web.presenters.send_confirmation_email_presenter import (
 from arbeitszeit_web.presenters.show_company_work_invite_details_presenter import (
     ShowCompanyWorkInviteDetailsPresenter,
 )
+from arbeitszeit_web.presenters.show_prd_account_details_presenter import (
+    ShowPRDAccountDetailsPresenter,
+)
 from arbeitszeit_web.query_companies import QueryCompaniesPresenter
 from arbeitszeit_web.query_plans import QueryPlansPresenter
 from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
@@ -328,6 +331,12 @@ class CompanyModule(Module):
         self, url_index: CompanyUrlIndex
     ) -> AnswerCompanyWorkInviteUrlIndex:
         return url_index
+
+    @provider
+    def provide_show_prd_account_details_presenter(
+        self, translator: Translator
+    ) -> ShowPRDAccountDetailsPresenter:
+        return ShowPRDAccountDetailsPresenter(translator=translator)
 
 
 class FlaskModule(Module):
