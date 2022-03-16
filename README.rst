@@ -72,6 +72,7 @@ Caveats
 
 To run the app in development mode you first have to define some environment variables::
 
+    $ export FLASK_APP=arbeitszeit_flask
     $ export FLASK_ENV=development
     $ export ARBEITSZEIT_APP_CONFIGURATION="$PWD/arbeitszeit_flask/development_settings.py"
     $ export DEV_DATABASE_URI="sqlite:///$(pwd)/db.sqlite3" 
