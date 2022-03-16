@@ -8,13 +8,6 @@ class WorkerAlreadyAtCompany(Exception):
         super().__init__()
 
 
-class WorkerNotAtCompany(Exception):
-    def __init__(self, worker: Member, company: Company) -> None:
-        self.worker = worker
-        self.company = company
-        super().__init__()
-
-
 class PlanIsInactive(Exception):
     def __init__(self, plan: Plan) -> None:
         self.plan = plan

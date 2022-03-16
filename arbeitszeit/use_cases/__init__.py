@@ -152,7 +152,11 @@ from .resend_confirmation_mail import (
     ResendConfirmationMailResponse,
 )
 from .seek_approval import SeekApproval
-from .send_work_certificates_to_worker import SendWorkCertificatesToWorker
+from .send_work_certificates_to_worker import (
+    SendWorkCertificatesToWorker,
+    SendWorkCertificatesToWorkerRequest,
+    SendWorkCertificatesToWorkerResponse,
+)
 from .show_a_account_details import ShowAAccountDetails, ShowAAccountDetailsResponse
 from .show_company_work_invite_details import (
     ShowCompanyWorkInviteDetailsRequest,
@@ -294,6 +298,8 @@ __all__ = [
     "ResendConfirmationMailResponse",
     "SeekApproval",
     "SendWorkCertificatesToWorker",
+    "SendWorkCertificatesToWorkerRequest",
+    "SendWorkCertificatesToWorkerResponse",
     "ShowAAccountDetails",
     "ShowAAccountDetailsResponse",
     "ShowCompanyWorkInviteDetailsRequest",
