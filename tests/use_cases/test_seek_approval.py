@@ -3,7 +3,7 @@ from uuid import UUID
 
 from arbeitszeit.repositories import PlanDraftRepository, PlanRepository
 from arbeitszeit.use_cases import SeekApproval
-from tests.data_generators import CompanyGenerator, PlanGenerator
+from tests.data_generators import PlanGenerator
 from tests.datetime_service import FakeDatetimeService
 
 from .dependency_injection import injection_test
@@ -15,8 +15,7 @@ def test_that_any_plan_will_be_approved(
     seek_approval: SeekApproval,
 ):
     plan_draft = plan_generator.draft_plan()
-    original_plan = plan_generator.create_plan()
-    approval_response = seek_approval(plan_draft.id, original_plan.id)
+    approval_response = seek_approval(plan_draft.id)
     assert approval_response.is_approved
 
 
@@ -27,21 +26,11 @@ def test_plan_draft_gets_deleted_after_approval(
     draft_repository: PlanDraftRepository,
 ):
     draft = plan_generator.draft_plan()
-    response = seek_approval(draft.id, None)
+    response = seek_approval(
+        draft.id,
+    )
     assert response.is_approved
     assert draft_repository.get_by_id(draft.id) is None
-
-
-@injection_test
-def test_that_any_plan_will_be_approved_and_original_plan_renewed(
-    plan_generator: PlanGenerator,
-    seek_approval: SeekApproval,
-):
-    plan_draft = plan_generator.draft_plan()
-    original_plan = plan_generator.create_plan()
-    approval_response = seek_approval(plan_draft.id, original_plan.id)
-    assert approval_response.is_approved
-    assert original_plan.renewed
 
 
 @injection_test
@@ -50,8 +39,7 @@ def test_that_true_is_returned(
     seek_approval: SeekApproval,
 ):
     plan_draft = plan_generator.draft_plan()
-    original_plan = plan_generator.create_plan()
-    approval_response = seek_approval(plan_draft.id, original_plan.id)
+    approval_response = seek_approval(plan_draft.id)
     assert approval_response.is_approved is True
 
 
@@ -61,8 +49,7 @@ def test_that_returned_new_plan_id_is_uuid(
     seek_approval: SeekApproval,
 ):
     plan_draft = plan_generator.draft_plan()
-    original_plan = plan_generator.create_plan()
-    approval_response = seek_approval(plan_draft.id, original_plan.id)
+    approval_response = seek_approval(plan_draft.id)
     assert isinstance(approval_response.new_plan_id, UUID)
 
 
@@ -75,8 +62,7 @@ def test_that_approval_date_has_correct_day_of_month(
 ):
     datetime_service.freeze_time(datetime(year=2021, month=5, day=3))
     draft = plan_generator.draft_plan()
-    original_plan = plan_generator.create_plan()
-    seek_approval(draft.id, original_plan.id)
+    seek_approval(draft.id)
     new_plan = plan_repository.get_plan_by_id(draft.id)
     assert new_plan
     assert new_plan.approval_date
@@ -86,12 +72,11 @@ def test_that_approval_date_has_correct_day_of_month(
 @injection_test
 def test_that_approved_plan_has_same_planner_as_draft(
     plan_generator: PlanGenerator,
-    company_generator: CompanyGenerator,
     seek_approval: SeekApproval,
     plan_repository: PlanRepository,
 ):
     draft = plan_generator.draft_plan()
-    seek_approval(draft.id, None)
+    seek_approval(draft.id)
     new_plan = plan_repository.get_plan_by_id(draft.id)
     assert new_plan
     assert new_plan.planner == draft.planner

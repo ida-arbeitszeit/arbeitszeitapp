@@ -214,7 +214,6 @@ def create_draft_from_expired_plan(
                 url_for(
                     "main_company.create_plan",
                     draft_uuid=response.draft_id,
-                    expired_plan_uuid=expired_plan_uuid,
                 )
             )
 
@@ -262,7 +261,6 @@ def create_draft(
                 url_for(
                     "main_company.create_plan",
                     draft_uuid=response.draft_id,
-                    expired_plan_uuid=None,
                 )
             )
 
@@ -287,14 +285,8 @@ def create_plan(
     template_renderer: UserTemplateRenderer,
 ):
     draft_uuid: UUID = UUID(request.args.get("draft_uuid"))
-    expired_plan_optional = request.args.get("expired_plan_uuid")
-    expired_plan_uuid: Optional[UUID] = (
-        UUID(expired_plan_optional.strip())
-        if expired_plan_optional is not None
-        else None
-    )
 
-    approval_response = seek_approval(draft_uuid, expired_plan_uuid)
+    approval_response = seek_approval(draft_uuid)
 
     if approval_response.is_approved:
         flash("Plan erfolgreich erstellt und genehmigt.", "is-success")
