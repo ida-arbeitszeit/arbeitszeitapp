@@ -222,9 +222,7 @@ def create_draft_from_expired_plan(
     )
 
     prefilled_draft_data = (
-        get_prefilled_draft_data_presenter.present(
-            plan_summary_success.plan_summary, from_expired_plan=True
-        )
+        get_prefilled_draft_data_presenter.present(plan_summary_success.plan_summary)
         if plan_summary_success
         else None
     )
@@ -266,9 +264,7 @@ def create_draft(
 
     draft_summary = get_draft_summary(saved_draft_uuid) if saved_draft_uuid else None
     prefilled_draft_data = (
-        get_prefilled_draft_data_presenter.present(
-            draft_summary, from_expired_plan=False
-        )
+        get_prefilled_draft_data_presenter.present(draft_summary)
         if draft_summary
         else None
     )
