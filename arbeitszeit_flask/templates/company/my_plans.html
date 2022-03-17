@@ -107,16 +107,9 @@
         <td><a href="{{ plan.plan_summary_url }}">{{ plan.prd_name }}</a></td>
         <td>{{ plan.type_of_plan }}</td>
         <td>{{ plan.plan_creation_date }}</td>
-
-        {% if plan.renewed %}
-        <td>
-          <a><i class="{{ 'fas fa-redo not-active' }}"></i></a>
-        </td>
-        {% else %}
         <td>
           <a href="{{ plan.renew_plan_url }}"><i class="{{ 'fas fa-redo' }}"></i></a>
         </td>
-        {% endif %}
         <td>
           <a href="{{ plan.hide_plan_url }}"><i class="fas fa-trash"></i></a>
         </td>

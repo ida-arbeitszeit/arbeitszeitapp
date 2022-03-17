@@ -52,7 +52,6 @@ class ExpiredPlansRow:
     prd_name: str
     type_of_plan: str
     plan_creation_date: str
-    renewed: bool
     renew_plan_url: str
     hide_plan_url: str
 
@@ -136,7 +135,6 @@ class ShowMyPlansPresenter:
                         prd_name=f"{plan.prd_name}",
                         type_of_plan=self.__get_type_of_plan(plan.is_public_service),
                         plan_creation_date=self.__format_date(plan.plan_creation_date),
-                        renewed=plan.renewed,
                         renew_plan_url=self.renew_plan_url_index.get_renew_plan_url(
                             plan.id
                         ),
