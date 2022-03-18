@@ -17,7 +17,7 @@ from arbeitszeit.use_cases import (
     DenyCooperationResponse,
     GetCompanySummary,
     GetDraftSummary,
-    GetPlanSummaryMember,
+    GetPlanSummaryCompany,
     HidePlan,
     ListAllCooperations,
     ListCoordinations,
@@ -188,19 +188,20 @@ def my_purchases(
 @commit_changes
 def create_draft_from_expired_plan(
     create_draft: CreatePlanDraft,
-    get_plan_summary_member: GetPlanSummaryMember,
+    get_plan_summary_company: GetPlanSummaryCompany,
     get_prefilled_draft_data_presenter: GetPrefilledDraftDataPresenter,
-    controller: PrefilledDraftDataController,
+    prefilled_data_controller: PrefilledDraftDataController,
     template_renderer: UserTemplateRenderer,
+    http_404_view: Http404View,
 ):
+    """create draft from exired plan."""
     expired_plan_id: Optional[str] = request.args.get("expired_plan_id")
-    expired_plan_uuid: Optional[UUID] = (
-        UUID(expired_plan_id) if expired_plan_id else None
-    )
+    assert expired_plan_id
+    expired_plan_uuid = UUID(expired_plan_id)
 
     if request.method == "POST":
         draft_form = CreateDraftForm(request.form)
-        use_case_request = controller.import_form_data(
+        use_case_request = prefilled_data_controller.import_form_data(
             UUID(current_user.id), draft_form
         )
 
@@ -217,18 +218,18 @@ def create_draft_from_expired_plan(
                 )
             )
 
-    plan_summary_success = (
-        get_plan_summary_member(expired_plan_uuid) if expired_plan_uuid else None
+    plan_summary_success = get_plan_summary_company(
+        expired_plan_uuid, UUID(current_user.id)
     )
-
-    prefilled_draft_data = (
-        get_prefilled_draft_data_presenter.present(plan_summary_success.plan_summary)
-        if plan_summary_success
-        else None
-    )
-    return template_renderer.render_template(
-        "company/create_draft.html", context=dict(prefilled=prefilled_draft_data)
-    )
+    if isinstance(plan_summary_success, use_cases.PlanSummaryCompanySuccess):
+        prefilled_draft_data = get_prefilled_draft_data_presenter.present(
+            plan_summary_success.plan_summary
+        )
+        return template_renderer.render_template(
+            "company/create_draft.html", context=dict(prefilled=prefilled_draft_data)
+        )
+    else:
+        return http_404_view.get_response()
 
 
 @CompanyRoute("/company/create_draft", methods=["GET", "POST"])
@@ -237,15 +238,16 @@ def create_draft(
     create_draft: CreatePlanDraft,
     get_draft_summary: GetDraftSummary,
     get_prefilled_draft_data_presenter: GetPrefilledDraftDataPresenter,
-    controller: PrefilledDraftDataController,
+    prefilled_data_controller: PrefilledDraftDataController,
     template_renderer: UserTemplateRenderer,
 ):
+    """create draft. use data from saved draft if specified."""
     saved_draft_id: Optional[str] = request.args.get("saved_draft_id")
     saved_draft_uuid: Optional[UUID] = UUID(saved_draft_id) if saved_draft_id else None
 
     if request.method == "POST":
         draft_form = CreateDraftForm(request.form)
-        use_case_request = controller.import_form_data(
+        use_case_request = prefilled_data_controller.import_form_data(
             UUID(current_user.id), draft_form
         )
 
@@ -280,10 +282,9 @@ def create_plan(
     activate_plan_and_grant_credit: use_cases.ActivatePlanAndGrantCredit,
     template_renderer: UserTemplateRenderer,
 ):
+    """create plan from draft and seek approval."""
     draft_uuid: UUID = UUID(request.args.get("draft_uuid"))
-
     approval_response = seek_approval(draft_uuid)
-
     if approval_response.is_approved:
         flash("Plan erfolgreich erstellt und genehmigt.", "is-success")
         activate_plan_and_grant_credit(approval_response.new_plan_id)
