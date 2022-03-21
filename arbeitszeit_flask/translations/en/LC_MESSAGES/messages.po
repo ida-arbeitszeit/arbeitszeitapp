@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-03-03 21:38+0100\n"
+"POT-Creation-Date: 2022-03-13 12:23+0100\n"
 "PO-Revision-Date: 2022-01-16 19:09+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -316,6 +316,38 @@ msgid "%(num).2f day"
 msgid_plural "%(num).2f days"
 msgstr[0] ""
 msgstr[1] ""
+
+#: arbeitszeit_web/pay_consumer_product.py:57
+#: tests/controllers/test_pay_consumer_product_controller.py:32
+msgid "Plan ID is invalid."
+msgstr ""
+
+#: arbeitszeit_web/pay_consumer_product.py:63
+#: tests/controllers/test_pay_consumer_product_controller.py:40
+msgid "This is not an integer."
+msgstr ""
+
+#: arbeitszeit_web/pay_consumer_product.py:67
+#: tests/controllers/test_pay_consumer_product_controller.py:48
+msgid "Negative numbers are not allowed."
+msgstr ""
+
+#: arbeitszeit_web/pay_consumer_product.py:89
+#: tests/presenters/test_pay_consumer_product_presenter.py:26
+msgid "Product successfully paid."
+msgstr ""
+
+#: arbeitszeit_web/pay_consumer_product.py:94
+#: tests/presenters/test_pay_consumer_product_presenter.py:34
+msgid ""
+"The specified plan has been expired. Please contact the selling company "
+"to provide you with an up-to-date plan ID."
+msgstr ""
+
+#: arbeitszeit_web/pay_consumer_product.py:101
+#: tests/presenters/test_pay_consumer_product_presenter.py:45
+msgid "There is no plan with the specified ID in the database."
+msgstr ""
 
 #: arbeitszeit_web/plan_summary_service.py:48
 #: tests/presenters/test_plan_summary_service.py:68

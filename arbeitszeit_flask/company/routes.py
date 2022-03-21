@@ -1,11 +1,10 @@
-from decimal import Decimal
 from typing import Optional
 from uuid import UUID
 
 from flask import flash, redirect, request, url_for
 from flask_login import current_user
 
-from arbeitszeit import errors, use_cases
+from arbeitszeit import use_cases
 from arbeitszeit.use_cases import (
     AcceptCooperation,
     AcceptCooperationRequest,
@@ -29,17 +28,13 @@ from arbeitszeit.use_cases import (
     ListOutboundCoopRequests,
     ListOutboundCoopRequestsRequest,
     ListPlans,
-    ListWorkers,
     RequestCooperation,
-    SendWorkCertificatesToWorker,
     ToggleProductAvailability,
 )
-from arbeitszeit.use_cases.list_workers import ListWorkersRequest
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_flask.database import (
     CompanyRepository,
     CompanyWorkerRepository,
-    MemberRepository,
     commit_changes,
 )
 from arbeitszeit_flask.forms import (
@@ -64,6 +59,7 @@ from arbeitszeit_flask.views import (
 )
 from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
+from arbeitszeit_flask.views.transfer_to_worker_view import TransferToWorkerView
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
@@ -83,6 +79,9 @@ from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPr
 from arbeitszeit_web.list_plans import ListPlansPresenter
 from arbeitszeit_web.presenters.show_a_account_details_presenter import (
     ShowAAccountDetailsPresenter,
+)
+from arbeitszeit_web.presenters.show_prd_account_details_presenter import (
+    ShowPRDAccountDetailsPresenter,
 )
 from arbeitszeit_web.query_companies import (
     QueryCompaniesController,
@@ -421,44 +420,28 @@ def account_a(
     )
 
 
+@CompanyRoute("/company/my_accounts/account_prd")
+def account_prd(
+    show_prd_account_details: use_cases.ShowPRDAccountDetails,
+    template_renderer: UserTemplateRenderer,
+    presenter: ShowPRDAccountDetailsPresenter,
+):
+    response = show_prd_account_details(UUID(current_user.id))
+    view_model = presenter.present(response)
+
+    return template_renderer.render_template(
+        "company/account_prd.html",
+        context=dict(view_model=view_model),
+    )
+
+
 @CompanyRoute("/company/transfer_to_worker", methods=["GET", "POST"])
 @commit_changes
-def transfer_to_worker(
-    send_work_certificates_to_worker: SendWorkCertificatesToWorker,
-    list_workers: ListWorkers,
-    company_repository: CompanyRepository,
-    member_repository: MemberRepository,
-    template_renderer: UserTemplateRenderer,
-):
-    company = company_repository.get_by_id(UUID(current_user.id))
-    assert company is not None
-
-    if request.method == "POST":
-        try:
-            worker = member_repository.get_by_id(
-                UUID(str(request.form["member_id"]).strip())
-            )
-            if worker is None:
-                flash("Mitglied existiert nicht.", "is-danger")
-            else:
-                amount = Decimal(request.form["amount"])
-                send_work_certificates_to_worker(
-                    company,
-                    worker,
-                    amount,
-                )
-        except ValueError:
-            flash("Bitte Mitarbeiter wählen!", "is-danger")
-        except errors.WorkerNotAtCompany:
-            flash("Mitglied ist nicht in diesem Betrieb beschäftigt.", "is-danger")
-        else:
-            flash("Erfolgreich überwiesen.", "is-success")
-
-    workers_list = list_workers(ListWorkersRequest(company=company.id))
-    return template_renderer.render_template(
-        "company/transfer_to_worker.html",
-        context=dict(workers_list=workers_list.workers),
-    )
+def transfer_to_worker(view: TransferToWorkerView):
+    if request.method == "GET":
+        return view.respond_to_get()
+    elif request.method == "POST":
+        return view.respond_to_post()
 
 
 @CompanyRoute("/company/transfer_to_company", methods=["GET", "POST"])
@@ -487,12 +470,12 @@ def statistics(
 @CompanyRoute("/company/plan_summary/<uuid:plan_id>")
 def plan_summary(
     plan_id: UUID,
-    get_plan_summary_member: use_cases.GetPlanSummaryCompany,
+    get_plan_summary_company: use_cases.GetPlanSummaryCompany,
     template_renderer: UserTemplateRenderer,
     presenter: GetPlanSummaryCompanySuccessPresenter,
     http_404_view: Http404View,
 ):
-    use_case_response = get_plan_summary_member(plan_id)
+    use_case_response = get_plan_summary_company(plan_id, UUID(current_user.id))
     if isinstance(use_case_response, use_cases.PlanSummaryCompanySuccess):
         view_model = presenter.present(use_case_response)
         return template_renderer.render_template(

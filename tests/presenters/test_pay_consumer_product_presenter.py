@@ -5,6 +5,7 @@ from arbeitszeit.use_cases.pay_consumer_product import (
     RejectionReason,
 )
 from arbeitszeit_web.pay_consumer_product import PayConsumerProductPresenter
+from tests.translator import FakeTranslator
 
 from .notifier import NotifierTestImpl
 
@@ -12,20 +13,27 @@ from .notifier import NotifierTestImpl
 class PayConsumerProductPresenterTests(TestCase):
     def setUp(self) -> None:
         self.notifier = NotifierTestImpl()
-        self.presenter = PayConsumerProductPresenter(user_notifier=self.notifier)
+        self.translator = FakeTranslator()
+        self.presenter = PayConsumerProductPresenter(
+            user_notifier=self.notifier, translator=self.translator
+        )
 
     def test_presenter_shows_correct_notification_when_payment_was_a_success(
         self,
     ) -> None:
         self.presenter.present(PayConsumerProductResponse(rejection_reason=None))
-        self.assertIn("Produkt erfolgreich bezahlt.", self.notifier.infos)
+        self.assertIn(
+            self.translator.gettext("Product successfully paid."), self.notifier.infos
+        )
 
     def test_presenter_shows_correct_notification_when_plan_was_inactive(self) -> None:
         self.presenter.present(
             PayConsumerProductResponse(rejection_reason=RejectionReason.plan_inactive)
         )
         self.assertIn(
-            "Der angegebene Plan ist nicht aktuell. Bitte wende dich an den Verkäufer, um eine aktuelle Plan-ID zu erhalten.",
+            self.translator.gettext(
+                "The specified plan has been expired. Please contact the selling company to provide you with an up-to-date plan ID."
+            ),
             self.notifier.warnings,
         )
 
@@ -34,7 +42,9 @@ class PayConsumerProductPresenterTests(TestCase):
             PayConsumerProductResponse(rejection_reason=RejectionReason.plan_not_found)
         )
         self.assertIn(
-            "Ein Plan mit der angegebene ID existiert nicht im System.",
+            self.translator.gettext(
+                "There is no plan with the specified ID in the database."
+            ),
             self.notifier.warnings,
         )
 

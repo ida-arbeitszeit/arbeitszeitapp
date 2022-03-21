@@ -24,7 +24,11 @@ from arbeitszeit.use_cases import (
     GetCompanySummary,
     ReadMessage,
 )
+from arbeitszeit.use_cases.list_workers import ListWorkers
 from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProduction
+from arbeitszeit.use_cases.send_work_certificates_to_worker import (
+    SendWorkCertificatesToWorker,
+)
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts
 from arbeitszeit_flask.database import get_social_accounting
 from arbeitszeit_flask.database.repositories import (
@@ -66,6 +70,7 @@ from arbeitszeit_flask.translator import FlaskTranslator
 from arbeitszeit_flask.url_index import CompanyUrlIndex, MemberUrlIndex
 from arbeitszeit_flask.views import EndCooperationView, Http404View, ReadMessageView
 from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
+from arbeitszeit_flask.views.transfer_to_worker_view import TransferToWorkerView
 from arbeitszeit_web.answer_company_work_invite import (
     AnswerCompanyWorkInviteController,
     AnswerCompanyWorkInvitePresenter,
@@ -80,6 +85,9 @@ from arbeitszeit_web.controllers.end_cooperation_controller import (
 from arbeitszeit_web.controllers.list_workers_controller import ListWorkersController
 from arbeitszeit_web.controllers.pay_means_of_production_controller import (
     PayMeansOfProductionController,
+)
+from arbeitszeit_web.controllers.send_work_certificates_to_worker_controller import (
+    SendWorkCertificatesToWorkerController,
 )
 from arbeitszeit_web.controllers.show_company_work_invite_details_controller import (
     ShowCompanyWorkInviteDetailsController,
@@ -105,8 +113,14 @@ from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationP
 from arbeitszeit_web.presenters.send_confirmation_email_presenter import (
     SendConfirmationEmailPresenter,
 )
+from arbeitszeit_web.presenters.send_work_certificates_to_worker_presenter import (
+    SendWorkCertificatesToWorkerPresenter,
+)
 from arbeitszeit_web.presenters.show_company_work_invite_details_presenter import (
     ShowCompanyWorkInviteDetailsPresenter,
+)
+from arbeitszeit_web.presenters.show_prd_account_details_presenter import (
+    ShowPRDAccountDetailsPresenter,
 )
 from arbeitszeit_web.query_companies import QueryCompaniesPresenter
 from arbeitszeit_web.query_plans import QueryPlansPresenter
@@ -290,6 +304,35 @@ class CompanyModule(Module):
         return EndCooperationController(session, request)
 
     @provider
+    def provide_send_work_certificates_to_worker_controller(
+        self, session: FlaskSession, request: FlaskRequest
+    ) -> SendWorkCertificatesToWorkerController:
+        return SendWorkCertificatesToWorkerController(session, request)
+
+    @provider
+    def provide_send_work_certificates_to_worker_presenter(
+        self, notifier: Notifier, translator: Translator
+    ) -> SendWorkCertificatesToWorkerPresenter:
+        return SendWorkCertificatesToWorkerPresenter(notifier, translator)
+
+    @provider
+    def provide_transfer_to_worker_view(
+        self,
+        template_renderer: UserTemplateRenderer,
+        send_work_certificates_to_worker: SendWorkCertificatesToWorker,
+        controller: SendWorkCertificatesToWorkerController,
+        presenter: SendWorkCertificatesToWorkerPresenter,
+        list_workers: ListWorkers,
+    ) -> TransferToWorkerView:
+        return TransferToWorkerView(
+            template_renderer,
+            send_work_certificates_to_worker,
+            controller,
+            presenter,
+            list_workers,
+        )
+
+    @provider
     def provide_end_cooperation_presenter(
         self,
         request: FlaskRequest,
@@ -328,6 +371,12 @@ class CompanyModule(Module):
         self, url_index: CompanyUrlIndex
     ) -> AnswerCompanyWorkInviteUrlIndex:
         return url_index
+
+    @provider
+    def provide_show_prd_account_details_presenter(
+        self, translator: Translator
+    ) -> ShowPRDAccountDetailsPresenter:
+        return ShowPRDAccountDetailsPresenter(translator=translator)
 
 
 class FlaskModule(Module):
