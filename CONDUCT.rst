@@ -29,10 +29,10 @@ groups.
 
 Private harassment is also unacceptable. No matter who you are, if you
 feel you have been or are being harassed or made uncomfortable by a
-community member, please contact ``TBD (sorry, we are not finished
-with this CoC yet)``. Whether you’re a regular contributor or a
-newcomer, we care about making this community a safe place for you and
-we’ve got your back.
+community member, please contact
+``community-arbeitszeitapp@systemli.org``. Whether you’re a regular
+contributor or a newcomer, we care about making this community a safe
+place for you and we’ve got your back.
 
 Likewise any spamming, trolling, flaming, baiting or other
 attention-stealing behavior is not welcome.
