@@ -21,7 +21,6 @@ def _convert_into_plan_info(plan: Plan) -> PlanInfo:
         expiration_date=plan.expiration_date,
         expiration_relative=plan.expiration_relative,
         is_available=plan.is_available,
-        renewed=plan.renewed,
         is_cooperating=bool(plan.cooperation),
         cooperation=plan.cooperation,
     )
@@ -169,10 +168,6 @@ class ShowMyPlansPresenterTests(TestCase):
             expected_plan.prd_name,
         )
         self.assertEqual(row1.type_of_plan, "Produktiv")
-        self.assertEqual(
-            row1.renewed,
-            expected_plan.renewed,
-        )
         self.assertEqual(
             row1.renew_plan_url, self.renew_plan_url_index.get_renew_plan_url(plan.id)
         )

@@ -64,7 +64,6 @@ class PrefilledDraftDataController:
 
 @dataclass
 class PrefilledDraftData:
-    from_expired_plan: bool
     product_name: str
     description: str
     timeframe: str
@@ -78,12 +77,9 @@ class PrefilledDraftData:
 
 class GetPrefilledDraftDataPresenter:
     def present(
-        self,
-        summary_data: Union[BusinessPlanSummary, DraftSummarySuccess],
-        from_expired_plan: bool,
+        self, summary_data: Union[BusinessPlanSummary, DraftSummarySuccess]
     ) -> PrefilledDraftData:
         return PrefilledDraftData(
-            from_expired_plan=True if from_expired_plan else False,
             product_name=summary_data.product_name,
             description=summary_data.description,
             timeframe=f"{summary_data.timeframe}",

@@ -139,7 +139,6 @@ class Plan:
     approval_reason: Optional[str]
     is_active: bool
     expired: bool
-    renewed: bool
     activation_date: Optional[datetime]
     expiration_relative: Optional[int]
     expiration_date: Optional[datetime]

@@ -207,7 +207,7 @@ class PlanGenerator:
             is_public_service=is_public_service,
             plan_creation_date=plan_creation_date,
         )
-        response = self.seek_approval(draft.id, None)
+        response = self.seek_approval(draft.id)
         plan = self.plan_repository.get_plan_by_id(response.new_plan_id)
         assert plan
         assert plan.approved

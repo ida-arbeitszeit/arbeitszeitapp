@@ -26,7 +26,6 @@ class PlanInfo:
     expiration_date: Optional[datetime]
     expiration_relative: Optional[int]
     is_available: bool
-    renewed: bool
     is_cooperating: bool
     cooperation: Optional[UUID]
 
@@ -67,7 +66,6 @@ class ShowMyPlansUseCase:
                 expiration_date=plan.expiration_date,
                 expiration_relative=plan.expiration_relative,
                 is_available=plan.is_available,
-                renewed=plan.renewed,
                 is_cooperating=bool(plan.cooperation),
                 cooperation=plan.cooperation,
             )
@@ -87,7 +85,6 @@ class ShowMyPlansUseCase:
                 expiration_date=plan.expiration_date,
                 expiration_relative=plan.expiration_relative,
                 is_available=plan.is_available,
-                renewed=plan.renewed,
                 is_cooperating=bool(plan.cooperation),
                 cooperation=plan.cooperation,
             )
@@ -107,7 +104,6 @@ class ShowMyPlansUseCase:
                 expiration_date=plan.expiration_date,
                 expiration_relative=plan.expiration_relative,
                 is_available=plan.is_available,
-                renewed=plan.renewed,
                 is_cooperating=bool(plan.cooperation),
                 cooperation=plan.cooperation,
             )
