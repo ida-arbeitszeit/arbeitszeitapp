@@ -5,7 +5,7 @@
     <nav class="navbar is-light" role="navigation" aria-label="main navigation">
       <div class="navbar-brand">
         <div class="navbar-item has-background-primary	has-text-white">
-          {{ gettext("Betriebs-Ansicht") }}
+          {{ gettext("Company view") }}
         </div>
 
         <a role="button" class="navbar-burger" onclick="expandMenu()" aria-label="menu" aria-expanded="false"
@@ -21,40 +21,40 @@
           {% if current_user.is_authenticated %}
           <div class="navbar-item has-dropdown is-hoverable">
             <a class="navbar-link">
-              {{ gettext("Pläne") }}
+              {{ gettext("Plans") }}
             </a>
             <div class="navbar-dropdown">
               <a href="{{ url_for('main_company.create_draft') }}" class="navbar-item">
-                {{ gettext("Neuer Plan") }}
+                {{ gettext("New plan") }}
               </a>
               <a href="{{ url_for('main_company.my_plans') }}" class="navbar-item">
-                {{ gettext("Eigene Pläne") }}
+                {{ gettext("My plans") }}
               </a>
               <a href="{{ url_for('main_company.my_drafts') }}" class="navbar-item">
-                {{ gettext("Eigene Entwürfe") }}
+                {{ gettext("My drafts") }}
               </a>
               <a href="{{ url_for('main_company.query_plans') }}" class="navbar-item">
-                {{ gettext("Alle Pläne") }}
+                {{ gettext("All plans") }}
               </a>
             </div>
           </div>
 
           <div class="navbar-item has-dropdown is-hoverable">
             <a class="navbar-link">
-              {{ gettext("Kooperation") }}
+              {{ gettext("Cooperations") }}
             </a>
             <div class="navbar-dropdown">
               <a href="{{ url_for('main_company.create_cooperation') }}" class="navbar-item">
-                {{ gettext("Neue Kooperation") }}
+                {{ gettext("New cooperation") }}
               </a>
               <a href="{{ url_for('main_company.request_cooperation') }}" class="navbar-item">
-                {{ gettext("Kooperation beitreten") }}
+                {{ gettext("Join cooperation") }}
               </a>
               <a href="{{ url_for('main_company.my_cooperations') }}" class="navbar-item">
-                {{ gettext("Meine Kooperationen") }}
+                {{ gettext("My cooperations") }}
               </a>
               <a href="{{ url_for('main_company.list_all_cooperations') }}" class="navbar-item">
-                {{ gettext("Alle Kooperationen") }}
+                {{ gettext("All cooperations") }}
               </a>
             </div>
           </div>
@@ -63,21 +63,21 @@
 
           <div class="navbar-item has-dropdown is-hoverable">
             <a class="navbar-link">
-              {{ gettext("Konten und Käufe") }}
+              {{ gettext("Accounts and purchases") }}
             </a>
 
             <div class="navbar-dropdown">
               <a href="{{ url_for('main_company.my_accounts') }}" class="navbar-item">
-                {{ gettext("Konten") }}
+                {{ gettext("Accounts") }}
               </a>
               <a href="{{ url_for('main_company.transfer_to_worker') }}" class="navbar-item">
-                {{ gettext("Bezahlen Mitarbeiter") }}
+                {{ gettext("Pay workers") }}
               </a>
               <a href="{{ url_for('main_company.transfer_to_company') }}" class="navbar-item">
-                {{ gettext("Bezahlen Produktionsmittel") }}
+                {{ gettext("Pay means") }}
               </a>
               <a href="{{ url_for('main_company.my_purchases') }}" class="navbar-item">
-                {{ gettext("Meine Käufe") }}
+                {{ gettext("My purchases") }}
               </a>
             </div>
           </div>
@@ -85,24 +85,24 @@
 
 
           <a href="{{ url_for('main_company.invite_worker_to_company') }}" class="navbar-item">
-            {{ gettext("Arbeit") }}
+            {{ gettext("Work") }}
           </a>
 
           <a href="{{ url_for('main_company.statistics') }}" class="navbar-item">
-            {{ gettext("Statistiken") }}
+            {{ gettext("Statistics") }}
           </a>
 
           <a href="{{ url_for('main_company.query_companies') }}" class="navbar-item">
-            {{ gettext("Betriebe") }}
+            {{ gettext("Companies") }}
           </a>
 
           <a href="{{ url_for('main_company.profile') }}" class="navbar-item">
-            {{ gettext("Meine Daten") }}
+            {{ gettext("My profile") }}
           </a>
 
           <a href="{{ url_for('main_company.list_messages') }}"
              class="navbar-item {% if message_indicator is defined %}{% if message_indicator.show_unread_messages_indicator %}unread-messages-indicator{% endif %}{% endif %}">
-            {{ gettext("Nachrichten") }}
+            {{ gettext("Messages") }}
           </a>
         </div>
 
@@ -114,17 +114,17 @@
           <div class="buttons">
             {% if not current_user.is_authenticated %}
             <a class="button" href="{{ url_for('auth.login_company') }}">
-              {{ gettext("Anmelden") }}
+              {{ gettext("Sign in") }}
             </a>
             <a class="button" href="{{ url_for('auth.signup_company') }}">
-              {{ gettext("Registrieren") }}
+              {{ gettext("Register") }}
             </a>
             <a class="button" href="{{ url_for('auth.zurueck') }}">
-              {{ gettext("Zurück") }}
+              {{ gettext("Back") }}
             </a>
             {% else %}
             <a class="button" href="{{ url_for('auth.logout') }}">
-              {{ gettext("Logout") }}
+              {{ gettext("Sign out") }}
             </a>
             <a class="button" href="{{ url_for('main_company.hilfe') }}">
               {{ gettext("?") }}
