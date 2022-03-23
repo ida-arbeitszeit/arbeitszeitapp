@@ -136,11 +136,7 @@ from .register_company import (
     RegisterCompanyRequest,
     RegisterCompanyResponse,
 )
-from .register_member import (
-    RegisterMember,
-    RegisterMemberRequest,
-    RegisterMemberResponse,
-)
+from .register_member import RegisterMemberUseCase
 from .request_cooperation import (
     RequestCooperation,
     RequestCooperationRequest,
@@ -287,9 +283,7 @@ __all__ = [
     "RegisterCompany",
     "RegisterCompanyRequest",
     "RegisterCompanyResponse",
-    "RegisterMember",
-    "RegisterMemberRequest",
-    "RegisterMemberResponse",
+    "RegisterMemberUseCase",
     "RequestCooperation",
     "RequestCooperationRequest",
     "RequestCooperationResponse",

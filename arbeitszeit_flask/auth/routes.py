@@ -16,8 +16,7 @@ from werkzeug.security import check_password_hash
 from arbeitszeit.use_cases import (
     RegisterCompany,
     RegisterCompanyResponse,
-    RegisterMember,
-    RegisterMemberResponse,
+    RegisterMemberUseCase,
     ResendConfirmationMail,
     ResendConfirmationMailRequest,
 )
@@ -76,7 +75,7 @@ def unconfirmed_member():
 @with_injection(modules=[MemberModule()])
 @commit_changes
 def signup_member(
-    register_member: RegisterMember,
+    register_member: RegisterMemberUseCase,
     member_repository: MemberRepository,
     controller: RegisterMemberController,
 ):
@@ -89,7 +88,7 @@ def signup_member(
         if response.is_rejected:
             if (
                 response.rejection_reason
-                == RegisterMemberResponse.RejectionReason.member_already_exists
+                == RegisterMemberUseCase.Response.RejectionReason.member_already_exists
             ):
                 register_form.email.errors.append("Emailadresse existiert bereits")
                 return render_template("signup_member.html", form=register_form)
