@@ -6,7 +6,13 @@ FLASK_ENV = "production"
 DEBUG = False
 TESTING = False
 # using heroku's existing env variable
+# (SQLAlchemy 1.4.x has removed support for the postgres:// URI scheme, which is used by Heroku Postgres)
 SQLALCHEMY_DATABASE_URI = environ.get("DATABASE_URL")
+assert SQLALCHEMY_DATABASE_URI
+if SQLALCHEMY_DATABASE_URI.startswith("postgres://"):
+    SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace(
+        "postgres://", "postgresql://", 1
+    )
 # setting secret key from bash with: heroku config:set MY_SECRET_KEY=...
 SECRET_KEY = environ.get("MY_SECRET_KEY")
 

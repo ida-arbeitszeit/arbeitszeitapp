@@ -479,7 +479,6 @@ class PlanRepository(repositories.PlanRepository):
             approval_reason=plan.approval_reason,
             is_active=plan.is_active,
             expired=plan.expired,
-            renewed=plan.renewed,
             expiration_relative=plan.expiration_relative,
             expiration_date=plan.expiration_date,
             activation_date=plan.activation_date,
@@ -555,12 +554,6 @@ class PlanRepository(repositories.PlanRepository):
         plan_orm = self.object_to_orm(plan)
         plan_orm.expired = True
         plan_orm.is_active = False
-
-    def set_plan_as_renewed(self, plan: entities.Plan) -> None:
-        plan.renewed = True
-
-        plan_orm = self.object_to_orm(plan)
-        plan_orm.renewed = True
 
     def set_expiration_date(
         self, plan: entities.Plan, expiration_date: datetime

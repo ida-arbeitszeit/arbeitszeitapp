@@ -1,22 +1,9 @@
 {% extends "base_company.html" %}
 {% block content2 %}
-
+{% from 'macros/show_notifications.html' import show_notifications %}
 
 <div class="columns is-centered">
     <div class="column is-three-fifths">
-
-        {% if prefilled.from_expired_plan %}
-
-        <div class="box has-background-info-light has-text-info-dark">
-            <div class="icon"><i class="fas fa-info-circle"></i></div>
-            <p>
-                Planerneuerung. <br><br>
-                Wenn du keine Änderungen vornimmst, wird der Plan automatisch erneuert, ansonsten wird eventuell ein
-                Genehmigungsprozess nötig.
-            </p>
-        </div>
-
-        {% endif %}
 
         <div class="box has-background-info-light has-text-info-dark">
             <div class="icon"><i class="fas fa-info-circle"></i></div>
@@ -35,13 +22,7 @@
 
 
 
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-        {% for message in messages %}
-        <div class="notification is-danger">{{ message }} </div>
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
+        {{ show_notifications() }}
 
         <form method="post">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

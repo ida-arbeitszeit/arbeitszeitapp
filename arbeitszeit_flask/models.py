@@ -105,7 +105,6 @@ class Plan(UserMixin, db.Model):
     is_active = db.Column(db.Boolean, nullable=False, default=False)
     activation_date = db.Column(db.DateTime, nullable=True)
     expired = db.Column(db.Boolean, nullable=False, default=False)
-    renewed = db.Column(db.Boolean, nullable=False, default=False)
     expiration_date = db.Column(db.DateTime, nullable=True)
     expiration_relative = db.Column(db.Integer, nullable=True)
     active_days = db.Column(db.Integer, nullable=True)
