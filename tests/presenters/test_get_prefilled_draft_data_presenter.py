@@ -42,8 +42,7 @@ TEST_DRAFT_SUMMARY_SUCCESS = DraftSummarySuccess(
 
 def test_correct_refilled_data_is_returned_for_plan_summary():
     get_prefilled_data = GetPrefilledDraftDataPresenter()
-    result = get_prefilled_data.present(BUSINESS_PLAN_SUMMARY, True)
-    assert result.from_expired_plan == True
+    result = get_prefilled_data.present(BUSINESS_PLAN_SUMMARY)
     assert result.product_name == BUSINESS_PLAN_SUMMARY.product_name
     assert result.description == BUSINESS_PLAN_SUMMARY.description
     assert result.timeframe == str(BUSINESS_PLAN_SUMMARY.timeframe)
@@ -57,8 +56,7 @@ def test_correct_refilled_data_is_returned_for_plan_summary():
 
 def test_correct_refilled_data_is_returned_for_draft_summary():
     get_prefilled_data = GetPrefilledDraftDataPresenter()
-    result = get_prefilled_data.present(TEST_DRAFT_SUMMARY_SUCCESS, False)
-    assert result.from_expired_plan == False
+    result = get_prefilled_data.present(TEST_DRAFT_SUMMARY_SUCCESS)
     assert result.product_name == TEST_DRAFT_SUMMARY_SUCCESS.product_name
     assert result.description == TEST_DRAFT_SUMMARY_SUCCESS.description
     assert result.timeframe == str(TEST_DRAFT_SUMMARY_SUCCESS.timeframe)
