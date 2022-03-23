@@ -24,5 +24,4 @@ class RegisterAccountantUseCase:
         invited_email = self.token_service.confirm_token(
             request.token, max_age_in_sec=1
         )
-        print(invited_email)
         return self.Response(is_accepted=invited_email == request.email)

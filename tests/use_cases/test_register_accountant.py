@@ -61,5 +61,4 @@ class UseCaseTests(TestCase):
             )
         )
         token = self.token_deliverer.delivered_tokens[-1]
-        print(token)
         return token.token
