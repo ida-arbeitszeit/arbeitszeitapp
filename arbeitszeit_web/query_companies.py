@@ -6,6 +6,7 @@ from arbeitszeit.use_cases.query_companies import (
     CompanyQueryResponse,
     QueryCompaniesRequest,
 )
+from arbeitszeit_web.url_index import CompanySummaryUrlIndex
 
 from .notification import Notifier
 
@@ -51,6 +52,7 @@ class ResultTableRow:
     company_id: str
     company_name: str
     company_email: str
+    company_summary_url: str
 
 
 @dataclass
@@ -70,6 +72,7 @@ class QueryCompaniesViewModel:
 @dataclass
 class QueryCompaniesPresenter:
     user_notifier: Notifier
+    company_url_index: CompanySummaryUrlIndex
 
     def present(self, response: CompanyQueryResponse) -> QueryCompaniesViewModel:
         if not response.results:
@@ -82,6 +85,9 @@ class QueryCompaniesPresenter:
                         company_id=str(result.company_id),
                         company_name=result.company_name,
                         company_email=result.company_email,
+                        company_summary_url=self.company_url_index.get_company_summary_url(
+                            result.company_id
+                        ),
                     )
                     for result in response.results
                 ],

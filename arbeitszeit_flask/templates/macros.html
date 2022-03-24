@@ -360,7 +360,7 @@
     <tbody>
       {% for column in view_model.results.rows %}
       <tr>
-        <td>{{ column.company_name }}</td>
+        <td><a href="{{ column.company_summary_url }}">{{ column.company_name }}</a></td>
         <td>{{ column.company_email }}</td>
       </tr>
       {% endfor %}

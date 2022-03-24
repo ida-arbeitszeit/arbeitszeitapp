@@ -488,9 +488,11 @@ class FlaskModule(Module):
 
     @provider
     def provide_query_companies_presenter(
-        self, notifier: Notifier
+        self, notifier: Notifier, company_url_index: CompanySummaryUrlIndex
     ) -> QueryCompaniesPresenter:
-        return QueryCompaniesPresenter(user_notifier=notifier)
+        return QueryCompaniesPresenter(
+            user_notifier=notifier, company_url_index=company_url_index
+        )
 
     @provider
     def provide_pay_means_of_production_presenter(
