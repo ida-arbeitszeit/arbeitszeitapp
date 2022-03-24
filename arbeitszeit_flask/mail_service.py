@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Protocol
+from typing import List
 
 from flask import current_app, render_template, url_for
 from flask_mail import Message
@@ -7,6 +7,7 @@ from flask_mail import Message
 from arbeitszeit.errors import CannotSendEmail
 from arbeitszeit.token import ConfirmationEmail
 from arbeitszeit_flask.extensions import mail
+from arbeitszeit_web.email import MailService
 from arbeitszeit_web.presenters.send_confirmation_email_presenter import (
     SendConfirmationEmailPresenter,
 )
@@ -15,17 +16,6 @@ from arbeitszeit_web.presenters.send_confirmation_email_presenter import (
 class FlaskEmailConfiguration:
     def get_sender_address(self) -> str:
         return current_app.config["MAIL_DEFAULT_SENDER"]
-
-
-class MailService(Protocol):
-    def send_message(
-        self,
-        subject: str,
-        recipients: List[str],
-        html: str,
-        sender: str,
-    ) -> None:
-        ...
 
 
 def get_mail_service() -> MailService:

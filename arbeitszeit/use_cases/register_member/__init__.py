@@ -3,13 +3,16 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Optional
+from uuid import UUID
 
 from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import AccountTypes
 from arbeitszeit.repositories import AccountRepository, MemberRepository
-from arbeitszeit.token import ConfirmationEmail, TokenDeliverer, TokenService
+from arbeitszeit.token import TokenService
+
+from .member_registration_message_presenter import MemberRegistrationMessagePresenter
 
 
 @inject
@@ -19,7 +22,7 @@ class RegisterMemberUseCase:
     member_repository: MemberRepository
     datetime_service: DatetimeService
     token_service: TokenService
-    token_deliverer: TokenDeliverer
+    member_registration_message_presenter: MemberRegistrationMessagePresenter
 
     @dataclass
     class Response:
@@ -53,13 +56,15 @@ class RegisterMemberUseCase:
 
         member_account = self.account_repository.create_account(AccountTypes.member)
         registered_on = self.datetime_service.now()
-        self.member_repository.create_member(
+        member = self.member_repository.create_member(
             request.email, request.name, request.password, member_account, registered_on
         )
-        self._create_confirmation_mail(request)
+        self._create_confirmation_mail(request, member.id)
 
-    def _create_confirmation_mail(self, request: RegisterMemberUseCase.Request) -> None:
+    def _create_confirmation_mail(
+        self, request: RegisterMemberUseCase.Request, member: UUID
+    ) -> None:
         token = self.token_service.generate_token(request.email)
-        self.token_deliverer.deliver_confirmation_token(
-            ConfirmationEmail(token=token, email=request.email)
+        self.member_registration_message_presenter.show_member_registration_message(
+            token=token, member=member
         )
