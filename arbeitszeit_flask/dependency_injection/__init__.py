@@ -96,6 +96,7 @@ from arbeitszeit_web.controllers.show_my_accounts_controller import (
     ShowMyAccountsController,
 )
 from arbeitszeit_web.email import EmailConfiguration
+from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
 from arbeitszeit_web.get_plan_summary_company import (
@@ -575,6 +576,12 @@ class FlaskModule(Module):
         self, plan_index: PlanSummaryUrlIndex, end_coop_index: EndCoopUrlIndex
     ) -> GetCoopSummarySuccessPresenter:
         return GetCoopSummarySuccessPresenter(plan_index, end_coop_index)
+
+    @provider
+    def provide_get_company_summary_success_presenter(
+        self, plan_index: PlanSummaryUrlIndex
+    ) -> GetCompanySummarySuccessPresenter:
+        return GetCompanySummarySuccessPresenter(plan_index)
 
     @provider
     def provide_transaction_repository(

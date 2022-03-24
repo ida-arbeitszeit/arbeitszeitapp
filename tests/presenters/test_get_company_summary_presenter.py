@@ -1,6 +1,6 @@
 from datetime import datetime
 from unittest import TestCase
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.get_company_summary import (
     GetCompanySummarySuccess,
@@ -19,7 +19,8 @@ RESPONSE_WITH_2_PLANS = GetCompanySummarySuccess(
 
 class GetGetCompanySummaryPresenterTests(TestCase):
     def setUp(self) -> None:
-        self.presenter = GetCompanySummarySuccessPresenter()
+        self.plan_index = PlanSummaryUrlIndex()
+        self.presenter = GetCompanySummarySuccessPresenter(plan_index=self.plan_index)
 
     def test_company_id_is_shown(self):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
@@ -58,3 +59,23 @@ class GetGetCompanySummaryPresenterTests(TestCase):
             view_model.active_plans[1].name,
             str(RESPONSE_WITH_2_PLANS.active_plans[1].name),
         )
+
+    def test_urls_of_plans_are_shown(self):
+        view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
+        self.assertEqual(
+            view_model.active_plans[0].url,
+            self.plan_index.get_plan_summary_url(
+                RESPONSE_WITH_2_PLANS.active_plans[0].id
+            ),
+        )
+        self.assertEqual(
+            view_model.active_plans[1].url,
+            self.plan_index.get_plan_summary_url(
+                RESPONSE_WITH_2_PLANS.active_plans[1].id
+            ),
+        )
+
+
+class PlanSummaryUrlIndex:
+    def get_plan_summary_url(self, plan_id: UUID) -> str:
+        return f"fake_plan_url:{plan_id}"
