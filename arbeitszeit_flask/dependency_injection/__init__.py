@@ -538,10 +538,13 @@ class FlaskModule(Module):
     def provide_query_plans_presenter(
         self,
         plan_index: PlanSummaryUrlIndex,
+        company_index: CompanySummaryUrlIndex,
         coop_index: CoopSummaryUrlIndex,
         notifier: Notifier,
     ) -> QueryPlansPresenter:
-        return QueryPlansPresenter(plan_index, coop_index, user_notifier=notifier)
+        return QueryPlansPresenter(
+            plan_index, company_index, coop_index, user_notifier=notifier
+        )
 
     @provider
     def provide_user_action_resolver(

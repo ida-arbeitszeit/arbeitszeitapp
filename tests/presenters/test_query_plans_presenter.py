@@ -13,6 +13,7 @@ RESPONSE_WITH_ONE_RESULT = PlanQueryResponse(
         QueriedPlan(
             plan_id=uuid4(),
             company_name="Planner name",
+            company_id=uuid4(),
             product_name="Bread",
             description="For eating",
             price_per_unit=Decimal(5),
@@ -30,6 +31,7 @@ RESPONSE_WITH_ONE_COOPERATING_RESULT = PlanQueryResponse(
         QueriedPlan(
             plan_id=uuid4(),
             company_name="Planner name",
+            company_id=uuid4(),
             product_name="Bread",
             description="For eating",
             price_per_unit=Decimal(5),
@@ -46,10 +48,14 @@ RESPONSE_WITH_ONE_COOPERATING_RESULT = PlanQueryResponse(
 class QueryPlansPresenterTests(TestCase):
     def setUp(self):
         self.plan_url_index = PlanSummaryUrlIndex()
+        self.company_url_index = CompanySummaryUrlIndex()
         self.coop_url_index = CoopSummaryUrlIndex()
         self.notifier = NotifierTestImpl()
         self.presenter = QueryPlansPresenter(
-            self.plan_url_index, self.coop_url_index, user_notifier=self.notifier
+            self.plan_url_index,
+            self.company_url_index,
+            self.coop_url_index,
+            user_notifier=self.notifier,
         )
 
     def test_presenting_empty_response_leads_to_not_showing_results(self):
@@ -81,6 +87,15 @@ class QueryPlansPresenterTests(TestCase):
             self.plan_url_index.get_plan_summary_url(plan_id),
         )
 
+    def test_company_url(self) -> None:
+        presentation = self.presenter.present(RESPONSE_WITH_ONE_RESULT)
+        company_id = RESPONSE_WITH_ONE_RESULT.results[0].company_id
+        table_row = presentation.results.rows[0]
+        self.assertEqual(
+            table_row.company_summary_url,
+            self.company_url_index.get_company_summary_url(company_id),
+        )
+
     def test_no_coop_url_is_shown_with_one_non_cooperating_plan(self) -> None:
         presentation = self.presenter.present(RESPONSE_WITH_ONE_RESULT)
         table_row = presentation.results.rows[0]
@@ -108,3 +123,8 @@ class PlanSummaryUrlIndex:
 class CoopSummaryUrlIndex:
     def get_coop_summary_url(self, coop_id: UUID) -> str:
         return f"fake_coop_url:{coop_id}"
+
+
+class CompanySummaryUrlIndex:
+    def get_company_summary_url(self, company_id: UUID) -> str:
+        return f"fake_company_url:{company_id}"
