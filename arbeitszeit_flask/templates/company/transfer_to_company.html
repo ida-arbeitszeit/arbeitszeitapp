@@ -7,7 +7,7 @@
     <div class="column is-two-third">
         <div class="content">
             <h1 class="title">
-                Bezahlung Produktionsmittel und Rohstoffe
+                {{ gettext("Payment of fixed and liquid means of production") }}
             </h1>
         </div>
         {{ show_notifications() }}
@@ -32,7 +32,7 @@
                     </div>
                     <div class="control">
                         <button class="button is-primary" name="transfer_type" value="transfer_to_company"
-                            type="submit">Überweisen</button>
+                            type="submit">{{ gettext("Transfer") }}</button>
                     </div>
                 </div>
             </form>
