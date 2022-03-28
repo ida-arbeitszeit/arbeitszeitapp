@@ -5,11 +5,11 @@
 
 
 <h1 class="title">
-    <a href="{{ url_for('main_company.my_accounts') }}">Accounts</a> > Transactions
+    <a href="{{ url_for('main_company.my_accounts') }}">{{ gettext("Accounts") }}</a> > {{ gettext("Transactions") }}
 </h1>
 <div class="box has-background-info-light has-text-info-dark">
     <div class="icon"><i class="fas fa-info-circle"></i></div>
-    <p>Here are all transactions you have made or received so far.</p>
+    <p>{{ gettext("Here are all transactions you have made or received so far.") }}</p>
 </div>
 
 {{ show_notifications() }}
@@ -21,9 +21,9 @@
             <tr>
                 <th></th>
                 <th></th>
-                <th>Account</th>
-                <th>Type</th>
-                <th>Details</th>
+                <th>{{ gettext("Account") }}</th>
+                <th>{{ gettext("Type") }}</th>
+                <th>{{ gettext("Details") }}</th>
             </tr>
         </thead>
         <tbody>
