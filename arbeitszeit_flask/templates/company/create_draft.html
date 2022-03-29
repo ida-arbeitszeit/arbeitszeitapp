@@ -88,7 +88,7 @@
             <div class="field">
                 <label class="label">Kosten für Produktionsmittel</label>
                 <div class="control">
-                    <input class="input is-large" type="number" name="costs_p"
+                    <input class="input is-large" type="number" name="costs_p" min=0
                         value="{{ prefilled.means_cost if prefilled else 0 }}" required>
                 </div>
             </div>
@@ -98,7 +98,7 @@
             <div class="field">
                 <label class="label">Kosten für Roh- und Hilfsstoffe</label>
                 <div class="control">
-                    <input class="input is-large" type="number" name="costs_r"
+                    <input class="input is-large" type="number" name="costs_r" min=0
                         value="{{ prefilled.resources_cost if prefilled else 0 }}" required>
                 </div>
             </div>
@@ -108,7 +108,7 @@
             <div class="field">
                 <label class="label">Enthaltene Arbeitsstunden</label>
                 <div class="control">
-                    <input class="input is-large" type="number" name="costs_a"
+                    <input class="input is-large" type="number" name="costs_a" min=0
                         value="{{ prefilled.labour_cost if prefilled else 0 }}" required>
                 </div>
             </div>
