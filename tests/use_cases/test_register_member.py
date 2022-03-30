@@ -26,18 +26,18 @@ class RegisterMemberTests(TestCase):
 
     def test_that_a_token_is_sent_out_when_a_member_registers(self) -> None:
         self.use_case(RegisterMemberUseCase.Request(**DEFAULT))
-        self.assertTrue(self.token_delivery.delivered_tokens)
+        self.assertTrue(self.token_delivery.presented_member_tokens)
 
-    def test_that_token_was_delivered_to_registering_email(self) -> None:
-        expected_mail = "mailtest321@cp.org"
+    def test_that_token_was_delivered_to_registering_user(self) -> None:
         request_args = DEFAULT.copy()
         request_args.pop("email")
         self.use_case(
-            RegisterMemberUseCase.Request(email=expected_mail, **request_args)
+            RegisterMemberUseCase.Request(email="test@test.test", **request_args)
         )
+        expected_user = list(self.member_repo.members.keys())[0]
         self.assertEqual(
-            self.token_delivery.delivered_tokens[0].email,
-            expected_mail,
+            self.token_delivery.presented_member_tokens[0][0],
+            expected_user,
         )
 
     def test_that_registering_member_is_possible(self) -> None:

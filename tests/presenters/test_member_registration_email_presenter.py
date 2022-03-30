@@ -7,6 +7,7 @@ from arbeitszeit_web.presenters.member_registration_email_presenter import (
     MemberRegistrationEmailPresenter,
 )
 from tests.email import Email, FakeEmailConfiguration, FakeEmailSender
+from tests.translator import FakeTranslator
 
 
 class PresenterTests(TestCase):
@@ -16,12 +17,14 @@ class PresenterTests(TestCase):
         self.address_book = MemberAddressBook()
         self.email_template = EmailTemplate()
         self.url_index = ConfirmationUrlIndex()
+        self.translator = FakeTranslator()
         self.presenter = MemberRegistrationEmailPresenter(
             email_sender=self.email_sender,
             address_book=self.address_book,
             email_template=self.email_template,
             url_index=self.url_index,
             email_configuration=self.email_configuration,
+            translator=self.translator,
         )
         self.member = uuid4()
         self.token = "some test token"
@@ -49,11 +52,16 @@ class PresenterTests(TestCase):
             recipient,
         )
 
-    def test_that_temlate_is_rendered(self) -> None:
+    def test_that_template_is_rendered(self) -> None:
         expected_url = self.url_index.get_confirmation_url(self.token)
         self.presenter.show_member_registration_message(self.member, self.token)
         email = self.get_sent_email()
         self.assertEqual(email.html, self.email_template.render_to_html(expected_url))
+
+    def test_that_subject_line_is_correct(self) -> None:
+        self.presenter.show_member_registration_message(self.member, self.token)
+        email = self.get_sent_email()
+        self.assertEqual(email.subject, self.translator.gettext("Account confirmation"))
 
     def get_sent_email(self) -> Email:
         return self.email_sender.sent_mails[0]

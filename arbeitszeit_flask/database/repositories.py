@@ -63,6 +63,19 @@ class CompanyWorkerRepository(repositories.CompanyWorkerRepository):
         ]
 
 
+@dataclass
+class UserAddressBookImpl:
+    db: SQLAlchemy
+
+    def get_user_email_address(self, user: UUID) -> Optional[str]:
+        if member := self.db.session.query(Member).filter_by(id=str(user)).first():
+            return member.email
+        elif company := self.db.session.query(Company).filter_by(id=str(user)).first():
+            return company.email
+        else:
+            return None
+
+
 @inject
 @dataclass
 class MemberRepository(repositories.MemberRepository):

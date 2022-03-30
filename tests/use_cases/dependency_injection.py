@@ -1,3 +1,5 @@
+from unittest import mock
+
 from injector import Injector, Module, inject, provider, singleton
 
 import arbeitszeit.repositories as interfaces
@@ -5,6 +7,9 @@ from arbeitszeit import entities
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.token import TokenDeliverer, TokenService
 from arbeitszeit.use_cases import GetCompanySummary
+from arbeitszeit.use_cases.register_member.member_registration_message_presenter import (
+    MemberRegistrationMessagePresenter,
+)
 from tests import data_generators
 from tests.datetime_service import FakeDatetimeService
 from tests.dependency_injection import TestingModule
@@ -14,6 +19,12 @@ from . import repositories
 
 
 class InMemoryModule(Module):
+    @provider
+    def provide_member_registration_message_presenter(
+        self, token_delivery_service: TokenDeliveryService
+    ) -> MemberRegistrationMessagePresenter:
+        return token_delivery_service
+
     @provider
     @singleton
     def provide_token_delivery_service(self) -> TokenDeliveryService:

@@ -69,3 +69,9 @@ class UserTemplateRenderer:
             response = self.check_unread_messages_use_case(request)
             view_model = self.check_unread_messages_presenter.present(response)
         return dict(context, message_indicator=view_model)
+
+
+@dataclass
+class MemberRegistrationEmailTemplateImpl:
+    def render_to_html(self, confirmation_url: str) -> str:
+        return render_template("activate.html", confirm_url=confirmation_url)

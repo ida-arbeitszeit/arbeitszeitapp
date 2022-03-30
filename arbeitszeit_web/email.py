@@ -1,4 +1,4 @@
-from typing import List, Protocol
+from typing import List, Optional, Protocol
 from uuid import UUID
 
 
@@ -19,5 +19,5 @@ class MailService(Protocol):
 
 
 class UserAddressBook(Protocol):
-    def get_user_email_address(self, user: UUID) -> str:
+    def get_user_email_address(self, user: UUID) -> Optional[str]:
         ...

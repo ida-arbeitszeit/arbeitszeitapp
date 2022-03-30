@@ -53,4 +53,3 @@ class UnauthenticatedAndUnconfirmedMemberTests(ViewTestCase):
             assert len(outbox) == 1
             assert outbox[0].sender == "test_sender@cp.org"
             assert outbox[0].recipients[0] == member_email
-            assert outbox[0].subject == "Bitte bestätige dein Konto"
