@@ -8,6 +8,8 @@ from arbeitszeit.use_cases.get_company_summary import (
 )
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 
+from .dependency_injection import get_dependency_injector
+
 RESPONSE_WITH_2_PLANS = GetCompanySummarySuccess(
     id=uuid4(),
     name="Company Name",
@@ -19,7 +21,8 @@ RESPONSE_WITH_2_PLANS = GetCompanySummarySuccess(
 
 class GetGetCompanySummaryPresenterTests(TestCase):
     def setUp(self) -> None:
-        self.presenter = GetCompanySummarySuccessPresenter()
+        self.injector = get_dependency_injector()
+        self.presenter = self.injector.get(GetCompanySummarySuccessPresenter)
 
     def test_company_id_is_shown(self):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
