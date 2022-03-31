@@ -1,11 +1,13 @@
 from dataclasses import dataclass
+from enum import Enum, auto
+from typing import Optional
 from uuid import UUID
 
 from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import ProductionCosts
-from arbeitszeit.repositories import PlanDraftRepository
+from arbeitszeit.repositories import CompanyRepository, PlanDraftRepository
 
 
 @dataclass
@@ -22,21 +24,43 @@ class CreatePlanDraftRequest:
 
 @dataclass
 class CreatePlanDraftResponse:
-    draft_id: UUID
+    class RejectionReason(Exception, Enum):
+        negative_plan_input = auto()
+        planner_does_not_exist = auto()
+
+    draft_id: Optional[UUID]
+    rejection_reason: Optional[RejectionReason]
+
+    @property
+    def is_rejected(self) -> bool:
+        return self.rejection_reason is not None
 
 
 @inject
 @dataclass
 class CreatePlanDraft:
     plan_draft_repository: PlanDraftRepository
+    company_repository: CompanyRepository
     datetime_service: DatetimeService
 
     def __call__(self, request: CreatePlanDraftRequest) -> CreatePlanDraftResponse:
-        assert request.costs.labour_cost >= 0
-        assert request.costs.means_cost >= 0
-        assert request.costs.resource_cost >= 0
-        assert request.production_amount >= 0
-        assert request.timeframe_in_days >= 0
+        if (
+            request.costs.labour_cost < 0
+            or request.costs.means_cost < 0
+            or request.costs.resource_cost < 0
+            or request.production_amount < 0
+            or request.timeframe_in_days < 0
+        ):
+            return CreatePlanDraftResponse(
+                draft_id=None,
+                rejection_reason=CreatePlanDraftResponse.RejectionReason.negative_plan_input,
+            )
+        if not self.company_repository.get_by_id(request.planner):
+            return CreatePlanDraftResponse(
+                draft_id=None,
+                rejection_reason=CreatePlanDraftResponse.RejectionReason.planner_does_not_exist,
+            )
+
         draft = self.plan_draft_repository.create_plan_draft(
             planner=request.planner,
             costs=request.costs,
@@ -48,4 +72,4 @@ class CreatePlanDraft:
             is_public_service=request.is_public_service,
             creation_timestamp=self.datetime_service.now(),
         )
-        return CreatePlanDraftResponse(draft_id=draft.id)
+        return CreatePlanDraftResponse(draft_id=draft.id, rejection_reason=None)

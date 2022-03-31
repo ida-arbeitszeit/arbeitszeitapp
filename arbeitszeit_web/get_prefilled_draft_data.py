@@ -49,11 +49,6 @@ class PrefilledDraftDataController:
         means_cost = Decimal(draft_form.get_costs_p_string())
         production_amount = int(draft_form.get_prd_amount_string())
         timeframe_in_days = int(draft_form.get_timeframe_string())
-        assert labour_costs >= 0
-        assert resource_cost >= 0
-        assert means_cost >= 0
-        assert production_amount >= 0
-        assert timeframe_in_days >= 0
         return CreatePlanDraftRequest(
             costs=ProductionCosts(
                 labour_cost=labour_costs,
