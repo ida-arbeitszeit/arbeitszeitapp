@@ -102,6 +102,7 @@ from arbeitszeit_web.get_plan_summary_company import (
     GetPlanSummaryCompanySuccessPresenter,
 )
 from arbeitszeit_web.get_plan_summary_member import GetPlanSummarySuccessPresenter
+from arbeitszeit_web.get_prefilled_draft_data import PrefilledDraftDataController
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyController
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
@@ -377,6 +378,12 @@ class CompanyModule(Module):
         self, translator: Translator
     ) -> ShowPRDAccountDetailsPresenter:
         return ShowPRDAccountDetailsPresenter(translator=translator)
+
+    @provider
+    def provide_prefilled_draft_data_controller(
+        self, session: Session
+    ) -> PrefilledDraftDataController:
+        return PrefilledDraftDataController(session=session)
 
 
 class FlaskModule(Module):
