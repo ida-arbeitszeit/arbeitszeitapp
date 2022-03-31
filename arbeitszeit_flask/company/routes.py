@@ -11,13 +11,10 @@ from arbeitszeit.use_cases import (
     AcceptCooperationResponse,
     CancelCooperationSolicitation,
     CancelCooperationSolicitationRequest,
-    CreatePlanDraft,
     DenyCooperation,
     DenyCooperationRequest,
     DenyCooperationResponse,
     GetCompanySummary,
-    GetDraftSummary,
-    GetPlanSummaryCompany,
     HidePlan,
     ListAllCooperations,
     ListCoordinations,
@@ -57,6 +54,7 @@ from arbeitszeit_flask.views import (
     ReadMessageView,
     RequestCooperationView,
 )
+from arbeitszeit_flask.views.create_draft_view import CreateDraftView
 from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
 from arbeitszeit_flask.views.transfer_to_worker_view import TransferToWorkerView
@@ -66,11 +64,6 @@ from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPrese
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_plan_summary_company import (
     GetPlanSummaryCompanySuccessPresenter,
-)
-from arbeitszeit_web.get_prefilled_draft_data import (
-    GetPrefilledDraftDataPresenter,
-    PrefilledDraftData,
-    PrefilledDraftDataController,
 )
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.hide_plan import HidePlanPresenter
@@ -188,83 +181,14 @@ def my_purchases(
 @CompanyRoute("/company/create_draft", methods=["GET", "POST"])
 @commit_changes
 def create_draft(
-    prefilled_data_controller: PrefilledDraftDataController,
-    get_plan_summary_company: GetPlanSummaryCompany,
-    create_draft: CreatePlanDraft,
-    get_draft_summary: GetDraftSummary,
-    get_prefilled_draft_data_presenter: GetPrefilledDraftDataPresenter,
-    template_renderer: UserTemplateRenderer,
-    http_404_view: Http404View,
+    view: CreateDraftView,
 ):
-
+    form = CreateDraftForm(request.form)
     if request.method == "POST":
-        """either cancel plan creation, save draft or file draft."""
-        user_action = request.form["action"]
-        draft_form = CreateDraftForm(request.form)
-        if user_action == "cancel":
-            flash("Plan creation has been canceled.", "is-success")
-            return redirect(url_for("main_company.my_plans"))
-        elif user_action == "save_draft":
-            use_case_request = prefilled_data_controller.import_form_data(draft_form)
-            response = create_draft(use_case_request)
-            if response.is_rejected:
-                return http_404_view.get_response()
-            flash("Draft successfully saved.", "is-success")
-            return redirect(url_for("main_company.my_drafts"))
-        elif user_action == "file_draft":
-            use_case_request = prefilled_data_controller.import_form_data(draft_form)
-            response = create_draft(use_case_request)
-            if response.is_rejected:
-                return http_404_view.get_response()
-            return redirect(
-                url_for(
-                    "main_company.seek_approval",
-                    draft_uuid=response.draft_id,
-                )
-            )
+        return view.respond_to_post(form)
 
     elif request.method == "GET":
-        """
-        show user input form for plan draft.
-        prefilled data comes from exired plan or saved draft if available in request arguments.
-        """
-
-        prefilled_draft_data: Optional[PrefilledDraftData]
-        if request.args.get("expired_plan_id"):
-            # use expired plan as data source
-            expired_plan_id: str = request.args.get("expired_plan_id")
-            expired_plan_uuid = UUID(expired_plan_id)
-
-            plan_summary_success = get_plan_summary_company(
-                expired_plan_uuid, UUID(current_user.id)
-            )
-            if isinstance(plan_summary_success, use_cases.PlanSummaryCompanySuccess):
-                prefilled_draft_data = get_prefilled_draft_data_presenter.present(
-                    plan_summary_success.plan_summary
-                )
-            else:
-                return http_404_view.get_response()
-
-        elif request.args.get("saved_draft_id"):
-            # use saved draft as data source
-            saved_draft_id: str = request.args.get("saved_draft_id")
-            saved_draft_uuid: UUID = UUID(saved_draft_id)
-
-            draft_summary = get_draft_summary(saved_draft_uuid)
-            if isinstance(draft_summary, use_cases.DraftSummarySuccess):
-                prefilled_draft_data = get_prefilled_draft_data_presenter.present(
-                    draft_summary
-                )
-            else:
-                return http_404_view.get_response()
-
-        else:
-            # no data source
-            prefilled_draft_data = None
-
-        return template_renderer.render_template(
-            "company/create_draft.html", context=dict(prefilled=prefilled_draft_data)
-        )
+        return view.respond_to_get()
 
 
 @CompanyRoute("/company/seek_approval", methods=["GET", "POST"])

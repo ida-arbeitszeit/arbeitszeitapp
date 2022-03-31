@@ -24,6 +24,9 @@ from arbeitszeit.use_cases import (
     GetCompanySummary,
     ReadMessage,
 )
+from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
+from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
+from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
 from arbeitszeit.use_cases.list_workers import ListWorkers
 from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProduction
 from arbeitszeit.use_cases.send_work_certificates_to_worker import (
@@ -69,6 +72,7 @@ from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.translator import FlaskTranslator
 from arbeitszeit_flask.url_index import CompanyUrlIndex, MemberUrlIndex
 from arbeitszeit_flask.views import EndCooperationView, Http404View, ReadMessageView
+from arbeitszeit_flask.views.create_draft_view import CreateDraftView
 from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
 from arbeitszeit_flask.views.transfer_to_worker_view import TransferToWorkerView
 from arbeitszeit_web.answer_company_work_invite import (
@@ -102,7 +106,10 @@ from arbeitszeit_web.get_plan_summary_company import (
     GetPlanSummaryCompanySuccessPresenter,
 )
 from arbeitszeit_web.get_plan_summary_member import GetPlanSummarySuccessPresenter
-from arbeitszeit_web.get_prefilled_draft_data import PrefilledDraftDataController
+from arbeitszeit_web.get_prefilled_draft_data import (
+    GetPrefilledDraftDataPresenter,
+    PrefilledDraftDataController,
+)
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyController
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
@@ -384,6 +391,33 @@ class CompanyModule(Module):
         self, session: Session
     ) -> PrefilledDraftDataController:
         return PrefilledDraftDataController(session=session)
+
+    @provider
+    def provide_create_draft_view(
+        self,
+        request: FlaskRequest,
+        session: Session,
+        notifier: Notifier,
+        prefilled_data_controller: PrefilledDraftDataController,
+        get_plan_summary_company: GetPlanSummaryCompany,
+        create_draft: CreatePlanDraft,
+        get_draft_summary: GetDraftSummary,
+        get_prefilled_draft_data_presenter: GetPrefilledDraftDataPresenter,
+        template_renderer: UserTemplateRenderer,
+        http_404_view: Http404View,
+    ) -> CreateDraftView:
+        return CreateDraftView(
+            request,
+            session,
+            notifier,
+            prefilled_data_controller,
+            get_plan_summary_company,
+            create_draft,
+            get_draft_summary,
+            get_prefilled_draft_data_presenter,
+            template_renderer,
+            http_404_view,
+        )
 
 
 class FlaskModule(Module):
