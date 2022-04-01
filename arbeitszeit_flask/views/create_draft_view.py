@@ -21,6 +21,7 @@ from arbeitszeit_web.get_prefilled_draft_data import (
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.session import Session
+from arbeitszeit_web.translator import Translator
 
 
 @dataclass
@@ -28,6 +29,7 @@ class CreateDraftView:
     request: Request
     session: Session
     notifier: Notifier
+    translator: Translator
     prefilled_data_controller: PrefilledDraftDataController
     get_plan_summary_company: GetPlanSummaryCompany
     create_draft: CreatePlanDraft
@@ -41,26 +43,32 @@ class CreateDraftView:
 
         user_action = self.request.get_form("action")
         if user_action == "cancel":
-            self.notifier.display_info("Plan creation has been canceled.")
+            self.notifier.display_info(
+                self.translator.gettext("Plan creation has been canceled.")
+            )
             return redirect(url_for("main_company.my_plans"))
         elif user_action == "save_draft":
-            use_case_request = self.prefilled_data_controller.import_form_data(form)
-            response = self.create_draft(use_case_request)
-            if response.is_rejected:
-                return self.http_404_view.get_response()
-            self.notifier.display_info("Draft successfully saved.")
+            self._create_draft(form)
+            self.notifier.display_info(
+                self.translator.gettext("Draft successfully saved.")
+            )
             return redirect(url_for("main_company.my_drafts"))
         elif user_action == "file_draft":
-            use_case_request = self.prefilled_data_controller.import_form_data(form)
-            response = self.create_draft(use_case_request)
-            if response.is_rejected:
-                return self.http_404_view.get_response()
+            draft_id = self._create_draft(form)
             return redirect(
                 url_for(
                     "main_company.seek_approval",
-                    draft_uuid=response.draft_id,
+                    draft_uuid=draft_id,
                 )
             )
+
+    def _create_draft(self, form: CreateDraftForm) -> UUID:
+        use_case_request = self.prefilled_data_controller.import_form_data(form)
+        response = self.create_draft(use_case_request)
+        if response.is_rejected:
+            return self.http_404_view.get_response()
+        assert response.draft_id
+        return response.draft_id
 
     def respond_to_get(self) -> Response:
         """
