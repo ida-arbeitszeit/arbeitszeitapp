@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Union
 from uuid import UUID
 
 from flask import Response, redirect, url_for
@@ -62,7 +62,7 @@ class CreateDraftView:
                 )
             )
 
-    def _create_draft(self, form: CreateDraftForm) -> UUID:
+    def _create_draft(self, form: CreateDraftForm) -> Union[Response, UUID]:
         use_case_request = self.prefilled_data_controller.import_form_data(form)
         response = self.create_draft(use_case_request)
         if response.is_rejected:
