@@ -2,7 +2,8 @@ from dataclasses import dataclass
 from typing import Optional, Union
 from uuid import UUID
 
-from flask import Response, redirect, url_for
+from flask import Response as FlaskResponse
+from flask import redirect, url_for
 
 from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
 from arbeitszeit.use_cases.get_draft_summary import DraftSummarySuccess, GetDraftSummary
@@ -12,6 +13,7 @@ from arbeitszeit.use_cases.get_plan_summary_company import (
 )
 from arbeitszeit_flask.forms import CreateDraftForm
 from arbeitszeit_flask.template import UserTemplateRenderer
+from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views.http_404_view import Http404View
 from arbeitszeit_web.get_prefilled_draft_data import (
     GetPrefilledDraftDataPresenter,
@@ -42,12 +44,7 @@ class CreateDraftView:
         """either cancel plan creation, save draft or file draft."""
 
         user_action = self.request.get_form("action")
-        if user_action == "cancel":
-            self.notifier.display_info(
-                self.translator.gettext("Plan creation has been canceled.")
-            )
-            return redirect(url_for("main_company.my_plans"))
-        elif user_action == "save_draft":
+        if user_action == "save_draft":
             self._create_draft(form)
             self.notifier.display_info(
                 self.translator.gettext("Draft successfully saved.")
@@ -61,6 +58,11 @@ class CreateDraftView:
                     draft_uuid=draft_id,
                 )
             )
+        else:
+            self.notifier.display_info(
+                self.translator.gettext("Plan creation has been canceled.")
+            )
+            return redirect(url_for("main_company.my_plans"))
 
     def _create_draft(self, form: CreateDraftForm) -> Union[Response, UUID]:
         use_case_request = self.prefilled_data_controller.import_form_data(form)
@@ -111,6 +113,9 @@ class CreateDraftView:
             # no prefilled data
             prefilled_draft_data = None
 
-        return self.template_renderer.render_template(
-            "company/create_draft.html", context=dict(prefilled=prefilled_draft_data)
+        return FlaskResponse(
+            self.template_renderer.render_template(
+                "company/create_draft.html",
+                context=dict(prefilled=prefilled_draft_data),
+            )
         )
