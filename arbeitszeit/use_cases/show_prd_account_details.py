@@ -20,9 +20,16 @@ class TransactionInfo:
 
 
 @dataclass
+class PlotDetails:
+    dates: List[datetime]
+    accumulated_volumes: List[Decimal]
+
+
+@dataclass
 class ShowPRDAccountDetailsResponse:
     transactions: List[TransactionInfo]
     account_balance: Decimal
+    plot: PlotDetails
 
 
 @inject
@@ -44,8 +51,12 @@ class ShowPRDAccountDetails:
         account_balance = self.account_repository.get_account_balance(
             company.product_account
         )
+        plot = PlotDetails(
+            dates=self._get_plot_dates(transactions),
+            accumulated_volumes=self._get_plot_volumes(transactions),
+        )
         return ShowPRDAccountDetailsResponse(
-            transactions=transactions, account_balance=account_balance
+            transactions=transactions, account_balance=account_balance, plot=plot
         )
 
     def _create_info(
@@ -67,3 +78,22 @@ class ShowPRDAccountDetails:
             transaction_volume,
             transaction.purpose,
         )
+
+    def _get_plot_dates(self, transactions: List[TransactionInfo]) -> List[datetime]:
+        dates = [t.date for t in transactions]
+        dates.reverse()
+        return dates
+
+    def _get_plot_volumes(self, transactions: List[TransactionInfo]) -> List[Decimal]:
+        volumes = [t.transaction_volume for t in transactions]
+        volumes.reverse()
+        volumes_cumsum = self._cumsum(volumes)
+        return volumes_cumsum
+
+    def _cumsum(self, trans_volumes: List[Decimal]) -> List[Decimal]:
+        cum_list = []
+        y = Decimal("0")
+        for x in range(len(trans_volumes)):
+            y += trans_volumes[x]
+            cum_list.append(y)
+        return cum_list
