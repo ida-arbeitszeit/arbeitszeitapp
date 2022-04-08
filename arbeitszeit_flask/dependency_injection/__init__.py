@@ -96,6 +96,7 @@ from arbeitszeit_web.controllers.show_my_accounts_controller import (
     ShowMyAccountsController,
 )
 from arbeitszeit_web.email import EmailConfiguration
+from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
 from arbeitszeit_web.get_plan_summary_company import (
@@ -488,9 +489,11 @@ class FlaskModule(Module):
 
     @provider
     def provide_query_companies_presenter(
-        self, notifier: Notifier
+        self, notifier: Notifier, company_url_index: CompanySummaryUrlIndex
     ) -> QueryCompaniesPresenter:
-        return QueryCompaniesPresenter(user_notifier=notifier)
+        return QueryCompaniesPresenter(
+            user_notifier=notifier, company_url_index=company_url_index
+        )
 
     @provider
     def provide_pay_means_of_production_presenter(
@@ -535,10 +538,13 @@ class FlaskModule(Module):
     def provide_query_plans_presenter(
         self,
         plan_index: PlanSummaryUrlIndex,
+        company_index: CompanySummaryUrlIndex,
         coop_index: CoopSummaryUrlIndex,
         notifier: Notifier,
     ) -> QueryPlansPresenter:
-        return QueryPlansPresenter(plan_index, coop_index, user_notifier=notifier)
+        return QueryPlansPresenter(
+            plan_index, company_index, coop_index, user_notifier=notifier
+        )
 
     @provider
     def provide_user_action_resolver(
@@ -573,6 +579,12 @@ class FlaskModule(Module):
         self, plan_index: PlanSummaryUrlIndex, end_coop_index: EndCoopUrlIndex
     ) -> GetCoopSummarySuccessPresenter:
         return GetCoopSummarySuccessPresenter(plan_index, end_coop_index)
+
+    @provider
+    def provide_get_company_summary_success_presenter(
+        self, plan_index: PlanSummaryUrlIndex
+    ) -> GetCompanySummarySuccessPresenter:
+        return GetCompanySummarySuccessPresenter(plan_index)
 
     @provider
     def provide_transaction_repository(

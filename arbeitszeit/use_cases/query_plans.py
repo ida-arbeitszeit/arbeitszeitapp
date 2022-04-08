@@ -28,6 +28,7 @@ class PlanQueryResponse:
 class QueriedPlan:
     plan_id: UUID
     company_name: str
+    company_id: UUID
     product_name: str
     description: str
     price_per_unit: Decimal
@@ -75,6 +76,7 @@ class QueryPlans:
         return QueriedPlan(
             plan_id=plan.id,
             company_name=plan.planner.name,
+            company_id=plan.planner.id,
             product_name=plan.prd_name,
             description=plan.description,
             price_per_unit=price_per_unit,

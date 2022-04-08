@@ -6,12 +6,14 @@ from arbeitszeit.use_cases.get_company_summary import (
     GetCompanySummarySuccess,
     PlanDetails,
 )
+from arbeitszeit_web.url_index import PlanSummaryUrlIndex
 
 
 @dataclass
 class PlanDetailsWeb:
     id: str
     name: str
+    url: str
 
 
 @dataclass
@@ -28,6 +30,8 @@ class GetCompanySummaryViewModel:
 
 @dataclass
 class GetCompanySummarySuccessPresenter:
+    plan_index: PlanSummaryUrlIndex
+
     def present(
         self, use_case_response: GetCompanySummarySuccess
     ) -> GetCompanySummaryViewModel:
@@ -40,4 +44,8 @@ class GetCompanySummarySuccessPresenter:
         )
 
     def _get_plan_details(self, plan_details: PlanDetails) -> PlanDetailsWeb:
-        return PlanDetailsWeb(str(plan_details.id), plan_details.name)
+        return PlanDetailsWeb(
+            str(plan_details.id),
+            plan_details.name,
+            self.plan_index.get_plan_summary_url(plan_details.id),
+        )
