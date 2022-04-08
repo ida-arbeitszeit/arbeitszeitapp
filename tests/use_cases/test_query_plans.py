@@ -17,7 +17,9 @@ from .dependency_injection import injection_test
 def plan_in_results(plan: Plan, response: PlanQueryResponse) -> bool:
     return any(
         (
-            plan.id == result.plan_id and plan.prd_name == result.product_name
+            plan.id == result.plan_id
+            and plan.prd_name == result.product_name
+            and plan.planner.id == result.company_id
             for result in response.results
         )
     )

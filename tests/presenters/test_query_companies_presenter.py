@@ -1,5 +1,5 @@
 from unittest import TestCase
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.query_companies import CompanyQueryResponse, QueriedCompany
 from arbeitszeit_web.query_companies import QueryCompaniesPresenter
@@ -21,7 +21,10 @@ RESPONSE_WITH_ONE_RESULT = CompanyQueryResponse(
 class QueryCompaniesPresenterTests(TestCase):
     def setUp(self):
         self.notifier = NotifierTestImpl()
-        self.presenter = QueryCompaniesPresenter(user_notifier=self.notifier)
+        self.url_index = CompanySummaryUrlIndex()
+        self.presenter = QueryCompaniesPresenter(
+            user_notifier=self.notifier, company_url_index=self.url_index
+        )
 
     def test_empty_view_model_does_not_show_results(self):
         presentation = self.presenter.get_empty_view_model()
@@ -38,3 +41,8 @@ class QueryCompaniesPresenterTests(TestCase):
     def test_dont_show_notifications_when_results_are_found(self):
         self.presenter.present(RESPONSE_WITH_ONE_RESULT)
         self.assertFalse(self.notifier.warnings)
+
+
+class CompanySummaryUrlIndex:
+    def get_company_summary_url(self, company_id: UUID) -> str:
+        return f"fake_company_url:{company_id}"

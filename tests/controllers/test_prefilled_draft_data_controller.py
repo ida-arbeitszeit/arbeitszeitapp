@@ -4,6 +4,7 @@ from uuid import uuid4
 
 from arbeitszeit.use_cases import CreatePlanDraftRequest
 from arbeitszeit_web.get_prefilled_draft_data import PrefilledDraftDataController
+from tests.session import FakeSession
 
 
 @dataclass
@@ -63,41 +64,43 @@ fake_form = FakeDraftForm(
     action="save_draft",
 )
 
-controller = PrefilledDraftDataController()
+session = FakeSession()
+session.set_current_user_id(uuid4())
+controller = PrefilledDraftDataController(session)
 
 
 def test_import_of_data_returns_a_request_object():
-    request = controller.import_form_data(uuid4(), fake_form)
+    request = controller.import_form_data(fake_form)
     assert isinstance(request, CreatePlanDraftRequest)
 
 
 def test_import_of_data_transforms_prd_name_string_to_correct_string():
     assert isinstance(fake_form.prd_name, str)
-    request = controller.import_form_data(uuid4(), fake_form)
+    request = controller.import_form_data(fake_form)
     assert request.product_name == "test name"
 
 
 def test_import_of_data_transforms_description_string_to_correct_string():
     assert isinstance(fake_form.description, str)
-    request = controller.import_form_data(uuid4(), fake_form)
+    request = controller.import_form_data(fake_form)
     assert request.description == "test description"
 
 
 def test_import_of_data_transforms_timeframe_string_to_correct_integer():
     assert isinstance(fake_form.timeframe, str)
-    request = controller.import_form_data(uuid4(), fake_form)
+    request = controller.import_form_data(fake_form)
     assert request.timeframe_in_days == 14
 
 
 def test_import_of_data_transforms_prd_unit_string_to_correct_string():
     assert isinstance(fake_form.prd_unit, str)
-    request = controller.import_form_data(uuid4(), fake_form)
+    request = controller.import_form_data(fake_form)
     assert request.production_unit == "1 piece"
 
 
 def test_import_of_data_transforms_prd_amount_string_to_correct_integer():
     assert isinstance(fake_form.prd_amount, str)
-    request = controller.import_form_data(uuid4(), fake_form)
+    request = controller.import_form_data(fake_form)
     assert request.production_amount == 10
 
 
@@ -105,7 +108,7 @@ def test_import_of_data_transforms_cost_strings_to_correct_decimal():
     assert isinstance(fake_form.costs_p, str)
     assert isinstance(fake_form.costs_r, str)
     assert isinstance(fake_form.costs_a, str)
-    request = controller.import_form_data(uuid4(), fake_form)
+    request = controller.import_form_data(fake_form)
     assert request.costs.means_cost == Decimal(10.5)
     assert request.costs.resource_cost == Decimal(15)
     assert request.costs.labour_cost == Decimal(20)
@@ -113,12 +116,12 @@ def test_import_of_data_transforms_cost_strings_to_correct_decimal():
 
 def test_import_of_data_transforms_productive_or_public_string_to_correct_bool_when_public_service():
     assert isinstance(fake_form.productive_or_public, str)
-    request = controller.import_form_data(uuid4(), fake_form)
+    request = controller.import_form_data(fake_form)
     assert request.is_public_service == True
 
 
 def test_import_of_data_transforms_productive_or_public_string_to_correct_bool_when_productive():
     _fake_form = replace(fake_form, productive_or_public="productive")
     assert isinstance(_fake_form.productive_or_public, str)
-    request = controller.import_form_data(uuid4(), _fake_form)
+    request = controller.import_form_data(_fake_form)
     assert request.is_public_service == False

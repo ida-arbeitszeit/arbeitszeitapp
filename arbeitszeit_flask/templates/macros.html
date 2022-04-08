@@ -277,8 +277,8 @@
     <thead>
       <tr>
         <th>Plan-ID</th>
-        <th>Betrieb</th>
         <th>Produktname</th>
+        <th>Betrieb</th>
         <th>Beschreibung</th>
         <th>Stückpr.</th>
         <th>Art</th>
@@ -291,8 +291,8 @@
       <tr>
         <td><a href="{{ column.plan_summary_url }}">{{ column.plan_id }}</a>
         </td>
-        <td>{{ column.company_name }}</td>
         <td>{{ column.product_name }}</td>
+        <td><a href="{{ column.company_summary_url }}">{{ column.company_name }}</a></td>
         <td>{% for paragraph in column.description %}{{ paragraph }}<br>{% endfor %}</td>
         <td>{{ column.price_per_unit }} {% if column.is_cooperating %} <span>
             <a href="{{ column.coop_summary_url }}"><i class="fas fa-hands-helping"></i></a></span>{% endif %}
@@ -360,7 +360,7 @@
     <tbody>
       {% for column in view_model.results.rows %}
       <tr>
-        <td>{{ column.company_name }}</td>
+        <td><a href="{{ column.company_summary_url }}">{{ column.company_name }}</a></td>
         <td>{{ column.company_email }}</td>
       </tr>
       {% endfor %}

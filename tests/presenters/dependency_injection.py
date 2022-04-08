@@ -2,6 +2,7 @@ from injector import Injector, Module, provider, singleton
 
 from arbeitszeit_web.answer_company_work_invite import AnswerCompanyWorkInvitePresenter
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
+from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
 from arbeitszeit_web.notification import Notifier
@@ -108,6 +109,14 @@ class PresenterTestsInjector(Module):
     ) -> GetMemberProfileInfoPresenter:
         return GetMemberProfileInfoPresenter(
             translator=translator,
+        )
+
+    @provider
+    def provide_get_company_summary_success_presenter(
+        self, plan_index: PlanSummaryUrlIndexTestImpl
+    ) -> GetCompanySummarySuccessPresenter:
+        return GetCompanySummarySuccessPresenter(
+            plan_index=plan_index,
         )
 
 
