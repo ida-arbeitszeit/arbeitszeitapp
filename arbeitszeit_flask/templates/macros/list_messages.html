@@ -4,14 +4,14 @@
 
 {{ show_notifications() }}
 
-<h1 class="title">Nachrichten</h1>
+<h1 class="title">{{ gettext("Messages") }}</h1>
 <ul>
   {% for message in view_model.messages %}
   <li {% if message.show_unread_message_indicator %}class="unread-message"{% endif %}>
     <a href="{{message.message_url}}">"{{ message.title }}"</a> from {{ message.sender_name }}
   </li>
   {% else %}
-  Keine Nachrichten empfangen.
+  {{ gettext("No messages received.") }}
   {% endfor %}
 </ul>
 

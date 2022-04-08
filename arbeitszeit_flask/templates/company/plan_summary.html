@@ -7,7 +7,7 @@
 
 {% if view_model.show_action_section %}
 
-<div>Verfügbarkeit ändern:</div>
+<div>{{ gettext("Change availability:") }}</div>
 <div>
     <span class="{{ 'has-text-success' if view_model.action.is_available else 'has-text-danger' }}"><a
             style="text-decoration: none; color: inherit;" href="{{ view_model.action.toggle_availability_url }}"><i
@@ -16,9 +16,9 @@
 
 
 {% if view_model.action.is_cooperating %}
-<div>Kooperation beenden:</div>
+<div>{{ gettext("End cooperation:") }}</div>
 <a class="button is-danger" href="{{ view_model.action.end_coop_url }}">
-    <span>Beenden</span>
+    <span>{{ gettext("End") }}</span>
 </a>
 {% endif %}
 
