@@ -114,26 +114,46 @@ In development mode you can run it manually in the CLI.
 Translation
 ===========
 
-We use `Flask-Babel <https://flask-babel.tkte.ch/>` for translation. Available languages are set in ``arbeitszeit_flask/configuration_base.py``.
+We use `Flask-Babel <https://flask-babel.tkte.ch/>` for translation. 
+A possible procedure might be:
 
-You can mark translatable strings in python files with ``translator.gettext(message: str)`` and ``translator.pgettext(comment: str, message: str)``. 
-In jinja templates use ``gettext(message: str)`` and ``ngettext(singular: str, plural: str, n)``.
+1) 
+Add a new language:
 
-Parse the code and create a new ``.pot``-file::
+a. Execute::
 
-    $ pybabel extract -F babel.cfg -k lazy_gettext -o messages.pot .
+    $ pybabel init -i arbeitszeit_flask/translations/messages.pot -d arbeitszeit_flask/translations -l {LANGUAGE CODE e.g. en}
 
-Add a new language (create a ``.po``-file for that language from ``.pot``-file)::
+b. Add the new language to the LANGUAGES variable in ``arbeitszeit_flask/configuration_base.py``.
 
-    $ pybabel init -i messages.pot -d arbeitszeit_flask/translations -l LANGUAGE-CODE
+2)   
+Mark translatable, user-facing strings in the code. 
 
-Update all existing translation files (intelligent merge) from ``.pot``-file::
+In python files use: 
 
-    $ pybabel update -i messages.pot -d arbeitszeit_flask/translations
+- ``translator.gettext(message: str)`` 
+- ``translator.pgettext(comment: str, message: str)``
+- ``translator.ngettext(self, singular: str, plural: str, n: Number)``
 
-Compile (create ``.mo``-files from ``.po``-files)::
+In jinja templates use: 
+
+- ``gettext(message: str)``
+- ``ngettext(singular: str, plural: str, n)``
+
+
+3) 
+Parse the code and update language specific .po-files::
+
+		$ sh update-translations
+
+4) 
+Translate language specific .po-files.
+	
+5)
+Compile translation files::
 
     $ pybabel compile -d arbeitszeit_flask/translations
+		
 
 License
 =======

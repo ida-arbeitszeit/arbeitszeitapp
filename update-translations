@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
 
-pybabel extract -F babel.cfg -k lazy_gettext -o messages.pot .
-pybabel update -i messages.pot -d arbeitszeit_flask/translations --no-fuzzy-matching
+pybabel extract -F babel.cfg -k lazy_gettext -o arbeitszeit_flask/translations/messages.pot .
+pybabel update -i arbeitszeit_flask/translations/messages.pot -d arbeitszeit_flask/translations --no-fuzzy-matching
