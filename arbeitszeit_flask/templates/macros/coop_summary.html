@@ -5,7 +5,7 @@
     <div class="column is-two-thirds">
         <div class="content">
             <h1 class="title">
-                Kooperation
+                {{ gettext("Cooperation") }}
             </h1>
         </div>
         {{ show_notifications() }}
@@ -15,35 +15,35 @@
             <table class="table is-fullwidth">
                 <tbody>
                     <tr>
-                        <td class="has-text-left has-text-weight-semibold">ID:</td>
+                        <td class="has-text-left has-text-weight-semibold">{{ gettext("ID") }}</td>
                         <td class="has-text-left">{{ view_model.coop_id }}</td>
                     </tr>
                     <tr>
-                        <td class="has-text-left has-text-weight-semibold">Name:</td>
+                        <td class="has-text-left has-text-weight-semibold">{{ gettext("Name") }}</td>
                         <td class="has-text-left">{{ view_model.coop_name }}</td>
                     </tr>
                     <tr>
-                        <td class="has-text-left has-text-weight-semibold">Definition:</td>
+                        <td class="has-text-left has-text-weight-semibold">{{ gettext("Definition") }}</td>
                         <td class="has-text-left">{% for parag in view_model.coop_definition %} {{ parag }} {% endfor %}
                         </td>
                     </tr>
                     <tr>
-                        <td class="has-text-left has-text-weight-semibold">Koordinator:</td>
+                        <td class="has-text-left has-text-weight-semibold">{{ gettext("Coordinator") }}</td>
                         <td class="has-text-left">{{ view_model.coordinator_id }}</td>
                     </tr>
                 </tbody>
             </table>
             <h1 class="title is-4">
-                Teilnehmende Pläne
+                {{ gettext("Participating plans") }}
             </h1>
             <table class="table is-fullwidth">
                 <thead>
                     <tr>
-                        <th>Plan</th>
-                        <th>Individueller Preis</th>
-                        <th>Kooperationspreis</th>
+                        <th>{{ gettext("Plan") }}</th>
+                        <th>{{ gettext("Individual price") }}</th>
+                        <th>{{ gettext("Cooperation price") }}</th>
                         {% if view_model.show_end_coop_button %}
-                        <th>Kooperation beenden</th>
+                        <th>{{ gettext("End cooperation") }}</th>
                         {% endif %}
                     </tr>
                 </thead>
@@ -59,7 +59,7 @@
                                 <span class="icon">
                                     <i class="fas fa-times"></i>
                                 </span>
-                                <span>Beenden</span>
+                                <span>{{ gettext("End") }}</span>
                             </a>
                         </td>
                         {% endif %}

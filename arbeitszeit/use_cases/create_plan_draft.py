@@ -32,6 +32,11 @@ class CreatePlanDraft:
     datetime_service: DatetimeService
 
     def __call__(self, request: CreatePlanDraftRequest) -> CreatePlanDraftResponse:
+        assert request.costs.labour_cost >= 0
+        assert request.costs.means_cost >= 0
+        assert request.costs.resource_cost >= 0
+        assert request.production_amount >= 0
+        assert request.timeframe_in_days >= 0
         draft = self.plan_draft_repository.create_plan_draft(
             planner=request.planner,
             costs=request.costs,
