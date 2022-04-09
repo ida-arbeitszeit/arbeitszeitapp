@@ -547,9 +547,9 @@ class FlaskModule(Module):
 
     @provider
     def provide_pay_means_of_production_presenter(
-        self, notifier: Notifier
+        self, notifier: Notifier, trans: Translator
     ) -> PayMeansOfProductionPresenter:
-        return PayMeansOfProductionPresenter(notifier)
+        return PayMeansOfProductionPresenter(notifier, trans)
 
     @provider
     def provide_list_all_cooperations_presenter(
