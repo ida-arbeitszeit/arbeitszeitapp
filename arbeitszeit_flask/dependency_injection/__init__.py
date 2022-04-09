@@ -138,6 +138,7 @@ from arbeitszeit_web.request_cooperation import RequestCooperationController
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
+from arbeitszeit_web.show_r_account_details import ShowRAccountDetailsPresenter
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import (
     AnswerCompanyWorkInviteUrlIndex,
@@ -386,6 +387,12 @@ class CompanyModule(Module):
         self, translator: Translator
     ) -> ShowPRDAccountDetailsPresenter:
         return ShowPRDAccountDetailsPresenter(translator=translator)
+
+    @provider
+    def provide_show_r_account_details_presenter(
+        self, translator: Translator
+    ) -> ShowRAccountDetailsPresenter:
+        return ShowRAccountDetailsPresenter(trans=translator)
 
     @provider
     def provide_prefilled_draft_data_controller(
