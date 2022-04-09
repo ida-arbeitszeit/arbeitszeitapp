@@ -584,9 +584,10 @@ class FlaskModule(Module):
         company_index: CompanySummaryUrlIndex,
         coop_index: CoopSummaryUrlIndex,
         notifier: Notifier,
+        trans: Translator,
     ) -> QueryPlansPresenter:
         return QueryPlansPresenter(
-            plan_index, company_index, coop_index, user_notifier=notifier
+            plan_index, company_index, coop_index, notifier, trans
         )
 
     @provider
