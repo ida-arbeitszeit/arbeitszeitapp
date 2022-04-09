@@ -115,14 +115,13 @@ Translation
 ===========
 
 We use `Flask-Babel <https://flask-babel.tkte.ch/>` for translation. 
-A possible procedure might be:
 
 1) 
 Add a new language:
 
 a. Execute::
 
-    $ pybabel init -i arbeitszeit_flask/translations/messages.pot -d arbeitszeit_flask/translations -l {LANGUAGE CODE e.g. en}
+    $ flask trans-new LANG_CODE
 
 b. Add the new language to the LANGUAGES variable in ``arbeitszeit_flask/configuration_base.py``.
 
@@ -142,9 +141,9 @@ In jinja templates use:
 
 
 3) 
-Parse the code and update language specific .po-files::
+Parse code and update language specific .po-files::
 
-		$ sh update-translations
+	$ flask trans-update
 
 4) 
 Translate language specific .po-files.
@@ -152,7 +151,7 @@ Translate language specific .po-files.
 5)
 Compile translation files::
 
-    $ pybabel compile -d arbeitszeit_flask/translations
+    $ flask trans-compile
 		
 
 License

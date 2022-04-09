@@ -1,3 +1,4 @@
+import click
 from flask import Flask, current_app, request, session
 from flask_talisman import Talisman
 from flask_wtf.csrf import CSRFProtect
@@ -49,9 +50,17 @@ def create_app(config=None, db=None, migrate=None, template_folder=None):
 
     with app.app_context():
 
-        from arbeitszeit_flask.commands import update_and_payout
+        from arbeitszeit_flask.commands import (
+            trans_compile,
+            trans_new,
+            trans_update,
+            update_and_payout,
+        )
 
         app.cli.command("payout")(update_and_payout)
+        app.cli.command("trans-update")(trans_update)
+        app.cli.command("trans-compile")(trans_compile)
+        app.cli.command("trans-new")(click.argument("lang_code")(trans_new))
 
         from .models import Company, Member
 
