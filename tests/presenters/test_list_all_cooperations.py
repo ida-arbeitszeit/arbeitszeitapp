@@ -7,11 +7,15 @@ from hypothesis import given, strategies
 from arbeitszeit.use_cases import ListAllCooperationsResponse, ListedCooperation
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 
+from .dependency_injection import get_dependency_injector
+from .url_index import CoopSummaryUrlIndexTestImpl
+
 
 class ListMessagesPresenterTests(TestCase):
     def setUp(self) -> None:
-        self.url_index = FakeUrlIndex()
-        self.presenter = ListAllCooperationsPresenter(self.url_index)
+        self.injector = get_dependency_injector()
+        self.url_index = self.injector.get(CoopSummaryUrlIndexTestImpl)
+        self.presenter = self.injector.get(ListAllCooperationsPresenter)
 
     def test_view_model_contains_no_cooperation_and_does_not_show_result_when_non_were_provided(
         self,
@@ -65,8 +69,3 @@ class ListMessagesPresenterTests(TestCase):
                 )
             ]
         )
-
-
-class FakeUrlIndex:
-    def get_coop_summary_url(self, coop_id: UUID) -> str:
-        return f"url:{coop_id}"
