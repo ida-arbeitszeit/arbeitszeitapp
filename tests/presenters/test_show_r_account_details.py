@@ -8,6 +8,7 @@ from arbeitszeit.use_cases.show_r_account_details import (
     TransactionInfo,
 )
 from arbeitszeit_web.show_r_account_details import ShowRAccountDetailsPresenter
+from tests.translator import FakeTranslator
 
 DEFAULT_INFO1 = TransactionInfo(
     transaction_type=TransactionTypes.credit_for_liquid_means,
@@ -26,7 +27,8 @@ DEFAULT_INFO2 = TransactionInfo(
 
 class CompanyTransactionsPresenterTests(TestCase):
     def setUp(self) -> None:
-        self.presenter = ShowRAccountDetailsPresenter()
+        self.trans = FakeTranslator()
+        self.presenter = ShowRAccountDetailsPresenter(trans=self.trans)
 
     def test_return_empty_list_when_no_transactions_took_place(self):
         response = ShowRAccountDetailsResponse(
@@ -43,7 +45,7 @@ class CompanyTransactionsPresenterTests(TestCase):
         self.assertTrue(len(view_model.transactions), 1)
         self.assertEqual(view_model.account_balance, Decimal(100))
         trans = view_model.transactions[0]
-        self.assertEqual(trans.transaction_type, "Credit")
+        self.assertEqual(trans.transaction_type, self.trans.gettext("Credit"))
         self.assertIsInstance(trans.date, datetime)
         self.assertEqual(trans.transaction_volume, DEFAULT_INFO1.transaction_volume)
         self.assertIsInstance(trans.purpose, str)

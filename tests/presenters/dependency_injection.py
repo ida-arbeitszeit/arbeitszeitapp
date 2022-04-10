@@ -9,6 +9,7 @@ from arbeitszeit_web.get_plan_summary_company import (
     GetPlanSummaryCompanySuccessPresenter,
 )
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
+from arbeitszeit_web.hide_plan import HidePlanPresenter
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.plan_summary_service import (
@@ -177,6 +178,15 @@ class PresenterTestsInjector(Module):
     ) -> ListAllCooperationsPresenter:
         return ListAllCooperationsPresenter(
             coop_url_index=coop_summary_url_index,
+        )
+
+    @provider
+    def provide_hide_plan_presenter(
+        self, notifier: Notifier, translator: FakeTranslator
+    ) -> HidePlanPresenter:
+        return HidePlanPresenter(
+            notifier=notifier,
+            trans=translator,
         )
 
 

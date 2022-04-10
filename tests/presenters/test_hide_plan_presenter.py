@@ -19,6 +19,7 @@ FAILED_DELETE_RESPONSE = HidePlanResponse(
 
 class HidePlanPresenterTests(TestCase):
     def setUp(self):
+
         self.injector = get_dependency_injector()
         self.notifier = self.injector.get(NotifierTestImpl)
         self.presenter = self.injector.get(HidePlanPresenter)
