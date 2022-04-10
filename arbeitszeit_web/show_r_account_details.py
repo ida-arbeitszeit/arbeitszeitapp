@@ -8,6 +8,7 @@ from arbeitszeit.use_cases.show_r_account_details import (
     ShowRAccountDetailsResponse,
     TransactionInfo,
 )
+from arbeitszeit_web.translator import Translator
 
 
 @dataclass
@@ -24,7 +25,10 @@ class ShowRAccountDetailsResponseViewModel:
     account_balance: Decimal
 
 
+@dataclass
 class ShowRAccountDetailsPresenter:
+    trans: Translator
+
     def present(
         self, use_case_response: ShowRAccountDetailsResponse
     ) -> ShowRAccountDetailsResponseViewModel:
@@ -38,9 +42,9 @@ class ShowRAccountDetailsPresenter:
 
     def _create_info(self, transaction: TransactionInfo) -> ViewModelTransactionInfo:
         transaction_type = (
-            "Payment"
+            self.trans.gettext("Payment")
             if transaction.transaction_type == TransactionTypes.payment_of_liquid_means
-            else "Credit"
+            else self.trans.gettext("Credit")
         )
         return ViewModelTransactionInfo(
             transaction_type,
