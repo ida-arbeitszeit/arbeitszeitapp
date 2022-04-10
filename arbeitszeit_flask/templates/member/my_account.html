@@ -1,57 +1,61 @@
 {% extends "base_member.html" %}
 
-{% block content2 %}
+{% block member %}
 
-<h1 class="title">
-  {{ gettext("My Account") }}
-</h1>
+<div class="section has-text-centered">
+    <h1 class="title">
+        {{ gettext("My Account") }}
+    </h1>
 
-{% with messages = get_flashed_messages() %}
-{% if messages %}
-{% for message in messages %}
-<div class="notification is-danger is-light">{{ message }}</div>
-{% endfor %}
-{% endif %}
-{% endwith %}
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <div class="notification is-danger is-light">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
 
-<div class="columns">
-    <div class="column"></div>
-    <div class="column">
-        <div>
-            <p>{{ gettext("Current balance") }}:</p>
-            <p class="py-2 has-text-weight-bold {{ 'has-text-primary' if my_balance >= 0 else 'has-text-danger' }}">
-	      {{ my_balance }}
-	    </p>
+    <div class="columns">
+        <div class="column"></div>
+        <div class="column is-10">
+            <div>
+                <p>{{ gettext("Current balance") }}:</p>
+                <p class="py-2 has-text-weight-bold {{ 'has-text-primary' if my_balance >= 0 else 'has-text-danger' }}">
+                    {{ my_balance }}
+                </p>
+            </div>
+            <div class="table-container">
+                <table class="table is-fullwidth">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if all_transactions_info is defined and all_transactions_info|length %}
+                        {% for trans_info in all_transactions_info %}
+                        <tr>
+                            <td>{{ trans_info.date|format_datetime(zone='Europe/Berlin', fmt='%d.%m.%Y %H:%M') }}</td>
+                            <td>{{ trans_info.peer_name }}</td>
+                            <td
+                                class="has-text-weight-bold {{ 'has-text-success' if trans_info.transaction_volume >= 0 else 'has-text-danger' }}">
+                                {{
+                                trans_info.transaction_volume }}
+                            </td>
+                            <td>{{ trans_info.purpose }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
         </div>
+        <div class="column"></div>
     </div>
-    <div class="column"></div>
-</div>
 
-<div class="table-container">
-    <table class="table is-fullwidth">
-        <thead>
-            <tr>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% if all_transactions_info is defined and all_transactions_info|length %}
-            {% for trans_info in all_transactions_info %}
-            <tr>
-                <td>{{ trans_info.date|format_datetime(zone='Europe/Berlin', fmt='%d.%m.%Y %H:%M') }}</td>
-                <td>{{ trans_info.peer_name }}</td>
-                <td class="{{ 'has-text-success' if trans_info.transaction_volume >= 0 else 'has-text-danger' }}">{{
-                    trans_info.transaction_volume }}
-                </td>
-                <td>{{ trans_info.purpose }}</td>
-            </tr>
-            {% endfor %}
-            {% endif %}
-        </tbody>
-    </table>
-</div>
 
+</div>
 {% endblock %}

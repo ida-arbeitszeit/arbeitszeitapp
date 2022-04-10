@@ -1,94 +1,83 @@
 {% extends "base.html" %}
-{% block content1 %}
-<section class="hero">
-  <div class="hero-head">
 
-    <nav class="navbar is-light" role="navigation" aria-label="main navigation">
-      <div class="navbar-brand">
-        <div class="navbar-item has-background-primary	has-text-white">
-          Mitglieder-Ansicht
-        </div>
+{% block body %}
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <div class="navbar-item has-background-primary	has-text-white">
+      Mitglieder-Ansicht
+    </div>
 
-        <a role="button" class="navbar-burger" onclick="expandMenu()" aria-label="menu" aria-expanded="false"
-          data-target="navbarOnTop">
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
-        </a>
-      </div>
+    <a role="button" class="navbar-burger" onclick="expandMenu()" aria-label="menu" aria-expanded="false"
+      data-target="navbarOnTop">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
 
-      <div id="navbarOnTop" class="navbar-menu">
-        <div class="navbar-start">
+  <div id="navbarOnTop" class="navbar-menu">
+    <div class="navbar-start">
 
+      {% if current_user.is_authenticated %}
+      <a href="{{ url_for('main_member.query_plans') }}" class="navbar-item">
+        Alle Pläne
+      </a>
+      <a href="{{ url_for('main_member.pay_consumer_product') }}" class="navbar-item">
+        Bezahlen Produkt
+      </a>
+      <a href="{{ url_for('main_member.my_account') }}" class="navbar-item">
+        Mein Konto
+      </a>
+      <a href="{{ url_for('main_member.my_purchases') }}" class="navbar-item">
+        Meine Käufe
+      </a>
+      <a href="{{ url_for('main_member.statistics') }}" class="navbar-item">
+        Statistiken
+      </a>
+      <a href="{{ url_for('main_member.query_companies') }}" class="navbar-item">
+        Betriebe
+      </a>
+      <a href="{{ url_for('main_member.profile') }}" class="navbar-item">
+        Meine Daten
+      </a>
+      <a href="{{ url_for('main_member.list_messages') }}"
+        class="navbar-item {% if message_indicator is defined %}{% if message_indicator.show_unread_messages_indicator %}unread-messages-indicator{% endif %}{% endif %}">
+        Nachrichten
+      </a>
+      {% endif %}
+
+    </div>
+
+    <div class="navbar-end">
+      <div class="navbar-item">
+        <div class="buttons">
+          {% if not current_user.is_authenticated %}
+          <a class="button" href="{{ url_for('auth.login_member') }}">
+            Anmelden
+          </a>
+          <a class="button" href="{{ url_for('auth.signup_member') }}">
+            Registrieren
+          </a>
+          <a class="button" href="{{ url_for('auth.zurueck') }}">
+            Zurück
+          </a>
+          {% endif %}
           {% if current_user.is_authenticated %}
-          <a href="{{ url_for('main_member.query_plans') }}" class="navbar-item">
-            Alle Pläne
+          <a class="button" href="{{ url_for('auth.logout') }}">
+            Logout
           </a>
-          <a href="{{ url_for('main_member.pay_consumer_product') }}" class="navbar-item">
-            Bezahlen Produkt
-          </a>
-          <a href="{{ url_for('main_member.my_account') }}" class="navbar-item">
-            Mein Konto
-          </a>
-          <a href="{{ url_for('main_member.my_purchases') }}" class="navbar-item">
-            Meine Käufe
-          </a>
-          <a href="{{ url_for('main_member.statistics') }}" class="navbar-item">
-            Statistiken
-          </a>
-          <a href="{{ url_for('main_member.query_companies') }}" class="navbar-item">
-            Betriebe
-          </a>
-          <a href="{{ url_for('main_member.profile') }}" class="navbar-item">
-            Meine Daten
-          </a>
-          <a href="{{ url_for('main_member.list_messages') }}"
-            class="navbar-item {% if message_indicator is defined %}{% if message_indicator.show_unread_messages_indicator %}unread-messages-indicator{% endif %}{% endif %}">
-            Nachrichten
+          <a class="button" href="{{ url_for('main_member.hilfe') }}">
+            ?
           </a>
           {% endif %}
 
         </div>
-
-        <div class="navbar-end">
-          <div class="navbar-item">
-            <div class="buttons">
-              {% if not current_user.is_authenticated %}
-              <a class="button" href="{{ url_for('auth.login_member') }}">
-                Anmelden
-              </a>
-              <a class="button" href="{{ url_for('auth.signup_member') }}">
-                Registrieren
-              </a>
-              <a class="button" href="{{ url_for('auth.zurueck') }}">
-                Zurück
-              </a>
-              {% endif %}
-              {% if current_user.is_authenticated %}
-              <a class="button" href="{{ url_for('auth.logout') }}">
-                Logout
-              </a>
-              <a class="button" href="{{ url_for('main_member.hilfe') }}">
-                ?
-              </a>
-              {% endif %}
-
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </nav>
-
-  </div>
-
-  <div class="hero-body has-text-centered">
-    <div class="section">
-      <div class="container">
-        {% block content2 %}
-        {% endblock %}
       </div>
     </div>
   </div>
-</section>
+</nav>
+
+{% block member %}
+{% endblock %}
+
 {% endblock %}

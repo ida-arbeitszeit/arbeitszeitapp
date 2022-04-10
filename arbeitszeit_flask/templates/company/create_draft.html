@@ -1,162 +1,166 @@
 {% extends "base_company.html" %}
-{% block content2 %}
+{% block company %}
 {% from 'macros/show_notifications.html' import show_notifications %}
 
-<div class="columns is-centered">
-    <div class="column is-three-fifths">
+<div class="section has-text-centered">
+    <h1 class="title">
+        Plan erstellen
+    </h1>
+    <div class="columns is-centered">
+        <div class="column is-three-fifths">
 
-        <div class="box has-background-info-light has-text-info-dark">
-            <div class="icon"><i class="fas fa-info-circle"></i></div>
-            <p>
-                Erstelle hier deinen Plan. <br><br>
-                Ein Plan besteht zunächst aus dem <b>Namen des Produktes</b>,
-                der <b>Beschreibung des Produktes</b> und dem <b>Planungszeitraum</b>.
-                In diesem Zeitraum planst du, eine bestimmte <b>Menge</b> an <b>Einheiten</b>
-                eines bestimmten Produktes herzustellen und zu verkaufen. <br>
-                Gib an, wieviele <b>Kosten für Produktionsmittel</b>, <b>Roh- und Hilfsstoffe</b> und
-                <b>Arbeitskraft</b>
-                du für das (gesamte) Produkt in diesem Zeitraum aufwenden wirst. <br>
-                Wähle, ob es sich um einen <b>produktiven oder öffentlichen Plan</b> handelt.
-            </p>
-        </div>
-
-
-
-        {{ show_notifications() }}
-
-        <form method="post">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div class="field">
-                <label class="label">Name des Produkts</label>
-                <div class="control">
-                    <input class="input is-large" , type="text" , name="prd_name" ,
-                        value="{{ prefilled.product_name if prefilled else '' }}" required>
-                </div>
-            </div>
-            <div class="block"></div>
-
-
-            <div class="field">
-                <label class="label">Beschreibung des Produkts</label>
-                <div class="control">
-                    <textarea class="textarea is-large" , name="description"
-                        required>{{ prefilled.description if prefilled else '' }}</textarea>
-                </div>
-
-            </div>
-            <div class="block"></div>
-
-
-            <div class="field">
-                <label class="label">Planungszeitraum (Tage)</label>
-                <div class="control">
-                    <input class="input is-large" type="number" name="timeframe" min=1 max=365
-                        value="{{ prefilled.timeframe if prefilled else 1 }}" required>
-                </div>
-            </div>
-            <div class="block"></div>
-
-
-
-            <div class="field">
-                <label class="label">Kleinste Abgabeeinheit</label>
-                <div class="control">
-                    <input class="input is-large" , type="text" , name="prd_unit" ,
-                        value="{{ prefilled.production_unit if prefilled else '1 Kg' }}" , required>
-                    <p class="help">(1 Packung à 100 Stück, 1 Kilogramm, 1 Flasche à 0,5 Liter, 1 Meter,
-                        Unterrichtseinheit à 1,5
-                        Stunde,
-                        etc.)</p>
-                </div>
-
-            </div>
-            <div class="block"></div>
-
-
-
-            <div class="field">
-                <label class="label">Menge</label>
-                <div class="control">
-                    <input class="input is-large" type="number" name="prd_amount" min=1
-                        value="{{ prefilled.amount if prefilled else 1 }}" required>
-                    <p class="help">(Wieviele Einheiten werden produziert und verkauft?)</p>
-                </div>
-            </div>
-            <div class="block"></div>
-
-
-            <div class="field">
-                <label class="label">Kosten für Produktionsmittel</label>
-                <div class="control">
-                    <input class="input is-large" type="number" name="costs_p" min=0
-                        value="{{ prefilled.means_cost if prefilled else 0 }}" required>
-                </div>
-            </div>
-            <div class="block"></div>
-
-
-            <div class="field">
-                <label class="label">Kosten für Roh- und Hilfsstoffe</label>
-                <div class="control">
-                    <input class="input is-large" type="number" name="costs_r" min=0
-                        value="{{ prefilled.resources_cost if prefilled else 0 }}" required>
-                </div>
-            </div>
-            <div class="block"></div>
-
-
-            <div class="field">
-                <label class="label">Enthaltene Arbeitsstunden</label>
-                <div class="control">
-                    <input class="input is-large" type="number" name="costs_a" min=0
-                        value="{{ prefilled.labour_cost if prefilled else 0 }}" required>
-                </div>
-            </div>
-            <div class="block"></div>
-
-
-            <div class="field">
-                <label class="label">Art des Plans</label>
-                <div class="control">
-                    <label class="radio">
-                        <input type="radio" name="productive_or_public" value="productive" required {% if prefilled and
-                            not prefilled.is_public_service %} checked {% endif %}>
-                        Produktiv
-                    </label>
-                    <label class="radio">
-                        <input type="radio" name="productive_or_public" value="public" {% if prefilled and
-                            prefilled.is_public_service %} checked {% endif %}>
-                        Öffentlich
-                    </label>
-                    <p class="help">Produktive Pläne sind der Regelfall.<br>
-                        Öffentliche Pläne müssen vom Plenum genehmigt sein.
-                    </p>
-                </div>
-            </div>
-
-
-            <div class="box has-background-danger-light has-text-danger-dark">
-                <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <div class="box has-background-info-light has-text-info-dark">
+                <div class="icon"><i class="fas fa-info-circle"></i></div>
                 <p>
-                    Der Plan bestimmt den Preis deiner Produkte und lässt
-                    sich deshalb nachträglich nicht ändern!
-                    <br>
+                    Erstelle hier deinen Plan. <br><br>
+                    Ein Plan besteht zunächst aus dem <b>Namen des Produktes</b>,
+                    der <b>Beschreibung des Produktes</b> und dem <b>Planungszeitraum</b>.
+                    In diesem Zeitraum planst du, eine bestimmte <b>Menge</b> an <b>Einheiten</b>
+                    eines bestimmten Produktes herzustellen und zu verkaufen. <br>
+                    Gib an, wieviele <b>Kosten für Produktionsmittel</b>, <b>Roh- und Hilfsstoffe</b> und
+                    <b>Arbeitskraft</b>
+                    du für das (gesamte) Produkt in diesem Zeitraum aufwenden wirst. <br>
+                    Wähle, ob es sich um einen <b>produktiven oder öffentlichen Plan</b> handelt.
                 </p>
             </div>
-    </div>
-</div>
 
-<div class="field is-grouped is-grouped-centered">
-    <div class="control">
-        <div class="field is-grouped is-grouped-centered">
-            <button class="button is-light" name="action" value="cancel" type="submit">Abbrechen</button>
-            <button class="button is-primary" name="action" value="save_draft" type="submit">Als Entwurf
-                speichern</button>
-            <button class="button is-danger" name="action" value="file_draft" type="submit">Plan einreichen</button>
+
+
+            {{ show_notifications() }}
+
+            <form method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="field">
+                    <label class="label">Name des Produkts</label>
+                    <div class="control">
+                        <input class="input is-large" , type="text" , name="prd_name" ,
+                            value="{{ prefilled.product_name if prefilled else '' }}" required>
+                    </div>
+                </div>
+                <div class="block"></div>
+
+
+                <div class="field">
+                    <label class="label">Beschreibung des Produkts</label>
+                    <div class="control">
+                        <textarea class="textarea is-large" , name="description"
+                            required>{{ prefilled.description if prefilled else '' }}</textarea>
+                    </div>
+
+                </div>
+                <div class="block"></div>
+
+
+                <div class="field">
+                    <label class="label">Planungszeitraum (Tage)</label>
+                    <div class="control">
+                        <input class="input is-large" type="number" name="timeframe" min=1 max=365
+                            value="{{ prefilled.timeframe if prefilled else 1 }}" required>
+                    </div>
+                </div>
+                <div class="block"></div>
+
+
+
+                <div class="field">
+                    <label class="label">Kleinste Abgabeeinheit</label>
+                    <div class="control">
+                        <input class="input is-large" , type="text" , name="prd_unit" ,
+                            value="{{ prefilled.production_unit if prefilled else '1 Kg' }}" , required>
+                        <p class="help">(1 Packung à 100 Stück, 1 Kilogramm, 1 Flasche à 0,5 Liter, 1 Meter,
+                            Unterrichtseinheit à 1,5
+                            Stunde,
+                            etc.)</p>
+                    </div>
+
+                </div>
+                <div class="block"></div>
+
+
+
+                <div class="field">
+                    <label class="label">Menge</label>
+                    <div class="control">
+                        <input class="input is-large" type="number" name="prd_amount" min=1
+                            value="{{ prefilled.amount if prefilled else 1 }}" required>
+                        <p class="help">(Wieviele Einheiten werden produziert und verkauft?)</p>
+                    </div>
+                </div>
+                <div class="block"></div>
+
+
+                <div class="field">
+                    <label class="label">Kosten für Produktionsmittel</label>
+                    <div class="control">
+                        <input class="input is-large" type="number" name="costs_p" min=0
+                            value="{{ prefilled.means_cost if prefilled else 0 }}" required>
+                    </div>
+                </div>
+                <div class="block"></div>
+
+
+                <div class="field">
+                    <label class="label">Kosten für Roh- und Hilfsstoffe</label>
+                    <div class="control">
+                        <input class="input is-large" type="number" name="costs_r" min=0
+                            value="{{ prefilled.resources_cost if prefilled else 0 }}" required>
+                    </div>
+                </div>
+                <div class="block"></div>
+
+
+                <div class="field">
+                    <label class="label">Enthaltene Arbeitsstunden</label>
+                    <div class="control">
+                        <input class="input is-large" type="number" name="costs_a" min=0
+                            value="{{ prefilled.labour_cost if prefilled else 0 }}" required>
+                    </div>
+                </div>
+                <div class="block"></div>
+
+
+                <div class="field">
+                    <label class="label">Art des Plans</label>
+                    <div class="control">
+                        <label class="radio">
+                            <input type="radio" name="productive_or_public" value="productive" required {% if prefilled
+                                and not prefilled.is_public_service %} checked {% endif %}>
+                            Produktiv
+                        </label>
+                        <label class="radio">
+                            <input type="radio" name="productive_or_public" value="public" {% if prefilled and
+                                prefilled.is_public_service %} checked {% endif %}>
+                            Öffentlich
+                        </label>
+                        <p class="help">Produktive Pläne sind der Regelfall.<br>
+                            Öffentliche Pläne müssen vom Plenum genehmigt sein.
+                        </p>
+                    </div>
+                </div>
+
+
+                <div class="box has-background-danger-light has-text-danger-dark">
+                    <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
+                    <p>
+                        Der Plan bestimmt den Preis deiner Produkte und lässt
+                        sich deshalb nachträglich nicht ändern!
+                        <br>
+                    </p>
+                </div>
         </div>
     </div>
+
+    <div class="field is-grouped is-grouped-centered">
+        <div class="control">
+            <div class="field is-grouped is-grouped-centered">
+                <button class="button is-light" name="action" value="cancel" type="submit">Abbrechen</button>
+                <button class="button is-primary" name="action" value="save_draft" type="submit">Als Entwurf
+                    speichern</button>
+                <button class="button is-danger" name="action" value="file_draft" type="submit">Plan einreichen</button>
+            </div>
+        </div>
+    </div>
+
+    </form>
 </div>
-
-</form>
-
 {% endblock %}

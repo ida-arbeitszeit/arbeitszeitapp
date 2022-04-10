@@ -1,9 +1,10 @@
 {% macro read_message(view_model) %}
 
-<h1 class="title">{{ view_model.title }}</h1>
-<p>{{ view_model.content }}</p>
-{% if view_model.show_action_link %}
-<a href="{{ view_model.action_link_reference }}">{{ view_model.action_link_label }}</a>
-{% endif %}
-
+<div class="section is-medium has-text-centered">
+    <h1 class="title">{{ view_model.title }}</h1>
+    <p>{{ view_model.content }}</p>
+    {% if view_model.show_action_link %}
+    <a href="{{ view_model.action_link_reference }}">{{ view_model.action_link_label }}</a>
+    {% endif %}
+</div>
 {% endmacro %}

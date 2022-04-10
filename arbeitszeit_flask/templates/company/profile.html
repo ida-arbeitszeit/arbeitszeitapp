@@ -1,63 +1,60 @@
 {% extends "base_company.html" %}
 
-{% block content2 %}
-
-<div class="columns is-centered">
-  <div class="column is-two-fifths">
-    <h1 class="title">
-      {{ welcome_message }}
-    </h1>
-
-
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <div class="notification is-danger">
-      {{ messages[0] }}
-    </div>
-    {% endif %}
-    {% endwith %}
-
-    <br>
-    <div class="level">
-      <div class="level-left">
-        <div class="level-item">
-          <p class="has-text-weight-semibold">{{ gettext("Your ID") }}:</p>
-        </div>
-      </div>
-      <div class="level-right">
-        <div class="level-item">
-          <p>{{ current_user.id }}</p>
-        </div>
-      </div>
-    </div>
-    <div class="level">
-      <div class="level-left">
-        <div class="level-item">
-          <p class="has-text-weight-semibold">{{ gettext("Your email") }}:</p>
-        </div>
-      </div>
-      <div class="level-right">
-        <div class="level-item">
-          <p>{{ current_user.email }}</p>
-        </div>
-      </div>
-    </div>
-
-
-    <div class="content">
-      {% if having_workers is sameas false %}
-      <div class="block">
-        <p>
-	  <span class="icon"><i class="fas fa-exclamation-triangle"></i></span>
-	  <a href="{{ url_for('main_company.invite_worker_to_company') }}">
-	    {{ gettext("No workers are registered with your company. Click here to add some.") }}
-	  </a>
-	</p>
+{% block company %}
+<div class="section has-text-centered is-medium">
+  <div class="columns is-centered">
+    <div class="column is-two-fifths">
+      <h1 class="title">
+        {{ welcome_message }}
+      </h1>
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      <div class="notification is-danger">
+        {{ messages[0] }}
       </div>
       {% endif %}
+      {% endwith %}
+      <br>
+      <div class="level">
+        <div class="level-left">
+          <div class="level-item">
+            <p class="has-text-weight-semibold">{{ gettext("Your ID") }}:</p>
+          </div>
+        </div>
+        <div class="level-right">
+          <div class="level-item">
+            <p>{{ current_user.id }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="level">
+        <div class="level-left">
+          <div class="level-item">
+            <p class="has-text-weight-semibold">{{ gettext("Your email") }}:</p>
+          </div>
+        </div>
+        <div class="level-right">
+          <div class="level-item">
+            <p>{{ current_user.email }}</p>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="content">
+        {% if having_workers is sameas false %}
+        <div class="block">
+          <p>
+            <span class="icon"><i class="fas fa-exclamation-triangle"></i></span>
+            <a href="{{ url_for('main_company.invite_worker_to_company') }}">
+              {{ gettext("No workers are registered with your company. Click here to add some.") }}
+            </a>
+          </p>
+        </div>
+        {% endif %}
+      </div>
     </div>
   </div>
 </div>
-
 
 {% endblock %}

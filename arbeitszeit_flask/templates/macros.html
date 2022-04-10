@@ -32,9 +32,7 @@
     <div class="block content has-text-left">
       <ul>
         <li>
-          Als ArbeiterIn brauchst du nur einen „Nutzer-Account“. Auf diesen
-          Account wird dir vom Betrieb das Arbeitszeitgeld überwiesen und du
-          kannst Produkte auf dem gemeinsamen Marktplatz suchen und erwerben.
+          ...
         </li>
       </ul>
     </div>
@@ -69,13 +67,13 @@
     <p class="title">FAQ</p>
     <div class="block content has-text-left">
       <ul>
-        <li>xxx1?</li>
+        <li>...?</li>
         <ul>
-          <li>xxx</li>
+          <li>...</li>
         </ul>
-        <li>xxx2?</li>
+        <li>...?</li>
         <ul>
-          <li>xxx</li>
+          <li>...</li>
         </ul>
       </ul>
     </div>
@@ -84,113 +82,115 @@
 {% endmacro %}
 
 {% macro statistics(view_model) %}
-<div class="columns is-centered">
-  <div class="column is-half">
-    <div class="content">
-      <h1 class="title">{{ gettext("Global statistics") }}</h1>
-    </div>
+<div class="section has-text-centered">
+  <div class="columns is-centered">
+    <div class="column is-half">
+      <div class="content">
+        <h1 class="title">{{ gettext("Global statistics") }}</h1>
+      </div>
 
-    <br />
+      <br />
 
-    <div class="level">
-      <div class="level-left">
-        <div class="level-item">
-          <p class="has-text-weight-semibold">{{ gettext("Registered companies") }}:</p>
+      <div class="level">
+        <div class="level-left">
+          <div class="level-item">
+            <p class="has-text-weight-semibold">{{ gettext("Registered companies") }}:</p>
+          </div>
+        </div>
+        <div class="level-right">
+          <div class="level-item">
+            <p>{{ view_model.registered_companies_count }}</p>
+          </div>
         </div>
       </div>
-      <div class="level-right">
-        <div class="level-item">
-          <p>{{ view_model.registered_companies_count }}</p>
+      <div class="level">
+        <div class="level-left">
+          <div class="level-item">
+            <p class="has-text-weight-semibold">{{ gettext("Registered workers") }}:</p>
+          </div>
+        </div>
+        <div class="level-right">
+          <div class="level-item">
+            <p>{{ view_model.registered_members_count }}</p>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="level">
-      <div class="level-left">
-        <div class="level-item">
-          <p class="has-text-weight-semibold">{{ gettext("Registered workers") }}:</p>
+      <br />
+      <div class="level">
+        <div class="level-left">
+          <div class="level-item">
+            <p class="has-text-weight-semibold">{{ gettext("Active plans") }}:</p>
+          </div>
+        </div>
+        <div class="level-right">
+          <div class="level-item">
+            <p>{{ view_model.active_plans_count }}</p>
+          </div>
         </div>
       </div>
-      <div class="level-right">
-        <div class="level-item">
-          <p>{{ view_model.registered_members_count }}</p>
+      <div class="level">
+        <div class="level-left">
+          <div class="level-item">
+            <p class="has-text-weight-semibold">{{ gettext("Public active plans") }}:</p>
+          </div>
+        </div>
+        <div class="level-right has-text-right-tablet">
+          <div class="level-item">
+            <p>{{ view_model.active_plans_public_count }}</p>
+          </div>
         </div>
       </div>
-    </div>
-    <br />
-    <div class="level">
-      <div class="level-left">
-        <div class="level-item">
-          <p class="has-text-weight-semibold">{{ gettext("Active plans") }}:</p>
+      <div class="level">
+        <div class="level-left">
+          <div class="level-item">
+            <p class="has-text-weight-semibold">{{ gettext("Average plan duration") }}:</p>
+          </div>
+        </div>
+        <div class="level-right has-text-right-tablet">
+          <div class="level-item">
+            <p>{{ view_model.average_timeframe_days }}</p>
+          </div>
         </div>
       </div>
-      <div class="level-right">
-        <div class="level-item">
-          <p>{{ view_model.active_plans_count }}</p>
+      <br />
+      <div class="level">
+        <div class="level-left">
+          <div class="level-item">
+            <p class="has-text-weight-semibold">
+              {{ gettext("Currently planned work") }}:
+            </p>
+          </div>
+        </div>
+        <div class="level-right has-text-right-tablet">
+          <div class="level-item">
+            <p>{{ view_model.planned_work_hours }}</p>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="level">
-      <div class="level-left">
-        <div class="level-item">
-          <p class="has-text-weight-semibold">{{ gettext("Public active plans") }}:</p>
+      <div class="level">
+        <div class="level-left">
+          <div class="level-item">
+            <p class="has-text-weight-semibold">{{ gettext("Currently planned liquid means") }}:</p>
+          </div>
+        </div>
+        <div class="level-right has-text-right-tablet">
+          <div class="level-item">
+            <p>{{ view_model.planned_resources_hours }}</p>
+          </div>
         </div>
       </div>
-      <div class="level-right has-text-right-tablet">
-        <div class="level-item">
-          <p>{{ view_model.active_plans_public_count }}</p>
+      <div class="level">
+        <div class="level-left">
+          <div class="level-item">
+            <p class="has-text-weight-semibold">
+              {{ gettext("Currently planned fixed means") }}:
+            </p>
+          </div>
         </div>
-      </div>
-    </div>
-    <div class="level">
-      <div class="level-left">
-        <div class="level-item">
-          <p class="has-text-weight-semibold">{{ gettext("Average plan duration") }}:</p>
-        </div>
-      </div>
-      <div class="level-right has-text-right-tablet">
-        <div class="level-item">
-          <p>{{ view_model.average_timeframe_days }}</p>
-        </div>
-      </div>
-    </div>
-    <br />
-    <div class="level">
-      <div class="level-left">
-        <div class="level-item">
-          <p class="has-text-weight-semibold">
-            {{ gettext("Currently planned work") }}:
-          </p>
-        </div>
-      </div>
-      <div class="level-right has-text-right-tablet">
-        <div class="level-item">
-          <p>{{ view_model.planned_work_hours }}</p>
-        </div>
-      </div>
-    </div>
-    <div class="level">
-      <div class="level-left">
-        <div class="level-item">
-          <p class="has-text-weight-semibold">{{ gettext("Currently planned liquid means") }}:</p>
-        </div>
-      </div>
-      <div class="level-right has-text-right-tablet">
-        <div class="level-item">
-          <p>{{ view_model.planned_resources_hours }}</p>
-        </div>
-      </div>
-    </div>
-    <div class="level">
-      <div class="level-left">
-        <div class="level-item">
-          <p class="has-text-weight-semibold">
-            {{ gettext("Currently planned fixed means") }}:
-          </p>
-        </div>
-      </div>
-      <div class="level-right has-text-right-tablet">
-        <div class="level-item">
-          <p>{{ view_model.planned_means_hours }}</p>
+        <div class="level-right has-text-right-tablet">
+          <div class="level-item">
+            <p>{{ view_model.planned_means_hours }}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -241,131 +241,141 @@
 
 
 {% macro query_plans(form, view_model) %}
-<div class="columns is-centered">
-  <div class="column is-one-third">
-    <h1 class="title">
-      Plansuche
-    </h1>
-    {{ show_notifications() }}
-    <form method="post">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <div class="field">
-        <div class="control">
-          <div class="select is-large is-fullwidth">
-            {{ form.select }}
+<div class="section has-text-centered">
+  <div class="columns is-centered">
+    <div class="column is-one-third">
+      <h1 class="title">
+        Aktive Pläne
+      </h1>
+      {{ show_notifications() }}
+      <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="field">
+          <div class="control">
+            <div class="select is-large is-fullwidth">
+              {{ form.select }}
+            </div>
+          </div>
+          <p class="help">Suche in Plan-ID oder Produktname</p>
+        </div>
+        <div class="field">
+          <div class="control">
+            {{ form.search(class_="input is-large") }}
           </div>
         </div>
-        <p class="help">Suche in Plan-ID oder Produktname</p>
-      </div>
-      <div class="field">
-        <div class="control">
-          {{ form.search(class_="input is-large") }}
-        </div>
-      </div>
-      <button class="button is-block is-primary is-large is-fullwidth">
-        Suche
-      </button>
-    </form>
+        <button class="button is-block is-primary is-large is-fullwidth">
+          Suche
+        </button>
+      </form>
+    </div>
   </div>
+  {% if view_model.show_results %}
+  <h1 class="title">
+    Ergebnisse
+  </h1>
+  <div class="table-container">
+    <table class="table is-fullwidth">
+      <thead>
+        <tr>
+          <th>Plan-ID</th>
+          <th>Produktname</th>
+          <th>Betrieb</th>
+          <th>Beschreibung</th>
+          <th>Stückpr.</th>
+          <th>Art</th>
+          <th>Endet in</th>
+          <th>Verfügbar</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for column in view_model.results.rows %}
+        <tr>
+          <td><a href="{{ column.plan_summary_url }}">{{ column.plan_id }}</a>
+          </td>
+          <td>{{ column.product_name }}</td>
+          <td><a href="{{ column.company_summary_url }}">{{ column.company_name }}</a></td>
+          <td>{% for paragraph in column.description %}{{ paragraph }}<br>{% endfor %}</td>
+          <td>{{ column.price_per_unit }} {% if column.is_cooperating %} <span>
+              <a href="{{ column.coop_summary_url }}"><i class="fas fa-hands-helping"></i></a></span>{% endif %}
+          </td>
+          <td>{{ column.type_of_plan }}</td>
+          <td>{{ column.ends_in }}</td>
+          {% if column.is_available %}
+          <td>
+            <span class="icon has-text-success"><i class="fas fa-circle"></i></span>
+          </td>
+          {% else %}
+          <td>
+            <span class="icon has-text-danger"><i class="fas fa-circle"></i></span>
+          </td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
 </div>
-{% if view_model.show_results %}
-<h1 class="title">
-  Ergebnisse
-</h1>
-<div class="table-container">
-  <table class="table is-fullwidth">
-    <thead>
-      <tr>
-        <th>Plan-ID</th>
-        <th>Produktname</th>
-        <th>Betrieb</th>
-        <th>Beschreibung</th>
-        <th>Stückpr.</th>
-        <th>Art</th>
-        <th>Endet in</th>
-        <th>Verfügbar</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for column in view_model.results.rows %}
-      <tr>
-        <td><a href="{{ column.plan_summary_url }}">{{ column.plan_id }}</a>
-        </td>
-        <td>{{ column.product_name }}</td>
-        <td><a href="{{ column.company_summary_url }}">{{ column.company_name }}</a></td>
-        <td>{% for paragraph in column.description %}{{ paragraph }}<br>{% endfor %}</td>
-        <td>{{ column.price_per_unit }} {% if column.is_cooperating %} <span>
-            <a href="{{ column.coop_summary_url }}"><i class="fas fa-hands-helping"></i></a></span>{% endif %}
-        </td>
-        <td>{{ column.type_of_plan }}</td>
-        <td>{{ column.ends_in }}</td>
-        {% if column.is_available %}
-        <td>
-          <span class="icon has-text-success"><i class="fas fa-circle"></i></span>
-        </td>
-        {% else %}
-        <td>
-          <span class="icon has-text-danger"><i class="fas fa-circle"></i></span>
-        </td>
-        {% endif %}
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-{% endif %}
 {% endmacro %}
 
 
 {% macro query_companies(form, view_model) %}
-<div class="columns is-centered">
-  <div class="column is-one-third">
-    <h1 class="title">
-      Betriebe suchen
-    </h1>
-    {{ show_notifications() }}
-    <form method="post">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <div class="field">
-        <div class="control">
-          <div class="select is-large is-fullwidth">
-            {{ form.select }}
+<div class="section has-text-centered">
+  <h1 class="title">
+    Betriebe suchen
+  </h1>
+  <div class="columns is-centered">
+    <div class="column is-4">
+      {{ show_notifications() }}
+      <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="field">
+          <div class="control">
+            <div class="select is-large is-fullwidth">
+              {{ form.select }}
+            </div>
+          </div>
+          <p class="help">Suche nach Name oder Email</p>
+        </div>
+        <div class="field">
+          <div class="control">
+            {{ form.search(class_="input is-large") }}
           </div>
         </div>
-        <p class="help">Suche nach Name oder Email</p>
-      </div>
-      <div class="field">
-        <div class="control">
-          {{ form.search(class_="input is-large") }}
-        </div>
-      </div>
-      <button class="button is-block is-primary is-large is-fullwidth">
-        Suche
-      </button>
-    </form>
+        <button class="button is-block is-primary is-large is-fullwidth">
+          Suche
+        </button>
+      </form>
+    </div>
   </div>
+  {% if view_model.show_results %}
+  <h1 class="title">
+    Ergebnisse
+  </h1>
+  <div class="columns">
+    <div class="column"></div>
+    <div class="column is-8">
+      <div class="table-container">
+        <table class="table is-fullwidth">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for column in view_model.results.rows %}
+            <tr>
+              <td><a href="{{ column.company_summary_url }}">{{ column.company_name }}</a></td>
+              <td>{{ column.company_email }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="column"></div>
+  </div>
+  {% endif %}
 </div>
-{% if view_model.show_results %}
-<h1 class="title">
-  Ergebnisse
-</h1>
-<div class="table-container">
-  <table class="table is-fullwidth">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Email</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for column in view_model.results.rows %}
-      <tr>
-        <td><a href="{{ column.company_summary_url }}">{{ column.company_name }}</a></td>
-        <td>{{ column.company_email }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-{% endif %}
 {% endmacro %}

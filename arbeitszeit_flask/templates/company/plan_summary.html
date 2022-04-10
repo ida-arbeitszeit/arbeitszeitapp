@@ -1,27 +1,29 @@
 {% extends "base_company.html" %}
 
-{% block content2 %}
-{% from 'macros.html' import plan_summary %}
-{{ plan_summary(view_model) }}
+{% block company %}
+<div class="section has-text-centered">
+
+    {% from 'macros.html' import plan_summary %}
+    {{ plan_summary(view_model) }}
 
 
-{% if view_model.show_action_section %}
+    {% if view_model.show_action_section %}
 
-<div>{{ gettext("Change availability:") }}</div>
-<div>
-    <span class="{{ 'has-text-success' if view_model.action.is_available else 'has-text-danger' }}"><a
-            style="text-decoration: none; color: inherit;" href="{{ view_model.action.toggle_availability_url }}"><i
-                class="{{ 'fas fa-toggle-on' if view_model.action.is_available else 'fas fa-toggle-off' }}"></i></a></span>
+    <div>{{ gettext("Change availability:") }}</div>
+    <div>
+        <span class="{{ 'has-text-success' if view_model.action.is_available else 'has-text-danger' }}"><a
+                style="text-decoration: none; color: inherit;" href="{{ view_model.action.toggle_availability_url }}"><i
+                    class="{{ 'fas fa-toggle-on' if view_model.action.is_available else 'fas fa-toggle-off' }}"></i></a></span>
+    </div>
+
+
+    {% if view_model.action.is_cooperating %}
+    <div>{{ gettext("End cooperation:") }}</div>
+    <a class="button is-danger" href="{{ view_model.action.end_coop_url }}">
+        <span>{{ gettext("End") }}</span>
+    </a>
+    {% endif %}
+
+    {% endif %}
 </div>
-
-
-{% if view_model.action.is_cooperating %}
-<div>{{ gettext("End cooperation:") }}</div>
-<a class="button is-danger" href="{{ view_model.action.end_coop_url }}">
-    <span>{{ gettext("End") }}</span>
-</a>
-{% endif %}
-
-{% endif %}
-
 {% endblock %}

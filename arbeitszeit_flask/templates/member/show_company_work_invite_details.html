@@ -1,24 +1,25 @@
 {% extends "base_member.html" %}
 
-{% block content2 %}
+{% block member %}
 
 {% from 'macros/show_notifications.html' import show_notifications %}
 {{ show_notifications() }}
 
-<p>
-  {{ view_model.explanation_text }}
-</p>
+<div class="section">
+  <p>
+    {{ view_model.explanation_text }}
+  </p>
 
-<form action="{{ view_model.answer_invite_url }}" method="post">
-  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-  <button name="is_accepted" value="true" type="submit" class="button primary is-success">
-    {{ gettext('Accept') }}
-  </button>
-</from>
-<form action="{{ view_model.answer_invite_url }}" method="post">
-  <button name="is_accepted" value="false" type="submit" class="button is-danger">
-    {{ gettext('Reject') }}
-  </button>
-</from>
-
+  <form action="{{ view_model.answer_invite_url }}" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button name="is_accepted" value="true" type="submit" class="button primary is-success">
+      {{ gettext('Accept') }}
+    </button>
+    </from>
+    <form action="{{ view_model.answer_invite_url }}" method="post">
+      <button name="is_accepted" value="false" type="submit" class="button is-danger">
+        {{ gettext('Reject') }}
+      </button>
+      </from>
+</div>
 {% endblock %}

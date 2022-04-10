@@ -1,164 +1,164 @@
 {% extends "base_company.html" %}
 
-{% block content2 %}
+{% block company %}
+<div class="section has-text-centered">
+    <div class="content">
+        <h1 class="title">
+            Kooperationen, die ich kooordiniere
+        </h1>
+    </div>
 
-<div class="content">
-    <h1 class="title">
-        Kooperationen, die ich kooordiniere
-    </h1>
-</div>
-
-{% if accept_message or deny_message or cancel_message %}
-<div class="block"></div>
-{% for message in accept_message %}
-<div class='{{ "notification is-success" if accept_message_success else "notification is-danger"}}'>
-    {{ message }}
-</div>
-{% endfor %}
-{% for message in deny_message %}
-<div class='{{ "notification is-success" if deny_message_success else "notification is-danger"}}'>{{ message }}
-</div>
-{% endfor %}
-{% for message in cancel_message %}
-<div class='{{ "notification is-success" if cancel_message_success else "notification is-danger"}}'>{{ message }}
-</div>
-{% endfor %}
-{% endif %}
-
-<div class="table-container">
-    {% if list_of_coordinations.rows %}
-    <table class="table is-fullwidth">
-        <thead>
-            <tr>
-                <th>Kooperation</th>
-                <th>Name</th>
-                <th>Definition</th>
-                <th>Anzahl Pläne</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for coop in list_of_coordinations.rows %}
-            <tr>
-                <td><a href="{{ coop.coop_summary_url }}">{{ coop.coop_id }}</a></td>
-                <td>{{ coop.coop_name }}</td>
-                <td>{% for paragraph in coop.coop_definition %}{{ paragraph }}<br>{% endfor %}</td>
-                <td>{{ coop.count_plans_in_coop }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p>(Du koordinierst keine Kooperationen.)</p>
+    {% if accept_message or deny_message or cancel_message %}
+    <div class="block"></div>
+    {% for message in accept_message %}
+    <div class='{{ "notification is-success" if accept_message_success else "notification is-danger"}}'>
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% for message in deny_message %}
+    <div class='{{ "notification is-success" if deny_message_success else "notification is-danger"}}'>{{ message }}
+    </div>
+    {% endfor %}
+    {% for message in cancel_message %}
+    <div class='{{ "notification is-success" if cancel_message_success else "notification is-danger"}}'>{{ message }}
+    </div>
+    {% endfor %}
     {% endif %}
+
+    <div class="table-container">
+        {% if list_of_coordinations.rows %}
+        <table class="table is-fullwidth">
+            <thead>
+                <tr>
+                    <th>Kooperation</th>
+                    <th>Name</th>
+                    <th>Definition</th>
+                    <th>Anzahl Pläne</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for coop in list_of_coordinations.rows %}
+                <tr>
+                    <td><a href="{{ coop.coop_summary_url }}">{{ coop.coop_id }}</a></td>
+                    <td>{{ coop.coop_name }}</td>
+                    <td>{% for paragraph in coop.coop_definition %}{{ paragraph }}<br>{% endfor %}</td>
+                    <td>{{ coop.count_plans_in_coop }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>(Du koordinierst keine Kooperationen.)</p>
+        {% endif %}
+    </div>
+
+
+    <div class="content">
+        <h1 class="title">
+            Eingehende Kooperationsanfragen (von anderen)
+        </h1>
+    </div>
+
+
+    <div class="table-container">
+        {% if list_of_inbound_coop_requests.rows %}
+        <table class="table is-fullwidth">
+            <thead>
+                <tr>
+                    <th>Meine Kooperation</th>
+                    <th>Anfragender Betrieb</th>
+                    <th>Anfragender Plan</th>
+                    <th>Anfrage akzeptieren</th>
+                    <th>Ablehnen</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in list_of_inbound_coop_requests.rows %}
+                <tr>
+                    <td>{{ req.coop_name }}</td>
+                    <td>{{ req.planner_name }}</td>
+                    <td>{{ req.plan_name }}</td>
+                    <form action="" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <td>
+                            <div class="control">
+                                <button class="button is-small is-success" name="accept"
+                                    value="{{ req.coop_id }},{{ req.plan_id }}" type="submit">
+                                    <span class="icon">
+                                        <i class="fas fa-check"></i>
+                                    </span>
+                                    <span>Akzeptieren</span>
+                                </button>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="control">
+                                <button class="button is-small is-danger" name="deny"
+                                    value="{{ req.coop_id }},{{ req.plan_id }}" type="submit">
+                                    <span class="icon">
+                                        <i class="fas fa-times"></i>
+                                    </span>
+                                    <span>Ablehnen</span>
+                                </button>
+                            </div>
+                        </td>
+                    </form>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>(Du hast keine offenen Anfragen.)</p>
+        {% endif %}
+    </div>
+
+
+
+
+
+
+    <div class="content">
+        <h1 class="title">
+            Ausgehende Kooperationsanfragen (eigene)
+        </h1>
+    </div>
+
+    <div class="table-container">
+        {% if list_of_outbound_coop_requests.rows %}
+        <table class="table is-fullwidth">
+            <thead>
+                <tr>
+                    <th>Mein anfragender Plan</th>
+                    <th>Angefragte Kooperation</th>
+                    <th>Anfrage abbrechen</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in list_of_outbound_coop_requests.rows %}
+                <tr>
+                    <td>{{ req.plan_name }}</td>
+                    <td>{{ req.coop_name }}</td>
+                    <form action="" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <td>
+                            <div class="control">
+                                <button class="button is-small is-danger" name="cancel" value="{{ req.plan_id }}"
+                                    type="submit">
+                                    <span class="icon">
+                                        <i class="fas fa-times"></i>
+                                    </span>
+                                    <span>Abbrechen</span>
+                                </button>
+                            </div>
+                        </td>
+                    </form>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>(Du hast keine Kooperationsanfragen gestellt.)</p>
+        {% endif %}
+    </div>
 </div>
-
-
-<div class="content">
-    <h1 class="title">
-        Eingehende Kooperationsanfragen (von anderen)
-    </h1>
-</div>
-
-
-<div class="table-container">
-    {% if list_of_inbound_coop_requests.rows %}
-    <table class="table is-fullwidth">
-        <thead>
-            <tr>
-                <th>Meine Kooperation</th>
-                <th>Anfragender Betrieb</th>
-                <th>Anfragender Plan</th>
-                <th>Anfrage akzeptieren</th>
-                <th>Ablehnen</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for req in list_of_inbound_coop_requests.rows %}
-            <tr>
-                <td>{{ req.coop_name }}</td>
-                <td>{{ req.planner_name }}</td>
-                <td>{{ req.plan_name }}</td>
-                <form action="" method="post">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <td>
-                        <div class="control">
-                            <button class="button is-small is-success" name="accept"
-                                value="{{ req.coop_id }},{{ req.plan_id }}" type="submit">
-                                <span class="icon">
-                                    <i class="fas fa-check"></i>
-                                </span>
-                                <span>Akzeptieren</span>
-                            </button>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="control">
-                            <button class="button is-small is-danger" name="deny"
-                                value="{{ req.coop_id }},{{ req.plan_id }}" type="submit">
-                                <span class="icon">
-                                    <i class="fas fa-times"></i>
-                                </span>
-                                <span>Ablehnen</span>
-                            </button>
-                        </div>
-                    </td>
-                </form>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p>(Du hast keine offenen Anfragen.)</p>
-    {% endif %}
-</div>
-
-
-
-
-
-
-<div class="content">
-    <h1 class="title">
-        Ausgehende Kooperationsanfragen (eigene)
-    </h1>
-</div>
-
-<div class="table-container">
-    {% if list_of_outbound_coop_requests.rows %}
-    <table class="table is-fullwidth">
-        <thead>
-            <tr>
-                <th>Mein anfragender Plan</th>
-                <th>Angefragte Kooperation</th>
-                <th>Anfrage abbrechen</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for req in list_of_outbound_coop_requests.rows %}
-            <tr>
-                <td>{{ req.plan_name }}</td>
-                <td>{{ req.coop_name }}</td>
-                <form action="" method="post">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <td>
-                        <div class="control">
-                            <button class="button is-small is-danger" name="cancel" value="{{ req.plan_id }}"
-                                type="submit">
-                                <span class="icon">
-                                    <i class="fas fa-times"></i>
-                                </span>
-                                <span>Abbrechen</span>
-                            </button>
-                        </div>
-                    </td>
-                </form>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p>(Du hast keine Kooperationsanfragen gestellt.)</p>
-    {% endif %}
-</div>
-
 {% endblock %}

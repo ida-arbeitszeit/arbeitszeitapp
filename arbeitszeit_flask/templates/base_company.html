@@ -1,152 +1,137 @@
 {% extends "base.html" %}
-{% block content1 %}
-<section class="hero">
-  <div class="hero-head">
-    <nav class="navbar is-light" role="navigation" aria-label="main navigation">
-      <div class="navbar-brand">
-        <div class="navbar-item has-background-primary	has-text-white">
-          {{ gettext("Company view") }}
-        </div>
 
-        <a role="button" class="navbar-burger" onclick="expandMenu()" aria-label="menu" aria-expanded="false"
-           data-target="navbarOnTop">
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
+
+{% block body %}
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <div class="navbar-item has-background-primary	has-text-white">
+      {{ gettext("Company view") }}
+    </div>
+
+    <a role="button" class="navbar-burger" onclick="expandMenu()" aria-label="menu" aria-expanded="false"
+      data-target="navbarOnTop">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+
+  <div id="navbarOnTop" class="navbar-menu">
+    <div class="navbar-start">
+      {% if current_user.is_authenticated %}
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">
+          {{ gettext("Plans") }}
         </a>
-      </div>
-
-      <div id="navbarOnTop" class="navbar-menu">
-        <div class="navbar-start">
-          {% if current_user.is_authenticated %}
-          <div class="navbar-item has-dropdown is-hoverable">
-            <a class="navbar-link">
-              {{ gettext("Plans") }}
-            </a>
-            <div class="navbar-dropdown">
-              <a href="{{ url_for('main_company.create_draft') }}" class="navbar-item">
-                {{ gettext("New plan") }}
-              </a>
-              <a href="{{ url_for('main_company.my_plans') }}" class="navbar-item">
-                {{ gettext("My plans") }}
-              </a>
-              <a href="{{ url_for('main_company.my_drafts') }}" class="navbar-item">
-                {{ gettext("My drafts") }}
-              </a>
-              <a href="{{ url_for('main_company.query_plans') }}" class="navbar-item">
-                {{ gettext("All plans") }}
-              </a>
-            </div>
-          </div>
-
-          <div class="navbar-item has-dropdown is-hoverable">
-            <a class="navbar-link">
-              {{ gettext("Cooperations") }}
-            </a>
-            <div class="navbar-dropdown">
-              <a href="{{ url_for('main_company.create_cooperation') }}" class="navbar-item">
-                {{ gettext("New cooperation") }}
-              </a>
-              <a href="{{ url_for('main_company.request_cooperation') }}" class="navbar-item">
-                {{ gettext("Join cooperation") }}
-              </a>
-              <a href="{{ url_for('main_company.my_cooperations') }}" class="navbar-item">
-                {{ gettext("My cooperations") }}
-              </a>
-              <a href="{{ url_for('main_company.list_all_cooperations') }}" class="navbar-item">
-                {{ gettext("All cooperations") }}
-              </a>
-            </div>
-          </div>
-
-
-
-          <div class="navbar-item has-dropdown is-hoverable">
-            <a class="navbar-link">
-              {{ gettext("Accounts and purchases") }}
-            </a>
-
-            <div class="navbar-dropdown">
-              <a href="{{ url_for('main_company.my_accounts') }}" class="navbar-item">
-                {{ gettext("Accounts") }}
-              </a>
-              <a href="{{ url_for('main_company.transfer_to_worker') }}" class="navbar-item">
-                {{ gettext("Pay workers") }}
-              </a>
-              <a href="{{ url_for('main_company.transfer_to_company') }}" class="navbar-item">
-                {{ gettext("Pay production means") }}
-              </a>
-              <a href="{{ url_for('main_company.my_purchases') }}" class="navbar-item">
-                {{ gettext("My purchases") }}
-              </a>
-            </div>
-          </div>
-
-
-
-          <a href="{{ url_for('main_company.invite_worker_to_company') }}" class="navbar-item">
-            {{ gettext("Work") }}
+        <div class="navbar-dropdown">
+          <a href="{{ url_for('main_company.create_draft') }}" class="navbar-item">
+            {{ gettext("New plan") }}
           </a>
-
-          <a href="{{ url_for('main_company.statistics') }}" class="navbar-item">
-            {{ gettext("Statistics") }}
+          <a href="{{ url_for('main_company.my_plans') }}" class="navbar-item">
+            {{ gettext("My plans") }}
           </a>
-
-          <a href="{{ url_for('main_company.query_companies') }}" class="navbar-item">
-            {{ gettext("Companies") }}
+          <a href="{{ url_for('main_company.my_drafts') }}" class="navbar-item">
+            {{ gettext("My drafts") }}
           </a>
-
-          <a href="{{ url_for('main_company.profile') }}" class="navbar-item">
-            {{ gettext("My profile") }}
-          </a>
-
-          <a href="{{ url_for('main_company.list_messages') }}"
-             class="navbar-item {% if message_indicator is defined %}{% if message_indicator.show_unread_messages_indicator %}unread-messages-indicator{% endif %}{% endif %}">
-            {{ gettext("Messages") }}
+          <a href="{{ url_for('main_company.query_plans') }}" class="navbar-item">
+            {{ gettext("All plans") }}
           </a>
         </div>
-
-        {% endif %}
-
       </div>
-      <div class="navbar-end">
-        <div class="navbar-item">
-          <div class="buttons">
-            {% if not current_user.is_authenticated %}
-            <a class="button" href="{{ url_for('auth.login_company') }}">
-              {{ gettext("Sign in") }}
-            </a>
-            <a class="button" href="{{ url_for('auth.signup_company') }}">
-              {{ gettext("Sign up") }}
-            </a>
-            <a class="button" href="{{ url_for('auth.zurueck') }}">
-              {{ gettext("Back") }}
-            </a>
-            {% else %}
-            <a class="button" href="{{ url_for('auth.logout') }}">
-              {{ gettext("Sign out") }}
-            </a>
-            <a class="button" href="{{ url_for('main_company.hilfe') }}">
-              {{ gettext("?") }}
-            </a>
-            {% endif %}
 
-          </div>
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">
+          {{ gettext("Cooperations") }}
+        </a>
+        <div class="navbar-dropdown">
+          <a href="{{ url_for('main_company.create_cooperation') }}" class="navbar-item">
+            {{ gettext("New cooperation") }}
+          </a>
+          <a href="{{ url_for('main_company.request_cooperation') }}" class="navbar-item">
+            {{ gettext("Join cooperation") }}
+          </a>
+          <a href="{{ url_for('main_company.my_cooperations') }}" class="navbar-item">
+            {{ gettext("My cooperations") }}
+          </a>
+          <a href="{{ url_for('main_company.list_all_cooperations') }}" class="navbar-item">
+            {{ gettext("All cooperations") }}
+          </a>
         </div>
       </div>
+
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">
+          {{ gettext("Accounts and purchases") }}
+        </a>
+
+        <div class="navbar-dropdown">
+          <a href="{{ url_for('main_company.my_accounts') }}" class="navbar-item">
+            {{ gettext("Accounts") }}
+          </a>
+          <a href="{{ url_for('main_company.transfer_to_worker') }}" class="navbar-item">
+            {{ gettext("Pay workers") }}
+          </a>
+          <a href="{{ url_for('main_company.transfer_to_company') }}" class="navbar-item">
+            {{ gettext("Pay production means") }}
+          </a>
+          <a href="{{ url_for('main_company.my_purchases') }}" class="navbar-item">
+            {{ gettext("My purchases") }}
+          </a>
+        </div>
+      </div>
+
+      <a href="{{ url_for('main_company.invite_worker_to_company') }}" class="navbar-item">
+        {{ gettext("Work") }}
+      </a>
+
+      <a href="{{ url_for('main_company.statistics') }}" class="navbar-item">
+        {{ gettext("Statistics") }}
+      </a>
+
+      <a href="{{ url_for('main_company.query_companies') }}" class="navbar-item">
+        {{ gettext("Companies") }}
+      </a>
+
+      <a href="{{ url_for('main_company.profile') }}" class="navbar-item">
+        {{ gettext("My profile") }}
+      </a>
+
+      <a href="{{ url_for('main_company.list_messages') }}"
+        class="navbar-item {% if message_indicator is defined %}{% if message_indicator.show_unread_messages_indicator %}unread-messages-indicator{% endif %}{% endif %}">
+        {{ gettext("Messages") }}
+      </a>
+    </div>
+
+    {% endif %}
 
   </div>
-  </nav>
-</div>
-
-<div class="hero-body has-text-centered">
-  <div class="section">
-    <div class="container">
-      {% block content2 %}
-      {% endblock %}
+  <div class="navbar-end">
+    <div class="navbar-item">
+      <div class="buttons">
+        {% if not current_user.is_authenticated %}
+        <a class="button" href="{{ url_for('auth.login_company') }}">
+          {{ gettext("Sign in") }}
+        </a>
+        <a class="button" href="{{ url_for('auth.signup_company') }}">
+          {{ gettext("Sign up") }}
+        </a>
+        <a class="button" href="{{ url_for('auth.zurueck') }}">
+          {{ gettext("Back") }}
+        </a>
+        {% else %}
+        <a class="button" href="{{ url_for('auth.logout') }}">
+          {{ gettext("Sign out") }}
+        </a>
+        <a class="button" href="{{ url_for('main_company.hilfe') }}">
+          {{ gettext("?") }}
+        </a>
+        {% endif %}
+      </div>
     </div>
   </div>
-</div>
+</nav>
 
-</section>
+{% block company %}
+{% endblock %}
+
 {% endblock %}

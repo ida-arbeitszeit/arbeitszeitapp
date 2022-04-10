@@ -2,124 +2,125 @@
 
 {% from 'macros/show_notifications.html' import show_notifications %}
 
-{% block content2 %}
-<div class="content">
-  <h1>Eigene Pläne</h1>
-  <div class="box has-background-info-light has-text-info-dark">
-    <div class="icon"><i class="fas fa-info-circle"></i></div>
-    <p>
-      Aktuelle Pläne kannst du als (nicht) verfügbar kennzeichnen. <br />
-      Abgelaufene Pläne kannst du erneuern oder löschen.
-    </p>
+{% block company %}
+<div class="section has-text-centered">
+  <div class="content">
+    <h1>Eigene Pläne</h1>
+    <div class="box has-background-info-light has-text-info-dark">
+      <div class="icon"><i class="fas fa-info-circle"></i></div>
+      <p>
+        Aktuelle Pläne kannst du als (nicht) verfügbar kennzeichnen. <br />
+        Abgelaufene Pläne kannst du erneuern oder löschen.
+      </p>
+    </div>
+  </div>
+  <h1 class="title is-4">Aktuell</h1>
+
+  {{ show_notifications() }}
+
+  <div class="table-container">
+    {% if show_active_plans %}
+    <table class="table is-fullwidth">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Kosten</th>
+          <th>Art</th>
+          <th>Planungszeitraum</th>
+          <th>Endet&nbsp;in</th>
+          <th>Verfügbar</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for plan in active_plans.rows %}
+        <tr>
+          <td><a href="{{ plan.plan_summary_url }}">{{ plan.prd_name }}</a></td>
+          <td>{{ plan.price_per_unit }} {% if plan.is_cooperating %} <span><a href="{{ plan.coop_summary_url }}"><i
+                  class="fas fa-hands-helping"></i></a></span>{%
+            endif %}
+          </td>
+          <td>{{ plan.type_of_plan }}</td>
+          <td>{{ plan.activation_date }} - {{ plan.expiration_date }}</td>
+          <td>{{ plan.expiration_relative }}</td>
+          {% if plan.is_available %}
+          <td>
+            <span class="icon has-text-success"><i class="fas fa-circle"></i></span>
+          </td>
+          {% else %}
+          <td>
+            <span class="icon has-text-danger"><i class="fas fa-circle"></i></span>
+          </td>
+          {% endif %}
+          {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p>(Du hast keine aktiven Pläne.)</p>
+    {% endif %}
+  </div>
+
+  <h1 class="title is-4">Wartend</h1>
+
+  <div class="table-container">
+    {% if show_non_active_plans %}
+    <table class="table is-fullwidth">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Kosten</th>
+          <th>Art</th>
+          <th>Plan&nbsp;vom</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for plan in non_active_plans.rows %}
+        <tr>
+          <td><a href="{{ plan.plan_summary_url }}">{{ plan.prd_name }}</a></td>
+          <td>{{ plan.price_per_unit }}</td>
+          <td>{{ plan.type_of_plan }}</td>
+          <td>{{ plan.plan_creation_date }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p>(Du hast keine Pläne, die auf Aktivierung warten.)</p>
+    {% endif %}
+  </div>
+
+  <h1 class="title is-4">Abgelaufen</h1>
+
+  <div class="table-container">
+    {% if show_expired_plans %}
+    <table class="table is-fullwidth">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Art</th>
+          <th>Plan&nbsp;vom</th>
+          <th><abbr title="Nur einmal möglich.">Plan erneuern</abbr></th>
+          <th>Del.</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for plan in expired_plans.rows %}
+        <tr>
+          <td><a href="{{ plan.plan_summary_url }}">{{ plan.prd_name }}</a></td>
+          <td>{{ plan.type_of_plan }}</td>
+          <td>{{ plan.plan_creation_date }}</td>
+          <td>
+            <a href="{{ plan.renew_plan_url }}"><i class="{{ 'fas fa-redo' }}"></i></a>
+          </td>
+          <td>
+            <a href="{{ plan.hide_plan_url }}"><i class="fas fa-trash"></i></a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p>(Du hast keine abgelaufenen Pläne.)</p>
+    {% endif %}
   </div>
 </div>
-<h1 class="title is-4">Aktuell</h1>
-
-{{ show_notifications() }}
-
-<div class="table-container">
-  {% if show_active_plans %}
-  <table class="table is-fullwidth">
-    <thead>
-      <tr>
-        <th></th>
-        <th>Kosten</th>
-        <th>Art</th>
-        <th>Planungszeitraum</th>
-        <th>Endet&nbsp;in</th>
-        <th>Verfügbar</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for plan in active_plans.rows %}
-      <tr>
-        <td><a href="{{ plan.plan_summary_url }}">{{ plan.prd_name }}</a></td>
-        <td>{{ plan.price_per_unit }} {% if plan.is_cooperating %} <span><a href="{{ plan.coop_summary_url }}"><i
-                class="fas fa-hands-helping"></i></a></span>{%
-          endif %}
-        </td>
-        <td>{{ plan.type_of_plan }}</td>
-        <td>{{ plan.activation_date }} - {{ plan.expiration_date }}</td>
-        <td>{{ plan.expiration_relative }}</td>
-        {% if plan.is_available %}
-        <td>
-          <span class="icon has-text-success"><i class="fas fa-circle"></i></span>
-        </td>
-        {% else %}
-        <td>
-          <span class="icon has-text-danger"><i class="fas fa-circle"></i></span>
-        </td>
-        {% endif %}
-        {% endfor %}
-    </tbody>
-  </table>
-  {% else %}
-  <p>(Du hast keine aktiven Pläne.)</p>
-  {% endif %}
-</div>
-
-<h1 class="title is-4">Wartend</h1>
-
-<div class="table-container">
-  {% if show_non_active_plans %}
-  <table class="table is-fullwidth">
-    <thead>
-      <tr>
-        <th></th>
-        <th>Kosten</th>
-        <th>Art</th>
-        <th>Plan&nbsp;vom</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for plan in non_active_plans.rows %}
-      <tr>
-        <td><a href="{{ plan.plan_summary_url }}">{{ plan.prd_name }}</a></td>
-        <td>{{ plan.price_per_unit }}</td>
-        <td>{{ plan.type_of_plan }}</td>
-        <td>{{ plan.plan_creation_date }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% else %}
-  <p>(Du hast keine Pläne, die auf Aktivierung warten.)</p>
-  {% endif %}
-</div>
-
-<h1 class="title is-4">Abgelaufen</h1>
-
-<div class="table-container">
-  {% if show_expired_plans %}
-  <table class="table is-fullwidth">
-    <thead>
-      <tr>
-        <th></th>
-        <th>Art</th>
-        <th>Plan&nbsp;vom</th>
-        <th><abbr title="Nur einmal möglich.">Plan erneuern</abbr></th>
-        <th>Del.</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for plan in expired_plans.rows %}
-      <tr>
-        <td><a href="{{ plan.plan_summary_url }}">{{ plan.prd_name }}</a></td>
-        <td>{{ plan.type_of_plan }}</td>
-        <td>{{ plan.plan_creation_date }}</td>
-        <td>
-          <a href="{{ plan.renew_plan_url }}"><i class="{{ 'fas fa-redo' }}"></i></a>
-        </td>
-        <td>
-          <a href="{{ plan.hide_plan_url }}"><i class="fas fa-trash"></i></a>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% else %}
-  <p>(Du hast keine abgelaufenen Pläne.)</p>
-  {% endif %}
-</div>
-
 {% endblock %}
