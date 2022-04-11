@@ -21,7 +21,7 @@ class TransactionInfo:
 
 @dataclass
 class PlotDetails:
-    dates: List[datetime]
+    timestamps: List[datetime]
     accumulated_volumes: List[Decimal]
 
 
@@ -52,7 +52,7 @@ class ShowPRDAccountDetails:
             company.product_account
         )
         plot = PlotDetails(
-            dates=self._get_plot_dates(transactions),
+            timestamps=self._get_plot_dates(transactions),
             accumulated_volumes=self._get_plot_volumes(transactions),
         )
         return ShowPRDAccountDetailsResponse(
@@ -80,9 +80,9 @@ class ShowPRDAccountDetails:
         )
 
     def _get_plot_dates(self, transactions: List[TransactionInfo]) -> List[datetime]:
-        dates = [t.date for t in transactions]
-        dates.reverse()
-        return dates
+        timestamps = [t.date for t in transactions]
+        timestamps.reverse()
+        return timestamps
 
     def _get_plot_volumes(self, transactions: List[TransactionInfo]) -> List[Decimal]:
         volumes = [t.transaction_volume for t in transactions]

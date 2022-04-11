@@ -231,7 +231,7 @@ def test_that_plotting_info_is_empty_when_no_transactions_occurred(
     company = company_generator.create_company()
 
     response = show_prd_account_details(company.id)
-    assert not response.plot.dates
+    assert not response.plot.timestamps
     assert not response.plot.accumulated_volumes
 
 
@@ -253,7 +253,7 @@ def test_that_plotting_info_is_generated_after_selling_of_consumer_product(
     )
 
     response = show_prd_account_details(company.id)
-    assert response.plot.dates
+    assert response.plot.timestamps
     assert response.plot.accumulated_volumes
 
 
@@ -282,11 +282,11 @@ def test_that_correct_plotting_info_is_generated_after_selling_of_two_consumer_p
     )
 
     response = show_prd_account_details(company.id)
-    assert len(response.plot.dates) == 2
+    assert len(response.plot.timestamps) == 2
     assert len(response.plot.accumulated_volumes) == 2
 
-    assert trans1.date in response.plot.dates
-    assert trans2.date in response.plot.dates
+    assert trans1.date in response.plot.timestamps
+    assert trans2.date in response.plot.timestamps
 
     assert trans1.amount_received in response.plot.accumulated_volumes
     assert (
@@ -326,8 +326,8 @@ def test_that_plotting_info_is_generated_in_the_correct_order_after_selling_of_t
     )
 
     response = show_prd_account_details(company.id)
-    assert response.plot.dates[0] == trans1.date
-    assert response.plot.dates[2] == trans3.date
+    assert response.plot.timestamps[0] == trans1.date
+    assert response.plot.timestamps[2] == trans3.date
 
     assert response.plot.accumulated_volumes[0] == trans1.amount_received
     assert response.plot.accumulated_volumes[2] == (

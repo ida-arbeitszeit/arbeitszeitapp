@@ -67,5 +67,7 @@ class ShowPRDAccountDetailsPresenter:
         )
 
     def _create_graph(self, plot: PlotDetails) -> str:
-        graph = self.plotter.create_line_plot(x=plot.dates, y=plot.accumulated_volumes)
+        graph = self.plotter.create_line_plot(
+            x=plot.timestamps, y=plot.accumulated_volumes
+        )
         return graph
