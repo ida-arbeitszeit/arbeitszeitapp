@@ -1,6 +1,6 @@
 {% extends "base_member.html" %}
 
 {% block member %}
-{% from 'macros.html' import plan_summary %}
+{% from 'macros/plan_summary.html' import plan_summary %}
 {{ plan_summary(view_model) }}
 {% endblock %}
