@@ -8,6 +8,9 @@ from arbeitszeit.use_cases.get_company_summary import (
 )
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 
+from .dependency_injection import get_dependency_injector
+from .url_index import PlanSummaryUrlIndexTestImpl
+
 RESPONSE_WITH_2_PLANS = GetCompanySummarySuccess(
     id=uuid4(),
     name="Company Name",
@@ -19,7 +22,9 @@ RESPONSE_WITH_2_PLANS = GetCompanySummarySuccess(
 
 class GetGetCompanySummaryPresenterTests(TestCase):
     def setUp(self) -> None:
-        self.presenter = GetCompanySummarySuccessPresenter()
+        self.injector = get_dependency_injector()
+        self.presenter = self.injector.get(GetCompanySummarySuccessPresenter)
+        self.plan_index = self.injector.get(PlanSummaryUrlIndexTestImpl)
 
     def test_company_id_is_shown(self):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
@@ -57,4 +62,19 @@ class GetGetCompanySummaryPresenterTests(TestCase):
         self.assertEqual(
             view_model.active_plans[1].name,
             str(RESPONSE_WITH_2_PLANS.active_plans[1].name),
+        )
+
+    def test_urls_of_plans_are_shown(self):
+        view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
+        self.assertEqual(
+            view_model.active_plans[0].url,
+            self.plan_index.get_plan_summary_url(
+                RESPONSE_WITH_2_PLANS.active_plans[0].id
+            ),
+        )
+        self.assertEqual(
+            view_model.active_plans[1].url,
+            self.plan_index.get_plan_summary_url(
+                RESPONSE_WITH_2_PLANS.active_plans[1].id
+            ),
         )

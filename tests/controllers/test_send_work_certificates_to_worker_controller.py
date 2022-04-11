@@ -7,7 +7,7 @@ from arbeitszeit_web.controllers.send_work_certificates_to_worker_controller imp
     ControllerRejection,
     SendWorkCertificatesToWorkerController,
 )
-from tests.flask_integration.request import FakeRequest
+from tests.request import FakeRequest
 from tests.session import FakeSession
 
 
