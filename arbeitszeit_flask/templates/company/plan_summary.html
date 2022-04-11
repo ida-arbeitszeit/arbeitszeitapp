@@ -1,12 +1,11 @@
 {% extends "base_company.html" %}
 
 {% block company %}
-<div class="section has-text-centered">
 
-    {% from 'macros.html' import plan_summary %}
-    {{ plan_summary(view_model) }}
+{% from 'macros.html' import plan_summary %}
+{{ plan_summary(view_model) }}
 
-
+<div class="section has-text-centered pt-0">
     {% if view_model.show_action_section %}
 
     <div>{{ gettext("Change availability:") }}</div>
@@ -16,14 +15,12 @@
                     class="{{ 'fas fa-toggle-on' if view_model.action.is_available else 'fas fa-toggle-off' }}"></i></a></span>
     </div>
 
-
     {% if view_model.action.is_cooperating %}
     <div>{{ gettext("End cooperation:") }}</div>
     <a class="button is-danger" href="{{ view_model.action.end_coop_url }}">
         <span>{{ gettext("End") }}</span>
     </a>
     {% endif %}
-
     {% endif %}
 </div>
 {% endblock %}

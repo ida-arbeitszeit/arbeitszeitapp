@@ -1,6 +1,4 @@
 {% extends "base_company.html" %}
-{% from 'macros/show_notifications.html' import show_notifications %}
-
 {% block company %}
 
 <div class="section has-text-centered">
@@ -8,7 +6,6 @@
         {{ gettext("Accounts") }}
     </h1>
     <br>
-
     <div class="columns">
         <div class="column"></div>
         <div class="column is-6">
@@ -16,8 +13,6 @@
                 <div class="icon"><i class="fas fa-info-circle"></i></div>
                 <p>{{ gettext("You have four different accounts.") }}</p>
             </div>
-
-            {{ show_notifications() }}
             <br>
             <div class="table-container">
                 <table class="table is-fullwidth">
@@ -40,7 +35,6 @@
                             <td
                                 class="py-2  has-text-right has-text-weight-bold {{ 'has-text-primary' if view_model.is_fixed_positive else 'has-text-danger' }}">
                                 {{ view_model.balance_fixed }}</td>
-
                         </tr>
                         <tr>
                             <td class="py-2  has-text-left"><a href="{{ url_for('main_company.account_r') }}">{{
@@ -52,7 +46,6 @@
                             <td
                                 class="py-2 has-text-right has-text-weight-bold {{ 'has-text-primary' if view_model.is_liquid_positive else 'has-text-danger' }}">
                                 {{ view_model.balance_liquid }}</td>
-
                         </tr>
                         <tr>
                             <td class="py-2  has-text-left"><a href="{{ url_for('main_company.account_a') }}">{{
@@ -64,7 +57,6 @@
                             <td
                                 class="py-2 has-text-right has-text-weight-bold {{ 'has-text-primary' if view_model.is_work_positive else 'has-text-danger' }}">
                                 {{ view_model.balance_work }}</td>
-
                         </tr>
                         <tr>
                             <td class="py-2 has-text-left"><a href="{{ url_for('main_company.account_prd') }}">{{

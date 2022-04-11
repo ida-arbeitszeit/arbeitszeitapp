@@ -1,10 +1,8 @@
 {% extends "base_company.html" %}
-{% from 'macros/show_notifications.html' import show_notifications %}
 
 {% block company %}
 
 <div class="section is-medium has-text-centered">
-
     <h1 class="title">
         <a href="{{ url_for('main_company.my_accounts') }}">Accounts</a> > Account a
     </h1>
@@ -13,13 +11,11 @@
         <p>Your account for work certificates.</p>
     </div>
 
-    {{ show_notifications() }}
-
     <p>Balance:</p>
     <p
         class="py-2 has-text-weight-bold {{ 'has-text-primary' if view_model.account_balance|float >= 0 else 'has-text-danger' }}">
-        {{ view_model.account_balance }}</p>
-
+        {{ view_model.account_balance }}
+    </p>
 
     <div class="table-container">
         <table class="table is-fullwidth">
@@ -49,7 +45,6 @@
                 </tr>
                 {% endfor %}
                 {% endif %}
-
             </tbody>
         </table>
     </div>

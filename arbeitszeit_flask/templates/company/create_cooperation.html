@@ -1,6 +1,4 @@
 {% extends "base_company.html" %}
-{% from 'macros/show_notifications.html' import show_notifications %}
-
 {% block company %}
 <div class="section has-text-centered">
     <h1 class="title">
@@ -21,9 +19,6 @@
                     account whether they are part of a cooperation or not.") }}
                 </p>
             </div>
-
-            {{ show_notifications() }}
-
             <div class="content">
                 <form method="post">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -42,7 +37,6 @@
                         </div>
                     </div>
                     <div class="block"></div>
-
                     <div class="field">
                         <div class="control">
                             <button class="button is-primary" name="create" value="create" type="submit">

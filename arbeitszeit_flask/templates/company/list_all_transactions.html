@@ -1,6 +1,4 @@
 {% extends "base_company.html" %}
-{% from 'macros/show_notifications.html' import show_notifications %}
-
 {% block company %}
 
 <div class="section is-medium has-text-centered">
@@ -12,10 +10,6 @@
         <div class="icon"><i class="fas fa-info-circle"></i></div>
         <p>{{ gettext("Here are all transactions you have made or received so far.") }}</p>
     </div>
-
-    {{ show_notifications() }}
-
-
     <div class="table-container">
         <table class="table is-fullwidth">
             <thead>

@@ -1,7 +1,5 @@
 {% extends "base_member.html" %}
 
-{% from 'macros/show_notifications.html' import show_notifications %}
-
 {% block member %}
 <div class="section has-text-centered">
     <div class="columns">
@@ -40,8 +38,6 @@
                     </p>
                 </form>
             </div>
-
-            {{ show_notifications() }}
 
             {% for field_name, field_errors in form.errors|dictsort if field_errors %}
             {% for error in field_errors %}

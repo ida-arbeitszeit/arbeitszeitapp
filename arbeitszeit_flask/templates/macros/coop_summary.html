@@ -1,5 +1,4 @@
 {% macro coop_summary(view_model) %}
-{% from 'macros/show_notifications.html' import show_notifications %}
 
 <div class="section has-text-centered">
     <div class="columns is-centered">
@@ -9,8 +8,6 @@
                     {{ gettext("Cooperation") }}
                 </h1>
             </div>
-            {{ show_notifications() }}
-
             <br>
             <div class="table-container">
                 <table class="table is-fullwidth">

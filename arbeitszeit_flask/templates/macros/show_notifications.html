@@ -3,7 +3,7 @@
 {% with messages = get_flashed_messages(with_categories=true) %}
 {% if messages %}
 {% for category, message in messages %}
-<div class="block">
+<div class="block has-text-centered">
   <div class="notification {{ category }}">{{ message }}</div>
 </div>
 

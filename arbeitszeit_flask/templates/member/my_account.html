@@ -6,15 +6,6 @@
     <h1 class="title">
         {{ gettext("My Account") }}
     </h1>
-
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    {% for message in messages %}
-    <div class="notification is-danger is-light">{{ message }}</div>
-    {% endfor %}
-    {% endif %}
-    {% endwith %}
-
     <div class="columns">
         <div class="column"></div>
         <div class="column is-10">
@@ -55,7 +46,5 @@
         </div>
         <div class="column"></div>
     </div>
-
-
 </div>
 {% endblock %}

@@ -6,14 +6,6 @@
         <div class="column is-4 is-offset-4">
             <div class="box has-text-centered">
                 <h3 class="title">Login member</h3>
-                {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                <div class="notification is-danger">
-                    {{ messages[0] }}
-                </div>
-                {% endif %}
-                {% endwith %}
-
                 {% for field_name, field_errors in form.errors|dictsort if field_errors %}
                 {% for error in field_errors %}
                 <div class="notification is-danger">{{ error }}</div>

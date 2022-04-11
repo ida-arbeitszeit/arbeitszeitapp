@@ -1,7 +1,5 @@
 {% extends "base_company.html" %}
 
-{% from 'macros/show_notifications.html' import show_notifications %}
-
 {% block company %}
 <div class="section is-medium has-text-centered">
     <div class="columns">
@@ -10,7 +8,6 @@
             <h1 class="title">
                 Überweisung Arbeitszertifikate an Mitarbeiter
             </h1>
-            {{ show_notifications() }}
             <div class="content">
                 {% if workers_list is defined and workers_list|length %}
                 <form method="post">

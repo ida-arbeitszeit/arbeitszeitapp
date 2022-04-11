@@ -1,6 +1,6 @@
-{% extends "base.html" %}
+{% extends "base_general_pages.html" %}
 
-{% block body %}
+{% block general_pages %}
 <nav class="navbar is-light" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
         <a role="button" class="navbar-burger" onclick="expandMenu()" aria-label="menu" aria-expanded="false"
@@ -33,14 +33,6 @@
     <h2 class="subtitle">
         Eine Plattform für Arbeitszeitrechnung.
     </h2>
-
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <div class="notification is-danger">
-        {{ messages[0] }}
-    </div>
-    {% endif %}
-    {% endwith %}
 
     <div class="notification is-success">
         <h1>Willkommen!</h1>

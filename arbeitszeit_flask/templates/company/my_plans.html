@@ -1,7 +1,5 @@
 {% extends "base_company.html" %}
 
-{% from 'macros/show_notifications.html' import show_notifications %}
-
 {% block company %}
 <div class="section has-text-centered">
   <div class="content">
@@ -15,9 +13,6 @@
     </div>
   </div>
   <h1 class="title is-4">Aktuell</h1>
-
-  {{ show_notifications() }}
-
   <div class="table-container">
     {% if show_active_plans %}
     <table class="table is-fullwidth">

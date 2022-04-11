@@ -10,17 +10,7 @@
           {{ view_model.welcome_message }}
         </h1>
       </div>
-
-      {% with messages = get_flashed_messages() %}
-      {% if messages %}
-      <div class="notification is-danger">
-        {{ messages[0] }}
-      </div>
-      {% endif %}
-      {% endwith %}
-
       <br>
-
       <div class="level">
         <div class="level-left">
           <div class="level-item">

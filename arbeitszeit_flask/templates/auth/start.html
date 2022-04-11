@@ -1,6 +1,6 @@
-{% extends "base.html" %}
+{% extends "base_general_pages.html" %}
 
-{% block body %}
+{% block general_pages %}
 <section class="hero is-fullheight">
   <div class="hero-head">
     <nav class="navbar" role="navigation" aria-label="main navigation">
@@ -51,13 +51,6 @@
         <a class="button" href="{{ url_for('auth.login_member') }}">{{ gettext('Member') }}</a>
         <a class="button" href="{{ url_for('auth.login_company') }}">{{ gettext('Company') }}</a>
       </div>
-      {% with messages = get_flashed_messages() %}
-      {% if messages %}
-      <div class="notification is-danger">
-        {{ messages[0] }}
-      </div>
-      {% endif %}
-      {% endwith %}
     </div>
   </div>
   <div class="hero-foot"></div>

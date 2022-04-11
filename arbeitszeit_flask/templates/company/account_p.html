@@ -1,5 +1,4 @@
 {% extends "base_company.html" %}
-{% from 'macros/show_notifications.html' import show_notifications %}
 
 {% block company %}
 
@@ -11,17 +10,13 @@
         <div class="icon"><i class="fas fa-info-circle"></i></div>
         <p>{{ gettext("Your account for fixed means of production.") }}</p>
     </div>
-
-    {{ show_notifications() }}
-
     <p>{{ gettext("Balance:") }}</p>
     <p
         class="py-2 has-text-weight-bold {{ 'has-text-primary' if view_model.account_balance >= 0 else 'has-text-danger' }}">
         {{
         view_model.account_balance
-        | round(2) }}</p>
-
-
+        | round(2) }}
+    </p>
     <div class="table-container">
         <table class="table is-fullwidth">
             <thead>
@@ -33,7 +28,6 @@
                 </tr>
             </thead>
             <tbody>
-
                 {% if view_model.transactions is defined and view_model.transactions|length %}
                 {% for trans_info in view_model.transactions %}
                 <tr>
@@ -50,7 +44,6 @@
                 </tr>
                 {% endfor %}
                 {% endif %}
-
             </tbody>
         </table>
     </div>

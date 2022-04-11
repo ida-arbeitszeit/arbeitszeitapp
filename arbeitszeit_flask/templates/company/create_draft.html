@@ -1,14 +1,11 @@
 {% extends "base_company.html" %}
 {% block company %}
-{% from 'macros/show_notifications.html' import show_notifications %}
-
 <div class="section has-text-centered">
     <h1 class="title">
         Plan erstellen
     </h1>
     <div class="columns is-centered">
         <div class="column is-three-fifths">
-
             <div class="box has-background-info-light has-text-info-dark">
                 <div class="icon"><i class="fas fa-info-circle"></i></div>
                 <p>
@@ -24,10 +21,6 @@
                 </p>
             </div>
 
-
-
-            {{ show_notifications() }}
-
             <form method="post">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="field">
@@ -38,8 +31,6 @@
                     </div>
                 </div>
                 <div class="block"></div>
-
-
                 <div class="field">
                     <label class="label">Beschreibung des Produkts</label>
                     <div class="control">
@@ -49,8 +40,6 @@
 
                 </div>
                 <div class="block"></div>
-
-
                 <div class="field">
                     <label class="label">Planungszeitraum (Tage)</label>
                     <div class="control">
@@ -59,9 +48,6 @@
                     </div>
                 </div>
                 <div class="block"></div>
-
-
-
                 <div class="field">
                     <label class="label">Kleinste Abgabeeinheit</label>
                     <div class="control">
@@ -75,9 +61,6 @@
 
                 </div>
                 <div class="block"></div>
-
-
-
                 <div class="field">
                     <label class="label">Menge</label>
                     <div class="control">
@@ -87,8 +70,6 @@
                     </div>
                 </div>
                 <div class="block"></div>
-
-
                 <div class="field">
                     <label class="label">Kosten für Produktionsmittel</label>
                     <div class="control">
@@ -97,8 +78,6 @@
                     </div>
                 </div>
                 <div class="block"></div>
-
-
                 <div class="field">
                     <label class="label">Kosten für Roh- und Hilfsstoffe</label>
                     <div class="control">
@@ -107,8 +86,6 @@
                     </div>
                 </div>
                 <div class="block"></div>
-
-
                 <div class="field">
                     <label class="label">Enthaltene Arbeitsstunden</label>
                     <div class="control">
@@ -117,8 +94,6 @@
                     </div>
                 </div>
                 <div class="block"></div>
-
-
                 <div class="field">
                     <label class="label">Art des Plans</label>
                     <div class="control">
@@ -137,8 +112,6 @@
                         </p>
                     </div>
                 </div>
-
-
                 <div class="box has-background-danger-light has-text-danger-dark">
                     <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
                     <p>
@@ -149,7 +122,6 @@
                 </div>
         </div>
     </div>
-
     <div class="field is-grouped is-grouped-centered">
         <div class="control">
             <div class="field is-grouped is-grouped-centered">
@@ -160,7 +132,6 @@
             </div>
         </div>
     </div>
-
     </form>
 </div>
 {% endblock %}

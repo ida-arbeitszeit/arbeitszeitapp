@@ -7,7 +7,6 @@
             Kooperationen, die ich kooordiniere
         </h1>
     </div>
-
     {% if accept_message or deny_message or cancel_message %}
     <div class="block"></div>
     {% for message in accept_message %}
@@ -51,15 +50,11 @@
         <p>(Du koordinierst keine Kooperationen.)</p>
         {% endif %}
     </div>
-
-
     <div class="content">
         <h1 class="title">
             Eingehende Kooperationsanfragen (von anderen)
         </h1>
     </div>
-
-
     <div class="table-container">
         {% if list_of_inbound_coop_requests.rows %}
         <table class="table is-fullwidth">
@@ -111,11 +106,6 @@
         <p>(Du hast keine offenen Anfragen.)</p>
         {% endif %}
     </div>
-
-
-
-
-
 
     <div class="content">
         <h1 class="title">
