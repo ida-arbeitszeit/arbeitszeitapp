@@ -4,6 +4,7 @@ from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.query_plans import PlanQueryResponse, QueriedPlan
 from arbeitszeit_web.query_plans import QueryPlansPresenter
+from tests.translator import FakeTranslator
 
 from .notifier import NotifierTestImpl
 
@@ -51,11 +52,13 @@ class QueryPlansPresenterTests(TestCase):
         self.company_url_index = CompanySummaryUrlIndex()
         self.coop_url_index = CoopSummaryUrlIndex()
         self.notifier = NotifierTestImpl()
+        self.trans = FakeTranslator()
         self.presenter = QueryPlansPresenter(
             self.plan_url_index,
             self.company_url_index,
             self.coop_url_index,
             user_notifier=self.notifier,
+            trans=self.trans,
         )
 
     def test_presenting_empty_response_leads_to_not_showing_results(self):

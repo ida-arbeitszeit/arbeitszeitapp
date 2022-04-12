@@ -9,6 +9,8 @@ from arbeitszeit.use_cases.get_member_profile_info import (
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
 from tests.translator import FakeTranslator
 
+from .dependency_injection import get_dependency_injector
+
 RESPONSE_WITHOUT_WORKPLACES = GetMemberProfileInfoResponse(
     workplaces=[],
     account_balance=Decimal(0),
@@ -31,8 +33,9 @@ RESPONSE_WITH_ONE_WORKPLACE = GetMemberProfileInfoResponse(
 
 class GetMemberProfileInfoPresenterTests(TestCase):
     def setUp(self) -> None:
-        self.translator = FakeTranslator()
-        self.presenter = GetMemberProfileInfoPresenter(translator=self.translator)
+        self.injector = get_dependency_injector()
+        self.translator = self.injector.get(FakeTranslator)
+        self.presenter = self.injector.get(GetMemberProfileInfoPresenter)
 
     def test_that_welcome_line_is_correctly_translated(self) -> None:
         view_model = self.presenter.present(RESPONSE_WITHOUT_WORKPLACES)

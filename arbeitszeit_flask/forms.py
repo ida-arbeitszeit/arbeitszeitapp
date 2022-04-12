@@ -37,7 +37,10 @@ class FieldMustExist:
 
 
 class PlanSearchForm(Form):
-    choices = [("Plan-ID", "Plan-ID"), ("Produktname", "Produktname")]
+    choices = [
+        ("Plan-ID", trans.lazy_gettext("Plan ID")),
+        ("Produktname", trans.lazy_gettext("Product name")),
+    ]
     select = SelectField(
         "Nach Plänen suchen", choices=choices, validators=[validators.DataRequired()]
     )
