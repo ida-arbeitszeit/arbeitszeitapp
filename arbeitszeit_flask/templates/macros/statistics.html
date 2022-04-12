@@ -26,12 +26,20 @@
         </div>
         <div class="tile is-parent">
             <div class="tile is-child box">
-                <h1 class="title">X</h1>
+                <h1 class="title">{{ view_model.cooperations_count }}</h1>
                 <div class="subtitle">{{ gettext("Cooperations") }}</div>
             </div>
         </div>
     </div>
     <div class="tile is-ancestor">
+        <div class="tile is-parent">
+            <div class="tile is-child box">
+                <h1 class="title is-4">{{ gettext("Plans") }}</h1>
+                <p>{{ gettext("Active plans") }}: {{ view_model.active_plans_count }}</p>
+                <p>{{ gettext("Public active plans") }}: {{ view_model.active_plans_public_count }}</p>
+                <p>{{ gettext("Average plan duration") }}: {{ view_model.average_timeframe_days }}</p>
+            </div>
+        </div>
         <div class="tile is-parent">
             <div class="tile is-child box">
                 <h1 class="title is-4">{{ gettext("Means of production") }}</h1>
@@ -42,10 +50,9 @@
         </div>
         <div class="tile is-parent">
             <div class="tile is-child box">
-                <h1 class="title is-4">{{ gettext("Plans") }}</h1>
-                <p>{{ gettext("Active plans") }}: {{ view_model.active_plans_count }}</p>
-                <p>{{ gettext("Public active plans") }}: {{ view_model.active_plans_public_count }}</p>
-                <p>{{ gettext("Average plan duration") }}: {{ view_model.average_timeframe_days }}</p>
+                <h1 class="title is-4">{{ gettext("Certificates vs Product") }}</h1>
+                <p>Work certificates: X</p>
+                <p>Available product: X</p>
             </div>
         </div>
     </div>

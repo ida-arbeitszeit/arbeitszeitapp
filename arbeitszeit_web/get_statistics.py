@@ -8,6 +8,7 @@ from arbeitszeit_web.translator import Translator
 class GetStatisticsViewModel:
     registered_companies_count: str
     registered_members_count: str
+    cooperations_count: str
     active_plans_count: str
     active_plans_public_count: str
     average_timeframe_days: str
@@ -41,6 +42,7 @@ class GetStatisticsPresenter:
                 use_case_response.registered_companies_count
             ),
             registered_members_count=str(use_case_response.registered_members_count),
+            cooperations_count=str(use_case_response.cooperations_count),
             active_plans_count=str(use_case_response.active_plans_count),
             active_plans_public_count=str(use_case_response.active_plans_public_count),
             average_timeframe_days=average_timeframe,

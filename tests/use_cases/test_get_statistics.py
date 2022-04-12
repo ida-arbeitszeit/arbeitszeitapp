@@ -3,7 +3,12 @@ from typing import Union
 
 from arbeitszeit.entities import ProductionCosts
 from arbeitszeit.use_cases import GetStatistics
-from tests.data_generators import CompanyGenerator, MemberGenerator, PlanGenerator
+from tests.data_generators import (
+    CompanyGenerator,
+    CooperationGenerator,
+    MemberGenerator,
+    PlanGenerator,
+)
 from tests.datetime_service import FakeDatetimeService
 
 from .dependency_injection import injection_test
@@ -50,6 +55,17 @@ def test_counting_of_members(
     member_generator.create_member()
     stats = get_statistics()
     assert stats.registered_members_count == 2
+
+
+@injection_test
+def test_counting_of_cooperations(
+    get_statistics: GetStatistics, coop_generator: CooperationGenerator
+):
+    number_of_coops = 2
+    for _ in range(number_of_coops):
+        coop_generator.create_cooperation()
+    stats = get_statistics()
+    assert stats.cooperations_count == number_of_coops
 
 
 @injection_test

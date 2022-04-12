@@ -1070,6 +1070,9 @@ class CooperationRepository(repositories.CooperationRepository):
             self.object_from_orm(cooperation) for cooperation in Cooperation.query.all()
         )
 
+    def count_cooperations(self) -> int:
+        return int(self.db.session.query(func.count(Cooperation.id)).one()[0])
+
 
 @inject
 @dataclass

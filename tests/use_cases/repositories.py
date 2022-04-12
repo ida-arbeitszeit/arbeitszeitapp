@@ -731,6 +731,9 @@ class CooperationRepository(interfaces.CooperationRepository):
     def get_all_cooperations(self) -> Iterator[Cooperation]:
         return (cooperation for cooperation in self.cooperations.values())
 
+    def count_cooperations(self) -> int:
+        return len(self.cooperations)
+
     def __len__(self) -> int:
         return len(self.cooperations)
 

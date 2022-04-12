@@ -10,6 +10,7 @@ from ..translator import FakeTranslator
 TESTING_RESPONSE_MODEL = StatisticsResponse(
     registered_companies_count=5,
     registered_members_count=30,
+    cooperations_count=10,
     active_plans_count=6,
     active_plans_public_count=2,
     avg_timeframe=Decimal(30.5),
@@ -77,6 +78,17 @@ class GetStatisticsPresenterTests(TestCase):
         self.assertEqual(
             view_model.registered_members_count,
             "32",
+        )
+
+    def test_coop_count_is_displayed_correctly_as_number(self):
+        response = replace(
+            TESTING_RESPONSE_MODEL,
+            cooperations_count=11,
+        )
+        view_model = self.presenter.present(response)
+        self.assertEqual(
+            view_model.cooperations_count,
+            "11",
         )
 
     def test_active_plans_count_is_displayed_correctly_as_number(self):

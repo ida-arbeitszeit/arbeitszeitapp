@@ -380,6 +380,10 @@ class CooperationRepository(ABC):
     def get_all_cooperations(self) -> Iterator[Cooperation]:
         pass
 
+    @abstractmethod
+    def count_cooperations(self) -> int:
+        pass
+
 
 class PlanCooperationRepository(ABC):
     @abstractmethod
