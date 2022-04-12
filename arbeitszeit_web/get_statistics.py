@@ -1,6 +1,8 @@
 from dataclasses import dataclass
+from decimal import Decimal
 
 from arbeitszeit.use_cases import StatisticsResponse
+from arbeitszeit_web.plotter import Plotter
 from arbeitszeit_web.translator import Translator
 
 
@@ -18,22 +20,27 @@ class GetStatisticsViewModel:
     planned_resources_hours: str
     planned_means_hours: str
 
+    barplot_certificates: str
+    barplot_means_of_production: str
+    barplot_plans: str
+
 
 @dataclass
 class GetStatisticsPresenter:
-    translator: Translator
+    trans: Translator
+    plotter: Plotter
 
     def present(self, use_case_response: StatisticsResponse) -> GetStatisticsViewModel:
-        average_timeframe = self.translator.ngettext(
+        average_timeframe = self.trans.ngettext(
             "%(num).2f day", "%(num).2f days", use_case_response.avg_timeframe
         )
-        planned_work = self.translator.ngettext(
+        planned_work = self.trans.ngettext(
             "%(num).2f hour", "%(num).2f hours", use_case_response.planned_work
         )
-        planned_liquid_means = self.translator.ngettext(
+        planned_liquid_means = self.trans.ngettext(
             "%(num).2f hour", "%(num).2f hours", use_case_response.planned_resources
         )
-        planned_fixed_means = self.translator.ngettext(
+        planned_fixed_means = self.trans.ngettext(
             "%(num).2f hour", "%(num).2f hours", use_case_response.planned_means
         )
         return GetStatisticsViewModel(
@@ -52,4 +59,44 @@ class GetStatisticsPresenter:
             active_plans_count=str(use_case_response.active_plans_count),
             active_plans_public_count=str(use_case_response.active_plans_public_count),
             average_timeframe_days=average_timeframe,
+            barplot_certificates=self.plotter.create_bar_plot(
+                [
+                    self.trans.gettext("Work certificates"),
+                    self.trans.gettext("Available product"),
+                ],
+                [
+                    use_case_response.certificates_count,
+                    use_case_response.available_product,
+                ],
+                (5, 4),
+                self.trans.gettext("Hours"),
+            ),
+            barplot_means_of_production=self.plotter.create_bar_plot(
+                [
+                    self.trans.gettext("Feste PM"),
+                    self.trans.gettext("Flüssige PM"),
+                    self.trans.gettext("Arbeit"),
+                ],
+                [
+                    use_case_response.planned_means,
+                    use_case_response.planned_resources,
+                    use_case_response.planned_work,
+                ],
+                (5, 4),
+                self.trans.gettext("Hours"),
+            ),
+            barplot_plans=self.plotter.create_bar_plot(
+                [
+                    self.trans.gettext("Produktive Pläne"),
+                    self.trans.gettext("Öffentliche Pläne"),
+                ],
+                [
+                    Decimal(
+                        use_case_response.active_plans_count
+                        - use_case_response.active_plans_public_count
+                    ),
+                    Decimal(use_case_response.active_plans_public_count),
+                ],
+                (5, 4),
+            ),
         )

@@ -4,6 +4,7 @@ from unittest import TestCase
 
 from arbeitszeit.use_cases.get_statistics import StatisticsResponse
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
+from tests.plotter import FakePlotter
 
 from ..translator import FakeTranslator
 
@@ -25,7 +26,10 @@ TESTING_RESPONSE_MODEL = StatisticsResponse(
 class GetStatisticsPresenterTests(TestCase):
     def setUp(self) -> None:
         self.translator = FakeTranslator()
-        self.presenter = GetStatisticsPresenter(translator=self.translator)
+        self.plotter = FakePlotter()
+        self.presenter = GetStatisticsPresenter(
+            trans=self.translator, plotter=self.plotter
+        )
 
     def test_planned_resources_hours_are_truncated_at_2_digits_after_comma(self):
         response = replace(

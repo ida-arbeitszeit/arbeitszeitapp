@@ -435,9 +435,9 @@ class CompanyModule(Module):
 class FlaskModule(Module):
     @provider
     def provide_get_statistics_presenter(
-        self, translator: Translator
+        self, translator: Translator, plotter: Plotter
     ) -> GetStatisticsPresenter:
-        return GetStatisticsPresenter(translator=translator)
+        return GetStatisticsPresenter(trans=translator, plotter=plotter)
 
     @provider
     def provide_get_company_summary(
