@@ -217,6 +217,10 @@ class MemberRepository(ABC):
     def get_by_id(self, id: UUID) -> Optional[Member]:
         pass
 
+    @abstractmethod
+    def get_all_members(self) -> Iterator[Member]:
+        pass
+
 
 class AccountOwnerRepository(ABC):
     @abstractmethod

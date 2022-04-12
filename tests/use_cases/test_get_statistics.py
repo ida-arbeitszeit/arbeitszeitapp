@@ -8,6 +8,7 @@ from tests.data_generators import (
     CooperationGenerator,
     MemberGenerator,
     PlanGenerator,
+    TransactionGenerator,
 )
 from tests.datetime_service import FakeDatetimeService
 
@@ -66,6 +67,72 @@ def test_counting_of_cooperations(
         coop_generator.create_cooperation()
     stats = get_statistics()
     assert stats.cooperations_count == number_of_coops
+
+
+@injection_test
+def test_counting_of_certificates_when_certs_are_zero(
+    get_statistics: GetStatistics,
+):
+    stats = get_statistics()
+    assert stats.certificates_count == 0
+
+
+@injection_test
+def test_counting_of_certificates_when_two_members_have_received_certs(
+    get_statistics: GetStatistics,
+    member_generator: MemberGenerator,
+    transaction_generator: TransactionGenerator,
+):
+    num_transactions = 2
+    for _ in range(num_transactions):
+        worker = member_generator.create_member()
+        account = worker.account
+        transaction_generator.create_transaction(
+            receiving_account=account,
+            amount_received=Decimal(10),
+        )
+    stats = get_statistics()
+    assert stats.certificates_count == num_transactions * Decimal(10)
+
+
+@injection_test
+def test_counting_of_certificates_when_one_worker_and_one_company_have_received_certs(
+    get_statistics: GetStatistics,
+    member_generator: MemberGenerator,
+    transaction_generator: TransactionGenerator,
+    company_generator: CompanyGenerator,
+):
+    # worker receives certs
+    worker = member_generator.create_member()
+    worker_account = worker.account
+    transaction_generator.create_transaction(
+        receiving_account=worker_account,
+        amount_received=Decimal(10.5),
+    )
+    # company receives certs
+    company = company_generator.create_company()
+    company_account = company.work_account
+    transaction_generator.create_transaction(
+        receiving_account=company_account, amount_received=Decimal(10)
+    )
+    stats = get_statistics()
+    assert stats.certificates_count == Decimal(20.5)
+
+
+@injection_test
+def test_correct_available_product_is_shown_when_two_companies_have_received_prd_credit(
+    get_statistics: GetStatistics,
+    company_generator: CompanyGenerator,
+    transaction_generator: TransactionGenerator,
+):
+    num_companies = 2
+    for _ in range(num_companies):
+        company = company_generator.create_company()
+        transaction_generator.create_transaction(
+            receiving_account=company.product_account, amount_received=Decimal(22)
+        )
+    stats = get_statistics()
+    assert stats.available_product == num_companies * Decimal(22)
 
 
 @injection_test

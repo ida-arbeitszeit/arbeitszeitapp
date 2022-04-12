@@ -51,8 +51,8 @@
         <div class="tile is-parent">
             <div class="tile is-child box">
                 <h1 class="title is-4">{{ gettext("Certificates vs Product") }}</h1>
-                <p>Work certificates: X</p>
-                <p>Available product: X</p>
+                <p>{{ gettext("Work certificates") }}: {{ view_model.certificates_count }}</p>
+                <p>{{ gettext("Available product (no public products)") }}: {{ view_model.available_product }}</p>
             </div>
         </div>
     </div>

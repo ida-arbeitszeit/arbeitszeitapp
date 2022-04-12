@@ -261,6 +261,9 @@ class MemberRepository(interfaces.MemberRepository):
     def get_by_id(self, id: UUID) -> Optional[Member]:
         return self.members.get(id)
 
+    def get_all_members(self) -> Iterator[Member]:
+        yield from self.members.values()
+
 
 @singleton
 class CompanyRepository(interfaces.CompanyRepository):

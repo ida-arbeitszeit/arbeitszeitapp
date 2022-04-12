@@ -68,3 +68,15 @@ def test_get_by_id_returns_none_when_member_does_not_exist(
 ) -> None:
     member = repository.get_by_id(uuid4())
     assert member is None
+
+
+@injection_test
+def test_that_all_members_can_be_retrieved(
+    repository: MemberRepository,
+    member_generator: MemberGenerator,
+):
+    expected_member1 = member_generator.create_member()
+    expected_member2 = member_generator.create_member()
+    all_members = list(repository.get_all_members())
+    assert expected_member1 in all_members
+    assert expected_member2 in all_members

@@ -122,6 +122,9 @@ class MemberRepository(repositories.MemberRepository):
     def count_registered_members(self) -> int:
         return int(self.db.session.query(func.count(Member.id)).one()[0])
 
+    def get_all_members(self) -> Iterator[entities.Member]:
+        return (self.object_from_orm(member) for member in Member.query.all())
+
 
 @inject
 @dataclass
