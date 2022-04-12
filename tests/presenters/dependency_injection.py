@@ -5,7 +5,17 @@ from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
+from arbeitszeit_web.get_plan_summary_company import (
+    GetPlanSummaryCompanySuccessPresenter,
+)
+from arbeitszeit_web.get_statistics import GetStatisticsPresenter
+from arbeitszeit_web.hide_plan import HidePlanPresenter
+from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.notification import Notifier
+from arbeitszeit_web.plan_summary_service import (
+    PlanSummaryService,
+    PlanSummaryServiceImpl,
+)
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
 from arbeitszeit_web.url_index import ListMessagesUrlIndex
 from tests.request import FakeRequest
@@ -13,10 +23,12 @@ from tests.translator import FakeTranslator
 
 from .notifier import NotifierTestImpl
 from .url_index import (
+    CompanySummaryUrlIndex,
     CoopSummaryUrlIndexTestImpl,
     EndCoopUrlIndexTestImpl,
     ListMessageUrlIndexTestImpl,
     PlanSummaryUrlIndexTestImpl,
+    TogglePlanAvailabilityUrlIndex,
 )
 
 
@@ -38,6 +50,13 @@ class PresenterTestsInjector(Module):
     @provider
     def provide_list_messages_url_index_test_impl(self) -> ListMessageUrlIndexTestImpl:
         return ListMessageUrlIndexTestImpl()
+
+    @singleton
+    @provider
+    def provide_toggle_plan_availability_url_index(
+        self,
+    ) -> TogglePlanAvailabilityUrlIndex:
+        return TogglePlanAvailabilityUrlIndex()
 
     @provider
     def provide_list_messages_url_index(
@@ -117,6 +136,57 @@ class PresenterTestsInjector(Module):
     ) -> GetCompanySummarySuccessPresenter:
         return GetCompanySummarySuccessPresenter(
             plan_index=plan_index,
+        )
+
+    @provider
+    def provide_plan_summary_service(
+        self,
+        coop_url_index: CoopSummaryUrlIndexTestImpl,
+        company_url_index: CompanySummaryUrlIndex,
+        translator: FakeTranslator,
+    ) -> PlanSummaryService:
+        return PlanSummaryServiceImpl(
+            coop_url_index=coop_url_index,
+            company_url_index=company_url_index,
+            trans=translator,
+        )
+
+    @provider
+    def provide_get_plan_summary_company_success_presenter(
+        self,
+        toggle_availability_url_index: TogglePlanAvailabilityUrlIndex,
+        end_coop_url_index: EndCoopUrlIndexTestImpl,
+        translator: FakeTranslator,
+        plan_summary_service: PlanSummaryService,
+    ) -> GetPlanSummaryCompanySuccessPresenter:
+        return GetPlanSummaryCompanySuccessPresenter(
+            toggle_availability_url_index=toggle_availability_url_index,
+            end_coop_url_index=end_coop_url_index,
+            trans=translator,
+            plan_summary_service=plan_summary_service,
+        )
+
+    @provider
+    def provide_get_statistics_presenter(
+        self, translator: FakeTranslator
+    ) -> GetStatisticsPresenter:
+        return GetStatisticsPresenter(translator=translator)
+
+    @provider
+    def provide_list_all_cooperations_presenter(
+        self, coop_summary_url_index: CoopSummaryUrlIndexTestImpl
+    ) -> ListAllCooperationsPresenter:
+        return ListAllCooperationsPresenter(
+            coop_url_index=coop_summary_url_index,
+        )
+
+    @provider
+    def provide_hide_plan_presenter(
+        self, notifier: Notifier, translator: FakeTranslator
+    ) -> HidePlanPresenter:
+        return HidePlanPresenter(
+            notifier=notifier,
+            trans=translator,
         )
 
 

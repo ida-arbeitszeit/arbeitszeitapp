@@ -19,3 +19,13 @@ class CoopSummaryUrlIndexTestImpl:
 class EndCoopUrlIndexTestImpl:
     def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
         return f"fake_end_coop_url:{plan_id}, {cooperation_id}"
+
+
+class TogglePlanAvailabilityUrlIndex:
+    def get_toggle_availability_url(self, plan_id: UUID) -> str:
+        return f"fake_toggle_url:{plan_id}"
+
+
+class CompanySummaryUrlIndex:
+    def get_company_summary_url(self, company_id: UUID) -> str:
+        return f"fake_company_url:{company_id}"
