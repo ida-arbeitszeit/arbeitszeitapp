@@ -5,6 +5,8 @@ from arbeitszeit.plan_summary import BusinessPlanSummary
 from arbeitszeit.use_cases import DraftSummarySuccess
 from arbeitszeit_web.get_prefilled_draft_data import GetPrefilledDraftDataPresenter
 
+from .dependency_injection import get_dependency_injector
+
 BUSINESS_PLAN_SUMMARY = BusinessPlanSummary(
     plan_id=uuid4(),
     is_active=True,
@@ -41,7 +43,8 @@ TEST_DRAFT_SUMMARY_SUCCESS = DraftSummarySuccess(
 
 
 def test_correct_refilled_data_is_returned_for_plan_summary():
-    get_prefilled_data = GetPrefilledDraftDataPresenter()
+    injector = get_dependency_injector()
+    get_prefilled_data = injector.get(GetPrefilledDraftDataPresenter)
     result = get_prefilled_data.present(BUSINESS_PLAN_SUMMARY)
     assert result.product_name == BUSINESS_PLAN_SUMMARY.product_name
     assert result.description == BUSINESS_PLAN_SUMMARY.description
@@ -55,7 +58,8 @@ def test_correct_refilled_data_is_returned_for_plan_summary():
 
 
 def test_correct_refilled_data_is_returned_for_draft_summary():
-    get_prefilled_data = GetPrefilledDraftDataPresenter()
+    injector = get_dependency_injector()
+    get_prefilled_data = injector.get(GetPrefilledDraftDataPresenter)
     result = get_prefilled_data.present(TEST_DRAFT_SUMMARY_SUCCESS)
     assert result.product_name == TEST_DRAFT_SUMMARY_SUCCESS.product_name
     assert result.description == TEST_DRAFT_SUMMARY_SUCCESS.description

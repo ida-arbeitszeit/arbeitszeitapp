@@ -1,12 +1,14 @@
 from typing import List
 from unittest import TestCase
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from arbeitszeit.use_cases.end_cooperation import EndCooperationResponse
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
-from tests.flask_integration.request import FakeRequest
+from tests.request import FakeRequest
 
+from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl
+from .url_index import CoopSummaryUrlIndexTestImpl, PlanSummaryUrlIndexTestImpl
 
 SUCCESSFUL_RESPONSE = EndCooperationResponse(rejection_reason=None)
 
@@ -21,16 +23,12 @@ REJECTED_RESPONSE_COOPERATION_NOT_FOUND = EndCooperationResponse(
 
 class PresenterTests(TestCase):
     def setUp(self) -> None:
-        self.request = FakeRequest()
-        self.notifier = NotifierTestImpl()
-        self.plan_summary_index = PlanSummaryUrlIndex()
-        self.coop_summary_index = CoopSummaryUrlIndex()
-        self.presenter = EndCooperationPresenter(
-            self.request,
-            self.notifier,
-            self.plan_summary_index,
-            self.coop_summary_index,
-        )
+        self.injector = get_dependency_injector()
+        self.request = self.injector.get(FakeRequest)
+        self.notifier = self.injector.get(NotifierTestImpl)
+        self.plan_summary_index = self.injector.get(PlanSummaryUrlIndexTestImpl)
+        self.coop_summary_index = self.injector.get(CoopSummaryUrlIndexTestImpl)
+        self.presenter = self.injector.get(EndCooperationPresenter)
 
     def test_404_and_empty_url_returned_when_use_case_response_returned_plan_not_found(
         self,
@@ -108,13 +106,3 @@ class PresenterTests(TestCase):
 
     def _get_warning_notifications(self) -> List[str]:
         return self.notifier.warnings
-
-
-class PlanSummaryUrlIndex:
-    def get_plan_summary_url(self, plan_id: UUID) -> str:
-        return f"fake_plan_url:{plan_id}"
-
-
-class CoopSummaryUrlIndex:
-    def get_coop_summary_url(self, coop_id: UUID) -> str:
-        return f"fake_coop_url:{coop_id}"

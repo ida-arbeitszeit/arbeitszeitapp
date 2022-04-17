@@ -219,3 +219,117 @@ def test_that_correct_info_is_generated_after_selling_of_raw_material(
         == TransactionTypes.sale_of_liquid_means
     )
     assert response.account_balance == Decimal(8.5)
+
+
+@injection_test
+def test_that_plotting_info_is_empty_when_no_transactions_occurred(
+    show_prd_account_details: ShowPRDAccountDetails,
+    member_generator: MemberGenerator,
+    company_generator: CompanyGenerator,
+):
+    member_generator.create_member()
+    company = company_generator.create_company()
+
+    response = show_prd_account_details(company.id)
+    assert not response.plot.timestamps
+    assert not response.plot.accumulated_volumes
+
+
+@injection_test
+def test_that_plotting_info_is_generated_after_selling_of_consumer_product(
+    show_prd_account_details: ShowPRDAccountDetails,
+    member_generator: MemberGenerator,
+    company_generator: CompanyGenerator,
+    transaction_generator: TransactionGenerator,
+):
+    member = member_generator.create_member()
+    company = company_generator.create_company()
+
+    transaction_generator.create_transaction(
+        sending_account=member.account,
+        receiving_account=company.product_account,
+        amount_sent=Decimal(10),
+        amount_received=Decimal(8.5),
+    )
+
+    response = show_prd_account_details(company.id)
+    assert response.plot.timestamps
+    assert response.plot.accumulated_volumes
+
+
+@injection_test
+def test_that_correct_plotting_info_is_generated_after_selling_of_two_consumer_products(
+    show_prd_account_details: ShowPRDAccountDetails,
+    member_generator: MemberGenerator,
+    company_generator: CompanyGenerator,
+    transaction_generator: TransactionGenerator,
+):
+    member = member_generator.create_member()
+    company = company_generator.create_company()
+
+    trans1 = transaction_generator.create_transaction(
+        sending_account=member.account,
+        receiving_account=company.product_account,
+        amount_sent=Decimal(10),
+        amount_received=Decimal(5),
+    )
+
+    trans2 = transaction_generator.create_transaction(
+        sending_account=member.account,
+        receiving_account=company.product_account,
+        amount_sent=Decimal(10),
+        amount_received=Decimal(10),
+    )
+
+    response = show_prd_account_details(company.id)
+    assert len(response.plot.timestamps) == 2
+    assert len(response.plot.accumulated_volumes) == 2
+
+    assert trans1.date in response.plot.timestamps
+    assert trans2.date in response.plot.timestamps
+
+    assert trans1.amount_received in response.plot.accumulated_volumes
+    assert (
+        trans1.amount_received + trans2.amount_received
+    ) in response.plot.accumulated_volumes
+
+
+@injection_test
+def test_that_plotting_info_is_generated_in_the_correct_order_after_selling_of_three_consumer_products(
+    show_prd_account_details: ShowPRDAccountDetails,
+    member_generator: MemberGenerator,
+    company_generator: CompanyGenerator,
+    transaction_generator: TransactionGenerator,
+):
+    member = member_generator.create_member()
+    company = company_generator.create_company()
+
+    trans1 = transaction_generator.create_transaction(
+        sending_account=member.account,
+        receiving_account=company.product_account,
+        amount_sent=Decimal(10),
+        amount_received=Decimal(1),
+    )
+
+    trans2 = transaction_generator.create_transaction(
+        sending_account=member.account,
+        receiving_account=company.product_account,
+        amount_sent=Decimal(10),
+        amount_received=Decimal(2),
+    )
+
+    trans3 = transaction_generator.create_transaction(
+        sending_account=member.account,
+        receiving_account=company.product_account,
+        amount_sent=Decimal(10),
+        amount_received=Decimal(3),
+    )
+
+    response = show_prd_account_details(company.id)
+    assert response.plot.timestamps[0] == trans1.date
+    assert response.plot.timestamps[2] == trans3.date
+
+    assert response.plot.accumulated_volumes[0] == trans1.amount_received
+    assert response.plot.accumulated_volumes[2] == (
+        trans1.amount_received + trans2.amount_received + trans3.amount_received
+    )

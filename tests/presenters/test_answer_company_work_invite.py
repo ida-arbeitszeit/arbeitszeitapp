@@ -5,7 +5,9 @@ from arbeitszeit.use_cases import AnswerCompanyWorkInviteResponse
 from arbeitszeit_web.answer_company_work_invite import AnswerCompanyWorkInvitePresenter
 from tests.translator import FakeTranslator
 
+from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl
+from .url_index import ListMessageUrlIndexTestImpl
 
 COMPANY_NAME = "test company"
 
@@ -35,14 +37,11 @@ def get_response(
 
 class SuccessfulResponseTests(TestCase):
     def setUp(self) -> None:
-        self.notifier = NotifierTestImpl()
-        self.url_index = MessagesUrlIndex()
-        self.translator = FakeTranslator()
-        self.presenter = AnswerCompanyWorkInvitePresenter(
-            user_notifier=self.notifier,
-            url_index=self.url_index,
-            translator=self.translator,
-        )
+        self.injector = get_dependency_injector()
+        self.notifier = self.injector.get(NotifierTestImpl)
+        self.url_index = self.injector.get(ListMessageUrlIndexTestImpl)
+        self.translator = self.injector.get(FakeTranslator)
+        self.presenter = self.injector.get(AnswerCompanyWorkInvitePresenter)
 
     def test_info_notification_is_displayed_on_success(self) -> None:
         self.presenter.present(get_response(is_success=True))
@@ -93,14 +92,11 @@ class SuccessfulResponseTests(TestCase):
 
 class UnsuccessfulResponseTests(TestCase):
     def setUp(self) -> None:
-        self.notifier = NotifierTestImpl()
-        self.url_index = MessagesUrlIndex()
-        self.translator = FakeTranslator()
-        self.presenter = AnswerCompanyWorkInvitePresenter(
-            user_notifier=self.notifier,
-            url_index=self.url_index,
-            translator=self.translator,
-        )
+        self.injector = get_dependency_injector()
+        self.notifier = self.injector.get(NotifierTestImpl)
+        self.url_index = self.injector.get(ListMessageUrlIndexTestImpl)
+        self.translator = self.injector.get(FakeTranslator)
+        self.presenter = self.injector.get(AnswerCompanyWorkInvitePresenter)
 
     def test_warning_notification_is_displayed_on_failure(self) -> None:
         self.presenter.present(get_response(is_success=False))
@@ -118,8 +114,3 @@ class UnsuccessfulResponseTests(TestCase):
             self.translator.gettext("Accepting or rejecting is not possible."),
             self.notifier.warnings,
         )
-
-
-class MessagesUrlIndex:
-    def get_list_messages_url(self) -> str:
-        return "list messages"

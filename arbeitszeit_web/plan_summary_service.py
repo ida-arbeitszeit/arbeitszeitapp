@@ -30,9 +30,6 @@ class PlanSummaryService(Protocol):
     def get_plan_summary_member(self, plan_summary: BusinessPlanSummary) -> PlanSummary:
         ...
 
-    def __format_price(self, price_per_unit: Decimal) -> str:
-        ...
-
 
 @dataclass
 class PlanSummaryServiceImpl:
@@ -73,7 +70,7 @@ class PlanSummaryServiceImpl:
             ),
             price_per_unit=(
                 "Preis (pro Einheit)",
-                self.__format_price(plan_summary.price_per_unit),
+                self._format_price(plan_summary.price_per_unit),
                 plan_summary.is_cooperating,
                 self.coop_url_index.get_coop_summary_url(plan_summary.cooperation)
                 if plan_summary.cooperation
@@ -85,5 +82,5 @@ class PlanSummaryServiceImpl:
             ),
         )
 
-    def __format_price(self, price_per_unit: Decimal) -> str:
+    def _format_price(self, price_per_unit: Decimal) -> str:
         return f"{round(price_per_unit, 2)}"

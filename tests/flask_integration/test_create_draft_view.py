@@ -4,7 +4,7 @@ from typing import Dict
 from arbeitszeit.repositories import PlanDraftRepository
 from tests.controllers.test_prefilled_draft_data_controller import FakeDraftForm
 from tests.data_generators import PlanGenerator
-from tests.flask_integration.request import FakeRequest
+from tests.request import FakeRequest
 
 from .flask import ViewTestCase
 

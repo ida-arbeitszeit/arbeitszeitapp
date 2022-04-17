@@ -13,6 +13,10 @@
         class="py-2 has-text-weight-bold {{ 'has-text-primary' if view_model.account_balance|float >= 0 else 'has-text-danger' }}">
         {{ view_model.account_balance }}</p>
 
+    <div>
+        <img src="data:image/png;base64, {{ view_model.plot }}" alt="plot of prd account">
+    </div>
+
     <div class="table-container">
         <table class="table is-fullwidth">
             <thead>

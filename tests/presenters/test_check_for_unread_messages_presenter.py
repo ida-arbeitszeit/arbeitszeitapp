@@ -3,10 +3,13 @@ from unittest import TestCase
 from arbeitszeit.use_cases import CheckForUnreadMessagesResponse
 from arbeitszeit_web.check_for_unread_message import CheckForUnreadMessagesPresenter
 
+from .dependency_injection import get_dependency_injector
+
 
 class CheckForUnreadMessagesPresenterTests(TestCase):
     def setUp(self) -> None:
-        self.presenter = CheckForUnreadMessagesPresenter()
+        self.injector = get_dependency_injector()
+        self.presenter = self.injector.get(CheckForUnreadMessagesPresenter)
 
     def test_when_response_has_unread_messages_then_show_indicator(self) -> None:
         response = CheckForUnreadMessagesResponse(has_unread_messages=True)

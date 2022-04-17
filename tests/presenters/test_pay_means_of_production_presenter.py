@@ -5,6 +5,7 @@ from arbeitszeit_web.pay_means_of_production import (
     PayMeansOfProductionController,
     PayMeansOfProductionPresenter,
 )
+from tests.translator import FakeTranslator
 
 from .notifier import NotifierTestImpl
 
@@ -14,7 +15,10 @@ reasons = PayMeansOfProductionResponse.RejectionReason
 class PayMeansOfProductionTests(TestCase):
     def setUp(self) -> None:
         self.notifier = NotifierTestImpl()
-        self.presenter = PayMeansOfProductionPresenter(user_notifier=self.notifier)
+        self.trans = FakeTranslator()
+        self.presenter = PayMeansOfProductionPresenter(
+            user_notifier=self.notifier, trans=self.trans
+        )
 
     def test_show_confirmation_when_payment_was_successful(self) -> None:
         self.presenter.present(
@@ -22,7 +26,7 @@ class PayMeansOfProductionTests(TestCase):
                 rejection_reason=None,
             )
         )
-        self.assertIn("Erfolgreich bezahlt.", self.notifier.infos)
+        self.assertIn(self.trans.gettext("Successfully paid."), self.notifier.infos)
 
     def test_missing_plan_show_correct_notification(self) -> None:
         self.presenter.present(
@@ -30,7 +34,9 @@ class PayMeansOfProductionTests(TestCase):
                 rejection_reason=reasons.plan_not_found,
             )
         )
-        self.assertIn("Plan existiert nicht.", self.notifier.warnings)
+        self.assertIn(
+            self.trans.gettext("Plan does not exist."), self.notifier.warnings
+        )
 
     def test_invalid_purpose_shows_correct_notification(self) -> None:
         self.presenter.present(
@@ -39,7 +45,8 @@ class PayMeansOfProductionTests(TestCase):
             )
         )
         self.assertIn(
-            "Der angegebene Verwendungszweck is ungültig.", self.notifier.warnings
+            self.trans.gettext("The specified purpose is invalid."),
+            self.notifier.warnings,
         )
 
     def test_inactive_plan_shows_correct_notification(self) -> None:
@@ -49,7 +56,9 @@ class PayMeansOfProductionTests(TestCase):
             )
         )
         self.assertIn(
-            "Der angegebene Plan ist nicht aktuell. Bitte wende dich an den Verkäufer, um eine aktuelle Plan-ID zu erhalten.",
+            self.trans.gettext(
+                "The specified plan has expired. Please contact the provider to obtain a current plan ID."
+            ),
             self.notifier.warnings,
         )
 
@@ -60,7 +69,9 @@ class PayMeansOfProductionTests(TestCase):
             )
         )
         self.assertIn(
-            "Bezahlung nicht erfolgreich. Betriebe können keine öffentlichen Dienstleistungen oder Produkte erwerben.",
+            self.trans.gettext(
+                "Payment failed. Companies cannot acquire public products."
+            ),
             self.notifier.warnings,
         )
 
@@ -71,7 +82,9 @@ class PayMeansOfProductionTests(TestCase):
             )
         )
         self.assertIn(
-            "Bezahlung nicht erfolgreich. Betriebe können keine eigenen Produkte erwerben.",
+            self.trans.gettext(
+                "Payment failed. Companies cannot acquire their own products."
+            ),
             self.notifier.warnings,
         )
 
