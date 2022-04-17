@@ -3,10 +3,13 @@ from unittest import TestCase
 from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyResponse
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyPresenter
 
+from .dependency_injection import get_dependency_injector
+
 
 class InviteWorkerToCompanyPresenterTests(TestCase):
     def setUp(self) -> None:
-        self.presenter = InviteWorkerToCompanyPresenter()
+        self.injector = get_dependency_injector()
+        self.presenter = self.injector.get(InviteWorkerToCompanyPresenter)
 
     def test_successfule_invitation_response_displays_proper_notification(self) -> None:
         response = InviteWorkerToCompanyResponse(

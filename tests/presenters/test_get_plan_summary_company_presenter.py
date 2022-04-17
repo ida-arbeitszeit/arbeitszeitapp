@@ -1,15 +1,16 @@
 from dataclasses import replace
 from decimal import Decimal
 from unittest import TestCase
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from arbeitszeit.plan_summary import BusinessPlanSummary
 from arbeitszeit.use_cases.get_plan_summary_company import PlanSummaryCompanySuccess
 from arbeitszeit_web.get_plan_summary_company import (
     GetPlanSummaryCompanySuccessPresenter,
 )
-from tests.plan_summary import FakePlanSummaryService
-from tests.translator import FakeTranslator
+
+from .dependency_injection import get_dependency_injector
+from .url_index import EndCoopUrlIndexTestImpl, TogglePlanAvailabilityUrlIndex
 
 TESTING_RESPONSE_MODEL = PlanSummaryCompanySuccess(
     plan_summary=BusinessPlanSummary(
@@ -37,17 +38,12 @@ TESTING_RESPONSE_MODEL = PlanSummaryCompanySuccess(
 
 class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
     def setUp(self) -> None:
-        self.coop_url_index = CoopSummaryUrlIndex()
-        self.toggle_availability_url_index = TogglePlanAvailabilityUrlIndex()
-        self.end_coop_url_index = EndCoopUrlIndex()
-        self.translator = FakeTranslator()
-        self.plan_summary_service = FakePlanSummaryService()
-        self.presenter = GetPlanSummaryCompanySuccessPresenter(
-            self.toggle_availability_url_index,
-            self.end_coop_url_index,
-            self.translator,
-            self.plan_summary_service,
+        self.injector = get_dependency_injector()
+        self.toggle_availability_url_index = self.injector.get(
+            TogglePlanAvailabilityUrlIndex
         )
+        self.end_coop_url_index = self.injector.get(EndCoopUrlIndexTestImpl)
+        self.presenter = self.injector.get(GetPlanSummaryCompanySuccessPresenter)
 
     def test_action_section_is_shown_when_current_user_is_planner(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
@@ -102,18 +98,3 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
             view_model.action.is_cooperating, response.plan_summary.is_cooperating
         )
         self.assertEqual(view_model.action.end_coop_url, None)
-
-
-class CoopSummaryUrlIndex:
-    def get_coop_summary_url(self, coop_id: UUID) -> str:
-        return f"fake_coop_url:{coop_id}"
-
-
-class TogglePlanAvailabilityUrlIndex:
-    def get_toggle_availability_url(self, plan_id: UUID) -> str:
-        return f"fake_toggle_url:{plan_id}"
-
-
-class EndCoopUrlIndex:
-    def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
-        return f"fake_end_coop_url:{plan_id}, {cooperation_id}"
