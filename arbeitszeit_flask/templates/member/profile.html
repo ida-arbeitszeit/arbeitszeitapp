@@ -1,89 +1,82 @@
 {% extends "base_member.html" %}
 
-{% block content2 %}
+{% block member %}
 
-<div class="columns is-centered">
-  <div class="column is-half">
-    <div class="content">
-      <h1 class="title">
-	{{ view_model.welcome_message }}
-      </h1>
-    </div>
+<div class="section is-medium has-text-centered">
+  <div class="columns is-centered">
+    <div class="column is-half">
+      <div class="content">
+        <h1 class="title">
+          {{ view_model.welcome_message }}
+        </h1>
+      </div>
+      <br>
+      <div class="level">
+        <div class="level-left">
+          <div class="level-item">
+            <p class="has-text-weight-semibold">{{ gettext("Your ID") }}:</p>
+          </div>
+        </div>
+        <div class="level-right">
+          <div class="level-item">
+            <p>{{ view_model.member_id }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="level">
+        <div class="level-left">
+          <div class="level-item">
+            <p class="has-text-weight-semibold">{{ gettext("Your credit") }}:</p>
+          </div>
+        </div>
+        <div class="level-right">
+          <div class="level-item">
+            <p>{{ view_model.account_balance }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="level">
+        <div class="level-left">
+          <div class="level-item">
+            <p class="has-text-weight-semibold">{{ gettext("Your email") }}:</p>
+          </div>
+        </div>
+        <div class="level-right">
+          <div class="level-item">
+            <p>{{ view_model.email }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="level">
+        <div class="level-left">
+          <div class="level-item">
+            <p class="has-text-weight-semibold">{{ gettext("Your workplace") }}:</p>
+          </div>
+        </div>
+        <div class="level-right has-text-right-tablet">
+          <div class="level-item">
+            {% if view_model.show_workplaces %}
+            <ul>
+              {% for workplace in view_model.workplaces %}
+              <li>{{ workplace.name }} ({{ workplace.email }})</li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+          </div>
+        </div>
+      </div>
 
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <div class="notification is-danger">
-      {{ messages[0] }}
-    </div>
-    {% endif %}
-    {% endwith %}
+      {% if view_model.show_workplace_registration_info %}
+      <div class="content">
+        <p>
+        <div class="icon-text"><i class="fas fa-exclamation-triangle"></i></div>
+        {{ gettext("You are not registered with any company. Tell your company your member ID so that they register
+        you.")
+        }}
+      </div>
+      {% endif %}
 
-    <br>
-
-    <div class="level">
-      <div class="level-left">
-        <div class="level-item">
-          <p class="has-text-weight-semibold">{{ gettext("Your ID") }}:</p>
-        </div>
-      </div>
-      <div class="level-right">
-        <div class="level-item">
-          <p>{{ view_model.member_id }}</p>
-        </div>
-      </div>
     </div>
-    <div class="level">
-      <div class="level-left">
-        <div class="level-item">
-          <p class="has-text-weight-semibold">{{ gettext("Your credit") }}:</p>
-        </div>
-      </div>
-      <div class="level-right">
-        <div class="level-item">
-          <p>{{ view_model.account_balance }}</p>
-        </div>
-      </div>
-    </div>
-    <div class="level">
-      <div class="level-left">
-        <div class="level-item">
-          <p class="has-text-weight-semibold">{{ gettext("Your email") }}:</p>
-        </div>
-      </div>
-      <div class="level-right">
-        <div class="level-item">
-          <p>{{ view_model.email }}</p>
-        </div>
-      </div>
-    </div>
-    <div class="level">
-      <div class="level-left">
-        <div class="level-item">
-          <p class="has-text-weight-semibold">{{ gettext("Your workplace") }}:</p>
-        </div>
-      </div>
-      <div class="level-right has-text-right-tablet">
-        <div class="level-item">
-          {% if view_model.show_workplaces %}
-          <ul>
-            {% for workplace in view_model.workplaces %}
-            <li>{{ workplace.name }} ({{ workplace.email }})</li>
-            {% endfor %}
-          </ul>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-
-    {% if view_model.show_workplace_registration_info %}
-    <div class="content">
-      <p>
-	<div class="icon-text"><i class="fas fa-exclamation-triangle"></i></div>
-	{{ gettext("You are not registered with any company. Tell your company your member ID so that they register you.") }}
-    </div>
-    {% endif %}
-
   </div>
 </div>
-
 {% endblock %}

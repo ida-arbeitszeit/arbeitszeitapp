@@ -1,50 +1,50 @@
 {% extends "base_company.html" %}
 
-{% from 'macros/show_notifications.html' import show_notifications %}
-
-{% block content2 %}
-<div class="columns has-text-left">
-    <div class="column is-two-third">
-        <h1 class="title">
-            Überweisung Arbeitszertifikate an Mitarbeiter
-        </h1>
-        {{ show_notifications() }}
-        <div class="content">
-            {% if workers_list is defined and workers_list|length %}
-            <form method="post">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div class="field has-addons">
-                    <div class="control has-icons-left">
-                        <div class="select has-icons-left">
-                            <select name="member_id" required>
-                                <option value="" disabled selected hidden>Mitarbeiter ...</option>
-                                {% for worker in workers_list %}
-                                <option value="{{ worker.id }}">{{ worker.name }}</option>
-                                {% endfor %}
-                            </select>
+{% block company %}
+<div class="section is-medium has-text-centered">
+    <div class="columns">
+        <div class="column"></div>
+        <div class="column is-10">
+            <h1 class="title">
+                Überweisung Arbeitszertifikate an Mitarbeiter
+            </h1>
+            <div class="content">
+                {% if workers_list is defined and workers_list|length %}
+                <form method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="field has-addons has-addons-centered">
+                        <div class="control has-icons-left">
+                            <div class="select has-icons-left">
+                                <select name="member_id" required>
+                                    <option value="" disabled selected hidden>Mitarbeiter ...</option>
+                                    {% for worker in workers_list %}
+                                    <option value="{{ worker.id }}">{{ worker.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <span class="icon is-left">
+                                <i class="fas fa-user"></i>
+                            </span>
                         </div>
-                        <span class="icon is-left">
-                            <i class="fas fa-user"></i>
-                        </span>
+                        <div class="control">
+                            <input class="input" type="number" step="0.01" placeholder="Summe" name="amount" required>
+                        </div>
+                        <div class="control">
+                            <button class="button is-primary" name="transfer_type" value="transfer_to_worker"
+                                type="submit">Überweisen</button>
+                        </div>
                     </div>
-                    <div class="control">
-                        <input class="input" type="number" step="0.01" placeholder="Summe" name="amount" required>
-                    </div>
-                    <div class="control">
-                        <button class="button is-primary" name="transfer_type" value="transfer_to_worker"
-                            type="submit">Überweisen</button>
-                    </div>
-                </div>
-                <p class="help">Mitarbeiter müssen unter <a
-                        href="{{url_for('main_company.invite_worker_to_company')}}">"Arbeit"</a>
-                    registriert werden.</p>
-            </form>
-            {% else %}
-            <p>(Noch keine Mitarbeiter.)</p>
-            {% endif %}
+                    <p class="help">Mitarbeiter müssen unter <a
+                            href="{{url_for('main_company.invite_worker_to_company')}}">"Arbeit"</a>
+                        registriert werden.</p>
+                </form>
+                {% else %}
+                <p>(Noch keine Mitarbeiter.)</p>
+                {% endif %}
+            </div>
         </div>
+        <div class="column"></div>
     </div>
 </div>
-
 
 {% endblock %}

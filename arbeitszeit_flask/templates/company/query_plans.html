@@ -1,6 +1,6 @@
 {% extends "base_company.html" %}
 
-{% block content2 %}
-{% from 'macros.html' import query_plans %}
+{% block company %}
+{% from 'macros/query_plans.html' import query_plans %}
 {{ query_plans(form, view_model) }}
 {% endblock %}

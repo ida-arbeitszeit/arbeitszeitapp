@@ -1,56 +1,58 @@
 {% macro company_summary(view_model) %}
 
-<div class="columns is-centered">
-    <div class="column is-two-thirds">
-        <div class="content">
-            <h1 class="title">
-                {{ gettext("Company") }}
-            </h1>
-        </div>
-        <br>
-        <div class="table-container">
-            <table class="table is-fullwidth">
-                <tbody>
-                    <tr>
-                        <td class="has-text-left has-text-weight-semibold">{{ gettext("ID") }}</td>
-                        <td class="has-text-left">{{ view_model.id }}</td>
-                    </tr>
-                    <tr>
-                        <td class="has-text-left has-text-weight-semibold">{{ gettext("Name") }}</td>
-                        <td class="has-text-left">{{ view_model.name }}</td>
-                    </tr>
-                    <tr>
-                        <td class="has-text-left has-text-weight-semibold">{{ gettext("Email") }}</td>
-                        <td class="has-text-left">{{ view_model.email }}</td>
-                    </tr>
-                    <tr>
-                        <td class="has-text-left has-text-weight-semibold">{{ gettext("Registered since") }}</td>
-                        <td class="has-text-left">{{ view_model.registered_on | format_datetime(zone='Europe/Berlin',
-                            fmt='%d.%m.%Y %H:%M') }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="table-container">
-            <h1 class="title is-4">
-                {{ gettext("Active plans") }}
-            </h1>
-            <table class="table is-fullwidth has-text-left">
-                <thead>
-                    <tr>
-                        <th>{{ gettext("Product name") }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for plan in view_model.active_plans %}
-                    <tr>
-                        <td><a href="{{ plan.url }}">{{ plan.name }}</a></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+<div class="section has-text-centered">
+    <div class="columns is-centered">
+        <div class="column is-two-thirds">
+            <div class="content">
+                <h1 class="title">
+                    {{ gettext("Company") }}
+                </h1>
+            </div>
+            <br>
+            <div class="table-container">
+                <table class="table is-fullwidth">
+                    <tbody>
+                        <tr>
+                            <td class="has-text-left has-text-weight-semibold">{{ gettext("ID") }}</td>
+                            <td class="has-text-left">{{ view_model.id }}</td>
+                        </tr>
+                        <tr>
+                            <td class="has-text-left has-text-weight-semibold">{{ gettext("Name") }}</td>
+                            <td class="has-text-left">{{ view_model.name }}</td>
+                        </tr>
+                        <tr>
+                            <td class="has-text-left has-text-weight-semibold">{{ gettext("Email") }}</td>
+                            <td class="has-text-left">{{ view_model.email }}</td>
+                        </tr>
+                        <tr>
+                            <td class="has-text-left has-text-weight-semibold">{{ gettext("Registered since") }}</td>
+                            <td class="has-text-left">{{ view_model.registered_on |
+                                format_datetime(zone='Europe/Berlin',
+                                fmt='%d.%m.%Y %H:%M') }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-container">
+                <h1 class="title is-4">
+                    {{ gettext("Active plans") }}
+                </h1>
+                <table class="table is-fullwidth has-text-left">
+                    <thead>
+                        <tr>
+                            <th>{{ gettext("Product name") }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for plan in view_model.active_plans %}
+                        <tr>
+                            <td><a href="{{ plan.url }}">{{ plan.name }}</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
-
 {% endmacro %}

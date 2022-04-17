@@ -1,8 +1,8 @@
 {% extends "base_member.html" %}
 
-{% block content2 %}
+{% block member %}
 
-{% from 'macros.html' import statistics %}
+{% from 'macros/statistics.html' import statistics %}
 {{ statistics(view_model) }}
 
 {% endblock %}
