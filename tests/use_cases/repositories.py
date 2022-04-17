@@ -111,6 +111,15 @@ class TransactionRepository(interfaces.TransactionRepository):
                 all_received.append(transaction)
         return all_received
 
+    def get_sales_balance_of_plan(self, plan: Plan) -> Decimal:
+        balance = Decimal(0)
+        for transaction in self.transactions:
+            if (transaction.receiving_account == plan.planner.product_account) and (
+                str(plan.id) in transaction.purpose
+            ):
+                balance += transaction.amount_received
+        return balance
+
 
 @singleton
 class CompanyWorkerRepository(interfaces.CompanyWorkerRepository):

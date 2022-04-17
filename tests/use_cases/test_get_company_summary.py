@@ -2,10 +2,10 @@ from datetime import datetime
 from decimal import Decimal
 from uuid import uuid4
 
+from arbeitszeit.entities import ProductionCosts
 from arbeitszeit.repositories import TransactionRepository
 from arbeitszeit.use_cases import GetCompanySummary
-from arbeitszeit.use_cases.get_company_summary import PlanDetails
-from tests.data_generators import CompanyGenerator, PlanGenerator
+from tests.data_generators import CompanyGenerator, PlanGenerator, TransactionGenerator
 
 from .dependency_injection import injection_test
 
@@ -95,45 +95,173 @@ def test_labour_account_shows_correct_balance_after_company_received_a_transacti
 
 
 @injection_test
-def test_returns_empty_list_of_companys_active_plans_when_there_are_none(
+def test_returns_empty_list_of_companys_plans_when_there_are_none(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+):
+    company = company_generator.create_company()
+    response = get_company_summary(company.id)
+    assert response
+    assert response.plan_details == []
+
+
+@injection_test
+def test_returns_list_of_companys_plans_when_there_are_any(
     get_company_summary: GetCompanySummary,
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
 ):
     company = company_generator.create_company()
+    plan_generator.create_plan(planner=company, activation_date=datetime.min)
     plan_generator.create_plan(planner=company, activation_date=None)
     response = get_company_summary(company.id)
     assert response
-    assert response.active_plans == []
+    assert len(response.plan_details) == 2
 
 
 @injection_test
-def test_returns_list_of_companys_active_plans_when_there_are_any(
+def test_returns_correct_sales_volume_of_zero_if_plan_is_public(
     get_company_summary: GetCompanySummary,
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
 ):
     company = company_generator.create_company()
-    plan1 = plan_generator.create_plan(planner=company, activation_date=datetime.min)
-    plan2 = plan_generator.create_plan(planner=company, activation_date=datetime.min)
+    plan_generator.create_plan(planner=company, is_public_service=True)
     response = get_company_summary(company.id)
     assert response
-    assert response.active_plans == [
-        PlanDetails(plan1.id, plan1.prd_name),
-        PlanDetails(plan2.id, plan2.prd_name),
-    ]
+    assert response.plan_details[0].sales_volume == 0
 
 
 @injection_test
-def test_returns_list_of_companys_active_plans_and_ignores_inactive_plans(
+def test_returns_correct_sales_volume_if_plan_is_productive(
     get_company_summary: GetCompanySummary,
-    company_repository: CompanyGenerator,
+    company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
 ):
-    company = company_repository.create_company()
-    plan_generator.create_plan(planner=company, activation_date=datetime.min)
-    plan_generator.create_plan(planner=company, activation_date=datetime.min)
-    plan_generator.create_plan(planner=company, activation_date=None)
+    company = company_generator.create_company()
+    plan_generator.create_plan(
+        planner=company,
+        costs=ProductionCosts(Decimal(2), Decimal(2), Decimal(2)),
+    )
     response = get_company_summary(company.id)
     assert response
-    assert len(response.active_plans) == 2
+    assert response.plan_details[0].sales_volume == Decimal(6)
+
+
+@injection_test
+def test_returns_correct_sales_balance_if_plan_is_productive_and_no_transactions_took_place(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+):
+    company = company_generator.create_company()
+    plan_generator.create_plan(
+        planner=company,
+    )
+    response = get_company_summary(company.id)
+    assert response
+    assert response.plan_details[0].sales_balance == Decimal(0)
+
+
+@injection_test
+def test_returns_correct_sales_balance_if_plan_is_productive_and_one_transaction_took_place(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+    transaction_generator: TransactionGenerator,
+):
+    company = company_generator.create_company()
+    plan = plan_generator.create_plan(
+        planner=company,
+    )
+    transaction_generator.create_transaction(
+        receiving_account=company.product_account,
+        amount_received=Decimal(15),
+        purpose=f"Plan ID: {plan.id}",
+    )
+    response = get_company_summary(company.id)
+    assert response
+    assert response.plan_details[0].sales_balance == Decimal(15)
+
+
+@injection_test
+def test_returns_correct_deviation_if_plan_is_productive_with_costs_of_10_and_balance_of_10(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+    transaction_generator: TransactionGenerator,
+):
+    company = company_generator.create_company()
+    plan = plan_generator.create_plan(
+        planner=company,
+        costs=ProductionCosts(Decimal(5), Decimal(5), Decimal(0)),
+    )
+    transaction_generator.create_transaction(
+        receiving_account=company.product_account,
+        amount_received=Decimal(10),
+        purpose=f"Plan ID: {plan.id}",
+    )
+    response = get_company_summary(company.id)
+    assert response
+    assert response.plan_details[0].deviation_relative == Decimal(100)
+
+
+@injection_test
+def test_returns_correct_deviation_if_plan_is_productive_with_costs_of_10_and_balance_of_minus_10(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+    transaction_generator: TransactionGenerator,
+):
+    company = company_generator.create_company()
+    plan = plan_generator.create_plan(
+        planner=company,
+        costs=ProductionCosts(Decimal(5), Decimal(5), Decimal(0)),
+    )
+    transaction_generator.create_transaction(
+        receiving_account=company.product_account,
+        amount_received=Decimal(-10),
+        purpose=f"Plan ID: {plan.id}",
+    )
+    response = get_company_summary(company.id)
+    assert response
+    assert response.plan_details[0].deviation_relative == Decimal(-100)
+
+
+@injection_test
+def test_returns_correct_deviation_if_plan_is_productive_with_costs_of_10_and_balance_of_0(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+):
+    company = company_generator.create_company()
+    plan_generator.create_plan(
+        planner=company,
+        costs=ProductionCosts(Decimal(5), Decimal(5), Decimal(0)),
+    )
+    response = get_company_summary(company.id)
+    assert response
+    assert response.plan_details[0].deviation_relative == Decimal(0)
+
+
+@injection_test
+def test_returns_correct_deviation_if_plan_is_public(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+    transaction_generator: TransactionGenerator,
+):
+    company = company_generator.create_company()
+    plan = plan_generator.create_plan(
+        planner=company,
+        is_public_service=True,
+        costs=ProductionCosts(Decimal(5), Decimal(5), Decimal(0)),
+    )
+    transaction_generator.create_transaction(
+        receiving_account=company.product_account,
+        amount_received=Decimal(10),
+        purpose=f"Plan ID: {plan.id}",
+    )
+    response = get_company_summary(company.id)
+    assert response
+    assert response.plan_details[0].deviation_relative == Decimal(0)

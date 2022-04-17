@@ -125,9 +125,13 @@ class InMemoryModule(Module):
         company_repository: interfaces.CompanyRepository,
         plan_repository: interfaces.PlanRepository,
         account_repository: interfaces.AccountRepository,
+        transaction_repository: interfaces.TransactionRepository,
     ) -> GetCompanySummary:
         return GetCompanySummary(
-            company_repository, plan_repository, account_repository
+            company_repository,
+            plan_repository,
+            account_repository,
+            transaction_repository,
         )
 
 

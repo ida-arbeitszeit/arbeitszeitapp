@@ -9,6 +9,7 @@ from arbeitszeit.use_cases.get_company_summary import (
     PlanDetails,
 )
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
+from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
 from .url_index import PlanSummaryUrlIndexTestImpl
@@ -21,7 +22,24 @@ RESPONSE_WITH_2_PLANS = GetCompanySummarySuccess(
     account_balances=AccountBalances(
         Decimal("1"), Decimal("2"), Decimal("3"), Decimal("4.561")
     ),
-    active_plans=[PlanDetails(uuid4(), "name_1"), PlanDetails(uuid4(), "name_2")],
+    plan_details=[
+        PlanDetails(
+            uuid4(),
+            "name_1",
+            True,
+            sales_volume=Decimal(5),
+            sales_balance=Decimal(-5),
+            deviation_relative=Decimal(-100),
+        ),
+        PlanDetails(
+            uuid4(),
+            "name_2",
+            False,
+            sales_volume=Decimal(2),
+            sales_balance=Decimal(-4),
+            deviation_relative=Decimal(-200),
+        ),
+    ],
 )
 
 
@@ -30,6 +48,7 @@ class GetGetCompanySummaryPresenterTests(TestCase):
         self.injector = get_dependency_injector()
         self.presenter = self.injector.get(GetCompanySummarySuccessPresenter)
         self.plan_index = self.injector.get(PlanSummaryUrlIndexTestImpl)
+        self.translator = self.injector.get(FakeTranslator)
 
     def test_company_id_is_shown(self):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
@@ -54,36 +73,62 @@ class GetGetCompanySummaryPresenterTests(TestCase):
     def test_ids_of_plans_are_shown(self):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
         self.assertEqual(
-            view_model.active_plans[0].id,
-            str(RESPONSE_WITH_2_PLANS.active_plans[0].id),
+            view_model.plan_details[0].id,
+            str(RESPONSE_WITH_2_PLANS.plan_details[0].id),
         )
         self.assertEqual(
-            view_model.active_plans[1].id,
-            str(RESPONSE_WITH_2_PLANS.active_plans[1].id),
+            view_model.plan_details[1].id,
+            str(RESPONSE_WITH_2_PLANS.plan_details[1].id),
         )
 
     def test_names_of_plans_are_shown(self):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
         self.assertEqual(
-            view_model.active_plans[0].name,
-            str(RESPONSE_WITH_2_PLANS.active_plans[0].name),
+            view_model.plan_details[0].name,
+            str(RESPONSE_WITH_2_PLANS.plan_details[0].name),
         )
         self.assertEqual(
-            view_model.active_plans[1].name,
-            str(RESPONSE_WITH_2_PLANS.active_plans[1].name),
+            view_model.plan_details[1].name,
+            str(RESPONSE_WITH_2_PLANS.plan_details[1].name),
         )
 
     def test_urls_of_plans_are_shown(self):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
         self.assertEqual(
-            view_model.active_plans[0].url,
+            view_model.plan_details[0].url,
             self.plan_index.get_plan_summary_url(
-                RESPONSE_WITH_2_PLANS.active_plans[0].id
+                RESPONSE_WITH_2_PLANS.plan_details[0].id
             ),
         )
         self.assertEqual(
-            view_model.active_plans[1].url,
+            view_model.plan_details[1].url,
             self.plan_index.get_plan_summary_url(
-                RESPONSE_WITH_2_PLANS.active_plans[1].id
+                RESPONSE_WITH_2_PLANS.plan_details[1].id
             ),
+        )
+
+    def test_status_of_plans_are_shown(self):
+        view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
+        self.assertEqual(
+            view_model.plan_details[0].status,
+            self.translator.gettext("Active"),
+        )
+        self.assertEqual(
+            view_model.plan_details[1].status,
+            self.translator.gettext("Inactive"),
+        )
+
+    def test_sales_volume_balance_and_deviation_of_plan_are_shown(self):
+        view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
+        self.assertEqual(
+            view_model.plan_details[0].sales_volume,
+            f"{round(RESPONSE_WITH_2_PLANS.plan_details[0].sales_volume, 2)}",
+        )
+        self.assertEqual(
+            view_model.plan_details[0].sales_balance,
+            f"{round(RESPONSE_WITH_2_PLANS.plan_details[0].sales_balance, 2)}",
+        )
+        self.assertEqual(
+            view_model.plan_details[0].deviation_relative,
+            f"{round(RESPONSE_WITH_2_PLANS.plan_details[0].deviation_relative)}",
         )

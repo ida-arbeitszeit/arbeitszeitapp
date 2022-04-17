@@ -182,6 +182,10 @@ class TransactionRepository(ABC):
     ) -> List[Transaction]:
         pass
 
+    @abstractmethod
+    def get_sales_balance_of_plan(self, plan: Plan) -> Decimal:
+        pass
+
 
 class AccountRepository(ABC):
     @abstractmethod

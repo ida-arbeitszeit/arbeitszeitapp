@@ -779,6 +779,17 @@ class TransactionRepository(repositories.TransactionRepository):
             for transaction in account_orm.transactions_received.all()
         ]
 
+    def get_sales_balance_of_plan(self, plan: entities.Plan) -> Decimal:
+        return Decimal(
+            self.db.session.query(func.sum(Transaction.amount_received))
+            .filter(
+                Transaction.receiving_account == str(plan.planner.product_account.id),
+                Transaction.purpose.contains(f"{plan.id}"),
+            )
+            .one()[0]
+            or 0
+        )
+
 
 @inject
 @dataclass

@@ -50,18 +50,28 @@
         </div>
         <div class="table-container">
             <h1 class="title is-4">
-                {{ gettext("Active plans") }}
+                {{ gettext("Plans") }}
             </h1>
             <table class="table is-fullwidth has-text-left">
                 <thead>
                     <tr>
-                        <th>{{ gettext("Product name") }}</th>
+                        <th></th>
+                        <th>{{ gettext("Status") }}</th>
+                        <th>{{ gettext("Planned sales") }}</th>
+                        <th>{{ gettext("Sales balance") }}</th>
+                        <th>{{ gettext("Deviation") }}</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for plan in view_model.active_plans %}
+                    {% for plan in view_model.plan_details %}
                     <tr>
                         <td><a href="{{ plan.url }}">{{ plan.name }}</a></td>
+                        <td>{{ plan.status }}</td>
+                        <td>{{ plan.sales_volume }}</td>
+                        <td>{{ plan.sales_balance }}</td>
+                        <td
+                            class="{{ 'has-text-danger' if plan.deviation_relative | float | abs >= 33 else 'has-text-primary'  }}">
+                            {{ plan.deviation_relative }}%</td>
                     </tr>
                     {% endfor %}
                 </tbody>
