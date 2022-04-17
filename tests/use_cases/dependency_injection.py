@@ -124,8 +124,11 @@ class InMemoryModule(Module):
         self,
         company_repository: interfaces.CompanyRepository,
         plan_repository: interfaces.PlanRepository,
+        account_repository: interfaces.AccountRepository,
     ) -> GetCompanySummary:
-        return GetCompanySummary(company_repository, plan_repository)
+        return GetCompanySummary(
+            company_repository, plan_repository, account_repository
+        )
 
 
 def get_dependency_injector() -> Injector:

@@ -1,8 +1,10 @@
 from datetime import datetime
+from decimal import Decimal
 from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases.get_company_summary import (
+    AccountBalances,
     GetCompanySummarySuccess,
     PlanDetails,
 )
@@ -16,6 +18,9 @@ RESPONSE_WITH_2_PLANS = GetCompanySummarySuccess(
     name="Company Name",
     email="comp_mail@cp.org",
     registered_on=datetime(2022, 1, 2),
+    account_balances=AccountBalances(
+        Decimal("1"), Decimal("2"), Decimal("3"), Decimal("4.561")
+    ),
     active_plans=[PlanDetails(uuid4(), "name_1"), PlanDetails(uuid4(), "name_2")],
 )
 
@@ -41,6 +46,10 @@ class GetGetCompanySummaryPresenterTests(TestCase):
     def test_company_register_date_is_shown(self):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
         self.assertEqual(view_model.registered_on, RESPONSE_WITH_2_PLANS.registered_on)
+
+    def test_company_account_balances_is_shown_as_list_of_strings(self):
+        view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
+        self.assertEqual(view_model.account_balances, ["1.00", "2.00", "3.00", "4.56"])
 
     def test_ids_of_plans_are_shown(self):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)

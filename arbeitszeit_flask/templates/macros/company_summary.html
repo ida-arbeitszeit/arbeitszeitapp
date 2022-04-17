@@ -28,6 +28,23 @@
                         <td class="has-text-left">{{ view_model.registered_on | format_datetime(zone='Europe/Berlin',
                             fmt='%d.%m.%Y %H:%M') }}</td>
                     </tr>
+                    <tr>
+                        <td class="has-text-left has-text-weight-semibold">{{ gettext("Account balances") }}</td>
+                        <td class="has-text-left">
+                            p <span
+                                class="{{ 'has-text-primary' if view_model.account_balances[0] | float >= 0 else 'has-text-danger' }}">{{
+                                view_model.account_balances[0] }}</span> //
+                            r <span
+                                class="{{ 'has-text-primary' if view_model.account_balances[1] | float >= 0 else 'has-text-danger' }}">{{
+                                view_model.account_balances[1] }}</span> //
+                            a <span
+                                class="{{ 'has-text-primary' if view_model.account_balances[2] | float >= 0 else 'has-text-danger' }}">{{
+                                view_model.account_balances[2] }}</span> //
+                            prd <span
+                                class="{{ 'has-text-primary' if view_model.account_balances[3] | float >= 0 else 'has-text-danger' }}">{{
+                                view_model.account_balances[3] }}</span>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>

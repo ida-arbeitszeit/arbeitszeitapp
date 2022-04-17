@@ -22,6 +22,7 @@ class GetCompanySummaryViewModel:
     name: str
     email: str
     registered_on: datetime
+    account_balances: List[str]
     active_plans: List[PlanDetailsWeb]
 
     def to_dict(self) -> Dict[str, Any]:
@@ -40,6 +41,12 @@ class GetCompanySummarySuccessPresenter:
             use_case_response.name,
             use_case_response.email,
             use_case_response.registered_on,
+            [
+                "%(num).2f" % dict(num=use_case_response.account_balances.means),
+                "%(num).2f" % dict(num=use_case_response.account_balances.raw_material),
+                "%(num).2f" % dict(num=use_case_response.account_balances.work),
+                "%(num).2f" % dict(num=use_case_response.account_balances.product),
+            ],
             [self._get_plan_details(plan) for plan in use_case_response.active_plans],
         )
 
