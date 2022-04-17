@@ -51,6 +51,7 @@ from arbeitszeit_flask.database.repositories import (
 )
 from arbeitszeit_flask.datetime import RealtimeDatetimeService
 from arbeitszeit_flask.extensions import db
+from arbeitszeit_flask.flask_colors import FlaskColors
 from arbeitszeit_flask.flask_plotter import FlaskPlotter
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.flask_session import FlaskSession
@@ -84,6 +85,7 @@ from arbeitszeit_web.check_for_unread_message import (
     CheckForUnreadMessagesController,
     CheckForUnreadMessagesPresenter,
 )
+from arbeitszeit_web.colors import Colors
 from arbeitszeit_web.controllers.end_cooperation_controller import (
     EndCooperationController,
 )
@@ -435,9 +437,9 @@ class CompanyModule(Module):
 class FlaskModule(Module):
     @provider
     def provide_get_statistics_presenter(
-        self, translator: Translator, plotter: Plotter
+        self, translator: Translator, plotter: Plotter, colors: Colors
     ) -> GetStatisticsPresenter:
-        return GetStatisticsPresenter(trans=translator, plotter=plotter)
+        return GetStatisticsPresenter(trans=translator, plotter=plotter, colors=colors)
 
     @provider
     def provide_get_company_summary(
@@ -722,6 +724,10 @@ class FlaskModule(Module):
     @provider
     def provide_plotter(self) -> Plotter:
         return FlaskPlotter()
+
+    @provider
+    def provide_colors(self) -> Colors:
+        return FlaskColors()
 
     @provider
     def provide_show_my_accounts_controller(

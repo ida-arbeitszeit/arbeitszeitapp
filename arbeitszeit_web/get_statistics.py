@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 
 from arbeitszeit.use_cases import StatisticsResponse
+from arbeitszeit_web.colors import Colors
 from arbeitszeit_web.plotter import Plotter
 from arbeitszeit_web.translator import Translator
 
@@ -29,6 +30,7 @@ class GetStatisticsViewModel:
 class GetStatisticsPresenter:
     trans: Translator
     plotter: Plotter
+    colors: Colors
 
     def present(self, use_case_response: StatisticsResponse) -> GetStatisticsViewModel:
         average_timeframe = self.trans.ngettext(
@@ -60,43 +62,51 @@ class GetStatisticsPresenter:
             active_plans_public_count=str(use_case_response.active_plans_public_count),
             average_timeframe_days=average_timeframe,
             barplot_certificates=self.plotter.create_bar_plot(
-                [
+                x_coordinates=[
                     self.trans.gettext("Work certificates"),
                     self.trans.gettext("Available product"),
                 ],
-                [
+                height_of_bars=[
                     use_case_response.certificates_count,
                     use_case_response.available_product,
                 ],
-                (5, 4),
-                self.trans.gettext("Hours"),
+                colors_of_bars=[self.colors.primary, self.colors.info],
+                fig_size=(5, 4),
+                y_label=self.trans.gettext("Hours"),
             ),
             barplot_means_of_production=self.plotter.create_bar_plot(
-                [
+                x_coordinates=[
                     self.trans.gettext("Feste PM"),
                     self.trans.gettext("Flüssige PM"),
                     self.trans.gettext("Arbeit"),
                 ],
-                [
+                height_of_bars=[
                     use_case_response.planned_means,
                     use_case_response.planned_resources,
                     use_case_response.planned_work,
                 ],
-                (5, 4),
-                self.trans.gettext("Hours"),
+                colors_of_bars=[
+                    self.colors.primary,
+                    self.colors.info,
+                    self.colors.danger,
+                ],
+                fig_size=(5, 4),
+                y_label=self.trans.gettext("Hours"),
             ),
             barplot_plans=self.plotter.create_bar_plot(
-                [
+                x_coordinates=[
                     self.trans.gettext("Produktive Pläne"),
                     self.trans.gettext("Öffentliche Pläne"),
                 ],
-                [
+                height_of_bars=[
                     Decimal(
                         use_case_response.active_plans_count
                         - use_case_response.active_plans_public_count
                     ),
                     Decimal(use_case_response.active_plans_public_count),
                 ],
-                (5, 4),
+                colors_of_bars=list(self.colors.get_dict().values()),
+                fig_size=(5, 4),
+                y_label=self.trans.gettext("Amount"),
             ),
         )

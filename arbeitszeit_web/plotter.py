@@ -13,7 +13,8 @@ class Plotter(Protocol):
         self,
         x_coordinates: List[Union[int, str]],
         height_of_bars: List[Decimal],
+        colors_of_bars: List[str],
         fig_size: Tuple[int, int],
-        y_label: Optional[str] = None,
+        y_label: Optional[str],
     ) -> str:
         ...
