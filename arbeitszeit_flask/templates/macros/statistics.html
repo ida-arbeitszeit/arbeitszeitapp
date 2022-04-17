@@ -39,21 +39,15 @@
                     <img src="data:image/png;base64, {{ view_model.barplot_plans }}"
                         alt="bar plot of public and productive plans">
                 </div>
-                <p>{{ gettext("Active plans") }}: {{ view_model.active_plans_count }}</p>
-                <p>{{ gettext("Public active plans") }}: {{ view_model.active_plans_public_count }}</p>
-                <p>{{ gettext("Average plan duration") }}: {{ view_model.average_timeframe_days }}</p>
             </div>
         </div>
         <div class="tile is-parent">
             <div class="tile is-child box">
-                <h1 class="title is-4 has-text-centered">{{ gettext("Means of production") }}</h1>
+                <h1 class="title is-4 has-text-centered">{{ gettext("Planned ressources") }}</h1>
                 <div>
                     <img src="data:image/png;base64, {{ view_model.barplot_means_of_production }}"
                         alt="bar plot of means of production">
                 </div>
-                <p>{{ gettext("Currently planned fixed means") }}: {{ view_model.planned_means_hours }}</p>
-                <p>{{ gettext("Currently planned liquid means") }}: {{ view_model.planned_resources_hours }}</p>
-                <p>{{ gettext("Currently planned work") }}: {{ view_model.planned_work_hours }}</p>
             </div>
         </div>
         <div class="tile is-parent">
@@ -63,8 +57,26 @@
                     <img src="data:image/png;base64, {{ view_model.barplot_certificates }}"
                         alt="bar plot of certificates vs product">
                 </div>
-                <p>{{ gettext("Work certificates") }}: {{ view_model.certificates_count }}</p>
-                <p>{{ gettext("Available product (no public products)") }}: {{ view_model.available_product }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="tile is-ancestor">
+        <div class="tile is-parent">
+            <div class="tile is-child box">
+                <b>{{ gettext("Active plans") }}:</b> {{ view_model.active_plans_count }} &#8212;
+                <b>{{ gettext("Public active plans") }}:</b> {{ view_model.active_plans_public_count }} &#8212;
+                <b>{{ gettext("Average plan duration") }}:</b> {{ view_model.average_timeframe_days }} &#8212;
+                <b>{{ gettext("Currently planned fixed means") }}:</b> {{ view_model.planned_means_hours }} &#8212;
+                <b>{{ gettext("Currently planned liquid means") }}:</b> {{ view_model.planned_resources_hours }} &#8212;
+                <b>{{ gettext("Currently planned work") }}:</b> {{ view_model.planned_work_hours }} &#8212;
+                <b>{{ gettext("Available work certificates") }}:</b> {{ view_model.certificates_count }} &#8212;
+                <b>{{ gettext("Available product (no public products)") }}:</b> {{ view_model.available_product }}
+            </div>
+        </div>
+        <div class="tile is-parent is-4 has-text-centered">
+            <div class="tile is-child box">
+                <h1 class="title">{{ view_model.average_timeframe_days }}</h1>
+                <div class="subtitle">{{ gettext("Average plan duration") }}</div>
             </div>
         </div>
     </div>

@@ -1,6 +1,5 @@
 from typing import Dict
 
-
 # hex values should be same as bulma values
 _colors = {
     "primary": "#00d1b2",

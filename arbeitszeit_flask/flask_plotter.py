@@ -5,7 +5,6 @@ from decimal import Decimal
 from typing import List, Optional, Tuple, Union
 
 from matplotlib.figure import Figure
-from arbeitszeit_flask.flask_colors import FlaskColors
 
 
 class FlaskPlotter:

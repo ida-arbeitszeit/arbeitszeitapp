@@ -1,6 +1,5 @@
 from typing import Dict
 
-
 _colors = {
     "primary": "primary_color",
     "info": "info_color",
