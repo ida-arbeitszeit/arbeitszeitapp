@@ -1,83 +1,85 @@
 {% macro company_summary(view_model) %}
 
-<div class="columns is-centered">
-    <div class="column is-two-thirds">
-        <div class="content">
-            <h1 class="title">
-                {{ gettext("Company") }}
-            </h1>
-        </div>
-        <br>
-        <div class="table-container">
-            <table class="table is-fullwidth">
-                <tbody>
-                    <tr>
-                        <td class="has-text-left has-text-weight-semibold">{{ gettext("ID") }}</td>
-                        <td class="has-text-left">{{ view_model.id }}</td>
-                    </tr>
-                    <tr>
-                        <td class="has-text-left has-text-weight-semibold">{{ gettext("Name") }}</td>
-                        <td class="has-text-left">{{ view_model.name }}</td>
-                    </tr>
-                    <tr>
-                        <td class="has-text-left has-text-weight-semibold">{{ gettext("Email") }}</td>
-                        <td class="has-text-left">{{ view_model.email }}</td>
-                    </tr>
-                    <tr>
-                        <td class="has-text-left has-text-weight-semibold">{{ gettext("Registered since") }}</td>
-                        <td class="has-text-left">{{ view_model.registered_on | format_datetime(zone='Europe/Berlin',
-                            fmt='%d.%m.%Y %H:%M') }}</td>
-                    </tr>
-                    <tr>
-                        <td class="has-text-left has-text-weight-semibold">{{ gettext("Account balances") }}</td>
-                        <td class="has-text-left">
-                            p <span
-                                class="{{ 'has-text-primary' if view_model.account_balances[0] | float >= 0 else 'has-text-danger' }}">{{
-                                view_model.account_balances[0] }}</span> //
-                            r <span
-                                class="{{ 'has-text-primary' if view_model.account_balances[1] | float >= 0 else 'has-text-danger' }}">{{
-                                view_model.account_balances[1] }}</span> //
-                            a <span
-                                class="{{ 'has-text-primary' if view_model.account_balances[2] | float >= 0 else 'has-text-danger' }}">{{
-                                view_model.account_balances[2] }}</span> //
-                            prd <span
-                                class="{{ 'has-text-primary' if view_model.account_balances[3] | float >= 0 else 'has-text-danger' }}">{{
-                                view_model.account_balances[3] }}</span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="table-container">
-            <h1 class="title is-4">
-                {{ gettext("Plans") }}
-            </h1>
-            <table class="table is-fullwidth has-text-left">
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th>{{ gettext("Status") }}</th>
-                        <th>{{ gettext("Planned sales") }}</th>
-                        <th>{{ gettext("Sales balance") }}</th>
-                        <th>{{ gettext("Deviation") }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for plan in view_model.plan_details %}
-                    <tr>
-                        <td><a href="{{ plan.url }}">{{ plan.name }}</a></td>
-                        <td>{{ plan.status }}</td>
-                        <td>{{ plan.sales_volume }}</td>
-                        <td>{{ plan.sales_balance }}</td>
-                        <td
-                            class="{{ 'has-text-danger' if plan.deviation_relative | float | abs >= 33 else 'has-text-primary'  }}">
-                            {{ plan.deviation_relative }}%</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+<div class="section has-text-centered">
+    <div class="columns is-centered">
+        <div class="column is-two-thirds">
+            <div class="content">
+                <h1 class="title">
+                    {{ gettext("Company") }}
+                </h1>
+            </div>
+            <br>
+            <div class="table-container">
+                <table class="table is-fullwidth">
+                    <tbody>
+                        <tr>
+                            <td class="has-text-left has-text-weight-semibold">{{ gettext("ID") }}</td>
+                            <td class="has-text-left">{{ view_model.id }}</td>
+                        </tr>
+                        <tr>
+                            <td class="has-text-left has-text-weight-semibold">{{ gettext("Name") }}</td>
+                            <td class="has-text-left">{{ view_model.name }}</td>
+                        </tr>
+                        <tr>
+                            <td class="has-text-left has-text-weight-semibold">{{ gettext("Email") }}</td>
+                            <td class="has-text-left">{{ view_model.email }}</td>
+                        </tr>
+                        <tr>
+                            <td class="has-text-left has-text-weight-semibold">{{ gettext("Registered since") }}</td>
+                            <td class="has-text-left">{{ view_model.registered_on |
+                                format_datetime(zone='Europe/Berlin',
+                                fmt='%d.%m.%Y %H:%M') }}</td>
+                        </tr>
+                        <tr>
+                            <td class="has-text-left has-text-weight-semibold">{{ gettext("Account balances") }}</td>
+                            <td class="has-text-left">
+                                p <span
+                                    class="{{ 'has-text-primary' if view_model.account_balances[0] | float >= 0 else 'has-text-danger' }}">{{
+                                    view_model.account_balances[0] }}</span> //
+                                r <span
+                                    class="{{ 'has-text-primary' if view_model.account_balances[1] | float >= 0 else 'has-text-danger' }}">{{
+                                    view_model.account_balances[1] }}</span> //
+                                a <span
+                                    class="{{ 'has-text-primary' if view_model.account_balances[2] | float >= 0 else 'has-text-danger' }}">{{
+                                    view_model.account_balances[2] }}</span> //
+                                prd <span
+                                    class="{{ 'has-text-primary' if view_model.account_balances[3] | float >= 0 else 'has-text-danger' }}">{{
+                                    view_model.account_balances[3] }}</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-container">
+                <h1 class="title is-4">
+                    {{ gettext("Plans") }}
+                </h1>
+                <table class="table is-fullwidth has-text-left">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>{{ gettext("Status") }}</th>
+                            <th>{{ gettext("Planned sales") }}</th>
+                            <th>{{ gettext("Sales balance") }}</th>
+                            <th>{{ gettext("Deviation") }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for plan in view_model.plan_details %}
+                        <tr>
+                            <td><a href="{{ plan.url }}">{{ plan.name }}</a></td>
+                            <td>{{ plan.status }}</td>
+                            <td>{{ plan.sales_volume }}</td>
+                            <td>{{ plan.sales_balance }}</td>
+                            <td
+                                class="{{ 'has-text-danger' if plan.deviation_relative | float | abs >= 33 else 'has-text-primary'  }}">
+                                {{ plan.deviation_relative }}%</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
-
 {% endmacro %}

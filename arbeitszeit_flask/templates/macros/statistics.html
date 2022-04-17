@@ -1,0 +1,114 @@
+{% macro statistics(view_model) %}
+<div class="section has-text-centered">
+    <div class="columns is-centered">
+        <div class="column is-half">
+            <div class="content">
+                <h1 class="title">{{ gettext("Global statistics") }}</h1>
+            </div>
+            <br />
+            <div class="level">
+                <div class="level-left">
+                    <div class="level-item">
+                        <p class="has-text-weight-semibold">{{ gettext("Registered companies") }}:</p>
+                    </div>
+                </div>
+                <div class="level-right">
+                    <div class="level-item">
+                        <p>{{ view_model.registered_companies_count }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="level">
+                <div class="level-left">
+                    <div class="level-item">
+                        <p class="has-text-weight-semibold">{{ gettext("Registered workers") }}:</p>
+                    </div>
+                </div>
+                <div class="level-right">
+                    <div class="level-item">
+                        <p>{{ view_model.registered_members_count }}</p>
+                    </div>
+                </div>
+            </div>
+            <br />
+            <div class="level">
+                <div class="level-left">
+                    <div class="level-item">
+                        <p class="has-text-weight-semibold">{{ gettext("Active plans") }}:</p>
+                    </div>
+                </div>
+                <div class="level-right">
+                    <div class="level-item">
+                        <p>{{ view_model.active_plans_count }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="level">
+                <div class="level-left">
+                    <div class="level-item">
+                        <p class="has-text-weight-semibold">{{ gettext("Public active plans") }}:</p>
+                    </div>
+                </div>
+                <div class="level-right has-text-right-tablet">
+                    <div class="level-item">
+                        <p>{{ view_model.active_plans_public_count }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="level">
+                <div class="level-left">
+                    <div class="level-item">
+                        <p class="has-text-weight-semibold">{{ gettext("Average plan duration") }}:</p>
+                    </div>
+                </div>
+                <div class="level-right has-text-right-tablet">
+                    <div class="level-item">
+                        <p>{{ view_model.average_timeframe_days }}</p>
+                    </div>
+                </div>
+            </div>
+            <br />
+            <div class="level">
+                <div class="level-left">
+                    <div class="level-item">
+                        <p class="has-text-weight-semibold">
+                            {{ gettext("Currently planned work") }}:
+                        </p>
+                    </div>
+                </div>
+                <div class="level-right has-text-right-tablet">
+                    <div class="level-item">
+                        <p>{{ view_model.planned_work_hours }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="level">
+                <div class="level-left">
+                    <div class="level-item">
+                        <p class="has-text-weight-semibold">{{ gettext("Currently planned liquid means") }}:</p>
+                    </div>
+                </div>
+                <div class="level-right has-text-right-tablet">
+                    <div class="level-item">
+                        <p>{{ view_model.planned_resources_hours }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="level">
+                <div class="level-left">
+                    <div class="level-item">
+                        <p class="has-text-weight-semibold">
+                            {{ gettext("Currently planned fixed means") }}:
+                        </p>
+                    </div>
+                </div>
+                <div class="level-right has-text-right-tablet">
+                    <div class="level-item">
+                        <p>{{ view_model.planned_means_hours }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endmacro %}

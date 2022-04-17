@@ -4,7 +4,7 @@ backcall==0.2.0
 bcrypt==3.2.0
 black==22.1.0
 blinker==1.4
-certifi==2020.12.5
+certifi==2021.10.8
 cffi==1.15.0
 click==8.0.3
 coverage==6.2
@@ -32,6 +32,7 @@ itsdangerous==2.0.1
 jedi==0.18.0
 Jinja2==3.0.3
 Mako==1.1.6
+matplotlib==3.5.1
 mypy==0.931
 parso==0.8.1
 passlib==1.7.4

@@ -1,51 +1,53 @@
 {% extends "base_company.html" %}
-{% from 'macros/show_notifications.html' import show_notifications %}
-
-{% block content2 %}
-<div class="columns is-centered">
-    <div class="column is-three-fifths">
-
-        <div class="box has-background-info-light has-text-info-dark">
-            <div class="icon"><i class="fas fa-info-circle"></i></div>
-            <p>
-              {{ gettext("Here you can create a new cooperation.") }}
-	      <br><br>
-	      {{ gettext("A cooperation contains similar products.  The prices for all products in a cooperation are averaged to reduce price competition.  All producers still receive the credits on sale corresponding to how they planned production. This means that producers receive the same amount of credit to their account whether they are part of a cooperation or not.") }}
-            </p>
-        </div>
-
-	{{ show_notifications() }}
-
-        <div class="content">
-            <form method="post">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div class="field">
-                    <label class="label">{{ gettext("Cooperation name") }}</label>
-                    <div class="control">
-                        <input class="input is-large" , type="text" , placeholder="Name" , name="name" required>
+{% block company %}
+<div class="section has-text-centered">
+    <h1 class="title">
+        {{ gettext("Create Cooperation") }}
+    </h1>
+    <div class="columns is-centered">
+        <div class="column is-three-fifths">
+            <div class="box has-background-info-light has-text-info-dark">
+                <div class="icon"><i class="fas fa-info-circle"></i></div>
+                <p>
+                    {{ gettext("Here you can create a new cooperation.") }}
+                    <br><br>
+                    {{ gettext("A cooperation contains similar products. The prices for all products in a cooperation
+                    are
+                    averaged to reduce price competition. All producers still receive the credits on sale corresponding
+                    to
+                    how they planned production. This means that producers receive the same amount of credit to their
+                    account whether they are part of a cooperation or not.") }}
+                </p>
+            </div>
+            <div class="content">
+                <form method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="field">
+                        <label class="label">{{ gettext("Cooperation name") }}</label>
+                        <div class="control">
+                            <input class="input is-large" , type="text" , placeholder="Name" , name="name" required>
+                        </div>
                     </div>
-                </div>
-                <div class="block"></div>
+                    <div class="block"></div>
 
-                <div class="field">
-                    <label class="label">{{ gettext("Definition of the cooperation") }}</label>
-                    <div class="control">
-                        <textarea class="textarea is-large" , name="definition" required></textarea>
+                    <div class="field">
+                        <label class="label">{{ gettext("Definition of the cooperation") }}</label>
+                        <div class="control">
+                            <textarea class="textarea is-large" , name="definition" required></textarea>
+                        </div>
                     </div>
-                </div>
-                <div class="block"></div>
-
-                <div class="field">
-                    <div class="control">
-                      <button class="button is-primary" name="create" value="create" type="submit">
-			{{ gettext("Create cooperation") }}
-		      </button>
+                    <div class="block"></div>
+                    <div class="field">
+                        <div class="control">
+                            <button class="button is-primary" name="create" value="create" type="submit">
+                                {{ gettext("Create cooperation") }}
+                            </button>
+                        </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 </div>
-
 
 {% endblock %}
