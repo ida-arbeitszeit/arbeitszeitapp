@@ -6,6 +6,7 @@ from arbeitszeit.entities import ProductionCosts, SocialAccounting
 from arbeitszeit.repositories import TransactionRepository
 from arbeitszeit.use_cases import GetCompanySummary
 from tests.data_generators import CompanyGenerator, PlanGenerator, TransactionGenerator
+from tests.datetime_service import FakeDatetimeService
 
 from .dependency_injection import injection_test
 
@@ -401,6 +402,30 @@ def test_returns_list_of_companys_plans_when_there_are_any(
     response = get_company_summary(company.id)
     assert response
     assert len(response.plan_details) == 2
+
+
+@injection_test
+def test_returns_list_of_companys_plans_in_descending_order(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+    datetime_service: FakeDatetimeService,
+):
+    company = company_generator.create_company()
+    third = plan_generator.create_plan(
+        planner=company, plan_creation_date=datetime_service.now_minus_one_day()
+    )
+    first = plan_generator.create_plan(
+        planner=company, plan_creation_date=datetime_service.now_minus_ten_days()
+    )
+    second = plan_generator.create_plan(
+        planner=company, plan_creation_date=datetime_service.now_minus_two_days()
+    )
+    response = get_company_summary(company.id)
+    assert response
+    assert response.plan_details[0].id == third.id
+    assert response.plan_details[1].id == second.id
+    assert response.plan_details[2].id == first.id
 
 
 @injection_test

@@ -67,7 +67,7 @@ class GetCompanySummary:
         company = self.company_respository.get_by_id(company_id)
         if company is None:
             return None
-        plans = self.plan_repository.get_all_plans_for_company(company.id)
+        plans = self.plan_repository.get_all_plans_for_company_descending(company.id)
         expectations = self._get_expectations(company)
         account_balances = self._get_account_balances(company)
         return GetCompanySummarySuccess(

@@ -147,7 +147,7 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def get_all_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
+    def get_all_plans_for_company_descending(self, company_id: UUID) -> Iterator[Plan]:
         pass
 
     @abstractmethod

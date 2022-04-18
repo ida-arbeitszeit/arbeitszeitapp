@@ -690,10 +690,14 @@ class PlanRepository(repositories.PlanRepository):
             ).all()
         )
 
-    def get_all_plans_for_company(self, company_id: UUID) -> Iterator[entities.Plan]:
+    def get_all_plans_for_company_descending(
+        self, company_id: UUID
+    ) -> Iterator[entities.Plan]:
         return (
             self.object_from_orm(plan_orm)
-            for plan_orm in Plan.query.filter(Plan.planner == str(company_id))
+            for plan_orm in Plan.query.filter(Plan.planner == str(company_id)).order_by(
+                Plan.plan_creation_date.desc()
+            )
         )
 
     def get_all_active_plans_for_company(
@@ -1100,7 +1104,9 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
                     yield plan
 
     def get_outbound_requests(self, requester_id: UUID) -> Iterator[entities.Plan]:
-        plans_of_company = self.plan_repository.get_all_plans_for_company(requester_id)
+        plans_of_company = self.plan_repository.get_all_plans_for_company_descending(
+            requester_id
+        )
         for plan in plans_of_company:
             if plan.requested_cooperation:
                 yield plan
