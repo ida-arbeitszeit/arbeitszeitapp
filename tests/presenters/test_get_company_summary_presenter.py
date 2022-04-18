@@ -5,6 +5,7 @@ from uuid import uuid4
 
 from arbeitszeit.use_cases.get_company_summary import (
     AccountBalances,
+    Expectations,
     GetCompanySummarySuccess,
     PlanDetails,
 )
@@ -19,9 +20,18 @@ RESPONSE_WITH_2_PLANS = GetCompanySummarySuccess(
     name="Company Name",
     email="comp_mail@cp.org",
     registered_on=datetime(2022, 1, 2),
-    account_balances=AccountBalances(
-        Decimal("1"), Decimal("2"), Decimal("3"), Decimal("4.561")
+    expectations=Expectations(
+        Decimal("1"), Decimal("2"), Decimal("3"), Decimal("-4.561")
     ),
+    account_balances=AccountBalances(
+        Decimal("1"), Decimal("2"), Decimal("3"), Decimal("-4.561")
+    ),
+    deviations_relative=[
+        Decimal("100"),
+        Decimal("20"),
+        Decimal("-300"),
+        Decimal("-4.561"),
+    ],
     plan_details=[
         PlanDetails(
             uuid4(),
@@ -66,9 +76,17 @@ class GetGetCompanySummaryPresenterTests(TestCase):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
         self.assertEqual(view_model.registered_on, RESPONSE_WITH_2_PLANS.registered_on)
 
+    def test_expectations_are_shown_as_list_of_strings(self):
+        view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
+        self.assertEqual(view_model.expectations, ["1.00", "2.00", "3.00", "-4.56"])
+
     def test_company_account_balances_is_shown_as_list_of_strings(self):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
-        self.assertEqual(view_model.account_balances, ["1.00", "2.00", "3.00", "4.56"])
+        self.assertEqual(view_model.account_balances, ["1.00", "2.00", "3.00", "-4.56"])
+
+    def test_company_relative_deviations_are_shown_as_list_of_strings(self):
+        view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
+        self.assertEqual(view_model.deviations_relative, ["100", "20", "-300", "-5"])
 
     def test_ids_of_plans_are_shown(self):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)

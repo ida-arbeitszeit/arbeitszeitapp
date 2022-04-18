@@ -446,12 +446,14 @@ class FlaskModule(Module):
         plan_repository: interfaces.PlanRepository,
         account_repository: interfaces.AccountRepository,
         transaction_repository: interfaces.TransactionRepository,
+        social_accounting: entities.SocialAccounting,
     ) -> GetCompanySummary:
         return GetCompanySummary(
             company_repository,
             plan_repository,
             account_repository,
             transaction_repository,
+            social_accounting,
         )
 
     @provider

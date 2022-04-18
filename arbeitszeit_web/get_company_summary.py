@@ -27,7 +27,9 @@ class GetCompanySummaryViewModel:
     name: str
     email: str
     registered_on: datetime
+    expectations: List[str]
     account_balances: List[str]
+    deviations_relative: List[str]
     plan_details: List[PlanDetailsWeb]
 
     def to_dict(self) -> Dict[str, Any]:
@@ -47,11 +49,23 @@ class GetCompanySummarySuccessPresenter:
             name=use_case_response.name,
             email=use_case_response.email,
             registered_on=use_case_response.registered_on,
+            expectations=[
+                "%(num).2f" % dict(num=use_case_response.expectations.means),
+                "%(num).2f" % dict(num=use_case_response.expectations.raw_material),
+                "%(num).2f" % dict(num=use_case_response.expectations.work),
+                "%(num).2f" % dict(num=use_case_response.expectations.product),
+            ],
             account_balances=[
                 "%(num).2f" % dict(num=use_case_response.account_balances.means),
                 "%(num).2f" % dict(num=use_case_response.account_balances.raw_material),
                 "%(num).2f" % dict(num=use_case_response.account_balances.work),
                 "%(num).2f" % dict(num=use_case_response.account_balances.product),
+            ],
+            deviations_relative=[
+                "%(num).0f" % dict(num=use_case_response.deviations_relative[0]),
+                "%(num).0f" % dict(num=use_case_response.deviations_relative[1]),
+                "%(num).0f" % dict(num=use_case_response.deviations_relative[2]),
+                "%(num).0f" % dict(num=use_case_response.deviations_relative[3]),
             ],
             plan_details=[
                 self._get_plan_details(plan) for plan in use_case_response.plan_details

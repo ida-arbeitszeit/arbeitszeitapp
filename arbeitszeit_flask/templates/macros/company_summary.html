@@ -28,23 +28,61 @@
                             <td class="has-text-left has-text-weight-semibold">{{ gettext("Registered since") }}</td>
                             <td class="has-text-left">{{ view_model.registered_on |
                                 format_datetime(zone='Europe/Berlin',
-                                fmt='%d.%m.%Y %H:%M') }}</td>
+                                fmt='%d.%m.%Y') }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-container">
+                <h1 class="title is-4">
+                    {{ gettext("Metrics") }}
+                </h1>
+                <table class="table is-fullwidth">
+                    <tbody>
+                        <tr>
+                            <td class="has-text-left has-text-weight-semibold">{{ gettext("Expectations") }}
+                            </td>
+                            <td class="has-text-left">
+                                p <span class="tag is-medium">{{
+                                    view_model.expectations[0] }}</span>
+                                r <span class="tag is-medium">{{
+                                    view_model.expectations[1] }}</span>
+                                a <span class="tag is-medium">{{
+                                    view_model.expectations[2] }}</span>
+                                prd <span class="tag is-medium">{{
+                                    view_model.expectations[3] }}</span>
+                            </td>
                         </tr>
                         <tr>
-                            <td class="has-text-left has-text-weight-semibold">{{ gettext("Account balances") }}</td>
+                            <td class="has-text-left has-text-weight-semibold">{{ gettext("Balances") }}
+                            </td>
+                            <td class="has-text-left">
+                                p <span class="tag is-medium">{{
+                                    view_model.account_balances[0] }}</span>
+                                r <span class="tag is-medium">{{
+                                    view_model.account_balances[1] }}</span>
+                                a <span class="tag is-medium">{{
+                                    view_model.account_balances[2] }}</span>
+                                prd <span class="tag is-medium">{{
+                                    view_model.account_balances[3] }}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="has-text-left has-text-weight-semibold">{{ gettext("Deviation (&percnt;)") }}
+                            </td>
                             <td class="has-text-left">
                                 p <span
-                                    class="{{ 'has-text-primary' if view_model.account_balances[0] | float >= 0 else 'has-text-danger' }}">{{
-                                    view_model.account_balances[0] }}</span> //
+                                    class="tag is-light is-medium {{ 'is-danger' if view_model.deviations_relative[0] | float | abs >= 33 else 'is-primary'  }}">{{
+                                    view_model.deviations_relative[0] }}%</span>
                                 r <span
-                                    class="{{ 'has-text-primary' if view_model.account_balances[1] | float >= 0 else 'has-text-danger' }}">{{
-                                    view_model.account_balances[1] }}</span> //
+                                    class="tag is-light is-medium {{ 'is-danger' if view_model.deviations_relative[1] | float | abs >= 33 else 'is-primary'  }}">{{
+                                    view_model.deviations_relative[1] }}%</span>
                                 a <span
-                                    class="{{ 'has-text-primary' if view_model.account_balances[2] | float >= 0 else 'has-text-danger' }}">{{
-                                    view_model.account_balances[2] }}</span> //
+                                    class="tag is-light is-medium {{ 'is-danger' if view_model.deviations_relative[2] | float | abs >= 33 else 'is-primary'  }}">{{
+                                    view_model.deviations_relative[2] }}%</span>
                                 prd <span
-                                    class="{{ 'has-text-primary' if view_model.account_balances[3] | float >= 0 else 'has-text-danger' }}">{{
-                                    view_model.account_balances[3] }}</span>
+                                    class="is-light tag is-medium {{ 'is-danger' if view_model.deviations_relative[3] | float | abs >= 33 else 'is-primary'  }}">{{
+                                    view_model.deviations_relative[3] }}%</span>
                             </td>
                         </tr>
                     </tbody>
@@ -60,8 +98,8 @@
                             <th></th>
                             <th>{{ gettext("Status") }}</th>
                             <th>{{ gettext("Planned sales") }}</th>
-                            <th>{{ gettext("Sales balance") }}</th>
-                            <th>{{ gettext("Deviation") }}</th>
+                            <th>{{ gettext("Sales deviation") }}</th>
+                            <th>{{ gettext("Sales deviation (&percnt;)") }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -69,11 +107,13 @@
                         <tr>
                             <td><a href="{{ plan.url }}">{{ plan.name }}</a></td>
                             <td>{{ plan.status }}</td>
-                            <td>{{ plan.sales_volume }}</td>
-                            <td>{{ plan.sales_balance }}</td>
-                            <td
-                                class="{{ 'has-text-danger' if plan.deviation_relative | float | abs >= 33 else 'has-text-primary'  }}">
-                                {{ plan.deviation_relative }}%</td>
+                            <td> <span class="tag is-medium">{{ plan.sales_volume }}</span></td>
+                            <td><span class="tag is-medium">{{ plan.sales_balance }}</span></td>
+                            <td>
+                                <span
+                                    class="tag is-light is-medium {{ 'is-danger' if plan.deviation_relative | float | abs >= 33 else 'is-primary'  }}">{{
+                                    plan.deviation_relative }}%</span>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
