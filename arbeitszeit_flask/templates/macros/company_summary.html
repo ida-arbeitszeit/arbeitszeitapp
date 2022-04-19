@@ -37,53 +37,38 @@
                 <h1 class="title is-4">
                     {{ gettext("Metrics") }}
                 </h1>
-                <table class="table is-fullwidth">
+                <table class="table has-text-left">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>p</th>
+                            <th>r</th>
+                            <th>a</th>
+                            <th>prd</th>
+                        </tr>
+                    </thead>
                     <tbody>
                         <tr>
-                            <td class="has-text-left has-text-weight-semibold">{{ gettext("Expectations") }}
-                            </td>
-                            <td class="has-text-left">
-                                p <span class="tag is-medium">{{
-                                    view_model.expectations[0] }}</span>
-                                r <span class="tag is-medium">{{
-                                    view_model.expectations[1] }}</span>
-                                a <span class="tag is-medium">{{
-                                    view_model.expectations[2] }}</span>
-                                prd <span class="tag is-medium">{{
-                                    view_model.expectations[3] }}</span>
-                            </td>
+                            <td>{{ gettext(" Expectations") }}</td>
+                            {% for exp in view_model.expectations %}
+                            <td><span class="tag is-medium">{{
+                                    exp }}</span></td>
+                            {% endfor %}
                         </tr>
                         <tr>
-                            <td class="has-text-left has-text-weight-semibold">{{ gettext("Balances") }}
-                            </td>
-                            <td class="has-text-left">
-                                p <span class="tag is-medium">{{
-                                    view_model.account_balances[0] }}</span>
-                                r <span class="tag is-medium">{{
-                                    view_model.account_balances[1] }}</span>
-                                a <span class="tag is-medium">{{
-                                    view_model.account_balances[2] }}</span>
-                                prd <span class="tag is-medium">{{
-                                    view_model.account_balances[3] }}</span>
-                            </td>
+                            <td>{{ gettext("Balances") }}</td>
+                            {% for bal in view_model.account_balances %}
+                            <td><span class="tag is-medium">{{
+                                    bal }}</span></td>
+                            {% endfor %}
                         </tr>
                         <tr>
-                            <td class="has-text-left has-text-weight-semibold">{{ gettext("Deviation (&percnt;)") }}
-                            </td>
-                            <td class="has-text-left">
-                                p <span
-                                    class="tag is-light is-medium {{ 'is-danger' if view_model.deviations_relative[0] | float | abs >= 33 else 'is-primary'  }}">{{
-                                    view_model.deviations_relative[0] }}%</span>
-                                r <span
-                                    class="tag is-light is-medium {{ 'is-danger' if view_model.deviations_relative[1] | float | abs >= 33 else 'is-primary'  }}">{{
-                                    view_model.deviations_relative[1] }}%</span>
-                                a <span
-                                    class="tag is-light is-medium {{ 'is-danger' if view_model.deviations_relative[2] | float | abs >= 33 else 'is-primary'  }}">{{
-                                    view_model.deviations_relative[2] }}%</span>
-                                prd <span
-                                    class="is-light tag is-medium {{ 'is-danger' if view_model.deviations_relative[3] | float | abs >= 33 else 'is-primary'  }}">{{
-                                    view_model.deviations_relative[3] }}%</span>
-                            </td>
+                            <td class="has-text-weight-semibold">{{ gettext("Deviation (&percnt;)") }}</td>
+                            {% for dev_rel in view_model.deviations_relative %}
+                            <td><span
+                                    class="tag is-light is-medium {{ 'is-danger' if dev_rel | float | abs >= 33 else 'is-primary'  }}">{{
+                                    dev_rel }}%</span></td>
+                            {% endfor %}
                         </tr>
                     </tbody>
                 </table>
@@ -92,7 +77,7 @@
                 <h1 class="title is-4">
                     {{ gettext("Plans") }}
                 </h1>
-                <table class="table is-fullwidth has-text-left">
+                <table class="table has-text-left">
                     <thead>
                         <tr>
                             <th></th>
