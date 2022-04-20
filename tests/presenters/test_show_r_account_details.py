@@ -10,6 +10,8 @@ from arbeitszeit.use_cases.show_r_account_details import (
 from arbeitszeit_web.show_r_account_details import ShowRAccountDetailsPresenter
 from tests.translator import FakeTranslator
 
+from .dependency_injection import get_dependency_injector
+
 DEFAULT_INFO1 = TransactionInfo(
     transaction_type=TransactionTypes.credit_for_liquid_means,
     date=datetime.now(),
@@ -27,8 +29,9 @@ DEFAULT_INFO2 = TransactionInfo(
 
 class CompanyTransactionsPresenterTests(TestCase):
     def setUp(self) -> None:
-        self.trans = FakeTranslator()
-        self.presenter = ShowRAccountDetailsPresenter(trans=self.trans)
+        self.injector = get_dependency_injector()
+        self.trans = self.injector.get(FakeTranslator)
+        self.presenter = self.injector.get(ShowRAccountDetailsPresenter)
 
     def test_return_empty_list_when_no_transactions_took_place(self):
         response = ShowRAccountDetailsResponse(

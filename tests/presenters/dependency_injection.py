@@ -20,21 +20,40 @@ from arbeitszeit_web.plan_summary_service import (
     PlanSummaryServiceImpl,
 )
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
+from arbeitszeit_web.presenters.send_work_certificates_to_worker_presenter import (
+    SendWorkCertificatesToWorkerPresenter,
+)
+from arbeitszeit_web.presenters.show_company_work_invite_details_presenter import (
+    ShowCompanyWorkInviteDetailsPresenter,
+)
+from arbeitszeit_web.presenters.show_prd_account_details_presenter import (
+    ShowPRDAccountDetailsPresenter,
+)
 from arbeitszeit_web.query_companies import QueryCompaniesPresenter
 from arbeitszeit_web.query_plans import QueryPlansPresenter
 from arbeitszeit_web.read_message import ReadMessagePresenter
+from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
+from arbeitszeit_web.show_r_account_details import ShowRAccountDetailsPresenter
 from arbeitszeit_web.url_index import ListMessagesUrlIndex
+from arbeitszeit_web.user_action import UserActionResolverImpl
+from tests.dependency_injection import TestingModule
+from tests.plotter import FakePlotter
 from tests.request import FakeRequest
 from tests.translator import FakeTranslator
+from tests.use_cases.dependency_injection import InMemoryModule
 
 from .notifier import NotifierTestImpl
 from .url_index import (
+    AnswerCompanyWorkInviteUrlIndexImpl,
     CompanySummaryUrlIndex,
     CoopSummaryUrlIndexTestImpl,
     EndCoopUrlIndexTestImpl,
+    HidePlanUrlIndex,
+    InviteUrlIndexImpl,
     ListMessageUrlIndexTestImpl,
     MessageUrlIndex,
     PlanSummaryUrlIndexTestImpl,
+    RenewPlanUrlIndex,
     TogglePlanAvailabilityUrlIndex,
 )
 from .user_action_resolver import UserActionResolver
@@ -268,6 +287,71 @@ class PresenterTestsInjector(Module):
             action_link_resolver=user_action_resolver,
         )
 
+    @provider
+    def provide_send_work_certificates_to_worker_presenter(
+        self, notifier: Notifier, translator: FakeTranslator
+    ) -> SendWorkCertificatesToWorkerPresenter:
+        return SendWorkCertificatesToWorkerPresenter(
+            notifier=notifier,
+            translator=translator,
+        )
+
+    @provider
+    def provide_show_company_work_invite_details_presenter(
+        self,
+        answer_invite_url_index: AnswerCompanyWorkInviteUrlIndexImpl,
+        translator: FakeTranslator,
+    ) -> ShowCompanyWorkInviteDetailsPresenter:
+        return ShowCompanyWorkInviteDetailsPresenter(
+            url_index=answer_invite_url_index,
+            translator=translator,
+        )
+
+    @provider
+    def provide_show_my_plans_presenter(
+        self,
+        plan_url_index: PlanSummaryUrlIndexTestImpl,
+        coop_url_index: CoopSummaryUrlIndexTestImpl,
+        renew_plan_url_index: RenewPlanUrlIndex,
+        hide_plan_url_index: HidePlanUrlIndex,
+    ) -> ShowMyPlansPresenter:
+        return ShowMyPlansPresenter(
+            url_index=plan_url_index,
+            coop_url_index=coop_url_index,
+            renew_plan_url_index=renew_plan_url_index,
+            hide_plan_url_index=hide_plan_url_index,
+        )
+
+    @provider
+    def provide_show_prd_account_details_presenter(
+        self, translator: FakeTranslator, plotter: FakePlotter
+    ) -> ShowPRDAccountDetailsPresenter:
+        return ShowPRDAccountDetailsPresenter(
+            translator=translator,
+            plotter=plotter,
+        )
+
+    @provider
+    def provide_show_r_account_details_presenter(
+        self, translator: FakeTranslator
+    ) -> ShowRAccountDetailsPresenter:
+        return ShowRAccountDetailsPresenter(
+            trans=translator,
+        )
+
+    @provider
+    def provide_user_action_resolver_impl(
+        self,
+        invite_url_index: InviteUrlIndexImpl,
+        coop_url_index: CoopSummaryUrlIndexTestImpl,
+    ) -> UserActionResolverImpl:
+        return UserActionResolverImpl(
+            invite_url_index=invite_url_index,
+            coop_url_index=coop_url_index,
+        )
+
 
 def get_dependency_injector() -> Injector:
-    return Injector(modules=[PresenterTestsInjector()])
+    return Injector(
+        modules=[TestingModule(), InMemoryModule(), PresenterTestsInjector()]
+    )

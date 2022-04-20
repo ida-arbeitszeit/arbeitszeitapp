@@ -1,13 +1,19 @@
 from datetime import datetime
 from decimal import Decimal
 from unittest import TestCase
-from uuid import UUID
 
 from arbeitszeit.entities import Plan
 from arbeitszeit.use_cases.show_my_plans import PlanInfo, ShowMyPlansResponse
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from tests.data_generators import CooperationGenerator, PlanGenerator
-from tests.use_cases.dependency_injection import get_dependency_injector
+
+from .dependency_injection import get_dependency_injector
+from .url_index import (
+    CoopSummaryUrlIndexTestImpl,
+    HidePlanUrlIndex,
+    PlanSummaryUrlIndexTestImpl,
+    RenewPlanUrlIndex,
+)
 
 
 def _convert_into_plan_info(plan: Plan) -> PlanInfo:
@@ -67,17 +73,12 @@ def response_with_one_non_active_plan(plan: Plan) -> ShowMyPlansResponse:
 
 class ShowMyPlansPresenterTests(TestCase):
     def setUp(self):
-        self.plan_url_index = PlanSummaryUrlIndex()
-        self.coop_url_index = CoopSummaryUrlIndex()
-        self.renew_plan_url_index = RenewPlanUrlIndex()
-        self.hide_plan_url_index = HidePlanUrlIndex()
-        self.presenter = ShowMyPlansPresenter(
-            self.plan_url_index,
-            self.coop_url_index,
-            self.renew_plan_url_index,
-            self.hide_plan_url_index,
-        )
         self.injector = get_dependency_injector()
+        self.plan_url_index = self.injector.get(PlanSummaryUrlIndexTestImpl)
+        self.coop_url_index = self.injector.get(CoopSummaryUrlIndexTestImpl)
+        self.renew_plan_url_index = self.injector.get(RenewPlanUrlIndex)
+        self.hide_plan_url_index = self.injector.get(HidePlanUrlIndex)
+        self.presenter = self.injector.get(ShowMyPlansPresenter)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.coop_generator = self.injector.get(CooperationGenerator)
 
@@ -194,26 +195,6 @@ class ShowMyPlansPresenterTests(TestCase):
             format_price(expected_plan.price_per_unit),
         )
         self.assertEqual(row1.type_of_plan, "Produktiv")
-
-
-class PlanSummaryUrlIndex:
-    def get_plan_summary_url(self, plan_id: UUID) -> str:
-        return f"fake_plan_url:{plan_id}"
-
-
-class CoopSummaryUrlIndex:
-    def get_coop_summary_url(self, coop_id: UUID) -> str:
-        return f"fake_coop_url:{coop_id}"
-
-
-class RenewPlanUrlIndex:
-    def get_renew_plan_url(self, plan_id: UUID) -> str:
-        return f"fake_renew_url:{plan_id}"
-
-
-class HidePlanUrlIndex:
-    def get_hide_plan_url(self, plan_id: UUID) -> str:
-        return f"fake_hide_plan_url:{plan_id}"
 
 
 def format_price(price_per_unit: Decimal) -> str:

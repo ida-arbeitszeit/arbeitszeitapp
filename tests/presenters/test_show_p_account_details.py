@@ -9,6 +9,8 @@ from arbeitszeit.use_cases.show_p_account_details import (
 )
 from arbeitszeit_web.show_p_account_details import ShowPAccountDetailsPresenter
 
+from .dependency_injection import get_dependency_injector
+
 DEFAULT_INFO1 = TransactionInfo(
     transaction_type=TransactionTypes.credit_for_fixed_means,
     date=datetime.now(),
@@ -26,7 +28,8 @@ DEFAULT_INFO2 = TransactionInfo(
 
 class CompanyTransactionsPresenterTests(TestCase):
     def setUp(self) -> None:
-        self.presenter = ShowPAccountDetailsPresenter()
+        self.injector = get_dependency_injector()
+        self.presenter = self.injector.get(ShowPAccountDetailsPresenter)
 
     def test_return_empty_list_when_no_transactions_took_place(self):
         response = ShowPAccountDetailsResponse(
