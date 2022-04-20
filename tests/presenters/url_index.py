@@ -29,3 +29,8 @@ class TogglePlanAvailabilityUrlIndex:
 class CompanySummaryUrlIndex:
     def get_company_summary_url(self, company_id: UUID) -> str:
         return f"fake_company_url:{company_id}"
+
+
+class MessageUrlIndex:
+    def get_message_url(self, message_id: UUID) -> str:
+        return f"url:{message_id}"

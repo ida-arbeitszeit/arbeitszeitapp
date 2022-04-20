@@ -7,11 +7,15 @@ from hypothesis import given, strategies
 from arbeitszeit.use_cases import ListedMessage, ListMessagesResponse
 from arbeitszeit_web.list_messages import ListMessagesPresenter
 
+from .dependency_injection import get_dependency_injector
+from .url_index import MessageUrlIndex
+
 
 class ListMessagesPresenterTests(TestCase):
     def setUp(self) -> None:
-        self.url_index = FakeUrlIndex()
-        self.presenter = ListMessagesPresenter(self.url_index)
+        self.injector = get_dependency_injector()
+        self.url_index = self.injector.get(MessageUrlIndex)
+        self.presenter = self.injector.get(ListMessagesPresenter)
 
     def test_view_model_contains_no_messages_when_non_were_provided(self) -> None:
         response = ListMessagesResponse(messages=[])
@@ -76,8 +80,3 @@ class ListMessagesPresenterTests(TestCase):
                 )
             ]
         )
-
-
-class FakeUrlIndex:
-    def get_message_url(self, message_id: UUID) -> str:
-        return f"url:{message_id}"

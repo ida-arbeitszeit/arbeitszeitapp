@@ -11,12 +11,18 @@ from arbeitszeit_web.get_plan_summary_company import (
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.hide_plan import HidePlanPresenter
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
+from arbeitszeit_web.list_messages import ListMessagesPresenter
 from arbeitszeit_web.notification import Notifier
+from arbeitszeit_web.pay_consumer_product import PayConsumerProductPresenter
+from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from arbeitszeit_web.plan_summary_service import (
     PlanSummaryService,
     PlanSummaryServiceImpl,
 )
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
+from arbeitszeit_web.query_companies import QueryCompaniesPresenter
+from arbeitszeit_web.query_plans import QueryPlansPresenter
+from arbeitszeit_web.read_message import ReadMessagePresenter
 from arbeitszeit_web.url_index import ListMessagesUrlIndex
 from tests.request import FakeRequest
 from tests.translator import FakeTranslator
@@ -27,9 +33,11 @@ from .url_index import (
     CoopSummaryUrlIndexTestImpl,
     EndCoopUrlIndexTestImpl,
     ListMessageUrlIndexTestImpl,
+    MessageUrlIndex,
     PlanSummaryUrlIndexTestImpl,
     TogglePlanAvailabilityUrlIndex,
 )
+from .user_action_resolver import UserActionResolver
 
 
 class PresenterTestsInjector(Module):
@@ -187,6 +195,77 @@ class PresenterTestsInjector(Module):
         return HidePlanPresenter(
             notifier=notifier,
             trans=translator,
+        )
+
+    @provider
+    def provide_list_messages_presenter(
+        self, messages_url_index: MessageUrlIndex
+    ) -> ListMessagesPresenter:
+        return ListMessagesPresenter(url_index=messages_url_index)
+
+    @provider
+    def provide_pay_consumer_product_presenter(
+        self, notifier: Notifier, translator: FakeTranslator
+    ) -> PayConsumerProductPresenter:
+        return PayConsumerProductPresenter(
+            user_notifier=notifier,
+            translator=translator,
+        )
+
+    @provider
+    def provide_pay_means_of_production_presenter(
+        self, notifier: Notifier, translator: FakeTranslator
+    ) -> PayMeansOfProductionPresenter:
+        return PayMeansOfProductionPresenter(
+            user_notifier=notifier,
+            trans=translator,
+        )
+
+    @provider
+    def provide_plan_summary_service_impl(
+        self,
+        coop_url_index: CoopSummaryUrlIndexTestImpl,
+        company_url_index: CompanySummaryUrlIndex,
+        translator: FakeTranslator,
+    ) -> PlanSummaryServiceImpl:
+        return PlanSummaryServiceImpl(
+            coop_url_index=coop_url_index,
+            company_url_index=company_url_index,
+            trans=translator,
+        )
+
+    @provider
+    def provide_query_companies_presenter(
+        self, notifier: Notifier, company_url_index: CompanySummaryUrlIndex
+    ) -> QueryCompaniesPresenter:
+        return QueryCompaniesPresenter(
+            user_notifier=notifier,
+            company_url_index=company_url_index,
+        )
+
+    @provider
+    def provide_query_plans_presenter(
+        self,
+        notifier: Notifier,
+        coop_url_index: CoopSummaryUrlIndexTestImpl,
+        plan_url_index: PlanSummaryUrlIndexTestImpl,
+        company_url_index: CompanySummaryUrlIndex,
+        translator: FakeTranslator,
+    ) -> QueryPlansPresenter:
+        return QueryPlansPresenter(
+            plan_url_index=plan_url_index,
+            company_url_index=company_url_index,
+            coop_url_index=coop_url_index,
+            user_notifier=notifier,
+            trans=translator,
+        )
+
+    @provider
+    def provide_read_message_presenter(
+        self, user_action_resolver: UserActionResolver
+    ) -> ReadMessagePresenter:
+        return ReadMessagePresenter(
+            action_link_resolver=user_action_resolver,
         )
 
 
