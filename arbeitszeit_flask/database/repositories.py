@@ -693,10 +693,14 @@ class PlanRepository(repositories.PlanRepository):
             ).all()
         )
 
-    def get_all_plans_for_company(self, company_id: UUID) -> Iterator[entities.Plan]:
+    def get_all_plans_for_company_descending(
+        self, company_id: UUID
+    ) -> Iterator[entities.Plan]:
         return (
             self.object_from_orm(plan_orm)
-            for plan_orm in Plan.query.filter(Plan.planner == str(company_id))
+            for plan_orm in Plan.query.filter(Plan.planner == str(company_id)).order_by(
+                Plan.plan_creation_date.desc()
+            )
         )
 
     def get_all_active_plans_for_company(
@@ -781,6 +785,17 @@ class TransactionRepository(repositories.TransactionRepository):
             self.object_from_orm(transaction)
             for transaction in account_orm.transactions_received.all()
         ]
+
+    def get_sales_balance_of_plan(self, plan: entities.Plan) -> Decimal:
+        return Decimal(
+            self.db.session.query(func.sum(Transaction.amount_received))
+            .filter(
+                Transaction.receiving_account == str(plan.planner.product_account.id),
+                Transaction.purpose.contains(f"{plan.id}"),
+            )
+            .one()[0]
+            or 0
+        )
 
 
 @inject
@@ -1095,7 +1110,9 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
                     yield plan
 
     def get_outbound_requests(self, requester_id: UUID) -> Iterator[entities.Plan]:
-        plans_of_company = self.plan_repository.get_all_plans_for_company(requester_id)
+        plans_of_company = self.plan_repository.get_all_plans_for_company_descending(
+            requester_id
+        )
         for plan in plans_of_company:
             if plan.requested_cooperation:
                 yield plan

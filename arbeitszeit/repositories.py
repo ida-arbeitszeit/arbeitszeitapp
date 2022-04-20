@@ -147,7 +147,7 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def get_all_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
+    def get_all_plans_for_company_descending(self, company_id: UUID) -> Iterator[Plan]:
         pass
 
     @abstractmethod
@@ -180,6 +180,10 @@ class TransactionRepository(ABC):
     def all_transactions_received_by_account(
         self, account: Account
     ) -> List[Transaction]:
+        pass
+
+    @abstractmethod
+    def get_sales_balance_of_plan(self, plan: Plan) -> Decimal:
         pass
 
 

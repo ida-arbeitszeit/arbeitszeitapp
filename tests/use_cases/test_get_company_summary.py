@@ -1,9 +1,12 @@
 from datetime import datetime
+from decimal import Decimal
 from uuid import uuid4
 
+from arbeitszeit.entities import ProductionCosts, SocialAccounting
+from arbeitszeit.repositories import TransactionRepository
 from arbeitszeit.use_cases import GetCompanySummary
-from arbeitszeit.use_cases.get_company_summary import PlanDetails
-from tests.data_generators import CompanyGenerator, PlanGenerator
+from tests.data_generators import CompanyGenerator, PlanGenerator, TransactionGenerator
+from tests.datetime_service import FakeDatetimeService
 
 from .dependency_injection import injection_test
 
@@ -38,9 +41,9 @@ def test_returns_name(
 
 @injection_test
 def test_returns_email(
-    get_company_summary: GetCompanySummary, company_repository: CompanyGenerator
+    get_company_summary: GetCompanySummary, company_generator: CompanyGenerator
 ):
-    company = company_repository.create_company(email="company@cp.org")
+    company = company_generator.create_company(email="company@cp.org")
     response = get_company_summary(company.id)
     assert response
     assert response.email == "company@cp.org"
@@ -48,54 +51,526 @@ def test_returns_email(
 
 @injection_test
 def test_returns_register_date(
-    get_company_summary: GetCompanySummary, company_repository: CompanyGenerator
+    get_company_summary: GetCompanySummary, company_generator: CompanyGenerator
 ):
-    company = company_repository.create_company(registered_on=datetime(2022, 1, 25))
+    company = company_generator.create_company(registered_on=datetime(2022, 1, 25))
     response = get_company_summary(company.id)
     assert response
     assert response.registered_on == datetime(2022, 1, 25)
 
 
 @injection_test
-def test_returns_empty_list_of_companys_active_plans_when_there_are_none(
-    get_company_summary: GetCompanySummary,
-    company_repository: CompanyGenerator,
-    plan_generator: PlanGenerator,
+def test_returns_expectations_of_zero_when_no_transactions_took_place(
+    get_company_summary: GetCompanySummary, company_generator: CompanyGenerator
 ):
-    company = company_repository.create_company()
-    plan_generator.create_plan(planner=company, activation_date=None)
+    company = company_generator.create_company()
     response = get_company_summary(company.id)
     assert response
-    assert response.active_plans == []
+    assert response.expectations.means == 0
+    assert response.expectations.raw_material == 0
+    assert response.expectations.work == 0
+    assert response.expectations.product == 0
 
 
 @injection_test
-def test_returns_list_of_companys_active_plans_when_there_are_any(
+def test_returns_correct_expectations_after_company_receives_credit_for_means_of_production(
     get_company_summary: GetCompanySummary,
-    company_repository: CompanyGenerator,
-    plan_generator: PlanGenerator,
+    company_generator: CompanyGenerator,
+    transaction_repository: TransactionRepository,
+    social_accounting: SocialAccounting,
 ):
-    company = company_repository.create_company()
-    plan1 = plan_generator.create_plan(planner=company, activation_date=datetime.min)
-    plan2 = plan_generator.create_plan(planner=company, activation_date=datetime.min)
-    response = get_company_summary(company.id)
+    receiving_company = company_generator.create_company()
+    amount_transferred = Decimal(20)
+    transaction_repository.create_transaction(
+        date=datetime.min,
+        sending_account=social_accounting.account,
+        receiving_account=receiving_company.means_account,
+        amount_sent=amount_transferred,
+        amount_received=amount_transferred,
+        purpose="test",
+    )
+    response = get_company_summary(receiving_company.id)
     assert response
-    assert response.active_plans == [
-        PlanDetails(plan1.id, plan1.prd_name),
-        PlanDetails(plan2.id, plan2.prd_name),
-    ]
+    assert response.expectations.means == amount_transferred
 
 
 @injection_test
-def test_returns_list_of_companys_active_plans_and_ignores_inactive_plans(
+def test_returns_correct_expectations_after_company_receives_credit_for_raw_materials(
     get_company_summary: GetCompanySummary,
-    company_repository: CompanyGenerator,
+    company_generator: CompanyGenerator,
+    transaction_repository: TransactionRepository,
+    social_accounting: SocialAccounting,
+):
+    receiving_company = company_generator.create_company()
+    amount_transferred = Decimal(20)
+    transaction_repository.create_transaction(
+        date=datetime.min,
+        sending_account=social_accounting.account,
+        receiving_account=receiving_company.raw_material_account,
+        amount_sent=amount_transferred,
+        amount_received=amount_transferred,
+        purpose="test",
+    )
+    response = get_company_summary(receiving_company.id)
+    assert response
+    assert response.expectations.raw_material == amount_transferred
+
+
+@injection_test
+def test_returns_correct_expectations_after_company_receives_credit_for_labour(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    transaction_repository: TransactionRepository,
+    social_accounting: SocialAccounting,
+):
+    receiving_company = company_generator.create_company()
+    amount_transferred = Decimal(20)
+    transaction_repository.create_transaction(
+        date=datetime.min,
+        sending_account=social_accounting.account,
+        receiving_account=receiving_company.work_account,
+        amount_sent=amount_transferred,
+        amount_received=amount_transferred,
+        purpose="test",
+    )
+    response = get_company_summary(receiving_company.id)
+    assert response
+    assert response.expectations.work == amount_transferred
+
+
+@injection_test
+def test_returns_correct_expectations_after_company_receives_negative_amount_on_prd_account_from_social_accounting(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    transaction_repository: TransactionRepository,
+    social_accounting: SocialAccounting,
+):
+    receiving_company = company_generator.create_company()
+    amount_transferred = Decimal(-20)
+    transaction_repository.create_transaction(
+        date=datetime.min,
+        sending_account=social_accounting.account,
+        receiving_account=receiving_company.product_account,
+        amount_sent=amount_transferred,
+        amount_received=amount_transferred,
+        purpose="test",
+    )
+    response = get_company_summary(receiving_company.id)
+    assert response
+    assert response.expectations.product == amount_transferred
+
+
+@injection_test
+def test_returns_correct_expectations_after_company_receives_positive_amount_on_prd_account_from_social_accounting(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    transaction_repository: TransactionRepository,
+    social_accounting: SocialAccounting,
+):
+    receiving_company = company_generator.create_company()
+    amount_transferred = Decimal(20)
+    transaction_repository.create_transaction(
+        date=datetime.min,
+        sending_account=social_accounting.account,
+        receiving_account=receiving_company.product_account,
+        amount_sent=amount_transferred,
+        amount_received=amount_transferred,
+        purpose="test",
+    )
+    response = get_company_summary(receiving_company.id)
+    assert response
+    assert response.expectations.product == amount_transferred
+
+
+@injection_test
+def test_returns_no_expectations_for_product_after_company_receives_amount_on_prd_account_from_another_company(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    transaction_repository: TransactionRepository,
+):
+    receiving_company = company_generator.create_company()
+    amount_transferred = Decimal(20)
+    transaction_repository.create_transaction(
+        date=datetime.min,
+        sending_account=company_generator.create_company().work_account,
+        receiving_account=receiving_company.product_account,
+        amount_sent=amount_transferred,
+        amount_received=amount_transferred,
+        purpose="test",
+    )
+    response = get_company_summary(receiving_company.id)
+    assert response
+    assert response.expectations.product == 0
+
+
+@injection_test
+def test_all_four_accounts_have_balance_of_zero(
+    get_company_summary: GetCompanySummary, company_generator: CompanyGenerator
+):
+    company = company_generator.create_company()
+    response = get_company_summary(company.id)
+    assert response
+    assert response.account_balances.means == 0
+    assert response.account_balances.raw_material == 0
+    assert response.account_balances.work == 0
+    assert response.account_balances.product == 0
+
+
+@injection_test
+def test_labour_account_shows_correct_balance_after_company_received_a_transaction(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    transaction_repository: TransactionRepository,
+):
+    sending_company = company_generator.create_company()
+    receiving_company = company_generator.create_company()
+    amount_transferred = Decimal(10)
+    transaction_repository.create_transaction(
+        date=datetime.min,
+        sending_account=sending_company.means_account,
+        receiving_account=receiving_company.work_account,
+        amount_sent=amount_transferred,
+        amount_received=amount_transferred,
+        purpose="test",
+    )
+    response = get_company_summary(receiving_company.id)
+    assert response
+    assert response.account_balances.work == amount_transferred
+    assert response.account_balances.means == 0
+
+
+@injection_test
+def test_show_relative_deviation_of_zero_for_all_accounts_when_no_transactions_took_place(
+    get_company_summary: GetCompanySummary, company_generator: CompanyGenerator
+):
+    company = company_generator.create_company()
+    response = get_company_summary(company.id)
+    assert response
+    for i in range(4):
+        assert response.deviations_relative[i] == 0
+
+
+@injection_test
+def test_show_relative_deviation_of_zero_when_company_sends_minus_5_to_p_account(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    transaction_repository: TransactionRepository,
+):
+    sending_company = company_generator.create_company()
+    receiving_company = company_generator.create_company()
+    amount_transferred = Decimal(-5)
+    transaction_repository.create_transaction(
+        date=datetime.min,
+        sending_account=sending_company.means_account,
+        receiving_account=receiving_company.means_account,
+        amount_sent=amount_transferred,
+        amount_received=amount_transferred,
+        purpose="test",
+    )
+    response = get_company_summary(receiving_company.id)
+    assert response
+    for i in range(4):
+        assert response.deviations_relative[i] == 0
+
+
+@injection_test
+def test_show_relative_deviation_of_100_when_social_accounting_sends_5_to_p_account(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    transaction_repository: TransactionRepository,
+    social_accounting: SocialAccounting,
+):
+    receiving_company = company_generator.create_company()
+    amount_transferred = Decimal(5)
+    transaction_repository.create_transaction(
+        date=datetime.min,
+        sending_account=social_accounting.account,
+        receiving_account=receiving_company.means_account,
+        amount_sent=amount_transferred,
+        amount_received=amount_transferred,
+        purpose="test",
+    )
+    response = get_company_summary(receiving_company.id)
+    assert response
+    assert response.deviations_relative[0] == Decimal(100)
+    for i in range(1, 4):
+        assert response.deviations_relative[i] == 0
+
+
+@injection_test
+def test_show_relative_deviation_of_zero_when_company_sends_minus_5_to_prd_account(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    transaction_repository: TransactionRepository,
+):
+    sending_company = company_generator.create_company()
+    receiving_company = company_generator.create_company()
+    amount_transferred = Decimal(-5)
+    transaction_repository.create_transaction(
+        date=datetime.min,
+        sending_account=sending_company.means_account,
+        receiving_account=receiving_company.product_account,
+        amount_sent=amount_transferred,
+        amount_received=amount_transferred,
+        purpose="test",
+    )
+    response = get_company_summary(receiving_company.id)
+    assert response
+    for i in range(4):
+        assert response.deviations_relative[i] == 0
+
+
+@injection_test
+def test_show_relative_deviation_of_100_when_social_accounting_sends_minus_5_to_prd_account(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    transaction_repository: TransactionRepository,
+    social_accounting: SocialAccounting,
+):
+    receiving_company = company_generator.create_company()
+    amount_transferred = Decimal(-5)
+    transaction_repository.create_transaction(
+        date=datetime.min,
+        sending_account=social_accounting.account,
+        receiving_account=receiving_company.product_account,
+        amount_sent=amount_transferred,
+        amount_received=amount_transferred,
+        purpose="test",
+    )
+    response = get_company_summary(receiving_company.id)
+    assert response
+    for i in range(3):
+        assert response.deviations_relative[i] == 0
+    assert response.deviations_relative[3] == Decimal(100)
+
+
+@injection_test
+def test_show_relative_deviation_of_50_when_company_sells_half_of_expected_sales(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    transaction_repository: TransactionRepository,
+    social_accounting: SocialAccounting,
+):
+    company = company_generator.create_company()
+    expected_sales = Decimal(-10)
+    transaction_repository.create_transaction(
+        date=datetime.min,
+        sending_account=social_accounting.account,
+        receiving_account=company.product_account,
+        amount_sent=expected_sales,
+        amount_received=expected_sales,
+        purpose="test",
+    )
+    buying_company = company_generator.create_company()
+    sales_value = Decimal(5)
+    transaction_repository.create_transaction(
+        date=datetime.min,
+        sending_account=buying_company.product_account,
+        receiving_account=company.product_account,
+        amount_sent=sales_value,
+        amount_received=sales_value,
+        purpose="test",
+    )
+
+    response = get_company_summary(company.id)
+    assert response
+    for i in range(3):
+        assert response.deviations_relative[i] == 0
+    assert response.deviations_relative[3] == Decimal(50)
+
+
+@injection_test
+def test_returns_empty_list_of_companys_plans_when_there_are_none(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+):
+    company = company_generator.create_company()
+    response = get_company_summary(company.id)
+    assert response
+    assert response.plan_details == []
+
+
+@injection_test
+def test_returns_list_of_companys_plans_when_there_are_any(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
 ):
-    company = company_repository.create_company()
-    plan_generator.create_plan(planner=company, activation_date=datetime.min)
+    company = company_generator.create_company()
     plan_generator.create_plan(planner=company, activation_date=datetime.min)
     plan_generator.create_plan(planner=company, activation_date=None)
     response = get_company_summary(company.id)
     assert response
-    assert len(response.active_plans) == 2
+    assert len(response.plan_details) == 2
+
+
+@injection_test
+def test_returns_list_of_companys_plans_in_descending_order(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+    datetime_service: FakeDatetimeService,
+):
+    company = company_generator.create_company()
+    third = plan_generator.create_plan(
+        planner=company, plan_creation_date=datetime_service.now_minus_one_day()
+    )
+    first = plan_generator.create_plan(
+        planner=company, plan_creation_date=datetime_service.now_minus_ten_days()
+    )
+    second = plan_generator.create_plan(
+        planner=company, plan_creation_date=datetime_service.now_minus_two_days()
+    )
+    response = get_company_summary(company.id)
+    assert response
+    assert response.plan_details[0].id == third.id
+    assert response.plan_details[1].id == second.id
+    assert response.plan_details[2].id == first.id
+
+
+@injection_test
+def test_returns_correct_sales_volume_of_zero_if_plan_is_public(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+):
+    company = company_generator.create_company()
+    plan_generator.create_plan(planner=company, is_public_service=True)
+    response = get_company_summary(company.id)
+    assert response
+    assert response.plan_details[0].sales_volume == 0
+
+
+@injection_test
+def test_returns_correct_sales_volume_if_plan_is_productive(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+):
+    company = company_generator.create_company()
+    plan_generator.create_plan(
+        planner=company,
+        costs=ProductionCosts(Decimal(2), Decimal(2), Decimal(2)),
+    )
+    response = get_company_summary(company.id)
+    assert response
+    assert response.plan_details[0].sales_volume == Decimal(6)
+
+
+@injection_test
+def test_returns_correct_sales_balance_if_plan_is_productive_and_no_transactions_took_place(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+):
+    company = company_generator.create_company()
+    plan_generator.create_plan(
+        planner=company,
+    )
+    response = get_company_summary(company.id)
+    assert response
+    assert response.plan_details[0].sales_balance == Decimal(0)
+
+
+@injection_test
+def test_returns_correct_sales_balance_if_plan_is_productive_and_one_transaction_took_place(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+    transaction_generator: TransactionGenerator,
+):
+    company = company_generator.create_company()
+    plan = plan_generator.create_plan(
+        planner=company,
+    )
+    transaction_generator.create_transaction(
+        receiving_account=company.product_account,
+        amount_received=Decimal(15),
+        purpose=f"Plan ID: {plan.id}",
+    )
+    response = get_company_summary(company.id)
+    assert response
+    assert response.plan_details[0].sales_balance == Decimal(15)
+
+
+@injection_test
+def test_returns_correct_deviation_if_plan_is_productive_with_costs_of_10_and_balance_of_10(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+    transaction_generator: TransactionGenerator,
+):
+    company = company_generator.create_company()
+    plan = plan_generator.create_plan(
+        planner=company,
+        costs=ProductionCosts(Decimal(5), Decimal(5), Decimal(0)),
+    )
+    transaction_generator.create_transaction(
+        receiving_account=company.product_account,
+        amount_received=Decimal(10),
+        purpose=f"Plan ID: {plan.id}",
+    )
+    response = get_company_summary(company.id)
+    assert response
+    assert response.plan_details[0].deviation_relative == Decimal(100)
+
+
+@injection_test
+def test_returns_correct_deviation_if_plan_is_productive_with_costs_of_10_and_balance_of_minus_10(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+    transaction_generator: TransactionGenerator,
+):
+    company = company_generator.create_company()
+    plan = plan_generator.create_plan(
+        planner=company,
+        costs=ProductionCosts(Decimal(5), Decimal(5), Decimal(0)),
+    )
+    transaction_generator.create_transaction(
+        receiving_account=company.product_account,
+        amount_received=Decimal(-10),
+        purpose=f"Plan ID: {plan.id}",
+    )
+    response = get_company_summary(company.id)
+    assert response
+    assert response.plan_details[0].deviation_relative == Decimal(100)
+
+
+@injection_test
+def test_returns_correct_deviation_if_plan_is_productive_with_costs_of_10_and_balance_of_0(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+):
+    company = company_generator.create_company()
+    plan_generator.create_plan(
+        planner=company,
+        costs=ProductionCosts(Decimal(5), Decimal(5), Decimal(0)),
+    )
+    response = get_company_summary(company.id)
+    assert response
+    assert response.plan_details[0].deviation_relative == Decimal(0)
+
+
+@injection_test
+def test_returns_correct_deviation_if_plan_is_public(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+    transaction_generator: TransactionGenerator,
+):
+    company = company_generator.create_company()
+    plan = plan_generator.create_plan(
+        planner=company,
+        is_public_service=True,
+        costs=ProductionCosts(Decimal(5), Decimal(5), Decimal(0)),
+    )
+    transaction_generator.create_transaction(
+        receiving_account=company.product_account,
+        amount_received=Decimal(10),
+        purpose=f"Plan ID: {plan.id}",
+    )
+    response = get_company_summary(company.id)
+    assert response
+    assert response.plan_details[0].deviation_relative == Decimal(0)
