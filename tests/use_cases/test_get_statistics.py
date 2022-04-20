@@ -120,7 +120,21 @@ def test_counting_of_certificates_when_one_worker_and_one_company_have_received_
 
 
 @injection_test
-def test_correct_available_product_is_shown_when_two_companies_have_received_prd_credit(
+def test_available_product_is_positive_number_when_amount_on_prd_account_is_negative(
+    get_statistics: GetStatistics,
+    company_generator: CompanyGenerator,
+    transaction_generator: TransactionGenerator,
+):
+    company = company_generator.create_company()
+    transaction_generator.create_transaction(
+        receiving_account=company.product_account, amount_received=Decimal(-10)
+    )
+    stats = get_statistics()
+    assert stats.available_product == Decimal(10)
+
+
+@injection_test
+def test_correct_available_product_is_shown_when_two_companies_have_received_prd_debit(
     get_statistics: GetStatistics,
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
@@ -129,7 +143,7 @@ def test_correct_available_product_is_shown_when_two_companies_have_received_prd
     for _ in range(num_companies):
         company = company_generator.create_company()
         transaction_generator.create_transaction(
-            receiving_account=company.product_account, amount_received=Decimal(22)
+            receiving_account=company.product_account, amount_received=Decimal(-22)
         )
     stats = get_statistics()
     assert stats.available_product == num_companies * Decimal(22)

@@ -57,6 +57,10 @@ class GetStatistics:
         )
 
     def _count_certificates_and_available_product(self) -> Tuple[Decimal, Decimal]:
+        """
+        available product is sum of prd account balances *(-1)
+        available certificates is sum of company work account balances and sum of member account balances
+        """
         certs_in_company_accounts = Decimal(0)
         available_product = Decimal(0)
         all_companies = self.company_repository.get_all_companies()
@@ -74,4 +78,4 @@ class GetStatistics:
                 member.account
             )
         certs_total = certs_in_company_accounts + certs_in_member_accounts
-        return certs_total, available_product
+        return certs_total, available_product * -1
