@@ -3,14 +3,17 @@ from unittest import TestCase
 from arbeitszeit.use_cases import RequestCooperationResponse
 from arbeitszeit_web.request_cooperation import RequestCooperationPresenter
 
-rr = RequestCooperationResponse.RejectionReason
+from .dependency_injection import get_dependency_injector
+
+RejectionReason = RequestCooperationResponse.RejectionReason
 
 SUCCESSFUL_COOPERATION_REQUEST = RequestCooperationResponse(rejection_reason=None)
 
 
 class RequestCooperationPresenterTests(TestCase):
     def setUp(self) -> None:
-        self.presenter = RequestCooperationPresenter()
+        self.injector = get_dependency_injector()
+        self.presenter = self.injector.get(RequestCooperationPresenter)
 
     def test_do_not_show_as_error_if_request_was_successful(self):
         presentation = self.presenter.present(SUCCESSFUL_COOPERATION_REQUEST)
@@ -18,25 +21,27 @@ class RequestCooperationPresenterTests(TestCase):
 
     def test_show_as_error_if_request_was_rejected(self):
         presentation = self.presenter.present(
-            RequestCooperationResponse(rejection_reason=rr.plan_not_found)
+            RequestCooperationResponse(rejection_reason=RejectionReason.plan_not_found)
         )
         self.assertTrue(presentation.is_error)
 
     def test_correct_notification_when_rejected_because_plan_not_found(self):
         presentation = self.presenter.present(
-            RequestCooperationResponse(rejection_reason=rr.plan_not_found)
+            RequestCooperationResponse(rejection_reason=RejectionReason.plan_not_found)
         )
         self.assertEqual(presentation.notifications[0], "Plan nicht gefunden.")
 
     def test_correct_notification_when_rejected_because_coop_not_found(self):
         presentation = self.presenter.present(
-            RequestCooperationResponse(rejection_reason=rr.cooperation_not_found)
+            RequestCooperationResponse(
+                rejection_reason=RejectionReason.cooperation_not_found
+            )
         )
         self.assertEqual(presentation.notifications[0], "Kooperation nicht gefunden.")
 
     def test_correct_notification_when_rejected_because_plan_inactive(self):
         presentation = self.presenter.present(
-            RequestCooperationResponse(rejection_reason=rr.plan_inactive)
+            RequestCooperationResponse(rejection_reason=RejectionReason.plan_inactive)
         )
         self.assertEqual(presentation.notifications[0], "Plan nicht aktiv.")
 
@@ -44,7 +49,9 @@ class RequestCooperationPresenterTests(TestCase):
         self,
     ):
         presentation = self.presenter.present(
-            RequestCooperationResponse(rejection_reason=rr.plan_has_cooperation)
+            RequestCooperationResponse(
+                rejection_reason=RejectionReason.plan_has_cooperation
+            )
         )
         self.assertEqual(
             presentation.notifications[0],
@@ -56,7 +63,7 @@ class RequestCooperationPresenterTests(TestCase):
     ):
         presentation = self.presenter.present(
             RequestCooperationResponse(
-                rejection_reason=rr.plan_is_already_requesting_cooperation
+                rejection_reason=RejectionReason.plan_is_already_requesting_cooperation
             )
         )
         self.assertEqual(
@@ -68,7 +75,9 @@ class RequestCooperationPresenterTests(TestCase):
         self,
     ):
         presentation = self.presenter.present(
-            RequestCooperationResponse(rejection_reason=rr.plan_is_public_service)
+            RequestCooperationResponse(
+                rejection_reason=RejectionReason.plan_is_public_service
+            )
         )
         self.assertEqual(
             presentation.notifications[0],
@@ -79,7 +88,9 @@ class RequestCooperationPresenterTests(TestCase):
         self,
     ):
         presentation = self.presenter.present(
-            RequestCooperationResponse(rejection_reason=rr.requester_is_not_planner)
+            RequestCooperationResponse(
+                rejection_reason=RejectionReason.requester_is_not_planner
+            )
         )
         self.assertEqual(
             presentation.notifications[0],

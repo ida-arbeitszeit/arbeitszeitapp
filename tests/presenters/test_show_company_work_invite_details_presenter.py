@@ -8,15 +8,16 @@ from arbeitszeit_web.presenters.show_company_work_invite_details_presenter impor
 )
 from tests.translator import FakeTranslator
 
+from .dependency_injection import get_dependency_injector
+from .url_index import AnswerCompanyWorkInviteUrlIndexImpl
+
 
 class PresenterTests(TestCase):
     def setUp(self) -> None:
-        self.invite_url_index = UrlIndexImpl()
-        self.translator = FakeTranslator()
-        self.presenter = ShowCompanyWorkInviteDetailsPresenter(
-            url_index=self.invite_url_index,
-            translator=self.translator,
-        )
+        self.injector = get_dependency_injector()
+        self.invite_url_index = self.injector.get(AnswerCompanyWorkInviteUrlIndexImpl)
+        self.translator = self.injector.get(FakeTranslator)
+        self.presenter = self.injector.get(ShowCompanyWorkInviteDetailsPresenter)
 
     def test_use_case_response_without_details_doesnt_render_to_view_model(
         self,
@@ -68,8 +69,3 @@ class PresenterTests(TestCase):
 
     def make_error_response(self) -> ShowCompanyWorkInviteDetailsResponse:
         return ShowCompanyWorkInviteDetailsResponse(details=None)
-
-
-class UrlIndexImpl:
-    def get_answer_company_work_invite_url(self, invite_id: UUID) -> str:
-        return f"{invite_id} url"

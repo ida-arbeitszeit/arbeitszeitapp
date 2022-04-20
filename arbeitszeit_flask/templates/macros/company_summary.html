@@ -28,25 +28,77 @@
                             <td class="has-text-left has-text-weight-semibold">{{ gettext("Registered since") }}</td>
                             <td class="has-text-left">{{ view_model.registered_on |
                                 format_datetime(zone='Europe/Berlin',
-                                fmt='%d.%m.%Y %H:%M') }}</td>
+                                fmt='%d.%m.%Y') }}</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
             <div class="table-container">
                 <h1 class="title is-4">
-                    {{ gettext("Active plans") }}
+                    {{ gettext("Metrics") }}
                 </h1>
-                <table class="table is-fullwidth has-text-left">
+                <table class="table has-text-left">
                     <thead>
                         <tr>
-                            <th>{{ gettext("Product name") }}</th>
+                            <th></th>
+                            <th>p</th>
+                            <th>r</th>
+                            <th>a</th>
+                            <th>prd</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for plan in view_model.active_plans %}
+                        <tr>
+                            <td>{{ gettext(" Expectations") }}</td>
+                            {% for exp in view_model.expectations %}
+                            <td><span class="tag is-medium">{{
+                                    exp }}</span></td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td>{{ gettext("Balances") }}</td>
+                            {% for bal in view_model.account_balances %}
+                            <td><span class="tag is-medium">{{
+                                    bal }}</span></td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td class="has-text-weight-semibold">{{ gettext("Deviation (&percnt;)") }}</td>
+                            {% for dev_rel in view_model.deviations_relative %}
+                            <td><span
+                                    class="tag is-light is-medium {{ 'is-danger' if dev_rel | float | abs >= 33 else 'is-primary'  }}">{{
+                                    dev_rel }}%</span></td>
+                            {% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-container">
+                <h1 class="title is-4">
+                    {{ gettext("Plans") }}
+                </h1>
+                <table class="table has-text-left">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>{{ gettext("Status") }}</th>
+                            <th>{{ gettext("Planned sales") }}</th>
+                            <th>{{ gettext("Sales deviation") }}</th>
+                            <th>{{ gettext("Sales deviation (&percnt;)") }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for plan in view_model.plan_details %}
                         <tr>
                             <td><a href="{{ plan.url }}">{{ plan.name }}</a></td>
+                            <td>{{ plan.status }}</td>
+                            <td> <span class="tag is-medium">{{ plan.sales_volume }}</span></td>
+                            <td><span class="tag is-medium">{{ plan.sales_balance }}</span></td>
+                            <td>
+                                <span
+                                    class="tag is-light is-medium {{ 'is-danger' if plan.deviation_relative | float | abs >= 33 else 'is-primary'  }}">{{
+                                    plan.deviation_relative }}%</span>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>

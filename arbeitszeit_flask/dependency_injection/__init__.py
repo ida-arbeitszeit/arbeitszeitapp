@@ -478,8 +478,17 @@ class FlaskModule(Module):
         self,
         company_repository: interfaces.CompanyRepository,
         plan_repository: interfaces.PlanRepository,
+        account_repository: interfaces.AccountRepository,
+        transaction_repository: interfaces.TransactionRepository,
+        social_accounting: entities.SocialAccounting,
     ) -> GetCompanySummary:
-        return GetCompanySummary(company_repository, plan_repository)
+        return GetCompanySummary(
+            company_repository,
+            plan_repository,
+            account_repository,
+            transaction_repository,
+            social_accounting,
+        )
 
     @provider
     def provide_list_workers_controller(
@@ -669,9 +678,9 @@ class FlaskModule(Module):
 
     @provider
     def provide_get_company_summary_success_presenter(
-        self, plan_index: PlanSummaryUrlIndex
+        self, plan_index: PlanSummaryUrlIndex, translator: Translator
     ) -> GetCompanySummarySuccessPresenter:
-        return GetCompanySummarySuccessPresenter(plan_index)
+        return GetCompanySummarySuccessPresenter(plan_index, translator)
 
     @provider
     def provide_transaction_repository(
