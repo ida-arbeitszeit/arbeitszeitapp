@@ -5,10 +5,13 @@ from uuid import UUID, uuid4
 from arbeitszeit.use_cases.list_workers import ListedWorker, ListWorkersResponse
 from arbeitszeit_web.presenters.list_workers_presenter import ListWorkersPresenter
 
+from .dependency_injection import get_dependency_injector
+
 
 class PresenterTests(TestCase):
     def setUp(self) -> None:
-        self.presenter = ListWorkersPresenter()
+        self.injector = get_dependency_injector()
+        self.presenter = self.injector.get(ListWorkersPresenter)
 
     def test_that_view_model_does_not_contains_workers_if_response_didnt_either(
         self,

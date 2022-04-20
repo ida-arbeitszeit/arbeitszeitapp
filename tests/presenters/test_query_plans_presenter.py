@@ -1,12 +1,17 @@
 from decimal import Decimal
 from unittest import TestCase
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from arbeitszeit.use_cases.query_plans import PlanQueryResponse, QueriedPlan
 from arbeitszeit_web.query_plans import QueryPlansPresenter
-from tests.translator import FakeTranslator
 
+from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl
+from .url_index import (
+    CompanySummaryUrlIndex,
+    CoopSummaryUrlIndexTestImpl,
+    PlanSummaryUrlIndexTestImpl,
+)
 
 RESPONSE_WITHOUT_RESULTS = PlanQueryResponse(results=[])
 RESPONSE_WITH_ONE_RESULT = PlanQueryResponse(
@@ -48,18 +53,12 @@ RESPONSE_WITH_ONE_COOPERATING_RESULT = PlanQueryResponse(
 
 class QueryPlansPresenterTests(TestCase):
     def setUp(self):
-        self.plan_url_index = PlanSummaryUrlIndex()
-        self.company_url_index = CompanySummaryUrlIndex()
-        self.coop_url_index = CoopSummaryUrlIndex()
-        self.notifier = NotifierTestImpl()
-        self.trans = FakeTranslator()
-        self.presenter = QueryPlansPresenter(
-            self.plan_url_index,
-            self.company_url_index,
-            self.coop_url_index,
-            user_notifier=self.notifier,
-            trans=self.trans,
-        )
+        self.injector = get_dependency_injector()
+        self.plan_url_index = self.injector.get(PlanSummaryUrlIndexTestImpl)
+        self.company_url_index = self.injector.get(CompanySummaryUrlIndex)
+        self.coop_url_index = self.injector.get(CoopSummaryUrlIndexTestImpl)
+        self.notifier = self.injector.get(NotifierTestImpl)
+        self.presenter = self.injector.get(QueryPlansPresenter)
 
     def test_presenting_empty_response_leads_to_not_showing_results(self):
         presentation = self.presenter.present(RESPONSE_WITHOUT_RESULTS)
@@ -116,18 +115,3 @@ class QueryPlansPresenterTests(TestCase):
             table_row.coop_summary_url,
             self.coop_url_index.get_coop_summary_url(coop_id),
         )
-
-
-class PlanSummaryUrlIndex:
-    def get_plan_summary_url(self, plan_id: UUID) -> str:
-        return f"fake_plan_url:{plan_id}"
-
-
-class CoopSummaryUrlIndex:
-    def get_coop_summary_url(self, coop_id: UUID) -> str:
-        return f"fake_coop_url:{coop_id}"
-
-
-class CompanySummaryUrlIndex:
-    def get_company_summary_url(self, company_id: UUID) -> str:
-        return f"fake_company_url:{company_id}"

@@ -7,16 +7,16 @@ from arbeitszeit.use_cases.pay_consumer_product import (
 from arbeitszeit_web.pay_consumer_product import PayConsumerProductPresenter
 from tests.translator import FakeTranslator
 
+from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl
 
 
 class PayConsumerProductPresenterTests(TestCase):
     def setUp(self) -> None:
-        self.notifier = NotifierTestImpl()
-        self.translator = FakeTranslator()
-        self.presenter = PayConsumerProductPresenter(
-            user_notifier=self.notifier, translator=self.translator
-        )
+        self.injector = get_dependency_injector()
+        self.notifier = self.injector.get(NotifierTestImpl)
+        self.translator = self.injector.get(FakeTranslator)
+        self.presenter = self.injector.get(PayConsumerProductPresenter)
 
     def test_presenter_shows_correct_notification_when_payment_was_a_success(
         self,

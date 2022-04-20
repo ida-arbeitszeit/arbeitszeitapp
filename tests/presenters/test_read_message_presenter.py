@@ -8,11 +8,15 @@ from arbeitszeit.user_action import UserAction, UserActionType
 from arbeitszeit_web.read_message import ReadMessagePresenter
 from tests.strategies import user_actions
 
+from .dependency_injection import get_dependency_injector
+from .user_action_resolver import UserActionResolver
+
 
 class ReadMessagePresenterTests(TestCase):
     def setUp(self) -> None:
-        self.action_link_resolver = UserActionResolver()
-        self.presenter = ReadMessagePresenter(self.action_link_resolver)
+        self.injector = get_dependency_injector()
+        self.action_link_resolver = self.injector.get(UserActionResolver)
+        self.presenter = self.injector.get(ReadMessagePresenter)
         self.use_case_response = ReadMessageSuccess(
             message_title="test title",
             message_content="message content",
@@ -99,24 +103,4 @@ class ReadMessagePresenterTests(TestCase):
         self.assertEqual(
             view_model.action_link_label,
             self.action_link_resolver.resolve_user_action_name(action),
-        )
-
-
-class UserActionResolver:
-    def resolve_user_action_reference(self, action: UserAction) -> str:
-        return " ".join(
-            [
-                str(action.type),
-                str(action.reference),
-                "reference",
-            ]
-        )
-
-    def resolve_user_action_name(self, action: UserAction) -> str:
-        return " ".join(
-            [
-                str(action.type),
-                str(action.reference),
-                "name",
-            ]
         )

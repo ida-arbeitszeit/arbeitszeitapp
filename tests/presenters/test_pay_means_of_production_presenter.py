@@ -7,6 +7,7 @@ from arbeitszeit_web.pay_means_of_production import (
 )
 from tests.translator import FakeTranslator
 
+from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl
 
 reasons = PayMeansOfProductionResponse.RejectionReason
@@ -14,11 +15,10 @@ reasons = PayMeansOfProductionResponse.RejectionReason
 
 class PayMeansOfProductionTests(TestCase):
     def setUp(self) -> None:
-        self.notifier = NotifierTestImpl()
-        self.trans = FakeTranslator()
-        self.presenter = PayMeansOfProductionPresenter(
-            user_notifier=self.notifier, trans=self.trans
-        )
+        self.injector = get_dependency_injector()
+        self.notifier = self.injector.get(NotifierTestImpl)
+        self.trans = self.injector.get(FakeTranslator)
+        self.presenter = self.injector.get(PayMeansOfProductionPresenter)
 
     def test_show_confirmation_when_payment_was_successful(self) -> None:
         self.presenter.present(
