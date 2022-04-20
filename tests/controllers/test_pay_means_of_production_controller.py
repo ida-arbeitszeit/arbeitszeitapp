@@ -7,7 +7,7 @@ from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProductionRe
 from arbeitszeit_web.controllers.pay_means_of_production_controller import (
     PayMeansOfProductionController,
 )
-from tests.flask_integration.request import FakeRequest
+from tests.request import FakeRequest
 from tests.session import FakeSession
 
 

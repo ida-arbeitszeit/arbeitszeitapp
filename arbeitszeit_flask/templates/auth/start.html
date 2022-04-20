@@ -1,11 +1,9 @@
-{% extends "base.html" %}
+{% extends "base_general_pages.html" %}
 
-{% block content1 %}
-
-
+{% block general_pages %}
 <section class="hero is-fullheight">
   <div class="hero-head">
-    <nav class="navbar is-light" role="navigation" aria-label="main navigation">
+    <nav class="navbar" role="navigation" aria-label="main navigation">
       <div class="navbar-brand">
         <a role="button" class="navbar-burger" onclick="expandMenu()" aria-label="menu" aria-expanded="false"
           data-target="navbarOnTop">
@@ -40,10 +38,11 @@
     </nav>
   </div>
 
-  <div class="hero-body">
+  <div class="hero-body pt-0">
     <div class="container has-text-centered">
       <h1 class="title">
-        {{ gettext('Companies 2020') }}
+        <!-- do not translate -->
+        Arbeitszeit
       </h1>
       <h2 class="subtitle">
         {{ gettext('A platform for working time calculation.') }}
@@ -52,27 +51,8 @@
         <a class="button" href="{{ url_for('auth.login_member') }}">{{ gettext('Member') }}</a>
         <a class="button" href="{{ url_for('auth.login_company') }}">{{ gettext('Company') }}</a>
       </div>
-      {% with messages = get_flashed_messages() %}
-      {% if messages %}
-      <div class="notification is-danger">
-        {{ messages[0] }}
-      </div>
-      {% endif %}
-      {% endwith %}
-
     </div>
-
   </div>
-
-
-  <footer class="footer">
-    <div class="content has-text-centered">
-      <p>
-        {{ gettext('App version') }}: 16/03/2022
-      </p>
-    </div>
-  </footer>
-
-
+  <div class="hero-foot"></div>
 </section>
 {% endblock %}

@@ -1,18 +1,15 @@
 {% macro list_messages(view_model) %}
 
-{% from 'macros/show_notifications.html' import show_notifications %}
-
-{{ show_notifications() }}
-
-<h1 class="title">{{ gettext("Messages") }}</h1>
-<ul>
-  {% for message in view_model.messages %}
-  <li {% if message.show_unread_message_indicator %}class="unread-message"{% endif %}>
-    <a href="{{message.message_url}}">"{{ message.title }}"</a> from {{ message.sender_name }}
-  </li>
-  {% else %}
-  {{ gettext("No messages received.") }}
-  {% endfor %}
-</ul>
-
+<div class="section is-medium has-text-centered">
+  <h1 class="title">{{ gettext("Messages") }}</h1>
+  <ul>
+    {% for message in view_model.messages %}
+    <li {% if message.show_unread_message_indicator %}class="unread-message" {% endif %}>
+      <a href="{{message.message_url}}">"{{ message.title }}"</a> from {{ message.sender_name }}
+    </li>
+    {% else %}
+    {{ gettext("No messages received.") }}
+    {% endfor %}
+  </ul>
+</div>
 {% endmacro %}

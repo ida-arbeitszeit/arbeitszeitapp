@@ -1,55 +1,54 @@
 {% extends "base_member.html" %}
 
-{% from 'macros/show_notifications.html' import show_notifications %}
-
-{% block content2 %}
-<div class="columns has-text-left">
-    <div class="column is-two-third">
-        <div class="content">
-            <h1 class="title">
-                {{ gettext("Pay Consumer Product") }}
-            </h1>
-            <div class="box has-background-info-light has-text-info-dark has-text-centered">
-                <div class="icon"><i class="fas fa-info-circle"></i></div>
-                <p>
-                  {{ gettext("You can pay consumer products here.") }}
-		  <br>
-                </p>
-            </div>
-        </div>
-
-        <div class="content">
-            <form method="post">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div class="field has-addons">
-                    <div class="control">
-                        {{ form.plan_id(class_="input") }}
-                    </div>
-                    <div class="control">
-                        {{ form.amount(class_="input") }}
-                    </div>
-                    <div class="control">
-                        <button class="button is-primary" name="transfer_type" value="transfer_to_company"
-                            type="submit">{{ gettext("Transfer") }}</button>
-                    </div>
+{% block member %}
+<div class="section has-text-centered">
+    <div class="columns">
+        <div class="column"></div>
+        <div class="column is-8">
+            <div class="content">
+                <h1 class="title">
+                    {{ gettext("Pay Consumer Product") }}
+                </h1>
+                <div class="box has-background-info-light has-text-info-dark has-text-centered">
+                    <div class="icon"><i class="fas fa-info-circle"></i></div>
+                    <p>
+                        {{ gettext("You can pay consumer products here.") }}
+                        <br>
+                    </p>
                 </div>
-                <p class="help">
-		  {{ gettext("The producer needs to tell you the plan ID for the product you want to pay.") }}
-		</p>
-            </form>
-        </div>
+            </div>
 
-	{{ show_notifications() }}
+            <div class="content">
+                <form method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="field has-addons has-addons-centered">
+                        <div class="control">
+                            {{ form.plan_id(class_="input") }}
+                        </div>
+                        <div class="control">
+                            {{ form.amount(class_="input") }}
+                        </div>
+                        <div class="control">
+                            <button class="button is-primary" name="transfer_type" value="transfer_to_company"
+                                type="submit">{{ gettext("Transfer") }}</button>
+                        </div>
+                    </div>
+                    <p class="help">
+                        {{ gettext("The producer needs to tell you the plan ID for the product you want to pay.") }}
+                    </p>
+                </form>
+            </div>
 
-        {% for field_name, field_errors in form.errors|dictsort if field_errors %}
-        {% for error in field_errors %}
-        <div class="notification is-danger">
-            {{ form[field_name].label }}: {{ error }}
+            {% for field_name, field_errors in form.errors|dictsort if field_errors %}
+            {% for error in field_errors %}
+            <div class="notification is-danger">
+                {{ form[field_name].label }}: {{ error }}
+            </div>
+            {% endfor %}
+            {% endfor %}
         </div>
-        {% endfor %}
-        {% endfor %}
+        <div class="column"></div>
     </div>
 </div>
-
 
 {% endblock %}

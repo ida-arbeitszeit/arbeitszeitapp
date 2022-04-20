@@ -16,7 +16,7 @@ class TemplateRenderer(Protocol):
     def render_template(
         self, name: str, context: Optional[Dict[str, Any]] = None
     ) -> str:
-        pass
+        ...
 
 
 class TemplateIndex(Protocol):
@@ -74,4 +74,4 @@ class UserTemplateRenderer:
 @dataclass
 class MemberRegistrationEmailTemplateImpl:
     def render_to_html(self, confirmation_url: str) -> str:
-        return render_template("activate.html", confirm_url=confirmation_url)
+        return render_template("auth/activate.html", confirm_url=confirmation_url)

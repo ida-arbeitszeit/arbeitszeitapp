@@ -24,6 +24,9 @@ from arbeitszeit.use_cases import (
     GetCompanySummary,
     ReadMessage,
 )
+from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
+from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
+from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
 from arbeitszeit.use_cases.list_workers import ListWorkers
 from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProduction
 from arbeitszeit.use_cases.register_member.member_registration_message_presenter import (
@@ -52,6 +55,7 @@ from arbeitszeit_flask.database.repositories import (
 )
 from arbeitszeit_flask.datetime import RealtimeDatetimeService
 from arbeitszeit_flask.extensions import db
+from arbeitszeit_flask.flask_plotter import FlaskPlotter
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.mail_service import (
@@ -74,6 +78,7 @@ from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.translator import FlaskTranslator
 from arbeitszeit_flask.url_index import CompanyUrlIndex, MemberUrlIndex
 from arbeitszeit_flask.views import EndCooperationView, Http404View, ReadMessageView
+from arbeitszeit_flask.views.create_draft_view import CreateDraftView
 from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
 from arbeitszeit_flask.views.transfer_to_worker_view import TransferToWorkerView
 from arbeitszeit_web.answer_company_work_invite import (
@@ -101,12 +106,17 @@ from arbeitszeit_web.controllers.show_my_accounts_controller import (
     ShowMyAccountsController,
 )
 from arbeitszeit_web.email import EmailConfiguration, UserAddressBook
+from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
 from arbeitszeit_web.get_plan_summary_company import (
     GetPlanSummaryCompanySuccessPresenter,
 )
 from arbeitszeit_web.get_plan_summary_member import GetPlanSummarySuccessPresenter
+from arbeitszeit_web.get_prefilled_draft_data import (
+    GetPrefilledDraftDataPresenter,
+    PrefilledDraftDataController,
+)
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyController
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
@@ -114,6 +124,7 @@ from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPr
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from arbeitszeit_web.plan_summary_service import PlanSummaryServiceImpl
+from arbeitszeit_web.plotter import Plotter
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
 from arbeitszeit_web.presenters.member_registration_email_presenter import (
     MemberRegistrationEmailPresenter,
@@ -138,6 +149,7 @@ from arbeitszeit_web.request_cooperation import RequestCooperationController
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
+from arbeitszeit_web.show_r_account_details import ShowRAccountDetailsPresenter
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import (
     AnswerCompanyWorkInviteUrlIndex,
@@ -383,9 +395,50 @@ class CompanyModule(Module):
 
     @provider
     def provide_show_prd_account_details_presenter(
-        self, translator: Translator
+        self, translator: Translator, plotter: Plotter
     ) -> ShowPRDAccountDetailsPresenter:
-        return ShowPRDAccountDetailsPresenter(translator=translator)
+        return ShowPRDAccountDetailsPresenter(translator=translator, plotter=plotter)
+
+    @provider
+    def provide_show_r_account_details_presenter(
+        self, translator: Translator
+    ) -> ShowRAccountDetailsPresenter:
+        return ShowRAccountDetailsPresenter(trans=translator)
+
+    @provider
+    def provide_prefilled_draft_data_controller(
+        self, session: Session
+    ) -> PrefilledDraftDataController:
+        return PrefilledDraftDataController(session=session)
+
+    @provider
+    def provide_create_draft_view(
+        self,
+        request: FlaskRequest,
+        session: Session,
+        notifier: Notifier,
+        translator: Translator,
+        prefilled_data_controller: PrefilledDraftDataController,
+        get_plan_summary_company: GetPlanSummaryCompany,
+        create_draft: CreatePlanDraft,
+        get_draft_summary: GetDraftSummary,
+        get_prefilled_draft_data_presenter: GetPrefilledDraftDataPresenter,
+        template_renderer: UserTemplateRenderer,
+        http_404_view: Http404View,
+    ) -> CreateDraftView:
+        return CreateDraftView(
+            request,
+            session,
+            notifier,
+            translator,
+            prefilled_data_controller,
+            get_plan_summary_company,
+            create_draft,
+            get_draft_summary,
+            get_prefilled_draft_data_presenter,
+            template_renderer,
+            http_404_view,
+        )
 
 
 class FlaskModule(Module):
@@ -522,15 +575,17 @@ class FlaskModule(Module):
 
     @provider
     def provide_query_companies_presenter(
-        self, notifier: Notifier
+        self, notifier: Notifier, company_url_index: CompanySummaryUrlIndex
     ) -> QueryCompaniesPresenter:
-        return QueryCompaniesPresenter(user_notifier=notifier)
+        return QueryCompaniesPresenter(
+            user_notifier=notifier, company_url_index=company_url_index
+        )
 
     @provider
     def provide_pay_means_of_production_presenter(
-        self, notifier: Notifier
+        self, notifier: Notifier, trans: Translator
     ) -> PayMeansOfProductionPresenter:
-        return PayMeansOfProductionPresenter(notifier)
+        return PayMeansOfProductionPresenter(notifier, trans)
 
     @provider
     def provide_list_all_cooperations_presenter(
@@ -569,10 +624,14 @@ class FlaskModule(Module):
     def provide_query_plans_presenter(
         self,
         plan_index: PlanSummaryUrlIndex,
+        company_index: CompanySummaryUrlIndex,
         coop_index: CoopSummaryUrlIndex,
         notifier: Notifier,
+        trans: Translator,
     ) -> QueryPlansPresenter:
-        return QueryPlansPresenter(plan_index, coop_index, user_notifier=notifier)
+        return QueryPlansPresenter(
+            plan_index, company_index, coop_index, notifier, trans
+        )
 
     @provider
     def provide_user_action_resolver(
@@ -607,6 +666,12 @@ class FlaskModule(Module):
         self, plan_index: PlanSummaryUrlIndex, end_coop_index: EndCoopUrlIndex
     ) -> GetCoopSummarySuccessPresenter:
         return GetCoopSummarySuccessPresenter(plan_index, end_coop_index)
+
+    @provider
+    def provide_get_company_summary_success_presenter(
+        self, plan_index: PlanSummaryUrlIndex
+    ) -> GetCompanySummarySuccessPresenter:
+        return GetCompanySummarySuccessPresenter(plan_index)
 
     @provider
     def provide_transaction_repository(
@@ -687,6 +752,10 @@ class FlaskModule(Module):
     @provider
     def provide_translator(self) -> Translator:
         return FlaskTranslator()
+
+    @provider
+    def provide_plotter(self) -> Plotter:
+        return FlaskPlotter()
 
     @provider
     def provide_show_my_accounts_controller(

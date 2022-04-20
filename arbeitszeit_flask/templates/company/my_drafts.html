@@ -1,53 +1,49 @@
 {% extends "base_company.html" %}
+{% block company %}
+<div class="section has-text-centered">
+    <div class="content">
+        <h1 class="title">
+            Plan-Entwürfe
+        </h1>
+        <div class="box has-background-info-light has-text-info-dark has-text-centered">
+            <div class="icon"><i class="fas fa-info-circle"></i></div>
+            <p>
+                Du kannst deine Entwürfe weiter bearbeiten und einreichen oder löschen.<br>
+            </p>
+        </div>
+    </div>
 
-{% block content2 %}
-
-<div class="content">
-    <h1 class="title">
-        Plan-Entwürfe
-    </h1>
-    <div class="box has-background-info-light has-text-info-dark has-text-centered">
-        <div class="icon"><i class="fas fa-info-circle"></i></div>
-        <p>
-            Du kannst deine Entwürfe weiter bearbeiten und einreichen oder löschen.<br>
-        </p>
+    <div class="table-container">
+        {% if show_results %}
+        <table class="table is-fullwidth">
+            <thead>
+                <tr>
+                    <th>Datum</th>
+                    <th>Name</th>
+                    <th>Beschreibung</th>
+                    <th>Bearbeiten</th>
+                    <th>Löschen</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in results.rows %}
+                <tr>
+                    <td>{{ row.creation_date }}</td>
+                    <td>{{ row.product_name }}</td>
+                    <td>{% for paragraph in row.description %}{{ paragraph }}<br>{% endfor %}</td>
+                    <td>
+                        <a href="{{ url_for('main_company.create_draft', saved_draft_id=row.id) }}"><i
+                                class="fas fa-edit"></i></a>
+                    </td>
+                    <td>X</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div>Du hast keine Entwürfe.</div>
+        {% endif %}
     </div>
 </div>
-
-<div class="table-container">
-    {% if show_results %}
-    <table class="table is-fullwidth">
-
-        <thead>
-            <tr>
-                <th>Datum</th>
-                <th>Name</th>
-                <th>Beschreibung</th>
-                <th>Bearbeiten</th>
-                <th>Löschen</th>
-            </tr>
-        </thead>
-        <tbody>
-
-            {% for row in results.rows %}
-            <tr>
-                <td>{{ row.creation_date }}</td>
-                <td>{{ row.product_name }}</td>
-                <td>{% for paragraph in row.description %}{{ paragraph }}<br>{% endfor %}</td>
-                <td>
-                    <a href="{{ url_for('main_company.create_draft', saved_draft_id=row.id) }}"><i
-                            class="fas fa-edit"></i></a>
-                </td>
-                <td>X</td>
-            </tr>
-            {% endfor %}
-
-        </tbody>
-    </table>
-    {% else %}
-    <div>Du hast keine Entwürfe.</div>
-    {% endif %}
-</div>
-
 
 {% endblock %}

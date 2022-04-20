@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-from typing import List
 from unittest import TestCase
 from uuid import UUID, uuid4
 

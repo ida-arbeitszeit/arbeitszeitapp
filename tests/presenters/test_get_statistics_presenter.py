@@ -6,6 +6,7 @@ from arbeitszeit.use_cases.get_statistics import StatisticsResponse
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 
 from ..translator import FakeTranslator
+from .dependency_injection import get_dependency_injector
 
 TESTING_RESPONSE_MODEL = StatisticsResponse(
     registered_companies_count=5,
@@ -21,8 +22,9 @@ TESTING_RESPONSE_MODEL = StatisticsResponse(
 
 class GetStatisticsPresenterTests(TestCase):
     def setUp(self) -> None:
-        self.translator = FakeTranslator()
-        self.presenter = GetStatisticsPresenter(translator=self.translator)
+        self.injector = get_dependency_injector()
+        self.translator = self.injector.get(FakeTranslator)
+        self.presenter = self.injector.get(GetStatisticsPresenter)
 
     def test_planned_resources_hours_are_truncated_at_2_digits_after_comma(self):
         response = replace(

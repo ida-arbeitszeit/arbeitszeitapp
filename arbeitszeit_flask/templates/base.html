@@ -8,17 +8,14 @@
   <title>{{ gettext("Companies 2020") }}</title>
   <link rel="stylesheet" href="/static/bulma.css">
   <link rel="stylesheet" href="/static/main.css">
+  {% block style %}
+  {% endblock %}
   <script defer src="https://use.fontawesome.com/releases/v5.14.0/js/all.js"></script>
-  <script>
-    function expandMenu() {
-      var element = document.getElementById("navbarOnTop");
-      element.classList.toggle("is-active");
-    }
-  </script>
+  <script src="/static/main.js"></script>
 </head>
 
 <body>
-  {% block content1 %}
+  {% block body %}
   {% endblock %}
 </body>
 

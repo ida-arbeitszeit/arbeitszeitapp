@@ -1,5 +1,3 @@
-from unittest import mock
-
 from injector import Injector, Module, inject, provider, singleton
 
 import arbeitszeit.repositories as interfaces

@@ -48,12 +48,12 @@ def start():
     if "user_type" not in session:
         session["user_type"] = None
     save_next_url_in_session(request)
-    return render_template("start.html", languages=current_app.config["LANGUAGES"])
+    return render_template("auth/start.html", languages=current_app.config["LANGUAGES"])
 
 
 @auth.route("/help")
 def help():
-    return render_template("start_hilfe.html")
+    return render_template("auth/start_hilfe.html")
 
 
 @auth.route("/language=<language>")
@@ -68,7 +68,7 @@ def set_language(language=None):
 def unconfirmed_member():
     if current_user.confirmed_on is not None:
         return redirect(url_for("auth.start"))
-    return render_template("unconfirmed_member.html")
+    return render_template("auth/unconfirmed_member.html")
 
 
 @auth.route("/member/signup", methods=["GET", "POST"])
@@ -91,7 +91,7 @@ def signup_member(
                 == RegisterMemberUseCase.Response.RejectionReason.member_already_exists
             ):
                 register_form.email.errors.append("Emailadresse existiert bereits")
-                return render_template("signup_member.html", form=register_form)
+                return render_template("auth/signup_member.html", form=register_form)
 
         email = register_form.data["email"]
         member = member_repository.get_member_orm_by_mail(email)
@@ -106,7 +106,7 @@ def signup_member(
             session["user_type"] = None
             logout_user()
 
-    return render_template("signup_member.html", form=register_form)
+    return render_template("auth/signup_member.html", form=register_form)
 
 
 @auth.route("/member/confirm/<token>")
@@ -156,7 +156,7 @@ def login_member():
             session["user_type"] = None
             logout_user()
 
-    return render_template("login_member.html", form=login_form)
+    return render_template("auth/login_member.html", form=login_form)
 
 
 @auth.route("/member/resend")
@@ -186,7 +186,7 @@ def resend_confirmation_member(use_case: ResendConfirmationMail):
 def unconfirmed_company():
     if current_user.confirmed_on is not None:
         return redirect(url_for("auth.start"))
-    return render_template("unconfirmed_company.html")
+    return render_template("auth/unconfirmed_company.html")
 
 
 @auth.route("/company/login", methods=["GET", "POST"])
@@ -218,7 +218,7 @@ def login_company():
             session["user_type"] = None
             logout_user()
 
-    return render_template("login_company.html", form=login_form)
+    return render_template("auth/login_company.html", form=login_form)
 
 
 @auth.route("/company/signup", methods=["GET", "POST"])
@@ -241,7 +241,7 @@ def signup_company(
                 == RegisterCompanyResponse.RejectionReason.company_already_exists
             ):
                 register_form.email.errors.append("Emailadresse existiert bereits")
-                return render_template("signup_company.html", form=register_form)
+                return render_template("auth/signup_company.html", form=register_form)
 
         email = register_form.data["email"]
         company = company_repository.get_company_orm_by_mail(email)
@@ -256,7 +256,7 @@ def signup_company(
             session["user_type"] = None
             logout_user()
 
-    return render_template("signup_company.html", form=register_form)
+    return render_template("auth/signup_company.html", form=register_form)
 
 
 @auth.route("/company/confirm/<token>")

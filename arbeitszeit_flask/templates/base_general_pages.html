@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% from 'macros/show_notifications.html' import show_notifications %}
+
+{% block body %}
+
+{{ show_notifications() }}
+
+{% block general_pages %}
+{% endblock %}
+
+{% endblock %}

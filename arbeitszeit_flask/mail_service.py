@@ -68,7 +68,9 @@ class FlaskTokenDeliverer:
 
     def deliver_confirmation_token(self, email: ConfirmationEmail) -> None:
         view_model = self.presenter.render_confirmation_email(email)
-        html = render_template("activate.html", confirm_url=view_model.confirmation_url)
+        html = render_template(
+            "auth/activate.html", confirm_url=view_model.confirmation_url
+        )
         self.mail_service.send_message(
             subject=view_model.subject,
             recipients=view_model.recipients,

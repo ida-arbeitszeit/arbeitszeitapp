@@ -1,10 +1,13 @@
 from dataclasses import replace
 from decimal import Decimal
 from unittest import TestCase
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from arbeitszeit.use_cases.get_coop_summary import AssociatedPlan, GetCoopSummarySuccess
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
+
+from .dependency_injection import get_dependency_injector
+from .url_index import EndCoopUrlIndexTestImpl, PlanSummaryUrlIndexTestImpl
 
 TESTING_RESPONSE_MODEL = GetCoopSummarySuccess(
     requester_is_coordinator=True,
@@ -25,11 +28,10 @@ TESTING_RESPONSE_MODEL = GetCoopSummarySuccess(
 
 class GetCoopSummarySuccessPresenterTests(TestCase):
     def setUp(self) -> None:
-        self.plan_url_index = PlanSummaryUrlIndex()
-        self.end_coop_url_index = EndCoopUrlIndex()
-        self.presenter = GetCoopSummarySuccessPresenter(
-            self.plan_url_index, self.end_coop_url_index
-        )
+        self.injector = get_dependency_injector()
+        self.plan_url_index = self.injector.get(PlanSummaryUrlIndexTestImpl)
+        self.end_coop_url_index = self.injector.get(EndCoopUrlIndexTestImpl)
+        self.presenter = self.injector.get(GetCoopSummarySuccessPresenter)
 
     def test_end_coop_button_is_shown_when_requester_is_coordinator(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
@@ -89,13 +91,3 @@ class GetCoopSummarySuccessPresenterTests(TestCase):
                 TESTING_RESPONSE_MODEL.plans[0].plan_id, TESTING_RESPONSE_MODEL.coop_id
             ),
         )
-
-
-class PlanSummaryUrlIndex:
-    def get_plan_summary_url(self, plan_id: UUID) -> str:
-        return f"fake_plan_url:{plan_id}"
-
-
-class EndCoopUrlIndex:
-    def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
-        return f"fake_end_coop_url:{plan_id}, {cooperation_id}"

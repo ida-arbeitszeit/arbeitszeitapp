@@ -6,6 +6,7 @@ from arbeitszeit.use_cases import CreateCooperationResponse
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
 from tests.translator import FakeTranslator
 
+from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl
 
 SUCCESSFUL_CREATE_RESPONSE = CreateCooperationResponse(
@@ -25,11 +26,10 @@ REJECTED_RESPONSE_COORDINATOR_NOT_FOUND = CreateCooperationResponse(
 
 class CreateCooperationPresenterTests(TestCase):
     def setUp(self) -> None:
-        self.notifier = NotifierTestImpl()
-        self.translator = FakeTranslator()
-        self.presenter = CreateCooperationPresenter(
-            user_notifier=self.notifier, translator=self.translator
-        )
+        self.injector = get_dependency_injector()
+        self.notifier = self.injector.get(NotifierTestImpl)
+        self.translator = self.injector.get(FakeTranslator)
+        self.presenter = self.injector.get(CreateCooperationPresenter)
 
     def test_notification_returned_when_creation_was_successful(self):
         self.presenter.present(SUCCESSFUL_CREATE_RESPONSE)

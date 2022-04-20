@@ -1,51 +1,52 @@
 {% extends "base_company.html" %}
 
-{% block content2 %}
+{% block company %}
 
-<div class="content">
-  <h1 class="title">
-    {{ gettext("My past purchases") }}
-  </h1>
-  <div class="box has-background-info-light has-text-info-dark has-text-centered">
-    <div class="icon"><i class="fas fa-info-circle"></i></div>
-    <p>
-      {{ gettext("Here you can view your past purchases.") }}<br>
-    </p>
+<div class="section has-text-centered">
+  <div class="content">
+    <h1 class="title">
+      {{ gettext("My past purchases") }}
+    </h1>
+    <div class="box has-background-info-light has-text-info-dark has-text-centered">
+      <div class="icon"><i class="fas fa-info-circle"></i></div>
+      <p>
+        {{ gettext("Here you can view your past purchases.") }}<br>
+      </p>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table class="table is-fullwidth">
+      <thead>
+        <tr>
+          <th>{{ gettext("Date") }}</th>
+          <th>{{ gettext("Name") }}</th>
+          <th>{{ gettext("Description") }}</th>
+          <th>{{ gettext("Purpose") }}</th>
+          <th>{{ gettext("Unit price") }}</th>
+          <th>{{ gettext("Amount") }}</th>
+          <th>{{ gettext("Total price") }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if purchases is defined and purchases|length %}
+        {% for purchase in purchases %}
+        <tr>
+          <td>{{ purchase.purchase_date|format_datetime(zone='Europe/Berlin', fmt='%d.%m.%Y') }}</td>
+          <td>{{ purchase.product_name }}</td>
+          <td>{{ purchase.product_description }}</td>
+          <td>{{ purchase.purpose }}</td>
+          <td>{{ purchase.price_per_unit }}</td>
+          <th>{{ purchase.amount }}</th>
+          <th>{{ purchase.price_total }}</th>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <div>{{ gettext("You haven't purchased anything yet.") }}</div>
+        {% endif %}
+      </tbody>
+    </table>
   </div>
 </div>
-
-<div class="table-container">
-  <table class="table is-fullwidth">
-    <thead>
-      <tr>
-        <th>{{ gettext("Date") }}</th>
-        <th>{{ gettext("Name") }}</th>
-        <th>{{ gettext("Description") }}</th>
-        <th>{{ gettext("Purpose") }}</th>
-        <th>{{ gettext("Unit price") }}</th>
-        <th>{{ gettext("Amount") }}</th>
-        <th>{{ gettext("Total price") }}</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% if purchases is defined and purchases|length %}
-      {% for purchase in purchases %}
-      <tr>
-        <td>{{ purchase.purchase_date|format_datetime(zone='Europe/Berlin', fmt='%d.%m.%Y') }}</td>
-        <td>{{ purchase.product_name }}</td>
-        <td>{{ purchase.product_description }}</td>
-        <td>{{ purchase.purpose }}</td>
-        <td>{{ purchase.price_per_unit }}</td>
-        <th>{{ purchase.amount }}</th>
-        <th>{{ purchase.price_total }}</th>
-      </tr>
-      {% endfor %}
-      {% else %}
-      <div>{{ gettext("You haven't purchased anything yet.") }}</div>
-      {% endif %}
-    </tbody>
-  </table>
-</div>
-
 
 {% endblock %}
