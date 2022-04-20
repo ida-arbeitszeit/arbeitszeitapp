@@ -111,6 +111,15 @@ class TransactionRepository(interfaces.TransactionRepository):
                 all_received.append(transaction)
         return all_received
 
+    def get_sales_balance_of_plan(self, plan: Plan) -> Decimal:
+        balance = Decimal(0)
+        for transaction in self.transactions:
+            if (transaction.receiving_account == plan.planner.product_account) and (
+                str(plan.id) in transaction.purpose
+            ):
+                balance += transaction.amount_received
+        return balance
+
 
 @singleton
 class CompanyWorkerRepository(interfaces.CompanyWorkerRepository):
@@ -463,8 +472,10 @@ class PlanRepository(interfaces.PlanRepository):
         assert plan
         plan.hidden_by_user = True
 
-    def get_all_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
-        for plan in self.plans.values():
+    def get_all_plans_for_company_descending(self, company_id: UUID) -> Iterator[Plan]:
+        plans = self.plans.values()
+        plans_ordered = sorted(plans, key=lambda x: x.plan_creation_date, reverse=True)
+        for plan in plans_ordered:
             if str(plan.planner.id) == str(company_id):
                 yield plan
 
@@ -757,7 +768,9 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
                 yield plan
 
     def get_outbound_requests(self, requester_id: UUID) -> Iterator[Plan]:
-        plans_of_company = self.plan_repository.get_all_plans_for_company(requester_id)
+        plans_of_company = self.plan_repository.get_all_plans_for_company_descending(
+            requester_id
+        )
         for plan in plans_of_company:
             if plan.requested_cooperation:
                 yield plan

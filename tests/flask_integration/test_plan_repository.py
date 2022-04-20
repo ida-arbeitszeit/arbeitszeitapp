@@ -5,6 +5,7 @@ from uuid import uuid4
 
 from arbeitszeit.entities import ProductionCosts
 from arbeitszeit_flask.database.repositories import PlanRepository
+from tests.datetime_service import FakeDatetimeService
 
 from ..data_generators import CompanyGenerator, PlanGenerator
 from .dependency_injection import injection_test
@@ -144,8 +145,38 @@ def test_that_all_plans_for_a_company_are_returned(
     plan_generator.create_plan(planner=company, activation_date=None)
     plan_generator.create_plan(planner=company, is_public_service=True)
     plan_generator.create_plan(planner=company, is_available=False)
-    returned_plans = list(repository.get_all_plans_for_company(company_id=company.id))
+    returned_plans = list(
+        repository.get_all_plans_for_company_descending(company_id=company.id)
+    )
     assert len(returned_plans) == 3
+
+
+@injection_test
+def test_that_all_plans_for_a_company_are_returned_in_descending_order(
+    repository: PlanRepository,
+    plan_generator: PlanGenerator,
+    company_generator: CompanyGenerator,
+    datetime_service: FakeDatetimeService,
+) -> None:
+    company = company_generator.create_company()
+    third = plan_generator.create_plan(
+        planner=company,
+        plan_creation_date=datetime_service.now_minus_one_day(),
+    )
+    second = plan_generator.create_plan(
+        planner=company,
+        plan_creation_date=datetime_service.now_minus_two_days(),
+    )
+    first = plan_generator.create_plan(
+        planner=company,
+        plan_creation_date=datetime_service.now_minus_ten_days(),
+    )
+    returned_plans = list(
+        repository.get_all_plans_for_company_descending(company_id=company.id)
+    )
+    assert returned_plans[0] == third
+    assert returned_plans[1] == second
+    assert returned_plans[2] == first
 
 
 @injection_test

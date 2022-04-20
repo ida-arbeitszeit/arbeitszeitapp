@@ -47,7 +47,7 @@ class ShowMyPlansUseCase:
     def __call__(self, request: ShowMyPlansRequest) -> ShowMyPlansResponse:
         all_plans_of_company = [
             plan
-            for plan in self.plan_repository.get_all_plans_for_company(
+            for plan in self.plan_repository.get_all_plans_for_company_descending(
                 request.company_id
             )
         ]
