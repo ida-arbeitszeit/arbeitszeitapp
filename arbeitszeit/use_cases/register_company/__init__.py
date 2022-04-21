@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Optional
@@ -10,25 +12,6 @@ from arbeitszeit.repositories import AccountRepository, CompanyRepository
 from arbeitszeit.token import ConfirmationEmail, TokenDeliverer, TokenService
 
 
-@dataclass
-class RegisterCompanyResponse:
-    class RejectionReason(Exception, Enum):
-        company_already_exists = auto()
-
-    rejection_reason: Optional[RejectionReason]
-
-    @property
-    def is_rejected(self) -> bool:
-        return self.rejection_reason is not None
-
-
-@dataclass
-class RegisterCompanyRequest:
-    email: str
-    name: str
-    password: str
-
-
 @inject
 @dataclass
 class RegisterCompany:
@@ -38,17 +21,34 @@ class RegisterCompany:
     token_service: TokenService
     token_deliverer: TokenDeliverer
 
-    def __call__(self, request: RegisterCompanyRequest) -> RegisterCompanyResponse:
+    @dataclass
+    class Response:
+        class RejectionReason(Exception, Enum):
+            company_already_exists = auto()
+
+        rejection_reason: Optional[RejectionReason]
+
+        @property
+        def is_rejected(self) -> bool:
+            return self.rejection_reason is not None
+
+    @dataclass
+    class Request:
+        email: str
+        name: str
+        password: str
+
+    def __call__(self, request: Request) -> Response:
         try:
             self._register_company(request)
             self._create_confirmation_mail(request)
-        except RegisterCompanyResponse.RejectionReason as reason:
-            return RegisterCompanyResponse(rejection_reason=reason)
-        return RegisterCompanyResponse(rejection_reason=None)
+        except self.Response.RejectionReason as reason:
+            return self.Response(rejection_reason=reason)
+        return self.Response(rejection_reason=None)
 
-    def _register_company(self, request: RegisterCompanyRequest) -> None:
+    def _register_company(self, request: Request) -> None:
         if self.company_repository.has_company_with_email(request.email):
-            raise RegisterCompanyResponse.RejectionReason.company_already_exists
+            raise self.Response.RejectionReason.company_already_exists
         means_account = self.account_repository.create_account(AccountTypes.p)
         resources_account = self.account_repository.create_account(AccountTypes.r)
         labour_account = self.account_repository.create_account(AccountTypes.a)
@@ -65,7 +65,7 @@ class RegisterCompany:
             registered_on,
         )
 
-    def _create_confirmation_mail(self, request: RegisterCompanyRequest) -> None:
+    def _create_confirmation_mail(self, request: Request) -> None:
         token = self.token_service.generate_token(request.email)
         self.token_deliverer.deliver_confirmation_token(
             ConfirmationEmail(token=token, email=request.email)

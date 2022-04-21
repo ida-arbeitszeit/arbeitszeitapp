@@ -15,7 +15,6 @@ from werkzeug.security import check_password_hash
 
 from arbeitszeit.use_cases import (
     RegisterCompany,
-    RegisterCompanyResponse,
     RegisterMemberUseCase,
     ResendConfirmationMail,
     ResendConfirmationMailRequest,
@@ -238,7 +237,7 @@ def signup_company(
         if response.is_rejected:
             if (
                 response.rejection_reason
-                == RegisterCompanyResponse.RejectionReason.company_already_exists
+                == RegisterCompany.Response.RejectionReason.company_already_exists
             ):
                 register_form.email.errors.append("Emailadresse existiert bereits")
                 return render_template("auth/signup_company.html", form=register_form)

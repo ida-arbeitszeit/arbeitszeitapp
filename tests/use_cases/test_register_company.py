@@ -1,11 +1,7 @@
 from unittest import TestCase
 
 from arbeitszeit.entities import AccountTypes
-from arbeitszeit.use_cases import (
-    RegisterCompany,
-    RegisterCompanyRequest,
-    RegisterCompanyResponse,
-)
+from arbeitszeit.use_cases import RegisterCompany
 from tests.data_generators import CompanyGenerator
 from tests.token import TokenDeliveryService
 
@@ -29,36 +25,36 @@ class RegisterCompanyTests(TestCase):
         self.token_delivery = self.injector.get(TokenDeliveryService)
 
     def test_that_a_token_is_sent_out_when_a_company_registers(self) -> None:
-        self.use_case(RegisterCompanyRequest(**DEFAULT))
+        self.use_case(RegisterCompany.Request(**DEFAULT))
         self.assertTrue(self.token_delivery.delivered_tokens)
 
     def test_that_token_was_delivered_to_registering_email(self) -> None:
         expected_mail = "mailtest321@cp.org"
         request_args = DEFAULT.copy()
         request_args.pop("email")
-        self.use_case(RegisterCompanyRequest(email=expected_mail, **request_args))
+        self.use_case(RegisterCompany.Request(email=expected_mail, **request_args))
         self.assertEqual(
             self.token_delivery.delivered_tokens[0].email,
             expected_mail,
         )
 
     def test_that_registering_company_is_possible(self) -> None:
-        request = RegisterCompanyRequest(**DEFAULT)
+        request = RegisterCompany.Request(**DEFAULT)
         response = self.use_case(request)
         self.assertFalse(response.is_rejected)
 
     def test_that_correct_error_is_raised_when_user_with_mail_exists(self) -> None:
         self.company_generator.create_company(email="test@cp.org")
-        request = RegisterCompanyRequest(**DEFAULT)
+        request = RegisterCompany.Request(**DEFAULT)
         response = self.use_case(request)
         self.assertTrue(response.is_rejected)
         self.assertEqual(
             response.rejection_reason,
-            RegisterCompanyResponse.RejectionReason.company_already_exists,
+            RegisterCompany.Response.RejectionReason.company_already_exists,
         )
 
     def test_that_registering_a_company_does_create_all_company_accounts(self) -> None:
-        self.use_case(RegisterCompanyRequest(**DEFAULT))
+        self.use_case(RegisterCompany.Request(**DEFAULT))
         assert len(self.account_repository.accounts) == 4
         for account in self.account_repository.accounts:
             assert account.account_type in (
@@ -69,7 +65,7 @@ class RegisterCompanyTests(TestCase):
             )
 
     def test_that_correct_member_attributes_are_registered(self):
-        request = RegisterCompanyRequest(**DEFAULT)
+        request = RegisterCompany.Request(**DEFAULT)
         self.use_case(request)
         assert len(self.company_repo.companies) == 1
         for company in self.company_repo.companies.values():
