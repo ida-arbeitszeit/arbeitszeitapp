@@ -5,6 +5,9 @@ from arbeitszeit import entities
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.token import TokenDeliverer, TokenService
 from arbeitszeit.use_cases import GetCompanySummary
+from arbeitszeit.use_cases.register_company.company_registration_message_presenter import (
+    CompanyRegistrationMessagePresenter,
+)
 from arbeitszeit.use_cases.register_member.member_registration_message_presenter import (
     MemberRegistrationMessagePresenter,
 )
@@ -17,6 +20,12 @@ from . import repositories
 
 
 class InMemoryModule(Module):
+    @provider
+    def provide_company_registration_message_presenter(
+        self, token_delivery_service: TokenDeliveryService
+    ) -> CompanyRegistrationMessagePresenter:
+        return token_delivery_service
+
     @provider
     def provide_member_registration_message_presenter(
         self, token_delivery_service: TokenDeliveryService

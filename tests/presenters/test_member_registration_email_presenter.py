@@ -1,7 +1,7 @@
 from unittest import TestCase
 from uuid import UUID, uuid4
 
-from arbeitszeit_web.presenters.member_registration_email_presenter import (
+from arbeitszeit_web.presenters.registration_email_presenter import (
     MemberRegistrationEmailPresenter,
 )
 from tests.email import Email, FakeEmailConfiguration, FakeEmailSender

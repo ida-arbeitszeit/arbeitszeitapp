@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Optional
+from uuid import UUID
 
 from injector import inject
 
@@ -10,6 +11,8 @@ from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import AccountTypes
 from arbeitszeit.repositories import AccountRepository, CompanyRepository
 from arbeitszeit.token import ConfirmationEmail, TokenDeliverer, TokenService
+
+from .company_registration_message_presenter import CompanyRegistrationMessagePresenter
 
 
 @inject
@@ -19,7 +22,7 @@ class RegisterCompany:
     account_repository: AccountRepository
     datetime_service: DatetimeService
     token_service: TokenService
-    token_deliverer: TokenDeliverer
+    company_registration_message_presenter: CompanyRegistrationMessagePresenter
 
     @dataclass
     class Response:
@@ -41,7 +44,6 @@ class RegisterCompany:
     def __call__(self, request: Request) -> Response:
         try:
             self._register_company(request)
-            self._create_confirmation_mail(request)
         except self.Response.RejectionReason as reason:
             return self.Response(rejection_reason=reason)
         return self.Response(rejection_reason=None)
@@ -54,7 +56,7 @@ class RegisterCompany:
         labour_account = self.account_repository.create_account(AccountTypes.a)
         products_account = self.account_repository.create_account(AccountTypes.prd)
         registered_on = self.datetime_service.now()
-        self.company_repository.create_company(
+        company = self.company_repository.create_company(
             request.email,
             request.name,
             request.password,
@@ -64,9 +66,10 @@ class RegisterCompany:
             products_account,
             registered_on,
         )
+        self._create_confirmation_mail(request, company.id)
 
-    def _create_confirmation_mail(self, request: Request) -> None:
+    def _create_confirmation_mail(self, request: Request, company: UUID) -> None:
         token = self.token_service.generate_token(request.email)
-        self.token_deliverer.deliver_confirmation_token(
-            ConfirmationEmail(token=token, email=request.email)
+        self.company_registration_message_presenter.show_company_registration_message(
+            token=token, company=company
         )

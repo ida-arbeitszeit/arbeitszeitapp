@@ -126,7 +126,7 @@ from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresente
 from arbeitszeit_web.plan_summary_service import PlanSummaryServiceImpl
 from arbeitszeit_web.plotter import Plotter
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
-from arbeitszeit_web.presenters.member_registration_email_presenter import (
+from arbeitszeit_web.presenters.registration_email_presenter import (
     MemberRegistrationEmailPresenter,
     MemberRegistrationEmailTemplate,
 )

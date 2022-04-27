@@ -41,16 +41,14 @@ class RegisterMemberUseCase:
         name: str
         password: str
 
-    def __call__(
-        self, request: RegisterMemberUseCase.Request
-    ) -> RegisterMemberUseCase.Response:
+    def __call__(self, request: Request) -> Response:
         try:
             self._register_member(request)
         except RegisterMemberUseCase.Response.RejectionReason as reason:
             return RegisterMemberUseCase.Response(rejection_reason=reason)
         return RegisterMemberUseCase.Response(rejection_reason=None)
 
-    def _register_member(self, request: RegisterMemberUseCase.Request) -> None:
+    def _register_member(self, request: Request) -> None:
         if self.member_repository.has_member_with_email(request.email):
             raise self.Response.RejectionReason.member_already_exists
 
@@ -61,9 +59,7 @@ class RegisterMemberUseCase:
         )
         self._create_confirmation_mail(request, member.id)
 
-    def _create_confirmation_mail(
-        self, request: RegisterMemberUseCase.Request, member: UUID
-    ) -> None:
+    def _create_confirmation_mail(self, request: Request, member: UUID) -> None:
         token = self.token_service.generate_token(request.email)
         self.member_registration_message_presenter.show_member_registration_message(
             token=token, member=member

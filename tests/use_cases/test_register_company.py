@@ -26,16 +26,19 @@ class RegisterCompanyTests(TestCase):
 
     def test_that_a_token_is_sent_out_when_a_company_registers(self) -> None:
         self.use_case(RegisterCompany.Request(**DEFAULT))
-        self.assertTrue(self.token_delivery.delivered_tokens)
+        self.assertTrue(self.token_delivery.presented_company_tokens)
 
-    def test_that_token_was_delivered_to_registering_email(self) -> None:
+    def test_that_token_was_delivered_to_registering_user(self) -> None:
         expected_mail = "mailtest321@cp.org"
         request_args = DEFAULT.copy()
         request_args.pop("email")
         self.use_case(RegisterCompany.Request(email=expected_mail, **request_args))
+        expected_company = [
+            company.id for company in self.company_repo.companies.values()
+        ][0]
         self.assertEqual(
-            self.token_delivery.delivered_tokens[0].email,
-            expected_mail,
+            self.token_delivery.presented_company_tokens[0][0],
+            expected_company,
         )
 
     def test_that_registering_company_is_possible(self) -> None:
