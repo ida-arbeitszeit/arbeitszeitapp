@@ -29,6 +29,9 @@ from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
 from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
 from arbeitszeit.use_cases.list_workers import ListWorkers
 from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProduction
+from arbeitszeit.use_cases.register_company.company_registration_message_presenter import (
+    CompanyRegistrationMessagePresenter,
+)
 from arbeitszeit.use_cases.register_member.member_registration_message_presenter import (
     MemberRegistrationMessagePresenter,
 )
@@ -127,8 +130,8 @@ from arbeitszeit_web.plan_summary_service import PlanSummaryServiceImpl
 from arbeitszeit_web.plotter import Plotter
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
 from arbeitszeit_web.presenters.registration_email_presenter import (
-    MemberRegistrationEmailPresenter,
-    MemberRegistrationEmailTemplate,
+    RegistrationEmailPresenter,
+    RegistrationEmailTemplate,
 )
 from arbeitszeit_web.presenters.send_confirmation_email_presenter import (
     SendConfirmationEmailPresenter,
@@ -443,28 +446,41 @@ class CompanyModule(Module):
 
 class FlaskModule(Module):
     @provider
-    def provide_member_registration_message_presenter(
+    def provide_registration_email_presenter(
         self,
         email_sender: MailService,
         address_book: UserAddressBook,
-        email_template: MemberRegistrationEmailTemplate,
+        email_template: RegistrationEmailTemplate,
         url_index: ConfirmationUrlIndex,
         email_configuration: EmailConfiguration,
         translator: Translator,
-    ) -> MemberRegistrationMessagePresenter:
-        return MemberRegistrationEmailPresenter(
-            email_sender,
-            address_book,
-            email_template,
-            url_index,
-            email_configuration,
-            translator,
+    ) -> RegistrationEmailPresenter:
+        return RegistrationEmailPresenter(
+            email_sender=email_sender,
+            address_book=address_book,
+            member_email_template=email_template,
+            company_email_template=email_template,
+            url_index=url_index,
+            email_configuration=email_configuration,
+            translator=translator,
         )
+
+    @provider
+    def provide_member_registration_message_presenter(
+        self, presenter: RegistrationEmailPresenter
+    ) -> MemberRegistrationMessagePresenter:
+        return presenter
+
+    @provider
+    def provide_company_registration_message_presenter(
+        self, presenter: RegistrationEmailPresenter
+    ) -> CompanyRegistrationMessagePresenter:
+        return presenter
 
     @provider
     def provide_member_registration_email_template(
         self,
-    ) -> MemberRegistrationEmailTemplate:
+    ) -> RegistrationEmailTemplate:
         return MemberRegistrationEmailTemplateImpl()
 
     @provider

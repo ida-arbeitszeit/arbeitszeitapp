@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
+from uuid import UUID
 
 
 @dataclass
@@ -31,6 +32,17 @@ class FakeEmailSender:
         )
 
 
+@dataclass
+class FakeAddressBook:
+    def get_user_email_address(self, user: UUID) -> Optional[str]:
+        return f"{user}@test.test"
+
+
 class FakeEmailConfiguration:
     def get_sender_address(self) -> str:
         return "test@test.test"
+
+
+class RegistrationEmailTemplateImpl:
+    def render_to_html(self, confirmation_url: str) -> str:
+        return f"member confirmation mail {confirmation_url}"
