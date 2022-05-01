@@ -4,6 +4,21 @@ Development setup
 After configuring the database connection you need to run the database
 migrations via ``flask db upgrade``.
 
+Developer documentation
+=======================
+
+Run::
+
+  $ make html
+
+in the root folder of the project to generate developer documentation
+including auto generated API docs.  Open the documentation in your
+browser at ``build/html/index.html``.
+
+Regenerate the API docs via::
+
+  $ ./regenerate-api-docs
+
 Code formatting
 ===============
 

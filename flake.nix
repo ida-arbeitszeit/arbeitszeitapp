@@ -24,6 +24,7 @@
               psycopg2
               gunicorn
               types-dateutil
+              sphinx
             ]) ++ (with pkgs; [ nixfmt ]);
             inputsFrom = [ python.pkgs.arbeitszeitapp ];
           };
