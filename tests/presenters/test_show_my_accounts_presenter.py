@@ -10,8 +10,8 @@ from tests.use_cases.dependency_injection import get_dependency_injector
 
 class ShowMyAccountsPresenterTests(TestCase):
     def setUp(self):
-        self.presenter = ShowMyAccountsPresenter()
         self.injector = get_dependency_injector()
+        self.presenter = self.injector.get(ShowMyAccountsPresenter)
 
     def test_show_correct_balance_string_for_balances(self):
         presentation = self.presenter.present(
