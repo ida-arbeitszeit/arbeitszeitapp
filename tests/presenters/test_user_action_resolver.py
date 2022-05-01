@@ -1,17 +1,19 @@
 from unittest import TestCase
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from arbeitszeit.user_action import UserAction, UserActionType
 from arbeitszeit_web.user_action import UserActionResolverImpl
 
+from .dependency_injection import get_dependency_injector
+from .url_index import CoopSummaryUrlIndexTestImpl, InviteUrlIndexImpl
+
 
 class UserActionResolverTests(TestCase):
     def setUp(self) -> None:
-        self.url_resolver = InviteUrlIndexImpl()
-        self.action_resolver = UserActionResolverImpl(
-            invite_url_index=self.url_resolver,
-            coop_url_index=self.url_resolver,
-        )
+        self.injector = get_dependency_injector()
+        self.invite_url_index = self.injector.get(InviteUrlIndexImpl)
+        self.coop_url_index = self.injector.get(CoopSummaryUrlIndexTestImpl)
+        self.action_resolver = self.injector.get(UserActionResolverImpl)
 
     def test_answer_invite_action_name_resolves_properly(self) -> None:
         action = self._get_answer_invite_request_action()
@@ -31,14 +33,14 @@ class UserActionResolverTests(TestCase):
         action = self._get_answer_invite_request_action()
         self.assertEqual(
             self.action_resolver.resolve_user_action_reference(action),
-            self.url_resolver.get_invite_url(action.reference),
+            self.invite_url_index.get_invite_url(action.reference),
         )
 
     def test_answer_cooperation_request_url_resolves_to_proper_url(self) -> None:
         action = self._get_answer_cooperation_request_action()
         self.assertEqual(
             self.action_resolver.resolve_user_action_reference(action),
-            self.url_resolver.get_coop_summary_url(action.reference),
+            self.coop_url_index.get_coop_summary_url(action.reference),
         )
 
     def _get_answer_cooperation_request_action(self) -> UserAction:
@@ -51,11 +53,3 @@ class UserActionResolverTests(TestCase):
             type=UserActionType.answer_invite,
             reference=uuid4(),
         )
-
-
-class InviteUrlIndexImpl:
-    def get_invite_url(self, invite_id: UUID) -> str:
-        return f"invite url for {invite_id}"
-
-    def get_coop_summary_url(self, coop_id: UUID) -> str:
-        return f"coop url for {coop_id}"
