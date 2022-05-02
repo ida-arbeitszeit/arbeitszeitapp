@@ -58,9 +58,19 @@ class GetStatistics:
 
     def _count_certificates_and_available_product(self) -> Tuple[Decimal, Decimal]:
         """
-        available product is sum of prd account balances *(-1)
         available certificates is sum of company work account balances and sum of member account balances
         """
+        (
+            certs_in_company_accounts,
+            available_product,
+        ) = self._count_certs_and_products_from_companies()
+
+        certs_in_member_accounts = self._count_certs_in_member_accounts()
+        certs_total = certs_in_company_accounts + certs_in_member_accounts
+        return certs_total, available_product
+
+    def _count_certs_and_products_from_companies(self) -> Tuple[Decimal, Decimal]:
+        """available product is sum of prd account balances *(-1)"""
         certs_in_company_accounts = Decimal(0)
         available_product = Decimal(0)
         all_companies = self.company_repository.get_all_companies()
@@ -71,11 +81,13 @@ class GetStatistics:
             certs_in_company_accounts += self.account_respository.get_account_balance(
                 company.work_account
             )
+        return certs_in_company_accounts, available_product * -1
+
+    def _count_certs_in_member_accounts(self) -> Decimal:
         certs_in_member_accounts = Decimal(0)
         all_members = self.member_repository.get_all_members()
         for member in all_members:
             certs_in_member_accounts += self.account_respository.get_account_balance(
                 member.account
             )
-        certs_total = certs_in_company_accounts + certs_in_member_accounts
-        return certs_total, available_product * -1
+        return certs_in_member_accounts
