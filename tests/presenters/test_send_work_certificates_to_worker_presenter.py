@@ -11,6 +11,7 @@ from arbeitszeit_web.presenters.send_work_certificates_to_worker_presenter impor
 )
 
 from ..translator import FakeTranslator
+from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl
 
 SUCCESS_USE_CASE_RESPONSE = SendWorkCertificatesToWorkerResponse(rejection_reason=None)
@@ -30,11 +31,9 @@ REJECTED_CONTROLLER_RES_NEGATIVE_AMOUNT = ControllerRejection(
 
 class PresentUseCaseResponseTests(TestCase):
     def setUp(self) -> None:
-        self.translator = FakeTranslator()
-        self.notifier = NotifierTestImpl()
-        self.presenter = SendWorkCertificatesToWorkerPresenter(
-            notifier=self.notifier, translator=self.translator
-        )
+        self.injector = get_dependency_injector()
+        self.notifier = self.injector.get(NotifierTestImpl)
+        self.presenter = self.injector.get(SendWorkCertificatesToWorkerPresenter)
 
     def test_presenter_renders_warning_if_use_case_response_is_rejected(self):
         self.presenter.present_use_case_response(REJECTED_USE_CASE_RESPONSE)

@@ -15,6 +15,8 @@ from arbeitszeit_web.presenters.show_prd_account_details_presenter import (
 from tests.plotter import FakePlotter
 from tests.translator import FakeTranslator
 
+from .dependency_injection import get_dependency_injector
+
 DEFAULT_INFO1 = TransactionInfo(
     transaction_type=TransactionTypes.expected_sales,
     date=datetime.now(),
@@ -32,11 +34,10 @@ DEFAULT_INFO2 = TransactionInfo(
 
 class CompanyTransactionsPresenterTests(TestCase):
     def setUp(self) -> None:
-        self.translator = FakeTranslator()
-        self.plotter = FakePlotter()
-        self.presenter = ShowPRDAccountDetailsPresenter(
-            translator=self.translator, plotter=self.plotter
-        )
+        self.injector = get_dependency_injector()
+        self.translator = self.injector.get(FakeTranslator)
+        self.plotter = self.injector.get(FakePlotter)
+        self.presenter = self.injector.get(ShowPRDAccountDetailsPresenter)
 
     def test_return_empty_list_when_no_transactions_took_place(self):
         response = self._use_case_response()

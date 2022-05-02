@@ -1,11 +1,14 @@
 from dataclasses import replace
 from decimal import Decimal
 from unittest import TestCase
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from arbeitszeit.plan_summary import BusinessPlanSummary
 from arbeitszeit_web.plan_summary_service import PlanSummaryServiceImpl
 from tests.translator import FakeTranslator
+
+from .dependency_injection import get_dependency_injector
+from .url_index import CompanySummaryUrlIndex, CoopSummaryUrlIndexTestImpl
 
 BUSINESS_PLAN_SUMMARY = BusinessPlanSummary(
     plan_id=uuid4(),
@@ -30,12 +33,11 @@ BUSINESS_PLAN_SUMMARY = BusinessPlanSummary(
 
 class PlanSummaryServiceTests(TestCase):
     def setUp(self) -> None:
-        self.coop_url_index = CoopSummaryUrlIndex()
-        self.company_url_index = CompanySummaryUrlIndex()
-        self.translator = FakeTranslator()
-        self.service = PlanSummaryServiceImpl(
-            self.coop_url_index, self.company_url_index, self.translator
-        )
+        self.injector = get_dependency_injector()
+        self.coop_url_index = self.injector.get(CoopSummaryUrlIndexTestImpl)
+        self.company_url_index = self.injector.get(CompanySummaryUrlIndex)
+        self.translator = self.injector.get(FakeTranslator)
+        self.service = self.injector.get(PlanSummaryServiceImpl)
 
     def test_plan_id_is_displayed_correctly_as_tuple_of_strings(self):
         plan_summary = self.service.get_plan_summary_member(BUSINESS_PLAN_SUMMARY)
@@ -213,13 +215,3 @@ class PlanSummaryServiceTests(TestCase):
                 "Ja",
             ),
         )
-
-
-class CoopSummaryUrlIndex:
-    def get_coop_summary_url(self, coop_id: UUID) -> str:
-        return f"fake_coop_url:{coop_id}"
-
-
-class CompanySummaryUrlIndex:
-    def get_company_summary_url(self, company_id: UUID) -> str:
-        return f"fake_company_url:{company_id}"
