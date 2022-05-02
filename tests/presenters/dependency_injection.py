@@ -172,7 +172,9 @@ class PresenterTestsInjector(Module):
     def provide_get_statistics_presenter(
         self, translator: FakeTranslator, plotter: FakePlotter, colors: TestColors
     ) -> GetStatisticsPresenter:
-        return GetStatisticsPresenter(trans=translator, plotter=plotter, colors=colors)
+        return GetStatisticsPresenter(
+            translator=translator, plotter=plotter, colors=colors
+        )
 
     @provider
     def provide_list_all_cooperations_presenter(

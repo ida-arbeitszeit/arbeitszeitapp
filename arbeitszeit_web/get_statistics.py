@@ -28,21 +28,21 @@ class GetStatisticsViewModel:
 
 @dataclass
 class GetStatisticsPresenter:
-    trans: Translator
+    translator: Translator
     plotter: Plotter
     colors: Colors
 
     def present(self, use_case_response: StatisticsResponse) -> GetStatisticsViewModel:
-        average_timeframe = self.trans.ngettext(
+        average_timeframe = self.translator.ngettext(
             "%(num).2f day", "%(num).2f days", use_case_response.avg_timeframe
         )
-        planned_work = self.trans.ngettext(
+        planned_work = self.translator.ngettext(
             "%(num).2f hour", "%(num).2f hours", use_case_response.planned_work
         )
-        planned_liquid_means = self.trans.ngettext(
+        planned_liquid_means = self.translator.ngettext(
             "%(num).2f hour", "%(num).2f hours", use_case_response.planned_resources
         )
-        planned_fixed_means = self.trans.ngettext(
+        planned_fixed_means = self.translator.ngettext(
             "%(num).2f hour", "%(num).2f hours", use_case_response.planned_means
         )
         return GetStatisticsViewModel(
@@ -63,8 +63,8 @@ class GetStatisticsPresenter:
             average_timeframe_days=average_timeframe,
             barplot_certificates=self.plotter.create_bar_plot(
                 x_coordinates=[
-                    self.trans.gettext("Work certificates"),
-                    self.trans.gettext("Available product"),
+                    self.translator.gettext("Work certificates"),
+                    self.translator.gettext("Available product"),
                 ],
                 height_of_bars=[
                     use_case_response.certificates_count,
@@ -72,13 +72,13 @@ class GetStatisticsPresenter:
                 ],
                 colors_of_bars=[self.colors.primary, self.colors.info],
                 fig_size=(5, 4),
-                y_label=self.trans.gettext("Hours"),
+                y_label=self.translator.gettext("Hours"),
             ),
             barplot_means_of_production=self.plotter.create_bar_plot(
                 x_coordinates=[
-                    self.trans.gettext("Feste PM"),
-                    self.trans.gettext("Flüssige PM"),
-                    self.trans.gettext("Arbeit"),
+                    self.translator.gettext("Feste PM"),
+                    self.translator.gettext("Flüssige PM"),
+                    self.translator.gettext("Arbeit"),
                 ],
                 height_of_bars=[
                     use_case_response.planned_means,
@@ -91,12 +91,12 @@ class GetStatisticsPresenter:
                     self.colors.danger,
                 ],
                 fig_size=(5, 4),
-                y_label=self.trans.gettext("Hours"),
+                y_label=self.translator.gettext("Hours"),
             ),
             barplot_plans=self.plotter.create_bar_plot(
                 x_coordinates=[
-                    self.trans.gettext("Produktive Pläne"),
-                    self.trans.gettext("Öffentliche Pläne"),
+                    self.translator.gettext("Produktive Pläne"),
+                    self.translator.gettext("Öffentliche Pläne"),
                 ],
                 height_of_bars=[
                     Decimal(
@@ -107,6 +107,6 @@ class GetStatisticsPresenter:
                 ],
                 colors_of_bars=list(self.colors.get_all_defined_colors().values()),
                 fig_size=(5, 4),
-                y_label=self.trans.gettext("Amount"),
+                y_label=self.translator.gettext("Amount"),
             ),
         )
