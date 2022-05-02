@@ -1,35 +1,36 @@
 from typing import Dict
 
-# hex values should be same as bulma values
-_colors = {
-    "primary": "#00d1b2",
-    "info": "#3e8ed0",
-    "warning": "#ffe08a",
-    "danger": "#f14668",
-    "success": "#48c78e",
-}
-
 
 class FlaskColors:
+    def __init__(self) -> None:
+        # hex values should be same as bulma values
+        self.all_colors = {
+            "primary": "#00d1b2",
+            "info": "#3e8ed0",
+            "warning": "#ffe08a",
+            "danger": "#f14668",
+            "success": "#48c78e",
+        }
+
     @property
     def primary(self) -> str:
-        return _colors["primary"]
+        return self.all_colors["primary"]
 
     @property
     def info(self) -> str:
-        return _colors["info"]
+        return self.all_colors["info"]
 
     @property
     def warning(self) -> str:
-        return _colors["warning"]
+        return self.all_colors["warning"]
 
     @property
     def danger(self) -> str:
-        return _colors["danger"]
+        return self.all_colors["danger"]
 
     @property
     def success(self) -> str:
-        return _colors["success"]
+        return self.all_colors["success"]
 
-    def get_dict(self) -> Dict[str, str]:
-        return _colors
+    def get_all_defined_colors(self) -> Dict[str, str]:
+        return self.all_colors

@@ -22,5 +22,5 @@ class Colors(Protocol):
     def success(self) -> str:
         ...
 
-    def get_dict(self) -> Dict[str, str]:
+    def get_all_defined_colors(self) -> Dict[str, str]:
         ...

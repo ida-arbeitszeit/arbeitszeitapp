@@ -105,7 +105,7 @@ class GetStatisticsPresenter:
                     ),
                     Decimal(use_case_response.active_plans_public_count),
                 ],
-                colors_of_bars=list(self.colors.get_dict().values()),
+                colors_of_bars=list(self.colors.get_all_defined_colors().values()),
                 fig_size=(5, 4),
                 y_label=self.trans.gettext("Amount"),
             ),
