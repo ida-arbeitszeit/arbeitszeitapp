@@ -270,6 +270,9 @@ class MemberRepository(interfaces.MemberRepository):
     def get_by_id(self, id: UUID) -> Optional[Member]:
         return self.members.get(id)
 
+    def get_all_members(self) -> Iterator[Member]:
+        yield from self.members.values()
+
 
 @singleton
 class CompanyRepository(interfaces.CompanyRepository):
@@ -741,6 +744,9 @@ class CooperationRepository(interfaces.CooperationRepository):
 
     def get_all_cooperations(self) -> Iterator[Cooperation]:
         return (cooperation for cooperation in self.cooperations.values())
+
+    def count_cooperations(self) -> int:
+        return len(self.cooperations)
 
     def __len__(self) -> int:
         return len(self.cooperations)

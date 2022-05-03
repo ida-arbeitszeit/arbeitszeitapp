@@ -1,4 +1,4 @@
-from injector import Module, provider
+from injector import Module, provider, singleton
 
 from arbeitszeit.repositories import (
     CompanyRepository,
@@ -6,9 +6,15 @@ from arbeitszeit.repositories import (
     MemberRepository,
 )
 from tests.company import CompanyManager
+from tests.email import FakeEmailSender
 
 
 class TestingModule(Module):
+    @singleton
+    @provider
+    def provide_fake_email_service(self) -> FakeEmailSender:
+        return FakeEmailSender()
+
     @provider
     def provide_company_manager(
         self,

@@ -29,6 +29,12 @@ from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
 from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
 from arbeitszeit.use_cases.list_workers import ListWorkers
 from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProduction
+from arbeitszeit.use_cases.register_company.company_registration_message_presenter import (
+    CompanyRegistrationMessagePresenter,
+)
+from arbeitszeit.use_cases.register_member.member_registration_message_presenter import (
+    MemberRegistrationMessagePresenter,
+)
 from arbeitszeit.use_cases.send_work_certificates_to_worker import (
     SendWorkCertificatesToWorker,
 )
@@ -47,10 +53,12 @@ from arbeitszeit_flask.database.repositories import (
     PlanRepository,
     PurchaseRepository,
     TransactionRepository,
+    UserAddressBookImpl,
     WorkerInviteRepository,
 )
 from arbeitszeit_flask.datetime import RealtimeDatetimeService
 from arbeitszeit_flask.extensions import db
+from arbeitszeit_flask.flask_colors import FlaskColors
 from arbeitszeit_flask.flask_plotter import FlaskPlotter
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.flask_session import FlaskSession
@@ -64,6 +72,7 @@ from arbeitszeit_flask.notifications import FlaskFlashNotifier
 from arbeitszeit_flask.template import (
     CompanyTemplateIndex,
     FlaskTemplateRenderer,
+    MemberRegistrationEmailTemplateImpl,
     MemberTemplateIndex,
     TemplateIndex,
     TemplateRenderer,
@@ -84,6 +93,7 @@ from arbeitszeit_web.check_for_unread_message import (
     CheckForUnreadMessagesController,
     CheckForUnreadMessagesPresenter,
 )
+from arbeitszeit_web.colors import Colors
 from arbeitszeit_web.controllers.end_cooperation_controller import (
     EndCooperationController,
 )
@@ -100,7 +110,7 @@ from arbeitszeit_web.controllers.show_company_work_invite_details_controller imp
 from arbeitszeit_web.controllers.show_my_accounts_controller import (
     ShowMyAccountsController,
 )
-from arbeitszeit_web.email import EmailConfiguration
+from arbeitszeit_web.email import EmailConfiguration, UserAddressBook
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
@@ -121,6 +131,10 @@ from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresente
 from arbeitszeit_web.plan_summary_service import PlanSummaryServiceImpl
 from arbeitszeit_web.plotter import Plotter
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
+from arbeitszeit_web.presenters.registration_email_presenter import (
+    RegistrationEmailPresenter,
+    RegistrationEmailTemplate,
+)
 from arbeitszeit_web.presenters.send_confirmation_email_presenter import (
     SendConfirmationEmailPresenter,
 )
@@ -434,10 +448,50 @@ class CompanyModule(Module):
 
 class FlaskModule(Module):
     @provider
+    def provide_registration_email_presenter(
+        self,
+        email_sender: MailService,
+        address_book: UserAddressBook,
+        email_template: RegistrationEmailTemplate,
+        url_index: ConfirmationUrlIndex,
+        email_configuration: EmailConfiguration,
+        translator: Translator,
+    ) -> RegistrationEmailPresenter:
+        return RegistrationEmailPresenter(
+            email_sender=email_sender,
+            address_book=address_book,
+            member_email_template=email_template,
+            company_email_template=email_template,
+            url_index=url_index,
+            email_configuration=email_configuration,
+            translator=translator,
+        )
+
+    @provider
+    def provide_member_registration_message_presenter(
+        self, presenter: RegistrationEmailPresenter
+    ) -> MemberRegistrationMessagePresenter:
+        return presenter
+
+    @provider
+    def provide_company_registration_message_presenter(
+        self, presenter: RegistrationEmailPresenter
+    ) -> CompanyRegistrationMessagePresenter:
+        return presenter
+
+    @provider
+    def provide_member_registration_email_template(
+        self,
+    ) -> RegistrationEmailTemplate:
+        return MemberRegistrationEmailTemplateImpl()
+
+    @provider
     def provide_get_statistics_presenter(
-        self, translator: Translator
+        self, translator: Translator, plotter: Plotter, colors: Colors
     ) -> GetStatisticsPresenter:
-        return GetStatisticsPresenter(translator=translator)
+        return GetStatisticsPresenter(
+            translator=translator, plotter=plotter, colors=colors
+        )
 
     @provider
     def provide_get_company_summary(
@@ -733,6 +787,10 @@ class FlaskModule(Module):
         return FlaskPlotter()
 
     @provider
+    def provide_colors(self) -> Colors:
+        return FlaskColors()
+
+    @provider
     def provide_show_my_accounts_controller(
         self, session: FlaskSession
     ) -> ShowMyAccountsController:
@@ -812,6 +870,7 @@ class FlaskModule(Module):
             to=ClassProvider(PlanCooperationRepository),
         )
         binder.bind(TokenService, to=ClassProvider(FlaskTokenService))  # type: ignore
+        binder.bind(UserAddressBook, to=ClassProvider(inject(UserAddressBookImpl)))  # type: ignore
 
 
 class with_injection:

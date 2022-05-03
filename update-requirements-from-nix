@@ -12,7 +12,9 @@ from typing import Dict, Iterable, Tuple
 def main() -> None:
     parse_arguments()
     controller = RequirementsUpdater(
-        requirements_file=RequirementsFile.from_path(Path("requirements.txt")),
+        requirements_file=RequirementsFile.from_path(
+            Path("requirements.txt"), version_string_cleaner=VersionStringCleaner()
+        ),
         python_environment=PythonEnvironment(),
     )
     controller.process_requirements_file()
@@ -36,6 +38,7 @@ class RequirementsUpdater:
 class RequirementsFile:
     packages: Dict[str, str]
     path: Path
+    version_string_cleaner: VersionStringCleaner
 
     def save_to_disk(self) -> None:
         with open(self.path, "w") as handle:
@@ -44,10 +47,14 @@ class RequirementsFile:
 
     def update_package(self, package_name: str, package_version: str) -> None:
         if package_name in self.packages:
-            self.packages[package_name] = package_version
+            self.packages[
+                package_name
+            ] = self.version_string_cleaner.clean_version_string(package_version)
 
     @classmethod
-    def from_path(cls, path: Path) -> RequirementsFile:
+    def from_path(
+        cls, path: Path, version_string_cleaner: VersionStringCleaner
+    ) -> RequirementsFile:
         """Construct a RequirementsFile from a path object"""
         packages: Dict[str, str] = dict()
         with open(path) as handle:
@@ -60,6 +67,7 @@ class RequirementsFile:
         return cls(
             packages=packages,
             path=path,
+            version_string_cleaner=version_string_cleaner,
         )
 
     def packages_sorted_by_name(self) -> Iterable[Tuple[str, str]]:
@@ -85,6 +93,18 @@ class PythonEnvironment:
         packages = json.loads(process_info.stdout)
         for package in packages:
             yield package["name"], package["version"]
+
+
+class VersionStringCleaner:
+    def clean_version_string(self, version_string: str) -> str:
+        parts = version_string.split(".")
+        try:
+            major = parts[0]
+            minor = parts[1]
+            patch = parts[2]
+        except IndexError:
+            return version_string
+        return ".".join([major, minor, patch])
 
 
 def parse_arguments():

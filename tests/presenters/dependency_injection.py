@@ -20,6 +20,9 @@ from arbeitszeit_web.plan_summary_service import (
     PlanSummaryServiceImpl,
 )
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
+from arbeitszeit_web.presenters.registration_email_presenter import (
+    RegistrationEmailPresenter,
+)
 from arbeitszeit_web.presenters.send_work_certificates_to_worker_presenter import (
     SendWorkCertificatesToWorkerPresenter,
 )
@@ -37,7 +40,14 @@ from arbeitszeit_web.show_r_account_details import ShowRAccountDetailsPresenter
 from arbeitszeit_web.url_index import ListMessagesUrlIndex
 from arbeitszeit_web.user_action import UserActionResolverImpl
 from tests.dependency_injection import TestingModule
+from tests.email import (
+    FakeAddressBook,
+    FakeEmailConfiguration,
+    FakeEmailSender,
+    RegistrationEmailTemplateImpl,
+)
 from tests.plotter import FakePlotter
+from tests.presenters.test_colors import TestColors
 from tests.request import FakeRequest
 from tests.translator import FakeTranslator
 from tests.use_cases.dependency_injection import InMemoryModule
@@ -46,6 +56,7 @@ from .notifier import NotifierTestImpl
 from .url_index import (
     AnswerCompanyWorkInviteUrlIndexImpl,
     CompanySummaryUrlIndex,
+    ConfirmationUrlIndexImpl,
     CoopSummaryUrlIndexTestImpl,
     EndCoopUrlIndexTestImpl,
     HidePlanUrlIndex,
@@ -195,9 +206,11 @@ class PresenterTestsInjector(Module):
 
     @provider
     def provide_get_statistics_presenter(
-        self, translator: FakeTranslator
+        self, translator: FakeTranslator, plotter: FakePlotter, colors: TestColors
     ) -> GetStatisticsPresenter:
-        return GetStatisticsPresenter(translator=translator)
+        return GetStatisticsPresenter(
+            translator=translator, plotter=plotter, colors=colors
+        )
 
     @provider
     def provide_list_all_cooperations_presenter(
@@ -348,6 +361,26 @@ class PresenterTestsInjector(Module):
         return UserActionResolverImpl(
             invite_url_index=invite_url_index,
             coop_url_index=coop_url_index,
+        )
+
+    @provider
+    def provide_registration_email_presenter(
+        self,
+        mail_service: FakeEmailSender,
+        address_book: FakeAddressBook,
+        url_index: ConfirmationUrlIndexImpl,
+        email_template: RegistrationEmailTemplateImpl,
+        email_configuration: FakeEmailConfiguration,
+        translator: FakeTranslator,
+    ) -> RegistrationEmailPresenter:
+        return RegistrationEmailPresenter(
+            email_sender=mail_service,
+            address_book=address_book,
+            url_index=url_index,
+            member_email_template=email_template,
+            company_email_template=email_template,
+            email_configuration=email_configuration,
+            translator=translator,
         )
 
 

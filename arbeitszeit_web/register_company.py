@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from arbeitszeit.use_cases import RegisterCompanyRequest
+from arbeitszeit.use_cases import RegisterCompany
 
 
 class RegisterForm(Protocol):
@@ -18,8 +18,8 @@ class RegisterCompanyController:
     def create_request(
         self,
         register_form: RegisterForm,
-    ) -> RegisterCompanyRequest:
-        return RegisterCompanyRequest(
+    ) -> RegisterCompany.Request:
+        return RegisterCompany.Request(
             email=register_form.get_email_string(),
             name=register_form.get_name_string(),
             password=register_form.get_password_string(),

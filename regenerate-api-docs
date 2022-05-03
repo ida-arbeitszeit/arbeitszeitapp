@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+
+sphinx-apidoc \
+    -f \
+    -o docs/modules \
+    . \
+    '*_settings.py' 'setup.py' 'format_code.py' 'tests/*'

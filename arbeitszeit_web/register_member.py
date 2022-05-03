@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from arbeitszeit.use_cases import RegisterMemberRequest
+from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
 
 
 class RegisterForm(Protocol):
@@ -18,8 +18,8 @@ class RegisterMemberController:
     def create_request(
         self,
         register_form: RegisterForm,
-    ) -> RegisterMemberRequest:
-        return RegisterMemberRequest(
+    ) -> RegisterMemberUseCase.Request:
+        return RegisterMemberUseCase.Request(
             email=register_form.get_email_string(),
             name=register_form.get_name_string(),
             password=register_form.get_password_string(),
