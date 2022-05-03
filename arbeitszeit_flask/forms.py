@@ -85,6 +85,9 @@ class RegisterForm(Form):
     def get_password_string(self) -> str:
         return self.data["password"]
 
+    def add_email_error(self, error: str) -> None:
+        self.email.errors.append(error)
+
 
 class LoginForm(Form):
     email = StringField(

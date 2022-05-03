@@ -48,3 +48,6 @@ class FakeRegisterMemberForm:
 
     def get_password_string(self) -> str:
         return self.password
+
+    def add_email_error(self, error: str) -> None:
+        pass
