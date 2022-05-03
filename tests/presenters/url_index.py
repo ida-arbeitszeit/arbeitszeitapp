@@ -54,3 +54,8 @@ class HidePlanUrlIndex:
 class InviteUrlIndexImpl:
     def get_invite_url(self, invite_id: UUID) -> str:
         return f"invite url for {invite_id}"
+
+
+class ConfirmationUrlIndexImpl:
+    def get_confirmation_url(self, token: str) -> str:
+        return f"{token} url"
