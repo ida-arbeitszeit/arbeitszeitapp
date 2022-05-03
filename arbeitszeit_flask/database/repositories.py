@@ -122,6 +122,9 @@ class MemberRepository(repositories.MemberRepository):
     def count_registered_members(self) -> int:
         return int(self.db.session.query(func.count(Member.id)).one()[0])
 
+    def get_all_members(self) -> Iterator[entities.Member]:
+        return (self.object_from_orm(member) for member in Member.query.all())
+
 
 @inject
 @dataclass
@@ -1084,6 +1087,9 @@ class CooperationRepository(repositories.CooperationRepository):
         return (
             self.object_from_orm(cooperation) for cooperation in Cooperation.query.all()
         )
+
+    def count_cooperations(self) -> int:
+        return int(self.db.session.query(func.count(Cooperation.id)).one()[0])
 
 
 @inject

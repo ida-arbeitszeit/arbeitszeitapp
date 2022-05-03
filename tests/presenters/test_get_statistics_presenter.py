@@ -11,6 +11,9 @@ from .dependency_injection import get_dependency_injector
 TESTING_RESPONSE_MODEL = StatisticsResponse(
     registered_companies_count=5,
     registered_members_count=30,
+    cooperations_count=10,
+    certificates_count=Decimal(50),
+    available_product=Decimal(20.5),
     active_plans_count=6,
     active_plans_public_count=2,
     avg_timeframe=Decimal(30.5),
@@ -79,6 +82,39 @@ class GetStatisticsPresenterTests(TestCase):
         self.assertEqual(
             view_model.registered_members_count,
             "32",
+        )
+
+    def test_coop_count_is_displayed_correctly_as_number(self):
+        response = replace(
+            TESTING_RESPONSE_MODEL,
+            cooperations_count=11,
+        )
+        view_model = self.presenter.present(response)
+        self.assertEqual(
+            view_model.cooperations_count,
+            "11",
+        )
+
+    def test_certificates_count_is_displayed_correctly_as_number(self):
+        response = replace(
+            TESTING_RESPONSE_MODEL,
+            certificates_count=Decimal(50.5),
+        )
+        view_model = self.presenter.present(response)
+        self.assertEqual(
+            view_model.certificates_count,
+            "50.50",
+        )
+
+    def test_available_prdocut_is_displayed_correctly_as_number(self):
+        response = replace(
+            TESTING_RESPONSE_MODEL,
+            available_product=Decimal(2.504),
+        )
+        view_model = self.presenter.present(response)
+        self.assertEqual(
+            view_model.available_product,
+            "2.50",
         )
 
     def test_active_plans_count_is_displayed_correctly_as_number(self):

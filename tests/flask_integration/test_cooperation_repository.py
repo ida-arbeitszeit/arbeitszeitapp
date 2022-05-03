@@ -106,3 +106,10 @@ class CooperationRepositoryTests(TestCase):
         self.assertEqual(len(returned_coops), 2)
         self.assertIn(cooperation1, returned_coops)
         self.assertIn(cooperation2, returned_coops)
+
+    def test_cooperations_are_counted(self):
+        number_of_coops = 2
+        for _ in range(number_of_coops):
+            self.repo.create_cooperation(**self.DEFAULT_CREATE_ARGUMENTS)
+        count = self.repo.count_cooperations()
+        self.assertEqual(count, number_of_coops)

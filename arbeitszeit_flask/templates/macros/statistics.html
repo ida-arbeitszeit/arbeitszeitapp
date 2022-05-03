@@ -1,114 +1,85 @@
 {% macro statistics(view_model) %}
-<div class="section has-text-centered">
-    <div class="columns is-centered">
-        <div class="column is-half">
-            <div class="content">
-                <h1 class="title">{{ gettext("Global statistics") }}</h1>
+
+<div class="section">
+    <div class="has-text-centered">
+        <h1 class="title">{{ gettext("Global statistics") }}</h1>
+    </div>
+    <div class="block py-2"></div>
+    <div class="tile is-ancestor has-text-centered">
+        <div class="tile is-parent">
+            <div class="tile is-child box">
+                <h1 class="title">{{ view_model.registered_companies_count }}</h1>
+                <div class="subtitle">{{ gettext("Companies") }}</div>
             </div>
-            <br />
-            <div class="level">
-                <div class="level-left">
-                    <div class="level-item">
-                        <p class="has-text-weight-semibold">{{ gettext("Registered companies") }}:</p>
-                    </div>
-                </div>
-                <div class="level-right">
-                    <div class="level-item">
-                        <p>{{ view_model.registered_companies_count }}</p>
-                    </div>
-                </div>
+        </div>
+        <div class="tile is-parent">
+            <div class="tile is-child box">
+                <h1 class="title">{{ view_model.registered_members_count }}</h1>
+                <div class="subtitle">{{ gettext("Workers") }}</div>
             </div>
-            <div class="level">
-                <div class="level-left">
-                    <div class="level-item">
-                        <p class="has-text-weight-semibold">{{ gettext("Registered workers") }}:</p>
-                    </div>
-                </div>
-                <div class="level-right">
-                    <div class="level-item">
-                        <p>{{ view_model.registered_members_count }}</p>
-                    </div>
-                </div>
+        </div>
+        <div class="tile is-parent">
+            <div class="tile is-child box">
+                <h1 class="title">{{ view_model.active_plans_count }}</h1>
+                <div class="subtitle">{{ gettext("Plans") }}</div>
             </div>
-            <br />
-            <div class="level">
-                <div class="level-left">
-                    <div class="level-item">
-                        <p class="has-text-weight-semibold">{{ gettext("Active plans") }}:</p>
-                    </div>
-                </div>
-                <div class="level-right">
-                    <div class="level-item">
-                        <p>{{ view_model.active_plans_count }}</p>
-                    </div>
+        </div>
+        <div class="tile is-parent">
+            <div class="tile is-child box">
+                <h1 class="title">{{ view_model.cooperations_count }}</h1>
+                <div class="subtitle">{{ gettext("Cooperations") }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="tile is-ancestor">
+        <div class="tile is-parent">
+            <div class="tile is-child box">
+                <h1 class="title is-4 has-text-centered">{{ gettext("Plans") }}</h1>
+                <div>
+                    <img src="data:image/png;base64, {{ view_model.barplot_plans }}"
+                        alt="bar plot of public and productive plans">
                 </div>
             </div>
-            <div class="level">
-                <div class="level-left">
-                    <div class="level-item">
-                        <p class="has-text-weight-semibold">{{ gettext("Public active plans") }}:</p>
-                    </div>
-                </div>
-                <div class="level-right has-text-right-tablet">
-                    <div class="level-item">
-                        <p>{{ view_model.active_plans_public_count }}</p>
-                    </div>
+        </div>
+        <div class="tile is-parent">
+            <div class="tile is-child box">
+                <h1 class="title is-4 has-text-centered">{{ gettext("Planned ressources") }}</h1>
+                <div>
+                    <img src="data:image/png;base64, {{ view_model.barplot_means_of_production }}"
+                        alt="bar plot of means of production">
                 </div>
             </div>
-            <div class="level">
-                <div class="level-left">
-                    <div class="level-item">
-                        <p class="has-text-weight-semibold">{{ gettext("Average plan duration") }}:</p>
-                    </div>
-                </div>
-                <div class="level-right has-text-right-tablet">
-                    <div class="level-item">
-                        <p>{{ view_model.average_timeframe_days }}</p>
-                    </div>
-                </div>
-            </div>
-            <br />
-            <div class="level">
-                <div class="level-left">
-                    <div class="level-item">
-                        <p class="has-text-weight-semibold">
-                            {{ gettext("Currently planned work") }}:
-                        </p>
-                    </div>
-                </div>
-                <div class="level-right has-text-right-tablet">
-                    <div class="level-item">
-                        <p>{{ view_model.planned_work_hours }}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="level">
-                <div class="level-left">
-                    <div class="level-item">
-                        <p class="has-text-weight-semibold">{{ gettext("Currently planned liquid means") }}:</p>
-                    </div>
-                </div>
-                <div class="level-right has-text-right-tablet">
-                    <div class="level-item">
-                        <p>{{ view_model.planned_resources_hours }}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="level">
-                <div class="level-left">
-                    <div class="level-item">
-                        <p class="has-text-weight-semibold">
-                            {{ gettext("Currently planned fixed means") }}:
-                        </p>
-                    </div>
-                </div>
-                <div class="level-right has-text-right-tablet">
-                    <div class="level-item">
-                        <p>{{ view_model.planned_means_hours }}</p>
-                    </div>
+        </div>
+        <div class="tile is-parent">
+            <div class="tile is-child box">
+                <h1 class="title is-4 has-text-centered">{{ gettext("Certificates and products") }}</h1>
+                <div>
+                    <img src="data:image/png;base64, {{ view_model.barplot_certificates }}"
+                        alt="bar plot of certificates vs product">
                 </div>
             </div>
         </div>
     </div>
+    <div class="tile is-ancestor">
+        <div class="tile is-parent">
+            <div class="tile is-child box">
+                <b>{{ gettext("Active plans") }}:</b> {{ view_model.active_plans_count }} &#8212;
+                <b>{{ gettext("Public active plans") }}:</b> {{ view_model.active_plans_public_count }} &#8212;
+                <b>{{ gettext("Average plan duration") }}:</b> {{ view_model.average_timeframe_days }} &#8212;
+                <b>{{ gettext("Currently planned fixed means") }}:</b> {{ view_model.planned_means_hours }} &#8212;
+                <b>{{ gettext("Currently planned liquid means") }}:</b> {{ view_model.planned_resources_hours }} &#8212;
+                <b>{{ gettext("Currently planned work") }}:</b> {{ view_model.planned_work_hours }} &#8212;
+                <b>{{ gettext("Available work certificates") }}:</b> {{ view_model.certificates_count }} &#8212;
+                <b>{{ gettext("Available product (no public products)") }}:</b> {{ view_model.available_product }}
+            </div>
+        </div>
+        <div class="tile is-parent is-4 has-text-centered">
+            <div class="tile is-child box">
+                <h1 class="title">{{ view_model.average_timeframe_days }}</h1>
+                <div class="subtitle">{{ gettext("Average plan duration") }}</div>
+            </div>
+        </div>
+    </div>
 </div>
+
 {% endmacro %}

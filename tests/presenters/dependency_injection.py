@@ -38,6 +38,7 @@ from arbeitszeit_web.url_index import ListMessagesUrlIndex
 from arbeitszeit_web.user_action import UserActionResolverImpl
 from tests.dependency_injection import TestingModule
 from tests.plotter import FakePlotter
+from tests.presenters.test_colors import TestColors
 from tests.request import FakeRequest
 from tests.translator import FakeTranslator
 from tests.use_cases.dependency_injection import InMemoryModule
@@ -195,9 +196,11 @@ class PresenterTestsInjector(Module):
 
     @provider
     def provide_get_statistics_presenter(
-        self, translator: FakeTranslator
+        self, translator: FakeTranslator, plotter: FakePlotter, colors: TestColors
     ) -> GetStatisticsPresenter:
-        return GetStatisticsPresenter(translator=translator)
+        return GetStatisticsPresenter(
+            translator=translator, plotter=plotter, colors=colors
+        )
 
     @provider
     def provide_list_all_cooperations_presenter(
