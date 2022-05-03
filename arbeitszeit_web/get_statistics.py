@@ -76,9 +76,9 @@ class GetStatisticsPresenter:
             ),
             barplot_means_of_production=self.plotter.create_bar_plot(
                 x_coordinates=[
-                    self.translator.gettext("Feste PM"),
-                    self.translator.gettext("Flüssige PM"),
-                    self.translator.gettext("Arbeit"),
+                    self.translator.pgettext("Text should be short", "Fixed means"),
+                    self.translator.pgettext("Text should be short", "Liquid means"),
+                    self.translator.gettext("Work"),
                 ],
                 height_of_bars=[
                     use_case_response.planned_means,
@@ -95,8 +95,8 @@ class GetStatisticsPresenter:
             ),
             barplot_plans=self.plotter.create_bar_plot(
                 x_coordinates=[
-                    self.translator.gettext("Produktive Pläne"),
-                    self.translator.gettext("Öffentliche Pläne"),
+                    self.translator.gettext("Productive plans"),
+                    self.translator.gettext("Public plans"),
                 ],
                 height_of_bars=[
                     Decimal(
