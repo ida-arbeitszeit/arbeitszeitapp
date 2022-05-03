@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2022-05-01 21:12+0200\n"
-"PO-Revision-Date: 2022-05-01 21:18+0200\n"
+"PO-Revision-Date: 2022-05-03 19:57+0200\n"
 "Last-Translator: Sebastian Jordan <sebastian.jordan.mail@googlemail.com>\n"
 "Language: de\n"
 "Language-Team: de <LL@li.org>\n"
@@ -389,7 +389,7 @@ msgstr "Deine email"
 #: arbeitszeit_flask/templates/company/profile.html:43
 msgid "No workers are registered with your company. Click here to add some."
 msgstr ""
-"Es sind keine Arbeiter*innen bei deiner Firma registriert. Klicke hier, um "
+"Es sind keine Arbeiter*innen bei deinem Betrieb registriert. Klicke hier, um "
 "welche hinzuzufügen."
 
 #: arbeitszeit_flask/templates/company/transfer_to_company.html:10
@@ -598,7 +598,7 @@ msgstr "Du bist erfolgreich \"%(company)s\" beigetreten."
 #: tests/presenters/test_answer_company_work_invite.py:69
 #, python-format
 msgid "You rejected the invitation from \"%(company)s\"."
-msgstr "Du haste die Einladung von \"%(company)s\" abgelehnt."
+msgstr "Du hast die Einladung von \"%(company)s\" abgelehnt."
 
 #: arbeitszeit_web/answer_company_work_invite.py:64
 #: tests/presenters/test_answer_company_work_invite.py:114
@@ -779,7 +779,7 @@ msgstr "Ungültige Eingabe"
 #: arbeitszeit_web/presenters/send_work_certificates_to_worker_presenter.py:50
 #: tests/presenters/test_send_work_certificates_to_worker_presenter.py:84
 msgid "A negative amount is not allowed."
-msgstr "Ein negativer Betrag ist ist nicht erlaubt."
+msgstr "Ein negativer Betrag ist nicht erlaubt."
 
 #: arbeitszeit_web/presenters/show_company_work_invite_details_presenter.py:27
 #, python-format
