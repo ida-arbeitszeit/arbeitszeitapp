@@ -49,17 +49,15 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td>{{ gettext(" Expectations") }}</td>
+                            <td>{{ gettext("Expectations") }}</td>
                             {% for exp in view_model.expectations %}
-                            <td><span class="tag is-medium">{{
-                                    exp }}</span></td>
+                            <td><span class="tag is-medium">{{ exp }}</span></td>
                             {% endfor %}
                         </tr>
                         <tr>
                             <td>{{ gettext("Balances") }}</td>
                             {% for bal in view_model.account_balances %}
-                            <td><span class="tag is-medium">{{
-                                    bal }}</span></td>
+                            <td><span class="tag is-medium">{{ bal }}</span></td>
                             {% endfor %}
                         </tr>
                         <tr>
