@@ -32,7 +32,6 @@ class FakeEmailSender:
         )
 
 
-@dataclass
 class FakeAddressBook:
     def get_user_email_address(self, user: UUID) -> Optional[str]:
         return f"{user}@test.test"

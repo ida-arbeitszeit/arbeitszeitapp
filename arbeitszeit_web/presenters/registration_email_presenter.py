@@ -23,14 +23,16 @@ class RegistrationEmailPresenter:
     translator: Translator
 
     def show_member_registration_message(self, member: UUID, token: str) -> None:
-        self._show_registration_message(member, token)
+        self._show_registration_message(member, token, self.member_email_template)
 
     def show_company_registration_message(self, company: UUID, token: str) -> None:
-        self._show_registration_message(company, token)
+        self._show_registration_message(company, token, self.company_email_template)
 
-    def _show_registration_message(self, user: UUID, token: str) -> None:
+    def _show_registration_message(
+        self, user: UUID, token: str, template: RegistrationEmailTemplate
+    ) -> None:
         confirmation_url = self.url_index.get_confirmation_url(token)
-        mail_content = self.member_email_template.render_to_html(confirmation_url)
+        mail_content = template.render_to_html(confirmation_url)
         recipient = self.address_book.get_user_email_address(user)
         assert recipient
         self.email_sender.send_message(
