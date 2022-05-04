@@ -450,9 +450,9 @@ class CompanyModule(Module):
 class FlaskModule(Module):
     @provider
     def provide_flask_session(
-        self, member_repository: MemberRepository
+        self, member_repository: MemberRepository, company_repository: CompanyRepository
     ) -> FlaskSession:
-        return FlaskSession(member_repository)
+        return FlaskSession(member_repository, company_repository)
 
     @provider
     def provide_register_member_presenter(
