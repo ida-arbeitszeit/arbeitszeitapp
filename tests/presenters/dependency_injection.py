@@ -20,6 +20,7 @@ from arbeitszeit_web.plan_summary_service import (
     PlanSummaryServiceImpl,
 )
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
+from arbeitszeit_web.presenters.register_member_presenter import RegisterMemberPresenter
 from arbeitszeit_web.presenters.registration_email_presenter import (
     RegistrationEmailPresenter,
 )
@@ -49,6 +50,7 @@ from tests.email import (
 from tests.plotter import FakePlotter
 from tests.presenters.test_colors import TestColors
 from tests.request import FakeRequest
+from tests.session import FakeSession
 from tests.translator import FakeTranslator
 from tests.use_cases.dependency_injection import InMemoryModule
 
@@ -382,6 +384,12 @@ class PresenterTestsInjector(Module):
             email_configuration=email_configuration,
             translator=translator,
         )
+
+    @provider
+    def provide_register_member_presenter(
+        self, session: FakeSession, translator: FakeTranslator
+    ) -> RegisterMemberPresenter:
+        return RegisterMemberPresenter(session=session, translator=translator)
 
 
 def get_dependency_injector() -> Injector:

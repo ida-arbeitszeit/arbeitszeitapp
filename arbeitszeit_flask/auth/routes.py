@@ -15,16 +15,11 @@ from werkzeug.security import check_password_hash
 
 from arbeitszeit.use_cases import (
     RegisterCompany,
-    RegisterMemberUseCase,
     ResendConfirmationMail,
     ResendConfirmationMailRequest,
 )
 from arbeitszeit_flask import database
-from arbeitszeit_flask.database import (
-    CompanyRepository,
-    MemberRepository,
-    commit_changes,
-)
+from arbeitszeit_flask.database import CompanyRepository, commit_changes
 from arbeitszeit_flask.dependency_injection import (
     CompanyModule,
     MemberModule,
@@ -36,8 +31,8 @@ from arbeitszeit_flask.next_url import (
     save_next_url_in_session,
 )
 from arbeitszeit_flask.token import FlaskTokenService
+from arbeitszeit_flask.views.signup_member_view import SignupMemberView
 from arbeitszeit_web.register_company import RegisterCompanyController
-from arbeitszeit_web.register_member import RegisterMemberController
 
 auth = Blueprint("auth", __name__, template_folder="templates", static_folder="static")
 
@@ -73,39 +68,8 @@ def unconfirmed_member():
 @auth.route("/member/signup", methods=["GET", "POST"])
 @with_injection(modules=[MemberModule()])
 @commit_changes
-def signup_member(
-    register_member: RegisterMemberUseCase,
-    member_repository: MemberRepository,
-    controller: RegisterMemberController,
-):
-    register_form = RegisterForm(request.form)
-    if request.method == "POST" and register_form.validate():
-        use_case_request = controller.create_request(
-            register_form,
-        )
-        response = register_member(use_case_request)
-        if response.is_rejected:
-            if (
-                response.rejection_reason
-                == RegisterMemberUseCase.Response.RejectionReason.member_already_exists
-            ):
-                register_form.email.errors.append("Emailadresse existiert bereits")
-                return render_template("auth/signup_member.html", form=register_form)
-
-        email = register_form.data["email"]
-        member = member_repository.get_member_orm_by_mail(email)
-        session["user_type"] = "member"
-        login_user(member)
-        return redirect(url_for("auth.unconfirmed_member"))
-
-    if current_user.is_authenticated:
-        if session.get("user_type") == "member":
-            return redirect(url_for("main_member.profile"))
-        else:
-            session["user_type"] = None
-            logout_user()
-
-    return render_template("auth/signup_member.html", form=register_form)
+def signup_member(view: SignupMemberView):
+    return view.handle_request()
 
 
 @auth.route("/member/confirm/<token>")

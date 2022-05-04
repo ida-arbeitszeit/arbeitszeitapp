@@ -7,7 +7,9 @@ from arbeitszeit.use_cases import (
     ShowCompanyWorkInviteDetailsUseCase,
 )
 from arbeitszeit.use_cases.list_workers import ListWorkers
+from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts
+from arbeitszeit_flask.database.repositories import MemberRepository
 from arbeitszeit_flask.template import TemplateIndex, TemplateRenderer
 from arbeitszeit_flask.views import (
     CompanyWorkInviteView,
@@ -20,6 +22,7 @@ from arbeitszeit_flask.views.invite_worker_to_company import (
     InviteWorkerPostRequestHandler,
 )
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
+from arbeitszeit_flask.views.signup_member_view import SignupMemberView
 from arbeitszeit_web.answer_company_work_invite import (
     AnswerCompanyWorkInviteController,
     AnswerCompanyWorkInvitePresenter,
@@ -36,6 +39,7 @@ from arbeitszeit_web.invite_worker_to_company import (
     InviteWorkerToCompanyPresenter,
 )
 from arbeitszeit_web.presenters.list_workers_presenter import ListWorkersPresenter
+from arbeitszeit_web.presenters.register_member_presenter import RegisterMemberPresenter
 from arbeitszeit_web.presenters.show_company_work_invite_details_presenter import (
     ShowCompanyWorkInviteDetailsPresenter,
 )
@@ -43,6 +47,7 @@ from arbeitszeit_web.presenters.show_my_accounts_presenter import (
     ShowMyAccountsPresenter,
 )
 from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
+from arbeitszeit_web.register_member import RegisterMemberController
 
 
 class ViewsModule(Module):
@@ -152,3 +157,18 @@ class ViewsModule(Module):
         presenter: ShowMyAccountsPresenter,
     ) -> ShowMyAccountsView:
         return ShowMyAccountsView(template_renderer, controller, use_case, presenter)
+
+    @provider
+    def provide_signup_member_view(
+        self,
+        register_member: RegisterMemberUseCase,
+        member_repository: MemberRepository,
+        controller: RegisterMemberController,
+        register_member_presenter: RegisterMemberPresenter,
+    ) -> SignupMemberView:
+        return SignupMemberView(
+            register_member=register_member,
+            member_repository=member_repository,
+            controller=controller,
+            register_member_presenter=register_member_presenter,
+        )
