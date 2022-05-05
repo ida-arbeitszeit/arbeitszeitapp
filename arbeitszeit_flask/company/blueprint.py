@@ -36,7 +36,7 @@ class CompanyRoute:
 
 
 def user_is_company():
-    return session["user_type"] == "company"
+    return session.get("user_type") == "company"
 
 
 def check_confirmed(func):

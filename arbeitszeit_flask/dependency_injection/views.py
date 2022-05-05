@@ -10,6 +10,7 @@ from arbeitszeit.use_cases.list_workers import ListWorkers
 from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts
 from arbeitszeit_flask.database.repositories import MemberRepository
+from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.template import TemplateIndex, TemplateRenderer
 from arbeitszeit_flask.views import (
     CompanyWorkInviteView,
@@ -165,10 +166,12 @@ class ViewsModule(Module):
         member_repository: MemberRepository,
         controller: RegisterMemberController,
         register_member_presenter: RegisterMemberPresenter,
+        flask_session: FlaskSession,
     ) -> SignupMemberView:
         return SignupMemberView(
             register_member=register_member,
             member_repository=member_repository,
             controller=controller,
             register_member_presenter=register_member_presenter,
+            flask_session=flask_session,
         )

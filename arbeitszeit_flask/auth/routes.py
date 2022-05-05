@@ -10,7 +10,7 @@ from flask import (
     session,
     url_for,
 )
-from flask_login import current_user, login_required, login_user, logout_user
+from flask_login import current_user, login_required
 from werkzeug.security import check_password_hash
 
 from arbeitszeit.use_cases import (
@@ -19,12 +19,13 @@ from arbeitszeit.use_cases import (
     ResendConfirmationMailRequest,
 )
 from arbeitszeit_flask import database
-from arbeitszeit_flask.database import CompanyRepository, commit_changes
+from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.dependency_injection import (
     CompanyModule,
     MemberModule,
     with_injection,
 )
+from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import LoginForm, RegisterForm
 from arbeitszeit_flask.next_url import (
     get_next_url_from_session,
@@ -39,8 +40,6 @@ auth = Blueprint("auth", __name__, template_folder="templates", static_folder="s
 
 @auth.route("/")
 def start():
-    if "user_type" not in session:
-        session["user_type"] = None
     save_next_url_in_session(request)
     return render_template("auth/start.html", languages=current_app.config["LANGUAGES"])
 
@@ -91,8 +90,9 @@ def confirm_email_member(token):
 
 
 @auth.route("/member/login", methods=["GET", "POST"])
+@with_injection()
 @commit_changes
-def login_member():
+def login_member(flask_session: FlaskSession):
     login_form = LoginForm(request.form)
     if request.method == "POST" and login_form.validate():
         email = login_form.data["email"]
@@ -107,17 +107,15 @@ def login_member():
         elif not check_password_hash(member.password, password):
             login_form.password.errors.append("Passwort nicht korrekt")
         else:
-            session["user_type"] = "member"
-            login_user(member, remember=remember)
+            flask_session.login_member(email, remember=remember)
             next = get_next_url_from_session()
             return redirect(next or url_for("main_member.profile"))
 
     if current_user.is_authenticated:
-        if session.get("user_type") == "member":
+        if flask_session.is_logged_in_as_member():
             return redirect(url_for("main_member.profile"))
         else:
-            session["user_type"] = None
-            logout_user()
+            flask_session.logout()
 
     return render_template("auth/login_member.html", form=login_form)
 
@@ -153,8 +151,9 @@ def unconfirmed_company():
 
 
 @auth.route("/company/login", methods=["GET", "POST"])
+@with_injection()
 @commit_changes
-def login_company():
+def login_company(flask_session: FlaskSession):
     login_form = LoginForm(request.form)
     if request.method == "POST" and login_form.validate():
         email = login_form.data["email"]
@@ -169,17 +168,15 @@ def login_company():
         elif not check_password_hash(company.password, password):
             login_form.password.errors.append("Passwort nicht korrekt")
         else:
-            session["user_type"] = "company"
-            login_user(company, remember=remember)
+            flask_session.login_company(email, remember=remember)
             next = get_next_url_from_session()
             return redirect(next or url_for("main_company.profile"))
 
     if current_user.is_authenticated:
-        if session.get("user_type") == "company":
+        if flask_session.is_logged_in_as_company():
             return redirect(url_for("main_company.profile"))
         else:
-            session["user_type"] = None
-            logout_user()
+            flask_session.logout()
 
     return render_template("auth/login_company.html", form=login_form)
 
@@ -189,8 +186,8 @@ def login_company():
 @with_injection(modules=[CompanyModule()])
 def signup_company(
     register_company: RegisterCompany,
-    company_repository: CompanyRepository,
     controller: RegisterCompanyController,
+    flask_session: FlaskSession,
 ):
     register_form = RegisterForm(request.form)
     if request.method == "POST" and register_form.validate():
@@ -207,17 +204,14 @@ def signup_company(
                 return render_template("auth/signup_company.html", form=register_form)
 
         email = register_form.data["email"]
-        company = company_repository.get_company_orm_by_mail(email)
-        session["user_type"] = "company"
-        login_user(company)
+        flask_session.login_company(email)
         return redirect(url_for("auth.unconfirmed_company"))
 
     if current_user.is_authenticated:
-        if session.get("user_type") == "company":
+        if flask_session.is_logged_in_as_company():
             return redirect(url_for("main_company.profile"))
         else:
-            session["user_type"] = None
-            logout_user()
+            flask_session.logout()
 
     return render_template("auth/signup_company.html", form=register_form)
 
@@ -263,15 +257,15 @@ def resend_confirmation_company(use_case: ResendConfirmationMail):
 
 # logout
 @auth.route("/zurueck")
-def zurueck():
-    session["user_type"] = None
-    logout_user()
+@with_injection()
+def zurueck(flask_session: FlaskSession):
+    flask_session.logout()
     return redirect(url_for("auth.start"))
 
 
 @auth.route("/logout")
+@with_injection()
 @login_required
-def logout():
-    session["user_type"] = None
-    logout_user()
+def logout(flask_session: FlaskSession):
+    flask_session.logout()
     return redirect(url_for("auth.start"))
