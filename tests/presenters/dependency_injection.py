@@ -20,6 +20,9 @@ from arbeitszeit_web.plan_summary_service import (
     PlanSummaryServiceImpl,
 )
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
+from arbeitszeit_web.presenters.register_company_presenter import (
+    RegisterCompanyPresenter,
+)
 from arbeitszeit_web.presenters.register_member_presenter import RegisterMemberPresenter
 from arbeitszeit_web.presenters.registration_email_presenter import (
     RegistrationEmailPresenter,
@@ -390,6 +393,12 @@ class PresenterTestsInjector(Module):
         self, session: FakeSession, translator: FakeTranslator
     ) -> RegisterMemberPresenter:
         return RegisterMemberPresenter(session=session, translator=translator)
+
+    @provider
+    def provide_register_company_presenter(
+        self, session: FakeSession, translator: FakeTranslator
+    ) -> RegisterCompanyPresenter:
+        return RegisterCompanyPresenter(translator=translator, session=session)
 
 
 def get_dependency_injector() -> Injector:

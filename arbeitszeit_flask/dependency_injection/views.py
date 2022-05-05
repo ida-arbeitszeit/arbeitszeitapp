@@ -7,6 +7,7 @@ from arbeitszeit.use_cases import (
     ShowCompanyWorkInviteDetailsUseCase,
 )
 from arbeitszeit.use_cases.list_workers import ListWorkers
+from arbeitszeit.use_cases.register_company import RegisterCompany
 from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts
 from arbeitszeit_flask.database.repositories import MemberRepository
@@ -23,6 +24,7 @@ from arbeitszeit_flask.views.invite_worker_to_company import (
     InviteWorkerPostRequestHandler,
 )
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
+from arbeitszeit_flask.views.signup_company_view import SignupCompanyView
 from arbeitszeit_flask.views.signup_member_view import SignupMemberView
 from arbeitszeit_web.answer_company_work_invite import (
     AnswerCompanyWorkInviteController,
@@ -40,6 +42,9 @@ from arbeitszeit_web.invite_worker_to_company import (
     InviteWorkerToCompanyPresenter,
 )
 from arbeitszeit_web.presenters.list_workers_presenter import ListWorkersPresenter
+from arbeitszeit_web.presenters.register_company_presenter import (
+    RegisterCompanyPresenter,
+)
 from arbeitszeit_web.presenters.register_member_presenter import RegisterMemberPresenter
 from arbeitszeit_web.presenters.show_company_work_invite_details_presenter import (
     ShowCompanyWorkInviteDetailsPresenter,
@@ -48,6 +53,7 @@ from arbeitszeit_web.presenters.show_my_accounts_presenter import (
     ShowMyAccountsPresenter,
 )
 from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
+from arbeitszeit_web.register_company import RegisterCompanyController
 from arbeitszeit_web.register_member import RegisterMemberController
 
 
@@ -174,4 +180,19 @@ class ViewsModule(Module):
             controller=controller,
             register_member_presenter=register_member_presenter,
             flask_session=flask_session,
+        )
+
+    @provider
+    def provide_signup_company_view(
+        self,
+        use_case: RegisterCompany,
+        controller: RegisterCompanyController,
+        presenter: RegisterCompanyPresenter,
+        flask_session: FlaskSession,
+    ) -> SignupCompanyView:
+        return SignupCompanyView(
+            register_company=use_case,
+            controller=controller,
+            flask_session=flask_session,
+            presenter=presenter,
         )

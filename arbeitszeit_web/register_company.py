@@ -13,6 +13,9 @@ class RegisterForm(Protocol):
     def get_password_string(self) -> str:
         ...
 
+    def add_email_error(self, message: str) -> None:
+        ...
+
 
 class RegisterCompanyController:
     def create_request(
