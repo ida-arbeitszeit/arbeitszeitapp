@@ -7,6 +7,7 @@ from arbeitszeit.repositories import (
 )
 from tests.company import CompanyManager
 from tests.email import FakeEmailSender
+from tests.session import FakeSession
 
 
 class TestingModule(Module):
@@ -27,3 +28,8 @@ class TestingModule(Module):
             company_repository=company_repository,
             member_repository=member_repository,
         )
+
+    @singleton
+    @provider
+    def provide_fake_session(self) -> FakeSession:
+        return FakeSession()

@@ -131,6 +131,9 @@ from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresente
 from arbeitszeit_web.plan_summary_service import PlanSummaryServiceImpl
 from arbeitszeit_web.plotter import Plotter
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
+from arbeitszeit_web.presenters.register_company_presenter import (
+    RegisterCompanyPresenter,
+)
 from arbeitszeit_web.presenters.register_member_presenter import RegisterMemberPresenter
 from arbeitszeit_web.presenters.registration_email_presenter import (
     RegistrationEmailPresenter,
@@ -459,6 +462,12 @@ class FlaskModule(Module):
         self, session: Session, translator: Translator
     ) -> RegisterMemberPresenter:
         return RegisterMemberPresenter(session=session, translator=translator)
+
+    @provider
+    def provide_register_company_presenter(
+        self, session: Session, translator: Translator
+    ) -> RegisterCompanyPresenter:
+        return RegisterCompanyPresenter(session=session, translator=translator)
 
     @provider
     def provide_registration_email_presenter(

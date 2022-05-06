@@ -13,11 +13,7 @@ from flask import (
 from flask_login import current_user, login_required
 from werkzeug.security import check_password_hash
 
-from arbeitszeit.use_cases import (
-    RegisterCompany,
-    ResendConfirmationMail,
-    ResendConfirmationMailRequest,
-)
+from arbeitszeit.use_cases import ResendConfirmationMail, ResendConfirmationMailRequest
 from arbeitszeit_flask import database
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.dependency_injection import (
@@ -26,14 +22,14 @@ from arbeitszeit_flask.dependency_injection import (
     with_injection,
 )
 from arbeitszeit_flask.flask_session import FlaskSession
-from arbeitszeit_flask.forms import LoginForm, RegisterForm
+from arbeitszeit_flask.forms import LoginForm
 from arbeitszeit_flask.next_url import (
     get_next_url_from_session,
     save_next_url_in_session,
 )
 from arbeitszeit_flask.token import FlaskTokenService
+from arbeitszeit_flask.views.signup_company_view import SignupCompanyView
 from arbeitszeit_flask.views.signup_member_view import SignupMemberView
-from arbeitszeit_web.register_company import RegisterCompanyController
 
 auth = Blueprint("auth", __name__, template_folder="templates", static_folder="static")
 
@@ -184,36 +180,8 @@ def login_company(flask_session: FlaskSession):
 @auth.route("/company/signup", methods=["GET", "POST"])
 @commit_changes
 @with_injection(modules=[CompanyModule()])
-def signup_company(
-    register_company: RegisterCompany,
-    controller: RegisterCompanyController,
-    flask_session: FlaskSession,
-):
-    register_form = RegisterForm(request.form)
-    if request.method == "POST" and register_form.validate():
-        use_case_request = controller.create_request(
-            register_form,
-        )
-        response = register_company(use_case_request)
-        if response.is_rejected:
-            if (
-                response.rejection_reason
-                == RegisterCompany.Response.RejectionReason.company_already_exists
-            ):
-                register_form.email.errors.append("Emailadresse existiert bereits")
-                return render_template("auth/signup_company.html", form=register_form)
-
-        email = register_form.data["email"]
-        flask_session.login_company(email)
-        return redirect(url_for("auth.unconfirmed_company"))
-
-    if current_user.is_authenticated:
-        if flask_session.is_logged_in_as_company():
-            return redirect(url_for("main_company.profile"))
-        else:
-            flask_session.logout()
-
-    return render_template("auth/signup_company.html", form=register_form)
+def signup_company(view: SignupCompanyView):
+    return view.handle_request(request)
 
 
 @auth.route("/company/confirm/<token>")

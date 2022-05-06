@@ -8,3 +8,6 @@ class Session(Protocol):
 
     def login_member(self, email: str, remember: bool = ...) -> None:
         ...
+
+    def login_company(self, email: str, remember: bool = ...) -> None:
+        ...
