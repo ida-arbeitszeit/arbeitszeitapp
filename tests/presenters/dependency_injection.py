@@ -344,11 +344,12 @@ class PresenterTestsInjector(Module):
 
     @provider
     def provide_show_prd_account_details_presenter(
-        self, translator: FakeTranslator, plotter: FakePlotter
+        self,
+        translator: FakeTranslator,
+        url_index: PlotsUrlIndexImpl,
     ) -> ShowPRDAccountDetailsPresenter:
         return ShowPRDAccountDetailsPresenter(
-            translator=translator,
-            plotter=plotter,
+            translator=translator, url_index=url_index
         )
 
     @provider

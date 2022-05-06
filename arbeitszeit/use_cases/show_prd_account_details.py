@@ -27,6 +27,7 @@ class PlotDetails:
 
 @dataclass
 class ShowPRDAccountDetailsResponse:
+    company_id: UUID
     transactions: List[TransactionInfo]
     account_balance: Decimal
     plot: PlotDetails
@@ -56,7 +57,10 @@ class ShowPRDAccountDetails:
             accumulated_volumes=self._get_plot_volumes(transactions),
         )
         return ShowPRDAccountDetailsResponse(
-            transactions=transactions, account_balance=account_balance, plot=plot
+            company_id=company_id,
+            transactions=transactions,
+            account_balance=account_balance,
+            plot=plot,
         )
 
     def _create_info(

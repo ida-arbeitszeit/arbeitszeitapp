@@ -1,8 +1,10 @@
 from decimal import Decimal
+from uuid import UUID
 
 from flask import Blueprint, Response, request
 from flask_login import login_required
 
+from arbeitszeit.use_cases.show_prd_account_details import ShowPRDAccountDetails
 from arbeitszeit_flask.dependency_injection import with_injection
 from arbeitszeit_web.colors import Colors
 from arbeitszeit_web.plotter import Plotter
@@ -83,5 +85,21 @@ def global_barplot_for_plans(plotter: Plotter, translator: Translator, colors: C
         colors_of_bars=list(colors.get_all_defined_colors().values()),
         fig_size=(5, 4),
         y_label=translator.gettext("Amount"),
+    )
+    return Response(png, mimetype="image/png", direct_passthrough=True)
+
+
+@plots.route("/plots/line_plot_of_company_prd_account")
+@with_injection()
+@login_required
+def line_plot_of_company_prd_account(
+    plotter: Plotter,
+    use_case: ShowPRDAccountDetails,
+):
+    company_id = UUID(request.args["company_id"])
+    use_case_response = use_case(company_id)
+    png = plotter.create_line_plot(
+        x=use_case_response.plot.timestamps,
+        y=use_case_response.plot.accumulated_volumes,
     )
     return Response(png, mimetype="image/png", direct_passthrough=True)

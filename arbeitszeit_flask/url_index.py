@@ -71,6 +71,12 @@ class MemberUrlIndex:
             public_plans=public_plans,
         )
 
+    def get_line_plot_of_company_prd_account(self, company_id: UUID) -> str:
+        return url_for(
+            endpoint="plots.line_plot_of_company_prd_account",
+            company_id=str(company_id),
+        )
+
 
 class CompanyUrlIndex:
     def get_plan_summary_url(self, plan_id: UUID) -> str:
@@ -145,4 +151,10 @@ class CompanyUrlIndex:
             endpoint="plots.global_barplot_for_plans",
             productive_plans=productive_plans,
             public_plans=public_plans,
+        )
+
+    def get_line_plot_of_company_prd_account(self, company_id: UUID) -> str:
+        return url_for(
+            endpoint="plots.line_plot_of_company_prd_account",
+            company_id=str(company_id),
         )

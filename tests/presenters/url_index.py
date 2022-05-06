@@ -79,3 +79,6 @@ class PlotsUrlIndexImpl:
         self, productive_plans: int, public_plans: int
     ) -> str:
         return f"barplot url with {productive_plans} and {public_plans}"
+
+    def get_line_plot_of_company_prd_account(self, company_id: UUID) -> str:
+        return f"line plot for {company_id}"

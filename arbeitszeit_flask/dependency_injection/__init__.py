@@ -410,9 +410,11 @@ class CompanyModule(Module):
 
     @provider
     def provide_show_prd_account_details_presenter(
-        self, translator: Translator, plotter: Plotter
+        self, translator: Translator, url_index: PlotsUrlIndex
     ) -> ShowPRDAccountDetailsPresenter:
-        return ShowPRDAccountDetailsPresenter(translator=translator, plotter=plotter)
+        return ShowPRDAccountDetailsPresenter(
+            translator=translator, url_index=url_index
+        )
 
     @provider
     def provide_show_r_account_details_presenter(
