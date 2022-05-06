@@ -2,7 +2,11 @@ from decimal import Decimal
 from uuid import UUID
 
 from arbeitszeit.use_cases import InviteWorkerToCompany, InviteWorkerToCompanyRequest
-from arbeitszeit_flask.url_index import CompanyUrlIndex, MemberUrlIndex
+from arbeitszeit_flask.url_index import (
+    CompanyUrlIndex,
+    FlaskPlotsUrlIndex,
+    MemberUrlIndex,
+)
 from tests.data_generators import (
     CompanyGenerator,
     CooperationGenerator,
@@ -90,32 +94,6 @@ class CompanyUrlIndexTests(ViewTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-    def test_url_for_barplot_for_certificates_returns_png(self) -> None:
-        url = self.url_index.get_global_barplot_for_certificates_url(
-            certificates_count=Decimal("10"), available_product=Decimal("5")
-        )
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.mimetype, "image/png")
-
-    def test_url_for_barplot_for_means_of_productions_returns_png(self) -> None:
-        url = self.url_index.get_global_barplot_for_means_of_production_url(
-            planned_means=Decimal("10"),
-            planned_resources=Decimal("5"),
-            planned_work=Decimal("20"),
-        )
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.mimetype, "image/png")
-
-    def test_url_for_barplot_for_plans_returns_png(self) -> None:
-        url = self.url_index.get_global_barplot_for_plans_url(
-            productive_plans=10, public_plans=5
-        )
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.mimetype, "image/png")
-
 
 class MemberUrlIndexTests(ViewTestCase):
     def setUp(self) -> None:
@@ -175,3 +153,45 @@ class MemberUrlIndexTests(ViewTestCase):
             )
         )
         return response.invite_id
+
+
+class PlotUrlIndexTests(ViewTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.url_index = FlaskPlotsUrlIndex()
+        self.company, _, self.email = self.login_company()
+        self.company = self.confirm_company(company=self.company, email=self.email)
+
+    def test_url_for_barplot_for_certificates_returns_png(self) -> None:
+        url = self.url_index.get_global_barplot_for_certificates_url(
+            certificates_count=Decimal("10"), available_product=Decimal("5")
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, "image/png")
+
+    def test_url_for_barplot_for_means_of_productions_returns_png(self) -> None:
+        url = self.url_index.get_global_barplot_for_means_of_production_url(
+            planned_means=Decimal("10"),
+            planned_resources=Decimal("5"),
+            planned_work=Decimal("20"),
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, "image/png")
+
+    def test_url_for_barplot_for_plans_returns_png(self) -> None:
+        url = self.url_index.get_global_barplot_for_plans_url(
+            productive_plans=10, public_plans=5
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, "image/png")
+
+    def test_url_for_lineplot_for_companies_own_prd_account_returns_png(self) -> None:
+        url = self.url_index.get_line_plot_of_company_prd_account(
+            company_id=self.company.id
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, "image/png")

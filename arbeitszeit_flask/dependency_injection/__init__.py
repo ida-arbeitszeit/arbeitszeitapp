@@ -80,7 +80,11 @@ from arbeitszeit_flask.template import (
 )
 from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.translator import FlaskTranslator
-from arbeitszeit_flask.url_index import CompanyUrlIndex, MemberUrlIndex
+from arbeitszeit_flask.url_index import (
+    CompanyUrlIndex,
+    FlaskPlotsUrlIndex,
+    MemberUrlIndex,
+)
 from arbeitszeit_flask.views import EndCooperationView, Http404View, ReadMessageView
 from arbeitszeit_flask.views.create_draft_view import CreateDraftView
 from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
@@ -231,10 +235,6 @@ class MemberModule(Module):
         return member_index
 
     @provider
-    def provide_plots_url_index(self, member_index: MemberUrlIndex) -> PlotsUrlIndex:
-        return member_index
-
-    @provider
     def provide_template_index(self) -> TemplateIndex:
         return MemberTemplateIndex()
 
@@ -308,10 +308,6 @@ class CompanyModule(Module):
     def provide_company_url_index(
         self, company_index: CompanyUrlIndex
     ) -> CompanySummaryUrlIndex:
-        return company_index
-
-    @provider
-    def provide_plots_url_index(self, company_index: CompanyUrlIndex) -> PlotsUrlIndex:
         return company_index
 
     @provider
@@ -464,6 +460,12 @@ class FlaskModule(Module):
         self, member_repository: MemberRepository
     ) -> FlaskSession:
         return FlaskSession(member_repository)
+
+    @provider
+    def provide_plots_url_index(
+        self, flask_plots_url_index: FlaskPlotsUrlIndex
+    ) -> PlotsUrlIndex:
+        return flask_plots_url_index
 
     @provider
     def provide_register_member_presenter(
