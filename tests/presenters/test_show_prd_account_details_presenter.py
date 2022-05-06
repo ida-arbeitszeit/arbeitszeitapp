@@ -2,6 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import List
 from unittest import TestCase
+from uuid import UUID, uuid4
 
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.show_prd_account_details import (
@@ -12,7 +13,6 @@ from arbeitszeit.use_cases.show_prd_account_details import (
 from arbeitszeit_web.presenters.show_prd_account_details_presenter import (
     ShowPRDAccountDetailsPresenter,
 )
-from tests.plotter import FakePlotter
 from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
@@ -36,7 +36,6 @@ class CompanyTransactionsPresenterTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.translator = self.injector.get(FakeTranslator)
-        self.plotter = self.injector.get(FakePlotter)
         self.presenter = self.injector.get(ShowPRDAccountDetailsPresenter)
 
     def test_return_empty_list_when_no_transactions_took_place(self):
@@ -86,15 +85,19 @@ class CompanyTransactionsPresenterTests(TestCase):
         view_model = self.presenter.present(response)
         self.assertTrue(len(view_model.transactions), 2)
 
-    def test_presenter_returns_always_a_plot(self):
+    def test_presenter_returns_a_plot_url_with_company_id_as_parameter(self):
         response = self._use_case_response()
         view_model = self.presenter.present(response)
-        self.assertTrue(view_model.plot)
+        self.assertTrue(view_model.plot_url)
+        self.assertIn(str(response.company_id), view_model.plot_url)
 
     def _use_case_response(
         self,
+        company_id: UUID = uuid4(),
         transactions: List[TransactionInfo] = [],
         account_balance: Decimal = Decimal(0),
         plot: PlotDetails = PlotDetails([], []),
     ):
-        return ShowPRDAccountDetailsResponse(transactions, account_balance, plot)
+        return ShowPRDAccountDetailsResponse(
+            company_id, transactions, account_balance, plot
+        )

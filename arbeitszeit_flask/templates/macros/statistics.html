@@ -36,8 +36,7 @@
             <div class="tile is-child box">
                 <h1 class="title is-4 has-text-centered">{{ gettext("Plans") }}</h1>
                 <div>
-                    <img src="data:image/png;base64, {{ view_model.barplot_plans }}"
-                        alt="bar plot of public and productive plans">
+                    <img src="{{ view_model.barplot_plans_url }}" alt="bar plot of public and productive plans">
                 </div>
             </div>
         </div>
@@ -45,8 +44,7 @@
             <div class="tile is-child box">
                 <h1 class="title is-4 has-text-centered">{{ gettext("Planned ressources") }}</h1>
                 <div>
-                    <img src="data:image/png;base64, {{ view_model.barplot_means_of_production }}"
-                        alt="bar plot of means of production">
+                    <img src="{{ view_model.barplot_means_of_production_url }}" alt="bar plot of means of production">
                 </div>
             </div>
         </div>
@@ -54,8 +52,7 @@
             <div class="tile is-child box">
                 <h1 class="title is-4 has-text-centered">{{ gettext("Certificates and products") }}</h1>
                 <div>
-                    <img src="data:image/png;base64, {{ view_model.barplot_certificates }}"
-                        alt="bar plot of certificates vs product">
+                    <img src="{{ view_model.barplot_for_certificates_url }}" alt="bar plot of certificates vs product">
                 </div>
             </div>
         </div>

@@ -1,3 +1,4 @@
+from decimal import Decimal
 from uuid import UUID
 
 
@@ -59,3 +60,25 @@ class InviteUrlIndexImpl:
 class ConfirmationUrlIndexImpl:
     def get_confirmation_url(self, token: str) -> str:
         return f"{token} url"
+
+
+class PlotsUrlIndexImpl:
+    def get_global_barplot_for_certificates_url(
+        self, certificates_count: Decimal, available_product: Decimal
+    ) -> str:
+        return f"barplot url with {certificates_count} and {available_product}"
+
+    def get_global_barplot_for_means_of_production_url(
+        self, planned_means: Decimal, planned_resources: Decimal, planned_work: Decimal
+    ) -> str:
+        return (
+            f"barplot url with {planned_means}, {planned_resources} and {planned_work}"
+        )
+
+    def get_global_barplot_for_plans_url(
+        self, productive_plans: int, public_plans: int
+    ) -> str:
+        return f"barplot url with {productive_plans} and {public_plans}"
+
+    def get_line_plot_of_company_prd_account(self, company_id: UUID) -> str:
+        return f"line plot for {company_id}"
