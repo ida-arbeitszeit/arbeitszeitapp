@@ -6,7 +6,9 @@ class TokenService(Protocol):
     def generate_token(self, input: str) -> str:
         ...
 
-    def confirm_token(self, token: str, max_age_in_sec: int) -> Optional[str]:
+
+class InvitationTokenValidator(Protocol):
+    def unwrap_invitation_token(self, token: str) -> Optional[str]:
         ...
 
 

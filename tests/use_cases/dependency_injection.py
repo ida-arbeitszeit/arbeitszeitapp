@@ -3,7 +3,7 @@ from injector import Injector, Module, inject, provider, singleton
 import arbeitszeit.repositories as interfaces
 from arbeitszeit import entities
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.token import TokenDeliverer, TokenService
+from arbeitszeit.token import InvitationTokenValidator, TokenDeliverer, TokenService
 from arbeitszeit.use_cases import GetCompanySummary
 from arbeitszeit.use_cases.register_company.company_registration_message_presenter import (
     CompanyRegistrationMessagePresenter,
@@ -20,6 +20,12 @@ from . import repositories
 
 
 class InMemoryModule(Module):
+    @provider
+    def provide_invitation_token_validator(
+        self, token_service: FakeTokenService
+    ) -> InvitationTokenValidator:
+        return token_service
+
     @provider
     def provide_company_registration_message_presenter(
         self, token_delivery_service: TokenDeliveryService

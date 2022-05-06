@@ -28,6 +28,9 @@ class FakeTokenService:
         else:
             raise Exception()
 
+    def unwrap_invitation_token(self, token: str) -> Optional[str]:
+        return self.confirm_token(token, 10000000)
+
 
 class TokenDeliveryService:
     def __init__(self) -> None:
