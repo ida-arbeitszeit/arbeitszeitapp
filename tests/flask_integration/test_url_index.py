@@ -1,3 +1,4 @@
+from decimal import Decimal
 from uuid import UUID
 
 from arbeitszeit.use_cases import InviteWorkerToCompany, InviteWorkerToCompanyRequest
@@ -88,6 +89,32 @@ class CompanyUrlIndexTests(ViewTestCase):
         url = self.url_index.get_list_messages_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
+
+    def test_url_for_barplot_for_certificates_returns_png(self) -> None:
+        url = self.url_index.get_global_barplot_for_certificates_url(
+            certificates_count=Decimal("10"), available_product=Decimal("5")
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, "image/png")
+
+    def test_url_for_barplot_for_means_of_productions_returns_png(self) -> None:
+        url = self.url_index.get_global_barplot_for_means_of_production_url(
+            planned_means=Decimal("10"),
+            planned_resources=Decimal("5"),
+            planned_work=Decimal("20"),
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, "image/png")
+
+    def test_url_for_barplot_for_plans_returns_png(self) -> None:
+        url = self.url_index.get_global_barplot_for_plans_url(
+            productive_plans=10, public_plans=5
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, "image/png")
 
 
 class MemberUrlIndexTests(ViewTestCase):

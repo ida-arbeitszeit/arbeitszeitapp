@@ -66,6 +66,7 @@ from .url_index import (
     ListMessageUrlIndexTestImpl,
     MessageUrlIndex,
     PlanSummaryUrlIndexTestImpl,
+    PlotsUrlIndexImpl,
     RenewPlanUrlIndex,
     TogglePlanAvailabilityUrlIndex,
 )
@@ -208,10 +209,14 @@ class PresenterTestsInjector(Module):
 
     @provider
     def provide_get_statistics_presenter(
-        self, translator: FakeTranslator, plotter: FakePlotter, colors: TestColors
+        self,
+        translator: FakeTranslator,
+        plotter: FakePlotter,
+        colors: TestColors,
+        url_index: PlotsUrlIndexImpl,
     ) -> GetStatisticsPresenter:
         return GetStatisticsPresenter(
-            translator=translator, plotter=plotter, colors=colors
+            translator=translator, plotter=plotter, colors=colors, url_index=url_index
         )
 
     @provider

@@ -168,6 +168,7 @@ from arbeitszeit_web.url_index import (
     ListMessagesUrlIndex,
     MessageUrlIndex,
     PlanSummaryUrlIndex,
+    PlotsUrlIndex,
     RenewPlanUrlIndex,
     TogglePlanAvailabilityUrlIndex,
 )
@@ -227,6 +228,10 @@ class MemberModule(Module):
     def provide_company_url_index(
         self, member_index: MemberUrlIndex
     ) -> CompanySummaryUrlIndex:
+        return member_index
+
+    @provider
+    def provide_plots_url_index(self, member_index: MemberUrlIndex) -> PlotsUrlIndex:
         return member_index
 
     @provider
@@ -303,6 +308,10 @@ class CompanyModule(Module):
     def provide_company_url_index(
         self, company_index: CompanyUrlIndex
     ) -> CompanySummaryUrlIndex:
+        return company_index
+
+    @provider
+    def provide_plots_url_index(self, company_index: CompanyUrlIndex) -> PlotsUrlIndex:
         return company_index
 
     @provider
@@ -500,10 +509,14 @@ class FlaskModule(Module):
 
     @provider
     def provide_get_statistics_presenter(
-        self, translator: Translator, plotter: Plotter, colors: Colors
+        self,
+        translator: Translator,
+        plotter: Plotter,
+        colors: Colors,
+        url_index: PlotsUrlIndex,
     ) -> GetStatisticsPresenter:
         return GetStatisticsPresenter(
-            translator=translator, plotter=plotter, colors=colors
+            translator=translator, plotter=plotter, colors=colors, url_index=url_index
         )
 
     @provider
