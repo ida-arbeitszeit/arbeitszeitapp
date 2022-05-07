@@ -21,84 +21,88 @@
       {% if current_user.is_authenticated %}
       <div class="navbar-item has-dropdown is-hoverable">
         <a class="navbar-link">
-          {{ gettext("Plans") }}
+          Mein Bereich
         </a>
         <div class="navbar-dropdown">
-          <a href="{{ url_for('main_company.create_draft') }}" class="navbar-item">
-            {{ gettext("New plan") }}
+          <a href="{{ url_for('main_company.profile') }}" class="navbar-item">
+            <p><span class="icon"><i class="fas fa-industry"></i></span> Betrieb</p>
           </a>
           <a href="{{ url_for('main_company.my_plans') }}" class="navbar-item">
-            {{ gettext("My plans") }}
+            <p><span class="icon"><i class="fas fa-file"></i></span> Pläne</p>
+          </a>
+          <a href="{{ url_for('main_company.my_accounts') }}" class="navbar-item">
+            <p><span class="icon"><i class="fas fa-chart-line"></i></span> Konten</p>
           </a>
           <a href="{{ url_for('main_company.my_drafts') }}" class="navbar-item">
-            {{ gettext("My drafts") }}
-          </a>
-          <a href="{{ url_for('main_company.query_plans') }}" class="navbar-item">
-            {{ gettext("All plans") }}
-          </a>
-        </div>
-      </div>
-
-      <div class="navbar-item has-dropdown is-hoverable">
-        <a class="navbar-link">
-          {{ gettext("Cooperations") }}
-        </a>
-        <div class="navbar-dropdown">
-          <a href="{{ url_for('main_company.create_cooperation') }}" class="navbar-item">
-            {{ gettext("New cooperation") }}
-          </a>
-          <a href="{{ url_for('main_company.request_cooperation') }}" class="navbar-item">
-            {{ gettext("Join cooperation") }}
+            <p>Planentwürfe</p>
           </a>
           <a href="{{ url_for('main_company.my_cooperations') }}" class="navbar-item">
-            {{ gettext("My cooperations") }}
+            <p><span class="icon"><i class="fas fa-hands-helping"></i></span> Kooperationen</p>
           </a>
-          <a href="{{ url_for('main_company.list_all_cooperations') }}" class="navbar-item">
-            {{ gettext("All cooperations") }}
+          <a href="{{ url_for('main_company.my_purchases') }}" class="navbar-item">
+            <p><span class="icon"><i class="fa-solid fa-basket-shopping"></i></span> Käufe</p>
           </a>
         </div>
       </div>
 
       <div class="navbar-item has-dropdown is-hoverable">
         <a class="navbar-link">
-          {{ gettext("Accounts and purchases") }}
+          Aktionen
         </a>
-
         <div class="navbar-dropdown">
-          <a href="{{ url_for('main_company.my_accounts') }}" class="navbar-item">
-            {{ gettext("Accounts") }}
-          </a>
           <a href="{{ url_for('main_company.transfer_to_worker') }}" class="navbar-item">
-            {{ gettext("Pay workers") }}
+            <p><span class="icon"><i class="fa-regular fa-credit-card"></i></span>
+              Arbeiter*innen bezahlen</p>
           </a>
           <a href="{{ url_for('main_company.transfer_to_company') }}" class="navbar-item">
-            {{ gettext("Pay production means") }}
+            <p><span class="icon"><i class="fa-regular fa-credit-card"></i></span>
+              Produktionsmittel bezahlen</p>
           </a>
-          <a href="{{ url_for('main_company.my_purchases') }}" class="navbar-item">
-            {{ gettext("My purchases") }}
+          <a href="{{ url_for('main_company.create_draft') }}" class="navbar-item">
+            <p><span class="icon"><i class="fa-solid fa-file-circle-plus"></i></span> Neuen Plan
+              erstellen</p>
+          </a>
+          <a href="{{ url_for('main_company.create_cooperation') }}" class="navbar-item">
+            <p><span class="icon"><i class="fas fa-hands-helping"></i></span> Neue Kooperation
+              erstellen</p>
+          </a>
+          <a href="{{ url_for('main_company.request_cooperation') }}" class="navbar-item">
+            <p><span class="icon"><i class="fas fa-hands-helping"></i></span> Kooperation
+              beitreten</p>
+          </a>
+          <a href="{{ url_for('main_company.invite_worker_to_company') }}" class="navbar-item">
+            <p><span class="icon"><i class="fa-solid fa-users"></i></span> Arbeiter*innen
+              einladen</p>
           </a>
         </div>
       </div>
 
-      <a href="{{ url_for('main_company.invite_worker_to_company') }}" class="navbar-item">
-        {{ gettext("Work") }}
-      </a>
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">
+          Global
+        </a>
 
-      <a href="{{ url_for('main_company.statistics') }}" class="navbar-item">
-        {{ gettext("Statistics") }}
-      </a>
-
-      <a href="{{ url_for('main_company.query_companies') }}" class="navbar-item">
-        {{ gettext("Companies") }}
-      </a>
-
-      <a href="{{ url_for('main_company.profile') }}" class="navbar-item">
-        {{ gettext("My profile") }}
-      </a>
-
+        <div class="navbar-dropdown">
+          <a href="{{ url_for('main_company.statistics') }}" class="navbar-item">
+            <p><span class="icon"><i class="fa-solid fa-chart-pie"></i></span> Statistiken</p>
+          </a>
+          <a href="{{ url_for('main_company.query_companies') }}" class="navbar-item">
+            <p><span class="icon"><i class="fas fa-industry"></i></span> Alle Betriebe</p>
+          </a>
+          <a href="{{ url_for('main_company.query_plans') }}" class="navbar-item">
+            <p><span class="icon"><i class="fas fa-file"></i></span> Alle Pläne</p>
+          </a>
+          <a href="{{ url_for('main_company.list_all_cooperations') }}" class="navbar-item">
+            <p><span class="icon"><i class="fas fa-hands-helping"></i></span> Alle Kooperationen</p>
+          </a>
+        </div>
+      </div>
       <a href="{{ url_for('main_company.list_messages') }}"
         class="navbar-item {% if message_indicator is defined %}{% if message_indicator.show_unread_messages_indicator %}unread-messages-indicator{% endif %}{% endif %}">
         {{ gettext("Messages") }}
+      </a>
+      <a href="{{ url_for('main_company.dashboard') }}" class="navbar-item">
+        {{ gettext("Dashboard") }}
       </a>
       {% endif %}
     </div>

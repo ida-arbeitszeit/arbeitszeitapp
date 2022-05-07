@@ -95,6 +95,13 @@ from arbeitszeit_web.translator import Translator
 from .blueprint import CompanyRoute
 
 
+@CompanyRoute("/company/dashboard")
+def dashboard(
+    template_renderer: UserTemplateRenderer,
+):
+    return template_renderer.render_template("company/dashboard.html")
+
+
 @CompanyRoute("/company/profile")
 def profile(
     company_repository: CompanyRepository,
