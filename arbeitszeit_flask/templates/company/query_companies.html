@@ -1,5 +1,9 @@
 {% extends "base_company.html" %}
 
+{% block navbar_start %}
+<div class="navbar-item">{{ gettext("All companies") }}</div>
+{% endblock %}
+
 {% block company %}
 {% from 'macros/query_companies.html' import query_companies %}
 {{ query_companies(form, view_model) }}
