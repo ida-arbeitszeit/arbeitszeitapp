@@ -24,7 +24,7 @@
           Mein Bereich
         </a>
         <div class="navbar-dropdown">
-          <a href="{{ url_for('main_company.profile') }}" class="navbar-item">
+          <a href="{{ url_for('main_company.company_summary', company_id=current_user.id) }}" class="navbar-item">
             <p><span class="icon"><i class="fas fa-industry"></i></span> Betrieb</p>
           </a>
           <a href="{{ url_for('main_company.my_plans') }}" class="navbar-item">

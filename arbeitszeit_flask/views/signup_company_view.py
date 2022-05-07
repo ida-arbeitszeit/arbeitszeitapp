@@ -25,7 +25,7 @@ class SignupCompanyView:
             self._handle_successful_post_request(register_form)
         if current_user.is_authenticated:
             if self.flask_session.is_logged_in_as_company():
-                return redirect(url_for("main_company.profile"))
+                return redirect(url_for("main_company.dashboard"))
             else:
                 self.flask_session.logout()
         return render_template("auth/signup_company.html", form=register_form)
