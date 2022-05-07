@@ -51,6 +51,7 @@ def create_app(config=None, db=None, migrate=None, template_folder=None):
     with app.app_context():
 
         from arbeitszeit_flask.commands import (
+            invite_accountant,
             trans_compile,
             trans_new,
             trans_update,
@@ -61,6 +62,7 @@ def create_app(config=None, db=None, migrate=None, template_folder=None):
         app.cli.command("trans-update")(trans_update)
         app.cli.command("trans-compile")(trans_compile)
         app.cli.command("trans-new")(click.argument("lang_code")(trans_new))
+        app.cli.command("invite-accountant")(invite_accountant)
 
         from .models import Company, Member
 

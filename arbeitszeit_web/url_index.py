@@ -60,3 +60,8 @@ class ListMessagesUrlIndex(Protocol):
 class ConfirmationUrlIndex(Protocol):
     def get_confirmation_url(self, token: str) -> str:
         ...
+
+
+class AccountantInvitationUrlIndex(Protocol):
+    def get_accountant_invitation_url(self, token: str) -> str:
+        ...

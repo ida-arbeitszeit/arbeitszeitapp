@@ -4,7 +4,7 @@ from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
 from arbeitszeit.use_cases.send_accountant_registration_token import (
     SendAccountantRegistrationTokenUseCase,
 )
-from tests.token import TokenDeliveryService
+from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
 
 from .dependency_injection import get_dependency_injector
 
@@ -16,7 +16,9 @@ class UseCaseTests(TestCase):
         self.send_registration_token_use_case = self.injector.get(
             SendAccountantRegistrationTokenUseCase
         )
-        self.token_deliverer = self.injector.get(TokenDeliveryService)
+        self.invitation_presenter = self.injector.get(
+            AccountantInvitationPresenterTestImpl
+        )
 
     def test_that_user_with_random_token_and_email_cannot_register(self) -> None:
         request = self.create_request(token="random token")
@@ -45,8 +47,7 @@ class UseCaseTests(TestCase):
         self.send_registration_token_use_case.send_accountant_registration_token(
             request=self.send_registration_token_use_case.Request(email=email)
         )
-        token = self.token_deliverer.delivered_tokens[-1]
-        return token.token
+        return self.invitation_presenter.invitations[-1].token
 
     def create_request(
         self, token: str, email: str = "test@mail.test", name: str = "test name"

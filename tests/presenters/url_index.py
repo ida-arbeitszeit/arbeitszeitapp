@@ -59,3 +59,8 @@ class InviteUrlIndexImpl:
 class ConfirmationUrlIndexImpl:
     def get_confirmation_url(self, token: str) -> str:
         return f"{token} url"
+
+
+class AccountantInvitationUrlIndexImpl:
+    def get_accountant_invitation_url(self, token: str) -> str:
+        return f"accountant invitation {token} url"

@@ -35,6 +35,9 @@ from arbeitszeit.use_cases.register_company.company_registration_message_present
 from arbeitszeit.use_cases.register_member.member_registration_message_presenter import (
     MemberRegistrationMessagePresenter,
 )
+from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitation_presenter import (
+    AccountantInvitationPresenter,
+)
 from arbeitszeit.use_cases.send_work_certificates_to_worker import (
     SendWorkCertificatesToWorker,
 )
@@ -80,7 +83,7 @@ from arbeitszeit_flask.template import (
 )
 from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.translator import FlaskTranslator
-from arbeitszeit_flask.url_index import CompanyUrlIndex, MemberUrlIndex
+from arbeitszeit_flask.url_index import CompanyUrlIndex, GeneralUrlIndex, MemberUrlIndex
 from arbeitszeit_flask.views import EndCooperationView, Http404View, ReadMessageView
 from arbeitszeit_flask.views.create_draft_view import CreateDraftView
 from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
@@ -130,6 +133,10 @@ from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from arbeitszeit_web.plan_summary_service import PlanSummaryServiceImpl
 from arbeitszeit_web.plotter import Plotter
+from arbeitszeit_web.presenters.accountant_invitation_presenter import (
+    AccountantInvitationEmailPresenter,
+    AccountantInvitationEmailView,
+)
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
 from arbeitszeit_web.presenters.register_company_presenter import (
     RegisterCompanyPresenter,
@@ -451,6 +458,21 @@ class CompanyModule(Module):
 
 
 class FlaskModule(Module):
+    @provider
+    def provide_accountant_invitation_presenter(
+        self,
+        view: AccountantInvitationEmailView,
+        email_configuration: EmailConfiguration,
+        translator: Translator,
+        invitation_url_index: GeneralUrlIndex,
+    ) -> AccountantInvitationPresenter:
+        return AccountantInvitationEmailPresenter(
+            invitation_view=view,
+            email_configuration=email_configuration,
+            translator=translator,
+            invitation_url_index=invitation_url_index,
+        )
+
     @provider
     def provide_flask_session(
         self, member_repository: MemberRepository, company_repository: CompanyRepository

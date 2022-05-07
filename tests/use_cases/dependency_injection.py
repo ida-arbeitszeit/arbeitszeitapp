@@ -11,7 +11,11 @@ from arbeitszeit.use_cases.register_company.company_registration_message_present
 from arbeitszeit.use_cases.register_member.member_registration_message_presenter import (
     MemberRegistrationMessagePresenter,
 )
+from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitation_presenter import (
+    AccountantInvitationPresenter,
+)
 from tests import data_generators
+from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
 from tests.datetime_service import FakeDatetimeService
 from tests.dependency_injection import TestingModule
 from tests.token import FakeTokenService, TokenDeliveryService
@@ -20,6 +24,19 @@ from . import repositories
 
 
 class InMemoryModule(Module):
+    @singleton
+    @provider
+    def provide_accountant_invitation_presenter_test_impl(
+        self,
+    ) -> AccountantInvitationPresenterTestImpl:
+        return AccountantInvitationPresenterTestImpl()
+
+    @provider
+    def provide_accountant_invitation_presenter(
+        self, presenter: AccountantInvitationPresenterTestImpl
+    ) -> AccountantInvitationPresenter:
+        return presenter
+
     @provider
     def provide_invitation_token_validator(
         self, token_service: FakeTokenService
