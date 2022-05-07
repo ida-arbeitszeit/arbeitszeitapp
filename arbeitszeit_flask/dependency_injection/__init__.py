@@ -83,7 +83,12 @@ from arbeitszeit_flask.template import (
 )
 from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.translator import FlaskTranslator
-from arbeitszeit_flask.url_index import CompanyUrlIndex, GeneralUrlIndex, MemberUrlIndex
+from arbeitszeit_flask.url_index import (
+    CompanyUrlIndex,
+    FlaskPlotsUrlIndex,
+    GeneralUrlIndex,
+    MemberUrlIndex,
+)
 from arbeitszeit_flask.views import EndCooperationView, Http404View, ReadMessageView
 from arbeitszeit_flask.views.create_draft_view import CreateDraftView
 from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
@@ -178,6 +183,7 @@ from arbeitszeit_web.url_index import (
     ListMessagesUrlIndex,
     MessageUrlIndex,
     PlanSummaryUrlIndex,
+    PlotsUrlIndex,
     RenewPlanUrlIndex,
     TogglePlanAvailabilityUrlIndex,
 )
@@ -411,9 +417,11 @@ class CompanyModule(Module):
 
     @provider
     def provide_show_prd_account_details_presenter(
-        self, translator: Translator, plotter: Plotter
+        self, translator: Translator, url_index: PlotsUrlIndex
     ) -> ShowPRDAccountDetailsPresenter:
-        return ShowPRDAccountDetailsPresenter(translator=translator, plotter=plotter)
+        return ShowPRDAccountDetailsPresenter(
+            translator=translator, url_index=url_index
+        )
 
     @provider
     def provide_show_r_account_details_presenter(
@@ -480,6 +488,12 @@ class FlaskModule(Module):
         return FlaskSession(member_repository, company_repository)
 
     @provider
+    def provide_plots_url_index(
+        self, flask_plots_url_index: FlaskPlotsUrlIndex
+    ) -> PlotsUrlIndex:
+        return flask_plots_url_index
+
+    @provider
     def provide_register_member_presenter(
         self, session: Session, translator: Translator
     ) -> RegisterMemberPresenter:
@@ -531,10 +545,14 @@ class FlaskModule(Module):
 
     @provider
     def provide_get_statistics_presenter(
-        self, translator: Translator, plotter: Plotter, colors: Colors
+        self,
+        translator: Translator,
+        plotter: Plotter,
+        colors: Colors,
+        url_index: PlotsUrlIndex,
     ) -> GetStatisticsPresenter:
         return GetStatisticsPresenter(
-            translator=translator, plotter=plotter, colors=colors
+            translator=translator, plotter=plotter, colors=colors, url_index=url_index
         )
 
     @provider

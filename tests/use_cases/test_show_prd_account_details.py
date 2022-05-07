@@ -40,6 +40,19 @@ def test_balance_is_zero_when_no_transactions_took_place(
 
 
 @injection_test
+def test_company_id_is_returned(
+    show_prd_account_details: ShowPRDAccountDetails,
+    member_generator: MemberGenerator,
+    company_generator: CompanyGenerator,
+):
+    member_generator.create_member()
+    company = company_generator.create_company()
+
+    response = show_prd_account_details(company.id)
+    assert response.company_id == company.id
+
+
+@injection_test
 def test_that_no_info_is_generated_after_company_buying_p(
     show_prd_account_details: ShowPRDAccountDetails,
     company_generator: CompanyGenerator,

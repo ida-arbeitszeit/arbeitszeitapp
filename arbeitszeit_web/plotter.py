@@ -6,7 +6,7 @@ from typing import List, Optional, Protocol, Tuple, Union
 class Plotter(Protocol):
     def create_line_plot(
         self, x: List[datetime], y: List[Decimal], fig_size: Tuple[int, int] = (10, 5)
-    ) -> str:
+    ) -> bytes:
         ...
 
     def create_bar_plot(
@@ -16,5 +16,5 @@ class Plotter(Protocol):
         colors_of_bars: List[str],
         fig_size: Tuple[int, int],
         y_label: Optional[str],
-    ) -> str:
+    ) -> bytes:
         ...

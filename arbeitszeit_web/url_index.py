@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import Protocol
 from uuid import UUID
 
@@ -64,4 +65,24 @@ class ConfirmationUrlIndex(Protocol):
 
 class AccountantInvitationUrlIndex(Protocol):
     def get_accountant_invitation_url(self, token: str) -> str:
+        ...
+
+
+class PlotsUrlIndex(Protocol):
+    def get_global_barplot_for_certificates_url(
+        self, certificates_count: Decimal, available_product: Decimal
+    ) -> str:
+        ...
+
+    def get_global_barplot_for_means_of_production_url(
+        self, planned_means: Decimal, planned_resources: Decimal, planned_work: Decimal
+    ) -> str:
+        ...
+
+    def get_global_barplot_for_plans_url(
+        self, productive_plans: int, public_plans: int
+    ) -> str:
+        ...
+
+    def get_line_plot_of_company_prd_account(self, company_id: UUID) -> str:
         ...

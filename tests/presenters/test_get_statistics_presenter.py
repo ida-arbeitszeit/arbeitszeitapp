@@ -12,14 +12,14 @@ TESTING_RESPONSE_MODEL = StatisticsResponse(
     registered_companies_count=5,
     registered_members_count=30,
     cooperations_count=10,
-    certificates_count=Decimal(50),
-    available_product=Decimal(20.5),
+    certificates_count=Decimal("50"),
+    available_product=Decimal("20.5"),
     active_plans_count=6,
     active_plans_public_count=2,
-    avg_timeframe=Decimal(30.5),
-    planned_work=Decimal(500.23),
-    planned_resources=Decimal(400.1),
-    planned_means=Decimal(215.23),
+    avg_timeframe=Decimal("30.5"),
+    planned_work=Decimal("500.23"),
+    planned_resources=Decimal("400.1"),
+    planned_means=Decimal("215.23"),
 )
 
 
@@ -148,4 +148,44 @@ class GetStatisticsPresenterTests(TestCase):
         self.assertEqual(
             view_model.average_timeframe_days,
             self.translator.gettext("%.2f days") % 31.21,
+        )
+
+    def test_that_plot_url_for_certificates_with_correct_args_is_returned(self):
+        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        self.assertIn(
+            str(TESTING_RESPONSE_MODEL.certificates_count),
+            view_model.barplot_for_certificates_url,
+        )
+        self.assertIn(
+            str(TESTING_RESPONSE_MODEL.available_product),
+            view_model.barplot_for_certificates_url,
+        )
+
+    def test_that_plot_url_for_means_of_productions_with_correct_args_is_returned(self):
+        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        self.assertIn(
+            str(TESTING_RESPONSE_MODEL.planned_means),
+            view_model.barplot_means_of_production_url,
+        )
+        self.assertIn(
+            str(TESTING_RESPONSE_MODEL.planned_resources),
+            view_model.barplot_means_of_production_url,
+        )
+        self.assertIn(
+            str(TESTING_RESPONSE_MODEL.planned_work),
+            view_model.barplot_means_of_production_url,
+        )
+
+    def test_that_plot_url_for_plans_with_correct_args_is_returned(self):
+        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        self.assertIn(
+            str(
+                TESTING_RESPONSE_MODEL.active_plans_count
+                - TESTING_RESPONSE_MODEL.active_plans_public_count
+            ),
+            view_model.barplot_plans_url,
+        )
+        self.assertIn(
+            str(TESTING_RESPONSE_MODEL.active_plans_public_count),
+            view_model.barplot_plans_url,
         )

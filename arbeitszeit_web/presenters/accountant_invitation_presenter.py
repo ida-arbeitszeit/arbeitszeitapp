@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Protocol
 
-from arbeitszeit_web.email import EmailConfiguration, MailService
+from arbeitszeit_web.email import EmailConfiguration
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import AccountantInvitationUrlIndex
 
