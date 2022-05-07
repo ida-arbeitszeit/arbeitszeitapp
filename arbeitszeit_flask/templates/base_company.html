@@ -2,7 +2,7 @@
 {% from 'macros/show_notifications.html' import show_notifications %}
 
 {% block body %}
-<nav class="navbar" role="navigation" aria-label="main navigation">
+<nav class="navbar is-transparent" role="navigation" aria-label="main navigation">
   <div class="navbar-brand">
     <div class="navbar-item has-background-primary	has-text-white">
       {{ gettext("Company view") }}
@@ -100,30 +100,30 @@
         class="navbar-item {% if message_indicator is defined %}{% if message_indicator.show_unread_messages_indicator %}unread-messages-indicator{% endif %}{% endif %}">
         {{ gettext("Messages") }}
       </a>
+      {% endif %}
     </div>
-    {% endif %}
-  </div>
-  <div class="navbar-end">
-    <div class="navbar-item">
-      <div class="buttons">
-        {% if not current_user.is_authenticated %}
-        <a class="button" href="{{ url_for('auth.login_company') }}">
-          {{ gettext("Sign in") }}
-        </a>
-        <a class="button" href="{{ url_for('auth.signup_company') }}">
-          {{ gettext("Sign up") }}
-        </a>
-        <a class="button" href="{{ url_for('auth.zurueck') }}">
-          {{ gettext("Back") }}
-        </a>
-        {% else %}
-        <a class="button" href="{{ url_for('auth.logout') }}">
-          {{ gettext("Sign out") }}
-        </a>
-        <a class="button" href="{{ url_for('main_company.hilfe') }}">
-          {{ gettext("?") }}
-        </a>
-        {% endif %}
+    <div class="navbar-end">
+      <div class="navbar-item">
+        <div class="buttons">
+          {% if not current_user.is_authenticated %}
+          <a class="button" href="{{ url_for('auth.login_company') }}">
+            {{ gettext("Sign in") }}
+          </a>
+          <a class="button" href="{{ url_for('auth.signup_company') }}">
+            {{ gettext("Sign up") }}
+          </a>
+          <a class="button" href="{{ url_for('auth.zurueck') }}">
+            {{ gettext("Back") }}
+          </a>
+          {% else %}
+          <a class="button" href="{{ url_for('auth.logout') }}">
+            {{ gettext("Sign out") }}
+          </a>
+          <a class="button" href="{{ url_for('main_company.hilfe') }}">
+            {{ gettext("?") }}
+          </a>
+          {% endif %}
+        </div>
       </div>
     </div>
   </div>
