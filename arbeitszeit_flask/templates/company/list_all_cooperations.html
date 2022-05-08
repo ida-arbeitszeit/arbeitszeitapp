@@ -1,14 +1,14 @@
 {% extends "base_company.html" %}
 
 {% block navbar_start %}
-<div class="navbar-item">Alle Kooperationen</div>
+<div class="navbar-item">{{ gettext("All cooperations") }}</div>
 {% endblock %}
 
 {% block company %}
 
 <div class="section has-text-centered">
     <h1 class="title">
-        Alle Kooperationen
+        {{ gettext("All cooperations") }}
     </h1>
     <div class="columns">
         <div class="column"></div>
@@ -18,8 +18,8 @@
                 <table class="table is-fullwidth">
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Anzahl Pläne</th>
+                            <th>{{ gettext("Name") }}</th>
+                            <th>{{ gettext("Number of plans") }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -34,7 +34,7 @@
                 </table>
             </div>
             {% else %}
-            <p>(Keine Kooperationen vorhanden.)</p>
+            <p>{{ gettext("No cooperations found") }}</p>
             {% endif %}
         </div>
         <div class="column"></div>

@@ -1,7 +1,7 @@
 {% extends "base_company.html" %}
 
 {% block navbar_start %}
-<div class="navbar-item">Arbeiter*in einladen</div>
+<div class="navbar-item">{{ gettext("Invite worker") }}</div>
 {% endblock %}
 
 {% block company %}
@@ -11,24 +11,24 @@
     <div class="column"></div>
     <div class="column is-5">
       <div class="content">
-        <h1 class="title">Arbeiter*in einladen</h1>
+        <h1 class="title">{{ gettext("Invite worker") }}</h1>
         <form method="post">
           <div class="field has-addons has-addons-centered">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             {{ form.member_id(class_="input") }}
-            <button class="button is-primary">Einladen</button>
+            <button class="button is-primary">{{ gettext("Invite") }}</button>
           </div>
         </form>
       </div>
 
       <div class="content">
         {% if view_model.is_show_workers %}
-        <h1 class="title">Mitarbeiter*innen des Betriebs</h1>
+        <h1 class="title">{{ gettext("Workers of the company") }}</h1>
         <div class="table-container">
           <table class="table is-full-width">
             <thead>
-              <th>Mitglieder-ID</th>
-              <th>Name</th>
+              <th>{{ gettext("Member ID")}}</th>
+              <th>{{ gettext("Name") }}</th>
             </thead>
             {% for worker in view_model.workers %}
             <tr>
