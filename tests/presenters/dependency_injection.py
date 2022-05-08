@@ -19,6 +19,9 @@ from arbeitszeit_web.plan_summary_service import (
     PlanSummaryService,
     PlanSummaryServiceImpl,
 )
+from arbeitszeit_web.presenters.accountant_invitation_presenter import (
+    AccountantInvitationEmailPresenter,
+)
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
 from arbeitszeit_web.presenters.register_company_presenter import (
     RegisterCompanyPresenter,
@@ -57,8 +60,10 @@ from tests.session import FakeSession
 from tests.translator import FakeTranslator
 from tests.use_cases.dependency_injection import InMemoryModule
 
+from .accountant_invitation_email_view import AccountantInvitationEmailViewImpl
 from .notifier import NotifierTestImpl
 from .url_index import (
+    AccountantInvitationUrlIndexImpl,
     AnswerCompanyWorkInviteUrlIndexImpl,
     CompanySummaryUrlIndex,
     ConfirmationUrlIndexImpl,
@@ -405,6 +410,28 @@ class PresenterTestsInjector(Module):
         self, session: FakeSession, translator: FakeTranslator
     ) -> RegisterCompanyPresenter:
         return RegisterCompanyPresenter(translator=translator, session=session)
+
+    @singleton
+    @provider
+    def provide_accountant_invitation_email_view(
+        self,
+    ) -> AccountantInvitationEmailViewImpl:
+        return AccountantInvitationEmailViewImpl()
+
+    @provider
+    def provide_accountant_invitation_presenter_impl(
+        self,
+        invitation_view: AccountantInvitationEmailViewImpl,
+        translator: FakeTranslator,
+        email_configuration: FakeEmailConfiguration,
+        invitation_url_index: AccountantInvitationUrlIndexImpl,
+    ) -> AccountantInvitationEmailPresenter:
+        return AccountantInvitationEmailPresenter(
+            invitation_view=invitation_view,
+            translator=translator,
+            email_configuration=email_configuration,
+            invitation_url_index=invitation_url_index,
+        )
 
 
 def get_dependency_injector() -> Injector:

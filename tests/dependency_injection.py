@@ -1,5 +1,6 @@
 from injector import Module, provider, singleton
 
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.repositories import (
     CompanyRepository,
     CompanyWorkerRepository,
@@ -8,6 +9,7 @@ from arbeitszeit.repositories import (
 from tests.company import CompanyManager
 from tests.email import FakeEmailSender
 from tests.session import FakeSession
+from tests.token import FakeTokenService
 
 
 class TestingModule(Module):
@@ -33,3 +35,9 @@ class TestingModule(Module):
     @provider
     def provide_fake_session(self) -> FakeSession:
         return FakeSession()
+
+    @provider
+    def provide_fake_token_service(
+        self, datetime_service: DatetimeService
+    ) -> FakeTokenService:
+        return FakeTokenService(datetime_service=datetime_service)

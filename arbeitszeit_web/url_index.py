@@ -63,6 +63,11 @@ class ConfirmationUrlIndex(Protocol):
         ...
 
 
+class AccountantInvitationUrlIndex(Protocol):
+    def get_accountant_invitation_url(self, token: str) -> str:
+        ...
+
+
 class PlotsUrlIndex(Protocol):
     def get_global_barplot_for_certificates_url(
         self, certificates_count: Decimal, available_product: Decimal

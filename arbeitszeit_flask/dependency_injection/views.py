@@ -19,6 +19,9 @@ from arbeitszeit_flask.views import (
     InviteWorkerToCompanyView,
     ReadMessageView,
 )
+from arbeitszeit_flask.views.accountant_invitation_email_view import (
+    AccountantInvitationEmailViewImpl,
+)
 from arbeitszeit_flask.views.invite_worker_to_company import (
     InviteWorkerGetRequestHandler,
     InviteWorkerPostRequestHandler,
@@ -37,9 +40,13 @@ from arbeitszeit_web.controllers.show_company_work_invite_details_controller imp
 from arbeitszeit_web.controllers.show_my_accounts_controller import (
     ShowMyAccountsController,
 )
+from arbeitszeit_web.email import MailService
 from arbeitszeit_web.invite_worker_to_company import (
     InviteWorkerToCompanyController,
     InviteWorkerToCompanyPresenter,
+)
+from arbeitszeit_web.presenters.accountant_invitation_presenter import (
+    AccountantInvitationEmailView,
 )
 from arbeitszeit_web.presenters.list_workers_presenter import ListWorkersPresenter
 from arbeitszeit_web.presenters.register_company_presenter import (
@@ -195,4 +202,15 @@ class ViewsModule(Module):
             controller=controller,
             flask_session=flask_session,
             presenter=presenter,
+        )
+
+    @provider
+    def provide_accountant_invitation_email_view(
+        self,
+        mail_service: MailService,
+        template_renderer: TemplateRenderer,
+    ) -> AccountantInvitationEmailView:
+        return AccountantInvitationEmailViewImpl(
+            mail_service=mail_service,
+            template_renderer=template_renderer,
         )
