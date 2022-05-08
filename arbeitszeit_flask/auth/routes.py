@@ -70,12 +70,17 @@ def signup_member(view: SignupMemberView):
 @auth.route("/member/confirm/<token>")
 @commit_changes
 def confirm_email_member(token):
-    try:
-        token_service = FlaskTokenService()
-        email = token_service.confirm_token(token)
-    except Exception:
+    def redirect_invalid_request():
         flash("Der Bestätigungslink ist ungültig oder ist abgelaufen.")
         return redirect(url_for("auth.unconfirmed_member"))
+
+    token_service = FlaskTokenService()
+    try:
+        email = token_service.confirm_token(token)
+    except Exception:
+        return redirect_invalid_request()
+    if email is None:
+        return redirect_invalid_request()
     member = database.get_user_by_mail(email)
     if member.confirmed_on is not None:
         flash("Konto ist bereits bestätigt.")
@@ -187,12 +192,17 @@ def signup_company(view: SignupCompanyView):
 @auth.route("/company/confirm/<token>")
 @commit_changes
 def confirm_email_company(token):
-    try:
-        token_service = FlaskTokenService()
-        email = token_service.confirm_token(token)
-    except Exception:
+    def redirect_invalid_request():
         flash("Der Bestätigungslink ist ungültig oder ist abgelaufen.")
         return redirect(url_for("auth.unconfirmed_company"))
+
+    token_service = FlaskTokenService()
+    try:
+        email = token_service.confirm_token(token)
+    except Exception:
+        return redirect_invalid_request()
+    if email is None:
+        return redirect_invalid_request()
     company = database.get_company_by_mail(email)
     if company.confirmed_on is not None:
         flash("Konto ist bereits bestätigt.")

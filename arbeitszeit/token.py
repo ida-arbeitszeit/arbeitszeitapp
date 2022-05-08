@@ -1,12 +1,14 @@
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Optional, Protocol
 
 
 class TokenService(Protocol):
     def generate_token(self, input: str) -> str:
         ...
 
-    def confirm_token(self, token: str, max_age_in_sec: int) -> str:
+
+class InvitationTokenValidator(Protocol):
+    def unwrap_invitation_token(self, token: str) -> Optional[str]:
         ...
 
 

@@ -4,6 +4,11 @@ from uuid import UUID
 from flask import url_for
 
 
+class GeneralUrlIndex:
+    def get_accountant_invitation_url(self, token: str) -> str:
+        return "/not/implemented/yet"
+
+
 class MemberUrlIndex:
     def get_plan_summary_url(self, plan_id: UUID) -> str:
         return url_for("main_member.plan_summary", plan_id=plan_id)

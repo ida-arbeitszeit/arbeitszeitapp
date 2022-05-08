@@ -62,6 +62,11 @@ class ConfirmationUrlIndexImpl:
         return f"{token} url"
 
 
+class AccountantInvitationUrlIndexImpl:
+    def get_accountant_invitation_url(self, token: str) -> str:
+        return f"accountant invitation {token} url"
+
+
 class PlotsUrlIndexImpl:
     def get_global_barplot_for_certificates_url(
         self, certificates_count: Decimal, available_product: Decimal
