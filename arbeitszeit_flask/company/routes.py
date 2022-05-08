@@ -95,8 +95,8 @@ from arbeitszeit_web.translator import Translator
 from .blueprint import CompanyRoute
 
 
-@CompanyRoute("/company/profile")
-def profile(
+@CompanyRoute("/company/dashboard")
+def dashboard(
     company_repository: CompanyRepository,
     company_worker_repository: CompanyWorkerRepository,
     template_renderer: UserTemplateRenderer,
@@ -110,7 +110,7 @@ def profile(
     else:
         having_workers = False
     return template_renderer.render_template(
-        "company/profile.html",
+        "company/dashboard.html",
         context=dict(
             having_workers=having_workers,
             welcome_message=translator.gettext("Welcome, %s!") % current_user.name,

@@ -80,13 +80,13 @@ class CompanyUrlIndex:
 
     def get_invite_url(self, invite_id: UUID) -> str:
         # since invites don't make sense for a company, we redirect
-        # them in this case to their profile page.
-        return url_for("main_company.profile")
+        # them in this case to their dashboard page.
+        return url_for("main_company.dashboard")
 
     def get_answer_company_work_invite_url(self, invite_id: UUID) -> str:
         # since invites don't make sense for a company, we redirect
-        # them in this case to their profile page.
-        return url_for("main_company.profile", invite_id=invite_id)
+        # them in this case to their dashboard page.
+        return url_for("main_company.dashboard", invite_id=invite_id)
 
     def get_list_messages_url(self) -> str:
         return url_for("main_company.list_messages")

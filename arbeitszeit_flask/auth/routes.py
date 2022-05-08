@@ -171,11 +171,11 @@ def login_company(flask_session: FlaskSession):
         else:
             flask_session.login_company(email, remember=remember)
             next = get_next_url_from_session()
-            return redirect(next or url_for("main_company.profile"))
+            return redirect(next or url_for("main_company.dashboard"))
 
     if current_user.is_authenticated:
         if flask_session.is_logged_in_as_company():
-            return redirect(url_for("main_company.profile"))
+            return redirect(url_for("main_company.dashboard"))
         else:
             flask_session.logout()
 

@@ -1,5 +1,9 @@
 {% extends "base_company.html" %}
 
+{% block navbar_start %}
+<div class="navbar-item">{{ gettext("Plan information") }}</div>
+{% endblock %}
+
 {% block company %}
 
 {% from 'macros/plan_summary.html' import plan_summary %}

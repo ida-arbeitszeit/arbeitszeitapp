@@ -1,9 +1,13 @@
 {% extends "base_company.html" %}
 
+{% block navbar_start %}
+<div class="navbar-item">{{ gettext("My plans") }}</div>
+{% endblock %}
+
 {% block company %}
 <div class="section has-text-centered">
   <div class="content">
-    <h1>Eigene Pläne</h1>
+    <h1>{{ gettext("My plans") }}</h1>
     <div class="box has-background-info-light has-text-info-dark">
       <div class="icon"><i class="fas fa-info-circle"></i></div>
       <p>

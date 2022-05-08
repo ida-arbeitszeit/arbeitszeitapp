@@ -1,8 +1,14 @@
 {% extends "base_company.html" %}
+
+{% block navbar_start %}
+<a class="navbar-item" href="{{ url_for('main_company.my_accounts') }}">{{ gettext("Accounts") }}</a>
+<div class="navbar-item">{{ gettext("Account prd") }}</div>
+{% endblock %}
+
 {% block company %}
 <div class="section is-medium has-text-centered">
     <h1 class="title">
-        <a href="{{ url_for('main_company.my_accounts') }}">{{ gettext("Accounts") }}</a> > {{ gettext("Account prd") }}
+        {{ gettext("Account prd") }}
     </h1>
     <div class="box has-background-info-light has-text-info-dark">
         <div class="icon"><i class="fas fa-info-circle"></i></div>

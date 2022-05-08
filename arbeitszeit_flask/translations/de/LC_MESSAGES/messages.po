@@ -69,7 +69,7 @@ msgstr "Pläne"
 
 #: arbeitszeit_flask/templates/base_company.html:28
 msgid "New plan"
-msgstr "Neue Pläne"
+msgstr "Neuer Plan"
 
 #: arbeitszeit_flask/templates/base_company.html:31
 msgid "My plans"
