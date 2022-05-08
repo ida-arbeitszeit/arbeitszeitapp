@@ -13,7 +13,6 @@
                     <p>{{ current_user.id }}</p>
                     <p class="has-text-weight-semibold">{{ gettext("Your email") }}:</p>
                     <p>{{ current_user.email }}</p>
-
                     <div class="content">
                         {% if having_workers is sameas false %}
                         <div class="block pt-3">
@@ -30,28 +29,27 @@
             <div class="column"></div>
         </div>
         <div class="has-text-centered py-5">
-            <h1 class="title is-3">Aktionen</h1>
+            <h1 class="title is-3">{{ gettext("Actions") }}</h1>
         </div>
         <div class="tile is-ancestor">
             <a class="tile is-parent" href="{{ url_for('main_company.create_draft') }}">
                 <div class="tile is-child box has-background-danger-light">
-                    <h1 class="title is-5"><span class="icon"><i class="fa-solid fa-file-circle-plus"></i></span> Neuen
-                        Plan
-                        erstellen</h1>
+                    <h1 class="title is-5"><span class="icon"><i class="fa-solid fa-file-circle-plus"></i></span> {{
+                        gettext("Create new plan") }}</h1>
                     <div class="subtitle"></div>
                 </div>
             </a>
             <a class="tile is-parent" href="{{ url_for('main_company.transfer_to_company') }}">
                 <div class="tile is-child box has-background-danger-light">
                     <h1 class="title is-5"><span class="icon"><i class="fa-regular fa-credit-card"></i></span>
-                        Produktionsmittel bezahlen</h1>
+                        {{ gettext("Pay production means") }}</h1>
                     <div class="subtitle"></div>
                 </div>
             </a>
             <a class="tile is-parent" href="{{ url_for('main_company.transfer_to_worker') }}">
                 <div class="tile is-child box has-background-danger-light">
                     <h1 class="title is-5"><span class="icon"><i class="fa-regular fa-credit-card"></i></span>
-                        Arbeiter*innen bezahlen</h1>
+                        {{ gettext("Pay workers") }}</h1>
                     <div class="subtitle"></div>
                 </div>
             </a>
@@ -59,70 +57,74 @@
         <div class="tile is-ancestor">
             <a class="tile is-parent" href="{{ url_for('main_company.create_cooperation') }}">
                 <div class="tile is-child box has-background-danger-light">
-                    <h1 class="title is-5"><span class="icon"><i class="fas fa-hands-helping"></i></span> Neue
-                        Kooperation
-                        erstellen</h1>
+                    <h1 class="title is-5"><span class="icon"><i class="fas fa-hands-helping"></i></span> {{
+                        gettext("Create Cooperation") }}</h1>
                     <div class="subtitle"></div>
                 </div>
             </a>
             <a class="tile is-parent" href="{{ url_for('main_company.request_cooperation') }}">
                 <div class="tile is-child box has-background-danger-light">
-                    <h1 class="title is-5"><span class="icon"><i class="fas fa-hands-helping"></i></span> Kooperation
-                        beitreten</h1>
+                    <h1 class="title is-5"><span class="icon"><i class="fas fa-hands-helping"></i></span> {{
+                        gettext("Join cooperation") }}</h1>
                     <div class="subtitle"></div>
                 </div>
             </a>
             <a class="tile is-parent" href="{{ url_for('main_company.invite_worker_to_company') }}">
                 <div class="tile is-child box has-background-danger-light">
-                    <h1 class="title is-5"><span class="icon"><i class="fa-solid fa-users"></i></span> Arbeiter*innen
-                        einladen</h1>
+                    <h1 class="title is-5"><span class="icon"><i class="fa-solid fa-users"></i></span> {{
+                        gettext("Invite workers") }}</h1>
                     <div class="subtitle"></div>
                 </div>
             </a>
         </div>
         <div class="has-text-centered py-5">
-            <h1 class="title is-3">Betriebliche Buchhaltung</h1>
+            <h1 class="title is-3">{{ gettext("Company accounting") }}</h1>
         </div>
         <div class="tile is-ancestor">
             <a class="tile is-parent" href="{{ url_for('main_company.company_summary', company_id=current_user.id) }}">
                 <div class="tile is-child box has-background-primary-light">
-                    <h1 class="title is-5"><span class="icon"><i class="fas fa-industry"></i></span> Betrieb
+                    <h1 class="title is-5"><span class="icon"><i class="fas fa-industry"></i></span> {{
+                        gettext("Company") }}
                     </h1>
-                    <div class="subtitle is-6">Dein Betrieb "{{ current_user.name }}"</div>
+                    <div class="subtitle is-6">{{ gettext("Your company") }} "{{ current_user.name }}"</div>
                 </div>
             </a>
             <a class="tile is-parent" href="{{ url_for('main_company.my_plans') }}">
                 <div class="tile is-child box has-background-primary-light">
-                    <h1 class="title is-5"><span class="icon"><i class="fas fa-file"></i></span> Pläne</h1>
-                    <div class="subtitle is-6">Deine Pläne</div>
+                    <h1 class="title is-5"><span class="icon"><i class="fas fa-file"></i></span> {{ gettext("Plans") }}
+                    </h1>
+                    <div class="subtitle is-6">{{ gettext("Your plans") }}</div>
                 </div>
             </a>
             <a class="tile is-parent" href="{{ url_for('main_company.my_accounts') }}">
                 <div class="tile is-child box has-background-primary-light">
-                    <h1 class="title is-5"><span class="icon"><i class="fas fa-chart-line"></i></span> Konten</h1>
-                    <div class="subtitle is-6">Du hast vier Konten</div>
+                    <h1 class="title is-5"><span class="icon"><i class="fas fa-chart-line"></i></span> {{
+                        gettext("Accounts") }}</h1>
+                    <div class="subtitle is-6">{{ gettext("You have four accounts") }}</div>
                 </div>
             </a>
         </div>
         <div class="tile is-ancestor">
             <a class="tile is-parent" href="{{ url_for('main_company.my_drafts') }}">
                 <div class="tile is-child box has-background-primary-light">
-                    <h1 class="title is-5">Planentwürfe</h1>
-                    <div class="subtitle is-6">Deine gespeicherten Planentwürfe</div>
+                    <h1 class="title is-5">{{ gettext("Plan drafts") }}</h1>
+                    <div class="subtitle is-6">{{ gettext("Your saved plan drafts") }}</div>
                 </div>
             </a>
             <a class="tile is-parent" href="{{ url_for('main_company.my_cooperations') }}">
                 <div class="tile is-child box has-background-primary-light">
-                    <h1 class="title is-5"><span class="icon"><i class="fas fa-hands-helping"></i></span> Kooperationen
+                    <h1 class="title is-5"><span class="icon"><i class="fas fa-hands-helping"></i></span> {{
+                        gettext("Cooperations") }}
                     </h1>
-                    <div class="subtitle is-6">Kooperationen, die du koordinierst</div>
+                    <div class="subtitle is-6">{{("Cooperations you are coordinating")}}</div>
                 </div>
             </a>
             <a class="tile is-parent" href="{{ url_for('main_company.my_purchases') }}">
                 <div class="tile is-child box has-background-primary-light">
-                    <h1 class="title is-5"><span class="icon"><i class="fa-solid fa-basket-shopping"></i></span> Käufe
+                    <h1 class="title is-5"><span class="icon"><i class="fa-solid fa-basket-shopping"></i></span> {{
+                        gettext("Purchases") }}
                     </h1>
-                    <div class="subtitle is-6">Deine Käufe</div>
+                    <div class="subtitle is-6">{{ gettext("Your purchases") }}</div>
                 </div>
             </a>
         </div>
@@ -132,11 +134,11 @@
                     <h1
                         class="title is-5 {% if message_indicator is defined %}{% if message_indicator.show_unread_messages_indicator %}has-text-danger{% endif %}{% endif %}">
                         <span class="icon"><i class="fa-solid fa-envelope"></i></span>
-                        Nachrichten
+                        {{ gettext("Messages") }}
                     </h1>
                     <div class="subtitle is-6">{% if message_indicator is defined %}{% if
-                        message_indicator.show_unread_messages_indicator %}Du hast neue Nachrichten{% else %}Keine neuen
-                        Nachrichten{% endif %}{%
+                        message_indicator.show_unread_messages_indicator %}{{ gettext("You received a new message") }}{%
+                        else %}{{ gettext("No new messages") }}{% endif %}{%
                         endif %}
                     </div>
                 </div>
@@ -145,25 +147,28 @@
             <div class="tile is-parent"></div>
         </div>
         <div class="has-text-centered py-5">
-            <h1 class="title is-3">Gesellschaftliche Buchhaltung</h1>
+            <h1 class="title is-3">{{ gettext("Social accounting") }}</h1>
         </div>
         <div class="tile is-ancestor">
             <a class="tile is-parent" href="{{ url_for('main_company.statistics') }}">
                 <div class="tile is-child box has-background-warning-light">
-                    <h1 class="title is-5"><span class="icon"><i class="fa-solid fa-chart-pie"></i></span> Statistiken
+                    <h1 class="title is-5"><span class="icon"><i class="fa-solid fa-chart-pie"></i></span> {{
+                        gettext("Statistics") }}
                     </h1>
                     <div class="subtitle"></div>
                 </div>
             </a>
             <a class="tile is-parent" href="{{ url_for('main_company.query_companies') }}">
                 <div class="tile is-child box has-background-warning-light">
-                    <h1 class="title is-5"><span class="icon"><i class="fas fa-industry"></i></span> Alle Betriebe</h1>
+                    <h1 class="title is-5"><span class="icon"><i class="fas fa-industry"></i></span> {{ gettext("All
+                        companies") }}</h1>
                     <div class="subtitle"></div>
                 </div>
             </a>
             <a class="tile is-parent" href="{{ url_for('main_company.query_plans') }}">
                 <div class="tile is-child box has-background-warning-light">
-                    <h1 class="title is-5"><span class="icon"><i class="fas fa-file"></i></span> Alle Pläne</h1>
+                    <h1 class="title is-5"><span class="icon"><i class="fas fa-file"></i></span> {{ gettext("All plans")
+                        }}</h1>
                     <div class="subtitle"></div>
                 </div>
             </a>
@@ -171,8 +176,8 @@
         <div class="tile is-ancestor">
             <a class="tile is-parent" href="{{ url_for('main_company.list_all_cooperations') }}">
                 <div class="tile is-child box has-background-warning-light">
-                    <h1 class="title is-5"><span class="icon"><i class="fas fa-hands-helping"></i></span> Alle
-                        Kooperationen
+                    <h1 class="title is-5"><span class="icon"><i class="fas fa-hands-helping"></i></span> {{
+                        gettext("All cooperations") }}
                     </h1>
                     <div class="subtitle"></div>
                 </div>
