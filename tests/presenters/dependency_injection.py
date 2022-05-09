@@ -3,6 +3,7 @@ from injector import Injector, Module, provider, singleton
 from arbeitszeit_web.answer_company_work_invite import AnswerCompanyWorkInvitePresenter
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
+from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
 from arbeitszeit_web.get_plan_summary_company import (
@@ -42,7 +43,9 @@ from arbeitszeit_web.presenters.show_prd_account_details_presenter import (
 from arbeitszeit_web.query_companies import QueryCompaniesPresenter
 from arbeitszeit_web.query_plans import QueryPlansPresenter
 from arbeitszeit_web.read_message import ReadMessagePresenter
+from arbeitszeit_web.request_cooperation import RequestCooperationPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
+from arbeitszeit_web.show_p_account_details import ShowPAccountDetailsPresenter
 from arbeitszeit_web.show_r_account_details import ShowRAccountDetailsPresenter
 from arbeitszeit_web.url_index import ListMessagesUrlIndex
 from arbeitszeit_web.user_action import UserActionResolverImpl
@@ -158,6 +161,14 @@ class PresenterTestsInjector(Module):
             notifier=notifier,
             plan_summary_index=plan_summary_index,
             coop_summary_index=coop_summary_index,
+        )
+
+    @provider
+    def provide_request_cooperation_presenter(
+        self, translator: FakeTranslator
+    ) -> RequestCooperationPresenter:
+        return RequestCooperationPresenter(
+            translator=translator,
         )
 
     @provider
@@ -283,11 +294,15 @@ class PresenterTestsInjector(Module):
 
     @provider
     def provide_query_companies_presenter(
-        self, notifier: Notifier, company_url_index: CompanySummaryUrlIndex
+        self,
+        notifier: Notifier,
+        company_url_index: CompanySummaryUrlIndex,
+        translator: FakeTranslator,
     ) -> QueryCompaniesPresenter:
         return QueryCompaniesPresenter(
             user_notifier=notifier,
             company_url_index=company_url_index,
+            translator=translator,
         )
 
     @provider
@@ -369,6 +384,14 @@ class PresenterTestsInjector(Module):
         )
 
     @provider
+    def provide_show_p_account_details_presenter(
+        self, translator: FakeTranslator
+    ) -> ShowPAccountDetailsPresenter:
+        return ShowPAccountDetailsPresenter(
+            translator=translator,
+        )
+
+    @provider
     def provide_user_action_resolver_impl(
         self,
         invite_url_index: InviteUrlIndexImpl,
@@ -431,6 +454,14 @@ class PresenterTestsInjector(Module):
             translator=translator,
             email_configuration=email_configuration,
             invitation_url_index=invitation_url_index,
+        )
+
+    @provider
+    def provide_get_company_transactions_presenter(
+        self, translator: FakeTranslator
+    ) -> GetCompanyTransactionsPresenter:
+        return GetCompanyTransactionsPresenter(
+            translator=translator,
         )
 
 

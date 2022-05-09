@@ -120,6 +120,7 @@ from arbeitszeit_web.controllers.show_my_accounts_controller import (
 )
 from arbeitszeit_web.email import EmailConfiguration, UserAddressBook
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
+from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
 from arbeitszeit_web.get_plan_summary_company import (
@@ -166,10 +167,14 @@ from arbeitszeit_web.presenters.show_prd_account_details_presenter import (
 from arbeitszeit_web.query_companies import QueryCompaniesPresenter
 from arbeitszeit_web.query_plans import QueryPlansPresenter
 from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
-from arbeitszeit_web.request_cooperation import RequestCooperationController
+from arbeitszeit_web.request_cooperation import (
+    RequestCooperationController,
+    RequestCooperationPresenter,
+)
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
+from arbeitszeit_web.show_p_account_details import ShowPAccountDetailsPresenter
 from arbeitszeit_web.show_r_account_details import ShowRAccountDetailsPresenter
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import (
@@ -347,6 +352,12 @@ class CompanyModule(Module):
         return EndCooperationController(session, request)
 
     @provider
+    def provide_request_cooperation_presenter(
+        self, translator: Translator
+    ) -> RequestCooperationPresenter:
+        return RequestCooperationPresenter(translator)
+
+    @provider
     def provide_send_work_certificates_to_worker_controller(
         self, session: FlaskSession, request: FlaskRequest
     ) -> SendWorkCertificatesToWorkerController:
@@ -430,6 +441,12 @@ class CompanyModule(Module):
         return ShowRAccountDetailsPresenter(trans=translator)
 
     @provider
+    def provide_show_p_account_details_presenter(
+        self, translator: Translator
+    ) -> ShowPAccountDetailsPresenter:
+        return ShowPAccountDetailsPresenter(translator=translator)
+
+    @provider
     def provide_prefilled_draft_data_controller(
         self, session: Session
     ) -> PrefilledDraftDataController:
@@ -463,6 +480,12 @@ class CompanyModule(Module):
             template_renderer,
             http_404_view,
         )
+
+    @provider
+    def provide_get_company_transactions_presenter(
+        self, translator: Translator
+    ) -> GetCompanyTransactionsPresenter:
+        return GetCompanyTransactionsPresenter(translator=translator)
 
 
 class FlaskModule(Module):
@@ -666,10 +689,15 @@ class FlaskModule(Module):
 
     @provider
     def provide_query_companies_presenter(
-        self, notifier: Notifier, company_url_index: CompanySummaryUrlIndex
+        self,
+        notifier: Notifier,
+        company_url_index: CompanySummaryUrlIndex,
+        translator: Translator,
     ) -> QueryCompaniesPresenter:
         return QueryCompaniesPresenter(
-            user_notifier=notifier, company_url_index=company_url_index
+            user_notifier=notifier,
+            company_url_index=company_url_index,
+            translator=translator,
         )
 
     @provider
@@ -686,9 +714,9 @@ class FlaskModule(Module):
 
     @provider
     def provide_show_my_cooperations_presenter(
-        self, coop_index: CoopSummaryUrlIndex
+        self, coop_index: CoopSummaryUrlIndex, translator: Translator
     ) -> ShowMyCooperationsPresenter:
-        return ShowMyCooperationsPresenter(coop_index)
+        return ShowMyCooperationsPresenter(coop_index, translator=translator)
 
     @provider
     def provide_show_my_plans_presenter(
@@ -811,9 +839,9 @@ class FlaskModule(Module):
 
     @provider
     def provide_request_cooperation_controller(
-        self, session: Session
+        self, session: Session, translator: Translator
     ) -> RequestCooperationController:
-        return RequestCooperationController(session)
+        return RequestCooperationController(session, translator)
 
     @provider
     def provide_read_message_controller(

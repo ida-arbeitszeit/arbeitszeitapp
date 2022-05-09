@@ -1,14 +1,14 @@
 {% extends "base_company.html" %}
 
 {% block navbar_start %}
-<div class="navbar-item">Meine Kooperationen</div>
+<div class="navbar-item">{{ gettext("My cooperations") }}</div>
 {% endblock %}
 
 {% block company %}
 <div class="section has-text-centered">
     <div class="content">
         <h1 class="title">
-            Kooperationen, die ich kooordiniere
+            {{ gettext("Cooperations that I coordinate") }}
         </h1>
     </div>
     {% if accept_message or deny_message or cancel_message %}
@@ -33,10 +33,10 @@
         <table class="table is-fullwidth">
             <thead>
                 <tr>
-                    <th>Kooperation</th>
-                    <th>Name</th>
-                    <th>Definition</th>
-                    <th>Anzahl Pläne</th>
+                    <th>{{ gettext("Cooperation") }}</th>
+                    <th>{{ gettext("Name") }}</th>
+                    <th>{{ gettext("Definition") }}</th>
+                    <th>{{ gettext("Number of plans") }} </th>
                 </tr>
             </thead>
             <tbody>
@@ -51,12 +51,12 @@
             </tbody>
         </table>
         {% else %}
-        <p>(Du koordinierst keine Kooperationen.)</p>
+        <p>{{ gettext("You do not coordinate any cooperation") }}</p>
         {% endif %}
     </div>
     <div class="content">
         <h1 class="title">
-            Eingehende Kooperationsanfragen (von anderen)
+            {{ gettext("Incoming cooperation request (by others)") }}
         </h1>
     </div>
     <div class="table-container">
@@ -64,11 +64,11 @@
         <table class="table is-fullwidth">
             <thead>
                 <tr>
-                    <th>Meine Kooperation</th>
-                    <th>Anfragender Betrieb</th>
-                    <th>Anfragender Plan</th>
-                    <th>Anfrage akzeptieren</th>
-                    <th>Ablehnen</th>
+                    <th>{{ gettext("My cooperation") }}</th>
+                    <th>{{ gettext("Requesting company") }}</th>
+                    <th>{{ gettext("Requesting plan") }}</th>
+                    <th>{{ gettext("Accept request") }}</th>
+                    <th>{{ gettext("Decline") }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -86,7 +86,7 @@
                                     <span class="icon">
                                         <i class="fas fa-check"></i>
                                     </span>
-                                    <span>Akzeptieren</span>
+                                    <span>{{ gettext("Accept") }}</span>
                                 </button>
                             </div>
                         </td>
@@ -97,7 +97,7 @@
                                     <span class="icon">
                                         <i class="fas fa-times"></i>
                                     </span>
-                                    <span>Ablehnen</span>
+                                    <span>{{ gettext("Decline") }}</span>
                                 </button>
                             </div>
                         </td>
@@ -107,13 +107,13 @@
             </tbody>
         </table>
         {% else %}
-        <p>(Du hast keine offenen Anfragen.)</p>
+        <p>{{ gettext("You don't have open requests") }}</p>
         {% endif %}
     </div>
 
     <div class="content">
         <h1 class="title">
-            Ausgehende Kooperationsanfragen (eigene)
+            {{ gettext("Outgoing cooperation requests (own requests)") }}
         </h1>
     </div>
 
@@ -122,9 +122,9 @@
         <table class="table is-fullwidth">
             <thead>
                 <tr>
-                    <th>Mein anfragender Plan</th>
-                    <th>Angefragte Kooperation</th>
-                    <th>Anfrage abbrechen</th>
+                    <th>{{ gettext("My requesting plan")}}</th>
+                    <th>{{ gettext("Requested cooperation") }}</th>
+                    <th>{{ gettext("Cancel request") }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -141,7 +141,7 @@
                                     <span class="icon">
                                         <i class="fas fa-times"></i>
                                     </span>
-                                    <span>Abbrechen</span>
+                                    <span>{{ gettext("Cancel")}}</span>
                                 </button>
                             </div>
                         </td>
@@ -151,7 +151,7 @@
             </tbody>
         </table>
         {% else %}
-        <p>(Du hast keine Kooperationsanfragen gestellt.)</p>
+        <p>{{ gettext("You haven't requested any cooperation")}}</p>
         {% endif %}
     </div>
 </div>

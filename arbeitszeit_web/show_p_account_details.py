@@ -8,6 +8,7 @@ from arbeitszeit.use_cases.show_p_account_details import (
     ShowPAccountDetailsResponse,
     TransactionInfo,
 )
+from arbeitszeit_web.translator import Translator
 
 
 @dataclass
@@ -24,7 +25,10 @@ class ShowPAccountDetailsResponseViewModel:
     account_balance: Decimal
 
 
+@dataclass
 class ShowPAccountDetailsPresenter:
+    translator: Translator
+
     def present(
         self, use_case_response: ShowPAccountDetailsResponse
     ) -> ShowPAccountDetailsResponseViewModel:
@@ -38,9 +42,9 @@ class ShowPAccountDetailsPresenter:
 
     def _create_info(self, transaction: TransactionInfo) -> ViewModelTransactionInfo:
         transaction_type = (
-            "Payment"
+            self.translator.gettext("Payment")
             if transaction.transaction_type == TransactionTypes.payment_of_fixed_means
-            else "Credit"
+            else self.translator.gettext("Credit")
         )
         return ViewModelTransactionInfo(
             transaction_type,

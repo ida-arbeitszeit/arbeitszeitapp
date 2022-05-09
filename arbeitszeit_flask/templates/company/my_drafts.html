@@ -1,19 +1,19 @@
 {% extends "base_company.html" %}
 
 {% block navbar_start %}
-<div class="navbar-item">Plan-Entwürfe</div>
+<div class="navbar-item">{{ gettext("Plan drafts") }}</div>
 {% endblock %}
 
 {% block company %}
 <div class="section has-text-centered">
     <div class="content">
         <h1 class="title">
-            Plan-Entwürfe
+            {{ gettext("Plan drafts") }}
         </h1>
         <div class="box has-background-info-light has-text-info-dark has-text-centered">
             <div class="icon"><i class="fas fa-info-circle"></i></div>
             <p>
-                Du kannst deine Entwürfe weiter bearbeiten und einreichen oder löschen.<br>
+                {{ gettext("You can further edit your drafts, file or delete them.")}}<br>
             </p>
         </div>
     </div>
@@ -23,11 +23,11 @@
         <table class="table is-fullwidth">
             <thead>
                 <tr>
-                    <th>Datum</th>
-                    <th>Name</th>
-                    <th>Beschreibung</th>
-                    <th>Bearbeiten</th>
-                    <th>Löschen</th>
+                    <th>{{ gettext("Date") }}</th>
+                    <th>{{ gettext("Name") }}</th>
+                    <th>{{ gettext("Description") }}</th>
+                    <th>{{ gettext("Edit") }}</th>
+                    <th>{{ gettext("Delete") }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -46,7 +46,7 @@
             </tbody>
         </table>
         {% else %}
-        <div>Du hast keine Entwürfe.</div>
+        <div>{{ gettext("You don't have any drafts") }}</div>
         {% endif %}
     </div>
 </div>

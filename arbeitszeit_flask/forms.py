@@ -121,7 +121,10 @@ class PayConsumerProductForm(Form):
 
 
 class CompanySearchForm(Form):
-    choices = [("Name", "Name"), ("Email", "Email")]
+    choices = [
+        ("Name", trans.lazy_gettext("Name")),
+        ("Email", trans.lazy_gettext("Email")),
+    ]
     select = SelectField(
         "Nach Betrieb suchen", choices=choices, validators=[validators.DataRequired()]
     )

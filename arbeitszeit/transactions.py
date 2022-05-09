@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from decimal import Decimal
-from enum import Enum
+from enum import Enum, auto
 from typing import List, Union
 
 from injector import inject
@@ -14,18 +14,18 @@ class TransactionTypes(Enum):
     'Subjective' transaction types, i.e. seen from a concrete user perspective.
     """
 
-    credit_for_wages = "Credit for wages"
-    payment_of_wages = "Payment of wages"
-    incoming_wages = "Incoming wages"
-    credit_for_fixed_means = "Credit for fixed means of production"
-    payment_of_fixed_means = "Payment of fixed means of production"
-    credit_for_liquid_means = "Credit for liquid means of production"
-    payment_of_liquid_means = "Payment of liquid means of production"
-    expected_sales = "Debit expected sales"
-    sale_of_consumer_product = "Sale of consumer product"
-    payment_of_consumer_product = "Payment of consumer product"
-    sale_of_fixed_means = "Sale of fixed means of production"
-    sale_of_liquid_means = "Sale of liquid means of production"
+    credit_for_wages = auto()
+    payment_of_wages = auto()
+    incoming_wages = auto()
+    credit_for_fixed_means = auto()
+    payment_of_fixed_means = auto()
+    credit_for_liquid_means = auto()
+    payment_of_liquid_means = auto()
+    expected_sales = auto()
+    sale_of_consumer_product = auto()
+    payment_of_consumer_product = auto()
+    sale_of_fixed_means = auto()
+    sale_of_liquid_means = auto()
 
 
 @inject

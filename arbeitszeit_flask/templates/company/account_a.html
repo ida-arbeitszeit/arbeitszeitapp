@@ -9,14 +9,14 @@
 
 <div class="section is-medium has-text-centered">
     <h1 class="title">
-        Account a
+        {{ gettext("Account a") }}
     </h1>
     <div class="box has-background-info-light has-text-info-dark">
         <div class="icon"><i class="fas fa-info-circle"></i></div>
-        <p>Your account for work certificates.</p>
+        <p>{{ gettext("Your account for work certificates") }}</p>
     </div>
 
-    <p>Balance:</p>
+    <p>{{ gettext("Balance:") }}</p>
     <p
         class="py-2 has-text-weight-bold {{ 'has-text-primary' if view_model.account_balance|float >= 0 else 'has-text-danger' }}">
         {{ view_model.account_balance }}
@@ -27,8 +27,8 @@
             <thead>
                 <tr>
                     <th></th>
-                    <th>Type</th>
-                    <th>Details</th>
+                    <th>{{ gettext("Type") }}</th>
+                    <th>{{ gettext("Details") }}</th>
                     <th></th>
                 </tr>
             </thead>
