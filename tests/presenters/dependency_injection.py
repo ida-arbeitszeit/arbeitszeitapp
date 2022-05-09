@@ -409,10 +409,12 @@ class PresenterTestsInjector(Module):
         self,
         invite_url_index: InviteUrlIndexImpl,
         coop_url_index: CoopSummaryUrlIndexTestImpl,
+        translator: FakeTranslator,
     ) -> UserActionResolverImpl:
         return UserActionResolverImpl(
             invite_url_index=invite_url_index,
             coop_url_index=coop_url_index,
+            translator=translator,
         )
 
     @provider
