@@ -6,6 +6,7 @@ from arbeitszeit.use_cases import RequestCooperationRequest
 from arbeitszeit_web.malformed_input_data import MalformedInputData
 from arbeitszeit_web.request_cooperation import RequestCooperationController
 from tests.session import FakeSession
+from tests.translator import FakeTranslator
 
 
 @dataclass
@@ -28,7 +29,10 @@ fake_form = FakeRequestCooperationForm(
 class RequestCooperationControllerTests(TestCase):
     def setUp(self) -> None:
         self.session = FakeSession()
-        self.controller = RequestCooperationController(session=self.session)
+        self.translator = FakeTranslator()
+        self.controller = RequestCooperationController(
+            session=self.session, translator=self.translator
+        )
 
     def test_when_user_is_not_authenticated_then_we_cannot_get_a_use_case_request(
         self,
@@ -55,7 +59,9 @@ class RequestCooperationControllerTests(TestCase):
         assert use_case_request is not None
         assert isinstance(use_case_request, MalformedInputData)
         self.assertEqual(use_case_request.field, "plan_id")
-        self.assertEqual(use_case_request.message, "Plan-ID ist ungültig.")
+        self.assertEqual(
+            use_case_request.message, self.translator.gettext("Invalid plan ID.")
+        )
 
     def test_returns_malformed_data_instance_if_coop_id_cannot_be_converted_to_uuid(
         self,
@@ -66,7 +72,10 @@ class RequestCooperationControllerTests(TestCase):
         assert use_case_request is not None
         assert isinstance(use_case_request, MalformedInputData)
         self.assertEqual(use_case_request.field, "cooperation_id")
-        self.assertEqual(use_case_request.message, "Kooperations-ID ist ungültig.")
+        self.assertEqual(
+            use_case_request.message,
+            self.translator.gettext("Invalid cooperation ID."),
+        )
 
     def test_controller_can_convert_plan_and_cooperation_id_into_correct_uuid(self):
         self.session.set_current_user_id(uuid4())

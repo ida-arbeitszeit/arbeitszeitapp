@@ -42,6 +42,7 @@ from arbeitszeit_web.presenters.show_prd_account_details_presenter import (
 from arbeitszeit_web.query_companies import QueryCompaniesPresenter
 from arbeitszeit_web.query_plans import QueryPlansPresenter
 from arbeitszeit_web.read_message import ReadMessagePresenter
+from arbeitszeit_web.request_cooperation import RequestCooperationPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from arbeitszeit_web.show_p_account_details import ShowPAccountDetailsPresenter
 from arbeitszeit_web.show_r_account_details import ShowRAccountDetailsPresenter
@@ -159,6 +160,14 @@ class PresenterTestsInjector(Module):
             notifier=notifier,
             plan_summary_index=plan_summary_index,
             coop_summary_index=coop_summary_index,
+        )
+
+    @provider
+    def provide_request_cooperation_presenter(
+        self, translator: FakeTranslator
+    ) -> RequestCooperationPresenter:
+        return RequestCooperationPresenter(
+            translator=translator,
         )
 
     @provider

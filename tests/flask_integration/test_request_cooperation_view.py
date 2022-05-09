@@ -81,7 +81,7 @@ class LoggedInCompanyTests(ViewTestCase):
             self.url, data=dict(plan_id=str(uuid4()), cooperation_id="no uuid")
         )
         self.assertEqual(response.status_code, 400)
-        self.assertIn("Kooperations-ID ist ungültig", response.get_data(as_text=True))
+        self.assertIn("Invalid cooperation ID.", response.get_data(as_text=True))
 
     def test_error_message_shows_up_when_posting_malformed_plan_id_data(
         self,
@@ -90,7 +90,7 @@ class LoggedInCompanyTests(ViewTestCase):
             self.url, data=dict(plan_id="no uuid", cooperation_id=str(uuid4()))
         )
         self.assertEqual(response.status_code, 400)
-        self.assertIn("Plan-ID ist ungültig", response.get_data(as_text=True))
+        self.assertIn("Invalid plan ID.", response.get_data(as_text=True))
 
     def test_posting_valid_data_results_in_200(
         self,

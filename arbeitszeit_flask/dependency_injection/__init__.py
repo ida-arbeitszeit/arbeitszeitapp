@@ -166,7 +166,10 @@ from arbeitszeit_web.presenters.show_prd_account_details_presenter import (
 from arbeitszeit_web.query_companies import QueryCompaniesPresenter
 from arbeitszeit_web.query_plans import QueryPlansPresenter
 from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
-from arbeitszeit_web.request_cooperation import RequestCooperationController
+from arbeitszeit_web.request_cooperation import (
+    RequestCooperationController,
+    RequestCooperationPresenter,
+)
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
@@ -346,6 +349,12 @@ class CompanyModule(Module):
         self, session: FlaskSession, request: FlaskRequest
     ) -> EndCooperationController:
         return EndCooperationController(session, request)
+
+    @provider
+    def provide_request_cooperation_presenter(
+        self, translator: Translator
+    ) -> RequestCooperationPresenter:
+        return RequestCooperationPresenter(translator)
 
     @provider
     def provide_send_work_certificates_to_worker_controller(
@@ -823,9 +832,9 @@ class FlaskModule(Module):
 
     @provider
     def provide_request_cooperation_controller(
-        self, session: Session
+        self, session: Session, translator: Translator
     ) -> RequestCooperationController:
-        return RequestCooperationController(session)
+        return RequestCooperationController(session, translator)
 
     @provider
     def provide_read_message_controller(
