@@ -34,6 +34,9 @@ from arbeitszeit_web.presenters.registration_email_presenter import (
 from arbeitszeit_web.presenters.send_work_certificates_to_worker_presenter import (
     SendWorkCertificatesToWorkerPresenter,
 )
+from arbeitszeit_web.presenters.show_a_account_details_presenter import (
+    ShowAAccountDetailsPresenter,
+)
 from arbeitszeit_web.presenters.show_company_work_invite_details_presenter import (
     ShowCompanyWorkInviteDetailsPresenter,
 )
@@ -390,6 +393,14 @@ class PresenterTestsInjector(Module):
         self, translator: FakeTranslator
     ) -> ShowPAccountDetailsPresenter:
         return ShowPAccountDetailsPresenter(
+            translator=translator,
+        )
+
+    @provider
+    def provide_show_a_account_details_presenter(
+        self, translator: FakeTranslator
+    ) -> ShowAAccountDetailsPresenter:
+        return ShowAAccountDetailsPresenter(
             translator=translator,
         )
 

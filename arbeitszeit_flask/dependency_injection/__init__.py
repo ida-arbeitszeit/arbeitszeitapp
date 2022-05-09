@@ -158,6 +158,9 @@ from arbeitszeit_web.presenters.send_confirmation_email_presenter import (
 from arbeitszeit_web.presenters.send_work_certificates_to_worker_presenter import (
     SendWorkCertificatesToWorkerPresenter,
 )
+from arbeitszeit_web.presenters.show_a_account_details_presenter import (
+    ShowAAccountDetailsPresenter,
+)
 from arbeitszeit_web.presenters.show_company_work_invite_details_presenter import (
     ShowCompanyWorkInviteDetailsPresenter,
 )
@@ -440,6 +443,12 @@ class CompanyModule(Module):
         self, translator: Translator
     ) -> ShowRAccountDetailsPresenter:
         return ShowRAccountDetailsPresenter(trans=translator)
+
+    @provider
+    def provide_show_a_account_details_presenter(
+        self, translator: Translator
+    ) -> ShowAAccountDetailsPresenter:
+        return ShowAAccountDetailsPresenter(translator=translator)
 
     @provider
     def provide_show_p_account_details_presenter(

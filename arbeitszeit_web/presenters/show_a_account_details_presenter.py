@@ -7,6 +7,7 @@ from arbeitszeit.use_cases.show_a_account_details import (
     ShowAAccountDetailsResponse,
     TransactionInfo,
 )
+from arbeitszeit_web.translator import Translator
 
 
 @dataclass
@@ -23,7 +24,10 @@ class ShowAAccountDetailsResponseViewModel:
     account_balance: str
 
 
+@dataclass
 class ShowAAccountDetailsPresenter:
+    translator: Translator
+
     def present(
         self, use_case_response: ShowAAccountDetailsResponse
     ) -> ShowAAccountDetailsResponseViewModel:
@@ -42,9 +46,9 @@ class ShowAAccountDetailsPresenter:
             TransactionTypes.credit_for_wages,
         ]
         transaction_type = (
-            "Payment"
+            self.translator.gettext("Payment")
             if transaction.transaction_type == TransactionTypes.payment_of_wages
-            else "Credit"
+            else self.translator.gettext("Credit")
         )
         return ViewModelTransactionInfo(
             transaction_type,

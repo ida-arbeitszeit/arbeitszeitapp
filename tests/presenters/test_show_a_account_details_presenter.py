@@ -10,7 +10,9 @@ from arbeitszeit.use_cases.show_a_account_details import (
 from arbeitszeit_web.presenters.show_a_account_details_presenter import (
     ShowAAccountDetailsPresenter,
 )
-from tests.use_cases.dependency_injection import get_dependency_injector
+from tests.translator import FakeTranslator
+
+from .dependency_injection import get_dependency_injector
 
 DEFAULT_INFO1 = TransactionInfo(
     transaction_type=TransactionTypes.credit_for_wages,
@@ -30,6 +32,7 @@ DEFAULT_INFO2 = TransactionInfo(
 class CompanyTransactionsPresenterTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
+        self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(ShowAAccountDetailsPresenter)
 
     def test_return_empty_list_when_no_transactions_took_place(self):
@@ -47,7 +50,7 @@ class CompanyTransactionsPresenterTests(TestCase):
         self.assertTrue(len(view_model.transactions), 1)
         self.assertEqual(view_model.account_balance, "100.01")
         trans = view_model.transactions[0]
-        self.assertEqual(trans.transaction_type, "Credit")
+        self.assertEqual(trans.transaction_type, self.translator.gettext("Credit"))
         self.assertIsInstance(trans.date, datetime)
         self.assertEqual(trans.transaction_volume, "10.01")
         self.assertIsInstance(trans.purpose, str)
