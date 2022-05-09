@@ -43,6 +43,7 @@ from arbeitszeit_web.query_companies import QueryCompaniesPresenter
 from arbeitszeit_web.query_plans import QueryPlansPresenter
 from arbeitszeit_web.read_message import ReadMessagePresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
+from arbeitszeit_web.show_p_account_details import ShowPAccountDetailsPresenter
 from arbeitszeit_web.show_r_account_details import ShowRAccountDetailsPresenter
 from arbeitszeit_web.url_index import ListMessagesUrlIndex
 from arbeitszeit_web.user_action import UserActionResolverImpl
@@ -370,6 +371,14 @@ class PresenterTestsInjector(Module):
     ) -> ShowRAccountDetailsPresenter:
         return ShowRAccountDetailsPresenter(
             trans=translator,
+        )
+
+    @provider
+    def provide_show_p_account_details_presenter(
+        self, translator: FakeTranslator
+    ) -> ShowPAccountDetailsPresenter:
+        return ShowPAccountDetailsPresenter(
+            translator=translator,
         )
 
     @provider
