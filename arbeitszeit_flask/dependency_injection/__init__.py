@@ -120,6 +120,7 @@ from arbeitszeit_web.controllers.show_my_accounts_controller import (
 )
 from arbeitszeit_web.email import EmailConfiguration, UserAddressBook
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
+from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
 from arbeitszeit_web.get_plan_summary_company import (
@@ -479,6 +480,12 @@ class CompanyModule(Module):
             template_renderer,
             http_404_view,
         )
+
+    @provider
+    def provide_get_company_transactions_presenter(
+        self, translator: Translator
+    ) -> GetCompanyTransactionsPresenter:
+        return GetCompanyTransactionsPresenter(translator=translator)
 
 
 class FlaskModule(Module):

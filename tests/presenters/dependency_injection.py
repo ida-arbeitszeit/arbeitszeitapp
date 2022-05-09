@@ -3,6 +3,7 @@ from injector import Injector, Module, provider, singleton
 from arbeitszeit_web.answer_company_work_invite import AnswerCompanyWorkInvitePresenter
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
+from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
 from arbeitszeit_web.get_plan_summary_company import (
@@ -453,6 +454,14 @@ class PresenterTestsInjector(Module):
             translator=translator,
             email_configuration=email_configuration,
             invitation_url_index=invitation_url_index,
+        )
+
+    @provider
+    def provide_get_company_transactions_presenter(
+        self, translator: FakeTranslator
+    ) -> GetCompanyTransactionsPresenter:
+        return GetCompanyTransactionsPresenter(
+            translator=translator,
         )
 
 
