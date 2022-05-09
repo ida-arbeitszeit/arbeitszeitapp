@@ -639,10 +639,15 @@ class FlaskModule(Module):
 
     @provider
     def provide_send_confirmation_email_presenter(
-        self, url_index: ConfirmationUrlIndex, email_configuration: EmailConfiguration
+        self,
+        url_index: ConfirmationUrlIndex,
+        email_configuration: EmailConfiguration,
+        translator: Translator,
     ) -> SendConfirmationEmailPresenter:
         return SendConfirmationEmailPresenter(
-            url_index=url_index, email_configuration=email_configuration
+            url_index=url_index,
+            email_configuration=email_configuration,
+            translator=translator,
         )
 
     @provider

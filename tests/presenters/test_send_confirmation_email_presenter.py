@@ -4,14 +4,18 @@ from arbeitszeit.token import ConfirmationEmail
 from arbeitszeit_web.presenters.send_confirmation_email_presenter import (
     SendConfirmationEmailPresenter,
 )
+from tests.translator import FakeTranslator
 
 
 class PresenterTests(TestCase):
     def setUp(self) -> None:
         self.url_index = ConfirmationUrlIndex()
         self.email_configuration = EmailConfiguration()
+        self.translator = FakeTranslator()
         self.presenter = SendConfirmationEmailPresenter(
-            url_index=self.url_index, email_configuration=self.email_configuration
+            url_index=self.url_index,
+            email_configuration=self.email_configuration,
+            translator=self.translator,
         )
 
     def test_that_confirmation_email_contains_confirmation_url(self) -> None:
@@ -30,7 +34,7 @@ class PresenterTests(TestCase):
         )
         self.assertEqual(
             view_model.subject,
-            "Bitte bestätige dein Konto",
+            self.translator.gettext("Please confirm your account"),
         )
 
     def test_that_email_address_is_in_recipients(self) -> None:
