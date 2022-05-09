@@ -213,7 +213,7 @@ class PresenterTestsInjector(Module):
         return PlanSummaryServiceImpl(
             coop_url_index=coop_url_index,
             company_url_index=company_url_index,
-            trans=translator,
+            translator=translator,
         )
 
     @provider
@@ -294,7 +294,7 @@ class PresenterTestsInjector(Module):
         return PlanSummaryServiceImpl(
             coop_url_index=coop_url_index,
             company_url_index=company_url_index,
-            trans=translator,
+            translator=translator,
         )
 
     @provider

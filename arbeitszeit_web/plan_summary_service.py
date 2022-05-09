@@ -35,41 +35,60 @@ class PlanSummaryService(Protocol):
 class PlanSummaryServiceImpl:
     coop_url_index: CoopSummaryUrlIndex
     company_url_index: CompanySummaryUrlIndex
-    trans: Translator
+    translator: Translator
 
     def get_plan_summary_member(self, plan_summary: BusinessPlanSummary) -> PlanSummary:
         return PlanSummary(
-            plan_id=("Plan-ID", str(plan_summary.plan_id)),
-            is_active=("Status", "Aktiv" if plan_summary.is_active else "Inaktiv"),
+            plan_id=(self.translator.gettext("Plan ID"), str(plan_summary.plan_id)),
+            is_active=(
+                self.translator.gettext("Status"),
+                self.translator.gettext("Active")
+                if plan_summary.is_active
+                else self.translator.gettext("Inactive"),
+            ),
             planner=(
-                self.trans.gettext("Planning company"),
+                self.translator.gettext("Planning company"),
                 str(plan_summary.planner_id),
                 self.company_url_index.get_company_summary_url(plan_summary.planner_id),
                 plan_summary.planner_name,
             ),
             product_name=(
-                self.trans.gettext("Name of product"),
+                self.translator.gettext("Name of product"),
                 plan_summary.product_name,
             ),
             description=(
-                self.trans.gettext("Description of product"),
+                self.translator.gettext("Description of product"),
                 plan_summary.description.splitlines(),
             ),
-            timeframe=("Planungszeitraum (Tage)", str(plan_summary.timeframe)),
-            production_unit=("Kleinste Abgabeeinheit", plan_summary.production_unit),
-            amount=("Menge", str(plan_summary.amount)),
-            means_cost=("Kosten für Produktionsmittel", str(plan_summary.means_cost)),
+            timeframe=(
+                self.translator.gettext("Planning timeframe (days)"),
+                str(plan_summary.timeframe),
+            ),
+            production_unit=(
+                self.translator.gettext("Smallest delivery unit"),
+                plan_summary.production_unit,
+            ),
+            amount=(self.translator.gettext("Amount"), str(plan_summary.amount)),
+            means_cost=(
+                self.translator.gettext("Costs for fixed means of production"),
+                str(plan_summary.means_cost),
+            ),
             resources_cost=(
-                "Kosten für Roh- und Hilfststoffe",
+                self.translator.gettext("Costs for liquid means of production"),
                 str(plan_summary.resources_cost),
             ),
-            labour_cost=("Arbeitsstunden", str(plan_summary.labour_cost)),
+            labour_cost=(
+                self.translator.gettext("Costs for work"),
+                str(plan_summary.labour_cost),
+            ),
             type_of_plan=(
-                "Art des Plans",
-                "Öffentlich" if plan_summary.is_public_service else "Produktiv",
+                self.translator.gettext("Type"),
+                self.translator.gettext("Public")
+                if plan_summary.is_public_service
+                else self.translator.gettext("Productive"),
             ),
             price_per_unit=(
-                "Preis (pro Einheit)",
+                self.translator.gettext("Price (per unit)"),
                 self._format_price(plan_summary.price_per_unit),
                 plan_summary.is_cooperating,
                 self.coop_url_index.get_coop_summary_url(plan_summary.cooperation)
@@ -77,8 +96,10 @@ class PlanSummaryServiceImpl:
                 else None,
             ),
             is_available=(
-                "Produkt aktuell verfügbar",
-                "Ja" if plan_summary.is_available else "Nein",
+                self.translator.gettext("Product currently available"),
+                self.translator.gettext("Yes")
+                if plan_summary.is_available
+                else self.translator.gettext("No"),
             ),
         )
 

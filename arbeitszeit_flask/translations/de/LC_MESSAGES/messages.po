@@ -129,7 +129,7 @@ msgstr "Meine Käufe"
 
 #: arbeitszeit_flask/templates/base_company.html:84
 msgid "Work"
-msgstr "Arbeiten"
+msgstr "Arbeit"
 
 #: arbeitszeit_flask/templates/base_company.html:88
 msgid "Statistics"

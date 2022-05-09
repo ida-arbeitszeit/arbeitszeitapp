@@ -42,12 +42,16 @@ class PlanSummaryServiceTests(TestCase):
     def test_plan_id_is_displayed_correctly_as_tuple_of_strings(self):
         plan_summary = self.service.get_plan_summary_member(BUSINESS_PLAN_SUMMARY)
         self.assertTupleEqual(
-            plan_summary.plan_id, ("Plan-ID", str(BUSINESS_PLAN_SUMMARY.plan_id))
+            plan_summary.plan_id,
+            (self.translator.gettext("Plan ID"), str(BUSINESS_PLAN_SUMMARY.plan_id)),
         )
 
     def test_active_status_is_displayed_correctly_as_tuple_of_strings(self):
         plan_summary = self.service.get_plan_summary_member(BUSINESS_PLAN_SUMMARY)
-        self.assertTupleEqual(plan_summary.is_active, ("Status", "Aktiv"))
+        self.assertTupleEqual(
+            plan_summary.is_active,
+            (self.translator.gettext("Status"), self.translator.gettext("Active")),
+        )
 
     def test_inactive_status_is_displayed_correctly_as_tuple_of_strings(self):
         response = replace(
@@ -55,7 +59,10 @@ class PlanSummaryServiceTests(TestCase):
             is_active=False,
         )
         plan_summary = self.service.get_plan_summary_member(response)
-        self.assertTupleEqual(plan_summary.is_active, ("Status", "Inaktiv"))
+        self.assertTupleEqual(
+            plan_summary.is_active,
+            (self.translator.gettext("Status"), self.translator.gettext("Inactive")),
+        )
 
     def test_planner_is_displayed_correctly_as_tuple_of_strings(self):
         expected_planner_id = uuid4()
@@ -116,28 +123,37 @@ class PlanSummaryServiceTests(TestCase):
         plan_summary = self.service.get_plan_summary_member(BUSINESS_PLAN_SUMMARY)
         self.assertTupleEqual(
             plan_summary.timeframe,
-            ("Planungszeitraum (Tage)", str(BUSINESS_PLAN_SUMMARY.timeframe)),
+            (
+                self.translator.gettext("Planning timeframe (days)"),
+                str(BUSINESS_PLAN_SUMMARY.timeframe),
+            ),
         )
 
     def test_production_unit_is_displayed_correctly_as_tuple_of_strings(self):
         plan_summary = self.service.get_plan_summary_member(BUSINESS_PLAN_SUMMARY)
         self.assertTupleEqual(
             plan_summary.production_unit,
-            ("Kleinste Abgabeeinheit", BUSINESS_PLAN_SUMMARY.production_unit),
+            (
+                self.translator.gettext("Smallest delivery unit"),
+                BUSINESS_PLAN_SUMMARY.production_unit,
+            ),
         )
 
     def test_amount_is_displayed_correctly_as_tuple_of_strings(self):
         plan_summary = self.service.get_plan_summary_member(BUSINESS_PLAN_SUMMARY)
         self.assertTupleEqual(
             plan_summary.amount,
-            ("Menge", str(BUSINESS_PLAN_SUMMARY.amount)),
+            (self.translator.gettext("Amount"), str(BUSINESS_PLAN_SUMMARY.amount)),
         )
 
     def test_means_cost_is_displayed_correctly_as_tuple_of_strings(self):
         plan_summary = self.service.get_plan_summary_member(BUSINESS_PLAN_SUMMARY)
         self.assertTupleEqual(
             plan_summary.means_cost,
-            ("Kosten für Produktionsmittel", str(BUSINESS_PLAN_SUMMARY.means_cost)),
+            (
+                self.translator.gettext("Costs for fixed means of production"),
+                str(BUSINESS_PLAN_SUMMARY.means_cost),
+            ),
         )
 
     def test_resources_cost_is_displayed_correctly_as_tuple_of_strings(self):
@@ -145,7 +161,7 @@ class PlanSummaryServiceTests(TestCase):
         self.assertTupleEqual(
             plan_summary.resources_cost,
             (
-                "Kosten für Roh- und Hilfststoffe",
+                self.translator.gettext("Costs for liquid means of production"),
                 str(BUSINESS_PLAN_SUMMARY.resources_cost),
             ),
         )
@@ -155,7 +171,7 @@ class PlanSummaryServiceTests(TestCase):
         self.assertTupleEqual(
             plan_summary.labour_cost,
             (
-                "Arbeitsstunden",
+                self.translator.gettext("Costs for work"),
                 str(BUSINESS_PLAN_SUMMARY.labour_cost),
             ),
         )
@@ -171,8 +187,8 @@ class PlanSummaryServiceTests(TestCase):
         self.assertTupleEqual(
             plan_summary.type_of_plan,
             (
-                "Art des Plans",
-                "Produktiv",
+                self.translator.gettext("Type"),
+                self.translator.gettext("Productive"),
             ),
         )
 
@@ -187,8 +203,8 @@ class PlanSummaryServiceTests(TestCase):
         self.assertTupleEqual(
             plan_summary.type_of_plan,
             (
-                "Art des Plans",
-                "Öffentlich",
+                self.translator.gettext("Type"),
+                self.translator.gettext("Public"),
             ),
         )
 
@@ -199,7 +215,7 @@ class PlanSummaryServiceTests(TestCase):
         self.assertTupleEqual(
             plan_summary.price_per_unit,
             (
-                "Preis (pro Einheit)",
+                self.translator.gettext("Price (per unit)"),
                 "0.06",
                 True,
                 self.coop_url_index.get_coop_summary_url(coop_id),
@@ -211,7 +227,7 @@ class PlanSummaryServiceTests(TestCase):
         self.assertTupleEqual(
             plan_summary.is_available,
             (
-                "Produkt aktuell verfügbar",
-                "Ja",
+                self.translator.gettext("Product currently available"),
+                self.translator.gettext("Yes"),
             ),
         )

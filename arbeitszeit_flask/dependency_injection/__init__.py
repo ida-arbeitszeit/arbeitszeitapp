@@ -698,9 +698,9 @@ class FlaskModule(Module):
         self,
         coop_url_index: CoopSummaryUrlIndex,
         company_url_index: CompanySummaryUrlIndex,
-        trans: Translator,
+        translator: Translator,
     ) -> PlanSummaryServiceImpl:
-        return PlanSummaryServiceImpl(coop_url_index, company_url_index, trans)
+        return PlanSummaryServiceImpl(coop_url_index, company_url_index, translator)
 
     @provider
     def provide_query_companies_presenter(
