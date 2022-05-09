@@ -13,6 +13,7 @@ from arbeitszeit.use_cases import (
     ListOutboundCoopRequestsResponse,
 )
 from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
+from tests.translator import FakeTranslator
 
 LIST_COORDINATIONS_RESPONSE_LEN_1 = ListCoordinationsResponse(
     coordinations=[
@@ -53,7 +54,10 @@ LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1 = ListOutboundCoopRequestsResponse(
 class ShowMyCooperationsPresenterTests(TestCase):
     def setUp(self) -> None:
         self.coop_url_index = CoopSummaryUrlIndex()
-        self.presenter = ShowMyCooperationsPresenter(self.coop_url_index)
+        self.translator = FakeTranslator()
+        self.presenter = ShowMyCooperationsPresenter(
+            self.coop_url_index, self.translator
+        )
 
     def test_coordinations_are_presented_correctly(self):
         presentation = self.presenter.present(
@@ -139,7 +143,7 @@ class ShowMyCooperationsPresenterTests(TestCase):
         )
         self.assertEqual(
             presentation_success.accept_message[0],
-            "Kooperationsanfrage wurde angenommen.",
+            self.translator.gettext("Cooperation request has been accepted."),
         )
 
     def test_successfull_deny_request_response_is_presented_correctly(self):
@@ -159,7 +163,7 @@ class ShowMyCooperationsPresenterTests(TestCase):
         )
         self.assertEqual(
             presentation_success.deny_message[0],
-            "Kooperationsanfrage wurde abgelehnt.",
+            self.translator.gettext("Cooperation request has been denied."),
         )
 
     def test_failed_accept_request_response_is_presented_correctly(self):
@@ -181,7 +185,7 @@ class ShowMyCooperationsPresenterTests(TestCase):
         )
         self.assertEqual(
             presentation_failure.accept_message[0],
-            "Plan oder Kooperation nicht gefunden.",
+            self.translator.gettext("Plan or cooperation not found."),
         )
 
     def test_failed_deny_request_response_is_presented_correctly(self):
@@ -203,7 +207,7 @@ class ShowMyCooperationsPresenterTests(TestCase):
         )
         self.assertEqual(
             presentation_failure.deny_message[0],
-            "Plan oder Kooperation nicht gefunden.",
+            self.translator.gettext("Plan or cooperation not found."),
         )
 
     def test_outbound_cooperation_requests_are_presented_correctly(self):
@@ -253,7 +257,7 @@ class ShowMyCooperationsPresenterTests(TestCase):
         )
         self.assertEqual(
             presentation.cancel_message[0],
-            "Kooperationsanfrage wurde abgebrochen.",
+            self.translator.gettext("Cooperation request has been canceled."),
         )
 
     def test_failed_cancel_request_response_is_presented_correctly(self):
@@ -272,7 +276,7 @@ class ShowMyCooperationsPresenterTests(TestCase):
         )
         self.assertEqual(
             presentation.cancel_message[0],
-            "Fehler: Anfrage kann nicht abgebrochen werden.",
+            self.translator.gettext("Error: Not possible to cancel request."),
         )
 
 

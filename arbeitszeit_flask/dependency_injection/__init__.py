@@ -691,9 +691,9 @@ class FlaskModule(Module):
 
     @provider
     def provide_show_my_cooperations_presenter(
-        self, coop_index: CoopSummaryUrlIndex
+        self, coop_index: CoopSummaryUrlIndex, translator: Translator
     ) -> ShowMyCooperationsPresenter:
-        return ShowMyCooperationsPresenter(coop_index)
+        return ShowMyCooperationsPresenter(coop_index, translator=translator)
 
     @provider
     def provide_show_my_plans_presenter(

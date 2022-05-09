@@ -11,6 +11,7 @@ from arbeitszeit.use_cases import (
     ListInboundCoopRequestsResponse,
     ListOutboundCoopRequestsResponse,
 )
+from arbeitszeit_web.translator import Translator
 
 from .url_index import CoopSummaryUrlIndex
 
@@ -76,6 +77,7 @@ class ShowMyCooperationsViewModel:
 @dataclass
 class ShowMyCooperationsPresenter:
     coop_url_index: CoopSummaryUrlIndex
+    translator: Translator
 
     def present(
         self,
@@ -179,7 +181,9 @@ class ShowMyCooperationsPresenter:
         self, accept_cooperation_response: AcceptCooperationResponse
     ) -> Tuple[List[str], bool]:
         if not accept_cooperation_response.is_rejected:
-            accept_message = ["Kooperationsanfrage wurde angenommen."]
+            accept_message = [
+                self.translator.gettext("Cooperation request has been accepted.")
+            ]
             accept_message_success = True
         else:
             accept_message_success = False
@@ -188,24 +192,34 @@ class ShowMyCooperationsPresenter:
                 == AcceptCooperationResponse.RejectionReason.plan_not_found
                 or AcceptCooperationResponse.RejectionReason.cooperation_not_found
             ):
-                accept_message = ["Plan oder Kooperation nicht gefunden."]
+                accept_message = [
+                    self.translator.gettext("Plan or cooperation not found.")
+                ]
             elif (
                 accept_cooperation_response
                 == AcceptCooperationResponse.RejectionReason.plan_inactive
                 or AcceptCooperationResponse.RejectionReason.plan_has_cooperation
                 or AcceptCooperationResponse.RejectionReason.plan_is_public_service
             ):
-                accept_message = ["Mit dem Plan stimmt etwas nicht."]
+                accept_message = [
+                    self.translator.gettext("Something's wrong with that plan.")
+                ]
             elif (
                 accept_cooperation_response
                 == AcceptCooperationResponse.RejectionReason.cooperation_was_not_requested
             ):
-                accept_message = ["Diese Kooperationsanfrage existiert nicht."]
+                accept_message = [
+                    self.translator.gettext("This cooperation request does not exist.")
+                ]
             elif (
                 accept_cooperation_response
                 == AcceptCooperationResponse.RejectionReason.requester_is_not_coordinator
             ):
-                accept_message = ["Du bist nicht Koordinator dieser Kooperation."]
+                accept_message = [
+                    self.translator.gettext(
+                        "You are not coordinator of this cooperation."
+                    )
+                ]
         return accept_message, accept_message_success
 
     def _deny_message_info(
@@ -224,7 +238,9 @@ class ShowMyCooperationsPresenter:
         self, deny_cooperation_response: DenyCooperationResponse
     ) -> Tuple[List[str], bool]:
         if not deny_cooperation_response.is_rejected:
-            deny_message = ["Kooperationsanfrage wurde abgelehnt."]
+            deny_message = [
+                self.translator.gettext("Cooperation request has been denied.")
+            ]
             deny_message_success = True
         else:
             deny_message_success = False
@@ -233,17 +249,25 @@ class ShowMyCooperationsPresenter:
                 == DenyCooperationResponse.RejectionReason.plan_not_found
                 or DenyCooperationResponse.RejectionReason.cooperation_not_found
             ):
-                deny_message = ["Plan oder Kooperation nicht gefunden."]
+                deny_message = [
+                    self.translator.gettext("Plan or cooperation not found.")
+                ]
             elif (
                 deny_cooperation_response
                 == DenyCooperationResponse.RejectionReason.cooperation_was_not_requested
             ):
-                deny_message = ["Diese Kooperationsanfrage existiert nicht."]
+                deny_message = [
+                    self.translator.gettext("This cooperation request does not exist.")
+                ]
             elif (
                 deny_cooperation_response
                 == DenyCooperationResponse.RejectionReason.requester_is_not_coordinator
             ):
-                deny_message = ["Du bist nicht Koordinator dieser Kooperation."]
+                deny_message = [
+                    self.translator.gettext(
+                        "You are not coordinator of this cooperation."
+                    )
+                ]
         return deny_message, deny_message_success
 
     def _cancel_message_info(
@@ -252,6 +276,10 @@ class ShowMyCooperationsPresenter:
         if cancel_coop_response is None:
             return [], False
         elif cancel_coop_response == True:
-            return ["Kooperationsanfrage wurde abgebrochen."], True
+            return [
+                self.translator.gettext("Cooperation request has been canceled.")
+            ], True
         else:
-            return ["Fehler: Anfrage kann nicht abgebrochen werden."], False
+            return [
+                self.translator.gettext("Error: Not possible to cancel request.")
+            ], False
