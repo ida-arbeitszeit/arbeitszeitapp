@@ -6,6 +6,7 @@ from arbeitszeit.use_cases.query_companies import (
     CompanyQueryResponse,
     QueryCompaniesRequest,
 )
+from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import CompanySummaryUrlIndex
 
 from .notification import Notifier
@@ -73,10 +74,13 @@ class QueryCompaniesViewModel:
 class QueryCompaniesPresenter:
     user_notifier: Notifier
     company_url_index: CompanySummaryUrlIndex
+    translator: Translator
 
     def present(self, response: CompanyQueryResponse) -> QueryCompaniesViewModel:
         if not response.results:
-            self.user_notifier.display_warning("Keine Ergebnisse!")
+            self.user_notifier.display_warning(
+                self.translator.gettext("Keine Ergebnisse")
+            )
         return QueryCompaniesViewModel(
             show_results=bool(response.results),
             results=ResultsTable(

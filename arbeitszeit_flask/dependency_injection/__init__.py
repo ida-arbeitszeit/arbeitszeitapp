@@ -666,10 +666,15 @@ class FlaskModule(Module):
 
     @provider
     def provide_query_companies_presenter(
-        self, notifier: Notifier, company_url_index: CompanySummaryUrlIndex
+        self,
+        notifier: Notifier,
+        company_url_index: CompanySummaryUrlIndex,
+        translator: Translator,
     ) -> QueryCompaniesPresenter:
         return QueryCompaniesPresenter(
-            user_notifier=notifier, company_url_index=company_url_index
+            user_notifier=notifier,
+            company_url_index=company_url_index,
+            translator=translator,
         )
 
     @provider
