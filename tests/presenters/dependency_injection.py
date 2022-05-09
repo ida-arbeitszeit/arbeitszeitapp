@@ -155,12 +155,14 @@ class PresenterTestsInjector(Module):
         notifier: Notifier,
         plan_summary_index: PlanSummaryUrlIndexTestImpl,
         coop_summary_index: CoopSummaryUrlIndexTestImpl,
+        translator: FakeTranslator,
     ) -> EndCooperationPresenter:
         return EndCooperationPresenter(
             request=request,
             notifier=notifier,
             plan_summary_index=plan_summary_index,
             coop_summary_index=coop_summary_index,
+            translator=translator,
         )
 
     @provider

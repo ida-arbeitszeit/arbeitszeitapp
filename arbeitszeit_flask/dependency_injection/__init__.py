@@ -393,9 +393,10 @@ class CompanyModule(Module):
         notifier: Notifier,
         plan_summary_index: PlanSummaryUrlIndex,
         coop_summary_index: CoopSummaryUrlIndex,
+        translator: Translator,
     ) -> EndCooperationPresenter:
         return EndCooperationPresenter(
-            request, notifier, plan_summary_index, coop_summary_index
+            request, notifier, plan_summary_index, coop_summary_index, translator
         )
 
     @provider

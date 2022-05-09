@@ -5,6 +5,7 @@ from uuid import UUID
 from arbeitszeit.use_cases.end_cooperation import EndCooperationResponse
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.request import Request
+from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import CoopSummaryUrlIndex, PlanSummaryUrlIndex
 
 
@@ -19,12 +20,17 @@ class EndCooperationPresenter:
     notifier: Notifier
     plan_summary_index: PlanSummaryUrlIndex
     coop_summary_index: CoopSummaryUrlIndex
+    translator: Translator
 
     def present(self, response: EndCooperationResponse) -> ViewModel:
         if response.is_rejected:
-            self.notifier.display_warning("Kooperation konnte nicht beendet werden.")
+            self.notifier.display_warning(
+                self.translator.gettext("Cooperation could not be terminated.")
+            )
             return self.ViewModel(show_404=True, redirect_url="")
-        self.notifier.display_info("Kooperation wurde erfolgreich beendet.")
+        self.notifier.display_info(
+            self.translator.gettext("Cooperation has been terminated.")
+        )
         redirect_url = self._get_redirect_url()
         return self.ViewModel(show_404=False, redirect_url=redirect_url)
 
