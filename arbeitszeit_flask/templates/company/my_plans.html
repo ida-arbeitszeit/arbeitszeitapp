@@ -8,26 +8,19 @@
 <div class="section has-text-centered">
   <div class="content">
     <h1>{{ gettext("My plans") }}</h1>
-    <div class="box has-background-info-light has-text-info-dark">
-      <div class="icon"><i class="fas fa-info-circle"></i></div>
-      <p>
-        Aktuelle Pläne kannst du als (nicht) verfügbar kennzeichnen. <br />
-        Abgelaufene Pläne kannst du erneuern oder löschen.
-      </p>
-    </div>
   </div>
-  <h1 class="title is-4">Aktuell</h1>
+  <h1 class="title is-4">{{ gettext("Active")}}</h1>
   <div class="table-container">
     {% if show_active_plans %}
     <table class="table is-fullwidth">
       <thead>
         <tr>
           <th></th>
-          <th>Kosten</th>
-          <th>Art</th>
-          <th>Planungszeitraum</th>
-          <th>Endet in (Tage)</th>
-          <th>Verfügbar</th>
+          <th>{{ gettext("Costs")}}</th>
+          <th>{{ gettext("Type")}}</th>
+          <th>{{ gettext("Planning timeframe")}}</th>
+          <th>{{ gettext("Ends in (days)")}}</th>
+          <th>{{ gettext("Product available")}}</th>
         </tr>
       </thead>
       <tbody>
@@ -54,11 +47,11 @@
       </tbody>
     </table>
     {% else %}
-    <p>(Du hast keine aktiven Pläne.)</p>
+    <p>{{ gettext("You don't have active plans.")}}</p>
     {% endif %}
   </div>
 
-  <h1 class="title is-4">Wartend</h1>
+  <h1 class="title is-4">{{ gettext("Waiting")}}</h1>
 
   <div class="table-container">
     {% if show_non_active_plans %}
@@ -66,9 +59,9 @@
       <thead>
         <tr>
           <th></th>
-          <th>Kosten</th>
-          <th>Art</th>
-          <th>Plan&nbsp;vom</th>
+          <th>{{ gettext("Costs")}}</th>
+          <th>{{ gettext("Type")}}</th>
+          <th>{{ gettext("Plan created")}}</th>
         </tr>
       </thead>
       <tbody>
@@ -83,11 +76,11 @@
       </tbody>
     </table>
     {% else %}
-    <p>(Du hast keine Pläne, die auf Aktivierung warten.)</p>
+    <p>{{ gettext("You don't have plans waiting for activation.")}}</p>
     {% endif %}
   </div>
 
-  <h1 class="title is-4">Abgelaufen</h1>
+  <h1 class="title is-4">{{ gettext("Expired")}}</h1>
 
   <div class="table-container">
     {% if show_expired_plans %}
@@ -95,10 +88,10 @@
       <thead>
         <tr>
           <th></th>
-          <th>Art</th>
-          <th>Plan&nbsp;vom</th>
-          <th><abbr title="Nur einmal möglich.">Plan erneuern</abbr></th>
-          <th>Del.</th>
+          <th>{{ gettext("Type") }}</th>
+          <th>{{ gettext("Plan created") }}</th>
+          <th>{{ gettext("Renew plan") }}</th>
+          <th>{{ gettext("Hide plan")}}</th>
         </tr>
       </thead>
       <tbody>
@@ -118,7 +111,7 @@
       </tbody>
     </table>
     {% else %}
-    <p>(Du hast keine abgelaufenen Pläne.)</p>
+    <p>{{ gettext("You don't have expired plans.") }}</p>
     {% endif %}
   </div>
 </div>
