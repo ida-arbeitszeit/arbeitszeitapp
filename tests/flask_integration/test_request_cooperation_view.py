@@ -52,7 +52,7 @@ class LoggedInCompanyTests(ViewTestCase):
     def test_get_request_shows_message_if_company_has_no_plans(self) -> None:
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
-        self.assertIn("(Noch keine Pläne.)", response.get_data(as_text=True))
+        self.assertIn("No plans yet.", response.get_data(as_text=True))
 
     def test_posting_without_data_results_in_400(self) -> None:
         response = self.client.post(self.url)
