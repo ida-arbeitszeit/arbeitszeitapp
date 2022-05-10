@@ -6,6 +6,7 @@ from arbeitszeit.use_cases import (
     InviteWorkerToCompanyRequest,
     InviteWorkerToCompanyResponse,
 )
+from arbeitszeit_web.translator import Translator
 
 from .session import Session
 
@@ -45,12 +46,17 @@ class ViewModel:
     notifications: List[str]
 
 
+@dataclass
 class InviteWorkerToCompanyPresenter:
+    translator: Translator
+
     def present(self, use_case_response: InviteWorkerToCompanyResponse) -> ViewModel:
         if use_case_response.is_success:
-            notifications = ["Arbeiter*in erfolgreich eingeladen."]
+            notifications = [
+                self.translator.gettext("Worker has been invited successfully.")
+            ]
         else:
-            notifications = ["Arbeiter*in konnte nicht eingeladen werden."]
+            notifications = [self.translator.gettext("Worker could not be invited.")]
         return ViewModel(
             notifications=notifications,
         )

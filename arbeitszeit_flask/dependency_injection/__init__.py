@@ -132,7 +132,10 @@ from arbeitszeit_web.get_prefilled_draft_data import (
     PrefilledDraftDataController,
 )
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
-from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyController
+from arbeitszeit_web.invite_worker_to_company import (
+    InviteWorkerToCompanyController,
+    InviteWorkerToCompanyPresenter,
+)
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 from arbeitszeit_web.notification import Notifier
@@ -827,6 +830,12 @@ class FlaskModule(Module):
         self, session: Session
     ) -> InviteWorkerToCompanyController:
         return InviteWorkerToCompanyController(session)
+
+    @provider
+    def provide_invite_worker_to_company_presenter(
+        self, translator: Translator
+    ) -> InviteWorkerToCompanyPresenter:
+        return InviteWorkerToCompanyPresenter(translator)
 
     @provider
     def provide_user_template_renderer(

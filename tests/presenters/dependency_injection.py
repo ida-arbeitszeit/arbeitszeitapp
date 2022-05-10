@@ -11,6 +11,7 @@ from arbeitszeit_web.get_plan_summary_company import (
 )
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.hide_plan import HidePlanPresenter
+from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyPresenter
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_messages import ListMessagesPresenter
 from arbeitszeit_web.notification import Notifier
@@ -480,6 +481,12 @@ class PresenterTestsInjector(Module):
         return GetCompanyTransactionsPresenter(
             translator=translator,
         )
+
+    @provider
+    def provide_invite_worker_to_company_presenter(
+        self, translator: FakeTranslator
+    ) -> InviteWorkerToCompanyPresenter:
+        return InviteWorkerToCompanyPresenter(translator=translator)
 
 
 def get_dependency_injector() -> Injector:
