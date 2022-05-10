@@ -362,12 +362,14 @@ class PresenterTestsInjector(Module):
         coop_url_index: CoopSummaryUrlIndexTestImpl,
         renew_plan_url_index: RenewPlanUrlIndex,
         hide_plan_url_index: HidePlanUrlIndex,
+        translator: FakeTranslator,
     ) -> ShowMyPlansPresenter:
         return ShowMyPlansPresenter(
             url_index=plan_url_index,
             coop_url_index=coop_url_index,
             renew_plan_url_index=renew_plan_url_index,
             hide_plan_url_index=hide_plan_url_index,
+            translator=translator,
         )
 
     @provider

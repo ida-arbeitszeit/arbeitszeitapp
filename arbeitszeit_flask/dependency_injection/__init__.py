@@ -740,12 +740,10 @@ class FlaskModule(Module):
         coop_index: CoopSummaryUrlIndex,
         renew_plan_index: RenewPlanUrlIndex,
         hide_plan_index: HidePlanUrlIndex,
+        translator: Translator,
     ) -> ShowMyPlansPresenter:
         return ShowMyPlansPresenter(
-            plan_index,
-            coop_index,
-            renew_plan_index,
-            hide_plan_index,
+            plan_index, coop_index, renew_plan_index, hide_plan_index, translator
         )
 
     @provider

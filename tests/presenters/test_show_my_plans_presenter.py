@@ -6,6 +6,7 @@ from arbeitszeit.entities import Plan
 from arbeitszeit.use_cases.show_my_plans import PlanInfo, ShowMyPlansResponse
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from tests.data_generators import CooperationGenerator, PlanGenerator
+from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
 from .url_index import (
@@ -78,6 +79,7 @@ class ShowMyPlansPresenterTests(TestCase):
         self.coop_url_index = self.injector.get(CoopSummaryUrlIndexTestImpl)
         self.renew_plan_url_index = self.injector.get(RenewPlanUrlIndex)
         self.hide_plan_url_index = self.injector.get(HidePlanUrlIndex)
+        self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(ShowMyPlansPresenter)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.coop_generator = self.injector.get(CooperationGenerator)
@@ -92,7 +94,10 @@ class ShowMyPlansPresenterTests(TestCase):
             )
         )
         self.assertTrue(presentation.notifications)
-        self.assertEqual(presentation.notifications, ["Du hast keine Pläne."])
+        self.assertEqual(
+            presentation.notifications,
+            [self.translator.gettext("You don't have any plans.")],
+        )
 
     def test_do_not_show_notification_when_user_has_one_plan(self):
         plan = self.plan_generator.create_plan()
@@ -126,7 +131,9 @@ class ShowMyPlansPresenterTests(TestCase):
         )
         self.assertEqual(
             presentation.active_plans.rows[0].type_of_plan,
-            "Öffentlich" if plan.is_public_service else "Produktiv",
+            self.translator.gettext("Public")
+            if plan.is_public_service
+            else self.translator.gettext("Productive"),
         )
         self.assertEqual(
             presentation.active_plans.rows[0].is_available,
@@ -168,7 +175,7 @@ class ShowMyPlansPresenterTests(TestCase):
             row1.prd_name,
             expected_plan.prd_name,
         )
-        self.assertEqual(row1.type_of_plan, "Produktiv")
+        self.assertEqual(row1.type_of_plan, self.translator.gettext("Productive"))
         self.assertEqual(
             row1.renew_plan_url, self.renew_plan_url_index.get_renew_plan_url(plan.id)
         )
@@ -194,7 +201,7 @@ class ShowMyPlansPresenterTests(TestCase):
             row1.price_per_unit,
             format_price(expected_plan.price_per_unit),
         )
-        self.assertEqual(row1.type_of_plan, "Produktiv")
+        self.assertEqual(row1.type_of_plan, self.translator.gettext("Productive"))
 
 
 def format_price(price_per_unit: Decimal) -> str:
