@@ -1,22 +1,21 @@
 {% extends "base_company.html" %}
 
 {% block navbar_start %}
-<div class="navbar-item">Kooperation anfragen</div>
+<div class="navbar-item">{{ gettext("Request cooperation")}}</div>
 {% endblock %}
 
 {% block company %}
 <div class="section is-medium has-text-centered">
     <h1 class="title">
-        Kooperation anfragen
+        {{ gettext("Request cooperation")}}
     </h1>
 
     <div class="box has-background-info-light has-text-info-dark">
         <div class="icon"><i class="fas fa-info-circle"></i></div>
         <p>
-            Frage hier eine Kooperation an. <br><br>
-            Der "Koordinator" der Kooperation entscheidet dann darüber, ob er deinen
-            Plan zur Kooperation hinzufügt.<br>
-            Alle Pläne in einer Kooperation sollten das gleiche oder ein ähnliches Produkt anbieten.
+            {{ gettext("Here you can request a cooperation.")}} <br><br>
+            {{ gettext("The coordinator of the cooperation decides if they add your plan to the cooperation.")}}<br>
+            {{ gettext("All plans in a cooperation should offer the same or a similar product.")}}
         </p>
     </div>
     <div class="columns is-centered">
@@ -49,7 +48,7 @@
                         <div class="control has-icons-left">
                             <div class="select has-icons-left">
                                 <select name="plan_id" required>
-                                    <option>Mein Plan...</option>
+                                    <option>{{ gettext("My plan...")}}</option>
                                     {% for plan in list_plans_view_model.plans %}
                                     <option value="{{ plan.id }}">{{ plan.prd_name_truncated }} ({{
                                         plan.id_truncated
@@ -63,19 +62,19 @@
                             </span>
                         </div>
                         <div class="control">
-                            <input class="input" type="text" placeholder="Kooperation-ID" , name="cooperation_id"
-                                required>
+                            <input class="input" type="text" placeholder="{{ gettext('Cooperation ID') }}" ,
+                                name="cooperation_id" required>
                         </div>
                         <div class="field">
                             <div class="control">
                                 <button class="button is-primary" name="request_coop" value="request_coop"
-                                    type="submit">Kooperation anfragen</button>
+                                    type="submit">{{ gettext("Request cooperation")}}</button>
                             </div>
                         </div>
                     </div>
                 </form>
                 {% else %}
-                <p>(Noch keine Pläne.)</p>
+                <p>{{ gettext("No plans yet.")}}</p>
                 {% endif %}
             </div>
         </div>
