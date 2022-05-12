@@ -3,7 +3,7 @@
     <div class="columns is-centered">
         <div class="column is-one-third">
             <h1 class="title">
-                Aktive Pläne
+                {{ gettext("Active plans") }}
             </h1>
             <form method="post">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -13,7 +13,7 @@
                             {{ form.select }}
                         </div>
                     </div>
-                    <p class="help">Suche in Plan-ID oder Produktname</p>
+                    <p class="help">{{ gettext("Search by plan ID or product name") }}</p>
                 </div>
                 <div class="field">
                     <div class="control">
@@ -34,14 +34,14 @@
         <table class="table is-fullwidth">
             <thead>
                 <tr>
-                    <th>Plan-ID</th>
-                    <th>Produktname</th>
-                    <th>Betrieb</th>
-                    <th>Beschreibung</th>
-                    <th>Stückpr.</th>
-                    <th>Art</th>
-                    <th>Endet in</th>
-                    <th>Verfügbar</th>
+                    <th>{{ gettext("Plan ID") }}</th>
+                    <th>{{ gettext("Product name") }}</th>
+                    <th>{{ gettext("Company") }}</th>
+                    <th>{{ gettext("Description") }}</th>
+                    <th>{{ gettext("Price per unit") }}</th>
+                    <th>{{ gettext("Type") }}</th>
+                    <th>{{ gettext("Ends in")}}</th>
+                    <th>{{ gettext("Available")}}</th>
                 </tr>
             </thead>
             <tbody>
