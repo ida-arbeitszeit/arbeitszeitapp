@@ -34,17 +34,17 @@ class GetStatisticsPresenter:
     url_index: PlotsUrlIndex
 
     def present(self, use_case_response: StatisticsResponse) -> GetStatisticsViewModel:
-        average_timeframe = self.translator.ngettext(
-            "%(num).2f day", "%(num).2f days", use_case_response.avg_timeframe
+        average_timeframe = self.translator.gettext(
+            "%(num).2f days" % dict(num=use_case_response.avg_timeframe)
         )
-        planned_work = self.translator.ngettext(
-            "%(num).2f hour", "%(num).2f hours", use_case_response.planned_work
+        planned_work = self.translator.gettext(
+            "%(num).2f hours" % dict(num=use_case_response.planned_work)
         )
-        planned_liquid_means = self.translator.ngettext(
-            "%(num).2f hour", "%(num).2f hours", use_case_response.planned_resources
+        planned_liquid_means = self.translator.gettext(
+            "%(num).2f hours" % dict(num=use_case_response.planned_resources)
         )
-        planned_fixed_means = self.translator.ngettext(
-            "%(num).2f hour", "%(num).2f hours", use_case_response.planned_means
+        planned_fixed_means = self.translator.gettext(
+            "%(num).2f hours" % dict(num=use_case_response.planned_means)
         )
         return GetStatisticsViewModel(
             planned_resources_hours=planned_liquid_means,
