@@ -94,7 +94,7 @@ class GetCompanySummarySuccessPresenter:
             sales_volume=f"{round(plan_details.sales_volume, 2)}",
             sales_balance=f"{round(plan_details.sales_balance, 2)}",
             deviation_relative=Deviation(
-                percentage=f"{round(plan_details.deviation_relative)}",
+                percentage="%(num).0f" % dict(num=plan_details.deviation_relative),
                 is_critical=plan_details.deviation_relative >= THRESHOLD_DEVIATION,
             ),
         )

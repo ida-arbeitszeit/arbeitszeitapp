@@ -32,7 +32,7 @@ RESPONSE_WITH_2_PLANS = GetCompanySummarySuccess(
         Decimal("1"), Decimal("2"), Decimal("3"), Decimal("-4.561")
     ),
     deviations_relative=[
-        Decimal("100"),
+        Decimal("Infinity"),
         Decimal("20"),
         Decimal("-300"),
         Decimal("-4.561"),
@@ -98,7 +98,7 @@ class GetGetCompanySummaryPresenterTests(TestCase):
         self,
     ):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
-        expected_percentages = ["100", "20", "-300", "-5"]
+        expected_percentages = ["inf", "20", "-300", "-5"]
         expected_status = [True, False, True, False]
         for count, deviation in enumerate(view_model.deviations_relative):
             self.assertEqual(deviation.percentage, expected_percentages[count])

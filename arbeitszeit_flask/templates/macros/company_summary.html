@@ -65,7 +65,7 @@
                             {% for dev_rel in view_model.deviations_relative %}
                             <td><span
                                     class="tag is-light is-medium {{ 'is-danger' if dev_rel.is_critical else 'is-primary'  }}">{{
-                                    dev_rel.percentage }}%</span></td>
+                                    dev_rel.percentage }}</span></td>
                             {% endfor %}
                         </tr>
                     </tbody>
@@ -95,7 +95,7 @@
                             <td>
                                 <span
                                     class="tag is-light is-medium {{ 'is-danger' if plan.deviation_relative.is_critical else 'is-primary'  }}">{{
-                                    plan.deviation_relative.percentage }}%</span>
+                                    plan.deviation_relative.percentage }}</span>
                             </td>
                         </tr>
                         {% endfor %}
