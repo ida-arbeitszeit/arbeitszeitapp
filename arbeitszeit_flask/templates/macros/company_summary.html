@@ -64,8 +64,8 @@
                             <td class="has-text-weight-semibold">{{ gettext("Deviation (&percnt;)") }}</td>
                             {% for dev_rel in view_model.deviations_relative %}
                             <td><span
-                                    class="tag is-light is-medium {{ 'is-danger' if dev_rel | float | abs >= 33 else 'is-primary'  }}">{{
-                                    dev_rel }}%</span></td>
+                                    class="tag is-light is-medium {{ 'is-danger' if dev_rel.is_critical else 'is-primary'  }}">{{
+                                    dev_rel.percentage }}%</span></td>
                             {% endfor %}
                         </tr>
                     </tbody>
@@ -94,8 +94,8 @@
                             <td><span class="tag is-medium">{{ plan.sales_balance }}</span></td>
                             <td>
                                 <span
-                                    class="tag is-light is-medium {{ 'is-danger' if plan.deviation_relative | float | abs >= 33 else 'is-primary'  }}">{{
-                                    plan.deviation_relative }}%</span>
+                                    class="tag is-light is-medium {{ 'is-danger' if plan.deviation_relative.is_critical else 'is-primary'  }}">{{
+                                    plan.deviation_relative.percentage }}%</span>
                             </td>
                         </tr>
                         {% endfor %}

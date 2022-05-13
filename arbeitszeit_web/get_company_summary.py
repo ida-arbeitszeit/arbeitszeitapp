@@ -9,6 +9,14 @@ from arbeitszeit.use_cases.get_company_summary import (
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import PlanSummaryUrlIndex
 
+THRESHOLD_DEVIATION = 33
+
+
+@dataclass
+class Deviation:
+    percentage: str
+    is_critical: bool
+
 
 @dataclass
 class PlanDetailsWeb:
@@ -18,7 +26,7 @@ class PlanDetailsWeb:
     status: str
     sales_volume: str
     sales_balance: str
-    deviation_relative: str
+    deviation_relative: Deviation
 
 
 @dataclass
@@ -29,7 +37,7 @@ class GetCompanySummaryViewModel:
     registered_on: datetime
     expectations: List[str]
     account_balances: List[str]
-    deviations_relative: List[str]
+    deviations_relative: List[Deviation]
     plan_details: List[PlanDetailsWeb]
 
     def to_dict(self) -> Dict[str, Any]:
@@ -62,10 +70,13 @@ class GetCompanySummarySuccessPresenter:
                 "%(num).2f" % dict(num=use_case_response.account_balances.product),
             ],
             deviations_relative=[
-                "%(num).0f" % dict(num=use_case_response.deviations_relative[0]),
-                "%(num).0f" % dict(num=use_case_response.deviations_relative[1]),
-                "%(num).0f" % dict(num=use_case_response.deviations_relative[2]),
-                "%(num).0f" % dict(num=use_case_response.deviations_relative[3]),
+                Deviation(
+                    percentage="%(num).0f"
+                    % dict(num=use_case_response.deviations_relative[i]),
+                    is_critical=abs(use_case_response.deviations_relative[i])
+                    >= THRESHOLD_DEVIATION,
+                )
+                for i in range(len(use_case_response.deviations_relative))
             ],
             plan_details=[
                 self._get_plan_details(plan) for plan in use_case_response.plan_details
@@ -82,5 +93,8 @@ class GetCompanySummarySuccessPresenter:
             else self.translator.gettext("Inactive"),
             sales_volume=f"{round(plan_details.sales_volume, 2)}",
             sales_balance=f"{round(plan_details.sales_balance, 2)}",
-            deviation_relative=f"{round(plan_details.deviation_relative)}",
+            deviation_relative=Deviation(
+                percentage=f"{round(plan_details.deviation_relative)}",
+                is_critical=plan_details.deviation_relative >= THRESHOLD_DEVIATION,
+            ),
         )
