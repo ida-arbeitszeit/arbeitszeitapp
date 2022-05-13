@@ -38,13 +38,18 @@
                     {{ gettext("Metrics") }}
                 </h1>
                 <table class="table has-text-left">
-                    <thead>
+                    <thead class="has-text-centered">
                         <tr>
                             <th></th>
-                            <th>p</th>
-                            <th>r</th>
-                            <th>a</th>
-                            <th>prd</th>
+                            <th><span class="icon"><i class="fas fa-industry"></i></span><br>{{ gettext("Account p") }}
+                            </th>
+                            <th><span class="icon"><i class="fas fa-oil-can"></i></span><br>{{ gettext("Account r") }}
+                            </th>
+                            <th><span class="icon"><i class="fas fa-users"></i></span><br>{{ gettext("Account a") }}
+                            </th>
+                            <th><span class="icon"><i class="fas fa-exchange-alt"></i></span>
+                                <br>{{ gettext("Account prd") }}
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
