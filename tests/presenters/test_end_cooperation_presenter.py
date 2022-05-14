@@ -5,6 +5,7 @@ from uuid import uuid4
 from arbeitszeit.use_cases.end_cooperation import EndCooperationResponse
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
 from tests.request import FakeRequest
+from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl
@@ -28,6 +29,7 @@ class PresenterTests(TestCase):
         self.notifier = self.injector.get(NotifierTestImpl)
         self.plan_summary_index = self.injector.get(PlanSummaryUrlIndexTestImpl)
         self.coop_summary_index = self.injector.get(CoopSummaryUrlIndexTestImpl)
+        self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(EndCooperationPresenter)
 
     def test_404_and_empty_url_returned_when_use_case_response_returned_plan_not_found(
@@ -48,7 +50,7 @@ class PresenterTests(TestCase):
     ):
         self.presenter.present(REJECTED_RESPONSE_PLAN_NOT_FOUND)
         self.assertIn(
-            "Kooperation konnte nicht beendet werden.",
+            self.translator.gettext("Cooperation could not be terminated."),
             self._get_warning_notifications(),
         )
 
@@ -97,7 +99,7 @@ class PresenterTests(TestCase):
         self.request.set_arg("cooperation_id", str(uuid4()))
         self.presenter.present(SUCCESSFUL_RESPONSE)
         self.assertIn(
-            "Kooperation wurde erfolgreich beendet.",
+            self.translator.gettext("Cooperation has been terminated."),
             self._get_info_notifications(),
         )
 

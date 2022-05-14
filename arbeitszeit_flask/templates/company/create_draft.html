@@ -1,35 +1,36 @@
 {% extends "base_company.html" %}
 
 {% block navbar_start %}
-<div class="navbar-item">Plan erstellen</div>
+<div class="navbar-item">{{ gettext("Create plan") }}</div>
 {% endblock %}
 
 {% block company %}
 <div class="section has-text-centered">
     <h1 class="title">
-        Plan erstellen
+        {{ gettext("Create plan") }}
     </h1>
     <div class="columns is-centered">
         <div class="column is-three-fifths">
             <div class="box has-background-info-light has-text-info-dark">
                 <div class="icon"><i class="fas fa-info-circle"></i></div>
                 <p>
-                    Erstelle hier deinen Plan. <br><br>
-                    Ein Plan besteht zunächst aus dem <b>Namen des Produktes</b>,
-                    der <b>Beschreibung des Produktes</b> und dem <b>Planungszeitraum</b>.
-                    In diesem Zeitraum planst du, eine bestimmte <b>Menge</b> an <b>Einheiten</b>
-                    eines bestimmten Produktes herzustellen und zu verkaufen. <br>
-                    Gib an, wieviele <b>Kosten für Produktionsmittel</b>, <b>Roh- und Hilfsstoffe</b> und
-                    <b>Arbeitskraft</b>
-                    du für das (gesamte) Produkt in diesem Zeitraum aufwenden wirst. <br>
-                    Wähle, ob es sich um einen <b>produktiven oder öffentlichen Plan</b> handelt.
+                    {{ gettext("Create your plan here.") }} <br><br>
+                    {{ gettext("Choose a <b>product name</b>,
+                    <b>product description</b> and <b>planning timeframe</b>.
+                    In this timeframe you are planning to produce and deliver a certain <b>amount</b> of <b>units</b>
+                    of a certain product.") }} <br>
+                    {{ gettext("Next, estimate what costs for <b>fixed means of production</b>, <b>liquid means of
+                        production</b> and <b>labour</b> you will have in the given
+                    timeframe. (You should be able to buy your means of production and labour within this
+                    application!)")
+                    }}<br>
+                    {{ gettext("Finally, select if your plan is <b>productive</b> or <b>public</b>.") }}
                 </p>
             </div>
-
             <form method="post">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="field">
-                    <label class="label">Name des Produkts</label>
+                    <label class="label">{{ gettext("Product name")}}</label>
                     <div class="control">
                         <input class="input is-large" , type="text" , name="prd_name" ,
                             value="{{ prefilled.product_name if prefilled else '' }}" required>
@@ -37,16 +38,15 @@
                 </div>
                 <div class="block"></div>
                 <div class="field">
-                    <label class="label">Beschreibung des Produkts</label>
+                    <label class="label">{{ gettext("Product description")}}</label>
                     <div class="control">
                         <textarea class="textarea is-large" , name="description"
                             required>{{ prefilled.description if prefilled else '' }}</textarea>
                     </div>
-
                 </div>
                 <div class="block"></div>
                 <div class="field">
-                    <label class="label">Planungszeitraum (Tage)</label>
+                    <label class="label">{{ gettext("Planning timeframe (days)")}}</label>
                     <div class="control">
                         <input class="input is-large" type="number" name="timeframe" min=1 max=365
                             value="{{ prefilled.timeframe if prefilled else 1 }}" required>
@@ -54,29 +54,26 @@
                 </div>
                 <div class="block"></div>
                 <div class="field">
-                    <label class="label">Kleinste Abgabeeinheit</label>
+                    <label class="label">{{ gettext("Smallest delivery unit")}}</label>
                     <div class="control">
                         <input class="input is-large" , type="text" , name="prd_unit" ,
                             value="{{ prefilled.production_unit if prefilled else '1 Kg' }}" , required>
-                        <p class="help">(1 Packung à 100 Stück, 1 Kilogramm, 1 Flasche à 0,5 Liter, 1 Meter,
-                            Unterrichtseinheit à 1,5
-                            Stunde,
-                            etc.)</p>
+                        <p class="help">{{ gettext("E.g. 1 package of 100 pieces, 1 kilogram, 1 bottle of 0.5 liters, 1
+                            meter, 1 language lesson of 1.5 hour, etc.")}}</p>
                     </div>
-
                 </div>
                 <div class="block"></div>
                 <div class="field">
-                    <label class="label">Menge</label>
+                    <label class="label">{{ gettext("Amount")}}</label>
                     <div class="control">
                         <input class="input is-large" type="number" name="prd_amount" min=1
                             value="{{ prefilled.amount if prefilled else 1 }}" required>
-                        <p class="help">(Wieviele Einheiten werden produziert und verkauft?)</p>
+                        <p class="help">{{ gettext("How many units will be produced and delivered?")}}</p>
                     </div>
                 </div>
                 <div class="block"></div>
                 <div class="field">
-                    <label class="label">Kosten für Produktionsmittel</label>
+                    <label class="label">{{ gettext("Costs for fixed means of production")}}</label>
                     <div class="control">
                         <input class="input is-large" type="number" name="costs_p" min=0
                             value="{{ prefilled.means_cost if prefilled else 0 }}" required>
@@ -84,7 +81,7 @@
                 </div>
                 <div class="block"></div>
                 <div class="field">
-                    <label class="label">Kosten für Roh- und Hilfsstoffe</label>
+                    <label class="label">{{ gettext("Costs for liquid means of production")}}</label>
                     <div class="control">
                         <input class="input is-large" type="number" name="costs_r" min=0
                             value="{{ prefilled.resources_cost if prefilled else 0 }}" required>
@@ -92,7 +89,7 @@
                 </div>
                 <div class="block"></div>
                 <div class="field">
-                    <label class="label">Enthaltene Arbeitsstunden</label>
+                    <label class="label">{{ gettext("Costs for labour")}}</label>
                     <div class="control">
                         <input class="input is-large" type="number" name="costs_a" min=0
                             value="{{ prefilled.labour_cost if prefilled else 0 }}" required>
@@ -100,28 +97,25 @@
                 </div>
                 <div class="block"></div>
                 <div class="field">
-                    <label class="label">Art des Plans</label>
+                    <label class="label">{{ gettext("Type")}}</label>
                     <div class="control">
                         <label class="radio">
                             <input type="radio" name="productive_or_public" value="productive" required {% if prefilled
                                 and not prefilled.is_public_service %} checked {% endif %}>
-                            Produktiv
+                            {{ gettext("Productive")}}
                         </label>
                         <label class="radio">
                             <input type="radio" name="productive_or_public" value="public" {% if prefilled and
                                 prefilled.is_public_service %} checked {% endif %}>
-                            Öffentlich
+                            {{ gettext("Public")}}
                         </label>
-                        <p class="help">Produktive Pläne sind der Regelfall.<br>
-                            Öffentliche Pläne müssen vom Plenum genehmigt sein.
-                        </p>
+                        <p class="help">{{ gettext("Productive plans are the norm.")}}</p>
                     </div>
                 </div>
                 <div class="box has-background-danger-light has-text-danger-dark">
                     <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
                     <p>
-                        Der Plan bestimmt den Preis deiner Produkte und lässt
-                        sich deshalb nachträglich nicht ändern!
+                        {{ gettext("Plans cannot be changed after submission!")}}
                         <br>
                     </p>
                 </div>
@@ -130,10 +124,12 @@
     <div class="field is-grouped is-grouped-centered">
         <div class="control">
             <div class="field is-grouped is-grouped-centered">
-                <button class="button is-light" name="action" value="cancel" type="submit">Abbrechen</button>
-                <button class="button is-primary" name="action" value="save_draft" type="submit">Als Entwurf
-                    speichern</button>
-                <button class="button is-danger" name="action" value="file_draft" type="submit">Plan einreichen</button>
+                <button class="button is-light" name="action" value="cancel" type="submit">{{
+                    gettext("Cancel")}}</button>
+                <button class="button is-primary" name="action" value="save_draft" type="submit">{{ gettext("Save as
+                    draft")}}</button>
+                <button class="button is-danger" name="action" value="file_draft" type="submit">{{ gettext("Submit
+                    plan")}}</button>
             </div>
         </div>
     </div>

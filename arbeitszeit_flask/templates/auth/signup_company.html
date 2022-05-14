@@ -5,7 +5,7 @@
     <div class="container">
         <div class="column is-4 is-offset-4">
             <div class="box has-text-centered">
-                <h3 class="title">Sign up company</h3>
+                <h3 class="title">{{ gettext("Sign up company") }}</h3>
                 {% for field_name, field_errors in form.errors|dictsort if field_errors %}
                 {% for error in field_errors %}
                 <div class="notification is-danger">{{ error }}</div>
@@ -15,7 +15,7 @@
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="field">
                         <div class="control has-icons-left">
-                            {{ form.email(class_="input is-large", placeholder="Email") }}
+                            {{ form.email(class_="input is-large", placeholder=gettext('Email')) }}
                             <span class="icon is-small is-left">
                                 <i class="fas fa-at"></i>
                             </span>
@@ -23,7 +23,7 @@
                     </div>
                     <div class="field">
                         <div class="control has-icons-left">
-                            {{ form.name(class_="input is-large", placeholder="Name des Betriebs") }}
+                            {{ form.name(class_="input is-large", placeholder=gettext("Company name")) }}
                             <span class="icon is-small is-left">
                                 <i class="fas fa-industry"></i>
                             </span>
@@ -31,13 +31,13 @@
                     </div>
                     <div class="field">
                         <div class="control has-icons-left">
-                            {{ form.password(class_="input is-large", placeholder="Passwort") }}
+                            {{ form.password(class_="input is-large", placeholder=gettext("Password")) }}
                             <span class="icon is-small is-left">
                                 <i class="fas fa-key"></i>
                             </span>
                         </div>
                     </div>
-                    <button class="button is-block is-primary is-large is-fullwidth">Sign Up</button>
+                    <button class="button is-block is-primary is-large is-fullwidth">{{ gettext("Sign Up") }}</button>
                 </form>
             </div>
         </div>

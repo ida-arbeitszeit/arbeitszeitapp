@@ -11,6 +11,7 @@ from arbeitszeit_web.get_plan_summary_company import (
 )
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.hide_plan import HidePlanPresenter
+from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyPresenter
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_messages import ListMessagesPresenter
 from arbeitszeit_web.notification import Notifier
@@ -33,6 +34,9 @@ from arbeitszeit_web.presenters.registration_email_presenter import (
 )
 from arbeitszeit_web.presenters.send_work_certificates_to_worker_presenter import (
     SendWorkCertificatesToWorkerPresenter,
+)
+from arbeitszeit_web.presenters.show_a_account_details_presenter import (
+    ShowAAccountDetailsPresenter,
 )
 from arbeitszeit_web.presenters.show_company_work_invite_details_presenter import (
     ShowCompanyWorkInviteDetailsPresenter,
@@ -155,12 +159,14 @@ class PresenterTestsInjector(Module):
         notifier: Notifier,
         plan_summary_index: PlanSummaryUrlIndexTestImpl,
         coop_summary_index: CoopSummaryUrlIndexTestImpl,
+        translator: FakeTranslator,
     ) -> EndCooperationPresenter:
         return EndCooperationPresenter(
             request=request,
             notifier=notifier,
             plan_summary_index=plan_summary_index,
             coop_summary_index=coop_summary_index,
+            translator=translator,
         )
 
     @provider
@@ -208,7 +214,7 @@ class PresenterTestsInjector(Module):
         return PlanSummaryServiceImpl(
             coop_url_index=coop_url_index,
             company_url_index=company_url_index,
-            trans=translator,
+            translator=translator,
         )
 
     @provider
@@ -289,7 +295,7 @@ class PresenterTestsInjector(Module):
         return PlanSummaryServiceImpl(
             coop_url_index=coop_url_index,
             company_url_index=company_url_index,
-            trans=translator,
+            translator=translator,
         )
 
     @provider
@@ -357,12 +363,14 @@ class PresenterTestsInjector(Module):
         coop_url_index: CoopSummaryUrlIndexTestImpl,
         renew_plan_url_index: RenewPlanUrlIndex,
         hide_plan_url_index: HidePlanUrlIndex,
+        translator: FakeTranslator,
     ) -> ShowMyPlansPresenter:
         return ShowMyPlansPresenter(
             url_index=plan_url_index,
             coop_url_index=coop_url_index,
             renew_plan_url_index=renew_plan_url_index,
             hide_plan_url_index=hide_plan_url_index,
+            translator=translator,
         )
 
     @provider
@@ -392,14 +400,24 @@ class PresenterTestsInjector(Module):
         )
 
     @provider
+    def provide_show_a_account_details_presenter(
+        self, translator: FakeTranslator
+    ) -> ShowAAccountDetailsPresenter:
+        return ShowAAccountDetailsPresenter(
+            translator=translator,
+        )
+
+    @provider
     def provide_user_action_resolver_impl(
         self,
         invite_url_index: InviteUrlIndexImpl,
         coop_url_index: CoopSummaryUrlIndexTestImpl,
+        translator: FakeTranslator,
     ) -> UserActionResolverImpl:
         return UserActionResolverImpl(
             invite_url_index=invite_url_index,
             coop_url_index=coop_url_index,
+            translator=translator,
         )
 
     @provider
@@ -463,6 +481,12 @@ class PresenterTestsInjector(Module):
         return GetCompanyTransactionsPresenter(
             translator=translator,
         )
+
+    @provider
+    def provide_invite_worker_to_company_presenter(
+        self, translator: FakeTranslator
+    ) -> InviteWorkerToCompanyPresenter:
+        return InviteWorkerToCompanyPresenter(translator=translator)
 
 
 def get_dependency_injector() -> Injector:

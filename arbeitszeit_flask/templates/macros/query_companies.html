@@ -1,7 +1,7 @@
 {% macro query_companies(form, view_model) %}
 <div class="section has-text-centered">
     <h1 class="title">
-        Betriebe suchen
+        {{ gettext("Search companies") }}
     </h1>
     <div class="columns is-centered">
         <div class="column is-4">
@@ -13,7 +13,7 @@
                             {{ form.select }}
                         </div>
                     </div>
-                    <p class="help">Suche nach Name oder Email</p>
+                    <p class="help">{{ gettext("Search by name or email")}}</p>
                 </div>
                 <div class="field">
                     <div class="control">
@@ -28,7 +28,7 @@
     </div>
     {% if view_model.show_results %}
     <h1 class="title">
-        Ergebnisse
+        {{ gettext("Results") }}
     </h1>
     <div class="columns">
         <div class="column"></div>
@@ -37,8 +37,8 @@
                 <table class="table is-fullwidth">
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Email</th>
+                            <th>{{ gettext("Name") }}</th>
+                            <th>{{ gettext("Email")}}</th>
                         </tr>
                     </thead>
                     <tbody>

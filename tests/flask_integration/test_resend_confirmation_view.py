@@ -33,5 +33,5 @@ class AuthenticatedButUnconfirmedMemberTests(ViewTestCase):
             assert len(outbox) == 1
             assert outbox[0].sender == "test_sender@cp.org"
             assert outbox[0].recipients[0] == self.email
-            assert outbox[0].subject == "Bitte bestätige dein Konto"
+            assert outbox[0].subject == "Please confirm your account"
             assert member_token in outbox[0].html

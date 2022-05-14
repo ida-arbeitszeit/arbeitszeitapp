@@ -132,7 +132,10 @@ from arbeitszeit_web.get_prefilled_draft_data import (
     PrefilledDraftDataController,
 )
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
-from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyController
+from arbeitszeit_web.invite_worker_to_company import (
+    InviteWorkerToCompanyController,
+    InviteWorkerToCompanyPresenter,
+)
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 from arbeitszeit_web.notification import Notifier
@@ -157,6 +160,9 @@ from arbeitszeit_web.presenters.send_confirmation_email_presenter import (
 )
 from arbeitszeit_web.presenters.send_work_certificates_to_worker_presenter import (
     SendWorkCertificatesToWorkerPresenter,
+)
+from arbeitszeit_web.presenters.show_a_account_details_presenter import (
+    ShowAAccountDetailsPresenter,
 )
 from arbeitszeit_web.presenters.show_company_work_invite_details_presenter import (
     ShowCompanyWorkInviteDetailsPresenter,
@@ -393,9 +399,10 @@ class CompanyModule(Module):
         notifier: Notifier,
         plan_summary_index: PlanSummaryUrlIndex,
         coop_summary_index: CoopSummaryUrlIndex,
+        translator: Translator,
     ) -> EndCooperationPresenter:
         return EndCooperationPresenter(
-            request, notifier, plan_summary_index, coop_summary_index
+            request, notifier, plan_summary_index, coop_summary_index, translator
         )
 
     @provider
@@ -439,6 +446,12 @@ class CompanyModule(Module):
         self, translator: Translator
     ) -> ShowRAccountDetailsPresenter:
         return ShowRAccountDetailsPresenter(trans=translator)
+
+    @provider
+    def provide_show_a_account_details_presenter(
+        self, translator: Translator
+    ) -> ShowAAccountDetailsPresenter:
+        return ShowAAccountDetailsPresenter(translator=translator)
 
     @provider
     def provide_show_p_account_details_presenter(
@@ -639,10 +652,15 @@ class FlaskModule(Module):
 
     @provider
     def provide_send_confirmation_email_presenter(
-        self, url_index: ConfirmationUrlIndex, email_configuration: EmailConfiguration
+        self,
+        url_index: ConfirmationUrlIndex,
+        email_configuration: EmailConfiguration,
+        translator: Translator,
     ) -> SendConfirmationEmailPresenter:
         return SendConfirmationEmailPresenter(
-            url_index=url_index, email_configuration=email_configuration
+            url_index=url_index,
+            email_configuration=email_configuration,
+            translator=translator,
         )
 
     @provider
@@ -683,9 +701,9 @@ class FlaskModule(Module):
         self,
         coop_url_index: CoopSummaryUrlIndex,
         company_url_index: CompanySummaryUrlIndex,
-        trans: Translator,
+        translator: Translator,
     ) -> PlanSummaryServiceImpl:
-        return PlanSummaryServiceImpl(coop_url_index, company_url_index, trans)
+        return PlanSummaryServiceImpl(coop_url_index, company_url_index, translator)
 
     @provider
     def provide_query_companies_presenter(
@@ -725,12 +743,10 @@ class FlaskModule(Module):
         coop_index: CoopSummaryUrlIndex,
         renew_plan_index: RenewPlanUrlIndex,
         hide_plan_index: HidePlanUrlIndex,
+        translator: Translator,
     ) -> ShowMyPlansPresenter:
         return ShowMyPlansPresenter(
-            plan_index,
-            coop_index,
-            renew_plan_index,
-            hide_plan_index,
+            plan_index, coop_index, renew_plan_index, hide_plan_index, translator
         )
 
     @provider
@@ -757,8 +773,9 @@ class FlaskModule(Module):
         self,
         invite_index: InviteUrlIndex,
         coop_index: CoopSummaryUrlIndex,
+        translator: Translator,
     ) -> UserActionResolver:
-        return UserActionResolverImpl(invite_index, coop_index)
+        return UserActionResolverImpl(invite_index, coop_index, translator)
 
     @provider
     def provide_get_plan_summary_success_presenter(
@@ -813,6 +830,12 @@ class FlaskModule(Module):
         self, session: Session
     ) -> InviteWorkerToCompanyController:
         return InviteWorkerToCompanyController(session)
+
+    @provider
+    def provide_invite_worker_to_company_presenter(
+        self, translator: Translator
+    ) -> InviteWorkerToCompanyPresenter:
+        return InviteWorkerToCompanyPresenter(translator)
 
     @provider
     def provide_user_template_renderer(

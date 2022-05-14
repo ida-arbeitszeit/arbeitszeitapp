@@ -4,6 +4,7 @@ from decimal import Decimal
 from typing import Any, Dict, List, Optional
 
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansResponse
+from arbeitszeit_web.translator import Translator
 
 from .url_index import (
     CoopSummaryUrlIndex,
@@ -81,11 +82,12 @@ class ShowMyPlansPresenter:
     coop_url_index: CoopSummaryUrlIndex
     renew_plan_url_index: RenewPlanUrlIndex
     hide_plan_url_index: HidePlanUrlIndex
+    translator: Translator
 
     def present(self, response: ShowMyPlansResponse) -> ShowMyPlansViewModel:
 
         if not response.count_all_plans:
-            notifications = ["Du hast keine Pläne."]
+            notifications = [self.translator.gettext("You don't have any plans.")]
         else:
             notifications = []
         return ShowMyPlansViewModel(
@@ -105,7 +107,7 @@ class ShowMyPlansPresenter:
                         type_of_plan=self.__get_type_of_plan(plan.is_public_service),
                         activation_date=self.__format_date(plan.activation_date),
                         expiration_date=self.__format_date(plan.expiration_date),
-                        expiration_relative=f"{plan.expiration_relative} Tagen"
+                        expiration_relative=f"{plan.expiration_relative}"
                         if plan.expiration_relative is not None
                         else "–",
                         is_available=plan.is_available,
@@ -148,7 +150,11 @@ class ShowMyPlansPresenter:
         )
 
     def __get_type_of_plan(self, is_public_service: bool) -> str:
-        return "Öffentlich" if is_public_service else "Produktiv"
+        return (
+            self.translator.gettext("Public")
+            if is_public_service
+            else self.translator.gettext("Productive")
+        )
 
     def __format_date(self, date: Optional[datetime]) -> str:
         return f"{date.strftime('%d.%m.%y')}" if date else "–"
