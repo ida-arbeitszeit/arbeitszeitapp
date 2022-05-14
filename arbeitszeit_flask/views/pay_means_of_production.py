@@ -28,6 +28,7 @@ class PayMeansOfProductionView:
             return Response(self._render_template(form), status=400)
         use_case_response = self.pay_means_of_production(data)
         self.presenter.present(use_case_response)
+        form = PayMeansOfProductionForm()
         return Response(self._render_template(form), status=200)
 
     def _render_template(self, form: PayMeansOfProductionForm) -> str:
