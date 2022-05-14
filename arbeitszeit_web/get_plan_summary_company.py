@@ -37,9 +37,7 @@ class GetPlanSummaryCompanySuccessPresenter:
         self, response: PlanSummaryCompanySuccess
     ) -> GetPlanSummaryCompanyViewModel:
         return GetPlanSummaryCompanyViewModel(
-            summary=self.plan_summary_service.get_plan_summary_member(
-                response.plan_summary
-            ),
+            summary=self.plan_summary_service.get_plan_summary(response.plan_summary),
             show_action_section=response.current_user_is_planner,
             action=Action(
                 is_available=response.plan_summary.is_available,

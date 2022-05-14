@@ -27,7 +27,7 @@ class PlanSummary:
 
 
 class PlanSummaryService(Protocol):
-    def get_plan_summary_member(self, plan_summary: BusinessPlanSummary) -> PlanSummary:
+    def get_plan_summary(self, plan_summary: BusinessPlanSummary) -> PlanSummary:
         ...
 
 
@@ -37,7 +37,7 @@ class PlanSummaryServiceImpl:
     company_url_index: CompanySummaryUrlIndex
     translator: Translator
 
-    def get_plan_summary_member(self, plan_summary: BusinessPlanSummary) -> PlanSummary:
+    def get_plan_summary(self, plan_summary: BusinessPlanSummary) -> PlanSummary:
         return PlanSummary(
             plan_id=(self.translator.gettext("Plan ID"), str(plan_summary.plan_id)),
             is_active=(
