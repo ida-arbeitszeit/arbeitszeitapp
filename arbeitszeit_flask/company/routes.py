@@ -356,10 +356,10 @@ def transfer_to_worker(view: TransferToWorkerView):
 @CompanyRoute("/company/transfer_to_company", methods=["GET", "POST"])
 @commit_changes
 def transfer_to_company(view: PayMeansOfProductionView):
+    form = PayMeansOfProductionForm(request.form)
     if request.method == "GET":
-        return view.respond_to_get()
+        return view.respond_to_get(form)
     elif request.method == "POST":
-        form = PayMeansOfProductionForm(request.form)
         return view.respond_to_post(form)
 
 

@@ -18,20 +18,20 @@ class PayMeansOfProductionView:
     presenter: PayMeansOfProductionPresenter
     template_renderer: UserTemplateRenderer
 
-    def respond_to_get(self):
-        return Response(self._render_template(), status=200)
+    def respond_to_get(self, form: PayMeansOfProductionForm):
+        return Response(self._render_template(form), status=200)
 
     def respond_to_post(self, form: PayMeansOfProductionForm):
         data = self.controller.process_input_data(form)
         if isinstance(data, PayMeansOfProductionController.MalformedInputData):
             self.presenter.present_malformed_data_warnings(data)
-            return Response(self._render_template(), status=400)
+            return Response(self._render_template(form), status=400)
         use_case_response = self.pay_means_of_production(data)
         self.presenter.present(use_case_response)
-        return Response(self._render_template(), status=200)
-
-    def _render_template(self) -> str:
         form = PayMeansOfProductionForm()
+        return Response(self._render_template(form), status=200)
+
+    def _render_template(self, form: PayMeansOfProductionForm) -> str:
         return self.template_renderer.render_template(
             "company/transfer_to_company.html", context=dict(form=form)
         )
