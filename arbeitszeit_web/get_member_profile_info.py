@@ -31,8 +31,8 @@ class GetMemberProfileInfoPresenter:
     ) -> GetMemberProfileInfoViewModel:
         return GetMemberProfileInfoViewModel(
             member_id=str(use_case_response.id),
-            account_balance=self.translator.ngettext(
-                "%(num).2f hour", "%(num).2f hours", use_case_response.account_balance
+            account_balance=self.translator.gettext(
+                "%(num).2f hours" % dict(num=use_case_response.account_balance)
             ),
             email=use_case_response.email,
             workplaces=[

@@ -1,7 +1,7 @@
 from typing import Dict
 
 
-class TestColors:
+class ColorsTestImpl:
     def __init__(self) -> None:
         self.all_colors = {
             "primary": "primary_color",

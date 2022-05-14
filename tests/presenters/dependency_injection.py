@@ -61,7 +61,7 @@ from tests.email import (
     RegistrationEmailTemplateImpl,
 )
 from tests.plotter import FakePlotter
-from tests.presenters.test_colors import TestColors
+from tests.presenters.test_colors import ColorsTestImpl
 from tests.request import FakeRequest
 from tests.session import FakeSession
 from tests.translator import FakeTranslator
@@ -237,7 +237,7 @@ class PresenterTestsInjector(Module):
         self,
         translator: FakeTranslator,
         plotter: FakePlotter,
-        colors: TestColors,
+        colors: ColorsTestImpl,
         url_index: PlotsUrlIndexImpl,
     ) -> GetStatisticsPresenter:
         return GetStatisticsPresenter(
