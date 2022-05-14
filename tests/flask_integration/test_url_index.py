@@ -70,6 +70,13 @@ class CompanyUrlIndexTests(ViewTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
 
+    def test_request_coop_url_leads_to_functional_url(
+        self,
+    ) -> None:
+        url = self.url_index.get_request_coop_url()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
     def test_end_coop_url_for_existing_plan_and_cooperation_leads_to_functional_url(
         self,
     ) -> None:

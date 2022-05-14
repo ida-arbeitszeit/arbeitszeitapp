@@ -24,6 +24,11 @@
     <a class="button is-danger" href="{{ view_model.action.end_coop_url }}">
         <span>{{ gettext("End") }}</span>
     </a>
+    {% else %}
+    <div>{{ gettext("Join cooperation:") }}</div>
+    <a class="button is-primary" href="{{ view_model.action.request_coop_url }}">
+        <span>{{ gettext("Join") }}</span>
+    </a>
     {% endif %}
     {% endif %}
 </div>
