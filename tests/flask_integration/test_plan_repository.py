@@ -108,15 +108,69 @@ def test_sum_of_active_planned_means_calculated_correctly(
 
 
 @injection_test
+def test_all_active_plans_get_retrieved(
+    repository: PlanRepository,
+    generator: PlanGenerator,
+) -> None:
+    number_of_plans = 5
+    list_of_plans = [
+        generator.create_plan(activation_date=datetime.min)
+        for _ in range(number_of_plans)
+    ]
+    retrieved_plans = list(repository.get_active_plans())
+    assert len(retrieved_plans) == number_of_plans
+    for plan in list_of_plans:
+        assert plan in retrieved_plans
+
+
+@injection_test
+def test_limited_number_of_active_plans_get_retrieved_when_limit_is_specified(
+    repository: PlanRepository,
+    generator: PlanGenerator,
+) -> None:
+    number_of_plans = 5
+    limit = 3
+    list_of_plans = [
+        generator.create_plan(activation_date=datetime.min)
+        for _ in range(number_of_plans)
+    ]
+    retrieved_plans = list(repository.get_active_plans(limit=limit))
+    assert len(retrieved_plans) == limit
+    for plan in list_of_plans[:limit]:
+        assert plan in retrieved_plans
+
+
+@injection_test
+def test_plans_get_retrieved_in_correct_order_when_order_is_specified(
+    repository: PlanRepository,
+    generator: PlanGenerator,
+    datetime_service: FakeDatetimeService,
+) -> None:
+    activation_dates = [
+        datetime_service.now_minus_ten_days(),
+        datetime_service.now(),
+        datetime_service.now_minus_20_hours(),
+        datetime_service.now_minus_25_hours(),
+        datetime_service.now_minus_one_day(),
+    ]
+    plans = [generator.create_plan(activation_date=date) for date in activation_dates]
+    retrieved_plans = list(repository.get_active_plans(order_by_activation_date=True))
+    assert retrieved_plans[0] == plans[1]
+    assert retrieved_plans[1] == plans[2]
+    assert retrieved_plans[2] == plans[4]
+    assert retrieved_plans[3] == plans[3]
+    assert retrieved_plans[4] == plans[0]
+
+
+@injection_test
 def test_plans_that_were_set_to_expired_dont_show_up_in_active_plans(
     repository: PlanRepository,
     generator: PlanGenerator,
 ) -> None:
-    plan = generator.create_plan()
-    repository.activate_plan(plan, datetime.now())
-    assert plan in list(repository.all_active_plans())
+    plan = generator.create_plan(activation_date=datetime.min)
+    assert plan in list(repository.get_active_plans())
     repository.set_plan_as_expired(plan)
-    assert plan not in list(repository.all_active_plans())
+    assert plan not in list(repository.get_active_plans())
 
 
 @injection_test

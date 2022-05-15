@@ -387,10 +387,21 @@ class PlanRepository(interfaces.PlanRepository):
     def increase_payout_count_by_one(self, plan: Plan) -> None:
         plan.payout_count += 1
 
-    def all_active_plans(self) -> Iterator[Plan]:
-        for plan in self.plans.values():
-            if plan.is_active:
-                yield plan
+    def get_active_plans(
+        self, limit: Optional[int] = None, order_by_activation_date: bool = False
+    ) -> Iterator[Plan]:
+        active_plans = [plan for plan in self.plans.values() if plan.is_active]
+        if order_by_activation_date:
+            active_plans = sorted(
+                active_plans,
+                key=lambda x: x.activation_date if x.activation_date is not None else 0,
+                reverse=True,
+            )
+        for count, plan in enumerate(active_plans):
+            if limit is not None:
+                if count - 1 == limit:
+                    break
+            yield plan
 
     def count_active_plans(self) -> int:
         return len([plan for plan in self.plans.values() if plan.is_active])

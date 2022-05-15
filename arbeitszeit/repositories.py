@@ -91,7 +91,9 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def all_active_plans(self) -> Iterator[Plan]:
+    def get_active_plans(
+        self, limit: Optional[int] = ..., order_by_activation_date: bool = ...
+    ) -> Iterator[Plan]:
         pass
 
     @abstractmethod
