@@ -24,6 +24,7 @@ from arbeitszeit.use_cases import (
     GetCompanySummary,
     ReadMessage,
 )
+from arbeitszeit.use_cases.create_cooperation import CreateCooperation
 from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
 from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
 from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
@@ -90,6 +91,7 @@ from arbeitszeit_flask.url_index import (
     MemberUrlIndex,
 )
 from arbeitszeit_flask.views import EndCooperationView, Http404View, ReadMessageView
+from arbeitszeit_flask.views.create_cooperation_view import CreateCooperationView
 from arbeitszeit_flask.views.create_draft_view import CreateDraftView
 from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
 from arbeitszeit_flask.views.transfer_to_worker_view import TransferToWorkerView
@@ -118,6 +120,7 @@ from arbeitszeit_web.controllers.show_company_work_invite_details_controller imp
 from arbeitszeit_web.controllers.show_my_accounts_controller import (
     ShowMyAccountsController,
 )
+from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
 from arbeitszeit_web.email import EmailConfiguration, UserAddressBook
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
@@ -348,6 +351,18 @@ class CompanyModule(Module):
     @provider
     def provide_template_index(self) -> TemplateIndex:
         return CompanyTemplateIndex()
+
+    @provider
+    def provide_create_cooperation_view(
+        self,
+        create_cooperation: CreateCooperation,
+        presenter: CreateCooperationPresenter,
+        template_renderer: UserTemplateRenderer,
+        session: FlaskSession,
+    ) -> CreateCooperationView:
+        return CreateCooperationView(
+            create_cooperation, presenter, template_renderer, session
+        )
 
     @provider
     def provide_end_cooperation_view(
