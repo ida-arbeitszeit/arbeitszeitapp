@@ -26,6 +26,7 @@ from arbeitszeit.use_cases import (
 )
 from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
 from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
+from arbeitszeit.use_cases.get_latest_activated_plans import GetLatestActivatedPlans
 from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
 from arbeitszeit.use_cases.list_workers import ListWorkers
 from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProduction
@@ -91,6 +92,7 @@ from arbeitszeit_flask.url_index import (
 )
 from arbeitszeit_flask.views import EndCooperationView, Http404View, ReadMessageView
 from arbeitszeit_flask.views.create_draft_view import CreateDraftView
+from arbeitszeit_flask.views.dashboard_view import DashboardView
 from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
 from arbeitszeit_flask.views.transfer_to_worker_view import TransferToWorkerView
 from arbeitszeit_web.answer_company_work_invite import (
@@ -147,6 +149,9 @@ from arbeitszeit_web.presenters.accountant_invitation_presenter import (
     AccountantInvitationEmailView,
 )
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
+from arbeitszeit_web.presenters.get_latest_activated_plans_presenter import (
+    GetLatestActivatedPlansPresenter,
+)
 from arbeitszeit_web.presenters.register_company_presenter import (
     RegisterCompanyPresenter,
 )
@@ -499,6 +504,23 @@ class CompanyModule(Module):
         self, translator: Translator
     ) -> GetCompanyTransactionsPresenter:
         return GetCompanyTransactionsPresenter(translator=translator)
+
+    @provider
+    def provide_dashboard_view(
+        self,
+        list_workers_use_case: ListWorkers,
+        get_latest_plans_use_case: GetLatestActivatedPlans,
+        get_latest_plans_presenter: GetLatestActivatedPlansPresenter,
+        template_renderer: UserTemplateRenderer,
+        flask_session: FlaskSession,
+    ) -> DashboardView:
+        return DashboardView(
+            list_workers_use_case,
+            get_latest_plans_use_case,
+            get_latest_plans_presenter,
+            template_renderer,
+            flask_session,
+        )
 
 
 class FlaskModule(Module):
@@ -916,6 +938,12 @@ class FlaskModule(Module):
         account_repository: AccountRepository,
     ) -> ShowMyAccounts:
         return ShowMyAccounts(company_repository, account_repository)
+
+    @provider
+    def provide_get_latest_activated_plans_presenter(
+        self, url_index: PlanSummaryUrlIndex
+    ) -> GetLatestActivatedPlansPresenter:
+        return GetLatestActivatedPlansPresenter(url_index=url_index)
 
     def configure(self, binder: Binder) -> None:
         binder.bind(

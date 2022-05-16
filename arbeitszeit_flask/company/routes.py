@@ -29,11 +29,7 @@ from arbeitszeit.use_cases import (
     ToggleProductAvailability,
 )
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
-from arbeitszeit_flask.database import (
-    CompanyRepository,
-    CompanyWorkerRepository,
-    commit_changes,
-)
+from arbeitszeit_flask.database import CompanyRepository, commit_changes
 from arbeitszeit_flask.forms import (
     CompanySearchForm,
     CreateDraftForm,
@@ -55,6 +51,7 @@ from arbeitszeit_flask.views import (
     RequestCooperationView,
 )
 from arbeitszeit_flask.views.create_draft_view import CreateDraftView
+from arbeitszeit_flask.views.dashboard_view import DashboardView
 from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
 from arbeitszeit_flask.views.transfer_to_worker_view import TransferToWorkerView
@@ -90,32 +87,13 @@ from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from arbeitszeit_web.show_p_account_details import ShowPAccountDetailsPresenter
 from arbeitszeit_web.show_r_account_details import ShowRAccountDetailsPresenter
-from arbeitszeit_web.translator import Translator
 
 from .blueprint import CompanyRoute
 
 
 @CompanyRoute("/company/dashboard")
-def dashboard(
-    company_repository: CompanyRepository,
-    company_worker_repository: CompanyWorkerRepository,
-    template_renderer: UserTemplateRenderer,
-    translator: Translator,
-):
-    company = company_repository.get_by_id(UUID(current_user.id))
-    assert company is not None
-    worker = list(company_worker_repository.get_company_workers(company))
-    if worker:
-        having_workers = True
-    else:
-        having_workers = False
-    return template_renderer.render_template(
-        "company/dashboard.html",
-        context=dict(
-            having_workers=having_workers,
-            welcome_message=translator.gettext("Welcome, %s!") % current_user.name,
-        ),
-    )
+def dashboard(view: DashboardView):
+    return view.respond_to_get()
 
 
 @CompanyRoute("/company/query_plans", methods=["GET", "POST"])

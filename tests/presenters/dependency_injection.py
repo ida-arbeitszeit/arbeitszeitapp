@@ -25,6 +25,9 @@ from arbeitszeit_web.presenters.accountant_invitation_presenter import (
     AccountantInvitationEmailPresenter,
 )
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
+from arbeitszeit_web.presenters.get_latest_activated_plans_presenter import (
+    GetLatestActivatedPlansPresenter,
+)
 from arbeitszeit_web.presenters.register_company_presenter import (
     RegisterCompanyPresenter,
 )
@@ -487,6 +490,12 @@ class PresenterTestsInjector(Module):
         self, translator: FakeTranslator
     ) -> InviteWorkerToCompanyPresenter:
         return InviteWorkerToCompanyPresenter(translator=translator)
+
+    @provider
+    def provide_get_latest_activated_plans_presenter(
+        self, url_index: PlanSummaryUrlIndexTestImpl
+    ) -> GetLatestActivatedPlansPresenter:
+        return GetLatestActivatedPlansPresenter(url_index=url_index)
 
 
 def get_dependency_injector() -> Injector:

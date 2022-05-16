@@ -399,7 +399,7 @@ class PlanRepository(interfaces.PlanRepository):
             )
         for count, plan in enumerate(active_plans):
             if limit is not None:
-                if count - 1 == limit:
+                if count == limit:
                     break
             yield plan
 
