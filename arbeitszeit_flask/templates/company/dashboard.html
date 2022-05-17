@@ -105,12 +105,6 @@
             </a>
         </div>
         <div class="tile is-ancestor">
-            <a class="tile is-parent" href="{{ url_for('main_company.my_drafts') }}">
-                <div class="tile is-child box has-background-primary-light">
-                    <h1 class="title is-5">{{ gettext("Plan drafts") }}</h1>
-                    <div class="subtitle is-6">{{ gettext("Your saved plan drafts") }}</div>
-                </div>
-            </a>
             <a class="tile is-parent" href="{{ url_for('main_company.my_cooperations') }}">
                 <div class="tile is-child box has-background-primary-light">
                     <h1 class="title is-5"><span class="icon"><i class="fas fa-hands-helping"></i></span> {{
@@ -127,8 +121,6 @@
                     <div class="subtitle is-6">{{ gettext("Your purchases") }}</div>
                 </div>
             </a>
-        </div>
-        <div class="tile is-ancestor">
             <a class="tile is-parent" href="{{ url_for('main_company.list_messages') }}">
                 <div class="tile is-child box has-background-primary-light">
                     <h1
@@ -143,8 +135,6 @@
                     </div>
                 </div>
             </a>
-            <div class="tile is-parent"></div>
-            <div class="tile is-parent"></div>
         </div>
         <div class="has-text-centered py-5">
             <h1 class="title is-3">{{ gettext("Social accounting") }}</h1>
