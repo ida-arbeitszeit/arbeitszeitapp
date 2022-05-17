@@ -11,128 +11,137 @@
     </h1>
     <div class="columns is-centered">
         <div class="column is-three-fifths">
-            <p class="pb-5"><a class="is-italic" href="{{ url_for('main_company.my_drafts') }}">
-                    {{ gettext("(Load a draft)") }}</a></p>
-            <div class="box has-background-info-light has-text-info-dark">
-                <div class="icon"><i class="fas fa-info-circle"></i></div>
-                <p>
-                    {{ gettext("Create your plan here.") }} <br><br>
-                    {{ gettext("Choose a <b>product name</b>,
-                    <b>product description</b> and <b>planning timeframe</b>.
-                    In this timeframe you are planning to produce and deliver a certain <b>amount</b> of <b>units</b>
-                    of a certain product.") }} <br>
-                    {{ gettext("Next, estimate what costs for <b>fixed means of production</b>, <b>liquid means of
-                        production</b> and <b>labour</b> you will have in the given
-                    timeframe. (You should be able to buy your means of production and labour within this
-                    application!)")
-                    }}<br>
-                    {{ gettext("Finally, select if your plan is <b>productive</b> or <b>public</b>.") }}
-                </p>
-            </div>
+            <p class="pb-5 has-text-right">
+                <a class="" href="{{ url_for('main_company.my_drafts') }}">
+                    <span class="icon"><i class="fa-regular fa-floppy-disk"></i></span>
+                    {{ gettext("Load a draft") }}</a>
+            </p>
             <form method="post">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div class="field">
-                    <label class="label">{{ gettext("Product name")}}</label>
-                    <div class="control">
-                        <input class="input is-large" , type="text" , name="prd_name" ,
-                            value="{{ prefilled.product_name if prefilled else '' }}" required>
+                <div class="pb-2 has-text-info-dark">
+                    {{ gettext("Specify product name and description.") }}
+                </div>
+                <div class="box has-background-info-light">   
+                    <div class="field">
+                        <label class="label">{{ gettext("Product name")}}</label>
+                        <div class="control">
+                            <input class="input is-large" type="text" name="prd_name"
+                                value="{{ prefilled.product_name if prefilled else '' }}" required>
+                        </div>
+                    </div>
+                    <div class="block"></div>
+                    <div class="field">
+                        <label class="label">{{ gettext("Product description")}}</label>
+                        <div class="control">
+                            <textarea class="textarea" name="description"
+                                required>{{ prefilled.description if prefilled else '' }}</textarea>
+                        </div>
                     </div>
                 </div>
-                <div class="block"></div>
-                <div class="field">
-                    <label class="label">{{ gettext("Product description")}}</label>
-                    <div class="control">
-                        <textarea class="textarea is-large" , name="description"
-                            required>{{ prefilled.description if prefilled else '' }}</textarea>
+                <div class="block py-2"></div>
+                <div class="pb-2 has-text-info-dark">
+                    {{ gettext("Choose a planning timeframe in which you are planning to produce and deliver your product.") }}
+                </div>
+                <div class="box has-background-info-light">
+                    <div class="field">   
+                        <label class="label">{{ gettext("Planning timeframe (days)")}}</label>
+                        <div class="control">
+                            <input class="input is-large" type="number" name="timeframe" min=1 max=365
+                                value="{{ prefilled.timeframe if prefilled else 1 }}" required>
+                        </div>
                     </div>
                 </div>
-                <div class="block"></div>
-                <div class="field">
-                    <label class="label">{{ gettext("Planning timeframe (days)")}}</label>
-                    <div class="control">
-                        <input class="input is-large" type="number" name="timeframe" min=1 max=365
-                            value="{{ prefilled.timeframe if prefilled else 1 }}" required>
+                <div class="block py-2"></div>
+                <div class="pb-2 has-text-info-dark">
+                    {{ gettext("Estimate what costs you will have in the given timeframe.") }}
+                </div>
+                <div class="box has-background-info-light">
+                    <div class="field">
+                        <label class="label">{{ gettext("Costs for fixed means of production")}}</label>
+                        <div class="control">
+                            <input class="input is-large" type="number" name="costs_p" min=0
+                                value="{{ prefilled.means_cost if prefilled else 0 }}" required>
+                        </div>
+                    </div>
+                    <div class="block"></div>
+                    <div class="field">
+                        <label class="label">{{ gettext("Costs for liquid means of production")}}</label>
+                        <div class="control">
+                            <input class="input is-large" type="number" name="costs_r" min=0
+                                value="{{ prefilled.resources_cost if prefilled else 0 }}" required>
+                        </div>
+                    </div>
+                    <div class="block"></div>
+                    <div class="field">
+                        <label class="label">{{ gettext("Costs for labour")}}</label>
+                        <div class="control">
+                            <input class="input is-large" type="number" name="costs_a" min=0
+                                value="{{ prefilled.labour_cost if prefilled else 0 }}" required>
+                        </div>
                     </div>
                 </div>
-                <div class="block"></div>
-                <div class="field">
-                    <label class="label">{{ gettext("Smallest delivery unit")}}</label>
-                    <div class="control">
-                        <input class="input is-large" , type="text" , name="prd_unit" ,
-                            value="{{ prefilled.production_unit if prefilled else '1 Kg' }}" , required>
-                        <p class="help">{{ gettext("E.g. 1 package of 100 pieces, 1 kilogram, 1 bottle of 0.5 liters, 1
-                            meter, 1 language lesson of 1.5 hour, etc.")}}</p>
+                <div class="block py-2"></div>
+                <div class="pb-2 has-text-info-dark">
+                    {{ gettext("Describe the smallest delivery unit and what amount of these units you will produce.") }}
+                </div>
+                <div class="box has-background-info-light">
+                    <div class="field">                 
+                        <label class="label">{{ gettext("Smallest delivery unit")}}</label>
+                        <div class="control">
+                            <input class="input is-large" type="text" name="prd_unit"
+                                value="{{ prefilled.production_unit if prefilled else '1 Kg' }}" required>
+                            <p class="help">{{ gettext("E.g. 1 package of 100 pieces, 1 kilogram, 1 language lesson of 1.5 hour, etc.")}}</p>
+                        </div>
+                    </div>
+                    <div class="block"></div>
+                    <div class="field">
+                        <label class="label">{{ gettext("Amount")}}</label>
+                        <div class="control">
+                            <input class="input is-large" type="number" name="prd_amount" min=1
+                                value="{{ prefilled.amount if prefilled else 1 }}" required>
+                        </div>
                     </div>
                 </div>
-                <div class="block"></div>
-                <div class="field">
-                    <label class="label">{{ gettext("Amount")}}</label>
-                    <div class="control">
-                        <input class="input is-large" type="number" name="prd_amount" min=1
-                            value="{{ prefilled.amount if prefilled else 1 }}" required>
-                        <p class="help">{{ gettext("How many units will be produced and delivered?")}}</p>
+                <div class="block py-2"></div>
+                <div class="pb-2 has-text-info-dark">
+                    {{ gettext("The type of plan.") }}
+                </div>
+                <div class="box has-background-info-light">
+                    <div class="field">
+                        <label class="label">{{ gettext("Type")}}</label>
+                        <div class="control">
+                            <label class="radio">
+                                <input type="radio" name="productive_or_public" value="productive" required {% if prefilled
+                                    and not prefilled.is_public_service %} checked {% endif %}>
+                                {{ gettext("Productive")}}
+                            </label>
+                            <label class="radio">
+                                <input type="radio" name="productive_or_public" value="public" {% if prefilled and
+                                    prefilled.is_public_service %} checked {% endif %}>
+                                {{ gettext("Public")}}
+                            </label>
+                            <p class="help">{{ gettext("Productive plans are the norm.")}}</p>
+                        </div>
                     </div>
                 </div>
-                <div class="block"></div>
-                <div class="field">
-                    <label class="label">{{ gettext("Costs for fixed means of production")}}</label>
-                    <div class="control">
-                        <input class="input is-large" type="number" name="costs_p" min=0
-                            value="{{ prefilled.means_cost if prefilled else 0 }}" required>
-                    </div>
-                </div>
-                <div class="block"></div>
-                <div class="field">
-                    <label class="label">{{ gettext("Costs for liquid means of production")}}</label>
-                    <div class="control">
-                        <input class="input is-large" type="number" name="costs_r" min=0
-                            value="{{ prefilled.resources_cost if prefilled else 0 }}" required>
-                    </div>
-                </div>
-                <div class="block"></div>
-                <div class="field">
-                    <label class="label">{{ gettext("Costs for labour")}}</label>
-                    <div class="control">
-                        <input class="input is-large" type="number" name="costs_a" min=0
-                            value="{{ prefilled.labour_cost if prefilled else 0 }}" required>
-                    </div>
-                </div>
-                <div class="block"></div>
-                <div class="field">
-                    <label class="label">{{ gettext("Type")}}</label>
-                    <div class="control">
-                        <label class="radio">
-                            <input type="radio" name="productive_or_public" value="productive" required {% if prefilled
-                                and not prefilled.is_public_service %} checked {% endif %}>
-                            {{ gettext("Productive")}}
-                        </label>
-                        <label class="radio">
-                            <input type="radio" name="productive_or_public" value="public" {% if prefilled and
-                                prefilled.is_public_service %} checked {% endif %}>
-                            {{ gettext("Public")}}
-                        </label>
-                        <p class="help">{{ gettext("Productive plans are the norm.")}}</p>
-                    </div>
-                </div>
-                <div class="box has-background-danger-light has-text-danger-dark">
-                    <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
-                    <p>
-                        {{ gettext("Plans cannot be changed after submission!")}}
-                        <br>
-                    </p>
+                <div class="block py-2"></div>
+                <div class="has-text-danger-dark">
+                    {{ gettext("Plans cannot be changed after submission!")}}
                 </div>
         </div>
     </div>
     <div class="field is-grouped is-grouped-centered">
         <div class="control">
-            <div class="field is-grouped is-grouped-centered">
+                <button class="button is-danger is-light" name="action" value="file_draft" type="submit">
+                    {{ gettext("Submit plan")}}</button>
+        </div>
+        <div class="control">
+                <button class="button is-primary is-light" name="action" value="save_draft" type="submit">
+                    {{ gettext("Save as draft")}}</button>
+        </div>
+        <div class="control">
                 <button class="button is-light" name="action" value="cancel" type="submit" formnovalidate>{{
                     gettext("Cancel")}}</button>
-                <button class="button is-primary" name="action" value="save_draft" type="submit">{{ gettext("Save as
-                    draft")}}</button>
-                <button class="button is-danger" name="action" value="file_draft" type="submit">{{ gettext("Submit
-                    plan")}}</button>
-            </div>
         </div>
     </div>
     </form>
