@@ -6,7 +6,7 @@ from flask import url_for
 
 class GeneralUrlIndex:
     def get_accountant_invitation_url(self, token: str) -> str:
-        return "/not/implemented/yet"
+        return url_for("auth.signup_accountant", token=token)
 
 
 class MemberUrlIndex:
