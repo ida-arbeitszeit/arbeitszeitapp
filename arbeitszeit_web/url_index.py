@@ -43,6 +43,11 @@ class HidePlanUrlIndex(Protocol):
         ...
 
 
+class RequestCoopUrlIndex(Protocol):
+    def get_request_coop_url(self) -> str:
+        ...
+
+
 class EndCoopUrlIndex(Protocol):
     def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
         ...

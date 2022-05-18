@@ -9,11 +9,16 @@ from arbeitszeit.use_cases.get_company_summary import (
     GetCompanySummarySuccess,
     PlanDetails,
 )
-from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
+from arbeitszeit_web.get_company_summary import (
+    Deviation,
+    GetCompanySummarySuccessPresenter,
+)
 from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
 from .url_index import PlanSummaryUrlIndexTestImpl
+
+THRESHOLD_DEVIATION_TEST = 33
 
 RESPONSE_WITH_2_PLANS = GetCompanySummarySuccess(
     id=uuid4(),
@@ -27,7 +32,7 @@ RESPONSE_WITH_2_PLANS = GetCompanySummarySuccess(
         Decimal("1"), Decimal("2"), Decimal("3"), Decimal("-4.561")
     ),
     deviations_relative=[
-        Decimal("100"),
+        Decimal("Infinity"),
         Decimal("20"),
         Decimal("-300"),
         Decimal("-4.561"),
@@ -84,9 +89,20 @@ class GetGetCompanySummaryPresenterTests(TestCase):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
         self.assertEqual(view_model.account_balances, ["1.00", "2.00", "3.00", "-4.56"])
 
-    def test_company_relative_deviations_are_shown_as_list_of_strings(self):
+    def test_company_relative_deviations_is_list_of_four_deviation_objects(self):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
-        self.assertEqual(view_model.deviations_relative, ["100", "20", "-300", "-5"])
+        self.assertEqual(len(view_model.deviations_relative), 4)
+        self.assertIsInstance(view_model.deviations_relative[0], Deviation)
+
+    def test_company_relative_deviations_shows_correct_percentages_and_critical_status(
+        self,
+    ):
+        view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
+        expected_percentages = ["inf", "20", "-300", "-5"]
+        expected_status = [True, False, True, False]
+        for count, deviation in enumerate(view_model.deviations_relative):
+            self.assertEqual(deviation.percentage, expected_percentages[count])
+            self.assertEqual(deviation.is_critical, expected_status[count])
 
     def test_ids_of_plans_are_shown(self):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
@@ -147,6 +163,13 @@ class GetGetCompanySummaryPresenterTests(TestCase):
             f"{round(RESPONSE_WITH_2_PLANS.plan_details[0].sales_balance, 2)}",
         )
         self.assertEqual(
-            view_model.plan_details[0].deviation_relative,
+            view_model.plan_details[0].deviation_relative.percentage,
             f"{round(RESPONSE_WITH_2_PLANS.plan_details[0].deviation_relative)}",
+        )
+        self.assertEqual(
+            view_model.plan_details[0].deviation_relative.is_critical,
+            bool(
+                RESPONSE_WITH_2_PLANS.plan_details[0].deviation_relative
+                >= THRESHOLD_DEVIATION_TEST
+            ),
         )

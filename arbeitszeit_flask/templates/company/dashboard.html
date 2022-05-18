@@ -29,7 +29,7 @@
             <div class="column"></div>
         </div>
         <div class="has-text-centered py-5">
-            <h1 class="title is-3">{{ gettext("Actions") }}</h1>
+            <h1 class="title is-3">{{ gettext("Frequent actions") }}</h1>
         </div>
         <div class="tile is-ancestor">
             <a class="tile is-parent" href="{{ url_for('main_company.create_draft') }}">
@@ -50,29 +50,6 @@
                 <div class="tile is-child box has-background-danger-light">
                     <h1 class="title is-5"><span class="icon"><i class="fa-regular fa-credit-card"></i></span>
                         {{ gettext("Pay workers") }}</h1>
-                    <div class="subtitle"></div>
-                </div>
-            </a>
-        </div>
-        <div class="tile is-ancestor">
-            <a class="tile is-parent" href="{{ url_for('main_company.create_cooperation') }}">
-                <div class="tile is-child box has-background-danger-light">
-                    <h1 class="title is-5"><span class="icon"><i class="fas fa-hands-helping"></i></span> {{
-                        gettext("Create Cooperation") }}</h1>
-                    <div class="subtitle"></div>
-                </div>
-            </a>
-            <a class="tile is-parent" href="{{ url_for('main_company.request_cooperation') }}">
-                <div class="tile is-child box has-background-danger-light">
-                    <h1 class="title is-5"><span class="icon"><i class="fas fa-hands-helping"></i></span> {{
-                        gettext("Join cooperation") }}</h1>
-                    <div class="subtitle"></div>
-                </div>
-            </a>
-            <a class="tile is-parent" href="{{ url_for('main_company.invite_worker_to_company') }}">
-                <div class="tile is-child box has-background-danger-light">
-                    <h1 class="title is-5"><span class="icon"><i class="fa-solid fa-users"></i></span> {{
-                        gettext("Invite workers") }}</h1>
                     <div class="subtitle"></div>
                 </div>
             </a>
@@ -117,7 +94,7 @@
                     <h1 class="title is-5"><span class="icon"><i class="fas fa-hands-helping"></i></span> {{
                         gettext("Cooperations") }}
                     </h1>
-                    <div class="subtitle is-6">{{("Cooperations you are coordinating")}}</div>
+                    <div class="subtitle is-6">{{("Your cooperations")}}</div>
                 </div>
             </a>
             <a class="tile is-parent" href="{{ url_for('main_company.my_purchases') }}">
@@ -130,6 +107,13 @@
             </a>
         </div>
         <div class="tile is-ancestor">
+            <a class="tile is-parent" href="{{ url_for('main_company.invite_worker_to_company') }}">
+                <div class="tile is-child box has-background-primary-light">
+                    <h1 class="title is-5"><span class="icon"><i class="fa-solid fa-users"></i></span> {{
+                        gettext("Workers") }}</h1>
+                    <div class="subtitle is-6">{{ gettext("Members of your collective") }}</div>
+                </div>
+            </a>
             <a class="tile is-parent" href="{{ url_for('main_company.list_messages') }}">
                 <div class="tile is-child box has-background-primary-light">
                     <h1
@@ -138,18 +122,16 @@
                         {{ gettext("Messages") }}
                     </h1>
                     <div class="subtitle is-6">{% if message_indicator is defined %}{% if
-                        message_indicator.show_unread_messages_indicator %}{{ gettext("You received a new message")
-                        }}{%
+                        message_indicator.show_unread_messages_indicator %}{{ gettext("You have new messages") }}{%
                         else %}{{ gettext("No new messages") }}{% endif %}{%
                         endif %}
                     </div>
                 </div>
             </a>
             <div class="tile is-parent"></div>
-            <div class="tile is-parent"></div>
         </div>
         <div class="has-text-centered py-5">
-            <h1 class="title is-3">{{ gettext("Social accounting") }}</h1>
+            <h1 class="title is-3">{{ gettext("Public accounting") }}</h1>
         </div>
         <div class="tile is-ancestor">
             <div class="tile is-parent"></div>
@@ -176,7 +158,7 @@
             <a class="tile is-parent" href="{{ url_for('main_company.statistics') }}">
                 <div class="tile is-child box has-background-warning-light">
                     <h1 class="title is-5"><span class="icon"><i class="fa-solid fa-chart-pie"></i></span> {{
-                        gettext("Statistics") }}
+                        gettext("Global statistics") }}
                     </h1>
                     <div class="subtitle"></div>
                 </div>

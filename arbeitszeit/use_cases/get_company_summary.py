@@ -1,6 +1,6 @@
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from decimal import Decimal
+from decimal import Decimal, DivisionByZero, InvalidOperation
 from typing import List, Optional
 from uuid import UUID
 
@@ -78,18 +78,11 @@ class GetCompanySummary:
             expectations=expectations,
             account_balances=account_balances,
             deviations_relative=[
-                abs(account_balances.means / expectations.means) * 100
-                if expectations.means
-                else Decimal(0),
-                abs(account_balances.raw_material / expectations.raw_material) * 100
-                if expectations.raw_material
-                else Decimal(0),
-                abs(account_balances.work / expectations.work) * 100
-                if expectations.work
-                else Decimal(0),
-                abs(account_balances.product / expectations.product) * 100
-                if expectations.product
-                else Decimal(0),
+                self._calculate_deviation(
+                    asdict(account_balances)[account_name],
+                    asdict(expectations)[account_name],
+                )
+                for account_name in ["means", "raw_material", "work", "product"]
             ],
             plan_details=[self._get_plan_details(plan) for plan in plans],
         )
@@ -99,18 +92,15 @@ class GetCompanySummary:
         sales_balance_of_plan = self.transaction_repository.get_sales_balance_of_plan(
             plan
         )
-        sales_deviation_relative = (
-            abs(sales_balance_of_plan / expected_sales_volume) * 100
-            if expected_sales_volume
-            else Decimal(0)
-        )
         return PlanDetails(
             id=plan.id,
             name=plan.prd_name,
             is_active=plan.is_active,
             sales_volume=expected_sales_volume,
             sales_balance=sales_balance_of_plan,
-            deviation_relative=sales_deviation_relative,
+            deviation_relative=self._calculate_deviation(
+                sales_balance_of_plan, expected_sales_volume
+            ),
         )
 
     def _get_expectations(self, company: Company) -> Expectations:
@@ -136,10 +126,10 @@ class GetCompanySummary:
             ]
         )
         return Expectations(
-            credits[0],
-            credits[1],
-            credits[2],
-            expected_sales,
+            means=credits[0],
+            raw_material=credits[1],
+            work=credits[2],
+            product=expected_sales,
         )
 
     def _get_account_balances(self, company: Company) -> AccountBalances:
@@ -153,3 +143,15 @@ class GetCompanySummary:
             account_balances[2],
             account_balances[3],
         )
+
+    def _calculate_deviation(
+        self,
+        account_balance: Decimal,
+        expectation: Decimal,
+    ) -> Decimal:
+        try:
+            return abs(account_balance / expectation) * 100
+        except InvalidOperation:  # zero devided by zero
+            return Decimal(0)
+        except DivisionByZero:  # non-zero devided by zero
+            return Decimal("Infinity")

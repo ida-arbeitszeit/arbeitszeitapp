@@ -6,11 +6,25 @@
 
 {% block company %}
 <div class="section has-text-centered">
-    <div class="content">
-        <h1 class="title">
-            {{ gettext("Cooperations that I coordinate") }}
-        </h1>
+    <h1 class="title">
+        {{ gettext("My cooperations") }}
+    </h1>
+
+    <div class="tile is-ancestor">
+        <div class="tile is-parent"></div>
+        <a class="tile is-parent" href="{{ url_for('main_company.create_cooperation') }}">
+            <div class="tile is-child box has-background-primary-light">
+                <h1 class="title is-5"><span class="icon"><i class="fas fa-hands-helping"></i></span>
+                    {{ gettext("Create cooperation ") }}</h1>
+                <div class="subtitle"></div>
+            </div>
+        </a>
+        <div class="tile is-parent"></div>
     </div>
+
+    <h1 class="title is-4">
+        {{ gettext("Cooperations that I coordinate") }}
+    </h1>
     {% if accept_message or deny_message or cancel_message %}
     <div class="block"></div>
     {% for message in accept_message %}
@@ -55,7 +69,7 @@
         {% endif %}
     </div>
     <div class="content">
-        <h1 class="title">
+        <h1 class="title is-4">
             {{ gettext("Incoming cooperation request (by others)") }}
         </h1>
     </div>
@@ -112,7 +126,7 @@
     </div>
 
     <div class="content">
-        <h1 class="title">
+        <h1 class="title is-4">
             {{ gettext("Outgoing cooperation requests (own requests)") }}
         </h1>
     </div>
