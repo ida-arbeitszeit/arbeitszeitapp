@@ -196,6 +196,7 @@ from arbeitszeit_web.url_index import (
     PlanSummaryUrlIndex,
     PlotsUrlIndex,
     RenewPlanUrlIndex,
+    RequestCoopUrlIndex,
     TogglePlanAvailabilityUrlIndex,
 )
 from arbeitszeit_web.user_action import UserActionResolver, UserActionResolverImpl
@@ -242,6 +243,12 @@ class MemberModule(Module):
     def provide_message_url_index(
         self, member_index: MemberUrlIndex
     ) -> MessageUrlIndex:
+        return member_index
+
+    @provider
+    def provide_request_coop_url_index(
+        self, member_index: MemberUrlIndex
+    ) -> RequestCoopUrlIndex:
         return member_index
 
     @provider
@@ -318,6 +325,12 @@ class CompanyModule(Module):
     def provide_hide_plan_url_index(
         self, company_index: CompanyUrlIndex
     ) -> HidePlanUrlIndex:
+        return company_index
+
+    @provider
+    def provide_request_coop_url_index(
+        self, company_index: CompanyUrlIndex
+    ) -> RequestCoopUrlIndex:
         return company_index
 
     @provider
@@ -790,11 +803,16 @@ class FlaskModule(Module):
         self,
         toggle_availability_index: TogglePlanAvailabilityUrlIndex,
         end_coop_url_index: EndCoopUrlIndex,
+        request_coop_url_index: RequestCoopUrlIndex,
         trans: Translator,
         plan_summary_service: PlanSummaryServiceImpl,
     ) -> GetPlanSummaryCompanySuccessPresenter:
         return GetPlanSummaryCompanySuccessPresenter(
-            toggle_availability_index, end_coop_url_index, trans, plan_summary_service
+            toggle_availability_index,
+            end_coop_url_index,
+            request_coop_url_index,
+            trans,
+            plan_summary_service,
         )
 
     @provider

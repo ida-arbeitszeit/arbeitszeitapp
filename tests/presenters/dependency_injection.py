@@ -83,6 +83,7 @@ from .url_index import (
     PlanSummaryUrlIndexTestImpl,
     PlotsUrlIndexImpl,
     RenewPlanUrlIndex,
+    RequestCoopUrlIndexTestImpl,
     TogglePlanAvailabilityUrlIndex,
 )
 from .user_action_resolver import UserActionResolver
@@ -222,12 +223,14 @@ class PresenterTestsInjector(Module):
         self,
         toggle_availability_url_index: TogglePlanAvailabilityUrlIndex,
         end_coop_url_index: EndCoopUrlIndexTestImpl,
+        request_coop_url_index: RequestCoopUrlIndexTestImpl,
         translator: FakeTranslator,
         plan_summary_service: PlanSummaryService,
     ) -> GetPlanSummaryCompanySuccessPresenter:
         return GetPlanSummaryCompanySuccessPresenter(
             toggle_availability_url_index=toggle_availability_url_index,
             end_coop_url_index=end_coop_url_index,
+            request_coop_url_index=request_coop_url_index,
             trans=translator,
             plan_summary_service=plan_summary_service,
         )
