@@ -7,7 +7,8 @@
 
   outputs = { self, nixpkgs, flake-utils }:
     let
-      systemDependent = flake-utils.lib.eachDefaultSystem (system:
+      supportedSystems = [ "x86_64-linux" ];
+      systemDependent = flake-utils.lib.eachSystem supportedSystems (system:
         let
           pkgs = import nixpkgs {
             inherit system;
