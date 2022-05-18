@@ -18,10 +18,10 @@
             </p>
             <form method="post">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div class="pb-2 has-text-info-dark">
-                    {{ gettext("Specify product name and description.") }}
-                </div>
-                <div class="box has-background-info-light">   
+                <div class="box has-background-info-light">
+                    <div class="has-text-right has-text-info-dark js-modal-trigger" data-target="name_desc">
+                        <span class="icon"><i class="fa-solid fa-circle-question"></i></span>
+                    </div>   
                     <div class="field">
                         <label class="label">{{ gettext("Product name")}}</label>
                         <div class="control">
@@ -39,10 +39,10 @@
                     </div>
                 </div>
                 <div class="block py-2"></div>
-                <div class="pb-2 has-text-info-dark">
-                    {{ gettext("Choose a planning timeframe in which you are planning to produce and deliver your product.") }}
-                </div>
                 <div class="box has-background-info-light">
+                    <div class="has-text-right has-text-info-dark js-modal-trigger" data-target="timeframe">
+                        <span class="icon"><i class="fa-solid fa-circle-question"></i></span>
+                    </div>
                     <div class="field">   
                         <label class="label">{{ gettext("Planning timeframe (days)")}}</label>
                         <div class="control">
@@ -52,10 +52,10 @@
                     </div>
                 </div>
                 <div class="block py-2"></div>
-                <div class="pb-2 has-text-info-dark">
-                    {{ gettext("Estimate what costs you will have in the given timeframe.") }}
-                </div>
                 <div class="box has-background-info-light">
+                    <div class="has-text-right has-text-info-dark js-modal-trigger" data-target="costs">
+                        <span class="icon"><i class="fa-solid fa-circle-question"></i></span>
+                    </div>
                     <div class="field">
                         <label class="label">{{ gettext("Costs for fixed means of production")}}</label>
                         <div class="control">
@@ -81,16 +81,16 @@
                     </div>
                 </div>
                 <div class="block py-2"></div>
-                <div class="pb-2 has-text-info-dark">
-                    {{ gettext("Describe the smallest delivery unit and what amount of these units you will produce.") }}
-                </div>
                 <div class="box has-background-info-light">
+                    <div class="has-text-right has-text-info-dark js-modal-trigger" data-target="unit_amount">
+                        <span class="icon"><i class="fa-solid fa-circle-question"></i></span>
+                    </div>
                     <div class="field">                 
                         <label class="label">{{ gettext("Smallest delivery unit")}}</label>
                         <div class="control">
                             <input class="input is-large" type="text" name="prd_unit"
-                                value="{{ prefilled.production_unit if prefilled else '1 Kg' }}" required>
-                            <p class="help">{{ gettext("E.g. 1 package of 100 pieces, 1 kilogram, 1 language lesson of 1.5 hour, etc.")}}</p>
+                                value="{{ prefilled.production_unit if prefilled else '1 Kg' }}" required>                        
+                                <p class="help">{{ gettext("E.g. 1 package of 100 pieces, 1 kilogram, 1 language lesson of 1.5 hour, etc.")}}</p>
                         </div>
                     </div>
                     <div class="block"></div>
@@ -103,10 +103,10 @@
                     </div>
                 </div>
                 <div class="block py-2"></div>
-                <div class="pb-2 has-text-info-dark">
-                    {{ gettext("The type of plan.") }}
-                </div>
                 <div class="box has-background-info-light">
+                    <div class="has-text-right has-text-info-dark js-modal-trigger" data-target="type">
+                        <span class="icon"><i class="fa-solid fa-circle-question"></i></span>
+                    </div>
                     <div class="field">
                         <label class="label">{{ gettext("Type")}}</label>
                         <div class="control">
@@ -120,7 +120,6 @@
                                     prefilled.is_public_service %} checked {% endif %}>
                                 {{ gettext("Public")}}
                             </label>
-                            <p class="help">{{ gettext("Productive plans are the norm.")}}</p>
                         </div>
                     </div>
                 </div>
@@ -146,4 +145,13 @@
     </div>
     </form>
 </div>
+
+{% from 'macros/modals.html' import info_modal %}
+
+{{ info_modal(id="name_desc", text=gettext("Specify product name and description.")) }}
+{{ info_modal(id="timeframe", text=gettext("Choose a planning timeframe in which you are planning to produce and deliver your product.")) }}
+{{ info_modal(id="costs", text=gettext("Estimate what costs you will have in the given timeframe.")) }}
+{{ info_modal(id="unit_amount", text=gettext("Describe the smallest delivery unit and what amount of these units you will produce.")) }}
+{{ info_modal(id="type", text=gettext("The type of plan. Productive plans are the norm.")) }}
+
 {% endblock %}
