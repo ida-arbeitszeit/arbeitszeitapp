@@ -10,7 +10,11 @@ from arbeitszeit_web.get_plan_summary_company import (
 )
 
 from .dependency_injection import get_dependency_injector
-from .url_index import EndCoopUrlIndexTestImpl, TogglePlanAvailabilityUrlIndex
+from .url_index import (
+    EndCoopUrlIndexTestImpl,
+    RequestCoopUrlIndexTestImpl,
+    TogglePlanAvailabilityUrlIndex,
+)
 
 TESTING_RESPONSE_MODEL = PlanSummaryCompanySuccess(
     plan_summary=BusinessPlanSummary(
@@ -43,6 +47,7 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
             TogglePlanAvailabilityUrlIndex
         )
         self.end_coop_url_index = self.injector.get(EndCoopUrlIndexTestImpl)
+        self.request_coop_url_index = self.injector.get(RequestCoopUrlIndexTestImpl)
         self.presenter = self.injector.get(GetPlanSummaryCompanySuccessPresenter)
 
     def test_action_section_is_shown_when_current_user_is_planner(self):
@@ -72,10 +77,7 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
     ):
         assert TESTING_RESPONSE_MODEL.plan_summary.cooperation
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
-        self.assertEqual(
-            view_model.action.is_cooperating,
-            TESTING_RESPONSE_MODEL.plan_summary.is_cooperating,
-        )
+        self.assertTrue(view_model.action.is_cooperating)
         self.assertEqual(
             view_model.action.end_coop_url,
             self.end_coop_url_index.get_end_coop_url(
@@ -84,7 +86,15 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
             ),
         )
 
-    def test_url_for_ending_cooperation_is_displayed_correctly_when_plan_is_not_cooperating(
+    def test_no_url_for_requesting_cooperation_is_displayed_when_plan_is_cooperating(
+        self,
+    ):
+        assert TESTING_RESPONSE_MODEL.plan_summary.cooperation
+        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        self.assertTrue(view_model.action.is_cooperating)
+        self.assertIsNone(view_model.action.request_coop_url)
+
+    def test_no_url_for_ending_cooperation_is_displayed_when_plan_is_not_cooperating(
         self,
     ):
         plan_summary = replace(
@@ -94,7 +104,21 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
             plan_summary=plan_summary, current_user_is_planner=True
         )
         view_model = self.presenter.present(response)
-        self.assertEqual(
-            view_model.action.is_cooperating, response.plan_summary.is_cooperating
+        self.assertFalse(view_model.action.is_cooperating)
+        self.assertIsNone(view_model.action.end_coop_url)
+
+    def test_url_for_requesting_cooperation_is_displayed_correctly_when_plan_is_not_cooperating(
+        self,
+    ):
+        plan_summary = replace(
+            TESTING_RESPONSE_MODEL.plan_summary, is_cooperating=False, cooperation=None
         )
-        self.assertEqual(view_model.action.end_coop_url, None)
+        response = PlanSummaryCompanySuccess(
+            plan_summary=plan_summary, current_user_is_planner=True
+        )
+        view_model = self.presenter.present(response)
+        self.assertFalse(view_model.action.is_cooperating)
+        self.assertEqual(
+            view_model.action.request_coop_url,
+            self.request_coop_url_index.get_request_coop_url(),
+        )

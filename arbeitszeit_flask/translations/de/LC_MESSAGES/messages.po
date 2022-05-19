@@ -484,7 +484,7 @@ msgstr "Keine Nachrichten erhalten."
 
 #: arbeitszeit_flask/templates/macros/plan_summary.html:7
 msgid "Plan information"
-msgstr "Planungsinformationen"
+msgstr "Planinformationen"
 
 #: arbeitszeit_flask/templates/macros/statistics.html:6
 msgid "Global statistics"
