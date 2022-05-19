@@ -597,15 +597,20 @@ class PlanRepository(repositories.PlanRepository):
         plan_orm = self.object_to_orm(plan)
         plan_orm.payout_count += 1
 
-    def get_active_plans(
-        self, limit: Optional[int] = None, order_by_activation_date: bool = False
+    def get_active_plans(self) -> Iterator[entities.Plan]:
+        return (
+            self.object_from_orm(plan_orm)
+            for plan_orm in Plan.query.filter_by(is_active=True).all()
+        )
+
+    def get_three_latest_active_plans_ordered_by_activation_date(
+        self,
     ) -> Iterator[entities.Plan]:
         return (
             self.object_from_orm(plan_orm)
             for plan_orm in Plan.query.filter_by(is_active=True)
-            .order_by(Plan.activation_date.desc() if order_by_activation_date else None)
-            .limit(limit)
-            .all()
+            .order_by(Plan.activation_date.desc())
+            .limit(3)
         )
 
     def count_active_plans(self) -> int:

@@ -25,8 +25,8 @@ class GetLatestActivatedPlans:
         plans: List[PlanDetail]
 
     def __call__(self) -> Response:
-        latest_plans = self.plan_repository.get_active_plans(
-            limit=3, order_by_activation_date=True
+        latest_plans = (
+            self.plan_repository.get_three_latest_active_plans_ordered_by_activation_date()
         )
         plans = []
         for plan in latest_plans:

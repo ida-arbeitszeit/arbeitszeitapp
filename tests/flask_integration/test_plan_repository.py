@@ -124,24 +124,7 @@ def test_all_active_plans_get_retrieved(
 
 
 @injection_test
-def test_limited_number_of_active_plans_get_retrieved_when_limit_is_specified(
-    repository: PlanRepository,
-    generator: PlanGenerator,
-) -> None:
-    number_of_plans = 5
-    limit = 3
-    list_of_plans = [
-        generator.create_plan(activation_date=datetime.min)
-        for _ in range(number_of_plans)
-    ]
-    retrieved_plans = list(repository.get_active_plans(limit=limit))
-    assert len(retrieved_plans) == limit
-    for plan in list_of_plans[:limit]:
-        assert plan in retrieved_plans
-
-
-@injection_test
-def test_plans_get_retrieved_in_correct_order_when_order_is_specified(
+def test_three_active_plans_get_retrieved_ordered_by_activation_date(
     repository: PlanRepository,
     generator: PlanGenerator,
     datetime_service: FakeDatetimeService,
@@ -154,12 +137,13 @@ def test_plans_get_retrieved_in_correct_order_when_order_is_specified(
         datetime_service.now_minus_one_day(),
     ]
     plans = [generator.create_plan(activation_date=date) for date in activation_dates]
-    retrieved_plans = list(repository.get_active_plans(order_by_activation_date=True))
+    retrieved_plans = list(
+        repository.get_three_latest_active_plans_ordered_by_activation_date()
+    )
+    assert len(retrieved_plans) == 3
     assert retrieved_plans[0] == plans[1]
     assert retrieved_plans[1] == plans[2]
     assert retrieved_plans[2] == plans[4]
-    assert retrieved_plans[3] == plans[3]
-    assert retrieved_plans[4] == plans[0]
 
 
 @injection_test
