@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from typing import Iterable, List, Optional, Union
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from injector import inject
 
@@ -47,6 +47,11 @@ from arbeitszeit.use_cases import (
     RequestCooperationRequest,
     SeekApproval,
 )
+from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
+from arbeitszeit.use_cases.send_accountant_registration_token import (
+    SendAccountantRegistrationTokenUseCase,
+)
+from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
 from tests.company import CompanyManager
 from tests.datetime_service import FakeDatetimeService
 
@@ -396,3 +401,35 @@ class MessageGenerator:
             sender_remarks=None,
             reference=None,
         )
+
+
+@inject
+@dataclass
+class AccountantGenerator:
+    invite_accountant_use_case: SendAccountantRegistrationTokenUseCase
+    invite_accountant_presenter: AccountantInvitationPresenterTestImpl
+    register_accountant_use_case: RegisterAccountantUseCase
+    email_generator: EmailGenerator
+
+    def create_accountant(
+        self, *, email_address: Optional[str] = None, name: Optional[str] = None
+    ) -> UUID:
+        if email_address is None:
+            email_address = self.email_generator.get_random_email()
+        if name is None:
+            name = "user name test"
+        self.invite_accountant_use_case.send_accountant_registration_token(
+            request=SendAccountantRegistrationTokenUseCase.Request(email=email_address)
+        )
+        token = self.invite_accountant_presenter.invitations[-1].token
+        response = self.register_accountant_use_case.register_accountant(
+            request=RegisterAccountantUseCase.Request(
+                name=name,
+                email=email_address,
+                token=token,
+            )
+        )
+        assert response.is_accepted
+        user_id = response.user_id
+        assert user_id is not None
+        return user_id

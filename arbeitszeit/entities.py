@@ -216,3 +216,9 @@ class Message:
     sender_remarks: Optional[str]
     user_action: Optional[UserAction]
     is_read: bool
+
+
+@dataclass
+class Accountant:
+    email_address: str
+    name: str
