@@ -71,6 +71,13 @@ class Company(UserMixin, db.Model):
         )
 
 
+class Accountant(UserMixin, db.Model):
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(1000), nullable=False)
+
+
 class PlanDraft(UserMixin, db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
     plan_creation_date = db.Column(db.DateTime, nullable=False)

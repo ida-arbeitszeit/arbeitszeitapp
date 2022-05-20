@@ -4,11 +4,7 @@ from uuid import UUID
 
 from injector import inject
 
-from arbeitszeit.repositories import (
-    AccountantRepository,
-    CompanyRepository,
-    MemberRepository,
-)
+from arbeitszeit.repositories import AccountantRepository
 from arbeitszeit.token import InvitationTokenValidator
 
 
@@ -28,17 +24,11 @@ class RegisterAccountantUseCase:
         user_id: Optional[UUID]
 
     token_service: InvitationTokenValidator
-    member_repository: MemberRepository
-    company_repository: CompanyRepository
     accountant_repository: AccountantRepository
 
     def register_accountant(self, request: Request) -> Response:
         invited_email = self.token_service.unwrap_invitation_token(request.token)
         if invited_email != request.email:
-            return self._failed_registration()
-        if self.member_repository.has_member_with_email(request.email):
-            return self._failed_registration()
-        if self.company_repository.has_company_with_email(request.email):
             return self._failed_registration()
         if self.accountant_repository.has_accountant_with_email(request.email):
             return self._failed_registration()
