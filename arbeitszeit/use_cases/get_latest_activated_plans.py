@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from datetime import datetime
 from typing import List
@@ -8,21 +10,20 @@ from injector import inject
 from arbeitszeit.repositories import PlanRepository
 
 
-@dataclass
-class PlanDetail:
-    plan_id: UUID
-    prd_name: str
-    activation_date: datetime
-
-
 @inject
 @dataclass
 class GetLatestActivatedPlans:
-    plan_repository: PlanRepository
+    @dataclass
+    class PlanDetail:
+        plan_id: UUID
+        prd_name: str
+        activation_date: datetime
 
     @dataclass
     class Response:
-        plans: List[PlanDetail]
+        plans: List[GetLatestActivatedPlans.PlanDetail]
+
+    plan_repository: PlanRepository
 
     def __call__(self) -> Response:
         latest_plans = (
@@ -31,6 +32,6 @@ class GetLatestActivatedPlans:
         plans = []
         for plan in latest_plans:
             assert plan.activation_date
-            plans.append(PlanDetail(plan.id, plan.prd_name, plan.activation_date))
+            plans.append(self.PlanDetail(plan.id, plan.prd_name, plan.activation_date))
 
         return self.Response(plans)

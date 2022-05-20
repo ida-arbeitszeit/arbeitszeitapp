@@ -2,10 +2,7 @@ from datetime import datetime
 from unittest import TestCase
 from uuid import uuid4
 
-from arbeitszeit.use_cases.get_latest_activated_plans import (
-    GetLatestActivatedPlans,
-    PlanDetail,
-)
+from arbeitszeit.use_cases.get_latest_activated_plans import GetLatestActivatedPlans
 from arbeitszeit_web.presenters.get_latest_activated_plans_presenter import (
     GetLatestActivatedPlansPresenter,
 )
@@ -20,7 +17,7 @@ class PresenterTests(TestCase):
         self.presenter = self.injector.get(GetLatestActivatedPlansPresenter)
         self.default_response_with_one_plan = GetLatestActivatedPlans.Response(
             plans=[
-                PlanDetail(
+                GetLatestActivatedPlans.PlanDetail(
                     plan_id=uuid4(),
                     prd_name="prd name",
                     activation_date=datetime(2022, 5, 16),
@@ -29,12 +26,12 @@ class PresenterTests(TestCase):
         )
         self.default_response_with_two_plans = GetLatestActivatedPlans.Response(
             plans=[
-                PlanDetail(
+                GetLatestActivatedPlans.PlanDetail(
                     plan_id=uuid4(),
                     prd_name="prd name",
                     activation_date=datetime(2022, 5, 16),
                 ),
-                PlanDetail(
+                GetLatestActivatedPlans.PlanDetail(
                     plan_id=uuid4(),
                     prd_name="prd name2",
                     activation_date=datetime(2022, 5, 17),
