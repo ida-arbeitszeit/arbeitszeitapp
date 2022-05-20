@@ -7,6 +7,7 @@ from arbeitszeit.use_cases import (
     ShowCompanyWorkInviteDetailsUseCase,
 )
 from arbeitszeit.use_cases.create_cooperation import CreateCooperation
+from arbeitszeit.use_cases.get_latest_activated_plans import GetLatestActivatedPlans
 from arbeitszeit.use_cases.list_workers import ListWorkers
 from arbeitszeit.use_cases.register_company import RegisterCompany
 from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
@@ -28,6 +29,7 @@ from arbeitszeit_flask.views.accountant_invitation_email_view import (
     AccountantInvitationEmailViewImpl,
 )
 from arbeitszeit_flask.views.create_cooperation_view import CreateCooperationView
+from arbeitszeit_flask.views.dashboard_view import DashboardView
 from arbeitszeit_flask.views.invite_worker_to_company import (
     InviteWorkerGetRequestHandler,
     InviteWorkerPostRequestHandler,
@@ -54,6 +56,9 @@ from arbeitszeit_web.invite_worker_to_company import (
 )
 from arbeitszeit_web.presenters.accountant_invitation_presenter import (
     AccountantInvitationEmailView,
+)
+from arbeitszeit_web.presenters.get_latest_activated_plans_presenter import (
+    GetLatestActivatedPlansPresenter,
 )
 from arbeitszeit_web.presenters.list_workers_presenter import ListWorkersPresenter
 from arbeitszeit_web.presenters.register_company_presenter import (
@@ -232,4 +237,21 @@ class ViewsModule(Module):
     ) -> CreateCooperationView:
         return CreateCooperationView(
             create_cooperation, presenter, template_renderer, session
+        )
+
+    @provider
+    def provide_dashboard_view(
+        self,
+        list_workers_use_case: ListWorkers,
+        get_latest_plans_use_case: GetLatestActivatedPlans,
+        get_latest_plans_presenter: GetLatestActivatedPlansPresenter,
+        template_renderer: UserTemplateRenderer,
+        flask_session: FlaskSession,
+    ) -> DashboardView:
+        return DashboardView(
+            list_workers_use_case,
+            get_latest_plans_use_case,
+            get_latest_plans_presenter,
+            template_renderer,
+            flask_session,
         )
