@@ -16,7 +16,7 @@ class UseCaseTests(TestCase):
         self.get_profile_use_case = self.injector.get(GetAccountantProfileInfoUseCase)
         self.accountant_generator = self.injector.get(AccountantGenerator)
 
-    def test_that_user_user_can_see_correct_email_if_they_registered_with_test_mail_address(
+    def test_that_user_can_see_correct_email_if_they_registered_with_test_mail_address(
         self,
     ) -> None:
         email_address = "test@test.test"
@@ -28,7 +28,7 @@ class UseCaseTests(TestCase):
         )
         self.assertRecord(response, lambda r: r.email_address == email_address)
 
-    def test_that_user_user_can_see_correct_email_if_they_registered_with_another_test_mail_address(
+    def test_that_user_can_see_correct_email_if_they_registered_with_another_test_mail_address(
         self,
     ) -> None:
         email_address = "test2@test.test"
