@@ -10,6 +10,7 @@ Welcome to arbeitszeitapp's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   configuration
    philosophy
    modules/modules
 

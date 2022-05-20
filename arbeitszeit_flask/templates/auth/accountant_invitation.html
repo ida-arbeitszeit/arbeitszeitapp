@@ -1,6 +1,6 @@
 <p>
   {{
   gettext("Hello. You were invited to be a public accountant at Arbeitszeitapp. Go to %(link)s to register."
-  ,link=('<a href="{{%(url)s}}">{{%(url)s}}</a>'|format(url=view_model.registration_link_url)| safe))
+  ,link=('<a href="%(url)s">%(url)s</a>'|format(url=view_model.registration_link_url)| safe))
   }}
 </p>
