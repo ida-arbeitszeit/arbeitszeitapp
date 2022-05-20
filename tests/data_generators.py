@@ -412,12 +412,18 @@ class AccountantGenerator:
     email_generator: EmailGenerator
 
     def create_accountant(
-        self, *, email_address: Optional[str] = None, name: Optional[str] = None
+        self,
+        *,
+        email_address: Optional[str] = None,
+        name: Optional[str] = None,
+        password: Optional[str] = None,
     ) -> UUID:
         if email_address is None:
             email_address = self.email_generator.get_random_email()
         if name is None:
             name = "user name test"
+        if password is None:
+            password = "password123"
         self.invite_accountant_use_case.send_accountant_registration_token(
             request=SendAccountantRegistrationTokenUseCase.Request(email=email_address)
         )
@@ -427,6 +433,7 @@ class AccountantGenerator:
                 name=name,
                 email=email_address,
                 token=token,
+                password=password,
             )
         )
         assert response.is_accepted

@@ -20,6 +20,7 @@ class RegisterAccountantUseCase:
         token: str
         email: str
         name: str
+        password: str
 
     @dataclass
     class Response:
@@ -42,7 +43,9 @@ class RegisterAccountantUseCase:
         if self.accountant_repository.has_accountant_with_email(request.email):
             return self._failed_registration()
         user_id = self.accountant_repository.create_accountant(
-            email=request.email, name=request.name
+            email=request.email,
+            name=request.name,
+            password=request.password,
         )
         return self.Response(is_accepted=True, user_id=user_id)
 

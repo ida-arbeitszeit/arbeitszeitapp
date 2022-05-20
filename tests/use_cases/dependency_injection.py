@@ -8,6 +8,7 @@ from arbeitszeit.use_cases import GetCompanySummary
 from arbeitszeit.use_cases.get_accountant_profile_info import (
     GetAccountantProfileInfoUseCase,
 )
+from arbeitszeit.use_cases.log_in_accountant import LogInAccountantUseCase
 from arbeitszeit.use_cases.register_company.company_registration_message_presenter import (
     CompanyRegistrationMessagePresenter,
 )
@@ -198,6 +199,14 @@ class InMemoryModule(Module):
         self, accountant_repository: interfaces.AccountantRepository
     ) -> GetAccountantProfileInfoUseCase:
         return GetAccountantProfileInfoUseCase(
+            accountant_repository=accountant_repository,
+        )
+
+    @provider
+    def provide_log_in_accountant_use_case(
+        self, accountant_repository: interfaces.AccountantRepository
+    ) -> LogInAccountantUseCase:
+        return LogInAccountantUseCase(
             accountant_repository=accountant_repository,
         )
 

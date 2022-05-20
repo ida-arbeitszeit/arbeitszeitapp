@@ -835,17 +835,19 @@ class AccountantRepositoryTestImpl:
     class _AccountantRecord:
         email: str
         name: str
+        password: str
 
     def __init__(self) -> None:
         self.accountants: Dict[
             UUID, AccountantRepositoryTestImpl._AccountantRecord
         ] = dict()
 
-    def create_accountant(self, email: str, name: str) -> UUID:
+    def create_accountant(self, email: str, name: str, password: str) -> UUID:
         id = uuid4()
         record = self._AccountantRecord(
             email=email,
             name=name,
+            password=password,
         )
         self.accountants[id] = record
         return id
@@ -858,3 +860,12 @@ class AccountantRepositoryTestImpl:
         if record is None:
             return None
         return Accountant(email_address=record.email, name=record.name)
+
+    def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
+        for uuid, record in self.accountants.items():
+            if record.email == email:
+                if record.password == password:
+                    return uuid
+                else:
+                    return None
+        return None

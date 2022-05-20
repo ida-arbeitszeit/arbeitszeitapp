@@ -433,11 +433,14 @@ class PlanCooperationRepository(ABC):
 
 
 class AccountantRepository(Protocol):
-    def create_accountant(self, email: str, name: str) -> UUID:
+    def create_accountant(self, email: str, name: str, password: str) -> UUID:
         ...
 
     def has_accountant_with_email(self, email: str) -> bool:
         ...
 
     def get_by_id(self, id: UUID) -> Optional[Accountant]:
+        ...
+
+    def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
         ...

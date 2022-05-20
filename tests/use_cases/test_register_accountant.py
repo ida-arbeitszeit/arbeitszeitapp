@@ -100,4 +100,5 @@ class UseCaseTests(TestCase):
             token=token,
             email=email,
             name=name,
+            password="test password",
         )
