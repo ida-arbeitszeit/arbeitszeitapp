@@ -17,18 +17,20 @@ class GetLatestActivatedPlansPresenter:
 
     @dataclass
     class ViewModel:
-        plans: List[GetLatestActivatedPlansPresenter.PlanDetailsWeb]
+        latest_plans: List[GetLatestActivatedPlansPresenter.PlanDetailsWeb]
+        has_latest_plans: bool
 
     url_index: PlanSummaryUrlIndex
 
     def show_latest_plans(
         self, use_case_response: GetLatestActivatedPlans.Response
     ) -> ViewModel:
+        latest_plans = [
+            self._get_plan_details_web(plan_detail)
+            for plan_detail in use_case_response.plans
+        ]
         return self.ViewModel(
-            plans=[
-                self._get_plan_details_web(plan_detail)
-                for plan_detail in use_case_response.plans
-            ]
+            latest_plans=latest_plans, has_latest_plans=bool(latest_plans)
         )
 
     def _get_plan_details_web(

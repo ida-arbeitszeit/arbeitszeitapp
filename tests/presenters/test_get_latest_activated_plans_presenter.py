@@ -43,26 +43,28 @@ class PresenterTests(TestCase):
         view_model = self.presenter.show_latest_plans(
             GetLatestActivatedPlans.Response(plans=[])
         )
-        self.assertFalse(view_model.plans)
+        self.assertFalse(view_model.latest_plans)
+        self.assertFalse(view_model.has_latest_plans)
 
     def test_one_plan_is_shown_when_use_case_response_has_one_plan(self):
         view_model = self.presenter.show_latest_plans(
             self.default_response_with_one_plan
         )
-        self.assertEqual(view_model.plans.__len__(), 1)
+        self.assertEqual(view_model.latest_plans.__len__(), 1)
+        self.assertTrue(view_model.has_latest_plans)
 
     def test_two_plans_are_shown_when_use_case_response_has_two_plans(self):
         view_model = self.presenter.show_latest_plans(
             self.default_response_with_two_plans
         )
-        self.assertEqual(view_model.plans.__len__(), 2)
+        self.assertEqual(view_model.latest_plans.__len__(), 2)
 
     def test_prd_name_is_correctly_shown(self):
         view_model = self.presenter.show_latest_plans(
             self.default_response_with_one_plan
         )
         self.assertEqual(
-            view_model.plans[0].prd_name,
+            view_model.latest_plans[0].prd_name,
             self.default_response_with_one_plan.plans[0].prd_name,
         )
 
@@ -71,7 +73,7 @@ class PresenterTests(TestCase):
             self.default_response_with_one_plan
         )
         self.assertEqual(
-            view_model.plans[0].activation_date,
+            view_model.latest_plans[0].activation_date,
             str(self.default_response_with_one_plan.plans[0].activation_date),
         )
 
@@ -80,7 +82,7 @@ class PresenterTests(TestCase):
             self.default_response_with_one_plan
         )
         self.assertEqual(
-            view_model.plans[0].plan_summary_url,
+            view_model.latest_plans[0].plan_summary_url,
             self.plan_index.get_plan_summary_url(
                 self.default_response_with_one_plan.plans[0].plan_id
             ),

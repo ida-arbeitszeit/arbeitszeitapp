@@ -25,15 +25,15 @@ class DashboardView:
         assert current_user
         workers = self.list_workers_use_case(ListWorkersRequest(current_user)).workers
         latest_plans_use_case_response = self.get_latest_plans_use_case()
-        latest_plans = self.get_latest_plans_presenter.show_latest_plans(
+        view_model = self.get_latest_plans_presenter.show_latest_plans(
             latest_plans_use_case_response
-        ).plans
+        )
         return FlaskResponse(
             self.template_renderer.render_template(
                 "company/dashboard.html",
                 context=dict(
                     having_workers=bool(workers),
-                    latest_plans=latest_plans,
+                    view_model=view_model,
                 ),
             )
         )

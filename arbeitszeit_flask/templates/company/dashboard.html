@@ -140,13 +140,13 @@
                     <nav class="panel">
                         <p class="panel-heading is-italic has-background-warning-light">{{ gettext("Latest plans") }}
                         </p>
-                        {% if latest_plans is defined and latest_plans | length %}
-                        {% for plan in latest_plans %}
-                        <a class="panel-block" href="{{ plan.plan_summary_url }}"><span
-                                class="has-text-weight-semibold">{{ plan.activation_date |
-                                format_datetime(zone='Europe/Berlin', fmt='%d.%m.') }}</span>&nbsp;{{
-                            plan.prd_name
-                            }}</a>
+                        {% if view_model.has_latest_plans %}
+                        {% for plan in view_model.latest_plans %}
+                        <a class="panel-block" href="{{ plan.plan_summary_url }}">
+                            <span class="has-text-weight-semibold">
+                                {{ plan.activation_date | format_datetime(zone='Europe/Berlin', fmt='%d.%m.') }}
+                            </span>&nbsp;{{ plan.prd_name }}
+                        </a>
                         {% endfor %}
                         {% endif %}
                     </nav>
