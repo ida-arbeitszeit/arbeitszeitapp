@@ -143,8 +143,7 @@
                         {% if view_model.has_latest_plans %}
                         {% for plan in view_model.latest_plans %}
                         <a class="panel-block" href="{{ plan.plan_summary_url }}">
-                            <span class="has-text-weight-semibold">
-                                {{ plan.activation_date | format_datetime(zone='Europe/Berlin', fmt='%d.%m.') }}
+                            <span class="has-text-weight-semibold">{{ plan.activation_date }}
                             </span>&nbsp;{{ plan.prd_name }}
                         </a>
                         {% endfor %}

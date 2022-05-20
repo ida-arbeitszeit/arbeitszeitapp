@@ -56,6 +56,7 @@ from arbeitszeit_web.show_p_account_details import ShowPAccountDetailsPresenter
 from arbeitszeit_web.show_r_account_details import ShowRAccountDetailsPresenter
 from arbeitszeit_web.url_index import ListMessagesUrlIndex
 from arbeitszeit_web.user_action import UserActionResolverImpl
+from tests.datetime_service import FakeDatetimeService
 from tests.dependency_injection import TestingModule
 from tests.email import (
     FakeAddressBook,
@@ -496,9 +497,13 @@ class PresenterTestsInjector(Module):
 
     @provider
     def provide_get_latest_activated_plans_presenter(
-        self, url_index: PlanSummaryUrlIndexTestImpl
+        self,
+        url_index: PlanSummaryUrlIndexTestImpl,
+        datetime_service: FakeDatetimeService,
     ) -> GetLatestActivatedPlansPresenter:
-        return GetLatestActivatedPlansPresenter(url_index=url_index)
+        return GetLatestActivatedPlansPresenter(
+            url_index=url_index, datetime_service=datetime_service
+        )
 
 
 def get_dependency_injector() -> Injector:

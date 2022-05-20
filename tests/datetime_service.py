@@ -1,5 +1,7 @@
 from datetime import date, datetime, timedelta
+from typing import Optional, Union
 
+from dateutil import parser, tz
 from injector import singleton
 
 from arbeitszeit.datetime_service import DatetimeService
@@ -23,6 +25,20 @@ class FakeDatetimeService(DatetimeService):
             if self.frozen_time
             else date.today()
         )
+
+    def format_datetime(
+        self,
+        date: Union[str, datetime],
+        zone: Optional[str] = None,
+        fmt: Optional[str] = None,
+    ) -> str:
+        if isinstance(date, str):
+            date = parser.parse(date)
+        if zone is not None:
+            date = date.astimezone(tz.gettz(zone))
+        if fmt is None:
+            fmt = "%d.%m.%Y %H:%M"
+        return date.strftime(fmt)
 
     def now_minus_one_day(self) -> datetime:
         return self.now() - timedelta(days=1)

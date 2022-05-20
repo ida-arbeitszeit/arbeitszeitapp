@@ -68,13 +68,17 @@ class PresenterTests(TestCase):
             self.default_response_with_one_plan.plans[0].prd_name,
         )
 
-    def test_activation_date_is_correctly_shown(self):
+    def test_activation_date_is_correctly_formatted(self):
         view_model = self.presenter.show_latest_plans(
             self.default_response_with_one_plan
         )
         self.assertEqual(
             view_model.latest_plans[0].activation_date,
-            str(self.default_response_with_one_plan.plans[0].activation_date),
+            str(
+                self.default_response_with_one_plan.plans[0].activation_date.strftime(
+                    "%d.%m."
+                )
+            ),
         )
 
     def test_plan_summary_url_is_correctly_shown(self):

@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List
 
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.use_cases.get_latest_activated_plans import GetLatestActivatedPlans
 from arbeitszeit_web.url_index import PlanSummaryUrlIndex
 
@@ -21,6 +22,7 @@ class GetLatestActivatedPlansPresenter:
         has_latest_plans: bool
 
     url_index: PlanSummaryUrlIndex
+    datetime_service: DatetimeService
 
     def show_latest_plans(
         self, use_case_response: GetLatestActivatedPlans.Response
@@ -38,6 +40,8 @@ class GetLatestActivatedPlansPresenter:
     ) -> PlanDetailsWeb:
         return self.PlanDetailsWeb(
             prd_name=plan.prd_name,
-            activation_date=f"{plan.activation_date}",
+            activation_date=self.datetime_service.format_datetime(
+                plan.activation_date, zone="Europe/Berlin", fmt="%d.%m."
+            ),
             plan_summary_url=self.url_index.get_plan_summary_url(plan.plan_id),
         )

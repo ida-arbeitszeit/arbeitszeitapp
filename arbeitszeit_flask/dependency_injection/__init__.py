@@ -940,9 +940,11 @@ class FlaskModule(Module):
 
     @provider
     def provide_get_latest_activated_plans_presenter(
-        self, url_index: PlanSummaryUrlIndex
+        self, url_index: PlanSummaryUrlIndex, datetime_service: DatetimeService
     ) -> GetLatestActivatedPlansPresenter:
-        return GetLatestActivatedPlansPresenter(url_index=url_index)
+        return GetLatestActivatedPlansPresenter(
+            url_index=url_index, datetime_service=datetime_service
+        )
 
     def configure(self, binder: Binder) -> None:
         binder.bind(
