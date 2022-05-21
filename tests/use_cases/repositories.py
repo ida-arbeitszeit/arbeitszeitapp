@@ -4,6 +4,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
+from itertools import islice
 from statistics import StatisticsError, mean
 from typing import Dict, Iterable, Iterator, List, Optional, Set, Tuple, Union
 from uuid import UUID, uuid4
@@ -389,10 +390,22 @@ class PlanRepository(interfaces.PlanRepository):
     def increase_payout_count_by_one(self, plan: Plan) -> None:
         plan.payout_count += 1
 
-    def all_active_plans(self) -> Iterator[Plan]:
+    def get_active_plans(self) -> Iterator[Plan]:
         for plan in self.plans.values():
             if plan.is_active:
                 yield plan
+
+    def get_three_latest_active_plans_ordered_by_activation_date(
+        self,
+    ) -> Iterator[Plan]:
+        active_plans = [plan for plan in self.plans.values() if plan.is_active]
+        active_plans_sorted = sorted(
+            active_plans,
+            key=lambda x: x.activation_date if x.activation_date is not None else 0,
+            reverse=True,
+        )
+        for plan in islice(active_plans_sorted, 3):
+            yield plan
 
     def count_active_plans(self) -> int:
         return len([plan for plan in self.plans.values() if plan.is_active])

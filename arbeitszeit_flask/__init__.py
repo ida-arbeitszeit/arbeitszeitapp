@@ -4,8 +4,8 @@ from flask_talisman import Talisman
 from flask_wtf.csrf import CSRFProtect
 
 import arbeitszeit_flask.extensions
+from arbeitszeit_flask.datetime import RealtimeDatetimeService
 from arbeitszeit_flask.extensions import babel, login_manager, mail
-from arbeitszeit_flask.filter import format_datetime
 from arbeitszeit_flask.profiling import show_profile_info, show_sql_queries
 
 
@@ -46,7 +46,7 @@ def create_app(config=None, db=None, migrate=None, template_folder=None):
     babel.init_app(app)
 
     # Setup template filter
-    app.template_filter()(format_datetime)
+    app.template_filter()(RealtimeDatetimeService().format_datetime)
 
     with app.app_context():
 

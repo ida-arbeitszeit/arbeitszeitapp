@@ -597,10 +597,20 @@ class PlanRepository(repositories.PlanRepository):
         plan_orm = self.object_to_orm(plan)
         plan_orm.payout_count += 1
 
-    def all_active_plans(self) -> Iterator[entities.Plan]:
+    def get_active_plans(self) -> Iterator[entities.Plan]:
         return (
             self.object_from_orm(plan_orm)
             for plan_orm in Plan.query.filter_by(is_active=True).all()
+        )
+
+    def get_three_latest_active_plans_ordered_by_activation_date(
+        self,
+    ) -> Iterator[entities.Plan]:
+        return (
+            self.object_from_orm(plan_orm)
+            for plan_orm in Plan.query.filter_by(is_active=True)
+            .order_by(Plan.activation_date.desc())
+            .limit(3)
         )
 
     def count_active_plans(self) -> int:
@@ -1112,7 +1122,7 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
     cooperation_repository: CooperationRepository
 
     def get_inbound_requests(self, coordinator_id: UUID) -> Iterator[entities.Plan]:
-        for plan in self.plan_repository.all_active_plans():
+        for plan in self.plan_repository.get_active_plans():
             if plan.requested_cooperation:
                 if plan.requested_cooperation in [
                     coop.id

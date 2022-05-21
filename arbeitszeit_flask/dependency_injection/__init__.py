@@ -148,6 +148,9 @@ from arbeitszeit_web.presenters.accountant_invitation_presenter import (
     AccountantInvitationEmailView,
 )
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
+from arbeitszeit_web.presenters.get_latest_activated_plans_presenter import (
+    GetLatestActivatedPlansPresenter,
+)
 from arbeitszeit_web.presenters.register_company_presenter import (
     RegisterCompanyPresenter,
 )
@@ -941,6 +944,14 @@ class FlaskModule(Module):
         account_repository: AccountRepository,
     ) -> ShowMyAccounts:
         return ShowMyAccounts(company_repository, account_repository)
+
+    @provider
+    def provide_get_latest_activated_plans_presenter(
+        self, url_index: PlanSummaryUrlIndex, datetime_service: DatetimeService
+    ) -> GetLatestActivatedPlansPresenter:
+        return GetLatestActivatedPlansPresenter(
+            url_index=url_index, datetime_service=datetime_service
+        )
 
     def configure(self, binder: Binder) -> None:
         binder.bind(

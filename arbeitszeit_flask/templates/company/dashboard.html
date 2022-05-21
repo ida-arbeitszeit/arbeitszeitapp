@@ -4,7 +4,7 @@
 
 <div class="section">
     <div class="has-text-centered pb-5">
-        <h1 class="title is-2">{{ welcome_message}}</h1>
+        <h1 class="title is-2">{{ gettext("Welcome, %(name)s!", name= current_user.name) }}</h1>
         <div class="columns">
             <div class="column"></div>
             <div class="column is-one-third">
@@ -68,7 +68,8 @@
             </a>
             <a class="tile is-parent" href="{{ url_for('main_company.my_plans') }}">
                 <div class="tile is-child box has-background-primary-light">
-                    <h1 class="title is-5"><span class="icon"><i class="fas fa-file"></i></span> {{ gettext("Plans") }}
+                    <h1 class="title is-5"><span class="icon"><i class="fas fa-file"></i></span> {{ gettext("Plans")
+                        }}
                     </h1>
                     <div class="subtitle is-6">{{ gettext("Your plans") }}</div>
                 </div>
@@ -133,6 +134,26 @@
             <h1 class="title is-3">{{ gettext("Public accounting") }}</h1>
         </div>
         <div class="tile is-ancestor">
+            <div class="tile is-parent"></div>
+            <div class="tile is-parent">
+                <div class="tile is-child">
+                    <nav class="panel">
+                        <p class="panel-heading is-italic has-background-warning-light">{{ gettext("Latest plans") }}
+                        </p>
+                        {% if view_model.has_latest_plans %}
+                        {% for plan in view_model.latest_plans %}
+                        <a class="panel-block" href="{{ plan.plan_summary_url }}">
+                            <span class="has-text-weight-semibold">{{ plan.activation_date }}
+                            </span>&nbsp;{{ plan.prd_name }}
+                        </a>
+                        {% endfor %}
+                        {% endif %}
+                    </nav>
+                </div>
+            </div>
+            <div class="tile is-parent"></div>
+        </div>
+        <div class="tile is-ancestor">
             <a class="tile is-parent" href="{{ url_for('main_company.statistics') }}">
                 <div class="tile is-child box has-background-warning-light">
                     <h1 class="title is-5"><span class="icon"><i class="fa-solid fa-chart-pie"></i></span> {{
@@ -150,8 +171,8 @@
             </a>
             <a class="tile is-parent" href="{{ url_for('main_company.query_plans') }}">
                 <div class="tile is-child box has-background-warning-light">
-                    <h1 class="title is-5"><span class="icon"><i class="fas fa-file"></i></span> {{ gettext("All plans")
-                        }}</h1>
+                    <h1 class="title is-5"><span class="icon"><i class="fas fa-file"></i></span>
+                        {{ gettext("All plans") }}</h1>
                     <div class="subtitle"></div>
                 </div>
             </a>
