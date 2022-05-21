@@ -29,13 +29,10 @@ from arbeitszeit.use_cases import (
     ToggleProductAvailability,
 )
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
-from arbeitszeit_flask.database import (
-    CompanyRepository,
-    CompanyWorkerRepository,
-    commit_changes,
-)
+from arbeitszeit_flask.database import CompanyRepository, commit_changes
 from arbeitszeit_flask.forms import (
     CompanySearchForm,
+    CreateCooperationForm,
     CreateDraftForm,
     InviteWorkerToCompanyForm,
     PayMeansOfProductionForm,
@@ -54,11 +51,12 @@ from arbeitszeit_flask.views import (
     ReadMessageView,
     RequestCooperationView,
 )
+from arbeitszeit_flask.views.create_cooperation_view import CreateCooperationView
 from arbeitszeit_flask.views.create_draft_view import CreateDraftView
+from arbeitszeit_flask.views.dashboard_view import DashboardView
 from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
 from arbeitszeit_flask.views.transfer_to_worker_view import TransferToWorkerView
-from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
@@ -90,32 +88,13 @@ from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from arbeitszeit_web.show_p_account_details import ShowPAccountDetailsPresenter
 from arbeitszeit_web.show_r_account_details import ShowRAccountDetailsPresenter
-from arbeitszeit_web.translator import Translator
 
 from .blueprint import CompanyRoute
 
 
 @CompanyRoute("/company/dashboard")
-def dashboard(
-    company_repository: CompanyRepository,
-    company_worker_repository: CompanyWorkerRepository,
-    template_renderer: UserTemplateRenderer,
-    translator: Translator,
-):
-    company = company_repository.get_by_id(UUID(current_user.id))
-    assert company is not None
-    worker = list(company_worker_repository.get_company_workers(company))
-    if worker:
-        having_workers = True
-    else:
-        having_workers = False
-    return template_renderer.render_template(
-        "company/dashboard.html",
-        context=dict(
-            having_workers=having_workers,
-            welcome_message=translator.gettext("Welcome, %s!") % current_user.name,
-        ),
-    )
+def dashboard(view: DashboardView):
+    return view.respond_to_get()
 
 
 @CompanyRoute("/company/query_plans", methods=["GET", "POST"])
@@ -435,24 +414,12 @@ def coop_summary(
 
 @CompanyRoute("/company/create_cooperation", methods=["GET", "POST"])
 @commit_changes
-def create_cooperation(
-    create_cooperation: use_cases.CreateCooperation,
-    presenter: CreateCooperationPresenter,
-    template_renderer: UserTemplateRenderer,
-):
+def create_cooperation(view: CreateCooperationView):
+    form = CreateCooperationForm(request.form)
     if request.method == "POST":
-        name = request.form["name"]
-        definition = request.form["definition"]
-        use_case_request = use_cases.CreateCooperationRequest(
-            UUID(current_user.id), name, definition
-        )
-        use_case_response = create_cooperation(use_case_request)
-        presenter.present(use_case_response)
-        return template_renderer.render_template(
-            "company/create_cooperation.html", context=dict()
-        )
+        return view.respond_to_post(form)
     elif request.method == "GET":
-        return template_renderer.render_template("company/create_cooperation.html")
+        return view.respond_to_get(form)
 
 
 @CompanyRoute("/company/request_cooperation", methods=["GET", "POST"])

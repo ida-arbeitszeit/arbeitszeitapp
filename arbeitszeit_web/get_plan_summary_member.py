@@ -22,7 +22,5 @@ class GetPlanSummarySuccessPresenter:
 
     def present(self, response: PlanSummarySuccess) -> GetPlanSummaryViewModel:
         return GetPlanSummaryViewModel(
-            summary=self.plan_summary_service.get_plan_summary_member(
-                response.plan_summary
-            )
+            summary=self.plan_summary_service.get_plan_summary(response.plan_summary)
         )

@@ -1,6 +1,7 @@
 {% extends "base_company.html" %}
 
 {% block navbar_start %}
+<a class="navbar-item" href="{{ url_for('main_company.my_cooperations') }}">{{ gettext("My cooperations") }}</a>
 <div class="navbar-item">{{ gettext("Create Cooperation") }}</div>
 {% endblock %}
 
@@ -16,7 +17,7 @@
                 <p>
                     {{ gettext("Here you can create a new cooperation.") }}
                     <br><br>
-                    {{ gettext("A cooperation contains similar products.  The prices for all products in a cooperation are averaged to reduce price competition.  All producers still receive the credits on sale corresponding to how they planned production. This means that producers receive the same amount of credit to their account whether they are part of a cooperation or not.") }}
+                    {{ gettext("A cooperation contains similar products.  The prices for all products in a cooperation are averaged to reduce price competition.  All producers still receive the credits on sale corresponding to how they planned production.") }}
                 </p>
             </div>
             <div class="content">
@@ -25,7 +26,7 @@
                     <div class="field">
                         <label class="label">{{ gettext("Cooperation name") }}</label>
                         <div class="control">
-                            <input class="input is-large" , type="text" , placeholder="Name" , name="name" required>
+                            {{ form.name(class_="input is-large") }}
                         </div>
                     </div>
                     <div class="block"></div>
@@ -33,7 +34,7 @@
                     <div class="field">
                         <label class="label">{{ gettext("Definition of the cooperation") }}</label>
                         <div class="control">
-                            <textarea class="textarea is-large" , name="definition" required></textarea>
+                            {{ form.definition(class_="textarea is-large") }}
                         </div>
                     </div>
                     <div class="block"></div>

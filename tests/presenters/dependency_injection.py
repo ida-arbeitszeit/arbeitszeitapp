@@ -25,6 +25,9 @@ from arbeitszeit_web.presenters.accountant_invitation_presenter import (
     AccountantInvitationEmailPresenter,
 )
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
+from arbeitszeit_web.presenters.get_latest_activated_plans_presenter import (
+    GetLatestActivatedPlansPresenter,
+)
 from arbeitszeit_web.presenters.register_company_presenter import (
     RegisterCompanyPresenter,
 )
@@ -53,6 +56,7 @@ from arbeitszeit_web.show_p_account_details import ShowPAccountDetailsPresenter
 from arbeitszeit_web.show_r_account_details import ShowRAccountDetailsPresenter
 from arbeitszeit_web.url_index import ListMessagesUrlIndex
 from arbeitszeit_web.user_action import UserActionResolverImpl
+from tests.datetime_service import FakeDatetimeService
 from tests.dependency_injection import TestingModule
 from tests.email import (
     FakeAddressBook,
@@ -83,6 +87,7 @@ from .url_index import (
     PlanSummaryUrlIndexTestImpl,
     PlotsUrlIndexImpl,
     RenewPlanUrlIndex,
+    RequestCoopUrlIndexTestImpl,
     TogglePlanAvailabilityUrlIndex,
 )
 from .user_action_resolver import UserActionResolver
@@ -222,12 +227,14 @@ class PresenterTestsInjector(Module):
         self,
         toggle_availability_url_index: TogglePlanAvailabilityUrlIndex,
         end_coop_url_index: EndCoopUrlIndexTestImpl,
+        request_coop_url_index: RequestCoopUrlIndexTestImpl,
         translator: FakeTranslator,
         plan_summary_service: PlanSummaryService,
     ) -> GetPlanSummaryCompanySuccessPresenter:
         return GetPlanSummaryCompanySuccessPresenter(
             toggle_availability_url_index=toggle_availability_url_index,
             end_coop_url_index=end_coop_url_index,
+            request_coop_url_index=request_coop_url_index,
             trans=translator,
             plan_summary_service=plan_summary_service,
         )
@@ -487,6 +494,16 @@ class PresenterTestsInjector(Module):
         self, translator: FakeTranslator
     ) -> InviteWorkerToCompanyPresenter:
         return InviteWorkerToCompanyPresenter(translator=translator)
+
+    @provider
+    def provide_get_latest_activated_plans_presenter(
+        self,
+        url_index: PlanSummaryUrlIndexTestImpl,
+        datetime_service: FakeDatetimeService,
+    ) -> GetLatestActivatedPlansPresenter:
+        return GetLatestActivatedPlansPresenter(
+            url_index=url_index, datetime_service=datetime_service
+        )
 
 
 def get_dependency_injector() -> Injector:

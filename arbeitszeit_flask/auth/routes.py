@@ -28,6 +28,7 @@ from arbeitszeit_flask.next_url import (
     save_next_url_in_session,
 )
 from arbeitszeit_flask.token import FlaskTokenService
+from arbeitszeit_flask.views.signup_accountant_view import SignupAccountantView
 from arbeitszeit_flask.views.signup_company_view import SignupCompanyView
 from arbeitszeit_flask.views.signup_member_view import SignupMemberView
 
@@ -231,6 +232,12 @@ def resend_confirmation_company(use_case: ResendConfirmationMail):
         flash("Eine neue Bestätigungsmail wurde gesendet.")
 
     return redirect(url_for("auth.unconfirmed_company"))
+
+
+@auth.route("/accountant/signup/<token>")
+@with_injection()
+def signup_accountant(token: str, view: SignupAccountantView):
+    return view.handle_request()
 
 
 # logout

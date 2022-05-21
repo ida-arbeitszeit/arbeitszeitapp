@@ -5,6 +5,10 @@ from arbeitszeit import entities
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.token import InvitationTokenValidator, TokenDeliverer, TokenService
 from arbeitszeit.use_cases import GetCompanySummary
+from arbeitszeit.use_cases.get_accountant_profile_info import (
+    GetAccountantProfileInfoUseCase,
+)
+from arbeitszeit.use_cases.log_in_accountant import LogInAccountantUseCase
 from arbeitszeit.use_cases.register_company.company_registration_message_presenter import (
     CompanyRegistrationMessagePresenter,
 )
@@ -24,6 +28,19 @@ from . import repositories
 
 
 class InMemoryModule(Module):
+    @singleton
+    @provider
+    def provide_accoutant_repository_test_impl(
+        self,
+    ) -> repositories.AccountantRepositoryTestImpl:
+        return repositories.AccountantRepositoryTestImpl()
+
+    @provider
+    def provide_accountant_repository(
+        self, repository: repositories.AccountantRepositoryTestImpl
+    ) -> interfaces.AccountantRepository:
+        return repository
+
     @singleton
     @provider
     def provide_accountant_invitation_presenter_test_impl(
@@ -175,6 +192,22 @@ class InMemoryModule(Module):
             account_repository,
             transaction_repository,
             social_accounting,
+        )
+
+    @provider
+    def provide_get_accountant_profile_info_use_case(
+        self, accountant_repository: interfaces.AccountantRepository
+    ) -> GetAccountantProfileInfoUseCase:
+        return GetAccountantProfileInfoUseCase(
+            accountant_repository=accountant_repository,
+        )
+
+    @provider
+    def provide_log_in_accountant_use_case(
+        self, accountant_repository: interfaces.AccountantRepository
+    ) -> LogInAccountantUseCase:
+        return LogInAccountantUseCase(
+            accountant_repository=accountant_repository,
         )
 
 

@@ -226,6 +226,23 @@ class InviteWorkerToCompanyForm(Form):
         return self.data["member_id"]
 
 
+class CreateCooperationForm(Form):
+    name = StringField(
+        render_kw={"placeholder": trans.lazy_gettext("Name")},
+        validators=[validators.InputRequired()],
+    )
+    definition = TextAreaField(
+        render_kw={"placeholder": trans.lazy_gettext("Definition")},
+        validators=[validators.InputRequired()],
+    )
+
+    def get_name_string(self) -> str:
+        return self.data["name"]
+
+    def get_definition_string(self) -> str:
+        return self.data["definition"]
+
+
 class RequestCooperationForm(Form):
     plan_id = StringField()
     cooperation_id = StringField()

@@ -2,11 +2,16 @@ from decimal import Decimal
 from uuid import UUID
 
 from arbeitszeit.use_cases import InviteWorkerToCompany, InviteWorkerToCompanyRequest
+from arbeitszeit.use_cases.send_accountant_registration_token import (
+    SendAccountantRegistrationTokenUseCase,
+)
 from arbeitszeit_flask.url_index import (
     CompanyUrlIndex,
     FlaskPlotsUrlIndex,
+    GeneralUrlIndex,
     MemberUrlIndex,
 )
+from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
 from tests.data_generators import (
     CompanyGenerator,
     CooperationGenerator,
@@ -69,6 +74,13 @@ class CompanyUrlIndexTests(ViewTestCase):
         url = self.url_index.get_hide_plan_url(plan.id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
+
+    def test_request_coop_url_leads_to_functional_url(
+        self,
+    ) -> None:
+        url = self.url_index.get_request_coop_url()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
 
     def test_end_coop_url_for_existing_plan_and_cooperation_leads_to_functional_url(
         self,
@@ -195,3 +207,27 @@ class PlotUrlIndexTests(ViewTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.mimetype, "image/png")
+
+
+class GeneralUrlIndexTests(ViewTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.url_index = self.injector.get(GeneralUrlIndex)
+        self.invite_accountant_use_case = self.injector.get(
+            SendAccountantRegistrationTokenUseCase
+        )
+        self.invitation_presenter = self.injector.get(
+            AccountantInvitationPresenterTestImpl
+        )
+
+    def test_can_create_valid_url_from_valid_token(self) -> None:
+        token = self.invite_accountant(email="test@test.test")
+        url = self.url_index.get_accountant_invitation_url(token=token)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def invite_accountant(self, email: str) -> str:
+        self.invite_accountant_use_case.send_accountant_registration_token(
+            request=SendAccountantRegistrationTokenUseCase.Request(email=email)
+        )
+        return self.invitation_presenter.invitations[-1].token

@@ -251,7 +251,7 @@ def test_show_relative_deviation_of_zero_for_all_accounts_when_no_transactions_t
 
 
 @injection_test
-def test_show_relative_deviation_of_zero_when_company_sends_minus_5_to_p_account(
+def test_show_relative_deviation_of_infinite_when_company_receives_minus_5_on_p_account(
     get_company_summary: GetCompanySummary,
     company_generator: CompanyGenerator,
     transaction_repository: TransactionRepository,
@@ -269,12 +269,12 @@ def test_show_relative_deviation_of_zero_when_company_sends_minus_5_to_p_account
     )
     response = get_company_summary(receiving_company.id)
     assert response
-    for i in range(4):
-        assert response.deviations_relative[i] == 0
+    assert response.deviations_relative[0] == Decimal("Infinity")
+    assert response.deviations_relative[1] == 0
 
 
 @injection_test
-def test_show_relative_deviation_of_100_when_social_accounting_sends_5_to_p_account(
+def test_show_relative_deviation_of_100_after_social_accounting_sends_credit_to_p_account(
     get_company_summary: GetCompanySummary,
     company_generator: CompanyGenerator,
     transaction_repository: TransactionRepository,
@@ -298,7 +298,7 @@ def test_show_relative_deviation_of_100_when_social_accounting_sends_5_to_p_acco
 
 
 @injection_test
-def test_show_relative_deviation_of_zero_when_company_sends_minus_5_to_prd_account(
+def test_show_relative_deviation_of_infinite_when_company_receives_minus_5_on_prd_account(
     get_company_summary: GetCompanySummary,
     company_generator: CompanyGenerator,
     transaction_repository: TransactionRepository,
@@ -316,8 +316,9 @@ def test_show_relative_deviation_of_zero_when_company_sends_minus_5_to_prd_accou
     )
     response = get_company_summary(receiving_company.id)
     assert response
-    for i in range(4):
+    for i in range(0, 3):
         assert response.deviations_relative[i] == 0
+    assert response.deviations_relative[3] == Decimal("Infinity")
 
 
 @injection_test
@@ -435,7 +436,11 @@ def test_returns_correct_sales_volume_of_zero_if_plan_is_public(
     plan_generator: PlanGenerator,
 ):
     company = company_generator.create_company()
-    plan_generator.create_plan(planner=company, is_public_service=True)
+    plan_generator.create_plan(
+        planner=company,
+        is_public_service=True,
+        costs=ProductionCosts(Decimal(2), Decimal(2), Decimal(2)),
+    )
     response = get_company_summary(company.id)
     assert response
     assert response.plan_details[0].sales_volume == 0
@@ -494,7 +499,29 @@ def test_returns_correct_sales_balance_if_plan_is_productive_and_one_transaction
 
 
 @injection_test
-def test_returns_correct_deviation_if_plan_is_productive_with_costs_of_10_and_balance_of_10(
+def test_returns_correct_infinite_sales_deviation_if_plan_is_productive_with_costs_of_0_and_balance_of_1(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+    transaction_generator: TransactionGenerator,
+):
+    company = company_generator.create_company()
+    plan = plan_generator.create_plan(
+        planner=company,
+        costs=ProductionCosts(Decimal(0), Decimal(0), Decimal(0)),
+    )
+    transaction_generator.create_transaction(
+        receiving_account=company.product_account,
+        amount_received=Decimal(1),
+        purpose=f"Plan ID: {plan.id}",
+    )
+    response = get_company_summary(company.id)
+    assert response
+    assert response.plan_details[0].deviation_relative == Decimal("Infinity")
+
+
+@injection_test
+def test_returns_correct_sales_deviation_of_100_if_plan_is_productive_with_costs_of_10_and_balance_of_10(
     get_company_summary: GetCompanySummary,
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
@@ -516,7 +543,7 @@ def test_returns_correct_deviation_if_plan_is_productive_with_costs_of_10_and_ba
 
 
 @injection_test
-def test_returns_correct_deviation_if_plan_is_productive_with_costs_of_10_and_balance_of_minus_10(
+def test_returns_correct_sales_deviation_of_100_if_plan_is_productive_with_costs_of_10_and_balance_of_minus_10(
     get_company_summary: GetCompanySummary,
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
@@ -538,7 +565,7 @@ def test_returns_correct_deviation_if_plan_is_productive_with_costs_of_10_and_ba
 
 
 @injection_test
-def test_returns_correct_deviation_if_plan_is_productive_with_costs_of_10_and_balance_of_0(
+def test_returns_correct_sales_deviation_of_0_if_plan_is_productive_with_costs_of_10_and_balance_of_0(
     get_company_summary: GetCompanySummary,
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
@@ -554,7 +581,7 @@ def test_returns_correct_deviation_if_plan_is_productive_with_costs_of_10_and_ba
 
 
 @injection_test
-def test_returns_correct_deviation_if_plan_is_public(
+def test_returns_correct_sales_deviation_of_infinite_if_plan_is_public_but_received_transaction_on_prd(
     get_company_summary: GetCompanySummary,
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
@@ -573,4 +600,27 @@ def test_returns_correct_deviation_if_plan_is_public(
     )
     response = get_company_summary(company.id)
     assert response
-    assert response.plan_details[0].deviation_relative == Decimal(0)
+    assert response.plan_details[0].deviation_relative == Decimal("Infinity")
+
+
+@injection_test
+def test_returns_correct_sales_deviation_of_0_if_plan_is_public_with_balance_of_0(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    plan_generator: PlanGenerator,
+    transaction_generator: TransactionGenerator,
+):
+    company = company_generator.create_company()
+    plan = plan_generator.create_plan(
+        planner=company,
+        is_public_service=True,
+        costs=ProductionCosts(Decimal(5), Decimal(5), Decimal(0)),
+    )
+    transaction_generator.create_transaction(
+        receiving_account=company.product_account,
+        amount_received=Decimal(0),
+        purpose=f"Plan ID: {plan.id}",
+    )
+    response = get_company_summary(company.id)
+    assert response
+    assert response.plan_details[0].deviation_relative == Decimal("0")

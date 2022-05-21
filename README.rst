@@ -92,6 +92,7 @@ To run the app in development mode you first have to define some environment var
     $ export ARBEITSZEIT_APP_CONFIGURATION="$PWD/arbeitszeit_flask/development_settings.py"
     $ export DEV_DATABASE_URI="sqlite:///$(pwd)/db.sqlite3" 
     $ export DEV_SECRET_KEY=my_secret_key
+    $ export ARBEITSZEIT_APP_SERVER_NAME=localhost:5000
 
 Afterwards you can start the development server with ``flask run``.
 

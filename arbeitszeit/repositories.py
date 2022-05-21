@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterable, Iterator, List, Optional, Union
+from typing import Iterable, Iterator, List, Optional, Protocol, Union
 from uuid import UUID
 
 from arbeitszeit.entities import (
     Account,
+    Accountant,
     AccountTypes,
     Company,
     CompanyWorkInvite,
@@ -91,7 +92,13 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def all_active_plans(self) -> Iterator[Plan]:
+    def get_active_plans(self) -> Iterator[Plan]:
+        pass
+
+    @abstractmethod
+    def get_three_latest_active_plans_ordered_by_activation_date(
+        self,
+    ) -> Iterator[Plan]:
         pass
 
     @abstractmethod
@@ -429,3 +436,17 @@ class PlanCooperationRepository(ABC):
     @abstractmethod
     def get_plans_in_cooperation(self, cooperation_id: UUID) -> Iterable[Plan]:
         pass
+
+
+class AccountantRepository(Protocol):
+    def create_accountant(self, email: str, name: str, password: str) -> UUID:
+        ...
+
+    def has_accountant_with_email(self, email: str) -> bool:
+        ...
+
+    def get_by_id(self, id: UUID) -> Optional[Accountant]:
+        ...
+
+    def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
+        ...

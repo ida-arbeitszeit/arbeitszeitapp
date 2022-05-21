@@ -6,6 +6,10 @@ from arbeitszeit.repositories import (
     CompanyWorkerRepository,
     MemberRepository,
 )
+from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitation_presenter import (
+    AccountantInvitationPresenter,
+)
+from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
 from tests.company import CompanyManager
 from tests.email import FakeEmailSender
 from tests.session import FakeSession
@@ -41,3 +45,16 @@ class TestingModule(Module):
         self, datetime_service: DatetimeService
     ) -> FakeTokenService:
         return FakeTokenService(datetime_service=datetime_service)
+
+    @provider
+    def provide_accountant_invitation_presenter(
+        self, presenter: AccountantInvitationPresenterTestImpl
+    ) -> AccountantInvitationPresenter:
+        return presenter
+
+    @singleton
+    @provider
+    def provide_accountant_invitation_presenter_test_impl(
+        self,
+    ) -> AccountantInvitationPresenterTestImpl:
+        return AccountantInvitationPresenterTestImpl()

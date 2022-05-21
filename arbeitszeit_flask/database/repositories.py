@@ -9,7 +9,7 @@ from uuid import UUID, uuid4
 from flask_sqlalchemy import SQLAlchemy
 from injector import inject
 from sqlalchemy import desc, func
-from werkzeug.security import generate_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from arbeitszeit import entities, repositories
 from arbeitszeit.decimal import decimal_sum
@@ -597,10 +597,20 @@ class PlanRepository(repositories.PlanRepository):
         plan_orm = self.object_to_orm(plan)
         plan_orm.payout_count += 1
 
-    def all_active_plans(self) -> Iterator[entities.Plan]:
+    def get_active_plans(self) -> Iterator[entities.Plan]:
         return (
             self.object_from_orm(plan_orm)
             for plan_orm in Plan.query.filter_by(is_active=True).all()
+        )
+
+    def get_three_latest_active_plans_ordered_by_activation_date(
+        self,
+    ) -> Iterator[entities.Plan]:
+        return (
+            self.object_from_orm(plan_orm)
+            for plan_orm in Plan.query.filter_by(is_active=True)
+            .order_by(Plan.activation_date.desc())
+            .limit(3)
         )
 
     def count_active_plans(self) -> int:
@@ -1112,7 +1122,7 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
     cooperation_repository: CooperationRepository
 
     def get_inbound_requests(self, coordinator_id: UUID) -> Iterator[entities.Plan]:
-        for plan in self.plan_repository.all_active_plans():
+        for plan in self.plan_repository.get_active_plans():
             if plan.requested_cooperation:
                 if plan.requested_cooperation in [
                     coop.id
@@ -1175,3 +1185,37 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
         plans = Plan.query.filter_by(cooperation=str(cooperation_id)).all()
         for plan in plans:
             yield self.plan_repository.object_from_orm(plan)
+
+
+@inject
+@dataclass
+class AccountantRepository:
+    db: SQLAlchemy
+
+    def create_accountant(self, email: str, name: str, password: str) -> UUID:
+        user_id = uuid4()
+        accountant = models.Accountant(
+            id=str(user_id),
+            name=name,
+            password=generate_password_hash(password, method="sha256"),
+            email=email,
+        )
+        self.db.session.add(accountant)
+        return user_id
+
+    def get_by_id(self, id: UUID) -> Optional[entities.Accountant]:
+        record = models.Accountant.query.filter_by(id=str(id)).first()
+        if record is None:
+            return None
+        return entities.Accountant(email_address=record.email, name=record.name)
+
+    def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
+        record = models.Accountant.query.filter_by(email=email).first()
+        if record is None:
+            return None
+        if not check_password_hash(record.password, password):
+            return None
+        return UUID(record.id)
+
+    def has_accountant_with_email(self, email: str) -> bool:
+        return bool(models.Accountant.query.filter_by(email=email).first())

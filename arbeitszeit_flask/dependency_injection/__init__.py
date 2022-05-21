@@ -44,6 +44,7 @@ from arbeitszeit.use_cases.send_work_certificates_to_worker import (
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts
 from arbeitszeit_flask.database import get_social_accounting
 from arbeitszeit_flask.database.repositories import (
+    AccountantRepository,
     AccountOwnerRepository,
     AccountRepository,
     CompanyRepository,
@@ -147,6 +148,9 @@ from arbeitszeit_web.presenters.accountant_invitation_presenter import (
     AccountantInvitationEmailView,
 )
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
+from arbeitszeit_web.presenters.get_latest_activated_plans_presenter import (
+    GetLatestActivatedPlansPresenter,
+)
 from arbeitszeit_web.presenters.register_company_presenter import (
     RegisterCompanyPresenter,
 )
@@ -196,6 +200,7 @@ from arbeitszeit_web.url_index import (
     PlanSummaryUrlIndex,
     PlotsUrlIndex,
     RenewPlanUrlIndex,
+    RequestCoopUrlIndex,
     TogglePlanAvailabilityUrlIndex,
 )
 from arbeitszeit_web.user_action import UserActionResolver, UserActionResolverImpl
@@ -242,6 +247,12 @@ class MemberModule(Module):
     def provide_message_url_index(
         self, member_index: MemberUrlIndex
     ) -> MessageUrlIndex:
+        return member_index
+
+    @provider
+    def provide_request_coop_url_index(
+        self, member_index: MemberUrlIndex
+    ) -> RequestCoopUrlIndex:
         return member_index
 
     @provider
@@ -318,6 +329,12 @@ class CompanyModule(Module):
     def provide_hide_plan_url_index(
         self, company_index: CompanyUrlIndex
     ) -> HidePlanUrlIndex:
+        return company_index
+
+    @provider
+    def provide_request_coop_url_index(
+        self, company_index: CompanyUrlIndex
+    ) -> RequestCoopUrlIndex:
         return company_index
 
     @provider
@@ -790,11 +807,16 @@ class FlaskModule(Module):
         self,
         toggle_availability_index: TogglePlanAvailabilityUrlIndex,
         end_coop_url_index: EndCoopUrlIndex,
+        request_coop_url_index: RequestCoopUrlIndex,
         trans: Translator,
         plan_summary_service: PlanSummaryServiceImpl,
     ) -> GetPlanSummaryCompanySuccessPresenter:
         return GetPlanSummaryCompanySuccessPresenter(
-            toggle_availability_index, end_coop_url_index, trans, plan_summary_service
+            toggle_availability_index,
+            end_coop_url_index,
+            request_coop_url_index,
+            trans,
+            plan_summary_service,
         )
 
     @provider
@@ -813,6 +835,12 @@ class FlaskModule(Module):
     def provide_transaction_repository(
         self, instance: TransactionRepository
     ) -> interfaces.TransactionRepository:
+        return instance
+
+    @provider
+    def provide_accountant_repository(
+        self, instance: AccountantRepository
+    ) -> interfaces.AccountantRepository:
         return instance
 
     @provider
@@ -916,6 +944,14 @@ class FlaskModule(Module):
         account_repository: AccountRepository,
     ) -> ShowMyAccounts:
         return ShowMyAccounts(company_repository, account_repository)
+
+    @provider
+    def provide_get_latest_activated_plans_presenter(
+        self, url_index: PlanSummaryUrlIndex, datetime_service: DatetimeService
+    ) -> GetLatestActivatedPlansPresenter:
+        return GetLatestActivatedPlansPresenter(
+            url_index=url_index, datetime_service=datetime_service
+        )
 
     def configure(self, binder: Binder) -> None:
         binder.bind(

@@ -59,7 +59,7 @@ class QueryPlans:
         query = request.get_query_string()
         filter_by = request.get_filter_category()
         if query is None:
-            found_plans = self.plan_repository.all_active_plans()
+            found_plans = self.plan_repository.get_active_plans()
         elif filter_by == PlanFilter.by_plan_id:
             found_plans = self.plan_repository.query_active_plans_by_plan_id(query)
         else:

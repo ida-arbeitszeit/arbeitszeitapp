@@ -17,6 +17,11 @@ class CoopSummaryUrlIndexTestImpl:
         return f"fake_coop_url:{coop_id}"
 
 
+class RequestCoopUrlIndexTestImpl:
+    def get_request_coop_url(self) -> str:
+        return "fake_request_coop_url"
+
+
 class EndCoopUrlIndexTestImpl:
     def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
         return f"fake_end_coop_url:{plan_id}, {cooperation_id}"

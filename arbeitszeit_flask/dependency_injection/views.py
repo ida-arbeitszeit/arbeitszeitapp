@@ -6,13 +6,19 @@ from arbeitszeit.use_cases import (
     ReadMessage,
     ShowCompanyWorkInviteDetailsUseCase,
 )
+from arbeitszeit.use_cases.create_cooperation import CreateCooperation
+from arbeitszeit.use_cases.get_latest_activated_plans import GetLatestActivatedPlans
 from arbeitszeit.use_cases.list_workers import ListWorkers
 from arbeitszeit.use_cases.register_company import RegisterCompany
 from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts
 from arbeitszeit_flask.database.repositories import MemberRepository
 from arbeitszeit_flask.flask_session import FlaskSession
-from arbeitszeit_flask.template import TemplateIndex, TemplateRenderer
+from arbeitszeit_flask.template import (
+    TemplateIndex,
+    TemplateRenderer,
+    UserTemplateRenderer,
+)
 from arbeitszeit_flask.views import (
     CompanyWorkInviteView,
     Http404View,
@@ -22,6 +28,8 @@ from arbeitszeit_flask.views import (
 from arbeitszeit_flask.views.accountant_invitation_email_view import (
     AccountantInvitationEmailViewImpl,
 )
+from arbeitszeit_flask.views.create_cooperation_view import CreateCooperationView
+from arbeitszeit_flask.views.dashboard_view import DashboardView
 from arbeitszeit_flask.views.invite_worker_to_company import (
     InviteWorkerGetRequestHandler,
     InviteWorkerPostRequestHandler,
@@ -40,6 +48,7 @@ from arbeitszeit_web.controllers.show_company_work_invite_details_controller imp
 from arbeitszeit_web.controllers.show_my_accounts_controller import (
     ShowMyAccountsController,
 )
+from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
 from arbeitszeit_web.email import MailService
 from arbeitszeit_web.invite_worker_to_company import (
     InviteWorkerToCompanyController,
@@ -47,6 +56,9 @@ from arbeitszeit_web.invite_worker_to_company import (
 )
 from arbeitszeit_web.presenters.accountant_invitation_presenter import (
     AccountantInvitationEmailView,
+)
+from arbeitszeit_web.presenters.get_latest_activated_plans_presenter import (
+    GetLatestActivatedPlansPresenter,
 )
 from arbeitszeit_web.presenters.list_workers_presenter import ListWorkersPresenter
 from arbeitszeit_web.presenters.register_company_presenter import (
@@ -213,4 +225,33 @@ class ViewsModule(Module):
         return AccountantInvitationEmailViewImpl(
             mail_service=mail_service,
             template_renderer=template_renderer,
+        )
+
+    @provider
+    def provide_create_cooperation_view(
+        self,
+        create_cooperation: CreateCooperation,
+        presenter: CreateCooperationPresenter,
+        template_renderer: UserTemplateRenderer,
+        session: FlaskSession,
+    ) -> CreateCooperationView:
+        return CreateCooperationView(
+            create_cooperation, presenter, template_renderer, session
+        )
+
+    @provider
+    def provide_dashboard_view(
+        self,
+        list_workers_use_case: ListWorkers,
+        get_latest_plans_use_case: GetLatestActivatedPlans,
+        get_latest_plans_presenter: GetLatestActivatedPlansPresenter,
+        template_renderer: UserTemplateRenderer,
+        flask_session: FlaskSession,
+    ) -> DashboardView:
+        return DashboardView(
+            list_workers_use_case,
+            get_latest_plans_use_case,
+            get_latest_plans_presenter,
+            template_renderer,
+            flask_session,
         )
