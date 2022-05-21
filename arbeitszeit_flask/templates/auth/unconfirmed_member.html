@@ -1,31 +1,6 @@
-{% extends "base_general_pages.html" %}
+{% extends "base_member.html" %}
 
-{% block general_pages %}
-<nav class="navbar is-transparent" role="navigation" aria-label="main navigation">
-    <div class="navbar-brand">
-        <a role="button" class="navbar-burger" onclick="expandMenu()" aria-label="menu" aria-expanded="false"
-            data-target="navbarOnTop">
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-        </a>
-    </div>
-    <div id="navbarOnTop" class="navbar-menu">
-        <div class="navbar-end">
-            <div class="navbar-item">
-                <div class="buttons">
-                    <a class="button" href="{{ url_for('auth.logout') }}">
-                        {{ gettext("Logout") }}
-                    </a>
-                    <a class="button is-primary" href="{{ url_for('auth.help') }}">
-                        {{ gettext("Help") }}
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</nav>
-
+{% block content %}
 <div class="section is-medium has-text-centered">
     <h1 class="title">
         Arbeitszeit

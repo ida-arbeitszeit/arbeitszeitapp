@@ -1,27 +1,14 @@
 {% extends "base_general_pages.html" %}
-
-{% block general_pages %}
-<nav class="navbar is-transparent" role="navigation" aria-label="main navigation">
-  <div class="navbar-brand">
-    <a role="button" class="navbar-burger" onclick="expandMenu()" aria-label="menu" aria-expanded="false"
-      data-target="navbarOnTop">
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-    </a>
-  </div>
-  <div id="navbarOnTop" class="navbar-menu">
-    <div class="navbar-end">
-      <div class="navbar-item">
-        <a class="button" href="{{ url_for('auth.start') }}">
-          {{ gettext("Back") }}
-        </a>
-      </div>
-    </div>
-  </div>
-</nav>
-
 {% from 'macros/start_hilfe.html' import start_hilfe %}
-{{ start_hilfe() }}
 
+{% block navigation_items %}
+<div class="navbar-item">
+  <a class="button is-primary" href="{{ url_for('auth.start') }}">
+    {{ gettext('Start') }}
+  </a>
+</div>
+{% endblock %}
+
+{% block content %}
+{{ start_hilfe() }}
 {% endblock %}
