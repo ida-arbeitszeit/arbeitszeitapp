@@ -5,6 +5,7 @@ from arbeitszeit.use_cases.send_accountant_registration_token import (
     SendAccountantRegistrationTokenUseCase,
 )
 from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
+from tests.data_generators import AccountantGenerator, CompanyGenerator, MemberGenerator
 
 from .dependency_injection import get_dependency_injector
 
@@ -19,6 +20,9 @@ class UseCaseTests(TestCase):
         self.invitation_presenter = self.injector.get(
             AccountantInvitationPresenterTestImpl
         )
+        self.member_generator = self.injector.get(MemberGenerator)
+        self.company_generator = self.injector.get(CompanyGenerator)
+        self.accountant_generator = self.injector.get(AccountantGenerator)
 
     def test_that_user_with_random_token_and_email_cannot_register(self) -> None:
         request = self.create_request(token="random token")
@@ -43,6 +47,47 @@ class UseCaseTests(TestCase):
         response = self.use_case.register_accountant(request)
         self.assertFalse(response.is_accepted)
 
+    def test_that_user_can_register_with_email_already_belonging_to_a_member(
+        self,
+    ) -> None:
+        email_address = "test@test.test"
+        token = self.invite_user(email=email_address)
+        self.member_generator.create_member(email=email_address)
+        request = self.create_request(token=token, email=email_address)
+        response = self.use_case.register_accountant(request)
+        self.assertTrue(response.is_accepted)
+
+    def test_that_user_can_register_with_email_already_belonging_to_a_company(
+        self,
+    ) -> None:
+        email_address = "test@test.test"
+        token = self.invite_user(email=email_address)
+        self.company_generator.create_company(email=email_address)
+        request = self.create_request(token=token, email=email_address)
+        response = self.use_case.register_accountant(request)
+        self.assertTrue(response.is_accepted)
+
+    def test_that_user_cannot_register_twice_with_same_email_address(self) -> None:
+        expected_email = "testmail@test.test"
+        token = self.invite_user(email=expected_email)
+        request = self.create_request(
+            token=token,
+            email=expected_email,
+        )
+        self.use_case.register_accountant(request)
+        response = self.use_case.register_accountant(request)
+        self.assertFalse(response.is_accepted)
+
+    def test_that_no_user_id_is_returned_when_trying_to_create_accountant_with_email_address_of_another_accountant(
+        self,
+    ) -> None:
+        email_address = "test@test.test"
+        token = self.invite_user(email=email_address)
+        self.accountant_generator.create_accountant(email_address=email_address)
+        request = self.create_request(token=token, email=email_address)
+        response = self.use_case.register_accountant(request)
+        self.assertIsNone(response.user_id)
+
     def invite_user(self, email: str) -> str:
         self.send_registration_token_use_case.send_accountant_registration_token(
             request=self.send_registration_token_use_case.Request(email=email)
@@ -56,4 +101,5 @@ class UseCaseTests(TestCase):
             token=token,
             email=email,
             name=name,
+            password="test password",
         )

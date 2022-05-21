@@ -44,6 +44,7 @@ from arbeitszeit.use_cases.send_work_certificates_to_worker import (
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts
 from arbeitszeit_flask.database import get_social_accounting
 from arbeitszeit_flask.database.repositories import (
+    AccountantRepository,
     AccountOwnerRepository,
     AccountRepository,
     CompanyRepository,
@@ -831,6 +832,12 @@ class FlaskModule(Module):
     def provide_transaction_repository(
         self, instance: TransactionRepository
     ) -> interfaces.TransactionRepository:
+        return instance
+
+    @provider
+    def provide_accountant_repository(
+        self, instance: AccountantRepository
+    ) -> interfaces.AccountantRepository:
         return instance
 
     @provider

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from statistics import StatisticsError, mean
@@ -14,6 +15,7 @@ from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.entities import (
     Account,
+    Accountant,
     AccountTypes,
     Company,
     CompanyWorkInvite,
@@ -826,3 +828,44 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
         for plan in plans:
             if plan.cooperation == cooperation_id:
                 yield plan
+
+
+class AccountantRepositoryTestImpl:
+    @dataclass
+    class _AccountantRecord:
+        email: str
+        name: str
+        password: str
+
+    def __init__(self) -> None:
+        self.accountants: Dict[
+            UUID, AccountantRepositoryTestImpl._AccountantRecord
+        ] = dict()
+
+    def create_accountant(self, email: str, name: str, password: str) -> UUID:
+        id = uuid4()
+        record = self._AccountantRecord(
+            email=email,
+            name=name,
+            password=password,
+        )
+        self.accountants[id] = record
+        return id
+
+    def has_accountant_with_email(self, email: str) -> bool:
+        return any(record.email == email for record in self.accountants.values())
+
+    def get_by_id(self, id: UUID) -> Optional[Accountant]:
+        record = self.accountants.get(id)
+        if record is None:
+            return None
+        return Accountant(email_address=record.email, name=record.name)
+
+    def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
+        for uuid, record in self.accountants.items():
+            if record.email == email:
+                if record.password == password:
+                    return uuid
+                else:
+                    return None
+        return None
