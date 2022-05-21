@@ -1,10 +1,15 @@
+from decimal import Decimal
+
 from wtforms import (
     BooleanField,
+    DecimalField,
     Form,
     IntegerField,
     PasswordField,
+    RadioField,
     SelectField,
     StringField,
+    TextAreaField,
     validators,
 )
 
@@ -143,45 +148,69 @@ class CompanySearchForm(Form):
 
 
 class CreateDraftForm(Form):
-    prd_name = StringField()
-    description = StringField()
-    timeframe = StringField()
-    prd_unit = StringField()
-    prd_amount = StringField()
-    costs_p = StringField()
-    costs_r = StringField()
-    costs_a = StringField()
-    productive_or_public = StringField()
+    prd_name = StringField(
+        validators=[
+            validators.InputRequired(),
+            validators.Length(max=100),
+        ]
+    )
+    description = TextAreaField(validators=[validators.InputRequired()])
+    timeframe = IntegerField(
+        validators=[validators.InputRequired(), validators.NumberRange(min=1, max=365)]
+    )
+    prd_unit = StringField(validators=[validators.InputRequired()])
+    prd_amount = IntegerField(
+        validators=[validators.InputRequired(), validators.NumberRange(min=1)]
+    )
+    costs_p = DecimalField(
+        validators=[validators.InputRequired(), validators.NumberRange(min=0)]
+    )
+    costs_r = DecimalField(
+        validators=[validators.InputRequired(), validators.NumberRange(min=0)]
+    )
+    costs_a = DecimalField(
+        validators=[validators.InputRequired(), validators.NumberRange(min=0)]
+    )
+    productive_or_public = RadioField(
+        choices=[
+            ("productive", trans.lazy_gettext("Productive")),
+            (
+                "public",
+                trans.lazy_gettext("Public"),
+            ),
+        ],
+        validators=[validators.InputRequired()],
+    )
     action = StringField()
 
-    def get_prd_name_string(self) -> str:
+    def get_prd_name(self) -> str:
         return self.data["prd_name"]
 
-    def get_description_string(self) -> str:
+    def get_description(self) -> str:
         return self.data["description"]
 
-    def get_timeframe_string(self) -> str:
+    def get_timeframe(self) -> int:
         return self.data["timeframe"]
 
-    def get_prd_unit_string(self) -> str:
+    def get_prd_unit(self) -> str:
         return self.data["prd_unit"]
 
-    def get_prd_amount_string(self) -> str:
+    def get_prd_amount(self) -> int:
         return self.data["prd_amount"]
 
-    def get_costs_p_string(self) -> str:
+    def get_costs_p(self) -> Decimal:
         return self.data["costs_p"]
 
-    def get_costs_r_string(self) -> str:
+    def get_costs_r(self) -> Decimal:
         return self.data["costs_r"]
 
-    def get_costs_a_string(self) -> str:
+    def get_costs_a(self) -> Decimal:
         return self.data["costs_a"]
 
-    def get_productive_or_public_string(self) -> str:
+    def get_productive_or_public(self) -> str:
         return self.data["productive_or_public"]
 
-    def get_action_string(self) -> str:
+    def get_action(self) -> str:
         return self.data["action"]
 
 

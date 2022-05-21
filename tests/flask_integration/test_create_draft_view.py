@@ -1,4 +1,5 @@
 from dataclasses import asdict
+from decimal import Decimal
 from typing import Dict
 
 from arbeitszeit.repositories import PlanDraftRepository
@@ -79,12 +80,12 @@ class AuthenticatedCompanyTestsForPost(ViewTestCase):
         test_data = FakeDraftForm(
             prd_name="test name",
             description="test description",
-            timeframe="14",
+            timeframe=14,
             prd_unit="1 piece",
-            prd_amount="10",
-            costs_p="10.5",
-            costs_r="15",
-            costs_a="20",
+            prd_amount=10,
+            costs_p=Decimal("10.5"),
+            costs_r=Decimal("15"),
+            costs_a=Decimal("20"),
             productive_or_public="public",
             action=action,
         )
