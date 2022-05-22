@@ -91,3 +91,6 @@ class PlotsUrlIndex(Protocol):
 
     def get_line_plot_of_company_prd_account(self, company_id: UUID) -> str:
         ...
+
+    def get_line_plot_of_company_r_account(self, company_id: UUID) -> str:
+        ...

@@ -47,13 +47,15 @@ from arbeitszeit_web.presenters.show_company_work_invite_details_presenter impor
 from arbeitszeit_web.presenters.show_prd_account_details_presenter import (
     ShowPRDAccountDetailsPresenter,
 )
+from arbeitszeit_web.presenters.show_r_account_details_presenter import (
+    ShowRAccountDetailsPresenter,
+)
 from arbeitszeit_web.query_companies import QueryCompaniesPresenter
 from arbeitszeit_web.query_plans import QueryPlansPresenter
 from arbeitszeit_web.read_message import ReadMessagePresenter
 from arbeitszeit_web.request_cooperation import RequestCooperationPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from arbeitszeit_web.show_p_account_details import ShowPAccountDetailsPresenter
-from arbeitszeit_web.show_r_account_details import ShowRAccountDetailsPresenter
 from arbeitszeit_web.url_index import ListMessagesUrlIndex
 from arbeitszeit_web.user_action import UserActionResolverImpl
 from tests.datetime_service import FakeDatetimeService
@@ -392,11 +394,11 @@ class PresenterTestsInjector(Module):
 
     @provider
     def provide_show_r_account_details_presenter(
-        self, translator: FakeTranslator
+        self,
+        translator: FakeTranslator,
+        url_index: PlotsUrlIndexImpl,
     ) -> ShowRAccountDetailsPresenter:
-        return ShowRAccountDetailsPresenter(
-            trans=translator,
-        )
+        return ShowRAccountDetailsPresenter(trans=translator, url_index=url_index)
 
     @provider
     def provide_show_p_account_details_presenter(

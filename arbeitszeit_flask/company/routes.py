@@ -75,6 +75,9 @@ from arbeitszeit_web.presenters.show_a_account_details_presenter import (
 from arbeitszeit_web.presenters.show_prd_account_details_presenter import (
     ShowPRDAccountDetailsPresenter,
 )
+from arbeitszeit_web.presenters.show_r_account_details_presenter import (
+    ShowRAccountDetailsPresenter,
+)
 from arbeitszeit_web.query_companies import (
     QueryCompaniesController,
     QueryCompaniesPresenter,
@@ -87,7 +90,6 @@ from arbeitszeit_web.request_cooperation import (
 from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from arbeitszeit_web.show_p_account_details import ShowPAccountDetailsPresenter
-from arbeitszeit_web.show_r_account_details import ShowRAccountDetailsPresenter
 
 from .blueprint import CompanyRoute
 
@@ -280,7 +282,7 @@ def account_p(
 
 @CompanyRoute("/company/my_accounts/account_r")
 def account_r(
-    show_r_account_details: use_cases.ShowRAccountDetails,
+    show_r_account_details: use_cases.ShowRAccountDetailsUseCase,
     template_renderer: UserTemplateRenderer,
     presenter: ShowRAccountDetailsPresenter,
 ):

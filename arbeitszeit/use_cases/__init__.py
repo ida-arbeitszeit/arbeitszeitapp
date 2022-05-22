@@ -161,7 +161,7 @@ from .show_prd_account_details import (
     ShowPRDAccountDetails,
     ShowPRDAccountDetailsResponse,
 )
-from .show_r_account_details import ShowRAccountDetails, ShowRAccountDetailsResponse
+from .show_r_account_details import ShowRAccountDetailsUseCase
 from .show_work_invites import ShowWorkInvites, ShowWorkInvitesRequest
 from .toggle_product_availablity import (
     ToggleProductAvailability,
@@ -300,8 +300,7 @@ __all__ = [
     "ShowPAccountDetailsResponse",
     "ShowPRDAccountDetails",
     "ShowPRDAccountDetailsResponse",
-    "ShowRAccountDetails",
-    "ShowRAccountDetailsResponse",
+    "ShowRAccountDetailsUseCase",
     "ShowWorkInvites",
     "ShowWorkInvitesRequest",
     "StatisticsResponse",
