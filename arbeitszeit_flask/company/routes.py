@@ -312,7 +312,7 @@ def account_a(
 
 @CompanyRoute("/company/my_accounts/account_prd")
 def account_prd(
-    show_prd_account_details: use_cases.ShowPRDAccountDetails,
+    show_prd_account_details: use_cases.ShowPRDAccountDetailsUseCase,
     template_renderer: UserTemplateRenderer,
     presenter: ShowPRDAccountDetailsPresenter,
 ):

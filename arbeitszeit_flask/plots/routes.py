@@ -4,7 +4,7 @@ from uuid import UUID
 from flask import Blueprint, Response, request
 from flask_login import login_required
 
-from arbeitszeit.use_cases.show_prd_account_details import ShowPRDAccountDetails
+from arbeitszeit.use_cases.show_prd_account_details import ShowPRDAccountDetailsUseCase
 from arbeitszeit.use_cases.show_r_account_details import ShowRAccountDetailsUseCase
 from arbeitszeit_flask.dependency_injection import with_injection
 from arbeitszeit_web.colors import Colors
@@ -95,7 +95,7 @@ def global_barplot_for_plans(plotter: Plotter, translator: Translator, colors: C
 @login_required
 def line_plot_of_company_prd_account(
     plotter: Plotter,
-    use_case: ShowPRDAccountDetails,
+    use_case: ShowPRDAccountDetailsUseCase,
 ):
     company_id = UUID(request.args["company_id"])
     use_case_response = use_case(company_id)

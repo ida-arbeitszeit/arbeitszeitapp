@@ -157,10 +157,7 @@ from .show_company_work_invite_details import (
 )
 from .show_my_plans import ShowMyPlansRequest, ShowMyPlansResponse, ShowMyPlansUseCase
 from .show_p_account_details import ShowPAccountDetails, ShowPAccountDetailsResponse
-from .show_prd_account_details import (
-    ShowPRDAccountDetails,
-    ShowPRDAccountDetailsResponse,
-)
+from .show_prd_account_details import ShowPRDAccountDetailsUseCase
 from .show_r_account_details import ShowRAccountDetailsUseCase
 from .show_work_invites import ShowWorkInvites, ShowWorkInvitesRequest
 from .toggle_product_availablity import (
@@ -298,8 +295,7 @@ __all__ = [
     "ShowMyPlansUseCase",
     "ShowPAccountDetails",
     "ShowPAccountDetailsResponse",
-    "ShowPRDAccountDetails",
-    "ShowPRDAccountDetailsResponse",
+    "ShowPRDAccountDetailsUseCase",
     "ShowRAccountDetailsUseCase",
     "ShowWorkInvites",
     "ShowWorkInvitesRequest",
