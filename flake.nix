@@ -12,36 +12,36 @@
         let
           pkgs = import nixpkgs {
             inherit system;
-            overlays = [ self.overlay ];
+            overlays = [ self.overlays.default ];
           };
-          python = pkgs.python3;
+          developmentPkgs = import nixpkgs {
+            inherit system;
+            overlays = [ self.overlays.development ];
+          };
         in {
-          devShell = pkgs.mkShell {
-            packages = (with python.pkgs; [
-              black
-              flake8
-              mypy
-              isort
-              psycopg2
-              gunicorn
-              types-dateutil
-              sphinx
-            ]) ++ (with pkgs; [ nixfmt ]);
-            inputsFrom = [ python.pkgs.arbeitszeitapp ];
-          };
+          devShell = developmentPkgs.callPackage nix/devShell.nix { };
           defaultPackage = pkgs.python3.pkgs.arbeitszeitapp;
           packages = {
-            inherit python;
+            inherit (pkgs) python3;
             arbeitszeitapp-docker-image = pkgs.arbeitszeitapp-docker-image;
           };
         });
       systemIndependent = {
-        overlay = final: prev: {
-          python3 = prev.python3.override {
-            packageOverrides = import nix/pythonPackages.nix;
+        overlays = {
+          default = final: prev: {
+            python3 = prev.python3.override {
+              packageOverrides = import nix/pythonPackages.nix;
+            };
+            arbeitszeitapp-docker-image =
+              final.callPackage nix/docker.nix { python = final.python3; };
           };
-          arbeitszeitapp-docker-image =
-            prev.callPackage nix/docker.nix { python = final.python3; };
+          development = final: prev: {
+            python3 = prev.python3.override {
+              packageOverrides = with nixpkgs.lib;
+                composeExtensions (import nix/developmentOverrides.nix)
+                (import nix/pythonPackages.nix);
+            };
+          };
         };
       };
     in systemDependent // systemIndependent;
