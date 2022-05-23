@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import Protocol, Union
@@ -9,34 +11,34 @@ from arbeitszeit_web.session import Session
 
 
 class CreateDraftForm(Protocol):
-    def get_prd_name_string(self) -> str:
+    def get_prd_name(self) -> str:
         ...
 
-    def get_description_string(self) -> str:
+    def get_description(self) -> str:
         ...
 
-    def get_timeframe_string(self) -> str:
+    def get_timeframe(self) -> int:
         ...
 
-    def get_prd_unit_string(self) -> str:
+    def get_prd_unit(self) -> str:
         ...
 
-    def get_prd_amount_string(self) -> str:
+    def get_prd_amount(self) -> int:
         ...
 
-    def get_costs_p_string(self) -> str:
+    def get_costs_p(self) -> Decimal:
         ...
 
-    def get_costs_r_string(self) -> str:
+    def get_costs_r(self) -> Decimal:
         ...
 
-    def get_costs_a_string(self) -> str:
+    def get_costs_a(self) -> Decimal:
         ...
 
-    def get_productive_or_public_string(self) -> str:
+    def get_productive_or_public(self) -> str:
         ...
 
-    def get_action_string(self) -> str:
+    def get_action(self) -> str:
         ...
 
 
@@ -47,54 +49,59 @@ class PrefilledDraftDataController:
     def import_form_data(self, draft_form: CreateDraftForm) -> CreatePlanDraftRequest:
         planner = self.session.get_current_user()
         assert planner
-        labour_costs = Decimal(draft_form.get_costs_a_string())
-        resource_cost = Decimal(draft_form.get_costs_r_string())
-        means_cost = Decimal(draft_form.get_costs_p_string())
-        production_amount = int(draft_form.get_prd_amount_string())
-        timeframe_in_days = int(draft_form.get_timeframe_string())
         return CreatePlanDraftRequest(
             costs=ProductionCosts(
-                labour_cost=labour_costs,
-                resource_cost=resource_cost,
-                means_cost=means_cost,
+                labour_cost=draft_form.get_costs_a(),
+                resource_cost=draft_form.get_costs_r(),
+                means_cost=draft_form.get_costs_p(),
             ),
-            product_name=draft_form.get_prd_name_string(),
-            production_unit=draft_form.get_prd_unit_string(),
-            production_amount=production_amount,
-            description=draft_form.get_description_string(),
-            timeframe_in_days=timeframe_in_days,
+            product_name=draft_form.get_prd_name(),
+            production_unit=draft_form.get_prd_unit(),
+            production_amount=draft_form.get_prd_amount(),
+            description=draft_form.get_description(),
+            timeframe_in_days=draft_form.get_timeframe(),
             is_public_service=True
-            if draft_form.get_productive_or_public_string() == "public"
+            if draft_form.get_productive_or_public() == "public"
             else False,
             planner=planner,
         )
 
 
 @dataclass
-class PrefilledDraftData:
-    product_name: str
-    description: str
-    timeframe: str
-    production_unit: str
-    amount: str
-    means_cost: str
-    resources_cost: str
-    labour_cost: str
-    is_public_service: bool
-
-
 class GetPrefilledDraftDataPresenter:
-    def present(
-        self, summary_data: Union[BusinessPlanSummary, DraftSummarySuccess]
-    ) -> PrefilledDraftData:
-        return PrefilledDraftData(
-            product_name=summary_data.product_name,
+    @dataclass
+    class PrefilledDraftData:
+        prd_name: str
+        description: str
+        timeframe: int
+        prd_unit: str
+        prd_amount: int
+        costs_p: Decimal
+        costs_r: Decimal
+        costs_a: Decimal
+        productive_or_public: str
+        action: str
+
+    @dataclass
+    class ViewModel:
+        prefilled_draft_data: GetPrefilledDraftDataPresenter.PrefilledDraftData
+
+    def show_prefilled_draft_data(
+        self,
+        summary_data: Union[BusinessPlanSummary, DraftSummarySuccess],
+    ) -> ViewModel:
+        prefilled_data = self.PrefilledDraftData(
+            prd_name=summary_data.product_name,
             description=summary_data.description,
-            timeframe=f"{summary_data.timeframe}",
-            production_unit=summary_data.production_unit,
-            amount=f"{summary_data.amount}",
-            means_cost=f"{summary_data.means_cost}",
-            resources_cost=f"{summary_data.resources_cost}",
-            labour_cost=f"{summary_data.labour_cost}",
-            is_public_service=summary_data.is_public_service,
+            timeframe=summary_data.timeframe,
+            prd_unit=summary_data.production_unit,
+            prd_amount=summary_data.amount,
+            costs_p=summary_data.means_cost,
+            costs_r=summary_data.resources_cost,
+            costs_a=summary_data.labour_cost,
+            productive_or_public="public"
+            if summary_data.is_public_service
+            else "productive",
+            action="",
         )
+        return self.ViewModel(prefilled_draft_data=prefilled_data)
