@@ -490,7 +490,7 @@ class PlanRepository(repositories.PlanRepository):
             description=plan.description,
             timeframe=int(plan.timeframe),
             is_public_service=plan.is_public_service,
-            approved=plan.approved,
+            approved=plan.approval_date is not None,
             approval_date=plan.approval_date,
             approval_reason=plan.approval_reason,
             is_active=plan.is_active,
@@ -550,7 +550,6 @@ class PlanRepository(repositories.PlanRepository):
         self, draft: entities.PlanDraft, approval_timestamp: datetime
     ) -> entities.Plan:
         plan_orm = self._create_plan_from_draft(draft)
-        plan_orm.approved = True
         plan_orm.approval_reason = "approved"
         plan_orm.approval_date = approval_timestamp
         return self.object_from_orm(plan_orm)

@@ -106,7 +106,6 @@ class Plan(UserMixin, db.Model):
     description = db.Column(db.String(5000), nullable=False)
     timeframe = db.Column(db.Numeric(), nullable=False)
     is_public_service = db.Column(db.Boolean, nullable=False, default=False)
-    approved = db.Column(db.Boolean, nullable=False, default=False)
     approval_date = db.Column(db.DateTime, nullable=True, default=None)
     approval_reason = db.Column(db.String(1000), nullable=True, default=None)
     is_active = db.Column(db.Boolean, nullable=False, default=False)
