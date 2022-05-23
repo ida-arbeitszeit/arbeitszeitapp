@@ -1,58 +1,31 @@
 {% extends "base_general_pages.html" %}
 
-{% block general_pages %}
+{% block body %}
 <section class="hero is-fullheight">
-  <div class="hero-head">
-    <nav class="navbar is-transparent" role="navigation" aria-label="main navigation">
-      <div class="navbar-brand">
-        <a role="button" class="navbar-burger" onclick="expandMenu()" aria-label="menu" aria-expanded="false"
-          data-target="navbarOnTop">
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
-        </a>
-      </div>
-      <div id="navbarOnTop" class="navbar-menu">
-        <div class="navbar-end">
-          <div class="navbar-item has-dropdown is-hoverable">
-            <a class="navbar-link">
-              {{ gettext('Language') }}
-            </a>
-            <div class="navbar-dropdown">
-              {% if languages is defined and languages | length %}
-              {% for lang_code, lang_name in languages.items() %}
-              <a href="{{ url_for('auth.set_language', language=lang_code) }}" class="navbar-item">
-                {{ lang_name }}
-              </a>
-              {% endfor %}
-              {% endif %}
-            </div>
-          </div>
-          <div class="navbar-item">
-            <a class="button is-primary" href="{{ url_for('auth.help') }}">
-              {{ gettext('Help') }}
-            </a>
-          </div>
-        </div>
-      </div>
-    </nav>
-  </div>
+  {{ super() }}
+</section>
+{% endblock %}
 
-  <div class="hero-body pt-0">
-    <div class="container has-text-centered">
-      <h1 class="title">
-        <!-- do not translate -->
-        Arbeitszeit
-      </h1>
-      <h2 class="subtitle">
-        {{ gettext('A platform for working time calculation.') }}
-      </h2>
-      <div class="buttons is-centered">
-        <a class="button" href="{{ url_for('auth.login_member') }}">{{ gettext('Member') }}</a>
-        <a class="button" href="{{ url_for('auth.login_company') }}">{{ gettext('Company') }}</a>
-      </div>
+{% block navigation %}
+<div class="hero-head">
+  {{ super() }}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="hero-body">
+  <div class="container has-text-centered">
+    <h1 class="title">
+      <!-- do not translate -->
+      Arbeitszeit
+    </h1>
+    <h2 class="subtitle">
+      {{ gettext('A platform for working time calculation.') }}
+    </h2>
+    <div class="buttons is-centered">
+      <a class="button" href="{{ url_for('auth.login_member') }}">{{ gettext('Member') }}</a>
+      <a class="button" href="{{ url_for('auth.login_company') }}">{{ gettext('Company') }}</a>
     </div>
   </div>
-  <div class="hero-foot"></div>
-</section>
+</div>
 {% endblock %}

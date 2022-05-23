@@ -4,7 +4,7 @@
 <div class="navbar-item">{{ gettext("Messages") }}</div>
 {% endblock %}
 
-{% block company %}
+{% block content %}
 {% from 'macros/list_messages.html' import list_messages %}
 {{ list_messages(view_model) }}
 {% endblock %}

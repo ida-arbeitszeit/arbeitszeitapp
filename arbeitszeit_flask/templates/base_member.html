@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from 'macros/show_notifications.html' import show_notifications %}
 
-{% block body %}
+{% block navigation %}
 <nav class="navbar is-transparent" role="navigation" aria-label="main navigation">
   <div class="navbar-brand">
     <div class="navbar-item has-background-primary	has-text-white">
@@ -21,29 +21,29 @@
 
       {% if current_user.is_authenticated %}
       <a href="{{ url_for('main_member.query_plans') }}" class="navbar-item">
-        {{ gettext("All plans") }}
+	{{ gettext("All plans") }}
       </a>
       <a href="{{ url_for('main_member.pay_consumer_product') }}" class="navbar-item">
-        {{ gettext("Pay product")}}
+	{{ gettext("Pay product")}}
       </a>
       <a href="{{ url_for('main_member.my_account') }}" class="navbar-item">
-        {{ gettext("My account")}}
+	{{ gettext("My account")}}
       </a>
       <a href="{{ url_for('main_member.my_purchases') }}" class="navbar-item">
-        {{ gettext("My purchases")}}
+	{{ gettext("My purchases")}}
       </a>
       <a href="{{ url_for('main_member.statistics') }}" class="navbar-item">
-        {{ gettext("Statistics")}}
+	{{ gettext("Statistics")}}
       </a>
       <a href="{{ url_for('main_member.query_companies') }}" class="navbar-item">
-        {{ gettext("Companies")}}
+	{{ gettext("Companies")}}
       </a>
       <a href="{{ url_for('main_member.profile') }}" class="navbar-item">
-        {{ gettext("My profile")}}
+	{{ gettext("My profile")}}
       </a>
       <a href="{{ url_for('main_member.list_messages') }}"
-        class="navbar-item {% if message_indicator is defined %}{% if message_indicator.show_unread_messages_indicator %}unread-messages-indicator{% endif %}{% endif %}">
-        {{ gettext("Messages")}}
+	class="navbar-item {% if message_indicator is defined %}{% if message_indicator.show_unread_messages_indicator %}unread-messages-indicator{% endif %}{% endif %}">
+	{{ gettext("Messages")}}
       </a>
       {% endif %}
 
@@ -51,36 +51,30 @@
 
     <div class="navbar-end">
       <div class="navbar-item">
-        <div class="buttons">
-          {% if not current_user.is_authenticated %}
-          <a class="button" href="{{ url_for('auth.login_member') }}">
-            {{ gettext("Sign in")}}
-          </a>
-          <a class="button" href="{{ url_for('auth.signup_member') }}">
-            {{ gettext("Sign up")}}
-          </a>
-          <a class="button" href="{{ url_for('auth.zurueck') }}">
-            {{ gettext("Back")}}
-          </a>
-          {% endif %}
-          {% if current_user.is_authenticated %}
-          <a class="button" href="{{ url_for('auth.logout') }}">
-            {{ gettext("Sign out")}}
-          </a>
-          <a class="button" href="{{ url_for('main_member.hilfe') }}">
-            ?
-          </a>
-          {% endif %}
+	<div class="buttons">
+	  {% if not current_user.is_authenticated %}
+	  <a class="button" href="{{ url_for('auth.login_member') }}">
+	    {{ gettext("Sign in")}}
+	  </a>
+	  <a class="button" href="{{ url_for('auth.signup_member') }}">
+	    {{ gettext("Sign up")}}
+	  </a>
+	  <a class="button" href="{{ url_for('auth.zurueck') }}">
+	    {{ gettext("Back")}}
+	  </a>
+	  {% endif %}
+	  {% if current_user.is_authenticated %}
+	  <a class="button" href="{{ url_for('auth.logout') }}">
+	    {{ gettext("Sign out")}}
+	  </a>
+	  <a class="button" href="{{ url_for('main_member.hilfe') }}">
+	    ?
+	  </a>
+	  {% endif %}
 
-        </div>
+	</div>
       </div>
     </div>
   </div>
 </nav>
-
-{{ show_notifications() }}
-
-{% block member %}
-{% endblock %}
-
 {% endblock %}
