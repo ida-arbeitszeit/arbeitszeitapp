@@ -20,17 +20,6 @@ def test_that_non_existing_plan_id_raises_assertion_error(
 
 
 @injection_test
-def test_that_a_nonapproved_plan_raises_assertion_error_and_does_not_get_activated(
-    activate_plan: ActivatePlanAndGrantCredit, plan_generator: PlanGenerator
-):
-    plan = plan_generator.create_plan()
-    plan.approved = False
-    with pytest.raises(AssertionError, match="Plan has not been approved"):
-        activate_plan(plan.id)
-    assert not plan.is_active
-
-
-@injection_test
 def test_that_approved_plans_gets_activated(
     activate_plan: ActivatePlanAndGrantCredit, plan_generator: PlanGenerator
 ):
