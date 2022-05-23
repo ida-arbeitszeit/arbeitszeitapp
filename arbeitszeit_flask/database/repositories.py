@@ -1219,3 +1219,6 @@ class AccountantRepository:
 
     def has_accountant_with_email(self, email: str) -> bool:
         return bool(models.Accountant.query.filter_by(email=email).first())
+
+    def get_accountant_orm_by_mail(self, email: str) -> Optional[models.Accountant]:
+        return models.Accountant.query.filter_by(email=email).first()

@@ -90,6 +90,34 @@ class RegisterForm(Form):
         self.email.errors.append(error)
 
 
+class RegisterAccountantForm(Form):
+    email = StringField(
+        "Email",
+        validators=[validators.InputRequired(message="Emailadresse erforderlich")],
+    )
+    name = StringField(
+        "Name",
+        validators=[validators.InputRequired(message="Name ist erforderlich")],
+    )
+    password = PasswordField(
+        "Passwort",
+        validators=[
+            validators.Length(
+                min=8, message="Passwort muss mindestens 8 Zeichen umfassen"
+            )
+        ],
+    )
+
+    def get_email_address(self) -> str:
+        return self.data["email"]
+
+    def get_name(self) -> str:
+        return self.data["name"]
+
+    def get_password(self) -> str:
+        return self.data["password"]
+
+
 class LoginForm(Form):
     email = StringField(
         "Email",

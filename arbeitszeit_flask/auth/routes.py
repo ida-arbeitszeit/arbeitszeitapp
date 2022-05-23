@@ -234,10 +234,11 @@ def resend_confirmation_company(use_case: ResendConfirmationMail):
     return redirect(url_for("auth.unconfirmed_company"))
 
 
-@auth.route("/accountant/signup/<token>")
+@auth.route("/accountant/signup/<token>", methods=["GET", "POST"])
+@commit_changes
 @with_injection()
 def signup_accountant(token: str, view: SignupAccountantView):
-    return view.handle_request()
+    return view.handle_request(token)
 
 
 # logout

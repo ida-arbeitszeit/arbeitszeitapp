@@ -92,3 +92,8 @@ class PlotsUrlIndexImpl:
 
     def get_line_plot_of_company_prd_account(self, company_id: UUID) -> str:
         return f"line plot for {company_id}"
+
+
+class AccountantDashboardUrlIndexImpl:
+    def get_accountant_dashboard_url(self) -> str:
+        return "accountant dashboard url"

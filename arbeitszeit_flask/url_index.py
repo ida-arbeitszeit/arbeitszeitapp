@@ -8,6 +8,9 @@ class GeneralUrlIndex:
     def get_accountant_invitation_url(self, token: str) -> str:
         return url_for("auth.signup_accountant", token=token)
 
+    def get_accountant_dashboard_url(self) -> str:
+        return url_for("main_accountant.dashboard")
+
 
 class MemberUrlIndex:
     def get_plan_summary_url(self, plan_id: UUID) -> str:

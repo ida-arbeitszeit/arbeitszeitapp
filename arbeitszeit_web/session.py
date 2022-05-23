@@ -11,3 +11,6 @@ class Session(Protocol):
 
     def login_company(self, email: str, remember: bool = ...) -> None:
         ...
+
+    def login_accountant(self, email: str, remember: bool = ...) -> None:
+        ...
