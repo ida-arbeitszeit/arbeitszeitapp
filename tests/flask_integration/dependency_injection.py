@@ -11,11 +11,27 @@ from tests.dependency_injection import TestingModule
 
 
 class FlaskConfiguration(dict):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for key, value in self.items():
+            if key.isupper():
+                setattr(self, key, value)
+
     def _get_template_folder(self) -> Optional[str]:
         return self.get("template_folder")
 
     def _set_template_folder(self, template_folder: Optional[str]) -> None:
         self["template_folder"] = template_folder
+
+    def __setitem__(self, key, value):
+        super().__setitem__(key, value)
+        if key.isupper():
+            setattr(self, key, value)
+
+    def __delitem__(self, key):
+        super().__delitem__(key)
+        if key.isupper():
+            delattr(self, key)
 
     # Allows you to control where flask loads templates from.
     template_folder = property(_get_template_folder, _set_template_folder)

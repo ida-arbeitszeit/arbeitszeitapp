@@ -11,6 +11,6 @@ in dockerTools.buildImage {
   contents = gunicornServer;
   config = {
     Cmd = [ "/bin/gunicorn" "arbeitszeit_flask.wsgi:app" ];
-    Env = [ "ARBEITSZEIT_APP_CONFIGURATION=${configurationFile}" ];
+    Env = [ "ARBEITSZEITAPP_CONFIGURATION_PATH=${configurationFile}" ];
   };
 }

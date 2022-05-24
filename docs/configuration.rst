@@ -1,11 +1,54 @@
 Configuration of the web server
 ===============================
 
-The app needs some configuration to properly function. Most of the
-configuration should be done via process environment variables, or
-"env vars" for short.
+The application needs to be configured to function properly. This is
+done via a configuration file. When starting ``arbeitszeitapp`` it
+looks for configuration files in the following locations from top to
+bottom. It loads the first configuration file it finds:
 
-``ARBEITSZEIT_APP_SERVER_NAME=https://your.server.org/path/to/app``
+* Path set in ``ARBEITSZEITAPP_CONFIGURATION_PATH`` environment variable
+* ``/etc/arbeitszeitapp/arbeitszeitapp.py``
 
-This variable tells the application how it is addressed. This is
-important to generate links in emails it sends out.
+The configuration file must be a valid python script.  Configuration
+options are set as variables on the top level. The following
+configuration options are available
+
+.. py:data:: MAIL_SERVER
+   The server name of the SMTP server used to send mails.
+
+.. py:data:: MAIL_PORT
+   Port of the SMTP server used to send mails.
+
+   Default: ``25``
+
+.. py:data:: MAIL_USERNAME
+   The username used to log in to the ``SMPT`` server used to send
+   mail.
+
+.. py:data:: MAIL_PASSWORD
+   The password used to log in to the ``SMPT`` server used to send
+   mail.
+
+.. py:data:: MAIL_DEFAULT_SENDER
+   The sender address used when sending out mail.
+
+.. py:data:: SECRET_KEY
+   A password used for protecting agains Cross-site request forgery
+   and more. Setting this option is obligatory for many security
+   measures.
+
+.. py:data:: SECURITY_PASSWORD_SALT
+   This option is used when encrypting passwords. Don't lose it.
+
+.. py:data:: SERVER_NAME
+   This variable tells the application how it is addressed. This is
+   important to generate links in emails it sends out.
+
+   Example: ``SERVER_NAME = "arbeitszeitapp.cp.org"``
+
+.. py:data:: SQLALCHEMY_DATABASE_URI
+   The address of the database used for persistence.
+
+   Default: ``"sqlite:////tmp/arbeitszeitapp.db"``
+
+   Example: ``SQLALCHEMY_DATABASE_URI = "postgresql:///my_data"``

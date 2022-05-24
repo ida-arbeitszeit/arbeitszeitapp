@@ -1,8 +1,20 @@
 Development setup
 =================
 
+To run the app in development mode you first have to define some
+environment variables::
+
+    $ export ARBEITSZEITAPP_CONFIGURATION_PATH="$PWD/arbeitszeit_flask/development_settings.py"
+    $ export FLASK_APP=arbeitszeit_flask
+    $ export FLASK_ENV=development
+    $ export DEV_DATABASE_URI="sqlite:///$(pwd)/db.sqlite3"
+    $ export DEV_SECRET_KEY=my_secret_key
+    $ export ARBEITSZEIT_APP_SERVER_NAME=localhost:5000
+
 After configuring the database connection you need to run the database
 migrations via ``flask db upgrade``.
+
+Afterwards you can start the development server with ``flask run``.
 
 Developer documentation
 =======================
@@ -81,20 +93,6 @@ folder. Inside the tests folder the code is organized similarly to the
 root folder: business logic tests live in ``tests/use_cases``,
 presenter tests can be found in ``tests/presenters`` and flask
 specific code is tested under ``tests/flask_integration``.
-
-Caveats
-=======
-
-To run the app in development mode you first have to define some environment variables::
-
-    $ export FLASK_APP=arbeitszeit_flask
-    $ export FLASK_ENV=development
-    $ export ARBEITSZEIT_APP_CONFIGURATION="$PWD/arbeitszeit_flask/development_settings.py"
-    $ export DEV_DATABASE_URI="sqlite:///$(pwd)/db.sqlite3" 
-    $ export DEV_SECRET_KEY=my_secret_key
-    $ export ARBEITSZEIT_APP_SERVER_NAME=localhost:5000
-
-Afterwards you can start the development server with ``flask run``.
 
 Email configuration
 ===================

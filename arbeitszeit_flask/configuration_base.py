@@ -1,9 +1,10 @@
 from os import environ
 
-"""Base config."""
-STATIC_FOLDER = "static"
-TEMPLATES_FOLDER = "templates"
+DEBUG = False
+DEBUG_DETAILS = False
+TESTING = False
 SQLALCHEMY_TRACK_MODIFICATIONS = False
+SQLALCHEMY_DATABASE_URI = "sqlite:////tmp/arbeitszeitapp.db"
 SECURITY_PASSWORD_SALT = environ.get("SECURITY_PASSWORD_SALT")
 LANGUAGES = {"en": "English", "de": "Deutsch"}
-SERVER_NAME = environ.get("ARBEITSZEIT_APP_SERVER_NAME")
+MAIL_PORT = "25"
