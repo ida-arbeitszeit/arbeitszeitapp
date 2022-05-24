@@ -33,7 +33,9 @@ class SeekApproval:
         )
 
     def approve_plan_and_delete_draft(self, draft: PlanDraft) -> Plan:
-        new_plan = self.plan_repository.approve_plan(draft, self.get_approval_date())
+        new_plan = self.plan_repository.set_plan_approval_date(
+            draft, self.get_approval_date()
+        )
         self.draft_repository.delete_draft(draft.id)
         return new_plan
 

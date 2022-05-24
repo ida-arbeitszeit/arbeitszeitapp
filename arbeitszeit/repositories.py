@@ -60,7 +60,9 @@ class PurchaseRepository(ABC):
 
 class PlanRepository(ABC):
     @abstractmethod
-    def approve_plan(self, plan: PlanDraft, approval_timestamp: datetime) -> Plan:
+    def set_plan_approval_date(
+        self, plan: PlanDraft, approval_timestamp: datetime
+    ) -> Plan:
         pass
 
     @abstractmethod
