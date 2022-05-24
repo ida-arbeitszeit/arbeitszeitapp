@@ -15,7 +15,7 @@ def test_that_any_plan_will_be_approved(
     seek_approval: SeekApproval,
 ):
     plan_draft = plan_generator.draft_plan()
-    approval_response = seek_approval(plan_draft.id)
+    approval_response = seek_approval(SeekApproval.Request(draft_id=plan_draft.id))
     assert approval_response.is_approved
 
 
@@ -25,12 +25,10 @@ def test_plan_draft_gets_deleted_after_approval(
     seek_approval: SeekApproval,
     draft_repository: PlanDraftRepository,
 ):
-    draft = plan_generator.draft_plan()
-    response = seek_approval(
-        draft.id,
-    )
+    plan_draft = plan_generator.draft_plan()
+    response = seek_approval(SeekApproval.Request(draft_id=plan_draft.id))
     assert response.is_approved
-    assert draft_repository.get_by_id(draft.id) is None
+    assert draft_repository.get_by_id(plan_draft.id) is None
 
 
 @injection_test
@@ -39,7 +37,7 @@ def test_that_true_is_returned(
     seek_approval: SeekApproval,
 ):
     plan_draft = plan_generator.draft_plan()
-    approval_response = seek_approval(plan_draft.id)
+    approval_response = seek_approval(SeekApproval.Request(draft_id=plan_draft.id))
     assert approval_response.is_approved is True
 
 
@@ -49,7 +47,7 @@ def test_that_returned_new_plan_id_is_uuid(
     seek_approval: SeekApproval,
 ):
     plan_draft = plan_generator.draft_plan()
-    approval_response = seek_approval(plan_draft.id)
+    approval_response = seek_approval(SeekApproval.Request(draft_id=plan_draft.id))
     assert isinstance(approval_response.new_plan_id, UUID)
 
 
@@ -61,9 +59,9 @@ def test_that_approval_date_has_correct_day_of_month(
     plan_repository: PlanRepository,
 ):
     datetime_service.freeze_time(datetime(year=2021, month=5, day=3))
-    draft = plan_generator.draft_plan()
-    seek_approval(draft.id)
-    new_plan = plan_repository.get_plan_by_id(draft.id)
+    plan_draft = plan_generator.draft_plan()
+    seek_approval(SeekApproval.Request(draft_id=plan_draft.id))
+    new_plan = plan_repository.get_plan_by_id(plan_draft.id)
     assert new_plan
     assert new_plan.approval_date
     assert 3 == new_plan.approval_date.day
@@ -75,8 +73,8 @@ def test_that_approved_plan_has_same_planner_as_draft(
     seek_approval: SeekApproval,
     plan_repository: PlanRepository,
 ):
-    draft = plan_generator.draft_plan()
-    seek_approval(draft.id)
-    new_plan = plan_repository.get_plan_by_id(draft.id)
+    plan_draft = plan_generator.draft_plan()
+    seek_approval(SeekApproval.Request(draft_id=plan_draft.id))
+    new_plan = plan_repository.get_plan_by_id(plan_draft.id)
     assert new_plan
-    assert new_plan.planner == draft.planner
+    assert new_plan.planner == plan_draft.planner
