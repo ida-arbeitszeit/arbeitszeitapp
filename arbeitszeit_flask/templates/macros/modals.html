@@ -1,0 +1,16 @@
+{% macro info_modal(id, text) %}
+
+<div id="{{ id }}" class="modal">
+    <div class="modal-background"></div>
+    <div class="modal-content">
+        <div class="box has-text-centered has-background-info-light has-text-info-dark">
+            <div class="icon"><i class="fas fa-info-circle"></i></div>
+            <p class="has-text-info-dark">
+                {{ text }}
+            </p>
+        </div>
+    </div>
+    <button class="modal-close is-large" aria-label="close"></button>
+</div>
+
+{% endmacro %}

@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Optional, Union
 from uuid import UUID
 
@@ -17,7 +17,6 @@ from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views.http_404_view import Http404View
 from arbeitszeit_web.get_prefilled_draft_data import (
     GetPrefilledDraftDataPresenter,
-    PrefilledDraftData,
     PrefilledDraftDataController,
 )
 from arbeitszeit_web.notification import Notifier
@@ -77,8 +76,6 @@ class CreateDraftView:
         show user input form for plan draft.
         prefilled data comes from exired plan or saved draft if available in request arguments.
         """
-
-        prefilled_draft_data: Optional[PrefilledDraftData]
         if self.request.get_arg("expired_plan_id"):
             # use expired plan to prefill data
             expired_plan_id: Optional[str] = self.request.get_arg("expired_plan_id")
@@ -89,9 +86,12 @@ class CreateDraftView:
                 UUID(expired_plan_id), planner
             )
             if isinstance(plan_summary_success, PlanSummaryCompanySuccess):
-                prefilled_draft_data = self.get_prefilled_draft_data_presenter.present(
-                    plan_summary_success.plan_summary
+                view_model = (
+                    self.get_prefilled_draft_data_presenter.show_prefilled_draft_data(
+                        plan_summary_success.plan_summary
+                    )
                 )
+                form = CreateDraftForm(data=asdict(view_model.prefilled_draft_data))
             else:
                 return self.http_404_view.get_response()
 
@@ -103,19 +103,21 @@ class CreateDraftView:
 
             draft_summary = self.get_draft_summary(saved_draft_uuid)
             if isinstance(draft_summary, DraftSummarySuccess):
-                prefilled_draft_data = self.get_prefilled_draft_data_presenter.present(
-                    draft_summary
+                view_model = (
+                    self.get_prefilled_draft_data_presenter.show_prefilled_draft_data(
+                        draft_summary
+                    )
                 )
+                form = CreateDraftForm(data=asdict(view_model.prefilled_draft_data))
             else:
                 return self.http_404_view.get_response()
 
         else:
-            # no prefilled data
-            prefilled_draft_data = None
+            form = CreateDraftForm()
 
         return FlaskResponse(
             self.template_renderer.render_template(
                 "company/create_draft.html",
-                context=dict(prefilled=prefilled_draft_data),
+                context=dict(form=form),
             )
         )

@@ -42,31 +42,74 @@ TEST_DRAFT_SUMMARY_SUCCESS = DraftSummarySuccess(
 )
 
 
-def test_correct_refilled_data_is_returned_for_plan_summary():
+def test_correct_prefilled_data_is_returned_for_plan_summary():
     injector = get_dependency_injector()
     get_prefilled_data = injector.get(GetPrefilledDraftDataPresenter)
-    result = get_prefilled_data.present(BUSINESS_PLAN_SUMMARY)
-    assert result.product_name == BUSINESS_PLAN_SUMMARY.product_name
-    assert result.description == BUSINESS_PLAN_SUMMARY.description
-    assert result.timeframe == str(BUSINESS_PLAN_SUMMARY.timeframe)
-    assert result.production_unit == BUSINESS_PLAN_SUMMARY.production_unit
-    assert result.amount == str(BUSINESS_PLAN_SUMMARY.amount)
-    assert result.means_cost == str(BUSINESS_PLAN_SUMMARY.means_cost)
-    assert result.resources_cost == str(BUSINESS_PLAN_SUMMARY.resources_cost)
-    assert result.labour_cost == str(BUSINESS_PLAN_SUMMARY.labour_cost)
-    assert result.is_public_service == BUSINESS_PLAN_SUMMARY.is_public_service
+    view_model = get_prefilled_data.show_prefilled_draft_data(BUSINESS_PLAN_SUMMARY)
+    assert (
+        view_model.prefilled_draft_data.prd_name == BUSINESS_PLAN_SUMMARY.product_name
+    )
+    assert (
+        view_model.prefilled_draft_data.description == BUSINESS_PLAN_SUMMARY.description
+    )
+    assert view_model.prefilled_draft_data.timeframe == BUSINESS_PLAN_SUMMARY.timeframe
+    assert (
+        view_model.prefilled_draft_data.prd_unit
+        == BUSINESS_PLAN_SUMMARY.production_unit
+    )
+    assert view_model.prefilled_draft_data.prd_amount == BUSINESS_PLAN_SUMMARY.amount
+    assert view_model.prefilled_draft_data.costs_p == BUSINESS_PLAN_SUMMARY.means_cost
+    assert (
+        view_model.prefilled_draft_data.costs_r == BUSINESS_PLAN_SUMMARY.resources_cost
+    )
+    assert view_model.prefilled_draft_data.costs_a == BUSINESS_PLAN_SUMMARY.labour_cost
+    assert (
+        view_model.prefilled_draft_data.productive_or_public == "public"
+        if BUSINESS_PLAN_SUMMARY.is_public_service
+        else "productive"
+    )
+    assert view_model.prefilled_draft_data.action == ""
 
 
-def test_correct_refilled_data_is_returned_for_draft_summary():
+def test_correct_prefilled_data_is_returned_for_draft_summary():
     injector = get_dependency_injector()
     get_prefilled_data = injector.get(GetPrefilledDraftDataPresenter)
-    result = get_prefilled_data.present(TEST_DRAFT_SUMMARY_SUCCESS)
-    assert result.product_name == TEST_DRAFT_SUMMARY_SUCCESS.product_name
-    assert result.description == TEST_DRAFT_SUMMARY_SUCCESS.description
-    assert result.timeframe == str(TEST_DRAFT_SUMMARY_SUCCESS.timeframe)
-    assert result.production_unit == TEST_DRAFT_SUMMARY_SUCCESS.production_unit
-    assert result.amount == str(TEST_DRAFT_SUMMARY_SUCCESS.amount)
-    assert result.means_cost == str(TEST_DRAFT_SUMMARY_SUCCESS.means_cost)
-    assert result.resources_cost == str(TEST_DRAFT_SUMMARY_SUCCESS.resources_cost)
-    assert result.labour_cost == str(TEST_DRAFT_SUMMARY_SUCCESS.labour_cost)
-    assert result.is_public_service == TEST_DRAFT_SUMMARY_SUCCESS.is_public_service
+    view_model = get_prefilled_data.show_prefilled_draft_data(
+        TEST_DRAFT_SUMMARY_SUCCESS
+    )
+    assert (
+        view_model.prefilled_draft_data.prd_name
+        == TEST_DRAFT_SUMMARY_SUCCESS.product_name
+    )
+    assert (
+        view_model.prefilled_draft_data.description
+        == TEST_DRAFT_SUMMARY_SUCCESS.description
+    )
+    assert (
+        view_model.prefilled_draft_data.timeframe
+        == TEST_DRAFT_SUMMARY_SUCCESS.timeframe
+    )
+    assert (
+        view_model.prefilled_draft_data.prd_unit
+        == TEST_DRAFT_SUMMARY_SUCCESS.production_unit
+    )
+    assert (
+        view_model.prefilled_draft_data.prd_amount == TEST_DRAFT_SUMMARY_SUCCESS.amount
+    )
+    assert (
+        view_model.prefilled_draft_data.costs_p == TEST_DRAFT_SUMMARY_SUCCESS.means_cost
+    )
+    assert (
+        view_model.prefilled_draft_data.costs_r
+        == TEST_DRAFT_SUMMARY_SUCCESS.resources_cost
+    )
+    assert (
+        view_model.prefilled_draft_data.costs_a
+        == TEST_DRAFT_SUMMARY_SUCCESS.labour_cost
+    )
+    assert (
+        view_model.prefilled_draft_data.productive_or_public == "public"
+        if TEST_DRAFT_SUMMARY_SUCCESS.is_public_service
+        else "productive"
+    )
+    assert view_model.prefilled_draft_data.action == ""

@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
+from itertools import accumulate
 from typing import List
 from uuid import UUID
 
@@ -11,36 +14,33 @@ from arbeitszeit.repositories import AccountRepository, CompanyRepository
 from arbeitszeit.transactions import TransactionTypes, UserAccountingService
 
 
-@dataclass
-class TransactionInfo:
-    transaction_type: TransactionTypes
-    date: datetime
-    transaction_volume: Decimal
-    purpose: str
-
-
-@dataclass
-class PlotDetails:
-    timestamps: List[datetime]
-    accumulated_volumes: List[Decimal]
-
-
-@dataclass
-class ShowPRDAccountDetailsResponse:
-    company_id: UUID
-    transactions: List[TransactionInfo]
-    account_balance: Decimal
-    plot: PlotDetails
-
-
 @inject
 @dataclass
-class ShowPRDAccountDetails:
+class ShowPRDAccountDetailsUseCase:
+    @dataclass
+    class TransactionInfo:
+        transaction_type: TransactionTypes
+        date: datetime
+        transaction_volume: Decimal
+        purpose: str
+
+    @dataclass
+    class PlotDetails:
+        timestamps: List[datetime]
+        accumulated_volumes: List[Decimal]
+
+    @dataclass
+    class Response:
+        company_id: UUID
+        transactions: List[ShowPRDAccountDetailsUseCase.TransactionInfo]
+        account_balance: Decimal
+        plot: ShowPRDAccountDetailsUseCase.PlotDetails
+
     accounting_service: UserAccountingService
     company_repository: CompanyRepository
     account_repository: AccountRepository
 
-    def __call__(self, company_id: UUID) -> ShowPRDAccountDetailsResponse:
+    def __call__(self, company_id: UUID) -> Response:
         company = self.company_repository.get_by_id(company_id)
         assert company
         transactions = [
@@ -52,11 +52,11 @@ class ShowPRDAccountDetails:
         account_balance = self.account_repository.get_account_balance(
             company.product_account
         )
-        plot = PlotDetails(
+        plot = self.PlotDetails(
             timestamps=self._get_plot_dates(transactions),
             accumulated_volumes=self._get_plot_volumes(transactions),
         )
-        return ShowPRDAccountDetailsResponse(
+        return self.Response(
             company_id=company_id,
             transactions=transactions,
             account_balance=account_balance,
@@ -76,7 +76,7 @@ class ShowPRDAccountDetails:
             transaction,
             user_is_sender,
         )
-        return TransactionInfo(
+        return self.TransactionInfo(
             transaction_type,
             transaction.date,
             transaction_volume,
@@ -91,13 +91,5 @@ class ShowPRDAccountDetails:
     def _get_plot_volumes(self, transactions: List[TransactionInfo]) -> List[Decimal]:
         volumes = [t.transaction_volume for t in transactions]
         volumes.reverse()
-        volumes_cumsum = self._cumsum(volumes)
+        volumes_cumsum = list(accumulate(volumes))
         return volumes_cumsum
-
-    def _cumsum(self, trans_volumes: List[Decimal]) -> List[Decimal]:
-        cum_list = []
-        y = Decimal("0")
-        for x in range(len(trans_volumes)):
-            y += trans_volumes[x]
-            cum_list.append(y)
-        return cum_list

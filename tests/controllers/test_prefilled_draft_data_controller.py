@@ -11,55 +11,55 @@ from tests.session import FakeSession
 class FakeDraftForm:
     prd_name: str
     description: str
-    timeframe: str
+    timeframe: int
     prd_unit: str
-    prd_amount: str
-    costs_p: str
-    costs_r: str
-    costs_a: str
+    prd_amount: int
+    costs_p: Decimal
+    costs_r: Decimal
+    costs_a: Decimal
     productive_or_public: str
     action: str
 
-    def get_prd_name_string(self) -> str:
+    def get_prd_name(self) -> str:
         return self.prd_name
 
-    def get_description_string(self) -> str:
+    def get_description(self) -> str:
         return self.description
 
-    def get_timeframe_string(self) -> str:
+    def get_timeframe(self) -> int:
         return self.timeframe
 
-    def get_prd_unit_string(self) -> str:
+    def get_prd_unit(self) -> str:
         return self.prd_unit
 
-    def get_prd_amount_string(self) -> str:
+    def get_prd_amount(self) -> int:
         return self.prd_amount
 
-    def get_costs_p_string(self) -> str:
+    def get_costs_p(self) -> Decimal:
         return self.costs_p
 
-    def get_costs_r_string(self) -> str:
+    def get_costs_r(self) -> Decimal:
         return self.costs_r
 
-    def get_costs_a_string(self) -> str:
+    def get_costs_a(self) -> Decimal:
         return self.costs_a
 
-    def get_productive_or_public_string(self) -> str:
+    def get_productive_or_public(self) -> str:
         return self.productive_or_public
 
-    def get_action_string(self) -> str:
+    def get_action(self) -> str:
         return self.action
 
 
 fake_form = FakeDraftForm(
     prd_name="test name",
     description="test description",
-    timeframe="14",
+    timeframe=14,
     prd_unit="1 piece",
-    prd_amount="10",
-    costs_p="10.5",
-    costs_r="15",
-    costs_a="20",
+    prd_amount=10,
+    costs_p=Decimal("10.5"),
+    costs_r=Decimal("15"),
+    costs_a=Decimal("20"),
     productive_or_public="public",
     action="save_draft",
 )
@@ -86,8 +86,8 @@ def test_import_of_data_transforms_description_string_to_correct_string():
     assert request.description == "test description"
 
 
-def test_import_of_data_transforms_timeframe_string_to_correct_integer():
-    assert isinstance(fake_form.timeframe, str)
+def test_import_of_data_transforms_timeframe_integer_to_correct_integer():
+    assert isinstance(fake_form.timeframe, int)
     request = controller.import_form_data(fake_form)
     assert request.timeframe_in_days == 14
 
@@ -98,16 +98,16 @@ def test_import_of_data_transforms_prd_unit_string_to_correct_string():
     assert request.production_unit == "1 piece"
 
 
-def test_import_of_data_transforms_prd_amount_string_to_correct_integer():
-    assert isinstance(fake_form.prd_amount, str)
+def test_import_of_data_transforms_prd_amount_integer_to_correct_integer():
+    assert isinstance(fake_form.prd_amount, int)
     request = controller.import_form_data(fake_form)
     assert request.production_amount == 10
 
 
-def test_import_of_data_transforms_cost_strings_to_correct_decimal():
-    assert isinstance(fake_form.costs_p, str)
-    assert isinstance(fake_form.costs_r, str)
-    assert isinstance(fake_form.costs_a, str)
+def test_import_of_data_transforms_cost_decimals_to_correct_decimals():
+    assert isinstance(fake_form.costs_p, Decimal)
+    assert isinstance(fake_form.costs_r, Decimal)
+    assert isinstance(fake_form.costs_a, Decimal)
     request = controller.import_form_data(fake_form)
     assert request.costs.means_cost == Decimal(10.5)
     assert request.costs.resource_cost == Decimal(15)
