@@ -47,12 +47,14 @@ class PlanSearchForm(Form):
         ("Produktname", trans.lazy_gettext("Product name")),
     ]
     select = SelectField(
-        "Nach Plänen suchen", choices=choices, validators=[validators.DataRequired()]
+        trans.lazy_gettext("Search Plans"),
+        choices=choices,
+        validators=[validators.DataRequired()],
     )
     search = StringField(
-        "Suchbegriff",
+        trans.lazy_gettext("Search term"),
         validators=[
-            FieldMustExist(message="Angabe erforderlich"),
+            FieldMustExist(message=trans.lazy_gettext("Required")),
         ],
     )
 
@@ -65,18 +67,25 @@ class PlanSearchForm(Form):
 
 class RegisterForm(Form):
     email = StringField(
-        "Email",
-        validators=[validators.Email(message="Korrekte Emailadresse erforderlich")],
+        trans.lazy_gettext("Email"),
+        validators=[
+            validators.Email(
+                message=trans.lazy_gettext("Proper email address required")
+            )
+        ],
     )
     name = StringField(
-        "Name",
-        validators=[validators.InputRequired(message="Name ist erforderlich")],
+        trans.lazy_gettext("Name"),
+        validators=[validators.InputRequired(message="Name is required")],
     )
     password = PasswordField(
-        "Passwort",
+        trans.lazy_gettext("Password"),
         validators=[
             validators.Length(
-                min=8, message="Passwort muss mindestens 8 Zeichen umfassen"
+                min=8,
+                message=trans.lazy_gettext(
+                    "The password must be at least 8 characters long"
+                ),
             )
         ],
     )
@@ -96,25 +105,31 @@ class RegisterForm(Form):
 
 class LoginForm(Form):
     email = StringField(
-        "Email",
-        validators=[validators.InputRequired(message="Emailadresse erforderlich")],
+        trans.lazy_gettext("Email"),
+        validators=[
+            validators.InputRequired(
+                message=trans.lazy_gettext("Email address required")
+            )
+        ],
     )
     password = PasswordField(
-        "Passwort",
-        validators=[validators.InputRequired(message="Passwort erforderlich")],
+        trans.lazy_gettext("Password"),
+        validators=[
+            validators.InputRequired(message=trans.lazy_gettext("Password is required"))
+        ],
     )
-    remember = BooleanField("Angemeldet bleiben?")
+    remember = BooleanField(trans.lazy_gettext("Remember login?"))
 
 
 class PayConsumerProductForm(Form):
     plan_id = StringField(
-        "Plan-ID",
-        render_kw={"placeholder": "Plan-ID"},
+        trans.lazy_gettext("Plan ID"),
+        render_kw={"placeholder": trans.lazy_gettext("Plan ID")},
         validators=[validators.InputRequired()],
     )
     amount = StringField(
-        "Menge",
-        render_kw={"placeholder": "Menge"},
+        trans.lazy_gettext("Amount"),
+        render_kw={"placeholder": trans.lazy_gettext("Amount")},
         validators=[validators.InputRequired()],
     )
 
@@ -131,12 +146,14 @@ class CompanySearchForm(Form):
         ("Email", trans.lazy_gettext("Email")),
     ]
     select = SelectField(
-        "Nach Betrieb suchen", choices=choices, validators=[validators.DataRequired()]
+        trans.lazy_gettext("Search for company"),
+        choices=choices,
+        validators=[validators.DataRequired()],
     )
     search = StringField(
-        "Suchbegriff",
+        trans.lazy_gettext("Search term"),
         validators=[
-            FieldMustExist(message="Angabe erforderlich"),
+            FieldMustExist(message=trans.lazy_gettext("Required")),
         ],
     )
 
@@ -217,9 +234,9 @@ class CreateDraftForm(Form):
 class InviteWorkerToCompanyForm(Form):
     member_id = StringField(
         validators=[
-            FieldMustExist(message="Angabe erforderlich"),
+            FieldMustExist(message=trans.lazy_gettext("Required")),
         ],
-        render_kw={"placeholder": "Mitglieder-ID"},
+        render_kw={"placeholder": trans.lazy_gettext("Member ID")},
     )
 
     def get_worker_id(self) -> str:
@@ -256,21 +273,21 @@ class RequestCooperationForm(Form):
 
 class PayMeansOfProductionForm(Form):
     plan_id = StringField(
-        render_kw={"placeholder": "Plan-ID"},
+        render_kw={"placeholder": trans.lazy_gettext("Plan ID")},
         validators=[
             validators.InputRequired(),
             validators.UUID(message=error_msgs["uuid"]),
         ],
     )
     amount = IntegerField(
-        render_kw={"placeholder": "Amount"},
+        render_kw={"placeholder": trans.lazy_gettext("Amount")},
         validators=[
             validators.InputRequired(),
             validators.NumberRange(min=0, message=error_msgs["num_range_min_0"]),
         ],
     )
     choices = [
-        ("Fixed", trans.lazy_gettext("Fixed means of production")),
+        ("Fixed", trans.lazy_gettext(trans.lazy_gettext("Fixed means of production"))),
         (
             "Liquid",
             trans.lazy_gettext("Liquid means of production"),
