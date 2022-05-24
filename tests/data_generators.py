@@ -215,7 +215,7 @@ class PlanGenerator:
         response = self.seek_approval(draft.id)
         plan = self.plan_repository.get_plan_by_id(response.new_plan_id)
         assert plan
-        assert plan.approved
+        assert plan.is_approved
         if activation_date:
             self.plan_repository.activate_plan(plan, activation_date)
         if expired:

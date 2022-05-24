@@ -347,7 +347,9 @@ class PlanRepository(interfaces.PlanRepository):
     def get_plan_by_id(self, id: UUID) -> Optional[Plan]:
         return self.plans.get(id)
 
-    def approve_plan(self, draft: PlanDraft, approval_timestamp: datetime) -> Plan:
+    def set_plan_approval_date(
+        self, draft: PlanDraft, approval_timestamp: datetime
+    ) -> Plan:
         planner = self.company_repository.get_by_id(draft.planner.id)
         assert planner
         plan = self._create_plan(
@@ -363,7 +365,6 @@ class PlanRepository(interfaces.PlanRepository):
             creation_timestamp=draft.creation_date,
         )
         plan.approval_date = approval_timestamp
-        plan.approved = True
         plan.approval_reason = "approved"
         return plan
 
@@ -457,12 +458,12 @@ class PlanRepository(interfaces.PlanRepository):
 
     def all_plans_approved_and_not_expired(self) -> Iterator[Plan]:
         for plan in self.plans.values():
-            if plan.approved and not plan.expired:
+            if plan.is_approved and not plan.expired:
                 yield plan
 
     def all_plans_approved_active_and_not_expired(self) -> Iterator[Plan]:
         for plan in self.plans.values():
-            if plan.approved and plan.is_active and not plan.expired:
+            if plan.is_approved and plan.is_active and not plan.expired:
                 yield plan
 
     def all_productive_plans_approved_active_and_not_expired(self) -> Iterator[Plan]:
@@ -470,7 +471,7 @@ class PlanRepository(interfaces.PlanRepository):
             if (
                 not plan.is_public_service
                 and plan.is_active
-                and plan.approved
+                and plan.is_approved
                 and not plan.expired
             ):
                 yield plan
@@ -480,7 +481,7 @@ class PlanRepository(interfaces.PlanRepository):
             if (
                 plan.is_public_service
                 and plan.is_active
-                and plan.approved
+                and plan.is_approved
                 and not plan.expired
             ):
                 yield plan
@@ -528,7 +529,6 @@ class PlanRepository(interfaces.PlanRepository):
             is_public_service=is_public_service,
             is_active=False,
             activation_date=None,
-            approved=False,
             approval_date=None,
             approval_reason=None,
             expired=False,

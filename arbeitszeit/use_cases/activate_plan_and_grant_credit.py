@@ -20,7 +20,7 @@ class ActivatePlanAndGrantCredit:
     def __call__(self, plan_id: UUID) -> None:
         plan = self.plan_repository.get_plan_by_id(plan_id)
         assert plan, "Plan does not exist"
-        assert plan.approved, "Plan has not been approved"
+        assert plan.is_approved, "Plan has not been approved"
         self.plan_repository.activate_plan(plan, self.datetime_service.now())
         self._credit_production_cost_to_planner(plan)
 

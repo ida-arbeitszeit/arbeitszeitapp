@@ -134,7 +134,6 @@ class Plan:
     description: str
     timeframe: int
     is_public_service: bool
-    approved: bool
     approval_date: Optional[datetime]
     approval_reason: Optional[str]
     is_active: bool
@@ -161,6 +160,10 @@ class Plan:
             if not self.is_public_service
             else Decimal(0)
         )
+
+    @property
+    def is_approved(self) -> bool:
+        return self.approval_date is not None
 
 
 class PurposesOfPurchases(Enum):
