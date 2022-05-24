@@ -9,26 +9,29 @@ from arbeitszeit.entities import Plan, PlanDraft
 from arbeitszeit.repositories import PlanDraftRepository, PlanRepository
 
 
-@dataclass
-class SeekApprovalResponse:
-    is_approved: bool
-    reason: str
-    new_plan_id: UUID
-
-
 @inject
 @dataclass
 class SeekApproval:
+    @dataclass
+    class Request:
+        draft_id: UUID
+
+    @dataclass
+    class Response:
+        is_approved: bool
+        reason: str
+        new_plan_id: UUID
+
     datetime_service: DatetimeService
     plan_repository: PlanRepository
     draft_repository: PlanDraftRepository
 
-    def __call__(self, draft_id: UUID) -> SeekApprovalResponse:
-        draft = self.draft_repository.get_by_id(draft_id)
+    def __call__(self, request: Request) -> Response:
+        draft = self.draft_repository.get_by_id(request.draft_id)
         assert draft is not None
         new_plan = self.approve_plan_and_delete_draft(draft)
         assert new_plan.approval_reason
-        return SeekApprovalResponse(
+        return self.Response(
             is_approved=True, reason=new_plan.approval_reason, new_plan_id=new_plan.id
         )
 
