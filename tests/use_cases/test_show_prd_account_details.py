@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from arbeitszeit.entities import SocialAccounting
 from arbeitszeit.transactions import TransactionTypes
-from arbeitszeit.use_cases import ShowPRDAccountDetails
+from arbeitszeit.use_cases import ShowPRDAccountDetailsUseCase
 from tests.data_generators import (
     CompanyGenerator,
     MemberGenerator,
@@ -15,7 +15,7 @@ from .dependency_injection import injection_test
 
 @injection_test
 def test_no_transactions_returned_when_no_transactions_took_place(
-    show_prd_account_details: ShowPRDAccountDetails,
+    show_prd_account_details: ShowPRDAccountDetailsUseCase,
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
 ):
@@ -28,7 +28,7 @@ def test_no_transactions_returned_when_no_transactions_took_place(
 
 @injection_test
 def test_balance_is_zero_when_no_transactions_took_place(
-    show_prd_account_details: ShowPRDAccountDetails,
+    show_prd_account_details: ShowPRDAccountDetailsUseCase,
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
 ):
@@ -41,7 +41,7 @@ def test_balance_is_zero_when_no_transactions_took_place(
 
 @injection_test
 def test_company_id_is_returned(
-    show_prd_account_details: ShowPRDAccountDetails,
+    show_prd_account_details: ShowPRDAccountDetailsUseCase,
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
 ):
@@ -54,7 +54,7 @@ def test_company_id_is_returned(
 
 @injection_test
 def test_that_no_info_is_generated_after_company_buying_p(
-    show_prd_account_details: ShowPRDAccountDetails,
+    show_prd_account_details: ShowPRDAccountDetailsUseCase,
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
 ):
@@ -74,7 +74,7 @@ def test_that_no_info_is_generated_after_company_buying_p(
 
 @injection_test
 def test_that_no_info_is_generated_after_company_buying_r(
-    show_prd_account_details: ShowPRDAccountDetails,
+    show_prd_account_details: ShowPRDAccountDetailsUseCase,
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
 ):
@@ -94,7 +94,7 @@ def test_that_no_info_is_generated_after_company_buying_r(
 
 @injection_test
 def test_that_no_info_is_generated_when_credit_for_r_is_granted(
-    show_prd_account_details: ShowPRDAccountDetails,
+    show_prd_account_details: ShowPRDAccountDetailsUseCase,
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
     social_accounting: SocialAccounting,
@@ -113,7 +113,7 @@ def test_that_no_info_is_generated_when_credit_for_r_is_granted(
 
 @injection_test
 def test_that_no_info_is_generated_when_credit_for_p_is_granted(
-    show_prd_account_details: ShowPRDAccountDetails,
+    show_prd_account_details: ShowPRDAccountDetailsUseCase,
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
     social_accounting: SocialAccounting,
@@ -132,7 +132,7 @@ def test_that_no_info_is_generated_when_credit_for_p_is_granted(
 
 @injection_test
 def test_that_no_info_is_generated_when_credit_for_a_is_granted(
-    show_prd_account_details: ShowPRDAccountDetails,
+    show_prd_account_details: ShowPRDAccountDetailsUseCase,
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
     social_accounting: SocialAccounting,
@@ -151,7 +151,7 @@ def test_that_no_info_is_generated_when_credit_for_a_is_granted(
 
 @injection_test
 def test_that_correct_info_is_generated_after_selling_of_consumer_product(
-    show_prd_account_details: ShowPRDAccountDetails,
+    show_prd_account_details: ShowPRDAccountDetailsUseCase,
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
@@ -180,7 +180,7 @@ def test_that_correct_info_is_generated_after_selling_of_consumer_product(
 
 @injection_test
 def test_that_correct_info_is_generated_after_selling_of_means_of_production(
-    show_prd_account_details: ShowPRDAccountDetails,
+    show_prd_account_details: ShowPRDAccountDetailsUseCase,
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
 ):
@@ -208,7 +208,7 @@ def test_that_correct_info_is_generated_after_selling_of_means_of_production(
 
 @injection_test
 def test_that_correct_info_is_generated_after_selling_of_raw_material(
-    show_prd_account_details: ShowPRDAccountDetails,
+    show_prd_account_details: ShowPRDAccountDetailsUseCase,
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
 ):
@@ -236,7 +236,7 @@ def test_that_correct_info_is_generated_after_selling_of_raw_material(
 
 @injection_test
 def test_that_plotting_info_is_empty_when_no_transactions_occurred(
-    show_prd_account_details: ShowPRDAccountDetails,
+    show_prd_account_details: ShowPRDAccountDetailsUseCase,
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
 ):
@@ -250,7 +250,7 @@ def test_that_plotting_info_is_empty_when_no_transactions_occurred(
 
 @injection_test
 def test_that_plotting_info_is_generated_after_selling_of_consumer_product(
-    show_prd_account_details: ShowPRDAccountDetails,
+    show_prd_account_details: ShowPRDAccountDetailsUseCase,
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
@@ -272,7 +272,7 @@ def test_that_plotting_info_is_generated_after_selling_of_consumer_product(
 
 @injection_test
 def test_that_correct_plotting_info_is_generated_after_selling_of_two_consumer_products(
-    show_prd_account_details: ShowPRDAccountDetails,
+    show_prd_account_details: ShowPRDAccountDetailsUseCase,
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
@@ -309,7 +309,7 @@ def test_that_correct_plotting_info_is_generated_after_selling_of_two_consumer_p
 
 @injection_test
 def test_that_plotting_info_is_generated_in_the_correct_order_after_selling_of_three_consumer_products(
-    show_prd_account_details: ShowPRDAccountDetails,
+    show_prd_account_details: ShowPRDAccountDetailsUseCase,
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,

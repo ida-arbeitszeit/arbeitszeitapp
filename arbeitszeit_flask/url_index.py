@@ -137,3 +137,9 @@ class FlaskPlotsUrlIndex:
             endpoint="plots.line_plot_of_company_prd_account",
             company_id=str(company_id),
         )
+
+    def get_line_plot_of_company_r_account(self, company_id: UUID) -> str:
+        return url_for(
+            endpoint="plots.line_plot_of_company_r_account",
+            company_id=str(company_id),
+        )
