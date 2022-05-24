@@ -88,6 +88,27 @@ class UseCaseTests(TestCase):
         response = self.use_case.register_accountant(request)
         self.assertIsNone(response.user_id)
 
+    def test_that_original_email_address_is_returned_when_registering_successful(
+        self,
+    ) -> None:
+        for email_address in self.example_email_addresses:
+            with self.subTest():
+                token = self.invite_user(email=email_address)
+                request = self.create_request(token=token, email=email_address)
+                response = self.use_case.register_accountant(request)
+                self.assertEqual(response.email_address, email_address)
+
+    def test_that_original_email_address_is_returned_when_failing_to_register(
+        self,
+    ) -> None:
+        for email_address in self.example_email_addresses:
+            with self.subTest():
+                token = self.invite_user(email=email_address)
+                request = self.create_request(token=token, email=email_address)
+                self.accountant_generator.create_accountant(email_address=email_address)
+                response = self.use_case.register_accountant(request)
+                self.assertEqual(response.email_address, email_address)
+
     def invite_user(self, email: str) -> str:
         self.send_registration_token_use_case.send_accountant_registration_token(
             request=self.send_registration_token_use_case.Request(email=email)
@@ -103,3 +124,8 @@ class UseCaseTests(TestCase):
             name=name,
             password="test password",
         )
+
+    example_email_addresses = [
+        "test@test.test",
+        "test2@test.test",
+    ]

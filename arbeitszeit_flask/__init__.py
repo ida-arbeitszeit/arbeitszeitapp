@@ -64,7 +64,7 @@ def create_app(config=None, db=None, migrate=None, template_folder=None):
         app.cli.command("trans-new")(click.argument("lang_code")(trans_new))
         app.cli.command("invite-accountant")(invite_accountant)
 
-        from .models import Company, Member
+        from .models import Accountant, Company, Member
 
         @login_manager.user_loader
         def load_user(user_id):
@@ -78,9 +78,11 @@ def create_app(config=None, db=None, migrate=None, template_folder=None):
                     return Member.query.get(user_id)
                 elif user_type == "company":
                     return Company.query.get(user_id)
+                elif user_type == "accountant":
+                    return Accountant.query.get(user_id)
 
         # register blueprints
-        from . import company, member
+        from . import accountant, company, member
         from .auth import routes as auth_routes
         from .plots import routes as plots_routes
 
@@ -88,6 +90,7 @@ def create_app(config=None, db=None, migrate=None, template_folder=None):
         app.register_blueprint(plots_routes.plots)
         app.register_blueprint(company.blueprint.main_company)
         app.register_blueprint(member.blueprint.main_member)
+        app.register_blueprint(accountant.blueprint.main_accountant)
 
         if app.config["ENV"] == "development":
             if app.config["DEBUG_DETAILS"] == True:

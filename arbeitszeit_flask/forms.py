@@ -103,6 +103,43 @@ class RegisterForm(Form):
         self.email.errors.append(error)
 
 
+class RegisterAccountantForm(Form):
+    email = StringField(
+        trans.lazy_gettext("Email"),
+        validators=[
+            validators.InputRequired(
+                message=trans.lazy_gettext("Email address is required")
+            )
+        ],
+    )
+    name = StringField(
+        trans.lazy_gettext("Name"),
+        validators=[
+            validators.InputRequired(message=trans.lazy_gettext("Name is required"))
+        ],
+    )
+    password = PasswordField(
+        trans.lazy_gettext("Password"),
+        validators=[
+            validators.Length(
+                min=8,
+                message=trans.lazy_gettext(
+                    "The password must at least characters in length"
+                ),
+            )
+        ],
+    )
+
+    def get_email_address(self) -> str:
+        return self.data["email"]
+
+    def get_name(self) -> str:
+        return self.data["name"]
+
+    def get_password(self) -> str:
+        return self.data["password"]
+
+
 class LoginForm(Form):
     email = StringField(
         trans.lazy_gettext("Email"),

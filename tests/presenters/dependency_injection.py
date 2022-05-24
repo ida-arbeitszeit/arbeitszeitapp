@@ -28,6 +28,9 @@ from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationP
 from arbeitszeit_web.presenters.get_latest_activated_plans_presenter import (
     GetLatestActivatedPlansPresenter,
 )
+from arbeitszeit_web.presenters.register_accountant_presenter import (
+    RegisterAccountantPresenter,
+)
 from arbeitszeit_web.presenters.register_company_presenter import (
     RegisterCompanyPresenter,
 )
@@ -76,6 +79,7 @@ from tests.use_cases.dependency_injection import InMemoryModule
 from .accountant_invitation_email_view import AccountantInvitationEmailViewImpl
 from .notifier import NotifierTestImpl
 from .url_index import (
+    AccountantDashboardUrlIndexImpl,
     AccountantInvitationUrlIndexImpl,
     AnswerCompanyWorkInviteUrlIndexImpl,
     CompanySummaryUrlIndex,
@@ -505,6 +509,21 @@ class PresenterTestsInjector(Module):
     ) -> GetLatestActivatedPlansPresenter:
         return GetLatestActivatedPlansPresenter(
             url_index=url_index, datetime_service=datetime_service
+        )
+
+    @provider
+    def provide_register_accountant_presenter(
+        self,
+        notifier: Notifier,
+        session: FakeSession,
+        translator: FakeTranslator,
+        dashboard_url_index: AccountantDashboardUrlIndexImpl,
+    ) -> RegisterAccountantPresenter:
+        return RegisterAccountantPresenter(
+            notifier=notifier,
+            session=session,
+            translator=translator,
+            dashboard_url_index=dashboard_url_index,
         )
 
 
