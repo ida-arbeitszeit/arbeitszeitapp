@@ -17,7 +17,7 @@ from injector import (
 from arbeitszeit import entities
 from arbeitszeit import repositories as interfaces
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.token import TokenDeliverer, TokenService
+from arbeitszeit.token import InvitationTokenValidator, TokenDeliverer, TokenService
 from arbeitszeit.use_cases import (
     CheckForUnreadMessages,
     EndCooperation,
@@ -150,6 +150,9 @@ from arbeitszeit_web.presenters.accountant_invitation_presenter import (
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
 from arbeitszeit_web.presenters.get_latest_activated_plans_presenter import (
     GetLatestActivatedPlansPresenter,
+)
+from arbeitszeit_web.presenters.register_accountant_presenter import (
+    RegisterAccountantPresenter,
 )
 from arbeitszeit_web.presenters.register_company_presenter import (
     RegisterCompanyPresenter,
@@ -522,6 +525,27 @@ class CompanyModule(Module):
 
 class FlaskModule(Module):
     @provider
+    def provide_invitation_token_validator(
+        self, validator: FlaskTokenService
+    ) -> InvitationTokenValidator:
+        return validator
+
+    @provider
+    def provide_register_accountant_presenter(
+        self,
+        notifier: FlaskFlashNotifier,
+        session: FlaskSession,
+        translator: FlaskTranslator,
+        dashboard_url_index: GeneralUrlIndex,
+    ) -> RegisterAccountantPresenter:
+        return RegisterAccountantPresenter(
+            notifier=notifier,
+            session=session,
+            translator=translator,
+            dashboard_url_index=dashboard_url_index,
+        )
+
+    @provider
     def provide_accountant_invitation_presenter(
         self,
         view: AccountantInvitationEmailView,
@@ -538,9 +562,14 @@ class FlaskModule(Module):
 
     @provider
     def provide_flask_session(
-        self, member_repository: MemberRepository, company_repository: CompanyRepository
+        self,
+        member_repository: MemberRepository,
+        company_repository: CompanyRepository,
+        accountant_repository: AccountantRepository,
     ) -> FlaskSession:
-        return FlaskSession(member_repository, company_repository)
+        return FlaskSession(
+            member_repository, company_repository, accountant_repository
+        )
 
     @provider
     def provide_plots_url_index(

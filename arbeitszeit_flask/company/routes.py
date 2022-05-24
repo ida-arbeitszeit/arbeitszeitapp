@@ -185,7 +185,9 @@ def seek_approval(
     """
 
     draft_uuid: UUID = UUID(request.args.get("draft_uuid"))
-    approval_response = seek_approval(draft_uuid)
+    approval_response = seek_approval(
+        use_cases.SeekApproval.Request(draft_id=draft_uuid)
+    )
     if approval_response.is_approved:
         flash("Plan erfolgreich erstellt und genehmigt.", "is-success")
         activate_plan_and_grant_credit(approval_response.new_plan_id)

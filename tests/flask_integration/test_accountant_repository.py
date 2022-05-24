@@ -41,6 +41,14 @@ class CreateAccountantTests(FlaskTestCase):
             self.repository.has_accountant_with_email(email="different@email.org")
         )
 
+    def test_can_retrieve_accountant_orm_by_mail(self) -> None:
+        self.assertTrue(self.repository.get_accountant_orm_by_mail(self.expected_email))
+
+    def test_return_no_accountant_with_specified_email_exists(self) -> None:
+        self.assertIsNone(
+            self.repository.get_accountant_orm_by_mail("different@email.org")
+        )
+
 
 class ValidationTests(FlaskTestCase):
     def setUp(self) -> None:

@@ -9,6 +9,7 @@ from arbeitszeit.use_cases import (
 from arbeitszeit.use_cases.create_cooperation import CreateCooperation
 from arbeitszeit.use_cases.get_latest_activated_plans import GetLatestActivatedPlans
 from arbeitszeit.use_cases.list_workers import ListWorkers
+from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
 from arbeitszeit.use_cases.register_company import RegisterCompany
 from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts
@@ -35,6 +36,7 @@ from arbeitszeit_flask.views.invite_worker_to_company import (
     InviteWorkerPostRequestHandler,
 )
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
+from arbeitszeit_flask.views.signup_accountant_view import SignupAccountantView
 from arbeitszeit_flask.views.signup_company_view import SignupCompanyView
 from arbeitszeit_flask.views.signup_member_view import SignupMemberView
 from arbeitszeit_web.answer_company_work_invite import (
@@ -42,6 +44,9 @@ from arbeitszeit_web.answer_company_work_invite import (
     AnswerCompanyWorkInvitePresenter,
 )
 from arbeitszeit_web.controllers.list_workers_controller import ListWorkersController
+from arbeitszeit_web.controllers.register_accountant_controller import (
+    RegisterAccountantController,
+)
 from arbeitszeit_web.controllers.show_company_work_invite_details_controller import (
     ShowCompanyWorkInviteDetailsController,
 )
@@ -61,6 +66,9 @@ from arbeitszeit_web.presenters.get_latest_activated_plans_presenter import (
     GetLatestActivatedPlansPresenter,
 )
 from arbeitszeit_web.presenters.list_workers_presenter import ListWorkersPresenter
+from arbeitszeit_web.presenters.register_accountant_presenter import (
+    RegisterAccountantPresenter,
+)
 from arbeitszeit_web.presenters.register_company_presenter import (
     RegisterCompanyPresenter,
 )
@@ -254,4 +262,19 @@ class ViewsModule(Module):
             get_latest_plans_presenter,
             template_renderer,
             flask_session,
+        )
+
+    @provider
+    def provide_signup_accountant_view(
+        self,
+        template_renderer: TemplateRenderer,
+        controller: RegisterAccountantController,
+        presenter: RegisterAccountantPresenter,
+        use_case: RegisterAccountantUseCase,
+    ) -> SignupAccountantView:
+        return SignupAccountantView(
+            template_renderer=template_renderer,
+            controller=controller,
+            presenter=presenter,
+            use_case=use_case,
         )
