@@ -105,18 +105,29 @@ class RegisterForm(Form):
 
 class RegisterAccountantForm(Form):
     email = StringField(
-        "Email",
-        validators=[validators.InputRequired(message="Emailadresse erforderlich")],
+        trans.lazy_gettext("Email"),
+        validators=[
+            validators.InputRequired(
+                message=trans.lazy_gettext("Emailadresse erforderlich")
+            )
+        ],
     )
     name = StringField(
-        "Name",
-        validators=[validators.InputRequired(message="Name ist erforderlich")],
+        trans.lazy_gettext("Name"),
+        validators=[
+            validators.InputRequired(
+                message=trans.lazy_gettext("Name ist erforderlich")
+            )
+        ],
     )
     password = PasswordField(
-        "Passwort",
+        trans.lazy_gettext("Passwort"),
         validators=[
             validators.Length(
-                min=8, message="Passwort muss mindestens 8 Zeichen umfassen"
+                min=8,
+                message=trans.lazy_gettext(
+                    "Passwort muss mindestens 8 Zeichen umfassen"
+                ),
             )
         ],
     )
