@@ -1,7 +1,5 @@
 from os import environ
 
-from arbeitszeit_flask.configuration_base import *
-
 FLASK_ENV = "production"
 DEBUG = False
 TESTING = False
@@ -15,6 +13,10 @@ if SQLALCHEMY_DATABASE_URI.startswith("postgres://"):
     )
 # setting secret key from bash with: heroku config:set MY_SECRET_KEY=...
 SECRET_KEY = environ.get("MY_SECRET_KEY")
+SECURITY_PASSWORD_SALT = environ.get("SECURITY_PASSWORD_SALT")
+SERVER_NAME = environ.get("ARBEITSZEIT_APP_SERVER_NAME")
+STATIC_FOLDER = "static"
+TEMPLATES_FOLDER = "templates"
 
 SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = True

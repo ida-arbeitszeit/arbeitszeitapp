@@ -1,3 +1,5 @@
+import os
+
 import click
 from flask import Flask, current_app, request, session
 from flask_talisman import Talisman
@@ -9,6 +11,24 @@ from arbeitszeit_flask.extensions import babel, login_manager, mail
 from arbeitszeit_flask.profiling import show_profile_info, show_sql_queries
 
 
+def load_configuration(app, configuration=None):
+    """Load the right configuration files for the application.
+
+    We will try to load the configuration from top to bottom and use
+    the first one that we can find:
+    - Load configuration passed into create_app
+    - Load from path ARBEITSZEITAPP_CONFIGURATION_PATH
+    - Load from path /etc/arbeitszeitapp/arbeitszeitapp.py
+    """
+    app.config.from_object("arbeitszeit_flask.configuration_base")
+    if configuration:
+        app.config.from_object(configuration)
+    elif config_path := os.environ.get("ARBEITSZEITAPP_CONFIGURATION_PATH"):
+        app.config.from_pyfile(config_path)
+    else:
+        app.config.from_pyfile("/etc/arbeitszeitapp/arbeitszeitapp.py", silent=True)
+
+
 def create_app(config=None, db=None, migrate=None, template_folder=None):
     if template_folder is None:
         template_folder = "templates"
@@ -17,10 +37,7 @@ def create_app(config=None, db=None, migrate=None, template_folder=None):
         __name__, instance_relative_config=False, template_folder=template_folder
     )
 
-    if config:
-        app.config.update(**config)
-    else:
-        app.config.from_envvar("ARBEITSZEIT_APP_CONFIGURATION")
+    load_configuration(app=app, configuration=config)
 
     if db is None:
         db = arbeitszeit_flask.extensions.db

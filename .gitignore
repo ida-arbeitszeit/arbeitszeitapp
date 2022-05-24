@@ -3,6 +3,7 @@ my_database_key.py
 *.pyc
 *.png
 .vscode/
+custom_settings.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
