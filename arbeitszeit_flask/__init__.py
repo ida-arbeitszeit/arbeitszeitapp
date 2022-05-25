@@ -52,7 +52,9 @@ def create_app(config=None, db=None, migrate=None, template_folder=None):
     # Init Flask-Talisman
     if app.config["ENV"] == "production":
         csp = {"default-src": ["'self'", "'unsafe-inline'", "*.fontawesome.com"]}
-        Talisman(app, content_security_policy=csp)
+        Talisman(
+            app, content_security_policy=csp, force_https=app.config["FORCE_HTTPS"]
+        )
 
     # init flask extensions
     CSRFProtect(app)
