@@ -38,6 +38,7 @@ from arbeitszeit_web.presenters.register_member_presenter import RegisterMemberP
 from arbeitszeit_web.presenters.registration_email_presenter import (
     RegistrationEmailPresenter,
 )
+from arbeitszeit_web.presenters.seek_plan_approval import SeekPlanApprovalPresenter
 from arbeitszeit_web.presenters.send_work_certificates_to_worker_presenter import (
     SendWorkCertificatesToWorkerPresenter,
 )
@@ -524,6 +525,15 @@ class PresenterTestsInjector(Module):
             session=session,
             translator=translator,
             dashboard_url_index=dashboard_url_index,
+        )
+
+    @provider
+    def provide_seek_plan_approval_presenter(
+        self, notifier: NotifierTestImpl, translator: FakeTranslator
+    ) -> SeekPlanApprovalPresenter:
+        return SeekPlanApprovalPresenter(
+            notifier=notifier,
+            translator=translator,
         )
 
 

@@ -162,6 +162,7 @@ from arbeitszeit_web.presenters.registration_email_presenter import (
     RegistrationEmailPresenter,
     RegistrationEmailTemplate,
 )
+from arbeitszeit_web.presenters.seek_plan_approval import SeekPlanApprovalPresenter
 from arbeitszeit_web.presenters.send_confirmation_email_presenter import (
     SendConfirmationEmailPresenter,
 )
@@ -982,6 +983,15 @@ class FlaskModule(Module):
     ) -> GetLatestActivatedPlansPresenter:
         return GetLatestActivatedPlansPresenter(
             url_index=url_index, datetime_service=datetime_service
+        )
+
+    @provider
+    def provide_seek_plan_approval_presenter(
+        self, notifier: Notifier, translator: Translator
+    ) -> SeekPlanApprovalPresenter:
+        return SeekPlanApprovalPresenter(
+            notifier=notifier,
+            translator=translator,
         )
 
     def configure(self, binder: Binder) -> None:

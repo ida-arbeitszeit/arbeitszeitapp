@@ -1,7 +1,7 @@
 from typing import Optional
 from uuid import UUID
 
-from flask import flash, redirect, request, url_for
+from flask import redirect, request, url_for
 from flask_login import current_user
 
 from arbeitszeit import use_cases
@@ -69,6 +69,7 @@ from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_drafts_of_company import ListDraftsPresenter
 from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 from arbeitszeit_web.list_plans import ListPlansPresenter
+from arbeitszeit_web.presenters.seek_plan_approval import SeekPlanApprovalPresenter
 from arbeitszeit_web.presenters.show_a_account_details_presenter import (
     ShowAAccountDetailsPresenter,
 )
@@ -172,12 +173,13 @@ def create_draft(
         return view.respond_to_get()
 
 
-@CompanyRoute("/company/seek_approval", methods=["GET", "POST"])
+@CompanyRoute("/company/seek_approval")
 @commit_changes
 def seek_approval(
     seek_approval: use_cases.SeekApproval,
     activate_plan_and_grant_credit: use_cases.ActivatePlanAndGrantCredit,
     template_renderer: UserTemplateRenderer,
+    presenter: SeekPlanApprovalPresenter,
 ):
     """
     seek approval for draft.
@@ -189,16 +191,9 @@ def seek_approval(
         use_cases.SeekApproval.Request(draft_id=draft_uuid)
     )
     if approval_response.is_approved:
-        flash("Plan erfolgreich erstellt und genehmigt.", "is-success")
         activate_plan_and_grant_credit(approval_response.new_plan_id)
-        flash(
-            "Plan wurde aktiviert. Kredite für Produktionskosten wurden bereits gewährt, Kosten für Arbeit werden täglich ausgezahlt.",
-            "is-success",
-        )
-    else:
-        flash(f"Plan nicht genehmigt. Grund:\n{approval_response.reason}", "is-danger")
-
-    return template_renderer.render_template("/company/create_plan_response.html")
+    presenter.present_response(approval_response)
+    return redirect(url_for("main_company.my_plans"))
 
 
 @CompanyRoute("/company/my_drafts", methods=["GET"])
