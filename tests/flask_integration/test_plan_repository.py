@@ -336,3 +336,24 @@ def test_that_availability_is_toggled_to_true(
     plan_from_repo = repository.get_plan_by_id(plan.id)
     assert plan_from_repo
     assert plan_from_repo.is_available == True
+
+
+@injection_test
+def test_that_all_productive_plans_approved_active_and_not_expired_returns_no_plans_with_empty_db(
+    repository: PlanRepository,
+) -> None:
+    assert not list(repository.all_productive_plans_approved_active_and_not_expired())
+
+
+@injection_test
+def test_all_public_plans_approved_active_and_not_expired_returns_no_plans_with_empty_db(
+    repository: PlanRepository,
+) -> None:
+    assert not list(repository.all_public_plans_approved_active_and_not_expired())
+
+
+@injection_test
+def test_all_plans_approved_active_and_not_expired_returns_no_plans_with_empty_db(
+    repository: PlanRepository,
+) -> None:
+    assert not list(repository.all_plans_approved_active_and_not_expired())
