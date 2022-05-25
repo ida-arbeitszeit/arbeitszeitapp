@@ -17,14 +17,14 @@ from .dependency_injection import get_dependency_injector
 DEFAULT_INFO1 = ShowRAccountDetailsUseCase.TransactionInfo(
     transaction_type=TransactionTypes.credit_for_liquid_means,
     date=datetime.now(),
-    transaction_volume=Decimal(10),
+    transaction_volume=Decimal(10.007),
     purpose="Test purpose",
 )
 
 DEFAULT_INFO2 = ShowRAccountDetailsUseCase.TransactionInfo(
     transaction_type=TransactionTypes.credit_for_wages,
     date=datetime.now(),
-    transaction_volume=Decimal(20),
+    transaction_volume=Decimal(20.103),
     purpose="Test purpose",
 )
 
@@ -57,7 +57,9 @@ class CompanyTransactionsPresenterTests(TestCase):
                 date=DEFAULT_INFO1.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
             ),
         )
-        self.assertEqual(trans.transaction_volume, DEFAULT_INFO1.transaction_volume)
+        self.assertEqual(
+            trans.transaction_volume, str(round(DEFAULT_INFO1.transaction_volume, 2))
+        )
         self.assertIsInstance(trans.purpose, str)
 
     def test_return_two_transactions_when_two_transactions_took_place(self):

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from decimal import Decimal
 from typing import List
 
 from arbeitszeit.datetime_service import DatetimeService
@@ -17,7 +16,7 @@ class ShowPAccountDetailsPresenter:
     class TransactionInfo:
         transaction_type: str
         date: str
-        transaction_volume: Decimal
+        transaction_volume: str
         purpose: str
 
     @dataclass
@@ -58,6 +57,6 @@ class ShowPAccountDetailsPresenter:
             self.datetime_service.format_datetime(
                 date=transaction.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
             ),
-            round(transaction.transaction_volume, 2),
+            str(round(transaction.transaction_volume, 2)),
             transaction.purpose,
         )
