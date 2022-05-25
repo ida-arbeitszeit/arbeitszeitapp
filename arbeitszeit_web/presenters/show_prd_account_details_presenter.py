@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
 from typing import List
 
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.show_prd_account_details import ShowPRDAccountDetailsUseCase
 from arbeitszeit_web.translator import Translator
@@ -15,7 +15,7 @@ class ShowPRDAccountDetailsPresenter:
     @dataclass
     class TransactionInfo:
         transaction_type: str
-        date: datetime
+        date: str
         transaction_volume: str
         purpose: str
 
@@ -28,6 +28,7 @@ class ShowPRDAccountDetailsPresenter:
 
     translator: Translator
     url_index: PlotsUrlIndex
+    datetime_service: DatetimeService
 
     def present(
         self, use_case_response: ShowPRDAccountDetailsUseCase.Response
@@ -61,7 +62,9 @@ class ShowPRDAccountDetailsPresenter:
         )
         return self.TransactionInfo(
             transaction_type,
-            transaction.date,
+            self.datetime_service.format_datetime(
+                date=transaction.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
+            ),
             str(round(transaction.transaction_volume, 2)),
             transaction.purpose,
         )

@@ -460,29 +460,49 @@ class CompanyModule(Module):
 
     @provider
     def provide_show_prd_account_details_presenter(
-        self, translator: Translator, url_index: PlotsUrlIndex
+        self,
+        translator: Translator,
+        url_index: PlotsUrlIndex,
+        datetime_service: DatetimeService,
     ) -> ShowPRDAccountDetailsPresenter:
         return ShowPRDAccountDetailsPresenter(
-            translator=translator, url_index=url_index
+            translator=translator,
+            url_index=url_index,
+            datetime_service=datetime_service,
         )
 
     @provider
     def provide_show_r_account_details_presenter(
-        self, translator: Translator, url_index: PlotsUrlIndex
+        self,
+        translator: Translator,
+        url_index: PlotsUrlIndex,
+        datetime_service: DatetimeService,
     ) -> ShowRAccountDetailsPresenter:
-        return ShowRAccountDetailsPresenter(trans=translator, url_index=url_index)
+        return ShowRAccountDetailsPresenter(
+            trans=translator, url_index=url_index, datetime_service=datetime_service
+        )
 
     @provider
     def provide_show_a_account_details_presenter(
-        self, translator: Translator, url_index: PlotsUrlIndex
+        self,
+        translator: Translator,
+        url_index: PlotsUrlIndex,
+        datetime_service: DatetimeService,
     ) -> ShowAAccountDetailsPresenter:
-        return ShowAAccountDetailsPresenter(trans=translator, url_index=url_index)
+        return ShowAAccountDetailsPresenter(
+            trans=translator, url_index=url_index, datetime_service=datetime_service
+        )
 
     @provider
     def provide_show_p_account_details_presenter(
-        self, translator: Translator, url_index: PlotsUrlIndex
+        self,
+        translator: Translator,
+        url_index: PlotsUrlIndex,
+        datetime_service: DatetimeService,
     ) -> ShowPAccountDetailsPresenter:
-        return ShowPAccountDetailsPresenter(trans=translator, url_index=url_index)
+        return ShowPAccountDetailsPresenter(
+            trans=translator, url_index=url_index, datetime_service=datetime_service
+        )
 
     @provider
     def provide_prefilled_draft_data_controller(

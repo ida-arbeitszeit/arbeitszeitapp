@@ -394,9 +394,12 @@ class PresenterTestsInjector(Module):
         self,
         translator: FakeTranslator,
         url_index: PlotsUrlIndexImpl,
+        datetime_service: FakeDatetimeService,
     ) -> ShowPRDAccountDetailsPresenter:
         return ShowPRDAccountDetailsPresenter(
-            translator=translator, url_index=url_index
+            translator=translator,
+            url_index=url_index,
+            datetime_service=datetime_service,
         )
 
     @provider
@@ -404,24 +407,33 @@ class PresenterTestsInjector(Module):
         self,
         translator: FakeTranslator,
         url_index: PlotsUrlIndexImpl,
+        datetime_service: FakeDatetimeService,
     ) -> ShowRAccountDetailsPresenter:
-        return ShowRAccountDetailsPresenter(trans=translator, url_index=url_index)
+        return ShowRAccountDetailsPresenter(
+            trans=translator, url_index=url_index, datetime_service=datetime_service
+        )
 
     @provider
     def provide_show_p_account_details_presenter(
         self,
         translator: FakeTranslator,
         url_index: PlotsUrlIndexImpl,
+        datetime_service: FakeDatetimeService,
     ) -> ShowPAccountDetailsPresenter:
-        return ShowPAccountDetailsPresenter(trans=translator, url_index=url_index)
+        return ShowPAccountDetailsPresenter(
+            trans=translator, url_index=url_index, datetime_service=datetime_service
+        )
 
     @provider
     def provide_show_a_account_details_presenter(
         self,
         translator: FakeTranslator,
         url_index: PlotsUrlIndexImpl,
+        datetime_service: FakeDatetimeService,
     ) -> ShowAAccountDetailsPresenter:
-        return ShowAAccountDetailsPresenter(trans=translator, url_index=url_index)
+        return ShowAAccountDetailsPresenter(
+            trans=translator, url_index=url_index, datetime_service=datetime_service
+        )
 
     @provider
     def provide_user_action_resolver_impl(

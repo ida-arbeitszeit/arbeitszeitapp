@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
 from decimal import Decimal
 from typing import List
 
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.show_p_account_details import ShowPAccountDetailsUseCase
 from arbeitszeit_web.translator import Translator
@@ -16,7 +16,7 @@ class ShowPAccountDetailsPresenter:
     @dataclass
     class TransactionInfo:
         transaction_type: str
-        date: datetime
+        date: str
         transaction_volume: Decimal
         purpose: str
 
@@ -28,6 +28,7 @@ class ShowPAccountDetailsPresenter:
 
     trans: Translator
     url_index: PlotsUrlIndex
+    datetime_service: DatetimeService
 
     def present(
         self, use_case_response: ShowPAccountDetailsUseCase.Response
@@ -54,7 +55,9 @@ class ShowPAccountDetailsPresenter:
         )
         return self.TransactionInfo(
             transaction_type,
-            transaction.date,
+            self.datetime_service.format_datetime(
+                date=transaction.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
+            ),
             round(transaction.transaction_volume, 2),
             transaction.purpose,
         )

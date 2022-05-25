@@ -41,7 +41,7 @@
                 {% if view_model.transactions is defined and view_model.transactions|length %}
                 {% for trans_info in view_model.transactions %}
                 <tr>
-                    <td>{{ trans_info.date|format_datetime(zone='Europe/Berlin', fmt='%d.%m.%Y %H:%M') }}</td>
+                    <td>{{ trans_info.date }}</td>
                     <td>
                         {{ trans_info.transaction_type }}
                     </td>
