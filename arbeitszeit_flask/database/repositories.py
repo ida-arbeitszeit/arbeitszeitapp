@@ -669,8 +669,8 @@ class PlanRepository(repositories.PlanRepository):
         return (
             self.object_from_orm(plan_orm)
             for plan_orm in Plan.query.filter_by(
-                approved=True, is_active=True, expired=False, is_public_service=False
-            ).all()
+                is_active=True, expired=False, is_public_service=False
+            ).filter(Plan.approval_date != None)
         )
 
     def all_public_plans_approved_active_and_not_expired(
@@ -679,18 +679,19 @@ class PlanRepository(repositories.PlanRepository):
         return (
             self.object_from_orm(plan_orm)
             for plan_orm in Plan.query.filter_by(
-                approved=True, is_active=True, expired=False, is_public_service=True
-            ).all()
+                is_active=True,
+                expired=False,
+                is_public_service=True,
+            ).filter(Plan.approval_date != None)
         )
 
     def all_plans_approved_active_and_not_expired(self) -> Iterator[entities.Plan]:
         return (
             self.object_from_orm(plan_orm)
             for plan_orm in Plan.query.filter_by(
-                approved=True,
                 is_active=True,
                 expired=False,
-            ).all()
+            ).filter(Plan.approval_date != None)
         )
 
     def hide_plan(self, plan_id: UUID) -> None:
