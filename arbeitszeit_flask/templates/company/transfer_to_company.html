@@ -8,38 +8,42 @@
 <div class="section is-medium has-text-centered">
     <div class="columns">
         <div class="column"></div>
-        <div class="column is-10">
+        <div class="column is-6">
             <div class="content">
                 <h1 class="title">
                     {{ gettext("Payment of fixed and liquid means of production") }}
                 </h1>
             </div>
-            <div class="content">
-                <form method="post">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <div class="field has-addons has-addons-centered">
-                        <div class="control">
-                            {{ form.plan_id(class_="input") }}
-                        </div>
-                        <div class="control">
-                            {{ form.amount(class_="input") }}
-                        </div>
-                        <div class="control">
-                            <div class="select">
-                                <select name="category" required>
-                                    {% for option in form.category %}
-                                    {{ option }}
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="control">
-                            <button class="button is-primary" name="transfer_type" value="transfer_to_company"
-                                type="submit">{{ gettext("Transfer") }}</button>
+            <form method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="field">
+                    <div class="control">
+                        {{ form.plan_id(class_="input") }}
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="control">
+                        {{ form.amount(class_="input") }}
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="control">
+                        <div class="select">
+                            <select name="category" required>
+                                {% for option in form.category %}
+                                {{ option }}
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
-                </form>
-            </div>
+                </div>
+                <div class="field">
+                    <div class="control">
+                        <button class="button is-primary" name="transfer_type" value="transfer_to_company"
+                            type="submit">{{ gettext("Transfer") }}</button>
+                    </div>
+                </div>
+            </form>
         </div>
         <div class="column"></div>
     </div>
