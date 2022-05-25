@@ -8,45 +8,47 @@
 <div class="section is-medium has-text-centered">
     <div class="columns">
         <div class="column"></div>
-        <div class="column is-10">
+        <div class="column is-6">
             <h1 class="title">
                 {{ gettext("Transfer of work certificates to worker") }}
             </h1>
-            <div class="content">
-                {% if workers_list is defined and workers_list|length %}
-                <form method="post">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <div class="field has-addons has-addons-centered">
-                        <div class="control has-icons-left">
-                            <div class="select has-icons-left">
-                                <select name="member_id" required>
-                                    <option value="" disabled selected hidden>{{ gettext("Worker") }} ...</option>
-                                    {% for worker in workers_list %}
-                                    <option value="{{ worker.id }}">{{ worker.name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
+            {% if workers_list is defined and workers_list|length %}
+            <form method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="field">
+                    <div class="control">
+                        <input class="input" type="number" step="0.01" placeholder="{{ gettext('Amount') }}"
+                            name="amount" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <p class="control is-expanded has-icons-left">
+                        <span class="select">
                             <span class="icon is-left">
                                 <i class="fas fa-user"></i>
                             </span>
-                        </div>
-                        <div class="control">
-                            <input class="input" type="number" step="0.01" placeholder="{{ gettext('Amount') }}"
-                                name="amount" required>
-                        </div>
-                        <div class="control">
-                            <button class="button is-primary" name="transfer_type" value="transfer_to_worker"
-                                type="submit">{{ gettext("Transfer")}}</button>
-                        </div>
+                            <select name="member_id" required>
+                                <option value="" disabled selected hidden>{{ gettext("Worker") }} ...</option>
+                                {% for worker in workers_list %}
+                                <option value="{{ worker.id }}">{{ worker.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </span>
+                    </p>
+                </div>
+                <div class="field">
+                    <div class="control">
+                        <button class="button is-primary" name="transfer_type" value="transfer_to_worker"
+                            type="submit">{{ gettext("Transfer")}}</button>
                     </div>
-                    <p class="help"><a href="{{url_for('main_company.invite_worker_to_company')}}">{{ gettext("You can
-                            register
-                            workers here") }}</a></p>
-                </form>
-                {% else %}
-                <p>{{ gettext("No workers registered yet") }}</p>
-                {% endif %}
-            </div>
+                </div>
+                <p class="help"><a href="{{url_for('main_company.invite_worker_to_company')}}">{{ gettext("You can
+                        register
+                        workers here") }}</a></p>
+            </form>
+            {% else %}
+            <p>{{ gettext("No workers registered yet") }}</p>
+            {% endif %}
         </div>
         <div class="column"></div>
     </div>

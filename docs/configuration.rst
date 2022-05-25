@@ -13,6 +13,14 @@ The configuration file must be a valid python script.  Configuration
 options are set as variables on the top level. The following
 configuration options are available
 
+.. py:data:: FORCE_HTTPS
+   This option controls whether the application will allow unsecure
+   HTTP trafic or force a redirect to an HTTPS address.
+
+   Example: ``FORCE_HTTPS = False``
+
+   Default: ``True``
+
 .. py:data:: MAIL_SERVER
    The server name of the SMTP server used to send mails.
 
