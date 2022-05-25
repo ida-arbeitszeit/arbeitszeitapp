@@ -29,7 +29,13 @@ def load_configuration(app, configuration=None):
         app.config.from_pyfile("/etc/arbeitszeitapp/arbeitszeitapp.py", silent=True)
 
 
-def create_app(config=None, db=None, migrate=None, template_folder=None):
+def initialize_migrations(app, db):
+    migrate = arbeitszeit_flask.extensions.migrate
+    migrations_directory = os.path.join(os.path.dirname(__file__), "migrations")
+    migrate.init_app(app, db, directory=migrations_directory)
+
+
+def create_app(config=None, db=None, template_folder=None):
     if template_folder is None:
         template_folder = "templates"
 
@@ -41,9 +47,6 @@ def create_app(config=None, db=None, migrate=None, template_folder=None):
 
     if db is None:
         db = arbeitszeit_flask.extensions.db
-
-    if migrate is None:
-        migrate = arbeitszeit_flask.extensions.migrate
 
     # Where to redirect the user when he attempts to access a login_required
     # view without being logged in.
@@ -60,7 +63,7 @@ def create_app(config=None, db=None, migrate=None, template_folder=None):
     CSRFProtect(app)
     db.init_app(app)
     login_manager.init_app(app)
-    migrate.init_app(app, db)
+    initialize_migrations(app=app, db=db)
     mail.init_app(app)
     babel.init_app(app)
 
