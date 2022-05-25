@@ -17,10 +17,8 @@
     </div>
     <p>{{ gettext("Balance:") }}</p>
     <p
-        class="py-2 has-text-weight-bold {{ 'has-text-primary' if view_model.account_balance >= 0 else 'has-text-danger' }}">
-        {{
-        view_model.account_balance
-        | round(2) }}
+        class="py-2 has-text-weight-bold {{ 'has-text-primary' if view_model.account_balance | float >= 0 else 'has-text-danger' }}">
+        {{ view_model.account_balance }}
     </p>
 
     <div>

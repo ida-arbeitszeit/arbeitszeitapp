@@ -23,7 +23,7 @@ class ShowRAccountDetailsPresenter:
     @dataclass
     class ViewModel:
         transactions: List[ShowRAccountDetailsPresenter.TransactionInfo]
-        account_balance: Decimal
+        account_balance: str
         plot_url: str
 
     trans: Translator
@@ -38,7 +38,7 @@ class ShowRAccountDetailsPresenter:
         ]
         return self.ViewModel(
             transactions=transactions,
-            account_balance=use_case_response.account_balance,
+            account_balance=str(round(use_case_response.account_balance, 2)),
             plot_url=self.url_index.get_line_plot_of_company_r_account(
                 use_case_response.company_id
             ),

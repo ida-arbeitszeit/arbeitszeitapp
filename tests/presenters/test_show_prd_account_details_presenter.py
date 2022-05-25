@@ -47,12 +47,13 @@ class CompanyTransactionsPresenterTests(TestCase):
     def test_return_correct_info_when_one_transaction_of_granting_credit_took_place(
         self,
     ):
+        ACCOUNT_BALANCE = Decimal(100.007)
         response = self._use_case_response(
-            transactions=[DEFAULT_INFO1], account_balance=Decimal(100.007)
+            transactions=[DEFAULT_INFO1], account_balance=ACCOUNT_BALANCE
         )
         view_model = self.presenter.present(response)
         self.assertTrue(len(view_model.transactions), 1)
-        self.assertEqual(view_model.account_balance, "100.01")
+        self.assertEqual(view_model.account_balance, str(round(ACCOUNT_BALANCE, 2)))
         trans = view_model.transactions[0]
         self.assertEqual(
             trans.transaction_type, self.translator.gettext("Debit expected sales")
