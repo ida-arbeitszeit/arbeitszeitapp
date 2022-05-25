@@ -175,6 +175,9 @@ from arbeitszeit_web.presenters.show_a_account_details_presenter import (
 from arbeitszeit_web.presenters.show_company_work_invite_details_presenter import (
     ShowCompanyWorkInviteDetailsPresenter,
 )
+from arbeitszeit_web.presenters.show_p_account_details_presenter import (
+    ShowPAccountDetailsPresenter,
+)
 from arbeitszeit_web.presenters.show_prd_account_details_presenter import (
     ShowPRDAccountDetailsPresenter,
 )
@@ -191,7 +194,6 @@ from arbeitszeit_web.request_cooperation import (
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
-from arbeitszeit_web.show_p_account_details import ShowPAccountDetailsPresenter
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import (
     AnswerCompanyWorkInviteUrlIndex,
@@ -478,9 +480,9 @@ class CompanyModule(Module):
 
     @provider
     def provide_show_p_account_details_presenter(
-        self, translator: Translator
+        self, translator: Translator, url_index: PlotsUrlIndex
     ) -> ShowPAccountDetailsPresenter:
-        return ShowPAccountDetailsPresenter(translator=translator)
+        return ShowPAccountDetailsPresenter(trans=translator, url_index=url_index)
 
     @provider
     def provide_prefilled_draft_data_controller(

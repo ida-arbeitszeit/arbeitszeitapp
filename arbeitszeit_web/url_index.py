@@ -95,6 +95,9 @@ class PlotsUrlIndex(Protocol):
     def get_line_plot_of_company_r_account(self, company_id: UUID) -> str:
         ...
 
+    def get_line_plot_of_company_p_account(self, company_id: UUID) -> str:
+        ...
+
 
 class AccountantDashboardUrlIndex(Protocol):
     def get_accountant_dashboard_url(self) -> str:
