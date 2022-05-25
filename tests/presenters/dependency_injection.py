@@ -417,11 +417,11 @@ class PresenterTestsInjector(Module):
 
     @provider
     def provide_show_a_account_details_presenter(
-        self, translator: FakeTranslator
+        self,
+        translator: FakeTranslator,
+        url_index: PlotsUrlIndexImpl,
     ) -> ShowAAccountDetailsPresenter:
-        return ShowAAccountDetailsPresenter(
-            translator=translator,
-        )
+        return ShowAAccountDetailsPresenter(trans=translator, url_index=url_index)
 
     @provider
     def provide_user_action_resolver_impl(

@@ -4,6 +4,7 @@ from uuid import UUID
 from flask import Blueprint, Response, request
 from flask_login import login_required
 
+from arbeitszeit.use_cases.show_a_account_details import ShowAAccountDetailsUseCase
 from arbeitszeit.use_cases.show_p_account_details import ShowPAccountDetailsUseCase
 from arbeitszeit.use_cases.show_prd_account_details import ShowPRDAccountDetailsUseCase
 from arbeitszeit.use_cases.show_r_account_details import ShowRAccountDetailsUseCase
@@ -129,6 +130,22 @@ def line_plot_of_company_r_account(
 def line_plot_of_company_p_account(
     plotter: Plotter,
     use_case: ShowPAccountDetailsUseCase,
+):
+    company_id = UUID(request.args["company_id"])
+    use_case_response = use_case(company_id)
+    png = plotter.create_line_plot(
+        x=use_case_response.plot.timestamps,
+        y=use_case_response.plot.accumulated_volumes,
+    )
+    return Response(png, mimetype="image/png", direct_passthrough=True)
+
+
+@plots.route("/plots/line_plot_of_company_a_account")
+@with_injection()
+@login_required
+def line_plot_of_company_a_account(
+    plotter: Plotter,
+    use_case: ShowAAccountDetailsUseCase,
 ):
     company_id = UUID(request.args["company_id"])
     use_case_response = use_case(company_id)

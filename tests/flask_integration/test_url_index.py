@@ -224,6 +224,14 @@ class PlotUrlIndexTests(ViewTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.mimetype, "image/png")
 
+    def test_url_for_lineplot_for_companies_own_a_account_returns_png(self) -> None:
+        url = self.url_index.get_line_plot_of_company_a_account(
+            company_id=self.company.id
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, "image/png")
+
 
 class GeneralUrlIndexTests(ViewTestCase):
     def setUp(self) -> None:

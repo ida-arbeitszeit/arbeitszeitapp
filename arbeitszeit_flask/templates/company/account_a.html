@@ -22,6 +22,10 @@
         {{ view_model.account_balance }}
     </p>
 
+    <div>
+        <img src="{{ view_model.plot_url }}" alt="plot of a account">
+    </div>
+
     <div class="table-container">
         <table class="table is-fullwidth">
             <thead>
@@ -43,9 +47,8 @@
                     </td>
                     <td>{{ trans_info.purpose }}</td>
                     <td
-                        class="has-text-weight-bold {{ 'has-text-success' if trans_info.transaction_volume|float >= 0 else 'has-text-danger' }}">
-                        {{
-                        trans_info.transaction_volume }}
+                        class="has-text-weight-bold {{ 'has-text-success' if trans_info.transaction_volume >= 0 else 'has-text-danger' }}">
+                        {{ trans_info.transaction_volume }}
                     </td>
                 </tr>
                 {% endfor %}

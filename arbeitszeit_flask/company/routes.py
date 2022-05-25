@@ -296,7 +296,7 @@ def account_r(
 
 @CompanyRoute("/company/my_accounts/account_a")
 def account_a(
-    show_a_account_details: use_cases.ShowAAccountDetails,
+    show_a_account_details: use_cases.ShowAAccountDetailsUseCase,
     template_renderer: UserTemplateRenderer,
     presenter: ShowAAccountDetailsPresenter,
 ):

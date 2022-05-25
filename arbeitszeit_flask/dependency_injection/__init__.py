@@ -474,9 +474,9 @@ class CompanyModule(Module):
 
     @provider
     def provide_show_a_account_details_presenter(
-        self, translator: Translator
+        self, translator: Translator, url_index: PlotsUrlIndex
     ) -> ShowAAccountDetailsPresenter:
-        return ShowAAccountDetailsPresenter(translator=translator)
+        return ShowAAccountDetailsPresenter(trans=translator, url_index=url_index)
 
     @provider
     def provide_show_p_account_details_presenter(
