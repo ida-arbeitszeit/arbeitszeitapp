@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
-from decimal import Decimal
 from typing import List
 
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.show_r_account_details import ShowRAccountDetailsUseCase
 from arbeitszeit_web.translator import Translator
@@ -16,18 +15,19 @@ class ShowRAccountDetailsPresenter:
     @dataclass
     class TransactionInfo:
         transaction_type: str
-        date: datetime
-        transaction_volume: Decimal
+        date: str
+        transaction_volume: str
         purpose: str
 
     @dataclass
     class ViewModel:
         transactions: List[ShowRAccountDetailsPresenter.TransactionInfo]
-        account_balance: Decimal
+        account_balance: str
         plot_url: str
 
     trans: Translator
     url_index: PlotsUrlIndex
+    datetime_service: DatetimeService
 
     def present(
         self, use_case_response: ShowRAccountDetailsUseCase.Response
@@ -38,7 +38,7 @@ class ShowRAccountDetailsPresenter:
         ]
         return self.ViewModel(
             transactions=transactions,
-            account_balance=use_case_response.account_balance,
+            account_balance=str(round(use_case_response.account_balance, 2)),
             plot_url=self.url_index.get_line_plot_of_company_r_account(
                 use_case_response.company_id
             ),
@@ -54,7 +54,9 @@ class ShowRAccountDetailsPresenter:
         )
         return self.TransactionInfo(
             transaction_type,
-            transaction.date,
-            round(transaction.transaction_volume, 2),
+            self.datetime_service.format_datetime(
+                date=transaction.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
+            ),
+            str(round(transaction.transaction_volume, 2)),
             transaction.purpose,
         )

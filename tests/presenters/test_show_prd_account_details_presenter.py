@@ -9,6 +9,7 @@ from arbeitszeit.use_cases.show_prd_account_details import ShowPRDAccountDetails
 from arbeitszeit_web.presenters.show_prd_account_details_presenter import (
     ShowPRDAccountDetailsPresenter,
 )
+from tests.datetime_service import FakeDatetimeService
 from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
@@ -32,6 +33,7 @@ class CompanyTransactionsPresenterTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.translator = self.injector.get(FakeTranslator)
+        self.datetime_service = self.injector.get(FakeDatetimeService)
         self.presenter = self.injector.get(ShowPRDAccountDetailsPresenter)
 
     def test_return_empty_list_when_no_transactions_took_place(self):
@@ -47,17 +49,23 @@ class CompanyTransactionsPresenterTests(TestCase):
     def test_return_correct_info_when_one_transaction_of_granting_credit_took_place(
         self,
     ):
+        ACCOUNT_BALANCE = Decimal(100.007)
         response = self._use_case_response(
-            transactions=[DEFAULT_INFO1], account_balance=Decimal(100.007)
+            transactions=[DEFAULT_INFO1], account_balance=ACCOUNT_BALANCE
         )
         view_model = self.presenter.present(response)
         self.assertTrue(len(view_model.transactions), 1)
-        self.assertEqual(view_model.account_balance, "100.01")
+        self.assertEqual(view_model.account_balance, str(round(ACCOUNT_BALANCE, 2)))
         trans = view_model.transactions[0]
         self.assertEqual(
             trans.transaction_type, self.translator.gettext("Debit expected sales")
         )
-        self.assertIsInstance(trans.date, datetime)
+        self.assertEqual(
+            trans.date,
+            self.datetime_service.format_datetime(
+                date=DEFAULT_INFO1.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
+            ),
+        )
         self.assertEqual(trans.transaction_volume, "10.01")
         self.assertIsInstance(trans.purpose, str)
 
@@ -72,7 +80,12 @@ class CompanyTransactionsPresenterTests(TestCase):
         self.assertEqual(view_model.account_balance, "100.01")
         trans = view_model.transactions[0]
         self.assertEqual(trans.transaction_type, self.translator.gettext("Sale"))
-        self.assertIsInstance(trans.date, datetime)
+        self.assertEqual(
+            trans.date,
+            self.datetime_service.format_datetime(
+                date=DEFAULT_INFO1.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
+            ),
+        )
         self.assertEqual(trans.transaction_volume, "20.00")
         self.assertIsInstance(trans.purpose, str)
 

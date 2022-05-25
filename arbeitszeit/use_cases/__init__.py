@@ -149,14 +149,14 @@ from .send_work_certificates_to_worker import (
     SendWorkCertificatesToWorkerRequest,
     SendWorkCertificatesToWorkerResponse,
 )
-from .show_a_account_details import ShowAAccountDetails, ShowAAccountDetailsResponse
+from .show_a_account_details import ShowAAccountDetailsUseCase
 from .show_company_work_invite_details import (
     ShowCompanyWorkInviteDetailsRequest,
     ShowCompanyWorkInviteDetailsResponse,
     ShowCompanyWorkInviteDetailsUseCase,
 )
 from .show_my_plans import ShowMyPlansRequest, ShowMyPlansResponse, ShowMyPlansUseCase
-from .show_p_account_details import ShowPAccountDetails, ShowPAccountDetailsResponse
+from .show_p_account_details import ShowPAccountDetailsUseCase
 from .show_prd_account_details import ShowPRDAccountDetailsUseCase
 from .show_r_account_details import ShowRAccountDetailsUseCase
 from .show_work_invites import ShowWorkInvites, ShowWorkInvitesRequest
@@ -285,16 +285,14 @@ __all__ = [
     "SendWorkCertificatesToWorker",
     "SendWorkCertificatesToWorkerRequest",
     "SendWorkCertificatesToWorkerResponse",
-    "ShowAAccountDetails",
-    "ShowAAccountDetailsResponse",
+    "ShowAAccountDetailsUseCase",
     "ShowCompanyWorkInviteDetailsRequest",
     "ShowCompanyWorkInviteDetailsResponse",
     "ShowCompanyWorkInviteDetailsUseCase",
     "ShowMyPlansRequest",
     "ShowMyPlansResponse",
     "ShowMyPlansUseCase",
-    "ShowPAccountDetails",
-    "ShowPAccountDetailsResponse",
+    "ShowPAccountDetailsUseCase",
     "ShowPRDAccountDetailsUseCase",
     "ShowRAccountDetailsUseCase",
     "ShowWorkInvites",

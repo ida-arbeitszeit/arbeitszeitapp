@@ -48,6 +48,9 @@ from arbeitszeit_web.presenters.show_a_account_details_presenter import (
 from arbeitszeit_web.presenters.show_company_work_invite_details_presenter import (
     ShowCompanyWorkInviteDetailsPresenter,
 )
+from arbeitszeit_web.presenters.show_p_account_details_presenter import (
+    ShowPAccountDetailsPresenter,
+)
 from arbeitszeit_web.presenters.show_prd_account_details_presenter import (
     ShowPRDAccountDetailsPresenter,
 )
@@ -59,7 +62,6 @@ from arbeitszeit_web.query_plans import QueryPlansPresenter
 from arbeitszeit_web.read_message import ReadMessagePresenter
 from arbeitszeit_web.request_cooperation import RequestCooperationPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
-from arbeitszeit_web.show_p_account_details import ShowPAccountDetailsPresenter
 from arbeitszeit_web.url_index import ListMessagesUrlIndex
 from arbeitszeit_web.user_action import UserActionResolverImpl
 from tests.datetime_service import FakeDatetimeService
@@ -392,9 +394,12 @@ class PresenterTestsInjector(Module):
         self,
         translator: FakeTranslator,
         url_index: PlotsUrlIndexImpl,
+        datetime_service: FakeDatetimeService,
     ) -> ShowPRDAccountDetailsPresenter:
         return ShowPRDAccountDetailsPresenter(
-            translator=translator, url_index=url_index
+            translator=translator,
+            url_index=url_index,
+            datetime_service=datetime_service,
         )
 
     @provider
@@ -402,23 +407,32 @@ class PresenterTestsInjector(Module):
         self,
         translator: FakeTranslator,
         url_index: PlotsUrlIndexImpl,
+        datetime_service: FakeDatetimeService,
     ) -> ShowRAccountDetailsPresenter:
-        return ShowRAccountDetailsPresenter(trans=translator, url_index=url_index)
+        return ShowRAccountDetailsPresenter(
+            trans=translator, url_index=url_index, datetime_service=datetime_service
+        )
 
     @provider
     def provide_show_p_account_details_presenter(
-        self, translator: FakeTranslator
+        self,
+        translator: FakeTranslator,
+        url_index: PlotsUrlIndexImpl,
+        datetime_service: FakeDatetimeService,
     ) -> ShowPAccountDetailsPresenter:
         return ShowPAccountDetailsPresenter(
-            translator=translator,
+            trans=translator, url_index=url_index, datetime_service=datetime_service
         )
 
     @provider
     def provide_show_a_account_details_presenter(
-        self, translator: FakeTranslator
+        self,
+        translator: FakeTranslator,
+        url_index: PlotsUrlIndexImpl,
+        datetime_service: FakeDatetimeService,
     ) -> ShowAAccountDetailsPresenter:
         return ShowAAccountDetailsPresenter(
-            translator=translator,
+            trans=translator, url_index=url_index, datetime_service=datetime_service
         )
 
     @provider
