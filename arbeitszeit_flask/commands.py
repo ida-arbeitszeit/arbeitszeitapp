@@ -61,6 +61,8 @@ def trans_update():
             "-d",
             "arbeitszeit_flask/translations",
             "--no-fuzzy-matching",
+            "--width",
+            "78",
         ],
         check=True,
     )
