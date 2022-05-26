@@ -69,8 +69,9 @@ class PresenterTests(TestCase):
                 self.assertEqual(
                     self.notifier.warnings[-1],
                     self.translator.gettext(
-                        f"Could not register {email_address} as an accountant"
-                    ),
+                        "Could not register %(email_address)s as an accountant"
+                    )
+                    % dict(email_address=email_address),
                 )
 
     def test_redirect_to_accountant_dashboard_on_registration_success(self) -> None:
