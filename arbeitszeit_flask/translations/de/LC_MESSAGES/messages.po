@@ -1039,7 +1039,7 @@ msgid ""
 "The coordinator of the cooperation decides if they add your plan to the "
 "cooperation."
 msgstr ""
-"Der Koordinator der Kooperation entscheidet, ob er deinen Plan in die Kooperation "
+"Der*die Koordinator*in der Kooperation entscheidet, ob er*sie deinen Plan in die Kooperation "
 "aufnimmt."
 
 #: arbeitszeit_flask/templates/company/request_cooperation.html:18
