@@ -4,10 +4,37 @@ extend-exclude = '''
 (
   ^/arbeitszeit_flask/development_settings\.py |
   ^/arbeitszeit_flask/production_settings\.py |
-  ^/migrations/
+  ^/arbeitszeit_flask/migrations/
 )
 '''
 
 [tool.isort]
 profile = "black"
 multi_line_output = 3
+skip = "arbeitszeit_flask/migrations"
+
+[tool.mypy]
+ignore_missing_imports = true
+files = [
+    "arbeitszeit/**/*.py",
+    "tests/**/*.py",
+    "arbeitszeit_flask/__init__.py",
+    "arbeitszeit_web/**/*.py"
+]
+mypy_path = "type_stubs"
+exclude = '''
+    migrations/
+'''
+
+[[tool.mypy.overrides]]
+module = "arbeitszeit.*,arbeitszeit_web.*"
+allow_untyped_defs = false
+ignore_missing_imports = false
+
+[[tool.mypy.overrides]]
+module = "arbeitszeit_flask.*"
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+check_untyped_defs = true
