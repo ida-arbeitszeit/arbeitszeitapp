@@ -219,6 +219,10 @@ class MemberRepository(ABC):
         pass
 
     @abstractmethod
+    def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
+        pass
+
+    @abstractmethod
     def has_member_with_email(self, email: str) -> bool:
         pass
 
