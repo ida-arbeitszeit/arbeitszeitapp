@@ -42,9 +42,8 @@
                             type="submit">{{ gettext("Transfer")}}</button>
                     </div>
                 </div>
-                <p class="help"><a href="{{url_for('main_company.invite_worker_to_company')}}">{{ gettext("You can
-                        register
-                        workers here") }}</a></p>
+                <p class="help"><a href="{{url_for('main_company.invite_worker_to_company')}}">
+                        {{ gettext("You can register workers here") }}</a></p>
             </form>
             {% else %}
             <p>{{ gettext("No workers registered yet") }}</p>

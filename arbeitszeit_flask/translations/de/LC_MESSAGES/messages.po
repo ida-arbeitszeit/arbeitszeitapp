@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-05-26 17:49+0200\n"
+"POT-Creation-Date: 2022-05-27 14:06+0200\n"
 "PO-Revision-Date: 2022-05-03 19:57+0200\n"
 "Last-Translator: Sebastian Jordan <sebastian.jordan.mail@googlemail.com>\n"
 "Language: de\n"
@@ -99,8 +99,8 @@ msgstr "Name"
 msgid "Password"
 msgstr "Passwort"
 
-#: arbeitszeit_flask/forms.py:86
-msgid "The password must be at least 8 characters long"
+#: arbeitszeit_flask/forms.py:86 arbeitszeit_flask/forms.py:126
+msgid "The password must be at least 8 characters in length"
 msgstr ""
 
 #: arbeitszeit_flask/forms.py:111
@@ -109,10 +109,6 @@ msgstr ""
 
 #: arbeitszeit_flask/forms.py:118
 msgid "Name is required"
-msgstr ""
-
-#: arbeitszeit_flask/forms.py:126
-msgid "The password must at least characters in length"
 msgstr ""
 
 #: arbeitszeit_flask/forms.py:148
@@ -372,20 +368,20 @@ msgstr ""
 msgid "Please confirm your account."
 msgstr ""
 
-#: arbeitszeit_flask/templates/auth/unconfirmed_company.html:16
+#: arbeitszeit_flask/templates/auth/unconfirmed_company.html:17
 #: arbeitszeit_flask/templates/auth/unconfirmed_member.html:15
 msgid ""
-"Check your mailbox (and your spam folder) - you\n"
-"            should have received an email with a confirmation link."
+"Check your mailbox (and your spam folder) - you should have received an "
+"email with a confirmation link."
 msgstr ""
 
 #: arbeitszeit_flask/templates/auth/unconfirmed_company.html:18
-#: arbeitszeit_flask/templates/auth/unconfirmed_member.html:17
+#: arbeitszeit_flask/templates/auth/unconfirmed_member.html:16
 msgid "You did not get an email?"
 msgstr ""
 
 #: arbeitszeit_flask/templates/auth/unconfirmed_company.html:19
-#: arbeitszeit_flask/templates/auth/unconfirmed_member.html:18
+#: arbeitszeit_flask/templates/auth/unconfirmed_member.html:17
 msgid "Resend mail"
 msgstr ""
 
@@ -681,6 +677,10 @@ msgstr ""
 msgid "Cooperations"
 msgstr "Kooperationen"
 
+#: arbeitszeit_flask/templates/company/dashboard.html:91
+msgid "Your cooperations"
+msgstr ""
+
 #: arbeitszeit_flask/templates/company/dashboard.html:97
 msgid "Purchases"
 msgstr ""
@@ -720,10 +720,9 @@ msgstr ""
 msgid "Global statistics"
 msgstr "Globale Statistiken"
 
-#: arbeitszeit_flask/templates/company/dashboard.html:162
-msgid ""
-"All\n"
-"                        companies"
+#: arbeitszeit_flask/templates/company/dashboard.html:163
+#: arbeitszeit_flask/templates/company/query_companies.html:4
+msgid "All companies"
 msgstr ""
 
 #: arbeitszeit_flask/templates/company/dashboard.html:179
@@ -1010,10 +1009,6 @@ msgstr ""
 msgid "Join"
 msgstr ""
 
-#: arbeitszeit_flask/templates/company/query_companies.html:4
-msgid "All companies"
-msgstr ""
-
 #: arbeitszeit_flask/templates/company/request_cooperation.html:4
 #: arbeitszeit_flask/templates/company/request_cooperation.html:10
 #: arbeitszeit_flask/templates/company/request_cooperation.html:71
@@ -1072,14 +1067,11 @@ msgstr ""
 msgid "Worker"
 msgstr ""
 
-#: arbeitszeit_flask/templates/company/transfer_to_worker.html:45
-msgid ""
-"You can\n"
-"                        register\n"
-"                        workers here"
+#: arbeitszeit_flask/templates/company/transfer_to_worker.html:46
+msgid "You can register workers here"
 msgstr ""
 
-#: arbeitszeit_flask/templates/company/transfer_to_worker.html:50
+#: arbeitszeit_flask/templates/company/transfer_to_worker.html:49
 msgid "No workers registered yet"
 msgstr ""
 
@@ -1386,8 +1378,8 @@ msgid "Sale of liquid means of production"
 msgstr ""
 
 #: arbeitszeit_web/get_member_profile_info.py:35
-#: arbeitszeit_web/get_statistics.py:41 arbeitszeit_web/get_statistics.py:44
-#: arbeitszeit_web/get_statistics.py:47
+#: arbeitszeit_web/get_statistics.py:40 arbeitszeit_web/get_statistics.py:43
+#: arbeitszeit_web/get_statistics.py:46
 #, python-format
 msgid "%(num).2f hours"
 msgstr ""
@@ -1398,7 +1390,7 @@ msgstr ""
 msgid "Welcome, %s!"
 msgstr "Willkommen, %s!"
 
-#: arbeitszeit_web/get_statistics.py:38
+#: arbeitszeit_web/get_statistics.py:37
 #, python-format
 msgid "%(num).2f days"
 msgstr ""
@@ -1528,8 +1520,8 @@ msgstr ""
 msgid "No"
 msgstr ""
 
-#: arbeitszeit_web/query_companies.py:82
-msgid "Keine Ergebnisse"
+#: arbeitszeit_web/query_companies.py:81
+msgid "No results"
 msgstr ""
 
 #: arbeitszeit_web/query_plans.py:89
@@ -1828,4 +1820,29 @@ msgstr ""
 #~ msgid_plural "%(num).2f days"
 #~ msgstr[0] "%(num).2f Tag"
 #~ msgstr[1] "%(num).2f Tage"
+
+#~ msgid "The password must be at least 8 characters long"
+#~ msgstr ""
+
+#~ msgid "The password must at least characters in length"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "All\n"
+#~ "                        companies"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "You can\n"
+#~ "                        register\n"
+#~ "                        workers here"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Check your mailbox (and your spam folder) - you\n"
+#~ "            should have received an email with a confirmation link."
+#~ msgstr ""
+
+#~ msgid "Keine Ergebnisse"
+#~ msgstr ""
 

@@ -84,7 +84,7 @@ class RegisterForm(Form):
             validators.Length(
                 min=8,
                 message=trans.lazy_gettext(
-                    "The password must be at least 8 characters long"
+                    "The password must be at least 8 characters in length"
                 ),
             )
         ],
@@ -124,7 +124,7 @@ class RegisterAccountantForm(Form):
             validators.Length(
                 min=8,
                 message=trans.lazy_gettext(
-                    "The password must at least characters in length"
+                    "The password must be at least 8 characters in length"
                 ),
             )
         ],

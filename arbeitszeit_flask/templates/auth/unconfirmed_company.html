@@ -13,8 +13,8 @@
     <div class="notification is-success">
         <h1>{{ gettext("Welcome!") }}</h1>
         <br>
-        <p>{{ gettext("Please confirm your account.") }}<br>{{ gettext("Check your mailbox (and your spam folder) - you
-            should have received an email with a confirmation link.") }}</p>
+        <p>{{ gettext("Please confirm your account.") }}<br>
+            {{ gettext("Check your mailbox (and your spam folder) - you should have received an email with a confirmation link.") }}</p>
         <p>{{ gettext("You did not get an email?") }} <a href="{{ url_for('auth.resend_confirmation_company') }}">{{
                 gettext("Resend mail") }}</a>.
         </p>
