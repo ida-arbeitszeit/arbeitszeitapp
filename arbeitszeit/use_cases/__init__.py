@@ -73,11 +73,7 @@ from .get_plan_summary_member import (
 )
 from .get_statistics import GetStatistics, StatisticsResponse
 from .hide_plan import HidePlan, HidePlanResponse
-from .invite_worker_to_company import (
-    InviteWorkerToCompany,
-    InviteWorkerToCompanyRequest,
-    InviteWorkerToCompanyResponse,
-)
+from .invite_worker_to_company import InviteWorkerToCompanyUseCase
 from .list_all_cooperations import (
     ListAllCooperations,
     ListAllCooperationsResponse,
@@ -216,9 +212,7 @@ __all__ = [
     "GetStatistics",
     "HidePlan",
     "HidePlanResponse",
-    "InviteWorkerToCompany",
-    "InviteWorkerToCompanyRequest",
-    "InviteWorkerToCompanyResponse",
+    "InviteWorkerToCompanyUseCase",
     "ListAllCooperations",
     "ListAllCooperationsResponse",
     "ListCoordinations",
