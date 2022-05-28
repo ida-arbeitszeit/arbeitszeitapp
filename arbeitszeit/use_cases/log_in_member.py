@@ -28,12 +28,11 @@ class LogInMemberUseCase:
     member_repository: MemberRepository
 
     def log_in_member(self, request: Request) -> Response:
-        reason: Optional[LogInMemberUseCase.RejectionReason] = None
         if self.member_repository.validate_credentials(
             email=request.email, password=request.password
         ):
             return self.Response(
-                is_logged_in=True, rejection_reason=reason, email=request.email
+                is_logged_in=True, rejection_reason=None, email=request.email
             )
         if self.member_repository.has_member_with_email(request.email):
             reason = self.RejectionReason.invalid_password
