@@ -44,7 +44,6 @@ class GetMemberProfileInfoPresenter:
             ],
             show_workplaces=bool(use_case_response.workplaces),
             show_workplace_registration_info=not bool(use_case_response.workplaces),
-            welcome_message=self.translator.gettext(
-                "Welcome, %s!" % use_case_response.name
-            ),
+            welcome_message=self.translator.gettext("Welcome, %s!")
+            % use_case_response.name,
         )

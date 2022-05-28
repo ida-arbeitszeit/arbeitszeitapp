@@ -17,11 +17,14 @@
     </div>
     <p>{{ gettext("Balance:") }}</p>
     <p
-        class="py-2 has-text-weight-bold {{ 'has-text-primary' if view_model.account_balance >= 0 else 'has-text-danger' }}">
-        {{
-        view_model.account_balance
-        | round(2) }}
+        class="py-2 has-text-weight-bold {{ 'has-text-primary' if view_model.account_balance | float >= 0 else 'has-text-danger' }}">
+        {{ view_model.account_balance }}
     </p>
+
+    <div>
+        <img src="{{ view_model.plot_url }}" alt="plot of p account">
+    </div>
+
     <div class="table-container">
         <table class="table is-fullwidth">
             <thead>
@@ -36,13 +39,13 @@
                 {% if view_model.transactions is defined and view_model.transactions|length %}
                 {% for trans_info in view_model.transactions %}
                 <tr>
-                    <td>{{ trans_info.date|format_datetime(zone='Europe/Berlin', fmt='%d.%m.%Y %H:%M') }}</td>
+                    <td>{{ trans_info.date }}</td>
                     <td>
                         {{ trans_info.transaction_type }}
                     </td>
                     <td>{{ trans_info.purpose }}</td>
                     <td
-                        class="has-text-weight-bold {{ 'has-text-success' if trans_info.transaction_volume >= 0 else 'has-text-danger' }}">
+                        class="has-text-weight-bold {{ 'has-text-success' if trans_info.transaction_volume|float >= 0 else 'has-text-danger' }}">
                         {{
                         trans_info.transaction_volume }}
                     </td>

@@ -175,6 +175,9 @@ from arbeitszeit_web.presenters.show_a_account_details_presenter import (
 from arbeitszeit_web.presenters.show_company_work_invite_details_presenter import (
     ShowCompanyWorkInviteDetailsPresenter,
 )
+from arbeitszeit_web.presenters.show_p_account_details_presenter import (
+    ShowPAccountDetailsPresenter,
+)
 from arbeitszeit_web.presenters.show_prd_account_details_presenter import (
     ShowPRDAccountDetailsPresenter,
 )
@@ -191,7 +194,6 @@ from arbeitszeit_web.request_cooperation import (
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
-from arbeitszeit_web.show_p_account_details import ShowPAccountDetailsPresenter
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import (
     AnswerCompanyWorkInviteUrlIndex,
@@ -458,29 +460,49 @@ class CompanyModule(Module):
 
     @provider
     def provide_show_prd_account_details_presenter(
-        self, translator: Translator, url_index: PlotsUrlIndex
+        self,
+        translator: Translator,
+        url_index: PlotsUrlIndex,
+        datetime_service: DatetimeService,
     ) -> ShowPRDAccountDetailsPresenter:
         return ShowPRDAccountDetailsPresenter(
-            translator=translator, url_index=url_index
+            translator=translator,
+            url_index=url_index,
+            datetime_service=datetime_service,
         )
 
     @provider
     def provide_show_r_account_details_presenter(
-        self, translator: Translator, url_index: PlotsUrlIndex
+        self,
+        translator: Translator,
+        url_index: PlotsUrlIndex,
+        datetime_service: DatetimeService,
     ) -> ShowRAccountDetailsPresenter:
-        return ShowRAccountDetailsPresenter(trans=translator, url_index=url_index)
+        return ShowRAccountDetailsPresenter(
+            trans=translator, url_index=url_index, datetime_service=datetime_service
+        )
 
     @provider
     def provide_show_a_account_details_presenter(
-        self, translator: Translator
+        self,
+        translator: Translator,
+        url_index: PlotsUrlIndex,
+        datetime_service: DatetimeService,
     ) -> ShowAAccountDetailsPresenter:
-        return ShowAAccountDetailsPresenter(translator=translator)
+        return ShowAAccountDetailsPresenter(
+            trans=translator, url_index=url_index, datetime_service=datetime_service
+        )
 
     @provider
     def provide_show_p_account_details_presenter(
-        self, translator: Translator
+        self,
+        translator: Translator,
+        url_index: PlotsUrlIndex,
+        datetime_service: DatetimeService,
     ) -> ShowPAccountDetailsPresenter:
-        return ShowPAccountDetailsPresenter(translator=translator)
+        return ShowPAccountDetailsPresenter(
+            trans=translator, url_index=url_index, datetime_service=datetime_service
+        )
 
     @provider
     def provide_prefilled_draft_data_controller(

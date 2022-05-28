@@ -78,9 +78,7 @@ class QueryCompaniesPresenter:
 
     def present(self, response: CompanyQueryResponse) -> QueryCompaniesViewModel:
         if not response.results:
-            self.user_notifier.display_warning(
-                self.translator.gettext("Keine Ergebnisse")
-            )
+            self.user_notifier.display_warning(self.translator.gettext("No results"))
         return QueryCompaniesViewModel(
             show_results=bool(response.results),
             results=ResultsTable(
