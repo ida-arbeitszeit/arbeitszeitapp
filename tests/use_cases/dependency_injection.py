@@ -9,6 +9,7 @@ from arbeitszeit.use_cases.get_accountant_profile_info import (
     GetAccountantProfileInfoUseCase,
 )
 from arbeitszeit.use_cases.log_in_accountant import LogInAccountantUseCase
+from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit.use_cases.register_company.company_registration_message_presenter import (
     CompanyRegistrationMessagePresenter,
 )
@@ -209,6 +210,12 @@ class InMemoryModule(Module):
         return LogInAccountantUseCase(
             accountant_repository=accountant_repository,
         )
+
+    @provider
+    def provide_log_in_member_use_case(
+        self, member_repository: interfaces.MemberRepository
+    ) -> LogInMemberUseCase:
+        return LogInMemberUseCase(member_repository=member_repository)
 
 
 def get_dependency_injector() -> Injector:

@@ -28,6 +28,7 @@ from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationP
 from arbeitszeit_web.presenters.get_latest_activated_plans_presenter import (
     GetLatestActivatedPlansPresenter,
 )
+from arbeitszeit_web.presenters.log_in_member_presenter import LogInMemberPresenter
 from arbeitszeit_web.presenters.register_accountant_presenter import (
     RegisterAccountantPresenter,
 )
@@ -92,6 +93,7 @@ from .url_index import (
     HidePlanUrlIndex,
     InviteUrlIndexImpl,
     ListMessageUrlIndexTestImpl,
+    MemberUrlIndex,
     MessageUrlIndex,
     PlanSummaryUrlIndexTestImpl,
     PlotsUrlIndexImpl,
@@ -548,6 +550,19 @@ class PresenterTestsInjector(Module):
         return SeekPlanApprovalPresenter(
             notifier=notifier,
             translator=translator,
+        )
+
+    @provider
+    def provide_log_in_member_presenter(
+        self,
+        session: FakeSession,
+        translator: FakeTranslator,
+        member_url_index: MemberUrlIndex,
+    ) -> LogInMemberPresenter:
+        return LogInMemberPresenter(
+            session=session,
+            translator=translator,
+            member_url_index=member_url_index,
         )
 
 

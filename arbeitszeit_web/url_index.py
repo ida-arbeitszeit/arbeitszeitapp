@@ -3,6 +3,11 @@ from typing import Protocol
 from uuid import UUID
 
 
+class MemberUrlIndex(Protocol):
+    def get_member_profile_url(self) -> str:
+        ...
+
+
 class AnswerCompanyWorkInviteUrlIndex(Protocol):
     def get_answer_company_work_invite_url(self, invite_id: UUID) -> str:
         ...
