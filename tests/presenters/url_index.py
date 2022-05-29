@@ -2,6 +2,11 @@ from decimal import Decimal
 from uuid import UUID
 
 
+class MemberUrlIndex:
+    def get_member_profile_url(self) -> str:
+        return "member profile url"
+
+
 class ListMessageUrlIndexTestImpl:
     def get_list_messages_url(self) -> str:
         return "list messages"

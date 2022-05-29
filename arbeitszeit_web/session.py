@@ -14,3 +14,6 @@ class Session(Protocol):
 
     def login_accountant(self, email: str, remember: bool = ...) -> None:
         ...
+
+    def pop_next_url(self) -> Optional[str]:
+        ...

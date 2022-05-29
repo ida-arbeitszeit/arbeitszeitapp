@@ -239,6 +239,7 @@ class MemberRepository(interfaces.MemberRepository):
     @inject
     def __init__(self, datetime_service: DatetimeService):
         self.members: Dict[UUID, Member] = {}
+        self.passwords: Dict[UUID, str] = {}
         self.datetime_service = datetime_service
 
     def create_member(
@@ -259,13 +260,17 @@ class MemberRepository(interfaces.MemberRepository):
             confirmed_on=None,
         )
         self.members[id] = member
+        self.passwords[id] = password
         return member
 
+    def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
+        if member := self._get_member_by_email(email):
+            if self.passwords[member.id] == password:
+                return member.id
+        return None
+
     def has_member_with_email(self, email: str) -> bool:
-        for member in self.members.values():
-            if member.email == email:
-                return True
-        return False
+        return bool(self._get_member_by_email(email))
 
     def count_registered_members(self) -> int:
         return len(self.members)
@@ -275,6 +280,12 @@ class MemberRepository(interfaces.MemberRepository):
 
     def get_all_members(self) -> Iterator[Member]:
         yield from self.members.values()
+
+    def _get_member_by_email(self, email: str) -> Optional[Member]:
+        for member in self.members.values():
+            if member.email == email:
+                return member
+        return None
 
 
 @singleton

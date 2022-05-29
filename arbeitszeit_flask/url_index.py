@@ -11,6 +11,9 @@ class GeneralUrlIndex:
     def get_accountant_dashboard_url(self) -> str:
         return url_for("main_accountant.dashboard")
 
+    def get_member_profile_url(self) -> str:
+        return url_for("main_member.profile")
+
 
 class MemberUrlIndex:
     def get_plan_summary_url(self, plan_id: UUID) -> str:

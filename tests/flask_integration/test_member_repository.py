@@ -6,6 +6,7 @@ from arbeitszeit_flask.database.repositories import AccountRepository, MemberRep
 from tests.data_generators import MemberGenerator
 
 from .dependency_injection import injection_test
+from .flask import FlaskTestCase
 
 
 @injection_test
@@ -92,3 +93,86 @@ def test_that_number_of_returned_members_is_equal_to_number_of_created_members(
         member_generator.create_member()
     member_count = len(list(repository.get_all_members()))
     assert member_count == expected_number_of_members
+
+
+class ValidateCredentialTests(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.repository = self.injector.get(MemberRepository)
+        self.account_repository = self.injector.get(AccountRepository)
+        self.account = self.account_repository.create_account(
+            account_type=AccountTypes.member
+        )
+        self.timestamp = datetime(2000, 1, 1)
+
+    def test_correct_email_and_password_can_be_validated(self) -> None:
+        expected_email = "test@test.test"
+        password = "test password"
+        self.repository.create_member(
+            email=expected_email,
+            name="test",
+            password=password,
+            account=self.account,
+            registered_on=self.timestamp,
+        )
+        self.assertTrue(
+            self.repository.validate_credentials(
+                email=expected_email, password=password
+            )
+        )
+
+    def test_correct_member_id_is_returned(self) -> None:
+        expected_email = "test@test.test"
+        password = "test password"
+        member = self.repository.create_member(
+            email=expected_email,
+            name="test",
+            password=password,
+            account=self.account,
+            registered_on=self.timestamp,
+        )
+        self.assertEqual(
+            self.repository.validate_credentials(
+                email=expected_email, password=password
+            ),
+            member.id,
+        )
+
+    def test_cannot_validate_with_wrong_password(self) -> None:
+        expected_email = "test@test.test"
+        self.repository.create_member(
+            email=expected_email,
+            name="test",
+            password="test password",
+            account=self.account,
+            registered_on=self.timestamp,
+        )
+        self.assertFalse(
+            self.repository.validate_credentials(
+                email=expected_email,
+                password="other password",
+            )
+        )
+
+    def test_cannot_validate_with_wrong_email(self) -> None:
+        password = "test password"
+        self.repository.create_member(
+            email="test@test.test",
+            name="test",
+            password=password,
+            account=self.account,
+            registered_on=self.timestamp,
+        )
+        self.assertFalse(
+            self.repository.validate_credentials(
+                email="other@email.test",
+                password=password,
+            )
+        )
+
+    def test_that_validation_fails_with_no_members_in_db(self) -> None:
+        self.assertFalse(
+            self.repository.validate_credentials(
+                email="test@test.test", password="test"
+            )
+        )

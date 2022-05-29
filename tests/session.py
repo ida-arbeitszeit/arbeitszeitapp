@@ -16,11 +16,13 @@ class FakeSession:
     class LoginAttempt:
         user_role: FakeSession.UserRole
         email: str
+        is_remember: bool
 
     def __init__(self) -> None:
         self._current_user_id: Optional[UUID] = None
         self._is_logged_in = False
         self._recent_logins: List[FakeSession.LoginAttempt] = []
+        self._next_url: Optional[str] = None
 
     def is_logged_in(self) -> bool:
         return self._is_logged_in
@@ -36,6 +38,7 @@ class FakeSession:
             self.LoginAttempt(
                 user_role=self.UserRole.member,
                 email=email,
+                is_remember=remember,
             )
         )
         self._is_logged_in = True
@@ -45,6 +48,7 @@ class FakeSession:
             self.LoginAttempt(
                 user_role=self.UserRole.company,
                 email=email,
+                is_remember=remember,
             )
         )
         self._is_logged_in = True
@@ -54,6 +58,7 @@ class FakeSession:
             self.LoginAttempt(
                 user_role=self.UserRole.accountant,
                 email=email,
+                is_remember=remember,
             )
         )
         self._is_logged_in = True
@@ -63,6 +68,14 @@ class FakeSession:
             return None
         else:
             return self._recent_logins[-1]
+
+    def set_next_url(self, url: Optional[str]) -> None:
+        self._next_url = url
+
+    def pop_next_url(self) -> Optional[str]:
+        next_url = self._next_url
+        self._next_url = None
+        return next_url
 
     def logout(self) -> None:
         self._is_logged_in = False

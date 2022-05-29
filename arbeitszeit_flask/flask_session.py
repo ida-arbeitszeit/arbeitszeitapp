@@ -48,3 +48,6 @@ class FlaskSession:
     def logout(self) -> None:
         session["user_type"] = None
         logout_user()
+
+    def pop_next_url(self) -> Optional[str]:
+        return session.pop("next", None)

@@ -28,6 +28,7 @@ from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
 from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
 from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
 from arbeitszeit.use_cases.list_workers import ListWorkers
+from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProduction
 from arbeitszeit.use_cases.register_company.company_registration_message_presenter import (
     CompanyRegistrationMessagePresenter,
@@ -151,6 +152,7 @@ from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationP
 from arbeitszeit_web.presenters.get_latest_activated_plans_presenter import (
     GetLatestActivatedPlansPresenter,
 )
+from arbeitszeit_web.presenters.log_in_member_presenter import LogInMemberPresenter
 from arbeitszeit_web.presenters.register_accountant_presenter import (
     RegisterAccountantPresenter,
 )
@@ -1002,6 +1004,14 @@ class FlaskModule(Module):
         return ShowMyAccounts(company_repository, account_repository)
 
     @provider
+    def provide_log_in_member_use_case(
+        self, member_repository: MemberRepository
+    ) -> LogInMemberUseCase:
+        return LogInMemberUseCase(
+            member_repository=member_repository,
+        )
+
+    @provider
     def provide_get_latest_activated_plans_presenter(
         self, url_index: PlanSummaryUrlIndex, datetime_service: DatetimeService
     ) -> GetLatestActivatedPlansPresenter:
@@ -1016,6 +1026,19 @@ class FlaskModule(Module):
         return SeekPlanApprovalPresenter(
             notifier=notifier,
             translator=translator,
+        )
+
+    @provider
+    def provide_log_in_member_presenter(
+        self,
+        session: Session,
+        translator: Translator,
+        member_url_index: GeneralUrlIndex,
+    ) -> LogInMemberPresenter:
+        return LogInMemberPresenter(
+            session=session,
+            translator=translator,
+            member_url_index=member_url_index,
         )
 
     def configure(self, binder: Binder) -> None:

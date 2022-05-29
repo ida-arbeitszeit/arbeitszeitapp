@@ -14,6 +14,7 @@ from flask_login import current_user, login_required
 from werkzeug.security import check_password_hash
 
 from arbeitszeit.use_cases import ResendConfirmationMail, ResendConfirmationMailRequest
+from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit_flask import database
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.dependency_injection import (
@@ -31,6 +32,7 @@ from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.views.signup_accountant_view import SignupAccountantView
 from arbeitszeit_flask.views.signup_company_view import SignupCompanyView
 from arbeitszeit_flask.views.signup_member_view import SignupMemberView
+from arbeitszeit_web.presenters.log_in_member_presenter import LogInMemberPresenter
 
 auth = Blueprint("auth", __name__, template_folder="templates", static_folder="static")
 
@@ -94,24 +96,26 @@ def confirm_email_member(token):
 @auth.route("/member/login", methods=["GET", "POST"])
 @with_injection()
 @commit_changes
-def login_member(flask_session: FlaskSession):
+def login_member(
+    flask_session: FlaskSession,
+    presenter: LogInMemberPresenter,
+    use_case: LogInMemberUseCase,
+):
     login_form = LoginForm(request.form)
     if request.method == "POST" and login_form.validate():
         email = login_form.data["email"]
         password = login_form.data["password"]
-        remember = True if login_form.data["remember"] else False
-
-        member = database.get_user_by_mail(email)
-        if not member:
-            login_form.email.errors.append(
-                "Emailadresse nicht korrekt. Bist du schon registriert?"
+        response = use_case.log_in_member(
+            LogInMemberUseCase.Request(
+                email=email,
+                password=password,
             )
-        elif not check_password_hash(member.password, password):
-            login_form.password.errors.append("Passwort nicht korrekt")
+        )
+        view_model = presenter.present_login_process(response, login_form)
+        if view_model.redirect_url:
+            return redirect(view_model.redirect_url)
         else:
-            flask_session.login_member(email, remember=remember)
-            next = get_next_url_from_session()
-            return redirect(next or url_for("main_member.profile"))
+            render_template("auth/login_member.html", form=login_form)
 
     if current_user.is_authenticated:
         if flask_session.is_logged_in_as_member():

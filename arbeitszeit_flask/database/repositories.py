@@ -88,6 +88,16 @@ class MemberRepository(repositories.MemberRepository):
             return None
         return self.object_from_orm(orm_object)
 
+    def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
+        if (
+            member := self.db.session.query(Member)
+            .filter(Member.email == email)
+            .first()
+        ):
+            if check_password_hash(member.password, password):
+                return UUID(member.id)
+        return None
+
     def get_member_orm_by_mail(self, email: str) -> Member:
         member_orm = Member.query.filter_by(email=email).first()
         assert member_orm
