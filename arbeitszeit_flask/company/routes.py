@@ -48,7 +48,6 @@ from arbeitszeit_flask.views import (
     ListMessagesView,
     QueryCompaniesView,
     QueryPlansView,
-    ReadMessageView,
     RequestCooperationView,
 )
 from arbeitszeit_flask.views.create_cooperation_view import CreateCooperationView
@@ -562,15 +561,6 @@ def invite_worker_to_company(
         return view.respond_to_post(form)
     else:
         return view.respond_to_get(form)
-
-
-@CompanyRoute("/company/messages/<uuid:message_id>")
-@commit_changes
-def read_message(
-    message_id: UUID,
-    view: ReadMessageView,
-) -> Response:
-    return view.respond_to_get(message_id)
 
 
 @CompanyRoute("/company/end_cooperation")

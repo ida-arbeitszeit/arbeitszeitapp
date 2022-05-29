@@ -22,7 +22,7 @@ from arbeitszeit.use_cases import (
     CheckForUnreadMessages,
     EndCooperation,
     GetCompanySummary,
-    ReadMessage,
+    ReadWorkerInviteMessage,
 )
 from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
 from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
@@ -51,13 +51,13 @@ from arbeitszeit_flask.database.repositories import (
     CompanyWorkerRepository,
     CooperationRepository,
     MemberRepository,
-    MessageRepository,
     PlanCooperationRepository,
     PlanDraftRepository,
     PlanRepository,
     PurchaseRepository,
     TransactionRepository,
     UserAddressBookImpl,
+    WorkerInviteMessageRepository,
     WorkerInviteRepository,
 )
 from arbeitszeit_flask.datetime import RealtimeDatetimeService
@@ -90,7 +90,11 @@ from arbeitszeit_flask.url_index import (
     GeneralUrlIndex,
     MemberUrlIndex,
 )
-from arbeitszeit_flask.views import EndCooperationView, Http404View, ReadMessageView
+from arbeitszeit_flask.views import (
+    EndCooperationView,
+    Http404View,
+    ReadWorkerInviteMessageView,
+)
 from arbeitszeit_flask.views.create_draft_view import CreateDraftView
 from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
 from arbeitszeit_flask.views.transfer_to_worker_view import TransferToWorkerView
@@ -186,7 +190,10 @@ from arbeitszeit_web.presenters.show_r_account_details_presenter import (
 )
 from arbeitszeit_web.query_companies import QueryCompaniesPresenter
 from arbeitszeit_web.query_plans import QueryPlansPresenter
-from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
+from arbeitszeit_web.read_worker_invite_message import (
+    ReadWorkerInviteMessageController,
+    ReadWorkerInviteMessagePresenter,
+)
 from arbeitszeit_web.request_cooperation import (
     RequestCooperationController,
     RequestCooperationPresenter,
@@ -202,16 +209,14 @@ from arbeitszeit_web.url_index import (
     CoopSummaryUrlIndex,
     EndCoopUrlIndex,
     HidePlanUrlIndex,
-    InviteUrlIndex,
     ListMessagesUrlIndex,
-    MessageUrlIndex,
     PlanSummaryUrlIndex,
     PlotsUrlIndex,
     RenewPlanUrlIndex,
     RequestCoopUrlIndex,
     TogglePlanAvailabilityUrlIndex,
+    WorkInviteMessageUrlIndex,
 )
-from arbeitszeit_web.user_action import UserActionResolver, UserActionResolverImpl
 
 from .views import ViewsModule
 
@@ -252,12 +257,6 @@ class MemberModule(Module):
         return member_index
 
     @provider
-    def provide_message_url_index(
-        self, member_index: MemberUrlIndex
-    ) -> MessageUrlIndex:
-        return member_index
-
-    @provider
     def provide_request_coop_url_index(
         self, member_index: MemberUrlIndex
     ) -> RequestCoopUrlIndex:
@@ -280,13 +279,15 @@ class MemberModule(Module):
         return MemberTemplateIndex()
 
     @provider
-    def provide_invite_url_index(self, index: MemberUrlIndex) -> InviteUrlIndex:
-        return index
-
-    @provider
     def provide_answer_company_work_invite_url_index(
         self, url_index: MemberUrlIndex
     ) -> AnswerCompanyWorkInviteUrlIndex:
+        return url_index
+
+    @provider
+    def provide_work_invite_message_url_index(
+        self, url_index: MemberUrlIndex
+    ) -> WorkInviteMessageUrlIndex:
         return url_index
 
 
@@ -313,12 +314,6 @@ class CompanyModule(Module):
     def provide_coop_summary_url_index(
         self, company_index: CompanyUrlIndex
     ) -> CoopSummaryUrlIndex:
-        return company_index
-
-    @provider
-    def provide_message_url_index(
-        self, company_index: CompanyUrlIndex
-    ) -> MessageUrlIndex:
         return company_index
 
     @provider
@@ -449,10 +444,6 @@ class CompanyModule(Module):
         )
 
     @provider
-    def provide_invite_url_index(self, index: CompanyUrlIndex) -> InviteUrlIndex:
-        return index
-
-    @provider
     def provide_answer_company_work_invite_url_index(
         self, url_index: CompanyUrlIndex
     ) -> AnswerCompanyWorkInviteUrlIndex:
@@ -544,6 +535,12 @@ class CompanyModule(Module):
         self, translator: Translator
     ) -> GetCompanyTransactionsPresenter:
         return GetCompanyTransactionsPresenter(translator=translator)
+
+    @provider
+    def provide_work_invite_message_url_index(
+        self, url_index: CompanyUrlIndex
+    ) -> WorkInviteMessageUrlIndex:
+        return url_index
 
 
 class FlaskModule(Module):
@@ -741,21 +738,19 @@ class FlaskModule(Module):
         return FlaskTokenDeliverer(mail_service=mail_service, presenter=presenter)
 
     @provider
-    def provide_read_message_view(
+    def provide_read_worker_invite_message_view(
         self,
-        read_message: ReadMessage,
-        controller: ReadMessageController,
-        presenter: ReadMessagePresenter,
+        read_message: ReadWorkerInviteMessage,
+        controller: ReadWorkerInviteMessageController,
+        presenter: ReadWorkerInviteMessagePresenter,
         template_renderer: TemplateRenderer,
-        template_index: TemplateIndex,
         http_404_view: Http404View,
-    ) -> ReadMessageView:
-        return ReadMessageView(
+    ) -> ReadWorkerInviteMessageView:
+        return ReadWorkerInviteMessageView(
             read_message,
             controller,
             presenter,
             template_renderer,
-            template_index,
             http_404_view,
         )
 
@@ -822,9 +817,12 @@ class FlaskModule(Module):
 
     @provider
     def provide_list_messages_presenter(
-        self, message_index: MessageUrlIndex
+        self,
+        message_index: WorkInviteMessageUrlIndex,
+        datetime_service: DatetimeService,
+        translator: Translator,
     ) -> ListMessagesPresenter:
-        return ListMessagesPresenter(message_index)
+        return ListMessagesPresenter(message_index, datetime_service, translator)
 
     @provider
     def provide_query_plans_presenter(
@@ -838,15 +836,6 @@ class FlaskModule(Module):
         return QueryPlansPresenter(
             plan_index, company_index, coop_index, notifier, trans
         )
-
-    @provider
-    def provide_user_action_resolver(
-        self,
-        invite_index: InviteUrlIndex,
-        coop_index: CoopSummaryUrlIndex,
-        translator: Translator,
-    ) -> UserActionResolver:
-        return UserActionResolverImpl(invite_index, coop_index, translator)
 
     @provider
     def provide_get_plan_summary_success_presenter(
@@ -951,18 +940,18 @@ class FlaskModule(Module):
     @provider
     def provide_read_message_controller(
         self, session: Session
-    ) -> ReadMessageController:
-        return ReadMessageController(session)
+    ) -> ReadWorkerInviteMessageController:
+        return ReadWorkerInviteMessageController(session)
 
     @provider
     def provide_session(self, flask_session: FlaskSession) -> Session:
         return flask_session
 
     @provider
-    def provide_read_message_presenter(
-        self, user_action_resolver: UserActionResolver
-    ) -> ReadMessagePresenter:
-        return ReadMessagePresenter(user_action_resolver)
+    def provide_read_worker_invite_message_presenter(
+        self,
+    ) -> ReadWorkerInviteMessagePresenter:
+        return ReadWorkerInviteMessagePresenter()
 
     @provider
     def provide_notifier(self) -> Notifier:
@@ -1070,16 +1059,16 @@ class FlaskModule(Module):
             to=InstanceProvider(db),
         )
         binder.bind(
-            interfaces.MessageRepository,  # type: ignore
-            to=ClassProvider(MessageRepository),
-        )
-        binder.bind(
             interfaces.CooperationRepository,  # type: ignore
             to=ClassProvider(CooperationRepository),
         )
         binder.bind(
             interfaces.PlanCooperationRepository,  # type: ignore
             to=ClassProvider(PlanCooperationRepository),
+        )
+        binder.bind(
+            interfaces.WorkerInviteMessageRepository,  # type: ignore
+            to=ClassProvider(WorkerInviteMessageRepository),
         )
         binder.bind(TokenService, to=ClassProvider(FlaskTokenService))  # type: ignore
         binder.bind(UserAddressBook, to=ClassProvider(inject(UserAddressBookImpl)))  # type: ignore

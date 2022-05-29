@@ -14,7 +14,6 @@ from arbeitszeit_web.answer_company_work_invite import (
     AnswerCompanyWorkInviteController,
     AnswerCompanyWorkInviteForm,
     AnswerCompanyWorkInvitePresenter,
-    AnswerCompanyWorkInviteRequest,
 )
 from arbeitszeit_web.controllers.show_company_work_invite_details_controller import (
     ShowCompanyWorkInviteDetailsController,
@@ -65,7 +64,7 @@ class CompanyWorkInviteView:
         use_case_request = self.answer_controller.import_form_data(
             form=form, invite_id=invite_id
         )
-        assert isinstance(use_case_request, AnswerCompanyWorkInviteRequest)
+        assert isinstance(use_case_request, AnswerCompanyWorkInvite.Request)
         use_case_response = self.answer_use_case(use_case_request)
         view_model = self.answer_presenter.present(use_case_response)
         return cast(Response, redirect(view_model.redirect_url))

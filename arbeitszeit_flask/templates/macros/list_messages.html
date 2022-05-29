@@ -3,9 +3,10 @@
 <div class="section is-medium has-text-centered">
   <h1 class="title">{{ gettext("Messages") }}</h1>
   <ul>
-    {% for message in view_model.messages %}
+    {% for message in view_model.worker_invite_messages %}
     <li {% if message.show_unread_message_indicator %}class="unread-message" {% endif %}>
-      <a href="{{message.message_url}}">"{{ message.title }}"</a> from {{ message.sender_name }}
+      {{ message.creation_date }} // {{ message.title }} // <a href="{{ message.url }}">OPEN
+        MESSAGE</a>
     </li>
     {% else %}
     {{ gettext("No messages received.") }}

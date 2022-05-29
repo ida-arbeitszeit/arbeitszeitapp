@@ -21,7 +21,7 @@ from arbeitszeit_flask.views import (
     PayConsumerProductView,
     QueryCompaniesView,
     QueryPlansView,
-    ReadMessageView,
+    ReadWorkerInviteMessageView,
 )
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
@@ -258,12 +258,12 @@ def list_messages(
     return view.respond_to_get()
 
 
-@MemberRoute("/member/messages/<uuid:message_id>")
+@MemberRoute("/member/worker_invite_messages/<uuid:message_id>")
 @commit_changes
-def read_message(
+def read_worker_invite_message(
     message_id: UUID,
-    view: ReadMessageView,
-) -> Response:
+    view: ReadWorkerInviteMessageView,
+):
     return view.respond_to_get(message_id)
 
 

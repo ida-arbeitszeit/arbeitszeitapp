@@ -1,7 +1,7 @@
 from typing import Optional
 from unittest import TestCase
 
-from arbeitszeit.use_cases import AnswerCompanyWorkInviteResponse
+from arbeitszeit.use_cases import AnswerCompanyWorkInvite
 from arbeitszeit_web.answer_company_work_invite import AnswerCompanyWorkInvitePresenter
 from tests.translator import FakeTranslator
 
@@ -16,8 +16,8 @@ def get_response(
     is_success: Optional[bool] = None,
     is_accepted: Optional[bool] = None,
     company_name: Optional[str] = None,
-) -> AnswerCompanyWorkInviteResponse:
-    failure_reason: Optional[AnswerCompanyWorkInviteResponse.Failure] = None
+) -> AnswerCompanyWorkInvite.Response:
+    failure_reason: Optional[AnswerCompanyWorkInvite.Response.Failure] = None
     if is_success is None:
         is_success = True
     if is_accepted is None:
@@ -26,8 +26,8 @@ def get_response(
         if is_success:
             company_name = COMPANY_NAME
     if not is_success:
-        failure_reason = AnswerCompanyWorkInviteResponse.Failure.invite_not_found
-    return AnswerCompanyWorkInviteResponse(
+        failure_reason = AnswerCompanyWorkInvite.Response.Failure.invite_not_found
+    return AnswerCompanyWorkInvite.Response(
         is_success=is_success,
         is_accepted=is_accepted,
         company_name=company_name,

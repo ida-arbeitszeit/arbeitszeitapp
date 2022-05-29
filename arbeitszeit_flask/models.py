@@ -1,14 +1,9 @@
-"""
-Definition of database tables.
-"""
-
 import uuid
 from enum import Enum
 
 from flask_login import UserMixin
 
 from arbeitszeit import entities
-from arbeitszeit.user_action import UserActionType
 from arbeitszeit_flask.extensions import db
 
 
@@ -188,23 +183,6 @@ class CompanyWorkInvite(db.Model):
     member = db.Column(db.String, db.ForeignKey("member.id"), nullable=False)
 
 
-class Message(db.Model):
-    id = db.Column(db.String, primary_key=True, default=generate_uuid)
-    sender = db.Column(db.String)
-    addressee = db.Column(db.String)
-    title = db.Column(db.String)
-    content = db.Column(db.String)
-    sender_remarks = db.Column(db.String, nullable=True)
-    is_read = db.Column(db.Boolean)
-    user_action = db.Column(db.String, db.ForeignKey("user_action.id"), nullable=True)
-
-
-class UserAction(db.Model):
-    id = db.Column(db.String, primary_key=True, default=generate_uuid)
-    reference = db.Column(db.String)
-    action_type = db.Column(db.Enum(UserActionType))
-
-
 class Cooperation(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
     creation_date = db.Column(db.DateTime, nullable=False)
@@ -215,3 +193,14 @@ class Cooperation(db.Model):
     plans = db.relationship(
         "Plan", foreign_keys="Plan.cooperation", lazy="dynamic", backref="coop"
     )
+
+
+class WorkerInviteMessage(UserMixin, db.Model):
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
+    invite_id = db.Column(
+        db.String, db.ForeignKey("company_work_invite.id"), nullable=False
+    )
+    company = db.Column(db.String, db.ForeignKey("company.id"), nullable=False)
+    worker = db.Column(db.String, db.ForeignKey("member.id"), nullable=False)
+    is_read = db.Column(db.Boolean)
+    creation_date = db.Column(db.DateTime, nullable=False)

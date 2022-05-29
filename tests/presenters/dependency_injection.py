@@ -59,11 +59,10 @@ from arbeitszeit_web.presenters.show_r_account_details_presenter import (
 )
 from arbeitszeit_web.query_companies import QueryCompaniesPresenter
 from arbeitszeit_web.query_plans import QueryPlansPresenter
-from arbeitszeit_web.read_message import ReadMessagePresenter
+from arbeitszeit_web.read_worker_invite_message import ReadWorkerInviteMessagePresenter
 from arbeitszeit_web.request_cooperation import RequestCooperationPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from arbeitszeit_web.url_index import ListMessagesUrlIndex
-from arbeitszeit_web.user_action import UserActionResolverImpl
 from tests.datetime_service import FakeDatetimeService
 from tests.dependency_injection import TestingModule
 from tests.email import (
@@ -90,16 +89,14 @@ from .url_index import (
     CoopSummaryUrlIndexTestImpl,
     EndCoopUrlIndexTestImpl,
     HidePlanUrlIndex,
-    InviteUrlIndexImpl,
     ListMessageUrlIndexTestImpl,
-    MessageUrlIndex,
     PlanSummaryUrlIndexTestImpl,
     PlotsUrlIndexImpl,
     RenewPlanUrlIndex,
     RequestCoopUrlIndexTestImpl,
     TogglePlanAvailabilityUrlIndex,
+    WorkInviteMessageUrlIndexImpl,
 )
-from .user_action_resolver import UserActionResolver
 
 
 class PresenterTestsInjector(Module):
@@ -279,9 +276,16 @@ class PresenterTestsInjector(Module):
 
     @provider
     def provide_list_messages_presenter(
-        self, messages_url_index: MessageUrlIndex
+        self,
+        messages_url_index: WorkInviteMessageUrlIndexImpl,
+        datetime_service: FakeDatetimeService,
+        translator: FakeTranslator,
     ) -> ListMessagesPresenter:
-        return ListMessagesPresenter(url_index=messages_url_index)
+        return ListMessagesPresenter(
+            url_index=messages_url_index,
+            datetime_service=datetime_service,
+            translator=translator,
+        )
 
     @provider
     def provide_pay_consumer_product_presenter(
@@ -345,12 +349,10 @@ class PresenterTestsInjector(Module):
         )
 
     @provider
-    def provide_read_message_presenter(
-        self, user_action_resolver: UserActionResolver
-    ) -> ReadMessagePresenter:
-        return ReadMessagePresenter(
-            action_link_resolver=user_action_resolver,
-        )
+    def provide_read_worker_invite_message_presenter(
+        self,
+    ) -> ReadWorkerInviteMessagePresenter:
+        return ReadWorkerInviteMessagePresenter()
 
     @provider
     def provide_send_work_certificates_to_worker_presenter(
@@ -433,19 +435,6 @@ class PresenterTestsInjector(Module):
     ) -> ShowAAccountDetailsPresenter:
         return ShowAAccountDetailsPresenter(
             trans=translator, url_index=url_index, datetime_service=datetime_service
-        )
-
-    @provider
-    def provide_user_action_resolver_impl(
-        self,
-        invite_url_index: InviteUrlIndexImpl,
-        coop_url_index: CoopSummaryUrlIndexTestImpl,
-        translator: FakeTranslator,
-    ) -> UserActionResolverImpl:
-        return UserActionResolverImpl(
-            invite_url_index=invite_url_index,
-            coop_url_index=coop_url_index,
-            translator=translator,
         )
 
     @provider

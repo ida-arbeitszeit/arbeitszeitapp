@@ -5,7 +5,7 @@ from typing import Any, Callable, cast
 from unittest import TestCase
 from uuid import uuid4
 
-from arbeitszeit.use_cases import AnswerCompanyWorkInviteRequest
+from arbeitszeit.use_cases import AnswerCompanyWorkInvite
 from arbeitszeit_web.answer_company_work_invite import AnswerCompanyWorkInviteController
 
 from ..session import FakeSession
@@ -22,10 +22,10 @@ class BaseTestCase(TestCase):
     def assertSuccess(
         self,
         candidate: Any,
-        condition: Callable[[AnswerCompanyWorkInviteRequest], bool],
+        condition: Callable[[AnswerCompanyWorkInvite.Request], bool],
     ) -> None:
-        self.assertIsInstance(candidate, AnswerCompanyWorkInviteRequest)
-        self.assertTrue(condition(cast(AnswerCompanyWorkInviteRequest, candidate)))
+        self.assertIsInstance(candidate, AnswerCompanyWorkInvite.Request)
+        self.assertTrue(condition(cast(AnswerCompanyWorkInvite.Request, candidate)))
 
 
 class AnonymousUserTests(BaseTestCase):

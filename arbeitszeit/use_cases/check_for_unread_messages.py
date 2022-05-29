@@ -1,36 +1,34 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from uuid import UUID
 
 from injector import inject
 
-from arbeitszeit.repositories import MemberRepository, MessageRepository
-
-
-@dataclass
-class CheckForUnreadMessagesRequest:
-    user: UUID
-
-
-@dataclass
-class CheckForUnreadMessagesResponse:
-    has_unread_messages: bool
+from arbeitszeit.repositories import MemberRepository, WorkerInviteMessageRepository
 
 
 @inject
 @dataclass
 class CheckForUnreadMessages:
-    member_repository: MemberRepository
-    message_repository: MessageRepository
+    @dataclass
+    class Request:
+        user: UUID
 
-    def __call__(
-        self, request: CheckForUnreadMessagesRequest
-    ) -> CheckForUnreadMessagesResponse:
+    @dataclass
+    class Response:
+        has_unread_messages: bool
+
+    member_repository: MemberRepository
+    worker_invite_message_repository: WorkerInviteMessageRepository
+
+    def __call__(self, request: Request) -> Response:
         if self.member_repository.get_by_id(request.user) is None:
-            return CheckForUnreadMessagesResponse(has_unread_messages=False)
+            return self.Response(has_unread_messages=False)
         else:
-            has_unread_messages = self.message_repository.has_unread_messages_for_user(
-                request.user
+            has_unread_messages = (
+                self.worker_invite_message_repository.has_unread_messages_for_user(
+                    request.user
+                )
             )
-            return CheckForUnreadMessagesResponse(
-                has_unread_messages=has_unread_messages
-            )
+            return self.Response(has_unread_messages=has_unread_messages)

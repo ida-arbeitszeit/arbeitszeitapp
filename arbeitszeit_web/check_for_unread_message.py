@@ -1,9 +1,6 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases import (
-    CheckForUnreadMessagesRequest,
-    CheckForUnreadMessagesResponse,
-)
+from arbeitszeit.use_cases import CheckForUnreadMessages
 
 from .session import Session
 
@@ -14,7 +11,7 @@ class ViewModel:
 
 
 class CheckForUnreadMessagesPresenter:
-    def present(self, response: CheckForUnreadMessagesResponse) -> ViewModel:
+    def present(self, response: CheckForUnreadMessages.Response) -> ViewModel:
         return ViewModel(show_unread_messages_indicator=response.has_unread_messages)
 
     def anonymous_view_model(self) -> ViewModel:
@@ -25,8 +22,8 @@ class CheckForUnreadMessagesPresenter:
 class CheckForUnreadMessagesController:
     session: Session
 
-    def create_use_case_request(self) -> CheckForUnreadMessagesRequest:
+    def create_use_case_request(self) -> CheckForUnreadMessages.Request:
         user_id = self.session.get_current_user()
         if user_id is None:
             raise ValueError("User is not authenticated")
-        return CheckForUnreadMessagesRequest(user=user_id)
+        return CheckForUnreadMessages.Request(user=user_id)

@@ -19,7 +19,6 @@ from arbeitszeit.entities import (
     Company,
     Cooperation,
     Member,
-    Message,
     Plan,
     PlanDraft,
     ProductionCosts,
@@ -27,18 +26,19 @@ from arbeitszeit.entities import (
     PurposesOfPurchases,
     SocialAccounting,
     Transaction,
+    WorkerInviteMessage,
 )
 from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
     CooperationRepository,
     MemberRepository,
-    MessageRepository,
     PlanCooperationRepository,
     PlanDraftRepository,
     PlanRepository,
     PurchaseRepository,
     TransactionRepository,
+    WorkerInviteMessageRepository,
 )
 from arbeitszeit.use_cases import (
     AcceptCooperation,
@@ -377,29 +377,28 @@ class CooperationGenerator:
 
 @inject
 @dataclass
-class MessageGenerator:
-    message_repository: MessageRepository
+class WorkerInviteMessageGenerator:
+    worker_invite_message_repository: WorkerInviteMessageRepository
     company_generator: CompanyGenerator
+    member_generator: MemberGenerator
 
     def create_message(
         self,
-        *,
-        sender: Union[None, SocialAccounting, Member, Company] = None,
-        addressee: Union[None, Member, Company],
-        title: str = "test title",
-        content: str = "test message content",
-    ) -> Message:
-        if addressee is None:
-            addressee = self.company_generator.create_company()
-        if sender is None:
-            sender = self.company_generator.create_company()
-        return self.message_repository.create_message(
-            sender=sender,
-            addressee=addressee,
-            title=title,
-            content=content,
-            sender_remarks=None,
-            reference=None,
+        invite_id: UUID = None,
+        company: Company = None,
+        worker: Member = None,
+        creation_date: datetime = None,
+    ) -> WorkerInviteMessage:
+        if invite_id is None:
+            invite_id = uuid4()
+        if company is None:
+            company = self.company_generator.create_company()
+        if worker is None:
+            worker = self.member_generator.create_member()
+        if creation_date is None:
+            creation_date = datetime.now()
+        return self.worker_invite_message_repository.create_message(
+            invite_id, company, worker, creation_date
         )
 
 

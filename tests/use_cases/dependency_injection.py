@@ -94,12 +94,7 @@ class InMemoryModule(Module):
         return repo
 
     @provider
-    def provide_message_repo(
-        self, repo: repositories.MessageRepository
-    ) -> interfaces.MessageRepository:
-        return repo
-
-    @provider
+    @singleton
     def provide_company_worker_repo(
         self, repo: repositories.CompanyWorkerRepository
     ) -> interfaces.CompanyWorkerRepository:
@@ -166,6 +161,13 @@ class InMemoryModule(Module):
     def provide_plan_cooperation_repository(
         self, repo: repositories.PlanCooperationRepository
     ) -> interfaces.PlanCooperationRepository:
+        return repo
+
+    @provider
+    @singleton
+    def provide_worker_invite_message_repository(
+        self, repo: repositories.WorkerInviteMessageRepository
+    ) -> interfaces.WorkerInviteMessageRepository:
         return repo
 
     @provider

@@ -2,13 +2,12 @@ from typing import Optional
 from unittest import TestCase
 from uuid import UUID, uuid4
 
-from arbeitszeit.repositories import CompanyWorkerRepository, WorkerInviteRepository
-from arbeitszeit.use_cases import (
-    AnswerCompanyWorkInvite,
-    AnswerCompanyWorkInviteRequest,
-    AnswerCompanyWorkInviteResponse,
-    InviteWorkerToCompanyUseCase,
+from arbeitszeit.repositories import (
+    CompanyWorkerRepository,
+    WorkerInviteMessageRepository,
+    WorkerInviteRepository,
 )
+from arbeitszeit.use_cases import AnswerCompanyWorkInvite, InviteWorkerToCompanyUseCase
 from tests.data_generators import CompanyGenerator, MemberGenerator
 
 from .dependency_injection import get_dependency_injector
@@ -23,6 +22,7 @@ class AnwerCompanyWorkInviteTests(TestCase):
         self.company_generator = self.injector.get(CompanyGenerator)
         self.invite_repository = self.injector.get(WorkerInviteRepository)  # type: ignore
         self.company_worker_repository = self.injector.get(CompanyWorkerRepository)  # type: ignore
+        self.worker_invite_message_repository = self.injector.get(WorkerInviteMessageRepository)  # type: ignore
         self.company = self.company_generator.create_company()
         self.member = self.member_generator.create_member()
 
@@ -48,7 +48,7 @@ class AnwerCompanyWorkInviteTests(TestCase):
         )
         self.assertEqual(
             response.failure_reason,
-            AnswerCompanyWorkInviteResponse.Failure.invite_not_found,
+            AnswerCompanyWorkInvite.Response.Failure.invite_not_found,
         )
 
     def test_rejecting_existing_invite_is_successful(self) -> None:
@@ -171,7 +171,7 @@ class AnwerCompanyWorkInviteTests(TestCase):
         )
         self.assertEqual(
             response.failure_reason,
-            AnswerCompanyWorkInviteResponse.Failure.member_was_not_invited,
+            AnswerCompanyWorkInvite.Response.Failure.member_was_not_invited,
         )
 
     def test_successful_response_contains_name_of_inviting_company(self) -> None:
@@ -198,6 +198,44 @@ class AnwerCompanyWorkInviteTests(TestCase):
         )
         self.assertIsNone(response.company_name)
 
+    def test_invitation_message_gets_deleted_when_rejecting_an_invite(self) -> None:
+        invite_id = self._invite_worker()
+        self.assertTrue(self.worker_invite_message_repository.get_by_invite(invite_id))
+        self.answer_company_work_invite(
+            self._create_request(
+                is_accepted=False,
+                invite_id=invite_id,
+            )
+        )
+        self.assertFalse(self.worker_invite_message_repository.get_by_invite(invite_id))
+
+    def test_invitation_message_gets_deleted_when_accepting_an_invite(self) -> None:
+        invite_id = self._invite_worker()
+        self.assertTrue(self.worker_invite_message_repository.get_by_invite(invite_id))
+        self.answer_company_work_invite(
+            self._create_request(
+                is_accepted=True,
+                invite_id=invite_id,
+            )
+        )
+        self.assertFalse(self.worker_invite_message_repository.get_by_invite(invite_id))
+
+    def test_correct_failure_reason_gets_set_when_invite_message_does_not_exist(
+        self,
+    ) -> None:
+        invite_id = self._invite_worker()
+        invite_message = self.worker_invite_message_repository.get_by_invite(invite_id)
+        assert invite_message
+        self.worker_invite_message_repository.delete_message(invite_message.id)
+
+        response = self.answer_company_work_invite(
+            self._create_request(
+                is_accepted=True,
+                invite_id=invite_id,
+            )
+        )
+        self.assertEqual(response.failure_reason, response.Failure.message_not_found)
+
     def _invite_worker(self) -> UUID:
         invite_response = self.invite_worker_to_company(
             InviteWorkerToCompanyUseCase.Request(
@@ -211,10 +249,10 @@ class AnwerCompanyWorkInviteTests(TestCase):
 
     def _create_request(
         self, invite_id: UUID, is_accepted: bool, user: Optional[UUID] = None
-    ) -> AnswerCompanyWorkInviteRequest:
+    ) -> AnswerCompanyWorkInvite.Request:
         if user is None:
             user = self.member.id
-        return AnswerCompanyWorkInviteRequest(
+        return AnswerCompanyWorkInvite.Request(
             invite_id=invite_id,
             is_accepted=is_accepted,
             user=user,

@@ -1,21 +1,17 @@
-from typing import List, cast
+from datetime import datetime
+from typing import List
 from unittest import TestCase
-from uuid import UUID, uuid4
+from uuid import uuid4
 
-from arbeitszeit.repositories import MessageRepository
+from arbeitszeit.repositories import WorkerInviteMessageRepository
 from arbeitszeit.use_cases import (
     AnswerCompanyWorkInvite,
-    AnswerCompanyWorkInviteRequest,
     InviteWorkerToCompanyUseCase,
-    ListedMessage,
     ListMessages,
-    ListMessagesRequest,
-    ReadMessage,
-    ReadMessageRequest,
-    ReadMessageSuccess,
+    ReadWorkerInviteMessage,
 )
-from arbeitszeit.user_action import UserAction, UserActionType
 from tests.data_generators import CompanyGenerator, MemberGenerator
+from tests.datetime_service import FakeDatetimeService
 
 from .dependency_injection import get_dependency_injector
 
@@ -110,23 +106,19 @@ class InviteWorkerTests(TestCase):
         )
         self.assertIsNotNone(response.invite_id)
 
-    def test_after_being_invited_the_member_has_received_a_message_with_the_correct_title(
+    def test_after_being_invited_the_member_has_received_a_message(
         self,
     ) -> None:
-        message_repository: MessageRepository
+        message_repository: WorkerInviteMessageRepository
         self.invite_worker_to_company(
             InviteWorkerToCompanyUseCase.Request(
                 company=self.company.id,
                 worker=self.member.id,
             )
         )
-        message_repository = self.injector.get(MessageRepository)  # type: ignore
+        message_repository = self.injector.get(WorkerInviteMessageRepository)  # type: ignore
         messages = list(message_repository.get_messages_to_user(self.member.id))
         self.assertEqual(len(messages), 1)
-        message = messages[0]
-        self.assertEqual(
-            message.title, f"Company {self.company.name} invited you to join them"
-        )
 
 
 class WorkInviteMessageTests(TestCase):
@@ -136,10 +128,11 @@ class WorkInviteMessageTests(TestCase):
         self.company_generator = self.injector.get(CompanyGenerator)
         self.invite_worker_to_company = self.injector.get(InviteWorkerToCompanyUseCase)
         self.list_messages = self.injector.get(ListMessages)
-        self.read_message = self.injector.get(ReadMessage)
+        self.read_message = self.injector.get(ReadWorkerInviteMessage)
         self.answer_invite = self.injector.get(AnswerCompanyWorkInvite)
         self.member = self.member_generator.create_member()
         self.company = self.company_generator.create_company()
+        self.datetime_service = self.injector.get(FakeDatetimeService)
 
     def test_inviting_a_worker_sends_them_a_message(self) -> None:
         self.assertMemberMessageCount(0)
@@ -151,43 +144,12 @@ class WorkInviteMessageTests(TestCase):
         message = self.get_member_messages()[0]
         self.assertFalse(message.is_read)
 
-    def test_that_received_message_contains_a_user_action(self) -> None:
+    def test_message_received_has_current_timestamp(self) -> None:
+        frozen_time = datetime(2022, 5, 29)
+        self.datetime_service.freeze_time(frozen_time)
         self.invite_member()
-        message_details = self.read_invite_message()
-        self.assertIsNotNone(message_details.user_action)
-
-    def test_that_received_message_action_type_is_properly_set(self) -> None:
-        self.invite_member()
-        message_details = self.read_invite_message()
-        self.assertEqual(
-            cast(UserAction, message_details.user_action).type,
-            UserActionType.answer_invite,
-        )
-
-    def test_that_user_action_id_in_received_message_can_be_accepted(self) -> None:
-        self.invite_member()
-        message_details = self.read_invite_message()
-        invite_id = cast(UserAction, message_details.user_action).reference
-        self.assertCanAcceptInvite(invite_id)
-
-    def assertCanAcceptInvite(self, invite_id: UUID) -> None:
-        response = self.answer_invite(
-            AnswerCompanyWorkInviteRequest(
-                is_accepted=True, invite_id=invite_id, user=self.member.id
-            )
-        )
-        self.assertTrue(response.is_success)
-
-    def read_invite_message(self) -> ReadMessageSuccess:
         message = self.get_member_messages()[0]
-        message_details = self.read_message(
-            ReadMessageRequest(
-                reader_id=self.member.id,
-                message_id=message.message_id,
-            )
-        )
-        assert isinstance(message_details, ReadMessageSuccess)
-        return message_details
+        self.assertEqual(message.creation_date, frozen_time)
 
     def invite_member(self) -> None:
         self.invite_worker_to_company(
@@ -199,6 +161,6 @@ class WorkInviteMessageTests(TestCase):
     def assertMemberMessageCount(self, count: int) -> None:
         self.assertEqual(len(self.get_member_messages()), count)
 
-    def get_member_messages(self) -> List[ListedMessage]:
-        messages_response = self.list_messages(ListMessagesRequest(self.member.id))
-        return messages_response.messages
+    def get_member_messages(self) -> List[ListMessages.InviteMessage]:
+        messages_response = self.list_messages(ListMessages.Request(self.member.id))
+        return messages_response.worker_invite_messages

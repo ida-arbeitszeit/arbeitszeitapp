@@ -12,7 +12,6 @@ from arbeitszeit.entities import (
     CompanyWorkInvite,
     Cooperation,
     Member,
-    Message,
     Plan,
     PlanDraft,
     ProductionCosts,
@@ -20,8 +19,8 @@ from arbeitszeit.entities import (
     PurposesOfPurchases,
     SocialAccounting,
     Transaction,
+    WorkerInviteMessage,
 )
-from arbeitszeit.user_action import UserAction
 
 
 class CompanyWorkerRepository(ABC):
@@ -334,25 +333,23 @@ class WorkerInviteRepository(ABC):
         pass
 
 
-class MessageRepository(ABC):
+class WorkerInviteMessageRepository(ABC):
     @abstractmethod
     def create_message(
-        self,
-        sender: Union[Member, Company, SocialAccounting],
-        addressee: Union[Member, Company],
-        title: str,
-        content: str,
-        sender_remarks: Optional[str],
-        reference: Optional[UserAction],
-    ) -> Message:
+        self, invite_id: UUID, company: Company, worker: Member, creation_date: datetime
+    ) -> WorkerInviteMessage:
         pass
 
     @abstractmethod
-    def get_by_id(self, id: UUID) -> Optional[Message]:
+    def get_messages_to_user(self, user: UUID) -> Iterable[WorkerInviteMessage]:
         pass
 
     @abstractmethod
-    def mark_as_read(self, message: Message) -> None:
+    def get_by_id(self, id: UUID) -> Optional[WorkerInviteMessage]:
+        pass
+
+    @abstractmethod
+    def mark_as_read(self, message: WorkerInviteMessage) -> None:
         pass
 
     @abstractmethod
@@ -360,7 +357,11 @@ class MessageRepository(ABC):
         pass
 
     @abstractmethod
-    def get_messages_to_user(self, user: UUID) -> Iterable[Message]:
+    def get_by_invite(self, invite: UUID) -> Optional[WorkerInviteMessage]:
+        pass
+
+    @abstractmethod
+    def delete_message(self, id: UUID) -> None:
         pass
 
 

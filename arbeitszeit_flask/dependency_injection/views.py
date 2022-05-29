@@ -3,7 +3,7 @@ from injector import Module, provider
 from arbeitszeit.use_cases import (
     AnswerCompanyWorkInvite,
     InviteWorkerToCompanyUseCase,
-    ReadMessage,
+    ReadWorkerInviteMessage,
     ShowCompanyWorkInviteDetailsUseCase,
 )
 from arbeitszeit.use_cases.create_cooperation import CreateCooperation
@@ -24,7 +24,7 @@ from arbeitszeit_flask.views import (
     CompanyWorkInviteView,
     Http404View,
     InviteWorkerToCompanyView,
-    ReadMessageView,
+    ReadWorkerInviteMessageView,
 )
 from arbeitszeit_flask.views.accountant_invitation_email_view import (
     AccountantInvitationEmailViewImpl,
@@ -79,7 +79,10 @@ from arbeitszeit_web.presenters.show_company_work_invite_details_presenter impor
 from arbeitszeit_web.presenters.show_my_accounts_presenter import (
     ShowMyAccountsPresenter,
 )
-from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
+from arbeitszeit_web.read_worker_invite_message import (
+    ReadWorkerInviteMessageController,
+    ReadWorkerInviteMessagePresenter,
+)
 from arbeitszeit_web.register_company import RegisterCompanyController
 from arbeitszeit_web.register_member import RegisterMemberController
 
@@ -111,21 +114,19 @@ class ViewsModule(Module):
         )
 
     @provider
-    def provide_read_message_view(
+    def provide_read_worker_invite_message_view(
         self,
-        read_message: ReadMessage,
-        controller: ReadMessageController,
-        presenter: ReadMessagePresenter,
+        read_message: ReadWorkerInviteMessage,
+        controller: ReadWorkerInviteMessageController,
+        presenter: ReadWorkerInviteMessagePresenter,
         template_renderer: TemplateRenderer,
-        template_index: TemplateIndex,
         http_404_view: Http404View,
-    ) -> ReadMessageView:
-        return ReadMessageView(
+    ) -> ReadWorkerInviteMessageView:
+        return ReadWorkerInviteMessageView(
             read_message,
             controller,
             presenter,
             template_renderer,
-            template_index,
             http_404_view,
         )
 

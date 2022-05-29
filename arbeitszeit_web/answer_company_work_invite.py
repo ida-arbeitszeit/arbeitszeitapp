@@ -2,10 +2,7 @@ from dataclasses import dataclass
 from typing import Protocol, Union
 from uuid import UUID
 
-from arbeitszeit.use_cases import (
-    AnswerCompanyWorkInviteRequest,
-    AnswerCompanyWorkInviteResponse,
-)
+from arbeitszeit.use_cases import AnswerCompanyWorkInvite
 
 from .malformed_input_data import MalformedInputData
 from .notification import Notifier
@@ -25,10 +22,10 @@ class AnswerCompanyWorkInviteController:
 
     def import_form_data(
         self, form: AnswerCompanyWorkInviteForm, invite_id: UUID
-    ) -> Union[None, MalformedInputData, AnswerCompanyWorkInviteRequest]:
+    ) -> Union[None, MalformedInputData, AnswerCompanyWorkInvite.Request]:
         requesting_user = self.session.get_current_user()
         if requesting_user is not None:
-            return AnswerCompanyWorkInviteRequest(
+            return AnswerCompanyWorkInvite.Request(
                 form.get_is_accepted_field(), invite_id, requesting_user
             )
         else:
@@ -45,7 +42,7 @@ class AnswerCompanyWorkInvitePresenter:
     url_index: ListMessagesUrlIndex
     translator: Translator
 
-    def present(self, response: AnswerCompanyWorkInviteResponse) -> ViewModel:
+    def present(self, response: AnswerCompanyWorkInvite.Response) -> ViewModel:
         if response.is_success:
             if response.is_accepted:
                 self.user_notifier.display_info(
