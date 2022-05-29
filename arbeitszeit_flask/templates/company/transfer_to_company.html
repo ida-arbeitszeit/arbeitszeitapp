@@ -19,11 +19,17 @@
                 <div class="field">
                     <div class="control">
                         {{ form.plan_id(class_="input") }}
+			{% for error in form.errors['plan_id'] %}
+			<div class="notification is-danger">{{ error }}</div>
+			{% endfor %}
                     </div>
                 </div>
                 <div class="field">
                     <div class="control">
                         {{ form.amount(class_="input") }}
+			{% for error in form.errors['amount'] %}
+			<div class="notification is-danger">{{ error }}</div>
+			{% endfor %}
                     </div>
                 </div>
                 <div class="field">

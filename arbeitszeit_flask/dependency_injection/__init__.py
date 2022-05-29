@@ -292,6 +292,14 @@ class MemberModule(Module):
 
 class CompanyModule(Module):
     @provider
+    def provide_pay_means_of_production_presenter(
+        self, notifier: Notifier, trans: Translator, company_url_index: CompanyUrlIndex
+    ) -> PayMeansOfProductionPresenter:
+        return PayMeansOfProductionPresenter(
+            notifier, trans, pay_means_of_production_url_index=company_url_index
+        )
+
+    @provider
     def provide_list_messages_url_index(
         self, company_index: CompanyUrlIndex
     ) -> ListMessagesUrlIndex:
@@ -788,12 +796,6 @@ class FlaskModule(Module):
             company_url_index=company_url_index,
             translator=translator,
         )
-
-    @provider
-    def provide_pay_means_of_production_presenter(
-        self, notifier: Notifier, trans: Translator
-    ) -> PayMeansOfProductionPresenter:
-        return PayMeansOfProductionPresenter(notifier, trans)
 
     @provider
     def provide_list_all_cooperations_presenter(

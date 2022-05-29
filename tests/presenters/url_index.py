@@ -106,3 +106,8 @@ class PlotsUrlIndexImpl:
 class AccountantDashboardUrlIndexImpl:
     def get_accountant_dashboard_url(self) -> str:
         return "accountant dashboard url"
+
+
+class PayMeansOfProductionUrlIndexImpl:
+    def get_pay_means_of_production_url(self) -> str:
+        return "pay means of production form url"
