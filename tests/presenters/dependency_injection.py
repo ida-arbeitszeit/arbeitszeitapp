@@ -93,6 +93,7 @@ from .url_index import (
     InviteUrlIndexImpl,
     ListMessageUrlIndexTestImpl,
     MessageUrlIndex,
+    PayMeansOfProductionUrlIndexImpl,
     PlanSummaryUrlIndexTestImpl,
     PlotsUrlIndexImpl,
     RenewPlanUrlIndex,
@@ -294,11 +295,15 @@ class PresenterTestsInjector(Module):
 
     @provider
     def provide_pay_means_of_production_presenter(
-        self, notifier: Notifier, translator: FakeTranslator
+        self,
+        notifier: Notifier,
+        translator: FakeTranslator,
+        pay_means_of_production_url_index: PayMeansOfProductionUrlIndexImpl,
     ) -> PayMeansOfProductionPresenter:
         return PayMeansOfProductionPresenter(
             user_notifier=notifier,
             trans=translator,
+            pay_means_of_production_url_index=pay_means_of_production_url_index,
         )
 
     @provider
