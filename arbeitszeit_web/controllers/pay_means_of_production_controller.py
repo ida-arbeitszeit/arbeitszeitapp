@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, List, Protocol, Union
+from typing import Protocol
 from uuid import UUID
 
 from arbeitszeit.entities import PurposesOfPurchases
