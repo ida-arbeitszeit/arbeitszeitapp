@@ -16,7 +16,7 @@ class LoginForm:
     def has_errors(self) -> bool:
         return bool(self.email_errors or self.password_errors)
 
-    def set_rember_field(self, state: bool) -> None:
+    def set_remember_field(self, state: bool) -> None:
         self._is_remember = state
 
     def get_remember_field(self) -> bool:

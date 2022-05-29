@@ -81,7 +81,7 @@ class PresenterTests(TestCase):
             self.form.password_errors,
         )
 
-    def test_that_correct_no_email_error_is_rendered_if_password_was_invalid(
+    def test_that_no_email_error_is_rendered_if_password_was_invalid(
         self,
     ) -> None:
         response = self.create_failure_response(
@@ -135,16 +135,16 @@ class PresenterTests(TestCase):
                 )
 
     def test_that_remember_field_from_form_is_respected(self) -> None:
-        for expected_rember_state in [True, False]:
+        for expected_remember_state in [True, False]:
             with self.subTest():
-                self.form.set_rember_field(expected_rember_state)
+                self.form.set_remember_field(expected_remember_state)
                 response = self.create_success_response()
                 self.presenter.present_login_process(response, self.form)
                 login_attempt = self.session.get_most_recent_login()
                 assert login_attempt
                 self.assertEqual(
                     login_attempt.is_remember,
-                    expected_rember_state,
+                    expected_remember_state,
                 )
 
     def test_that_user_gets_logged_in_as_member(self) -> None:
