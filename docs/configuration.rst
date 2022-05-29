@@ -13,6 +13,13 @@ The configuration file must be a valid python script.  Configuration
 options are set as variables on the top level. The following
 configuration options are available
 
+.. py:data:: AUTO_MIGRATE
+   Upgrade the database schema if changes are detected.
+
+   Example: ``AUTO_MIGRATE = True``
+
+   Default: ``False``
+
 .. py:data:: FORCE_HTTPS
    This option controls whether the application will allow unsecure
    HTTP trafic or force a redirect to an HTTPS address.

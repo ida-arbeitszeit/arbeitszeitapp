@@ -108,6 +108,9 @@ class CompanyUrlIndex:
             endpoint="auth.confirm_email_company", token=token, _external=True
         )
 
+    def get_pay_means_of_production_url(self) -> str:
+        return url_for(endpoint="main_company.transfer_to_company")
+
 
 class FlaskPlotsUrlIndex:
     def get_global_barplot_for_certificates_url(

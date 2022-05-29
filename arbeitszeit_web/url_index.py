@@ -78,6 +78,11 @@ class AccountantInvitationUrlIndex(Protocol):
         ...
 
 
+class PayMeansOfProductionUrlIndex(Protocol):
+    def get_pay_means_of_production_url(self) -> str:
+        ...
+
+
 class PlotsUrlIndex(Protocol):
     def get_global_barplot_for_certificates_url(
         self, certificates_count: Decimal, available_product: Decimal

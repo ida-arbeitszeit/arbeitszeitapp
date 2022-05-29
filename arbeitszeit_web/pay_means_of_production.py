@@ -1,23 +1,34 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
+from typing import Optional
 
 from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProductionResponse
-from arbeitszeit_web.controllers.pay_means_of_production_controller import (
-    PayMeansOfProductionController,
-)
 from arbeitszeit_web.translator import Translator
+from arbeitszeit_web.url_index import PayMeansOfProductionUrlIndex
 
 from .notification import Notifier
 
 
 @dataclass
 class PayMeansOfProductionPresenter:
+    @dataclass
+    class ViewModel:
+        redirect_url: Optional[str]
+
     user_notifier: Notifier
     trans: Translator
+    pay_means_of_production_url_index: PayMeansOfProductionUrlIndex
 
-    def present(self, use_case_response: PayMeansOfProductionResponse) -> None:
+    def present(self, use_case_response: PayMeansOfProductionResponse) -> ViewModel:
+        redirect_url: Optional[str] = None
+
         reasons = use_case_response.RejectionReason
         if use_case_response.rejection_reason is None:
             self.user_notifier.display_info(self.trans.gettext("Successfully paid."))
+            redirect_url = (
+                self.pay_means_of_production_url_index.get_pay_means_of_production_url()
+            )
         elif use_case_response.rejection_reason == reasons.plan_not_found:
             self.user_notifier.display_warning(
                 self.trans.gettext("Plan does not exist.")
@@ -44,11 +55,4 @@ class PayMeansOfProductionPresenter:
             self.user_notifier.display_warning(
                 self.trans.gettext("The specified purpose is invalid.")
             )
-
-    def present_malformed_data_warnings(
-        self, malformed_data: PayMeansOfProductionController.MalformedInputData
-    ) -> None:
-        fields_and_messages = malformed_data.field_messages
-        for field in fields_and_messages:
-            for msg in fields_and_messages[field]:
-                self.user_notifier.display_warning(msg)
+        return self.ViewModel(redirect_url=redirect_url)

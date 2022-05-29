@@ -2,6 +2,7 @@ import os
 
 import click
 from flask import Flask, current_app, request, session
+from flask_migrate import upgrade
 from flask_talisman import Talisman
 from flask_wtf.csrf import CSRFProtect
 
@@ -33,6 +34,9 @@ def initialize_migrations(app, db):
     migrate = arbeitszeit_flask.extensions.migrate
     migrations_directory = os.path.join(os.path.dirname(__file__), "migrations")
     migrate.init_app(app, db, directory=migrations_directory)
+    if app.config["AUTO_MIGRATE"]:
+        with app.app_context():
+            upgrade(migrations_directory)
 
 
 def create_app(config=None, db=None, template_folder=None):

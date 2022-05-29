@@ -106,6 +106,11 @@ class CompanyUrlIndexTests(ViewTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
+    def test_pay_means_of_production_url_leads_to_a_view(self) -> None:
+        url = self.url_index.get_pay_means_of_production_url()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
 
 class MemberUrlIndexTests(ViewTestCase):
     def setUp(self) -> None:
