@@ -9,43 +9,47 @@
 {% from 'macros/plan_summary.html' import plan_summary %}
 {{ plan_summary(view_model) }}
 
-<div class="section has-text-centered pt-0">
+<div class="section has-text-centered">
     {% if view_model.show_action_section %}
     <div class="content">
         <h1 class="title">
             {{ gettext("Actions") }}
         </h1>
     </div>
-
-    <div class="tile is-ancestor">
-        <div class="tile is-parent">
-            <div class="tile is-child box has-background-danger-light">
-                <h1 class="title is-5">{{ gettext("Change availability:") }}</h1>
-                <div
-                    class="icon is-large {{ 'has-text-success' if view_model.action.is_available else 'has-text-danger' }}">
-                    <a style="text-decoration: none; color: inherit;"
-                        href="{{ view_model.action.toggle_availability_url }}"><i
-                            class="{{ 'fas fa-lg fa-toggle-on' if view_model.action.is_available else 'fas fa-lg fa-toggle-off' }}"></i></a>
+    <div class="column is-offset-2 is-8">
+        <div class="box">
+            <div class="tile is-ancestor">
+                <div class="tile is-vertical">
+                    <div class="tile is-parent">
+                        <div class="tile is-child box has-background-danger-light">
+                            <h1 class="title is-4">{{ gettext("Change availability:") }}</h1>
+                            <div
+                                class="icon is-large {{ 'has-text-success' if view_model.action.is_available else 'has-text-danger' }}">
+                                <a style="text-decoration: none; color: inherit;"
+                                    href="{{ view_model.action.toggle_availability_url }}"><i
+                                        class="{{ 'fas fa-lg fa-toggle-on' if view_model.action.is_available else 'fas fa-lg fa-toggle-off' }}"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tile is-parent" href="">
+                        <div class="tile is-child box has-background-danger-light">
+                            {% if view_model.action.is_cooperating %}
+                            <h1 class="title is-4">{{ gettext("End cooperation:") }}</h1>
+                            <a class="button is-danger" href="{{ view_model.action.end_coop_url }}">
+                                <span>{{ gettext("End") }}</span>
+                            </a>
+                            {% else %}
+                            <h1 class="title is-4">{{ gettext("Join a cooperation") }} </h1>
+                            <a class="button is-primary" href="{{ view_model.action.request_coop_url }}">
+                                <span>{{ gettext("Join") }}</span>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="tile is-parent" href="">
-            <div class="tile is-child box has-background-danger-light">
-                {% if view_model.action.is_cooperating %}
-                <h1 class="title is-5">{{ gettext("End cooperation:") }}</h1>
-                <a class="button is-danger" href="{{ view_model.action.end_coop_url }}">
-                    <span>{{ gettext("End") }}</span>
-                </a>
-                {% else %}
-                <h1 class="title is-5">{{ gettext("Join a cooperation") }} </h1>
-                <a class="button is-primary" href="{{ view_model.action.request_coop_url }}">
-                    <span>{{ gettext("Join") }}</span>
-                </a>
-                {% endif %}
-            </div>
-        </div>
     </div>
-
     {% endif %}
 </div>
 {% endblock %}
