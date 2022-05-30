@@ -1,9 +1,9 @@
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, Optional
 
-from arbeitszeit.use_cases.get_plan_summary_company import PlanSummaryCompanySuccess
+from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
 
-from .plan_summary_service import PlanSummary, PlanSummaryService
+from .plan_summary_service import PlanSummaryService, PlanSummaryWeb
 from .translator import Translator
 from .url_index import (
     EndCoopUrlIndex,
@@ -23,7 +23,7 @@ class Action:
 
 @dataclass
 class GetPlanSummaryCompanyViewModel:
-    summary: PlanSummary
+    summary: PlanSummaryWeb
     show_action_section: bool
     action: Action
 
@@ -40,7 +40,7 @@ class GetPlanSummaryCompanySuccessPresenter:
     plan_summary_service: PlanSummaryService
 
     def present(
-        self, response: PlanSummaryCompanySuccess
+        self, response: GetPlanSummaryCompany.Success
     ) -> GetPlanSummaryCompanyViewModel:
         plan_id = response.plan_summary.plan_id
         coop_id = response.plan_summary.cooperation

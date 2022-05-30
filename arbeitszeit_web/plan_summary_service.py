@@ -2,14 +2,14 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import List, Optional, Protocol, Tuple
 
-from arbeitszeit.plan_summary import BusinessPlanSummary
+from arbeitszeit.plan_summary import PlanSummary
 from arbeitszeit_web.url_index import CompanySummaryUrlIndex, CoopSummaryUrlIndex
 
 from .translator import Translator
 
 
 @dataclass
-class PlanSummary:
+class PlanSummaryWeb:
     plan_id: Tuple[str, str]
     activity_string: Tuple[str, str]
     planner: Tuple[str, str, str, str]
@@ -28,7 +28,7 @@ class PlanSummary:
 
 
 class PlanSummaryService(Protocol):
-    def get_plan_summary(self, plan_summary: BusinessPlanSummary) -> PlanSummary:
+    def get_plan_summary(self, plan_summary: PlanSummary) -> PlanSummaryWeb:
         ...
 
 
@@ -38,8 +38,8 @@ class PlanSummaryServiceImpl:
     company_url_index: CompanySummaryUrlIndex
     translator: Translator
 
-    def get_plan_summary(self, plan_summary: BusinessPlanSummary) -> PlanSummary:
-        return PlanSummary(
+    def get_plan_summary(self, plan_summary: PlanSummary) -> PlanSummaryWeb:
+        return PlanSummaryWeb(
             plan_id=(self.translator.gettext("Plan ID"), str(plan_summary.plan_id)),
             activity_string=(
                 self.translator.gettext("Status"),

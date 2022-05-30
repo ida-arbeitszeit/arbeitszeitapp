@@ -3,8 +3,8 @@ from decimal import Decimal
 from unittest import TestCase
 from uuid import uuid4
 
-from arbeitszeit.plan_summary import BusinessPlanSummary
-from arbeitszeit.use_cases.get_plan_summary_company import PlanSummaryCompanySuccess
+from arbeitszeit.plan_summary import PlanSummary
+from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
 from arbeitszeit_web.get_plan_summary_company import (
     GetPlanSummaryCompanySuccessPresenter,
 )
@@ -16,8 +16,8 @@ from .url_index import (
     TogglePlanAvailabilityUrlIndex,
 )
 
-TESTING_RESPONSE_MODEL = PlanSummaryCompanySuccess(
-    plan_summary=BusinessPlanSummary(
+TESTING_RESPONSE_MODEL = GetPlanSummaryCompany.Success(
+    plan_summary=PlanSummary(
         plan_id=uuid4(),
         is_active=True,
         planner_id=uuid4(),
@@ -119,7 +119,7 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
         plan_summary = replace(
             TESTING_RESPONSE_MODEL.plan_summary, is_cooperating=False, cooperation=None
         )
-        response = PlanSummaryCompanySuccess(
+        response = GetPlanSummaryCompany.Success(
             plan_summary=plan_summary, current_user_is_planner=True
         )
         view_model = self.presenter.present(response)
@@ -132,7 +132,7 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
         plan_summary = replace(
             TESTING_RESPONSE_MODEL.plan_summary, is_cooperating=False, cooperation=None
         )
-        response = PlanSummaryCompanySuccess(
+        response = GetPlanSummaryCompany.Success(
             plan_summary=plan_summary, current_user_is_planner=True
         )
         view_model = self.presenter.present(response)

@@ -1,16 +1,12 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import Callable
+from typing import Callable, Union
 from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.entities import ProductionCosts
-from arbeitszeit.plan_summary import BusinessPlanSummary
-from arbeitszeit.use_cases import (
-    GetPlanSummaryMember,
-    PlanSummaryResponse,
-    PlanSummarySuccess,
-)
+from arbeitszeit.plan_summary import PlanSummary
+from arbeitszeit.use_cases import GetPlanSummaryMember
 from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
@@ -118,8 +114,8 @@ class UseCaseTests(TestCase):
         summary = self.use_case(plan.id)
         self.assert_success(summary, lambda s: s.is_public_service == True)
 
-    def test_that_none_is_returned_when_plan_does_not_exist(self) -> None:
-        self.assertIsNone(self.use_case(uuid4()))
+    def test_that_failure_is_returned_when_plan_does_not_exist(self) -> None:
+        self.assertIsInstance(self.use_case(uuid4()), GetPlanSummaryMember.Failure)
 
     def test_that_correct_availability_is_shown(self):
         plan = self.plan_generator.create_plan()
@@ -185,9 +181,9 @@ class UseCaseTests(TestCase):
 
     def assert_success(
         self,
-        response: PlanSummaryResponse,
-        assertion: Callable[[BusinessPlanSummary], bool],
+        response: Union[GetPlanSummaryMember.Success, GetPlanSummaryMember.Failure],
+        assertion: Callable[[PlanSummary], bool],
     ) -> None:
-        assert isinstance(response, PlanSummarySuccess)
-        assert isinstance(response.plan_summary, BusinessPlanSummary)
+        assert isinstance(response, GetPlanSummaryMember.Success)
+        assert isinstance(response.plan_summary, PlanSummary)
         assert assertion(response.plan_summary)
