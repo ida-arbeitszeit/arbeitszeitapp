@@ -13,6 +13,7 @@ class BusinessPlanSummary:
     product_name: str
     description: str
     timeframe: int
+    active_days: int
     production_unit: str
     amount: int
     means_cost: Decimal

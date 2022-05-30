@@ -14,7 +14,7 @@ from .url_index import (
 
 @dataclass
 class Action:
-    is_available: bool
+    is_available_bool: bool
     toggle_availability_url: str
     is_cooperating: bool
     end_coop_url: Optional[str]
@@ -44,13 +44,12 @@ class GetPlanSummaryCompanySuccessPresenter:
     ) -> GetPlanSummaryCompanyViewModel:
         plan_id = response.plan_summary.plan_id
         coop_id = response.plan_summary.cooperation
-        is_available = response.plan_summary.is_available
         is_cooperating = response.plan_summary.is_cooperating
         return GetPlanSummaryCompanyViewModel(
             summary=self.plan_summary_service.get_plan_summary(response.plan_summary),
             show_action_section=response.current_user_is_planner,
             action=Action(
-                is_available=is_available,
+                is_available_bool=response.plan_summary.is_available,
                 toggle_availability_url=self.toggle_availability_url_index.get_toggle_availability_url(
                     plan_id
                 ),

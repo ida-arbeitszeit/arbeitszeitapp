@@ -18,6 +18,7 @@ BUSINESS_PLAN_SUMMARY = BusinessPlanSummary(
     product_name="test product name",
     description="test description",
     timeframe=7,
+    active_days=5,
     production_unit="Piece",
     amount=100,
     means_cost=Decimal(1),
@@ -49,7 +50,7 @@ class PlanSummaryServiceTests(TestCase):
     def test_active_status_is_displayed_correctly_as_tuple_of_strings(self):
         plan_summary = self.service.get_plan_summary(BUSINESS_PLAN_SUMMARY)
         self.assertTupleEqual(
-            plan_summary.is_active,
+            plan_summary.activity_string,
             (self.translator.gettext("Status"), self.translator.gettext("Active")),
         )
 
@@ -60,7 +61,7 @@ class PlanSummaryServiceTests(TestCase):
         )
         plan_summary = self.service.get_plan_summary(response)
         self.assertTupleEqual(
-            plan_summary.is_active,
+            plan_summary.activity_string,
             (self.translator.gettext("Status"), self.translator.gettext("Inactive")),
         )
 
@@ -225,9 +226,16 @@ class PlanSummaryServiceTests(TestCase):
     def test_availability_is_displayed_correctly_as_tuple_of_strings(self):
         plan_summary = self.service.get_plan_summary(BUSINESS_PLAN_SUMMARY)
         self.assertTupleEqual(
-            plan_summary.is_available,
+            plan_summary.availability_string,
             (
                 self.translator.gettext("Product currently available"),
                 self.translator.gettext("Yes"),
             ),
+        )
+
+    def test_active_days_is_displayed_correctly_as_string(self):
+        plan_summary = self.service.get_plan_summary(BUSINESS_PLAN_SUMMARY)
+        self.assertEqual(
+            plan_summary.active_days,
+            str(BUSINESS_PLAN_SUMMARY.active_days),
         )

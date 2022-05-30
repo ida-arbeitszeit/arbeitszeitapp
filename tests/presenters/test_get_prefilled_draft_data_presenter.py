@@ -15,6 +15,7 @@ BUSINESS_PLAN_SUMMARY = BusinessPlanSummary(
     product_name="test",
     description="beschreibung",
     timeframe=10,
+    active_days=5,
     production_unit="1 kilo",
     amount=2,
     means_cost=Decimal(5),

@@ -39,6 +39,7 @@ class GetPlanSummaryMember:
                 product_name=plan.prd_name,
                 description=plan.description,
                 timeframe=plan.timeframe,
+                active_days=plan.active_days or 0,
                 production_unit=plan.prd_unit,
                 amount=plan.prd_amount,
                 means_cost=plan.production_costs.means_cost,
