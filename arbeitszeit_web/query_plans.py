@@ -9,7 +9,7 @@ from arbeitszeit.use_cases.query_plans import (
 from arbeitszeit_web.translator import Translator
 
 from .notification import Notifier
-from .url_index import CompanySummaryUrlIndex, CoopSummaryUrlIndex, PlanSummaryUrlIndex
+from .url_index import PlanSummaryUrlIndex
 
 
 class QueryPlansFormData(Protocol):
@@ -48,16 +48,12 @@ class QueryPlansController:
 
 @dataclass
 class ResultTableRow:
-    plan_id: str
     plan_summary_url: str
-    company_summary_url: str
-    coop_summary_url: Optional[str]
     company_name: str
     product_name: str
     description: List[str]
     price_per_unit: str
     type_of_plan: str
-    ends_in: str
     is_available: bool
     is_cooperating: bool
 
@@ -79,8 +75,6 @@ class QueryPlansViewModel:
 @dataclass
 class QueryPlansPresenter:
     plan_url_index: PlanSummaryUrlIndex
-    company_url_index: CompanySummaryUrlIndex
-    coop_url_index: CoopSummaryUrlIndex
     user_notifier: Notifier
     trans: Translator
 
@@ -92,18 +86,9 @@ class QueryPlansPresenter:
             results=ResultsTable(
                 rows=[
                     ResultTableRow(
-                        plan_id=str(result.plan_id),
                         plan_summary_url=self.plan_url_index.get_plan_summary_url(
                             result.plan_id
                         ),
-                        company_summary_url=self.company_url_index.get_company_summary_url(
-                            result.company_id
-                        ),
-                        coop_summary_url=self.coop_url_index.get_coop_summary_url(
-                            result.cooperation
-                        )
-                        if result.cooperation
-                        else None,
                         company_name=result.company_name,
                         product_name=result.product_name,
                         description=result.description.splitlines(),
@@ -111,10 +96,6 @@ class QueryPlansPresenter:
                         type_of_plan=self.trans.gettext("Public")
                         if result.is_public_service
                         else self.trans.gettext("Productive"),
-                        ends_in=self.trans.gettext("%(num)d days")
-                        % dict(num=result.expiration_relative)
-                        if result.expiration_relative is not None
-                        else "–",
                         is_available=result.is_available,
                         is_cooperating=result.is_cooperating,
                     )

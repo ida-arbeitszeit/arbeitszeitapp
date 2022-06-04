@@ -34,22 +34,19 @@
         <table class="table is-fullwidth">
             <thead>
                 <tr>
-                    <th>{{ gettext("Plan ID") }}</th>
-                    <th>{{ gettext("Product name") }}</th>
+                    <th>{{ gettext("Plan") }}</th>
                     <th>{{ gettext("Company") }}</th>
                     <th>{{ gettext("Description") }}</th>
                     <th>{{ gettext("Price per unit") }}</th>
                     <th>{{ gettext("Type") }}</th>
-                    <th>{{ gettext("Ends in")}}</th>
                     <th>{{ gettext("Available")}}</th>
                 </tr>
             </thead>
             <tbody>
                 {% for column in view_model.results.rows %}
                 <tr>
-                    <td><a href="{{ column.plan_summary_url }}">{{ column.plan_id }}</a>
+                    <td><a href="{{ column.plan_summary_url }}">{{ column.product_name }}</a>
                     </td>
-                    <td>{{ column.product_name }}</td>
                     <td><a href="{{ column.company_summary_url }}">{{ column.company_name }}</a></td>
                     <td>{% for paragraph in column.description %}{{ paragraph }}<br>{% endfor %}</td>
                     <td>{{ column.price_per_unit }} {% if column.is_cooperating %} <span>
@@ -57,7 +54,6 @@
                         endif %}
                     </td>
                     <td>{{ column.type_of_plan }}</td>
-                    <td>{{ column.ends_in }}</td>
                     {% if column.is_available %}
                     <td>
                         <span class="icon has-text-success"><i class="fas fa-circle"></i></span>

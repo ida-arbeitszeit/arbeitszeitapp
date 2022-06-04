@@ -24,10 +24,8 @@ RESPONSE_WITH_ONE_RESULT = PlanQueryResponse(
             description="For eating",
             price_per_unit=Decimal(5),
             is_public_service=False,
-            expiration_relative=14,
             is_available=True,
             is_cooperating=False,
-            cooperation=None,
         )
     ]
 )
@@ -42,10 +40,8 @@ RESPONSE_WITH_ONE_COOPERATING_RESULT = PlanQueryResponse(
             description="For eating",
             price_per_unit=Decimal(5),
             is_public_service=False,
-            expiration_relative=14,
             is_available=True,
             is_cooperating=True,
-            cooperation=uuid4(),
         )
     ]
 )
@@ -89,29 +85,25 @@ class QueryPlansPresenterTests(TestCase):
             self.plan_url_index.get_plan_summary_url(plan_id),
         )
 
-    def test_company_url(self) -> None:
-        presentation = self.presenter.present(RESPONSE_WITH_ONE_RESULT)
-        company_id = RESPONSE_WITH_ONE_RESULT.results[0].company_id
-        table_row = presentation.results.rows[0]
-        self.assertEqual(
-            table_row.company_summary_url,
-            self.company_url_index.get_company_summary_url(company_id),
-        )
-
-    def test_no_coop_url_is_shown_with_one_non_cooperating_plan(self) -> None:
+    def test_company_name(self) -> None:
         presentation = self.presenter.present(RESPONSE_WITH_ONE_RESULT)
         table_row = presentation.results.rows[0]
         self.assertEqual(
-            table_row.coop_summary_url,
-            None,
+            table_row.company_name, RESPONSE_WITH_ONE_RESULT.results[0].company_name
         )
 
-    def test_coop_url_is_shown_with_one_cooperating_plan(self) -> None:
-        coop_id = RESPONSE_WITH_ONE_COOPERATING_RESULT.results[0].cooperation
-        assert coop_id
+    def test_no_coop_is_shown_with_one_non_cooperating_plan(self) -> None:
+        presentation = self.presenter.present(RESPONSE_WITH_ONE_RESULT)
+        table_row = presentation.results.rows[0]
+        self.assertEqual(
+            table_row.is_cooperating,
+            False,
+        )
+
+    def test_coop_is_shown_with_one_cooperating_plan(self) -> None:
         presentation = self.presenter.present(RESPONSE_WITH_ONE_COOPERATING_RESULT)
         table_row = presentation.results.rows[0]
         self.assertEqual(
-            table_row.coop_summary_url,
-            self.coop_url_index.get_coop_summary_url(coop_id),
+            table_row.is_cooperating,
+            True,
         )
