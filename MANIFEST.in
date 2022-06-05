@@ -1,3 +1,4 @@
 recursive-include arbeitszeit_flask/templates *.html
 recursive-include arbeitszeit_flask/migrations *.ini *.mako *.py
 recursive-include arbeitszeit_flask/static *.js *.css
+recursive-include arbeitszeit_flask/translations *.po *.mo

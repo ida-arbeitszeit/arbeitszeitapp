@@ -128,19 +128,18 @@ In development mode you can run it manually in the CLI.
 Translation
 ===========
 
-We use `Flask-Babel <https://flask-babel.tkte.ch/>` for translation. 
+We use `Flask-Babel <https://flask-babel.tkte.ch/>` for translation.
 
-1) 
-Add a new language:
+1) Add a new language:
 
 a. Execute::
 
-    $ flask trans-new LANG_CODE
+    $ python setup.py init_catalog -l LANGUAGE_CODE
 
-b. Add the new language to the LANGUAGES variable in ``arbeitszeit_flask/configuration_base.py``.
+b. Add the new language to the LANGUAGES variable in
+   ``arbeitszeit_flask/configuration_base.py``.
 
-2)   
-Mark translatable, user-facing strings in the code. 
+2) Mark translatable, user-facing strings in the code.
 
 In python files use: 
 
@@ -154,18 +153,15 @@ In jinja templates use:
 - ``ngettext(singular: str, plural: str, n)``
 
 
-3) 
-Parse code and update language specific .po-files::
+3) Parse code and update language specific .po-files::
 
-	$ flask trans-update
+    $ python setup.py update_catalog
 
-4) 
-Translate language specific .po-files.
+4) Translate language specific .po-files.
 	
-5)
-Compile translation files::
+5) Compile translation files::
 
-    $ flask trans-compile
+    $ python setup.py compile_catalog
 		
 
 License
