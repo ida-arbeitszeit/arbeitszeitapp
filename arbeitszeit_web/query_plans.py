@@ -9,7 +9,7 @@ from arbeitszeit.use_cases.query_plans import (
 from arbeitszeit_web.translator import Translator
 
 from .notification import Notifier
-from .url_index import PlanSummaryUrlIndex
+from .url_index import CompanySummaryUrlIndex, PlanSummaryUrlIndex
 
 
 class QueryPlansFormData(Protocol):
@@ -49,6 +49,7 @@ class QueryPlansController:
 @dataclass
 class ResultTableRow:
     plan_summary_url: str
+    company_summary_url: str
     company_name: str
     product_name: str
     description: str
@@ -75,6 +76,7 @@ class QueryPlansViewModel:
 @dataclass
 class QueryPlansPresenter:
     plan_url_index: PlanSummaryUrlIndex
+    company_url_index: CompanySummaryUrlIndex
     user_notifier: Notifier
     trans: Translator
 
@@ -88,6 +90,9 @@ class QueryPlansPresenter:
                     ResultTableRow(
                         plan_summary_url=self.plan_url_index.get_plan_summary_url(
                             result.plan_id
+                        ),
+                        company_summary_url=self.company_url_index.get_company_summary_url(
+                            result.company_id
                         ),
                         company_name=result.company_name,
                         product_name=result.product_name,

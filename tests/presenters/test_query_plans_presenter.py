@@ -58,6 +58,16 @@ class QueryPlansPresenterTests(TestCase):
             self.plan_url_index.get_plan_summary_url(plan_id),
         )
 
+    def test_correct_company_url_is_shown(self) -> None:
+        company_id = uuid4()
+        response = self._get_response([self._get_queried_plan(company_id=company_id)])
+        presentation = self.presenter.present(response)
+        table_row = presentation.results.rows[0]
+        self.assertEqual(
+            table_row.company_summary_url,
+            self.company_url_index.get_company_summary_url(company_id),
+        )
+
     def test_correct_company_name_is_shown(self) -> None:
         response = self._get_response([self._get_queried_plan()])
         presentation = self.presenter.present(response)
@@ -108,10 +118,16 @@ class QueryPlansPresenterTests(TestCase):
         self.assertNotIn(unexpected_substring, table_row.description)
 
     def _get_queried_plan(
-        self, plan_id: UUID = None, is_cooperating: bool = None, description: str = None
+        self,
+        plan_id: UUID = None,
+        company_id: UUID = None,
+        is_cooperating: bool = None,
+        description: str = None,
     ) -> QueriedPlan:
         if plan_id is None:
             plan_id = uuid4()
+        if company_id is None:
+            company_id = uuid4()
         if is_cooperating is None:
             is_cooperating = False
         if description is None:
@@ -119,7 +135,7 @@ class QueryPlansPresenterTests(TestCase):
         return QueriedPlan(
             plan_id=plan_id,
             company_name="Planner name",
-            company_id=uuid4(),
+            company_id=company_id,
             product_name="Bread",
             description=description,
             price_per_unit=Decimal(5),

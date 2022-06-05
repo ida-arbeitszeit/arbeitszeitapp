@@ -339,10 +339,12 @@ class PresenterTestsInjector(Module):
         self,
         notifier: Notifier,
         plan_url_index: PlanSummaryUrlIndexTestImpl,
+        company_url_index: CompanySummaryUrlIndex,
         translator: FakeTranslator,
     ) -> QueryPlansPresenter:
         return QueryPlansPresenter(
             plan_url_index=plan_url_index,
+            company_url_index=company_url_index,
             user_notifier=notifier,
             trans=translator,
         )
