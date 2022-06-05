@@ -51,7 +51,7 @@ class ResultTableRow:
     plan_summary_url: str
     company_name: str
     product_name: str
-    description: List[str]
+    description: str
     price_per_unit: str
     is_public_service: bool
     is_available: bool
@@ -91,7 +91,7 @@ class QueryPlansPresenter:
                         ),
                         company_name=result.company_name,
                         product_name=result.product_name,
-                        description=result.description.splitlines(),
+                        description="".join(result.description.splitlines())[:150],
                         price_per_unit=str(round(result.price_per_unit, 2)),
                         is_public_service=result.is_public_service,
                         is_available=result.is_available,

@@ -40,12 +40,15 @@
                 <div class="media-content">
                     <div class="content">
                         <p>
-                            <strong><a href="{{ column.plan_summary_url }}">{{ column.product_name }}</a></strong>
-                            <small class="is-italic">{{ column.type_of_plan }}</small>
+                            <strong class="is-size-5">
+                                <a href="{{ column.plan_summary_url }}">{{ column.product_name }}</a>
+                            </strong>
                             <br>
                             <small>@{{ column.company_name }}</small>
                             <br>
-                            {% for paragraph in column.description %}{{ paragraph }}<br>{% endfor %}
+                            <span>
+                                {{ column.description }}
+                            </span>
                         </p>
                     </div>
                     <div>
@@ -61,7 +64,9 @@
                     </div>
                 </div>
                 <div class="media-right">
-                    {{ column.price_per_unit }}
+                    <p class="is-size-5">
+                        {{ column.price_per_unit }}
+                    </p>
                 </div>
             </article>
             {% endfor %}

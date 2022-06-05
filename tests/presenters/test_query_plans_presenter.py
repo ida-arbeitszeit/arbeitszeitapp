@@ -21,7 +21,7 @@ RESPONSE_WITH_ONE_RESULT = PlanQueryResponse(
             company_name="Planner name",
             company_id=uuid4(),
             product_name="Bread",
-            description="For eating",
+            description="For eating\nNext paragraph\rThird one Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores.",
             price_per_unit=Decimal(5),
             is_public_service=False,
             is_available=True,
@@ -37,7 +37,7 @@ RESPONSE_WITH_ONE_COOPERATING_RESULT = PlanQueryResponse(
             company_name="Planner name",
             company_id=uuid4(),
             product_name="Bread",
-            description="For eating",
+            description="For eating\nNext paragraph\rThird one",
             price_per_unit=Decimal(5),
             is_public_service=False,
             is_available=True,
@@ -115,3 +115,16 @@ class QueryPlansPresenterTests(TestCase):
             table_row.is_public_service,
             False,
         )
+
+    def test_that_description_is_shown_without_line_returns(self) -> None:
+        presentation = self.presenter.present(RESPONSE_WITH_ONE_RESULT)
+        table_row = presentation.results.rows[0]
+        self.assertIn("For eatingNext paragraphThird one", table_row.description)
+
+    def test_that_only_first_few_chars_of_description_are_shown(self) -> None:
+        expected_string = "For eatingNext paragraphThird one"
+        unexpected_string = "et accusam et justo duo dolores."
+        presentation = self.presenter.present(RESPONSE_WITH_ONE_RESULT)
+        table_row = presentation.results.rows[0]
+        self.assertIn(expected_string, table_row.description)
+        self.assertNotIn(unexpected_string, table_row.description)
