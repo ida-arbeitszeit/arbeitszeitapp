@@ -55,6 +55,9 @@
                         {% if column.is_cooperating %}
                         <span class="tag is-primary">{{ gettext("Cooperating plan") }}</span>
                         {% endif %}
+                        {% if column.is_public_service %}
+                        <span class="tag is-warning">{{ gettext("Public") }}</span>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="media-right">

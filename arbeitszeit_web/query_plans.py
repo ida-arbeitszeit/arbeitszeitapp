@@ -53,7 +53,7 @@ class ResultTableRow:
     product_name: str
     description: List[str]
     price_per_unit: str
-    type_of_plan: str
+    is_public_service: bool
     is_available: bool
     is_cooperating: bool
 
@@ -93,9 +93,7 @@ class QueryPlansPresenter:
                         product_name=result.product_name,
                         description=result.description.splitlines(),
                         price_per_unit=str(round(result.price_per_unit, 2)),
-                        type_of_plan=self.trans.gettext("Public")
-                        if result.is_public_service
-                        else self.trans.gettext("Productive"),
+                        is_public_service=result.is_public_service,
                         is_available=result.is_available,
                         is_cooperating=result.is_cooperating,
                     )

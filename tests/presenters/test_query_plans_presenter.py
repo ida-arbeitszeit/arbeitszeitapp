@@ -107,3 +107,11 @@ class QueryPlansPresenterTests(TestCase):
             table_row.is_cooperating,
             True,
         )
+
+    def test_public_service_bool_is_passed_on_to_view_model(self) -> None:
+        presentation = self.presenter.present(RESPONSE_WITH_ONE_RESULT)
+        table_row = presentation.results.rows[0]
+        self.assertEqual(
+            table_row.is_public_service,
+            False,
+        )
