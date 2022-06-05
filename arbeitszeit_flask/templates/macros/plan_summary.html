@@ -1,43 +1,137 @@
 {% macro plan_summary(view_model) %}
 <div class="section has-text-centered">
-    <div class="columns is-centered">
-        <div class="column is-two-thirds">
-            <div class="content">
-                <h1 class="title">
-                    {{ gettext("Plan information") }}
-                </h1>
+    <div class="section">
+        <div class="content">
+            <h1 class="title">
+                {{ gettext("Plan information") }}
+            </h1>
+        </div>
+        <div class="box">
+            <div class="tile is-ancestor">
+                <div class="tile is-vertical is-8">
+                    <div class="tile">
+                        <div class="tile is-parent is-vertical">
+                            <article class="tile is-child notification">
+                                <p class="title is-4">{{ view_model.summary.plan_id[0] }}</p>
+                                <p class="subtitle">{{ view_model.summary.plan_id[1] }}</p>
+                            </article>
+                            <article class="tile is-child notification">
+                                <p class="title is-4">{{ view_model.summary.planner[0] }}</p>
+                                <p class="subtitle"><a href="{{ view_model.summary.planner[2] }}">{{
+                                        view_model.summary.planner[3] }}</a></p>
+                            </article>
+                        </div>
+                        <div class="tile is-parent is-vertical">
+                            <article class="tile is-child notification">
+                                <p class="title is-4">{{ view_model.summary.product_name[0] }}</p>
+                                <p class="subtitle">{{ view_model.summary.product_name[1] }}</p>
+                            </article>
+                            <article class="tile is-child notification"></article>
+                        </div>
+                    </div>
+                </div>
+                <div class="tile is-parent">
+                    <article class="tile is-child notification has-background-primary-light">
+                        <div class="content">
+                            <p class="title is-4">{{ view_model.summary.description[0] }}</p>
+                            <div class="content">
+                                <p>{% for paragraph in view_model.summary.description[1] %}{{ paragraph
+                                    }}<br>{% endfor %}</p>
+                            </div>
+                        </div>
+                    </article>
+                </div>
             </div>
-            <br>
-            <div class="table-container">
-                <table class="table is-fullwidth">
-                    <tbody>
-                        {% for key in view_model.summary %}
-                        <tr>
-                            <td class="has-text-left has-text-weight-semibold">{{ view_model.summary[key][0] }}</td>
-                            {% if key == "description" %}
-                            <td class="has-text-left">{% for paragraph in view_model.summary[key][1] %}{{ paragraph
-                                }}<br>{% endfor %}
-                            </td>
-                            {% elif key == "price_per_unit" %}
-                            <td class="has-text-left">{{ view_model.summary[key][1] }}{% if view_model.summary[key][2]
-                                %} <span>
-                                    <a href="{{ view_model.summary[key][3] }}"><i
-                                            class="fas fa-hands-helping"></i></a></span>{% endif %}
-                            </td>
-                            {% elif key == "planner" %}
-                            <td class="has-text-left"><a href="{{ view_model.summary[key][2] }}">{{
-                                    view_model.summary[key][3] }}</a>
-                            </td>
-                            {% else %}
-                            <td class="has-text-left">{{ view_model.summary[key][1] }}
-                            </td>
+        </div>
+
+        <div class="box">
+            <div class="tile is-ancestor">
+                <div class="tile is-4">
+                    <div class="tile is-parent">
+                        <article class="tile is-child notification has-background-warning-light">
+                            <p class="title is-4">{{ view_model.summary.activity_string[0] }}</p>
+                            <p class="subtitle">{{ view_model.summary.activity_string[1] }}</p>
+                        </article>
+                    </div>
+                </div>
+                <div class="tile is-parent">
+                    <div class="tile is-child notification">
+                        <p class="title is-4">{{ view_model.summary.timeframe[0] }}</p>
+                        <p class="subtitle">({{ view_model.summary.active_days}} / {{ view_model.summary.timeframe[1]
+                            }})</p>
+                        <progress class="progress" value="{{ view_model.summary.active_days}}"
+                            max="{{ view_model.summary.timeframe[1] }}"></progress>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="box">
+            <div class="tile is-ancestor">
+                <div class="tile is-vertical">
+                    <div class="tile">
+                        <div class="tile is-parent is-vertical">
+                            <article class="tile is-child notification">
+                                <p class="title is-4">{{ view_model.summary.amount[0] }}</p>
+                                <p class="subtitle">{{ view_model.summary.amount[1] }}</p>
+                            </article>
+                            <article class="tile is-child notification">
+                                <p class="title is-4">{{ view_model.summary.production_unit[0] }}</p>
+                                <p class="subtitle">{{ view_model.summary.production_unit[1] }}</p>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+                <div class="tile is-vertical is-8">
+                    <div class="tile">
+                        <div class="tile is-parent is-vertical">
+                            <article class="tile is-child notification has-background-danger-light">
+                                <p class="title is-4">{{ view_model.summary.means_cost[0] }}</p>
+                                <p class="subtitle">{{ view_model.summary.means_cost[1] }}</p>
+                            </article>
+                            <article class="tile is-child notification has-background-danger-light">
+                                <p class="title is-4">{{ view_model.summary.resources_cost[0] }}</p>
+                                <p class="subtitle">{{ view_model.summary.resources_cost[1] }}</p>
+                            </article>
+                            <article class="tile is-child notification has-background-danger-light">
+                                <p class="title is-4">{{ view_model.summary.labour_cost[0] }}</p>
+                                <p class="subtitle">{{ view_model.summary.labour_cost[1] }}</p>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="box">
+            <div class="tile is-ancestor">
+                <div class="tile is-parent">
+                    <article class="tile is-child notification">
+                        <p class="title is-4">{{ view_model.summary.type_of_plan[0] }}</p>
+                        <p class="subtitle">{{ view_model.summary.type_of_plan[1] }}</p>
+                    </article>
+                </div>
+                <div class="tile is-parent">
+                    <div class="tile is-child notification has-background-warning-light">
+                        <p class="title is-4">{{ view_model.summary.price_per_unit[0] }}</p>
+                        <p class="subtitle">{{ view_model.summary.price_per_unit[1] }}
+                            {% if view_model.summary.price_per_unit[2] %} <span>
+                                <a href="{{ view_model.summary.price_per_unit[3] }}">
+                                    <i class="fas fa-hands-helping"></i></a>
+                            </span>
                             {% endif %}
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                        </p>
+                    </div>
+                </div>
+                <div class="tile is-parent">
+                    <article class="tile is-child notification">
+                        <p class="title is-4">{{ view_model.summary.availability_string[0] }}</p>
+                        <p class="subtitle">{{ view_model.summary.availability_string[1] }}</p>
+                    </article>
+                </div>
             </div>
         </div>
     </div>
-</div>
-{% endmacro %}
+
+    {% endmacro %}

@@ -3,8 +3,8 @@ from decimal import Decimal
 from unittest import TestCase
 from uuid import uuid4
 
-from arbeitszeit.plan_summary import BusinessPlanSummary
-from arbeitszeit.use_cases.get_plan_summary_company import PlanSummaryCompanySuccess
+from arbeitszeit.plan_summary import PlanSummary
+from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
 from arbeitszeit_web.get_plan_summary_company import (
     GetPlanSummaryCompanySuccessPresenter,
 )
@@ -16,14 +16,15 @@ from .url_index import (
     TogglePlanAvailabilityUrlIndex,
 )
 
-TESTING_RESPONSE_MODEL = PlanSummaryCompanySuccess(
-    plan_summary=BusinessPlanSummary(
+TESTING_RESPONSE_MODEL = GetPlanSummaryCompany.Success(
+    plan_summary=PlanSummary(
         plan_id=uuid4(),
         is_active=True,
         planner_id=uuid4(),
         planner_name="planner name",
         product_name="test product name",
         description="test description",
+        active_days=5,
         timeframe=7,
         production_unit="Piece",
         amount=100,
@@ -41,6 +42,10 @@ TESTING_RESPONSE_MODEL = PlanSummaryCompanySuccess(
 
 
 class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
+    """
+    some functionality are tested in tests/presenters/test_plan_summary_service.py
+    """
+
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.toggle_availability_url_index = self.injector.get(
@@ -59,17 +64,31 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
         view_model = self.presenter.present(response)
         self.assertFalse(view_model.show_action_section)
 
-    def test_url_for_changing_availability_is_displayed_correctly(self):
+    def test_view_model_sows_availability_when_plan_is_available(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
         self.assertEqual(
-            view_model.action.is_available,
+            view_model.action.is_available_bool,
             TESTING_RESPONSE_MODEL.plan_summary.is_available,
         )
+
+    def test_url_for_changing_availability_is_displayed_correctly(self):
+        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
         self.assertEqual(
             view_model.action.toggle_availability_url,
             self.toggle_availability_url_index.get_toggle_availability_url(
                 TESTING_RESPONSE_MODEL.plan_summary.plan_id
             ),
+        )
+
+    def test_view_model_shows_plan_as_cooperating_when_plan_is_cooperating(
+        self,
+    ):
+        assert TESTING_RESPONSE_MODEL.plan_summary.cooperation
+        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        self.assertTrue(view_model.action.is_cooperating)
+        self.assertEqual(
+            view_model.action.is_cooperating,
+            TESTING_RESPONSE_MODEL.plan_summary.is_cooperating,
         )
 
     def test_url_for_ending_cooperation_is_displayed_correctly_when_plan_is_cooperating(
@@ -100,7 +119,7 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
         plan_summary = replace(
             TESTING_RESPONSE_MODEL.plan_summary, is_cooperating=False, cooperation=None
         )
-        response = PlanSummaryCompanySuccess(
+        response = GetPlanSummaryCompany.Success(
             plan_summary=plan_summary, current_user_is_planner=True
         )
         view_model = self.presenter.present(response)
@@ -113,7 +132,7 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
         plan_summary = replace(
             TESTING_RESPONSE_MODEL.plan_summary, is_cooperating=False, cooperation=None
         )
-        response = PlanSummaryCompanySuccess(
+        response = GetPlanSummaryCompany.Success(
             plan_summary=plan_summary, current_user_is_planner=True
         )
         view_model = self.presenter.present(response)
