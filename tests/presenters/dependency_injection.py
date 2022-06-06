@@ -338,7 +338,6 @@ class PresenterTestsInjector(Module):
     def provide_query_plans_presenter(
         self,
         notifier: Notifier,
-        coop_url_index: CoopSummaryUrlIndexTestImpl,
         plan_url_index: PlanSummaryUrlIndexTestImpl,
         company_url_index: CompanySummaryUrlIndex,
         translator: FakeTranslator,
@@ -346,7 +345,6 @@ class PresenterTestsInjector(Module):
         return QueryPlansPresenter(
             plan_url_index=plan_url_index,
             company_url_index=company_url_index,
-            coop_url_index=coop_url_index,
             user_notifier=notifier,
             trans=translator,
         )
