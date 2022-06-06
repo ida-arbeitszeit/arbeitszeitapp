@@ -29,6 +29,7 @@ from arbeitszeit_flask.next_url import (
     save_next_url_in_session,
 )
 from arbeitszeit_flask.token import FlaskTokenService
+from arbeitszeit_flask.translator import FlaskTranslator
 from arbeitszeit_flask.views.signup_accountant_view import SignupAccountantView
 from arbeitszeit_flask.views.signup_company_view import SignupCompanyView
 from arbeitszeit_flask.views.signup_member_view import SignupMemberView
@@ -159,7 +160,11 @@ def unconfirmed_company():
 @auth.route("/company/login", methods=["GET", "POST"])
 @with_injection()
 @commit_changes
-def login_company(flask_session: FlaskSession, company_repository: CompanyRepository):
+def login_company(
+    flask_session: FlaskSession,
+    company_repository: CompanyRepository,
+    translator: FlaskTranslator,
+):
     login_form = LoginForm(request.form)
     if request.method == "POST" and login_form.validate():
         email = login_form.data["email"]
@@ -174,10 +179,14 @@ def login_company(flask_session: FlaskSession, company_repository: CompanyReposi
             return redirect(next or url_for("main_company.dashboard"))
         elif not company_repository.has_company_with_email(email):
             login_form.email.errors.append(
-                "Emailadresse nicht korrekt. Bist du schon registriert?"
+                translator.gettext(
+                    "Email address is not correct. Are you already signed up?"
+                )
             )
         else:
-            login_form.password.errors.append("Passwort nicht korrekt")
+            login_form.password.errors.append(
+                translator.gettext("Password is incorrect")
+            )
 
     if current_user.is_authenticated:
         if flask_session.is_logged_in_as_company():
