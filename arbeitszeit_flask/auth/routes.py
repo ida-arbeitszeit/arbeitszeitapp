@@ -11,12 +11,12 @@ from flask import (
     url_for,
 )
 from flask_login import current_user, login_required
-from werkzeug.security import check_password_hash
 
 from arbeitszeit.use_cases import ResendConfirmationMail, ResendConfirmationMailRequest
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit_flask import database
 from arbeitszeit_flask.database import commit_changes
+from arbeitszeit_flask.database.repositories import CompanyRepository
 from arbeitszeit_flask.dependency_injection import (
     CompanyModule,
     MemberModule,
@@ -159,24 +159,25 @@ def unconfirmed_company():
 @auth.route("/company/login", methods=["GET", "POST"])
 @with_injection()
 @commit_changes
-def login_company(flask_session: FlaskSession):
+def login_company(flask_session: FlaskSession, company_repository: CompanyRepository):
     login_form = LoginForm(request.form)
     if request.method == "POST" and login_form.validate():
         email = login_form.data["email"]
         password = login_form.data["password"]
         remember = True if login_form.data["remember"] else False
 
-        company = database.get_company_by_mail(email)
-        if not company:
-            login_form.email.errors.append(
-                "Emailadresse nicht korrekt. Bist du schon registriert?"
-            )
-        elif not check_password_hash(company.password, password):
-            login_form.password.errors.append("Passwort nicht korrekt")
-        else:
+        if company_repository.validate_credentials(
+            email_address=email, password=password
+        ):
             flask_session.login_company(email, remember=remember)
             next = get_next_url_from_session()
             return redirect(next or url_for("main_company.dashboard"))
+        elif not company_repository.has_company_with_email(email):
+            login_form.email.errors.append(
+                "Emailadresse nicht korrekt. Bist du schon registriert?"
+            )
+        else:
+            login_form.password.errors.append("Passwort nicht korrekt")
 
     if current_user.is_authenticated:
         if flask_session.is_logged_in_as_company():
