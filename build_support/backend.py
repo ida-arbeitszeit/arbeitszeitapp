@@ -3,8 +3,11 @@ from setuptools import build_meta as _orig
 
 def prepare_metadata_for_build_wheel(metadata_directory, config_settings=None):
     import subprocess
+
     subprocess.run(["python", "setup.py", "compile_catalog"])
-    return _orig.prepare_metadata_for_build_wheel(metadata_directory, config_settings=None)
+    return _orig.prepare_metadata_for_build_wheel(
+        metadata_directory, config_settings=None
+    )
 
 
 def build_wheel(wheel_directory, config_settings=None, metadata_directory=None):
