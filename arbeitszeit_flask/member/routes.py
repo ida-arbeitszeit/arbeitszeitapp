@@ -183,7 +183,7 @@ def plan_summary(
     http_404_view: Http404View,
 ) -> Response:
     use_case_response = get_plan_summary_member(plan_id)
-    if isinstance(use_case_response, use_cases.PlanSummarySuccess):
+    if isinstance(use_case_response, use_cases.GetPlanSummaryMember.Success):
         view_model = presenter.present(use_case_response)
         return Response(
             template_renderer.render_template(

@@ -1,9 +1,9 @@
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, Optional
 
-from arbeitszeit.use_cases.get_plan_summary_company import PlanSummaryCompanySuccess
+from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
 
-from .plan_summary_service import PlanSummary, PlanSummaryService
+from .plan_summary_service import PlanSummaryService, PlanSummaryWeb
 from .translator import Translator
 from .url_index import (
     EndCoopUrlIndex,
@@ -14,7 +14,7 @@ from .url_index import (
 
 @dataclass
 class Action:
-    is_available: bool
+    is_available_bool: bool
     toggle_availability_url: str
     is_cooperating: bool
     end_coop_url: Optional[str]
@@ -23,7 +23,7 @@ class Action:
 
 @dataclass
 class GetPlanSummaryCompanyViewModel:
-    summary: PlanSummary
+    summary: PlanSummaryWeb
     show_action_section: bool
     action: Action
 
@@ -40,17 +40,16 @@ class GetPlanSummaryCompanySuccessPresenter:
     plan_summary_service: PlanSummaryService
 
     def present(
-        self, response: PlanSummaryCompanySuccess
+        self, response: GetPlanSummaryCompany.Success
     ) -> GetPlanSummaryCompanyViewModel:
         plan_id = response.plan_summary.plan_id
         coop_id = response.plan_summary.cooperation
-        is_available = response.plan_summary.is_available
         is_cooperating = response.plan_summary.is_cooperating
         return GetPlanSummaryCompanyViewModel(
             summary=self.plan_summary_service.get_plan_summary(response.plan_summary),
             show_action_section=response.current_user_is_planner,
             action=Action(
-                is_available=is_available,
+                is_available_bool=response.plan_summary.is_available,
                 toggle_availability_url=self.toggle_availability_url_index.get_toggle_availability_url(
                     plan_id
                 ),

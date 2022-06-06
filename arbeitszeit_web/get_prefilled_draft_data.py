@@ -5,7 +5,7 @@ from decimal import Decimal
 from typing import Protocol, Union
 
 from arbeitszeit.entities import ProductionCosts
-from arbeitszeit.plan_summary import BusinessPlanSummary
+from arbeitszeit.plan_summary import PlanSummary
 from arbeitszeit.use_cases import CreatePlanDraftRequest, DraftSummarySuccess
 from arbeitszeit_web.session import Session
 
@@ -88,7 +88,7 @@ class GetPrefilledDraftDataPresenter:
 
     def show_prefilled_draft_data(
         self,
-        summary_data: Union[BusinessPlanSummary, DraftSummarySuccess],
+        summary_data: Union[PlanSummary, DraftSummarySuccess],
     ) -> ViewModel:
         prefilled_data = self.PrefilledDraftData(
             prd_name=summary_data.product_name,
