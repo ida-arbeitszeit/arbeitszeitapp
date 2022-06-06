@@ -26,52 +26,52 @@
             </form>
         </div>
     </div>
-    {% if view_model.show_results %}
     <h1 class="title">
         Ergebnisse
     </h1>
-    <div class="table-container">
-        <table class="table is-fullwidth">
-            <thead>
-                <tr>
-                    <th>{{ gettext("Plan ID") }}</th>
-                    <th>{{ gettext("Product name") }}</th>
-                    <th>{{ gettext("Company") }}</th>
-                    <th>{{ gettext("Description") }}</th>
-                    <th>{{ gettext("Price per unit") }}</th>
-                    <th>{{ gettext("Type") }}</th>
-                    <th>{{ gettext("Ends in")}}</th>
-                    <th>{{ gettext("Available")}}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for column in view_model.results.rows %}
-                <tr>
-                    <td><a href="{{ column.plan_summary_url }}">{{ column.plan_id }}</a>
-                    </td>
-                    <td>{{ column.product_name }}</td>
-                    <td><a href="{{ column.company_summary_url }}">{{ column.company_name }}</a></td>
-                    <td>{% for paragraph in column.description %}{{ paragraph }}<br>{% endfor %}</td>
-                    <td>{{ column.price_per_unit }} {% if column.is_cooperating %} <span>
-                            <a href="{{ column.coop_summary_url }}"><i class="fas fa-hands-helping"></i></a></span>{%
-                        endif %}
-                    </td>
-                    <td>{{ column.type_of_plan }}</td>
-                    <td>{{ column.ends_in }}</td>
-                    {% if column.is_available %}
-                    <td>
-                        <span class="icon has-text-success"><i class="fas fa-circle"></i></span>
-                    </td>
-                    {% else %}
-                    <td>
-                        <span class="icon has-text-danger"><i class="fas fa-circle"></i></span>
-                    </td>
-                    {% endif %}
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% endif %}
 </div>
+
+{% if view_model.show_results %}
+<div class="section">
+    <div class="columns is-centered">
+        <div class="column is-one-third">
+            {% for column in view_model.results.rows %}
+            <article class="media">
+                <div class="media-content">
+                    <div class="content">
+                        <p>
+                            <strong class="is-size-5">
+                                <a href="{{ column.plan_summary_url }}">{{ column.product_name }}</a>
+                            </strong>
+                            <br>
+                            <small><a href="{{ column.company_summary_url }}">@{{ column.company_name }}</a></small>
+                            <br>
+                            <span>
+                                {{ column.description }}
+                            </span>
+                        </p>
+                    </div>
+                    <div>
+                        {% if not column.is_available %}
+                        <span class="tag is-danger">{{ gettext("Product not available") }}</span>
+                        {% endif %}
+                        {% if column.is_cooperating %}
+                        <span class="tag is-primary">{{ gettext("Cooperating plan") }}</span>
+                        {% endif %}
+                        {% if column.is_public_service %}
+                        <span class="tag is-warning">{{ gettext("Public") }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="media-right">
+                    <p class="is-size-5">
+                        {{ column.price_per_unit }}
+                    </p>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endmacro %}
