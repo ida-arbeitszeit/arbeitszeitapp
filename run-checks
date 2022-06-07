@@ -12,10 +12,12 @@ def main():
     autoformatted_paths = read_autoformat_target_paths()
     run_check_command(["black", "--check"] + autoformatted_paths)
     run_check_command(["flake8"])
+    run_check_command(["flake8", "update-bulma"])
     run_check_command(["mypy"])
     run_check_command(["mypy", "run-checks"])
     run_check_command(["mypy", "format_code.py"])
     run_check_command(["mypy", "update-requirements-from-nix"])
+    run_check_command(["mypy", "update-bulma"])
     if configuration.is_unittests_requested:
         run_check_command(["pytest"])
     run_check_command(["isort", "--check"] + autoformatted_paths)
