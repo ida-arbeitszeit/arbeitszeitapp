@@ -13,10 +13,10 @@ from flask import (
 from flask_login import current_user, login_required
 
 from arbeitszeit.use_cases import ResendConfirmationMail, ResendConfirmationMailRequest
+from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit_flask import database
 from arbeitszeit_flask.database import commit_changes
-from arbeitszeit_flask.database.repositories import CompanyRepository
 from arbeitszeit_flask.dependency_injection import (
     CompanyModule,
     MemberModule,
@@ -24,10 +24,7 @@ from arbeitszeit_flask.dependency_injection import (
 )
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import LoginForm
-from arbeitszeit_flask.next_url import (
-    get_next_url_from_session,
-    save_next_url_in_session,
-)
+from arbeitszeit_flask.next_url import save_next_url_in_session
 from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.translator import FlaskTranslator
 from arbeitszeit_flask.views.signup_accountant_view import SignupAccountantView
@@ -162,7 +159,7 @@ def unconfirmed_company():
 @commit_changes
 def login_company(
     flask_session: FlaskSession,
-    company_repository: CompanyRepository,
+    log_in_use_case: LogInCompanyUseCase,
     translator: FlaskTranslator,
 ):
     login_form = LoginForm(request.form)
@@ -171,13 +168,19 @@ def login_company(
         password = login_form.data["password"]
         remember = True if login_form.data["remember"] else False
 
-        if company_repository.validate_credentials(
-            email_address=email, password=password
-        ):
+        use_case_request = LogInCompanyUseCase.Request(
+            email_address=email,
+            password=password,
+        )
+        use_case_response = log_in_use_case.log_in_company(use_case_request)
+        if use_case_response.is_logged_in:
             flask_session.login_company(email, remember=remember)
-            next = get_next_url_from_session()
+            next = flask_session.pop_next_url()
             return redirect(next or url_for("main_company.dashboard"))
-        elif not company_repository.has_company_with_email(email):
+        elif (
+            use_case_response.rejection_reason
+            == LogInCompanyUseCase.RejectionReason.invalid_email_address
+        ):
             login_form.email.errors.append(
                 translator.gettext(
                     "Email address is not correct. Are you already signed up?"

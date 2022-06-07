@@ -293,6 +293,7 @@ class CompanyRepository(interfaces.CompanyRepository):
     @inject
     def __init__(self) -> None:
         self.companies: Dict[str, Company] = {}
+        self.passwords: Dict[UUID, str] = {}
 
     def create_company(
         self,
@@ -317,6 +318,7 @@ class CompanyRepository(interfaces.CompanyRepository):
             confirmed_on=None,
         )
         self.companies[email] = new_company
+        self.passwords[new_company.id] = password
         return new_company
 
     def has_company_with_email(self, email: str) -> bool:
@@ -343,6 +345,13 @@ class CompanyRepository(interfaces.CompanyRepository):
 
     def get_all_companies(self) -> Iterator[Company]:
         yield from self.companies.values()
+
+    def validate_credentials(self, email_address: str, password: str) -> Optional[UUID]:
+        if company := self.companies.get(email_address):
+            if correct_password := self.passwords.get(company.id):
+                if password == correct_password:
+                    return company.id
+        return None
 
 
 @singleton
