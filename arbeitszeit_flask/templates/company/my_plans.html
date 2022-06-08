@@ -10,46 +10,46 @@
     <h1>{{ gettext("My plans") }}</h1>
   </div>
   <h1 class="title is-4">{{ gettext("Active")}}</h1>
-  <div class="table-container">
-    {% if show_active_plans %}
-    <table class="table is-fullwidth">
-      <thead>
-        <tr>
-          <th></th>
-          <th>{{ gettext("Costs")}}</th>
-          <th>{{ gettext("Type")}}</th>
-          <th>{{ gettext("Planning timeframe")}}</th>
-          <th>{{ gettext("Ends in (days)")}}</th>
-          <th>{{ gettext("Product available")}}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for plan in active_plans.rows %}
-        <tr>
-          <td><a href="{{ plan.plan_summary_url }}">{{ plan.prd_name }}</a></td>
-          <td>{{ plan.price_per_unit }} {% if plan.is_cooperating %} <span><a href="{{ plan.coop_summary_url }}"><i
-                  class="fas fa-hands-helping"></i></a></span>{%
-            endif %}
-          </td>
-          <td>{{ plan.type_of_plan }}</td>
-          <td>{{ plan.activation_date }} - {{ plan.expiration_date }}</td>
-          <td>{{ plan.expiration_relative }}</td>
-          {% if plan.is_available %}
-          <td>
-            <span class="icon has-text-success"><i class="fas fa-circle"></i></span>
-          </td>
-          {% else %}
-          <td>
-            <span class="icon has-text-danger"><i class="fas fa-circle"></i></span>
-          </td>
-          {% endif %}
-          {% endfor %}
-      </tbody>
-    </table>
-    {% else %}
-    <p>{{ gettext("You don't have active plans.")}}</p>
-    {% endif %}
+  {% if show_active_plans %}
+  {% for plan in active_plans.rows %}
+  <div class="columns is-centered has-text-left">
+    <div class="column is-one-third">
+      <article class="media">
+        <div class="media-content">
+          <div class="content">
+            <p>
+              <strong class="is-size-5">
+                <a href="{{ plan.plan_summary_url }}">{{ plan.prd_name }}</a>
+              </strong>
+              <br>
+              <small><i class="fa-solid fa-calendar"></i>&nbsp;{{ plan.activation_date }}</small>
+              <small><i class="fa-solid fa-hourglass"></i>&nbsp;{{ plan.expiration_relative }}</small>
+            </p>
+          </div>
+          <div>
+            {% if not plan.is_available %}
+            <span class="tag is-danger">{{ gettext("Product not available") }}</span>
+            {% endif %}
+            {% if plan.is_cooperating %}
+            <span class="tag is-primary">{{ gettext("Cooperating plan") }}</span>
+            {% endif %}
+            {% if plan.is_public_service %}
+            <span class="tag is-warning">{{ gettext("Public") }}</span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="media-right">
+          <p class="is-size-5">
+            {{ plan.price_per_unit }}
+          </p>
+        </div>
+      </article>
+    </div>
   </div>
+  {% endfor %}
+  {% else %}
+  <p>{{ gettext("You don't have active plans.")}}</p>
+  {% endif %}
 
   <h1 class="title is-4">{{ gettext("Waiting")}}</h1>
 

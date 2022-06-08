@@ -9,12 +9,7 @@ from tests.data_generators import CooperationGenerator, PlanGenerator
 from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
-from .url_index import (
-    CoopSummaryUrlIndexTestImpl,
-    HidePlanUrlIndex,
-    PlanSummaryUrlIndexTestImpl,
-    RenewPlanUrlIndex,
-)
+from .url_index import HidePlanUrlIndex, PlanSummaryUrlIndexTestImpl, RenewPlanUrlIndex
 
 
 def _convert_into_plan_info(plan: Plan) -> PlanInfo:
@@ -76,7 +71,6 @@ class ShowMyPlansPresenterTests(TestCase):
     def setUp(self):
         self.injector = get_dependency_injector()
         self.plan_url_index = self.injector.get(PlanSummaryUrlIndexTestImpl)
-        self.coop_url_index = self.injector.get(CoopSummaryUrlIndexTestImpl)
         self.renew_plan_url_index = self.injector.get(RenewPlanUrlIndex)
         self.hide_plan_url_index = self.injector.get(HidePlanUrlIndex)
         self.translator = self.injector.get(FakeTranslator)
@@ -123,17 +117,13 @@ class ShowMyPlansPresenterTests(TestCase):
             presentation.active_plans.rows[0].plan_summary_url,
             self.plan_url_index.get_plan_summary_url(plan.id),
         )
-        self.assertEqual(presentation.active_plans.rows[0].coop_summary_url, None)
         self.assertEqual(presentation.active_plans.rows[0].prd_name, plan.prd_name)
         self.assertEqual(
             presentation.active_plans.rows[0].price_per_unit,
             str("10.00"),
         )
         self.assertEqual(
-            presentation.active_plans.rows[0].type_of_plan,
-            self.translator.gettext("Public")
-            if plan.is_public_service
-            else self.translator.gettext("Productive"),
+            presentation.active_plans.rows[0].is_public_service, plan.is_public_service
         )
         self.assertEqual(
             presentation.active_plans.rows[0].is_available,
@@ -152,10 +142,6 @@ class ShowMyPlansPresenterTests(TestCase):
 
         RESPONSE_WITH_COOPERATING_PLAN = response_with_one_active_plan(plan)
         presentation = self.presenter.present(RESPONSE_WITH_COOPERATING_PLAN)
-        self.assertEqual(
-            presentation.active_plans.rows[0].coop_summary_url,
-            self.coop_url_index.get_coop_summary_url(coop.id),
-        )
         self.assertEqual(
             presentation.active_plans.rows[0].is_cooperating,
             True,
