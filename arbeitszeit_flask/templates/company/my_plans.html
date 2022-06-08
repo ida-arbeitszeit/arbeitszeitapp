@@ -5,15 +5,16 @@
 {% endblock %}
 
 {% block content %}
-<div class="section has-text-centered">
-  <div class="content">
-    <h1>{{ gettext("My plans") }}</h1>
-  </div>
-  <h1 class="title is-4">{{ gettext("Active")}}</h1>
+<div class="content has-text-centered">
+  <h1>{{ gettext("My plans") }}</h1>
+</div>
+
+<div class="section">
+  <h1 class="title is-4 has-text-centered">{{ gettext("Active")}}</h1>
   {% if show_active_plans %}
-  {% for plan in active_plans.rows %}
   <div class="columns is-centered has-text-left">
     <div class="column is-one-third">
+      {% for plan in active_plans.rows %}
       <article class="media">
         <div class="media-content">
           <div class="content">
@@ -39,20 +40,21 @@
           </div>
         </div>
         <div class="media-right">
-          <p class="is-size-5">
+          <p class="is-size-5 pt-1">
             {{ plan.price_per_unit }}
           </p>
         </div>
       </article>
+      {% endfor %}
     </div>
   </div>
-  {% endfor %}
   {% else %}
-  <p>{{ gettext("You don't have active plans.")}}</p>
+  <p class="has-text-centered">{{ gettext("You don't have active plans.")}}</p>
   {% endif %}
+</div>
 
-  <h1 class="title is-4">{{ gettext("Waiting")}}</h1>
-
+<div class="section">
+  <h1 class="title is-4 has-text-centered">{{ gettext("Waiting")}}</h1>
   <div class="table-container">
     {% if show_non_active_plans %}
     <table class="table is-fullwidth">
@@ -76,43 +78,42 @@
       </tbody>
     </table>
     {% else %}
-    <p>{{ gettext("You don't have plans waiting for activation.")}}</p>
+    <p class="has-text-centered">{{ gettext("You don't have plans waiting for activation.")}}</p>
     {% endif %}
   </div>
+</div>
 
-  <h1 class="title is-4">{{ gettext("Expired")}}</h1>
-
-  <div class="table-container">
-    {% if show_expired_plans %}
-    <table class="table is-fullwidth">
-      <thead>
-        <tr>
-          <th></th>
-          <th>{{ gettext("Type") }}</th>
-          <th>{{ gettext("Plan created") }}</th>
-          <th>{{ gettext("Renew plan") }}</th>
-          <th>{{ gettext("Hide plan")}}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for plan in expired_plans.rows %}
-        <tr>
-          <td><a href="{{ plan.plan_summary_url }}">{{ plan.prd_name }}</a></td>
-          <td>{{ plan.type_of_plan }}</td>
-          <td>{{ plan.plan_creation_date }}</td>
-          <td>
-            <a href="{{ plan.renew_plan_url }}"><i class="{{ 'fas fa-redo' }}"></i></a>
-          </td>
-          <td>
+<div class="section">
+  <h1 class="title is-4 has-text-centered">{{ gettext("Expired")}}</h1>
+  {% if show_expired_plans %}
+  <div class="columns is-centered has-text-left">
+    <div class="column is-one-third">
+      {% for plan in expired_plans.rows %}
+      <article class="media">
+        <div class="media-content">
+          <div class="content">
+            <p>
+              <strong class="is-size-5">
+                <a href="{{ plan.plan_summary_url }}">{{ plan.prd_name }}</a>
+              </strong>
+              <br>
+              <small><i class="fa-solid fa-calendar"></i>&nbsp;{{ plan.plan_creation_date }}</small>
+            </p>
+          </div>
+        </div>
+        <div class="media-right">
+          <div class="content pt-1">
+            <a href="{{ plan.renew_plan_url }}"><i class="fas fa-redo"></i></a>
+            &nbsp;
             <a href="{{ plan.hide_plan_url }}"><i class="fas fa-trash"></i></a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {% else %}
-    <p>{{ gettext("You don't have expired plans.") }}</p>
-    {% endif %}
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
   </div>
+  {% else %}
+  <p class="has-text-centered">{{ gettext("You don't have expired plans.") }}</p>
+  {% endif %}
 </div>
 {% endblock %}

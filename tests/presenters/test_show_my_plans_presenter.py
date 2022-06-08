@@ -161,7 +161,7 @@ class ShowMyPlansPresenterTests(TestCase):
             row1.prd_name,
             expected_plan.prd_name,
         )
-        self.assertEqual(row1.type_of_plan, self.translator.gettext("Productive"))
+        self.assertEqual(row1.is_public_service, plan.is_public_service)
         self.assertEqual(
             row1.renew_plan_url, self.renew_plan_url_index.get_renew_plan_url(plan.id)
         )
