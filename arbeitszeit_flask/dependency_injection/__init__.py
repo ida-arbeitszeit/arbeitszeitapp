@@ -17,6 +17,7 @@ from injector import (
 from arbeitszeit import entities
 from arbeitszeit import repositories as interfaces
 from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.political_decisions import PoliticalDecisions
 from arbeitszeit.token import InvitationTokenValidator, TokenDeliverer, TokenService
 from arbeitszeit.use_cases import (
     CheckForUnreadMessages,
@@ -74,6 +75,7 @@ from arbeitszeit_flask.mail_service import (
     get_mail_service,
 )
 from arbeitszeit_flask.notifications import FlaskFlashNotifier
+from arbeitszeit_flask.political_decisions import PoliticalDecisionsFlask
 from arbeitszeit_flask.template import (
     CompanyTemplateIndex,
     FlaskTemplateRenderer,
@@ -1042,6 +1044,12 @@ class FlaskModule(Module):
             translator=translator,
             member_url_index=member_url_index,
         )
+
+    @provider
+    def provide_political_decisions(
+        self, political_decisions: PoliticalDecisionsFlask
+    ) -> PoliticalDecisions:
+        return political_decisions
 
     def configure(self, binder: Binder) -> None:
         binder.bind(
