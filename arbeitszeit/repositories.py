@@ -286,6 +286,10 @@ class CompanyRepository(ABC):
     def get_all_companies(self) -> Iterator[Company]:
         pass
 
+    @abstractmethod
+    def validate_credentials(self, email_address: str, password: str) -> Optional[UUID]:
+        pass
+
 
 class PlanDraftRepository(ABC):
     @abstractmethod

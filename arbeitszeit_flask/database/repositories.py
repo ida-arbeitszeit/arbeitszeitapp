@@ -266,6 +266,16 @@ class CompanyRepository(repositories.CompanyRepository):
     def get_all_companies(self) -> Iterator[entities.Company]:
         return (self.object_from_orm(company) for company in Company.query.all())
 
+    def validate_credentials(self, email_address: str, password: str) -> Optional[UUID]:
+        if (
+            company := self.db.session.query(Company)
+            .filter(Company.email == email_address)
+            .first()
+        ):
+            if check_password_hash(company.password, password):
+                return UUID(company.id)
+        return None
+
 
 @inject
 @dataclass
