@@ -68,6 +68,8 @@ class ConsumerProductTransaction:
         price = self.amount * calculate_price(
             self.plan_cooperation_repository.get_cooperating_plans(self.plan.id)
         )
+        if price == 0:
+            return None
         if (account_balance - price + allowed_overdraw) < 0:
             raise errors.MemberHasInsufficientBalance(
                 member=self.buyer, balance=account_balance, requested=price

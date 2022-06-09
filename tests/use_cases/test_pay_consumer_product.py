@@ -102,6 +102,20 @@ class PayConsumerProductTests(TestCase):
         self.pay_consumer_product(self.make_request(plan.id, amount=3))
         assert len(self.purchase_repository.purchases) == 0
 
+    def test_payment_is_successful_if_member_has_negative_certs_and_buys_public_product(
+        self,
+    ):
+        plan = self.plan_generator.create_plan(
+            activation_date=self.datetime_service.now(), is_public_service=True
+        )
+        account = self.buyer.account
+        self.make_transaction_to_buyer_account(Decimal("-10"))
+        assert self.account_repository.get_account_balance(account) == Decimal("-10")
+        self.political_decisions.set_allowed_overdraw_of_member_account(0)
+
+        response = self.pay_consumer_product(self.make_request(plan.id, 3))
+        self.assertTrue(response.is_accepted)
+
     def test_payment_is_unsuccessful_if_member_without_certs_buys_value_of_10_and_has_account_limit_of_9(
         self,
     ):
