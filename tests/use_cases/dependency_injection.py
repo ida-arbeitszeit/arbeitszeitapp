@@ -3,6 +3,7 @@ from injector import Injector, Module, inject, provider, singleton
 import arbeitszeit.repositories as interfaces
 from arbeitszeit import entities
 from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.political_decisions import PoliticalDecisions
 from arbeitszeit.token import InvitationTokenValidator, TokenDeliverer, TokenService
 from arbeitszeit.use_cases import GetCompanySummary
 from arbeitszeit.use_cases.get_accountant_profile_info import (
@@ -24,6 +25,7 @@ from tests.accountant_invitation_presenter import AccountantInvitationPresenterT
 from tests.datetime_service import FakeDatetimeService
 from tests.dependency_injection import TestingModule
 from tests.token import FakeTokenService, TokenDeliveryService
+from tests.use_cases.political_decisions import PoliticalDecisionsTestImpl
 
 from . import repositories
 
@@ -216,6 +218,13 @@ class InMemoryModule(Module):
         self, member_repository: interfaces.MemberRepository
     ) -> LogInMemberUseCase:
         return LogInMemberUseCase(member_repository=member_repository)
+
+    @provider
+    @singleton
+    def provide_political_decisions(
+        self, political_decisions: PoliticalDecisionsTestImpl
+    ) -> PoliticalDecisions:
+        return political_decisions
 
 
 def get_dependency_injector() -> Injector:

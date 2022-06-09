@@ -4,10 +4,13 @@ from dataclasses import dataclass
 
 from injector import inject
 
+from arbeitszeit import errors
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Member, Plan, PurposesOfPurchases
+from arbeitszeit.political_decisions import PoliticalDecisions
 from arbeitszeit.price_calculator import calculate_price
 from arbeitszeit.repositories import (
+    AccountRepository,
     PlanCooperationRepository,
     PurchaseRepository,
     TransactionRepository,
@@ -21,6 +24,8 @@ class ConsumerProductTransactionFactory:
     purchase_repository: PurchaseRepository
     transaction_repository: TransactionRepository
     plan_cooperation_repository: PlanCooperationRepository
+    account_repository: AccountRepository
+    political_decisions: PoliticalDecisions
 
     def create_consumer_product_transaction(
         self,
@@ -36,6 +41,8 @@ class ConsumerProductTransactionFactory:
             self.purchase_repository,
             self.transaction_repository,
             self.plan_cooperation_repository,
+            self.account_repository,
+            self.political_decisions,
         )
 
 
@@ -48,6 +55,23 @@ class ConsumerProductTransaction:
     purchase_repository: PurchaseRepository
     transaction_repository: TransactionRepository
     plan_cooperation_repository: PlanCooperationRepository
+    account_repository: AccountRepository
+    political_decisions: PoliticalDecisions
+
+    def check_for_sufficient_account_balance(self) -> None:
+        allowed_overdraw = (
+            self.political_decisions.get_allowed_overdraw_of_member_account()
+        )
+        account_balance = self.account_repository.get_account_balance(
+            self.buyer.account
+        )
+        price = self.amount * calculate_price(
+            self.plan_cooperation_repository.get_cooperating_plans(self.plan.id)
+        )
+        if (account_balance - price + allowed_overdraw) < 0:
+            raise errors.MemberHasInsufficientBalance(
+                member=self.buyer, balance=account_balance, requested=price
+            )
 
     def record_purchase(self) -> None:
         price_per_unit = calculate_price(
