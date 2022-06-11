@@ -49,11 +49,6 @@ class PayConsumerProduct:
     ) -> PayConsumerProductResponse:
         try:
             return self._perform_buying_process(request)
-
-        except errors.MemberHasInsufficientBalance:
-            return PayConsumerProductResponse(
-                rejection_reason=RejectionReason.insufficient_balance
-            )
         except errors.PlanIsInactive:
             return PayConsumerProductResponse(
                 rejection_reason=RejectionReason.plan_inactive
@@ -68,7 +63,10 @@ class PayConsumerProduct:
     ) -> PayConsumerProductResponse:
         plan = self._get_active_plan(request)
         transaction = self._create_product_transaction(plan, request)
-        transaction.check_for_sufficient_account_balance()
+        if not transaction.is_account_balance_sufficient():
+            return PayConsumerProductResponse(
+                rejection_reason=RejectionReason.insufficient_balance
+            )
         transaction.record_purchase()
         transaction.exchange_currency()
         return PayConsumerProductResponse(rejection_reason=None)

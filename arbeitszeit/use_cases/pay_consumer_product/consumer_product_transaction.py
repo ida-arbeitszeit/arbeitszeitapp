@@ -4,7 +4,6 @@ from dataclasses import dataclass
 
 from injector import inject
 
-from arbeitszeit import errors
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Member, Plan, PurposesOfPurchases
 from arbeitszeit.political_decisions import PoliticalDecisions
@@ -58,7 +57,7 @@ class ConsumerProductTransaction:
     account_repository: AccountRepository
     political_decisions: PoliticalDecisions
 
-    def check_for_sufficient_account_balance(self) -> None:
+    def is_account_balance_sufficient(self) -> bool:
         allowed_overdraw = (
             self.political_decisions.get_allowed_overdraw_of_member_account()
         )
@@ -69,11 +68,10 @@ class ConsumerProductTransaction:
             self.plan_cooperation_repository.get_cooperating_plans(self.plan.id)
         )
         if price == 0:
-            return None
+            return True
         if (account_balance - price + allowed_overdraw) < 0:
-            raise errors.MemberHasInsufficientBalance(
-                member=self.buyer, balance=account_balance, requested=price
-            )
+            return False
+        return True
 
     def record_purchase(self) -> None:
         price_per_unit = calculate_price(
