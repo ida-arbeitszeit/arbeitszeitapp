@@ -11,6 +11,8 @@ from arbeitszeit_flask.dependency_injection import FlaskModule, ViewsModule
 from arbeitszeit_flask.extensions import db
 from tests.dependency_injection import TestingModule
 
+from .renderer import FakeTemplateRenderer
+
 
 class FlaskConfiguration(dict):
     def __init__(self, *args, **kwargs):
@@ -77,6 +79,11 @@ class SqliteModule(Module):
     @provider
     def provide_flask_configuration(self) -> FlaskConfiguration:
         return FlaskConfiguration.default()
+
+    @singleton
+    @provider
+    def provide_fake_template_renderer(self) -> FakeTemplateRenderer:
+        return FakeTemplateRenderer()
 
 
 def get_dependency_injector(additional_modules: Optional[List[Module]] = None):

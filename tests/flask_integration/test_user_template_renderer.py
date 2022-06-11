@@ -10,12 +10,10 @@ class CompanyTemplateRendererTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.fake_template_renderer = FakeTemplateRenderer()
-        self.session = FakeSession()
+        self.session = self.injector.get(FakeSession)
         self.renderer = self.injector.create_object(
             UserTemplateRenderer,
-            additional_kwargs=dict(
-                inner_renderer=self.fake_template_renderer, session=self.session
-            ),
+            additional_kwargs=dict(inner_renderer=self.fake_template_renderer),
         )
         self.company_generator = self.injector.get(CompanyGenerator)
 
@@ -34,7 +32,7 @@ class CompanyTemplateRendererTests(FlaskTestCase):
         )
         self.assertIn(
             "test variable",
-            self.fake_template_renderer.previouse_render_context,
+            self.fake_template_renderer.previous_render_context,
         )
 
     def test_adds_message_indicator_to_context_when_user_is_registered(self) -> None:
@@ -43,5 +41,5 @@ class CompanyTemplateRendererTests(FlaskTestCase):
         self.session.set_current_user_id(user.id)
         self.renderer.render_template("test.html")
         self.assertIn(
-            "message_indicator", self.fake_template_renderer.previouse_render_context
+            "message_indicator", self.fake_template_renderer.previous_render_context
         )

@@ -16,6 +16,7 @@ from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts
 from arbeitszeit_flask.database.repositories import MemberRepository
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.template import (
+    AnonymousUserTemplateRenderer,
     TemplateIndex,
     TemplateRenderer,
     UserTemplateRenderer,
@@ -267,7 +268,7 @@ class ViewsModule(Module):
     @provider
     def provide_signup_accountant_view(
         self,
-        template_renderer: TemplateRenderer,
+        template_renderer: AnonymousUserTemplateRenderer,
         controller: RegisterAccountantController,
         presenter: RegisterAccountantPresenter,
         use_case: RegisterAccountantUseCase,

@@ -78,6 +78,7 @@ from arbeitszeit_flask.mail_service import (
 )
 from arbeitszeit_flask.notifications import FlaskFlashNotifier
 from arbeitszeit_flask.template import (
+    AnonymousUserTemplateRenderer,
     CompanyTemplateIndex,
     FlaskTemplateRenderer,
     MemberRegistrationEmailTemplateImpl,
@@ -952,17 +953,28 @@ class FlaskModule(Module):
     def provide_user_template_renderer(
         self,
         flask_template_renderer: FlaskTemplateRenderer,
-        session: Session,
         check_unread_messages_use_case: CheckForUnreadMessages,
         check_unread_messages_controller: CheckForUnreadMessagesController,
         check_unread_messages_presenter: CheckForUnreadMessagesPresenter,
     ) -> UserTemplateRenderer:
         return UserTemplateRenderer(
             flask_template_renderer,
-            session,
             check_unread_messages_use_case,
             check_unread_messages_controller,
             check_unread_messages_presenter,
+        )
+
+    @provider
+    def provide_anonymous_user_template_renderer(
+        self,
+        inner_renderer: TemplateRenderer,
+        list_languages_user_case: ListAvailableLanguagesUseCase,
+        list_languages_presenter: ListAvailableLanguagesPresenter,
+    ) -> AnonymousUserTemplateRenderer:
+        return AnonymousUserTemplateRenderer(
+            inner_renderer=inner_renderer,
+            list_languages_use_case=list_languages_user_case,
+            list_languages_presenter=list_languages_presenter,
         )
 
     @provider

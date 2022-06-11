@@ -5,7 +5,7 @@ from flask import Response, redirect, request
 from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
 from arbeitszeit_flask import types
 from arbeitszeit_flask.forms import RegisterAccountantForm
-from arbeitszeit_flask.template import TemplateRenderer
+from arbeitszeit_flask.template import AnonymousUserTemplateRenderer
 from arbeitszeit_web.controllers.register_accountant_controller import (
     RegisterAccountantController,
 )
@@ -16,7 +16,7 @@ from arbeitszeit_web.presenters.register_accountant_presenter import (
 
 @dataclass
 class SignupAccountantView:
-    template_renderer: TemplateRenderer
+    template_renderer: AnonymousUserTemplateRenderer
     controller: RegisterAccountantController
     presenter: RegisterAccountantPresenter
     use_case: RegisterAccountantUseCase
