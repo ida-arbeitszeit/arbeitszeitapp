@@ -10,6 +10,7 @@ from arbeitszeit.use_cases.get_accountant_profile_info import (
 )
 from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
 from arbeitszeit.use_cases.log_in_accountant import LogInAccountantUseCase
+from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit.use_cases.register_company.company_registration_message_presenter import (
     CompanyRegistrationMessagePresenter,
@@ -234,6 +235,12 @@ class InMemoryModule(Module):
         self, language_repository: interfaces.LanguageRepository
     ) -> ListAvailableLanguagesUseCase:
         return ListAvailableLanguagesUseCase(language_repository=language_repository)
+
+    @provider
+    def provide_log_in_company_use_case(
+        self, company_repository: interfaces.CompanyRepository
+    ) -> LogInCompanyUseCase:
+        return LogInCompanyUseCase(company_repository=company_repository)
 
 
 def get_dependency_injector() -> Injector:

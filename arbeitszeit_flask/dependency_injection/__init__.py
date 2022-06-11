@@ -29,6 +29,7 @@ from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
 from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
 from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
 from arbeitszeit.use_cases.list_workers import ListWorkers
+from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProduction
 from arbeitszeit.use_cases.register_company.company_registration_message_presenter import (
@@ -1069,6 +1070,14 @@ class FlaskModule(Module):
             session=session,
             translator=translator,
             member_url_index=member_url_index,
+        )
+
+    @provider
+    def provide_log_in_company_use_case(
+        self, company_repository: CompanyRepository
+    ) -> LogInCompanyUseCase:
+        return LogInCompanyUseCase(
+            company_repository=company_repository,
         )
 
     def configure(self, binder: Binder) -> None:
