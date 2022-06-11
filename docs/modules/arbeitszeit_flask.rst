@@ -7,11 +7,13 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   arbeitszeit_flask.accountant
    arbeitszeit_flask.auth
    arbeitszeit_flask.company
    arbeitszeit_flask.database
    arbeitszeit_flask.dependency_injection
    arbeitszeit_flask.member
+   arbeitszeit_flask.plots
    arbeitszeit_flask.views
 
 Submodules
@@ -41,14 +43,6 @@ arbeitszeit\_flask.datetime module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit\_flask.error module
--------------------------------
-
-.. automodule:: arbeitszeit_flask.error
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 arbeitszeit\_flask.extensions module
 ------------------------------------
 
@@ -57,10 +51,10 @@ arbeitszeit\_flask.extensions module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit\_flask.filter module
---------------------------------
+arbeitszeit\_flask.flask\_colors module
+---------------------------------------
 
-.. automodule:: arbeitszeit_flask.filter
+.. automodule:: arbeitszeit_flask.flask_colors
    :members:
    :undoc-members:
    :show-inheritance:
