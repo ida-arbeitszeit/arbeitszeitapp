@@ -35,8 +35,9 @@ def start(template_renderer: AnonymousUserTemplateRenderer):
 
 
 @auth.route("/help")
-def help():
-    return render_template("auth/start_hilfe.html")
+@with_injection()
+def help(template_renderer: AnonymousUserTemplateRenderer):
+    return template_renderer.render_template("auth/start_hilfe.html")
 
 
 @auth.route("/language=<language>")
