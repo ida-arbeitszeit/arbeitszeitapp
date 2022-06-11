@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import List, Optional
 
 from flask import Flask
@@ -16,6 +18,25 @@ class FlaskConfiguration(dict):
         for key, value in self.items():
             if key.isupper():
                 setattr(self, key, value)
+
+    @classmethod
+    def default(cls) -> FlaskConfiguration:
+        return cls(
+            {
+                "SQLALCHEMY_DATABASE_URI": "sqlite://",
+                "SQLALCHEMY_TRACK_MODIFICATIONS": False,
+                "SECRET_KEY": "dev secret key",
+                "WTF_CSRF_ENABLED": False,
+                "SERVER_NAME": "test.name",
+                "ENV": "development",
+                "DEBUG_DETAILS": False,
+                "SECURITY_PASSWORD_SALT": "dev password salt",
+                "TESTING": True,
+                "MAIL_DEFAULT_SENDER": "test_sender@cp.org",
+                "MAIL_BACKEND": "flask_mail",
+                "LANGUAGES": {"en": "English", "de": "Deutsch"},
+            }
+        )
 
     def _get_template_folder(self) -> Optional[str]:
         return self.get("template_folder")
@@ -37,40 +58,25 @@ class FlaskConfiguration(dict):
     template_folder = property(_get_template_folder, _set_template_folder)
 
 
-FLASK_TESTING_CONFIGURATION = FlaskConfiguration(
-    {
-        "SQLALCHEMY_DATABASE_URI": "sqlite://",
-        "SQLALCHEMY_TRACK_MODIFICATIONS": False,
-        "SECRET_KEY": "dev secret key",
-        "WTF_CSRF_ENABLED": False,
-        "SERVER_NAME": "test.name",
-        "ENV": "development",
-        "DEBUG_DETAILS": False,
-        "SECURITY_PASSWORD_SALT": "dev password salt",
-        "TESTING": True,
-        "MAIL_DEFAULT_SENDER": "test_sender@cp.org",
-        "MAIL_BACKEND": "flask_mail",
-        "LANGUAGES": {"en": "English", "de": "Deutsch"},
-    }
-)
-
-
 class SqliteModule(Module):
     @provider
     @singleton
+    # We require the application for the database. This is done to
+    # ensure that the correct flask application context is present.
     def provide_sqlalchemy(self, app: Flask) -> SQLAlchemy:
-        app.app_context().push()
         db.create_all()
         return db
 
     @provider
     @singleton
     def provide_app(self, config: FlaskConfiguration) -> Flask:
-        return create_app(config=config, db=db, template_folder=config.template_folder)
+        app = create_app(config=config, db=db, template_folder=config.template_folder)
+        app.app_context().push()
+        return app
 
     @provider
     def provide_flask_configuration(self) -> FlaskConfiguration:
-        return FLASK_TESTING_CONFIGURATION
+        return FlaskConfiguration.default()
 
 
 def get_dependency_injector(additional_modules: Optional[List[Module]] = None):

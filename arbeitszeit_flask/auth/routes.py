@@ -13,6 +13,7 @@ from flask import (
 from flask_login import current_user, login_required
 
 from arbeitszeit.use_cases import ResendConfirmationMail, ResendConfirmationMailRequest
+from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit_flask import database
 from arbeitszeit_flask.database import commit_changes
@@ -33,15 +34,24 @@ from arbeitszeit_flask.translator import FlaskTranslator
 from arbeitszeit_flask.views.signup_accountant_view import SignupAccountantView
 from arbeitszeit_flask.views.signup_company_view import SignupCompanyView
 from arbeitszeit_flask.views.signup_member_view import SignupMemberView
+from arbeitszeit_web.presenters.list_available_languages_presenter import (
+    ListAvailableLanguagesPresenter,
+)
 from arbeitszeit_web.presenters.log_in_member_presenter import LogInMemberPresenter
 
 auth = Blueprint("auth", __name__, template_folder="templates", static_folder="static")
 
 
 @auth.route("/")
-def start():
+@with_injection()
+def start(
+    use_case: ListAvailableLanguagesUseCase, presenter: ListAvailableLanguagesPresenter
+):
+    use_case_request = use_case.Request()
+    use_case_response = use_case.list_available_languages(use_case_request)
+    view_model = presenter.present_available_languages_list(use_case_response)
     save_next_url_in_session(request)
-    return render_template("auth/start.html", languages=current_app.config["LANGUAGES"])
+    return render_template("auth/start.html", languages=view_model)
 
 
 @auth.route("/help")

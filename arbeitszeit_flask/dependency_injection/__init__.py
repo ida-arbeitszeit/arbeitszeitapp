@@ -27,6 +27,7 @@ from arbeitszeit.use_cases import (
 from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
 from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
 from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
+from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
 from arbeitszeit.use_cases.list_workers import ListWorkers
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProduction
@@ -67,6 +68,7 @@ from arbeitszeit_flask.flask_colors import FlaskColors
 from arbeitszeit_flask.flask_plotter import FlaskPlotter
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.flask_session import FlaskSession
+from arbeitszeit_flask.language_repository import LanguageRepositoryImpl
 from arbeitszeit_flask.mail_service import (
     FlaskEmailConfiguration,
     FlaskTokenDeliverer,
@@ -151,6 +153,9 @@ from arbeitszeit_web.presenters.accountant_invitation_presenter import (
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
 from arbeitszeit_web.presenters.get_latest_activated_plans_presenter import (
     GetLatestActivatedPlansPresenter,
+)
+from arbeitszeit_web.presenters.list_available_languages_presenter import (
+    ListAvailableLanguagesPresenter,
 )
 from arbeitszeit_web.presenters.log_in_member_presenter import LogInMemberPresenter
 from arbeitszeit_web.presenters.register_accountant_presenter import (
@@ -690,6 +695,23 @@ class FlaskModule(Module):
         )
 
     @provider
+    def provide_list_available_languages_presenter(
+        self,
+        language_changer_url_index: GeneralUrlIndex,
+        language_service: LanguageRepositoryImpl,
+    ) -> ListAvailableLanguagesPresenter:
+        return ListAvailableLanguagesPresenter(
+            language_changer_url_index=language_changer_url_index,
+            language_service=language_service,
+        )
+
+    @provider
+    def provide_language_repository(
+        self, language_repository: LanguageRepositoryImpl
+    ) -> interfaces.LanguageRepository:
+        return language_repository
+
+    @provider
     def provide_list_workers_controller(
         self, session: Session
     ) -> ListWorkersController:
@@ -1004,6 +1026,12 @@ class FlaskModule(Module):
         account_repository: AccountRepository,
     ) -> ShowMyAccounts:
         return ShowMyAccounts(company_repository, account_repository)
+
+    @provider
+    def provide_list_available_languages_use_case(
+        self, language_repository: interfaces.LanguageRepository
+    ) -> ListAvailableLanguagesUseCase:
+        return ListAvailableLanguagesUseCase(language_repository=language_repository)
 
     @provider
     def provide_log_in_member_use_case(

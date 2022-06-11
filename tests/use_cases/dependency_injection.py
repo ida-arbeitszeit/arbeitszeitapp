@@ -8,6 +8,7 @@ from arbeitszeit.use_cases import GetCompanySummary
 from arbeitszeit.use_cases.get_accountant_profile_info import (
     GetAccountantProfileInfoUseCase,
 )
+from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
 from arbeitszeit.use_cases.log_in_accountant import LogInAccountantUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit.use_cases.register_company.company_registration_message_presenter import (
@@ -29,6 +30,17 @@ from . import repositories
 
 
 class InMemoryModule(Module):
+    @singleton
+    @provider
+    def provide_fake_language_repository(self) -> repositories.FakeLanguageRepository:
+        return repositories.FakeLanguageRepository()
+
+    @provider
+    def provide_language_repository(
+        self, language_repository: repositories.FakeLanguageRepository
+    ) -> interfaces.LanguageRepository:
+        return language_repository
+
     @singleton
     @provider
     def provide_accoutant_repository_test_impl(
@@ -216,6 +228,12 @@ class InMemoryModule(Module):
         self, member_repository: interfaces.MemberRepository
     ) -> LogInMemberUseCase:
         return LogInMemberUseCase(member_repository=member_repository)
+
+    @provider
+    def provide_list_available_languages_use_case(
+        self, language_repository: interfaces.LanguageRepository
+    ) -> ListAvailableLanguagesUseCase:
+        return ListAvailableLanguagesUseCase(language_repository=language_repository)
 
 
 def get_dependency_injector() -> Injector:

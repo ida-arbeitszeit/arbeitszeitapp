@@ -14,6 +14,9 @@ class GeneralUrlIndex:
     def get_member_profile_url(self) -> str:
         return url_for("main_member.profile")
 
+    def get_language_change_url(self, language_code: str) -> str:
+        return url_for("auth.set_language", language=language_code)
+
 
 class MemberUrlIndex:
     def get_plan_summary_url(self, plan_id: UUID) -> str:

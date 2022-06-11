@@ -12,11 +12,17 @@ from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitat
 from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
 from tests.company import CompanyManager
 from tests.email import FakeEmailSender
+from tests.language_service import FakeLanguageService
 from tests.session import FakeSession
 from tests.token import FakeTokenService
 
 
 class TestingModule(Module):
+    @singleton
+    @provider
+    def provide_language_service(self) -> FakeLanguageService:
+        return FakeLanguageService()
+
     @singleton
     @provider
     def provide_fake_email_service(self) -> FakeEmailSender:

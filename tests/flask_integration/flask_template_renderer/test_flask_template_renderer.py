@@ -1,12 +1,11 @@
 import os.path as path
-from copy import copy
 from typing import List
 
 from injector import Module, provider
 
 from arbeitszeit_flask.template import FlaskTemplateRenderer
 
-from ..dependency_injection import FLASK_TESTING_CONFIGURATION, FlaskConfiguration
+from ..dependency_injection import FlaskConfiguration
 from ..flask import FlaskTestCase
 
 
@@ -33,6 +32,6 @@ class FlaskTemplateRendererTests(FlaskTestCase):
 class FlaskModule(Module):
     @provider
     def provide_flask_configuration(self) -> FlaskConfiguration:
-        config = copy(FLASK_TESTING_CONFIGURATION)
+        config = FlaskConfiguration.default()
         config.template_folder = path.dirname(__file__)
         return config

@@ -115,3 +115,8 @@ class PlotsUrlIndex(Protocol):
 class AccountantDashboardUrlIndex(Protocol):
     def get_accountant_dashboard_url(self) -> str:
         ...
+
+
+class LanguageChangerUrlIndex(Protocol):
+    def get_language_change_url(self, language_code: str) -> str:
+        ...

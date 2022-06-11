@@ -37,7 +37,7 @@ class CompanyTemplateRendererTests(FlaskTestCase):
             self.fake_template_renderer.previouse_render_context,
         )
 
-    def test_addes_message_indicator_to_context_when_user_is_registered(self) -> None:
+    def test_adds_message_indicator_to_context_when_user_is_registered(self) -> None:
         self.fake_template_renderer.register_template(name="test.html")
         user = self.company_generator.create_company()
         self.session.set_current_user_id(user.id)
