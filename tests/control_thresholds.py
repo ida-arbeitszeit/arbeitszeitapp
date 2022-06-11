@@ -1,4 +1,4 @@
-class PoliticalDecisionsTestImpl:
+class ControlThresholdsTestImpl:
     allowed_overdraw_of_member_account: int = 0
 
     def get_allowed_overdraw_of_member_account(self) -> int:

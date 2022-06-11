@@ -25,9 +25,9 @@ from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitat
 )
 from tests import data_generators
 from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
+from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.datetime_service import FakeDatetimeService
 from tests.dependency_injection import TestingModule
-from tests.political_decisions import PoliticalDecisionsTestImpl
 from tests.token import FakeTokenService, TokenDeliveryService
 
 from . import repositories
@@ -224,8 +224,8 @@ class InMemoryModule(Module):
 
     @singleton
     @provider
-    def provide_political_decisions_test_impl(self) -> PoliticalDecisionsTestImpl:
-        return PoliticalDecisionsTestImpl()
+    def provide_political_decisions_test_impl(self) -> ControlThresholdsTestImpl:
+        return ControlThresholdsTestImpl()
 
     @provider
     def provide_consumer_product_transaction_factory(
@@ -235,7 +235,7 @@ class InMemoryModule(Module):
         transaction_repository: interfaces.TransactionRepository,
         plan_cooperation_repository: interfaces.PlanCooperationRepository,
         account_repository: interfaces.AccountRepository,
-        political_decisions: PoliticalDecisionsTestImpl,
+        political_decisions: ControlThresholdsTestImpl,
     ) -> ConsumerProductTransactionFactory:
         return ConsumerProductTransactionFactory(
             datetime_service=datetime_service,

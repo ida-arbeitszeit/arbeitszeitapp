@@ -4,9 +4,9 @@ from dataclasses import dataclass
 
 from injector import inject
 
+from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Member, Plan, PurposesOfPurchases
-from arbeitszeit.political_decisions import PoliticalDecisions
 from arbeitszeit.price_calculator import calculate_price
 from arbeitszeit.repositories import (
     AccountRepository,
@@ -24,7 +24,7 @@ class ConsumerProductTransactionFactory:
     transaction_repository: TransactionRepository
     plan_cooperation_repository: PlanCooperationRepository
     account_repository: AccountRepository
-    political_decisions: PoliticalDecisions
+    political_decisions: ControlThresholds
 
     def create_consumer_product_transaction(
         self,
@@ -55,7 +55,7 @@ class ConsumerProductTransaction:
     transaction_repository: TransactionRepository
     plan_cooperation_repository: PlanCooperationRepository
     account_repository: AccountRepository
-    political_decisions: PoliticalDecisions
+    political_decisions: ControlThresholds
 
     def is_account_balance_sufficient(self) -> bool:
         allowed_overdraw = (

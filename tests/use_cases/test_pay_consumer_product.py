@@ -9,9 +9,9 @@ from arbeitszeit.entities import ProductionCosts, PurposesOfPurchases
 from arbeitszeit.price_calculator import calculate_price
 from arbeitszeit.use_cases import PayConsumerProduct
 from arbeitszeit.use_cases.pay_consumer_product import RejectionReason
+from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.data_generators import MemberGenerator, PlanGenerator, TransactionGenerator
 from tests.datetime_service import FakeDatetimeService
-from tests.political_decisions import PoliticalDecisionsTestImpl
 
 from .dependency_injection import get_dependency_injector
 from .repositories import (
@@ -35,7 +35,7 @@ class PayConsumerProductTests(TestCase):
         self.purchase_repository = injector.get(PurchaseRepository)
         self.plan_cooperation_repository = injector.get(PlanCooperationRepository)
         self.buyer = self.member_generator.create_member()
-        self.political_decisions = injector.get(PoliticalDecisionsTestImpl)
+        self.political_decisions = injector.get(ControlThresholdsTestImpl)
 
     def test_payment_fails_when_plan_does_not_exist(self):
         response = self.pay_consumer_product(self.make_request(uuid4(), 1))

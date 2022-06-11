@@ -11,5 +11,5 @@ MAIL_PORT = "25"
 FORCE_HTTPS = True
 AUTO_MIGRATE = False
 
-# political decisions
+# control thresholds
 ALLOWED_OVERDRAW_MEMBER = "0"

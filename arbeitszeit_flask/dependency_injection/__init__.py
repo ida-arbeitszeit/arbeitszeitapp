@@ -16,8 +16,8 @@ from injector import (
 
 from arbeitszeit import entities
 from arbeitszeit import repositories as interfaces
+from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.political_decisions import PoliticalDecisions
 from arbeitszeit.token import InvitationTokenValidator, TokenDeliverer, TokenService
 from arbeitszeit.use_cases import (
     CheckForUnreadMessages,
@@ -45,6 +45,7 @@ from arbeitszeit.use_cases.send_work_certificates_to_worker import (
     SendWorkCertificatesToWorker,
 )
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts
+from arbeitszeit_flask.contol_thresholds import ControlThresholdsFlask
 from arbeitszeit_flask.database import get_social_accounting
 from arbeitszeit_flask.database.repositories import (
     AccountantRepository,
@@ -76,7 +77,6 @@ from arbeitszeit_flask.mail_service import (
     get_mail_service,
 )
 from arbeitszeit_flask.notifications import FlaskFlashNotifier
-from arbeitszeit_flask.political_decisions import PoliticalDecisionsFlask
 from arbeitszeit_flask.template import (
     CompanyTemplateIndex,
     FlaskTemplateRenderer,
@@ -1048,8 +1048,8 @@ class FlaskModule(Module):
 
     @provider
     def provide_political_decisions(
-        self, political_decisions: PoliticalDecisionsFlask
-    ) -> PoliticalDecisions:
+        self, political_decisions: ControlThresholdsFlask
+    ) -> ControlThresholds:
         return political_decisions
 
     @provider
