@@ -1,5 +1,9 @@
 {% extends "base_member.html" %}
 
+{% block navbar_start %}
+<div class="navbar-item">{{ gettext("All plans") }}</div>
+{% endblock %}
+
 {% block content %}
 {% from 'macros/query_plans.html' import query_plans %}
 {{ query_plans(form, view_model) }}
