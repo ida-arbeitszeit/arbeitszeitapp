@@ -1,5 +1,7 @@
+from datetime import datetime
+
 from arbeitszeit.use_cases import GetMemberProfileInfo
-from tests.data_generators import CompanyGenerator, MemberGenerator
+from tests.data_generators import CompanyGenerator, MemberGenerator, PlanGenerator
 
 from .dependency_injection import injection_test
 from .repositories import CompanyWorkerRepository
@@ -33,3 +35,25 @@ def test_that_correct_workplace_name_is_shown(
 
     member_info = get_member_info(worker.id)
     assert member_info.workplaces[0].workplace_name == "SomeCompanyNameXY"
+
+
+@injection_test
+def test_that_three_latest_plans_is_empty_if_there_are_no_plans(
+    get_member_info: GetMemberProfileInfo,
+    member_generator: MemberGenerator,
+):
+    member = member_generator.create_member()
+    response = get_member_info(member.id)
+    assert not response.three_latest_plans
+
+
+@injection_test
+def test_three_latest_plans_has_at_least_one_entry_if_there_is_one_active_plan(
+    get_member_info: GetMemberProfileInfo,
+    member_generator: MemberGenerator,
+    plan_generator: PlanGenerator,
+):
+    plan_generator.create_plan(activation_date=datetime.min)
+    member = member_generator.create_member()
+    response = get_member_info(member.id)
+    assert response.three_latest_plans
