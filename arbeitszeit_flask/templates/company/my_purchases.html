@@ -40,9 +40,9 @@
           <td>{{ purchase.product_name }}</td>
           <td>{{ purchase.product_description }}</td>
           <td>{{ purchase.purpose }}</td>
-          <td>{{ purchase.price_per_unit }}</td>
+          <td>{{ purchase.price_per_unit|round(1) }}</td>
           <th>{{ purchase.amount }}</th>
-          <th>{{ purchase.price_total }}</th>
+          <th>{{ purchase.price_total|round(1) }}</th>
         </tr>
         {% endfor %}
         {% else %}
