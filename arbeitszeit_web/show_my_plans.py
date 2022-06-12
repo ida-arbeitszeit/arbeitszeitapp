@@ -6,26 +6,20 @@ from typing import Any, Dict, List, Optional
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansResponse
 from arbeitszeit_web.translator import Translator
 
-from .url_index import (
-    CoopSummaryUrlIndex,
-    HidePlanUrlIndex,
-    PlanSummaryUrlIndex,
-    RenewPlanUrlIndex,
-)
+from .url_index import HidePlanUrlIndex, PlanSummaryUrlIndex, RenewPlanUrlIndex
 
 
 @dataclass
 class ActivePlansRow:
     plan_summary_url: str
-    coop_summary_url: Optional[str]
     prd_name: str
     price_per_unit: str
-    type_of_plan: str
     activation_date: str
     expiration_date: str
     expiration_relative: str
     is_available: bool
     is_cooperating: bool
+    is_public_service: bool
 
 
 @dataclass
@@ -51,10 +45,10 @@ class NonActivePlansTable:
 class ExpiredPlansRow:
     plan_summary_url: str
     prd_name: str
-    type_of_plan: str
     plan_creation_date: str
     renew_plan_url: str
     hide_plan_url: str
+    is_public_service: bool
 
 
 @dataclass
@@ -79,7 +73,6 @@ class ShowMyPlansViewModel:
 @dataclass
 class ShowMyPlansPresenter:
     url_index: PlanSummaryUrlIndex
-    coop_url_index: CoopSummaryUrlIndex
     renew_plan_url_index: RenewPlanUrlIndex
     hide_plan_url_index: HidePlanUrlIndex
     translator: Translator
@@ -97,14 +90,8 @@ class ShowMyPlansPresenter:
                 rows=[
                     ActivePlansRow(
                         plan_summary_url=self.url_index.get_plan_summary_url(plan.id),
-                        coop_summary_url=self.coop_url_index.get_coop_summary_url(
-                            plan.cooperation
-                        )
-                        if plan.cooperation
-                        else None,
                         prd_name=f"{plan.prd_name}",
                         price_per_unit=self.__format_price(plan.price_per_unit),
-                        type_of_plan=self.__get_type_of_plan(plan.is_public_service),
                         activation_date=self.__format_date(plan.activation_date),
                         expiration_date=self.__format_date(plan.expiration_date),
                         expiration_relative=f"{plan.expiration_relative}"
@@ -112,6 +99,7 @@ class ShowMyPlansPresenter:
                         else "–",
                         is_available=plan.is_available,
                         is_cooperating=plan.is_cooperating,
+                        is_public_service=plan.is_public_service,
                     )
                     for plan in response.active_plans
                 ],
@@ -135,7 +123,7 @@ class ShowMyPlansPresenter:
                     ExpiredPlansRow(
                         plan_summary_url=self.url_index.get_plan_summary_url(plan.id),
                         prd_name=f"{plan.prd_name}",
-                        type_of_plan=self.__get_type_of_plan(plan.is_public_service),
+                        is_public_service=plan.is_public_service,
                         plan_creation_date=self.__format_date(plan.plan_creation_date),
                         renew_plan_url=self.renew_plan_url_index.get_renew_plan_url(
                             plan.id
