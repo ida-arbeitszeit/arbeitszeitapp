@@ -35,7 +35,7 @@ class PayConsumerProductTests(TestCase):
         self.purchase_repository = injector.get(PurchaseRepository)
         self.plan_cooperation_repository = injector.get(PlanCooperationRepository)
         self.buyer = self.member_generator.create_member()
-        self.political_decisions = injector.get(ControlThresholdsTestImpl)
+        self.control_thresholds = injector.get(ControlThresholdsTestImpl)
 
     def test_payment_fails_when_plan_does_not_exist(self):
         response = self.pay_consumer_product(self.make_request(uuid4(), 1))
@@ -66,7 +66,7 @@ class PayConsumerProductTests(TestCase):
         )
         account = self.buyer.account
         assert self.account_repository.get_account_balance(account) == 0
-        self.political_decisions.set_allowed_overdraw_of_member_account(0)
+        self.control_thresholds.set_allowed_overdraw_of_member_account(0)
 
         response = self.pay_consumer_product(self.make_request(plan.id, 3))
         self.assertFalse(response.is_accepted)
@@ -83,7 +83,7 @@ class PayConsumerProductTests(TestCase):
 
         account = self.buyer.account
         assert self.account_repository.get_account_balance(account) == 0
-        self.political_decisions.set_allowed_overdraw_of_member_account(0)
+        self.control_thresholds.set_allowed_overdraw_of_member_account(0)
 
         self.pay_consumer_product(self.make_request(plan.id, amount=3))
         assert len(self.transaction_repository.transactions) == 0
@@ -97,7 +97,7 @@ class PayConsumerProductTests(TestCase):
 
         account = self.buyer.account
         assert self.account_repository.get_account_balance(account) == 0
-        self.political_decisions.set_allowed_overdraw_of_member_account(0)
+        self.control_thresholds.set_allowed_overdraw_of_member_account(0)
 
         self.pay_consumer_product(self.make_request(plan.id, amount=3))
         assert len(self.purchase_repository.purchases) == 0
@@ -111,7 +111,7 @@ class PayConsumerProductTests(TestCase):
         account = self.buyer.account
         self.make_transaction_to_buyer_account(Decimal("-10"))
         assert self.account_repository.get_account_balance(account) == Decimal("-10")
-        self.political_decisions.set_allowed_overdraw_of_member_account(0)
+        self.control_thresholds.set_allowed_overdraw_of_member_account(0)
 
         response = self.pay_consumer_product(self.make_request(plan.id, 3))
         self.assertTrue(response.is_accepted)
@@ -132,7 +132,7 @@ class PayConsumerProductTests(TestCase):
 
         account = self.buyer.account
         assert self.account_repository.get_account_balance(account) == 0
-        self.political_decisions.set_allowed_overdraw_of_member_account(9)
+        self.control_thresholds.set_allowed_overdraw_of_member_account(9)
 
         response = self.pay_consumer_product(self.make_request(plan.id, amount=1))
         self.assertFalse(response.is_accepted)
@@ -155,7 +155,7 @@ class PayConsumerProductTests(TestCase):
         )
         account = self.buyer.account
         assert self.account_repository.get_account_balance(account) == 0
-        self.political_decisions.set_allowed_overdraw_of_member_account(11)
+        self.control_thresholds.set_allowed_overdraw_of_member_account(11)
 
         response = self.pay_consumer_product(self.make_request(plan.id, 1))
         self.assertTrue(response.is_accepted)

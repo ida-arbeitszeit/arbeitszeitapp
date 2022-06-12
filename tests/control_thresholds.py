@@ -1,3 +1,7 @@
+from dataclasses import dataclass
+
+
+@dataclass
 class ControlThresholdsTestImpl:
     allowed_overdraw_of_member_account: int = 0
 

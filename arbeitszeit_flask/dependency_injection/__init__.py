@@ -1047,10 +1047,10 @@ class FlaskModule(Module):
         )
 
     @provider
-    def provide_political_decisions(
-        self, political_decisions: ControlThresholdsFlask
+    def provide_control_thresholds(
+        self, control_thresholds: ControlThresholdsFlask
     ) -> ControlThresholds:
-        return political_decisions
+        return control_thresholds
 
     @provider
     def provide_log_in_company_use_case(

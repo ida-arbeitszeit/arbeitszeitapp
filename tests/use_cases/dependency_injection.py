@@ -224,7 +224,7 @@ class InMemoryModule(Module):
 
     @singleton
     @provider
-    def provide_political_decisions_test_impl(self) -> ControlThresholdsTestImpl:
+    def provide_control_thresholds_test_impl(self) -> ControlThresholdsTestImpl:
         return ControlThresholdsTestImpl()
 
     @provider
@@ -235,7 +235,7 @@ class InMemoryModule(Module):
         transaction_repository: interfaces.TransactionRepository,
         plan_cooperation_repository: interfaces.PlanCooperationRepository,
         account_repository: interfaces.AccountRepository,
-        political_decisions: ControlThresholdsTestImpl,
+        control_thresholds: ControlThresholdsTestImpl,
     ) -> ConsumerProductTransactionFactory:
         return ConsumerProductTransactionFactory(
             datetime_service=datetime_service,
@@ -243,7 +243,7 @@ class InMemoryModule(Module):
             transaction_repository=transaction_repository,
             plan_cooperation_repository=plan_cooperation_repository,
             account_repository=account_repository,
-            political_decisions=political_decisions,
+            control_thresholds=control_thresholds,
         )
 
     @provider

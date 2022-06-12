@@ -33,17 +33,6 @@ class AuthenticatedMemberTests(ViewTestCase):
         )
         self.assertEqual(response.status_code, 400)
 
-    def test_posting_without_enough_work_certificates_results_in_406(self) -> None:
-        plan = self.plan_generator.create_plan(activation_date=datetime.min)
-        response = self.client.post(
-            "/member/pay_consumer_product",
-            data=dict(
-                plan_id=plan.id,
-                amount=2,
-            ),
-        )
-        self.assertEqual(response.status_code, 406)
-
     def test_posting_with_valid_form_data_results_in_200(self) -> None:
         self.transaction_generator.create_transaction(
             receiving_account=self.member.account, amount_received=Decimal(100)

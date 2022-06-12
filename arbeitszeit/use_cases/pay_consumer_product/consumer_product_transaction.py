@@ -24,7 +24,7 @@ class ConsumerProductTransactionFactory:
     transaction_repository: TransactionRepository
     plan_cooperation_repository: PlanCooperationRepository
     account_repository: AccountRepository
-    political_decisions: ControlThresholds
+    control_thresholds: ControlThresholds
 
     def create_consumer_product_transaction(
         self,
@@ -41,7 +41,7 @@ class ConsumerProductTransactionFactory:
             self.transaction_repository,
             self.plan_cooperation_repository,
             self.account_repository,
-            self.political_decisions,
+            self.control_thresholds,
         )
 
 
@@ -55,11 +55,11 @@ class ConsumerProductTransaction:
     transaction_repository: TransactionRepository
     plan_cooperation_repository: PlanCooperationRepository
     account_repository: AccountRepository
-    political_decisions: ControlThresholds
+    control_thresholds: ControlThresholds
 
     def is_account_balance_sufficient(self) -> bool:
         allowed_overdraw = (
-            self.political_decisions.get_allowed_overdraw_of_member_account()
+            self.control_thresholds.get_allowed_overdraw_of_member_account()
         )
         account_balance = self.account_repository.get_account_balance(
             self.buyer.account
