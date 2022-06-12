@@ -96,6 +96,11 @@ class PayConsumerProductPresenter:
                 )
             )
             return PayConsumerProductViewModel(status_code=410)
+        elif use_case_response.rejection_reason == RejectionReason.insufficient_balance:
+            self.user_notifier.display_warning(
+                self.translator.gettext("You do not have enough work certificates.")
+            )
+            return PayConsumerProductViewModel(status_code=406)
         else:
             self.user_notifier.display_warning(
                 self.translator.gettext(

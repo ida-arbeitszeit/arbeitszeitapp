@@ -10,3 +10,6 @@ LANGUAGES = {"en": "English", "de": "Deutsch"}
 MAIL_PORT = "25"
 FORCE_HTTPS = True
 AUTO_MIGRATE = False
+
+# control thresholds
+ALLOWED_OVERDRAW_MEMBER = "0"

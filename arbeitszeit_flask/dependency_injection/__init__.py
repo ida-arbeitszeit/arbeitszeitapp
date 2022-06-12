@@ -16,6 +16,7 @@ from injector import (
 
 from arbeitszeit import entities
 from arbeitszeit import repositories as interfaces
+from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.token import InvitationTokenValidator, TokenDeliverer, TokenService
 from arbeitszeit.use_cases import (
@@ -44,6 +45,7 @@ from arbeitszeit.use_cases.send_work_certificates_to_worker import (
     SendWorkCertificatesToWorker,
 )
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts
+from arbeitszeit_flask.contol_thresholds import ControlThresholdsFlask
 from arbeitszeit_flask.database import get_social_accounting
 from arbeitszeit_flask.database.repositories import (
     AccountantRepository,
@@ -1042,6 +1044,12 @@ class FlaskModule(Module):
             translator=translator,
             member_url_index=member_url_index,
         )
+
+    @provider
+    def provide_control_thresholds(
+        self, control_thresholds: ControlThresholdsFlask
+    ) -> ControlThresholds:
+        return control_thresholds
 
     @provider
     def provide_log_in_company_use_case(

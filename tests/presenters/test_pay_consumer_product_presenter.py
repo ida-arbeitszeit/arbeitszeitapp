@@ -48,6 +48,19 @@ class PayConsumerProductPresenterTests(TestCase):
             self.notifier.warnings,
         )
 
+    def test_presenter_shows_correct_notification_when_member_has_insufficient_balance(
+        self,
+    ) -> None:
+        self.presenter.present(
+            PayConsumerProductResponse(
+                rejection_reason=RejectionReason.insufficient_balance
+            )
+        )
+        self.assertIn(
+            self.translator.gettext("You do not have enough work certificates."),
+            self.notifier.warnings,
+        )
+
     def test_presenter_returns_404_status_code_when_plan_was_not_found(self) -> None:
         view_model = self.presenter.present(
             PayConsumerProductResponse(rejection_reason=RejectionReason.plan_not_found)
@@ -65,3 +78,13 @@ class PayConsumerProductPresenterTests(TestCase):
             PayConsumerProductResponse(rejection_reason=RejectionReason.plan_inactive)
         )
         self.assertEqual(view_model.status_code, 410)
+
+    def test_presenter_returns_406_status_code_when_member_has_insufficient_balance(
+        self,
+    ) -> None:
+        view_model = self.presenter.present(
+            PayConsumerProductResponse(
+                rejection_reason=RejectionReason.insufficient_balance
+            )
+        )
+        self.assertEqual(view_model.status_code, 406)

@@ -11,6 +11,9 @@ from arbeitszeit.use_cases.get_accountant_profile_info import (
 from arbeitszeit.use_cases.log_in_accountant import LogInAccountantUseCase
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
+from arbeitszeit.use_cases.pay_consumer_product.consumer_product_transaction import (
+    ConsumerProductTransactionFactory,
+)
 from arbeitszeit.use_cases.register_company.company_registration_message_presenter import (
     CompanyRegistrationMessagePresenter,
 )
@@ -22,6 +25,7 @@ from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitat
 )
 from tests import data_generators
 from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
+from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.datetime_service import FakeDatetimeService
 from tests.dependency_injection import TestingModule
 from tests.token import FakeTokenService, TokenDeliveryService
@@ -217,6 +221,30 @@ class InMemoryModule(Module):
         self, member_repository: interfaces.MemberRepository
     ) -> LogInMemberUseCase:
         return LogInMemberUseCase(member_repository=member_repository)
+
+    @singleton
+    @provider
+    def provide_control_thresholds_test_impl(self) -> ControlThresholdsTestImpl:
+        return ControlThresholdsTestImpl()
+
+    @provider
+    def provide_consumer_product_transaction_factory(
+        self,
+        datetime_service: DatetimeService,
+        purchase_repository: interfaces.PurchaseRepository,
+        transaction_repository: interfaces.TransactionRepository,
+        plan_cooperation_repository: interfaces.PlanCooperationRepository,
+        account_repository: interfaces.AccountRepository,
+        control_thresholds: ControlThresholdsTestImpl,
+    ) -> ConsumerProductTransactionFactory:
+        return ConsumerProductTransactionFactory(
+            datetime_service=datetime_service,
+            purchase_repository=purchase_repository,
+            transaction_repository=transaction_repository,
+            plan_cooperation_repository=plan_cooperation_repository,
+            account_repository=account_repository,
+            control_thresholds=control_thresholds,
+        )
 
     @provider
     def provide_log_in_company_use_case(

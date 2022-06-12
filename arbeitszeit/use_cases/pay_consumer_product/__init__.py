@@ -63,6 +63,10 @@ class PayConsumerProduct:
     ) -> PayConsumerProductResponse:
         plan = self._get_active_plan(request)
         transaction = self._create_product_transaction(plan, request)
+        if not transaction.is_account_balance_sufficient():
+            return PayConsumerProductResponse(
+                rejection_reason=RejectionReason.insufficient_balance
+            )
         transaction.record_purchase()
         transaction.exchange_currency()
         return PayConsumerProductResponse(rejection_reason=None)
