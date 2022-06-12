@@ -13,7 +13,7 @@ from arbeitszeit_web.presenters.get_latest_activated_plans_presenter import (
 
 
 @dataclass
-class DashboardView:
+class CompanyDashboardView:
     list_workers_use_case: ListWorkers
     get_latest_plans_use_case: GetLatestActivatedPlans
     get_latest_plans_presenter: GetLatestActivatedPlansPresenter

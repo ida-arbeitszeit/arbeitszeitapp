@@ -30,8 +30,8 @@ from arbeitszeit_flask.views import (
 from arbeitszeit_flask.views.accountant_invitation_email_view import (
     AccountantInvitationEmailViewImpl,
 )
+from arbeitszeit_flask.views.company_dashboard_view import CompanyDashboardView
 from arbeitszeit_flask.views.create_cooperation_view import CreateCooperationView
-from arbeitszeit_flask.views.dashboard_view import DashboardView
 from arbeitszeit_flask.views.invite_worker_to_company import (
     InviteWorkerGetRequestHandler,
     InviteWorkerPostRequestHandler,
@@ -249,15 +249,15 @@ class ViewsModule(Module):
         )
 
     @provider
-    def provide_dashboard_view(
+    def provide_company_dashboard_view(
         self,
         list_workers_use_case: ListWorkers,
         get_latest_plans_use_case: GetLatestActivatedPlans,
         get_latest_plans_presenter: GetLatestActivatedPlansPresenter,
         template_renderer: UserTemplateRenderer,
         flask_session: FlaskSession,
-    ) -> DashboardView:
-        return DashboardView(
+    ) -> CompanyDashboardView:
+        return CompanyDashboardView(
             list_workers_use_case,
             get_latest_plans_use_case,
             get_latest_plans_presenter,

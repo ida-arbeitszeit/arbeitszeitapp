@@ -51,9 +51,9 @@ from arbeitszeit_flask.views import (
     ReadMessageView,
     RequestCooperationView,
 )
+from arbeitszeit_flask.views.company_dashboard_view import CompanyDashboardView
 from arbeitszeit_flask.views.create_cooperation_view import CreateCooperationView
 from arbeitszeit_flask.views.create_draft_view import CreateDraftView
-from arbeitszeit_flask.views.dashboard_view import DashboardView
 from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
 from arbeitszeit_flask.views.transfer_to_worker_view import TransferToWorkerView
@@ -98,7 +98,7 @@ from .blueprint import CompanyRoute
 
 
 @CompanyRoute("/company/dashboard")
-def dashboard(view: DashboardView):
+def dashboard(view: CompanyDashboardView):
     return view.respond_to_get()
 
 
