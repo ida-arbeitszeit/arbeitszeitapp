@@ -29,6 +29,14 @@ arbeitszeit\_web.check\_for\_unread\_message module
    :undoc-members:
    :show-inheritance:
 
+arbeitszeit\_web.colors module
+------------------------------
+
+.. automodule:: arbeitszeit_web.colors
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit\_web.create\_cooperation module
 -------------------------------------------
 
@@ -41,6 +49,14 @@ arbeitszeit\_web.email module
 -----------------------------
 
 .. automodule:: arbeitszeit_web.email
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit\_web.forms module
+-----------------------------
+
+.. automodule:: arbeitszeit_web.forms
    :members:
    :undoc-members:
    :show-inheritance:
@@ -281,22 +297,6 @@ arbeitszeit\_web.show\_my\_plans module
 ---------------------------------------
 
 .. automodule:: arbeitszeit_web.show_my_plans
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-arbeitszeit\_web.show\_p\_account\_details module
--------------------------------------------------
-
-.. automodule:: arbeitszeit_web.show_p_account_details
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-arbeitszeit\_web.show\_r\_account\_details module
--------------------------------------------------
-
-.. automodule:: arbeitszeit_web.show_r_account_details
    :members:
    :undoc-members:
    :show-inheritance:
