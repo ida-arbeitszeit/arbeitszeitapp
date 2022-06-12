@@ -1,5 +1,3 @@
-import subprocess
-
 import click
 from flask_babel import force_locale
 
@@ -32,64 +30,3 @@ def invite_accountant(
         use_case.send_accountant_registration_token(
             SendAccountantRegistrationTokenUseCase.Request(email=email_address)
         )
-
-
-def trans_update():
-    """
-    Parse code and update language specific .po-files.
-    """
-    subprocess.run(
-        [
-            "pybabel",
-            "extract",
-            "-F",
-            "babel.cfg",
-            "-k",
-            "lazy_gettext",
-            "-o",
-            "arbeitszeit_flask/translations/messages.pot",
-            ".",
-        ],
-        check=True,
-    )
-    subprocess.run(
-        [
-            "pybabel",
-            "update",
-            "-i",
-            "arbeitszeit_flask/translations/messages.pot",
-            "-d",
-            "arbeitszeit_flask/translations",
-            "--no-fuzzy-matching",
-            "--width",
-            "78",
-        ],
-        check=True,
-    )
-
-
-def trans_compile():
-    """Compile translation files."""
-    subprocess.run(
-        ["pybabel", "compile", "-d", "arbeitszeit_flask/translations"], check=True
-    )
-
-
-def trans_new(lang_code: str):
-    """
-    Add a new language.
-    Examples for argument lang_code are en, de, fr, etc.
-    """
-    subprocess.run(
-        [
-            "pybabel",
-            "init",
-            "-i",
-            "arbeitszeit_flask/translations/messages.pot",
-            "-d",
-            "arbeitszeit_flask/translations",
-            "-l",
-            lang_code,
-        ],
-        check=True,
-    )

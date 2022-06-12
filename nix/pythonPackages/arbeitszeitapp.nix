@@ -7,6 +7,7 @@ buildPythonPackage {
   pname = "arbeitszeitapp";
   version = "develop";
   src = ../..;
+  format = "pyproject";
   buildInputs = [ pytestCheckHook ];
   checkInputs = [ hypothesis ];
   propagatedBuildInputs = [

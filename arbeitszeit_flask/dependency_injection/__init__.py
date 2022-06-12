@@ -16,6 +16,7 @@ from injector import (
 
 from arbeitszeit import entities
 from arbeitszeit import repositories as interfaces
+from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.token import InvitationTokenValidator, TokenDeliverer, TokenService
 from arbeitszeit.use_cases import (
@@ -27,7 +28,10 @@ from arbeitszeit.use_cases import (
 from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
 from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
 from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
+from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
 from arbeitszeit.use_cases.list_workers import ListWorkers
+from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
+from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProduction
 from arbeitszeit.use_cases.register_company.company_registration_message_presenter import (
     CompanyRegistrationMessagePresenter,
@@ -42,6 +46,7 @@ from arbeitszeit.use_cases.send_work_certificates_to_worker import (
     SendWorkCertificatesToWorker,
 )
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts
+from arbeitszeit_flask.contol_thresholds import ControlThresholdsFlask
 from arbeitszeit_flask.database import get_social_accounting
 from arbeitszeit_flask.database.repositories import (
     AccountantRepository,
@@ -66,6 +71,7 @@ from arbeitszeit_flask.flask_colors import FlaskColors
 from arbeitszeit_flask.flask_plotter import FlaskPlotter
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.flask_session import FlaskSession
+from arbeitszeit_flask.language_repository import LanguageRepositoryImpl
 from arbeitszeit_flask.mail_service import (
     FlaskEmailConfiguration,
     FlaskTokenDeliverer,
@@ -74,6 +80,7 @@ from arbeitszeit_flask.mail_service import (
 )
 from arbeitszeit_flask.notifications import FlaskFlashNotifier
 from arbeitszeit_flask.template import (
+    AnonymousUserTemplateRenderer,
     CompanyTemplateIndex,
     FlaskTemplateRenderer,
     MemberRegistrationEmailTemplateImpl,
@@ -151,6 +158,10 @@ from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationP
 from arbeitszeit_web.presenters.get_latest_activated_plans_presenter import (
     GetLatestActivatedPlansPresenter,
 )
+from arbeitszeit_web.presenters.list_available_languages_presenter import (
+    ListAvailableLanguagesPresenter,
+)
+from arbeitszeit_web.presenters.log_in_member_presenter import LogInMemberPresenter
 from arbeitszeit_web.presenters.register_accountant_presenter import (
     RegisterAccountantPresenter,
 )
@@ -291,6 +302,14 @@ class MemberModule(Module):
 
 
 class CompanyModule(Module):
+    @provider
+    def provide_pay_means_of_production_presenter(
+        self, notifier: Notifier, trans: Translator, company_url_index: CompanyUrlIndex
+    ) -> PayMeansOfProductionPresenter:
+        return PayMeansOfProductionPresenter(
+            notifier, trans, pay_means_of_production_url_index=company_url_index
+        )
+
     @provider
     def provide_list_messages_url_index(
         self, company_index: CompanyUrlIndex
@@ -680,6 +699,23 @@ class FlaskModule(Module):
         )
 
     @provider
+    def provide_list_available_languages_presenter(
+        self,
+        language_changer_url_index: GeneralUrlIndex,
+        language_service: LanguageRepositoryImpl,
+    ) -> ListAvailableLanguagesPresenter:
+        return ListAvailableLanguagesPresenter(
+            language_changer_url_index=language_changer_url_index,
+            language_service=language_service,
+        )
+
+    @provider
+    def provide_language_repository(
+        self, language_repository: LanguageRepositoryImpl
+    ) -> interfaces.LanguageRepository:
+        return language_repository
+
+    @provider
     def provide_list_workers_controller(
         self, session: Session
     ) -> ListWorkersController:
@@ -790,12 +826,6 @@ class FlaskModule(Module):
         )
 
     @provider
-    def provide_pay_means_of_production_presenter(
-        self, notifier: Notifier, trans: Translator
-    ) -> PayMeansOfProductionPresenter:
-        return PayMeansOfProductionPresenter(notifier, trans)
-
-    @provider
     def provide_list_all_cooperations_presenter(
         self, coop_index: CoopSummaryUrlIndex
     ) -> ListAllCooperationsPresenter:
@@ -811,13 +841,12 @@ class FlaskModule(Module):
     def provide_show_my_plans_presenter(
         self,
         plan_index: PlanSummaryUrlIndex,
-        coop_index: CoopSummaryUrlIndex,
         renew_plan_index: RenewPlanUrlIndex,
         hide_plan_index: HidePlanUrlIndex,
         translator: Translator,
     ) -> ShowMyPlansPresenter:
         return ShowMyPlansPresenter(
-            plan_index, coop_index, renew_plan_index, hide_plan_index, translator
+            plan_index, renew_plan_index, hide_plan_index, translator
         )
 
     @provider
@@ -831,12 +860,14 @@ class FlaskModule(Module):
         self,
         plan_index: PlanSummaryUrlIndex,
         company_index: CompanySummaryUrlIndex,
-        coop_index: CoopSummaryUrlIndex,
         notifier: Notifier,
         trans: Translator,
     ) -> QueryPlansPresenter:
         return QueryPlansPresenter(
-            plan_index, company_index, coop_index, notifier, trans
+            plan_url_index=plan_index,
+            company_url_index=company_index,
+            user_notifier=notifier,
+            trans=trans,
         )
 
     @provider
@@ -923,17 +954,28 @@ class FlaskModule(Module):
     def provide_user_template_renderer(
         self,
         flask_template_renderer: FlaskTemplateRenderer,
-        session: Session,
         check_unread_messages_use_case: CheckForUnreadMessages,
         check_unread_messages_controller: CheckForUnreadMessagesController,
         check_unread_messages_presenter: CheckForUnreadMessagesPresenter,
     ) -> UserTemplateRenderer:
         return UserTemplateRenderer(
             flask_template_renderer,
-            session,
             check_unread_messages_use_case,
             check_unread_messages_controller,
             check_unread_messages_presenter,
+        )
+
+    @provider
+    def provide_anonymous_user_template_renderer(
+        self,
+        inner_renderer: TemplateRenderer,
+        list_languages_user_case: ListAvailableLanguagesUseCase,
+        list_languages_presenter: ListAvailableLanguagesPresenter,
+    ) -> AnonymousUserTemplateRenderer:
+        return AnonymousUserTemplateRenderer(
+            inner_renderer=inner_renderer,
+            list_languages_use_case=list_languages_user_case,
+            list_languages_presenter=list_languages_presenter,
         )
 
     @provider
@@ -1000,6 +1042,20 @@ class FlaskModule(Module):
         return ShowMyAccounts(company_repository, account_repository)
 
     @provider
+    def provide_list_available_languages_use_case(
+        self, language_repository: interfaces.LanguageRepository
+    ) -> ListAvailableLanguagesUseCase:
+        return ListAvailableLanguagesUseCase(language_repository=language_repository)
+
+    @provider
+    def provide_log_in_member_use_case(
+        self, member_repository: MemberRepository
+    ) -> LogInMemberUseCase:
+        return LogInMemberUseCase(
+            member_repository=member_repository,
+        )
+
+    @provider
     def provide_get_latest_activated_plans_presenter(
         self, url_index: PlanSummaryUrlIndex, datetime_service: DatetimeService
     ) -> GetLatestActivatedPlansPresenter:
@@ -1014,6 +1070,33 @@ class FlaskModule(Module):
         return SeekPlanApprovalPresenter(
             notifier=notifier,
             translator=translator,
+        )
+
+    @provider
+    def provide_log_in_member_presenter(
+        self,
+        session: Session,
+        translator: Translator,
+        member_url_index: GeneralUrlIndex,
+    ) -> LogInMemberPresenter:
+        return LogInMemberPresenter(
+            session=session,
+            translator=translator,
+            member_url_index=member_url_index,
+        )
+
+    @provider
+    def provide_control_thresholds(
+        self, control_thresholds: ControlThresholdsFlask
+    ) -> ControlThresholds:
+        return control_thresholds
+
+    @provider
+    def provide_log_in_company_use_case(
+        self, company_repository: CompanyRepository
+    ) -> LogInCompanyUseCase:
+        return LogInCompanyUseCase(
+            company_repository=company_repository,
         )
 
     def configure(self, binder: Binder) -> None:

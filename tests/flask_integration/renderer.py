@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Set
+from typing import Any, Dict, Optional
 
 
 class FakeTemplateRenderer:
@@ -8,7 +8,7 @@ class FakeTemplateRenderer:
 
     def __init__(self) -> None:
         self._templates: Dict[str, str] = dict()
-        self.previous_render_context: Set[str] = set()
+        self.previous_render_context: Dict[str, Any] = dict()
 
     def register_template(self, name: str, content: str = "test content") -> None:
         self._templates[name] = content
@@ -17,7 +17,7 @@ class FakeTemplateRenderer:
         self, name: str, context: Optional[Dict[str, Any]] = None
     ) -> str:
         if context is None:
-            self.previouse_render_context = set()
+            self.previous_render_context = dict()
         else:
-            self.previouse_render_context = set(context.keys())
+            self.previous_render_context = context
         return self._templates[name]

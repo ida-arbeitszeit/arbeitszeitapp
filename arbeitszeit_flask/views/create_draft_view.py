@@ -7,10 +7,7 @@ from flask import redirect, url_for
 
 from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
 from arbeitszeit.use_cases.get_draft_summary import DraftSummarySuccess, GetDraftSummary
-from arbeitszeit.use_cases.get_plan_summary_company import (
-    GetPlanSummaryCompany,
-    PlanSummaryCompanySuccess,
-)
+from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
 from arbeitszeit_flask.forms import CreateDraftForm
 from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_flask.types import Response
@@ -82,13 +79,11 @@ class CreateDraftView:
             planner = self.session.get_current_user()
             assert expired_plan_id is not None
             assert planner is not None
-            plan_summary_success = self.get_plan_summary_company(
-                UUID(expired_plan_id), planner
-            )
-            if isinstance(plan_summary_success, PlanSummaryCompanySuccess):
+            response = self.get_plan_summary_company(UUID(expired_plan_id), planner)
+            if isinstance(response, GetPlanSummaryCompany.Success):
                 view_model = (
                     self.get_prefilled_draft_data_presenter.show_prefilled_draft_data(
-                        plan_summary_success.plan_summary
+                        response.plan_summary
                     )
                 )
                 form = CreateDraftForm(data=asdict(view_model.prefilled_draft_data))

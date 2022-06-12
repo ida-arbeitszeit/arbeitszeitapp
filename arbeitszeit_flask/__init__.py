@@ -1,7 +1,7 @@
 import os
 
-import click
 from flask import Flask, current_app, request, session
+from flask_migrate import upgrade
 from flask_talisman import Talisman
 from flask_wtf.csrf import CSRFProtect
 
@@ -33,6 +33,9 @@ def initialize_migrations(app, db):
     migrate = arbeitszeit_flask.extensions.migrate
     migrations_directory = os.path.join(os.path.dirname(__file__), "migrations")
     migrate.init_app(app, db, directory=migrations_directory)
+    if app.config["AUTO_MIGRATE"]:
+        with app.app_context():
+            upgrade(migrations_directory)
 
 
 def create_app(config=None, db=None, template_folder=None):
@@ -72,18 +75,9 @@ def create_app(config=None, db=None, template_folder=None):
 
     with app.app_context():
 
-        from arbeitszeit_flask.commands import (
-            invite_accountant,
-            trans_compile,
-            trans_new,
-            trans_update,
-            update_and_payout,
-        )
+        from arbeitszeit_flask.commands import invite_accountant, update_and_payout
 
         app.cli.command("payout")(update_and_payout)
-        app.cli.command("trans-update")(trans_update)
-        app.cli.command("trans-compile")(trans_compile)
-        app.cli.command("trans-new")(click.argument("lang_code")(trans_new))
         app.cli.command("invite-accountant")(invite_accountant)
 
         from .models import Accountant, Company, Member

@@ -1,7 +1,8 @@
 from datetime import datetime
+from decimal import Decimal
 from uuid import uuid4
 
-from tests.data_generators import PlanGenerator
+from tests.data_generators import PlanGenerator, TransactionGenerator
 
 from .flask import ViewTestCase
 
@@ -10,6 +11,7 @@ class AuthenticatedMemberTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.plan_generator = self.injector.get(PlanGenerator)
+        self.transaction_generator = self.injector.get(TransactionGenerator)
         self.member, _, self.email = self.login_member()
         self.member = self.confirm_member(member=self.member, email=self.email)
 
@@ -32,6 +34,9 @@ class AuthenticatedMemberTests(ViewTestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_posting_with_valid_form_data_results_in_200(self) -> None:
+        self.transaction_generator.create_transaction(
+            receiving_account=self.member.account, amount_received=Decimal(100)
+        )
         plan = self.plan_generator.create_plan(activation_date=datetime.min)
         response = self.client.post(
             "/member/pay_consumer_product",

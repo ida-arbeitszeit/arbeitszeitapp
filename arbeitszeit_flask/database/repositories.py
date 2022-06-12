@@ -88,6 +88,16 @@ class MemberRepository(repositories.MemberRepository):
             return None
         return self.object_from_orm(orm_object)
 
+    def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
+        if (
+            member := self.db.session.query(Member)
+            .filter(Member.email == email)
+            .first()
+        ):
+            if check_password_hash(member.password, password):
+                return UUID(member.id)
+        return None
+
     def get_member_orm_by_mail(self, email: str) -> Member:
         member_orm = Member.query.filter_by(email=email).first()
         assert member_orm
@@ -255,6 +265,16 @@ class CompanyRepository(repositories.CompanyRepository):
 
     def get_all_companies(self) -> Iterator[entities.Company]:
         return (self.object_from_orm(company) for company in Company.query.all())
+
+    def validate_credentials(self, email_address: str, password: str) -> Optional[UUID]:
+        if (
+            company := self.db.session.query(Company)
+            .filter(Company.email == email_address)
+            .first()
+        ):
+            if check_password_hash(company.password, password):
+                return UUID(company.id)
+        return None
 
 
 @inject

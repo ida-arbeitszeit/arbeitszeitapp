@@ -11,6 +11,12 @@ class GeneralUrlIndex:
     def get_accountant_dashboard_url(self) -> str:
         return url_for("main_accountant.dashboard")
 
+    def get_member_profile_url(self) -> str:
+        return url_for("main_member.profile")
+
+    def get_language_change_url(self, language_code: str) -> str:
+        return url_for("auth.set_language", language=language_code)
+
 
 class MemberUrlIndex:
     def get_plan_summary_url(self, plan_id: UUID) -> str:
@@ -104,6 +110,9 @@ class CompanyUrlIndex:
         return url_for(
             endpoint="auth.confirm_email_company", token=token, _external=True
         )
+
+    def get_pay_means_of_production_url(self) -> str:
+        return url_for(endpoint="main_company.transfer_to_company")
 
 
 class FlaskPlotsUrlIndex:

@@ -4,10 +4,12 @@ from dataclasses import dataclass
 
 from injector import inject
 
+from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Member, Plan, PurposesOfPurchases
 from arbeitszeit.price_calculator import calculate_price
 from arbeitszeit.repositories import (
+    AccountRepository,
     PlanCooperationRepository,
     PurchaseRepository,
     TransactionRepository,
@@ -21,6 +23,8 @@ class ConsumerProductTransactionFactory:
     purchase_repository: PurchaseRepository
     transaction_repository: TransactionRepository
     plan_cooperation_repository: PlanCooperationRepository
+    account_repository: AccountRepository
+    control_thresholds: ControlThresholds
 
     def create_consumer_product_transaction(
         self,
@@ -36,6 +40,8 @@ class ConsumerProductTransactionFactory:
             self.purchase_repository,
             self.transaction_repository,
             self.plan_cooperation_repository,
+            self.account_repository,
+            self.control_thresholds,
         )
 
 
@@ -48,6 +54,24 @@ class ConsumerProductTransaction:
     purchase_repository: PurchaseRepository
     transaction_repository: TransactionRepository
     plan_cooperation_repository: PlanCooperationRepository
+    account_repository: AccountRepository
+    control_thresholds: ControlThresholds
+
+    def is_account_balance_sufficient(self) -> bool:
+        allowed_overdraw = (
+            self.control_thresholds.get_allowed_overdraw_of_member_account()
+        )
+        account_balance = self.account_repository.get_account_balance(
+            self.buyer.account
+        )
+        price = self.amount * calculate_price(
+            self.plan_cooperation_repository.get_cooperating_plans(self.plan.id)
+        )
+        if price == 0:
+            return True
+        if (account_balance - price + allowed_overdraw) < 0:
+            return False
+        return True
 
     def record_purchase(self) -> None:
         price_per_unit = calculate_price(

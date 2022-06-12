@@ -28,6 +28,10 @@ from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationP
 from arbeitszeit_web.presenters.get_latest_activated_plans_presenter import (
     GetLatestActivatedPlansPresenter,
 )
+from arbeitszeit_web.presenters.list_available_languages_presenter import (
+    ListAvailableLanguagesPresenter,
+)
+from arbeitszeit_web.presenters.log_in_member_presenter import LogInMemberPresenter
 from arbeitszeit_web.presenters.register_accountant_presenter import (
     RegisterAccountantPresenter,
 )
@@ -72,6 +76,7 @@ from tests.email import (
     FakeEmailSender,
     RegistrationEmailTemplateImpl,
 )
+from tests.language_service import FakeLanguageService
 from tests.plotter import FakePlotter
 from tests.presenters.test_colors import ColorsTestImpl
 from tests.request import FakeRequest
@@ -91,8 +96,11 @@ from .url_index import (
     EndCoopUrlIndexTestImpl,
     HidePlanUrlIndex,
     InviteUrlIndexImpl,
+    LanguageChangerUrlIndexImpl,
     ListMessageUrlIndexTestImpl,
+    MemberUrlIndex,
     MessageUrlIndex,
+    PayMeansOfProductionUrlIndexImpl,
     PlanSummaryUrlIndexTestImpl,
     PlotsUrlIndexImpl,
     RenewPlanUrlIndex,
@@ -294,11 +302,15 @@ class PresenterTestsInjector(Module):
 
     @provider
     def provide_pay_means_of_production_presenter(
-        self, notifier: Notifier, translator: FakeTranslator
+        self,
+        notifier: Notifier,
+        translator: FakeTranslator,
+        pay_means_of_production_url_index: PayMeansOfProductionUrlIndexImpl,
     ) -> PayMeansOfProductionPresenter:
         return PayMeansOfProductionPresenter(
             user_notifier=notifier,
             trans=translator,
+            pay_means_of_production_url_index=pay_means_of_production_url_index,
         )
 
     @provider
@@ -331,7 +343,6 @@ class PresenterTestsInjector(Module):
     def provide_query_plans_presenter(
         self,
         notifier: Notifier,
-        coop_url_index: CoopSummaryUrlIndexTestImpl,
         plan_url_index: PlanSummaryUrlIndexTestImpl,
         company_url_index: CompanySummaryUrlIndex,
         translator: FakeTranslator,
@@ -339,7 +350,6 @@ class PresenterTestsInjector(Module):
         return QueryPlansPresenter(
             plan_url_index=plan_url_index,
             company_url_index=company_url_index,
-            coop_url_index=coop_url_index,
             user_notifier=notifier,
             trans=translator,
         )
@@ -376,14 +386,12 @@ class PresenterTestsInjector(Module):
     def provide_show_my_plans_presenter(
         self,
         plan_url_index: PlanSummaryUrlIndexTestImpl,
-        coop_url_index: CoopSummaryUrlIndexTestImpl,
         renew_plan_url_index: RenewPlanUrlIndex,
         hide_plan_url_index: HidePlanUrlIndex,
         translator: FakeTranslator,
     ) -> ShowMyPlansPresenter:
         return ShowMyPlansPresenter(
             url_index=plan_url_index,
-            coop_url_index=coop_url_index,
             renew_plan_url_index=renew_plan_url_index,
             hide_plan_url_index=hide_plan_url_index,
             translator=translator,
@@ -548,6 +556,30 @@ class PresenterTestsInjector(Module):
         return SeekPlanApprovalPresenter(
             notifier=notifier,
             translator=translator,
+        )
+
+    @provider
+    def provide_log_in_member_presenter(
+        self,
+        session: FakeSession,
+        translator: FakeTranslator,
+        member_url_index: MemberUrlIndex,
+    ) -> LogInMemberPresenter:
+        return LogInMemberPresenter(
+            session=session,
+            translator=translator,
+            member_url_index=member_url_index,
+        )
+
+    @provider
+    def provide_list_available_languages_presenter(
+        self,
+        language_changer_url_index: LanguageChangerUrlIndexImpl,
+        language_service: FakeLanguageService,
+    ) -> ListAvailableLanguagesPresenter:
+        return ListAvailableLanguagesPresenter(
+            language_changer_url_index=language_changer_url_index,
+            language_service=language_service,
         )
 
 

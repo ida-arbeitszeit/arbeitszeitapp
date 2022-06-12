@@ -8,7 +8,13 @@ from arbeitszeit.use_cases import GetCompanySummary
 from arbeitszeit.use_cases.get_accountant_profile_info import (
     GetAccountantProfileInfoUseCase,
 )
+from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
 from arbeitszeit.use_cases.log_in_accountant import LogInAccountantUseCase
+from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
+from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
+from arbeitszeit.use_cases.pay_consumer_product.consumer_product_transaction import (
+    ConsumerProductTransactionFactory,
+)
 from arbeitszeit.use_cases.register_company.company_registration_message_presenter import (
     CompanyRegistrationMessagePresenter,
 )
@@ -20,6 +26,7 @@ from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitat
 )
 from tests import data_generators
 from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
+from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.datetime_service import FakeDatetimeService
 from tests.dependency_injection import TestingModule
 from tests.token import FakeTokenService, TokenDeliveryService
@@ -28,6 +35,17 @@ from . import repositories
 
 
 class InMemoryModule(Module):
+    @singleton
+    @provider
+    def provide_fake_language_repository(self) -> repositories.FakeLanguageRepository:
+        return repositories.FakeLanguageRepository()
+
+    @provider
+    def provide_language_repository(
+        self, language_repository: repositories.FakeLanguageRepository
+    ) -> interfaces.LanguageRepository:
+        return language_repository
+
     @singleton
     @provider
     def provide_accoutant_repository_test_impl(
@@ -209,6 +227,48 @@ class InMemoryModule(Module):
         return LogInAccountantUseCase(
             accountant_repository=accountant_repository,
         )
+
+    @provider
+    def provide_log_in_member_use_case(
+        self, member_repository: interfaces.MemberRepository
+    ) -> LogInMemberUseCase:
+        return LogInMemberUseCase(member_repository=member_repository)
+
+    @singleton
+    @provider
+    def provide_control_thresholds_test_impl(self) -> ControlThresholdsTestImpl:
+        return ControlThresholdsTestImpl()
+
+    @provider
+    def provide_consumer_product_transaction_factory(
+        self,
+        datetime_service: DatetimeService,
+        purchase_repository: interfaces.PurchaseRepository,
+        transaction_repository: interfaces.TransactionRepository,
+        plan_cooperation_repository: interfaces.PlanCooperationRepository,
+        account_repository: interfaces.AccountRepository,
+        control_thresholds: ControlThresholdsTestImpl,
+    ) -> ConsumerProductTransactionFactory:
+        return ConsumerProductTransactionFactory(
+            datetime_service=datetime_service,
+            purchase_repository=purchase_repository,
+            transaction_repository=transaction_repository,
+            plan_cooperation_repository=plan_cooperation_repository,
+            account_repository=account_repository,
+            control_thresholds=control_thresholds,
+        )
+
+    @provider
+    def provide_list_available_languages_use_case(
+        self, language_repository: interfaces.LanguageRepository
+    ) -> ListAvailableLanguagesUseCase:
+        return ListAvailableLanguagesUseCase(language_repository=language_repository)
+
+    @provider
+    def provide_log_in_company_use_case(
+        self, company_repository: interfaces.CompanyRepository
+    ) -> LogInCompanyUseCase:
+        return LogInCompanyUseCase(company_repository=company_repository)
 
 
 def get_dependency_injector() -> Injector:

@@ -28,6 +28,14 @@ arbeitszeit\_web.controllers.pay\_means\_of\_production\_controller module
    :undoc-members:
    :show-inheritance:
 
+arbeitszeit\_web.controllers.register\_accountant\_controller module
+--------------------------------------------------------------------
+
+.. automodule:: arbeitszeit_web.controllers.register_accountant_controller
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit\_web.controllers.send\_work\_certificates\_to\_worker\_controller module
 ------------------------------------------------------------------------------------
 

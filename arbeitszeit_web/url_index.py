@@ -3,6 +3,11 @@ from typing import Protocol
 from uuid import UUID
 
 
+class MemberUrlIndex(Protocol):
+    def get_member_profile_url(self) -> str:
+        ...
+
+
 class AnswerCompanyWorkInviteUrlIndex(Protocol):
     def get_answer_company_work_invite_url(self, invite_id: UUID) -> str:
         ...
@@ -73,6 +78,11 @@ class AccountantInvitationUrlIndex(Protocol):
         ...
 
 
+class PayMeansOfProductionUrlIndex(Protocol):
+    def get_pay_means_of_production_url(self) -> str:
+        ...
+
+
 class PlotsUrlIndex(Protocol):
     def get_global_barplot_for_certificates_url(
         self, certificates_count: Decimal, available_product: Decimal
@@ -104,4 +114,9 @@ class PlotsUrlIndex(Protocol):
 
 class AccountantDashboardUrlIndex(Protocol):
     def get_accountant_dashboard_url(self) -> str:
+        ...
+
+
+class LanguageChangerUrlIndex(Protocol):
+    def get_language_change_url(self, language_code: str) -> str:
         ...

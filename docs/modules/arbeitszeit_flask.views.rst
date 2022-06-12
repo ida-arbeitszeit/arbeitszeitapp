@@ -4,6 +4,14 @@ arbeitszeit\_flask.views package
 Submodules
 ----------
 
+arbeitszeit\_flask.views.accountant\_invitation\_email\_view module
+-------------------------------------------------------------------
+
+.. automodule:: arbeitszeit_flask.views.accountant_invitation_email_view
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit\_flask.views.company\_work\_invite\_view module
 -----------------------------------------------------------
 
@@ -12,10 +20,26 @@ arbeitszeit\_flask.views.company\_work\_invite\_view module
    :undoc-members:
    :show-inheritance:
 
+arbeitszeit\_flask.views.create\_cooperation\_view module
+---------------------------------------------------------
+
+.. automodule:: arbeitszeit_flask.views.create_cooperation_view
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit\_flask.views.create\_draft\_view module
 ---------------------------------------------------
 
 .. automodule:: arbeitszeit_flask.views.create_draft_view
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit\_flask.views.dashboard\_view module
+-----------------------------------------------
+
+.. automodule:: arbeitszeit_flask.views.dashboard_view
    :members:
    :undoc-members:
    :show-inheritance:
@@ -104,6 +128,30 @@ arbeitszeit\_flask.views.show\_my\_accounts\_view module
 --------------------------------------------------------
 
 .. automodule:: arbeitszeit_flask.views.show_my_accounts_view
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit\_flask.views.signup\_accountant\_view module
+--------------------------------------------------------
+
+.. automodule:: arbeitszeit_flask.views.signup_accountant_view
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit\_flask.views.signup\_company\_view module
+-----------------------------------------------------
+
+.. automodule:: arbeitszeit_flask.views.signup_company_view
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit\_flask.views.signup\_member\_view module
+----------------------------------------------------
+
+.. automodule:: arbeitszeit_flask.views.signup_member_view
    :members:
    :undoc-members:
    :show-inheritance:

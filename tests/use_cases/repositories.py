@@ -239,6 +239,7 @@ class MemberRepository(interfaces.MemberRepository):
     @inject
     def __init__(self, datetime_service: DatetimeService):
         self.members: Dict[UUID, Member] = {}
+        self.passwords: Dict[UUID, str] = {}
         self.datetime_service = datetime_service
 
     def create_member(
@@ -259,13 +260,17 @@ class MemberRepository(interfaces.MemberRepository):
             confirmed_on=None,
         )
         self.members[id] = member
+        self.passwords[id] = password
         return member
 
+    def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
+        if member := self._get_member_by_email(email):
+            if self.passwords[member.id] == password:
+                return member.id
+        return None
+
     def has_member_with_email(self, email: str) -> bool:
-        for member in self.members.values():
-            if member.email == email:
-                return True
-        return False
+        return bool(self._get_member_by_email(email))
 
     def count_registered_members(self) -> int:
         return len(self.members)
@@ -276,12 +281,19 @@ class MemberRepository(interfaces.MemberRepository):
     def get_all_members(self) -> Iterator[Member]:
         yield from self.members.values()
 
+    def _get_member_by_email(self, email: str) -> Optional[Member]:
+        for member in self.members.values():
+            if member.email == email:
+                return member
+        return None
+
 
 @singleton
 class CompanyRepository(interfaces.CompanyRepository):
     @inject
     def __init__(self) -> None:
         self.companies: Dict[str, Company] = {}
+        self.passwords: Dict[UUID, str] = {}
 
     def create_company(
         self,
@@ -306,6 +318,7 @@ class CompanyRepository(interfaces.CompanyRepository):
             confirmed_on=None,
         )
         self.companies[email] = new_company
+        self.passwords[new_company.id] = password
         return new_company
 
     def has_company_with_email(self, email: str) -> bool:
@@ -332,6 +345,13 @@ class CompanyRepository(interfaces.CompanyRepository):
 
     def get_all_companies(self) -> Iterator[Company]:
         yield from self.companies.values()
+
+    def validate_credentials(self, email_address: str, password: str) -> Optional[UUID]:
+        if company := self.companies.get(email_address):
+            if correct_password := self.passwords.get(company.id):
+                if password == correct_password:
+                    return company.id
+        return None
 
 
 @singleton
@@ -882,3 +902,14 @@ class AccountantRepositoryTestImpl:
                 else:
                     return None
         return None
+
+
+class FakeLanguageRepository:
+    def __init__(self) -> None:
+        self._language_codes: Set[str] = set()
+
+    def add_language(self, language_code: str) -> None:
+        self._language_codes.add(language_code)
+
+    def get_available_language_codes(self) -> Iterable[str]:
+        return self._language_codes

@@ -1,14 +1,13 @@
+from typing import Optional
 from unittest import TestCase
 
 from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProductionResponse
-from arbeitszeit_web.pay_means_of_production import (
-    PayMeansOfProductionController,
-    PayMeansOfProductionPresenter,
-)
+from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl
+from .url_index import PayMeansOfProductionUrlIndexImpl
 
 reasons = PayMeansOfProductionResponse.RejectionReason
 
@@ -19,6 +18,7 @@ class PayMeansOfProductionTests(TestCase):
         self.notifier = self.injector.get(NotifierTestImpl)
         self.trans = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(PayMeansOfProductionPresenter)
+        self.url_index = self.injector.get(PayMeansOfProductionUrlIndexImpl)
 
     def test_show_confirmation_when_payment_was_successful(self) -> None:
         self.presenter.present(
@@ -88,36 +88,29 @@ class PayMeansOfProductionTests(TestCase):
             self.notifier.warnings,
         )
 
-    def test_no_malformed_data_results_in_no_warning(self):
-        self.presenter.present_malformed_data_warnings(
-            PayMeansOfProductionController.MalformedInputData({})
-        )
-        self.assertFalse(self.notifier.warnings)
+    def test_that_redirect_url_is_not_set_when_payment_got_rejected(self) -> None:
+        response = self.create_failed_response()
+        view_model = self.presenter.present(response)
+        self.assertIsNone(view_model.redirect_url)
 
-    def test_one_malformed_field_with_two_messages_results_in_two_warnings_with_correct_messages(
-        self,
-    ):
-        self.presenter.present_malformed_data_warnings(
-            PayMeansOfProductionController.MalformedInputData({"a": ["one", "two"]})
-        )
-        self.assertEqual(len(self.notifier.warnings), 2)
-        self.assertIn("one", self.notifier.warnings)
-        self.assertIn("two", self.notifier.warnings)
+    def test_that_redirect_url_is_set_when_response_is_success(self) -> None:
+        response = self.create_success_response()
+        view_model = self.presenter.present(response)
+        self.assertIsNotNone(view_model.redirect_url)
 
-    def test_two_malformed_fields_with_one_message_each_results_in_two_warnings_with_correct_messages(
-        self,
-    ):
-        self.presenter.present_malformed_data_warnings(
-            PayMeansOfProductionController.MalformedInputData(
-                {"a": ["one"], "b": ["two"]}
-            )
+    def test_that_user_gets_redirected_to_pay_means_form(self) -> None:
+        response = self.create_success_response()
+        view_model = self.presenter.present(response)
+        self.assertEqual(
+            view_model.redirect_url, self.url_index.get_pay_means_of_production_url()
         )
-        self.assertEqual(len(self.notifier.warnings), 2)
-        self.assertIn(
-            "one",
-            self.notifier.warnings,
-        )
-        self.assertIn(
-            "two",
-            self.notifier.warnings,
-        )
+
+    def create_success_response(self) -> PayMeansOfProductionResponse:
+        return PayMeansOfProductionResponse(rejection_reason=None)
+
+    def create_failed_response(
+        self, reason: Optional[PayMeansOfProductionResponse.RejectionReason] = None
+    ) -> PayMeansOfProductionResponse:
+        if reason is None:
+            reason = reasons.buyer_is_planner
+        return PayMeansOfProductionResponse(rejection_reason=reason)

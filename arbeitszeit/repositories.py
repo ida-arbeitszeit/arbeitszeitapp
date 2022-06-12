@@ -219,6 +219,10 @@ class MemberRepository(ABC):
         pass
 
     @abstractmethod
+    def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
+        pass
+
+    @abstractmethod
     def has_member_with_email(self, email: str) -> bool:
         pass
 
@@ -280,6 +284,10 @@ class CompanyRepository(ABC):
 
     @abstractmethod
     def get_all_companies(self) -> Iterator[Company]:
+        pass
+
+    @abstractmethod
+    def validate_credentials(self, email_address: str, password: str) -> Optional[UUID]:
         pass
 
 
@@ -451,4 +459,9 @@ class AccountantRepository(Protocol):
         ...
 
     def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
+        ...
+
+
+class LanguageRepository(Protocol):
+    def get_available_language_codes(self) -> Iterable[str]:
         ...

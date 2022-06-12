@@ -2,6 +2,11 @@ from decimal import Decimal
 from uuid import UUID
 
 
+class MemberUrlIndex:
+    def get_member_profile_url(self) -> str:
+        return "member profile url"
+
+
 class ListMessageUrlIndexTestImpl:
     def get_list_messages_url(self) -> str:
         return "list messages"
@@ -106,3 +111,13 @@ class PlotsUrlIndexImpl:
 class AccountantDashboardUrlIndexImpl:
     def get_accountant_dashboard_url(self) -> str:
         return "accountant dashboard url"
+
+
+class PayMeansOfProductionUrlIndexImpl:
+    def get_pay_means_of_production_url(self) -> str:
+        return "pay means of production form url"
+
+
+class LanguageChangerUrlIndexImpl:
+    def get_language_change_url(self, language_code: str) -> str:
+        return f"language change url for {language_code}"

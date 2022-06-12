@@ -10,6 +10,7 @@ from arbeitszeit_flask.database.repositories import AccountRepository, CompanyRe
 from tests.data_generators import CompanyGenerator
 
 from .dependency_injection import injection_test
+from .flask import FlaskTestCase
 
 
 def company_in_companies(company: Company, companies: List[Company]) -> bool:
@@ -196,3 +197,42 @@ def test_query_companies_by_email_with_capitalization(
     expected_company = generator.create_company(email="company@provider.de")
     companies_result = list(repository.query_companies_by_email("COMPANY"))
     assert company_in_companies(expected_company, companies_result)
+
+
+class ValidateCredentialsTest(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.repository = self.injector.get(CompanyRepository)
+        self.company_generator = self.injector.get(CompanyGenerator)
+
+    def test_cannot_validate_random_user_with_empty_database(self) -> None:
+        company_id = self.repository.validate_credentials(
+            email_address="test@test.test",
+            password="test password",
+        )
+        self.assertIsNone(company_id)
+
+    def test_can_validate_company_with_correct_credentials(self) -> None:
+        expected_email = "test@test.test"
+        expected_password = "test password"
+        expected_company = self.company_generator.create_company(
+            email=expected_email,
+            password=expected_password,
+        )
+        company_id = self.repository.validate_credentials(
+            expected_email,
+            expected_password,
+        )
+        self.assertEqual(company_id, expected_company.id)
+
+    def test_cannot_validate_user_with_wrong_password(self) -> None:
+        expected_email = "test@test.test"
+        self.company_generator.create_company(
+            email=expected_email,
+            password="test password",
+        )
+        company_id = self.repository.validate_credentials(
+            expected_email,
+            "wrong_password",
+        )
+        self.assertIsNone(company_id)

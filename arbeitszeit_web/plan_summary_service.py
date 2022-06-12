@@ -2,20 +2,21 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import List, Optional, Protocol, Tuple
 
-from arbeitszeit.plan_summary import BusinessPlanSummary
+from arbeitszeit.plan_summary import PlanSummary
 from arbeitszeit_web.url_index import CompanySummaryUrlIndex, CoopSummaryUrlIndex
 
 from .translator import Translator
 
 
 @dataclass
-class PlanSummary:
+class PlanSummaryWeb:
     plan_id: Tuple[str, str]
-    is_active: Tuple[str, str]
+    activity_string: Tuple[str, str]
     planner: Tuple[str, str, str, str]
     product_name: Tuple[str, str]
     description: Tuple[str, List[str]]
     timeframe: Tuple[str, str]
+    active_days: str
     production_unit: Tuple[str, str]
     amount: Tuple[str, str]
     means_cost: Tuple[str, str]
@@ -23,11 +24,11 @@ class PlanSummary:
     labour_cost: Tuple[str, str]
     type_of_plan: Tuple[str, str]
     price_per_unit: Tuple[str, str, bool, Optional[str]]
-    is_available: Tuple[str, str]
+    availability_string: Tuple[str, str]
 
 
 class PlanSummaryService(Protocol):
-    def get_plan_summary(self, plan_summary: BusinessPlanSummary) -> PlanSummary:
+    def get_plan_summary(self, plan_summary: PlanSummary) -> PlanSummaryWeb:
         ...
 
 
@@ -37,10 +38,10 @@ class PlanSummaryServiceImpl:
     company_url_index: CompanySummaryUrlIndex
     translator: Translator
 
-    def get_plan_summary(self, plan_summary: BusinessPlanSummary) -> PlanSummary:
-        return PlanSummary(
+    def get_plan_summary(self, plan_summary: PlanSummary) -> PlanSummaryWeb:
+        return PlanSummaryWeb(
             plan_id=(self.translator.gettext("Plan ID"), str(plan_summary.plan_id)),
-            is_active=(
+            activity_string=(
                 self.translator.gettext("Status"),
                 self.translator.gettext("Active")
                 if plan_summary.is_active
@@ -64,6 +65,7 @@ class PlanSummaryServiceImpl:
                 self.translator.gettext("Planning timeframe (days)"),
                 str(plan_summary.timeframe),
             ),
+            active_days=str(plan_summary.active_days),
             production_unit=(
                 self.translator.gettext("Smallest delivery unit"),
                 plan_summary.production_unit,
@@ -95,7 +97,7 @@ class PlanSummaryServiceImpl:
                 if plan_summary.cooperation
                 else None,
             ),
-            is_available=(
+            availability_string=(
                 self.translator.gettext("Product currently available"),
                 self.translator.gettext("Yes")
                 if plan_summary.is_available

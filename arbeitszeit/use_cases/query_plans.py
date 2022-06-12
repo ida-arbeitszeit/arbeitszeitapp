@@ -33,10 +33,8 @@ class QueriedPlan:
     description: str
     price_per_unit: Decimal
     is_public_service: bool
-    expiration_relative: Optional[int]
     is_available: bool
     is_cooperating: bool
-    cooperation: Optional[UUID]
 
 
 class QueryPlansRequest(ABC):
@@ -81,8 +79,6 @@ class QueryPlans:
             description=plan.description,
             price_per_unit=price_per_unit,
             is_public_service=plan.is_public_service,
-            expiration_relative=plan.expiration_relative,
             is_available=plan.is_available,
             is_cooperating=bool(plan.cooperation),
-            cooperation=plan.cooperation,
         )

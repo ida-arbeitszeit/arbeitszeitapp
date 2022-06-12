@@ -157,6 +157,15 @@ class LoginForm(Form):
     )
     remember = BooleanField(trans.lazy_gettext("Remember login?"))
 
+    def add_email_error(self, error: str) -> None:
+        self.email.errors.append(error)
+
+    def add_password_error(self, error: str) -> None:
+        self.password.errors.append(error)
+
+    def get_remember_field(self) -> bool:
+        return bool(self.data["remember"])
+
 
 class PayConsumerProductForm(Form):
     plan_id = StringField(
