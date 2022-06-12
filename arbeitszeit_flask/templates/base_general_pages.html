@@ -17,10 +17,10 @@
 	  {{ gettext('Language') }}
 	</a>
 	<div class="navbar-dropdown">
-	  {% if languages is defined and languages | length %}
-	  {% for lang_code, lang_name in languages.items() %}
-	  <a href="{{ url_for('auth.set_language', language=lang_code) }}" class="navbar-item">
-	    {{ lang_name }}
+	  {% if languages.show_language_listing %}
+	  {% for language in languages.languages_listing %}
+	  <a href="{{ language.change_url }}" class="navbar-item">
+	    {{ language.label }}
 	  </a>
 	  {% endfor %}
 	  {% endif %}

@@ -1,15 +1,6 @@
 from datetime import datetime
 
-from flask import (
-    Blueprint,
-    current_app,
-    flash,
-    redirect,
-    render_template,
-    request,
-    session,
-    url_for,
-)
+from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
 
 from arbeitszeit.use_cases import ResendConfirmationMail, ResendConfirmationMailRequest
@@ -25,6 +16,7 @@ from arbeitszeit_flask.dependency_injection import (
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import LoginForm
 from arbeitszeit_flask.next_url import save_next_url_in_session
+from arbeitszeit_flask.template import AnonymousUserTemplateRenderer
 from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.translator import FlaskTranslator
 from arbeitszeit_flask.views.signup_accountant_view import SignupAccountantView
@@ -36,14 +28,16 @@ auth = Blueprint("auth", __name__, template_folder="templates", static_folder="s
 
 
 @auth.route("/")
-def start():
+@with_injection()
+def start(template_renderer: AnonymousUserTemplateRenderer):
     save_next_url_in_session(request)
-    return render_template("auth/start.html", languages=current_app.config["LANGUAGES"])
+    return template_renderer.render_template("auth/start.html")
 
 
 @auth.route("/help")
-def help():
-    return render_template("auth/start_hilfe.html")
+@with_injection()
+def help(template_renderer: AnonymousUserTemplateRenderer):
+    return template_renderer.render_template("auth/start_hilfe.html")
 
 
 @auth.route("/language=<language>")

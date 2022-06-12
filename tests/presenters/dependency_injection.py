@@ -28,6 +28,9 @@ from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationP
 from arbeitszeit_web.presenters.get_latest_activated_plans_presenter import (
     GetLatestActivatedPlansPresenter,
 )
+from arbeitszeit_web.presenters.list_available_languages_presenter import (
+    ListAvailableLanguagesPresenter,
+)
 from arbeitszeit_web.presenters.log_in_member_presenter import LogInMemberPresenter
 from arbeitszeit_web.presenters.register_accountant_presenter import (
     RegisterAccountantPresenter,
@@ -73,6 +76,7 @@ from tests.email import (
     FakeEmailSender,
     RegistrationEmailTemplateImpl,
 )
+from tests.language_service import FakeLanguageService
 from tests.plotter import FakePlotter
 from tests.presenters.test_colors import ColorsTestImpl
 from tests.request import FakeRequest
@@ -92,6 +96,7 @@ from .url_index import (
     EndCoopUrlIndexTestImpl,
     HidePlanUrlIndex,
     InviteUrlIndexImpl,
+    LanguageChangerUrlIndexImpl,
     ListMessageUrlIndexTestImpl,
     MemberUrlIndex,
     MessageUrlIndex,
@@ -564,6 +569,17 @@ class PresenterTestsInjector(Module):
             session=session,
             translator=translator,
             member_url_index=member_url_index,
+        )
+
+    @provider
+    def provide_list_available_languages_presenter(
+        self,
+        language_changer_url_index: LanguageChangerUrlIndexImpl,
+        language_service: FakeLanguageService,
+    ) -> ListAvailableLanguagesPresenter:
+        return ListAvailableLanguagesPresenter(
+            language_changer_url_index=language_changer_url_index,
+            language_service=language_service,
         )
 
 

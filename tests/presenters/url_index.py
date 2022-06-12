@@ -116,3 +116,8 @@ class AccountantDashboardUrlIndexImpl:
 class PayMeansOfProductionUrlIndexImpl:
     def get_pay_means_of_production_url(self) -> str:
         return "pay means of production form url"
+
+
+class LanguageChangerUrlIndexImpl:
+    def get_language_change_url(self, language_code: str) -> str:
+        return f"language change url for {language_code}"

@@ -902,3 +902,14 @@ class AccountantRepositoryTestImpl:
                 else:
                     return None
         return None
+
+
+class FakeLanguageRepository:
+    def __init__(self) -> None:
+        self._language_codes: Set[str] = set()
+
+    def add_language(self, language_code: str) -> None:
+        self._language_codes.add(language_code)
+
+    def get_available_language_codes(self) -> Iterable[str]:
+        return self._language_codes
