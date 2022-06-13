@@ -32,8 +32,8 @@ from arbeitszeit_web.pay_consumer_product import (
     PayConsumerProductController,
     PayConsumerProductPresenter,
 )
-from arbeitszeit_web.presenters.get_member_profile_info_presenter import (
-    GetMemberProfileInfoPresenter,
+from arbeitszeit_web.presenters.get_member_dashboard_presenter import (
+    GetMemberDashboardPresenter,
 )
 from arbeitszeit_web.query_companies import (
     QueryCompaniesController,
@@ -128,17 +128,17 @@ def pay_consumer_product(
         return view.respond_to_get()
 
 
-@MemberRoute("/member/profile")
-def profile(
-    get_member_profile: use_cases.GetMemberProfileInfo,
-    presenter: GetMemberProfileInfoPresenter,
+@MemberRoute("/member/dashboard")
+def dashboard(
+    get_member_dashboard: use_cases.GetMemberDashboard,
+    presenter: GetMemberDashboardPresenter,
     template_renderer: UserTemplateRenderer,
 ) -> Response:
-    member_profile = get_member_profile(UUID(current_user.id))
-    view_model = presenter.present(member_profile)
+    response = get_member_dashboard(UUID(current_user.id))
+    view_model = presenter.present(response)
     return Response(
         template_renderer.render_template(
-            "member/profile.html",
+            "member/dashboard.html",
             dict(view_model=view_model),
         )
     )

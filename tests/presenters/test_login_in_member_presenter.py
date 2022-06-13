@@ -92,14 +92,14 @@ class PresenterTests(TestCase):
             self.form.email_errors,
         )
 
-    def test_that_redirect_url_is_set_to_profile_if_no_next_url_can_be_retrieved_from_session(
+    def test_that_redirect_url_is_set_to_dashboard_if_no_next_url_can_be_retrieved_from_session(
         self,
     ) -> None:
         response = self.create_success_response()
         view_model = self.presenter.present_login_process(response, self.form)
         self.assertEqual(
             view_model.redirect_url,
-            self.member_url_index.get_member_profile_url(),
+            self.member_url_index.get_member_dashboard_url(),
         )
 
     def test_that_no_redirect_url_is_set_when_login_failed(self) -> None:

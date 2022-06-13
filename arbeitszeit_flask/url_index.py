@@ -11,8 +11,8 @@ class GeneralUrlIndex:
     def get_accountant_dashboard_url(self) -> str:
         return url_for("main_accountant.dashboard")
 
-    def get_member_profile_url(self) -> str:
-        return url_for("main_member.profile")
+    def get_member_dashboard_url(self) -> str:
+        return url_for("main_member.dashboard")
 
     def get_language_change_url(self, language_code: str) -> str:
         return url_for("auth.set_language", language=language_code)

@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from typing import List
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.use_cases.get_member_profile_info import (
-    GetMemberProfileInfoResponse,
+from arbeitszeit.use_cases.get_member_dashboard import (
+    GetMemberDashboardResponse,
     PlanDetails,
 )
 from arbeitszeit_web.translator import Translator
@@ -24,7 +24,7 @@ class PlanDetailsWeb:
 
 
 @dataclass
-class GetMemberProfileInfoViewModel:
+class GetMemberDashboardViewModel:
     member_id: str
     account_balance: str
     email: str
@@ -37,19 +37,19 @@ class GetMemberProfileInfoViewModel:
 
 
 @dataclass
-class GetMemberProfileInfoPresenter:
+class GetMemberDashboardPresenter:
     translator: Translator
     url_index: PlanSummaryUrlIndex
     datetime_service: DatetimeService
 
     def present(
-        self, use_case_response: GetMemberProfileInfoResponse
-    ) -> GetMemberProfileInfoViewModel:
+        self, use_case_response: GetMemberDashboardResponse
+    ) -> GetMemberDashboardViewModel:
         latest_plans = [
             self._get_plan_details_web(plan_detail)
             for plan_detail in use_case_response.three_latest_plans
         ]
-        return GetMemberProfileInfoViewModel(
+        return GetMemberDashboardViewModel(
             member_id=str(use_case_response.id),
             account_balance=self.translator.gettext(
                 "%(num).2f hours" % dict(num=use_case_response.account_balance)

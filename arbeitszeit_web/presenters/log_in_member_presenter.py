@@ -27,7 +27,7 @@ class LogInMemberPresenter:
             )
             next_url = (
                 self.session.pop_next_url()
-                or self.member_url_index.get_member_profile_url()
+                or self.member_url_index.get_member_dashboard_url()
             )
             return self.ViewModel(redirect_url=next_url)
         else:

@@ -4,13 +4,13 @@ from typing import List
 from unittest import TestCase
 from uuid import uuid4
 
-from arbeitszeit.use_cases.get_member_profile_info import (
-    GetMemberProfileInfoResponse,
+from arbeitszeit.use_cases.get_member_dashboard import (
+    GetMemberDashboardResponse,
     PlanDetails,
     Workplace,
 )
-from arbeitszeit_web.presenters.get_member_profile_info_presenter import (
-    GetMemberProfileInfoPresenter,
+from arbeitszeit_web.presenters.get_member_dashboard_presenter import (
+    GetMemberDashboardPresenter,
 )
 from tests.presenters.url_index import PlanSummaryUrlIndexTestImpl
 from tests.translator import FakeTranslator
@@ -18,11 +18,11 @@ from tests.translator import FakeTranslator
 from .dependency_injection import get_dependency_injector
 
 
-class GetMemberProfileInfoPresenterTests(TestCase):
+class GetMemberDashboardPresenterTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.translator = self.injector.get(FakeTranslator)
-        self.presenter = self.injector.get(GetMemberProfileInfoPresenter)
+        self.presenter = self.injector.get(GetMemberDashboardPresenter)
         self.plan_index = self.injector.get(PlanSummaryUrlIndexTestImpl)
 
     def test_that_welcome_line_is_correctly_translated(self) -> None:
@@ -134,14 +134,14 @@ class GetMemberProfileInfoPresenterTests(TestCase):
         workplaces: List[Workplace] = None,
         account_balance: Decimal = None,
         three_latest_plans: List[PlanDetails] = None,
-    ) -> GetMemberProfileInfoResponse:
+    ) -> GetMemberDashboardResponse:
         if workplaces is None:
             workplaces = []
         if account_balance is None:
             account_balance = Decimal(0)
         if three_latest_plans is None:
             three_latest_plans = []
-        return GetMemberProfileInfoResponse(
+        return GetMemberDashboardResponse(
             workplaces=workplaces,
             three_latest_plans=three_latest_plans,
             account_balance=account_balance,

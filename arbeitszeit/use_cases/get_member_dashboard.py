@@ -28,7 +28,7 @@ class PlanDetails:
 
 
 @dataclass
-class GetMemberProfileInfoResponse:
+class GetMemberDashboardResponse:
     workplaces: List[Workplace]
     three_latest_plans: List[PlanDetails]
     account_balance: Decimal
@@ -39,13 +39,13 @@ class GetMemberProfileInfoResponse:
 
 @inject
 @dataclass
-class GetMemberProfileInfo:
+class GetMemberDashboard:
     company_worker_repository: CompanyWorkerRepository
     account_repository: AccountRepository
     member_repository: MemberRepository
     plan_repository: PlanRepository
 
-    def __call__(self, member: UUID) -> GetMemberProfileInfoResponse:
+    def __call__(self, member: UUID) -> GetMemberDashboardResponse:
         _member = self.member_repository.get_by_id(member)
         assert _member is not None
         workplaces = [
@@ -57,7 +57,7 @@ class GetMemberProfileInfo:
                 member
             )
         ]
-        return GetMemberProfileInfoResponse(
+        return GetMemberDashboardResponse(
             workplaces=workplaces,
             three_latest_plans=self._get_three_latest_plans(),
             account_balance=self.account_repository.get_account_balance(

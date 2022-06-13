@@ -4,7 +4,7 @@ from uuid import UUID
 
 
 class MemberUrlIndex(Protocol):
-    def get_member_profile_url(self) -> str:
+    def get_member_dashboard_url(self) -> str:
         ...
 
 

@@ -27,8 +27,8 @@ from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationP
 from arbeitszeit_web.presenters.get_latest_activated_plans_presenter import (
     GetLatestActivatedPlansPresenter,
 )
-from arbeitszeit_web.presenters.get_member_profile_info_presenter import (
-    GetMemberProfileInfoPresenter,
+from arbeitszeit_web.presenters.get_member_dashboard_presenter import (
+    GetMemberDashboardPresenter,
 )
 from arbeitszeit_web.presenters.list_available_languages_presenter import (
     ListAvailableLanguagesPresenter,
@@ -213,13 +213,13 @@ class PresenterTestsInjector(Module):
         )
 
     @provider
-    def provide_get_member_profile_info_presenter(
+    def provide_get_member_dashboard_presenter(
         self,
         translator: FakeTranslator,
         url_index: PlanSummaryUrlIndexTestImpl,
         datetime_service: FakeDatetimeService,
-    ) -> GetMemberProfileInfoPresenter:
-        return GetMemberProfileInfoPresenter(
+    ) -> GetMemberDashboardPresenter:
+        return GetMemberDashboardPresenter(
             translator=translator,
             url_index=url_index,
             datetime_service=datetime_service,
