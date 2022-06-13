@@ -4,11 +4,7 @@ from typing import List
 from unittest import TestCase
 from uuid import uuid4
 
-from arbeitszeit.use_cases.get_member_dashboard import (
-    GetMemberDashboardResponse,
-    PlanDetails,
-    Workplace,
-)
+from arbeitszeit.use_cases.get_member_dashboard import GetMemberDashboard
 from arbeitszeit_web.presenters.get_member_dashboard_presenter import (
     GetMemberDashboardPresenter,
 )
@@ -44,7 +40,7 @@ class GetMemberDashboardPresenterTests(TestCase):
     def test_that_workplaces_are_shown_when_worker_is_employed(self):
         response = self.get_response(
             workplaces=[
-                Workplace(
+                GetMemberDashboard.Workplace(
                     workplace_name="workplace_name", workplace_email="workplace@cp.org"
                 ),
             ]
@@ -56,7 +52,7 @@ class GetMemberDashboardPresenterTests(TestCase):
     def test_that_work_registration_info_is_not_shown_when_worker_is_employed(self):
         response = self.get_response(
             workplaces=[
-                Workplace(
+                GetMemberDashboard.Workplace(
                     workplace_name="workplace_name", workplace_email="workplace@cp.org"
                 ),
             ]
@@ -86,7 +82,7 @@ class GetMemberDashboardPresenterTests(TestCase):
         expected_name = "test name"
         response = self.get_response(
             three_latest_plans=[
-                PlanDetails(
+                GetMemberDashboard.PlanDetails(
                     plan_id=uuid4(),
                     prd_name=expected_name,
                     activation_date=datetime.now(),
@@ -100,7 +96,7 @@ class GetMemberDashboardPresenterTests(TestCase):
         now = datetime.now()
         response = self.get_response(
             three_latest_plans=[
-                PlanDetails(
+                GetMemberDashboard.PlanDetails(
                     plan_id=uuid4(),
                     prd_name="test name",
                     activation_date=now,
@@ -116,7 +112,7 @@ class GetMemberDashboardPresenterTests(TestCase):
         plan_id = uuid4()
         response = self.get_response(
             three_latest_plans=[
-                PlanDetails(
+                GetMemberDashboard.PlanDetails(
                     plan_id=plan_id,
                     prd_name="test name",
                     activation_date=datetime.now(),
@@ -131,17 +127,17 @@ class GetMemberDashboardPresenterTests(TestCase):
 
     def get_response(
         self,
-        workplaces: List[Workplace] = None,
+        workplaces: List[GetMemberDashboard.Workplace] = None,
         account_balance: Decimal = None,
-        three_latest_plans: List[PlanDetails] = None,
-    ) -> GetMemberDashboardResponse:
+        three_latest_plans: List[GetMemberDashboard.PlanDetails] = None,
+    ) -> GetMemberDashboard.Response:
         if workplaces is None:
             workplaces = []
         if account_balance is None:
             account_balance = Decimal(0)
         if three_latest_plans is None:
             three_latest_plans = []
-        return GetMemberDashboardResponse(
+        return GetMemberDashboard.Response(
             workplaces=workplaces,
             three_latest_plans=three_latest_plans,
             account_balance=account_balance,

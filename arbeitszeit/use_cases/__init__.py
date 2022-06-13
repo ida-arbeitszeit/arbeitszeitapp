@@ -56,11 +56,7 @@ from .get_draft_summary import (
     GetDraftSummary,
 )
 from .get_member_account import GetMemberAccount, GetMemberAccountResponse
-from .get_member_dashboard import (
-    GetMemberDashboard,
-    GetMemberDashboardResponse,
-    Workplace,
-)
+from .get_member_dashboard import GetMemberDashboard
 from .get_plan_summary_company import GetPlanSummaryCompany
 from .get_plan_summary_member import GetPlanSummaryMember
 from .get_statistics import GetStatistics, StatisticsResponse
@@ -202,7 +198,6 @@ __all__ = [
     "GetMemberAccount",
     "GetMemberAccountResponse",
     "GetMemberDashboard",
-    "GetMemberDashboardResponse",
     "GetPlanSummaryMember",
     "GetPlanSummaryCompany",
     "GetStatistics",
@@ -289,5 +284,4 @@ __all__ = [
     "ToggleProductAvailability",
     "ToggleProductAvailabilityResponse",
     "UpdatePlansAndPayout",
-    "Workplace",
 ]

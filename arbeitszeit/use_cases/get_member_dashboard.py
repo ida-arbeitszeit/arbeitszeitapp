@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
@@ -14,42 +16,39 @@ from arbeitszeit.repositories import (
 )
 
 
-@dataclass
-class Workplace:
-    workplace_name: str
-    workplace_email: str
-
-
-@dataclass
-class PlanDetails:
-    plan_id: UUID
-    prd_name: str
-    activation_date: datetime
-
-
-@dataclass
-class GetMemberDashboardResponse:
-    workplaces: List[Workplace]
-    three_latest_plans: List[PlanDetails]
-    account_balance: Decimal
-    name: str
-    email: str
-    id: UUID
-
-
 @inject
 @dataclass
 class GetMemberDashboard:
+    @dataclass
+    class Workplace:
+        workplace_name: str
+        workplace_email: str
+
+    @dataclass
+    class PlanDetails:
+        plan_id: UUID
+        prd_name: str
+        activation_date: datetime
+
+    @dataclass
+    class Response:
+        workplaces: List[GetMemberDashboard.Workplace]
+        three_latest_plans: List[GetMemberDashboard.PlanDetails]
+        account_balance: Decimal
+        name: str
+        email: str
+        id: UUID
+
     company_worker_repository: CompanyWorkerRepository
     account_repository: AccountRepository
     member_repository: MemberRepository
     plan_repository: PlanRepository
 
-    def __call__(self, member: UUID) -> GetMemberDashboardResponse:
+    def __call__(self, member: UUID) -> Response:
         _member = self.member_repository.get_by_id(member)
         assert _member is not None
         workplaces = [
-            Workplace(
+            self.Workplace(
                 workplace_name=workplace.name,
                 workplace_email=workplace.email,
             )
@@ -57,7 +56,7 @@ class GetMemberDashboard:
                 member
             )
         ]
-        return GetMemberDashboardResponse(
+        return self.Response(
             workplaces=workplaces,
             three_latest_plans=self._get_three_latest_plans(),
             account_balance=self.account_repository.get_account_balance(
@@ -75,5 +74,5 @@ class GetMemberDashboard:
         plans = []
         for plan in latest_plans:
             assert plan.activation_date
-            plans.append(PlanDetails(plan.id, plan.prd_name, plan.activation_date))
+            plans.append(self.PlanDetails(plan.id, plan.prd_name, plan.activation_date))
         return plans

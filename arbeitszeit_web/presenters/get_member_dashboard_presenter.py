@@ -2,10 +2,7 @@ from dataclasses import dataclass
 from typing import List
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.use_cases.get_member_dashboard import (
-    GetMemberDashboardResponse,
-    PlanDetails,
-)
+from arbeitszeit.use_cases.get_member_dashboard import GetMemberDashboard
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import PlanSummaryUrlIndex
 
@@ -43,7 +40,7 @@ class GetMemberDashboardPresenter:
     datetime_service: DatetimeService
 
     def present(
-        self, use_case_response: GetMemberDashboardResponse
+        self, use_case_response: GetMemberDashboard.Response
     ) -> GetMemberDashboardViewModel:
         latest_plans = [
             self._get_plan_details_web(plan_detail)
@@ -70,7 +67,9 @@ class GetMemberDashboardPresenter:
             has_latest_plans=bool(latest_plans),
         )
 
-    def _get_plan_details_web(self, plan_detail: PlanDetails) -> PlanDetailsWeb:
+    def _get_plan_details_web(
+        self, plan_detail: GetMemberDashboard.PlanDetails
+    ) -> PlanDetailsWeb:
         return PlanDetailsWeb(
             prd_name=plan_detail.prd_name,
             activation_date=self.datetime_service.format_datetime(
