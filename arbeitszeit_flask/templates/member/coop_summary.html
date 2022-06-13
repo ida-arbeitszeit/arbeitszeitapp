@@ -1,5 +1,9 @@
 {% extends "base_member.html" %}
 
+{% block navbar_start %}
+<div class="navbar-item">{{ gettext("Cooperation") }}</div>
+{% endblock %}
+
 {% block content %}
 {% from 'macros/coop_summary.html' import coop_summary %}
 {{ coop_summary(view_model) }}

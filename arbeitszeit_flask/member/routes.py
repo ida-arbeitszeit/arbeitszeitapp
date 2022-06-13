@@ -25,13 +25,15 @@ from arbeitszeit_flask.views import (
 )
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
-from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
 from arbeitszeit_web.get_plan_summary_member import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 from arbeitszeit_web.pay_consumer_product import (
     PayConsumerProductController,
     PayConsumerProductPresenter,
+)
+from arbeitszeit_web.presenters.get_member_dashboard_presenter import (
+    GetMemberDashboardPresenter,
 )
 from arbeitszeit_web.query_companies import (
     QueryCompaniesController,
@@ -126,17 +128,17 @@ def pay_consumer_product(
         return view.respond_to_get()
 
 
-@MemberRoute("/member/profile")
-def profile(
-    get_member_profile: use_cases.GetMemberProfileInfo,
-    presenter: GetMemberProfileInfoPresenter,
+@MemberRoute("/member/dashboard")
+def dashboard(
+    get_member_dashboard: use_cases.GetMemberDashboard,
+    presenter: GetMemberDashboardPresenter,
     template_renderer: UserTemplateRenderer,
 ) -> Response:
-    member_profile = get_member_profile(UUID(current_user.id))
-    view_model = presenter.present(member_profile)
+    response = get_member_dashboard(UUID(current_user.id))
+    view_model = presenter.present(response)
     return Response(
         template_renderer.render_template(
-            "member/profile.html",
+            "member/dashboard.html",
             dict(view_model=view_model),
         )
     )

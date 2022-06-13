@@ -1,5 +1,9 @@
 {% extends "base_member.html" %}
 
+{% block navbar_start %}
+<div class="navbar-item">{{ gettext("Company overview") }}</div>
+{% endblock %}
+
 {% block content %}
 {% from 'macros/company_summary.html' import company_summary %}
 {{ company_summary(view_model) }}

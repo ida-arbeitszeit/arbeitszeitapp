@@ -1,0 +1,134 @@
+{% extends "base_member.html" %}
+
+{% block content %}
+<div class="section">
+  <div class="has-text-centered pb-5">
+    <h1 class="title is-2">{{ view_model.welcome_message }}</h1>
+    <div class="columns">
+      <div class="column"></div>
+      <div class="column is-one-third">
+        <div class="box">
+          <p class="has-text-weight-semibold">{{ gettext("Your ID") }}:</p>
+          <p>{{ view_model.member_id }}</p>
+          <p class="has-text-weight-semibold">{{ gettext("Your email") }}:</p>
+          <p>{{ view_model.email }}</p>
+          <p class="has-text-weight-semibold">{{ gettext("Your credit") }}:</p>
+          <p>{{ view_model.account_balance }}</p>
+          <p class="has-text-weight-semibold">{{ gettext("Your workplace") }}:</p>
+          {% if view_model.show_workplaces %}
+          <ul>
+            {% for workplace in view_model.workplaces %}
+            <li>{{ workplace.name }} ({{ workplace.email }})</li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+
+          {% if view_model.show_workplace_registration_info %}
+          <div>
+            <span class="icon"><i class="fas fa-exclamation-triangle"></i></span>
+            <p>
+              {{ gettext("You are not registered with any company. Tell your company your member ID so that they register you.") }}
+            </p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="column"></div>
+    </div>
+
+
+    <div class="has-text-centered py-5">
+      <h1 class="title is-3">{{ gettext("My area") }}</h1>
+    </div>
+    <div class="tile is-ancestor">
+      <a class="tile is-parent" href="{{ url_for('main_member.pay_consumer_product') }}">
+        <div class="tile is-child box has-background-primary-light">
+          <h1 class="title is-5"><span class="icon"><i class="fa-solid fa-file-circle-plus"></i></span> {{
+            gettext("Pay product") }}</h1>
+          <div class="subtitle"></div>
+        </div>
+      </a>
+      <a class="tile is-parent" href="{{ url_for('main_member.my_account') }}">
+        <div class="tile is-child box has-background-primary-light">
+          <h1 class="title is-5"><span class="icon"><i class="fas fa-industry"></i></span> {{
+            gettext("My account") }}
+          </h1>
+        </div>
+      </a>
+      <a class="tile is-parent" href="{{ url_for('main_member.my_purchases') }}">
+        <div class="tile is-child box has-background-primary-light">
+          <h1 class="title is-5"><span class="icon"><i class="fas fa-file"></i></span>
+            {{ gettext("My purchases") }}
+          </h1>
+        </div>
+      </a>
+    </div>
+    <div class="tile is-ancestor">
+      <a class="tile is-parent" href="{{ url_for('main_member.list_messages') }}">
+        <div class="tile is-child box has-background-primary-light">
+          <h1
+            class="title is-5 {% if message_indicator is defined %}{% if message_indicator.show_unread_messages_indicator %}has-text-danger{% endif %}{% endif %}">
+            <span class="icon"><i class="fa-solid fa-envelope"></i></span>
+            {{ gettext("Messages") }}
+          </h1>
+          <div class="subtitle is-6">{% if message_indicator is defined %}{% if
+            message_indicator.show_unread_messages_indicator %}{{ gettext("You have new messages") }}{%
+            else %}{{ gettext("No new messages") }}{% endif %}{%
+            endif %}
+          </div>
+        </div>
+      </a>
+      <div class="tile is-parent"></div>
+      <div class="tile is-parent"></div>
+    </div>
+    <div class="has-text-centered py-5">
+      <h1 class="title is-3">{{ gettext("Public accounting") }}</h1>
+    </div>
+    <div class="tile is-ancestor">
+      <div class="tile is-parent"></div>
+      <div class="tile is-parent">
+        <div class="tile is-child">
+          <nav class="panel">
+            <p class="panel-heading is-italic has-background-warning-light">{{ gettext("Latest plans") }}
+            </p>
+            {% if view_model.has_latest_plans %}
+            {% for plan in view_model.three_latest_plans %}
+            <a class="panel-block" href="{{ plan.plan_summary_url }}">
+              <span class="has-text-weight-semibold">{{ plan.activation_date }}
+              </span>&nbsp;{{ plan.prd_name }}
+            </a>
+            {% endfor %}
+            {% endif %}
+          </nav>
+        </div>
+      </div>
+      <div class="tile is-parent"></div>
+    </div>
+    <div class="tile is-ancestor">
+      <a class="tile is-parent" href="{{ url_for('main_member.statistics') }}">
+        <div class="tile is-child box has-background-warning-light">
+          <h1 class="title is-5"><span class="icon"><i class="fa-solid fa-chart-pie"></i></span> {{
+            gettext("Global statistics") }}
+          </h1>
+          <div class="subtitle"></div>
+        </div>
+      </a>
+      <a class="tile is-parent" href="{{ url_for('main_member.query_companies') }}">
+        <div class="tile is-child box has-background-warning-light">
+          <h1 class="title is-5"><span class="icon"><i class="fas fa-industry"></i></span>
+            {{ gettext("All companies") }}</h1>
+          <div class="subtitle"></div>
+        </div>
+      </a>
+      <a class="tile is-parent" href="{{ url_for('main_member.query_plans') }}">
+        <div class="tile is-child box has-background-warning-light">
+          <h1 class="title is-5"><span class="icon"><i class="fas fa-file"></i></span>
+            {{ gettext("All plans") }}</h1>
+          <div class="subtitle"></div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+
+  {% endblock %}

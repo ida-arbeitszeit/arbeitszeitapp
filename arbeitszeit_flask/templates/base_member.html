@@ -18,61 +18,39 @@
 
   <div id="navbarOnTop" class="navbar-menu">
     <div class="navbar-start">
-
       {% if current_user.is_authenticated %}
-      <a href="{{ url_for('main_member.query_plans') }}" class="navbar-item">
-	{{ gettext("All plans") }}
+      <a href="{{ url_for('main_member.dashboard') }}" class="navbar-item">
+        {{ gettext("Dashboard") }}
       </a>
-      <a href="{{ url_for('main_member.pay_consumer_product') }}" class="navbar-item">
-	{{ gettext("Pay product")}}
-      </a>
-      <a href="{{ url_for('main_member.my_account') }}" class="navbar-item">
-	{{ gettext("My account")}}
-      </a>
-      <a href="{{ url_for('main_member.my_purchases') }}" class="navbar-item">
-	{{ gettext("My purchases")}}
-      </a>
-      <a href="{{ url_for('main_member.statistics') }}" class="navbar-item">
-	{{ gettext("Statistics")}}
-      </a>
-      <a href="{{ url_for('main_member.query_companies') }}" class="navbar-item">
-	{{ gettext("Companies")}}
-      </a>
-      <a href="{{ url_for('main_member.profile') }}" class="navbar-item">
-	{{ gettext("My profile")}}
-      </a>
-      <a href="{{ url_for('main_member.list_messages') }}"
-	class="navbar-item {% if message_indicator is defined %}{% if message_indicator.show_unread_messages_indicator %}unread-messages-indicator{% endif %}{% endif %}">
-	{{ gettext("Messages")}}
-      </a>
+      {% block navbar_start %}
+      {% endblock %}
       {% endif %}
-
     </div>
 
     <div class="navbar-end">
       <div class="navbar-item">
-	<div class="buttons">
-	  {% if not current_user.is_authenticated %}
-	  <a class="button" href="{{ url_for('auth.login_member') }}">
-	    {{ gettext("Sign in")}}
-	  </a>
-	  <a class="button" href="{{ url_for('auth.signup_member') }}">
-	    {{ gettext("Sign up")}}
-	  </a>
-	  <a class="button" href="{{ url_for('auth.zurueck') }}">
-	    {{ gettext("Back")}}
-	  </a>
-	  {% endif %}
-	  {% if current_user.is_authenticated %}
-	  <a class="button" href="{{ url_for('auth.logout') }}">
-	    {{ gettext("Sign out")}}
-	  </a>
-	  <a class="button" href="{{ url_for('main_member.hilfe') }}">
-	    ?
-	  </a>
-	  {% endif %}
+        <div class="buttons">
+          {% if not current_user.is_authenticated %}
+          <a class="button" href="{{ url_for('auth.login_member') }}">
+            {{ gettext("Sign in")}}
+          </a>
+          <a class="button" href="{{ url_for('auth.signup_member') }}">
+            {{ gettext("Sign up")}}
+          </a>
+          <a class="button" href="{{ url_for('auth.zurueck') }}">
+            {{ gettext("Back")}}
+          </a>
+          {% endif %}
+          {% if current_user.is_authenticated %}
+          <a class="button" href="{{ url_for('auth.logout') }}">
+            {{ gettext("Sign out")}}
+          </a>
+          <a class="button" href="{{ url_for('main_member.hilfe') }}">
+            ?
+          </a>
+          {% endif %}
 
-	</div>
+        </div>
       </div>
     </div>
   </div>

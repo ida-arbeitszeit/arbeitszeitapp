@@ -111,7 +111,7 @@ def login_member(
 
     if current_user.is_authenticated:
         if flask_session.is_logged_in_as_member():
-            return redirect(url_for("main_member.profile"))
+            return redirect(url_for("main_member.dashboard"))
         else:
             flask_session.logout()
 

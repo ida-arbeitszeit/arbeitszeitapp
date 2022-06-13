@@ -3,8 +3,8 @@ from uuid import UUID
 
 
 class MemberUrlIndex:
-    def get_member_profile_url(self) -> str:
-        return "member profile url"
+    def get_member_dashboard_url(self) -> str:
+        return "member dashboard url"
 
 
 class ListMessageUrlIndexTestImpl:

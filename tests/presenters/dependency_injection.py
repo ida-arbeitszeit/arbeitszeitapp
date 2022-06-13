@@ -5,7 +5,6 @@ from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
-from arbeitszeit_web.get_member_profile_info import GetMemberProfileInfoPresenter
 from arbeitszeit_web.get_plan_summary_company import (
     GetPlanSummaryCompanySuccessPresenter,
 )
@@ -27,6 +26,9 @@ from arbeitszeit_web.presenters.accountant_invitation_presenter import (
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
 from arbeitszeit_web.presenters.get_latest_activated_plans_presenter import (
     GetLatestActivatedPlansPresenter,
+)
+from arbeitszeit_web.presenters.get_member_dashboard_presenter import (
+    GetMemberDashboardPresenter,
 )
 from arbeitszeit_web.presenters.list_available_languages_presenter import (
     ListAvailableLanguagesPresenter,
@@ -211,11 +213,16 @@ class PresenterTestsInjector(Module):
         )
 
     @provider
-    def provide_get_member_profile_info_presenter(
-        self, translator: FakeTranslator
-    ) -> GetMemberProfileInfoPresenter:
-        return GetMemberProfileInfoPresenter(
+    def provide_get_member_dashboard_presenter(
+        self,
+        translator: FakeTranslator,
+        url_index: PlanSummaryUrlIndexTestImpl,
+        datetime_service: FakeDatetimeService,
+    ) -> GetMemberDashboardPresenter:
+        return GetMemberDashboardPresenter(
             translator=translator,
+            url_index=url_index,
+            datetime_service=datetime_service,
         )
 
     @provider
