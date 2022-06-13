@@ -24,34 +24,30 @@
           {% endif %}
 
           {% if view_model.show_workplace_registration_info %}
-          <div class="block pt-3">
-            <div class="icon-text"><i class="fas fa-exclamation-triangle"></i></div>
-            {{ gettext("You are not registered with any company. Tell your company your member ID so that they register
-            you.") }}
+          <div>
+            <span class="icon"><i class="fas fa-exclamation-triangle"></i></span>
+            <p>
+              {{ gettext("You are not registered with any company. Tell your company your member ID so that they register you.") }}
+            </p>
           </div>
           {% endif %}
         </div>
       </div>
       <div class="column"></div>
     </div>
+
+
     <div class="has-text-centered py-5">
-      <h1 class="title is-3">{{ gettext("Frequent actions") }}</h1>
+      <h1 class="title is-3">{{ gettext("My area") }}</h1>
     </div>
     <div class="tile is-ancestor">
-      <div class="tile is-parent"></div>
       <a class="tile is-parent" href="{{ url_for('main_member.pay_consumer_product') }}">
-        <div class="tile is-child box has-background-danger-light">
+        <div class="tile is-child box has-background-primary-light">
           <h1 class="title is-5"><span class="icon"><i class="fa-solid fa-file-circle-plus"></i></span> {{
             gettext("Pay product") }}</h1>
           <div class="subtitle"></div>
         </div>
       </a>
-      <div class="tile is-parent"></div>
-    </div>
-    <div class="has-text-centered py-5">
-      <h1 class="title is-3">{{ gettext("My area") }}</h1>
-    </div>
-    <div class="tile is-ancestor">
       <a class="tile is-parent" href="{{ url_for('main_member.my_account') }}">
         <div class="tile is-child box has-background-primary-light">
           <h1 class="title is-5"><span class="icon"><i class="fas fa-industry"></i></span> {{
@@ -66,6 +62,8 @@
           </h1>
         </div>
       </a>
+    </div>
+    <div class="tile is-ancestor">
       <a class="tile is-parent" href="{{ url_for('main_member.list_messages') }}">
         <div class="tile is-child box has-background-primary-light">
           <h1
@@ -80,8 +78,6 @@
           </div>
         </div>
       </a>
-    </div>
-    <div class="tile is-ancestor">
       <div class="tile is-parent"></div>
       <div class="tile is-parent"></div>
     </div>
