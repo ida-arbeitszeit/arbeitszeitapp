@@ -19,9 +19,9 @@
             overlays = [ self.overlays.development ];
           };
         in {
-          devShell = developmentPkgs.callPackage nix/devShell.nix { };
-          defaultPackage = pkgs.python3.pkgs.arbeitszeitapp;
+          devShells.default = developmentPkgs.callPackage nix/devShell.nix { };
           packages = {
+            default = pkgs.python3.pkgs.arbeitszeitapp;
             inherit (pkgs) python3;
             arbeitszeitapp-docker-image = pkgs.arbeitszeitapp-docker-image;
           };
