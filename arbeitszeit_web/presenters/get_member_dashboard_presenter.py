@@ -22,8 +22,8 @@ class PlanDetailsWeb:
 
 @dataclass
 class Invite:
-    company_name: str
     invite_details_url: str
+    invite_message: str
 
 
 @dataclass
@@ -96,6 +96,9 @@ class GetMemberDashboardPresenter:
 
     def _get_invites_web(self, invite: GetMemberDashboard.WorkInvitation) -> Invite:
         return Invite(
-            company_name=invite.company_name,
             invite_details_url=self.invite_url_index.get_invite_url(invite.invite_id),
+            invite_message=self.translator.gettext(
+                "Company %(company)s has invited you!"
+                % dict(company=invite.company_name)
+            ),
         )

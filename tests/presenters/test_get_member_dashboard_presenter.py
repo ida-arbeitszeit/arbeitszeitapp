@@ -146,13 +146,16 @@ class GetMemberDashboardPresenterTests(TestCase):
         presentation = self.presenter.present(response)
         self.assertTrue(presentation.show_invites)
 
-    def test_correct_company_name_of_work_invites_is_shown(self):
-        expected_name = "company name"
+    def test_correct_invite_message_is_shown(self):
+        expected_company_name = "company name"
+        expected_message = self.translator.gettext(
+            f"Company {expected_company_name} has invited you!"
+        )
         response = self.get_response(
-            invites=[self.get_invite(company_name=expected_name)]
+            invites=[self.get_invite(company_name=expected_company_name)]
         )
         presentation = self.presenter.present(response)
-        self.assertEqual(presentation.invites[0].company_name, expected_name)
+        self.assertEqual(presentation.invites[0].invite_message, expected_message)
 
     def test_correct_invite_details_url_is_shown(self):
         invite_id = uuid4()
