@@ -2,10 +2,7 @@ from dataclasses import dataclass
 from typing import List, Protocol
 from uuid import UUID
 
-from arbeitszeit.use_cases import (
-    InviteWorkerToCompanyRequest,
-    InviteWorkerToCompanyResponse,
-)
+from arbeitszeit.use_cases import InviteWorkerToCompanyUseCase
 from arbeitszeit_web.translator import Translator
 
 from .session import Session
@@ -22,8 +19,8 @@ class InviteWorkerToCompanyController:
 
     def import_request_data(
         self, form: InviteWorkerToCompanyForm
-    ) -> InviteWorkerToCompanyRequest:
-        return InviteWorkerToCompanyRequest(
+    ) -> InviteWorkerToCompanyUseCase.Request:
+        return InviteWorkerToCompanyUseCase.Request(
             company=self._get_current_user_id(),
             worker=self._get_worker_id(form),
         )
@@ -50,7 +47,9 @@ class ViewModel:
 class InviteWorkerToCompanyPresenter:
     translator: Translator
 
-    def present(self, use_case_response: InviteWorkerToCompanyResponse) -> ViewModel:
+    def present(
+        self, use_case_response: InviteWorkerToCompanyUseCase.Response
+    ) -> ViewModel:
         if use_case_response.is_success:
             notifications = [
                 self.translator.gettext("Worker has been invited successfully.")

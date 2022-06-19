@@ -7,8 +7,7 @@ from arbeitszeit.use_cases import (
     AnswerCompanyWorkInvite,
     AnswerCompanyWorkInviteRequest,
     AnswerCompanyWorkInviteResponse,
-    InviteWorkerToCompany,
-    InviteWorkerToCompanyRequest,
+    InviteWorkerToCompanyUseCase,
 )
 from tests.data_generators import CompanyGenerator, MemberGenerator
 
@@ -19,7 +18,7 @@ class AnwerCompanyWorkInviteTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.answer_company_work_invite = self.injector.get(AnswerCompanyWorkInvite)
-        self.invite_worker_to_company = self.injector.get(InviteWorkerToCompany)
+        self.invite_worker_to_company = self.injector.get(InviteWorkerToCompanyUseCase)
         self.member_generator = self.injector.get(MemberGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.invite_repository = self.injector.get(WorkerInviteRepository)  # type: ignore
@@ -201,7 +200,7 @@ class AnwerCompanyWorkInviteTests(TestCase):
 
     def _invite_worker(self) -> UUID:
         invite_response = self.invite_worker_to_company(
-            InviteWorkerToCompanyRequest(
+            InviteWorkerToCompanyUseCase.Request(
                 self.company.id,
                 self.member.id,
             )

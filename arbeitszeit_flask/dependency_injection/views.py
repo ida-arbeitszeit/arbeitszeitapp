@@ -2,7 +2,7 @@ from injector import Module, provider
 
 from arbeitszeit.use_cases import (
     AnswerCompanyWorkInvite,
-    InviteWorkerToCompany,
+    InviteWorkerToCompanyUseCase,
     ReadMessage,
     ShowCompanyWorkInviteDetailsUseCase,
 )
@@ -152,7 +152,7 @@ class ViewsModule(Module):
     @provider
     def provide_invite_worker_post_request_handler(
         self,
-        use_case: InviteWorkerToCompany,
+        use_case: InviteWorkerToCompanyUseCase,
         presenter: InviteWorkerToCompanyPresenter,
         controller: InviteWorkerToCompanyController,
         template_renderer: TemplateRenderer,

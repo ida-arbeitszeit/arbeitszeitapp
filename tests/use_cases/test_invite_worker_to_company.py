@@ -6,8 +6,7 @@ from arbeitszeit.repositories import MessageRepository
 from arbeitszeit.use_cases import (
     AnswerCompanyWorkInvite,
     AnswerCompanyWorkInviteRequest,
-    InviteWorkerToCompany,
-    InviteWorkerToCompanyRequest,
+    InviteWorkerToCompanyUseCase,
     ListedMessage,
     ListMessages,
     ListMessagesRequest,
@@ -28,13 +27,13 @@ class InviteWorkerTests(TestCase):
         self.company = self.company_generator.create_company()
         self.member_generator = self.injector.get(MemberGenerator)
         self.member = self.member_generator.create_member()
-        self.invite_worker_to_company = self.injector.get(InviteWorkerToCompany)
+        self.invite_worker_to_company = self.injector.get(InviteWorkerToCompanyUseCase)
 
     def test_can_successfully_invite_worker_which_was_not_previously_invited(
         self,
     ) -> None:
         response = self.invite_worker_to_company(
-            InviteWorkerToCompanyRequest(
+            InviteWorkerToCompanyUseCase.Request(
                 company=self.company.id,
                 worker=self.member.id,
             )
@@ -42,7 +41,7 @@ class InviteWorkerTests(TestCase):
         self.assertTrue(response.is_success)
 
     def test_cannot_invite_worker_twices(self) -> None:
-        request = InviteWorkerToCompanyRequest(
+        request = InviteWorkerToCompanyUseCase.Request(
             company=self.company.id,
             worker=self.member.id,
         )
@@ -54,13 +53,13 @@ class InviteWorkerTests(TestCase):
         first_member = self.member_generator.create_member()
         second_member = self.member_generator.create_member()
         self.invite_worker_to_company(
-            InviteWorkerToCompanyRequest(
+            InviteWorkerToCompanyUseCase.Request(
                 company=self.company.id,
                 worker=first_member.id,
             )
         )
         response = self.invite_worker_to_company(
-            InviteWorkerToCompanyRequest(
+            InviteWorkerToCompanyUseCase.Request(
                 company=self.company.id,
                 worker=second_member.id,
             )
@@ -71,13 +70,13 @@ class InviteWorkerTests(TestCase):
         first_company = self.company_generator.create_company()
         second_company = self.company_generator.create_company()
         self.invite_worker_to_company(
-            InviteWorkerToCompanyRequest(
+            InviteWorkerToCompanyUseCase.Request(
                 company=first_company.id,
                 worker=self.member.id,
             )
         )
         response = self.invite_worker_to_company(
-            InviteWorkerToCompanyRequest(
+            InviteWorkerToCompanyUseCase.Request(
                 company=second_company.id,
                 worker=self.member.id,
             )
@@ -86,7 +85,7 @@ class InviteWorkerTests(TestCase):
 
     def test_cannot_invite_worker_that_does_not_exist(self) -> None:
         response = self.invite_worker_to_company(
-            InviteWorkerToCompanyRequest(
+            InviteWorkerToCompanyUseCase.Request(
                 company=self.company.id,
                 worker=uuid4(),
             )
@@ -95,7 +94,7 @@ class InviteWorkerTests(TestCase):
 
     def test_cannot_invite_worker_to_company_that_does_not_exist(self) -> None:
         response = self.invite_worker_to_company(
-            InviteWorkerToCompanyRequest(
+            InviteWorkerToCompanyUseCase.Request(
                 company=uuid4(),
                 worker=self.member.id,
             )
@@ -104,7 +103,7 @@ class InviteWorkerTests(TestCase):
 
     def test_response_uuid_is_not_none_on_successful_invite(self) -> None:
         response = self.invite_worker_to_company(
-            InviteWorkerToCompanyRequest(
+            InviteWorkerToCompanyUseCase.Request(
                 company=self.company.id,
                 worker=self.member.id,
             )
@@ -116,7 +115,7 @@ class InviteWorkerTests(TestCase):
     ) -> None:
         message_repository: MessageRepository
         self.invite_worker_to_company(
-            InviteWorkerToCompanyRequest(
+            InviteWorkerToCompanyUseCase.Request(
                 company=self.company.id,
                 worker=self.member.id,
             )
@@ -135,7 +134,7 @@ class WorkInviteMessageTests(TestCase):
         self.injector = get_dependency_injector()
         self.member_generator = self.injector.get(MemberGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
-        self.invite_worker_to_company = self.injector.get(InviteWorkerToCompany)
+        self.invite_worker_to_company = self.injector.get(InviteWorkerToCompanyUseCase)
         self.list_messages = self.injector.get(ListMessages)
         self.read_message = self.injector.get(ReadMessage)
         self.answer_invite = self.injector.get(AnswerCompanyWorkInvite)
@@ -192,7 +191,9 @@ class WorkInviteMessageTests(TestCase):
 
     def invite_member(self) -> None:
         self.invite_worker_to_company(
-            InviteWorkerToCompanyRequest(company=self.company.id, worker=self.member.id)
+            InviteWorkerToCompanyUseCase.Request(
+                company=self.company.id, worker=self.member.id
+            )
         )
 
     def assertMemberMessageCount(self, count: int) -> None:

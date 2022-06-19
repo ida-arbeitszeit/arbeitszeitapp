@@ -1,7 +1,7 @@
 from decimal import Decimal
 from uuid import UUID
 
-from arbeitszeit.use_cases import InviteWorkerToCompany, InviteWorkerToCompanyRequest
+from arbeitszeit.use_cases import InviteWorkerToCompanyUseCase
 from arbeitszeit.use_cases.send_accountant_registration_token import (
     SendAccountantRegistrationTokenUseCase,
 )
@@ -122,7 +122,7 @@ class MemberUrlIndexTests(ViewTestCase):
         self.member = self.confirm_member(member=self.member, email=self.email)
         self.cooperation_generator = self.injector.get(CooperationGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
-        self.invite_worker_to_company = self.injector.get(InviteWorkerToCompany)
+        self.invite_worker_to_company = self.injector.get(InviteWorkerToCompanyUseCase)
 
     def test_plan_summary_url_for_existing_plan_leads_to_functional_url(self) -> None:
         plan = self.plan_generator.create_plan()
@@ -164,7 +164,7 @@ class MemberUrlIndexTests(ViewTestCase):
     def _create_invite(self) -> UUID:
         company = self.company_generator.create_company()
         response = self.invite_worker_to_company(
-            InviteWorkerToCompanyRequest(
+            InviteWorkerToCompanyUseCase.Request(
                 company=company.id,
                 worker=self.member.id,
             )
