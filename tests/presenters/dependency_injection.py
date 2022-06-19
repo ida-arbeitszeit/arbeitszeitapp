@@ -33,6 +33,7 @@ from arbeitszeit_web.presenters.get_member_dashboard_presenter import (
 from arbeitszeit_web.presenters.list_available_languages_presenter import (
     ListAvailableLanguagesPresenter,
 )
+from arbeitszeit_web.presenters.log_in_company_presenter import LogInCompanyPresenter
 from arbeitszeit_web.presenters.log_in_member_presenter import LogInMemberPresenter
 from arbeitszeit_web.presenters.register_accountant_presenter import (
     RegisterAccountantPresenter,
@@ -93,6 +94,7 @@ from .url_index import (
     AccountantInvitationUrlIndexImpl,
     AnswerCompanyWorkInviteUrlIndexImpl,
     CompanySummaryUrlIndex,
+    CompanyUrlIndexImpl,
     ConfirmationUrlIndexImpl,
     CoopSummaryUrlIndexTestImpl,
     EndCoopUrlIndexTestImpl,
@@ -587,6 +589,19 @@ class PresenterTestsInjector(Module):
         return ListAvailableLanguagesPresenter(
             language_changer_url_index=language_changer_url_index,
             language_service=language_service,
+        )
+
+    @provider
+    def provide_log_in_company_presenter(
+        self,
+        session: FakeSession,
+        company_url_index: CompanyUrlIndexImpl,
+        translator: FakeTranslator,
+    ) -> LogInCompanyPresenter:
+        return LogInCompanyPresenter(
+            session=session,
+            company_url_index=company_url_index,
+            translator=translator,
         )
 
 
