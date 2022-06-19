@@ -7,6 +7,11 @@ class MemberUrlIndex:
         return "member dashboard url"
 
 
+class CompanyUrlIndexImpl:
+    def get_company_dashboard_url(self) -> str:
+        return "company dashboard url"
+
+
 class ListMessageUrlIndexTestImpl:
     def get_list_messages_url(self) -> str:
         return "list messages"

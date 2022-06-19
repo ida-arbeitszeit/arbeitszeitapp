@@ -18,10 +18,10 @@ from arbeitszeit_flask.forms import LoginForm
 from arbeitszeit_flask.next_url import save_next_url_in_session
 from arbeitszeit_flask.template import AnonymousUserTemplateRenderer
 from arbeitszeit_flask.token import FlaskTokenService
-from arbeitszeit_flask.translator import FlaskTranslator
 from arbeitszeit_flask.views.signup_accountant_view import SignupAccountantView
 from arbeitszeit_flask.views.signup_company_view import SignupCompanyView
 from arbeitszeit_flask.views.signup_member_view import SignupMemberView
+from arbeitszeit_web.presenters.log_in_company_presenter import LogInCompanyPresenter
 from arbeitszeit_web.presenters.log_in_member_presenter import LogInMemberPresenter
 
 auth = Blueprint("auth", __name__, template_folder="templates", static_folder="static")
@@ -154,36 +154,25 @@ def unconfirmed_company():
 def login_company(
     flask_session: FlaskSession,
     log_in_use_case: LogInCompanyUseCase,
-    translator: FlaskTranslator,
+    log_in_presenter: LogInCompanyPresenter,
 ):
     login_form = LoginForm(request.form)
     if request.method == "POST" and login_form.validate():
         email = login_form.data["email"]
         password = login_form.data["password"]
-        remember = True if login_form.data["remember"] else False
 
         use_case_request = LogInCompanyUseCase.Request(
             email_address=email,
             password=password,
         )
         use_case_response = log_in_use_case.log_in_company(use_case_request)
-        if use_case_response.is_logged_in:
-            flask_session.login_company(email, remember=remember)
-            next = flask_session.pop_next_url()
-            return redirect(next or url_for("main_company.dashboard"))
-        elif (
-            use_case_response.rejection_reason
-            == LogInCompanyUseCase.RejectionReason.invalid_email_address
-        ):
-            login_form.email.errors.append(
-                translator.gettext(
-                    "Email address is not correct. Are you already signed up?"
-                )
-            )
-        else:
-            login_form.password.errors.append(
-                translator.gettext("Password is incorrect")
-            )
+        view_model = log_in_presenter.present_login_process(
+            response=use_case_response,
+            form=login_form,
+        )
+        if view_model.redirect_url:
+            return redirect(view_model.redirect_url)
+        return render_template("auth/login_company.html", form=login_form)
 
     if current_user.is_authenticated:
         if flask_session.is_logged_in_as_company():
