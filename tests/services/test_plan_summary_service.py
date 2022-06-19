@@ -2,6 +2,8 @@ from datetime import datetime
 from decimal import Decimal
 from unittest import TestCase
 
+import pytest
+
 from arbeitszeit.entities import ProductionCosts
 from arbeitszeit.plan_summary import PlanSummaryService
 from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
@@ -156,3 +158,36 @@ class PlanSummaryServiceTests(TestCase):
         self.payout_use_case()
         summary = self.service.get_summary_from_plan(plan)
         self.assertEqual(summary.active_days, timeframe)
+
+    def test_that_creation_date_is_shown(self):
+        self.assertEqual(self.summary.creation_date, self.plan.plan_creation_date)
+
+    def test_that_approval_date_is_shown_if_it_exists(self):
+        assert self.plan.approval_date
+        self.assertEqual(self.summary.approval_date, self.plan.approval_date)
+
+    def test_that_assertion_error_is_raised_when_approval_date_does_not_exist(self):
+        with pytest.raises(
+            AssertionError,
+            match="Currently the application does not support plan rejection",
+        ):
+            plan = self.plan_generator.create_plan(approved=False)
+            assert not plan.approval_date
+            summary = self.service.get_summary_from_plan(plan)
+            self.assertIsNone(summary.approval_date)
+
+    def test_that_expiration_date_is_shown_if_it_exists(self):
+        plan = self.plan_generator.create_plan(
+            activation_date=self.datetime_service.now(), timeframe=5
+        )
+        self.payout_use_case()
+        assert plan.expiration_date
+        summary = self.service.get_summary_from_plan(plan)
+        self.assertTrue(summary.expiration_date)
+
+    def test_that_none_is_shown_if_expiration_date_does_not_exist(self):
+        plan = self.plan_generator.create_plan(activation_date=None)
+        self.payout_use_case()
+        assert not plan.expiration_date
+        summary = self.service.get_summary_from_plan(plan)
+        self.assertFalse(summary.expiration_date)

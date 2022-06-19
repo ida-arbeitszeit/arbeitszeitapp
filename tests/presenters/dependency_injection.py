@@ -239,11 +239,13 @@ class PresenterTestsInjector(Module):
         coop_url_index: CoopSummaryUrlIndexTestImpl,
         company_url_index: CompanySummaryUrlIndex,
         translator: FakeTranslator,
+        datetime_service: FakeDatetimeService,
     ) -> PlanSummaryService:
         return PlanSummaryServiceImpl(
             coop_url_index=coop_url_index,
             company_url_index=company_url_index,
             translator=translator,
+            datetime_service=datetime_service,
         )
 
     @provider
@@ -326,11 +328,13 @@ class PresenterTestsInjector(Module):
         coop_url_index: CoopSummaryUrlIndexTestImpl,
         company_url_index: CompanySummaryUrlIndex,
         translator: FakeTranslator,
+        datetime_service: FakeDatetimeService,
     ) -> PlanSummaryServiceImpl:
         return PlanSummaryServiceImpl(
             coop_url_index=coop_url_index,
             company_url_index=company_url_index,
             translator=translator,
+            datetime_service=datetime_service,
         )
 
     @provider

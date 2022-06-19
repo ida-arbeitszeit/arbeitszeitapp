@@ -1,4 +1,5 @@
 from dataclasses import replace
+from datetime import datetime
 from decimal import Decimal
 from unittest import TestCase
 from uuid import uuid4
@@ -36,6 +37,9 @@ TESTING_RESPONSE_MODEL = GetPlanSummaryCompany.Success(
         is_available=True,
         is_cooperating=True,
         cooperation=uuid4(),
+        creation_date=datetime.now(),
+        approval_date=None,
+        expiration_date=None,
     ),
     current_user_is_planner=True,
 )
