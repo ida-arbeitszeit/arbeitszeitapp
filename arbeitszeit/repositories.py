@@ -334,6 +334,10 @@ class WorkerInviteRepository(ABC):
         pass
 
     @abstractmethod
+    def get_invites_for_worker(self, member: UUID) -> Iterable[CompanyWorkInvite]:
+        pass
+
+    @abstractmethod
     def get_by_id(self, id: UUID) -> Optional[CompanyWorkInvite]:
         pass
 

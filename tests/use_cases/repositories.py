@@ -665,6 +665,14 @@ class WorkerInviteRepository(interfaces.WorkerInviteRepository):
             if invited_worker == member:
                 yield company
 
+    def get_invites_for_worker(self, member: UUID) -> Iterable[CompanyWorkInvite]:
+        for invite_id in self.invites:
+            if self.invites[invite_id][1] == member:
+                invite = self.get_by_id(invite_id)
+                if invite is None:
+                    continue
+                yield invite
+
     def get_by_id(self, id: UUID) -> Optional[CompanyWorkInvite]:
         try:
             company_id, worker_id = self.invites[id]
@@ -677,6 +685,7 @@ class WorkerInviteRepository(interfaces.WorkerInviteRepository):
         if member is None:
             return None
         return CompanyWorkInvite(
+            id=id,
             company=company,
             member=member,
         )

@@ -139,6 +139,7 @@ class GetMemberDashboardPresenterTests(TestCase):
             three_latest_plans = []
         return GetMemberDashboard.Response(
             workplaces=workplaces,
+            invites=[],
             three_latest_plans=three_latest_plans,
             account_balance=account_balance,
             name="worker",

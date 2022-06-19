@@ -941,6 +941,15 @@ class WorkerInviteRepository(repositories.WorkerInviteRepository):
         for invite in CompanyWorkInvite.query.filter_by(member=str(member)):
             yield UUID(invite.company)
 
+    def get_invites_for_worker(
+        self, member: UUID
+    ) -> Iterable[entities.CompanyWorkInvite]:
+        for invite in CompanyWorkInvite.query.filter_by(member=str(member)):
+            invite_object = self.get_by_id(invite.id)
+            if invite_object is None:
+                continue
+            yield invite_object
+
     def get_by_id(self, id: UUID) -> Optional[entities.CompanyWorkInvite]:
         if (
             invite_orm := CompanyWorkInvite.query.filter_by(id=str(id)).first()
@@ -952,6 +961,7 @@ class WorkerInviteRepository(repositories.WorkerInviteRepository):
             if member is None:
                 return None
             return entities.CompanyWorkInvite(
+                id=id,
                 company=company,
                 member=member,
             )

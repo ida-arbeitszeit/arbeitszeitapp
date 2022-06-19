@@ -13,6 +13,7 @@ from arbeitszeit.repositories import (
     CompanyWorkerRepository,
     MemberRepository,
     PlanRepository,
+    WorkerInviteRepository,
 )
 
 
@@ -25,6 +26,11 @@ class GetMemberDashboard:
         workplace_email: str
 
     @dataclass
+    class WorkInvitation:
+        invite_id: UUID
+        company_id: UUID
+
+    @dataclass
     class PlanDetails:
         plan_id: UUID
         prd_name: str
@@ -33,6 +39,7 @@ class GetMemberDashboard:
     @dataclass
     class Response:
         workplaces: List[GetMemberDashboard.Workplace]
+        invites: List[GetMemberDashboard.WorkInvitation]
         three_latest_plans: List[GetMemberDashboard.PlanDetails]
         account_balance: Decimal
         name: str
@@ -43,6 +50,7 @@ class GetMemberDashboard:
     account_repository: AccountRepository
     member_repository: MemberRepository
     plan_repository: PlanRepository
+    worker_invite_repository: WorkerInviteRepository
 
     def __call__(self, member: UUID) -> Response:
         _member = self.member_repository.get_by_id(member)
@@ -56,8 +64,16 @@ class GetMemberDashboard:
                 member
             )
         ]
+        invites = [
+            self.WorkInvitation(
+                invite_id=invite.id,
+                company_id=invite.company.id,
+            )
+            for invite in self.worker_invite_repository.get_invites_for_worker(member)
+        ]
         return self.Response(
             workplaces=workplaces,
+            invites=invites,
             three_latest_plans=self._get_three_latest_plans(),
             account_balance=self.account_repository.get_account_balance(
                 _member.account
