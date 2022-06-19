@@ -19,7 +19,6 @@ from arbeitszeit.entities import (
     Company,
     Cooperation,
     Member,
-    Message,
     Plan,
     PlanDraft,
     ProductionCosts,
@@ -33,7 +32,6 @@ from arbeitszeit.repositories import (
     CompanyRepository,
     CooperationRepository,
     MemberRepository,
-    MessageRepository,
     PlanCooperationRepository,
     PlanDraftRepository,
     PlanRepository,
@@ -373,34 +371,6 @@ class CooperationGenerator:
                     plan.id, cooperation.id
                 )
         return cooperation
-
-
-@inject
-@dataclass
-class MessageGenerator:
-    message_repository: MessageRepository
-    company_generator: CompanyGenerator
-
-    def create_message(
-        self,
-        *,
-        sender: Union[None, SocialAccounting, Member, Company] = None,
-        addressee: Union[None, Member, Company],
-        title: str = "test title",
-        content: str = "test message content",
-    ) -> Message:
-        if addressee is None:
-            addressee = self.company_generator.create_company()
-        if sender is None:
-            sender = self.company_generator.create_company()
-        return self.message_repository.create_message(
-            sender=sender,
-            addressee=addressee,
-            title=title,
-            content=content,
-            sender_remarks=None,
-            reference=None,
-        )
 
 
 @inject

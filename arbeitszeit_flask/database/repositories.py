@@ -13,7 +13,6 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from arbeitszeit import entities, repositories
 from arbeitszeit.decimal import decimal_sum
-from arbeitszeit.user_action import UserAction
 from arbeitszeit_flask import models
 from arbeitszeit_flask.models import (
     Account,
@@ -22,7 +21,6 @@ from arbeitszeit_flask.models import (
     CompanyWorkInvite,
     Cooperation,
     Member,
-    Message,
     Plan,
     PlanDraft,
     Purchase,
@@ -969,106 +967,6 @@ class WorkerInviteRepository(repositories.WorkerInviteRepository):
 
     def delete_invite(self, id: UUID) -> None:
         CompanyWorkInvite.query.filter_by(id=str(id)).delete()
-
-
-@inject
-@dataclass
-class MessageRepository(repositories.MessageRepository):
-    db: SQLAlchemy
-    member_repository: MemberRepository
-    company_repository: CompanyRepository
-    social_accounting_repository: AccountingRepository
-
-    def get_by_id(self, id: UUID) -> Optional[entities.Message]:
-        orm_message = Message.query.filter_by(id=str(id)).first()
-        if orm_message is None:
-            return None
-        return self.object_from_orm(orm_message)
-
-    def object_from_orm(self, message: Message) -> entities.Message:
-        addressee = self._get_user(UUID(message.addressee))
-        if addressee is None:
-            raise Exception(
-                "Internal error, addressee of message could not be retrieved"
-            )
-        sender = self._get_user_or_social_accounting(UUID(message.sender))
-        if sender is None:
-            raise Exception("Internal error, sender of message could not be retrieved")
-        if message.user_action is None:
-            user_action = None
-        else:
-            user_action_orm = models.UserAction.query.get(message.user_action)
-            user_action = UserAction(
-                type=user_action_orm.action_type,
-                reference=UUID(user_action_orm.reference),
-            )
-        return entities.Message(
-            sender=sender,
-            id=UUID(message.id),
-            title=message.title,
-            content=message.content,
-            addressee=addressee,
-            sender_remarks=message.sender_remarks,
-            user_action=user_action,
-            is_read=message.is_read,
-        )
-
-    def _get_user(self, id: UUID) -> Union[None, entities.Member, entities.Company]:
-        member = self.member_repository.get_by_id(id)
-        return member or self.company_repository.get_by_id(id)
-
-    def _get_user_or_social_accounting(
-        self, id: UUID
-    ) -> Union[None, entities.Member, entities.Company, entities.SocialAccounting]:
-        user = self._get_user(id)
-        if user is not None:
-            return user
-        return self.social_accounting_repository.get_by_id(id)
-
-    def create_message(
-        self,
-        sender: Union[entities.Company, entities.Member, entities.SocialAccounting],
-        addressee: Union[entities.Member, entities.Company],
-        title: str,
-        content: str,
-        sender_remarks: Optional[str],
-        reference: Optional[UserAction],
-    ) -> entities.Message:
-        if reference is not None:
-            user_action: Optional[models.UserAction] = models.UserAction(
-                id=str(uuid4()),
-                action_type=reference.type,
-                reference=str(reference.reference),
-            )
-            self.db.session.add(user_action)
-            self.db.session.flush()
-        else:
-            user_action = None
-        message = Message(
-            id=str(uuid4()),
-            sender=str(sender.id),
-            addressee=str(addressee.id),
-            title=title,
-            content=content,
-            user_action=user_action.id if user_action is not None else None,
-            sender_remarks=sender_remarks,
-            is_read=False,
-        )
-        self.db.session.add(message)
-        return self.object_from_orm(message)
-
-    def mark_as_read(self, message: entities.Message) -> None:
-        message.is_read = True
-        Message.query.filter_by(id=str(message.id)).update({Message.is_read: True})
-
-    def has_unread_messages_for_user(self, user: UUID) -> bool:
-        return bool(Message.query.filter_by(addressee=str(user), is_read=False).count())
-
-    def get_messages_to_user(self, user: UUID) -> Iterable[entities.Message]:
-        return (
-            self.object_from_orm(m)
-            for m in Message.query.filter_by(addressee=str(user))
-        )
 
 
 @inject

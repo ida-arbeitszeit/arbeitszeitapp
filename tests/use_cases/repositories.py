@@ -22,7 +22,6 @@ from arbeitszeit.entities import (
     CompanyWorkInvite,
     Cooperation,
     Member,
-    Message,
     Plan,
     PlanDraft,
     ProductionCosts,
@@ -31,7 +30,6 @@ from arbeitszeit.entities import (
     SocialAccounting,
     Transaction,
 )
-from arbeitszeit.user_action import UserAction
 
 
 @singleton
@@ -692,53 +690,6 @@ class WorkerInviteRepository(interfaces.WorkerInviteRepository):
 
     def delete_invite(self, id: UUID) -> None:
         del self.invites[id]
-
-
-@singleton
-class MessageRepository(interfaces.MessageRepository):
-    @inject
-    def __init__(self) -> None:
-        self.messages: Dict[UUID, Message] = dict()
-
-    def create_message(
-        self,
-        sender: Union[Company, Member, SocialAccounting],
-        addressee: Union[Member, Company],
-        title: str,
-        content: str,
-        sender_remarks: Optional[str],
-        reference: Optional[UserAction],
-    ) -> Message:
-        message_id = uuid4()
-        message = Message(
-            sender=sender,
-            id=message_id,
-            addressee=addressee,
-            title=title,
-            content=content,
-            sender_remarks=sender_remarks,
-            user_action=reference,
-            is_read=False,
-        )
-        self.messages[message_id] = message
-        return message
-
-    def get_by_id(self, id: UUID) -> Optional[Message]:
-        return self.messages.get(id)
-
-    def mark_as_read(self, message: Message) -> None:
-        message.is_read = True
-
-    def has_unread_messages_for_user(self, user: UUID) -> bool:
-        return any(
-            message.addressee.id == user and not message.is_read
-            for message in self.messages.values()
-        )
-
-    def get_messages_to_user(self, user: UUID) -> Iterable[Message]:
-        for message in self.messages.values():
-            if message.addressee.id == user:
-                yield message
 
 
 @singleton

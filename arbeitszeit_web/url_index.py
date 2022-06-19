@@ -23,11 +23,6 @@ class PlanSummaryUrlIndex(Protocol):
         ...
 
 
-class MessageUrlIndex(Protocol):
-    def get_message_url(self, message_id: UUID) -> str:
-        ...
-
-
 class CoopSummaryUrlIndex(Protocol):
     def get_coop_summary_url(self, coop_id: UUID) -> str:
         ...
@@ -60,11 +55,6 @@ class EndCoopUrlIndex(Protocol):
 
 class CompanySummaryUrlIndex(Protocol):
     def get_company_summary_url(self, company_id: UUID) -> str:
-        ...
-
-
-class ListMessagesUrlIndex(Protocol):
-    def get_list_messages_url(self) -> str:
         ...
 
 
