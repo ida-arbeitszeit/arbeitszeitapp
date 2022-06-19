@@ -210,7 +210,6 @@ from arbeitszeit_web.url_index import (
     RequestCoopUrlIndex,
     TogglePlanAvailabilityUrlIndex,
 )
-from arbeitszeit_web.user_action import UserActionResolver, UserActionResolverImpl
 
 from .views import ViewsModule
 
@@ -814,15 +813,6 @@ class FlaskModule(Module):
             user_notifier=notifier,
             trans=trans,
         )
-
-    @provider
-    def provide_user_action_resolver(
-        self,
-        invite_index: InviteUrlIndex,
-        coop_index: CoopSummaryUrlIndex,
-        translator: Translator,
-    ) -> UserActionResolver:
-        return UserActionResolverImpl(invite_index, coop_index, translator)
 
     @provider
     def provide_get_plan_summary_success_presenter(
