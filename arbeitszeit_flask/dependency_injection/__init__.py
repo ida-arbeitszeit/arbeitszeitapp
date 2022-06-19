@@ -240,11 +240,13 @@ class MemberModule(Module):
         translator: Translator,
         url_index: MemberUrlIndex,
         datetime_service: DatetimeService,
+        invite_url_index: InviteUrlIndex,
     ) -> GetMemberDashboardPresenter:
         return GetMemberDashboardPresenter(
             translator=translator,
             url_index=url_index,
             datetime_service=datetime_service,
+            invite_url_index=invite_url_index,
         )
 
     @provider

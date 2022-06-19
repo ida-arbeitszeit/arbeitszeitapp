@@ -62,13 +62,21 @@ class UseCaseTests(TestCase):
         response = self.get_member_dashboard(self.member.id)
         self.assertTrue(response.invites)
 
-    def test_show_which_company_sent_the_invite(self):
+    def test_show_id_of_company_that_sent_the_invite(self):
         inviting_company = self.company_generator.create_company()
         self.invite_worker_to_company(
             InviteWorkerToCompanyRequest(inviting_company.id, self.member.id)
         )
         response = self.get_member_dashboard(self.member.id)
         self.assertEqual(response.invites[0].company_id, inviting_company.id)
+
+    def test_show_name_of_company_that_sent_the_invite(self):
+        inviting_company = self.company_generator.create_company()
+        self.invite_worker_to_company(
+            InviteWorkerToCompanyRequest(inviting_company.id, self.member.id)
+        )
+        response = self.get_member_dashboard(self.member.id)
+        self.assertEqual(response.invites[0].company_name, inviting_company.name)
 
     def test_show_correct_invite_id(self):
         inviting_company = self.company_generator.create_company()

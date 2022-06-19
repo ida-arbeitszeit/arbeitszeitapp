@@ -29,6 +29,7 @@ class GetMemberDashboard:
     class WorkInvitation:
         invite_id: UUID
         company_id: UUID
+        company_name: str
 
     @dataclass
     class PlanDetails:
@@ -68,6 +69,7 @@ class GetMemberDashboard:
             self.WorkInvitation(
                 invite_id=invite.id,
                 company_id=invite.company.id,
+                company_name=invite.company.name,
             )
             for invite in self.worker_invite_repository.get_invites_for_worker(member)
         ]

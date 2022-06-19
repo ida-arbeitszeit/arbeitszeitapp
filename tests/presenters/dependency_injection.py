@@ -218,11 +218,13 @@ class PresenterTestsInjector(Module):
         translator: FakeTranslator,
         url_index: PlanSummaryUrlIndexTestImpl,
         datetime_service: FakeDatetimeService,
+        invite_url_index: InviteUrlIndexImpl,
     ) -> GetMemberDashboardPresenter:
         return GetMemberDashboardPresenter(
             translator=translator,
             url_index=url_index,
             datetime_service=datetime_service,
+            invite_url_index=invite_url_index,
         )
 
     @provider
