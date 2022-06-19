@@ -2,10 +2,7 @@ from datetime import datetime
 from unittest import TestCase
 
 from arbeitszeit.use_cases import GetMemberDashboard
-from arbeitszeit.use_cases.invite_worker_to_company import (
-    InviteWorkerToCompany,
-    InviteWorkerToCompanyRequest,
-)
+from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
 from tests.data_generators import CompanyGenerator, MemberGenerator, PlanGenerator
 
 from .dependency_injection import get_dependency_injector
@@ -20,7 +17,7 @@ class UseCaseTests(TestCase):
         self.member_generator = self.injector.get(MemberGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.plan_generator = self.injector.get(PlanGenerator)
-        self.invite_worker_to_company = self.injector.get(InviteWorkerToCompany)
+        self.invite_worker_to_company = self.injector.get(InviteWorkerToCompanyUseCase)
         self.member = self.member_generator.create_member()
 
     def test_that_correct_workplace_email_is_shown(self):
@@ -57,7 +54,7 @@ class UseCaseTests(TestCase):
     def test_invites_are_shown_when_worker_was_previously_invited(self):
         inviting_company = self.company_generator.create_company()
         self.invite_worker_to_company(
-            InviteWorkerToCompanyRequest(inviting_company.id, self.member.id)
+            InviteWorkerToCompanyUseCase.Request(inviting_company.id, self.member.id)
         )
         response = self.get_member_dashboard(self.member.id)
         self.assertTrue(response.invites)
@@ -65,7 +62,7 @@ class UseCaseTests(TestCase):
     def test_show_id_of_company_that_sent_the_invite(self):
         inviting_company = self.company_generator.create_company()
         self.invite_worker_to_company(
-            InviteWorkerToCompanyRequest(inviting_company.id, self.member.id)
+            InviteWorkerToCompanyUseCase.Request(inviting_company.id, self.member.id)
         )
         response = self.get_member_dashboard(self.member.id)
         self.assertEqual(response.invites[0].company_id, inviting_company.id)
@@ -73,7 +70,7 @@ class UseCaseTests(TestCase):
     def test_show_name_of_company_that_sent_the_invite(self):
         inviting_company = self.company_generator.create_company()
         self.invite_worker_to_company(
-            InviteWorkerToCompanyRequest(inviting_company.id, self.member.id)
+            InviteWorkerToCompanyUseCase.Request(inviting_company.id, self.member.id)
         )
         response = self.get_member_dashboard(self.member.id)
         self.assertEqual(response.invites[0].company_name, inviting_company.name)
@@ -81,7 +78,7 @@ class UseCaseTests(TestCase):
     def test_show_correct_invite_id(self):
         inviting_company = self.company_generator.create_company()
         invite_response = self.invite_worker_to_company(
-            InviteWorkerToCompanyRequest(inviting_company.id, self.member.id)
+            InviteWorkerToCompanyUseCase.Request(inviting_company.id, self.member.id)
         )
         get_dashboard_response = self.get_member_dashboard(self.member.id)
         self.assertEqual(
