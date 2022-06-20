@@ -152,6 +152,7 @@ from arbeitszeit_web.presenters.get_member_dashboard_presenter import (
 from arbeitszeit_web.presenters.list_available_languages_presenter import (
     ListAvailableLanguagesPresenter,
 )
+from arbeitszeit_web.presenters.log_in_company_presenter import LogInCompanyPresenter
 from arbeitszeit_web.presenters.log_in_member_presenter import LogInMemberPresenter
 from arbeitszeit_web.presenters.register_accountant_presenter import (
     RegisterAccountantPresenter,
@@ -538,6 +539,19 @@ class CompanyModule(Module):
 
 
 class FlaskModule(Module):
+    @provider
+    def provide_log_in_company_presenter(
+        self,
+        translator: FlaskTranslator,
+        session: FlaskSession,
+        company_url_index: GeneralUrlIndex,
+    ) -> LogInCompanyPresenter:
+        return LogInCompanyPresenter(
+            translator=translator,
+            session=session,
+            company_url_index=company_url_index,
+        )
+
     @provider
     def provide_invitation_token_validator(
         self, validator: FlaskTokenService
