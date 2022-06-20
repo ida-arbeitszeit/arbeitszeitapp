@@ -70,6 +70,11 @@ class PurchaseRepository(interfaces.PurchaseRepository):
             if purchase.buyer is user:
                 yield purchase
 
+    def get_purchases_of_company(self, company: UUID) -> Iterator[Purchase]:
+        for purchase in self.purchases:
+            if purchase.buyer.id is company:
+                yield purchase
+
 
 @singleton
 class TransactionRepository(interfaces.TransactionRepository):

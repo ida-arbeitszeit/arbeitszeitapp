@@ -289,14 +289,20 @@ class PurchaseGenerator:
         buyer: Union[Member, Company],
         purchase_date=None,
         amount=1,
+        price_per_unit=None,
+        plan = None
     ) -> Purchase:
         if purchase_date is None:
             purchase_date = self.datetime_service.now_minus_one_day()
+        if price_per_unit is None:
+            price_per_unit = Decimal(10)
+        if plan is None:
+            plan = self.plan_generator.create_plan()
         return self.purchase_repository.create_purchase(
             purchase_date=purchase_date,
-            plan=self.plan_generator.create_plan(),
+            plan=plan,
             buyer=buyer,
-            price_per_unit=Decimal(10),
+            price_per_unit=price_per_unit,
             amount=amount,
             purpose=PurposesOfPurchases.consumption,
         )

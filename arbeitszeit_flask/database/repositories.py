@@ -484,6 +484,14 @@ class PurchaseRepository(repositories.PurchaseRepository):
             for purchase in user_orm.purchases.order_by(desc("purchase_date")).all()
         )
 
+    def get_purchases_of_company(self, company: UUID) -> Iterator[entities.Purchase]:
+        return (
+            self.object_from_orm(purchase)
+            for purchase in Company.query.filter_by(id=str(company))
+            .one()
+            .purchases.all()
+        )
+
 
 @inject
 @dataclass

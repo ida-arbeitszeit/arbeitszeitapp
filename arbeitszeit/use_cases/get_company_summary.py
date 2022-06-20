@@ -1,15 +1,16 @@
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from decimal import Decimal, DivisionByZero, InvalidOperation
-from typing import List, Optional
+from typing import Dict, Iterator, List, Optional, Tuple
 from uuid import UUID
 
 from arbeitszeit.decimal import decimal_sum
-from arbeitszeit.entities import Company, Plan, SocialAccounting
+from arbeitszeit.entities import Company, Plan, Purchase, SocialAccounting
 from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
     PlanRepository,
+    PurchaseRepository,
     TransactionRepository,
 )
 
@@ -41,6 +42,13 @@ class Expectations:
 
 
 @dataclass
+class Supplier:
+    company_id: UUID
+    company_name: str
+    volume_of_sales: Decimal
+
+
+@dataclass
 class GetCompanySummarySuccess:
     id: UUID
     name: str
@@ -50,6 +58,7 @@ class GetCompanySummarySuccess:
     account_balances: AccountBalances
     deviations_relative: List[Decimal]
     plan_details: List[PlanDetails]
+    suppliers_ordered_by_volume: List[Supplier]
 
 
 GetCompanySummaryResponse = Optional[GetCompanySummarySuccess]
@@ -62,12 +71,14 @@ class GetCompanySummary:
     account_repository: AccountRepository
     transaction_repository: TransactionRepository
     social_accounting: SocialAccounting
+    purchase_repository: PurchaseRepository
 
     def __call__(self, company_id: UUID) -> GetCompanySummaryResponse:
         company = self.company_respository.get_by_id(company_id)
         if company is None:
             return None
         plans = self.plan_repository.get_all_plans_for_company_descending(company.id)
+        purchases = self.purchase_repository.get_purchases_of_company(company_id)
         expectations = self._get_expectations(company)
         account_balances = self._get_account_balances(company)
         return GetCompanySummarySuccess(
@@ -85,6 +96,7 @@ class GetCompanySummary:
                 for account_name in ["means", "raw_material", "work", "product"]
             ],
             plan_details=[self._get_plan_details(plan) for plan in plans],
+            suppliers_ordered_by_volume=self._get_suppliers(purchases),
         )
 
     def _get_plan_details(self, plan: Plan) -> PlanDetails:
@@ -155,3 +167,28 @@ class GetCompanySummary:
             return Decimal(0)
         except DivisionByZero:  # non-zero devided by zero
             return Decimal("Infinity")
+
+    def _get_suppliers(self, purchases: Iterator[Purchase]) -> List[Supplier]:
+        suppliers_dict = self._create_dict_of_suppliers_and_volume_of_sales(purchases)
+        suppliers_dict_ordered = dict(
+            sorted(suppliers_dict.items(), key=lambda item: item[1], reverse=True)
+        )
+        suppliers_list = [
+            Supplier(company_id=key[0], company_name=key[1], volume_of_sales=value)
+            for key, value in suppliers_dict_ordered.items()
+        ]
+        return suppliers_list
+
+    def _create_dict_of_suppliers_and_volume_of_sales(
+        self, purchases: Iterator[Purchase]
+    ) -> Dict[Tuple[UUID, str], Decimal]:
+        suppliers: Dict[Tuple[UUID, str], Decimal] = {}
+        for purchase in purchases:
+            supplier_id = purchase.plan.planner.id
+            supplier_name = purchase.plan.planner.name
+            purchase_volume = purchase.amount * purchase.price_per_unit
+            if (supplier_id, supplier_name) in suppliers:
+                suppliers[supplier_id, supplier_name] += purchase_volume
+            else:
+                suppliers[supplier_id, supplier_name] = purchase_volume
+        return suppliers
