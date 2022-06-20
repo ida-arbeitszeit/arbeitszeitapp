@@ -229,10 +229,13 @@ class PresenterTestsInjector(Module):
 
     @provider
     def provide_get_company_summary_success_presenter(
-        self, plan_index: PlanSummaryUrlIndexTestImpl, translator: FakeTranslator
+        self,
+        plan_index: PlanSummaryUrlIndexTestImpl,
+        translator: FakeTranslator,
+        company_index: CompanySummaryUrlIndex,
     ) -> GetCompanySummarySuccessPresenter:
         return GetCompanySummarySuccessPresenter(
-            plan_index=plan_index, translator=translator
+            plan_index=plan_index, translator=translator, company_index=company_index
         )
 
     @provider

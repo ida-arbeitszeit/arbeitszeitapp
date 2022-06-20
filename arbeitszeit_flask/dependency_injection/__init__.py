@@ -712,6 +712,7 @@ class FlaskModule(Module):
         account_repository: interfaces.AccountRepository,
         transaction_repository: interfaces.TransactionRepository,
         social_accounting: entities.SocialAccounting,
+        purchase_repository: interfaces.PurchaseRepository,
     ) -> GetCompanySummary:
         return GetCompanySummary(
             company_repository,
@@ -719,6 +720,7 @@ class FlaskModule(Module):
             account_repository,
             transaction_repository,
             social_accounting,
+            purchase_repository,
         )
 
     @provider
@@ -935,9 +937,12 @@ class FlaskModule(Module):
 
     @provider
     def provide_get_company_summary_success_presenter(
-        self, plan_index: PlanSummaryUrlIndex, translator: Translator
+        self,
+        plan_index: PlanSummaryUrlIndex,
+        translator: Translator,
+        company_index: CompanySummaryUrlIndex,
     ) -> GetCompanySummarySuccessPresenter:
-        return GetCompanySummarySuccessPresenter(plan_index, translator)
+        return GetCompanySummarySuccessPresenter(plan_index, translator, company_index)
 
     @provider
     def provide_transaction_repository(

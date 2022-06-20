@@ -5,9 +5,10 @@ from typing import Any, Dict, List
 from arbeitszeit.use_cases.get_company_summary import (
     GetCompanySummarySuccess,
     PlanDetails,
+    Supplier,
 )
 from arbeitszeit_web.translator import Translator
-from arbeitszeit_web.url_index import PlanSummaryUrlIndex
+from arbeitszeit_web.url_index import CompanySummaryUrlIndex, PlanSummaryUrlIndex
 
 THRESHOLD_DEVIATION = 33
 
@@ -30,6 +31,13 @@ class PlanDetailsWeb:
 
 
 @dataclass
+class SuppliersWeb:
+    company_url: str
+    company_name: str
+    volume_of_sales: str
+
+
+@dataclass
 class GetCompanySummaryViewModel:
     id: str
     name: str
@@ -39,6 +47,8 @@ class GetCompanySummaryViewModel:
     account_balances: List[str]
     deviations_relative: List[Deviation]
     plan_details: List[PlanDetailsWeb]
+    suppliers_ordered_by_volume: List[SuppliersWeb]
+    show_suppliers: bool
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -48,10 +58,14 @@ class GetCompanySummaryViewModel:
 class GetCompanySummarySuccessPresenter:
     plan_index: PlanSummaryUrlIndex
     translator: Translator
+    company_index: CompanySummaryUrlIndex
 
     def present(
         self, use_case_response: GetCompanySummarySuccess
     ) -> GetCompanySummaryViewModel:
+        suppliers_ordered_by_volume = self._get_suppliers(
+            use_case_response.suppliers_ordered_by_volume
+        )
         return GetCompanySummaryViewModel(
             id=str(use_case_response.id),
             name=use_case_response.name,
@@ -81,6 +95,8 @@ class GetCompanySummarySuccessPresenter:
             plan_details=[
                 self._get_plan_details(plan) for plan in use_case_response.plan_details
             ],
+            suppliers_ordered_by_volume=suppliers_ordered_by_volume,
+            show_suppliers=bool(suppliers_ordered_by_volume),
         )
 
     def _get_plan_details(self, plan_details: PlanDetails) -> PlanDetailsWeb:
@@ -98,3 +114,15 @@ class GetCompanySummarySuccessPresenter:
                 is_critical=plan_details.deviation_relative >= THRESHOLD_DEVIATION,
             ),
         )
+
+    def _get_suppliers(self, suppliers: List[Supplier]) -> List[SuppliersWeb]:
+        return [
+            SuppliersWeb(
+                company_url=self.company_index.get_company_summary_url(
+                    supplier.company_id
+                ),
+                company_name=supplier.company_name,
+                volume_of_sales=f"{supplier.volume_of_sales:.2f}",
+            )
+            for supplier in suppliers
+        ]

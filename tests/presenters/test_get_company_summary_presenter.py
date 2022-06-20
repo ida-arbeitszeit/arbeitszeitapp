@@ -1,3 +1,4 @@
+from dataclasses import replace
 from datetime import datetime
 from decimal import Decimal
 from unittest import TestCase
@@ -8,6 +9,7 @@ from arbeitszeit.use_cases.get_company_summary import (
     Expectations,
     GetCompanySummarySuccess,
     PlanDetails,
+    Supplier,
 )
 from arbeitszeit_web.get_company_summary import (
     Deviation,
@@ -16,7 +18,7 @@ from arbeitszeit_web.get_company_summary import (
 from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
-from .url_index import PlanSummaryUrlIndexTestImpl
+from .url_index import CompanySummaryUrlIndex, PlanSummaryUrlIndexTestImpl
 
 THRESHOLD_DEVIATION_TEST = 33
 
@@ -55,6 +57,7 @@ RESPONSE_WITH_2_PLANS = GetCompanySummarySuccess(
             deviation_relative=Decimal(-200),
         ),
     ],
+    suppliers_ordered_by_volume=[],
 )
 
 
@@ -64,6 +67,7 @@ class GetGetCompanySummaryPresenterTests(TestCase):
         self.presenter = self.injector.get(GetCompanySummarySuccessPresenter)
         self.plan_index = self.injector.get(PlanSummaryUrlIndexTestImpl)
         self.translator = self.injector.get(FakeTranslator)
+        self.company_url_index = self.injector.get(CompanySummaryUrlIndex)
 
     def test_company_id_is_shown(self):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
@@ -172,4 +176,78 @@ class GetGetCompanySummaryPresenterTests(TestCase):
                 RESPONSE_WITH_2_PLANS.plan_details[0].deviation_relative
                 >= THRESHOLD_DEVIATION_TEST
             ),
+        )
+
+    def test_list_of_suppliers_is_empty_if_none_exist(self):
+        view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
+        self.assertFalse(view_model.suppliers_ordered_by_volume)
+
+    def test_suppliers_are_not_shown_if_no_supplier_exist(self):
+        view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
+        self.assertFalse(view_model.show_suppliers)
+
+    def test_suppliers_are_shown_if_a_supplier_exists(self):
+        response = replace(
+            RESPONSE_WITH_2_PLANS,
+            suppliers_ordered_by_volume=[
+                Supplier(
+                    company_id=uuid4(),
+                    company_name="supplier name",
+                    volume_of_sales=Decimal("20"),
+                )
+            ],
+        )
+        view_model = self.presenter.present(response)
+        self.assertTrue(view_model.show_suppliers)
+
+    def test_correct_supplier_summary_url_is_shown(self):
+        supplier_id = uuid4()
+        response = replace(
+            RESPONSE_WITH_2_PLANS,
+            suppliers_ordered_by_volume=[
+                Supplier(
+                    company_id=supplier_id,
+                    company_name="supplier name",
+                    volume_of_sales=Decimal("20"),
+                )
+            ],
+        )
+        view_model = self.presenter.present(response)
+        self.assertEqual(
+            view_model.suppliers_ordered_by_volume[0].company_url,
+            self.company_url_index.get_company_summary_url(supplier_id),
+        )
+
+    def test_correct_supplier_name_is_shown(self):
+        response = replace(
+            RESPONSE_WITH_2_PLANS,
+            suppliers_ordered_by_volume=[
+                Supplier(
+                    company_id=uuid4(),
+                    company_name="supplier name",
+                    volume_of_sales=Decimal("20"),
+                )
+            ],
+        )
+        view_model = self.presenter.present(response)
+        self.assertEqual(
+            view_model.suppliers_ordered_by_volume[0].company_name,
+            "supplier name",
+        )
+
+    def test_correct_sales_volume_of_supplier_is_shown(self):
+        response = replace(
+            RESPONSE_WITH_2_PLANS,
+            suppliers_ordered_by_volume=[
+                Supplier(
+                    company_id=uuid4(),
+                    company_name="supplier name",
+                    volume_of_sales=Decimal("20.2051"),
+                )
+            ],
+        )
+        view_model = self.presenter.present(response)
+        self.assertEqual(
+            view_model.suppliers_ordered_by_volume[0].volume_of_sales,
+            "20.21",
         )
