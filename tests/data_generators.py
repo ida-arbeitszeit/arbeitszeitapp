@@ -290,7 +290,7 @@ class PurchaseGenerator:
         purchase_date=None,
         amount=1,
         price_per_unit=None,
-        plan = None
+        plan=None,
     ) -> Purchase:
         if purchase_date is None:
             purchase_date = self.datetime_service.now_minus_one_day()
