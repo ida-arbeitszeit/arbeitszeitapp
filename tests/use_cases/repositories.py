@@ -43,8 +43,9 @@ class PurchaseRepository(interfaces.PurchaseRepository):
     def create_purchase(
         self,
         purchase_date: datetime,
-        plan: Plan,
-        buyer: Union[Member, Company],
+        plan: UUID,
+        buyer: UUID,
+        is_member: bool,
         price_per_unit: Decimal,
         amount: int,
         purpose: PurposesOfPurchases,
@@ -53,6 +54,7 @@ class PurchaseRepository(interfaces.PurchaseRepository):
             purchase_date=purchase_date,
             plan=plan,
             buyer=buyer,
+            is_member=is_member,
             price_per_unit=price_per_unit,
             amount=amount,
             purpose=purpose,
@@ -67,7 +69,7 @@ class PurchaseRepository(interfaces.PurchaseRepository):
         )
 
         for purchase in self.purchases:
-            if purchase.buyer is user:
+            if purchase.buyer is user.id:
                 yield purchase
 
 
@@ -576,6 +578,11 @@ class PlanRepository(interfaces.PlanRepository):
 
     def toggle_product_availability(self, plan: Plan) -> None:
         plan.is_available = True if (plan.is_available == False) else False
+
+    def get_plan_name_and_description(self, id: UUID) -> Tuple[str, str]:
+        plan = self.plans.get(id)
+        assert plan
+        return (plan.prd_name, plan.description)
 
 
 @singleton

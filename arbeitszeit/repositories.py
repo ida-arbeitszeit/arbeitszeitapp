@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterable, Iterator, List, Optional, Protocol, Union
+from typing import Iterable, Iterator, List, Optional, Protocol, Tuple, Union
 from uuid import UUID
 
 from arbeitszeit.entities import (
@@ -43,8 +43,9 @@ class PurchaseRepository(ABC):
     def create_purchase(
         self,
         purchase_date: datetime,
-        plan: Plan,
-        buyer: Union[Member, Company],
+        plan: UUID,
+        buyer: UUID,
+        is_member: bool,
         price_per_unit: Decimal,
         amount: int,
         purpose: PurposesOfPurchases,
@@ -165,6 +166,10 @@ class PlanRepository(ABC):
 
     @abstractmethod
     def toggle_product_availability(self, plan: Plan) -> None:
+        pass
+
+    @abstractmethod
+    def get_plan_name_and_description(self, id: UUID) -> Tuple[str, str]:
         pass
 
 

@@ -279,8 +279,6 @@ class PlanGenerator:
 @dataclass
 class PurchaseGenerator:
     plan_generator: PlanGenerator
-    member_generator: MemberGenerator
-    company_generator: CompanyGenerator
     datetime_service: FakeDatetimeService
     purchase_repository: PurchaseRepository
 
@@ -294,8 +292,9 @@ class PurchaseGenerator:
             purchase_date = self.datetime_service.now_minus_one_day()
         return self.purchase_repository.create_purchase(
             purchase_date=purchase_date,
-            plan=self.plan_generator.create_plan(),
-            buyer=buyer,
+            plan=self.plan_generator.create_plan().id,
+            buyer=buyer.id,
+            is_member=isinstance(buyer, Member),
             price_per_unit=Decimal(10),
             amount=amount,
             purpose=PurposesOfPurchases.consumption,
