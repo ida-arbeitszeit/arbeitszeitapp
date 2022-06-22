@@ -176,6 +176,10 @@ class PlanRepository(ABC):
     def get_plan_name_and_description(self, id: UUID) -> Tuple[str, str]:
         pass
 
+    @abstractmethod
+    def get_planner_id(self, plan_id: UUID) -> UUID:
+        pass
+
 
 class TransactionRepository(ABC):
     @abstractmethod

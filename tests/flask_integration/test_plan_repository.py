@@ -372,3 +372,13 @@ def test_correct_name_and_description_returned(
     name, description = repository.get_plan_name_and_description(plan.id)
     assert name == expected_name
     assert description == expected_description
+
+
+@injection_test
+def test_that_correct_id_of_planning_company_gets_returned(
+    repository: PlanRepository,
+    plan_generator: PlanGenerator,
+) -> None:
+    expected_plan = plan_generator.create_plan()
+    plan_id = repository.get_planner_id(expected_plan.id)
+    assert plan_id == expected_plan.planner.id

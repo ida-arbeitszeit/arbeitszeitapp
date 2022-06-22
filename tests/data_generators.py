@@ -285,10 +285,10 @@ class PurchaseGenerator:
     def create_purchase(
         self,
         buyer: Union[Member, Company],
-        purchase_date=None,
-        amount=1,
-        price_per_unit=None,
-        plan=None,
+        purchase_date: datetime = None,
+        amount: int = 1,
+        price_per_unit: Decimal = None,
+        plan: Plan = None,
     ) -> Purchase:
         if purchase_date is None:
             purchase_date = self.datetime_service.now_minus_one_day()
@@ -298,10 +298,10 @@ class PurchaseGenerator:
             plan = self.plan_generator.create_plan()
         return self.purchase_repository.create_purchase(
             purchase_date=purchase_date,
-            plan=self.plan_generator.create_plan().id,
+            plan=plan.id,
             buyer=buyer.id,
             is_member=isinstance(buyer, Member),
-            price_per_unit=Decimal(10),
+            price_per_unit=price_per_unit,
             amount=amount,
             purpose=PurposesOfPurchases.consumption,
         )

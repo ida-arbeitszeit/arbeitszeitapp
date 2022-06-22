@@ -1,7 +1,7 @@
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from decimal import Decimal, DivisionByZero, InvalidOperation
-from typing import Dict, Iterator, List, Optional, Tuple
+from typing import Dict, Iterator, List, Optional
 from uuid import UUID
 
 from arbeitszeit.decimal import decimal_sum
@@ -173,22 +173,28 @@ class GetCompanySummary:
         suppliers_dict_ordered = dict(
             sorted(suppliers_dict.items(), key=lambda item: item[1], reverse=True)
         )
-        suppliers_list = [
-            Supplier(company_id=key[0], company_name=key[1], volume_of_sales=value)
-            for key, value in suppliers_dict_ordered.items()
-        ]
+        suppliers_list = []
+        for key, value in suppliers_dict_ordered.items():
+            supplier = self.company_respository.get_by_id(key)
+            assert supplier
+            suppliers_list.append(
+                Supplier(
+                    company_id=supplier.id,
+                    company_name=supplier.name,
+                    volume_of_sales=value,
+                )
+            )
         return suppliers_list
 
     def _create_dict_of_suppliers_and_volume_of_sales(
         self, purchases: Iterator[Purchase]
-    ) -> Dict[Tuple[UUID, str], Decimal]:
-        suppliers: Dict[Tuple[UUID, str], Decimal] = {}
+    ) -> Dict[UUID, Decimal]:
+        suppliers: Dict[UUID, Decimal] = {}
         for purchase in purchases:
-            supplier_id = purchase.plan.planner.id
-            supplier_name = purchase.plan.planner.name
+            supplier_id = self.plan_repository.get_planner_id(purchase.plan)
             purchase_volume = purchase.amount * purchase.price_per_unit
-            if (supplier_id, supplier_name) in suppliers:
-                suppliers[supplier_id, supplier_name] += purchase_volume
+            if supplier_id in suppliers:
+                suppliers[supplier_id] += purchase_volume
             else:
-                suppliers[supplier_id, supplier_name] = purchase_volume
+                suppliers[supplier_id] = purchase_volume
         return suppliers

@@ -74,7 +74,7 @@ class PurchaseRepository(interfaces.PurchaseRepository):
 
     def get_purchases_of_company(self, company: UUID) -> Iterator[Purchase]:
         for purchase in self.purchases:
-            if purchase.buyer.id is company:
+            if purchase.buyer is company:
                 yield purchase
 
 
@@ -588,6 +588,11 @@ class PlanRepository(interfaces.PlanRepository):
         plan = self.plans.get(id)
         assert plan
         return (plan.prd_name, plan.description)
+
+    def get_planner_id(self, plan_id: UUID) -> UUID:
+        plan = self.plans.get(plan_id)
+        assert plan
+        return plan.planner.id
 
 
 @singleton

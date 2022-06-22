@@ -693,14 +693,15 @@ def test_that_correct_supplier_id_is_shown(
     get_company_summary: GetCompanySummary,
     company_generator: CompanyGenerator,
     purchase_generator: PurchaseGenerator,
+    plan_generator: PlanGenerator,
 ):
-    company = company_generator.create_company()
-    purchase = purchase_generator.create_purchase(buyer=company)
-    response = get_company_summary(company.id)
+    buyer = company_generator.create_company()
+    supplier = company_generator.create_company()
+    offered_plan = plan_generator.create_plan(planner=supplier)
+    purchase_generator.create_purchase(buyer=buyer, plan=offered_plan)
+    response = get_company_summary(buyer.id)
     assert response
-    assert (
-        response.suppliers_ordered_by_volume[0].company_id == purchase.plan.planner.id
-    )
+    assert response.suppliers_ordered_by_volume[0].company_id == supplier.id
 
 
 @injection_test
@@ -708,15 +709,15 @@ def test_that_correct_supplier_name_is_shown(
     get_company_summary: GetCompanySummary,
     company_generator: CompanyGenerator,
     purchase_generator: PurchaseGenerator,
+    plan_generator: PlanGenerator,
 ):
-    company = company_generator.create_company()
-    purchase = purchase_generator.create_purchase(buyer=company)
-    response = get_company_summary(company.id)
+    buyer = company_generator.create_company()
+    supplier = company_generator.create_company()
+    offered_plan = plan_generator.create_plan(planner=supplier)
+    purchase_generator.create_purchase(buyer=buyer, plan=offered_plan)
+    response = get_company_summary(buyer.id)
     assert response
-    assert (
-        response.suppliers_ordered_by_volume[0].company_name
-        == purchase.plan.planner.name
-    )
+    assert response.suppliers_ordered_by_volume[0].company_name == supplier.name
 
 
 @injection_test
@@ -761,19 +762,31 @@ def test_that_supplier_with_highest_sales_volume_is_listed_before_other_supplier
     get_company_summary: GetCompanySummary,
     company_generator: CompanyGenerator,
     purchase_generator: PurchaseGenerator,
+    plan_generator: PlanGenerator,
 ):
     buyer = company_generator.create_company()
-    low_volume_purchase = purchase_generator.create_purchase(buyer=buyer, amount=1)
-    high_volume_purchase = purchase_generator.create_purchase(buyer=buyer, amount=20)
-    medium_volume_purchase = purchase_generator.create_purchase(buyer=buyer, amount=10)
+    top_supplier_plan = plan_generator.create_plan()
+    medium_supplier_plan = plan_generator.create_plan()
+    low_supplier_plan = plan_generator.create_plan()
+    purchase_generator.create_purchase(buyer=buyer, amount=1, plan=low_supplier_plan)
+    purchase_generator.create_purchase(buyer=buyer, amount=20, plan=top_supplier_plan)
+    purchase_generator.create_purchase(
+        buyer=buyer, amount=10, plan=medium_supplier_plan
+    )
     response = get_company_summary(buyer.id)
     assert response
-    top_supplier = high_volume_purchase.plan.planner.id
-    medium_supplier = medium_volume_purchase.plan.planner.id
-    low_supplier = low_volume_purchase.plan.planner.id
-    assert response.suppliers_ordered_by_volume[0].company_id == top_supplier
-    assert response.suppliers_ordered_by_volume[1].company_id == medium_supplier
-    assert response.suppliers_ordered_by_volume[2].company_id == low_supplier
+    assert (
+        response.suppliers_ordered_by_volume[0].company_id
+        == top_supplier_plan.planner.id
+    )
+    assert (
+        response.suppliers_ordered_by_volume[1].company_id
+        == medium_supplier_plan.planner.id
+    )
+    assert (
+        response.suppliers_ordered_by_volume[2].company_id
+        == low_supplier_plan.planner.id
+    )
 
 
 @injection_test

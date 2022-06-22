@@ -754,6 +754,10 @@ class PlanRepository(repositories.PlanRepository):
         plan = Plan.query.get(str(id))
         return (plan.prd_name, plan.description)
 
+    def get_planner_id(self, plan_id: UUID) -> UUID:
+        plan = Plan.query.get(str(plan_id))
+        return UUID(plan.planner)
+
     def __len__(self) -> int:
         return len(Plan.query.all())
 
