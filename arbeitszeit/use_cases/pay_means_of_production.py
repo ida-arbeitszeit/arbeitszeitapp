@@ -8,7 +8,7 @@ from uuid import UUID
 from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Company, Plan, PurposesOfPurchases
+from arbeitszeit.entities import Company, Member, Plan, PurposesOfPurchases
 from arbeitszeit.price_calculator import calculate_price
 from arbeitszeit.repositories import (
     CompanyRepository,
@@ -121,7 +121,7 @@ class Payment:
             purchase_date=self.datetime_service.now(),
             plan=self.plan.id,
             buyer=self.buyer.id,
-            is_member=isinstance(self.buyer, Company),
+            is_member=isinstance(self.buyer, Member),
             price_per_unit=price_per_unit,
             amount=self.amount,
             purpose=self.purpose,
