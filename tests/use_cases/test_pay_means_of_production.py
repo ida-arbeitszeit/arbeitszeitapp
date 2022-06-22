@@ -322,14 +322,14 @@ def test_correct_purchase_added_if_means_of_production_were_paid(
     )
     purchase_added = purchase_repository.purchases[0]
     assert len(purchase_repository.purchases) == 1
-    assert purchase_added.plan == plan
+    assert purchase_added.plan == plan.id
     assert purchase_added.price_per_unit == calculate_price(
         plan_cooperation_repository.get_cooperating_plans(plan.id)
     )
     assert purchase_added.amount == pieces
     assert purchase_added.purpose == PurposesOfPurchases.means_of_prod
-    assert purchase_added.buyer == sender
-    assert purchase_added.plan == plan
+    assert purchase_added.buyer == sender.id
+    assert purchase_added.plan == plan.id
 
 
 @injection_test
@@ -352,14 +352,14 @@ def test_correct_purchase_added_if_raw_materials_were_paid(
     )
     purchase_added = purchase_repository.purchases[0]
     assert len(purchase_repository.purchases) == 1
-    assert purchase_added.plan == plan
+    assert purchase_added.plan == plan.id
     assert purchase_added.price_per_unit == calculate_price(
         plan_cooperation_repository.get_cooperating_plans(plan.id)
     )
     assert purchase_added.amount == pieces
     assert purchase_added.purpose == PurposesOfPurchases.raw_materials
-    assert purchase_added.buyer == sender
-    assert purchase_added.plan == plan
+    assert purchase_added.buyer == sender.id
+    assert purchase_added.plan == plan.id
 
 
 @injection_test

@@ -12,7 +12,7 @@ from .repositories import PurchaseRepository
 def purchase_in_results(
     purchase: Purchase, results: Iterable[PurchaseQueryResponse]
 ) -> bool:
-    return purchase.plan.id in [result.plan_id for result in results]
+    return purchase.plan in [result.plan_id for result in results]
 
 
 @injection_test
@@ -35,7 +35,6 @@ def test_that_correct_purchases_are_returned(
     member_generator: MemberGenerator,
     purchase_generator: PurchaseGenerator,
     company_generator: CompanyGenerator,
-    repository: PurchaseRepository,
 ):
     member = member_generator.create_member()
     company = company_generator.create_company()

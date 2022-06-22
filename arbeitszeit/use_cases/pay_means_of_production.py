@@ -119,8 +119,9 @@ class Payment:
         )
         self.purchase_repository.create_purchase(
             purchase_date=self.datetime_service.now(),
-            plan=self.plan,
-            buyer=self.buyer,
+            plan=self.plan.id,
+            buyer=self.buyer.id,
+            is_member=isinstance(self.buyer, Company),
             price_per_unit=price_per_unit,
             amount=self.amount,
             purpose=self.purpose,

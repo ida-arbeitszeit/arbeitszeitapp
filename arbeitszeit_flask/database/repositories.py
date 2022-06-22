@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterable, Iterator, List, Optional, Union
+from typing import Iterable, Iterator, List, Optional, Tuple, Union
 from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
@@ -403,58 +403,40 @@ class AccountingRepository:
 @dataclass
 class PurchaseRepository(repositories.PurchaseRepository):
     member_repository: MemberRepository
-    plan_repository: PlanRepository
     company_repository: CompanyRepository
     db: SQLAlchemy
 
     def object_to_orm(self, purchase: entities.Purchase) -> Purchase:
         return Purchase(
             purchase_date=purchase.purchase_date,
-            plan_id=str(purchase.plan.id),
-            type_member=isinstance(purchase.buyer, entities.Member),
-            company=(
-                self.company_repository.object_to_orm(purchase.buyer).id
-                if isinstance(purchase.buyer, entities.Company)
-                else None
-            ),
-            member=(
-                self.member_repository.object_to_orm(purchase.buyer).id
-                if isinstance(purchase.buyer, entities.Member)
-                else None
-            ),
+            plan_id=str(purchase.plan),
+            type_member=purchase.is_member,
+            company=str(purchase.buyer) if not purchase.is_member else None,
+            member=str(purchase.buyer) if purchase.is_member else None,
             price_per_unit=float(purchase.price_per_unit),
             amount=purchase.amount,
             purpose=purchase.purpose.value,
         )
 
     def object_from_orm(self, purchase: Purchase) -> entities.Purchase:
-        plan = self.plan_repository.get_plan_by_id(purchase.plan_id)
-        assert plan is not None
         return entities.Purchase(
             purchase_date=purchase.purchase_date,
-            plan=plan,
-            buyer=self._get_buyer(purchase),
-            price_per_unit=purchase.price_per_unit,
+            plan=UUID(purchase.plan_id),
+            buyer=UUID(purchase.member)
+            if purchase.type_member
+            else UUID(purchase.company),
+            is_member=purchase.type_member,
+            price_per_unit=Decimal(purchase.price_per_unit),
             amount=purchase.amount,
             purpose=purchase.purpose,
         )
 
-    def _get_buyer(
-        self, purchase: Purchase
-    ) -> Union[entities.Company, entities.Member]:
-        buyer: Union[None, entities.Company, entities.Member]
-        if purchase.type_member:
-            buyer = self.member_repository.get_by_id(purchase.member)
-        else:
-            buyer = self.company_repository.get_by_id(purchase.company)
-        assert buyer is not None
-        return buyer
-
     def create_purchase(
         self,
         purchase_date: datetime,
-        plan: entities.Plan,
-        buyer: Union[entities.Member, entities.Company],
+        plan: UUID,
+        buyer: UUID,
+        is_member: bool,
         price_per_unit: Decimal,
         amount: int,
         purpose: entities.PurposesOfPurchases,
@@ -463,6 +445,7 @@ class PurchaseRepository(repositories.PurchaseRepository):
             purchase_date=purchase_date,
             plan=plan,
             buyer=buyer,
+            is_member=is_member,
             price_per_unit=price_per_unit,
             amount=amount,
             purpose=purpose,
@@ -766,6 +749,10 @@ class PlanRepository(repositories.PlanRepository):
 
         plan_orm = self.object_to_orm(plan)
         plan_orm.is_available = True if (plan_orm.is_available == False) else False
+
+    def get_plan_name_and_description(self, id: UUID) -> Tuple[str, str]:
+        plan = Plan.query.get(str(id))
+        return (plan.prd_name, plan.description)
 
     def __len__(self) -> int:
         return len(Plan.query.all())

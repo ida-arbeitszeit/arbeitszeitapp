@@ -357,3 +357,18 @@ def test_all_plans_approved_active_and_not_expired_returns_no_plans_with_empty_d
     repository: PlanRepository,
 ) -> None:
     assert not list(repository.all_plans_approved_active_and_not_expired())
+
+
+@injection_test
+def test_correct_name_and_description_returned(
+    repository: PlanRepository,
+    plan_generator: PlanGenerator,
+) -> None:
+    expected_name = "name 20220621"
+    expected_description = "description 20220621"
+    plan = plan_generator.create_plan(
+        product_name=expected_name, description=expected_description
+    )
+    name, description = repository.get_plan_name_and_description(plan.id)
+    assert name == expected_name
+    assert description == expected_description
