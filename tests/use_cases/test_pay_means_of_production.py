@@ -330,6 +330,7 @@ def test_correct_purchase_added_if_means_of_production_were_paid(
     assert purchase_added.purpose == PurposesOfPurchases.means_of_prod
     assert purchase_added.buyer == sender.id
     assert purchase_added.plan == plan.id
+    assert purchase_added.is_member == False
 
 
 @injection_test
@@ -360,6 +361,7 @@ def test_correct_purchase_added_if_raw_materials_were_paid(
     assert purchase_added.purpose == PurposesOfPurchases.raw_materials
     assert purchase_added.buyer == sender.id
     assert purchase_added.plan == plan.id
+    assert purchase_added.is_member == False
 
 
 @injection_test
