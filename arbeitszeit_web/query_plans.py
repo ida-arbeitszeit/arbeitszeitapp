@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional, Protocol
 from arbeitszeit.use_cases.query_plans import (
     PlanFilter,
     PlanQueryResponse,
+    PlanSorting,
     QueryPlansRequest,
 )
 from arbeitszeit_web.translator import Translator
@@ -19,11 +20,15 @@ class QueryPlansFormData(Protocol):
     def get_category_string(self) -> str:
         ...
 
+    def get_radio_string(self) -> str:
+        ...
+
 
 @dataclass
 class QueryPlansRequestImpl(QueryPlansRequest):
     query: Optional[str]
     filter_category: PlanFilter
+    sorting_category: PlanSorting
 
     def get_query_string(self) -> Optional[str]:
         return self.query
@@ -31,19 +36,42 @@ class QueryPlansRequestImpl(QueryPlansRequest):
     def get_filter_category(self) -> PlanFilter:
         return self.filter_category
 
+    def get_sorting_category(self) -> PlanSorting:
+        return self.sorting_category
+
 
 class QueryPlansController:
     def import_form_data(self, form: Optional[QueryPlansFormData]) -> QueryPlansRequest:
         if form is None:
-            filter_category = PlanFilter.by_product_name
             query = None
+            filter_category = PlanFilter.by_product_name
+            sorting_category = PlanSorting.by_activation
         else:
             query = form.get_query_string().strip() or None
-            if form.get_category_string() == "Plan-ID":
-                filter_category = PlanFilter.by_plan_id
-            else:
-                filter_category = PlanFilter.by_product_name
-        return QueryPlansRequestImpl(query=query, filter_category=filter_category)
+            filter_category = self._import_filter_category(form)
+            sorting_category = self._import_sorting_category(form)
+        return QueryPlansRequestImpl(
+            query=query,
+            filter_category=filter_category,
+            sorting_category=sorting_category,
+        )
+
+    def _import_filter_category(self, form: QueryPlansFormData) -> PlanFilter:
+        if form.get_category_string() == "Plan-ID":
+            filter_category = PlanFilter.by_plan_id
+        else:
+            filter_category = PlanFilter.by_product_name
+        return filter_category
+
+    def _import_sorting_category(self, form: QueryPlansFormData) -> PlanSorting:
+        sorting = form.get_radio_string()
+        if sorting == "price":
+            sorting_category = PlanSorting.by_price
+        elif sorting == "company_name":
+            sorting_category = PlanSorting.by_company_name
+        else:
+            sorting_category = PlanSorting.by_activation
+        return sorting_category
 
 
 @dataclass
