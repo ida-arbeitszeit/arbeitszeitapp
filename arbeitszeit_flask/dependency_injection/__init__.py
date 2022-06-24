@@ -577,8 +577,11 @@ class FlaskModule(PresenterModule):
         coop_url_index: CoopSummaryUrlIndex,
         company_url_index: CompanySummaryUrlIndex,
         translator: Translator,
+        datetime_service: RealtimeDatetimeService,
     ) -> PlanSummaryServiceImpl:
-        return PlanSummaryServiceImpl(coop_url_index, company_url_index, translator)
+        return PlanSummaryServiceImpl(
+            coop_url_index, company_url_index, translator, datetime_service
+        )
 
     @provider
     def provide_query_companies_presenter(
