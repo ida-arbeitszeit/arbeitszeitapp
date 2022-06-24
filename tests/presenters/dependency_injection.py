@@ -2,6 +2,7 @@ from injector import Injector, Module, provider, singleton
 
 from arbeitszeit_web.answer_company_work_invite import AnswerCompanyWorkInvitePresenter
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
+from arbeitszeit_web.formatters.plan_summary_formatter import PlanSummaryFormatter
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
@@ -15,7 +16,6 @@ from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.pay_consumer_product import PayConsumerProductPresenter
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
-from arbeitszeit_web.plan_summary_service import PlanSummaryFormatter
 from arbeitszeit_web.presenters.accountant_invitation_presenter import (
     AccountantInvitationEmailPresenter,
 )

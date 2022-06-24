@@ -93,11 +93,11 @@ from arbeitszeit_web.controllers.show_my_accounts_controller import (
     ShowMyAccountsController,
 )
 from arbeitszeit_web.email import EmailConfiguration, UserAddressBook
+from arbeitszeit_web.formatters.plan_summary_formatter import PlanSummaryFormatter
 from arbeitszeit_web.get_prefilled_draft_data import PrefilledDraftDataController
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyController
 from arbeitszeit_web.language_service import LanguageService
 from arbeitszeit_web.notification import Notifier
-from arbeitszeit_web.plan_summary_service import PlanSummaryFormatter
 from arbeitszeit_web.plotter import Plotter
 from arbeitszeit_web.presenters.list_available_languages_presenter import (
     ListAvailableLanguagesPresenter,

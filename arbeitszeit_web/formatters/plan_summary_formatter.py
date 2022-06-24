@@ -4,9 +4,8 @@ from typing import List, Optional, Tuple
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.plan_summary import PlanSummary
+from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import CompanySummaryUrlIndex, CoopSummaryUrlIndex
-
-from .translator import Translator
 
 
 @dataclass

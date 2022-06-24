@@ -5,7 +5,7 @@ from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.plan_summary import PlanSummary
-from arbeitszeit_web.plan_summary_service import PlanSummaryFormatter
+from arbeitszeit_web.formatters.plan_summary_formatter import PlanSummaryFormatter
 from tests.datetime_service import FakeDatetimeService
 from tests.translator import FakeTranslator
 

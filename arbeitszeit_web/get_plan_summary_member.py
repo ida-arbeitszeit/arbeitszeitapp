@@ -2,7 +2,10 @@ from dataclasses import asdict, dataclass
 from typing import Any, Dict
 
 from arbeitszeit.use_cases.get_plan_summary_member import GetPlanSummaryMember
-from arbeitszeit_web.plan_summary_service import PlanSummaryFormatter, PlanSummaryWeb
+from arbeitszeit_web.formatters.plan_summary_formatter import (
+    PlanSummaryFormatter,
+    PlanSummaryWeb,
+)
 
 from .translator import Translator
 
