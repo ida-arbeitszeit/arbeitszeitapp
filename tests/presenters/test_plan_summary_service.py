@@ -1,10 +1,12 @@
 from dataclasses import replace
+from datetime import datetime
 from decimal import Decimal
 from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.plan_summary import PlanSummary
 from arbeitszeit_web.plan_summary_service import PlanSummaryServiceImpl
+from tests.datetime_service import FakeDatetimeService
 from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
@@ -29,6 +31,9 @@ PLAN_SUMMARY = PlanSummary(
     is_available=True,
     is_cooperating=True,
     cooperation=uuid4(),
+    creation_date=datetime.now(),
+    approval_date=None,
+    expiration_date=None,
 )
 
 
@@ -39,6 +44,7 @@ class PlanSummaryServiceTests(TestCase):
         self.company_url_index = self.injector.get(CompanySummaryUrlIndex)
         self.translator = self.injector.get(FakeTranslator)
         self.service = self.injector.get(PlanSummaryServiceImpl)
+        self.datetime_service = self.injector.get(FakeDatetimeService)
 
     def test_plan_id_is_displayed_correctly_as_tuple_of_strings(self):
         plan_summary = self.service.get_plan_summary(PLAN_SUMMARY)
@@ -238,4 +244,64 @@ class PlanSummaryServiceTests(TestCase):
         self.assertEqual(
             plan_summary.active_days,
             str(PLAN_SUMMARY.active_days),
+        )
+
+    def test_correct_creation_date_is_shown(self):
+        expected_creation_date = self.datetime_service.now()
+        response = replace(
+            PLAN_SUMMARY,
+            creation_date=expected_creation_date,
+        )
+        plan_summary = self.service.get_plan_summary(response)
+        self.assertEqual(
+            plan_summary.creation_date,
+            self.datetime_service.format_datetime(
+                date=expected_creation_date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
+            ),
+        )
+
+    def test_dash_is_shown_if_approval_date_does_not_exist(self):
+        response = replace(
+            PLAN_SUMMARY,
+            approval_date=None,
+        )
+        plan_summary = self.service.get_plan_summary(response)
+        self.assertEqual(plan_summary.approval_date, "-")
+
+    def test_correct_approval_date_is_shown_if_it_exists(self):
+        expected_approval_date = self.datetime_service.now()
+        response = replace(
+            PLAN_SUMMARY,
+            approval_date=expected_approval_date,
+        )
+        plan_summary = self.service.get_plan_summary(response)
+        self.assertEqual(
+            plan_summary.approval_date,
+            self.datetime_service.format_datetime(
+                date=expected_approval_date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
+            ),
+        )
+
+    def test_dash_is_shown_if_expiration_date_does_not_exist(self):
+        response = replace(
+            PLAN_SUMMARY,
+            expiration_date=None,
+        )
+        plan_summary = self.service.get_plan_summary(response)
+        self.assertEqual(plan_summary.expiration_date, "-")
+
+    def test_correct_expiration_date_is_shown_if_it_exists(self):
+        expected_expiration_date = self.datetime_service.now()
+        response = replace(
+            PLAN_SUMMARY,
+            expiration_date=expected_expiration_date,
+        )
+        plan_summary = self.service.get_plan_summary(response)
+        self.assertEqual(
+            plan_summary.expiration_date,
+            self.datetime_service.format_datetime(
+                date=expected_expiration_date,
+                zone="Europe/Berlin",
+                fmt="%d.%m.%Y %H:%M",
+            ),
         )

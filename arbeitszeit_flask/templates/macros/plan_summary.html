@@ -15,18 +15,21 @@
                                 <p class="title is-4">{{ view_model.summary.plan_id[0] }}</p>
                                 <p class="subtitle">{{ view_model.summary.plan_id[1] }}</p>
                             </article>
-                            <article class="tile is-child notification">
-                                <p class="title is-4">{{ view_model.summary.planner[0] }}</p>
-                                <p class="subtitle"><a href="{{ view_model.summary.planner[2] }}">{{
+                            <div class="tile">
+                                <div class="tile is-parent">
+                                    <article class="tile is-child notification">
+                                        <p class="title is-4">{{ view_model.summary.product_name[0] }}</p>
+                                        <p class="subtitle">{{ view_model.summary.product_name[1] }}</p>
+                                    </article>
+                                </div>
+                                <div class="tile is-parent">
+                                    <article class="tile is-child notification">
+                                        <p class="title is-4">{{ view_model.summary.planner[0] }}</p>
+                                        <p class="subtitle"><a href="{{ view_model.summary.planner[2] }}">{{
                                         view_model.summary.planner[3] }}</a></p>
-                            </article>
-                        </div>
-                        <div class="tile is-parent is-vertical">
-                            <article class="tile is-child notification">
-                                <p class="title is-4">{{ view_model.summary.product_name[0] }}</p>
-                                <p class="subtitle">{{ view_model.summary.product_name[1] }}</p>
-                            </article>
-                            <article class="tile is-child notification"></article>
+                                    </article>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -64,7 +67,23 @@
                     </div>
                 </div>
             </div>
-
+            <div class="tile is-ancestor">
+                <div class="tile is-parent">
+                    <article class="tile is-child notification">
+                        <div class="columns subtitle is-italic">
+                            <div class="column"><span
+                                    class="has-text-weight-semibold">{{  gettext("Plan creation") }}</span>
+                                {{ view_model.summary.creation_date }}</div>
+                            <div class="column"><span
+                                    class="has-text-weight-semibold">{{  gettext("Plan approval") }}</span>
+                                {{ view_model.summary.approval_date }}</div>
+                            <div class="column"><span
+                                    class="has-text-weight-semibold">{{  gettext("Plan expiration") }}</span>
+                                {{ view_model.summary.expiration_date }}</div>
+                        </div>
+                    </article>
+                </div>
+            </div>
         </div>
 
         <div class="box">
