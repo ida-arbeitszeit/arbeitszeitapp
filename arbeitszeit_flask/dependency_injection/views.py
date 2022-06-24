@@ -6,13 +6,22 @@ from arbeitszeit.use_cases import (
     ShowCompanyWorkInviteDetailsUseCase,
 )
 from arbeitszeit.use_cases.create_cooperation import CreateCooperation
+from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
+from arbeitszeit.use_cases.end_cooperation import EndCooperation
+from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
 from arbeitszeit.use_cases.get_latest_activated_plans import GetLatestActivatedPlans
+from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
 from arbeitszeit.use_cases.list_workers import ListWorkers
+from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProduction
 from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
 from arbeitszeit.use_cases.register_company import RegisterCompany
 from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
+from arbeitszeit.use_cases.send_work_certificates_to_worker import (
+    SendWorkCertificatesToWorker,
+)
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts
 from arbeitszeit_flask.database.repositories import MemberRepository
+from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.template import (
     AnonymousUserTemplateRenderer,
@@ -30,21 +39,34 @@ from arbeitszeit_flask.views.accountant_invitation_email_view import (
 )
 from arbeitszeit_flask.views.company_dashboard_view import CompanyDashboardView
 from arbeitszeit_flask.views.create_cooperation_view import CreateCooperationView
+from arbeitszeit_flask.views.create_draft_view import CreateDraftView
+from arbeitszeit_flask.views.end_cooperation_view import EndCooperationView
 from arbeitszeit_flask.views.invite_worker_to_company import (
     InviteWorkerGetRequestHandler,
     InviteWorkerPostRequestHandler,
 )
+from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
 from arbeitszeit_flask.views.signup_accountant_view import SignupAccountantView
 from arbeitszeit_flask.views.signup_company_view import SignupCompanyView
 from arbeitszeit_flask.views.signup_member_view import SignupMemberView
+from arbeitszeit_flask.views.transfer_to_worker_view import TransferToWorkerView
 from arbeitszeit_web.answer_company_work_invite import (
     AnswerCompanyWorkInviteController,
     AnswerCompanyWorkInvitePresenter,
 )
+from arbeitszeit_web.controllers.end_cooperation_controller import (
+    EndCooperationController,
+)
 from arbeitszeit_web.controllers.list_workers_controller import ListWorkersController
+from arbeitszeit_web.controllers.pay_means_of_production_controller import (
+    PayMeansOfProductionController,
+)
 from arbeitszeit_web.controllers.register_accountant_controller import (
     RegisterAccountantController,
+)
+from arbeitszeit_web.controllers.send_work_certificates_to_worker_controller import (
+    SendWorkCertificatesToWorkerController,
 )
 from arbeitszeit_web.controllers.show_company_work_invite_details_controller import (
     ShowCompanyWorkInviteDetailsController,
@@ -54,13 +76,20 @@ from arbeitszeit_web.controllers.show_my_accounts_controller import (
 )
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
 from arbeitszeit_web.email import MailService
+from arbeitszeit_web.get_prefilled_draft_data import (
+    GetPrefilledDraftDataPresenter,
+    PrefilledDraftDataController,
+)
 from arbeitszeit_web.invite_worker_to_company import (
     InviteWorkerToCompanyController,
     InviteWorkerToCompanyPresenter,
 )
+from arbeitszeit_web.notification import Notifier
+from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from arbeitszeit_web.presenters.accountant_invitation_presenter import (
     AccountantInvitationEmailView,
 )
+from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
 from arbeitszeit_web.presenters.get_latest_activated_plans_presenter import (
     GetLatestActivatedPlansPresenter,
 )
@@ -72,6 +101,9 @@ from arbeitszeit_web.presenters.register_company_presenter import (
     RegisterCompanyPresenter,
 )
 from arbeitszeit_web.presenters.register_member_presenter import RegisterMemberPresenter
+from arbeitszeit_web.presenters.send_work_certificates_to_worker_presenter import (
+    SendWorkCertificatesToWorkerPresenter,
+)
 from arbeitszeit_web.presenters.show_company_work_invite_details_presenter import (
     ShowCompanyWorkInviteDetailsPresenter,
 )
@@ -80,6 +112,8 @@ from arbeitszeit_web.presenters.show_my_accounts_presenter import (
 )
 from arbeitszeit_web.register_company import RegisterCompanyController
 from arbeitszeit_web.register_member import RegisterMemberController
+from arbeitszeit_web.session import Session
+from arbeitszeit_web.translator import Translator
 
 
 class ViewsModule(Module):
@@ -256,4 +290,77 @@ class ViewsModule(Module):
             controller=controller,
             presenter=presenter,
             use_case=use_case,
+        )
+
+    @provider
+    def provide_end_cooperation_view(
+        self,
+        end_cooperation: EndCooperation,
+        controller: EndCooperationController,
+        presenter: EndCooperationPresenter,
+        http_404_view: Http404View,
+    ) -> EndCooperationView:
+        return EndCooperationView(
+            end_cooperation,
+            controller,
+            presenter,
+            http_404_view,
+        )
+
+    @provider
+    def provide_transfer_to_worker_view(
+        self,
+        template_renderer: UserTemplateRenderer,
+        send_work_certificates_to_worker: SendWorkCertificatesToWorker,
+        controller: SendWorkCertificatesToWorkerController,
+        presenter: SendWorkCertificatesToWorkerPresenter,
+        list_workers: ListWorkers,
+    ) -> TransferToWorkerView:
+        return TransferToWorkerView(
+            template_renderer,
+            send_work_certificates_to_worker,
+            controller,
+            presenter,
+            list_workers,
+        )
+
+    @provider
+    def provide_pay_means_of_production_view(
+        self,
+        controller: PayMeansOfProductionController,
+        pay_means_of_production: PayMeansOfProduction,
+        presenter: PayMeansOfProductionPresenter,
+        template_renderer: UserTemplateRenderer,
+    ) -> PayMeansOfProductionView:
+        return PayMeansOfProductionView(
+            controller, pay_means_of_production, presenter, template_renderer
+        )
+
+    @provider
+    def provide_create_draft_view(
+        self,
+        request: FlaskRequest,
+        session: Session,
+        notifier: Notifier,
+        translator: Translator,
+        prefilled_data_controller: PrefilledDraftDataController,
+        get_plan_summary_company: GetPlanSummaryCompany,
+        create_draft: CreatePlanDraft,
+        get_draft_summary: GetDraftSummary,
+        get_prefilled_draft_data_presenter: GetPrefilledDraftDataPresenter,
+        template_renderer: UserTemplateRenderer,
+        http_404_view: Http404View,
+    ) -> CreateDraftView:
+        return CreateDraftView(
+            request,
+            session,
+            notifier,
+            translator,
+            prefilled_data_controller,
+            get_plan_summary_company,
+            create_draft,
+            get_draft_summary,
+            get_prefilled_draft_data_presenter,
+            template_renderer,
+            http_404_view,
         )
