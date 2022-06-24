@@ -45,7 +45,7 @@ class PurchaseRepository(ABC):
         purchase_date: datetime,
         plan: UUID,
         buyer: UUID,
-        is_member: bool,
+        is_buyer_a_member: bool,
         price_per_unit: Decimal,
         amount: int,
         purpose: PurposesOfPurchases,

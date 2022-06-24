@@ -81,7 +81,7 @@ class ConsumerProductTransaction:
             purchase_date=self.datetime_service.now(),
             plan=self.plan.id,
             buyer=self.buyer.id,
-            is_member=isinstance(self.buyer, Member),
+            is_buyer_a_member=isinstance(self.buyer, Member),
             price_per_unit=price_per_unit,
             amount=self.amount,
             purpose=PurposesOfPurchases.consumption,

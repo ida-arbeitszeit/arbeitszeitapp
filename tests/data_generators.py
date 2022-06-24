@@ -294,7 +294,7 @@ class PurchaseGenerator:
             purchase_date=purchase_date,
             plan=self.plan_generator.create_plan().id,
             buyer=buyer.id,
-            is_member=isinstance(buyer, Member),
+            is_buyer_a_member=isinstance(buyer, Member),
             price_per_unit=Decimal(10),
             amount=amount,
             purpose=PurposesOfPurchases.consumption,
