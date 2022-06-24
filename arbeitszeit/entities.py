@@ -137,7 +137,6 @@ class Plan:
     is_active: bool
     expired: bool
     activation_date: Optional[datetime]
-    expiration_relative: Optional[int]
     expiration_date: Optional[datetime]
     active_days: Optional[int]
     payout_count: int
