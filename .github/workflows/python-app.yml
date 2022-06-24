@@ -41,8 +41,7 @@ jobs:
       run: |
         python -m venv ./venv && . ./venv/bin/activate
         python -m pip install --upgrade pip
-        pip install black flake8 mypy pytest
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip install -r requirements-dev.txt
     
     - name: Test with ./run-checks
       run: |
