@@ -5,7 +5,7 @@ from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.plan_summary import PlanSummary
-from arbeitszeit_web.plan_summary_service import PlanSummaryServiceImpl
+from arbeitszeit_web.formatters.plan_summary_formatter import PlanSummaryFormatter
 from tests.datetime_service import FakeDatetimeService
 from tests.translator import FakeTranslator
 
@@ -37,24 +37,24 @@ PLAN_SUMMARY = PlanSummary(
 )
 
 
-class PlanSummaryServiceTests(TestCase):
+class PlanSummaryFormatterTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.coop_url_index = self.injector.get(CoopSummaryUrlIndexTestImpl)
         self.company_url_index = self.injector.get(CompanySummaryUrlIndex)
         self.translator = self.injector.get(FakeTranslator)
-        self.service = self.injector.get(PlanSummaryServiceImpl)
+        self.formatter = self.injector.get(PlanSummaryFormatter)
         self.datetime_service = self.injector.get(FakeDatetimeService)
 
     def test_plan_id_is_displayed_correctly_as_tuple_of_strings(self):
-        plan_summary = self.service.get_plan_summary(PLAN_SUMMARY)
+        plan_summary = self.formatter.format_plan_summary(PLAN_SUMMARY)
         self.assertTupleEqual(
             plan_summary.plan_id,
             (self.translator.gettext("Plan ID"), str(PLAN_SUMMARY.plan_id)),
         )
 
     def test_active_status_is_displayed_correctly_as_tuple_of_strings(self):
-        plan_summary = self.service.get_plan_summary(PLAN_SUMMARY)
+        plan_summary = self.formatter.format_plan_summary(PLAN_SUMMARY)
         self.assertTupleEqual(
             plan_summary.activity_string,
             (self.translator.gettext("Status"), self.translator.gettext("Active")),
@@ -65,7 +65,7 @@ class PlanSummaryServiceTests(TestCase):
             PLAN_SUMMARY,
             is_active=False,
         )
-        plan_summary = self.service.get_plan_summary(response)
+        plan_summary = self.formatter.format_plan_summary(response)
         self.assertTupleEqual(
             plan_summary.activity_string,
             (self.translator.gettext("Status"), self.translator.gettext("Inactive")),
@@ -77,7 +77,7 @@ class PlanSummaryServiceTests(TestCase):
             PLAN_SUMMARY,
             planner_id=expected_planner_id,
         )
-        plan_summary = self.service.get_plan_summary(response)
+        plan_summary = self.formatter.format_plan_summary(response)
         self.assertTupleEqual(
             plan_summary.planner,
             (
@@ -89,7 +89,7 @@ class PlanSummaryServiceTests(TestCase):
         )
 
     def test_product_name_is_displayed_correctly_as_tuple_of_strings(self):
-        plan_summary = self.service.get_plan_summary(PLAN_SUMMARY)
+        plan_summary = self.formatter.format_plan_summary(PLAN_SUMMARY)
         self.assertTupleEqual(
             plan_summary.product_name,
             (
@@ -101,7 +101,7 @@ class PlanSummaryServiceTests(TestCase):
     def test_description_is_displayed_correctly_as_tuple_of_string_and_list_of_string(
         self,
     ):
-        plan_summary = self.service.get_plan_summary(PLAN_SUMMARY)
+        plan_summary = self.formatter.format_plan_summary(PLAN_SUMMARY)
         self.assertTupleEqual(
             plan_summary.description,
             (
@@ -117,7 +117,7 @@ class PlanSummaryServiceTests(TestCase):
             PLAN_SUMMARY,
             description="first paragraph\rsecond paragraph",
         )
-        plan_summary = self.service.get_plan_summary(response)
+        plan_summary = self.formatter.format_plan_summary(response)
         self.assertTupleEqual(
             plan_summary.description,
             (
@@ -127,7 +127,7 @@ class PlanSummaryServiceTests(TestCase):
         )
 
     def test_timeframe_is_displayed_correctly_as_tuple_of_strings(self):
-        plan_summary = self.service.get_plan_summary(PLAN_SUMMARY)
+        plan_summary = self.formatter.format_plan_summary(PLAN_SUMMARY)
         self.assertTupleEqual(
             plan_summary.timeframe,
             (
@@ -137,7 +137,7 @@ class PlanSummaryServiceTests(TestCase):
         )
 
     def test_production_unit_is_displayed_correctly_as_tuple_of_strings(self):
-        plan_summary = self.service.get_plan_summary(PLAN_SUMMARY)
+        plan_summary = self.formatter.format_plan_summary(PLAN_SUMMARY)
         self.assertTupleEqual(
             plan_summary.production_unit,
             (
@@ -147,14 +147,14 @@ class PlanSummaryServiceTests(TestCase):
         )
 
     def test_amount_is_displayed_correctly_as_tuple_of_strings(self):
-        plan_summary = self.service.get_plan_summary(PLAN_SUMMARY)
+        plan_summary = self.formatter.format_plan_summary(PLAN_SUMMARY)
         self.assertTupleEqual(
             plan_summary.amount,
             (self.translator.gettext("Amount"), str(PLAN_SUMMARY.amount)),
         )
 
     def test_means_cost_is_displayed_correctly_as_tuple_of_strings(self):
-        plan_summary = self.service.get_plan_summary(PLAN_SUMMARY)
+        plan_summary = self.formatter.format_plan_summary(PLAN_SUMMARY)
         self.assertTupleEqual(
             plan_summary.means_cost,
             (
@@ -164,7 +164,7 @@ class PlanSummaryServiceTests(TestCase):
         )
 
     def test_resources_cost_is_displayed_correctly_as_tuple_of_strings(self):
-        plan_summary = self.service.get_plan_summary(PLAN_SUMMARY)
+        plan_summary = self.formatter.format_plan_summary(PLAN_SUMMARY)
         self.assertTupleEqual(
             plan_summary.resources_cost,
             (
@@ -174,7 +174,7 @@ class PlanSummaryServiceTests(TestCase):
         )
 
     def test_labour_cost_is_displayed_correctly_as_tuple_of_strings(self):
-        plan_summary = self.service.get_plan_summary(PLAN_SUMMARY)
+        plan_summary = self.formatter.format_plan_summary(PLAN_SUMMARY)
         self.assertTupleEqual(
             plan_summary.labour_cost,
             (
@@ -190,7 +190,7 @@ class PlanSummaryServiceTests(TestCase):
             PLAN_SUMMARY,
             is_public_service=False,
         )
-        plan_summary = self.service.get_plan_summary(response)
+        plan_summary = self.formatter.format_plan_summary(response)
         self.assertTupleEqual(
             plan_summary.type_of_plan,
             (
@@ -206,7 +206,7 @@ class PlanSummaryServiceTests(TestCase):
             PLAN_SUMMARY,
             is_public_service=True,
         )
-        plan_summary = self.service.get_plan_summary(response)
+        plan_summary = self.formatter.format_plan_summary(response)
         self.assertTupleEqual(
             plan_summary.type_of_plan,
             (
@@ -216,7 +216,7 @@ class PlanSummaryServiceTests(TestCase):
         )
 
     def test_price_per_unit_is_displayed_correctly_as_tuple_of_strings_and_bool(self):
-        plan_summary = self.service.get_plan_summary(PLAN_SUMMARY)
+        plan_summary = self.formatter.format_plan_summary(PLAN_SUMMARY)
         coop_id = PLAN_SUMMARY.cooperation
         assert coop_id
         self.assertTupleEqual(
@@ -230,7 +230,7 @@ class PlanSummaryServiceTests(TestCase):
         )
 
     def test_availability_is_displayed_correctly_as_tuple_of_strings(self):
-        plan_summary = self.service.get_plan_summary(PLAN_SUMMARY)
+        plan_summary = self.formatter.format_plan_summary(PLAN_SUMMARY)
         self.assertTupleEqual(
             plan_summary.availability_string,
             (
@@ -240,7 +240,7 @@ class PlanSummaryServiceTests(TestCase):
         )
 
     def test_active_days_is_displayed_correctly_as_string(self):
-        plan_summary = self.service.get_plan_summary(PLAN_SUMMARY)
+        plan_summary = self.formatter.format_plan_summary(PLAN_SUMMARY)
         self.assertEqual(
             plan_summary.active_days,
             str(PLAN_SUMMARY.active_days),
@@ -252,7 +252,7 @@ class PlanSummaryServiceTests(TestCase):
             PLAN_SUMMARY,
             creation_date=expected_creation_date,
         )
-        plan_summary = self.service.get_plan_summary(response)
+        plan_summary = self.formatter.format_plan_summary(response)
         self.assertEqual(
             plan_summary.creation_date,
             self.datetime_service.format_datetime(
@@ -265,7 +265,7 @@ class PlanSummaryServiceTests(TestCase):
             PLAN_SUMMARY,
             approval_date=None,
         )
-        plan_summary = self.service.get_plan_summary(response)
+        plan_summary = self.formatter.format_plan_summary(response)
         self.assertEqual(plan_summary.approval_date, "-")
 
     def test_correct_approval_date_is_shown_if_it_exists(self):
@@ -274,7 +274,7 @@ class PlanSummaryServiceTests(TestCase):
             PLAN_SUMMARY,
             approval_date=expected_approval_date,
         )
-        plan_summary = self.service.get_plan_summary(response)
+        plan_summary = self.formatter.format_plan_summary(response)
         self.assertEqual(
             plan_summary.approval_date,
             self.datetime_service.format_datetime(
@@ -287,7 +287,7 @@ class PlanSummaryServiceTests(TestCase):
             PLAN_SUMMARY,
             expiration_date=None,
         )
-        plan_summary = self.service.get_plan_summary(response)
+        plan_summary = self.formatter.format_plan_summary(response)
         self.assertEqual(plan_summary.expiration_date, "-")
 
     def test_correct_expiration_date_is_shown_if_it_exists(self):
@@ -296,7 +296,7 @@ class PlanSummaryServiceTests(TestCase):
             PLAN_SUMMARY,
             expiration_date=expected_expiration_date,
         )
-        plan_summary = self.service.get_plan_summary(response)
+        plan_summary = self.formatter.format_plan_summary(response)
         self.assertEqual(
             plan_summary.expiration_date,
             self.datetime_service.format_datetime(

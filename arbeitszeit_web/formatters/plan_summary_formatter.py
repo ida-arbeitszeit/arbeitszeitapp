@@ -1,12 +1,11 @@
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import List, Optional, Protocol, Tuple
+from typing import List, Optional, Tuple
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.plan_summary import PlanSummary
+from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import CompanySummaryUrlIndex, CoopSummaryUrlIndex
-
-from .translator import Translator
 
 
 @dataclass
@@ -31,19 +30,14 @@ class PlanSummaryWeb:
     expiration_date: str
 
 
-class PlanSummaryService(Protocol):
-    def get_plan_summary(self, plan_summary: PlanSummary) -> PlanSummaryWeb:
-        ...
-
-
 @dataclass
-class PlanSummaryServiceImpl:
+class PlanSummaryFormatter:
     coop_url_index: CoopSummaryUrlIndex
     company_url_index: CompanySummaryUrlIndex
     translator: Translator
     datetime_service: DatetimeService
 
-    def get_plan_summary(self, plan_summary: PlanSummary) -> PlanSummaryWeb:
+    def format_plan_summary(self, plan_summary: PlanSummary) -> PlanSummaryWeb:
         return PlanSummaryWeb(
             plan_id=(self.translator.gettext("Plan ID"), str(plan_summary.plan_id)),
             activity_string=(
