@@ -6,14 +6,14 @@ import json
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Iterable, Tuple
+from typing import Dict, Iterable, Optional, Tuple
 
 
 def main() -> None:
     parse_arguments()
     controller = RequirementsUpdater(
         requirements_file=RequirementsFile.from_path(
-            Path("requirements.txt"), version_string_cleaner=VersionStringCleaner()
+            Path("constraints.txt"), version_string_cleaner=VersionStringCleaner()
         ),
         python_environment=PythonEnvironment(),
     )
@@ -46,10 +46,9 @@ class RequirementsFile:
                 print(f"{name}=={version}", file=handle)
 
     def update_package(self, package_name: str, package_version: str) -> None:
-        if package_name in self.packages:
-            self.packages[
-                package_name
-            ] = self.version_string_cleaner.clean_version_string(package_version)
+        self.packages[package_name] = self.version_string_cleaner.clean_version_string(
+            package_version
+        )
 
     @classmethod
     def from_path(
@@ -97,14 +96,30 @@ class PythonEnvironment:
 
 class VersionStringCleaner:
     def clean_version_string(self, version_string: str) -> str:
+        return (
+            self._parse_three_part_version_string(version_string)
+            or self._parse_two_part_version_string(version_string)
+            or version_string
+        )
+
+    def _parse_three_part_version_string(self, version_string: str) -> Optional[str]:
         parts = version_string.split(".")
         try:
             major = parts[0]
             minor = parts[1]
             patch = parts[2]
         except IndexError:
-            return version_string
+            return None
         return ".".join([major, minor, patch])
+
+    def _parse_two_part_version_string(self, version_string: str) -> Optional[str]:
+        parts = version_string.split(".")
+        try:
+            major = parts[0]
+            minor = parts[1]
+        except IndexError:
+            return None
+        return ".".join([major, minor])
 
 
 def parse_arguments():
