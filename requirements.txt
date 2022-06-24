@@ -6,7 +6,6 @@ Flask-Mail
 Flask-Migrate
 Flask-Talisman
 Flask-WTF
-hypothesis
 injector
 is_safe_url
 matplotlib

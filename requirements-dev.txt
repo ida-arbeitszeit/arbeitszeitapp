@@ -2,8 +2,9 @@
 
 black
 flake8
-mypy
-isort
-psycopg2
 gunicorn
+hypothesis
+isort
+mypy
+psycopg2
 sphinx
