@@ -2,13 +2,13 @@ from datetime import datetime
 from decimal import Decimal
 from typing import List
 from unittest import TestCase
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.get_member_dashboard import GetMemberDashboard
 from arbeitszeit_web.presenters.get_member_dashboard_presenter import (
     GetMemberDashboardPresenter,
 )
-from tests.presenters.url_index import PlanSummaryUrlIndexTestImpl
+from tests.presenters.url_index import InviteUrlIndexImpl, PlanSummaryUrlIndexTestImpl
 from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
@@ -20,6 +20,7 @@ class GetMemberDashboardPresenterTests(TestCase):
         self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(GetMemberDashboardPresenter)
         self.plan_index = self.injector.get(PlanSummaryUrlIndexTestImpl)
+        self.invite_index = self.injector.get(InviteUrlIndexImpl)
 
     def test_that_welcome_line_is_correctly_translated(self) -> None:
         view_model = self.presenter.present(self.get_response())
@@ -125,11 +126,63 @@ class GetMemberDashboardPresenterTests(TestCase):
             self.plan_index.get_plan_summary_url(plan_id),
         )
 
+    def test_invites_is_empty_when_no_invites_exist(self):
+        response = self.get_response()
+        presentation = self.presenter.present(response)
+        self.assertFalse(presentation.invites)
+
+    def test_invites_is_not_empty_when_invite_exists(self):
+        response = self.get_response(invites=[self.get_invite()])
+        presentation = self.presenter.present(response)
+        self.assertTrue(presentation.invites)
+
+    def test_show_invites_is_false_when_no_invites_exist(self):
+        response = self.get_response()
+        presentation = self.presenter.present(response)
+        self.assertFalse(presentation.show_invites)
+
+    def test_show_invites_is_true_when_invite_exists(self):
+        response = self.get_response(invites=[self.get_invite()])
+        presentation = self.presenter.present(response)
+        self.assertTrue(presentation.show_invites)
+
+    def test_correct_invite_message_is_shown(self):
+        expected_company_name = "company name"
+        expected_message = self.translator.gettext(
+            f"Company {expected_company_name} has invited you!"
+        )
+        response = self.get_response(
+            invites=[self.get_invite(company_name=expected_company_name)]
+        )
+        presentation = self.presenter.present(response)
+        self.assertEqual(presentation.invites[0].invite_message, expected_message)
+
+    def test_correct_invite_details_url_is_shown(self):
+        invite_id = uuid4()
+        response = self.get_response(invites=[self.get_invite(invite_id=invite_id)])
+        presentation = self.presenter.present(response)
+        self.assertEqual(
+            presentation.invites[0].invite_details_url,
+            self.invite_index.get_invite_url(invite_id),
+        )
+
+    def get_invite(
+        self, invite_id: UUID = None, company_name: str = None
+    ) -> GetMemberDashboard.WorkInvitation:
+        if invite_id is None:
+            invite_id = uuid4()
+        if company_name is None:
+            company_name = ""
+        return GetMemberDashboard.WorkInvitation(
+            invite_id=invite_id, company_id=uuid4(), company_name=company_name
+        )
+
     def get_response(
         self,
         workplaces: List[GetMemberDashboard.Workplace] = None,
         account_balance: Decimal = None,
         three_latest_plans: List[GetMemberDashboard.PlanDetails] = None,
+        invites: List[GetMemberDashboard.WorkInvitation] = None,
     ) -> GetMemberDashboard.Response:
         if workplaces is None:
             workplaces = []
@@ -137,8 +190,11 @@ class GetMemberDashboardPresenterTests(TestCase):
             account_balance = Decimal(0)
         if three_latest_plans is None:
             three_latest_plans = []
+        if invites is None:
+            invites = []
         return GetMemberDashboard.Response(
             workplaces=workplaces,
+            invites=invites,
             three_latest_plans=three_latest_plans,
             account_balance=account_balance,
             name="worker",

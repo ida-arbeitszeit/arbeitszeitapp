@@ -21,7 +21,6 @@ from arbeitszeit.use_cases import (
     ListCoordinationsRequest,
     ListInboundCoopRequests,
     ListInboundCoopRequestsRequest,
-    ListMessages,
     ListOutboundCoopRequests,
     ListOutboundCoopRequestsRequest,
     ListPlans,
@@ -45,10 +44,8 @@ from arbeitszeit_flask.views import (
     EndCooperationView,
     Http404View,
     InviteWorkerToCompanyView,
-    ListMessagesView,
     QueryCompaniesView,
     QueryPlansView,
-    ReadMessageView,
     RequestCooperationView,
 )
 from arbeitszeit_flask.views.company_dashboard_view import CompanyDashboardView
@@ -67,7 +64,6 @@ from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.hide_plan import HidePlanPresenter
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_drafts_of_company import ListDraftsPresenter
-from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 from arbeitszeit_web.list_plans import ListPlansPresenter
 from arbeitszeit_web.presenters.seek_plan_approval import SeekPlanApprovalPresenter
 from arbeitszeit_web.presenters.show_a_account_details_presenter import (
@@ -534,25 +530,6 @@ def hilfe(template_renderer: UserTemplateRenderer):
     return template_renderer.render_template("company/help.html")
 
 
-@CompanyRoute("/company/messages")
-def list_messages(
-    template_renderer: UserTemplateRenderer,
-    controller: ListMessagesController,
-    use_case: ListMessages,
-    presenter: ListMessagesPresenter,
-    http_404_view: Http404View,
-) -> Response:
-    view = ListMessagesView(
-        template_renderer=template_renderer,
-        presenter=presenter,
-        controller=controller,
-        list_messages=use_case,
-        not_found_view=http_404_view,
-        template_name="company/list_messages.html",
-    )
-    return view.respond_to_get()
-
-
 @CompanyRoute("/company/invite_worker_to_company", methods=["GET", "POST"])
 def invite_worker_to_company(
     view: InviteWorkerToCompanyView,
@@ -562,15 +539,6 @@ def invite_worker_to_company(
         return view.respond_to_post(form)
     else:
         return view.respond_to_get(form)
-
-
-@CompanyRoute("/company/messages/<uuid:message_id>")
-@commit_changes
-def read_message(
-    message_id: UUID,
-    view: ReadMessageView,
-) -> Response:
-    return view.respond_to_get(message_id)
 
 
 @CompanyRoute("/company/end_cooperation")

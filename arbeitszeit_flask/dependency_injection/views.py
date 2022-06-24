@@ -2,8 +2,7 @@ from injector import Module, provider
 
 from arbeitszeit.use_cases import (
     AnswerCompanyWorkInvite,
-    InviteWorkerToCompany,
-    ReadMessage,
+    InviteWorkerToCompanyUseCase,
     ShowCompanyWorkInviteDetailsUseCase,
 )
 from arbeitszeit.use_cases.create_cooperation import CreateCooperation
@@ -25,7 +24,6 @@ from arbeitszeit_flask.views import (
     CompanyWorkInviteView,
     Http404View,
     InviteWorkerToCompanyView,
-    ReadMessageView,
 )
 from arbeitszeit_flask.views.accountant_invitation_email_view import (
     AccountantInvitationEmailViewImpl,
@@ -80,7 +78,6 @@ from arbeitszeit_web.presenters.show_company_work_invite_details_presenter impor
 from arbeitszeit_web.presenters.show_my_accounts_presenter import (
     ShowMyAccountsPresenter,
 )
-from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
 from arbeitszeit_web.register_company import RegisterCompanyController
 from arbeitszeit_web.register_member import RegisterMemberController
 
@@ -112,25 +109,6 @@ class ViewsModule(Module):
         )
 
     @provider
-    def provide_read_message_view(
-        self,
-        read_message: ReadMessage,
-        controller: ReadMessageController,
-        presenter: ReadMessagePresenter,
-        template_renderer: TemplateRenderer,
-        template_index: TemplateIndex,
-        http_404_view: Http404View,
-    ) -> ReadMessageView:
-        return ReadMessageView(
-            read_message,
-            controller,
-            presenter,
-            template_renderer,
-            template_index,
-            http_404_view,
-        )
-
-    @provider
     def provide_http_404_view(
         self, template_renderer: TemplateRenderer, template_index: TemplateIndex
     ) -> Http404View:
@@ -152,7 +130,7 @@ class ViewsModule(Module):
     @provider
     def provide_invite_worker_post_request_handler(
         self,
-        use_case: InviteWorkerToCompany,
+        use_case: InviteWorkerToCompanyUseCase,
         presenter: InviteWorkerToCompanyPresenter,
         controller: InviteWorkerToCompanyController,
         template_renderer: TemplateRenderer,

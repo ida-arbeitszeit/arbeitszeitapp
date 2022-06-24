@@ -1,8 +1,7 @@
 from unittest import TestCase
 
 from arbeitszeit.use_cases import (
-    InviteWorkerToCompany,
-    InviteWorkerToCompanyRequest,
+    InviteWorkerToCompanyUseCase,
     ShowWorkInvites,
     ShowWorkInvitesRequest,
 )
@@ -19,7 +18,7 @@ class ShowWorkInvitesTests(TestCase):
         self.company_generator = self.injector.get(CompanyGenerator)
         self.member = self.member_generator.create_member()
         self.company = self.company_generator.create_company()
-        self.invite_worker_to_company = self.injector.get(InviteWorkerToCompany)
+        self.invite_worker_to_company = self.injector.get(InviteWorkerToCompanyUseCase)
 
     def test_no_invites_are_shown_when_none_was_sent(self) -> None:
         request = ShowWorkInvitesRequest(member=self.member.id)
@@ -28,7 +27,7 @@ class ShowWorkInvitesTests(TestCase):
 
     def test_invites_are_shown_when_worker_was_previously_invited(self) -> None:
         self.invite_worker_to_company(
-            InviteWorkerToCompanyRequest(
+            InviteWorkerToCompanyUseCase.Request(
                 company=self.company.id,
                 worker=self.member.id,
             )
@@ -42,7 +41,7 @@ class ShowWorkInvitesTests(TestCase):
 
     def test_show_which_company_sent_the_invite(self) -> None:
         self.invite_worker_to_company(
-            InviteWorkerToCompanyRequest(
+            InviteWorkerToCompanyUseCase.Request(
                 company=self.company.id,
                 worker=self.member.id,
             )

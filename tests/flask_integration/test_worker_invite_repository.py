@@ -12,6 +12,7 @@ class WorkerInviteRepositoryTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.repository = self.injector.get(WorkerInviteRepository)
+        self.member_generator = self.injector.get(MemberGenerator)
         self.company = uuid4()
         self.worker = uuid4()
 
@@ -41,6 +42,11 @@ class WorkerInviteRepositoryTests(TestCase):
     ) -> None:
         repository = self.injector.get(interfaces.WorkerInviteRepository)
         self.assertIsInstance(repository, WorkerInviteRepository)
+
+    def test_no_invites_for_worker_gets_returned_with_no_invites_send(
+        self,
+    ) -> None:
+        self.assertFalse(list(self.repository.get_invites_for_worker(self.worker)))
 
 
 class IsWorkerInvitedToCompanyTests(TestCase):
@@ -104,3 +110,9 @@ class IsWorkerInvitedToCompanyTests(TestCase):
 
     def test_deleting_a_non_existing_invite_does_not_raise(self) -> None:
         self.repository.delete_invite(uuid4())
+
+    def test_that_invite_for_worker_gets_returned(
+        self,
+    ) -> None:
+        self.repository.create_company_worker_invite(self.company, self.worker)
+        self.assertTrue(list(self.repository.get_invites_for_worker(self.worker)))

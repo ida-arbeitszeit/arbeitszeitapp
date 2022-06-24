@@ -4,7 +4,6 @@ from flask import Response, request
 from flask_login import current_user
 
 from arbeitszeit import use_cases
-from arbeitszeit.use_cases import ListMessages
 from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
 from arbeitszeit_flask.database import MemberRepository, commit_changes
 from arbeitszeit_flask.forms import (
@@ -17,17 +16,14 @@ from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_flask.views import (
     CompanyWorkInviteView,
     Http404View,
-    ListMessagesView,
     PayConsumerProductView,
     QueryCompaniesView,
     QueryPlansView,
-    ReadMessageView,
 )
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_plan_summary_member import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
-from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 from arbeitszeit_web.pay_consumer_product import (
     PayConsumerProductController,
     PayConsumerProductPresenter,
@@ -239,34 +235,6 @@ def coop_summary(
 @MemberRoute("/member/hilfe")
 def hilfe(template_renderer: UserTemplateRenderer) -> Response:
     return Response(template_renderer.render_template("member/help.html"))
-
-
-@MemberRoute("/member/messages")
-def list_messages(
-    template_renderer: UserTemplateRenderer,
-    controller: ListMessagesController,
-    presenter: ListMessagesPresenter,
-    use_case: ListMessages,
-    http_404_view: Http404View,
-) -> Response:
-    view = ListMessagesView(
-        template_renderer=template_renderer,
-        presenter=presenter,
-        controller=controller,
-        list_messages=use_case,
-        not_found_view=http_404_view,
-        template_name="member/list_messages.html",
-    )
-    return view.respond_to_get()
-
-
-@MemberRoute("/member/messages/<uuid:message_id>")
-@commit_changes
-def read_message(
-    message_id: UUID,
-    view: ReadMessageView,
-) -> Response:
-    return view.respond_to_get(message_id)
 
 
 @MemberRoute("/member/invite_details/<uuid:invite_id>", methods=["GET", "POST"])

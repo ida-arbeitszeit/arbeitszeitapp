@@ -19,12 +19,7 @@ from arbeitszeit import repositories as interfaces
 from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.token import InvitationTokenValidator, TokenDeliverer, TokenService
-from arbeitszeit.use_cases import (
-    CheckForUnreadMessages,
-    EndCooperation,
-    GetCompanySummary,
-    ReadMessage,
-)
+from arbeitszeit.use_cases import EndCooperation, GetCompanySummary
 from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
 from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
 from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
@@ -56,7 +51,6 @@ from arbeitszeit_flask.database.repositories import (
     CompanyWorkerRepository,
     CooperationRepository,
     MemberRepository,
-    MessageRepository,
     PlanCooperationRepository,
     PlanDraftRepository,
     PlanRepository,
@@ -97,17 +91,13 @@ from arbeitszeit_flask.url_index import (
     GeneralUrlIndex,
     MemberUrlIndex,
 )
-from arbeitszeit_flask.views import EndCooperationView, Http404View, ReadMessageView
+from arbeitszeit_flask.views import EndCooperationView, Http404View
 from arbeitszeit_flask.views.create_draft_view import CreateDraftView
 from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
 from arbeitszeit_flask.views.transfer_to_worker_view import TransferToWorkerView
 from arbeitszeit_web.answer_company_work_invite import (
     AnswerCompanyWorkInviteController,
     AnswerCompanyWorkInvitePresenter,
-)
-from arbeitszeit_web.check_for_unread_message import (
-    CheckForUnreadMessagesController,
-    CheckForUnreadMessagesPresenter,
 )
 from arbeitszeit_web.colors import Colors
 from arbeitszeit_web.controllers.end_cooperation_controller import (
@@ -144,7 +134,6 @@ from arbeitszeit_web.invite_worker_to_company import (
     InviteWorkerToCompanyPresenter,
 )
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
-from arbeitszeit_web.list_messages import ListMessagesController, ListMessagesPresenter
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from arbeitszeit_web.plan_summary_service import PlanSummaryServiceImpl
@@ -200,7 +189,6 @@ from arbeitszeit_web.presenters.show_r_account_details_presenter import (
 )
 from arbeitszeit_web.query_companies import QueryCompaniesPresenter
 from arbeitszeit_web.query_plans import QueryPlansPresenter
-from arbeitszeit_web.read_message import ReadMessageController, ReadMessagePresenter
 from arbeitszeit_web.request_cooperation import (
     RequestCooperationController,
     RequestCooperationPresenter,
@@ -217,15 +205,12 @@ from arbeitszeit_web.url_index import (
     EndCoopUrlIndex,
     HidePlanUrlIndex,
     InviteUrlIndex,
-    ListMessagesUrlIndex,
-    MessageUrlIndex,
     PlanSummaryUrlIndex,
     PlotsUrlIndex,
     RenewPlanUrlIndex,
     RequestCoopUrlIndex,
     TogglePlanAvailabilityUrlIndex,
 )
-from arbeitszeit_web.user_action import UserActionResolver, UserActionResolverImpl
 
 from .views import ViewsModule
 
@@ -241,18 +226,14 @@ class MemberModule(Module):
         translator: Translator,
         url_index: MemberUrlIndex,
         datetime_service: DatetimeService,
+        invite_url_index: InviteUrlIndex,
     ) -> GetMemberDashboardPresenter:
         return GetMemberDashboardPresenter(
             translator=translator,
             url_index=url_index,
             datetime_service=datetime_service,
+            invite_url_index=invite_url_index,
         )
-
-    @provider
-    def provide_list_messages_url_index(
-        self, member_index: MemberUrlIndex
-    ) -> ListMessagesUrlIndex:
-        return member_index
 
     @provider
     def provide_confirmation_url_index(
@@ -270,12 +251,6 @@ class MemberModule(Module):
     def provide_coop_summary_url_index(
         self, member_index: MemberUrlIndex
     ) -> CoopSummaryUrlIndex:
-        return member_index
-
-    @provider
-    def provide_message_url_index(
-        self, member_index: MemberUrlIndex
-    ) -> MessageUrlIndex:
         return member_index
 
     @provider
@@ -321,12 +296,6 @@ class CompanyModule(Module):
         )
 
     @provider
-    def provide_list_messages_url_index(
-        self, company_index: CompanyUrlIndex
-    ) -> ListMessagesUrlIndex:
-        return company_index
-
-    @provider
     def provide_confirmation_url_index(
         self, company_index: CompanyUrlIndex
     ) -> ConfirmationUrlIndex:
@@ -342,12 +311,6 @@ class CompanyModule(Module):
     def provide_coop_summary_url_index(
         self, company_index: CompanyUrlIndex
     ) -> CoopSummaryUrlIndex:
-        return company_index
-
-    @provider
-    def provide_message_url_index(
-        self, company_index: CompanyUrlIndex
-    ) -> MessageUrlIndex:
         return company_index
 
     @provider
@@ -767,13 +730,10 @@ class FlaskModule(Module):
 
     @provider
     def provide_answer_company_work_invite_presenter(
-        self,
-        notifier: Notifier,
-        url_index: ListMessagesUrlIndex,
-        translator: Translator,
+        self, notifier: Notifier, translator: Translator, url_index: GeneralUrlIndex
     ) -> AnswerCompanyWorkInvitePresenter:
         return AnswerCompanyWorkInvitePresenter(
-            notifier, url_index=url_index, translator=translator
+            notifier, translator=translator, url_index=url_index
         )
 
     @provider
@@ -798,25 +758,6 @@ class FlaskModule(Module):
         self, mail_service: MailService, presenter: SendConfirmationEmailPresenter
     ) -> TokenDeliverer:
         return FlaskTokenDeliverer(mail_service=mail_service, presenter=presenter)
-
-    @provider
-    def provide_read_message_view(
-        self,
-        read_message: ReadMessage,
-        controller: ReadMessageController,
-        presenter: ReadMessagePresenter,
-        template_renderer: TemplateRenderer,
-        template_index: TemplateIndex,
-        http_404_view: Http404View,
-    ) -> ReadMessageView:
-        return ReadMessageView(
-            read_message,
-            controller,
-            presenter,
-            template_renderer,
-            template_index,
-            http_404_view,
-        )
 
     @provider
     def provide_http_404_view(
@@ -873,12 +814,6 @@ class FlaskModule(Module):
         )
 
     @provider
-    def provide_list_messages_presenter(
-        self, message_index: MessageUrlIndex
-    ) -> ListMessagesPresenter:
-        return ListMessagesPresenter(message_index)
-
-    @provider
     def provide_query_plans_presenter(
         self,
         plan_index: PlanSummaryUrlIndex,
@@ -892,15 +827,6 @@ class FlaskModule(Module):
             user_notifier=notifier,
             trans=trans,
         )
-
-    @provider
-    def provide_user_action_resolver(
-        self,
-        invite_index: InviteUrlIndex,
-        coop_index: CoopSummaryUrlIndex,
-        translator: Translator,
-    ) -> UserActionResolver:
-        return UserActionResolverImpl(invite_index, coop_index, translator)
 
     @provider
     def provide_get_plan_summary_success_presenter(
@@ -956,12 +882,6 @@ class FlaskModule(Module):
         return FlaskTemplateRenderer()
 
     @provider
-    def provide_check_for_unread_messages_controller(
-        self, session: Session
-    ) -> CheckForUnreadMessagesController:
-        return CheckForUnreadMessagesController(session)
-
-    @provider
     def provide_invite_worker_to_company_controller(
         self, session: Session
     ) -> InviteWorkerToCompanyController:
@@ -975,18 +895,9 @@ class FlaskModule(Module):
 
     @provider
     def provide_user_template_renderer(
-        self,
-        flask_template_renderer: FlaskTemplateRenderer,
-        check_unread_messages_use_case: CheckForUnreadMessages,
-        check_unread_messages_controller: CheckForUnreadMessagesController,
-        check_unread_messages_presenter: CheckForUnreadMessagesPresenter,
+        self, flask_template_renderer: FlaskTemplateRenderer
     ) -> UserTemplateRenderer:
-        return UserTemplateRenderer(
-            flask_template_renderer,
-            check_unread_messages_use_case,
-            check_unread_messages_controller,
-            check_unread_messages_presenter,
-        )
+        return UserTemplateRenderer(flask_template_renderer)
 
     @provider
     def provide_anonymous_user_template_renderer(
@@ -1002,32 +913,14 @@ class FlaskModule(Module):
         )
 
     @provider
-    def provide_list_messages_controller(
-        self, session: Session
-    ) -> ListMessagesController:
-        return ListMessagesController(session)
-
-    @provider
     def provide_request_cooperation_controller(
         self, session: Session, translator: Translator
     ) -> RequestCooperationController:
         return RequestCooperationController(session, translator)
 
     @provider
-    def provide_read_message_controller(
-        self, session: Session
-    ) -> ReadMessageController:
-        return ReadMessageController(session)
-
-    @provider
     def provide_session(self, flask_session: FlaskSession) -> Session:
         return flask_session
-
-    @provider
-    def provide_read_message_presenter(
-        self, user_action_resolver: UserActionResolver
-    ) -> ReadMessagePresenter:
-        return ReadMessagePresenter(user_action_resolver)
 
     @provider
     def provide_notifier(self) -> Notifier:
@@ -1174,10 +1067,6 @@ class FlaskModule(Module):
         binder.bind(
             SQLAlchemy,
             to=InstanceProvider(db),
-        )
-        binder.bind(
-            interfaces.MessageRepository,  # type: ignore
-            to=ClassProvider(MessageRepository),
         )
         binder.bind(
             interfaces.CooperationRepository,  # type: ignore

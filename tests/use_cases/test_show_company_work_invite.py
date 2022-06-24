@@ -3,8 +3,7 @@ from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases import (
-    InviteWorkerToCompany,
-    InviteWorkerToCompanyRequest,
+    InviteWorkerToCompanyUseCase,
     ShowCompanyWorkInviteDetailsRequest,
     ShowCompanyWorkInviteDetailsResponse,
     ShowCompanyWorkInviteDetailsUseCase,
@@ -34,12 +33,12 @@ class TestExistingMemberWithNonMatchingInvite(TestCase):
         self.use_case = self.injector.get(ShowCompanyWorkInviteDetailsUseCase)
         self.member_generator = self.injector.get(MemberGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
-        self.invite_worker = self.injector.get(InviteWorkerToCompany)
+        self.invite_worker = self.injector.get(InviteWorkerToCompanyUseCase)
         self.invited_member = self.member_generator.create_member()
         self.other_member = self.member_generator.create_member()
         self.company = self.company_generator.create_company()
         invite_response = self.invite_worker(
-            InviteWorkerToCompanyRequest(
+            InviteWorkerToCompanyUseCase.Request(
                 company=self.company.id,
                 worker=self.invited_member.id,
             )
@@ -79,13 +78,13 @@ class TestExistingMemberWithMatchingInvite(TestCase):
         self.use_case = self.injector.get(ShowCompanyWorkInviteDetailsUseCase)
         self.member_generator = self.injector.get(MemberGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
-        self.invite_worker = self.injector.get(InviteWorkerToCompany)
+        self.invite_worker = self.injector.get(InviteWorkerToCompanyUseCase)
         self.member = self.member_generator.create_member()
         self.company = self.company_generator.create_company(
             name=self.expected_company_name
         )
         invite_response = self.invite_worker(
-            InviteWorkerToCompanyRequest(
+            InviteWorkerToCompanyUseCase.Request(
                 company=self.company.id,
                 worker=self.member.id,
             )
