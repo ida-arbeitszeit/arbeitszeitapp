@@ -2,6 +2,7 @@ from injector import Injector, Module, provider, singleton
 
 from arbeitszeit_web.answer_company_work_invite import AnswerCompanyWorkInvitePresenter
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
+from arbeitszeit_web.formatters.plan_summary_formatter import PlanSummaryFormatter
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
@@ -15,10 +16,6 @@ from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.pay_consumer_product import PayConsumerProductPresenter
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
-from arbeitszeit_web.plan_summary_service import (
-    PlanSummaryService,
-    PlanSummaryServiceImpl,
-)
 from arbeitszeit_web.presenters.accountant_invitation_presenter import (
     AccountantInvitationEmailPresenter,
 )
@@ -216,14 +213,14 @@ class PresenterTestsInjector(Module):
         )
 
     @provider
-    def provide_plan_summary_service(
+    def provide_plan_summary_formatter(
         self,
         coop_url_index: CoopSummaryUrlIndexTestImpl,
         company_url_index: CompanySummaryUrlIndex,
         translator: FakeTranslator,
         datetime_service: FakeDatetimeService,
-    ) -> PlanSummaryService:
-        return PlanSummaryServiceImpl(
+    ) -> PlanSummaryFormatter:
+        return PlanSummaryFormatter(
             coop_url_index=coop_url_index,
             company_url_index=company_url_index,
             translator=translator,
@@ -237,7 +234,7 @@ class PresenterTestsInjector(Module):
         end_coop_url_index: EndCoopUrlIndexTestImpl,
         request_coop_url_index: RequestCoopUrlIndexTestImpl,
         translator: FakeTranslator,
-        plan_summary_service: PlanSummaryService,
+        plan_summary_service: PlanSummaryFormatter,
     ) -> GetPlanSummaryCompanySuccessPresenter:
         return GetPlanSummaryCompanySuccessPresenter(
             toggle_availability_url_index=toggle_availability_url_index,
@@ -296,21 +293,6 @@ class PresenterTestsInjector(Module):
             user_notifier=notifier,
             trans=translator,
             pay_means_of_production_url_index=pay_means_of_production_url_index,
-        )
-
-    @provider
-    def provide_plan_summary_service_impl(
-        self,
-        coop_url_index: CoopSummaryUrlIndexTestImpl,
-        company_url_index: CompanySummaryUrlIndex,
-        translator: FakeTranslator,
-        datetime_service: FakeDatetimeService,
-    ) -> PlanSummaryServiceImpl:
-        return PlanSummaryServiceImpl(
-            coop_url_index=coop_url_index,
-            company_url_index=company_url_index,
-            translator=translator,
-            datetime_service=datetime_service,
         )
 
     @provider

@@ -2,8 +2,11 @@ from dataclasses import asdict, dataclass
 from typing import Any, Dict, Optional
 
 from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
+from arbeitszeit_web.formatters.plan_summary_formatter import (
+    PlanSummaryFormatter,
+    PlanSummaryWeb,
+)
 
-from .plan_summary_service import PlanSummaryService, PlanSummaryWeb
 from .translator import Translator
 from .url_index import (
     EndCoopUrlIndex,
@@ -37,7 +40,7 @@ class GetPlanSummaryCompanySuccessPresenter:
     end_coop_url_index: EndCoopUrlIndex
     request_coop_url_index: RequestCoopUrlIndex
     trans: Translator
-    plan_summary_service: PlanSummaryService
+    plan_summary_service: PlanSummaryFormatter
 
     def present(
         self, response: GetPlanSummaryCompany.Success
@@ -46,7 +49,9 @@ class GetPlanSummaryCompanySuccessPresenter:
         coop_id = response.plan_summary.cooperation
         is_cooperating = response.plan_summary.is_cooperating
         return GetPlanSummaryCompanyViewModel(
-            summary=self.plan_summary_service.get_plan_summary(response.plan_summary),
+            summary=self.plan_summary_service.format_plan_summary(
+                response.plan_summary
+            ),
             show_action_section=response.current_user_is_planner,
             action=Action(
                 is_available_bool=response.plan_summary.is_available,
