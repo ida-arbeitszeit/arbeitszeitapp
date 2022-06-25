@@ -58,11 +58,25 @@ class PlanSearchForm(Form):
         ],
     )
 
+    choices_radio = [
+        ("activation", trans.lazy_gettext("Newest")),
+        ("company_name", trans.lazy_gettext("Company name")),
+        ("price", trans.lazy_gettext("Lowest cost")),
+    ]
+    radio = RadioField(
+        choices=choices_radio,
+        default="activation",
+        validators=[FieldMustExist(message=trans.lazy_gettext("Required"))],
+    )
+
     def get_query_string(self) -> str:
         return self.data["search"]
 
     def get_category_string(self) -> str:
         return self.data["select"]
+
+    def get_radio_string(self) -> str:
+        return self.data["radio"]
 
 
 class RegisterForm(Form):
