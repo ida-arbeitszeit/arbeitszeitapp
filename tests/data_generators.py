@@ -282,24 +282,38 @@ class PurchaseGenerator:
     datetime_service: FakeDatetimeService
     purchase_repository: PurchaseRepository
 
-    def create_purchase(
+    def create_purchase_by_company(
         self,
-        buyer: Union[Member, Company],
+        buyer: Company,
         purchase_date=None,
         amount=1,
     ) -> Purchase:
         if purchase_date is None:
             purchase_date = self.datetime_service.now_minus_one_day()
-        return self.purchase_repository.create_purchase(
+        return self.purchase_repository.create_purchase_by_company(
             purchase_date=purchase_date,
             plan=self.plan_generator.create_plan().id,
             buyer=buyer.id,
-            is_buyer_a_member=isinstance(buyer, Member),
             price_per_unit=Decimal(10),
             amount=amount,
-            purpose=PurposesOfPurchases.consumption,
+            purpose=PurposesOfPurchases.means_of_prod,
         )
 
+    def create_purchase_by_member(
+        self,
+        buyer: Member,
+        purchase_date=None,
+        amount=1,
+    ) -> Purchase:
+        if purchase_date is None:
+            purchase_date = self.datetime_service.now_minus_one_day()
+        return self.purchase_repository.create_purchase_by_member(
+            purchase_date=purchase_date,
+            plan=self.plan_generator.create_plan().id,
+            buyer=buyer.id,
+            price_per_unit=Decimal(10),
+            amount=amount,
+        )
 
 @inject
 @dataclass

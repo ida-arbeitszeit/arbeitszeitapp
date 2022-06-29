@@ -117,11 +117,10 @@ class Payment:
         price_per_unit = calculate_price(
             self.plan_cooperation_repository.get_cooperating_plans(self.plan.id)
         )
-        self.purchase_repository.create_purchase(
+        self.purchase_repository.create_purchase_by_company(
             purchase_date=self.datetime_service.now(),
             plan=self.plan.id,
             buyer=self.buyer.id,
-            is_buyer_a_member=isinstance(self.buyer, Member),
             price_per_unit=price_per_unit,
             amount=self.amount,
             purpose=self.purpose,

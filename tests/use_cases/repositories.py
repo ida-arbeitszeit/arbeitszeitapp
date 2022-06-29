@@ -40,12 +40,11 @@ class PurchaseRepository(interfaces.PurchaseRepository):
     def __init__(self):
         self.purchases = []
 
-    def create_purchase(
+    def create_purchase_by_company(
         self,
         purchase_date: datetime,
         plan: UUID,
         buyer: UUID,
-        is_buyer_a_member: bool,
         price_per_unit: Decimal,
         amount: int,
         purpose: PurposesOfPurchases,
@@ -54,10 +53,30 @@ class PurchaseRepository(interfaces.PurchaseRepository):
             purchase_date=purchase_date,
             plan=plan,
             buyer=buyer,
-            is_buyer_a_member=is_buyer_a_member,
+            is_buyer_a_member=False,
             price_per_unit=price_per_unit,
             amount=amount,
             purpose=purpose,
+        )
+        self.purchases.append(purchase)
+        return purchase
+
+    def create_purchase_by_member(
+        self,
+        purchase_date: datetime,
+        plan: UUID,
+        buyer: UUID,
+        price_per_unit: Decimal,
+        amount: int,
+    ) -> Purchase:
+        purchase = Purchase(
+            purchase_date=purchase_date,
+            plan=plan,
+            buyer=buyer,
+            is_buyer_a_member=True,
+            price_per_unit=price_per_unit,
+            amount=amount,
+            purpose=PurposesOfPurchases.consumption,
         )
         self.purchases.append(purchase)
         return purchase

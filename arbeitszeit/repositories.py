@@ -40,15 +40,25 @@ class CompanyWorkerRepository(ABC):
 
 class PurchaseRepository(ABC):
     @abstractmethod
-    def create_purchase(
+    def create_purchase_by_company(
         self,
         purchase_date: datetime,
         plan: UUID,
         buyer: UUID,
-        is_buyer_a_member: bool,
         price_per_unit: Decimal,
         amount: int,
         purpose: PurposesOfPurchases,
+    ) -> Purchase:
+        pass
+
+    @abstractmethod
+    def create_purchase_by_member(
+        self,
+        purchase_date: datetime,
+        plan: UUID,
+        buyer: UUID,
+        price_per_unit: Decimal,
+        amount: int,
     ) -> Purchase:
         pass
 
