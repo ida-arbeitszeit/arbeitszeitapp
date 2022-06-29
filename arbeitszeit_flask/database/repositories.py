@@ -8,7 +8,7 @@ from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
 from injector import inject
-from sqlalchemy import desc, func
+from sqlalchemy import and_, desc, func
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from arbeitszeit import entities, repositories
@@ -135,11 +135,7 @@ class MemberRepository(repositories.MemberRepository):
         registered_on: datetime,
     ) -> entities.Member:
         orm_account = self.account_repository.object_to_orm(account)
-        user_orm = models.User(
-            id=str(uuid4()),
-            email=email,
-            password=generate_password_hash(password, method="sha256"),
-        )
+        user_orm = self._get_or_create_user(email, password)
         orm_member = Member(
             id=str(uuid4()),
             user=user_orm,
@@ -165,6 +161,17 @@ class MemberRepository(repositories.MemberRepository):
 
     def get_all_members(self) -> Iterator[entities.Member]:
         return (self.object_from_orm(member) for member in Member.query.all())
+
+    def _get_or_create_user(self, email: str, password: str) -> models.User:
+        return self.db.session.query(models.User).filter(
+            and_(
+                models.User.email == email,
+                models.User.member == None,
+            )
+        ).first() or models.User(
+            email=email,
+            password=generate_password_hash(password, method="sha256"),
+        )
 
 
 @inject
@@ -245,10 +252,7 @@ class CompanyRepository(repositories.CompanyRepository):
         products_account: entities.Account,
         registered_on: datetime,
     ) -> entities.Company:
-        user_orm = models.User(
-            email=email,
-            password=generate_password_hash(password, method="sha256"),
-        )
+        user_orm = self._get_or_create_user(email, password)
         company = Company(
             id=str(uuid4()),
             name=name,
@@ -307,6 +311,17 @@ class CompanyRepository(repositories.CompanyRepository):
             if check_password_hash(company.user.password, password):
                 return UUID(company.id)
         return None
+
+    def _get_or_create_user(self, email: str, password: str) -> models.User:
+        return self.db.session.query(models.User).filter(
+            and_(
+                models.User.email == email,
+                models.User.company == None,
+            )
+        ).first() or models.User(
+            email=email,
+            password=generate_password_hash(password, method="sha256"),
+        )
 
 
 @inject
@@ -1155,10 +1170,7 @@ class AccountantRepository:
 
     def create_accountant(self, email: str, name: str, password: str) -> UUID:
         user_id = uuid4()
-        user_orm = models.User(
-            password=generate_password_hash(password, method="sha256"),
-            email=email,
-        )
+        user_orm = self._get_or_create_user(email, password)
         accountant = models.Accountant(
             id=str(user_id),
             name=name,
@@ -1200,4 +1212,12 @@ class AccountantRepository:
             .join(models.User)
             .filter(models.User.email == email)
             .first()
+        )
+
+    def _get_or_create_user(self, email: str, password: str) -> None:
+        return self.db.session.query(models.User).filter(
+            and_(models.User.email == email, models.User.accountant == None)
+        ).first() or models.User(
+            password=generate_password_hash(password, method="sha256"),
+            email=email,
         )
