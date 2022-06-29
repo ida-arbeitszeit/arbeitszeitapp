@@ -20,6 +20,14 @@
                         {{ form.search(class_="input is-large") }}
                     </div>
                 </div>
+                <p class="has-text-weight-semibold">Sort by:</p>
+                <div class="field">
+                    <div class="control">
+                        {% for subfield in form.radio %}
+                        <span>{{ subfield }} {{ subfield.label }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
                 <button class="button is-block is-primary is-large is-fullwidth">
                     Suche
                 </button>

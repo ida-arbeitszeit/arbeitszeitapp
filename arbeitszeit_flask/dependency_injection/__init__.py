@@ -19,27 +19,10 @@ from arbeitszeit import repositories as interfaces
 from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.token import InvitationTokenValidator, TokenDeliverer, TokenService
-from arbeitszeit.use_cases import EndCooperation, GetCompanySummary
-from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
-from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
-from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
+from arbeitszeit.use_cases import GetCompanySummary
 from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
-from arbeitszeit.use_cases.list_workers import ListWorkers
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
-from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProduction
-from arbeitszeit.use_cases.register_company.company_registration_message_presenter import (
-    CompanyRegistrationMessagePresenter,
-)
-from arbeitszeit.use_cases.register_member.member_registration_message_presenter import (
-    MemberRegistrationMessagePresenter,
-)
-from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitation_presenter import (
-    AccountantInvitationPresenter,
-)
-from arbeitszeit.use_cases.send_work_certificates_to_worker import (
-    SendWorkCertificatesToWorker,
-)
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts
 from arbeitszeit_flask.contol_thresholds import ControlThresholdsFlask
 from arbeitszeit_flask.database import get_social_accounting
@@ -88,17 +71,10 @@ from arbeitszeit_flask.translator import FlaskTranslator
 from arbeitszeit_flask.url_index import (
     CompanyUrlIndex,
     FlaskPlotsUrlIndex,
-    GeneralUrlIndex,
     MemberUrlIndex,
 )
-from arbeitszeit_flask.views import EndCooperationView, Http404View
-from arbeitszeit_flask.views.create_draft_view import CreateDraftView
-from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
-from arbeitszeit_flask.views.transfer_to_worker_view import TransferToWorkerView
-from arbeitszeit_web.answer_company_work_invite import (
-    AnswerCompanyWorkInviteController,
-    AnswerCompanyWorkInvitePresenter,
-)
+from arbeitszeit_flask.views import Http404View
+from arbeitszeit_web.answer_company_work_invite import AnswerCompanyWorkInviteController
 from arbeitszeit_web.colors import Colors
 from arbeitszeit_web.controllers.end_cooperation_controller import (
     EndCooperationController,
@@ -117,85 +93,23 @@ from arbeitszeit_web.controllers.show_my_accounts_controller import (
     ShowMyAccountsController,
 )
 from arbeitszeit_web.email import EmailConfiguration, UserAddressBook
-from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
-from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
-from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
-from arbeitszeit_web.get_plan_summary_company import (
-    GetPlanSummaryCompanySuccessPresenter,
-)
-from arbeitszeit_web.get_plan_summary_member import GetPlanSummarySuccessPresenter
-from arbeitszeit_web.get_prefilled_draft_data import (
-    GetPrefilledDraftDataPresenter,
-    PrefilledDraftDataController,
-)
-from arbeitszeit_web.get_statistics import GetStatisticsPresenter
-from arbeitszeit_web.invite_worker_to_company import (
-    InviteWorkerToCompanyController,
-    InviteWorkerToCompanyPresenter,
-)
-from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
+from arbeitszeit_web.formatters.plan_summary_formatter import PlanSummaryFormatter
+from arbeitszeit_web.get_prefilled_draft_data import PrefilledDraftDataController
+from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyController
+from arbeitszeit_web.language_service import LanguageService
 from arbeitszeit_web.notification import Notifier
-from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
-from arbeitszeit_web.plan_summary_service import PlanSummaryServiceImpl
 from arbeitszeit_web.plotter import Plotter
-from arbeitszeit_web.presenters.accountant_invitation_presenter import (
-    AccountantInvitationEmailPresenter,
-    AccountantInvitationEmailView,
-)
-from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
-from arbeitszeit_web.presenters.get_latest_activated_plans_presenter import (
-    GetLatestActivatedPlansPresenter,
-)
-from arbeitszeit_web.presenters.get_member_dashboard_presenter import (
-    GetMemberDashboardPresenter,
-)
 from arbeitszeit_web.presenters.list_available_languages_presenter import (
     ListAvailableLanguagesPresenter,
 )
-from arbeitszeit_web.presenters.log_in_company_presenter import LogInCompanyPresenter
-from arbeitszeit_web.presenters.log_in_member_presenter import LogInMemberPresenter
-from arbeitszeit_web.presenters.register_accountant_presenter import (
-    RegisterAccountantPresenter,
-)
-from arbeitszeit_web.presenters.register_company_presenter import (
-    RegisterCompanyPresenter,
-)
-from arbeitszeit_web.presenters.register_member_presenter import RegisterMemberPresenter
 from arbeitszeit_web.presenters.registration_email_presenter import (
-    RegistrationEmailPresenter,
     RegistrationEmailTemplate,
 )
-from arbeitszeit_web.presenters.seek_plan_approval import SeekPlanApprovalPresenter
 from arbeitszeit_web.presenters.send_confirmation_email_presenter import (
     SendConfirmationEmailPresenter,
 )
-from arbeitszeit_web.presenters.send_work_certificates_to_worker_presenter import (
-    SendWorkCertificatesToWorkerPresenter,
-)
-from arbeitszeit_web.presenters.show_a_account_details_presenter import (
-    ShowAAccountDetailsPresenter,
-)
-from arbeitszeit_web.presenters.show_company_work_invite_details_presenter import (
-    ShowCompanyWorkInviteDetailsPresenter,
-)
-from arbeitszeit_web.presenters.show_p_account_details_presenter import (
-    ShowPAccountDetailsPresenter,
-)
-from arbeitszeit_web.presenters.show_prd_account_details_presenter import (
-    ShowPRDAccountDetailsPresenter,
-)
-from arbeitszeit_web.presenters.show_r_account_details_presenter import (
-    ShowRAccountDetailsPresenter,
-)
-from arbeitszeit_web.query_companies import QueryCompaniesPresenter
-from arbeitszeit_web.query_plans import QueryPlansPresenter
-from arbeitszeit_web.request_cooperation import (
-    RequestCooperationController,
-    RequestCooperationPresenter,
-)
+from arbeitszeit_web.request_cooperation import RequestCooperationController
 from arbeitszeit_web.session import Session
-from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
-from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import (
     AnswerCompanyWorkInviteUrlIndex,
@@ -212,6 +126,7 @@ from arbeitszeit_web.url_index import (
     TogglePlanAvailabilityUrlIndex,
 )
 
+from .presenters import CompanyPresenterModule, MemberPresenterModule, PresenterModule
 from .views import ViewsModule
 
 __all__ = [
@@ -219,22 +134,7 @@ __all__ = [
 ]
 
 
-class MemberModule(Module):
-    @provider
-    def provide_get_member_dashboard_presenter(
-        self,
-        translator: Translator,
-        url_index: MemberUrlIndex,
-        datetime_service: DatetimeService,
-        invite_url_index: InviteUrlIndex,
-    ) -> GetMemberDashboardPresenter:
-        return GetMemberDashboardPresenter(
-            translator=translator,
-            url_index=url_index,
-            datetime_service=datetime_service,
-            invite_url_index=invite_url_index,
-        )
-
+class MemberModule(MemberPresenterModule):
     @provider
     def provide_confirmation_url_index(
         self, member_index: MemberUrlIndex
@@ -286,15 +186,7 @@ class MemberModule(Module):
         return url_index
 
 
-class CompanyModule(Module):
-    @provider
-    def provide_pay_means_of_production_presenter(
-        self, notifier: Notifier, trans: Translator, company_url_index: CompanyUrlIndex
-    ) -> PayMeansOfProductionPresenter:
-        return PayMeansOfProductionPresenter(
-            notifier, trans, pay_means_of_production_url_index=company_url_index
-        )
-
+class CompanyModule(CompanyPresenterModule):
     @provider
     def provide_confirmation_url_index(
         self, company_index: CompanyUrlIndex
@@ -354,31 +246,10 @@ class CompanyModule(Module):
         return CompanyTemplateIndex()
 
     @provider
-    def provide_end_cooperation_view(
-        self,
-        end_cooperation: EndCooperation,
-        controller: EndCooperationController,
-        presenter: EndCooperationPresenter,
-        http_404_view: Http404View,
-    ) -> EndCooperationView:
-        return EndCooperationView(
-            end_cooperation,
-            controller,
-            presenter,
-            http_404_view,
-        )
-
-    @provider
     def provide_end_cooperation_controller(
         self, session: FlaskSession, request: FlaskRequest
     ) -> EndCooperationController:
         return EndCooperationController(session, request)
-
-    @provider
-    def provide_request_cooperation_presenter(
-        self, translator: Translator
-    ) -> RequestCooperationPresenter:
-        return RequestCooperationPresenter(translator)
 
     @provider
     def provide_send_work_certificates_to_worker_controller(
@@ -387,58 +258,10 @@ class CompanyModule(Module):
         return SendWorkCertificatesToWorkerController(session, request)
 
     @provider
-    def provide_send_work_certificates_to_worker_presenter(
-        self, notifier: Notifier, translator: Translator
-    ) -> SendWorkCertificatesToWorkerPresenter:
-        return SendWorkCertificatesToWorkerPresenter(notifier, translator)
-
-    @provider
-    def provide_transfer_to_worker_view(
-        self,
-        template_renderer: UserTemplateRenderer,
-        send_work_certificates_to_worker: SendWorkCertificatesToWorker,
-        controller: SendWorkCertificatesToWorkerController,
-        presenter: SendWorkCertificatesToWorkerPresenter,
-        list_workers: ListWorkers,
-    ) -> TransferToWorkerView:
-        return TransferToWorkerView(
-            template_renderer,
-            send_work_certificates_to_worker,
-            controller,
-            presenter,
-            list_workers,
-        )
-
-    @provider
-    def provide_end_cooperation_presenter(
-        self,
-        request: FlaskRequest,
-        notifier: Notifier,
-        plan_summary_index: PlanSummaryUrlIndex,
-        coop_summary_index: CoopSummaryUrlIndex,
-        translator: Translator,
-    ) -> EndCooperationPresenter:
-        return EndCooperationPresenter(
-            request, notifier, plan_summary_index, coop_summary_index, translator
-        )
-
-    @provider
     def provide_pay_means_of_production_controller(
         self, session: FlaskSession, request: FlaskRequest
     ) -> PayMeansOfProductionController:
         return PayMeansOfProductionController(session, request)
-
-    @provider
-    def provide_pay_means_of_production_view(
-        self,
-        controller: PayMeansOfProductionController,
-        pay_means_of_production: PayMeansOfProduction,
-        presenter: PayMeansOfProductionPresenter,
-        template_renderer: UserTemplateRenderer,
-    ) -> PayMeansOfProductionView:
-        return PayMeansOfProductionView(
-            controller, pay_means_of_production, presenter, template_renderer
-        )
 
     @provider
     def provide_invite_url_index(self, index: CompanyUrlIndex) -> InviteUrlIndex:
@@ -451,142 +274,18 @@ class CompanyModule(Module):
         return url_index
 
     @provider
-    def provide_show_prd_account_details_presenter(
-        self,
-        translator: Translator,
-        url_index: PlotsUrlIndex,
-        datetime_service: DatetimeService,
-    ) -> ShowPRDAccountDetailsPresenter:
-        return ShowPRDAccountDetailsPresenter(
-            translator=translator,
-            url_index=url_index,
-            datetime_service=datetime_service,
-        )
-
-    @provider
-    def provide_show_r_account_details_presenter(
-        self,
-        translator: Translator,
-        url_index: PlotsUrlIndex,
-        datetime_service: DatetimeService,
-    ) -> ShowRAccountDetailsPresenter:
-        return ShowRAccountDetailsPresenter(
-            trans=translator, url_index=url_index, datetime_service=datetime_service
-        )
-
-    @provider
-    def provide_show_a_account_details_presenter(
-        self,
-        translator: Translator,
-        url_index: PlotsUrlIndex,
-        datetime_service: DatetimeService,
-    ) -> ShowAAccountDetailsPresenter:
-        return ShowAAccountDetailsPresenter(
-            trans=translator, url_index=url_index, datetime_service=datetime_service
-        )
-
-    @provider
-    def provide_show_p_account_details_presenter(
-        self,
-        translator: Translator,
-        url_index: PlotsUrlIndex,
-        datetime_service: DatetimeService,
-    ) -> ShowPAccountDetailsPresenter:
-        return ShowPAccountDetailsPresenter(
-            trans=translator, url_index=url_index, datetime_service=datetime_service
-        )
-
-    @provider
     def provide_prefilled_draft_data_controller(
         self, session: Session
     ) -> PrefilledDraftDataController:
         return PrefilledDraftDataController(session=session)
 
-    @provider
-    def provide_create_draft_view(
-        self,
-        request: FlaskRequest,
-        session: Session,
-        notifier: Notifier,
-        translator: Translator,
-        prefilled_data_controller: PrefilledDraftDataController,
-        get_plan_summary_company: GetPlanSummaryCompany,
-        create_draft: CreatePlanDraft,
-        get_draft_summary: GetDraftSummary,
-        get_prefilled_draft_data_presenter: GetPrefilledDraftDataPresenter,
-        template_renderer: UserTemplateRenderer,
-        http_404_view: Http404View,
-    ) -> CreateDraftView:
-        return CreateDraftView(
-            request,
-            session,
-            notifier,
-            translator,
-            prefilled_data_controller,
-            get_plan_summary_company,
-            create_draft,
-            get_draft_summary,
-            get_prefilled_draft_data_presenter,
-            template_renderer,
-            http_404_view,
-        )
 
-    @provider
-    def provide_get_company_transactions_presenter(
-        self, translator: Translator
-    ) -> GetCompanyTransactionsPresenter:
-        return GetCompanyTransactionsPresenter(translator=translator)
-
-
-class FlaskModule(Module):
-    @provider
-    def provide_log_in_company_presenter(
-        self,
-        translator: FlaskTranslator,
-        session: FlaskSession,
-        company_url_index: GeneralUrlIndex,
-    ) -> LogInCompanyPresenter:
-        return LogInCompanyPresenter(
-            translator=translator,
-            session=session,
-            company_url_index=company_url_index,
-        )
-
+class FlaskModule(PresenterModule):
     @provider
     def provide_invitation_token_validator(
         self, validator: FlaskTokenService
     ) -> InvitationTokenValidator:
         return validator
-
-    @provider
-    def provide_register_accountant_presenter(
-        self,
-        notifier: FlaskFlashNotifier,
-        session: FlaskSession,
-        translator: FlaskTranslator,
-        dashboard_url_index: GeneralUrlIndex,
-    ) -> RegisterAccountantPresenter:
-        return RegisterAccountantPresenter(
-            notifier=notifier,
-            session=session,
-            translator=translator,
-            dashboard_url_index=dashboard_url_index,
-        )
-
-    @provider
-    def provide_accountant_invitation_presenter(
-        self,
-        view: AccountantInvitationEmailView,
-        email_configuration: EmailConfiguration,
-        translator: Translator,
-        invitation_url_index: GeneralUrlIndex,
-    ) -> AccountantInvitationPresenter:
-        return AccountantInvitationEmailPresenter(
-            invitation_view=view,
-            email_configuration=email_configuration,
-            translator=translator,
-            invitation_url_index=invitation_url_index,
-        )
 
     @provider
     def provide_flask_session(
@@ -606,66 +305,10 @@ class FlaskModule(Module):
         return flask_plots_url_index
 
     @provider
-    def provide_register_member_presenter(
-        self, session: Session, translator: Translator
-    ) -> RegisterMemberPresenter:
-        return RegisterMemberPresenter(session=session, translator=translator)
-
-    @provider
-    def provide_register_company_presenter(
-        self, session: Session, translator: Translator
-    ) -> RegisterCompanyPresenter:
-        return RegisterCompanyPresenter(session=session, translator=translator)
-
-    @provider
-    def provide_registration_email_presenter(
-        self,
-        email_sender: MailService,
-        address_book: UserAddressBook,
-        email_template: RegistrationEmailTemplate,
-        url_index: ConfirmationUrlIndex,
-        email_configuration: EmailConfiguration,
-        translator: Translator,
-    ) -> RegistrationEmailPresenter:
-        return RegistrationEmailPresenter(
-            email_sender=email_sender,
-            address_book=address_book,
-            member_email_template=email_template,
-            company_email_template=email_template,
-            url_index=url_index,
-            email_configuration=email_configuration,
-            translator=translator,
-        )
-
-    @provider
-    def provide_member_registration_message_presenter(
-        self, presenter: RegistrationEmailPresenter
-    ) -> MemberRegistrationMessagePresenter:
-        return presenter
-
-    @provider
-    def provide_company_registration_message_presenter(
-        self, presenter: RegistrationEmailPresenter
-    ) -> CompanyRegistrationMessagePresenter:
-        return presenter
-
-    @provider
     def provide_member_registration_email_template(
         self,
     ) -> RegistrationEmailTemplate:
         return MemberRegistrationEmailTemplateImpl()
-
-    @provider
-    def provide_get_statistics_presenter(
-        self,
-        translator: Translator,
-        plotter: Plotter,
-        colors: Colors,
-        url_index: PlotsUrlIndex,
-    ) -> GetStatisticsPresenter:
-        return GetStatisticsPresenter(
-            translator=translator, plotter=plotter, colors=colors, url_index=url_index
-        )
 
     @provider
     def provide_get_company_summary(
@@ -685,33 +328,22 @@ class FlaskModule(Module):
         )
 
     @provider
-    def provide_list_available_languages_presenter(
-        self,
-        language_changer_url_index: GeneralUrlIndex,
-        language_service: LanguageRepositoryImpl,
-    ) -> ListAvailableLanguagesPresenter:
-        return ListAvailableLanguagesPresenter(
-            language_changer_url_index=language_changer_url_index,
-            language_service=language_service,
-        )
-
-    @provider
     def provide_language_repository(
         self, language_repository: LanguageRepositoryImpl
     ) -> interfaces.LanguageRepository:
         return language_repository
 
     @provider
+    def provide_language_service(
+        self, language_repository_impl: LanguageRepositoryImpl
+    ) -> LanguageService:
+        return language_repository_impl
+
+    @provider
     def provide_list_workers_controller(
         self, session: Session
     ) -> ListWorkersController:
         return ListWorkersController(session=session)
-
-    @provider
-    def provide_show_company_work_invite_details_presenter(
-        self, url_index: AnswerCompanyWorkInviteUrlIndex, translator: Translator
-    ) -> ShowCompanyWorkInviteDetailsPresenter:
-        return ShowCompanyWorkInviteDetailsPresenter(url_index, translator)
 
     @provider
     def provide_show_company_work_invite_details_controller(
@@ -729,29 +361,8 @@ class FlaskModule(Module):
         return AnswerCompanyWorkInviteController(session)
 
     @provider
-    def provide_answer_company_work_invite_presenter(
-        self, notifier: Notifier, translator: Translator, url_index: GeneralUrlIndex
-    ) -> AnswerCompanyWorkInvitePresenter:
-        return AnswerCompanyWorkInvitePresenter(
-            notifier, translator=translator, url_index=url_index
-        )
-
-    @provider
     def provide_email_configuration(self) -> EmailConfiguration:
         return FlaskEmailConfiguration()
-
-    @provider
-    def provide_send_confirmation_email_presenter(
-        self,
-        url_index: ConfirmationUrlIndex,
-        email_configuration: EmailConfiguration,
-        translator: Translator,
-    ) -> SendConfirmationEmailPresenter:
-        return SendConfirmationEmailPresenter(
-            url_index=url_index,
-            email_configuration=email_configuration,
-            translator=translator,
-        )
 
     @provider
     def provide_token_deliverer(
@@ -774,99 +385,10 @@ class FlaskModule(Module):
         company_url_index: CompanySummaryUrlIndex,
         translator: Translator,
         datetime_service: RealtimeDatetimeService,
-    ) -> PlanSummaryServiceImpl:
-        return PlanSummaryServiceImpl(
+    ) -> PlanSummaryFormatter:
+        return PlanSummaryFormatter(
             coop_url_index, company_url_index, translator, datetime_service
         )
-
-    @provider
-    def provide_query_companies_presenter(
-        self,
-        notifier: Notifier,
-        company_url_index: CompanySummaryUrlIndex,
-        translator: Translator,
-    ) -> QueryCompaniesPresenter:
-        return QueryCompaniesPresenter(
-            user_notifier=notifier,
-            company_url_index=company_url_index,
-            translator=translator,
-        )
-
-    @provider
-    def provide_list_all_cooperations_presenter(
-        self, coop_index: CoopSummaryUrlIndex
-    ) -> ListAllCooperationsPresenter:
-        return ListAllCooperationsPresenter(coop_index)
-
-    @provider
-    def provide_show_my_cooperations_presenter(
-        self, coop_index: CoopSummaryUrlIndex, translator: Translator
-    ) -> ShowMyCooperationsPresenter:
-        return ShowMyCooperationsPresenter(coop_index, translator=translator)
-
-    @provider
-    def provide_show_my_plans_presenter(
-        self,
-        plan_index: PlanSummaryUrlIndex,
-        renew_plan_index: RenewPlanUrlIndex,
-        hide_plan_index: HidePlanUrlIndex,
-        translator: Translator,
-    ) -> ShowMyPlansPresenter:
-        return ShowMyPlansPresenter(
-            plan_index, renew_plan_index, hide_plan_index, translator
-        )
-
-    @provider
-    def provide_query_plans_presenter(
-        self,
-        plan_index: PlanSummaryUrlIndex,
-        company_index: CompanySummaryUrlIndex,
-        notifier: Notifier,
-        trans: Translator,
-    ) -> QueryPlansPresenter:
-        return QueryPlansPresenter(
-            plan_url_index=plan_index,
-            company_url_index=company_index,
-            user_notifier=notifier,
-            trans=trans,
-        )
-
-    @provider
-    def provide_get_plan_summary_success_presenter(
-        self,
-        trans: Translator,
-        plan_summary_service: PlanSummaryServiceImpl,
-    ) -> GetPlanSummarySuccessPresenter:
-        return GetPlanSummarySuccessPresenter(trans, plan_summary_service)
-
-    @provider
-    def provide_get_plan_summary_company_success_presenter(
-        self,
-        toggle_availability_index: TogglePlanAvailabilityUrlIndex,
-        end_coop_url_index: EndCoopUrlIndex,
-        request_coop_url_index: RequestCoopUrlIndex,
-        trans: Translator,
-        plan_summary_service: PlanSummaryServiceImpl,
-    ) -> GetPlanSummaryCompanySuccessPresenter:
-        return GetPlanSummaryCompanySuccessPresenter(
-            toggle_availability_index,
-            end_coop_url_index,
-            request_coop_url_index,
-            trans,
-            plan_summary_service,
-        )
-
-    @provider
-    def provide_get_coop_summary_success_presenter(
-        self, plan_index: PlanSummaryUrlIndex, end_coop_index: EndCoopUrlIndex
-    ) -> GetCoopSummarySuccessPresenter:
-        return GetCoopSummarySuccessPresenter(plan_index, end_coop_index)
-
-    @provider
-    def provide_get_company_summary_success_presenter(
-        self, plan_index: PlanSummaryUrlIndex, translator: Translator
-    ) -> GetCompanySummarySuccessPresenter:
-        return GetCompanySummarySuccessPresenter(plan_index, translator)
 
     @provider
     def provide_transaction_repository(
@@ -889,12 +411,6 @@ class FlaskModule(Module):
         self, session: Session
     ) -> InviteWorkerToCompanyController:
         return InviteWorkerToCompanyController(session)
-
-    @provider
-    def provide_invite_worker_to_company_presenter(
-        self, translator: Translator
-    ) -> InviteWorkerToCompanyPresenter:
-        return InviteWorkerToCompanyPresenter(translator)
 
     @provider
     def provide_user_template_renderer(
@@ -972,36 +488,6 @@ class FlaskModule(Module):
     ) -> LogInMemberUseCase:
         return LogInMemberUseCase(
             member_repository=member_repository,
-        )
-
-    @provider
-    def provide_get_latest_activated_plans_presenter(
-        self, url_index: PlanSummaryUrlIndex, datetime_service: DatetimeService
-    ) -> GetLatestActivatedPlansPresenter:
-        return GetLatestActivatedPlansPresenter(
-            url_index=url_index, datetime_service=datetime_service
-        )
-
-    @provider
-    def provide_seek_plan_approval_presenter(
-        self, notifier: Notifier, translator: Translator
-    ) -> SeekPlanApprovalPresenter:
-        return SeekPlanApprovalPresenter(
-            notifier=notifier,
-            translator=translator,
-        )
-
-    @provider
-    def provide_log_in_member_presenter(
-        self,
-        session: Session,
-        translator: Translator,
-        member_url_index: GeneralUrlIndex,
-    ) -> LogInMemberPresenter:
-        return LogInMemberPresenter(
-            session=session,
-            translator=translator,
-            member_url_index=member_url_index,
         )
 
     @provider
