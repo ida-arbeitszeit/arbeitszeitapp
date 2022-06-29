@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterable, Iterator, List, Optional, Tuple, Union
+from typing import Iterable, Iterator, List, Optional, Union
 from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
@@ -764,9 +764,13 @@ class PlanRepository(repositories.PlanRepository):
         plan_orm = self.object_to_orm(plan)
         plan_orm.is_available = True if (plan_orm.is_available == False) else False
 
-    def get_plan_name_and_description(self, id: UUID) -> repositories.PlanRepository.NameAndDescription:
+    def get_plan_name_and_description(
+        self, id: UUID
+    ) -> repositories.PlanRepository.NameAndDescription:
         plan = Plan.query.get(str(id))
-        name_and_description = repositories.PlanRepository.NameAndDescription(name=plan.prd_name, description=plan.description) 
+        name_and_description = repositories.PlanRepository.NameAndDescription(
+            name=plan.prd_name, description=plan.description
+        )
         return name_and_description
 
     def __len__(self) -> int:

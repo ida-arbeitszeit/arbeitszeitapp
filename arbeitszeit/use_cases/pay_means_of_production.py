@@ -8,7 +8,7 @@ from uuid import UUID
 from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Company, Member, Plan, PurposesOfPurchases
+from arbeitszeit.entities import Company, Plan, PurposesOfPurchases
 from arbeitszeit.price_calculator import calculate_price
 from arbeitszeit.repositories import (
     CompanyRepository,

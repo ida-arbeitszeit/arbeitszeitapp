@@ -6,7 +6,6 @@ from tests.data_generators import CompanyGenerator, MemberGenerator, PurchaseGen
 from tests.datetime_service import FakeDatetimeService
 
 from .dependency_injection import injection_test
-from .repositories import PurchaseRepository
 
 
 def purchase_in_results(
@@ -38,8 +37,12 @@ def test_that_correct_purchases_are_returned(
 ):
     member = member_generator.create_member()
     company = company_generator.create_company()
-    expected_purchase_member = purchase_generator.create_purchase_by_member(buyer=member)
-    expected_purchase_company = purchase_generator.create_purchase_by_company(buyer=company)
+    expected_purchase_member = purchase_generator.create_purchase_by_member(
+        buyer=member
+    )
+    expected_purchase_company = purchase_generator.create_purchase_by_company(
+        buyer=company
+    )
     results = list(query_purchases(member))
     assert len(results) == 1
     assert purchase_in_results(expected_purchase_member, results)

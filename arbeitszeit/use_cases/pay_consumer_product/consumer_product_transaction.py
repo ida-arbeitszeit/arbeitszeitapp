@@ -6,7 +6,7 @@ from injector import inject
 
 from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Member, Plan, PurposesOfPurchases
+from arbeitszeit.entities import Member, Plan
 from arbeitszeit.price_calculator import calculate_price
 from arbeitszeit.repositories import (
     AccountRepository,

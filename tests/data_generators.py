@@ -315,6 +315,7 @@ class PurchaseGenerator:
             amount=amount,
         )
 
+
 @inject
 @dataclass
 class TransactionGenerator:

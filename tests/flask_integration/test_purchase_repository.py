@@ -22,6 +22,7 @@ def test_repository_for_member(
     result = list(repository.get_purchases_descending_by_date(user))
     assert [later_purchase, earlier_purchase] == result
 
+
 @injection_test
 def test_repository_for_company(
     repository: PurchaseRepository,
