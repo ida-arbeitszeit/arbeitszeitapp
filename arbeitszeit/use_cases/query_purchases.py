@@ -46,14 +46,14 @@ class QueryPurchases:
             purpose = "Rohmat."
         else:
             purpose = "Konsum"
-        name, description = self.plan_repository.get_plan_name_and_description(
+        name_and_description = self.plan_repository.get_plan_name_and_description(
             purchase.plan
         )
         return PurchaseQueryResponse(
             purchase_date=purchase.purchase_date,
             plan_id=purchase.plan,
-            product_name=name,
-            product_description=description,
+            product_name=name_and_description.name,
+            product_description=name_and_description.description,
             purpose=purpose,
             price_per_unit=purchase.price_per_unit,
             amount=purchase.amount,

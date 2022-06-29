@@ -598,10 +598,14 @@ class PlanRepository(interfaces.PlanRepository):
     def toggle_product_availability(self, plan: Plan) -> None:
         plan.is_available = True if (plan.is_available == False) else False
 
-    def get_plan_name_and_description(self, id: UUID) -> Tuple[str, str]:
+    def get_plan_name_and_description(self, id: UUID) -> interfaces.PlanRepository.NameAndDescription:
         plan = self.plans.get(id)
         assert plan
-        return (plan.prd_name, plan.description)
+        name_and_description = interfaces.PlanRepository.NameAndDescription(
+            name=plan.prd_name,
+            description=plan.description
+        )
+        return name_and_description
 
 
 @singleton

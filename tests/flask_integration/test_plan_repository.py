@@ -369,6 +369,6 @@ def test_correct_name_and_description_returned(
     plan = plan_generator.create_plan(
         product_name=expected_name, description=expected_description
     )
-    name, description = repository.get_plan_name_and_description(plan.id)
-    assert name == expected_name
-    assert description == expected_description
+    name_and_description = repository.get_plan_name_and_description(plan.id)
+    assert name_and_description.name == expected_name
+    assert name_and_description.description == expected_description

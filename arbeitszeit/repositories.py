@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from typing import Iterable, Iterator, List, Optional, Protocol, Tuple, Union
@@ -178,8 +179,13 @@ class PlanRepository(ABC):
     def toggle_product_availability(self, plan: Plan) -> None:
         pass
 
+    @dataclass
+    class NameAndDescription:
+        name: str
+        description: str
+
     @abstractmethod
-    def get_plan_name_and_description(self, id: UUID) -> Tuple[str, str]:
+    def get_plan_name_and_description(self, id: UUID) -> NameAndDescription:
         pass
 
 

@@ -764,9 +764,10 @@ class PlanRepository(repositories.PlanRepository):
         plan_orm = self.object_to_orm(plan)
         plan_orm.is_available = True if (plan_orm.is_available == False) else False
 
-    def get_plan_name_and_description(self, id: UUID) -> Tuple[str, str]:
+    def get_plan_name_and_description(self, id: UUID) -> repositories.PlanRepository.NameAndDescription:
         plan = Plan.query.get(str(id))
-        return (plan.prd_name, plan.description)
+        name_and_description = repositories.PlanRepository.NameAndDescription(name=plan.prd_name, description=plan.description) 
+        return name_and_description
 
     def __len__(self) -> int:
         return len(Plan.query.all())
