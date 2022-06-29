@@ -1,7 +1,7 @@
 from datetime import date, datetime, timedelta
-from typing import Optional, Union
+from typing import Optional
 
-from dateutil import parser, tz
+from dateutil import tz
 from injector import singleton
 
 from arbeitszeit.datetime_service import DatetimeService
@@ -28,12 +28,10 @@ class FakeDatetimeService(DatetimeService):
 
     def format_datetime(
         self,
-        date: Union[str, datetime],
+        date: datetime,
         zone: Optional[str] = None,
         fmt: Optional[str] = None,
     ) -> str:
-        if isinstance(date, str):
-            date = parser.parse(date)
         if zone is not None:
             date = date.astimezone(tz.gettz(zone))
         if fmt is None:
