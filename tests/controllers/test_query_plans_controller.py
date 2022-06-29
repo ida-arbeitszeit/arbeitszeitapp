@@ -5,6 +5,7 @@ from typing import Optional
 from unittest import TestCase
 
 from arbeitszeit.use_cases import PlanFilter
+from arbeitszeit.use_cases.query_plans import PlanSorting
 from arbeitszeit_web.query_plans import QueryPlansController
 
 
@@ -58,12 +59,46 @@ class QueryPlansControllerTests(TestCase):
         request = self.controller.import_form_data(form=None)
         self.assertTrue(request.get_query_string() is None)
 
+    def test_that_empty_sorting_field_results_in_sorting_by_activation_date(
+        self,
+    ) -> None:
+        request = self.controller.import_form_data(form=None)
+        self.assertEqual(request.get_sorting_category(), PlanSorting.by_activation)
+
+    def test_that_nonexisting_sorting_field_results_in_sorting_by_activation_date(
+        self,
+    ) -> None:
+        request = self.controller.import_form_data(
+            form=make_fake_form(sorting_category="somethingjsbjbsd")
+        )
+        self.assertEqual(request.get_sorting_category(), PlanSorting.by_activation)
+
+    def test_that_company_name_in_sorting_field_results_in_sorting_by_company_name(
+        self,
+    ) -> None:
+        request = self.controller.import_form_data(
+            form=make_fake_form(sorting_category="company_name")
+        )
+        self.assertEqual(request.get_sorting_category(), PlanSorting.by_company_name)
+
+    def test_that_price_in_sorting_field_results_in_sorting_by_price(
+        self,
+    ) -> None:
+        request = self.controller.import_form_data(
+            form=make_fake_form(sorting_category="price")
+        )
+        self.assertEqual(request.get_sorting_category(), PlanSorting.by_price)
+
 
 def make_fake_form(
-    query: Optional[str] = None, filter_category: Optional[str] = None
+    query: Optional[str] = None,
+    filter_category: Optional[str] = None,
+    sorting_category: Optional[str] = None,
 ) -> FakeQueryPlansForm:
     return FakeQueryPlansForm(
-        query=query or "", products_filter=filter_category or "Produktname"
+        query=query or "",
+        products_filter=filter_category or "Produktname",
+        sorting_category=sorting_category or "activation",
     )
 
 
@@ -71,9 +106,13 @@ def make_fake_form(
 class FakeQueryPlansForm:
     query: str
     products_filter: str
+    sorting_category: str
 
     def get_query_string(self) -> str:
         return self.query
 
     def get_category_string(self) -> str:
         return self.products_filter
+
+    def get_radio_string(self) -> str:
+        return self.sorting_category

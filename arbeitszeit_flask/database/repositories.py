@@ -1214,7 +1214,7 @@ class AccountantRepository:
             .first()
         )
 
-    def _get_or_create_user(self, email: str, password: str) -> None:
+    def _get_or_create_user(self, email: str, password: str) -> models.User:
         return self.db.session.query(models.User).filter(
             and_(models.User.email == email, models.User.accountant == None)
         ).first() or models.User(

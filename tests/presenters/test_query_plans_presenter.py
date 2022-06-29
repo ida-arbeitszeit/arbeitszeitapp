@@ -1,3 +1,4 @@
+from datetime import datetime
 from decimal import Decimal
 from typing import List
 from unittest import TestCase
@@ -142,6 +143,7 @@ class QueryPlansPresenterTests(TestCase):
             is_public_service=False,
             is_available=True,
             is_cooperating=is_cooperating,
+            activation_date=datetime.min,
         )
 
     def _get_response(self, queried_plans: List[QueriedPlan]) -> PlanQueryResponse:
