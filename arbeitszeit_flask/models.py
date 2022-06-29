@@ -15,6 +15,12 @@ def generate_uuid() -> str:
     return str(uuid.uuid4())
 
 
+class User(UserMixin, db.Model):
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String(100), nullable=False)
+
+
 class SocialAccounting(UserMixin, db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
 
@@ -33,14 +39,14 @@ jobs = db.Table(
 
 class Member(UserMixin, db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
-    email = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.ForeignKey("user.id"), nullable=False)
     name = db.Column(db.String(1000), nullable=False)
     registered_on = db.Column(db.DateTime, nullable=False)
     confirmed_on = db.Column(db.DateTime, nullable=True)
 
     account = db.relationship("Account", uselist=False, lazy=True, backref="member")
     purchases = db.relationship("Purchase", lazy="dynamic")
+    user = db.relationship("User", lazy=True, uselist=False, backref="member")
 
     workplaces = db.relationship(
         "Company",
@@ -52,12 +58,12 @@ class Member(UserMixin, db.Model):
 
 class Company(UserMixin, db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
-    email = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.ForeignKey("user.id"), nullable=False)
     name = db.Column(db.String(1000), nullable=False)
     registered_on = db.Column(db.DateTime, nullable=False)
     confirmed_on = db.Column(db.DateTime, nullable=True)
 
+    user = db.relationship("User", lazy=True, uselist=False, backref="company")
     plans = db.relationship("Plan", lazy="dynamic", backref="company")
     accounts = db.relationship("Account", lazy="dynamic", backref="company")
     purchases = db.relationship("Purchase", lazy="dynamic")
@@ -72,9 +78,10 @@ class Company(UserMixin, db.Model):
 
 class Accountant(UserMixin, db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
-    email = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.ForeignKey("user.id"), nullable=False)
     name = db.Column(db.String(1000), nullable=False)
+
+    user = db.relationship("User", lazy=True, uselist=False, backref="accountant")
 
 
 class PlanDraft(UserMixin, db.Model):

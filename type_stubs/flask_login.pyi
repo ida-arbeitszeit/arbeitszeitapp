@@ -11,9 +11,12 @@ def logout_user() -> None:
 
 def login_required(callable: T) -> T: ...
 
+class User:
+    email: str
+
 class CurrentUser:
     id: str
-    email: str
+    user: User
     is_authenticated: bool
     confirmed_on: Optional[datetime]
     name: str
