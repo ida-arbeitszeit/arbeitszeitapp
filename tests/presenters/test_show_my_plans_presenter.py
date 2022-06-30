@@ -4,8 +4,10 @@ from unittest import TestCase
 
 from arbeitszeit.entities import Plan
 from arbeitszeit.use_cases.show_my_plans import PlanInfo, ShowMyPlansResponse
+from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from tests.data_generators import CooperationGenerator, PlanGenerator
+from tests.datetime_service import FakeDatetimeService
 from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
@@ -22,6 +24,8 @@ class ShowMyPlansPresenterTests(TestCase):
         self.presenter = self.injector.get(ShowMyPlansPresenter)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.coop_generator = self.injector.get(CooperationGenerator)
+        self.datetime_service = self.injector.get(FakeDatetimeService)
+        self.update_plans_use_case = self.injector.get(UpdatePlansAndPayout)
 
     def test_show_correct_notification_when_user_has_no_plans(self):
         presentation = self.presenter.present(
@@ -80,11 +84,11 @@ class ShowMyPlansPresenterTests(TestCase):
         )
 
     def test_presenter_shows_correct_info_of_one_single_plan_that_is_cooperating(self):
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
         coop = self.coop_generator.create_cooperation()
         plan = self.plan_generator.create_plan(
-            activation_date=datetime.min, cooperation=coop, is_available=True
+            activation_date=datetime(2000, 1, 1), cooperation=coop, is_available=True
         )
-
         RESPONSE_WITH_COOPERATING_PLAN = self.response_with_one_active_plan(plan)
         presentation = self.presenter.present(RESPONSE_WITH_COOPERATING_PLAN)
         self.assertEqual(
@@ -114,7 +118,7 @@ class ShowMyPlansPresenterTests(TestCase):
             row1.hide_plan_url, self.hide_plan_url_index.get_hide_plan_url(plan.id)
         )
 
-    def test_presenter_shows_correct_info_of_one_single_non_active_plan(self):
+    def test_presenter_shows_correct_info_of_one_single_non_active_plan(self) -> None:
         plan = self.plan_generator.create_plan(activation_date=None)
         RESPONSE_WITH_ONE_NON_ACTIVE_PLAN = self.response_with_one_non_active_plan(plan)
         presentation = self.presenter.present(RESPONSE_WITH_ONE_NON_ACTIVE_PLAN)
@@ -133,6 +137,15 @@ class ShowMyPlansPresenterTests(TestCase):
             format_price(expected_plan.price_per_unit),
         )
         self.assertEqual(row1.type_of_plan, self.translator.gettext("Productive"))
+
+    def test_that_relative_expiration_is_calculated_correctly(self) -> None:
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        plan = self._create_active_plan(timeframe=5)
+        view_model = self.presenter.present(self.response_with_one_active_plan(plan))
+        self.assertEqual(
+            view_model.active_plans.rows[0].expiration_relative,
+            "5",
+        )
 
     def _convert_into_plan_info(self, plan: Plan) -> PlanInfo:
         return PlanInfo(
@@ -182,6 +195,14 @@ class ShowMyPlansPresenterTests(TestCase):
             active_plans=[],
             expired_plans=[],
         )
+
+    def _create_active_plan(self, timeframe: int = 1) -> Plan:
+        plan = self.plan_generator.create_plan(
+            activation_date=self.datetime_service.now(),
+            timeframe=timeframe,
+        )
+        self.update_plans_use_case()
+        return plan
 
 
 def format_price(price_per_unit: Decimal) -> str:
