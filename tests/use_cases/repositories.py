@@ -38,11 +38,11 @@ class PurchaseRepository(interfaces.PurchaseRepository):
     def __init__(self):
         self.purchases = []
 
-    def create_purchase(
+    def create_purchase_by_company(
         self,
         purchase_date: datetime,
-        plan: Plan,
-        buyer: Union[Member, Company],
+        plan: UUID,
+        buyer: UUID,
         price_per_unit: Decimal,
         amount: int,
         purpose: PurposesOfPurchases,
@@ -51,9 +51,30 @@ class PurchaseRepository(interfaces.PurchaseRepository):
             purchase_date=purchase_date,
             plan=plan,
             buyer=buyer,
+            is_buyer_a_member=False,
             price_per_unit=price_per_unit,
             amount=amount,
             purpose=purpose,
+        )
+        self.purchases.append(purchase)
+        return purchase
+
+    def create_purchase_by_member(
+        self,
+        purchase_date: datetime,
+        plan: UUID,
+        buyer: UUID,
+        price_per_unit: Decimal,
+        amount: int,
+    ) -> Purchase:
+        purchase = Purchase(
+            purchase_date=purchase_date,
+            plan=plan,
+            buyer=buyer,
+            is_buyer_a_member=True,
+            price_per_unit=price_per_unit,
+            amount=amount,
+            purpose=PurposesOfPurchases.consumption,
         )
         self.purchases.append(purchase)
         return purchase
@@ -65,7 +86,7 @@ class PurchaseRepository(interfaces.PurchaseRepository):
         )
 
         for purchase in self.purchases:
-            if purchase.buyer is user:
+            if purchase.buyer is user.id:
                 yield purchase
 
 
@@ -411,9 +432,6 @@ class PlanRepository(interfaces.PlanRepository):
     def set_expiration_date(self, plan: Plan, expiration_date: datetime) -> None:
         plan.expiration_date = expiration_date
 
-    def set_expiration_relative(self, plan: Plan, days: int) -> None:
-        plan.expiration_relative = days
-
     def set_active_days(self, plan: Plan, full_active_days: int) -> None:
         plan.active_days = full_active_days
 
@@ -561,7 +579,6 @@ class PlanRepository(interfaces.PlanRepository):
             approval_date=None,
             approval_reason=None,
             expired=False,
-            expiration_relative=None,
             expiration_date=None,
             active_days=None,
             payout_count=0,
@@ -585,6 +602,16 @@ class PlanRepository(interfaces.PlanRepository):
 
     def toggle_product_availability(self, plan: Plan) -> None:
         plan.is_available = True if (plan.is_available == False) else False
+
+    def get_plan_name_and_description(
+        self, id: UUID
+    ) -> interfaces.PlanRepository.NameAndDescription:
+        plan = self.plans.get(id)
+        assert plan
+        name_and_description = interfaces.PlanRepository.NameAndDescription(
+            name=plan.prd_name, description=plan.description
+        )
+        return name_and_description
 
 
 @singleton
