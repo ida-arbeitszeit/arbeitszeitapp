@@ -6,10 +6,7 @@ class AuthenticatedMemberTests(ViewTestCase):
         super().setUp()
         self.url = "/member/query_plans"
         self.company_url = "/company/query_plans"
-        self.default_data = dict(
-            select="Produktname",
-            search="",
-        )
+        self.default_data = dict(select="Produktname", search="", radio="activation")
         self.member, _, self.email = self.login_member()
         self.member = self.confirm_member(member=self.member, email=self.email)
 
@@ -17,13 +14,18 @@ class AuthenticatedMemberTests(ViewTestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
 
-    def test_can_posting_empty_search_string_is_valid(self):
+    def test_posting_empty_search_string_is_valid(self):
         self.default_data["search"] = ""
         response = self.client.post(self.url, data=self.default_data)
         self.assertEqual(response.status_code, 200)
 
     def test_posting_query_without_query_string_is_invalid(self):
         self.default_data.pop("search")
+        response = self.client.post(self.url, data=self.default_data)
+        self.assertEqual(response.status_code, 400)
+
+    def test_posting_query_without_sorting_category_is_invalid(self):
+        self.default_data.pop("radio")
         response = self.client.post(self.url, data=self.default_data)
         self.assertEqual(response.status_code, 400)
 

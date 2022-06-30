@@ -7,8 +7,6 @@ from enum import Enum
 from typing import List, Optional, Union
 from uuid import UUID
 
-from arbeitszeit.user_action import UserAction
-
 
 @dataclass
 class SocialAccounting:
@@ -206,20 +204,9 @@ class Transaction:
 
 @dataclass
 class CompanyWorkInvite:
+    id: UUID
     company: Company
     member: Member
-
-
-@dataclass
-class Message:
-    id: UUID
-    sender: Union[Member, Company, SocialAccounting]
-    addressee: Union[Member, Company]
-    title: str
-    content: str
-    sender_remarks: Optional[str]
-    user_action: Optional[UserAction]
-    is_read: bool
 
 
 @dataclass

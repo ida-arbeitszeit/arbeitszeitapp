@@ -11,7 +11,7 @@ from .malformed_input_data import MalformedInputData
 from .notification import Notifier
 from .session import Session
 from .translator import Translator
-from .url_index import ListMessagesUrlIndex
+from .url_index import MemberUrlIndex
 
 
 class AnswerCompanyWorkInviteForm(Protocol):
@@ -42,8 +42,8 @@ class AnswerCompanyWorkInvitePresenter:
         redirect_url: str
 
     user_notifier: Notifier
-    url_index: ListMessagesUrlIndex
     translator: Translator
+    url_index: MemberUrlIndex
 
     def present(self, response: AnswerCompanyWorkInviteResponse) -> ViewModel:
         if response.is_success:
@@ -63,4 +63,4 @@ class AnswerCompanyWorkInvitePresenter:
             self.user_notifier.display_warning(
                 self.translator.gettext("Accepting or rejecting is not possible.")
             )
-        return self.ViewModel(redirect_url=self.url_index.get_list_messages_url())
+        return self.ViewModel(redirect_url=self.url_index.get_member_dashboard_url())

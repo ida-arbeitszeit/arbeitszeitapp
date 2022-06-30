@@ -33,7 +33,19 @@
           {% endif %}
         </div>
       </div>
-      <div class="column"></div>
+      <div class="column">
+        {% if view_model.show_invites %}
+        <div class="box">
+          <ul>
+            {% for invite in view_model.invites %}
+            <li>
+              <p><a href="{{ invite.invite_details_url }}">{{ invite.invite_message }}</a></p>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+      </div>
     </div>
 
 
@@ -62,24 +74,6 @@
           </h1>
         </div>
       </a>
-    </div>
-    <div class="tile is-ancestor">
-      <a class="tile is-parent" href="{{ url_for('main_member.list_messages') }}">
-        <div class="tile is-child box has-background-primary-light">
-          <h1
-            class="title is-5 {% if message_indicator is defined %}{% if message_indicator.show_unread_messages_indicator %}has-text-danger{% endif %}{% endif %}">
-            <span class="icon"><i class="fa-solid fa-envelope"></i></span>
-            {{ gettext("Messages") }}
-          </h1>
-          <div class="subtitle is-6">{% if message_indicator is defined %}{% if
-            message_indicator.show_unread_messages_indicator %}{{ gettext("You have new messages") }}{%
-            else %}{{ gettext("No new messages") }}{% endif %}{%
-            endif %}
-          </div>
-        </div>
-      </a>
-      <div class="tile is-parent"></div>
-      <div class="tile is-parent"></div>
     </div>
     <div class="has-text-centered py-5">
       <h1 class="title is-3">{{ gettext("Public accounting") }}</h1>
