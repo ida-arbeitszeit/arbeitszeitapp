@@ -243,8 +243,8 @@ class PayConsumerProductTests(TestCase):
         )
         assert purchase_added.amount == pieces
         assert purchase_added.purpose == PurposesOfPurchases.consumption
-        assert purchase_added.buyer == self.buyer
-        assert purchase_added.plan == plan
+        assert purchase_added.buyer == self.buyer.id
+        assert purchase_added.plan == plan.id
 
     def test_correct_purchase_is_added_when_plan_is_public_service(self):
         plan = self.plan_generator.create_plan(
@@ -256,7 +256,7 @@ class PayConsumerProductTests(TestCase):
         assert len(self.purchase_repository.purchases) == 1
         purchase_added = self.purchase_repository.purchases[0]
         assert purchase_added.price_per_unit == 0
-        assert purchase_added.plan == plan
+        assert purchase_added.plan == plan.id
 
     def make_request(
         self,
