@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterable, List, Optional, Union
+from typing import Iterable, List, Optional
 from uuid import UUID, uuid4
 
 from injector import inject
