@@ -515,7 +515,6 @@ class PlanRepository(repositories.PlanRepository):
             approval_reason=plan.approval_reason,
             is_active=plan.is_active,
             expired=plan.expired,
-            expiration_relative=plan.expiration_relative,
             expiration_date=plan.expiration_date,
             activation_date=plan.activation_date,
             active_days=plan.active_days,
@@ -597,12 +596,6 @@ class PlanRepository(repositories.PlanRepository):
 
         plan_orm = self.object_to_orm(plan)
         plan_orm.expiration_date = expiration_date
-
-    def set_expiration_relative(self, plan: entities.Plan, days: int) -> None:
-        plan.expiration_relative = days
-
-        plan_orm = self.object_to_orm(plan)
-        plan_orm.expiration_relative = days
 
     def set_active_days(self, plan: entities.Plan, full_active_days: int) -> None:
         plan.active_days = full_active_days

@@ -350,12 +350,14 @@ class PresenterTestsInjector(Module):
         renew_plan_url_index: RenewPlanUrlIndex,
         hide_plan_url_index: HidePlanUrlIndex,
         translator: FakeTranslator,
+        datetime_serivce: FakeDatetimeService,
     ) -> ShowMyPlansPresenter:
         return ShowMyPlansPresenter(
             url_index=plan_url_index,
             renew_plan_url_index=renew_plan_url_index,
             hide_plan_url_index=hide_plan_url_index,
             translator=translator,
+            datetime_service=datetime_serivce,
         )
 
     @provider

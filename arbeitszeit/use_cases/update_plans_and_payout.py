@@ -42,12 +42,10 @@ class UpdatePlansAndPayout:
             expiration_time = plan.activation_date + datetime.timedelta(
                 days=int(plan.timeframe)
             )
-            days_until_exp = (expiration_time - self.datetime_service.now()).days
 
             self.plan_repository.set_active_days(
                 plan, self._calculate_active_days(plan)
             )
-            self.plan_repository.set_expiration_relative(plan, days_until_exp)
             self.plan_repository.set_expiration_date(plan, expiration_time)
 
             assert plan.expiration_date

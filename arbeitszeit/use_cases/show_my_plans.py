@@ -24,7 +24,6 @@ class PlanInfo:
     plan_creation_date: Optional[datetime]
     activation_date: Optional[datetime]
     expiration_date: Optional[datetime]
-    expiration_relative: Optional[int]
     is_available: bool
     is_cooperating: bool
     cooperation: Optional[UUID]
@@ -64,7 +63,6 @@ class ShowMyPlansUseCase:
                 plan_creation_date=plan.plan_creation_date,
                 activation_date=plan.activation_date,
                 expiration_date=plan.expiration_date,
-                expiration_relative=plan.expiration_relative,
                 is_available=plan.is_available,
                 is_cooperating=bool(plan.cooperation),
                 cooperation=plan.cooperation,
@@ -83,7 +81,6 @@ class ShowMyPlansUseCase:
                 plan_creation_date=plan.plan_creation_date,
                 activation_date=plan.activation_date,
                 expiration_date=plan.expiration_date,
-                expiration_relative=plan.expiration_relative,
                 is_available=plan.is_available,
                 is_cooperating=bool(plan.cooperation),
                 cooperation=plan.cooperation,
@@ -102,7 +99,6 @@ class ShowMyPlansUseCase:
                 plan_creation_date=plan.plan_creation_date,
                 activation_date=plan.activation_date,
                 expiration_date=plan.expiration_date,
-                expiration_relative=plan.expiration_relative,
                 is_available=plan.is_available,
                 is_cooperating=bool(plan.cooperation),
                 cooperation=plan.cooperation,
