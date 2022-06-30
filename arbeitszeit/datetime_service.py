@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import date, datetime
-from typing import Optional, Union
+from typing import Optional
 
 
 class DatetimeService(ABC):
@@ -15,7 +15,7 @@ class DatetimeService(ABC):
     @abstractmethod
     def format_datetime(
         self,
-        date: Union[str, datetime],
+        date: datetime,
         zone: Optional[str] = ...,
         fmt: Optional[str] = ...,
     ) -> str:
