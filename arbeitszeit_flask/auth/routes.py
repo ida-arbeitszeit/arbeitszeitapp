@@ -78,8 +78,8 @@ def confirm_email_member(token, member_repository: MemberRepository):
         return redirect_invalid_request()
     if email is None:
         return redirect_invalid_request()
-    member = database.get_user_by_mail(email)
-    if member.confirmed_on is not None:
+    member = database.get_member_by_mail(email)
+    if member_repository.is_member_confirmed(member.id):
         flash("Konto ist bereits bestätigt.")
     else:
         member_repository.confirm_member(

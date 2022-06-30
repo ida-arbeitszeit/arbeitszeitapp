@@ -196,6 +196,24 @@ class ConfirmMemberTests(FlaskTestCase):
         member = self.repository.get_by_id(member_id)
         self.assertEqual(member.confirmed_on, expected_timestamp)
 
+    def test_that_member_is_confirmed_after_confirmation_date_is_set(self) -> None:
+        member_id = self.create_member()
+        self.repository.confirm_member(member_id, confirmed_on=datetime(2000, 1, 2))
+        self.assertTrue(self.repository.is_member_confirmed(member_id))
+
+    def test_that_member_is_not_confirmed_before_setting_confirmation_date(
+        self,
+    ) -> None:
+        member_id = self.create_member()
+        self.assertFalse(self.repository.is_member_confirmed(member_id))
+
+    def test_that_is_member_confirmed_returns_false_for_non_existing_member(
+        self,
+    ) -> None:
+        self.assertFalse(
+            self.repository.is_member_confirmed(uuid4()),
+        )
+
     def test_that_confirmed_on_does_not_get_updated_for_other_user(self) -> None:
         other_member_id = self.member_generator.create_member(is_confirmed=None).id
         expected_timestamp = datetime(2000, 1, 2)

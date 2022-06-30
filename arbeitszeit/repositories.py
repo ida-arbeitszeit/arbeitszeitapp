@@ -240,6 +240,10 @@ class MemberRepository(ABC):
     def confirm_member(self, member: UUID, confirmed_on: datetime) -> None:
         pass
 
+    @abstractmethod
+    def is_member_confirmed(self, member: UUID) -> bool:
+        pass
+
 
 class AccountOwnerRepository(ABC):
     @abstractmethod
