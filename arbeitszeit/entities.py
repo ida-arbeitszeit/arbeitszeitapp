@@ -173,8 +173,9 @@ class PurposesOfPurchases(Enum):
 @dataclass
 class Purchase:
     purchase_date: datetime
-    plan: Plan
-    buyer: Union[Member, Company]
+    plan: UUID
+    buyer: UUID
+    is_buyer_a_member: bool
     price_per_unit: Decimal
     amount: int
     purpose: PurposesOfPurchases
