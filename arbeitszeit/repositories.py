@@ -236,6 +236,10 @@ class MemberRepository(ABC):
     def get_all_members(self) -> Iterator[Member]:
         pass
 
+    @abstractmethod
+    def confirm_member(self, member: UUID, confirmed_on: datetime) -> None:
+        pass
+
 
 class AccountOwnerRepository(ABC):
     @abstractmethod

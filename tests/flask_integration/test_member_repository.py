@@ -1,5 +1,5 @@
 from datetime import datetime
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from arbeitszeit.entities import AccountTypes
 from arbeitszeit_flask.database.repositories import AccountRepository, MemberRepository
@@ -176,3 +176,39 @@ class ValidateCredentialTests(FlaskTestCase):
                 email="test@test.test", password="test"
             )
         )
+
+
+class ConfirmMemberTests(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.repository = self.injector.get(MemberRepository)
+        self.account_repository = self.injector.get(AccountRepository)
+        self.account = self.account_repository.create_account(
+            account_type=AccountTypes.member
+        )
+        self.timestamp = datetime(2000, 1, 1)
+        self.member_generator = self.injector.get(MemberGenerator)
+
+    def test_that_confirmed_on_gets_updated_for_affected_user(self) -> None:
+        expected_timestamp = datetime(2000, 1, 2)
+        member_id = self.create_member()
+        self.repository.confirm_member(member_id, confirmed_on=expected_timestamp)
+        member = self.repository.get_by_id(member_id)
+        self.assertEqual(member.confirmed_on, expected_timestamp)
+
+    def test_that_confirmed_on_does_not_get_updated_for_other_user(self) -> None:
+        other_member_id = self.member_generator.create_member(is_confirmed=None).id
+        expected_timestamp = datetime(2000, 1, 2)
+        member_id = self.create_member()
+        self.repository.confirm_member(member_id, confirmed_on=expected_timestamp)
+        self.assertIsNone(self.repository.get_by_id(other_member_id).confirmed_on)
+
+    def create_member(self) -> UUID:
+        member = self.repository.create_member(
+            email="test email",
+            name="test name",
+            password="test password",
+            account=self.account,
+            registered_on=self.timestamp,
+        )
+        return member.id

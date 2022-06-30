@@ -273,6 +273,10 @@ class MemberRepository(interfaces.MemberRepository):
     def count_registered_members(self) -> int:
         return len(self.members)
 
+    def confirm_member(self, member: UUID, confirmed_on: datetime) -> None:
+        entity = self.members[member]
+        entity.confirmed_on = confirmed_on
+
     def get_by_id(self, id: UUID) -> Optional[Member]:
         return self.members.get(id)
 

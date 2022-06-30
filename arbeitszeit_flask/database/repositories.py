@@ -101,6 +101,11 @@ class MemberRepository(repositories.MemberRepository):
         assert member_orm
         return member_orm
 
+    def confirm_member(self, member: UUID, confirmed_on: datetime) -> None:
+        self.db.session.query(models.Member).filter(
+            models.Member.id == str(member)
+        ).update({models.Member.confirmed_on: confirmed_on})
+
     def object_from_orm(self, orm_object: Member) -> entities.Member:
         member_account = self.account_repository.object_from_orm(orm_object.account)
         return entities.Member(
