@@ -69,7 +69,7 @@ class MemberGenerator:
         name: str = "test member name",
         account: Optional[Account] = None,
         password: str = "password",
-        registered_on: datetime = None,
+        registered_on: Optional[datetime] = None,
     ) -> Member:
         if not email:
             email = self.email_generator.get_random_email()

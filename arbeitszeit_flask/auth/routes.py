@@ -8,6 +8,7 @@ from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit_flask import database
 from arbeitszeit_flask.database import commit_changes
+from arbeitszeit_flask.database.repositories import MemberRepository
 from arbeitszeit_flask.dependency_injection import (
     CompanyModule,
     MemberModule,
@@ -64,7 +65,8 @@ def signup_member(view: SignupMemberView):
 
 @auth.route("/member/confirm/<token>")
 @commit_changes
-def confirm_email_member(token):
+@with_injection()
+def confirm_email_member(token, member_repository: MemberRepository):
     def redirect_invalid_request():
         flash("Der Bestätigungslink ist ungültig oder ist abgelaufen.")
         return redirect(url_for("auth.unconfirmed_member"))
@@ -76,11 +78,14 @@ def confirm_email_member(token):
         return redirect_invalid_request()
     if email is None:
         return redirect_invalid_request()
-    member = database.get_user_by_mail(email)
-    if member.confirmed_on is not None:
+    member = database.get_member_by_mail(email)
+    if member_repository.is_member_confirmed(member.id):
         flash("Konto ist bereits bestätigt.")
     else:
-        member.confirmed_on = datetime.now()
+        member_repository.confirm_member(
+            member=member.id,
+            confirmed_on=datetime.now(),
+        )
         flash("Das Konto wurde bestätigt. Danke!")
     return redirect(url_for("auth.login_member"))
 
