@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from typing import Iterable, Iterator, List, Optional, Protocol, Union
@@ -38,14 +39,25 @@ class CompanyWorkerRepository(ABC):
 
 class PurchaseRepository(ABC):
     @abstractmethod
-    def create_purchase(
+    def create_purchase_by_company(
         self,
         purchase_date: datetime,
-        plan: Plan,
-        buyer: Union[Member, Company],
+        plan: UUID,
+        buyer: UUID,
         price_per_unit: Decimal,
         amount: int,
         purpose: PurposesOfPurchases,
+    ) -> Purchase:
+        pass
+
+    @abstractmethod
+    def create_purchase_by_member(
+        self,
+        purchase_date: datetime,
+        plan: UUID,
+        buyer: UUID,
+        price_per_unit: Decimal,
+        amount: int,
     ) -> Purchase:
         pass
 
@@ -69,10 +81,6 @@ class PlanRepository(ABC):
 
     @abstractmethod
     def set_plan_as_expired(self, plan: Plan) -> None:
-        pass
-
-    @abstractmethod
-    def set_expiration_relative(self, plan: Plan, days: int) -> None:
         pass
 
     @abstractmethod
@@ -165,6 +173,15 @@ class PlanRepository(ABC):
     def toggle_product_availability(self, plan: Plan) -> None:
         pass
 
+    @dataclass
+    class NameAndDescription:
+        name: str
+        description: str
+
+    @abstractmethod
+    def get_plan_name_and_description(self, id: UUID) -> NameAndDescription:
+        pass
+
 
 class TransactionRepository(ABC):
     @abstractmethod
@@ -234,6 +251,14 @@ class MemberRepository(ABC):
 
     @abstractmethod
     def get_all_members(self) -> Iterator[Member]:
+        pass
+
+    @abstractmethod
+    def confirm_member(self, member: UUID, confirmed_on: datetime) -> None:
+        pass
+
+    @abstractmethod
+    def is_member_confirmed(self, member: UUID) -> bool:
         pass
 
 

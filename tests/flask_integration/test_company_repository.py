@@ -2,12 +2,13 @@ from datetime import datetime
 from typing import List
 from uuid import uuid4
 
+from flask_sqlalchemy import SQLAlchemy
 from pytest import raises
 from sqlalchemy.exc import IntegrityError
 
 from arbeitszeit.entities import AccountTypes, Company
 from arbeitszeit_flask.database.repositories import AccountRepository, CompanyRepository
-from tests.data_generators import CompanyGenerator
+from tests.data_generators import CompanyGenerator, MemberGenerator
 
 from .dependency_injection import injection_test
 from .flask import FlaskTestCase
@@ -236,3 +237,33 @@ class ValidateCredentialsTest(FlaskTestCase):
             "wrong_password",
         )
         self.assertIsNone(company_id)
+
+
+class CreateCompanyTests(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.db = self.injector.get(SQLAlchemy)
+        self.repository = self.injector.get(CompanyRepository)
+        self.account_repository = self.injector.get(AccountRepository)
+        self.company_generator = self.injector.get(CompanyGenerator)
+        self.means_account = self.account_repository.create_account(AccountTypes.p)
+        self.labour_account = self.account_repository.create_account(AccountTypes.a)
+        self.resource_account = self.account_repository.create_account(AccountTypes.r)
+        self.products_account = self.account_repository.create_account(AccountTypes.prd)
+        self.timestamp = datetime(2000, 1, 1)
+        self.member_generator = self.injector.get(MemberGenerator)
+
+    def test(self) -> None:
+        email = "test@test.test"
+        self.member_generator.create_member(email=email)
+        self.repository.create_company(
+            email=email,
+            name="test name",
+            password="testpassword",
+            means_account=self.means_account,
+            labour_account=self.labour_account,
+            resource_account=self.resource_account,
+            products_account=self.products_account,
+            registered_on=self.timestamp,
+        )
+        self.db.session.flush()

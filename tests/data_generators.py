@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterable, List, Optional, Union
+from typing import Iterable, List, Optional
 from uuid import UUID, uuid4
 
 from injector import inject
@@ -69,7 +69,7 @@ class MemberGenerator:
         name: str = "test member name",
         account: Optional[Account] = None,
         password: str = "password",
-        registered_on: datetime = None,
+        registered_on: Optional[datetime] = None,
     ) -> Member:
         if not email:
             email = self.email_generator.get_random_email()
@@ -277,26 +277,40 @@ class PlanGenerator:
 @dataclass
 class PurchaseGenerator:
     plan_generator: PlanGenerator
-    member_generator: MemberGenerator
-    company_generator: CompanyGenerator
     datetime_service: FakeDatetimeService
     purchase_repository: PurchaseRepository
 
-    def create_purchase(
+    def create_purchase_by_company(
         self,
-        buyer: Union[Member, Company],
+        buyer: Company,
         purchase_date=None,
         amount=1,
     ) -> Purchase:
         if purchase_date is None:
             purchase_date = self.datetime_service.now_minus_one_day()
-        return self.purchase_repository.create_purchase(
+        return self.purchase_repository.create_purchase_by_company(
             purchase_date=purchase_date,
-            plan=self.plan_generator.create_plan(),
-            buyer=buyer,
+            plan=self.plan_generator.create_plan().id,
+            buyer=buyer.id,
             price_per_unit=Decimal(10),
             amount=amount,
-            purpose=PurposesOfPurchases.consumption,
+            purpose=PurposesOfPurchases.means_of_prod,
+        )
+
+    def create_purchase_by_member(
+        self,
+        buyer: Member,
+        purchase_date=None,
+        amount=1,
+    ) -> Purchase:
+        if purchase_date is None:
+            purchase_date = self.datetime_service.now_minus_one_day()
+        return self.purchase_repository.create_purchase_by_member(
+            purchase_date=purchase_date,
+            plan=self.plan_generator.create_plan().id,
+            buyer=buyer.id,
+            price_per_unit=Decimal(10),
+            amount=amount,
         )
 
 
