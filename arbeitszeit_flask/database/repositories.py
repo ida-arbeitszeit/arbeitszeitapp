@@ -308,12 +308,12 @@ class CompanyRepository(repositories.CompanyRepository):
                 return UUID(company.id)
         return None
 
-    def confirm(self, company: UUID, confirmed_on: datetime) -> None:
+    def confirm_company(self, company: UUID, confirmed_on: datetime) -> None:
         self.db.session.query(models.Company).filter(
             models.Company.id == str(company)
         ).update({models.Company.confirmed_on: confirmed_on})
 
-    def is_confirmed(self, company: UUID) -> bool:
+    def is_company_confirmed(self, company: UUID) -> bool:
         orm = (
             self.db.session.query(models.Company)
             .filter(models.Company.id == str(company))

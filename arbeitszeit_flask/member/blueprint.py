@@ -1,10 +1,12 @@
 from functools import wraps
 from typing import Any, Callable
+from uuid import UUID
 
 from flask import Blueprint, redirect, session, url_for
 from flask_login import current_user, login_required
 
 from arbeitszeit_flask import types
+from arbeitszeit_flask.database.repositories import MemberRepository
 from arbeitszeit_flask.dependency_injection import MemberModule, with_injection
 
 main_member = Blueprint(
@@ -30,8 +32,9 @@ class MemberRoute:
         return self._apply_decorators(_wrapper)
 
     def _apply_decorators(self, function):
+        injection = with_injection([MemberModule()])
         return main_member.route(self.route_string, methods=self.methods)(
-            with_injection([MemberModule()])(login_required(check_confirmed(function)))
+            injection(login_required(injection(check_confirmed)(function)))
         )
 
 
@@ -39,18 +42,11 @@ def user_is_member():
     return session.get("user_type") == "member"
 
 
-def check_confirmed(func):
+def check_confirmed(func, member_repository: MemberRepository):
     @wraps(func)
     def decorated_function(*args, **kwargs):
-        if not user_is_confirmed(current_user):
+        if not member_repository.is_member_confirmed(UUID(current_user.id)):
             return redirect(url_for("auth.unconfirmed_member"))
         return func(*args, **kwargs)
 
     return decorated_function
-
-
-def user_is_confirmed(current_user) -> bool:
-    try:
-        return current_user.confirmed_on is not None
-    except Exception:
-        return False

@@ -279,21 +279,21 @@ class ConfirmCompanyTests(FlaskTestCase):
 
     def test_that_newly_created_company_is_not_confirmed(self) -> None:
         company = self._create_company()
-        self.assertFalse(self.repository.is_confirmed(company.id))
+        self.assertFalse(self.repository.is_company_confirmed(company.id))
 
     def test_that_company_is_confirmed_after_confirm_was_called(self) -> None:
         company = self._create_company()
-        self.repository.confirm(company.id, datetime(2000, 1, 2))
-        self.assertTrue(self.repository.is_confirmed(company.id))
+        self.repository.confirm_company(company.id, datetime(2000, 1, 2))
+        self.assertTrue(self.repository.is_company_confirmed(company.id))
 
     def test_when_confirming_company_other_company_stays_unconfirmed(self) -> None:
         company = self._create_company()
         other_company = self._create_company("other@company.org")
-        self.repository.confirm(company.id, datetime(2000, 1, 2))
-        self.assertFalse(self.repository.is_confirmed(other_company.id))
+        self.repository.confirm_company(company.id, datetime(2000, 1, 2))
+        self.assertFalse(self.repository.is_company_confirmed(other_company.id))
 
     def test_non_existing_company_counts_as_unconfirmed(self) -> None:
-        self.assertFalse(self.repository.is_confirmed(company=uuid4()))
+        self.assertFalse(self.repository.is_company_confirmed(company=uuid4()))
 
     def _create_company(self, email: str = "test@test.test") -> Company:
         means_account = self.account_repository.create_account(AccountTypes.p)

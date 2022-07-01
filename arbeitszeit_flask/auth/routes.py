@@ -1,4 +1,5 @@
 from datetime import datetime
+from uuid import UUID
 
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
@@ -49,9 +50,10 @@ def set_language(language=None):
 
 # Member
 @auth.route("/member/unconfirmed")
+@with_injection()
 @login_required
-def unconfirmed_member():
-    if current_user.confirmed_on is not None:
+def unconfirmed_member(member_repository: MemberRepository):
+    if member_repository.is_member_confirmed(UUID(current_user.id)):
         return redirect(url_for("auth.start"))
     return render_template("auth/unconfirmed_member.html")
 
@@ -146,9 +148,10 @@ def resend_confirmation_member(use_case: ResendConfirmationMail):
 
 # Company
 @auth.route("/company/unconfirmed")
+@with_injection()
 @login_required
-def unconfirmed_company():
-    if current_user.confirmed_on is not None:
+def unconfirmed_company(company_repository: CompanyRepository):
+    if company_repository.is_company_confirmed(UUID(current_user.id)):
         return redirect(url_for("auth.start"))
     return render_template("auth/unconfirmed_company.html")
 
@@ -211,10 +214,10 @@ def confirm_email_company(token, company_repository: CompanyRepository):
     if email is None:
         return redirect_invalid_request()
     company = database.get_company_by_mail(email)
-    if company_repository.is_confirmed(company.id):
+    if company_repository.is_company_confirmed(company.id):
         flash("Konto ist bereits bestätigt.")
     else:
-        company_repository.confirm(company.id, datetime.now())
+        company_repository.confirm_company(company.id, datetime.now())
         flash("Das Konto wurde bestätigt. Danke!")
     return redirect(url_for("auth.login_company"))
 
