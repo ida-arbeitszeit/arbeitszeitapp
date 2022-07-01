@@ -128,12 +128,12 @@ def login_member(
 @login_required
 def resend_confirmation_member(use_case: ResendConfirmationMail):
     assert (
-        current_user.email
+        current_user.user.email
     )  # current user object must have email because it is logged in
 
     request = ResendConfirmationMailRequest(
         subject="Bitte bestätige dein Konto",
-        recipient=current_user.email,
+        recipient=current_user.user.email,
     )
     response = use_case(request)
     if response.is_rejected:
@@ -223,12 +223,12 @@ def confirm_email_company(token):
 @login_required
 def resend_confirmation_company(use_case: ResendConfirmationMail):
     assert (
-        current_user.email
+        current_user.user.email
     )  # current user object must have email because it is logged in
 
     request = ResendConfirmationMailRequest(
         subject="Bitte bestätige dein Konto",
-        recipient=current_user.email,
+        recipient=current_user.user.email,
     )
     response = use_case(request)
     if response.is_rejected:

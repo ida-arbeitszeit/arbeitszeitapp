@@ -1,9 +1,12 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import IntegrityError
+
 from arbeitszeit.entities import AccountTypes
 from arbeitszeit_flask.database.repositories import AccountRepository, MemberRepository
-from tests.data_generators import MemberGenerator
+from tests.data_generators import AccountantGenerator, CompanyGenerator, MemberGenerator
 
 from .dependency_injection import injection_test
 from .flask import FlaskTestCase
@@ -230,3 +233,48 @@ class ConfirmMemberTests(FlaskTestCase):
             registered_on=self.timestamp,
         )
         return member.id
+
+
+class CreateMemberTests(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.repository = self.injector.get(MemberRepository)
+        self.company_generator = self.injector.get(CompanyGenerator)
+        self.accountant_generator = self.injector.get(AccountantGenerator)
+        self.account_repository = self.injector.get(AccountRepository)
+        self.account = self.account_repository.create_account(
+            account_type=AccountTypes.member
+        )
+        self.timestamp = datetime(2000, 1, 1)
+        self.db = self.injector.get(SQLAlchemy)
+
+    def test_can_create_member_with_same_email_as_company(self) -> None:
+        email = "test@test.test"
+        self.company_generator.create_company(email=email)
+        self.repository.create_member(
+            email=email,
+            name="test name",
+            password="test password",
+            account=self.account,
+            registered_on=self.timestamp,
+        )
+        self.db.session.flush()
+
+    def test_cannot_create_member_with_same_email_twice(self) -> None:
+        email = "test@test.test"
+        self.repository.create_member(
+            email=email,
+            name="test name",
+            password="test password",
+            account=self.account,
+            registered_on=self.timestamp,
+        )
+        with self.assertRaises(IntegrityError):
+            self.repository.create_member(
+                email=email,
+                name="test name",
+                password="test password",
+                account=self.account,
+                registered_on=self.timestamp,
+            )
+            self.db.session.flush()

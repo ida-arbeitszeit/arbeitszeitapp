@@ -6,8 +6,8 @@ from typing import Any, Callable
 from injector import inject
 
 from arbeitszeit import entities
+from arbeitszeit_flask import models
 from arbeitszeit_flask.extensions import db
-from arbeitszeit_flask.models import Company, Member
 
 from .repositories import (
     AccountingRepository,
@@ -53,13 +53,17 @@ def commit_changes(function: Callable) -> Callable:
     return wrapper
 
 
-def get_member_by_mail(email) -> Member:
+def get_member_by_mail(email) -> models.Member:
     """returns first user in User, filtered by email."""
-    member = Member.query.filter_by(email=email).first()
-    return member
+    return (
+        models.Member.query.join(models.User).filter(models.User.email == email).first()
+    )
 
 
-def get_company_by_mail(email) -> Company:
+def get_company_by_mail(email) -> models.Company:
     """returns first company in Company, filtered by mail."""
-    company = Company.query.filter_by(email=email).first()
-    return company
+    return (
+        models.Company.query.join(models.User)
+        .filter(models.User.email == email)
+        .first()
+    )
