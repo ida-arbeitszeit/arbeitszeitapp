@@ -70,10 +70,7 @@ class MemberGenerator:
         account: Optional[Account] = None,
         password: str = "password",
         registered_on: Optional[datetime] = None,
-        is_confirmed: Optional[bool] = None,
     ) -> Member:
-        if is_confirmed is None:
-            is_confirmed = True
         if not email:
             email = self.email_generator.get_random_email()
         assert email is not None
