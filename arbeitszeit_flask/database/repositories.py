@@ -220,26 +220,6 @@ class CompanyRepository(repositories.CompanyRepository):
             confirmed_on=company_orm.confirmed_on,
         )
 
-    def _get_means_account(self, company: Company) -> Account:
-        account = company.accounts.filter_by(account_type="p").first()
-        assert account
-        return account
-
-    def _get_resources_account(self, company: Company) -> Account:
-        account = company.accounts.filter_by(account_type="r").first()
-        assert account
-        return account
-
-    def _get_labour_account(self, company: Company) -> Account:
-        account = company.accounts.filter_by(account_type="a").first()
-        assert account
-        return account
-
-    def _get_products_account(self, company: Company) -> Account:
-        account = company.accounts.filter_by(account_type="prd").first()
-        assert account
-        return account
-
     def get_company_orm_by_mail(self, email: str) -> Company:
         company_orm = (
             self.db.session.query(models.Company)
@@ -328,6 +308,22 @@ class CompanyRepository(repositories.CompanyRepository):
                 return UUID(company.id)
         return None
 
+    def confirm_company(self, company: UUID, confirmed_on: datetime) -> None:
+        self.db.session.query(models.Company).filter(
+            models.Company.id == str(company)
+        ).update({models.Company.confirmed_on: confirmed_on})
+
+    def is_company_confirmed(self, company: UUID) -> bool:
+        orm = (
+            self.db.session.query(models.Company)
+            .filter(models.Company.id == str(company))
+            .first()
+        )
+        if orm is None:
+            return False
+        else:
+            return orm.confirmed_on is not None
+
     def _get_or_create_user(self, email: str, password: str) -> models.User:
         return self.db.session.query(models.User).filter(
             and_(
@@ -338,6 +334,26 @@ class CompanyRepository(repositories.CompanyRepository):
             email=email,
             password=generate_password_hash(password, method="sha256"),
         )
+
+    def _get_means_account(self, company: Company) -> Account:
+        account = company.accounts.filter_by(account_type="p").first()
+        assert account
+        return account
+
+    def _get_resources_account(self, company: Company) -> Account:
+        account = company.accounts.filter_by(account_type="r").first()
+        assert account
+        return account
+
+    def _get_labour_account(self, company: Company) -> Account:
+        account = company.accounts.filter_by(account_type="a").first()
+        assert account
+        return account
+
+    def _get_products_account(self, company: Company) -> Account:
+        account = company.accounts.filter_by(account_type="prd").first()
+        assert account
+        return account
 
 
 @inject
