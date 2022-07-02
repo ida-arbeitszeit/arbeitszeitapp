@@ -10,7 +10,7 @@ from arbeitszeit.use_cases.register_member.member_registration_message_presenter
 from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitation_presenter import (
     AccountantInvitationPresenter,
 )
-from arbeitszeit_flask.contol_thresholds import ControlThresholdsFlask
+from arbeitszeit_flask.control_thresholds import ControlThresholdsFlask
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.url_index import CompanyUrlIndex, GeneralUrlIndex, MemberUrlIndex
 from arbeitszeit_web.answer_company_work_invite import AnswerCompanyWorkInvitePresenter
