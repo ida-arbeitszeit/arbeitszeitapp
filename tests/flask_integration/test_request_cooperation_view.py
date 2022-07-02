@@ -9,8 +9,7 @@ from .flask import ViewTestCase
 class LoggedInMemberTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.member, _, self.email = self.login_member()
-        self.member = self.confirm_member(member=self.member, email=self.email)
+        self.member = self.login_member(confirm_member=True)
         self.url = "/company/request_cooperation"
 
     def test_member_gets_redirected_when_trying_to_access_company_page(self) -> None:

@@ -33,13 +33,16 @@ class ViewTestCase(FlaskTestCase):
         member: Optional[Member] = None,
         password: Optional[str] = None,
         email: Optional[str] = None,
-    ) -> Tuple[Member, str, str]:
+        confirm_member: bool = True,
+    ) -> Member:
         if password is None:
             password = "password123"
         if email is None:
             email = self.email_generator.get_random_email()
         if member is None:
             member = self.member_generator.create_member(password=password, email=email)
+        if confirm_member:
+            self._confirm_member(email)
         response = self.client.post(
             "/member/login",
             data=dict(
@@ -49,24 +52,18 @@ class ViewTestCase(FlaskTestCase):
             follow_redirects=True,
         )
         assert response.status_code < 400
-        return member, password, email
+        return member
 
-    def confirm_member(
+    def _confirm_member(
         self,
-        member: Optional[Member] = None,
-        email: Optional[str] = None,
-    ) -> Member:
-        if email is None:
-            email = self.email_generator.get_random_email()
-        if member is None:
-            member = self.member_generator.create_member(email=email)
+        email: str,
+    ) -> None:
         token = FlaskTokenService().generate_token(email)
         response = self.client.get(
             f"/member/confirm/{token}",
             follow_redirects=True,
         )
         assert response.status_code < 400
-        return member
 
     def login_company(
         self,

@@ -6,8 +6,7 @@ from .flask import ViewTestCase
 class MemberViewTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.member, _, self.email = self.login_member()
-        self.member = self.confirm_member(member=self.member, email=self.email)
+        self.member = self.login_member(confirm_member=True)
 
     def test_get_200_when_accessing_view(self) -> None:
         plan_generator = self.injector.get(PlanGenerator)

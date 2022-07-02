@@ -7,8 +7,7 @@ class AuthenticatedMemberTests(ViewTestCase):
         self.url = "/member/query_plans"
         self.company_url = "/company/query_plans"
         self.default_data = dict(select="Produktname", search="", radio="activation")
-        self.member, _, self.email = self.login_member()
-        self.member = self.confirm_member(member=self.member, email=self.email)
+        self.member = self.login_member(confirm_member=True)
 
     def test_authenticated_users_get_200(self):
         response = self.client.get(self.url)
