@@ -8,12 +8,17 @@ from enum import Enum
 from flask_login import UserMixin
 
 from arbeitszeit import entities
-from arbeitszeit.user_action import UserActionType
 from arbeitszeit_flask.extensions import db
 
 
 def generate_uuid() -> str:
     return str(uuid.uuid4())
+
+
+class User(UserMixin, db.Model):
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String(100), nullable=False)
 
 
 class SocialAccounting(UserMixin, db.Model):
@@ -34,14 +39,14 @@ jobs = db.Table(
 
 class Member(UserMixin, db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
-    email = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.ForeignKey("user.id"), nullable=False)
     name = db.Column(db.String(1000), nullable=False)
     registered_on = db.Column(db.DateTime, nullable=False)
     confirmed_on = db.Column(db.DateTime, nullable=True)
 
     account = db.relationship("Account", uselist=False, lazy=True, backref="member")
     purchases = db.relationship("Purchase", lazy="dynamic")
+    user = db.relationship("User", lazy=True, uselist=False, backref="member")
 
     workplaces = db.relationship(
         "Company",
@@ -53,12 +58,12 @@ class Member(UserMixin, db.Model):
 
 class Company(UserMixin, db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
-    email = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.ForeignKey("user.id"), nullable=False)
     name = db.Column(db.String(1000), nullable=False)
     registered_on = db.Column(db.DateTime, nullable=False)
     confirmed_on = db.Column(db.DateTime, nullable=True)
 
+    user = db.relationship("User", lazy=True, uselist=False, backref="company")
     plans = db.relationship("Plan", lazy="dynamic", backref="company")
     accounts = db.relationship("Account", lazy="dynamic", backref="company")
     purchases = db.relationship("Purchase", lazy="dynamic")
@@ -73,9 +78,10 @@ class Company(UserMixin, db.Model):
 
 class Accountant(UserMixin, db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
-    email = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.ForeignKey("user.id"), nullable=False)
     name = db.Column(db.String(1000), nullable=False)
+
+    user = db.relationship("User", lazy=True, uselist=False, backref="accountant")
 
 
 class PlanDraft(UserMixin, db.Model):
@@ -112,7 +118,6 @@ class Plan(UserMixin, db.Model):
     activation_date = db.Column(db.DateTime, nullable=True)
     expired = db.Column(db.Boolean, nullable=False, default=False)
     expiration_date = db.Column(db.DateTime, nullable=True)
-    expiration_relative = db.Column(db.Integer, nullable=True)
     active_days = db.Column(db.Integer, nullable=True)
     payout_count = db.Column(db.Integer, nullable=False, default=0)
     is_available = db.Column(db.Boolean, nullable=False, default=True)
@@ -186,23 +191,6 @@ class CompanyWorkInvite(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
     company = db.Column(db.String, db.ForeignKey("company.id"), nullable=False)
     member = db.Column(db.String, db.ForeignKey("member.id"), nullable=False)
-
-
-class Message(db.Model):
-    id = db.Column(db.String, primary_key=True, default=generate_uuid)
-    sender = db.Column(db.String)
-    addressee = db.Column(db.String)
-    title = db.Column(db.String)
-    content = db.Column(db.String)
-    sender_remarks = db.Column(db.String, nullable=True)
-    is_read = db.Column(db.Boolean)
-    user_action = db.Column(db.String, db.ForeignKey("user_action.id"), nullable=True)
-
-
-class UserAction(db.Model):
-    id = db.Column(db.String, primary_key=True, default=generate_uuid)
-    reference = db.Column(db.String)
-    action_type = db.Column(db.Enum(UserActionType))
 
 
 class Cooperation(db.Model):

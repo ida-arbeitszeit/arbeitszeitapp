@@ -7,7 +7,7 @@ from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl
-from .url_index import ListMessageUrlIndexTestImpl
+from .url_index import MemberUrlIndex
 
 COMPANY_NAME = "test company"
 
@@ -39,7 +39,7 @@ class SuccessfulResponseTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.notifier = self.injector.get(NotifierTestImpl)
-        self.url_index = self.injector.get(ListMessageUrlIndexTestImpl)
+        self.url_index = self.injector.get(MemberUrlIndex)
         self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(AnswerCompanyWorkInvitePresenter)
 
@@ -83,10 +83,10 @@ class SuccessfulResponseTests(TestCase):
         view_model = self.presenter.present(get_response(is_accepted=False))
         self.assertIsNotNone(view_model.redirect_url)
 
-    def test_view_model_redirect_is_set_to_messages_index(self) -> None:
+    def test_view_model_redirect_is_set_to_member_dashboard(self) -> None:
         view_model = self.presenter.present(get_response(is_accepted=False))
         self.assertEqual(
-            view_model.redirect_url, self.url_index.get_list_messages_url()
+            view_model.redirect_url, self.url_index.get_member_dashboard_url()
         )
 
 
@@ -94,7 +94,7 @@ class UnsuccessfulResponseTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.notifier = self.injector.get(NotifierTestImpl)
-        self.url_index = self.injector.get(ListMessageUrlIndexTestImpl)
+        self.url_index = self.injector.get(MemberUrlIndex)
         self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(AnswerCompanyWorkInvitePresenter)
 

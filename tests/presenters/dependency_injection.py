@@ -2,6 +2,7 @@ from injector import Injector, Module, provider, singleton
 
 from arbeitszeit_web.answer_company_work_invite import AnswerCompanyWorkInvitePresenter
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
+from arbeitszeit_web.formatters.plan_summary_formatter import PlanSummaryFormatter
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
@@ -12,14 +13,9 @@ from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.hide_plan import HidePlanPresenter
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyPresenter
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
-from arbeitszeit_web.list_messages import ListMessagesPresenter
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.pay_consumer_product import PayConsumerProductPresenter
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
-from arbeitszeit_web.plan_summary_service import (
-    PlanSummaryService,
-    PlanSummaryServiceImpl,
-)
 from arbeitszeit_web.presenters.accountant_invitation_presenter import (
     AccountantInvitationEmailPresenter,
 )
@@ -66,11 +62,8 @@ from arbeitszeit_web.presenters.show_r_account_details_presenter import (
 )
 from arbeitszeit_web.query_companies import QueryCompaniesPresenter
 from arbeitszeit_web.query_plans import QueryPlansPresenter
-from arbeitszeit_web.read_message import ReadMessagePresenter
 from arbeitszeit_web.request_cooperation import RequestCooperationPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
-from arbeitszeit_web.url_index import ListMessagesUrlIndex
-from arbeitszeit_web.user_action import UserActionResolverImpl
 from tests.datetime_service import FakeDatetimeService
 from tests.dependency_injection import TestingModule
 from tests.email import (
@@ -101,9 +94,7 @@ from .url_index import (
     HidePlanUrlIndex,
     InviteUrlIndexImpl,
     LanguageChangerUrlIndexImpl,
-    ListMessageUrlIndexTestImpl,
     MemberUrlIndex,
-    MessageUrlIndex,
     PayMeansOfProductionUrlIndexImpl,
     PlanSummaryUrlIndexTestImpl,
     PlotsUrlIndexImpl,
@@ -111,7 +102,6 @@ from .url_index import (
     RequestCoopUrlIndexTestImpl,
     TogglePlanAvailabilityUrlIndex,
 )
-from .user_action_resolver import UserActionResolver
 
 
 class PresenterTestsInjector(Module):
@@ -129,22 +119,12 @@ class PresenterTestsInjector(Module):
     def provide_notifier(self, notifier: NotifierTestImpl) -> Notifier:
         return notifier
 
-    @provider
-    def provide_list_messages_url_index_test_impl(self) -> ListMessageUrlIndexTestImpl:
-        return ListMessageUrlIndexTestImpl()
-
     @singleton
     @provider
     def provide_toggle_plan_availability_url_index(
         self,
     ) -> TogglePlanAvailabilityUrlIndex:
         return TogglePlanAvailabilityUrlIndex()
-
-    @provider
-    def provide_list_messages_url_index(
-        self, url_index: ListMessageUrlIndexTestImpl
-    ) -> ListMessagesUrlIndex:
-        return url_index
 
     @singleton
     @provider
@@ -158,15 +138,10 @@ class PresenterTestsInjector(Module):
 
     @provider
     def provide_answer_company_work_invite_presenter(
-        self,
-        notifier: Notifier,
-        url_index: ListMessagesUrlIndex,
-        translator: FakeTranslator,
+        self, notifier: Notifier, translator: FakeTranslator, url_index: MemberUrlIndex
     ) -> AnswerCompanyWorkInvitePresenter:
         return AnswerCompanyWorkInvitePresenter(
-            user_notifier=notifier,
-            url_index=url_index,
-            translator=translator,
+            user_notifier=notifier, translator=translator, url_index=url_index
         )
 
     @provider
@@ -220,11 +195,13 @@ class PresenterTestsInjector(Module):
         translator: FakeTranslator,
         url_index: PlanSummaryUrlIndexTestImpl,
         datetime_service: FakeDatetimeService,
+        invite_url_index: InviteUrlIndexImpl,
     ) -> GetMemberDashboardPresenter:
         return GetMemberDashboardPresenter(
             translator=translator,
             url_index=url_index,
             datetime_service=datetime_service,
+            invite_url_index=invite_url_index,
         )
 
     @provider
@@ -239,16 +216,18 @@ class PresenterTestsInjector(Module):
         )
 
     @provider
-    def provide_plan_summary_service(
+    def provide_plan_summary_formatter(
         self,
         coop_url_index: CoopSummaryUrlIndexTestImpl,
         company_url_index: CompanySummaryUrlIndex,
         translator: FakeTranslator,
-    ) -> PlanSummaryService:
-        return PlanSummaryServiceImpl(
+        datetime_service: FakeDatetimeService,
+    ) -> PlanSummaryFormatter:
+        return PlanSummaryFormatter(
             coop_url_index=coop_url_index,
             company_url_index=company_url_index,
             translator=translator,
+            datetime_service=datetime_service,
         )
 
     @provider
@@ -258,7 +237,7 @@ class PresenterTestsInjector(Module):
         end_coop_url_index: EndCoopUrlIndexTestImpl,
         request_coop_url_index: RequestCoopUrlIndexTestImpl,
         translator: FakeTranslator,
-        plan_summary_service: PlanSummaryService,
+        plan_summary_service: PlanSummaryFormatter,
     ) -> GetPlanSummaryCompanySuccessPresenter:
         return GetPlanSummaryCompanySuccessPresenter(
             toggle_availability_url_index=toggle_availability_url_index,
@@ -298,12 +277,6 @@ class PresenterTestsInjector(Module):
         )
 
     @provider
-    def provide_list_messages_presenter(
-        self, messages_url_index: MessageUrlIndex
-    ) -> ListMessagesPresenter:
-        return ListMessagesPresenter(url_index=messages_url_index)
-
-    @provider
     def provide_pay_consumer_product_presenter(
         self, notifier: Notifier, translator: FakeTranslator
     ) -> PayConsumerProductPresenter:
@@ -323,19 +296,6 @@ class PresenterTestsInjector(Module):
             user_notifier=notifier,
             trans=translator,
             pay_means_of_production_url_index=pay_means_of_production_url_index,
-        )
-
-    @provider
-    def provide_plan_summary_service_impl(
-        self,
-        coop_url_index: CoopSummaryUrlIndexTestImpl,
-        company_url_index: CompanySummaryUrlIndex,
-        translator: FakeTranslator,
-    ) -> PlanSummaryServiceImpl:
-        return PlanSummaryServiceImpl(
-            coop_url_index=coop_url_index,
-            company_url_index=company_url_index,
-            translator=translator,
         )
 
     @provider
@@ -367,14 +327,6 @@ class PresenterTestsInjector(Module):
         )
 
     @provider
-    def provide_read_message_presenter(
-        self, user_action_resolver: UserActionResolver
-    ) -> ReadMessagePresenter:
-        return ReadMessagePresenter(
-            action_link_resolver=user_action_resolver,
-        )
-
-    @provider
     def provide_send_work_certificates_to_worker_presenter(
         self, notifier: Notifier, translator: FakeTranslator
     ) -> SendWorkCertificatesToWorkerPresenter:
@@ -401,12 +353,14 @@ class PresenterTestsInjector(Module):
         renew_plan_url_index: RenewPlanUrlIndex,
         hide_plan_url_index: HidePlanUrlIndex,
         translator: FakeTranslator,
+        datetime_serivce: FakeDatetimeService,
     ) -> ShowMyPlansPresenter:
         return ShowMyPlansPresenter(
             url_index=plan_url_index,
             renew_plan_url_index=renew_plan_url_index,
             hide_plan_url_index=hide_plan_url_index,
             translator=translator,
+            datetime_service=datetime_serivce,
         )
 
     @provider
@@ -453,19 +407,6 @@ class PresenterTestsInjector(Module):
     ) -> ShowAAccountDetailsPresenter:
         return ShowAAccountDetailsPresenter(
             trans=translator, url_index=url_index, datetime_service=datetime_service
-        )
-
-    @provider
-    def provide_user_action_resolver_impl(
-        self,
-        invite_url_index: InviteUrlIndexImpl,
-        coop_url_index: CoopSummaryUrlIndexTestImpl,
-        translator: FakeTranslator,
-    ) -> UserActionResolverImpl:
-        return UserActionResolverImpl(
-            invite_url_index=invite_url_index,
-            coop_url_index=coop_url_index,
-            translator=translator,
         )
 
     @provider

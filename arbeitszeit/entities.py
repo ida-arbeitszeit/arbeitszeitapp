@@ -7,8 +7,6 @@ from enum import Enum
 from typing import List, Optional, Union
 from uuid import UUID
 
-from arbeitszeit.user_action import UserAction
-
 
 @dataclass
 class SocialAccounting:
@@ -139,7 +137,6 @@ class Plan:
     is_active: bool
     expired: bool
     activation_date: Optional[datetime]
-    expiration_relative: Optional[int]
     expiration_date: Optional[datetime]
     active_days: Optional[int]
     payout_count: int
@@ -177,7 +174,7 @@ class Purchase:
     purchase_date: datetime
     plan: UUID
     buyer: UUID
-    is_member: bool
+    is_buyer_a_member: bool
     price_per_unit: Decimal
     amount: int
     purpose: PurposesOfPurchases
@@ -206,20 +203,9 @@ class Transaction:
 
 @dataclass
 class CompanyWorkInvite:
+    id: UUID
     company: Company
     member: Member
-
-
-@dataclass
-class Message:
-    id: UUID
-    sender: Union[Member, Company, SocialAccounting]
-    addressee: Union[Member, Company]
-    title: str
-    content: str
-    sender_remarks: Optional[str]
-    user_action: Optional[UserAction]
-    is_read: bool
 
 
 @dataclass

@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 from uuid import UUID
@@ -30,6 +31,9 @@ class PlanSummary:
     is_available: bool
     is_cooperating: bool
     cooperation: Optional[UUID]
+    creation_date: datetime
+    approval_date: Optional[datetime]
+    expiration_date: Optional[datetime]
 
 
 @inject
@@ -60,4 +64,7 @@ class PlanSummaryService:
             is_available=plan.is_available,
             is_cooperating=bool(plan.cooperation),
             cooperation=plan.cooperation or None,
+            creation_date=plan.plan_creation_date,
+            approval_date=plan.approval_date,
+            expiration_date=plan.expiration_date,
         )

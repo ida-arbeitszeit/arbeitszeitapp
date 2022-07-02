@@ -17,10 +17,10 @@ class PurchaseRepoTests(TestCase):
 
     def test_that_purchases_of_member_are_returned_in_correct_order(self) -> None:
         user = self.member_generator.create_member()
-        earlier_purchase = self.purchase_generator.create_purchase(
+        earlier_purchase = self.purchase_generator.create_purchase_by_member(
             buyer=user, purchase_date=datetime(2000, 1, 1)
         )
-        later_purchase = self.purchase_generator.create_purchase(
+        later_purchase = self.purchase_generator.create_purchase_by_member(
             buyer=user, purchase_date=datetime(2001, 2, 2)
         )
         result = list(self.repository.get_purchases_descending_by_date(user))
@@ -30,6 +30,6 @@ class PurchaseRepoTests(TestCase):
         self,
     ):
         company = self.company_generator.create_company()
-        purchase = self.purchase_generator.create_purchase(buyer=company)
+        purchase = self.purchase_generator.create_purchase_by_company(buyer=company)
         result = self.repository.get_purchases_of_company(company.id)
         self.assertIn(purchase, result)

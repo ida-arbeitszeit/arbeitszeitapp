@@ -22,7 +22,6 @@ from arbeitszeit.entities import (
     CompanyWorkInvite,
     Cooperation,
     Member,
-    Message,
     Plan,
     PlanDraft,
     ProductionCosts,
@@ -31,7 +30,6 @@ from arbeitszeit.entities import (
     SocialAccounting,
     Transaction,
 )
-from arbeitszeit.user_action import UserAction
 
 
 @singleton
@@ -40,12 +38,11 @@ class PurchaseRepository(interfaces.PurchaseRepository):
     def __init__(self):
         self.purchases = []
 
-    def create_purchase(
+    def create_purchase_by_company(
         self,
         purchase_date: datetime,
         plan: UUID,
         buyer: UUID,
-        is_member: bool,
         price_per_unit: Decimal,
         amount: int,
         purpose: PurposesOfPurchases,
@@ -54,10 +51,30 @@ class PurchaseRepository(interfaces.PurchaseRepository):
             purchase_date=purchase_date,
             plan=plan,
             buyer=buyer,
-            is_member=is_member,
+            is_buyer_a_member=False,
             price_per_unit=price_per_unit,
             amount=amount,
             purpose=purpose,
+        )
+        self.purchases.append(purchase)
+        return purchase
+
+    def create_purchase_by_member(
+        self,
+        purchase_date: datetime,
+        plan: UUID,
+        buyer: UUID,
+        price_per_unit: Decimal,
+        amount: int,
+    ) -> Purchase:
+        purchase = Purchase(
+            purchase_date=purchase_date,
+            plan=plan,
+            buyer=buyer,
+            is_buyer_a_member=True,
+            price_per_unit=price_per_unit,
+            amount=amount,
+            purpose=PurposesOfPurchases.consumption,
         )
         self.purchases.append(purchase)
         return purchase
@@ -282,6 +299,17 @@ class MemberRepository(interfaces.MemberRepository):
     def count_registered_members(self) -> int:
         return len(self.members)
 
+    def confirm_member(self, member: UUID, confirmed_on: datetime) -> None:
+        entity = self.members[member]
+        entity.confirmed_on = confirmed_on
+
+    def is_member_confirmed(self, member: UUID) -> bool:
+        entity = self.members.get(member)
+        if entity:
+            return entity.confirmed_on is not None
+        else:
+            return False
+
     def get_by_id(self, id: UUID) -> Optional[Member]:
         return self.members.get(id)
 
@@ -408,9 +436,6 @@ class PlanRepository(interfaces.PlanRepository):
 
     def set_expiration_date(self, plan: Plan, expiration_date: datetime) -> None:
         plan.expiration_date = expiration_date
-
-    def set_expiration_relative(self, plan: Plan, days: int) -> None:
-        plan.expiration_relative = days
 
     def set_active_days(self, plan: Plan, full_active_days: int) -> None:
         plan.active_days = full_active_days
@@ -559,7 +584,6 @@ class PlanRepository(interfaces.PlanRepository):
             approval_date=None,
             approval_reason=None,
             expired=False,
-            expiration_relative=None,
             expiration_date=None,
             active_days=None,
             payout_count=0,
@@ -584,10 +608,15 @@ class PlanRepository(interfaces.PlanRepository):
     def toggle_product_availability(self, plan: Plan) -> None:
         plan.is_available = True if (plan.is_available == False) else False
 
-    def get_plan_name_and_description(self, id: UUID) -> Tuple[str, str]:
+    def get_plan_name_and_description(
+        self, id: UUID
+    ) -> interfaces.PlanRepository.NameAndDescription:
         plan = self.plans.get(id)
         assert plan
-        return (plan.prd_name, plan.description)
+        name_and_description = interfaces.PlanRepository.NameAndDescription(
+            name=plan.prd_name, description=plan.description
+        )
+        return name_and_description
 
     def get_planner_id(self, plan_id: UUID) -> UUID:
         plan = self.plans.get(plan_id)
@@ -682,6 +711,14 @@ class WorkerInviteRepository(interfaces.WorkerInviteRepository):
             if invited_worker == member:
                 yield company
 
+    def get_invites_for_worker(self, member: UUID) -> Iterable[CompanyWorkInvite]:
+        for invite_id in self.invites:
+            if self.invites[invite_id][1] == member:
+                invite = self.get_by_id(invite_id)
+                if invite is None:
+                    continue
+                yield invite
+
     def get_by_id(self, id: UUID) -> Optional[CompanyWorkInvite]:
         try:
             company_id, worker_id = self.invites[id]
@@ -694,59 +731,13 @@ class WorkerInviteRepository(interfaces.WorkerInviteRepository):
         if member is None:
             return None
         return CompanyWorkInvite(
+            id=id,
             company=company,
             member=member,
         )
 
     def delete_invite(self, id: UUID) -> None:
         del self.invites[id]
-
-
-@singleton
-class MessageRepository(interfaces.MessageRepository):
-    @inject
-    def __init__(self) -> None:
-        self.messages: Dict[UUID, Message] = dict()
-
-    def create_message(
-        self,
-        sender: Union[Company, Member, SocialAccounting],
-        addressee: Union[Member, Company],
-        title: str,
-        content: str,
-        sender_remarks: Optional[str],
-        reference: Optional[UserAction],
-    ) -> Message:
-        message_id = uuid4()
-        message = Message(
-            sender=sender,
-            id=message_id,
-            addressee=addressee,
-            title=title,
-            content=content,
-            sender_remarks=sender_remarks,
-            user_action=reference,
-            is_read=False,
-        )
-        self.messages[message_id] = message
-        return message
-
-    def get_by_id(self, id: UUID) -> Optional[Message]:
-        return self.messages.get(id)
-
-    def mark_as_read(self, message: Message) -> None:
-        message.is_read = True
-
-    def has_unread_messages_for_user(self, user: UUID) -> bool:
-        return any(
-            message.addressee.id == user and not message.is_read
-            for message in self.messages.values()
-        )
-
-    def get_messages_to_user(self, user: UUID) -> Iterable[Message]:
-        for message in self.messages.values():
-            if message.addressee.id == user:
-                yield message
 
 
 @singleton

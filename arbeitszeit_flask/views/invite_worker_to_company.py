@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from flask import Response, flash
 
-from arbeitszeit.use_cases import InviteWorkerToCompany
+from arbeitszeit.use_cases import InviteWorkerToCompanyUseCase
 from arbeitszeit.use_cases.list_workers import ListWorkers
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.forms import InviteWorkerToCompanyForm
@@ -56,7 +56,7 @@ class InviteWorkerGetRequestHandler:
 
 @dataclass
 class InviteWorkerPostRequestHandler:
-    use_case: InviteWorkerToCompany
+    use_case: InviteWorkerToCompanyUseCase
     presenter: InviteWorkerToCompanyPresenter
     controller: InviteWorkerToCompanyController
     template_renderer: TemplateRenderer

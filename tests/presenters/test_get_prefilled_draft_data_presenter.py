@@ -1,3 +1,4 @@
+from datetime import datetime
 from decimal import Decimal
 from uuid import uuid4
 
@@ -26,6 +27,9 @@ PLAN_SUMMARY = PlanSummary(
     is_available=True,
     is_cooperating=False,
     cooperation=None,
+    creation_date=datetime.now(),
+    approval_date=None,
+    expiration_date=None,
 )
 
 TEST_DRAFT_SUMMARY_SUCCESS = DraftSummarySuccess(

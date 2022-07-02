@@ -6,7 +6,7 @@ from injector import inject
 
 from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Member, Plan, PurposesOfPurchases
+from arbeitszeit.entities import Member, Plan
 from arbeitszeit.price_calculator import calculate_price
 from arbeitszeit.repositories import (
     AccountRepository,
@@ -77,14 +77,12 @@ class ConsumerProductTransaction:
         price_per_unit = calculate_price(
             self.plan_cooperation_repository.get_cooperating_plans(self.plan.id)
         )
-        self.purchase_repository.create_purchase(
+        self.purchase_repository.create_purchase_by_member(
             purchase_date=self.datetime_service.now(),
             plan=self.plan.id,
             buyer=self.buyer.id,
-            is_member=isinstance(self.buyer, Member),
             price_per_unit=price_per_unit,
             amount=self.amount,
-            purpose=PurposesOfPurchases.consumption,
         )
 
     def exchange_currency(self) -> None:

@@ -6,7 +6,6 @@ from tests.data_generators import CompanyGenerator, MemberGenerator, PurchaseGen
 from tests.datetime_service import FakeDatetimeService
 
 from .dependency_injection import injection_test
-from .repositories import PurchaseRepository
 
 
 def purchase_in_results(
@@ -38,8 +37,12 @@ def test_that_correct_purchases_are_returned(
 ):
     member = member_generator.create_member()
     company = company_generator.create_company()
-    expected_purchase_member = purchase_generator.create_purchase(buyer=member)
-    expected_purchase_company = purchase_generator.create_purchase(buyer=company)
+    expected_purchase_member = purchase_generator.create_purchase_by_member(
+        buyer=member
+    )
+    expected_purchase_company = purchase_generator.create_purchase_by_company(
+        buyer=company
+    )
     results = list(query_purchases(member))
     assert len(results) == 1
     assert purchase_in_results(expected_purchase_member, results)
@@ -55,15 +58,14 @@ def test_that_purchases_are_returned_in_correct_order_when_member_queries(
     query_purchases: QueryPurchases,
     member_generator: MemberGenerator,
     purchase_generator: PurchaseGenerator,
-    repository: PurchaseRepository,
     datetime_service: FakeDatetimeService,
 ):
     member = member_generator.create_member()
     # Creating older purchase first to test correct ordering
-    purchase_generator.create_purchase(
+    purchase_generator.create_purchase_by_member(
         buyer=member, purchase_date=datetime_service.now_minus_two_days()
     )
-    expected_recent_purchase = purchase_generator.create_purchase(
+    expected_recent_purchase = purchase_generator.create_purchase_by_member(
         buyer=member, purchase_date=datetime_service.now_minus_one_day()
     )
     results = list(query_purchases(member))
@@ -77,15 +79,14 @@ def test_that_purchases_are_returned_in_correct_order_when_company_queries(
     query_purchases: QueryPurchases,
     purchase_generator: PurchaseGenerator,
     company_generator: CompanyGenerator,
-    repository: PurchaseRepository,
     datetime_service: FakeDatetimeService,
 ):
     company = company_generator.create_company()
     # Creating older purchase first to test correct ordering
-    purchase_generator.create_purchase(
+    purchase_generator.create_purchase_by_company(
         buyer=company, purchase_date=datetime_service.now_minus_two_days()
     )
-    expected_recent_purchase = purchase_generator.create_purchase(
+    expected_recent_purchase = purchase_generator.create_purchase_by_company(
         buyer=company, purchase_date=datetime_service.now_minus_one_day()
     )
     results = list(query_purchases(company))

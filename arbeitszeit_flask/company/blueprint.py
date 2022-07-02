@@ -1,10 +1,12 @@
 from functools import wraps
 from typing import Any, Callable
+from uuid import UUID
 
 from flask import Blueprint, redirect, session, url_for
 from flask_login import current_user, login_required
 
 from arbeitszeit_flask import types
+from arbeitszeit_flask.database.repositories import CompanyRepository
 from arbeitszeit_flask.dependency_injection import CompanyModule, with_injection
 
 main_company = Blueprint(
@@ -30,8 +32,9 @@ class CompanyRoute:
         return self._apply_decorators(_wrapper)
 
     def _apply_decorators(self, function):
+        injection = with_injection([CompanyModule()])
         return main_company.route(self.route_string, methods=self.methods)(
-            with_injection([CompanyModule()])(login_required(check_confirmed(function)))
+            injection(login_required(injection(check_confirmed)(function)))
         )
 
 
@@ -39,18 +42,11 @@ def user_is_company():
     return session.get("user_type") == "company"
 
 
-def check_confirmed(func):
+def check_confirmed(func, company_repository: CompanyRepository):
     @wraps(func)
     def decorated_function(*args, **kwargs):
-        if not user_is_confirmed(current_user):
+        if not company_repository.is_company_confirmed(UUID(current_user.id)):
             return redirect(url_for("auth.unconfirmed_company"))
         return func(*args, **kwargs)
 
     return decorated_function
-
-
-def user_is_confirmed(current_user) -> bool:
-    try:
-        return current_user.confirmed_on is not None
-    except Exception:
-        return False

@@ -4,12 +4,7 @@ from typing import Any, Dict, Optional, Protocol
 from flask import render_template
 from injector import inject
 
-from arbeitszeit.use_cases import CheckForUnreadMessages
 from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
-from arbeitszeit_web.check_for_unread_message import (
-    CheckForUnreadMessagesController,
-    CheckForUnreadMessagesPresenter,
-)
 from arbeitszeit_web.presenters.list_available_languages_presenter import (
     ListAvailableLanguagesPresenter,
 )
@@ -72,27 +67,11 @@ class AnonymousUserTemplateRenderer:
 @dataclass
 class UserTemplateRenderer:
     inner_renderer: TemplateRenderer
-    check_unread_messages_use_case: CheckForUnreadMessages
-    check_unread_messages_controller: CheckForUnreadMessagesController
-    check_unread_messages_presenter: CheckForUnreadMessagesPresenter
 
     def render_template(
         self, name: str, context: Optional[Dict[str, Any]] = None
     ) -> str:
-        enriched_context = self._add_message_indicator_to_context(context or dict())
-        return self.inner_renderer.render_template(name, enriched_context)
-
-    def _add_message_indicator_to_context(
-        self, context: Dict[str, Any]
-    ) -> Dict[str, Any]:
-        try:
-            request = self.check_unread_messages_controller.create_use_case_request()
-        except ValueError:
-            view_model = self.check_unread_messages_presenter.anonymous_view_model()
-        else:
-            response = self.check_unread_messages_use_case(request)
-            view_model = self.check_unread_messages_presenter.present(response)
-        return dict(context, message_indicator=view_model)
+        return self.inner_renderer.render_template(name, context)
 
 
 @dataclass

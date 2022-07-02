@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterable, Iterator, List, Optional, Protocol, Tuple, Union
+from typing import Iterable, Iterator, List, Optional, Protocol, Union
 from uuid import UUID
 
 from arbeitszeit.entities import (
@@ -12,7 +13,6 @@ from arbeitszeit.entities import (
     CompanyWorkInvite,
     Cooperation,
     Member,
-    Message,
     Plan,
     PlanDraft,
     ProductionCosts,
@@ -21,7 +21,6 @@ from arbeitszeit.entities import (
     SocialAccounting,
     Transaction,
 )
-from arbeitszeit.user_action import UserAction
 
 
 class CompanyWorkerRepository(ABC):
@@ -40,15 +39,25 @@ class CompanyWorkerRepository(ABC):
 
 class PurchaseRepository(ABC):
     @abstractmethod
-    def create_purchase(
+    def create_purchase_by_company(
         self,
         purchase_date: datetime,
         plan: UUID,
         buyer: UUID,
-        is_member: bool,
         price_per_unit: Decimal,
         amount: int,
         purpose: PurposesOfPurchases,
+    ) -> Purchase:
+        pass
+
+    @abstractmethod
+    def create_purchase_by_member(
+        self,
+        purchase_date: datetime,
+        plan: UUID,
+        buyer: UUID,
+        price_per_unit: Decimal,
+        amount: int,
     ) -> Purchase:
         pass
 
@@ -76,10 +85,6 @@ class PlanRepository(ABC):
 
     @abstractmethod
     def set_plan_as_expired(self, plan: Plan) -> None:
-        pass
-
-    @abstractmethod
-    def set_expiration_relative(self, plan: Plan, days: int) -> None:
         pass
 
     @abstractmethod
@@ -172,8 +177,13 @@ class PlanRepository(ABC):
     def toggle_product_availability(self, plan: Plan) -> None:
         pass
 
+    @dataclass
+    class NameAndDescription:
+        name: str
+        description: str
+
     @abstractmethod
-    def get_plan_name_and_description(self, id: UUID) -> Tuple[str, str]:
+    def get_plan_name_and_description(self, id: UUID) -> NameAndDescription:
         pass
 
     @abstractmethod
@@ -249,6 +259,14 @@ class MemberRepository(ABC):
 
     @abstractmethod
     def get_all_members(self) -> Iterator[Member]:
+        pass
+
+    @abstractmethod
+    def confirm_member(self, member: UUID, confirmed_on: datetime) -> None:
+        pass
+
+    @abstractmethod
+    def is_member_confirmed(self, member: UUID) -> bool:
         pass
 
 
@@ -347,41 +365,15 @@ class WorkerInviteRepository(ABC):
         pass
 
     @abstractmethod
+    def get_invites_for_worker(self, member: UUID) -> Iterable[CompanyWorkInvite]:
+        pass
+
+    @abstractmethod
     def get_by_id(self, id: UUID) -> Optional[CompanyWorkInvite]:
         pass
 
     @abstractmethod
     def delete_invite(self, id: UUID) -> None:
-        pass
-
-
-class MessageRepository(ABC):
-    @abstractmethod
-    def create_message(
-        self,
-        sender: Union[Member, Company, SocialAccounting],
-        addressee: Union[Member, Company],
-        title: str,
-        content: str,
-        sender_remarks: Optional[str],
-        reference: Optional[UserAction],
-    ) -> Message:
-        pass
-
-    @abstractmethod
-    def get_by_id(self, id: UUID) -> Optional[Message]:
-        pass
-
-    @abstractmethod
-    def mark_as_read(self, message: Message) -> None:
-        pass
-
-    @abstractmethod
-    def has_unread_messages_for_user(self, user: UUID) -> bool:
-        pass
-
-    @abstractmethod
-    def get_messages_to_user(self, user: UUID) -> Iterable[Message]:
         pass
 
 

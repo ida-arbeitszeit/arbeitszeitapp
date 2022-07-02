@@ -1,4 +1,5 @@
 from datetime import datetime
+from uuid import UUID
 
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
@@ -8,6 +9,7 @@ from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit_flask import database
 from arbeitszeit_flask.database import commit_changes
+from arbeitszeit_flask.database.repositories import CompanyRepository, MemberRepository
 from arbeitszeit_flask.dependency_injection import (
     CompanyModule,
     MemberModule,
@@ -48,9 +50,10 @@ def set_language(language=None):
 
 # Member
 @auth.route("/member/unconfirmed")
+@with_injection()
 @login_required
-def unconfirmed_member():
-    if current_user.confirmed_on is not None:
+def unconfirmed_member(member_repository: MemberRepository):
+    if member_repository.is_member_confirmed(UUID(current_user.id)):
         return redirect(url_for("auth.start"))
     return render_template("auth/unconfirmed_member.html")
 
@@ -64,7 +67,8 @@ def signup_member(view: SignupMemberView):
 
 @auth.route("/member/confirm/<token>")
 @commit_changes
-def confirm_email_member(token):
+@with_injection()
+def confirm_email_member(token, member_repository: MemberRepository):
     def redirect_invalid_request():
         flash("Der Bestätigungslink ist ungültig oder ist abgelaufen.")
         return redirect(url_for("auth.unconfirmed_member"))
@@ -76,11 +80,14 @@ def confirm_email_member(token):
         return redirect_invalid_request()
     if email is None:
         return redirect_invalid_request()
-    member = database.get_user_by_mail(email)
-    if member.confirmed_on is not None:
+    member = database.get_member_by_mail(email)
+    if member_repository.is_member_confirmed(member.id):
         flash("Konto ist bereits bestätigt.")
     else:
-        member.confirmed_on = datetime.now()
+        member_repository.confirm_member(
+            member=member.id,
+            confirmed_on=datetime.now(),
+        )
         flash("Das Konto wurde bestätigt. Danke!")
     return redirect(url_for("auth.login_member"))
 
@@ -123,12 +130,12 @@ def login_member(
 @login_required
 def resend_confirmation_member(use_case: ResendConfirmationMail):
     assert (
-        current_user.email
+        current_user.user.email
     )  # current user object must have email because it is logged in
 
     request = ResendConfirmationMailRequest(
         subject="Bitte bestätige dein Konto",
-        recipient=current_user.email,
+        recipient=current_user.user.email,
     )
     response = use_case(request)
     if response.is_rejected:
@@ -141,9 +148,10 @@ def resend_confirmation_member(use_case: ResendConfirmationMail):
 
 # Company
 @auth.route("/company/unconfirmed")
+@with_injection()
 @login_required
-def unconfirmed_company():
-    if current_user.confirmed_on is not None:
+def unconfirmed_company(company_repository: CompanyRepository):
+    if company_repository.is_company_confirmed(UUID(current_user.id)):
         return redirect(url_for("auth.start"))
     return render_template("auth/unconfirmed_company.html")
 
@@ -192,7 +200,8 @@ def signup_company(view: SignupCompanyView):
 
 @auth.route("/company/confirm/<token>")
 @commit_changes
-def confirm_email_company(token):
+@with_injection()
+def confirm_email_company(token, company_repository: CompanyRepository):
     def redirect_invalid_request():
         flash("Der Bestätigungslink ist ungültig oder ist abgelaufen.")
         return redirect(url_for("auth.unconfirmed_company"))
@@ -205,10 +214,10 @@ def confirm_email_company(token):
     if email is None:
         return redirect_invalid_request()
     company = database.get_company_by_mail(email)
-    if company.confirmed_on is not None:
+    if company_repository.is_company_confirmed(company.id):
         flash("Konto ist bereits bestätigt.")
     else:
-        company.confirmed_on = datetime.now()
+        company_repository.confirm_company(company.id, datetime.now())
         flash("Das Konto wurde bestätigt. Danke!")
     return redirect(url_for("auth.login_company"))
 
@@ -218,12 +227,12 @@ def confirm_email_company(token):
 @login_required
 def resend_confirmation_company(use_case: ResendConfirmationMail):
     assert (
-        current_user.email
+        current_user.user.email
     )  # current user object must have email because it is logged in
 
     request = ResendConfirmationMailRequest(
         subject="Bitte bestätige dein Konto",
-        recipient=current_user.email,
+        recipient=current_user.user.email,
     )
     response = use_case(request)
     if response.is_rejected:

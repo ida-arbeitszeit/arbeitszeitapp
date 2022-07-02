@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterable, List, Optional, Union
+from typing import Iterable, List, Optional
 from uuid import UUID, uuid4
 
 from injector import inject
@@ -19,7 +19,6 @@ from arbeitszeit.entities import (
     Company,
     Cooperation,
     Member,
-    Message,
     Plan,
     PlanDraft,
     ProductionCosts,
@@ -33,7 +32,6 @@ from arbeitszeit.repositories import (
     CompanyRepository,
     CooperationRepository,
     MemberRepository,
-    MessageRepository,
     PlanCooperationRepository,
     PlanDraftRepository,
     PlanRepository,
@@ -71,7 +69,7 @@ class MemberGenerator:
         name: str = "test member name",
         account: Optional[Account] = None,
         password: str = "password",
-        registered_on: datetime = None,
+        registered_on: Optional[datetime] = None,
     ) -> Member:
         if not email:
             email = self.email_generator.get_random_email()
@@ -282,11 +280,11 @@ class PurchaseGenerator:
     datetime_service: FakeDatetimeService
     purchase_repository: PurchaseRepository
 
-    def create_purchase(
+    def create_purchase_by_company(
         self,
-        buyer: Union[Member, Company],
-        purchase_date: datetime = None,
-        amount: int = 1,
+        buyer: Company,
+        purchase_date=None,
+        amount=1,
         price_per_unit: Decimal = None,
         plan: Plan = None,
     ) -> Purchase:
@@ -296,14 +294,35 @@ class PurchaseGenerator:
             price_per_unit = Decimal(10)
         if plan is None:
             plan = self.plan_generator.create_plan()
-        return self.purchase_repository.create_purchase(
+        return self.purchase_repository.create_purchase_by_company(
             purchase_date=purchase_date,
             plan=plan.id,
             buyer=buyer.id,
-            is_member=isinstance(buyer, Member),
             price_per_unit=price_per_unit,
             amount=amount,
-            purpose=PurposesOfPurchases.consumption,
+            purpose=PurposesOfPurchases.means_of_prod,
+        )
+
+    def create_purchase_by_member(
+        self,
+        buyer: Member,
+        purchase_date=None,
+        amount=1,
+        price_per_unit: Decimal = None,
+        plan: Plan = None,
+    ) -> Purchase:
+        if purchase_date is None:
+            purchase_date = self.datetime_service.now_minus_one_day()
+        if price_per_unit is None:
+            price_per_unit = Decimal(10)
+        if plan is None:
+            plan = self.plan_generator.create_plan()
+        return self.purchase_repository.create_purchase_by_member(
+            purchase_date=purchase_date,
+            plan=plan.id,
+            buyer=buyer.id,
+            price_per_unit=price_per_unit,
+            amount=amount,
         )
 
 
@@ -378,34 +397,6 @@ class CooperationGenerator:
                     plan.id, cooperation.id
                 )
         return cooperation
-
-
-@inject
-@dataclass
-class MessageGenerator:
-    message_repository: MessageRepository
-    company_generator: CompanyGenerator
-
-    def create_message(
-        self,
-        *,
-        sender: Union[None, SocialAccounting, Member, Company] = None,
-        addressee: Union[None, Member, Company],
-        title: str = "test title",
-        content: str = "test message content",
-    ) -> Message:
-        if addressee is None:
-            addressee = self.company_generator.create_company()
-        if sender is None:
-            sender = self.company_generator.create_company()
-        return self.message_repository.create_message(
-            sender=sender,
-            addressee=addressee,
-            title=title,
-            content=content,
-            sender_remarks=None,
-            reference=None,
-        )
 
 
 @inject

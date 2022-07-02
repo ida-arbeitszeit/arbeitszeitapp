@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import List, Optional, Protocol, Tuple
+from typing import List, Optional, Tuple
 
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.plan_summary import PlanSummary
+from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import CompanySummaryUrlIndex, CoopSummaryUrlIndex
-
-from .translator import Translator
 
 
 @dataclass
@@ -25,20 +25,19 @@ class PlanSummaryWeb:
     type_of_plan: Tuple[str, str]
     price_per_unit: Tuple[str, str, bool, Optional[str]]
     availability_string: Tuple[str, str]
-
-
-class PlanSummaryService(Protocol):
-    def get_plan_summary(self, plan_summary: PlanSummary) -> PlanSummaryWeb:
-        ...
+    creation_date: str
+    approval_date: str
+    expiration_date: str
 
 
 @dataclass
-class PlanSummaryServiceImpl:
+class PlanSummaryFormatter:
     coop_url_index: CoopSummaryUrlIndex
     company_url_index: CompanySummaryUrlIndex
     translator: Translator
+    datetime_service: DatetimeService
 
-    def get_plan_summary(self, plan_summary: PlanSummary) -> PlanSummaryWeb:
+    def format_plan_summary(self, plan_summary: PlanSummary) -> PlanSummaryWeb:
         return PlanSummaryWeb(
             plan_id=(self.translator.gettext("Plan ID"), str(plan_summary.plan_id)),
             activity_string=(
@@ -103,6 +102,25 @@ class PlanSummaryServiceImpl:
                 if plan_summary.is_available
                 else self.translator.gettext("No"),
             ),
+            creation_date=self.datetime_service.format_datetime(
+                date=plan_summary.creation_date,
+                zone="Europe/Berlin",
+                fmt="%d.%m.%Y %H:%M",
+            ),
+            approval_date=self.datetime_service.format_datetime(
+                date=plan_summary.approval_date,
+                zone="Europe/Berlin",
+                fmt="%d.%m.%Y %H:%M",
+            )
+            if plan_summary.approval_date
+            else "-",
+            expiration_date=self.datetime_service.format_datetime(
+                date=plan_summary.expiration_date,
+                zone="Europe/Berlin",
+                fmt="%d.%m.%Y %H:%M",
+            )
+            if plan_summary.expiration_date
+            else "-",
         )
 
     def _format_price(self, price_per_unit: Decimal) -> str:

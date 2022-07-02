@@ -3,6 +3,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
 
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansResponse
 from arbeitszeit_web.translator import Translator
 
@@ -76,6 +77,7 @@ class ShowMyPlansPresenter:
     renew_plan_url_index: RenewPlanUrlIndex
     hide_plan_url_index: HidePlanUrlIndex
     translator: Translator
+    datetime_service: DatetimeService
 
     def present(self, response: ShowMyPlansResponse) -> ShowMyPlansViewModel:
 
@@ -94,9 +96,9 @@ class ShowMyPlansPresenter:
                         price_per_unit=self.__format_price(plan.price_per_unit),
                         activation_date=self.__format_date(plan.activation_date),
                         expiration_date=self.__format_date(plan.expiration_date),
-                        expiration_relative=f"{plan.expiration_relative}"
-                        if plan.expiration_relative is not None
-                        else "–",
+                        expiration_relative=self._format_days_until_expiration(
+                            plan.expiration_date
+                        ),
                         is_available=plan.is_available,
                         is_cooperating=plan.is_cooperating,
                         is_public_service=plan.is_public_service,
@@ -136,6 +138,14 @@ class ShowMyPlansPresenter:
                 ],
             ),
         )
+
+    def _format_days_until_expiration(
+        self, expiration_datetime: Optional[datetime]
+    ) -> str:
+        if expiration_datetime is None:
+            return "-"
+        else:
+            return str((expiration_datetime - self.datetime_service.now()).days)
 
     def __get_type_of_plan(self, is_public_service: bool) -> str:
         return (

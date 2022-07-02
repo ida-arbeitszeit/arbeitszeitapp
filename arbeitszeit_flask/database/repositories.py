@@ -3,17 +3,16 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterable, Iterator, List, Optional, Tuple, Union
+from typing import Iterable, Iterator, List, Optional, Union
 from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
 from injector import inject
-from sqlalchemy import desc, func
+from sqlalchemy import and_, desc, func
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from arbeitszeit import entities, repositories
 from arbeitszeit.decimal import decimal_sum
-from arbeitszeit.user_action import UserAction
 from arbeitszeit_flask import models
 from arbeitszeit_flask.models import (
     Account,
@@ -22,7 +21,6 @@ from arbeitszeit_flask.models import (
     CompanyWorkInvite,
     Cooperation,
     Member,
-    Message,
     Plan,
     PlanDraft,
     Purchase,
@@ -68,10 +66,15 @@ class UserAddressBookImpl:
     db: SQLAlchemy
 
     def get_user_email_address(self, user: UUID) -> Optional[str]:
-        if member := self.db.session.query(Member).filter_by(id=str(user)).first():
-            return member.email
-        elif company := self.db.session.query(Company).filter_by(id=str(user)).first():
-            return company.email
+        user_orm = (
+            self.db.session.query(models.User)
+            .join(models.Member, isouter=True)
+            .join(models.Company, isouter=True)
+            .filter((models.Member.id == str(user)) | (models.Company.id == str(user)))
+            .first()
+        )
+        if user_orm:
+            return user_orm.email
         else:
             return None
 
@@ -91,17 +94,39 @@ class MemberRepository(repositories.MemberRepository):
     def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
         if (
             member := self.db.session.query(Member)
-            .filter(Member.email == email)
+            .join(models.User)
+            .filter(models.User.email == email)
             .first()
         ):
-            if check_password_hash(member.password, password):
+            if check_password_hash(member.user.password, password):
                 return UUID(member.id)
         return None
 
     def get_member_orm_by_mail(self, email: str) -> Member:
-        member_orm = Member.query.filter_by(email=email).first()
+        member_orm = (
+            self.db.session.query(models.Member)
+            .join(models.User)
+            .filter(models.User.email == email)
+            .first()
+        )
         assert member_orm
         return member_orm
+
+    def confirm_member(self, member: UUID, confirmed_on: datetime) -> None:
+        self.db.session.query(models.Member).filter(
+            models.Member.id == str(member)
+        ).update({models.Member.confirmed_on: confirmed_on})
+
+    def is_member_confirmed(self, member: UUID) -> bool:
+        orm = (
+            self.db.session.query(models.Member)
+            .filter(models.Member.id == str(member))
+            .first()
+        )
+        if orm:
+            return orm.confirmed_on is not None
+        else:
+            return False
 
     def object_from_orm(self, orm_object: Member) -> entities.Member:
         member_account = self.account_repository.object_from_orm(orm_object.account)
@@ -109,7 +134,7 @@ class MemberRepository(repositories.MemberRepository):
             id=UUID(orm_object.id),
             name=orm_object.name,
             account=member_account,
-            email=orm_object.email,
+            email=orm_object.user.email,
             registered_on=orm_object.registered_on,
             confirmed_on=orm_object.confirmed_on,
         )
@@ -126,11 +151,11 @@ class MemberRepository(repositories.MemberRepository):
         registered_on: datetime,
     ) -> entities.Member:
         orm_account = self.account_repository.object_to_orm(account)
+        user_orm = self._get_or_create_user(email, password)
         orm_member = Member(
             id=str(uuid4()),
-            email=email,
+            user=user_orm,
             name=name,
-            password=generate_password_hash(password, method="sha256"),
             account=orm_account,
             registered_on=registered_on,
             confirmed_on=None,
@@ -140,13 +165,29 @@ class MemberRepository(repositories.MemberRepository):
         return self.object_from_orm(orm_member)
 
     def has_member_with_email(self, email: str) -> bool:
-        return Member.query.filter_by(email=email).count()
+        return bool(
+            self.db.session.query(models.Member)
+            .join(models.User)
+            .filter(models.User.email == email)
+            .count()
+        )
 
     def count_registered_members(self) -> int:
         return int(self.db.session.query(func.count(Member.id)).one()[0])
 
     def get_all_members(self) -> Iterator[entities.Member]:
         return (self.object_from_orm(member) for member in Member.query.all())
+
+    def _get_or_create_user(self, email: str, password: str) -> models.User:
+        return self.db.session.query(models.User).filter(
+            and_(
+                models.User.email == email,
+                models.User.member == None,
+            )
+        ).first() or models.User(
+            email=email,
+            password=generate_password_hash(password, method="sha256"),
+        )
 
 
 @inject
@@ -161,7 +202,7 @@ class CompanyRepository(repositories.CompanyRepository):
     def object_from_orm(self, company_orm: Company) -> entities.Company:
         return entities.Company(
             id=UUID(company_orm.id),
-            email=company_orm.email,
+            email=company_orm.user.email,
             name=company_orm.name,
             means_account=self.account_repository.object_from_orm(
                 self._get_means_account(company_orm)
@@ -179,28 +220,13 @@ class CompanyRepository(repositories.CompanyRepository):
             confirmed_on=company_orm.confirmed_on,
         )
 
-    def _get_means_account(self, company: Company) -> Account:
-        account = company.accounts.filter_by(account_type="p").first()
-        assert account
-        return account
-
-    def _get_resources_account(self, company: Company) -> Account:
-        account = company.accounts.filter_by(account_type="r").first()
-        assert account
-        return account
-
-    def _get_labour_account(self, company: Company) -> Account:
-        account = company.accounts.filter_by(account_type="a").first()
-        assert account
-        return account
-
-    def _get_products_account(self, company: Company) -> Account:
-        account = company.accounts.filter_by(account_type="prd").first()
-        assert account
-        return account
-
     def get_company_orm_by_mail(self, email: str) -> Company:
-        company_orm = Company.query.filter_by(email=email).first()
+        company_orm = (
+            self.db.session.query(models.Company)
+            .join(models.User)
+            .filter(models.User.email == email)
+            .first()
+        )
         assert company_orm
         return company_orm
 
@@ -222,13 +248,13 @@ class CompanyRepository(repositories.CompanyRepository):
         products_account: entities.Account,
         registered_on: datetime,
     ) -> entities.Company:
+        user_orm = self._get_or_create_user(email, password)
         company = Company(
             id=str(uuid4()),
-            email=email,
             name=name,
-            password=generate_password_hash(password, method="sha256"),
             registered_on=registered_on,
             confirmed_on=None,
+            user=user_orm,
         )
         self.db.session.add(company)
         for account in [
@@ -242,7 +268,12 @@ class CompanyRepository(repositories.CompanyRepository):
         return self.object_from_orm(company)
 
     def has_company_with_email(self, email: str) -> bool:
-        return Company.query.filter_by(email=email).first() is not None
+        return bool(
+            self.db.session.query(models.Company)
+            .join(models.User)
+            .filter(models.User.email == email)
+            .first()
+        )
 
     def count_registered_companies(self) -> int:
         return int(self.db.session.query(func.count(Company.id)).one()[0])
@@ -256,25 +287,73 @@ class CompanyRepository(repositories.CompanyRepository):
         )
 
     def query_companies_by_email(self, query: str) -> Iterator[entities.Company]:
-        return (
-            self.object_from_orm(company)
-            for company in Company.query.filter(
-                Company.email.ilike("%" + query + "%")
-            ).all()
+        companies = (
+            self.db.session.query(models.Company)
+            .join(models.User)
+            .filter(models.User.email.ilike("%" + query + "%"))
         )
+        return (self.object_from_orm(company) for company in companies)
 
     def get_all_companies(self) -> Iterator[entities.Company]:
         return (self.object_from_orm(company) for company in Company.query.all())
 
     def validate_credentials(self, email_address: str, password: str) -> Optional[UUID]:
         if (
-            company := self.db.session.query(Company)
-            .filter(Company.email == email_address)
+            company := self.db.session.query(models.Company)
+            .join(models.User)
+            .filter(models.User.email == email_address)
             .first()
         ):
-            if check_password_hash(company.password, password):
+            if check_password_hash(company.user.password, password):
                 return UUID(company.id)
         return None
+
+    def confirm_company(self, company: UUID, confirmed_on: datetime) -> None:
+        self.db.session.query(models.Company).filter(
+            models.Company.id == str(company)
+        ).update({models.Company.confirmed_on: confirmed_on})
+
+    def is_company_confirmed(self, company: UUID) -> bool:
+        orm = (
+            self.db.session.query(models.Company)
+            .filter(models.Company.id == str(company))
+            .first()
+        )
+        if orm is None:
+            return False
+        else:
+            return orm.confirmed_on is not None
+
+    def _get_or_create_user(self, email: str, password: str) -> models.User:
+        return self.db.session.query(models.User).filter(
+            and_(
+                models.User.email == email,
+                models.User.company == None,
+            )
+        ).first() or models.User(
+            email=email,
+            password=generate_password_hash(password, method="sha256"),
+        )
+
+    def _get_means_account(self, company: Company) -> Account:
+        account = company.accounts.filter_by(account_type="p").first()
+        assert account
+        return account
+
+    def _get_resources_account(self, company: Company) -> Account:
+        account = company.accounts.filter_by(account_type="r").first()
+        assert account
+        return account
+
+    def _get_labour_account(self, company: Company) -> Account:
+        account = company.accounts.filter_by(account_type="a").first()
+        assert account
+        return account
+
+    def _get_products_account(self, company: Company) -> Account:
+        account = company.accounts.filter_by(account_type="prd").first()
+        assert account
+        return account
 
 
 @inject
@@ -410,9 +489,9 @@ class PurchaseRepository(repositories.PurchaseRepository):
         return Purchase(
             purchase_date=purchase.purchase_date,
             plan_id=str(purchase.plan),
-            type_member=purchase.is_member,
-            company=str(purchase.buyer) if not purchase.is_member else None,
-            member=str(purchase.buyer) if purchase.is_member else None,
+            type_member=purchase.is_buyer_a_member,
+            company=str(purchase.buyer) if not purchase.is_buyer_a_member else None,
+            member=str(purchase.buyer) if purchase.is_buyer_a_member else None,
             price_per_unit=float(purchase.price_per_unit),
             amount=purchase.amount,
             purpose=purchase.purpose.value,
@@ -425,18 +504,17 @@ class PurchaseRepository(repositories.PurchaseRepository):
             buyer=UUID(purchase.member)
             if purchase.type_member
             else UUID(purchase.company),
-            is_member=purchase.type_member,
+            is_buyer_a_member=purchase.type_member,
             price_per_unit=Decimal(purchase.price_per_unit),
             amount=purchase.amount,
             purpose=purchase.purpose,
         )
 
-    def create_purchase(
+    def create_purchase_by_company(
         self,
         purchase_date: datetime,
         plan: UUID,
         buyer: UUID,
-        is_member: bool,
         price_per_unit: Decimal,
         amount: int,
         purpose: entities.PurposesOfPurchases,
@@ -445,10 +523,31 @@ class PurchaseRepository(repositories.PurchaseRepository):
             purchase_date=purchase_date,
             plan=plan,
             buyer=buyer,
-            is_member=is_member,
+            is_buyer_a_member=False,
             price_per_unit=price_per_unit,
             amount=amount,
             purpose=purpose,
+        )
+        purchase_orm = self.object_to_orm(purchase)
+        self.db.session.add(purchase_orm)
+        return purchase
+
+    def create_purchase_by_member(
+        self,
+        purchase_date: datetime,
+        plan: UUID,
+        buyer: UUID,
+        price_per_unit: Decimal,
+        amount: int,
+    ) -> entities.Purchase:
+        purchase = entities.Purchase(
+            purchase_date=purchase_date,
+            plan=plan,
+            buyer=buyer,
+            is_buyer_a_member=True,
+            price_per_unit=price_per_unit,
+            amount=amount,
+            purpose=entities.PurposesOfPurchases.consumption,
         )
         purchase_orm = self.object_to_orm(purchase)
         self.db.session.add(purchase_orm)
@@ -503,7 +602,6 @@ class PlanRepository(repositories.PlanRepository):
             approval_reason=plan.approval_reason,
             is_active=plan.is_active,
             expired=plan.expired,
-            expiration_relative=plan.expiration_relative,
             expiration_date=plan.expiration_date,
             activation_date=plan.activation_date,
             active_days=plan.active_days,
@@ -585,12 +683,6 @@ class PlanRepository(repositories.PlanRepository):
 
         plan_orm = self.object_to_orm(plan)
         plan_orm.expiration_date = expiration_date
-
-    def set_expiration_relative(self, plan: entities.Plan, days: int) -> None:
-        plan.expiration_relative = days
-
-        plan_orm = self.object_to_orm(plan)
-        plan_orm.expiration_relative = days
 
     def set_active_days(self, plan: entities.Plan, full_active_days: int) -> None:
         plan.active_days = full_active_days
@@ -750,9 +842,14 @@ class PlanRepository(repositories.PlanRepository):
         plan_orm = self.object_to_orm(plan)
         plan_orm.is_available = True if (plan_orm.is_available == False) else False
 
-    def get_plan_name_and_description(self, id: UUID) -> Tuple[str, str]:
+    def get_plan_name_and_description(
+        self, id: UUID
+    ) -> repositories.PlanRepository.NameAndDescription:
         plan = Plan.query.get(str(id))
-        return (plan.prd_name, plan.description)
+        name_and_description = repositories.PlanRepository.NameAndDescription(
+            name=plan.prd_name, description=plan.description
+        )
+        return name_and_description
 
     def get_planner_id(self, plan_id: UUID) -> UUID:
         plan = Plan.query.get(str(plan_id))
@@ -938,6 +1035,15 @@ class WorkerInviteRepository(repositories.WorkerInviteRepository):
         for invite in CompanyWorkInvite.query.filter_by(member=str(member)):
             yield UUID(invite.company)
 
+    def get_invites_for_worker(
+        self, member: UUID
+    ) -> Iterable[entities.CompanyWorkInvite]:
+        for invite in CompanyWorkInvite.query.filter_by(member=str(member)):
+            invite_object = self.get_by_id(invite.id)
+            if invite_object is None:
+                continue
+            yield invite_object
+
     def get_by_id(self, id: UUID) -> Optional[entities.CompanyWorkInvite]:
         if (
             invite_orm := CompanyWorkInvite.query.filter_by(id=str(id)).first()
@@ -949,6 +1055,7 @@ class WorkerInviteRepository(repositories.WorkerInviteRepository):
             if member is None:
                 return None
             return entities.CompanyWorkInvite(
+                id=id,
                 company=company,
                 member=member,
             )
@@ -956,106 +1063,6 @@ class WorkerInviteRepository(repositories.WorkerInviteRepository):
 
     def delete_invite(self, id: UUID) -> None:
         CompanyWorkInvite.query.filter_by(id=str(id)).delete()
-
-
-@inject
-@dataclass
-class MessageRepository(repositories.MessageRepository):
-    db: SQLAlchemy
-    member_repository: MemberRepository
-    company_repository: CompanyRepository
-    social_accounting_repository: AccountingRepository
-
-    def get_by_id(self, id: UUID) -> Optional[entities.Message]:
-        orm_message = Message.query.filter_by(id=str(id)).first()
-        if orm_message is None:
-            return None
-        return self.object_from_orm(orm_message)
-
-    def object_from_orm(self, message: Message) -> entities.Message:
-        addressee = self._get_user(UUID(message.addressee))
-        if addressee is None:
-            raise Exception(
-                "Internal error, addressee of message could not be retrieved"
-            )
-        sender = self._get_user_or_social_accounting(UUID(message.sender))
-        if sender is None:
-            raise Exception("Internal error, sender of message could not be retrieved")
-        if message.user_action is None:
-            user_action = None
-        else:
-            user_action_orm = models.UserAction.query.get(message.user_action)
-            user_action = UserAction(
-                type=user_action_orm.action_type,
-                reference=UUID(user_action_orm.reference),
-            )
-        return entities.Message(
-            sender=sender,
-            id=UUID(message.id),
-            title=message.title,
-            content=message.content,
-            addressee=addressee,
-            sender_remarks=message.sender_remarks,
-            user_action=user_action,
-            is_read=message.is_read,
-        )
-
-    def _get_user(self, id: UUID) -> Union[None, entities.Member, entities.Company]:
-        member = self.member_repository.get_by_id(id)
-        return member or self.company_repository.get_by_id(id)
-
-    def _get_user_or_social_accounting(
-        self, id: UUID
-    ) -> Union[None, entities.Member, entities.Company, entities.SocialAccounting]:
-        user = self._get_user(id)
-        if user is not None:
-            return user
-        return self.social_accounting_repository.get_by_id(id)
-
-    def create_message(
-        self,
-        sender: Union[entities.Company, entities.Member, entities.SocialAccounting],
-        addressee: Union[entities.Member, entities.Company],
-        title: str,
-        content: str,
-        sender_remarks: Optional[str],
-        reference: Optional[UserAction],
-    ) -> entities.Message:
-        if reference is not None:
-            user_action: Optional[models.UserAction] = models.UserAction(
-                id=str(uuid4()),
-                action_type=reference.type,
-                reference=str(reference.reference),
-            )
-            self.db.session.add(user_action)
-            self.db.session.flush()
-        else:
-            user_action = None
-        message = Message(
-            id=str(uuid4()),
-            sender=str(sender.id),
-            addressee=str(addressee.id),
-            title=title,
-            content=content,
-            user_action=user_action.id if user_action is not None else None,
-            sender_remarks=sender_remarks,
-            is_read=False,
-        )
-        self.db.session.add(message)
-        return self.object_from_orm(message)
-
-    def mark_as_read(self, message: entities.Message) -> None:
-        message.is_read = True
-        Message.query.filter_by(id=str(message.id)).update({Message.is_read: True})
-
-    def has_unread_messages_for_user(self, user: UUID) -> bool:
-        return bool(Message.query.filter_by(addressee=str(user), is_read=False).count())
-
-    def get_messages_to_user(self, user: UUID) -> Iterable[entities.Message]:
-        return (
-            self.object_from_orm(m)
-            for m in Message.query.filter_by(addressee=str(user))
-        )
 
 
 @inject
@@ -1210,11 +1217,11 @@ class AccountantRepository:
 
     def create_accountant(self, email: str, name: str, password: str) -> UUID:
         user_id = uuid4()
+        user_orm = self._get_or_create_user(email, password)
         accountant = models.Accountant(
             id=str(user_id),
             name=name,
-            password=generate_password_hash(password, method="sha256"),
-            email=email,
+            user=user_orm,
         )
         self.db.session.add(accountant)
         return user_id
@@ -1223,18 +1230,41 @@ class AccountantRepository:
         record = models.Accountant.query.filter_by(id=str(id)).first()
         if record is None:
             return None
-        return entities.Accountant(email_address=record.email, name=record.name)
+        return entities.Accountant(email_address=record.user.email, name=record.name)
 
     def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
-        record = models.Accountant.query.filter_by(email=email).first()
+        record = (
+            self.db.session.query(models.Accountant)
+            .join(models.User)
+            .filter(models.User.email == email)
+            .first()
+        )
         if record is None:
             return None
-        if not check_password_hash(record.password, password):
+        if not check_password_hash(record.user.password, password):
             return None
         return UUID(record.id)
 
     def has_accountant_with_email(self, email: str) -> bool:
-        return bool(models.Accountant.query.filter_by(email=email).first())
+        return bool(
+            self.db.session.query(models.Accountant)
+            .join(models.User)
+            .filter(models.User.email == email)
+            .first()
+        )
 
     def get_accountant_orm_by_mail(self, email: str) -> Optional[models.Accountant]:
-        return models.Accountant.query.filter_by(email=email).first()
+        return (
+            self.db.session.query(models.Accountant)
+            .join(models.User)
+            .filter(models.User.email == email)
+            .first()
+        )
+
+    def _get_or_create_user(self, email: str, password: str) -> models.User:
+        return self.db.session.query(models.User).filter(
+            and_(models.User.email == email, models.User.accountant == None)
+        ).first() or models.User(
+            password=generate_password_hash(password, method="sha256"),
+            email=email,
+        )
