@@ -572,6 +572,11 @@ class FlaskModule(PresenterModule):
 class with_injection:
     def __init__(self, modules: Optional[List[Module]] = None) -> None:
         self._modules = modules if modules is not None else []
+        all_modules: List[Module] = []
+        all_modules.append(FlaskModule())
+        all_modules.append(ViewsModule())
+        all_modules += self._modules
+        self._injector = Injector(all_modules)
 
     def __call__(self, original_function):
         """When you wrap a function, make sure that the parameters to be
@@ -581,15 +586,12 @@ class with_injection:
 
         @wraps(original_function)
         def wrapped_function(*args, **kwargs):
-            return self.get_injector().call_with_injection(
+            return self._injector.call_with_injection(
                 inject(original_function), args=args, kwargs=kwargs
             )
 
         return wrapped_function
 
-    def get_injector(self) -> Injector:
-        all_modules: List[Module] = []
-        all_modules.append(FlaskModule())
-        all_modules.append(ViewsModule())
-        all_modules += self._modules
-        return Injector(all_modules)
+    @property
+    def injector(self) -> Injector:
+        return self._injector

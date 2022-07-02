@@ -253,7 +253,9 @@ class CreateCompanyTests(FlaskTestCase):
         self.timestamp = datetime(2000, 1, 1)
         self.member_generator = self.injector.get(MemberGenerator)
 
-    def test(self) -> None:
+    def test_that_company_can_be_created_while_member_with_same_email_exists(
+        self,
+    ) -> None:
         email = "test@test.test"
         self.member_generator.create_member(email=email)
         self.repository.create_company(
@@ -267,3 +269,44 @@ class CreateCompanyTests(FlaskTestCase):
             registered_on=self.timestamp,
         )
         self.db.session.flush()
+
+
+class ConfirmCompanyTests(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.repository = self.injector.get(CompanyRepository)
+        self.account_repository = self.injector.get(AccountRepository)
+
+    def test_that_newly_created_company_is_not_confirmed(self) -> None:
+        company = self._create_company()
+        self.assertFalse(self.repository.is_company_confirmed(company.id))
+
+    def test_that_company_is_confirmed_after_confirm_was_called(self) -> None:
+        company = self._create_company()
+        self.repository.confirm_company(company.id, datetime(2000, 1, 2))
+        self.assertTrue(self.repository.is_company_confirmed(company.id))
+
+    def test_when_confirming_company_other_company_stays_unconfirmed(self) -> None:
+        company = self._create_company()
+        other_company = self._create_company("other@company.org")
+        self.repository.confirm_company(company.id, datetime(2000, 1, 2))
+        self.assertFalse(self.repository.is_company_confirmed(other_company.id))
+
+    def test_non_existing_company_counts_as_unconfirmed(self) -> None:
+        self.assertFalse(self.repository.is_company_confirmed(company=uuid4()))
+
+    def _create_company(self, email: str = "test@test.test") -> Company:
+        means_account = self.account_repository.create_account(AccountTypes.p)
+        labour_account = self.account_repository.create_account(AccountTypes.a)
+        resource_account = self.account_repository.create_account(AccountTypes.r)
+        products_account = self.account_repository.create_account(AccountTypes.prd)
+        return self.repository.create_company(
+            email=email,
+            name="test name",
+            password="some password",
+            means_account=means_account,
+            labour_account=labour_account,
+            resource_account=resource_account,
+            products_account=products_account,
+            registered_on=datetime(2000, 1, 1),
+        )
