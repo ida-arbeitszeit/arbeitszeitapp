@@ -7,7 +7,7 @@ class AuthenticatedMemberTests(ViewTestCase):
         self.url = "/member/query_plans"
         self.company_url = "/company/query_plans"
         self.default_data = dict(select="Produktname", search="", radio="activation")
-        self.member = self.login_member(confirm_member=True)
+        self.member = self.login_member()
 
     def test_authenticated_users_get_200(self):
         response = self.client.get(self.url)
@@ -38,8 +38,7 @@ class AuthenticatedCompanyTests(ViewTestCase):
         super().setUp()
         self.member_url = "/member/query_plans"
         self.url = "/company/query_plans"
-        self.company, _, self.email = self.login_company()
-        self.company = self.confirm_company(company=self.company, email=self.email)
+        self.company = self.login_company()
 
     def test_company_gets_redirected_when_trying_to_access_member_view(self):
         response = self.client.get(self.member_url)

@@ -12,7 +12,7 @@ class AuthenticatedMemberTests(ViewTestCase):
         super().setUp()
         self.plan_generator = self.injector.get(PlanGenerator)
         self.transaction_generator = self.injector.get(TransactionGenerator)
-        self.member = self.login_member(confirm_member=True)
+        self.member = self.login_member()
 
     def test_get_returns_200_status(self) -> None:
         response = self.client.get("/member/pay_consumer_product")

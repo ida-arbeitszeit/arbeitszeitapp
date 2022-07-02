@@ -9,7 +9,7 @@ from .flask import ViewTestCase
 class AuthenticatedTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.member = self.login_member(confirm_member=True)
+        self.member = self.login_member()
         self.company_generator = self.injector.get(CompanyGenerator)
         self.invite_use_case = self.injector.get(InviteWorkerToCompanyUseCase)
 

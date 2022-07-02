@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple
+from typing import List, Optional
 from unittest import TestCase
 
 from flask import Flask
@@ -41,8 +41,6 @@ class ViewTestCase(FlaskTestCase):
             email = self.email_generator.get_random_email()
         if member is None:
             member = self.member_generator.create_member(password=password, email=email)
-        if confirm_member:
-            self._confirm_member(email)
         response = self.client.post(
             "/member/login",
             data=dict(
@@ -52,6 +50,8 @@ class ViewTestCase(FlaskTestCase):
             follow_redirects=True,
         )
         assert response.status_code < 400
+        if confirm_member:
+            self._confirm_member(email)
         return member
 
     def _confirm_member(
@@ -70,7 +70,8 @@ class ViewTestCase(FlaskTestCase):
         company: Optional[Company] = None,
         password: Optional[str] = None,
         email: Optional[str] = None,
-    ) -> Tuple[Company, str, str]:
+        confirm_company: bool = True,
+    ) -> Company:
         if password is None:
             password = "password123"
         if email is None:
@@ -88,21 +89,17 @@ class ViewTestCase(FlaskTestCase):
             follow_redirects=True,
         )
         assert response.status_code < 400
-        return company, password, email
+        if confirm_company:
+            self._confirm_company(email)
+        return company
 
-    def confirm_company(
+    def _confirm_company(
         self,
-        company: Optional[Company] = None,
-        email: Optional[str] = None,
-    ) -> Company:
-        if email is None:
-            email = self.email_generator.get_random_email()
-        if company is None:
-            company = self.company_generator.create_company(email=email)
+        email: str,
+    ) -> None:
         token = FlaskTokenService().generate_token(email)
         response = self.client.get(
             f"/company/confirm/{token}",
             follow_redirects=True,
         )
         assert response.status_code < 400
-        return company
