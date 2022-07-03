@@ -298,6 +298,10 @@ class CompanyRepository(ABC):
         pass
 
     @abstractmethod
+    def get_by_email(self, email: str) -> Optional[Company]:
+        pass
+
+    @abstractmethod
     def count_registered_companies(self) -> int:
         pass
 

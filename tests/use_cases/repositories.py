@@ -363,6 +363,12 @@ class CompanyRepository(interfaces.CompanyRepository):
                 return company
         return None
 
+    def get_by_email(self, email: str) -> Optional[Company]:
+        for company in self.companies.values():
+            if company.email == email:
+                return company
+        return None
+
     def count_registered_companies(self) -> int:
         return len(self.companies)
 

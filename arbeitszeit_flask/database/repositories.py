@@ -246,6 +246,15 @@ class CompanyRepository(repositories.CompanyRepository):
         else:
             return self.object_from_orm(company_orm)
 
+    def get_by_email(self, email: str) -> Optional[entities.Company]:
+        company_orm = (
+            self.db.session.query(models.Company)
+            .join(models.User)
+            .filter(models.User.email == email)
+            .first()
+        )
+        return self.object_from_orm(company_orm) if company_orm else None
+
     def create_company(
         self,
         email: str,

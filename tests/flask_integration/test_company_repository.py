@@ -49,6 +49,16 @@ def test_can_retrieve_a_company_by_its_uuid(
 
 
 @injection_test
+def test_can_retrieve_a_company_by_its_email(
+    company_generator: CompanyGenerator,
+    company_repository: CompanyRepository,
+):
+    expected_email = "expected@mail.com"
+    expected_company = company_generator.create_company(email=expected_email)
+    assert company_repository.get_by_email(expected_email) == expected_company
+
+
+@injection_test
 def test_can_create_company_with_correct_name(
     company_repository: CompanyRepository,
     account_repository: AccountRepository,
