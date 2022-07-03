@@ -6,7 +6,6 @@ from typing import Any, Callable
 from injector import inject
 
 from arbeitszeit import entities
-from arbeitszeit_flask import models
 from arbeitszeit_flask.extensions import db
 
 from .repositories import (
@@ -32,7 +31,6 @@ __all__ = [
     "PurchaseRepository",
     "TransactionRepository",
     "commit_changes",
-    "get_company_by_mail",
 ]
 
 
@@ -51,19 +49,3 @@ def commit_changes(function: Callable) -> Callable:
         return result
 
     return wrapper
-
-
-def get_member_by_mail(email) -> models.Member:
-    """returns first user in User, filtered by email."""
-    return (
-        models.Member.query.join(models.User).filter(models.User.email == email).first()
-    )
-
-
-def get_company_by_mail(email) -> models.Company:
-    """returns first company in Company, filtered by mail."""
-    return (
-        models.Company.query.join(models.User)
-        .filter(models.User.email == email)
-        .first()
-    )

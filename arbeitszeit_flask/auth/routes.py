@@ -7,7 +7,6 @@ from flask_login import current_user, login_required
 from arbeitszeit.use_cases import ResendConfirmationMail, ResendConfirmationMailRequest
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
-from arbeitszeit_flask import database
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.database.repositories import CompanyRepository, MemberRepository
 from arbeitszeit_flask.dependency_injection import (
@@ -80,7 +79,8 @@ def confirm_email_member(token, member_repository: MemberRepository):
         return redirect_invalid_request()
     if email is None:
         return redirect_invalid_request()
-    member = database.get_member_by_mail(email)
+    member = member_repository.get_by_email(email)
+    assert member
     if member_repository.is_member_confirmed(member.id):
         flash("Konto ist bereits bestätigt.")
     else:
@@ -213,7 +213,8 @@ def confirm_email_company(token, company_repository: CompanyRepository):
         return redirect_invalid_request()
     if email is None:
         return redirect_invalid_request()
-    company = database.get_company_by_mail(email)
+    company = company_repository.get_by_email(email)
+    assert company
     if company_repository.is_company_confirmed(company.id):
         flash("Konto ist bereits bestätigt.")
     else:

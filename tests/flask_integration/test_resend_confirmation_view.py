@@ -18,13 +18,14 @@ class AuthenticatedButUnconfirmedMemberTests(ViewTestCase):
     def setUp(self):
         super().setUp()
         self.url = "/member/resend"
-        self.member, _, self.email = self.login_member()
+        self.member = self.login_member(confirm_member=False)
 
     def test_authenticated_and_unconfirmed_users_get_redirected_and_mail_gets_send(
         self,
     ):
+        assert not self.member.confirmed_on
         response = self.client.get(self.url)
-        member_token = FlaskTokenService().generate_token(self.email)
+        member_token = FlaskTokenService().generate_token(self.member.email)
         with mail.record_messages() as outbox:
             response = self.client.get(
                 self.url,
@@ -32,6 +33,30 @@ class AuthenticatedButUnconfirmedMemberTests(ViewTestCase):
             self.assertEqual(response.status_code, 302)
             assert len(outbox) == 1
             assert outbox[0].sender == "test_sender@cp.org"
-            assert outbox[0].recipients[0] == self.email
+            assert outbox[0].recipients[0] == self.member.email
+            assert outbox[0].subject == "Please confirm your account"
+            assert member_token in outbox[0].html
+
+
+class ConfirmedMemberTests(ViewTestCase):
+    def setUp(self):
+        super().setUp()
+        self.url = "/member/resend"
+        self.member = self.login_member(confirm_member=True)
+
+    def test_already_confirmed_member_gets_redirected_and_mail_gets_send(
+        self,
+    ):
+        assert self.member.confirmed_on
+        response = self.client.get(self.url)
+        member_token = FlaskTokenService().generate_token(self.member.email)
+        with mail.record_messages() as outbox:
+            response = self.client.get(
+                self.url,
+            )
+            self.assertEqual(response.status_code, 302)
+            assert len(outbox) == 1
+            assert outbox[0].sender == "test_sender@cp.org"
+            assert outbox[0].recipients[0] == self.member.email
             assert outbox[0].subject == "Please confirm your account"
             assert member_token in outbox[0].html
