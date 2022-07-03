@@ -59,6 +59,15 @@ def test_can_retrieve_a_company_by_its_email(
 
 
 @injection_test
+def test_that_random_email_returns_no_company(
+    repository: CompanyRepository, company_generator: CompanyGenerator
+):
+    random_email = "xyz123@testmail.com"
+    company_generator.create_company(email="test_mail@testmail.com")
+    assert repository.get_by_email(random_email) is None
+
+
+@injection_test
 def test_can_create_company_with_correct_name(
     company_repository: CompanyRepository,
     account_repository: AccountRepository,
