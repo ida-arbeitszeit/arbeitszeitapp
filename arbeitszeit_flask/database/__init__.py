@@ -53,13 +53,6 @@ def commit_changes(function: Callable) -> Callable:
     return wrapper
 
 
-def get_member_by_mail(email) -> models.Member:
-    """returns first user in User, filtered by email."""
-    return (
-        models.Member.query.join(models.User).filter(models.User.email == email).first()
-    )
-
-
 def get_company_by_mail(email) -> models.Company:
     """returns first company in Company, filtered by mail."""
     return (

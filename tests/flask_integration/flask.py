@@ -5,6 +5,7 @@ from flask import Flask
 from injector import Module
 
 from arbeitszeit.entities import Company, Member
+from arbeitszeit.repositories import MemberRepository
 from arbeitszeit_flask.token import FlaskTokenService
 from tests.data_generators import CompanyGenerator, EmailGenerator, MemberGenerator
 
@@ -27,6 +28,7 @@ class ViewTestCase(FlaskTestCase):
         self.member_generator = self.injector.get(MemberGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.email_generator = self.injector.get(EmailGenerator)
+        self.member_repository = self.injector.get(MemberRepository)
 
     def login_member(
         self,
@@ -52,7 +54,9 @@ class ViewTestCase(FlaskTestCase):
         assert response.status_code < 400
         if confirm_member:
             self._confirm_member(email)
-        return member
+        updated_member = self.member_repository.get_by_email(email)
+        assert updated_member
+        return updated_member
 
     def _confirm_member(
         self,

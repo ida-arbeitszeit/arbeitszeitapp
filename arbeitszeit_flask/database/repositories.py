@@ -91,6 +91,15 @@ class MemberRepository(repositories.MemberRepository):
             return None
         return self.object_from_orm(orm_object)
 
+    def get_by_email(self, email: str) -> Optional[entities.Member]:
+        member_orm = (
+            self.db.session.query(models.Member)
+            .join(models.User)
+            .filter(models.User.email == email)
+            .first()
+        )
+        return self.object_from_orm(member_orm) if member_orm else None
+
     def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
         if (
             member := self.db.session.query(Member)

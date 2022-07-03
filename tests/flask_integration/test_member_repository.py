@@ -38,6 +38,15 @@ def test_that_member_can_be_retrieved_by_its_id(
 
 
 @injection_test
+def test_that_member_can_be_retrieved_by_its_email(
+    repository: MemberRepository, member_generator: MemberGenerator
+):
+    expected_mail = "test_mail@testmail.com"
+    expected_member = member_generator.create_member(email=expected_mail)
+    assert repository.get_by_email(expected_mail) == expected_member
+
+
+@injection_test
 def test_cannot_find_member_by_email_before_it_was_added(
     member_repository: MemberRepository,
     account_repository: AccountRepository,

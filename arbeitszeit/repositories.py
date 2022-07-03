@@ -242,6 +242,10 @@ class MemberRepository(ABC):
         pass
 
     @abstractmethod
+    def get_by_email(self, email: str) -> Optional[Member]:
+        pass
+
+    @abstractmethod
     def count_registered_members(self) -> int:
         pass
 
