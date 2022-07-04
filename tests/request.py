@@ -22,5 +22,5 @@ class FakeRequest:
     def set_form(self, key: str, value: str) -> None:
         self._form[key] = value
 
-    def set_environ(self, key: str, value: str) -> None:
+    def set_header(self, key: str, value: str) -> None:
         self._environ[key] = value

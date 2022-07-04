@@ -80,7 +80,7 @@ class PresenterTests(TestCase):
         self,
     ):
         plan_id = uuid4()
-        self.request.set_environ("Referer", f"/company/plan_summary/{str(plan_id)}")
+        self.request.set_header("Referer", f"/company/plan_summary/{str(plan_id)}")
         self.request.set_arg("plan_id", str(plan_id))
         self.request.set_arg("cooperation_id", str(uuid4()))
         view_model = self.presenter.present(SUCCESSFUL_RESPONSE)
