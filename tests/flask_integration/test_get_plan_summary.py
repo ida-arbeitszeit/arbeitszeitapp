@@ -9,8 +9,7 @@ class AuthenticatedMemberTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.plan_generator = self.injector.get(PlanGenerator)
-        self.member, _, self.email = self.login_member()
-        self.member = self.confirm_member(member=self.member, email=self.email)
+        self.member = self.login_member()
 
     def test_get_404_when_plan_does_not_exist(self) -> None:
         url = f"/member/plan_summary/{uuid4()}"
@@ -28,8 +27,7 @@ class AuthenticatedCompanyTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.plan_generator = self.injector.get(PlanGenerator)
-        self.company, _, self.email = self.login_company()
-        self.company = self.confirm_company(company=self.company, email=self.email)
+        self.company = self.login_company()
 
     def test_get_404_when_plan_does_not_exist(self) -> None:
         url = f"/company/plan_summary/{uuid4()}"

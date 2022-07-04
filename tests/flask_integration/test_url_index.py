@@ -22,8 +22,7 @@ class CompanyUrlIndexTests(ViewTestCase):
         super().setUp()
         self.url_index = CompanyUrlIndex()
         self.plan_generator = self.injector.get(PlanGenerator)
-        self.company, _, self.email = self.login_company()
-        self.company = self.confirm_company(company=self.company, email=self.email)
+        self.company = self.login_company()
         self.cooperation_generator = self.injector.get(CooperationGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
 
@@ -100,8 +99,7 @@ class MemberUrlIndexTests(ViewTestCase):
         super().setUp()
         self.url_index = MemberUrlIndex()
         self.plan_generator = self.injector.get(PlanGenerator)
-        self.member, _, self.email = self.login_member()
-        self.member = self.confirm_member(member=self.member, email=self.email)
+        self.member = self.login_member()
         self.cooperation_generator = self.injector.get(CooperationGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.invite_worker_to_company = self.injector.get(InviteWorkerToCompanyUseCase)
@@ -147,8 +145,7 @@ class PlotUrlIndexTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.url_index = FlaskPlotsUrlIndex()
-        self.company, _, self.email = self.login_company()
-        self.company = self.confirm_company(company=self.company, email=self.email)
+        self.company = self.login_company()
 
     def test_url_for_barplot_for_certificates_returns_png(self) -> None:
         url = self.url_index.get_global_barplot_for_certificates_url(

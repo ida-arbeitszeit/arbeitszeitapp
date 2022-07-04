@@ -2,14 +2,13 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from typing import Any, Dict, List
 
+from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.use_cases.get_company_summary import (
     GetCompanySummarySuccess,
     PlanDetails,
 )
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import PlanSummaryUrlIndex
-
-THRESHOLD_DEVIATION = 33
 
 
 @dataclass
@@ -48,6 +47,7 @@ class GetCompanySummaryViewModel:
 class GetCompanySummarySuccessPresenter:
     plan_index: PlanSummaryUrlIndex
     translator: Translator
+    control_thresholds: ControlThresholds
 
     def present(
         self, use_case_response: GetCompanySummarySuccess
@@ -74,7 +74,7 @@ class GetCompanySummarySuccessPresenter:
                     percentage="%(num).0f"
                     % dict(num=use_case_response.deviations_relative[i]),
                     is_critical=abs(use_case_response.deviations_relative[i])
-                    >= THRESHOLD_DEVIATION,
+                    > self.control_thresholds.get_acceptable_relative_account_deviation(),
                 )
                 for i in range(len(use_case_response.deviations_relative))
             ],
@@ -95,6 +95,7 @@ class GetCompanySummarySuccessPresenter:
             sales_balance=f"{round(plan_details.sales_balance, 2)}",
             deviation_relative=Deviation(
                 percentage="%(num).0f" % dict(num=plan_details.deviation_relative),
-                is_critical=plan_details.deviation_relative >= THRESHOLD_DEVIATION,
+                is_critical=abs(plan_details.deviation_relative)
+                > self.control_thresholds.get_acceptable_relative_account_deviation(),
             ),
         )

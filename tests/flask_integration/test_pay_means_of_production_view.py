@@ -6,8 +6,7 @@ from .flask import ViewTestCase
 class CompanyTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.company, _, self.email = self.login_company()
-        self.company = self.confirm_company(company=self.company, email=self.email)
+        self.company = self.login_company()
 
     def test_that_logged_in_company_get_200_response(self) -> None:
         response = self.client.get("/company/transfer_to_company")
