@@ -24,7 +24,7 @@ from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguage
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts
-from arbeitszeit_flask.contol_thresholds import ControlThresholdsFlask
+from arbeitszeit_flask.control_thresholds import ControlThresholdsFlask
 from arbeitszeit_flask.database import get_social_accounting
 from arbeitszeit_flask.database.repositories import (
     AccountantRepository,

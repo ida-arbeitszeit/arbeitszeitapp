@@ -9,8 +9,7 @@ from .flask import ViewTestCase
 class LoggedInMemberTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.member, _, self.email = self.login_member()
-        self.member = self.confirm_member(member=self.member, email=self.email)
+        self.member = self.login_member()
         self.url = "/company/request_cooperation"
 
     def test_member_gets_redirected_when_trying_to_access_company_page(self) -> None:
@@ -32,8 +31,7 @@ class LoggedInCompanyTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.plan_generator = self.injector.get(PlanGenerator)
-        self.company, _, self.email = self.login_company()
-        self.company = self.confirm_company(company=self.company, email=self.email)
+        self.company = self.login_company()
         self.url = "/company/request_cooperation"
 
     def test_company_gets_200_status_when_opening_view(self) -> None:

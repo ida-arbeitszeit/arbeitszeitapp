@@ -46,7 +46,7 @@ def test_created_transactions_show_up_in_all_sent_received_by_account(
 
 
 @injection_test
-def test_correct_sales_balance_of_plan_gets_returned(
+def test_correct_sales_balance_of_plan_gets_returned_after_one_transaction(
     repository: TransactionRepository,
     account_generator: AccountGenerator,
     plan_generator: PlanGenerator,
@@ -63,3 +63,32 @@ def test_correct_sales_balance_of_plan_gets_returned(
         purpose=f"test {plan.id} test",
     )
     assert repository.get_sales_balance_of_plan(plan) == Decimal(10)
+
+
+@injection_test
+def test_correct_sales_balance_of_plan_gets_returned_after_two_transactions(
+    repository: TransactionRepository,
+    account_generator: AccountGenerator,
+    plan_generator: PlanGenerator,
+) -> None:
+    plan = plan_generator.create_plan()
+    sender_account_1 = account_generator.create_account()
+    sender_account_2 = account_generator.create_account()
+    receiver_account = plan.planner.product_account
+    repository.create_transaction(
+        datetime.now(),
+        sending_account=sender_account_1,
+        receiving_account=receiver_account,
+        amount_sent=Decimal(12),
+        amount_received=Decimal(10),
+        purpose=f"test {plan.id} test",
+    )
+    repository.create_transaction(
+        datetime.now(),
+        sending_account=sender_account_2,
+        receiving_account=receiver_account,
+        amount_sent=Decimal(12),
+        amount_received=Decimal(15),
+        purpose=f"test2 {plan.id} test2",
+    )
+    assert repository.get_sales_balance_of_plan(plan) == Decimal(25)

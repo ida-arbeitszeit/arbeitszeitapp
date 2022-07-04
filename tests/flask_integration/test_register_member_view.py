@@ -6,8 +6,7 @@ from .flask import ViewTestCase
 class AuthenticatedCompanyTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.company, _, self.email = self.login_company()
-        self.company = self.confirm_company(company=self.company, email=self.email)
+        self.company = self.login_company()
         self.url = "/member/signup"
 
     def test_authenticated_company_gets_200_when_accessing_member_page(self) -> None:
