@@ -35,7 +35,7 @@ class EndCooperationPresenter:
         return self.ViewModel(show_404=False, redirect_url=redirect_url)
 
     def _get_redirect_url(self) -> str:
-        referer = self.request.get_header("HTTP_REFERER")
+        referer = self.request.get_header("Referer")
         query_string = self.request.query_string()
         plan_id = query_string.get("plan_id")
         cooperation_id = query_string.get("cooperation_id")
