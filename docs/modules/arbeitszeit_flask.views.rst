@@ -12,6 +12,14 @@ arbeitszeit\_flask.views.accountant\_invitation\_email\_view module
    :undoc-members:
    :show-inheritance:
 
+arbeitszeit\_flask.views.company\_dashboard\_view module
+--------------------------------------------------------
+
+.. automodule:: arbeitszeit_flask.views.company_dashboard_view
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit\_flask.views.company\_work\_invite\_view module
 -----------------------------------------------------------
 
@@ -36,14 +44,6 @@ arbeitszeit\_flask.views.create\_draft\_view module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit\_flask.views.dashboard\_view module
------------------------------------------------
-
-.. automodule:: arbeitszeit_flask.views.dashboard_view
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 arbeitszeit\_flask.views.end\_cooperation\_view module
 ------------------------------------------------------
 
@@ -64,14 +64,6 @@ arbeitszeit\_flask.views.invite\_worker\_to\_company module
 -----------------------------------------------------------
 
 .. automodule:: arbeitszeit_flask.views.invite_worker_to_company
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-arbeitszeit\_flask.views.list\_messages\_view module
-----------------------------------------------------
-
-.. automodule:: arbeitszeit_flask.views.list_messages_view
    :members:
    :undoc-members:
    :show-inheritance:
@@ -104,14 +96,6 @@ arbeitszeit\_flask.views.query\_plans module
 --------------------------------------------
 
 .. automodule:: arbeitszeit_flask.views.query_plans
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-arbeitszeit\_flask.views.read\_message module
----------------------------------------------
-
-.. automodule:: arbeitszeit_flask.views.read_message
    :members:
    :undoc-members:
    :show-inheritance:

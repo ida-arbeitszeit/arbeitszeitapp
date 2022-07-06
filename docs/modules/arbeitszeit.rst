@@ -12,6 +12,14 @@ Subpackages
 Submodules
 ----------
 
+arbeitszeit.control\_thresholds module
+--------------------------------------
+
+.. automodule:: arbeitszeit.control_thresholds
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit.datetime\_service module
 ------------------------------------
 
@@ -88,14 +96,6 @@ arbeitszeit.transactions module
 -------------------------------
 
 .. automodule:: arbeitszeit.transactions
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-arbeitszeit.user\_action module
--------------------------------
-
-.. automodule:: arbeitszeit.user_action
    :members:
    :undoc-members:
    :show-inheritance:

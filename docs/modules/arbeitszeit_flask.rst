@@ -35,6 +35,14 @@ arbeitszeit\_flask.configuration\_base module
    :undoc-members:
    :show-inheritance:
 
+arbeitszeit\_flask.control\_thresholds module
+---------------------------------------------
+
+.. automodule:: arbeitszeit_flask.control_thresholds
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit\_flask.datetime module
 ----------------------------------
 
@@ -87,6 +95,14 @@ arbeitszeit\_flask.forms module
 -------------------------------
 
 .. automodule:: arbeitszeit_flask.forms
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit\_flask.language\_repository module
+----------------------------------------------
+
+.. automodule:: arbeitszeit_flask.language_repository
    :members:
    :undoc-members:
    :show-inheritance:
