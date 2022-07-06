@@ -1,5 +1,5 @@
 from dataclasses import asdict, dataclass
-from typing import Optional, Union
+from typing import Union
 from uuid import UUID
 
 from flask import Response as FlaskResponse
@@ -73,9 +73,9 @@ class CreateDraftView:
         show user input form for plan draft.
         prefilled data comes from exired plan or saved draft if available in request arguments.
         """
-        if self.request.get_arg("expired_plan_id"):
+        query_string = self.request.query_string()
+        if expired_plan_id := query_string.get("expired_plan_id"):
             # use expired plan to prefill data
-            expired_plan_id: Optional[str] = self.request.get_arg("expired_plan_id")
             planner = self.session.get_current_user()
             assert expired_plan_id is not None
             assert planner is not None
@@ -90,9 +90,8 @@ class CreateDraftView:
             else:
                 return self.http_404_view.get_response()
 
-        elif self.request.get_arg("saved_draft_id"):
+        elif saved_draft_id := query_string.get("saved_draft_id"):
             # use saved draft to prefill data
-            saved_draft_id = self.request.get_arg("saved_draft_id")
             assert saved_draft_id
             saved_draft_uuid: UUID = UUID(saved_draft_id)
 
