@@ -13,8 +13,9 @@ class EndCooperationController:
     request: Request
 
     def process_request_data(self) -> Optional[EndCooperationRequest]:
-        plan_id = self.request.get_arg("plan_id")
-        cooperation_id = self.request.get_arg("cooperation_id")
+        query_string = self.request.query_string()
+        plan_id = query_string.get("plan_id")
+        cooperation_id = query_string.get("cooperation_id")
         current_user = self.session.get_current_user()
         if not all([plan_id, cooperation_id, current_user]):
             return None
