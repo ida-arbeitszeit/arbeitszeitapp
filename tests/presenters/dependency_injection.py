@@ -211,11 +211,13 @@ class PresenterTestsInjector(Module):
         plan_index: PlanSummaryUrlIndexTestImpl,
         translator: FakeTranslator,
         control_thresholds: ControlThresholdsTestImpl,
+        datetime_service: FakeDatetimeService,
     ) -> GetCompanySummarySuccessPresenter:
         return GetCompanySummarySuccessPresenter(
             plan_index=plan_index,
             translator=translator,
             control_thresholds=control_thresholds,
+            datetime_service=datetime_service,
         )
 
     @provider

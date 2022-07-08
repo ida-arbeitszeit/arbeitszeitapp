@@ -1,8 +1,8 @@
 from dataclasses import asdict, dataclass
-from datetime import datetime
 from typing import Any, Dict, List
 
 from arbeitszeit.control_thresholds import ControlThresholds
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.use_cases.get_company_summary import (
     GetCompanySummarySuccess,
     PlanDetails,
@@ -33,7 +33,7 @@ class GetCompanySummaryViewModel:
     id: str
     name: str
     email: str
-    registered_on: datetime
+    registered_on: str
     expectations: List[str]
     account_balances: List[str]
     deviations_relative: List[Deviation]
@@ -48,6 +48,7 @@ class GetCompanySummarySuccessPresenter:
     plan_index: PlanSummaryUrlIndex
     translator: Translator
     control_thresholds: ControlThresholds
+    datetime_service: DatetimeService
 
     def present(
         self, use_case_response: GetCompanySummarySuccess
@@ -56,7 +57,9 @@ class GetCompanySummarySuccessPresenter:
             id=str(use_case_response.id),
             name=use_case_response.name,
             email=use_case_response.email,
-            registered_on=use_case_response.registered_on,
+            registered_on=self.datetime_service.format_datetime(
+                use_case_response.registered_on, zone="Europe/Berlin", fmt="%d.%m.%Y"
+            ),
             expectations=[
                 "%(num).2f" % dict(num=use_case_response.expectations.means),
                 "%(num).2f" % dict(num=use_case_response.expectations.raw_material),
