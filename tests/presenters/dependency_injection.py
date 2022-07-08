@@ -468,10 +468,10 @@ class PresenterTestsInjector(Module):
 
     @provider
     def provide_get_company_transactions_presenter(
-        self, translator: FakeTranslator
+        self, translator: FakeTranslator, datetime_service: FakeDatetimeService
     ) -> GetCompanyTransactionsPresenter:
         return GetCompanyTransactionsPresenter(
-            translator=translator,
+            translator=translator, datetime_service=datetime_service
         )
 
     @provider
