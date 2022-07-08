@@ -712,12 +712,13 @@ def test_that_correct_supplier_name_is_shown(
     plan_generator: PlanGenerator,
 ):
     buyer = company_generator.create_company()
-    supplier = company_generator.create_company()
+    supplier_name = "supplier coop"
+    supplier = company_generator.create_company(name=supplier_name)
     offered_plan = plan_generator.create_plan(planner=supplier)
     purchase_generator.create_purchase_by_company(buyer=buyer, plan=offered_plan)
     response = get_company_summary(buyer.id)
     assert response
-    assert response.suppliers_ordered_by_volume[0].company_name == supplier.name
+    assert response.suppliers_ordered_by_volume[0].company_name == supplier_name
 
 
 @injection_test

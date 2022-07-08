@@ -94,8 +94,6 @@ from arbeitszeit_web.controllers.show_my_accounts_controller import (
 )
 from arbeitszeit_web.email import EmailConfiguration, UserAddressBook
 from arbeitszeit_web.formatters.plan_summary_formatter import PlanSummaryFormatter
-from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
-from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_prefilled_draft_data import PrefilledDraftDataController
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyController
 from arbeitszeit_web.language_service import LanguageService
@@ -393,21 +391,6 @@ class FlaskModule(PresenterModule):
         return PlanSummaryFormatter(
             coop_url_index, company_url_index, translator, datetime_service
         )
-
-    @provider
-    def provide_get_coop_summary_success_presenter(
-        self, plan_index: PlanSummaryUrlIndex, end_coop_index: EndCoopUrlIndex
-    ) -> GetCoopSummarySuccessPresenter:
-        return GetCoopSummarySuccessPresenter(plan_index, end_coop_index)
-
-    @provider
-    def provide_get_company_summary_success_presenter(
-        self,
-        plan_index: PlanSummaryUrlIndex,
-        translator: Translator,
-        company_index: CompanySummaryUrlIndex,
-    ) -> GetCompanySummarySuccessPresenter:
-        return GetCompanySummarySuccessPresenter(plan_index, translator, company_index)
 
     @provider
     def provide_transaction_repository(
