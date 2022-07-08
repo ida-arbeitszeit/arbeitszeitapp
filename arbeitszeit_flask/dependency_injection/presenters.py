@@ -10,6 +10,7 @@ from arbeitszeit.use_cases.register_member.member_registration_message_presenter
 from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitation_presenter import (
     AccountantInvitationPresenter,
 )
+from arbeitszeit_flask.control_thresholds import ControlThresholdsFlask
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.url_index import CompanyUrlIndex, GeneralUrlIndex, MemberUrlIndex
 from arbeitszeit_web.answer_company_work_invite import AnswerCompanyWorkInvitePresenter
@@ -464,8 +465,11 @@ class PresenterModule(Module):
         plan_index: PlanSummaryUrlIndex,
         translator: Translator,
         company_index: CompanySummaryUrlIndex,
+        control_thresholds: ControlThresholdsFlask,
     ) -> GetCompanySummarySuccessPresenter:
-        return GetCompanySummarySuccessPresenter(plan_index, translator, company_index)
+        return GetCompanySummarySuccessPresenter(
+            plan_index, translator, company_index, control_thresholds
+        )
 
     @provider
     def provide_invite_worker_to_company_presenter(

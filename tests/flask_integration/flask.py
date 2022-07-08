@@ -1,10 +1,11 @@
-from typing import List, Optional, Tuple
+from typing import List, Optional
 from unittest import TestCase
 
 from flask import Flask
 from injector import Module
 
 from arbeitszeit.entities import Company, Member
+from arbeitszeit.repositories import CompanyRepository, MemberRepository
 from arbeitszeit_flask.token import FlaskTokenService
 from tests.data_generators import CompanyGenerator, EmailGenerator, MemberGenerator
 
@@ -27,13 +28,16 @@ class ViewTestCase(FlaskTestCase):
         self.member_generator = self.injector.get(MemberGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.email_generator = self.injector.get(EmailGenerator)
+        self.member_repository = self.injector.get(MemberRepository)
+        self.company_repository = self.injector.get(CompanyRepository)
 
     def login_member(
         self,
         member: Optional[Member] = None,
         password: Optional[str] = None,
         email: Optional[str] = None,
-    ) -> Tuple[Member, str, str]:
+        confirm_member: bool = True,
+    ) -> Member:
         if password is None:
             password = "password123"
         if email is None:
@@ -49,31 +53,30 @@ class ViewTestCase(FlaskTestCase):
             follow_redirects=True,
         )
         assert response.status_code < 400
-        return member, password, email
+        if confirm_member:
+            self._confirm_member(email)
+        updated_member = self.member_repository.get_by_email(email)
+        assert updated_member
+        return updated_member
 
-    def confirm_member(
+    def _confirm_member(
         self,
-        member: Optional[Member] = None,
-        email: Optional[str] = None,
-    ) -> Member:
-        if email is None:
-            email = self.email_generator.get_random_email()
-        if member is None:
-            member = self.member_generator.create_member(email=email)
+        email: str,
+    ) -> None:
         token = FlaskTokenService().generate_token(email)
         response = self.client.get(
             f"/member/confirm/{token}",
             follow_redirects=True,
         )
         assert response.status_code < 400
-        return member
 
     def login_company(
         self,
         company: Optional[Company] = None,
         password: Optional[str] = None,
         email: Optional[str] = None,
-    ) -> Tuple[Company, str, str]:
+        confirm_company: bool = True,
+    ) -> Company:
         if password is None:
             password = "password123"
         if email is None:
@@ -91,21 +94,19 @@ class ViewTestCase(FlaskTestCase):
             follow_redirects=True,
         )
         assert response.status_code < 400
-        return company, password, email
+        if confirm_company:
+            self._confirm_company(email)
+        updated_company = self.company_repository.get_by_email(email)
+        assert updated_company
+        return updated_company
 
-    def confirm_company(
+    def _confirm_company(
         self,
-        company: Optional[Company] = None,
-        email: Optional[str] = None,
-    ) -> Company:
-        if email is None:
-            email = self.email_generator.get_random_email()
-        if company is None:
-            company = self.company_generator.create_company(email=email)
+        email: str,
+    ) -> None:
         token = FlaskTokenService().generate_token(email)
         response = self.client.get(
             f"/company/confirm/{token}",
             follow_redirects=True,
         )
         assert response.status_code < 400
-        return company

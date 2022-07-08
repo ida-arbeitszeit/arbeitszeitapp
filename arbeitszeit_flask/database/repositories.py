@@ -91,6 +91,15 @@ class MemberRepository(repositories.MemberRepository):
             return None
         return self.object_from_orm(orm_object)
 
+    def get_by_email(self, email: str) -> Optional[entities.Member]:
+        member_orm = (
+            self.db.session.query(models.Member)
+            .join(models.User)
+            .filter(models.User.email == email)
+            .first()
+        )
+        return self.object_from_orm(member_orm) if member_orm else None
+
     def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
         if (
             member := self.db.session.query(Member)
@@ -236,6 +245,15 @@ class CompanyRepository(repositories.CompanyRepository):
             return None
         else:
             return self.object_from_orm(company_orm)
+
+    def get_by_email(self, email: str) -> Optional[entities.Company]:
+        company_orm = (
+            self.db.session.query(models.Company)
+            .join(models.User)
+            .filter(models.User.email == email)
+            .first()
+        )
+        return self.object_from_orm(company_orm) if company_orm else None
 
     def create_company(
         self,

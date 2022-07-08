@@ -64,6 +64,7 @@ from arbeitszeit_web.query_companies import QueryCompaniesPresenter
 from arbeitszeit_web.query_plans import QueryPlansPresenter
 from arbeitszeit_web.request_cooperation import RequestCooperationPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
+from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.datetime_service import FakeDatetimeService
 from tests.dependency_injection import TestingModule
 from tests.email import (
@@ -210,9 +211,13 @@ class PresenterTestsInjector(Module):
         plan_index: PlanSummaryUrlIndexTestImpl,
         translator: FakeTranslator,
         company_index: CompanySummaryUrlIndex,
+        control_thresholds: ControlThresholdsTestImpl,
     ) -> GetCompanySummarySuccessPresenter:
         return GetCompanySummarySuccessPresenter(
-            plan_index=plan_index, translator=translator, company_index=company_index
+            plan_index=plan_index,
+            translator=translator,
+            company_index=company_index,
+            control_thresholds=control_thresholds,
         )
 
     @provider

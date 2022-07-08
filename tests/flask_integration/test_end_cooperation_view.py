@@ -10,8 +10,7 @@ class AuthenticatedCompanyTests(ViewTestCase):
         super().setUp()
         self.cooperation_generator = self.injector.get(CooperationGenerator)
         self.plan_generator = self.injector.get(PlanGenerator)
-        self.company, _, self.email = self.login_company()
-        self.company = self.confirm_company(company=self.company, email=self.email)
+        self.company = self.login_company()
 
     def test_get_404_when_no_query_arguments_are_sent(
         self,

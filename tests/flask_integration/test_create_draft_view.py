@@ -14,8 +14,7 @@ class AuthenticatedCompanyTestsForGet(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.plan_generator = self.injector.get(PlanGenerator)
-        self.company, _, self.email = self.login_company()
-        self.company = self.confirm_company(company=self.company, email=self.email)
+        self.company = self.login_company()
 
     def test_get_200_without_url_parameter(
         self,
@@ -47,8 +46,7 @@ class AuthenticatedCompanyTestsForPost(ViewTestCase):
         self.plan_generator = self.injector.get(PlanGenerator)
         self.plan_draft_repository = self.injector.get(PlanDraftRepository)
         self.form = self.injector.get(FakeRequest)
-        self.company, _, self.email = self.login_company()
-        self.company = self.confirm_company(company=self.company, email=self.email)
+        self.company = self.login_company()
 
     def test_post_user_canceling_leads_to_302_and_no_draft_gets_created(self) -> None:
         test_data = self._create_form_data()

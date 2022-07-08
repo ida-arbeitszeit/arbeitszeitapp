@@ -250,6 +250,10 @@ class MemberRepository(ABC):
         pass
 
     @abstractmethod
+    def get_by_email(self, email: str) -> Optional[Member]:
+        pass
+
+    @abstractmethod
     def count_registered_members(self) -> int:
         pass
 
@@ -299,6 +303,10 @@ class CompanyRepository(ABC):
 
     @abstractmethod
     def get_by_id(self, id: UUID) -> Optional[Company]:
+        pass
+
+    @abstractmethod
+    def get_by_email(self, email: str) -> Optional[Company]:
         pass
 
     @abstractmethod

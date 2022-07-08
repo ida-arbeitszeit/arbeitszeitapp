@@ -313,6 +313,9 @@ class MemberRepository(interfaces.MemberRepository):
     def get_by_id(self, id: UUID) -> Optional[Member]:
         return self.members.get(id)
 
+    def get_by_email(self, email: str) -> Optional[Member]:
+        return self._get_member_by_email(email)
+
     def get_all_members(self) -> Iterator[Member]:
         yield from self.members.values()
 
@@ -362,6 +365,12 @@ class CompanyRepository(interfaces.CompanyRepository):
     def get_by_id(self, id: UUID) -> Optional[Company]:
         for company in self.companies.values():
             if company.id == id:
+                return company
+        return None
+
+    def get_by_email(self, email: str) -> Optional[Company]:
+        for company in self.companies.values():
+            if company.email == email:
                 return company
         return None
 
