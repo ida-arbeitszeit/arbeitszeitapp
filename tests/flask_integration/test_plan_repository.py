@@ -375,6 +375,16 @@ def test_correct_name_and_description_returned(
 
 
 @injection_test
+def test_that_non_existing_plan_returns_no_planner_id(
+    repository: PlanRepository,
+    plan_generator: PlanGenerator,
+) -> None:
+    plan_generator.create_plan()
+    nothing = repository.get_planner_id(uuid4())
+    assert nothing is None
+
+
+@injection_test
 def test_that_correct_id_of_planning_company_gets_returned(
     repository: PlanRepository,
     plan_generator: PlanGenerator,

@@ -198,5 +198,6 @@ class GetCompanySummary:
         suppliers: Dict[UUID, Decimal] = defaultdict(lambda: Decimal("0"))
         for purchase in purchases:
             supplier_id = self.plan_repository.get_planner_id(purchase.plan)
-            suppliers[supplier_id] += purchase.amount * purchase.price_per_unit
+            if supplier_id:
+                suppliers[supplier_id] += purchase.amount * purchase.price_per_unit
         return list(suppliers.items())

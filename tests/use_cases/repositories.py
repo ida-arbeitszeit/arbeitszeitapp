@@ -618,9 +618,10 @@ class PlanRepository(interfaces.PlanRepository):
         )
         return name_and_description
 
-    def get_planner_id(self, plan_id: UUID) -> UUID:
+    def get_planner_id(self, plan_id: UUID) -> Optional[UUID]:
         plan = self.plans.get(plan_id)
-        assert plan
+        if plan is None:
+            return None
         return plan.planner.id
 
 

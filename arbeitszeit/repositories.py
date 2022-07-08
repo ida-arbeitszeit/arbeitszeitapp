@@ -187,7 +187,7 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def get_planner_id(self, plan_id: UUID) -> UUID:
+    def get_planner_id(self, plan_id: UUID) -> Optional[UUID]:
         pass
 
 
