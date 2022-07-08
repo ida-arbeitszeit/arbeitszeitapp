@@ -183,13 +183,6 @@ class PlansOfCompanyTests(TestCase):
             view_model.plan_details[0].deviation_relative.percentage,
             f"{round(RESPONSE_WITH_2_PLANS.plan_details[0].deviation_relative)}",
         )
-        self.assertEqual(
-            view_model.plan_details[0].deviation_relative.is_critical,
-            bool(
-                RESPONSE_WITH_2_PLANS.plan_details[0].deviation_relative
-                >= self.control_thresholds.get_acceptable_relative_account_deviation()
-            ),
-        )
 
     def test_list_of_suppliers_is_empty_if_none_exist(self):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
