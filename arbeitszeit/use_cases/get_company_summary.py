@@ -1,7 +1,8 @@
+from collections import defaultdict
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from decimal import Decimal, DivisionByZero, InvalidOperation
-from typing import Dict, Iterator, List, Optional
+from typing import Dict, Iterator, List, Optional, Tuple
 from uuid import UUID
 
 from arbeitszeit.decimal import decimal_sum
@@ -169,32 +170,33 @@ class GetCompanySummary:
             return Decimal("Infinity")
 
     def _get_suppliers(self, purchases: Iterator[Purchase]) -> List[Supplier]:
-        suppliers_dict = self._create_dict_of_suppliers_and_volume_of_sales(purchases)
-        suppliers_dict_ordered = dict(
-            sorted(suppliers_dict.items(), key=lambda item: item[1], reverse=True)
+        ordered_suppliers = sorted(
+            self._get_suppliers_and_volume_of_sales(purchases),
+            key=lambda item: item[1],
+            reverse=True,
         )
-        suppliers_list = []
-        for key, value in suppliers_dict_ordered.items():
-            supplier = self.company_respository.get_by_id(key)
-            assert supplier
-            suppliers_list.append(
-                Supplier(
-                    company_id=supplier.id,
-                    company_name=supplier.name,
-                    volume_of_sales=value,
-                )
-            )
-        return suppliers_list
+        suppliers = [
+            self._get_supplier_info(supplier_id, transaction_volume)
+            for supplier_id, transaction_volume in ordered_suppliers
+        ]
+        return suppliers
 
-    def _create_dict_of_suppliers_and_volume_of_sales(
+    def _get_supplier_info(
+        self, supplier_id: UUID, transaction_volume: Decimal
+    ) -> Supplier:
+        supplier = self.company_respository.get_by_id(supplier_id)
+        assert supplier
+        return Supplier(
+            company_id=supplier_id,
+            company_name=supplier.name,
+            volume_of_sales=transaction_volume,
+        )
+
+    def _get_suppliers_and_volume_of_sales(
         self, purchases: Iterator[Purchase]
-    ) -> Dict[UUID, Decimal]:
-        suppliers: Dict[UUID, Decimal] = {}
+    ) -> List[Tuple[UUID, Decimal]]:
+        suppliers: Dict[UUID, Decimal] = defaultdict(lambda: Decimal("0"))
         for purchase in purchases:
             supplier_id = self.plan_repository.get_planner_id(purchase.plan)
-            purchase_volume = purchase.amount * purchase.price_per_unit
-            if supplier_id in suppliers:
-                suppliers[supplier_id] += purchase_volume
-            else:
-                suppliers[supplier_id] = purchase_volume
-        return suppliers
+            suppliers[supplier_id] += purchase.amount * purchase.price_per_unit
+        return list(suppliers.items())
