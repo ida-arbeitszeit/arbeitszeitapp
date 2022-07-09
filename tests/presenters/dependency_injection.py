@@ -210,11 +210,13 @@ class PresenterTestsInjector(Module):
         self,
         plan_index: PlanSummaryUrlIndexTestImpl,
         translator: FakeTranslator,
+        company_index: CompanySummaryUrlIndex,
         control_thresholds: ControlThresholdsTestImpl,
     ) -> GetCompanySummarySuccessPresenter:
         return GetCompanySummarySuccessPresenter(
             plan_index=plan_index,
             translator=translator,
+            company_index=company_index,
             control_thresholds=control_thresholds,
         )
 

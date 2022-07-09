@@ -584,6 +584,12 @@ class PurchaseRepository(repositories.PurchaseRepository):
             for purchase in user_orm.purchases.order_by(desc("purchase_date")).all()
         )
 
+    def get_purchases_of_company(self, company: UUID) -> Iterator[entities.Purchase]:
+        return (
+            self.object_from_orm(purchase)
+            for purchase in Purchase.query.filter_by(company=str(company))
+        )
+
 
 @inject
 @dataclass
@@ -862,6 +868,10 @@ class PlanRepository(repositories.PlanRepository):
             name=plan.prd_name, description=plan.description
         )
         return name_and_description
+
+    def get_planner_id(self, plan_id: UUID) -> Optional[UUID]:
+        plan = Plan.query.get(str(plan_id))
+        return UUID(plan.planner) if plan else None
 
     def __len__(self) -> int:
         return len(Plan.query.all())
