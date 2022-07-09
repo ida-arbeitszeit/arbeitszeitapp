@@ -50,7 +50,7 @@ class CreateDraftView:
             draft_id = self._create_draft(form)
             return redirect(
                 url_for(
-                    "main_company.seek_approval",
+                    "main_company.self_approve_plan",
                     draft_uuid=draft_id,
                 )
             )
