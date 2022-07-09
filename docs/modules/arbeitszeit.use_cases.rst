@@ -47,14 +47,6 @@ arbeitszeit.use\_cases.cancel\_cooperation\_solicitation module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit.use\_cases.check\_for\_unread\_messages module
-----------------------------------------------------------
-
-.. automodule:: arbeitszeit.use_cases.check_for_unread_messages
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 arbeitszeit.use\_cases.create\_cooperation module
 -------------------------------------------------
 
@@ -143,10 +135,10 @@ arbeitszeit.use\_cases.get\_member\_account module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit.use\_cases.get\_member\_profile\_info module
---------------------------------------------------------
+arbeitszeit.use\_cases.get\_member\_dashboard module
+----------------------------------------------------
 
-.. automodule:: arbeitszeit.use_cases.get_member_profile_info
+.. automodule:: arbeitszeit.use_cases.get_member_dashboard
    :members:
    :undoc-members:
    :show-inheritance:
@@ -199,6 +191,14 @@ arbeitszeit.use\_cases.list\_all\_cooperations module
    :undoc-members:
    :show-inheritance:
 
+arbeitszeit.use\_cases.list\_available\_languages module
+--------------------------------------------------------
+
+.. automodule:: arbeitszeit.use_cases.list_available_languages
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit.use\_cases.list\_coordinations module
 -------------------------------------------------
 
@@ -219,14 +219,6 @@ arbeitszeit.use\_cases.list\_inbound\_coop\_requests module
 -----------------------------------------------------------
 
 .. automodule:: arbeitszeit.use_cases.list_inbound_coop_requests
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-arbeitszeit.use\_cases.list\_messages module
---------------------------------------------
-
-.. automodule:: arbeitszeit.use_cases.list_messages
    :members:
    :undoc-members:
    :show-inheritance:
@@ -311,14 +303,6 @@ arbeitszeit.use\_cases.query\_purchases module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit.use\_cases.read\_message module
--------------------------------------------
-
-.. automodule:: arbeitszeit.use_cases.read_message
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 arbeitszeit.use\_cases.register\_accountant module
 --------------------------------------------------
 
@@ -343,10 +327,10 @@ arbeitszeit.use\_cases.resend\_confirmation\_mail module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit.use\_cases.seek\_approval module
---------------------------------------------
+arbeitszeit.use\_cases.self\_approve\_plan module
+-------------------------------------------------
 
-.. automodule:: arbeitszeit.use_cases.seek_approval
+.. automodule:: arbeitszeit.use_cases.self_approve_plan
    :members:
    :undoc-members:
    :show-inheritance:

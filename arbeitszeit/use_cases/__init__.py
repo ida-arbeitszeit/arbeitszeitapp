@@ -109,7 +109,7 @@ from .resend_confirmation_mail import (
     ResendConfirmationMailRequest,
     ResendConfirmationMailResponse,
 )
-from .seek_approval import SeekApproval
+from .self_approve_plan import SelfApprovePlan
 from .send_work_certificates_to_worker import (
     SendWorkCertificatesToWorker,
     SendWorkCertificatesToWorkerRequest,
@@ -227,7 +227,7 @@ __all__ = [
     "ResendConfirmationMail",
     "ResendConfirmationMailRequest",
     "ResendConfirmationMailResponse",
-    "SeekApproval",
+    "SelfApprovePlan",
     "SendWorkCertificatesToWorker",
     "SendWorkCertificatesToWorkerRequest",
     "SendWorkCertificatesToWorkerResponse",
