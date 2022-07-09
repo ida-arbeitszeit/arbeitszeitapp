@@ -50,9 +50,8 @@ def test_avg_timeframe_of_active_plans_is_calculated_correctly(
     plan_generator: PlanGenerator,
 ):
     assert plan_repository.avg_timeframe_of_active_plans() == 0
-    plan_generator.create_plan(activation_date=datetime.min, timeframe=5)
-    plan_generator.create_plan(activation_date=datetime.min, timeframe=3)
-    plan_generator.create_plan(activation_date=None, timeframe=20)
+    plan_generator.create_plan(timeframe=5)
+    plan_generator.create_plan(timeframe=3)
     assert plan_repository.avg_timeframe_of_active_plans() == 4
 
 
@@ -224,8 +223,7 @@ def test_that_all_active_plan_for_a_company_are_returned(
     company_generator: CompanyGenerator,
 ) -> None:
     company = company_generator.create_company()
-    plan_generator.create_plan(planner=company, activation_date=datetime.min)
-    plan_generator.create_plan(planner=company, activation_date=datetime.min)
+    plan_generator.create_plan(planner=company)
     plan_generator.create_plan(planner=company)
     returned_plans = list(
         repository.get_all_active_plans_for_company(company_id=company.id)
