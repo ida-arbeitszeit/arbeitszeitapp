@@ -212,12 +212,14 @@ class PresenterTestsInjector(Module):
         translator: FakeTranslator,
         company_index: CompanySummaryUrlIndex,
         control_thresholds: ControlThresholdsTestImpl,
+        datetime_service: FakeDatetimeService,
     ) -> GetCompanySummarySuccessPresenter:
         return GetCompanySummarySuccessPresenter(
             plan_index=plan_index,
             translator=translator,
             company_index=company_index,
             control_thresholds=control_thresholds,
+            datetime_service=datetime_service,
         )
 
     @provider
@@ -470,10 +472,10 @@ class PresenterTestsInjector(Module):
 
     @provider
     def provide_get_company_transactions_presenter(
-        self, translator: FakeTranslator
+        self, translator: FakeTranslator, datetime_service: FakeDatetimeService
     ) -> GetCompanyTransactionsPresenter:
         return GetCompanyTransactionsPresenter(
-            translator=translator,
+            translator=translator, datetime_service=datetime_service
         )
 
     @provider
