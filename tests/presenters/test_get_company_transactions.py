@@ -2,6 +2,8 @@ from datetime import datetime
 from decimal import Decimal
 from unittest import TestCase
 
+from dateutil import tz
+
 from arbeitszeit.entities import AccountTypes
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.get_company_transactions import (
@@ -69,7 +71,7 @@ class CompanyTransactionsPresenterTests(TestCase):
         self.assertIsInstance(presented_transaction.date, str)
 
     def test_that_transaction_date_is_formatted_correctly(self):
-        expected_time = datetime(1998, 12, 1, 22, 5)
+        expected_time = datetime(1998, 12, 1, 22, 5, tzinfo=tz.gettz("Europe/Berlin"))
         expected_transaction = self._get_single_transaction_info(date=expected_time)
         response = GetCompanyTransactionsResponse(transactions=[expected_transaction])
         view_model = self.presenter.present(response)

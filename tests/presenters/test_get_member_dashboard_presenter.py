@@ -4,6 +4,8 @@ from typing import List
 from unittest import TestCase
 from uuid import UUID, uuid4
 
+from dateutil import tz
+
 from arbeitszeit.use_cases.get_member_dashboard import GetMemberDashboard
 from arbeitszeit_web.presenters.get_member_dashboard_presenter import (
     GetMemberDashboardPresenter,
@@ -94,7 +96,7 @@ class GetMemberDashboardPresenterTests(TestCase):
         self.assertEqual(presentation.three_latest_plans[0].prd_name, expected_name)
 
     def test_activation_date_of_latest_plans_is_correctly_formatted(self):
-        now = datetime.now()
+        now = datetime.now(tz=tz.gettz("Europe/Berlin"))
         response = self.get_response(
             three_latest_plans=[
                 GetMemberDashboard.PlanDetails(
