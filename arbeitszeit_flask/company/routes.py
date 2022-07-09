@@ -65,7 +65,7 @@ from arbeitszeit_web.hide_plan import HidePlanPresenter
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_drafts_of_company import ListDraftsPresenter
 from arbeitszeit_web.list_plans import ListPlansPresenter
-from arbeitszeit_web.presenters.seek_plan_approval import SeekPlanApprovalPresenter
+from arbeitszeit_web.presenters.self_approve_plan import SelfApprovePlanPresenter
 from arbeitszeit_web.presenters.show_a_account_details_presenter import (
     ShowAAccountDetailsPresenter,
 )
@@ -171,22 +171,19 @@ def create_draft(
         return view.respond_to_get()
 
 
-@CompanyRoute("/company/seek_approval")
+@CompanyRoute("/company/self_approve_plan")
 @commit_changes
-def seek_approval(
-    seek_approval: use_cases.SeekApproval,
+def self_approve_plan(
+    self_approve_plan: use_cases.SelfApprovePlan,
     activate_plan_and_grant_credit: use_cases.ActivatePlanAndGrantCredit,
     template_renderer: UserTemplateRenderer,
-    presenter: SeekPlanApprovalPresenter,
+    presenter: SelfApprovePlanPresenter,
 ):
-    """
-    seek approval for draft.
-    if approved: create plan from draft, activate plan and grant credit.
-    """
+    "Self-approve a plan. Credit is granted automatically."
 
     draft_uuid: UUID = UUID(request.args.get("draft_uuid"))
-    approval_response = seek_approval(
-        use_cases.SeekApproval.Request(draft_id=draft_uuid)
+    approval_response = self_approve_plan(
+        use_cases.SelfApprovePlan.Request(draft_id=draft_uuid)
     )
     if approval_response.is_approved:
         activate_plan_and_grant_credit(approval_response.new_plan_id)

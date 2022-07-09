@@ -28,10 +28,34 @@ arbeitszeit\_web.presenters.get\_latest\_activated\_plans\_presenter module
    :undoc-members:
    :show-inheritance:
 
+arbeitszeit\_web.presenters.get\_member\_dashboard\_presenter module
+--------------------------------------------------------------------
+
+.. automodule:: arbeitszeit_web.presenters.get_member_dashboard_presenter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit\_web.presenters.list\_available\_languages\_presenter module
+------------------------------------------------------------------------
+
+.. automodule:: arbeitszeit_web.presenters.list_available_languages_presenter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit\_web.presenters.list\_workers\_presenter module
 -----------------------------------------------------------
 
 .. automodule:: arbeitszeit_web.presenters.list_workers_presenter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit\_web.presenters.log\_in\_company\_presenter module
+--------------------------------------------------------------
+
+.. automodule:: arbeitszeit_web.presenters.log_in_company_presenter
    :members:
    :undoc-members:
    :show-inheritance:
@@ -76,10 +100,10 @@ arbeitszeit\_web.presenters.registration\_email\_presenter module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit\_web.presenters.seek\_plan\_approval module
--------------------------------------------------------
+arbeitszeit\_web.presenters.self\_approve\_plan module
+------------------------------------------------------
 
-.. automodule:: arbeitszeit_web.presenters.seek_plan_approval
+.. automodule:: arbeitszeit_web.presenters.self_approve_plan
    :members:
    :undoc-members:
    :show-inheritance:

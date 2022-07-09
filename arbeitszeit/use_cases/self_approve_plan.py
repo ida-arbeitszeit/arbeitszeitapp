@@ -11,7 +11,7 @@ from arbeitszeit.repositories import PlanDraftRepository, PlanRepository
 
 @inject
 @dataclass
-class SeekApproval:
+class SelfApprovePlan:
     @dataclass
     class Request:
         draft_id: UUID

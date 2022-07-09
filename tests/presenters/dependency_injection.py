@@ -41,7 +41,7 @@ from arbeitszeit_web.presenters.register_member_presenter import RegisterMemberP
 from arbeitszeit_web.presenters.registration_email_presenter import (
     RegistrationEmailPresenter,
 )
-from arbeitszeit_web.presenters.seek_plan_approval import SeekPlanApprovalPresenter
+from arbeitszeit_web.presenters.self_approve_plan import SelfApprovePlanPresenter
 from arbeitszeit_web.presenters.send_work_certificates_to_worker_presenter import (
     SendWorkCertificatesToWorkerPresenter,
 )
@@ -210,12 +210,16 @@ class PresenterTestsInjector(Module):
         self,
         plan_index: PlanSummaryUrlIndexTestImpl,
         translator: FakeTranslator,
+        company_index: CompanySummaryUrlIndex,
         control_thresholds: ControlThresholdsTestImpl,
+        datetime_service: FakeDatetimeService,
     ) -> GetCompanySummarySuccessPresenter:
         return GetCompanySummarySuccessPresenter(
             plan_index=plan_index,
             translator=translator,
+            company_index=company_index,
             control_thresholds=control_thresholds,
+            datetime_service=datetime_service,
         )
 
     @provider
@@ -468,10 +472,10 @@ class PresenterTestsInjector(Module):
 
     @provider
     def provide_get_company_transactions_presenter(
-        self, translator: FakeTranslator
+        self, translator: FakeTranslator, datetime_service: FakeDatetimeService
     ) -> GetCompanyTransactionsPresenter:
         return GetCompanyTransactionsPresenter(
-            translator=translator,
+            translator=translator, datetime_service=datetime_service
         )
 
     @provider
@@ -506,10 +510,10 @@ class PresenterTestsInjector(Module):
         )
 
     @provider
-    def provide_seek_plan_approval_presenter(
+    def provide_self_approve_plan_presenter(
         self, notifier: NotifierTestImpl, translator: FakeTranslator
-    ) -> SeekPlanApprovalPresenter:
-        return SeekPlanApprovalPresenter(
+    ) -> SelfApprovePlanPresenter:
+        return SelfApprovePlanPresenter(
             notifier=notifier,
             translator=translator,
         )

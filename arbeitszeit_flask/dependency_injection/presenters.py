@@ -58,7 +58,7 @@ from arbeitszeit_web.presenters.registration_email_presenter import (
     RegistrationEmailPresenter,
     RegistrationEmailTemplate,
 )
-from arbeitszeit_web.presenters.seek_plan_approval import SeekPlanApprovalPresenter
+from arbeitszeit_web.presenters.self_approve_plan import SelfApprovePlanPresenter
 from arbeitszeit_web.presenters.send_confirmation_email_presenter import (
     SendConfirmationEmailPresenter,
 )
@@ -202,9 +202,11 @@ class CompanyPresenterModule(Module):
 
     @provider
     def provide_get_company_transactions_presenter(
-        self, translator: Translator
+        self, translator: Translator, datetime_service: DatetimeService
     ) -> GetCompanyTransactionsPresenter:
-        return GetCompanyTransactionsPresenter(translator=translator)
+        return GetCompanyTransactionsPresenter(
+            translator=translator, datetime_service=datetime_service
+        )
 
 
 class PresenterModule(Module):
@@ -230,10 +232,10 @@ class PresenterModule(Module):
         )
 
     @provider
-    def provide_seek_plan_approval_presenter(
+    def provide_self_approve_plan_presenter(
         self, notifier: Notifier, translator: Translator
-    ) -> SeekPlanApprovalPresenter:
-        return SeekPlanApprovalPresenter(
+    ) -> SelfApprovePlanPresenter:
+        return SelfApprovePlanPresenter(
             notifier=notifier,
             translator=translator,
         )
@@ -464,10 +466,12 @@ class PresenterModule(Module):
         self,
         plan_index: PlanSummaryUrlIndex,
         translator: Translator,
+        company_index: CompanySummaryUrlIndex,
         control_thresholds: ControlThresholdsFlask,
+        datetime_service: DatetimeService,
     ) -> GetCompanySummarySuccessPresenter:
         return GetCompanySummarySuccessPresenter(
-            plan_index, translator, control_thresholds
+            plan_index, translator, company_index, control_thresholds, datetime_service
         )
 
     @provider

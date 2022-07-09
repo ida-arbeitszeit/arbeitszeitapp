@@ -67,6 +67,10 @@ class PurchaseRepository(ABC):
     ) -> Iterator[Purchase]:
         pass
 
+    @abstractmethod
+    def get_purchases_of_company(self, company: UUID) -> Iterator[Purchase]:
+        pass
+
 
 class PlanRepository(ABC):
     @abstractmethod
@@ -180,6 +184,10 @@ class PlanRepository(ABC):
 
     @abstractmethod
     def get_plan_name_and_description(self, id: UUID) -> NameAndDescription:
+        pass
+
+    @abstractmethod
+    def get_planner_id(self, plan_id: UUID) -> Optional[UUID]:
         pass
 
 

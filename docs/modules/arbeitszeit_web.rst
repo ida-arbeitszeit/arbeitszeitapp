@@ -8,6 +8,7 @@ Subpackages
    :maxdepth: 4
 
    arbeitszeit_web.controllers
+   arbeitszeit_web.formatters
    arbeitszeit_web.presenters
 
 Submodules
@@ -17,14 +18,6 @@ arbeitszeit\_web.answer\_company\_work\_invite module
 -----------------------------------------------------
 
 .. automodule:: arbeitszeit_web.answer_company_work_invite
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-arbeitszeit\_web.check\_for\_unread\_message module
----------------------------------------------------
-
-.. automodule:: arbeitszeit_web.check_for_unread_message
    :members:
    :undoc-members:
    :show-inheritance:
@@ -85,14 +78,6 @@ arbeitszeit\_web.get\_coop\_summary module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit\_web.get\_member\_profile\_info module
---------------------------------------------------
-
-.. automodule:: arbeitszeit_web.get_member_profile_info
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 arbeitszeit\_web.get\_plan\_summary\_company module
 ---------------------------------------------------
 
@@ -141,6 +126,14 @@ arbeitszeit\_web.invite\_worker\_to\_company module
    :undoc-members:
    :show-inheritance:
 
+arbeitszeit\_web.language\_service module
+-----------------------------------------
+
+.. automodule:: arbeitszeit_web.language_service
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit\_web.list\_all\_cooperations module
 -----------------------------------------------
 
@@ -153,14 +146,6 @@ arbeitszeit\_web.list\_drafts\_of\_company module
 -------------------------------------------------
 
 .. automodule:: arbeitszeit_web.list_drafts_of_company
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-arbeitszeit\_web.list\_messages module
---------------------------------------
-
-.. automodule:: arbeitszeit_web.list_messages
    :members:
    :undoc-members:
    :show-inheritance:
@@ -205,14 +190,6 @@ arbeitszeit\_web.pay\_means\_of\_production module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit\_web.plan\_summary\_service module
-----------------------------------------------
-
-.. automodule:: arbeitszeit_web.plan_summary_service
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 arbeitszeit\_web.plotter module
 -------------------------------
 
@@ -233,14 +210,6 @@ arbeitszeit\_web.query\_plans module
 ------------------------------------
 
 .. automodule:: arbeitszeit_web.query_plans
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-arbeitszeit\_web.read\_message module
--------------------------------------
-
-.. automodule:: arbeitszeit_web.read_message
    :members:
    :undoc-members:
    :show-inheritance:
@@ -313,14 +282,6 @@ arbeitszeit\_web.url\_index module
 ----------------------------------
 
 .. automodule:: arbeitszeit_web.url_index
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-arbeitszeit\_web.user\_action module
-------------------------------------
-
-.. automodule:: arbeitszeit_web.user_action
    :members:
    :undoc-members:
    :show-inheritance:

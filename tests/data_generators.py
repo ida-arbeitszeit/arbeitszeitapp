@@ -43,7 +43,7 @@ from arbeitszeit.use_cases import (
     AcceptCooperationRequest,
     RequestCooperation,
     RequestCooperationRequest,
-    SeekApproval,
+    SelfApprovePlan,
 )
 from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
 from arbeitszeit.use_cases.send_accountant_registration_token import (
@@ -173,7 +173,7 @@ class PlanGenerator:
     company_generator: CompanyGenerator
     datetime_service: FakeDatetimeService
     plan_repository: PlanRepository
-    seek_approval: SeekApproval
+    self_approve_plan: SelfApprovePlan
     request_cooperation: RequestCooperation
     accept_cooperation: AcceptCooperation
     draft_repository: PlanDraftRepository
@@ -210,7 +210,7 @@ class PlanGenerator:
             is_public_service=is_public_service,
             plan_creation_date=plan_creation_date,
         )
-        response = self.seek_approval(SeekApproval.Request(draft_id=draft.id))
+        response = self.self_approve_plan(SelfApprovePlan.Request(draft_id=draft.id))
         plan = self.plan_repository.get_plan_by_id(response.new_plan_id)
         assert plan
         assert plan.is_approved
@@ -285,14 +285,20 @@ class PurchaseGenerator:
         buyer: Company,
         purchase_date=None,
         amount=1,
+        price_per_unit: Decimal = None,
+        plan: Plan = None,
     ) -> Purchase:
         if purchase_date is None:
             purchase_date = self.datetime_service.now_minus_one_day()
+        if price_per_unit is None:
+            price_per_unit = Decimal(10)
+        if plan is None:
+            plan = self.plan_generator.create_plan()
         return self.purchase_repository.create_purchase_by_company(
             purchase_date=purchase_date,
-            plan=self.plan_generator.create_plan().id,
+            plan=plan.id,
             buyer=buyer.id,
-            price_per_unit=Decimal(10),
+            price_per_unit=price_per_unit,
             amount=amount,
             purpose=PurposesOfPurchases.means_of_prod,
         )
@@ -302,14 +308,20 @@ class PurchaseGenerator:
         buyer: Member,
         purchase_date=None,
         amount=1,
+        price_per_unit: Decimal = None,
+        plan: Plan = None,
     ) -> Purchase:
         if purchase_date is None:
             purchase_date = self.datetime_service.now_minus_one_day()
+        if price_per_unit is None:
+            price_per_unit = Decimal(10)
+        if plan is None:
+            plan = self.plan_generator.create_plan()
         return self.purchase_repository.create_purchase_by_member(
             purchase_date=purchase_date,
-            plan=self.plan_generator.create_plan().id,
+            plan=plan.id,
             buyer=buyer.id,
-            price_per_unit=Decimal(10),
+            price_per_unit=price_per_unit,
             amount=amount,
         )
 

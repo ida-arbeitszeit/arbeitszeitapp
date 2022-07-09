@@ -5,7 +5,12 @@ from uuid import uuid4
 from arbeitszeit.entities import ProductionCosts, SocialAccounting
 from arbeitszeit.repositories import TransactionRepository
 from arbeitszeit.use_cases import GetCompanySummary
-from tests.data_generators import CompanyGenerator, PlanGenerator, TransactionGenerator
+from tests.data_generators import (
+    CompanyGenerator,
+    PlanGenerator,
+    PurchaseGenerator,
+    TransactionGenerator,
+)
 from tests.datetime_service import FakeDatetimeService
 
 from .dependency_injection import injection_test
@@ -624,3 +629,188 @@ def test_returns_correct_sales_deviation_of_0_if_plan_is_public_with_balance_of_
     response = get_company_summary(company.id)
     assert response
     assert response.plan_details[0].deviation_relative == Decimal("0")
+
+
+@injection_test
+def test_that_empty_list_of_suppliers_is_returned_when_company_did_not_purchase_anything(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+):
+    company = company_generator.create_company()
+    response = get_company_summary(company.id)
+    assert response
+    assert not response.suppliers_ordered_by_volume
+
+
+@injection_test
+def test_that_list_of_suppliers_contains_one_supplier_when_company_did_one_purchase(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    purchase_generator: PurchaseGenerator,
+):
+    company = company_generator.create_company()
+    purchase_generator.create_purchase_by_company(buyer=company)
+    response = get_company_summary(company.id)
+    assert response
+    assert len(response.suppliers_ordered_by_volume) == 1
+
+
+@injection_test
+def test_that_list_of_suppliers_contains_one_supplier_when_company_did_two_purchases_from_same_supplier(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    purchase_generator: PurchaseGenerator,
+    plan_generator: PlanGenerator,
+):
+    buyer = company_generator.create_company()
+    seller = company_generator.create_company()
+    plan1 = plan_generator.create_plan(planner=seller)
+    plan2 = plan_generator.create_plan(planner=seller)
+    purchase_generator.create_purchase_by_company(buyer=buyer, plan=plan1)
+    purchase_generator.create_purchase_by_company(buyer=buyer, plan=plan2)
+    response = get_company_summary(buyer.id)
+    assert response
+    assert len(response.suppliers_ordered_by_volume) == 1
+
+
+@injection_test
+def test_that_list_of_suppliers_contains_two_supplier_when_company_did_two_purchases_from_different_suppliers(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    purchase_generator: PurchaseGenerator,
+):
+    buyer = company_generator.create_company()
+    company_generator.create_company()
+    purchase_generator.create_purchase_by_company(buyer=buyer)
+    purchase_generator.create_purchase_by_company(buyer=buyer)
+    response = get_company_summary(buyer.id)
+    assert response
+    assert len(response.suppliers_ordered_by_volume) == 2
+
+
+@injection_test
+def test_that_correct_supplier_id_is_shown(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    purchase_generator: PurchaseGenerator,
+    plan_generator: PlanGenerator,
+):
+    buyer = company_generator.create_company()
+    supplier = company_generator.create_company()
+    offered_plan = plan_generator.create_plan(planner=supplier)
+    purchase_generator.create_purchase_by_company(buyer=buyer, plan=offered_plan)
+    response = get_company_summary(buyer.id)
+    assert response
+    assert response.suppliers_ordered_by_volume[0].company_id == supplier.id
+
+
+@injection_test
+def test_that_correct_supplier_name_is_shown(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    purchase_generator: PurchaseGenerator,
+    plan_generator: PlanGenerator,
+):
+    buyer = company_generator.create_company()
+    supplier_name = "supplier coop"
+    supplier = company_generator.create_company(name=supplier_name)
+    offered_plan = plan_generator.create_plan(planner=supplier)
+    purchase_generator.create_purchase_by_company(buyer=buyer, plan=offered_plan)
+    response = get_company_summary(buyer.id)
+    assert response
+    assert response.suppliers_ordered_by_volume[0].company_name == supplier_name
+
+
+@injection_test
+def test_that_correct_volume_of_sale_of_supplier_is_calculated_after_one_purchase(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    purchase_generator: PurchaseGenerator,
+):
+    company = company_generator.create_company()
+    purchase_generator.create_purchase_by_company(
+        buyer=company, price_per_unit=Decimal("8.5"), amount=1
+    )
+    response = get_company_summary(company.id)
+    assert response
+    assert response.suppliers_ordered_by_volume[0].volume_of_sales == Decimal("8.5")
+
+
+@injection_test
+def test_that_correct_volume_of_sale_of_supplier_is_calculated_after_two_purchases_from_same_supplier(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    purchase_generator: PurchaseGenerator,
+    plan_generator: PlanGenerator,
+):
+    buyer = company_generator.create_company()
+    seller = company_generator.create_company()
+    plan1 = plan_generator.create_plan(planner=seller)
+    plan2 = plan_generator.create_plan(planner=seller)
+    purchase_generator.create_purchase_by_company(
+        buyer=buyer, plan=plan1, price_per_unit=Decimal("8.5"), amount=1
+    )
+    purchase_generator.create_purchase_by_company(
+        buyer=buyer, plan=plan2, price_per_unit=Decimal("5"), amount=2
+    )
+    response = get_company_summary(buyer.id)
+    assert response
+    assert response.suppliers_ordered_by_volume[0].volume_of_sales == Decimal("18.5")
+
+
+@injection_test
+def test_that_supplier_with_highest_sales_volume_is_listed_before_other_suppliers(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    purchase_generator: PurchaseGenerator,
+    plan_generator: PlanGenerator,
+):
+    buyer = company_generator.create_company()
+    top_supplier_plan = plan_generator.create_plan()
+    medium_supplier_plan = plan_generator.create_plan()
+    low_supplier_plan = plan_generator.create_plan()
+    purchase_generator.create_purchase_by_company(
+        buyer=buyer, amount=1, plan=low_supplier_plan
+    )
+    purchase_generator.create_purchase_by_company(
+        buyer=buyer, amount=20, plan=top_supplier_plan
+    )
+    purchase_generator.create_purchase_by_company(
+        buyer=buyer, amount=10, plan=medium_supplier_plan
+    )
+    response = get_company_summary(buyer.id)
+    assert response
+    assert (
+        response.suppliers_ordered_by_volume[0].company_id
+        == top_supplier_plan.planner.id
+    )
+    assert (
+        response.suppliers_ordered_by_volume[1].company_id
+        == medium_supplier_plan.planner.id
+    )
+    assert (
+        response.suppliers_ordered_by_volume[2].company_id
+        == low_supplier_plan.planner.id
+    )
+
+
+@injection_test
+def test_that_correct_volumes_of_sale_of_suppliers_are_calculated_after_two_purchases_from_different_suppliers(
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    purchase_generator: PurchaseGenerator,
+    plan_generator: PlanGenerator,
+):
+    buyer = company_generator.create_company()
+    plan1 = plan_generator.create_plan()
+    plan2 = plan_generator.create_plan()
+    purchase_generator.create_purchase_by_company(
+        buyer=buyer, plan=plan1, price_per_unit=Decimal("8.5"), amount=1
+    )
+    purchase_generator.create_purchase_by_company(
+        buyer=buyer, plan=plan2, price_per_unit=Decimal("5"), amount=2
+    )
+    response = get_company_summary(buyer.id)
+    assert response
+    assert response.suppliers_ordered_by_volume[0].volume_of_sales == Decimal("10")
+    assert response.suppliers_ordered_by_volume[1].volume_of_sales == Decimal("8.5")

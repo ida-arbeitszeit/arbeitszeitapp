@@ -32,7 +32,7 @@
                 {% if all_transactions is defined and all_transactions|length %}
                 {% for trans_info in all_transactions %}
                 <tr>
-                    <td>{{ trans_info.date|format_datetime(zone='Europe/Berlin', fmt='%d.%m.%Y %H:%M') }}</td>
+                    <td>{{ trans_info.date }}</td>
                     <td class="{{ 'has-text-success' if trans_info.transaction_volume >= 0 else 'has-text-danger' }}">{{
                         trans_info.transaction_volume }}
                     </td>
