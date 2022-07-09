@@ -80,9 +80,9 @@ class GetCompanySummaryPresenterTests(TestCase):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
         self.assertEqual(view_model.email, RESPONSE_WITH_2_PLANS.email)
 
-    def test_company_register_date_is_shown(self):
+    def test_company_register_date_is_formatted_correctly(self):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
-        self.assertEqual(view_model.registered_on, RESPONSE_WITH_2_PLANS.registered_on)
+        self.assertEqual(view_model.registered_on, "02.01.2022")
 
     def test_expectations_are_shown_as_list_of_strings(self):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)

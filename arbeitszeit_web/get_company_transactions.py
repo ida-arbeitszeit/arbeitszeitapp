@@ -1,8 +1,8 @@
 from dataclasses import dataclass
-from datetime import datetime
 from decimal import Decimal
 from typing import List
 
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import AccountTypes
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.get_company_transactions import (
@@ -15,7 +15,7 @@ from arbeitszeit_web.translator import Translator
 @dataclass
 class ViewModelTransactionInfo:
     transaction_type: str
-    date: datetime
+    date: str
     transaction_volume: Decimal
     account: str
     purpose: str
@@ -29,6 +29,7 @@ class GetCompanyTransactionsViewModel:
 @dataclass
 class GetCompanyTransactionsPresenter:
     translator: Translator
+    datetime_service: DatetimeService
 
     def present(
         self, use_case_response: GetCompanyTransactionsResponse
@@ -43,11 +44,13 @@ class GetCompanyTransactionsPresenter:
     def _create_info(self, transaction: TransactionInfo) -> ViewModelTransactionInfo:
         account = self._get_account(transaction.account_type)
         return ViewModelTransactionInfo(
-            self._get_transaction_name(transaction.transaction_type),
-            transaction.date,
-            round(transaction.transaction_volume, 2),
-            account,
-            transaction.purpose,
+            transaction_type=self._get_transaction_name(transaction.transaction_type),
+            date=self.datetime_service.format_datetime(
+                transaction.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
+            ),
+            transaction_volume=round(transaction.transaction_volume, 2),
+            account=account,
+            purpose=transaction.purpose,
         )
 
     def _get_account(self, account_type: AccountTypes) -> str:

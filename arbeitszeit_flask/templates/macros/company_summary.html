@@ -28,9 +28,7 @@
                                 <tr>
                                     <td class="has-text-left has-text-weight-semibold">{{ gettext("Registered since") }}
                                     </td>
-                                    <td class="has-text-left">{{ view_model.registered_on |
-                                        format_datetime(zone='Europe/Berlin',
-                                        fmt='%d.%m.%Y') }}</td>
+                                    <td class="has-text-left">{{ view_model.registered_on }}</td>
                                 </tr>
                             </tbody>
                         </table>

@@ -202,9 +202,11 @@ class CompanyPresenterModule(Module):
 
     @provider
     def provide_get_company_transactions_presenter(
-        self, translator: Translator
+        self, translator: Translator, datetime_service: DatetimeService
     ) -> GetCompanyTransactionsPresenter:
-        return GetCompanyTransactionsPresenter(translator=translator)
+        return GetCompanyTransactionsPresenter(
+            translator=translator, datetime_service=datetime_service
+        )
 
 
 class PresenterModule(Module):
@@ -466,9 +468,10 @@ class PresenterModule(Module):
         translator: Translator,
         company_index: CompanySummaryUrlIndex,
         control_thresholds: ControlThresholdsFlask,
+        datetime_service: DatetimeService,
     ) -> GetCompanySummarySuccessPresenter:
         return GetCompanySummarySuccessPresenter(
-            plan_index, translator, company_index, control_thresholds
+            plan_index, translator, company_index, control_thresholds, datetime_service
         )
 
     @provider
