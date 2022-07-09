@@ -1,7 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
 
-from arbeitszeit.entities import ProductionCosts
 from arbeitszeit_flask.database.repositories import TransactionRepository
 from tests.data_generators import AccountGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService

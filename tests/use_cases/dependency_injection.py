@@ -197,6 +197,7 @@ class InMemoryModule(Module):
         account_repository: interfaces.AccountRepository,
         transaction_repository: interfaces.TransactionRepository,
         social_accounting: entities.SocialAccounting,
+        purchase_repository: interfaces.PurchaseRepository,
     ) -> GetCompanySummary:
         return GetCompanySummary(
             company_repository,
@@ -204,6 +205,7 @@ class InMemoryModule(Module):
             account_repository,
             transaction_repository,
             social_accounting,
+            purchase_repository,
         )
 
     @provider

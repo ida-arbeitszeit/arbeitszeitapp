@@ -464,10 +464,11 @@ class PresenterModule(Module):
         self,
         plan_index: PlanSummaryUrlIndex,
         translator: Translator,
+        company_index: CompanySummaryUrlIndex,
         control_thresholds: ControlThresholdsFlask,
     ) -> GetCompanySummarySuccessPresenter:
         return GetCompanySummarySuccessPresenter(
-            plan_index, translator, control_thresholds
+            plan_index, translator, company_index, control_thresholds
         )
 
     @provider
