@@ -1,5 +1,55 @@
-Development setup
-=================
+Overview
+========
+
+Description
+-----------
+
+Arbeitszeitapp is a webapp to exchange services and products on the basis of working time.
+
+
+Introduction
+------------
+
+Companies do usually calculate with working hours internally, 
+but switch to money when dealing with other agents on the market. Planning and 
+working time calculation ends where the cooperation ends: on the market. 
+
+This app extends collective planning and working time calculation beyond the 
+company boundaries. In other words, it facilitates the creation of networks 
+of cooperations that exchanges products on the basis of working time 
+without the need for money. 
+
+To make this possible, it provides a planning interface for companies and 
+communities as well as a working time management for companies and workers. 
+Plans can get filed and approved, products can get published and paid, 
+work certificates can get transferred. 
+
+It is the implementation of a theory (`"Arbeitszeitrechnung" 
+<https://aaap.be/Pages/Transition-en-Fundamental-Principles-1930.html>`) elaborated in 
+the 1920s working class movement. 
+
+
+User roles
+----------
+
+There are three user roles:
+
+- **Companies** can file plans for each product (or service) they offer. A plan describes a product and defines how much working time it will cost. 
+
+- **Members** are workers in companies. They receive work certificates for their worked hours. They can use them to purchase products. 
+
+- **Accountants** are delegates of the cooperating network of companies. They can approve company plans based on collectively agreed criteria. 
+
+
+Development
+===========
+
+
+The preferred development environment is Linux. We encourage to use nix. 
+A nix flake is located in this repository.  
+
+Setup
+-----
 
 To run the app in development mode you first have to define some
 environment variables::
@@ -16,8 +66,22 @@ migrations via ``flask db upgrade``.
 
 Afterwards you can start the development server with ``flask run``.
 
-Developer documentation
-=======================
+
+Repository layout
+-----------------
+
+We practice clean architecture and our code is organized thusly.
+Business logic related code is found in the ``arbeitszeit`` folder.
+presenters are located under ``arbeitszeit_web`` and the flask related
+code is found in ``arbeitszeit_flask``.  Tests are stored in the ``tests``
+folder. Inside the tests folder the code is organized similarly to the
+root folder: business logic tests live in ``tests/use_cases``,
+presenter tests can be found in ``tests/presenters`` and flask
+specific code is tested under ``tests/flask_integration``.
+
+
+Documentation
+-------------
 
 Run::
 
@@ -31,16 +95,18 @@ Regenerate the API docs via::
 
   $ ./regenerate-api-docs
 
+
 Code formatting
-===============
+---------------
 
 There is a script that auto formats python files.  It uses black and
 isort for that purpose.  Currently this script only applies auto
 formatting to a limited selection of paths.  You can add more paths by
 adding lines to ".autoformattingrc".
 
+
 Code analysis
-=============
+-------------
 
 We use type hints.  You can check the consistency of the type hints
 via the ``mypy`` command.
@@ -55,8 +121,9 @@ environment variable::
 
     $ export DEBUG_DETAILS=true
 
+
 Testing
-=======
+-------
 
 You can run the tests via by executing ``pytest`` in the root folder
 of this project.
@@ -82,20 +149,8 @@ examples are run per test.  This behavior can be controlled via the
   HYPOTHESIS_PROFILE=ci pytest
 
 
-Repository layout
-=================
-
-We practice clean architecture and our code is organized thusly.
-Business logic related code is found in the ``arbeitszeit`` folder.
-presenters are located under ``arbeitszeit_web`` and the flask related
-code is found in ``arbeitszeit_flask``.  Tests are stored in the ``tests``
-folder. Inside the tests folder the code is organized similarly to the
-root folder: business logic tests live in ``tests/use_cases``,
-presenter tests can be found in ``tests/presenters`` and flask
-specific code is tested under ``tests/flask_integration``.
-
 Email configuration
-===================
+-------------------
 
 There are two email backend implementations available.  One
 implementation meant for production ``flask_mail`` and the other one
@@ -112,7 +167,7 @@ production backend.
 
 
 Cronjob
-=======
+-------
 
 There is a command ``flask payout``. It does the following things:
 
@@ -126,7 +181,7 @@ In development mode you can run it manually in the CLI.
 
 
 Translation
-===========
+-----------
 
 We use `Flask-Babel <https://flask-babel.tkte.ch/>` for translation.
 
