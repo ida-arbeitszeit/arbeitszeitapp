@@ -8,6 +8,7 @@ from arbeitszeit.use_cases import GetCompanySummary
 from arbeitszeit.use_cases.get_accountant_profile_info import (
     GetAccountantProfileInfoUseCase,
 )
+from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCase
 from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
 from arbeitszeit.use_cases.log_in_accountant import LogInAccountantUseCase
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
@@ -234,6 +235,19 @@ class InMemoryModule(Module):
     @provider
     def provide_control_thresholds_test_impl(self) -> ControlThresholdsTestImpl:
         return ControlThresholdsTestImpl()
+
+    @provider
+    def provide_get_company_dashboard_use_case(
+        self,
+        company_repository: interfaces.CompanyRepository,
+        company_worker_repository: interfaces.CompanyWorkerRepository,
+        plan_repository: interfaces.PlanRepository,
+    ) -> GetCompanyDashboardUseCase:
+        return GetCompanyDashboardUseCase(
+            company_repository=company_repository,
+            company_worker_repository=company_worker_repository,
+            plan_repository=plan_repository,
+        )
 
     @provider
     def provide_consumer_product_transaction_factory(
