@@ -20,7 +20,7 @@ class UseCaseTest(TestCase):
         self.assertFalse(response.plans)
 
     def test_returns_nothing_when_there_is_only_one_inactive_plan(self):
-        self.plan_generator.create_plan()
+        self.plan_generator.draft_plan()
         response = self.use_case()
         self.assertFalse(response.plans)
 
@@ -52,7 +52,6 @@ class UseCaseTest(TestCase):
 
     def test_returns_three_active_plans_in_correct_order(self):
         timestamps = [
-            None,
             self.datetime_service.now_minus_two_days(),
             self.datetime_service.now_minus_one_day(),  # second latest
             self.datetime_service.now_minus_ten_days(),
@@ -63,6 +62,6 @@ class UseCaseTest(TestCase):
             self.plan_generator.create_plan(activation_date=t) for t in timestamps
         ]
         response = self.use_case()
-        self.assertEqual(response.plans[0].plan_id, unordered_plans[4].id)
-        self.assertEqual(response.plans[1].plan_id, unordered_plans[2].id)
-        self.assertEqual(response.plans[2].plan_id, unordered_plans[5].id)
+        self.assertEqual(response.plans[0].plan_id, unordered_plans[3].id)
+        self.assertEqual(response.plans[1].plan_id, unordered_plans[1].id)
+        self.assertEqual(response.plans[2].plan_id, unordered_plans[4].id)

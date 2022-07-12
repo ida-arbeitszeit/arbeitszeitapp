@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from uuid import UUID
 
 from flask import Response, request
@@ -31,6 +33,7 @@ from arbeitszeit_web.pay_consumer_product import (
 from arbeitszeit_web.presenters.get_member_dashboard_presenter import (
     GetMemberDashboardPresenter,
 )
+from arbeitszeit_web.presenters.member_purchases import MemberPurchasesPresenter
 from arbeitszeit_web.query_companies import (
     QueryCompaniesController,
     QueryCompaniesPresenter,
@@ -40,18 +43,21 @@ from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresente
 from .blueprint import MemberRoute
 
 
-@MemberRoute("/member/kaeufe")
+@MemberRoute("/member/purchases")
 def my_purchases(
     query_purchases: use_cases.QueryPurchases,
     member_repository: MemberRepository,
     template_renderer: UserTemplateRenderer,
+    presenter: MemberPurchasesPresenter,
 ) -> Response:
     member = member_repository.get_by_id(UUID(current_user.id))
     assert member is not None
-    purchases = list(query_purchases(member))
+    response = query_purchases(member)
+    view_model = presenter.present_member_purchases(response)
     return Response(
         template_renderer.render_template(
-            "member/my_purchases.html", context=dict(purchases=purchases)
+            "member/my_purchases.html",
+            context=dict(view_model=view_model),
         )
     )
 

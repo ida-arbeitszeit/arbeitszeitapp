@@ -475,11 +475,11 @@ def test_returns_correct_sales_balance_if_plan_is_productive_and_no_transactions
 ):
     company = company_generator.create_company()
     plan_generator.create_plan(
-        planner=company,
+        planner=company, costs=ProductionCosts(Decimal(1), Decimal(1), Decimal(1))
     )
     response = get_company_summary(company.id)
     assert response
-    assert response.plan_details[0].sales_balance == Decimal(0)
+    assert response.plan_details[0].sales_balance == Decimal("-3")
 
 
 @injection_test
@@ -492,6 +492,7 @@ def test_returns_correct_sales_balance_if_plan_is_productive_and_one_transaction
     company = company_generator.create_company()
     plan = plan_generator.create_plan(
         planner=company,
+        costs=ProductionCosts(Decimal(1), Decimal(1), Decimal(1)),
     )
     transaction_generator.create_transaction(
         receiving_account=company.product_account,
@@ -500,7 +501,7 @@ def test_returns_correct_sales_balance_if_plan_is_productive_and_one_transaction
     )
     response = get_company_summary(company.id)
     assert response
-    assert response.plan_details[0].sales_balance == Decimal(15)
+    assert response.plan_details[0].sales_balance == Decimal(12)
 
 
 @injection_test
@@ -539,7 +540,7 @@ def test_returns_correct_sales_deviation_of_100_if_plan_is_productive_with_costs
     )
     transaction_generator.create_transaction(
         receiving_account=company.product_account,
-        amount_received=Decimal(10),
+        amount_received=Decimal(20),
         purpose=f"Plan ID: {plan.id}",
     )
     response = get_company_summary(company.id)
@@ -555,14 +556,9 @@ def test_returns_correct_sales_deviation_of_100_if_plan_is_productive_with_costs
     transaction_generator: TransactionGenerator,
 ):
     company = company_generator.create_company()
-    plan = plan_generator.create_plan(
+    plan_generator.create_plan(
         planner=company,
         costs=ProductionCosts(Decimal(5), Decimal(5), Decimal(0)),
-    )
-    transaction_generator.create_transaction(
-        receiving_account=company.product_account,
-        amount_received=Decimal(-10),
-        purpose=f"Plan ID: {plan.id}",
     )
     response = get_company_summary(company.id)
     assert response
@@ -574,11 +570,17 @@ def test_returns_correct_sales_deviation_of_0_if_plan_is_productive_with_costs_o
     get_company_summary: GetCompanySummary,
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
+    transaction_generator: TransactionGenerator,
 ):
     company = company_generator.create_company()
-    plan_generator.create_plan(
+    plan = plan_generator.create_plan(
         planner=company,
         costs=ProductionCosts(Decimal(5), Decimal(5), Decimal(0)),
+    )
+    transaction_generator.create_transaction(
+        receiving_account=company.product_account,
+        amount_received=Decimal(10),
+        purpose=f"Plan ID: {plan.id}",
     )
     response = get_company_summary(company.id)
     assert response

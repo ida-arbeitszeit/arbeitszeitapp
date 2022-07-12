@@ -175,7 +175,6 @@ def create_draft(
 @commit_changes
 def self_approve_plan(
     self_approve_plan: use_cases.SelfApprovePlan,
-    activate_plan_and_grant_credit: use_cases.ActivatePlanAndGrantCredit,
     template_renderer: UserTemplateRenderer,
     presenter: SelfApprovePlanPresenter,
 ):
@@ -185,8 +184,6 @@ def self_approve_plan(
     approval_response = self_approve_plan(
         use_cases.SelfApprovePlan.Request(draft_id=draft_uuid)
     )
-    if approval_response.is_approved:
-        activate_plan_and_grant_credit(approval_response.new_plan_id)
     presenter.present_response(approval_response)
     return redirect(url_for("main_company.my_plans"))
 
