@@ -1,3 +1,4 @@
+from datetime import datetime
 from unittest import TestCase
 from uuid import uuid4
 
@@ -24,9 +25,10 @@ class GeneralUseCaseTests(TestCase):
         self.assertIsInstance(response, GetCompanyDashboardUseCase.Success)
 
     def test_that_dashboard_shows_company_name(self):
-        company = self.company_generator.create_company(name="test coop name")
+        expected_name = "test coop name"
+        company = self.company_generator.create_company(name=expected_name)
         response = self.use_case.get_dashboard(company.id)
-        self.assertEqual(response.company_info.name, company.name)
+        self.assertEqual(response.company_info.name, expected_name)
 
     def test_that_dashboard_shows_company_id(self):
         company = self.company_generator.create_company()
@@ -34,9 +36,10 @@ class GeneralUseCaseTests(TestCase):
         self.assertEqual(response.company_info.id, company.id)
 
     def test_that_dashboard_shows_company_email(self):
-        company = self.company_generator.create_company(email="t@tmail.com")
+        expected_mail = "t@tmail.com"
+        company = self.company_generator.create_company(email=expected_mail)
         response = self.use_case.get_dashboard(company.id)
-        self.assertEqual(response.company_info.email, company.email)
+        self.assertEqual(response.company_info.email, expected_mail)
 
     def test_that_dashboard_shows_that_company_has_no_workers(self):
         company = self.company_generator.create_company(workers=None)
@@ -63,25 +66,6 @@ class ThreeLatestPlansTests(TestCase):
         response = self.use_case.get_dashboard(company.id)
         self.assertFalse(response.three_latest_plans)
 
-    def test_that_list_of_latest_plans_is_emtpy_when_there_is_one_inactive_plan(
-        self,
-    ):
-        plan = self.plan_generator.create_plan()
-        assert not plan.is_active
-        company = self.company_generator.create_company()
-        response = self.use_case.get_dashboard(company.id)
-        self.assertFalse(response.three_latest_plans)
-
-    def test_that_list_of_latest_plans_has_one_entry_when_there_is_one_active_plan(
-        self,
-    ):
-        self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day()
-        )
-        company = self.company_generator.create_company()
-        response = self.use_case.get_dashboard(company.id)
-        self.assertEqual(len(response.three_latest_plans), 1)
-
     def test_that_list_of_latest_plans_has_three_entries_when_there_are_five_active_plans(
         self,
     ):
@@ -93,20 +77,35 @@ class ThreeLatestPlansTests(TestCase):
         response = self.use_case.get_dashboard(company.id)
         self.assertEqual(len(response.three_latest_plans), 3)
 
-    def test_returns_three_active_plans_in_correct_order(self):
+    def test_that_plan_id_of_latest_plan_is_set_correctly(
+        self,
+    ):
+        plan = self.plan_generator.create_plan(
+            activation_date=self.datetime_service.now_minus_one_day()
+        )
         company = self.company_generator.create_company()
-        timestamps = [
-            None,
-            self.datetime_service.now_minus_two_days(),
-            self.datetime_service.now_minus_one_day(),  # second latest
-            self.datetime_service.now_minus_ten_days(),
-            self.datetime_service.now_minus_20_hours(),  # latest
-            self.datetime_service.now_minus_25_hours(),  # third latest
-        ]
-        unordered_plans = [
-            self.plan_generator.create_plan(activation_date=t) for t in timestamps
-        ]
         response = self.use_case.get_dashboard(company.id)
-        self.assertEqual(response.three_latest_plans[0].plan_id, unordered_plans[4].id)
-        self.assertEqual(response.three_latest_plans[1].plan_id, unordered_plans[2].id)
-        self.assertEqual(response.three_latest_plans[2].plan_id, unordered_plans[5].id)
+        self.assertEqual(response.three_latest_plans[0].plan_id, plan.id)
+
+    def test_that_product_name_of_latest_plan_is_set_correctly(
+        self,
+    ):
+        expected_name = "test product xy"
+        self.plan_generator.create_plan(
+            activation_date=self.datetime_service.now_minus_one_day(),
+            product_name=expected_name,
+        )
+        company = self.company_generator.create_company()
+        response = self.use_case.get_dashboard(company.id)
+        self.assertEqual(response.three_latest_plans[0].prd_name, expected_name)
+
+    def test_that_activation_date_of_latest_plan_is_set_correctly(
+        self,
+    ):
+        expected_datetime = datetime(2020, 10, 10)
+        self.plan_generator.create_plan(activation_date=expected_datetime)
+        company = self.company_generator.create_company()
+        response = self.use_case.get_dashboard(company.id)
+        self.assertEqual(
+            response.three_latest_plans[0].activation_date, expected_datetime
+        )
