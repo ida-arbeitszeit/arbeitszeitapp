@@ -7,4 +7,5 @@ hypothesis
 isort
 mypy
 psycopg2
+pytest
 sphinx
