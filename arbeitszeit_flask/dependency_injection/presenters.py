@@ -47,6 +47,7 @@ from arbeitszeit_web.presenters.list_available_languages_presenter import (
 )
 from arbeitszeit_web.presenters.log_in_company_presenter import LogInCompanyPresenter
 from arbeitszeit_web.presenters.log_in_member_presenter import LogInMemberPresenter
+from arbeitszeit_web.presenters.member_purchases import MemberPurchasesPresenter
 from arbeitszeit_web.presenters.register_accountant_presenter import (
     RegisterAccountantPresenter,
 )
@@ -479,3 +480,10 @@ class PresenterModule(Module):
         self, translator: Translator
     ) -> InviteWorkerToCompanyPresenter:
         return InviteWorkerToCompanyPresenter(translator)
+
+    @provider
+    def provide_member_purchases_presenter(
+        self,
+        datetime_service: DatetimeService,
+    ) -> MemberPurchasesPresenter:
+        return MemberPurchasesPresenter(datetime_service=datetime_service)
