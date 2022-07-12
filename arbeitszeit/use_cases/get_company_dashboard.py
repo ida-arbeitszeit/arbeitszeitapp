@@ -40,7 +40,7 @@ class GetCompanyDashboardUseCase:
     company_worker_repository: CompanyWorkerRepository
     plan_repository: PlanRepository
 
-    def __call__(self, company_id: UUID) -> Union[Success, Failure]:
+    def get_dashboard(self, company_id: UUID) -> Union[Success, Failure]:
         company = self.company_repository.get_by_id(company_id)
         if company is None:
             return self.Failure()
