@@ -12,10 +12,13 @@ from typing import Dict, Iterable, Optional, Tuple
 def main() -> None:
     parse_arguments()
     controller = RequirementsUpdater(
-        requirements_file=RequirementsFile.from_path(
-            Path("constraints.txt"), version_string_cleaner=VersionStringCleaner()
+        requirements_file=RequirementsFile(
+            packages=dict(),
+            path=Path("constraints.txt"),
+            version_string_cleaner=VersionStringCleaner(),
         ),
         python_environment=PythonEnvironment(),
+        package_filter=PackageFilter(),
     )
     controller.process_requirements_file()
 
@@ -24,13 +27,17 @@ def main() -> None:
 class RequirementsUpdater:
     requirements_file: RequirementsFile
     python_environment: PythonEnvironment
+    package_filter: PackageFilter
 
     def process_requirements_file(self) -> None:
         for (
             package_name,
             package_version,
         ) in self.python_environment.get_installed_packages():
-            self.requirements_file.update_package(package_name, package_version)
+            if self.package_filter.is_package_to_be_included_in_requirements(
+                package_name
+            ):
+                self.requirements_file.update_package(package_name, package_version)
         self.requirements_file.save_to_disk()
 
 
@@ -48,25 +55,6 @@ class RequirementsFile:
     def update_package(self, package_name: str, package_version: str) -> None:
         self.packages[package_name] = self.version_string_cleaner.clean_version_string(
             package_version
-        )
-
-    @classmethod
-    def from_path(
-        cls, path: Path, version_string_cleaner: VersionStringCleaner
-    ) -> RequirementsFile:
-        """Construct a RequirementsFile from a path object"""
-        packages: Dict[str, str] = dict()
-        with open(path) as handle:
-            for line in handle:
-                try:
-                    name, version = line.split("==")
-                except ValueError:
-                    continue
-                packages[name.strip()] = version.strip()
-        return cls(
-            packages=packages,
-            path=path,
-            version_string_cleaner=version_string_cleaner,
         )
 
     def packages_sorted_by_name(self) -> Iterable[Tuple[str, str]]:
@@ -120,6 +108,16 @@ class VersionStringCleaner:
         except IndexError:
             return None
         return ".".join([major, minor])
+
+
+class PackageFilter:
+    def is_package_to_be_included_in_requirements(self, package_name: str) -> bool:
+        # As of 12. Jul 2022 the nix environment uses mccabe 0.7,
+        # which is in conflict with flake8 requirements 'mccabe <
+        # 0.7'. mccabe 0.6.1 and 0.7 seem to work fine with flake8. So
+        # to avoid pip complaining about dependency conflicts we
+        # filter mccabe and let pip decide which version to use.
+        return package_name != "mccabe"
 
 
 def parse_arguments():
