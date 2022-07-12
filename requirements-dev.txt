@@ -1,0 +1,11 @@
+-r requirements.txt
+
+black
+flake8
+gunicorn
+hypothesis
+isort
+mypy
+psycopg2
+pytest
+sphinx

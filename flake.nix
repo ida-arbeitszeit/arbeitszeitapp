@@ -31,25 +31,37 @@
             arbeitszeitapp-docker-image = pkgs.arbeitszeitapp-docker-image;
           };
           checks = {
+            arbeitszeit-python39 = pkgs.python39.pkgs.arbeitszeitapp;
+            arbeitszeit-python310 = pkgs.python310.pkgs.arbeitszeitapp;
             arbeitszeitapp-22_05 = pkgs_22_05.python3.pkgs.arbeitszeitapp;
           };
         });
       systemIndependent = {
         overlays = {
-          default = final: prev: {
-            python3 = prev.python3.override {
-              packageOverrides = import nix/pythonPackages.nix;
+          default = final: prev:
+            let
+              overridePython = python:
+                python.override {
+                  packageOverrides = import nix/pythonPackages.nix;
+                };
+            in {
+              python39 = overridePython prev.python39;
+              python310 = overridePython prev.python310;
+              arbeitszeitapp-docker-image =
+                final.callPackage nix/docker.nix { python = final.python3; };
             };
-            arbeitszeitapp-docker-image =
-              final.callPackage nix/docker.nix { python = final.python3; };
-          };
-          development = final: prev: {
-            python3 = prev.python3.override {
-              packageOverrides = with nixpkgs.lib;
-                composeExtensions (import nix/developmentOverrides.nix)
-                (import nix/pythonPackages.nix);
+          development = final: prev:
+            let
+              overridePython = python:
+                python.override {
+                  packageOverrides = with nixpkgs.lib;
+                    composeExtensions (import nix/developmentOverrides.nix)
+                    (import nix/pythonPackages.nix);
+                };
+            in {
+              python39 = overridePython prev.python39;
+              python310 = overridePython prev.python310;
             };
-          };
         };
       };
     in systemDependent // systemIndependent;
