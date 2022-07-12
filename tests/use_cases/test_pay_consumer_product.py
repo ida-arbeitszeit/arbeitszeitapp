@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 from decimal import Decimal
 from unittest import TestCase
 from uuid import UUID, uuid4
@@ -9,6 +10,7 @@ from arbeitszeit.entities import ProductionCosts, PurposesOfPurchases
 from arbeitszeit.price_calculator import calculate_price
 from arbeitszeit.use_cases import PayConsumerProduct
 from arbeitszeit.use_cases.pay_consumer_product import RejectionReason
+from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
 from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.data_generators import MemberGenerator, PlanGenerator, TransactionGenerator
 from tests.datetime_service import FakeDatetimeService
@@ -36,24 +38,21 @@ class PayConsumerProductTests(TestCase):
         self.plan_cooperation_repository = injector.get(PlanCooperationRepository)
         self.buyer = self.member_generator.create_member()
         self.control_thresholds = injector.get(ControlThresholdsTestImpl)
+        self.update_plans_and_payout = injector.get(UpdatePlansAndPayout)
 
     def test_payment_fails_when_plan_does_not_exist(self):
         response = self.pay_consumer_product(self.make_request(uuid4(), 1))
         self.assertFalse(response.is_accepted)
         self.assertEqual(response.rejection_reason, RejectionReason.plan_not_found)
 
-    def test_payment_fails_if_plan_isnt_active_yet(self):
-        plan = self.plan_generator.create_plan()
-        response = self.pay_consumer_product(self.make_request(plan.id, amount=3))
-        self.assertFalse(response.is_accepted)
-        self.assertEqual(response.rejection_reason, RejectionReason.plan_inactive)
-
     def test_payment_is_unsuccessful_if_plan_is_expired(self):
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
         plan = self.plan_generator.create_plan(
-            plan_creation_date=self.datetime_service.now_minus_ten_days(),
             timeframe=1,
         )
-        plan.expired = True
+        self.update_plans_and_payout()
+        self.datetime_service.freeze_time(datetime(2001, 1, 1))
+        self.update_plans_and_payout()
         response = self.pay_consumer_product(self.make_request(plan.id, amount=3))
         self.assertFalse(response.is_accepted)
         self.assertEqual(response.rejection_reason, RejectionReason.plan_inactive)
@@ -81,12 +80,15 @@ class PayConsumerProductTests(TestCase):
             activation_date=self.datetime_service.now(),
         )
 
+        transactions_before_payment = len(self.transaction_repository.transactions)
         account = self.buyer.account
         assert self.account_repository.get_account_balance(account) == 0
         self.control_thresholds.set_allowed_overdraw_of_member_account(0)
 
         self.pay_consumer_product(self.make_request(plan.id, amount=3))
-        assert len(self.transaction_repository.transactions) == 0
+        self.assertEqual(
+            len(self.transaction_repository.transactions), transactions_before_payment
+        )
 
     def test_no_purchase_is_added_when_member_has_insufficient_balance(
         self,
@@ -164,11 +166,15 @@ class PayConsumerProductTests(TestCase):
         plan = self.plan_generator.create_plan(
             activation_date=self.datetime_service.now_minus_one_day()
         )
+        transactions_before_payment = len(self.transaction_repository.transactions)
         pieces = 3
         self.make_transaction_to_buyer_account(Decimal(100))
         self.pay_consumer_product(self.make_request(plan.id, pieces))
-        assert len(self.transaction_repository.transactions) == 2
-        transaction_added = self.transaction_repository.transactions[1]
+        self.assertEqual(
+            len(self.transaction_repository.transactions),
+            transactions_before_payment + 2,
+        )
+        transaction_added = self.transaction_repository.transactions[-1]
         expected_amount_sent = pieces * calculate_price(
             self.plan_cooperation_repository.get_cooperating_plans(plan.id)
         )
@@ -180,7 +186,13 @@ class PayConsumerProductTests(TestCase):
 
     def test_balances_are_adjusted_correctly(self) -> None:
         plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day()
+            activation_date=self.datetime_service.now_minus_one_day(),
+            costs=ProductionCosts(
+                means_cost=Decimal(3),
+                resource_cost=Decimal(3),
+                labour_cost=Decimal(3),
+            ),
+            amount=4,
         )
         start_balance = Decimal(100)
         self.make_transaction_to_buyer_account(start_balance)
@@ -191,13 +203,13 @@ class PayConsumerProductTests(TestCase):
         )
 
         expected_balance = start_balance - costs
-        assert (
-            self.account_repository.get_account_balance(self.buyer.account)
-            == expected_balance
+        self.assertEqual(
+            self.account_repository.get_account_balance(self.buyer.account),
+            expected_balance,
         )
-        assert (
-            self.account_repository.get_account_balance(plan.planner.product_account)
-            == costs
+        self.assertEqual(
+            self.account_repository.get_account_balance(plan.planner.product_account),
+            Decimal("-9") + costs,
         )
 
     def test_that_correct_transaction_is_added_when_plan_is_public_service(self):
@@ -205,10 +217,14 @@ class PayConsumerProductTests(TestCase):
             is_public_service=True,
             activation_date=self.datetime_service.now_minus_one_day(),
         )
+        transactions_before_payment = len(self.transaction_repository.transactions)
         pieces = 3
         self.pay_consumer_product(self.make_request(plan.id, pieces))
-        assert len(self.transaction_repository.transactions) == 1
-        transaction_added = self.transaction_repository.transactions[0]
+        self.assertEqual(
+            len(self.transaction_repository.transactions),
+            transactions_before_payment + 1,
+        )
+        transaction_added = self.transaction_repository.transactions[-1]
         assert transaction_added.sending_account == self.buyer.account
         assert transaction_added.receiving_account == plan.planner.product_account
         assert transaction_added.amount_sent == transaction_added.amount_received == 0

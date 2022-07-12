@@ -40,30 +40,6 @@ def test_that_no_plan_is_returned_when_searching_an_empty_repository(
 
 
 @injection_test
-def test_that_only_active_plans_are_returned_where_plan_id_query_is_none(
-    query_plans: QueryPlans,
-    plan_generator: PlanGenerator,
-):
-    expected_plan = plan_generator.create_plan(activation_date=datetime.min)
-    unexpected_plan = plan_generator.create_plan(activation_date=None)
-    response = query_plans(make_request(None, PlanFilter.by_plan_id))
-    assert plan_in_results(expected_plan, response)
-    assert not plan_in_results(unexpected_plan, response)
-
-
-@injection_test
-def test_that_only_active_plans_are_returned_where_product_name_query_is_none(
-    query_plans: QueryPlans,
-    plan_generator: PlanGenerator,
-):
-    expected_plan = plan_generator.create_plan(activation_date=datetime.min)
-    unexpected_plan = plan_generator.create_plan(activation_date=None)
-    response = query_plans(make_request(None, PlanFilter.by_product_name))
-    assert plan_in_results(expected_plan, response)
-    assert not plan_in_results(unexpected_plan, response)
-
-
-@injection_test
 def test_that_plans_where_id_is_exact_match_are_returned(
     query_plans: QueryPlans,
     plan_generator: PlanGenerator,

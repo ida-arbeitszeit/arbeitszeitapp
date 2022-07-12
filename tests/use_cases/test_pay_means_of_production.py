@@ -1,14 +1,16 @@
 from datetime import datetime, timedelta
+from decimal import Decimal
 from unittest import TestCase
 from uuid import uuid4
 
-from arbeitszeit.entities import Company, PurposesOfPurchases
+from arbeitszeit.entities import Company, ProductionCosts, PurposesOfPurchases
 from arbeitszeit.price_calculator import calculate_price
 from arbeitszeit.use_cases import (
     GetCompanyTransactions,
     PayMeansOfProduction,
     PayMeansOfProductionRequest,
 )
+from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsResponse
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
@@ -23,33 +25,19 @@ from .repositories import (
 
 
 @injection_test
-def test_error_is_raised_if_plan_is_not_active_yet(
-    pay_means_of_production: PayMeansOfProduction,
-    company_generator: CompanyGenerator,
-    plan_generator: PlanGenerator,
-):
-    sender = company_generator.create_company()
-    plan = plan_generator.create_plan()
-    purpose = PurposesOfPurchases.means_of_prod
-    pieces = 5
-    response = pay_means_of_production(
-        PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
-    )
-    assert response.is_rejected
-    assert response.rejection_reason == response.RejectionReason.plan_is_not_active
-
-
-@injection_test
 def test_reject_payment_if_plan_is_expired(
     pay_means_of_production: PayMeansOfProduction,
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
     datetime_service: FakeDatetimeService,
+    update_plans_and_payout: UpdatePlansAndPayout,
 ):
+    datetime_service.freeze_time(datetime(2000, 1, 1))
     sender = company_generator.create_company()
-    plan = plan_generator.create_plan(
-        plan_creation_date=datetime_service.now_minus_ten_days(), timeframe=1
-    )
+    plan = plan_generator.create_plan(timeframe=1)
+    update_plans_and_payout()
+    datetime_service.freeze_time(datetime(2001, 1, 1))
+    update_plans_and_payout()
     purpose = PurposesOfPurchases.means_of_prod
     pieces = 5
     plan.expired = True
@@ -181,22 +169,25 @@ def test_balance_of_seller_increased(
 ):
     sender = company_generator.create_company()
     plan = plan_generator.create_plan(
-        activation_date=datetime_service.now_minus_one_day()
+        costs=ProductionCosts(
+            labour_cost=Decimal(1),
+            means_cost=Decimal(1),
+            resource_cost=Decimal(1),
+        ),
+        amount=5,
     )
     purpose = PurposesOfPurchases.raw_materials
     pieces = 5
-
+    assert account_repository.get_account_balance(
+        plan.planner.product_account
+    ) == Decimal("-3")
     pay_means_of_production(
         PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
     )
 
-    # account prd shows the originally planned cost of the sold product
-    # (the coop price is irrelevant here)
-    planed_cost_of_product = pieces * calculate_price([plan])
-    assert (
-        account_repository.get_account_balance(plan.planner.product_account)
-        == planed_cost_of_product
-    )
+    assert account_repository.get_account_balance(
+        plan.planner.product_account
+    ) == Decimal("0")
 
 
 @injection_test
@@ -224,14 +215,18 @@ def test_balance_of_seller_increased_correctly_when_plan_is_in_cooperation(
     purpose = PurposesOfPurchases.raw_materials
     pieces = 5
 
+    balance_before_transaction = account_repository.get_account_balance(
+        plan.planner.product_account
+    )
+
     pay_means_of_production(
         PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
     )
 
-    planed_cost_of_product = pieces * calculate_price([plan])
-    assert (
-        account_repository.get_account_balance(plan.planner.product_account)
-        == planed_cost_of_product
+    assert account_repository.get_account_balance(
+        plan.planner.product_account
+    ) == balance_before_transaction + (
+        plan.production_costs.total_cost() / Decimal(plan.prd_amount) * 5
     )
 
 
@@ -250,22 +245,23 @@ def test_correct_transaction_added_if_means_of_production_were_paid(
     )
     purpose = PurposesOfPurchases.means_of_prod
     pieces = 5
+    transactions_before_payment = len(transaction_repository.transactions)
     pay_means_of_production(
         PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
     )
     price_total = pieces * calculate_price(
         plan_cooperation_repository.get_cooperating_plans(plan.id)
     )
-    assert len(transaction_repository.transactions) == 1
+    assert len(transaction_repository.transactions) == transactions_before_payment + 1
     assert (
-        transaction_repository.transactions[0].sending_account == sender.means_account
+        transaction_repository.transactions[-1].sending_account == sender.means_account
     )
     assert (
-        transaction_repository.transactions[0].receiving_account
+        transaction_repository.transactions[-1].receiving_account
         == plan.planner.product_account
     )
-    assert transaction_repository.transactions[0].amount_sent == price_total
-    assert transaction_repository.transactions[0].amount_received == price_total
+    assert transaction_repository.transactions[-1].amount_sent == price_total
+    assert transaction_repository.transactions[-1].amount_received == price_total
 
 
 @injection_test
@@ -283,23 +279,24 @@ def test_correct_transaction_added_if_raw_materials_were_paid(
     )
     purpose = PurposesOfPurchases.raw_materials
     pieces = 5
+    transactions_before_payment = len(transaction_repository.transactions)
     pay_means_of_production(
         PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
     )
     price_total = pieces * calculate_price(
         plan_cooperation_repository.get_cooperating_plans(plan.id)
     )
-    assert len(transaction_repository.transactions) == 1
+    assert len(transaction_repository.transactions) == transactions_before_payment + 1
     assert (
-        transaction_repository.transactions[0].sending_account
+        transaction_repository.transactions[-1].sending_account
         == sender.raw_material_account
     )
     assert (
-        transaction_repository.transactions[0].receiving_account
+        transaction_repository.transactions[-1].receiving_account
         == plan.planner.product_account
     )
-    assert transaction_repository.transactions[0].amount_sent == price_total
-    assert transaction_repository.transactions[0].amount_received == price_total
+    assert transaction_repository.transactions[-1].amount_sent == price_total
+    assert transaction_repository.transactions[-1].amount_received == price_total
 
 
 @injection_test
@@ -417,6 +414,9 @@ class TestSuccessfulPayment(TestCase):
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.transaction_time = datetime(2020, 10, 1, 22, 30)
         self.datetime_service.freeze_time(self.transaction_time)
+        self.planner_transactions_before_payment = len(
+            self.get_company_transactions(self.planner.id).transactions
+        )
         self.response = self.pay_means_of_production(
             PayMeansOfProductionRequest(
                 buyer=self.buyer.id,
@@ -433,7 +433,10 @@ class TestSuccessfulPayment(TestCase):
 
     def test_transaction_shows_up_in_transaction_listing_for_planner(self) -> None:
         transaction_info = self.get_company_transactions(self.planner.id)
-        self.assertEqual(len(transaction_info.transactions), 1)
+        self.assertEqual(
+            len(transaction_info.transactions),
+            self.planner_transactions_before_payment + 1,
+        )
 
     def test_transaction_info_of_buyer_shows_transaction_timestamp(self) -> None:
         transaction_info = self.get_company_transactions(self.buyer.id)
@@ -441,7 +444,7 @@ class TestSuccessfulPayment(TestCase):
 
     def test_transaction_info_of_planner_shows_transaction_timestamp(self) -> None:
         transaction_info = self.get_company_transactions(self.planner.id)
-        self.assertEqual(transaction_info.transactions[0].date, self.transaction_time)
+        self.assertEqual(transaction_info.transactions[-1].date, self.transaction_time)
 
     def get_buyer_transaction_infos(
         self, user: Company

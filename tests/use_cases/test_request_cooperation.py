@@ -53,21 +53,6 @@ class RequestCooperationTests(TestCase):
             == RequestCooperationResponse.RejectionReason.cooperation_not_found
         )
 
-    def test_error_is_raised_when_plan_is_inactive(self) -> None:
-        cooperation = self.coop_generator.create_cooperation()
-        plan = self.plan_generator.create_plan()
-        request = RequestCooperationRequest(
-            requester_id=self.requester.id,
-            plan_id=plan.id,
-            cooperation_id=cooperation.id,
-        )
-        response = self.request_cooperation(request)
-        assert response.is_rejected
-        assert (
-            response.rejection_reason
-            == RequestCooperationResponse.RejectionReason.plan_inactive
-        )
-
     def test_error_is_raised_when_plan_has_already_cooperation(self) -> None:
         cooperation1 = self.coop_generator.create_cooperation()
         cooperation2 = self.coop_generator.create_cooperation(

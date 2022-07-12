@@ -155,7 +155,6 @@ def test_counting_of_active_plans(
     plan_generator: PlanGenerator,
     datetime_service: FakeDatetimeService,
 ):
-    plan_generator.create_plan(activation_date=None)
     plan_generator.create_plan(activation_date=datetime_service.now_minus_one_day())
     plan_generator.create_plan(activation_date=datetime_service.now_minus_one_day())
     stats = get_statistics()
@@ -184,7 +183,6 @@ def test_that_inactive_and_productive_plans_are_ignored_when_counting_active_and
     plan_generator: PlanGenerator,
     datetime_service: FakeDatetimeService,
 ):
-    plan_generator.create_plan(activation_date=None, is_public_service=True)
     plan_generator.create_plan(
         activation_date=datetime_service.now_minus_one_day(), is_public_service=False
     )
@@ -212,20 +210,6 @@ def test_average_calculation_of_two_active_plan_timeframes(
 
 
 @injection_test
-def test_that_inactive_plans_are_ignored_when_calculating_average_of_plan_timeframes(
-    get_statistics: GetStatistics,
-    plan_generator: PlanGenerator,
-    datetime_service: FakeDatetimeService,
-):
-    plan_generator.create_plan(activation_date=None, timeframe=20)
-    plan_generator.create_plan(
-        activation_date=datetime_service.now_minus_one_day(), timeframe=3
-    )
-    stats = get_statistics()
-    assert stats.avg_timeframe == 3
-
-
-@injection_test
 def test_adding_up_work_of_two_plans(
     get_statistics: GetStatistics,
     plan_generator: PlanGenerator,
@@ -241,21 +225,6 @@ def test_adding_up_work_of_two_plans(
     )
     stats = get_statistics()
     assert stats.planned_work == 5
-
-
-@injection_test
-def test_that_inactive_plans_are_ignored_when_adding_up_work(
-    get_statistics: GetStatistics,
-    plan_generator: PlanGenerator,
-    datetime_service: FakeDatetimeService,
-):
-    plan_generator.create_plan(activation_date=None, costs=production_costs(10, 1, 1))
-    plan_generator.create_plan(
-        activation_date=datetime_service.now_minus_one_day(),
-        costs=production_costs(3, 1, 1),
-    )
-    stats = get_statistics()
-    assert stats.planned_work == 3
 
 
 @injection_test
@@ -277,21 +246,6 @@ def test_adding_up_resources_of_two_plans(
 
 
 @injection_test
-def test_that_inactive_plans_are_ignored_when_adding_up_resources(
-    get_statistics: GetStatistics,
-    plan_generator: PlanGenerator,
-    datetime_service: FakeDatetimeService,
-):
-    plan_generator.create_plan(activation_date=None, costs=production_costs(1, 10, 1))
-    plan_generator.create_plan(
-        activation_date=datetime_service.now_minus_one_day(),
-        costs=production_costs(1, 3, 1),
-    )
-    stats = get_statistics()
-    assert stats.planned_resources == 3
-
-
-@injection_test
 def test_adding_up_means_of_two_plans(
     get_statistics: GetStatistics,
     plan_generator: PlanGenerator,
@@ -307,18 +261,3 @@ def test_adding_up_means_of_two_plans(
     )
     stats = get_statistics()
     assert stats.planned_means == 5
-
-
-@injection_test
-def test_that_inactive_plans_are_ignored_when_adding_up_means(
-    get_statistics: GetStatistics,
-    plan_generator: PlanGenerator,
-    datetime_service: FakeDatetimeService,
-):
-    plan_generator.create_plan(activation_date=None, costs=production_costs(1, 1, 10))
-    plan_generator.create_plan(
-        activation_date=datetime_service.now_minus_one_day(),
-        costs=production_costs(1, 1, 3),
-    )
-    stats = get_statistics()
-    assert stats.planned_means == 3

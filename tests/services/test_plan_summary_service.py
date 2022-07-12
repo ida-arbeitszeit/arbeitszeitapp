@@ -29,10 +29,6 @@ class PlanSummaryServiceTests(TestCase):
     def test_that_correct_planner_name_is_shown(self):
         self.assertEqual(self.summary.planner_name, self.plan.planner.name)
 
-    def test_that_correct_active_status_is_shown_when_plan_is_inactive(self):
-        assert not self.plan.is_active
-        self.assertFalse(self.summary.is_active)
-
     def test_that_correct_active_status_is_shown_when_plan_is_active(self):
         plan = self.plan_generator.create_plan(activation_date=datetime.min)
         assert plan.is_active
@@ -184,10 +180,3 @@ class PlanSummaryServiceTests(TestCase):
         assert plan.expiration_date
         summary = self.service.get_summary_from_plan(plan)
         self.assertTrue(summary.expiration_date)
-
-    def test_that_none_is_shown_if_expiration_date_does_not_exist(self):
-        plan = self.plan_generator.create_plan(activation_date=None)
-        self.payout_use_case()
-        assert not plan.expiration_date
-        summary = self.service.get_summary_from_plan(plan)
-        self.assertFalse(summary.expiration_date)
