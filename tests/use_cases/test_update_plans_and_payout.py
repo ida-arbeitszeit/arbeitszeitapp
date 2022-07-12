@@ -45,12 +45,6 @@ class UseCaseTests(TestCase):
         self.payout()
         self.assertIsNotNone(plan.active_days)
 
-    def test_that_active_days_is_not_set_if_plan_is_not_active(self) -> None:
-        plan = self.plan_generator.create_plan(timeframe=2, activation_date=None)
-        assert not plan.active_days
-        self.payout()
-        assert plan.active_days is None
-
     def test_that_active_days_is_set_correctly(self) -> None:
         self.datetime_service.freeze_time(datetime.datetime(2021, 10, 2, 2))
         plan = self.plan_generator.create_plan(
@@ -290,18 +284,9 @@ class UseCaseTests(TestCase):
     ) -> None:
         self.datetime_service.freeze_time(datetime.datetime(2021, 10, 2, 10))
         plan1 = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now(),
             is_public_service=False,
             timeframe=2,
             costs=ProductionCosts(Decimal(1), Decimal(1), Decimal(1)),
-        )
-
-        plan2 = self.plan_generator.create_plan(
-            approved=True,
-            activation_date=None,
-            is_public_service=True,
-            timeframe=5,
-            costs=ProductionCosts(Decimal(3), Decimal(3), Decimal(3)),
         )
 
         self.datetime_service.freeze_time(datetime.datetime(2021, 10, 3, 9))
@@ -314,16 +299,11 @@ class UseCaseTests(TestCase):
             ),
             2,
         )
-        expected_payout2 = 0
         self.payout()
 
-        assert (
-            self.account_repository.get_account_balance(plan1.planner.work_account)
-            == expected_payout1
-        )
-        assert (
-            self.account_repository.get_account_balance(plan2.planner.work_account)
-            == expected_payout2
+        self.assertEqual(
+            self.account_repository.get_account_balance(plan1.planner.work_account),
+            expected_payout1,
         )
 
     def test_that_wages_are_paid_out_twice_after_25_hours_when_plan_has_timeframe_of_3(

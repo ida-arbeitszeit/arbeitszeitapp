@@ -31,6 +31,7 @@ from arbeitszeit_web.presenters.list_available_languages_presenter import (
 )
 from arbeitszeit_web.presenters.log_in_company_presenter import LogInCompanyPresenter
 from arbeitszeit_web.presenters.log_in_member_presenter import LogInMemberPresenter
+from arbeitszeit_web.presenters.member_purchases import MemberPurchasesPresenter
 from arbeitszeit_web.presenters.register_accountant_presenter import (
     RegisterAccountantPresenter,
 )
@@ -553,6 +554,14 @@ class PresenterTestsInjector(Module):
             session=session,
             company_url_index=company_url_index,
             translator=translator,
+        )
+
+    @provider
+    def provide_member_purchase_provider(
+        self, datetime_service: FakeDatetimeService
+    ) -> MemberPurchasesPresenter:
+        return MemberPurchasesPresenter(
+            datetime_service=datetime_service,
         )
 
 
