@@ -116,8 +116,9 @@ class PackageFilter:
         # which is in conflict with flake8 requirements 'mccabe <
         # 0.7'. mccabe 0.6.1 and 0.7 seem to work fine with flake8. So
         # to avoid pip complaining about dependency conflicts we
-        # filter mccabe and let pip decide which version to use.
-        return package_name != "mccabe"
+        # filter mccabe and let pip decide which version to use. There
+        # is a similar situation with docutils and sphinx.
+        return package_name not in ["mccabe", "docutils"]
 
 
 def parse_arguments():
