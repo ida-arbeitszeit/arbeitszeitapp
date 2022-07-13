@@ -37,6 +37,8 @@ from arbeitszeit_web.query_companies import (
 )
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
 
+from arbeitszeit_web.presenters.show_my_purchases_presenter import ShowMyPurchasesPresenter
+
 from .blueprint import MemberRoute
 
 
@@ -45,13 +47,17 @@ def my_purchases(
     query_purchases: use_cases.QueryPurchases,
     member_repository: MemberRepository,
     template_renderer: UserTemplateRenderer,
+    presenter: ShowMyPurchasesPresenter
 ) -> Response:
     member = member_repository.get_by_id(UUID(current_user.id))
     assert member is not None
-    purchases = list(query_purchases(member))
+    purchases = query_purchases(member)
+
+    view_model = presenter.present(purchases)
+
     return Response(
         template_renderer.render_template(
-            "member/my_purchases.html", context=dict(purchases=purchases)
+            "member/my_purchases.html", context=dict(purchases=view_model)
         )
     )
 
