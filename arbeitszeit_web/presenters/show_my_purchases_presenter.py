@@ -10,7 +10,7 @@ from typing import Iterator
 class ViewModel:
     @dataclass
     class Purchase:
-        purchase_date: datetime
+        purchase_date: str
         product_name: str
         product_description: str
         price_per_unit: str
