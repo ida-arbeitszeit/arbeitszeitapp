@@ -13,6 +13,7 @@ class ViewModel:
         purchase_date: str
         product_name: str
         product_description: str
+        purpose: str
         price_per_unit: str
         amount: str
         price_total: str
@@ -26,6 +27,7 @@ class ViewModel:
                     format_datetime(date=purchase_respond.purchase_date),
             product_name=purchase_respond.product_name,
             product_description=purchase_respond.product_description,
+            purpose=purchase_respond.purpose,
             price_per_unit=round(purchase_respond.price_per_unit, 2),
             amount=str(purchase_respond.amount),
             price_total=round(purchase_respond.price_total, 2),
