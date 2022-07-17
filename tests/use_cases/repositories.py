@@ -408,6 +408,39 @@ class PlanRepository(interfaces.PlanRepository):
         self.plans: Dict[UUID, Plan] = {}
         self.company_repository = company_repository
 
+    def get_all_plans_without_completed_review(self) -> Iterable[UUID]:
+        for plan in self.plans.values():
+            if plan.approval_date is None:
+                yield plan.id
+
+    def create_plan(
+        self,
+        planner: UUID,
+        product_name: str,
+        description: str,
+        costs: ProductionCosts,
+        production_unit: str,
+        amount: int,
+        timeframe_in_days: int,
+        is_public_service: bool,
+        creation_timestamp: datetime,
+    ) -> UUID:
+        planning_company = self.company_repository.get_by_id(planner)
+        assert planning_company
+        plan = self._create_plan(
+            id=uuid4(),
+            planner=planning_company,
+            costs=costs,
+            product_name=product_name,
+            production_unit=production_unit,
+            amount=amount,
+            description=description,
+            timeframe_in_days=timeframe_in_days,
+            is_public_service=is_public_service,
+            creation_timestamp=creation_timestamp,
+        )
+        return plan.id
+
     def get_plan_by_id(self, id: UUID) -> Optional[Plan]:
         return self.plans.get(id)
 

@@ -11,6 +11,9 @@ from arbeitszeit.use_cases.get_accountant_profile_info import (
 )
 from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCase
 from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
+from arbeitszeit.use_cases.list_plans_with_pending_review import (
+    ListPlansWithPendingReviewUseCase,
+)
 from arbeitszeit.use_cases.log_in_accountant import LogInAccountantUseCase
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
@@ -283,9 +286,24 @@ class InMemoryModule(Module):
 
     @provider
     def provide_file_plan_with_accounting_use_case(
-        self, draft_repository: repositories.PlanDraftRepository
+        self,
+        draft_repository: repositories.PlanDraftRepository,
+        plan_repository: repositories.PlanRepository,
+        datetime_service: FakeDatetimeService,
     ) -> FilePlanWithAccounting:
-        return FilePlanWithAccounting(draft_repository=draft_repository)
+        return FilePlanWithAccounting(
+            draft_repository=draft_repository,
+            plan_repository=plan_repository,
+            datetime_service=datetime_service,
+        )
+
+    @provider
+    def provide_list_plans_with_pending_review(
+        self, plan_repository: repositories.PlanRepository
+    ) -> ListPlansWithPendingReviewUseCase:
+        return ListPlansWithPendingReviewUseCase(
+            plan_repository=plan_repository,
+        )
 
 
 def get_dependency_injector() -> Injector:
