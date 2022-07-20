@@ -11,7 +11,7 @@ from arbeitszeit.use_cases.get_plan_summary_member import GetPlanSummaryMember
 from arbeitszeit.use_cases.list_plans_with_pending_review import (
     ListPlansWithPendingReviewUseCase,
 )
-from tests.data_generators import PlanGenerator
+from tests.data_generators import CompanyGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
 
 from .dependency_injection import get_dependency_injector
@@ -27,6 +27,8 @@ class UseCaseTests(TestCase):
         )
         self.get_plan_summary_member_use_case = self.injector.get(GetPlanSummaryMember)
         self.datetime_service = self.injector.get(FakeDatetimeService)
+        self.company_generator = self.injector.get(CompanyGenerator)
+        self.planner = self.company_generator.create_company()
 
     def test_that_filing_a_plan_with_a_random_draft_id_is_rejected(self) -> None:
         request = self.create_request(draft=uuid4())
@@ -101,12 +103,6 @@ class UseCaseTests(TestCase):
             condition=lambda s: s.resources_cost == expected_costs.resource_cost,
         )
 
-    def file_draft(self, draft: UUID) -> UUID:
-        request = self.create_request(draft=draft)
-        response = self.use_case.file_plan_with_accounting(request)
-        assert response.plan_id
-        return response.plan_id
-
     def test_that_production_unit_is_correct_in_newly_created_plan(self) -> None:
         expected_unit = "test unit"
         draft = self.create_draft(production_unit=expected_unit)
@@ -157,6 +153,26 @@ class UseCaseTests(TestCase):
             plan=plan_id, condition=lambda s: not s.is_public_service
         )
 
+    def test_if_company_that_is_not_creator_of_craft_tries_to_file_a_draft_then_it_does_not_show_in_list_of_pending_reviews(
+        self,
+    ) -> None:
+        draft = self.create_draft()
+        other_company = self.company_generator.create_company()
+        request = self.create_request(draft=draft, filing_company=other_company.id)
+        self.use_case.file_plan_with_accounting(request)
+        response = (
+            self.list_plans_with_pending_review_use_case.list_plans_with_pending_review(
+                ListPlansWithPendingReviewUseCase.Request()
+            )
+        )
+        self.assertFalse(response.plans)
+
+    def file_draft(self, draft: UUID) -> UUID:
+        request = self.create_request(draft=draft)
+        response = self.use_case.file_plan_with_accounting(request)
+        assert response.plan_id
+        return response.plan_id
+
     def create_draft(
         self,
         product_name: Optional[str] = None,
@@ -175,15 +191,22 @@ class UseCaseTests(TestCase):
             amount=amount,
             is_public_service=is_public_service,
             timeframe=timeframe,
+            planner=self.planner,
         )
         return draft.id
 
     def create_request(
-        self, draft: Optional[UUID] = None
+        self,
+        draft: Optional[UUID] = None,
+        filing_company: Optional[UUID] = None,
     ) -> FilePlanWithAccounting.Request:
+        if filing_company is None:
+            filing_company = self.planner.id
         if draft is None:
             draft = self.create_draft()
-        return FilePlanWithAccounting.Request(draft_id=draft)
+        return FilePlanWithAccounting.Request(
+            draft_id=draft, filing_company=filing_company
+        )
 
     def assertPlanSummaryIsAvailable(self, plan: UUID) -> None:
         response = self.get_plan_summary_member_use_case(plan_id=plan)

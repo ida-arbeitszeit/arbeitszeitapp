@@ -33,6 +33,8 @@ class UseCaseTests(TestCase):
         self.assertTrue(response.plans)
 
     def file_plan_draft(self) -> None:
-        draft = self.plan_generator.draft_plan().id
-        request = FilePlanWithAccounting.Request(draft_id=draft)
+        draft = self.plan_generator.draft_plan()
+        request = FilePlanWithAccounting.Request(
+            draft_id=draft.id, filing_company=draft.planner.id
+        )
         self.file_plan_with_accounting_use_case.file_plan_with_accounting(request)

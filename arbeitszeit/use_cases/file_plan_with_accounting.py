@@ -14,6 +14,7 @@ class FilePlanWithAccounting:
     @dataclass
     class Request:
         draft_id: UUID
+        filing_company: UUID
 
     @dataclass
     class Response:
@@ -26,7 +27,7 @@ class FilePlanWithAccounting:
 
     def file_plan_with_accounting(self, request: Request) -> Response:
         draft = self.draft_repository.get_by_id(id=request.draft_id)
-        if draft is not None:
+        if draft is not None and draft.planner.id == request.filing_company:
             plan_id = self.plan_repository.create_plan(
                 planner=draft.planner.id,
                 product_name=draft.product_name,
