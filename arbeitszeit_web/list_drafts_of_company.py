@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from arbeitszeit.use_cases import ListDraftsResponse
+from arbeitszeit_web.url_index import DraftUrlIndex
 
 
 @dataclass
@@ -11,6 +12,7 @@ class ResultTableRow:
     creation_date: str
     product_name: str
     description: List[str]
+    details_url: str
 
 
 @dataclass
@@ -29,6 +31,8 @@ class ListDraftsViewModel:
 
 @dataclass
 class ListDraftsPresenter:
+    draft_url_index: DraftUrlIndex
+
     def present(self, response: ListDraftsResponse) -> ListDraftsViewModel:
         show_results = bool(response.results)
         results = ResultsTable(
@@ -38,6 +42,7 @@ class ListDraftsPresenter:
                     creation_date=self.__format_date(result.creation_date),
                     product_name=result.product_name,
                     description=result.description.splitlines(),
+                    details_url=self.draft_url_index.get_draft_summary_url(result.id),
                 )
                 for result in response.results
             ]

@@ -1,3 +1,4 @@
+from dataclasses import asdict
 from typing import Optional
 from uuid import UUID
 
@@ -27,6 +28,7 @@ from arbeitszeit.use_cases import (
     RequestCooperation,
     ToggleProductAvailability,
 )
+from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_flask.database import CompanyRepository, commit_changes
 from arbeitszeit_flask.forms import (
@@ -60,6 +62,7 @@ from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_plan_summary_company import (
     GetPlanSummaryCompanySuccessPresenter,
 )
+from arbeitszeit_web.get_prefilled_draft_data import GetPrefilledDraftDataPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.hide_plan import HidePlanPresenter
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
@@ -188,12 +191,33 @@ def self_approve_plan(
     return redirect(url_for("main_company.my_plans"))
 
 
+@CompanyRoute("/company/draft/<draft_id>", methods=["GET"])
+def get_draft_summary(
+    draft_id: str,
+    use_case: GetDraftSummary,
+    presenter: GetPrefilledDraftDataPresenter,
+    template_renderer: UserTemplateRenderer,
+    not_found_view: Http404View,
+) -> Response:
+    use_case_response = use_case(UUID(draft_id))
+    if use_case_response is None:
+        return not_found_view.get_response()
+    view_model = presenter.show_prefilled_draft_data(use_case_response)
+    return template_renderer.render_template(
+        "company/create_draft.html",
+        context=dict(
+            view_model=view_model,
+            form=CreateDraftForm(data=asdict(view_model.prefilled_draft_data)),
+        ),
+    )
+
+
 @CompanyRoute("/company/draft", methods=["GET"])
 def draft_list(
     list_drafts: use_cases.ListDraftsOfCompany,
     list_drafts_presenter: ListDraftsPresenter,
     template_renderer: UserTemplateRenderer,
-):
+) -> Response:
     response = list_drafts(UUID(current_user.id))
     view_model = list_drafts_presenter.present(response)
     return template_renderer.render_template(

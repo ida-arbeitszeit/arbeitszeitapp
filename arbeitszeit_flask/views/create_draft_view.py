@@ -90,22 +90,6 @@ class CreateDraftView:
             else:
                 return self.http_404_view.get_response()
 
-        elif saved_draft_id := query_string.get("saved_draft_id"):
-            # use saved draft to prefill data
-            assert saved_draft_id
-            saved_draft_uuid: UUID = UUID(saved_draft_id)
-
-            draft_summary = self.get_draft_summary(saved_draft_uuid)
-            if isinstance(draft_summary, DraftSummarySuccess):
-                view_model = (
-                    self.get_prefilled_draft_data_presenter.show_prefilled_draft_data(
-                        draft_summary
-                    )
-                )
-                form = CreateDraftForm(data=asdict(view_model.prefilled_draft_data))
-            else:
-                return self.http_404_view.get_response()
-
         else:
             form = CreateDraftForm()
 
