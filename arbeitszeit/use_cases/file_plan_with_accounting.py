@@ -28,6 +28,7 @@ class FilePlanWithAccounting:
     def file_plan_with_accounting(self, request: Request) -> Response:
         draft = self.draft_repository.get_by_id(id=request.draft_id)
         if draft is not None and draft.planner.id == request.filing_company:
+            self.draft_repository.delete_draft(id=request.draft_id)
             plan_id = self.plan_repository.create_plan(
                 planner=draft.planner.id,
                 product_name=draft.product_name,
@@ -39,10 +40,11 @@ class FilePlanWithAccounting:
                 is_public_service=draft.is_public_service,
                 creation_timestamp=self.datetime_service.now(),
             )
+            is_plan_successfully_filed = True
         else:
             plan_id = None
-        self.draft_repository.delete_draft(id=request.draft_id)
+            is_plan_successfully_filed = False
         return self.Response(
-            is_plan_successfully_filed=draft is not None,
+            is_plan_successfully_filed=is_plan_successfully_filed,
             plan_id=plan_id,
         )

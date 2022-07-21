@@ -167,6 +167,33 @@ class UseCaseTests(TestCase):
         )
         self.assertFalse(response.plans)
 
+    def test_if_company_that_is_not_creator_of_craft_tries_to_file_a_draft_then_plan_is_not_filed_successfully(
+        self,
+    ) -> None:
+        draft = self.create_draft()
+        other_company = self.company_generator.create_company()
+        request = self.create_request(draft=draft, filing_company=other_company.id)
+        response = self.use_case.file_plan_with_accounting(request)
+        self.assertFalse(response.is_plan_successfully_filed)
+
+    def test_that_original_planner_can_stil_file_draft_after_other_company_tried_to_file_it(
+        self,
+    ) -> None:
+        draft = self.create_draft()
+        other_company = self.company_generator.create_company()
+        self.use_case.file_plan_with_accounting(
+            request=self.create_request(draft=draft, filing_company=other_company.id)
+        )
+        response = self.use_case.file_plan_with_accounting(
+            request=self.create_request(
+                draft=draft,
+                filing_company=self.planner.id,
+            )
+        )
+        self.assertTrue(
+            response.is_plan_successfully_filed,
+        )
+
     def file_draft(self, draft: UUID) -> UUID:
         request = self.create_request(draft=draft)
         response = self.use_case.file_plan_with_accounting(request)

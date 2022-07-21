@@ -20,6 +20,7 @@ from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.token import InvitationTokenValidator, TokenDeliverer, TokenService
 from arbeitszeit.use_cases import GetCompanySummary
+from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
 from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
@@ -504,6 +505,19 @@ class FlaskModule(PresenterModule):
     ) -> LogInCompanyUseCase:
         return LogInCompanyUseCase(
             company_repository=company_repository,
+        )
+
+    @provider
+    def provide_file_plan_with_accounting_use_case(
+        self,
+        draft_repository: PlanDraftRepository,
+        plan_repository: PlanRepository,
+        datetime_service: DatetimeService,
+    ) -> FilePlanWithAccounting:
+        return FilePlanWithAccounting(
+            draft_repository=draft_repository,
+            plan_repository=plan_repository,
+            datetime_service=datetime_service,
         )
 
     def configure(self, binder: Binder) -> None:

@@ -36,6 +36,9 @@ from arbeitszeit_web.presenters.accountant_invitation_presenter import (
     AccountantInvitationEmailView,
 )
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
+from arbeitszeit_web.presenters.file_plan_with_accounting_presenter import (
+    FilePlanWithAccountingPresenter,
+)
 from arbeitszeit_web.presenters.get_latest_activated_plans_presenter import (
     GetLatestActivatedPlansPresenter,
 )
@@ -487,3 +490,16 @@ class PresenterModule(Module):
         datetime_service: DatetimeService,
     ) -> MemberPurchasesPresenter:
         return MemberPurchasesPresenter(datetime_service=datetime_service)
+
+    @provider
+    def provide_file_plan_with_accounting_presenter(
+        self,
+        plan_summary_url_index: PlanSummaryUrlIndex,
+        notifier: Notifier,
+        translator: Translator,
+    ) -> FilePlanWithAccountingPresenter:
+        return FilePlanWithAccountingPresenter(
+            plan_summary_url_index=plan_summary_url_index,
+            notifier=notifier,
+            translator=translator,
+        )

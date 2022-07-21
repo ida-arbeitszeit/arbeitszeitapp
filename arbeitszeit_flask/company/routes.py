@@ -27,8 +27,10 @@ from arbeitszeit.use_cases import (
     RequestCooperation,
     ToggleProductAvailability,
 )
+from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_flask.database import CompanyRepository, commit_changes
+from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import (
     CompanySearchForm,
     CreateCooperationForm,
@@ -54,6 +56,9 @@ from arbeitszeit_flask.views.create_draft_view import CreateDraftView
 from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
 from arbeitszeit_flask.views.transfer_to_worker_view import TransferToWorkerView
+from arbeitszeit_web.controllers.file_plan_with_accounting_controller import (
+    FilePlanWithAccountingController,
+)
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
@@ -65,6 +70,9 @@ from arbeitszeit_web.hide_plan import HidePlanPresenter
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_drafts_of_company import ListDraftsPresenter
 from arbeitszeit_web.list_plans import ListPlansPresenter
+from arbeitszeit_web.presenters.file_plan_with_accounting_presenter import (
+    FilePlanWithAccountingPresenter,
+)
 from arbeitszeit_web.presenters.self_approve_plan import SelfApprovePlanPresenter
 from arbeitszeit_web.presenters.show_a_account_details_presenter import (
     ShowAAccountDetailsPresenter,
@@ -186,6 +194,26 @@ def self_approve_plan(
     )
     presenter.present_response(approval_response)
     return redirect(url_for("main_company.my_plans"))
+
+
+@CompanyRoute("/company/draft/<draft_id>/file_with_accounting", methods=["POST"])
+def file_plan_with_public_accounting(
+    draft_id: str,
+    use_case: FilePlanWithAccounting,
+    presenter: FilePlanWithAccountingPresenter,
+    controller: FilePlanWithAccountingController,
+    session: FlaskSession,
+):
+    use_case_request = controller.process_file_plan_with_accounting_request(
+        draft_id, session
+    )
+    use_case_response = use_case.file_plan_with_accounting(use_case_request)
+    print(use_case_response)
+    view_model = presenter.present_response(use_case_response)
+    if view_model.redirect_url is not None:
+        return redirect(view_model.redirect_url)
+    else:
+        return ""
 
 
 @CompanyRoute("/company/my_drafts", methods=["GET"])
