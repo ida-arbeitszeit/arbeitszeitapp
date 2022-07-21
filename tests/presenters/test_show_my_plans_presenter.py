@@ -97,7 +97,8 @@ class ShowMyPlansPresenterTests(TestCase):
         )
 
     def test_presenter_shows_correct_info_of_one_single_expired_plan(self):
-        plan = self.plan_generator.create_plan(expired=True)
+        plan = self.plan_generator.create_plan()
+        plan.expired = True
         RESPONSE_WITH_ONE_EXPIRED_PLAN = self.response_with_one_expired_plan(plan)
         presentation = self.presenter.present(RESPONSE_WITH_ONE_EXPIRED_PLAN)
         row1 = presentation.expired_plans.rows[0]
