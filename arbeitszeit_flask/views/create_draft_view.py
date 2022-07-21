@@ -6,7 +6,7 @@ from flask import Response as FlaskResponse
 from flask import redirect, url_for
 
 from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
-from arbeitszeit.use_cases.get_draft_summary import DraftSummarySuccess, GetDraftSummary
+from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
 from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
 from arbeitszeit_flask.forms import CreateDraftForm
 from arbeitszeit_flask.template import UserTemplateRenderer
@@ -45,7 +45,7 @@ class CreateDraftView:
             self.notifier.display_info(
                 self.translator.gettext("Draft successfully saved.")
             )
-            return redirect(url_for("main_company.my_drafts"))
+            return redirect(url_for("main_company.draft_list"))
         elif user_action == "file_draft":
             draft_id = self._create_draft(form)
             return redirect(
@@ -84,22 +84,6 @@ class CreateDraftView:
                 view_model = (
                     self.get_prefilled_draft_data_presenter.show_prefilled_draft_data(
                         response.plan_summary
-                    )
-                )
-                form = CreateDraftForm(data=asdict(view_model.prefilled_draft_data))
-            else:
-                return self.http_404_view.get_response()
-
-        elif saved_draft_id := query_string.get("saved_draft_id"):
-            # use saved draft to prefill data
-            assert saved_draft_id
-            saved_draft_uuid: UUID = UUID(saved_draft_id)
-
-            draft_summary = self.get_draft_summary(saved_draft_uuid)
-            if isinstance(draft_summary, DraftSummarySuccess):
-                view_model = (
-                    self.get_prefilled_draft_data_presenter.show_prefilled_draft_data(
-                        draft_summary
                     )
                 )
                 form = CreateDraftForm(data=asdict(view_model.prefilled_draft_data))
