@@ -6,7 +6,7 @@ from flask import Response as FlaskResponse
 from flask import redirect, url_for
 
 from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
-from arbeitszeit.use_cases.get_draft_summary import DraftSummarySuccess, GetDraftSummary
+from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
 from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
 from arbeitszeit_flask.forms import CreateDraftForm
 from arbeitszeit_flask.template import UserTemplateRenderer
