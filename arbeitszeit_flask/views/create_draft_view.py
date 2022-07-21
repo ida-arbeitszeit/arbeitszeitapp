@@ -45,7 +45,7 @@ class CreateDraftView:
             self.notifier.display_info(
                 self.translator.gettext("Draft successfully saved.")
             )
-            return redirect(url_for("main_company.my_drafts"))
+            return redirect(url_for("main_company.draft_list"))
         elif user_action == "file_draft":
             draft_id = self._create_draft(form)
             return redirect(

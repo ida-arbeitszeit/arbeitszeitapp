@@ -188,8 +188,8 @@ def self_approve_plan(
     return redirect(url_for("main_company.my_plans"))
 
 
-@CompanyRoute("/company/my_drafts", methods=["GET"])
-def my_drafts(
+@CompanyRoute("/company/draft", methods=["GET"])
+def draft_list(
     list_drafts: use_cases.ListDraftsOfCompany,
     list_drafts_presenter: ListDraftsPresenter,
     template_renderer: UserTemplateRenderer,
@@ -197,7 +197,7 @@ def my_drafts(
     response = list_drafts(UUID(current_user.id))
     view_model = list_drafts_presenter.present(response)
     return template_renderer.render_template(
-        "company/my_drafts.html", context=view_model.to_dict()
+        "company/draft_list.html", context=view_model.to_dict()
     )
 
 
