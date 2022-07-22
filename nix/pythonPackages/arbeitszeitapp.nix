@@ -11,7 +11,7 @@ buildPythonPackage {
   outputs = [ "out" "doc" ];
   postPhases = [ "buildDocsPhase" ];
   format = "pyproject";
-  buildInputs = [ pytestCheckHook ];
+  buildInputs = [ pytestCheckHook sphinx ];
   checkInputs = [ hypothesis ];
   propagatedBuildInputs = [
     email_validator
@@ -27,6 +27,7 @@ buildPythonPackage {
     matplotlib
   ];
   buildDocsPhase = ''
-    ${sphinx}/bin/sphinx-build -a $src/docs $doc
+    mkdir -p $doc/share/doc/arbeitszeitapp
+    python -m sphinx -a $src/docs $doc/share/doc/arbeitszeitapp
   '';
 }
