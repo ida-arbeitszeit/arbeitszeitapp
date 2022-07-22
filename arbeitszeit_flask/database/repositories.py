@@ -597,18 +597,7 @@ class PlanRepository(repositories.PlanRepository):
     company_repository: CompanyRepository
     db: SQLAlchemy
 
-    def create_plan(
-        self,
-        planner: UUID,
-        product_name: str,
-        description: str,
-        costs: entities.ProductionCosts,
-        production_unit: str,
-        amount: int,
-        timeframe_in_days: int,
-        is_public_service: bool,
-        creation_timestamp: datetime,
-    ) -> UUID:
+    def create_plan(self, plan: repositories.PlanRepository.CreatePlan) -> UUID:
         raise NotImplementedError()
 
     def get_all_plans_without_completed_review(self) -> Iterable[UUID]:

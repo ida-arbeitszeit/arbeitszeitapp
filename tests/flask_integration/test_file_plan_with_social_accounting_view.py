@@ -17,7 +17,7 @@ class Tests(ViewTestCase):
         self.assertNotEqual(response.status_code, 404)
 
     def test_that_we_get_redirected_when_posting_a_valid_draft(self) -> None:
-        draft = self.plan_generator.draft_plan()
+        draft = self.plan_generator.draft_plan(planner=self.company)
         response = self.client.post(self.get_url(draft.id))
         self.assertEqual(response.status_code, 302)
 

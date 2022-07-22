@@ -413,33 +413,22 @@ class PlanRepository(interfaces.PlanRepository):
             if plan.approval_date is None:
                 yield plan.id
 
-    def create_plan(
-        self,
-        planner: UUID,
-        product_name: str,
-        description: str,
-        costs: ProductionCosts,
-        production_unit: str,
-        amount: int,
-        timeframe_in_days: int,
-        is_public_service: bool,
-        creation_timestamp: datetime,
-    ) -> UUID:
-        planning_company = self.company_repository.get_by_id(planner)
+    def create_plan(self, plan: interfaces.PlanRepository.CreatePlan) -> UUID:
+        planning_company = self.company_repository.get_by_id(plan.planner)
         assert planning_company
-        plan = self._create_plan(
+        model = self._create_plan(
             id=uuid4(),
             planner=planning_company,
-            costs=costs,
-            product_name=product_name,
-            production_unit=production_unit,
-            amount=amount,
-            description=description,
-            timeframe_in_days=timeframe_in_days,
-            is_public_service=is_public_service,
-            creation_timestamp=creation_timestamp,
+            costs=plan.costs,
+            product_name=plan.product_name,
+            production_unit=plan.production_unit,
+            amount=plan.amount,
+            description=plan.description,
+            timeframe_in_days=plan.timeframe_in_days,
+            is_public_service=plan.is_public_service,
+            creation_timestamp=plan.creation_timestamp,
         )
-        return plan.id
+        return model.id
 
     def get_plan_by_id(self, id: UUID) -> Optional[Plan]:
         return self.plans.get(id)
