@@ -150,3 +150,4 @@ cython_debug/
 
 # nix
 /result
+/result-*
