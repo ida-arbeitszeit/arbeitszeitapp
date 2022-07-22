@@ -8,7 +8,7 @@ buildPythonPackage {
   pname = "arbeitszeitapp";
   version = "develop";
   src = ../..;
-  outputs = [ "out" "docs" ];
+  outputs = [ "out" "doc" ];
   postPhases = [ "buildDocsPhase" ];
   format = "pyproject";
   buildInputs = [ pytestCheckHook ];
@@ -27,6 +27,6 @@ buildPythonPackage {
     matplotlib
   ];
   buildDocsPhase = ''
-    ${sphinx}/bin/sphinx-build -a $src/docs $docs
+    ${sphinx}/bin/sphinx-build -a $src/docs $doc
   '';
 }
