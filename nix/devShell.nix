@@ -8,7 +8,6 @@ mkShell {
     psycopg2
     gunicorn
     types-dateutil
-    sphinx
   ]) ++ [ nixfmt ];
   inputsFrom = [ python3.pkgs.arbeitszeitapp ];
 }

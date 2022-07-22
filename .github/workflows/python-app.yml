@@ -22,7 +22,6 @@ jobs:
     - run: nix build --print-build-logs
     # We don't need to run this unittests since they are run as part of 'nix build'
     - run: nix develop --command ./run-checks --no-unittests
-    - run: nix develop --command make html
 
   build-pip:
     runs-on: ubuntu-latest

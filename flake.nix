@@ -28,7 +28,6 @@
           packages = {
             default = pkgs.python3.pkgs.arbeitszeitapp;
             inherit (pkgs) python3;
-            arbeitszeitapp-docker-image = pkgs.arbeitszeitapp-docker-image;
           };
           checks = {
             arbeitszeit-python39 = pkgs.python39.pkgs.arbeitszeitapp;
@@ -47,8 +46,6 @@
             in {
               python39 = overridePython prev.python39;
               python310 = overridePython prev.python310;
-              arbeitszeitapp-docker-image =
-                final.callPackage nix/docker.nix { python = final.python3; };
             };
           development = final: prev:
             let

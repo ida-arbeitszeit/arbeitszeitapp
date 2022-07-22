@@ -68,6 +68,14 @@ arbeitszeit\_web.presenters.log\_in\_member\_presenter module
    :undoc-members:
    :show-inheritance:
 
+arbeitszeit\_web.presenters.member\_purchases module
+----------------------------------------------------
+
+.. automodule:: arbeitszeit_web.presenters.member_purchases
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit\_web.presenters.register\_accountant\_presenter module
 ------------------------------------------------------------------
 
