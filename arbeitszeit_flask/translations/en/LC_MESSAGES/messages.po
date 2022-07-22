@@ -7,170 +7,19 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-05-27 14:09+0200\n"
+"POT-Creation-Date: 2022-06-05 17:31+0200\n"
 "PO-Revision-Date: 2022-01-16 19:09+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
 "Language-Team: en <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.1\n"
-
-#: arbeitszeit_flask/forms.py:21
-msgid "Invalid ID."
-msgstr ""
-
-#: arbeitszeit_flask/forms.py:22
-msgid "Number must be at least 0."
-msgstr ""
+"Generated-By: Babel 2.10.3\n"
 
 #: arbeitszeit_flask/forms.py:33
 msgid "This field is required."
-msgstr ""
-
-#: arbeitszeit_flask/forms.py:46 arbeitszeit_flask/forms.py:163
-#: arbeitszeit_flask/forms.py:164 arbeitszeit_flask/forms.py:313
-#: arbeitszeit_flask/templates/macros/query_plans.html:37
-#: arbeitszeit_web/plan_summary_service.py:42
-#: tests/presenters/test_plan_summary_service.py:46
-msgid "Plan ID"
-msgstr ""
-
-#: arbeitszeit_flask/forms.py:47
-#: arbeitszeit_flask/templates/company/create_draft.html:26
-#: arbeitszeit_flask/templates/macros/query_plans.html:38
-msgid "Product name"
-msgstr ""
-
-#: arbeitszeit_flask/forms.py:50
-msgid "Search Plans"
-msgstr ""
-
-#: arbeitszeit_flask/forms.py:55 arbeitszeit_flask/forms.py:191
-msgid "Search term"
-msgstr ""
-
-#: arbeitszeit_flask/forms.py:57 arbeitszeit_flask/forms.py:193
-#: arbeitszeit_flask/forms.py:274
-msgid "Required"
-msgstr ""
-
-#: arbeitszeit_flask/forms.py:70 arbeitszeit_flask/forms.py:108
-#: arbeitszeit_flask/forms.py:145 arbeitszeit_flask/forms.py:183
-#: arbeitszeit_flask/templates/auth/login_company.html:18
-#: arbeitszeit_flask/templates/auth/login_member.html:18
-#: arbeitszeit_flask/templates/auth/signup_accountant.html:18
-#: arbeitszeit_flask/templates/auth/signup_company.html:18
-#: arbeitszeit_flask/templates/auth/signup_member.html:18
-#: arbeitszeit_flask/templates/macros/company_summary.html:24
-#: arbeitszeit_flask/templates/macros/query_companies.html:41
-msgid "Email"
-msgstr ""
-
-#: arbeitszeit_flask/forms.py:73
-msgid "Proper email address required"
-msgstr ""
-
-#: arbeitszeit_flask/forms.py:78 arbeitszeit_flask/forms.py:116
-#: arbeitszeit_flask/forms.py:182 arbeitszeit_flask/forms.py:285
-#: arbeitszeit_flask/templates/auth/signup_accountant.html:27
-#: arbeitszeit_flask/templates/auth/signup_member.html:27
-#: arbeitszeit_flask/templates/company/invite_worker_to_company.html:31
-#: arbeitszeit_flask/templates/company/list_all_cooperations.html:21
-#: arbeitszeit_flask/templates/company/my_cooperations.html:51
-#: arbeitszeit_flask/templates/company/my_drafts.html:27
-#: arbeitszeit_flask/templates/company/my_purchases.html:27
-#: arbeitszeit_flask/templates/macros/company_summary.html:20
-#: arbeitszeit_flask/templates/macros/coop_summary.html:20
-#: arbeitszeit_flask/templates/macros/query_companies.html:40
-#: arbeitszeit_flask/templates/member/my_purchases.html:23
-msgid "Name"
-msgstr ""
-
-#: arbeitszeit_flask/forms.py:82 arbeitszeit_flask/forms.py:122
-#: arbeitszeit_flask/forms.py:153
-#: arbeitszeit_flask/templates/auth/login_company.html:27
-#: arbeitszeit_flask/templates/auth/login_member.html:27
-#: arbeitszeit_flask/templates/auth/signup_accountant.html:36
-#: arbeitszeit_flask/templates/auth/signup_company.html:34
-#: arbeitszeit_flask/templates/auth/signup_member.html:36
-msgid "Password"
-msgstr ""
-
-#: arbeitszeit_flask/forms.py:86 arbeitszeit_flask/forms.py:126
-msgid "The password must be at least 8 characters in length"
-msgstr ""
-
-#: arbeitszeit_flask/forms.py:111
-msgid "Email address is required"
-msgstr ""
-
-#: arbeitszeit_flask/forms.py:118
-msgid "Name is required"
-msgstr ""
-
-#: arbeitszeit_flask/forms.py:148
-msgid "Email address required"
-msgstr ""
-
-#: arbeitszeit_flask/forms.py:155
-msgid "Password is required"
-msgstr ""
-
-#: arbeitszeit_flask/forms.py:158
-msgid "Remember login?"
-msgstr ""
-
-#: arbeitszeit_flask/forms.py:168 arbeitszeit_flask/forms.py:169
-#: arbeitszeit_flask/forms.py:320 arbeitszeit_flask/plots/routes.py:90
-#: arbeitszeit_flask/templates/company/create_draft.html:91
-#: arbeitszeit_flask/templates/company/my_purchases.html:31
-#: arbeitszeit_flask/templates/company/transfer_to_worker.html:20
-#: arbeitszeit_flask/templates/member/my_purchases.html:26
-#: arbeitszeit_web/plan_summary_service.py:71
-#: tests/presenters/test_plan_summary_service.py:146
-msgid "Amount"
-msgstr ""
-
-#: arbeitszeit_flask/forms.py:186
-msgid "Search for company"
-msgstr ""
-
-#: arbeitszeit_flask/forms.py:230 arbeitszeit_web/plan_summary_service.py:88
-#: arbeitszeit_web/query_plans.py:113 arbeitszeit_web/show_my_plans.py:156
-#: tests/presenters/test_plan_summary_service.py:191
-#: tests/presenters/test_show_my_plans_presenter.py:136
-#: tests/presenters/test_show_my_plans_presenter.py:178
-#: tests/presenters/test_show_my_plans_presenter.py:204
-msgid "Productive"
-msgstr ""
-
-#: arbeitszeit_flask/forms.py:233 arbeitszeit_web/plan_summary_service.py:86
-#: arbeitszeit_web/query_plans.py:111 arbeitszeit_web/show_my_plans.py:154
-#: tests/presenters/test_plan_summary_service.py:207
-#: tests/presenters/test_show_my_plans_presenter.py:134
-msgid "Public"
-msgstr ""
-
-#: arbeitszeit_flask/forms.py:276
-#: arbeitszeit_flask/templates/company/invite_worker_to_company.html:30
-msgid "Member ID"
-msgstr ""
-
-#: arbeitszeit_flask/forms.py:289
-#: arbeitszeit_flask/templates/company/my_cooperations.html:52
-#: arbeitszeit_flask/templates/macros/coop_summary.html:24
-msgid "Definition"
-msgstr ""
-
-#: arbeitszeit_flask/forms.py:327
-msgid "Fixed means of production"
-msgstr ""
-
-#: arbeitszeit_flask/forms.py:330
-msgid "Liquid means of production"
 msgstr ""
 
 #: arbeitszeit_flask/plots/routes.py:31
@@ -205,6 +54,16 @@ msgstr ""
 
 #: arbeitszeit_flask/plots/routes.py:85
 msgid "Public plans"
+msgstr ""
+
+#: arbeitszeit_flask/plots/routes.py:90
+#: arbeitszeit_flask/templates/company/create_draft.html:91
+#: arbeitszeit_flask/templates/company/my_purchases.html:31
+#: arbeitszeit_flask/templates/company/transfer_to_worker.html:20
+#: arbeitszeit_flask/templates/member/my_purchases.html:26
+#: arbeitszeit_web/plan_summary_service.py:71
+#: tests/presenters/test_plan_summary_service.py:146
+msgid "Amount"
 msgstr ""
 
 #: arbeitszeit_flask/templates/base_company.html:8
@@ -307,6 +166,24 @@ msgstr ""
 msgid "Login company"
 msgstr ""
 
+#: arbeitszeit_flask/templates/auth/login_company.html:18
+#: arbeitszeit_flask/templates/auth/login_member.html:18
+#: arbeitszeit_flask/templates/auth/signup_accountant.html:18
+#: arbeitszeit_flask/templates/auth/signup_company.html:18
+#: arbeitszeit_flask/templates/auth/signup_member.html:18
+#: arbeitszeit_flask/templates/macros/company_summary.html:24
+#: arbeitszeit_flask/templates/macros/query_companies.html:41
+msgid "Email"
+msgstr ""
+
+#: arbeitszeit_flask/templates/auth/login_company.html:27
+#: arbeitszeit_flask/templates/auth/login_member.html:27
+#: arbeitszeit_flask/templates/auth/signup_accountant.html:36
+#: arbeitszeit_flask/templates/auth/signup_company.html:34
+#: arbeitszeit_flask/templates/auth/signup_member.html:36
+msgid "Password"
+msgstr ""
+
 #: arbeitszeit_flask/templates/auth/login_company.html:36
 #: arbeitszeit_flask/templates/auth/login_member.html:36
 msgid "Login"
@@ -318,6 +195,20 @@ msgstr ""
 
 #: arbeitszeit_flask/templates/auth/signup_accountant.html:8
 msgid "Sign up accountant"
+msgstr ""
+
+#: arbeitszeit_flask/templates/auth/signup_accountant.html:27
+#: arbeitszeit_flask/templates/auth/signup_member.html:27
+#: arbeitszeit_flask/templates/company/invite_worker_to_company.html:31
+#: arbeitszeit_flask/templates/company/list_all_cooperations.html:21
+#: arbeitszeit_flask/templates/company/my_cooperations.html:51
+#: arbeitszeit_flask/templates/company/my_drafts.html:27
+#: arbeitszeit_flask/templates/company/my_purchases.html:27
+#: arbeitszeit_flask/templates/macros/company_summary.html:20
+#: arbeitszeit_flask/templates/macros/coop_summary.html:20
+#: arbeitszeit_flask/templates/macros/query_companies.html:40
+#: arbeitszeit_flask/templates/member/my_purchases.html:23
+msgid "Name"
 msgstr ""
 
 #: arbeitszeit_flask/templates/auth/signup_accountant.html:43
@@ -533,6 +424,11 @@ msgstr ""
 msgid "Load a draft"
 msgstr ""
 
+#: arbeitszeit_flask/templates/company/create_draft.html:26
+#: arbeitszeit_flask/templates/macros/query_plans.html:38
+msgid "Product name"
+msgstr ""
+
 #: arbeitszeit_flask/templates/company/create_draft.html:33
 msgid "Product description"
 msgstr ""
@@ -742,6 +638,10 @@ msgstr ""
 msgid "Workers of the company"
 msgstr ""
 
+#: arbeitszeit_flask/templates/company/invite_worker_to_company.html:30
+msgid "Member ID"
+msgstr ""
+
 #: arbeitszeit_flask/templates/company/list_all_cooperations.html:22
 #: arbeitszeit_flask/templates/company/my_cooperations.html:53
 msgid "Number of plans"
@@ -794,6 +694,11 @@ msgstr ""
 
 #: arbeitszeit_flask/templates/company/my_cooperations.html:26
 msgid "Cooperations that I coordinate"
+msgstr ""
+
+#: arbeitszeit_flask/templates/company/my_cooperations.html:52
+#: arbeitszeit_flask/templates/macros/coop_summary.html:24
+msgid "Definition"
 msgstr ""
 
 #: arbeitszeit_flask/templates/company/my_cooperations.html:68
@@ -1047,7 +952,7 @@ msgstr ""
 msgid "Payment of fixed and liquid means of production"
 msgstr ""
 
-#: arbeitszeit_flask/templates/company/transfer_to_company.html:43
+#: arbeitszeit_flask/templates/company/transfer_to_company.html:49
 #: arbeitszeit_flask/templates/company/transfer_to_worker.html:42
 #: arbeitszeit_flask/templates/member/pay_consumer_product.html:37
 msgid "Transfer"
@@ -1164,6 +1069,12 @@ msgstr ""
 
 #: arbeitszeit_flask/templates/macros/query_plans.html:16
 msgid "Search by plan ID or product name"
+msgstr ""
+
+#: arbeitszeit_flask/templates/macros/query_plans.html:37
+#: arbeitszeit_web/plan_summary_service.py:42
+#: tests/presenters/test_plan_summary_service.py:46
+msgid "Plan ID"
 msgstr ""
 
 #: arbeitszeit_flask/templates/macros/query_plans.html:41
@@ -1436,34 +1347,34 @@ msgstr ""
 msgid "There is no plan with the specified ID in the database."
 msgstr ""
 
-#: arbeitszeit_web/pay_means_of_production.py:20
+#: arbeitszeit_web/pay_means_of_production.py:28
 #: tests/presenters/test_pay_means_of_production_presenter.py:29
 msgid "Successfully paid."
 msgstr ""
 
-#: arbeitszeit_web/pay_means_of_production.py:23
+#: arbeitszeit_web/pay_means_of_production.py:34
 #: tests/presenters/test_pay_means_of_production_presenter.py:38
 msgid "Plan does not exist."
 msgstr ""
 
-#: arbeitszeit_web/pay_means_of_production.py:27
+#: arbeitszeit_web/pay_means_of_production.py:38
 #: tests/presenters/test_pay_means_of_production_presenter.py:59
 msgid ""
 "The specified plan has expired. Please contact the provider to obtain a "
 "current plan ID."
 msgstr ""
 
-#: arbeitszeit_web/pay_means_of_production.py:33
+#: arbeitszeit_web/pay_means_of_production.py:44
 #: tests/presenters/test_pay_means_of_production_presenter.py:72
 msgid "Payment failed. Companies cannot acquire public products."
 msgstr ""
 
-#: arbeitszeit_web/pay_means_of_production.py:39
+#: arbeitszeit_web/pay_means_of_production.py:50
 #: tests/presenters/test_pay_means_of_production_presenter.py:85
 msgid "Payment failed. Companies cannot acquire their own products."
 msgstr ""
 
-#: arbeitszeit_web/pay_means_of_production.py:45
+#: arbeitszeit_web/pay_means_of_production.py:56
 #: tests/presenters/test_pay_means_of_production_presenter.py:48
 msgid "The specified purpose is invalid."
 msgstr ""
@@ -1487,6 +1398,22 @@ msgstr ""
 #: arbeitszeit_web/plan_summary_service.py:81
 #: tests/presenters/test_plan_summary_service.py:174
 msgid "Costs for work"
+msgstr ""
+
+#: arbeitszeit_web/plan_summary_service.py:86 arbeitszeit_web/query_plans.py:111
+#: arbeitszeit_web/show_my_plans.py:154
+#: tests/presenters/test_plan_summary_service.py:207
+#: tests/presenters/test_show_my_plans_presenter.py:134
+msgid "Public"
+msgstr ""
+
+#: arbeitszeit_web/plan_summary_service.py:88 arbeitszeit_web/query_plans.py:113
+#: arbeitszeit_web/show_my_plans.py:156
+#: tests/presenters/test_plan_summary_service.py:191
+#: tests/presenters/test_show_my_plans_presenter.py:136
+#: tests/presenters/test_show_my_plans_presenter.py:178
+#: tests/presenters/test_show_my_plans_presenter.py:204
+msgid "Productive"
 msgstr ""
 
 #: arbeitszeit_web/plan_summary_service.py:91
@@ -1635,6 +1562,16 @@ msgstr ""
 #: arbeitszeit_web/presenters/end_cooperation_presenter.py:32
 #: tests/presenters/test_end_cooperation_presenter.py:102
 msgid "Cooperation has been terminated."
+msgstr ""
+
+#: arbeitszeit_web/presenters/log_in_member_presenter.py:39
+#: tests/presenters/test_login_in_member_presenter.py:50
+msgid "Email address incorrect. Are you already registered as a member?"
+msgstr ""
+
+#: arbeitszeit_web/presenters/log_in_member_presenter.py:45
+#: tests/presenters/test_login_in_member_presenter.py:80
+msgid "Incorrect password"
 msgstr ""
 
 #: arbeitszeit_web/presenters/register_accountant_presenter.py:32
@@ -1856,5 +1793,50 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Keine Ergebnisse"
+#~ msgstr ""
+
+#~ msgid "Invalid ID."
+#~ msgstr ""
+
+#~ msgid "Number must be at least 0."
+#~ msgstr ""
+
+#~ msgid "Search Plans"
+#~ msgstr ""
+
+#~ msgid "Search term"
+#~ msgstr ""
+
+#~ msgid "Required"
+#~ msgstr ""
+
+#~ msgid "Proper email address required"
+#~ msgstr ""
+
+#~ msgid "The password must be at least 8 characters in length"
+#~ msgstr ""
+
+#~ msgid "Email address is required"
+#~ msgstr ""
+
+#~ msgid "Name is required"
+#~ msgstr ""
+
+#~ msgid "Email address required"
+#~ msgstr ""
+
+#~ msgid "Password is required"
+#~ msgstr ""
+
+#~ msgid "Remember login?"
+#~ msgstr ""
+
+#~ msgid "Search for company"
+#~ msgstr ""
+
+#~ msgid "Fixed means of production"
+#~ msgstr ""
+
+#~ msgid "Liquid means of production"
 #~ msgstr ""
 
