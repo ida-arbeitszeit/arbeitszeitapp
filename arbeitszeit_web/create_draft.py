@@ -43,7 +43,7 @@ class CreateDraftForm(Protocol):
 
 
 @dataclass
-class PrefilledDraftDataController:
+class CreateDraftController:
     session: Session
 
     def import_form_data(self, draft_form: CreateDraftForm) -> CreatePlanDraftRequest:

@@ -97,7 +97,7 @@ arbeitszeit\_web.get\_plan\_summary\_member module
 arbeitszeit\_web.get\_prefilled\_draft\_data module
 ---------------------------------------------------
 
-.. automodule:: arbeitszeit_web.get_prefilled_draft_data
+.. automodule:: arbeitszeit_web.create_draft
    :members:
    :undoc-members:
    :show-inheritance:

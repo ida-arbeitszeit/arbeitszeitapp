@@ -75,11 +75,11 @@ from arbeitszeit_web.controllers.show_my_accounts_controller import (
     ShowMyAccountsController,
 )
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
-from arbeitszeit_web.email import MailService
-from arbeitszeit_web.get_prefilled_draft_data import (
+from arbeitszeit_web.create_draft import (
+    CreateDraftController,
     GetPrefilledDraftDataPresenter,
-    PrefilledDraftDataController,
 )
+from arbeitszeit_web.email import MailService
 from arbeitszeit_web.invite_worker_to_company import (
     InviteWorkerToCompanyController,
     InviteWorkerToCompanyPresenter,
@@ -343,11 +343,11 @@ class ViewsModule(Module):
         session: Session,
         notifier: Notifier,
         translator: Translator,
-        prefilled_data_controller: PrefilledDraftDataController,
+        prefilled_data_controller: CreateDraftController,
         get_plan_summary_company: GetPlanSummaryCompany,
         create_draft: CreatePlanDraft,
         get_draft_summary: GetDraftSummary,
-        get_prefilled_draft_data_presenter: GetPrefilledDraftDataPresenter,
+        create_draft_presenter: GetPrefilledDraftDataPresenter,
         template_renderer: UserTemplateRenderer,
         http_404_view: Http404View,
     ) -> CreateDraftView:
@@ -360,7 +360,7 @@ class ViewsModule(Module):
             get_plan_summary_company,
             create_draft,
             get_draft_summary,
-            get_prefilled_draft_data_presenter,
+            create_draft_presenter,
             template_renderer,
             http_404_view,
         )
