@@ -349,15 +349,15 @@ class PlanDraftRepository(ABC):
     @dataclass
     class UpdateDraft:
         id: UUID
-        product_name: Optional[str]
-        amount: Optional[int]
-        description: Optional[str]
-        labour_cost: Optional[Decimal]
-        means_cost: Optional[Decimal]
-        resource_cost: Optional[Decimal]
-        is_public_service: Optional[bool]
-        timeframe: Optional[int]
-        unit_of_distribution: Optional[str]
+        product_name: Optional[str] = None
+        amount: Optional[int] = None
+        description: Optional[str] = None
+        labour_cost: Optional[Decimal] = None
+        means_cost: Optional[Decimal] = None
+        resource_cost: Optional[Decimal] = None
+        is_public_service: Optional[bool] = None
+        timeframe: Optional[int] = None
+        unit_of_distribution: Optional[str] = None
 
     @abstractmethod
     def update_draft(self, update: UpdateDraft) -> None:

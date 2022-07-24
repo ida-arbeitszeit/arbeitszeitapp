@@ -987,6 +987,29 @@ class PlanDraftRepository(repositories.PlanDraftRepository):
         self.db.session.add(orm)
         return self._object_from_orm(orm)
 
+    def update_draft(
+        self, update: repositories.PlanDraftRepository.UpdateDraft
+    ) -> None:
+        class UpdateInstructions(dict):
+            def update_attribute(self, key, value):
+                if value is not None:
+                    self[key] = value
+
+        update_instructions = UpdateInstructions()
+        update_instructions.update_attribute(
+            models.PlanDraft.prd_name, update.product_name
+        )
+        update_instructions.update_attribute(
+            models.PlanDraft.description, update.description
+        )
+        update_instructions.update_attribute(
+            models.PlanDraft.prd_unit, update.unit_of_distribution
+        )
+        if update_instructions:
+            self.db.session.query(models.PlanDraft).filter(
+                models.PlanDraft.id == str(update.id)
+            ).update(update_instructions)
+
     def get_by_id(self, id: UUID) -> Optional[entities.PlanDraft]:
         orm = PlanDraft.query.get(str(id))
         if orm is None:
