@@ -93,9 +93,9 @@ from arbeitszeit_web.controllers.show_company_work_invite_details_controller imp
 from arbeitszeit_web.controllers.show_my_accounts_controller import (
     ShowMyAccountsController,
 )
+from arbeitszeit_web.create_draft import CreateDraftController
 from arbeitszeit_web.email import EmailConfiguration, UserAddressBook
 from arbeitszeit_web.formatters.plan_summary_formatter import PlanSummaryFormatter
-from arbeitszeit_web.get_prefilled_draft_data import PrefilledDraftDataController
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyController
 from arbeitszeit_web.language_service import LanguageService
 from arbeitszeit_web.notification import Notifier
@@ -277,8 +277,8 @@ class CompanyModule(CompanyPresenterModule):
     @provider
     def provide_prefilled_draft_data_controller(
         self, session: Session
-    ) -> PrefilledDraftDataController:
-        return PrefilledDraftDataController(session=session)
+    ) -> CreateDraftController:
+        return CreateDraftController(session=session)
 
 
 class FlaskModule(PresenterModule):

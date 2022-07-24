@@ -3,7 +3,7 @@ from decimal import Decimal
 from uuid import uuid4
 
 from arbeitszeit.use_cases import CreatePlanDraftRequest
-from arbeitszeit_web.get_prefilled_draft_data import PrefilledDraftDataController
+from arbeitszeit_web.create_draft import CreateDraftController
 from tests.session import FakeSession
 
 
@@ -66,7 +66,7 @@ fake_form = FakeDraftForm(
 
 session = FakeSession()
 session.set_current_user_id(uuid4())
-controller = PrefilledDraftDataController(session)
+controller = CreateDraftController(session)
 
 
 def test_import_of_data_returns_a_request_object():

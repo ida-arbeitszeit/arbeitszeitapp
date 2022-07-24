@@ -1,5 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
+from typing import Any
 from unittest import TestCase
 from uuid import uuid4
 
@@ -92,3 +93,123 @@ class PlanDraftRepositoryTests(TestCase):
     ) -> None:
         drafts = self.repo.all_drafts_of_company(self.planner.id)
         self.assertFalse(list(drafts))
+
+
+class UpdateDraftTests(TestCase):
+    def setUp(self) -> None:
+        self.injector = get_dependency_injector()
+        self.repo = self.injector.get(PlanDraftRepository)
+        self.company_generator = self.injector.get(CompanyGenerator)
+        self.planner = self.company_generator.create_company()
+        self.DEFAULT_CREATE_ARGUMENTS = dict(
+            planner=self.planner.id,
+            product_name="test product name",
+            description="test description",
+            costs=DEFAULT_COST,
+            production_unit="test unit",
+            amount=1,
+            timeframe_in_days=1,
+            is_public_service=True,
+            creation_timestamp=datetime.now(),
+        )
+        self.old_draft = self.repo.create_plan_draft(**self.DEFAULT_CREATE_ARGUMENTS)
+        self.other_draft = self.repo.create_plan_draft(**self.DEFAULT_CREATE_ARGUMENTS)
+
+    def test_can_update_draft_name(self) -> None:
+        self.assertUpdate(
+            self.repo.UpdateDraft(
+                id=self.old_draft.id, product_name="new product name"
+            ),
+            "product_name",
+            "new product name",
+        )
+
+    def test_with_product_name_update_none_the_product_name_does_not_get_updated(
+        self,
+    ) -> None:
+        expected_product_name = self.old_draft.product_name
+        self.repo.update_draft(
+            update=self.repo.UpdateDraft(
+                id=self.old_draft.id,
+                product_name=None,
+            )
+        )
+        updated_draft = self.repo.get_by_id(self.old_draft.id)
+        assert updated_draft
+        self.assertEqual(updated_draft.product_name, expected_product_name)
+
+    def test_can_update_description(self) -> None:
+        self.assertUpdate(
+            self.repo.UpdateDraft(id=self.old_draft.id, description="new description"),
+            "description",
+            "new description",
+        )
+
+    def test_can_update_unit_of_distribution(self) -> None:
+        self.assertUpdate(
+            self.repo.UpdateDraft(
+                id=self.old_draft.id, unit_of_distribution="new unit"
+            ),
+            "unit_of_distribution",
+            "new unit",
+        )
+
+    def test_can_update_amount(self) -> None:
+        expected_amount = 413
+        self.assertUpdate(
+            self.repo.UpdateDraft(id=self.old_draft.id, amount=expected_amount),
+            "amount_produced",
+            expected_amount,
+        )
+
+    def test_can_update_costs(self):
+        expected_costs = ProductionCosts(
+            labour_cost=Decimal(54),
+            means_cost=Decimal(274),
+            resource_cost=Decimal(923),
+        )
+        self.assertUpdate(
+            self.repo.UpdateDraft(
+                id=self.old_draft.id,
+                labour_cost=expected_costs.labour_cost,
+                means_cost=expected_costs.means_cost,
+                resource_cost=expected_costs.resource_cost,
+            ),
+            "production_costs",
+            expected_costs,
+        )
+
+    def test_can_update_is_public_plan(self) -> None:
+        self.assertUpdate(
+            self.repo.UpdateDraft(id=self.old_draft.id, is_public_service=False),
+            "is_public_service",
+            False,
+        )
+
+    def test_can_update_timeframe(self) -> None:
+        self.assertUpdate(
+            self.repo.UpdateDraft(id=self.old_draft.id, timeframe=33), "timeframe", 33
+        )
+
+    def test_draft_update_only_updates_draft_with_specified_id(self) -> None:
+        self.repo.update_draft(
+            update=self.repo.UpdateDraft(
+                id=self.old_draft.id, product_name="new product name"
+            )
+        )
+        other_draft = self.repo.get_by_id(self.other_draft.id)
+        assert other_draft
+        self.assertNotEqual(other_draft.product_name, "new product name")
+
+    def assertUpdate(
+        self,
+        update: PlanDraftRepository.UpdateDraft,
+        attribute_name: str,
+        expected_value: Any,
+    ) -> None:
+        self.repo.update_draft(
+            update=update,
+        )
+        updated_draft = self.repo.get_by_id(self.old_draft.id)
+        assert updated_draft
+        self.assertEqual(getattr(updated_draft, attribute_name), expected_value)
