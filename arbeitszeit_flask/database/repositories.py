@@ -1005,6 +1005,23 @@ class PlanDraftRepository(repositories.PlanDraftRepository):
         update_instructions.update_attribute(
             models.PlanDraft.prd_unit, update.unit_of_distribution
         )
+        update_instructions.update_attribute(
+            models.PlanDraft.costs_p, update.means_cost
+        )
+        update_instructions.update_attribute(
+            models.PlanDraft.costs_a,
+            update.labour_cost,
+        )
+        update_instructions.update_attribute(
+            models.PlanDraft.costs_r, update.resource_cost
+        )
+        update_instructions.update_attribute(
+            models.PlanDraft.is_public_service, update.is_public_service
+        )
+        update_instructions.update_attribute(
+            models.PlanDraft.timeframe, update.timeframe
+        )
+        update_instructions.update_attribute(models.PlanDraft.prd_amount, update.amount)
         if update_instructions:
             self.db.session.query(models.PlanDraft).filter(
                 models.PlanDraft.id == str(update.id)

@@ -154,6 +154,43 @@ class UpdateDraftTests(TestCase):
             "new unit",
         )
 
+    def test_can_update_amount(self) -> None:
+        expected_amount = 413
+        self.assertUpdate(
+            self.repo.UpdateDraft(id=self.old_draft.id, amount=expected_amount),
+            "amount_produced",
+            expected_amount,
+        )
+
+    def test_can_update_costs(self):
+        expected_costs = ProductionCosts(
+            labour_cost=Decimal(54),
+            means_cost=Decimal(274),
+            resource_cost=Decimal(923),
+        )
+        self.assertUpdate(
+            self.repo.UpdateDraft(
+                id=self.old_draft.id,
+                labour_cost=expected_costs.labour_cost,
+                means_cost=expected_costs.means_cost,
+                resource_cost=expected_costs.resource_cost,
+            ),
+            "production_costs",
+            expected_costs,
+        )
+
+    def test_can_update_is_public_plan(self) -> None:
+        self.assertUpdate(
+            self.repo.UpdateDraft(id=self.old_draft.id, is_public_service=False),
+            "is_public_service",
+            False,
+        )
+
+    def test_can_update_timeframe(self) -> None:
+        self.assertUpdate(
+            self.repo.UpdateDraft(id=self.old_draft.id, timeframe=33), "timeframe", 33
+        )
+
     def test_draft_update_only_updates_draft_with_specified_id(self) -> None:
         self.repo.update_draft(
             update=self.repo.UpdateDraft(
