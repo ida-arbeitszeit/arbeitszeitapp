@@ -12,7 +12,7 @@
     <div class="columns is-centered">
         <div class="column is-three-fifths">
             <p class="pb-5 has-text-right">
-                <a class="" href="{{ url_for('main_company.my_drafts') }}">
+                <a class="" href="{{ url_for('main_company.draft_list') }}">
                     <span class="icon"><i class="fa-regular fa-floppy-disk"></i></span>
                     {{ gettext("Load a draft") }}</a>
             </p>
@@ -118,18 +118,34 @@
         </div>
     </div>
     <div class="field is-grouped is-grouped-centered">
-        <div class="control">
-                <button class="button is-danger is-light" name="action" value="file_draft" type="submit">
-                    {{ gettext("Submit plan")}}</button>
-        </div>
-        <div class="control">
-                <button class="button is-primary is-light" name="action" value="save_draft" type="submit">
-                    {{ gettext("Save as draft")}}</button>
-        </div>
-        <div class="control">
-                <button class="button is-light" name="action" value="cancel" type="submit" formnovalidate>{{
-                    gettext("Cancel")}}</button>
-        </div>
+      <div class="control">
+        <button class="button is-danger is-light"
+                name="action"
+                value="file_draft"
+                type="submit"
+                formaction="{{ view_model.self_approve_plan_url }}">
+          {{ gettext("Submit plan")}}
+        </button>
+      </div>
+      <div class="control">
+        <button class="button is-primary is-light"
+                name="action"
+                value="save_draft"
+                type="submit"
+                formaction="{{ view_model.save_draft_url }}">
+          {{ gettext("Save as draft")}}
+        </button>
+      </div>
+      <div class="control">
+        <button class="button is-light"
+                name="action"
+                value="cancel"
+                type="submit"
+                formaction="{{ view_model.cancel_url }}"
+                formnovalidate>
+          {{ gettext("Cancel")}}
+        </button>
+      </div>
     </div>
     </form>
 </div>
