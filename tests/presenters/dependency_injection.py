@@ -13,6 +13,7 @@ from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.hide_plan import HidePlanPresenter
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyPresenter
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
+from arbeitszeit_web.list_drafts_of_company import ListDraftsPresenter
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.pay_consumer_product import PayConsumerProductPresenter
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
@@ -92,6 +93,7 @@ from .url_index import (
     CompanyUrlIndexImpl,
     ConfirmationUrlIndexImpl,
     CoopSummaryUrlIndexTestImpl,
+    DraftUrlIndexImpl,
     EndCoopUrlIndexTestImpl,
     HidePlanUrlIndex,
     InviteUrlIndexImpl,
@@ -562,6 +564,15 @@ class PresenterTestsInjector(Module):
     ) -> MemberPurchasesPresenter:
         return MemberPurchasesPresenter(
             datetime_service=datetime_service,
+        )
+
+    @provider
+    def provide_list_drafts_presenter(
+        self,
+        draft_url_index: DraftUrlIndexImpl,
+    ) -> ListDraftsPresenter:
+        return ListDraftsPresenter(
+            draft_url_index=draft_url_index,
         )
 
 
