@@ -29,7 +29,6 @@ from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitat
 from tests import data_generators
 from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
 from tests.control_thresholds import ControlThresholdsTestImpl
-from tests.datetime_service import FakeDatetimeService
 from tests.dependency_injection import TestingModule
 from tests.token import FakeTokenService, TokenDeliveryService
 
@@ -181,11 +180,6 @@ class InMemoryModule(Module):
         self, repo: repositories.PlanCooperationRepository
     ) -> interfaces.PlanCooperationRepository:
         return repo
-
-    @provider
-    @singleton
-    def provide_datetime_service(self, service: FakeDatetimeService) -> DatetimeService:
-        return service
 
     @provider
     def provide_token_service(self, token_service: FakeTokenService) -> TokenService:

@@ -10,7 +10,6 @@ from arbeitszeit.datetime_service import DatetimeService
 @singleton
 class FakeDatetimeService(DatetimeService):
     def __init__(self):
-        super().__init__()
         self.frozen_time = None
 
     def freeze_time(self, timestamp: datetime):

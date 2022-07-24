@@ -8,6 +8,11 @@ class MemberUrlIndex(Protocol):
         ...
 
 
+class DraftUrlIndex(Protocol):
+    def get_draft_summary_url(self, draft_id: UUID) -> str:
+        ...
+
+
 class CompanyUrlIndex(Protocol):
     def get_company_dashboard_url(self) -> str:
         ...

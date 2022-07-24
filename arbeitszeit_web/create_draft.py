@@ -85,6 +85,9 @@ class GetPrefilledDraftDataPresenter:
     @dataclass
     class ViewModel:
         prefilled_draft_data: GetPrefilledDraftDataPresenter.PrefilledDraftData
+        self_approve_plan_url: str
+        save_draft_url: str
+        cancel_url: str
 
     def show_prefilled_draft_data(
         self,
@@ -104,4 +107,9 @@ class GetPrefilledDraftDataPresenter:
             else "productive",
             action="",
         )
-        return self.ViewModel(prefilled_draft_data=prefilled_data)
+        return self.ViewModel(
+            prefilled_draft_data=prefilled_data,
+            self_approve_plan_url="/company/create_draft",
+            save_draft_url="/company/create_draft",
+            cancel_url="/company/create_draft",
+        )

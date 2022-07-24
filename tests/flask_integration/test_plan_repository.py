@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Union
 from uuid import uuid4
@@ -196,18 +196,13 @@ def test_that_all_plans_for_a_company_are_returned_in_descending_order(
     datetime_service: FakeDatetimeService,
 ) -> None:
     company = company_generator.create_company()
-    third = plan_generator.create_plan(
-        planner=company,
-        plan_creation_date=datetime_service.now_minus_one_day(),
-    )
-    second = plan_generator.create_plan(
-        planner=company,
-        plan_creation_date=datetime_service.now_minus_two_days(),
-    )
-    first = plan_generator.create_plan(
-        planner=company,
-        plan_creation_date=datetime_service.now_minus_ten_days(),
-    )
+    datetime_service.freeze_time(datetime(2000, 1, 1))
+    third = plan_generator.create_plan(planner=company)
+    datetime_service.freeze_time(datetime_service.now() - timedelta(days=1))
+    second = plan_generator.create_plan(planner=company)
+    datetime_service.freeze_time(datetime_service.now() - timedelta(days=9))
+    first = plan_generator.create_plan(planner=company)
+    datetime_service.freeze_time(datetime(2000, 1, 2))
     returned_plans = list(
         repository.get_all_plans_for_company_descending(company_id=company.id)
     )

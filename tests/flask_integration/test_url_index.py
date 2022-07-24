@@ -209,6 +209,7 @@ class PlotUrlIndexTests(ViewTestCase):
 class GeneralUrlIndexTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
+        self.plan_generator = self.injector.get(PlanGenerator)
         self.url_index = self.injector.get(GeneralUrlIndex)
         self.invite_accountant_use_case = self.injector.get(
             SendAccountantRegistrationTokenUseCase
@@ -220,6 +221,15 @@ class GeneralUrlIndexTests(ViewTestCase):
     def test_can_create_valid_url_from_valid_token(self) -> None:
         token = self.invite_accountant(email="test@test.test")
         url = self.url_index.get_accountant_invitation_url(token=token)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_that_draft_summary_url_leads_to_200_response_for_existing_draft(
+        self,
+    ) -> None:
+        company = self.login_company()
+        draft = self.plan_generator.draft_plan(planner=company)
+        url = self.url_index.get_draft_summary_url(draft_id=draft.id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 

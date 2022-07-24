@@ -37,8 +37,9 @@
                     <td>{{ row.product_name }}</td>
                     <td>{% for paragraph in row.description %}{{ paragraph }}<br>{% endfor %}</td>
                     <td>
-                        <a href="{{ url_for('main_company.create_draft', saved_draft_id=row.id) }}"><i
-                                class="fas fa-edit"></i></a>
+                      <a href="{{ row.details_url }}">
+                        <i class="fas fa-edit"></i>
+                      </a>
                     </td>
                     <td>X</td>
                 </tr>

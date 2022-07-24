@@ -31,14 +31,6 @@ class AuthenticatedCompanyTestsForGet(ViewTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-    def test_get_200_with_existing_saved_draft_as_url_parameter(
-        self,
-    ) -> None:
-        draft = self.plan_generator.draft_plan()
-        url = f"/company/create_draft?saved_draft_id={str(draft.id)}"
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-
 
 class AuthenticatedCompanyTestsForPost(ViewTestCase):
     def setUp(self) -> None:
