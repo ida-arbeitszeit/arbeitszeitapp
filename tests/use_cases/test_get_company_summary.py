@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from uuid import uuid4
 
@@ -418,15 +418,13 @@ def test_returns_list_of_companys_plans_in_descending_order(
     datetime_service: FakeDatetimeService,
 ):
     company = company_generator.create_company()
-    third = plan_generator.create_plan(
-        planner=company, plan_creation_date=datetime_service.now_minus_one_day()
-    )
-    first = plan_generator.create_plan(
-        planner=company, plan_creation_date=datetime_service.now_minus_ten_days()
-    )
-    second = plan_generator.create_plan(
-        planner=company, plan_creation_date=datetime_service.now_minus_two_days()
-    )
+    datetime_service.freeze_time(datetime(2000, 1, 1))
+    third = plan_generator.create_plan(planner=company)
+    datetime_service.freeze_time(datetime_service.now() - timedelta(days=9))
+    first = plan_generator.create_plan(planner=company)
+    datetime_service.freeze_time(datetime_service.now() + timedelta(days=8))
+    second = plan_generator.create_plan(planner=company)
+    datetime_service.freeze_time(datetime(2000, 1, 2))
     response = get_company_summary(company.id)
     assert response
     assert response.plan_details[0].id == third.id

@@ -11,6 +11,7 @@ from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitat
 )
 from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
 from tests.company import CompanyManager
+from tests.datetime_service import FakeDatetimeService
 from tests.email import FakeEmailSender
 from tests.language_service import FakeLanguageService
 from tests.session import FakeSession
@@ -64,3 +65,12 @@ class TestingModule(Module):
         self,
     ) -> AccountantInvitationPresenterTestImpl:
         return AccountantInvitationPresenterTestImpl()
+
+    @singleton
+    @provider
+    def provide_fake_datetime_service(self) -> FakeDatetimeService:
+        return FakeDatetimeService()
+
+    @provider
+    def provide_datetime_service(self, service: FakeDatetimeService) -> DatetimeService:
+        return service
