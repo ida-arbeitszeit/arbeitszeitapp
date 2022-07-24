@@ -96,6 +96,13 @@ class CreateDraftView:
         return FlaskResponse(
             self.template_renderer.render_template(
                 "company/create_draft.html",
-                context=dict(form=form),
+                context=dict(
+                    form=form,
+                    view_model=dict(
+                        self_approve_plan="",
+                        save_draft_url="",
+                        cancel_url="",
+                    ),
+                ),
             )
         )
