@@ -14,6 +14,7 @@ from tests.company import CompanyManager
 from tests.datetime_service import FakeDatetimeService
 from tests.email import FakeEmailSender
 from tests.language_service import FakeLanguageService
+from tests.request import FakeRequest
 from tests.session import FakeSession
 from tests.token import FakeTokenService
 
@@ -74,3 +75,8 @@ class TestingModule(Module):
     @provider
     def provide_datetime_service(self, service: FakeDatetimeService) -> DatetimeService:
         return service
+
+    @singleton
+    @provider
+    def provide_fake_request(self) -> FakeRequest:
+        return FakeRequest()
