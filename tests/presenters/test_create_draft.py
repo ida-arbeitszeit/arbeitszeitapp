@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from arbeitszeit.plan_summary import PlanSummary
 from arbeitszeit.use_cases import DraftSummarySuccess
-from arbeitszeit_web.get_prefilled_draft_data import GetPrefilledDraftDataPresenter
+from arbeitszeit_web.create_draft import GetPrefilledDraftDataPresenter
 
 from .dependency_injection import get_dependency_injector
 

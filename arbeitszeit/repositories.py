@@ -346,6 +346,23 @@ class PlanDraftRepository(ABC):
     ) -> PlanDraft:
         pass
 
+    @dataclass
+    class UpdateDraft:
+        id: UUID
+        product_name: Optional[str] = None
+        amount: Optional[int] = None
+        description: Optional[str] = None
+        labour_cost: Optional[Decimal] = None
+        means_cost: Optional[Decimal] = None
+        resource_cost: Optional[Decimal] = None
+        is_public_service: Optional[bool] = None
+        timeframe: Optional[int] = None
+        unit_of_distribution: Optional[str] = None
+
+    @abstractmethod
+    def update_draft(self, update: UpdateDraft) -> None:
+        pass
+
     @abstractmethod
     def get_by_id(self, id: UUID) -> Optional[PlanDraft]:
         pass

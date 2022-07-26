@@ -5,6 +5,7 @@ from arbeitszeit import entities
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.token import InvitationTokenValidator, TokenDeliverer, TokenService
 from arbeitszeit.use_cases import GetCompanySummary
+from arbeitszeit.use_cases.edit_draft import EditDraftUseCase
 from arbeitszeit.use_cases.get_accountant_profile_info import (
     GetAccountantProfileInfoUseCase,
 )
@@ -273,6 +274,12 @@ class InMemoryModule(Module):
         self, company_repository: interfaces.CompanyRepository
     ) -> LogInCompanyUseCase:
         return LogInCompanyUseCase(company_repository=company_repository)
+
+    @provider
+    def provide_edit_draft_use_case(
+        self, draft_repository: interfaces.PlanDraftRepository
+    ) -> EditDraftUseCase:
+        return EditDraftUseCase(draft_repository=draft_repository)
 
 
 def get_dependency_injector() -> Injector:

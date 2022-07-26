@@ -12,9 +12,9 @@ from arbeitszeit_flask.forms import CreateDraftForm
 from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views.http_404_view import Http404View
-from arbeitszeit_web.get_prefilled_draft_data import (
+from arbeitszeit_web.create_draft import (
+    CreateDraftController,
     GetPrefilledDraftDataPresenter,
-    PrefilledDraftDataController,
 )
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.request import Request
@@ -28,11 +28,11 @@ class CreateDraftView:
     session: Session
     notifier: Notifier
     translator: Translator
-    prefilled_data_controller: PrefilledDraftDataController
+    prefilled_data_controller: CreateDraftController
     get_plan_summary_company: GetPlanSummaryCompany
     create_draft: CreatePlanDraft
     get_draft_summary: GetDraftSummary
-    get_prefilled_draft_data_presenter: GetPrefilledDraftDataPresenter
+    create_draft_presenter: GetPrefilledDraftDataPresenter
     template_renderer: UserTemplateRenderer
     http_404_view: Http404View
 
@@ -81,10 +81,8 @@ class CreateDraftView:
             assert planner is not None
             response = self.get_plan_summary_company(UUID(expired_plan_id), planner)
             if isinstance(response, GetPlanSummaryCompany.Success):
-                view_model = (
-                    self.get_prefilled_draft_data_presenter.show_prefilled_draft_data(
-                        response.plan_summary
-                    )
+                view_model = self.create_draft_presenter.show_prefilled_draft_data(
+                    response.plan_summary
                 )
                 form = CreateDraftForm(data=asdict(view_model.prefilled_draft_data))
             else:
