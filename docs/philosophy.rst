@@ -66,8 +66,8 @@ See this example for reference::
       @dataclass
       class Request:
           company_id: UUID
-	  planned_hours: Decimal
-	  plan_duration_in_days: int
+          planned_hours: Decimal
+          plan_duration_in_days: int
 
       @dataclass
       class Response:
@@ -75,7 +75,7 @@ See this example for reference::
 
       def file_plan(self, request: Request) -> Response:
           response = business_logic(request)
-	  return response
+          return response
 
 Implementing calls to persistent storage (a.k.a the database)
 =============================================================
@@ -210,7 +210,9 @@ use case without the need to create an SQL database::
           self.books: Dict[int, Optional[int]] = dict()
 
       def get_book_count_borrowed_by_customer(self, customer_id: int) -> int:
-          return sum(filter(lambda _id: _id == customer_id, self.books.values()))
+          return sum(
+              1 for _ in filter(lambda _id: _id == customer_id, self.books.values())
+          )
 
       def update_books(self, update: BookStorage.UpdateBooksModel) -> None:
           if update.borrowed_to is None:
