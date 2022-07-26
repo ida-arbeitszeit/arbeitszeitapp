@@ -8,6 +8,8 @@ from arbeitszeit_web.request_cooperation import RequestCooperationController
 from tests.session import FakeSession
 from tests.translator import FakeTranslator
 
+from .dependency_injection import get_dependency_injector
+
 
 @dataclass
 class FakeRequestCooperationForm:
@@ -28,11 +30,10 @@ fake_form = FakeRequestCooperationForm(
 
 class RequestCooperationControllerTests(TestCase):
     def setUp(self) -> None:
-        self.session = FakeSession()
-        self.translator = FakeTranslator()
-        self.controller = RequestCooperationController(
-            session=self.session, translator=self.translator
-        )
+        self.injector = get_dependency_injector()
+        self.session = self.injector.get(FakeSession)
+        self.translator = self.injector.get(FakeTranslator)
+        self.controller = self.injector.get(RequestCooperationController)
 
     def test_when_user_is_not_authenticated_then_we_cannot_get_a_use_case_request(
         self,

@@ -9,12 +9,14 @@ from arbeitszeit.use_cases import AnswerCompanyWorkInviteRequest
 from arbeitszeit_web.answer_company_work_invite import AnswerCompanyWorkInviteController
 
 from ..session import FakeSession
+from .dependency_injection import get_dependency_injector
 
 
 class BaseTestCase(TestCase):
     def setUp(self) -> None:
-        self.session = FakeSession()
-        self.controller = AnswerCompanyWorkInviteController(self.session)
+        self.injector = get_dependency_injector()
+        self.session = self.injector.get(FakeSession)
+        self.controller = self.injector.get(AnswerCompanyWorkInviteController)
 
     def _get_request_form(self, is_accepted: bool = True) -> FakeRequestForm:
         return FakeRequestForm(is_accepted=is_accepted)

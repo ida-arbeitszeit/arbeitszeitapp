@@ -9,6 +9,8 @@ from arbeitszeit_web.pay_consumer_product import (
 )
 from tests.translator import FakeTranslator
 
+from .dependency_injection import get_dependency_injector
+
 ControllerResult = Union[
     PayConsumerProductRequestImpl,
     PayConsumerProductController.MalformedInputData,
@@ -17,8 +19,9 @@ ControllerResult = Union[
 
 class PayConsumerProductControllerTests(TestCase):
     def setUp(self) -> None:
-        self.translator = FakeTranslator()
-        self.controller = PayConsumerProductController(translator=self.translator)
+        self.injector = get_dependency_injector()
+        self.translator = self.injector.get(FakeTranslator)
+        self.controller = self.injector.get(PayConsumerProductController)
 
     def test_malformed_data_is_returned_when_form_data_is_empty_strings(self) -> None:
         result = self._process_form(plan_id="", amount="")
