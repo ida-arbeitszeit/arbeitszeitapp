@@ -6,12 +6,14 @@ from arbeitszeit_web.controllers.show_company_work_invite_details_controller imp
 )
 
 from ..session import FakeSession
+from .dependency_injection import get_dependency_injector
 
 
 class ControllerTests(TestCase):
     def setUp(self) -> None:
-        self.session = FakeSession()
-        self.controller = ShowCompanyWorkInviteDetailsController(session=self.session)
+        self.injector = get_dependency_injector()
+        self.session = self.injector.get(FakeSession)
+        self.controller = self.injector.get(ShowCompanyWorkInviteDetailsController)
 
     def test_when_user_is_not_logged_in_then_dont_generate_use_case_request(
         self,

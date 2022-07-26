@@ -10,6 +10,8 @@ from arbeitszeit_web.controllers.pay_means_of_production_controller import (
 from tests.request import FakeRequest
 from tests.session import FakeSession
 
+from .dependency_injection import get_dependency_injector
+
 
 class FakePayMeansForm:
     def __init__(self, amount: int, plan_id: UUID, category: str) -> None:
@@ -30,9 +32,10 @@ class FakePayMeansForm:
 
 class AuthenticatedCompanyTests(TestCase):
     def setUp(self) -> None:
-        self.session = FakeSession()
-        self.request = FakeRequest()
-        self.controller = PayMeansOfProductionController(self.session, self.request)
+        self.injector = get_dependency_injector()
+        self.session = self.injector.get(FakeSession)
+        self.request = self.injector.get(FakeRequest)
+        self.controller = self.injector.get(PayMeansOfProductionController)
         self.expected_user_id = uuid4()
         self.session.set_current_user_id(self.expected_user_id)
         self.fake_form = FakePayMeansForm(amount=10, plan_id=uuid4(), category="Fixed")

@@ -8,10 +8,13 @@ from arbeitszeit.use_cases import PlanFilter
 from arbeitszeit.use_cases.query_plans import PlanSorting
 from arbeitszeit_web.query_plans import QueryPlansController
 
+from .dependency_injection import get_dependency_injector
+
 
 class QueryPlansControllerTests(TestCase):
     def setUp(self) -> None:
-        self.controller = QueryPlansController()
+        self.injector = get_dependency_injector()
+        self.controller = self.injector.get(QueryPlansController)
 
     def test_that_empty_query_string_translates_to_no_query_string_in_request(
         self,
