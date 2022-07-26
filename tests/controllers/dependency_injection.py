@@ -16,7 +16,7 @@ from arbeitszeit_web.controllers.show_company_work_invite_details_controller imp
 from arbeitszeit_web.controllers.show_my_accounts_controller import (
     ShowMyAccountsController,
 )
-from arbeitszeit_web.get_prefilled_draft_data import PrefilledDraftDataController
+from arbeitszeit_web.create_draft import CreateDraftController
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyController
 from arbeitszeit_web.pay_consumer_product import PayConsumerProductController
 from arbeitszeit_web.request_cooperation import RequestCooperationController
@@ -104,10 +104,10 @@ class ControllerTestsModule(Module):
         )
 
     @provider
-    def provide_prefilled_draft_data_controller(
+    def provide_create_draft_controller(
         self, session: FakeSession
-    ) -> PrefilledDraftDataController:
-        return PrefilledDraftDataController(session=session)
+    ) -> CreateDraftController:
+        return CreateDraftController(session=session)
 
 
 def get_dependency_injector() -> Injector:

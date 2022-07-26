@@ -675,6 +675,30 @@ class PlanDraftRepository(interfaces.PlanDraftRepository):
         self.drafts.append(draft)
         return draft
 
+    def update_draft(self, update: interfaces.PlanDraftRepository.UpdateDraft) -> None:
+        draft = self.get_by_id(update.id)
+        if draft is None:
+            return
+        if update.product_name is not None:
+            draft.product_name = update.product_name
+        if update.amount is not None:
+            draft.amount_produced = update.amount
+        if update.description is not None:
+            draft.description = update.description
+        if update.labour_cost is not None:
+            draft.production_costs.labour_cost = update.labour_cost
+        if update.means_cost is not None:
+            draft.production_costs.means_cost = update.means_cost
+        if update.resource_cost is not None:
+            draft.production_costs.resource_cost = update.resource_cost
+        if update.is_public_service is not None:
+            draft.is_public_service = update.is_public_service
+        if update.timeframe is not None:
+            draft.timeframe = update.timeframe
+        if update.unit_of_distribution is not None:
+            draft.unit_of_distribution = update.unit_of_distribution
+        return
+
     def get_by_id(self, id: UUID) -> Optional[PlanDraft]:
         for draft in self.drafts:
             if draft.id == id:

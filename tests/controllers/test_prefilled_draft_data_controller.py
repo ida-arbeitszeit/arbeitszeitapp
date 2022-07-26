@@ -4,7 +4,7 @@ from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases import CreatePlanDraftRequest
-from arbeitszeit_web.get_prefilled_draft_data import PrefilledDraftDataController
+from arbeitszeit_web.create_draft import CreateDraftController
 from tests.session import FakeSession
 
 from .dependency_injection import get_dependency_injector
@@ -58,7 +58,7 @@ class ControllerTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.session = self.injector.get(FakeSession)
-        self.controller = self.injector.get(PrefilledDraftDataController)
+        self.controller = self.injector.get(CreateDraftController)
         self.fake_form = FakeDraftForm(
             prd_name="test name",
             description="test description",
