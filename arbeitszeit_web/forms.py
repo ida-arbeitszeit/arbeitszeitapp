@@ -1,23 +1,25 @@
 from typing import Protocol
 
+from arbeitszeit_web.fields import FormField
+
 
 class LoginMemberForm(Protocol):
-    def add_email_error(self, error: str) -> None:
+    def email_field(self) -> FormField[str]:
         ...
 
-    def add_password_error(self, error: str) -> None:
+    def password_field(self) -> FormField[str]:
         ...
 
-    def get_remember_field(self) -> bool:
+    def remember_field(self) -> FormField[bool]:
         ...
 
 
 class LoginCompanyForm(Protocol):
-    def add_password_error(self, error: str) -> None:
+    def email_field(self) -> FormField[str]:
         ...
 
-    def add_email_error(self, error: str) -> None:
+    def password_field(self) -> FormField[str]:
         ...
 
-    def get_remember_field(self) -> bool:
+    def remember_field(self) -> FormField[bool]:
         ...

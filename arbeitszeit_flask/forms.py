@@ -1,4 +1,5 @@
 from decimal import Decimal
+from typing import Generic, TypeVar
 
 from wtforms import (
     BooleanField,
@@ -14,6 +15,25 @@ from wtforms import (
 )
 
 from .translator import FlaskTranslator
+
+T = TypeVar("T")
+
+
+class WtFormField(Generic[T]):
+    def __init__(self, form: Form, field_name: str) -> None:
+        self._form = form
+        self._field_name = field_name
+
+    def get_value(self) -> T:
+        return self._form.data[self._field_name]
+
+    def attach_error(self, message: str) -> None:
+        self._field.errors.append(message)
+
+    @property
+    def _field(self):
+        return getattr(self._form, self._field_name)
+
 
 trans = FlaskTranslator()
 
@@ -163,6 +183,7 @@ class LoginForm(Form):
             )
         ],
     )
+
     password = PasswordField(
         trans.lazy_gettext("Password"),
         validators=[
@@ -171,14 +192,14 @@ class LoginForm(Form):
     )
     remember = BooleanField(trans.lazy_gettext("Remember login?"))
 
-    def add_email_error(self, error: str) -> None:
-        self.email.errors.append(error)
+    def email_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="email")
 
-    def add_password_error(self, error: str) -> None:
-        self.password.errors.append(error)
+    def password_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="password")
 
-    def get_remember_field(self) -> bool:
-        return bool(self.data["remember"])
+    def remember_field(self) -> WtFormField[bool]:
+        return WtFormField(form=self, field_name="remember")
 
 
 class PayConsumerProductForm(Form):

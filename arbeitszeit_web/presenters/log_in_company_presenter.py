@@ -25,7 +25,7 @@ class LogInCompanyPresenter:
     ) -> ViewModel:
         if response.is_logged_in and response.email_address:
             self.session.login_company(
-                response.email_address, form.get_remember_field()
+                response.email_address, form.remember_field().get_value()
             )
             redirect_url = (
                 self.session.pop_next_url()
@@ -36,11 +36,11 @@ class LogInCompanyPresenter:
                 response.rejection_reason
                 == LogInCompanyUseCase.RejectionReason.invalid_password
             ):
-                form.add_password_error(
+                form.password_field().attach_error(
                     self.translator.gettext("Password is incorrect")
                 )
             else:
-                form.add_email_error(
+                form.email_field().attach_error(
                     self.translator.gettext(
                         "Email address is not correct. Are you already signed up?"
                     )

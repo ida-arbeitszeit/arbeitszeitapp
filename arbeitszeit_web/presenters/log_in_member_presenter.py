@@ -23,7 +23,7 @@ class LogInMemberPresenter:
     ) -> ViewModel:
         if response.is_logged_in:
             self.session.login_member(
-                email=response.email, remember=form.get_remember_field()
+                email=response.email, remember=form.remember_field().get_value()
             )
             next_url = (
                 self.session.pop_next_url()
@@ -35,13 +35,13 @@ class LogInMemberPresenter:
                 response.rejection_reason
                 == LogInMemberUseCase.RejectionReason.unknown_email_address
             ):
-                form.add_email_error(
+                form.email_field().attach_error(
                     self.translator.gettext(
                         "Email address incorrect. Are you already registered as a member?"
                     ),
                 )
             else:
-                form.add_password_error(
+                form.password_field().attach_error(
                     self.translator.gettext("Incorrect password"),
                 )
             return self.ViewModel(redirect_url=None)
