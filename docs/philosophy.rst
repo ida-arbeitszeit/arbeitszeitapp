@@ -152,7 +152,7 @@ protocol where the data about the books is stored in an SQL database::
 Now let us see how another class can use the interface to implement a
 use case::
 
-  # Implement a use case makes of the BookStorage protocol. This class
+  # Implement a use case that uses the BookStorage protocol. This class
   # implements the "business logic" of borrowing books from a library.
   # The customer cannot borrow any more books if they currently borrow
   # 20 other books.
@@ -226,8 +226,8 @@ use case without the need to create an SQL database::
 
 The protocols that define DB access in the *arbeitszeitapp* are
 located under ``arbeitszeit.repositories``. Note that while the above
-method is the standard for new implementations there is some "legacy"
-code in this module.  All the production implementations are located
-under ``arbeitszeit_flask.database.repositories`` and the in-memory
-testing implementations can be found under
-``tests.use_cases.repositories``.
+method, using protocols, is the standard for new implementations there
+is some "legacy" code in this module.  All the production
+implementations are located under
+``arbeitszeit_flask.database.repositories`` and the in-memory testing
+implementations can be found under ``tests.use_cases.repositories``.
