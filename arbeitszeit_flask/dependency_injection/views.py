@@ -267,12 +267,14 @@ class ViewsModule(Module):
         get_company_dashboard_presenter: GetCompanyDashboardPresenter,
         template_renderer: UserTemplateRenderer,
         flask_session: FlaskSession,
+        http_404_view: Http404View,
     ) -> CompanyDashboardView:
         return CompanyDashboardView(
             get_company_dashboard_use_case,
             get_company_dashboard_presenter,
             template_renderer,
             flask_session,
+            http_404_view,
         )
 
     @provider
