@@ -24,9 +24,6 @@ from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationP
 from arbeitszeit_web.presenters.get_company_dashboard_presenter import (
     GetCompanyDashboardPresenter,
 )
-from arbeitszeit_web.presenters.get_latest_activated_plans_presenter import (
-    GetLatestActivatedPlansPresenter,
-)
 from arbeitszeit_web.presenters.get_member_dashboard_presenter import (
     GetMemberDashboardPresenter,
 )
@@ -489,16 +486,6 @@ class PresenterTestsInjector(Module):
         self, translator: FakeTranslator
     ) -> InviteWorkerToCompanyPresenter:
         return InviteWorkerToCompanyPresenter(translator=translator)
-
-    @provider
-    def provide_get_latest_activated_plans_presenter(
-        self,
-        url_index: PlanSummaryUrlIndexTestImpl,
-        datetime_service: FakeDatetimeService,
-    ) -> GetLatestActivatedPlansPresenter:
-        return GetLatestActivatedPlansPresenter(
-            url_index=url_index, datetime_service=datetime_service
-        )
 
     @provider
     def provide_get_company_dashboard_presenter(

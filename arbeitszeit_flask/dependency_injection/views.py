@@ -10,7 +10,6 @@ from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
 from arbeitszeit.use_cases.end_cooperation import EndCooperation
 from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCase
 from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
-from arbeitszeit.use_cases.get_latest_activated_plans import GetLatestActivatedPlans
 from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
 from arbeitszeit.use_cases.list_workers import ListWorkers
 from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProduction
@@ -93,9 +92,6 @@ from arbeitszeit_web.presenters.accountant_invitation_presenter import (
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
 from arbeitszeit_web.presenters.get_company_dashboard_presenter import (
     GetCompanyDashboardPresenter,
-)
-from arbeitszeit_web.presenters.get_latest_activated_plans_presenter import (
-    GetLatestActivatedPlansPresenter,
 )
 from arbeitszeit_web.presenters.list_workers_presenter import ListWorkersPresenter
 from arbeitszeit_web.presenters.register_accountant_presenter import (

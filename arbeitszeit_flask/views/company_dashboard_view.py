@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 
 from flask import Response as FlaskResponse
-from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCase
 
+from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCase
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_flask.types import Response
@@ -22,6 +22,7 @@ class CompanyDashboardView:
         current_user = self.flask_session.get_current_user()
         assert current_user
         response = self.get_company_dashboard_use_case.get_dashboard(current_user)
+        assert isinstance(response, GetCompanyDashboardUseCase.Success)
         view_model = self.get_company_dashboard_presenter.present(response)
         return FlaskResponse(
             self.template_renderer.render_template(

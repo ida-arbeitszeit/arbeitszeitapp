@@ -2,12 +2,12 @@ from datetime import datetime
 from typing import List
 from unittest import TestCase
 from uuid import uuid4
+
 from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCase
 from arbeitszeit_web.presenters.get_company_dashboard_presenter import (
     GetCompanyDashboardPresenter,
 )
 from tests.datetime_service import FakeDatetimeService
-
 from tests.presenters.dependency_injection import get_dependency_injector
 from tests.presenters.url_index import PlanSummaryUrlIndexTestImpl
 
