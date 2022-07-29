@@ -133,9 +133,14 @@ class CompanyPresenterModule(Module):
 
     @provider
     def provide_request_cooperation_presenter(
-        self, translator: Translator
+        self,
+        translator: Translator,
+        mail_service: MailService,
+        email_configuration: EmailConfiguration,
     ) -> RequestCooperationPresenter:
-        return RequestCooperationPresenter(translator)
+        return RequestCooperationPresenter(
+            translator, mail_service, email_configuration
+        )
 
     @provider
     def provide_send_work_certificates_to_worker_presenter(
