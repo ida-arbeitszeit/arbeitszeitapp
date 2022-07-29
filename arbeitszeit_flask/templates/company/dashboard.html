@@ -4,17 +4,17 @@
 
 <div class="section">
     <div class="has-text-centered pb-5">
-        <h1 class="title is-2">{{ gettext("Welcome, %(name)s!", name= current_user.name) }}</h1>
+        <h1 class="title is-2">{{ gettext("Welcome, %(name)s!", name= view_model.company_name) }}</h1>
         <div class="columns">
             <div class="column"></div>
             <div class="column is-one-third">
                 <div class="box">
                     <p class="has-text-weight-semibold">{{ gettext("Your ID") }}:</p>
-                    <p>{{ current_user.id }}</p>
+                    <p>{{ view_model.company_id }}</p>
                     <p class="has-text-weight-semibold">{{ gettext("Your email") }}:</p>
-                    <p>{{ current_user.email }}</p>
+                    <p>{{ view_model.company_email }}</p>
                     <div class="content">
-                        {% if having_workers is sameas false %}
+                        {% if not view_model.has_workers %}
                         <div class="block pt-3">
                             <span class="icon"><i class="fas fa-exclamation-triangle"></i></span><br>
                             <a href="{{ url_for('main_company.invite_worker_to_company') }}">
@@ -63,7 +63,7 @@
                     <h1 class="title is-5"><span class="icon"><i class="fas fa-industry"></i></span> {{
                         gettext("Company") }}
                     </h1>
-                    <div class="subtitle is-6">{{ gettext("Your company") }} "{{ current_user.name }}"</div>
+                    <div class="subtitle is-6">{{ gettext("Your company") }} "{{ view_model.company_name }}"</div>
                 </div>
             </a>
             <a class="tile is-parent" href="{{ url_for('main_company.my_plans') }}">

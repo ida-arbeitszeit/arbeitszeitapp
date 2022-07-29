@@ -37,6 +37,9 @@ from arbeitszeit_web.presenters.accountant_invitation_presenter import (
     AccountantInvitationEmailView,
 )
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
+from arbeitszeit_web.presenters.get_company_dashboard_presenter import (
+    GetCompanyDashboardPresenter,
+)
 from arbeitszeit_web.presenters.get_latest_activated_plans_presenter import (
     GetLatestActivatedPlansPresenter,
 )
@@ -230,6 +233,14 @@ class PresenterModule(Module):
         self, url_index: PlanSummaryUrlIndex, datetime_service: DatetimeService
     ) -> GetLatestActivatedPlansPresenter:
         return GetLatestActivatedPlansPresenter(
+            url_index=url_index, datetime_service=datetime_service
+        )
+
+    @provider
+    def provide_get_company_dashboard_presenter(
+        self, url_index: PlanSummaryUrlIndex, datetime_service: DatetimeService
+    ) -> GetCompanyDashboardPresenter:
+        return GetCompanyDashboardPresenter(
             url_index=url_index, datetime_service=datetime_service
         )
 

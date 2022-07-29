@@ -8,6 +8,7 @@ from arbeitszeit.use_cases import (
 from arbeitszeit.use_cases.create_cooperation import CreateCooperation
 from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
 from arbeitszeit.use_cases.end_cooperation import EndCooperation
+from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCase
 from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
 from arbeitszeit.use_cases.get_latest_activated_plans import GetLatestActivatedPlans
 from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
@@ -90,6 +91,9 @@ from arbeitszeit_web.presenters.accountant_invitation_presenter import (
     AccountantInvitationEmailView,
 )
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
+from arbeitszeit_web.presenters.get_company_dashboard_presenter import (
+    GetCompanyDashboardPresenter,
+)
 from arbeitszeit_web.presenters.get_latest_activated_plans_presenter import (
     GetLatestActivatedPlansPresenter,
 )
@@ -263,16 +267,14 @@ class ViewsModule(Module):
     @provider
     def provide_company_dashboard_view(
         self,
-        list_workers_use_case: ListWorkers,
-        get_latest_plans_use_case: GetLatestActivatedPlans,
-        get_latest_plans_presenter: GetLatestActivatedPlansPresenter,
+        get_company_dashboard_use_case: GetCompanyDashboardUseCase,
+        get_company_dashboard_presenter: GetCompanyDashboardPresenter,
         template_renderer: UserTemplateRenderer,
         flask_session: FlaskSession,
     ) -> CompanyDashboardView:
         return CompanyDashboardView(
-            list_workers_use_case,
-            get_latest_plans_use_case,
-            get_latest_plans_presenter,
+            get_company_dashboard_use_case,
+            get_company_dashboard_presenter,
             template_renderer,
             flask_session,
         )
