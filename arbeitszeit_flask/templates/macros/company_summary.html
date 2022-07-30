@@ -7,36 +7,31 @@
                 {{ gettext("Company overview") }}
             </h1>
         </div>
-        <div class="section">
-            <div class="columns is-centered">
-                <div class="column is-two-thirds">
-                    <div class="table-container">
-                        <table class="table has-text-left mx-auto">
-                            <tbody>
-                                <tr>
-                                    <td class="has-text-left has-text-weight-semibold">{{ gettext("ID") }}</td>
-                                    <td class="has-text-left">{{ view_model.id }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="has-text-left has-text-weight-semibold">{{ gettext("Name") }}</td>
-                                    <td class="has-text-left">{{ view_model.name }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="has-text-left has-text-weight-semibold">{{ gettext("Email") }}</td>
-                                    <td class="has-text-left">{{ view_model.email }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="has-text-left has-text-weight-semibold">{{ gettext("Registered since") }}
-                                    </td>
-                                    <td class="has-text-left">{{ view_model.registered_on }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                </div>
+        <br>
+        <div class="section box">
+            <div class="table-container">
+                <table class="table has-text-left mx-auto">
+                    <tbody>
+                        <tr>
+                            <td class="has-text-left has-text-weight-semibold">{{ gettext("ID") }}</td>
+                            <td class="has-text-left">{{ view_model.id }}</td>
+                        </tr>
+                        <tr>
+                            <td class="has-text-left has-text-weight-semibold">{{ gettext("Name") }}</td>
+                            <td class="has-text-left">{{ view_model.name }}</td>
+                        </tr>
+                        <tr>
+                            <td class="has-text-left has-text-weight-semibold">{{ gettext("Email") }}</td>
+                            <td class="has-text-left">{{ view_model.email }}</td>
+                        </tr>
+                        <tr>
+                            <td class="has-text-left has-text-weight-semibold">{{ gettext("Registered since") }}
+                            </td>
+                            <td class="has-text-left">{{ view_model.registered_on }}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-
         </div>
         <div class="section box">
             <div class="has-text-centered">
@@ -45,52 +40,45 @@
                 </h1>
             </div>
             <br>
-            <div class="columns is-centered">
-                <div class="column is-two-thirds">
-                    <div class="table-container">
-                        <table class="table has-text-left mx-auto">
-                            <thead class="has-text-centered">
-                                <tr>
-                                    <th></th>
-                                    <th><span class="icon"><i
-                                                class="fas fa-industry"></i></span><br>{{ gettext("Account p") }}
-                                    </th>
-                                    <th><span class="icon"><i
-                                                class="fas fa-oil-can"></i></span><br>{{ gettext("Account r") }}
-                                    </th>
-                                    <th><span class="icon"><i
-                                                class="fas fa-users"></i></span><br>{{ gettext("Account a") }}
-                                    </th>
-                                    <th><span class="icon"><i class="fas fa-exchange-alt"></i></span>
-                                        <br>{{ gettext("Account prd") }}
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>{{ gettext("Expectations") }}</td>
-                                    {% for exp in view_model.expectations %}
-                                    <td><span class="tag is-medium">{{ exp }}</span></td>
-                                    {% endfor %}
-                                </tr>
-                                <tr>
-                                    <td>{{ gettext("Balances") }}</td>
-                                    {% for bal in view_model.account_balances %}
-                                    <td><span class="tag is-medium">{{ bal }}</span></td>
-                                    {% endfor %}
-                                </tr>
-                                <tr>
-                                    <td class="has-text-weight-semibold">{{ gettext("Deviation (&percnt;)") }}</td>
-                                    {% for dev_rel in view_model.deviations_relative %}
-                                    <td><span
-                                            class="tag is-light is-medium {{ 'is-danger' if dev_rel.is_critical else 'is-primary'  }}">{{
+            <div class="table-container">
+                <table class="table has-text-left mx-auto">
+                    <thead class="has-text-centered">
+                        <tr>
+                            <th></th>
+                            <th><span class="icon"><i class="fas fa-industry"></i></span><br>{{ gettext("Account p") }}
+                            </th>
+                            <th><span class="icon"><i class="fas fa-oil-can"></i></span><br>{{ gettext("Account r") }}
+                            </th>
+                            <th><span class="icon"><i class="fas fa-users"></i></span><br>{{ gettext("Account a") }}
+                            </th>
+                            <th><span class="icon"><i class="fas fa-exchange-alt"></i></span>
+                                <br>{{ gettext("Account prd") }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ gettext("Expectations") }}</td>
+                            {% for exp in view_model.expectations %}
+                            <td><span class="tag is-medium">{{ exp }}</span></td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td>{{ gettext("Balances") }}</td>
+                            {% for bal in view_model.account_balances %}
+                            <td><span class="tag is-medium">{{ bal }}</span></td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td class="has-text-weight-semibold">{{ gettext("Deviation (&percnt;)") }}</td>
+                            {% for dev_rel in view_model.deviations_relative %}
+                            <td><span
+                                    class="tag is-light is-medium {{ 'is-danger' if dev_rel.is_critical else 'is-primary'  }}">{{
                                             dev_rel.percentage }}</span></td>
-                                    {% endfor %}
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                            {% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
         <div class="section box has-text-centered">

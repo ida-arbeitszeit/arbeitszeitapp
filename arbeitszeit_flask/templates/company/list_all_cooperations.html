@@ -10,34 +10,29 @@
     <h1 class="title">
         {{ gettext("All cooperations") }}
     </h1>
-    <div class="columns">
-        <div class="column"></div>
-        <div class="column is-10">
-            {% if view_model.show_results %}
-            <div class="table-container">
-                <table class="table has-text-left mx-auto">
-                    <thead>
-                        <tr>
-                            <th>{{ gettext("Name") }}</th>
-                            <th>{{ gettext("Number of plans") }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for coop in view_model.cooperations %}
-                        <tr>
-                            <td><a href="{{ coop.coop_summary_url }}">{{ coop.name }}</a>
-                            </td>
-                            <td>{{ coop.plan_count }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <p>{{ gettext("No cooperations found") }}</p>
-            {% endif %}
-        </div>
-        <div class="column"></div>
+    {% if view_model.show_results %}
+    <div class="table-container">
+        <table class="table has-text-left mx-auto">
+            <thead>
+                <tr>
+                    <th>{{ gettext("Name") }}</th>
+                    <th>{{ gettext("Number of plans") }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for coop in view_model.cooperations %}
+                <tr>
+                    <td><a href="{{ coop.coop_summary_url }}">{{ coop.name }}</a>
+                    </td>
+                    <td>{{ coop.plan_count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
+    {% else %}
+    <p>{{ gettext("No cooperations found") }}</p>
+    {% endif %}
+</div>
 </div>
 {% endblock %}
