@@ -21,8 +21,8 @@ from arbeitszeit_web.presenters.accountant_invitation_presenter import (
     AccountantInvitationEmailPresenter,
 )
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
-from arbeitszeit_web.presenters.get_latest_activated_plans_presenter import (
-    GetLatestActivatedPlansPresenter,
+from arbeitszeit_web.presenters.get_company_dashboard_presenter import (
+    GetCompanyDashboardPresenter,
 )
 from arbeitszeit_web.presenters.get_member_dashboard_presenter import (
     GetMemberDashboardPresenter,
@@ -493,12 +493,12 @@ class PresenterTestsInjector(Module):
         return InviteWorkerToCompanyPresenter(translator=translator)
 
     @provider
-    def provide_get_latest_activated_plans_presenter(
+    def provide_get_company_dashboard_presenter(
         self,
         url_index: PlanSummaryUrlIndexTestImpl,
         datetime_service: FakeDatetimeService,
-    ) -> GetLatestActivatedPlansPresenter:
-        return GetLatestActivatedPlansPresenter(
+    ) -> GetCompanyDashboardPresenter:
+        return GetCompanyDashboardPresenter(
             url_index=url_index, datetime_service=datetime_service
         )
 

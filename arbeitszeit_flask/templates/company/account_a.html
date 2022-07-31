@@ -27,7 +27,7 @@
     </div>
 
     <div class="table-container">
-        <table class="table is-fullwidth">
+        <table class="table has-text-left mx-auto">
             <thead>
                 <tr>
                     <th></th>
@@ -47,7 +47,7 @@
                     </td>
                     <td>{{ trans_info.purpose }}</td>
                     <td
-                        class="has-text-weight-bold {{ 'has-text-success' if trans_info.transaction_volume|float >= 0 else 'has-text-danger' }}">
+                        class="has-text-right has-text-weight-bold {{ 'has-text-success' if trans_info.transaction_volume|float >= 0 else 'has-text-danger' }}">
                         {{ trans_info.transaction_volume }}
                     </td>
                 </tr>
