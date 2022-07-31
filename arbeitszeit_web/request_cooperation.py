@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from html import escape
 from typing import List, Protocol, Union
 from uuid import UUID
 
@@ -95,7 +96,7 @@ class RequestCooperationPresenter:
             html=self.translator.gettext(
                 "Hello %(coordinator)s,<br>A company wants to be part of a cooperation that you are coordinating. Please check the request in the Arbeitszeitapp."
             )
-            % dict(coordinator=coordinator_name),
+            % dict(coordinator=escape(coordinator_name)),
             sender=self.email_configuration.get_sender_address(),
         )
 

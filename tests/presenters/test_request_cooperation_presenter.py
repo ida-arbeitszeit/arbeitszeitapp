@@ -35,10 +35,20 @@ class RequestCooperationPresenterTests(TestCase):
         self.presenter.present(self.get_successful_request(coordinator_mail=recipient))
         self.assertEqual(self.mail_service.sent_mails[0].recipients, [recipient])
 
-    def test_mail_gets_send_and_subject_and_html_body_are_not_empty(self):
+    def test_mail_gets_sent_and_subject_and_html_body_are_not_empty(self):
         self.presenter.present(self.get_successful_request())
         self.assertTrue(self.mail_service.sent_mails[0].subject)
         self.assertTrue(self.mail_service.sent_mails[0].html)
+
+    def test_mail_html_body_has_name_of_coordinator_safely_escaped(self):
+        coordinator_name = '<a href="dangerous site">coordinator</a>'
+        self.presenter.present(
+            self.get_successful_request(coordinator_name=coordinator_name)
+        )
+        self.assertIn(
+            "&lt;a href=&quot;dangerous site&quot;&gt;coordinator&lt;/a&gt;",
+            self.mail_service.sent_mails[0].html,
+        )
 
     def test_show_as_error_if_request_was_rejected(self):
         presentation = self.presenter.present(
@@ -141,12 +151,14 @@ class RequestCooperationPresenterTests(TestCase):
         )
 
     def get_successful_request(
-        self, coordinator_mail: str = None
+        self, coordinator_mail: str = None, coordinator_name: str = None
     ) -> RequestCooperationResponse:
         if coordinator_mail is None:
             coordinator_mail = "company@comp.any"
+        if coordinator_name is None:
+            coordinator_name = "company xy"
         return RequestCooperationResponse(
-            coordinator_name="company xy",
+            coordinator_name=coordinator_name,
             coordinator_email=coordinator_mail,
             rejection_reason=None,
         )
