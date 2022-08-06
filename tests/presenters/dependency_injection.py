@@ -176,10 +176,15 @@ class PresenterTestsInjector(Module):
 
     @provider
     def provide_request_cooperation_presenter(
-        self, translator: FakeTranslator
+        self,
+        translator: FakeTranslator,
+        mail_service: FakeEmailSender,
+        email_configuration: FakeEmailConfiguration,
     ) -> RequestCooperationPresenter:
         return RequestCooperationPresenter(
             translator=translator,
+            mail_service=mail_service,
+            email_configuration=email_configuration,
         )
 
     @provider
