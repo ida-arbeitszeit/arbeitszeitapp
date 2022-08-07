@@ -97,6 +97,7 @@ from arbeitszeit_web.url_index import (
     EndCoopUrlIndex,
     HidePlanUrlIndex,
     InviteUrlIndex,
+    PayConsumerProductUrlIndex,
     PlanSummaryUrlIndex,
     PlotsUrlIndex,
     RenewPlanUrlIndex,
@@ -442,8 +443,9 @@ class PresenterModule(Module):
         self,
         trans: Translator,
         plan_summary_service: PlanSummaryFormatter,
+        url_index: PayConsumerProductUrlIndex,
     ) -> GetPlanSummarySuccessPresenter:
-        return GetPlanSummarySuccessPresenter(trans, plan_summary_service)
+        return GetPlanSummarySuccessPresenter(trans, plan_summary_service, url_index)
 
     @provider
     def provide_get_plan_summary_company_success_presenter(

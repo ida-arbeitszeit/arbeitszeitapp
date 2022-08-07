@@ -120,6 +120,7 @@ from arbeitszeit_web.url_index import (
     EndCoopUrlIndex,
     HidePlanUrlIndex,
     InviteUrlIndex,
+    PayConsumerProductUrlIndex,
     PlanSummaryUrlIndex,
     PlotsUrlIndex,
     RenewPlanUrlIndex,
@@ -184,6 +185,12 @@ class MemberModule(MemberPresenterModule):
     def provide_answer_company_work_invite_url_index(
         self, url_index: MemberUrlIndex
     ) -> AnswerCompanyWorkInviteUrlIndex:
+        return url_index
+
+    @provider
+    def provide_pay_consumer_product_url_index(
+        self, url_index: MemberUrlIndex
+    ) -> PayConsumerProductUrlIndex:
         return url_index
 
 

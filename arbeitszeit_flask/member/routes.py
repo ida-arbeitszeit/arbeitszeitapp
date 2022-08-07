@@ -26,10 +26,6 @@ from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresente
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_plan_summary_member import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
-from arbeitszeit_web.pay_consumer_product import (
-    PayConsumerProductController,
-    PayConsumerProductPresenter,
-)
 from arbeitszeit_web.presenters.get_member_dashboard_presenter import (
     GetMemberDashboardPresenter,
 )
@@ -110,24 +106,12 @@ def query_companies(
 
 @MemberRoute("/member/pay_consumer_product", methods=["GET", "POST"])
 @commit_changes
-def pay_consumer_product(
-    pay_consumer_product: use_cases.PayConsumerProduct,
-    presenter: PayConsumerProductPresenter,
-    controller: PayConsumerProductController,
-    template_renderer: UserTemplateRenderer,
-) -> Response:
-    view = PayConsumerProductView(
-        form=PayConsumerProductForm(request.form),
-        current_user=UUID(current_user.id),
-        pay_consumer_product=pay_consumer_product,
-        controller=controller,
-        presenter=presenter,
-        template_renderer=template_renderer,
-    )
+def pay_consumer_product(view: PayConsumerProductView) -> Response:
+    form = PayConsumerProductForm(request.form)
     if request.method == "POST":
-        return view.respond_to_post()
+        return view.respond_to_post(form)
     else:
-        return view.respond_to_get()
+        return view.respond_to_get(form)
 
 
 @MemberRoute("/member/dashboard")

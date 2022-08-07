@@ -9,6 +9,7 @@ from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_plan_summary_company import (
     GetPlanSummaryCompanySuccessPresenter,
 )
+from arbeitszeit_web.get_plan_summary_member import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.hide_plan import HidePlanPresenter
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyPresenter
@@ -99,6 +100,7 @@ from .url_index import (
     InviteUrlIndexImpl,
     LanguageChangerUrlIndexImpl,
     MemberUrlIndex,
+    PayConsumerProductUrlIndexImpl,
     PayMeansOfProductionUrlIndexImpl,
     PlanSummaryUrlIndexTestImpl,
     PlotsUrlIndexImpl,
@@ -260,6 +262,19 @@ class PresenterTestsInjector(Module):
             request_coop_url_index=request_coop_url_index,
             trans=translator,
             plan_summary_service=plan_summary_service,
+        )
+
+    @provider
+    def provide_get_plan_summary_member_success_presenter(
+        self,
+        translator: FakeTranslator,
+        plan_summary_service: PlanSummaryFormatter,
+        url_index: PayConsumerProductUrlIndexImpl,
+    ) -> GetPlanSummarySuccessPresenter:
+        return GetPlanSummarySuccessPresenter(
+            trans=translator,
+            plan_summary_service=plan_summary_service,
+            url_index=url_index,
         )
 
     @provider

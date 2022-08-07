@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Protocol, Union
+from typing import Optional
 from uuid import UUID
 
 from injector import inject
@@ -8,6 +8,7 @@ from arbeitszeit.use_cases.pay_consumer_product import (
     PayConsumerProductResponse,
     RejectionReason,
 )
+from arbeitszeit_web.forms import PayConsumerProductForm
 from arbeitszeit_web.translator import Translator
 
 from .notification import Notifier
@@ -29,43 +30,37 @@ class PayConsumerProductRequestImpl:
         return self.amount
 
 
-class PayConsumerProductForm(Protocol):
-    def get_plan_id_field(self) -> str:
-        ...
-
-    def get_amount_field(self) -> str:
-        ...
-
-
 @inject
 @dataclass
 class PayConsumerProductController:
-    @dataclass
-    class MalformedInputData:
-        field: str
-        message: str
-
     translator: Translator
 
     def import_form_data(
         self, current_user: UUID, form: PayConsumerProductForm
-    ) -> Union[PayConsumerProductRequestImpl, MalformedInputData]:
+    ) -> Optional[PayConsumerProductRequestImpl]:
+        amount = form.amount_field().get_value()
+        malformed_input_string: bool = False
         try:
-            uuid = UUID(form.get_plan_id_field())
+            uuid = UUID(form.plan_id_field().get_value())
         except ValueError:
-            return self.MalformedInputData(
-                "plan_id", self.translator.gettext("Plan ID is invalid.")
+            form.plan_id_field().attach_error(
+                self.translator.gettext("Plan ID is invalid.")
             )
+            malformed_input_string = True
         try:
-            amount = int(form.get_amount_field())
+            amount = int(amount)
+            if amount <= 0:
+                form.amount_field().attach_error(
+                    self.translator.gettext("Must be a number larger than zero.")
+                )
+                malformed_input_string = True
         except ValueError:
-            return self.MalformedInputData(
-                "amount", self.translator.gettext("This is not an integer.")
+            form.amount_field().attach_error(
+                self.translator.gettext("This is not an integer.")
             )
-        if amount < 0:
-            return self.MalformedInputData(
-                "amount", self.translator.gettext("Negative numbers are not allowed.")
-            )
+            malformed_input_string = True
+        if malformed_input_string:
+            return None
         return PayConsumerProductRequestImpl(current_user, uuid, amount)
 
 

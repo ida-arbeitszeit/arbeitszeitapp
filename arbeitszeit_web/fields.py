@@ -9,3 +9,6 @@ class FormField(Protocol[T]):
 
     def attach_error(self, message: str) -> None:
         ...
+
+    def set_default_value(self, value: T) -> None:
+        ...

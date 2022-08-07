@@ -23,3 +23,11 @@ class LoginCompanyForm(Protocol):
 
     def remember_field(self) -> FormField[bool]:
         ...
+
+
+class PayConsumerProductForm(Protocol):
+    def amount_field(self) -> FormField[int]:
+        ...
+
+    def plan_id_field(self) -> FormField[str]:
+        ...

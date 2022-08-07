@@ -60,6 +60,11 @@ class MemberUrlIndex:
             endpoint="auth.confirm_email_member", token=token, _external=True
         )
 
+    def get_pay_consumer_product_url(self, amount: int, plan_id: UUID) -> str:
+        return url_for(
+            endpoint="main_member.pay_consumer_product", amount=amount, plan_id=plan_id
+        )
+
 
 class CompanyUrlIndex:
     def get_plan_summary_url(self, plan_id: UUID) -> str:

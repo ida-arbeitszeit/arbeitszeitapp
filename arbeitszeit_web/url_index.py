@@ -83,6 +83,11 @@ class PayMeansOfProductionUrlIndex(Protocol):
         ...
 
 
+class PayConsumerProductUrlIndex(Protocol):
+    def get_pay_consumer_product_url(self, amount: int, plan_id: UUID) -> str:
+        ...
+
+
 class PlotsUrlIndex(Protocol):
     def get_global_barplot_for_certificates_url(
         self, certificates_count: Decimal, available_product: Decimal
