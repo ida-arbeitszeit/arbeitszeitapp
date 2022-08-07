@@ -4,7 +4,7 @@ from typing import Any, Dict, List
 
 from arbeitszeit.use_cases.get_coop_summary import GetCoopSummarySuccess
 
-from .url_index import EndCoopUrlIndex, PlanSummaryUrlIndex
+from .url_index import CompanySummaryUrlIndex, EndCoopUrlIndex, PlanSummaryUrlIndex
 
 
 @dataclass
@@ -23,6 +23,8 @@ class GetCoopSummaryViewModel:
     coop_name: str
     coop_definition: List[str]
     coordinator_id: str
+    coordinator_name: str
+    coordinator_link: str
 
     plans: List[AssociatedPlanPresentation]
 
@@ -34,6 +36,7 @@ class GetCoopSummaryViewModel:
 class GetCoopSummarySuccessPresenter:
     plan_url_index: PlanSummaryUrlIndex
     end_coop_url_index: EndCoopUrlIndex
+    company_summary_url_index: CompanySummaryUrlIndex
 
     def present(self, response: GetCoopSummarySuccess) -> GetCoopSummaryViewModel:
         return GetCoopSummaryViewModel(
@@ -42,6 +45,10 @@ class GetCoopSummarySuccessPresenter:
             coop_name=response.coop_name,
             coop_definition=response.coop_definition.splitlines(),
             coordinator_id=str(response.coordinator_id),
+            coordinator_name=response.coordinator_name,
+            coordinator_link=self.company_summary_url_index.get_company_summary_url(
+                response.coordinator_id
+            ),
             plans=[
                 AssociatedPlanPresentation(
                     plan_name=plan.plan_name,

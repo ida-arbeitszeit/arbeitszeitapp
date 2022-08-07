@@ -192,10 +192,12 @@ class PresenterTestsInjector(Module):
         self,
         plan_url_index: PlanSummaryUrlIndexTestImpl,
         end_coop_url_index: EndCoopUrlIndexTestImpl,
+        company_summary_url_index: CompanySummaryUrlIndex,
     ) -> GetCoopSummarySuccessPresenter:
         return GetCoopSummarySuccessPresenter(
             plan_url_index=plan_url_index,
             end_coop_url_index=end_coop_url_index,
+            company_summary_url_index=company_summary_url_index,
         )
 
     @provider

@@ -464,9 +464,14 @@ class PresenterModule(Module):
 
     @provider
     def provide_get_coop_summary_success_presenter(
-        self, plan_index: PlanSummaryUrlIndex, end_coop_index: EndCoopUrlIndex
+        self,
+        plan_index: PlanSummaryUrlIndex,
+        end_coop_index: EndCoopUrlIndex,
+        company_summary_url_index: CompanySummaryUrlIndex,
     ) -> GetCoopSummarySuccessPresenter:
-        return GetCoopSummarySuccessPresenter(plan_index, end_coop_index)
+        return GetCoopSummarySuccessPresenter(
+            plan_index, end_coop_index, company_summary_url_index
+        )
 
     @provider
     def provide_get_company_summary_success_presenter(
