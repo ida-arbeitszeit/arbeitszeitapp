@@ -9,14 +9,18 @@ from arbeitszeit.repositories import (
 from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitation_presenter import (
     AccountantInvitationPresenter,
 )
+from arbeitszeit_web.translator import Translator
+from arbeitszeit_web.url_index import PayConsumerProductUrlIndex
 from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
 from tests.company import CompanyManager
 from tests.datetime_service import FakeDatetimeService
 from tests.email import FakeEmailSender
 from tests.language_service import FakeLanguageService
+from tests.presenters.url_index import PayConsumerProductUrlIndexImpl
 from tests.request import FakeRequest
 from tests.session import FakeSession
 from tests.token import FakeTokenService
+from tests.translator import FakeTranslator
 
 
 class TestingModule(Module):
@@ -29,6 +33,10 @@ class TestingModule(Module):
     @provider
     def provide_fake_email_service(self) -> FakeEmailSender:
         return FakeEmailSender()
+
+    @provider
+    def provide_translator(self) -> Translator:
+        return FakeTranslator()
 
     @provider
     def provide_company_manager(
@@ -80,3 +88,7 @@ class TestingModule(Module):
     @provider
     def provide_fake_request(self) -> FakeRequest:
         return FakeRequest()
+
+    @provider
+    def provide_pay_consumer_product_url_index(self) -> PayConsumerProductUrlIndex:
+        return PayConsumerProductUrlIndexImpl()

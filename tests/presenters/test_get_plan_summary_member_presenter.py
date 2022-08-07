@@ -6,7 +6,9 @@ from uuid import uuid4
 from arbeitszeit.plan_summary import PlanSummary
 from arbeitszeit.use_cases.get_plan_summary_member import GetPlanSummaryMember
 from arbeitszeit_web.get_plan_summary_member import GetPlanSummarySuccessPresenter
-from tests.presenters.dependency_injection import get_dependency_injector
+from tests.presenters.dependency_injection import (
+    injection_test,
+)
 from tests.presenters.url_index import PayConsumerProductUrlIndexImpl
 
 
@@ -15,19 +17,21 @@ class PresenterTests(TestCase):
     some functionality tested in tests/presenters/test_plan_summary_service.py
     """
 
-    def setUp(self) -> None:
-        self.injector = get_dependency_injector()
-        self.pay_consumer_product_url_index = self.injector.get(
-            PayConsumerProductUrlIndexImpl
-        )
-        self.presenter = self.injector.get(GetPlanSummarySuccessPresenter)
+    @injection_test
+    def setUp(
+        self,
+        url_index: PayConsumerProductUrlIndexImpl,
+        presenter: GetPlanSummarySuccessPresenter,
+    ) -> None:
+        self.url_index = url_index
+        self.presenter = presenter
 
     def test_that_pay_product_url_is_shown_correctly(self):
         use_case_response = self.get_use_case_response()
         view_model = self.presenter.present(use_case_response)
         self.assertEqual(
             view_model.pay_product_url,
-            self.pay_consumer_product_url_index.get_pay_consumer_product_url(
+            self.url_index.get_pay_consumer_product_url(
                 amount=1, plan_id=use_case_response.plan_summary.plan_id
             ),
         )

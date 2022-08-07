@@ -439,15 +439,6 @@ class PresenterModule(Module):
         )
 
     @provider
-    def provide_get_plan_summary_success_presenter(
-        self,
-        trans: Translator,
-        plan_summary_service: PlanSummaryFormatter,
-        url_index: PayConsumerProductUrlIndex,
-    ) -> GetPlanSummarySuccessPresenter:
-        return GetPlanSummarySuccessPresenter(trans, plan_summary_service, url_index)
-
-    @provider
     def provide_get_plan_summary_company_success_presenter(
         self,
         toggle_availability_index: TogglePlanAvailabilityUrlIndex,

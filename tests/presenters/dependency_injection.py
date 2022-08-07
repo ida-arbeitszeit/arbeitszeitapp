@@ -1,4 +1,4 @@
-from injector import Injector, Module, provider, singleton
+from injector import Injector, Module, provider, singleton, inject
 
 from arbeitszeit_web.answer_company_work_invite import AnswerCompanyWorkInvitePresenter
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
@@ -262,19 +262,6 @@ class PresenterTestsInjector(Module):
             request_coop_url_index=request_coop_url_index,
             trans=translator,
             plan_summary_service=plan_summary_service,
-        )
-
-    @provider
-    def provide_get_plan_summary_member_success_presenter(
-        self,
-        translator: FakeTranslator,
-        plan_summary_service: PlanSummaryFormatter,
-        url_index: PayConsumerProductUrlIndexImpl,
-    ) -> GetPlanSummarySuccessPresenter:
-        return GetPlanSummarySuccessPresenter(
-            trans=translator,
-            plan_summary_service=plan_summary_service,
-            url_index=url_index,
         )
 
     @provider
@@ -600,3 +587,14 @@ def get_dependency_injector() -> Injector:
     return Injector(
         modules=[TestingModule(), InMemoryModule(), PresenterTestsInjector()]
     )
+
+
+def injection_test(original_test):
+    injector = get_dependency_injector()
+
+    def wrapper(*args, **kwargs):
+        return injector.call_with_injection(
+            inject(original_test), args=args, kwargs=kwargs
+        )
+
+    return wrapper

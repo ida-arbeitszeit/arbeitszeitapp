@@ -9,6 +9,7 @@ from arbeitszeit_web.formatters.plan_summary_formatter import (
 from arbeitszeit_web.url_index import PayConsumerProductUrlIndex
 
 from .translator import Translator
+from injector import inject
 
 
 @dataclass
@@ -20,6 +21,7 @@ class GetPlanSummaryViewModel:
         return asdict(self)
 
 
+@inject
 @dataclass
 class GetPlanSummarySuccessPresenter:
     trans: Translator
