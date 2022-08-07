@@ -2,13 +2,16 @@ from dataclasses import dataclass
 from urllib.parse import urlparse
 from uuid import UUID
 
+from injector import inject
+
 from arbeitszeit.use_cases.end_cooperation import EndCooperationResponse
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.translator import Translator
-from arbeitszeit_web.url_index import CoopSummaryUrlIndex, PlanSummaryUrlIndex
+from arbeitszeit_web.url_index import CoopSummaryUrlIndex, UrlIndex
 
 
+@inject
 @dataclass
 class EndCooperationPresenter:
     @dataclass
@@ -18,7 +21,7 @@ class EndCooperationPresenter:
 
     request: Request
     notifier: Notifier
-    plan_summary_index: PlanSummaryUrlIndex
+    plan_summary_index: UrlIndex
     coop_summary_index: CoopSummaryUrlIndex
     translator: Translator
 
@@ -43,7 +46,9 @@ class EndCooperationPresenter:
         assert cooperation_id
         if referer:
             if self._refers_from_plan_summary(referer):
-                url = self.plan_summary_index.get_plan_summary_url(UUID(plan_id))
+                url = self.plan_summary_index.get_company_plan_summary_url(
+                    UUID(plan_id)
+                )
                 return url
         url = self.coop_summary_index.get_coop_summary_url(UUID(cooperation_id))
         return url

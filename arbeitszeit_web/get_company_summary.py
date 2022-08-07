@@ -1,6 +1,8 @@
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, List
 
+from injector import inject
+
 from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.use_cases.get_company_summary import (
@@ -9,7 +11,7 @@ from arbeitszeit.use_cases.get_company_summary import (
     Supplier,
 )
 from arbeitszeit_web.translator import Translator
-from arbeitszeit_web.url_index import CompanySummaryUrlIndex, PlanSummaryUrlIndex
+from arbeitszeit_web.url_index import CompanySummaryUrlIndex, UserUrlIndex
 
 
 @dataclass
@@ -53,9 +55,10 @@ class GetCompanySummaryViewModel:
         return asdict(self)
 
 
+@inject
 @dataclass
 class GetCompanySummarySuccessPresenter:
-    plan_index: PlanSummaryUrlIndex
+    user_url_index: UserUrlIndex
     translator: Translator
     company_index: CompanySummaryUrlIndex
     control_thresholds: ControlThresholds
@@ -106,7 +109,9 @@ class GetCompanySummarySuccessPresenter:
         return PlanDetailsWeb(
             id=str(plan_details.id),
             name=plan_details.name,
-            url=self.plan_index.get_plan_summary_url(plan_details.id),
+            url=self.user_url_index.get_plan_summary_url(
+                plan_details.id,
+            ),
             status=self.translator.gettext("Active")
             if plan_details.is_active
             else self.translator.gettext("Inactive"),

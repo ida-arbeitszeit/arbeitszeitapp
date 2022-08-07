@@ -10,6 +10,7 @@ from arbeitszeit_flask.database.repositories import (
     CompanyRepository,
     MemberRepository,
 )
+from arbeitszeit_web.session import UserRole
 
 
 @dataclass
@@ -17,6 +18,18 @@ class FlaskSession:
     member_repository: MemberRepository
     company_repository: CompanyRepository
     accountant_repository: AccountantRepository
+
+    ROLES = {
+        "member": UserRole.member,
+        "company": UserRole.company,
+        "accountant": UserRole.accountant,
+    }
+
+    def get_user_role(self) -> Optional[UserRole]:
+        user_type = session.get("user_type")
+        if user_type is None:
+            return None
+        return self.ROLES.get(user_type)
 
     def is_logged_in_as_member(self) -> bool:
         return session.get("user_type") == "member"

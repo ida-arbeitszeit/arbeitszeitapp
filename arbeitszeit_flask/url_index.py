@@ -5,6 +5,12 @@ from flask import url_for
 
 
 class GeneralUrlIndex:
+    def get_company_plan_summary_url(self, plan_id: UUID) -> str:
+        return url_for("main_company.plan_summary", plan_id=plan_id)
+
+    def get_member_plan_summary_url(self, plan_id: UUID) -> str:
+        return url_for("main_member.plan_summary", plan_id=plan_id)
+
     def get_accountant_invitation_url(self, token: str) -> str:
         return url_for("auth.signup_accountant", token=token)
 
@@ -23,11 +29,11 @@ class GeneralUrlIndex:
     def get_draft_summary_url(self, draft_id: UUID) -> str:
         return url_for("main_company.get_draft_summary", draft_id=draft_id)
 
+    def get_work_invite_url(self, invite_id: UUID) -> str:
+        return url_for("main_member.show_company_work_invite", invite_id=invite_id)
+
 
 class MemberUrlIndex:
-    def get_plan_summary_url(self, plan_id: UUID) -> str:
-        return url_for("main_member.plan_summary", plan_id=plan_id)
-
     def get_coop_summary_url(self, coop_id: UUID) -> str:
         return url_for("main_member.coop_summary", coop_id=coop_id)
 
@@ -49,9 +55,6 @@ class MemberUrlIndex:
     def get_company_summary_url(self, company_id: UUID) -> str:
         return url_for("main_member.company_summary", company_id=company_id)
 
-    def get_invite_url(self, invite_id: UUID) -> str:
-        return url_for("main_member.show_company_work_invite", invite_id=invite_id)
-
     def get_answer_company_work_invite_url(self, invite_id: UUID) -> str:
         return url_for("main_member.show_company_work_invite", invite_id=invite_id)
 
@@ -62,9 +65,6 @@ class MemberUrlIndex:
 
 
 class CompanyUrlIndex:
-    def get_plan_summary_url(self, plan_id: UUID) -> str:
-        return url_for("main_company.plan_summary", plan_id=plan_id)
-
     def get_coop_summary_url(self, coop_id: UUID) -> str:
         return url_for("main_company.coop_summary", coop_id=coop_id)
 
@@ -90,7 +90,7 @@ class CompanyUrlIndex:
     def get_company_summary_url(self, company_id: UUID) -> str:
         return url_for("main_company.company_summary", company_id=company_id)
 
-    def get_invite_url(self, invite_id: UUID) -> str:
+    def get_work_invite_url(self, invite_id: UUID) -> str:
         # since invites don't make sense for a company, we redirect
         # them in this case to their dashboard page.
         return url_for("main_company.dashboard")

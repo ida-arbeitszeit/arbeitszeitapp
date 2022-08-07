@@ -10,7 +10,7 @@ from tests.datetime_service import FakeDatetimeService
 from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
-from .url_index import CompanySummaryUrlIndex, CoopSummaryUrlIndexTestImpl
+from .url_index import CompanySummaryUrlIndexTestImpl, CoopSummaryUrlIndexTestImpl
 
 PLAN_SUMMARY = PlanSummary(
     plan_id=uuid4(),
@@ -41,7 +41,7 @@ class PlanSummaryFormatterTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.coop_url_index = self.injector.get(CoopSummaryUrlIndexTestImpl)
-        self.company_url_index = self.injector.get(CompanySummaryUrlIndex)
+        self.company_url_index = self.injector.get(CompanySummaryUrlIndexTestImpl)
         self.translator = self.injector.get(FakeTranslator)
         self.formatter = self.injector.get(PlanSummaryFormatter)
         self.datetime_service = self.injector.get(FakeDatetimeService)

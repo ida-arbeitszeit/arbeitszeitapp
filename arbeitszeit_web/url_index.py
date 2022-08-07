@@ -1,11 +1,11 @@
+from dataclasses import dataclass
 from decimal import Decimal
 from typing import Protocol
 from uuid import UUID
 
+from injector import inject
 
-class MemberUrlIndex(Protocol):
-    def get_member_dashboard_url(self) -> str:
-        ...
+from arbeitszeit_web.session import Session, UserRole
 
 
 class DraftUrlIndex(Protocol):
@@ -23,13 +23,17 @@ class AnswerCompanyWorkInviteUrlIndex(Protocol):
         ...
 
 
-class InviteUrlIndex(Protocol):
-    def get_invite_url(self, invite_id: UUID) -> str:
+class UrlIndex(Protocol):
+    def get_member_dashboard_url(self) -> str:
         ...
 
+    def get_company_plan_summary_url(self, plan_id: UUID) -> str:
+        ...
 
-class PlanSummaryUrlIndex(Protocol):
-    def get_plan_summary_url(self, plan_id: UUID) -> str:
+    def get_member_plan_summary_url(self, plan_id: UUID) -> str:
+        ...
+
+    def get_work_invite_url(self, invite_id: UUID) -> str:
         ...
 
 
@@ -120,3 +124,18 @@ class AccountantDashboardUrlIndex(Protocol):
 class LanguageChangerUrlIndex(Protocol):
     def get_language_change_url(self, language_code: str) -> str:
         ...
+
+
+@inject
+@dataclass
+class UserUrlIndex:
+    session: Session
+    plan_url_index: UrlIndex
+
+    def get_plan_summary_url(self, plan_id: UUID) -> str:
+        user_role = self.session.get_user_role()
+        if user_role == UserRole.member:
+            return self.plan_url_index.get_member_plan_summary_url(plan_id)
+        if user_role == UserRole.company:
+            return self.plan_url_index.get_company_plan_summary_url(plan_id)
+        raise Exception(f"Cannot get plan summary url for role {user_role}")

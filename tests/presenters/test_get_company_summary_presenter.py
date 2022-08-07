@@ -16,10 +16,11 @@ from arbeitszeit_web.get_company_summary import (
     GetCompanySummarySuccessPresenter,
 )
 from tests.control_thresholds import ControlThresholdsTestImpl
+from tests.session import FakeSession
 from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
-from .url_index import CompanySummaryUrlIndex, PlanSummaryUrlIndexTestImpl
+from .url_index import CompanySummaryUrlIndexTestImpl, UrlIndexTestImpl
 
 RESPONSE_WITH_2_PLANS = GetCompanySummarySuccess(
     id=uuid4(),
@@ -64,9 +65,10 @@ class GetCompanySummaryPresenterTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.presenter = self.injector.get(GetCompanySummarySuccessPresenter)
-        self.plan_index = self.injector.get(PlanSummaryUrlIndexTestImpl)
         self.translator = self.injector.get(FakeTranslator)
         self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
+        self.session = self.injector.get(FakeSession)
+        self.session.login_company("test@test.test")
 
     def test_company_id_is_shown(self):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
@@ -113,10 +115,12 @@ class PlansOfCompanyTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.presenter = self.injector.get(GetCompanySummarySuccessPresenter)
-        self.plan_index = self.injector.get(PlanSummaryUrlIndexTestImpl)
+        self.plan_index = self.injector.get(UrlIndexTestImpl)
         self.translator = self.injector.get(FakeTranslator)
         self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
-        self.company_url_index = self.injector.get(CompanySummaryUrlIndex)
+        self.company_url_index = self.injector.get(CompanySummaryUrlIndexTestImpl)
+        self.session = self.injector.get(FakeSession)
+        self.session.login_company("test@test.test")
 
     def test_ids_of_plans_are_shown(self):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
@@ -140,17 +144,33 @@ class PlansOfCompanyTests(TestCase):
             str(RESPONSE_WITH_2_PLANS.plan_details[1].name),
         )
 
-    def test_urls_of_plans_are_shown(self):
+    def test_urls_of_plans_are_shown_for_companies(self):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
         self.assertEqual(
             view_model.plan_details[0].url,
-            self.plan_index.get_plan_summary_url(
+            self.plan_index.get_company_plan_summary_url(
                 RESPONSE_WITH_2_PLANS.plan_details[0].id
             ),
         )
         self.assertEqual(
             view_model.plan_details[1].url,
-            self.plan_index.get_plan_summary_url(
+            self.plan_index.get_company_plan_summary_url(
+                RESPONSE_WITH_2_PLANS.plan_details[1].id
+            ),
+        )
+
+    def test_urls_of_plans_are_shown_for_members(self):
+        self.session.login_member("test@test.test")
+        view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
+        self.assertEqual(
+            view_model.plan_details[0].url,
+            self.plan_index.get_member_plan_summary_url(
+                RESPONSE_WITH_2_PLANS.plan_details[0].id
+            ),
+        )
+        self.assertEqual(
+            view_model.plan_details[1].url,
+            self.plan_index.get_member_plan_summary_url(
                 RESPONSE_WITH_2_PLANS.plan_details[1].id
             ),
         )

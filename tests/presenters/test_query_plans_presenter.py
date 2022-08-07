@@ -6,24 +6,27 @@ from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.query_plans import PlanQueryResponse, QueriedPlan
 from arbeitszeit_web.query_plans import QueryPlansPresenter
+from tests.session import FakeSession
 
 from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl
 from .url_index import (
-    CompanySummaryUrlIndex,
+    CompanySummaryUrlIndexTestImpl,
     CoopSummaryUrlIndexTestImpl,
-    PlanSummaryUrlIndexTestImpl,
+    UrlIndexTestImpl,
 )
 
 
 class QueryPlansPresenterTests(TestCase):
     def setUp(self):
         self.injector = get_dependency_injector()
-        self.plan_url_index = self.injector.get(PlanSummaryUrlIndexTestImpl)
-        self.company_url_index = self.injector.get(CompanySummaryUrlIndex)
+        self.plan_url_index = self.injector.get(UrlIndexTestImpl)
+        self.company_url_index = self.injector.get(CompanySummaryUrlIndexTestImpl)
         self.coop_url_index = self.injector.get(CoopSummaryUrlIndexTestImpl)
         self.notifier = self.injector.get(NotifierTestImpl)
         self.presenter = self.injector.get(QueryPlansPresenter)
+        self.session = self.injector.get(FakeSession)
+        self.session.login_member("test@test.test")
 
     def test_presenting_empty_response_leads_to_not_showing_results(self):
         response = self._get_response([])
@@ -56,7 +59,7 @@ class QueryPlansPresenterTests(TestCase):
         table_row = presentation.results.rows[0]
         self.assertEqual(
             table_row.plan_summary_url,
-            self.plan_url_index.get_plan_summary_url(plan_id),
+            self.plan_url_index.get_member_plan_summary_url(plan_id),
         )
 
     def test_correct_company_url_is_shown(self) -> None:

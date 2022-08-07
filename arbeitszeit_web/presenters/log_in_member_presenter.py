@@ -1,13 +1,16 @@
 from dataclasses import dataclass
 from typing import Optional
 
+from injector import inject
+
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit_web.forms import LoginMemberForm
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
-from arbeitszeit_web.url_index import MemberUrlIndex
+from arbeitszeit_web.url_index import UrlIndex
 
 
+@inject
 @dataclass
 class LogInMemberPresenter:
     @dataclass
@@ -16,7 +19,7 @@ class LogInMemberPresenter:
 
     session: Session
     translator: Translator
-    member_url_index: MemberUrlIndex
+    member_url_index: UrlIndex
 
     def present_login_process(
         self, response: LogInMemberUseCase.Response, form: LoginMemberForm

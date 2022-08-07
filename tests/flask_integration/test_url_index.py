@@ -26,12 +26,6 @@ class CompanyUrlIndexTests(ViewTestCase):
         self.cooperation_generator = self.injector.get(CooperationGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
 
-    def test_plan_summary_url_for_existing_plan_leads_to_functional_url(self) -> None:
-        plan = self.plan_generator.create_plan()
-        url = self.url_index.get_plan_summary_url(plan.id)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-
     def test_coop_summary_url_for_existing_coop_leads_to_functional_url(self) -> None:
         coop = self.cooperation_generator.create_cooperation()
         url = self.url_index.get_coop_summary_url(coop.id)
@@ -102,13 +96,6 @@ class MemberUrlIndexTests(ViewTestCase):
         self.member = self.login_member()
         self.cooperation_generator = self.injector.get(CooperationGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
-        self.invite_worker_to_company = self.injector.get(InviteWorkerToCompanyUseCase)
-
-    def test_plan_summary_url_for_existing_plan_leads_to_functional_url(self) -> None:
-        plan = self.plan_generator.create_plan()
-        url = self.url_index.get_plan_summary_url(plan.id)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
 
     def test_coop_summary_url_for_existing_coop_leads_to_functional_url(self) -> None:
         coop = self.cooperation_generator.create_cooperation()
@@ -123,22 +110,6 @@ class MemberUrlIndexTests(ViewTestCase):
         url = self.url_index.get_company_summary_url(company.id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-
-    def test_invite_url_for_existing_invite_leads_to_functional_url(self) -> None:
-        invite_id = self._create_invite()
-        url = self.url_index.get_invite_url(invite_id)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-
-    def _create_invite(self) -> UUID:
-        company = self.company_generator.create_company()
-        response = self.invite_worker_to_company(
-            InviteWorkerToCompanyUseCase.Request(
-                company=company.id,
-                worker=self.member.id,
-            )
-        )
-        return response.invite_id
 
 
 class PlotUrlIndexTests(ViewTestCase):
@@ -211,12 +182,40 @@ class GeneralUrlIndexTests(ViewTestCase):
         super().setUp()
         self.plan_generator = self.injector.get(PlanGenerator)
         self.url_index = self.injector.get(GeneralUrlIndex)
+        self.invite_worker_to_company = self.injector.get(InviteWorkerToCompanyUseCase)
         self.invite_accountant_use_case = self.injector.get(
             SendAccountantRegistrationTokenUseCase
         )
         self.invitation_presenter = self.injector.get(
             AccountantInvitationPresenterTestImpl
         )
+
+    def test_invite_url_for_existing_invite_leads_to_functional_url_for_member(
+        self,
+    ) -> None:
+        member = self.login_member()
+        invite_id = self._create_invite(member.id)
+        url = self.url_index.get_work_invite_url(invite_id)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_plan_company_summary_url_for_existing_plan_leads_to_functional_url(
+        self,
+    ) -> None:
+        self.login_company()
+        plan = self.plan_generator.create_plan()
+        url = self.url_index.get_company_plan_summary_url(plan.id)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_plan_member_summary_url_for_existing_plan_leads_to_functional_url(
+        self,
+    ) -> None:
+        self.login_member()
+        plan = self.plan_generator.create_plan()
+        url = self.url_index.get_member_plan_summary_url(plan.id)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
 
     def test_can_create_valid_url_from_valid_token(self) -> None:
         token = self.invite_accountant(email="test@test.test")
@@ -238,3 +237,13 @@ class GeneralUrlIndexTests(ViewTestCase):
             request=SendAccountantRegistrationTokenUseCase.Request(email=email)
         )
         return self.invitation_presenter.invitations[-1].token
+
+    def _create_invite(self, member: UUID) -> UUID:
+        company = self.company_generator.create_company()
+        response = self.invite_worker_to_company(
+            InviteWorkerToCompanyUseCase.Request(
+                company=company.id,
+                worker=member,
+            )
+        )
+        return response.invite_id

@@ -2,19 +2,23 @@ from decimal import Decimal
 from uuid import UUID
 
 
-class MemberUrlIndex:
-    def get_member_dashboard_url(self) -> str:
-        return "member dashboard url"
-
-
 class CompanyUrlIndexImpl:
     def get_company_dashboard_url(self) -> str:
         return "company dashboard url"
 
 
-class PlanSummaryUrlIndexTestImpl:
-    def get_plan_summary_url(self, plan_id: UUID) -> str:
-        return f"fake_plan_url:{plan_id}"
+class UrlIndexTestImpl:
+    def get_company_plan_summary_url(self, plan_id: UUID) -> str:
+        return f"fake_plan_url for company:{plan_id}"
+
+    def get_member_plan_summary_url(self, plan_id: UUID) -> str:
+        return f"fake_plan_url for member:{plan_id}"
+
+    def get_member_dashboard_url(self) -> str:
+        return "member dashboard url"
+
+    def get_work_invite_url(self, invite_id: UUID) -> str:
+        return f"invite url for {invite_id}"
 
 
 class CoopSummaryUrlIndexTestImpl:
@@ -37,7 +41,7 @@ class TogglePlanAvailabilityUrlIndex:
         return f"fake_toggle_url:{plan_id}"
 
 
-class CompanySummaryUrlIndex:
+class CompanySummaryUrlIndexTestImpl:
     def get_company_summary_url(self, company_id: UUID) -> str:
         return f"fake_company_url:{company_id}"
 
@@ -47,19 +51,14 @@ class AnswerCompanyWorkInviteUrlIndexImpl:
         return f"{invite_id} url"
 
 
-class RenewPlanUrlIndex:
+class RenewPlanUrlIndexTestImpl:
     def get_renew_plan_url(self, plan_id: UUID) -> str:
         return f"fake_renew_url:{plan_id}"
 
 
-class HidePlanUrlIndex:
+class HidePlanUrlIndexTestImpl:
     def get_hide_plan_url(self, plan_id: UUID) -> str:
         return f"fake_hide_plan_url:{plan_id}"
-
-
-class InviteUrlIndexImpl:
-    def get_invite_url(self, invite_id: UUID) -> str:
-        return f"invite url for {invite_id}"
 
 
 class ConfirmationUrlIndexImpl:

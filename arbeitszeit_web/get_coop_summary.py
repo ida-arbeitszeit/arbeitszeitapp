@@ -2,9 +2,12 @@ from dataclasses import asdict, dataclass
 from decimal import Decimal
 from typing import Any, Dict, List
 
-from arbeitszeit.use_cases.get_coop_summary import GetCoopSummarySuccess
+from injector import inject
 
-from .url_index import EndCoopUrlIndex, PlanSummaryUrlIndex
+from arbeitszeit.use_cases.get_coop_summary import GetCoopSummarySuccess
+from arbeitszeit_web.session import Session
+
+from .url_index import EndCoopUrlIndex, UserUrlIndex
 
 
 @dataclass
@@ -30,10 +33,12 @@ class GetCoopSummaryViewModel:
         return asdict(self)
 
 
+@inject
 @dataclass
 class GetCoopSummarySuccessPresenter:
-    plan_url_index: PlanSummaryUrlIndex
+    user_url_index: UserUrlIndex
     end_coop_url_index: EndCoopUrlIndex
+    session: Session
 
     def present(self, response: GetCoopSummarySuccess) -> GetCoopSummaryViewModel:
         return GetCoopSummaryViewModel(
@@ -45,7 +50,7 @@ class GetCoopSummarySuccessPresenter:
             plans=[
                 AssociatedPlanPresentation(
                     plan_name=plan.plan_name,
-                    plan_url=self.plan_url_index.get_plan_summary_url(plan.plan_id),
+                    plan_url=self.user_url_index.get_plan_summary_url(plan.plan_id),
                     plan_individual_price=self.__format_price(
                         plan.plan_individual_price
                     ),
