@@ -29,7 +29,7 @@ class GetCompanyDashboardPresenter:
     datetime_service: DatetimeService
 
     def present(
-        self, use_case_response: GetCompanyDashboardUseCase.Success
+        self, use_case_response: GetCompanyDashboardUseCase.Response
     ) -> ViewModel:
         latest_plans = [
             self._get_plan_details_web(plan_detail)
@@ -45,7 +45,7 @@ class GetCompanyDashboardPresenter:
         )
 
     def _get_plan_details_web(
-        self, plan: GetCompanyDashboardUseCase.Success.LatestPlansDetails
+        self, plan: GetCompanyDashboardUseCase.Response.LatestPlansDetails
     ) -> PlanDetailsWeb:
         return self.PlanDetailsWeb(
             prd_name=plan.prd_name,
