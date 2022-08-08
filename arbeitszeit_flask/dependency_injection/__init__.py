@@ -268,7 +268,7 @@ class FlaskModule(PresenterModule):
         return request
 
     @provider
-    def provide_plan_summary_url_index(self, index: GeneralUrlIndex) -> UrlIndex:
+    def provide_url_index(self, index: GeneralUrlIndex) -> UrlIndex:
         return index
 
     @provider

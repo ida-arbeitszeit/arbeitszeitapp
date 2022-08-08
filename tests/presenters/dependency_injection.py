@@ -157,7 +157,7 @@ class PresenterTestsInjector(Module):
         return UrlIndexTestImpl()
 
     @provider
-    def provide_plan_summary_url_index(self, index: UrlIndexTestImpl) -> UrlIndex:
+    def provide_url_index(self, index: UrlIndexTestImpl) -> UrlIndex:
         return index
 
     @singleton

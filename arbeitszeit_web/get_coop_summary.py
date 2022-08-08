@@ -5,7 +5,6 @@ from typing import Any, Dict, List
 from injector import inject
 
 from arbeitszeit.use_cases.get_coop_summary import GetCoopSummarySuccess
-from arbeitszeit_web.session import Session
 
 from .url_index import EndCoopUrlIndex, UserUrlIndex
 
@@ -38,7 +37,6 @@ class GetCoopSummaryViewModel:
 class GetCoopSummarySuccessPresenter:
     user_url_index: UserUrlIndex
     end_coop_url_index: EndCoopUrlIndex
-    session: Session
 
     def present(self, response: GetCoopSummarySuccess) -> GetCoopSummaryViewModel:
         return GetCoopSummaryViewModel(

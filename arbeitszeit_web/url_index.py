@@ -143,7 +143,7 @@ class UserUrlIndex:
     implemented by the web framework. It is merely used internally as
     a convinience interface. You should refrain from using this class
     in your tests and instead rely on the UrlIndex interface. In a
-    test scenario you most likely now in advance if you expect a url
+    test scenario you most likely know in advance if you expect a url
     intended for a member, company or any other role. This is why the
     UrlIndex interface is much better suited for testing needs.
     """
