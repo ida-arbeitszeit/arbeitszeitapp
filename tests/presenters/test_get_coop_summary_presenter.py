@@ -78,7 +78,7 @@ class GetCoopSummarySuccessPresenterTests(TestCase):
     def test_link_to_coordinators_company_summary_page_is_displayed_correctly(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
         self.assertEqual(
-            view_model.coordinator_link,
+            view_model.coordinator_url,
             self.company_summary_url_index.get_company_summary_url(
                 TESTING_RESPONSE_MODEL.coordinator_id
             ),
