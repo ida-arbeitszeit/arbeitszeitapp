@@ -10,8 +10,9 @@ from arbeitszeit.use_cases.get_company_summary import (
     PlanDetails,
     Supplier,
 )
+from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
-from arbeitszeit_web.url_index import CompanySummaryUrlIndex, UserUrlIndex
+from arbeitszeit_web.url_index import UrlIndex, UserUrlIndex
 
 
 @dataclass
@@ -60,9 +61,10 @@ class GetCompanySummaryViewModel:
 class GetCompanySummarySuccessPresenter:
     user_url_index: UserUrlIndex
     translator: Translator
-    company_index: CompanySummaryUrlIndex
+    url_index: UrlIndex
     control_thresholds: ControlThresholds
     datetime_service: DatetimeService
+    session: Session
 
     def present(
         self, use_case_response: GetCompanySummarySuccess
@@ -127,8 +129,9 @@ class GetCompanySummarySuccessPresenter:
     def _get_suppliers(self, suppliers: List[Supplier]) -> List[SuppliersWeb]:
         return [
             SuppliersWeb(
-                company_url=self.company_index.get_company_summary_url(
-                    supplier.company_id
+                company_url=self.url_index.get_company_summary_url(
+                    company_id=supplier.company_id,
+                    user_role=self.session.get_user_role(),
                 ),
                 company_name=supplier.company_name,
                 volume_of_sales=f"{supplier.volume_of_sales:.2f}",

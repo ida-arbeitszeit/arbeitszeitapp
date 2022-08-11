@@ -7,8 +7,9 @@ from injector import inject
 from arbeitszeit.use_cases.end_cooperation import EndCooperationResponse
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.request import Request
+from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
-from arbeitszeit_web.url_index import CoopSummaryUrlIndex, UrlIndex
+from arbeitszeit_web.url_index import UrlIndex
 
 
 @inject
@@ -21,9 +22,9 @@ class EndCooperationPresenter:
 
     request: Request
     notifier: Notifier
-    plan_summary_index: UrlIndex
-    coop_summary_index: CoopSummaryUrlIndex
+    url_index: UrlIndex
     translator: Translator
+    session: Session
 
     def present(self, response: EndCooperationResponse) -> ViewModel:
         if response.is_rejected:
@@ -46,11 +47,11 @@ class EndCooperationPresenter:
         assert cooperation_id
         if referer:
             if self._refers_from_plan_summary(referer):
-                url = self.plan_summary_index.get_company_plan_summary_url(
-                    UUID(plan_id)
-                )
+                url = self.url_index.get_company_plan_summary_url(UUID(plan_id))
                 return url
-        url = self.coop_summary_index.get_coop_summary_url(UUID(cooperation_id))
+        url = self.url_index.get_coop_summary_url(
+            user_role=self.session.get_user_role(), coop_id=UUID(cooperation_id)
+        )
         return url
 
     def _refers_from_plan_summary(self, referer: str) -> bool:

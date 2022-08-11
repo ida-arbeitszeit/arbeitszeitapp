@@ -1,5 +1,8 @@
 from decimal import Decimal
+from typing import Optional
 from uuid import UUID
+
+from arbeitszeit_web.session import UserRole
 
 
 class CompanyUrlIndexImpl:
@@ -20,10 +23,13 @@ class UrlIndexTestImpl:
     def get_work_invite_url(self, invite_id: UUID) -> str:
         return f"invite url for {invite_id}"
 
+    def get_company_summary_url(
+        self, user_role: Optional[UserRole], company_id: UUID
+    ) -> str:
+        return f"company summary url for: {company_id}, {user_role}"
 
-class CoopSummaryUrlIndexTestImpl:
-    def get_coop_summary_url(self, coop_id: UUID) -> str:
-        return f"fake_coop_url:{coop_id}"
+    def get_coop_summary_url(self, user_role: Optional[UserRole], coop_id: UUID) -> str:
+        return f"coop summary url for: {coop_id}, {user_role}"
 
 
 class RequestCoopUrlIndexTestImpl:
@@ -39,11 +45,6 @@ class EndCoopUrlIndexTestImpl:
 class TogglePlanAvailabilityUrlIndex:
     def get_toggle_availability_url(self, plan_id: UUID) -> str:
         return f"fake_toggle_url:{plan_id}"
-
-
-class CompanySummaryUrlIndexTestImpl:
-    def get_company_summary_url(self, company_id: UUID) -> str:
-        return f"fake_company_url:{company_id}"
 
 
 class AnswerCompanyWorkInviteUrlIndexImpl:

@@ -9,10 +9,11 @@ from arbeitszeit.use_cases.query_plans import (
     PlanSorting,
     QueryPlansRequest,
 )
+from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
 
 from .notification import Notifier
-from .url_index import CompanySummaryUrlIndex, UserUrlIndex
+from .url_index import UrlIndex, UserUrlIndex
 
 
 class QueryPlansFormData(Protocol):
@@ -107,9 +108,10 @@ class QueryPlansViewModel:
 @dataclass
 class QueryPlansPresenter:
     user_url_index: UserUrlIndex
-    company_url_index: CompanySummaryUrlIndex
+    url_index: UrlIndex
     user_notifier: Notifier
     trans: Translator
+    session: Session
 
     def present(self, response: PlanQueryResponse) -> QueryPlansViewModel:
         if not response.results:
@@ -122,8 +124,9 @@ class QueryPlansPresenter:
                         plan_summary_url=self.user_url_index.get_plan_summary_url(
                             result.plan_id
                         ),
-                        company_summary_url=self.company_url_index.get_company_summary_url(
-                            result.company_id
+                        company_summary_url=self.url_index.get_company_summary_url(
+                            user_role=self.session.get_user_role(),
+                            company_id=result.company_id,
                         ),
                         company_name=result.company_name,
                         product_name=result.product_name,

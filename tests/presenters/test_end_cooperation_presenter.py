@@ -4,13 +4,14 @@ from uuid import uuid4
 
 from arbeitszeit.use_cases.end_cooperation import EndCooperationResponse
 from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
+from arbeitszeit_web.session import UserRole
 from tests.request import FakeRequest
 from tests.session import FakeSession
 from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl
-from .url_index import CoopSummaryUrlIndexTestImpl, UrlIndexTestImpl
+from .url_index import UrlIndexTestImpl
 
 SUCCESSFUL_RESPONSE = EndCooperationResponse(rejection_reason=None)
 
@@ -28,8 +29,7 @@ class PresenterTests(TestCase):
         self.injector = get_dependency_injector()
         self.request = self.injector.get(FakeRequest)
         self.notifier = self.injector.get(NotifierTestImpl)
-        self.plan_summary_index = self.injector.get(UrlIndexTestImpl)
-        self.coop_summary_index = self.injector.get(CoopSummaryUrlIndexTestImpl)
+        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(EndCooperationPresenter)
         self.session = self.injector.get(FakeSession)
@@ -76,7 +76,9 @@ class PresenterTests(TestCase):
         self.assertFalse(view_model.show_404)
         self.assertEqual(
             view_model.redirect_url,
-            self.coop_summary_index.get_coop_summary_url(coop_id),
+            self.url_index.get_coop_summary_url(
+                coop_id=coop_id, user_role=UserRole.company
+            ),
         )
 
     def test_plan_summary_url_gets_returned_when_plan_summary_url_was_referer(
@@ -90,7 +92,7 @@ class PresenterTests(TestCase):
         self.assertFalse(view_model.show_404)
         self.assertEqual(
             view_model.redirect_url,
-            self.plan_summary_index.get_company_plan_summary_url(plan_id),
+            self.url_index.get_company_plan_summary_url(plan_id=plan_id),
         )
 
     def test_correct_notification_is_returned_when_operation_was_successfull(

@@ -96,7 +96,6 @@ from arbeitszeit_web.controllers.show_my_accounts_controller import (
 )
 from arbeitszeit_web.create_draft import CreateDraftController
 from arbeitszeit_web.email import EmailConfiguration, UserAddressBook
-from arbeitszeit_web.formatters.plan_summary_formatter import PlanSummaryFormatter
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyController
 from arbeitszeit_web.language_service import LanguageService
 from arbeitszeit_web.notification import Notifier
@@ -116,9 +115,7 @@ from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import (
     AnswerCompanyWorkInviteUrlIndex,
-    CompanySummaryUrlIndex,
     ConfirmationUrlIndex,
-    CoopSummaryUrlIndex,
     EndCoopUrlIndex,
     HidePlanUrlIndex,
     PlotsUrlIndex,
@@ -144,12 +141,6 @@ class MemberModule(Module):
         return member_index
 
     @provider
-    def provide_coop_summary_url_index(
-        self, member_index: MemberUrlIndex
-    ) -> CoopSummaryUrlIndex:
-        return member_index
-
-    @provider
     def provide_request_coop_url_index(
         self, member_index: MemberUrlIndex
     ) -> RequestCoopUrlIndex:
@@ -159,12 +150,6 @@ class MemberModule(Module):
     def provide_end_coop_url_index(
         self, member_index: MemberUrlIndex
     ) -> EndCoopUrlIndex:
-        return member_index
-
-    @provider
-    def provide_company_url_index(
-        self, member_index: MemberUrlIndex
-    ) -> CompanySummaryUrlIndex:
         return member_index
 
     @provider
@@ -183,12 +168,6 @@ class CompanyModule(CompanyPresenterModule):
     def provide_confirmation_url_index(
         self, company_index: CompanyUrlIndex
     ) -> ConfirmationUrlIndex:
-        return company_index
-
-    @provider
-    def provide_coop_summary_url_index(
-        self, company_index: CompanyUrlIndex
-    ) -> CoopSummaryUrlIndex:
         return company_index
 
     @provider
@@ -219,12 +198,6 @@ class CompanyModule(CompanyPresenterModule):
     def provide_end_coop_url_index(
         self, company_index: CompanyUrlIndex
     ) -> EndCoopUrlIndex:
-        return company_index
-
-    @provider
-    def provide_company_url_index(
-        self, company_index: CompanyUrlIndex
-    ) -> CompanySummaryUrlIndex:
         return company_index
 
     @provider
@@ -381,18 +354,6 @@ class FlaskModule(PresenterModule):
     ) -> Http404View:
         return Http404View(
             template_index=template_index, template_renderer=template_renderer
-        )
-
-    @provider
-    def provide_plan_summary_service(
-        self,
-        coop_url_index: CoopSummaryUrlIndex,
-        company_url_index: CompanySummaryUrlIndex,
-        translator: Translator,
-        datetime_service: RealtimeDatetimeService,
-    ) -> PlanSummaryFormatter:
-        return PlanSummaryFormatter(
-            coop_url_index, company_url_index, translator, datetime_service
         )
 
     @provider

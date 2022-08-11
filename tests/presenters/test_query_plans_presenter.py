@@ -6,23 +6,18 @@ from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.query_plans import PlanQueryResponse, QueriedPlan
 from arbeitszeit_web.query_plans import QueryPlansPresenter
+from arbeitszeit_web.session import UserRole
 from tests.session import FakeSession
 
 from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl
-from .url_index import (
-    CompanySummaryUrlIndexTestImpl,
-    CoopSummaryUrlIndexTestImpl,
-    UrlIndexTestImpl,
-)
+from .url_index import UrlIndexTestImpl
 
 
 class QueryPlansPresenterTests(TestCase):
     def setUp(self):
         self.injector = get_dependency_injector()
-        self.plan_url_index = self.injector.get(UrlIndexTestImpl)
-        self.company_url_index = self.injector.get(CompanySummaryUrlIndexTestImpl)
-        self.coop_url_index = self.injector.get(CoopSummaryUrlIndexTestImpl)
+        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.notifier = self.injector.get(NotifierTestImpl)
         self.presenter = self.injector.get(QueryPlansPresenter)
         self.session = self.injector.get(FakeSession)
@@ -59,7 +54,7 @@ class QueryPlansPresenterTests(TestCase):
         table_row = presentation.results.rows[0]
         self.assertEqual(
             table_row.plan_summary_url,
-            self.plan_url_index.get_member_plan_summary_url(plan_id),
+            self.url_index.get_member_plan_summary_url(plan_id),
         )
 
     def test_correct_company_url_is_shown(self) -> None:
@@ -69,7 +64,9 @@ class QueryPlansPresenterTests(TestCase):
         table_row = presentation.results.rows[0]
         self.assertEqual(
             table_row.company_summary_url,
-            self.company_url_index.get_company_summary_url(company_id),
+            self.url_index.get_company_summary_url(
+                user_role=UserRole.member, company_id=company_id
+            ),
         )
 
     def test_correct_company_name_is_shown(self) -> None:

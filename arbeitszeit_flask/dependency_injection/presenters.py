@@ -22,7 +22,6 @@ from arbeitszeit_web.get_plan_summary_member import GetPlanSummarySuccessPresent
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyPresenter
 from arbeitszeit_web.language_service import LanguageService
-from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_drafts_of_company import ListDraftsPresenter
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
@@ -69,16 +68,12 @@ from arbeitszeit_web.presenters.show_prd_account_details_presenter import (
 from arbeitszeit_web.presenters.show_r_account_details_presenter import (
     ShowRAccountDetailsPresenter,
 )
-from arbeitszeit_web.query_companies import QueryCompaniesPresenter
 from arbeitszeit_web.request_cooperation import RequestCooperationPresenter
 from arbeitszeit_web.session import Session
-from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import (
     AnswerCompanyWorkInviteUrlIndex,
-    CompanySummaryUrlIndex,
     ConfirmationUrlIndex,
-    CoopSummaryUrlIndex,
     EndCoopUrlIndex,
     PlotsUrlIndex,
     RequestCoopUrlIndex,
@@ -305,31 +300,6 @@ class PresenterModule(Module):
             email_configuration=email_configuration,
             translator=translator,
         )
-
-    @provider
-    def provide_query_companies_presenter(
-        self,
-        notifier: Notifier,
-        company_url_index: CompanySummaryUrlIndex,
-        translator: Translator,
-    ) -> QueryCompaniesPresenter:
-        return QueryCompaniesPresenter(
-            user_notifier=notifier,
-            company_url_index=company_url_index,
-            translator=translator,
-        )
-
-    @provider
-    def provide_list_all_cooperations_presenter(
-        self, coop_index: CoopSummaryUrlIndex
-    ) -> ListAllCooperationsPresenter:
-        return ListAllCooperationsPresenter(coop_index)
-
-    @provider
-    def provide_show_my_cooperations_presenter(
-        self, coop_index: CoopSummaryUrlIndex, translator: Translator
-    ) -> ShowMyCooperationsPresenter:
-        return ShowMyCooperationsPresenter(coop_index, translator=translator)
 
     @provider
     def provide_get_plan_summary_success_presenter(

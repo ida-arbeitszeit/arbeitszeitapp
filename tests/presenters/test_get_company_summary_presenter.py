@@ -15,12 +15,13 @@ from arbeitszeit_web.get_company_summary import (
     Deviation,
     GetCompanySummarySuccessPresenter,
 )
+from arbeitszeit_web.session import UserRole
 from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.session import FakeSession
 from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
-from .url_index import CompanySummaryUrlIndexTestImpl, UrlIndexTestImpl
+from .url_index import UrlIndexTestImpl
 
 RESPONSE_WITH_2_PLANS = GetCompanySummarySuccess(
     id=uuid4(),
@@ -115,10 +116,9 @@ class PlansOfCompanyTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.presenter = self.injector.get(GetCompanySummarySuccessPresenter)
-        self.plan_index = self.injector.get(UrlIndexTestImpl)
+        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.translator = self.injector.get(FakeTranslator)
         self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
-        self.company_url_index = self.injector.get(CompanySummaryUrlIndexTestImpl)
         self.session = self.injector.get(FakeSession)
         self.session.login_company("test@test.test")
 
@@ -148,13 +148,13 @@ class PlansOfCompanyTests(TestCase):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
         self.assertEqual(
             view_model.plan_details[0].url,
-            self.plan_index.get_company_plan_summary_url(
+            self.url_index.get_company_plan_summary_url(
                 RESPONSE_WITH_2_PLANS.plan_details[0].id
             ),
         )
         self.assertEqual(
             view_model.plan_details[1].url,
-            self.plan_index.get_company_plan_summary_url(
+            self.url_index.get_company_plan_summary_url(
                 RESPONSE_WITH_2_PLANS.plan_details[1].id
             ),
         )
@@ -164,13 +164,13 @@ class PlansOfCompanyTests(TestCase):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
         self.assertEqual(
             view_model.plan_details[0].url,
-            self.plan_index.get_member_plan_summary_url(
+            self.url_index.get_member_plan_summary_url(
                 RESPONSE_WITH_2_PLANS.plan_details[0].id
             ),
         )
         self.assertEqual(
             view_model.plan_details[1].url,
-            self.plan_index.get_member_plan_summary_url(
+            self.url_index.get_member_plan_summary_url(
                 RESPONSE_WITH_2_PLANS.plan_details[1].id
             ),
         )
@@ -241,7 +241,9 @@ class PlansOfCompanyTests(TestCase):
         view_model = self.presenter.present(response)
         self.assertEqual(
             view_model.suppliers_ordered_by_volume[0].company_url,
-            self.company_url_index.get_company_summary_url(supplier_id),
+            self.url_index.get_company_summary_url(
+                user_role=UserRole.company, company_id=supplier_id
+            ),
         )
 
     def test_correct_supplier_name_is_shown(self):

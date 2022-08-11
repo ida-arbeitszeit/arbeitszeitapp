@@ -10,7 +10,7 @@ method name, for example "get_member_dashboard_url" and
 
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Protocol
+from typing import Optional, Protocol
 from uuid import UUID
 
 from injector import inject
@@ -46,9 +46,12 @@ class UrlIndex(Protocol):
     def get_work_invite_url(self, invite_id: UUID) -> str:
         ...
 
+    def get_company_summary_url(
+        self, user_role: Optional[UserRole], company_id: UUID
+    ) -> str:
+        ...
 
-class CoopSummaryUrlIndex(Protocol):
-    def get_coop_summary_url(self, coop_id: UUID) -> str:
+    def get_coop_summary_url(self, user_role: Optional[UserRole], coop_id: UUID) -> str:
         ...
 
 
@@ -74,11 +77,6 @@ class RequestCoopUrlIndex(Protocol):
 
 class EndCoopUrlIndex(Protocol):
     def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
-        ...
-
-
-class CompanySummaryUrlIndex(Protocol):
-    def get_company_summary_url(self, company_id: UUID) -> str:
         ...
 
 

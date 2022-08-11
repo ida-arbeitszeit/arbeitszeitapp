@@ -9,7 +9,6 @@ from arbeitszeit_web.get_plan_summary_company import (
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.hide_plan import HidePlanPresenter
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyPresenter
-from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_drafts_of_company import ListDraftsPresenter
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.pay_consumer_product import PayConsumerProductPresenter
@@ -17,7 +16,6 @@ from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresente
 from arbeitszeit_web.presenters.accountant_invitation_presenter import (
     AccountantInvitationEmailPresenter,
 )
-from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
 from arbeitszeit_web.presenters.list_available_languages_presenter import (
     ListAvailableLanguagesPresenter,
 )
@@ -52,11 +50,10 @@ from arbeitszeit_web.presenters.show_prd_account_details_presenter import (
 from arbeitszeit_web.presenters.show_r_account_details_presenter import (
     ShowRAccountDetailsPresenter,
 )
-from arbeitszeit_web.query_companies import QueryCompaniesPresenter
+from arbeitszeit_web.request import Request
 from arbeitszeit_web.request_cooperation import RequestCooperationPresenter
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.url_index import (
-    CompanySummaryUrlIndex,
     EndCoopUrlIndex,
     HidePlanUrlIndex,
     RenewPlanUrlIndex,
@@ -84,10 +81,8 @@ from .url_index import (
     AccountantDashboardUrlIndexImpl,
     AccountantInvitationUrlIndexImpl,
     AnswerCompanyWorkInviteUrlIndexImpl,
-    CompanySummaryUrlIndexTestImpl,
     CompanyUrlIndexImpl,
     ConfirmationUrlIndexImpl,
-    CoopSummaryUrlIndexTestImpl,
     DraftUrlIndexImpl,
     EndCoopUrlIndexTestImpl,
     HidePlanUrlIndexTestImpl,
@@ -102,6 +97,10 @@ from .url_index import (
 
 
 class PresenterTestsInjector(Module):
+    @provider
+    def provide_request(self, request: FakeRequest) -> Request:
+        return request
+
     @provider
     def provide_hide_plan_url_index(
         self, index: HidePlanUrlIndexTestImpl
@@ -118,12 +117,6 @@ class PresenterTestsInjector(Module):
     def provide_end_coop_url_index(
         self, index: EndCoopUrlIndexTestImpl
     ) -> EndCoopUrlIndex:
-        return index
-
-    @provider
-    def provide_company_summary_url_index(
-        self, index: CompanySummaryUrlIndexTestImpl
-    ) -> CompanySummaryUrlIndex:
         return index
 
     @provider
@@ -160,34 +153,12 @@ class PresenterTestsInjector(Module):
     def provide_url_index(self, index: UrlIndexTestImpl) -> UrlIndex:
         return index
 
-    @singleton
-    @provider
-    def provide_coop_summary_url_index_test_impl(self) -> CoopSummaryUrlIndexTestImpl:
-        return CoopSummaryUrlIndexTestImpl()
-
     @provider
     def provide_create_cooperation_presenter(
         self, notifier: Notifier, translator: FakeTranslator
     ) -> CreateCooperationPresenter:
         return CreateCooperationPresenter(
             user_notifier=notifier,
-            translator=translator,
-        )
-
-    @provider
-    def provide_end_cooperation_presenter(
-        self,
-        request: FakeRequest,
-        notifier: Notifier,
-        plan_summary_index: UrlIndexTestImpl,
-        coop_summary_index: CoopSummaryUrlIndexTestImpl,
-        translator: FakeTranslator,
-    ) -> EndCooperationPresenter:
-        return EndCooperationPresenter(
-            request=request,
-            notifier=notifier,
-            plan_summary_index=plan_summary_index,
-            coop_summary_index=coop_summary_index,
             translator=translator,
         )
 
@@ -202,21 +173,6 @@ class PresenterTestsInjector(Module):
             translator=translator,
             mail_service=mail_service,
             email_configuration=email_configuration,
-        )
-
-    @provider
-    def provide_plan_summary_formatter(
-        self,
-        coop_url_index: CoopSummaryUrlIndexTestImpl,
-        company_url_index: CompanySummaryUrlIndexTestImpl,
-        translator: FakeTranslator,
-        datetime_service: FakeDatetimeService,
-    ) -> PlanSummaryFormatter:
-        return PlanSummaryFormatter(
-            coop_url_index=coop_url_index,
-            company_url_index=company_url_index,
-            translator=translator,
-            datetime_service=datetime_service,
         )
 
     @provider
@@ -249,14 +205,6 @@ class PresenterTestsInjector(Module):
         )
 
     @provider
-    def provide_list_all_cooperations_presenter(
-        self, coop_summary_url_index: CoopSummaryUrlIndexTestImpl
-    ) -> ListAllCooperationsPresenter:
-        return ListAllCooperationsPresenter(
-            coop_url_index=coop_summary_url_index,
-        )
-
-    @provider
     def provide_hide_plan_presenter(
         self, notifier: Notifier, translator: FakeTranslator
     ) -> HidePlanPresenter:
@@ -285,19 +233,6 @@ class PresenterTestsInjector(Module):
             user_notifier=notifier,
             trans=translator,
             pay_means_of_production_url_index=pay_means_of_production_url_index,
-        )
-
-    @provider
-    def provide_query_companies_presenter(
-        self,
-        notifier: Notifier,
-        company_url_index: CompanySummaryUrlIndexTestImpl,
-        translator: FakeTranslator,
-    ) -> QueryCompaniesPresenter:
-        return QueryCompaniesPresenter(
-            user_notifier=notifier,
-            company_url_index=company_url_index,
-            translator=translator,
         )
 
     @provider
