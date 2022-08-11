@@ -19,7 +19,6 @@ multi_line_output = 3
 skip = "arbeitszeit_flask/migrations"
 
 [tool.mypy]
-ignore_missing_imports = true
 files = [
     "arbeitszeit/**/*.py",
     "tests/**/*.py",
@@ -35,7 +34,6 @@ no_site_packages = true
 [[tool.mypy.overrides]]
 module = "arbeitszeit.*,arbeitszeit_web.*"
 allow_untyped_defs = false
-ignore_missing_imports = false
 
 [[tool.mypy.overrides]]
 module = "arbeitszeit_flask.*"
@@ -44,3 +42,18 @@ check_untyped_defs = true
 [[tool.mypy.overrides]]
 module = "tests.*"
 check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = [
+    "flask_babel",
+    "flask_mail",
+    "flask_migrate",
+    "flask_sqlalchemy",
+    "flask_talisman",
+    "flask_wtf.*",
+    "is_safe_url",
+    "matplotlib.*",
+    "sqlalchemy.*",
+    "wtforms",
+]
+ignore_missing_imports = true

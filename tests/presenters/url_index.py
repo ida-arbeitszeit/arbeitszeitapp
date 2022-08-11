@@ -5,11 +5,6 @@ from uuid import UUID
 from arbeitszeit_web.session import UserRole
 
 
-class CompanyUrlIndexImpl:
-    def get_company_dashboard_url(self) -> str:
-        return "company dashboard url"
-
-
 class UrlIndexTestImpl:
     def get_plan_summary_url(self, user_role: Optional[UserRole], plan_id: UUID) -> str:
         return f"plan summary url for {plan_id}, {user_role}"
@@ -27,6 +22,9 @@ class UrlIndexTestImpl:
 
     def get_coop_summary_url(self, user_role: Optional[UserRole], coop_id: UUID) -> str:
         return f"coop summary url for: {coop_id}, {user_role}"
+
+    def get_company_dashboard_url(self) -> str:
+        return "company dashboard url"
 
 
 class RequestCoopUrlIndexTestImpl:

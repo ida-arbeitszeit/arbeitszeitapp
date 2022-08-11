@@ -81,7 +81,6 @@ from .url_index import (
     AccountantDashboardUrlIndexImpl,
     AccountantInvitationUrlIndexImpl,
     AnswerCompanyWorkInviteUrlIndexImpl,
-    CompanyUrlIndexImpl,
     ConfirmationUrlIndexImpl,
     DraftUrlIndexImpl,
     EndCoopUrlIndexTestImpl,
@@ -402,19 +401,6 @@ class PresenterTestsInjector(Module):
         return ListAvailableLanguagesPresenter(
             language_changer_url_index=language_changer_url_index,
             language_service=language_service,
-        )
-
-    @provider
-    def provide_log_in_company_presenter(
-        self,
-        session: FakeSession,
-        company_url_index: CompanyUrlIndexImpl,
-        translator: FakeTranslator,
-    ) -> LogInCompanyPresenter:
-        return LogInCompanyPresenter(
-            session=session,
-            company_url_index=company_url_index,
-            translator=translator,
         )
 
     @provider

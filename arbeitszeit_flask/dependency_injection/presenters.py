@@ -164,19 +164,6 @@ class CompanyPresenterModule(Module):
 
 class PresenterModule(Module):
     @provider
-    def provide_log_in_company_presenter(
-        self,
-        translator: Translator,
-        session: Session,
-        company_url_index: GeneralUrlIndex,
-    ) -> LogInCompanyPresenter:
-        return LogInCompanyPresenter(
-            translator=translator,
-            session=session,
-            company_url_index=company_url_index,
-        )
-
-    @provider
     def provide_self_approve_plan_presenter(
         self, notifier: Notifier, translator: Translator
     ) -> SelfApprovePlanPresenter:
