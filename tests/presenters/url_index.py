@@ -26,6 +26,9 @@ class UrlIndexTestImpl:
     def get_company_dashboard_url(self) -> str:
         return "company dashboard url"
 
+    def get_draft_summary_url(self, draft_id: UUID) -> str:
+        return f"fake_draft_url:{draft_id}"
+
 
 class RequestCoopUrlIndexTestImpl:
     def get_request_coop_url(self) -> str:
@@ -111,8 +114,3 @@ class PayMeansOfProductionUrlIndexImpl:
 class LanguageChangerUrlIndexImpl:
     def get_language_change_url(self, language_code: str) -> str:
         return f"language change url for {language_code}"
-
-
-class DraftUrlIndexImpl:
-    def get_draft_summary_url(self, draft_id: UUID) -> str:
-        return f"fake_draft_url:{draft_id}"

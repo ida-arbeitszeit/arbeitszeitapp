@@ -22,7 +22,6 @@ from arbeitszeit_web.get_plan_summary_member import GetPlanSummarySuccessPresent
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyPresenter
 from arbeitszeit_web.language_service import LanguageService
-from arbeitszeit_web.list_drafts_of_company import ListDraftsPresenter
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from arbeitszeit_web.plotter import Plotter
@@ -33,7 +32,6 @@ from arbeitszeit_web.presenters.accountant_invitation_presenter import (
 from arbeitszeit_web.presenters.list_available_languages_presenter import (
     ListAvailableLanguagesPresenter,
 )
-from arbeitszeit_web.presenters.log_in_company_presenter import LogInCompanyPresenter
 from arbeitszeit_web.presenters.member_purchases import MemberPurchasesPresenter
 from arbeitszeit_web.presenters.register_accountant_presenter import (
     RegisterAccountantPresenter,
@@ -325,11 +323,3 @@ class PresenterModule(Module):
         datetime_service: DatetimeService,
     ) -> MemberPurchasesPresenter:
         return MemberPurchasesPresenter(datetime_service=datetime_service)
-
-    @provider
-    def provide_list_drafts_presenter(
-        self, draft_url_index: GeneralUrlIndex
-    ) -> ListDraftsPresenter:
-        return ListDraftsPresenter(
-            draft_url_index=draft_url_index,
-        )

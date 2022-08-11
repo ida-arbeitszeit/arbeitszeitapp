@@ -17,11 +17,6 @@ from injector import inject
 from arbeitszeit_web.session import Session, UserRole
 
 
-class DraftUrlIndex(Protocol):
-    def get_draft_summary_url(self, draft_id: UUID) -> str:
-        ...
-
-
 class AnswerCompanyWorkInviteUrlIndex(Protocol):
     def get_answer_company_work_invite_url(self, invite_id: UUID) -> str:
         ...
@@ -46,6 +41,9 @@ class UrlIndex(Protocol):
         ...
 
     def get_company_dashboard_url(self) -> str:
+        ...
+
+    def get_draft_summary_url(self, draft_id: UUID) -> str:
         ...
 
 
