@@ -5,8 +5,9 @@ from typing import Any, Dict, List
 from injector import inject
 
 from arbeitszeit.use_cases.get_coop_summary import GetCoopSummarySuccess
+from arbeitszeit_web.session import Session
 
-from .url_index import EndCoopUrlIndex, UserUrlIndex
+from .url_index import EndCoopUrlIndex, UrlIndex, UserUrlIndex
 
 
 @dataclass
@@ -25,6 +26,8 @@ class GetCoopSummaryViewModel:
     coop_name: str
     coop_definition: List[str]
     coordinator_id: str
+    coordinator_name: str
+    coordinator_url: str
 
     plans: List[AssociatedPlanPresentation]
 
@@ -37,6 +40,8 @@ class GetCoopSummaryViewModel:
 class GetCoopSummarySuccessPresenter:
     user_url_index: UserUrlIndex
     end_coop_url_index: EndCoopUrlIndex
+    url_index: UrlIndex
+    session: Session
 
     def present(self, response: GetCoopSummarySuccess) -> GetCoopSummaryViewModel:
         return GetCoopSummaryViewModel(
@@ -45,6 +50,11 @@ class GetCoopSummarySuccessPresenter:
             coop_name=response.coop_name,
             coop_definition=response.coop_definition.splitlines(),
             coordinator_id=str(response.coordinator_id),
+            coordinator_name=response.coordinator_name,
+            coordinator_url=self.url_index.get_company_summary_url(
+                user_role=self.session.get_user_role(),
+                company_id=response.coordinator_id,
+            ),
             plans=[
                 AssociatedPlanPresentation(
                     plan_name=plan.plan_name,

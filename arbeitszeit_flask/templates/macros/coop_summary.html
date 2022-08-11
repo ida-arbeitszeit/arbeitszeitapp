@@ -26,7 +26,8 @@
                 </tr>
                 <tr>
                     <td class="has-text-left has-text-weight-semibold">{{ gettext("Coordinator") }}</td>
-                    <td class="has-text-left">{{ view_model.coordinator_id }}</td>
+                    <td class="has-text-left"><a
+                            href="{{ view_model.coordinator_url }}">{{ view_model.coordinator_name }}</a></td>
                 </tr>
             </tbody>
         </table>
