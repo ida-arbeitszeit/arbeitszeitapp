@@ -92,7 +92,7 @@ class PresenterTests(TestCase):
         self.assertFalse(view_model.show_404)
         self.assertEqual(
             view_model.redirect_url,
-            self.url_index.get_company_plan_summary_url(plan_id=plan_id),
+            self.url_index.get_plan_summary_url(UserRole.company, plan_id=plan_id),
         )
 
     def test_correct_notification_is_returned_when_operation_was_successfull(

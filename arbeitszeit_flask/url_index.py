@@ -8,11 +8,13 @@ from arbeitszeit_web.session import UserRole
 
 
 class GeneralUrlIndex:
-    def get_company_plan_summary_url(self, plan_id: UUID) -> str:
-        return url_for("main_company.plan_summary", plan_id=plan_id)
-
-    def get_member_plan_summary_url(self, plan_id: UUID) -> str:
-        return url_for("main_member.plan_summary", plan_id=plan_id)
+    def get_plan_summary_url(self, user_role: Optional[UserRole], plan_id: UUID) -> str:
+        if user_role == UserRole.company:
+            return url_for("main_company.plan_summary", plan_id=plan_id)
+        elif user_role == UserRole.member:
+            return url_for("main_member.plan_summary", plan_id=plan_id)
+        else:
+            raise ValueError(f"Plan summary url is unsupported for {user_role}")
 
     def get_accountant_invitation_url(self, token: str) -> str:
         return url_for("auth.signup_accountant", token=token)

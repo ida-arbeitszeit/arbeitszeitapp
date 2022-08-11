@@ -11,11 +11,8 @@ class CompanyUrlIndexImpl:
 
 
 class UrlIndexTestImpl:
-    def get_company_plan_summary_url(self, plan_id: UUID) -> str:
-        return f"fake_plan_url for company:{plan_id}"
-
-    def get_member_plan_summary_url(self, plan_id: UUID) -> str:
-        return f"fake_plan_url for member:{plan_id}"
+    def get_plan_summary_url(self, user_role: Optional[UserRole], plan_id: UUID) -> str:
+        return f"plan summary url for {plan_id}, {user_role}"
 
     def get_member_dashboard_url(self) -> str:
         return "member dashboard url"

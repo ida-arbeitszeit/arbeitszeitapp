@@ -167,7 +167,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_company()
         plan = self.plan_generator.create_plan()
-        url = self.url_index.get_company_plan_summary_url(plan.id)
+        url = self.url_index.get_plan_summary_url(UserRole.company, plan.id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -176,7 +176,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_member()
         plan = self.plan_generator.create_plan()
-        url = self.url_index.get_member_plan_summary_url(plan.id)
+        url = self.url_index.get_plan_summary_url(UserRole.member, plan.id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
