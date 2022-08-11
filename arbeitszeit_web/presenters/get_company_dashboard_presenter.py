@@ -3,11 +3,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List
 
+from injector import inject
+
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCase
-from arbeitszeit_web.url_index import PlanSummaryUrlIndex
+from arbeitszeit_web.url_index import UrlIndex
 
 
+@inject
 @dataclass
 class GetCompanyDashboardPresenter:
     @dataclass
@@ -25,7 +28,7 @@ class GetCompanyDashboardPresenter:
         has_latest_plans: bool
         latest_plans: List[GetCompanyDashboardPresenter.PlanDetailsWeb]
 
-    url_index: PlanSummaryUrlIndex
+    url_index: UrlIndex
     datetime_service: DatetimeService
 
     def present(
@@ -52,5 +55,5 @@ class GetCompanyDashboardPresenter:
             activation_date=self.datetime_service.format_datetime(
                 plan.activation_date, zone="Europe/Berlin", fmt="%d.%m."
             ),
-            plan_summary_url=self.url_index.get_plan_summary_url(plan.plan_id),
+            plan_summary_url=self.url_index.get_company_plan_summary_url(plan.plan_id),
         )

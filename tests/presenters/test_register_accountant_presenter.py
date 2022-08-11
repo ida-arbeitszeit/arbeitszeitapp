@@ -6,6 +6,7 @@ from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
 from arbeitszeit_web.presenters.register_accountant_presenter import (
     RegisterAccountantPresenter,
 )
+from arbeitszeit_web.session import UserRole
 from tests.presenters.notifier import NotifierTestImpl
 from tests.session import FakeSession
 from tests.translator import FakeTranslator
@@ -58,7 +59,7 @@ class PresenterTests(TestCase):
         response = self.create_accepted_response()
         self.presenter.present_registration_result(response)
         self.assertLoggedIn(
-            lambda l: l.user_role == FakeSession.UserRole.accountant,
+            lambda l: l.user_role == UserRole.accountant,
         )
 
     def test_for_correct_error_message_when_failing_to_log_in(self) -> None:

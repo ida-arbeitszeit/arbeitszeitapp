@@ -6,16 +6,20 @@ from hypothesis import given, strategies
 
 from arbeitszeit.use_cases import ListAllCooperationsResponse, ListedCooperation
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
+from arbeitszeit_web.session import UserRole
+from tests.session import FakeSession
 
 from .dependency_injection import get_dependency_injector
-from .url_index import CoopSummaryUrlIndexTestImpl
+from .url_index import UrlIndexTestImpl
 
 
 class ListMessagesPresenterTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
-        self.url_index = self.injector.get(CoopSummaryUrlIndexTestImpl)
+        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.presenter = self.injector.get(ListAllCooperationsPresenter)
+        self.session = self.injector.get(FakeSession)
+        self.session.login_company("test@test.test")
 
     def test_view_model_contains_no_cooperation_and_does_not_show_result_when_non_were_provided(
         self,
@@ -46,7 +50,9 @@ class ListMessagesPresenterTests(TestCase):
 
     def test_correct_coop_summary_url_is_displayed_in_view_model(self) -> None:
         coop_id = uuid4()
-        expected_url = self.url_index.get_coop_summary_url(coop_id)
+        expected_url = self.url_index.get_coop_summary_url(
+            coop_id=coop_id, user_role=UserRole.company
+        )
         view_model = self.presenter.present(
             self._create_response_with_one_cooperation(coop_id=coop_id)
         )

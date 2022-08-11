@@ -9,7 +9,7 @@ from arbeitszeit_web.presenters.get_company_dashboard_presenter import (
 )
 from tests.datetime_service import FakeDatetimeService
 from tests.presenters.dependency_injection import get_dependency_injector
-from tests.presenters.url_index import PlanSummaryUrlIndexTestImpl
+from tests.presenters.url_index import UrlIndexTestImpl
 
 
 class TestPresenter(TestCase):
@@ -17,7 +17,7 @@ class TestPresenter(TestCase):
         self.injector = get_dependency_injector()
         self.presenter = self.injector.get(GetCompanyDashboardPresenter)
         self.datetime_service = self.injector.get(FakeDatetimeService)
-        self.plan_index = self.injector.get(PlanSummaryUrlIndexTestImpl)
+        self.plan_index = self.injector.get(UrlIndexTestImpl)
 
     def test_presenter_successfully_presents_a_use_case_response(self):
         self.assertTrue(self.presenter.present(self.get_use_case_response()))
@@ -98,7 +98,7 @@ class TestPresenter(TestCase):
         )
         self.assertEqual(
             view_model.latest_plans[0].plan_summary_url,
-            self.plan_index.get_plan_summary_url(plan_id),
+            self.plan_index.get_company_plan_summary_url(plan_id),
         )
 
     def get_use_case_response(
