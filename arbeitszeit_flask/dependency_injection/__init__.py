@@ -114,7 +114,6 @@ from arbeitszeit_web.request_cooperation import RequestCooperationController
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import (
-    AnswerCompanyWorkInviteUrlIndex,
     ConfirmationUrlIndex,
     EndCoopUrlIndex,
     HidePlanUrlIndex,
@@ -155,12 +154,6 @@ class MemberModule(Module):
     @provider
     def provide_template_index(self) -> TemplateIndex:
         return MemberTemplateIndex()
-
-    @provider
-    def provide_answer_company_work_invite_url_index(
-        self, url_index: MemberUrlIndex
-    ) -> AnswerCompanyWorkInviteUrlIndex:
-        return url_index
 
 
 class CompanyModule(CompanyPresenterModule):
@@ -221,12 +214,6 @@ class CompanyModule(CompanyPresenterModule):
         self, session: FlaskSession, request: FlaskRequest
     ) -> PayMeansOfProductionController:
         return PayMeansOfProductionController(session, request)
-
-    @provider
-    def provide_answer_company_work_invite_url_index(
-        self, url_index: CompanyUrlIndex
-    ) -> AnswerCompanyWorkInviteUrlIndex:
-        return url_index
 
     @provider
     def provide_prefilled_draft_data_controller(

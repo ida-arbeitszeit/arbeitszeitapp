@@ -36,9 +36,6 @@ from arbeitszeit_web.presenters.send_work_certificates_to_worker_presenter impor
 from arbeitszeit_web.presenters.show_a_account_details_presenter import (
     ShowAAccountDetailsPresenter,
 )
-from arbeitszeit_web.presenters.show_company_work_invite_details_presenter import (
-    ShowCompanyWorkInviteDetailsPresenter,
-)
 from arbeitszeit_web.presenters.show_p_account_details_presenter import (
     ShowPAccountDetailsPresenter,
 )
@@ -78,7 +75,6 @@ from .notifier import NotifierTestImpl
 from .url_index import (
     AccountantDashboardUrlIndexImpl,
     AccountantInvitationUrlIndexImpl,
-    AnswerCompanyWorkInviteUrlIndexImpl,
     ConfirmationUrlIndexImpl,
     EndCoopUrlIndexTestImpl,
     HidePlanUrlIndexTestImpl,
@@ -237,17 +233,6 @@ class PresenterTestsInjector(Module):
     ) -> SendWorkCertificatesToWorkerPresenter:
         return SendWorkCertificatesToWorkerPresenter(
             notifier=notifier,
-            translator=translator,
-        )
-
-    @provider
-    def provide_show_company_work_invite_details_presenter(
-        self,
-        answer_invite_url_index: AnswerCompanyWorkInviteUrlIndexImpl,
-        translator: FakeTranslator,
-    ) -> ShowCompanyWorkInviteDetailsPresenter:
-        return ShowCompanyWorkInviteDetailsPresenter(
-            url_index=answer_invite_url_index,
             translator=translator,
         )
 

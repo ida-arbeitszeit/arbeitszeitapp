@@ -54,9 +54,6 @@ from arbeitszeit_web.presenters.send_work_certificates_to_worker_presenter impor
 from arbeitszeit_web.presenters.show_a_account_details_presenter import (
     ShowAAccountDetailsPresenter,
 )
-from arbeitszeit_web.presenters.show_company_work_invite_details_presenter import (
-    ShowCompanyWorkInviteDetailsPresenter,
-)
 from arbeitszeit_web.presenters.show_p_account_details_presenter import (
     ShowPAccountDetailsPresenter,
 )
@@ -70,7 +67,6 @@ from arbeitszeit_web.request_cooperation import RequestCooperationPresenter
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import (
-    AnswerCompanyWorkInviteUrlIndex,
     ConfirmationUrlIndex,
     EndCoopUrlIndex,
     PlotsUrlIndex,
@@ -266,12 +262,6 @@ class PresenterModule(Module):
             language_changer_url_index=language_changer_url_index,
             language_service=language_service,
         )
-
-    @provider
-    def provide_show_company_work_invite_details_presenter(
-        self, url_index: AnswerCompanyWorkInviteUrlIndex, translator: Translator
-    ) -> ShowCompanyWorkInviteDetailsPresenter:
-        return ShowCompanyWorkInviteDetailsPresenter(url_index, translator)
 
     @provider
     def provide_send_confirmation_email_presenter(

@@ -55,6 +55,9 @@ class GeneralUrlIndex:
         else:
             raise ValueError(f"company summary not available for {user_role}")
 
+    def get_answer_company_work_invite_url(self, invite_id: UUID) -> str:
+        return url_for("main_member.show_company_work_invite", invite_id=invite_id)
+
 
 class MemberUrlIndex:
     def get_toggle_availability_url(self, plan_id: UUID) -> str:
@@ -71,9 +74,6 @@ class MemberUrlIndex:
 
     def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
         ...
-
-    def get_answer_company_work_invite_url(self, invite_id: UUID) -> str:
-        return url_for("main_member.show_company_work_invite", invite_id=invite_id)
 
     def get_confirmation_url(self, token: str) -> str:
         return url_for(
@@ -105,11 +105,6 @@ class CompanyUrlIndex:
         # since invites don't make sense for a company, we redirect
         # them in this case to their dashboard page.
         return url_for("main_company.dashboard")
-
-    def get_answer_company_work_invite_url(self, invite_id: UUID) -> str:
-        # since invites don't make sense for a company, we redirect
-        # them in this case to their dashboard page.
-        return url_for("main_company.dashboard", invite_id=invite_id)
 
     def get_confirmation_url(self, token: str) -> str:
         return url_for(

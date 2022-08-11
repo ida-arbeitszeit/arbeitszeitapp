@@ -29,6 +29,9 @@ class UrlIndexTestImpl:
     def get_draft_summary_url(self, draft_id: UUID) -> str:
         return f"fake_draft_url:{draft_id}"
 
+    def get_answer_company_work_invite_url(self, invite_id: UUID) -> str:
+        return f"{invite_id} url"
+
 
 class RequestCoopUrlIndexTestImpl:
     def get_request_coop_url(self) -> str:
@@ -43,11 +46,6 @@ class EndCoopUrlIndexTestImpl:
 class TogglePlanAvailabilityUrlIndex:
     def get_toggle_availability_url(self, plan_id: UUID) -> str:
         return f"fake_toggle_url:{plan_id}"
-
-
-class AnswerCompanyWorkInviteUrlIndexImpl:
-    def get_answer_company_work_invite_url(self, invite_id: UUID) -> str:
-        return f"{invite_id} url"
 
 
 class RenewPlanUrlIndexTestImpl:
