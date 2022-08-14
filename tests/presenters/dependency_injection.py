@@ -6,7 +6,6 @@ from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPrese
 from arbeitszeit_web.get_plan_summary_company import (
     GetPlanSummaryCompanySuccessPresenter,
 )
-from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.hide_plan import HidePlanPresenter
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyPresenter
 from arbeitszeit_web.notification import Notifier
@@ -33,18 +32,6 @@ from arbeitszeit_web.presenters.self_approve_plan import SelfApprovePlanPresente
 from arbeitszeit_web.presenters.send_work_certificates_to_worker_presenter import (
     SendWorkCertificatesToWorkerPresenter,
 )
-from arbeitszeit_web.presenters.show_a_account_details_presenter import (
-    ShowAAccountDetailsPresenter,
-)
-from arbeitszeit_web.presenters.show_p_account_details_presenter import (
-    ShowPAccountDetailsPresenter,
-)
-from arbeitszeit_web.presenters.show_prd_account_details_presenter import (
-    ShowPRDAccountDetailsPresenter,
-)
-from arbeitszeit_web.presenters.show_r_account_details_presenter import (
-    ShowRAccountDetailsPresenter,
-)
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.request_cooperation import RequestCooperationPresenter
 from arbeitszeit_web.session import Session
@@ -63,8 +50,6 @@ from tests.email import (
     RegistrationEmailTemplateImpl,
 )
 from tests.language_service import FakeLanguageService
-from tests.plotter import FakePlotter
-from tests.presenters.test_colors import ColorsTestImpl
 from tests.request import FakeRequest
 from tests.session import FakeSession
 from tests.translator import FakeTranslator
@@ -80,7 +65,6 @@ from .url_index import (
     HidePlanUrlIndexTestImpl,
     LanguageChangerUrlIndexImpl,
     PayMeansOfProductionUrlIndexImpl,
-    PlotsUrlIndexImpl,
     RenewPlanUrlIndexTestImpl,
     RequestCoopUrlIndexTestImpl,
     TogglePlanAvailabilityUrlIndex,
@@ -185,18 +169,6 @@ class PresenterTestsInjector(Module):
         )
 
     @provider
-    def provide_get_statistics_presenter(
-        self,
-        translator: FakeTranslator,
-        plotter: FakePlotter,
-        colors: ColorsTestImpl,
-        url_index: PlotsUrlIndexImpl,
-    ) -> GetStatisticsPresenter:
-        return GetStatisticsPresenter(
-            translator=translator, plotter=plotter, colors=colors, url_index=url_index
-        )
-
-    @provider
     def provide_hide_plan_presenter(
         self, notifier: Notifier, translator: FakeTranslator
     ) -> HidePlanPresenter:
@@ -234,52 +206,6 @@ class PresenterTestsInjector(Module):
         return SendWorkCertificatesToWorkerPresenter(
             notifier=notifier,
             translator=translator,
-        )
-
-    @provider
-    def provide_show_prd_account_details_presenter(
-        self,
-        translator: FakeTranslator,
-        url_index: PlotsUrlIndexImpl,
-        datetime_service: FakeDatetimeService,
-    ) -> ShowPRDAccountDetailsPresenter:
-        return ShowPRDAccountDetailsPresenter(
-            translator=translator,
-            url_index=url_index,
-            datetime_service=datetime_service,
-        )
-
-    @provider
-    def provide_show_r_account_details_presenter(
-        self,
-        translator: FakeTranslator,
-        url_index: PlotsUrlIndexImpl,
-        datetime_service: FakeDatetimeService,
-    ) -> ShowRAccountDetailsPresenter:
-        return ShowRAccountDetailsPresenter(
-            trans=translator, url_index=url_index, datetime_service=datetime_service
-        )
-
-    @provider
-    def provide_show_p_account_details_presenter(
-        self,
-        translator: FakeTranslator,
-        url_index: PlotsUrlIndexImpl,
-        datetime_service: FakeDatetimeService,
-    ) -> ShowPAccountDetailsPresenter:
-        return ShowPAccountDetailsPresenter(
-            trans=translator, url_index=url_index, datetime_service=datetime_service
-        )
-
-    @provider
-    def provide_show_a_account_details_presenter(
-        self,
-        translator: FakeTranslator,
-        url_index: PlotsUrlIndexImpl,
-        datetime_service: FakeDatetimeService,
-    ) -> ShowAAccountDetailsPresenter:
-        return ShowAAccountDetailsPresenter(
-            trans=translator, url_index=url_index, datetime_service=datetime_service
         )
 
     @provider

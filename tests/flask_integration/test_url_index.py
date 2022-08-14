@@ -5,11 +5,7 @@ from arbeitszeit.use_cases import InviteWorkerToCompanyUseCase
 from arbeitszeit.use_cases.send_accountant_registration_token import (
     SendAccountantRegistrationTokenUseCase,
 )
-from arbeitszeit_flask.url_index import (
-    CompanyUrlIndex,
-    FlaskPlotsUrlIndex,
-    GeneralUrlIndex,
-)
+from arbeitszeit_flask.url_index import CompanyUrlIndex, GeneralUrlIndex
 from arbeitszeit_web.session import UserRole
 from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
@@ -77,7 +73,7 @@ class CompanyUrlIndexTests(ViewTestCase):
 class PlotUrlIndexTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.url_index = FlaskPlotsUrlIndex()
+        self.url_index = GeneralUrlIndex()
         self.company = self.login_company()
 
     def test_url_for_barplot_for_certificates_returns_png(self) -> None:

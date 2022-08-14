@@ -58,6 +58,58 @@ class GeneralUrlIndex:
     def get_answer_company_work_invite_url(self, invite_id: UUID) -> str:
         return url_for("main_member.show_company_work_invite", invite_id=invite_id)
 
+    def get_global_barplot_for_certificates_url(
+        self, certificates_count: Decimal, available_product: Decimal
+    ) -> str:
+        return url_for(
+            endpoint="plots.global_barplot_for_certificates",
+            certificates_count=str(certificates_count),
+            available_product=str(available_product),
+        )
+
+    def get_global_barplot_for_means_of_production_url(
+        self, planned_means: Decimal, planned_resources: Decimal, planned_work: Decimal
+    ) -> str:
+        return url_for(
+            endpoint="plots.global_barplot_for_means_of_production",
+            planned_means=planned_means,
+            planned_resources=planned_resources,
+            planned_work=planned_work,
+        )
+
+    def get_global_barplot_for_plans_url(
+        self, productive_plans: int, public_plans: int
+    ) -> str:
+        return url_for(
+            endpoint="plots.global_barplot_for_plans",
+            productive_plans=productive_plans,
+            public_plans=public_plans,
+        )
+
+    def get_line_plot_of_company_prd_account(self, company_id: UUID) -> str:
+        return url_for(
+            endpoint="plots.line_plot_of_company_prd_account",
+            company_id=str(company_id),
+        )
+
+    def get_line_plot_of_company_r_account(self, company_id: UUID) -> str:
+        return url_for(
+            endpoint="plots.line_plot_of_company_r_account",
+            company_id=str(company_id),
+        )
+
+    def get_line_plot_of_company_p_account(self, company_id: UUID) -> str:
+        return url_for(
+            endpoint="plots.line_plot_of_company_p_account",
+            company_id=str(company_id),
+        )
+
+    def get_line_plot_of_company_a_account(self, company_id: UUID) -> str:
+        return url_for(
+            endpoint="plots.line_plot_of_company_a_account",
+            company_id=str(company_id),
+        )
+
 
 class MemberUrlIndex:
     def get_toggle_availability_url(self, plan_id: UUID) -> str:
@@ -113,57 +165,3 @@ class CompanyUrlIndex:
 
     def get_pay_means_of_production_url(self) -> str:
         return url_for(endpoint="main_company.transfer_to_company")
-
-
-class FlaskPlotsUrlIndex:
-    def get_global_barplot_for_certificates_url(
-        self, certificates_count: Decimal, available_product: Decimal
-    ) -> str:
-        return url_for(
-            endpoint="plots.global_barplot_for_certificates",
-            certificates_count=str(certificates_count),
-            available_product=str(available_product),
-        )
-
-    def get_global_barplot_for_means_of_production_url(
-        self, planned_means: Decimal, planned_resources: Decimal, planned_work: Decimal
-    ) -> str:
-        return url_for(
-            endpoint="plots.global_barplot_for_means_of_production",
-            planned_means=planned_means,
-            planned_resources=planned_resources,
-            planned_work=planned_work,
-        )
-
-    def get_global_barplot_for_plans_url(
-        self, productive_plans: int, public_plans: int
-    ) -> str:
-        return url_for(
-            endpoint="plots.global_barplot_for_plans",
-            productive_plans=productive_plans,
-            public_plans=public_plans,
-        )
-
-    def get_line_plot_of_company_prd_account(self, company_id: UUID) -> str:
-        return url_for(
-            endpoint="plots.line_plot_of_company_prd_account",
-            company_id=str(company_id),
-        )
-
-    def get_line_plot_of_company_r_account(self, company_id: UUID) -> str:
-        return url_for(
-            endpoint="plots.line_plot_of_company_r_account",
-            company_id=str(company_id),
-        )
-
-    def get_line_plot_of_company_p_account(self, company_id: UUID) -> str:
-        return url_for(
-            endpoint="plots.line_plot_of_company_p_account",
-            company_id=str(company_id),
-        )
-
-    def get_line_plot_of_company_a_account(self, company_id: UUID) -> str:
-        return url_for(
-            endpoint="plots.line_plot_of_company_a_account",
-            company_id=str(company_id),
-        )

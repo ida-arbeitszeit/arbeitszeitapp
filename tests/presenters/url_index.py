@@ -32,6 +32,35 @@ class UrlIndexTestImpl:
     def get_answer_company_work_invite_url(self, invite_id: UUID) -> str:
         return f"{invite_id} url"
 
+    def get_global_barplot_for_certificates_url(
+        self, certificates_count: Decimal, available_product: Decimal
+    ) -> str:
+        return f"barplot url with {certificates_count} and {available_product}"
+
+    def get_global_barplot_for_means_of_production_url(
+        self, planned_means: Decimal, planned_resources: Decimal, planned_work: Decimal
+    ) -> str:
+        return (
+            f"barplot url with {planned_means}, {planned_resources} and {planned_work}"
+        )
+
+    def get_global_barplot_for_plans_url(
+        self, productive_plans: int, public_plans: int
+    ) -> str:
+        return f"barplot url with {productive_plans} and {public_plans}"
+
+    def get_line_plot_of_company_prd_account(self, company_id: UUID) -> str:
+        return f"line plot for {company_id}"
+
+    def get_line_plot_of_company_r_account(self, company_id: UUID) -> str:
+        return f"line plot for {company_id}"
+
+    def get_line_plot_of_company_p_account(self, company_id: UUID) -> str:
+        return f"line plot for {company_id}"
+
+    def get_line_plot_of_company_a_account(self, company_id: UUID) -> str:
+        return f"line plot for {company_id}"
+
 
 class RequestCoopUrlIndexTestImpl:
     def get_request_coop_url(self) -> str:
@@ -66,37 +95,6 @@ class ConfirmationUrlIndexImpl:
 class AccountantInvitationUrlIndexImpl:
     def get_accountant_invitation_url(self, token: str) -> str:
         return f"accountant invitation {token} url"
-
-
-class PlotsUrlIndexImpl:
-    def get_global_barplot_for_certificates_url(
-        self, certificates_count: Decimal, available_product: Decimal
-    ) -> str:
-        return f"barplot url with {certificates_count} and {available_product}"
-
-    def get_global_barplot_for_means_of_production_url(
-        self, planned_means: Decimal, planned_resources: Decimal, planned_work: Decimal
-    ) -> str:
-        return (
-            f"barplot url with {planned_means}, {planned_resources} and {planned_work}"
-        )
-
-    def get_global_barplot_for_plans_url(
-        self, productive_plans: int, public_plans: int
-    ) -> str:
-        return f"barplot url with {productive_plans} and {public_plans}"
-
-    def get_line_plot_of_company_prd_account(self, company_id: UUID) -> str:
-        return f"line plot for {company_id}"
-
-    def get_line_plot_of_company_r_account(self, company_id: UUID) -> str:
-        return f"line plot for {company_id}"
-
-    def get_line_plot_of_company_p_account(self, company_id: UUID) -> str:
-        return f"line plot for {company_id}"
-
-    def get_line_plot_of_company_a_account(self, company_id: UUID) -> str:
-        return f"line plot for {company_id}"
 
 
 class AccountantDashboardUrlIndexImpl:

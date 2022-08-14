@@ -69,12 +69,7 @@ from arbeitszeit_flask.template import (
 )
 from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.translator import FlaskTranslator
-from arbeitszeit_flask.url_index import (
-    CompanyUrlIndex,
-    FlaskPlotsUrlIndex,
-    GeneralUrlIndex,
-    MemberUrlIndex,
-)
+from arbeitszeit_flask.url_index import CompanyUrlIndex, GeneralUrlIndex, MemberUrlIndex
 from arbeitszeit_flask.views import Http404View
 from arbeitszeit_web.answer_company_work_invite import AnswerCompanyWorkInviteController
 from arbeitszeit_web.colors import Colors
@@ -117,7 +112,6 @@ from arbeitszeit_web.url_index import (
     ConfirmationUrlIndex,
     EndCoopUrlIndex,
     HidePlanUrlIndex,
-    PlotsUrlIndex,
     RenewPlanUrlIndex,
     RequestCoopUrlIndex,
     TogglePlanAvailabilityUrlIndex,
@@ -247,12 +241,6 @@ class FlaskModule(PresenterModule):
         return FlaskSession(
             member_repository, company_repository, accountant_repository
         )
-
-    @provider
-    def provide_plots_url_index(
-        self, flask_plots_url_index: FlaskPlotsUrlIndex
-    ) -> PlotsUrlIndex:
-        return flask_plots_url_index
 
     @provider
     def provide_member_registration_email_template(

@@ -44,6 +44,33 @@ class UrlIndex(Protocol):
     def get_answer_company_work_invite_url(self, invite_id: UUID) -> str:
         ...
 
+    def get_global_barplot_for_certificates_url(
+        self, certificates_count: Decimal, available_product: Decimal
+    ) -> str:
+        ...
+
+    def get_global_barplot_for_means_of_production_url(
+        self, planned_means: Decimal, planned_resources: Decimal, planned_work: Decimal
+    ) -> str:
+        ...
+
+    def get_global_barplot_for_plans_url(
+        self, productive_plans: int, public_plans: int
+    ) -> str:
+        ...
+
+    def get_line_plot_of_company_prd_account(self, company_id: UUID) -> str:
+        ...
+
+    def get_line_plot_of_company_r_account(self, company_id: UUID) -> str:
+        ...
+
+    def get_line_plot_of_company_p_account(self, company_id: UUID) -> str:
+        ...
+
+    def get_line_plot_of_company_a_account(self, company_id: UUID) -> str:
+        ...
+
 
 class TogglePlanAvailabilityUrlIndex(Protocol):
     def get_toggle_availability_url(self, plan_id: UUID) -> str:
@@ -82,35 +109,6 @@ class AccountantInvitationUrlIndex(Protocol):
 
 class PayMeansOfProductionUrlIndex(Protocol):
     def get_pay_means_of_production_url(self) -> str:
-        ...
-
-
-class PlotsUrlIndex(Protocol):
-    def get_global_barplot_for_certificates_url(
-        self, certificates_count: Decimal, available_product: Decimal
-    ) -> str:
-        ...
-
-    def get_global_barplot_for_means_of_production_url(
-        self, planned_means: Decimal, planned_resources: Decimal, planned_work: Decimal
-    ) -> str:
-        ...
-
-    def get_global_barplot_for_plans_url(
-        self, productive_plans: int, public_plans: int
-    ) -> str:
-        ...
-
-    def get_line_plot_of_company_prd_account(self, company_id: UUID) -> str:
-        ...
-
-    def get_line_plot_of_company_r_account(self, company_id: UUID) -> str:
-        ...
-
-    def get_line_plot_of_company_p_account(self, company_id: UUID) -> str:
-        ...
-
-    def get_line_plot_of_company_a_account(self, company_id: UUID) -> str:
         ...
 
 

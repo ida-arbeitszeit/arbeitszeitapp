@@ -11,7 +11,6 @@ from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitat
     AccountantInvitationPresenter,
 )
 from arbeitszeit_flask.url_index import CompanyUrlIndex, GeneralUrlIndex
-from arbeitszeit_web.colors import Colors
 from arbeitszeit_web.email import EmailConfiguration, MailService, UserAddressBook
 from arbeitszeit_web.formatters.plan_summary_formatter import PlanSummaryFormatter
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
@@ -19,12 +18,10 @@ from arbeitszeit_web.get_plan_summary_company import (
     GetPlanSummaryCompanySuccessPresenter,
 )
 from arbeitszeit_web.get_plan_summary_member import GetPlanSummarySuccessPresenter
-from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyPresenter
 from arbeitszeit_web.language_service import LanguageService
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
-from arbeitszeit_web.plotter import Plotter
 from arbeitszeit_web.presenters.accountant_invitation_presenter import (
     AccountantInvitationEmailPresenter,
     AccountantInvitationEmailView,
@@ -51,25 +48,12 @@ from arbeitszeit_web.presenters.send_confirmation_email_presenter import (
 from arbeitszeit_web.presenters.send_work_certificates_to_worker_presenter import (
     SendWorkCertificatesToWorkerPresenter,
 )
-from arbeitszeit_web.presenters.show_a_account_details_presenter import (
-    ShowAAccountDetailsPresenter,
-)
-from arbeitszeit_web.presenters.show_p_account_details_presenter import (
-    ShowPAccountDetailsPresenter,
-)
-from arbeitszeit_web.presenters.show_prd_account_details_presenter import (
-    ShowPRDAccountDetailsPresenter,
-)
-from arbeitszeit_web.presenters.show_r_account_details_presenter import (
-    ShowRAccountDetailsPresenter,
-)
 from arbeitszeit_web.request_cooperation import RequestCooperationPresenter
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import (
     ConfirmationUrlIndex,
     EndCoopUrlIndex,
-    PlotsUrlIndex,
     RequestCoopUrlIndex,
     TogglePlanAvailabilityUrlIndex,
 )
@@ -100,52 +84,6 @@ class CompanyPresenterModule(Module):
         self, notifier: Notifier, translator: Translator
     ) -> SendWorkCertificatesToWorkerPresenter:
         return SendWorkCertificatesToWorkerPresenter(notifier, translator)
-
-    @provider
-    def provide_show_prd_account_details_presenter(
-        self,
-        translator: Translator,
-        url_index: PlotsUrlIndex,
-        datetime_service: DatetimeService,
-    ) -> ShowPRDAccountDetailsPresenter:
-        return ShowPRDAccountDetailsPresenter(
-            translator=translator,
-            url_index=url_index,
-            datetime_service=datetime_service,
-        )
-
-    @provider
-    def provide_show_r_account_details_presenter(
-        self,
-        translator: Translator,
-        url_index: PlotsUrlIndex,
-        datetime_service: DatetimeService,
-    ) -> ShowRAccountDetailsPresenter:
-        return ShowRAccountDetailsPresenter(
-            trans=translator, url_index=url_index, datetime_service=datetime_service
-        )
-
-    @provider
-    def provide_show_a_account_details_presenter(
-        self,
-        translator: Translator,
-        url_index: PlotsUrlIndex,
-        datetime_service: DatetimeService,
-    ) -> ShowAAccountDetailsPresenter:
-        return ShowAAccountDetailsPresenter(
-            trans=translator, url_index=url_index, datetime_service=datetime_service
-        )
-
-    @provider
-    def provide_show_p_account_details_presenter(
-        self,
-        translator: Translator,
-        url_index: PlotsUrlIndex,
-        datetime_service: DatetimeService,
-    ) -> ShowPAccountDetailsPresenter:
-        return ShowPAccountDetailsPresenter(
-            trans=translator, url_index=url_index, datetime_service=datetime_service
-        )
 
     @provider
     def provide_get_company_transactions_presenter(
@@ -239,18 +177,6 @@ class PresenterModule(Module):
         self, presenter: RegistrationEmailPresenter
     ) -> CompanyRegistrationMessagePresenter:
         return presenter
-
-    @provider
-    def provide_get_statistics_presenter(
-        self,
-        translator: Translator,
-        plotter: Plotter,
-        colors: Colors,
-        url_index: PlotsUrlIndex,
-    ) -> GetStatisticsPresenter:
-        return GetStatisticsPresenter(
-            translator=translator, plotter=plotter, colors=colors, url_index=url_index
-        )
 
     @provider
     def provide_list_available_languages_presenter(
