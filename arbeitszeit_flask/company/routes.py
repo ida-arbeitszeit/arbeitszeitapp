@@ -186,7 +186,7 @@ def create_draft_from_plan(
         response = create_form_use_case.get_plan_summary_for_company(
             plan_id=plan_id, company_id=current_user
         )
-        assert isinstance(response, GetPlanSummaryCompany.Success)
+        assert response.plan_summary is not None
         create_form_presenter.show_prefilled_draft_data(
             summary_data=response.plan_summary, form=form
         )
@@ -434,8 +434,10 @@ def plan_summary(
     presenter: GetPlanSummaryCompanySuccessPresenter,
     http_404_view: Http404View,
 ):
-    use_case_response = get_plan_summary_company(plan_id, UUID(current_user.id))
-    if isinstance(use_case_response, use_cases.GetPlanSummaryCompany.Success):
+    use_case_response = get_plan_summary_company.get_plan_summary_for_company(
+        plan_id, UUID(current_user.id)
+    )
+    if use_case_response.plan_summary:
         view_model = presenter.present(use_case_response)
         return template_renderer.render_template(
             "company/plan_summary.html", context=dict(view_model=view_model.to_dict())

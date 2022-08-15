@@ -68,12 +68,11 @@ class CreateDraftView:
         show user input form for plan draft.
         prefilled data comes from exired plan or saved draft if available in request arguments.
         """
-        form = CreateDraftForm()
         return FlaskResponse(
             self.template_renderer.render_template(
                 "company/create_draft.html",
                 context=dict(
-                    form=form,
+                    form=CreateDraftForm(),
                     view_model=dict(
                         self_approve_plan="",
                         save_draft_url="",
