@@ -69,12 +69,7 @@ from arbeitszeit_flask.template import (
 )
 from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.translator import FlaskTranslator
-from arbeitszeit_flask.url_index import (
-    CompanyUrlIndex,
-    FlaskPlotsUrlIndex,
-    GeneralUrlIndex,
-    MemberUrlIndex,
-)
+from arbeitszeit_flask.url_index import CompanyUrlIndex, GeneralUrlIndex, MemberUrlIndex
 from arbeitszeit_flask.views import Http404View
 from arbeitszeit_web.answer_company_work_invite import AnswerCompanyWorkInviteController
 from arbeitszeit_web.colors import Colors
@@ -114,11 +109,9 @@ from arbeitszeit_web.request_cooperation import RequestCooperationController
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import (
-    AnswerCompanyWorkInviteUrlIndex,
     ConfirmationUrlIndex,
     EndCoopUrlIndex,
     HidePlanUrlIndex,
-    PlotsUrlIndex,
     RenewPlanUrlIndex,
     RequestCoopUrlIndex,
     TogglePlanAvailabilityUrlIndex,
@@ -155,12 +148,6 @@ class MemberModule(Module):
     @provider
     def provide_template_index(self) -> TemplateIndex:
         return MemberTemplateIndex()
-
-    @provider
-    def provide_answer_company_work_invite_url_index(
-        self, url_index: MemberUrlIndex
-    ) -> AnswerCompanyWorkInviteUrlIndex:
-        return url_index
 
 
 class CompanyModule(CompanyPresenterModule):
@@ -223,12 +210,6 @@ class CompanyModule(CompanyPresenterModule):
         return PayMeansOfProductionController(session, request)
 
     @provider
-    def provide_answer_company_work_invite_url_index(
-        self, url_index: CompanyUrlIndex
-    ) -> AnswerCompanyWorkInviteUrlIndex:
-        return url_index
-
-    @provider
     def provide_prefilled_draft_data_controller(
         self, session: Session
     ) -> CreateDraftController:
@@ -260,12 +241,6 @@ class FlaskModule(PresenterModule):
         return FlaskSession(
             member_repository, company_repository, accountant_repository
         )
-
-    @provider
-    def provide_plots_url_index(
-        self, flask_plots_url_index: FlaskPlotsUrlIndex
-    ) -> PlotsUrlIndex:
-        return flask_plots_url_index
 
     @provider
     def provide_member_registration_email_template(

@@ -2,8 +2,10 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
+from injector import inject
+
 from arbeitszeit.use_cases import ListDraftsResponse
-from arbeitszeit_web.url_index import DraftUrlIndex
+from arbeitszeit_web.url_index import UrlIndex
 
 
 @dataclass
@@ -29,9 +31,10 @@ class ListDraftsViewModel:
         return asdict(self)
 
 
+@inject
 @dataclass
 class ListDraftsPresenter:
-    draft_url_index: DraftUrlIndex
+    url_index: UrlIndex
 
     def present(self, response: ListDraftsResponse) -> ListDraftsViewModel:
         show_results = bool(response.results)
@@ -42,7 +45,7 @@ class ListDraftsPresenter:
                     creation_date=self.__format_date(result.creation_date),
                     product_name=result.product_name,
                     description=result.description.splitlines(),
-                    details_url=self.draft_url_index.get_draft_summary_url(result.id),
+                    details_url=self.url_index.get_draft_summary_url(result.id),
                 )
                 for result in response.results
             ]

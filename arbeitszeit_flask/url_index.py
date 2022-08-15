@@ -8,11 +8,13 @@ from arbeitszeit_web.session import UserRole
 
 
 class GeneralUrlIndex:
-    def get_company_plan_summary_url(self, plan_id: UUID) -> str:
-        return url_for("main_company.plan_summary", plan_id=plan_id)
-
-    def get_member_plan_summary_url(self, plan_id: UUID) -> str:
-        return url_for("main_member.plan_summary", plan_id=plan_id)
+    def get_plan_summary_url(self, user_role: Optional[UserRole], plan_id: UUID) -> str:
+        if user_role == UserRole.company:
+            return url_for("main_company.plan_summary", plan_id=plan_id)
+        elif user_role == UserRole.member:
+            return url_for("main_member.plan_summary", plan_id=plan_id)
+        else:
+            raise ValueError(f"Plan summary url is unsupported for {user_role}")
 
     def get_accountant_invitation_url(self, token: str) -> str:
         return url_for("auth.signup_accountant", token=token)
@@ -53,72 +55,9 @@ class GeneralUrlIndex:
         else:
             raise ValueError(f"company summary not available for {user_role}")
 
-
-class MemberUrlIndex:
-    def get_toggle_availability_url(self, plan_id: UUID) -> str:
-        ...
-
-    def get_renew_plan_url(self, plan_id: UUID) -> str:
-        ...
-
-    def get_hide_plan_url(self, plan_id: UUID) -> str:
-        ...
-
-    def get_request_coop_url(self) -> str:
-        ...
-
-    def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
-        ...
-
     def get_answer_company_work_invite_url(self, invite_id: UUID) -> str:
         return url_for("main_member.show_company_work_invite", invite_id=invite_id)
 
-    def get_confirmation_url(self, token: str) -> str:
-        return url_for(
-            endpoint="auth.confirm_email_member", token=token, _external=True
-        )
-
-
-class CompanyUrlIndex:
-    def get_toggle_availability_url(self, plan_id: UUID) -> str:
-        return url_for("main_company.toggle_availability", plan_id=plan_id)
-
-    def get_renew_plan_url(self, plan_id: UUID) -> str:
-        return url_for("main_company.create_draft", expired_plan_id=plan_id)
-
-    def get_hide_plan_url(self, plan_id: UUID) -> str:
-        return url_for("main_company.hide_plan", plan_id=plan_id)
-
-    def get_request_coop_url(self) -> str:
-        return url_for("main_company.request_cooperation")
-
-    def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
-        return url_for(
-            "main_company.end_cooperation",
-            plan_id=plan_id,
-            cooperation_id=cooperation_id,
-        )
-
-    def get_work_invite_url(self, invite_id: UUID) -> str:
-        # since invites don't make sense for a company, we redirect
-        # them in this case to their dashboard page.
-        return url_for("main_company.dashboard")
-
-    def get_answer_company_work_invite_url(self, invite_id: UUID) -> str:
-        # since invites don't make sense for a company, we redirect
-        # them in this case to their dashboard page.
-        return url_for("main_company.dashboard", invite_id=invite_id)
-
-    def get_confirmation_url(self, token: str) -> str:
-        return url_for(
-            endpoint="auth.confirm_email_company", token=token, _external=True
-        )
-
-    def get_pay_means_of_production_url(self) -> str:
-        return url_for(endpoint="main_company.transfer_to_company")
-
-
-class FlaskPlotsUrlIndex:
     def get_global_barplot_for_certificates_url(
         self, certificates_count: Decimal, available_product: Decimal
     ) -> str:
@@ -170,3 +109,59 @@ class FlaskPlotsUrlIndex:
             endpoint="plots.line_plot_of_company_a_account",
             company_id=str(company_id),
         )
+
+
+class MemberUrlIndex:
+    def get_toggle_availability_url(self, plan_id: UUID) -> str:
+        ...
+
+    def get_renew_plan_url(self, plan_id: UUID) -> str:
+        ...
+
+    def get_hide_plan_url(self, plan_id: UUID) -> str:
+        ...
+
+    def get_request_coop_url(self) -> str:
+        ...
+
+    def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
+        ...
+
+    def get_confirmation_url(self, token: str) -> str:
+        return url_for(
+            endpoint="auth.confirm_email_member", token=token, _external=True
+        )
+
+
+class CompanyUrlIndex:
+    def get_toggle_availability_url(self, plan_id: UUID) -> str:
+        return url_for("main_company.toggle_availability", plan_id=plan_id)
+
+    def get_renew_plan_url(self, plan_id: UUID) -> str:
+        return url_for("main_company.create_draft", expired_plan_id=plan_id)
+
+    def get_hide_plan_url(self, plan_id: UUID) -> str:
+        return url_for("main_company.hide_plan", plan_id=plan_id)
+
+    def get_request_coop_url(self) -> str:
+        return url_for("main_company.request_cooperation")
+
+    def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
+        return url_for(
+            "main_company.end_cooperation",
+            plan_id=plan_id,
+            cooperation_id=cooperation_id,
+        )
+
+    def get_work_invite_url(self, invite_id: UUID) -> str:
+        # since invites don't make sense for a company, we redirect
+        # them in this case to their dashboard page.
+        return url_for("main_company.dashboard")
+
+    def get_confirmation_url(self, token: str) -> str:
+        return url_for(
+            endpoint="auth.confirm_email_company", token=token, _external=True
+        )
+
+    def get_pay_means_of_production_url(self) -> str:
+        return url_for(endpoint="main_company.transfer_to_company")

@@ -3,9 +3,8 @@ there is legacy code in this module. In the past we used to implement
 individual interfaces for different "kinds" of urls. This is now
 deprecated and unwanted. If you want to add a new url to the index,
 simply add an appropriate method the the UrlIndex interface. If you
-need different urls for different roles include the role name in the
-method name, for example "get_member_dashboard_url" and
-"get_company_dashboard_url".
+need different urls for different roles include the user role in the
+arguments of the declared method.
 """
 
 from dataclasses import dataclass
@@ -18,29 +17,11 @@ from injector import inject
 from arbeitszeit_web.session import Session, UserRole
 
 
-class DraftUrlIndex(Protocol):
-    def get_draft_summary_url(self, draft_id: UUID) -> str:
-        ...
-
-
-class CompanyUrlIndex(Protocol):
-    def get_company_dashboard_url(self) -> str:
-        ...
-
-
-class AnswerCompanyWorkInviteUrlIndex(Protocol):
-    def get_answer_company_work_invite_url(self, invite_id: UUID) -> str:
-        ...
-
-
 class UrlIndex(Protocol):
     def get_member_dashboard_url(self) -> str:
         ...
 
-    def get_company_plan_summary_url(self, plan_id: UUID) -> str:
-        ...
-
-    def get_member_plan_summary_url(self, plan_id: UUID) -> str:
+    def get_plan_summary_url(self, user_role: Optional[UserRole], plan_id: UUID) -> str:
         ...
 
     def get_work_invite_url(self, invite_id: UUID) -> str:
@@ -52,6 +33,42 @@ class UrlIndex(Protocol):
         ...
 
     def get_coop_summary_url(self, user_role: Optional[UserRole], coop_id: UUID) -> str:
+        ...
+
+    def get_company_dashboard_url(self) -> str:
+        ...
+
+    def get_draft_summary_url(self, draft_id: UUID) -> str:
+        ...
+
+    def get_answer_company_work_invite_url(self, invite_id: UUID) -> str:
+        ...
+
+    def get_global_barplot_for_certificates_url(
+        self, certificates_count: Decimal, available_product: Decimal
+    ) -> str:
+        ...
+
+    def get_global_barplot_for_means_of_production_url(
+        self, planned_means: Decimal, planned_resources: Decimal, planned_work: Decimal
+    ) -> str:
+        ...
+
+    def get_global_barplot_for_plans_url(
+        self, productive_plans: int, public_plans: int
+    ) -> str:
+        ...
+
+    def get_line_plot_of_company_prd_account(self, company_id: UUID) -> str:
+        ...
+
+    def get_line_plot_of_company_r_account(self, company_id: UUID) -> str:
+        ...
+
+    def get_line_plot_of_company_p_account(self, company_id: UUID) -> str:
+        ...
+
+    def get_line_plot_of_company_a_account(self, company_id: UUID) -> str:
         ...
 
 
@@ -95,35 +112,6 @@ class PayMeansOfProductionUrlIndex(Protocol):
         ...
 
 
-class PlotsUrlIndex(Protocol):
-    def get_global_barplot_for_certificates_url(
-        self, certificates_count: Decimal, available_product: Decimal
-    ) -> str:
-        ...
-
-    def get_global_barplot_for_means_of_production_url(
-        self, planned_means: Decimal, planned_resources: Decimal, planned_work: Decimal
-    ) -> str:
-        ...
-
-    def get_global_barplot_for_plans_url(
-        self, productive_plans: int, public_plans: int
-    ) -> str:
-        ...
-
-    def get_line_plot_of_company_prd_account(self, company_id: UUID) -> str:
-        ...
-
-    def get_line_plot_of_company_r_account(self, company_id: UUID) -> str:
-        ...
-
-    def get_line_plot_of_company_p_account(self, company_id: UUID) -> str:
-        ...
-
-    def get_line_plot_of_company_a_account(self, company_id: UUID) -> str:
-        ...
-
-
 class AccountantDashboardUrlIndex(Protocol):
     def get_accountant_dashboard_url(self) -> str:
         ...
@@ -147,12 +135,8 @@ class UserUrlIndex:
     """
 
     session: Session
-    plan_url_index: UrlIndex
+    url_index: UrlIndex
 
     def get_plan_summary_url(self, plan_id: UUID) -> str:
         user_role = self.session.get_user_role()
-        if user_role == UserRole.member:
-            return self.plan_url_index.get_member_plan_summary_url(plan_id)
-        if user_role == UserRole.company:
-            return self.plan_url_index.get_company_plan_summary_url(plan_id)
-        raise Exception(f"Cannot get plan summary url for role {user_role}")
+        return self.url_index.get_plan_summary_url(user_role=user_role, plan_id=plan_id)
