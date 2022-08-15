@@ -28,9 +28,12 @@ from arbeitszeit.use_cases import (
     RequestCooperation,
     ToggleProductAvailability,
 )
+from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
 from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
+from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_flask.database import CompanyRepository, commit_changes
+from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import (
     CompanySearchForm,
     CreateCooperationForm,
@@ -56,7 +59,11 @@ from arbeitszeit_flask.views.create_draft_view import CreateDraftView
 from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
 from arbeitszeit_flask.views.transfer_to_worker_view import TransferToWorkerView
-from arbeitszeit_web.create_draft import GetPrefilledDraftDataPresenter
+from arbeitszeit_web.create_draft import (
+    CreateDraftController,
+    CreateDraftPresenter,
+    GetPrefilledDraftDataPresenter,
+)
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
@@ -158,6 +165,50 @@ def my_purchases(
     purchases = list(query_purchases(company))
     return template_renderer.render_template(
         "company/my_purchases.html", context=dict(purchases=purchases)
+    )
+
+
+@CompanyRoute("/company/create_draft/<uuid:plan_id>", methods=["GET", "POST"])
+def create_draft_from_plan(
+    plan_id: UUID,
+    session: FlaskSession,
+    create_form_use_case: GetPlanSummaryCompany,
+    create_form_presenter: GetPrefilledDraftDataPresenter,
+    process_form_use_case: CreatePlanDraft,
+    process_form_controller: CreateDraftController,
+    process_form_presenter: CreateDraftPresenter,
+    template_renderer: UserTemplateRenderer,
+) -> Response:
+    form = CreateDraftForm(request.form)
+    if request.method == "GET":
+        current_user = session.get_current_user()
+        assert current_user
+        response = create_form_use_case.get_plan_summary_for_company(
+            plan_id=plan_id, company_id=current_user
+        )
+        assert isinstance(response, GetPlanSummaryCompany.Success)
+        create_form_presenter.show_prefilled_draft_data(
+            summary_data=response.plan_summary, form=form
+        )
+
+    if request.method == "POST":
+        use_case_request = process_form_controller.import_form_data(draft_form=form)
+        use_case_response = process_form_use_case(use_case_request)
+        view_model = process_form_presenter.present_plan_creation(use_case_response)
+        if view_model.redirect_url is not None:
+            return redirect(view_model.redirect_url)
+    return FlaskResponse(
+        template_renderer.render_template(
+            "company/create_draft.html",
+            context=dict(
+                form=form,
+                view_model=dict(
+                    self_approve_plan="/company/create_draft",
+                    save_draft_url="",
+                    cancel_url="/company/create_draft",
+                ),
+            ),
+        )
     )
 
 
