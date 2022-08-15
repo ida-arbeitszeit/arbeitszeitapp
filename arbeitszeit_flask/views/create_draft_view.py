@@ -79,7 +79,9 @@ class CreateDraftView:
             planner = self.session.get_current_user()
             assert expired_plan_id is not None
             assert planner is not None
-            response = self.get_plan_summary_company(UUID(expired_plan_id), planner)
+            response = self.get_plan_summary_company.get_plan_summary_for_company(
+                UUID(expired_plan_id), planner
+            )
             if isinstance(response, GetPlanSummaryCompany.Success):
                 view_model = self.create_draft_presenter.show_prefilled_draft_data(
                     response.plan_summary

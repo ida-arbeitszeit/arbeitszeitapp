@@ -383,7 +383,9 @@ def plan_summary(
     presenter: GetPlanSummaryCompanySuccessPresenter,
     http_404_view: Http404View,
 ):
-    use_case_response = get_plan_summary_company(plan_id, UUID(current_user.id))
+    use_case_response = get_plan_summary_company.get_plan_summary_for_company(
+        plan_id, UUID(current_user.id)
+    )
     if isinstance(use_case_response, use_cases.GetPlanSummaryCompany.Success):
         view_model = presenter.present(use_case_response)
         return template_renderer.render_template(
