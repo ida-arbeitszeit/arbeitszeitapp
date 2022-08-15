@@ -6,8 +6,8 @@ from arbeitszeit_web.presenters.log_in_member_presenter import LogInMemberPresen
 from tests.session import FakeSession
 from tests.translator import FakeTranslator
 
+from ..forms import LoginForm
 from .dependency_injection import get_dependency_injector
-from .forms import LoginForm
 from .url_index import MemberUrlIndex
 
 

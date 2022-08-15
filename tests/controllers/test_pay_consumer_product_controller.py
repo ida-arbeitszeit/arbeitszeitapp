@@ -6,10 +6,10 @@ from arbeitszeit_web.pay_consumer_product import (
     PayConsumerProductController,
     PayConsumerProductRequestImpl,
 )
+from tests.forms import PayConsumerProductFakeForm
 from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
-from .forms import PayConsumerProductFakeForm
 
 ControllerResult = Optional[PayConsumerProductRequestImpl]
 
