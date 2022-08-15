@@ -1,6 +1,6 @@
 from typing import Protocol, TypeVar
 
-T = TypeVar("T", covariant=True)
+T = TypeVar("T")
 
 
 class FormField(Protocol[T]):
@@ -8,4 +8,7 @@ class FormField(Protocol[T]):
         ...
 
     def attach_error(self, message: str) -> None:
+        ...
+
+    def set_value(self, value: T) -> None:
         ...

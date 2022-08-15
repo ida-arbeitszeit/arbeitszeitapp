@@ -2,67 +2,34 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Protocol, Union
+from typing import Union
 
 from arbeitszeit.entities import ProductionCosts
 from arbeitszeit.plan_summary import PlanSummary
 from arbeitszeit.use_cases import CreatePlanDraftRequest, DraftSummarySuccess
+from arbeitszeit_web.forms import DraftForm
 from arbeitszeit_web.session import Session
-
-
-class CreateDraftForm(Protocol):
-    def get_prd_name(self) -> str:
-        ...
-
-    def get_description(self) -> str:
-        ...
-
-    def get_timeframe(self) -> int:
-        ...
-
-    def get_prd_unit(self) -> str:
-        ...
-
-    def get_prd_amount(self) -> int:
-        ...
-
-    def get_costs_p(self) -> Decimal:
-        ...
-
-    def get_costs_r(self) -> Decimal:
-        ...
-
-    def get_costs_a(self) -> Decimal:
-        ...
-
-    def get_productive_or_public(self) -> str:
-        ...
-
-    def get_action(self) -> str:
-        ...
 
 
 @dataclass
 class CreateDraftController:
     session: Session
 
-    def import_form_data(self, draft_form: CreateDraftForm) -> CreatePlanDraftRequest:
+    def import_form_data(self, draft_form: DraftForm) -> CreatePlanDraftRequest:
         planner = self.session.get_current_user()
         assert planner
         return CreatePlanDraftRequest(
             costs=ProductionCosts(
-                labour_cost=draft_form.get_costs_a(),
-                resource_cost=draft_form.get_costs_r(),
-                means_cost=draft_form.get_costs_p(),
+                labour_cost=draft_form.labour_cost_field().get_value(),
+                resource_cost=draft_form.resource_cost_field().get_value(),
+                means_cost=draft_form.means_cost_field().get_value(),
             ),
-            product_name=draft_form.get_prd_name(),
-            production_unit=draft_form.get_prd_unit(),
-            production_amount=draft_form.get_prd_amount(),
-            description=draft_form.get_description(),
-            timeframe_in_days=draft_form.get_timeframe(),
-            is_public_service=True
-            if draft_form.get_productive_or_public() == "public"
-            else False,
+            product_name=draft_form.product_name_field().get_value(),
+            production_unit=draft_form.unit_of_distribution_field().get_value(),
+            production_amount=draft_form.amount_field().get_value(),
+            description=draft_form.description_field().get_value(),
+            timeframe_in_days=draft_form.timeframe_field().get_value(),
+            is_public_service=draft_form.is_public_service_field().get_value(),
             planner=planner,
         )
 
@@ -79,7 +46,7 @@ class GetPrefilledDraftDataPresenter:
         costs_p: Decimal
         costs_r: Decimal
         costs_a: Decimal
-        productive_or_public: str
+        is_public_service: bool
         action: str
 
     @dataclass
@@ -102,9 +69,7 @@ class GetPrefilledDraftDataPresenter:
             costs_p=summary_data.means_cost,
             costs_r=summary_data.resources_cost,
             costs_a=summary_data.labour_cost,
-            productive_or_public="public"
-            if summary_data.is_public_service
-            else "productive",
+            is_public_service=summary_data.is_public_service,
             action="",
         )
         return self.ViewModel(

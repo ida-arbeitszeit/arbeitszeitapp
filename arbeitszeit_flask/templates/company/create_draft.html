@@ -100,15 +100,7 @@
                         <span class="icon"><i class="fa-solid fa-circle-question"></i></span>
                     </div>
                     <div class="field">
-                        <label class="label">{{ gettext("Type")}}</label>
-                        <div class="control">
-                            {% for subfield in form.productive_or_public %}
-                            <tr>
-                                <td>{{ subfield }}</td>
-                                <td>{{ subfield.label }}</td>
-                            </tr>
-                            {% endfor %}
-                        </div>
+                        {{ form.productive_or_public }} {{ form.productive_or_public.label }}
                     </div>
                 </div>
                 <div class="block py-2"></div>

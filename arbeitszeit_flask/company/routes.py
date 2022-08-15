@@ -204,12 +204,15 @@ def get_draft_summary(
     if use_case_response is None:
         return not_found_view.get_response()
     view_model = presenter.show_prefilled_draft_data(use_case_response)
+    form_data = asdict(view_model.prefilled_draft_data)
+    form_data["productive_or_public"] = form_data["is_public_service"]
+    del form_data["is_public_service"]
     return FlaskResponse(
         template_renderer.render_template(
             "company/create_draft.html",
             context=dict(
                 view_model=view_model,
-                form=CreateDraftForm(data=asdict(view_model.prefilled_draft_data)),
+                form=CreateDraftForm(data=form_data),
             ),
         )
     )

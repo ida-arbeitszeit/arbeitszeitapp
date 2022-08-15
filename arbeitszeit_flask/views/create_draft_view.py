@@ -84,7 +84,9 @@ class CreateDraftView:
                 view_model = self.create_draft_presenter.show_prefilled_draft_data(
                     response.plan_summary
                 )
-                form = CreateDraftForm(data=asdict(view_model.prefilled_draft_data))
+                form_data = asdict(view_model.prefilled_draft_data)
+                form_data["productive_or_public"] = form_data["is_public_service"]
+                form = CreateDraftForm(data=form_data)
             else:
                 return self.http_404_view.get_response()
 

@@ -60,7 +60,7 @@ def test_correct_prefilled_data_is_returned_for_plan_summary():
     assert view_model.prefilled_draft_data.costs_r == PLAN_SUMMARY.resources_cost
     assert view_model.prefilled_draft_data.costs_a == PLAN_SUMMARY.labour_cost
     assert (
-        view_model.prefilled_draft_data.productive_or_public == "public"
+        view_model.prefilled_draft_data.is_public_service == "public"
         if PLAN_SUMMARY.is_public_service
         else "productive"
     )
@@ -104,7 +104,7 @@ def test_correct_prefilled_data_is_returned_for_draft_summary():
         == TEST_DRAFT_SUMMARY_SUCCESS.labour_cost
     )
     assert (
-        view_model.prefilled_draft_data.productive_or_public == "public"
+        view_model.prefilled_draft_data.is_public_service == "public"
         if TEST_DRAFT_SUMMARY_SUCCESS.is_public_service
         else "productive"
     )
