@@ -25,7 +25,7 @@ class PayConsumerProductView:
         amount: Optional[str] = request.args.get("amount")
         plan_id: Optional[str] = request.args.get("plan_id")
         if amount:
-            form.amount_field().set_default_value(int(amount))
+            form.amount_field().set_default_value(amount)
         if plan_id:
             form.plan_id_field().set_default_value(plan_id)
         return Response(self._render_template(form=form))
@@ -35,8 +35,9 @@ class PayConsumerProductView:
             return self._handle_invalid_form(form)
         current_user = self.flask_session.get_current_user()
         assert current_user
-        use_case_request = self.controller.import_form_data(current_user, form)
-        if not use_case_request:
+        try:
+            use_case_request = self.controller.import_form_data(current_user, form)
+        except self.controller.Error:
             return Response(self._render_template(form), status=400)
         response = self.pay_consumer_product(use_case_request)
         view_model = self.presenter.present(response)

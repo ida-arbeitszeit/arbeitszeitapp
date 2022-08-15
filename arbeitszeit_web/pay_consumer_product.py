@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 from uuid import UUID
 
 from injector import inject
@@ -33,35 +32,43 @@ class PayConsumerProductRequestImpl:
 @inject
 @dataclass
 class PayConsumerProductController:
+    class Error(Exception):
+        pass
+
+    class PlanIdInvalid(Error):
+        pass
+
+    class AmountNegativeOrZero(Error):
+        pass
+
+    class AmountNotAnInteger(Error):
+        pass
+
     translator: Translator
 
     def import_form_data(
         self, current_user: UUID, form: PayConsumerProductForm
-    ) -> Optional[PayConsumerProductRequestImpl]:
-        amount = form.amount_field().get_value()
-        malformed_input_string: bool = False
+    ) -> PayConsumerProductRequestImpl:
         try:
-            uuid = UUID(form.plan_id_field().get_value())
+            plan_id = UUID(form.plan_id_field().get_value())
         except ValueError:
             form.plan_id_field().attach_error(
                 self.translator.gettext("Plan ID is invalid.")
             )
-            malformed_input_string = True
+            raise self.PlanIdInvalid()
         try:
-            amount = int(amount)
+            amount = int(form.amount_field().get_value())
             if amount <= 0:
                 form.amount_field().attach_error(
                     self.translator.gettext("Must be a number larger than zero.")
                 )
-                malformed_input_string = True
+                raise self.AmountNegativeOrZero()
         except ValueError:
             form.amount_field().attach_error(
                 self.translator.gettext("This is not an integer.")
             )
-            malformed_input_string = True
-        if malformed_input_string:
-            return None
-        return PayConsumerProductRequestImpl(current_user, uuid, amount)
+            raise self.AmountNotAnInteger()
+        return PayConsumerProductRequestImpl(current_user, plan_id, amount)
 
 
 @inject

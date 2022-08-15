@@ -211,19 +211,17 @@ class PayConsumerProductForm(Form):
         render_kw={"placeholder": trans.lazy_gettext("Plan ID")},
         validators=[
             validators.InputRequired(),
-            validators.UUID(message=error_msgs["uuid"]),
         ],
     )
-    amount = IntegerField(
+    amount = StringField(
         trans.lazy_gettext("Amount"),
         render_kw={"placeholder": trans.lazy_gettext("Amount")},
         validators=[
             validators.InputRequired(),
-            validators.NumberRange(min=0, message=error_msgs["num_range_min_0"]),
         ],
     )
 
-    def amount_field(self) -> WtFormField[int]:
+    def amount_field(self) -> WtFormField[str]:
         return WtFormField(form=self, field_name="amount")
 
     def plan_id_field(self) -> WtFormField[str]:

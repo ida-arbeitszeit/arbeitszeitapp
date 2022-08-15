@@ -26,7 +26,7 @@ class LoginCompanyForm(Protocol):
 
 
 class PayConsumerProductForm(Protocol):
-    def amount_field(self) -> FormField[int]:
+    def amount_field(self) -> FormField[str]:
         ...
 
     def plan_id_field(self) -> FormField[str]:

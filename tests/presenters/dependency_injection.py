@@ -1,4 +1,4 @@
-from injector import Injector, Module, provider, singleton, inject
+from injector import Injector, Module, inject, provider, singleton
 
 from arbeitszeit_web.answer_company_work_invite import AnswerCompanyWorkInvitePresenter
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
@@ -9,7 +9,6 @@ from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_plan_summary_company import (
     GetPlanSummaryCompanySuccessPresenter,
 )
-from arbeitszeit_web.get_plan_summary_member import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.hide_plan import HidePlanPresenter
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyPresenter
@@ -100,7 +99,6 @@ from .url_index import (
     InviteUrlIndexImpl,
     LanguageChangerUrlIndexImpl,
     MemberUrlIndex,
-    PayConsumerProductUrlIndexImpl,
     PayMeansOfProductionUrlIndexImpl,
     PlanSummaryUrlIndexTestImpl,
     PlotsUrlIndexImpl,
