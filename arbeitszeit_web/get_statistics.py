@@ -1,10 +1,12 @@
 from dataclasses import dataclass
 
+from injector import inject
+
 from arbeitszeit.use_cases import StatisticsResponse
 from arbeitszeit_web.colors import Colors
 from arbeitszeit_web.plotter import Plotter
 from arbeitszeit_web.translator import Translator
-from arbeitszeit_web.url_index import PlotsUrlIndex
+from arbeitszeit_web.url_index import UrlIndex
 
 
 @dataclass
@@ -26,12 +28,13 @@ class GetStatisticsViewModel:
     barplot_plans_url: str
 
 
+@inject
 @dataclass
 class GetStatisticsPresenter:
     translator: Translator
     plotter: Plotter
     colors: Colors
-    url_index: PlotsUrlIndex
+    url_index: UrlIndex
 
     def present(self, use_case_response: StatisticsResponse) -> GetStatisticsViewModel:
         average_timeframe = self.translator.gettext("%(num).2f days") % dict(

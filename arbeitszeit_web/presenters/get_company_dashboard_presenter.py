@@ -7,6 +7,7 @@ from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCase
+from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.url_index import UrlIndex
 
 
@@ -55,5 +56,7 @@ class GetCompanyDashboardPresenter:
             activation_date=self.datetime_service.format_datetime(
                 plan.activation_date, zone="Europe/Berlin", fmt="%d.%m."
             ),
-            plan_summary_url=self.url_index.get_company_plan_summary_url(plan.plan_id),
+            plan_summary_url=self.url_index.get_plan_summary_url(
+                plan_id=plan.plan_id, user_role=UserRole.company
+            ),
         )

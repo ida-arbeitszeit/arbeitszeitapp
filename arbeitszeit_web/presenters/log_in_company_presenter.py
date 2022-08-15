@@ -3,13 +3,16 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
+from injector import inject
+
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit_web.forms import LoginCompanyForm
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
-from arbeitszeit_web.url_index import CompanyUrlIndex
+from arbeitszeit_web.url_index import UrlIndex
 
 
+@inject
 @dataclass
 class LogInCompanyPresenter:
     @dataclass
@@ -17,7 +20,7 @@ class LogInCompanyPresenter:
         redirect_url: Optional[str]
 
     session: Session
-    company_url_index: CompanyUrlIndex
+    url_index: UrlIndex
     translator: Translator
 
     def present_login_process(
@@ -29,7 +32,7 @@ class LogInCompanyPresenter:
             )
             redirect_url = (
                 self.session.pop_next_url()
-                or self.company_url_index.get_company_dashboard_url()
+                or self.url_index.get_company_dashboard_url()
             )
         else:
             if (
