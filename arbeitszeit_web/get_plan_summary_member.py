@@ -8,7 +8,7 @@ from arbeitszeit_web.formatters.plan_summary_formatter import (
     PlanSummaryFormatter,
     PlanSummaryWeb,
 )
-from arbeitszeit_web.url_index import PayConsumerProductUrlIndex
+from arbeitszeit_web.url_index import UrlIndex
 
 from .translator import Translator
 
@@ -27,7 +27,7 @@ class GetPlanSummaryViewModel:
 class GetPlanSummarySuccessPresenter:
     trans: Translator
     plan_summary_service: PlanSummaryFormatter
-    url_index: PayConsumerProductUrlIndex
+    url_index: UrlIndex
 
     def present(
         self, response: GetPlanSummaryMember.Success

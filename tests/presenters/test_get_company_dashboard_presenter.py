@@ -7,6 +7,7 @@ from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCa
 from arbeitszeit_web.presenters.get_company_dashboard_presenter import (
     GetCompanyDashboardPresenter,
 )
+from arbeitszeit_web.session import UserRole
 from tests.datetime_service import FakeDatetimeService
 from tests.presenters.dependency_injection import get_dependency_injector
 from tests.presenters.url_index import UrlIndexTestImpl
@@ -98,7 +99,7 @@ class TestPresenter(TestCase):
         )
         self.assertEqual(
             view_model.latest_plans[0].plan_summary_url,
-            self.plan_index.get_company_plan_summary_url(plan_id),
+            self.plan_index.get_plan_summary_url(UserRole.company, plan_id),
         )
 
     def get_use_case_response(

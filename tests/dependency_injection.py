@@ -10,15 +10,17 @@ from arbeitszeit.repositories import (
 from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitation_presenter import (
     AccountantInvitationPresenter,
 )
+from arbeitszeit_web.colors import Colors
+from arbeitszeit_web.plotter import Plotter
 from arbeitszeit_web.translator import Translator
-from arbeitszeit_web.url_index import PayConsumerProductUrlIndex
 from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
 from tests.company import CompanyManager
 from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.datetime_service import FakeDatetimeService
 from tests.email import FakeEmailSender
 from tests.language_service import FakeLanguageService
-from tests.presenters.url_index import PayConsumerProductUrlIndexImpl
+from tests.plotter import FakePlotter
+from tests.presenters.test_colors import ColorsTestImpl
 from tests.request import FakeRequest
 from tests.session import FakeSession
 from tests.token import FakeTokenService
@@ -26,6 +28,14 @@ from tests.translator import FakeTranslator
 
 
 class TestingModule(Module):
+    @provider
+    def provide_colors(self, colors: ColorsTestImpl) -> Colors:
+        return colors
+
+    @provider
+    def provide_plotter(self, plotter: FakePlotter) -> Plotter:
+        return plotter
+
     @provider
     def provide_control_thresholds(
         self, thresholds: ControlThresholdsTestImpl
@@ -96,7 +106,3 @@ class TestingModule(Module):
     @provider
     def provide_fake_request(self) -> FakeRequest:
         return FakeRequest()
-
-    @provider
-    def provide_pay_consumer_product_url_index(self) -> PayConsumerProductUrlIndex:
-        return PayConsumerProductUrlIndexImpl()

@@ -10,14 +10,14 @@ from tests.translator import FakeTranslator
 
 from ..forms import LoginForm
 from .dependency_injection import get_dependency_injector
-from .url_index import CompanyUrlIndexImpl
+from .url_index import UrlIndexTestImpl
 
 
 class PresenterTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.session = self.injector.get(FakeSession)
-        self.company_url_index = self.injector.get(CompanyUrlIndexImpl)
+        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.presenter = self.injector.get(LogInCompanyPresenter)
         self.translator = self.injector.get(FakeTranslator)
         self.form = LoginForm()
@@ -60,7 +60,7 @@ class PresenterTests(TestCase):
         view_model = self.present_login_process(response)
         self.assertEqual(
             view_model.redirect_url,
-            self.company_url_index.get_company_dashboard_url(),
+            self.url_index.get_company_dashboard_url(),
         )
 
     def test_do_not_get_redirected_if_login_fails(self) -> None:
