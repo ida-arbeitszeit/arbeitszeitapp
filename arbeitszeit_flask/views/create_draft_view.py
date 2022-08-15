@@ -1,4 +1,4 @@
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from typing import Union
 from uuid import UUID
 
@@ -83,12 +83,11 @@ class CreateDraftView:
             assert planner is not None
             response = self.get_plan_summary_company(UUID(expired_plan_id), planner)
             if isinstance(response, GetPlanSummaryCompany.Success):
-                view_model = self.create_draft_presenter.show_prefilled_draft_data(
-                    response.plan_summary
+                form = CreateDraftForm()
+                self.create_draft_presenter.show_prefilled_draft_data(
+                    response.plan_summary,
+                    form=form,
                 )
-                form_data = asdict(view_model.prefilled_draft_data)
-                form_data["productive_or_public"] = form_data["is_public_service"]
-                form = CreateDraftForm(data=form_data)
             else:
                 return self.http_404_view.get_response()
 

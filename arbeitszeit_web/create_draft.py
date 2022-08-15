@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from decimal import Decimal
 from typing import Union
 
 from arbeitszeit.entities import ProductionCosts
@@ -37,43 +36,24 @@ class CreateDraftController:
 @dataclass
 class GetPrefilledDraftDataPresenter:
     @dataclass
-    class PrefilledDraftData:
-        prd_name: str
-        description: str
-        timeframe: int
-        prd_unit: str
-        prd_amount: int
-        costs_p: Decimal
-        costs_r: Decimal
-        costs_a: Decimal
-        is_public_service: bool
-        action: str
-
-    @dataclass
     class ViewModel:
-        prefilled_draft_data: GetPrefilledDraftDataPresenter.PrefilledDraftData
         self_approve_plan_url: str
         save_draft_url: str
         cancel_url: str
 
     def show_prefilled_draft_data(
-        self,
-        summary_data: Union[PlanSummary, DraftSummarySuccess],
+        self, summary_data: Union[PlanSummary, DraftSummarySuccess], form: DraftForm
     ) -> ViewModel:
-        prefilled_data = self.PrefilledDraftData(
-            prd_name=summary_data.product_name,
-            description=summary_data.description,
-            timeframe=summary_data.timeframe,
-            prd_unit=summary_data.production_unit,
-            prd_amount=summary_data.amount,
-            costs_p=summary_data.means_cost,
-            costs_r=summary_data.resources_cost,
-            costs_a=summary_data.labour_cost,
-            is_public_service=summary_data.is_public_service,
-            action="",
-        )
+        form.product_name_field().set_value(summary_data.product_name)
+        form.description_field().set_value(summary_data.description)
+        form.timeframe_field().set_value(summary_data.timeframe)
+        form.unit_of_distribution_field().set_value(summary_data.production_unit)
+        form.amount_field().set_value(summary_data.amount)
+        form.means_cost_field().set_value(summary_data.means_cost)
+        form.resource_cost_field().set_value(summary_data.resources_cost)
+        form.labour_cost_field().set_value(summary_data.labour_cost)
+        form.is_public_service_field().set_value(summary_data.is_public_service)
         return self.ViewModel(
-            prefilled_draft_data=prefilled_data,
             self_approve_plan_url="/company/create_draft",
             save_draft_url="/company/create_draft",
             cancel_url="/company/create_draft",

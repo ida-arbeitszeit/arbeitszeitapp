@@ -31,15 +31,15 @@ class LoginForm:
 class DraftForm:
     def __init__(
         self,
-        prd_name: str,
-        description: str,
-        timeframe: int,
-        prd_unit: str,
-        prd_amount: int,
-        costs_p: Decimal,
-        costs_r: Decimal,
-        costs_a: Decimal,
-        productive_or_public: str,
+        prd_name: str = "product name",
+        description: str = "product description",
+        timeframe: int = 1,
+        prd_unit: str = "unit",
+        prd_amount: int = 1,
+        costs_p: Decimal = Decimal("1"),
+        costs_r: Decimal = Decimal("1"),
+        costs_a: Decimal = Decimal("1"),
+        is_public_service: bool = False,
     ) -> None:
         self._product_name_field = FormFieldImpl(value=prd_name)
         self._description_field = FormFieldImpl(value=description)
@@ -49,12 +49,7 @@ class DraftForm:
         self._means_cost_field = FormFieldImpl(value=costs_p)
         self._resource_cost_field = FormFieldImpl(value=costs_r)
         self._labour_cost_field = FormFieldImpl(value=costs_a)
-        if productive_or_public == "public":
-            self._is_public_service_field = FormFieldImpl(value=True)
-        elif productive_or_public == "productive":
-            self._is_public_service_field = FormFieldImpl(value=True)
-        else:
-            raise ValueError("{productive_or_public=} must be 'productive' or 'public'")
+        self._is_public_service_field = FormFieldImpl(value=is_public_service)
 
     def product_name_field(self) -> FormFieldImpl[str]:
         return self._product_name_field

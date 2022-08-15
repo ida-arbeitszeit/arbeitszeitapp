@@ -24,7 +24,7 @@ class ControllerTests(TestCase):
             costs_p=Decimal("10.5"),
             costs_r=Decimal("15"),
             costs_a=Decimal("20"),
-            productive_or_public="public",
+            is_public_service=True,
         )
         self.session.set_current_user_id(uuid4())
 

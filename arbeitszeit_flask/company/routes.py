@@ -1,4 +1,3 @@
-from dataclasses import asdict
 from typing import Optional
 from uuid import UUID
 
@@ -203,16 +202,14 @@ def get_draft_summary(
     use_case_response = use_case(UUID(draft_id))
     if use_case_response is None:
         return not_found_view.get_response()
-    view_model = presenter.show_prefilled_draft_data(use_case_response)
-    form_data = asdict(view_model.prefilled_draft_data)
-    form_data["productive_or_public"] = form_data["is_public_service"]
-    del form_data["is_public_service"]
+    form = CreateDraftForm()
+    view_model = presenter.show_prefilled_draft_data(use_case_response, form=form)
     return FlaskResponse(
         template_renderer.render_template(
             "company/create_draft.html",
             context=dict(
                 view_model=view_model,
-                form=CreateDraftForm(data=form_data),
+                form=form,
             ),
         )
     )

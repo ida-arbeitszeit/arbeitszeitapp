@@ -6,6 +6,7 @@ from uuid import uuid4
 from arbeitszeit.plan_summary import PlanSummary
 from arbeitszeit.use_cases import DraftSummarySuccess
 from arbeitszeit_web.create_draft import GetPrefilledDraftDataPresenter
+from tests.presenters.forms import DraftForm
 
 from .dependency_injection import get_dependency_injector
 
@@ -23,7 +24,7 @@ PLAN_SUMMARY = PlanSummary(
     means_cost=Decimal(5),
     resources_cost=Decimal(5),
     labour_cost=Decimal(5),
-    is_public_service=False,
+    is_public_service=True,
     price_per_unit=Decimal(10),
     is_available=True,
     is_cooperating=False,
@@ -54,61 +55,57 @@ class PresenterTests(TestCase):
         self.get_prefilled_data = self.injector.get(GetPrefilledDraftDataPresenter)
 
     def test_correct_prefilled_data_is_returned_for_plan_summary(self) -> None:
-        view_model = self.get_prefilled_data.show_prefilled_draft_data(PLAN_SUMMARY)
-        assert view_model.prefilled_draft_data.prd_name == PLAN_SUMMARY.product_name
-        assert view_model.prefilled_draft_data.description == PLAN_SUMMARY.description
-        assert view_model.prefilled_draft_data.timeframe == PLAN_SUMMARY.timeframe
-        assert view_model.prefilled_draft_data.prd_unit == PLAN_SUMMARY.production_unit
-        assert view_model.prefilled_draft_data.prd_amount == PLAN_SUMMARY.amount
-        assert view_model.prefilled_draft_data.costs_p == PLAN_SUMMARY.means_cost
-        assert view_model.prefilled_draft_data.costs_r == PLAN_SUMMARY.resources_cost
-        assert view_model.prefilled_draft_data.costs_a == PLAN_SUMMARY.labour_cost
+        form = DraftForm()
+        self.get_prefilled_data.show_prefilled_draft_data(PLAN_SUMMARY, form=form)
+        assert form.product_name_field().get_value() == PLAN_SUMMARY.product_name
+        assert form.description_field().get_value() == PLAN_SUMMARY.description
+        assert form.timeframe_field().get_value() == PLAN_SUMMARY.timeframe
         assert (
-            view_model.prefilled_draft_data.is_public_service == "public"
-            if PLAN_SUMMARY.is_public_service
-            else "productive"
+            form.unit_of_distribution_field().get_value()
+            == PLAN_SUMMARY.production_unit
         )
-        assert view_model.prefilled_draft_data.action == ""
+        assert form.amount_field().get_value() == PLAN_SUMMARY.amount
+        assert form.means_cost_field().get_value() == PLAN_SUMMARY.means_cost
+        assert form.resource_cost_field().get_value() == PLAN_SUMMARY.resources_cost
+        assert form.labour_cost_field().get_value() == PLAN_SUMMARY.labour_cost
+        assert (
+            form.is_public_service_field().get_value() == PLAN_SUMMARY.is_public_service
+        )
 
     def test_correct_prefilled_data_is_returned_for_draft_summary(self) -> None:
-        view_model = self.get_prefilled_data.show_prefilled_draft_data(
-            TEST_DRAFT_SUMMARY_SUCCESS
+        form = DraftForm()
+        self.get_prefilled_data.show_prefilled_draft_data(
+            TEST_DRAFT_SUMMARY_SUCCESS,
+            form=form,
         )
         assert (
-            view_model.prefilled_draft_data.prd_name
+            form.product_name_field().get_value()
             == TEST_DRAFT_SUMMARY_SUCCESS.product_name
         )
         assert (
-            view_model.prefilled_draft_data.description
+            form.description_field().get_value()
             == TEST_DRAFT_SUMMARY_SUCCESS.description
         )
         assert (
-            view_model.prefilled_draft_data.timeframe
-            == TEST_DRAFT_SUMMARY_SUCCESS.timeframe
+            form.timeframe_field().get_value() == TEST_DRAFT_SUMMARY_SUCCESS.timeframe
         )
         assert (
-            view_model.prefilled_draft_data.prd_unit
+            form.unit_of_distribution_field().get_value()
             == TEST_DRAFT_SUMMARY_SUCCESS.production_unit
         )
+        assert form.amount_field().get_value() == TEST_DRAFT_SUMMARY_SUCCESS.amount
         assert (
-            view_model.prefilled_draft_data.prd_amount
-            == TEST_DRAFT_SUMMARY_SUCCESS.amount
+            form.means_cost_field().get_value() == TEST_DRAFT_SUMMARY_SUCCESS.means_cost
         )
         assert (
-            view_model.prefilled_draft_data.costs_p
-            == TEST_DRAFT_SUMMARY_SUCCESS.means_cost
-        )
-        assert (
-            view_model.prefilled_draft_data.costs_r
+            form.resource_cost_field().get_value()
             == TEST_DRAFT_SUMMARY_SUCCESS.resources_cost
         )
         assert (
-            view_model.prefilled_draft_data.costs_a
+            form.labour_cost_field().get_value()
             == TEST_DRAFT_SUMMARY_SUCCESS.labour_cost
         )
         assert (
-            view_model.prefilled_draft_data.is_public_service == "public"
-            if TEST_DRAFT_SUMMARY_SUCCESS.is_public_service
-            else "productive"
+            form.is_public_service_field().get_value()
+            == TEST_DRAFT_SUMMARY_SUCCESS.is_public_service
         )
-        assert view_model.prefilled_draft_data.action == ""
