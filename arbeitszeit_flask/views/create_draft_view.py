@@ -4,6 +4,7 @@ from uuid import UUID
 
 from flask import Response as FlaskResponse
 from flask import redirect, url_for
+from injector import inject
 
 from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
 from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
@@ -22,6 +23,7 @@ from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
 
 
+@inject
 @dataclass
 class CreateDraftView:
     request: Request
