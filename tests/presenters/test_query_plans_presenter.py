@@ -54,7 +54,9 @@ class QueryPlansPresenterTests(TestCase):
         table_row = presentation.results.rows[0]
         self.assertEqual(
             table_row.plan_summary_url,
-            self.url_index.get_member_plan_summary_url(plan_id),
+            self.url_index.get_plan_summary_url(
+                user_role=UserRole.member, plan_id=plan_id
+            ),
         )
 
     def test_correct_company_url_is_shown(self) -> None:

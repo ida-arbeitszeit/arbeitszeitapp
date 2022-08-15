@@ -3,13 +3,16 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List
 
+from injector import inject
+
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.show_p_account_details import ShowPAccountDetailsUseCase
 from arbeitszeit_web.translator import Translator
-from arbeitszeit_web.url_index import PlotsUrlIndex
+from arbeitszeit_web.url_index import UrlIndex
 
 
+@inject
 @dataclass
 class ShowPAccountDetailsPresenter:
     @dataclass
@@ -26,7 +29,7 @@ class ShowPAccountDetailsPresenter:
         plot_url: str
 
     trans: Translator
-    url_index: PlotsUrlIndex
+    url_index: UrlIndex
     datetime_service: DatetimeService
 
     def present(
