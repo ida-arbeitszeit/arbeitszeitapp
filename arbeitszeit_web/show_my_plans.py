@@ -3,11 +3,13 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
 
+from injector import inject
+
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansResponse
 from arbeitszeit_web.translator import Translator
 
-from .url_index import HidePlanUrlIndex, PlanSummaryUrlIndex, RenewPlanUrlIndex
+from .url_index import HidePlanUrlIndex, RenewPlanUrlIndex, UserUrlIndex
 
 
 @dataclass
@@ -71,9 +73,10 @@ class ShowMyPlansViewModel:
         return asdict(self)
 
 
+@inject
 @dataclass
 class ShowMyPlansPresenter:
-    url_index: PlanSummaryUrlIndex
+    user_url_index: UserUrlIndex
     renew_plan_url_index: RenewPlanUrlIndex
     hide_plan_url_index: HidePlanUrlIndex
     translator: Translator
@@ -91,7 +94,9 @@ class ShowMyPlansPresenter:
             active_plans=ActivePlansTable(
                 rows=[
                     ActivePlansRow(
-                        plan_summary_url=self.url_index.get_plan_summary_url(plan.id),
+                        plan_summary_url=self.user_url_index.get_plan_summary_url(
+                            plan.id
+                        ),
                         prd_name=f"{plan.prd_name}",
                         price_per_unit=self.__format_price(plan.price_per_unit),
                         activation_date=self.__format_date(plan.activation_date),
@@ -110,7 +115,9 @@ class ShowMyPlansPresenter:
             non_active_plans=NonActivePlansTable(
                 rows=[
                     NonActivePlansRow(
-                        plan_summary_url=self.url_index.get_plan_summary_url(plan.id),
+                        plan_summary_url=self.user_url_index.get_plan_summary_url(
+                            plan.id
+                        ),
                         prd_name=f"{plan.prd_name}",
                         price_per_unit=self.__format_price(plan.price_per_unit),
                         type_of_plan=self.__get_type_of_plan(plan.is_public_service),
@@ -123,7 +130,9 @@ class ShowMyPlansPresenter:
             expired_plans=ExpiredPlansTable(
                 rows=[
                     ExpiredPlansRow(
-                        plan_summary_url=self.url_index.get_plan_summary_url(plan.id),
+                        plan_summary_url=self.user_url_index.get_plan_summary_url(
+                            plan.id
+                        ),
                         prd_name=f"{plan.prd_name}",
                         is_public_service=plan.is_public_service,
                         plan_creation_date=self.__format_date(plan.plan_creation_date),

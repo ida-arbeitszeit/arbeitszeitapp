@@ -2,6 +2,7 @@ from dataclasses import asdict
 from typing import Optional
 from uuid import UUID
 
+from flask import Response as FlaskResponse
 from flask import redirect, request, url_for
 from flask_login import current_user
 
@@ -231,12 +232,14 @@ def get_draft_summary(
     if use_case_response is None:
         return not_found_view.get_response()
     view_model = presenter.show_prefilled_draft_data(use_case_response)
-    return template_renderer.render_template(
-        "company/create_draft.html",
-        context=dict(
-            view_model=view_model,
-            form=CreateDraftForm(data=asdict(view_model.prefilled_draft_data)),
-        ),
+    return FlaskResponse(
+        template_renderer.render_template(
+            "company/create_draft.html",
+            context=dict(
+                view_model=view_model,
+                form=CreateDraftForm(data=asdict(view_model.prefilled_draft_data)),
+            ),
+        )
     )
 
 
@@ -248,8 +251,10 @@ def draft_list(
 ) -> Response:
     response = list_drafts(UUID(current_user.id))
     view_model = list_drafts_presenter.present(response)
-    return template_renderer.render_template(
-        "company/draft_list.html", context=view_model.to_dict()
+    return FlaskResponse(
+        template_renderer.render_template(
+            "company/draft_list.html", context=view_model.to_dict()
+        )
     )
 
 

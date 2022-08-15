@@ -170,7 +170,7 @@ class UseCaseTests(TestCase):
         self, draft_id: UUID, condition: Callable[[DraftSummarySuccess], bool]
     ) -> None:
         response = self.get_draft_summary_use_case(draft_id)
-        self.assertIsInstance(response, DraftSummarySuccess)
+        assert isinstance(response, DraftSummarySuccess)
         self.assertTrue(condition(response))
 
     def create_request(

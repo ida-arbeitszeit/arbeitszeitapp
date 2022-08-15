@@ -6,20 +6,24 @@ from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounti
 from arbeitszeit_web.presenters.file_plan_with_accounting_presenter import (
     FilePlanWithAccountingPresenter,
 )
+from arbeitszeit_web.session import UserRole
+from tests.session import FakeSession
 from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl
-from .url_index import PlanSummaryUrlIndexTestImpl
+from .url_index import UrlIndexTestImpl
 
 
 class Tests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.presenter = self.injector.get(FilePlanWithAccountingPresenter)
-        self.plan_summary_url_index = self.injector.get(PlanSummaryUrlIndexTestImpl)
+        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.notifier = self.injector.get(NotifierTestImpl)
         self.translator = self.injector.get(FakeTranslator)
+        self.session = self.injector.get(FakeSession)
+        self.session.login_company("test@test.test")
 
     def test_view_model_has_redirect_url_with_successful_responses(self) -> None:
         view_model = self.presenter.present_response(self.create_success_response())
@@ -38,7 +42,7 @@ class Tests(TestCase):
         )
         self.assertEqual(
             view_model.redirect_url,
-            self.plan_summary_url_index.get_plan_summary_url(plan_id),
+            self.url_index.get_company_plan_summary_url(plan_id=plan_id),
         )
 
     def test_that_user_receives_warning_on_failure_response(self) -> None:

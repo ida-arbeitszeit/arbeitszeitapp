@@ -5,9 +5,11 @@ from uuid import uuid4
 
 from arbeitszeit.use_cases.get_coop_summary import AssociatedPlan, GetCoopSummarySuccess
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
+from arbeitszeit_web.session import UserRole
+from tests.session import FakeSession
 
 from .dependency_injection import get_dependency_injector
-from .url_index import EndCoopUrlIndexTestImpl, PlanSummaryUrlIndexTestImpl
+from .url_index import EndCoopUrlIndexTestImpl, UrlIndexTestImpl
 
 TESTING_RESPONSE_MODEL = GetCoopSummarySuccess(
     requester_is_coordinator=True,
@@ -15,6 +17,7 @@ TESTING_RESPONSE_MODEL = GetCoopSummarySuccess(
     coop_name="coop name",
     coop_definition="coop def\ncoop def2",
     coordinator_id=uuid4(),
+    coordinator_name="coordinator name",
     plans=[
         AssociatedPlan(
             plan_id=uuid4(),
@@ -29,9 +32,11 @@ TESTING_RESPONSE_MODEL = GetCoopSummarySuccess(
 class GetCoopSummarySuccessPresenterTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
-        self.plan_url_index = self.injector.get(PlanSummaryUrlIndexTestImpl)
+        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.end_coop_url_index = self.injector.get(EndCoopUrlIndexTestImpl)
         self.presenter = self.injector.get(GetCoopSummarySuccessPresenter)
+        self.session = self.injector.get(FakeSession)
+        self.session.login_company("test@test.test")
 
     def test_end_coop_button_is_shown_when_requester_is_coordinator(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
@@ -61,6 +66,22 @@ class GetCoopSummarySuccessPresenterTests(TestCase):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
         self.assertEqual(
             view_model.coordinator_id, str(TESTING_RESPONSE_MODEL.coordinator_id)
+        )
+
+    def test_coordinator_name_is_displayed_correctly(self):
+        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        self.assertEqual(
+            view_model.coordinator_name, TESTING_RESPONSE_MODEL.coordinator_name
+        )
+
+    def test_link_to_coordinators_company_summary_page_is_displayed_correctly(self):
+        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        self.assertEqual(
+            view_model.coordinator_url,
+            self.url_index.get_company_summary_url(
+                company_id=TESTING_RESPONSE_MODEL.coordinator_id,
+                user_role=UserRole.company,
+            ),
         )
 
     def test_first_plans_name_is_displayed_correctly(self):

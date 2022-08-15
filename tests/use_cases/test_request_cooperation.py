@@ -135,6 +135,19 @@ class RequestCooperationTests(TestCase):
         response = self.request_cooperation(request)
         assert not response.is_rejected
 
+    def test_successful_cooperation_request_returns_coordinator_data(self) -> None:
+        requester = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(
+            activation_date=self.datetime_service.now(), planner=requester
+        )
+        cooperation = self.coop_generator.create_cooperation(coordinator=requester)
+        request = RequestCooperationRequest(
+            requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation.id
+        )
+        response = self.request_cooperation(request)
+        assert response.coordinator_name
+        assert response.coordinator_email
+
     def test_succesfully_requesting_cooperation_makes_it_possible_to_accept_cooperation(
         self,
     ) -> None:

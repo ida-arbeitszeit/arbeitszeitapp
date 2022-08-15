@@ -1,10 +1,12 @@
 from dataclasses import dataclass
 from typing import List
 
+from injector import inject
+
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.use_cases.get_member_dashboard import GetMemberDashboard
 from arbeitszeit_web.translator import Translator
-from arbeitszeit_web.url_index import InviteUrlIndex, PlanSummaryUrlIndex
+from arbeitszeit_web.url_index import UrlIndex
 
 
 @dataclass
@@ -41,12 +43,12 @@ class GetMemberDashboardViewModel:
     show_invites: bool
 
 
+@inject
 @dataclass
 class GetMemberDashboardPresenter:
     translator: Translator
-    url_index: PlanSummaryUrlIndex
+    url_index: UrlIndex
     datetime_service: DatetimeService
-    invite_url_index: InviteUrlIndex
 
     def present(
         self, use_case_response: GetMemberDashboard.Response
@@ -91,12 +93,14 @@ class GetMemberDashboardPresenter:
                 zone="Europe/Berlin",
                 fmt="%d.%m.",
             ),
-            plan_summary_url=self.url_index.get_plan_summary_url(plan_detail.plan_id),
+            plan_summary_url=self.url_index.get_member_plan_summary_url(
+                plan_detail.plan_id
+            ),
         )
 
     def _get_invites_web(self, invite: GetMemberDashboard.WorkInvitation) -> Invite:
         return Invite(
-            invite_details_url=self.invite_url_index.get_invite_url(invite.invite_id),
+            invite_details_url=self.url_index.get_work_invite_url(invite.invite_id),
             invite_message=self.translator.gettext(
                 "Company %(company)s has invited you!"
                 % dict(company=invite.company_name)

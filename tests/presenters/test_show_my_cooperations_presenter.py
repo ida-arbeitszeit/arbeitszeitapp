@@ -1,6 +1,6 @@
 from datetime import datetime
 from unittest import TestCase
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from arbeitszeit.use_cases import (
     AcceptCooperationResponse,
@@ -12,8 +12,12 @@ from arbeitszeit.use_cases import (
     ListInboundCoopRequestsResponse,
     ListOutboundCoopRequestsResponse,
 )
+from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from tests.translator import FakeTranslator
+
+from .dependency_injection import get_dependency_injector
+from .url_index import UrlIndexTestImpl
 
 LIST_COORDINATIONS_RESPONSE_LEN_1 = ListCoordinationsResponse(
     coordinations=[
@@ -53,11 +57,10 @@ LIST_OUTBD_COOP_REQUESTS_RESPONSE_LEN_1 = ListOutboundCoopRequestsResponse(
 
 class ShowMyCooperationsPresenterTests(TestCase):
     def setUp(self) -> None:
-        self.coop_url_index = CoopSummaryUrlIndex()
+        self.injector = get_dependency_injector()
+        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.translator = FakeTranslator()
-        self.presenter = ShowMyCooperationsPresenter(
-            self.coop_url_index, self.translator
-        )
+        self.presenter = self.injector.get(ShowMyCooperationsPresenter)
 
     def test_coordinations_are_presented_correctly(self):
         presentation = self.presenter.present(
@@ -76,7 +79,9 @@ class ShowMyCooperationsPresenterTests(TestCase):
         coop_id = LIST_COORDINATIONS_RESPONSE_LEN_1.coordinations[0].id
         self.assertEqual(
             presentation.list_of_coordinations.rows[0].coop_summary_url,
-            self.coop_url_index.get_coop_summary_url(coop_id),
+            self.url_index.get_coop_summary_url(
+                coop_id=coop_id, user_role=UserRole.company
+            ),
         )
         self.assertEqual(
             presentation.list_of_coordinations.rows[0].coop_creation_date,
@@ -278,8 +283,3 @@ class ShowMyCooperationsPresenterTests(TestCase):
             presentation.cancel_message[0],
             self.translator.gettext("Error: Not possible to cancel request."),
         )
-
-
-class CoopSummaryUrlIndex:
-    def get_coop_summary_url(self, coop_id: UUID) -> str:
-        return f"fake_coop_url:{coop_id}"

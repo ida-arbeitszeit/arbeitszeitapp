@@ -1,13 +1,16 @@
 from dataclasses import dataclass
 from typing import Optional
 
+from injector import inject
+
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit_web.forms import LoginMemberForm
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
-from arbeitszeit_web.url_index import MemberUrlIndex
+from arbeitszeit_web.url_index import UrlIndex
 
 
+@inject
 @dataclass
 class LogInMemberPresenter:
     @dataclass
@@ -16,14 +19,14 @@ class LogInMemberPresenter:
 
     session: Session
     translator: Translator
-    member_url_index: MemberUrlIndex
+    member_url_index: UrlIndex
 
     def present_login_process(
         self, response: LogInMemberUseCase.Response, form: LoginMemberForm
     ) -> ViewModel:
         if response.is_logged_in:
             self.session.login_member(
-                email=response.email, remember=form.get_remember_field()
+                email=response.email, remember=form.remember_field().get_value()
             )
             next_url = (
                 self.session.pop_next_url()
@@ -35,13 +38,13 @@ class LogInMemberPresenter:
                 response.rejection_reason
                 == LogInMemberUseCase.RejectionReason.unknown_email_address
             ):
-                form.add_email_error(
+                form.email_field().attach_error(
                     self.translator.gettext(
                         "Email address incorrect. Are you already registered as a member?"
                     ),
                 )
             else:
-                form.add_password_error(
+                form.password_field().attach_error(
                     self.translator.gettext("Incorrect password"),
                 )
             return self.ViewModel(redirect_url=None)

@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from typing import Protocol, Union
 from uuid import UUID
 
+from injector import inject
+
 from arbeitszeit.use_cases import (
     AnswerCompanyWorkInviteRequest,
     AnswerCompanyWorkInviteResponse,
@@ -11,7 +13,7 @@ from .malformed_input_data import MalformedInputData
 from .notification import Notifier
 from .session import Session
 from .translator import Translator
-from .url_index import MemberUrlIndex
+from .url_index import UrlIndex
 
 
 class AnswerCompanyWorkInviteForm(Protocol):
@@ -35,6 +37,7 @@ class AnswerCompanyWorkInviteController:
             return None
 
 
+@inject
 @dataclass
 class AnswerCompanyWorkInvitePresenter:
     @dataclass
@@ -43,7 +46,7 @@ class AnswerCompanyWorkInvitePresenter:
 
     user_notifier: Notifier
     translator: Translator
-    url_index: MemberUrlIndex
+    url_index: UrlIndex
 
     def present(self, response: AnswerCompanyWorkInviteResponse) -> ViewModel:
         if response.is_success:

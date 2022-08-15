@@ -2,10 +2,13 @@ from dataclasses import dataclass
 from typing import Optional
 from uuid import UUID
 
+from injector import inject
+
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.repositories import PlanDraftRepository, PlanRepository
 
 
+@inject
 @dataclass
 class FilePlanWithAccounting:
     @dataclass

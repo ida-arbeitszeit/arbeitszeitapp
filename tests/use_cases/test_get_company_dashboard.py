@@ -16,13 +16,13 @@ class GeneralUseCaseTests(TestCase):
         self.member_generator = self.injector.get(MemberGenerator)
 
     def test_that_retrieving_dashboard_for_nonexisting_company_fails(self):
-        response = self.use_case.get_dashboard(uuid4())
-        self.assertIsInstance(response, GetCompanyDashboardUseCase.Failure)
+        with self.assertRaises(GetCompanyDashboardUseCase.Failure):
+            self.use_case.get_dashboard(uuid4())
 
     def test_that_retrieving_dashboard_for_existing_company_succeeds(self):
         company = self.company_generator.create_company()
         response = self.use_case.get_dashboard(company.id)
-        self.assertIsInstance(response, GetCompanyDashboardUseCase.Success)
+        self.assertIsInstance(response, GetCompanyDashboardUseCase.Response)
 
     def test_that_dashboard_shows_company_name(self):
         expected_name = "test coop name"

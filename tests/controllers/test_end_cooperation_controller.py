@@ -8,14 +8,15 @@ from arbeitszeit_web.controllers.end_cooperation_controller import (
 from tests.request import FakeRequest
 from tests.session import FakeSession
 
+from .dependency_injection import get_dependency_injector
+
 
 class EndCooperationControllerTests(TestCase):
     def setUp(self) -> None:
-        self.session = FakeSession()
-        self.request = FakeRequest()
-        self.controller = EndCooperationController(
-            session=self.session, request=self.request
-        )
+        self.injector = get_dependency_injector()
+        self.session = self.injector.get(FakeSession)
+        self.request = self.injector.get(FakeRequest)
+        self.controller = self.injector.get(EndCooperationController)
 
     def test_when_user_is_not_authenticated_then_we_cannot_get_a_use_case_request(
         self,

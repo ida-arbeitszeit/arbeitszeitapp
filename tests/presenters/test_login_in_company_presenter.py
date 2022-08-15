@@ -4,6 +4,7 @@ from unittest import TestCase
 
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit_web.presenters.log_in_company_presenter import LogInCompanyPresenter
+from arbeitszeit_web.session import UserRole
 from tests.session import FakeSession
 from tests.translator import FakeTranslator
 
@@ -36,7 +37,7 @@ class PresenterTests(TestCase):
         self.present_login_process(response)
         login_attempt = self.session.get_most_recent_login()
         assert login_attempt
-        self.assertEqual(login_attempt.user_role, FakeSession.UserRole.company)
+        self.assertEqual(login_attempt.user_role, UserRole.company)
 
     def test_that_email_is_correct_with_example_email(self) -> None:
         expected_email = "karl@cp.org"

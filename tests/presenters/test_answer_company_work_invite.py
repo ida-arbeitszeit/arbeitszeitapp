@@ -7,7 +7,7 @@ from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl
-from .url_index import MemberUrlIndex
+from .url_index import UrlIndexTestImpl
 
 COMPANY_NAME = "test company"
 
@@ -39,7 +39,7 @@ class SuccessfulResponseTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.notifier = self.injector.get(NotifierTestImpl)
-        self.url_index = self.injector.get(MemberUrlIndex)
+        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(AnswerCompanyWorkInvitePresenter)
 
@@ -94,7 +94,7 @@ class UnsuccessfulResponseTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.notifier = self.injector.get(NotifierTestImpl)
-        self.url_index = self.injector.get(MemberUrlIndex)
+        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(AnswerCompanyWorkInvitePresenter)
 
