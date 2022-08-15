@@ -138,7 +138,7 @@ class CompanyUrlIndex:
         return url_for("main_company.toggle_availability", plan_id=plan_id)
 
     def get_renew_plan_url(self, plan_id: UUID) -> str:
-        return url_for("main_company.create_draft", expired_plan_id=plan_id)
+        return url_for("main_company.create_draft_from_plan", plan_id=plan_id)
 
     def get_hide_plan_url(self, plan_id: UUID) -> str:
         return url_for("main_company.hide_plan", plan_id=plan_id)

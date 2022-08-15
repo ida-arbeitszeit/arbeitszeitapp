@@ -1,153 +1,63 @@
 {% extends "base_company.html" %}
 
+{% from 'macros/draft_form.html' import draft_form %}
+
 {% block navbar_start %}
 <div class="navbar-item">{{ gettext("Create plan") }}</div>
 {% endblock %}
 
 {% block content %}
 <div class="section has-text-centered">
-    <h1 class="title">
-        {{ gettext("Create plan") }}
-    </h1>
-    <div class="columns is-centered">
-        <div class="column is-three-fifths">
-            <p class="pb-5 has-text-right">
-                <a class="" href="{{ url_for('main_company.draft_list') }}">
-                    <span class="icon"><i class="fa-regular fa-floppy-disk"></i></span>
-                    {{ gettext("Load a draft") }}</a>
-            </p>
-            <form method="post">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div class="box has-background-info-light">
-                    <div class="has-text-right has-text-info-dark js-modal-trigger" data-target="id_name_desc">
-                        <span class="icon"><i class="fa-solid fa-circle-question"></i></span>
-                    </div>   
-                    <div class="field">
-                        <label class="label">{{ gettext("Product name")}}</label>
-                        <div class="control">
-                            {{ form.prd_name(class_="input is-large") }}
-                        </div>
-                    </div>
-                    <div class="block"></div>
-                    <div class="field">
-                        <label class="label">{{ gettext("Product description")}}</label>
-                        <div class="control">
-                            {{ form.description(class_="textarea is-large") }}
-                        </div>
-                    </div>
-                </div>
-                <div class="block py-2"></div>
-                <div class="box has-background-info-light">
-                    <div class="has-text-right has-text-info-dark js-modal-trigger" data-target="id_timeframe">
-                        <span class="icon"><i class="fa-solid fa-circle-question"></i></span>
-                    </div>
-                    <div class="field">   
-                        <label class="label">{{ gettext("Planning timeframe (days)")}}</label>
-                        <div class="control">
-                            {{ form.timeframe(class_="input is-large") }}
-                        </div>
-                    </div>
-                </div>
-                <div class="block py-2"></div>
-                <div class="box has-background-info-light">
-                    <div class="has-text-right has-text-info-dark js-modal-trigger" data-target="id_costs">
-                        <span class="icon"><i class="fa-solid fa-circle-question"></i></span>
-                    </div>
-                    <div class="field">
-                        <label class="label">{{ gettext("Costs for fixed means of production")}}</label>
-                        <div class="control">
-                            {{ form.costs_p(class_="input is-large") }}
-                        </div>
-                    </div>
-                    <div class="block"></div>
-                    <div class="field">
-                        <label class="label">{{ gettext("Costs for liquid means of production")}}</label>
-                        <div class="control">
-                            {{ form.costs_r(class_="input is-large") }}
-                        </div>
-                    </div>
-                    <div class="block"></div>
-                    <div class="field">
-                        <label class="label">{{ gettext("Costs for labour")}}</label>
-                        <div class="control">
-                            {{ form.costs_a(class_="input is-large") }}
-                        </div>
-                    </div>
-                </div>
-                <div class="block py-2"></div>
-                <div class="box has-background-info-light">
-                    <div class="has-text-right has-text-info-dark js-modal-trigger" data-target="id_unit_amount">
-                        <span class="icon"><i class="fa-solid fa-circle-question"></i></span>
-                    </div>
-                    <div class="field">                 
-                        <label class="label">{{ gettext("Smallest delivery unit")}}</label>
-                        <div class="control">
-                            {{ form.prd_unit(class_="input is-large") }}                        
-                            <p class="help">{{ gettext("E.g. 1 package of 100 pieces, 1 kilogram, 1 language lesson of 1.5 hour, etc.")}}</p>
-                        </div>
-                    </div>
-                    <div class="block"></div>
-                    <div class="field">
-                        <label class="label">{{ gettext("Amount")}}</label>
-                        <div class="control">
-                            {{ form.prd_amount(class_="input is-large") }}
-                        </div>
-                    </div>
-                </div>
-                <div class="block py-2"></div>
-                <div class="box has-background-info-light">
-                    <div class="has-text-right has-text-info-dark js-modal-trigger" data-target="id_type">
-                        <span class="icon"><i class="fa-solid fa-circle-question"></i></span>
-                    </div>
-                    <div class="field">
-                        {{ form.productive_or_public }} {{ form.productive_or_public.label }}
-                    </div>
-                </div>
-                <div class="block py-2"></div>
-                <div class="has-text-danger-dark">
-                    {{ gettext("Plans cannot be changed after submission!")}}
-                </div>
+  <h1 class="title">
+    {{ gettext("Create plan") }}
+  </h1>
+  <div class="columns is-centered">
+    <div class="column is-three-fifths">
+      <p class="pb-5 has-text-right">
+        <a class="" href="{{ url_for('main_company.draft_list') }}">
+          <span class="icon"><i class="fa-regular fa-floppy-disk"></i></span>
+          {{ gettext("Load a draft") }}</a>
+      </p>
+      <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {{ draft_form(form) }}
+        <div class="block py-2"></div>
+        <div class="has-text-danger-dark">
+          {{ gettext("Plans cannot be changed after submission!")}}
         </div>
+        <div class="field is-grouped is-grouped-centered">
+          <div class="control">
+            <button class="button is-danger is-light"
+                    name="action"
+                    value="file_draft"
+                    type="submit"
+                    formaction="{{ view_model.self_approve_plan_url }}">
+              {{ gettext("Submit plan")}}
+            </button>
+          </div>
+          <div class="control">
+            <button class="button is-primary is-light"
+                    name="action"
+                    value="save_draft"
+                    type="submit"
+                    formaction="{{ view_model.save_draft_url }}">
+              {{ gettext("Save as draft")}}
+            </button>
+          </div>
+          <div class="control">
+            <button class="button is-light"
+                    name="action"
+                    value="cancel"
+                    type="submit"
+                    formaction="{{ view_model.cancel_url }}"
+                    formnovalidate>
+              {{ gettext("Cancel")}}
+            </button>
+          </div>
+        </div>
+      </form>
     </div>
-    <div class="field is-grouped is-grouped-centered">
-      <div class="control">
-        <button class="button is-danger is-light"
-                name="action"
-                value="file_draft"
-                type="submit"
-                formaction="{{ view_model.self_approve_plan_url }}">
-          {{ gettext("Submit plan")}}
-        </button>
-      </div>
-      <div class="control">
-        <button class="button is-primary is-light"
-                name="action"
-                value="save_draft"
-                type="submit"
-                formaction="{{ view_model.save_draft_url }}">
-          {{ gettext("Save as draft")}}
-        </button>
-      </div>
-      <div class="control">
-        <button class="button is-light"
-                name="action"
-                value="cancel"
-                type="submit"
-                formaction="{{ view_model.cancel_url }}"
-                formnovalidate>
-          {{ gettext("Cancel")}}
-        </button>
-      </div>
-    </div>
-    </form>
+  </div>
 </div>
-
-{% from 'macros/modals.html' import info_modal %}
-
-{{ info_modal(id="id_name_desc", text=gettext("Specify product name and description.")) }}
-{{ info_modal(id="id_timeframe", text=gettext("Choose a planning timeframe in which you are planning to produce and deliver your product.")) }}
-{{ info_modal(id="id_costs", text=gettext("Estimate what costs you will have in the given timeframe.")) }}
-{{ info_modal(id="id_unit_amount", text=gettext("Describe the smallest delivery unit and what amount of these units you will produce.")) }}
-{{ info_modal(id="id_type", text=gettext("The type of plan. Productive plans are the norm.")) }}
 
 {% endblock %}

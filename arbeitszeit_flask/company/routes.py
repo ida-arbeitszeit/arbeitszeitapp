@@ -169,6 +169,7 @@ def my_purchases(
 
 
 @CompanyRoute("/company/create_draft/<uuid:plan_id>", methods=["GET", "POST"])
+@commit_changes
 def create_draft_from_plan(
     plan_id: UUID,
     session: FlaskSession,
