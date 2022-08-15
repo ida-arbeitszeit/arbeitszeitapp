@@ -1,10 +1,19 @@
 from decimal import Decimal
+from typing import Optional
 from uuid import UUID
 
 from flask import url_for
 
+from arbeitszeit_web.session import UserRole
+
 
 class GeneralUrlIndex:
+    def get_company_plan_summary_url(self, plan_id: UUID) -> str:
+        return url_for("main_company.plan_summary", plan_id=plan_id)
+
+    def get_member_plan_summary_url(self, plan_id: UUID) -> str:
+        return url_for("main_member.plan_summary", plan_id=plan_id)
+
     def get_accountant_invitation_url(self, token: str) -> str:
         return url_for("auth.signup_accountant", token=token)
 
@@ -23,14 +32,29 @@ class GeneralUrlIndex:
     def get_draft_summary_url(self, draft_id: UUID) -> str:
         return url_for("main_company.get_draft_summary", draft_id=draft_id)
 
+    def get_work_invite_url(self, invite_id: UUID) -> str:
+        return url_for("main_member.show_company_work_invite", invite_id=invite_id)
+
+    def get_coop_summary_url(self, user_role: Optional[UserRole], coop_id: UUID) -> str:
+        if user_role == UserRole.member:
+            return url_for("main_member.coop_summary", coop_id=coop_id)
+        elif user_role == UserRole.company:
+            return url_for("main_company.coop_summary", coop_id=coop_id)
+        else:
+            raise ValueError(f"coop summary url not available for {user_role}")
+
+    def get_company_summary_url(
+        self, user_role: Optional[UserRole], company_id: UUID
+    ) -> str:
+        if user_role == UserRole.company:
+            return url_for("main_company.company_summary", company_id=company_id)
+        if user_role == UserRole.member:
+            return url_for("main_member.company_summary", company_id=company_id)
+        else:
+            raise ValueError(f"company summary not available for {user_role}")
+
 
 class MemberUrlIndex:
-    def get_plan_summary_url(self, plan_id: UUID) -> str:
-        return url_for("main_member.plan_summary", plan_id=plan_id)
-
-    def get_coop_summary_url(self, coop_id: UUID) -> str:
-        return url_for("main_member.coop_summary", coop_id=coop_id)
-
     def get_toggle_availability_url(self, plan_id: UUID) -> str:
         ...
 
@@ -45,12 +69,6 @@ class MemberUrlIndex:
 
     def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
         ...
-
-    def get_company_summary_url(self, company_id: UUID) -> str:
-        return url_for("main_member.company_summary", company_id=company_id)
-
-    def get_invite_url(self, invite_id: UUID) -> str:
-        return url_for("main_member.show_company_work_invite", invite_id=invite_id)
 
     def get_answer_company_work_invite_url(self, invite_id: UUID) -> str:
         return url_for("main_member.show_company_work_invite", invite_id=invite_id)
@@ -67,12 +85,6 @@ class MemberUrlIndex:
 
 
 class CompanyUrlIndex:
-    def get_plan_summary_url(self, plan_id: UUID) -> str:
-        return url_for("main_company.plan_summary", plan_id=plan_id)
-
-    def get_coop_summary_url(self, coop_id: UUID) -> str:
-        return url_for("main_company.coop_summary", coop_id=coop_id)
-
     def get_toggle_availability_url(self, plan_id: UUID) -> str:
         return url_for("main_company.toggle_availability", plan_id=plan_id)
 
@@ -92,10 +104,7 @@ class CompanyUrlIndex:
             cooperation_id=cooperation_id,
         )
 
-    def get_company_summary_url(self, company_id: UUID) -> str:
-        return url_for("main_company.company_summary", company_id=company_id)
-
-    def get_invite_url(self, invite_id: UUID) -> str:
+    def get_work_invite_url(self, invite_id: UUID) -> str:
         # since invites don't make sense for a company, we redirect
         # them in this case to their dashboard page.
         return url_for("main_company.dashboard")

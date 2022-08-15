@@ -9,7 +9,7 @@ from arbeitszeit_web.presenters.get_company_dashboard_presenter import (
 )
 from tests.datetime_service import FakeDatetimeService
 from tests.presenters.dependency_injection import get_dependency_injector
-from tests.presenters.url_index import PlanSummaryUrlIndexTestImpl
+from tests.presenters.url_index import UrlIndexTestImpl
 
 
 class TestPresenter(TestCase):
@@ -17,7 +17,7 @@ class TestPresenter(TestCase):
         self.injector = get_dependency_injector()
         self.presenter = self.injector.get(GetCompanyDashboardPresenter)
         self.datetime_service = self.injector.get(FakeDatetimeService)
-        self.plan_index = self.injector.get(PlanSummaryUrlIndexTestImpl)
+        self.plan_index = self.injector.get(UrlIndexTestImpl)
 
     def test_presenter_successfully_presents_a_use_case_response(self):
         self.assertTrue(self.presenter.present(self.get_use_case_response()))
@@ -31,7 +31,7 @@ class TestPresenter(TestCase):
     def test_presenter_correctly_shows_company_name(self):
         view_model = self.presenter.present(
             self.get_use_case_response(
-                company_info=GetCompanyDashboardUseCase.Success.CompanyInfo(
+                company_info=GetCompanyDashboardUseCase.Response.CompanyInfo(
                     id=uuid4(), name="company test name", email="mail@test.de"
                 )
             )
@@ -42,7 +42,7 @@ class TestPresenter(TestCase):
         company_id = uuid4()
         view_model = self.presenter.present(
             self.get_use_case_response(
-                company_info=GetCompanyDashboardUseCase.Success.CompanyInfo(
+                company_info=GetCompanyDashboardUseCase.Response.CompanyInfo(
                     id=company_id, name="company test name", email="mail@test.de"
                 )
             )
@@ -52,7 +52,7 @@ class TestPresenter(TestCase):
     def test_presenter_correctly_shows_company_email(self):
         view_model = self.presenter.present(
             self.get_use_case_response(
-                company_info=GetCompanyDashboardUseCase.Success.CompanyInfo(
+                company_info=GetCompanyDashboardUseCase.Response.CompanyInfo(
                     id=uuid4(), name="company test name", email="mail@test.de"
                 )
             )
@@ -73,7 +73,7 @@ class TestPresenter(TestCase):
         view_model = self.presenter.present(
             self.get_use_case_response(
                 latest_plans=[
-                    GetCompanyDashboardUseCase.Success.LatestPlansDetails(
+                    GetCompanyDashboardUseCase.Response.LatestPlansDetails(
                         plan_id=uuid4(),
                         prd_name="prd name test",
                         activation_date=activation_time,
@@ -88,7 +88,7 @@ class TestPresenter(TestCase):
         view_model = self.presenter.present(
             self.get_use_case_response(
                 latest_plans=[
-                    GetCompanyDashboardUseCase.Success.LatestPlansDetails(
+                    GetCompanyDashboardUseCase.Response.LatestPlansDetails(
                         plan_id=plan_id,
                         prd_name="prd name test",
                         activation_date=self.datetime_service.now(),
@@ -98,32 +98,32 @@ class TestPresenter(TestCase):
         )
         self.assertEqual(
             view_model.latest_plans[0].plan_summary_url,
-            self.plan_index.get_plan_summary_url(plan_id),
+            self.plan_index.get_company_plan_summary_url(plan_id),
         )
 
     def get_use_case_response(
         self,
         has_workers: bool = None,
-        company_info: GetCompanyDashboardUseCase.Success.CompanyInfo = None,
+        company_info: GetCompanyDashboardUseCase.Response.CompanyInfo = None,
         latest_plans: List[
-            GetCompanyDashboardUseCase.Success.LatestPlansDetails
+            GetCompanyDashboardUseCase.Response.LatestPlansDetails
         ] = None,
     ):
         if has_workers is None:
             has_workers = False
         if company_info is None:
-            company_info = GetCompanyDashboardUseCase.Success.CompanyInfo(
+            company_info = GetCompanyDashboardUseCase.Response.CompanyInfo(
                 id=uuid4(), name="company name", email="mail@test.de"
             )
         if latest_plans is None:
             latest_plans = [
-                GetCompanyDashboardUseCase.Success.LatestPlansDetails(
+                GetCompanyDashboardUseCase.Response.LatestPlansDetails(
                     plan_id=uuid4(),
                     prd_name="prd name test",
                     activation_date=self.datetime_service.now(),
                 )
             ]
-        return GetCompanyDashboardUseCase.Success(
+        return GetCompanyDashboardUseCase.Response(
             company_info=company_info,
             has_workers=has_workers,
             three_latest_plans=latest_plans,

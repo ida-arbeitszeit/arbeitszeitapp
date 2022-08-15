@@ -1,5 +1,6 @@
 from injector import Module, provider, singleton
 
+from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.repositories import (
     CompanyRepository,
@@ -13,6 +14,7 @@ from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import PayConsumerProductUrlIndex
 from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
 from tests.company import CompanyManager
+from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.datetime_service import FakeDatetimeService
 from tests.email import FakeEmailSender
 from tests.language_service import FakeLanguageService
@@ -24,6 +26,16 @@ from tests.translator import FakeTranslator
 
 
 class TestingModule(Module):
+    @provider
+    def provide_control_thresholds(
+        self, thresholds: ControlThresholdsTestImpl
+    ) -> ControlThresholds:
+        return thresholds
+
+    @provider
+    def provide_translator(self, translator: FakeTranslator) -> Translator:
+        return translator
+
     @singleton
     @provider
     def provide_language_service(self) -> FakeLanguageService:
@@ -33,10 +45,6 @@ class TestingModule(Module):
     @provider
     def provide_fake_email_service(self) -> FakeEmailSender:
         return FakeEmailSender()
-
-    @provider
-    def provide_translator(self) -> Translator:
-        return FakeTranslator()
 
     @provider
     def provide_company_manager(

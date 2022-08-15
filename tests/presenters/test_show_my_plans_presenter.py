@@ -8,24 +8,31 @@ from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from tests.data_generators import CooperationGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
+from tests.session import FakeSession
 from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
-from .url_index import HidePlanUrlIndex, PlanSummaryUrlIndexTestImpl, RenewPlanUrlIndex
+from .url_index import (
+    HidePlanUrlIndexTestImpl,
+    RenewPlanUrlIndexTestImpl,
+    UrlIndexTestImpl,
+)
 
 
 class ShowMyPlansPresenterTests(TestCase):
     def setUp(self):
         self.injector = get_dependency_injector()
-        self.plan_url_index = self.injector.get(PlanSummaryUrlIndexTestImpl)
-        self.renew_plan_url_index = self.injector.get(RenewPlanUrlIndex)
-        self.hide_plan_url_index = self.injector.get(HidePlanUrlIndex)
+        self.plan_url_index = self.injector.get(UrlIndexTestImpl)
+        self.renew_plan_url_index = self.injector.get(RenewPlanUrlIndexTestImpl)
+        self.hide_plan_url_index = self.injector.get(HidePlanUrlIndexTestImpl)
         self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(ShowMyPlansPresenter)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.coop_generator = self.injector.get(CooperationGenerator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.update_plans_use_case = self.injector.get(UpdatePlansAndPayout)
+        self.session = self.injector.get(FakeSession)
+        self.session.login_company("test@test.test")
 
     def test_show_correct_notification_when_user_has_no_plans(self):
         presentation = self.presenter.present(
@@ -64,7 +71,7 @@ class ShowMyPlansPresenterTests(TestCase):
         presentation = self.presenter.present(RESPONSE_WITH_ONE_ACTIVE_PLAN)
         self.assertEqual(
             presentation.active_plans.rows[0].plan_summary_url,
-            self.plan_url_index.get_plan_summary_url(plan.id),
+            self.plan_url_index.get_company_plan_summary_url(plan.id),
         )
         self.assertEqual(presentation.active_plans.rows[0].prd_name, plan.prd_name)
         self.assertEqual(
@@ -105,7 +112,7 @@ class ShowMyPlansPresenterTests(TestCase):
         expected_plan = RESPONSE_WITH_ONE_EXPIRED_PLAN.expired_plans[0]
         self.assertEqual(
             row1.plan_summary_url,
-            self.plan_url_index.get_plan_summary_url(plan.id),
+            self.plan_url_index.get_company_plan_summary_url(plan.id),
         )
         self.assertEqual(
             row1.prd_name,
@@ -127,7 +134,7 @@ class ShowMyPlansPresenterTests(TestCase):
         expected_plan = RESPONSE_WITH_ONE_NON_ACTIVE_PLAN.non_active_plans[0]
         self.assertEqual(
             row1.plan_summary_url,
-            self.plan_url_index.get_plan_summary_url(plan.id),
+            self.plan_url_index.get_company_plan_summary_url(plan.id),
         )
         self.assertEqual(
             row1.prd_name,

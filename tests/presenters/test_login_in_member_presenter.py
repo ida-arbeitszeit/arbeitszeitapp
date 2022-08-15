@@ -3,12 +3,13 @@ from unittest import TestCase
 
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit_web.presenters.log_in_member_presenter import LogInMemberPresenter
+from arbeitszeit_web.session import UserRole
 from tests.session import FakeSession
 from tests.translator import FakeTranslator
 
 from ..forms import LoginForm
 from .dependency_injection import get_dependency_injector
-from .url_index import MemberUrlIndex
+from .url_index import UrlIndexTestImpl
 
 
 class PresenterTests(TestCase):
@@ -17,7 +18,7 @@ class PresenterTests(TestCase):
         self.presenter = self.injector.get(LogInMemberPresenter)
         self.session = self.injector.get(FakeSession)
         self.translator = self.injector.get(FakeTranslator)
-        self.member_url_index = self.injector.get(MemberUrlIndex)
+        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.form = LoginForm()
 
     def test_that_user_is_logged_into_session_on_success(self) -> None:
@@ -99,7 +100,7 @@ class PresenterTests(TestCase):
         view_model = self.presenter.present_login_process(response, self.form)
         self.assertEqual(
             view_model.redirect_url,
-            self.member_url_index.get_member_dashboard_url(),
+            self.url_index.get_member_dashboard_url(),
         )
 
     def test_that_no_redirect_url_is_set_when_login_failed(self) -> None:
@@ -154,7 +155,7 @@ class PresenterTests(TestCase):
         assert login_attempt
         self.assertEqual(
             login_attempt.user_role,
-            FakeSession.UserRole.member,
+            UserRole.member,
         )
 
     def create_success_response(

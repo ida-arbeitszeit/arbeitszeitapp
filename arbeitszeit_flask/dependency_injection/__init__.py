@@ -72,6 +72,7 @@ from arbeitszeit_flask.translator import FlaskTranslator
 from arbeitszeit_flask.url_index import (
     CompanyUrlIndex,
     FlaskPlotsUrlIndex,
+    GeneralUrlIndex,
     MemberUrlIndex,
 )
 from arbeitszeit_flask.views import Http404View
@@ -95,7 +96,6 @@ from arbeitszeit_web.controllers.show_my_accounts_controller import (
 )
 from arbeitszeit_web.create_draft import CreateDraftController
 from arbeitszeit_web.email import EmailConfiguration, UserAddressBook
-from arbeitszeit_web.formatters.plan_summary_formatter import PlanSummaryFormatter
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyController
 from arbeitszeit_web.language_service import LanguageService
 from arbeitszeit_web.notification import Notifier
@@ -109,26 +109,24 @@ from arbeitszeit_web.presenters.registration_email_presenter import (
 from arbeitszeit_web.presenters.send_confirmation_email_presenter import (
     SendConfirmationEmailPresenter,
 )
+from arbeitszeit_web.request import Request
 from arbeitszeit_web.request_cooperation import RequestCooperationController
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import (
     AnswerCompanyWorkInviteUrlIndex,
-    CompanySummaryUrlIndex,
     ConfirmationUrlIndex,
-    CoopSummaryUrlIndex,
     EndCoopUrlIndex,
     HidePlanUrlIndex,
-    InviteUrlIndex,
     PayConsumerProductUrlIndex,
-    PlanSummaryUrlIndex,
     PlotsUrlIndex,
     RenewPlanUrlIndex,
     RequestCoopUrlIndex,
     TogglePlanAvailabilityUrlIndex,
+    UrlIndex,
 )
 
-from .presenters import CompanyPresenterModule, MemberPresenterModule, PresenterModule
+from .presenters import CompanyPresenterModule, PresenterModule
 from .views import ViewsModule
 
 __all__ = [
@@ -136,23 +134,11 @@ __all__ = [
 ]
 
 
-class MemberModule(MemberPresenterModule):
+class MemberModule(Module):
     @provider
     def provide_confirmation_url_index(
         self, member_index: MemberUrlIndex
     ) -> ConfirmationUrlIndex:
-        return member_index
-
-    @provider
-    def provide_plan_summary_url_index(
-        self, member_index: MemberUrlIndex
-    ) -> PlanSummaryUrlIndex:
-        return member_index
-
-    @provider
-    def provide_coop_summary_url_index(
-        self, member_index: MemberUrlIndex
-    ) -> CoopSummaryUrlIndex:
         return member_index
 
     @provider
@@ -168,24 +154,8 @@ class MemberModule(MemberPresenterModule):
         return member_index
 
     @provider
-    def provide_company_url_index(
-        self, member_index: MemberUrlIndex
-    ) -> CompanySummaryUrlIndex:
-        return member_index
-
-    @provider
     def provide_template_index(self) -> TemplateIndex:
         return MemberTemplateIndex()
-
-    @provider
-    def provide_invite_url_index(self, index: MemberUrlIndex) -> InviteUrlIndex:
-        return index
-
-    @provider
-    def provide_answer_company_work_invite_url_index(
-        self, url_index: MemberUrlIndex
-    ) -> AnswerCompanyWorkInviteUrlIndex:
-        return url_index
 
     @provider
     def provide_pay_consumer_product_url_index(
@@ -199,18 +169,6 @@ class CompanyModule(CompanyPresenterModule):
     def provide_confirmation_url_index(
         self, company_index: CompanyUrlIndex
     ) -> ConfirmationUrlIndex:
-        return company_index
-
-    @provider
-    def provide_plan_summary_url_index(
-        self, company_index: CompanyUrlIndex
-    ) -> PlanSummaryUrlIndex:
-        return company_index
-
-    @provider
-    def provide_coop_summary_url_index(
-        self, company_index: CompanyUrlIndex
-    ) -> CoopSummaryUrlIndex:
         return company_index
 
     @provider
@@ -244,12 +202,6 @@ class CompanyModule(CompanyPresenterModule):
         return company_index
 
     @provider
-    def provide_company_url_index(
-        self, company_index: CompanyUrlIndex
-    ) -> CompanySummaryUrlIndex:
-        return company_index
-
-    @provider
     def provide_template_index(self) -> TemplateIndex:
         return CompanyTemplateIndex()
 
@@ -272,10 +224,6 @@ class CompanyModule(CompanyPresenterModule):
         return PayMeansOfProductionController(session, request)
 
     @provider
-    def provide_invite_url_index(self, index: CompanyUrlIndex) -> InviteUrlIndex:
-        return index
-
-    @provider
     def provide_answer_company_work_invite_url_index(
         self, url_index: CompanyUrlIndex
     ) -> AnswerCompanyWorkInviteUrlIndex:
@@ -289,6 +237,14 @@ class CompanyModule(CompanyPresenterModule):
 
 
 class FlaskModule(PresenterModule):
+    @provider
+    def provide_request(self, request: FlaskRequest) -> Request:
+        return request
+
+    @provider
+    def provide_url_index(self, index: GeneralUrlIndex) -> UrlIndex:
+        return index
+
     @provider
     def provide_invitation_token_validator(
         self, validator: FlaskTokenService
@@ -399,18 +355,6 @@ class FlaskModule(PresenterModule):
     ) -> Http404View:
         return Http404View(
             template_index=template_index, template_renderer=template_renderer
-        )
-
-    @provider
-    def provide_plan_summary_service(
-        self,
-        coop_url_index: CoopSummaryUrlIndex,
-        company_url_index: CompanySummaryUrlIndex,
-        translator: Translator,
-        datetime_service: RealtimeDatetimeService,
-    ) -> PlanSummaryFormatter:
-        return PlanSummaryFormatter(
-            coop_url_index, company_url_index, translator, datetime_service
         )
 
     @provider
