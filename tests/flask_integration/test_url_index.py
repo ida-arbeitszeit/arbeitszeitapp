@@ -83,7 +83,7 @@ class MemberUrlIndexTests(ViewTestCase):
     def test_url_for_payment_of_consumer_product_leads_to_functional_url(self) -> None:
         url = self.url_index.get_pay_consumer_product_url(amount=1, plan_id=uuid4())
         response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
 
 
 class PlotUrlIndexTests(ViewTestCase):

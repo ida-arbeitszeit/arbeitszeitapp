@@ -163,6 +163,12 @@ class MemberModule(Module):
     ) -> PayConsumerProductUrlIndex:
         return url_index
 
+    @provider
+    def provide_answer_company_work_invite_url_index(
+        self, url_index: MemberUrlIndex
+    ) -> AnswerCompanyWorkInviteUrlIndex:
+        return url_index
+
 
 class CompanyModule(CompanyPresenterModule):
     @provider

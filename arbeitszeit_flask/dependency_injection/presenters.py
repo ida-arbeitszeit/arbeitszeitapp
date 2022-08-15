@@ -18,7 +18,6 @@ from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPrese
 from arbeitszeit_web.get_plan_summary_company import (
     GetPlanSummaryCompanySuccessPresenter,
 )
-from arbeitszeit_web.get_plan_summary_member import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyPresenter
 from arbeitszeit_web.language_service import LanguageService
