@@ -20,7 +20,7 @@ class Tests(TestCase):
         response = self.get_plan_summary_company.get_plan_summary_for_company(
             plan.id, planner_and_current_user.id
         )
-        assert isinstance(response, GetPlanSummaryCompany.Success)
+        assert isinstance(response, GetPlanSummaryCompany.Response)
         assert response.current_user_is_planner
 
     def test_that_current_user_is_correctly_shown_as_non_planner(self):
@@ -29,17 +29,14 @@ class Tests(TestCase):
         response = self.get_plan_summary_company.get_plan_summary_for_company(
             plan.id, current_user.id
         )
-        assert isinstance(response, GetPlanSummaryCompany.Success)
         assert not response.current_user_is_planner
 
-    def test_that_failure_is_returned_when_plan_does_not_exist(self):
+    def test_that_plan_summary_is_none_if_plan_does_not_exist(self):
         current_user = self.company_generator.create_company()
-        self.assertIsInstance(
-            self.get_plan_summary_company.get_plan_summary_for_company(
-                uuid4(), current_user.id
-            ),
-            GetPlanSummaryCompany.Failure,
+        response = self.get_plan_summary_company.get_plan_summary_for_company(
+            uuid4(), current_user.id
         )
+        self.assertIsNone(response.plan_summary)
 
     def test_plan_summary_success_is_returned_when_plan_exists(self):
         current_user = self.company_generator.create_company()
@@ -48,7 +45,7 @@ class Tests(TestCase):
             self.get_plan_summary_company.get_plan_summary_for_company(
                 plan.id, current_user.id
             ),
-            GetPlanSummaryCompany.Success,
+            GetPlanSummaryCompany.Response,
         )
 
     def test_plan_summary_is_returned_when_plan_exists(self):
@@ -59,5 +56,5 @@ class Tests(TestCase):
                 plan.id, current_user.id
             )
         )
-        assert isinstance(plan_summary_success, GetPlanSummaryCompany.Success)
+        assert isinstance(plan_summary_success, GetPlanSummaryCompany.Response)
         self.assertTrue(plan_summary_success.plan_summary)

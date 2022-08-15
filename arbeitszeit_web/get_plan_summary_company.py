@@ -43,18 +43,18 @@ class GetPlanSummaryCompanySuccessPresenter:
     plan_summary_service: PlanSummaryFormatter
 
     def present(
-        self, response: GetPlanSummaryCompany.Success
+        self, response: GetPlanSummaryCompany.Response
     ) -> GetPlanSummaryCompanyViewModel:
-        plan_id = response.plan_summary.plan_id
-        coop_id = response.plan_summary.cooperation
-        is_cooperating = response.plan_summary.is_cooperating
+        plan_summary = response.plan_summary
+        assert plan_summary is not None
+        plan_id = plan_summary.plan_id
+        coop_id = plan_summary.cooperation
+        is_cooperating = plan_summary.is_cooperating
         return GetPlanSummaryCompanyViewModel(
-            summary=self.plan_summary_service.format_plan_summary(
-                response.plan_summary
-            ),
+            summary=self.plan_summary_service.format_plan_summary(plan_summary),
             show_action_section=response.current_user_is_planner,
             action=Action(
-                is_available_bool=response.plan_summary.is_available,
+                is_available_bool=plan_summary.is_available,
                 toggle_availability_url=self.toggle_availability_url_index.get_toggle_availability_url(
                     plan_id
                 ),

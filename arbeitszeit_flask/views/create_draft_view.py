@@ -82,13 +82,14 @@ class CreateDraftView:
             response = self.get_plan_summary_company.get_plan_summary_for_company(
                 UUID(expired_plan_id), planner
             )
-            if isinstance(response, GetPlanSummaryCompany.Success):
+            plan_summary = response.plan_summary
+            if plan_summary is None:
+                return self.http_404_view.get_response()
+            else:
                 view_model = self.create_draft_presenter.show_prefilled_draft_data(
-                    response.plan_summary
+                    plan_summary
                 )
                 form = CreateDraftForm(data=asdict(view_model.prefilled_draft_data))
-            else:
-                return self.http_404_view.get_response()
 
         else:
             form = CreateDraftForm()

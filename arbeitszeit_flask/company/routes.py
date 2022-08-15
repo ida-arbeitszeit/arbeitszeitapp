@@ -386,7 +386,7 @@ def plan_summary(
     use_case_response = get_plan_summary_company.get_plan_summary_for_company(
         plan_id, UUID(current_user.id)
     )
-    if isinstance(use_case_response, use_cases.GetPlanSummaryCompany.Success):
+    if use_case_response.plan_summary:
         view_model = presenter.present(use_case_response)
         return template_renderer.render_template(
             "company/plan_summary.html", context=dict(view_model=view_model.to_dict())
