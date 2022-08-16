@@ -22,38 +22,38 @@ class PayConsumerProductControllerTests(TestCase):
         self.form = PayConsumerProductFakeForm()
 
     def test_error_is_raised_when_form_data_is_empty_strings(self) -> None:
-        with self.assertRaises(self.controller.Error):
+        with self.assertRaises(self.controller.FormError):
             self._process_form(plan_id="", amount="")
 
-    def test_correct_error_is_raised_when_plan_id_is_emtpy(self) -> None:
-        with self.assertRaises(self.controller.PlanIdInvalid):
+    def test_error_is_raised_when_plan_id_is_emtpy(self) -> None:
+        with self.assertRaises(self.controller.FormError):
             self._process_form(plan_id="")
 
-    def test_correct_error_is_raised_when_plan_id_is_not_a_valid_uuid(self) -> None:
-        with self.assertRaises(self.controller.PlanIdInvalid):
+    def test_error_is_raised_when_plan_id_is_not_a_valid_uuid(self) -> None:
+        with self.assertRaises(self.controller.FormError):
             self._process_form(plan_id="1872da")
 
-    def test_correct_error_is_raised_when_amount_is_empty(self) -> None:
-        with self.assertRaises(self.controller.AmountNotAnInteger):
+    def test_error_is_raised_when_amount_is_empty(self) -> None:
+        with self.assertRaises(self.controller.FormError):
             self._process_form(amount="")
 
-    def test_correct_error_is_raised_when_amount_is_negative(self) -> None:
-        with self.assertRaises(self.controller.AmountNegativeOrZero):
+    def test_error_is_raised_when_amount_is_negative(self) -> None:
+        with self.assertRaises(self.controller.FormError):
             self._process_form(amount="-1")
 
-    def test_correct_error_is_raised_when_amount_is_zero(self) -> None:
-        with self.assertRaises(self.controller.AmountNegativeOrZero):
+    def test_error_is_raised_when_amount_is_zero(self) -> None:
+        with self.assertRaises(self.controller.FormError):
             self._process_form(amount="0")
 
-    def test_correct_error_is_raised_when_amount_is_a_floating_number(self) -> None:
+    def test_error_is_raised_when_amount_is_a_floating_number(self) -> None:
         for amount in ["1.1", "-1.1"]:
-            with self.assertRaises(self.controller.AmountNotAnInteger):
+            with self.assertRaises(self.controller.FormError):
                 self._process_form(amount=amount)
 
     def test_correct_error_message_returned_for_plan_id_when_form_data_is_empty_string(
         self,
     ) -> None:
-        with self.assertRaises(self.controller.Error):
+        with self.assertRaises(self.controller.FormError):
             self._process_form(plan_id="", amount="")
         self.assertEqual(
             self.form.plan_id_errors, [self.translator.gettext("Plan ID is invalid.")]
@@ -62,7 +62,7 @@ class PayConsumerProductControllerTests(TestCase):
     def test_correct_error_message_returned_when_plan_id_is_invalid_uuid(
         self,
     ) -> None:
-        with self.assertRaises(self.controller.Error):
+        with self.assertRaises(self.controller.FormError):
             self._process_form(plan_id="aa18781hh")
         self.assertEqual(
             self.form.plan_id_errors,
@@ -72,7 +72,7 @@ class PayConsumerProductControllerTests(TestCase):
     def test_correct_error_message_returned_when_amount_is_negative_int_string(
         self,
     ) -> None:
-        with self.assertRaises(self.controller.Error):
+        with self.assertRaises(self.controller.FormError):
             self._process_form(amount="-1")
         self.assertEqual(
             self.form.amount_errors,
@@ -82,7 +82,7 @@ class PayConsumerProductControllerTests(TestCase):
     def test_correct_error_message_returned_when_amount_is_positive_float_string(
         self,
     ) -> None:
-        with self.assertRaises(self.controller.Error):
+        with self.assertRaises(self.controller.FormError):
             self._process_form(amount="1.1")
         self.assertEqual(
             self.form.amount_errors,
@@ -94,7 +94,7 @@ class PayConsumerProductControllerTests(TestCase):
     def test_correct_error_message_returned_when_amount_is_negative_float_string(
         self,
     ) -> None:
-        with self.assertRaises(self.controller.Error):
+        with self.assertRaises(self.controller.FormError):
             self._process_form(amount="-1.1")
         self.assertEqual(
             self.form.amount_errors,
@@ -106,7 +106,7 @@ class PayConsumerProductControllerTests(TestCase):
     def test_correct_error_message_returned_when_amount_string_contains_letters(
         self,
     ) -> None:
-        with self.assertRaises(self.controller.Error):
+        with self.assertRaises(self.controller.FormError):
             self._process_form(amount="1a")
         self.assertEqual(
             self.form.amount_errors,

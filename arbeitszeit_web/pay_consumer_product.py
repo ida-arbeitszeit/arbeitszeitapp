@@ -32,16 +32,7 @@ class PayConsumerProductRequestImpl:
 @inject
 @dataclass
 class PayConsumerProductController:
-    class Error(Exception):
-        pass
-
-    class PlanIdInvalid(Error):
-        pass
-
-    class AmountNegativeOrZero(Error):
-        pass
-
-    class AmountNotAnInteger(Error):
+    class FormError(Exception):
         pass
 
     translator: Translator
@@ -55,19 +46,19 @@ class PayConsumerProductController:
             form.plan_id_field().attach_error(
                 self.translator.gettext("Plan ID is invalid.")
             )
-            raise self.PlanIdInvalid()
+            raise self.FormError()
         try:
             amount = int(form.amount_field().get_value())
             if amount <= 0:
                 form.amount_field().attach_error(
                     self.translator.gettext("Must be a number larger than zero.")
                 )
-                raise self.AmountNegativeOrZero()
+                raise self.FormError()
         except ValueError:
             form.amount_field().attach_error(
                 self.translator.gettext("This is not an integer.")
             )
-            raise self.AmountNotAnInteger()
+            raise self.FormError()
         return PayConsumerProductRequestImpl(current_user, plan_id, amount)
 
 

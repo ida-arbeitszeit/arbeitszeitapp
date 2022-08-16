@@ -37,7 +37,7 @@ class PayConsumerProductView:
         assert current_user
         try:
             use_case_request = self.controller.import_form_data(current_user, form)
-        except self.controller.Error:
+        except self.controller.FormError:
             return Response(self._render_template(form), status=400)
         response = self.pay_consumer_product(use_case_request)
         view_model = self.presenter.present(response)
