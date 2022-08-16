@@ -7,7 +7,6 @@ from flask import redirect, url_for
 from injector import inject
 
 from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
-from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
 from arbeitszeit_flask.forms import CreateDraftForm
 from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_flask.types import Response
@@ -15,7 +14,6 @@ from arbeitszeit_flask.views.http_404_view import Http404View
 from arbeitszeit_web.create_draft import CreateDraftController
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.request import Request
-from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
 
 
@@ -23,12 +21,10 @@ from arbeitszeit_web.translator import Translator
 @dataclass
 class CreateDraftView:
     request: Request
-    session: Session
     notifier: Notifier
     translator: Translator
     prefilled_data_controller: CreateDraftController
     create_draft: CreatePlanDraft
-    get_draft_summary: GetDraftSummary
     template_renderer: UserTemplateRenderer
     http_404_view: Http404View
 
