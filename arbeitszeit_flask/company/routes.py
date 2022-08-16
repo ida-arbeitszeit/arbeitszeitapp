@@ -168,7 +168,7 @@ def my_purchases(
     )
 
 
-@CompanyRoute("/company/create_draft/<uuid:plan_id>", methods=["GET", "POST"])
+@CompanyRoute("/company/draft/from-plan/<uuid:plan_id>", methods=["GET", "POST"])
 @commit_changes
 def create_draft_from_plan(
     plan_id: UUID,
@@ -178,8 +178,10 @@ def create_draft_from_plan(
     process_form_use_case: CreatePlanDraft,
     process_form_controller: CreateDraftController,
     process_form_presenter: CreateDraftPresenter,
+    not_found_view: Http404View,
     template_renderer: UserTemplateRenderer,
 ) -> Response:
+    status_code: int = 200
     form = CreateDraftForm(request.form)
     if request.method == "GET":
         current_user = session.get_current_user()
@@ -187,17 +189,20 @@ def create_draft_from_plan(
         response = create_form_use_case.get_plan_summary_for_company(
             plan_id=plan_id, company_id=current_user
         )
-        assert response.plan_summary is not None
-        create_form_presenter.show_prefilled_draft_data(
-            summary_data=response.plan_summary, form=form
-        )
-
+        if response.plan_summary is None:
+            return not_found_view.get_response()
+        else:
+            create_form_presenter.show_prefilled_draft_data(
+                summary_data=response.plan_summary, form=form
+            )
     if request.method == "POST":
-        use_case_request = process_form_controller.import_form_data(draft_form=form)
-        use_case_response = process_form_use_case(use_case_request)
-        view_model = process_form_presenter.present_plan_creation(use_case_response)
-        if view_model.redirect_url is not None:
-            return redirect(view_model.redirect_url)
+        if form.validate():
+            use_case_request = process_form_controller.import_form_data(draft_form=form)
+            use_case_response = process_form_use_case(use_case_request)
+            view_model = process_form_presenter.present_plan_creation(use_case_response)
+            if view_model.redirect_url is not None:
+                return redirect(view_model.redirect_url)
+        status_code = 400
     return FlaskResponse(
         template_renderer.render_template(
             "company/create_draft.html",
@@ -209,7 +214,8 @@ def create_draft_from_plan(
                     cancel_url="/company/create_draft",
                 ),
             ),
-        )
+        ),
+        status=status_code,
     )
 
 
