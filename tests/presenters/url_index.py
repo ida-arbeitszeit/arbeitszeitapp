@@ -61,6 +61,9 @@ class UrlIndexTestImpl:
     def get_line_plot_of_company_a_account(self, company_id: UUID) -> str:
         return f"line plot for {company_id}"
 
+    def get_pay_consumer_product_url(self, amount: int, plan_id: UUID) -> str:
+        return f"pay consumer product url: {amount}, {plan_id}"
+
 
 class RequestCoopUrlIndexTestImpl:
     def get_request_coop_url(self) -> str:

@@ -30,6 +30,9 @@ class WtFormField(Generic[T]):
     def attach_error(self, message: str) -> None:
         self._field.errors.append(message)
 
+    def set_value(self, value: T) -> None:
+        self._field.data = value
+
     @property
     def _field(self):
         return getattr(self._form, self._field_name)
@@ -206,19 +209,23 @@ class PayConsumerProductForm(Form):
     plan_id = StringField(
         trans.lazy_gettext("Plan ID"),
         render_kw={"placeholder": trans.lazy_gettext("Plan ID")},
-        validators=[validators.InputRequired()],
+        validators=[
+            validators.InputRequired(),
+        ],
     )
     amount = StringField(
         trans.lazy_gettext("Amount"),
         render_kw={"placeholder": trans.lazy_gettext("Amount")},
-        validators=[validators.InputRequired()],
+        validators=[
+            validators.InputRequired(),
+        ],
     )
 
-    def get_amount_field(self) -> str:
-        return self.data["amount"]
+    def amount_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="amount")
 
-    def get_plan_id_field(self) -> str:
-        return self.data["plan_id"].strip()
+    def plan_id_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="plan_id")
 
 
 class CompanySearchForm(Form):

@@ -12,6 +12,7 @@ from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCa
 from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
 from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
 from arbeitszeit.use_cases.list_workers import ListWorkers
+from arbeitszeit.use_cases.pay_consumer_product import PayConsumerProduct
 from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProduction
 from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
 from arbeitszeit.use_cases.register_company import RegisterCompany
@@ -45,6 +46,7 @@ from arbeitszeit_flask.views.invite_worker_to_company import (
     InviteWorkerGetRequestHandler,
     InviteWorkerPostRequestHandler,
 )
+from arbeitszeit_flask.views.pay_consumer_product import PayConsumerProductView
 from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
 from arbeitszeit_flask.views.signup_accountant_view import SignupAccountantView
@@ -85,6 +87,10 @@ from arbeitszeit_web.invite_worker_to_company import (
     InviteWorkerToCompanyPresenter,
 )
 from arbeitszeit_web.notification import Notifier
+from arbeitszeit_web.pay_consumer_product import (
+    PayConsumerProductController,
+    PayConsumerProductPresenter,
+)
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from arbeitszeit_web.presenters.accountant_invitation_presenter import (
     AccountantInvitationEmailView,
@@ -334,6 +340,23 @@ class ViewsModule(Module):
     ) -> PayMeansOfProductionView:
         return PayMeansOfProductionView(
             controller, pay_means_of_production, presenter, template_renderer
+        )
+
+    @provider
+    def provide_pay_consumer_product_view(
+        self,
+        flask_session: FlaskSession,
+        pay_consumer_product: PayConsumerProduct,
+        controller: PayConsumerProductController,
+        presenter: PayConsumerProductPresenter,
+        template_renderer: TemplateRenderer,
+    ) -> PayConsumerProductView:
+        return PayConsumerProductView(
+            flask_session,
+            pay_consumer_product,
+            controller,
+            presenter,
+            template_renderer,
         )
 
     @provider

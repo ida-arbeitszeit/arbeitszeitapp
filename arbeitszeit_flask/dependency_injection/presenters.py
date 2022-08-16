@@ -17,7 +17,6 @@ from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPrese
 from arbeitszeit_web.get_plan_summary_company import (
     GetPlanSummaryCompanySuccessPresenter,
 )
-from arbeitszeit_web.get_plan_summary_member import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyPresenter
 from arbeitszeit_web.language_service import LanguageService
 from arbeitszeit_web.notification import Notifier
@@ -201,14 +200,6 @@ class PresenterModule(Module):
             email_configuration=email_configuration,
             translator=translator,
         )
-
-    @provider
-    def provide_get_plan_summary_success_presenter(
-        self,
-        trans: Translator,
-        plan_summary_service: PlanSummaryFormatter,
-    ) -> GetPlanSummarySuccessPresenter:
-        return GetPlanSummarySuccessPresenter(trans, plan_summary_service)
 
     @provider
     def provide_get_plan_summary_company_success_presenter(
