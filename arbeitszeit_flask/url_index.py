@@ -31,6 +31,9 @@ class GeneralUrlIndex:
     def get_language_change_url(self, language_code: str) -> str:
         return url_for("auth.set_language", language=language_code)
 
+    def get_draft_list_url(self) -> str:
+        return url_for("main_company.draft_list")
+
     def get_draft_summary_url(self, draft_id: UUID) -> str:
         return url_for("main_company.get_draft_summary", draft_id=draft_id)
 

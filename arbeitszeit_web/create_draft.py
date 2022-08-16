@@ -10,7 +10,9 @@ from arbeitszeit.plan_summary import PlanSummary
 from arbeitszeit.use_cases import CreatePlanDraftRequest, DraftSummarySuccess
 from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraftResponse
 from arbeitszeit_web.forms import DraftForm
+from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.session import Session
+from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 
 
@@ -72,11 +74,16 @@ class CreateDraftPresenter:
         redirect_url: Optional[str]
 
     url_index: UrlIndex
+    notifier: Notifier
+    translator: Translator
 
     def present_plan_creation(self, response: CreatePlanDraftResponse) -> ViewModel:
         redirect_url: Optional[str]
         if response.draft_id is None:
             redirect_url = None
         else:
-            redirect_url = self.url_index.get_draft_summary_url(response.draft_id)
+            redirect_url = self.url_index.get_draft_list_url()
+            self.notifier.display_info(
+                self.translator.gettext("Plan draft successfully created")
+            )
         return self.ViewModel(redirect_url=redirect_url)
