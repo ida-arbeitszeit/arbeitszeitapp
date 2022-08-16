@@ -1,12 +1,14 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from flask import Response, request
+from flask import Response as FlaskResponse
+from flask import redirect, request, url_for
 
 from arbeitszeit.use_cases import PayConsumerProduct
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import PayConsumerProductForm
 from arbeitszeit_flask.template import TemplateRenderer
+from arbeitszeit_flask.types import Response
 from arbeitszeit_web.pay_consumer_product import (
     PayConsumerProductController,
     PayConsumerProductPresenter,
@@ -28,7 +30,7 @@ class PayConsumerProductView:
             form.amount_field().set_value(amount)
         if plan_id:
             form.plan_id_field().set_value(plan_id)
-        return Response(self._render_template(form=form))
+        return FlaskResponse(self._render_template(form=form))
 
     def respond_to_post(self, form: PayConsumerProductForm) -> Response:
         if not form.validate():
@@ -38,18 +40,19 @@ class PayConsumerProductView:
         try:
             use_case_request = self.controller.import_form_data(current_user, form)
         except self.controller.FormError:
-            return Response(self._render_template(form), status=400)
+            return self._handle_invalid_form(form)
         response = self.pay_consumer_product(use_case_request)
         view_model = self.presenter.present(response)
         if view_model.status_code == 200:
-            # reset form
-            form = PayConsumerProductForm()
-        return Response(self._render_template(form=form), status=view_model.status_code)
+            return redirect(url_for("main_member.pay_consumer_product"))
+        return FlaskResponse(
+            self._render_template(form=form), status=view_model.status_code
+        )
 
-    def _render_template(self, form: Optional[PayConsumerProductForm] = None) -> str:
+    def _render_template(self, form: PayConsumerProductForm) -> str:
         return self.template_renderer.render_template(
             "member/pay_consumer_product.html", context=dict(form=form)
         )
 
     def _handle_invalid_form(self, form: PayConsumerProductForm) -> Response:
-        return Response(self._render_template(form), status=400)
+        return FlaskResponse(self._render_template(form), status=400)
