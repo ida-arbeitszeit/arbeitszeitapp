@@ -6,7 +6,7 @@ from uuid import uuid4
 from arbeitszeit.plan_summary import PlanSummary
 from arbeitszeit.use_cases import DraftSummarySuccess
 from arbeitszeit_web.create_draft import GetPrefilledDraftDataPresenter
-from tests.presenters.forms import DraftForm
+from tests.forms import DraftForm
 
 from .dependency_injection import get_dependency_injector
 

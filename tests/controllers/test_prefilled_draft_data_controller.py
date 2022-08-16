@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from arbeitszeit.use_cases import CreatePlanDraftRequest
 from arbeitszeit_web.create_draft import CreateDraftController
-from tests.presenters.forms import DraftForm
+from tests.forms import DraftForm
 from tests.session import FakeSession
 
 from .dependency_injection import get_dependency_injector

@@ -1,5 +1,5 @@
 from decimal import Decimal
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases import InviteWorkerToCompanyUseCase
 from arbeitszeit.use_cases.send_accountant_registration_token import (
@@ -246,3 +246,8 @@ class GeneralUrlIndexTests(ViewTestCase):
             )
         )
         return response.invite_id
+
+    def test_url_for_payment_of_consumer_product_leads_to_functional_url(self) -> None:
+        url = self.url_index.get_pay_consumer_product_url(amount=1, plan_id=uuid4())
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)

@@ -1,4 +1,4 @@
-from injector import Injector, Module, provider, singleton
+from injector import Injector, Module, inject, provider, singleton
 
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
 from arbeitszeit_web.formatters.plan_summary_formatter import PlanSummaryFormatter
@@ -324,3 +324,14 @@ def get_dependency_injector() -> Injector:
     return Injector(
         modules=[TestingModule(), InMemoryModule(), PresenterTestsInjector()]
     )
+
+
+def injection_test(original_test):
+    injector = get_dependency_injector()
+
+    def wrapper(*args, **kwargs):
+        return injector.call_with_injection(
+            inject(original_test), args=args, kwargs=kwargs
+        )
+
+    return wrapper

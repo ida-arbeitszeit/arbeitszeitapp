@@ -53,3 +53,11 @@ class DraftForm(Protocol):
 
     def is_public_service_field(self) -> FormField[bool]:
         ...
+
+
+class PayConsumerProductForm(Protocol):
+    def amount_field(self) -> FormField[str]:
+        ...
+
+    def plan_id_field(self) -> FormField[str]:
+        ...
