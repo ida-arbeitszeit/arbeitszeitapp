@@ -25,9 +25,9 @@ class PayConsumerProductView:
         amount: Optional[str] = request.args.get("amount")
         plan_id: Optional[str] = request.args.get("plan_id")
         if amount:
-            form.amount_field().set_default_value(amount)
+            form.amount_field().set_value(amount)
         if plan_id:
-            form.plan_id_field().set_default_value(plan_id)
+            form.plan_id_field().set_value(plan_id)
         return Response(self._render_template(form=form))
 
     def respond_to_post(self, form: PayConsumerProductForm) -> Response:

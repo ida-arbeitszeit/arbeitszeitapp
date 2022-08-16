@@ -30,7 +30,7 @@ class WtFormField(Generic[T]):
     def attach_error(self, message: str) -> None:
         self._field.errors.append(message)
 
-    def set_default_value(self, value: T) -> None:
+    def set_value(self, value: T) -> None:
         self._field.data = value
 
     @property
