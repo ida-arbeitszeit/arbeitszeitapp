@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from flask import Response, request
+from flask import Response as FlaskResponse
+from flask import request
 from flask_login import current_user
 
 from arbeitszeit import use_cases
@@ -15,6 +16,7 @@ from arbeitszeit_flask.forms import (
     PlanSearchForm,
 )
 from arbeitszeit_flask.template import UserTemplateRenderer
+from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views import (
     CompanyWorkInviteView,
     Http404View,
@@ -50,7 +52,7 @@ def my_purchases(
     assert member is not None
     response = query_purchases(member)
     view_model = presenter.present_member_purchases(response)
-    return Response(
+    return FlaskResponse(
         template_renderer.render_template(
             "member/my_purchases.html",
             context=dict(view_model=view_model),
@@ -122,7 +124,7 @@ def dashboard(
 ) -> Response:
     response = get_member_dashboard(UUID(current_user.id))
     view_model = presenter.present(response)
-    return Response(
+    return FlaskResponse(
         template_renderer.render_template(
             "member/dashboard.html",
             dict(view_model=view_model),
@@ -136,7 +138,7 @@ def my_account(
     template_renderer: UserTemplateRenderer,
 ) -> Response:
     response = get_member_account(UUID(current_user.id))
-    return Response(
+    return FlaskResponse(
         template_renderer.render_template(
             "member/my_account.html",
             context=dict(
@@ -155,7 +157,7 @@ def statistics(
 ) -> Response:
     use_case_response = get_statistics()
     view_model = presenter.present(use_case_response)
-    return Response(
+    return FlaskResponse(
         template_renderer.render_template(
             "member/statistics.html", context=dict(view_model=view_model)
         )
@@ -173,7 +175,7 @@ def plan_summary(
     use_case_response = get_plan_summary_member(plan_id)
     if isinstance(use_case_response, use_cases.GetPlanSummaryMember.Success):
         view_model = presenter.present(use_case_response)
-        return Response(
+        return FlaskResponse(
             template_renderer.render_template(
                 "member/plan_summary.html",
                 context=dict(view_model=view_model.to_dict()),
@@ -224,7 +226,7 @@ def coop_summary(
 
 @MemberRoute("/member/hilfe")
 def hilfe(template_renderer: UserTemplateRenderer) -> Response:
-    return Response(template_renderer.render_template("member/help.html"))
+    return FlaskResponse(template_renderer.render_template("member/help.html"))
 
 
 @MemberRoute("/member/invite_details/<uuid:invite_id>", methods=["GET", "POST"])
