@@ -311,15 +311,3 @@ class ViewsModule(Module):
             presenter,
             list_workers,
         )
-
-    @provider
-    def provide_pay_means_of_production_view(
-        self,
-        controller: PayMeansOfProductionController,
-        pay_means_of_production: PayMeansOfProduction,
-        presenter: PayMeansOfProductionPresenter,
-        template_renderer: UserTemplateRenderer,
-    ) -> PayMeansOfProductionView:
-        return PayMeansOfProductionView(
-            controller, pay_means_of_production, presenter, template_renderer
-        )

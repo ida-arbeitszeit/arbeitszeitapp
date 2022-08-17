@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from flask import Response, redirect
+from injector import inject
 
 from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProduction
 from arbeitszeit_flask.forms import PayMeansOfProductionForm
@@ -11,6 +12,7 @@ from arbeitszeit_web.controllers.pay_means_of_production_controller import (
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 
 
+@inject
 @dataclass
 class PayMeansOfProductionView:
     controller: PayMeansOfProductionController

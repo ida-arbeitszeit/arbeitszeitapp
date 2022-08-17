@@ -24,6 +24,7 @@ from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCa
 from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
+from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProduction
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts
 from arbeitszeit_flask.control_thresholds import ControlThresholdsFlask
 from arbeitszeit_flask.database import get_social_accounting
@@ -214,7 +215,6 @@ class CompanyModule(CompanyPresenterModule):
         self, session: Session
     ) -> CreateDraftController:
         return CreateDraftController(session=session)
-
 
 class FlaskModule(PresenterModule):
     @provider
