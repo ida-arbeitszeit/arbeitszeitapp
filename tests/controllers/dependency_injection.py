@@ -4,9 +4,6 @@ from arbeitszeit_web.answer_company_work_invite import AnswerCompanyWorkInviteCo
 from arbeitszeit_web.controllers.end_cooperation_controller import (
     EndCooperationController,
 )
-from arbeitszeit_web.controllers.pay_means_of_production_controller import (
-    PayMeansOfProductionController,
-)
 from arbeitszeit_web.controllers.send_work_certificates_to_worker_controller import (
     SendWorkCertificatesToWorkerController,
 )
@@ -60,15 +57,6 @@ class ControllerTestsModule(Module):
     ) -> PayConsumerProductController:
         return PayConsumerProductController(
             translator=translator,
-        )
-
-    @provider
-    def provide_pay_means_of_production_controller(
-        self, session: FakeSession, request: FakeRequest
-    ) -> PayMeansOfProductionController:
-        return PayMeansOfProductionController(
-            session=session,
-            request=request,
         )
 
     @provider

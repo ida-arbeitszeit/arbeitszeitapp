@@ -103,6 +103,25 @@ class PayConsumerProductFakeForm:
         self._plan_id = plan_id
 
 
+class PayMeansFakeForm:
+    def __init__(self, amount: str, plan_id: str, category: str) -> None:
+        self._amount = amount
+        self._plan_id = plan_id
+        self._category = category
+        self.amount_errors: List[str] = []
+        self.plan_id_errors: List[str] = []
+        self.category_errors: List[str] = []
+
+    def amount_field(self) -> FormFieldImpl[str]:
+        return FormFieldImpl(value=self._amount, errors=self.amount_errors)
+
+    def plan_id_field(self) -> FormFieldImpl[str]:
+        return FormFieldImpl(value=self._plan_id, errors=self.plan_id_errors)
+
+    def category_field(self) -> FormFieldImpl[str]:
+        return FormFieldImpl(value=self._category, errors=self.category_errors)
+
+
 class FormFieldImpl(Generic[T]):
     def __init__(self, value: T, errors: Optional[List[str]] = None) -> None:
         if errors is None:

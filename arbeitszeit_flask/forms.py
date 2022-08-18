@@ -354,33 +354,36 @@ class PayMeansOfProductionForm(Form):
         render_kw={"placeholder": trans.lazy_gettext("Plan ID")},
         validators=[
             validators.InputRequired(),
-            validators.UUID(message=error_msgs["uuid"]),
         ],
     )
-    amount = IntegerField(
+    amount = StringField(
         render_kw={"placeholder": trans.lazy_gettext("Amount")},
         validators=[
             validators.InputRequired(),
-            validators.NumberRange(min=0, message=error_msgs["num_range_min_0"]),
         ],
     )
     choices = [
+        ("", ""),
         ("Fixed", trans.lazy_gettext(trans.lazy_gettext("Fixed means of production"))),
         (
             "Liquid",
             trans.lazy_gettext("Liquid means of production"),
         ),
     ]
-    category = SelectField(choices=choices, validators=[validators.DataRequired()])
+    category = SelectField(
+        trans.lazy_gettext("Type of payment"),
+        choices=choices,
+        validators=[validators.DataRequired()],
+    )
 
-    def get_amount_field(self) -> int:
-        return self.data["amount"]
+    def amount_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="amount")
 
-    def get_plan_id_field(self) -> str:
-        return self.data["plan_id"].strip()
+    def plan_id_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="plan_id")
 
-    def get_category_field(self) -> str:
-        return self.data["category"]
+    def category_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="category")
 
 
 class AnswerCompanyWorkInviteForm(Form):

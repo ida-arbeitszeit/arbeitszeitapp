@@ -24,7 +24,6 @@ from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCa
 from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
-from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProduction
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts
 from arbeitszeit_flask.control_thresholds import ControlThresholdsFlask
 from arbeitszeit_flask.database import get_social_accounting
@@ -78,9 +77,6 @@ from arbeitszeit_web.controllers.end_cooperation_controller import (
     EndCooperationController,
 )
 from arbeitszeit_web.controllers.list_workers_controller import ListWorkersController
-from arbeitszeit_web.controllers.pay_means_of_production_controller import (
-    PayMeansOfProductionController,
-)
 from arbeitszeit_web.controllers.send_work_certificates_to_worker_controller import (
     SendWorkCertificatesToWorkerController,
 )
@@ -205,16 +201,11 @@ class CompanyModule(CompanyPresenterModule):
         return SendWorkCertificatesToWorkerController(session, request)
 
     @provider
-    def provide_pay_means_of_production_controller(
-        self, session: FlaskSession, request: FlaskRequest
-    ) -> PayMeansOfProductionController:
-        return PayMeansOfProductionController(session, request)
-
-    @provider
     def provide_prefilled_draft_data_controller(
         self, session: Session
     ) -> CreateDraftController:
         return CreateDraftController(session=session)
+
 
 class FlaskModule(PresenterModule):
     @provider

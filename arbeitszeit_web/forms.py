@@ -61,3 +61,14 @@ class PayConsumerProductForm(Protocol):
 
     def plan_id_field(self) -> FormField[str]:
         ...
+
+
+class PayMeansOfProductionForm(Protocol):
+    def amount_field(self) -> FormField[str]:
+        ...
+
+    def plan_id_field(self) -> FormField[str]:
+        ...
+
+    def category_field(self) -> FormField[str]:
+        ...
