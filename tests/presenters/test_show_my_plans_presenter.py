@@ -42,6 +42,7 @@ class ShowMyPlansPresenterTests(TestCase):
                 non_active_plans=[],
                 active_plans=[],
                 expired_plans=[],
+                drafts=[],
             )
         )
         self.assertTrue(presentation.notifications)
@@ -176,6 +177,7 @@ class ShowMyPlansPresenterTests(TestCase):
             non_active_plans=[],
             active_plans=[],
             expired_plans=[],
+            drafts=[],
         )
 
     def response_with_one_active_plan(self, plan: Plan) -> ShowMyPlansResponse:
@@ -185,6 +187,7 @@ class ShowMyPlansPresenterTests(TestCase):
             non_active_plans=[],
             active_plans=[plan_info],
             expired_plans=[],
+            drafts=[],
         )
 
     def response_with_one_expired_plan(self, plan: Plan) -> ShowMyPlansResponse:
@@ -194,6 +197,7 @@ class ShowMyPlansPresenterTests(TestCase):
             non_active_plans=[],
             active_plans=[],
             expired_plans=[plan_info],
+            drafts=[],
         )
 
     def response_with_one_non_active_plan(self, plan: Plan) -> ShowMyPlansResponse:
@@ -203,6 +207,7 @@ class ShowMyPlansPresenterTests(TestCase):
             non_active_plans=[plan_info],
             active_plans=[],
             expired_plans=[],
+            drafts=[],
         )
 
     def _create_active_plan(self, timeframe: int = 1) -> Plan:

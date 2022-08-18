@@ -237,7 +237,7 @@ def my_plans(
     show_my_plans_presenter: ShowMyPlansPresenter,
 ):
     request = ShowMyPlansRequest(company_id=UUID(current_user.id))
-    response = show_my_plans_use_case(request)
+    response = show_my_plans_use_case.show_company_plans(request)
     view_model = show_my_plans_presenter.present(response)
 
     return template_renderer.render_template(
