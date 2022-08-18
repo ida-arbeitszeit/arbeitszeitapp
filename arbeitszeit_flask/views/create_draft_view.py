@@ -60,10 +60,6 @@ class CreateDraftView:
         return response.draft_id
 
     def respond_to_get(self) -> Response:
-        """
-        show user input form for plan draft.
-        prefilled data comes from exired plan or saved draft if available in request arguments.
-        """
         return FlaskResponse(
             self.template_renderer.render_template(
                 "company/create_draft.html",

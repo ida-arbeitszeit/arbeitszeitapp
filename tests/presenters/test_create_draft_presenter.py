@@ -18,7 +18,7 @@ class PresenterTests(TestCase):
         self.notifier = self.injector.get(NotifierTestImpl)
         self.translator = self.injector.get(FakeTranslator)
 
-    def test_on_successful_draft_creation_redirect_to_draft_detail_page(self) -> None:
+    def test_on_successful_draft_creation_redirect_to_draft_list_page(self) -> None:
         draft_id = uuid4()
         response = CreatePlanDraftResponse(draft_id=draft_id, rejection_reason=None)
         view_model = self.presenter.present_plan_creation(response)
