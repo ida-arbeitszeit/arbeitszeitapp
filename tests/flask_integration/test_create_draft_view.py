@@ -1,9 +1,7 @@
-from dataclasses import asdict
 from decimal import Decimal
 from typing import Dict
 
 from arbeitszeit.repositories import PlanDraftRepository
-from tests.controllers.test_prefilled_draft_data_controller import FakeDraftForm
 from tests.data_generators import PlanGenerator
 from tests.request import FakeRequest
 
@@ -67,7 +65,7 @@ class AuthenticatedCompanyTestsForPost(ViewTestCase):
         )
 
     def _create_form_data(self, action: str = "cancel") -> Dict:
-        test_data = FakeDraftForm(
+        return dict(
             prd_name="test name",
             description="test description",
             timeframe=14,
@@ -76,10 +74,9 @@ class AuthenticatedCompanyTestsForPost(ViewTestCase):
             costs_p=Decimal("10.5"),
             costs_r=Decimal("15"),
             costs_a=Decimal("20"),
-            productive_or_public="public",
+            productive_or_public=True,
             action=action,
         )
-        return asdict(test_data)
 
     def _count_drafts_of_company(self) -> int:
         return len(

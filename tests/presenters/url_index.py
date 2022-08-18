@@ -26,6 +26,9 @@ class UrlIndexTestImpl:
     def get_company_dashboard_url(self) -> str:
         return "company dashboard url"
 
+    def get_draft_list_url(self) -> str:
+        return "fake draft list url"
+
     def get_draft_summary_url(self, draft_id: UUID) -> str:
         return f"fake_draft_url:{draft_id}"
 
