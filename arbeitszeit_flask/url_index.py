@@ -31,6 +31,9 @@ class GeneralUrlIndex:
     def get_language_change_url(self, language_code: str) -> str:
         return url_for("auth.set_language", language=language_code)
 
+    def get_draft_list_url(self) -> str:
+        return url_for("main_company.draft_list")
+
     def get_draft_summary_url(self, draft_id: UUID) -> str:
         return url_for("main_company.get_draft_summary", draft_id=draft_id)
 
@@ -143,7 +146,7 @@ class CompanyUrlIndex:
         return url_for("main_company.toggle_availability", plan_id=plan_id)
 
     def get_renew_plan_url(self, plan_id: UUID) -> str:
-        return url_for("main_company.create_draft", expired_plan_id=plan_id)
+        return url_for("main_company.create_draft_from_plan", plan_id=plan_id)
 
     def get_hide_plan_url(self, plan_id: UUID) -> str:
         return url_for("main_company.hide_plan", plan_id=plan_id)

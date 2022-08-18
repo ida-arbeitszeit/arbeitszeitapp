@@ -6,13 +6,9 @@ from arbeitszeit.use_cases import (
     ShowCompanyWorkInviteDetailsUseCase,
 )
 from arbeitszeit.use_cases.create_cooperation import CreateCooperation
-from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
 from arbeitszeit.use_cases.end_cooperation import EndCooperation
 from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCase
-from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
-from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
 from arbeitszeit.use_cases.list_workers import ListWorkers
-from arbeitszeit.use_cases.pay_consumer_product import PayConsumerProduct
 from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProduction
 from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
 from arbeitszeit.use_cases.register_company import RegisterCompany
@@ -22,7 +18,6 @@ from arbeitszeit.use_cases.send_work_certificates_to_worker import (
 )
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts
 from arbeitszeit_flask.database.repositories import MemberRepository
-from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.template import (
     AnonymousUserTemplateRenderer,
@@ -40,13 +35,11 @@ from arbeitszeit_flask.views.accountant_invitation_email_view import (
 )
 from arbeitszeit_flask.views.company_dashboard_view import CompanyDashboardView
 from arbeitszeit_flask.views.create_cooperation_view import CreateCooperationView
-from arbeitszeit_flask.views.create_draft_view import CreateDraftView
 from arbeitszeit_flask.views.end_cooperation_view import EndCooperationView
 from arbeitszeit_flask.views.invite_worker_to_company import (
     InviteWorkerGetRequestHandler,
     InviteWorkerPostRequestHandler,
 )
-from arbeitszeit_flask.views.pay_consumer_product import PayConsumerProductView
 from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
 from arbeitszeit_flask.views.signup_accountant_view import SignupAccountantView
@@ -77,19 +70,10 @@ from arbeitszeit_web.controllers.show_my_accounts_controller import (
     ShowMyAccountsController,
 )
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
-from arbeitszeit_web.create_draft import (
-    CreateDraftController,
-    GetPrefilledDraftDataPresenter,
-)
 from arbeitszeit_web.email import MailService
 from arbeitszeit_web.invite_worker_to_company import (
     InviteWorkerToCompanyController,
     InviteWorkerToCompanyPresenter,
-)
-from arbeitszeit_web.notification import Notifier
-from arbeitszeit_web.pay_consumer_product import (
-    PayConsumerProductController,
-    PayConsumerProductPresenter,
 )
 from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from arbeitszeit_web.presenters.accountant_invitation_presenter import (
@@ -118,8 +102,6 @@ from arbeitszeit_web.presenters.show_my_accounts_presenter import (
 )
 from arbeitszeit_web.register_company import RegisterCompanyController
 from arbeitszeit_web.register_member import RegisterMemberController
-from arbeitszeit_web.session import Session
-from arbeitszeit_web.translator import Translator
 
 
 class ViewsModule(Module):
@@ -340,50 +322,4 @@ class ViewsModule(Module):
     ) -> PayMeansOfProductionView:
         return PayMeansOfProductionView(
             controller, pay_means_of_production, presenter, template_renderer
-        )
-
-    @provider
-    def provide_pay_consumer_product_view(
-        self,
-        flask_session: FlaskSession,
-        pay_consumer_product: PayConsumerProduct,
-        controller: PayConsumerProductController,
-        presenter: PayConsumerProductPresenter,
-        template_renderer: TemplateRenderer,
-    ) -> PayConsumerProductView:
-        return PayConsumerProductView(
-            flask_session,
-            pay_consumer_product,
-            controller,
-            presenter,
-            template_renderer,
-        )
-
-    @provider
-    def provide_create_draft_view(
-        self,
-        request: FlaskRequest,
-        session: Session,
-        notifier: Notifier,
-        translator: Translator,
-        prefilled_data_controller: CreateDraftController,
-        get_plan_summary_company: GetPlanSummaryCompany,
-        create_draft: CreatePlanDraft,
-        get_draft_summary: GetDraftSummary,
-        create_draft_presenter: GetPrefilledDraftDataPresenter,
-        template_renderer: UserTemplateRenderer,
-        http_404_view: Http404View,
-    ) -> CreateDraftView:
-        return CreateDraftView(
-            request,
-            session,
-            notifier,
-            translator,
-            prefilled_data_controller,
-            get_plan_summary_company,
-            create_draft,
-            get_draft_summary,
-            create_draft_presenter,
-            template_renderer,
-            http_404_view,
         )
