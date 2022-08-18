@@ -1,15 +1,11 @@
 from decimal import Decimal
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases import InviteWorkerToCompanyUseCase
 from arbeitszeit.use_cases.send_accountant_registration_token import (
     SendAccountantRegistrationTokenUseCase,
 )
-from arbeitszeit_flask.url_index import (
-    CompanyUrlIndex,
-    FlaskPlotsUrlIndex,
-    GeneralUrlIndex,
-)
+from arbeitszeit_flask.url_index import CompanyUrlIndex, GeneralUrlIndex
 from arbeitszeit_web.session import UserRole
 from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
@@ -77,7 +73,7 @@ class CompanyUrlIndexTests(ViewTestCase):
 class PlotUrlIndexTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.url_index = FlaskPlotsUrlIndex()
+        self.url_index = GeneralUrlIndex()
         self.company = self.login_company()
 
     def test_url_for_barplot_for_certificates_returns_png(self) -> None:
@@ -167,7 +163,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_company()
         plan = self.plan_generator.create_plan()
-        url = self.url_index.get_company_plan_summary_url(plan.id)
+        url = self.url_index.get_plan_summary_url(UserRole.company, plan.id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -176,7 +172,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_member()
         plan = self.plan_generator.create_plan()
-        url = self.url_index.get_member_plan_summary_url(plan.id)
+        url = self.url_index.get_plan_summary_url(UserRole.member, plan.id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -241,6 +237,14 @@ class GeneralUrlIndexTests(ViewTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
+    def test_that_draft_list_url_returns_success_status_when_requested_as_company(
+        self,
+    ) -> None:
+        self.login_company()
+        url = self.url_index.get_draft_list_url()
+        response = self.client.get(url)
+        self.assertTrue(response.status_code < 400)
+
     def _create_invite(self, member: UUID) -> UUID:
         company = self.company_generator.create_company()
         response = self.invite_worker_to_company(
@@ -250,3 +254,8 @@ class GeneralUrlIndexTests(ViewTestCase):
             )
         )
         return response.invite_id
+
+    def test_url_for_payment_of_consumer_product_leads_to_functional_url(self) -> None:
+        url = self.url_index.get_pay_consumer_product_url(amount=1, plan_id=uuid4())
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)

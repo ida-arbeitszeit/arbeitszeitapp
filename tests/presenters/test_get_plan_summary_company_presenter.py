@@ -17,30 +17,32 @@ from .url_index import (
     TogglePlanAvailabilityUrlIndex,
 )
 
-TESTING_RESPONSE_MODEL = GetPlanSummaryCompany.Success(
-    plan_summary=PlanSummary(
-        plan_id=uuid4(),
-        is_active=True,
-        planner_id=uuid4(),
-        planner_name="planner name",
-        product_name="test product name",
-        description="test description",
-        active_days=5,
-        timeframe=7,
-        production_unit="Piece",
-        amount=100,
-        means_cost=Decimal(1),
-        resources_cost=Decimal(2),
-        labour_cost=Decimal(3),
-        is_public_service=False,
-        price_per_unit=Decimal("0.061"),
-        is_available=True,
-        is_cooperating=True,
-        cooperation=uuid4(),
-        creation_date=datetime.now(),
-        approval_date=None,
-        expiration_date=None,
-    ),
+TESTING_PLAN_SUMMARY = PlanSummary(
+    plan_id=uuid4(),
+    is_active=True,
+    planner_id=uuid4(),
+    planner_name="planner name",
+    product_name="test product name",
+    description="test description",
+    active_days=5,
+    timeframe=7,
+    production_unit="Piece",
+    amount=100,
+    means_cost=Decimal(1),
+    resources_cost=Decimal(2),
+    labour_cost=Decimal(3),
+    is_public_service=False,
+    price_per_unit=Decimal("0.061"),
+    is_available=True,
+    is_cooperating=True,
+    cooperation=uuid4(),
+    creation_date=datetime.now(),
+    approval_date=None,
+    expiration_date=None,
+)
+
+TESTING_RESPONSE_MODEL = GetPlanSummaryCompany.Response(
+    plan_summary=TESTING_PLAN_SUMMARY,
     current_user_is_planner=True,
 )
 
@@ -72,7 +74,7 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
         self.assertEqual(
             view_model.action.is_available_bool,
-            TESTING_RESPONSE_MODEL.plan_summary.is_available,
+            TESTING_PLAN_SUMMARY.is_available,
         )
 
     def test_url_for_changing_availability_is_displayed_correctly(self):
@@ -80,39 +82,39 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
         self.assertEqual(
             view_model.action.toggle_availability_url,
             self.toggle_availability_url_index.get_toggle_availability_url(
-                TESTING_RESPONSE_MODEL.plan_summary.plan_id
+                TESTING_PLAN_SUMMARY.plan_id
             ),
         )
 
     def test_view_model_shows_plan_as_cooperating_when_plan_is_cooperating(
         self,
     ):
-        assert TESTING_RESPONSE_MODEL.plan_summary.cooperation
+        assert TESTING_PLAN_SUMMARY.cooperation
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
         self.assertTrue(view_model.action.is_cooperating)
         self.assertEqual(
             view_model.action.is_cooperating,
-            TESTING_RESPONSE_MODEL.plan_summary.is_cooperating,
+            TESTING_PLAN_SUMMARY.is_cooperating,
         )
 
     def test_url_for_ending_cooperation_is_displayed_correctly_when_plan_is_cooperating(
         self,
     ):
-        assert TESTING_RESPONSE_MODEL.plan_summary.cooperation
+        assert TESTING_PLAN_SUMMARY.cooperation
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
         self.assertTrue(view_model.action.is_cooperating)
         self.assertEqual(
             view_model.action.end_coop_url,
             self.end_coop_url_index.get_end_coop_url(
-                TESTING_RESPONSE_MODEL.plan_summary.plan_id,
-                TESTING_RESPONSE_MODEL.plan_summary.cooperation,
+                TESTING_PLAN_SUMMARY.plan_id,
+                TESTING_PLAN_SUMMARY.cooperation,
             ),
         )
 
     def test_no_url_for_requesting_cooperation_is_displayed_when_plan_is_cooperating(
         self,
     ):
-        assert TESTING_RESPONSE_MODEL.plan_summary.cooperation
+        assert TESTING_PLAN_SUMMARY.cooperation
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
         self.assertTrue(view_model.action.is_cooperating)
         self.assertIsNone(view_model.action.request_coop_url)
@@ -121,9 +123,9 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
         self,
     ):
         plan_summary = replace(
-            TESTING_RESPONSE_MODEL.plan_summary, is_cooperating=False, cooperation=None
+            TESTING_PLAN_SUMMARY, is_cooperating=False, cooperation=None
         )
-        response = GetPlanSummaryCompany.Success(
+        response = GetPlanSummaryCompany.Response(
             plan_summary=plan_summary, current_user_is_planner=True
         )
         view_model = self.presenter.present(response)
@@ -134,9 +136,9 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
         self,
     ):
         plan_summary = replace(
-            TESTING_RESPONSE_MODEL.plan_summary, is_cooperating=False, cooperation=None
+            TESTING_PLAN_SUMMARY, is_cooperating=False, cooperation=None
         )
-        response = GetPlanSummaryCompany.Success(
+        response = GetPlanSummaryCompany.Response(
             plan_summary=plan_summary, current_user_is_planner=True
         )
         view_model = self.presenter.present(response)

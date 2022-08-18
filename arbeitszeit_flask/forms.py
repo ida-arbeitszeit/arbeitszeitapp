@@ -30,6 +30,9 @@ class WtFormField(Generic[T]):
     def attach_error(self, message: str) -> None:
         self._field.errors.append(message)
 
+    def set_value(self, value: T) -> None:
+        self._field.data = value
+
     @property
     def _field(self):
         return getattr(self._form, self._field_name)
@@ -206,19 +209,23 @@ class PayConsumerProductForm(Form):
     plan_id = StringField(
         trans.lazy_gettext("Plan ID"),
         render_kw={"placeholder": trans.lazy_gettext("Plan ID")},
-        validators=[validators.InputRequired()],
+        validators=[
+            validators.InputRequired(),
+        ],
     )
     amount = StringField(
         trans.lazy_gettext("Amount"),
         render_kw={"placeholder": trans.lazy_gettext("Amount")},
-        validators=[validators.InputRequired()],
+        validators=[
+            validators.InputRequired(),
+        ],
     )
 
-    def get_amount_field(self) -> str:
-        return self.data["amount"]
+    def amount_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="amount")
 
-    def get_plan_id_field(self) -> str:
-        return self.data["plan_id"].strip()
+    def plan_id_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="plan_id")
 
 
 class CompanySearchForm(Form):
@@ -269,47 +276,37 @@ class CreateDraftForm(Form):
     costs_a = DecimalField(
         validators=[validators.InputRequired(), validators.NumberRange(min=0)]
     )
-    productive_or_public = RadioField(
-        choices=[
-            ("productive", trans.lazy_gettext("Productive")),
-            (
-                "public",
-                trans.lazy_gettext("Public"),
-            ),
-        ],
-        validators=[validators.InputRequired()],
+    productive_or_public = BooleanField(
+        trans.lazy_gettext("This plan is a public service")
     )
     action = StringField()
 
-    def get_prd_name(self) -> str:
-        return self.data["prd_name"]
+    def product_name_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="prd_name")
 
-    def get_description(self) -> str:
-        return self.data["description"]
+    def description_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="description")
 
-    def get_timeframe(self) -> int:
-        return self.data["timeframe"]
+    def timeframe_field(self) -> WtFormField[int]:
+        return WtFormField(form=self, field_name="timeframe")
 
-    def get_prd_unit(self) -> str:
-        return self.data["prd_unit"]
+    def unit_of_distribution_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="prd_unit")
 
-    def get_prd_amount(self) -> int:
-        return self.data["prd_amount"]
+    def amount_field(self) -> WtFormField[int]:
+        return WtFormField(form=self, field_name="prd_amount")
 
-    def get_costs_p(self) -> Decimal:
-        return self.data["costs_p"]
+    def means_cost_field(self) -> WtFormField[Decimal]:
+        return WtFormField(form=self, field_name="costs_p")
 
-    def get_costs_r(self) -> Decimal:
-        return self.data["costs_r"]
+    def resource_cost_field(self) -> WtFormField[Decimal]:
+        return WtFormField(form=self, field_name="costs_r")
 
-    def get_costs_a(self) -> Decimal:
-        return self.data["costs_a"]
+    def labour_cost_field(self) -> WtFormField[Decimal]:
+        return WtFormField(form=self, field_name="costs_a")
 
-    def get_productive_or_public(self) -> str:
-        return self.data["productive_or_public"]
-
-    def get_action(self) -> str:
-        return self.data["action"]
+    def is_public_service_field(self) -> WtFormField[bool]:
+        return WtFormField(form=self, field_name="productive_or_public")
 
 
 class InviteWorkerToCompanyForm(Form):

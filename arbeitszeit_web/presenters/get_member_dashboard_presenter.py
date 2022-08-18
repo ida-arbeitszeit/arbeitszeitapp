@@ -5,6 +5,7 @@ from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.use_cases.get_member_dashboard import GetMemberDashboard
+from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 
@@ -93,8 +94,8 @@ class GetMemberDashboardPresenter:
                 zone="Europe/Berlin",
                 fmt="%d.%m.",
             ),
-            plan_summary_url=self.url_index.get_member_plan_summary_url(
-                plan_detail.plan_id
+            plan_summary_url=self.url_index.get_plan_summary_url(
+                user_role=UserRole.member, plan_id=plan_detail.plan_id
             ),
         )
 

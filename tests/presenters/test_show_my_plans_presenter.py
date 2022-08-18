@@ -5,6 +5,7 @@ from unittest import TestCase
 from arbeitszeit.entities import Plan
 from arbeitszeit.use_cases.show_my_plans import PlanInfo, ShowMyPlansResponse
 from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
+from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from tests.data_generators import CooperationGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
@@ -71,7 +72,7 @@ class ShowMyPlansPresenterTests(TestCase):
         presentation = self.presenter.present(RESPONSE_WITH_ONE_ACTIVE_PLAN)
         self.assertEqual(
             presentation.active_plans.rows[0].plan_summary_url,
-            self.plan_url_index.get_company_plan_summary_url(plan.id),
+            self.plan_url_index.get_plan_summary_url(UserRole.company, plan.id),
         )
         self.assertEqual(presentation.active_plans.rows[0].prd_name, plan.prd_name)
         self.assertEqual(
@@ -112,7 +113,7 @@ class ShowMyPlansPresenterTests(TestCase):
         expected_plan = RESPONSE_WITH_ONE_EXPIRED_PLAN.expired_plans[0]
         self.assertEqual(
             row1.plan_summary_url,
-            self.plan_url_index.get_company_plan_summary_url(plan.id),
+            self.plan_url_index.get_plan_summary_url(UserRole.company, plan.id),
         )
         self.assertEqual(
             row1.prd_name,
@@ -134,7 +135,7 @@ class ShowMyPlansPresenterTests(TestCase):
         expected_plan = RESPONSE_WITH_ONE_NON_ACTIVE_PLAN.non_active_plans[0]
         self.assertEqual(
             row1.plan_summary_url,
-            self.plan_url_index.get_company_plan_summary_url(plan.id),
+            self.plan_url_index.get_plan_summary_url(UserRole.company, plan.id),
         )
         self.assertEqual(
             row1.prd_name,

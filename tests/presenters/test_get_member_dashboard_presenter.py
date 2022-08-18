@@ -10,6 +10,7 @@ from arbeitszeit.use_cases.get_member_dashboard import GetMemberDashboard
 from arbeitszeit_web.presenters.get_member_dashboard_presenter import (
     GetMemberDashboardPresenter,
 )
+from arbeitszeit_web.session import UserRole
 from tests.presenters.url_index import UrlIndexTestImpl
 from tests.translator import FakeTranslator
 
@@ -124,7 +125,7 @@ class GetMemberDashboardPresenterTests(TestCase):
         presentation = self.presenter.present(response)
         self.assertEqual(
             presentation.three_latest_plans[0].plan_summary_url,
-            self.url_index.get_member_plan_summary_url(plan_id),
+            self.url_index.get_plan_summary_url(UserRole.member, plan_id),
         )
 
     def test_invites_is_empty_when_no_invites_exist(self):
