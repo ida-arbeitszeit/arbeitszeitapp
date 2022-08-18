@@ -9,6 +9,7 @@ from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from tests.data_generators import CooperationGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
+from tests.presenters.notifier import NotifierTestImpl
 from tests.session import FakeSession
 from tests.translator import FakeTranslator
 
@@ -32,11 +33,12 @@ class ShowMyPlansPresenterTests(TestCase):
         self.coop_generator = self.injector.get(CooperationGenerator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.update_plans_use_case = self.injector.get(UpdatePlansAndPayout)
+        self.notifier = self.injector.get(NotifierTestImpl)
         self.session = self.injector.get(FakeSession)
         self.session.login_company("test@test.test")
 
     def test_show_correct_notification_when_user_has_no_plans(self):
-        presentation = self.presenter.present(
+        self.presenter.present(
             ShowMyPlansResponse(
                 count_all_plans=0,
                 non_active_plans=[],
@@ -45,17 +47,18 @@ class ShowMyPlansPresenterTests(TestCase):
                 drafts=[],
             )
         )
-        self.assertTrue(presentation.notifications)
+        self.assertTrue(self.notifier.display_info)
         self.assertEqual(
-            presentation.notifications,
+            self.notifier.infos,
             [self.translator.gettext("You don't have any plans.")],
         )
 
     def test_do_not_show_notification_when_user_has_one_plan(self):
         plan = self.plan_generator.create_plan()
         RESPONSE_WITH_ONE_PLAN = self.response_with_one_plan(plan)
-        presentation = self.presenter.present(RESPONSE_WITH_ONE_PLAN)
-        self.assertFalse(presentation.notifications)
+        self.presenter.present(RESPONSE_WITH_ONE_PLAN)
+        self.assertFalse(self.notifier.infos)
+        self.assertFalse(self.notifier.warnings)
 
     def test_do_only_show_active_plans_when_user_has_one_active_plan(self):
         plan = self.plan_generator.create_plan(activation_date=datetime.min)

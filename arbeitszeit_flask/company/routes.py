@@ -297,7 +297,6 @@ def my_plans(
     request = ShowMyPlansRequest(company_id=UUID(current_user.id))
     response = show_my_plans_use_case.show_company_plans(request)
     view_model = show_my_plans_presenter.present(response)
-
     return template_renderer.render_template(
         "company/my_plans.html",
         context=view_model.to_dict(),

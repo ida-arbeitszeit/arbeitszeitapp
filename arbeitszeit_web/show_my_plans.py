@@ -7,9 +7,9 @@ from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansResponse
+from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.translator import Translator
-
-from .url_index import HidePlanUrlIndex, RenewPlanUrlIndex, UserUrlIndex
+from arbeitszeit_web.url_index import HidePlanUrlIndex, RenewPlanUrlIndex, UserUrlIndex
 
 
 @dataclass
@@ -61,7 +61,6 @@ class ExpiredPlansTable:
 
 @dataclass
 class ShowMyPlansViewModel:
-    notifications: List[str]
     show_non_active_plans: bool
     non_active_plans: NonActivePlansTable
     show_active_plans: bool
@@ -81,15 +80,15 @@ class ShowMyPlansPresenter:
     hide_plan_url_index: HidePlanUrlIndex
     translator: Translator
     datetime_service: DatetimeService
+    notifier: Notifier
 
     def present(self, response: ShowMyPlansResponse) -> ShowMyPlansViewModel:
 
         if not response.count_all_plans:
-            notifications = [self.translator.gettext("You don't have any plans.")]
-        else:
-            notifications = []
+            self.notifier.display_info(
+                self.translator.gettext("You don't have any plans.")
+            )
         return ShowMyPlansViewModel(
-            notifications=notifications,
             show_active_plans=bool(response.active_plans),
             active_plans=ActivePlansTable(
                 rows=[
@@ -164,7 +163,7 @@ class ShowMyPlansPresenter:
         )
 
     def __format_date(self, date: Optional[datetime]) -> str:
-        return f"{date.strftime('%d.%m.%y')}" if date else "–"
+        return date.strftime("%d.%m.%y") if date else "–"
 
     def __format_price(self, price_per_unit: Decimal) -> str:
         return f"{round(price_per_unit, 2)}"

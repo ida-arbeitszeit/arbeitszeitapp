@@ -4,7 +4,7 @@ from uuid import uuid4
 from arbeitszeit.use_cases import ShowMyPlansRequest, ShowMyPlansUseCase
 
 from ..data_generators import CompanyGenerator, PlanGenerator
-from .dependency_injection import get_dependency_injector, injection_test
+from .dependency_injection import get_dependency_injector
 
 
 class UseCaseTests(TestCase):
