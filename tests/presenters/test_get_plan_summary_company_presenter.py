@@ -55,24 +55,24 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
 
     def test_action_section_is_shown_when_current_user_is_planner(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
-        self.assertTrue(view_model.show_action_section)
+        self.assertTrue(view_model.show_own_plan_action_section)
 
     def test_action_section_is_not_shown_when_current_user_is_not_planner(self):
         response = replace(TESTING_RESPONSE_MODEL, current_user_is_planner=False)
         view_model = self.presenter.present(response)
-        self.assertFalse(view_model.show_action_section)
+        self.assertFalse(view_model.show_own_plan_action_section)
 
     def test_view_model_sows_availability_when_plan_is_available(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
         self.assertEqual(
-            view_model.action.is_available_bool,
+            view_model.own_plan_action.is_available_bool,
             TESTING_PLAN_SUMMARY.is_available,
         )
 
     def test_url_for_changing_availability_is_displayed_correctly(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
         self.assertEqual(
-            view_model.action.toggle_availability_url,
+            view_model.own_plan_action.toggle_availability_url,
             self.url_index.get_toggle_availability_url(TESTING_PLAN_SUMMARY.plan_id),
         )
 
@@ -81,9 +81,9 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
     ):
         assert TESTING_PLAN_SUMMARY.cooperation
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
-        self.assertTrue(view_model.action.is_cooperating)
+        self.assertTrue(view_model.own_plan_action.is_cooperating)
         self.assertEqual(
-            view_model.action.is_cooperating,
+            view_model.own_plan_action.is_cooperating,
             TESTING_PLAN_SUMMARY.is_cooperating,
         )
 
@@ -92,9 +92,9 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
     ):
         assert TESTING_PLAN_SUMMARY.cooperation
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
-        self.assertTrue(view_model.action.is_cooperating)
+        self.assertTrue(view_model.own_plan_action.is_cooperating)
         self.assertEqual(
-            view_model.action.end_coop_url,
+            view_model.own_plan_action.end_coop_url,
             self.url_index.get_end_coop_url(
                 TESTING_PLAN_SUMMARY.plan_id,
                 TESTING_PLAN_SUMMARY.cooperation,
@@ -106,8 +106,8 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
     ):
         assert TESTING_PLAN_SUMMARY.cooperation
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
-        self.assertTrue(view_model.action.is_cooperating)
-        self.assertIsNone(view_model.action.request_coop_url)
+        self.assertTrue(view_model.own_plan_action.is_cooperating)
+        self.assertIsNone(view_model.own_plan_action.request_coop_url)
 
     def test_no_url_for_ending_cooperation_is_displayed_when_plan_is_not_cooperating(
         self,
@@ -119,8 +119,8 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
             plan_summary=plan_summary, current_user_is_planner=True
         )
         view_model = self.presenter.present(response)
-        self.assertFalse(view_model.action.is_cooperating)
-        self.assertIsNone(view_model.action.end_coop_url)
+        self.assertFalse(view_model.own_plan_action.is_cooperating)
+        self.assertIsNone(view_model.own_plan_action.end_coop_url)
 
     def test_url_for_requesting_cooperation_is_displayed_correctly_when_plan_is_not_cooperating(
         self,
@@ -132,9 +132,9 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
             plan_summary=plan_summary, current_user_is_planner=True
         )
         view_model = self.presenter.present(response)
-        self.assertFalse(view_model.action.is_cooperating)
+        self.assertFalse(view_model.own_plan_action.is_cooperating)
         self.assertEqual(
-            view_model.action.request_coop_url,
+            view_model.own_plan_action.request_coop_url,
             self.url_index.get_request_coop_url(),
         )
 

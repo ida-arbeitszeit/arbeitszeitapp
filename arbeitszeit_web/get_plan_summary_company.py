@@ -14,7 +14,7 @@ from .url_index import UrlIndex
 
 
 @dataclass
-class Action:
+class OwnPlanAction:
     is_available_bool: bool
     toggle_availability_url: str
     is_cooperating: bool
@@ -25,8 +25,8 @@ class Action:
 @dataclass
 class GetPlanSummaryCompanyViewModel:
     summary: PlanSummaryWeb
-    show_action_section: bool
-    action: Action
+    show_own_plan_action_section: bool
+    own_plan_action: OwnPlanAction
     show_payment_url: bool
     payment_url: str
 
@@ -51,8 +51,8 @@ class GetPlanSummaryCompanySuccessPresenter:
         is_cooperating = plan_summary.is_cooperating
         return GetPlanSummaryCompanyViewModel(
             summary=self.plan_summary_service.format_plan_summary(plan_summary),
-            show_action_section=response.current_user_is_planner,
-            action=Action(
+            show_own_plan_action_section=response.current_user_is_planner,
+            own_plan_action=OwnPlanAction(
                 is_available_bool=plan_summary.is_available,
                 toggle_availability_url=self.url_index.get_toggle_availability_url(
                     plan_id
