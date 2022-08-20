@@ -35,6 +35,7 @@ from arbeitszeit_flask.database.repositories import (
     CompanyWorkerRepository,
     CooperationRepository,
     MemberRepository,
+    PayoutFactorRepository,
     PlanCooperationRepository,
     PlanDraftRepository,
     PlanRepository,
@@ -508,6 +509,10 @@ class FlaskModule(PresenterModule):
         )
         binder.bind(TokenService, to=ClassProvider(FlaskTokenService))  # type: ignore
         binder.bind(UserAddressBook, to=ClassProvider(inject(UserAddressBookImpl)))  # type: ignore
+        binder.bind(
+            interfaces.PayoutFactorRepository,  # type: ignore
+            to=ClassProvider(PayoutFactorRepository),
+        )
 
 
 class with_injection:

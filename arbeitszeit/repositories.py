@@ -495,3 +495,11 @@ class AccountantRepository(Protocol):
 class LanguageRepository(Protocol):
     def get_available_language_codes(self) -> Iterable[str]:
         ...
+
+
+class PayoutFactorRepository(Protocol):
+    def store_payout_factor(self, timestamp: datetime, payout_factor: Decimal) -> None:
+        ...
+
+    def get_latest_payout_factor(self) -> Optional[Decimal]:
+        ...
