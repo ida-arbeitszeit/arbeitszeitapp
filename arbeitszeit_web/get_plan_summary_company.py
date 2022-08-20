@@ -1,6 +1,8 @@
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, Optional
 
+from injector import inject
+
 from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
 from arbeitszeit_web.formatters.plan_summary_formatter import (
     PlanSummaryFormatter,
@@ -8,11 +10,7 @@ from arbeitszeit_web.formatters.plan_summary_formatter import (
 )
 
 from .translator import Translator
-from .url_index import (
-    EndCoopUrlIndex,
-    RequestCoopUrlIndex,
-    TogglePlanAvailabilityUrlIndex,
-)
+from .url_index import UrlIndex
 
 
 @dataclass
@@ -29,18 +27,19 @@ class GetPlanSummaryCompanyViewModel:
     summary: PlanSummaryWeb
     show_action_section: bool
     action: Action
+    show_payment_url: bool
+    payment_url: str
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
 
 
+@inject
 @dataclass
 class GetPlanSummaryCompanySuccessPresenter:
-    toggle_availability_url_index: TogglePlanAvailabilityUrlIndex
-    end_coop_url_index: EndCoopUrlIndex
-    request_coop_url_index: RequestCoopUrlIndex
     trans: Translator
     plan_summary_service: PlanSummaryFormatter
+    url_index: UrlIndex
 
     def present(
         self, response: GetPlanSummaryCompany.Response
@@ -55,15 +54,19 @@ class GetPlanSummaryCompanySuccessPresenter:
             show_action_section=response.current_user_is_planner,
             action=Action(
                 is_available_bool=plan_summary.is_available,
-                toggle_availability_url=self.toggle_availability_url_index.get_toggle_availability_url(
+                toggle_availability_url=self.url_index.get_toggle_availability_url(
                     plan_id
                 ),
                 is_cooperating=is_cooperating,
-                end_coop_url=self.end_coop_url_index.get_end_coop_url(plan_id, coop_id)
+                end_coop_url=self.url_index.get_end_coop_url(plan_id, coop_id)
                 if coop_id
                 else None,
-                request_coop_url=self.request_coop_url_index.get_request_coop_url()
+                request_coop_url=self.url_index.get_request_coop_url()
                 if not is_cooperating
                 else None,
+            ),
+            show_payment_url=True if not response.current_user_is_planner else False,
+            payment_url=self.url_index.get_pay_means_of_production_with_plan_parameter_url(
+                plan_id
             ),
         )

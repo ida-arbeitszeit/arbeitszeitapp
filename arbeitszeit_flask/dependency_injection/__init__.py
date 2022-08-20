@@ -107,11 +107,8 @@ from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import (
     ConfirmationUrlIndex,
-    EndCoopUrlIndex,
     HidePlanUrlIndex,
     RenewPlanUrlIndex,
-    RequestCoopUrlIndex,
-    TogglePlanAvailabilityUrlIndex,
     UrlIndex,
 )
 
@@ -131,18 +128,6 @@ class MemberModule(Module):
         return member_index
 
     @provider
-    def provide_request_coop_url_index(
-        self, member_index: MemberUrlIndex
-    ) -> RequestCoopUrlIndex:
-        return member_index
-
-    @provider
-    def provide_end_coop_url_index(
-        self, member_index: MemberUrlIndex
-    ) -> EndCoopUrlIndex:
-        return member_index
-
-    @provider
     def provide_template_index(self) -> TemplateIndex:
         return MemberTemplateIndex()
 
@@ -155,12 +140,6 @@ class CompanyModule(CompanyPresenterModule):
         return company_index
 
     @provider
-    def provide_toggle_plan_availability_url_index(
-        self, company_index: CompanyUrlIndex
-    ) -> TogglePlanAvailabilityUrlIndex:
-        return company_index
-
-    @provider
     def provide_renew_plan_url_index(
         self, company_index: CompanyUrlIndex
     ) -> RenewPlanUrlIndex:
@@ -170,18 +149,6 @@ class CompanyModule(CompanyPresenterModule):
     def provide_hide_plan_url_index(
         self, company_index: CompanyUrlIndex
     ) -> HidePlanUrlIndex:
-        return company_index
-
-    @provider
-    def provide_request_coop_url_index(
-        self, company_index: CompanyUrlIndex
-    ) -> RequestCoopUrlIndex:
-        return company_index
-
-    @provider
-    def provide_end_coop_url_index(
-        self, company_index: CompanyUrlIndex
-    ) -> EndCoopUrlIndex:
         return company_index
 
     @provider

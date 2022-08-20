@@ -77,9 +77,16 @@ class UrlIndex(Protocol):
     def get_pay_consumer_product_url(self, amount: int, plan_id: UUID) -> str:
         ...
 
+    def get_pay_means_of_production_with_plan_parameter_url(self, plan_id: UUID) -> str:
+        ...
 
-class TogglePlanAvailabilityUrlIndex(Protocol):
     def get_toggle_availability_url(self, plan_id: UUID) -> str:
+        ...
+
+    def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
+        ...
+
+    def get_request_coop_url(self) -> str:
         ...
 
 
@@ -90,16 +97,6 @@ class RenewPlanUrlIndex(Protocol):
 
 class HidePlanUrlIndex(Protocol):
     def get_hide_plan_url(self, plan_id: UUID) -> str:
-        ...
-
-
-class RequestCoopUrlIndex(Protocol):
-    def get_request_coop_url(self) -> str:
-        ...
-
-
-class EndCoopUrlIndex(Protocol):
-    def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
         ...
 
 

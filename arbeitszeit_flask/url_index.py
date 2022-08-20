@@ -118,21 +118,28 @@ class GeneralUrlIndex:
             company_id=str(company_id),
         )
 
+    def get_pay_means_of_production_with_plan_parameter_url(self, plan_id: UUID) -> str:
+        return url_for(endpoint="main_company.transfer_to_company", plan_id=plan_id)
+
+    def get_toggle_availability_url(self, plan_id: UUID) -> str:
+        return url_for("main_company.toggle_availability", plan_id=plan_id)
+
+    def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
+        return url_for(
+            "main_company.end_cooperation",
+            plan_id=plan_id,
+            cooperation_id=cooperation_id,
+        )
+
+    def get_request_coop_url(self) -> str:
+        return url_for("main_company.request_cooperation")
+
 
 class MemberUrlIndex:
-    def get_toggle_availability_url(self, plan_id: UUID) -> str:
-        ...
-
     def get_renew_plan_url(self, plan_id: UUID) -> str:
         ...
 
     def get_hide_plan_url(self, plan_id: UUID) -> str:
-        ...
-
-    def get_request_coop_url(self) -> str:
-        ...
-
-    def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
         ...
 
     def get_confirmation_url(self, token: str) -> str:
@@ -142,24 +149,11 @@ class MemberUrlIndex:
 
 
 class CompanyUrlIndex:
-    def get_toggle_availability_url(self, plan_id: UUID) -> str:
-        return url_for("main_company.toggle_availability", plan_id=plan_id)
-
     def get_renew_plan_url(self, plan_id: UUID) -> str:
         return url_for("main_company.create_draft_from_plan", plan_id=plan_id)
 
     def get_hide_plan_url(self, plan_id: UUID) -> str:
         return url_for("main_company.hide_plan", plan_id=plan_id)
-
-    def get_request_coop_url(self) -> str:
-        return url_for("main_company.request_cooperation")
-
-    def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
-        return url_for(
-            "main_company.end_cooperation",
-            plan_id=plan_id,
-            cooperation_id=cooperation_id,
-        )
 
     def get_work_invite_url(self, invite_id: UUID) -> str:
         # since invites don't make sense for a company, we redirect

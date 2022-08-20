@@ -11,11 +11,7 @@ from arbeitszeit_web.get_plan_summary_company import (
 )
 
 from .dependency_injection import get_dependency_injector
-from .url_index import (
-    EndCoopUrlIndexTestImpl,
-    RequestCoopUrlIndexTestImpl,
-    TogglePlanAvailabilityUrlIndex,
-)
+from .url_index import UrlIndexTestImpl
 
 TESTING_PLAN_SUMMARY = PlanSummary(
     plan_id=uuid4(),
@@ -54,11 +50,7 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
 
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
-        self.toggle_availability_url_index = self.injector.get(
-            TogglePlanAvailabilityUrlIndex
-        )
-        self.end_coop_url_index = self.injector.get(EndCoopUrlIndexTestImpl)
-        self.request_coop_url_index = self.injector.get(RequestCoopUrlIndexTestImpl)
+        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.presenter = self.injector.get(GetPlanSummaryCompanySuccessPresenter)
 
     def test_action_section_is_shown_when_current_user_is_planner(self):
@@ -81,9 +73,7 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
         self.assertEqual(
             view_model.action.toggle_availability_url,
-            self.toggle_availability_url_index.get_toggle_availability_url(
-                TESTING_PLAN_SUMMARY.plan_id
-            ),
+            self.url_index.get_toggle_availability_url(TESTING_PLAN_SUMMARY.plan_id),
         )
 
     def test_view_model_shows_plan_as_cooperating_when_plan_is_cooperating(
@@ -105,7 +95,7 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
         self.assertTrue(view_model.action.is_cooperating)
         self.assertEqual(
             view_model.action.end_coop_url,
-            self.end_coop_url_index.get_end_coop_url(
+            self.url_index.get_end_coop_url(
                 TESTING_PLAN_SUMMARY.plan_id,
                 TESTING_PLAN_SUMMARY.cooperation,
             ),
@@ -145,5 +135,31 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
         self.assertFalse(view_model.action.is_cooperating)
         self.assertEqual(
             view_model.action.request_coop_url,
-            self.request_coop_url_index.get_request_coop_url(),
+            self.url_index.get_request_coop_url(),
         )
+
+    def test_url_for_paying_product_is_displayed_when_user_is_not_planner_of_plan(
+        self,
+    ):
+        response = replace(TESTING_RESPONSE_MODEL, current_user_is_planner=False)
+        view_model = self.presenter.present(response)
+        self.assertTrue(view_model.show_payment_url)
+
+    def test_correct_url_for_paying_product_is_displayed(
+        self,
+    ):
+        response = replace(TESTING_RESPONSE_MODEL, current_user_is_planner=False)
+        view_model = self.presenter.present(response)
+        self.assertEqual(
+            view_model.payment_url,
+            self.url_index.get_pay_means_of_production_with_plan_parameter_url(
+                TESTING_PLAN_SUMMARY.plan_id
+            ),
+        )
+
+    def test_url_for_paying_product_is_not_displayed_when_user_is_planner_of_plan(
+        self,
+    ):
+        assert TESTING_RESPONSE_MODEL.current_user_is_planner
+        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        self.assertFalse(view_model.show_payment_url)

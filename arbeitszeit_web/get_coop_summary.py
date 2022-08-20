@@ -7,7 +7,7 @@ from injector import inject
 from arbeitszeit.use_cases.get_coop_summary import GetCoopSummarySuccess
 from arbeitszeit_web.session import Session
 
-from .url_index import EndCoopUrlIndex, UrlIndex, UserUrlIndex
+from .url_index import UrlIndex, UserUrlIndex
 
 
 @dataclass
@@ -39,7 +39,6 @@ class GetCoopSummaryViewModel:
 @dataclass
 class GetCoopSummarySuccessPresenter:
     user_url_index: UserUrlIndex
-    end_coop_url_index: EndCoopUrlIndex
     url_index: UrlIndex
     session: Session
 
@@ -63,7 +62,7 @@ class GetCoopSummarySuccessPresenter:
                         plan.plan_individual_price
                     ),
                     plan_coop_price=self.__format_price(plan.plan_coop_price),
-                    end_coop_url=self.end_coop_url_index.get_end_coop_url(
+                    end_coop_url=self.url_index.get_end_coop_url(
                         plan_id=plan.plan_id, cooperation_id=response.coop_id
                     ),
                 )
