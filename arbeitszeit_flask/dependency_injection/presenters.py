@@ -10,13 +10,12 @@ from arbeitszeit.use_cases.register_member.member_registration_message_presenter
 from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitation_presenter import (
     AccountantInvitationPresenter,
 )
-from arbeitszeit_flask.url_index import CompanyUrlIndex, GeneralUrlIndex
+from arbeitszeit_flask.url_index import GeneralUrlIndex
 from arbeitszeit_web.email import EmailConfiguration, MailService, UserAddressBook
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyPresenter
 from arbeitszeit_web.language_service import LanguageService
 from arbeitszeit_web.notification import Notifier
-from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from arbeitszeit_web.presenters.accountant_invitation_presenter import (
     AccountantInvitationEmailPresenter,
     AccountantInvitationEmailView,
@@ -50,14 +49,6 @@ from arbeitszeit_web.url_index import ConfirmationUrlIndex
 
 
 class CompanyPresenterModule(Module):
-    @provider
-    def provide_pay_means_of_production_presenter(
-        self, notifier: Notifier, trans: Translator, company_url_index: CompanyUrlIndex
-    ) -> PayMeansOfProductionPresenter:
-        return PayMeansOfProductionPresenter(
-            notifier, trans, pay_means_of_production_url_index=company_url_index
-        )
-
     @provider
     def provide_request_cooperation_presenter(
         self,

@@ -118,7 +118,7 @@ class GeneralUrlIndex:
             company_id=str(company_id),
         )
 
-    def get_pay_means_of_production_with_plan_parameter_url(self, plan_id: UUID) -> str:
+    def get_pay_means_of_production_url(self, plan_id: Optional[UUID] = None) -> str:
         return url_for(endpoint="main_company.transfer_to_company", plan_id=plan_id)
 
     def get_toggle_availability_url(self, plan_id: UUID) -> str:
@@ -164,6 +164,3 @@ class CompanyUrlIndex:
         return url_for(
             endpoint="auth.confirm_email_company", token=token, _external=True
         )
-
-    def get_pay_means_of_production_url(self) -> str:
-        return url_for(endpoint="main_company.transfer_to_company")

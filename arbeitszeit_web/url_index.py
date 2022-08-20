@@ -77,7 +77,7 @@ class UrlIndex(Protocol):
     def get_pay_consumer_product_url(self, amount: int, plan_id: UUID) -> str:
         ...
 
-    def get_pay_means_of_production_with_plan_parameter_url(self, plan_id: UUID) -> str:
+    def get_pay_means_of_production_url(self, plan_id: Optional[UUID] = None) -> str:
         ...
 
     def get_toggle_availability_url(self, plan_id: UUID) -> str:
@@ -107,11 +107,6 @@ class ConfirmationUrlIndex(Protocol):
 
 class AccountantInvitationUrlIndex(Protocol):
     def get_accountant_invitation_url(self, token: str) -> str:
-        ...
-
-
-class PayMeansOfProductionUrlIndex(Protocol):
-    def get_pay_means_of_production_url(self) -> str:
         ...
 
 

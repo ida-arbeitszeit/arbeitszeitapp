@@ -67,7 +67,7 @@ class UrlIndexTestImpl:
     def get_pay_consumer_product_url(self, amount: int, plan_id: UUID) -> str:
         return f"pay consumer product url: {amount}, {plan_id}"
 
-    def get_pay_means_of_production_with_plan_parameter_url(self, plan_id: UUID) -> str:
+    def get_pay_means_of_production_url(self, plan_id: Optional[UUID] = None) -> str:
         return f"pay means of production url for plan {plan_id}"
 
     def get_toggle_availability_url(self, plan_id: UUID) -> str:
@@ -103,11 +103,6 @@ class AccountantInvitationUrlIndexImpl:
 class AccountantDashboardUrlIndexImpl:
     def get_accountant_dashboard_url(self) -> str:
         return "accountant dashboard url"
-
-
-class PayMeansOfProductionUrlIndexImpl:
-    def get_pay_means_of_production_url(self) -> str:
-        return "pay means of production form url"
 
 
 class LanguageChangerUrlIndexImpl:

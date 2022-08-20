@@ -152,7 +152,7 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
         view_model = self.presenter.present(response)
         self.assertEqual(
             view_model.payment_url,
-            self.url_index.get_pay_means_of_production_with_plan_parameter_url(
+            self.url_index.get_pay_means_of_production_url(
                 TESTING_PLAN_SUMMARY.plan_id
             ),
         )

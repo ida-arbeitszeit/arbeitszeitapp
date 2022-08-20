@@ -6,7 +6,6 @@ from arbeitszeit_web.hide_plan import HidePlanPresenter
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyPresenter
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.pay_consumer_product import PayConsumerProductPresenter
-from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from arbeitszeit_web.presenters.accountant_invitation_presenter import (
     AccountantInvitationEmailPresenter,
 )
@@ -54,7 +53,6 @@ from .url_index import (
     ConfirmationUrlIndexImpl,
     HidePlanUrlIndexTestImpl,
     LanguageChangerUrlIndexImpl,
-    PayMeansOfProductionUrlIndexImpl,
     RenewPlanUrlIndexTestImpl,
     UrlIndexTestImpl,
 )
@@ -142,19 +140,6 @@ class PresenterTestsInjector(Module):
         return PayConsumerProductPresenter(
             user_notifier=notifier,
             translator=translator,
-        )
-
-    @provider
-    def provide_pay_means_of_production_presenter(
-        self,
-        notifier: Notifier,
-        translator: FakeTranslator,
-        pay_means_of_production_url_index: PayMeansOfProductionUrlIndexImpl,
-    ) -> PayMeansOfProductionPresenter:
-        return PayMeansOfProductionPresenter(
-            user_notifier=notifier,
-            trans=translator,
-            pay_means_of_production_url_index=pay_means_of_production_url_index,
         )
 
     @provider

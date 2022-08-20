@@ -66,7 +66,5 @@ class GetPlanSummaryCompanySuccessPresenter:
                 else None,
             ),
             show_payment_url=True if not response.current_user_is_planner else False,
-            payment_url=self.url_index.get_pay_means_of_production_with_plan_parameter_url(
-                plan_id
-            ),
+            payment_url=self.url_index.get_pay_means_of_production_url(plan_id),
         )
