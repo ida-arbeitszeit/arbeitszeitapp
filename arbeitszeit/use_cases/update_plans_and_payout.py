@@ -8,6 +8,7 @@ from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan, SocialAccounting
 from arbeitszeit.payout_factor import PayoutFactorService
 from arbeitszeit.repositories import (
+    PayoutFactorRepository,
     PlanCooperationRepository,
     PlanRepository,
     TransactionRepository,
@@ -23,6 +24,7 @@ class UpdatePlansAndPayout:
     social_accounting: SocialAccounting
     plan_cooperation_repository: PlanCooperationRepository
     payout_factor_service: PayoutFactorService
+    payout_factor_repository: PayoutFactorRepository
 
     def __call__(self) -> None:
         """
@@ -30,6 +32,9 @@ class UpdatePlansAndPayout:
         preferably more often (e.g. every hour).
         """
         payout_factor = self.payout_factor_service.calculate_payout_factor()
+        self.payout_factor_repository.store_payout_factor(
+            self.datetime_service.now(), payout_factor
+        )
         self._calculate_plan_expiration(payout_factor)
         for plan in self.plan_repository.all_plans_approved_active_and_not_expired():
             self._payout_work_certificates(plan, payout_factor)
