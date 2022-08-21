@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Tuple
+from typing import Optional, Tuple
 
 from injector import inject
 
@@ -9,6 +9,7 @@ from arbeitszeit.repositories import (
     CompanyRepository,
     CooperationRepository,
     MemberRepository,
+    PayoutFactorRepository,
     PlanRepository,
 )
 
@@ -26,6 +27,7 @@ class StatisticsResponse:
     planned_work: Decimal
     planned_resources: Decimal
     planned_means: Decimal
+    payout_factor: Optional[Decimal]
 
 
 @inject
@@ -36,6 +38,7 @@ class GetStatistics:
     plan_repository: PlanRepository
     cooperation_respository: CooperationRepository
     account_respository: AccountRepository
+    payout_factor_repository: PayoutFactorRepository
 
     def __call__(self) -> StatisticsResponse:
         (
@@ -54,6 +57,7 @@ class GetStatistics:
             planned_work=self.plan_repository.sum_of_active_planned_work(),
             planned_resources=self.plan_repository.sum_of_active_planned_resources(),
             planned_means=self.plan_repository.sum_of_active_planned_means(),
+            payout_factor=self.payout_factor_repository.get_latest_payout_factor(),
         )
 
     def _count_certificates_and_available_product(self) -> Tuple[Decimal, Decimal]:

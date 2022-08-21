@@ -20,6 +20,7 @@ TESTING_RESPONSE_MODEL = StatisticsResponse(
     planned_work=Decimal("500.23"),
     planned_resources=Decimal("400.1"),
     planned_means=Decimal("215.23"),
+    payout_factor=Decimal("0.74516"),
 )
 
 
@@ -188,4 +189,20 @@ class GetStatisticsPresenterTests(TestCase):
         self.assertIn(
             str(TESTING_RESPONSE_MODEL.active_plans_public_count),
             view_model.barplot_plans_url,
+        )
+
+    def test_that_payout_factor_is_correctly_shown_when_it_exists(self):
+        assert TESTING_RESPONSE_MODEL.payout_factor is not None
+        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        self.assertEqual(
+            view_model.payout_factor,
+            round(TESTING_RESPONSE_MODEL.payout_factor, 2).__str__(),
+        )
+
+    def test_that_correct_message_is_shown_when_payout_factor_does_not_exist(self):
+        uc_response = replace(TESTING_RESPONSE_MODEL, payout_factor=None)
+        view_model = self.presenter.present(uc_response)
+        self.assertEqual(
+            view_model.payout_factor,
+            self.translator.gettext("Not found."),
         )
