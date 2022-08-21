@@ -18,7 +18,7 @@ class PayoutFactorRepositoryTests(TestCase):
         payout_factor = Decimal("-1.1")
         self.repository.store_payout_factor(self.datetime_service.now(), payout_factor)
         retrieved_payout_factor = self.repository.get_latest_payout_factor()
-        assert payout_factor == retrieved_payout_factor
+        assert payout_factor == retrieved_payout_factor.value
 
     def test_return_none_when_no_payout_factor_is_stored_in_database(self):
         result = self.repository.get_latest_payout_factor()
@@ -35,4 +35,5 @@ class PayoutFactorRepositoryTests(TestCase):
         self.datetime_service.freeze_time(datetime(2020, 2, 1, 10))
         self.repository.store_payout_factor(self.datetime_service.now(), Decimal("15"))
         payout_factor = self.repository.get_latest_payout_factor()
-        assert payout_factor == expected_payout_factor
+        assert payout_factor.value == expected_payout_factor
+        assert payout_factor.timestamp == datetime(2020, 3, 1, 10)

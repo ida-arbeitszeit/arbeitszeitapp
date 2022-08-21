@@ -265,7 +265,7 @@ def test_adding_up_means_of_two_plans(
 
 
 @injection_test
-def test_that_use_case_returns_none_for_current_payout_factor_if_it_never_has_been_calculated(
+def test_that_use_case_returns_none_for_payout_factor_if_it_never_has_been_calculated(
     get_statistics: GetStatistics,
 ):
     stats = get_statistics()
@@ -273,7 +273,7 @@ def test_that_use_case_returns_none_for_current_payout_factor_if_it_never_has_be
 
 
 @injection_test
-def test_that_use_case_shows_the_current_payout_factor_if_it_has_been_calculated(
+def test_that_use_case_shows_payout_factor_if_it_has_been_calculated(
     get_statistics: GetStatistics, update_plans_and_payout: UpdatePlansAndPayout
 ):
     update_plans_and_payout()

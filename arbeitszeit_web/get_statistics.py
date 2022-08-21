@@ -1,9 +1,10 @@
 from dataclasses import dataclass
-from decimal import Decimal
 from typing import Optional
 
 from injector import inject
 
+from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.entities import PayoutFactor
 from arbeitszeit.use_cases import StatisticsResponse
 from arbeitszeit_web.colors import Colors
 from arbeitszeit_web.plotter import Plotter
@@ -25,6 +26,7 @@ class GetStatisticsViewModel:
     planned_resources_hours: str
     planned_means_hours: str
     payout_factor: str
+    payout_factor_explanation: str
 
     barplot_for_certificates_url: str
     barplot_means_of_production_url: str
@@ -38,6 +40,7 @@ class GetStatisticsPresenter:
     plotter: Plotter
     colors: Colors
     url_index: UrlIndex
+    datetime_service: DatetimeService
 
     def present(self, use_case_response: StatisticsResponse) -> GetStatisticsViewModel:
         average_timeframe = self.translator.gettext("%(num).2f days") % dict(
@@ -69,6 +72,9 @@ class GetStatisticsPresenter:
             active_plans_public_count=str(use_case_response.active_plans_public_count),
             average_timeframe_days=average_timeframe,
             payout_factor=self._format_payout_factor(use_case_response.payout_factor),
+            payout_factor_explanation=self._format_payout_factor_explanation(
+                use_case_response.payout_factor
+            ),
             barplot_for_certificates_url=self.url_index.get_global_barplot_for_certificates_url(
                 use_case_response.certificates_count,
                 use_case_response.available_product,
@@ -87,7 +93,19 @@ class GetStatisticsPresenter:
             ),
         )
 
-    def _format_payout_factor(self, payout_factor: Optional[Decimal]) -> str:
+    def _format_payout_factor(self, payout_factor: Optional[PayoutFactor]) -> str:
         if payout_factor is None:
             return self.translator.gettext("Not found.")
-        return round(payout_factor, 2).__str__()
+        return round(payout_factor.value, 2).__str__()
+
+    def _format_payout_factor_explanation(
+        self, payout_factor: Optional[PayoutFactor]
+    ) -> str:
+        if payout_factor is None:
+            return self.translator.gettext("Not found.")
+        timestamp = self.datetime_service.format_datetime(
+            payout_factor.timestamp, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
+        )
+        return self.translator.gettext("Payout factor (%(timestamp)s)") % dict(
+            timestamp=timestamp
+        )

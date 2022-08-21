@@ -22,6 +22,7 @@ from arbeitszeit.entities import (
     CompanyWorkInvite,
     Cooperation,
     Member,
+    PayoutFactor,
     Plan,
     PlanDraft,
     ProductionCosts,
@@ -959,22 +960,19 @@ class FakeLanguageRepository:
 
 @singleton
 class FakePayoutFactorRepository:
-    @dataclass
-    class _PayoutFactor:
-        timestamp: datetime
-        payout_factor: Decimal
-
     @inject
     def __init__(self) -> None:
-        self._payout_factors: List[FakePayoutFactorRepository._PayoutFactor] = []
+        self._payout_factors: List[PayoutFactor] = []
 
     def store_payout_factor(self, timestamp: datetime, payout_factor: Decimal) -> None:
-        self._payout_factors.append(self._PayoutFactor(timestamp, payout_factor))
+        self._payout_factors.append(PayoutFactor(timestamp, payout_factor))
 
-    def get_latest_payout_factor(self) -> Optional[Decimal]:
+    def get_latest_payout_factor(
+        self,
+    ) -> Optional[PayoutFactor]:
         if not self._payout_factors:
             return None
         payout_factors_sorted = sorted(
             self._payout_factors, key=lambda x: x.timestamp, reverse=True
         )
-        return payout_factors_sorted[0].payout_factor
+        return payout_factors_sorted[0]

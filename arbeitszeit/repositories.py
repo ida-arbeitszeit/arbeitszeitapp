@@ -13,6 +13,7 @@ from arbeitszeit.entities import (
     CompanyWorkInvite,
     Cooperation,
     Member,
+    PayoutFactor,
     Plan,
     PlanDraft,
     ProductionCosts,
@@ -501,5 +502,5 @@ class PayoutFactorRepository(Protocol):
     def store_payout_factor(self, timestamp: datetime, payout_factor: Decimal) -> None:
         ...
 
-    def get_latest_payout_factor(self) -> Optional[Decimal]:
+    def get_latest_payout_factor(self) -> Optional[PayoutFactor]:
         ...

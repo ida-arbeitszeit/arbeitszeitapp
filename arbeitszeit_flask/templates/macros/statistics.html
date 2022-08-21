@@ -32,6 +32,14 @@
         </div>
     </div>
     <div class="tile is-ancestor">
+        <div class="tile is-parent has-text-centered">
+            <div class="tile is-child box">
+                <h1 class="title">{{ view_model.payout_factor }}</h1>
+                <div class="subtitle">{{ view_model.payout_factor_explanation }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="tile is-ancestor">
         <div class="tile is-parent">
             <div class="tile is-child box">
                 <h1 class="title is-4 has-text-centered">{{ gettext("Plans") }}</h1>
@@ -74,14 +82,6 @@
             <div class="tile is-child box">
                 <h1 class="title">{{ view_model.average_timeframe_days }}</h1>
                 <div class="subtitle">{{ gettext("Average plan duration") }}</div>
-            </div>
-        </div>
-    </div>
-    <div class="tile is-ancestor">
-        <div class="tile is-parent has-text-centered">
-            <div class="tile is-child box">
-                <h1 class="title">{{ view_model.payout_factor }}</h1>
-                <div class="subtitle">{{ gettext("Payout factor") }}</div>
             </div>
         </div>
     </div>

@@ -4,6 +4,7 @@ from typing import Optional, Tuple
 
 from injector import inject
 
+from arbeitszeit.entities import PayoutFactor
 from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
@@ -27,7 +28,7 @@ class StatisticsResponse:
     planned_work: Decimal
     planned_resources: Decimal
     planned_means: Decimal
-    payout_factor: Optional[Decimal]
+    payout_factor: Optional[PayoutFactor]
 
 
 @inject

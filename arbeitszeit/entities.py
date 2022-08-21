@@ -225,3 +225,9 @@ class CompanyWorkInvite:
 class Accountant:
     email_address: str
     name: str
+
+
+@dataclass
+class PayoutFactor:
+    timestamp: datetime
+    value: Decimal

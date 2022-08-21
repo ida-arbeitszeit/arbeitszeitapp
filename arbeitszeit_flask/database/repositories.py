@@ -1339,7 +1339,9 @@ class PayoutFactorRepository:
         )
         self.db.session.add(payout_factor)
 
-    def get_latest_payout_factor(self) -> Optional[Decimal]:
+    def get_latest_payout_factor(
+        self,
+    ) -> Optional[entities.PayoutFactor]:
         payout_factor_orm = (
             self.db.session.query(models.PayoutFactor)
             .order_by(models.PayoutFactor.timestamp.desc())
@@ -1347,4 +1349,7 @@ class PayoutFactorRepository:
         )
         if not payout_factor_orm:
             return None
-        return Decimal(payout_factor_orm.payout_factor)
+        return entities.PayoutFactor(
+            timestamp=payout_factor_orm.timestamp,
+            value=Decimal(payout_factor_orm.payout_factor),
+        )
