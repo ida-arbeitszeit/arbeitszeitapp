@@ -51,6 +51,9 @@ A nix flake is located in this repository.
 Setup
 -----
 
+Create a virtual environment with ``python -m venv venv``
+To execute the virtual environment ``source ./venv/bin/activate``
+
 To run the app in development mode you first have to define some
 environment variables::
 
