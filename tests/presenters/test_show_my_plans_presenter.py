@@ -147,7 +147,7 @@ class ShowMyPlansPresenterTests(TestCase):
         )
         self.assertEqual(
             row1.price_per_unit,
-            format_price(expected_plan.price_per_unit),
+            "10.00",
         )
         self.assertEqual(row1.type_of_plan, self.translator.gettext("Productive"))
 
@@ -220,7 +220,3 @@ class ShowMyPlansPresenterTests(TestCase):
         )
         self.update_plans_use_case()
         return plan
-
-
-def format_price(price_per_unit: Decimal) -> str:
-    return f"{round(price_per_unit, 2)}"
