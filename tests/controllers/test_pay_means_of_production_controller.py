@@ -82,7 +82,7 @@ class AuthenticatedCompanyTests(TestCase):
         with self.assertRaises(self.controller.FormError):
             self.controller.process_input_data(form)
         self.assertEqual(
-            form.amount_errors,
+            form.amount_field().errors,
             [self.translator.gettext("Must be a number larger than zero.")],
         )
 
@@ -91,7 +91,7 @@ class AuthenticatedCompanyTests(TestCase):
         with self.assertRaises(self.controller.FormError):
             self.controller.process_input_data(form)
         self.assertEqual(
-            form.amount_errors,
+            form.amount_field().errors,
             [self.translator.gettext("This is not an integer.")],
         )
 
@@ -102,7 +102,7 @@ class AuthenticatedCompanyTests(TestCase):
         with self.assertRaises(self.controller.FormError):
             self.controller.process_input_data(form)
         self.assertEqual(
-            form.amount_errors,
+            form.amount_field().errors,
             [self.translator.gettext("This is not an integer.")],
         )
 
@@ -112,7 +112,9 @@ class AuthenticatedCompanyTests(TestCase):
         form = self.get_fake_form(plan_id="")
         with self.assertRaises(self.controller.FormError):
             self.controller.process_input_data(form)
-        self.assertEqual(form.plan_id_errors, [self.translator.gettext("Invalid ID.")])
+        self.assertEqual(
+            form.plan_id_field().errors, [self.translator.gettext("Invalid ID.")]
+        )
 
     def test_correct_error_message_returned_when_plan_id_is_invalid_uuid(
         self,
@@ -121,7 +123,7 @@ class AuthenticatedCompanyTests(TestCase):
         with self.assertRaises(self.controller.FormError):
             self.controller.process_input_data(form)
         self.assertEqual(
-            form.plan_id_errors,
+            form.plan_id_field().errors,
             [self.translator.gettext("Invalid ID.")],
         )
 
@@ -132,7 +134,8 @@ class AuthenticatedCompanyTests(TestCase):
         with self.assertRaises(self.controller.FormError):
             self.controller.process_input_data(form)
         self.assertEqual(
-            form.category_errors, [self.translator.gettext("This field is required.")]
+            form.category_field().errors,
+            [self.translator.gettext("This field is required.")],
         )
 
     def get_fake_form(

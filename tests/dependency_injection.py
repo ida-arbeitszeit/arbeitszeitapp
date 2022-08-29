@@ -77,8 +77,8 @@ class TestingModule(Module):
 
     @singleton
     @provider
-    def provide_session(self) -> Session:
-        return FakeSession()
+    def provide_session(self, instance: FakeSession) -> Session:
+        return instance
 
     @provider
     def provide_fake_token_service(
