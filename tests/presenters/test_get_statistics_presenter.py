@@ -24,7 +24,7 @@ TESTING_RESPONSE_MODEL = StatisticsResponse(
     planned_resources=Decimal("400.1"),
     planned_means=Decimal("215.23"),
     payout_factor=PayoutFactor(
-        timestamp=datetime(2020, 1, 1, 10), value=Decimal("0.74516")
+        calculation_date=datetime(2020, 1, 1, 10), value=Decimal("0.74516")
     ),
 )
 
@@ -218,7 +218,7 @@ class GetStatisticsPresenterTests(TestCase):
     ):
         assert TESTING_RESPONSE_MODEL.payout_factor is not None
         expected_timestamp = self.datetime_service.format_datetime(
-            TESTING_RESPONSE_MODEL.payout_factor.timestamp,
+            TESTING_RESPONSE_MODEL.payout_factor.calculation_date,
             zone="Europe/Berlin",
             fmt="%d.%m.%Y %H:%M",
         )

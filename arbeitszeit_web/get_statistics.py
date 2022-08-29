@@ -104,7 +104,7 @@ class GetStatisticsPresenter:
         if payout_factor is None:
             return self.translator.gettext("Not found.")
         timestamp = self.datetime_service.format_datetime(
-            payout_factor.timestamp, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
+            payout_factor.calculation_date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
         )
         return self.translator.gettext("Payout factor (%(timestamp)s)") % dict(
             timestamp=timestamp

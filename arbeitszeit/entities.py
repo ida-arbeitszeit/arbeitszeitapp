@@ -229,5 +229,5 @@ class Accountant:
 
 @dataclass
 class PayoutFactor:
-    timestamp: datetime
+    calculation_date: datetime
     value: Decimal

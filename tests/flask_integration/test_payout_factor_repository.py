@@ -36,4 +36,4 @@ class PayoutFactorRepositoryTests(TestCase):
         self.repository.store_payout_factor(self.datetime_service.now(), Decimal("15"))
         payout_factor = self.repository.get_latest_payout_factor()
         assert payout_factor.value == expected_payout_factor
-        assert payout_factor.timestamp == datetime(2020, 3, 1, 10)
+        assert payout_factor.calculation_date == datetime(2020, 3, 1, 10)

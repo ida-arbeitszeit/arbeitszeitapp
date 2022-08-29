@@ -1350,6 +1350,6 @@ class PayoutFactorRepository:
         if not payout_factor_orm:
             return None
         return entities.PayoutFactor(
-            timestamp=payout_factor_orm.timestamp,
+            calculation_date=payout_factor_orm.timestamp,
             value=Decimal(payout_factor_orm.payout_factor),
         )

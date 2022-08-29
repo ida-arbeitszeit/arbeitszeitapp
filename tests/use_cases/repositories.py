@@ -973,6 +973,6 @@ class FakePayoutFactorRepository:
         if not self._payout_factors:
             return None
         payout_factors_sorted = sorted(
-            self._payout_factors, key=lambda x: x.timestamp, reverse=True
+            self._payout_factors, key=lambda x: x.calculation_date, reverse=True
         )
         return payout_factors_sorted[0]
