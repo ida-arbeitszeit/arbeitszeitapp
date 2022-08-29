@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+from bisect import insort
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from itertools import islice
+from operator import attrgetter
 from statistics import StatisticsError, mean
 from typing import Dict, Iterable, Iterator, List, Optional, Set, Tuple, Union
 from uuid import UUID, uuid4
@@ -965,14 +967,12 @@ class FakePayoutFactorRepository:
         self._payout_factors: List[PayoutFactor] = []
 
     def store_payout_factor(self, timestamp: datetime, payout_factor: Decimal) -> None:
-        self._payout_factors.append(PayoutFactor(timestamp, payout_factor))
+        key = attrgetter("calculation_date")
+        insort(self._payout_factors, PayoutFactor(timestamp, payout_factor), key=key)
 
     def get_latest_payout_factor(
         self,
     ) -> Optional[PayoutFactor]:
         if not self._payout_factors:
             return None
-        payout_factors_sorted = sorted(
-            self._payout_factors, key=lambda x: x.calculation_date, reverse=True
-        )
-        return payout_factors_sorted[0]
+        return self._payout_factors[-1]
