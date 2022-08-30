@@ -3,13 +3,16 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
+from injector import inject
+
 from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProductionResponse
 from arbeitszeit_web.translator import Translator
-from arbeitszeit_web.url_index import PayMeansOfProductionUrlIndex
+from arbeitszeit_web.url_index import UrlIndex
 
 from .notification import Notifier
 
 
+@inject
 @dataclass
 class PayMeansOfProductionPresenter:
     @dataclass
@@ -18,7 +21,7 @@ class PayMeansOfProductionPresenter:
 
     user_notifier: Notifier
     trans: Translator
-    pay_means_of_production_url_index: PayMeansOfProductionUrlIndex
+    url_index: UrlIndex
 
     def present(self, use_case_response: PayMeansOfProductionResponse) -> ViewModel:
         redirect_url: Optional[str] = None
@@ -26,9 +29,7 @@ class PayMeansOfProductionPresenter:
         reasons = use_case_response.RejectionReason
         if use_case_response.rejection_reason is None:
             self.user_notifier.display_info(self.trans.gettext("Successfully paid."))
-            redirect_url = (
-                self.pay_means_of_production_url_index.get_pay_means_of_production_url()
-            )
+            redirect_url = self.url_index.get_pay_means_of_production_url()
         elif use_case_response.rejection_reason == reasons.plan_not_found:
             self.user_notifier.display_warning(
                 self.trans.gettext("Plan does not exist.")

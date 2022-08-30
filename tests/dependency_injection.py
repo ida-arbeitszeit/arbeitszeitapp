@@ -12,6 +12,7 @@ from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitat
 )
 from arbeitszeit_web.colors import Colors
 from arbeitszeit_web.plotter import Plotter
+from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
 from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
 from tests.company import CompanyManager
@@ -73,6 +74,11 @@ class TestingModule(Module):
     @provider
     def provide_fake_session(self) -> FakeSession:
         return FakeSession()
+
+    @singleton
+    @provider
+    def provide_session(self, instance: FakeSession) -> Session:
+        return instance
 
     @provider
     def provide_fake_token_service(

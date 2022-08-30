@@ -7,7 +7,7 @@ from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl
-from .url_index import PayMeansOfProductionUrlIndexImpl
+from .url_index import UrlIndexTestImpl
 
 reasons = PayMeansOfProductionResponse.RejectionReason
 
@@ -18,7 +18,7 @@ class PayMeansOfProductionTests(TestCase):
         self.notifier = self.injector.get(NotifierTestImpl)
         self.trans = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(PayMeansOfProductionPresenter)
-        self.url_index = self.injector.get(PayMeansOfProductionUrlIndexImpl)
+        self.url_index = self.injector.get(UrlIndexTestImpl)
 
     def test_show_confirmation_when_payment_was_successful(self) -> None:
         self.presenter.present(
@@ -102,7 +102,8 @@ class PayMeansOfProductionTests(TestCase):
         response = self.create_success_response()
         view_model = self.presenter.present(response)
         self.assertEqual(
-            view_model.redirect_url, self.url_index.get_pay_means_of_production_url()
+            view_model.redirect_url,
+            self.url_index.get_pay_means_of_production_url(),
         )
 
     def create_success_response(self) -> PayMeansOfProductionResponse:

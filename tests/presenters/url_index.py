@@ -67,20 +67,17 @@ class UrlIndexTestImpl:
     def get_pay_consumer_product_url(self, amount: int, plan_id: UUID) -> str:
         return f"pay consumer product url: {amount}, {plan_id}"
 
+    def get_pay_means_of_production_url(self, plan_id: Optional[UUID] = None) -> str:
+        return f"pay means of production url for plan {plan_id}"
 
-class RequestCoopUrlIndexTestImpl:
+    def get_toggle_availability_url(self, plan_id: UUID) -> str:
+        return f"fake_toggle_url:{plan_id}"
+
     def get_request_coop_url(self) -> str:
         return "fake_request_coop_url"
 
-
-class EndCoopUrlIndexTestImpl:
     def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
         return f"fake_end_coop_url:{plan_id}, {cooperation_id}"
-
-
-class TogglePlanAvailabilityUrlIndex:
-    def get_toggle_availability_url(self, plan_id: UUID) -> str:
-        return f"fake_toggle_url:{plan_id}"
 
 
 class RenewPlanUrlIndexTestImpl:
@@ -106,11 +103,6 @@ class AccountantInvitationUrlIndexImpl:
 class AccountantDashboardUrlIndexImpl:
     def get_accountant_dashboard_url(self) -> str:
         return "accountant dashboard url"
-
-
-class PayMeansOfProductionUrlIndexImpl:
-    def get_pay_means_of_production_url(self) -> str:
-        return "pay means of production form url"
 
 
 class LanguageChangerUrlIndexImpl:

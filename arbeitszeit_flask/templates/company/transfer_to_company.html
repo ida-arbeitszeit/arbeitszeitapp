@@ -14,25 +14,29 @@
                     {{ gettext("Payment of fixed and liquid means of production") }}
                 </h1>
             </div>
+            {% for field_name, field_errors in form.errors|dictsort if field_errors %}
+            {% for error in field_errors %}
+            <div class="notification is-danger">
+                {{ form[field_name].label }}: {{ error }}
+            </div>
+            {% endfor %}
+            {% endfor %}
             <form method="post">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="field">
+                    <label class="label">{{ gettext("Plan ID") }}</label>
                     <div class="control">
                         {{ form.plan_id(class_="input") }}
-			{% for error in form.errors['plan_id'] %}
-			<div class="notification is-danger">{{ error }}</div>
-			{% endfor %}
                     </div>
                 </div>
                 <div class="field">
+                    <label class="label">{{ gettext("Amount") }}</label>
                     <div class="control">
                         {{ form.amount(class_="input") }}
-			{% for error in form.errors['amount'] %}
-			<div class="notification is-danger">{{ error }}</div>
-			{% endfor %}
                     </div>
                 </div>
                 <div class="field">
+                    <label class="label">{{ form.category.label }}</label>
                     <div class="control">
                         <div class="select">
                             <select name="category" required>

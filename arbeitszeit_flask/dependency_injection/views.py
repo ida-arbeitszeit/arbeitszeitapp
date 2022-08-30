@@ -9,7 +9,6 @@ from arbeitszeit.use_cases.create_cooperation import CreateCooperation
 from arbeitszeit.use_cases.end_cooperation import EndCooperation
 from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCase
 from arbeitszeit.use_cases.list_workers import ListWorkers
-from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProduction
 from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
 from arbeitszeit.use_cases.register_company import RegisterCompany
 from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
@@ -40,7 +39,6 @@ from arbeitszeit_flask.views.invite_worker_to_company import (
     InviteWorkerGetRequestHandler,
     InviteWorkerPostRequestHandler,
 )
-from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
 from arbeitszeit_flask.views.signup_accountant_view import SignupAccountantView
 from arbeitszeit_flask.views.signup_company_view import SignupCompanyView
@@ -54,9 +52,6 @@ from arbeitszeit_web.controllers.end_cooperation_controller import (
     EndCooperationController,
 )
 from arbeitszeit_web.controllers.list_workers_controller import ListWorkersController
-from arbeitszeit_web.controllers.pay_means_of_production_controller import (
-    PayMeansOfProductionController,
-)
 from arbeitszeit_web.controllers.register_accountant_controller import (
     RegisterAccountantController,
 )
@@ -75,7 +70,6 @@ from arbeitszeit_web.invite_worker_to_company import (
     InviteWorkerToCompanyController,
     InviteWorkerToCompanyPresenter,
 )
-from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from arbeitszeit_web.presenters.accountant_invitation_presenter import (
     AccountantInvitationEmailView,
 )
@@ -310,16 +304,4 @@ class ViewsModule(Module):
             controller,
             presenter,
             list_workers,
-        )
-
-    @provider
-    def provide_pay_means_of_production_view(
-        self,
-        controller: PayMeansOfProductionController,
-        pay_means_of_production: PayMeansOfProduction,
-        presenter: PayMeansOfProductionPresenter,
-        template_renderer: UserTemplateRenderer,
-    ) -> PayMeansOfProductionView:
-        return PayMeansOfProductionView(
-            controller, pay_means_of_production, presenter, template_renderer
         )

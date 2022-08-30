@@ -1,16 +1,11 @@
 from injector import Injector, Module, inject, provider, singleton
 
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
-from arbeitszeit_web.formatters.plan_summary_formatter import PlanSummaryFormatter
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
-from arbeitszeit_web.get_plan_summary_company import (
-    GetPlanSummaryCompanySuccessPresenter,
-)
 from arbeitszeit_web.hide_plan import HidePlanPresenter
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyPresenter
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.pay_consumer_product import PayConsumerProductPresenter
-from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from arbeitszeit_web.presenters.accountant_invitation_presenter import (
     AccountantInvitationEmailPresenter,
 )
@@ -35,12 +30,7 @@ from arbeitszeit_web.presenters.send_work_certificates_to_worker_presenter impor
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.request_cooperation import RequestCooperationPresenter
 from arbeitszeit_web.session import Session
-from arbeitszeit_web.url_index import (
-    EndCoopUrlIndex,
-    HidePlanUrlIndex,
-    RenewPlanUrlIndex,
-    UrlIndex,
-)
+from arbeitszeit_web.url_index import HidePlanUrlIndex, RenewPlanUrlIndex, UrlIndex
 from tests.datetime_service import FakeDatetimeService
 from tests.dependency_injection import TestingModule
 from tests.email import (
@@ -61,13 +51,9 @@ from .url_index import (
     AccountantDashboardUrlIndexImpl,
     AccountantInvitationUrlIndexImpl,
     ConfirmationUrlIndexImpl,
-    EndCoopUrlIndexTestImpl,
     HidePlanUrlIndexTestImpl,
     LanguageChangerUrlIndexImpl,
-    PayMeansOfProductionUrlIndexImpl,
     RenewPlanUrlIndexTestImpl,
-    RequestCoopUrlIndexTestImpl,
-    TogglePlanAvailabilityUrlIndex,
     UrlIndexTestImpl,
 )
 
@@ -90,12 +76,6 @@ class PresenterTestsInjector(Module):
         return index
 
     @provider
-    def provide_end_coop_url_index(
-        self, index: EndCoopUrlIndexTestImpl
-    ) -> EndCoopUrlIndex:
-        return index
-
-    @provider
     def provide_session(self, session: FakeSession) -> Session:
         return session
 
@@ -112,13 +92,6 @@ class PresenterTestsInjector(Module):
     @provider
     def provide_notifier(self, notifier: NotifierTestImpl) -> Notifier:
         return notifier
-
-    @singleton
-    @provider
-    def provide_toggle_plan_availability_url_index(
-        self,
-    ) -> TogglePlanAvailabilityUrlIndex:
-        return TogglePlanAvailabilityUrlIndex()
 
     @singleton
     @provider
@@ -152,23 +125,6 @@ class PresenterTestsInjector(Module):
         )
 
     @provider
-    def provide_get_plan_summary_company_success_presenter(
-        self,
-        toggle_availability_url_index: TogglePlanAvailabilityUrlIndex,
-        end_coop_url_index: EndCoopUrlIndexTestImpl,
-        request_coop_url_index: RequestCoopUrlIndexTestImpl,
-        translator: FakeTranslator,
-        plan_summary_service: PlanSummaryFormatter,
-    ) -> GetPlanSummaryCompanySuccessPresenter:
-        return GetPlanSummaryCompanySuccessPresenter(
-            toggle_availability_url_index=toggle_availability_url_index,
-            end_coop_url_index=end_coop_url_index,
-            request_coop_url_index=request_coop_url_index,
-            trans=translator,
-            plan_summary_service=plan_summary_service,
-        )
-
-    @provider
     def provide_hide_plan_presenter(
         self, notifier: Notifier, translator: FakeTranslator
     ) -> HidePlanPresenter:
@@ -184,19 +140,6 @@ class PresenterTestsInjector(Module):
         return PayConsumerProductPresenter(
             user_notifier=notifier,
             translator=translator,
-        )
-
-    @provider
-    def provide_pay_means_of_production_presenter(
-        self,
-        notifier: Notifier,
-        translator: FakeTranslator,
-        pay_means_of_production_url_index: PayMeansOfProductionUrlIndexImpl,
-    ) -> PayMeansOfProductionPresenter:
-        return PayMeansOfProductionPresenter(
-            user_notifier=notifier,
-            trans=translator,
-            pay_means_of_production_url_index=pay_means_of_production_url_index,
         )
 
     @provider

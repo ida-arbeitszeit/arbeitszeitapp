@@ -9,7 +9,7 @@ from arbeitszeit_web.session import UserRole
 from tests.session import FakeSession
 
 from .dependency_injection import get_dependency_injector
-from .url_index import EndCoopUrlIndexTestImpl, UrlIndexTestImpl
+from .url_index import UrlIndexTestImpl
 
 TESTING_RESPONSE_MODEL = GetCoopSummarySuccess(
     requester_is_coordinator=True,
@@ -33,7 +33,6 @@ class GetCoopSummarySuccessPresenterTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.url_index = self.injector.get(UrlIndexTestImpl)
-        self.end_coop_url_index = self.injector.get(EndCoopUrlIndexTestImpl)
         self.presenter = self.injector.get(GetCoopSummarySuccessPresenter)
         self.session = self.injector.get(FakeSession)
         self.session.login_company("test@test.test")
@@ -108,7 +107,7 @@ class GetCoopSummarySuccessPresenterTests(TestCase):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
         self.assertEqual(
             view_model.plans[0].end_coop_url,
-            self.end_coop_url_index.get_end_coop_url(
+            self.url_index.get_end_coop_url(
                 TESTING_RESPONSE_MODEL.plans[0].plan_id, TESTING_RESPONSE_MODEL.coop_id
             ),
         )
