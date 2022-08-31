@@ -18,6 +18,7 @@ depends_on = None
 
 def upgrade():
     op.drop_table("message")
+    sa.Enum(name="useractiontype").drop(op.get_bind(), checkfirst=False)
     op.drop_table("user_action")
 
 
