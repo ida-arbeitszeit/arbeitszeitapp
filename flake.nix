@@ -30,9 +30,7 @@
             inherit (pkgs) python3;
           };
           checks = {
-            arbeitszeit-python39 = pkgs.python39.pkgs.arbeitszeitapp;
             arbeitszeit-python310 = pkgs.python310.pkgs.arbeitszeitapp;
-            arbeitszeitapp-22_05 = pkgs_22_05.python3.pkgs.arbeitszeitapp;
           };
         });
       systemIndependent = {
@@ -56,7 +54,6 @@
                     (import nix/pythonPackages.nix);
                 };
             in {
-              python39 = overridePython prev.python39;
               python310 = overridePython prev.python310;
             };
         };
