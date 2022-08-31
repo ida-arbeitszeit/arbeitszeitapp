@@ -1326,3 +1326,30 @@ class AccountantRepository:
             password=generate_password_hash(password, method="sha256"),
             email=email,
         )
+
+
+@inject
+@dataclass
+class PayoutFactorRepository:
+    db: SQLAlchemy
+
+    def store_payout_factor(self, timestamp: datetime, payout_factor: Decimal) -> None:
+        payout_factor = models.PayoutFactor(
+            timestamp=timestamp, payout_factor=payout_factor
+        )
+        self.db.session.add(payout_factor)
+
+    def get_latest_payout_factor(
+        self,
+    ) -> Optional[entities.PayoutFactor]:
+        payout_factor_orm = (
+            self.db.session.query(models.PayoutFactor)
+            .order_by(models.PayoutFactor.timestamp.desc())
+            .first()
+        )
+        if not payout_factor_orm:
+            return None
+        return entities.PayoutFactor(
+            calculation_date=payout_factor_orm.timestamp,
+            value=Decimal(payout_factor_orm.payout_factor),
+        )

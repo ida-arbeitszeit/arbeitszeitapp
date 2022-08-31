@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+from bisect import insort
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from itertools import islice
+from operator import attrgetter
 from statistics import StatisticsError, mean
 from typing import Dict, Iterable, Iterator, List, Optional, Set, Tuple, Union
 from uuid import UUID, uuid4
@@ -22,6 +24,7 @@ from arbeitszeit.entities import (
     CompanyWorkInvite,
     Cooperation,
     Member,
+    PayoutFactor,
     Plan,
     PlanDraft,
     ProductionCosts,
@@ -955,3 +958,21 @@ class FakeLanguageRepository:
 
     def get_available_language_codes(self) -> Iterable[str]:
         return self._language_codes
+
+
+@singleton
+class FakePayoutFactorRepository:
+    @inject
+    def __init__(self) -> None:
+        self._payout_factors: List[PayoutFactor] = []
+
+    def store_payout_factor(self, timestamp: datetime, payout_factor: Decimal) -> None:
+        key = attrgetter("calculation_date")
+        insort(self._payout_factors, PayoutFactor(timestamp, payout_factor), key=key)
+
+    def get_latest_payout_factor(
+        self,
+    ) -> Optional[PayoutFactor]:
+        if not self._payout_factors:
+            return None
+        return self._payout_factors[-1]
