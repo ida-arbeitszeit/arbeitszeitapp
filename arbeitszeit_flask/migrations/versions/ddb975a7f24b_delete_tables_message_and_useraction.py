@@ -18,7 +18,6 @@ depends_on = None
 
 def upgrade():
     op.drop_table("message")
-    #op.execute("DROP TYPE IF EXISTS useractiontype CASCADE")
     op.drop_table("user_action")
 
 

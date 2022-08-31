@@ -47,9 +47,6 @@ def upgrade():
     migrator.copy_company_credentials()
     migrator.copy_member_credentials()
     
-    #op.alter_column('accountant', 'user_id', nullable=False)
-    #op.alter_column('member', 'user_id', nullable=False)
-    #op.alter_column('company', 'user_id', nullable=False
     with op.batch_alter_table('accountant') as batch_op:
         batch_op.alter_column('user_id', nullable=False)
     
