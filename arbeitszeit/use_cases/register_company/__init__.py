@@ -30,6 +30,7 @@ class RegisterCompany:
             company_already_exists = auto()
 
         rejection_reason: Optional[RejectionReason]
+        company_id: Optional[UUID]
 
         @property
         def is_rejected(self) -> bool:
@@ -43,12 +44,12 @@ class RegisterCompany:
 
     def __call__(self, request: Request) -> Response:
         try:
-            self._register_company(request)
+            company_id = self._register_company(request)
         except self.Response.RejectionReason as reason:
-            return self.Response(rejection_reason=reason)
-        return self.Response(rejection_reason=None)
+            return self.Response(rejection_reason=reason, company_id=None)
+        return self.Response(rejection_reason=None, company_id=company_id)
 
-    def _register_company(self, request: Request) -> None:
+    def _register_company(self, request: Request) -> UUID:
         if self.company_repository.has_company_with_email(request.email):
             raise self.Response.RejectionReason.company_already_exists
         means_account = self.account_repository.create_account(AccountTypes.p)
@@ -67,6 +68,7 @@ class RegisterCompany:
             registered_on,
         )
         self._create_confirmation_mail(request, company.id)
+        return company.id
 
     def _create_confirmation_mail(self, request: Request, company: UUID) -> None:
         token = self.token_service.generate_token(request.email)
