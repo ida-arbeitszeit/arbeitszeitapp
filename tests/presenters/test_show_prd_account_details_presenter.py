@@ -19,6 +19,7 @@ DEFAULT_INFO1 = ShowPRDAccountDetailsUseCase.TransactionInfo(
     date=datetime.now(),
     transaction_volume=Decimal(10.007),
     purpose="Test purpose",
+    buyer=None,
 )
 
 DEFAULT_INFO2 = ShowPRDAccountDetailsUseCase.TransactionInfo(
@@ -26,6 +27,9 @@ DEFAULT_INFO2 = ShowPRDAccountDetailsUseCase.TransactionInfo(
     date=datetime.now(),
     transaction_volume=Decimal(20),
     purpose="Test purpose",
+    buyer=ShowPRDAccountDetailsUseCase.Buyer(
+        buyer_id=uuid4(), buyer_name="member name"
+    ),
 )
 
 
