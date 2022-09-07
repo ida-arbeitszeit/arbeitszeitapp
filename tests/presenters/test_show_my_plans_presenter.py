@@ -61,7 +61,7 @@ class ShowMyPlansPresenterTests(TestCase):
         self.assertFalse(self.notifier.warnings)
 
     def test_do_only_show_active_plans_when_user_has_one_active_plan(self):
-        plan = self.plan_generator.create_plan(activation_date=datetime.min)
+        plan = self.plan_generator.create_plan(activation_date=datetime.now())
         RESPONSE_WITH_ONE_ACTIVE_PLAN = self.response_with_one_active_plan(plan)
         presentation = self.presenter.present(RESPONSE_WITH_ONE_ACTIVE_PLAN)
         self.assertTrue(presentation.show_active_plans)
@@ -70,7 +70,7 @@ class ShowMyPlansPresenterTests(TestCase):
 
     def test_presenter_shows_correct_info_of_one_single_active_plan(self):
         plan = self.plan_generator.create_plan(
-            activation_date=datetime.min, cooperation=None, is_available=True
+            activation_date=datetime.now(), cooperation=None, is_available=True
         )
         RESPONSE_WITH_ONE_ACTIVE_PLAN = self.response_with_one_active_plan(plan)
         presentation = self.presenter.present(RESPONSE_WITH_ONE_ACTIVE_PLAN)
