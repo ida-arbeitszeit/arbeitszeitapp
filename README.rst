@@ -67,7 +67,7 @@ environment variables::
 After configuring the database connection you need to run the database
 migrations via ``flask db upgrade``.
 
-Afterwards you can start the development server with ``flask run``.
+Afterwards you can start the development server with ``flask run -h localhost``.
 
 
 Repository layout
