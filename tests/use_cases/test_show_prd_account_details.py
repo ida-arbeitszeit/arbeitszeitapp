@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 
-from arbeitszeit.entities import SocialAccounting
+from arbeitszeit.entities import Company, Member, SocialAccounting
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases import ShowPRDAccountDetailsUseCase
 from tests.data_generators import (
@@ -387,6 +387,7 @@ def test_that_correct_buyer_info_is_shown_when_company_sold_to_member(
 
     response = show_prd_account_details(company.id)
     assert response.transactions[0].buyer
+    assert response.transactions[0].buyer.buyer_type == Member
     assert response.transactions[0].buyer.buyer_id == member.id
     assert response.transactions[0].buyer.buyer_name == member.name
 
@@ -409,5 +410,6 @@ def test_that_correct_buyer_info_is_shown_when_company_sold_to_company(
 
     response = show_prd_account_details(company2.id)
     assert response.transactions[0].buyer
+    assert response.transactions[0].buyer.buyer_type == Company
     assert response.transactions[0].buyer.buyer_id == company1.id
     assert response.transactions[0].buyer.buyer_name == company1.name

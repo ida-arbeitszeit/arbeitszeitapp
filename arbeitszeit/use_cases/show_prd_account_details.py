@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from itertools import accumulate
-from typing import List, Optional, Union
+from typing import List, Optional, Type, Union
 from uuid import UUID
 
 from injector import inject
@@ -19,6 +19,7 @@ from arbeitszeit.transactions import TransactionTypes, UserAccountingService
 class ShowPRDAccountDetailsUseCase:
     @dataclass
     class Buyer:
+        buyer_type: Union[Type[Company], Type[Member]]
         buyer_id: UUID
         buyer_name: str
 
@@ -107,4 +108,8 @@ class ShowPRDAccountDetailsUseCase:
     ) -> Optional[ShowPRDAccountDetailsUseCase.Buyer]:
         if not buyer:
             return None
-        return self.Buyer(buyer_id=buyer.id, buyer_name=buyer.get_name())
+        return self.Buyer(
+            buyer_type=Member if isinstance(buyer, Member) else Company,
+            buyer_id=buyer.id,
+            buyer_name=buyer.get_name(),
+        )

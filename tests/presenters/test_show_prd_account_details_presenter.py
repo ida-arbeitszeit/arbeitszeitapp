@@ -4,6 +4,7 @@ from typing import List
 from unittest import TestCase
 from uuid import UUID, uuid4
 
+from arbeitszeit.entities import Member
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.show_prd_account_details import ShowPRDAccountDetailsUseCase
 from arbeitszeit_web.presenters.show_prd_account_details_presenter import (
@@ -29,7 +30,7 @@ DEFAULT_INFO2 = ShowPRDAccountDetailsUseCase.TransactionInfo(
     transaction_volume=Decimal(20),
     purpose="Test purpose",
     buyer=ShowPRDAccountDetailsUseCase.Buyer(
-        buyer_id=uuid4(), buyer_name="member name"
+        buyer_type=Member, buyer_id=uuid4(), buyer_name="member name"
     ),
 )
 
