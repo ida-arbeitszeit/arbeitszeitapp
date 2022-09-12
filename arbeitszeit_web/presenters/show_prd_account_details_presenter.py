@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
 from injector import inject
 
@@ -22,6 +22,7 @@ class ShowPRDAccountDetailsPresenter:
         transaction_volume: str
         purpose: str
         buyer_name: str
+        buyer_type: str
 
     @dataclass
     class ViewModel:
@@ -72,4 +73,15 @@ class ShowPRDAccountDetailsPresenter:
             transaction_volume=str(round(transaction.transaction_volume, 2)),
             purpose=transaction.purpose,
             buyer_name=transaction.buyer.buyer_name if transaction.buyer else "",
+            buyer_type=self._get_buyer_type(transaction.buyer),
         )
+
+    def _get_buyer_type(
+        self, buyer: Optional[ShowPRDAccountDetailsUseCase.Buyer]
+    ) -> str:
+        if not buyer:
+            return ""
+        elif buyer.buyer_is_member:
+            return self.translator.gettext("Worker")
+        else:
+            return self.translator.gettext("Company")
