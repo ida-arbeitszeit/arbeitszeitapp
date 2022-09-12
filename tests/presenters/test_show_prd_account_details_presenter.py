@@ -10,6 +10,7 @@ from arbeitszeit_web.presenters.show_prd_account_details_presenter import (
     ShowPRDAccountDetailsPresenter,
 )
 from tests.datetime_service import FakeDatetimeService
+from tests.presenters.url_index import UrlIndexTestImpl
 from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
@@ -39,6 +40,7 @@ class CompanyTransactionsPresenterTests(TestCase):
         self.translator = self.injector.get(FakeTranslator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.presenter = self.injector.get(ShowPRDAccountDetailsPresenter)
+        self.url_index = self.injector.get(UrlIndexTestImpl)
 
     def test_return_empty_list_when_no_transactions_took_place(self):
         response = self._use_case_response()
@@ -103,6 +105,18 @@ class CompanyTransactionsPresenterTests(TestCase):
         view_model = self.presenter.present(response)
         self.assertTrue(view_model.plot_url)
         self.assertIn(str(response.company_id), view_model.plot_url)
+
+    def test_name_of_buyer_is_shown_if_transaction_is_of_type_sale(self):
+        response = self._use_case_response(transactions=[DEFAULT_INFO2])
+        view_model = self.presenter.present(response)
+        self.assertEqual(view_model.transactions[0].buyer_name, "member name")
+
+    def test_name_of_buyer_is_empty_string_if_transaction_is_of_type_expected_sales(
+        self,
+    ):
+        response = self._use_case_response(transactions=[DEFAULT_INFO1])
+        view_model = self.presenter.present(response)
+        self.assertEqual(view_model.transactions[0].buyer_name, "")
 
     def _use_case_response(
         self,

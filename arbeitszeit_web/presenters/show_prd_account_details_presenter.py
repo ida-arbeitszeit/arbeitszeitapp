@@ -21,6 +21,7 @@ class ShowPRDAccountDetailsPresenter:
         date: str
         transaction_volume: str
         purpose: str
+        buyer_name: str
 
     @dataclass
     class ViewModel:
@@ -64,10 +65,11 @@ class ShowPRDAccountDetailsPresenter:
             else self.translator.gettext("Sale")
         )
         return self.TransactionInfo(
-            transaction_type,
-            self.datetime_service.format_datetime(
+            transaction_type=transaction_type,
+            date=self.datetime_service.format_datetime(
                 date=transaction.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
             ),
-            str(round(transaction.transaction_volume, 2)),
-            transaction.purpose,
+            transaction_volume=str(round(transaction.transaction_volume, 2)),
+            purpose=transaction.purpose,
+            buyer_name=transaction.buyer.buyer_name if transaction.buyer else "",
         )
