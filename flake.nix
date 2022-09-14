@@ -53,9 +53,7 @@
                     composeExtensions (import nix/developmentOverrides.nix)
                     (import nix/pythonPackages.nix);
                 };
-            in {
-              python310 = overridePython prev.python310;
-            };
+            in { python310 = overridePython prev.python310; };
         };
       };
     in systemDependent // systemIndependent;
