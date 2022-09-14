@@ -113,7 +113,7 @@ class CompanyTransactionsPresenterTests(TestCase):
         view_model = self.presenter.present(response)
         self.assertEqual(view_model.transactions[0].buyer_name, "member name")
 
-    def test_correct_type_of_buyer_is_shown_if_transaction_is_sale_of_consumer_product(
+    def test_correct_icon_for_type_of_buyer_is_shown_if_transaction_is_sale_of_consumer_product(
         self,
     ):
         response = self._use_case_response(
@@ -127,11 +127,9 @@ class CompanyTransactionsPresenterTests(TestCase):
             ]
         )
         view_model = self.presenter.present(response)
-        self.assertEqual(
-            view_model.transactions[0].buyer_type, self.translator.gettext("Worker")
-        )
+        self.assertEqual(view_model.transactions[0].buyer_type_icon, "fas fa-user")
 
-    def test_correct_type_of_buyer_is_shown_if_transaction_is_sale_of_liquid_means(
+    def test_correct_icon_for_type_of_buyer_is_shown_if_transaction_is_sale_of_liquid_means(
         self,
     ):
         response = self._use_case_response(
@@ -147,16 +145,14 @@ class CompanyTransactionsPresenterTests(TestCase):
             ]
         )
         view_model = self.presenter.present(response)
-        self.assertEqual(
-            view_model.transactions[0].buyer_type, self.translator.gettext("Company")
-        )
+        self.assertEqual(view_model.transactions[0].buyer_type_icon, "fas fa-industry")
 
-    def test_type_of_buyer_is_empty_string_if_transaction_is_of_type_expected_sales(
+    def test_type_of_buyer_is_none_if_transaction_is_of_type_expected_sales(
         self,
     ):
         response = self._use_case_response(transactions=[self._get_transaction_info()])
         view_model = self.presenter.present(response)
-        self.assertEqual(view_model.transactions[0].buyer_type, "")
+        self.assertIsNone(view_model.transactions[0].buyer_type_icon)
 
     def test_name_of_buyer_is_empty_string_if_transaction_is_of_type_expected_sales(
         self,

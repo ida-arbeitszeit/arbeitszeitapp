@@ -22,7 +22,7 @@ class ShowPRDAccountDetailsPresenter:
         transaction_volume: str
         purpose: str
         buyer_name: str
-        buyer_type: str
+        buyer_type_icon: Optional[str]
 
     @dataclass
     class ViewModel:
@@ -73,15 +73,15 @@ class ShowPRDAccountDetailsPresenter:
             transaction_volume=str(round(transaction.transaction_volume, 2)),
             purpose=transaction.purpose,
             buyer_name=transaction.buyer.buyer_name if transaction.buyer else "",
-            buyer_type=self._get_buyer_type(transaction.buyer),
+            buyer_type_icon=self._get_buyer_type_icon(transaction.buyer),
         )
 
-    def _get_buyer_type(
+    def _get_buyer_type_icon(
         self, buyer: Optional[ShowPRDAccountDetailsUseCase.Buyer]
-    ) -> str:
+    ) -> Optional[str]:
         if not buyer:
-            return ""
+            return None
         elif buyer.buyer_is_member:
-            return self.translator.gettext("Worker")
+            return "fas fa-user"
         else:
-            return self.translator.gettext("Company")
+            return "fas fa-industry"

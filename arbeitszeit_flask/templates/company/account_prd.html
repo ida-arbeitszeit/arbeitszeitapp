@@ -30,7 +30,6 @@
                     <th></th>
                     <th>{{ gettext("Type") }}</th>
                     <th>{{ gettext("Buyer") }} </th>
-                    <th>{{ gettext("Buyer type") }} </th>
                     <th>{{ gettext("Details") }}</th>
                     <th></th>
                 </tr>
@@ -43,8 +42,9 @@
                     <td>
                         {{ trans_info.transaction_type }}
                     </td>
-                    <td>{{ trans_info.buyer_name }}</td>
-                    <td>{{ trans_info.buyer_type }}</td>
+                    <td><span class="icon"><i
+                                class='{{ trans_info.buyer_type_icon }}'></i></span>&ensp;<span>{{ trans_info.buyer_name }}</span>
+                    </td>
                     <td>{{ trans_info.purpose }}</td>
                     <td
                         class="has-text-right has-text-weight-bold {{ 'has-text-success' if trans_info.transaction_volume|float >= 0 else 'has-text-danger' }}">
