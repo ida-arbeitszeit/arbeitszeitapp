@@ -1,0 +1,27 @@
+{% macro basic_transaction(date, type, purpose, volume) %}
+
+<article class="media">
+    <div class="media-left">
+        <p class="pt-1">
+            <small class="has-text-weight-semibold">{{ date }}</small><br>
+        </p>
+    </div>
+    <div class="media-content">
+        <div class="content">
+            <p>
+                <strong class="is-size-5">
+                    {{ type }}
+                </strong>
+                <br>
+                <small>{{ purpose }}</small>
+            </p>
+        </div>
+    </div>
+    <div class="media-right">
+        <p class="is-size-5 pt-1 {{ 'has-text-success' if volume|float >= 0 else 'has-text-danger' }}">
+            {{ volume }}
+        </p>
+    </div>
+</article>
+
+{% endmacro %}

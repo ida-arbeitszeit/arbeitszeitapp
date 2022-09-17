@@ -1673,7 +1673,7 @@ msgstr "Bezahlung"
 #: tests/presenters/test_show_p_account_details.py:53
 #: tests/presenters/test_show_r_account_details.py:53
 msgid "Credit"
-msgstr "Guthaben"
+msgstr "Gutschrift"
 
 #: arbeitszeit_web/presenters/show_company_work_invite_details_presenter.py:27
 #, python-format
