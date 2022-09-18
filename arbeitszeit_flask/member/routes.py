@@ -28,6 +28,9 @@ from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresente
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_plan_summary_member import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
+from arbeitszeit_web.presenters.get_member_account_presenter import (
+    GetMemberAccountPresenter,
+)
 from arbeitszeit_web.presenters.get_member_dashboard_presenter import (
     GetMemberDashboardPresenter,
 )
@@ -136,15 +139,14 @@ def dashboard(
 def my_account(
     get_member_account: use_cases.GetMemberAccount,
     template_renderer: UserTemplateRenderer,
+    presenter: GetMemberAccountPresenter,
 ) -> Response:
     response = get_member_account(UUID(current_user.id))
+    view_model = presenter.present_member_account(response)
     return FlaskResponse(
         template_renderer.render_template(
             "member/my_account.html",
-            context=dict(
-                all_transactions_info=response.transactions,
-                my_balance=response.balance,
-            ),
+            context=dict(view_model=view_model),
         )
     )
 
