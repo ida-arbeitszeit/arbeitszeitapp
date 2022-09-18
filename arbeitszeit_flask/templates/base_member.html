@@ -4,8 +4,14 @@
 {% block navigation %}
 <nav class="navbar is-transparent" role="navigation" aria-label="main navigation">
   <div class="navbar-brand">
-    <div class="navbar-item has-background-primary	has-text-white">
+    <div class="navbar-item has-background-primary has-text-white">
+      {% if current_user.is_authenticated %}
+      <span class="icon"><i class="fas fa-user"></i></span>&nbsp;
+      {{ current_user.name|truncate(20, True) }}
+      {% else %}
+      <span class="icon"><i class="fas fa-user"></i></span>&nbsp;
       {{ gettext("Member view") }}
+      {% endif %}
     </div>
 
     <a role="button" class="navbar-burger" onclick="expandMenu()" aria-label="menu" aria-expanded="false"
