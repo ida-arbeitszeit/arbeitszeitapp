@@ -6,7 +6,9 @@ from typing import List
 from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.get_member_account import GetMemberAccountResponse
+from arbeitszeit_web.translator import Translator
 
 
 @inject
@@ -28,6 +30,7 @@ class GetMemberAccountPresenter:
         transactions: List[GetMemberAccountPresenter.Transaction]
 
     datetime_service: DatetimeService
+    translator: Translator
 
     def present_member_account(
         self, use_case_response: GetMemberAccountResponse
@@ -37,7 +40,9 @@ class GetMemberAccountPresenter:
                 date=self.datetime_service.format_datetime(
                     t.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
                 ),
-                type="XXX",
+                type=self.translator.gettext("Payment")
+                if (t.type == TransactionTypes.payment_of_consumer_product)
+                else self.translator.gettext("Wages"),
                 user_name=t.peer_name,
                 volume=f"{round(t.transaction_volume, 2)}",
                 is_volume_positive=t.transaction_volume >= 0,

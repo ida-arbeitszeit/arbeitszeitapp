@@ -3,6 +3,7 @@ from decimal import Decimal
 from typing import List
 from unittest import TestCase
 
+from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.get_member_account import (
     GetMemberAccountResponse,
     TransactionInfo,
@@ -11,6 +12,7 @@ from arbeitszeit_web.presenters.get_member_account_presenter import (
     GetMemberAccountPresenter,
 )
 from tests.datetime_service import FakeDatetimeService
+from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
 
@@ -19,6 +21,7 @@ class TestPresenter(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.datetime_service = self.injector.get(FakeDatetimeService)
+        self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(GetMemberAccountPresenter)
 
     def test_that_empty_transaction_list_is_shown_if_no_transactions_took_place(
@@ -110,6 +113,42 @@ class TestPresenter(TestCase):
         view_model = self.presenter.present_member_account(response)
         self.assertTrue(view_model.transactions[0].is_volume_positive)
 
+    def test_that_transaction_type_is_shown_correctly_for_incoming_wages(
+        self,
+    ):
+        response = self.get_use_case_response(
+            [self.get_transaction(type=TransactionTypes.incoming_wages)]
+        )
+        view_model = self.presenter.present_member_account(response)
+        self.assertEqual(
+            view_model.transactions[0].type, self.translator.gettext("Wages")
+        )
+
+    def test_that_transaction_type_is_shown_correctly_for_payment_of_consumer_product(
+        self,
+    ):
+        response = self.get_use_case_response(
+            [self.get_transaction(type=TransactionTypes.payment_of_consumer_product)]
+        )
+        view_model = self.presenter.present_member_account(response)
+        self.assertEqual(
+            view_model.transactions[0].type, self.translator.gettext("Payment")
+        )
+
+    def test_that_name_of_peer_is_shown(
+        self,
+    ):
+        response = self.get_use_case_response([self.get_transaction()])
+        view_model = self.presenter.present_member_account(response)
+        self.assertTrue(view_model.transactions[0].user_name)
+
+    def test_that_purpose_is_shown(
+        self,
+    ):
+        response = self.get_use_case_response([self.get_transaction()])
+        view_model = self.presenter.present_member_account(response)
+        self.assertTrue(view_model.transactions[0].purpose)
+
     def get_use_case_response(
         self, transactions: List[TransactionInfo], balance: Decimal = None
     ) -> GetMemberAccountResponse:
@@ -118,15 +157,21 @@ class TestPresenter(TestCase):
         return GetMemberAccountResponse(transactions=transactions, balance=balance)
 
     def get_transaction(
-        self, date: datetime = None, transaction_volume: Decimal = None
+        self,
+        date: datetime = None,
+        transaction_volume: Decimal = None,
+        type: TransactionTypes = None,
     ) -> TransactionInfo:
         if date is None:
             date = self.datetime_service.now()
         if transaction_volume is None:
             transaction_volume = Decimal("20.006")
+        if type is None:
+            type = TransactionTypes.incoming_wages
         return TransactionInfo(
             date=date,
             peer_name="test company",
             transaction_volume=transaction_volume,
             purpose="test purpose",
+            type=type,
         )

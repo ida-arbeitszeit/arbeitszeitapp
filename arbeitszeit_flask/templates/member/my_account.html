@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-{% from 'macros/transactions.html' import basic_transaction %}
+{% from 'macros/transactions.html' import member_transaction %}
 
 <div class="section has-text-centered">
     <h1 class="title">
@@ -24,7 +24,7 @@
         <div class="column is-half">
             {% if view_model.transactions is defined and view_model.transactions|length %}
             {% for transaction in view_model.transactions %}
-            {{ basic_transaction(transaction.date, transaction.type, transaction.purpose, transaction.volume) }}
+            {{ member_transaction(transaction.date, transaction.type, transaction.purpose, transaction.user_name, transaction.volume, transaction.is_volume_positive) }}
             {% endfor %}
             {% endif %}
         </div>
