@@ -5,6 +5,7 @@
 {% endblock %}
 
 {% block content %}
+{% from 'macros/transactions.html' import basic_transaction %}
 
 <div class="section has-text-centered">
     <h1 class="title">
@@ -17,33 +18,16 @@
             {{ view_model.balance }}
         </p>
     </div>
-    <div class="table-container">
-        <table class="table has-text-left mx-auto">
-            <thead>
-                <tr>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if view_model.transactions is defined and view_model.transactions|length %}
-                {% for transaction in view_model.transactions %}
-                <tr>
-                    <td>{{ transaction.date }}</td>
-                    <td>{{ transaction.user_name }}</td>
-                    <td>{{ transaction.purpose }}</td>
-                    <td
-                        class="has-text-right has-text-weight-bold {{ 'has-text-success' if transaction.is_volume_positive else 'has-text-danger' }}">
-                        {{ transaction.volume }}
-                    </td>
-                </tr>
-                {% endfor %}
-                {% endif %}
-            </tbody>
-        </table>
-    </div>
 </div>
+<div class="section">
+    <div class="columns is-centered">
+        <div class="column is-half">
+            {% if view_model.transactions is defined and view_model.transactions|length %}
+            {% for transaction in view_model.transactions %}
+            {{ basic_transaction(transaction.date, transaction.type, transaction.purpose, transaction.volume) }}
+            {% endfor %}
+            {% endif %}
+        </div>
+    </div>
 </div>
 {% endblock %}
