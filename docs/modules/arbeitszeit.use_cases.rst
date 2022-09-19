@@ -55,10 +55,26 @@ arbeitszeit.use\_cases.create\_plan\_draft module
    :undoc-members:
    :show-inheritance:
 
+arbeitszeit.use\_cases.delete\_draft module
+-------------------------------------------
+
+.. automodule:: arbeitszeit.use_cases.delete_draft
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit.use\_cases.deny\_cooperation module
 -----------------------------------------------
 
 .. automodule:: arbeitszeit.use_cases.deny_cooperation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit.use\_cases.edit\_draft module
+-----------------------------------------
+
+.. automodule:: arbeitszeit.use_cases.edit_draft
    :members:
    :undoc-members:
    :show-inheritance:
@@ -115,14 +131,6 @@ arbeitszeit.use\_cases.get\_draft\_summary module
 -------------------------------------------------
 
 .. automodule:: arbeitszeit.use_cases.get_draft_summary
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-arbeitszeit.use\_cases.get\_latest\_activated\_plans module
------------------------------------------------------------
-
-.. automodule:: arbeitszeit.use_cases.get_latest_activated_plans
    :members:
    :undoc-members:
    :show-inheritance:

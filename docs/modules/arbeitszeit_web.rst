@@ -38,10 +38,26 @@ arbeitszeit\_web.create\_cooperation module
    :undoc-members:
    :show-inheritance:
 
+arbeitszeit\_web.create\_draft module
+-------------------------------------
+
+.. automodule:: arbeitszeit_web.create_draft
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit\_web.email module
 -----------------------------
 
 .. automodule:: arbeitszeit_web.email
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit\_web.fields module
+------------------------------
+
+.. automodule:: arbeitszeit_web.fields
    :members:
    :undoc-members:
    :show-inheritance:
@@ -90,14 +106,6 @@ arbeitszeit\_web.get\_plan\_summary\_member module
 --------------------------------------------------
 
 .. automodule:: arbeitszeit_web.get_plan_summary_member
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-arbeitszeit\_web.get\_prefilled\_draft\_data module
----------------------------------------------------
-
-.. automodule:: arbeitszeit_web.create_draft
    :members:
    :undoc-members:
    :show-inheritance:
