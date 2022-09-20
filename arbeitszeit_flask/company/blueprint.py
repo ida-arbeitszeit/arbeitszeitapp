@@ -2,7 +2,7 @@ from functools import wraps
 from typing import Any, Callable
 from uuid import UUID
 
-from flask import Blueprint, redirect, session, url_for
+from flask import Blueprint, redirect, url_for
 from flask_login import current_user, login_required
 
 from arbeitszeit_flask import types
@@ -25,8 +25,6 @@ class CompanyRoute:
     def __call__(self, view_function: Callable[..., types.Response]):
         @wraps(view_function)
         def _wrapper(*args: Any, **kwargs: Any) -> types.Response:
-            if not user_is_company():
-                return redirect(url_for("auth.zurueck"))
             return view_function(*args, **kwargs)
 
         return self._apply_decorators(_wrapper)
@@ -38,15 +36,11 @@ class CompanyRoute:
         )
 
 
-def user_is_company():
-    return session.get("user_type") == "company"
-
-
 def check_confirmed(func, company_repository: CompanyRepository):
     @wraps(func)
     def decorated_function(*args, **kwargs):
         if not company_repository.is_company_confirmed(UUID(current_user.id)):
-            return redirect(url_for("auth.unconfirmed_company"))
+            return redirect(url_for("auth.zurueck"))
         return func(*args, **kwargs)
 
     return decorated_function
