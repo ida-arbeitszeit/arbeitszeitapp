@@ -100,18 +100,21 @@ class CompanyTransactionsPresenterTests(TestCase):
         self.assertIn(str(response.company_id), view_model.plot_url)
 
     def test_name_of_buyer_is_shown_if_transaction_is_of_type_sale(self):
+        expected_member_name = "member name"
         response = self._use_case_response(
             transactions=[
                 self._get_transaction_info(
                     transaction_type=TransactionTypes.sale_of_consumer_product,
                     buyer=ShowPRDAccountDetailsUseCase.Buyer(
-                        buyer_is_member=True, buyer_id=uuid4(), buyer_name="member name"
+                        buyer_is_member=True,
+                        buyer_id=uuid4(),
+                        buyer_name=expected_member_name,
                     ),
                 )
             ]
         )
         view_model = self.presenter.present(response)
-        self.assertEqual(view_model.transactions[0].buyer_name, "member name")
+        self.assertEqual(view_model.transactions[0].buyer_name, expected_member_name)
 
     def test_correct_icon_for_type_of_buyer_is_shown_if_transaction_is_sale_of_consumer_product(
         self,
