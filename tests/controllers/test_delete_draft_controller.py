@@ -30,4 +30,4 @@ class ControllerTests(TestCase):
         self,
     ) -> None:
         with self.assertRaises(DeleteDraftController.Failure):
-            request = self.controller.get_request(uuid4())
+            self.controller.get_request(uuid4())
