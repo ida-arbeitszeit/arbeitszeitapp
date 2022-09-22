@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
 from injector import inject
 
@@ -21,6 +21,8 @@ class ShowPRDAccountDetailsPresenter:
         date: str
         transaction_volume: str
         purpose: str
+        buyer_name: str
+        buyer_type_icon: Optional[str]
 
     @dataclass
     class ViewModel:
@@ -64,10 +66,22 @@ class ShowPRDAccountDetailsPresenter:
             else self.translator.gettext("Sale")
         )
         return self.TransactionInfo(
-            transaction_type,
-            self.datetime_service.format_datetime(
+            transaction_type=transaction_type,
+            date=self.datetime_service.format_datetime(
                 date=transaction.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
             ),
-            str(round(transaction.transaction_volume, 2)),
-            transaction.purpose,
+            transaction_volume=str(round(transaction.transaction_volume, 2)),
+            purpose=transaction.purpose,
+            buyer_name=transaction.buyer.buyer_name if transaction.buyer else "",
+            buyer_type_icon=self._get_buyer_type_icon(transaction.buyer),
         )
+
+    def _get_buyer_type_icon(
+        self, buyer: Optional[ShowPRDAccountDetailsUseCase.Buyer]
+    ) -> Optional[str]:
+        if not buyer:
+            return None
+        elif buyer.buyer_is_member:
+            return "fas fa-user"
+        else:
+            return "fas fa-industry"
