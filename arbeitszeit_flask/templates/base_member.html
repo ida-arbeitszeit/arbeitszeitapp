@@ -50,8 +50,7 @@
           {{ gettext("Back")}}
         </a>
       </div>
-      {% endif %}
-      {% if current_user.is_authenticated %}
+      {% else %}
       <div class="navbar-item">
         <a class="button" href="{{ url_for('auth.logout') }}">
           {{ gettext("Sign out")}}
