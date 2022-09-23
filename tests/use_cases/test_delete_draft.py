@@ -71,6 +71,17 @@ class UseCaseTests(BaseTestCase):
                 self.create_request(deleter=company.id, draft=draft.id)
             )
 
+    def test_show_draft_name_in_successful_deletion_response(self) -> None:
+        expected_name = "test product draft"
+        planner = self.company_generator.create_company()
+        draft = self.plan_generator.draft_plan(
+            planner=planner, product_name=expected_name
+        )
+        response = self.use_case.delete_draft(
+            self.create_request(deleter=planner.id, draft=draft.id)
+        )
+        self.assertEqual(response.product_name, expected_name)
+
     def create_request(self, deleter: UUID, draft: UUID) -> DeleteDraftUseCase.Request:
         return DeleteDraftUseCase.Request(
             deleter=deleter,
