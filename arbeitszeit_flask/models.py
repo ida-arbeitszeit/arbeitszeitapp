@@ -70,10 +70,7 @@ class Company(UserMixin, db.Model):
     drafts = db.relationship("PlanDraft", lazy="dynamic")
 
     def __repr__(self):
-        return "<Company(email='%s', name='%s')>" % (
-            self.email,
-            self.name,
-        )
+        return "<Company(name='%s')>" % (self.name,)
 
 
 class Accountant(UserMixin, db.Model):
