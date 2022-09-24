@@ -16,7 +16,6 @@ from arbeitszeit_flask.dependency_injection import (
 )
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import LoginForm
-from arbeitszeit_flask.next_url import save_next_url_in_session
 from arbeitszeit_flask.template import AnonymousUserTemplateRenderer
 from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.views.signup_accountant_view import SignupAccountantView
@@ -30,8 +29,10 @@ auth = Blueprint("auth", __name__, template_folder="templates", static_folder="s
 
 @auth.route("/")
 @with_injection()
-def start(template_renderer: AnonymousUserTemplateRenderer):
-    save_next_url_in_session(request)
+def start(template_renderer: AnonymousUserTemplateRenderer, session: FlaskSession):
+    next_url = request.args.get("next")
+    if next_url is not None:
+        session.set_next_url(next_url)
     return template_renderer.render_template("auth/start.html")
 
 
