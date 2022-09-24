@@ -268,7 +268,6 @@ def file_plan_with_public_accounting(
         draft_id, session
     )
     use_case_response = use_case.file_plan_with_accounting(use_case_request)
-    print(use_case_response)
     view_model = presenter.present_response(use_case_response)
     if view_model.redirect_url is not None:
         return redirect(view_model.redirect_url)

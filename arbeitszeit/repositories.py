@@ -74,23 +74,8 @@ class PurchaseRepository(ABC):
 
 
 class PlanRepository(ABC):
-    @dataclass
-    class CreatePlan:
-        planner: UUID
-        product_name: str
-        description: str
-        costs: ProductionCosts
-        production_unit: str
-        amount: int
-        timeframe_in_days: int
-        is_public_service: bool
-        creation_timestamp: datetime
-
     @abstractmethod
-    def create_plan(
-        self,
-        plan: CreatePlan,
-    ) -> UUID:
+    def create_plan_from_draft(self, draft_id: UUID) -> Optional[UUID]:
         pass
 
     @abstractmethod

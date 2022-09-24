@@ -407,31 +407,35 @@ class PlanRepository(interfaces.PlanRepository):
     def __init__(
         self,
         company_repository: CompanyRepository,
+        draft_repository: PlanDraftRepository,
     ) -> None:
         self.plans: Dict[UUID, Plan] = {}
         self.company_repository = company_repository
+        self.draft_repository = draft_repository
 
     def get_all_plans_without_completed_review(self) -> Iterable[UUID]:
         for plan in self.plans.values():
             if plan.approval_date is None:
                 yield plan.id
 
-    def create_plan(self, plan: interfaces.PlanRepository.CreatePlan) -> UUID:
-        planning_company = self.company_repository.get_by_id(plan.planner)
-        assert planning_company
-        model = self._create_plan(
-            id=uuid4(),
-            planner=planning_company,
-            costs=plan.costs,
-            product_name=plan.product_name,
-            production_unit=plan.production_unit,
-            amount=plan.amount,
-            description=plan.description,
-            timeframe_in_days=plan.timeframe_in_days,
-            is_public_service=plan.is_public_service,
-            creation_timestamp=plan.creation_timestamp,
+    def create_plan_from_draft(self, draft_id: UUID) -> Optional[UUID]:
+        draft = self.draft_repository.get_by_id(draft_id)
+        assert draft
+        planner = self.company_repository.get_by_id(draft.planner.id)
+        assert planner
+        plan = self._create_plan(
+            id=draft.id,
+            planner=planner,
+            costs=draft.production_costs,
+            product_name=draft.product_name,
+            production_unit=draft.unit_of_distribution,
+            amount=draft.amount_produced,
+            description=draft.description,
+            timeframe_in_days=draft.timeframe,
+            is_public_service=draft.is_public_service,
+            creation_timestamp=draft.creation_date,
         )
-        return model.id
+        return plan.id
 
     def get_plan_by_id(self, id: UUID) -> Optional[Plan]:
         return self.plans.get(id)
