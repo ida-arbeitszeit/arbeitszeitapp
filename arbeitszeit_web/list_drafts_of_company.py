@@ -15,6 +15,7 @@ class ResultTableRow:
     product_name: str
     description: List[str]
     details_url: str
+    delete_url: str
 
 
 @dataclass
@@ -46,6 +47,7 @@ class ListDraftsPresenter:
                     product_name=result.product_name,
                     description=result.description.splitlines(),
                     details_url=self.url_index.get_draft_summary_url(result.id),
+                    delete_url=self.url_index.get_delete_draft_url(result.id),
                 )
                 for result in response.results
             ]
