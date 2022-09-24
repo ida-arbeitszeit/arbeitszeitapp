@@ -287,27 +287,6 @@ class InMemoryModule(Module):
         return LogInCompanyUseCase(company_repository=company_repository)
 
     @provider
-    def provide_file_plan_with_accounting_use_case(
-        self,
-        draft_repository: repositories.PlanDraftRepository,
-        plan_repository: repositories.PlanRepository,
-        datetime_service: DatetimeService,
-    ) -> FilePlanWithAccounting:
-        return FilePlanWithAccounting(
-            draft_repository=draft_repository,
-            plan_repository=plan_repository,
-            datetime_service=datetime_service,
-        )
-
-    @provider
-    def provide_list_plans_with_pending_review(
-        self, plan_repository: repositories.PlanRepository
-    ) -> ListPlansWithPendingReviewUseCase:
-        return ListPlansWithPendingReviewUseCase(
-            plan_repository=plan_repository,
-        )
-
-    @provider
     def provide_edit_draft_use_case(
         self, draft_repository: interfaces.PlanDraftRepository
     ) -> EditDraftUseCase:

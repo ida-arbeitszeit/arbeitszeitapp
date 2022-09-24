@@ -3,9 +3,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List
 
+from injector import inject
+
 from arbeitszeit.repositories import PlanRepository
 
 
+@inject
 @dataclass
 class ListPlansWithPendingReviewUseCase:
     class Request:
