@@ -34,6 +34,7 @@ from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
 from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_flask.database import CompanyRepository, commit_changes
+from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import (
     CompanySearchForm,
@@ -180,7 +181,7 @@ def delete_draft(
     presenter: DeleteDraftPresenter,
     http_404_view: Http404View,
 ) -> Response:
-    use_case_request = controller.get_request(draft_id)
+    use_case_request = controller.get_request(request=FlaskRequest(), draft=draft_id)
     try:
         use_case_response = use_case.delete_draft(use_case_request)
     except use_case.Failure:
