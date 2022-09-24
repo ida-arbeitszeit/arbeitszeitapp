@@ -16,7 +16,7 @@ class DeleteDraftUseCase:
 
     @dataclass
     class Response:
-        pass
+        product_name: str
 
     class Failure(Exception):
         pass
@@ -32,4 +32,4 @@ class DeleteDraftUseCase:
         if draft.planner.id != deleter.id:
             raise self.Failure()
         self.draft_repository.delete_draft(request.draft)
-        return self.Response()
+        return self.Response(product_name=draft.product_name)

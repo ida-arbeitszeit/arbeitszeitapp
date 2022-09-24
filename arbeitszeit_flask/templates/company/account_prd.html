@@ -29,6 +29,7 @@
                 <tr>
                     <th></th>
                     <th>{{ gettext("Type") }}</th>
+                    <th>{{ gettext("Buyer") }} </th>
                     <th>{{ gettext("Details") }}</th>
                     <th></th>
                 </tr>
@@ -40,6 +41,9 @@
                     <td>{{ trans_info.date }}</td>
                     <td>
                         {{ trans_info.transaction_type }}
+                    </td>
+                    <td><span class="icon"><i
+                                class='{{ trans_info.buyer_type_icon }}'></i></span>&ensp;<span>{{ trans_info.buyer_name }}</span>
                     </td>
                     <td>{{ trans_info.purpose }}</td>
                     <td

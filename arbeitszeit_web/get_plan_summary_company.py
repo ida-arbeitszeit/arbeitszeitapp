@@ -49,9 +49,12 @@ class GetPlanSummaryCompanySuccessPresenter:
         plan_id = plan_summary.plan_id
         coop_id = plan_summary.cooperation
         is_cooperating = plan_summary.is_cooperating
+        show_own_plan_action_section = (
+            response.current_user_is_planner and plan_summary.is_active
+        )
         return GetPlanSummaryCompanyViewModel(
             summary=self.plan_summary_service.format_plan_summary(plan_summary),
-            show_own_plan_action_section=response.current_user_is_planner,
+            show_own_plan_action_section=show_own_plan_action_section,
             own_plan_action=OwnPlanAction(
                 is_available_bool=plan_summary.is_available,
                 toggle_availability_url=self.url_index.get_toggle_availability_url(
