@@ -43,8 +43,8 @@ There are three user roles:
 Development setup
 =================
 
-The preferred development environment is Linux. We encourage to use nix. 
-A nix flake is located in this repository.  
+The preferred development environment is Linux. We encourage to use nix. A nix flake is located in this repository.  
+
 
 Development philosophy
 -----------------------
@@ -81,11 +81,35 @@ directories in the source code.
    every line of code in the other directories in here.
 
 
-Setup
------
+PostgreSQL setup
+-------------------
+
+- Debian: ``sudo apt install -y postgresql``
+- Arch: ``sudo pacman -Syu postgresql``
+
+
+Installing PostgreSQL will create a user named *postgres*.
+Switch to postgres user: ``sudo -iu postgres``
+
+Initialize the database: ``initdb -D /var/lib/postgres/data``
+
+Exit user: ``exit``
+
+Start the postgresql service: ``systemctl postgresql.service start``
+
+To start the service automatically at boot: ``systemctl enable postgresql.service``
+
+Switch to postgres user: ``sudo -iu postgres``
+
+Create database: ``createdb <name of database>``
+
+
+General setup
+-------------
 
 Create a virtual environment with ``python -m venv venv``
 To execute the virtual environment ``source ./venv/bin/activate``
+Install all packages when not using nix: ``pip install -r requirements-dev.txt``
 
 To run the app in development mode you first have to define some
 environment variables::
@@ -93,7 +117,7 @@ environment variables::
     $ export ARBEITSZEITAPP_CONFIGURATION_PATH="$PWD/arbeitszeit_flask/development_settings.py"
     $ export FLASK_APP=arbeitszeit_flask
     $ export FLASK_ENV=development
-    $ export DEV_DATABASE_URI="sqlite:///$(pwd)/db.sqlite3"
+    $ export DEV_DATABASE_URI="postgresql://postgres@localhost:5432/<name of database>"
     $ export DEV_SECRET_KEY=my_secret_key
     $ export ARBEITSZEIT_APP_SERVER_NAME=localhost:5000
 
@@ -101,6 +125,12 @@ After configuring the database connection you need to run the database
 migrations via ``flask db upgrade``.
 
 Afterwards you can start the development server with ``flask run -h localhost``.
+
+Create an user by signing up and providing the required fields.
+You will be redirected to a site that asks to confirm your account creating with the link provided in your Email.
+This link can be found in the commandline you ran ``flask run`` starting with *<p><a href="* until the next quotation marks.
+Copy this link to your browser and your account will be activated.
+
 
 Code formatting
 ---------------
