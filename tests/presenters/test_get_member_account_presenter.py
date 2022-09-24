@@ -76,7 +76,8 @@ class TestPresenter(TestCase):
         self.assertTrue(view_model.is_balance_positive)
 
     def test_that_date_of_transaction_is_formatted_correctly(self):
-        test_date = self.datetime_service.freeze_time(datetime(2022, 5, 1, 10, 30))
+        self.datetime_service.freeze_time(datetime(2022, 5, 1, 10, 30))
+        test_date = self.datetime_service.now()
         response = self.get_use_case_response([self.get_transaction(date=test_date)])
         view_model = self.presenter.present_member_account(response)
         self.assertEqual(view_model.transactions[0].date, "01.05.2022 10:30")
