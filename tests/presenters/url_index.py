@@ -79,6 +79,9 @@ class UrlIndexTestImpl:
     def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
         return f"fake_end_coop_url:{plan_id}, {cooperation_id}"
 
+    def get_delete_draft_url(self, draft_id: UUID) -> str:
+        return f"fake delete draft url:{draft_id}"
+
 
 class RenewPlanUrlIndexTestImpl:
     def get_renew_plan_url(self, plan_id: UUID) -> str:
