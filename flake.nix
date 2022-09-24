@@ -2,20 +2,15 @@
   description = "Arbeitszeitapp";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    nixpkgs-22_05.url = "github:NixOS/nixpkgs/nixos-22.05";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-22_05, flake-utils }:
+  outputs = { self, nixpkgs, flake-utils }:
     let
       supportedSystems = [ "x86_64-linux" ];
       systemDependent = flake-utils.lib.eachSystem supportedSystems (system:
         let
           pkgs = import nixpkgs {
-            inherit system;
-            overlays = [ self.overlays.default ];
-          };
-          pkgs_22_05 = import nixpkgs-22_05 {
             inherit system;
             overlays = [ self.overlays.default ];
           };
@@ -30,9 +25,7 @@
             inherit (pkgs) python3;
           };
           checks = {
-            arbeitszeit-python39 = pkgs.python39.pkgs.arbeitszeitapp;
             arbeitszeit-python310 = pkgs.python310.pkgs.arbeitszeitapp;
-            arbeitszeitapp-22_05 = pkgs_22_05.python3.pkgs.arbeitszeitapp;
           };
         });
       systemIndependent = {
@@ -55,10 +48,7 @@
                     composeExtensions (import nix/developmentOverrides.nix)
                     (import nix/pythonPackages.nix);
                 };
-            in {
-              python39 = overridePython prev.python39;
-              python310 = overridePython prev.python310;
-            };
+            in { python310 = overridePython prev.python310; };
         };
       };
     in systemDependent // systemIndependent;

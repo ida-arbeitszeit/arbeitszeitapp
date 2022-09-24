@@ -10,17 +10,12 @@ from arbeitszeit.use_cases.register_member.member_registration_message_presenter
 from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitation_presenter import (
     AccountantInvitationPresenter,
 )
-from arbeitszeit_flask.url_index import CompanyUrlIndex, GeneralUrlIndex
+from arbeitszeit_flask.url_index import GeneralUrlIndex
 from arbeitszeit_web.email import EmailConfiguration, MailService, UserAddressBook
-from arbeitszeit_web.formatters.plan_summary_formatter import PlanSummaryFormatter
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
-from arbeitszeit_web.get_plan_summary_company import (
-    GetPlanSummaryCompanySuccessPresenter,
-)
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyPresenter
 from arbeitszeit_web.language_service import LanguageService
 from arbeitszeit_web.notification import Notifier
-from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
 from arbeitszeit_web.presenters.accountant_invitation_presenter import (
     AccountantInvitationEmailPresenter,
     AccountantInvitationEmailView,
@@ -50,23 +45,10 @@ from arbeitszeit_web.presenters.send_work_certificates_to_worker_presenter impor
 from arbeitszeit_web.request_cooperation import RequestCooperationPresenter
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
-from arbeitszeit_web.url_index import (
-    ConfirmationUrlIndex,
-    EndCoopUrlIndex,
-    RequestCoopUrlIndex,
-    TogglePlanAvailabilityUrlIndex,
-)
+from arbeitszeit_web.url_index import ConfirmationUrlIndex
 
 
 class CompanyPresenterModule(Module):
-    @provider
-    def provide_pay_means_of_production_presenter(
-        self, notifier: Notifier, trans: Translator, company_url_index: CompanyUrlIndex
-    ) -> PayMeansOfProductionPresenter:
-        return PayMeansOfProductionPresenter(
-            notifier, trans, pay_means_of_production_url_index=company_url_index
-        )
-
     @provider
     def provide_request_cooperation_presenter(
         self,
@@ -199,23 +181,6 @@ class PresenterModule(Module):
             url_index=url_index,
             email_configuration=email_configuration,
             translator=translator,
-        )
-
-    @provider
-    def provide_get_plan_summary_company_success_presenter(
-        self,
-        toggle_availability_index: TogglePlanAvailabilityUrlIndex,
-        end_coop_url_index: EndCoopUrlIndex,
-        request_coop_url_index: RequestCoopUrlIndex,
-        trans: Translator,
-        plan_summary_service: PlanSummaryFormatter,
-    ) -> GetPlanSummaryCompanySuccessPresenter:
-        return GetPlanSummaryCompanySuccessPresenter(
-            toggle_availability_index,
-            end_coop_url_index,
-            request_coop_url_index,
-            trans,
-            plan_summary_service,
         )
 
     @provider

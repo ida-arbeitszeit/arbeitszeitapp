@@ -9,7 +9,11 @@ from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGe
 from tests.datetime_service import FakeDatetimeService
 
 from .dependency_injection import get_dependency_injector
-from .repositories import AccountRepository, TransactionRepository
+from .repositories import (
+    AccountRepository,
+    FakePayoutFactorRepository,
+    TransactionRepository,
+)
 
 
 class UseCaseTests(TestCase):
@@ -21,6 +25,7 @@ class UseCaseTests(TestCase):
         self.cooperation_generator = self.injector.get(CooperationGenerator)
         self.account_repository = self.injector.get(AccountRepository)
         self.transaction_repository = self.injector.get(TransactionRepository)
+        self.payout_factor_repository = self.injector.get(FakePayoutFactorRepository)
         self.show_my_accounts = self.injector.get(ShowMyAccounts)
         self.company_generator = self.injector.get(CompanyGenerator)
 
@@ -358,6 +363,13 @@ class UseCaseTests(TestCase):
         self.assertEqual(
             self.get_company_work_account_balance(planner), expected_wage_payout
         )
+
+    def test_that_a_payout_factor_gets_stored_in_repository(
+        self,
+    ) -> None:
+        assert self.payout_factor_repository.get_latest_payout_factor() is None
+        self.payout()
+        assert self.payout_factor_repository.get_latest_payout_factor() is not None
 
     def get_company_work_account_balance(self, company: Company) -> Decimal:
         show_my_accounts_response = self.show_my_accounts(

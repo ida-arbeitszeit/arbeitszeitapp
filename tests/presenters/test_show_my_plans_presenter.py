@@ -2,13 +2,14 @@ from datetime import datetime
 from decimal import Decimal
 from unittest import TestCase
 
-from arbeitszeit.entities import Plan
+from arbeitszeit.entities import Plan, PlanDraft
 from arbeitszeit.use_cases.show_my_plans import PlanInfo, ShowMyPlansResponse
 from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
 from tests.data_generators import CooperationGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
+from tests.presenters.notifier import NotifierTestImpl
 from tests.session import FakeSession
 from tests.translator import FakeTranslator
 
@@ -23,7 +24,7 @@ from .url_index import (
 class ShowMyPlansPresenterTests(TestCase):
     def setUp(self):
         self.injector = get_dependency_injector()
-        self.plan_url_index = self.injector.get(UrlIndexTestImpl)
+        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.renew_plan_url_index = self.injector.get(RenewPlanUrlIndexTestImpl)
         self.hide_plan_url_index = self.injector.get(HidePlanUrlIndexTestImpl)
         self.translator = self.injector.get(FakeTranslator)
@@ -32,29 +33,32 @@ class ShowMyPlansPresenterTests(TestCase):
         self.coop_generator = self.injector.get(CooperationGenerator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.update_plans_use_case = self.injector.get(UpdatePlansAndPayout)
+        self.notifier = self.injector.get(NotifierTestImpl)
         self.session = self.injector.get(FakeSession)
         self.session.login_company("test@test.test")
 
     def test_show_correct_notification_when_user_has_no_plans(self):
-        presentation = self.presenter.present(
+        self.presenter.present(
             ShowMyPlansResponse(
                 count_all_plans=0,
                 non_active_plans=[],
                 active_plans=[],
                 expired_plans=[],
+                drafts=[],
             )
         )
-        self.assertTrue(presentation.notifications)
+        self.assertTrue(self.notifier.display_info)
         self.assertEqual(
-            presentation.notifications,
+            self.notifier.infos,
             [self.translator.gettext("You don't have any plans.")],
         )
 
     def test_do_not_show_notification_when_user_has_one_plan(self):
         plan = self.plan_generator.create_plan()
         RESPONSE_WITH_ONE_PLAN = self.response_with_one_plan(plan)
-        presentation = self.presenter.present(RESPONSE_WITH_ONE_PLAN)
-        self.assertFalse(presentation.notifications)
+        self.presenter.present(RESPONSE_WITH_ONE_PLAN)
+        self.assertFalse(self.notifier.infos)
+        self.assertFalse(self.notifier.warnings)
 
     def test_do_only_show_active_plans_when_user_has_one_active_plan(self):
         plan = self.plan_generator.create_plan(activation_date=datetime.min)
@@ -72,7 +76,7 @@ class ShowMyPlansPresenterTests(TestCase):
         presentation = self.presenter.present(RESPONSE_WITH_ONE_ACTIVE_PLAN)
         self.assertEqual(
             presentation.active_plans.rows[0].plan_summary_url,
-            self.plan_url_index.get_plan_summary_url(UserRole.company, plan.id),
+            self.url_index.get_plan_summary_url(UserRole.company, plan.id),
         )
         self.assertEqual(presentation.active_plans.rows[0].prd_name, plan.prd_name)
         self.assertEqual(
@@ -113,7 +117,7 @@ class ShowMyPlansPresenterTests(TestCase):
         expected_plan = RESPONSE_WITH_ONE_EXPIRED_PLAN.expired_plans[0]
         self.assertEqual(
             row1.plan_summary_url,
-            self.plan_url_index.get_plan_summary_url(UserRole.company, plan.id),
+            self.url_index.get_plan_summary_url(UserRole.company, plan.id),
         )
         self.assertEqual(
             row1.prd_name,
@@ -135,7 +139,7 @@ class ShowMyPlansPresenterTests(TestCase):
         expected_plan = RESPONSE_WITH_ONE_NON_ACTIVE_PLAN.non_active_plans[0]
         self.assertEqual(
             row1.plan_summary_url,
-            self.plan_url_index.get_plan_summary_url(UserRole.company, plan.id),
+            self.url_index.get_plan_summary_url(UserRole.company, plan.id),
         )
         self.assertEqual(
             row1.prd_name,
@@ -143,7 +147,7 @@ class ShowMyPlansPresenterTests(TestCase):
         )
         self.assertEqual(
             row1.price_per_unit,
-            format_price(expected_plan.price_per_unit),
+            "10.00",
         )
         self.assertEqual(row1.type_of_plan, self.translator.gettext("Productive"))
 
@@ -154,6 +158,31 @@ class ShowMyPlansPresenterTests(TestCase):
         self.assertEqual(
             view_model.active_plans.rows[0].expiration_relative,
             "5",
+        )
+
+    def test_that_drafts_are_not_shown_when_no_draft_is_in_response(self) -> None:
+        response = self.response_with_no_plans()
+        view_model = self.presenter.present(response)
+        self.assertFalse(view_model.show_drafts)
+
+    def test_drafts_are_displayed_if_one_is_in_response(self) -> None:
+        response = self.response_with_one_draft()
+        view_model = self.presenter.present(response)
+        self.assertTrue(view_model.show_drafts)
+
+    def test_that_draft_prd_name_is_filled_in_correctly(self) -> None:
+        expected_name = "test product name"
+        response = self.response_with_one_draft(product_name=expected_name)
+        view_model = self.presenter.present(response)
+        self.assertEqual(view_model.drafts.rows[0].product_name, expected_name)
+
+    def test_that_draft_details_url_is_set_correctly(self) -> None:
+        response = self.response_with_one_draft()
+        draft_id = response.drafts[0].id
+        view_model = self.presenter.present(response)
+        self.assertEqual(
+            view_model.drafts.rows[0].draft_details_url,
+            self.url_index.get_draft_summary_url(draft_id),
         )
 
     def _convert_into_plan_info(self, plan: Plan) -> PlanInfo:
@@ -170,12 +199,50 @@ class ShowMyPlansPresenterTests(TestCase):
             cooperation=plan.cooperation,
         )
 
-    def response_with_one_plan(self, plan: Plan) -> ShowMyPlansResponse:
+    def _convert_draft_into_plan_info(self, plan: PlanDraft) -> PlanInfo:
+        return PlanInfo(
+            id=plan.id,
+            prd_name=plan.product_name,
+            price_per_unit=plan.production_costs.total_cost() / plan.amount_produced,
+            is_public_service=plan.is_public_service,
+            plan_creation_date=plan.creation_date,
+            activation_date=None,
+            expiration_date=None,
+            is_available=False,
+            is_cooperating=False,
+            cooperation=None,
+        )
+
+    def response_with_one_draft(
+        self, *, product_name: str = "test name"
+    ) -> ShowMyPlansResponse:
+        plan = self.plan_generator.draft_plan(product_name=product_name)
+        plan_info = self._convert_draft_into_plan_info(plan)
         return ShowMyPlansResponse(
             count_all_plans=1,
             non_active_plans=[],
             active_plans=[],
             expired_plans=[],
+            drafts=[plan_info],
+        )
+
+    def response_with_no_plans(self) -> ShowMyPlansResponse:
+        return ShowMyPlansResponse(
+            count_all_plans=0,
+            non_active_plans=[],
+            active_plans=[],
+            expired_plans=[],
+            drafts=[],
+        )
+
+    def response_with_one_plan(self, plan: Plan) -> ShowMyPlansResponse:
+        plan_info = self._convert_into_plan_info(plan)
+        return ShowMyPlansResponse(
+            count_all_plans=1,
+            non_active_plans=[],
+            active_plans=[plan_info],
+            expired_plans=[],
+            drafts=[],
         )
 
     def response_with_one_active_plan(self, plan: Plan) -> ShowMyPlansResponse:
@@ -185,6 +252,7 @@ class ShowMyPlansPresenterTests(TestCase):
             non_active_plans=[],
             active_plans=[plan_info],
             expired_plans=[],
+            drafts=[],
         )
 
     def response_with_one_expired_plan(self, plan: Plan) -> ShowMyPlansResponse:
@@ -194,6 +262,7 @@ class ShowMyPlansPresenterTests(TestCase):
             non_active_plans=[],
             active_plans=[],
             expired_plans=[plan_info],
+            drafts=[],
         )
 
     def response_with_one_non_active_plan(self, plan: Plan) -> ShowMyPlansResponse:
@@ -203,6 +272,7 @@ class ShowMyPlansPresenterTests(TestCase):
             non_active_plans=[plan_info],
             active_plans=[],
             expired_plans=[],
+            drafts=[],
         )
 
     def _create_active_plan(self, timeframe: int = 1) -> Plan:
@@ -212,7 +282,3 @@ class ShowMyPlansPresenterTests(TestCase):
         )
         self.update_plans_use_case()
         return plan
-
-
-def format_price(price_per_unit: Decimal) -> str:
-    return f"{round(price_per_unit, 2)}"

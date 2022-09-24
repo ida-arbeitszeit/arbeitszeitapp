@@ -3,6 +3,7 @@ from typing import Union
 
 from arbeitszeit.entities import ProductionCosts
 from arbeitszeit.use_cases import GetStatistics
+from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
 from tests.data_generators import (
     CompanyGenerator,
     CooperationGenerator,
@@ -261,3 +262,20 @@ def test_adding_up_means_of_two_plans(
     )
     stats = get_statistics()
     assert stats.planned_means == 5
+
+
+@injection_test
+def test_that_use_case_returns_none_for_payout_factor_if_it_never_has_been_calculated(
+    get_statistics: GetStatistics,
+):
+    stats = get_statistics()
+    assert stats.payout_factor is None
+
+
+@injection_test
+def test_that_use_case_shows_payout_factor_if_it_has_been_calculated(
+    get_statistics: GetStatistics, update_plans_and_payout: UpdatePlansAndPayout
+):
+    update_plans_and_payout()
+    stats = get_statistics()
+    assert stats.payout_factor is not None

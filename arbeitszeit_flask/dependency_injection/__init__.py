@@ -34,6 +34,7 @@ from arbeitszeit_flask.database.repositories import (
     CompanyWorkerRepository,
     CooperationRepository,
     MemberRepository,
+    PayoutFactorRepository,
     PlanCooperationRepository,
     PlanDraftRepository,
     PlanRepository,
@@ -76,9 +77,6 @@ from arbeitszeit_web.controllers.end_cooperation_controller import (
     EndCooperationController,
 )
 from arbeitszeit_web.controllers.list_workers_controller import ListWorkersController
-from arbeitszeit_web.controllers.pay_means_of_production_controller import (
-    PayMeansOfProductionController,
-)
 from arbeitszeit_web.controllers.send_work_certificates_to_worker_controller import (
     SendWorkCertificatesToWorkerController,
 )
@@ -109,11 +107,8 @@ from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import (
     ConfirmationUrlIndex,
-    EndCoopUrlIndex,
     HidePlanUrlIndex,
     RenewPlanUrlIndex,
-    RequestCoopUrlIndex,
-    TogglePlanAvailabilityUrlIndex,
     UrlIndex,
 )
 
@@ -133,18 +128,6 @@ class MemberModule(Module):
         return member_index
 
     @provider
-    def provide_request_coop_url_index(
-        self, member_index: MemberUrlIndex
-    ) -> RequestCoopUrlIndex:
-        return member_index
-
-    @provider
-    def provide_end_coop_url_index(
-        self, member_index: MemberUrlIndex
-    ) -> EndCoopUrlIndex:
-        return member_index
-
-    @provider
     def provide_template_index(self) -> TemplateIndex:
         return MemberTemplateIndex()
 
@@ -157,12 +140,6 @@ class CompanyModule(CompanyPresenterModule):
         return company_index
 
     @provider
-    def provide_toggle_plan_availability_url_index(
-        self, company_index: CompanyUrlIndex
-    ) -> TogglePlanAvailabilityUrlIndex:
-        return company_index
-
-    @provider
     def provide_renew_plan_url_index(
         self, company_index: CompanyUrlIndex
     ) -> RenewPlanUrlIndex:
@@ -172,18 +149,6 @@ class CompanyModule(CompanyPresenterModule):
     def provide_hide_plan_url_index(
         self, company_index: CompanyUrlIndex
     ) -> HidePlanUrlIndex:
-        return company_index
-
-    @provider
-    def provide_request_coop_url_index(
-        self, company_index: CompanyUrlIndex
-    ) -> RequestCoopUrlIndex:
-        return company_index
-
-    @provider
-    def provide_end_coop_url_index(
-        self, company_index: CompanyUrlIndex
-    ) -> EndCoopUrlIndex:
         return company_index
 
     @provider
@@ -201,12 +166,6 @@ class CompanyModule(CompanyPresenterModule):
         self, session: FlaskSession, request: FlaskRequest
     ) -> SendWorkCertificatesToWorkerController:
         return SendWorkCertificatesToWorkerController(session, request)
-
-    @provider
-    def provide_pay_means_of_production_controller(
-        self, session: FlaskSession, request: FlaskRequest
-    ) -> PayMeansOfProductionController:
-        return PayMeansOfProductionController(session, request)
 
     @provider
     def provide_prefilled_draft_data_controller(
@@ -494,6 +453,10 @@ class FlaskModule(PresenterModule):
         )
         binder.bind(TokenService, to=ClassProvider(FlaskTokenService))  # type: ignore
         binder.bind(UserAddressBook, to=ClassProvider(inject(UserAddressBookImpl)))  # type: ignore
+        binder.bind(
+            interfaces.PayoutFactorRepository,  # type: ignore
+            to=ClassProvider(PayoutFactorRepository),
+        )
 
 
 class with_injection:

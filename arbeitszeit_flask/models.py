@@ -70,10 +70,7 @@ class Company(UserMixin, db.Model):
     drafts = db.relationship("PlanDraft", lazy="dynamic")
 
     def __repr__(self):
-        return "<Company(email='%s', name='%s')>" % (
-            self.email,
-            self.name,
-        )
+        return "<Company(name='%s')>" % (self.name,)
 
 
 class Accountant(UserMixin, db.Model):
@@ -203,3 +200,9 @@ class Cooperation(db.Model):
     plans = db.relationship(
         "Plan", foreign_keys="Plan.cooperation", lazy="dynamic", backref="coop"
     )
+
+
+class PayoutFactor(UserMixin, db.Model):
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
+    timestamp = db.Column(db.DateTime, nullable=False)
+    payout_factor = db.Column(db.Numeric(), nullable=False)

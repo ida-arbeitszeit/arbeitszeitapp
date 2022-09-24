@@ -5,6 +5,7 @@
 {% endblock %}
 
 {% block content %}
+{% from 'macros/transactions.html' import member_transaction %}
 
 <div class="section has-text-centered">
     <h1 class="title">
@@ -12,38 +13,21 @@
     </h1>
     <div>
         <p>{{ gettext("Current balance") }}:</p>
-        <p class="py-2 has-text-weight-bold {{ 'has-text-primary' if my_balance >= 0 else 'has-text-danger' }}">
-            {{ my_balance }}
+        <p
+            class="py-2 has-text-weight-bold {{ 'has-text-primary' if view_model.is_balance_positive else 'has-text-danger' }}">
+            {{ view_model.balance }}
         </p>
     </div>
-    <div class="table-container">
-        <table class="table has-text-left mx-auto">
-            <thead>
-                <tr>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if all_transactions_info is defined and all_transactions_info|length %}
-                {% for trans_info in all_transactions_info %}
-                <tr>
-                    <td>{{ trans_info.date|format_datetime(zone='Europe/Berlin', fmt='%d.%m.%Y %H:%M') }}</td>
-                    <td>{{ trans_info.peer_name }}</td>
-                    <td>{{ trans_info.purpose }}</td>
-                    <td
-                        class="has-text-right has-text-weight-bold {{ 'has-text-success' if trans_info.transaction_volume >= 0 else 'has-text-danger' }}">
-                        {{
-                                trans_info.transaction_volume }}
-                    </td>
-                </tr>
-                {% endfor %}
-                {% endif %}
-            </tbody>
-        </table>
-    </div>
 </div>
+<div class="section">
+    <div class="columns is-centered">
+        <div class="column is-half">
+            {% if view_model.transactions is defined and view_model.transactions|length %}
+            {% for transaction in view_model.transactions %}
+            {{ member_transaction(transaction.date, transaction.type, transaction.purpose, transaction.user_name, transaction.volume, transaction.is_volume_positive) }}
+            {% endfor %}
+            {% endif %}
+        </div>
+    </div>
 </div>
 {% endblock %}

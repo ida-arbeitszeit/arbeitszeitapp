@@ -346,3 +346,70 @@ def test_that_plotting_info_is_generated_in_the_correct_order_after_selling_of_t
     assert response.plot.accumulated_volumes[2] == (
         trans1.amount_received + trans2.amount_received + trans3.amount_received
     )
+
+
+@injection_test
+def test_that_no_buyer_is_shown_in_transaction_detail_when_transaction_is_debit_for_expected_sales(
+    show_prd_account_details: ShowPRDAccountDetailsUseCase,
+    company_generator: CompanyGenerator,
+    social_accounting: SocialAccounting,
+    transaction_generator: TransactionGenerator,
+):
+    company = company_generator.create_company()
+
+    transaction_generator.create_transaction(
+        sending_account=social_accounting.account,
+        receiving_account=company.product_account,
+        amount_sent=Decimal(10),
+        amount_received=Decimal(5),
+    )
+
+    response = show_prd_account_details(company.id)
+    assert response.transactions[0].buyer is None
+
+
+@injection_test
+def test_that_correct_buyer_info_is_shown_when_company_sold_to_member(
+    show_prd_account_details: ShowPRDAccountDetailsUseCase,
+    company_generator: CompanyGenerator,
+    member_generator: MemberGenerator,
+    transaction_generator: TransactionGenerator,
+):
+    company = company_generator.create_company()
+    member = member_generator.create_member()
+
+    transaction_generator.create_transaction(
+        sending_account=member.account,
+        receiving_account=company.product_account,
+        amount_sent=Decimal(10),
+        amount_received=Decimal(5),
+    )
+
+    response = show_prd_account_details(company.id)
+    assert response.transactions[0].buyer
+    assert response.transactions[0].buyer.buyer_is_member == True
+    assert response.transactions[0].buyer.buyer_id == member.id
+    assert response.transactions[0].buyer.buyer_name == member.name
+
+
+@injection_test
+def test_that_correct_buyer_info_is_shown_when_company_sold_to_company(
+    show_prd_account_details: ShowPRDAccountDetailsUseCase,
+    company_generator: CompanyGenerator,
+    transaction_generator: TransactionGenerator,
+):
+    company1 = company_generator.create_company()
+    company2 = company_generator.create_company()
+
+    transaction_generator.create_transaction(
+        sending_account=company1.means_account,
+        receiving_account=company2.product_account,
+        amount_sent=Decimal(10),
+        amount_received=Decimal(5),
+    )
+
+    response = show_prd_account_details(company2.id)
+    assert response.transactions[0].buyer
+    assert response.transactions[0].buyer.buyer_is_member == False
+    assert response.transactions[0].buyer.buyer_id == company1.id
+    assert response.transactions[0].buyer.buyer_name == company1.name

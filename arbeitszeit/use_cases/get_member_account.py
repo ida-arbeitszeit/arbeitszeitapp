@@ -18,7 +18,7 @@ from arbeitszeit.repositories import (
     AccountRepository,
     MemberRepository,
 )
-from arbeitszeit.transactions import UserAccountingService
+from arbeitszeit.transactions import TransactionTypes, UserAccountingService
 
 User = Union[Member, Company]
 UserOrSocialAccounting = Union[User, SocialAccounting]
@@ -30,6 +30,7 @@ class TransactionInfo:
     peer_name: str
     transaction_volume: Decimal
     purpose: str
+    type: TransactionTypes
 
 
 @dataclass
@@ -75,10 +76,13 @@ class GetMemberAccount:
             transaction, user_is_sender
         )
         return TransactionInfo(
-            transaction.date,
-            peer_name,
-            transaction_volume,
-            transaction.purpose,
+            date=transaction.date,
+            peer_name=peer_name,
+            transaction_volume=transaction_volume,
+            purpose=transaction.purpose,
+            type=self.accounting_service.get_transaction_type(
+                transaction, user_is_sender
+            ),
         )
 
     def _get_peer_name(

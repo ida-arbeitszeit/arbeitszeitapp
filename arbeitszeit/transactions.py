@@ -5,8 +5,8 @@ from typing import List, Union
 
 from injector import inject
 
-from .entities import AccountTypes, Company, Member, Transaction
-from .repositories import TransactionRepository
+from .entities import AccountTypes, Company, Member, SocialAccounting, Transaction
+from .repositories import AccountOwnerRepository, TransactionRepository
 
 
 class TransactionTypes(Enum):
@@ -32,6 +32,7 @@ class TransactionTypes(Enum):
 @dataclass
 class UserAccountingService:
     transaction_repository: TransactionRepository
+    account_owner_repository: AccountOwnerRepository
 
     def get_all_transactions_sorted(
         self, user: Union[Member, Company]
@@ -113,6 +114,8 @@ class UserAccountingService:
                 transaction_type = TransactionTypes.sale_of_fixed_means
             elif sending_account == AccountTypes.r:
                 transaction_type = TransactionTypes.sale_of_liquid_means
+            elif sending_account == AccountTypes.a:
+                transaction_type = TransactionTypes.incoming_wages
             elif sending_account == AccountTypes.member:
                 transaction_type = TransactionTypes.sale_of_consumer_product
 
@@ -129,5 +132,25 @@ class UserAccountingService:
         this method returns the 'subjective' transaction volume.
         """
         if user_is_sender:
+            if transaction.amount_sent == 0:
+                return Decimal(0)
             return -1 * transaction.amount_sent
         return transaction.amount_received
+
+    def get_buyer(
+        self,
+        transaction_type: TransactionTypes,
+        transaction: Transaction,
+    ) -> Union[Member, Company, None]:
+        if transaction_type not in (
+            TransactionTypes.sale_of_consumer_product,
+            TransactionTypes.sale_of_fixed_means,
+            TransactionTypes.sale_of_liquid_means,
+        ):
+            return None
+        buyer_account = transaction.sending_account
+        buyer = self.account_owner_repository.get_account_owner(buyer_account)
+        assert not isinstance(
+            buyer, SocialAccounting
+        )  # from the transactiontype we know: buyer can't be social accounting
+        return buyer

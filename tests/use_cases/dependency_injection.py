@@ -185,6 +185,13 @@ class InMemoryModule(Module):
     ) -> interfaces.PlanCooperationRepository:
         return repo
 
+    @singleton
+    @provider
+    def provide_payout_factor_repository(
+        self, repo: repositories.FakePayoutFactorRepository
+    ) -> interfaces.PayoutFactorRepository:
+        return repo
+
     @provider
     def provide_token_service(self, token_service: FakeTokenService) -> TokenService:
         return token_service

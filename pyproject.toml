@@ -54,5 +54,6 @@ module = [
     "matplotlib.*",
     "sqlalchemy.*",
     "wtforms",
+    "pytz"
 ]
 ignore_missing_imports = true

@@ -84,6 +84,32 @@
 </div>
 
 <div class="section">
+  <h1 class="title is-4 has-text-centered">{{ gettext("Drafts") }}</h1>
+  {% if show_drafts %}
+  <div class="columns is-centered has-text-left">
+    <div class="column is-one-third">
+      {% for draft in drafts.rows %}
+      <article class="media">
+        <div class="media-content">
+          <div class="content">
+            <p>
+              <strong class="is-size-5">
+                <a href="{{ draft.draft_details_url }}">{{ draft.product_name }}</a>
+              </strong>
+              <br>
+            </p>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+  {% else %}
+  <p class="has-text-centered">{{ gettext("You don't have any drafts saved.") }}</p>
+  {% endif %}
+</div>
+
+<div class="section">
   <h1 class="title is-4 has-text-centered">{{ gettext("Expired")}}</h1>
   {% if show_expired_plans %}
   <div class="columns is-centered has-text-left">
