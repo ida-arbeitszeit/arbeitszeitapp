@@ -75,11 +75,13 @@ class TestPresenter(TestCase):
         view_model = self.presenter.present_member_account(response)
         self.assertTrue(view_model.is_balance_positive)
 
-    def test_that_date_of_transaction_is_formatted_correctly(self):
-        test_date = datetime(2022, 5, 1, 10, 30)
+    def test_that_date_of_transaction_is_formatted_correctly_as_berlin_summertime(
+        self,
+    ):
+        test_date = datetime(2022, 8, 1, 10, 30)
         response = self.get_use_case_response([self.get_transaction(date=test_date)])
         view_model = self.presenter.present_member_account(response)
-        self.assertEqual(view_model.transactions[0].date, "01.05.2022 10:30")
+        self.assertEqual(view_model.transactions[0].date, "01.08.2022 12:30")
 
     def test_that_transaction_volume_is_formatted_correctly(self):
         response = self.get_use_case_response([self.get_transaction()])
