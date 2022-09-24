@@ -37,6 +37,9 @@ class GeneralUrlIndex:
     def get_draft_summary_url(self, draft_id: UUID) -> str:
         return url_for("main_company.get_draft_summary", draft_id=draft_id)
 
+    def get_delete_draft_url(self, draft_id: UUID) -> str:
+        return url_for("main_company.delete_draft", draft_id=draft_id)
+
     def get_work_invite_url(self, invite_id: UUID) -> str:
         return url_for("main_member.show_company_work_invite", invite_id=invite_id)
 
