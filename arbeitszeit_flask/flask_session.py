@@ -68,6 +68,6 @@ class FlaskSession:
         return session.pop("next", None)
 
     def set_next_url(self, next_url: str) -> None:
-        hostname = urlparse(request.base_url).hostname
+        hostname = urlparse(request.base_url).netloc
         if is_safe_url(next_url, {hostname}):
             session["next"] = next_url
