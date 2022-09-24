@@ -41,7 +41,12 @@
                             <i class="fas fa-edit"></i>
                         </a>
                     </td>
-                    <td>X</td>
+                    <td>
+                      <form method="post" action="{{ row.delete_url }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="button is-ghost" type="submit"><i class="fas fa-trash"></i></button>
+                      </form>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
