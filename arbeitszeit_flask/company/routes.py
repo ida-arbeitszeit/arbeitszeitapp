@@ -29,10 +29,12 @@ from arbeitszeit.use_cases import (
     ToggleProductAvailability,
 )
 from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
+from arbeitszeit.use_cases.delete_draft import DeleteDraftUseCase
 from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
 from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_flask.database import CompanyRepository, commit_changes
+from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import (
     CompanySearchForm,
@@ -59,6 +61,7 @@ from arbeitszeit_flask.views.create_draft_view import CreateDraftView
 from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
 from arbeitszeit_flask.views.transfer_to_worker_view import TransferToWorkerView
+from arbeitszeit_web.controllers.delete_draft_controller import DeleteDraftController
 from arbeitszeit_web.create_draft import (
     CreateDraftController,
     CreateDraftPresenter,
@@ -75,6 +78,7 @@ from arbeitszeit_web.hide_plan import HidePlanPresenter
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_drafts_of_company import ListDraftsPresenter
 from arbeitszeit_web.list_plans import ListPlansPresenter
+from arbeitszeit_web.presenters.delete_draft_presenter import DeleteDraftPresenter
 from arbeitszeit_web.presenters.self_approve_plan import SelfApprovePlanPresenter
 from arbeitszeit_web.presenters.show_a_account_details_presenter import (
     ShowAAccountDetailsPresenter,
@@ -166,6 +170,24 @@ def my_purchases(
     return template_renderer.render_template(
         "company/my_purchases.html", context=dict(purchases=purchases)
     )
+
+
+@CompanyRoute("/company/draft/delete/<uuid:draft_id>", methods=["POST"])
+@commit_changes
+def delete_draft(
+    draft_id: UUID,
+    controller: DeleteDraftController,
+    use_case: DeleteDraftUseCase,
+    presenter: DeleteDraftPresenter,
+    http_404_view: Http404View,
+) -> Response:
+    use_case_request = controller.get_request(request=FlaskRequest(), draft=draft_id)
+    try:
+        use_case_response = use_case.delete_draft(use_case_request)
+    except use_case.Failure:
+        return http_404_view.get_response()
+    view_model = presenter.present_draft_deletion(use_case_response)
+    return redirect(view_model.redirect_target)
 
 
 @CompanyRoute("/company/draft/from-plan/<uuid:plan_id>", methods=["GET", "POST"])
