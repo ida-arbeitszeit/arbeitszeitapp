@@ -20,10 +20,10 @@ arbeitszeit\_web.presenters.end\_cooperation\_presenter module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit\_web.presenters.get\_latest\_activated\_plans\_presenter module
----------------------------------------------------------------------------
+arbeitszeit\_web.presenters.get\_company\_dashboard\_presenter module
+---------------------------------------------------------------------
 
-.. automodule:: arbeitszeit_web.presenters.get_latest_activated_plans_presenter
+.. automodule:: arbeitszeit_web.presenters.get_company_dashboard_presenter
    :members:
    :undoc-members:
    :show-inheritance:

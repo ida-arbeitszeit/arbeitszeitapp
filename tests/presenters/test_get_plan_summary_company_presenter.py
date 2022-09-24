@@ -62,7 +62,17 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
         view_model = self.presenter.present(response)
         self.assertFalse(view_model.show_own_plan_action_section)
 
-    def test_view_model_sows_availability_when_plan_is_available(self):
+    def test_action_section_is_not_shown_when_current_user_is_planner_but_plan_is_expired(
+        self,
+    ):
+        summary_of_inactive_plan = replace(TESTING_PLAN_SUMMARY, is_active=False)
+        use_case_response = GetPlanSummaryCompany.Response(
+            plan_summary=summary_of_inactive_plan, current_user_is_planner=True
+        )
+        view_model = self.presenter.present(use_case_response)
+        self.assertFalse(view_model.show_own_plan_action_section)
+
+    def test_view_model_shows_availability_when_plan_is_available(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
         self.assertEqual(
             view_model.own_plan_action.is_available_bool,

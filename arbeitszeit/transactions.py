@@ -114,6 +114,8 @@ class UserAccountingService:
                 transaction_type = TransactionTypes.sale_of_fixed_means
             elif sending_account == AccountTypes.r:
                 transaction_type = TransactionTypes.sale_of_liquid_means
+            elif sending_account == AccountTypes.a:
+                transaction_type = TransactionTypes.incoming_wages
             elif sending_account == AccountTypes.member:
                 transaction_type = TransactionTypes.sale_of_consumer_product
 
@@ -130,6 +132,8 @@ class UserAccountingService:
         this method returns the 'subjective' transaction volume.
         """
         if user_is_sender:
+            if transaction.amount_sent == 0:
+                return Decimal(0)
             return -1 * transaction.amount_sent
         return transaction.amount_received
 
