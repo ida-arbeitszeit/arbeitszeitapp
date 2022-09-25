@@ -596,6 +596,17 @@ class PurchaseRepository(repositories.PurchaseRepository):
 class PlanRepository(repositories.PlanRepository):
     company_repository: CompanyRepository
     db: SQLAlchemy
+    draft_repository: PlanDraftRepository
+
+    def create_plan_from_draft(self, draft_id: UUID) -> Optional[UUID]:
+        draft = self.draft_repository.get_by_id(draft_id)
+        if draft is None:
+            return None
+        plan_orm = self._create_plan_from_draft(draft)
+        return UUID(plan_orm.id)
+
+    def get_all_plans_without_completed_review(self) -> Iterable[UUID]:
+        raise NotImplementedError()
 
     def object_from_orm(self, plan: Plan) -> entities.Plan:
         production_costs = entities.ProductionCosts(
