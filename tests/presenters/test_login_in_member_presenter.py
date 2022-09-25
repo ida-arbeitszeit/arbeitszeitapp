@@ -38,7 +38,7 @@ class PresenterTests(TestCase):
             reason=LogInMemberUseCase.RejectionReason.unknown_email_address
         )
         self.presenter.present_login_process(response, self.form)
-        self.assertTrue(self.form.email_errors)
+        self.assertTrue(self.form.email_field().errors)
 
     def test_that_correct_error_message_is_added_to_form(
         self,
@@ -51,7 +51,7 @@ class PresenterTests(TestCase):
             self.translator.gettext(
                 "Email address incorrect. Are you already registered as a member?"
             ),
-            self.form.email_errors,
+            self.form.email_field().errors,
         )
 
     def test_that_no_password_errors_are_rendered_when_email_address_is_unknown(
@@ -61,7 +61,7 @@ class PresenterTests(TestCase):
             reason=LogInMemberUseCase.RejectionReason.unknown_email_address
         )
         self.presenter.present_login_process(response, self.form)
-        self.assertFalse(self.form.password_errors)
+        self.assertFalse(self.form.password_field().errors)
 
     def test_that_no_errors_are_rendered_to_form_if_login_was_successful(
         self,
@@ -79,7 +79,7 @@ class PresenterTests(TestCase):
         self.presenter.present_login_process(response, self.form)
         self.assertIn(
             self.translator.gettext("Incorrect password"),
-            self.form.password_errors,
+            self.form.password_field().errors,
         )
 
     def test_that_no_email_error_is_rendered_if_password_was_invalid(
@@ -90,7 +90,7 @@ class PresenterTests(TestCase):
         )
         self.presenter.present_login_process(response, self.form)
         self.assertFalse(
-            self.form.email_errors,
+            self.form.email_field().errors,
         )
 
     def test_that_redirect_url_is_set_to_dashboard_if_no_next_url_can_be_retrieved_from_session(
@@ -138,7 +138,7 @@ class PresenterTests(TestCase):
     def test_that_remember_field_from_form_is_respected(self) -> None:
         for expected_remember_state in [True, False]:
             with self.subTest():
-                self.form.set_remember_field(expected_remember_state)
+                self.form = LoginForm(remember_value=expected_remember_state)
                 response = self.create_success_response()
                 self.presenter.present_login_process(response, self.form)
                 login_attempt = self.session.get_most_recent_login()
