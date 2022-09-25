@@ -385,3 +385,28 @@ def test_that_correct_id_of_planning_company_gets_returned(
     expected_plan = plan_generator.create_plan()
     plan_id = repository.get_planner_id(expected_plan.id)
     assert plan_id == expected_plan.planner.id
+
+
+@injection_test
+def test_cannot_create_plan_from_non_existing_draft(
+    repository: PlanRepository,
+) -> None:
+    assert repository.create_plan_from_draft(uuid4()) is None
+
+
+@injection_test
+def test_can_create_plan_from_exiting_draft(
+    repository: PlanRepository, plan_generator: PlanGenerator
+) -> None:
+    draft = plan_generator.draft_plan()
+    assert repository.create_plan_from_draft(draft.id) is not None
+
+
+@injection_test
+def test_query_plan_after_it_was_created_from_draft(
+    repository: PlanRepository, plan_generator: PlanGenerator
+) -> None:
+    draft = plan_generator.draft_plan()
+    plan_id = repository.create_plan_from_draft(draft.id)
+    assert plan_id
+    assert repository.get_plan_by_id(plan_id) is not None

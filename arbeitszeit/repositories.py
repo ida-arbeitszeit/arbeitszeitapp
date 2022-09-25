@@ -75,6 +75,10 @@ class PurchaseRepository(ABC):
 
 class PlanRepository(ABC):
     @abstractmethod
+    def create_plan_from_draft(self, draft_id: UUID) -> Optional[UUID]:
+        pass
+
+    @abstractmethod
     def set_plan_approval_date(
         self, plan: PlanDraft, approval_timestamp: datetime
     ) -> Plan:
@@ -189,6 +193,10 @@ class PlanRepository(ABC):
 
     @abstractmethod
     def get_planner_id(self, plan_id: UUID) -> Optional[UUID]:
+        pass
+
+    @abstractmethod
+    def get_all_plans_without_completed_review(self) -> Iterable[UUID]:
         pass
 
 
