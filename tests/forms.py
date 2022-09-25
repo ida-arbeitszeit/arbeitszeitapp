@@ -8,25 +8,32 @@ T = TypeVar("T")
 
 
 class LoginForm:
-    def __init__(self) -> None:
-        self.email_errors: List[str] = []
-        self.password_errors: List[str] = []
-        self._is_remember: bool = False
+    def __init__(
+        self,
+        *,
+        remember_value: bool = False,
+        email_value: str = "test@email.ad",
+        password_value: str = "testpassword",
+    ) -> None:
+        self._email_field = FormFieldImpl(value=email_value)
+        self._remember_field = FormFieldImpl(value=remember_value)
+        self._password_field = FormFieldImpl(value=password_value)
 
     def email_field(self) -> FormFieldImpl[str]:
-        return FormFieldImpl(value="test value", errors=self.email_errors)
+        return self._email_field
 
     def password_field(self) -> FormFieldImpl[str]:
-        return FormFieldImpl(value="test password", errors=self.password_errors)
+        return self._password_field
 
     def remember_field(self) -> FormFieldImpl[bool]:
-        return FormFieldImpl(value=self._is_remember, errors=[])
+        return self._remember_field
 
     def has_errors(self) -> bool:
-        return bool(self.email_errors or self.password_errors)
-
-    def set_remember_field(self, state: bool) -> None:
-        self._is_remember = state
+        return bool(
+            self._email_field.errors
+            or self._password_field.errors
+            or self._remember_field.errors
+        )
 
 
 class DraftForm:
