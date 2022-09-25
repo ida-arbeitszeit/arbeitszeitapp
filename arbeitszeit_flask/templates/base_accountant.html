@@ -6,7 +6,7 @@
   <div class="navbar-brand">
     <div class="navbar-item has-background-primary has-text-white">
       {% if current_user.is_authenticated %}
-      <span class="icon"><i class="fas fa-user"></i></span>&nbsp;
+      <span class="icon"><i class="fas fa-book"></i></span>&nbsp;
       {{ current_user.name|truncate(20, True) }}
       {% else %}
       <span class="icon"><i class="fas fa-user"></i></span>&nbsp;
