@@ -26,6 +26,17 @@ class LoginCompanyForm(Protocol):
         ...
 
 
+class LogInAccountantForm(Protocol):
+    def email_field(self) -> FormField[str]:
+        ...
+
+    def password_field(self) -> FormField[str]:
+        ...
+
+    def remember_field(self) -> FormField[bool]:
+        ...
+
+
 class DraftForm(Protocol):
     def product_name_field(self) -> FormField[str]:
         ...
