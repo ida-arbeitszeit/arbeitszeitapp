@@ -1,10 +1,12 @@
 from datetime import datetime
 from uuid import UUID
 
+import flask
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
 
 from arbeitszeit.use_cases import ResendConfirmationMail, ResendConfirmationMailRequest
+from arbeitszeit.use_cases.log_in_accountant import LogInAccountantUseCase
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit_flask.database import commit_changes
@@ -21,6 +23,12 @@ from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.views.signup_accountant_view import SignupAccountantView
 from arbeitszeit_flask.views.signup_company_view import SignupCompanyView
 from arbeitszeit_flask.views.signup_member_view import SignupMemberView
+from arbeitszeit_web.controllers.log_in_accountant_controller import (
+    LogInAccountantController,
+)
+from arbeitszeit_web.presenters.log_in_accountant_presenter import (
+    LogInAccountantPresenter,
+)
 from arbeitszeit_web.presenters.log_in_company_presenter import LogInCompanyPresenter
 from arbeitszeit_web.presenters.log_in_member_presenter import LogInMemberPresenter
 
@@ -250,6 +258,26 @@ def resend_confirmation_company(use_case: ResendConfirmationMail):
 @with_injection()
 def signup_accountant(token: str, view: SignupAccountantView):
     return view.handle_request(token)
+
+
+@auth.route("/accountant/login", methods=["GET", "POST"])
+@commit_changes
+@with_injection()
+def login_accountant(
+    controller: LogInAccountantController,
+    use_case: LogInAccountantUseCase,
+    presenter: LogInAccountantPresenter,
+):
+    form = LoginForm(request.form)
+    if request.method == "POST" and form.validate():
+        use_case_request = controller.process_login_form(form)
+        use_case_response = use_case.log_in_accountant(use_case_request)
+        view_model = presenter.present_login_process(
+            form=form, response=use_case_response
+        )
+        if view_model.redirect_url is not None:
+            return redirect(view_model.redirect_url)
+    return render_template("auth/login_accountant.html", form=form)
 
 
 # logout
