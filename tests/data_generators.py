@@ -241,14 +241,24 @@ class PlanGenerator:
     def draft_plan(
         self,
         planner: Optional[Company] = None,
-        timeframe=None,
-        amount: int = 100,
+        timeframe: Optional[int] = None,
         costs: Optional[ProductionCosts] = None,
-        is_public_service: bool = False,
-        product_name="Produkt A",
-        description="Beschreibung für Produkt A.",
-        production_unit="500 Gramm",
+        is_public_service: Optional[bool] = None,
+        product_name: Optional[str] = None,
+        description: Optional[str] = None,
+        production_unit: Optional[str] = None,
+        amount: Optional[int] = None,
     ) -> PlanDraft:
+        if amount is None:
+            amount = 5
+        if production_unit is None:
+            production_unit = "test unit"
+        if description is None:
+            description = "Beschreibung für Produkt A."
+        if is_public_service is None:
+            is_public_service = False
+        if product_name is None:
+            product_name = "Produkt A."
         if costs is None:
             costs = ProductionCosts(Decimal(1), Decimal(1), Decimal(1))
         if planner is None:
