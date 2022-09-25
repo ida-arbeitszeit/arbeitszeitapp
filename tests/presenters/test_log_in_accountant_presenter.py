@@ -1,3 +1,4 @@
+from typing import Optional
 from unittest import TestCase
 from uuid import uuid4
 
@@ -8,6 +9,7 @@ from arbeitszeit_web.presenters.log_in_accountant_presenter import (
 from arbeitszeit_web.session import UserRole
 from tests.forms import LoginForm
 from tests.session import FakeSession
+from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
 from .url_index import UrlIndexTestImpl
@@ -20,6 +22,7 @@ class PresenterTester(TestCase):
         self.presenter = self.injector.get(LogInAccountantPresenter)
         self.session = self.injector.get(FakeSession)
         self.url_index = self.injector.get(UrlIndexTestImpl)
+        self.translator = self.injector.get(FakeTranslator)
 
     def test_user_gets_redirected_when_login_was_successful(self) -> None:
         response = self._create_success_response()
@@ -116,11 +119,83 @@ class PresenterTester(TestCase):
             view_model.redirect_url, self.url_index.get_accountant_dashboard_url()
         )
 
+    def test_that_password_error_is_shown_when_password_is_wrong(
+        self,
+    ) -> None:
+        response = self._create_failure_response(
+            reason=UseCase.RejectionReason.wrong_password
+        )
+        form = self._create_form()
+        self.presenter.present_login_process(response=response, form=form)
+        self.assertTrue(form.password_field().errors)
+
+    def test_that_no_email_error_is_shown_when_password_is_wrong(
+        self,
+    ) -> None:
+        response = self._create_failure_response(
+            reason=UseCase.RejectionReason.wrong_password
+        )
+        form = self._create_form()
+        self.presenter.present_login_process(response=response, form=form)
+        self.assertFalse(form.email_field().errors)
+
+    def test_that_proper_error_message_is_shown_when_password_is_wrong(
+        self,
+    ) -> None:
+        response = self._create_failure_response(
+            reason=UseCase.RejectionReason.wrong_password
+        )
+        form = self._create_form()
+        self.presenter.present_login_process(response=response, form=form)
+        self.assertIn(
+            self.translator.gettext("Incorrect password"),
+            form.password_field().errors,
+        )
+
+    def test_that_no_password_error_is_shown_when_email_is_wrong(
+        self,
+    ) -> None:
+        response = self._create_failure_response(
+            reason=UseCase.RejectionReason.email_is_not_accountant
+        )
+        form = self._create_form()
+        self.presenter.present_login_process(response=response, form=form)
+        self.assertFalse(form.password_field().errors)
+
+    def test_that_some_email_error_is_shown_when_email_is_wrong(
+        self,
+    ) -> None:
+        response = self._create_failure_response(
+            reason=UseCase.RejectionReason.email_is_not_accountant
+        )
+        form = self._create_form()
+        self.presenter.present_login_process(response=response, form=form)
+        self.assertTrue(form.email_field().errors)
+
+    def test_that_proper_error_message_is_shown_when_email_is_wrong(
+        self,
+    ) -> None:
+        response = self._create_failure_response(
+            reason=UseCase.RejectionReason.email_is_not_accountant
+        )
+        form = self._create_form()
+        self.presenter.present_login_process(response=response, form=form)
+        self.assertIn(
+            self.translator.gettext(
+                "This email address does not belong to a registered accountant"
+            ),
+            form.email_field().errors,
+        )
+
     def _create_success_response(self) -> UseCase.Response:
         return UseCase.Response(user_id=uuid4())
 
-    def _create_failure_response(self) -> UseCase.Response:
-        return UseCase.Response(user_id=None)
+    def _create_failure_response(
+        self, reason: Optional[UseCase.RejectionReason] = None
+    ) -> UseCase.Response:
+        if reason is None:
+            reason = UseCase.RejectionReason.wrong_password
+        return UseCase.Response(user_id=None, rejection_reason=reason)
 
     def _create_form(self, remember: bool = False, email: str = "a@b.c") -> LoginForm:
         return LoginForm(remember_value=remember, email_value=email)
