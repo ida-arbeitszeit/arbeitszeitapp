@@ -5,6 +5,8 @@ from datetime import datetime
 from typing import List
 from uuid import UUID
 
+from injector import inject
+
 from arbeitszeit.repositories import (
     CompanyRepository,
     CompanyWorkerRepository,
@@ -12,6 +14,7 @@ from arbeitszeit.repositories import (
 )
 
 
+@inject
 @dataclass
 class GetCompanyDashboardUseCase:
     class Failure(Exception):
