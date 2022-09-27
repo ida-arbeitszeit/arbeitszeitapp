@@ -7,7 +7,7 @@ from uuid import UUID
 
 from injector import inject
 
-from arbeitszeit.actors import MemberRepository
+from arbeitszeit.member import MemberRepository
 
 
 class RejectionReason(Exception, Enum):

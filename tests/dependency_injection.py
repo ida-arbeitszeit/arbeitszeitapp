@@ -1,7 +1,8 @@
-from injector import Module, provider, singleton
+from injector import provider, singleton
 
 from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.dependency_injection import ArbeitszeitModule
 from arbeitszeit.repositories import (
     CompanyRepository,
     CompanyWorkerRepository,
@@ -28,7 +29,7 @@ from tests.token import FakeTokenService
 from tests.translator import FakeTranslator
 
 
-class TestingModule(Module):
+class TestingModule(ArbeitszeitModule):
     @provider
     def provide_colors(self, colors: ColorsTestImpl) -> Colors:
         return colors

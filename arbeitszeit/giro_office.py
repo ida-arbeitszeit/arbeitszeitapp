@@ -1,22 +1,23 @@
 from __future__ import annotations
 
-import enum
 from dataclasses import dataclass
-from typing import Optional
 
 from injector import inject
 
 from arbeitszeit import repositories
+from arbeitszeit.actors import (
+    ConsumerProductTransaction,
+    TransactionReceipt,
+    TransactionRejection,
+)
 from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Member as MemberEntity
-from arbeitszeit.entities import Plan
 from arbeitszeit.price_calculator import calculate_price
 
 
 @inject
 @dataclass
-class GiroOffice:
+class GiroOfficeImpl:
     plan_cooperation_repository: repositories.PlanCooperationRepository
     datetime_service: DatetimeService
     purchase_repository: repositories.PurchaseRepository
@@ -79,24 +80,3 @@ class GiroOffice:
         if (account_balance - price + allowed_overdraw) < 0:
             return False
         return True
-
-
-@dataclass(frozen=True)
-class TransactionReceipt:
-    rejection_reason: Optional[TransactionRejection]
-
-    @property
-    def is_success(self) -> bool:
-        return self.rejection_reason is None
-
-
-@enum.unique
-class TransactionRejection(enum.Enum):
-    insufficient_balance = enum.auto()
-
-
-@dataclass
-class ConsumerProductTransaction:
-    buyer: MemberEntity
-    plan: Plan
-    amount: int

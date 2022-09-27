@@ -18,6 +18,7 @@ from arbeitszeit import entities
 from arbeitszeit import repositories as interfaces
 from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.dependency_injection import ArbeitszeitModule
 from arbeitszeit.token import InvitationTokenValidator, TokenDeliverer, TokenService
 from arbeitszeit.use_cases import GetCompanySummary
 from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
@@ -465,6 +466,7 @@ class with_injection:
         all_modules: List[Module] = []
         all_modules.append(FlaskModule())
         all_modules.append(ViewsModule())
+        all_modules.append(ArbeitszeitModule())
         all_modules += self._modules
         self._injector = Injector(all_modules)
 
