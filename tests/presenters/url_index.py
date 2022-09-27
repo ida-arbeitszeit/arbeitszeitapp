@@ -91,6 +91,9 @@ class UrlIndexTestImpl:
     def get_delete_draft_url(self, draft_id: UUID) -> str:
         return f"fake delete draft url:{draft_id}"
 
+    def get_accountant_dashboard_url(self) -> str:
+        return "accountant dashboard url"
+
 
 class RenewPlanUrlIndexTestImpl:
     def get_renew_plan_url(self, plan_id: UUID) -> str:
@@ -110,11 +113,6 @@ class ConfirmationUrlIndexImpl:
 class AccountantInvitationUrlIndexImpl:
     def get_accountant_invitation_url(self, token: str) -> str:
         return f"accountant invitation {token} url"
-
-
-class AccountantDashboardUrlIndexImpl:
-    def get_accountant_dashboard_url(self) -> str:
-        return "accountant dashboard url"
 
 
 class LanguageChangerUrlIndexImpl:
