@@ -20,12 +20,16 @@ class Member(Protocol):
     def pay_for_product(self, plan: Plan, amount: int) -> TransactionReceipt:
         ...
 
+    def get_planning_information(self, plan_id: UUID) -> Optional[Plan]:
+        ...
+
 
 @inject
 @dataclass
 class MemberRepository:
     member_db_gateway: repositories.MemberRepository
     giro_office: GiroOffice
+    plan_repository: repositories.PlanRepository
 
     def get_by_id(self, member_id: UUID) -> Optional[Member]:
         member = self.member_db_gateway.get_by_id(member_id)
@@ -34,6 +38,7 @@ class MemberRepository:
         return MemberImpl(
             member=member,
             giro_office=self.giro_office,
+            plan_repository=self.plan_repository,
         )
 
 
@@ -41,6 +46,7 @@ class MemberRepository:
 class MemberImpl:
     member: MemberEntity
     giro_office: GiroOffice
+    plan_repository: repositories.PlanRepository
 
     def pay_for_product(self, plan: Plan, amount: int) -> TransactionReceipt:
         transaction = ConsumerProductTransaction(
@@ -49,3 +55,6 @@ class MemberImpl:
             amount=amount,
         )
         return self.giro_office.conduct_consumer_transaction(transaction)
+
+    def get_planning_information(self, plan_id: UUID) -> Optional[Plan]:
+        return self.plan_repository.get_plan_by_id(plan_id)
