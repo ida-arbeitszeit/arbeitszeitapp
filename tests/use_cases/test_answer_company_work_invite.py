@@ -1,28 +1,24 @@
 from typing import Optional
-from unittest import TestCase
 from uuid import UUID, uuid4
 
-from arbeitszeit.repositories import CompanyWorkerRepository, WorkerInviteRepository
 from arbeitszeit.use_cases import (
     AnswerCompanyWorkInvite,
     AnswerCompanyWorkInviteRequest,
     AnswerCompanyWorkInviteResponse,
     InviteWorkerToCompanyUseCase,
 )
-from tests.data_generators import CompanyGenerator, MemberGenerator
+from tests.use_cases.repositories import CompanyWorkerRepository, WorkerInviteRepository
 
-from .dependency_injection import get_dependency_injector
+from .base_test_case import BaseTestCase
 
 
-class AnwerCompanyWorkInviteTests(TestCase):
+class AnwerCompanyWorkInviteTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.answer_company_work_invite = self.injector.get(AnswerCompanyWorkInvite)
         self.invite_worker_to_company = self.injector.get(InviteWorkerToCompanyUseCase)
-        self.member_generator = self.injector.get(MemberGenerator)
-        self.company_generator = self.injector.get(CompanyGenerator)
-        self.invite_repository = self.injector.get(WorkerInviteRepository)  # type: ignore
-        self.company_worker_repository = self.injector.get(CompanyWorkerRepository)  # type: ignore
+        self.invite_repository = self.injector.get(WorkerInviteRepository)
+        self.company_worker_repository = self.injector.get(CompanyWorkerRepository)
         self.company = self.company_generator.create_company()
         self.member = self.member_generator.create_member()
 
