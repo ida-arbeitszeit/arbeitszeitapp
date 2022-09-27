@@ -12,7 +12,7 @@ from tests.session import FakeSession
 from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
-from .url_index import AccountantDashboardUrlIndexImpl
+from .url_index import UrlIndexTestImpl
 
 
 class PresenterTests(TestCase):
@@ -22,7 +22,7 @@ class PresenterTests(TestCase):
         self.notifier = self.injector.get(NotifierTestImpl)
         self.session = self.injector.get(FakeSession)
         self.translator = self.injector.get(FakeTranslator)
-        self.dashboard_url_index = self.injector.get(AccountantDashboardUrlIndexImpl)
+        self.url_index = self.injector.get(UrlIndexTestImpl)
 
     def test_that_registration_rejection_results_in_error_message_shown(self) -> None:
         response = self.create_rejected_response()
@@ -80,7 +80,7 @@ class PresenterTests(TestCase):
         view_model = self.presenter.present_registration_result(response)
         self.assertEqual(
             view_model.redirect_url,
-            self.dashboard_url_index.get_accountant_dashboard_url(),
+            self.url_index.get_accountant_dashboard_url(),
         )
 
     def test_do_not_redirect_when_registration_fails(self) -> None:

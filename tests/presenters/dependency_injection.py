@@ -13,9 +13,6 @@ from arbeitszeit_web.presenters.list_available_languages_presenter import (
     ListAvailableLanguagesPresenter,
 )
 from arbeitszeit_web.presenters.member_purchases import MemberPurchasesPresenter
-from arbeitszeit_web.presenters.register_accountant_presenter import (
-    RegisterAccountantPresenter,
-)
 from arbeitszeit_web.presenters.register_company_presenter import (
     RegisterCompanyPresenter,
 )
@@ -48,7 +45,6 @@ from tests.use_cases.dependency_injection import InMemoryModule
 from .accountant_invitation_email_view import AccountantInvitationEmailViewImpl
 from .notifier import NotifierTestImpl
 from .url_index import (
-    AccountantDashboardUrlIndexImpl,
     AccountantInvitationUrlIndexImpl,
     ConfirmationUrlIndexImpl,
     HidePlanUrlIndexTestImpl,
@@ -218,21 +214,6 @@ class PresenterTestsInjector(Module):
         self, translator: FakeTranslator
     ) -> InviteWorkerToCompanyPresenter:
         return InviteWorkerToCompanyPresenter(translator=translator)
-
-    @provider
-    def provide_register_accountant_presenter(
-        self,
-        notifier: Notifier,
-        session: FakeSession,
-        translator: FakeTranslator,
-        dashboard_url_index: AccountantDashboardUrlIndexImpl,
-    ) -> RegisterAccountantPresenter:
-        return RegisterAccountantPresenter(
-            notifier=notifier,
-            session=session,
-            translator=translator,
-            dashboard_url_index=dashboard_url_index,
-        )
 
     @provider
     def provide_self_approve_plan_presenter(
