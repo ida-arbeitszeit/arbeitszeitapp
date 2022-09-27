@@ -181,6 +181,13 @@ class MemberRepository(repositories.MemberRepository):
             .count()
         )
 
+    def is_member(self, id: UUID) -> bool:
+        return bool(
+            self.db.session.query(models.Member)
+            .filter(models.Member.id == str(id))
+            .count()
+        )
+
     def count_registered_members(self) -> int:
         return int(self.db.session.query(func.count(Member.id)).one()[0])
 
@@ -254,6 +261,13 @@ class CompanyRepository(repositories.CompanyRepository):
             .first()
         )
         return self.object_from_orm(company_orm) if company_orm else None
+
+    def is_company(self, id: UUID) -> bool:
+        return bool(
+            self.db.session.query(models.Company)
+            .filter(models.Company.id == str(id))
+            .count()
+        )
 
     def create_company(
         self,

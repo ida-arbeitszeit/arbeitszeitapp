@@ -54,7 +54,7 @@ class CompanyRoute:
                     translator.gettext("Please log in to view this page.")
                 )
                 return redirect(url_for("auth.start", next=self.route_string))
-            elif not company_repository.get_by_id(user_id):
+            elif not company_repository.is_company(user_id):
                 # not a company
                 notifier.display_warning(
                     translator.gettext("You are not logged with the correct account.")
