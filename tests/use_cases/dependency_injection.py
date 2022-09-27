@@ -11,7 +11,6 @@ from arbeitszeit.use_cases.get_accountant_profile_info import (
 )
 from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCase
 from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
-from arbeitszeit.use_cases.log_in_accountant import LogInAccountantUseCase
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit.use_cases.pay_consumer_product.consumer_product_transaction import (
@@ -216,14 +215,6 @@ class InMemoryModule(Module):
         self, accountant_repository: interfaces.AccountantRepository
     ) -> GetAccountantProfileInfoUseCase:
         return GetAccountantProfileInfoUseCase(
-            accountant_repository=accountant_repository,
-        )
-
-    @provider
-    def provide_log_in_accountant_use_case(
-        self, accountant_repository: interfaces.AccountantRepository
-    ) -> LogInAccountantUseCase:
-        return LogInAccountantUseCase(
             accountant_repository=accountant_repository,
         )
 
