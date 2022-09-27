@@ -1,13 +1,14 @@
 from functools import wraps
 from typing import Any, Callable
-from uuid import UUID
 
 from flask import Blueprint, redirect, url_for
-from flask_login import current_user, login_required
 
 from arbeitszeit_flask import types
 from arbeitszeit_flask.database.repositories import MemberRepository
 from arbeitszeit_flask.dependency_injection import MemberModule, with_injection
+from arbeitszeit_flask.flask_session import FlaskSession
+from arbeitszeit_web.notification import Notifier
+from arbeitszeit_web.translator import Translator
 
 main_member = Blueprint(
     "main_member", __name__, template_folder="templates", static_folder="static"
@@ -32,15 +33,37 @@ class MemberRoute:
     def _apply_decorators(self, function):
         injection = with_injection([MemberModule()])
         return main_member.route(self.route_string, methods=self.methods)(
-            injection(login_required(injection(check_confirmed)(function)))
+            injection((self._check_is_member_and_confirmed)(function))
         )
 
+    @with_injection([MemberModule()])
+    def _check_is_member_and_confirmed(
+        self,
+        func,
+        member_repository: MemberRepository,
+        session: FlaskSession,
+        notifier: Notifier,
+        translator: Translator,
+    ):
+        @wraps(func)
+        def decorated_function(*args, **kwargs):
+            user_id = session.get_current_user()
+            if not user_id:
+                # not an authenticated user
+                notifier.display_warning(
+                    translator.gettext("Please log in to view this page.")
+                )
+                return redirect(url_for("auth.start", next=self.route_string))
+            elif not member_repository.get_by_id(user_id):
+                # not a member
+                notifier.display_warning(
+                    translator.gettext("You are not logged with the correct account.")
+                )
+                session.logout()
+                return redirect(url_for("auth.start", next=self.route_string))
+            elif not member_repository.is_member_confirmed(user_id):
+                # not a confirmed member
+                return redirect(url_for("auth.unconfirmed_member"))
+            return func(*args, **kwargs)
 
-def check_confirmed(func, member_repository: MemberRepository):
-    @wraps(func)
-    def decorated_function(*args, **kwargs):
-        if not member_repository.is_member_confirmed(UUID(current_user.id)):
-            return redirect(url_for("auth.zurueck"))
-        return func(*args, **kwargs)
-
-    return decorated_function
+        return decorated_function
