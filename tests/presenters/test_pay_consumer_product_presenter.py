@@ -88,3 +88,28 @@ class PayConsumerProductPresenterTests(TestCase):
             )
         )
         self.assertEqual(view_model.status_code, 406)
+
+    def test_for_proper_error_message_if_user_does_not_exist(
+        self,
+    ) -> None:
+        self.presenter.present(
+            PayConsumerProductResponse(
+                rejection_reason=RejectionReason.buyer_does_not_exist
+            )
+        )
+        self.assertIn(
+            self.translator.gettext(
+                "Failed to pay for consumer product. Are you logged in as a member?"
+            ),
+            self.notifier.warnings,
+        )
+
+    def test_presenter_returns_404_status_code_when_buyer_does_not_exist(
+        self,
+    ) -> None:
+        view_model = self.presenter.present(
+            PayConsumerProductResponse(
+                rejection_reason=RejectionReason.buyer_does_not_exist
+            )
+        )
+        self.assertEqual(view_model.status_code, 404)
