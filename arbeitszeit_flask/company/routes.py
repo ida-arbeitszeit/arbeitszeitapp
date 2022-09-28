@@ -253,7 +253,7 @@ def create_draft(
         return view.respond_to_get()
 
 
-@CompanyRoute("/company/self_approve_plan")
+@CompanyRoute("/company/self_approve_plan", methods=["POST"])
 @commit_changes
 def self_approve_plan(
     self_approve_plan: use_cases.SelfApprovePlan,

@@ -102,9 +102,10 @@
         </div>
         <div class="media-right">
           <div class="content pt-1">
-            <a href="{{ draft.self_approve_plan_url }}">
-              <i class="fas fa-envelope" title="{{ gettext('File plan') }}"></i>
-            </a>
+            <form method="post" action="{{ draft.self_approve_plan_url }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="button is-ghost" type="submit" title="{{ gettext('File plan') }}"><i class="fas fa-envelope"></i></button>
+            </form>
             &nbsp;
             <form method="post" action="{{ draft.draft_delete_url }}">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
