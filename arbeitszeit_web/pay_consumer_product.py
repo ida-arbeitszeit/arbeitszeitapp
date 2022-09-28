@@ -94,6 +94,13 @@ class PayConsumerProductPresenter:
                 self.translator.gettext("You do not have enough work certificates.")
             )
             return PayConsumerProductViewModel(status_code=406)
+        elif use_case_response.rejection_reason == RejectionReason.buyer_does_not_exist:
+            self.user_notifier.display_warning(
+                self.translator.gettext(
+                    "Failed to pay for consumer product. Are you logged in as a member?"
+                )
+            )
+            return PayConsumerProductViewModel(status_code=404)
         else:
             self.user_notifier.display_warning(
                 self.translator.gettext(
