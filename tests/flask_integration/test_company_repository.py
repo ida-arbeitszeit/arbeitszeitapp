@@ -102,6 +102,31 @@ def test_can_detect_if_company_with_email_is_already_present(
 
 
 @injection_test
+def test_does_not_identify_random_id_with_company(
+    company_repository: CompanyRepository,
+):
+    company_id = uuid4()
+    assert not company_repository.is_company(company_id)
+
+
+@injection_test
+def test_does_not_identify_member_as_company(
+    member_generator: MemberGenerator, company_repository: CompanyRepository
+):
+    member = member_generator.create_member()
+    assert not company_repository.is_company(member.id)
+
+
+@injection_test
+def test_does_identify_company_id_as_company(
+    company_repository: CompanyRepository,
+    company_generator: CompanyGenerator,
+):
+    company = company_generator.create_company()
+    assert company_repository.is_company(company.id)
+
+
+@injection_test
 def test_count_no_registered_company_if_none_was_created(
     repository: CompanyRepository,
 ) -> None:

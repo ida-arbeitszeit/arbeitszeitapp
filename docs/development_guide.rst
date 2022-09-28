@@ -70,7 +70,7 @@ library::
   from unittest import TestCase
 
 
-  # This is a value for distinguishing between "not settings a value"
+  # This is a value for distinguishing between "not setting a value"
   # and "setting a value to None/NIL/NULL
   class Null:
       pass
@@ -230,13 +230,14 @@ we override. This includes specifically ``setUp`` and
 
       def tearDown(self) -> None:
           self.db.close()
-	  super().tearDown()
+          super().tearDown()
 
       def test_example(self) -> None:
           ...
 
 Note how the order of the super() call in ``setUp`` and ``tearDown``
 is flipped.
+
 
 Configuration of the web server
 --------------------------------
