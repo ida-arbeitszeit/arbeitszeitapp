@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
+from typing import Optional
 from unittest import TestCase
 from uuid import UUID, uuid4
 
@@ -44,6 +45,16 @@ class PayConsumerProductTests(TestCase):
         response = self.pay_consumer_product(self.make_request(uuid4(), 1))
         self.assertFalse(response.is_accepted)
         self.assertEqual(response.rejection_reason, RejectionReason.plan_not_found)
+
+    def test_payment_fails_when_buyer_does_not_exist(self):
+        plan = self.plan_generator.create_plan()
+        response = self.pay_consumer_product(
+            self.make_request(plan.id, 1, buyer=uuid4())
+        )
+        self.assertFalse(response.is_accepted)
+        self.assertEqual(
+            response.rejection_reason, RejectionReason.buyer_does_not_exist
+        )
 
     def test_payment_is_unsuccessful_if_plan_is_expired(self):
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
@@ -275,12 +286,12 @@ class PayConsumerProductTests(TestCase):
         assert purchase_added.plan == plan.id
 
     def make_request(
-        self,
-        plan: UUID,
-        amount: int,
+        self, plan: UUID, amount: int, buyer: Optional[UUID] = None
     ) -> PayConsumerProductRequestTestImpl:
+        if buyer is None:
+            buyer = self.buyer.id
         return PayConsumerProductRequestTestImpl(
-            buyer=self.buyer.id,
+            buyer=buyer,
             plan=plan,
             amount=amount,
         )
