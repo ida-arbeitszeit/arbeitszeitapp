@@ -231,7 +231,6 @@ def create_draft_from_plan(
             context=dict(
                 form=form,
                 view_model=dict(
-                    self_approve_plan="/company/create_draft",
                     save_draft_url="",
                     cancel_url="/company/create_draft",
                 ),

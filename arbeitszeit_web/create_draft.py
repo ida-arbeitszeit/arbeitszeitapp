@@ -43,7 +43,6 @@ class CreateDraftController:
 class GetPrefilledDraftDataPresenter:
     @dataclass
     class ViewModel:
-        self_approve_plan_url: str
         save_draft_url: str
         cancel_url: str
 
@@ -60,7 +59,6 @@ class GetPrefilledDraftDataPresenter:
         form.labour_cost_field().set_value(summary_data.labour_cost)
         form.is_public_service_field().set_value(summary_data.is_public_service)
         return self.ViewModel(
-            self_approve_plan_url="/company/create_draft",
             save_draft_url="/company/create_draft",
             cancel_url="/company/create_draft",
         )
