@@ -14,6 +14,7 @@ class RejectionReason(Exception, Enum):
     plan_inactive = auto()
     plan_not_found = auto()
     insufficient_balance = auto()
+    buyer_does_not_exist = auto()
 
 
 class PayConsumerProductRequest(Protocol):
@@ -53,7 +54,8 @@ class PayConsumerProduct:
         self, request: PayConsumerProductRequest
     ) -> PayConsumerProductResponse:
         member = self.member_repository.get_by_id(request.get_buyer_id())
-        assert member
+        if not member:
+            raise RejectionReason.buyer_does_not_exist
         plan = member.get_planning_information(request.get_plan_id())
         if plan is None:
             raise RejectionReason.plan_not_found
