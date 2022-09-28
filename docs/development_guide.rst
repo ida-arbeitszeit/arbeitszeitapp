@@ -70,7 +70,7 @@ library::
   from unittest import TestCase
 
 
-  # This is a value for distinguishing between "not settings a value"
+  # This is a value for distinguishing between "not setting a value"
   # and "setting a value to None/NIL/NULL
   class Null:
       pass
@@ -202,6 +202,43 @@ implementations are located under
 implementations can be found under ``tests.use_cases.repositories``.
 
 
+Subclassing unittest.TestCase
+-----------------------------
+
+When using ``unittest.TestCase`` and its subclasses we need to follow some
+basic principles of object oriented programming. One such principle is
+the `Liskov Substitution Principle`_ which shall be roughly described
+in the following:
+
+The LSP states any subclasses S of a class T must be at least as
+useful as T. Therefore the programmer should be able to replace any
+instance of class T by class S.
+
+Since Python supports multiple inheritance this means that we must
+call the ``super`` method for any method of ``unittest.TestCase`` that
+we override. This includes specifically ``setUp`` and
+``tearDown``. Here is an example::
+
+  from unittest import TestCase
+  from my.package import open_db_connection
+
+
+  class MyTests(unittest.TestCase):
+      def setUp(self) -> None:
+          super().setUp()
+          self.db = open_db_connection()
+
+      def tearDown(self) -> None:
+          self.db.close()
+          super().tearDown()
+
+      def test_example(self) -> None:
+          ...
+
+Note how the order of the super() call in ``setUp`` and ``tearDown``
+is flipped.
+
+
 Configuration of the web server
 --------------------------------
 
@@ -303,3 +340,6 @@ configuration options are available
    Unacceptable high deviations might get labeled as such or highlighted by the application.
 
    Default: ``33``
+
+
+.. _Liskov Substitution Principle: https://en.wikipedia.org/wiki/Liskov_substitution_principle
