@@ -47,7 +47,7 @@ class GeneralUseCaseTests(TestCase):
         self.assertFalse(response.has_workers)
 
     def test_that_dashboard_shows_that_company_has_workers(self):
-        worker = self.member_generator.create_member_entity()
+        worker = self.member_generator.create_member()
         company = self.company_generator.create_company(workers=[worker])
         response = self.use_case.get_dashboard(company.id)
         self.assertTrue(response.has_workers)

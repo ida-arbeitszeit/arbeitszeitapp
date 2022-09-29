@@ -20,7 +20,7 @@ def test_that_no_info_is_generated_when_no_transaction_took_place(
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
 ):
-    member_generator.create_member_entity()
+    member_generator.create_member()
     company = company_generator.create_company()
 
     info = get_company_transactions(company.id)

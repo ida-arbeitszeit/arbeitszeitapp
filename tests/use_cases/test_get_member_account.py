@@ -16,8 +16,8 @@ def test_that_balance_is_zero_when_no_transaction_took_place(
     use_case: GetMemberAccount,
     member_generator: MemberGenerator,
 ):
-    member = member_generator.create_member_entity()
-    response = use_case(member.id)
+    member = member_generator.create_member()
+    response = use_case(member)
     assert response.balance == 0
 
 
@@ -26,8 +26,8 @@ def test_that_transactions_is_empty_when_no_transaction_took_place(
     use_case: GetMemberAccount,
     member_generator: MemberGenerator,
 ):
-    member = member_generator.create_member_entity()
-    response = use_case(member.id)
+    member = member_generator.create_member()
+    response = use_case(member)
     assert not response.transactions
 
 
@@ -38,7 +38,7 @@ def test_that_transactions_is_empty_when_member_is_not_involved_in_transaction(
     transaction_generator: TransactionGenerator,
     company_generator: CompanyGenerator,
 ):
-    member_of_interest = member_generator.create_member_entity()
+    member_of_interest = member_generator.create_member()
     company = company_generator.create_company()
     other_member = member_generator.create_member_entity()
 
@@ -49,7 +49,7 @@ def test_that_transactions_is_empty_when_member_is_not_involved_in_transaction(
         amount_received=Decimal(8.5),
     )
 
-    response = use_case(member_of_interest.id)
+    response = use_case(member_of_interest)
     assert not response.transactions
 
 

@@ -20,7 +20,7 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
         self.invite_repository = self.injector.get(WorkerInviteRepository)
         self.company_worker_repository = self.injector.get(CompanyWorkerRepository)
         self.company = self.company_generator.create_company()
-        self.member = self.member_generator.create_member_entity()
+        self.member = self.member_generator.create_member()
 
     def test_trying_to_answer_non_existing_invite_is_unsuccessful(self) -> None:
         response = self.answer_company_work_invite(
@@ -76,7 +76,10 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
             )
         )
         repository = self.injector.get(CompanyWorkerRepository)  # type: ignore
-        self.assertIn(self.member, repository.get_company_workers(self.company))
+        self.assertIn(
+            self.member,
+            {worker.id for worker in repository.get_company_workers(self.company)},
+        )
         self.assertTrue(response.is_success)
 
     def test_accepting_an_invite_marks_response_as_accepted(self) -> None:
@@ -99,7 +102,12 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
         )
         self.assertNotIn(
             self.member,
-            self.company_worker_repository.get_company_workers(self.company),
+            {
+                worker.id
+                for worker in self.company_worker_repository.get_company_workers(
+                    self.company
+                )
+            },
         )
         self.assertTrue(response.is_success)
 
@@ -143,12 +151,12 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
         self,
     ) -> None:
         invite_id = self._invite_worker()
-        other_member = self.member_generator.create_member_entity()
+        other_member = self.member_generator.create_member()
         response = self.answer_company_work_invite(
             self._create_request(
                 is_accepted=True,
                 invite_id=invite_id,
-                user=other_member.id,
+                user=other_member,
             )
         )
         self.assertFalse(response.is_success)
@@ -157,12 +165,12 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
         self,
     ) -> None:
         invite_id = self._invite_worker()
-        other_member = self.member_generator.create_member_entity()
+        other_member = self.member_generator.create_member()
         response = self.answer_company_work_invite(
             self._create_request(
                 is_accepted=True,
                 invite_id=invite_id,
-                user=other_member.id,
+                user=other_member,
             )
         )
         self.assertEqual(
@@ -184,12 +192,12 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
         self,
     ) -> None:
         invite_id = self._invite_worker()
-        other_member = self.member_generator.create_member_entity()
+        other_member = self.member_generator.create_member()
         response = self.answer_company_work_invite(
             self._create_request(
                 is_accepted=True,
                 invite_id=invite_id,
-                user=other_member.id,
+                user=other_member,
             )
         )
         self.assertIsNone(response.company_name)
@@ -198,7 +206,7 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
         invite_response = self.invite_worker_to_company(
             InviteWorkerToCompanyUseCase.Request(
                 self.company.id,
-                self.member.id,
+                self.member,
             )
         )
         invite_id = invite_response.invite_id
@@ -209,7 +217,7 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
         self, invite_id: UUID, is_accepted: bool, user: Optional[UUID] = None
     ) -> AnswerCompanyWorkInviteRequest:
         if user is None:
-            user = self.member.id
+            user = self.member
         return AnswerCompanyWorkInviteRequest(
             invite_id=invite_id,
             is_accepted=is_accepted,
