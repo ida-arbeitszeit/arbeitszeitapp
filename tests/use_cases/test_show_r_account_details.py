@@ -20,7 +20,7 @@ def test_no_transactions_returned_when_no_transactions_took_place(
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
 ):
-    member_generator.create_member()
+    member_generator.create_member_entity()
     company = company_generator.create_company()
 
     response = show_r_account_details(company.id)
@@ -33,7 +33,7 @@ def test_balance_is_zero_when_no_transactions_took_place(
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
 ):
-    member_generator.create_member()
+    member_generator.create_member_entity()
     company = company_generator.create_company()
 
     response = show_r_account_details(company.id)
@@ -46,7 +46,7 @@ def test_company_id_is_returned(
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
 ):
-    member_generator.create_member()
+    member_generator.create_member_entity()
     company = company_generator.create_company()
 
     response = show_r_account_details(company.id)
@@ -60,7 +60,7 @@ def test_that_no_info_is_generated_after_selling_of_consumer_product(
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    member = member_generator.create_member()
+    member = member_generator.create_member_entity()
     company = company_generator.create_company()
 
     transaction_generator.create_transaction(
@@ -171,7 +171,7 @@ def test_that_plotting_info_is_empty_when_no_transactions_occurred(
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
 ):
-    member_generator.create_member()
+    member_generator.create_member_entity()
     company = company_generator.create_company()
 
     response = show_r_account_details(company.id)

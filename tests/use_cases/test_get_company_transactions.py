@@ -20,7 +20,7 @@ def test_that_no_info_is_generated_when_no_transaction_took_place(
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
 ):
-    member_generator.create_member()
+    member_generator.create_member_entity()
     company = company_generator.create_company()
 
     info = get_company_transactions(company.id)
@@ -34,7 +34,7 @@ def test_that_correct_info_is_generated_after_transaction_of_member_buying_consu
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    member = member_generator.create_member()
+    member = member_generator.create_member_entity()
     company = company_generator.create_company()
 
     transaction_generator.create_transaction(
@@ -216,7 +216,7 @@ def test_that_correct_info_for_company_is_generated_in_correct_order_after_sever
 ):
     company1 = company_generator.create_company()
     company2 = company_generator.create_company()
-    member = member_generator.create_member()
+    member = member_generator.create_member_entity()
     social_accounting = social_accounting_generator.create_social_accounting()
 
     transaction_generator.create_transaction(

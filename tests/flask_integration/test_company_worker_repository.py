@@ -13,7 +13,7 @@ def test_that_no_workplaces_are_returned_for_new_member_account(
     member_generator: MemberGenerator,
     repo: CompanyWorkerRepository,
 ):
-    member = member_generator.create_member()
+    member = member_generator.create_member_entity()
     workplaces = repo.get_member_workplaces(member.id)
     assert not workplaces
 
@@ -33,7 +33,7 @@ def test_that_workplace_is_returned_after_one_is_registered(
     company_generator: CompanyGenerator,
     repo: CompanyWorkerRepository,
 ):
-    member = member_generator.create_member()
+    member = member_generator.create_member_entity()
     company = company_generator.create_company()
     repo.add_worker_to_company(company=company, worker=member)
     assert [company] == repo.get_member_workplaces(member.id)
@@ -55,6 +55,6 @@ def test_worker_that_was_added_shows_up_in_company_workers(
     repo: CompanyWorkerRepository,
 ):
     company = company_generator.create_company()
-    member = member_generator.create_member()
+    member = member_generator.create_member_entity()
     repo.add_worker_to_company(company=company, worker=member)
     assert member in repo.get_company_workers(company)

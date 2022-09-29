@@ -19,7 +19,7 @@ def test_no_transactions_returned_when_no_transactions_took_place(
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
 ):
-    member_generator.create_member()
+    member_generator.create_member_entity()
     company = company_generator.create_company()
 
     response = show_prd_account_details(company.id)
@@ -32,7 +32,7 @@ def test_balance_is_zero_when_no_transactions_took_place(
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
 ):
-    member_generator.create_member()
+    member_generator.create_member_entity()
     company = company_generator.create_company()
 
     response = show_prd_account_details(company.id)
@@ -45,7 +45,7 @@ def test_company_id_is_returned(
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
 ):
-    member_generator.create_member()
+    member_generator.create_member_entity()
     company = company_generator.create_company()
 
     response = show_prd_account_details(company.id)
@@ -156,7 +156,7 @@ def test_that_correct_info_is_generated_after_selling_of_consumer_product(
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    member = member_generator.create_member()
+    member = member_generator.create_member_entity()
     company = company_generator.create_company()
 
     transaction_generator.create_transaction(
@@ -240,7 +240,7 @@ def test_that_plotting_info_is_empty_when_no_transactions_occurred(
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
 ):
-    member_generator.create_member()
+    member_generator.create_member_entity()
     company = company_generator.create_company()
 
     response = show_prd_account_details(company.id)
@@ -255,7 +255,7 @@ def test_that_plotting_info_is_generated_after_selling_of_consumer_product(
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    member = member_generator.create_member()
+    member = member_generator.create_member_entity()
     company = company_generator.create_company()
 
     transaction_generator.create_transaction(
@@ -277,7 +277,7 @@ def test_that_correct_plotting_info_is_generated_after_selling_of_two_consumer_p
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    member = member_generator.create_member()
+    member = member_generator.create_member_entity()
     company = company_generator.create_company()
 
     trans1 = transaction_generator.create_transaction(
@@ -314,7 +314,7 @@ def test_that_plotting_info_is_generated_in_the_correct_order_after_selling_of_t
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    member = member_generator.create_member()
+    member = member_generator.create_member_entity()
     company = company_generator.create_company()
 
     trans1 = transaction_generator.create_transaction(
@@ -376,7 +376,7 @@ def test_that_correct_buyer_info_is_shown_when_company_sold_to_member(
     transaction_generator: TransactionGenerator,
 ):
     company = company_generator.create_company()
-    member = member_generator.create_member()
+    member = member_generator.create_member_entity()
 
     transaction_generator.create_transaction(
         sending_account=member.account,

@@ -20,7 +20,7 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
         self.invite_repository = self.injector.get(WorkerInviteRepository)
         self.company_worker_repository = self.injector.get(CompanyWorkerRepository)
         self.company = self.company_generator.create_company()
-        self.member = self.member_generator.create_member()
+        self.member = self.member_generator.create_member_entity()
 
     def test_trying_to_answer_non_existing_invite_is_unsuccessful(self) -> None:
         response = self.answer_company_work_invite(
@@ -143,7 +143,7 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
         self,
     ) -> None:
         invite_id = self._invite_worker()
-        other_member = self.member_generator.create_member()
+        other_member = self.member_generator.create_member_entity()
         response = self.answer_company_work_invite(
             self._create_request(
                 is_accepted=True,
@@ -157,7 +157,7 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
         self,
     ) -> None:
         invite_id = self._invite_worker()
-        other_member = self.member_generator.create_member()
+        other_member = self.member_generator.create_member_entity()
         response = self.answer_company_work_invite(
             self._create_request(
                 is_accepted=True,
@@ -184,7 +184,7 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
         self,
     ) -> None:
         invite_id = self._invite_worker()
-        other_member = self.member_generator.create_member()
+        other_member = self.member_generator.create_member_entity()
         response = self.answer_company_work_invite(
             self._create_request(
                 is_accepted=True,

@@ -13,7 +13,7 @@ class ShowWorkInvitesTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.show_work_invites = self.injector.get(ShowWorkInvites)
-        self.member: UUID = self.member_generator.create_member().id
+        self.member: UUID = self.member_generator.create_member_entity().id
         self.company: UUID = self.company_generator.create_company().id
         self.invite_worker_to_company = self.injector.get(InviteWorkerToCompanyUseCase)
 

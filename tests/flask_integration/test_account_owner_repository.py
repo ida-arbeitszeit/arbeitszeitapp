@@ -15,7 +15,7 @@ def test_can_retrieve_owner_of_member_accounts(
     member_generator: MemberGenerator,
 ) -> None:
     account = account_generator.create_account(AccountTypes.member)
-    member = member_generator.create_member(account=account)
+    member = member_generator.create_member_entity(account=account)
     assert repository.get_account_owner(account) == member
 
 

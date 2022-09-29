@@ -19,7 +19,7 @@ class AuthenticatedCompanyTests(ViewTestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_company_gets_200_when_posting_correct_data(self) -> None:
-        worker = self.member_generator.create_member()
+        worker = self.member_generator.create_member_entity()
         self.company_worker_repository.add_worker_to_company(self.company, worker)
         response = self.client.post(
             self.url,
@@ -30,7 +30,7 @@ class AuthenticatedCompanyTests(ViewTestCase):
     def test_company_gets_404_when_posting_incorrect_data_with_worker_not_in_company(
         self,
     ) -> None:
-        worker = self.member_generator.create_member()
+        worker = self.member_generator.create_member_entity()
         response = self.client.post(
             self.url,
             data=dict(member_id=str(worker.id), amount="10"),
@@ -40,7 +40,7 @@ class AuthenticatedCompanyTests(ViewTestCase):
     def test_company_gets_400_when_posting_incorrect_data_with_negative_amount(
         self,
     ) -> None:
-        worker = self.member_generator.create_member()
+        worker = self.member_generator.create_member_entity()
         self.company_worker_repository.add_worker_to_company(self.company, worker)
         response = self.client.post(
             self.url,

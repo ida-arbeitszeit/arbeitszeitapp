@@ -66,7 +66,7 @@ class MemberGenerator:
     member_repository: MemberRepository
     datetime_service: FakeDatetimeService
 
-    def create_member(
+    def create_member_entity(
         self,
         *,
         email: Optional[str] = None,
@@ -92,6 +92,24 @@ class MemberGenerator:
             account=account,
             registered_on=registered_on,
         )
+
+    # def create_member(
+    #     self,
+    #     *,
+    #     email: Optional[str] = None,
+    #     name: str = "test member name",
+    #     account: Optional[Account] = None,
+    #     password: str = "password",
+    #     registered_on: Optional[datetime] = None,
+    # ) -> UUID:
+    #     member = self.create_member_entity(
+    #         email=email,
+    #         name=name,
+    #         password=password,
+    #         account=account,
+    #         registered_on=registered_on,
+    #     )
+    #     return member.id
 
 
 @inject

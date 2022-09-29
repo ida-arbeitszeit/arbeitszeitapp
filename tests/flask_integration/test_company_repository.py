@@ -113,7 +113,7 @@ def test_does_not_identify_random_id_with_company(
 def test_does_not_identify_member_as_company(
     member_generator: MemberGenerator, company_repository: CompanyRepository
 ):
-    member = member_generator.create_member()
+    member = member_generator.create_member_entity()
     assert not company_repository.is_company(member.id)
 
 
@@ -301,7 +301,7 @@ class CreateCompanyTests(FlaskTestCase):
         self,
     ) -> None:
         email = "test@test.test"
-        self.member_generator.create_member(email=email)
+        self.member_generator.create_member_entity(email=email)
         self.repository.create_company(
             email=email,
             name="test name",

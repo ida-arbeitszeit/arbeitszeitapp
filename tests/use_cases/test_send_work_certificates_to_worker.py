@@ -23,9 +23,9 @@ def test_that_transfer_is_rejected_if_money_is_sent_to_worker_not_working_in_com
     member_generator: MemberGenerator,
 ):
     company = company_generator.create_company()
-    worker1 = member_generator.create_member()
+    worker1 = member_generator.create_member_entity()
     company_worker_repository.add_worker_to_company(company, worker1)
-    worker2 = member_generator.create_member()
+    worker2 = member_generator.create_member_entity()
     amount_to_transfer = Decimal(50)
 
     response = send_work_certificates_to_worker(
@@ -46,7 +46,7 @@ def test_that_correct_transfer_does_not_get_rejected(
     member_generator: MemberGenerator,
 ):
     company = company_generator.create_company()
-    worker = member_generator.create_member()
+    worker = member_generator.create_member_entity()
     company_worker_repository.add_worker_to_company(company, worker)
     amount_to_transfer = Decimal(50)
     response = send_work_certificates_to_worker(
@@ -64,7 +64,7 @@ def test_that_after_transfer_balances_of_worker_and_company_are_correct(
     account_repository: AccountRepository,
 ):
     company = company_generator.create_company()
-    worker = member_generator.create_member()
+    worker = member_generator.create_member_entity()
     company_worker_repository.add_worker_to_company(company, worker)
     amount_to_transfer = Decimal(50)
     send_work_certificates_to_worker(
@@ -86,7 +86,7 @@ def test_that_after_transfer_one_transaction_is_added(
     member_generator: MemberGenerator,
 ):
     company = company_generator.create_company()
-    worker = member_generator.create_member()
+    worker = member_generator.create_member_entity()
     company_worker_repository.add_worker_to_company(company, worker)
     amount_to_transfer = Decimal(50)
     send_work_certificates_to_worker(
@@ -104,7 +104,7 @@ def test_that_after_transfer_correct_transaction_is_added(
     member_generator: MemberGenerator,
 ):
     company = company_generator.create_company()
-    worker = member_generator.create_member()
+    worker = member_generator.create_member_entity()
     company_worker_repository.add_worker_to_company(company, worker)
     amount_to_transfer = Decimal(50)
     send_work_certificates_to_worker(

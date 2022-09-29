@@ -37,7 +37,7 @@ class PayConsumerProductTests(TestCase):
         self.account_repository = injector.get(AccountRepository)
         self.purchase_repository = injector.get(PurchaseRepository)
         self.plan_cooperation_repository = injector.get(PlanCooperationRepository)
-        self.buyer = self.member_generator.create_member()
+        self.buyer = self.member_generator.create_member_entity()
         self.control_thresholds = injector.get(ControlThresholdsTestImpl)
         self.update_plans_and_payout = injector.get(UpdatePlansAndPayout)
 
