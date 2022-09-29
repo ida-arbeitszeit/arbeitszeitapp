@@ -2,8 +2,7 @@
 
 # python packages
 , email_validator, flask, flask-babel, flask-talisman, flask_login, flask_mail
-, flask_migrate, flask_wtf, hypothesis, injector, is_safe_url, matplotlib
-, sphinx }:
+, flask_migrate, flask_wtf, injector, is_safe_url, matplotlib, sphinx }:
 buildPythonPackage {
   pname = "arbeitszeitapp";
   version = "develop";
@@ -12,7 +11,6 @@ buildPythonPackage {
   postPhases = [ "buildDocsPhase" ];
   format = "pyproject";
   buildInputs = [ pytestCheckHook sphinx ];
-  checkInputs = [ hypothesis ];
   propagatedBuildInputs = [
     email_validator
     flask
