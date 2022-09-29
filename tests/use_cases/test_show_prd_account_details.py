@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 
 from arbeitszeit.entities import SocialAccounting
@@ -285,6 +285,7 @@ def test_that_correct_plotting_info_is_generated_after_selling_of_two_consumer_p
         receiving_account=company.product_account,
         amount_sent=Decimal(10),
         amount_received=Decimal(5),
+        date=transaction_generator.datetime_service.now() + timedelta(hours=1),
     )
 
     trans2 = transaction_generator.create_transaction(
@@ -292,6 +293,7 @@ def test_that_correct_plotting_info_is_generated_after_selling_of_two_consumer_p
         receiving_account=company.product_account,
         amount_sent=Decimal(10),
         amount_received=Decimal(10),
+        date=transaction_generator.datetime_service.now() + timedelta(hours=2),
     )
 
     response = show_prd_account_details(company.id)
@@ -322,6 +324,7 @@ def test_that_plotting_info_is_generated_in_the_correct_order_after_selling_of_t
         receiving_account=company.product_account,
         amount_sent=Decimal(10),
         amount_received=Decimal(1),
+        date=transaction_generator.datetime_service.now() + timedelta(hours=1),
     )
 
     trans2 = transaction_generator.create_transaction(
@@ -329,6 +332,7 @@ def test_that_plotting_info_is_generated_in_the_correct_order_after_selling_of_t
         receiving_account=company.product_account,
         amount_sent=Decimal(10),
         amount_received=Decimal(2),
+        date=transaction_generator.datetime_service.now() + timedelta(hours=2),
     )
 
     trans3 = transaction_generator.create_transaction(
@@ -336,6 +340,7 @@ def test_that_plotting_info_is_generated_in_the_correct_order_after_selling_of_t
         receiving_account=company.product_account,
         amount_sent=Decimal(10),
         amount_received=Decimal(3),
+        date=transaction_generator.datetime_service.now() + timedelta(hours=3),
     )
 
     response = show_prd_account_details(company.id)

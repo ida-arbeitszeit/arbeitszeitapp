@@ -1,3 +1,4 @@
+from datetime import timedelta
 from decimal import Decimal
 
 from arbeitszeit.use_cases import GetMemberAccount
@@ -116,18 +117,21 @@ def test_that_correct_info_for_company_is_generated_in_correct_order_after_sever
         sending_account=company1.work_account,
         receiving_account=member.account,
         amount_received=Decimal(12),
+        date=transaction_generator.datetime_service.now() + timedelta(hours=1),
     )
     # pay product of comp1
     transaction_generator.create_transaction(
         sending_account=member.account,
         receiving_account=company1.product_account,
         amount_sent=Decimal(5),
+        date=transaction_generator.datetime_service.now() + timedelta(hours=2),
     )
     # wages from comp2
     transaction_generator.create_transaction(
         sending_account=company2.work_account,
         receiving_account=member.account,
         amount_received=Decimal(2),
+        date=transaction_generator.datetime_service.now() + timedelta(hours=3),
     )
 
     response = use_case(member.id)

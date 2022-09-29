@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 
 from arbeitszeit.entities import AccountTypes, SocialAccounting
@@ -183,14 +183,17 @@ def test_correct_info_is_generated_after_several_transactions_where_companies_bu
     transaction_generator.create_transaction(
         sending_account=company1.means_account,
         receiving_account=company2.product_account,
+        date=transaction_generator.datetime_service.now_minus_one_day(),
     )
     transaction_generator.create_transaction(
         sending_account=company2.means_account,
         receiving_account=company1.product_account,
+        date=transaction_generator.datetime_service.now(),
     )
     transaction_generator.create_transaction(
         sending_account=company1.raw_material_account,
         receiving_account=company2.product_account,
+        date=transaction_generator.datetime_service.now_plus_one_day(),
     )
 
     info_company1 = get_company_transactions(company1.id)
@@ -222,21 +225,27 @@ def test_that_correct_info_for_company_is_generated_in_correct_order_after_sever
     transaction_generator.create_transaction(
         sending_account=company1.means_account,
         receiving_account=company2.product_account,
+        date=transaction_generator.datetime_service.now() - timedelta(hours=5),
     )
     transaction_generator.create_transaction(
         sending_account=company2.means_account,
         receiving_account=company1.product_account,
+        date=transaction_generator.datetime_service.now() - timedelta(hours=4),
     )
     transaction_generator.create_transaction(
         sending_account=company1.raw_material_account,
         receiving_account=company2.product_account,
+        date=transaction_generator.datetime_service.now() - timedelta(hours=3),
     )
     transaction_generator.create_transaction(
-        sending_account=member.account, receiving_account=company1.product_account
+        sending_account=member.account,
+        receiving_account=company1.product_account,
+        date=transaction_generator.datetime_service.now() - timedelta(hours=2),
     )
     expected_trans5 = transaction_generator.create_transaction(
         sending_account=social_accounting.account,
         receiving_account=company1.product_account,
+        date=transaction_generator.datetime_service.now() - timedelta(hours=1),
     )
 
     info = get_company_transactions(company1.id)
