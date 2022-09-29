@@ -173,17 +173,6 @@ the command::
 
     coverage run --source arbeitszeit_flask,arbeitszeit,arbeitszeit_web -m pytest && coverage html
 
-In some circumstances we use ``hypothesis`` to check for edge cases.
-By default ``hypothesis`` generates only 10 examples per test to keep
-testing times reasonably low. However if you want to run more examples
-you can configure ``hypothesis`` for "CI mode" where at least 1000
-examples are run per test.  This behavior can be controlled via the
-``HYPOTHESIS_PROFILE`` environment variable.::
-
-  # this runs all hypothesis tests with at least 1000 different
-  # examples
-  HYPOTHESIS_PROFILE=ci pytest
-
 Translation
 -----------
 
