@@ -6,7 +6,9 @@
 {% endblock %}
 
 {% block content %}
-<div class="section is-medium has-text-centered">
+{% from 'macros/transactions.html' import transaction_with_buyer %}
+
+<div class="section is-medium has-text-centered pb-0">
     <h1 class="title">
         {{ gettext("Account prd") }}
     </h1>
@@ -22,40 +24,16 @@
     <div>
         <img src="{{ view_model.plot_url }}" alt="plot of prd account">
     </div>
-
-    <div class="table-container">
-        <table class="table has-text-left mx-auto">
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>{{ gettext("Type") }}</th>
-                    <th>{{ gettext("Buyer") }} </th>
-                    <th>{{ gettext("Details") }}</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if view_model.show_transactions %}
-                {% for trans_info in view_model.transactions %}
-                <tr>
-                    <td>{{ trans_info.date }}</td>
-                    <td>
-                        {{ trans_info.transaction_type }}
-                    </td>
-                    <td><span class="icon"><i
-                                class='{{ trans_info.buyer_type_icon }}'></i></span>&ensp;<span>{{ trans_info.buyer_name }}</span>
-                    </td>
-                    <td>{{ trans_info.purpose }}</td>
-                    <td
-                        class="has-text-right has-text-weight-bold {{ 'has-text-success' if trans_info.transaction_volume|float >= 0 else 'has-text-danger' }}">
-                        {{
-                        trans_info.transaction_volume }}
-                    </td>
-                </tr>
-                {% endfor %}
-                {% endif %}
-            </tbody>
-        </table>
+</div>
+<div class="section">
+    <div class="columns is-centered">
+        <div class="column is-two-thirds">
+            {% if view_model.show_transactions %}
+            {% for trans_info in view_model.transactions %}
+            {{ transaction_with_buyer(trans_info.date, trans_info.transaction_type, trans_info.purpose, trans_info.transaction_volume, trans_info.buyer_name, trans_info.buyer_type_icon) }}
+            {% endfor %}
+            {% endif %}
+        </div>
     </div>
 </div>
 {% endblock %}
