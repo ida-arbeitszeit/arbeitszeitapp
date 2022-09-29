@@ -299,6 +299,9 @@ class MemberRepository(interfaces.MemberRepository):
     def has_member_with_email(self, email: str) -> bool:
         return bool(self._get_member_by_email(email))
 
+    def is_member(self, id: UUID) -> bool:
+        return bool(self.get_by_id(id))
+
     def count_registered_members(self) -> int:
         return len(self.members)
 
@@ -376,6 +379,9 @@ class CompanyRepository(interfaces.CompanyRepository):
             if company.email == email:
                 return company
         return None
+
+    def is_company(self, id: UUID) -> bool:
+        return bool(self.get_by_id(id))
 
     def count_registered_companies(self) -> int:
         return len(self.companies)
