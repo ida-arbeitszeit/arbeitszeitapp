@@ -102,9 +102,14 @@
         </div>
         <div class="media-right">
           <div class="content pt-1">
+            <form method="post" action="{{ draft.self_approve_plan_url }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="button is-ghost" type="submit" title="{{ gettext('File plan') }}"><i class="fas fa-envelope"></i></button>
+            </form>
+            &nbsp;
             <form method="post" action="{{ draft.draft_delete_url }}">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <button class="button is-ghost" type="submit"><i class="fas fa-trash"></i></button>
+              <button class="button is-ghost" type="submit" title="{{ gettext('Delete plan') }}"><i class="fas fa-trash"></i></button>
             </form>
           </div>
         </div>

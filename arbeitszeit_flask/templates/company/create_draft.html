@@ -22,19 +22,7 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         {{ draft_form(form) }}
         <div class="block py-2"></div>
-        <div class="has-text-danger-dark">
-          {{ gettext("Plans cannot be changed after submission!")}}
-        </div>
         <div class="field is-grouped is-grouped-centered">
-          <div class="control">
-            <button class="button is-danger is-light"
-                    name="action"
-                    value="file_draft"
-                    type="submit"
-                    formaction="{{ view_model.self_approve_plan_url }}">
-              {{ gettext("Submit plan")}}
-            </button>
-          </div>
           <div class="control">
             <button class="button is-primary is-light"
                     name="action"
