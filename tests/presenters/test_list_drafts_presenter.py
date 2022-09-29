@@ -21,7 +21,7 @@ class PresenterTests(TestCase):
             results=[
                 ListedDraft(
                     id=draft_id,
-                    creation_date=datetime.min,
+                    creation_date=datetime.now(),
                     product_name="test product name",
                     description="test description",
                 )
