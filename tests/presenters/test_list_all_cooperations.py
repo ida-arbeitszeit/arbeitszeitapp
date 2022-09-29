@@ -2,8 +2,6 @@ from typing import Optional
 from unittest import TestCase
 from uuid import UUID, uuid4
 
-from hypothesis import given, strategies
-
 from arbeitszeit.use_cases import ListAllCooperationsResponse, ListedCooperation
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.session import UserRole
@@ -35,12 +33,12 @@ class ListMessagesPresenterTests(TestCase):
         self.assertTrue(view_model.cooperations)
         self.assertTrue(view_model.show_results)
 
-    @given(name=strategies.text())
-    def test_name_is_propagated_to_view_model(self, name: str) -> None:
+    def test_name_is_propagated_to_view_model(self) -> None:
+        expected_name = "test123"
         view_model = self.presenter.present(
-            self._create_response_with_one_cooperation(name=name)
+            self._create_response_with_one_cooperation(name=expected_name)
         )
-        self.assertEqual(view_model.cooperations[0].name, name)
+        self.assertEqual(view_model.cooperations[0].name, expected_name)
 
     def test_plan_count_is_propagated_to_view_model(self) -> None:
         view_model = self.presenter.present(
