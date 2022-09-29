@@ -22,9 +22,6 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         {{ draft_form(form) }}
         <div class="block py-2"></div>
-        <div class="has-text-danger-dark">
-          {{ gettext("Plans cannot be changed after submission!")}}
-        </div>
         <div class="field is-grouped is-grouped-centered">
           <div class="control">
             <button class="button is-primary is-light"

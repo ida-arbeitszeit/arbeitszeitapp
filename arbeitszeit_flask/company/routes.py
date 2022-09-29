@@ -257,7 +257,6 @@ def create_draft(
 @commit_changes
 def self_approve_plan(
     self_approve_plan: use_cases.SelfApprovePlan,
-    template_renderer: UserTemplateRenderer,
     presenter: SelfApprovePlanPresenter,
 ):
     "Self-approve a plan. Credit is granted automatically."
