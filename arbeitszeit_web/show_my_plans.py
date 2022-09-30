@@ -69,6 +69,7 @@ class DraftsTableRow:
     product_name: str
     draft_details_url: str
     draft_delete_url: str
+    self_approve_plan_url: str
 
 
 @dataclass
@@ -182,6 +183,9 @@ class ShowMyPlansPresenter:
                     product_name=draft.prd_name,
                     draft_details_url=self.url_index.get_draft_summary_url(draft.id),
                     draft_delete_url=self.url_index.get_delete_draft_url(draft.id),
+                    self_approve_plan_url=self.url_index.get_self_approve_plan_url(
+                        draft.id
+                    ),
                 )
                 for draft in response.drafts
             ]

@@ -54,16 +54,6 @@ class AuthenticatedCompanyTestsForPost(ViewTestCase):
             1,
         )
 
-    def test_post_user_filing_draft_leads_to_302_and_draft_gets_created(self) -> None:
-        self.assertFalse(self._count_drafts_of_company())
-        test_data = self._create_form_data(action="file_draft")
-        response = self.client.post("/company/create_draft", data=test_data)
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(
-            self._count_drafts_of_company(),
-            1,
-        )
-
     def _create_form_data(self, action: str = "cancel") -> Dict:
         return dict(
             prd_name="test name",

@@ -95,6 +95,9 @@ class UrlIndex(Protocol):
     def get_accountant_dashboard_url(self) -> str:
         ...
 
+    def get_self_approve_plan_url(self, draft_id: UUID) -> str:
+        ...
+
 
 class RenewPlanUrlIndex(Protocol):
     def get_renew_plan_url(self, plan_id: UUID) -> str:
