@@ -14,10 +14,7 @@
             inherit system;
             overlays = [ self.overlays.default ];
           };
-          developmentPkgs = import nixpkgs {
-            inherit system;
-            overlays = [ self.overlays.development ];
-          };
+          developmentPkgs = pkgs.extend self.overlays.development;
         in {
           devShells.default = developmentPkgs.callPackage nix/devShell.nix { };
           packages = {
@@ -29,26 +26,28 @@
           };
         });
       systemIndependent = {
-        overlays = {
-          default = final: prev:
-            let
-              overridePython = python:
-                python.override {
-                  packageOverrides = import nix/pythonPackages.nix;
-                };
-            in {
-              python39 = overridePython prev.python39;
-              python310 = overridePython prev.python310;
+        overlays = let
+          # Unfortunately python.override does not compose. That's why
+          # we use overrideScope.  There is an open issue on github
+          # about this topic:
+          # https://github.com/NixOS/nixpkgs/issues/44426
+          overridePython = pythonSelf: overrides:
+            pythonSelf // {
+              pkgs = pythonSelf.pkgs.overrideScope overrides;
             };
-          development = final: prev:
-            let
-              overridePython = python:
-                python.override {
-                  packageOverrides = with nixpkgs.lib;
-                    composeExtensions (import nix/developmentOverrides.nix)
-                    (import nix/pythonPackages.nix);
-                };
-            in { python310 = overridePython prev.python310; };
+        in {
+          # The default overlay provides the arbeitszeitapp to
+          # nixpkgs.
+          default = final: prev: {
+            python310 =
+              overridePython prev.python310 (import nix/pythonPackages.nix);
+          };
+          # The development overrides provide adjustments to nixpkgs
+          # that are only necessary for development.
+          development = final: prev: {
+            python310 = overridePython prev.python310
+              (import nix/developmentOverrides.nix);
+          };
         };
       };
     in systemDependent // systemIndependent;
