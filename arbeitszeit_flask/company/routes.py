@@ -231,7 +231,6 @@ def create_draft_from_plan(
             context=dict(
                 form=form,
                 view_model=dict(
-                    self_approve_plan="/company/create_draft",
                     save_draft_url="",
                     cancel_url="/company/create_draft",
                 ),
@@ -254,11 +253,10 @@ def create_draft(
         return view.respond_to_get()
 
 
-@CompanyRoute("/company/self_approve_plan")
+@CompanyRoute("/company/self_approve_plan", methods=["POST"])
 @commit_changes
 def self_approve_plan(
     self_approve_plan: use_cases.SelfApprovePlan,
-    template_renderer: UserTemplateRenderer,
     presenter: SelfApprovePlanPresenter,
 ):
     "Self-approve a plan. Credit is granted automatically."
