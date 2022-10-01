@@ -151,7 +151,7 @@ class TransactionRepository(interfaces.TransactionRepository):
 
 
 @singleton
-class CompanyWorkerRepository(interfaces.CompanyWorkerRepository):
+class CompanyWorkerRepository:
     @inject
     def __init__(
         self, company_repository: CompanyRepository, member_repository: MemberRepository
@@ -160,11 +160,11 @@ class CompanyWorkerRepository(interfaces.CompanyWorkerRepository):
         self.member_repository = member_repository
         self.company_workers: Dict[UUID, Set[UUID]] = defaultdict(lambda: set())
 
-    def add_worker_to_company(self, company: Company, worker: Member) -> None:
-        self.company_workers[company.id].add(worker.id)
+    def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
+        self.company_workers[company].add(worker)
 
-    def get_company_workers(self, company: Company) -> Iterable[Member]:
-        for member_id in self.company_workers[company.id]:
+    def get_company_workers(self, company: UUID) -> Iterable[Member]:
+        for member_id in self.company_workers[company]:
             member = self.member_repository.get_by_id(member_id)
             if member is not None:
                 yield member

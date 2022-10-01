@@ -24,18 +24,15 @@ from arbeitszeit.entities import (
 )
 
 
-class CompanyWorkerRepository(ABC):
-    @abstractmethod
-    def add_worker_to_company(self, company: Company, worker: Member) -> None:
-        pass
+class CompanyWorkerRepository(Protocol):
+    def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
+        ...
 
-    @abstractmethod
-    def get_company_workers(self, company: Company) -> Iterable[Member]:
-        pass
+    def get_company_workers(self, company: UUID) -> Iterable[Member]:
+        ...
 
-    @abstractmethod
     def get_member_workplaces(self, member: UUID) -> Iterable[Company]:
-        pass
+        ...
 
 
 class PurchaseRepository(ABC):
