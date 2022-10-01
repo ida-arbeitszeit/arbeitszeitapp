@@ -1,7 +1,5 @@
 from dataclasses import dataclass, field
-from datetime import datetime
 from arbeitszeit_flask.datetime import RealtimeDatetimeService
-from decimal import Decimal
 from arbeitszeit.use_cases.query_purchases import PurchaseQueryResponse
 from typing import Iterator
 
@@ -17,38 +15,38 @@ class ViewModel:
         price_per_unit: str
         amount: str
         price_total: str
-    
+
     purchases: list[Purchase] = field(default_factory=list)
-    
-    def append(self, purchase_respond: PurchaseQueryResponse):
-        
+
+    def append(self, purchase_respond: PurchaseQueryResponse) -> None:
+
         p = self.Purchase(
-            purchase_date=RealtimeDatetimeService().
-                    format_datetime(date=purchase_respond.purchase_date),
+            purchase_date=RealtimeDatetimeService().format_datetime(
+                date=purchase_respond.purchase_date
+            ),
             product_name=purchase_respond.product_name,
             product_description=purchase_respond.product_description,
             purpose=purchase_respond.purpose,
-            price_per_unit=round(purchase_respond.price_per_unit, 2),
+            price_per_unit=str(round(purchase_respond.price_per_unit, 2)),
             amount=str(purchase_respond.amount),
-            price_total=round(purchase_respond.price_total, 2),
+            price_total=str(round(purchase_respond.price_total, 2)),
         )
         self.purchases.append(p)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.purchases)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         for i in self.purchases:
             yield i
 
 
 class ShowMyPurchasesPresenter:
     def present(self, use_case_response: Iterator[PurchaseQueryResponse]) -> ViewModel:
-        
+
         model = ViewModel()
 
         for p in use_case_response:
             model.append(p)
 
         return model
-
