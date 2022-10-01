@@ -115,6 +115,6 @@ def test_show_purchases_from_company(
         presentation.purchases[1].product_description == "Beschreibung für Produkt A."
     )
     assert presentation.purchases[1].purpose == "Prod.mittel"
-    assert presentation.purchases[1].price_per_unit == "100000"
+    assert presentation.purchases[1].price_per_unit == "100000.00"
     assert presentation.purchases[1].amount == "1"
-    assert presentation.purchases[1].price_total == "100000"
+    assert presentation.purchases[1].price_total == "100000.00"
