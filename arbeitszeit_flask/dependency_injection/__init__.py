@@ -177,6 +177,12 @@ class CompanyModule(CompanyPresenterModule):
 
 class FlaskModule(PresenterModule):
     @provider
+    def provide_company_worker_repository(
+        self, instance: CompanyWorkerRepository
+    ) -> interfaces.CompanyWorkerRepository:
+        return instance
+
+    @provider
     def provide_request(self, request: FlaskRequest) -> Request:
         return request
 
@@ -392,10 +398,6 @@ class FlaskModule(PresenterModule):
         )
 
     def configure(self, binder: Binder) -> None:
-        binder.bind(
-            interfaces.CompanyWorkerRepository,  # type: ignore
-            to=ClassProvider(CompanyWorkerRepository),
-        )
         binder.bind(
             interfaces.PurchaseRepository,  # type: ignore
             to=ClassProvider(PurchaseRepository),
