@@ -1,11 +1,11 @@
 from datetime import datetime
 from unittest import TestCase
-from uuid import uuid4
 
 from arbeitszeit.use_cases.show_latest_plans import ShowLatestPlans
-from tests.datetime_service import FakeDatetimeService
-from .dependency_injection import get_dependency_injector
 from tests.data_generators import PlanGenerator
+from tests.datetime_service import FakeDatetimeService
+
+from .dependency_injection import get_dependency_injector
 
 
 class UseCaseTester(TestCase):
