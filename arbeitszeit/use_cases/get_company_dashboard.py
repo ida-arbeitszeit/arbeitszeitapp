@@ -50,7 +50,7 @@ class GetCompanyDashboardUseCase:
             id=company.id, name=company.name, email=company.email
         )
         has_workers = bool(
-            len(list(self.company_worker_repository.get_company_workers(company)))
+            len(list(self.company_worker_repository.get_company_workers(company_id)))
         )
         three_latest_plans = self._get_three_latest_plans()
         return self.Response(
