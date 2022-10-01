@@ -36,15 +36,7 @@ class CreateDraftView:
             self.notifier.display_info(
                 self.translator.gettext("Draft successfully saved.")
             )
-            return redirect(url_for("main_company.draft_list"))
-        elif user_action == "file_draft":
-            draft_id = self._create_draft(form)
-            return redirect(
-                url_for(
-                    "main_company.self_approve_plan",
-                    draft_uuid=draft_id,
-                )
-            )
+            return redirect(url_for("main_company.my_plans"))
         else:
             self.notifier.display_info(
                 self.translator.gettext("Plan creation has been canceled.")
@@ -66,7 +58,6 @@ class CreateDraftView:
                 context=dict(
                     form=CreateDraftForm(),
                     view_model=dict(
-                        self_approve_plan="",
                         save_draft_url="",
                         cancel_url="",
                     ),
