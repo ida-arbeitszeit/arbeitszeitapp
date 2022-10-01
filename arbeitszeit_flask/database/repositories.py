@@ -31,20 +31,23 @@ from arbeitszeit_flask.models import (
 
 @inject
 @dataclass
-class CompanyWorkerRepository(repositories.CompanyWorkerRepository):
+class CompanyWorkerRepository:
     member_repository: MemberRepository
     company_repository: CompanyRepository
 
-    def add_worker_to_company(
-        self, company: entities.Company, worker: entities.Member
-    ) -> None:
-        company_orm = self.company_repository.object_to_orm(company)
-        worker_orm = self.member_repository.object_to_orm(worker)
-        if worker_orm not in company_orm.workers:
-            company_orm.workers.append(worker_orm)
+    def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
+        member = models.Member.query.get(str(worker))
+        if member is None:
+            return
+        company = models.Company.query.get(str(company))
+        if company is None:
+            return
+        member.workplaces.append(company)
 
-    def get_company_workers(self, company: entities.Company) -> List[entities.Member]:
-        company_orm = self.company_repository.object_to_orm(company)
+    def get_company_workers(self, company: UUID) -> List[entities.Member]:
+        company_orm = models.Company.query.get(str(company))
+        if company_orm is None:
+            return []
         return [
             self.member_repository.object_from_orm(member)
             for member in company_orm.workers

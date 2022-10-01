@@ -78,7 +78,7 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
         repository = self.injector.get(CompanyWorkerRepository)  # type: ignore
         self.assertIn(
             self.member,
-            {worker.id for worker in repository.get_company_workers(self.company)},
+            {worker.id for worker in repository.get_company_workers(self.company.id)},
         )
         self.assertTrue(response.is_success)
 
@@ -105,7 +105,7 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
             {
                 worker.id
                 for worker in self.company_worker_repository.get_company_workers(
-                    self.company
+                    self.company.id
                 )
             },
         )

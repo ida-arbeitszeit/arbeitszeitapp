@@ -23,13 +23,13 @@ def test_that_transfer_is_rejected_if_money_is_sent_to_worker_not_working_in_com
     member_generator: MemberGenerator,
 ):
     company = company_generator.create_company()
-    worker1 = member_generator.create_member_entity()
-    company_worker_repository.add_worker_to_company(company, worker1)
-    worker2 = member_generator.create_member_entity()
+    worker1 = member_generator.create_member()
+    company_worker_repository.add_worker_to_company(company.id, worker1)
+    worker2 = member_generator.create_member()
     amount_to_transfer = Decimal(50)
 
     response = send_work_certificates_to_worker(
-        SendWorkCertificatesToWorkerRequest(company.id, worker2.id, amount_to_transfer)
+        SendWorkCertificatesToWorkerRequest(company.id, worker2, amount_to_transfer)
     )
     assert response.is_rejected
     assert (
@@ -46,11 +46,11 @@ def test_that_correct_transfer_does_not_get_rejected(
     member_generator: MemberGenerator,
 ):
     company = company_generator.create_company()
-    worker = member_generator.create_member_entity()
-    company_worker_repository.add_worker_to_company(company, worker)
+    worker = member_generator.create_member()
+    company_worker_repository.add_worker_to_company(company.id, worker)
     amount_to_transfer = Decimal(50)
     response = send_work_certificates_to_worker(
-        SendWorkCertificatesToWorkerRequest(company.id, worker.id, amount_to_transfer)
+        SendWorkCertificatesToWorkerRequest(company.id, worker, amount_to_transfer)
     )
     assert not response.is_rejected
 
@@ -65,7 +65,7 @@ def test_that_after_transfer_balances_of_worker_and_company_are_correct(
 ):
     company = company_generator.create_company()
     worker = member_generator.create_member_entity()
-    company_worker_repository.add_worker_to_company(company, worker)
+    company_worker_repository.add_worker_to_company(company.id, worker.id)
     amount_to_transfer = Decimal(50)
     send_work_certificates_to_worker(
         SendWorkCertificatesToWorkerRequest(company.id, worker.id, amount_to_transfer)
@@ -87,7 +87,7 @@ def test_that_after_transfer_one_transaction_is_added(
 ):
     company = company_generator.create_company()
     worker = member_generator.create_member_entity()
-    company_worker_repository.add_worker_to_company(company, worker)
+    company_worker_repository.add_worker_to_company(company.id, worker.id)
     amount_to_transfer = Decimal(50)
     send_work_certificates_to_worker(
         SendWorkCertificatesToWorkerRequest(company.id, worker.id, amount_to_transfer)
@@ -105,7 +105,7 @@ def test_that_after_transfer_correct_transaction_is_added(
 ):
     company = company_generator.create_company()
     worker = member_generator.create_member_entity()
-    company_worker_repository.add_worker_to_company(company, worker)
+    company_worker_repository.add_worker_to_company(company.id, worker.id)
     amount_to_transfer = Decimal(50)
     send_work_certificates_to_worker(
         SendWorkCertificatesToWorkerRequest(company.id, worker.id, amount_to_transfer)

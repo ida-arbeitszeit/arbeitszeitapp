@@ -19,11 +19,11 @@ class AuthenticatedCompanyTests(ViewTestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_company_gets_200_when_posting_correct_data(self) -> None:
-        worker = self.member_generator.create_member_entity()
-        self.company_worker_repository.add_worker_to_company(self.company, worker)
+        worker = self.member_generator.create_member()
+        self.company_worker_repository.add_worker_to_company(self.company.id, worker)
         response = self.client.post(
             self.url,
-            data=dict(member_id=str(worker.id), amount="10"),
+            data=dict(member_id=str(worker), amount="10"),
         )
         self.assertEqual(response.status_code, 200)
 
