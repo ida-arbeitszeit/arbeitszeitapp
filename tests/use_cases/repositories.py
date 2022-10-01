@@ -998,10 +998,7 @@ class FakePayoutFactorRepository:
         factor: PayoutFactor
 
         def __lt__(self, other: FakePayoutFactorRepository._PayoutFactorModel) -> bool:
-            return (
-                self.factor.calculation_date < other.factor.calculation_date
-                and self.factor.value < other.factor.value
-            )
+            return self.factor.calculation_date < other.factor.calculation_date
 
     @inject
     def __init__(self) -> None:

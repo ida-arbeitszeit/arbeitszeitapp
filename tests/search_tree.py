@@ -21,7 +21,7 @@ class SearchTree(Generic[T]):
             return
         node = self.root
         while True:
-            if node.value < value:
+            if value < node.value:
                 if node.left is None:
                     node.left = Node(value=value)
                     break
