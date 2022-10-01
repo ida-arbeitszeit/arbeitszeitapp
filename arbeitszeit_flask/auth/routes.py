@@ -30,17 +30,28 @@ from arbeitszeit_web.presenters.log_in_accountant_presenter import (
 )
 from arbeitszeit_web.presenters.log_in_company_presenter import LogInCompanyPresenter
 from arbeitszeit_web.presenters.log_in_member_presenter import LogInMemberPresenter
+from arbeitszeit.use_cases.show_latest_plans import ShowLatestPlans
+from arbeitszeit_web.presenters.show_latest_plans import ShowLatestPlansPresenter
 
 auth = Blueprint("auth", __name__, template_folder="templates", static_folder="static")
 
 
 @auth.route("/")
 @with_injection()
-def start(template_renderer: AnonymousUserTemplateRenderer, session: FlaskSession):
+def start(
+    template_renderer: AnonymousUserTemplateRenderer,
+    session: FlaskSession,
+    show_latest_plans: ShowLatestPlans,
+    show_latest_plans_presenter: ShowLatestPlansPresenter,
+):
     next_url = request.args.get("next")
     if next_url is not None:
         session.set_next_url(next_url)
-    return template_renderer.render_template("auth/start.html")
+    response = show_latest_plans.show_plans()
+    view_model = show_latest_plans_presenter.show_plans(response)
+    return template_renderer.render_template(
+        "auth/start.html", context=dict(view_model=view_model)
+    )
 
 
 @auth.route("/help")
