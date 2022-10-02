@@ -19,7 +19,7 @@ from arbeitszeit.entities import Plan
 
 @inject
 @dataclass
-class MemberRepository:
+class MemberRepositoryImpl:
     member_db_gateway: repositories.MemberRepository
     giro_office: GiroOffice
     plan_repository: repositories.PlanRepository

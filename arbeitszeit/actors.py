@@ -24,6 +24,11 @@ class GiroOffice(Protocol):
         ...
 
 
+class MemberRepository(Protocol):
+    def get_by_id(self, member_id: UUID) -> Optional[Member]:
+        ...
+
+
 @dataclass(frozen=True)
 class TransactionReceipt:
     rejection_reason: Optional[TransactionRejection]
