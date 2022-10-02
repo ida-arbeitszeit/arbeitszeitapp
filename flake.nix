@@ -23,6 +23,7 @@
           };
           checks = {
             arbeitszeit-python310 = pkgs.python310.pkgs.arbeitszeitapp;
+            arbeitszeit-python39 = pkgs.python39.pkgs.arbeitszeitapp;
           };
         });
       systemIndependent = {
@@ -41,11 +42,15 @@
           default = final: prev: {
             python310 =
               overridePython prev.python310 (import nix/pythonPackages.nix);
+            python39 =
+              overridePython prev.python39 (import nix/pythonPackages.nix);
           };
           # The development overrides provide adjustments to nixpkgs
           # that are only necessary for development.
           development = final: prev: {
             python310 = overridePython prev.python310
+              (import nix/developmentOverrides.nix);
+            python39 = overridePython prev.python39
               (import nix/developmentOverrides.nix);
           };
         };
