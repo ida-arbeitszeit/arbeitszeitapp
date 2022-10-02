@@ -4,11 +4,7 @@ from decimal import Decimal
 from arbeitszeit.entities import SocialAccounting
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases import ShowRAccountDetailsUseCase
-from tests.data_generators import (
-    CompanyGenerator,
-    MemberGenerator,
-    TransactionGenerator,
-)
+from tests.data_generators import TransactionGenerator
 
 from .base_test_case import BaseTestCase
 
@@ -16,8 +12,6 @@ from .base_test_case import BaseTestCase
 class UseCaseTester(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.member_generator = self.injector.get(MemberGenerator)
-        self.company_generator = self.injector.get(CompanyGenerator)
         self.show_r_account_details = self.injector.get(ShowRAccountDetailsUseCase)
         self.transaction_generator = self.injector.get(TransactionGenerator)
         self.social_accounting = self.injector.get(SocialAccounting)

@@ -5,7 +5,7 @@ from tests.data_generators import CompanyGenerator, MemberGenerator, PlanGenerat
 
 from .dependency_injection import get_dependency_injector
 
-T = TypeVar("T", covariant=True)
+T = TypeVar("T")
 
 
 # This class is a descriptor. Check
@@ -29,6 +29,9 @@ class _lazy_property(Generic[T]):
             instance = obj.injector.get(self.cls)
             cache[self._attribute_name] = instance
         return instance
+
+    def __set__(self, obj: Any, value: T) -> None:
+        raise Exception("This attribute is read-only")
 
 
 class BaseTestCase(TestCase):

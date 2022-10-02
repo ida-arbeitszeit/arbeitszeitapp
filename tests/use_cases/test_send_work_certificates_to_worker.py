@@ -5,7 +5,6 @@ from arbeitszeit.use_cases import (
     SendWorkCertificatesToWorkerRequest,
     SendWorkCertificatesToWorkerResponse,
 )
-from tests.data_generators import CompanyGenerator, MemberGenerator
 
 from .base_test_case import BaseTestCase
 from .repositories import (
@@ -18,8 +17,6 @@ from .repositories import (
 class UseCaseTester(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.company_generator = self.injector.get(CompanyGenerator)
-        self.member_generator = self.injector.get(MemberGenerator)
         self.company_worker_repository = self.injector.get(CompanyWorkerRepository)
         self.send_work_certificates_to_worker = self.injector.get(
             SendWorkCertificatesToWorker
