@@ -6,12 +6,12 @@ from typing import List
 from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.use_cases.show_latest_plans import ShowLatestPlans
+from arbeitszeit.use_cases.start_page import StartPageUseCase
 
 
 @inject
 @dataclass
-class ShowLatestPlansPresenter:
+class StartPagePresenter:
     @dataclass
     class Plan:
         prd_name: str
@@ -20,13 +20,13 @@ class ShowLatestPlansPresenter:
     @dataclass
     class ViewModel:
         has_plans: bool
-        plans: List[ShowLatestPlansPresenter.Plan]
+        plans: List[StartPagePresenter.Plan]
 
     datetime_service: DatetimeService
 
-    def show_plans(self, response: ShowLatestPlans.Response) -> ViewModel:
+    def show_start_page(self, response: StartPageUseCase.Response) -> ViewModel:
         if not response.latest_plans:
-            return ShowLatestPlansPresenter.ViewModel(has_plans=False, plans=[])
+            return StartPagePresenter.ViewModel(has_plans=False, plans=[])
         return self.ViewModel(
             has_plans=True,
             plans=[

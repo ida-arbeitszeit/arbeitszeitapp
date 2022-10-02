@@ -13,7 +13,7 @@ from arbeitszeit.repositories import PlanRepository
 
 @inject
 @dataclass
-class ShowLatestPlans:
+class StartPageUseCase:
     @dataclass
     class PlanDetail:
         activation_date: datetime
@@ -22,11 +22,11 @@ class ShowLatestPlans:
 
     @dataclass
     class Response:
-        latest_plans: List[ShowLatestPlans.PlanDetail]
+        latest_plans: List[StartPageUseCase.PlanDetail]
 
     plan_respository: PlanRepository
 
-    def show_plans(self) -> Response:
+    def show_start_page(self) -> Response:
         latest_plans = [
             self._get_plan(plan)
             for plan in self.plan_respository.get_three_latest_active_plans_ordered_by_activation_date()
