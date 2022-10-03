@@ -143,6 +143,9 @@ class GeneralUrlIndex:
             draft_uuid=draft_id,
         )
 
+    def get_my_plans_url(self) -> str:
+        return url_for("main_company.my_plans")
+
 
 class MemberUrlIndex:
     def get_renew_plan_url(self, plan_id: UUID) -> str:
