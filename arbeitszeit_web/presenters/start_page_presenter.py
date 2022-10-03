@@ -19,16 +19,16 @@ class StartPagePresenter:
 
     @dataclass
     class ViewModel:
-        has_plans: bool
+        show_plans: bool
         plans: List[StartPagePresenter.Plan]
 
     datetime_service: DatetimeService
 
     def show_start_page(self, response: StartPageUseCase.Response) -> ViewModel:
         if not response.latest_plans:
-            return StartPagePresenter.ViewModel(has_plans=False, plans=[])
+            return StartPagePresenter.ViewModel(show_plans=False, plans=[])
         return self.ViewModel(
-            has_plans=True,
+            show_plans=True,
             plans=[
                 self.Plan(
                     prd_name=plan.product_name,

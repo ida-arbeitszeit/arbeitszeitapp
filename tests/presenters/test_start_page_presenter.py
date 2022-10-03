@@ -4,7 +4,6 @@ from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.start_page import StartPageUseCase
 from arbeitszeit_web.presenters.start_page_presenter import StartPagePresenter
-from tests.datetime_service import FakeDatetimeService
 
 from .base_test_case import BaseTestCase
 
@@ -13,17 +12,16 @@ class PresenterTester(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.presenter = self.injector.get(StartPagePresenter)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
 
     def test_that_view_model_shows_that_there_are_no_plans_to_show(self) -> None:
         view_model = self.presenter.show_start_page(self.get_empty_response())
-        self.assertFalse(view_model.has_plans)
+        self.assertFalse(view_model.show_plans)
 
     def test_that_view_model_shows_that_there_are_plans_to_show(self) -> None:
         plan = self.get_latest_plan()
         response = self.get_response([plan])
         view_model = self.presenter.show_start_page(response)
-        self.assertTrue(view_model.has_plans)
+        self.assertTrue(view_model.show_plans)
 
     def test_that_view_model_shows_plans_activation_date_correctly_formatted(
         self,
@@ -43,7 +41,7 @@ class PresenterTester(BaseTestCase):
         product_name: str = None,
     ) -> StartPageUseCase.PlanDetail:
         if activation_date is None:
-            activation_date = self.datetime_service.now_minus_one_day()
+            activation_date = datetime(2022, 5, 1)
         if plan_id is None:
             plan_id = uuid4()
         if product_name is None:
