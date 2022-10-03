@@ -94,11 +94,11 @@ class UrlIndexTestImpl:
     def get_accountant_dashboard_url(self) -> str:
         return "accountant dashboard url"
 
-    def get_self_approve_plan_url(self, draft_id: UUID) -> str:
-        return f"self approve plan url for draft {draft_id}"
-
     def get_my_plans_url(self) -> str:
         return "my plans url"
+
+    def get_file_plan_url(self, draft_id: UUID) -> str:
+        return f"file plan url for draft {draft_id}"
 
 
 class RenewPlanUrlIndexTestImpl:

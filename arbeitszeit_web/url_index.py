@@ -95,10 +95,10 @@ class UrlIndex(Protocol):
     def get_accountant_dashboard_url(self) -> str:
         ...
 
-    def get_self_approve_plan_url(self, draft_id: UUID) -> str:
+    def get_my_plans_url(self) -> str:
         ...
 
-    def get_my_plans_url(self) -> str:
+    def get_file_plan_url(self, draft_id: UUID) -> str:
         ...
 
 

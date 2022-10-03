@@ -290,3 +290,11 @@ class GeneralUrlIndexTests(ViewTestCase):
         url = self.url_index.get_my_plans_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
+
+    def test_post_request_to_file_plan_url_leads_to_functional_url(
+        self,
+    ) -> None:
+        self.login_company()
+        url = self.url_index.get_file_plan_url(uuid4())
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 302)
