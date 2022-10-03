@@ -86,7 +86,6 @@ from arbeitszeit_web.presenters.delete_draft_presenter import DeleteDraftPresent
 from arbeitszeit_web.presenters.file_plan_with_accounting_presenter import (
     FilePlanWithAccountingPresenter,
 )
-from arbeitszeit_web.presenters.self_approve_plan import SelfApprovePlanPresenter
 from arbeitszeit_web.presenters.show_a_account_details_presenter import (
     ShowAAccountDetailsPresenter,
 )
@@ -279,22 +278,6 @@ def file_plan(
     response = use_case.file_plan_with_accounting(request)
     view_model = presenter.present_response(response)
     return redirect(view_model.redirect_url)
-
-
-@CompanyRoute("/company/self_approve_plan", methods=["POST"])
-@commit_changes
-def self_approve_plan(
-    self_approve_plan: use_cases.SelfApprovePlan,
-    presenter: SelfApprovePlanPresenter,
-):
-    "Self-approve a plan. Credit is granted automatically."
-
-    draft_uuid: UUID = UUID(request.args.get("draft_uuid"))
-    approval_response = self_approve_plan(
-        use_cases.SelfApprovePlan.Request(draft_id=draft_uuid)
-    )
-    presenter.present_response(approval_response)
-    return redirect(url_for("main_company.my_plans"))
 
 
 @CompanyRoute("/company/draft/<draft_id>", methods=["GET"])
