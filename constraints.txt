@@ -41,7 +41,7 @@ Mako==1.2.2
 MarkupSafe==2.1.1
 matplotlib==3.5.3
 mock==4.0.3
-mypy==0.971
+mypy==0.981
 mypy-extensions==0.4.3
 numpy==1.23.3
 olefile==0.46
