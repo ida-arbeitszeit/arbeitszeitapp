@@ -30,6 +30,7 @@ from arbeitszeit.use_cases import (
 )
 from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
 from arbeitszeit.use_cases.delete_draft import DeleteDraftUseCase
+from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
 from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
 from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
@@ -62,6 +63,9 @@ from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProduction
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
 from arbeitszeit_flask.views.transfer_to_worker_view import TransferToWorkerView
 from arbeitszeit_web.controllers.delete_draft_controller import DeleteDraftController
+from arbeitszeit_web.controllers.file_plan_with_accounting_controller import (
+    FilePlanWithAccountingController,
+)
 from arbeitszeit_web.create_draft import (
     CreateDraftController,
     CreateDraftPresenter,
@@ -79,6 +83,9 @@ from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_drafts_of_company import ListDraftsPresenter
 from arbeitszeit_web.list_plans import ListPlansPresenter
 from arbeitszeit_web.presenters.delete_draft_presenter import DeleteDraftPresenter
+from arbeitszeit_web.presenters.file_plan_with_accounting_presenter import (
+    FilePlanWithAccountingPresenter,
+)
 from arbeitszeit_web.presenters.self_approve_plan import SelfApprovePlanPresenter
 from arbeitszeit_web.presenters.show_a_account_details_presenter import (
     ShowAAccountDetailsPresenter,
@@ -251,6 +258,27 @@ def create_draft(
 
     elif request.method == "GET":
         return view.respond_to_get()
+
+
+@CompanyRoute("/company/file_plan/<draft_id>", methods=["POST"])
+@commit_changes
+def file_plan(
+    draft_id: str,
+    session: FlaskSession,
+    not_found_view: Http404View,
+    controller: FilePlanWithAccountingController,
+    use_case: FilePlanWithAccounting,
+    presenter: FilePlanWithAccountingPresenter,
+):
+    try:
+        request = controller.process_file_plan_with_accounting_request(
+            draft_id=draft_id, session=session
+        )
+    except controller.InvalidRequest:
+        return not_found_view.get_response()
+    response = use_case.file_plan_with_accounting(request)
+    view_model = presenter.present_response(response)
+    return redirect(view_model.redirect_url)
 
 
 @CompanyRoute("/company/self_approve_plan", methods=["POST"])
