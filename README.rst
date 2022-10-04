@@ -10,15 +10,13 @@
 Introduction
 ============
 
-The theory
+Theory
 -----------
 
 Companies do usually calculate with working hours internally, 
-but switch to money when dealing with other agents on the market. Planning and 
-working time calculation ends where the cooperation ends: on the market. 
-
-This app extends collective planning and working time calculation beyond the 
-company boundaries. In other words, it facilitates the creation of networks 
+but switch to money when dealing with other agents on the market. This app 
+extends collective planning and working time calculation beyond the 
+company boundaries. It facilitates the creation of networks 
 of cooperations that exchanges products on the basis of working time 
 without the need for money. 
 
