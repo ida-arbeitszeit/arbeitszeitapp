@@ -1,3 +1,8 @@
+|Generic badge|
+
+.. |Generic badge| image:: https://github.com/arbeitszeit/arbeitszeitapp/actions/workflows/python-app.yml/badge.svg
+   :target: https://github.com/arbeitszeit/arbeitszeitapp/actions/workflows/python-app.yml
+
 .. contents ::
 
 .. start-introduction-do-not-delete
