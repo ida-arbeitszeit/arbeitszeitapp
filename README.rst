@@ -176,7 +176,7 @@ the command::
 Translation
 -----------
 
-We use `Flask-Babel <https://flask-babel.tkte.ch/>`_ for translation.
+We use `Flask-Babel <https://python-babel.github.io/flask-babel/>`_ for translation.
 
 1) Add a new language:
 
