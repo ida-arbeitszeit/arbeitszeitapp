@@ -80,7 +80,7 @@ class AnwerCompanyWorkInviteTests(TestCase):
             )
         )
         repository = self.injector.get(CompanyWorkerRepository)  # type: ignore
-        self.assertIn(self.member, repository.get_company_workers(self.company))
+        self.assertIn(self.member, repository.get_company_workers(self.company.id))
         self.assertTrue(response.is_success)
 
     def test_accepting_an_invite_marks_response_as_accepted(self) -> None:
@@ -103,7 +103,7 @@ class AnwerCompanyWorkInviteTests(TestCase):
         )
         self.assertNotIn(
             self.member,
-            self.company_worker_repository.get_company_workers(self.company),
+            self.company_worker_repository.get_company_workers(self.company.id),
         )
         self.assertTrue(response.is_success)
 

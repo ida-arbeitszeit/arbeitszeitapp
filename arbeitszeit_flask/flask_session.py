@@ -1,15 +1,18 @@
 from dataclasses import dataclass
 from typing import Optional
+from urllib.parse import urlparse
 from uuid import UUID
 
-from flask import session
+from flask import request, session
 from flask_login import current_user, login_user, logout_user
+from is_safe_url import is_safe_url
 
 from arbeitszeit_flask.database.repositories import (
     AccountantRepository,
     CompanyRepository,
     MemberRepository,
 )
+from arbeitszeit_web.session import UserRole
 
 
 @dataclass
@@ -17,6 +20,18 @@ class FlaskSession:
     member_repository: MemberRepository
     company_repository: CompanyRepository
     accountant_repository: AccountantRepository
+
+    ROLES = {
+        "member": UserRole.member,
+        "company": UserRole.company,
+        "accountant": UserRole.accountant,
+    }
+
+    def get_user_role(self) -> Optional[UserRole]:
+        user_type = session.get("user_type")
+        if user_type is None:
+            return None
+        return self.ROLES.get(user_type)
 
     def is_logged_in_as_member(self) -> bool:
         return session.get("user_type") == "member"
@@ -51,3 +66,8 @@ class FlaskSession:
 
     def pop_next_url(self) -> Optional[str]:
         return session.pop("next", None)
+
+    def set_next_url(self, next_url: str) -> None:
+        hostname = urlparse(request.base_url).netloc
+        if is_safe_url(next_url, {hostname}):
+            session["next"] = next_url

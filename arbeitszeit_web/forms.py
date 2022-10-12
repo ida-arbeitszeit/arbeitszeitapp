@@ -1,23 +1,85 @@
+from decimal import Decimal
 from typing import Protocol
+
+from arbeitszeit_web.fields import FormField
 
 
 class LoginMemberForm(Protocol):
-    def add_email_error(self, error: str) -> None:
+    def email_field(self) -> FormField[str]:
         ...
 
-    def add_password_error(self, error: str) -> None:
+    def password_field(self) -> FormField[str]:
         ...
 
-    def get_remember_field(self) -> bool:
+    def remember_field(self) -> FormField[bool]:
         ...
 
 
 class LoginCompanyForm(Protocol):
-    def add_password_error(self, error: str) -> None:
+    def email_field(self) -> FormField[str]:
         ...
 
-    def add_email_error(self, error: str) -> None:
+    def password_field(self) -> FormField[str]:
         ...
 
-    def get_remember_field(self) -> bool:
+    def remember_field(self) -> FormField[bool]:
+        ...
+
+
+class LogInAccountantForm(Protocol):
+    def email_field(self) -> FormField[str]:
+        ...
+
+    def password_field(self) -> FormField[str]:
+        ...
+
+    def remember_field(self) -> FormField[bool]:
+        ...
+
+
+class DraftForm(Protocol):
+    def product_name_field(self) -> FormField[str]:
+        ...
+
+    def description_field(self) -> FormField[str]:
+        ...
+
+    def timeframe_field(self) -> FormField[int]:
+        ...
+
+    def unit_of_distribution_field(self) -> FormField[str]:
+        ...
+
+    def amount_field(self) -> FormField[int]:
+        ...
+
+    def means_cost_field(self) -> FormField[Decimal]:
+        ...
+
+    def resource_cost_field(self) -> FormField[Decimal]:
+        ...
+
+    def labour_cost_field(self) -> FormField[Decimal]:
+        ...
+
+    def is_public_service_field(self) -> FormField[bool]:
+        ...
+
+
+class PayConsumerProductForm(Protocol):
+    def amount_field(self) -> FormField[str]:
+        ...
+
+    def plan_id_field(self) -> FormField[str]:
+        ...
+
+
+class PayMeansOfProductionForm(Protocol):
+    def amount_field(self) -> FormField[str]:
+        ...
+
+    def plan_id_field(self) -> FormField[str]:
+        ...
+
+    def category_field(self) -> FormField[str]:
         ...

@@ -4,12 +4,12 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from itertools import accumulate
-from typing import List
+from typing import List, Optional, Union
 from uuid import UUID
 
 from injector import inject
 
-from arbeitszeit.entities import AccountTypes, Company, Transaction
+from arbeitszeit.entities import AccountTypes, Company, Member, Transaction
 from arbeitszeit.repositories import AccountRepository, CompanyRepository
 from arbeitszeit.transactions import TransactionTypes, UserAccountingService
 
@@ -18,11 +18,18 @@ from arbeitszeit.transactions import TransactionTypes, UserAccountingService
 @dataclass
 class ShowPRDAccountDetailsUseCase:
     @dataclass
+    class Buyer:
+        buyer_is_member: bool
+        buyer_id: UUID
+        buyer_name: str
+
+    @dataclass
     class TransactionInfo:
         transaction_type: TransactionTypes
         date: datetime
         transaction_volume: Decimal
         purpose: str
+        buyer: Optional[ShowPRDAccountDetailsUseCase.Buyer]
 
     @dataclass
     class PlotDetails:
@@ -76,11 +83,13 @@ class ShowPRDAccountDetailsUseCase:
             transaction,
             user_is_sender,
         )
+        buyer = self.accounting_service.get_buyer(transaction_type, transaction)
         return self.TransactionInfo(
-            transaction_type,
-            transaction.date,
-            transaction_volume,
-            transaction.purpose,
+            transaction_type=transaction_type,
+            date=transaction.date,
+            transaction_volume=transaction_volume,
+            purpose=transaction.purpose,
+            buyer=self._create_buyer_info(buyer),
         )
 
     def _get_plot_dates(self, transactions: List[TransactionInfo]) -> List[datetime]:
@@ -93,3 +102,14 @@ class ShowPRDAccountDetailsUseCase:
         volumes.reverse()
         volumes_cumsum = list(accumulate(volumes))
         return volumes_cumsum
+
+    def _create_buyer_info(
+        self, buyer: Union[Company, Member, None]
+    ) -> Optional[ShowPRDAccountDetailsUseCase.Buyer]:
+        if not buyer:
+            return None
+        return self.Buyer(
+            buyer_is_member=True if isinstance(buyer, Member) else False,
+            buyer_id=buyer.id,
+            buyer_name=buyer.get_name(),
+        )

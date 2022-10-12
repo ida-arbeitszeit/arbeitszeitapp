@@ -22,6 +22,7 @@ from arbeitszeit.entities import (
     CompanyWorkInvite,
     Cooperation,
     Member,
+    PayoutFactor,
     Plan,
     PlanDraft,
     ProductionCosts,
@@ -30,6 +31,7 @@ from arbeitszeit.entities import (
     SocialAccounting,
     Transaction,
 )
+from tests.search_tree import SearchTree
 
 
 @singleton
@@ -149,7 +151,7 @@ class TransactionRepository(interfaces.TransactionRepository):
 
 
 @singleton
-class CompanyWorkerRepository(interfaces.CompanyWorkerRepository):
+class CompanyWorkerRepository:
     @inject
     def __init__(
         self, company_repository: CompanyRepository, member_repository: MemberRepository
@@ -158,11 +160,11 @@ class CompanyWorkerRepository(interfaces.CompanyWorkerRepository):
         self.member_repository = member_repository
         self.company_workers: Dict[UUID, Set[UUID]] = defaultdict(lambda: set())
 
-    def add_worker_to_company(self, company: Company, worker: Member) -> None:
-        self.company_workers[company.id].add(worker.id)
+    def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
+        self.company_workers[company].add(worker)
 
-    def get_company_workers(self, company: Company) -> Iterable[Member]:
-        for member_id in self.company_workers[company.id]:
+    def get_company_workers(self, company: UUID) -> Iterable[Member]:
+        for member_id in self.company_workers[company]:
             member = self.member_repository.get_by_id(member_id)
             if member is not None:
                 yield member
@@ -296,6 +298,9 @@ class MemberRepository(interfaces.MemberRepository):
     def has_member_with_email(self, email: str) -> bool:
         return bool(self._get_member_by_email(email))
 
+    def is_member(self, id: UUID) -> bool:
+        return bool(self.get_by_id(id))
+
     def count_registered_members(self) -> int:
         return len(self.members)
 
@@ -374,6 +379,9 @@ class CompanyRepository(interfaces.CompanyRepository):
                 return company
         return None
 
+    def is_company(self, id: UUID) -> bool:
+        return bool(self.get_by_id(id))
+
     def count_registered_companies(self) -> int:
         return len(self.companies)
 
@@ -404,9 +412,35 @@ class PlanRepository(interfaces.PlanRepository):
     def __init__(
         self,
         company_repository: CompanyRepository,
+        draft_repository: PlanDraftRepository,
     ) -> None:
         self.plans: Dict[UUID, Plan] = {}
         self.company_repository = company_repository
+        self.draft_repository = draft_repository
+
+    def get_all_plans_without_completed_review(self) -> Iterable[UUID]:
+        for plan in self.plans.values():
+            if plan.approval_date is None:
+                yield plan.id
+
+    def create_plan_from_draft(self, draft_id: UUID) -> Optional[UUID]:
+        draft = self.draft_repository.get_by_id(draft_id)
+        assert draft
+        planner = self.company_repository.get_by_id(draft.planner.id)
+        assert planner
+        plan = self._create_plan(
+            id=draft.id,
+            planner=planner,
+            costs=draft.production_costs,
+            product_name=draft.product_name,
+            production_unit=draft.unit_of_distribution,
+            amount=draft.amount_produced,
+            description=draft.description,
+            timeframe_in_days=draft.timeframe,
+            is_public_service=draft.is_public_service,
+            creation_timestamp=draft.creation_date,
+        )
+        return plan.id
 
     def get_plan_by_id(self, id: UUID) -> Optional[Plan]:
         return self.plans.get(id)
@@ -675,6 +709,30 @@ class PlanDraftRepository(interfaces.PlanDraftRepository):
         self.drafts.append(draft)
         return draft
 
+    def update_draft(self, update: interfaces.PlanDraftRepository.UpdateDraft) -> None:
+        draft = self.get_by_id(update.id)
+        if draft is None:
+            return
+        if update.product_name is not None:
+            draft.product_name = update.product_name
+        if update.amount is not None:
+            draft.amount_produced = update.amount
+        if update.description is not None:
+            draft.description = update.description
+        if update.labour_cost is not None:
+            draft.production_costs.labour_cost = update.labour_cost
+        if update.means_cost is not None:
+            draft.production_costs.means_cost = update.means_cost
+        if update.resource_cost is not None:
+            draft.production_costs.resource_cost = update.resource_cost
+        if update.is_public_service is not None:
+            draft.is_public_service = update.is_public_service
+        if update.timeframe is not None:
+            draft.timeframe = update.timeframe
+        if update.unit_of_distribution is not None:
+            draft.unit_of_distribution = update.unit_of_distribution
+        return
+
     def get_by_id(self, id: UUID) -> Optional[PlanDraft]:
         for draft in self.drafts:
             if draft.id == id:
@@ -931,3 +989,34 @@ class FakeLanguageRepository:
 
     def get_available_language_codes(self) -> Iterable[str]:
         return self._language_codes
+
+
+@singleton
+class FakePayoutFactorRepository:
+    @dataclass
+    class _PayoutFactorModel:
+        factor: PayoutFactor
+
+        def __lt__(self, other: FakePayoutFactorRepository._PayoutFactorModel) -> bool:
+            return self.factor.calculation_date < other.factor.calculation_date
+
+    @inject
+    def __init__(self) -> None:
+        self._payout_factors: SearchTree[
+            FakePayoutFactorRepository._PayoutFactorModel
+        ] = SearchTree()
+
+    def store_payout_factor(self, timestamp: datetime, payout_factor: Decimal) -> None:
+        model = self._PayoutFactorModel(
+            PayoutFactor(calculation_date=timestamp, value=payout_factor)
+        )
+        self._payout_factors.insert(model)
+
+    def get_latest_payout_factor(
+        self,
+    ) -> Optional[PayoutFactor]:
+        model = self._payout_factors.last()
+        if model is None:
+            return None
+        else:
+            return model.factor

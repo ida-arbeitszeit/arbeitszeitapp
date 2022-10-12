@@ -5,6 +5,7 @@ from uuid import UUID
 
 from injector import inject
 
+from arbeitszeit.entities import Cooperation
 from arbeitszeit.repositories import (
     CompanyRepository,
     CooperationRepository,
@@ -31,6 +32,8 @@ class RequestCooperationResponse:
         plan_is_public_service = auto()
         requester_is_not_planner = auto()
 
+    coordinator_name: Optional[str]
+    coordinator_email: Optional[str]
     rejection_reason: Optional[RejectionReason]
 
     @property
@@ -50,15 +53,21 @@ class RequestCooperation:
         self, request: RequestCooperationRequest
     ) -> RequestCooperationResponse:
         try:
-            self._validate_request(request)
+            cooperation = self._validate_request(request)
         except RequestCooperationResponse.RejectionReason as reason:
-            return RequestCooperationResponse(rejection_reason=reason)
+            return RequestCooperationResponse(
+                coordinator_name=None, coordinator_email=None, rejection_reason=reason
+            )
         self.plan_cooperation_repository.set_requested_cooperation(
             request.plan_id, request.cooperation_id
         )
-        return RequestCooperationResponse(rejection_reason=None)
+        return RequestCooperationResponse(
+            coordinator_name=cooperation.coordinator.name,
+            coordinator_email=cooperation.coordinator.email,
+            rejection_reason=None,
+        )
 
-    def _validate_request(self, request: RequestCooperationRequest) -> None:
+    def _validate_request(self, request: RequestCooperationRequest) -> Cooperation:
         requester = self.company_repository.get_by_id(request.requester_id)
         plan = self.plan_repository.get_plan_by_id(request.plan_id)
         cooperation = self.cooperation_repository.get_by_id(request.cooperation_id)
@@ -76,3 +85,4 @@ class RequestCooperation:
             raise RequestCooperationResponse.RejectionReason.plan_is_public_service
         if requester != plan.planner:
             raise RequestCooperationResponse.RejectionReason.requester_is_not_planner
+        return cooperation

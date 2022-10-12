@@ -32,7 +32,7 @@ class AuthenticatedMemberTests(ViewTestCase):
         )
         self.assertEqual(response.status_code, 400)
 
-    def test_posting_with_valid_form_data_results_in_200(self) -> None:
+    def test_posting_with_valid_form_data_results_in_302(self) -> None:
         self.transaction_generator.create_transaction(
             receiving_account=self.member.account, amount_received=Decimal(100)
         )
@@ -44,7 +44,7 @@ class AuthenticatedMemberTests(ViewTestCase):
                 amount=2,
             ),
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
 
     def test_posting_with_nonexisting_plan_id_results_in_404(self) -> None:
         response = self.client.post(

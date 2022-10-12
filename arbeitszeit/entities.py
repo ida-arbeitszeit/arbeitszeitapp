@@ -119,6 +119,19 @@ class PlanDraft:
     timeframe: int
     is_public_service: bool
 
+    @property
+    def expected_sales_value(self) -> Decimal:
+        """
+        For productive plans, sales value should equal total cost.
+        Public services are not expected to sell,
+        they give away their product for free.
+        """
+        return (
+            self.production_costs.total_cost()
+            if not self.is_public_service
+            else Decimal(0)
+        )
+
 
 @dataclass
 class Plan:
@@ -212,3 +225,9 @@ class CompanyWorkInvite:
 class Accountant:
     email_address: str
     name: str
+
+
+@dataclass
+class PayoutFactor:
+    calculation_date: datetime
+    value: Decimal

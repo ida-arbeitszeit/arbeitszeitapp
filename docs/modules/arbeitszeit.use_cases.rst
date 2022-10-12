@@ -23,14 +23,6 @@ arbeitszeit.use\_cases.accept\_cooperation module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit.use\_cases.activate\_plan\_and\_grant\_credit module
-----------------------------------------------------------------
-
-.. automodule:: arbeitszeit.use_cases.activate_plan_and_grant_credit
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 arbeitszeit.use\_cases.answer\_company\_work\_invite module
 -----------------------------------------------------------
 
@@ -63,10 +55,26 @@ arbeitszeit.use\_cases.create\_plan\_draft module
    :undoc-members:
    :show-inheritance:
 
+arbeitszeit.use\_cases.delete\_draft module
+-------------------------------------------
+
+.. automodule:: arbeitszeit.use_cases.delete_draft
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit.use\_cases.deny\_cooperation module
 -----------------------------------------------
 
 .. automodule:: arbeitszeit.use_cases.deny_cooperation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit.use\_cases.edit\_draft module
+-----------------------------------------
+
+.. automodule:: arbeitszeit.use_cases.edit_draft
    :members:
    :undoc-members:
    :show-inheritance:
@@ -83,6 +91,14 @@ arbeitszeit.use\_cases.get\_accountant\_profile\_info module
 ------------------------------------------------------------
 
 .. automodule:: arbeitszeit.use_cases.get_accountant_profile_info
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit.use\_cases.get\_company\_dashboard module
+-----------------------------------------------------
+
+.. automodule:: arbeitszeit.use_cases.get_company_dashboard
    :members:
    :undoc-members:
    :show-inheritance:
@@ -115,14 +131,6 @@ arbeitszeit.use\_cases.get\_draft\_summary module
 -------------------------------------------------
 
 .. automodule:: arbeitszeit.use_cases.get_draft_summary
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-arbeitszeit.use\_cases.get\_latest\_activated\_plans module
------------------------------------------------------------
-
-.. automodule:: arbeitszeit.use_cases.get_latest_activated_plans
    :members:
    :undoc-members:
    :show-inheritance:

@@ -3,7 +3,6 @@ from .accept_cooperation import (
     AcceptCooperationRequest,
     AcceptCooperationResponse,
 )
-from .activate_plan_and_grant_credit import ActivatePlanAndGrantCredit
 from .answer_company_work_invite import (
     AnswerCompanyWorkInvite,
     AnswerCompanyWorkInviteRequest,
@@ -136,7 +135,6 @@ __all__ = [
     "AcceptCooperation",
     "AcceptCooperationRequest",
     "AcceptCooperationResponse",
-    "ActivatePlanAndGrantCredit",
     "AnswerCompanyWorkInvite",
     "AnswerCompanyWorkInviteRequest",
     "AnswerCompanyWorkInviteResponse",

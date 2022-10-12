@@ -70,10 +70,7 @@ class Company(UserMixin, db.Model):
     drafts = db.relationship("PlanDraft", lazy="dynamic")
 
     def __repr__(self):
-        return "<Company(email='%s', name='%s')>" % (
-            self.email,
-            self.name,
-        )
+        return "<Company(name='%s')>" % (self.name,)
 
 
 class Accountant(UserMixin, db.Model):
@@ -112,8 +109,6 @@ class Plan(UserMixin, db.Model):
     description = db.Column(db.String(5000), nullable=False)
     timeframe = db.Column(db.Numeric(), nullable=False)
     is_public_service = db.Column(db.Boolean, nullable=False, default=False)
-    approval_date = db.Column(db.DateTime, nullable=True, default=None)
-    approval_reason = db.Column(db.String(1000), nullable=True, default=None)
     is_active = db.Column(db.Boolean, nullable=False, default=False)
     activation_date = db.Column(db.DateTime, nullable=True)
     expired = db.Column(db.Boolean, nullable=False, default=False)
@@ -126,6 +121,18 @@ class Plan(UserMixin, db.Model):
     )
     cooperation = db.Column(db.String, db.ForeignKey("cooperation.id"), nullable=True)
     hidden_by_user = db.Column(db.Boolean, nullable=False, default=False)
+    review = db.relationship("PlanReview", uselist=False, back_populates="plan")
+
+
+class PlanReview(db.Model):
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
+    approval_date = db.Column(db.DateTime, nullable=True, default=None)
+    approval_reason = db.Column(db.String(1000), nullable=True, default=None)
+    plan_id = db.Column(db.String, db.ForeignKey("plan.id"), nullable=False)
+    plan = db.relationship("Plan", back_populates="review")
+
+    def __repr__(self) -> str:
+        return f"PlanReview(id={self.id!r}, plan_id={self.plan_id!r}, approval_date={self.approval_date!r}, approval_reason={self.approval_reason!r})"
 
 
 class AccountTypes(Enum):
@@ -203,3 +210,9 @@ class Cooperation(db.Model):
     plans = db.relationship(
         "Plan", foreign_keys="Plan.cooperation", lazy="dynamic", backref="coop"
     )
+
+
+class PayoutFactor(UserMixin, db.Model):
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
+    timestamp = db.Column(db.DateTime, nullable=False)
+    payout_factor = db.Column(db.Numeric(), nullable=False)

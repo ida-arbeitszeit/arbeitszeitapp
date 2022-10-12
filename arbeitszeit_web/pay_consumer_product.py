@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Protocol, Union
 from uuid import UUID
 
 from injector import inject
@@ -8,6 +7,7 @@ from arbeitszeit.use_cases.pay_consumer_product import (
     PayConsumerProductResponse,
     RejectionReason,
 )
+from arbeitszeit_web.forms import PayConsumerProductForm
 from arbeitszeit_web.translator import Translator
 
 from .notification import Notifier
@@ -29,44 +29,37 @@ class PayConsumerProductRequestImpl:
         return self.amount
 
 
-class PayConsumerProductForm(Protocol):
-    def get_plan_id_field(self) -> str:
-        ...
-
-    def get_amount_field(self) -> str:
-        ...
-
-
 @inject
 @dataclass
 class PayConsumerProductController:
-    @dataclass
-    class MalformedInputData:
-        field: str
-        message: str
+    class FormError(Exception):
+        pass
 
     translator: Translator
 
     def import_form_data(
         self, current_user: UUID, form: PayConsumerProductForm
-    ) -> Union[PayConsumerProductRequestImpl, MalformedInputData]:
+    ) -> PayConsumerProductRequestImpl:
         try:
-            uuid = UUID(form.get_plan_id_field())
+            plan_id = UUID(form.plan_id_field().get_value())
         except ValueError:
-            return self.MalformedInputData(
-                "plan_id", self.translator.gettext("Plan ID is invalid.")
+            form.plan_id_field().attach_error(
+                self.translator.gettext("Plan ID is invalid.")
             )
+            raise self.FormError()
         try:
-            amount = int(form.get_amount_field())
+            amount = int(form.amount_field().get_value())
+            if amount <= 0:
+                form.amount_field().attach_error(
+                    self.translator.gettext("Must be a number larger than zero.")
+                )
+                raise self.FormError()
         except ValueError:
-            return self.MalformedInputData(
-                "amount", self.translator.gettext("This is not an integer.")
+            form.amount_field().attach_error(
+                self.translator.gettext("This is not an integer.")
             )
-        if amount < 0:
-            return self.MalformedInputData(
-                "amount", self.translator.gettext("Negative numbers are not allowed.")
-            )
-        return PayConsumerProductRequestImpl(current_user, uuid, amount)
+            raise self.FormError()
+        return PayConsumerProductRequestImpl(current_user, plan_id, amount)
 
 
 @inject
@@ -101,6 +94,13 @@ class PayConsumerProductPresenter:
                 self.translator.gettext("You do not have enough work certificates.")
             )
             return PayConsumerProductViewModel(status_code=406)
+        elif use_case_response.rejection_reason == RejectionReason.buyer_does_not_exist:
+            self.user_notifier.display_warning(
+                self.translator.gettext(
+                    "Failed to pay for consumer product. Are you logged in as a member?"
+                )
+            )
+            return PayConsumerProductViewModel(status_code=404)
         else:
             self.user_notifier.display_warning(
                 self.translator.gettext(

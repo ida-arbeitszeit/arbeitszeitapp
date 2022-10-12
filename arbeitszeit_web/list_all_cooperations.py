@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 from typing import List
 
-from arbeitszeit.use_cases import ListAllCooperationsResponse
+from injector import inject
 
-from .url_index import CoopSummaryUrlIndex
+from arbeitszeit.use_cases import ListAllCooperationsResponse
+from arbeitszeit_web.session import Session
+from arbeitszeit_web.url_index import UrlIndex
 
 
 @dataclass
@@ -20,9 +22,11 @@ class ListAllCooperationsViewModel:
     show_results: bool
 
 
+@inject
 @dataclass
 class ListAllCooperationsPresenter:
-    coop_url_index: CoopSummaryUrlIndex
+    url_index: UrlIndex
+    session: Session
 
     def present(
         self, response: ListAllCooperationsResponse
@@ -32,7 +36,9 @@ class ListAllCooperationsPresenter:
                 id=str(coop.id),
                 name=coop.name,
                 plan_count=str(coop.plan_count),
-                coop_summary_url=self.coop_url_index.get_coop_summary_url(coop.id),
+                coop_summary_url=self.url_index.get_coop_summary_url(
+                    user_role=self.session.get_user_role(), coop_id=coop.id
+                ),
             )
             for coop in response.cooperations
         ]

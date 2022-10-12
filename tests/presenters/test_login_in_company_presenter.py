@@ -4,19 +4,20 @@ from unittest import TestCase
 
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit_web.presenters.log_in_company_presenter import LogInCompanyPresenter
+from arbeitszeit_web.session import UserRole
 from tests.session import FakeSession
 from tests.translator import FakeTranslator
 
+from ..forms import LoginForm
 from .dependency_injection import get_dependency_injector
-from .forms import LoginForm
-from .url_index import CompanyUrlIndexImpl
+from .url_index import UrlIndexTestImpl
 
 
 class PresenterTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.session = self.injector.get(FakeSession)
-        self.company_url_index = self.injector.get(CompanyUrlIndexImpl)
+        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.presenter = self.injector.get(LogInCompanyPresenter)
         self.translator = self.injector.get(FakeTranslator)
         self.form = LoginForm()
@@ -36,7 +37,7 @@ class PresenterTests(TestCase):
         self.present_login_process(response)
         login_attempt = self.session.get_most_recent_login()
         assert login_attempt
-        self.assertEqual(login_attempt.user_role, FakeSession.UserRole.company)
+        self.assertEqual(login_attempt.user_role, UserRole.company)
 
     def test_that_email_is_correct_with_example_email(self) -> None:
         expected_email = "karl@cp.org"
@@ -59,7 +60,7 @@ class PresenterTests(TestCase):
         view_model = self.present_login_process(response)
         self.assertEqual(
             view_model.redirect_url,
-            self.company_url_index.get_company_dashboard_url(),
+            self.url_index.get_company_dashboard_url(),
         )
 
     def test_do_not_get_redirected_if_login_fails(self) -> None:
@@ -74,14 +75,14 @@ class PresenterTests(TestCase):
             reason=LogInCompanyUseCase.RejectionReason.invalid_password
         )
         self.present_login_process(response)
-        self.assertTrue(self.form.password_errors)
+        self.assertTrue(self.form.password_field().errors)
 
     def test_that_no_error_is_rendered_to_password_field_if_login_was_successful(
         self,
     ) -> None:
         response = self.create_success_response()
         self.present_login_process(response)
-        self.assertFalse(self.form.password_errors)
+        self.assertFalse(self.form.password_field().errors)
 
     def test_that_no_error_is_rendered_to_password_field_if_rejection_reason_is_invalid_email_address(
         self,
@@ -90,7 +91,7 @@ class PresenterTests(TestCase):
             reason=LogInCompanyUseCase.RejectionReason.invalid_email_address
         )
         self.present_login_process(response)
-        self.assertFalse(self.form.password_errors)
+        self.assertFalse(self.form.password_field().errors)
 
     def test_correct_error_message_for_incorrect_password(self) -> None:
         response = self.create_failure_response(
@@ -98,7 +99,7 @@ class PresenterTests(TestCase):
         )
         self.present_login_process(response)
         self.assertEqual(
-            self.form.password_errors[-1],
+            self.form.password_field().errors[-1],
             self.translator.gettext("Password is incorrect"),
         )
 
@@ -109,14 +110,14 @@ class PresenterTests(TestCase):
             reason=LogInCompanyUseCase.RejectionReason.invalid_email_address
         )
         self.present_login_process(response)
-        self.assertTrue(self.form.email_errors)
+        self.assertTrue(self.form.email_field().errors)
 
     def test_that_no_error_message_is_rendered_to_email_field_if_login_was_successful(
         self,
     ) -> None:
         response = self.create_success_response()
         self.present_login_process(response)
-        self.assertFalse(self.form.email_errors)
+        self.assertFalse(self.form.email_field().errors)
 
     def test_that_no_error_message_is_rendered_to_email_field_if_password_is_incorrect(
         self,
@@ -125,7 +126,7 @@ class PresenterTests(TestCase):
             reason=LogInCompanyUseCase.RejectionReason.invalid_password
         )
         self.present_login_process(response)
-        self.assertFalse(self.form.email_errors)
+        self.assertFalse(self.form.email_field().errors)
 
     def test_correct_error_message_for_incorrect_email_address(self) -> None:
         response = self.create_failure_response(
@@ -133,7 +134,7 @@ class PresenterTests(TestCase):
         )
         self.present_login_process(response)
         self.assertEqual(
-            self.form.email_errors[-1],
+            self.form.email_field().errors[-1],
             self.translator.gettext(
                 "Email address is not correct. Are you already signed up?"
             ),
@@ -150,8 +151,8 @@ class PresenterTests(TestCase):
 
     def test_that_remember_field_from_form_is_respected(self) -> None:
         for expected_remember_state in [True, False]:
+            self.form = LoginForm(remember_value=expected_remember_state)
             with self.subTest():
-                self.form.set_remember_field(expected_remember_state)
                 response = self.create_success_response()
                 self.presenter.present_login_process(response, self.form)
                 login_attempt = self.session.get_most_recent_login()

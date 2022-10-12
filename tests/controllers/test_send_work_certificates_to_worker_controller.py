@@ -10,14 +10,15 @@ from arbeitszeit_web.controllers.send_work_certificates_to_worker_controller imp
 from tests.request import FakeRequest
 from tests.session import FakeSession
 
+from .dependency_injection import get_dependency_injector
+
 
 class SendCertificatesControllerTests(TestCase):
     def setUp(self) -> None:
-        self.session = FakeSession()
-        self.request = FakeRequest()
-        self.controller = SendWorkCertificatesToWorkerController(
-            session=self.session, request=self.request
-        )
+        self.injector = get_dependency_injector()
+        self.session = self.injector.get(FakeSession)
+        self.request = self.injector.get(FakeRequest)
+        self.controller = self.injector.get(SendWorkCertificatesToWorkerController)
 
     def test_when_company_is_not_authenticated_then_we_get_the_adequate_controller_rejection(
         self,

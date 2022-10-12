@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Union
 from uuid import uuid4
@@ -50,9 +50,8 @@ def test_avg_timeframe_of_active_plans_is_calculated_correctly(
     plan_generator: PlanGenerator,
 ):
     assert plan_repository.avg_timeframe_of_active_plans() == 0
-    plan_generator.create_plan(activation_date=datetime.min, timeframe=5)
-    plan_generator.create_plan(activation_date=datetime.min, timeframe=3)
-    plan_generator.create_plan(activation_date=None, timeframe=20)
+    plan_generator.create_plan(timeframe=5)
+    plan_generator.create_plan(timeframe=3)
     assert plan_repository.avg_timeframe_of_active_plans() == 4
 
 
@@ -197,18 +196,13 @@ def test_that_all_plans_for_a_company_are_returned_in_descending_order(
     datetime_service: FakeDatetimeService,
 ) -> None:
     company = company_generator.create_company()
-    third = plan_generator.create_plan(
-        planner=company,
-        plan_creation_date=datetime_service.now_minus_one_day(),
-    )
-    second = plan_generator.create_plan(
-        planner=company,
-        plan_creation_date=datetime_service.now_minus_two_days(),
-    )
-    first = plan_generator.create_plan(
-        planner=company,
-        plan_creation_date=datetime_service.now_minus_ten_days(),
-    )
+    datetime_service.freeze_time(datetime(2000, 1, 1))
+    third = plan_generator.create_plan(planner=company)
+    datetime_service.freeze_time(datetime_service.now() - timedelta(days=1))
+    second = plan_generator.create_plan(planner=company)
+    datetime_service.freeze_time(datetime_service.now() - timedelta(days=9))
+    first = plan_generator.create_plan(planner=company)
+    datetime_service.freeze_time(datetime(2000, 1, 2))
     returned_plans = list(
         repository.get_all_plans_for_company_descending(company_id=company.id)
     )
@@ -224,8 +218,7 @@ def test_that_all_active_plan_for_a_company_are_returned(
     company_generator: CompanyGenerator,
 ) -> None:
     company = company_generator.create_company()
-    plan_generator.create_plan(planner=company, activation_date=datetime.min)
-    plan_generator.create_plan(planner=company, activation_date=datetime.min)
+    plan_generator.create_plan(planner=company)
     plan_generator.create_plan(planner=company)
     returned_plans = list(
         repository.get_all_active_plans_for_company(company_id=company.id)
@@ -392,3 +385,28 @@ def test_that_correct_id_of_planning_company_gets_returned(
     expected_plan = plan_generator.create_plan()
     plan_id = repository.get_planner_id(expected_plan.id)
     assert plan_id == expected_plan.planner.id
+
+
+@injection_test
+def test_cannot_create_plan_from_non_existing_draft(
+    repository: PlanRepository,
+) -> None:
+    assert repository.create_plan_from_draft(uuid4()) is None
+
+
+@injection_test
+def test_can_create_plan_from_exiting_draft(
+    repository: PlanRepository, plan_generator: PlanGenerator
+) -> None:
+    draft = plan_generator.draft_plan()
+    assert repository.create_plan_from_draft(draft.id) is not None
+
+
+@injection_test
+def test_query_plan_after_it_was_created_from_draft(
+    repository: PlanRepository, plan_generator: PlanGenerator
+) -> None:
+    draft = plan_generator.draft_plan()
+    plan_id = repository.create_plan_from_draft(draft.id)
+    assert plan_id
+    assert repository.get_plan_by_id(plan_id) is not None

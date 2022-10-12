@@ -35,7 +35,7 @@ class ListWorkers:
         company = self.company_repository.get_by_id(request.company)
         if company is None:
             return ListWorkersResponse(workers=[])
-        members = self.company_worker_repository.get_company_workers(company)
+        members = self.company_worker_repository.get_company_workers(company.id)
         return ListWorkersResponse(
             workers=[self._create_worker_response_model(member) for member in members]
         )

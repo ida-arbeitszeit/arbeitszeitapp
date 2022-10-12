@@ -20,7 +20,7 @@
 
     <div class="table-container">
         {% if show_results %}
-        <table class="table is-fullwidth">
+        <table class="table has-text-left mx-auto">
             <thead>
                 <tr>
                     <th>{{ gettext("Date") }}</th>
@@ -37,10 +37,16 @@
                     <td>{{ row.product_name }}</td>
                     <td>{% for paragraph in row.description %}{{ paragraph }}<br>{% endfor %}</td>
                     <td>
-                        <a href="{{ url_for('main_company.create_draft', saved_draft_id=row.id) }}"><i
-                                class="fas fa-edit"></i></a>
+                        <a href="{{ row.details_url }}">
+                            <i class="fas fa-edit"></i>
+                        </a>
                     </td>
-                    <td>X</td>
+                    <td>
+                      <form method="post" action="{{ row.delete_url }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="button is-ghost" type="submit"><i class="fas fa-trash"></i></button>
+                      </form>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>

@@ -6,10 +6,13 @@ from unittest import TestCase
 
 from arbeitszeit_web.register_member import RegisterMemberController
 
+from .dependency_injection import get_dependency_injector
+
 
 class RegisterMemberControllerTests(TestCase):
     def setUp(self) -> None:
-        self.controller = RegisterMemberController()
+        self.injector = get_dependency_injector()
+        self.controller = self.injector.get(RegisterMemberController)
 
     def test_that_strings_are_taken_as_literal_strings_in_request(
         self,

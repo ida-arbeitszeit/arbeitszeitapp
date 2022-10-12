@@ -44,24 +44,6 @@ def test_error_is_raised_when_cooperation_does_not_exist(
 
 
 @injection_test
-def test_error_is_raised_when_plan_is_not_active(
-    accept_cooperation: AcceptCooperation,
-    cooperation_generator: CooperationGenerator,
-    plan_generator: PlanGenerator,
-    company_generator: CompanyGenerator,
-):
-    requester = company_generator.create_company()
-    cooperation = cooperation_generator.create_cooperation(coordinator=requester)
-    plan = plan_generator.create_plan(activation_date=None)
-    request = AcceptCooperationRequest(
-        requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation.id
-    )
-    response = accept_cooperation(request)
-    assert response.is_rejected
-    assert response.rejection_reason == response.RejectionReason.plan_inactive
-
-
-@injection_test
 def test_error_is_raised_when_plan_is_already_in_cooperation(
     accept_cooperation: AcceptCooperation,
     cooperation_generator: CooperationGenerator,

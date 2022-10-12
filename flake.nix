@@ -2,11 +2,10 @@
   description = "Arbeitszeitapp";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    nixpkgs-22_05.url = "github:NixOS/nixpkgs/nixos-22.05";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-22_05, flake-utils }:
+  outputs = { self, nixpkgs, flake-utils }:
     let
       supportedSystems = [ "x86_64-linux" ];
       systemDependent = flake-utils.lib.eachSystem supportedSystems (system:
@@ -15,40 +14,44 @@
             inherit system;
             overlays = [ self.overlays.default ];
           };
-          pkgs_22_05 = import nixpkgs-22_05 {
-            inherit system;
-            overlays = [ self.overlays.default ];
-          };
-          developmentPkgs = import nixpkgs {
-            inherit system;
-            overlays = [ self.overlays.development ];
-          };
+          developmentPkgs = pkgs.extend self.overlays.development;
         in {
           devShells.default = developmentPkgs.callPackage nix/devShell.nix { };
           packages = {
             default = pkgs.python3.pkgs.arbeitszeitapp;
             inherit (pkgs) python3;
-            arbeitszeitapp-docker-image = pkgs.arbeitszeitapp-docker-image;
           };
           checks = {
-            arbeitszeitapp-22_05 = pkgs_22_05.python3.pkgs.arbeitszeitapp;
+            arbeitszeit-python310 = pkgs.python310.pkgs.arbeitszeitapp;
+            arbeitszeit-python39 = pkgs.python39.pkgs.arbeitszeitapp;
           };
         });
       systemIndependent = {
-        overlays = {
+        overlays = let
+          # Unfortunately python.override does not compose. That's why
+          # we use overrideScope.  There is an open issue on github
+          # about this topic:
+          # https://github.com/NixOS/nixpkgs/issues/44426
+          overridePython = pythonSelf: overrides:
+            pythonSelf // {
+              pkgs = pythonSelf.pkgs.overrideScope overrides;
+            };
+        in {
+          # The default overlay provides the arbeitszeitapp to
+          # nixpkgs.
           default = final: prev: {
-            python3 = prev.python3.override {
-              packageOverrides = import nix/pythonPackages.nix;
-            };
-            arbeitszeitapp-docker-image =
-              final.callPackage nix/docker.nix { python = final.python3; };
+            python310 =
+              overridePython prev.python310 (import nix/pythonPackages.nix);
+            python39 =
+              overridePython prev.python39 (import nix/pythonPackages.nix);
           };
+          # The development overrides provide adjustments to nixpkgs
+          # that are only necessary for development.
           development = final: prev: {
-            python3 = prev.python3.override {
-              packageOverrides = with nixpkgs.lib;
-                composeExtensions (import nix/developmentOverrides.nix)
-                (import nix/pythonPackages.nix);
-            };
+            python310 = overridePython prev.python310
+              (import nix/developmentOverrides.nix);
+            python39 = overridePython prev.python39
+              (import nix/developmentOverrides.nix);
           };
         };
       };

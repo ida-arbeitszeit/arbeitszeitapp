@@ -53,21 +53,6 @@ class RequestCooperationTests(TestCase):
             == RequestCooperationResponse.RejectionReason.cooperation_not_found
         )
 
-    def test_error_is_raised_when_plan_is_inactive(self) -> None:
-        cooperation = self.coop_generator.create_cooperation()
-        plan = self.plan_generator.create_plan()
-        request = RequestCooperationRequest(
-            requester_id=self.requester.id,
-            plan_id=plan.id,
-            cooperation_id=cooperation.id,
-        )
-        response = self.request_cooperation(request)
-        assert response.is_rejected
-        assert (
-            response.rejection_reason
-            == RequestCooperationResponse.RejectionReason.plan_inactive
-        )
-
     def test_error_is_raised_when_plan_has_already_cooperation(self) -> None:
         cooperation1 = self.coop_generator.create_cooperation()
         cooperation2 = self.coop_generator.create_cooperation(
@@ -149,6 +134,19 @@ class RequestCooperationTests(TestCase):
         )
         response = self.request_cooperation(request)
         assert not response.is_rejected
+
+    def test_successful_cooperation_request_returns_coordinator_data(self) -> None:
+        requester = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(
+            activation_date=self.datetime_service.now(), planner=requester
+        )
+        cooperation = self.coop_generator.create_cooperation(coordinator=requester)
+        request = RequestCooperationRequest(
+            requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation.id
+        )
+        response = self.request_cooperation(request)
+        assert response.coordinator_name
+        assert response.coordinator_email
 
     def test_succesfully_requesting_cooperation_makes_it_possible_to_accept_cooperation(
         self,

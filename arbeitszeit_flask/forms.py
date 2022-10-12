@@ -1,4 +1,5 @@
 from decimal import Decimal
+from typing import Generic, TypeVar
 
 from wtforms import (
     BooleanField,
@@ -14,6 +15,28 @@ from wtforms import (
 )
 
 from .translator import FlaskTranslator
+
+T = TypeVar("T")
+
+
+class WtFormField(Generic[T]):
+    def __init__(self, form: Form, field_name: str) -> None:
+        self._form = form
+        self._field_name = field_name
+
+    def get_value(self) -> T:
+        return self._form.data[self._field_name]
+
+    def attach_error(self, message: str) -> None:
+        self._field.errors.append(message)
+
+    def set_value(self, value: T) -> None:
+        self._field.data = value
+
+    @property
+    def _field(self):
+        return getattr(self._form, self._field_name)
+
 
 trans = FlaskTranslator()
 
@@ -163,6 +186,7 @@ class LoginForm(Form):
             )
         ],
     )
+
     password = PasswordField(
         trans.lazy_gettext("Password"),
         validators=[
@@ -171,33 +195,37 @@ class LoginForm(Form):
     )
     remember = BooleanField(trans.lazy_gettext("Remember login?"))
 
-    def add_email_error(self, error: str) -> None:
-        self.email.errors.append(error)
+    def email_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="email")
 
-    def add_password_error(self, error: str) -> None:
-        self.password.errors.append(error)
+    def password_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="password")
 
-    def get_remember_field(self) -> bool:
-        return bool(self.data["remember"])
+    def remember_field(self) -> WtFormField[bool]:
+        return WtFormField(form=self, field_name="remember")
 
 
 class PayConsumerProductForm(Form):
     plan_id = StringField(
         trans.lazy_gettext("Plan ID"),
         render_kw={"placeholder": trans.lazy_gettext("Plan ID")},
-        validators=[validators.InputRequired()],
+        validators=[
+            validators.InputRequired(),
+        ],
     )
     amount = StringField(
         trans.lazy_gettext("Amount"),
         render_kw={"placeholder": trans.lazy_gettext("Amount")},
-        validators=[validators.InputRequired()],
+        validators=[
+            validators.InputRequired(),
+        ],
     )
 
-    def get_amount_field(self) -> str:
-        return self.data["amount"]
+    def amount_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="amount")
 
-    def get_plan_id_field(self) -> str:
-        return self.data["plan_id"].strip()
+    def plan_id_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="plan_id")
 
 
 class CompanySearchForm(Form):
@@ -248,47 +276,37 @@ class CreateDraftForm(Form):
     costs_a = DecimalField(
         validators=[validators.InputRequired(), validators.NumberRange(min=0)]
     )
-    productive_or_public = RadioField(
-        choices=[
-            ("productive", trans.lazy_gettext("Productive")),
-            (
-                "public",
-                trans.lazy_gettext("Public"),
-            ),
-        ],
-        validators=[validators.InputRequired()],
+    productive_or_public = BooleanField(
+        trans.lazy_gettext("This plan is a public service")
     )
     action = StringField()
 
-    def get_prd_name(self) -> str:
-        return self.data["prd_name"]
+    def product_name_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="prd_name")
 
-    def get_description(self) -> str:
-        return self.data["description"]
+    def description_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="description")
 
-    def get_timeframe(self) -> int:
-        return self.data["timeframe"]
+    def timeframe_field(self) -> WtFormField[int]:
+        return WtFormField(form=self, field_name="timeframe")
 
-    def get_prd_unit(self) -> str:
-        return self.data["prd_unit"]
+    def unit_of_distribution_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="prd_unit")
 
-    def get_prd_amount(self) -> int:
-        return self.data["prd_amount"]
+    def amount_field(self) -> WtFormField[int]:
+        return WtFormField(form=self, field_name="prd_amount")
 
-    def get_costs_p(self) -> Decimal:
-        return self.data["costs_p"]
+    def means_cost_field(self) -> WtFormField[Decimal]:
+        return WtFormField(form=self, field_name="costs_p")
 
-    def get_costs_r(self) -> Decimal:
-        return self.data["costs_r"]
+    def resource_cost_field(self) -> WtFormField[Decimal]:
+        return WtFormField(form=self, field_name="costs_r")
 
-    def get_costs_a(self) -> Decimal:
-        return self.data["costs_a"]
+    def labour_cost_field(self) -> WtFormField[Decimal]:
+        return WtFormField(form=self, field_name="costs_a")
 
-    def get_productive_or_public(self) -> str:
-        return self.data["productive_or_public"]
-
-    def get_action(self) -> str:
-        return self.data["action"]
+    def is_public_service_field(self) -> WtFormField[bool]:
+        return WtFormField(form=self, field_name="productive_or_public")
 
 
 class InviteWorkerToCompanyForm(Form):
@@ -336,33 +354,36 @@ class PayMeansOfProductionForm(Form):
         render_kw={"placeholder": trans.lazy_gettext("Plan ID")},
         validators=[
             validators.InputRequired(),
-            validators.UUID(message=error_msgs["uuid"]),
         ],
     )
-    amount = IntegerField(
+    amount = StringField(
         render_kw={"placeholder": trans.lazy_gettext("Amount")},
         validators=[
             validators.InputRequired(),
-            validators.NumberRange(min=0, message=error_msgs["num_range_min_0"]),
         ],
     )
     choices = [
+        ("", ""),
         ("Fixed", trans.lazy_gettext(trans.lazy_gettext("Fixed means of production"))),
         (
             "Liquid",
             trans.lazy_gettext("Liquid means of production"),
         ),
     ]
-    category = SelectField(choices=choices, validators=[validators.DataRequired()])
+    category = SelectField(
+        trans.lazy_gettext("Type of payment"),
+        choices=choices,
+        validators=[validators.DataRequired()],
+    )
 
-    def get_amount_field(self) -> int:
-        return self.data["amount"]
+    def amount_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="amount")
 
-    def get_plan_id_field(self) -> str:
-        return self.data["plan_id"].strip()
+    def plan_id_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="plan_id")
 
-    def get_category_field(self) -> str:
-        return self.data["category"]
+    def category_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="category")
 
 
 class AnswerCompanyWorkInviteForm(Form):

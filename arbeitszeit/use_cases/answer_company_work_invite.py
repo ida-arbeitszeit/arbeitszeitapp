@@ -52,8 +52,8 @@ class AnswerCompanyWorkInvite:
             )
         elif request.is_accepted:
             self.company_worker_repository.add_worker_to_company(
-                invite.company,
-                invite.member,
+                invite.company.id,
+                invite.member.id,
             )
         self.worker_invite_repository.delete_invite(request.invite_id)
         return AnswerCompanyWorkInviteResponse(

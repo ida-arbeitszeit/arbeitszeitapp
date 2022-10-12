@@ -50,7 +50,7 @@ class SendWorkCertificatesToWorker:
         worker = self.member_repository.get_by_id(use_case_request.worker_id)
         assert company
         assert worker
-        company_workers = self.company_worker_repository.get_company_workers(company)
+        company_workers = self.company_worker_repository.get_company_workers(company.id)
         if worker not in company_workers:
             return SendWorkCertificatesToWorkerResponse(
                 rejection_reason=SendWorkCertificatesToWorkerResponse.RejectionReason.worker_not_at_company

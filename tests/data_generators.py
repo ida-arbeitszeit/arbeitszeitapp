@@ -45,6 +45,10 @@ from arbeitszeit.use_cases import (
     RequestCooperationRequest,
     SelfApprovePlan,
 )
+from arbeitszeit.use_cases.create_plan_draft import (
+    CreatePlanDraft,
+    CreatePlanDraftRequest,
+)
 from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
 from arbeitszeit.use_cases.send_accountant_registration_token import (
     SendAccountantRegistrationTokenUseCase,
@@ -171,12 +175,12 @@ class EmailGenerator:
 @dataclass
 class PlanGenerator:
     company_generator: CompanyGenerator
-    datetime_service: FakeDatetimeService
     plan_repository: PlanRepository
     self_approve_plan: SelfApprovePlan
     request_cooperation: RequestCooperation
     accept_cooperation: AcceptCooperation
     draft_repository: PlanDraftRepository
+    create_plan_draft_use_case: CreatePlanDraft
 
     def create_plan(
         self,
@@ -187,12 +191,10 @@ class PlanGenerator:
         costs: Optional[ProductionCosts] = None,
         description="Beschreibung für Produkt A.",
         is_public_service: bool = False,
-        plan_creation_date: Optional[datetime] = None,
         planner: Optional[Company] = None,
         product_name: str = "Produkt A",
         production_unit: str = "500 Gramm",
         timeframe: Optional[int] = None,
-        expired: bool = False,
         requested_cooperation: Optional[Cooperation] = None,
         cooperation: Optional[Cooperation] = None,
         is_available: bool = True,
@@ -208,7 +210,6 @@ class PlanGenerator:
             description=description,
             timeframe=timeframe,
             is_public_service=is_public_service,
-            plan_creation_date=plan_creation_date,
         )
         response = self.self_approve_plan(SelfApprovePlan.Request(draft_id=draft.id))
         plan = self.plan_repository.get_plan_by_id(response.new_plan_id)
@@ -216,8 +217,6 @@ class PlanGenerator:
         assert plan.is_approved
         if activation_date:
             self.plan_repository.activate_plan(plan, activation_date)
-        if expired:
-            self.plan_repository.set_plan_as_expired(plan)
         if requested_cooperation:
             self.request_cooperation(
                 RequestCooperationRequest(
@@ -241,35 +240,47 @@ class PlanGenerator:
 
     def draft_plan(
         self,
-        plan_creation_date: Optional[datetime] = None,
         planner: Optional[Company] = None,
-        timeframe=None,
-        amount: int = 100,
+        timeframe: Optional[int] = None,
         costs: Optional[ProductionCosts] = None,
-        is_public_service: bool = False,
-        product_name="Produkt A",
-        description="Beschreibung für Produkt A.",
-        production_unit="500 Gramm",
+        is_public_service: Optional[bool] = None,
+        product_name: Optional[str] = None,
+        description: Optional[str] = None,
+        production_unit: Optional[str] = None,
+        amount: Optional[int] = None,
     ) -> PlanDraft:
-        if plan_creation_date is None:
-            plan_creation_date = self.datetime_service.now_minus_two_days()
+        if amount is None:
+            amount = 5
+        if production_unit is None:
+            production_unit = "test unit"
+        if description is None:
+            description = "Beschreibung für Produkt A."
+        if is_public_service is None:
+            is_public_service = False
+        if product_name is None:
+            product_name = "Produkt A."
         if costs is None:
             costs = ProductionCosts(Decimal(1), Decimal(1), Decimal(1))
         if planner is None:
             planner = self.company_generator.create_company()
         if timeframe is None:
             timeframe = 14
-        draft = self.draft_repository.create_plan_draft(
-            planner=planner.id,
-            product_name=product_name,
-            description=description,
-            costs=costs,
-            production_unit=production_unit,
-            amount=amount,
-            timeframe_in_days=timeframe,
-            is_public_service=is_public_service,
-            creation_timestamp=plan_creation_date,
+        response = self.create_plan_draft_use_case(
+            request=CreatePlanDraftRequest(
+                costs=costs,
+                product_name=product_name,
+                production_unit=production_unit,
+                production_amount=amount,
+                description=description,
+                timeframe_in_days=timeframe,
+                is_public_service=is_public_service,
+                planner=planner.id,
+            )
         )
+        assert not response.is_rejected
+        assert response.draft_id
+        draft = self.draft_repository.get_by_id(response.draft_id)
+        assert draft
         return draft
 
 

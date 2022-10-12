@@ -1,6 +1,8 @@
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
+from injector import inject
+
 from arbeitszeit.use_cases import (
     AcceptCooperationResponse,
     CooperationInfo,
@@ -11,9 +13,9 @@ from arbeitszeit.use_cases import (
     ListInboundCoopRequestsResponse,
     ListOutboundCoopRequestsResponse,
 )
+from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.translator import Translator
-
-from .url_index import CoopSummaryUrlIndex
+from arbeitszeit_web.url_index import UrlIndex
 
 
 @dataclass
@@ -74,9 +76,10 @@ class ShowMyCooperationsViewModel:
         return asdict(self)
 
 
+@inject
 @dataclass
 class ShowMyCooperationsPresenter:
-    coop_url_index: CoopSummaryUrlIndex
+    url_index: UrlIndex
     translator: Translator
 
     def present(
@@ -141,7 +144,9 @@ class ShowMyCooperationsPresenter:
             coop_name=coop.name,
             coop_definition=coop.definition.splitlines(),
             count_plans_in_coop=str(coop.count_plans_in_coop),
-            coop_summary_url=self.coop_url_index.get_coop_summary_url(coop.id),
+            coop_summary_url=self.url_index.get_coop_summary_url(
+                user_role=UserRole.company, coop_id=coop.id
+            ),
         )
 
     def _display_inbound_coop_requests(

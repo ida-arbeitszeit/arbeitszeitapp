@@ -1,13 +1,12 @@
-.not-active {
-  pointer-events: none;
-  cursor: not-allowed;
-  opacity: 0.6;
+.navbar-end .navbar-item {
+  padding: 0.5rem 0.25rem;
 }
 
-.unread-message {
-  font-weight: bold;
+.media-right form {
+    display: inline-block;
 }
 
-.unread-messages-indicator {
-  font-weight: bold;
+.media-right form button {
+    padding: 0 0 0 0;
+    vertical-align: -.125em;
 }

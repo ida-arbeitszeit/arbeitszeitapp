@@ -5,11 +5,12 @@ from arbeitszeit import entities
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.token import InvitationTokenValidator, TokenDeliverer, TokenService
 from arbeitszeit.use_cases import GetCompanySummary
+from arbeitszeit.use_cases.edit_draft import EditDraftUseCase
 from arbeitszeit.use_cases.get_accountant_profile_info import (
     GetAccountantProfileInfoUseCase,
 )
+from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCase
 from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
-from arbeitszeit.use_cases.log_in_accountant import LogInAccountantUseCase
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit.use_cases.pay_consumer_product.consumer_product_transaction import (
@@ -27,7 +28,6 @@ from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitat
 from tests import data_generators
 from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
 from tests.control_thresholds import ControlThresholdsTestImpl
-from tests.datetime_service import FakeDatetimeService
 from tests.dependency_injection import TestingModule
 from tests.token import FakeTokenService, TokenDeliveryService
 
@@ -180,10 +180,12 @@ class InMemoryModule(Module):
     ) -> interfaces.PlanCooperationRepository:
         return repo
 
-    @provider
     @singleton
-    def provide_datetime_service(self, service: FakeDatetimeService) -> DatetimeService:
-        return service
+    @provider
+    def provide_payout_factor_repository(
+        self, repo: repositories.FakePayoutFactorRepository
+    ) -> interfaces.PayoutFactorRepository:
+        return repo
 
     @provider
     def provide_token_service(self, token_service: FakeTokenService) -> TokenService:
@@ -217,14 +219,6 @@ class InMemoryModule(Module):
         )
 
     @provider
-    def provide_log_in_accountant_use_case(
-        self, accountant_repository: interfaces.AccountantRepository
-    ) -> LogInAccountantUseCase:
-        return LogInAccountantUseCase(
-            accountant_repository=accountant_repository,
-        )
-
-    @provider
     def provide_log_in_member_use_case(
         self, member_repository: interfaces.MemberRepository
     ) -> LogInMemberUseCase:
@@ -234,6 +228,19 @@ class InMemoryModule(Module):
     @provider
     def provide_control_thresholds_test_impl(self) -> ControlThresholdsTestImpl:
         return ControlThresholdsTestImpl()
+
+    @provider
+    def provide_get_company_dashboard_use_case(
+        self,
+        company_repository: interfaces.CompanyRepository,
+        company_worker_repository: interfaces.CompanyWorkerRepository,
+        plan_repository: interfaces.PlanRepository,
+    ) -> GetCompanyDashboardUseCase:
+        return GetCompanyDashboardUseCase(
+            company_repository=company_repository,
+            company_worker_repository=company_worker_repository,
+            plan_repository=plan_repository,
+        )
 
     @provider
     def provide_consumer_product_transaction_factory(
@@ -265,6 +272,12 @@ class InMemoryModule(Module):
         self, company_repository: interfaces.CompanyRepository
     ) -> LogInCompanyUseCase:
         return LogInCompanyUseCase(company_repository=company_repository)
+
+    @provider
+    def provide_edit_draft_use_case(
+        self, draft_repository: interfaces.PlanDraftRepository
+    ) -> EditDraftUseCase:
+        return EditDraftUseCase(draft_repository=draft_repository)
 
 
 def get_dependency_injector() -> Injector:

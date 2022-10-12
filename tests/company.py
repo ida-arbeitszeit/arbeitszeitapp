@@ -15,11 +15,9 @@ class CompanyManager:
     member_repository: MemberRepository
 
     def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
-        company_entity = self.company_repository.get_by_id(company)
-        assert company_entity
-        member_entity = self.member_repository.get_by_id(worker)
-        assert member_entity
+        assert self.company_repository.get_by_id(company)
+        assert self.member_repository.get_by_id(worker)
         self.worker_repository.add_worker_to_company(
-            company_entity,
-            member_entity,
+            company,
+            worker,
         )
