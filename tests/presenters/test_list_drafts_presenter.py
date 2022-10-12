@@ -35,12 +35,13 @@ class PresenterTests(TestCase):
         )
 
     def test_that_correct_delete_url_is_shown_for_draft(self) -> None:
+        datetime_service = FakeDatetimeService()
         draft_id = uuid4()
         response = ListDraftsResponse(
             results=[
                 ListedDraft(
                     id=draft_id,
-                    creation_date=datetime.min,
+                    creation_date=datetime_service.now(),
                     product_name="test product name",
                     description="test description",
                 )
