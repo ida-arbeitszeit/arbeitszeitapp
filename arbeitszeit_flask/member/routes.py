@@ -34,7 +34,6 @@ from arbeitszeit_web.presenters.get_member_account_presenter import (
 from arbeitszeit_web.presenters.get_member_dashboard_presenter import (
     GetMemberDashboardPresenter,
 )
-from arbeitszeit_web.presenters.member_purchases import MemberPurchasesPresenter
 from arbeitszeit_web.query_companies import (
     QueryCompaniesController,
     QueryCompaniesPresenter,
@@ -59,7 +58,7 @@ def my_purchases(
     assert member is not None
     purchases = query_purchases(member)
     view_model = presenter.present(purchases)
-    return Response(
+    return FlaskResponse(
         template_renderer.render_template(
             "member/my_purchases.html", context=dict(purchases=view_model)
         )
