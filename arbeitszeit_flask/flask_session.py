@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 from typing import Optional
+from urllib.parse import urlparse
 from uuid import UUID
 
-from flask import session
+from flask import request, session
 from flask_login import current_user, login_user, logout_user
+from is_safe_url import is_safe_url
 
 from arbeitszeit_flask.database.repositories import (
     AccountantRepository,
@@ -64,3 +66,8 @@ class FlaskSession:
 
     def pop_next_url(self) -> Optional[str]:
         return session.pop("next", None)
+
+    def set_next_url(self, next_url: str) -> None:
+        hostname = urlparse(request.base_url).netloc
+        if is_safe_url(next_url, {hostname}):
+            session["next"] = next_url

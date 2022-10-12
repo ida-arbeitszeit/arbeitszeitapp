@@ -277,3 +277,54 @@ class UseCaseTester(BaseTestCase):
         assert response.plot.accumulated_volumes[2] == (
             trans1.amount_received + trans2.amount_received + trans3.amount_received
         )
+
+    def test_that_no_buyer_is_shown_in_transaction_detail_when_transaction_is_debit_for_expected_sales(
+        self,
+    ) -> None:
+        company = self.company_generator.create_company()
+
+        self.transaction_generator.create_transaction(
+            sending_account=self.social_accounting.account,
+            receiving_account=company.product_account,
+            amount_sent=Decimal(10),
+            amount_received=Decimal(5),
+        )
+
+        response = self.show_prd_account_details(company.id)
+        assert response.transactions[0].buyer is None
+
+    def test_that_correct_buyer_info_is_shown_when_company_sold_to_member(self) -> None:
+        company = self.company_generator.create_company()
+        member = self.member_generator.create_member()
+
+        self.transaction_generator.create_transaction(
+            sending_account=member.account,
+            receiving_account=company.product_account,
+            amount_sent=Decimal(10),
+            amount_received=Decimal(5),
+        )
+
+        response = self.show_prd_account_details(company.id)
+        assert response.transactions[0].buyer
+        assert response.transactions[0].buyer.buyer_is_member == True
+        assert response.transactions[0].buyer.buyer_id == member.id
+        assert response.transactions[0].buyer.buyer_name == member.name
+
+    def test_that_correct_buyer_info_is_shown_when_company_sold_to_company(
+        self,
+    ) -> None:
+        company1 = self.company_generator.create_company()
+        company2 = self.company_generator.create_company()
+
+        self.transaction_generator.create_transaction(
+            sending_account=company1.means_account,
+            receiving_account=company2.product_account,
+            amount_sent=Decimal(10),
+            amount_received=Decimal(5),
+        )
+
+        response = self.show_prd_account_details(company2.id)
+        assert response.transactions[0].buyer
+        assert response.transactions[0].buyer.buyer_is_member == False
+        assert response.transactions[0].buyer.buyer_id == company1.id
+        assert response.transactions[0].buyer.buyer_name == company1.name

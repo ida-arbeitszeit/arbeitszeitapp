@@ -44,6 +44,9 @@ class UrlIndex(Protocol):
     def get_draft_summary_url(self, draft_id: UUID) -> str:
         ...
 
+    def get_delete_draft_url(self, draft_id: UUID) -> str:
+        ...
+
     def get_answer_company_work_invite_url(self, invite_id: UUID) -> str:
         ...
 
@@ -89,6 +92,12 @@ class UrlIndex(Protocol):
     def get_request_coop_url(self) -> str:
         ...
 
+    def get_accountant_dashboard_url(self) -> str:
+        ...
+
+    def get_self_approve_plan_url(self, draft_id: UUID) -> str:
+        ...
+
 
 class RenewPlanUrlIndex(Protocol):
     def get_renew_plan_url(self, plan_id: UUID) -> str:
@@ -107,11 +116,6 @@ class ConfirmationUrlIndex(Protocol):
 
 class AccountantInvitationUrlIndex(Protocol):
     def get_accountant_invitation_url(self, token: str) -> str:
-        ...
-
-
-class AccountantDashboardUrlIndex(Protocol):
-    def get_accountant_dashboard_url(self) -> str:
         ...
 
 

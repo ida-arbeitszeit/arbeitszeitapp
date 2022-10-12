@@ -5,6 +5,8 @@ from datetime import datetime
 from typing import List
 from uuid import UUID
 
+from injector import inject
+
 from arbeitszeit.repositories import (
     CompanyRepository,
     CompanyWorkerRepository,
@@ -12,6 +14,7 @@ from arbeitszeit.repositories import (
 )
 
 
+@inject
 @dataclass
 class GetCompanyDashboardUseCase:
     class Failure(Exception):
@@ -47,7 +50,7 @@ class GetCompanyDashboardUseCase:
             id=company.id, name=company.name, email=company.email
         )
         has_workers = bool(
-            len(list(self.company_worker_repository.get_company_workers(company)))
+            len(list(self.company_worker_repository.get_company_workers(company_id)))
         )
         three_latest_plans = self._get_three_latest_plans()
         return self.Response(

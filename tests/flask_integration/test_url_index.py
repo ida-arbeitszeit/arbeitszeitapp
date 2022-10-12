@@ -274,3 +274,11 @@ class GeneralUrlIndexTests(ViewTestCase):
         url = self.url_index.get_end_coop_url(plan.id, coop.id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
+
+    def test_delete_draft_url_does_not_produce_404(
+        self,
+    ) -> None:
+        self.login_company()
+        url = self.url_index.get_delete_draft_url(uuid4())
+        response = self.client.get(url)
+        self.assertNotEqual(response.status_code, 404)

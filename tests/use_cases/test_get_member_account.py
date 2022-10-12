@@ -1,6 +1,7 @@
 from datetime import timedelta
 from decimal import Decimal
 
+from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases import GetMemberAccount
 from tests.data_generators import (
     CompanyGenerator,
@@ -75,7 +76,30 @@ def test_that_correct_info_is_generated_after_member_pays_product(
     assert len(response.transactions) == 1
     assert response.transactions[0].peer_name == company.name
     assert response.transactions[0].transaction_volume == Decimal(-10)
+    assert response.transactions[0].type == TransactionTypes.payment_of_consumer_product
     assert response.balance == Decimal(-10)
+
+
+@injection_test
+def test_that_a_transaction_with_volume_zero_is_shown_correctly(
+    use_case: GetMemberAccount,
+    member_generator: MemberGenerator,
+    company_generator: CompanyGenerator,
+    transaction_generator: TransactionGenerator,
+):
+    member = member_generator.create_member()
+    company = company_generator.create_company()
+
+    transaction_generator.create_transaction(
+        sending_account=member.account,
+        receiving_account=company.product_account,
+        amount_sent=Decimal(0),
+        amount_received=Decimal(0),
+    )
+
+    response = use_case(member.id)
+    assert response.transactions[0].transaction_volume == Decimal("0")
+    assert str(response.transactions[0].transaction_volume) == "0"
 
 
 @injection_test
@@ -99,6 +123,7 @@ def test_that_correct_info_is_generated_after_member_receives_wages(
     assert len(response.transactions) == 1
     assert response.transactions[0].peer_name == company.name
     assert response.transactions[0].transaction_volume == Decimal(8.5)
+    assert response.transactions[0].type == TransactionTypes.incoming_wages
     assert response.balance == Decimal(8.5)
 
 

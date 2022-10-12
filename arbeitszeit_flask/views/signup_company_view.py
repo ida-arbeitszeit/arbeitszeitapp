@@ -22,7 +22,7 @@ class SignupCompanyView:
     def handle_request(self, request):
         register_form = RegisterForm(request.form)
         if request.method == "POST" and register_form.validate():
-            self._handle_successful_post_request(register_form)
+            return self._handle_successful_post_request(register_form)
         if current_user.is_authenticated:
             if self.flask_session.is_logged_in_as_company():
                 return redirect(url_for("main_company.dashboard"))

@@ -20,7 +20,6 @@ from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.token import InvitationTokenValidator, TokenDeliverer, TokenService
 from arbeitszeit.use_cases import GetCompanySummary
-from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCase
 from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
@@ -177,6 +176,12 @@ class CompanyModule(CompanyPresenterModule):
 
 class FlaskModule(PresenterModule):
     @provider
+    def provide_company_worker_repository(
+        self, instance: CompanyWorkerRepository
+    ) -> interfaces.CompanyWorkerRepository:
+        return instance
+
+    @provider
     def provide_request(self, request: FlaskRequest) -> Request:
         return request
 
@@ -224,19 +229,6 @@ class FlaskModule(PresenterModule):
             transaction_repository,
             social_accounting,
             purchase_repository,
-        )
-
-    @provider
-    def provide_get_company_dashboard_use_case(
-        self,
-        company_repository: interfaces.CompanyRepository,
-        company_worker_repository: interfaces.CompanyWorkerRepository,
-        plan_repository: interfaces.PlanRepository,
-    ) -> GetCompanyDashboardUseCase:
-        return GetCompanyDashboardUseCase(
-            company_repository=company_repository,
-            company_worker_repository=company_worker_repository,
-            plan_repository=plan_repository,
         )
 
     @provider
@@ -405,10 +397,6 @@ class FlaskModule(PresenterModule):
         )
 
     def configure(self, binder: Binder) -> None:
-        binder.bind(
-            interfaces.CompanyWorkerRepository,  # type: ignore
-            to=ClassProvider(CompanyWorkerRepository),
-        )
         binder.bind(
             interfaces.PurchaseRepository,  # type: ignore
             to=ClassProvider(PurchaseRepository),

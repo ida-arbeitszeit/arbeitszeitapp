@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-from bisect import insort
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from itertools import islice
-from operator import attrgetter
 from statistics import StatisticsError, mean
 from typing import Dict, Iterable, Iterator, List, Optional, Set, Tuple, Union
 from uuid import UUID, uuid4
@@ -33,6 +31,7 @@ from arbeitszeit.entities import (
     SocialAccounting,
     Transaction,
 )
+from tests.search_tree import SearchTree
 
 
 @singleton
@@ -152,7 +151,7 @@ class TransactionRepository(interfaces.TransactionRepository):
 
 
 @singleton
-class CompanyWorkerRepository(interfaces.CompanyWorkerRepository):
+class CompanyWorkerRepository:
     @inject
     def __init__(
         self, company_repository: CompanyRepository, member_repository: MemberRepository
@@ -161,11 +160,11 @@ class CompanyWorkerRepository(interfaces.CompanyWorkerRepository):
         self.member_repository = member_repository
         self.company_workers: Dict[UUID, Set[UUID]] = defaultdict(lambda: set())
 
-    def add_worker_to_company(self, company: Company, worker: Member) -> None:
-        self.company_workers[company.id].add(worker.id)
+    def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
+        self.company_workers[company].add(worker)
 
-    def get_company_workers(self, company: Company) -> Iterable[Member]:
-        for member_id in self.company_workers[company.id]:
+    def get_company_workers(self, company: UUID) -> Iterable[Member]:
+        for member_id in self.company_workers[company]:
             member = self.member_repository.get_by_id(member_id)
             if member is not None:
                 yield member
@@ -299,6 +298,9 @@ class MemberRepository(interfaces.MemberRepository):
     def has_member_with_email(self, email: str) -> bool:
         return bool(self._get_member_by_email(email))
 
+    def is_member(self, id: UUID) -> bool:
+        return bool(self.get_by_id(id))
+
     def count_registered_members(self) -> int:
         return len(self.members)
 
@@ -377,6 +379,9 @@ class CompanyRepository(interfaces.CompanyRepository):
                 return company
         return None
 
+    def is_company(self, id: UUID) -> bool:
+        return bool(self.get_by_id(id))
+
     def count_registered_companies(self) -> int:
         return len(self.companies)
 
@@ -407,9 +412,35 @@ class PlanRepository(interfaces.PlanRepository):
     def __init__(
         self,
         company_repository: CompanyRepository,
+        draft_repository: PlanDraftRepository,
     ) -> None:
         self.plans: Dict[UUID, Plan] = {}
         self.company_repository = company_repository
+        self.draft_repository = draft_repository
+
+    def get_all_plans_without_completed_review(self) -> Iterable[UUID]:
+        for plan in self.plans.values():
+            if plan.approval_date is None:
+                yield plan.id
+
+    def create_plan_from_draft(self, draft_id: UUID) -> Optional[UUID]:
+        draft = self.draft_repository.get_by_id(draft_id)
+        assert draft
+        planner = self.company_repository.get_by_id(draft.planner.id)
+        assert planner
+        plan = self._create_plan(
+            id=draft.id,
+            planner=planner,
+            costs=draft.production_costs,
+            product_name=draft.product_name,
+            production_unit=draft.unit_of_distribution,
+            amount=draft.amount_produced,
+            description=draft.description,
+            timeframe_in_days=draft.timeframe,
+            is_public_service=draft.is_public_service,
+            creation_timestamp=draft.creation_date,
+        )
+        return plan.id
 
     def get_plan_by_id(self, id: UUID) -> Optional[Plan]:
         return self.plans.get(id)
@@ -962,17 +993,30 @@ class FakeLanguageRepository:
 
 @singleton
 class FakePayoutFactorRepository:
+    @dataclass
+    class _PayoutFactorModel:
+        factor: PayoutFactor
+
+        def __lt__(self, other: FakePayoutFactorRepository._PayoutFactorModel) -> bool:
+            return self.factor.calculation_date < other.factor.calculation_date
+
     @inject
     def __init__(self) -> None:
-        self._payout_factors: List[PayoutFactor] = []
+        self._payout_factors: SearchTree[
+            FakePayoutFactorRepository._PayoutFactorModel
+        ] = SearchTree()
 
     def store_payout_factor(self, timestamp: datetime, payout_factor: Decimal) -> None:
-        key = attrgetter("calculation_date")
-        insort(self._payout_factors, PayoutFactor(timestamp, payout_factor), key=key)
+        model = self._PayoutFactorModel(
+            PayoutFactor(calculation_date=timestamp, value=payout_factor)
+        )
+        self._payout_factors.insert(model)
 
     def get_latest_payout_factor(
         self,
     ) -> Optional[PayoutFactor]:
-        if not self._payout_factors:
+        model = self._payout_factors.last()
+        if model is None:
             return None
-        return self._payout_factors[-1]
+        else:
+            return model.factor

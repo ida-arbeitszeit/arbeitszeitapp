@@ -21,7 +21,6 @@ from arbeitszeit_flask.models import (
     CompanyWorkInvite,
     Cooperation,
     Member,
-    Plan,
     PlanDraft,
     Purchase,
     SocialAccounting,
@@ -31,20 +30,23 @@ from arbeitszeit_flask.models import (
 
 @inject
 @dataclass
-class CompanyWorkerRepository(repositories.CompanyWorkerRepository):
+class CompanyWorkerRepository:
     member_repository: MemberRepository
     company_repository: CompanyRepository
 
-    def add_worker_to_company(
-        self, company: entities.Company, worker: entities.Member
-    ) -> None:
-        company_orm = self.company_repository.object_to_orm(company)
-        worker_orm = self.member_repository.object_to_orm(worker)
-        if worker_orm not in company_orm.workers:
-            company_orm.workers.append(worker_orm)
+    def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
+        member = models.Member.query.get(str(worker))
+        if member is None:
+            return
+        company = models.Company.query.get(str(company))
+        if company is None:
+            return
+        member.workplaces.append(company)
 
-    def get_company_workers(self, company: entities.Company) -> List[entities.Member]:
-        company_orm = self.company_repository.object_to_orm(company)
+    def get_company_workers(self, company: UUID) -> List[entities.Member]:
+        company_orm = models.Company.query.get(str(company))
+        if company_orm is None:
+            return []
         return [
             self.member_repository.object_from_orm(member)
             for member in company_orm.workers
@@ -181,6 +183,13 @@ class MemberRepository(repositories.MemberRepository):
             .count()
         )
 
+    def is_member(self, id: UUID) -> bool:
+        return bool(
+            self.db.session.query(models.Member)
+            .filter(models.Member.id == str(id))
+            .count()
+        )
+
     def count_registered_members(self) -> int:
         return int(self.db.session.query(func.count(Member.id)).one()[0])
 
@@ -254,6 +263,13 @@ class CompanyRepository(repositories.CompanyRepository):
             .first()
         )
         return self.object_from_orm(company_orm) if company_orm else None
+
+    def is_company(self, id: UUID) -> bool:
+        return bool(
+            self.db.session.query(models.Company)
+            .filter(models.Company.id == str(id))
+            .count()
+        )
 
     def create_company(
         self,
@@ -596,8 +612,19 @@ class PurchaseRepository(repositories.PurchaseRepository):
 class PlanRepository(repositories.PlanRepository):
     company_repository: CompanyRepository
     db: SQLAlchemy
+    draft_repository: PlanDraftRepository
 
-    def object_from_orm(self, plan: Plan) -> entities.Plan:
+    def create_plan_from_draft(self, draft_id: UUID) -> Optional[UUID]:
+        draft = self.draft_repository.get_by_id(draft_id)
+        if draft is None:
+            return None
+        plan_orm = self._create_plan_from_draft(draft)
+        return UUID(plan_orm.id)
+
+    def get_all_plans_without_completed_review(self) -> Iterable[UUID]:
+        raise NotImplementedError()
+
+    def object_from_orm(self, plan: models.Plan) -> entities.Plan:
         production_costs = entities.ProductionCosts(
             labour_cost=plan.costs_a,
             resource_cost=plan.costs_r,
@@ -616,8 +643,8 @@ class PlanRepository(repositories.PlanRepository):
             description=plan.description,
             timeframe=int(plan.timeframe),
             is_public_service=plan.is_public_service,
-            approval_date=plan.approval_date,
-            approval_reason=plan.approval_reason,
+            approval_date=plan.review.approval_date,
+            approval_reason=plan.review.approval_reason,
             is_active=plan.is_active,
             expired=plan.expired,
             expiration_date=plan.expiration_date,
@@ -632,11 +659,11 @@ class PlanRepository(repositories.PlanRepository):
             hidden_by_user=plan.hidden_by_user,
         )
 
-    def object_to_orm(self, plan: entities.Plan) -> Plan:
-        return Plan.query.get(str(plan.id))
+    def object_to_orm(self, plan: entities.Plan) -> models.Plan:
+        return models.Plan.query.get(str(plan.id))
 
     def get_plan_by_id(self, id: UUID) -> Optional[entities.Plan]:
-        plan_orm = Plan.query.filter_by(id=str(id)).first()
+        plan_orm = models.Plan.query.filter_by(id=str(id)).first()
         if plan_orm is None:
             return None
         else:
@@ -645,9 +672,9 @@ class PlanRepository(repositories.PlanRepository):
     def _create_plan_from_draft(
         self,
         plan: entities.PlanDraft,
-    ) -> Plan:
+    ) -> models.Plan:
         costs = plan.production_costs
-        plan = Plan(
+        plan = models.Plan(
             id=plan.id,
             plan_creation_date=plan.creation_date,
             planner=self.company_repository.object_to_orm(plan.planner).id,
@@ -668,14 +695,18 @@ class PlanRepository(repositories.PlanRepository):
             is_available=True,
         )
         self.db.session.add(plan)
+        plan_review = models.PlanReview(
+            approval_date=None, approval_reason=None, plan=plan
+        )
+        self.db.session.add(plan_review)
         return plan
 
     def set_plan_approval_date(
         self, draft: entities.PlanDraft, approval_timestamp: datetime
     ) -> entities.Plan:
         plan_orm = self._create_plan_from_draft(draft)
-        plan_orm.approval_reason = "approved"
-        plan_orm.approval_date = approval_timestamp
+        plan_orm.review.approval_reason = "approved"
+        plan_orm.review.approval_date = approval_timestamp
         return self.object_from_orm(plan_orm)
 
     def activate_plan(self, plan: entities.Plan, activation_date: datetime) -> None:
@@ -717,7 +748,7 @@ class PlanRepository(repositories.PlanRepository):
     def get_active_plans(self) -> Iterator[entities.Plan]:
         return (
             self.object_from_orm(plan_orm)
-            for plan_orm in Plan.query.filter_by(is_active=True).all()
+            for plan_orm in models.Plan.query.filter_by(is_active=True).all()
         )
 
     def get_three_latest_active_plans_ordered_by_activation_date(
@@ -725,28 +756,28 @@ class PlanRepository(repositories.PlanRepository):
     ) -> Iterator[entities.Plan]:
         return (
             self.object_from_orm(plan_orm)
-            for plan_orm in Plan.query.filter_by(is_active=True)
-            .order_by(Plan.activation_date.desc())
+            for plan_orm in models.Plan.query.filter_by(is_active=True)
+            .order_by(models.Plan.activation_date.desc())
             .limit(3)
         )
 
     def count_active_plans(self) -> int:
         return int(
-            self.db.session.query(func.count(Plan.id))
+            self.db.session.query(func.count(models.Plan.id))
             .filter_by(is_active=True)
             .one()[0]
         )
 
     def count_active_public_plans(self) -> int:
         return int(
-            self.db.session.query(func.count(Plan.id))
+            self.db.session.query(func.count(models.Plan.id))
             .filter_by(is_active=True, is_public_service=True)
             .one()[0]
         )
 
     def avg_timeframe_of_active_plans(self) -> Decimal:
         return Decimal(
-            self.db.session.query(func.avg(Plan.timeframe))
+            self.db.session.query(func.avg(models.Plan.timeframe))
             .filter_by(is_active=True)
             .one()[0]
             or 0
@@ -754,7 +785,7 @@ class PlanRepository(repositories.PlanRepository):
 
     def sum_of_active_planned_work(self) -> Decimal:
         return Decimal(
-            self.db.session.query(func.sum(Plan.costs_a))
+            self.db.session.query(func.sum(models.Plan.costs_a))
             .filter_by(is_active=True)
             .one()[0]
             or 0
@@ -762,7 +793,7 @@ class PlanRepository(repositories.PlanRepository):
 
     def sum_of_active_planned_resources(self) -> Decimal:
         return Decimal(
-            self.db.session.query(func.sum(Plan.costs_r))
+            self.db.session.query(func.sum(models.Plan.costs_r))
             .filter_by(is_active=True)
             .one()[0]
             or 0
@@ -770,7 +801,7 @@ class PlanRepository(repositories.PlanRepository):
 
     def sum_of_active_planned_means(self) -> Decimal:
         return Decimal(
-            self.db.session.query(func.sum(Plan.costs_p))
+            self.db.session.query(func.sum(models.Plan.costs_p))
             .filter_by(is_active=True)
             .one()[0]
             or 0
@@ -779,7 +810,9 @@ class PlanRepository(repositories.PlanRepository):
     def all_plans_approved_and_not_expired(self) -> Iterator[entities.Plan]:
         return (
             self.object_from_orm(plan_orm)
-            for plan_orm in Plan.query.filter_by(approved=True, expired=False).all()
+            for plan_orm in models.Plan.query.filter_by(
+                approved=True, expired=False
+            ).all()
         )
 
     def all_productive_plans_approved_active_and_not_expired(
@@ -787,9 +820,12 @@ class PlanRepository(repositories.PlanRepository):
     ) -> Iterator[entities.Plan]:
         return (
             self.object_from_orm(plan_orm)
-            for plan_orm in Plan.query.filter_by(
-                is_active=True, expired=False, is_public_service=False
-            ).filter(Plan.approval_date != None)
+            for plan_orm in models.Plan.query.join(models.PlanReview).filter(
+                models.Plan.is_active == True
+                and models.Plan.expired == False
+                and models.Plan.is_public_service == False
+                and models.PlanReview.approval_date != None
+            )
         )
 
     def all_public_plans_approved_active_and_not_expired(
@@ -797,40 +833,42 @@ class PlanRepository(repositories.PlanRepository):
     ) -> Iterator[entities.Plan]:
         return (
             self.object_from_orm(plan_orm)
-            for plan_orm in Plan.query.filter_by(
-                is_active=True,
-                expired=False,
-                is_public_service=True,
-            ).filter(Plan.approval_date != None)
+            for plan_orm in models.Plan.query.join(models.PlanReview).filter(
+                models.Plan.is_active == True
+                and models.Plan.expired == False
+                and models.Plan.is_public_service == True
+                and models.PlanReview.approval_date != None
+            )
         )
 
     def all_plans_approved_active_and_not_expired(self) -> Iterator[entities.Plan]:
         return (
             self.object_from_orm(plan_orm)
-            for plan_orm in Plan.query.filter_by(
-                is_active=True,
-                expired=False,
-            ).filter(Plan.approval_date != None)
+            for plan_orm in models.Plan.query.join(models.PlanReview).filter(
+                models.Plan.is_active == True
+                and models.Plan.expired == False
+                and models.PlanReview.approval_date != None
+            )
         )
 
     def hide_plan(self, plan_id: UUID) -> None:
-        plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
+        plan_orm = models.Plan.query.filter_by(id=str(plan_id)).first()
         assert plan_orm
         plan_orm.hidden_by_user = True
 
     def query_active_plans_by_product_name(self, query: str) -> Iterator[entities.Plan]:
         return (
             self.object_from_orm(plan)
-            for plan in Plan.query.filter(
-                Plan.is_active == True, Plan.prd_name.ilike(f"%{query}%")
+            for plan in models.Plan.query.filter(
+                models.Plan.is_active == True, models.Plan.prd_name.ilike(f"%{query}%")
             ).all()
         )
 
     def query_active_plans_by_plan_id(self, query: str) -> Iterator[entities.Plan]:
         return (
             self.object_from_orm(plan)
-            for plan in Plan.query.filter(
-                Plan.is_active == True, Plan.id.contains(query)
+            for plan in models.Plan.query.filter(
+                models.Plan.is_active == True, models.Plan.id.contains(query)
             ).all()
         )
 
@@ -839,9 +877,9 @@ class PlanRepository(repositories.PlanRepository):
     ) -> Iterator[entities.Plan]:
         return (
             self.object_from_orm(plan_orm)
-            for plan_orm in Plan.query.filter(Plan.planner == str(company_id)).order_by(
-                Plan.plan_creation_date.desc()
-            )
+            for plan_orm in models.Plan.query.filter(
+                models.Plan.planner == str(company_id)
+            ).order_by(models.Plan.plan_creation_date.desc())
         )
 
     def get_all_active_plans_for_company(
@@ -849,8 +887,8 @@ class PlanRepository(repositories.PlanRepository):
     ) -> Iterator[entities.Plan]:
         return (
             self.object_from_orm(plan_orm)
-            for plan_orm in Plan.query.filter(
-                Plan.planner == str(company_id), Plan.is_active == True
+            for plan_orm in models.Plan.query.filter(
+                models.Plan.planner == str(company_id), models.Plan.is_active == True
             )
         )
 
@@ -863,18 +901,18 @@ class PlanRepository(repositories.PlanRepository):
     def get_plan_name_and_description(
         self, id: UUID
     ) -> repositories.PlanRepository.NameAndDescription:
-        plan = Plan.query.get(str(id))
+        plan = models.Plan.query.get(str(id))
         name_and_description = repositories.PlanRepository.NameAndDescription(
             name=plan.prd_name, description=plan.description
         )
         return name_and_description
 
     def get_planner_id(self, plan_id: UUID) -> Optional[UUID]:
-        plan = Plan.query.get(str(plan_id))
+        plan = models.Plan.query.get(str(plan_id))
         return UUID(plan.planner) if plan else None
 
     def __len__(self) -> int:
-        return len(Plan.query.all())
+        return len(models.Plan.query.all())
 
 
 @inject
@@ -1222,7 +1260,7 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
                 yield plan
 
     def get_cooperating_plans(self, plan_id: UUID) -> List[entities.Plan]:
-        plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
+        plan_orm = models.Plan.query.filter_by(id=str(plan_id)).first()
         if plan_orm is None:
             return []
         coop_orm = plan_orm.coop
@@ -1239,31 +1277,31 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
             ]
 
     def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
-        plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
+        plan_orm = models.Plan.query.filter_by(id=str(plan_id)).first()
         assert plan_orm
         plan_orm.cooperation = str(cooperation_id)
 
     def remove_plan_from_cooperation(self, plan_id: UUID) -> None:
-        plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
+        plan_orm = models.Plan.query.filter_by(id=str(plan_id)).first()
         assert plan_orm
         plan_orm.cooperation = None
 
     def set_requested_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
-        plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
+        plan_orm = models.Plan.query.filter_by(id=str(plan_id)).first()
         assert plan_orm
         plan_orm.requested_cooperation = str(cooperation_id)
 
     def set_requested_cooperation_to_none(self, plan_id: UUID) -> None:
-        plan_orm = Plan.query.filter_by(id=str(plan_id)).first()
+        plan_orm = models.Plan.query.filter_by(id=str(plan_id)).first()
         assert plan_orm
         plan_orm.requested_cooperation = None
 
     def count_plans_in_cooperation(self, cooperation_id: UUID) -> int:
-        count = Plan.query.filter_by(cooperation=str(cooperation_id)).count()
+        count = models.Plan.query.filter_by(cooperation=str(cooperation_id)).count()
         return count
 
     def get_plans_in_cooperation(self, cooperation_id: UUID) -> Iterable[entities.Plan]:
-        plans = Plan.query.filter_by(cooperation=str(cooperation_id)).all()
+        plans = models.Plan.query.filter_by(cooperation=str(cooperation_id)).all()
         for plan in plans:
             yield self.plan_repository.object_from_orm(plan)
 

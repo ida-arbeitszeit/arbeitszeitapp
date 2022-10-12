@@ -12,9 +12,6 @@ on:
 jobs:
   build-nix:
     runs-on: ubuntu-latest
-    env:
-      HYPOTHESIS_PROFILE: ci
-
     steps:
     - uses: actions/checkout@v2
     - uses: cachix/install-nix-action@v16
@@ -25,9 +22,6 @@ jobs:
 
   build-pip:
     runs-on: ubuntu-latest
-    env:
-      HYPOTHESIS_PROFILE: ci
-
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.10
