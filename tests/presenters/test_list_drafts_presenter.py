@@ -15,7 +15,7 @@ class PresenterTests(TestCase):
         self.presenter = self.injector.get(ListDraftsPresenter)
         self.url_index = self.injector.get(UrlIndexTestImpl)
 
-    def test(self) -> None:
+    def test_that_correct_details_url_is_shown_for_draft(self) -> None:
         datetime_service = FakeDatetimeService()
 
         draft_id = uuid4()
