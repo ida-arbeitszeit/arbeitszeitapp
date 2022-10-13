@@ -34,15 +34,14 @@ from arbeitszeit_web.presenters.get_member_account_presenter import (
 from arbeitszeit_web.presenters.get_member_dashboard_presenter import (
     GetMemberDashboardPresenter,
 )
+from arbeitszeit_web.presenters.show_my_purchases_presenter import (
+    ShowMyPurchasesPresenter,
+)
 from arbeitszeit_web.query_companies import (
     QueryCompaniesController,
     QueryCompaniesPresenter,
 )
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
-
-from arbeitszeit_web.presenters.show_my_purchases_presenter import (
-    ShowMyPurchasesPresenter,
-)
 
 from .blueprint import MemberRoute
 

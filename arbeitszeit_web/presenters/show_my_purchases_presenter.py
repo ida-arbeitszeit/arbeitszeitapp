@@ -1,7 +1,8 @@
 from dataclasses import dataclass, field
-from arbeitszeit_flask.datetime import RealtimeDatetimeService
-from arbeitszeit.use_cases.query_purchases import PurchaseQueryResponse
 from typing import Iterator
+
+from arbeitszeit.use_cases.query_purchases import PurchaseQueryResponse
+from arbeitszeit_flask.datetime import RealtimeDatetimeService
 
 
 @dataclass
