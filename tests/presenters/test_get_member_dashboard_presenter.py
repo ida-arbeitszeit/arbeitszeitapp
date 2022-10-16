@@ -151,8 +151,8 @@ class GetMemberDashboardPresenterTests(TestCase):
     def test_correct_invite_message_is_shown(self):
         expected_company_name = "company name"
         expected_message = self.translator.gettext(
-            f"Company {expected_company_name} has invited you!"
-        )
+            "Company %(expected_company_name)s has invited you!"
+        ) % dict(expected_company_name=expected_company_name)
         response = self.get_response(
             invites=[self.get_invite(company_name=expected_company_name)]
         )

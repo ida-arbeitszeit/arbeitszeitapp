@@ -181,7 +181,7 @@ the command::
 Translation
 -----------
 
-We use `Flask-Babel <https://flask-babel.tkte.ch/>`_ for translation.
+We use `Flask-Babel <https://python-babel.github.io/flask-babel/>`_ for translation.
 
 #. Add a new language: 
 
@@ -209,8 +209,14 @@ We use `Flask-Babel <https://flask-babel.tkte.ch/>`_ for translation.
     gettext(message: str)
     ngettext(singular: str, plural: str, n)
 
+#. Parse code for translatable strings (create .pot file): 
 
-#. Parse code and update language specific .po-files:
+    .. code-block:: bash
+
+     python setup.py extract_messages
+
+
+#. Update language specific .po-files:
 
    .. code-block::  bash
     
