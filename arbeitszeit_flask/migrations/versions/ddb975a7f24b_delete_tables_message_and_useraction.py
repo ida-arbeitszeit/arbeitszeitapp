@@ -18,7 +18,12 @@ depends_on = None
 
 def upgrade():
     op.drop_table("message")
-    sa.Enum(name="useractiontype").drop(op.get_bind(), checkfirst=False)
+    
+    if op.get_context().bind.dialect.name == 'sqlite':
+        sa.Enum(name="useractiontype").drop(op.get_bind(), checkfirst=False)
+    else:
+        op.execute("DROP TYPE IF EXISTS useractiontype CASCADE")
+
     op.drop_table("user_action")
 
 
