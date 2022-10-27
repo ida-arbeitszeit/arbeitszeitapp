@@ -175,11 +175,11 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def query_active_plans_by_product_name(self, query: str) -> Iterator[Plan]:
+    def query_active_plans_by_product_name(self, query: str) -> QueryResult[Plan]:
         pass
 
     @abstractmethod
-    def query_active_plans_by_plan_id(self, query: str) -> Iterator[Plan]:
+    def query_active_plans_by_plan_id(self, query: str) -> QueryResult[Plan]:
         pass
 
     @abstractmethod

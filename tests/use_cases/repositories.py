@@ -665,15 +665,23 @@ class PlanRepository(interfaces.PlanRepository):
         self.plans[plan.id] = plan
         return plan
 
-    def query_active_plans_by_product_name(self, query: str) -> Iterator[Plan]:
-        for plan in self.plans.values():
-            if plan.is_active and (query.lower() in plan.prd_name.lower()):
-                yield plan
+    def query_active_plans_by_product_name(self, query: str) -> QueryResultImpl[Plan]:
+        return QueryResultImpl(
+            [
+                plan
+                for plan in self.plans.values()
+                if plan.is_active and (query.lower() in plan.prd_name.lower())
+            ]
+        )
 
-    def query_active_plans_by_plan_id(self, query: str) -> Iterator[Plan]:
-        for plan in self.plans.values():
-            if plan.is_active and (query in str(plan.id)):
-                yield plan
+    def query_active_plans_by_plan_id(self, query: str) -> QueryResultImpl[Plan]:
+        return QueryResultImpl(
+            [
+                plan
+                for plan in self.plans.values()
+                if plan.is_active and (query in str(plan.id))
+            ]
+        )
 
     def toggle_product_availability(self, plan: Plan) -> None:
         plan.is_available = True if (plan.is_available == False) else False

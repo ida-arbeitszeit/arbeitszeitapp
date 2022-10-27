@@ -884,20 +884,24 @@ class PlanRepository(repositories.PlanRepository):
         assert plan_orm
         plan_orm.hidden_by_user = True
 
-    def query_active_plans_by_product_name(self, query: str) -> Iterator[entities.Plan]:
-        return (
-            self.object_from_orm(plan)
-            for plan in models.Plan.query.filter(
+    def query_active_plans_by_product_name(
+        self, query: str
+    ) -> FlaskQueryResult[entities.Plan]:
+        return FlaskQueryResult(
+            mapper=self.object_from_orm,
+            query=models.Plan.query.filter(
                 models.Plan.is_active == True, models.Plan.prd_name.ilike(f"%{query}%")
-            ).all()
+            ).all(),
         )
 
-    def query_active_plans_by_plan_id(self, query: str) -> Iterator[entities.Plan]:
-        return (
-            self.object_from_orm(plan)
-            for plan in models.Plan.query.filter(
+    def query_active_plans_by_plan_id(
+        self, query: str
+    ) -> FlaskQueryResult[entities.Plan]:
+        return FlaskQueryResult(
+            query=models.Plan.query.filter(
                 models.Plan.is_active == True, models.Plan.id.contains(query)
-            ).all()
+            ).all(),
+            mapper=self.object_from_orm,
         )
 
     def get_all_plans_for_company_descending(
