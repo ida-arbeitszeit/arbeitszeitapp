@@ -3,12 +3,23 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterable, Iterator, List, Optional, Union
+from typing import (
+    Any,
+    Callable,
+    Generic,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    TypeVar,
+    Union,
+)
 from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
 from injector import inject
 from sqlalchemy import and_, desc, func
+from sqlalchemy.sql.expression import Select
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from arbeitszeit import entities, repositories
@@ -26,6 +37,23 @@ from arbeitszeit_flask.models import (
     SocialAccounting,
     Transaction,
 )
+
+T = TypeVar("T", covariant=True)
+
+
+class FlaskQueryResult(Generic[T]):
+    def __init__(self, query: Select, mapper: Callable[[Any], T]) -> None:
+        self.query = query
+        self.mapper = mapper
+
+    def limit(self, n: int) -> FlaskQueryResult[T]:
+        return type(self)(query=self.query.limit(n), mapper=self.mapper)
+
+    def offset(self, n: int) -> FlaskQueryResult[T]:
+        return type(self)(query=self.query.offset(n), mapper=self.mapper)
+
+    def __iter__(self) -> Iterator[T]:
+        return (self.mapper(item) for item in self.query)
 
 
 @inject
@@ -745,10 +773,10 @@ class PlanRepository(repositories.PlanRepository):
         plan_orm = self.object_to_orm(plan)
         plan_orm.payout_count += 1
 
-    def get_active_plans(self) -> Iterator[entities.Plan]:
-        return (
-            self.object_from_orm(plan_orm)
-            for plan_orm in models.Plan.query.filter_by(is_active=True).all()
+    def get_active_plans(self) -> FlaskQueryResult[entities.Plan]:
+        return FlaskQueryResult(
+            query=models.Plan.query.filter_by(is_active=True).all(),
+            mapper=self.object_from_orm,
         )
 
     def get_three_latest_active_plans_ordered_by_activation_date(
