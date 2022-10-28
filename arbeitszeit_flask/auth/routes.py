@@ -8,6 +8,7 @@ from arbeitszeit.use_cases import ResendConfirmationMail, ResendConfirmationMail
 from arbeitszeit.use_cases.log_in_accountant import LogInAccountantUseCase
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
+from arbeitszeit.use_cases.start_page import StartPageUseCase
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.database.repositories import CompanyRepository, MemberRepository
 from arbeitszeit_flask.dependency_injection import (
@@ -30,17 +31,27 @@ from arbeitszeit_web.presenters.log_in_accountant_presenter import (
 )
 from arbeitszeit_web.presenters.log_in_company_presenter import LogInCompanyPresenter
 from arbeitszeit_web.presenters.log_in_member_presenter import LogInMemberPresenter
+from arbeitszeit_web.presenters.start_page_presenter import StartPagePresenter
 
 auth = Blueprint("auth", __name__, template_folder="templates", static_folder="static")
 
 
 @auth.route("/")
 @with_injection()
-def start(template_renderer: AnonymousUserTemplateRenderer, session: FlaskSession):
+def start(
+    template_renderer: AnonymousUserTemplateRenderer,
+    session: FlaskSession,
+    start_page: StartPageUseCase,
+    start_page_presenter: StartPagePresenter,
+):
     next_url = request.args.get("next")
     if next_url is not None:
         session.set_next_url(next_url)
-    return template_renderer.render_template("auth/start.html")
+    response = start_page.show_start_page()
+    view_model = start_page_presenter.show_start_page(response)
+    return template_renderer.render_template(
+        "auth/start.html", context=dict(view_model=view_model)
+    )
 
 
 @auth.route("/help")

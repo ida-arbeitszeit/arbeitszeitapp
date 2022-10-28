@@ -176,7 +176,7 @@ the command::
 Translation
 -----------
 
-We use `Flask-Babel <https://flask-babel.tkte.ch/>`_ for translation.
+We use `Flask-Babel <https://python-babel.github.io/flask-babel/>`_ for translation.
 
 1) Add a new language:
 
@@ -201,13 +201,17 @@ In jinja templates use:
 - ``ngettext(singular: str, plural: str, n)``
 
 
-3) Parse code and update language specific .po-files::
+3) Parse code for translatable strings (create .pot file): 
+
+    $ python setup.py extract_messages
+
+4) Update language specific .po-files::
 
     $ python setup.py update_catalog
 
-4) Translate language specific .po-files.
+5) Translate language specific .po-files.
 	
-5) Compile translation files::
+6) Compile translation files to .mo-files::
 
     $ python setup.py compile_catalog
 
