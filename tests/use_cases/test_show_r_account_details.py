@@ -4,11 +4,7 @@ from decimal import Decimal
 from arbeitszeit.entities import SocialAccounting
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases import ShowRAccountDetailsUseCase
-from tests.data_generators import (
-    CompanyGenerator,
-    MemberGenerator,
-    TransactionGenerator,
-)
+from tests.data_generators import TransactionGenerator
 
 from .base_test_case import BaseTestCase
 
@@ -16,8 +12,6 @@ from .base_test_case import BaseTestCase
 class UseCaseTester(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.member_generator = self.injector.get(MemberGenerator)
-        self.company_generator = self.injector.get(CompanyGenerator)
         self.show_r_account_details = self.injector.get(ShowRAccountDetailsUseCase)
         self.transaction_generator = self.injector.get(TransactionGenerator)
         self.social_accounting = self.injector.get(SocialAccounting)
@@ -43,7 +37,7 @@ class UseCaseTester(BaseTestCase):
         assert response.company_id == company.id
 
     def test_that_no_info_is_generated_after_selling_of_consumer_product(self) -> None:
-        member = self.member_generator.create_member()
+        member = self.member_generator.create_member_entity()
         company = self.company_generator.create_company()
 
         self.transaction_generator.create_transaction(

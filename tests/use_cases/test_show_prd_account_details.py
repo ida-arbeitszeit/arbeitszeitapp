@@ -4,11 +4,7 @@ from decimal import Decimal
 from arbeitszeit.entities import SocialAccounting
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases import ShowPRDAccountDetailsUseCase
-from tests.data_generators import (
-    CompanyGenerator,
-    MemberGenerator,
-    TransactionGenerator,
-)
+from tests.data_generators import TransactionGenerator
 
 from .base_test_case import BaseTestCase
 
@@ -16,8 +12,6 @@ from .base_test_case import BaseTestCase
 class UseCaseTester(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.member_generator = self.injector.get(MemberGenerator)
-        self.company_generator = self.injector.get(CompanyGenerator)
         self.show_prd_account_details = self.injector.get(ShowPRDAccountDetailsUseCase)
         self.transaction_generator = self.injector.get(TransactionGenerator)
         self.social_accounting = self.injector.get(SocialAccounting)
@@ -110,7 +104,7 @@ class UseCaseTester(BaseTestCase):
     def test_that_correct_info_is_generated_after_selling_of_consumer_product(
         self,
     ) -> None:
-        member = self.member_generator.create_member()
+        member = self.member_generator.create_member_entity()
         company = self.company_generator.create_company()
 
         self.transaction_generator.create_transaction(
@@ -188,7 +182,7 @@ class UseCaseTester(BaseTestCase):
     def test_that_plotting_info_is_generated_after_selling_of_consumer_product(
         self,
     ) -> None:
-        member = self.member_generator.create_member()
+        member = self.member_generator.create_member_entity()
         company = self.company_generator.create_company()
 
         self.transaction_generator.create_transaction(
@@ -205,7 +199,7 @@ class UseCaseTester(BaseTestCase):
     def test_that_correct_plotting_info_is_generated_after_selling_of_two_consumer_products(
         self,
     ) -> None:
-        member = self.member_generator.create_member()
+        member = self.member_generator.create_member_entity()
         company = self.company_generator.create_company()
 
         trans1 = self.transaction_generator.create_transaction(
@@ -237,7 +231,7 @@ class UseCaseTester(BaseTestCase):
     def test_that_plotting_info_is_generated_in_the_correct_order_after_selling_of_three_consumer_products(
         self,
     ) -> None:
-        member = self.member_generator.create_member()
+        member = self.member_generator.create_member_entity()
         company = self.company_generator.create_company()
 
         trans1 = self.transaction_generator.create_transaction(
@@ -287,7 +281,7 @@ class UseCaseTester(BaseTestCase):
 
     def test_that_correct_buyer_info_is_shown_when_company_sold_to_member(self) -> None:
         company = self.company_generator.create_company()
-        member = self.member_generator.create_member()
+        member = self.member_generator.create_member_entity()
 
         self.transaction_generator.create_transaction(
             sending_account=member.account,

@@ -33,7 +33,7 @@ def test_that_member_can_be_retrieved_by_its_id(
     repository: MemberRepository,
     member_generator: MemberGenerator,
 ):
-    expected_member = member_generator.create_member()
+    expected_member = member_generator.create_member_entity()
     assert repository.get_by_id(expected_member.id) == expected_member
 
 
@@ -42,7 +42,7 @@ def test_that_member_can_be_retrieved_by_its_email(
     repository: MemberRepository, member_generator: MemberGenerator
 ):
     expected_mail = "test_mail@testmail.com"
-    expected_member = member_generator.create_member(email=expected_mail)
+    expected_member = member_generator.create_member_entity(email=expected_mail)
     assert repository.get_by_email(expected_mail) == expected_member
 
 
@@ -51,7 +51,7 @@ def test_that_random_email_returns_no_member(
     repository: MemberRepository, member_generator: MemberGenerator
 ):
     random_email = "xyz123@testmail.com"
-    member_generator.create_member(email="test_mail@testmail.com")
+    member_generator.create_member_entity(email="test_mail@testmail.com")
     assert repository.get_by_email(random_email) is None
 
 
@@ -106,7 +106,7 @@ def test_count_one_registered_member_when_one_was_created(
     generator: MemberGenerator,
     repository: MemberRepository,
 ) -> None:
-    generator.create_member()
+    generator.create_member_entity()
     assert repository.count_registered_members() == 1
 
 
@@ -123,8 +123,8 @@ def test_that_all_members_can_be_retrieved(
     repository: MemberRepository,
     member_generator: MemberGenerator,
 ):
-    expected_member1 = member_generator.create_member()
-    expected_member2 = member_generator.create_member()
+    expected_member1 = member_generator.create_member_entity()
+    expected_member2 = member_generator.create_member_entity()
     all_members = list(repository.get_all_members())
     assert expected_member1 in all_members
     assert expected_member2 in all_members
@@ -137,7 +137,7 @@ def test_that_number_of_returned_members_is_equal_to_number_of_created_members(
 ):
     expected_number_of_members = 3
     for i in range(expected_number_of_members):
-        member_generator.create_member()
+        member_generator.create_member_entity()
     member_count = len(list(repository.get_all_members()))
     assert member_count == expected_number_of_members
 
@@ -262,7 +262,7 @@ class ConfirmMemberTests(FlaskTestCase):
         )
 
     def test_that_confirmed_on_does_not_get_updated_for_other_user(self) -> None:
-        other_member_id = self.member_generator.create_member().id
+        other_member_id = self.member_generator.create_member_entity().id
         expected_timestamp = datetime(2000, 1, 2)
         member_id = self.create_member()
         self.repository.confirm_member(member_id, confirmed_on=expected_timestamp)

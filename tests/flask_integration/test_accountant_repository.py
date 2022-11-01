@@ -75,7 +75,7 @@ class CreateAccountantWithExistingMemberEmailTests(FlaskTestCase):
         self.expected_password = "test password"
 
     def test_can_create_accountant_with_same_email_address_as_member(self) -> None:
-        self.member_generator.create_member(email=self.expected_email)
+        self.member_generator.create_member_entity(email=self.expected_email)
         self.repository.create_accountant(
             email=self.expected_email,
             name=self.expected_name,
