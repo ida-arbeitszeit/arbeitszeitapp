@@ -1,0 +1,23 @@
+{% extends "base_accountant.html" %}
+
+{% block content %}
+
+<div class="section">
+  <div class="has-text-centered pb-5">
+    <div class="has-text-centered py-5">
+      <h1 class="title is-3">{{ gettext("Frequent actions") }}</h1>
+    </div>
+    <div class="tile is-ancestor">
+      <div class="tile is-parent">
+        <a href="{{ view_model.unreviewed_plans_list_view_url }}">
+          <div class="tile is-child box has-background-danger-light">
+            <h1 class="title is-5">
+              {{ gettext("Unreviewed plans") }}
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
