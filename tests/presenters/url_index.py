@@ -97,6 +97,9 @@ class UrlIndexTestImpl:
     def get_self_approve_plan_url(self, draft_id: UUID) -> str:
         return f"self approve plan url for draft {draft_id}"
 
+    def get_unreviewed_plans_list_view_url(self) -> str:
+        return "unreviewed_plans_view_url 123"
+
 
 class RenewPlanUrlIndexTestImpl:
     def get_renew_plan_url(self, plan_id: UUID) -> str:
