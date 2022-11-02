@@ -61,7 +61,7 @@ class ShowMyPlansPresenterTests(TestCase):
         self.assertFalse(self.notifier.warnings)
 
     def test_do_only_show_active_plans_when_user_has_one_active_plan(self):
-        plan = self.plan_generator.create_plan(activation_date=datetime.min)
+        plan = self.plan_generator.create_plan(activation_date=datetime.now())
         RESPONSE_WITH_ONE_ACTIVE_PLAN = self.response_with_one_active_plan(plan)
         presentation = self.presenter.present(RESPONSE_WITH_ONE_ACTIVE_PLAN)
         self.assertTrue(presentation.show_active_plans)
@@ -70,7 +70,7 @@ class ShowMyPlansPresenterTests(TestCase):
 
     def test_presenter_shows_correct_info_of_one_single_active_plan(self):
         plan = self.plan_generator.create_plan(
-            activation_date=datetime.min, cooperation=None, is_available=True
+            activation_date=datetime.now(), cooperation=None, is_available=True
         )
         RESPONSE_WITH_ONE_ACTIVE_PLAN = self.response_with_one_active_plan(plan)
         presentation = self.presenter.present(RESPONSE_WITH_ONE_ACTIVE_PLAN)
@@ -194,13 +194,13 @@ class ShowMyPlansPresenterTests(TestCase):
             self.url_index.get_delete_draft_url(draft_id),
         )
 
-    def test_that_self_approve_plan_url_is_set_correctly(self) -> None:
+    def test_that_file_plan_url_is_set_correctly(self) -> None:
         response = self.response_with_one_draft()
         draft_id = response.drafts[0].id
         view_model = self.presenter.present(response)
         self.assertEqual(
-            view_model.drafts.rows[0].self_approve_plan_url,
-            self.url_index.get_self_approve_plan_url(draft_id),
+            view_model.drafts.rows[0].file_plan_url,
+            self.url_index.get_file_plan_url(draft_id),
         )
 
     def _convert_into_plan_info(self, plan: Plan) -> PlanInfo:
