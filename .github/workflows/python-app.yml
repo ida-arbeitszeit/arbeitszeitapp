@@ -5,9 +5,13 @@ name: Arbeitszeitapp CI Tests
 
 on:
   push:
-    branches: [ master sebas/file-plan ]
+    branches:
+      - master
+      - sebas/file-plan
   pull_request:
-    branches: [ master sebas/file-plan ]
+    branches:
+      - master
+      - sebas/file-plan
 
 jobs:
   build-nix:
