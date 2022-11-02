@@ -144,7 +144,7 @@ class GeneralUrlIndex:
         return url_for("main_company.file_plan", draft_id=draft_id)
 
     def get_unreviewed_plans_list_view_url(self) -> str:
-        return ""
+        return url_for("main_accountant.list_plans_with_pending_review")
 
 
 class MemberUrlIndex:
