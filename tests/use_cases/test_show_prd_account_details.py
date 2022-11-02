@@ -5,9 +5,7 @@ from arbeitszeit.entities import SocialAccounting
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases import ShowPRDAccountDetailsUseCase
 from tests.data_generators import (
-    CompanyGenerator,
     FakeDatetimeService,
-    MemberGenerator,
     TransactionGenerator,
 )
 
