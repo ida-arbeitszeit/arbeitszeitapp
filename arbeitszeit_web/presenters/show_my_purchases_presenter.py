@@ -37,9 +37,8 @@ class ViewModel:
     def __len__(self) -> int:
         return len(self.purchases)
 
-    def __iter__(self) -> Iterator:
-        for i in self.purchases:
-            yield i
+    def __iter__(self) -> Iterator[Purchase]:
+        yield from self.purchases
 
 
 class ShowMyPurchasesPresenter:
