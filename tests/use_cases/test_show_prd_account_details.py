@@ -1,10 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 
 from arbeitszeit.entities import SocialAccounting
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases import ShowPRDAccountDetailsUseCase
-from tests.data_generators import TransactionGenerator
+from tests.data_generators import FakeDatetimeService, TransactionGenerator
 
 from .base_test_case import BaseTestCase
 
@@ -201,12 +201,14 @@ class UseCaseTester(BaseTestCase):
     ) -> None:
         member = self.member_generator.create_member_entity()
         company = self.company_generator.create_company()
+        datetime_service = FakeDatetimeService()
 
         trans1 = self.transaction_generator.create_transaction(
             sending_account=member.account,
             receiving_account=company.product_account,
             amount_sent=Decimal(10),
             amount_received=Decimal(5),
+            date=datetime_service.now() - timedelta(hours=2),
         )
 
         trans2 = self.transaction_generator.create_transaction(
@@ -214,6 +216,7 @@ class UseCaseTester(BaseTestCase):
             receiving_account=company.product_account,
             amount_sent=Decimal(10),
             amount_received=Decimal(10),
+            date=datetime_service.now() - timedelta(hours=1),
         )
 
         response = self.show_prd_account_details(company.id)
@@ -233,12 +236,14 @@ class UseCaseTester(BaseTestCase):
     ) -> None:
         member = self.member_generator.create_member_entity()
         company = self.company_generator.create_company()
+        datetime_service = FakeDatetimeService()
 
         trans1 = self.transaction_generator.create_transaction(
             sending_account=member.account,
             receiving_account=company.product_account,
             amount_sent=Decimal(10),
             amount_received=Decimal(1),
+            date=datetime_service.now() - timedelta(hours=3),
         )
 
         trans2 = self.transaction_generator.create_transaction(
@@ -246,6 +251,7 @@ class UseCaseTester(BaseTestCase):
             receiving_account=company.product_account,
             amount_sent=Decimal(10),
             amount_received=Decimal(2),
+            date=datetime_service.now() - timedelta(hours=2),
         )
 
         trans3 = self.transaction_generator.create_transaction(
@@ -253,6 +259,7 @@ class UseCaseTester(BaseTestCase):
             receiving_account=company.product_account,
             amount_sent=Decimal(10),
             amount_received=Decimal(3),
+            date=datetime_service.now() - timedelta(hours=1),
         )
 
         response = self.show_prd_account_details(company.id)
