@@ -4,11 +4,7 @@ from decimal import Decimal
 from arbeitszeit.entities import SocialAccounting
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases import ShowPRDAccountDetailsUseCase
-from tests.data_generators import (
-    FakeDatetimeService,
-    TransactionGenerator,
-)
-
+from tests.data_generators import FakeDatetimeService, TransactionGenerator
 
 from .base_test_case import BaseTestCase
 
