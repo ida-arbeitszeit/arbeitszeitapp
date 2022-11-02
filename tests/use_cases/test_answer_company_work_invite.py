@@ -1,28 +1,24 @@
 from typing import Optional
-from unittest import TestCase
 from uuid import UUID, uuid4
 
-from arbeitszeit.repositories import CompanyWorkerRepository, WorkerInviteRepository
 from arbeitszeit.use_cases import (
     AnswerCompanyWorkInvite,
     AnswerCompanyWorkInviteRequest,
     AnswerCompanyWorkInviteResponse,
     InviteWorkerToCompanyUseCase,
 )
-from tests.data_generators import CompanyGenerator, MemberGenerator
+from tests.use_cases.repositories import CompanyWorkerRepository, WorkerInviteRepository
 
-from .dependency_injection import get_dependency_injector
+from .base_test_case import BaseTestCase
 
 
-class AnwerCompanyWorkInviteTests(TestCase):
+class AnwerCompanyWorkInviteTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.answer_company_work_invite = self.injector.get(AnswerCompanyWorkInvite)
         self.invite_worker_to_company = self.injector.get(InviteWorkerToCompanyUseCase)
-        self.member_generator = self.injector.get(MemberGenerator)
-        self.company_generator = self.injector.get(CompanyGenerator)
-        self.invite_repository = self.injector.get(WorkerInviteRepository)  # type: ignore
-        self.company_worker_repository = self.injector.get(CompanyWorkerRepository)  # type: ignore
+        self.invite_repository = self.injector.get(WorkerInviteRepository)
+        self.company_worker_repository = self.injector.get(CompanyWorkerRepository)
         self.company = self.company_generator.create_company()
         self.member = self.member_generator.create_member()
 
@@ -80,7 +76,10 @@ class AnwerCompanyWorkInviteTests(TestCase):
             )
         )
         repository = self.injector.get(CompanyWorkerRepository)  # type: ignore
-        self.assertIn(self.member, repository.get_company_workers(self.company.id))
+        self.assertIn(
+            self.member,
+            {worker.id for worker in repository.get_company_workers(self.company.id)},
+        )
         self.assertTrue(response.is_success)
 
     def test_accepting_an_invite_marks_response_as_accepted(self) -> None:
@@ -103,7 +102,12 @@ class AnwerCompanyWorkInviteTests(TestCase):
         )
         self.assertNotIn(
             self.member,
-            self.company_worker_repository.get_company_workers(self.company.id),
+            {
+                worker.id
+                for worker in self.company_worker_repository.get_company_workers(
+                    self.company.id
+                )
+            },
         )
         self.assertTrue(response.is_success)
 
@@ -152,7 +156,7 @@ class AnwerCompanyWorkInviteTests(TestCase):
             self._create_request(
                 is_accepted=True,
                 invite_id=invite_id,
-                user=other_member.id,
+                user=other_member,
             )
         )
         self.assertFalse(response.is_success)
@@ -166,7 +170,7 @@ class AnwerCompanyWorkInviteTests(TestCase):
             self._create_request(
                 is_accepted=True,
                 invite_id=invite_id,
-                user=other_member.id,
+                user=other_member,
             )
         )
         self.assertEqual(
@@ -193,7 +197,7 @@ class AnwerCompanyWorkInviteTests(TestCase):
             self._create_request(
                 is_accepted=True,
                 invite_id=invite_id,
-                user=other_member.id,
+                user=other_member,
             )
         )
         self.assertIsNone(response.company_name)
@@ -202,7 +206,7 @@ class AnwerCompanyWorkInviteTests(TestCase):
         invite_response = self.invite_worker_to_company(
             InviteWorkerToCompanyUseCase.Request(
                 self.company.id,
-                self.member.id,
+                self.member,
             )
         )
         invite_id = invite_response.invite_id
@@ -213,7 +217,7 @@ class AnwerCompanyWorkInviteTests(TestCase):
         self, invite_id: UUID, is_accepted: bool, user: Optional[UUID] = None
     ) -> AnswerCompanyWorkInviteRequest:
         if user is None:
-            user = self.member.id
+            user = self.member
         return AnswerCompanyWorkInviteRequest(
             invite_id=invite_id,
             is_accepted=is_accepted,

@@ -52,7 +52,7 @@ class UseCaseTests(TestCase):
     ) -> None:
         email_address = "test@test.test"
         token = self.invite_user(email=email_address)
-        self.member_generator.create_member(email=email_address)
+        self.member_generator.create_member_entity(email=email_address)
         request = self.create_request(token=token, email=email_address)
         response = self.use_case.register_accountant(request)
         self.assertTrue(response.is_accepted)
