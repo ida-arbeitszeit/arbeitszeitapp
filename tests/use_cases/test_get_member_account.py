@@ -19,7 +19,7 @@ def test_that_balance_is_zero_when_no_transaction_took_place(
     member_generator: MemberGenerator,
 ):
     member = member_generator.create_member()
-    response = use_case(member.id)
+    response = use_case(member)
     assert response.balance == 0
 
 
@@ -29,7 +29,7 @@ def test_that_transactions_is_empty_when_no_transaction_took_place(
     member_generator: MemberGenerator,
 ):
     member = member_generator.create_member()
-    response = use_case(member.id)
+    response = use_case(member)
     assert not response.transactions
 
 
@@ -42,7 +42,7 @@ def test_that_transactions_is_empty_when_member_is_not_involved_in_transaction(
 ):
     member_of_interest = member_generator.create_member()
     company = company_generator.create_company()
-    other_member = member_generator.create_member()
+    other_member = member_generator.create_member_entity()
 
     transaction_generator.create_transaction(
         sending_account=other_member.account,
@@ -51,7 +51,7 @@ def test_that_transactions_is_empty_when_member_is_not_involved_in_transaction(
         amount_received=Decimal(8.5),
     )
 
-    response = use_case(member_of_interest.id)
+    response = use_case(member_of_interest)
     assert not response.transactions
 
 
@@ -62,7 +62,7 @@ def test_that_correct_info_is_generated_after_member_pays_product(
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    member = member_generator.create_member()
+    member = member_generator.create_member_entity()
     company = company_generator.create_company()
 
     transaction_generator.create_transaction(
@@ -87,7 +87,7 @@ def test_that_a_transaction_with_volume_zero_is_shown_correctly(
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    member = member_generator.create_member()
+    member = member_generator.create_member_entity()
     company = company_generator.create_company()
 
     transaction_generator.create_transaction(
@@ -109,7 +109,7 @@ def test_that_correct_info_is_generated_after_member_receives_wages(
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    member = member_generator.create_member()
+    member = member_generator.create_member_entity()
     company = company_generator.create_company()
 
     transaction_generator.create_transaction(
@@ -137,7 +137,7 @@ def test_that_correct_info_for_company_is_generated_in_correct_order_after_sever
 ):
     company1 = company_generator.create_company()
     company2 = company_generator.create_company()
-    member = member_generator.create_member()
+    member = member_generator.create_member_entity()
 
     # wages from comp1
     transaction_generator.create_transaction(

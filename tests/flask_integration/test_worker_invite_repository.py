@@ -56,7 +56,7 @@ class IsWorkerInvitedToCompanyTests(TestCase):
         company_generator = self.injector.get(CompanyGenerator)
         member_generator = self.injector.get(MemberGenerator)
         self.company = company_generator.create_company().id
-        self.worker = member_generator.create_member().id
+        self.worker = member_generator.create_member_entity().id
 
     def test_being_invited_to_a_company_does_not_invite_worker_to_other_company(
         self,

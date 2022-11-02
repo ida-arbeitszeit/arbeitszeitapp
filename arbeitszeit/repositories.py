@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterable, Iterator, List, Optional, Protocol, Union
+from typing import Generic, Iterable, Iterator, List, Optional, Protocol, TypeVar, Union
 from uuid import UUID
 
 from arbeitszeit.entities import (
@@ -22,6 +24,19 @@ from arbeitszeit.entities import (
     SocialAccounting,
     Transaction,
 )
+
+T = TypeVar("T", covariant=True)
+
+
+class QueryResult(Protocol, Generic[T]):
+    def __iter__(self) -> Iterator[T]:
+        ...
+
+    def limit(self, n: int) -> QueryResult[T]:
+        ...
+
+    def offset(self, n: int) -> QueryResult[T]:
+        ...
 
 
 class CompanyWorkerRepository(Protocol):
@@ -106,7 +121,7 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def get_active_plans(self) -> Iterator[Plan]:
+    def get_active_plans(self) -> QueryResult[Plan]:
         pass
 
     @abstractmethod
@@ -160,11 +175,11 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def query_active_plans_by_product_name(self, query: str) -> Iterator[Plan]:
+    def query_active_plans_by_product_name(self, query: str) -> QueryResult[Plan]:
         pass
 
     @abstractmethod
-    def query_active_plans_by_plan_id(self, query: str) -> Iterator[Plan]:
+    def query_active_plans_by_plan_id(self, query: str) -> QueryResult[Plan]:
         pass
 
     @abstractmethod

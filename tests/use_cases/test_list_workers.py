@@ -50,7 +50,7 @@ def test_list_workers_response_includes_single_company_worker(
     company_generator: CompanyGenerator,
     member_generator: MemberGenerator,
 ):
-    worker: Member = member_generator.create_member()
+    worker: Member = member_generator.create_member_entity()
     company: Company = company_generator.create_company(workers=[worker])
     response: ListWorkersResponse = list_workers(make_request(company=company.id))
     assert worker_in_results(worker, response)
@@ -62,8 +62,8 @@ def test_list_workers_response_includes_multiple_company_workers(
     company_generator: CompanyGenerator,
     member_generator: MemberGenerator,
 ):
-    worker1: Member = member_generator.create_member()
-    worker2: Member = member_generator.create_member()
+    worker1: Member = member_generator.create_member_entity()
+    worker2: Member = member_generator.create_member_entity()
     company: Company = company_generator.create_company(workers=[worker1, worker2])
     response: ListWorkersResponse = list_workers(make_request(company=company.id))
     assert worker_in_results(worker1, response) and worker_in_results(worker2, response)

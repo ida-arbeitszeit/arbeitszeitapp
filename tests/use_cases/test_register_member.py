@@ -63,7 +63,7 @@ class RegisterMemberTests(TestCase):
             self.assertIsNone(member.confirmed_on)
 
     def test_that_correct_error_is_raised_when_user_with_mail_exists(self) -> None:
-        self.member_generator.create_member(email="test@cp.org")
+        self.member_generator.create_member_entity(email="test@cp.org")
         request = RegisterMemberUseCase.Request(**DEFAULT)
         response = self.use_case(request)
         self.assertTrue(response.is_rejected)
