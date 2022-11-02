@@ -1,4 +1,5 @@
 from unittest import TestCase
+from uuid import UUID
 
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
 from arbeitszeit.use_cases.list_plans_with_pending_review import (
@@ -32,9 +33,20 @@ class UseCaseTests(TestCase):
         )
         self.assertTrue(response.plans)
 
-    def file_plan_draft(self) -> None:
+    def test_that_plan_id_of_newly_filed_plan_shows_up_in_listing(self) -> None:
+        plan_id = self.file_plan_draft()
+        response = self.use_case.list_plans_with_pending_review(
+            request=ListPlansWithPendingReviewUseCase.Request()
+        )
+        self.assertIn(plan_id, [plan.id for plan in response.plans])
+
+    def file_plan_draft(self) -> UUID:
         draft = self.plan_generator.draft_plan()
         request = FilePlanWithAccounting.Request(
             draft_id=draft.id, filing_company=draft.planner.id
         )
-        self.file_plan_with_accounting_use_case.file_plan_with_accounting(request)
+        response = self.file_plan_with_accounting_use_case.file_plan_with_accounting(
+            request
+        )
+        assert response.plan_id
+        return response.plan_id
