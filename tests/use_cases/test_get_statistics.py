@@ -58,8 +58,8 @@ class GetStatisticsTester(TestCase):
         assert stats.registered_companies_count == 2
 
     def test_counting_of_members(self) -> None:
-        self.member_generator.create_member()
-        self.member_generator.create_member()
+        self.member_generator.create_member_entity()
+        self.member_generator.create_member_entity()
         stats = self.use_case()
         assert stats.registered_members_count == 2
 
@@ -79,7 +79,7 @@ class GetStatisticsTester(TestCase):
     ) -> None:
         num_transactions = 2
         for _ in range(num_transactions):
-            worker = self.member_generator.create_member()
+            worker = self.member_generator.create_member_entity()
             account = worker.account
             self.transaction_generator.create_transaction(
                 receiving_account=account,
@@ -92,7 +92,7 @@ class GetStatisticsTester(TestCase):
         self,
     ) -> None:
         # worker receives certs
-        worker = self.member_generator.create_member()
+        worker = self.member_generator.create_member_entity()
         worker_account = worker.account
         self.transaction_generator.create_transaction(
             receiving_account=worker_account,

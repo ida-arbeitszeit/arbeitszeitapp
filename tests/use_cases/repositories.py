@@ -6,7 +6,18 @@ from datetime import datetime
 from decimal import Decimal
 from itertools import islice
 from statistics import StatisticsError, mean
-from typing import Dict, Iterable, Iterator, List, Optional, Set, Tuple, Union
+from typing import (
+    Dict,
+    Generic,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    TypeVar,
+    Union,
+)
 from uuid import UUID, uuid4
 
 from injector import inject, singleton
@@ -32,6 +43,22 @@ from arbeitszeit.entities import (
     Transaction,
 )
 from tests.search_tree import SearchTree
+
+T = TypeVar("T")
+
+
+class QueryResultImpl(Generic[T]):
+    def __init__(self, items: List[T]) -> None:
+        self.items = items
+
+    def limit(self, n: int) -> QueryResultImpl[T]:
+        return type(self)(items=self.items[:n])
+
+    def offset(self, n: int) -> QueryResultImpl[T]:
+        return type(self)(items=self.items[n:])
+
+    def __iter__(self) -> Iterator[T]:
+        return iter(self.items)
 
 
 @singleton
@@ -486,10 +513,10 @@ class PlanRepository(interfaces.PlanRepository):
     def increase_payout_count_by_one(self, plan: Plan) -> None:
         plan.payout_count += 1
 
-    def get_active_plans(self) -> Iterator[Plan]:
-        for plan in self.plans.values():
-            if plan.is_active:
-                yield plan
+    def get_active_plans(self) -> QueryResultImpl[Plan]:
+        return QueryResultImpl(
+            items=[plan for plan in self.plans.values() if plan.is_active]
+        )
 
     def get_three_latest_active_plans_ordered_by_activation_date(
         self,
@@ -638,15 +665,23 @@ class PlanRepository(interfaces.PlanRepository):
         self.plans[plan.id] = plan
         return plan
 
-    def query_active_plans_by_product_name(self, query: str) -> Iterator[Plan]:
-        for plan in self.plans.values():
-            if plan.is_active and (query.lower() in plan.prd_name.lower()):
-                yield plan
+    def query_active_plans_by_product_name(self, query: str) -> QueryResultImpl[Plan]:
+        return QueryResultImpl(
+            [
+                plan
+                for plan in self.plans.values()
+                if plan.is_active and (query.lower() in plan.prd_name.lower())
+            ]
+        )
 
-    def query_active_plans_by_plan_id(self, query: str) -> Iterator[Plan]:
-        for plan in self.plans.values():
-            if plan.is_active and (query in str(plan.id)):
-                yield plan
+    def query_active_plans_by_plan_id(self, query: str) -> QueryResultImpl[Plan]:
+        return QueryResultImpl(
+            [
+                plan
+                for plan in self.plans.values()
+                if plan.is_active and (query in str(plan.id))
+            ]
+        )
 
     def toggle_product_availability(self, plan: Plan) -> None:
         plan.is_available = True if (plan.is_available == False) else False

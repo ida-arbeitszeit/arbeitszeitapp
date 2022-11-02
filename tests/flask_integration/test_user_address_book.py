@@ -18,7 +18,7 @@ class UserAddressBookTests(TestCase):
         self.assertIsNone(self.repository.get_user_email_address(uuid4()))
 
     def test_that_associated_email_for_member_is_returned(self) -> None:
-        member = self.member_generator.create_member()
+        member = self.member_generator.create_member_entity()
         self.assertEqual(
             member.email,
             self.repository.get_user_email_address(member.id),

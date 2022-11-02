@@ -2,7 +2,6 @@ from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.delete_draft import DeleteDraftUseCase
 from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
-from tests.data_generators import CompanyGenerator, PlanGenerator
 
 from .base_test_case import BaseTestCase
 
@@ -11,8 +10,6 @@ class UseCaseTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.use_case = self.injector.get(DeleteDraftUseCase)
-        self.company_generator = self.injector.get(CompanyGenerator)
-        self.plan_generator = self.injector.get(PlanGenerator)
         self.get_draft_summary = self.injector.get(GetDraftSummary)
 
     def test_that_failure_is_raised_if_non_existing_plan_is_deleted_for_non_existing_company(
