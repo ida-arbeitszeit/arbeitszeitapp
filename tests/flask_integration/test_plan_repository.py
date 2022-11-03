@@ -8,7 +8,6 @@ from arbeitszeit_flask.database.repositories import PlanRepository
 from tests.datetime_service import FakeDatetimeService
 
 from ..data_generators import CompanyGenerator, PlanGenerator
-from .dependency_injection import injection_test
 from .flask import FlaskTestCase
 
 Number = Union[int, Decimal]
