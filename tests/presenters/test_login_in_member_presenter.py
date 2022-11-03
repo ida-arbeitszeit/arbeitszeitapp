@@ -3,12 +3,13 @@ from unittest import TestCase
 
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit_web.presenters.log_in_member_presenter import LogInMemberPresenter
+from arbeitszeit_web.session import UserRole
 from tests.session import FakeSession
 from tests.translator import FakeTranslator
 
+from ..forms import LoginForm
 from .dependency_injection import get_dependency_injector
-from .forms import LoginForm
-from .url_index import MemberUrlIndex
+from .url_index import UrlIndexTestImpl
 
 
 class PresenterTests(TestCase):
@@ -17,7 +18,7 @@ class PresenterTests(TestCase):
         self.presenter = self.injector.get(LogInMemberPresenter)
         self.session = self.injector.get(FakeSession)
         self.translator = self.injector.get(FakeTranslator)
-        self.member_url_index = self.injector.get(MemberUrlIndex)
+        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.form = LoginForm()
 
     def test_that_user_is_logged_into_session_on_success(self) -> None:
@@ -37,7 +38,7 @@ class PresenterTests(TestCase):
             reason=LogInMemberUseCase.RejectionReason.unknown_email_address
         )
         self.presenter.present_login_process(response, self.form)
-        self.assertTrue(self.form.email_errors)
+        self.assertTrue(self.form.email_field().errors)
 
     def test_that_correct_error_message_is_added_to_form(
         self,
@@ -50,7 +51,7 @@ class PresenterTests(TestCase):
             self.translator.gettext(
                 "Email address incorrect. Are you already registered as a member?"
             ),
-            self.form.email_errors,
+            self.form.email_field().errors,
         )
 
     def test_that_no_password_errors_are_rendered_when_email_address_is_unknown(
@@ -60,7 +61,7 @@ class PresenterTests(TestCase):
             reason=LogInMemberUseCase.RejectionReason.unknown_email_address
         )
         self.presenter.present_login_process(response, self.form)
-        self.assertFalse(self.form.password_errors)
+        self.assertFalse(self.form.password_field().errors)
 
     def test_that_no_errors_are_rendered_to_form_if_login_was_successful(
         self,
@@ -78,7 +79,7 @@ class PresenterTests(TestCase):
         self.presenter.present_login_process(response, self.form)
         self.assertIn(
             self.translator.gettext("Incorrect password"),
-            self.form.password_errors,
+            self.form.password_field().errors,
         )
 
     def test_that_no_email_error_is_rendered_if_password_was_invalid(
@@ -89,7 +90,7 @@ class PresenterTests(TestCase):
         )
         self.presenter.present_login_process(response, self.form)
         self.assertFalse(
-            self.form.email_errors,
+            self.form.email_field().errors,
         )
 
     def test_that_redirect_url_is_set_to_dashboard_if_no_next_url_can_be_retrieved_from_session(
@@ -99,7 +100,7 @@ class PresenterTests(TestCase):
         view_model = self.presenter.present_login_process(response, self.form)
         self.assertEqual(
             view_model.redirect_url,
-            self.member_url_index.get_member_dashboard_url(),
+            self.url_index.get_member_dashboard_url(),
         )
 
     def test_that_no_redirect_url_is_set_when_login_failed(self) -> None:
@@ -137,7 +138,7 @@ class PresenterTests(TestCase):
     def test_that_remember_field_from_form_is_respected(self) -> None:
         for expected_remember_state in [True, False]:
             with self.subTest():
-                self.form.set_remember_field(expected_remember_state)
+                self.form = LoginForm(remember_value=expected_remember_state)
                 response = self.create_success_response()
                 self.presenter.present_login_process(response, self.form)
                 login_attempt = self.session.get_most_recent_login()
@@ -154,7 +155,7 @@ class PresenterTests(TestCase):
         assert login_attempt
         self.assertEqual(
             login_attempt.user_role,
-            FakeSession.UserRole.member,
+            UserRole.member,
         )
 
     def create_success_response(

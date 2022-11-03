@@ -6,11 +6,13 @@ from uuid import uuid4
 
 from arbeitszeit.plan_summary import PlanSummary
 from arbeitszeit_web.formatters.plan_summary_formatter import PlanSummaryFormatter
+from arbeitszeit_web.session import UserRole
 from tests.datetime_service import FakeDatetimeService
+from tests.session import FakeSession
 from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
-from .url_index import CompanySummaryUrlIndex, CoopSummaryUrlIndexTestImpl
+from .url_index import UrlIndexTestImpl
 
 PLAN_SUMMARY = PlanSummary(
     plan_id=uuid4(),
@@ -40,11 +42,12 @@ PLAN_SUMMARY = PlanSummary(
 class PlanSummaryFormatterTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
-        self.coop_url_index = self.injector.get(CoopSummaryUrlIndexTestImpl)
-        self.company_url_index = self.injector.get(CompanySummaryUrlIndex)
+        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.translator = self.injector.get(FakeTranslator)
         self.formatter = self.injector.get(PlanSummaryFormatter)
         self.datetime_service = self.injector.get(FakeDatetimeService)
+        self.session = self.injector.get(FakeSession)
+        self.session.login_company("test@test.test")
 
     def test_plan_id_is_displayed_correctly_as_tuple_of_strings(self):
         plan_summary = self.formatter.format_plan_summary(PLAN_SUMMARY)
@@ -83,7 +86,9 @@ class PlanSummaryFormatterTests(TestCase):
             (
                 self.translator.gettext("Planning company"),
                 str(expected_planner_id),
-                self.company_url_index.get_company_summary_url(expected_planner_id),
+                self.url_index.get_company_summary_url(
+                    user_role=UserRole.company, company_id=expected_planner_id
+                ),
                 PLAN_SUMMARY.planner_name,
             ),
         )
@@ -225,7 +230,9 @@ class PlanSummaryFormatterTests(TestCase):
                 self.translator.gettext("Price (per unit)"),
                 "0.06",
                 True,
-                self.coop_url_index.get_coop_summary_url(coop_id),
+                self.url_index.get_coop_summary_url(
+                    user_role=UserRole.company, coop_id=coop_id
+                ),
             ),
         )
 

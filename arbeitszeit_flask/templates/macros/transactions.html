@@ -1,0 +1,109 @@
+<!--Used in company's p, r, a accounts-->
+{% macro basic_transaction(date, type, purpose, volume) %}
+<article class="media">
+    <div class="media-left">
+        <p class="pt-1">
+            <small class="has-text-weight-semibold">{{ date }}</small><br>
+        </p>
+    </div>
+    <div class="media-content">
+        <div class="content">
+            <p>
+                <strong class="is-size-5">
+                    {{ type }}
+                </strong>
+                <br>
+                <small>{{ purpose }}</small>
+            </p>
+        </div>
+    </div>
+    <div class="media-right">
+        <p class="is-size-5 pt-1 {{ 'has-text-success' if volume|float >= 0 else 'has-text-danger' }}">
+            {{ volume }}
+        </p>
+    </div>
+</article>
+{% endmacro %}
+
+<!--Used in company's prd account-->
+{% macro transaction_with_buyer(date, type, purpose, volume, buyer_name, buyer_type_icon) %}
+<article class="media">
+    <div class="media-left">
+        <p class="pt-1">
+            <small class="has-text-weight-semibold">{{ date }}</small><br>
+        </p>
+    </div>
+    <div class="media-content">
+        <div class="content">
+            <p>
+                <strong class="is-size-5">
+                    {{ type }}
+                </strong><span class="icon"><i class='{{ buyer_type_icon }}'></i></span><span>{{ buyer_name }}</span>
+                <br>
+                <small>{{ purpose }}</small>
+            </p>
+        </div>
+    </div>
+    <div class="media-right">
+        <p class="is-size-5 pt-1 {{ 'has-text-success' if volume|float >= 0 else 'has-text-danger' }}">
+            {{ volume }}
+        </p>
+    </div>
+</article>
+{% endmacro %}
+
+<!--Used in company's transaction overview-->
+{% macro transaction_with_account(date, type, purpose, volume, account) %}
+<article class="media">
+    <div class="media-left">
+        <p class="pt-1">
+            <small class="has-text-weight-semibold">{{ date }}</small><br>
+        </p>
+    </div>
+    <div class="media-content">
+        <div class="content">
+            <p>
+                <strong class="is-size-5">
+                    {{ account }}: {{ type }}
+                </strong>
+                <br>
+                <small>{{ purpose }}</small>
+            </p>
+        </div>
+    </div>
+    <div class="media-right">
+        <p class="is-size-5 pt-1 {{ 'has-text-success' if volume|float >= 0 else 'has-text-danger' }}">
+            {{ volume }}
+        </p>
+    </div>
+</article>
+{% endmacro %}
+
+<!--Used in member account-->
+{% macro member_transaction(date, type, purpose, user_name, volume, is_volume_positive) %}
+<article class="media">
+    <div class="media-left">
+        <p class="pt-1">
+            <small class="has-text-weight-semibold">{{ date }}</small><br>
+        </p>
+    </div>
+    <div class="media-content">
+        <div class="content">
+            <p>
+                <strong class="is-size-5">
+                    {{ type }}
+                </strong>
+                <br>
+                <small>{{ purpose }}</small>
+                <br>
+                <small>{{ user_name }}</small>
+            </p>
+        </div>
+    </div>
+    <div class="media-right">
+        <p class="is-size-5 pt-1 {{ 'has-text-success' if is_volume_positive else 'has-text-danger' }}">
+            {{ volume }}
+        </p>
+    </div>
+</article>
+{% endmacro %}

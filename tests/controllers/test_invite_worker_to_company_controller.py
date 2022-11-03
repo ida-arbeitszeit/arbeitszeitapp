@@ -5,11 +5,14 @@ from uuid import uuid4
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyController
 from tests.session import FakeSession
 
+from .dependency_injection import get_dependency_injector
+
 
 class InviteWorkerToCompanyControllerTests(TestCase):
     def setUp(self) -> None:
-        self.session = FakeSession()
-        self.controller = InviteWorkerToCompanyController(self.session)
+        self.injector = get_dependency_injector()
+        self.session = self.injector.get(FakeSession)
+        self.controller = self.injector.get(InviteWorkerToCompanyController)
         self.company_id = uuid4()
         self.session.set_current_user_id(self.company_id)
 
@@ -41,8 +44,9 @@ class InviteWorkerToCompanyControllerTests(TestCase):
 
 class AnonymousUserTests(TestCase):
     def setUp(self) -> None:
-        self.session = FakeSession()
-        self.controller = InviteWorkerToCompanyController(self.session)
+        self.injector = get_dependency_injector()
+        self.session = self.injector.get(FakeSession)
+        self.controller = self.injector.get(InviteWorkerToCompanyController)
         self.session.set_current_user_id(None)
 
     def test_raise_value_error_if_user_is_not_logged_in(self) -> None:

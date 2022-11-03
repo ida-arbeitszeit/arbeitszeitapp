@@ -22,7 +22,7 @@ class SignupMemberView:
     def handle_request(self):
         register_form = RegisterForm(request.form)
         if request.method == "POST" and register_form.validate():
-            self._handle_valid_post_request(register_form=register_form)
+            return self._handle_valid_post_request(register_form=register_form)
         if current_user.is_authenticated:
             if self.flask_session.is_logged_in_as_member():
                 return redirect(url_for("main_member.dashboard"))

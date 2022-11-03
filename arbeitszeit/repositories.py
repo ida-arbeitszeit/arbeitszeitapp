@@ -13,6 +13,7 @@ from arbeitszeit.entities import (
     CompanyWorkInvite,
     Cooperation,
     Member,
+    PayoutFactor,
     Plan,
     PlanDraft,
     ProductionCosts,
@@ -23,18 +24,15 @@ from arbeitszeit.entities import (
 )
 
 
-class CompanyWorkerRepository(ABC):
-    @abstractmethod
-    def add_worker_to_company(self, company: Company, worker: Member) -> None:
-        pass
+class CompanyWorkerRepository(Protocol):
+    def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
+        ...
 
-    @abstractmethod
-    def get_company_workers(self, company: Company) -> Iterable[Member]:
-        pass
+    def get_company_workers(self, company: UUID) -> Iterable[Member]:
+        ...
 
-    @abstractmethod
     def get_member_workplaces(self, member: UUID) -> Iterable[Company]:
-        pass
+        ...
 
 
 class PurchaseRepository(ABC):
@@ -73,6 +71,10 @@ class PurchaseRepository(ABC):
 
 
 class PlanRepository(ABC):
+    @abstractmethod
+    def create_plan_from_draft(self, draft_id: UUID) -> Optional[UUID]:
+        pass
+
     @abstractmethod
     def set_plan_approval_date(
         self, plan: PlanDraft, approval_timestamp: datetime
@@ -190,6 +192,10 @@ class PlanRepository(ABC):
     def get_planner_id(self, plan_id: UUID) -> Optional[UUID]:
         pass
 
+    @abstractmethod
+    def get_all_plans_without_completed_review(self) -> Iterable[UUID]:
+        pass
+
 
 class TransactionRepository(ABC):
     @abstractmethod
@@ -247,6 +253,10 @@ class MemberRepository(ABC):
 
     @abstractmethod
     def has_member_with_email(self, email: str) -> bool:
+        pass
+
+    @abstractmethod
+    def is_member(self, id: UUID) -> bool:
         pass
 
     @abstractmethod
@@ -310,6 +320,10 @@ class CompanyRepository(ABC):
         pass
 
     @abstractmethod
+    def is_company(self, id: UUID) -> bool:
+        pass
+
+    @abstractmethod
     def count_registered_companies(self) -> int:
         pass
 
@@ -344,6 +358,23 @@ class PlanDraftRepository(ABC):
         is_public_service: bool,
         creation_timestamp: datetime,
     ) -> PlanDraft:
+        pass
+
+    @dataclass
+    class UpdateDraft:
+        id: UUID
+        product_name: Optional[str] = None
+        amount: Optional[int] = None
+        description: Optional[str] = None
+        labour_cost: Optional[Decimal] = None
+        means_cost: Optional[Decimal] = None
+        resource_cost: Optional[Decimal] = None
+        is_public_service: Optional[bool] = None
+        timeframe: Optional[int] = None
+        unit_of_distribution: Optional[str] = None
+
+    @abstractmethod
+    def update_draft(self, update: UpdateDraft) -> None:
         pass
 
     @abstractmethod
@@ -477,4 +508,12 @@ class AccountantRepository(Protocol):
 
 class LanguageRepository(Protocol):
     def get_available_language_codes(self) -> Iterable[str]:
+        ...
+
+
+class PayoutFactorRepository(Protocol):
+    def store_payout_factor(self, timestamp: datetime, payout_factor: Decimal) -> None:
+        ...
+
+    def get_latest_payout_factor(self) -> Optional[PayoutFactor]:
         ...

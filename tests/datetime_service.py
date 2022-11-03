@@ -1,6 +1,7 @@
 from datetime import date, datetime, timedelta
 from typing import Optional
 
+import pytz
 from dateutil import tz
 from injector import singleton
 
@@ -10,7 +11,6 @@ from arbeitszeit.datetime_service import DatetimeService
 @singleton
 class FakeDatetimeService(DatetimeService):
     def __init__(self):
-        super().__init__()
         self.frozen_time = None
 
     def freeze_time(self, timestamp: datetime):
@@ -32,6 +32,8 @@ class FakeDatetimeService(DatetimeService):
         zone: Optional[str] = None,
         fmt: Optional[str] = None,
     ) -> str:
+        if date.tzinfo is None:
+            date = date.replace(tzinfo=pytz.UTC)
         if zone is not None:
             date = date.astimezone(tz.gettz(zone))
         if fmt is None:

@@ -2,10 +2,13 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import List, Optional, Tuple
 
+from injector import inject
+
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.plan_summary import PlanSummary
+from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
-from arbeitszeit_web.url_index import CompanySummaryUrlIndex, CoopSummaryUrlIndex
+from arbeitszeit_web.url_index import UrlIndex
 
 
 @dataclass
@@ -30,14 +33,16 @@ class PlanSummaryWeb:
     expiration_date: str
 
 
+@inject
 @dataclass
 class PlanSummaryFormatter:
-    coop_url_index: CoopSummaryUrlIndex
-    company_url_index: CompanySummaryUrlIndex
+    url_index: UrlIndex
     translator: Translator
     datetime_service: DatetimeService
+    session: Session
 
     def format_plan_summary(self, plan_summary: PlanSummary) -> PlanSummaryWeb:
+        user_role = self.session.get_user_role()
         return PlanSummaryWeb(
             plan_id=(self.translator.gettext("Plan ID"), str(plan_summary.plan_id)),
             activity_string=(
@@ -49,7 +54,10 @@ class PlanSummaryFormatter:
             planner=(
                 self.translator.gettext("Planning company"),
                 str(plan_summary.planner_id),
-                self.company_url_index.get_company_summary_url(plan_summary.planner_id),
+                self.url_index.get_company_summary_url(
+                    user_role=user_role,
+                    company_id=plan_summary.planner_id,
+                ),
                 plan_summary.planner_name,
             ),
             product_name=(
@@ -92,7 +100,9 @@ class PlanSummaryFormatter:
                 self.translator.gettext("Price (per unit)"),
                 self._format_price(plan_summary.price_per_unit),
                 plan_summary.is_cooperating,
-                self.coop_url_index.get_coop_summary_url(plan_summary.cooperation)
+                self.url_index.get_coop_summary_url(
+                    user_role=user_role, coop_id=plan_summary.cooperation
+                )
                 if plan_summary.cooperation
                 else None,
             ),

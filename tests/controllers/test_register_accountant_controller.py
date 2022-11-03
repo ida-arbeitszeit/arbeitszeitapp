@@ -5,10 +5,13 @@ from arbeitszeit_web.controllers.register_accountant_controller import (
     RegisterAccountantController,
 )
 
+from .dependency_injection import get_dependency_injector
+
 
 class ControllerTests(TestCase):
     def setUp(self) -> None:
-        self.controller = RegisterAccountantController()
+        self.injector = get_dependency_injector()
+        self.controller = self.injector.get(RegisterAccountantController)
 
     def test_that_token_is_correctly_passed_to_request(self) -> None:
         form = FakeForm()

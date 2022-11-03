@@ -20,7 +20,7 @@
   </div>
 
   <div class="table-container">
-    <table class="table is-fullwidth">
+    <table class="table has-text-left mx-auto">
       <thead>
         <tr>
           <th>{{ gettext("Date") }}</th>
@@ -32,14 +32,14 @@
         </tr>
       </thead>
       <tbody>
-        {% if purchases is defined and purchases|length %}
-        {% for purchase in purchases %}
+        {% if view_model.is_purchases_visible %}
+        {% for purchase in view_model.purchases %}
         <tr>
-          <td>{{ purchase.purchase_date|format_datetime(zone='Europe/Berlin', fmt='%d.%m.%Y') }}</td>
+          <td>{{ purchase.purchase_date }}</td>
           <td>{{ purchase.product_name }}</td>
           <td>{{ purchase.product_description }}</td>
           <td>{{ purchase.price_per_unit }}</td>
-          <th>{{ purchase.amount }}</th>
+          <th>{{ purchase.purchase_amount }}</th>
           <th>{{ purchase.price_total }}</th>
         </tr>
         {% endfor %}

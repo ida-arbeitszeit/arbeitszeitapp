@@ -1,6 +1,7 @@
 from typing import Optional
 from uuid import UUID
 
+from flask import Response as FlaskResponse
 from flask import redirect, request, url_for
 from flask_login import current_user
 
@@ -27,8 +28,14 @@ from arbeitszeit.use_cases import (
     RequestCooperation,
     ToggleProductAvailability,
 )
+from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
+from arbeitszeit.use_cases.delete_draft import DeleteDraftUseCase
+from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
+from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_flask.database import CompanyRepository, commit_changes
+from arbeitszeit_flask.flask_request import FlaskRequest
+from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import (
     CompanySearchForm,
     CreateCooperationForm,
@@ -54,6 +61,12 @@ from arbeitszeit_flask.views.create_draft_view import CreateDraftView
 from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
 from arbeitszeit_flask.views.transfer_to_worker_view import TransferToWorkerView
+from arbeitszeit_web.controllers.delete_draft_controller import DeleteDraftController
+from arbeitszeit_web.create_draft import (
+    CreateDraftController,
+    CreateDraftPresenter,
+    GetPrefilledDraftDataPresenter,
+)
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
@@ -65,6 +78,7 @@ from arbeitszeit_web.hide_plan import HidePlanPresenter
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_drafts_of_company import ListDraftsPresenter
 from arbeitszeit_web.list_plans import ListPlansPresenter
+from arbeitszeit_web.presenters.delete_draft_presenter import DeleteDraftPresenter
 from arbeitszeit_web.presenters.self_approve_plan import SelfApprovePlanPresenter
 from arbeitszeit_web.presenters.show_a_account_details_presenter import (
     ShowAAccountDetailsPresenter,
@@ -158,6 +172,74 @@ def my_purchases(
     )
 
 
+@CompanyRoute("/company/draft/delete/<uuid:draft_id>", methods=["POST"])
+@commit_changes
+def delete_draft(
+    draft_id: UUID,
+    controller: DeleteDraftController,
+    use_case: DeleteDraftUseCase,
+    presenter: DeleteDraftPresenter,
+    http_404_view: Http404View,
+) -> Response:
+    use_case_request = controller.get_request(request=FlaskRequest(), draft=draft_id)
+    try:
+        use_case_response = use_case.delete_draft(use_case_request)
+    except use_case.Failure:
+        return http_404_view.get_response()
+    view_model = presenter.present_draft_deletion(use_case_response)
+    return redirect(view_model.redirect_target)
+
+
+@CompanyRoute("/company/draft/from-plan/<uuid:plan_id>", methods=["GET", "POST"])
+@commit_changes
+def create_draft_from_plan(
+    plan_id: UUID,
+    session: FlaskSession,
+    create_form_use_case: GetPlanSummaryCompany,
+    create_form_presenter: GetPrefilledDraftDataPresenter,
+    process_form_use_case: CreatePlanDraft,
+    process_form_controller: CreateDraftController,
+    process_form_presenter: CreateDraftPresenter,
+    not_found_view: Http404View,
+    template_renderer: UserTemplateRenderer,
+) -> Response:
+    status_code: int = 200
+    form = CreateDraftForm(request.form)
+    if request.method == "GET":
+        current_user = session.get_current_user()
+        assert current_user
+        response = create_form_use_case.get_plan_summary_for_company(
+            plan_id=plan_id, company_id=current_user
+        )
+        if response.plan_summary is None:
+            return not_found_view.get_response()
+        else:
+            create_form_presenter.show_prefilled_draft_data(
+                summary_data=response.plan_summary, form=form
+            )
+    if request.method == "POST":
+        if form.validate():
+            use_case_request = process_form_controller.import_form_data(draft_form=form)
+            use_case_response = process_form_use_case(use_case_request)
+            view_model = process_form_presenter.present_plan_creation(use_case_response)
+            if view_model.redirect_url is not None:
+                return redirect(view_model.redirect_url)
+        status_code = 400
+    return FlaskResponse(
+        template_renderer.render_template(
+            "company/create_draft.html",
+            context=dict(
+                form=form,
+                view_model=dict(
+                    save_draft_url="",
+                    cancel_url="/company/create_draft",
+                ),
+            ),
+        ),
+        status=status_code,
+    )
+
+
 @CompanyRoute("/company/create_draft", methods=["GET", "POST"])
 @commit_changes
 def create_draft(
@@ -171,12 +253,10 @@ def create_draft(
         return view.respond_to_get()
 
 
-@CompanyRoute("/company/self_approve_plan")
+@CompanyRoute("/company/self_approve_plan", methods=["POST"])
 @commit_changes
 def self_approve_plan(
     self_approve_plan: use_cases.SelfApprovePlan,
-    activate_plan_and_grant_credit: use_cases.ActivatePlanAndGrantCredit,
-    template_renderer: UserTemplateRenderer,
     presenter: SelfApprovePlanPresenter,
 ):
     "Self-approve a plan. Credit is granted automatically."
@@ -185,22 +265,46 @@ def self_approve_plan(
     approval_response = self_approve_plan(
         use_cases.SelfApprovePlan.Request(draft_id=draft_uuid)
     )
-    if approval_response.is_approved:
-        activate_plan_and_grant_credit(approval_response.new_plan_id)
     presenter.present_response(approval_response)
     return redirect(url_for("main_company.my_plans"))
 
 
-@CompanyRoute("/company/my_drafts", methods=["GET"])
-def my_drafts(
+@CompanyRoute("/company/draft/<draft_id>", methods=["GET"])
+def get_draft_summary(
+    draft_id: str,
+    use_case: GetDraftSummary,
+    presenter: GetPrefilledDraftDataPresenter,
+    template_renderer: UserTemplateRenderer,
+    not_found_view: Http404View,
+) -> Response:
+    use_case_response = use_case(UUID(draft_id))
+    if use_case_response is None:
+        return not_found_view.get_response()
+    form = CreateDraftForm()
+    view_model = presenter.show_prefilled_draft_data(use_case_response, form=form)
+    return FlaskResponse(
+        template_renderer.render_template(
+            "company/create_draft.html",
+            context=dict(
+                view_model=view_model,
+                form=form,
+            ),
+        )
+    )
+
+
+@CompanyRoute("/company/draft", methods=["GET"])
+def draft_list(
     list_drafts: use_cases.ListDraftsOfCompany,
     list_drafts_presenter: ListDraftsPresenter,
     template_renderer: UserTemplateRenderer,
-):
+) -> Response:
     response = list_drafts(UUID(current_user.id))
     view_model = list_drafts_presenter.present(response)
-    return template_renderer.render_template(
-        "company/my_drafts.html", context=view_model.to_dict()
+    return FlaskResponse(
+        template_renderer.render_template(
+            "company/draft_list.html", context=view_model.to_dict()
+        )
     )
 
 
@@ -211,9 +315,8 @@ def my_plans(
     show_my_plans_presenter: ShowMyPlansPresenter,
 ):
     request = ShowMyPlansRequest(company_id=UUID(current_user.id))
-    response = show_my_plans_use_case(request)
+    response = show_my_plans_use_case.show_company_plans(request)
     view_model = show_my_plans_presenter.present(response)
-
     return template_renderer.render_template(
         "company/my_plans.html",
         context=view_model.to_dict(),
@@ -357,8 +460,10 @@ def plan_summary(
     presenter: GetPlanSummaryCompanySuccessPresenter,
     http_404_view: Http404View,
 ):
-    use_case_response = get_plan_summary_company(plan_id, UUID(current_user.id))
-    if isinstance(use_case_response, use_cases.GetPlanSummaryCompany.Success):
+    use_case_response = get_plan_summary_company.get_plan_summary_for_company(
+        plan_id, UUID(current_user.id)
+    )
+    if use_case_response.plan_summary:
         view_model = presenter.present(use_case_response)
         return template_renderer.render_template(
             "company/plan_summary.html", context=dict(view_model=view_model.to_dict())

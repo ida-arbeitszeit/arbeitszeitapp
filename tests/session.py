@@ -1,31 +1,30 @@
 from __future__ import annotations
 
-import enum
 from dataclasses import dataclass
 from typing import List, Optional
 from uuid import UUID
 
+from arbeitszeit_web.session import UserRole
+
 
 class FakeSession:
-    class UserRole(enum.Enum):
-        member = enum.auto()
-        company = enum.auto()
-        accountant = enum.auto()
-
     @dataclass
     class LoginAttempt:
-        user_role: FakeSession.UserRole
+        user_role: UserRole
         email: str
         is_remember: bool
 
     def __init__(self) -> None:
         self._current_user_id: Optional[UUID] = None
-        self._is_logged_in = False
         self._recent_logins: List[FakeSession.LoginAttempt] = []
         self._next_url: Optional[str] = None
+        self._current_user_role: Optional[UserRole] = None
+
+    def get_user_role(self) -> Optional[UserRole]:
+        return self._current_user_role
 
     def is_logged_in(self) -> bool:
-        return self._is_logged_in
+        return self._current_user_role is not None
 
     def set_current_user_id(self, user_id: Optional[UUID]) -> None:
         self._current_user_id = user_id
@@ -36,32 +35,32 @@ class FakeSession:
     def login_member(self, email: str, remember: bool = False) -> None:
         self._recent_logins.append(
             self.LoginAttempt(
-                user_role=self.UserRole.member,
+                user_role=UserRole.member,
                 email=email,
                 is_remember=remember,
             )
         )
-        self._is_logged_in = True
+        self._current_user_role = UserRole.member
 
     def login_company(self, email: str, remember: bool = False) -> None:
         self._recent_logins.append(
             self.LoginAttempt(
-                user_role=self.UserRole.company,
+                user_role=UserRole.company,
                 email=email,
                 is_remember=remember,
             )
         )
-        self._is_logged_in = True
+        self._current_user_role = UserRole.company
 
     def login_accountant(self, email: str, remember: bool = False) -> None:
         self._recent_logins.append(
             self.LoginAttempt(
-                user_role=self.UserRole.accountant,
+                user_role=UserRole.accountant,
                 email=email,
                 is_remember=remember,
             )
         )
-        self._is_logged_in = True
+        self._current_user_role = UserRole.accountant
 
     def get_most_recent_login(self) -> Optional[LoginAttempt]:
         if not self._recent_logins:
@@ -78,4 +77,5 @@ class FakeSession:
         return next_url
 
     def logout(self) -> None:
-        self._is_logged_in = False
+        self._current_user_role = None
+        self._current_user_id = None

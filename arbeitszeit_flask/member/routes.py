@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 from uuid import UUID
 
-from flask import Response, request
+from flask import Response as FlaskResponse
+from flask import request
 from flask_login import current_user
 
 from arbeitszeit import use_cases
@@ -13,6 +16,7 @@ from arbeitszeit_flask.forms import (
     PlanSearchForm,
 )
 from arbeitszeit_flask.template import UserTemplateRenderer
+from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views import (
     CompanyWorkInviteView,
     Http404View,
@@ -24,13 +28,13 @@ from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresente
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_plan_summary_member import GetPlanSummarySuccessPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
-from arbeitszeit_web.pay_consumer_product import (
-    PayConsumerProductController,
-    PayConsumerProductPresenter,
+from arbeitszeit_web.presenters.get_member_account_presenter import (
+    GetMemberAccountPresenter,
 )
 from arbeitszeit_web.presenters.get_member_dashboard_presenter import (
     GetMemberDashboardPresenter,
 )
+from arbeitszeit_web.presenters.member_purchases import MemberPurchasesPresenter
 from arbeitszeit_web.query_companies import (
     QueryCompaniesController,
     QueryCompaniesPresenter,
@@ -40,18 +44,21 @@ from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresente
 from .blueprint import MemberRoute
 
 
-@MemberRoute("/member/kaeufe")
+@MemberRoute("/member/purchases")
 def my_purchases(
     query_purchases: use_cases.QueryPurchases,
     member_repository: MemberRepository,
     template_renderer: UserTemplateRenderer,
+    presenter: MemberPurchasesPresenter,
 ) -> Response:
     member = member_repository.get_by_id(UUID(current_user.id))
     assert member is not None
-    purchases = list(query_purchases(member))
-    return Response(
+    response = query_purchases(member)
+    view_model = presenter.present_member_purchases(response)
+    return FlaskResponse(
         template_renderer.render_template(
-            "member/my_purchases.html", context=dict(purchases=purchases)
+            "member/my_purchases.html",
+            context=dict(view_model=view_model),
         )
     )
 
@@ -104,24 +111,12 @@ def query_companies(
 
 @MemberRoute("/member/pay_consumer_product", methods=["GET", "POST"])
 @commit_changes
-def pay_consumer_product(
-    pay_consumer_product: use_cases.PayConsumerProduct,
-    presenter: PayConsumerProductPresenter,
-    controller: PayConsumerProductController,
-    template_renderer: UserTemplateRenderer,
-) -> Response:
-    view = PayConsumerProductView(
-        form=PayConsumerProductForm(request.form),
-        current_user=UUID(current_user.id),
-        pay_consumer_product=pay_consumer_product,
-        controller=controller,
-        presenter=presenter,
-        template_renderer=template_renderer,
-    )
+def pay_consumer_product(view: PayConsumerProductView) -> Response:
+    form = PayConsumerProductForm(request.form)
     if request.method == "POST":
-        return view.respond_to_post()
+        return view.respond_to_post(form)
     else:
-        return view.respond_to_get()
+        return view.respond_to_get(form)
 
 
 @MemberRoute("/member/dashboard")
@@ -132,7 +127,7 @@ def dashboard(
 ) -> Response:
     response = get_member_dashboard(UUID(current_user.id))
     view_model = presenter.present(response)
-    return Response(
+    return FlaskResponse(
         template_renderer.render_template(
             "member/dashboard.html",
             dict(view_model=view_model),
@@ -144,15 +139,14 @@ def dashboard(
 def my_account(
     get_member_account: use_cases.GetMemberAccount,
     template_renderer: UserTemplateRenderer,
+    presenter: GetMemberAccountPresenter,
 ) -> Response:
     response = get_member_account(UUID(current_user.id))
-    return Response(
+    view_model = presenter.present_member_account(response)
+    return FlaskResponse(
         template_renderer.render_template(
             "member/my_account.html",
-            context=dict(
-                all_transactions_info=response.transactions,
-                my_balance=response.balance,
-            ),
+            context=dict(view_model=view_model),
         )
     )
 
@@ -165,7 +159,7 @@ def statistics(
 ) -> Response:
     use_case_response = get_statistics()
     view_model = presenter.present(use_case_response)
-    return Response(
+    return FlaskResponse(
         template_renderer.render_template(
             "member/statistics.html", context=dict(view_model=view_model)
         )
@@ -183,7 +177,7 @@ def plan_summary(
     use_case_response = get_plan_summary_member(plan_id)
     if isinstance(use_case_response, use_cases.GetPlanSummaryMember.Success):
         view_model = presenter.present(use_case_response)
-        return Response(
+        return FlaskResponse(
             template_renderer.render_template(
                 "member/plan_summary.html",
                 context=dict(view_model=view_model.to_dict()),
@@ -234,7 +228,7 @@ def coop_summary(
 
 @MemberRoute("/member/hilfe")
 def hilfe(template_renderer: UserTemplateRenderer) -> Response:
-    return Response(template_renderer.render_template("member/help.html"))
+    return FlaskResponse(template_renderer.render_template("member/help.html"))
 
 
 @MemberRoute("/member/invite_details/<uuid:invite_id>", methods=["GET", "POST"])

@@ -10,7 +10,8 @@ from arbeitszeit.use_cases.get_member_dashboard import GetMemberDashboard
 from arbeitszeit_web.presenters.get_member_dashboard_presenter import (
     GetMemberDashboardPresenter,
 )
-from tests.presenters.url_index import InviteUrlIndexImpl, PlanSummaryUrlIndexTestImpl
+from arbeitszeit_web.session import UserRole
+from tests.presenters.url_index import UrlIndexTestImpl
 from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
@@ -21,8 +22,7 @@ class GetMemberDashboardPresenterTests(TestCase):
         self.injector = get_dependency_injector()
         self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(GetMemberDashboardPresenter)
-        self.plan_index = self.injector.get(PlanSummaryUrlIndexTestImpl)
-        self.invite_index = self.injector.get(InviteUrlIndexImpl)
+        self.url_index = self.injector.get(UrlIndexTestImpl)
 
     def test_that_welcome_line_is_correctly_translated(self) -> None:
         view_model = self.presenter.present(self.get_response())
@@ -125,7 +125,7 @@ class GetMemberDashboardPresenterTests(TestCase):
         presentation = self.presenter.present(response)
         self.assertEqual(
             presentation.three_latest_plans[0].plan_summary_url,
-            self.plan_index.get_plan_summary_url(plan_id),
+            self.url_index.get_plan_summary_url(UserRole.member, plan_id),
         )
 
     def test_invites_is_empty_when_no_invites_exist(self):
@@ -165,7 +165,7 @@ class GetMemberDashboardPresenterTests(TestCase):
         presentation = self.presenter.present(response)
         self.assertEqual(
             presentation.invites[0].invite_details_url,
-            self.invite_index.get_invite_url(invite_id),
+            self.url_index.get_work_invite_url(invite_id),
         )
 
     def get_invite(

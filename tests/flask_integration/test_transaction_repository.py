@@ -3,6 +3,7 @@ from decimal import Decimal
 
 from arbeitszeit_flask.database.repositories import TransactionRepository
 from tests.data_generators import AccountGenerator, PlanGenerator
+from tests.datetime_service import FakeDatetimeService
 
 from .dependency_injection import injection_test
 
@@ -50,19 +51,23 @@ def test_correct_sales_balance_of_plan_gets_returned_after_one_transaction(
     repository: TransactionRepository,
     account_generator: AccountGenerator,
     plan_generator: PlanGenerator,
+    datetime_service: FakeDatetimeService,
 ) -> None:
     plan = plan_generator.create_plan()
     sender_account = account_generator.create_account()
     receiver_account = plan.planner.product_account
+    account_balance_before_transaction = repository.get_sales_balance_of_plan(plan)
     repository.create_transaction(
-        datetime.now(),
+        datetime_service.now(),
         sending_account=sender_account,
         receiving_account=receiver_account,
         amount_sent=Decimal(12),
         amount_received=Decimal(10),
         purpose=f"test {plan.id} test",
     )
-    assert repository.get_sales_balance_of_plan(plan) == Decimal(10)
+    assert repository.get_sales_balance_of_plan(
+        plan
+    ) == account_balance_before_transaction + Decimal(10)
 
 
 @injection_test
@@ -75,6 +80,7 @@ def test_correct_sales_balance_of_plan_gets_returned_after_two_transactions(
     sender_account_1 = account_generator.create_account()
     sender_account_2 = account_generator.create_account()
     receiver_account = plan.planner.product_account
+    sales_balance_before_transactions = repository.get_sales_balance_of_plan(plan)
     repository.create_transaction(
         datetime.now(),
         sending_account=sender_account_1,
@@ -91,4 +97,6 @@ def test_correct_sales_balance_of_plan_gets_returned_after_two_transactions(
         amount_received=Decimal(15),
         purpose=f"test2 {plan.id} test2",
     )
-    assert repository.get_sales_balance_of_plan(plan) == Decimal(25)
+    assert repository.get_sales_balance_of_plan(
+        plan
+    ) == sales_balance_before_transactions + Decimal(25)

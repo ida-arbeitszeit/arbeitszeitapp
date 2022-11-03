@@ -7,7 +7,7 @@ from uuid import UUID
 from injector import inject
 
 from arbeitszeit import errors
-from arbeitszeit.entities import Plan
+from arbeitszeit.entities import Member, Plan
 from arbeitszeit.repositories import MemberRepository, PlanRepository
 
 from .consumer_product_transaction import (
@@ -62,7 +62,12 @@ class PayConsumerProduct:
         self, request: PayConsumerProductRequest
     ) -> PayConsumerProductResponse:
         plan = self._get_active_plan(request)
-        transaction = self._create_product_transaction(plan, request)
+        buyer = self.member_repository.get_by_id(request.get_buyer_id())
+        if buyer is None:
+            return PayConsumerProductResponse(
+                rejection_reason=RejectionReason.buyer_does_not_exist
+            )
+        transaction = self._create_product_transaction(plan, request, buyer)
         if not transaction.is_account_balance_sufficient():
             return PayConsumerProductResponse(
                 rejection_reason=RejectionReason.insufficient_balance
@@ -82,10 +87,8 @@ class PayConsumerProduct:
         return plan
 
     def _create_product_transaction(
-        self, plan: Plan, request: PayConsumerProductRequest
+        self, plan: Plan, request: PayConsumerProductRequest, buyer: Member
     ) -> ConsumerProductTransaction:
-        buyer = self.member_repository.get_by_id(request.get_buyer_id())
-        assert buyer is not None
         return self.transaction_factory.create_consumer_product_transaction(
             buyer=buyer,
             plan=plan,

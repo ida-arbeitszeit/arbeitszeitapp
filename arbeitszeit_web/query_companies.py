@@ -1,13 +1,16 @@
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional, Protocol
 
+from injector import inject
+
 from arbeitszeit.use_cases.query_companies import (
     CompanyFilter,
     CompanyQueryResponse,
     QueryCompaniesRequest,
 )
+from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
-from arbeitszeit_web.url_index import CompanySummaryUrlIndex
+from arbeitszeit_web.url_index import UrlIndex
 
 from .notification import Notifier
 
@@ -70,11 +73,13 @@ class QueryCompaniesViewModel:
         return asdict(self)
 
 
+@inject
 @dataclass
 class QueryCompaniesPresenter:
     user_notifier: Notifier
-    company_url_index: CompanySummaryUrlIndex
+    url_index: UrlIndex
     translator: Translator
+    session: Session
 
     def present(self, response: CompanyQueryResponse) -> QueryCompaniesViewModel:
         if not response.results:
@@ -87,8 +92,9 @@ class QueryCompaniesPresenter:
                         company_id=str(result.company_id),
                         company_name=result.company_name,
                         company_email=result.company_email,
-                        company_summary_url=self.company_url_index.get_company_summary_url(
-                            result.company_id
+                        company_summary_url=self.url_index.get_company_summary_url(
+                            user_role=self.session.get_user_role(),
+                            company_id=result.company_id,
                         ),
                     )
                     for result in response.results

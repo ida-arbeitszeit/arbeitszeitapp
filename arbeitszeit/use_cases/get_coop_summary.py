@@ -30,6 +30,7 @@ class GetCoopSummarySuccess:
     coop_name: str
     coop_definition: str
     coordinator_id: UUID
+    coordinator_name: str
 
     plans: List[AssociatedPlan]
 
@@ -69,5 +70,6 @@ class GetCoopSummary:
             coop_name=coop.name,
             coop_definition=coop.definition,
             coordinator_id=coop.coordinator.id,
+            coordinator_name=coop.coordinator.name,
             plans=plans,
         )

@@ -1,5 +1,13 @@
+import enum
 from typing import Optional, Protocol
 from uuid import UUID
+
+
+@enum.unique
+class UserRole(enum.Enum):
+    member = enum.auto()
+    company = enum.auto()
+    accountant = enum.auto()
 
 
 class Session(Protocol):
@@ -16,4 +24,10 @@ class Session(Protocol):
         ...
 
     def pop_next_url(self) -> Optional[str]:
+        ...
+
+    def set_next_url(self, next_url: str) -> None:
+        ...
+
+    def get_user_role(self) -> Optional[UserRole]:
         ...

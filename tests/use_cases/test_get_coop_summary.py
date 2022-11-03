@@ -81,6 +81,21 @@ def test_that_correct_coordinator_id_is_shown(
 
 
 @injection_test
+def test_that_correct_coordinator_name_is_shown(
+    get_coop_summary: GetCoopSummary,
+    company_generator: CompanyGenerator,
+    cooperation_generator: CooperationGenerator,
+    plan_generator: PlanGenerator,
+):
+    requester = company_generator.create_company()
+    plan1 = plan_generator.create_plan(activation_date=datetime.min)
+    plan2 = plan_generator.create_plan(activation_date=datetime.min)
+    coop = cooperation_generator.create_cooperation(plans=[plan1, plan2])
+    summary = get_coop_summary(GetCoopSummaryRequest(requester.id, coop.id))
+    assert_success(summary, lambda s: s.coordinator_name == coop.coordinator.name)
+
+
+@injection_test
 def test_that_correct_info_of_associated_plan_is_shown(
     get_coop_summary: GetCoopSummary,
     company_generator: CompanyGenerator,

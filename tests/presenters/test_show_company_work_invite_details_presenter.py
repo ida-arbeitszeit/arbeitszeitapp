@@ -9,13 +9,13 @@ from arbeitszeit_web.presenters.show_company_work_invite_details_presenter impor
 from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
-from .url_index import AnswerCompanyWorkInviteUrlIndexImpl
+from .url_index import UrlIndexTestImpl
 
 
 class PresenterTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
-        self.invite_url_index = self.injector.get(AnswerCompanyWorkInviteUrlIndexImpl)
+        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(ShowCompanyWorkInviteDetailsPresenter)
 
@@ -31,9 +31,7 @@ class PresenterTests(TestCase):
 
     def test_successful_response_renders_accept_url_to_view_model(self) -> None:
         invite_id = uuid4()
-        expected_url = self.invite_url_index.get_answer_company_work_invite_url(
-            invite_id
-        )
+        expected_url = self.url_index.get_answer_company_work_invite_url(invite_id)
         view_model = self.presenter.render_response(
             self.make_response(invite_id=invite_id)
         )

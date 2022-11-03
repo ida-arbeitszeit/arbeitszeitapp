@@ -3,16 +3,21 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to arbeitszeitapp's documentation!
-==========================================
+arbeitszeitapp's developer documentation
+=========================================
+
+Source code: `<https://github.com/arbeitszeit/arbeitszeitapp>`_
+
+Arbeitszeitapp is a webapp to exchange services and products on the basis of working time.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
-   configuration
-   philosophy
+   introduction
+   development_setup
+   development_guide
    modules/modules
+   license
 
 Indices and tables
 ==================
