@@ -46,10 +46,14 @@ class SelfApprovePlan:
         )
 
     def approve_plan_and_delete_draft(self, draft: PlanDraft) -> Plan:
-        new_plan = self.plan_repository.set_plan_approval_date(
-            draft, self.get_approval_date()
-        )
+        new_plan_id = self.plan_repository.create_plan_from_draft(draft.id)
+        assert new_plan_id
         self.draft_repository.delete_draft(draft.id)
+        self.plan_repository.set_plan_approval_date(
+            new_plan_id, self.get_approval_date()
+        )
+        new_plan = self.plan_repository.get_plan_by_id(new_plan_id)
+        assert new_plan
         return new_plan
 
     def get_approval_date(self) -> datetime:

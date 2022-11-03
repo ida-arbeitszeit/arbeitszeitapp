@@ -6,7 +6,6 @@ from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounti
 from arbeitszeit.use_cases.list_plans_with_pending_review import (
     ListPlansWithPendingReviewUseCase,
 )
-from tests.data_generators import PlanGenerator
 
 from .base_test_case import BaseTestCase
 from .dependency_injection import get_dependency_injector
