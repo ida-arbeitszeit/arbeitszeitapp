@@ -6,9 +6,6 @@ from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.token import InvitationTokenValidator, TokenDeliverer, TokenService
 from arbeitszeit.use_cases import GetCompanySummary
 from arbeitszeit.use_cases.edit_draft import EditDraftUseCase
-from arbeitszeit.use_cases.get_accountant_profile_info import (
-    GetAccountantProfileInfoUseCase,
-)
 from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCase
 from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
@@ -208,14 +205,6 @@ class InMemoryModule(Module):
             transaction_repository,
             social_accounting,
             purchase_repository,
-        )
-
-    @provider
-    def provide_get_accountant_profile_info_use_case(
-        self, accountant_repository: interfaces.AccountantRepository
-    ) -> GetAccountantProfileInfoUseCase:
-        return GetAccountantProfileInfoUseCase(
-            accountant_repository=accountant_repository,
         )
 
     @provider
