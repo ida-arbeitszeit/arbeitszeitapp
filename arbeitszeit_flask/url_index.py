@@ -146,6 +146,9 @@ class GeneralUrlIndex:
     def get_unreviewed_plans_list_view_url(self) -> str:
         return url_for("main_accountant.list_plans_with_pending_review")
 
+    def get_approve_plan_url(self, plan_id: UUID) -> str:
+        return url_for("main_accountant.approve_plan", plan=plan_id)
+
 
 class MemberUrlIndex:
     def get_renew_plan_url(self, plan_id: UUID) -> str:
