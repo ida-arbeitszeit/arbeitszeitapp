@@ -19,7 +19,6 @@
           packages = {
             default = pkgs.python3.pkgs.arbeitszeitapp;
             inherit (pkgs) python3;
-            nixpkgs = pkgs;
           };
           checks = {
             arbeitszeit-python310 = pkgs.python310.pkgs.arbeitszeitapp;
