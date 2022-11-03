@@ -650,7 +650,12 @@ class PlanRepository(repositories.PlanRepository):
         return UUID(plan_orm.id)
 
     def get_all_plans_without_completed_review(self) -> Iterable[UUID]:
-        raise NotImplementedError()
+        return [
+            UUID(plan.id)
+            for plan in models.Plan.query.join(models.PlanReview).filter(
+                models.PlanReview.approval_date == None
+            )
+        ]
 
     def object_from_orm(self, plan: models.Plan) -> entities.Plan:
         production_costs = entities.ProductionCosts(
