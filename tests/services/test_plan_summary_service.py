@@ -2,8 +2,6 @@ from datetime import datetime
 from decimal import Decimal
 from unittest import TestCase
 
-import pytest
-
 from arbeitszeit.entities import ProductionCosts
 from arbeitszeit.plan_summary import PlanSummaryService
 from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout

@@ -1,11 +1,9 @@
 from datetime import datetime, timezone
 from decimal import Decimal
 from typing import List
-from unittest import TestCase
 from uuid import UUID
 
 from arbeitszeit.entities import AccountTypes, ProductionCosts, PurposesOfPurchases
-from arbeitszeit.use_cases import SelfApprovePlan
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit.use_cases.get_company_summary import AccountBalances, GetCompanySummary
 from arbeitszeit.use_cases.get_company_transactions import (
@@ -23,11 +21,9 @@ from arbeitszeit.use_cases.query_plans import (
     QueryPlans,
 )
 from arbeitszeit_web.query_plans import QueryPlansRequestImpl as QueryPlansRequest
-from tests.data_generators import CompanyGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
 
 from .base_test_case import BaseTestCase
-from .dependency_injection import get_dependency_injector
 from .repositories import (
     AccountRepository,
     PlanDraftRepository,
@@ -41,7 +37,6 @@ class UseCaseTests(BaseTestCase):
         super().setUp()
         self.use_case = self.injector.get(ApprovePlanUseCase)
         self.get_company_summary = self.injector.get(GetCompanySummary)
-        self.self_approve_plan = self.injector.get(SelfApprovePlan)
         self.query_plans = self.injector.get(QueryPlans)
         self.draft_repository = self.injector.get(PlanDraftRepository)
         self.plan_repository = self.injector.get(PlanRepository)
