@@ -125,7 +125,7 @@ environment variables:
 
      export ARBEITSZEITAPP_CONFIGURATION_PATH="$PWD/arbeitszeit_flask/development_settings.py"
      export FLASK_APP=arbeitszeit_flask
-     export FLASK_ENV=development
+     export FLASK_DEBUG=1
      export DEV_DATABASE_URI="postgresql://postgres@localhost:5432/<name of database>"
      export DEV_SECRET_KEY=my_secret_key
      export ARBEITSZEIT_APP_SERVER_NAME=localhost:5000
