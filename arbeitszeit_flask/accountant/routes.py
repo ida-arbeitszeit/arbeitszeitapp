@@ -1,14 +1,14 @@
-from arbeitszeit.use_cases.get_accountant_dashboard import GetAccountantDashboardUseCase
-from arbeitszeit_flask.flask_session import FlaskSession
 from uuid import UUID
 
 from flask import redirect
 
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
+from arbeitszeit.use_cases.get_accountant_dashboard import GetAccountantDashboardUseCase
 from arbeitszeit.use_cases.list_plans_with_pending_review import (
     ListPlansWithPendingReviewUseCase,
 )
 from arbeitszeit_flask.database import commit_changes
+from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_flask.types import Response
 from arbeitszeit_web.controllers.approve_plan_controller import ApprovePlanController
