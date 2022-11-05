@@ -80,7 +80,7 @@ class CreateDraftPresenter:
         if response.draft_id is None:
             redirect_url = None
         else:
-            redirect_url = self.url_index.get_draft_list_url()
+            redirect_url = self.url_index.get_my_plans_url()
             self.notifier.display_info(
                 self.translator.gettext("Plan draft successfully created")
             )

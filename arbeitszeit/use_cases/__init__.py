@@ -67,7 +67,6 @@ from .list_coordinations import (
     ListCoordinationsRequest,
     ListCoordinationsResponse,
 )
-from .list_drafts_of_company import ListDraftsOfCompany, ListDraftsResponse
 from .list_inbound_coop_requests import (
     ListedInboundCoopRequest,
     ListInboundCoopRequests,
@@ -181,8 +180,6 @@ __all__ = [
     "ListCoordinations",
     "ListCoordinationsRequest",
     "ListCoordinationsResponse",
-    "ListDraftsOfCompany",
-    "ListDraftsResponse",
     "ListInboundCoopRequests",
     "ListInboundCoopRequests",
     "ListInboundCoopRequestsRequest",

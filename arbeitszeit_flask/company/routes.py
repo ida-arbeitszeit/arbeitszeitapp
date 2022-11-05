@@ -80,7 +80,6 @@ from arbeitszeit_web.get_plan_summary_company import (
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.hide_plan import HidePlanPresenter
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
-from arbeitszeit_web.list_drafts_of_company import ListDraftsPresenter
 from arbeitszeit_web.list_plans import ListPlansPresenter
 from arbeitszeit_web.presenters.delete_draft_presenter import DeleteDraftPresenter
 from arbeitszeit_web.presenters.file_plan_with_accounting_presenter import (
@@ -300,21 +299,6 @@ def get_draft_summary(
                 view_model=view_model,
                 form=form,
             ),
-        )
-    )
-
-
-@CompanyRoute("/company/draft", methods=["GET"])
-def draft_list(
-    list_drafts: use_cases.ListDraftsOfCompany,
-    list_drafts_presenter: ListDraftsPresenter,
-    template_renderer: UserTemplateRenderer,
-) -> Response:
-    response = list_drafts(UUID(current_user.id))
-    view_model = list_drafts_presenter.present(response)
-    return FlaskResponse(
-        template_renderer.render_template(
-            "company/draft_list.html", context=view_model.to_dict()
         )
     )
 
