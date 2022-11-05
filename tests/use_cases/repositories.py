@@ -472,26 +472,12 @@ class PlanRepository(interfaces.PlanRepository):
     def get_plan_by_id(self, id: UUID) -> Optional[Plan]:
         return self.plans.get(id)
 
-    def set_plan_approval_date(
-        self, draft: PlanDraft, approval_timestamp: datetime
-    ) -> Plan:
-        planner = self.company_repository.get_by_id(draft.planner.id)
-        assert planner
-        plan = self._create_plan(
-            id=draft.id,
-            planner=planner,
-            costs=draft.production_costs,
-            product_name=draft.product_name,
-            production_unit=draft.unit_of_distribution,
-            amount=draft.amount_produced,
-            description=draft.description,
-            timeframe_in_days=draft.timeframe,
-            is_public_service=draft.is_public_service,
-            creation_timestamp=draft.creation_date,
-        )
-        plan.approval_date = approval_timestamp
-        plan.approval_reason = "approved"
-        return plan
+    def set_plan_approval_date(self, plan: UUID, approval_timestamp: datetime):
+        plan_model = self.plans.get(plan)
+        if plan_model is None:
+            return
+        plan_model.approval_date = approval_timestamp
+        plan_model.approval_reason = "approved"
 
     def __len__(self) -> int:
         return len(self.plans)

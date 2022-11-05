@@ -104,6 +104,9 @@ class UrlIndex(Protocol):
     def get_unreviewed_plans_list_view_url(self) -> str:
         ...
 
+    def get_approve_plan_url(self, plan_id: UUID) -> str:
+        ...
+
 
 class RenewPlanUrlIndex(Protocol):
     def get_renew_plan_url(self, plan_id: UUID) -> str:
