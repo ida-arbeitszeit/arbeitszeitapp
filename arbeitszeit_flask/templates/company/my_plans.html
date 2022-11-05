@@ -97,6 +97,7 @@
                 <a href="{{ draft.draft_details_url }}">{{ draft.product_name }}</a>
               </strong>
               <br>
+              <small><i class="fa-solid fa-calendar"></i>&nbsp;{{ draft.draft_creation_date }}</small>
             </p>
           </div>
         </div>
@@ -112,6 +113,12 @@
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button class="button is-ghost" type="submit" title="{{ gettext('Delete plan') }}"><i
                   class="fas fa-trash"></i></button>
+            </form>
+            &nbsp;
+            <form method="get" action="{{ draft.edit_plan_url }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="button is-ghost" type="submit" title="{{ gettext('Edit plan') }}"><i
+                  class="fas fa-edit"></i></button>
             </form>
           </div>
         </div>

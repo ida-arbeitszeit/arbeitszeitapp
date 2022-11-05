@@ -67,9 +67,11 @@ class ExpiredPlansTable:
 @dataclass
 class DraftsTableRow:
     product_name: str
+    draft_creation_date: str
     draft_details_url: str
     draft_delete_url: str
     file_plan_url: str
+    edit_plan_url: str
 
 
 @dataclass
@@ -181,9 +183,11 @@ class ShowMyPlansPresenter:
             rows=[
                 DraftsTableRow(
                     product_name=draft.prd_name,
+                    draft_creation_date=self.__format_date(draft.plan_creation_date),
                     draft_details_url=self.url_index.get_draft_summary_url(draft.id),
                     draft_delete_url=self.url_index.get_delete_draft_url(draft.id),
                     file_plan_url=self.url_index.get_file_plan_url(draft.id),
+                    edit_plan_url=self.url_index.get_draft_summary_url(draft.id),
                 )
                 for draft in response.drafts
             ]
