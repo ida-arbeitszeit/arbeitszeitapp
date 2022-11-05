@@ -43,12 +43,13 @@ from arbeitszeit.use_cases import (
     AcceptCooperationRequest,
     RequestCooperation,
     RequestCooperationRequest,
-    SelfApprovePlan,
 )
+from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit.use_cases.create_plan_draft import (
     CreatePlanDraft,
     CreatePlanDraftRequest,
 )
+from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
 from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
 from arbeitszeit.use_cases.send_accountant_registration_token import (
     SendAccountantRegistrationTokenUseCase,
@@ -197,11 +198,12 @@ class EmailGenerator:
 class PlanGenerator:
     company_generator: CompanyGenerator
     plan_repository: PlanRepository
-    self_approve_plan: SelfApprovePlan
     request_cooperation: RequestCooperation
     accept_cooperation: AcceptCooperation
     draft_repository: PlanDraftRepository
     create_plan_draft_use_case: CreatePlanDraft
+    file_plan_with_accounting: FilePlanWithAccounting
+    approve_plan_use_case: ApprovePlanUseCase
 
     def create_plan(
         self,
@@ -221,7 +223,6 @@ class PlanGenerator:
         is_available: bool = True,
         hidden_by_user: bool = False,
     ) -> Plan:
-        assert approved, "Currently the application does not support plan rejection"
         draft = self.draft_plan(
             planner=planner,
             costs=costs,
@@ -232,8 +233,22 @@ class PlanGenerator:
             timeframe=timeframe,
             is_public_service=is_public_service,
         )
-        response = self.self_approve_plan(SelfApprovePlan.Request(draft_id=draft.id))
-        plan = self.plan_repository.get_plan_by_id(response.new_plan_id)
+        file_plan_response = self.file_plan_with_accounting.file_plan_with_accounting(
+            request=FilePlanWithAccounting.Request(
+                draft_id=draft.id, filing_company=draft.planner.id
+            )
+        )
+        assert file_plan_response.plan_id
+        assert file_plan_response.is_plan_successfully_filed
+        if not approved:
+            plan = self.plan_repository.get_plan_by_id(file_plan_response.plan_id)
+            assert plan
+            return plan
+        response = self.approve_plan_use_case.approve_plan(
+            ApprovePlanUseCase.Request(plan=file_plan_response.plan_id)
+        )
+        assert response.is_approved
+        plan = self.plan_repository.get_plan_by_id(file_plan_response.plan_id)
         assert plan
         assert plan.is_approved
         if activation_date:

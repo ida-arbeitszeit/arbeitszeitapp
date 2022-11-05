@@ -650,7 +650,12 @@ class PlanRepository(repositories.PlanRepository):
         return UUID(plan_orm.id)
 
     def get_all_plans_without_completed_review(self) -> Iterable[UUID]:
-        raise NotImplementedError()
+        return [
+            UUID(plan.id)
+            for plan in models.Plan.query.join(models.PlanReview).filter(
+                models.PlanReview.approval_date == None
+            )
+        ]
 
     def object_from_orm(self, plan: models.Plan) -> entities.Plan:
         production_costs = entities.ProductionCosts(
@@ -729,13 +734,13 @@ class PlanRepository(repositories.PlanRepository):
         self.db.session.add(plan_review)
         return plan
 
-    def set_plan_approval_date(
-        self, draft: entities.PlanDraft, approval_timestamp: datetime
-    ) -> entities.Plan:
-        plan_orm = self._create_plan_from_draft(draft)
-        plan_orm.review.approval_reason = "approved"
-        plan_orm.review.approval_date = approval_timestamp
-        return self.object_from_orm(plan_orm)
+    def set_plan_approval_date(self, plan: UUID, approval_timestamp: datetime):
+        models.PlanReview.query.filter(models.PlanReview.plan_id == str(plan)).update(
+            dict(
+                approval_reason="approved",
+                approval_date=approval_timestamp,
+            )
+        )
 
     def activate_plan(self, plan: entities.Plan, activation_date: datetime) -> None:
         plan.is_active = True
