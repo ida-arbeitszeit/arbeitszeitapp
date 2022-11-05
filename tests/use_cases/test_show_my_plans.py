@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 from uuid import uuid4
 
 from arbeitszeit.use_cases import ShowMyPlansRequest, ShowMyPlansUseCase
-from tests.datetime_service import FakeDatetimeService
 from tests.use_cases.base_test_case import BaseTestCase
 
 
@@ -10,7 +9,6 @@ class UseCaseTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.use_case = self.injector.get(ShowMyPlansUseCase)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
 
     def test_that_no_plans_are_returned_when_no_plans_were_created(self) -> None:
         response = self.use_case.show_company_plans(
