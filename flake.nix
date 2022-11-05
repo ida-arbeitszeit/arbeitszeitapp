@@ -13,6 +13,10 @@
           pkgs = import nixpkgs {
             inherit system;
             overlays = [ self.overlays.default ];
+            config = {
+              allowUnfreePredicate = pkg:
+                builtins.elem (nixpkgs.lib.getName pkg) [ "cudatoolkit" ];
+            };
           };
         in {
           devShells.default = pkgs.callPackage nix/devShell.nix { };
