@@ -77,7 +77,7 @@ class UseCaseTests(BaseTestCase):
             == expected_activation_timestamp
         )
 
-    def test_that_other_company_can_pay_for_self_approved_plan(self) -> None:
+    def test_that_other_company_can_pay_for_approved_plan(self) -> None:
         plan = self.plan_generator.create_plan(approved=False)
         self.use_case.approve_plan(self.create_request(plan=plan.id))
         plan_id = self.get_latest_activated_plan().plan_id
