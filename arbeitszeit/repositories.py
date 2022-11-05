@@ -91,9 +91,7 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def set_plan_approval_date(
-        self, plan: PlanDraft, approval_timestamp: datetime
-    ) -> Plan:
+    def set_plan_approval_date(self, plan: UUID, approval_timestamp: datetime):
         pass
 
     @abstractmethod

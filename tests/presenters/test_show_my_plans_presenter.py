@@ -194,13 +194,13 @@ class ShowMyPlansPresenterTests(TestCase):
             self.url_index.get_delete_draft_url(draft_id),
         )
 
-    def test_that_self_approve_plan_url_is_set_correctly(self) -> None:
+    def test_that_file_plan_url_is_set_correctly(self) -> None:
         response = self.response_with_one_draft()
         draft_id = response.drafts[0].id
         view_model = self.presenter.present(response)
         self.assertEqual(
-            view_model.drafts.rows[0].self_approve_plan_url,
-            self.url_index.get_self_approve_plan_url(draft_id),
+            view_model.drafts.rows[0].file_plan_url,
+            self.url_index.get_file_plan_url(draft_id),
         )
 
     def _convert_into_plan_info(self, plan: Plan) -> PlanInfo:

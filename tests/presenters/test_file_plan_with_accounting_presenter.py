@@ -31,7 +31,7 @@ class Tests(TestCase):
 
     def test_view_model_has_no_redirect_with_failure_responses(self) -> None:
         view_model = self.presenter.present_response(self.create_failure_response())
-        self.assertIsNone(view_model.redirect_url)
+        self.assertIsNotNone(view_model.redirect_url)
 
     def test_user_gets_redirected_to_plan_summary_page_on_successful_response(
         self,
@@ -45,6 +45,15 @@ class Tests(TestCase):
             self.url_index.get_plan_summary_url(
                 user_role=UserRole.company, plan_id=plan_id
             ),
+        )
+
+    def test_user_gets_redirected_to_my_plans_page_on_failure_response(
+        self,
+    ) -> None:
+        view_model = self.presenter.present_response(self.create_failure_response())
+        self.assertEqual(
+            view_model.redirect_url,
+            self.url_index.get_my_plans_url(),
         )
 
     def test_that_user_receives_warning_on_failure_response(self) -> None:

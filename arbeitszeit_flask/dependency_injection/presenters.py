@@ -35,7 +35,6 @@ from arbeitszeit_web.presenters.registration_email_presenter import (
     RegistrationEmailPresenter,
     RegistrationEmailTemplate,
 )
-from arbeitszeit_web.presenters.self_approve_plan import SelfApprovePlanPresenter
 from arbeitszeit_web.presenters.send_confirmation_email_presenter import (
     SendConfirmationEmailPresenter,
 )
@@ -76,15 +75,6 @@ class CompanyPresenterModule(Module):
 
 
 class PresenterModule(Module):
-    @provider
-    def provide_self_approve_plan_presenter(
-        self, notifier: Notifier, translator: Translator
-    ) -> SelfApprovePlanPresenter:
-        return SelfApprovePlanPresenter(
-            notifier=notifier,
-            translator=translator,
-        )
-
     @provider
     def provide_register_accountant_presenter(
         self,
