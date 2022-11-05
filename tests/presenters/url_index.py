@@ -1,10 +1,7 @@
 """This module shall contain a mock implementation of the UrlIndex."""
 
-from decimal import Decimal
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 from uuid import UUID
-
-from arbeitszeit_web.session import UserRole
 
 
 class UrlIndexMethod:
