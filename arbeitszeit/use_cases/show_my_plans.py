@@ -26,7 +26,7 @@ class PlanInfo:
     prd_name: str
     price_per_unit: Decimal
     is_public_service: bool
-    plan_creation_date: Optional[datetime]
+    plan_creation_date: datetime
     activation_date: Optional[datetime]
     expiration_date: Optional[datetime]
     is_available: bool
@@ -62,6 +62,7 @@ class ShowMyPlansUseCase:
                 self.draft_repository.all_drafts_of_company(id=request.company_id),
             )
         )
+        drafts_sorted = sorted(drafts, key=lambda x: x.plan_creation_date, reverse=True)
         count_all_plans = len(all_plans_of_company) + len(drafts)
         non_active_plans = [
             self._create_plan_info_from_plan(plan)
@@ -83,7 +84,7 @@ class ShowMyPlansUseCase:
             non_active_plans=non_active_plans,
             active_plans=active_plans,
             expired_plans=expired_plans,
-            drafts=drafts,
+            drafts=drafts_sorted,
         )
 
     def _create_plan_info_from_plan(self, plan: Plan) -> PlanInfo:
