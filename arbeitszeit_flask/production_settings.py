@@ -1,6 +1,5 @@
 from os import environ
 
-FLASK_DEBUG = 0
 TESTING = False
 # using heroku's existing env variable
 # (SQLAlchemy 1.4.x has removed support for the postgres:// URI scheme, which is used by Heroku Postgres)
