@@ -1363,7 +1363,9 @@ class AccountantRepository:
         record = models.Accountant.query.filter_by(id=str(id)).first()
         if record is None:
             return None
-        return entities.Accountant(email_address=record.user.email, name=record.name)
+        return entities.Accountant(
+            email_address=record.user.email, name=record.name, id=UUID(record.id)
+        )
 
     def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
         record = (
@@ -1400,6 +1402,16 @@ class AccountantRepository:
         ).first() or models.User(
             password=generate_password_hash(password, method="sha256"),
             email=email,
+        )
+
+    def get_all_accountants(self) -> FlaskQueryResult[entities.Accountant]:
+        return FlaskQueryResult(
+            query=models.Accountant.query.all(),
+            mapper=lambda record: entities.Accountant(
+                email_address=record.user.email,
+                name=record.name,
+                id=UUID(record.id),
+            ),
         )
 
 

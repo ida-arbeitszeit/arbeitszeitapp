@@ -989,7 +989,7 @@ class AccountantRepositoryTestImpl:
         record = self.accountants.get(id)
         if record is None:
             return None
-        return Accountant(email_address=record.email, name=record.name)
+        return Accountant(email_address=record.email, name=record.name, id=id)
 
     def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
         for uuid, record in self.accountants.items():
@@ -999,6 +999,16 @@ class AccountantRepositoryTestImpl:
                 else:
                     return None
         return None
+
+    def get_all_accountants(self) -> QueryResultImpl[Accountant]:
+        return QueryResultImpl(
+            items=[
+                Accountant(
+                    email_address=record.email, name=record.name, id=accountant_id
+                )
+                for accountant_id, record in self.accountants.items()
+            ]
+        )
 
 
 class FakeLanguageRepository:

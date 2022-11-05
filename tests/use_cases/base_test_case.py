@@ -1,7 +1,12 @@
 from typing import Any, Dict, Generic, Type, TypeVar
 from unittest import TestCase
 
-from tests.data_generators import CompanyGenerator, MemberGenerator, PlanGenerator
+from tests.data_generators import (
+    AccountantGenerator,
+    CompanyGenerator,
+    MemberGenerator,
+    PlanGenerator,
+)
 
 from .dependency_injection import get_dependency_injector
 
@@ -49,3 +54,4 @@ class BaseTestCase(TestCase):
     member_generator = _lazy_property(MemberGenerator)
     company_generator = _lazy_property(CompanyGenerator)
     plan_generator = _lazy_property(PlanGenerator)
+    accountant_generator = _lazy_property(AccountantGenerator)
