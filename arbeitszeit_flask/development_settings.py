@@ -1,6 +1,5 @@
 from os import environ, path
 
-DEBUG = True
 DEBUG_DETAILS = environ.get("DEBUG_DETAILS") in ("true", "True", "1", "t")
 TESTING = True
 SQLALCHEMY_DATABASE_URI = environ.get("DEV_DATABASE_URI")
