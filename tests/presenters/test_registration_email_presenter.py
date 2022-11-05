@@ -11,6 +11,7 @@ from tests.email import (
     FakeEmailSender,
     RegistrationEmailTemplateImpl,
 )
+from tests.text_renderer import TextRendererImpl
 from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
@@ -20,6 +21,7 @@ from .url_index import ConfirmationUrlIndexImpl
 class MemberPresenterTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
+        self.text_renderer = self.injector.get(TextRendererImpl)
         self.email_sender = self.injector.get(FakeEmailSender)
         self.email_configuration = self.injector.get(FakeEmailConfiguration)
         self.address_book = self.injector.get(FakeAddressBook)
