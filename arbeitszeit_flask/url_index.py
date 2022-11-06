@@ -137,6 +137,9 @@ class GeneralUrlIndex:
     def get_my_plans_url(self) -> str:
         return url_for("main_company.my_plans")
 
+    def get_my_plan_drafts_url(self) -> str:
+        return url_for("main_company.my_plans", _anchor="drafts")
+
     def get_file_plan_url(self, draft_id: UUID) -> str:
         return url_for("main_company.file_plan", draft_id=draft_id)
 
@@ -145,6 +148,9 @@ class GeneralUrlIndex:
 
     def get_approve_plan_url(self, plan_id: UUID) -> str:
         return url_for("main_accountant.approve_plan", plan=plan_id)
+
+    def get_create_draft_url(self) -> str:
+        return url_for("main_company.create_draft")
 
 
 class MemberUrlIndex:

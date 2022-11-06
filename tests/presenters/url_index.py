@@ -94,6 +94,9 @@ class UrlIndexTestImpl:
     def get_my_plans_url(self) -> str:
         return "my plans url"
 
+    def get_my_plan_drafts_url(self) -> str:
+        return "my plan drafts url"
+
     def get_file_plan_url(self, draft_id: UUID) -> str:
         return f"file plan url for draft {draft_id}"
 
@@ -102,6 +105,9 @@ class UrlIndexTestImpl:
 
     def get_approve_plan_url(self, plan_id: UUID) -> str:
         return f"approve plan url {plan_id}"
+
+    def get_create_draft_url(self) -> str:
+        return "fake create draft url"
 
 
 class RenewPlanUrlIndexTestImpl:

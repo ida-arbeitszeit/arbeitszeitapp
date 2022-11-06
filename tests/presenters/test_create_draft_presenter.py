@@ -18,11 +18,13 @@ class PresenterTests(TestCase):
         self.notifier = self.injector.get(NotifierTestImpl)
         self.translator = self.injector.get(FakeTranslator)
 
-    def test_on_successful_draft_creation_redirect_to_my_plans_page(self) -> None:
+    def test_on_successful_draft_creation_redirect_to_my_drafts_page(self) -> None:
         draft_id = uuid4()
         response = CreatePlanDraftResponse(draft_id=draft_id, rejection_reason=None)
         view_model = self.presenter.present_plan_creation(response)
-        self.assertEqual(self.url_index.get_my_plans_url(), view_model.redirect_url)
+        self.assertEqual(
+            self.url_index.get_my_plan_drafts_url(), view_model.redirect_url
+        )
 
     def test_on_failed_plan_creation_dont_redirect(self) -> None:
         response = CreatePlanDraftResponse(

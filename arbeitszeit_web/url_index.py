@@ -95,6 +95,9 @@ class UrlIndex(Protocol):
     def get_my_plans_url(self) -> str:
         ...
 
+    def get_my_plan_drafts_url(self) -> str:
+        ...
+
     def get_file_plan_url(self, draft_id: UUID) -> str:
         ...
 
@@ -102,6 +105,9 @@ class UrlIndex(Protocol):
         ...
 
     def get_approve_plan_url(self, plan_id: UUID) -> str:
+        ...
+
+    def get_create_draft_url(self) -> str:
         ...
 
 

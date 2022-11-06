@@ -25,7 +25,7 @@ class ViewTests(ViewTestCase):
         company = self.login_company()
         plan = self.plan_generator.create_plan(planner=company)
         response = self.client.post(self._get_url(plan.id), data={"test": "1"})
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 404)
 
     def _get_url(self, plan: UUID) -> str:
         return f"/company/draft/from-plan/{plan}"

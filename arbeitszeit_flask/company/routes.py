@@ -200,49 +200,46 @@ def delete_draft(
 def create_draft_from_plan(
     plan_id: UUID,
     session: FlaskSession,
-    create_form_use_case: GetPlanSummaryCompany,
-    create_form_presenter: GetPrefilledDraftDataPresenter,
-    process_form_use_case: CreatePlanDraft,
-    process_form_controller: CreateDraftController,
-    process_form_presenter: CreateDraftPresenter,
+    get_plan_summary_use_case: GetPlanSummaryCompany,
+    get_plan_summary_presenter: GetPrefilledDraftDataPresenter,
+    create_plan_draft_use_case: CreatePlanDraft,
+    create_draft_controller: CreateDraftController,
+    create_draft_presenter: CreateDraftPresenter,
     not_found_view: Http404View,
     template_renderer: UserTemplateRenderer,
 ) -> Response:
-    status_code: int = 200
     form = CreateDraftForm(request.form)
     if request.method == "GET":
         current_user = session.get_current_user()
         assert current_user
-        response = create_form_use_case.get_plan_summary_for_company(
+        response = get_plan_summary_use_case.get_plan_summary_for_company(
             plan_id=plan_id, company_id=current_user
         )
         if response.plan_summary is None:
             return not_found_view.get_response()
-        else:
-            create_form_presenter.show_prefilled_draft_data(
-                summary_data=response.plan_summary, form=form
-            )
-    if request.method == "POST":
-        if form.validate():
-            use_case_request = process_form_controller.import_form_data(draft_form=form)
-            use_case_response = process_form_use_case(use_case_request)
-            view_model = process_form_presenter.present_plan_creation(use_case_response)
-            if view_model.redirect_url is not None:
-                return redirect(view_model.redirect_url)
-        status_code = 400
-    return FlaskResponse(
-        template_renderer.render_template(
-            "company/create_draft.html",
-            context=dict(
-                form=form,
-                view_model=dict(
-                    save_draft_url="",
-                    cancel_url="/company/create_draft",
+        view_model_get = get_plan_summary_presenter.show_prefilled_draft_data(
+            summary_data=response.plan_summary, form=form
+        )
+        return FlaskResponse(
+            template_renderer.render_template(
+                "company/create_draft.html",
+                context=dict(
+                    form=form,
+                    view_model=view_model_get,
                 ),
             ),
-        ),
-        status=status_code,
-    )
+            status=200,
+        )
+    else:
+        if form.validate():
+            use_case_request = create_draft_controller.import_form_data(draft_form=form)
+            use_case_response = create_plan_draft_use_case(use_case_request)
+            view_model_post = create_draft_presenter.present_plan_creation(
+                use_case_response
+            )
+            if view_model_post.redirect_url is not None:
+                return redirect(view_model_post.redirect_url)
+        return not_found_view.get_response()
 
 
 @CompanyRoute("/company/create_draft", methods=["GET", "POST"])
