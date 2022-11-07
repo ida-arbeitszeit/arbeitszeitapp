@@ -10,24 +10,29 @@
 Introduction
 ============
 
+Description
+------------
+
+Arbeitszeitapp is a plattform to exchange services and products on the 
+basis of working time. It is designed to be self-hosted by communities or 
+organizations. A test instance is running on https://arbeitszeitapp.herokuapp.com/.
+
+
 Theory
 -----------
 
-Companies do usually calculate with working hours internally, 
-but switch to money when dealing with other agents on the market. This app 
-extends collective planning and working time calculation beyond the 
-company boundaries. It facilitates the creation of networks 
-of cooperations that exchanges products on the basis of working time 
-without the need for money. 
+Companies usually calculate with labour time internally, 
+but switch to money on the market. This app 
+extends planning and labour time calculation beyond the 
+company boundaries and supports networks that exchanges products on the basis of labour time. 
 
-To make this possible, it provides a planning interface for companies and 
+It provides a planning interface for companies and 
 communities as well as a working time management for companies and workers. 
 Plans can get filed and approved, products can get published and paid, 
 work certificates can get transferred. 
 
 It is the implementation of a theory (`"Arbeitszeitrechnung" 
-<https://aaap.be/Pages/Transition-en-Fundamental-Principles-1930.html>`_) elaborated in 
-the 1920s working class movement. 
+<https://aaap.be/Pages/Transition-en-Fundamental-Principles-1930.html>`_) elaborated in the 1920s working class movement. 
 
 
 User roles
