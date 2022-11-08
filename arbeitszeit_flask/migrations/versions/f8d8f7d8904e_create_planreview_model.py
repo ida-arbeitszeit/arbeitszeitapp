@@ -47,26 +47,30 @@ def upgrade():
             plan_id=plan.id,
         )
         connection.execute(plan_review_table.insert().values(values))
-    op.drop_column("plan", "approval_date")
-    op.drop_column("plan", "approval_reason")
+
+    with op.batch_alter_table('plan') as batch_op:
+        batch_op.drop_column("approval_date")
+        batch_op.drop_column("approval_reason")
 
 
 def downgrade():
-    op.add_column(
-        "plan",
-        sa.Column(
-            "approval_reason",
-            sa.VARCHAR(length=1000),
-            autoincrement=False,
-            nullable=True,
-        ),
-    )
-    op.add_column(
-        "plan",
-        sa.Column(
-            "approval_date", postgresql.TIMESTAMP(), autoincrement=False, nullable=True
-        ),
-    )
+    
+    with op.batch_alter_table('plan') as batch_op:
+        batch_op.add_column(
+            sa.Column(
+                "approval_reason",
+                sa.VARCHAR(length=1000),
+                autoincrement=False,
+                nullable=True,
+            ),
+        )
+
+        batch_op.add_column(
+            sa.Column(
+                "approval_date", postgresql.TIMESTAMP(), autoincrement=False, nullable=True
+            ),
+        )
+    
     plan_review_table = sa.Table(
         "plan_review",
         sa.MetaData(),
@@ -92,5 +96,5 @@ def downgrade():
             .where(plan_review_table.c.plan_id == plan_table.c.id)
             .values(values)
         )
-    op.drop_constraint("plan_review_plan_id_fkey", "plan_review", type_="foreignkey")
+
     op.drop_table("plan_review")
