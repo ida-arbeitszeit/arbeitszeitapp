@@ -1,7 +1,6 @@
 from uuid import uuid4
 
 from arbeitszeit.use_cases import ToggleProductAvailability
-from tests.data_generators import PlanGenerator
 
 from .base_test_case import BaseTestCase
 
@@ -10,7 +9,6 @@ class UseCaseTester(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.toggle = self.injector.get(ToggleProductAvailability)
-        self.plan_generator = self.injector.get(PlanGenerator)
 
     def test_that_toggle_is_unsuccessful_when_plan_does_not_exist(self) -> None:
         response = self.toggle(uuid4(), uuid4())

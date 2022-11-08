@@ -83,7 +83,7 @@ class RepositoryTester(FlaskTestCase):
 
     def test_does_not_identify_member_as_company(self):
         member = self.member_generator.create_member()
-        assert not self.company_repository.is_company(member.id)
+        assert not self.company_repository.is_company(member)
 
     def test_does_identify_company_id_as_company(self):
         company = self.company_generator.create_company()
@@ -238,7 +238,7 @@ class CreateCompanyTests(FlaskTestCase):
         self,
     ) -> None:
         email = "test@test.test"
-        self.member_generator.create_member(email=email)
+        self.member_generator.create_member_entity(email=email)
         self.repository.create_company(
             email=email,
             name="test name",

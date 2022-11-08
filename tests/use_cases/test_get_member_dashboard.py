@@ -18,7 +18,7 @@ class UseCaseTests(TestCase):
         self.company_generator = self.injector.get(CompanyGenerator)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.invite_worker_to_company = self.injector.get(InviteWorkerToCompanyUseCase)
-        self.member = self.member_generator.create_member()
+        self.member = self.member_generator.create_member_entity()
 
     def test_that_correct_workplace_email_is_shown(self):
         workplace = self.company_generator.create_company(email="companyname@mail.com")

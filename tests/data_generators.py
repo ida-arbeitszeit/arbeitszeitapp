@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterable, List, Optional
+from typing import Iterable, List, Optional, Union
 from uuid import UUID, uuid4
 
 from injector import inject
@@ -66,7 +66,7 @@ class MemberGenerator:
     member_repository: MemberRepository
     datetime_service: FakeDatetimeService
 
-    def create_member(
+    def create_member_entity(
         self,
         *,
         email: Optional[str] = None,
@@ -93,6 +93,24 @@ class MemberGenerator:
             registered_on=registered_on,
         )
 
+    def create_member(
+        self,
+        *,
+        email: Optional[str] = None,
+        name: str = "test member name",
+        account: Optional[Account] = None,
+        password: str = "password",
+        registered_on: Optional[datetime] = None,
+    ) -> UUID:
+        member = self.create_member_entity(
+            email=email,
+            name=name,
+            password=password,
+            account=account,
+            registered_on=registered_on,
+        )
+        return member.id
+
 
 @inject
 @dataclass
@@ -110,7 +128,7 @@ class CompanyGenerator:
         name: str = "Company Name",
         labour_account: Optional[Account] = None,
         password: str = "password",
-        workers: Optional[Iterable[Member]] = None,
+        workers: Optional[Iterable[Union[Member, UUID]]] = None,
         registered_on: datetime = None,
     ) -> Company:
         if email is None:
@@ -139,7 +157,10 @@ class CompanyGenerator:
         )
         if workers is not None:
             for worker in workers:
-                self.company_manager.add_worker_to_company(company.id, worker.id)
+                if isinstance(worker, UUID):
+                    self.company_manager.add_worker_to_company(company.id, worker)
+                else:
+                    self.company_manager.add_worker_to_company(company.id, worker.id)
         return company
 
 
