@@ -14,7 +14,7 @@ class SqliteMigrationTests(TestCase):
             "ARBEITSZEITAPP_CONFIGURATION_PATH"
         ] = sqlite_test_settings.__file__
         self.environment_variables["PYTHONPATH"] = ":".join(sys.path)
-        self.environment_variables["FLASK_APP"] = "arbeitszeit_flask"
+        self.environment_variables["FLASK_APP"] = os.getcwd() + "\\arbeitszeit_flask"
 
     def test_forward_migrations_work(self) -> None:
         with TemporaryDirectory() as cwd:
@@ -29,7 +29,7 @@ class SqliteMigrationTests(TestCase):
                 cwd=cwd,
             )
             assert completed_process.returncode == 0, completed_process.stderr
-
+    
     def test_backwards_migrations_work(self) -> None:
         with TemporaryDirectory() as cwd:
             self.environment_variables[
