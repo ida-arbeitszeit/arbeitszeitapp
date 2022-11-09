@@ -24,7 +24,8 @@ def upgrade():
     sa.Column('action_type', sa.Enum('answer_invite', 'answer_cooperation_request', name='useractiontype'), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
-    op.drop_column('message', 'user_action')
+    with op.batch_alter_table('message') as batch_op:
+        batch_op.drop_column('user_action')
     # ### end Alembic commands ###
 
 
