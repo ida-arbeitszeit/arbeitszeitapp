@@ -106,8 +106,8 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
         self.assertEqual(
             view_model.own_plan_action.end_coop_url,
             self.url_index.get_end_coop_url(
-                TESTING_PLAN_SUMMARY.plan_id,
-                TESTING_PLAN_SUMMARY.cooperation,
+                plan_id=TESTING_PLAN_SUMMARY.plan_id,
+                cooperation_id=TESTING_PLAN_SUMMARY.cooperation,
             ),
         )
 
