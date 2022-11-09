@@ -29,7 +29,7 @@ class SqliteMigrationTests(TestCase):
                 cwd=cwd,
             )
             assert completed_process.returncode == 0, completed_process.stderr
-    
+
     def test_backwards_migrations_work(self) -> None:
         with TemporaryDirectory() as cwd:
             self.environment_variables[
