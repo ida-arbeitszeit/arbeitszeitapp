@@ -62,7 +62,7 @@ class ShowMyPlansUseCase:
                 self.draft_repository.all_drafts_of_company(id=request.company_id),
             )
         )
-        drafts_sorted = sorted(drafts, key=lambda x: x.plan_creation_date, reverse=True)
+        drafts.sort(key=lambda x: x.plan_creation_date, reverse=True)
         count_all_plans = len(all_plans_of_company) + len(drafts)
         non_active_plans = [
             self._create_plan_info_from_plan(plan)
@@ -84,7 +84,7 @@ class ShowMyPlansUseCase:
             non_active_plans=non_active_plans,
             active_plans=active_plans,
             expired_plans=expired_plans,
-            drafts=drafts_sorted,
+            drafts=drafts,
         )
 
     def _create_plan_info_from_plan(self, plan: Plan) -> PlanInfo:
