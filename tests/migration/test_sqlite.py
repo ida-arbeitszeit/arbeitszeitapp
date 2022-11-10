@@ -27,7 +27,7 @@ class SqliteMigrationTests(TestCase):
                 "ARBEITSZEITAPP_TEST_DB_URL"
             ] = f"sqlite:///{cwd}/test.db"
             completed_process = subprocess.run(
-                ["flask", "db", "upgrade"],
+                ["python", "-m", "flask", "db", "upgrade"],
                 env=self.environment_variables,
                 capture_output=True,
                 universal_newlines=True,
@@ -41,14 +41,14 @@ class SqliteMigrationTests(TestCase):
                 "ARBEITSZEITAPP_TEST_DB_URL"
             ] = f"sqlite:///{cwd}/test.db"
             subprocess.run(
-                ["flask", "db", "upgrade"],
+                ["python", "-m", "flask", "db", "upgrade"],
                 env=self.environment_variables,
                 capture_output=True,
                 universal_newlines=True,
                 cwd=cwd,
             )
             completed_process = subprocess.run(
-                ["flask", "db", "downgrade", "5ccb2cf7d04c"],
+                ["python", "-m", "flask", "db", "downgrade", "5ccb2cf7d04c"],
                 env=self.environment_variables,
                 capture_output=True,
                 universal_newlines=True,
