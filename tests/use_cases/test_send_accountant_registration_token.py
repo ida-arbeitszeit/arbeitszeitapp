@@ -36,7 +36,7 @@ class UseCaseTests(TestCase):
         self,
     ) -> None:
         company_email = "test@test.test"
-        self.company_generator.create_company(email=company_email)
+        self.company_generator.create_company_entity(email=company_email)
         self.use_case.send_accountant_registration_token(
             request=SendAccountantRegistrationTokenUseCase.Request(
                 email=company_email,

@@ -53,7 +53,9 @@ class UseCaseTests(BaseTestCase):
 
     def test_name_of_planning_company_is_in_reponse(self) -> None:
         expected_company_name = "example company name"
-        planner = self.company_generator.create_company(name=expected_company_name)
+        planner = self.company_generator.create_company_entity(
+            name=expected_company_name
+        )
         self.file_plan_draft(planner=planner)
         response = self.use_case.list_plans_with_pending_review(
             request=ListPlansWithPendingReviewUseCase.Request()
@@ -66,7 +68,7 @@ class UseCaseTests(BaseTestCase):
         self, product_name: Optional[str] = None, planner: Optional[Company] = None
     ) -> UUID:
         if planner is None:
-            planner = self.company_generator.create_company()
+            planner = self.company_generator.create_company_entity()
         if product_name is None:
             product_name = "test draft name"
         draft = self.plan_generator.draft_plan(

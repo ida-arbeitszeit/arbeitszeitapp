@@ -33,7 +33,7 @@ def test_reject_payment_if_plan_is_expired(
     update_plans_and_payout: UpdatePlansAndPayout,
 ):
     datetime_service.freeze_time(datetime(2000, 1, 1))
-    sender = company_generator.create_company()
+    sender = company_generator.create_company_entity()
     plan = plan_generator.create_plan(timeframe=1)
     update_plans_and_payout()
     datetime_service.freeze_time(datetime(2001, 1, 1))
@@ -54,7 +54,7 @@ def test_payment_is_rejected_when_purpose_is_consumption(
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
 ):
-    sender = company_generator.create_company()
+    sender = company_generator.create_company_entity()
     plan = plan_generator.create_plan(activation_date=datetime.min)
     purpose = PurposesOfPurchases.consumption
     response = pay_means_of_production(
@@ -71,7 +71,7 @@ def test_reject_payment_trying_to_pay_public_service(
     plan_generator: PlanGenerator,
     datetime_service: FakeDatetimeService,
 ):
-    sender = company_generator.create_company()
+    sender = company_generator.create_company_entity()
     plan = plan_generator.create_plan(
         is_public_service=True, activation_date=datetime_service.now_minus_one_day()
     )
@@ -92,7 +92,7 @@ def test_reject_payment_trying_to_pay_own_product(
     plan_generator: PlanGenerator,
     datetime_service: FakeDatetimeService,
 ):
-    sender = company_generator.create_company()
+    sender = company_generator.create_company_entity()
     plan = plan_generator.create_plan(
         activation_date=datetime_service.now_minus_one_day(), planner=sender
     )
@@ -113,7 +113,7 @@ def test_balance_of_buyer_of_means_of_prod_reduced(
     datetime_service: FakeDatetimeService,
     plan_cooperation_repository: PlanCooperationRepository,
 ):
-    sender = company_generator.create_company()
+    sender = company_generator.create_company_entity()
     plan = plan_generator.create_plan(
         activation_date=datetime_service.now_minus_one_day()
     )
@@ -139,7 +139,7 @@ def test_balance_of_buyer_of_raw_materials_reduced(
     datetime_service: FakeDatetimeService,
     plan_cooperation_repository: PlanCooperationRepository,
 ):
-    sender = company_generator.create_company()
+    sender = company_generator.create_company_entity()
     plan = plan_generator.create_plan(
         activation_date=datetime_service.now_minus_one_day()
     )
@@ -167,7 +167,7 @@ def test_balance_of_seller_increased(
     account_repository: AccountRepository,
     datetime_service: FakeDatetimeService,
 ):
-    sender = company_generator.create_company()
+    sender = company_generator.create_company_entity()
     plan = plan_generator.create_plan(
         costs=ProductionCosts(
             labour_cost=Decimal(1),
@@ -200,7 +200,7 @@ def test_balance_of_seller_increased_correctly_when_plan_is_in_cooperation(
     cooperation_generator: CooperationGenerator,
 ):
     coop = cooperation_generator.create_cooperation()
-    sender = company_generator.create_company()
+    sender = company_generator.create_company_entity()
     plan = plan_generator.create_plan(
         activation_date=datetime_service.now_minus_one_day(),
         amount=50,
@@ -239,7 +239,7 @@ def test_correct_transaction_added_if_means_of_production_were_paid(
     datetime_service: FakeDatetimeService,
     plan_cooperation_repository: PlanCooperationRepository,
 ):
-    sender = company_generator.create_company()
+    sender = company_generator.create_company_entity()
     plan = plan_generator.create_plan(
         activation_date=datetime_service.now_minus_one_day()
     )
@@ -273,7 +273,7 @@ def test_correct_transaction_added_if_raw_materials_were_paid(
     datetime_service: FakeDatetimeService,
     plan_cooperation_repository: PlanCooperationRepository,
 ):
-    sender = company_generator.create_company()
+    sender = company_generator.create_company_entity()
     plan = plan_generator.create_plan(
         activation_date=datetime_service.now_minus_one_day()
     )
@@ -308,7 +308,7 @@ def test_correct_purchase_added_if_means_of_production_were_paid(
     datetime_service: FakeDatetimeService,
     plan_cooperation_repository: PlanCooperationRepository,
 ):
-    sender = company_generator.create_company()
+    sender = company_generator.create_company_entity()
     plan = plan_generator.create_plan(
         activation_date=datetime_service.now_minus_one_day()
     )
@@ -339,7 +339,7 @@ def test_correct_purchase_added_if_raw_materials_were_paid(
     datetime_service: FakeDatetimeService,
     plan_cooperation_repository: PlanCooperationRepository,
 ):
-    sender = company_generator.create_company()
+    sender = company_generator.create_company_entity()
     plan = plan_generator.create_plan(
         activation_date=datetime_service.now_minus_one_day()
     )
@@ -366,7 +366,7 @@ def test_plan_not_found_rejects_payment(
     pay_means_of_production: PayMeansOfProduction,
     company_generator: CompanyGenerator,
 ) -> None:
-    buyer = company_generator.create_company()
+    buyer = company_generator.create_company_entity()
     response = pay_means_of_production(
         PayMeansOfProductionRequest(
             buyer=buyer.id,
@@ -385,7 +385,7 @@ def test_plan_found_accepts_payment(
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
 ) -> None:
-    buyer = company_generator.create_company()
+    buyer = company_generator.create_company_entity()
     plan = plan_generator.create_plan(activation_date=datetime.min)
     response = pay_means_of_production(
         PayMeansOfProductionRequest(
@@ -404,8 +404,8 @@ class TestSuccessfulPayment(TestCase):
         self.injector = get_dependency_injector()
         self.company_generator = self.injector.get(CompanyGenerator)
         self.plan_generator = self.injector.get(PlanGenerator)
-        self.buyer = self.company_generator.create_company()
-        self.planner = self.company_generator.create_company()
+        self.buyer = self.company_generator.create_company_entity()
+        self.planner = self.company_generator.create_company_entity()
         self.plan = self.plan_generator.create_plan(
             planner=self.planner, activation_date=datetime.min
         )

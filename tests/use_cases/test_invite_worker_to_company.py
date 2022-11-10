@@ -11,7 +11,7 @@ class InviteWorkerTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.company_generator = self.injector.get(CompanyGenerator)
-        self.company = self.company_generator.create_company()
+        self.company = self.company_generator.create_company_entity()
         self.member_generator = self.injector.get(MemberGenerator)
         self.member = self.member_generator.create_member_entity()
         self.invite_worker_to_company = self.injector.get(InviteWorkerToCompanyUseCase)
@@ -54,8 +54,8 @@ class InviteWorkerTests(TestCase):
         self.assertTrue(response.is_success)
 
     def test_can_invite_same_worker_to_different_companies(self) -> None:
-        first_company = self.company_generator.create_company()
-        second_company = self.company_generator.create_company()
+        first_company = self.company_generator.create_company_entity()
+        second_company = self.company_generator.create_company_entity()
         self.invite_worker_to_company(
             InviteWorkerToCompanyUseCase.Request(
                 company=first_company.id,

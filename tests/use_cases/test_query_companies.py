@@ -38,7 +38,7 @@ def test_that_company_is_returned_when_searching_without_query(
     query_companies: QueryCompanies,
     company_generator: CompanyGenerator,
 ):
-    expected_company = company_generator.create_company(name="My Company")
+    expected_company = company_generator.create_company_entity(name="My Company")
     response = query_companies(make_request(None, CompanyFilter.by_name))
     assert company_in_results(expected_company, response)
 
@@ -48,7 +48,7 @@ def test_that_company_is_returned_when_searching_with_empty_query_string(
     query_companies: QueryCompanies,
     company_generator: CompanyGenerator,
 ):
-    expected_company = company_generator.create_company(name="My Company")
+    expected_company = company_generator.create_company_entity(name="My Company")
     response = query_companies(make_request("", CompanyFilter.by_name))
     assert company_in_results(expected_company, response)
 
@@ -58,7 +58,7 @@ def test_that_companies_where_name_is_exact_match_are_returned(
     query_companies: QueryCompanies,
     company_generator: CompanyGenerator,
 ):
-    expected_company = company_generator.create_company(name="My Company")
+    expected_company = company_generator.create_company_entity(name="My Company")
     response = query_companies(make_request("My Company", CompanyFilter.by_name))
     assert company_in_results(expected_company, response)
 
@@ -68,7 +68,7 @@ def test_query_substring_of_name_returns_correct_result(
     query_companies: QueryCompanies,
     company_generator: CompanyGenerator,
 ):
-    expected_company = company_generator.create_company(name="My Company")
+    expected_company = company_generator.create_company_entity(name="My Company")
     response = query_companies(make_request("Company", CompanyFilter.by_name))
     assert company_in_results(expected_company, response)
 
@@ -78,7 +78,7 @@ def test_that_companies_where_name_not_match_are_not_returned(
     query_companies: QueryCompanies,
     company_generator: CompanyGenerator,
 ):
-    company_generator.create_company(name="My Company")
+    company_generator.create_company_entity(name="My Company")
     response = query_companies(make_request("Factory", CompanyFilter.by_name))
     assert not response.results
 
@@ -88,7 +88,7 @@ def test_that_capitalization_is_ignored_in_name(
     query_companies: QueryCompanies,
     company_generator: CompanyGenerator,
 ):
-    expected_company = company_generator.create_company(name="My Company")
+    expected_company = company_generator.create_company_entity(name="My Company")
     response = query_companies(make_request("company", CompanyFilter.by_name))
     assert company_in_results(expected_company, response)
 
@@ -98,7 +98,9 @@ def test_that_companies_where_email_is_exact_match_are_returned(
     query_companies: QueryCompanies,
     company_generator: CompanyGenerator,
 ):
-    expected_company = company_generator.create_company(email="company@provider.de")
+    expected_company = company_generator.create_company_entity(
+        email="company@provider.de"
+    )
     response = query_companies(
         make_request("company@provider.de", CompanyFilter.by_email)
     )
@@ -110,7 +112,9 @@ def test_query_substring_of_email_returns_correct_result(
     query_companies: QueryCompanies,
     company_generator: CompanyGenerator,
 ):
-    expected_company = company_generator.create_company(email="company@provider.de")
+    expected_company = company_generator.create_company_entity(
+        email="company@provider.de"
+    )
     response = query_companies(make_request("company", CompanyFilter.by_email))
     assert company_in_results(expected_company, response)
 
@@ -120,7 +124,7 @@ def test_that_companies_where_email_not_match_are_not_returned(
     query_companies: QueryCompanies,
     company_generator: CompanyGenerator,
 ):
-    company_generator.create_company(email="company@provider.de")
+    company_generator.create_company_entity(email="company@provider.de")
     response = query_companies(make_request("factory", CompanyFilter.by_email))
     assert not response.results
 
@@ -130,7 +134,9 @@ def test_that_capitalization_is_ignored_in_email(
     query_companies: QueryCompanies,
     company_generator: CompanyGenerator,
 ):
-    expected_company = company_generator.create_company(email="company@provider.de")
+    expected_company = company_generator.create_company_entity(
+        email="company@provider.de"
+    )
     response = query_companies(make_request("Company", CompanyFilter.by_email))
     assert company_in_results(expected_company, response)
 

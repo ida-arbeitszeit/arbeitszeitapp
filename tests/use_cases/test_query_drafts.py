@@ -14,7 +14,7 @@ def test_that_no_draft_is_returned_when_searching_an_empty_repo(
     list_drafts: ListDraftsOfCompany,
     company_generator: CompanyGenerator,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     results = list_drafts(company.id).results
     assert not results
 
@@ -25,8 +25,8 @@ def test_that_only_drafts_from_company_are_returned(
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
 ):
-    company1 = company_generator.create_company()
-    company2 = company_generator.create_company()
+    company1 = company_generator.create_company_entity()
+    company2 = company_generator.create_company_entity()
     draft1 = plan_generator.draft_plan(planner=company1)
     draft2 = plan_generator.draft_plan(planner=company2)
     response = list_drafts(company1.id)
@@ -40,7 +40,7 @@ def test_that_draft_description_is_returned(
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     plan_generator.draft_plan(planner=company, description="test description")
     response = list_drafts(company.id)
     assert response.results.pop().description == "test description"

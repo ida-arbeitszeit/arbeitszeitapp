@@ -142,7 +142,7 @@ class CompanyGenerator:
     company_manager: CompanyManager
     register_company_use_case: RegisterCompany
 
-    def create_company(
+    def create_company_entity(
         self,
         *,
         email: Optional[str] = None,
@@ -184,7 +184,7 @@ class CompanyGenerator:
                     self.company_manager.add_worker_to_company(company.id, worker.id)
         return company
 
-    def create_company_ng(
+    def create_company(
         self, *, confirmed: bool = True, email: Optional[str] = None
     ) -> UUID:
         if email is None:
@@ -337,7 +337,7 @@ class PlanGenerator:
         if costs is None:
             costs = ProductionCosts(Decimal(1), Decimal(1), Decimal(1))
         if planner is None:
-            planner = self.company_generator.create_company()
+            planner = self.company_generator.create_company_entity()
         if timeframe is None:
             timeframe = 14
         response = self.create_plan_draft_use_case(
@@ -473,7 +473,7 @@ class CooperationGenerator:
         if name is None:
             name = "test name"
         if coordinator is None:
-            coordinator = self.company_generator.create_company()
+            coordinator = self.company_generator.create_company_entity()
         cooperation = self.cooperation_repository.create_cooperation(
             self.datetime_service.now(),
             name=name,

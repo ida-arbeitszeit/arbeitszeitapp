@@ -43,7 +43,7 @@ def test_possible_to_set_and_unset_requested_cooperation_attribute(
         creation_timestamp=datetime.now(),
         name="test name",
         definition="test description",
-        coordinator=company_generator.create_company(),
+        coordinator=company_generator.create_company_entity(),
     )
     plan = plan_generator.create_plan()
 
@@ -71,7 +71,7 @@ def test_possible_to_add_and_to_remove_plan_to_cooperation(
         creation_timestamp=datetime.now(),
         name="test name",
         definition="test description",
-        coordinator=company_generator.create_company(),
+        coordinator=company_generator.create_company_entity(),
     )
     plan = plan_generator.create_plan()
 
@@ -97,7 +97,7 @@ def test_correct_inbound_requests_are_returned(
         creation_timestamp=datetime.now(),
         name="test name",
         definition="test description",
-        coordinator=company_generator.create_company(),
+        coordinator=company_generator.create_company_entity(),
     )
     requesting_plan1 = plan_generator.create_plan(
         activation_date=datetime.min, requested_cooperation=coop
@@ -119,12 +119,12 @@ def test_correct_outbound_requests_are_returned(
     cooperation_repository: CooperationRepository,
     company_generator: CompanyGenerator,
 ):
-    planner = company_generator.create_company()
+    planner = company_generator.create_company_entity()
     coop = cooperation_repository.create_cooperation(
         creation_timestamp=datetime.now(),
         name="test name",
         definition="test description",
-        coordinator=company_generator.create_company(),
+        coordinator=company_generator.create_company_entity(),
     )
     requesting_plan1 = plan_generator.create_plan(
         activation_date=datetime.min, requested_cooperation=coop, planner=planner
@@ -152,7 +152,7 @@ def test_plans_in_cooperation_correctly_counted(
         creation_timestamp=datetime.now(),
         name="test name",
         definition="test description",
-        coordinator=company_generator.create_company(),
+        coordinator=company_generator.create_company_entity(),
     )
     plan_generator.create_plan(activation_date=datetime.min, cooperation=coop)
     plan_generator.create_plan(activation_date=datetime.min, cooperation=coop)
@@ -172,7 +172,7 @@ def test_only_cooperating_plans_are_returned(
         creation_timestamp=datetime.now(),
         name="test name",
         definition="test description",
-        coordinator=company_generator.create_company(),
+        coordinator=company_generator.create_company_entity(),
     )
     plan1 = plan_generator.create_plan(activation_date=datetime.min, cooperation=coop)
     plan2 = plan_generator.create_plan(activation_date=datetime.min, cooperation=coop)
@@ -194,7 +194,7 @@ def test_correct_plans_in_cooperation_returned(
         creation_timestamp=datetime.now(),
         name="test name",
         definition="test description",
-        coordinator=company_generator.create_company(),
+        coordinator=company_generator.create_company_entity(),
     )
     plan1 = plan_generator.create_plan(activation_date=datetime.min, cooperation=coop)
     plan2 = plan_generator.create_plan(activation_date=datetime.min, cooperation=coop)
@@ -230,7 +230,7 @@ def test_nothing_returned_when_no_plans_in_cooperation(
         creation_timestamp=datetime.now(),
         name="test name",
         definition="test description",
-        coordinator=company_generator.create_company(),
+        coordinator=company_generator.create_company_entity(),
     )
     plan_generator.create_plan(activation_date=datetime.min, requested_cooperation=None)
     plans = list(repository.get_plans_in_cooperation(coop.id))

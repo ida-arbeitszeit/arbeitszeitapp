@@ -107,7 +107,7 @@ class ViewTestCase(FlaskTestCase):
         if email is None:
             email = self.email_generator.get_random_email()
         if company is None:
-            company = self.company_generator.create_company(
+            company = self.company_generator.create_company_entity(
                 password=password, email=email
             )
         response = self.client.post(

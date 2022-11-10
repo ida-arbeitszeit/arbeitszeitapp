@@ -28,7 +28,7 @@ def test_returns_none_when_company_does_not_exist(
 def test_returns_id(
     get_company_summary: GetCompanySummary, company_generator: CompanyGenerator
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     response = get_company_summary(company.id)
     assert response
     assert response.id == company.id
@@ -38,7 +38,7 @@ def test_returns_id(
 def test_returns_name(
     get_company_summary: GetCompanySummary, company_generator: CompanyGenerator
 ):
-    company = company_generator.create_company(name="Company XYZ")
+    company = company_generator.create_company_entity(name="Company XYZ")
     response = get_company_summary(company.id)
     assert response
     assert response.name == "Company XYZ"
@@ -48,7 +48,7 @@ def test_returns_name(
 def test_returns_email(
     get_company_summary: GetCompanySummary, company_generator: CompanyGenerator
 ):
-    company = company_generator.create_company(email="company@cp.org")
+    company = company_generator.create_company_entity(email="company@cp.org")
     response = get_company_summary(company.id)
     assert response
     assert response.email == "company@cp.org"
@@ -58,7 +58,9 @@ def test_returns_email(
 def test_returns_register_date(
     get_company_summary: GetCompanySummary, company_generator: CompanyGenerator
 ):
-    company = company_generator.create_company(registered_on=datetime(2022, 1, 25))
+    company = company_generator.create_company_entity(
+        registered_on=datetime(2022, 1, 25)
+    )
     response = get_company_summary(company.id)
     assert response
     assert response.registered_on == datetime(2022, 1, 25)
@@ -68,7 +70,7 @@ def test_returns_register_date(
 def test_returns_expectations_of_zero_when_no_transactions_took_place(
     get_company_summary: GetCompanySummary, company_generator: CompanyGenerator
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     response = get_company_summary(company.id)
     assert response
     assert response.expectations.means == 0
@@ -84,7 +86,7 @@ def test_returns_correct_expectations_after_company_receives_credit_for_means_of
     transaction_repository: TransactionRepository,
     social_accounting: SocialAccounting,
 ):
-    receiving_company = company_generator.create_company()
+    receiving_company = company_generator.create_company_entity()
     amount_transferred = Decimal(20)
     transaction_repository.create_transaction(
         date=datetime.min,
@@ -106,7 +108,7 @@ def test_returns_correct_expectations_after_company_receives_credit_for_raw_mate
     transaction_repository: TransactionRepository,
     social_accounting: SocialAccounting,
 ):
-    receiving_company = company_generator.create_company()
+    receiving_company = company_generator.create_company_entity()
     amount_transferred = Decimal(20)
     transaction_repository.create_transaction(
         date=datetime.min,
@@ -128,7 +130,7 @@ def test_returns_correct_expectations_after_company_receives_credit_for_labour(
     transaction_repository: TransactionRepository,
     social_accounting: SocialAccounting,
 ):
-    receiving_company = company_generator.create_company()
+    receiving_company = company_generator.create_company_entity()
     amount_transferred = Decimal(20)
     transaction_repository.create_transaction(
         date=datetime.min,
@@ -150,7 +152,7 @@ def test_returns_correct_expectations_after_company_receives_negative_amount_on_
     transaction_repository: TransactionRepository,
     social_accounting: SocialAccounting,
 ):
-    receiving_company = company_generator.create_company()
+    receiving_company = company_generator.create_company_entity()
     amount_transferred = Decimal(-20)
     transaction_repository.create_transaction(
         date=datetime.min,
@@ -172,7 +174,7 @@ def test_returns_correct_expectations_after_company_receives_positive_amount_on_
     transaction_repository: TransactionRepository,
     social_accounting: SocialAccounting,
 ):
-    receiving_company = company_generator.create_company()
+    receiving_company = company_generator.create_company_entity()
     amount_transferred = Decimal(20)
     transaction_repository.create_transaction(
         date=datetime.min,
@@ -193,11 +195,11 @@ def test_returns_no_expectations_for_product_after_company_receives_amount_on_pr
     company_generator: CompanyGenerator,
     transaction_repository: TransactionRepository,
 ):
-    receiving_company = company_generator.create_company()
+    receiving_company = company_generator.create_company_entity()
     amount_transferred = Decimal(20)
     transaction_repository.create_transaction(
         date=datetime.min,
-        sending_account=company_generator.create_company().work_account,
+        sending_account=company_generator.create_company_entity().work_account,
         receiving_account=receiving_company.product_account,
         amount_sent=amount_transferred,
         amount_received=amount_transferred,
@@ -212,7 +214,7 @@ def test_returns_no_expectations_for_product_after_company_receives_amount_on_pr
 def test_all_four_accounts_have_balance_of_zero(
     get_company_summary: GetCompanySummary, company_generator: CompanyGenerator
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     response = get_company_summary(company.id)
     assert response
     assert response.account_balances.means == 0
@@ -227,8 +229,8 @@ def test_labour_account_shows_correct_balance_after_company_received_a_transacti
     company_generator: CompanyGenerator,
     transaction_repository: TransactionRepository,
 ):
-    sending_company = company_generator.create_company()
-    receiving_company = company_generator.create_company()
+    sending_company = company_generator.create_company_entity()
+    receiving_company = company_generator.create_company_entity()
     amount_transferred = Decimal(10)
     transaction_repository.create_transaction(
         date=datetime.min,
@@ -248,7 +250,7 @@ def test_labour_account_shows_correct_balance_after_company_received_a_transacti
 def test_show_relative_deviation_of_zero_for_all_accounts_when_no_transactions_took_place(
     get_company_summary: GetCompanySummary, company_generator: CompanyGenerator
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     response = get_company_summary(company.id)
     assert response
     for i in range(4):
@@ -261,8 +263,8 @@ def test_show_relative_deviation_of_infinite_when_company_receives_minus_5_on_p_
     company_generator: CompanyGenerator,
     transaction_repository: TransactionRepository,
 ):
-    sending_company = company_generator.create_company()
-    receiving_company = company_generator.create_company()
+    sending_company = company_generator.create_company_entity()
+    receiving_company = company_generator.create_company_entity()
     amount_transferred = Decimal(-5)
     transaction_repository.create_transaction(
         date=datetime.min,
@@ -285,7 +287,7 @@ def test_show_relative_deviation_of_100_after_social_accounting_sends_credit_to_
     transaction_repository: TransactionRepository,
     social_accounting: SocialAccounting,
 ):
-    receiving_company = company_generator.create_company()
+    receiving_company = company_generator.create_company_entity()
     amount_transferred = Decimal(5)
     transaction_repository.create_transaction(
         date=datetime.min,
@@ -308,8 +310,8 @@ def test_show_relative_deviation_of_infinite_when_company_receives_minus_5_on_pr
     company_generator: CompanyGenerator,
     transaction_repository: TransactionRepository,
 ):
-    sending_company = company_generator.create_company()
-    receiving_company = company_generator.create_company()
+    sending_company = company_generator.create_company_entity()
+    receiving_company = company_generator.create_company_entity()
     amount_transferred = Decimal(-5)
     transaction_repository.create_transaction(
         date=datetime.min,
@@ -333,7 +335,7 @@ def test_show_relative_deviation_of_100_when_social_accounting_sends_minus_5_to_
     transaction_repository: TransactionRepository,
     social_accounting: SocialAccounting,
 ):
-    receiving_company = company_generator.create_company()
+    receiving_company = company_generator.create_company_entity()
     amount_transferred = Decimal(-5)
     transaction_repository.create_transaction(
         date=datetime.min,
@@ -357,7 +359,7 @@ def test_show_relative_deviation_of_50_when_company_sells_half_of_expected_sales
     transaction_repository: TransactionRepository,
     social_accounting: SocialAccounting,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     expected_sales = Decimal(-10)
     transaction_repository.create_transaction(
         date=datetime.min,
@@ -367,7 +369,7 @@ def test_show_relative_deviation_of_50_when_company_sells_half_of_expected_sales
         amount_received=expected_sales,
         purpose="test",
     )
-    buying_company = company_generator.create_company()
+    buying_company = company_generator.create_company_entity()
     sales_value = Decimal(5)
     transaction_repository.create_transaction(
         date=datetime.min,
@@ -390,7 +392,7 @@ def test_returns_empty_list_of_companys_plans_when_there_are_none(
     get_company_summary: GetCompanySummary,
     company_generator: CompanyGenerator,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     response = get_company_summary(company.id)
     assert response
     assert response.plan_details == []
@@ -402,7 +404,7 @@ def test_returns_list_of_companys_plans_when_there_are_any(
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     plan_generator.create_plan(planner=company, activation_date=datetime.min)
     plan_generator.create_plan(planner=company, activation_date=None)
     response = get_company_summary(company.id)
@@ -417,7 +419,7 @@ def test_returns_list_of_companys_plans_in_descending_order(
     plan_generator: PlanGenerator,
     datetime_service: FakeDatetimeService,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     datetime_service.freeze_time(datetime(2000, 1, 1))
     third = plan_generator.create_plan(planner=company)
     datetime_service.freeze_time(datetime_service.now() - timedelta(days=9))
@@ -438,7 +440,7 @@ def test_returns_correct_sales_volume_of_zero_if_plan_is_public(
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     plan_generator.create_plan(
         planner=company,
         is_public_service=True,
@@ -455,7 +457,7 @@ def test_returns_correct_sales_volume_if_plan_is_productive(
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     plan_generator.create_plan(
         planner=company,
         costs=ProductionCosts(Decimal(2), Decimal(2), Decimal(2)),
@@ -471,7 +473,7 @@ def test_returns_correct_sales_balance_if_plan_is_productive_and_no_transactions
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     plan_generator.create_plan(
         planner=company, costs=ProductionCosts(Decimal(1), Decimal(1), Decimal(1))
     )
@@ -487,7 +489,7 @@ def test_returns_correct_sales_balance_if_plan_is_productive_and_one_transaction
     plan_generator: PlanGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     plan = plan_generator.create_plan(
         planner=company,
         costs=ProductionCosts(Decimal(1), Decimal(1), Decimal(1)),
@@ -509,7 +511,7 @@ def test_returns_correct_infinite_sales_deviation_if_plan_is_productive_with_cos
     plan_generator: PlanGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     plan = plan_generator.create_plan(
         planner=company,
         costs=ProductionCosts(Decimal(0), Decimal(0), Decimal(0)),
@@ -531,7 +533,7 @@ def test_returns_correct_sales_deviation_of_100_if_plan_is_productive_with_costs
     plan_generator: PlanGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     plan = plan_generator.create_plan(
         planner=company,
         costs=ProductionCosts(Decimal(5), Decimal(5), Decimal(0)),
@@ -553,7 +555,7 @@ def test_returns_correct_sales_deviation_of_100_if_plan_is_productive_with_costs
     plan_generator: PlanGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     plan_generator.create_plan(
         planner=company,
         costs=ProductionCosts(Decimal(5), Decimal(5), Decimal(0)),
@@ -570,7 +572,7 @@ def test_returns_correct_sales_deviation_of_0_if_plan_is_productive_with_costs_o
     plan_generator: PlanGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     plan = plan_generator.create_plan(
         planner=company,
         costs=ProductionCosts(Decimal(5), Decimal(5), Decimal(0)),
@@ -592,7 +594,7 @@ def test_returns_correct_sales_deviation_of_infinite_if_plan_is_public_but_recei
     plan_generator: PlanGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     plan = plan_generator.create_plan(
         planner=company,
         is_public_service=True,
@@ -615,7 +617,7 @@ def test_returns_correct_sales_deviation_of_0_if_plan_is_public_with_balance_of_
     plan_generator: PlanGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     plan = plan_generator.create_plan(
         planner=company,
         is_public_service=True,
@@ -636,7 +638,7 @@ def test_that_empty_list_of_suppliers_is_returned_when_company_did_not_purchase_
     get_company_summary: GetCompanySummary,
     company_generator: CompanyGenerator,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     response = get_company_summary(company.id)
     assert response
     assert not response.suppliers_ordered_by_volume
@@ -648,7 +650,7 @@ def test_that_list_of_suppliers_contains_one_supplier_when_company_did_one_purch
     company_generator: CompanyGenerator,
     purchase_generator: PurchaseGenerator,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     purchase_generator.create_purchase_by_company(buyer=company)
     response = get_company_summary(company.id)
     assert response
@@ -662,8 +664,8 @@ def test_that_list_of_suppliers_contains_one_supplier_when_company_did_two_purch
     purchase_generator: PurchaseGenerator,
     plan_generator: PlanGenerator,
 ):
-    buyer = company_generator.create_company()
-    seller = company_generator.create_company()
+    buyer = company_generator.create_company_entity()
+    seller = company_generator.create_company_entity()
     plan1 = plan_generator.create_plan(planner=seller)
     plan2 = plan_generator.create_plan(planner=seller)
     purchase_generator.create_purchase_by_company(buyer=buyer, plan=plan1)
@@ -679,8 +681,8 @@ def test_that_list_of_suppliers_contains_two_supplier_when_company_did_two_purch
     company_generator: CompanyGenerator,
     purchase_generator: PurchaseGenerator,
 ):
-    buyer = company_generator.create_company()
-    company_generator.create_company()
+    buyer = company_generator.create_company_entity()
+    company_generator.create_company_entity()
     purchase_generator.create_purchase_by_company(buyer=buyer)
     purchase_generator.create_purchase_by_company(buyer=buyer)
     response = get_company_summary(buyer.id)
@@ -695,8 +697,8 @@ def test_that_correct_supplier_id_is_shown(
     purchase_generator: PurchaseGenerator,
     plan_generator: PlanGenerator,
 ):
-    buyer = company_generator.create_company()
-    supplier = company_generator.create_company()
+    buyer = company_generator.create_company_entity()
+    supplier = company_generator.create_company_entity()
     offered_plan = plan_generator.create_plan(planner=supplier)
     purchase_generator.create_purchase_by_company(buyer=buyer, plan=offered_plan)
     response = get_company_summary(buyer.id)
@@ -711,9 +713,9 @@ def test_that_correct_supplier_name_is_shown(
     purchase_generator: PurchaseGenerator,
     plan_generator: PlanGenerator,
 ):
-    buyer = company_generator.create_company()
+    buyer = company_generator.create_company_entity()
     supplier_name = "supplier coop"
-    supplier = company_generator.create_company(name=supplier_name)
+    supplier = company_generator.create_company_entity(name=supplier_name)
     offered_plan = plan_generator.create_plan(planner=supplier)
     purchase_generator.create_purchase_by_company(buyer=buyer, plan=offered_plan)
     response = get_company_summary(buyer.id)
@@ -727,7 +729,7 @@ def test_that_correct_volume_of_sale_of_supplier_is_calculated_after_one_purchas
     company_generator: CompanyGenerator,
     purchase_generator: PurchaseGenerator,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     purchase_generator.create_purchase_by_company(
         buyer=company, price_per_unit=Decimal("8.5"), amount=1
     )
@@ -743,8 +745,8 @@ def test_that_correct_volume_of_sale_of_supplier_is_calculated_after_two_purchas
     purchase_generator: PurchaseGenerator,
     plan_generator: PlanGenerator,
 ):
-    buyer = company_generator.create_company()
-    seller = company_generator.create_company()
+    buyer = company_generator.create_company_entity()
+    seller = company_generator.create_company_entity()
     plan1 = plan_generator.create_plan(planner=seller)
     plan2 = plan_generator.create_plan(planner=seller)
     purchase_generator.create_purchase_by_company(
@@ -765,7 +767,7 @@ def test_that_supplier_with_highest_sales_volume_is_listed_before_other_supplier
     purchase_generator: PurchaseGenerator,
     plan_generator: PlanGenerator,
 ):
-    buyer = company_generator.create_company()
+    buyer = company_generator.create_company_entity()
     top_supplier_plan = plan_generator.create_plan()
     medium_supplier_plan = plan_generator.create_plan()
     low_supplier_plan = plan_generator.create_plan()
@@ -801,7 +803,7 @@ def test_that_correct_volumes_of_sale_of_suppliers_are_calculated_after_two_purc
     purchase_generator: PurchaseGenerator,
     plan_generator: PlanGenerator,
 ):
-    buyer = company_generator.create_company()
+    buyer = company_generator.create_company_entity()
     plan1 = plan_generator.create_plan()
     plan2 = plan_generator.create_plan()
     purchase_generator.create_purchase_by_company(

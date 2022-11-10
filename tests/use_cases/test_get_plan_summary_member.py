@@ -13,7 +13,7 @@ class UseCaseTests(TestCase):
         self.plan_generator = self.injector.get(PlanGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.use_case = self.injector.get(GetPlanSummaryMember)
-        self.company = self.company_generator.create_company()
+        self.company = self.company_generator.create_company_entity()
 
     def test_that_failure_is_returned_when_plan_does_not_exist(self) -> None:
         self.assertIsInstance(self.use_case(uuid4()), GetPlanSummaryMember.Failure)

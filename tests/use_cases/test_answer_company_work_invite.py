@@ -19,7 +19,7 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
         self.invite_worker_to_company = self.injector.get(InviteWorkerToCompanyUseCase)
         self.invite_repository = self.injector.get(WorkerInviteRepository)
         self.company_worker_repository = self.injector.get(CompanyWorkerRepository)
-        self.company = self.company_generator.create_company()
+        self.company = self.company_generator.create_company_entity()
         self.member = self.member_generator.create_member()
 
     def test_trying_to_answer_non_existing_invite_is_unsuccessful(self) -> None:

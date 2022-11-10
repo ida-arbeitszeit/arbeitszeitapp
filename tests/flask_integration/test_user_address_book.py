@@ -25,7 +25,7 @@ class UserAddressBookTests(TestCase):
         )
 
     def test_that_associated_email_for_company_is_returned(self) -> None:
-        company = self.company_generator.create_company()
+        company = self.company_generator.create_company_entity()
         self.assertEqual(
             company.email,
             self.repository.get_user_email_address(company.id),
