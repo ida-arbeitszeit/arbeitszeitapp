@@ -3,7 +3,12 @@ from injector import Injector, Module, inject, provider, singleton
 import arbeitszeit.repositories as interfaces
 from arbeitszeit import entities
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.token import InvitationTokenValidator, TokenDeliverer, TokenService
+from arbeitszeit.token import (
+    CompanyRegistrationMessagePresenter,
+    InvitationTokenValidator,
+    MemberRegistrationMessagePresenter,
+    TokenService,
+)
 from arbeitszeit.use_cases import GetCompanySummary
 from arbeitszeit.use_cases.edit_draft import EditDraftUseCase
 from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCase
@@ -12,12 +17,6 @@ from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit.use_cases.pay_consumer_product.consumer_product_transaction import (
     ConsumerProductTransactionFactory,
-)
-from arbeitszeit.use_cases.register_company.company_registration_message_presenter import (
-    CompanyRegistrationMessagePresenter,
-)
-from arbeitszeit.use_cases.register_member.member_registration_message_presenter import (
-    MemberRegistrationMessagePresenter,
 )
 from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitation_presenter import (
     AccountantInvitationPresenter,
@@ -91,10 +90,6 @@ class InMemoryModule(Module):
     @singleton
     def provide_token_delivery_service(self) -> TokenDeliveryService:
         return TokenDeliveryService()
-
-    @provider
-    def provide_token_deliverer(self, service: TokenDeliveryService) -> TokenDeliverer:
-        return service
 
     @provider
     def provide_purchase_repo(

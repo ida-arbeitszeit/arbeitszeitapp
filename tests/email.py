@@ -40,8 +40,3 @@ class FakeAddressBook:
 class FakeEmailConfiguration:
     def get_sender_address(self) -> str:
         return "test@test.test"
-
-
-class RegistrationEmailTemplateImpl:
-    def render_to_html(self, confirmation_url: str) -> str:
-        return f"member confirmation mail {confirmation_url}"

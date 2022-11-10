@@ -107,6 +107,12 @@ class UrlIndex(Protocol):
     def get_approve_plan_url(self, plan_id: UUID) -> str:
         ...
 
+    def get_member_confirmation_url(self, *, token: str) -> str:
+        ...
+
+    def get_company_confirmation_url(self, *, token: str) -> str:
+        ...
+
 
 class RenewPlanUrlIndex(Protocol):
     def get_renew_plan_url(self, plan_id: UUID) -> str:
@@ -115,11 +121,6 @@ class RenewPlanUrlIndex(Protocol):
 
 class HidePlanUrlIndex(Protocol):
     def get_hide_plan_url(self, plan_id: UUID) -> str:
-        ...
-
-
-class ConfirmationUrlIndex(Protocol):
-    def get_confirmation_url(self, token: str) -> str:
         ...
 
 

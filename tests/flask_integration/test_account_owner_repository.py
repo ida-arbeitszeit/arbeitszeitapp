@@ -17,7 +17,7 @@ class RepositoryTester(FlaskTestCase):
     def test_can_retrieve_owner_of_member_accounts(self) -> None:
         account = self.account_generator.create_account(AccountTypes.member)
         member = self.member_generator.create_member_entity(account=account)
-        assert self.repository.get_account_owner(account) == member
+        assert self.repository.get_account_owner(account).id == member.id
 
     def test_can_retrieve_owner_of_company_accounts(self) -> None:
         account = self.account_generator.create_account(AccountTypes.a)

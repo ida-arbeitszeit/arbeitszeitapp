@@ -262,7 +262,7 @@ class ConfirmMemberTests(FlaskTestCase):
         )
 
     def test_that_confirmed_on_does_not_get_updated_for_other_user(self) -> None:
-        other_member_id = self.member_generator.create_member_entity().id
+        other_member_id = self.member_generator.create_member_entity(confirmed=False).id
         expected_timestamp = datetime(2000, 1, 2)
         member_id = self.create_member()
         self.repository.confirm_member(member_id, confirmed_on=expected_timestamp)

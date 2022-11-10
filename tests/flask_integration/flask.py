@@ -51,7 +51,7 @@ class ViewTestCase(FlaskTestCase):
             email = self.email_generator.get_random_email()
         if member is None:
             member = self.member_generator.create_member_entity(
-                password=password, email=email
+                password=password, email=email, confirmed=False
             )
         response = self.client.post(
             "/member/login",
