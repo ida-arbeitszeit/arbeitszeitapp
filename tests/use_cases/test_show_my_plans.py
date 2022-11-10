@@ -23,7 +23,7 @@ class UseCaseTests(TestCase):
     def test_that_one_approved_plan_is_returned_after_one_plan_was_created(
         self,
     ) -> None:
-        company = self.company_generator.create_company()
+        company = self.company_generator.create_company_entity()
         self.plan_generator.create_plan(planner=company)
         response = self.use_case.show_company_plans(
             request=ShowMyPlansRequest(company_id=company.id)
@@ -31,8 +31,8 @@ class UseCaseTests(TestCase):
         assert response.count_all_plans == 1
 
     def test_that_no_plans_for_a_company_without_plans_are_found(self) -> None:
-        company = self.company_generator.create_company()
-        other_company = self.company_generator.create_company()
+        company = self.company_generator.create_company_entity()
+        other_company = self.company_generator.create_company_entity()
         self.plan_generator.create_plan(approved=True, planner=company)
         response = self.use_case.show_company_plans(
             request=ShowMyPlansRequest(company_id=other_company.id)
@@ -40,7 +40,7 @@ class UseCaseTests(TestCase):
         assert not response.count_all_plans
 
     def test_that_with_one_draft_that_plan_count_is_one(self) -> None:
-        company = self.company_generator.create_company()
+        company = self.company_generator.create_company_entity()
         self.plan_generator.draft_plan(planner=company)
         response = self.use_case.show_company_plans(
             request=ShowMyPlansRequest(company_id=company.id)
@@ -48,7 +48,7 @@ class UseCaseTests(TestCase):
         self.assertEqual(response.count_all_plans, 1)
 
     def test_that_with_no_drafts_that_drafts_in_response_is_empty(self) -> None:
-        company = self.company_generator.create_company()
+        company = self.company_generator.create_company_entity()
         response = self.use_case.show_company_plans(
             request=ShowMyPlansRequest(company_id=company.id)
         )

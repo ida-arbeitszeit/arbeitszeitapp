@@ -1,16 +1,11 @@
-from dataclasses import dataclass
 from typing import List
 
 from flask import current_app, render_template, url_for
 from flask_mail import Message
 
 from arbeitszeit.errors import CannotSendEmail
-from arbeitszeit.token import ConfirmationEmail
 from arbeitszeit_flask.extensions import mail
 from arbeitszeit_web.email import MailService
-from arbeitszeit_web.presenters.send_confirmation_email_presenter import (
-    SendConfirmationEmailPresenter,
-)
 
 
 class FlaskEmailConfiguration:
@@ -59,21 +54,3 @@ class FlaskMailService:
             mail.send(msg)
         except Exception:
             raise CannotSendEmail
-
-
-@dataclass
-class FlaskTokenDeliverer:
-    presenter: SendConfirmationEmailPresenter
-    mail_service: MailService
-
-    def deliver_confirmation_token(self, email: ConfirmationEmail) -> None:
-        view_model = self.presenter.render_confirmation_email(email)
-        html = render_template(
-            "auth/activate.html", confirm_url=view_model.confirmation_url
-        )
-        self.mail_service.send_message(
-            subject=view_model.subject,
-            recipients=view_model.recipients,
-            html=html,
-            sender=view_model.sender,
-        )

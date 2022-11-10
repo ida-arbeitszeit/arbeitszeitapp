@@ -34,7 +34,7 @@ def test_empty_list_is_returned_when_there_are_no_requests_for_coordinator(
     plan_generator: PlanGenerator,
     company_generator: CompanyGenerator,
 ):
-    coordinator = company_generator.create_company()
+    coordinator = company_generator.create_company_entity()
     coop = coop_generator.create_cooperation()
     plan_generator.create_plan(requested_cooperation=coop, activation_date=datetime.min)
     response = list_requests(ListInboundCoopRequestsRequest(coordinator.id))
@@ -48,7 +48,7 @@ def test_correct_plans_are_returned_when_plans_request_cooperation(
     plan_generator: PlanGenerator,
     company_generator: CompanyGenerator,
 ):
-    coordinator = company_generator.create_company()
+    coordinator = company_generator.create_company_entity()
     coop = coop_generator.create_cooperation(coordinator=coordinator)
     requesting_plan1 = plan_generator.create_plan(
         requested_cooperation=coop, activation_date=datetime.min

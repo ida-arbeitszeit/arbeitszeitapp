@@ -32,7 +32,7 @@ def test_that_create_plan_creates_a_plan_draft_that_is_not_rejected(
     create_plan_draft: CreatePlanDraft,
     company_generator: CompanyGenerator,
 ):
-    planner = company_generator.create_company()
+    planner = company_generator.create_company_entity()
     request = replace(REQUEST, planner=planner.id)
     assert not len(plan_draft_repository)
     response = create_plan_draft(request)
@@ -45,7 +45,7 @@ def test_that_create_plan_returns_a_draft_id(
     create_plan_draft: CreatePlanDraft,
     company_generator: CompanyGenerator,
 ):
-    planner = company_generator.create_company()
+    planner = company_generator.create_company_entity()
     request = replace(REQUEST, planner=planner.id)
     response = create_plan_draft(request)
     assert response.draft_id
@@ -73,7 +73,7 @@ def test_that_create_plan_gets_rejected_with_negative_production_costs(
     create_plan_draft: CreatePlanDraft,
     company_generator: CompanyGenerator,
 ):
-    planner = company_generator.create_company()
+    planner = company_generator.create_company_entity()
     request = replace(
         REQUEST,
         planner=planner.id,
@@ -93,7 +93,7 @@ def test_that_create_plan_gets_rejected_with_negative_production_amount(
     create_plan_draft: CreatePlanDraft,
     company_generator: CompanyGenerator,
 ):
-    planner = company_generator.create_company()
+    planner = company_generator.create_company_entity()
     request = replace(
         REQUEST,
         planner=planner.id,
@@ -109,7 +109,7 @@ def test_that_create_plan_gets_rejected_with_negative_timeframe(
     create_plan_draft: CreatePlanDraft,
     company_generator: CompanyGenerator,
 ):
-    planner = company_generator.create_company()
+    planner = company_generator.create_company_entity()
     request = replace(
         REQUEST,
         planner=planner.id,
@@ -125,6 +125,6 @@ def test_that_drafted_plan_has_same_planner_as_specified_on_creation(
     plan_generator: PlanGenerator,
     company_generator: CompanyGenerator,
 ) -> None:
-    planner = company_generator.create_company()
+    planner = company_generator.create_company_entity()
     draft = plan_generator.draft_plan(planner=planner)
     assert draft.planner.id == planner.id

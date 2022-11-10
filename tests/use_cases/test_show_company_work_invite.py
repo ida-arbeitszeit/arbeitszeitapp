@@ -36,7 +36,7 @@ class TestExistingMemberWithNonMatchingInvite(TestCase):
         self.invite_worker = self.injector.get(InviteWorkerToCompanyUseCase)
         self.invited_member = self.member_generator.create_member_entity()
         self.other_member = self.member_generator.create_member_entity()
-        self.company = self.company_generator.create_company()
+        self.company = self.company_generator.create_company_entity()
         invite_response = self.invite_worker(
             InviteWorkerToCompanyUseCase.Request(
                 company=self.company.id,
@@ -80,7 +80,7 @@ class TestExistingMemberWithMatchingInvite(TestCase):
         self.company_generator = self.injector.get(CompanyGenerator)
         self.invite_worker = self.injector.get(InviteWorkerToCompanyUseCase)
         self.member = self.member_generator.create_member_entity()
-        self.company = self.company_generator.create_company(
+        self.company = self.company_generator.create_company_entity(
             name=self.expected_company_name
         )
         invite_response = self.invite_worker(

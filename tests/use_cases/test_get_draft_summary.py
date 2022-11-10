@@ -19,7 +19,7 @@ def test_that_correct_planner_id_is_returned(
     get_draft_summary: GetDraftSummary,
     company_generator: CompanyGenerator,
 ):
-    planner = company_generator.create_company()
+    planner = company_generator.create_company_entity()
     draft = plan_generator.draft_plan(planner=planner)
     summary = get_draft_summary(draft.id)
     assert_success(summary, lambda s: s.planner_id == draft.planner.id)

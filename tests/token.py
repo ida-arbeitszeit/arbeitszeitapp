@@ -5,7 +5,6 @@ from typing import List, Optional, Tuple
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.token import ConfirmationEmail
 
 
 @dataclass
@@ -34,12 +33,8 @@ class FakeTokenService:
 
 class TokenDeliveryService:
     def __init__(self) -> None:
-        self.delivered_tokens: List[ConfirmationEmail] = []
         self.presented_member_tokens: List[Tuple[UUID, str]] = []
         self.presented_company_tokens: List[Tuple[UUID, str]] = []
-
-    def deliver_confirmation_token(self, email: ConfirmationEmail) -> None:
-        self.delivered_tokens.append(email)
 
     def show_member_registration_message(self, member: UUID, token: str) -> None:
         self.presented_member_tokens.append((member, token))

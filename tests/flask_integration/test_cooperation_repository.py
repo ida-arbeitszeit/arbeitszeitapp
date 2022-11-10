@@ -23,7 +23,7 @@ class CooperationRepositoryTests(TestCase):
             creation_timestamp=datetime.now(),
             name="test name",
             definition="test description",
-            coordinator=self.company_generator.create_company(),
+            coordinator=self.company_generator.create_company_entity(),
         )
 
     def test_cooperation_can_be_created(self):
@@ -75,7 +75,7 @@ class CooperationRepositoryTests(TestCase):
         self.assertFalse(list(self.repo.get_by_name(query)))
 
     def test_only_cooperations_coordinated_by_company_are_returned(self):
-        company = self.company_generator.create_company()
+        company = self.company_generator.create_company_entity()
         expected_cooperation = self.repo.create_cooperation(
             creation_timestamp=datetime.now(),
             name="test name",
@@ -86,7 +86,7 @@ class CooperationRepositoryTests(TestCase):
             creation_timestamp=datetime.now(),
             name="test name",
             definition="test description",
-            coordinator=self.company_generator.create_company(),
+            coordinator=self.company_generator.create_company_entity(),
         )
         cooperations = list(
             self.repo.get_cooperations_coordinated_by_company(company.id)

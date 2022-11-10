@@ -11,7 +11,7 @@ def test_that_list_of_balances_has_four_entries_when_no_transactions_took_place(
     use_case: ShowMyAccounts,
     company_generator: CompanyGenerator,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     response = use_case(request=ShowMyAccountsRequest(current_user=company.id))
     assert len(response.balances) == 4
 
@@ -21,7 +21,7 @@ def test_that_all_balances_are_zero_when_no_transactions_took_place(
     use_case: ShowMyAccounts,
     company_generator: CompanyGenerator,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     response = use_case(request=ShowMyAccountsRequest(current_user=company.id))
     for balance in response.balances:
         assert balance == Decimal(0)
@@ -33,7 +33,7 @@ def test_that_balance_of_mean_account_reflects_transaction_that_took_place(
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     transaction_generator.create_transaction(
         sending_account=company.means_account, amount_sent=Decimal(10)
     )
@@ -47,7 +47,7 @@ def test_that_balance_of_raw_material_account_reflects_transaction_that_took_pla
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     transaction_generator.create_transaction(
         sending_account=company.raw_material_account, amount_sent=Decimal(10)
     )
@@ -61,7 +61,7 @@ def test_that_balance_of_work_account_reflects_transaction_that_took_place(
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     transaction_generator.create_transaction(
         sending_account=company.work_account, amount_sent=Decimal(10)
     )
@@ -75,7 +75,7 @@ def test_that_balance_of_product_account_reflects_transaction_that_took_place(
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     transaction_generator.create_transaction(
         receiving_account=company.product_account, amount_sent=Decimal(10)
     )

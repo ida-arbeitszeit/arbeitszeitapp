@@ -57,7 +57,7 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
     login_manager.login_view = "auth.start"
 
     # Init Flask-Talisman
-    if app.config["ENV"] == "production":
+    if not app.config["DEBUG"]:
         csp = {"default-src": ["'self'", "'unsafe-inline'", "*.fontawesome.com"]}
         Talisman(
             app, content_security_policy=csp, force_https=app.config["FORCE_HTTPS"]
@@ -109,11 +109,10 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
         app.register_blueprint(member.blueprint.main_member)
         app.register_blueprint(accountant.blueprint.main_accountant)
 
-        if app.config["ENV"] == "development":
-            if app.config["DEBUG_DETAILS"] == True:
-                # print profiling info to sys.stout
-                show_profile_info(app)
-                show_sql_queries(app)
+        if app.config["DEBUG_DETAILS"] == True:
+            # print profiling info to sys.stout
+            show_profile_info(app)
+            show_sql_queries(app)
 
         return app
 

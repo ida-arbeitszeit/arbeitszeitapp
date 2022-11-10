@@ -52,8 +52,8 @@ class GetStatisticsTester(TestCase):
         assert stats.planned_means == 0
 
     def test_counting_of_companies(self) -> None:
-        self.company_generator.create_company()
-        self.company_generator.create_company()
+        self.company_generator.create_company_entity()
+        self.company_generator.create_company_entity()
         stats = self.use_case()
         assert stats.registered_companies_count == 2
 
@@ -99,7 +99,7 @@ class GetStatisticsTester(TestCase):
             amount_received=Decimal(10.5),
         )
         # company receives certs
-        company = self.company_generator.create_company()
+        company = self.company_generator.create_company_entity()
         company_account = company.work_account
         self.transaction_generator.create_transaction(
             receiving_account=company_account, amount_received=Decimal(10)
@@ -110,7 +110,7 @@ class GetStatisticsTester(TestCase):
     def test_available_product_is_positive_number_when_amount_on_prd_account_is_negative(
         self,
     ) -> None:
-        company = self.company_generator.create_company()
+        company = self.company_generator.create_company_entity()
         self.transaction_generator.create_transaction(
             receiving_account=company.product_account, amount_received=Decimal(-10)
         )
@@ -122,7 +122,7 @@ class GetStatisticsTester(TestCase):
     ) -> None:
         num_companies = 2
         for _ in range(num_companies):
-            company = self.company_generator.create_company()
+            company = self.company_generator.create_company_entity()
             self.transaction_generator.create_transaction(
                 receiving_account=company.product_account, amount_received=Decimal(-22)
             )

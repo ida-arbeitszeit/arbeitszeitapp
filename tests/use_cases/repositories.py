@@ -432,6 +432,10 @@ class CompanyRepository(interfaces.CompanyRepository):
                     return company.id
         return None
 
+    def confirm_company(self, company: UUID, confirmation_timestamp: datetime) -> None:
+        if model := self.get_by_id(company):
+            model.confirmed_on = confirmation_timestamp
+
 
 @singleton
 class PlanRepository(interfaces.PlanRepository):

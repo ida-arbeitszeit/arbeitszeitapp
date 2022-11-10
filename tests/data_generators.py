@@ -51,6 +51,8 @@ from arbeitszeit.use_cases.create_plan_draft import (
 )
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
 from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
+from arbeitszeit.use_cases.register_company import RegisterCompany
+from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
 from arbeitszeit.use_cases.send_accountant_registration_token import (
     SendAccountantRegistrationTokenUseCase,
 )
@@ -66,6 +68,7 @@ class MemberGenerator:
     email_generator: EmailGenerator
     member_repository: MemberRepository
     datetime_service: FakeDatetimeService
+    register_member_use_case: RegisterMemberUseCase
 
     def create_member_entity(
         self,
@@ -75,24 +78,38 @@ class MemberGenerator:
         account: Optional[Account] = None,
         password: str = "password",
         registered_on: Optional[datetime] = None,
+        confirmed: bool = True,
     ) -> Member:
         if not email:
             email = self.email_generator.get_random_email()
         assert email is not None
+        if not confirmed:
+            response = self.register_member_use_case(
+                request=RegisterMemberUseCase.Request(
+                    email=email, name=name, password=password
+                )
+            )
+            assert not response.is_rejected
+            member = self.member_repository.get_by_email(email)
+            assert member
+            return member
         if account is None:
             account = self.account_generator.create_account(
                 account_type=AccountTypes.member
             )
         if registered_on is None:
             registered_on = self.datetime_service.now()
-
-        return self.member_repository.create_member(
+        member = self.member_repository.create_member(
             email=email,
             name=name,
             password=password,
             account=account,
             registered_on=registered_on,
         )
+        self.member_repository.confirm_member(member.id, confirmed_on=registered_on)
+        member = self.member_repository.get_by_id(member.id)
+        assert member
+        return member
 
     def create_member(
         self,
@@ -102,6 +119,7 @@ class MemberGenerator:
         account: Optional[Account] = None,
         password: str = "password",
         registered_on: Optional[datetime] = None,
+        confirmed: bool = True,
     ) -> UUID:
         member = self.create_member_entity(
             email=email,
@@ -109,6 +127,7 @@ class MemberGenerator:
             password=password,
             account=account,
             registered_on=registered_on,
+            confirmed=confirmed,
         )
         return member.id
 
@@ -121,8 +140,9 @@ class CompanyGenerator:
     email_generator: EmailGenerator
     datetime_service: FakeDatetimeService
     company_manager: CompanyManager
+    register_company_use_case: RegisterCompany
 
-    def create_company(
+    def create_company_entity(
         self,
         *,
         email: Optional[str] = None,
@@ -162,6 +182,25 @@ class CompanyGenerator:
                     self.company_manager.add_worker_to_company(company.id, worker)
                 else:
                     self.company_manager.add_worker_to_company(company.id, worker.id)
+        return company
+
+    def create_company(
+        self, *, confirmed: bool = True, email: Optional[str] = None
+    ) -> UUID:
+        if email is None:
+            email = self.email_generator.get_random_email()
+        response = self.register_company_use_case(
+            request=RegisterCompany.Request(
+                name="test company",
+                email=email,
+                password="test password",
+            )
+        )
+        company = response.company_id
+        assert company
+        if not confirmed:
+            return company
+        self.company_repository.confirm_company(company, self.datetime_service.now())
         return company
 
 
@@ -298,7 +337,7 @@ class PlanGenerator:
         if costs is None:
             costs = ProductionCosts(Decimal(1), Decimal(1), Decimal(1))
         if planner is None:
-            planner = self.company_generator.create_company()
+            planner = self.company_generator.create_company_entity()
         if timeframe is None:
             timeframe = 14
         response = self.create_plan_draft_use_case(
@@ -434,7 +473,7 @@ class CooperationGenerator:
         if name is None:
             name = "test name"
         if coordinator is None:
-            coordinator = self.company_generator.create_company()
+            coordinator = self.company_generator.create_company_entity()
         cooperation = self.cooperation_repository.create_cooperation(
             self.datetime_service.now(),
             name=name,

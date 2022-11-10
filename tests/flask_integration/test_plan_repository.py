@@ -135,7 +135,7 @@ class PlanRepositoryTests(FlaskTestCase):
         assert expected_plan == self.plan_repository.get_plan_by_id(expected_plan.id)
 
     def test_that_all_plans_for_a_company_are_returned(self) -> None:
-        company = self.company_generator.create_company()
+        company = self.company_generator.create_company_entity()
         self.plan_generator.create_plan(planner=company, activation_date=None)
         self.plan_generator.create_plan(planner=company, is_public_service=True)
         self.plan_generator.create_plan(planner=company, is_available=False)
@@ -149,7 +149,7 @@ class PlanRepositoryTests(FlaskTestCase):
     def test_that_all_plans_for_a_company_are_returned_in_descending_order(
         self,
     ) -> None:
-        company = self.company_generator.create_company()
+        company = self.company_generator.create_company_entity()
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         third = self.plan_generator.create_plan(planner=company)
         self.datetime_service.freeze_time(
@@ -171,7 +171,7 @@ class PlanRepositoryTests(FlaskTestCase):
         assert returned_plans[2] == first
 
     def test_that_all_active_plan_for_a_company_are_returned(self) -> None:
-        company = self.company_generator.create_company()
+        company = self.company_generator.create_company_entity()
         self.plan_generator.create_plan(planner=company)
         self.plan_generator.create_plan(planner=company)
         returned_plans = list(

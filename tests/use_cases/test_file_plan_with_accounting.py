@@ -25,7 +25,7 @@ class BaseUseCaseTestCase(BaseTestCase):
         )
         self.get_plan_summary_member_use_case = self.injector.get(GetPlanSummaryMember)
         self.datetime_service = self.injector.get(FakeDatetimeService)
-        self.planner = self.company_generator.create_company()
+        self.planner = self.company_generator.create_company_entity()
         self.notify_accountants_presenter = self.injector.get(
             NotifyAccountantsAboutNewPlanPresenterImpl
         )
@@ -142,7 +142,7 @@ class UseCaseTests(BaseUseCaseTestCase):
         self,
     ) -> None:
         draft = self.create_draft()
-        other_company = self.company_generator.create_company()
+        other_company = self.company_generator.create_company_entity()
         request = self.create_request(draft=draft, filing_company=other_company.id)
         self.use_case.file_plan_with_accounting(request)
         response = (
@@ -156,7 +156,7 @@ class UseCaseTests(BaseUseCaseTestCase):
         self,
     ) -> None:
         draft = self.create_draft()
-        other_company = self.company_generator.create_company()
+        other_company = self.company_generator.create_company_entity()
         request = self.create_request(draft=draft, filing_company=other_company.id)
         response = self.use_case.file_plan_with_accounting(request)
         self.assertFalse(response.is_plan_successfully_filed)
@@ -165,7 +165,7 @@ class UseCaseTests(BaseUseCaseTestCase):
         self,
     ) -> None:
         draft = self.create_draft()
-        other_company = self.company_generator.create_company()
+        other_company = self.company_generator.create_company_entity()
         self.use_case.file_plan_with_accounting(
             request=self.create_request(draft=draft, filing_company=other_company.id)
         )

@@ -1,5 +1,5 @@
-from dataclasses import dataclass
 from typing import Optional, Protocol
+from uuid import UUID
 
 
 class TokenService(Protocol):
@@ -12,12 +12,11 @@ class InvitationTokenValidator(Protocol):
         ...
 
 
-@dataclass
-class ConfirmationEmail:
-    token: str
-    email: str
+class MemberRegistrationMessagePresenter(Protocol):
+    def show_member_registration_message(self, member: UUID, token: str) -> None:
+        ...
 
 
-class TokenDeliverer(Protocol):
-    def deliver_confirmation_token(self, email: ConfirmationEmail) -> None:
+class CompanyRegistrationMessagePresenter(Protocol):
+    def show_company_registration_message(self, company: UUID, token: str) -> None:
         ...

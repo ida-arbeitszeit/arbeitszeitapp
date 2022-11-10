@@ -1,6 +1,6 @@
 from os import environ
 
-DEBUG = False
+FLASK_DEBUG = 0
 DEBUG_DETAILS = False
 TESTING = False
 SQLALCHEMY_TRACK_MODIFICATIONS = False

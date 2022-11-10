@@ -1,7 +1,6 @@
 from uuid import uuid4
 
 from arbeitszeit.use_cases.get_accountant_dashboard import GetAccountantDashboardUseCase
-from tests.data_generators import AccountantGenerator
 from tests.use_cases.base_test_case import BaseTestCase
 
 
@@ -9,7 +8,6 @@ class UseCaseTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.use_case = self.injector.get(GetAccountantDashboardUseCase)
-        self.accountant_generator = self.injector.get(AccountantGenerator)
 
     def test_retrieving_dashboard_for_nonexisting_accountant_fails(self):
         with self.assertRaises(self.use_case.Failure):

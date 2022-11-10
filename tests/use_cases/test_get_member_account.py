@@ -41,7 +41,7 @@ def test_that_transactions_is_empty_when_member_is_not_involved_in_transaction(
     company_generator: CompanyGenerator,
 ):
     member_of_interest = member_generator.create_member()
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     other_member = member_generator.create_member_entity()
 
     transaction_generator.create_transaction(
@@ -63,7 +63,7 @@ def test_that_correct_info_is_generated_after_member_pays_product(
     transaction_generator: TransactionGenerator,
 ):
     member = member_generator.create_member_entity()
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
 
     transaction_generator.create_transaction(
         sending_account=member.account,
@@ -88,7 +88,7 @@ def test_that_a_transaction_with_volume_zero_is_shown_correctly(
     transaction_generator: TransactionGenerator,
 ):
     member = member_generator.create_member_entity()
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
 
     transaction_generator.create_transaction(
         sending_account=member.account,
@@ -110,7 +110,7 @@ def test_that_correct_info_is_generated_after_member_receives_wages(
     transaction_generator: TransactionGenerator,
 ):
     member = member_generator.create_member_entity()
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
 
     transaction_generator.create_transaction(
         sending_account=company.work_account,
@@ -135,8 +135,8 @@ def test_that_correct_info_for_company_is_generated_in_correct_order_after_sever
     member_generator: MemberGenerator,
     datetime_service: FakeDatetimeService,
 ):
-    company1 = company_generator.create_company()
-    company2 = company_generator.create_company()
+    company1 = company_generator.create_company_entity()
+    company2 = company_generator.create_company_entity()
     member = member_generator.create_member_entity()
 
     # wages from comp1

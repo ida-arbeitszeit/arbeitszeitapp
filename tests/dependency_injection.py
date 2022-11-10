@@ -13,6 +13,7 @@ from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitat
 from arbeitszeit_web.colors import Colors
 from arbeitszeit_web.plotter import Plotter
 from arbeitszeit_web.session import Session
+from arbeitszeit_web.text_renderer import TextRenderer
 from arbeitszeit_web.translator import Translator
 from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
 from tests.company import CompanyManager
@@ -24,11 +25,16 @@ from tests.plotter import FakePlotter
 from tests.presenters.test_colors import ColorsTestImpl
 from tests.request import FakeRequest
 from tests.session import FakeSession
+from tests.text_renderer import TextRendererImpl
 from tests.token import FakeTokenService
 from tests.translator import FakeTranslator
 
 
 class TestingModule(Module):
+    @provider
+    def provide_text_renderer(self, instance: TextRendererImpl) -> TextRenderer:
+        return instance  # type: ignore
+
     @provider
     def provide_colors(self, colors: ColorsTestImpl) -> Colors:
         return colors

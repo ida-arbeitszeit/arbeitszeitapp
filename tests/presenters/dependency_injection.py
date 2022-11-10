@@ -1,6 +1,7 @@
 from injector import Injector, Module, inject, provider, singleton
 
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
+from arbeitszeit_web.email import EmailConfiguration, MailService, UserAddressBook
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
 from arbeitszeit_web.hide_plan import HidePlanPresenter
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyPresenter
@@ -17,9 +18,6 @@ from arbeitszeit_web.presenters.register_company_presenter import (
     RegisterCompanyPresenter,
 )
 from arbeitszeit_web.presenters.register_member_presenter import RegisterMemberPresenter
-from arbeitszeit_web.presenters.registration_email_presenter import (
-    RegistrationEmailPresenter,
-)
 from arbeitszeit_web.presenters.send_work_certificates_to_worker_presenter import (
     SendWorkCertificatesToWorkerPresenter,
 )
@@ -29,12 +27,7 @@ from arbeitszeit_web.session import Session
 from arbeitszeit_web.url_index import HidePlanUrlIndex, RenewPlanUrlIndex, UrlIndex
 from tests.datetime_service import FakeDatetimeService
 from tests.dependency_injection import TestingModule
-from tests.email import (
-    FakeAddressBook,
-    FakeEmailConfiguration,
-    FakeEmailSender,
-    RegistrationEmailTemplateImpl,
-)
+from tests.email import FakeAddressBook, FakeEmailConfiguration, FakeEmailSender
 from tests.language_service import FakeLanguageService
 from tests.request import FakeRequest
 from tests.session import FakeSession
@@ -45,7 +38,6 @@ from .accountant_invitation_email_view import AccountantInvitationEmailViewImpl
 from .notifier import NotifierTestImpl
 from .url_index import (
     AccountantInvitationUrlIndexImpl,
-    ConfirmationUrlIndexImpl,
     HidePlanUrlIndexTestImpl,
     LanguageChangerUrlIndexImpl,
     RenewPlanUrlIndexTestImpl,
@@ -54,6 +46,20 @@ from .url_index import (
 
 
 class PresenterTestsInjector(Module):
+    @provider
+    def provide_email_configuration(
+        self, instance: FakeEmailConfiguration
+    ) -> EmailConfiguration:
+        return instance
+
+    @provider
+    def provide_mail_service(self, instance: FakeEmailSender) -> MailService:
+        return instance
+
+    @provider
+    def provide_user_address_book(self, instance: FakeAddressBook) -> UserAddressBook:
+        return instance
+
     @provider
     def provide_request(self, request: FakeRequest) -> Request:
         return request
@@ -95,7 +101,7 @@ class PresenterTestsInjector(Module):
 
     @provider
     def provide_url_index(self, index: UrlIndexTestImpl) -> UrlIndex:
-        return index
+        return index  # type: ignore
 
     @provider
     def provide_create_cooperation_presenter(
@@ -143,26 +149,6 @@ class PresenterTestsInjector(Module):
     ) -> SendWorkCertificatesToWorkerPresenter:
         return SendWorkCertificatesToWorkerPresenter(
             notifier=notifier,
-            translator=translator,
-        )
-
-    @provider
-    def provide_registration_email_presenter(
-        self,
-        mail_service: FakeEmailSender,
-        address_book: FakeAddressBook,
-        url_index: ConfirmationUrlIndexImpl,
-        email_template: RegistrationEmailTemplateImpl,
-        email_configuration: FakeEmailConfiguration,
-        translator: FakeTranslator,
-    ) -> RegistrationEmailPresenter:
-        return RegistrationEmailPresenter(
-            email_sender=mail_service,
-            address_book=address_book,
-            url_index=url_index,
-            member_email_template=email_template,
-            company_email_template=email_template,
-            email_configuration=email_configuration,
             translator=translator,
         )
 

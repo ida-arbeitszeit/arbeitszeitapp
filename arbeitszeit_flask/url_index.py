@@ -149,17 +149,14 @@ class GeneralUrlIndex:
     def get_approve_plan_url(self, plan_id: UUID) -> str:
         return url_for("main_accountant.approve_plan", plan=plan_id)
 
-
-class MemberUrlIndex:
-    def get_renew_plan_url(self, plan_id: UUID) -> str:
-        ...
-
-    def get_hide_plan_url(self, plan_id: UUID) -> str:
-        ...
-
-    def get_confirmation_url(self, token: str) -> str:
+    def get_member_confirmation_url(self, token: str) -> str:
         return url_for(
             endpoint="auth.confirm_email_member", token=token, _external=True
+        )
+
+    def get_company_confirmation_url(self, token: str) -> str:
+        return url_for(
+            endpoint="auth.confirm_email_company", token=token, _external=True
         )
 
 
@@ -174,8 +171,3 @@ class CompanyUrlIndex:
         # since invites don't make sense for a company, we redirect
         # them in this case to their dashboard page.
         return url_for("main_company.dashboard")
-
-    def get_confirmation_url(self, token: str) -> str:
-        return url_for(
-            endpoint="auth.confirm_email_company", token=token, _external=True
-        )

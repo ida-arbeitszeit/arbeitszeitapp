@@ -4,10 +4,10 @@ from uuid import UUID
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
 
-from arbeitszeit.use_cases import ResendConfirmationMail, ResendConfirmationMailRequest
 from arbeitszeit.use_cases.log_in_accountant import LogInAccountantUseCase
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
+from arbeitszeit.use_cases.resend_confirmation_mail import ResendConfirmationMailUseCase
 from arbeitszeit.use_cases.start_page import StartPageUseCase
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.database.repositories import CompanyRepository, MemberRepository
@@ -147,21 +147,17 @@ def login_member(
 @auth.route("/member/resend")
 @with_injection(modules=[MemberModule()])
 @login_required
-def resend_confirmation_member(use_case: ResendConfirmationMail):
+def resend_confirmation_member(use_case: ResendConfirmationMailUseCase):
     assert (
         current_user.user.email
     )  # current user object must have email because it is logged in
 
-    request = ResendConfirmationMailRequest(
-        subject="Bitte bestätige dein Konto",
-        recipient=current_user.user.email,
-    )
-    response = use_case(request)
-    if response.is_rejected:
-        flash("Bestätigungsmail konnte nicht gesendet werden!")
-    else:
+    request = use_case.Request(user=UUID(current_user.id))
+    response = use_case.resend_confirmation_mail(request)
+    if response.is_token_sent:
         flash("Eine neue Bestätigungsmail wurde gesendet.")
-
+    else:
+        flash("Bestätigungsmail konnte nicht gesendet werden!")
     return redirect(url_for("auth.unconfirmed_member"))
 
 
@@ -245,21 +241,17 @@ def confirm_email_company(token, company_repository: CompanyRepository):
 @auth.route("/company/resend")
 @with_injection(modules=[CompanyModule()])
 @login_required
-def resend_confirmation_company(use_case: ResendConfirmationMail):
+def resend_confirmation_company(use_case: ResendConfirmationMailUseCase):
     assert (
         current_user.user.email
     )  # current user object must have email because it is logged in
 
-    request = ResendConfirmationMailRequest(
-        subject="Bitte bestätige dein Konto",
-        recipient=current_user.user.email,
-    )
-    response = use_case(request)
-    if response.is_rejected:
-        flash("Bestätigungsmail konnte nicht gesendet werden!")
-    else:
+    request = use_case.Request(user=UUID(current_user.id))
+    response = use_case.resend_confirmation_mail(request)
+    if response.is_token_sent:
         flash("Eine neue Bestätigungsmail wurde gesendet.")
-
+    else:
+        flash("Bestätigungsmail konnte nicht gesendet werden!")
     return redirect(url_for("auth.unconfirmed_company"))
 
 

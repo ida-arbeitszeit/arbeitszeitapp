@@ -4,17 +4,12 @@ from uuid import uuid4
 from arbeitszeit_web.presenters.registration_email_presenter import (
     RegistrationEmailPresenter,
 )
-from tests.email import (
-    Email,
-    FakeAddressBook,
-    FakeEmailConfiguration,
-    FakeEmailSender,
-    RegistrationEmailTemplateImpl,
-)
+from tests.email import Email, FakeAddressBook, FakeEmailConfiguration, FakeEmailSender
+from tests.text_renderer import TextRendererImpl
 from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
-from .url_index import ConfirmationUrlIndexImpl
+from .url_index import UrlIndexTestImpl
 
 
 class MemberPresenterTests(TestCase):
@@ -23,10 +18,10 @@ class MemberPresenterTests(TestCase):
         self.email_sender = self.injector.get(FakeEmailSender)
         self.email_configuration = self.injector.get(FakeEmailConfiguration)
         self.address_book = self.injector.get(FakeAddressBook)
-        self.email_template = self.injector.get(RegistrationEmailTemplateImpl)
-        self.url_index = self.injector.get(ConfirmationUrlIndexImpl)
+        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(RegistrationEmailPresenter)
+        self.text_renderer = self.injector.get(TextRendererImpl)
         self.member = uuid4()
         self.token = "some test token"
 
@@ -53,11 +48,16 @@ class MemberPresenterTests(TestCase):
             recipient,
         )
 
-    def test_that_template_is_rendered(self) -> None:
-        expected_url = self.url_index.get_confirmation_url(self.token)
+    def test_that_correct_message_is_rendered(self) -> None:
+        expected_url = self.url_index.get_member_confirmation_url(token=self.token)
         self.presenter.show_member_registration_message(self.member, self.token)
         email = self.get_sent_email()
-        self.assertEqual(email.html, self.email_template.render_to_html(expected_url))
+        self.assertEqual(
+            email.html,
+            self.text_renderer.render_member_registration_message(
+                confirmation_url=expected_url
+            ),
+        )
 
     def test_that_subject_line_is_correct(self) -> None:
         self.presenter.show_member_registration_message(self.member, self.token)
@@ -74,10 +74,10 @@ class CompanyPresenterTests(TestCase):
         self.email_sender = self.injector.get(FakeEmailSender)
         self.email_configuration = self.injector.get(FakeEmailConfiguration)
         self.address_book = self.injector.get(FakeAddressBook)
-        self.email_template = self.injector.get(RegistrationEmailTemplateImpl)
-        self.url_index = self.injector.get(ConfirmationUrlIndexImpl)
+        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(RegistrationEmailPresenter)
+        self.text_renderer = self.injector.get(TextRendererImpl)
         self.company = uuid4()
         self.token = "some test token"
 
@@ -104,11 +104,16 @@ class CompanyPresenterTests(TestCase):
             recipient,
         )
 
-    def test_that_template_is_rendered(self) -> None:
-        expected_url = self.url_index.get_confirmation_url(self.token)
+    def test_that_correct_message_is_rendered(self) -> None:
+        expected_url = self.url_index.get_company_confirmation_url(token=self.token)
         self.presenter.show_company_registration_message(self.company, self.token)
         email = self.get_sent_email()
-        self.assertEqual(email.html, self.email_template.render_to_html(expected_url))
+        self.assertEqual(
+            email.html,
+            self.text_renderer.render_company_registration_message(
+                confirmation_url=expected_url
+            ),
+        )
 
     def test_that_subject_line_is_correct(self) -> None:
         self.presenter.show_company_registration_message(self.company, self.token)
