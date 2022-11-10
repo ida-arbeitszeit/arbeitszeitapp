@@ -76,7 +76,9 @@ class ShowMyPlansPresenterTests(TestCase):
         presentation = self.presenter.present(RESPONSE_WITH_ONE_ACTIVE_PLAN)
         self.assertEqual(
             presentation.active_plans.rows[0].plan_summary_url,
-            self.url_index.get_plan_summary_url(UserRole.company, plan.id),
+            self.url_index.get_plan_summary_url(
+                user_role=UserRole.company, plan_id=plan.id
+            ),
         )
         self.assertEqual(presentation.active_plans.rows[0].prd_name, plan.prd_name)
         self.assertEqual(
@@ -117,7 +119,9 @@ class ShowMyPlansPresenterTests(TestCase):
         expected_plan = RESPONSE_WITH_ONE_EXPIRED_PLAN.expired_plans[0]
         self.assertEqual(
             row1.plan_summary_url,
-            self.url_index.get_plan_summary_url(UserRole.company, plan.id),
+            self.url_index.get_plan_summary_url(
+                user_role=UserRole.company, plan_id=plan.id
+            ),
         )
         self.assertEqual(
             row1.prd_name,
@@ -139,7 +143,9 @@ class ShowMyPlansPresenterTests(TestCase):
         expected_plan = RESPONSE_WITH_ONE_NON_ACTIVE_PLAN.non_active_plans[0]
         self.assertEqual(
             row1.plan_summary_url,
-            self.url_index.get_plan_summary_url(UserRole.company, plan.id),
+            self.url_index.get_plan_summary_url(
+                user_role=UserRole.company, plan_id=plan.id
+            ),
         )
         self.assertEqual(
             row1.prd_name,

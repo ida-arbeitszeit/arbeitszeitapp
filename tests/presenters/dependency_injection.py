@@ -101,7 +101,7 @@ class PresenterTestsInjector(Module):
 
     @provider
     def provide_url_index(self, index: UrlIndexTestImpl) -> UrlIndex:
-        return index
+        return index  # type: ignore
 
     @provider
     def provide_create_cooperation_presenter(
