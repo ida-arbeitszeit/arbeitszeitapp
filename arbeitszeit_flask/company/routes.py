@@ -108,6 +108,7 @@ from arbeitszeit_web.request_cooperation import (
 )
 from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
+from arbeitszeit_web.url_index import UrlIndex
 
 from .blueprint import CompanyRoute
 
@@ -207,6 +208,7 @@ def create_draft_from_plan(
     create_draft_presenter: CreateDraftPresenter,
     not_found_view: Http404View,
     template_renderer: UserTemplateRenderer,
+    url_index: UrlIndex,
 ) -> Response:
     form = CreateDraftForm(request.form)
     if request.method == "GET":
@@ -237,9 +239,24 @@ def create_draft_from_plan(
             view_model_post = create_draft_presenter.present_plan_creation(
                 use_case_response
             )
-            if view_model_post.redirect_url is not None:
+            if view_model_post.redirect_url is None:
+                return not_found_view.get_response()
+            else:
                 return redirect(view_model_post.redirect_url)
-        return not_found_view.get_response()
+        return FlaskResponse(
+            template_renderer.render_template(
+                "company/create_draft.html",
+                context=dict(
+                    form=form,
+                    view_model=dict(
+                        load_draft_url=url_index.get_my_plan_drafts_url(),
+                        save_draft_url=url_index.get_create_draft_url(),
+                        cancel_url=url_index.get_create_draft_url(),
+                    ),
+                ),
+            ),
+            status=400,
+        )
 
 
 @CompanyRoute("/company/create_draft", methods=["GET", "POST"])
