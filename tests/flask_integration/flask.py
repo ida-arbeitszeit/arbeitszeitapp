@@ -1,5 +1,6 @@
 from typing import List, Optional
 from unittest import TestCase
+from uuid import UUID
 
 from flask import Flask
 from injector import Module
@@ -7,7 +8,12 @@ from injector import Module
 from arbeitszeit.entities import Company, Member
 from arbeitszeit.repositories import CompanyRepository, MemberRepository
 from arbeitszeit_flask.token import FlaskTokenService
-from tests.data_generators import CompanyGenerator, EmailGenerator, MemberGenerator
+from tests.data_generators import (
+    AccountantGenerator,
+    CompanyGenerator,
+    EmailGenerator,
+    MemberGenerator,
+)
 
 from .dependency_injection import get_dependency_injector
 
@@ -30,6 +36,7 @@ class ViewTestCase(FlaskTestCase):
         self.email_generator = self.injector.get(EmailGenerator)
         self.member_repository = self.injector.get(MemberRepository)
         self.company_repository = self.injector.get(CompanyRepository)
+        self.accountant_generator = self.injector.get(AccountantGenerator)
 
     def login_member(
         self,
@@ -71,6 +78,22 @@ class ViewTestCase(FlaskTestCase):
             follow_redirects=True,
         )
         assert response.status_code < 400
+
+    def login_accountant(self) -> UUID:
+        email = self.email_generator.get_random_email()
+        password = "password123"
+        accountant = self.accountant_generator.create_accountant(
+            email_address=email, password=password
+        )
+        response = self.client.post(
+            "/accountant/login",
+            data=dict(
+                password=password,
+                email=email,
+            ),
+        )
+        self.assertLess(response.status_code, 400)
+        return accountant
 
     def login_company(
         self,

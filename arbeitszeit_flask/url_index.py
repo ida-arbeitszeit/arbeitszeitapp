@@ -137,11 +137,17 @@ class GeneralUrlIndex:
     def get_request_coop_url(self) -> str:
         return url_for("main_company.request_cooperation")
 
-    def get_self_approve_plan_url(self, draft_id: UUID) -> str:
-        return url_for(
-            "main_company.self_approve_plan",
-            draft_uuid=draft_id,
-        )
+    def get_my_plans_url(self) -> str:
+        return url_for("main_company.my_plans")
+
+    def get_file_plan_url(self, draft_id: UUID) -> str:
+        return url_for("main_company.file_plan", draft_id=draft_id)
+
+    def get_unreviewed_plans_list_view_url(self) -> str:
+        return url_for("main_accountant.list_plans_with_pending_review")
+
+    def get_approve_plan_url(self, plan_id: UUID) -> str:
+        return url_for("main_accountant.approve_plan", plan=plan_id)
 
 
 class MemberUrlIndex:

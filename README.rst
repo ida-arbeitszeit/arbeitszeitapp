@@ -125,7 +125,7 @@ environment variables:
 
      export ARBEITSZEITAPP_CONFIGURATION_PATH="$PWD/arbeitszeit_flask/development_settings.py"
      export FLASK_APP=arbeitszeit_flask
-     export FLASK_ENV=development
+     export FLASK_DEBUG=1
      export DEV_DATABASE_URI="postgresql://postgres@localhost:5432/<name of database>"
      export DEV_SECRET_KEY=my_secret_key
      export ARBEITSZEIT_APP_SERVER_NAME=localhost:5000
@@ -133,12 +133,16 @@ environment variables:
 After configuring the database connection you need to run the database
 migrations via ``flask db upgrade``.
 
-Afterwards you can start the development server with ``flask run -h localhost``.
+Afterwards you can start the development server with ``python -m flask
+run -h localhost``.  Unfortunately ``flask run`` might not work due to
+a bug in the ``werkzeug`` library.
 
-Create an user by signing up and providing the required fields.
-You will be redirected to a site that asks to confirm your account creating with the link provided in your Email.
-This link can be found in the commandline you ran ``flask run`` starting with *<p><a href="* until the next quotation marks.
-Copy this link to your browser and your account will be activated.
+Create an user by signing up and providing the required fields.  You
+will be redirected to a site that asks to confirm your account
+creating with the link provided in your Email.  This link can be found
+in the commandline you ran ``python -m flask run`` starting with
+*<p><a href="* until the next quotation marks.  Copy this link to your
+browser and your account will be activated.
 
 
 Code formatting and analysis

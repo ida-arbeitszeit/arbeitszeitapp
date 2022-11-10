@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 
 from arbeitszeit.entities import AccountTypes, SocialAccounting
@@ -6,6 +6,7 @@ from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases import GetCompanyTransactions
 from tests.data_generators import (
     CompanyGenerator,
+    FakeDatetimeService,
     MemberGenerator,
     SocialAccountingGenerator,
     TransactionGenerator,
@@ -176,6 +177,7 @@ def test_correct_info_is_generated_after_several_transactions_where_companies_bu
     get_company_transactions: GetCompanyTransactions,
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
+    datetime_service: FakeDatetimeService,
 ):
     company1 = company_generator.create_company()
     company2 = company_generator.create_company()
@@ -183,14 +185,17 @@ def test_correct_info_is_generated_after_several_transactions_where_companies_bu
     transaction_generator.create_transaction(
         sending_account=company1.means_account,
         receiving_account=company2.product_account,
+        date=datetime_service.now() - timedelta(hours=3),
     )
     transaction_generator.create_transaction(
         sending_account=company2.means_account,
         receiving_account=company1.product_account,
+        date=datetime_service.now() - timedelta(hours=2),
     )
     transaction_generator.create_transaction(
         sending_account=company1.raw_material_account,
         receiving_account=company2.product_account,
+        date=datetime_service.now() - timedelta(hours=1),
     )
 
     info_company1 = get_company_transactions(company1.id)
@@ -213,6 +218,7 @@ def test_that_correct_info_for_company_is_generated_in_correct_order_after_sever
     transaction_generator: TransactionGenerator,
     member_generator: MemberGenerator,
     social_accounting_generator: SocialAccountingGenerator,
+    datetime_service: FakeDatetimeService,
 ):
     company1 = company_generator.create_company()
     company2 = company_generator.create_company()
@@ -222,21 +228,27 @@ def test_that_correct_info_for_company_is_generated_in_correct_order_after_sever
     transaction_generator.create_transaction(
         sending_account=company1.means_account,
         receiving_account=company2.product_account,
+        date=datetime_service.now() - timedelta(hours=5),
     )
     transaction_generator.create_transaction(
         sending_account=company2.means_account,
         receiving_account=company1.product_account,
+        date=datetime_service.now() - timedelta(hours=4),
     )
     transaction_generator.create_transaction(
         sending_account=company1.raw_material_account,
         receiving_account=company2.product_account,
+        date=datetime_service.now() - timedelta(hours=3),
     )
     transaction_generator.create_transaction(
-        sending_account=member.account, receiving_account=company1.product_account
+        sending_account=member.account,
+        receiving_account=company1.product_account,
+        date=datetime_service.now() - timedelta(hours=2),
     )
     expected_trans5 = transaction_generator.create_transaction(
         sending_account=social_accounting.account,
         receiving_account=company1.product_account,
+        date=datetime_service.now() - timedelta(hours=1),
     )
 
     info = get_company_transactions(company1.id)

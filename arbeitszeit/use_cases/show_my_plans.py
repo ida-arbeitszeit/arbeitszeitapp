@@ -66,7 +66,7 @@ class ShowMyPlansUseCase:
         non_active_plans = [
             self._create_plan_info_from_plan(plan)
             for plan in all_plans_of_company
-            if (plan.is_approved and not plan.is_active and not plan.expired)
+            if (not plan.is_approved and not plan.is_active and not plan.expired)
         ]
         active_plans = [
             self._create_plan_info_from_plan(plan)
