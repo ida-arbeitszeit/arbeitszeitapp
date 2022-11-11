@@ -1,14 +1,13 @@
 from datetime import datetime
 from decimal import Decimal
-from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.plan_summary import PlanSummary
 from arbeitszeit.use_cases import DraftSummarySuccess
 from arbeitszeit_web.create_draft import GetPrefilledDraftDataPresenter
 from tests.forms import DraftForm
-
-from .dependency_injection import get_dependency_injector
+from tests.presenters.base_test_case import BaseTestCase
+from tests.presenters.url_index import UrlIndexTestImpl
 
 PLAN_SUMMARY = PlanSummary(
     plan_id=uuid4(),
@@ -49,14 +48,15 @@ TEST_DRAFT_SUMMARY_SUCCESS = DraftSummarySuccess(
 )
 
 
-class PresenterTests(TestCase):
+class PlanSummaryPresenterTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
-        self.get_prefilled_data = self.injector.get(GetPrefilledDraftDataPresenter)
+        super().setUp()
+        self.presenter = self.injector.get(GetPrefilledDraftDataPresenter)
+        self.url_index = self.injector.get(UrlIndexTestImpl)
 
-    def test_correct_prefilled_data_is_returned_for_plan_summary(self) -> None:
+    def test_correct_form_data_is_returned_for_plan_summary(self) -> None:
         form = DraftForm()
-        self.get_prefilled_data.show_prefilled_draft_data(PLAN_SUMMARY, form=form)
+        self.presenter.show_prefilled_draft_data(PLAN_SUMMARY, form=form)
         assert form.product_name_field().get_value() == PLAN_SUMMARY.product_name
         assert form.description_field().get_value() == PLAN_SUMMARY.description
         assert form.timeframe_field().get_value() == PLAN_SUMMARY.timeframe
@@ -72,9 +72,27 @@ class PresenterTests(TestCase):
             form.is_public_service_field().get_value() == PLAN_SUMMARY.is_public_service
         )
 
-    def test_correct_prefilled_data_is_returned_for_draft_summary(self) -> None:
+    def test_correct_view_model_is_returned_for_plan_summary(self) -> None:
         form = DraftForm()
-        self.get_prefilled_data.show_prefilled_draft_data(
+        view_model = self.presenter.show_prefilled_draft_data(PLAN_SUMMARY, form=form)
+        self.assertEqual(view_model.cancel_url, self.url_index.get_create_draft_url())
+        self.assertEqual(
+            view_model.save_draft_url, self.url_index.get_create_draft_url()
+        )
+        self.assertEqual(
+            view_model.load_draft_url, self.url_index.get_my_plan_drafts_url()
+        )
+
+
+class DraftSummaryPresenterTests(BaseTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.presenter = self.injector.get(GetPrefilledDraftDataPresenter)
+        self.url_index = self.injector.get(UrlIndexTestImpl)
+
+    def test_correct_form_data_is_returned_for_draft_summary(self) -> None:
+        form = DraftForm()
+        self.presenter.show_prefilled_draft_data(
             TEST_DRAFT_SUMMARY_SUCCESS,
             form=form,
         )
@@ -108,4 +126,17 @@ class PresenterTests(TestCase):
         assert (
             form.is_public_service_field().get_value()
             == TEST_DRAFT_SUMMARY_SUCCESS.is_public_service
+        )
+
+    def test_correct_view_model_is_returned_for_draft_summary(self) -> None:
+        form = DraftForm()
+        view_model = self.presenter.show_prefilled_draft_data(
+            TEST_DRAFT_SUMMARY_SUCCESS, form=form
+        )
+        self.assertEqual(view_model.cancel_url, self.url_index.get_create_draft_url())
+        self.assertEqual(
+            view_model.save_draft_url, self.url_index.get_create_draft_url()
+        )
+        self.assertEqual(
+            view_model.load_draft_url, self.url_index.get_my_plan_drafts_url()
         )

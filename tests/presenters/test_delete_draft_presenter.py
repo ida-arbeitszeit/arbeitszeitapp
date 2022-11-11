@@ -19,12 +19,10 @@ class PresenterTests(TestCase):
         self.translator = self.injector.get(FakeTranslator)
         self.session = self.injector.get(FakeSession)
 
-    def test_that_user_gets_redirected_to_draft_list(self) -> None:
+    def test_that_user_gets_redirected_to_my_plans(self) -> None:
         response = self.get_response()
         view_model = self.presenter.present_draft_deletion(response)
-        self.assertEqual(
-            view_model.redirect_target, self.url_index.get_draft_list_url()
-        )
+        self.assertEqual(view_model.redirect_target, self.url_index.get_my_plans_url())
 
     def test_that_user_gets_redirected_to_next_url_from_session_if_set(self) -> None:
         expected_url = "/a/b/c"
