@@ -31,9 +31,6 @@ class GeneralUrlIndex:
     def get_language_change_url(self, language_code: str) -> str:
         return url_for("auth.set_language", language=language_code)
 
-    def get_draft_list_url(self) -> str:
-        return url_for("main_company.draft_list")
-
     def get_draft_summary_url(self, draft_id: UUID) -> str:
         return url_for("main_company.get_draft_summary", draft_id=draft_id)
 
@@ -140,6 +137,9 @@ class GeneralUrlIndex:
     def get_my_plans_url(self) -> str:
         return url_for("main_company.my_plans")
 
+    def get_my_plan_drafts_url(self) -> str:
+        return url_for("main_company.my_plans", _anchor="drafts")
+
     def get_file_plan_url(self, draft_id: UUID) -> str:
         return url_for("main_company.file_plan", draft_id=draft_id)
 
@@ -148,6 +148,9 @@ class GeneralUrlIndex:
 
     def get_approve_plan_url(self, plan_id: UUID) -> str:
         return url_for("main_accountant.approve_plan", plan=plan_id)
+
+    def get_create_draft_url(self) -> str:
+        return url_for("main_company.create_draft")
 
 
 class MemberUrlIndex:

@@ -206,14 +206,6 @@ class GeneralUrlIndexTests(ViewTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-    def test_that_draft_list_url_returns_success_status_when_requested_as_company(
-        self,
-    ) -> None:
-        self.login_company()
-        url = self.url_index.get_draft_list_url()
-        response = self.client.get(url)
-        self.assertTrue(response.status_code < 400)
-
     def _create_invite(self, member: UUID) -> UUID:
         company = self.company_generator.create_company()
         response = self.invite_worker_to_company(
@@ -291,6 +283,14 @@ class GeneralUrlIndexTests(ViewTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
+    def test_my_plan_drafts_url_leads_to_functional_url(
+        self,
+    ) -> None:
+        self.login_company()
+        url = self.url_index.get_my_plan_drafts_url()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
     def test_post_request_to_file_plan_url_leads_to_functional_url(
         self,
     ) -> None:
@@ -298,3 +298,11 @@ class GeneralUrlIndexTests(ViewTestCase):
         url = self.url_index.get_file_plan_url(uuid4())
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
+
+    def test_create_draft_url_leads_to_functional_url(
+        self,
+    ) -> None:
+        self.login_company()
+        url = self.url_index.get_create_draft_url()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)

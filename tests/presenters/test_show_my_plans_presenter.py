@@ -182,6 +182,13 @@ class ShowMyPlansPresenterTests(TestCase):
         view_model = self.presenter.present(response)
         self.assertEqual(view_model.drafts.rows[0].product_name, expected_name)
 
+    def test_that_draft_creation_date_is_filled_in_correctly(self) -> None:
+        expected_creation_time = datetime(2020, 5, 1)
+        self.datetime_service.freeze_time(expected_creation_time)
+        response = self.response_with_one_draft()
+        view_model = self.presenter.present(response)
+        self.assertEqual(view_model.drafts.rows[0].draft_creation_date, "01.05.20")
+
     def test_that_draft_details_url_is_set_correctly(self) -> None:
         response = self.response_with_one_draft()
         draft_id = response.drafts[0].id
@@ -207,6 +214,15 @@ class ShowMyPlansPresenterTests(TestCase):
         self.assertEqual(
             view_model.drafts.rows[0].file_plan_url,
             self.url_index.get_file_plan_url(draft_id),
+        )
+
+    def test_that_edit_plan_url_is_set_correctly(self) -> None:
+        response = self.response_with_one_draft()
+        draft_id = response.drafts[0].id
+        view_model = self.presenter.present(response)
+        self.assertEqual(
+            view_model.drafts.rows[0].edit_plan_url,
+            self.url_index.get_draft_summary_url(draft_id),
         )
 
     def _convert_into_plan_info(self, plan: Plan) -> PlanInfo:
@@ -240,8 +256,8 @@ class ShowMyPlansPresenterTests(TestCase):
     def response_with_one_draft(
         self, *, product_name: str = "test name"
     ) -> ShowMyPlansResponse:
-        plan = self.plan_generator.draft_plan(product_name=product_name)
-        plan_info = self._convert_draft_into_plan_info(plan)
+        draft = self.plan_generator.draft_plan(product_name=product_name)
+        plan_info = self._convert_draft_into_plan_info(draft)
         return ShowMyPlansResponse(
             count_all_plans=1,
             non_active_plans=[],

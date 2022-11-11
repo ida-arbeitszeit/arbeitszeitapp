@@ -55,6 +55,8 @@ class UrlIndexTestImpl:
     get_file_plan_url = UrlIndexMethod()
     get_unreviewed_plans_list_view_url = UrlIndexMethod()
     get_approve_plan_url = UrlIndexMethod()
+    get_my_plan_drafts_url = UrlIndexMethod()
+    get_create_draft_url = UrlIndexMethod()
 
 
 class RenewPlanUrlIndexTestImpl:
