@@ -276,6 +276,18 @@ Regenerate the API docs via:
 
      ./regenerate-api-docs
 
+Using a binary cache
+--------------------
+
+You can access the binary cache hosted on `cachix
+<https://www.cachix.org/>`_ in your development environment if you are
+using ``nix`` to manage your development environment. The binary cache
+is called "arbeitszeit".  Check the `cachix docs
+<https://docs.cachix.org/getting-started#using-binaries-with-nix>`_ on
+how to set this up locally.  The benefit of this for you is that you
+can avoid building dependencies there where already build in the CI
+pipeline once.
+
 .. end-development-setup-do-not-delete
 
 .. start-license-do-not-delete
