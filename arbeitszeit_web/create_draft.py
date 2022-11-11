@@ -39,12 +39,16 @@ class CreateDraftController:
         )
 
 
+@inject
 @dataclass
 class GetPrefilledDraftDataPresenter:
     @dataclass
     class ViewModel:
+        load_draft_url: str
         save_draft_url: str
         cancel_url: str
+
+    url_index: UrlIndex
 
     def show_prefilled_draft_data(
         self, summary_data: Union[PlanSummary, DraftSummarySuccess], form: DraftForm
@@ -59,8 +63,9 @@ class GetPrefilledDraftDataPresenter:
         form.labour_cost_field().set_value(summary_data.labour_cost)
         form.is_public_service_field().set_value(summary_data.is_public_service)
         return self.ViewModel(
-            save_draft_url="/company/create_draft",
-            cancel_url="/company/create_draft",
+            load_draft_url=self.url_index.get_my_plan_drafts_url(),
+            save_draft_url=self.url_index.get_create_draft_url(),
+            cancel_url=self.url_index.get_create_draft_url(),
         )
 
 
@@ -80,7 +85,7 @@ class CreateDraftPresenter:
         if response.draft_id is None:
             redirect_url = None
         else:
-            redirect_url = self.url_index.get_draft_list_url()
+            redirect_url = self.url_index.get_my_plan_drafts_url()
             self.notifier.display_info(
                 self.translator.gettext("Plan draft successfully created")
             )

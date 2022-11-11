@@ -7,6 +7,7 @@ from tests.data_generators import (
     MemberGenerator,
     PlanGenerator,
 )
+from tests.datetime_service import FakeDatetimeService
 
 from .dependency_injection import get_dependency_injector
 
@@ -55,3 +56,4 @@ class BaseTestCase(TestCase):
     company_generator = _lazy_property(CompanyGenerator)
     plan_generator = _lazy_property(PlanGenerator)
     accountant_generator = _lazy_property(AccountantGenerator)
+    datetime_service = _lazy_property(FakeDatetimeService)

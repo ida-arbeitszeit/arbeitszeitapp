@@ -21,7 +21,6 @@ from arbeitszeit.use_cases.query_plans import (
     QueryPlans,
 )
 from arbeitszeit_web.query_plans import QueryPlansRequestImpl as QueryPlansRequest
-from tests.datetime_service import FakeDatetimeService
 
 from .base_test_case import BaseTestCase
 from .repositories import (
@@ -40,7 +39,6 @@ class UseCaseTests(BaseTestCase):
         self.query_plans = self.injector.get(QueryPlans)
         self.draft_repository = self.injector.get(PlanDraftRepository)
         self.plan_repository = self.injector.get(PlanRepository)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
         self.pay_means_of_production = self.injector.get(PayMeansOfProduction)
         self.account_repository = self.injector.get(AccountRepository)
         self.transaction_repository = self.injector.get(TransactionRepository)
