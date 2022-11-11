@@ -356,6 +356,10 @@ class CompanyRepository(ABC):
     def validate_credentials(self, email_address: str, password: str) -> Optional[UUID]:
         pass
 
+    @abstractmethod
+    def confirm_company(self, company: UUID, confirmation_timestamp: datetime) -> None:
+        pass
+
 
 class PlanDraftRepository(ABC):
     @abstractmethod

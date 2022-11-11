@@ -23,7 +23,7 @@ class PlanDraftRepositoryTests(TestCase):
         self.injector = get_dependency_injector()
         self.repo = self.injector.get(PlanDraftRepository)
         self.company_generator = self.injector.get(CompanyGenerator)
-        self.planner = self.company_generator.create_company()
+        self.planner = self.company_generator.create_company_entity()
         self.DEFAULT_CREATE_ARGUMENTS = dict(
             planner=self.planner.id,
             product_name="test product name",
@@ -100,7 +100,7 @@ class UpdateDraftTests(TestCase):
         self.injector = get_dependency_injector()
         self.repo = self.injector.get(PlanDraftRepository)
         self.company_generator = self.injector.get(CompanyGenerator)
-        self.planner = self.company_generator.create_company()
+        self.planner = self.company_generator.create_company_entity()
         self.DEFAULT_CREATE_ARGUMENTS = dict(
             planner=self.planner.id,
             product_name="test product name",

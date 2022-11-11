@@ -23,7 +23,7 @@ def test_that_no_purchase_is_returned_when_searching_an_empty_repo(
     member = member_generator.create_member_entity()
     results = list(query_purchases(member))
     assert not results
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     results = list(query_purchases(company))
     assert not results
 
@@ -36,7 +36,7 @@ def test_that_correct_purchases_are_returned(
     company_generator: CompanyGenerator,
 ):
     member = member_generator.create_member_entity()
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     expected_purchase_member = purchase_generator.create_purchase_by_member(
         buyer=member
     )
@@ -81,7 +81,7 @@ def test_that_purchases_are_returned_in_correct_order_when_company_queries(
     company_generator: CompanyGenerator,
     datetime_service: FakeDatetimeService,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     # Creating older purchase first to test correct ordering
     purchase_generator.create_purchase_by_company(
         buyer=company, purchase_date=datetime_service.now_minus_two_days()

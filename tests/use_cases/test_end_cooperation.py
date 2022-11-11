@@ -20,7 +20,7 @@ class TestEndCooperation(TestCase):
         self.plan_generator = self.injector.get(PlanGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.cooperation_repository = self.injector.get(CooperationRepository)
-        self.requester = self.company_generator.create_company()
+        self.requester = self.company_generator.create_company_entity()
 
     def test_error_is_raised_when_plan_does_not_exist(self) -> None:
         cooperation = self.coop_generator.create_cooperation()

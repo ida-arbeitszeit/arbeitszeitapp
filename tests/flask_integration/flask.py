@@ -51,7 +51,7 @@ class ViewTestCase(FlaskTestCase):
             email = self.email_generator.get_random_email()
         if member is None:
             member = self.member_generator.create_member_entity(
-                password=password, email=email
+                password=password, email=email, confirmed=False
             )
         response = self.client.post(
             "/member/login",
@@ -107,7 +107,7 @@ class ViewTestCase(FlaskTestCase):
         if email is None:
             email = self.email_generator.get_random_email()
         if company is None:
-            company = self.company_generator.create_company(
+            company = self.company_generator.create_company_entity(
                 password=password, email=email
             )
         response = self.client.post(

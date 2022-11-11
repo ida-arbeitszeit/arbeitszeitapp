@@ -18,7 +18,7 @@ from arbeitszeit import entities
 from arbeitszeit import repositories as interfaces
 from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.token import InvitationTokenValidator, TokenDeliverer, TokenService
+from arbeitszeit.token import InvitationTokenValidator, TokenService
 from arbeitszeit.use_cases import GetCompanySummary
 from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
@@ -52,7 +52,6 @@ from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.language_repository import LanguageRepositoryImpl
 from arbeitszeit_flask.mail_service import (
     FlaskEmailConfiguration,
-    FlaskTokenDeliverer,
     MailService,
     get_mail_service,
 )
@@ -67,9 +66,10 @@ from arbeitszeit_flask.template import (
     TemplateRenderer,
     UserTemplateRenderer,
 )
+from arbeitszeit_flask.text_renderer import TextRendererImpl
 from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.translator import FlaskTranslator
-from arbeitszeit_flask.url_index import CompanyUrlIndex, GeneralUrlIndex, MemberUrlIndex
+from arbeitszeit_flask.url_index import CompanyUrlIndex, GeneralUrlIndex
 from arbeitszeit_flask.views import Http404View
 from arbeitszeit_web.answer_company_work_invite import AnswerCompanyWorkInviteController
 from arbeitszeit_web.colors import Colors
@@ -98,19 +98,12 @@ from arbeitszeit_web.presenters.list_available_languages_presenter import (
 from arbeitszeit_web.presenters.registration_email_presenter import (
     RegistrationEmailTemplate,
 )
-from arbeitszeit_web.presenters.send_confirmation_email_presenter import (
-    SendConfirmationEmailPresenter,
-)
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.request_cooperation import RequestCooperationController
 from arbeitszeit_web.session import Session
+from arbeitszeit_web.text_renderer import TextRenderer
 from arbeitszeit_web.translator import Translator
-from arbeitszeit_web.url_index import (
-    ConfirmationUrlIndex,
-    HidePlanUrlIndex,
-    RenewPlanUrlIndex,
-    UrlIndex,
-)
+from arbeitszeit_web.url_index import HidePlanUrlIndex, RenewPlanUrlIndex, UrlIndex
 
 from .presenters import CompanyPresenterModule, PresenterModule
 from .views import ViewsModule
@@ -122,23 +115,11 @@ __all__ = [
 
 class MemberModule(Module):
     @provider
-    def provide_confirmation_url_index(
-        self, member_index: MemberUrlIndex
-    ) -> ConfirmationUrlIndex:
-        return member_index
-
-    @provider
     def provide_template_index(self) -> TemplateIndex:
         return MemberTemplateIndex()
 
 
 class CompanyModule(CompanyPresenterModule):
-    @provider
-    def provide_confirmation_url_index(
-        self, company_index: CompanyUrlIndex
-    ) -> ConfirmationUrlIndex:
-        return company_index
-
     @provider
     def provide_renew_plan_url_index(
         self, company_index: CompanyUrlIndex
@@ -175,6 +156,10 @@ class CompanyModule(CompanyPresenterModule):
 
 
 class FlaskModule(PresenterModule):
+    @provider
+    def provide_text_renderer(self, instance: TextRendererImpl) -> TextRenderer:
+        return instance
+
     @provider
     def provide_company_worker_repository(
         self, instance: CompanyWorkerRepository
@@ -267,12 +252,6 @@ class FlaskModule(PresenterModule):
     @provider
     def provide_email_configuration(self) -> EmailConfiguration:
         return FlaskEmailConfiguration()
-
-    @provider
-    def provide_token_deliverer(
-        self, mail_service: MailService, presenter: SendConfirmationEmailPresenter
-    ) -> TokenDeliverer:
-        return FlaskTokenDeliverer(mail_service=mail_service, presenter=presenter)
 
     @provider
     def provide_http_404_view(

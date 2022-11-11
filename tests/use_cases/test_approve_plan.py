@@ -79,7 +79,7 @@ class UseCaseTests(BaseTestCase):
         plan = self.plan_generator.create_plan(approved=False)
         self.use_case.approve_plan(self.create_request(plan=plan.id))
         plan_id = self.get_latest_activated_plan().plan_id
-        other_company = self.company_generator.create_company()
+        other_company = self.company_generator.create_company_entity()
         purchase_response = self.pay_means_of_production(
             PayMeansOfProductionRequest(
                 buyer=other_company.id,

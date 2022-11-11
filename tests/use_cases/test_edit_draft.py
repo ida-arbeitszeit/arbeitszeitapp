@@ -25,21 +25,21 @@ class UseCaseTests(TestCase):
         self.assertFalse(response.is_success)
 
     def test_planner_can_edit_successfully_an_existing_draft(self) -> None:
-        planner = self.company_generator.create_company()
+        planner = self.company_generator.create_company_entity()
         draft = self.plan_generator.draft_plan(planner=planner)
         request = self.create_request(draft=draft.id, editor=planner.id)
         response = self.use_case.edit_draft(request)
         self.assertTrue(response.is_success)
 
     def test_non_planner_cannot_edit_draft_successfully(self) -> None:
-        other_company = self.company_generator.create_company()
+        other_company = self.company_generator.create_company_entity()
         draft = self.plan_generator.draft_plan()
         request = self.create_request(draft=draft.id, editor=other_company.id)
         response = self.use_case.edit_draft(request)
         self.assertFalse(response.is_success)
 
     def test_can_change_product_name_in_draft(self) -> None:
-        planner = self.company_generator.create_company()
+        planner = self.company_generator.create_company_entity()
         draft = self.plan_generator.draft_plan(
             planner=planner, product_name="original name"
         )
@@ -53,7 +53,7 @@ class UseCaseTests(TestCase):
         )
 
     def test_can_change_labour_cost_in_draft(self) -> None:
-        planner = self.company_generator.create_company()
+        planner = self.company_generator.create_company_entity()
         draft = self.plan_generator.draft_plan(
             planner=planner,
             costs=ProductionCosts(
@@ -72,7 +72,7 @@ class UseCaseTests(TestCase):
         )
 
     def test_can_change_means_cost_in_draft(self) -> None:
-        planner = self.company_generator.create_company()
+        planner = self.company_generator.create_company_entity()
         draft = self.plan_generator.draft_plan(
             planner=planner,
             costs=ProductionCosts(
@@ -91,7 +91,7 @@ class UseCaseTests(TestCase):
         )
 
     def test_can_change_resource_cost_in_draft(self) -> None:
-        planner = self.company_generator.create_company()
+        planner = self.company_generator.create_company_entity()
         draft = self.plan_generator.draft_plan(
             planner=planner,
             costs=ProductionCosts(
@@ -110,7 +110,7 @@ class UseCaseTests(TestCase):
         )
 
     def test_can_change_description_in_draft(self) -> None:
-        planner = self.company_generator.create_company()
+        planner = self.company_generator.create_company_entity()
         draft = self.plan_generator.draft_plan(
             planner=planner,
             description="old description",
@@ -125,7 +125,7 @@ class UseCaseTests(TestCase):
         )
 
     def test_can_change_draft_from_public_to_productive(self) -> None:
-        planner = self.company_generator.create_company()
+        planner = self.company_generator.create_company_entity()
         draft = self.plan_generator.draft_plan(
             planner=planner,
             is_public_service=True,
@@ -139,7 +139,7 @@ class UseCaseTests(TestCase):
         self.assertDraft(draft.id, lambda d: not d.is_public_service)
 
     def test_can_edit_timeframe(self) -> None:
-        planner = self.company_generator.create_company()
+        planner = self.company_generator.create_company_entity()
         draft = self.plan_generator.draft_plan(
             planner=planner,
             timeframe=1,
@@ -153,7 +153,7 @@ class UseCaseTests(TestCase):
         self.assertDraft(draft.id, lambda d: d.timeframe == 2)
 
     def test_can_change_unit_of_distribution(self) -> None:
-        planner = self.company_generator.create_company()
+        planner = self.company_generator.create_company_entity()
         draft = self.plan_generator.draft_plan(
             planner=planner,
             production_unit="old unit",

@@ -24,7 +24,7 @@ class RequestCooperationTests(TestCase):
         self.plan_generator = self.injector.get(PlanGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.cooperation_repository = self.injector.get(CooperationRepository)
-        self.requester = self.company_generator.create_company()
+        self.requester = self.company_generator.create_company_entity()
         self.datetime_service = self.injector.get(FakeDatetimeService)
 
     def test_error_is_raised_when_plan_does_not_exist(self) -> None:
@@ -75,7 +75,7 @@ class RequestCooperationTests(TestCase):
         )
 
     def test_error_is_raised_when_plan_is_already_requesting_cooperation(self) -> None:
-        requester = self.company_generator.create_company()
+        requester = self.company_generator.create_company_entity()
         cooperation1 = self.coop_generator.create_cooperation()
         plan = self.plan_generator.create_plan(
             activation_date=self.datetime_service.now(),
@@ -93,7 +93,7 @@ class RequestCooperationTests(TestCase):
         )
 
     def test_error_is_raised_when_plan_is_public_plan(self) -> None:
-        requester = self.company_generator.create_company()
+        requester = self.company_generator.create_company_entity()
         plan = self.plan_generator.create_plan(
             activation_date=self.datetime_service.now(), is_public_service=True
         )
@@ -108,7 +108,7 @@ class RequestCooperationTests(TestCase):
         )
 
     def test_error_is_raised_when_requester_is_not_planner(self) -> None:
-        requester = self.company_generator.create_company()
+        requester = self.company_generator.create_company_entity()
         plan = self.plan_generator.create_plan(
             activation_date=self.datetime_service.now()
         )
@@ -124,7 +124,7 @@ class RequestCooperationTests(TestCase):
         )
 
     def test_requesting_cooperation_is_successful(self) -> None:
-        requester = self.company_generator.create_company()
+        requester = self.company_generator.create_company_entity()
         plan = self.plan_generator.create_plan(
             activation_date=self.datetime_service.now(), planner=requester
         )
@@ -136,7 +136,7 @@ class RequestCooperationTests(TestCase):
         assert not response.is_rejected
 
     def test_successful_cooperation_request_returns_coordinator_data(self) -> None:
-        requester = self.company_generator.create_company()
+        requester = self.company_generator.create_company_entity()
         plan = self.plan_generator.create_plan(
             activation_date=self.datetime_service.now(), planner=requester
         )
@@ -151,7 +151,7 @@ class RequestCooperationTests(TestCase):
     def test_succesfully_requesting_cooperation_makes_it_possible_to_accept_cooperation(
         self,
     ) -> None:
-        requester = self.company_generator.create_company()
+        requester = self.company_generator.create_company_entity()
         plan = self.plan_generator.create_plan(
             activation_date=self.datetime_service.now(), planner=requester
         )

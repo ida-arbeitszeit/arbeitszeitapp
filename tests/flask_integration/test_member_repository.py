@@ -78,7 +78,7 @@ def test_does_not_identify_random_id_with_member(member_repository: MemberReposi
 def test_does_not_identify_company_as_member(
     company_generator: CompanyGenerator, member_repository: MemberRepository
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     assert not member_repository.is_member(company.id)
 
 
@@ -262,7 +262,7 @@ class ConfirmMemberTests(FlaskTestCase):
         )
 
     def test_that_confirmed_on_does_not_get_updated_for_other_user(self) -> None:
-        other_member_id = self.member_generator.create_member_entity().id
+        other_member_id = self.member_generator.create_member_entity(confirmed=False).id
         expected_timestamp = datetime(2000, 1, 2)
         member_id = self.create_member()
         self.repository.confirm_member(member_id, confirmed_on=expected_timestamp)
@@ -294,7 +294,7 @@ class CreateMemberTests(FlaskTestCase):
 
     def test_can_create_member_with_same_email_as_company(self) -> None:
         email = "test@test.test"
-        self.company_generator.create_company(email=email)
+        self.company_generator.create_company_entity(email=email)
         self.repository.create_member(
             email=email,
             name="test name",

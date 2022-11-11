@@ -10,9 +10,7 @@ from injector import inject
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import AccountTypes
 from arbeitszeit.repositories import AccountRepository, MemberRepository
-from arbeitszeit.token import TokenService
-
-from .member_registration_message_presenter import MemberRegistrationMessagePresenter
+from arbeitszeit.token import MemberRegistrationMessagePresenter, TokenService
 
 
 @inject

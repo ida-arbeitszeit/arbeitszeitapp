@@ -29,7 +29,7 @@ class PurchaseRepoTests(TestCase):
     def test_that_list_of_purchases_of_company_contains_purchase_of_company(
         self,
     ):
-        company = self.company_generator.create_company()
+        company = self.company_generator.create_company_entity()
         purchase = self.purchase_generator.create_purchase_by_company(buyer=company)
         result = self.repository.get_purchases_of_company(company.id)
         self.assertIn(purchase, result)

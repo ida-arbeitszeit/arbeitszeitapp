@@ -58,6 +58,12 @@ class UrlIndexTestImpl:
     get_my_plan_drafts_url = UrlIndexMethod()
     get_create_draft_url = UrlIndexMethod()
 
+    def get_member_confirmation_url(self, *, token: str) -> str:
+        return f"get_member_confirmation_url {token}"
+
+    def get_company_confirmation_url(self, *, token: str) -> str:
+        return f"get_company_confirmation_url {token}"
+
 
 class RenewPlanUrlIndexTestImpl:
     def get_renew_plan_url(self, plan_id: UUID) -> str:
@@ -67,11 +73,6 @@ class RenewPlanUrlIndexTestImpl:
 class HidePlanUrlIndexTestImpl:
     def get_hide_plan_url(self, plan_id: UUID) -> str:
         return f"fake_hide_plan_url:{plan_id}"
-
-
-class ConfirmationUrlIndexImpl:
-    def get_confirmation_url(self, token: str) -> str:
-        return f"{token} url"
 
 
 class AccountantInvitationUrlIndexImpl:

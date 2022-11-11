@@ -34,7 +34,7 @@ class AuthenticatedTests(ViewTestCase):
         return f"/member/invite_details/{invite_id}"
 
     def invite_member(self) -> UUID:
-        company = self.company_generator.create_company()
+        company = self.company_generator.create_company_entity()
         response = self.invite_use_case(
             InviteWorkerToCompanyUseCase.Request(
                 company.id,

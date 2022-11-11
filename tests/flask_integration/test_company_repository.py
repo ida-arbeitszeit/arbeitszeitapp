@@ -28,7 +28,7 @@ class RepositoryTester(FlaskTestCase):
     def test_company_repository_can_convert_to_and_from_orm_without_changing_the_object(
         self,
     ):
-        expected_company = self.company_generator.create_company()
+        expected_company = self.company_generator.create_company_entity()
         actual_company = self.company_repository.object_from_orm(
             self.company_repository.object_to_orm(
                 expected_company,
@@ -40,17 +40,19 @@ class RepositoryTester(FlaskTestCase):
         assert self.company_repository.get_by_id(uuid4()) is None
 
     def test_can_retrieve_a_company_by_its_uuid(self):
-        company = self.company_generator.create_company()
+        company = self.company_generator.create_company_entity()
         assert self.company_repository.get_by_id(company.id) == company
 
     def test_can_retrieve_a_company_by_its_email(self):
         expected_email = "expected@mail.com"
-        expected_company = self.company_generator.create_company(email=expected_email)
+        expected_company = self.company_generator.create_company_entity(
+            email=expected_email
+        )
         assert self.company_repository.get_by_email(expected_email) == expected_company
 
     def test_that_random_email_returns_no_company(self):
         random_email = "xyz123@testmail.com"
-        self.company_generator.create_company(email="test_mail@testmail.com")
+        self.company_generator.create_company_entity(email="test_mail@testmail.com")
         assert self.company_repository.get_by_email(random_email) is None
 
     def test_can_create_company_with_correct_name(self):
@@ -74,7 +76,7 @@ class RepositoryTester(FlaskTestCase):
     def test_can_detect_if_company_with_email_is_already_present(self):
         expected_email = "rosa@cp.org"
         assert not self.company_repository.has_company_with_email(expected_email)
-        self.company_generator.create_company(email=expected_email)
+        self.company_generator.create_company_entity(email=expected_email)
         assert self.company_repository.has_company_with_email(expected_email)
 
     def test_does_not_identify_random_id_with_company(self):
@@ -86,26 +88,26 @@ class RepositoryTester(FlaskTestCase):
         assert not self.company_repository.is_company(member)
 
     def test_does_identify_company_id_as_company(self):
-        company = self.company_generator.create_company()
+        company = self.company_generator.create_company_entity()
         assert self.company_repository.is_company(company.id)
 
     def test_count_no_registered_company_if_none_was_created(self) -> None:
         assert self.company_repository.count_registered_companies() == 0
 
     def test_count_one_registered_company_if_one_was_created(self) -> None:
-        self.company_generator.create_company()
+        self.company_generator.create_company_entity()
         assert self.company_repository.count_registered_companies() == 1
 
     def test_that_can_not_register_company_with_same_email_twice(self):
         with raises(IntegrityError):
-            self.company_generator.create_company(email="company@provider.de")
-            self.company_generator.create_company(email="company@provider.de")
+            self.company_generator.create_company_entity(email="company@provider.de")
+            self.company_generator.create_company_entity(email="company@provider.de")
 
     def test_that_get_all_companies_returns_all_companies(self):
-        expected_company1 = self.company_generator.create_company(
+        expected_company1 = self.company_generator.create_company_entity(
             email="company1@provider.de"
         )
-        expected_company2 = self.company_generator.create_company(
+        expected_company2 = self.company_generator.create_company_entity(
             email="company2@provider.de"
         )
         all_companies = list(self.company_repository.get_all_companies())
@@ -113,10 +115,10 @@ class RepositoryTester(FlaskTestCase):
         assert company_in_companies(expected_company2, all_companies)
 
     def test_query_companies_by_name_matching_exactly(self):
-        expected_company = self.company_generator.create_company(
+        expected_company = self.company_generator.create_company_entity(
             name="Company1", email="company1@provider.de"
         )
-        unexpected_company = self.company_generator.create_company(
+        unexpected_company = self.company_generator.create_company_entity(
             name="Company2", email="company2@provider.de"
         )
         companies_by_name = list(
@@ -126,10 +128,10 @@ class RepositoryTester(FlaskTestCase):
         assert not company_in_companies(unexpected_company, companies_by_name)
 
     def test_query_companies_by_name_with_matching_substring(self):
-        expected_company = self.company_generator.create_company(
+        expected_company = self.company_generator.create_company_entity(
             name="Company One", email="company1@provider.de"
         )
-        unexpected_company = self.company_generator.create_company(
+        unexpected_company = self.company_generator.create_company_entity(
             name="Company Two", email="company2@provider.de"
         )
         companies_by_name = list(self.company_repository.query_companies_by_name("One"))
@@ -137,7 +139,7 @@ class RepositoryTester(FlaskTestCase):
         assert not company_in_companies(unexpected_company, companies_by_name)
 
     def test_query_companies_by_name_with_capitalization(self):
-        expected_company = self.company_generator.create_company(
+        expected_company = self.company_generator.create_company_entity(
             name="COMPANY", email="company@provider.de"
         )
         companies_result = list(
@@ -146,10 +148,10 @@ class RepositoryTester(FlaskTestCase):
         assert company_in_companies(expected_company, companies_result)
 
     def test_query_companies_by_email_matching_exactly(self):
-        expected_company = self.company_generator.create_company(
+        expected_company = self.company_generator.create_company_entity(
             email="company1@provider.de"
         )
-        unexpected_company = self.company_generator.create_company(
+        unexpected_company = self.company_generator.create_company_entity(
             email="company2@provider.de"
         )
         companies_by_email = list(
@@ -159,10 +161,10 @@ class RepositoryTester(FlaskTestCase):
         assert not company_in_companies(unexpected_company, companies_by_email)
 
     def test_query_companies_by_email_with_matching_substring(self):
-        expected_company = self.company_generator.create_company(
+        expected_company = self.company_generator.create_company_entity(
             email="company.one@provider.de"
         )
-        unexpected_company = self.company_generator.create_company(
+        unexpected_company = self.company_generator.create_company_entity(
             email="company.two@provider.de"
         )
         companies_by_email = list(
@@ -172,7 +174,7 @@ class RepositoryTester(FlaskTestCase):
         assert not company_in_companies(unexpected_company, companies_by_email)
 
     def test_query_companies_by_email_with_capitalization(self):
-        expected_company = self.company_generator.create_company(
+        expected_company = self.company_generator.create_company_entity(
             email="company@provider.de"
         )
         companies_result = list(
@@ -197,7 +199,7 @@ class ValidateCredentialsTest(FlaskTestCase):
     def test_can_validate_company_with_correct_credentials(self) -> None:
         expected_email = "test@test.test"
         expected_password = "test password"
-        expected_company = self.company_generator.create_company(
+        expected_company = self.company_generator.create_company_entity(
             email=expected_email,
             password=expected_password,
         )
@@ -209,7 +211,7 @@ class ValidateCredentialsTest(FlaskTestCase):
 
     def test_cannot_validate_user_with_wrong_password(self) -> None:
         expected_email = "test@test.test"
-        self.company_generator.create_company(
+        self.company_generator.create_company_entity(
             email=expected_email,
             password="test password",
         )

@@ -345,7 +345,7 @@ class UseCaseTests(TestCase):
         self.assertEqual(self.count_transactions_of_type_a(), 1)
 
     def test_that_company_receives_correct_wage_credit(self) -> None:
-        planner = self.company_generator.create_company()
+        planner = self.company_generator.create_company_entity()
         expected_wage_payout = Decimal("3")
         self.datetime_service.freeze_time(datetime.datetime(2021, 1, 1, 23, 45))
         self.plan_generator.create_plan(
