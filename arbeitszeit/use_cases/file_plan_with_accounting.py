@@ -38,7 +38,7 @@ class FilePlanWithAccounting:
             assert plan_id
             self.draft_repository.delete_draft(id=request.draft_id)
             is_plan_successfully_filed = True
-            self.accountant_notifier.notify_accountants_about_new_plan(
+            self.accountant_notifier.notify_all_accountants_about_new_plan(
                 product_name=draft.product_name,
                 plan_id=plan_id,
             )

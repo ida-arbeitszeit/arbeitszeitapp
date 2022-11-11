@@ -19,3 +19,4 @@ class RenderMethod:
 class TextRendererImpl:
     render_member_registration_message = RenderMethod()
     render_company_registration_message = RenderMethod()
+    render_accountant_notification_about_new_plan = RenderMethod()

@@ -100,7 +100,12 @@ class UserAddressBookImpl:
             self.db.session.query(models.User)
             .join(models.Member, isouter=True)
             .join(models.Company, isouter=True)
-            .filter((models.Member.id == str(user)) | (models.Company.id == str(user)))
+            .join(models.Accountant, isouter=True)
+            .filter(
+                (models.Member.id == str(user))
+                | (models.Company.id == str(user))
+                | (models.Accountant.id == str(user))
+            )
             .first()
         )
         if user_orm:

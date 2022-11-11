@@ -16,7 +16,7 @@ class Notification:
 
 class NotifyAccountantsAboutNewPlanPresenter(Protocol):
     def notify_accountant_about_new_plan(self, notification: Notification) -> None:
-        pass
+        ...
 
 
 @inject
@@ -25,7 +25,7 @@ class AccountantNotifier:
     presenter: NotifyAccountantsAboutNewPlanPresenter
     accountant_repository: AccountantRepository
 
-    def notify_accountants_about_new_plan(
+    def notify_all_accountants_about_new_plan(
         self, product_name: str, plan_id: UUID
     ) -> None:
         for accountant in self.accountant_repository.get_all_accountants():

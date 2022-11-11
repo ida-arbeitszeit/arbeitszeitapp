@@ -1,5 +1,6 @@
 from injector import Module, provider
 
+from arbeitszeit.accountant_notifications import NotifyAccountantsAboutNewPlanPresenter
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.token import (
     CompanyRegistrationMessagePresenter,
@@ -22,6 +23,9 @@ from arbeitszeit_web.presenters.list_available_languages_presenter import (
     ListAvailableLanguagesPresenter,
 )
 from arbeitszeit_web.presenters.member_purchases import MemberPurchasesPresenter
+from arbeitszeit_web.presenters.notify_accountant_about_new_plan_presenter import (
+    NotifyAccountantsAboutNewPlanPresenterImpl,
+)
 from arbeitszeit_web.presenters.register_accountant_presenter import (
     RegisterAccountantPresenter,
 )
@@ -68,6 +72,12 @@ class CompanyPresenterModule(Module):
 
 
 class PresenterModule(Module):
+    @provider
+    def provide_notify_accountants_about_new_plan_presenter(
+        self, instance: NotifyAccountantsAboutNewPlanPresenterImpl
+    ) -> NotifyAccountantsAboutNewPlanPresenter:
+        return instance
+
     @provider
     def provide_member_registration_message_presenter(
         self, instance: RegistrationEmailPresenter
