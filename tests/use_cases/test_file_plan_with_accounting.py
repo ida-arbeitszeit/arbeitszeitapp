@@ -8,7 +8,6 @@ from arbeitszeit.use_cases.get_plan_summary_member import GetPlanSummaryMember
 from arbeitszeit.use_cases.list_plans_with_pending_review import (
     ListPlansWithPendingReviewUseCase,
 )
-from tests.datetime_service import FakeDatetimeService
 
 from .base_test_case import BaseTestCase
 from .notify_accountant_about_new_plan_presenter import (
@@ -24,7 +23,6 @@ class BaseUseCaseTestCase(BaseTestCase):
             ListPlansWithPendingReviewUseCase
         )
         self.get_plan_summary_member_use_case = self.injector.get(GetPlanSummaryMember)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
         self.planner = self.company_generator.create_company_entity()
         self.notify_accountants_presenter = self.injector.get(
             NotifyAccountantsAboutNewPlanPresenterImpl
