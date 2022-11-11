@@ -8,8 +8,6 @@ arbeitszeitapp's developer documentation
 
 Source code: `<https://github.com/arbeitszeit/arbeitszeitapp>`_
 
-Arbeitszeitapp is a webapp to exchange services and products on the basis of working time.
-
 .. toctree::
    :maxdepth: 2
 
