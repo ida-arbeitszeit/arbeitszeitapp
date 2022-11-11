@@ -61,7 +61,9 @@ class GetPlanSummaryCompanySuccessPresenter:
                     plan_id
                 ),
                 is_cooperating=is_cooperating,
-                end_coop_url=self.url_index.get_end_coop_url(plan_id, coop_id)
+                end_coop_url=self.url_index.get_end_coop_url(
+                    plan_id=plan_id, cooperation_id=coop_id
+                )
                 if coop_id
                 else None,
                 request_coop_url=self.url_index.get_request_coop_url()

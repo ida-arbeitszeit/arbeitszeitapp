@@ -30,7 +30,7 @@ class FlaskConfiguration(dict):
                 "SECRET_KEY": "dev secret key",
                 "WTF_CSRF_ENABLED": False,
                 "SERVER_NAME": "test.name",
-                "ENV": "development",
+                "DEBUG": True,
                 "DEBUG_DETAILS": False,
                 "SECURITY_PASSWORD_SALT": "dev password salt",
                 "TESTING": True,

@@ -10,24 +10,29 @@
 Introduction
 ============
 
+Description
+------------
+
+Arbeitszeitapp is a plattform to exchange services and products on the 
+basis of working time. It is designed to be self-hosted by communities or 
+organizations. A test instance is running on https://arbeitszeitapp.herokuapp.com/.
+
+
 Theory
 -----------
 
-Companies do usually calculate with working hours internally, 
-but switch to money when dealing with other agents on the market. This app 
-extends collective planning and working time calculation beyond the 
-company boundaries. It facilitates the creation of networks 
-of cooperations that exchanges products on the basis of working time 
-without the need for money. 
+Companies usually calculate with labour time internally, 
+but switch to money on the market. This app 
+extends planning and labour time calculation beyond the 
+company boundaries and supports networks that exchanges products on the basis of labour time. 
 
-To make this possible, it provides a planning interface for companies and 
+It provides a planning interface for companies and 
 communities as well as a working time management for companies and workers. 
 Plans can get filed and approved, products can get published and paid, 
 work certificates can get transferred. 
 
 It is the implementation of a theory (`"Arbeitszeitrechnung" 
-<https://aaap.be/Pages/Transition-en-Fundamental-Principles-1930.html>`_) elaborated in 
-the 1920s working class movement. 
+<https://aaap.be/Pages/Transition-en-Fundamental-Principles-1930.html>`_) elaborated in the 1920s working class movement. 
 
 
 User roles
@@ -125,7 +130,7 @@ environment variables:
 
      export ARBEITSZEITAPP_CONFIGURATION_PATH="$PWD/arbeitszeit_flask/development_settings.py"
      export FLASK_APP=arbeitszeit_flask
-     export FLASK_ENV=development
+     export FLASK_DEBUG=1
      export DEV_DATABASE_URI="postgresql://postgres@localhost:5432/<name of database>"
      export DEV_SECRET_KEY=my_secret_key
      export ARBEITSZEIT_APP_SERVER_NAME=localhost:5000
@@ -270,6 +275,18 @@ Regenerate the API docs via:
     .. code-block:: bash
 
      ./regenerate-api-docs
+
+Using a binary cache
+--------------------
+
+You can access the binary cache hosted on `cachix
+<https://www.cachix.org/>`_ in your development environment if you are
+using ``nix`` to manage your development environment. The binary cache
+is called "arbeitszeit".  Check the `cachix docs
+<https://docs.cachix.org/getting-started#using-binaries-with-nix>`_ on
+how to set this up locally.  The benefit of this for you is that you
+can avoid building dependencies there where already build in the CI
+pipeline once.
 
 .. end-development-setup-do-not-delete
 

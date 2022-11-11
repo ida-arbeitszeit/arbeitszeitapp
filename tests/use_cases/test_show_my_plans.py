@@ -1,18 +1,14 @@
-from unittest import TestCase
+from datetime import datetime, timedelta
 from uuid import uuid4
 
 from arbeitszeit.use_cases import ShowMyPlansRequest, ShowMyPlansUseCase
-
-from ..data_generators import CompanyGenerator, PlanGenerator
-from .dependency_injection import get_dependency_injector
+from tests.use_cases.base_test_case import BaseTestCase
 
 
-class UseCaseTests(TestCase):
+class UseCaseTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.use_case = self.injector.get(ShowMyPlansUseCase)
-        self.plan_generator = self.injector.get(PlanGenerator)
-        self.company_generator = self.injector.get(CompanyGenerator)
 
     def test_that_no_plans_are_returned_when_no_plans_were_created(self) -> None:
         response = self.use_case.show_company_plans(
@@ -53,3 +49,24 @@ class UseCaseTests(TestCase):
             request=ShowMyPlansRequest(company_id=company.id)
         )
         self.assertFalse(response.drafts)
+
+    def test_that_drafts_are_returned_in_correct_order(self) -> None:
+        creation_time_1 = datetime(2020, 5, 1, 20)
+        creation_time_2 = creation_time_1 - timedelta(hours=5)
+        creation_time_3 = creation_time_1 + timedelta(days=2)
+
+        company = self.company_generator.create_company()
+
+        self.datetime_service.freeze_time(creation_time_2)
+        expected_third_plan = self.plan_generator.draft_plan(planner=company)
+        self.datetime_service.freeze_time(creation_time_1)
+        expected_second_plan = self.plan_generator.draft_plan(planner=company)
+        self.datetime_service.freeze_time(creation_time_3)
+        expected_first_plan = self.plan_generator.draft_plan(planner=company)
+
+        response = self.use_case.show_company_plans(
+            request=ShowMyPlansRequest(company_id=company.id)
+        )
+        self.assertEqual(response.drafts[0].id, expected_first_plan.id)
+        self.assertEqual(response.drafts[1].id, expected_second_plan.id)
+        self.assertEqual(response.drafts[2].id, expected_third_plan.id)

@@ -30,8 +30,7 @@
           };
         });
       systemIndependent = {
-        overlays = let iii = 1;
-        in {
+        overlays = {
           # The default overlay provides the arbeitszeitapp to
           # nixpkgs.
           default = final: prev: {

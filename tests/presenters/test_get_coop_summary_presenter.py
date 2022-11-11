@@ -108,6 +108,7 @@ class GetCoopSummarySuccessPresenterTests(TestCase):
         self.assertEqual(
             view_model.plans[0].end_coop_url,
             self.url_index.get_end_coop_url(
-                TESTING_RESPONSE_MODEL.plans[0].plan_id, TESTING_RESPONSE_MODEL.coop_id
+                plan_id=TESTING_RESPONSE_MODEL.plans[0].plan_id,
+                cooperation_id=TESTING_RESPONSE_MODEL.coop_id,
             ),
         )

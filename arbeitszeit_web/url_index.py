@@ -21,7 +21,9 @@ class UrlIndex(Protocol):
     def get_member_dashboard_url(self) -> str:
         ...
 
-    def get_plan_summary_url(self, user_role: Optional[UserRole], plan_id: UUID) -> str:
+    def get_plan_summary_url(
+        self, *, user_role: Optional[UserRole], plan_id: UUID
+    ) -> str:
         ...
 
     def get_work_invite_url(self, invite_id: UUID) -> str:
@@ -32,13 +34,12 @@ class UrlIndex(Protocol):
     ) -> str:
         ...
 
-    def get_coop_summary_url(self, user_role: Optional[UserRole], coop_id: UUID) -> str:
+    def get_coop_summary_url(
+        self, *, user_role: Optional[UserRole], coop_id: UUID
+    ) -> str:
         ...
 
     def get_company_dashboard_url(self) -> str:
-        ...
-
-    def get_draft_list_url(self) -> str:
         ...
 
     def get_draft_summary_url(self, draft_id: UUID) -> str:
@@ -86,7 +87,7 @@ class UrlIndex(Protocol):
     def get_toggle_availability_url(self, plan_id: UUID) -> str:
         ...
 
-    def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
+    def get_end_coop_url(self, *, plan_id: UUID, cooperation_id: UUID) -> str:
         ...
 
     def get_request_coop_url(self) -> str:
@@ -95,7 +96,22 @@ class UrlIndex(Protocol):
     def get_accountant_dashboard_url(self) -> str:
         ...
 
-    def get_self_approve_plan_url(self, draft_id: UUID) -> str:
+    def get_my_plans_url(self) -> str:
+        ...
+
+    def get_my_plan_drafts_url(self) -> str:
+        ...
+
+    def get_file_plan_url(self, draft_id: UUID) -> str:
+        ...
+
+    def get_unreviewed_plans_list_view_url(self) -> str:
+        ...
+
+    def get_approve_plan_url(self, plan_id: UUID) -> str:
+        ...
+
+    def get_create_draft_url(self) -> str:
         ...
 
 

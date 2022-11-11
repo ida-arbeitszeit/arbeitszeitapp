@@ -32,5 +32,5 @@ class DeleteDraftPresenter:
         )
         return self.ViewModel(
             redirect_target=self.session.pop_next_url()
-            or self.url_index.get_draft_list_url()
+            or self.url_index.get_my_plans_url()
         )

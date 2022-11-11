@@ -20,7 +20,6 @@ from arbeitszeit_web.presenters.register_member_presenter import RegisterMemberP
 from arbeitszeit_web.presenters.registration_email_presenter import (
     RegistrationEmailPresenter,
 )
-from arbeitszeit_web.presenters.self_approve_plan import SelfApprovePlanPresenter
 from arbeitszeit_web.presenters.send_work_certificates_to_worker_presenter import (
     SendWorkCertificatesToWorkerPresenter,
 )
@@ -96,7 +95,7 @@ class PresenterTestsInjector(Module):
 
     @provider
     def provide_url_index(self, index: UrlIndexTestImpl) -> UrlIndex:
-        return index
+        return index  # type: ignore
 
     @provider
     def provide_create_cooperation_presenter(
@@ -214,15 +213,6 @@ class PresenterTestsInjector(Module):
         self, translator: FakeTranslator
     ) -> InviteWorkerToCompanyPresenter:
         return InviteWorkerToCompanyPresenter(translator=translator)
-
-    @provider
-    def provide_self_approve_plan_presenter(
-        self, notifier: NotifierTestImpl, translator: FakeTranslator
-    ) -> SelfApprovePlanPresenter:
-        return SelfApprovePlanPresenter(
-            notifier=notifier,
-            translator=translator,
-        )
 
     @provider
     def provide_list_available_languages_presenter(
