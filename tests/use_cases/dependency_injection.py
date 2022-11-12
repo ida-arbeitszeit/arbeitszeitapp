@@ -2,6 +2,7 @@ from injector import Injector, Module, inject, provider, singleton
 
 import arbeitszeit.repositories as interfaces
 from arbeitszeit import entities
+from arbeitszeit.accountant_notifications import NotifyAccountantsAboutNewPlanPresenter
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.token import (
     CompanyRegistrationMessagePresenter,
@@ -28,6 +29,9 @@ from tests.dependency_injection import TestingModule
 from tests.token import FakeTokenService, TokenDeliveryService
 
 from . import repositories
+from .notify_accountant_about_new_plan_presenter import (
+    NotifyAccountantsAboutNewPlanPresenterImpl,
+)
 
 
 class InMemoryModule(Module):
@@ -35,6 +39,12 @@ class InMemoryModule(Module):
     @provider
     def provide_fake_language_repository(self) -> repositories.FakeLanguageRepository:
         return repositories.FakeLanguageRepository()
+
+    @provider
+    def provide_notify_accountants_about_new_plan_presenter(
+        self, instance: NotifyAccountantsAboutNewPlanPresenterImpl
+    ) -> NotifyAccountantsAboutNewPlanPresenter:
+        return instance
 
     @provider
     def provide_language_repository(

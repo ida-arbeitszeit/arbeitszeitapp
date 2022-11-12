@@ -223,6 +223,7 @@ class CompanyWorkInvite:
 
 @dataclass
 class Accountant:
+    id: UUID
     email_address: str
     name: str
 

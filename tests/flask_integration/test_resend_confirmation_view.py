@@ -1,5 +1,4 @@
 from arbeitszeit_flask.extensions import mail
-from arbeitszeit_flask.token import FlaskTokenService
 
 from .flask import ViewTestCase
 
@@ -25,14 +24,12 @@ class AuthenticatedButUnconfirmedMemberTests(ViewTestCase):
     ):
         assert not self.member.confirmed_on
         response = self.client.get(self.url)
-        member_token = FlaskTokenService().generate_token(self.member.email)
         with mail.record_messages() as outbox:
             response = self.client.get(
                 self.url,
             )
             self.assertEqual(response.status_code, 302)
             assert len(outbox) == 1
-            assert member_token in outbox[0].html
 
 
 class ConfirmedMemberTests(ViewTestCase):

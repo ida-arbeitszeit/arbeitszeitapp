@@ -13,3 +13,11 @@ class TextRendererImpl:
             "auth/activate.html",
             confirm_url=confirmation_url,
         )
+
+    def render_accountant_notification_about_new_plan(
+        self, *, product_name: str
+    ) -> str:
+        return render_template(
+            "accountant/notification-about-new-plan.html",
+            product_name=product_name,
+        )

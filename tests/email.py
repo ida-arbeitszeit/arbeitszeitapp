@@ -1,6 +1,8 @@
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Set
 from uuid import UUID
+
+from injector import singleton
 
 
 @dataclass
@@ -32,8 +34,17 @@ class FakeEmailSender:
         )
 
 
+@singleton
 class FakeAddressBook:
+    def __init__(self) -> None:
+        self._blacklisted_users: Set[UUID] = set()
+
+    def blacklist_user(self, user: UUID) -> None:
+        self._blacklisted_users.add(user)
+
     def get_user_email_address(self, user: UUID) -> Optional[str]:
+        if user in self._blacklisted_users:
+            return None
         return f"{user}@test.test"
 
 

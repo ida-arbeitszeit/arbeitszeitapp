@@ -105,3 +105,34 @@ class ValidationTests(FlaskTestCase):
         self.assertIsNone(
             self.repository.validate_credentials(self.expected_email, "pw123")
         )
+
+
+class GetAllAccountantsTests(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.repository = self.injector.get(AccountantRepository)
+
+    def test_that_by_default_there_are_no_accountants_in_db(self) -> None:
+        assert not list(self.repository.get_all_accountants())
+
+    def test_that_one_item_is_shown_after_accountant_was_created(self) -> None:
+        self.repository.create_accountant(
+            email="test@test.test", name="test accountant", password="1234"
+        )
+        assert len(list(self.repository.get_all_accountants())) == 1
+
+    def test_that_correct_email_address_is_retrieved(self) -> None:
+        expected_email_address = "test@email.com"
+        self.repository.create_accountant(
+            email=expected_email_address, name="test accountant", password="1234"
+        )
+        item = list(self.repository.get_all_accountants())[0]
+        assert item.email_address == expected_email_address
+
+    def test_that_correct_name_is_retrieved(self) -> None:
+        expected_name = "test name 123"
+        self.repository.create_accountant(
+            email="test@test.test", name=expected_name, password="1234"
+        )
+        item = list(self.repository.get_all_accountants())[0]
+        assert item.name == expected_name

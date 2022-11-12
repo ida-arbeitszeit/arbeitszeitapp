@@ -522,6 +522,9 @@ class AccountantRepository(Protocol):
     def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
         ...
 
+    def get_all_accountants(self) -> QueryResult[Accountant]:
+        ...
+
 
 class LanguageRepository(Protocol):
     def get_available_language_codes(self) -> Iterable[str]:
