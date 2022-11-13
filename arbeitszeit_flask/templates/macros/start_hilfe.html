@@ -1,79 +1,143 @@
 {% macro start_hilfe() %}
 <div class="hero-body">
-    <div class="container has-text-centered">
-        <h1 class="title">Was ist das hier?</h1>
-        <div class="block content has-text-left">
-            <ul>
-                <li>Dies ist eine Plattform für solidarisches Wirtschaften.</li>
-                <li>
-                    Produkte und Dienstleistungen werden ausgetauscht, wobei die
-                    gemeinsame „Währung“ die Arbeitszeit ist.
-                </li>
-                <li>
-                    ArbeiterInnen bekommen für geleistete Arbeit Arbeitszeitgeld, mit dem
-                    sie Produkte erwerben können.
-                </li>
-                <li>
-                    Produkte kosten soviel Arbeitszeit, wie sie zur Herstellung benötigen.
-                </li>
-                <li>
-                    Die Plattform richtet sich an Kollektivbetriebe, Genossenschaften und
-                    sonstige Betriebe und Einzelpersonen, die eine Alternative zu
-                    kapitalistischem Markt, Privateigentum an Produktionsmitteln und Geld
-                    suchen.
-                </li>
-            </ul>
-        </div>
+    <div class="container has-text-left">
+        <div class="column is-8 is-offset-2">
+            <section class="section">
+                <h1 class="title is-1">Nutzerhandbuch Arbeitszeitapp</h1>
+            </section>
+            <section class="section">
+                <div class="content">
+                <h5 class="title is-5">Inhaltsverzeichnis</h5>
+                <ol>
+                    <li><a href="#intro">Einführung</a></li>
+                    <li><a href="#users">Nutzer*innen</a></li>
+                    <ol type="a">
+                        <li><a href="#members">Mitglieder</a></li>
+                        <li><a href="#companies">Betriebe</a></li>
+                        <li>Buchhalter*innen</li>
+                        <li>Administrator*innen</li>
+                    </ol>
+                    <li><a href="#contact">Kontakt</a></li>
+                </ol>
+            </div>
+            </section>
 
-        <h1 class="title">Was muss ich als ArbeiterIn tun?</h1>
+            <section class="section" id="intro">
+                <h2 class="title is-2">1. Einführung</h2>
+                <div class="content has-text-justified">
+                    <p>Arbeitszeitapp ist eine Plattform, die Kooperation zwischen
+                        Kollektivbetrieben
+                        und Genossenschaften befördert.
+                    </p>
+                    <p>
+                        Um zu verstehen, in welchem Szenario diese App nützlich sein
+                        könnte stellen wir uns ein Netzwerk von 30 Kollektivbetrieben mit
+                        je 20 Mitarbeiter*innen vor. Die Belegschaften (600 Menschen)
+                        beschließen, ihre Produkte und Dienstleistungen untereinander
+                        auf der Basis von Arbeitszeit statt Geld auszutauschen. Vielleicht 
+                        gehen sie sogar noch einen Schritt weiter und sind bereit, ihr
+                        Privateigentum an Produktionsmitteln in eine betriebsübergreifende 
+                        Kooperative einzubringen.
+                    </p>
+                    <p>
+                        Nun stellen sich einige Herausforderungen: Wie kann der Austausch innerhalb
+                        dieser
+                        Gemeinschaft organisiert werden?
+                        Wie kann die "ordnende Funktion", die das Geld (eher schlecht als recht)
+                        erfüllt
+                        hat,
+                        ersetzt werden? Woher wissen
+                        die Arbeiter*innen, wieviel Arbeit in den einzelnen Produkten steckt, 
+                        welche Produkte für die Gesellschaft teuer in der Herstellung sind und
+                        wie erkennen sie Verschwendung?
+                    </p>
+                    <p>
+                        Um diese Aufgaben zu lösen, wurde diese Plattform programmiert. 
+                        Sie ist Open Source, wird in verschiedene Sprachen übersetzt und
+                        kann kostenlos von Betrieben, Kooperativen, Kommunen und Organisationen 
+                        genutzt werden. 
+                        Im Folgenden sollen ihre Funktionen möglichst verständlich erklärt
+                        werden.
+                    </p>
+                </div>
+            </section>
 
-        <div class="block content has-text-left">
-            <ul>
-                <li>
-                    ...
-                </li>
-            </ul>
-        </div>
+            <section class="section" id="users">
+                <h2 class="title is-2">2. Nutzer*innen</h2>
+                <div class="content has-text-justified">
+                    <p>
+                        Es gibt vier verschiedene Arten von Nutzer*innen auf dieser Plattform, deren
+                        Accounts je unterschiedliche Funktionen haben.
+                    </p>
+                </div>
+            </section>
 
-        <h1 class="title">Was muss ich als Betrieb/Kollektiv tun?</h1>
+            <section class="section" id="members">
+                <h2 class="title is-2">a. Mitglieder</h2>
+                <h3 class="title is-4">Allgemeines</h3>
+                <div class="content has-text-justified">
+                    <p>Mitglieder sind im Regelfall Teil eines Betriebes 
+                        und erhalten von diesem Betrieb Arbeitszertifikate für ihre geleistete Arbeit. 
+                        Diese Arbeitszertifkate wiederum
+                        können sie an Betriebe überweisen, deren Produkte sie konsumieren möchten. Es ist 
+                        auch möglich, einen Mitglieder-Account zu erstellen, ohne Teil eines Betriebs zu sein.  
+                    </p>
+                </div>
+                <h3 class="title is-4">Registrierung und Anmeldung</h3>
+                <div class="content has-text-justified">
+                    <p>Die Registrierung erfolgt auf der der Startseite. Email-Adresse, Name und Passwort
+                        müssen angegeben werden. Nach erfolgreicher Registrierung 
+                        wird ein Bestätigungslink an die angegebene Email-Adresse geschickt.
+                    </p>
+                    <p>Nach dem Klick auf den Bestätigungslink könnt ihr euch mit Adresse und 
+                        Passwort anmelden. Ihr werdet auf das Dashboard weitergeleitet.</p>
+                </div>
+                <h3 class="title is-4">Dashboard</h3>
+                <div class="content has-text-justified">
+                    <p>Auf dem Dashboard finden Mitglieder die folgenden Module:</p>
+                    <ul>
+                        <li>Persönliche Daten</li>
+                        <li>Produkt bezahlen</li>
+                        <li>Mein Konto</li>
+                        <li>Meine Käufe</li>
+                        <li>Neueste Pläne</li>
+                        <li>Globale Statistiken</li>
+                        <li>Alle Betriebe</li>
+                        <li>Alle Pläne</li>
+                    </ul>
+                </div>
+            </section>
 
-        <div class="block content has-text-left">
-            <ol>
-                <li>Stelle dich und deinen Betrieb beim Plenum vor.</li>
-                <li>Registriere in der App einen „Betriebe-Account“.</li>
-                <li>
-                    Veröffentliche in der App einen Plan für jedes Produkt, das du
-                    anbieten möchtest. In diesem Plan musst du angeben, wie viel
-                    Arbeitszeit die Herstellung dieses Produkts kostet.
-                </li>
-                <li>
-                    Du erhältst Arbeitszeit-Guthaben, um die Beschäftigten zu bezahlen und
-                    ein Konto, um Produktionsmittel von anderen teilnehmenden Betrieben zu
-                    erwerben.
-                </li>
-                <li>
-                    Veröffentliche das Produkt auf unserem Marktplatz oder wo immer du
-                    willst (deine Kunden brauchen nur Arbeitszeitgeld auf ihrem Konto und
-                    den Link zum Produkt). Der „Preis“ des Produktes entspricht immer
-                    genau der im Plan angegebenen Arbeitszeit.
-                </li>
-            </ol>
-        </div>
+            <section class="section" id="companies">
+                <h2 class="title is-2">b. Betriebe</h2>
+                <h3 class="title is-4">Allgemeines</h3>
+                <div class="content has-text-justified">
+                    <p>to do... 
+                    </p>
+                </div>
+                <h3 class="title is-4">Registrierung und Anmeldung</h3>
+                <div class="content has-text-justified">
+                    <p>Die Registrierung erfolgt auf der der Startseite. Email-Adresse, Name und Passwort
+                        müssen angegeben werden. Nach erfolgreicher Registrierung 
+                        wird ein Bestätigungslink an die angegebene Email-Adresse geschickt.
+                    </p>
+                    <p>Nach dem Klick auf den Bestätigungslink könnt ihr euch mit Adresse und 
+                        Passwort anmelden. Ihr werdet auf das Dashboard weitergeleitet.</p>
+                </div>
+                <h3 class="title is-4">Dashboard</h3>
+                <div class="content has-text-justified">to do...</div>
+            </section>
 
-        <hr />
-
-        <p class="title">FAQ</p>
-        <div class="block content has-text-left">
-            <ul>
-                <li>...?</li>
-                <ul>
-                    <li>...</li>
-                </ul>
-                <li>...?</li>
-                <ul>
-                    <li>...</li>
-                </ul>
-            </ul>
+            <section class="section" id="contact">
+                <h2 class="title is-2">3. Kontakt</h2>
+                
+                <div class="content has-text-justified">
+                Falls Fragen offen geblieben sind, könnt ihr eine Mail schreiben an:
+                <a
+                    href="mailto:community-arbeitszeitapp@systemli.org">community-arbeitszeitapp@systemli.org
+                </a>
+                </div>
+            </section>
         </div>
     </div>
 </div>
