@@ -36,7 +36,7 @@ class RegisterMemberTests(TestCase):
         )
         expected_user = list(self.member_repo.members.keys())[0]
         self.assertEqual(
-            self.token_delivery.presented_member_tokens[0][0],
+            self.token_delivery.presented_member_tokens[0].user,
             expected_user,
         )
 

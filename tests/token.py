@@ -31,13 +31,19 @@ class FakeTokenService:
         return self.confirm_token(token, 10000000)
 
 
+@dataclass
+class DeliveredToken:
+    token: str
+    user: UUID
+
+
 class TokenDeliveryService:
     def __init__(self) -> None:
-        self.presented_member_tokens: List[Tuple[UUID, str]] = []
-        self.presented_company_tokens: List[Tuple[UUID, str]] = []
+        self.presented_member_tokens: List[DeliveredToken] = []
+        self.presented_company_tokens: List[DeliveredToken] = []
 
     def show_member_registration_message(self, member: UUID, token: str) -> None:
-        self.presented_member_tokens.append((member, token))
+        self.presented_member_tokens.append(DeliveredToken(user=member, token=token))
 
     def show_company_registration_message(self, company: UUID, token: str) -> None:
-        self.presented_company_tokens.append((company, token))
+        self.presented_company_tokens.append(DeliveredToken(user=company, token=token))

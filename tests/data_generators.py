@@ -118,7 +118,6 @@ class MemberGenerator:
         name: str = "test member name",
         account: Optional[Account] = None,
         password: str = "password",
-        registered_on: Optional[datetime] = None,
         confirmed: bool = True,
     ) -> UUID:
         member = self.create_member_entity(
@@ -126,7 +125,6 @@ class MemberGenerator:
             name=name,
             password=password,
             account=account,
-            registered_on=registered_on,
             confirmed=confirmed,
         )
         return member.id

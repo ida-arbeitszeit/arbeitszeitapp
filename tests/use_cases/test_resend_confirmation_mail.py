@@ -42,7 +42,7 @@ class MemberTests(BaseTestCase):
         member = self.member_generator.create_member(confirmed=False)
         self.use_case.resend_confirmation_mail(request=UseCase.Request(user=member))
         assert self.token_service.confirm_token(
-            self.token_presenter.presented_member_tokens[-1][1], 10000
+            self.token_presenter.presented_member_tokens[-1].token, 10000
         )
 
     def test_that_token_sent_to_member_is_valid_email_address(self) -> None:
@@ -53,7 +53,7 @@ class MemberTests(BaseTestCase):
         self.use_case.resend_confirmation_mail(request=UseCase.Request(user=member))
         assert (
             self.token_service.confirm_token(
-                self.token_presenter.presented_member_tokens[-1][1], 10000
+                self.token_presenter.presented_member_tokens[-1].token, 10000
             )
             == expected_email_address
         )
@@ -107,7 +107,7 @@ class CompanyTests(BaseTestCase):
         company = self.company_generator.create_company(confirmed=False)
         self.use_case.resend_confirmation_mail(request=UseCase.Request(user=company))
         assert self.token_service.confirm_token(
-            self.token_presenter.presented_company_tokens[-1][1], 10000
+            self.token_presenter.presented_company_tokens[-1].token, 10000
         )
 
     def test_that_token_sent_to_company_is_valid_email_address(self) -> None:
@@ -118,7 +118,7 @@ class CompanyTests(BaseTestCase):
         self.use_case.resend_confirmation_mail(request=UseCase.Request(user=company))
         assert (
             self.token_service.confirm_token(
-                self.token_presenter.presented_company_tokens[-1][1], 10000
+                self.token_presenter.presented_company_tokens[-1].token, 10000
             )
             == expected_email_address
         )

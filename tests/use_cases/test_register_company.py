@@ -37,7 +37,7 @@ class RegisterCompanyTests(TestCase):
             company.id for company in self.company_repo.companies.values()
         ][0]
         self.assertEqual(
-            self.token_delivery.presented_company_tokens[0][0],
+            self.token_delivery.presented_company_tokens[0].user,
             expected_company,
         )
 
