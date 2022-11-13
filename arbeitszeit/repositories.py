@@ -103,10 +103,6 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def set_expiration_date(self, plan: Plan, expiration_date: datetime) -> None:
-        pass
-
-    @abstractmethod
     def set_active_days(self, plan: Plan, full_active_days: int) -> None:
         pass
 

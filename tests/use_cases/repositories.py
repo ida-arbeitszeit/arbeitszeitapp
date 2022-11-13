@@ -494,9 +494,6 @@ class PlanRepository(interfaces.PlanRepository):
         plan.expired = True
         plan.is_active = False
 
-    def set_expiration_date(self, plan: Plan, expiration_date: datetime) -> None:
-        plan.expiration_date = expiration_date
-
     def set_active_days(self, plan: Plan, full_active_days: int) -> None:
         plan.active_days = full_active_days
 
@@ -644,7 +641,6 @@ class PlanRepository(interfaces.PlanRepository):
             approval_date=None,
             approval_reason=None,
             expired=False,
-            expiration_date=None,
             active_days=None,
             payout_count=0,
             requested_cooperation=None,
