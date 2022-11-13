@@ -1,12 +1,14 @@
+import datetime
 from decimal import Decimal
 from unittest import TestCase
 
 from arbeitszeit.entities import ProductionCosts
 from tests.data_generators import PlanGenerator
+from tests.datetime_service import FakeDatetimeService
 from tests.use_cases.dependency_injection import get_dependency_injector
 
 
-class TestPlanEntity(TestCase):
+class TestPlanSalesValue(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.plan_generator = self.injector.get(PlanGenerator)
@@ -22,3 +24,46 @@ class TestPlanEntity(TestCase):
             costs=ProductionCosts(Decimal(10), Decimal(5), Decimal(5)), amount=10
         )
         self.assertEqual(plan.expected_sales_value, Decimal(20))
+
+
+class TestPlanExpirationDate(TestCase):
+    def setUp(self) -> None:
+        self.injector = get_dependency_injector()
+        self.plan_generator = self.injector.get(PlanGenerator)
+        self.datetime_service = self.injector.get(FakeDatetimeService)
+
+    def test_that_plan_has_no_expiration_date_if_plan_has_not_been_approved(
+        self,
+    ) -> None:
+        plan = self.plan_generator.create_plan(approved=False, activation_date=None)
+        self.assertIsNone(plan.expiration_date)
+
+    def test_that_plan_has_an_expiration_date_if_plan_has_been_approved(self) -> None:
+        plan = self.plan_generator.create_plan(
+            timeframe=2, approved=True, activation_date=self.datetime_service.now()
+        )
+        self.assertIsNotNone(plan.expiration_date)
+
+    def test_that_expiration_date_is_correctly_calculated_if_plan_expires_now(
+        self,
+    ) -> None:
+        self.datetime_service.freeze_time(datetime.datetime.now())
+        plan = self.plan_generator.create_plan(
+            timeframe=1,
+            activation_date=self.datetime_service.now_minus_one_day(),
+            approved=True,
+        )
+        expected_expiration_time = self.datetime_service.now()
+        assert plan.expiration_date == expected_expiration_time
+
+    def test_that_expiration_date_is_correctly_calculated_if_plan_expires_in_the_future(
+        self,
+    ) -> None:
+        self.datetime_service.freeze_time(datetime.datetime.now())
+        plan = self.plan_generator.create_plan(
+            timeframe=2,
+            activation_date=self.datetime_service.now_minus_one_day(),
+            approved=True,
+        )
+        expected_expiration_time = self.datetime_service.now_plus_one_day()
+        assert plan.expiration_date == expected_expiration_time

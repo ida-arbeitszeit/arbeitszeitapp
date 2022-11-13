@@ -1,4 +1,3 @@
-import datetime
 from dataclasses import dataclass
 from decimal import Decimal
 
@@ -40,16 +39,10 @@ class UpdatePlansAndPayout:
             assert plan.is_active, "Plan is not active!"
             assert plan.activation_date, "Plan has no activation date!"
 
-            expiration_time = plan.activation_date + datetime.timedelta(
-                days=int(plan.timeframe)
-            )
-
             self.plan_repository.set_active_days(
                 plan, self._calculate_active_days(plan)
             )
-            self.plan_repository.set_expiration_date(plan, expiration_time)
 
-            assert plan.expiration_date
             assert plan.active_days is not None
             if self._plan_is_expired(plan):
                 self._handle_expired_plan(plan, payout_factor)

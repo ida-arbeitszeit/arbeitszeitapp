@@ -112,7 +112,6 @@ class Plan(UserMixin, db.Model):
     is_active = db.Column(db.Boolean, nullable=False, default=False)
     activation_date = db.Column(db.DateTime, nullable=True)
     expired = db.Column(db.Boolean, nullable=False, default=False)
-    expiration_date = db.Column(db.DateTime, nullable=True)
     active_days = db.Column(db.Integer, nullable=True)
     payout_count = db.Column(db.Integer, nullable=False, default=0)
     is_available = db.Column(db.Boolean, nullable=False, default=True)
