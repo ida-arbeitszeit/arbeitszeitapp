@@ -62,6 +62,8 @@ from tests.company import CompanyManager
 from tests.datetime_service import FakeDatetimeService
 from tests.token import TokenDeliveryService
 
+from .interfaces import TokenInbox
+
 
 @inject
 @dataclass
@@ -72,7 +74,7 @@ class MemberGenerator:
     datetime_service: FakeDatetimeService
     register_member_use_case: RegisterMemberUseCase
     confirm_member_use_case: ConfirmMemberUseCase
-    token_delivery_service: TokenDeliveryService
+    token_inbox: TokenInbox
 
     def create_member_entity(
         self,

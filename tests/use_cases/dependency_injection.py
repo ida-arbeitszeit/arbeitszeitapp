@@ -4,12 +4,7 @@ import arbeitszeit.repositories as interfaces
 from arbeitszeit import entities
 from arbeitszeit.accountant_notifications import NotifyAccountantsAboutNewPlanPresenter
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.token import (
-    CompanyRegistrationMessagePresenter,
-    InvitationTokenValidator,
-    MemberRegistrationMessagePresenter,
-    TokenService,
-)
+from arbeitszeit.token import InvitationTokenValidator, TokenService
 from arbeitszeit.use_cases import GetCompanySummary
 from arbeitszeit.use_cases.edit_draft import EditDraftUseCase
 from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCase
@@ -83,18 +78,6 @@ class InMemoryModule(Module):
         self, token_service: FakeTokenService
     ) -> InvitationTokenValidator:
         return token_service
-
-    @provider
-    def provide_company_registration_message_presenter(
-        self, token_delivery_service: TokenDeliveryService
-    ) -> CompanyRegistrationMessagePresenter:
-        return token_delivery_service
-
-    @provider
-    def provide_member_registration_message_presenter(
-        self, token_delivery_service: TokenDeliveryService
-    ) -> MemberRegistrationMessagePresenter:
-        return token_delivery_service
 
     @provider
     @singleton

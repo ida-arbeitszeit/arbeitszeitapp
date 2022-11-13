@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Optional, Tuple
+from typing import List, Optional
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
@@ -47,3 +47,9 @@ class TokenDeliveryService:
 
     def show_company_registration_message(self, company: UUID, token: str) -> None:
         self.presented_company_tokens.append(DeliveredToken(user=company, token=token))
+
+    def get_deliviered_member_token(self, member: UUID) -> Optional[str]:
+        for delivered_token in reversed(self.presented_member_tokens):
+            if delivered_token.user == member:
+                return delivered_token.token
+        return None
