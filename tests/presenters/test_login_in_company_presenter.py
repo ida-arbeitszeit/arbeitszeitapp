@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from unittest import TestCase
+from uuid import uuid4
 
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit_web.presenters.log_in_company_presenter import LogInCompanyPresenter
@@ -174,6 +175,7 @@ class PresenterTests(TestCase):
             is_logged_in=True,
             rejection_reason=None,
             email_address=email,
+            user_id=uuid4(),
         )
 
     def create_failure_response(
@@ -184,4 +186,5 @@ class PresenterTests(TestCase):
             is_logged_in=False,
             rejection_reason=reason,
             email_address="test@test.test",
+            user_id=None,
         )

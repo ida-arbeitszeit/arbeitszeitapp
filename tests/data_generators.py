@@ -185,15 +185,21 @@ class CompanyGenerator:
         return company
 
     def create_company(
-        self, *, confirmed: bool = True, email: Optional[str] = None
+        self,
+        *,
+        confirmed: bool = True,
+        email: Optional[str] = None,
+        password: Optional[str] = None,
     ) -> UUID:
         if email is None:
             email = self.email_generator.get_random_email()
+        if password is None:
+            password = "test password"
         response = self.register_company_use_case(
             request=RegisterCompany.Request(
                 name="test company",
                 email=email,
-                password="test password",
+                password=password,
             )
         )
         company = response.company_id

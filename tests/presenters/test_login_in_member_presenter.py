@@ -1,5 +1,6 @@
 from typing import Optional
 from unittest import TestCase
+from uuid import uuid4
 
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit_web.presenters.log_in_member_presenter import LogInMemberPresenter
@@ -167,6 +168,7 @@ class PresenterTests(TestCase):
             is_logged_in=True,
             rejection_reason=None,
             email=email,
+            user_id=uuid4(),
         )
 
     def create_failure_response(
@@ -178,4 +180,5 @@ class PresenterTests(TestCase):
             is_logged_in=False,
             rejection_reason=reason,
             email="test@test.test",
+            user_id=None,
         )
