@@ -18,7 +18,7 @@ class ConfirmMemberUseCase:
 
     @dataclass
     class Response:
-        is_confirmed: bool = False
+        is_confirmed: bool
 
     member_repository: MemberRepository
     token_service: TokenService
@@ -27,9 +27,9 @@ class ConfirmMemberUseCase:
     def confirm_member(self, request: Request) -> Response:
         member = self.member_repository.get_by_id(request.member)
         if not member:
-            return self.Response()
+            return self.Response(is_confirmed=False)
         unwrapped_token = self.token_validator.unwrap_invitation_token(request.token)
         if member.confirmed_on is None and member.email == unwrapped_token:
             self.member_repository.confirm_member(member.id, datetime.min)
             return self.Response(is_confirmed=True)
-        return self.Response()
+        return self.Response(is_confirmed=False)

@@ -45,6 +45,7 @@ from arbeitszeit.use_cases import (
     RequestCooperationRequest,
 )
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
+from arbeitszeit.use_cases.confirm_member import ConfirmMemberUseCase
 from arbeitszeit.use_cases.create_plan_draft import (
     CreatePlanDraft,
     CreatePlanDraftRequest,
@@ -59,6 +60,7 @@ from arbeitszeit.use_cases.send_accountant_registration_token import (
 from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
 from tests.company import CompanyManager
 from tests.datetime_service import FakeDatetimeService
+from tests.token import TokenDeliveryService
 
 
 @inject
@@ -69,6 +71,8 @@ class MemberGenerator:
     member_repository: MemberRepository
     datetime_service: FakeDatetimeService
     register_member_use_case: RegisterMemberUseCase
+    confirm_member_use_case: ConfirmMemberUseCase
+    token_delivery_service: TokenDeliveryService
 
     def create_member_entity(
         self,
@@ -116,18 +120,29 @@ class MemberGenerator:
         *,
         email: Optional[str] = None,
         name: str = "test member name",
-        account: Optional[Account] = None,
         password: str = "password",
         confirmed: bool = True,
     ) -> UUID:
-        member = self.create_member_entity(
-            email=email,
-            name=name,
-            password=password,
-            account=account,
-            confirmed=confirmed,
+        if email is None:
+            email = self.email_generator.get_random_email()
+        register_response = self.register_member_use_case(
+            request=RegisterMemberUseCase.Request(
+                email=email,
+                name=name,
+                password=password,
+            )
         )
-        return member.id
+        assert not register_response.is_rejected
+        member_id = self.token_delivery_service.presented_member_tokens[-1].user
+        if confirmed:
+            confirm_response = self.confirm_member_use_case.confirm_member(
+                request=ConfirmMemberUseCase.Request(
+                    token=self.token_delivery_service.presented_member_tokens[-1].token,
+                    member=member_id,
+                )
+            )
+            assert confirm_response.is_confirmed
+        return member_id
 
 
 @inject
