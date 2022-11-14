@@ -1,8 +1,10 @@
 from dataclasses import dataclass, field
 from typing import Iterator
 
+from injector import inject
+
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.use_cases.query_purchases import PurchaseQueryResponse
-from arbeitszeit_flask.datetime import RealtimeDatetimeService
 
 
 @dataclass
@@ -17,13 +19,16 @@ class ViewModel:
         amount: str
         price_total: str
 
+    datetime_service: DatetimeService
     purchases: list[Purchase] = field(default_factory=list)
 
     def append(self, purchase_respond: PurchaseQueryResponse) -> None:
 
         p = self.Purchase(
-            purchase_date=RealtimeDatetimeService().format_datetime(
-                date=purchase_respond.purchase_date
+            purchase_date=self.datetime_service.format_datetime(
+                date=purchase_respond.purchase_date,
+                zone="Europe/Berlin",
+                fmt="%d.%m.%Y %H:%M",
             ),
             product_name=purchase_respond.product_name,
             product_description=purchase_respond.product_description,
@@ -41,10 +46,15 @@ class ViewModel:
         yield from self.purchases
 
 
+@inject
+@dataclass
 class ShowMyPurchasesPresenter:
+
+    datetime_service: DatetimeService
+
     def present(self, use_case_response: Iterator[PurchaseQueryResponse]) -> ViewModel:
 
-        model = ViewModel()
+        model = ViewModel(self.datetime_service)
 
         for p in use_case_response:
             model.append(p)

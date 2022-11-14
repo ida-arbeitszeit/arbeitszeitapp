@@ -1,15 +1,13 @@
-from datetime import datetime
 from decimal import Decimal
+from unittest import TestCase
 
 from arbeitszeit.use_cases.query_purchases import QueryPurchases
-from arbeitszeit_flask.datetime import RealtimeDatetimeService
 from arbeitszeit_web.presenters.show_my_purchases_presenter import (
     ShowMyPurchasesPresenter,
     ViewModel,
 )
-
-from unittest import TestCase
 from tests.data_generators import CompanyGenerator, MemberGenerator, PurchaseGenerator
+from tests.datetime_service import FakeDatetimeService
 from tests.use_cases.dependency_injection import get_dependency_injector
 
 
@@ -20,12 +18,13 @@ class TestPresenter(TestCase):
         self.member_generator = self.injector.get(MemberGenerator)
         self.purchase_generator = self.injector.get(PurchaseGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
+        self.datetime_service = self.injector.get(FakeDatetimeService)
 
     def test_show_purchases_from_member(self):
         injector = get_dependency_injector()
         presenter = injector.get(ShowMyPurchasesPresenter)  # DUT
 
-        now = datetime.now()
+        now = self.datetime_service.now()
 
         member = self.member_generator.create_member()
         self.purchase_generator.create_purchase_by_member(
@@ -47,7 +46,9 @@ class TestPresenter(TestCase):
 
         assert presentation.purchases[
             0
-        ].purchase_date == RealtimeDatetimeService().format_datetime(now)
+        ].purchase_date == FakeDatetimeService().format_datetime(
+            now, zone="Europe/Berlin"
+        )
         assert presentation.purchases[0].product_name == "Produkt A"
         assert (
             presentation.purchases[0].product_description
@@ -60,7 +61,9 @@ class TestPresenter(TestCase):
 
         assert presentation.purchases[
             1
-        ].purchase_date == RealtimeDatetimeService().format_datetime(now)
+        ].purchase_date == FakeDatetimeService().format_datetime(
+            now, zone="Europe/Berlin"
+        )
         assert presentation.purchases[1].product_name == "Produkt A"
         assert (
             presentation.purchases[1].product_description
@@ -75,7 +78,7 @@ class TestPresenter(TestCase):
         injector = get_dependency_injector()
         presenter = injector.get(ShowMyPurchasesPresenter)  # DUT
 
-        now = datetime.now()
+        now = self.datetime_service.now()
 
         company = self.company_generator.create_company()
         self.purchase_generator.create_purchase_by_company(
@@ -98,7 +101,9 @@ class TestPresenter(TestCase):
 
         assert presentation.purchases[
             0
-        ].purchase_date == RealtimeDatetimeService().format_datetime(now)
+        ].purchase_date == FakeDatetimeService().format_datetime(
+            now, zone="Europe/Berlin"
+        )
         assert presentation.purchases[0].product_name == "Produkt A"
         assert (
             presentation.purchases[0].product_description
@@ -111,7 +116,9 @@ class TestPresenter(TestCase):
 
         assert presentation.purchases[
             1
-        ].purchase_date == RealtimeDatetimeService().format_datetime(now)
+        ].purchase_date == FakeDatetimeService().format_datetime(
+            now, zone="Europe/Berlin"
+        )
         assert presentation.purchases[1].product_name == "Produkt A"
         assert (
             presentation.purchases[1].product_description
