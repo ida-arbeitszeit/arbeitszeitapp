@@ -47,7 +47,7 @@ class WrongPasswordTests(BaseTestCase):
         self.use_case = self.injector.get(LogInCompanyUseCase)
         self.register_use_case = self.injector.get(RegisterCompany)
         self.email = "test@test.test"
-        self.register_use_case(
+        self.register_use_case.register_company(
             request=RegisterCompany.Request(
                 email=self.email,
                 name="test company",

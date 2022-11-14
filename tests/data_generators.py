@@ -195,7 +195,7 @@ class CompanyGenerator:
             email = self.email_generator.get_random_email()
         if password is None:
             password = "test password"
-        response = self.register_company_use_case(
+        response = self.register_company_use_case.register_company(
             request=RegisterCompany.Request(
                 name="test company",
                 email=email,

@@ -25,14 +25,16 @@ class RegisterCompanyTests(TestCase):
         self.token_delivery = self.injector.get(TokenDeliveryService)
 
     def test_that_a_token_is_sent_out_when_a_company_registers(self) -> None:
-        self.use_case(RegisterCompany.Request(**DEFAULT))
+        self.use_case.register_company(RegisterCompany.Request(**DEFAULT))
         self.assertTrue(self.token_delivery.presented_company_tokens)
 
     def test_that_token_was_delivered_to_registering_user(self) -> None:
         expected_mail = "mailtest321@cp.org"
         request_args = DEFAULT.copy()
         request_args.pop("email")
-        self.use_case(RegisterCompany.Request(email=expected_mail, **request_args))
+        self.use_case.register_company(
+            RegisterCompany.Request(email=expected_mail, **request_args)
+        )
         expected_company = [
             company.id for company in self.company_repo.companies.values()
         ][0]
@@ -43,13 +45,13 @@ class RegisterCompanyTests(TestCase):
 
     def test_that_registering_company_is_possible(self) -> None:
         request = RegisterCompany.Request(**DEFAULT)
-        response = self.use_case(request)
+        response = self.use_case.register_company(request)
         self.assertFalse(response.is_rejected)
 
     def test_that_correct_error_is_raised_when_user_with_mail_exists(self) -> None:
         self.company_generator.create_company_entity(email="test@cp.org")
         request = RegisterCompany.Request(**DEFAULT)
-        response = self.use_case(request)
+        response = self.use_case.register_company(request)
         self.assertTrue(response.is_rejected)
         self.assertEqual(
             response.rejection_reason,
@@ -57,7 +59,7 @@ class RegisterCompanyTests(TestCase):
         )
 
     def test_that_registering_a_company_does_create_all_company_accounts(self) -> None:
-        self.use_case(RegisterCompany.Request(**DEFAULT))
+        self.use_case.register_company(RegisterCompany.Request(**DEFAULT))
         assert len(self.account_repository.accounts) == 4
         for account in self.account_repository.accounts:
             assert account.account_type in (
@@ -69,7 +71,7 @@ class RegisterCompanyTests(TestCase):
 
     def test_that_correct_member_attributes_are_registered(self):
         request = RegisterCompany.Request(**DEFAULT)
-        self.use_case(request)
+        self.use_case.register_company(request)
         assert len(self.company_repo.companies) == 1
         for company in self.company_repo.companies.values():
             assert company.email == request.email
