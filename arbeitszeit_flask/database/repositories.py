@@ -43,7 +43,6 @@ T = TypeVar("T", covariant=True)
 
 class FlaskQueryResult(Generic[T]):
     def __init__(self, query: Select, mapper: Callable[[Any], T]) -> None:
-        print(query)
         self.query = query
         self.mapper = mapper
 
