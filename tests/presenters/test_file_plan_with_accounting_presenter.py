@@ -23,7 +23,7 @@ class Tests(TestCase):
         self.notifier = self.injector.get(NotifierTestImpl)
         self.translator = self.injector.get(FakeTranslator)
         self.session = self.injector.get(FakeSession)
-        self.session.login_company("test@test.test")
+        self.session.login_company(company=uuid4())
 
     def test_view_model_has_redirect_url_with_successful_responses(self) -> None:
         view_model = self.presenter.present_response(self.create_success_response())

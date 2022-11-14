@@ -29,6 +29,6 @@ class RegisterMemberPresenter:
                 )
             return RegisterMemberViewModel(is_success_view=False)
         else:
-            email = form.get_email_string()
-            self.session.login_member(email)
+            assert response.user_id
+            self.session.login_member(response.user_id)
             return RegisterMemberViewModel(is_success_view=True)
