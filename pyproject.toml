@@ -35,14 +35,6 @@ module = "arbeitszeit,arbeitszeit_web,arbeitszeit_flask,tests"
 allow_untyped_defs = false
 
 [[tool.mypy.overrides]]
-module = "arbeitszeit_flask.*"
-check_untyped_defs = true
-
-[[tool.mypy.overrides]]
-module = "tests.*"
-check_untyped_defs = true
-
-[[tool.mypy.overrides]]
 module = [
     "flask_babel",
     "flask_mail",

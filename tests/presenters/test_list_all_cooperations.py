@@ -17,7 +17,7 @@ class ListMessagesPresenterTests(TestCase):
         self.url_index = self.injector.get(UrlIndexTestImpl)
         self.presenter = self.injector.get(ListAllCooperationsPresenter)
         self.session = self.injector.get(FakeSession)
-        self.session.login_company("test@test.test")
+        self.session.login_company(company=uuid4())
 
     def test_view_model_contains_no_cooperation_and_does_not_show_result_when_non_were_provided(
         self,

@@ -33,7 +33,7 @@ class PresenterTests(TestCase):
         self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(EndCooperationPresenter)
         self.session = self.injector.get(FakeSession)
-        self.session.login_company("test@test.test")
+        self.session.login_company(company=uuid4())
 
     def test_404_and_empty_url_returned_when_use_case_response_returned_plan_not_found(
         self,

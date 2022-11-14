@@ -38,14 +38,14 @@ class RequestCooperationControllerTests(TestCase):
     def test_when_user_is_not_authenticated_then_we_cannot_get_a_use_case_request(
         self,
     ) -> None:
-        self.session.set_current_user_id(None)
+        self.session.logout()
         self.assertIsNone(self.controller.import_form_data(form=fake_form))
 
     def test_when_user_is_authenticated_then_the_user_is_identified_in_use_case_request(
         self,
     ) -> None:
         expected_user_id = uuid4()
-        self.session.set_current_user_id(expected_user_id)
+        self.session.login_company(expected_user_id)
         use_case_request = self.controller.import_form_data(form=fake_form)
         assert use_case_request is not None
         assert isinstance(use_case_request, RequestCooperationRequest)
@@ -55,7 +55,7 @@ class RequestCooperationControllerTests(TestCase):
         self,
     ):
         malformed_form = replace(fake_form, plan_id="malformed plan id")
-        self.session.set_current_user_id(uuid4())
+        self.session.login_company(uuid4())
         use_case_request = self.controller.import_form_data(form=malformed_form)
         assert use_case_request is not None
         assert isinstance(use_case_request, MalformedInputData)
@@ -68,7 +68,7 @@ class RequestCooperationControllerTests(TestCase):
         self,
     ):
         malformed_form = replace(fake_form, cooperation_id="malformed coop id")
-        self.session.set_current_user_id(uuid4())
+        self.session.login_company(uuid4())
         use_case_request = self.controller.import_form_data(form=malformed_form)
         assert use_case_request is not None
         assert isinstance(use_case_request, MalformedInputData)
@@ -79,7 +79,7 @@ class RequestCooperationControllerTests(TestCase):
         )
 
     def test_controller_can_convert_plan_and_cooperation_id_into_correct_uuid(self):
-        self.session.set_current_user_id(uuid4())
+        self.session.login_company(uuid4())
         use_case_request = self.controller.import_form_data(form=fake_form)
         assert use_case_request is not None
         assert isinstance(use_case_request, RequestCooperationRequest)

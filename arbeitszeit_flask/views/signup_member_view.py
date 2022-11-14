@@ -33,7 +33,7 @@ class SignupMemberView:
 
     def _handle_valid_post_request(self, register_form: RegisterForm):
         use_case_request = self.controller.create_request(register_form)
-        response = self.register_member(use_case_request)
+        response = self.register_member.register_member(use_case_request)
         view_model = self.register_member_presenter.present_member_registration(
             response, register_form
         )

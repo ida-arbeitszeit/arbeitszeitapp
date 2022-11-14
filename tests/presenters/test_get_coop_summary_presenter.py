@@ -35,7 +35,7 @@ class GetCoopSummarySuccessPresenterTests(TestCase):
         self.url_index = self.injector.get(UrlIndexTestImpl)
         self.presenter = self.injector.get(GetCoopSummarySuccessPresenter)
         self.session = self.injector.get(FakeSession)
-        self.session.login_company("test@test.test")
+        self.session.login_company(company=uuid4())
 
     def test_end_coop_button_is_shown_when_requester_is_coordinator(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)

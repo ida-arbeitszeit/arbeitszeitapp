@@ -1,19 +1,19 @@
-from unittest import TestCase
+from uuid import UUID
 
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit.use_cases.register_company import RegisterCompany
 
-from .dependency_injection import get_dependency_injector
+from .base_test_case import BaseTestCase
 
 
-class CorrectCredentialsTests(TestCase):
+class CorrectCredentialsTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.use_case = self.injector.get(LogInCompanyUseCase)
         self.register_use_case = self.injector.get(RegisterCompany)
         self.email = "test user email"
         self.password = "test user password"
-        self.create_company(email=self.email, password=self.password)
+        self.company = self.create_company(email=self.email, password=self.password)
 
     def test_can_log_in_with_correct_credentials(self) -> None:
         response = self.try_log_in()
@@ -22,6 +22,10 @@ class CorrectCredentialsTests(TestCase):
     def test_that_no_rejection_reason_is_given(self) -> None:
         response = self.try_log_in()
         self.assertIsNone(response.rejection_reason)
+
+    def test_that_user_id_in_response_is_company_id(self) -> None:
+        response = self.try_log_in()
+        assert response.user_id == self.company
 
     def test_email_is_propagated_to_response(self) -> None:
         response = self.try_log_in()
@@ -33,25 +37,17 @@ class CorrectCredentialsTests(TestCase):
         )
         return self.use_case.log_in_company(request)
 
-    def create_company(self, email: str, password: str) -> None:
-        name = "test company"
-        response = self.register_use_case(
-            request=RegisterCompany.Request(
-                email=email,
-                name=name,
-                password=password,
-            )
-        )
-        self.assertFalse(response.is_rejected)
+    def create_company(self, email: str, password: str) -> UUID:
+        return self.company_generator.create_company(email=email, password=password)
 
 
-class WrongPasswordTests(TestCase):
+class WrongPasswordTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.use_case = self.injector.get(LogInCompanyUseCase)
         self.register_use_case = self.injector.get(RegisterCompany)
         self.email = "test@test.test"
-        self.register_use_case(
+        self.register_use_case.register_company(
             request=RegisterCompany.Request(
                 email=self.email,
                 name="test company",
@@ -74,6 +70,10 @@ class WrongPasswordTests(TestCase):
         response = self.try_log_in()
         self.assertIsNone(response.email_address)
 
+    def test_that_user_id_in_response_is_none(self) -> None:
+        response = self.try_log_in()
+        assert response.user_id is None
+
     def try_log_in(self) -> LogInCompanyUseCase.Response:
         request = LogInCompanyUseCase.Request(
             email_address=self.email, password="incorrect password"
@@ -81,9 +81,9 @@ class WrongPasswordTests(TestCase):
         return self.use_case.log_in_company(request)
 
 
-class WrongEmailTests(TestCase):
+class WrongEmailTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.use_case = self.injector.get(LogInCompanyUseCase)
         self.register_use_case = self.injector.get(RegisterCompany)
 

@@ -40,7 +40,7 @@ class LogInAccountantPresenter:
                 )
             return self.ViewModel(redirect_url=None)
         self.session.login_accountant(
-            email=form.email_field().get_value(),
+            accountant=response.user_id,
             remember=form.remember_field().get_value(),
         )
         return self.ViewModel(
