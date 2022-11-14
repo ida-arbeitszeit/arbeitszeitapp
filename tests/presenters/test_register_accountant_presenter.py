@@ -1,6 +1,6 @@
 from typing import Callable, Optional
 from unittest import TestCase
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
 from arbeitszeit_web.presenters.register_accountant_presenter import (
@@ -41,14 +41,13 @@ class PresenterTests(TestCase):
         self.presenter.present_registration_result(response)
         self.assertTrue(self.session.is_logged_in())
 
-    def test_that_successful_registration_authenticates_user_with_correct_email(
+    def test_that_successful_registration_authenticates_user_with_correct_user_id(
         self,
     ) -> None:
-        for email in self.example_email_addresses:
-            with self.subTest():
-                response = self.create_accepted_response(email=email)
-                self.presenter.present_registration_result(response)
-                self.assertLoggedIn(lambda l: l.email == email)
+        expected_id = uuid4()
+        response = self.create_accepted_response(user_id=expected_id)
+        self.presenter.present_registration_result(response)
+        self.assertLoggedIn(lambda l: l.user_id == expected_id)
 
     def test_that_user_is_not_logged_in_when_failing_to_register(self) -> None:
         response = self.create_rejected_response()
@@ -109,13 +108,15 @@ class PresenterTests(TestCase):
         )
 
     def create_accepted_response(
-        self, email: Optional[str] = None
+        self, email: Optional[str] = None, user_id: Optional[UUID] = None
     ) -> RegisterAccountantUseCase.Response:
         if email is None:
             email = "a@b.c"
+        if user_id is None:
+            user_id = uuid4()
         return RegisterAccountantUseCase.Response(
             is_accepted=True,
-            user_id=uuid4(),
+            user_id=user_id,
             email_address=email,
         )
 

@@ -24,5 +24,6 @@ class RegisterCompanyPresenter:
                 self.translator.gettext("This email address is already registered.")
             )
             return ViewModel(is_success_view=False)
-        self.session.login_company(form.get_email_string())
+        assert response.company_id
+        self.session.login_company(company=response.company_id)
         return ViewModel(is_success_view=True)
