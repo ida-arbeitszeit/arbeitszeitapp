@@ -1,5 +1,6 @@
 from typing import List
 from unittest import TestCase
+from uuid import uuid4
 
 from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
 from arbeitszeit_web.presenters.register_member_presenter import RegisterMemberPresenter
@@ -16,7 +17,9 @@ class PresenterTests(TestCase):
         self.translator = self.injector.get(FakeTranslator)
 
     def test_no_errors_are_rendered_when_registration_was_a_success(self) -> None:
-        response = RegisterMemberUseCase.Response(rejection_reason=None)
+        response = RegisterMemberUseCase.Response(
+            rejection_reason=None, user_id=uuid4()
+        )
         self.presenter.present_member_registration(response, self.form)
         self.assertFalse(self.form.errors)
 
@@ -24,7 +27,7 @@ class PresenterTests(TestCase):
         self,
     ) -> None:
         reason = RegisterMemberUseCase.Response.RejectionReason.member_already_exists
-        response = RegisterMemberUseCase.Response(rejection_reason=reason)
+        response = RegisterMemberUseCase.Response(rejection_reason=reason, user_id=None)
         self.presenter.present_member_registration(response, self.form)
         error = self.form.errors[0]
         self.assertEqual(
