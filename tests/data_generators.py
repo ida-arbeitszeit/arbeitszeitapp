@@ -84,7 +84,7 @@ class MemberGenerator:
             email = self.email_generator.get_random_email()
         assert email is not None
         if not confirmed:
-            response = self.register_member_use_case(
+            response = self.register_member_use_case.register_member(
                 request=RegisterMemberUseCase.Request(
                     email=email, name=name, password=password
                 )

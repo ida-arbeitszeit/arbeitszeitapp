@@ -105,7 +105,7 @@ class UseCaseTests(BaseTestCase):
 
     def create_member(self, email: str, password: str) -> None:
         name = "test user name"
-        response = self.register_use_case(
+        response = self.register_use_case.register_member(
             request=RegisterMemberUseCase.Request(
                 email=email,
                 name=name,

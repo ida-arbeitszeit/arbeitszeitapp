@@ -39,7 +39,7 @@ class RegisterMemberUseCase:
         name: str
         password: str
 
-    def __call__(self, request: Request) -> Response:
+    def register_member(self, request: Request) -> Response:
         try:
             self._register_member(request)
         except RegisterMemberUseCase.Response.RejectionReason as reason:
