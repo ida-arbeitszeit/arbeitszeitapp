@@ -27,8 +27,9 @@ class LogInCompanyPresenter:
         self, response: LogInCompanyUseCase.Response, form: LoginCompanyForm
     ) -> ViewModel:
         if response.is_logged_in and response.email_address:
+            assert response.user_id
             self.session.login_company(
-                response.email_address, form.remember_field().get_value()
+                company=response.user_id, remember=form.remember_field().get_value()
             )
             redirect_url = (
                 self.session.pop_next_url()

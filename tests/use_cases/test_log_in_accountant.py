@@ -1,16 +1,12 @@
-from unittest import TestCase
-
 from arbeitszeit.use_cases.log_in_accountant import LogInAccountantUseCase
-from tests.data_generators import AccountantGenerator
 
-from .dependency_injection import get_dependency_injector
+from .base_test_case import BaseTestCase
 
 
-class UseCaseTests(TestCase):
+class UseCaseTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.log_in_use_case = self.injector.get(LogInAccountantUseCase)
-        self.accountant_generator = self.injector.get(AccountantGenerator)
 
     def test_that_user_can_log_in_with_same_password_they_registered_with(self) -> None:
         email = "test@test.test"

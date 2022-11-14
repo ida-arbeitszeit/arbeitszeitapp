@@ -40,7 +40,7 @@ class RegisterCompany:
         name: str
         password: str
 
-    def __call__(self, request: Request) -> Response:
+    def register_company(self, request: Request) -> Response:
         try:
             company_id = self._register_company(request)
         except self.Response.RejectionReason as reason:

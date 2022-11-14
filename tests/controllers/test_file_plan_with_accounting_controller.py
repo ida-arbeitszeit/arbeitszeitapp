@@ -11,7 +11,7 @@ class ControllerTests(TestCase):
     def setUp(self) -> None:
         self.controller = FilePlanWithAccountingController()
         self.session = FakeSession()
-        self.session.set_current_user_id(uuid4())
+        self.session.login_company(company=uuid4())
 
     def test_that_request_is_processed_as_invalid_with_empty_draft_id_string(
         self,
@@ -52,7 +52,7 @@ class ControllerTests(TestCase):
 
     def test_that_filing_company_uuid_is_taken_from_session(self) -> None:
         expected_user_id = uuid4()
-        self.session.set_current_user_id(expected_user_id)
+        self.session.login_company(expected_user_id)
         request = self.controller.process_file_plan_with_accounting_request(
             str(uuid4()), self.session
         )
@@ -62,7 +62,7 @@ class ControllerTests(TestCase):
         )
 
     def test_that_invalid_request_is_raised_when_user_is_not_logged_in(self) -> None:
-        self.session.set_current_user_id(None)
+        self.session.logout()
         with self.assertRaises(FilePlanWithAccountingController.InvalidRequest):
             self.controller.process_file_plan_with_accounting_request(
                 str(uuid4()), self.session
