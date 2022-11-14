@@ -19,7 +19,7 @@ class ControllerTests(TestCase):
         self,
     ) -> None:
         expected_user_id = uuid4()
-        self.session.set_current_user_id(expected_user_id)
+        self.session.login_company(expected_user_id)
         use_case_request = self.controller.create_request()
         assert use_case_request is not None
         self.assertEqual(use_case_request.current_user, expected_user_id)

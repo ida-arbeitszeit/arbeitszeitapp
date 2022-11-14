@@ -25,8 +25,9 @@ class LogInMemberPresenter:
         self, response: LogInMemberUseCase.Response, form: LoginMemberForm
     ) -> ViewModel:
         if response.is_logged_in:
+            assert response.user_id
             self.session.login_member(
-                email=response.email, remember=form.remember_field().get_value()
+                member=response.user_id, remember=form.remember_field().get_value()
             )
             next_url = (
                 self.session.pop_next_url()

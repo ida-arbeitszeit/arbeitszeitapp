@@ -7,6 +7,7 @@ from flask import request, session
 from flask_login import current_user, login_user, logout_user
 from is_safe_url import is_safe_url
 
+from arbeitszeit_flask import models
 from arbeitszeit_flask.database.repositories import (
     AccountantRepository,
     CompanyRepository,
@@ -45,18 +46,18 @@ class FlaskSession:
         except AttributeError:
             return None
 
-    def login_member(self, email: str, remember: bool = False) -> None:
-        member = self.member_repository.get_member_orm_by_mail(email)
+    def login_member(self, member: UUID, remember: bool = False) -> None:
+        member = models.Member.query.get(str(member))
         login_user(member, remember=remember)
         session["user_type"] = "member"
 
-    def login_company(self, email: str, remember: bool = False) -> None:
-        company = self.company_repository.get_company_orm_by_mail(email)
+    def login_company(self, company: UUID, remember: bool = False) -> None:
+        company = models.Company.query.get(str(company))
         login_user(company, remember=remember)
         session["user_type"] = "company"
 
-    def login_accountant(self, email: str, remember: bool = False) -> None:
-        accountant = self.accountant_repository.get_accountant_orm_by_mail(email)
+    def login_accountant(self, accountant: UUID, remember: bool = False) -> None:
+        accountant = models.Accountant.query.get(str(accountant))
         login_user(accountant, remember=remember)
         session["user_type"] = "accountant"
 

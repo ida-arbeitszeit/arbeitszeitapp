@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+from typing import Optional
 from unittest import TestCase
+from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit_web.presenters.log_in_company_presenter import LogInCompanyPresenter
@@ -39,21 +41,13 @@ class PresenterTests(TestCase):
         assert login_attempt
         self.assertEqual(login_attempt.user_role, UserRole.company)
 
-    def test_that_email_is_correct_with_example_email(self) -> None:
-        expected_email = "karl@cp.org"
-        response = self.create_success_response(email=expected_email)
+    def test_that_user_is_logged_in_with_correct_id(self) -> None:
+        expected_id = uuid4()
+        response = self.create_success_response(user_id=expected_id)
         self.present_login_process(response)
         login_attempt = self.session.get_most_recent_login()
         assert login_attempt
-        self.assertEqual(login_attempt.email, expected_email)
-
-    def test_that_email_is_correct_with_another_example_email(self) -> None:
-        expected_email = "friedrich@cp.org"
-        response = self.create_success_response(email=expected_email)
-        self.present_login_process(response)
-        login_attempt = self.session.get_most_recent_login()
-        assert login_attempt
-        self.assertEqual(login_attempt.email, expected_email)
+        self.assertEqual(login_attempt.user_id, expected_id)
 
     def test_that_redirect_url_is_dashboard_if_none_is_set_in_session(self) -> None:
         response = self.create_success_response()
@@ -168,12 +162,15 @@ class PresenterTests(TestCase):
         return self.presenter.present_login_process(response, form=self.form)
 
     def create_success_response(
-        self, email: str = "test@test.test"
+        self, email: str = "test@test.test", user_id: Optional[UUID] = None
     ) -> LogInCompanyUseCase.Response:
+        if user_id is None:
+            user_id = uuid4()
         return LogInCompanyUseCase.Response(
             is_logged_in=True,
             rejection_reason=None,
             email_address=email,
+            user_id=user_id,
         )
 
     def create_failure_response(
@@ -184,4 +181,5 @@ class PresenterTests(TestCase):
             is_logged_in=False,
             rejection_reason=reason,
             email_address="test@test.test",
+            user_id=None,
         )

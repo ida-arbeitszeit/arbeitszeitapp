@@ -47,7 +47,7 @@ class PlanSummaryFormatterTests(TestCase):
         self.formatter = self.injector.get(PlanSummaryFormatter)
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.session = self.injector.get(FakeSession)
-        self.session.login_company("test@test.test")
+        self.session.login_company(company=uuid4())
 
     def test_plan_id_is_displayed_correctly_as_tuple_of_strings(self):
         plan_summary = self.formatter.format_plan_summary(PLAN_SUMMARY)

@@ -685,7 +685,6 @@ class PlanRepository(repositories.PlanRepository):
             approval_reason=plan.review.approval_reason,
             is_active=plan.is_active,
             expired=plan.expired,
-            expiration_date=plan.expiration_date,
             activation_date=plan.activation_date,
             active_days=plan.active_days,
             payout_count=plan.payout_count,
@@ -727,7 +726,6 @@ class PlanRepository(repositories.PlanRepository):
             is_public_service=plan.is_public_service,
             is_active=False,
             activation_date=None,
-            expiration_date=None,
             active_days=None,
             payout_count=0,
             is_available=True,
@@ -762,14 +760,6 @@ class PlanRepository(repositories.PlanRepository):
         plan_orm = self.object_to_orm(plan)
         plan_orm.expired = True
         plan_orm.is_active = False
-
-    def set_expiration_date(
-        self, plan: entities.Plan, expiration_date: datetime
-    ) -> None:
-        plan.expiration_date = expiration_date
-
-        plan_orm = self.object_to_orm(plan)
-        plan_orm.expiration_date = expiration_date
 
     def set_active_days(self, plan: entities.Plan, full_active_days: int) -> None:
         plan.active_days = full_active_days

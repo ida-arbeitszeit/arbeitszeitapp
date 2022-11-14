@@ -34,14 +34,6 @@ class UseCaseTests(TestCase):
         self.payout()
         self.assertFalse(plan.expired)
 
-    def test_that_expiration_time_is_set_if_plan_is_active(self) -> None:
-        plan = self.plan_generator.create_plan(
-            timeframe=2, activation_date=self.datetime_service.now()
-        )
-        self.assertIsNone(plan.expiration_date)
-        self.payout()
-        self.assertIsNotNone(plan.expiration_date)
-
     def test_that_active_days_is_set_if_plan_is_active(self) -> None:
         plan = self.plan_generator.create_plan(
             timeframe=2, activation_date=self.datetime_service.now()
@@ -87,28 +79,6 @@ class UseCaseTests(TestCase):
         self.payout()
         assert not plan.expired
         assert plan.is_active
-
-    def test_that_expiration_date_is_correctly_calculated_if_plan_expires_now(
-        self,
-    ) -> None:
-        self.datetime_service.freeze_time(datetime.datetime.now())
-        plan = self.plan_generator.create_plan(
-            timeframe=1, activation_date=self.datetime_service.now_minus_one_day()
-        )
-        self.payout()
-        expected_expiration_time = self.datetime_service.now()
-        assert plan.expiration_date == expected_expiration_time
-
-    def test_that_expiration_date_is_correctly_calculated_if_plan_expires_in_the_future(
-        self,
-    ) -> None:
-        self.datetime_service.freeze_time(datetime.datetime.now())
-        plan = self.plan_generator.create_plan(
-            timeframe=2, activation_date=self.datetime_service.now_minus_one_day()
-        )
-        self.payout()
-        expected_expiration_time = self.datetime_service.now_plus_one_day()
-        assert plan.expiration_date == expected_expiration_time
 
     def test_that_plan_with_requested_cooperation_has_no_requested_cooperation_after_expiration(
         self,

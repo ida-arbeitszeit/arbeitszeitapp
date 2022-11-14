@@ -1,5 +1,6 @@
 from typing import Optional
 from unittest import TestCase
+from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit_web.presenters.log_in_member_presenter import LogInMemberPresenter
@@ -123,17 +124,15 @@ class PresenterTests(TestCase):
         )
 
     def test_that_user_is_logged_in_with_correct_email_address(self) -> None:
-        emails = ["test1@test.test", "test2@test.test"]
-        for expected_email in emails:
-            with self.subTest():
-                response = self.create_success_response(email=expected_email)
-                self.presenter.present_login_process(response, self.form)
-                login_attempt = self.session.get_most_recent_login()
-                assert login_attempt
-                self.assertEqual(
-                    login_attempt.email,
-                    expected_email,
-                )
+        expected_id = uuid4()
+        response = self.create_success_response(user_id=expected_id)
+        self.presenter.present_login_process(response, self.form)
+        login_attempt = self.session.get_most_recent_login()
+        assert login_attempt
+        self.assertEqual(
+            login_attempt.user_id,
+            expected_id,
+        )
 
     def test_that_remember_field_from_form_is_respected(self) -> None:
         for expected_remember_state in [True, False]:
@@ -159,14 +158,17 @@ class PresenterTests(TestCase):
         )
 
     def create_success_response(
-        self, email: Optional[str] = None
+        self, email: Optional[str] = None, user_id: Optional[UUID] = None
     ) -> LogInMemberUseCase.Response:
         if email is None:
             email = "test@test.test"
+        if user_id is None:
+            user_id = uuid4()
         return LogInMemberUseCase.Response(
             is_logged_in=True,
             rejection_reason=None,
             email=email,
+            user_id=user_id,
         )
 
     def create_failure_response(
@@ -178,4 +180,5 @@ class PresenterTests(TestCase):
             is_logged_in=False,
             rejection_reason=reason,
             email="test@test.test",
+            user_id=None,
         )

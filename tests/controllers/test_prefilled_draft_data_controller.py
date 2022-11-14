@@ -26,7 +26,7 @@ class ControllerTests(TestCase):
             costs_a=Decimal("20"),
             is_public_service=True,
         )
-        self.session.set_current_user_id(uuid4())
+        self.session.login_company(uuid4())
 
     def test_import_of_data_returns_a_request_object(self):
         request = self.controller.import_form_data(self.fake_form)

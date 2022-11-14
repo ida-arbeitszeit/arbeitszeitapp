@@ -90,7 +90,7 @@ class MemberGenerator:
             email = self.email_generator.get_random_email()
         assert email is not None
         if not confirmed:
-            response = self.register_member_use_case(
+            response = self.register_member_use_case.register_member(
                 request=RegisterMemberUseCase.Request(
                     email=email, name=name, password=password
                 )
@@ -200,15 +200,21 @@ class CompanyGenerator:
         return company
 
     def create_company(
-        self, *, confirmed: bool = True, email: Optional[str] = None
+        self,
+        *,
+        confirmed: bool = True,
+        email: Optional[str] = None,
+        password: Optional[str] = None,
     ) -> UUID:
         if email is None:
             email = self.email_generator.get_random_email()
-        response = self.register_company_use_case(
+        if password is None:
+            password = "test password"
+        response = self.register_company_use_case.register_company(
             request=RegisterCompany.Request(
                 name="test company",
                 email=email,
-                password="test password",
+                password=password,
             )
         )
         company = response.company_id
