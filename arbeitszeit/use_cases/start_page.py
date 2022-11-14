@@ -29,7 +29,7 @@ class StartPageUseCase:
     def show_start_page(self) -> Response:
         latest_plans = [
             self._get_plan(plan)
-            for plan in self.plan_respository.get_three_latest_active_plans_ordered_by_activation_date()
+            for plan in self.plan_respository.get_active_plans().order_by_creation_date(ascending=False).limit(3)
         ]
         return self.Response(latest_plans=latest_plans)
 

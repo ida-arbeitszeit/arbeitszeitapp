@@ -39,6 +39,17 @@ class QueryResult(Protocol, Generic[T]):
         ...
 
 
+class PlanResult(QueryResult[Plan], Protocol):
+    def order_by_creation_date(self, ascending: bool = ...) -> PlanResult:
+        ...
+
+    def with_id_containing(self, query: str) -> PlanResult:
+        ...
+
+    def with_product_name_containing(self, query: str) -> PlanResult:
+        ...
+
+
 class CompanyWorkerRepository(Protocol):
     def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
         ...
@@ -115,13 +126,7 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def get_active_plans(self) -> QueryResult[Plan]:
-        pass
-
-    @abstractmethod
-    def get_three_latest_active_plans_ordered_by_activation_date(
-        self,
-    ) -> Iterator[Plan]:
+    def get_active_plans(self) -> PlanResult:
         pass
 
     @abstractmethod
@@ -166,14 +171,6 @@ class PlanRepository(ABC):
 
     @abstractmethod
     def hide_plan(self, plan_id: UUID) -> None:
-        pass
-
-    @abstractmethod
-    def query_active_plans_by_product_name(self, query: str) -> QueryResult[Plan]:
-        pass
-
-    @abstractmethod
-    def query_active_plans_by_plan_id(self, query: str) -> QueryResult[Plan]:
         pass
 
     @abstractmethod
