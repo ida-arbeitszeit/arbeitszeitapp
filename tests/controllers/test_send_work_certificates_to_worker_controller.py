@@ -25,7 +25,7 @@ class SendCertificatesControllerTests(TestCase):
     ) -> None:
         self.request.set_form("member_id", str(uuid4()))
         self.request.set_form("amount", "10")
-        self.session.set_current_user_id(None)
+        self.session.logout()
         controller_response = self.controller.create_use_case_request()
         assert isinstance(controller_response, ControllerRejection)
         self.assertEqual(
@@ -38,7 +38,7 @@ class SendCertificatesControllerTests(TestCase):
     ) -> None:
         self.request.set_form("member_id", "")
         self.request.set_form("amount", "10")
-        self.session.set_current_user_id(uuid4())
+        self.session.login_company(uuid4())
         controller_response = self.controller.create_use_case_request()
         assert isinstance(controller_response, ControllerRejection)
         self.assertEqual(
@@ -51,7 +51,7 @@ class SendCertificatesControllerTests(TestCase):
     ) -> None:
         self.request.set_form("member_id", "invalid_id")
         self.request.set_form("amount", "10")
-        self.session.set_current_user_id(uuid4())
+        self.session.login_company(uuid4())
         controller_response = self.controller.create_use_case_request()
         assert isinstance(controller_response, ControllerRejection)
         self.assertEqual(
@@ -64,7 +64,7 @@ class SendCertificatesControllerTests(TestCase):
     ) -> None:
         self.request.set_form("member_id", str(uuid4()))
         self.request.set_form("amount", "")
-        self.session.set_current_user_id(uuid4())
+        self.session.login_company(uuid4())
         controller_response = self.controller.create_use_case_request()
         assert isinstance(controller_response, ControllerRejection)
         self.assertEqual(
@@ -77,7 +77,7 @@ class SendCertificatesControllerTests(TestCase):
     ) -> None:
         self.request.set_form("member_id", str(uuid4()))
         self.request.set_form("amount", "abc")
-        self.session.set_current_user_id(uuid4())
+        self.session.login_company(uuid4())
         controller_response = self.controller.create_use_case_request()
         assert isinstance(controller_response, ControllerRejection)
         self.assertEqual(
@@ -90,7 +90,7 @@ class SendCertificatesControllerTests(TestCase):
     ) -> None:
         self.request.set_form("member_id", str(uuid4()))
         self.request.set_form("amount", "-1")
-        self.session.set_current_user_id(uuid4())
+        self.session.login_company(uuid4())
         controller_response = self.controller.create_use_case_request()
         assert isinstance(controller_response, ControllerRejection)
         self.assertEqual(
@@ -103,7 +103,7 @@ class SendCertificatesControllerTests(TestCase):
     ) -> None:
         self.request.set_form("member_id", str(uuid4()))
         self.request.set_form("amount", "10")
-        self.session.set_current_user_id(uuid4())
+        self.session.login_company(uuid4())
         controller_response = self.controller.create_use_case_request()
         self.assertIsInstance(controller_response, SendWorkCertificatesToWorkerRequest)
 
@@ -114,7 +114,7 @@ class SendCertificatesControllerTests(TestCase):
         self.request.set_form("member_id", str(member_id))
         self.request.set_form("amount", "10")
         user_id = uuid4()
-        self.session.set_current_user_id(user_id)
+        self.session.login_company(user_id)
         controller_response = self.controller.create_use_case_request()
         assert isinstance(controller_response, SendWorkCertificatesToWorkerRequest)
         self.assertEqual(controller_response.company_id, user_id)
@@ -127,7 +127,7 @@ class SendCertificatesControllerTests(TestCase):
         member_id = uuid4()
         self.request.set_form("member_id", " " + str(member_id) + " ")
         self.request.set_form("amount", "10")
-        self.session.set_current_user_id(uuid4())
+        self.session.login_company(uuid4())
         controller_response = self.controller.create_use_case_request()
         assert isinstance(controller_response, SendWorkCertificatesToWorkerRequest)
         self.assertEqual(controller_response.worker_id, member_id)

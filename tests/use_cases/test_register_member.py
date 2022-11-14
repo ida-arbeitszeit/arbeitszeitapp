@@ -1,13 +1,9 @@
-from unittest import TestCase
-
 from arbeitszeit.entities import AccountTypes
 from arbeitszeit.use_cases import RegisterMemberUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
-from tests.data_generators import MemberGenerator
 from tests.token import TokenDeliveryService
 
 from .base_test_case import BaseTestCase
-from .dependency_injection import get_dependency_injector
 from .repositories import AccountRepository, MemberRepository
 
 DEFAULT = dict(

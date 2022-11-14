@@ -26,13 +26,11 @@ class FakeSession:
     def is_logged_in(self) -> bool:
         return self._current_user_role is not None
 
-    def set_current_user_id(self, user_id: Optional[UUID]) -> None:
-        self._current_user_id = user_id
-
     def get_current_user(self) -> Optional[UUID]:
         return self._current_user_id
 
     def login_member(self, member: UUID, remember: bool = False) -> None:
+        self._current_user_id = member
         self._recent_logins.append(
             self.LoginAttempt(
                 user_role=UserRole.member,
@@ -43,6 +41,7 @@ class FakeSession:
         self._current_user_role = UserRole.member
 
     def login_company(self, company: UUID, remember: bool = False) -> None:
+        self._current_user_id = company
         self._recent_logins.append(
             self.LoginAttempt(
                 user_role=UserRole.company,
@@ -53,6 +52,7 @@ class FakeSession:
         self._current_user_role = UserRole.company
 
     def login_accountant(self, accountant: UUID, remember: bool = False) -> None:
+        self._current_user_id = accountant
         self._recent_logins.append(
             self.LoginAttempt(
                 user_role=UserRole.accountant,

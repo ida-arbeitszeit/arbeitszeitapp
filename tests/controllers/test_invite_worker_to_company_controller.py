@@ -14,7 +14,7 @@ class InviteWorkerToCompanyControllerTests(TestCase):
         self.session = self.injector.get(FakeSession)
         self.controller = self.injector.get(InviteWorkerToCompanyController)
         self.company_id = uuid4()
-        self.session.set_current_user_id(self.company_id)
+        self.session.login_company(company=self.company_id)
 
     def test_current_user_is_company_in_use_case_request(self) -> None:
         use_case_request = self.controller.import_request_data(
@@ -47,10 +47,9 @@ class AnonymousUserTests(TestCase):
         self.injector = get_dependency_injector()
         self.session = self.injector.get(FakeSession)
         self.controller = self.injector.get(InviteWorkerToCompanyController)
-        self.session.set_current_user_id(None)
+        self.session.logout()
 
     def test_raise_value_error_if_user_is_not_logged_in(self) -> None:
-        self.session.set_current_user_id(None)
         with self.assertRaisesRegex(ValueError, r"User is not logged in"):
             self.controller.import_request_data(
                 form=Form(worker_id=str(uuid4())),
