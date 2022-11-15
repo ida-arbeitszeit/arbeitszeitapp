@@ -4,6 +4,7 @@ from uuid import UUID
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
 
+from arbeitszeit.use_cases.confirm_member import ConfirmMemberUseCase
 from arbeitszeit.use_cases.log_in_accountant import LogInAccountantUseCase
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
@@ -86,28 +87,16 @@ def signup_member(view: SignupMemberView):
 @auth.route("/member/confirm/<token>")
 @commit_changes
 @with_injection()
-def confirm_email_member(token, member_repository: MemberRepository):
+def confirm_email_member(
+    token, member_repository: MemberRepository, use_case: ConfirmMemberUseCase
+):
     def redirect_invalid_request():
         flash("Der Bestätigungslink ist ungültig oder ist abgelaufen.")
         return redirect(url_for("auth.unconfirmed_member"))
 
-    token_service = FlaskTokenService()
-    try:
-        email = token_service.confirm_token(token)
-    except Exception:
+    response = use_case.confirm_member(request=use_case.Request(token=token))
+    if not response.is_confirmed:
         return redirect_invalid_request()
-    if email is None:
-        return redirect_invalid_request()
-    member = member_repository.get_by_email(email)
-    assert member
-    if member_repository.is_member_confirmed(member.id):
-        flash("Konto ist bereits bestätigt.")
-    else:
-        member_repository.confirm_member(
-            member=member.id,
-            confirmed_on=datetime.now(),
-        )
-        flash("Das Konto wurde bestätigt. Danke!")
     return redirect(url_for("auth.login_member"))
 
 

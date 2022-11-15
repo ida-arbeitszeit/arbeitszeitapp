@@ -30,6 +30,9 @@ class FakeTokenService:
     def unwrap_invitation_token(self, token: str) -> Optional[str]:
         return self.confirm_token(token, 10000000)
 
+    def unwrap_confirmation_token(self, token: str) -> Optional[str]:
+        return self.confirm_token(token, 10000000)
+
 
 @dataclass
 class DeliveredToken:
