@@ -56,6 +56,29 @@ class FlaskQueryResult(Generic[T]):
         return (self.mapper(item) for item in self.query)
 
 
+class PlanQueryResult(FlaskQueryResult[entities.Plan]):
+    def order_by_creation_date(self, ascending: bool = True) -> PlanQueryResult:
+        ordering = models.Plan.activation_date
+        if not ascending:
+            ordering = ordering.desc()
+        return type(self)(
+            query=self.query.order_by(ordering),
+            mapper=self.mapper,
+        )
+
+    def with_id_containing(self, query: str) -> PlanQueryResult:
+        return type(self)(
+            query=self.query.filter(models.Plan.id.contains(query)),
+            mapper=self.mapper,
+        )
+
+    def with_product_name_containing(self, query: str) -> PlanQueryResult:
+        return type(self)(
+            query=self.query.filter(models.Plan.prd_name.ilike(f"%{query}%")),
+            mapper=self.mapper,
+        )
+
+
 @inject
 @dataclass
 class CompanyWorkerRepository:
@@ -773,20 +796,10 @@ class PlanRepository(repositories.PlanRepository):
         plan_orm = self.object_to_orm(plan)
         plan_orm.payout_count += 1
 
-    def get_active_plans(self) -> FlaskQueryResult[entities.Plan]:
-        return FlaskQueryResult(
-            query=models.Plan.query.filter_by(is_active=True).all(),
+    def get_active_plans(self) -> PlanQueryResult:
+        return PlanQueryResult(
+            query=models.Plan.query.filter_by(is_active=True),
             mapper=self.object_from_orm,
-        )
-
-    def get_three_latest_active_plans_ordered_by_activation_date(
-        self,
-    ) -> Iterator[entities.Plan]:
-        return (
-            self.object_from_orm(plan_orm)
-            for plan_orm in models.Plan.query.filter_by(is_active=True)
-            .order_by(models.Plan.activation_date.desc())
-            .limit(3)
         )
 
     def count_active_plans(self) -> int:
@@ -883,26 +896,6 @@ class PlanRepository(repositories.PlanRepository):
         plan_orm = models.Plan.query.filter_by(id=str(plan_id)).first()
         assert plan_orm
         plan_orm.hidden_by_user = True
-
-    def query_active_plans_by_product_name(
-        self, query: str
-    ) -> FlaskQueryResult[entities.Plan]:
-        return FlaskQueryResult(
-            mapper=self.object_from_orm,
-            query=models.Plan.query.filter(
-                models.Plan.is_active == True, models.Plan.prd_name.ilike(f"%{query}%")
-            ).all(),
-        )
-
-    def query_active_plans_by_plan_id(
-        self, query: str
-    ) -> FlaskQueryResult[entities.Plan]:
-        return FlaskQueryResult(
-            query=models.Plan.query.filter(
-                models.Plan.is_active == True, models.Plan.id.contains(query)
-            ).all(),
-            mapper=self.object_from_orm,
-        )
 
     def get_all_plans_for_company_descending(
         self, company_id: UUID

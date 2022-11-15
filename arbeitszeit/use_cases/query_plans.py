@@ -69,13 +69,14 @@ class QueryPlans:
         query = request.get_query_string()
         filter_by = request.get_filter_category()
         sort_by = request.get_sorting_category()
+        plans = self.plan_repository.get_active_plans()
         if query is None:
-            found_plans = self.plan_repository.get_active_plans()
+            pass
         elif filter_by == PlanFilter.by_plan_id:
-            found_plans = self.plan_repository.query_active_plans_by_plan_id(query)
+            plans = plans.with_id_containing(query)
         else:
-            found_plans = self.plan_repository.query_active_plans_by_product_name(query)
-        results = [self._plan_to_response_model(plan) for plan in found_plans]
+            plans = plans.with_product_name_containing(query)
+        results = [self._plan_to_response_model(plan) for plan in plans]
         results_sorted = self._sort_plans(results, sort_by)
         return PlanQueryResponse(
             results=results_sorted,
