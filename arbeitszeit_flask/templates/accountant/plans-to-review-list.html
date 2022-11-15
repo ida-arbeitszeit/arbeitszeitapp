@@ -1,9 +1,12 @@
 {% extends "base_accountant.html" %}
 
 {% block content %}
-<div class="section">
+<div class="content has-text-centered">
+  <h1>{{ gettext("Unreviewed plans") }}</h1>
+</div>
+<section class="section">
   {% if view_model.show_plan_list %}
-  <div class="columns is-centered has-text-left">
+  <div class="column is-4 is-offset-4 is-centered has-text-left">
     {% for plan in view_model.plans %}
     <article class="media">
       <div class="media-content">
@@ -29,5 +32,5 @@
   {% else %}
   {{ gettext("There are currently no plans waiting for review") }}
   {% endif %}
-</div>
+</section>
 {% endblock %}
