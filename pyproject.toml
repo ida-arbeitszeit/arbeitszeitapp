@@ -3,6 +3,24 @@ requires = ["setuptools", "wheel"]
 build-backend = "backend"
 backend-path = ["build_support"]
 
+[project]
+name = "arbeitszeitapp"
+version = "0.0.0"
+classifiers = [
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+]
+
+[project.optional-dependencies]
+profiling = ["flask_profiler"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages]
+find = {}
+
 [tool.black]
 target-version = ['py39']
 extend-exclude = '''
@@ -39,14 +57,15 @@ module = [
     "flask_babel",
     "flask_mail",
     "flask_migrate",
+    "flask_profiler",
     "flask_sqlalchemy",
     "flask_talisman",
     "flask_wtf.*",
     "is_safe_url",
     "matplotlib.*",
+    "pytz",
     "sqlalchemy.*",
-    "wtforms",
-    "pytz"
+    "wtforms"
 ]
 ignore_missing_imports = true
 

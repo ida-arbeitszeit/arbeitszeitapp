@@ -2,10 +2,11 @@
 
 # python packages
 , email_validator, flask, flask-babel, flask-talisman, flask_login, flask_mail
-, flask_migrate, flask_wtf, injector, is_safe_url, matplotlib, sphinx }:
+, flask_migrate, flask_wtf, injector, is_safe_url, matplotlib, sphinx
+, flask_profiler }:
 buildPythonPackage {
   pname = "arbeitszeitapp";
-  version = "develop";
+  version = "0.0.0";
   src = ../..;
   outputs = [ "out" "doc" ];
   postPhases = [ "buildDocsPhase" ];
@@ -28,4 +29,5 @@ buildPythonPackage {
     mkdir -p $doc/share/doc/arbeitszeitapp
     python -m sphinx -a $src/docs $doc/share/doc/arbeitszeitapp
   '';
+  passthru.optional-dependencies = { profiling = [ flask_profiler ]; };
 }
