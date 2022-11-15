@@ -74,6 +74,7 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
     initialize_migrations(app=app, db=db)
     mail.init_app(app)
     babel.init_app(app)
+    initialize_flask_profiler(app)
 
     # Setup template filter
     app.template_filter()(RealtimeDatetimeService().format_datetime)
@@ -114,7 +115,6 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
         app.register_blueprint(accountant.blueprint.main_accountant)
 
         if app.config["DEBUG_DETAILS"] == True:
-            initialize_flask_profiler(app)
             show_profile_info(app)
             show_sql_queries(app)
 
