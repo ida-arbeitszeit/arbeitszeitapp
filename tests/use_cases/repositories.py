@@ -4,9 +4,9 @@ from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from itertools import islice
 from statistics import StatisticsError, mean
 from typing import (
+    Callable,
     Dict,
     Generic,
     Iterable,
@@ -59,6 +59,26 @@ class QueryResultImpl(Generic[T]):
 
     def __iter__(self) -> Iterator[T]:
         return iter(self.items)
+
+
+class PlanResult(QueryResultImpl[Plan]):
+    def order_by_creation_date(self, ascending: bool = True) -> PlanResult:
+        return type(self)(
+            items=sorted(
+                self.items,
+                key=lambda plan: plan.plan_creation_date,
+                reverse=not ascending,
+            )
+        )
+
+    def with_id_containing(self, query: str) -> PlanResult:
+        return self._filtered_by(lambda plan: query in str(plan.id))
+
+    def with_product_name_containing(self, query: str) -> PlanResult:
+        return self._filtered_by(lambda plan: query.lower() in plan.prd_name.lower())
+
+    def _filtered_by(self, key: Callable[[Plan], bool]) -> PlanResult:
+        return type(self)(items=[item for item in self.items if key(item)])
 
 
 @singleton
@@ -500,22 +520,10 @@ class PlanRepository(interfaces.PlanRepository):
     def increase_payout_count_by_one(self, plan: Plan) -> None:
         plan.payout_count += 1
 
-    def get_active_plans(self) -> QueryResultImpl[Plan]:
-        return QueryResultImpl(
+    def get_active_plans(self) -> PlanResult:
+        return PlanResult(
             items=[plan for plan in self.plans.values() if plan.is_active]
         )
-
-    def get_three_latest_active_plans_ordered_by_activation_date(
-        self,
-    ) -> Iterator[Plan]:
-        active_plans = [plan for plan in self.plans.values() if plan.is_active]
-        active_plans_sorted = sorted(
-            active_plans,
-            key=lambda x: x.activation_date if x.activation_date is not None else 0,
-            reverse=True,
-        )
-        for plan in islice(active_plans_sorted, 3):
-            yield plan
 
     def count_active_plans(self) -> int:
         return len([plan for plan in self.plans.values() if plan.is_active])
@@ -650,24 +658,6 @@ class PlanRepository(interfaces.PlanRepository):
         )
         self.plans[plan.id] = plan
         return plan
-
-    def query_active_plans_by_product_name(self, query: str) -> QueryResultImpl[Plan]:
-        return QueryResultImpl(
-            [
-                plan
-                for plan in self.plans.values()
-                if plan.is_active and (query.lower() in plan.prd_name.lower())
-            ]
-        )
-
-    def query_active_plans_by_plan_id(self, query: str) -> QueryResultImpl[Plan]:
-        return QueryResultImpl(
-            [
-                plan
-                for plan in self.plans.values()
-                if plan.is_active and (query in str(plan.id))
-            ]
-        )
 
     def toggle_product_availability(self, plan: Plan) -> None:
         plan.is_available = True if (plan.is_available == False) else False
