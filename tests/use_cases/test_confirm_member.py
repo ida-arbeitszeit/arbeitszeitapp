@@ -1,5 +1,3 @@
-from uuid import uuid4
-
 from arbeitszeit.use_cases.confirm_member import ConfirmMemberUseCase as UseCase
 from tests.token import TokenDeliveryService
 
