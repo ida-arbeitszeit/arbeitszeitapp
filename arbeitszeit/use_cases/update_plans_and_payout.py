@@ -31,7 +31,8 @@ class UpdatePlansAndPayout:
         payout_factor = self.payout_factor_service.calculate_payout_factor()
         self.payout_factor_service.store_payout_factor(payout_factor)
         self._calculate_plan_expiration(payout_factor)
-        for plan in self.plan_repository.all_plans_approved_active_and_not_expired():
+        plans = self.plan_repository.get_active_plans()
+        for plan in plans:
             self._payout_work_certificates(plan, payout_factor)
 
     def _calculate_plan_expiration(self, payout_factor: Decimal) -> None:

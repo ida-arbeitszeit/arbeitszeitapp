@@ -17,13 +17,10 @@ class PayoutFactorService:
     payout_factor_repository: PayoutFactorRepository
 
     def calculate_payout_factor(self) -> Decimal:
+        active_plans = self.plan_repository.get_active_plans()
         # payout factor = (A − ( P o + R o )) / (A + A o)
-        productive_plans = (
-            self.plan_repository.all_productive_plans_approved_active_and_not_expired()
-        )
-        public_plans = (
-            self.plan_repository.all_public_plans_approved_active_and_not_expired()
-        )
+        productive_plans = active_plans.that_are_productive()
+        public_plans = active_plans.that_are_public()
         # A o, P o, R o
         public_costs_per_day: ProductionCosts = sum(
             (p.production_costs / p.timeframe for p in public_plans),
