@@ -9,7 +9,11 @@ from flask_wtf.csrf import CSRFProtect
 import arbeitszeit_flask.extensions
 from arbeitszeit_flask.datetime import RealtimeDatetimeService
 from arbeitszeit_flask.extensions import babel, login_manager, mail
-from arbeitszeit_flask.profiling import show_profile_info, show_sql_queries
+from arbeitszeit_flask.profiling import (
+    initialize_flask_profiler,
+    show_profile_info,
+    show_sql_queries,
+)
 
 
 def load_configuration(app: Any, configuration: Optional[Any] = None) -> None:
@@ -110,7 +114,7 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
         app.register_blueprint(accountant.blueprint.main_accountant)
 
         if app.config["DEBUG_DETAILS"] == True:
-            # print profiling info to sys.stout
+            initialize_flask_profiler(app)
             show_profile_info(app)
             show_sql_queries(app)
 
