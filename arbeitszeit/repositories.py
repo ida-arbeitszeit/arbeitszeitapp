@@ -38,15 +38,30 @@ class QueryResult(Protocol, Generic[T]):
     def offset(self, n: int) -> QueryResult[T]:
         ...
 
+    def __len__(self) -> int:
+        ...
+
 
 class PlanResult(QueryResult[Plan], Protocol):
-    def order_by_creation_date(self, ascending: bool = ...) -> PlanResult:
+    def ordered_by_creation_date(self, ascending: bool = ...) -> PlanResult:
         ...
 
     def with_id_containing(self, query: str) -> PlanResult:
         ...
 
     def with_product_name_containing(self, query: str) -> PlanResult:
+        ...
+
+    def that_are_approved(self) -> PlanResult:
+        ...
+
+    def that_are_productive(self) -> PlanResult:
+        ...
+
+    def that_are_public(self) -> PlanResult:
+        ...
+
+    def planned_by(self, company: UUID) -> PlanResult:
         ...
 
 
@@ -132,14 +147,6 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def count_active_plans(self) -> int:
-        pass
-
-    @abstractmethod
-    def count_active_public_plans(self) -> int:
-        pass
-
-    @abstractmethod
     def avg_timeframe_of_active_plans(self) -> Decimal:
         pass
 
@@ -160,27 +167,7 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def all_plans_approved_active_and_not_expired(self) -> Iterator[Plan]:
-        pass
-
-    @abstractmethod
-    def all_productive_plans_approved_active_and_not_expired(self) -> Iterator[Plan]:
-        pass
-
-    @abstractmethod
-    def all_public_plans_approved_active_and_not_expired(self) -> Iterator[Plan]:
-        pass
-
-    @abstractmethod
     def hide_plan(self, plan_id: UUID) -> None:
-        pass
-
-    @abstractmethod
-    def get_all_plans_for_company_descending(self, company_id: UUID) -> Iterator[Plan]:
-        pass
-
-    @abstractmethod
-    def get_all_active_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
         pass
 
     @abstractmethod
@@ -202,6 +189,10 @@ class PlanRepository(ABC):
 
     @abstractmethod
     def get_all_plans_without_completed_review(self) -> Iterable[UUID]:
+        pass
+
+    @abstractmethod
+    def get_all_plans(self) -> PlanResult:
         pass
 
 
