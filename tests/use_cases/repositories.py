@@ -67,6 +67,13 @@ class QueryResultImpl(Generic[T]):
             member_repository=self.member_repository,
         )
 
+    def first(self) -> Optional[T]:
+        try:
+            item = next(iter(self))
+        except StopIteration:
+            return None
+        return item
+
     def __iter__(self) -> Iterator[T]:
         return iter(self.items())
 

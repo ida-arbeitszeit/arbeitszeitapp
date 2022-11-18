@@ -125,6 +125,15 @@ class GetAllMembersTests(FlaskTestCase):
         self.company_generator = self.injector.get(CompanyGenerator)
         self.repository = self.injector.get(MemberRepository)
 
+    def test_with_empty_db_the_first_member_is_none(self) -> None:
+        assert self.repository.get_all_members().first() is None
+
+    def test_with_one_member_id_db_the_first_element_is_that_member(self) -> None:
+        expected_member_id = self.member_generator.create_member()
+        member = self.repository.get_all_members().first()
+        assert member
+        assert member.id == expected_member_id
+
     def test_that_all_members_can_be_retrieved(self) -> None:
         expected_member1 = self.member_generator.create_member_entity()
         expected_member2 = self.member_generator.create_member_entity()

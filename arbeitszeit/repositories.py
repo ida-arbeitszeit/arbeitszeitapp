@@ -38,6 +38,9 @@ class QueryResult(Protocol, Generic[T]):
     def offset(self, n: int) -> QueryResult[T]:
         ...
 
+    def first(self) -> Optional[T]:
+        ...
+
     def __len__(self) -> int:
         ...
 

@@ -18,7 +18,7 @@ from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
 from injector import inject
-from sqlalchemy import and_, desc, func
+from sqlalchemy import and_, func
 from sqlalchemy.sql.expression import Select
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -51,6 +51,12 @@ class FlaskQueryResult(Generic[T]):
 
     def offset(self, n: int) -> FlaskQueryResult[T]:
         return type(self)(query=self.query.offset(n), mapper=self.mapper)
+
+    def first(self) -> Optional[T]:
+        element = self.query.first()
+        if element is None:
+            return None
+        return self.mapper(element)
 
     def __iter__(self) -> Iterator[T]:
         return (self.mapper(item) for item in self.query)
