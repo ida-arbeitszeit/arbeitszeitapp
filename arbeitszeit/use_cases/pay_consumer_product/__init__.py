@@ -44,7 +44,7 @@ class PayConsumerProduct:
     plan_repository: PlanRepository
     transaction_factory: ConsumerProductTransactionFactory
 
-    def __call__(
+    def pay_consumer_product(
         self, request: PayConsumerProductRequest
     ) -> PayConsumerProductResponse:
         try:

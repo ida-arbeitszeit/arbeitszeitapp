@@ -7,6 +7,10 @@ from arbeitszeit.repositories import (
     CompanyWorkerRepository,
     MemberRepository,
 )
+from arbeitszeit.token import (
+    CompanyRegistrationMessagePresenter,
+    MemberRegistrationMessagePresenter,
+)
 from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitation_presenter import (
     AccountantInvitationPresenter,
 )
@@ -26,11 +30,23 @@ from tests.presenters.test_colors import ColorsTestImpl
 from tests.request import FakeRequest
 from tests.session import FakeSession
 from tests.text_renderer import TextRendererImpl
-from tests.token import FakeTokenService
+from tests.token import FakeTokenService, TokenDeliveryService
 from tests.translator import FakeTranslator
 
 
 class TestingModule(Module):
+    @provider
+    def provide_company_registration_message_presenter(
+        self, token_delivery_service: TokenDeliveryService
+    ) -> CompanyRegistrationMessagePresenter:
+        return token_delivery_service
+
+    @provider
+    def provide_member_registration_message_presenter(
+        self, token_delivery_service: TokenDeliveryService
+    ) -> MemberRegistrationMessagePresenter:
+        return token_delivery_service
+
     @provider
     def provide_text_renderer(self, instance: TextRendererImpl) -> TextRenderer:
         return instance  # type: ignore

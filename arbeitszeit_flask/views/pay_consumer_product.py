@@ -43,7 +43,7 @@ class PayConsumerProductView:
             use_case_request = self.controller.import_form_data(current_user, form)
         except self.controller.FormError:
             return self._handle_invalid_form(form)
-        response = self.pay_consumer_product(use_case_request)
+        response = self.pay_consumer_product.pay_consumer_product(use_case_request)
         view_model = self.presenter.present(response)
         if view_model.status_code == 200:
             return redirect(url_for("main_member.pay_consumer_product"))
