@@ -161,15 +161,8 @@ adding lines to ``.autoformattingrc``.
 
 We use type hints.  You can check the consistency of the type hints
 via the ``mypy`` command. Furthermore ``flake8`` is employed to prevent certain mistakes like
-for example unused imports or uninitialized variables. Invoke both commands without 
+for example unused imports or uninitialized variables. Invoke both commands without
 arguments to test all the eligable code.
-
-You can print profiling info to the terminal by setting the following
-environment variable:
-
-   .. code-block:: bash
-    
-    export DEBUG_DETAILS=true
 
 
 Testing
@@ -255,6 +248,19 @@ appropriately.
 See the `flask mail documentation
 <https://pythonhosted.org/Flask-Mail/>`_ on how to configure the
 production backend.
+
+Profiling
+---------
+
+This project uses ``flask_profiler`` to provided a very basic
+graphical user interface for response times.  More in depth profiling
+information is printed to stdout (the terminal) when detailed
+debugging is enabled. Run the following in the same terminal as you
+start the development server to enable detailed profiling.
+
+   .. code-block:: bash
+
+    export DEBUG_DETAILS=true
 
 
 Documentation
