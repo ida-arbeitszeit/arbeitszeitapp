@@ -138,17 +138,16 @@ class GetAllMembersTests(FlaskTestCase):
         expected_number_of_members = 3
         for i in range(expected_number_of_members):
             self.member_generator.create_member_entity()
-        member_count = len(list(self.repository.get_all_members()))
+        member_count = len(self.repository.get_all_members())
         assert member_count == expected_number_of_members
 
     def test_can_filter_members_by_their_workplace(self) -> None:
         member = self.member_generator.create_member()
         self.member_generator.create_member()
         company = self.company_generator.create_company_entity(workers=[member])
-        assert len(list(self.repository.get_all_members())) == 2
+        assert len(self.repository.get_all_members()) == 2
         assert (
-            len(list(self.repository.get_all_members().working_at_company(company.id)))
-            == 1
+            len(self.repository.get_all_members().working_at_company(company.id)) == 1
         )
 
 
