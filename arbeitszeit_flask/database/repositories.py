@@ -61,7 +61,7 @@ class FlaskQueryResult(Generic[T]):
 
 class PlanQueryResult(FlaskQueryResult[entities.Plan]):
     def ordered_by_creation_date(self, ascending: bool = True) -> PlanQueryResult:
-        ordering = models.Plan.activation_date
+        ordering = models.Plan.plan_creation_date
         if not ascending:
             ordering = ordering.desc()
         return self._with_modified_query(lambda query: query.order_by(ordering))

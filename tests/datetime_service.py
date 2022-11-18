@@ -16,6 +16,9 @@ class FakeDatetimeService(DatetimeService):
     def freeze_time(self, timestamp: datetime):
         self.frozen_time = timestamp
 
+    def unfreeze_time(self) -> None:
+        self.frozen_time = None
+
     def now(self) -> datetime:
         return self.frozen_time if self.frozen_time else datetime.now()
 

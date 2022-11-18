@@ -1,9 +1,10 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import Union
+from typing import List, Union
 from uuid import uuid4
 
-from arbeitszeit.entities import ProductionCosts
+from arbeitszeit.entities import Plan, ProductionCosts
+from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit_flask.database.repositories import PlanRepository
 from tests.datetime_service import FakeDatetimeService
 
@@ -175,6 +176,7 @@ class GetActivePlansTests(FlaskTestCase):
         self.plan_generator = self.injector.get(PlanGenerator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.company_generator = self.injector.get(CompanyGenerator)
+        self.approve_plan_use_case = self.injector.get(ApprovePlanUseCase)
 
     def test_active_plans_can_be_ordered_by_creation_date_in_descending_order(
         self,
@@ -186,10 +188,11 @@ class GetActivePlansTests(FlaskTestCase):
             self.datetime_service.now_minus_25_hours(),
             self.datetime_service.now_minus_one_day(),
         ]
-        plans = [
-            self.plan_generator.create_plan(activation_date=date)
-            for date in activation_dates
-        ]
+        plans: List[Plan] = list()
+        for timestamp in activation_dates:
+            self.datetime_service.freeze_time(timestamp)
+            plans.append(self.plan_generator.create_plan(activation_date=timestamp))
+        self.datetime_service.unfreeze_time()
         retrieved_plans = list(
             self.plan_repository.get_active_plans()
             .ordered_by_creation_date(ascending=False)
@@ -235,6 +238,29 @@ class GetActivePlansTests(FlaskTestCase):
         )
         assert returned_plan
         assert returned_plan[0] == expected_plan
+
+    def test_that_plans_that_ordering_by_creation_date_works_even_when_plan_activation_was_in_reverse_order(
+        self,
+    ) -> None:
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        first_plan = self.plan_generator.create_plan(approved=False)
+        self.datetime_service.freeze_time(datetime(2000, 1, 2))
+        second_plan = self.plan_generator.create_plan(approved=False)
+        self.datetime_service.freeze_time(datetime(2000, 1, 3))
+        self.approve_plan_use_case.approve_plan(
+            request=ApprovePlanUseCase.Request(
+                plan=second_plan.id,
+            )
+        )
+        self.datetime_service.freeze_time(datetime(2000, 1, 4))
+        self.approve_plan_use_case.approve_plan(
+            request=ApprovePlanUseCase.Request(
+                plan=first_plan.id,
+            )
+        )
+        plans = list(self.plan_repository.get_all_plans().ordered_by_creation_date())
+        assert plans[0].id == first_plan.id
+        assert plans[1].id == second_plan.id
 
 
 class GetAllPlansWithoutCompletedReviewTests(FlaskTestCase):
