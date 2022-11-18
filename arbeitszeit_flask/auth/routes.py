@@ -4,6 +4,7 @@ from uuid import UUID
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
 
+from arbeitszeit.use_cases.confirm_member import ConfirmMemberUseCase
 from arbeitszeit.use_cases.log_in_accountant import LogInAccountantUseCase
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
@@ -20,6 +21,7 @@ from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import LoginForm
 from arbeitszeit_flask.template import AnonymousUserTemplateRenderer
 from arbeitszeit_flask.token import FlaskTokenService
+from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views.signup_accountant_view import SignupAccountantView
 from arbeitszeit_flask.views.signup_company_view import SignupCompanyView
 from arbeitszeit_flask.views.signup_member_view import SignupMemberView
@@ -86,28 +88,11 @@ def signup_member(view: SignupMemberView):
 @auth.route("/member/confirm/<token>")
 @commit_changes
 @with_injection()
-def confirm_email_member(token, member_repository: MemberRepository):
-    def redirect_invalid_request():
+def confirm_email_member(token: str, use_case: ConfirmMemberUseCase) -> Response:
+    response = use_case.confirm_member(request=use_case.Request(token=token))
+    if not response.is_confirmed:
         flash("Der Bestätigungslink ist ungültig oder ist abgelaufen.")
         return redirect(url_for("auth.unconfirmed_member"))
-
-    token_service = FlaskTokenService()
-    try:
-        email = token_service.confirm_token(token)
-    except Exception:
-        return redirect_invalid_request()
-    if email is None:
-        return redirect_invalid_request()
-    member = member_repository.get_by_email(email)
-    assert member
-    if member_repository.is_member_confirmed(member.id):
-        flash("Konto ist bereits bestätigt.")
-    else:
-        member_repository.confirm_member(
-            member=member.id,
-            confirmed_on=datetime.now(),
-        )
-        flash("Das Konto wurde bestätigt. Danke!")
     return redirect(url_for("auth.login_member"))
 
 
