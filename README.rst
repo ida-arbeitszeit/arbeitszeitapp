@@ -256,7 +256,7 @@ This project uses ``flask_profiler`` to provided a very basic
 graphical user interface for response times.  More in depth profiling
 information is printed to stdout (the terminal) when detailed
 debugging is enabled. Run the following in the same terminal as you
-start the development server to enabled detailed profiling.
+start the development server to enable detailed profiling.
 
    .. code-block:: bash
 
