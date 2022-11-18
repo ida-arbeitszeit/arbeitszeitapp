@@ -88,7 +88,7 @@ class GetMemberDashboard:
     def _get_three_latest_plans(self) -> List[PlanDetails]:
         latest_plans = (
             self.plan_repository.get_active_plans()
-            .order_by_creation_date(ascending=False)
+            .ordered_by_creation_date(ascending=False)
             .limit(3)
         )
         plans = []

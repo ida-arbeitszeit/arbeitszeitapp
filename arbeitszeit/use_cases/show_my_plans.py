@@ -52,9 +52,9 @@ class ShowMyPlansUseCase:
 
     def show_company_plans(self, request: ShowMyPlansRequest) -> ShowMyPlansResponse:
         all_plans_of_company = list(
-            self.plan_repository.get_all_plans_for_company_descending(
-                request.company_id
-            )
+            self.plan_repository.get_all_plans()
+            .planned_by(request.company_id)
+            .ordered_by_creation_date(ascending=False)
         )
         drafts = list(
             map(
