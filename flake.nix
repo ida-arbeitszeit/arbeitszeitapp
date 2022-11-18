@@ -3,9 +3,10 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    flask-profiler.url = "github:seppeljordan/flask-profiler";
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
+  outputs = { self, nixpkgs, flake-utils, flask-profiler }:
     let
       supportedSystems = [ "x86_64-linux" ];
       systemDependent = flake-utils.lib.eachSystem supportedSystems (system:
@@ -29,10 +30,13 @@
         overlays = {
           # The default overlay provides the arbeitszeitapp to
           # nixpkgs.
-          default = final: prev: {
-            pythonPackagesExtensions = prev.pythonPackagesExtensions
-              ++ [ (import nix/pythonPackages.nix) ];
-          };
+          default = let
+            ourOverlay = final: prev: {
+              pythonPackagesExtensions = prev.pythonPackagesExtensions
+                ++ [ (import nix/pythonPackages.nix) ];
+            };
+          in nixpkgs.lib.composeExtensions ourOverlay
+          flask-profiler.overlays.default;
         };
       };
     in systemDependent // systemIndependent;
