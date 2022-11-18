@@ -11,6 +11,9 @@ class InvitationTokenValidator(Protocol):
     def unwrap_invitation_token(self, token: str) -> Optional[str]:
         ...
 
+    def unwrap_confirmation_token(self, token: str) -> Optional[str]:
+        ...
+
 
 class MemberRegistrationMessagePresenter(Protocol):
     def show_member_registration_message(self, member: UUID, token: str) -> None:
