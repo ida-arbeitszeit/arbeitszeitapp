@@ -60,9 +60,12 @@ class QueryResultImpl(Generic[T]):
     def __iter__(self) -> Iterator[T]:
         return iter(self.items)
 
+    def __len__(self) -> int:
+        return len(self.items)
+
 
 class PlanResult(QueryResultImpl[Plan]):
-    def order_by_creation_date(self, ascending: bool = True) -> PlanResult:
+    def ordered_by_creation_date(self, ascending: bool = True) -> PlanResult:
         return type(self)(
             items=sorted(
                 self.items,
@@ -76,6 +79,18 @@ class PlanResult(QueryResultImpl[Plan]):
 
     def with_product_name_containing(self, query: str) -> PlanResult:
         return self._filtered_by(lambda plan: query.lower() in plan.prd_name.lower())
+
+    def that_are_approved(self) -> PlanResult:
+        return self._filtered_by(lambda plan: plan.approval_date is not None)
+
+    def that_are_productive(self) -> PlanResult:
+        return self._filtered_by(lambda plan: not plan.is_public_service)
+
+    def that_are_public(self) -> PlanResult:
+        return self._filtered_by(lambda plan: plan.is_public_service)
+
+    def planned_by(self, company: UUID) -> PlanResult:
+        return self._filtered_by(lambda plan: plan.planner.id == company)
 
     def _filtered_by(self, key: Callable[[Plan], bool]) -> PlanResult:
         return type(self)(items=[item for item in self.items if key(item)])
@@ -469,6 +484,9 @@ class PlanRepository(interfaces.PlanRepository):
         self.company_repository = company_repository
         self.draft_repository = draft_repository
 
+    def get_all_plans(self) -> PlanResult:
+        return PlanResult(items=list(self.plans.values()))
+
     def get_all_plans_without_completed_review(self) -> Iterable[UUID]:
         for plan in self.plans.values():
             if plan.approval_date is None:
@@ -525,18 +543,6 @@ class PlanRepository(interfaces.PlanRepository):
             items=[plan for plan in self.plans.values() if plan.is_active]
         )
 
-    def count_active_plans(self) -> int:
-        return len([plan for plan in self.plans.values() if plan.is_active])
-
-    def count_active_public_plans(self) -> int:
-        return len(
-            [
-                plan
-                for plan in self.plans.values()
-                if (plan.is_active and plan.is_public_service)
-            ]
-        )
-
     def avg_timeframe_of_active_plans(self) -> Decimal:
         try:
             avg_timeframe = mean(
@@ -578,47 +584,10 @@ class PlanRepository(interfaces.PlanRepository):
             if plan.is_approved and not plan.expired:
                 yield plan
 
-    def all_plans_approved_active_and_not_expired(self) -> Iterator[Plan]:
-        for plan in self.plans.values():
-            if plan.is_approved and plan.is_active and not plan.expired:
-                yield plan
-
-    def all_productive_plans_approved_active_and_not_expired(self) -> Iterator[Plan]:
-        for plan in self.plans.values():
-            if (
-                not plan.is_public_service
-                and plan.is_active
-                and plan.is_approved
-                and not plan.expired
-            ):
-                yield plan
-
-    def all_public_plans_approved_active_and_not_expired(self) -> Iterator[Plan]:
-        for plan in self.plans.values():
-            if (
-                plan.is_public_service
-                and plan.is_active
-                and plan.is_approved
-                and not plan.expired
-            ):
-                yield plan
-
     def hide_plan(self, plan_id: UUID) -> None:
         plan = self.plans.get(plan_id)
         assert plan
         plan.hidden_by_user = True
-
-    def get_all_plans_for_company_descending(self, company_id: UUID) -> Iterator[Plan]:
-        plans = self.plans.values()
-        plans_ordered = sorted(plans, key=lambda x: x.plan_creation_date, reverse=True)
-        for plan in plans_ordered:
-            if str(plan.planner.id) == str(company_id):
-                yield plan
-
-    def get_all_active_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
-        for plan in self.plans.values():
-            if (str(plan.planner.id) == str(company_id)) and plan.is_active:
-                yield plan
 
     def _create_plan(
         self,
@@ -896,8 +865,10 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
                 yield plan
 
     def get_outbound_requests(self, requester_id: UUID) -> Iterator[Plan]:
-        plans_of_company = self.plan_repository.get_all_plans_for_company_descending(
-            requester_id
+        plans_of_company = (
+            self.plan_repository.get_all_plans()
+            .planned_by(requester_id)
+            .ordered_by_creation_date(ascending=False)
         )
         for plan in plans_of_company:
             if plan.requested_cooperation:

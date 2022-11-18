@@ -1,9 +1,10 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from decimal import Decimal
-from typing import Union
+from typing import List, Union
 from uuid import uuid4
 
-from arbeitszeit.entities import ProductionCosts
+from arbeitszeit.entities import Plan, ProductionCosts
+from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit_flask.database.repositories import PlanRepository
 from tests.datetime_service import FakeDatetimeService
 
@@ -28,25 +29,6 @@ class PlanRepositoryTests(FlaskTestCase):
         self.plan_generator = self.injector.get(PlanGenerator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.company_generator = self.injector.get(CompanyGenerator)
-
-    def test_active_plans_are_counted_correctly(self) -> None:
-        assert self.plan_repository.count_active_plans() == 0
-        self.plan_generator.create_plan(activation_date=datetime.min)
-        self.plan_generator.create_plan(activation_date=datetime.min)
-        assert self.plan_repository.count_active_plans() == 2
-
-    def test_active_public_plans_are_counted_correctly(self) -> None:
-        assert self.plan_repository.count_active_public_plans() == 0
-        self.plan_generator.create_plan(
-            activation_date=datetime.min, is_public_service=True
-        )
-        self.plan_generator.create_plan(
-            activation_date=datetime.min, is_public_service=True
-        )
-        self.plan_generator.create_plan(
-            activation_date=datetime.min, is_public_service=False
-        )
-        assert self.plan_repository.count_active_public_plans() == 2
 
     def test_avg_timeframe_of_active_plans_is_calculated_correctly(self) -> None:
         assert self.plan_repository.avg_timeframe_of_active_plans() == 0
@@ -114,51 +96,6 @@ class PlanRepositoryTests(FlaskTestCase):
         expected_plan = self.plan_generator.create_plan()
         assert expected_plan == self.plan_repository.get_plan_by_id(expected_plan.id)
 
-    def test_that_all_plans_for_a_company_are_returned(self) -> None:
-        company = self.company_generator.create_company_entity()
-        self.plan_generator.create_plan(planner=company, activation_date=None)
-        self.plan_generator.create_plan(planner=company, is_public_service=True)
-        self.plan_generator.create_plan(planner=company, is_available=False)
-        returned_plans = list(
-            self.plan_repository.get_all_plans_for_company_descending(
-                company_id=company.id
-            )
-        )
-        assert len(returned_plans) == 3
-
-    def test_that_all_plans_for_a_company_are_returned_in_descending_order(
-        self,
-    ) -> None:
-        company = self.company_generator.create_company_entity()
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
-        third = self.plan_generator.create_plan(planner=company)
-        self.datetime_service.freeze_time(
-            self.datetime_service.now() - timedelta(days=1)
-        )
-        second = self.plan_generator.create_plan(planner=company)
-        self.datetime_service.freeze_time(
-            self.datetime_service.now() - timedelta(days=9)
-        )
-        first = self.plan_generator.create_plan(planner=company)
-        self.datetime_service.freeze_time(datetime(2000, 1, 2))
-        returned_plans = list(
-            self.plan_repository.get_all_plans_for_company_descending(
-                company_id=company.id
-            )
-        )
-        assert returned_plans[0] == third
-        assert returned_plans[1] == second
-        assert returned_plans[2] == first
-
-    def test_that_all_active_plan_for_a_company_are_returned(self) -> None:
-        company = self.company_generator.create_company_entity()
-        self.plan_generator.create_plan(planner=company)
-        self.plan_generator.create_plan(planner=company)
-        returned_plans = list(
-            self.plan_repository.get_all_active_plans_for_company(company_id=company.id)
-        )
-        assert len(returned_plans) == 2
-
     def test_that_plan_gets_hidden(self) -> None:
         plan = self.plan_generator.create_plan()
         self.plan_repository.hide_plan(plan.id)
@@ -197,27 +134,6 @@ class PlanRepositoryTests(FlaskTestCase):
         plan_from_repo = self.plan_repository.get_plan_by_id(plan.id)
         assert plan_from_repo
         assert plan_from_repo.is_available == True
-
-    def test_that_all_productive_plans_approved_active_and_not_expired_returns_no_plans_with_empty_db(
-        self,
-    ) -> None:
-        assert not list(
-            self.plan_repository.all_productive_plans_approved_active_and_not_expired()
-        )
-
-    def test_all_public_plans_approved_active_and_not_expired_returns_no_plans_with_empty_db(
-        self,
-    ) -> None:
-        assert not list(
-            self.plan_repository.all_public_plans_approved_active_and_not_expired()
-        )
-
-    def test_all_plans_approved_active_and_not_expired_returns_no_plans_with_empty_db(
-        self,
-    ) -> None:
-        assert not list(
-            self.plan_repository.all_plans_approved_active_and_not_expired()
-        )
 
     def test_correct_name_and_description_returned(self) -> None:
         expected_name = "name 20220621"
@@ -260,6 +176,7 @@ class GetActivePlansTests(FlaskTestCase):
         self.plan_generator = self.injector.get(PlanGenerator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.company_generator = self.injector.get(CompanyGenerator)
+        self.approve_plan_use_case = self.injector.get(ApprovePlanUseCase)
 
     def test_active_plans_can_be_ordered_by_creation_date_in_descending_order(
         self,
@@ -271,13 +188,14 @@ class GetActivePlansTests(FlaskTestCase):
             self.datetime_service.now_minus_25_hours(),
             self.datetime_service.now_minus_one_day(),
         ]
-        plans = [
-            self.plan_generator.create_plan(activation_date=date)
-            for date in activation_dates
-        ]
+        plans: List[Plan] = list()
+        for timestamp in activation_dates:
+            self.datetime_service.freeze_time(timestamp)
+            plans.append(self.plan_generator.create_plan(activation_date=timestamp))
+        self.datetime_service.unfreeze_time()
         retrieved_plans = list(
             self.plan_repository.get_active_plans()
-            .order_by_creation_date(ascending=False)
+            .ordered_by_creation_date(ascending=False)
             .limit(3)
         )
         assert len(retrieved_plans) == 3
@@ -321,6 +239,29 @@ class GetActivePlansTests(FlaskTestCase):
         assert returned_plan
         assert returned_plan[0] == expected_plan
 
+    def test_that_plans_that_ordering_by_creation_date_works_even_when_plan_activation_was_in_reverse_order(
+        self,
+    ) -> None:
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        first_plan = self.plan_generator.create_plan(approved=False)
+        self.datetime_service.freeze_time(datetime(2000, 1, 2))
+        second_plan = self.plan_generator.create_plan(approved=False)
+        self.datetime_service.freeze_time(datetime(2000, 1, 3))
+        self.approve_plan_use_case.approve_plan(
+            request=ApprovePlanUseCase.Request(
+                plan=second_plan.id,
+            )
+        )
+        self.datetime_service.freeze_time(datetime(2000, 1, 4))
+        self.approve_plan_use_case.approve_plan(
+            request=ApprovePlanUseCase.Request(
+                plan=first_plan.id,
+            )
+        )
+        plans = list(self.plan_repository.get_all_plans().ordered_by_creation_date())
+        assert plans[0].id == first_plan.id
+        assert plans[1].id == second_plan.id
+
 
 class GetAllPlansWithoutCompletedReviewTests(FlaskTestCase):
     def setUp(self) -> None:
@@ -347,3 +288,53 @@ class GetAllPlansWithoutCompletedReviewTests(FlaskTestCase):
         self.assertFalse(
             list(self.plan_repository.get_all_plans_without_completed_review())
         )
+
+
+class GetAllPlans(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.company_generator = self.injector.get(CompanyGenerator)
+        self.plan_repository = self.injector.get(PlanRepository)
+        self.plan_generator = self.injector.get(PlanGenerator)
+        self.datetime_service = self.injector.get(FakeDatetimeService)
+
+    def test_that_without_any_plans_nothing_is_returned(self) -> None:
+        assert not list(self.plan_repository.get_all_plans())
+
+    def test_that_unapproved_plans_are_returned(self) -> None:
+        self.plan_generator.create_plan(approved=False)
+        assert list(self.plan_repository.get_all_plans())
+
+    def test_that_approved_plans_are_returned(self) -> None:
+        self.plan_generator.create_plan(approved=True)
+        assert list(self.plan_repository.get_all_plans())
+
+    def test_that_can_filter_unapproved_plans_from_results(self) -> None:
+        self.plan_generator.create_plan(approved=False)
+        assert not list(self.plan_repository.get_all_plans().that_are_approved())
+
+    def test_can_filter_public_plans(self) -> None:
+        self.plan_generator.create_plan(is_public_service=False)
+        assert not list(self.plan_repository.get_all_plans().that_are_public())
+        self.plan_generator.create_plan(is_public_service=True)
+        assert list(self.plan_repository.get_all_plans().that_are_public())
+
+    def test_can_filter_productive_plans(self) -> None:
+        self.plan_generator.create_plan(is_public_service=True)
+        assert not list(self.plan_repository.get_all_plans().that_are_productive())
+        self.plan_generator.create_plan(is_public_service=False)
+        assert list(self.plan_repository.get_all_plans().that_are_productive())
+
+    def test_can_count_all_plans(self) -> None:
+        self.plan_generator.create_plan()
+        assert len(self.plan_repository.get_all_plans()) == 1
+        self.plan_generator.create_plan()
+        self.plan_generator.create_plan()
+        assert len(self.plan_repository.get_all_plans()) == 3
+
+    def test_can_filter_by_planner(self) -> None:
+        planner = self.company_generator.create_company_entity()
+        self.plan_generator.create_plan()
+        assert not self.plan_repository.get_all_plans().planned_by(planner.id)
+        self.plan_generator.create_plan(planner=planner)
+        assert self.plan_repository.get_all_plans().planned_by(planner.id)
