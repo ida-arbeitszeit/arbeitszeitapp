@@ -109,6 +109,13 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
             lambda query: query.filter(models.Plan.id == str(id_))
         )
 
+    def without_completed_review(self) -> PlanQueryResult:
+        return self._with_modified_query(
+            lambda query: self.query.join(models.PlanReview).filter(
+                models.PlanReview.approval_date == None
+            )
+        )
+
     def _with_modified_query(
         self, modification: Callable[[Any], Any]
     ) -> PlanQueryResult:
@@ -732,14 +739,6 @@ class PlanRepository(repositories.PlanRepository):
             return None
         plan_orm = self._create_plan_from_draft(draft)
         return UUID(plan_orm.id)
-
-    def get_plans_without_completed_review(self) -> Iterable[UUID]:
-        return [
-            UUID(plan.id)
-            for plan in models.Plan.query.join(models.PlanReview).filter(
-                models.PlanReview.approval_date == None
-            )
-        ]
 
     def object_from_orm(self, plan: models.Plan) -> entities.Plan:
         production_costs = entities.ProductionCosts(

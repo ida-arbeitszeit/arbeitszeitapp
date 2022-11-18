@@ -256,31 +256,6 @@ class GetActivePlansTests(FlaskTestCase):
         assert plans[1].id == second_plan.id
 
 
-class GetAllPlansWithoutCompletedReviewTests(FlaskTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.plan_repository = self.injector.get(PlanRepository)
-        self.plan_generator = self.injector.get(PlanGenerator)
-
-    def test_cannot_find_any_plans_with_empty_db(self) -> None:
-        self.assertFalse(
-            list(self.plan_repository.get_plans_without_completed_review())
-        )
-
-    def test_return_at_least_one_plan_if_previously_a_plan_was_created_from_a_draft(
-        self,
-    ) -> None:
-        draft = self.plan_generator.draft_plan()
-        self.plan_repository.create_plan_from_draft(draft.id)
-        self.assertTrue(list(self.plan_repository.get_plans_without_completed_review()))
-
-    def test_return_no_plan_if_there_is_only_one_approved_plan_in_db(self) -> None:
-        self.plan_generator.create_plan(approved=True)
-        self.assertFalse(
-            list(self.plan_repository.get_plans_without_completed_review())
-        )
-
-
 class GetAllPlans(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
@@ -341,3 +316,13 @@ class GetAllPlans(FlaskTestCase):
     ) -> None:
         self.plan_generator.create_plan()
         assert not self.plan_repository.get_plans().with_id(uuid4())
+
+    def test_can_filter_results_for_unreviewed_plans(self) -> None:
+        self.plan_generator.create_plan(approved=True)
+        assert not self.plan_repository.get_plans().without_completed_review()
+
+    def test_filtering_unreviewed_plans_will_still_contain_unreviewed_plans(
+        self,
+    ) -> None:
+        self.plan_generator.create_plan(approved=False)
+        assert self.plan_repository.get_plans().without_completed_review()

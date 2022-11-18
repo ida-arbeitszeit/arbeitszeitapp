@@ -70,6 +70,9 @@ class PlanResult(QueryResult[Plan], Protocol):
     def with_id(self, id_: UUID) -> PlanResult:
         ...
 
+    def without_completed_review(self) -> PlanResult:
+        ...
+
 
 class MemberResult(QueryResult[Member], Protocol):
     def working_at_company(self, company: UUID) -> MemberResult:
@@ -192,10 +195,6 @@ class PlanRepository(ABC):
 
     @abstractmethod
     def get_planner_id(self, plan_id: UUID) -> Optional[UUID]:
-        pass
-
-    @abstractmethod
-    def get_plans_without_completed_review(self) -> Iterable[UUID]:
         pass
 
     @abstractmethod

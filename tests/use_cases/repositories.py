@@ -113,6 +113,9 @@ class PlanResult(QueryResultImpl[Plan]):
     def with_id(self, id_: UUID) -> PlanResult:
         return self._filtered_by(lambda plan: plan.id == id_)
 
+    def without_completed_review(self) -> PlanResult:
+        return self._filtered_by(lambda plan: plan.approval_date is None)
+
     def _filtered_by(self, key: Callable[[Plan], bool]) -> PlanResult:
         return type(self)(
             items=lambda: filter(key, self.items()),
@@ -535,11 +538,6 @@ class PlanRepository(interfaces.PlanRepository):
         return PlanResult(
             items=lambda: self.plans.values(), member_repository=self.member_repository
         )
-
-    def get_plans_without_completed_review(self) -> Iterable[UUID]:
-        for plan in self.plans.values():
-            if plan.approval_date is None:
-                yield plan.id
 
     def create_plan_from_draft(self, draft_id: UUID) -> Optional[UUID]:
         draft = self.draft_repository.get_by_id(draft_id)
