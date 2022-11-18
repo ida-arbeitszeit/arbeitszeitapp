@@ -531,12 +531,12 @@ class PlanRepository(interfaces.PlanRepository):
         self.draft_repository = draft_repository
         self.member_repository = member_repository
 
-    def get_all_plans(self) -> PlanResult:
+    def get_plans(self) -> PlanResult:
         return PlanResult(
             items=lambda: self.plans.values(), member_repository=self.member_repository
         )
 
-    def get_all_plans_without_completed_review(self) -> Iterable[UUID]:
+    def get_plans_without_completed_review(self) -> Iterable[UUID]:
         for plan in self.plans.values():
             if plan.approval_date is None:
                 yield plan.id
@@ -913,7 +913,7 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
 
     def get_outbound_requests(self, requester_id: UUID) -> Iterator[Plan]:
         plans_of_company = (
-            self.plan_repository.get_all_plans()
+            self.plan_repository.get_plans()
             .planned_by(requester_id)
             .ordered_by_creation_date(ascending=False)
         )
@@ -923,7 +923,7 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
 
     def get_cooperating_plans(self, plan_id: UUID) -> List[Plan]:
         cooperating_plans = []
-        plan = self.plan_repository.get_all_plans().with_id(plan_id).first()
+        plan = self.plan_repository.get_plans().with_id(plan_id).first()
         assert plan
         cooperation_id = plan.cooperation
         if cooperation_id:
@@ -935,22 +935,22 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
             return [plan]
 
     def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
-        plan = self.plan_repository.get_all_plans().with_id(plan_id).first()
+        plan = self.plan_repository.get_plans().with_id(plan_id).first()
         assert plan
         plan.cooperation = cooperation_id
 
     def remove_plan_from_cooperation(self, plan_id: UUID) -> None:
-        plan = self.plan_repository.get_all_plans().with_id(plan_id).first()
+        plan = self.plan_repository.get_plans().with_id(plan_id).first()
         assert plan
         plan.cooperation = None
 
     def set_requested_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
-        plan = self.plan_repository.get_all_plans().with_id(plan_id).first()
+        plan = self.plan_repository.get_plans().with_id(plan_id).first()
         assert plan
         plan.requested_cooperation = cooperation_id
 
     def set_requested_cooperation_to_none(self, plan_id: UUID) -> None:
-        plan = self.plan_repository.get_all_plans().with_id(plan_id).first()
+        plan = self.plan_repository.get_plans().with_id(plan_id).first()
         assert plan
         plan.requested_cooperation = None
 

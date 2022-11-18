@@ -77,9 +77,7 @@ class PayConsumerProduct:
         return PayConsumerProductResponse(rejection_reason=None)
 
     def _get_active_plan(self, request: PayConsumerProductRequest) -> Plan:
-        plan = (
-            self.plan_repository.get_all_plans().with_id(request.get_plan_id()).first()
-        )
+        plan = self.plan_repository.get_plans().with_id(request.get_plan_id()).first()
         if plan is None:
             raise self.PlanNotFound("Plan could not be found")
         if not plan.is_active:

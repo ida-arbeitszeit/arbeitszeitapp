@@ -31,12 +31,12 @@ class ListPlansWithPendingReviewUseCase:
         return self.Response(
             plans=[
                 self._get_info_for_plan(plan)
-                for plan in self.plan_repository.get_all_plans_without_completed_review()
+                for plan in self.plan_repository.get_plans_without_completed_review()
             ]
         )
 
     def _get_info_for_plan(self, plan: UUID) -> Plan:
-        plan_model = self.plan_repository.get_all_plans().with_id(plan).first()
+        plan_model = self.plan_repository.get_plans().with_id(plan).first()
         assert plan_model
         return self.Plan(
             id=plan,

@@ -28,7 +28,7 @@ class ApprovePlanUseCase:
     transaction_repository: TransactionRepository
 
     def approve_plan(self, request: Request) -> Response:
-        plan = self.plan_repository.get_all_plans().with_id(request.plan).first()
+        plan = self.plan_repository.get_plans().with_id(request.plan).first()
         assert plan
         if plan.is_approved:
             return self.Response(is_approved=False)

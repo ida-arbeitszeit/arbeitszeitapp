@@ -92,7 +92,7 @@ class PlanRepositoryTests(FlaskTestCase):
     def test_that_plan_gets_hidden(self) -> None:
         plan = self.plan_generator.create_plan()
         self.plan_repository.hide_plan(plan.id)
-        plan_from_repo = self.plan_repository.get_all_plans().with_id(plan.id).first()
+        plan_from_repo = self.plan_repository.get_plans().with_id(plan.id).first()
         assert plan_from_repo
         assert plan_from_repo.hidden_by_user
 
@@ -100,7 +100,7 @@ class PlanRepositoryTests(FlaskTestCase):
         plan = self.plan_generator.create_plan(activation_date=datetime.min)
         assert plan.active_days is None
         self.plan_repository.set_active_days(plan, 3)
-        plan_from_repo = self.plan_repository.get_all_plans().with_id(plan.id).first()
+        plan_from_repo = self.plan_repository.get_plans().with_id(plan.id).first()
         assert plan_from_repo
         assert plan_from_repo.active_days == 3
 
@@ -108,7 +108,7 @@ class PlanRepositoryTests(FlaskTestCase):
         plan = self.plan_generator.create_plan(activation_date=datetime.min)
         assert plan.payout_count == 0
         self.plan_repository.increase_payout_count_by_one(plan)
-        plan_from_repo = self.plan_repository.get_all_plans().with_id(plan.id).first()
+        plan_from_repo = self.plan_repository.get_plans().with_id(plan.id).first()
         assert plan_from_repo
         assert plan_from_repo.payout_count == 1
 
@@ -116,7 +116,7 @@ class PlanRepositoryTests(FlaskTestCase):
         plan = self.plan_generator.create_plan()
         assert plan.is_available == True
         self.plan_repository.toggle_product_availability(plan)
-        plan_from_repo = self.plan_repository.get_all_plans().with_id(plan.id).first()
+        plan_from_repo = self.plan_repository.get_plans().with_id(plan.id).first()
         assert plan_from_repo
         assert plan_from_repo.is_available == False
 
@@ -124,7 +124,7 @@ class PlanRepositoryTests(FlaskTestCase):
         plan = self.plan_generator.create_plan(is_available=False)
         assert plan.is_available == False
         self.plan_repository.toggle_product_availability(plan)
-        plan_from_repo = self.plan_repository.get_all_plans().with_id(plan.id).first()
+        plan_from_repo = self.plan_repository.get_plans().with_id(plan.id).first()
         assert plan_from_repo
         assert plan_from_repo.is_available == True
 
@@ -159,7 +159,7 @@ class PlanRepositoryTests(FlaskTestCase):
         draft = self.plan_generator.draft_plan()
         plan_id = self.plan_repository.create_plan_from_draft(draft.id)
         assert plan_id
-        assert self.plan_repository.get_all_plans().with_id(plan_id)
+        assert self.plan_repository.get_plans().with_id(plan_id)
 
 
 class GetActivePlansTests(FlaskTestCase):
@@ -251,7 +251,7 @@ class GetActivePlansTests(FlaskTestCase):
                 plan=first_plan.id,
             )
         )
-        plans = list(self.plan_repository.get_all_plans().ordered_by_creation_date())
+        plans = list(self.plan_repository.get_plans().ordered_by_creation_date())
         assert plans[0].id == first_plan.id
         assert plans[1].id == second_plan.id
 
@@ -264,7 +264,7 @@ class GetAllPlansWithoutCompletedReviewTests(FlaskTestCase):
 
     def test_cannot_find_any_plans_with_empty_db(self) -> None:
         self.assertFalse(
-            list(self.plan_repository.get_all_plans_without_completed_review())
+            list(self.plan_repository.get_plans_without_completed_review())
         )
 
     def test_return_at_least_one_plan_if_previously_a_plan_was_created_from_a_draft(
@@ -272,14 +272,12 @@ class GetAllPlansWithoutCompletedReviewTests(FlaskTestCase):
     ) -> None:
         draft = self.plan_generator.draft_plan()
         self.plan_repository.create_plan_from_draft(draft.id)
-        self.assertTrue(
-            list(self.plan_repository.get_all_plans_without_completed_review())
-        )
+        self.assertTrue(list(self.plan_repository.get_plans_without_completed_review()))
 
     def test_return_no_plan_if_there_is_only_one_approved_plan_in_db(self) -> None:
         self.plan_generator.create_plan(approved=True)
         self.assertFalse(
-            list(self.plan_repository.get_all_plans_without_completed_review())
+            list(self.plan_repository.get_plans_without_completed_review())
         )
 
 
@@ -292,49 +290,49 @@ class GetAllPlans(FlaskTestCase):
         self.datetime_service = self.injector.get(FakeDatetimeService)
 
     def test_that_without_any_plans_nothing_is_returned(self) -> None:
-        assert not list(self.plan_repository.get_all_plans())
+        assert not list(self.plan_repository.get_plans())
 
     def test_that_unapproved_plans_are_returned(self) -> None:
         self.plan_generator.create_plan(approved=False)
-        assert list(self.plan_repository.get_all_plans())
+        assert list(self.plan_repository.get_plans())
 
     def test_that_approved_plans_are_returned(self) -> None:
         self.plan_generator.create_plan(approved=True)
-        assert list(self.plan_repository.get_all_plans())
+        assert list(self.plan_repository.get_plans())
 
     def test_that_can_filter_unapproved_plans_from_results(self) -> None:
         self.plan_generator.create_plan(approved=False)
-        assert not list(self.plan_repository.get_all_plans().that_are_approved())
+        assert not list(self.plan_repository.get_plans().that_are_approved())
 
     def test_can_filter_public_plans(self) -> None:
         self.plan_generator.create_plan(is_public_service=False)
-        assert not list(self.plan_repository.get_all_plans().that_are_public())
+        assert not list(self.plan_repository.get_plans().that_are_public())
         self.plan_generator.create_plan(is_public_service=True)
-        assert list(self.plan_repository.get_all_plans().that_are_public())
+        assert list(self.plan_repository.get_plans().that_are_public())
 
     def test_can_filter_productive_plans(self) -> None:
         self.plan_generator.create_plan(is_public_service=True)
-        assert not list(self.plan_repository.get_all_plans().that_are_productive())
+        assert not list(self.plan_repository.get_plans().that_are_productive())
         self.plan_generator.create_plan(is_public_service=False)
-        assert list(self.plan_repository.get_all_plans().that_are_productive())
+        assert list(self.plan_repository.get_plans().that_are_productive())
 
     def test_can_count_all_plans(self) -> None:
         self.plan_generator.create_plan()
-        assert len(self.plan_repository.get_all_plans()) == 1
+        assert len(self.plan_repository.get_plans()) == 1
         self.plan_generator.create_plan()
         self.plan_generator.create_plan()
-        assert len(self.plan_repository.get_all_plans()) == 3
+        assert len(self.plan_repository.get_plans()) == 3
 
     def test_can_filter_by_planner(self) -> None:
         planner = self.company_generator.create_company_entity()
         self.plan_generator.create_plan()
-        assert not self.plan_repository.get_all_plans().planned_by(planner.id)
+        assert not self.plan_repository.get_plans().planned_by(planner.id)
         self.plan_generator.create_plan(planner=planner)
-        assert self.plan_repository.get_all_plans().planned_by(planner.id)
+        assert self.plan_repository.get_plans().planned_by(planner.id)
 
     def test_can_get_plan_by_its_id(self) -> None:
         expected_plan = self.plan_generator.create_plan()
-        assert expected_plan in self.plan_repository.get_all_plans().with_id(
+        assert expected_plan in self.plan_repository.get_plans().with_id(
             expected_plan.id
         )
 
@@ -342,4 +340,4 @@ class GetAllPlans(FlaskTestCase):
         self,
     ) -> None:
         self.plan_generator.create_plan()
-        assert not self.plan_repository.get_all_plans().with_id(uuid4())
+        assert not self.plan_repository.get_plans().with_id(uuid4())

@@ -720,7 +720,7 @@ class PlanRepository(repositories.PlanRepository):
     db: SQLAlchemy
     draft_repository: PlanDraftRepository
 
-    def get_all_plans(self) -> PlanQueryResult:
+    def get_plans(self) -> PlanQueryResult:
         return PlanQueryResult(
             query=models.Plan.query,
             mapper=self.object_from_orm,
@@ -733,7 +733,7 @@ class PlanRepository(repositories.PlanRepository):
         plan_orm = self._create_plan_from_draft(draft)
         return UUID(plan_orm.id)
 
-    def get_all_plans_without_completed_review(self) -> Iterable[UUID]:
+    def get_plans_without_completed_review(self) -> Iterable[UUID]:
         return [
             UUID(plan.id)
             for plan in models.Plan.query.join(models.PlanReview).filter(
@@ -1257,7 +1257,7 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
 
     def get_outbound_requests(self, requester_id: UUID) -> Iterator[entities.Plan]:
         plans_of_company = (
-            self.plan_repository.get_all_plans()
+            self.plan_repository.get_plans()
             .planned_by(requester_id)
             .ordered_by_creation_date(ascending=False)
         )
@@ -1271,7 +1271,7 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
             return []
         coop_orm = plan_orm.coop
         if coop_orm is None:
-            return list(self.plan_repository.get_all_plans().with_id(plan_id))
+            return list(self.plan_repository.get_plans().with_id(plan_id))
         else:
             return [
                 self.plan_repository.object_from_orm(plan)

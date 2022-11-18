@@ -53,7 +53,7 @@ class EndCooperation:
 
     def _validate_request(self, request: EndCooperationRequest) -> None:
         requester = self.company_repository.get_by_id(request.requester_id)
-        plan = self.plan_repository.get_all_plans().with_id(request.plan_id).first()
+        plan = self.plan_repository.get_plans().with_id(request.plan_id).first()
         cooperation = self.cooperation_repository.get_by_id(request.cooperation_id)
         if plan is None:
             raise EndCooperationResponse.RejectionReason.plan_not_found

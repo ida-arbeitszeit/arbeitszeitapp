@@ -79,7 +79,7 @@ class GetCompanySummary:
         if company is None:
             return None
         plans = (
-            self.plan_repository.get_all_plans()
+            self.plan_repository.get_plans()
             .planned_by(company.id)
             .ordered_by_creation_date(ascending=False)
         )

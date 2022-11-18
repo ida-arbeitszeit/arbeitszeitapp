@@ -195,11 +195,11 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def get_all_plans_without_completed_review(self) -> Iterable[UUID]:
+    def get_plans_without_completed_review(self) -> Iterable[UUID]:
         pass
 
     @abstractmethod
-    def get_all_plans(self) -> PlanResult:
+    def get_plans(self) -> PlanResult:
         pass
 
 

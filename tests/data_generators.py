@@ -287,7 +287,7 @@ class PlanGenerator:
         assert file_plan_response.is_plan_successfully_filed
         if not approved:
             plan = (
-                self.plan_repository.get_all_plans()
+                self.plan_repository.get_plans()
                 .with_id(file_plan_response.plan_id)
                 .first()
             )
@@ -298,9 +298,7 @@ class PlanGenerator:
         )
         assert response.is_approved
         plan = (
-            self.plan_repository.get_all_plans()
-            .with_id(file_plan_response.plan_id)
-            .first()
+            self.plan_repository.get_plans().with_id(file_plan_response.plan_id).first()
         )
         assert plan
         assert plan.is_approved
