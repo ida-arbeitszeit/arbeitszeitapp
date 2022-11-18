@@ -21,6 +21,7 @@ from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import LoginForm
 from arbeitszeit_flask.template import AnonymousUserTemplateRenderer
 from arbeitszeit_flask.token import FlaskTokenService
+from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views.signup_accountant_view import SignupAccountantView
 from arbeitszeit_flask.views.signup_company_view import SignupCompanyView
 from arbeitszeit_flask.views.signup_member_view import SignupMemberView
@@ -87,16 +88,11 @@ def signup_member(view: SignupMemberView):
 @auth.route("/member/confirm/<token>")
 @commit_changes
 @with_injection()
-def confirm_email_member(
-    token, member_repository: MemberRepository, use_case: ConfirmMemberUseCase
-):
-    def redirect_invalid_request():
-        flash("Der Bestätigungslink ist ungültig oder ist abgelaufen.")
-        return redirect(url_for("auth.unconfirmed_member"))
-
+def confirm_email_member(token: str, use_case: ConfirmMemberUseCase) -> Response:
     response = use_case.confirm_member(request=use_case.Request(token=token))
     if not response.is_confirmed:
-        return redirect_invalid_request()
+        flash("Der Bestätigungslink ist ungültig oder ist abgelaufen.")
+        return redirect(url_for("auth.unconfirmed_member"))
     return redirect(url_for("auth.login_member"))
 
 
