@@ -117,8 +117,10 @@ class PackageFilter:
         # 0.7'. mccabe 0.6.1 and 0.7 seem to work fine with flake8. So
         # to avoid pip complaining about dependency conflicts we
         # filter mccabe and let pip decide which version to use. There
-        # is a similar situation with docutils and sphinx.
-        return package_name not in ["mccabe", "docutils"]
+        # is a similar situation with docutils and sphinx.  Since we
+        # use a custom flask-profiler package we need to exclude it
+        # from constraints.txt
+        return package_name not in ["mccabe", "docutils", "flask-profiler"]
 
 
 def parse_arguments():

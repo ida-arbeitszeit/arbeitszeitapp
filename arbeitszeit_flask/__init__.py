@@ -74,7 +74,6 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
     initialize_migrations(app=app, db=db)
     mail.init_app(app)
     babel.init_app(app)
-    initialize_flask_profiler(app)
 
     # Setup template filter
     app.template_filter()(RealtimeDatetimeService().format_datetime)
@@ -117,6 +116,10 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
         if app.config["DEBUG_DETAILS"] == True:
             show_profile_info(app)
             show_sql_queries(app)
+
+        # The profiler needs to be initialized last because all the
+        # routes to monitor need to present in the app at that point
+        initialize_flask_profiler(app)
 
         return app
 
