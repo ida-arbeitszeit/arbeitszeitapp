@@ -36,7 +36,7 @@ class ListPlansWithPendingReviewUseCase:
         )
 
     def _get_info_for_plan(self, plan: UUID) -> Plan:
-        plan_model = self.plan_repository.get_plan_by_id(plan)
+        plan_model = self.plan_repository.get_all_plans().with_id(plan).first()
         assert plan_model
         return self.Plan(
             id=plan,

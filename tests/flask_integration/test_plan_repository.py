@@ -89,17 +89,10 @@ class PlanRepositoryTests(FlaskTestCase):
         self.plan_repository.set_plan_as_expired(plan)
         assert plan not in list(self.plan_repository.get_active_plans())
 
-    def test_get_plan_by_id_with_unkown_id_results_in_none(self) -> None:
-        assert self.plan_repository.get_plan_by_id(uuid4()) is None
-
-    def test_that_existing_plan_can_be_retrieved_by_id(self) -> None:
-        expected_plan = self.plan_generator.create_plan()
-        assert expected_plan == self.plan_repository.get_plan_by_id(expected_plan.id)
-
     def test_that_plan_gets_hidden(self) -> None:
         plan = self.plan_generator.create_plan()
         self.plan_repository.hide_plan(plan.id)
-        plan_from_repo = self.plan_repository.get_plan_by_id(plan.id)
+        plan_from_repo = self.plan_repository.get_all_plans().with_id(plan.id).first()
         assert plan_from_repo
         assert plan_from_repo.hidden_by_user
 
@@ -107,7 +100,7 @@ class PlanRepositoryTests(FlaskTestCase):
         plan = self.plan_generator.create_plan(activation_date=datetime.min)
         assert plan.active_days is None
         self.plan_repository.set_active_days(plan, 3)
-        plan_from_repo = self.plan_repository.get_plan_by_id(plan.id)
+        plan_from_repo = self.plan_repository.get_all_plans().with_id(plan.id).first()
         assert plan_from_repo
         assert plan_from_repo.active_days == 3
 
@@ -115,7 +108,7 @@ class PlanRepositoryTests(FlaskTestCase):
         plan = self.plan_generator.create_plan(activation_date=datetime.min)
         assert plan.payout_count == 0
         self.plan_repository.increase_payout_count_by_one(plan)
-        plan_from_repo = self.plan_repository.get_plan_by_id(plan.id)
+        plan_from_repo = self.plan_repository.get_all_plans().with_id(plan.id).first()
         assert plan_from_repo
         assert plan_from_repo.payout_count == 1
 
@@ -123,7 +116,7 @@ class PlanRepositoryTests(FlaskTestCase):
         plan = self.plan_generator.create_plan()
         assert plan.is_available == True
         self.plan_repository.toggle_product_availability(plan)
-        plan_from_repo = self.plan_repository.get_plan_by_id(plan.id)
+        plan_from_repo = self.plan_repository.get_all_plans().with_id(plan.id).first()
         assert plan_from_repo
         assert plan_from_repo.is_available == False
 
@@ -131,7 +124,7 @@ class PlanRepositoryTests(FlaskTestCase):
         plan = self.plan_generator.create_plan(is_available=False)
         assert plan.is_available == False
         self.plan_repository.toggle_product_availability(plan)
-        plan_from_repo = self.plan_repository.get_plan_by_id(plan.id)
+        plan_from_repo = self.plan_repository.get_all_plans().with_id(plan.id).first()
         assert plan_from_repo
         assert plan_from_repo.is_available == True
 
@@ -166,7 +159,7 @@ class PlanRepositoryTests(FlaskTestCase):
         draft = self.plan_generator.draft_plan()
         plan_id = self.plan_repository.create_plan_from_draft(draft.id)
         assert plan_id
-        assert self.plan_repository.get_plan_by_id(plan_id) is not None
+        assert self.plan_repository.get_all_plans().with_id(plan_id)
 
 
 class GetActivePlansTests(FlaskTestCase):
@@ -338,3 +331,15 @@ class GetAllPlans(FlaskTestCase):
         assert not self.plan_repository.get_all_plans().planned_by(planner.id)
         self.plan_generator.create_plan(planner=planner)
         assert self.plan_repository.get_all_plans().planned_by(planner.id)
+
+    def test_can_get_plan_by_its_id(self) -> None:
+        expected_plan = self.plan_generator.create_plan()
+        assert expected_plan in self.plan_repository.get_all_plans().with_id(
+            expected_plan.id
+        )
+
+    def test_nothing_is_returned_if_plan_with_specified_uuid_is_not_present(
+        self,
+    ) -> None:
+        self.plan_generator.create_plan()
+        assert not self.plan_repository.get_all_plans().with_id(uuid4())

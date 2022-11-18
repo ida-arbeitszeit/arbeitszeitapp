@@ -67,6 +67,9 @@ class PlanResult(QueryResult[Plan], Protocol):
     def planned_by(self, company: UUID) -> PlanResult:
         ...
 
+    def with_id(self, id_: UUID) -> PlanResult:
+        ...
+
 
 class MemberResult(QueryResult[Member], Protocol):
     def working_at_company(self, company: UUID) -> MemberResult:
@@ -144,10 +147,6 @@ class PlanRepository(ABC):
 
     @abstractmethod
     def increase_payout_count_by_one(self, plan: Plan) -> None:
-        pass
-
-    @abstractmethod
-    def get_plan_by_id(self, id: UUID) -> Optional[Plan]:
         pass
 
     @abstractmethod

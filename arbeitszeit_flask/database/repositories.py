@@ -104,6 +104,11 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
             lambda query: query.filter(models.Plan.planner == str(company))
         )
 
+    def with_id(self, id_: UUID) -> PlanQueryResult:
+        return self._with_modified_query(
+            lambda query: query.filter(models.Plan.id == str(id_))
+        )
+
     def _with_modified_query(
         self, modification: Callable[[Any], Any]
     ) -> PlanQueryResult:
@@ -773,13 +778,6 @@ class PlanRepository(repositories.PlanRepository):
     def object_to_orm(self, plan: entities.Plan) -> models.Plan:
         return models.Plan.query.get(str(plan.id))
 
-    def get_plan_by_id(self, id: UUID) -> Optional[entities.Plan]:
-        plan_orm = models.Plan.query.filter_by(id=str(id)).first()
-        if plan_orm is None:
-            return None
-        else:
-            return self.object_from_orm(plan_orm)
-
     def _create_plan_from_draft(
         self,
         plan: entities.PlanDraft,
@@ -1273,11 +1271,7 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
             return []
         coop_orm = plan_orm.coop
         if coop_orm is None:
-            plan = self.plan_repository.get_plan_by_id(plan_id)
-            if plan is None:
-                return []
-            return [plan]
-
+            return list(self.plan_repository.get_all_plans().with_id(plan_id))
         else:
             return [
                 self.plan_repository.object_from_orm(plan)

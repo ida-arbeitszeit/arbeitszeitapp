@@ -73,7 +73,7 @@ class PayMeansOfProduction:
         )
 
     def _validate_plan(self, request: PayMeansOfProductionRequest) -> Plan:
-        plan = self.plan_repository.get_plan_by_id(request.plan)
+        plan = self.plan_repository.get_all_plans().with_id(request.plan).first()
         if plan is None:
             raise PayMeansOfProductionResponse.RejectionReason.plan_not_found
         if not plan.is_active:
