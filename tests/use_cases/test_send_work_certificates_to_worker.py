@@ -13,10 +13,10 @@ from .repositories import AccountRepository, MemberRepository, TransactionReposi
 class UseCaseTester(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.company_worker_repository = self.injector.get(MemberRepository)
         self.send_work_certificates_to_worker = self.injector.get(
             SendWorkCertificatesToWorker
         )
+        self.member_repository = self.injector.get(MemberRepository)
         self.account_repository = self.injector.get(AccountRepository)
         self.transaction_repository = self.injector.get(TransactionRepository)
 
@@ -25,7 +25,7 @@ class UseCaseTester(BaseTestCase):
     ) -> None:
         company = self.company_generator.create_company_entity()
         worker1 = self.member_generator.create_member()
-        self.company_worker_repository.add_worker_to_company(company.id, worker1)
+        self.member_repository.add_worker_to_company(company.id, worker1)
         worker2 = self.member_generator.create_member()
         amount_to_transfer = Decimal(50)
 
@@ -41,7 +41,7 @@ class UseCaseTester(BaseTestCase):
     def test_that_correct_transfer_does_not_get_rejected(self) -> None:
         company = self.company_generator.create_company_entity()
         worker = self.member_generator.create_member()
-        self.company_worker_repository.add_worker_to_company(company.id, worker)
+        self.member_repository.add_worker_to_company(company.id, worker)
         amount_to_transfer = Decimal(50)
         response = self.send_work_certificates_to_worker(
             SendWorkCertificatesToWorkerRequest(company.id, worker, amount_to_transfer)
@@ -53,7 +53,7 @@ class UseCaseTester(BaseTestCase):
     ) -> None:
         company = self.company_generator.create_company_entity()
         worker = self.member_generator.create_member_entity()
-        self.company_worker_repository.add_worker_to_company(company.id, worker.id)
+        self.member_repository.add_worker_to_company(company.id, worker.id)
         amount_to_transfer = Decimal(50)
         self.send_work_certificates_to_worker(
             SendWorkCertificatesToWorkerRequest(
@@ -72,7 +72,7 @@ class UseCaseTester(BaseTestCase):
     def test_that_after_transfer_one_transaction_is_added(self) -> None:
         company = self.company_generator.create_company_entity()
         worker = self.member_generator.create_member()
-        self.company_worker_repository.add_worker_to_company(company.id, worker)
+        self.member_repository.add_worker_to_company(company.id, worker)
         amount_to_transfer = Decimal(50)
         self.send_work_certificates_to_worker(
             SendWorkCertificatesToWorkerRequest(company.id, worker, amount_to_transfer)
@@ -82,7 +82,7 @@ class UseCaseTester(BaseTestCase):
     def test_that_after_transfer_correct_transaction_is_added(self) -> None:
         company = self.company_generator.create_company_entity()
         worker = self.member_generator.create_member_entity()
-        self.company_worker_repository.add_worker_to_company(company.id, worker.id)
+        self.member_repository.add_worker_to_company(company.id, worker.id)
         amount_to_transfer = Decimal(50)
         self.send_work_certificates_to_worker(
             SendWorkCertificatesToWorkerRequest(
