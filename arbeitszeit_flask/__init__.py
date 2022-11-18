@@ -114,9 +114,12 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
         app.register_blueprint(accountant.blueprint.main_accountant)
 
         if app.config["DEBUG_DETAILS"] == True:
-            initialize_flask_profiler(app)
             show_profile_info(app)
             show_sql_queries(app)
+
+        # The profiler needs to be initialized last because all the
+        # routes to monitor need to present in the app at that point
+        initialize_flask_profiler(app)
 
         return app
 

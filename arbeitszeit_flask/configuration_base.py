@@ -14,3 +14,7 @@ AUTO_MIGRATE = False
 # control thresholds
 ALLOWED_OVERDRAW_MEMBER = "0"
 ACCEPTABLE_RELATIVE_ACCOUNT_DEVIATION = "33"
+
+FLASK_PROFILER = {
+    "enabled": False,
+}
