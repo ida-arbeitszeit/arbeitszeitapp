@@ -70,6 +70,17 @@ class MemberResult(QueryResult[Member], Protocol):
         ...
 
 
+class PurchaseResult(QueryResult[Purchase], Protocol):
+    def ordered_by_creation_date(self, *, ascending: bool = ...) -> PurchaseResult:
+        ...
+
+    def conducted_by_company(self, company: UUID) -> PurchaseResult:
+        ...
+
+    def conducted_by_member(self, member: UUID) -> PurchaseResult:
+        ...
+
+
 class CompanyWorkerRepository(Protocol):
     def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
         ...
@@ -103,13 +114,7 @@ class PurchaseRepository(ABC):
         pass
 
     @abstractmethod
-    def get_purchases_descending_by_date(
-        self, user: Union[Member, Company]
-    ) -> Iterator[Purchase]:
-        pass
-
-    @abstractmethod
-    def get_purchases_of_company(self, company: UUID) -> Iterator[Purchase]:
+    def get_purchases(self) -> PurchaseResult:
         pass
 
 

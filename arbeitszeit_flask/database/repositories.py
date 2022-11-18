@@ -112,6 +112,31 @@ class MemberQueryResult(FlaskQueryResult[entities.Member]):
         )
 
 
+class PurchaseQueryResult(FlaskQueryResult[entities.Purchase]):
+    def ordered_by_creation_date(
+        self, *, ascending: bool = True
+    ) -> PurchaseQueryResult:
+        ordering = models.Purchase.purchase_date
+        if not ascending:
+            ordering = ordering.desc()
+        return type(self)(
+            mapper=self.mapper,
+            query=self.query.order_by(ordering),
+        )
+
+    def conducted_by_company(self, company: UUID) -> PurchaseQueryResult:
+        return type(self)(
+            mapper=self.mapper,
+            query=self.query.filter(models.Purchase.company == str(company)),
+        )
+
+    def conducted_by_member(self, member: UUID) -> PurchaseQueryResult:
+        return type(self)(
+            mapper=self.mapper,
+            query=self.query.filter(models.Purchase.member == str(member)),
+        )
+
+
 @inject
 @dataclass
 class CompanyWorkerRepository:
@@ -670,23 +695,10 @@ class PurchaseRepository(repositories.PurchaseRepository):
         self.db.session.add(purchase_orm)
         return purchase
 
-    def get_purchases_descending_by_date(
-        self, user: Union[entities.Member, entities.Company]
-    ) -> Iterator[entities.Purchase]:
-        user_orm: Union[Member, Company]
-        if isinstance(user, entities.Company):
-            user_orm = self.company_repository.object_to_orm(user)
-        else:
-            user_orm = self.member_repository.object_to_orm(user)
-        return (
-            self.object_from_orm(purchase)
-            for purchase in user_orm.purchases.order_by(desc("purchase_date")).all()
-        )
-
-    def get_purchases_of_company(self, company: UUID) -> Iterator[entities.Purchase]:
-        return (
-            self.object_from_orm(purchase)
-            for purchase in Purchase.query.filter_by(company=str(company))
+    def get_purchases(self) -> PurchaseQueryResult:
+        return PurchaseQueryResult(
+            mapper=self.object_from_orm,
+            query=models.Purchase.query,
         )
 
 

@@ -83,7 +83,9 @@ class GetCompanySummary:
             .planned_by(company.id)
             .ordered_by_creation_date(ascending=False)
         )
-        purchases = self.purchase_repository.get_purchases_of_company(company_id)
+        purchases = self.purchase_repository.get_purchases().conducted_by_company(
+            company_id
+        )
         expectations = self._get_expectations(company)
         account_balances = self._get_account_balances(company)
         return GetCompanySummarySuccess(

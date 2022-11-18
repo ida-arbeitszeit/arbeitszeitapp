@@ -124,11 +124,40 @@ class MemberResult(QueryResultImpl[Member]):
         )
 
 
+class PurchaseResult(QueryResultImpl[Purchase]):
+    def ordered_by_creation_date(self, ascending: bool = True) -> PurchaseResult:
+        return type(self)(
+            items=lambda: sorted(
+                list(self.items()),
+                key=lambda purchase: purchase.purchase_date,
+                reverse=not ascending,
+            ),
+            member_repository=self.member_repository,
+        )
+
+    def conducted_by_company(self, company: UUID) -> PurchaseResult:
+        return type(self)(
+            items=lambda: filter(
+                lambda purchase: purchase.buyer == company, self.items()
+            ),
+            member_repository=self.member_repository,
+        )
+
+    def conducted_by_member(self, member: UUID) -> PurchaseResult:
+        return type(self)(
+            items=lambda: filter(
+                lambda purchase: purchase.buyer == member, self.items()
+            ),
+            member_repository=self.member_repository,
+        )
+
+
 @singleton
 class PurchaseRepository(interfaces.PurchaseRepository):
     @inject
-    def __init__(self):
-        self.purchases = []
+    def __init__(self, member_repository: MemberRepository):
+        self.purchases: List[Purchase] = []
+        self.member_repository = member_repository
 
     def create_purchase_by_company(
         self,
@@ -171,20 +200,11 @@ class PurchaseRepository(interfaces.PurchaseRepository):
         self.purchases.append(purchase)
         return purchase
 
-    def get_purchases_descending_by_date(self, user: Union[Member, Company]):
-        # order purchases by purchase_date
-        self.purchases = sorted(
-            self.purchases, key=lambda x: x.purchase_date, reverse=True
+    def get_purchases(self) -> PurchaseResult:
+        return PurchaseResult(
+            items=lambda: self.purchases,
+            member_repository=self.member_repository,
         )
-
-        for purchase in self.purchases:
-            if purchase.buyer is user.id:
-                yield purchase
-
-    def get_purchases_of_company(self, company: UUID) -> Iterator[Purchase]:
-        for purchase in self.purchases:
-            if purchase.buyer is company:
-                yield purchase
 
 
 @singleton
