@@ -79,6 +79,14 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
         )
 
 
+class MemberQueryResult(FlaskQueryResult[entities.Member]):
+    def working_at_company(self, company: UUID) -> MemberQueryResult:
+        return type(self)(
+            query=self.query.filter(models.Member.workplaces.any(id=str(company))),
+            mapper=self.mapper,
+        )
+
+
 @inject
 @dataclass
 class CompanyWorkerRepository:
@@ -93,15 +101,6 @@ class CompanyWorkerRepository:
         if company is None:
             return
         member.workplaces.append(company)
-
-    def get_company_workers(self, company: UUID) -> List[entities.Member]:
-        company_orm = models.Company.query.get(str(company))
-        if company_orm is None:
-            return []
-        return [
-            self.member_repository.object_from_orm(member)
-            for member in company_orm.workers
-        ]
 
     def get_member_workplaces(self, member: UUID) -> List[entities.Company]:
         member_orm = Member.query.filter_by(id=str(member)).first()
@@ -249,8 +248,11 @@ class MemberRepository(repositories.MemberRepository):
     def count_registered_members(self) -> int:
         return int(self.db.session.query(func.count(Member.id)).one()[0])
 
-    def get_all_members(self) -> Iterator[entities.Member]:
-        return (self.object_from_orm(member) for member in Member.query.all())
+    def get_all_members(self) -> MemberQueryResult:
+        return MemberQueryResult(
+            mapper=self.object_from_orm,
+            query=Member.query,
+        )
 
     def _get_or_create_user(self, email: str, password: str) -> models.User:
         return self.db.session.query(models.User).filter(

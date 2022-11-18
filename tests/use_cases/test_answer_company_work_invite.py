@@ -7,7 +7,7 @@ from arbeitszeit.use_cases import (
     AnswerCompanyWorkInviteResponse,
     InviteWorkerToCompanyUseCase,
 )
-from tests.use_cases.repositories import CompanyWorkerRepository, WorkerInviteRepository
+from tests.use_cases.repositories import MemberRepository, WorkerInviteRepository
 
 from .base_test_case import BaseTestCase
 
@@ -18,7 +18,7 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
         self.answer_company_work_invite = self.injector.get(AnswerCompanyWorkInvite)
         self.invite_worker_to_company = self.injector.get(InviteWorkerToCompanyUseCase)
         self.invite_repository = self.injector.get(WorkerInviteRepository)
-        self.company_worker_repository = self.injector.get(CompanyWorkerRepository)
+        self.member_repository = self.injector.get(MemberRepository)
         self.company = self.company_generator.create_company_entity()
         self.member = self.member_generator.create_member()
 
@@ -75,10 +75,14 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
                 invite_id=invite_id,
             )
         )
-        repository = self.injector.get(CompanyWorkerRepository)  # type: ignore
         self.assertIn(
             self.member,
-            {worker.id for worker in repository.get_company_workers(self.company.id)},
+            {
+                worker.id
+                for worker in self.member_repository.get_all_members().working_at_company(
+                    self.company.id
+                )
+            },
         )
         self.assertTrue(response.is_success)
 
@@ -104,7 +108,7 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
             self.member,
             {
                 worker.id
-                for worker in self.company_worker_repository.get_company_workers(
+                for worker in self.member_repository.get_all_members().working_at_company(
                     self.company.id
                 )
             },

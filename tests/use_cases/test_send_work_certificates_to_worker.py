@@ -7,17 +7,13 @@ from arbeitszeit.use_cases import (
 )
 
 from .base_test_case import BaseTestCase
-from .repositories import (
-    AccountRepository,
-    CompanyWorkerRepository,
-    TransactionRepository,
-)
+from .repositories import AccountRepository, MemberRepository, TransactionRepository
 
 
 class UseCaseTester(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.company_worker_repository = self.injector.get(CompanyWorkerRepository)
+        self.company_worker_repository = self.injector.get(MemberRepository)
         self.send_work_certificates_to_worker = self.injector.get(
             SendWorkCertificatesToWorker
         )

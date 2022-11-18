@@ -7,11 +7,7 @@ from uuid import UUID
 
 from injector import inject
 
-from arbeitszeit.repositories import (
-    CompanyRepository,
-    CompanyWorkerRepository,
-    PlanRepository,
-)
+from arbeitszeit.repositories import CompanyRepository, MemberRepository, PlanRepository
 
 
 @inject
@@ -39,7 +35,7 @@ class GetCompanyDashboardUseCase:
         three_latest_plans: List[LatestPlansDetails]
 
     company_repository: CompanyRepository
-    company_worker_repository: CompanyWorkerRepository
+    member_repository: MemberRepository
     plan_repository: PlanRepository
 
     def get_dashboard(self, company_id: UUID) -> Response:
@@ -50,7 +46,13 @@ class GetCompanyDashboardUseCase:
             id=company.id, name=company.name, email=company.email
         )
         has_workers = bool(
-            len(list(self.company_worker_repository.get_company_workers(company_id)))
+            len(
+                list(
+                    self.member_repository.get_all_members().working_at_company(
+                        company_id
+                    )
+                )
+            )
         )
         three_latest_plans = self._get_three_latest_plans()
         return self.Response(
