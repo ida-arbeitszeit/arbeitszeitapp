@@ -65,11 +65,13 @@ class PlanResult(QueryResult[Plan], Protocol):
         ...
 
 
-class CompanyWorkerRepository(Protocol):
-    def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
+class MemberResult(QueryResult[Member], Protocol):
+    def working_at_company(self, company: UUID) -> MemberResult:
         ...
 
-    def get_company_workers(self, company: UUID) -> Iterable[Member]:
+
+class CompanyWorkerRepository(Protocol):
+    def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
         ...
 
     def get_member_workplaces(self, member: UUID) -> Iterable[Company]:
@@ -269,7 +271,7 @@ class MemberRepository(ABC):
         pass
 
     @abstractmethod
-    def get_all_members(self) -> Iterator[Member]:
+    def get_all_members(self) -> MemberResult:
         pass
 
     @abstractmethod

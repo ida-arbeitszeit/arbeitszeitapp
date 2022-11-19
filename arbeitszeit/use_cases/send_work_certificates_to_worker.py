@@ -9,7 +9,6 @@ from injector import inject
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.repositories import (
     CompanyRepository,
-    CompanyWorkerRepository,
     MemberRepository,
     TransactionRepository,
 )
@@ -37,7 +36,6 @@ class SendWorkCertificatesToWorkerResponse:
 @inject
 @dataclass
 class SendWorkCertificatesToWorker:
-    company_worker_repository: CompanyWorkerRepository
     company_repository: CompanyRepository
     member_repository: MemberRepository
     transaction_repository: TransactionRepository
@@ -50,7 +48,9 @@ class SendWorkCertificatesToWorker:
         worker = self.member_repository.get_by_id(use_case_request.worker_id)
         assert company
         assert worker
-        company_workers = self.company_worker_repository.get_company_workers(company.id)
+        company_workers = self.member_repository.get_all_members().working_at_company(
+            company.id
+        )
         if worker not in company_workers:
             return SendWorkCertificatesToWorkerResponse(
                 rejection_reason=SendWorkCertificatesToWorkerResponse.RejectionReason.worker_not_at_company

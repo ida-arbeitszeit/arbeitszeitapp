@@ -6,14 +6,14 @@ from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompany
 from tests.data_generators import CompanyGenerator, MemberGenerator, PlanGenerator
 
 from .dependency_injection import get_dependency_injector
-from .repositories import CompanyWorkerRepository
+from .repositories import MemberRepository
 
 
 class UseCaseTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.get_member_dashboard = self.injector.get(GetMemberDashboard)
-        self.company_worker_repository = self.injector.get(CompanyWorkerRepository)
+        self.member_repository = self.injector.get(MemberRepository)
         self.member_generator = self.injector.get(MemberGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.plan_generator = self.injector.get(PlanGenerator)
@@ -24,9 +24,7 @@ class UseCaseTests(TestCase):
         workplace = self.company_generator.create_company_entity(
             email="companyname@mail.com"
         )
-        self.company_worker_repository.add_worker_to_company(
-            workplace.id, self.member.id
-        )
+        self.member_repository.add_worker_to_company(workplace.id, self.member.id)
 
         member_info = self.get_member_dashboard(self.member.id)
         self.assertEqual(
@@ -37,9 +35,7 @@ class UseCaseTests(TestCase):
         workplace = self.company_generator.create_company_entity(
             name="SomeCompanyNameXY"
         )
-        self.company_worker_repository.add_worker_to_company(
-            workplace.id, self.member.id
-        )
+        self.member_repository.add_worker_to_company(workplace.id, self.member.id)
 
         member_info = self.get_member_dashboard(self.member.id)
         self.assertEqual(member_info.workplaces[0].workplace_name, "SomeCompanyNameXY")

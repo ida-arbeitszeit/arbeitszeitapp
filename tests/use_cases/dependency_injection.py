@@ -7,7 +7,6 @@ from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.token import InvitationTokenValidator, TokenService
 from arbeitszeit.use_cases import GetCompanySummary
 from arbeitszeit.use_cases.edit_draft import EditDraftUseCase
-from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCase
 from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
@@ -46,13 +45,6 @@ class InMemoryModule(Module):
         self, language_repository: repositories.FakeLanguageRepository
     ) -> interfaces.LanguageRepository:
         return language_repository
-
-    @singleton
-    @provider
-    def provide_accoutant_repository_test_impl(
-        self,
-    ) -> repositories.AccountantRepositoryTestImpl:
-        return repositories.AccountantRepositoryTestImpl()
 
     @provider
     def provide_accountant_repository(
@@ -98,7 +90,7 @@ class InMemoryModule(Module):
 
     @provider
     def provide_company_worker_repo(
-        self, repo: repositories.CompanyWorkerRepository
+        self, repo: repositories.MemberRepository
     ) -> interfaces.CompanyWorkerRepository:
         return repo
 
@@ -205,19 +197,6 @@ class InMemoryModule(Module):
     @provider
     def provide_control_thresholds_test_impl(self) -> ControlThresholdsTestImpl:
         return ControlThresholdsTestImpl()
-
-    @provider
-    def provide_get_company_dashboard_use_case(
-        self,
-        company_repository: interfaces.CompanyRepository,
-        company_worker_repository: interfaces.CompanyWorkerRepository,
-        plan_repository: interfaces.PlanRepository,
-    ) -> GetCompanyDashboardUseCase:
-        return GetCompanyDashboardUseCase(
-            company_repository=company_repository,
-            company_worker_repository=company_worker_repository,
-            plan_repository=plan_repository,
-        )
 
     @provider
     def provide_consumer_product_transaction_factory(

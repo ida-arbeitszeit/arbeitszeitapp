@@ -4,6 +4,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
+from itertools import islice
 from statistics import StatisticsError, mean
 from typing import (
     Callable,
@@ -48,30 +49,40 @@ T = TypeVar("T")
 
 
 class QueryResultImpl(Generic[T]):
-    def __init__(self, items: List[T]) -> None:
+    def __init__(
+        self, items: Callable[[], Iterable[T]], *, member_repository: MemberRepository
+    ) -> None:
         self.items = items
+        self.member_repository = member_repository
 
     def limit(self, n: int) -> QueryResultImpl[T]:
-        return type(self)(items=self.items[:n])
+        return type(self)(
+            items=lambda: islice(self.items(), n),
+            member_repository=self.member_repository,
+        )
 
     def offset(self, n: int) -> QueryResultImpl[T]:
-        return type(self)(items=self.items[n:])
+        return type(self)(
+            items=lambda: islice(self.items(), n, None),
+            member_repository=self.member_repository,
+        )
 
     def __iter__(self) -> Iterator[T]:
-        return iter(self.items)
+        return iter(self.items())
 
     def __len__(self) -> int:
-        return len(self.items)
+        return len(list(self.items()))
 
 
 class PlanResult(QueryResultImpl[Plan]):
     def ordered_by_creation_date(self, ascending: bool = True) -> PlanResult:
         return type(self)(
-            items=sorted(
-                self.items,
+            items=lambda: sorted(
+                list(self.items()),
                 key=lambda plan: plan.plan_creation_date,
                 reverse=not ascending,
-            )
+            ),
+            member_repository=self.member_repository,
         )
 
     def with_id_containing(self, query: str) -> PlanResult:
@@ -93,7 +104,24 @@ class PlanResult(QueryResultImpl[Plan]):
         return self._filtered_by(lambda plan: plan.planner.id == company)
 
     def _filtered_by(self, key: Callable[[Plan], bool]) -> PlanResult:
-        return type(self)(items=[item for item in self.items if key(item)])
+        return type(self)(
+            items=lambda: filter(key, self.items()),
+            member_repository=self.member_repository,
+        )
+
+
+class MemberResult(QueryResultImpl[Member]):
+    def working_at_company(self, company: UUID) -> MemberResult:
+        return self._filtered_by(
+            lambda member: member.id
+            in self.member_repository.company_workers.get(company, []),
+        )
+
+    def _filtered_by(self, key: Callable[[Member], bool]) -> MemberResult:
+        return type(self)(
+            items=lambda: filter(key, self.items()),
+            member_repository=self.member_repository,
+        )
 
 
 @singleton
@@ -213,34 +241,6 @@ class TransactionRepository(interfaces.TransactionRepository):
 
 
 @singleton
-class CompanyWorkerRepository:
-    @inject
-    def __init__(
-        self, company_repository: CompanyRepository, member_repository: MemberRepository
-    ) -> None:
-        self.company_repository = company_repository
-        self.member_repository = member_repository
-        self.company_workers: Dict[UUID, Set[UUID]] = defaultdict(lambda: set())
-
-    def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
-        self.company_workers[company].add(worker)
-
-    def get_company_workers(self, company: UUID) -> Iterable[Member]:
-        for member_id in self.company_workers[company]:
-            member = self.member_repository.get_by_id(member_id)
-            if member is not None:
-                yield member
-
-    def get_member_workplaces(self, member: UUID) -> Iterable[Company]:
-        for company_id, workers in self.company_workers.items():
-            if member not in workers:
-                continue
-            company = self.company_repository.get_by_id(company_id)
-            if company is not None:
-                yield company
-
-
-@singleton
 class AccountRepository(interfaces.AccountRepository):
     @inject
     def __init__(self, transaction_repository: TransactionRepository):
@@ -325,10 +325,14 @@ class AccountOwnerRepository(interfaces.AccountOwnerRepository):
 @singleton
 class MemberRepository(interfaces.MemberRepository):
     @inject
-    def __init__(self, datetime_service: DatetimeService):
+    def __init__(
+        self, datetime_service: DatetimeService, company_repository: CompanyRepository
+    ):
         self.members: Dict[UUID, Member] = {}
         self.passwords: Dict[UUID, str] = {}
         self.datetime_service = datetime_service
+        self.company_workers: Dict[UUID, Set[UUID]] = defaultdict(lambda: set())
+        self.company_repository = company_repository
 
     def create_member(
         self,
@@ -383,14 +387,25 @@ class MemberRepository(interfaces.MemberRepository):
     def get_by_email(self, email: str) -> Optional[Member]:
         return self._get_member_by_email(email)
 
-    def get_all_members(self) -> Iterator[Member]:
-        yield from self.members.values()
+    def get_all_members(self) -> MemberResult:
+        return MemberResult(items=lambda: self.members.values(), member_repository=self)
 
     def _get_member_by_email(self, email: str) -> Optional[Member]:
         for member in self.members.values():
             if member.email == email:
                 return member
         return None
+
+    def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
+        self.company_workers[company].add(worker)
+
+    def get_member_workplaces(self, member: UUID) -> Iterable[Company]:
+        for company_id, workers in self.company_workers.items():
+            if member not in workers:
+                continue
+            company = self.company_repository.get_by_id(company_id)
+            if company is not None:
+                yield company
 
 
 @singleton
@@ -479,13 +494,17 @@ class PlanRepository(interfaces.PlanRepository):
         self,
         company_repository: CompanyRepository,
         draft_repository: PlanDraftRepository,
+        member_repository: MemberRepository,
     ) -> None:
         self.plans: Dict[UUID, Plan] = {}
         self.company_repository = company_repository
         self.draft_repository = draft_repository
+        self.member_repository = member_repository
 
     def get_all_plans(self) -> PlanResult:
-        return PlanResult(items=list(self.plans.values()))
+        return PlanResult(
+            items=lambda: self.plans.values(), member_repository=self.member_repository
+        )
 
     def get_all_plans_without_completed_review(self) -> Iterable[UUID]:
         for plan in self.plans.values():
@@ -540,7 +559,8 @@ class PlanRepository(interfaces.PlanRepository):
 
     def get_active_plans(self) -> PlanResult:
         return PlanResult(
-            items=[plan for plan in self.plans.values() if plan.is_active]
+            items=lambda: filter(lambda plan: plan.is_active, self.plans.values()),
+            member_repository=self.member_repository,
         )
 
     def avg_timeframe_of_active_plans(self) -> Decimal:
@@ -921,17 +941,21 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
                 yield plan
 
 
+@singleton
 class AccountantRepositoryTestImpl:
     @dataclass
     class _AccountantRecord:
         email: str
         name: str
         password: str
+        id: UUID
 
-    def __init__(self) -> None:
+    @inject
+    def __init__(self, member_repository: MemberRepository) -> None:
         self.accountants: Dict[
             UUID, AccountantRepositoryTestImpl._AccountantRecord
         ] = dict()
+        self.member_repository = member_repository
 
     def create_accountant(self, email: str, name: str, password: str) -> UUID:
         id = uuid4()
@@ -939,8 +963,10 @@ class AccountantRepositoryTestImpl:
             email=email,
             name=name,
             password=password,
+            id=id,
         )
         self.accountants[id] = record
+        print(self.accountants)
         return id
 
     def has_accountant_with_email(self, email: str) -> bool:
@@ -963,12 +989,11 @@ class AccountantRepositoryTestImpl:
 
     def get_all_accountants(self) -> QueryResultImpl[Accountant]:
         return QueryResultImpl(
-            items=[
-                Accountant(
-                    email_address=record.email, name=record.name, id=accountant_id
-                )
-                for accountant_id, record in self.accountants.items()
-            ]
+            items=lambda: (
+                Accountant(email_address=record.email, name=record.name, id=record.id)
+                for record in self.accountants.values()
+            ),
+            member_repository=self.member_repository,
         )
 
 

@@ -118,28 +118,37 @@ def test_get_by_id_returns_none_when_member_does_not_exist(
     assert member is None
 
 
-@injection_test
-def test_that_all_members_can_be_retrieved(
-    repository: MemberRepository,
-    member_generator: MemberGenerator,
-):
-    expected_member1 = member_generator.create_member_entity()
-    expected_member2 = member_generator.create_member_entity()
-    all_members = list(repository.get_all_members())
-    assert expected_member1 in all_members
-    assert expected_member2 in all_members
+class GetAllMembersTests(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.member_generator = self.injector.get(MemberGenerator)
+        self.company_generator = self.injector.get(CompanyGenerator)
+        self.repository = self.injector.get(MemberRepository)
 
+    def test_that_all_members_can_be_retrieved(self) -> None:
+        expected_member1 = self.member_generator.create_member_entity()
+        expected_member2 = self.member_generator.create_member_entity()
+        all_members = list(self.repository.get_all_members())
+        assert expected_member1 in all_members
+        assert expected_member2 in all_members
 
-@injection_test
-def test_that_number_of_returned_members_is_equal_to_number_of_created_members(
-    repository: MemberRepository,
-    member_generator: MemberGenerator,
-):
-    expected_number_of_members = 3
-    for i in range(expected_number_of_members):
-        member_generator.create_member_entity()
-    member_count = len(list(repository.get_all_members()))
-    assert member_count == expected_number_of_members
+    def test_that_number_of_returned_members_is_equal_to_number_of_created_members(
+        self,
+    ) -> None:
+        expected_number_of_members = 3
+        for i in range(expected_number_of_members):
+            self.member_generator.create_member_entity()
+        member_count = len(self.repository.get_all_members())
+        assert member_count == expected_number_of_members
+
+    def test_can_filter_members_by_their_workplace(self) -> None:
+        member = self.member_generator.create_member()
+        self.member_generator.create_member()
+        company = self.company_generator.create_company_entity(workers=[member])
+        assert len(self.repository.get_all_members()) == 2
+        assert (
+            len(self.repository.get_all_members().working_at_company(company.id)) == 1
+        )
 
 
 class ValidateCredentialTests(FlaskTestCase):

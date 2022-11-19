@@ -5,7 +5,7 @@ from uuid import UUID
 from injector import inject
 
 from arbeitszeit.entities import Member
-from arbeitszeit.repositories import CompanyRepository, CompanyWorkerRepository
+from arbeitszeit.repositories import CompanyRepository, MemberRepository
 
 
 @dataclass
@@ -29,13 +29,15 @@ class ListWorkersRequest:
 @dataclass
 class ListWorkers:
     company_repository: CompanyRepository
-    company_worker_repository: CompanyWorkerRepository
+    member_repository: MemberRepository
 
     def __call__(self, request: ListWorkersRequest) -> ListWorkersResponse:
         company = self.company_repository.get_by_id(request.company)
         if company is None:
             return ListWorkersResponse(workers=[])
-        members = self.company_worker_repository.get_company_workers(company.id)
+        members = self.member_repository.get_all_members().working_at_company(
+            company.id
+        )
         return ListWorkersResponse(
             workers=[self._create_worker_response_model(member) for member in members]
         )
