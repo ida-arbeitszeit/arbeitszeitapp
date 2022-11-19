@@ -26,7 +26,7 @@ from arbeitszeit_flask.views import (
 )
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
-from arbeitszeit_web.get_plan_summary_member import GetPlanSummarySuccessPresenter
+from arbeitszeit_web.get_plan_summary_member import GetPlanSummaryMemberSuccessPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.presenters.get_member_account_presenter import (
     GetMemberAccountPresenter,
@@ -171,7 +171,7 @@ def plan_summary(
     plan_id: UUID,
     get_plan_summary_member: use_cases.GetPlanSummaryMember,
     template_renderer: UserTemplateRenderer,
-    presenter: GetPlanSummarySuccessPresenter,
+    presenter: GetPlanSummaryMemberSuccessPresenter,
     http_404_view: Http404View,
 ) -> Response:
     use_case_response = get_plan_summary_member(plan_id)

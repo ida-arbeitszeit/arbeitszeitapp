@@ -14,7 +14,7 @@ from .translator import Translator
 
 
 @dataclass
-class GetPlanSummaryViewModel:
+class GetPlanSummaryMemberViewModel:
     summary: PlanSummaryWeb
     pay_product_url: str
 
@@ -24,15 +24,15 @@ class GetPlanSummaryViewModel:
 
 @inject
 @dataclass
-class GetPlanSummarySuccessPresenter:
+class GetPlanSummaryMemberSuccessPresenter:
     trans: Translator
     plan_summary_service: PlanSummaryFormatter
     url_index: UrlIndex
 
     def present(
         self, response: GetPlanSummaryMember.Success
-    ) -> GetPlanSummaryViewModel:
-        return GetPlanSummaryViewModel(
+    ) -> GetPlanSummaryMemberViewModel:
+        return GetPlanSummaryMemberViewModel(
             summary=self.plan_summary_service.format_plan_summary(
                 response.plan_summary
             ),
