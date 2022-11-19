@@ -54,7 +54,7 @@ class GetMemberDashboard:
     worker_invite_repository: WorkerInviteRepository
 
     def __call__(self, member: UUID) -> Response:
-        _member = self.member_repository.get_by_id(member)
+        _member = self.member_repository.get_members().with_id(member).first()
         assert _member is not None
         workplaces = [
             self.Workplace(

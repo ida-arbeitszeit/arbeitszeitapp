@@ -90,7 +90,9 @@ class MemberGenerator:
                 )
             )
             assert not response.is_rejected
-            member = self.member_repository.get_by_email(email)
+            member = (
+                self.member_repository.get_members().with_email_address(email).first()
+            )
             assert member
             return member
         if account is None:
@@ -107,7 +109,7 @@ class MemberGenerator:
             registered_on=registered_on,
         )
         self.member_repository.confirm_member(member.id, confirmed_on=registered_on)
-        member = self.member_repository.get_by_id(member.id)
+        member = self.member_repository.get_members().with_id(member.id).first()
         assert member
         return member
 

@@ -79,7 +79,7 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
             self.member,
             {
                 worker.id
-                for worker in self.member_repository.get_all_members().working_at_company(
+                for worker in self.member_repository.get_members().working_at_company(
                     self.company.id
                 )
             },
@@ -108,7 +108,7 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
             self.member,
             {
                 worker.id
-                for worker in self.member_repository.get_all_members().working_at_company(
+                for worker in self.member_repository.get_members().working_at_company(
                     self.company.id
                 )
             },

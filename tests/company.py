@@ -16,7 +16,7 @@ class CompanyManager:
 
     def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
         assert self.company_repository.get_by_id(company)
-        assert self.member_repository.get_by_id(worker)
+        assert self.member_repository.get_members().with_id(worker)
         self.worker_repository.add_worker_to_company(
             company,
             worker,

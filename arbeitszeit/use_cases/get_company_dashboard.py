@@ -46,7 +46,7 @@ class GetCompanyDashboardUseCase:
             id=company.id, name=company.name, email=company.email
         )
         has_workers = bool(
-            self.member_repository.get_all_members().working_at_company(company_id)
+            self.member_repository.get_members().working_at_company(company_id)
         )
         three_latest_plans = self._get_three_latest_plans()
         return self.Response(

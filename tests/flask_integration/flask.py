@@ -64,7 +64,9 @@ class ViewTestCase(FlaskTestCase):
         assert response.status_code < 400
         if confirm_member:
             self._confirm_member(email)
-        updated_member = self.member_repository.get_by_email(email)
+        updated_member = (
+            self.member_repository.get_members().with_email_address(email).first()
+        )
         assert updated_member
         return updated_member
 

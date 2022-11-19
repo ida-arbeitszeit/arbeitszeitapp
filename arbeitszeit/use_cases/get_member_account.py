@@ -48,7 +48,7 @@ class GetMemberAccount:
     account_repository: AccountRepository
 
     def __call__(self, member_id: UUID) -> GetMemberAccountResponse:
-        member = self.member_repository.get_by_id(member_id)
+        member = self.member_repository.get_members().with_id(member_id).first()
         assert member
         transaction_info = [
             self._create_info(member, transaction)
