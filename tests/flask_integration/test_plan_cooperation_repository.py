@@ -113,35 +113,6 @@ def test_correct_inbound_requests_are_returned(
 
 
 @injection_test
-def test_correct_outbound_requests_are_returned(
-    repository: PlanCooperationRepository,
-    plan_generator: PlanGenerator,
-    cooperation_repository: CooperationRepository,
-    company_generator: CompanyGenerator,
-):
-    planner = company_generator.create_company_entity()
-    coop = cooperation_repository.create_cooperation(
-        creation_timestamp=datetime.now(),
-        name="test name",
-        definition="test description",
-        coordinator=company_generator.create_company_entity(),
-    )
-    requesting_plan1 = plan_generator.create_plan(
-        activation_date=datetime.min, requested_cooperation=coop, planner=planner
-    )
-    requesting_plan2 = plan_generator.create_plan(
-        activation_date=datetime.min, requested_cooperation=coop, planner=planner
-    )
-    plan_generator.create_plan(
-        activation_date=datetime.min, requested_cooperation=None, planner=planner
-    )
-    outbound_requests = list(repository.get_outbound_requests(planner.id))
-    assert len(outbound_requests) == 2
-    assert plan_in_list(requesting_plan1, outbound_requests)
-    assert plan_in_list(requesting_plan2, outbound_requests)
-
-
-@injection_test
 def test_plans_in_cooperation_correctly_counted(
     repository: PlanCooperationRepository,
     plan_generator: PlanGenerator,
