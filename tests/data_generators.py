@@ -286,14 +286,20 @@ class PlanGenerator:
         assert file_plan_response.plan_id
         assert file_plan_response.is_plan_successfully_filed
         if not approved:
-            plan = self.plan_repository.get_plan_by_id(file_plan_response.plan_id)
+            plan = (
+                self.plan_repository.get_plans()
+                .with_id(file_plan_response.plan_id)
+                .first()
+            )
             assert plan
             return plan
         response = self.approve_plan_use_case.approve_plan(
             ApprovePlanUseCase.Request(plan=file_plan_response.plan_id)
         )
         assert response.is_approved
-        plan = self.plan_repository.get_plan_by_id(file_plan_response.plan_id)
+        plan = (
+            self.plan_repository.get_plans().with_id(file_plan_response.plan_id).first()
+        )
         assert plan
         assert plan.is_approved
         if activation_date:
@@ -371,15 +377,20 @@ class PurchaseGenerator:
     plan_generator: PlanGenerator
     datetime_service: FakeDatetimeService
     purchase_repository: PurchaseRepository
+    company_generator: CompanyGenerator
+    member_generator: MemberGenerator
 
     def create_purchase_by_company(
         self,
-        buyer: Company,
+        *,
+        buyer: Optional[Company] = None,
         purchase_date=None,
         amount=1,
         price_per_unit: Decimal = None,
         plan: Plan = None,
     ) -> Purchase:
+        if buyer is None:
+            buyer = self.company_generator.create_company_entity()
         if purchase_date is None:
             purchase_date = self.datetime_service.now_minus_one_day()
         if price_per_unit is None:
@@ -397,12 +408,14 @@ class PurchaseGenerator:
 
     def create_purchase_by_member(
         self,
-        buyer: Member,
+        buyer: Optional[Member] = None,
         purchase_date=None,
         amount=1,
         price_per_unit: Decimal = None,
         plan: Plan = None,
     ) -> Purchase:
+        if buyer is None:
+            buyer = self.member_generator.create_member_entity()
         if purchase_date is None:
             purchase_date = self.datetime_service.now_minus_one_day()
         if price_per_unit is None:

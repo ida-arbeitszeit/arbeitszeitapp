@@ -23,7 +23,7 @@ class GetPlanSummaryCompany:
     plan_summary_service: PlanSummaryService
 
     def get_plan_summary_for_company(self, plan_id: UUID, company_id: UUID) -> Response:
-        plan = self.plan_repository.get_plan_by_id(plan_id)
+        plan = self.plan_repository.get_plans().with_id(plan_id).first()
         company = self.company_repository.get_by_id(company_id)
         if plan is None:
             return self.Response(

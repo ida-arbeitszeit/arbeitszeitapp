@@ -48,12 +48,12 @@ def test_possible_to_set_and_unset_requested_cooperation_attribute(
     plan = plan_generator.create_plan()
 
     repository.set_requested_cooperation(plan.id, cooperation.id)
-    plan_from_orm = plan_repository.get_plan_by_id(plan.id)
+    plan_from_orm = plan_repository.get_plans().with_id(plan.id).first()
     assert plan_from_orm
     assert plan_from_orm.requested_cooperation
 
     repository.set_requested_cooperation_to_none(plan.id)
-    plan_from_orm = plan_repository.get_plan_by_id(plan.id)
+    plan_from_orm = plan_repository.get_plans().with_id(plan.id).first()
     assert plan_from_orm
     assert plan_from_orm.requested_cooperation is None
 
@@ -76,12 +76,12 @@ def test_possible_to_add_and_to_remove_plan_to_cooperation(
     plan = plan_generator.create_plan()
 
     repository.add_plan_to_cooperation(plan.id, cooperation.id)
-    plan_from_orm = plan_repository.get_plan_by_id(plan.id)
+    plan_from_orm = plan_repository.get_plans().with_id(plan.id).first()
     assert plan_from_orm
     assert plan_from_orm.cooperation == cooperation.id
 
     repository.remove_plan_from_cooperation(plan.id)
-    plan_from_orm = plan_repository.get_plan_by_id(plan.id)
+    plan_from_orm = plan_repository.get_plans().with_id(plan.id).first()
     assert plan_from_orm
     assert plan_from_orm.cooperation is None
 

@@ -38,6 +38,9 @@ class QueryResult(Protocol, Generic[T]):
     def offset(self, n: int) -> QueryResult[T]:
         ...
 
+    def first(self) -> Optional[T]:
+        ...
+
     def __len__(self) -> int:
         ...
 
@@ -64,9 +67,28 @@ class PlanResult(QueryResult[Plan], Protocol):
     def planned_by(self, company: UUID) -> PlanResult:
         ...
 
+    def with_id(self, id_: UUID) -> PlanResult:
+        ...
+
+    def without_completed_review(self) -> PlanResult:
+        ...
+
 
 class MemberResult(QueryResult[Member], Protocol):
     def working_at_company(self, company: UUID) -> MemberResult:
+        ...
+
+
+class PurchaseResult(QueryResult[Purchase], Protocol):
+    def ordered_by_creation_date(self, *, ascending: bool = ...) -> PurchaseResult:
+        ...
+
+    def where_buyer_is_company(
+        self, *, company: Optional[UUID] = ...
+    ) -> PurchaseResult:
+        ...
+
+    def where_buyer_is_member(self, *, member: Optional[UUID] = ...) -> PurchaseResult:
         ...
 
 
@@ -103,13 +125,7 @@ class PurchaseRepository(ABC):
         pass
 
     @abstractmethod
-    def get_purchases_descending_by_date(
-        self, user: Union[Member, Company]
-    ) -> Iterator[Purchase]:
-        pass
-
-    @abstractmethod
-    def get_purchases_of_company(self, company: UUID) -> Iterator[Purchase]:
+    def get_purchases(self) -> PurchaseResult:
         pass
 
 
@@ -136,10 +152,6 @@ class PlanRepository(ABC):
 
     @abstractmethod
     def increase_payout_count_by_one(self, plan: Plan) -> None:
-        pass
-
-    @abstractmethod
-    def get_plan_by_id(self, id: UUID) -> Optional[Plan]:
         pass
 
     @abstractmethod
@@ -188,11 +200,7 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def get_all_plans_without_completed_review(self) -> Iterable[UUID]:
-        pass
-
-    @abstractmethod
-    def get_all_plans(self) -> PlanResult:
+    def get_plans(self) -> PlanResult:
         pass
 
 

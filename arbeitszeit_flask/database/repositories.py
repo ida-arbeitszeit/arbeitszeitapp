@@ -18,7 +18,7 @@ from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
 from injector import inject
-from sqlalchemy import and_, desc, func
+from sqlalchemy import and_, func
 from sqlalchemy.sql.expression import Select
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -51,6 +51,12 @@ class FlaskQueryResult(Generic[T]):
 
     def offset(self, n: int) -> FlaskQueryResult[T]:
         return type(self)(query=self.query.offset(n), mapper=self.mapper)
+
+    def first(self) -> Optional[T]:
+        element = self.query.first()
+        if element is None:
+            return None
+        return self.mapper(element)
 
     def __iter__(self) -> Iterator[T]:
         return (self.mapper(item) for item in self.query)
@@ -98,6 +104,18 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
             lambda query: query.filter(models.Plan.planner == str(company))
         )
 
+    def with_id(self, id_: UUID) -> PlanQueryResult:
+        return self._with_modified_query(
+            lambda query: query.filter(models.Plan.id == str(id_))
+        )
+
+    def without_completed_review(self) -> PlanQueryResult:
+        return self._with_modified_query(
+            lambda query: self.query.join(models.PlanReview).filter(
+                models.PlanReview.approval_date == None
+            )
+        )
+
     def _with_modified_query(
         self, modification: Callable[[Any], Any]
     ) -> PlanQueryResult:
@@ -109,6 +127,43 @@ class MemberQueryResult(FlaskQueryResult[entities.Member]):
         return type(self)(
             query=self.query.filter(models.Member.workplaces.any(id=str(company))),
             mapper=self.mapper,
+        )
+
+
+class PurchaseQueryResult(FlaskQueryResult[entities.Purchase]):
+    def ordered_by_creation_date(
+        self, *, ascending: bool = True
+    ) -> PurchaseQueryResult:
+        ordering = models.Purchase.purchase_date
+        if not ascending:
+            ordering = ordering.desc()
+        return type(self)(
+            mapper=self.mapper,
+            query=self.query.order_by(ordering),
+        )
+
+    def where_buyer_is_company(
+        self, *, company: Optional[UUID] = None
+    ) -> PurchaseQueryResult:
+        if company:
+            query = self.query.filter(models.Purchase.company == str(company))
+        else:
+            query = self.query.filter(models.Purchase.company != None)
+        return type(self)(
+            mapper=self.mapper,
+            query=query,
+        )
+
+    def where_buyer_is_member(
+        self, *, member: Optional[UUID] = None
+    ) -> PurchaseQueryResult:
+        if member:
+            query = self.query.filter(models.Purchase.member == str(member))
+        else:
+            query = self.query.filter(models.Purchase.member != None)
+        return type(self)(
+            mapper=self.mapper,
+            query=query,
         )
 
 
@@ -670,23 +725,10 @@ class PurchaseRepository(repositories.PurchaseRepository):
         self.db.session.add(purchase_orm)
         return purchase
 
-    def get_purchases_descending_by_date(
-        self, user: Union[entities.Member, entities.Company]
-    ) -> Iterator[entities.Purchase]:
-        user_orm: Union[Member, Company]
-        if isinstance(user, entities.Company):
-            user_orm = self.company_repository.object_to_orm(user)
-        else:
-            user_orm = self.member_repository.object_to_orm(user)
-        return (
-            self.object_from_orm(purchase)
-            for purchase in user_orm.purchases.order_by(desc("purchase_date")).all()
-        )
-
-    def get_purchases_of_company(self, company: UUID) -> Iterator[entities.Purchase]:
-        return (
-            self.object_from_orm(purchase)
-            for purchase in Purchase.query.filter_by(company=str(company))
+    def get_purchases(self) -> PurchaseQueryResult:
+        return PurchaseQueryResult(
+            mapper=self.object_from_orm,
+            query=models.Purchase.query,
         )
 
 
@@ -697,7 +739,7 @@ class PlanRepository(repositories.PlanRepository):
     db: SQLAlchemy
     draft_repository: PlanDraftRepository
 
-    def get_all_plans(self) -> PlanQueryResult:
+    def get_plans(self) -> PlanQueryResult:
         return PlanQueryResult(
             query=models.Plan.query,
             mapper=self.object_from_orm,
@@ -709,14 +751,6 @@ class PlanRepository(repositories.PlanRepository):
             return None
         plan_orm = self._create_plan_from_draft(draft)
         return UUID(plan_orm.id)
-
-    def get_all_plans_without_completed_review(self) -> Iterable[UUID]:
-        return [
-            UUID(plan.id)
-            for plan in models.Plan.query.join(models.PlanReview).filter(
-                models.PlanReview.approval_date == None
-            )
-        ]
 
     def object_from_orm(self, plan: models.Plan) -> entities.Plan:
         production_costs = entities.ProductionCosts(
@@ -754,13 +788,6 @@ class PlanRepository(repositories.PlanRepository):
 
     def object_to_orm(self, plan: entities.Plan) -> models.Plan:
         return models.Plan.query.get(str(plan.id))
-
-    def get_plan_by_id(self, id: UUID) -> Optional[entities.Plan]:
-        plan_orm = models.Plan.query.filter_by(id=str(id)).first()
-        if plan_orm is None:
-            return None
-        else:
-            return self.object_from_orm(plan_orm)
 
     def _create_plan_from_draft(
         self,
@@ -1241,7 +1268,7 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
 
     def get_outbound_requests(self, requester_id: UUID) -> Iterator[entities.Plan]:
         plans_of_company = (
-            self.plan_repository.get_all_plans()
+            self.plan_repository.get_plans()
             .planned_by(requester_id)
             .ordered_by_creation_date(ascending=False)
         )
@@ -1255,11 +1282,7 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
             return []
         coop_orm = plan_orm.coop
         if coop_orm is None:
-            plan = self.plan_repository.get_plan_by_id(plan_id)
-            if plan is None:
-                return []
-            return [plan]
-
+            return list(self.plan_repository.get_plans().with_id(plan_id))
         else:
             return [
                 self.plan_repository.object_from_orm(plan)

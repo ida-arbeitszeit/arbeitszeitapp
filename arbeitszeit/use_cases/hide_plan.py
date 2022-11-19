@@ -18,7 +18,7 @@ class HidePlan:
     plan_repository: PlanRepository
 
     def __call__(self, plan_id: UUID) -> HidePlanResponse:
-        plan = self.plan_repository.get_plan_by_id(plan_id)
+        plan = self.plan_repository.get_plans().with_id(plan_id).first()
         assert plan is not None
         if plan.is_active:
             return HidePlanResponse(plan_id=plan_id, is_success=False)

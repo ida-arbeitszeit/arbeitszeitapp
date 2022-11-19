@@ -2,7 +2,7 @@ from collections import defaultdict
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from decimal import Decimal, DivisionByZero, InvalidOperation
-from typing import Dict, Iterator, List, Optional, Tuple
+from typing import Dict, Iterable, List, Optional, Tuple
 from uuid import UUID
 
 from arbeitszeit.decimal import decimal_sum
@@ -79,11 +79,13 @@ class GetCompanySummary:
         if company is None:
             return None
         plans = (
-            self.plan_repository.get_all_plans()
+            self.plan_repository.get_plans()
             .planned_by(company.id)
             .ordered_by_creation_date(ascending=False)
         )
-        purchases = self.purchase_repository.get_purchases_of_company(company_id)
+        purchases = self.purchase_repository.get_purchases().where_buyer_is_company(
+            company=company_id
+        )
         expectations = self._get_expectations(company)
         account_balances = self._get_account_balances(company)
         return GetCompanySummarySuccess(
@@ -173,7 +175,7 @@ class GetCompanySummary:
         except DivisionByZero:  # non-zero devided by zero
             return Decimal("Infinity")
 
-    def _get_suppliers(self, purchases: Iterator[Purchase]) -> List[Supplier]:
+    def _get_suppliers(self, purchases: Iterable[Purchase]) -> List[Supplier]:
         ordered_suppliers = sorted(
             self._get_suppliers_and_volume_of_sales(purchases),
             key=lambda item: item[1],
@@ -197,7 +199,7 @@ class GetCompanySummary:
         )
 
     def _get_suppliers_and_volume_of_sales(
-        self, purchases: Iterator[Purchase]
+        self, purchases: Iterable[Purchase]
     ) -> List[Tuple[UUID, Decimal]]:
         suppliers: Dict[UUID, Decimal] = defaultdict(lambda: Decimal("0"))
         for purchase in purchases:

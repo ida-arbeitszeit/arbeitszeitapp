@@ -32,11 +32,14 @@ class QueryPurchases:
         self,
         user: Union[Member, Company],
     ) -> Iterator[PurchaseQueryResponse]:
+        purchases = self.purchase_repository.get_purchases()
+        if isinstance(user, Member):
+            purchases = purchases.where_buyer_is_member(member=user.id)
+        else:
+            purchases = purchases.where_buyer_is_company(company=user.id)
         return (
             self._purchase_to_response_model(purchase)
-            for purchase in self.purchase_repository.get_purchases_descending_by_date(
-                user
-            )
+            for purchase in purchases.ordered_by_creation_date(ascending=False)
         )
 
     def _purchase_to_response_model(self, purchase: Purchase) -> PurchaseQueryResponse:

@@ -3,33 +3,80 @@ from unittest import TestCase
 
 from arbeitszeit_flask.database.repositories import PurchaseRepository
 from tests.data_generators import CompanyGenerator, MemberGenerator, PurchaseGenerator
+from tests.datetime_service import FakeDatetimeService
 
 from .dependency_injection import get_dependency_injector
 
 
-class PurchaseRepoTests(TestCase):
+class GetPurchasesTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.repository = self.injector.get(PurchaseRepository)
         self.purchase_generator = self.injector.get(PurchaseGenerator)
         self.member_generator = self.injector.get(MemberGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
+        self.datetime_service = self.injector.get(FakeDatetimeService)
 
-    def test_that_purchases_of_member_are_returned_in_correct_order(self) -> None:
-        user = self.member_generator.create_member_entity()
-        earlier_purchase = self.purchase_generator.create_purchase_by_member(
-            buyer=user, purchase_date=datetime(2000, 1, 1)
-        )
-        later_purchase = self.purchase_generator.create_purchase_by_member(
-            buyer=user, purchase_date=datetime(2001, 2, 2)
-        )
-        result = list(self.repository.get_purchases_descending_by_date(user))
-        assert [later_purchase, earlier_purchase] == result
-
-    def test_that_list_of_purchases_of_company_contains_purchase_of_company(
+    def test_that_a_purchase_shows_up_in_result(
         self,
     ):
         company = self.company_generator.create_company_entity()
         purchase = self.purchase_generator.create_purchase_by_company(buyer=company)
-        result = self.repository.get_purchases_of_company(company.id)
-        self.assertIn(purchase, result)
+        result = list(self.repository.get_purchases())
+        assert purchase in result
+
+    def test_purchases_can_be_ordered_by_creation_date(
+        self,
+    ):
+        self.datetime_service.freeze_time(datetime(2000, 1, 2))
+        second_purchase = self.purchase_generator.create_purchase_by_company()
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        first_purchase = self.purchase_generator.create_purchase_by_company()
+        result = list(self.repository.get_purchases().ordered_by_creation_date())
+        assert first_purchase.purchase_date == result[0].purchase_date
+        assert second_purchase.purchase_date == result[1].purchase_date
+
+    def test_purchases_can_be_ordered_by_creation_date_descending(
+        self,
+    ):
+        self.datetime_service.freeze_time(datetime(2000, 1, 2))
+        second_purchase = self.purchase_generator.create_purchase_by_company()
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        first_purchase = self.purchase_generator.create_purchase_by_company()
+        result = list(
+            self.repository.get_purchases().ordered_by_creation_date(ascending=False)
+        )
+        assert first_purchase.purchase_date == result[1].purchase_date
+        assert second_purchase.purchase_date == result[0].purchase_date
+
+    def test_purchases_can_be_filtered_by_company_id(self) -> None:
+        buyer = self.company_generator.create_company_entity()
+        self.purchase_generator.create_purchase_by_company(buyer=buyer)
+        self.purchase_generator.create_purchase_by_company()
+        assert (
+            len(
+                self.repository.get_purchases().where_buyer_is_company(company=buyer.id)
+            )
+            == 1
+        )
+
+    def test_purchases_can_be_filtered_by_company(self) -> None:
+        self.purchase_generator.create_purchase_by_company()
+        self.purchase_generator.create_purchase_by_member()
+        self.purchase_generator.create_purchase_by_member()
+        assert len(self.repository.get_purchases().where_buyer_is_company()) == 1
+
+    def test_purchases_can_be_filtered_by_member_id(self) -> None:
+        buyer = self.member_generator.create_member_entity()
+        self.purchase_generator.create_purchase_by_member(buyer=buyer)
+        self.purchase_generator.create_purchase_by_member()
+        assert (
+            len(self.repository.get_purchases().where_buyer_is_member(member=buyer.id))
+            == 1
+        )
+
+    def test_purchases_can_be_filtered_by_member(self) -> None:
+        self.purchase_generator.create_purchase_by_member()
+        self.purchase_generator.create_purchase_by_company()
+        self.purchase_generator.create_purchase_by_company()
+        assert len(self.repository.get_purchases().where_buyer_is_member()) == 1

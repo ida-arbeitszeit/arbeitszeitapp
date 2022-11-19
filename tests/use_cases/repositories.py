@@ -50,22 +50,36 @@ T = TypeVar("T")
 
 class QueryResultImpl(Generic[T]):
     def __init__(
-        self, items: Callable[[], Iterable[T]], *, member_repository: MemberRepository
+        self,
+        items: Callable[[], Iterable[T]],
+        *,
+        member_repository: MemberRepository,
+        company_repository: CompanyRepository,
     ) -> None:
         self.items = items
         self.member_repository = member_repository
+        self.company_repository = company_repository
 
     def limit(self, n: int) -> QueryResultImpl[T]:
         return type(self)(
             items=lambda: islice(self.items(), n),
             member_repository=self.member_repository,
+            company_repository=self.company_repository,
         )
 
     def offset(self, n: int) -> QueryResultImpl[T]:
         return type(self)(
             items=lambda: islice(self.items(), n, None),
             member_repository=self.member_repository,
+            company_repository=self.company_repository,
         )
+
+    def first(self) -> Optional[T]:
+        try:
+            item = next(iter(self))
+        except StopIteration:
+            return None
+        return item
 
     def __iter__(self) -> Iterator[T]:
         return iter(self.items())
@@ -83,6 +97,7 @@ class PlanResult(QueryResultImpl[Plan]):
                 reverse=not ascending,
             ),
             member_repository=self.member_repository,
+            company_repository=self.company_repository,
         )
 
     def with_id_containing(self, query: str) -> PlanResult:
@@ -103,10 +118,17 @@ class PlanResult(QueryResultImpl[Plan]):
     def planned_by(self, company: UUID) -> PlanResult:
         return self._filtered_by(lambda plan: plan.planner.id == company)
 
+    def with_id(self, id_: UUID) -> PlanResult:
+        return self._filtered_by(lambda plan: plan.id == id_)
+
+    def without_completed_review(self) -> PlanResult:
+        return self._filtered_by(lambda plan: plan.approval_date is None)
+
     def _filtered_by(self, key: Callable[[Plan], bool]) -> PlanResult:
         return type(self)(
             items=lambda: filter(key, self.items()),
             member_repository=self.member_repository,
+            company_repository=self.company_repository,
         )
 
 
@@ -121,14 +143,73 @@ class MemberResult(QueryResultImpl[Member]):
         return type(self)(
             items=lambda: filter(key, self.items()),
             member_repository=self.member_repository,
+            company_repository=self.company_repository,
+        )
+
+
+class PurchaseResult(QueryResultImpl[Purchase]):
+    def ordered_by_creation_date(self, ascending: bool = True) -> PurchaseResult:
+        return type(self)(
+            items=lambda: sorted(
+                list(self.items()),
+                key=lambda purchase: purchase.purchase_date,
+                reverse=not ascending,
+            ),
+            member_repository=self.member_repository,
+            company_repository=self.company_repository,
+        )
+
+    def where_buyer_is_company(
+        self, *, company: Optional[UUID] = None
+    ) -> PurchaseResult:
+        if company is None:
+
+            def key_function(purchase: Purchase) -> bool:
+                return (
+                    purchase.buyer is not None
+                    and self.company_repository.is_company(purchase.buyer)
+                )
+
+        else:
+
+            def key_function(purchase: Purchase) -> bool:
+                return purchase.buyer == company
+
+        return type(self)(
+            items=lambda: filter(key_function, self.items()),
+            member_repository=self.member_repository,
+            company_repository=self.company_repository,
+        )
+
+    def where_buyer_is_member(self, *, member: Optional[UUID] = None) -> PurchaseResult:
+        if member is None:
+
+            def key_function(purchase: Purchase) -> bool:
+                return purchase.buyer is not None and self.member_repository.is_member(
+                    purchase.buyer
+                )
+
+        else:
+
+            def key_function(purchase: Purchase) -> bool:
+                return purchase.buyer == member
+
+        return type(self)(
+            items=lambda: filter(key_function, self.items()),
+            member_repository=self.member_repository,
+            company_repository=self.company_repository,
         )
 
 
 @singleton
 class PurchaseRepository(interfaces.PurchaseRepository):
     @inject
-    def __init__(self):
-        self.purchases = []
+    def __init__(
+        self, member_repository: MemberRepository, company_repository: CompanyRepository
+    ):
+        self.purchases: List[Purchase] = []
+        self.member_repository = member_repository
+        self.company_repository = company_repository
 
     def create_purchase_by_company(
         self,
@@ -171,20 +252,12 @@ class PurchaseRepository(interfaces.PurchaseRepository):
         self.purchases.append(purchase)
         return purchase
 
-    def get_purchases_descending_by_date(self, user: Union[Member, Company]):
-        # order purchases by purchase_date
-        self.purchases = sorted(
-            self.purchases, key=lambda x: x.purchase_date, reverse=True
+    def get_purchases(self) -> PurchaseResult:
+        return PurchaseResult(
+            items=lambda: self.purchases,
+            member_repository=self.member_repository,
+            company_repository=self.company_repository,
         )
-
-        for purchase in self.purchases:
-            if purchase.buyer is user.id:
-                yield purchase
-
-    def get_purchases_of_company(self, company: UUID) -> Iterator[Purchase]:
-        for purchase in self.purchases:
-            if purchase.buyer is company:
-                yield purchase
 
 
 @singleton
@@ -388,7 +461,11 @@ class MemberRepository(interfaces.MemberRepository):
         return self._get_member_by_email(email)
 
     def get_all_members(self) -> MemberResult:
-        return MemberResult(items=lambda: self.members.values(), member_repository=self)
+        return MemberResult(
+            items=lambda: self.members.values(),
+            member_repository=self,
+            company_repository=self.company_repository,
+        )
 
     def _get_member_by_email(self, email: str) -> Optional[Member]:
         for member in self.members.values():
@@ -501,15 +578,12 @@ class PlanRepository(interfaces.PlanRepository):
         self.draft_repository = draft_repository
         self.member_repository = member_repository
 
-    def get_all_plans(self) -> PlanResult:
+    def get_plans(self) -> PlanResult:
         return PlanResult(
-            items=lambda: self.plans.values(), member_repository=self.member_repository
+            items=lambda: self.plans.values(),
+            member_repository=self.member_repository,
+            company_repository=self.company_repository,
         )
-
-    def get_all_plans_without_completed_review(self) -> Iterable[UUID]:
-        for plan in self.plans.values():
-            if plan.approval_date is None:
-                yield plan.id
 
     def create_plan_from_draft(self, draft_id: UUID) -> Optional[UUID]:
         draft = self.draft_repository.get_by_id(draft_id)
@@ -529,9 +603,6 @@ class PlanRepository(interfaces.PlanRepository):
             creation_timestamp=draft.creation_date,
         )
         return plan.id
-
-    def get_plan_by_id(self, id: UUID) -> Optional[Plan]:
-        return self.plans.get(id)
 
     def set_plan_approval_date(self, plan: UUID, approval_timestamp: datetime):
         plan_model = self.plans.get(plan)
@@ -561,6 +632,7 @@ class PlanRepository(interfaces.PlanRepository):
         return PlanResult(
             items=lambda: filter(lambda plan: plan.is_active, self.plans.values()),
             member_repository=self.member_repository,
+            company_repository=self.company_repository,
         )
 
     def avg_timeframe_of_active_plans(self) -> Decimal:
@@ -886,7 +958,7 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
 
     def get_outbound_requests(self, requester_id: UUID) -> Iterator[Plan]:
         plans_of_company = (
-            self.plan_repository.get_all_plans()
+            self.plan_repository.get_plans()
             .planned_by(requester_id)
             .ordered_by_creation_date(ascending=False)
         )
@@ -896,7 +968,7 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
 
     def get_cooperating_plans(self, plan_id: UUID) -> List[Plan]:
         cooperating_plans = []
-        plan = self.plan_repository.get_plan_by_id(plan_id)
+        plan = self.plan_repository.get_plans().with_id(plan_id).first()
         assert plan
         cooperation_id = plan.cooperation
         if cooperation_id:
@@ -908,22 +980,22 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
             return [plan]
 
     def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
-        plan = self.plan_repository.get_plan_by_id(plan_id)
+        plan = self.plan_repository.get_plans().with_id(plan_id).first()
         assert plan
         plan.cooperation = cooperation_id
 
     def remove_plan_from_cooperation(self, plan_id: UUID) -> None:
-        plan = self.plan_repository.get_plan_by_id(plan_id)
+        plan = self.plan_repository.get_plans().with_id(plan_id).first()
         assert plan
         plan.cooperation = None
 
     def set_requested_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
-        plan = self.plan_repository.get_plan_by_id(plan_id)
+        plan = self.plan_repository.get_plans().with_id(plan_id).first()
         assert plan
         plan.requested_cooperation = cooperation_id
 
     def set_requested_cooperation_to_none(self, plan_id: UUID) -> None:
-        plan = self.plan_repository.get_plan_by_id(plan_id)
+        plan = self.plan_repository.get_plans().with_id(plan_id).first()
         assert plan
         plan.requested_cooperation = None
 
@@ -951,11 +1023,14 @@ class AccountantRepositoryTestImpl:
         id: UUID
 
     @inject
-    def __init__(self, member_repository: MemberRepository) -> None:
+    def __init__(
+        self, member_repository: MemberRepository, company_repository: CompanyRepository
+    ) -> None:
         self.accountants: Dict[
             UUID, AccountantRepositoryTestImpl._AccountantRecord
         ] = dict()
         self.member_repository = member_repository
+        self.company_repository = company_repository
 
     def create_accountant(self, email: str, name: str, password: str) -> UUID:
         id = uuid4()
@@ -994,6 +1069,7 @@ class AccountantRepositoryTestImpl:
                 for record in self.accountants.values()
             ),
             member_repository=self.member_repository,
+            company_repository=self.company_repository,
         )
 
 
