@@ -62,7 +62,9 @@ class PayConsumerProduct:
         self, request: PayConsumerProductRequest
     ) -> PayConsumerProductResponse:
         plan = self._get_active_plan(request)
-        buyer = self.member_repository.get_by_id(request.get_buyer_id())
+        buyer = (
+            self.member_repository.get_members().with_id(request.get_buyer_id()).first()
+        )
         if buyer is None:
             return PayConsumerProductResponse(
                 rejection_reason=RejectionReason.buyer_does_not_exist

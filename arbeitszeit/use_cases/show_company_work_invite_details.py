@@ -36,7 +36,7 @@ class ShowCompanyWorkInviteDetailsUseCase:
     def show_company_work_invite_details(
         self, request: ShowCompanyWorkInviteDetailsRequest
     ) -> ShowCompanyWorkInviteDetailsResponse:
-        if not self.member_repository.get_by_id(request.member):
+        if not self.member_repository.get_members().with_id(request.member):
             return failure_response
         invite = self.worker_invite_repository.get_by_id(request.invite)
         if invite is None:

@@ -48,7 +48,7 @@ class GetStatistics:
         ) = self._count_certificates_and_available_product()
         return StatisticsResponse(
             registered_companies_count=self.company_repository.count_registered_companies(),
-            registered_members_count=self.member_repository.count_registered_members(),
+            registered_members_count=len(self.member_repository.get_members()),
             cooperations_count=self.cooperation_respository.count_cooperations(),
             certificates_count=certs_total,
             available_product=available_product,
@@ -92,7 +92,7 @@ class GetStatistics:
 
     def _count_certs_in_member_accounts(self) -> Decimal:
         certs_in_member_accounts = Decimal(0)
-        all_members = self.member_repository.get_all_members()
+        all_members = self.member_repository.get_members()
         for member in all_members:
             certs_in_member_accounts += self.account_respository.get_account_balance(
                 member.account

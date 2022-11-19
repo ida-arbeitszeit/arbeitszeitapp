@@ -31,7 +31,7 @@ class InviteWorkerToCompanyUseCase:
     company_repository: CompanyRepository
 
     def __call__(self, request: Request) -> Response:
-        addressee = self.member_repository.get_by_id(request.worker)
+        addressee = self.member_repository.get_members().with_id(request.worker).first()
         if addressee is None:
             return self.Response(is_success=False)
         sender = self.company_repository.get_by_id(request.company)

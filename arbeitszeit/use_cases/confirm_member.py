@@ -28,7 +28,11 @@ class ConfirmMemberUseCase:
     def confirm_member(self, request: Request) -> Response:
         unwrapped_token = self.token_validator.unwrap_confirmation_token(request.token)
         if unwrapped_token:
-            member = self.member_repository.get_by_email(unwrapped_token)
+            member = (
+                self.member_repository.get_members()
+                .with_email_address(unwrapped_token)
+                .first()
+            )
             if not member:
                 return self.Response(is_confirmed=False)
             if member.confirmed_on is None:

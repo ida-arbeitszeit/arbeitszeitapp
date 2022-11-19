@@ -33,8 +33,10 @@ def test_that_member_can_be_retrieved_by_its_id(
     repository: MemberRepository,
     member_generator: MemberGenerator,
 ):
-    expected_member = member_generator.create_member_entity()
-    assert repository.get_by_id(expected_member.id) == expected_member
+    expected_member = member_generator.create_member()
+    retrieved_member = repository.get_members().with_id(expected_member).first()
+    assert retrieved_member
+    assert retrieved_member.id == expected_member
 
 
 @injection_test
@@ -43,7 +45,10 @@ def test_that_member_can_be_retrieved_by_its_email(
 ):
     expected_mail = "test_mail@testmail.com"
     expected_member = member_generator.create_member_entity(email=expected_mail)
-    assert repository.get_by_email(expected_mail) == expected_member
+    assert (
+        repository.get_members().with_email_address(expected_mail).first()
+        == expected_member
+    )
 
 
 @injection_test
@@ -52,7 +57,7 @@ def test_that_random_email_returns_no_member(
 ):
     random_email = "xyz123@testmail.com"
     member_generator.create_member_entity(email="test_mail@testmail.com")
-    assert repository.get_by_email(random_email) is None
+    assert not repository.get_members().with_email_address(random_email)
 
 
 @injection_test
@@ -60,18 +65,19 @@ def test_cannot_find_member_by_email_before_it_was_added(
     member_repository: MemberRepository,
     account_repository: AccountRepository,
 ):
-    assert not member_repository.has_member_with_email("member@cp.org")
+    members = member_repository.get_members()
+    assert not members.with_email_address("member@cp.org")
     account = account_repository.create_account(AccountTypes.member)
     member_repository.create_member(
         "member@cp.org", "karl", "password", account, datetime.now()
     )
-    assert member_repository.has_member_with_email("member@cp.org")
+    assert members.with_email_address("member@cp.org")
 
 
 @injection_test
 def test_does_not_identify_random_id_with_member(member_repository: MemberRepository):
     member_id = uuid4()
-    assert not member_repository.is_member(member_id)
+    assert not member_repository.get_members().with_id(member_id)
 
 
 @injection_test
@@ -79,7 +85,7 @@ def test_does_not_identify_company_as_member(
     company_generator: CompanyGenerator, member_repository: MemberRepository
 ):
     company = company_generator.create_company_entity()
-    assert not member_repository.is_member(company.id)
+    assert not member_repository.get_members().with_id(company.id)
 
 
 @injection_test
@@ -91,14 +97,14 @@ def test_does_identify_member_id_as_member(
     member = member_repository.create_member(
         "member@cp.org", "karl", "password", account, datetime.now()
     )
-    assert member_repository.is_member(member.id)
+    assert member_repository.get_members().with_id(member.id)
 
 
 @injection_test
 def test_member_count_is_0_when_none_were_created(
     repository: MemberRepository,
 ) -> None:
-    assert repository.count_registered_members() == 0
+    assert len(repository.get_members()) == 0
 
 
 @injection_test
@@ -107,15 +113,14 @@ def test_count_one_registered_member_when_one_was_created(
     repository: MemberRepository,
 ) -> None:
     generator.create_member_entity()
-    assert repository.count_registered_members() == 1
+    assert len(repository.get_members()) == 1
 
 
 @injection_test
-def test_get_by_id_returns_none_when_member_does_not_exist(
+def test_with_id_returns_no_members_when_member_does_not_exist(
     repository: MemberRepository,
 ) -> None:
-    member = repository.get_by_id(uuid4())
-    assert member is None
+    assert not repository.get_members().with_id(uuid4())
 
 
 class GetAllMembersTests(FlaskTestCase):
@@ -126,18 +131,18 @@ class GetAllMembersTests(FlaskTestCase):
         self.repository = self.injector.get(MemberRepository)
 
     def test_with_empty_db_the_first_member_is_none(self) -> None:
-        assert self.repository.get_all_members().first() is None
+        assert self.repository.get_members().first() is None
 
     def test_with_one_member_id_db_the_first_element_is_that_member(self) -> None:
         expected_member_id = self.member_generator.create_member()
-        member = self.repository.get_all_members().first()
+        member = self.repository.get_members().first()
         assert member
         assert member.id == expected_member_id
 
     def test_that_all_members_can_be_retrieved(self) -> None:
         expected_member1 = self.member_generator.create_member_entity()
         expected_member2 = self.member_generator.create_member_entity()
-        all_members = list(self.repository.get_all_members())
+        all_members = list(self.repository.get_members())
         assert expected_member1 in all_members
         assert expected_member2 in all_members
 
@@ -147,17 +152,15 @@ class GetAllMembersTests(FlaskTestCase):
         expected_number_of_members = 3
         for i in range(expected_number_of_members):
             self.member_generator.create_member_entity()
-        member_count = len(self.repository.get_all_members())
+        member_count = len(self.repository.get_members())
         assert member_count == expected_number_of_members
 
     def test_can_filter_members_by_their_workplace(self) -> None:
         member = self.member_generator.create_member()
         self.member_generator.create_member()
         company = self.company_generator.create_company_entity(workers=[member])
-        assert len(self.repository.get_all_members()) == 2
-        assert (
-            len(self.repository.get_all_members().working_at_company(company.id)) == 1
-        )
+        assert len(self.repository.get_members()) == 2
+        assert len(self.repository.get_members().working_at_company(company.id)) == 1
 
 
 class ValidateCredentialTests(FlaskTestCase):
@@ -258,13 +261,14 @@ class ConfirmMemberTests(FlaskTestCase):
         expected_timestamp = datetime(2000, 1, 2)
         member_id = self.create_member()
         self.repository.confirm_member(member_id, confirmed_on=expected_timestamp)
-        member = self.repository.get_by_id(member_id)
-        self.assertEqual(member.confirmed_on, expected_timestamp)
+        member = self.repository.get_members().with_id(member_id).first()
+        assert member
+        assert member.confirmed_on == expected_timestamp
 
     def test_that_member_is_confirmed_after_confirmation_date_is_set(self) -> None:
         member_id = self.create_member()
         self.repository.confirm_member(member_id, confirmed_on=datetime(2000, 1, 2))
-        self.assertTrue(self.repository.is_member_confirmed(member_id))
+        assert self.repository.is_member_confirmed(member_id)
 
     def test_that_member_is_not_confirmed_before_setting_confirmation_date(
         self,
@@ -284,7 +288,9 @@ class ConfirmMemberTests(FlaskTestCase):
         expected_timestamp = datetime(2000, 1, 2)
         member_id = self.create_member()
         self.repository.confirm_member(member_id, confirmed_on=expected_timestamp)
-        self.assertIsNone(self.repository.get_by_id(other_member_id).confirmed_on)
+        member = self.repository.get_members().with_id(other_member_id).first()
+        assert member
+        assert member.confirmed_on is None
 
     def create_member(self) -> UUID:
         member = self.repository.create_member(

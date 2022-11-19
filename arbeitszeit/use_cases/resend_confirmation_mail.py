@@ -29,7 +29,7 @@ class ResendConfirmationMailUseCase:
     token_service: TokenService
 
     def resend_confirmation_mail(self, request: Request) -> Response:
-        member = self.member_repository.get_by_id(request.user)
+        member = self.member_repository.get_members().with_id(request.user).first()
         if member and member.confirmed_on is None:
             token = self.token_service.generate_token(member.email)
             self.member_registration_message_presenter.show_member_registration_message(

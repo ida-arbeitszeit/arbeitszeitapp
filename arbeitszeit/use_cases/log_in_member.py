@@ -40,7 +40,7 @@ class LogInMemberUseCase:
                 email=request.email,
                 user_id=member_id,
             )
-        if self.member_repository.has_member_with_email(request.email):
+        if self.member_repository.get_members().with_email_address(request.email):
             reason = self.RejectionReason.invalid_password
         else:
             reason = self.RejectionReason.unknown_email_address

@@ -48,7 +48,7 @@ class RegisterMemberUseCase:
         return RegisterMemberUseCase.Response(rejection_reason=None, user_id=user_id)
 
     def _register_member(self, request: Request) -> Optional[UUID]:
-        if self.member_repository.has_member_with_email(request.email):
+        if self.member_repository.get_members().with_email_address(request.email):
             raise self.Response.RejectionReason.member_already_exists
 
         member_account = self.account_repository.create_account(AccountTypes.member)

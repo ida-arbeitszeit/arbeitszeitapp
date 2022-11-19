@@ -139,6 +139,12 @@ class MemberResult(QueryResultImpl[Member]):
             in self.member_repository.company_workers.get(company, []),
         )
 
+    def with_id(self, member: UUID) -> MemberResult:
+        return self._filtered_by(lambda model: model.id == member)
+
+    def with_email_address(self, email: str) -> MemberResult:
+        return self._filtered_by(lambda model: model.email == email)
+
     def _filtered_by(self, key: Callable[[Member], bool]) -> MemberResult:
         return type(self)(
             items=lambda: filter(key, self.items()),
@@ -185,8 +191,9 @@ class PurchaseResult(QueryResultImpl[Purchase]):
         if member is None:
 
             def key_function(purchase: Purchase) -> bool:
-                return purchase.buyer is not None and self.member_repository.is_member(
-                    purchase.buyer
+                return (
+                    purchase.buyer is not None
+                    and purchase.buyer in self.member_repository.members
                 )
 
         else:
@@ -434,15 +441,6 @@ class MemberRepository(interfaces.MemberRepository):
                 return member.id
         return None
 
-    def has_member_with_email(self, email: str) -> bool:
-        return bool(self._get_member_by_email(email))
-
-    def is_member(self, id: UUID) -> bool:
-        return bool(self.get_by_id(id))
-
-    def count_registered_members(self) -> int:
-        return len(self.members)
-
     def confirm_member(self, member: UUID, confirmed_on: datetime) -> None:
         entity = self.members[member]
         entity.confirmed_on = confirmed_on
@@ -454,13 +452,7 @@ class MemberRepository(interfaces.MemberRepository):
         else:
             return False
 
-    def get_by_id(self, id: UUID) -> Optional[Member]:
-        return self.members.get(id)
-
-    def get_by_email(self, email: str) -> Optional[Member]:
-        return self._get_member_by_email(email)
-
-    def get_all_members(self) -> MemberResult:
+    def get_members(self) -> MemberResult:
         return MemberResult(
             items=lambda: self.members.values(),
             member_repository=self,
@@ -867,7 +859,7 @@ class WorkerInviteRepository(interfaces.WorkerInviteRepository):
         company = self.company_repository.get_by_id(company_id)
         if company is None:
             return None
-        member = self.member_repository.get_by_id(worker_id)
+        member = self.member_repository.get_members().with_id(worker_id).first()
         if member is None:
             return None
         return CompanyWorkInvite(

@@ -54,7 +54,7 @@ class MemberRoute:
                     translator.gettext("Please log in to view this page.")
                 )
                 return redirect(url_for("auth.start", next=self.route_string))
-            elif not member_repository.is_member(user_id):
+            elif not member_repository.get_members().with_id(user_id):
                 # not a member
                 notifier.display_warning(
                     translator.gettext("You are not logged with the correct account.")

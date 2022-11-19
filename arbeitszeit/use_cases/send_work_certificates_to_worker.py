@@ -45,10 +45,14 @@ class SendWorkCertificatesToWorker:
         self, use_case_request: SendWorkCertificatesToWorkerRequest
     ) -> SendWorkCertificatesToWorkerResponse:
         company = self.company_repository.get_by_id(use_case_request.company_id)
-        worker = self.member_repository.get_by_id(use_case_request.worker_id)
+        worker = (
+            self.member_repository.get_members()
+            .with_id(use_case_request.worker_id)
+            .first()
+        )
         assert company
         assert worker
-        company_workers = self.member_repository.get_all_members().working_at_company(
+        company_workers = self.member_repository.get_members().working_at_company(
             company.id
         )
         if worker not in company_workers:

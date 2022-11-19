@@ -129,6 +129,18 @@ class MemberQueryResult(FlaskQueryResult[entities.Member]):
             mapper=self.mapper,
         )
 
+    def with_id(self, member: UUID) -> MemberQueryResult:
+        return type(self)(
+            query=self.query.filter(models.Member.id == str(member)),
+            mapper=self.mapper,
+        )
+
+    def with_email_address(self, email: str) -> MemberQueryResult:
+        return type(self)(
+            query=self.query.join(models.User).filter(models.User.email == email),
+            mapper=self.mapper,
+        )
+
 
 class PurchaseQueryResult(FlaskQueryResult[entities.Purchase]):
     def ordered_by_creation_date(
@@ -222,21 +234,6 @@ class MemberRepository(repositories.MemberRepository):
     account_repository: AccountRepository
     db: SQLAlchemy
 
-    def get_by_id(self, id: UUID) -> Optional[entities.Member]:
-        orm_object = Member.query.filter_by(id=str(id)).first()
-        if orm_object is None:
-            return None
-        return self.object_from_orm(orm_object)
-
-    def get_by_email(self, email: str) -> Optional[entities.Member]:
-        member_orm = (
-            self.db.session.query(models.Member)
-            .join(models.User)
-            .filter(models.User.email == email)
-            .first()
-        )
-        return self.object_from_orm(member_orm) if member_orm else None
-
     def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
         if (
             member := self.db.session.query(Member)
@@ -310,25 +307,7 @@ class MemberRepository(repositories.MemberRepository):
         self.db.session.add(orm_member)
         return self.object_from_orm(orm_member)
 
-    def has_member_with_email(self, email: str) -> bool:
-        return bool(
-            self.db.session.query(models.Member)
-            .join(models.User)
-            .filter(models.User.email == email)
-            .count()
-        )
-
-    def is_member(self, id: UUID) -> bool:
-        return bool(
-            self.db.session.query(models.Member)
-            .filter(models.Member.id == str(id))
-            .count()
-        )
-
-    def count_registered_members(self) -> int:
-        return int(self.db.session.query(func.count(Member.id)).one()[0])
-
-    def get_all_members(self) -> MemberQueryResult:
+    def get_members(self) -> MemberQueryResult:
         return MemberQueryResult(
             mapper=self.object_from_orm,
             query=Member.query,
@@ -1162,7 +1141,11 @@ class WorkerInviteRepository(repositories.WorkerInviteRepository):
             company = self.company_repository.get_by_id(UUID(invite_orm.company))
             if company is None:
                 return None
-            member = self.member_repository.get_by_id(UUID(invite_orm.member))
+            member = (
+                self.member_repository.get_members()
+                .with_id(UUID(invite_orm.member))
+                .first()
+            )
             if member is None:
                 return None
             return entities.CompanyWorkInvite(

@@ -51,7 +51,7 @@ def my_purchases(
     template_renderer: UserTemplateRenderer,
     presenter: MemberPurchasesPresenter,
 ) -> Response:
-    member = member_repository.get_by_id(UUID(current_user.id))
+    member = member_repository.get_members().with_id(UUID(current_user.id)).first()
     assert member is not None
     response = query_purchases(member)
     view_model = presenter.present_member_purchases(response)

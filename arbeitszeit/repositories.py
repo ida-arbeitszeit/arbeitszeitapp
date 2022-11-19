@@ -78,6 +78,12 @@ class MemberResult(QueryResult[Member], Protocol):
     def working_at_company(self, company: UUID) -> MemberResult:
         ...
 
+    def with_id(self, id_: UUID) -> MemberResult:
+        ...
+
+    def with_email_address(self, email: str) -> MemberResult:
+        ...
+
 
 class PurchaseResult(QueryResult[Purchase], Protocol):
     def ordered_by_creation_date(self, *, ascending: bool = ...) -> PurchaseResult:
@@ -259,27 +265,7 @@ class MemberRepository(ABC):
         pass
 
     @abstractmethod
-    def has_member_with_email(self, email: str) -> bool:
-        pass
-
-    @abstractmethod
-    def is_member(self, id: UUID) -> bool:
-        pass
-
-    @abstractmethod
-    def get_by_email(self, email: str) -> Optional[Member]:
-        pass
-
-    @abstractmethod
-    def count_registered_members(self) -> int:
-        pass
-
-    @abstractmethod
-    def get_by_id(self, id: UUID) -> Optional[Member]:
-        pass
-
-    @abstractmethod
-    def get_all_members(self) -> MemberResult:
+    def get_members(self) -> MemberResult:
         pass
 
     @abstractmethod
