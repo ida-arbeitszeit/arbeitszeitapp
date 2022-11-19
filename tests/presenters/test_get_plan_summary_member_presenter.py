@@ -12,7 +12,7 @@ from tests.presenters.url_index import UrlIndexTestImpl
 
 class PresenterTests(TestCase):
     """
-    some functionality tested in tests/presenters/test_plan_summary_service.py
+    some functionality tested in tests/presenters/test_plan_summary_formatter.py
     """
 
     @injection_test
