@@ -34,9 +34,9 @@ class QueryPurchases:
     ) -> Iterator[PurchaseQueryResponse]:
         purchases = self.purchase_repository.get_purchases()
         if isinstance(user, Member):
-            purchases = purchases.conducted_by_member(user.id)
+            purchases = purchases.where_buyer_is_member(member=user.id)
         else:
-            purchases = purchases.conducted_by_company(user.id)
+            purchases = purchases.where_buyer_is_company(company=user.id)
         return (
             self._purchase_to_response_model(purchase)
             for purchase in purchases.ordered_by_creation_date(ascending=False)

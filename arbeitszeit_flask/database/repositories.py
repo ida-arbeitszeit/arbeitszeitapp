@@ -142,16 +142,28 @@ class PurchaseQueryResult(FlaskQueryResult[entities.Purchase]):
             query=self.query.order_by(ordering),
         )
 
-    def conducted_by_company(self, company: UUID) -> PurchaseQueryResult:
+    def where_buyer_is_company(
+        self, *, company: Optional[UUID] = None
+    ) -> PurchaseQueryResult:
+        if company:
+            query = self.query.filter(models.Purchase.company == str(company))
+        else:
+            query = self.query.filter(models.Purchase.company != None)
         return type(self)(
             mapper=self.mapper,
-            query=self.query.filter(models.Purchase.company == str(company)),
+            query=query,
         )
 
-    def conducted_by_member(self, member: UUID) -> PurchaseQueryResult:
+    def where_buyer_is_member(
+        self, *, member: Optional[UUID] = None
+    ) -> PurchaseQueryResult:
+        if member:
+            query = self.query.filter(models.Purchase.member == str(member))
+        else:
+            query = self.query.filter(models.Purchase.member != None)
         return type(self)(
             mapper=self.mapper,
-            query=self.query.filter(models.Purchase.member == str(member)),
+            query=query,
         )
 
 

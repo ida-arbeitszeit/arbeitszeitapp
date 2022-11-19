@@ -49,14 +49,34 @@ class GetPurchasesTests(TestCase):
         assert first_purchase.purchase_date == result[1].purchase_date
         assert second_purchase.purchase_date == result[0].purchase_date
 
-    def test_purchases_can_be_filtered_by_company(self) -> None:
+    def test_purchases_can_be_filtered_by_company_id(self) -> None:
         buyer = self.company_generator.create_company_entity()
         self.purchase_generator.create_purchase_by_company(buyer=buyer)
         self.purchase_generator.create_purchase_by_company()
-        assert len(self.repository.get_purchases().conducted_by_company(buyer.id)) == 1
+        assert (
+            len(
+                self.repository.get_purchases().where_buyer_is_company(company=buyer.id)
+            )
+            == 1
+        )
 
-    def test_purchases_can_be_filtered_by_member(self) -> None:
+    def test_purchases_can_be_filtered_by_company(self) -> None:
+        self.purchase_generator.create_purchase_by_company()
+        self.purchase_generator.create_purchase_by_member()
+        self.purchase_generator.create_purchase_by_member()
+        assert len(self.repository.get_purchases().where_buyer_is_company()) == 1
+
+    def test_purchases_can_be_filtered_by_member_id(self) -> None:
         buyer = self.member_generator.create_member_entity()
         self.purchase_generator.create_purchase_by_member(buyer=buyer)
         self.purchase_generator.create_purchase_by_member()
-        assert len(self.repository.get_purchases().conducted_by_member(buyer.id)) == 1
+        assert (
+            len(self.repository.get_purchases().where_buyer_is_member(member=buyer.id))
+            == 1
+        )
+
+    def test_purchases_can_be_filtered_by_member(self) -> None:
+        self.purchase_generator.create_purchase_by_member()
+        self.purchase_generator.create_purchase_by_company()
+        self.purchase_generator.create_purchase_by_company()
+        assert len(self.repository.get_purchases().where_buyer_is_member()) == 1

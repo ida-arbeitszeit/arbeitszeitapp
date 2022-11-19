@@ -83,10 +83,12 @@ class PurchaseResult(QueryResult[Purchase], Protocol):
     def ordered_by_creation_date(self, *, ascending: bool = ...) -> PurchaseResult:
         ...
 
-    def conducted_by_company(self, company: UUID) -> PurchaseResult:
+    def where_buyer_is_company(
+        self, *, company: Optional[UUID] = ...
+    ) -> PurchaseResult:
         ...
 
-    def conducted_by_member(self, member: UUID) -> PurchaseResult:
+    def where_buyer_is_member(self, *, member: Optional[UUID] = ...) -> PurchaseResult:
         ...
 
 
