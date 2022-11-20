@@ -80,12 +80,12 @@ def approve_plan(
 @AccountantRoute("/accountant/plan_summary/<uuid:plan_id>")
 def plan_summary(
     plan_id: UUID,
-    get_plan_summary_accountant: GetPlanSummaryAccountant,
+    use_case: GetPlanSummaryAccountant,
     template_renderer: UserTemplateRenderer,
     presenter: GetPlanSummaryAccountantSuccessPresenter,
     http_404_view: Http404View,
 ) -> Response:
-    use_case_response = get_plan_summary_accountant(plan_id)
+    use_case_response = use_case.get_plan_summary(plan_id)
     if isinstance(use_case_response, GetPlanSummaryAccountant.Success):
         view_model = presenter.present(use_case_response)
         return FlaskResponse(
