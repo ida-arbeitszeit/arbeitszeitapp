@@ -1,9 +1,11 @@
 {% extends "base_accountant.html" %}
 
 {% block content %}
-<div class="content has-text-centered">
-  <h1>{{ gettext("Unreviewed plans") }}</h1>
-</div>
+<section class="section"> 
+  <div class="content has-text-centered">
+    <h1>{{ gettext("Unreviewed plans") }}</h1>
+  </div>
+</section>
 <section class="section">
   {% if view_model.show_plan_list %}
   <div class="column is-4 is-offset-4 is-centered has-text-left">
@@ -11,9 +13,9 @@
     <article class="media">
       <div class="media-content">
         <div class="content">
-          <strong>{{ plan.product_name }}</strong>
+          <strong><a href="{{ plan.plan_summary_url }}">{{ plan.product_name }}</a></strong>
           <br>
-          <small>@{{ plan.planner_name }}</small>
+          <small>@<a href="{{ plan.company_summary_url }}">{{ plan.planner_name }}</a></small>
         </div>
       </div>
       <div class="media-right">
