@@ -51,6 +51,7 @@ from .get_draft_summary import (
 )
 from .get_member_account import GetMemberAccount, GetMemberAccountResponse
 from .get_member_dashboard import GetMemberDashboard
+from .get_plan_summary_accountant import GetPlanSummaryAccountant
 from .get_plan_summary_company import GetPlanSummaryCompany
 from .get_plan_summary_member import GetPlanSummaryMember
 from .get_statistics import GetStatistics, StatisticsResponse
@@ -164,6 +165,7 @@ __all__ = [
     "GetMemberAccount",
     "GetMemberAccountResponse",
     "GetMemberDashboard",
+    "GetPlanSummaryAccountant",
     "GetPlanSummaryMember",
     "GetPlanSummaryCompany",
     "GetStatistics",

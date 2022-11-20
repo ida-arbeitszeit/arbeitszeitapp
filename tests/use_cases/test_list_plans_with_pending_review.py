@@ -64,6 +64,14 @@ class UseCaseTests(BaseTestCase):
             expected_company_name, [plan.planner_name for plan in response.plans]
         )
 
+    def test_id_of_planning_company_is_in_response(self) -> None:
+        planner = self.company_generator.create_company_entity()
+        self.file_plan_draft(planner=planner)
+        response = self.use_case.list_plans_with_pending_review(
+            request=ListPlansWithPendingReviewUseCase.Request()
+        )
+        self.assertIn(planner.id, [plan.planner_id for plan in response.plans])
+
     def file_plan_draft(
         self, product_name: Optional[str] = None, planner: Optional[Company] = None
     ) -> UUID:

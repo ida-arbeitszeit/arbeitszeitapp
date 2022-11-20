@@ -1,9 +1,13 @@
 from uuid import UUID
 
+from flask import Response as FlaskResponse
 from flask import redirect
 
+from arbeitszeit import use_cases
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit.use_cases.get_accountant_dashboard import GetAccountantDashboardUseCase
+from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
+from arbeitszeit.use_cases.get_plan_summary_accountant import GetPlanSummaryAccountant
 from arbeitszeit.use_cases.list_plans_with_pending_review import (
     ListPlansWithPendingReviewUseCase,
 )
@@ -11,7 +15,12 @@ from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_flask.types import Response
+from arbeitszeit_flask.views.http_404_view import Http404View
 from arbeitszeit_web.controllers.approve_plan_controller import ApprovePlanController
+from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
+from arbeitszeit_web.get_plan_summary_accountant import (
+    GetPlanSummaryAccountantSuccessPresenter,
+)
 from arbeitszeit_web.presenters.approve_plan_presenter import ApprovePlanPresenter
 from arbeitszeit_web.presenters.get_accountant_dashboard_presenter import (
     GetAccountantDashboardPresenter,
@@ -66,3 +75,43 @@ def approve_plan(
     response = use_case.approve_plan(request)
     view_model = presenter.approve_plan(response)
     return redirect(view_model.redirect_url)
+
+
+@AccountantRoute("/accountant/plan_summary/<uuid:plan_id>")
+def plan_summary(
+    plan_id: UUID,
+    use_case: GetPlanSummaryAccountant,
+    template_renderer: UserTemplateRenderer,
+    presenter: GetPlanSummaryAccountantSuccessPresenter,
+    http_404_view: Http404View,
+) -> Response:
+    use_case_response = use_case.get_plan_summary(plan_id)
+    if isinstance(use_case_response, GetPlanSummaryAccountant.Success):
+        view_model = presenter.present(use_case_response)
+        return FlaskResponse(
+            template_renderer.render_template(
+                "accountant/plan_summary.html",
+                context=dict(view_model=view_model.to_dict()),
+            )
+        )
+    else:
+        return http_404_view.get_response()
+
+
+@AccountantRoute("/accountant/company_summary/<uuid:company_id>")
+def company_summary(
+    company_id: UUID,
+    get_company_summary: GetCompanySummary,
+    template_renderer: UserTemplateRenderer,
+    presenter: GetCompanySummarySuccessPresenter,
+    http_404_view: Http404View,
+):
+    use_case_response = get_company_summary(company_id)
+    if isinstance(use_case_response, use_cases.GetCompanySummarySuccess):
+        view_model = presenter.present(use_case_response)
+        return template_renderer.render_template(
+            "accountant/company_summary.html",
+            context=dict(view_model=view_model.to_dict()),
+        )
+    else:
+        return http_404_view.get_response()

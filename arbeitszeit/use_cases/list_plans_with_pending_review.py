@@ -21,6 +21,7 @@ class ListPlansWithPendingReviewUseCase:
         id: UUID
         product_name: str
         planner_name: str
+        planner_id: UUID
 
     @dataclass
     class Response:
@@ -41,4 +42,5 @@ class ListPlansWithPendingReviewUseCase:
             id=plan_model.id,
             product_name=plan_model.prd_name,
             planner_name=plan_model.planner.name,
+            planner_id=plan_model.planner.id,
         )

@@ -1,0 +1,11 @@
+{% extends "base_accountant.html" %}
+
+{% block navbar_start %}
+<div class="navbar-item">{{ gettext("Plan information") }}</div>
+{% endblock %}
+
+{% block content %}
+{% from 'macros/plan_summary.html' import plan_summary %}
+{{ plan_summary(view_model) }}
+
+{% endblock %}

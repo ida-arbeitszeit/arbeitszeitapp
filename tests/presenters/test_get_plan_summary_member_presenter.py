@@ -5,21 +5,21 @@ from uuid import uuid4
 
 from arbeitszeit.plan_summary import PlanSummary
 from arbeitszeit.use_cases.get_plan_summary_member import GetPlanSummaryMember
-from arbeitszeit_web.get_plan_summary_member import GetPlanSummarySuccessPresenter
+from arbeitszeit_web.get_plan_summary_member import GetPlanSummaryMemberSuccessPresenter
 from tests.presenters.dependency_injection import injection_test
 from tests.presenters.url_index import UrlIndexTestImpl
 
 
 class PresenterTests(TestCase):
     """
-    some functionality tested in tests/presenters/test_plan_summary_service.py
+    some functionality tested in tests/presenters/test_plan_summary_formatter.py
     """
 
     @injection_test
     def setUp(
         self,
         url_index: UrlIndexTestImpl,
-        presenter: GetPlanSummarySuccessPresenter,
+        presenter: GetPlanSummaryMemberSuccessPresenter,
     ) -> None:
         self.url_index = url_index
         self.presenter = presenter

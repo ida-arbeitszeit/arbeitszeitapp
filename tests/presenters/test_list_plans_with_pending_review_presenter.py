@@ -7,6 +7,7 @@ from arbeitszeit.use_cases.list_plans_with_pending_review import (
 from arbeitszeit_web.presenters.list_plans_with_pending_review_presenter import (
     ListPlansWithPendingReviewPresenter,
 )
+from arbeitszeit_web.session import UserRole
 
 from .base_test_case import BaseTestCase
 from .url_index import UrlIndexTestImpl
@@ -57,6 +58,28 @@ class PresenterTests(BaseTestCase):
             0
         ].approve_plan_url == self.url_index.get_approve_plan_url(plan_id)
 
+    def test_that_plan_summary_url_is_set_correctly(self) -> None:
+        plan_id = uuid4()
+        view_model = self.presenter.list_plans_with_pending_review(
+            self._get_response_with_one_plan(plan_id=plan_id)
+        )
+        assert view_model.plans[
+            0
+        ].plan_summary_url == self.url_index.get_plan_summary_url(
+            user_role=UserRole.accountant, plan_id=plan_id
+        )
+
+    def test_that_company_summary_url_is_set_correctly(self) -> None:
+        planner_id = uuid4()
+        view_model = self.presenter.list_plans_with_pending_review(
+            self._get_response_with_one_plan(planner_id=planner_id)
+        )
+        assert view_model.plans[
+            0
+        ].company_summary_url == self.url_index.get_company_summary_url(
+            user_role=UserRole.accountant, company_id=planner_id
+        )
+
     def _get_empty_response(self) -> UseCase.Response:
         return UseCase.Response(plans=[])
 
@@ -66,13 +89,19 @@ class PresenterTests(BaseTestCase):
         product_name: str = "test product",
         planner_name: str = "example company",
         plan_id: Optional[UUID] = None,
+        planner_id: Optional[UUID] = None,
     ) -> UseCase.Response:
         if plan_id is None:
             plan_id = uuid4()
+        if planner_id is None:
+            planner_id = uuid4()
         return UseCase.Response(
             plans=[
                 UseCase.Plan(
-                    id=plan_id, product_name=product_name, planner_name=planner_name
+                    id=plan_id,
+                    product_name=product_name,
+                    planner_name=planner_name,
+                    planner_id=planner_id,
                 )
             ]
         )

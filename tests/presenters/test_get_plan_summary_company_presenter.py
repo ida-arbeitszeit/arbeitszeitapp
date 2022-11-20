@@ -45,7 +45,7 @@ TESTING_RESPONSE_MODEL = GetPlanSummaryCompany.Response(
 
 class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
     """
-    some functionality are tested in tests/presenters/test_plan_summary_service.py
+    some functionality are tested in tests/presenters/test_plan_summary_formatter.py
     """
 
     def setUp(self) -> None:

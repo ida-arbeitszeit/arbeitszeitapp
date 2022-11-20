@@ -5,7 +5,7 @@ from flask import Blueprint, redirect, session, url_for
 from flask_login import login_required
 
 from arbeitszeit_flask import types
-from arbeitszeit_flask.dependency_injection import with_injection
+from arbeitszeit_flask.dependency_injection import AccountantModule, with_injection
 
 main_accountant = Blueprint(
     "main_accountant",
@@ -34,7 +34,7 @@ class AccountantRoute:
 
     def _apply_decorators(self, function):
         return main_accountant.route(self.route_string, methods=self.methods)(
-            with_injection()(login_required(function))
+            with_injection([AccountantModule()])(login_required(function))
         )
 
 

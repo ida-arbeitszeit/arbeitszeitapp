@@ -57,6 +57,7 @@ from arbeitszeit_flask.mail_service import (
 )
 from arbeitszeit_flask.notifications import FlaskFlashNotifier
 from arbeitszeit_flask.template import (
+    AccountantTemplateIndex,
     AnonymousUserTemplateRenderer,
     CompanyTemplateIndex,
     FlaskTemplateRenderer,
@@ -111,6 +112,12 @@ from .views import ViewsModule
 __all__ = [
     "ViewsModule",
 ]
+
+
+class AccountantModule(Module):
+    @provider
+    def provide_template_index(self) -> TemplateIndex:
+        return AccountantTemplateIndex()
 
 
 class MemberModule(Module):
