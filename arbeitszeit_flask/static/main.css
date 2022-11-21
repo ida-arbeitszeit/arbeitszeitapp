@@ -11,6 +11,10 @@
     vertical-align: -.125em;
 }
 
+.media-right form button.large-button {
+  padding: 12px 12px 12px 12px;
+  vertical-align: -.125em;
+}
 
 /* notification box */
 .notification_box {

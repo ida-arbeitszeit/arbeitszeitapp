@@ -6,10 +6,12 @@
 
 {% block content %}
 <div class="section has-text-centered">
-    <h1 class="title">
-        {{ gettext("My cooperations") }}
-    </h1>
+  <h1 class="title">
+      {{ gettext("My cooperations") }}
+   </h1>  
+</div>
 
+<div class="section has-text-centered">
     <div class="tile is-ancestor">
         <div class="tile is-parent"></div>
         <a class="tile is-parent" href="{{ url_for('main_company.create_cooperation') }}">
@@ -21,7 +23,8 @@
         </a>
         <div class="tile is-parent"></div>
     </div>
-
+</div>
+<div class="section has-text-centered">
     <h1 class="title is-4">
         {{ gettext("Cooperations that I coordinate") }}
     </h1>
@@ -42,130 +45,112 @@
     {% endfor %}
     {% endif %}
 
-    <div class="table-container">
-        {% if list_of_coordinations.rows %}
-        <table class="table has-text-left mx-auto">
-            <thead>
-                <tr>
-                    <th>{{ gettext("Cooperation") }}</th>
-                    <th>{{ gettext("Name") }}</th>
-                    <th>{{ gettext("Definition") }}</th>
-                    <th>{{ gettext("Number of plans") }} </th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for coop in list_of_coordinations.rows %}
-                <tr>
-                    <td><a href="{{ coop.coop_summary_url }}">{{ coop.coop_id }}</a></td>
-                    <td>{{ coop.coop_name }}</td>
-                    <td>{% for paragraph in coop.coop_definition %}{{ paragraph }}<br>{% endfor %}</td>
-                    <td>{{ coop.count_plans_in_coop }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <p>{{ gettext("You do not coordinate any cooperation") }}</p>
-        {% endif %}
+    <div class="column is-offset-4 is-4 has-text-left">
+    {% if list_of_coordinations.rows %}
+    {% for coop in list_of_coordinations.rows %}
+      <article class="media">
+        <div class="media-content">
+          <div class="content">
+            <p>
+              <strong class="is-size-5">
+                <a href="{{ coop.coop_summary_url }}">{{ coop.coop_name }}</a>
+              </strong>
+              <br>
+              <small><span>{{ gettext("Number of plans") }}</span>&nbsp;{{ coop.count_plans_in_coop }}</small>
+            </p>
+          </div>
+        </div>
+      </article>  
+    {% endfor %}
+    {% else %}
+    <p class="has-text-centered">{{ gettext("You do not coordinate any cooperation") }}</p>
+    {% endif %}
     </div>
+</div>
+
+<div class="section has-text-centered">
     <div class="content">
         <h1 class="title is-4">
             {{ gettext("Incoming cooperation request (by others)") }}
         </h1>
     </div>
-    <div class="table-container">
-        {% if list_of_inbound_coop_requests.rows %}
-        <table class="table has-text-left mx-auto">
-            <thead>
-                <tr>
-                    <th>{{ gettext("My cooperation") }}</th>
-                    <th>{{ gettext("Requesting company") }}</th>
-                    <th>{{ gettext("Requesting plan") }}</th>
-                    <th>{{ gettext("Accept request") }}</th>
-                    <th>{{ gettext("Decline") }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for req in list_of_inbound_coop_requests.rows %}
-                <tr>
-                    <td>{{ req.coop_name }}</td>
-                    <td>{{ req.planner_name }}</td>
-                    <td>{{ req.plan_name }}</td>
-                    <form action="" method="post">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <td>
-                            <div class="control">
-                                <button class="button is-small is-success" name="accept"
-                                    value="{{ req.coop_id }},{{ req.plan_id }}" type="submit">
-                                    <span class="icon">
-                                        <i class="fas fa-check"></i>
-                                    </span>
-                                    <span>{{ gettext("Accept") }}</span>
-                                </button>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="control">
-                                <button class="button is-small is-danger" name="deny"
-                                    value="{{ req.coop_id }},{{ req.plan_id }}" type="submit">
-                                    <span class="icon">
-                                        <i class="fas fa-times"></i>
-                                    </span>
-                                    <span>{{ gettext("Decline") }}</span>
-                                </button>
-                            </div>
-                        </td>
-                    </form>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <p>{{ gettext("You don't have open requests") }}</p>
-        {% endif %}
-    </div>
 
+    <div class="column is-offset-4 is-4 has-text-left">
+    {% if list_of_inbound_coop_requests.rows %}
+    {% for req in list_of_inbound_coop_requests.rows %}
+        <article class="media">
+            <div class="media-content">
+                <div class="content">
+                    <p>
+                    <small><span>{{ gettext("Company") }}:</span>&nbsp;{{ req.coop_name }}</small>
+                    <br>
+                    <small><span>{{ gettext("Plan") }}:</span>&nbsp;{{ req.plan_name }}</small>
+                    <br>
+                    <small><span>{{ gettext("My cooperation") }}:</span>&nbsp;{{ req.coop_name }}</small
+                    </p>
+                </div>
+            </div>
+            <div class="media-right">
+                <form action="" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="content pt-1">
+                    <button class="button large-button is-primary" name="accept" 
+                        value="{{ req.coop_id }},{{ req.plan_id }}" type="submit" title="{{ gettext('Accept') }}">
+                        <i class="fas fa-check"></i>
+                    </button>
+                    &nbsp;
+                    <button class="button large-button is-danger" name="deny" 
+                        value="{{ req.coop_id }},{{ req.plan_id }}" type="submit" title="{{ gettext('Deny') }}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                </form>                
+            </div>
+        </article>  
+    
+    {% endfor %}
+    </div>
+    
+    {% else %}
+    <p class="has-text-centered">{{ gettext("You don't have open requests") }}</p>
+    {% endif %}
+
+</div>
+<div class="section has-text-centered">
     <div class="content">
         <h1 class="title is-4">
             {{ gettext("Outgoing cooperation requests (own requests)") }}
         </h1>
     </div>
 
-    <div class="table-container">
+    <div class="column is-offset-4 is-4 has-text-left">
         {% if list_of_outbound_coop_requests.rows %}
-        <table class="table has-text-left mx-auto">
-            <thead>
-                <tr>
-                    <th>{{ gettext("My requesting plan")}}</th>
-                    <th>{{ gettext("Requested cooperation") }}</th>
-                    <th>{{ gettext("Cancel request") }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for req in list_of_outbound_coop_requests.rows %}
-                <tr>
-                    <td>{{ req.plan_name }}</td>
-                    <td>{{ req.coop_name }}</td>
-                    <form action="" method="post">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <td>
-                            <div class="control">
-                                <button class="button is-small is-danger" name="cancel" value="{{ req.plan_id }}"
-                                    type="submit">
-                                    <span class="icon">
-                                        <i class="fas fa-times"></i>
-                                    </span>
-                                    <span>{{ gettext("Cancel")}}</span>
-                                </button>
-                            </div>
-                        </td>
+        {% for req in list_of_outbound_coop_requests.rows %}
+        <article class="media">
+            <div class="media-content">
+                <div class="content">
+                    <p>
+                    <small><span>{{ gettext("Plan") }}:</span>&nbsp;{{ req.plan_name }}</small>
+                    <br>
+                    <small><span>{{ gettext("Cooperation") }}:</span>&nbsp;{{ req.coop_name }}</small>
+                    </p>
+                </div>
+            </div>
+            <div class="media-right">
+                <form action="" method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="content pt-1">
+                        <button class="button large-button is-danger" name="cancel" 
+                            value="{{ req.plan_id }}" type="submit" title="{{ gettext('Cancel') }}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                     </form>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+            </div>
+        </article>
+        {% endfor %}
         {% else %}
-        <p>{{ gettext("You haven't requested any cooperation")}}</p>
+        <p class="has-text-centered">{{ gettext("You haven't requested any cooperation")}}</p>
         {% endif %}
     </div>
 </div>
