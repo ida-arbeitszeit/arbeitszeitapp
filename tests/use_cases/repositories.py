@@ -154,12 +154,14 @@ class MemberResult(QueryResultImpl[Member], interfaces.MemberResult):
     def with_email_address(self, email: str) -> MemberResult:
         return self._filtered_by(lambda model: model.email == email)
 
-    def set_confirmation_timestamp(self, timestamp: datetime) -> MemberResult:
-        def update_member(member: Member) -> bool:
+    def set_confirmation_timestamp(self, timestamp: datetime) -> int:
+        members = list(self)
+        for member in members:
             member.confirmed_on = timestamp
-            return True
+        return len(members)
 
-        return self._filtered_by(update_member)
+    def that_are_confirmed(self) -> MemberResult:
+        return self._filtered_by(lambda model: model.confirmed_on is not None)
 
     def _filtered_by(self, key: Callable[[Member], bool]) -> MemberResult:
         return type(self)(

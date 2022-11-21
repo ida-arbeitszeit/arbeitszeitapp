@@ -90,7 +90,10 @@ class MemberResult(QueryResult[Member], Protocol):
     def with_email_address(self, email: str) -> MemberResult:
         ...
 
-    def set_confirmation_timestamp(self, timestamp: datetime) -> MemberResult:
+    def set_confirmation_timestamp(self, timestamp: datetime) -> int:
+        ...
+
+    def that_are_confirmed(self) -> MemberResult:
         ...
 
 
