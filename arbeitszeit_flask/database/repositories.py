@@ -39,6 +39,7 @@ from arbeitszeit_flask.models import (
 )
 
 T = TypeVar("T", covariant=True)
+FlaskQueryResultT = TypeVar("FlaskQueryResultT", bound="FlaskQueryResult")
 
 
 class FlaskQueryResult(Generic[T]):
@@ -46,10 +47,10 @@ class FlaskQueryResult(Generic[T]):
         self.query = query
         self.mapper = mapper
 
-    def limit(self, n: int) -> FlaskQueryResult[T]:
+    def limit(self: FlaskQueryResultT, n: int) -> FlaskQueryResultT:
         return type(self)(query=self.query.limit(n), mapper=self.mapper)
 
-    def offset(self, n: int) -> FlaskQueryResult[T]:
+    def offset(self: FlaskQueryResultT, n: int) -> FlaskQueryResultT:
         return type(self)(query=self.query.offset(n), mapper=self.mapper)
 
     def first(self) -> Optional[T]:
@@ -57,6 +58,11 @@ class FlaskQueryResult(Generic[T]):
         if element is None:
             return None
         return self.mapper(element)
+
+    def _with_modified_query(
+        self: FlaskQueryResultT, modification: Callable[[Any], Any]
+    ) -> FlaskQueryResultT:
+        return type(self)(query=modification(self.query), mapper=self.mapper)
 
     def __iter__(self) -> Iterator[T]:
         return (self.mapper(item) for item in self.query)
@@ -116,29 +122,32 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
             )
         )
 
-    def _with_modified_query(
-        self, modification: Callable[[Any], Any]
+    def with_open_coordination_request(
+        self, *, cooperation: Optional[UUID] = None
     ) -> PlanQueryResult:
-        return type(self)(query=modification(self.query), mapper=self.mapper)
+        return self._with_modified_query(
+            lambda query: query.filter(
+                models.Plan.requested_cooperation == str(cooperation)
+                if cooperation
+                else models.Plan.requested_cooperation != None
+            )
+        )
 
 
 class MemberQueryResult(FlaskQueryResult[entities.Member]):
     def working_at_company(self, company: UUID) -> MemberQueryResult:
-        return type(self)(
-            query=self.query.filter(models.Member.workplaces.any(id=str(company))),
-            mapper=self.mapper,
+        return self._with_modified_query(
+            lambda query: query.filter(models.Member.workplaces.any(id=str(company)))
         )
 
     def with_id(self, member: UUID) -> MemberQueryResult:
-        return type(self)(
-            query=self.query.filter(models.Member.id == str(member)),
-            mapper=self.mapper,
+        return self._with_modified_query(
+            lambda query: query.filter(models.Member.id == str(member))
         )
 
     def with_email_address(self, email: str) -> MemberQueryResult:
-        return type(self)(
-            query=self.query.join(models.User).filter(models.User.email == email),
-            mapper=self.mapper,
+        return self._with_modified_query(
+            lambda query: query.join(models.User).filter(models.User.email == email)
         )
 
 
@@ -149,33 +158,24 @@ class PurchaseQueryResult(FlaskQueryResult[entities.Purchase]):
         ordering = models.Purchase.purchase_date
         if not ascending:
             ordering = ordering.desc()
-        return type(self)(
-            mapper=self.mapper,
-            query=self.query.order_by(ordering),
-        )
+        return self._with_modified_query(lambda query: query.order_by(ordering))
 
     def where_buyer_is_company(
         self, *, company: Optional[UUID] = None
     ) -> PurchaseQueryResult:
-        if company:
-            query = self.query.filter(models.Purchase.company == str(company))
-        else:
-            query = self.query.filter(models.Purchase.company != None)
-        return type(self)(
-            mapper=self.mapper,
-            query=query,
+        return self._with_modified_query(
+            lambda query: self.query.filter(models.Purchase.company == str(company))
+            if company
+            else self.query.filter(models.Purchase.company != None)
         )
 
     def where_buyer_is_member(
         self, *, member: Optional[UUID] = None
     ) -> PurchaseQueryResult:
-        if member:
-            query = self.query.filter(models.Purchase.member == str(member))
-        else:
-            query = self.query.filter(models.Purchase.member != None)
-        return type(self)(
-            mapper=self.mapper,
-            query=query,
+        return self._with_modified_query(
+            lambda query: self.query.filter(models.Purchase.member == str(member))
+            if member
+            else self.query.filter(models.Purchase.member != None)
         )
 
 
@@ -1248,16 +1248,6 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
                     )
                 ]:
                     yield plan
-
-    def get_outbound_requests(self, requester_id: UUID) -> Iterator[entities.Plan]:
-        plans_of_company = (
-            self.plan_repository.get_plans()
-            .planned_by(requester_id)
-            .ordered_by_creation_date(ascending=False)
-        )
-        for plan in plans_of_company:
-            if plan.requested_cooperation:
-                yield plan
 
     def get_cooperating_plans(self, plan_id: UUID) -> List[entities.Plan]:
         plan_orm = models.Plan.query.filter_by(id=str(plan_id)).first()
