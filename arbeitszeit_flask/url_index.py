@@ -13,6 +13,8 @@ class GeneralUrlIndex:
             return url_for("main_company.plan_summary", plan_id=plan_id)
         elif user_role == UserRole.member:
             return url_for("main_member.plan_summary", plan_id=plan_id)
+        elif user_role == UserRole.accountant:
+            return url_for("main_accountant.plan_summary", plan_id=plan_id)
         else:
             raise ValueError(f"Plan summary url is unsupported for {user_role}")
 
@@ -53,8 +55,10 @@ class GeneralUrlIndex:
     ) -> str:
         if user_role == UserRole.company:
             return url_for("main_company.company_summary", company_id=company_id)
-        if user_role == UserRole.member:
+        elif user_role == UserRole.member:
             return url_for("main_member.company_summary", company_id=company_id)
+        elif user_role == UserRole.accountant:
+            return url_for("main_accountant.company_summary", company_id=company_id)
         else:
             raise ValueError(f"company summary not available for {user_role}")
 

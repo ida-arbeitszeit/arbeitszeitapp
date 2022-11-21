@@ -32,6 +32,11 @@ class CompanyTemplateIndex:
         return f"company/{name}.html"
 
 
+class AccountantTemplateIndex:
+    def get_template_by_name(self, name: str) -> str:
+        return f"accountant/{name}.html"
+
+
 class FlaskTemplateRenderer:
     _EMPTY_CONTEXT: Dict[str, Any] = dict()
 
