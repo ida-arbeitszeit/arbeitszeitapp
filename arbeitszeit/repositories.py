@@ -264,6 +264,7 @@ class MemberRepository(ABC):
     @abstractmethod
     def create_member(
         self,
+        *,
         email: str,
         name: str,
         password: str,

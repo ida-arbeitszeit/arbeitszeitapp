@@ -18,7 +18,11 @@ def test_that_users_can_be_converted_from_and_to_orm_objects(
 ):
     account = account_repository.create_account(AccountTypes.member)
     expected_member = member_repository.create_member(
-        "member@cp.org", "karl", "password", account, datetime.now()
+        email="member@cp.org",
+        name="karl",
+        password="password",
+        account=account,
+        registered_on=datetime.now(),
     )
     converted_member = member_repository.object_from_orm(
         member_repository.object_to_orm(
@@ -69,7 +73,11 @@ def test_cannot_find_member_by_email_before_it_was_added(
     assert not members.with_email_address("member@cp.org")
     account = account_repository.create_account(AccountTypes.member)
     member_repository.create_member(
-        "member@cp.org", "karl", "password", account, datetime.now()
+        email="member@cp.org",
+        name="karl",
+        password="password",
+        account=account,
+        registered_on=datetime.now(),
     )
     assert members.with_email_address("member@cp.org")
 
@@ -95,7 +103,11 @@ def test_does_identify_member_id_as_member(
 ):
     account = account_repository.create_account(AccountTypes.member)
     member = member_repository.create_member(
-        "member@cp.org", "karl", "password", account, datetime.now()
+        email="member@cp.org",
+        name="karl",
+        password="password",
+        account=account,
+        registered_on=datetime.now(),
     )
     assert member_repository.get_members().with_id(member.id)
 

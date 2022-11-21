@@ -434,6 +434,7 @@ class MemberRepository(interfaces.MemberRepository):
 
     def create_member(
         self,
+        *,
         email: str,
         name: str,
         password: str,
