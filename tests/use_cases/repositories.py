@@ -154,6 +154,13 @@ class MemberResult(QueryResultImpl[Member], interfaces.MemberResult):
     def with_email_address(self, email: str) -> MemberResult:
         return self._filtered_by(lambda model: model.email == email)
 
+    def set_confirmation_timestamp(self, timestamp: datetime) -> MemberResult:
+        def update_member(member: Member) -> bool:
+            member.confirmed_on = timestamp
+            return True
+
+        return self._filtered_by(update_member)
+
     def _filtered_by(self, key: Callable[[Member], bool]) -> MemberResult:
         return type(self)(
             items=lambda: filter(key, self.items()),
@@ -449,17 +456,6 @@ class MemberRepository(interfaces.MemberRepository):
             if self.passwords[member.id] == password:
                 return member.id
         return None
-
-    def confirm_member(self, member: UUID, confirmed_on: datetime) -> None:
-        entity = self.members[member]
-        entity.confirmed_on = confirmed_on
-
-    def is_member_confirmed(self, member: UUID) -> bool:
-        entity = self.members.get(member)
-        if entity:
-            return entity.confirmed_on is not None
-        else:
-            return False
 
     def get_members(self) -> MemberResult:
         return MemberResult(
