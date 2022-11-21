@@ -82,9 +82,9 @@
             <div class="media-content">
                 <div class="content">
                     <p>
-                    <small><span>{{ gettext("Company") }}:</span>&nbsp;{{ req.coop_name }}</small>
+                    <small><span>{{ gettext("Company") }}:</span>&nbsp;<a href="{{ req.planner_url }}">{{ req.planner_name }}</a></small>
                     <br>
-                    <small><span>{{ gettext("Plan") }}:</span>&nbsp;{{ req.plan_name }}</small>
+                    <small><span>{{ gettext("Plan") }}:</span>&nbsp;<a href="{{ req.plan_url }}">{{ req.plan_name }}</a></small>
                     <br>
                     <small><span>{{ gettext("My cooperation") }}:</span>&nbsp;{{ req.coop_name }}</small
                     </p>
@@ -100,7 +100,7 @@
                     </button>
                     &nbsp;
                     <button class="button large-button is-danger" name="deny" 
-                        value="{{ req.coop_id }},{{ req.plan_id }}" type="submit" title="{{ gettext('Deny') }}">
+                        value="{{ req.coop_id }},{{ req.plan_id }}" type="submit" title="{{ gettext('Decline') }}">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
