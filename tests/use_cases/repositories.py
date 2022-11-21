@@ -88,7 +88,7 @@ class QueryResultImpl(Generic[T]):
         return len(list(self.items()))
 
 
-class PlanResult(QueryResultImpl[Plan]):
+class PlanResult(QueryResultImpl[Plan], interfaces.PlanResult):
     def ordered_by_creation_date(self, ascending: bool = True) -> PlanResult:
         return type(self)(
             items=lambda: sorted(
@@ -141,7 +141,7 @@ class PlanResult(QueryResultImpl[Plan]):
         )
 
 
-class MemberResult(QueryResultImpl[Member]):
+class MemberResult(QueryResultImpl[Member], interfaces.MemberResult):
     def working_at_company(self, company: UUID) -> MemberResult:
         return self._filtered_by(
             lambda member: member.id
@@ -162,7 +162,7 @@ class MemberResult(QueryResultImpl[Member]):
         )
 
 
-class PurchaseResult(QueryResultImpl[Purchase]):
+class PurchaseResult(QueryResultImpl[Purchase], interfaces.PurchaseResult):
     def ordered_by_creation_date(self, ascending: bool = True) -> PurchaseResult:
         return type(self)(
             items=lambda: sorted(
