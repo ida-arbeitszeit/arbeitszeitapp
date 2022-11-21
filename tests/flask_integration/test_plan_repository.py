@@ -8,7 +8,7 @@ from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit_flask.database.repositories import PlanRepository
 from tests.datetime_service import FakeDatetimeService
 
-from ..data_generators import CompanyGenerator, PlanGenerator
+from ..data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
 from .flask import FlaskTestCase
 
 Number = Union[int, Decimal]
@@ -263,6 +263,7 @@ class GetAllPlans(FlaskTestCase):
         self.plan_repository = self.injector.get(PlanRepository)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
+        self.cooperation_generator = self.injector.get(CooperationGenerator)
 
     def test_that_without_any_plans_nothing_is_returned(self) -> None:
         assert not list(self.plan_repository.get_plans())
@@ -326,3 +327,28 @@ class GetAllPlans(FlaskTestCase):
     ) -> None:
         self.plan_generator.create_plan(approved=False)
         assert self.plan_repository.get_plans().without_completed_review()
+
+    def test_that_plans_with_open_cooperation_request_can_be_filtered(self) -> None:
+        coop = self.cooperation_generator.create_cooperation()
+        requesting_plan = self.plan_generator.create_plan(requested_cooperation=coop)
+        non_requesting_plan = self.plan_generator.create_plan()
+        results = self.plan_repository.get_plans().with_open_coordination_request()
+        assert requesting_plan.id in [plan.id for plan in results]
+        assert non_requesting_plan.id not in [plan.id for plan in results]
+
+    def test_that_plans_with_open_cooperation_request_at_specific_coop_can_be_filtered(
+        self,
+    ) -> None:
+        coop = self.cooperation_generator.create_cooperation()
+        other_coop = self.cooperation_generator.create_cooperation()
+        plan_requesting_at_coop = self.plan_generator.create_plan(
+            requested_cooperation=coop
+        )
+        plan_requesting_at_other_coop = self.plan_generator.create_plan(
+            requested_cooperation=other_coop
+        )
+        results = self.plan_repository.get_plans().with_open_coordination_request(
+            cooperation=coop.id
+        )
+        assert plan_requesting_at_coop.id in [plan.id for plan in results]
+        assert plan_requesting_at_other_coop.id not in [plan.id for plan in results]

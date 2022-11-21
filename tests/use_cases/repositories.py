@@ -88,7 +88,7 @@ class QueryResultImpl(Generic[T]):
         return len(list(self.items()))
 
 
-class PlanResult(QueryResultImpl[Plan]):
+class PlanResult(QueryResultImpl[Plan], interfaces.PlanResult):
     def ordered_by_creation_date(self, ascending: bool = True) -> PlanResult:
         return type(self)(
             items=lambda: sorted(
@@ -124,6 +124,15 @@ class PlanResult(QueryResultImpl[Plan]):
     def without_completed_review(self) -> PlanResult:
         return self._filtered_by(lambda plan: plan.approval_date is None)
 
+    def with_open_coordination_request(
+        self, *, cooperation: Optional[UUID] = None
+    ) -> PlanResult:
+        return self._filtered_by(
+            lambda plan: plan.requested_cooperation == cooperation
+            if cooperation
+            else plan.requested_cooperation is not None
+        )
+
     def _filtered_by(self, key: Callable[[Plan], bool]) -> PlanResult:
         return type(self)(
             items=lambda: filter(key, self.items()),
@@ -132,7 +141,7 @@ class PlanResult(QueryResultImpl[Plan]):
         )
 
 
-class MemberResult(QueryResultImpl[Member]):
+class MemberResult(QueryResultImpl[Member], interfaces.MemberResult):
     def working_at_company(self, company: UUID) -> MemberResult:
         return self._filtered_by(
             lambda member: member.id
@@ -153,7 +162,7 @@ class MemberResult(QueryResultImpl[Member]):
         )
 
 
-class PurchaseResult(QueryResultImpl[Purchase]):
+class PurchaseResult(QueryResultImpl[Purchase], interfaces.PurchaseResult):
     def ordered_by_creation_date(self, ascending: bool = True) -> PurchaseResult:
         return type(self)(
             items=lambda: sorted(
@@ -946,16 +955,6 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
         )
         for plan in self.plan_repository.plans.values():
             if plan.requested_cooperation in [coop.id for coop in coops_of_company]:
-                yield plan
-
-    def get_outbound_requests(self, requester_id: UUID) -> Iterator[Plan]:
-        plans_of_company = (
-            self.plan_repository.get_plans()
-            .planned_by(requester_id)
-            .ordered_by_creation_date(ascending=False)
-        )
-        for plan in plans_of_company:
-            if plan.requested_cooperation:
                 yield plan
 
     def get_cooperating_plans(self, plan_id: UUID) -> List[Plan]:

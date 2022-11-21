@@ -26,16 +26,17 @@ from arbeitszeit.entities import (
 )
 
 T = TypeVar("T", covariant=True)
+QueryResultT = TypeVar("QueryResultT", bound="QueryResult")
 
 
 class QueryResult(Protocol, Generic[T]):
     def __iter__(self) -> Iterator[T]:
         ...
 
-    def limit(self, n: int) -> QueryResult[T]:
+    def limit(self: QueryResultT, n: int) -> QueryResultT:
         ...
 
-    def offset(self, n: int) -> QueryResult[T]:
+    def offset(self: QueryResultT, n: int) -> QueryResultT:
         ...
 
     def first(self) -> Optional[T]:
@@ -71,6 +72,11 @@ class PlanResult(QueryResult[Plan], Protocol):
         ...
 
     def without_completed_review(self) -> PlanResult:
+        ...
+
+    def with_open_coordination_request(
+        self, *, cooperation: Optional[UUID] = ...
+    ) -> PlanResult:
         ...
 
 
@@ -458,10 +464,6 @@ class PlanCooperationRepository(ABC):
 
     @abstractmethod
     def get_inbound_requests(self, coordinator_id: UUID) -> Iterator[Plan]:
-        pass
-
-    @abstractmethod
-    def get_outbound_requests(self, requester_id: UUID) -> Iterator[Plan]:
         pass
 
     @abstractmethod
