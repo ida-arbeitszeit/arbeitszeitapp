@@ -82,9 +82,15 @@
             <div class="media-content">
                 <div class="content">
                     <p>
-                    <small><span>{{ gettext("Company") }}:</span>&nbsp;<a href="{{ req.planner_url }}">{{ req.planner_name }}</a></small>
+                    <small>
+                        <span>{{ gettext("Company") }}:</span>&nbsp;
+                        <strong><a href="{{ req.planner_url }}">{{ req.planner_name }}</a></strong>
+                    </small>
                     <br>
-                    <small><span>{{ gettext("Plan") }}:</span>&nbsp;<a href="{{ req.plan_url }}">{{ req.plan_name }}</a></small>
+                    <small>
+                        <span>{{ gettext("Plan") }}:</span>&nbsp;
+                        <strong><a href="{{ req.plan_url }}">{{ req.plan_name }}</a></strong>
+                    </small>
                     <br>
                     <small><span>{{ gettext("My cooperation") }}:</span>&nbsp;{{ req.coop_name }}</small
                     </p>
@@ -130,7 +136,10 @@
             <div class="media-content">
                 <div class="content">
                     <p>
-                    <small><span>{{ gettext("Plan") }}:</span>&nbsp;{{ req.plan_name }}</small>
+                    <small>
+                        <span>{{ gettext("Plan") }}:</span>&nbsp;
+                        <strong><a href="{{ req.plan_url }}">{{ req.plan_name }}</a></strong>
+                    </small>
                     <br>
                     <small><span>{{ gettext("Cooperation") }}:</span>&nbsp;{{ req.coop_name }}</small>
                     </p>

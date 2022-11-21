@@ -43,6 +43,7 @@ class ListOfInboundCooperationRequestsRow:
 class ListOfOutboundCooperationRequestsRow:
     plan_id: str
     plan_name: str
+    plan_url: str
     coop_id: str
     coop_name: str
 
@@ -174,6 +175,9 @@ class ShowMyCooperationsPresenter:
         return ListOfOutboundCooperationRequestsRow(
             plan_id=str(plan.plan_id),
             plan_name=plan.plan_name,
+            plan_url=self.url_index.get_plan_summary_url(
+                user_role=UserRole.company, plan_id=plan.plan_id
+            ),
             coop_id=str(plan.coop_id),
             coop_name=plan.coop_name,
         )
