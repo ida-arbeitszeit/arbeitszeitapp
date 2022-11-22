@@ -33,6 +33,9 @@ from arbeitszeit.use_cases.delete_draft import DeleteDraftUseCase
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
 from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
 from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
+from arbeitszeit.use_cases.list_my_cooperating_plans import (
+    ListMyCooperatingPlansUseCase,
+)
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_flask.database import CompanyRepository, commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
@@ -571,6 +574,7 @@ def my_cooperations(
     accept_cooperation: AcceptCooperation,
     deny_cooperation: DenyCooperation,
     list_outbound_coop_requests: ListOutboundCoopRequests,
+    list_my_cooperating_plans: ListMyCooperatingPlansUseCase,
     presenter: ShowMyCooperationsPresenter,
     cancel_cooperation_solicitation: CancelCooperationSolicitation,
 ):
@@ -608,6 +612,9 @@ def my_cooperations(
     list_outbound_coop_requests_response = list_outbound_coop_requests(
         ListOutboundCoopRequestsRequest(UUID(current_user.id))
     )
+    list_my_coop_plans_response = list_my_cooperating_plans.list_cooperations(
+        UUID(current_user.id)
+    )
 
     view_model = presenter.present(
         list_coord_response,
@@ -616,6 +623,7 @@ def my_cooperations(
         deny_cooperation_response,
         list_outbound_coop_requests_response,
         cancel_cooperation_solicitation_response,
+        list_my_coop_plans_response,
     )
     return template_renderer.render_template(
         "company/my_cooperations.html", context=view_model.to_dict()
