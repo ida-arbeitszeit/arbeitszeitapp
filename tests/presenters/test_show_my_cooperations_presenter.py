@@ -11,6 +11,9 @@ from arbeitszeit.use_cases import (
     ListInboundCoopRequestsResponse,
     ListOutboundCoopRequestsResponse,
 )
+from arbeitszeit.use_cases.list_my_cooperating_plans import (
+    ListMyCooperatingPlansUseCase,
+)
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.show_my_cooperations import ShowMyCooperationsPresenter
 from tests.presenters.base_test_case import BaseTestCase
@@ -73,6 +76,25 @@ def get_outbound_response_length_1(
     )
 
 
+def get_coop_plans_response_length_1(
+    plan_id: UUID = None, coop_id: UUID = None
+) -> ListMyCooperatingPlansUseCase.Response:
+    if plan_id is None:
+        plan_id = uuid4()
+    if coop_id is None:
+        coop_id = uuid4()
+    return ListMyCooperatingPlansUseCase.Response(
+        cooperating_plans=[
+            ListMyCooperatingPlansUseCase.CooperatingPlan(
+                plan_id=plan_id,
+                plan_name="test plan name",
+                coop_id=coop_id,
+                coop_name="test coop name",
+            )
+        ]
+    )
+
+
 class ShowMyCooperationsPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
@@ -88,6 +110,7 @@ class ShowMyCooperationsPresenterTests(BaseTestCase):
             DenyCooperationResponse(rejection_reason=None),
             get_outbound_response_length_1(),
             None,
+            get_coop_plans_response_length_1(),
         )
         self.assertEqual(len(presentation.list_of_coordinations.rows), 1)
         self.assertEqual(
@@ -126,6 +149,7 @@ class ShowMyCooperationsPresenterTests(BaseTestCase):
             None,
             get_outbound_response_length_1(),
             None,
+            get_coop_plans_response_length_1(),
         )
         self.assertTrue(presentation_success.accept_message_success)
         self.assertFalse(presentation_success.deny_message_success)
@@ -146,6 +170,7 @@ class ShowMyCooperationsPresenterTests(BaseTestCase):
             DenyCooperationResponse(rejection_reason=None),
             get_outbound_response_length_1(),
             None,
+            get_coop_plans_response_length_1(),
         )
         self.assertTrue(presentation_success.deny_message_success)
         self.assertFalse(presentation_success.accept_message_success)
@@ -168,6 +193,7 @@ class ShowMyCooperationsPresenterTests(BaseTestCase):
             None,
             get_outbound_response_length_1(),
             None,
+            get_coop_plans_response_length_1(),
         )
         self.assertFalse(presentation_failure.accept_message_success)
         self.assertFalse(presentation_failure.deny_message_success)
@@ -190,6 +216,7 @@ class ShowMyCooperationsPresenterTests(BaseTestCase):
             ),
             get_outbound_response_length_1(),
             None,
+            get_coop_plans_response_length_1(),
         )
         self.assertFalse(presentation_failure.deny_message_success)
         self.assertFalse(presentation_failure.accept_message_success)
@@ -210,6 +237,7 @@ class ShowMyCooperationsPresenterTests(BaseTestCase):
             None,
             get_outbound_response_length_1(),
             True,
+            get_coop_plans_response_length_1(),
         )
         self.assertTrue(presentation.cancel_message_success)
         self.assertEqual(
@@ -229,6 +257,7 @@ class ShowMyCooperationsPresenterTests(BaseTestCase):
             None,
             get_outbound_response_length_1(),
             False,
+            get_coop_plans_response_length_1(),
         )
         self.assertFalse(presentation.cancel_message_success)
         self.assertEqual(
@@ -258,6 +287,7 @@ class InboundTest(BaseTestCase):
             DenyCooperationResponse(rejection_reason=None),
             get_outbound_response_length_1(),
             None,
+            get_coop_plans_response_length_1(),
         )
 
     def test_inbound_coop_name_is_presented(self):
@@ -318,6 +348,7 @@ class OutboundTest(BaseTestCase):
             DenyCooperationResponse(rejection_reason=None),
             get_outbound_response_length_1(plan_id=self.PLAN_ID, coop_id=self.COOP_ID),
             None,
+            get_coop_plans_response_length_1(),
         )
 
     def test_outbound_plan_id_is_presented_correctly(self):
@@ -348,4 +379,49 @@ class OutboundTest(BaseTestCase):
             self.url_index.get_plan_summary_url(
                 user_role=UserRole.company, plan_id=self.PLAN_ID
             ),
+        )
+
+
+class CooperatingPlansTest(BaseTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.presenter = self.injector.get(ShowMyCooperationsPresenter)
+        self.url_index = self.injector.get(UrlIndexTestImpl)
+        self.COOP_ID = uuid4()
+        self.PLAN_ID = uuid4()
+        self.view_model = self.presenter.present(
+            LIST_COORDINATIONS_RESPONSE_LEN_1,
+            get_inbound_response_length_1(),
+            AcceptCooperationResponse(rejection_reason=None),
+            DenyCooperationResponse(rejection_reason=None),
+            get_outbound_response_length_1(),
+            None,
+            get_coop_plans_response_length_1(
+                plan_id=self.PLAN_ID, coop_id=self.COOP_ID
+            ),
+        )
+
+    def test_show_one_plan_if_one_plan_exists(self):
+        assert len(self.view_model.list_of_my_cooperating_plans.rows) == 1
+
+    def test_name_of_plan_is_shown(self):
+        assert self.view_model.list_of_my_cooperating_plans.rows[0].plan_name
+
+    def test_name_of_cooperation_is_shown(self):
+        assert self.view_model.list_of_my_cooperating_plans.rows[0].coop_name
+
+    def test_plan_url_is_shown_correctly(self):
+        self.assertEqual(
+            self.url_index.get_plan_summary_url(
+                user_role=UserRole.company, plan_id=self.PLAN_ID
+            ),
+            self.view_model.list_of_my_cooperating_plans.rows[0].plan_url,
+        )
+
+    def test_coop_url_is_shown_correctly(self):
+        self.assertEqual(
+            self.url_index.get_coop_summary_url(
+                user_role=UserRole.company, coop_id=self.COOP_ID
+            ),
+            self.view_model.list_of_my_cooperating_plans.rows[0].coop_url,
         )
