@@ -105,6 +105,11 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
             lambda query: query.filter(models.Plan.is_public_service == True)
         )
 
+    def that_are_cooperating(self) -> PlanQueryResult:
+        return self._with_modified_query(
+            lambda query: query.filter(models.Plan.cooperation != None)
+        )
+
     def planned_by(self, company: UUID) -> PlanQueryResult:
         return self._with_modified_query(
             lambda query: query.filter(models.Plan.planner == str(company))

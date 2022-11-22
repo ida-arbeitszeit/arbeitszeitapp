@@ -65,6 +65,9 @@ class PlanResult(QueryResult[Plan], Protocol):
     def that_are_public(self) -> PlanResult:
         ...
 
+    def that_are_cooperating(self) -> PlanResult:
+        ...
+
     def planned_by(self, company: UUID) -> PlanResult:
         ...
 

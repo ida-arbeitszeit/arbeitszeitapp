@@ -115,6 +115,9 @@ class PlanResult(QueryResultImpl[Plan], interfaces.PlanResult):
     def that_are_public(self) -> PlanResult:
         return self._filtered_by(lambda plan: plan.is_public_service)
 
+    def that_are_cooperating(self) -> PlanResult:
+        return self._filtered_by(lambda plan: plan.cooperation is not None)
+
     def planned_by(self, company: UUID) -> PlanResult:
         return self._filtered_by(lambda plan: plan.planner.id == company)
 
