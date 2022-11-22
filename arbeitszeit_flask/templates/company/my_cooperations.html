@@ -92,7 +92,7 @@
                         <strong><a href="{{ req.plan_url }}">{{ req.plan_name }}</a></strong>
                     </small>
                     <br>
-                    <small><span>{{ gettext("My cooperation") }}:</span>&nbsp;{{ req.coop_name }}</small
+                    <small><span>{{ gettext("My cooperation") }}:</span>&nbsp;{{ req.coop_name }}</small>
                     </p>
                 </div>
             </div>
@@ -170,5 +170,28 @@
             {{ gettext("My cooperating plans") }}
         </h1>
     </div>
+
+    <div class="column is-offset-4 is-4 has-text-left">
+        {% if list_of_my_cooperating_plans.rows %}
+        {% for plan in list_of_my_cooperating_plans.rows %}
+        <article class="media">
+            <div class="media-content">
+                <div class="content">
+                    <p>
+                        <strong class="is-size-5">
+                            <a href="{{ plan.plan_url }}">{{ plan.plan_name }}</a>
+                        </strong>
+                        <br>
+                        <small>{{ gettext("Cooperation") }}: <strong><a href="{{ plan.coop_url }}">{{ plan.coop_name }}</a></strong></small>
+                    </p>
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+        {% else %}
+        <p class="has-text-centered">{{ gettext("You don't have any cooperating plans.")}}</p>
+        {% endif %}
+    </div>
+
 </div>
 {% endblock %}
