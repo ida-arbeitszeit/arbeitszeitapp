@@ -34,13 +34,16 @@ class ListOfInboundCooperationRequestsRow:
     coop_name: str
     plan_id: str
     plan_name: str
+    plan_url: str
     planner_name: str
+    planner_url: str
 
 
 @dataclass
 class ListOfOutboundCooperationRequestsRow:
     plan_id: str
     plan_name: str
+    plan_url: str
     coop_id: str
     coop_name: str
 
@@ -157,7 +160,13 @@ class ShowMyCooperationsPresenter:
             coop_name=plan.coop_name,
             plan_id=str(plan.plan_id),
             plan_name=plan.plan_name,
+            plan_url=self.url_index.get_plan_summary_url(
+                user_role=UserRole.company, plan_id=plan.plan_id
+            ),
             planner_name=plan.planner_name,
+            planner_url=self.url_index.get_company_summary_url(
+                user_role=UserRole.company, company_id=plan.planner_id
+            ),
         )
 
     def _display_outbound_coop_requests(
@@ -166,6 +175,9 @@ class ShowMyCooperationsPresenter:
         return ListOfOutboundCooperationRequestsRow(
             plan_id=str(plan.plan_id),
             plan_name=plan.plan_name,
+            plan_url=self.url_index.get_plan_summary_url(
+                user_role=UserRole.company, plan_id=plan.plan_id
+            ),
             coop_id=str(plan.coop_id),
             coop_name=plan.coop_name,
         )

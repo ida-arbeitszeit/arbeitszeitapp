@@ -4,6 +4,7 @@ from unittest import TestCase
 from tests.data_generators import (
     AccountantGenerator,
     CompanyGenerator,
+    CooperationGenerator,
     MemberGenerator,
     PlanGenerator,
 )
@@ -56,4 +57,5 @@ class BaseTestCase(TestCase):
     company_generator = _lazy_property(CompanyGenerator)
     plan_generator = _lazy_property(PlanGenerator)
     accountant_generator = _lazy_property(AccountantGenerator)
+    coop_generator = _lazy_property(CooperationGenerator)
     datetime_service = _lazy_property(FakeDatetimeService)
