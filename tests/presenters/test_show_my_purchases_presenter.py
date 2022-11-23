@@ -81,7 +81,7 @@ class TestPresenter(TestCase):
 
         now = self.datetime_service.now()
 
-        company = self.company_generator.create_company()
+        company = self.company_generator.create_company_entity()
         self.purchase_generator.create_purchase_by_company(
             buyer=company,
             purchase_date=now,
