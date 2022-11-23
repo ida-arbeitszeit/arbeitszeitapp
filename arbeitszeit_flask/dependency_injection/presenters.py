@@ -39,6 +39,9 @@ from arbeitszeit_web.presenters.registration_email_presenter import (
 from arbeitszeit_web.presenters.send_work_certificates_to_worker_presenter import (
     SendWorkCertificatesToWorkerPresenter,
 )
+from arbeitszeit_web.presenters.show_my_purchases_presenter import (
+    ShowMyPurchasesPresenter,
+)
 from arbeitszeit_web.request_cooperation import RequestCooperationPresenter
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
@@ -155,3 +158,11 @@ class PresenterModule(Module):
         datetime_service: DatetimeService,
     ) -> MemberPurchasesPresenter:
         return MemberPurchasesPresenter(datetime_service=datetime_service)
+
+    @provider
+    def provide_show_my_purchases_presenter(
+        self, datetime_service: DatetimeService
+    ) -> ShowMyPurchasesPresenter:
+        return ShowMyPurchasesPresenter(
+            datetime_service=datetime_service,
+        )
