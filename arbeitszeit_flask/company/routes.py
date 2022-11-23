@@ -167,7 +167,7 @@ def query_companies(
         return view.respond_to_get()
 
 
-@CompanyRoute("/company/kaeufe")
+@CompanyRoute("/company/purchases")
 def my_purchases(
     query_purchases: use_cases.QueryPurchases,
     company_repository: CompanyRepository,
