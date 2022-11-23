@@ -8,7 +8,7 @@ from arbeitszeit_web.presenters.show_my_purchases_presenter import (
 )
 from tests.data_generators import CompanyGenerator, MemberGenerator, PurchaseGenerator
 from tests.datetime_service import FakeDatetimeService
-from tests.use_cases.dependency_injection import get_dependency_injector
+from tests.presenters.dependency_injection import get_dependency_injector
 
 
 class TestPresenter(TestCase):
@@ -26,7 +26,8 @@ class TestPresenter(TestCase):
 
         now = self.datetime_service.now()
 
-        member = self.member_generator.create_member()
+        member = self.member_generator.create_member_entity()
+
         self.purchase_generator.create_purchase_by_member(
             buyer=member,
             purchase_date=now,
