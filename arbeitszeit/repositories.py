@@ -90,6 +90,12 @@ class MemberResult(QueryResult[Member], Protocol):
     def with_email_address(self, email: str) -> MemberResult:
         ...
 
+    def set_confirmation_timestamp(self, timestamp: datetime) -> int:
+        ...
+
+    def that_are_confirmed(self) -> MemberResult:
+        ...
+
 
 class PurchaseResult(QueryResult[Purchase], Protocol):
     def ordered_by_creation_date(self, *, ascending: bool = ...) -> PurchaseResult:
@@ -258,6 +264,7 @@ class MemberRepository(ABC):
     @abstractmethod
     def create_member(
         self,
+        *,
         email: str,
         name: str,
         password: str,
@@ -272,14 +279,6 @@ class MemberRepository(ABC):
 
     @abstractmethod
     def get_members(self) -> MemberResult:
-        pass
-
-    @abstractmethod
-    def confirm_member(self, member: UUID, confirmed_on: datetime) -> None:
-        pass
-
-    @abstractmethod
-    def is_member_confirmed(self, member: UUID) -> bool:
         pass
 
 

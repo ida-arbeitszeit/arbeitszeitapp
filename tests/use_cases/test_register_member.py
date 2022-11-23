@@ -1,10 +1,11 @@
 from arbeitszeit.entities import AccountTypes
 from arbeitszeit.use_cases import RegisterMemberUseCase
+from arbeitszeit.use_cases.get_member_dashboard import GetMemberDashboard
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from tests.token import TokenDeliveryService
 
 from .base_test_case import BaseTestCase
-from .repositories import AccountRepository, MemberRepository
+from .repositories import AccountRepository
 
 DEFAULT = dict(
     email="test@cp.org",
@@ -18,9 +19,9 @@ class RegisterMemberTests(BaseTestCase):
         super().setUp()
         self.use_case = self.injector.get(RegisterMemberUseCase)
         self.account_repository = self.injector.get(AccountRepository)
-        self.member_repo = self.injector.get(MemberRepository)
         self.token_delivery = self.injector.get(TokenDeliveryService)
         self.login_use_case = self.injector.get(LogInMemberUseCase)
+        self.get_member_dashboard = self.injector.get(GetMemberDashboard)
 
     def test_that_a_token_is_sent_out_when_a_member_registers(self) -> None:
         self.use_case.register_member(RegisterMemberUseCase.Request(**DEFAULT))
@@ -29,13 +30,13 @@ class RegisterMemberTests(BaseTestCase):
     def test_that_token_was_delivered_to_registering_user(self) -> None:
         request_args = DEFAULT.copy()
         request_args.pop("email")
-        self.use_case.register_member(
+        response = self.use_case.register_member(
             RegisterMemberUseCase.Request(email="test@test.test", **request_args)
         )
-        expected_user = list(self.member_repo.members.keys())[0]
+        assert response.user_id
         self.assertEqual(
             self.token_delivery.presented_member_tokens[0].user,
-            expected_user,
+            response.user_id,
         )
 
     def test_that_registering_member_is_possible(self) -> None:
@@ -52,13 +53,11 @@ class RegisterMemberTests(BaseTestCase):
 
     def test_that_correct_member_attributes_are_registered(self) -> None:
         request = RegisterMemberUseCase.Request(**DEFAULT)
-        self.use_case.register_member(request)
-        assert len(self.member_repo.members) == 1
-        for member in self.member_repo.members.values():
-            self.assertEqual(member.email, request.email)
-            self.assertEqual(member.name, request.name)
-            self.assertIsNotNone(member.registered_on)
-            self.assertIsNone(member.confirmed_on)
+        response = self.use_case.register_member(request)
+        assert response.user_id
+        dashboard_response = self.get_member_dashboard(response.user_id)
+        assert dashboard_response.email == DEFAULT["email"]
+        assert dashboard_response.name == DEFAULT["name"]
 
     def test_that_correct_error_is_raised_when_user_with_mail_exists(self) -> None:
         self.member_generator.create_member_entity(email="test@cp.org")

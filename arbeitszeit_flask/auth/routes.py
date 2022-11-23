@@ -73,7 +73,11 @@ def set_language(language=None):
 @with_injection()
 @login_required
 def unconfirmed_member(member_repository: MemberRepository):
-    if member_repository.is_member_confirmed(UUID(current_user.id)):
+    if (
+        member_repository.get_members()
+        .with_id(UUID(current_user.id))
+        .that_are_confirmed()
+    ):
         return redirect(url_for("auth.start"))
     return render_template("auth/unconfirmed_member.html")
 

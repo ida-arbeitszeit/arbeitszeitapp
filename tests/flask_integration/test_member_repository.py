@@ -18,7 +18,11 @@ def test_that_users_can_be_converted_from_and_to_orm_objects(
 ):
     account = account_repository.create_account(AccountTypes.member)
     expected_member = member_repository.create_member(
-        "member@cp.org", "karl", "password", account, datetime.now()
+        email="member@cp.org",
+        name="karl",
+        password="password",
+        account=account,
+        registered_on=datetime.now(),
     )
     converted_member = member_repository.object_from_orm(
         member_repository.object_to_orm(
@@ -69,7 +73,11 @@ def test_cannot_find_member_by_email_before_it_was_added(
     assert not members.with_email_address("member@cp.org")
     account = account_repository.create_account(AccountTypes.member)
     member_repository.create_member(
-        "member@cp.org", "karl", "password", account, datetime.now()
+        email="member@cp.org",
+        name="karl",
+        password="password",
+        account=account,
+        registered_on=datetime.now(),
     )
     assert members.with_email_address("member@cp.org")
 
@@ -95,7 +103,11 @@ def test_does_identify_member_id_as_member(
 ):
     account = account_repository.create_account(AccountTypes.member)
     member = member_repository.create_member(
-        "member@cp.org", "karl", "password", account, datetime.now()
+        email="member@cp.org",
+        name="karl",
+        password="password",
+        account=account,
+        registered_on=datetime.now(),
     )
     assert member_repository.get_members().with_id(member.id)
 
@@ -260,37 +272,47 @@ class ConfirmMemberTests(FlaskTestCase):
     def test_that_confirmed_on_gets_updated_for_affected_user(self) -> None:
         expected_timestamp = datetime(2000, 1, 2)
         member_id = self.create_member()
-        self.repository.confirm_member(member_id, confirmed_on=expected_timestamp)
+        self.repository.get_members().with_id(member_id).set_confirmation_timestamp(
+            expected_timestamp
+        )
         member = self.repository.get_members().with_id(member_id).first()
         assert member
         assert member.confirmed_on == expected_timestamp
 
     def test_that_member_is_confirmed_after_confirmation_date_is_set(self) -> None:
         member_id = self.create_member()
-        self.repository.confirm_member(member_id, confirmed_on=datetime(2000, 1, 2))
-        assert self.repository.is_member_confirmed(member_id)
+        self.repository.get_members().with_id(member_id).set_confirmation_timestamp(
+            datetime(2000, 1, 2)
+        )
+        assert self.repository.get_members().with_id(member_id).that_are_confirmed()
 
     def test_that_member_is_not_confirmed_before_setting_confirmation_date(
         self,
     ) -> None:
         member_id = self.create_member()
-        self.assertFalse(self.repository.is_member_confirmed(member_id))
-
-    def test_that_is_member_confirmed_returns_false_for_non_existing_member(
-        self,
-    ) -> None:
-        self.assertFalse(
-            self.repository.is_member_confirmed(uuid4()),
-        )
+        assert not self.repository.get_members().that_are_confirmed().with_id(member_id)
 
     def test_that_confirmed_on_does_not_get_updated_for_other_user(self) -> None:
         other_member_id = self.member_generator.create_member_entity(confirmed=False).id
         expected_timestamp = datetime(2000, 1, 2)
         member_id = self.create_member()
-        self.repository.confirm_member(member_id, confirmed_on=expected_timestamp)
+        self.repository.get_members().with_id(member_id).set_confirmation_timestamp(
+            expected_timestamp
+        )
         member = self.repository.get_members().with_id(other_member_id).first()
         assert member
         assert member.confirmed_on is None
+
+    def test_that_member_confirmation_returns_the_count_of_update_members(self) -> None:
+        expected_count = 5
+        for _ in range(5):
+            self.member_generator.create_member_entity()
+        assert (
+            expected_count
+            == self.repository.get_members().set_confirmation_timestamp(
+                datetime(2000, 1, 1)
+            )
+        )
 
     def create_member(self) -> UUID:
         member = self.repository.create_member(

@@ -108,7 +108,11 @@ class MemberGenerator:
             account=account,
             registered_on=registered_on,
         )
-        self.member_repository.confirm_member(member.id, confirmed_on=registered_on)
+        assert (
+            self.member_repository.get_members()
+            .with_id(member.id)
+            .set_confirmation_timestamp(registered_on)
+        )
         member = self.member_repository.get_members().with_id(member.id).first()
         assert member
         return member

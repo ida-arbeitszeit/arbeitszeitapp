@@ -54,7 +54,11 @@ class RegisterMemberUseCase:
         member_account = self.account_repository.create_account(AccountTypes.member)
         registered_on = self.datetime_service.now()
         member = self.member_repository.create_member(
-            request.email, request.name, request.password, member_account, registered_on
+            email=request.email,
+            name=request.name,
+            password=request.password,
+            account=member_account,
+            registered_on=registered_on,
         )
         self._create_confirmation_mail(request, member.id)
         return member.id
