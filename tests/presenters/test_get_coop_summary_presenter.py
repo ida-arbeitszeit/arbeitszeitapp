@@ -35,7 +35,7 @@ class GetCoopSummarySuccessPresenterTests(TestCase):
         self.url_index = self.injector.get(UrlIndexTestImpl)
         self.presenter = self.injector.get(GetCoopSummarySuccessPresenter)
         self.session = self.injector.get(FakeSession)
-        self.session.login_company("test@test.test")
+        self.session.login_company(company=uuid4())
 
     def test_end_coop_button_is_shown_when_requester_is_coordinator(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
@@ -108,6 +108,7 @@ class GetCoopSummarySuccessPresenterTests(TestCase):
         self.assertEqual(
             view_model.plans[0].end_coop_url,
             self.url_index.get_end_coop_url(
-                TESTING_RESPONSE_MODEL.plans[0].plan_id, TESTING_RESPONSE_MODEL.coop_id
+                plan_id=TESTING_RESPONSE_MODEL.plans[0].plan_id,
+                cooperation_id=TESTING_RESPONSE_MODEL.coop_id,
             ),
         )

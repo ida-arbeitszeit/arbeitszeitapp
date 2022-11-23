@@ -23,7 +23,7 @@ class EndCooperationControllerTests(TestCase):
     ) -> None:
         self.request.set_arg("plan_id", str(uuid4()))
         self.request.set_arg("cooperation_id", str(uuid4()))
-        self.session.set_current_user_id(None)
+        self.session.logout()
         self.assertIsNone(self.controller.process_request_data())
 
     def test_when_request_has_no_plan_id_then_we_cannot_get_a_use_case_request(
@@ -31,7 +31,7 @@ class EndCooperationControllerTests(TestCase):
     ) -> None:
         self.request.set_arg("plan_id", "")
         self.request.set_arg("cooperation_id", str(uuid4()))
-        self.session.set_current_user_id(uuid4())
+        self.session.login_company(uuid4())
         self.assertIsNone(self.controller.process_request_data())
 
     def test_when_request_has_a_malformed_plan_id_then_we_cannot_get_a_use_case_request(
@@ -39,7 +39,7 @@ class EndCooperationControllerTests(TestCase):
     ) -> None:
         self.request.set_arg("plan_id", "jsbbjs8sjns")
         self.request.set_arg("cooperation_id", str(uuid4()))
-        self.session.set_current_user_id(uuid4())
+        self.session.login_company(uuid4())
         self.assertIsNone(self.controller.process_request_data())
 
     def test_when_request_has_no_cooperation_id_then_we_cannot_get_a_use_case_request(
@@ -47,7 +47,7 @@ class EndCooperationControllerTests(TestCase):
     ) -> None:
         self.request.set_arg("plan_id", str(uuid4()))
         self.request.set_arg("cooperation_id", "")
-        self.session.set_current_user_id(uuid4())
+        self.session.login_company(uuid4())
         self.assertIsNone(self.controller.process_request_data())
 
     def test_when_request_has_malformed_cooperation_id_then_we_cannot_get_a_use_case_request(
@@ -55,7 +55,7 @@ class EndCooperationControllerTests(TestCase):
     ) -> None:
         self.request.set_arg("plan_id", str(uuid4()))
         self.request.set_arg("cooperation_id", "jnsjsn8snks")
-        self.session.set_current_user_id(uuid4())
+        self.session.login_company(uuid4())
         self.assertIsNone(self.controller.process_request_data())
 
     def test_a_use_case_request_can_get_returned(
@@ -63,7 +63,7 @@ class EndCooperationControllerTests(TestCase):
     ) -> None:
         self.request.set_arg("plan_id", str(uuid4()))
         self.request.set_arg("cooperation_id", str(uuid4()))
-        self.session.set_current_user_id(uuid4())
+        self.session.login_company(uuid4())
         use_case_request = self.controller.process_request_data()
         self.assertIsNotNone(use_case_request)
         self.assertIsInstance(use_case_request, EndCooperationRequest)
@@ -76,7 +76,7 @@ class EndCooperationControllerTests(TestCase):
         user_id = uuid4()
         self.request.set_arg("plan_id", plan_id)
         self.request.set_arg("cooperation_id", cooperation_id)
-        self.session.set_current_user_id(user_id)
+        self.session.login_company(user_id)
         use_case_request = self.controller.process_request_data()
         assert use_case_request
         self.assertEqual(use_case_request.plan_id, UUID(plan_id))

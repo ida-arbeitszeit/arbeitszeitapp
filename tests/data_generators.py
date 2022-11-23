@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterable, List, Optional
+from typing import Iterable, List, Optional, Union
 from uuid import UUID, uuid4
 
 from injector import inject
@@ -43,13 +43,16 @@ from arbeitszeit.use_cases import (
     AcceptCooperationRequest,
     RequestCooperation,
     RequestCooperationRequest,
-    SelfApprovePlan,
 )
+from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit.use_cases.create_plan_draft import (
     CreatePlanDraft,
     CreatePlanDraftRequest,
 )
+from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
 from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
+from arbeitszeit.use_cases.register_company import RegisterCompany
+from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
 from arbeitszeit.use_cases.send_accountant_registration_token import (
     SendAccountantRegistrationTokenUseCase,
 )
@@ -65,6 +68,48 @@ class MemberGenerator:
     email_generator: EmailGenerator
     member_repository: MemberRepository
     datetime_service: FakeDatetimeService
+    register_member_use_case: RegisterMemberUseCase
+
+    def create_member_entity(
+        self,
+        *,
+        email: Optional[str] = None,
+        name: str = "test member name",
+        account: Optional[Account] = None,
+        password: str = "password",
+        registered_on: Optional[datetime] = None,
+        confirmed: bool = True,
+    ) -> Member:
+        if not email:
+            email = self.email_generator.get_random_email()
+        assert email is not None
+        if not confirmed:
+            response = self.register_member_use_case.register_member(
+                request=RegisterMemberUseCase.Request(
+                    email=email, name=name, password=password
+                )
+            )
+            assert not response.is_rejected
+            member = self.member_repository.get_by_email(email)
+            assert member
+            return member
+        if account is None:
+            account = self.account_generator.create_account(
+                account_type=AccountTypes.member
+            )
+        if registered_on is None:
+            registered_on = self.datetime_service.now()
+        member = self.member_repository.create_member(
+            email=email,
+            name=name,
+            password=password,
+            account=account,
+            registered_on=registered_on,
+        )
+        self.member_repository.confirm_member(member.id, confirmed_on=registered_on)
+        member = self.member_repository.get_by_id(member.id)
+        assert member
+        return member
 
     def create_member(
         self,
@@ -74,24 +119,17 @@ class MemberGenerator:
         account: Optional[Account] = None,
         password: str = "password",
         registered_on: Optional[datetime] = None,
-    ) -> Member:
-        if not email:
-            email = self.email_generator.get_random_email()
-        assert email is not None
-        if account is None:
-            account = self.account_generator.create_account(
-                account_type=AccountTypes.member
-            )
-        if registered_on is None:
-            registered_on = self.datetime_service.now()
-
-        return self.member_repository.create_member(
+        confirmed: bool = True,
+    ) -> UUID:
+        member = self.create_member_entity(
             email=email,
             name=name,
             password=password,
             account=account,
             registered_on=registered_on,
+            confirmed=confirmed,
         )
+        return member.id
 
 
 @inject
@@ -102,15 +140,16 @@ class CompanyGenerator:
     email_generator: EmailGenerator
     datetime_service: FakeDatetimeService
     company_manager: CompanyManager
+    register_company_use_case: RegisterCompany
 
-    def create_company(
+    def create_company_entity(
         self,
         *,
         email: Optional[str] = None,
         name: str = "Company Name",
         labour_account: Optional[Account] = None,
         password: str = "password",
-        workers: Optional[Iterable[Member]] = None,
+        workers: Optional[Iterable[Union[Member, UUID]]] = None,
         registered_on: datetime = None,
     ) -> Company:
         if email is None:
@@ -139,7 +178,35 @@ class CompanyGenerator:
         )
         if workers is not None:
             for worker in workers:
-                self.company_manager.add_worker_to_company(company.id, worker.id)
+                if isinstance(worker, UUID):
+                    self.company_manager.add_worker_to_company(company.id, worker)
+                else:
+                    self.company_manager.add_worker_to_company(company.id, worker.id)
+        return company
+
+    def create_company(
+        self,
+        *,
+        confirmed: bool = True,
+        email: Optional[str] = None,
+        password: Optional[str] = None,
+    ) -> UUID:
+        if email is None:
+            email = self.email_generator.get_random_email()
+        if password is None:
+            password = "test password"
+        response = self.register_company_use_case.register_company(
+            request=RegisterCompany.Request(
+                name="test company",
+                email=email,
+                password=password,
+            )
+        )
+        company = response.company_id
+        assert company
+        if not confirmed:
+            return company
+        self.company_repository.confirm_company(company, self.datetime_service.now())
         return company
 
 
@@ -176,11 +243,12 @@ class EmailGenerator:
 class PlanGenerator:
     company_generator: CompanyGenerator
     plan_repository: PlanRepository
-    self_approve_plan: SelfApprovePlan
     request_cooperation: RequestCooperation
     accept_cooperation: AcceptCooperation
     draft_repository: PlanDraftRepository
     create_plan_draft_use_case: CreatePlanDraft
+    file_plan_with_accounting: FilePlanWithAccounting
+    approve_plan_use_case: ApprovePlanUseCase
 
     def create_plan(
         self,
@@ -200,7 +268,6 @@ class PlanGenerator:
         is_available: bool = True,
         hidden_by_user: bool = False,
     ) -> Plan:
-        assert approved, "Currently the application does not support plan rejection"
         draft = self.draft_plan(
             planner=planner,
             costs=costs,
@@ -211,8 +278,22 @@ class PlanGenerator:
             timeframe=timeframe,
             is_public_service=is_public_service,
         )
-        response = self.self_approve_plan(SelfApprovePlan.Request(draft_id=draft.id))
-        plan = self.plan_repository.get_plan_by_id(response.new_plan_id)
+        file_plan_response = self.file_plan_with_accounting.file_plan_with_accounting(
+            request=FilePlanWithAccounting.Request(
+                draft_id=draft.id, filing_company=draft.planner.id
+            )
+        )
+        assert file_plan_response.plan_id
+        assert file_plan_response.is_plan_successfully_filed
+        if not approved:
+            plan = self.plan_repository.get_plan_by_id(file_plan_response.plan_id)
+            assert plan
+            return plan
+        response = self.approve_plan_use_case.approve_plan(
+            ApprovePlanUseCase.Request(plan=file_plan_response.plan_id)
+        )
+        assert response.is_approved
+        plan = self.plan_repository.get_plan_by_id(file_plan_response.plan_id)
         assert plan
         assert plan.is_approved
         if activation_date:
@@ -262,7 +343,7 @@ class PlanGenerator:
         if costs is None:
             costs = ProductionCosts(Decimal(1), Decimal(1), Decimal(1))
         if planner is None:
-            planner = self.company_generator.create_company()
+            planner = self.company_generator.create_company_entity()
         if timeframe is None:
             timeframe = 14
         response = self.create_plan_draft_use_case(
@@ -353,6 +434,7 @@ class TransactionGenerator:
         amount_sent=None,
         amount_received=None,
         purpose=None,
+        date=None,
     ) -> Transaction:
         if sending_account is None:
             sending_account = self.account_generator.create_account(
@@ -368,8 +450,10 @@ class TransactionGenerator:
             amount_received = Decimal(10)
         if purpose is None:
             purpose = "test purpose"
+        if date is None:
+            date = self.datetime_service.now_minus_one_day()
         return self.transaction_repository.create_transaction(
-            date=self.datetime_service.now_minus_one_day(),
+            date=date,
             sending_account=sending_account,
             receiving_account=receiving_account,
             amount_sent=amount_sent,
@@ -395,7 +479,7 @@ class CooperationGenerator:
         if name is None:
             name = "test name"
         if coordinator is None:
-            coordinator = self.company_generator.create_company()
+            coordinator = self.company_generator.create_company_entity()
         cooperation = self.cooperation_repository.create_cooperation(
             self.datetime_service.now(),
             name=name,

@@ -33,7 +33,7 @@ class PresenterTests(TestCase):
         self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(EndCooperationPresenter)
         self.session = self.injector.get(FakeSession)
-        self.session.login_company("test@test.test")
+        self.session.login_company(company=uuid4())
 
     def test_404_and_empty_url_returned_when_use_case_response_returned_plan_not_found(
         self,
@@ -92,7 +92,9 @@ class PresenterTests(TestCase):
         self.assertFalse(view_model.show_404)
         self.assertEqual(
             view_model.redirect_url,
-            self.url_index.get_plan_summary_url(UserRole.company, plan_id=plan_id),
+            self.url_index.get_plan_summary_url(
+                user_role=UserRole.company, plan_id=plan_id
+            ),
         )
 
     def test_correct_notification_is_returned_when_operation_was_successfull(

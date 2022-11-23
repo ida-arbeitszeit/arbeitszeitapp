@@ -125,7 +125,9 @@ class GetMemberDashboardPresenterTests(TestCase):
         presentation = self.presenter.present(response)
         self.assertEqual(
             presentation.three_latest_plans[0].plan_summary_url,
-            self.url_index.get_plan_summary_url(UserRole.member, plan_id),
+            self.url_index.get_plan_summary_url(
+                user_role=UserRole.member, plan_id=plan_id
+            ),
         )
 
     def test_invites_is_empty_when_no_invites_exist(self):
@@ -151,8 +153,8 @@ class GetMemberDashboardPresenterTests(TestCase):
     def test_correct_invite_message_is_shown(self):
         expected_company_name = "company name"
         expected_message = self.translator.gettext(
-            f"Company {expected_company_name} has invited you!"
-        )
+            "Company %(expected_company_name)s has invited you!"
+        ) % dict(expected_company_name=expected_company_name)
         response = self.get_response(
             invites=[self.get_invite(company_name=expected_company_name)]
         )

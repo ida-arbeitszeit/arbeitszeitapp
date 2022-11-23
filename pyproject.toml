@@ -3,6 +3,24 @@ requires = ["setuptools", "wheel"]
 build-backend = "backend"
 backend-path = ["build_support"]
 
+[project]
+name = "arbeitszeitapp"
+version = "0.0.0"
+classifiers = [
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+]
+
+[project.optional-dependencies]
+profiling = ["flask_profiler"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages]
+find = {}
+
 [tool.black]
 target-version = ['py39']
 extend-exclude = '''
@@ -31,29 +49,28 @@ exclude = '''
 '''
 
 [[tool.mypy.overrides]]
-module = "arbeitszeit.*,arbeitszeit_web.*"
+module = "arbeitszeit,arbeitszeit_web,arbeitszeit_flask,tests"
 allow_untyped_defs = false
-
-[[tool.mypy.overrides]]
-module = "arbeitszeit_flask.*"
-check_untyped_defs = true
-
-[[tool.mypy.overrides]]
-module = "tests.*"
-check_untyped_defs = true
 
 [[tool.mypy.overrides]]
 module = [
     "flask_babel",
     "flask_mail",
     "flask_migrate",
+    "flask_profiler",
     "flask_sqlalchemy",
     "flask_talisman",
     "flask_wtf.*",
     "is_safe_url",
     "matplotlib.*",
+    "pytz",
     "sqlalchemy.*",
-    "wtforms",
-    "pytz"
+    "wtforms"
 ]
 ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    '''ignore:'_app_ctx_stack' is deprecated:DeprecationWarning''',
+    'ignore:Dialect sqlite\+pysqlite does \*not\* support Decimal objects natively, and SQLAlchemy must convert from floating point - rounding errors and other issues may occur',
+]

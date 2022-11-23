@@ -20,8 +20,8 @@ def test_no_transactions_returned_when_no_transactions_took_place(
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
 ):
-    member_generator.create_member()
-    company = company_generator.create_company()
+    member_generator.create_member_entity()
+    company = company_generator.create_company_entity()
 
     response = show_a_account_details(company.id)
     assert not response.transactions
@@ -33,8 +33,8 @@ def test_balance_is_zero_when_no_transactions_took_place(
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
 ):
-    member_generator.create_member()
-    company = company_generator.create_company()
+    member_generator.create_member_entity()
+    company = company_generator.create_company_entity()
 
     response = show_a_account_details(company.id)
     assert response.account_balance == 0
@@ -46,8 +46,8 @@ def test_company_id_is_returned(
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
 ):
-    member_generator.create_member()
-    company = company_generator.create_company()
+    member_generator.create_member_entity()
+    company = company_generator.create_company_entity()
 
     response = show_p_account_details(company.id)
     assert response.company_id == company.id
@@ -60,8 +60,8 @@ def test_that_no_info_is_generated_after_selling_of_consumer_product(
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    member = member_generator.create_member()
-    company = company_generator.create_company()
+    member = member_generator.create_member_entity()
+    company = company_generator.create_company_entity()
 
     transaction_generator.create_transaction(
         sending_account=member.account,
@@ -80,8 +80,8 @@ def test_that_no_info_is_generated_when_company_sells_p(
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    company1 = company_generator.create_company()
-    company2 = company_generator.create_company()
+    company1 = company_generator.create_company_entity()
+    company2 = company_generator.create_company_entity()
 
     transaction_generator.create_transaction(
         sending_account=company1.means_account,
@@ -101,7 +101,7 @@ def test_that_no_info_is_generated_when_credit_for_r_is_granted(
     transaction_generator: TransactionGenerator,
     social_accounting: SocialAccounting,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
 
     transaction_generator.create_transaction(
         sending_account=social_accounting.account,
@@ -121,7 +121,7 @@ def test_that_correct_info_is_generated_when_credit_for_wages_is_granted(
     transaction_generator: TransactionGenerator,
     social_accounting: SocialAccounting,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
 
     transaction_generator.create_transaction(
         sending_account=social_accounting.account,
@@ -148,8 +148,8 @@ def test_that_correct_info_is_generated_after_company_transfering_work_certifica
     member_generator: MemberGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    company1 = company_generator.create_company()
-    member = member_generator.create_member()
+    company1 = company_generator.create_company_entity()
+    member = member_generator.create_member_entity()
 
     trans = transaction_generator.create_transaction(
         sending_account=company1.work_account,
@@ -171,8 +171,8 @@ def test_that_plotting_info_is_empty_when_no_transactions_occurred(
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
 ):
-    member_generator.create_member()
-    company = company_generator.create_company()
+    member_generator.create_member_entity()
+    company = company_generator.create_company_entity()
 
     response = show_a_account_details(company.id)
     assert not response.plot.timestamps
@@ -186,8 +186,8 @@ def test_that_plotting_info_is_generated_after_transfer_of_work_certificates(
     member_generator: MemberGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    worker = member_generator.create_member()
-    own_company = company_generator.create_company(workers=[worker])
+    worker = member_generator.create_member_entity()
+    own_company = company_generator.create_company_entity(workers=[worker])
 
     transaction_generator.create_transaction(
         sending_account=own_company.work_account,
@@ -208,9 +208,9 @@ def test_that_correct_plotting_info_is_generated_after_transferring_of_work_cert
     member_generator: MemberGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    worker1 = member_generator.create_member()
-    worker2 = member_generator.create_member()
-    own_company = company_generator.create_company(workers=[worker1, worker2])
+    worker1 = member_generator.create_member_entity()
+    worker2 = member_generator.create_member_entity()
+    own_company = company_generator.create_company_entity(workers=[worker1, worker2])
 
     trans1 = transaction_generator.create_transaction(
         sending_account=own_company.work_account,
@@ -246,10 +246,12 @@ def test_that_plotting_info_is_generated_in_the_correct_order_after_transfer_of_
     member_generator: MemberGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    worker1 = member_generator.create_member()
-    worker2 = member_generator.create_member()
-    worker3 = member_generator.create_member()
-    own_company = company_generator.create_company(workers=[worker1, worker2, worker3])
+    worker1 = member_generator.create_member_entity()
+    worker2 = member_generator.create_member_entity()
+    worker3 = member_generator.create_member_entity()
+    own_company = company_generator.create_company_entity(
+        workers=[worker1, worker2, worker3]
+    )
 
     trans1 = transaction_generator.create_transaction(
         sending_account=own_company.work_account,
@@ -291,7 +293,7 @@ def test_that_correct_plotting_info_is_generated_after_receiving_of_work_certifi
     accounting_generator: SocialAccountingGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    company = company_generator.create_company()
+    company = company_generator.create_company_entity()
     social_accounting = accounting_generator.create_social_accounting()
 
     trans = transaction_generator.create_transaction(

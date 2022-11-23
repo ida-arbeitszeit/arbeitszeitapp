@@ -10,3 +10,19 @@
     padding: 0 0 0 0;
     vertical-align: -.125em;
 }
+
+
+/* notification box */
+.notification_box {
+  position: fixed;
+  left: 25%;
+  right: 25%;
+  width: 50%;
+  animation: hide_notification 5s linear 2s 1 forwards;
+}
+
+@keyframes hide_notification {
+  to {
+      opacity: 0;
+  }
+}

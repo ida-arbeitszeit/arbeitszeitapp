@@ -1,4 +1,3 @@
-import datetime
 from dataclasses import dataclass
 from decimal import Decimal
 
@@ -8,6 +7,7 @@ from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan, SocialAccounting
 from arbeitszeit.payout_factor import PayoutFactorService
 from arbeitszeit.repositories import (
+    PayoutFactorRepository,
     PlanCooperationRepository,
     PlanRepository,
     TransactionRepository,
@@ -23,36 +23,32 @@ class UpdatePlansAndPayout:
     social_accounting: SocialAccounting
     plan_cooperation_repository: PlanCooperationRepository
     payout_factor_service: PayoutFactorService
+    payout_factor_repository: PayoutFactorRepository
 
     def __call__(self) -> None:
         """
         This function should be called at least once per day,
         preferably more often (e.g. every hour).
         """
+        self._calculate_plan_expiration()
         payout_factor = self.payout_factor_service.calculate_payout_factor()
         self.payout_factor_service.store_payout_factor(payout_factor)
-        self._calculate_plan_expiration(payout_factor)
-        for plan in self.plan_repository.all_plans_approved_active_and_not_expired():
+        plans = self.plan_repository.get_active_plans()
+        for plan in plans:
             self._payout_work_certificates(plan, payout_factor)
 
-    def _calculate_plan_expiration(self, payout_factor: Decimal) -> None:
+    def _calculate_plan_expiration(self) -> None:
         for plan in self.plan_repository.get_active_plans():
             assert plan.is_active, "Plan is not active!"
             assert plan.activation_date, "Plan has no activation date!"
 
-            expiration_time = plan.activation_date + datetime.timedelta(
-                days=int(plan.timeframe)
-            )
-
             self.plan_repository.set_active_days(
                 plan, self._calculate_active_days(plan)
             )
-            self.plan_repository.set_expiration_date(plan, expiration_time)
 
-            assert plan.expiration_date
             assert plan.active_days is not None
             if self._plan_is_expired(plan):
-                self._handle_expired_plan(plan, payout_factor)
+                self._handle_expired_plan(plan)
 
     def _payout_work_certificates(self, plan: Plan, payout_factor: Decimal) -> None:
         """
@@ -92,15 +88,22 @@ class UpdatePlansAndPayout:
         assert plan.expiration_date
         return self.datetime_service.now() > plan.expiration_date
 
-    def _handle_expired_plan(self, plan: Plan, payout_factor: Decimal) -> None:
+    def _handle_expired_plan(self, plan: Plan) -> None:
         """
-        payout overdue wages, if there are any
+        payout overdue wages, if there are any, applying the latest payout factor stored in repo
         delete plan's cooperation and coop request, if there is any
         set plan as expired
         """
         assert plan.active_days
         while plan.payout_count < plan.active_days:
-            self._payout(plan, payout_factor)
+            payout_factor = self.payout_factor_repository.get_latest_payout_factor()
+            if payout_factor is None:
+                # overdue wages and no pf in repo should hardly ever happen
+                # in this case best approximation is probably 1
+                payout_factor_value = Decimal(1)
+            else:
+                payout_factor_value = payout_factor.value
+            self._payout(plan, payout_factor_value)
         self._delete_cooperation_and_coop_request_from_plan(plan)
         self.plan_repository.set_plan_as_expired(plan)
 

@@ -31,9 +31,6 @@ class GeneralUrlIndex:
     def get_language_change_url(self, language_code: str) -> str:
         return url_for("auth.set_language", language=language_code)
 
-    def get_draft_list_url(self) -> str:
-        return url_for("main_company.draft_list")
-
     def get_draft_summary_url(self, draft_id: UUID) -> str:
         return url_for("main_company.get_draft_summary", draft_id=draft_id)
 
@@ -137,23 +134,32 @@ class GeneralUrlIndex:
     def get_request_coop_url(self) -> str:
         return url_for("main_company.request_cooperation")
 
-    def get_self_approve_plan_url(self, draft_id: UUID) -> str:
-        return url_for(
-            "main_company.self_approve_plan",
-            draft_uuid=draft_id,
-        )
+    def get_my_plans_url(self) -> str:
+        return url_for("main_company.my_plans")
 
+    def get_my_plan_drafts_url(self) -> str:
+        return url_for("main_company.my_plans", _anchor="drafts")
 
-class MemberUrlIndex:
-    def get_renew_plan_url(self, plan_id: UUID) -> str:
-        ...
+    def get_file_plan_url(self, draft_id: UUID) -> str:
+        return url_for("main_company.file_plan", draft_id=draft_id)
 
-    def get_hide_plan_url(self, plan_id: UUID) -> str:
-        ...
+    def get_unreviewed_plans_list_view_url(self) -> str:
+        return url_for("main_accountant.list_plans_with_pending_review")
 
-    def get_confirmation_url(self, token: str) -> str:
+    def get_approve_plan_url(self, plan_id: UUID) -> str:
+        return url_for("main_accountant.approve_plan", plan=plan_id)
+
+    def get_create_draft_url(self) -> str:
+        return url_for("main_company.create_draft")
+
+    def get_member_confirmation_url(self, token: str) -> str:
         return url_for(
             endpoint="auth.confirm_email_member", token=token, _external=True
+        )
+
+    def get_company_confirmation_url(self, token: str) -> str:
+        return url_for(
+            endpoint="auth.confirm_email_company", token=token, _external=True
         )
 
 
@@ -168,8 +174,3 @@ class CompanyUrlIndex:
         # since invites don't make sense for a company, we redirect
         # them in this case to their dashboard page.
         return url_for("main_company.dashboard")
-
-    def get_confirmation_url(self, token: str) -> str:
-        return url_for(
-            endpoint="auth.confirm_email_company", token=token, _external=True
-        )

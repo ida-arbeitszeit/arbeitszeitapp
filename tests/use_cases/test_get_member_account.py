@@ -1,9 +1,11 @@
+from datetime import timedelta
 from decimal import Decimal
 
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases import GetMemberAccount
 from tests.data_generators import (
     CompanyGenerator,
+    FakeDatetimeService,
     MemberGenerator,
     TransactionGenerator,
 )
@@ -17,7 +19,7 @@ def test_that_balance_is_zero_when_no_transaction_took_place(
     member_generator: MemberGenerator,
 ):
     member = member_generator.create_member()
-    response = use_case(member.id)
+    response = use_case(member)
     assert response.balance == 0
 
 
@@ -27,7 +29,7 @@ def test_that_transactions_is_empty_when_no_transaction_took_place(
     member_generator: MemberGenerator,
 ):
     member = member_generator.create_member()
-    response = use_case(member.id)
+    response = use_case(member)
     assert not response.transactions
 
 
@@ -39,8 +41,8 @@ def test_that_transactions_is_empty_when_member_is_not_involved_in_transaction(
     company_generator: CompanyGenerator,
 ):
     member_of_interest = member_generator.create_member()
-    company = company_generator.create_company()
-    other_member = member_generator.create_member()
+    company = company_generator.create_company_entity()
+    other_member = member_generator.create_member_entity()
 
     transaction_generator.create_transaction(
         sending_account=other_member.account,
@@ -49,7 +51,7 @@ def test_that_transactions_is_empty_when_member_is_not_involved_in_transaction(
         amount_received=Decimal(8.5),
     )
 
-    response = use_case(member_of_interest.id)
+    response = use_case(member_of_interest)
     assert not response.transactions
 
 
@@ -60,8 +62,8 @@ def test_that_correct_info_is_generated_after_member_pays_product(
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    member = member_generator.create_member()
-    company = company_generator.create_company()
+    member = member_generator.create_member_entity()
+    company = company_generator.create_company_entity()
 
     transaction_generator.create_transaction(
         sending_account=member.account,
@@ -85,8 +87,8 @@ def test_that_a_transaction_with_volume_zero_is_shown_correctly(
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    member = member_generator.create_member()
-    company = company_generator.create_company()
+    member = member_generator.create_member_entity()
+    company = company_generator.create_company_entity()
 
     transaction_generator.create_transaction(
         sending_account=member.account,
@@ -107,8 +109,8 @@ def test_that_correct_info_is_generated_after_member_receives_wages(
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    member = member_generator.create_member()
-    company = company_generator.create_company()
+    member = member_generator.create_member_entity()
+    company = company_generator.create_company_entity()
 
     transaction_generator.create_transaction(
         sending_account=company.work_account,
@@ -131,28 +133,32 @@ def test_that_correct_info_for_company_is_generated_in_correct_order_after_sever
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
     member_generator: MemberGenerator,
+    datetime_service: FakeDatetimeService,
 ):
-    company1 = company_generator.create_company()
-    company2 = company_generator.create_company()
-    member = member_generator.create_member()
+    company1 = company_generator.create_company_entity()
+    company2 = company_generator.create_company_entity()
+    member = member_generator.create_member_entity()
 
     # wages from comp1
     transaction_generator.create_transaction(
         sending_account=company1.work_account,
         receiving_account=member.account,
         amount_received=Decimal(12),
+        date=datetime_service.now() + timedelta(hours=1),
     )
     # pay product of comp1
     transaction_generator.create_transaction(
         sending_account=member.account,
         receiving_account=company1.product_account,
         amount_sent=Decimal(5),
+        date=datetime_service.now() + timedelta(hours=2),
     )
     # wages from comp2
     transaction_generator.create_transaction(
         sending_account=company2.work_account,
         receiving_account=member.account,
         amount_received=Decimal(2),
+        date=datetime_service.now() + timedelta(hours=3),
     )
 
     response = use_case(member.id)

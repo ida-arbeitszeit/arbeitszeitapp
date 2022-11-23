@@ -1,28 +1,38 @@
+|Generic badge|
+
+.. |Generic badge| image:: https://github.com/arbeitszeit/arbeitszeitapp/actions/workflows/python-app.yml/badge.svg
+   :target: https://github.com/arbeitszeit/arbeitszeitapp/actions/workflows/python-app.yml
+
+.. contents ::
+
 .. start-introduction-do-not-delete
 
 Introduction
 ============
 
-The theory
+Description
+------------
+
+Arbeitszeitapp is a plattform to exchange services and products on the 
+basis of working time. It is designed to be self-hosted by communities or 
+organizations. A test instance is running on https://arbeitszeitapp.herokuapp.com/.
+
+
+Theory
 -----------
 
-Companies do usually calculate with working hours internally, 
-but switch to money when dealing with other agents on the market. Planning and 
-working time calculation ends where the cooperation ends: on the market. 
+Companies usually calculate with labour time internally, 
+but switch to money on the market. This app 
+extends planning and labour time calculation beyond the 
+company boundaries and supports networks that exchanges products on the basis of labour time. 
 
-This app extends collective planning and working time calculation beyond the 
-company boundaries. In other words, it facilitates the creation of networks 
-of cooperations that exchanges products on the basis of working time 
-without the need for money. 
-
-To make this possible, it provides a planning interface for companies and 
+It provides a planning interface for companies and 
 communities as well as a working time management for companies and workers. 
 Plans can get filed and approved, products can get published and paid, 
 work certificates can get transferred. 
 
 It is the implementation of a theory (`"Arbeitszeitrechnung" 
-<https://aaap.be/Pages/Transition-en-Fundamental-Principles-1930.html>`_) elaborated in 
-the 1920s working class movement. 
+<https://aaap.be/Pages/Transition-en-Fundamental-Principles-1930.html>`_) elaborated in the 1920s working class movement. 
 
 
 User roles
@@ -30,11 +40,11 @@ User roles
 
 There are three user roles:
 
-- **Companies** can file plans for each product (or service) they offer. A plan describes a product and defines how much working time it will cost. 
+* **Companies** can file plans for each product (or service) they offer. A plan describes a product and defines how much working time it will cost. 
 
-- **Members** are workers in companies. They receive work certificates for their worked hours. They can use them to purchase products. 
+* **Members** are workers in companies. They receive work certificates for their worked hours. They can use them to purchase products. 
 
-- **Accountants** are delegates of the cooperating network of companies. They can approve company plans based on collectively agreed criteria. 
+* **Accountants** are delegates of the cooperating network of companies. They can approve company plans based on collectively agreed criteria. 
 
 .. end-introduction-do-not-delete
 
@@ -70,7 +80,7 @@ directories in the source code.
     this directory should format and translate strings for display to
     the user and parse input data from forms and urls.  This code is
     completly framework agnostic and is only concerned with engaging
-    the business logic through the develivery mechanism of the WWW.
+    the business logic through the develivery mechanism of the `WWW`.
 
 ``arbeitszeit_flask/``
     Contains the conrete implementation for persistence and IO.  We
@@ -84,9 +94,9 @@ directories in the source code.
 PostgreSQL setup
 -------------------
 
-- Debian: ``sudo apt install -y postgresql``
-- Arch: ``sudo pacman -Syu postgresql``
+Debian: ``sudo apt install -y postgresql``
 
+Arch: ``sudo pacman -Syu postgresql``
 
 Installing PostgreSQL will create a user named *postgres*.
 Switch to postgres user: ``sudo -iu postgres``
@@ -108,54 +118,51 @@ General setup
 -------------
 
 Create a virtual environment with ``python -m venv venv``
+
 To execute the virtual environment ``source ./venv/bin/activate``
+
 Install all packages when not using nix: ``pip install -r requirements-dev.txt``
 
 To run the app in development mode you first have to define some
-environment variables::
+environment variables:
 
-    $ export ARBEITSZEITAPP_CONFIGURATION_PATH="$PWD/arbeitszeit_flask/development_settings.py"
-    $ export FLASK_APP=arbeitszeit_flask
-    $ export FLASK_ENV=development
-    $ export DEV_DATABASE_URI="postgresql://postgres@localhost:5432/<name of database>"
-    $ export DEV_SECRET_KEY=my_secret_key
-    $ export ARBEITSZEIT_APP_SERVER_NAME=localhost:5000
+    .. code-block:: bash
+
+     export ARBEITSZEITAPP_CONFIGURATION_PATH="$PWD/arbeitszeit_flask/development_settings.py"
+     export FLASK_APP=arbeitszeit_flask
+     export FLASK_DEBUG=1
+     export DEV_DATABASE_URI="postgresql://postgres@localhost:5432/<name of database>"
+     export DEV_SECRET_KEY=my_secret_key
+     export ARBEITSZEIT_APP_SERVER_NAME=localhost:5000
 
 After configuring the database connection you need to run the database
 migrations via ``flask db upgrade``.
 
-Afterwards you can start the development server with ``flask run -h localhost``.
+Afterwards you can start the development server with ``python -m flask
+run -h localhost``.  Unfortunately ``flask run`` might not work due to
+a bug in the ``werkzeug`` library.
 
-Create an user by signing up and providing the required fields.
-You will be redirected to a site that asks to confirm your account creating with the link provided in your Email.
-This link can be found in the commandline you ran ``flask run`` starting with *<p><a href="* until the next quotation marks.
-Copy this link to your browser and your account will be activated.
+Create an user by signing up and providing the required fields.  You
+will be redirected to a site that asks to confirm your account
+creating with the link provided in your Email.  This link can be found
+in the commandline you ran ``python -m flask run`` starting with
+*<p><a href="* until the next quotation marks.  Copy this link to your
+browser and your account will be activated.
 
 
-Code formatting
----------------
+Code formatting and analysis
+-----------------------------
 
-There is a script that auto formats python files.  It uses black and
-isort for that purpose.  Currently this script only applies auto
+There is a script that auto formats python files.  It uses ``black`` and
+``isort`` for that purpose.  Currently this script only applies auto
 formatting to a limited selection of paths.  You can add more paths by
-adding lines to ".autoformattingrc".
+adding lines to ``.autoformattingrc``.
 
-
-Code analysis
--------------
 
 We use type hints.  You can check the consistency of the type hints
-via the ``mypy`` command.
-
-Furthermore ``flake8`` is employed to prevent certain mistakes like
-for example unused imports or uninitialized variables.
-
-Invoke both commands without arguments to test all the eligable code.
-
-You can print profiling info to the terminal by setting the following
-environment variable::
-
-    $ export DEBUG_DETAILS=true
+via the ``mypy`` command. Furthermore ``flake8`` is employed to prevent certain mistakes like
+for example unused imports or uninitialized variables. Invoke both commands without
+arguments to test all the eligable code.
 
 
 Testing
@@ -176,40 +183,54 @@ the command::
 Translation
 -----------
 
-We use `Flask-Babel <https://flask-babel.tkte.ch/>`_ for translation.
+We use `Flask-Babel <https://python-babel.github.io/flask-babel/>`_ for translation.
 
-1) Add a new language:
+#. Add a new language: 
 
-a. Execute::
+   .. code-block::  bash 
+    
+    python setup.py init_catalog -l LANGUAGE_CODE
 
-    $ python setup.py init_catalog -l LANGUAGE_CODE
+   
+#. Add the new language to the LANGUAGES variable in ``arbeitszeit_flask/configuration_base.py``.
 
-b. Add the new language to the LANGUAGES variable in
-   ``arbeitszeit_flask/configuration_base.py``.
+#. Mark translatable, user-facing strings in the code.
 
-2) Mark translatable, user-facing strings in the code.
+   In python files use: 
 
-In python files use: 
+   .. code-block:: bash
+    
+    translator.gettext(message: str)
+    translator.pgettext(comment: str, message: str)
+    translator.ngettext(self, singular: str, plural: str, n: Number)
+   
+   In jinja templates use: 
 
-- ``translator.gettext(message: str)`` 
-- ``translator.pgettext(comment: str, message: str)``
-- ``translator.ngettext(self, singular: str, plural: str, n: Number)``
+   .. code-block:: bash
 
-In jinja templates use: 
+    gettext(message: str)
+    ngettext(singular: str, plural: str, n)
 
-- ``gettext(message: str)``
-- ``ngettext(singular: str, plural: str, n)``
+#. Parse code for translatable strings (create .pot file): 
+
+    .. code-block:: bash
+
+     python setup.py extract_messages
 
 
-3) Parse code and update language specific .po-files::
+#. Update language specific .po-files:
 
-    $ python setup.py update_catalog
+   .. code-block::  bash
+    
+     python setup.py update_catalog
 
-4) Translate language specific .po-files.
+#. Translate language specific .po-files.
 	
-5) Compile translation files::
+#. Compile translation files:
 
-    $ python setup.py compile_catalog
+   .. code-block::  bash
+
+    python setup.py compile_catalog
 
 
 Email configuration
@@ -228,35 +249,50 @@ See the `flask mail documentation
 <https://pythonhosted.org/Flask-Mail/>`_ on how to configure the
 production backend.
 
+Profiling
+---------
 
-Cronjob
--------
+This project uses ``flask_profiler`` to provided a very basic
+graphical user interface for response times.  More in depth profiling
+information is printed to stdout (the terminal) when detailed
+debugging is enabled. Run the following in the same terminal as you
+start the development server to enable detailed profiling.
 
-There is a command ``flask payout``. It does the following things:
+   .. code-block:: bash
 
-- Check if plans have expired and deactivate them
-- Calculate the payout factor
-- Check which plans are applicable for wage payout
-- Payout the wages
-
-This command is executed every hour on the production server. 
-In development mode you can run teh command manually in the CLI. 
+    export DEBUG_DETAILS=true
 
 
 Documentation
 --------------
 
-Run::
+Run:
 
-  $ make html
+   .. code-block:: bash
+
+    make html
 
 in the root folder of the project to generate developer documentation
 including auto generated API docs.  Open the documentation in your
 browser at ``build/html/index.html``.
 
-Regenerate the API docs via::
+Regenerate the API docs via:
 
-  $ ./regenerate-api-docs
+    .. code-block:: bash
+
+     ./regenerate-api-docs
+
+Using a binary cache
+--------------------
+
+You can access the binary cache hosted on `cachix
+<https://www.cachix.org/>`_ in your development environment if you are
+using ``nix`` to manage your development environment. The binary cache
+is called "arbeitszeit".  Check the `cachix docs
+<https://docs.cachix.org/getting-started#using-binaries-with-nix>`_ on
+how to set this up locally.  The benefit of this for you is that you
+can avoid building dependencies there where already build in the CI
+pipeline once.
 
 .. end-development-setup-do-not-delete
 

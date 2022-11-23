@@ -21,7 +21,7 @@ def test_that_none_is_returned_when_cooperation_does_not_exist(
     get_coop_summary: GetCoopSummary,
     company_generator: CompanyGenerator,
 ):
-    requester = company_generator.create_company()
+    requester = company_generator.create_company_entity()
     summary = get_coop_summary(GetCoopSummaryRequest(requester.id, uuid4()))
     assert summary is None
 
@@ -32,7 +32,7 @@ def test_that_requester_is_correctly_defined_as_equal_to_coordinator(
     company_generator: CompanyGenerator,
     cooperation_generator: CooperationGenerator,
 ):
-    requester = company_generator.create_company()
+    requester = company_generator.create_company_entity()
     coop = cooperation_generator.create_cooperation(coordinator=requester)
     summary = get_coop_summary(GetCoopSummaryRequest(requester.id, coop.id))
     assert_success(summary, lambda s: s.requester_is_coordinator == True)
@@ -44,7 +44,7 @@ def test_that_requester_is_correctly_defined_as_different_from_coordinator(
     company_generator: CompanyGenerator,
     cooperation_generator: CooperationGenerator,
 ):
-    requester = company_generator.create_company()
+    requester = company_generator.create_company_entity()
     coop = cooperation_generator.create_cooperation()
     summary = get_coop_summary(GetCoopSummaryRequest(requester.id, coop.id))
     assert_success(summary, lambda s: s.requester_is_coordinator == False)
@@ -57,7 +57,7 @@ def test_that_correct_amount_of_associated_plans_are_shown(
     cooperation_generator: CooperationGenerator,
     plan_generator: PlanGenerator,
 ):
-    requester = company_generator.create_company()
+    requester = company_generator.create_company_entity()
     plan1 = plan_generator.create_plan(activation_date=datetime.min)
     plan2 = plan_generator.create_plan(activation_date=datetime.min)
     coop = cooperation_generator.create_cooperation(plans=[plan1, plan2])
@@ -72,7 +72,7 @@ def test_that_correct_coordinator_id_is_shown(
     cooperation_generator: CooperationGenerator,
     plan_generator: PlanGenerator,
 ):
-    requester = company_generator.create_company()
+    requester = company_generator.create_company_entity()
     plan1 = plan_generator.create_plan(activation_date=datetime.min)
     plan2 = plan_generator.create_plan(activation_date=datetime.min)
     coop = cooperation_generator.create_cooperation(plans=[plan1, plan2])
@@ -87,7 +87,7 @@ def test_that_correct_coordinator_name_is_shown(
     cooperation_generator: CooperationGenerator,
     plan_generator: PlanGenerator,
 ):
-    requester = company_generator.create_company()
+    requester = company_generator.create_company_entity()
     plan1 = plan_generator.create_plan(activation_date=datetime.min)
     plan2 = plan_generator.create_plan(activation_date=datetime.min)
     coop = cooperation_generator.create_cooperation(plans=[plan1, plan2])
@@ -102,7 +102,7 @@ def test_that_correct_info_of_associated_plan_is_shown(
     cooperation_generator: CooperationGenerator,
     plan_generator: PlanGenerator,
 ):
-    requester = company_generator.create_company()
+    requester = company_generator.create_company_entity()
     plan1 = plan_generator.create_plan(
         activation_date=datetime.min,
         costs=ProductionCosts(Decimal(2), Decimal(2), Decimal(1)),

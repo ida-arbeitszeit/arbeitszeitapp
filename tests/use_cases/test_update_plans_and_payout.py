@@ -1,12 +1,11 @@
 import datetime
 from decimal import Decimal
-from unittest import TestCase
 
 from arbeitszeit.entities import AccountTypes, Company, ProductionCosts
 from arbeitszeit.use_cases import UpdatePlansAndPayout
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts, ShowMyAccountsRequest
-from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
-from tests.datetime_service import FakeDatetimeService
+from tests.data_generators import CooperationGenerator
+from tests.use_cases.base_test_case import BaseTestCase
 
 from .dependency_injection import get_dependency_injector
 from .repositories import (
@@ -16,31 +15,21 @@ from .repositories import (
 )
 
 
-class UseCaseTests(TestCase):
+class UseCaseTests(BaseTestCase):
     def setUp(self) -> None:
+        super().setUp()
         self.injector = get_dependency_injector()
-        self.plan_generator = self.injector.get(PlanGenerator)
         self.payout = self.injector.get(UpdatePlansAndPayout)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
         self.cooperation_generator = self.injector.get(CooperationGenerator)
         self.account_repository = self.injector.get(AccountRepository)
         self.transaction_repository = self.injector.get(TransactionRepository)
         self.payout_factor_repository = self.injector.get(FakePayoutFactorRepository)
         self.show_my_accounts = self.injector.get(ShowMyAccounts)
-        self.company_generator = self.injector.get(CompanyGenerator)
 
     def test_that_a_plan_that_is_not_active_can_not_expire(self) -> None:
         plan = self.plan_generator.create_plan(activation_date=None)
         self.payout()
         self.assertFalse(plan.expired)
-
-    def test_that_expiration_time_is_set_if_plan_is_active(self) -> None:
-        plan = self.plan_generator.create_plan(
-            timeframe=2, activation_date=self.datetime_service.now()
-        )
-        self.assertIsNone(plan.expiration_date)
-        self.payout()
-        self.assertIsNotNone(plan.expiration_date)
 
     def test_that_active_days_is_set_if_plan_is_active(self) -> None:
         plan = self.plan_generator.create_plan(
@@ -87,28 +76,6 @@ class UseCaseTests(TestCase):
         self.payout()
         assert not plan.expired
         assert plan.is_active
-
-    def test_that_expiration_date_is_correctly_calculated_if_plan_expires_now(
-        self,
-    ) -> None:
-        self.datetime_service.freeze_time(datetime.datetime.now())
-        plan = self.plan_generator.create_plan(
-            timeframe=1, activation_date=self.datetime_service.now_minus_one_day()
-        )
-        self.payout()
-        expected_expiration_time = self.datetime_service.now()
-        assert plan.expiration_date == expected_expiration_time
-
-    def test_that_expiration_date_is_correctly_calculated_if_plan_expires_in_the_future(
-        self,
-    ) -> None:
-        self.datetime_service.freeze_time(datetime.datetime.now())
-        plan = self.plan_generator.create_plan(
-            timeframe=2, activation_date=self.datetime_service.now_minus_one_day()
-        )
-        self.payout()
-        expected_expiration_time = self.datetime_service.now_plus_one_day()
-        assert plan.expiration_date == expected_expiration_time
 
     def test_that_plan_with_requested_cooperation_has_no_requested_cooperation_after_expiration(
         self,
@@ -345,7 +312,7 @@ class UseCaseTests(TestCase):
         self.assertEqual(self.count_transactions_of_type_a(), 1)
 
     def test_that_company_receives_correct_wage_credit(self) -> None:
-        planner = self.company_generator.create_company()
+        planner = self.company_generator.create_company_entity()
         expected_wage_payout = Decimal("3")
         self.datetime_service.freeze_time(datetime.datetime(2021, 1, 1, 23, 45))
         self.plan_generator.create_plan(
@@ -363,6 +330,29 @@ class UseCaseTests(TestCase):
         self.assertEqual(
             self.get_company_work_account_balance(planner), expected_wage_payout
         )
+
+    def test_that_payout_factor_ignores_plan_that_has_recently_expired(
+        self,
+    ) -> None:
+        time_of_plan_activation = datetime.datetime(2020, 5, 1, 8)
+        timeframe_of_plan = 1
+        time_of_payout_factor_calculation = (
+            time_of_plan_activation + datetime.timedelta(days=1, minutes=1)
+        )
+        expected_payout_factor = 0
+        self.datetime_service.freeze_time(time_of_plan_activation)
+        self.plan_generator.create_plan(
+            activation_date=time_of_plan_activation,
+            approved=True,
+            is_public_service=True,
+            timeframe=timeframe_of_plan,
+            costs=ProductionCosts(Decimal(10), Decimal(10), Decimal(10)),
+        )
+        self.datetime_service.freeze_time(time_of_payout_factor_calculation)
+        self.payout()
+        pf = self.payout_factor_repository.get_latest_payout_factor()
+        assert pf
+        self.assertEqual(pf.value, expected_payout_factor)
 
     def test_that_a_payout_factor_gets_stored_in_repository(
         self,

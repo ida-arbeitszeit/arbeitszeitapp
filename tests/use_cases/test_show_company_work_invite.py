@@ -34,9 +34,9 @@ class TestExistingMemberWithNonMatchingInvite(TestCase):
         self.member_generator = self.injector.get(MemberGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.invite_worker = self.injector.get(InviteWorkerToCompanyUseCase)
-        self.invited_member = self.member_generator.create_member()
-        self.other_member = self.member_generator.create_member()
-        self.company = self.company_generator.create_company()
+        self.invited_member = self.member_generator.create_member_entity()
+        self.other_member = self.member_generator.create_member_entity()
+        self.company = self.company_generator.create_company_entity()
         invite_response = self.invite_worker(
             InviteWorkerToCompanyUseCase.Request(
                 company=self.company.id,
@@ -60,7 +60,7 @@ class TestExistingMemberWithoutAnyInviteTest(TestCase):
         self.injector = get_dependency_injector()
         self.use_case = self.injector.get(ShowCompanyWorkInviteDetailsUseCase)
         self.member_generator = self.injector.get(MemberGenerator)
-        self.invited_member = self.member_generator.create_member()
+        self.invited_member = self.member_generator.create_member_entity()
         request = ShowCompanyWorkInviteDetailsRequest(
             invite=uuid4(),
             member=self.invited_member.id,
@@ -79,8 +79,8 @@ class TestExistingMemberWithMatchingInvite(TestCase):
         self.member_generator = self.injector.get(MemberGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.invite_worker = self.injector.get(InviteWorkerToCompanyUseCase)
-        self.member = self.member_generator.create_member()
-        self.company = self.company_generator.create_company(
+        self.member = self.member_generator.create_member_entity()
+        self.company = self.company_generator.create_company_entity(
             name=self.expected_company_name
         )
         invite_response = self.invite_worker(

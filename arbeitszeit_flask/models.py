@@ -15,13 +15,13 @@ def generate_uuid() -> str:
     return str(uuid.uuid4())
 
 
-class User(UserMixin, db.Model):
+class User(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
 
 
-class SocialAccounting(UserMixin, db.Model):
+class SocialAccounting(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
 
     account = db.relationship(
@@ -81,7 +81,7 @@ class Accountant(UserMixin, db.Model):
     user = db.relationship("User", lazy=True, uselist=False, backref="accountant")
 
 
-class PlanDraft(UserMixin, db.Model):
+class PlanDraft(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
     plan_creation_date = db.Column(db.DateTime, nullable=False)
     planner = db.Column(db.String, db.ForeignKey("company.id"), nullable=False)
@@ -96,7 +96,7 @@ class PlanDraft(UserMixin, db.Model):
     is_public_service = db.Column(db.Boolean, nullable=False, default=False)
 
 
-class Plan(UserMixin, db.Model):
+class Plan(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
     plan_creation_date = db.Column(db.DateTime, nullable=False)
     planner = db.Column(db.String, db.ForeignKey("company.id"), nullable=False)
@@ -112,7 +112,6 @@ class Plan(UserMixin, db.Model):
     is_active = db.Column(db.Boolean, nullable=False, default=False)
     activation_date = db.Column(db.DateTime, nullable=True)
     expired = db.Column(db.Boolean, nullable=False, default=False)
-    expiration_date = db.Column(db.DateTime, nullable=True)
     active_days = db.Column(db.Integer, nullable=True)
     payout_count = db.Column(db.Integer, nullable=False, default=0)
     is_available = db.Column(db.Boolean, nullable=False, default=True)
@@ -144,7 +143,7 @@ class AccountTypes(Enum):
     accounting = "accounting"
 
 
-class Account(UserMixin, db.Model):
+class Account(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
     account_owner_social_accounting = db.Column(
         db.String, db.ForeignKey("social_accounting.id"), nullable=True
@@ -170,7 +169,7 @@ class Account(UserMixin, db.Model):
     )
 
 
-class Transaction(UserMixin, db.Model):
+class Transaction(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
     date = db.Column(db.DateTime, nullable=False)
     sending_account = db.Column(db.String, db.ForeignKey("account.id"), nullable=False)
@@ -182,7 +181,7 @@ class Transaction(UserMixin, db.Model):
     purpose = db.Column(db.String(1000), nullable=True)  # Verwendungszweck
 
 
-class Purchase(UserMixin, db.Model):
+class Purchase(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
     purchase_date = db.Column(db.DateTime, nullable=False)
     plan_id = db.Column(db.String, db.ForeignKey("plan.id"), nullable=False)
@@ -212,7 +211,7 @@ class Cooperation(db.Model):
     )
 
 
-class PayoutFactor(UserMixin, db.Model):
+class PayoutFactor(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
     timestamp = db.Column(db.DateTime, nullable=False)
     payout_factor = db.Column(db.Numeric(), nullable=False)

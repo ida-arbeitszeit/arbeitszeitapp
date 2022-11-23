@@ -1,14 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 
 from arbeitszeit.entities import SocialAccounting
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases import ShowPRDAccountDetailsUseCase
-from tests.data_generators import (
-    CompanyGenerator,
-    MemberGenerator,
-    TransactionGenerator,
-)
+from tests.data_generators import FakeDatetimeService, TransactionGenerator
 
 from .base_test_case import BaseTestCase
 
@@ -16,36 +12,34 @@ from .base_test_case import BaseTestCase
 class UseCaseTester(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.member_generator = self.injector.get(MemberGenerator)
-        self.company_generator = self.injector.get(CompanyGenerator)
         self.show_prd_account_details = self.injector.get(ShowPRDAccountDetailsUseCase)
         self.transaction_generator = self.injector.get(TransactionGenerator)
         self.social_accounting = self.injector.get(SocialAccounting)
 
     def test_no_transactions_returned_when_no_transactions_took_place(self) -> None:
         self.member_generator.create_member()
-        company = self.company_generator.create_company()
+        company = self.company_generator.create_company_entity()
 
         response = self.show_prd_account_details(company.id)
         assert not response.transactions
 
     def test_balance_is_zero_when_no_transactions_took_place(self) -> None:
         self.member_generator.create_member()
-        company = self.company_generator.create_company()
+        company = self.company_generator.create_company_entity()
 
         response = self.show_prd_account_details(company.id)
         assert response.account_balance == 0
 
     def test_company_id_is_returned(self) -> None:
         self.member_generator.create_member()
-        company = self.company_generator.create_company()
+        company = self.company_generator.create_company_entity()
 
         response = self.show_prd_account_details(company.id)
         assert response.company_id == company.id
 
     def test_that_no_info_is_generated_after_company_buying_p(self) -> None:
-        company1 = self.company_generator.create_company()
-        company2 = self.company_generator.create_company()
+        company1 = self.company_generator.create_company_entity()
+        company2 = self.company_generator.create_company_entity()
 
         self.transaction_generator.create_transaction(
             sending_account=company1.means_account,
@@ -58,8 +52,8 @@ class UseCaseTester(BaseTestCase):
         assert len(response.transactions) == 0
 
     def test_that_no_info_is_generated_after_company_buying_r(self) -> None:
-        company1 = self.company_generator.create_company()
-        company2 = self.company_generator.create_company()
+        company1 = self.company_generator.create_company_entity()
+        company2 = self.company_generator.create_company_entity()
 
         self.transaction_generator.create_transaction(
             sending_account=company1.raw_material_account,
@@ -72,7 +66,7 @@ class UseCaseTester(BaseTestCase):
         assert len(response.transactions) == 0
 
     def test_that_no_info_is_generated_when_credit_for_r_is_granted(self) -> None:
-        company = self.company_generator.create_company()
+        company = self.company_generator.create_company_entity()
 
         self.transaction_generator.create_transaction(
             sending_account=self.social_accounting.account,
@@ -84,7 +78,7 @@ class UseCaseTester(BaseTestCase):
         assert len(response.transactions) == 0
 
     def test_that_no_info_is_generated_when_credit_for_p_is_granted(self) -> None:
-        company = self.company_generator.create_company()
+        company = self.company_generator.create_company_entity()
 
         self.transaction_generator.create_transaction(
             sending_account=self.social_accounting.account,
@@ -96,7 +90,7 @@ class UseCaseTester(BaseTestCase):
         assert len(response.transactions) == 0
 
     def test_that_no_info_is_generated_when_credit_for_a_is_granted(self) -> None:
-        company = self.company_generator.create_company()
+        company = self.company_generator.create_company_entity()
 
         self.transaction_generator.create_transaction(
             sending_account=self.social_accounting.account,
@@ -110,8 +104,8 @@ class UseCaseTester(BaseTestCase):
     def test_that_correct_info_is_generated_after_selling_of_consumer_product(
         self,
     ) -> None:
-        member = self.member_generator.create_member()
-        company = self.company_generator.create_company()
+        member = self.member_generator.create_member_entity()
+        company = self.company_generator.create_company_entity()
 
         self.transaction_generator.create_transaction(
             sending_account=member.account,
@@ -134,8 +128,8 @@ class UseCaseTester(BaseTestCase):
     def test_that_correct_info_is_generated_after_selling_of_means_of_production(
         self,
     ) -> None:
-        company1 = self.company_generator.create_company()
-        company2 = self.company_generator.create_company()
+        company1 = self.company_generator.create_company_entity()
+        company2 = self.company_generator.create_company_entity()
 
         self.transaction_generator.create_transaction(
             sending_account=company1.means_account,
@@ -156,8 +150,8 @@ class UseCaseTester(BaseTestCase):
         assert response.account_balance == Decimal(8.5)
 
     def test_that_correct_info_is_generated_after_selling_of_raw_material(self) -> None:
-        company1 = self.company_generator.create_company()
-        company2 = self.company_generator.create_company()
+        company1 = self.company_generator.create_company_entity()
+        company2 = self.company_generator.create_company_entity()
 
         self.transaction_generator.create_transaction(
             sending_account=company1.raw_material_account,
@@ -179,7 +173,7 @@ class UseCaseTester(BaseTestCase):
 
     def test_that_plotting_info_is_empty_when_no_transactions_occurred(self) -> None:
         self.member_generator.create_member()
-        company = self.company_generator.create_company()
+        company = self.company_generator.create_company_entity()
 
         response = self.show_prd_account_details(company.id)
         assert not response.plot.timestamps
@@ -188,8 +182,8 @@ class UseCaseTester(BaseTestCase):
     def test_that_plotting_info_is_generated_after_selling_of_consumer_product(
         self,
     ) -> None:
-        member = self.member_generator.create_member()
-        company = self.company_generator.create_company()
+        member = self.member_generator.create_member_entity()
+        company = self.company_generator.create_company_entity()
 
         self.transaction_generator.create_transaction(
             sending_account=member.account,
@@ -205,14 +199,16 @@ class UseCaseTester(BaseTestCase):
     def test_that_correct_plotting_info_is_generated_after_selling_of_two_consumer_products(
         self,
     ) -> None:
-        member = self.member_generator.create_member()
-        company = self.company_generator.create_company()
+        member = self.member_generator.create_member_entity()
+        company = self.company_generator.create_company_entity()
+        datetime_service = FakeDatetimeService()
 
         trans1 = self.transaction_generator.create_transaction(
             sending_account=member.account,
             receiving_account=company.product_account,
             amount_sent=Decimal(10),
             amount_received=Decimal(5),
+            date=datetime_service.now() - timedelta(hours=2),
         )
 
         trans2 = self.transaction_generator.create_transaction(
@@ -220,6 +216,7 @@ class UseCaseTester(BaseTestCase):
             receiving_account=company.product_account,
             amount_sent=Decimal(10),
             amount_received=Decimal(10),
+            date=datetime_service.now() - timedelta(hours=1),
         )
 
         response = self.show_prd_account_details(company.id)
@@ -237,14 +234,16 @@ class UseCaseTester(BaseTestCase):
     def test_that_plotting_info_is_generated_in_the_correct_order_after_selling_of_three_consumer_products(
         self,
     ) -> None:
-        member = self.member_generator.create_member()
-        company = self.company_generator.create_company()
+        member = self.member_generator.create_member_entity()
+        company = self.company_generator.create_company_entity()
+        datetime_service = FakeDatetimeService()
 
         trans1 = self.transaction_generator.create_transaction(
             sending_account=member.account,
             receiving_account=company.product_account,
             amount_sent=Decimal(10),
             amount_received=Decimal(1),
+            date=datetime_service.now() - timedelta(hours=3),
         )
 
         trans2 = self.transaction_generator.create_transaction(
@@ -252,6 +251,7 @@ class UseCaseTester(BaseTestCase):
             receiving_account=company.product_account,
             amount_sent=Decimal(10),
             amount_received=Decimal(2),
+            date=datetime_service.now() - timedelta(hours=2),
         )
 
         trans3 = self.transaction_generator.create_transaction(
@@ -259,6 +259,7 @@ class UseCaseTester(BaseTestCase):
             receiving_account=company.product_account,
             amount_sent=Decimal(10),
             amount_received=Decimal(3),
+            date=datetime_service.now() - timedelta(hours=1),
         )
 
         response = self.show_prd_account_details(company.id)
@@ -273,7 +274,7 @@ class UseCaseTester(BaseTestCase):
     def test_that_no_buyer_is_shown_in_transaction_detail_when_transaction_is_debit_for_expected_sales(
         self,
     ) -> None:
-        company = self.company_generator.create_company()
+        company = self.company_generator.create_company_entity()
 
         self.transaction_generator.create_transaction(
             sending_account=self.social_accounting.account,
@@ -286,8 +287,8 @@ class UseCaseTester(BaseTestCase):
         assert response.transactions[0].buyer is None
 
     def test_that_correct_buyer_info_is_shown_when_company_sold_to_member(self) -> None:
-        company = self.company_generator.create_company()
-        member = self.member_generator.create_member()
+        company = self.company_generator.create_company_entity()
+        member = self.member_generator.create_member_entity()
 
         self.transaction_generator.create_transaction(
             sending_account=member.account,
@@ -305,8 +306,8 @@ class UseCaseTester(BaseTestCase):
     def test_that_correct_buyer_info_is_shown_when_company_sold_to_company(
         self,
     ) -> None:
-        company1 = self.company_generator.create_company()
-        company2 = self.company_generator.create_company()
+        company1 = self.company_generator.create_company_entity()
+        company2 = self.company_generator.create_company_entity()
 
         self.transaction_generator.create_transaction(
             sending_account=company1.means_account,

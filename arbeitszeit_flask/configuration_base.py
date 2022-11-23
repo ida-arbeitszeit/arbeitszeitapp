@@ -1,6 +1,6 @@
 from os import environ
 
-DEBUG = False
+FLASK_DEBUG = 0
 DEBUG_DETAILS = False
 TESTING = False
 SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -14,3 +14,7 @@ AUTO_MIGRATE = False
 # control thresholds
 ALLOWED_OVERDRAW_MEMBER = "0"
 ACCEPTABLE_RELATIVE_ACCOUNT_DEVIATION = "33"
+
+FLASK_PROFILER = {
+    "enabled": False,
+}

@@ -3,9 +3,10 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    flask-profiler.url = "github:seppeljordan/flask-profiler";
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
+  outputs = { self, nixpkgs, flake-utils, flask-profiler }:
     let
       supportedSystems = [ "x86_64-linux" ];
       systemDependent = flake-utils.lib.eachSystem supportedSystems (system:
@@ -14,9 +15,8 @@
             inherit system;
             overlays = [ self.overlays.default ];
           };
-          developmentPkgs = pkgs.extend self.overlays.development;
         in {
-          devShells.default = developmentPkgs.callPackage nix/devShell.nix { };
+          devShells.default = pkgs.callPackage nix/devShell.nix { };
           packages = {
             default = pkgs.python3.pkgs.arbeitszeitapp;
             inherit (pkgs) python3;
@@ -27,32 +27,16 @@
           };
         });
       systemIndependent = {
-        overlays = let
-          # Unfortunately python.override does not compose. That's why
-          # we use overrideScope.  There is an open issue on github
-          # about this topic:
-          # https://github.com/NixOS/nixpkgs/issues/44426
-          overridePython = pythonSelf: overrides:
-            pythonSelf // {
-              pkgs = pythonSelf.pkgs.overrideScope overrides;
-            };
-        in {
+        overlays = {
           # The default overlay provides the arbeitszeitapp to
           # nixpkgs.
-          default = final: prev: {
-            python310 =
-              overridePython prev.python310 (import nix/pythonPackages.nix);
-            python39 =
-              overridePython prev.python39 (import nix/pythonPackages.nix);
-          };
-          # The development overrides provide adjustments to nixpkgs
-          # that are only necessary for development.
-          development = final: prev: {
-            python310 = overridePython prev.python310
-              (import nix/developmentOverrides.nix);
-            python39 = overridePython prev.python39
-              (import nix/developmentOverrides.nix);
-          };
+          default = let
+            ourOverlay = final: prev: {
+              pythonPackagesExtensions = prev.pythonPackagesExtensions
+                ++ [ (import nix/pythonPackages.nix) ];
+            };
+          in nixpkgs.lib.composeExtensions ourOverlay
+          flask-profiler.overlays.default;
         };
       };
     in systemDependent // systemIndependent;

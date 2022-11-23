@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterable, Iterator, List, Optional, Protocol, Union
+from typing import Generic, Iterable, Iterator, List, Optional, Protocol, TypeVar, Union
 from uuid import UUID
 
 from arbeitszeit.entities import (
@@ -23,12 +25,53 @@ from arbeitszeit.entities import (
     Transaction,
 )
 
+T = TypeVar("T", covariant=True)
+
+
+class QueryResult(Protocol, Generic[T]):
+    def __iter__(self) -> Iterator[T]:
+        ...
+
+    def limit(self, n: int) -> QueryResult[T]:
+        ...
+
+    def offset(self, n: int) -> QueryResult[T]:
+        ...
+
+    def __len__(self) -> int:
+        ...
+
+
+class PlanResult(QueryResult[Plan], Protocol):
+    def ordered_by_creation_date(self, ascending: bool = ...) -> PlanResult:
+        ...
+
+    def with_id_containing(self, query: str) -> PlanResult:
+        ...
+
+    def with_product_name_containing(self, query: str) -> PlanResult:
+        ...
+
+    def that_are_approved(self) -> PlanResult:
+        ...
+
+    def that_are_productive(self) -> PlanResult:
+        ...
+
+    def that_are_public(self) -> PlanResult:
+        ...
+
+    def planned_by(self, company: UUID) -> PlanResult:
+        ...
+
+
+class MemberResult(QueryResult[Member], Protocol):
+    def working_at_company(self, company: UUID) -> MemberResult:
+        ...
+
 
 class CompanyWorkerRepository(Protocol):
     def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
-        ...
-
-    def get_company_workers(self, company: UUID) -> Iterable[Member]:
         ...
 
     def get_member_workplaces(self, member: UUID) -> Iterable[Company]:
@@ -76,9 +119,7 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def set_plan_approval_date(
-        self, plan: PlanDraft, approval_timestamp: datetime
-    ) -> Plan:
+    def set_plan_approval_date(self, plan: UUID, approval_timestamp: datetime):
         pass
 
     @abstractmethod
@@ -87,10 +128,6 @@ class PlanRepository(ABC):
 
     @abstractmethod
     def set_plan_as_expired(self, plan: Plan) -> None:
-        pass
-
-    @abstractmethod
-    def set_expiration_date(self, plan: Plan, expiration_date: datetime) -> None:
         pass
 
     @abstractmethod
@@ -106,21 +143,7 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def get_active_plans(self) -> Iterator[Plan]:
-        pass
-
-    @abstractmethod
-    def get_three_latest_active_plans_ordered_by_activation_date(
-        self,
-    ) -> Iterator[Plan]:
-        pass
-
-    @abstractmethod
-    def count_active_plans(self) -> int:
-        pass
-
-    @abstractmethod
-    def count_active_public_plans(self) -> int:
+    def get_active_plans(self) -> PlanResult:
         pass
 
     @abstractmethod
@@ -144,35 +167,7 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def all_plans_approved_active_and_not_expired(self) -> Iterator[Plan]:
-        pass
-
-    @abstractmethod
-    def all_productive_plans_approved_active_and_not_expired(self) -> Iterator[Plan]:
-        pass
-
-    @abstractmethod
-    def all_public_plans_approved_active_and_not_expired(self) -> Iterator[Plan]:
-        pass
-
-    @abstractmethod
     def hide_plan(self, plan_id: UUID) -> None:
-        pass
-
-    @abstractmethod
-    def query_active_plans_by_product_name(self, query: str) -> Iterator[Plan]:
-        pass
-
-    @abstractmethod
-    def query_active_plans_by_plan_id(self, query: str) -> Iterator[Plan]:
-        pass
-
-    @abstractmethod
-    def get_all_plans_for_company_descending(self, company_id: UUID) -> Iterator[Plan]:
-        pass
-
-    @abstractmethod
-    def get_all_active_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
         pass
 
     @abstractmethod
@@ -194,6 +189,10 @@ class PlanRepository(ABC):
 
     @abstractmethod
     def get_all_plans_without_completed_review(self) -> Iterable[UUID]:
+        pass
+
+    @abstractmethod
+    def get_all_plans(self) -> PlanResult:
         pass
 
 
@@ -272,7 +271,7 @@ class MemberRepository(ABC):
         pass
 
     @abstractmethod
-    def get_all_members(self) -> Iterator[Member]:
+    def get_all_members(self) -> MemberResult:
         pass
 
     @abstractmethod
@@ -341,6 +340,10 @@ class CompanyRepository(ABC):
 
     @abstractmethod
     def validate_credentials(self, email_address: str, password: str) -> Optional[UUID]:
+        pass
+
+    @abstractmethod
+    def confirm_company(self, company: UUID, confirmation_timestamp: datetime) -> None:
         pass
 
 
@@ -503,6 +506,9 @@ class AccountantRepository(Protocol):
         ...
 
     def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
+        ...
+
+    def get_all_accountants(self) -> QueryResult[Accountant]:
         ...
 
 

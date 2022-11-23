@@ -1,6 +1,5 @@
 from os import environ, path
 
-DEBUG = True
 DEBUG_DETAILS = environ.get("DEBUG_DETAILS") in ("true", "True", "1", "t")
 TESTING = True
 SQLALCHEMY_DATABASE_URI = environ.get("DEV_DATABASE_URI")
@@ -21,3 +20,10 @@ MAIL_PASSWORD = environ.get("MAIL_PASSWORD")
 MAIL_DEFAULT_SENDER = environ.get("MAIL_DEFAULT_SENDER")
 MAIL_USE_TLS = False
 MAIL_USE_SSL = True
+
+FLASK_PROFILER = {
+    "enabled": True,
+    "storage": {"engine": "sqlite"},
+    "ignore": ["^/static/.*"],
+    "endpointRoot": "profiling",
+}

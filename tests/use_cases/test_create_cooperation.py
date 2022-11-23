@@ -32,7 +32,7 @@ def test_creation_is_rejected_when_coop_name_exists_already(
     cooperation_generator: CooperationGenerator,
 ):
     cooperation_generator.create_cooperation(name="existing name")
-    coordinator = company_generator.create_company()
+    coordinator = company_generator.create_company_entity()
     request = CreateCooperationRequest(
         coordinator_id=coordinator.id, name="existing name", definition="some info"
     )
@@ -51,7 +51,7 @@ def test_creation_is_rejected_when_coop_name_exists_with_case_variation(
     cooperation_generator: CooperationGenerator,
 ):
     cooperation_generator.create_cooperation(name="ExisTing NaMe")
-    coordinator = company_generator.create_company()
+    coordinator = company_generator.create_company_entity()
     request = CreateCooperationRequest(
         coordinator_id=coordinator.id, name="existing name", definition="some info"
     )
@@ -68,7 +68,7 @@ def test_creation_is_successfull(
     create_cooperation: CreateCooperation,
     company_generator: CompanyGenerator,
 ):
-    coordinator = company_generator.create_company()
+    coordinator = company_generator.create_company_entity()
     request = CreateCooperationRequest(
         coordinator_id=coordinator.id, name="test name", definition="some info"
     )

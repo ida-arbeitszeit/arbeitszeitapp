@@ -1,47 +1,49 @@
 from dataclasses import dataclass
-from enum import Enum, auto
-from typing import Optional
+from uuid import UUID
 
 from injector import inject
 
-from arbeitszeit.token import ConfirmationEmail, TokenDeliverer, TokenService
-
-
-@dataclass
-class ResendConfirmationMailResponse:
-    class RejectionReason(Exception, Enum):
-        sending_mail_failed = auto()
-
-    rejection_reason: Optional[RejectionReason]
-
-    @property
-    def is_rejected(self) -> bool:
-        return self.rejection_reason is not None
-
-
-@dataclass
-class ResendConfirmationMailRequest:
-    subject: str
-    recipient: str
+from arbeitszeit.repositories import CompanyRepository, MemberRepository
+from arbeitszeit.token import (
+    CompanyRegistrationMessagePresenter,
+    MemberRegistrationMessagePresenter,
+    TokenService,
+)
 
 
 @inject
 @dataclass
-class ResendConfirmationMail:
-    token_deliverer: TokenDeliverer
+class ResendConfirmationMailUseCase:
+    @dataclass
+    class Request:
+        user: UUID
+
+    @dataclass
+    class Response:
+        is_token_sent: bool = False
+
+    company_repository: CompanyRepository
+    company_registration_message_presenter: CompanyRegistrationMessagePresenter
+    member_repository: MemberRepository
+    member_registration_message_presenter: MemberRegistrationMessagePresenter
     token_service: TokenService
 
-    def __call__(
-        self, request: ResendConfirmationMailRequest
-    ) -> ResendConfirmationMailResponse:
-        self._create_confirmation_mail(request)
-        return ResendConfirmationMailResponse(rejection_reason=None)
-
-    def _create_confirmation_mail(self, request: ResendConfirmationMailRequest) -> None:
-        token = self.token_service.generate_token(request.recipient)
-        self.token_deliverer.deliver_confirmation_token(
-            ConfirmationEmail(
+    def resend_confirmation_mail(self, request: Request) -> Response:
+        member = self.member_repository.get_by_id(request.user)
+        if member and member.confirmed_on is None:
+            token = self.token_service.generate_token(member.email)
+            self.member_registration_message_presenter.show_member_registration_message(
+                request.user,
                 token=token,
-                email=request.recipient,
             )
-        )
+            return self.Response(is_token_sent=True)
+        if (
+            company := self.company_repository.get_by_id(request.user)
+        ) and company.confirmed_on is None:
+            token = self.token_service.generate_token(company.email)
+            self.company_registration_message_presenter.show_company_registration_message(
+                company=company.id,
+                token=token,
+            )
+            return self.Response(is_token_sent=True)
+        return self.Response()

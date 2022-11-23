@@ -1,15 +1,14 @@
 from typing import Optional
-from unittest import TestCase
 
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
 
-from .dependency_injection import get_dependency_injector
+from .base_test_case import BaseTestCase
 
 
-class UseCaseTests(TestCase):
+class UseCaseTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.use_case = self.injector.get(LogInMemberUseCase)
         self.register_use_case = self.injector.get(RegisterMemberUseCase)
 
@@ -68,6 +67,28 @@ class UseCaseTests(TestCase):
                 response = self.use_case.log_in_member(request)
                 self.assertEqual(response.email, expected_email)
 
+    def test_that_correct_user_id_is_returned_on_successful_login(self) -> None:
+        password = "testpassword"
+        email = "test@test.test"
+        member = self.member_generator.create_member(
+            email=email,
+            password=password,
+        )
+        request = self.get_request(
+            email=email,
+            password=password,
+        )
+        response = self.use_case.log_in_member(request)
+        assert response.user_id == member
+
+    def test_that_no_user_id_is_returned_on_invalid_login(self) -> None:
+        request = self.get_request(
+            email="random@email.com",
+            password="12341234",
+        )
+        response = self.use_case.log_in_member(request)
+        assert response.user_id is None
+
     def get_request(
         self,
         email: Optional[str] = None,
@@ -84,7 +105,7 @@ class UseCaseTests(TestCase):
 
     def create_member(self, email: str, password: str) -> None:
         name = "test user name"
-        response = self.register_use_case(
+        response = self.register_use_case.register_member(
             request=RegisterMemberUseCase.Request(
                 email=email,
                 name=name,

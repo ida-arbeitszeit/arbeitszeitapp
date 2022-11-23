@@ -19,7 +19,7 @@ class AuthenticatedCompanyTests(TestCase):
         self.translator = self.injector.get(FakeTranslator)
         self.session = self.injector.get(FakeSession)
         self.expected_user_id = uuid4()
-        self.session.set_current_user_id(self.expected_user_id)
+        self.session.login_company(self.expected_user_id)
         self.controller = PayMeansOfProductionController(self.session, self.translator)
 
     def test_use_case_request_gets_returned_when_correct_input_data(self):

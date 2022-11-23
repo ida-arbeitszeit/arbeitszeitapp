@@ -69,7 +69,7 @@ class GetCompanySummaryPresenterTests(TestCase):
         self.translator = self.injector.get(FakeTranslator)
         self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
         self.session = self.injector.get(FakeSession)
-        self.session.login_company("test@test.test")
+        self.session.login_company(uuid4())
 
     def test_company_id_is_shown(self):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
@@ -120,7 +120,7 @@ class PlansOfCompanyTests(TestCase):
         self.translator = self.injector.get(FakeTranslator)
         self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
         self.session = self.injector.get(FakeSession)
-        self.session.login_company("test@test.test")
+        self.session.login_company(uuid4())
 
     def test_ids_of_plans_are_shown(self):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
@@ -149,29 +149,33 @@ class PlansOfCompanyTests(TestCase):
         self.assertEqual(
             view_model.plan_details[0].url,
             self.url_index.get_plan_summary_url(
-                UserRole.company, RESPONSE_WITH_2_PLANS.plan_details[0].id
+                user_role=UserRole.company,
+                plan_id=RESPONSE_WITH_2_PLANS.plan_details[0].id,
             ),
         )
         self.assertEqual(
             view_model.plan_details[1].url,
             self.url_index.get_plan_summary_url(
-                UserRole.company, RESPONSE_WITH_2_PLANS.plan_details[1].id
+                user_role=UserRole.company,
+                plan_id=RESPONSE_WITH_2_PLANS.plan_details[1].id,
             ),
         )
 
     def test_urls_of_plans_are_shown_for_members(self):
-        self.session.login_member("test@test.test")
+        self.session.login_member(uuid4())
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
         self.assertEqual(
             view_model.plan_details[0].url,
             self.url_index.get_plan_summary_url(
-                UserRole.member, RESPONSE_WITH_2_PLANS.plan_details[0].id
+                user_role=UserRole.member,
+                plan_id=RESPONSE_WITH_2_PLANS.plan_details[0].id,
             ),
         )
         self.assertEqual(
             view_model.plan_details[1].url,
             self.url_index.get_plan_summary_url(
-                UserRole.member, RESPONSE_WITH_2_PLANS.plan_details[1].id
+                user_role=UserRole.member,
+                plan_id=RESPONSE_WITH_2_PLANS.plan_details[1].id,
             ),
         )
 

@@ -6,7 +6,19 @@ from datetime import datetime
 from decimal import Decimal
 from itertools import islice
 from statistics import StatisticsError, mean
-from typing import Dict, Iterable, Iterator, List, Optional, Set, Tuple, Union
+from typing import (
+    Callable,
+    Dict,
+    Generic,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    TypeVar,
+    Union,
+)
 from uuid import UUID, uuid4
 
 from injector import inject, singleton
@@ -32,6 +44,84 @@ from arbeitszeit.entities import (
     Transaction,
 )
 from tests.search_tree import SearchTree
+
+T = TypeVar("T")
+
+
+class QueryResultImpl(Generic[T]):
+    def __init__(
+        self, items: Callable[[], Iterable[T]], *, member_repository: MemberRepository
+    ) -> None:
+        self.items = items
+        self.member_repository = member_repository
+
+    def limit(self, n: int) -> QueryResultImpl[T]:
+        return type(self)(
+            items=lambda: islice(self.items(), n),
+            member_repository=self.member_repository,
+        )
+
+    def offset(self, n: int) -> QueryResultImpl[T]:
+        return type(self)(
+            items=lambda: islice(self.items(), n, None),
+            member_repository=self.member_repository,
+        )
+
+    def __iter__(self) -> Iterator[T]:
+        return iter(self.items())
+
+    def __len__(self) -> int:
+        return len(list(self.items()))
+
+
+class PlanResult(QueryResultImpl[Plan]):
+    def ordered_by_creation_date(self, ascending: bool = True) -> PlanResult:
+        return type(self)(
+            items=lambda: sorted(
+                list(self.items()),
+                key=lambda plan: plan.plan_creation_date,
+                reverse=not ascending,
+            ),
+            member_repository=self.member_repository,
+        )
+
+    def with_id_containing(self, query: str) -> PlanResult:
+        return self._filtered_by(lambda plan: query in str(plan.id))
+
+    def with_product_name_containing(self, query: str) -> PlanResult:
+        return self._filtered_by(lambda plan: query.lower() in plan.prd_name.lower())
+
+    def that_are_approved(self) -> PlanResult:
+        return self._filtered_by(lambda plan: plan.approval_date is not None)
+
+    def that_are_productive(self) -> PlanResult:
+        return self._filtered_by(lambda plan: not plan.is_public_service)
+
+    def that_are_public(self) -> PlanResult:
+        return self._filtered_by(lambda plan: plan.is_public_service)
+
+    def planned_by(self, company: UUID) -> PlanResult:
+        return self._filtered_by(lambda plan: plan.planner.id == company)
+
+    def _filtered_by(self, key: Callable[[Plan], bool]) -> PlanResult:
+        return type(self)(
+            items=lambda: filter(key, self.items()),
+            member_repository=self.member_repository,
+        )
+
+
+class MemberResult(QueryResultImpl[Member]):
+    def working_at_company(self, company: UUID) -> MemberResult:
+        return self._filtered_by(
+            lambda member: member.id
+            in self.member_repository.company_workers.get(company, []),
+        )
+
+    def _filtered_by(self, key: Callable[[Member], bool]) -> MemberResult:
+        return type(self)(
+            items=lambda: filter(key, self.items()),
+            member_repository=self.member_repository,
+        )
 
 
 @singleton
@@ -151,34 +241,6 @@ class TransactionRepository(interfaces.TransactionRepository):
 
 
 @singleton
-class CompanyWorkerRepository:
-    @inject
-    def __init__(
-        self, company_repository: CompanyRepository, member_repository: MemberRepository
-    ) -> None:
-        self.company_repository = company_repository
-        self.member_repository = member_repository
-        self.company_workers: Dict[UUID, Set[UUID]] = defaultdict(lambda: set())
-
-    def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
-        self.company_workers[company].add(worker)
-
-    def get_company_workers(self, company: UUID) -> Iterable[Member]:
-        for member_id in self.company_workers[company]:
-            member = self.member_repository.get_by_id(member_id)
-            if member is not None:
-                yield member
-
-    def get_member_workplaces(self, member: UUID) -> Iterable[Company]:
-        for company_id, workers in self.company_workers.items():
-            if member not in workers:
-                continue
-            company = self.company_repository.get_by_id(company_id)
-            if company is not None:
-                yield company
-
-
-@singleton
 class AccountRepository(interfaces.AccountRepository):
     @inject
     def __init__(self, transaction_repository: TransactionRepository):
@@ -263,10 +325,14 @@ class AccountOwnerRepository(interfaces.AccountOwnerRepository):
 @singleton
 class MemberRepository(interfaces.MemberRepository):
     @inject
-    def __init__(self, datetime_service: DatetimeService):
+    def __init__(
+        self, datetime_service: DatetimeService, company_repository: CompanyRepository
+    ):
         self.members: Dict[UUID, Member] = {}
         self.passwords: Dict[UUID, str] = {}
         self.datetime_service = datetime_service
+        self.company_workers: Dict[UUID, Set[UUID]] = defaultdict(lambda: set())
+        self.company_repository = company_repository
 
     def create_member(
         self,
@@ -321,14 +387,25 @@ class MemberRepository(interfaces.MemberRepository):
     def get_by_email(self, email: str) -> Optional[Member]:
         return self._get_member_by_email(email)
 
-    def get_all_members(self) -> Iterator[Member]:
-        yield from self.members.values()
+    def get_all_members(self) -> MemberResult:
+        return MemberResult(items=lambda: self.members.values(), member_repository=self)
 
     def _get_member_by_email(self, email: str) -> Optional[Member]:
         for member in self.members.values():
             if member.email == email:
                 return member
         return None
+
+    def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
+        self.company_workers[company].add(worker)
+
+    def get_member_workplaces(self, member: UUID) -> Iterable[Company]:
+        for company_id, workers in self.company_workers.items():
+            if member not in workers:
+                continue
+            company = self.company_repository.get_by_id(company_id)
+            if company is not None:
+                yield company
 
 
 @singleton
@@ -405,6 +482,10 @@ class CompanyRepository(interfaces.CompanyRepository):
                     return company.id
         return None
 
+    def confirm_company(self, company: UUID, confirmation_timestamp: datetime) -> None:
+        if model := self.get_by_id(company):
+            model.confirmed_on = confirmation_timestamp
+
 
 @singleton
 class PlanRepository(interfaces.PlanRepository):
@@ -413,10 +494,17 @@ class PlanRepository(interfaces.PlanRepository):
         self,
         company_repository: CompanyRepository,
         draft_repository: PlanDraftRepository,
+        member_repository: MemberRepository,
     ) -> None:
         self.plans: Dict[UUID, Plan] = {}
         self.company_repository = company_repository
         self.draft_repository = draft_repository
+        self.member_repository = member_repository
+
+    def get_all_plans(self) -> PlanResult:
+        return PlanResult(
+            items=lambda: self.plans.values(), member_repository=self.member_repository
+        )
 
     def get_all_plans_without_completed_review(self) -> Iterable[UUID]:
         for plan in self.plans.values():
@@ -445,26 +533,12 @@ class PlanRepository(interfaces.PlanRepository):
     def get_plan_by_id(self, id: UUID) -> Optional[Plan]:
         return self.plans.get(id)
 
-    def set_plan_approval_date(
-        self, draft: PlanDraft, approval_timestamp: datetime
-    ) -> Plan:
-        planner = self.company_repository.get_by_id(draft.planner.id)
-        assert planner
-        plan = self._create_plan(
-            id=draft.id,
-            planner=planner,
-            costs=draft.production_costs,
-            product_name=draft.product_name,
-            production_unit=draft.unit_of_distribution,
-            amount=draft.amount_produced,
-            description=draft.description,
-            timeframe_in_days=draft.timeframe,
-            is_public_service=draft.is_public_service,
-            creation_timestamp=draft.creation_date,
-        )
-        plan.approval_date = approval_timestamp
-        plan.approval_reason = "approved"
-        return plan
+    def set_plan_approval_date(self, plan: UUID, approval_timestamp: datetime):
+        plan_model = self.plans.get(plan)
+        if plan_model is None:
+            return
+        plan_model.approval_date = approval_timestamp
+        plan_model.approval_reason = "approved"
 
     def __len__(self) -> int:
         return len(self.plans)
@@ -477,42 +551,16 @@ class PlanRepository(interfaces.PlanRepository):
         plan.expired = True
         plan.is_active = False
 
-    def set_expiration_date(self, plan: Plan, expiration_date: datetime) -> None:
-        plan.expiration_date = expiration_date
-
     def set_active_days(self, plan: Plan, full_active_days: int) -> None:
         plan.active_days = full_active_days
 
     def increase_payout_count_by_one(self, plan: Plan) -> None:
         plan.payout_count += 1
 
-    def get_active_plans(self) -> Iterator[Plan]:
-        for plan in self.plans.values():
-            if plan.is_active:
-                yield plan
-
-    def get_three_latest_active_plans_ordered_by_activation_date(
-        self,
-    ) -> Iterator[Plan]:
-        active_plans = [plan for plan in self.plans.values() if plan.is_active]
-        active_plans_sorted = sorted(
-            active_plans,
-            key=lambda x: x.activation_date if x.activation_date is not None else 0,
-            reverse=True,
-        )
-        for plan in islice(active_plans_sorted, 3):
-            yield plan
-
-    def count_active_plans(self) -> int:
-        return len([plan for plan in self.plans.values() if plan.is_active])
-
-    def count_active_public_plans(self) -> int:
-        return len(
-            [
-                plan
-                for plan in self.plans.values()
-                if (plan.is_active and plan.is_public_service)
-            ]
+    def get_active_plans(self) -> PlanResult:
+        return PlanResult(
+            items=lambda: filter(lambda plan: plan.is_active, self.plans.values()),
+            member_repository=self.member_repository,
         )
 
     def avg_timeframe_of_active_plans(self) -> Decimal:
@@ -556,47 +604,10 @@ class PlanRepository(interfaces.PlanRepository):
             if plan.is_approved and not plan.expired:
                 yield plan
 
-    def all_plans_approved_active_and_not_expired(self) -> Iterator[Plan]:
-        for plan in self.plans.values():
-            if plan.is_approved and plan.is_active and not plan.expired:
-                yield plan
-
-    def all_productive_plans_approved_active_and_not_expired(self) -> Iterator[Plan]:
-        for plan in self.plans.values():
-            if (
-                not plan.is_public_service
-                and plan.is_active
-                and plan.is_approved
-                and not plan.expired
-            ):
-                yield plan
-
-    def all_public_plans_approved_active_and_not_expired(self) -> Iterator[Plan]:
-        for plan in self.plans.values():
-            if (
-                plan.is_public_service
-                and plan.is_active
-                and plan.is_approved
-                and not plan.expired
-            ):
-                yield plan
-
     def hide_plan(self, plan_id: UUID) -> None:
         plan = self.plans.get(plan_id)
         assert plan
         plan.hidden_by_user = True
-
-    def get_all_plans_for_company_descending(self, company_id: UUID) -> Iterator[Plan]:
-        plans = self.plans.values()
-        plans_ordered = sorted(plans, key=lambda x: x.plan_creation_date, reverse=True)
-        for plan in plans_ordered:
-            if str(plan.planner.id) == str(company_id):
-                yield plan
-
-    def get_all_active_plans_for_company(self, company_id: UUID) -> Iterator[Plan]:
-        for plan in self.plans.values():
-            if (str(plan.planner.id) == str(company_id)) and plan.is_active:
-                yield plan
 
     def _create_plan(
         self,
@@ -627,7 +638,6 @@ class PlanRepository(interfaces.PlanRepository):
             approval_date=None,
             approval_reason=None,
             expired=False,
-            expiration_date=None,
             active_days=None,
             payout_count=0,
             requested_cooperation=None,
@@ -637,16 +647,6 @@ class PlanRepository(interfaces.PlanRepository):
         )
         self.plans[plan.id] = plan
         return plan
-
-    def query_active_plans_by_product_name(self, query: str) -> Iterator[Plan]:
-        for plan in self.plans.values():
-            if plan.is_active and (query.lower() in plan.prd_name.lower()):
-                yield plan
-
-    def query_active_plans_by_plan_id(self, query: str) -> Iterator[Plan]:
-        for plan in self.plans.values():
-            if plan.is_active and (query in str(plan.id)):
-                yield plan
 
     def toggle_product_availability(self, plan: Plan) -> None:
         plan.is_available = True if (plan.is_available == False) else False
@@ -885,8 +885,10 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
                 yield plan
 
     def get_outbound_requests(self, requester_id: UUID) -> Iterator[Plan]:
-        plans_of_company = self.plan_repository.get_all_plans_for_company_descending(
-            requester_id
+        plans_of_company = (
+            self.plan_repository.get_all_plans()
+            .planned_by(requester_id)
+            .ordered_by_creation_date(ascending=False)
         )
         for plan in plans_of_company:
             if plan.requested_cooperation:
@@ -939,17 +941,21 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
                 yield plan
 
 
+@singleton
 class AccountantRepositoryTestImpl:
     @dataclass
     class _AccountantRecord:
         email: str
         name: str
         password: str
+        id: UUID
 
-    def __init__(self) -> None:
+    @inject
+    def __init__(self, member_repository: MemberRepository) -> None:
         self.accountants: Dict[
             UUID, AccountantRepositoryTestImpl._AccountantRecord
         ] = dict()
+        self.member_repository = member_repository
 
     def create_accountant(self, email: str, name: str, password: str) -> UUID:
         id = uuid4()
@@ -957,8 +963,10 @@ class AccountantRepositoryTestImpl:
             email=email,
             name=name,
             password=password,
+            id=id,
         )
         self.accountants[id] = record
+        print(self.accountants)
         return id
 
     def has_accountant_with_email(self, email: str) -> bool:
@@ -968,7 +976,7 @@ class AccountantRepositoryTestImpl:
         record = self.accountants.get(id)
         if record is None:
             return None
-        return Accountant(email_address=record.email, name=record.name)
+        return Accountant(email_address=record.email, name=record.name, id=id)
 
     def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
         for uuid, record in self.accountants.items():
@@ -978,6 +986,15 @@ class AccountantRepositoryTestImpl:
                 else:
                     return None
         return None
+
+    def get_all_accountants(self) -> QueryResultImpl[Accountant]:
+        return QueryResultImpl(
+            items=lambda: (
+                Accountant(email_address=record.email, name=record.name, id=record.id)
+                for record in self.accountants.values()
+            ),
+            member_repository=self.member_repository,
+        )
 
 
 class FakeLanguageRepository:

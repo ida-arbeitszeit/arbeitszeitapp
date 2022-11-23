@@ -26,7 +26,8 @@ class RegisterAccountantPresenter:
         self, response: RegisterAccountantUseCase.Response
     ) -> ViewModel:
         if response.is_accepted:
-            self.session.login_accountant(response.email_address)
+            assert response.user_id
+            self.session.login_accountant(accountant=response.user_id)
             return self.ViewModel(
                 redirect_url=self.dashboard_url_index.get_accountant_dashboard_url()
             )

@@ -1,4 +1,5 @@
 import os
+from typing import Any, Optional
 
 from flask import Flask, current_app, request, session
 from flask_migrate import upgrade
@@ -8,10 +9,14 @@ from flask_wtf.csrf import CSRFProtect
 import arbeitszeit_flask.extensions
 from arbeitszeit_flask.datetime import RealtimeDatetimeService
 from arbeitszeit_flask.extensions import babel, login_manager, mail
-from arbeitszeit_flask.profiling import show_profile_info, show_sql_queries
+from arbeitszeit_flask.profiling import (
+    initialize_flask_profiler,
+    show_profile_info,
+    show_sql_queries,
+)
 
 
-def load_configuration(app, configuration=None):
+def load_configuration(app: Any, configuration: Optional[Any] = None) -> None:
     """Load the right configuration files for the application.
 
     We will try to load the configuration from top to bottom and use
@@ -29,7 +34,7 @@ def load_configuration(app, configuration=None):
         app.config.from_pyfile("/etc/arbeitszeitapp/arbeitszeitapp.py", silent=True)
 
 
-def initialize_migrations(app, db):
+def initialize_migrations(app: Any, db: Any) -> None:
     migrate = arbeitszeit_flask.extensions.migrate
     migrations_directory = os.path.join(os.path.dirname(__file__), "migrations")
     migrate.init_app(app, db, directory=migrations_directory)
@@ -38,7 +43,7 @@ def initialize_migrations(app, db):
             upgrade(migrations_directory)
 
 
-def create_app(config=None, db=None, template_folder=None):
+def create_app(config: Any = None, db: Any = None, template_folder: Any = None) -> Any:
     if template_folder is None:
         template_folder = "templates"
 
@@ -56,7 +61,7 @@ def create_app(config=None, db=None, template_folder=None):
     login_manager.login_view = "auth.start"
 
     # Init Flask-Talisman
-    if app.config["ENV"] == "production":
+    if not app.config["DEBUG"]:
         csp = {"default-src": ["'self'", "'unsafe-inline'", "*.fontawesome.com"]}
         Talisman(
             app, content_security_policy=csp, force_https=app.config["FORCE_HTTPS"]
@@ -83,7 +88,7 @@ def create_app(config=None, db=None, template_folder=None):
         from .models import Accountant, Company, Member
 
         @login_manager.user_loader
-        def load_user(user_id):
+        def load_user(user_id: Any) -> Any:
             """
             This callback is used to reload the user object from the user ID
             stored in the session.
@@ -108,17 +113,19 @@ def create_app(config=None, db=None, template_folder=None):
         app.register_blueprint(member.blueprint.main_member)
         app.register_blueprint(accountant.blueprint.main_accountant)
 
-        if app.config["ENV"] == "development":
-            if app.config["DEBUG_DETAILS"] == True:
-                # print profiling info to sys.stout
-                show_profile_info(app)
-                show_sql_queries(app)
+        if app.config["DEBUG_DETAILS"] == True:
+            show_profile_info(app)
+            show_sql_queries(app)
+
+        # The profiler needs to be initialized last because all the
+        # routes to monitor need to present in the app at that point
+        initialize_flask_profiler(app)
 
         return app
 
 
 @babel.localeselector
-def get_locale():
+def get_locale() -> Any:
     try:
         return session["language"]
     except KeyError:

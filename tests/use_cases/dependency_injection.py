@@ -2,25 +2,16 @@ from injector import Injector, Module, inject, provider, singleton
 
 import arbeitszeit.repositories as interfaces
 from arbeitszeit import entities
+from arbeitszeit.accountant_notifications import NotifyAccountantsAboutNewPlanPresenter
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.token import InvitationTokenValidator, TokenDeliverer, TokenService
+from arbeitszeit.token import InvitationTokenValidator, TokenService
 from arbeitszeit.use_cases import GetCompanySummary
 from arbeitszeit.use_cases.edit_draft import EditDraftUseCase
-from arbeitszeit.use_cases.get_accountant_profile_info import (
-    GetAccountantProfileInfoUseCase,
-)
-from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCase
 from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit.use_cases.pay_consumer_product.consumer_product_transaction import (
     ConsumerProductTransactionFactory,
-)
-from arbeitszeit.use_cases.register_company.company_registration_message_presenter import (
-    CompanyRegistrationMessagePresenter,
-)
-from arbeitszeit.use_cases.register_member.member_registration_message_presenter import (
-    MemberRegistrationMessagePresenter,
 )
 from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitation_presenter import (
     AccountantInvitationPresenter,
@@ -32,6 +23,9 @@ from tests.dependency_injection import TestingModule
 from tests.token import FakeTokenService, TokenDeliveryService
 
 from . import repositories
+from .notify_accountant_about_new_plan_presenter import (
+    NotifyAccountantsAboutNewPlanPresenterImpl,
+)
 
 
 class InMemoryModule(Module):
@@ -41,17 +35,16 @@ class InMemoryModule(Module):
         return repositories.FakeLanguageRepository()
 
     @provider
+    def provide_notify_accountants_about_new_plan_presenter(
+        self, instance: NotifyAccountantsAboutNewPlanPresenterImpl
+    ) -> NotifyAccountantsAboutNewPlanPresenter:
+        return instance
+
+    @provider
     def provide_language_repository(
         self, language_repository: repositories.FakeLanguageRepository
     ) -> interfaces.LanguageRepository:
         return language_repository
-
-    @singleton
-    @provider
-    def provide_accoutant_repository_test_impl(
-        self,
-    ) -> repositories.AccountantRepositoryTestImpl:
-        return repositories.AccountantRepositoryTestImpl()
 
     @provider
     def provide_accountant_repository(
@@ -79,25 +72,9 @@ class InMemoryModule(Module):
         return token_service
 
     @provider
-    def provide_company_registration_message_presenter(
-        self, token_delivery_service: TokenDeliveryService
-    ) -> CompanyRegistrationMessagePresenter:
-        return token_delivery_service
-
-    @provider
-    def provide_member_registration_message_presenter(
-        self, token_delivery_service: TokenDeliveryService
-    ) -> MemberRegistrationMessagePresenter:
-        return token_delivery_service
-
-    @provider
     @singleton
     def provide_token_delivery_service(self) -> TokenDeliveryService:
         return TokenDeliveryService()
-
-    @provider
-    def provide_token_deliverer(self, service: TokenDeliveryService) -> TokenDeliverer:
-        return service
 
     @provider
     def provide_purchase_repo(
@@ -113,7 +90,7 @@ class InMemoryModule(Module):
 
     @provider
     def provide_company_worker_repo(
-        self, repo: repositories.CompanyWorkerRepository
+        self, repo: repositories.MemberRepository
     ) -> interfaces.CompanyWorkerRepository:
         return repo
 
@@ -211,14 +188,6 @@ class InMemoryModule(Module):
         )
 
     @provider
-    def provide_get_accountant_profile_info_use_case(
-        self, accountant_repository: interfaces.AccountantRepository
-    ) -> GetAccountantProfileInfoUseCase:
-        return GetAccountantProfileInfoUseCase(
-            accountant_repository=accountant_repository,
-        )
-
-    @provider
     def provide_log_in_member_use_case(
         self, member_repository: interfaces.MemberRepository
     ) -> LogInMemberUseCase:
@@ -228,19 +197,6 @@ class InMemoryModule(Module):
     @provider
     def provide_control_thresholds_test_impl(self) -> ControlThresholdsTestImpl:
         return ControlThresholdsTestImpl()
-
-    @provider
-    def provide_get_company_dashboard_use_case(
-        self,
-        company_repository: interfaces.CompanyRepository,
-        company_worker_repository: interfaces.CompanyWorkerRepository,
-        plan_repository: interfaces.PlanRepository,
-    ) -> GetCompanyDashboardUseCase:
-        return GetCompanyDashboardUseCase(
-            company_repository=company_repository,
-            company_worker_repository=company_worker_repository,
-            plan_repository=plan_repository,
-        )
 
     @provider
     def provide_consumer_product_transaction_factory(

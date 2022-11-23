@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Optional, Tuple
+from typing import List, Optional
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.token import ConfirmationEmail
 
 
 @dataclass
@@ -31,18 +30,29 @@ class FakeTokenService:
     def unwrap_invitation_token(self, token: str) -> Optional[str]:
         return self.confirm_token(token, 10000000)
 
+    def unwrap_confirmation_token(self, token: str) -> Optional[str]:
+        return self.confirm_token(token, 10000000)
+
+
+@dataclass
+class DeliveredToken:
+    token: str
+    user: UUID
+
 
 class TokenDeliveryService:
     def __init__(self) -> None:
-        self.delivered_tokens: List[ConfirmationEmail] = []
-        self.presented_member_tokens: List[Tuple[UUID, str]] = []
-        self.presented_company_tokens: List[Tuple[UUID, str]] = []
-
-    def deliver_confirmation_token(self, email: ConfirmationEmail) -> None:
-        self.delivered_tokens.append(email)
+        self.presented_member_tokens: List[DeliveredToken] = []
+        self.presented_company_tokens: List[DeliveredToken] = []
 
     def show_member_registration_message(self, member: UUID, token: str) -> None:
-        self.presented_member_tokens.append((member, token))
+        self.presented_member_tokens.append(DeliveredToken(user=member, token=token))
 
     def show_company_registration_message(self, company: UUID, token: str) -> None:
-        self.presented_company_tokens.append((company, token))
+        self.presented_company_tokens.append(DeliveredToken(user=company, token=token))
+
+    def get_deliviered_member_token(self, member: UUID) -> Optional[str]:
+        for delivered_token in reversed(self.presented_member_tokens):
+            if delivered_token.user == member:
+                return delivered_token.token
+        return None

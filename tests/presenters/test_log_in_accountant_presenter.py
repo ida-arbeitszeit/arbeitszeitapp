@@ -1,6 +1,6 @@
 from typing import Optional
 from unittest import TestCase
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.log_in_accountant import LogInAccountantUseCase as UseCase
 from arbeitszeit_web.presenters.log_in_accountant_presenter import (
@@ -66,17 +66,17 @@ class PresenterTester(TestCase):
             UserRole.accountant,
         )
 
-    def test_that_user_is_logged_in_with_their_specified_email_address(self) -> None:
-        expected_email = "test@mail.test"
-        response = self._create_success_response()
+    def test_that_user_is_logged_in_with_correct_user_id(self) -> None:
+        expected_id = uuid4()
+        response = self._create_success_response(user_id=expected_id)
         self.presenter.present_login_process(
-            response=response, form=self._create_form(email=expected_email)
+            response=response, form=self._create_form()
         )
         login = self.session.get_most_recent_login()
         assert login
         self.assertEqual(
-            login.email,
-            expected_email,
+            login.user_id,
+            expected_id,
         )
 
     def test_that_user_is_remembered_if_form_requests_so(self) -> None:
@@ -187,8 +187,12 @@ class PresenterTester(TestCase):
             form.email_field().errors,
         )
 
-    def _create_success_response(self) -> UseCase.Response:
-        return UseCase.Response(user_id=uuid4())
+    def _create_success_response(
+        self, user_id: Optional[UUID] = None
+    ) -> UseCase.Response:
+        if user_id is None:
+            user_id = uuid4()
+        return UseCase.Response(user_id=user_id)
 
     def _create_failure_response(
         self, reason: Optional[UseCase.RejectionReason] = None

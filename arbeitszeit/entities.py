@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from enum import Enum
 from typing import List, Optional, Union
@@ -150,7 +150,6 @@ class Plan:
     is_active: bool
     expired: bool
     activation_date: Optional[datetime]
-    expiration_date: Optional[datetime]
     active_days: Optional[int]
     payout_count: int
     requested_cooperation: Optional[UUID]
@@ -174,6 +173,13 @@ class Plan:
     @property
     def is_approved(self) -> bool:
         return self.approval_date is not None
+
+    @property
+    def expiration_date(self) -> Optional[datetime]:
+        if not self.activation_date:
+            return None
+        exp_date = self.activation_date + timedelta(days=int(self.timeframe))
+        return exp_date
 
 
 class PurposesOfPurchases(Enum):
@@ -223,6 +229,7 @@ class CompanyWorkInvite:
 
 @dataclass
 class Accountant:
+    id: UUID
     email_address: str
     name: str
 

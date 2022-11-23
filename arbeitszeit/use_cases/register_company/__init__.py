@@ -10,9 +10,7 @@ from injector import inject
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import AccountTypes
 from arbeitszeit.repositories import AccountRepository, CompanyRepository
-from arbeitszeit.token import TokenService
-
-from .company_registration_message_presenter import CompanyRegistrationMessagePresenter
+from arbeitszeit.token import CompanyRegistrationMessagePresenter, TokenService
 
 
 @inject
@@ -42,7 +40,7 @@ class RegisterCompany:
         name: str
         password: str
 
-    def __call__(self, request: Request) -> Response:
+    def register_company(self, request: Request) -> Response:
         try:
             company_id = self._register_company(request)
         except self.Response.RejectionReason as reason:

@@ -45,7 +45,7 @@ class LoggedInUsertests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.requesting_user = uuid4()
-        self.session.set_current_user_id(self.requesting_user)
+        self.session.login_member(member=self.requesting_user)
 
     def test_controller_returns_not_none_for_logged_in_user_when_importing_form_data(
         self,

@@ -1,0 +1,36 @@
+{% extends "base_accountant.html" %}
+
+{% block content %}
+<div class="content has-text-centered">
+  <h1>{{ gettext("Unreviewed plans") }}</h1>
+</div>
+<section class="section">
+  {% if view_model.show_plan_list %}
+  <div class="column is-4 is-offset-4 is-centered has-text-left">
+    {% for plan in view_model.plans %}
+    <article class="media">
+      <div class="media-content">
+        <div class="content">
+          <strong>{{ plan.product_name }}</strong>
+          <br>
+          <small>@{{ plan.planner_name }}</small>
+        </div>
+      </div>
+      <div class="media-right">
+        <div class="content pt-1">
+          <form method="post" action="{{ plan.approve_plan_url }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="button is-ghost" type="submit" title="{{ gettext('Approve plan') }}">
+              <i class="fas fa-check"></i>
+            </button>
+          </form>
+        </div>
+      </div>    
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  {{ gettext("There are currently no plans waiting for review") }}
+  {% endif %}
+</section>
+{% endblock %}

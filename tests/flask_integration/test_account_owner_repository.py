@@ -16,12 +16,12 @@ class RepositoryTester(FlaskTestCase):
 
     def test_can_retrieve_owner_of_member_accounts(self) -> None:
         account = self.account_generator.create_account(AccountTypes.member)
-        member = self.member_generator.create_member(account=account)
-        assert self.repository.get_account_owner(account) == member
+        member = self.member_generator.create_member_entity(account=account)
+        assert self.repository.get_account_owner(account).id == member.id
 
     def test_can_retrieve_owner_of_company_accounts(self) -> None:
         account = self.account_generator.create_account(AccountTypes.a)
-        company = self.company_generator.create_company(labour_account=account)
+        company = self.company_generator.create_company_entity(labour_account=account)
         assert self.repository.get_account_owner(account) == company
 
     def test_can_get_owner_of_public_account(self) -> None:

@@ -67,7 +67,6 @@ from .list_coordinations import (
     ListCoordinationsRequest,
     ListCoordinationsResponse,
 )
-from .list_drafts_of_company import ListDraftsOfCompany, ListDraftsResponse
 from .list_inbound_coop_requests import (
     ListedInboundCoopRequest,
     ListInboundCoopRequests,
@@ -103,12 +102,6 @@ from .request_cooperation import (
     RequestCooperationRequest,
     RequestCooperationResponse,
 )
-from .resend_confirmation_mail import (
-    ResendConfirmationMail,
-    ResendConfirmationMailRequest,
-    ResendConfirmationMailResponse,
-)
-from .self_approve_plan import SelfApprovePlan
 from .send_work_certificates_to_worker import (
     SendWorkCertificatesToWorker,
     SendWorkCertificatesToWorkerRequest,
@@ -182,8 +175,6 @@ __all__ = [
     "ListCoordinations",
     "ListCoordinationsRequest",
     "ListCoordinationsResponse",
-    "ListDraftsOfCompany",
-    "ListDraftsResponse",
     "ListInboundCoopRequests",
     "ListInboundCoopRequests",
     "ListInboundCoopRequestsRequest",
@@ -225,7 +216,6 @@ __all__ = [
     "ResendConfirmationMail",
     "ResendConfirmationMailRequest",
     "ResendConfirmationMailResponse",
-    "SelfApprovePlan",
     "SendWorkCertificatesToWorker",
     "SendWorkCertificatesToWorkerRequest",
     "SendWorkCertificatesToWorkerResponse",

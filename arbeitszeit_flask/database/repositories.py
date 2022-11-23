@@ -3,12 +3,23 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterable, Iterator, List, Optional, Union
+from typing import (
+    Any,
+    Callable,
+    Generic,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    TypeVar,
+    Union,
+)
 from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
 from injector import inject
 from sqlalchemy import and_, desc, func
+from sqlalchemy.sql.expression import Select
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from arbeitszeit import entities, repositories
@@ -27,6 +38,79 @@ from arbeitszeit_flask.models import (
     Transaction,
 )
 
+T = TypeVar("T", covariant=True)
+
+
+class FlaskQueryResult(Generic[T]):
+    def __init__(self, query: Select, mapper: Callable[[Any], T]) -> None:
+        self.query = query
+        self.mapper = mapper
+
+    def limit(self, n: int) -> FlaskQueryResult[T]:
+        return type(self)(query=self.query.limit(n), mapper=self.mapper)
+
+    def offset(self, n: int) -> FlaskQueryResult[T]:
+        return type(self)(query=self.query.offset(n), mapper=self.mapper)
+
+    def __iter__(self) -> Iterator[T]:
+        return (self.mapper(item) for item in self.query)
+
+    def __len__(self) -> int:
+        return self.query.count()
+
+
+class PlanQueryResult(FlaskQueryResult[entities.Plan]):
+    def ordered_by_creation_date(self, ascending: bool = True) -> PlanQueryResult:
+        ordering = models.Plan.plan_creation_date
+        if not ascending:
+            ordering = ordering.desc()
+        return self._with_modified_query(lambda query: query.order_by(ordering))
+
+    def with_id_containing(self, query: str) -> PlanQueryResult:
+        return self._with_modified_query(
+            lambda db_query: db_query.filter(models.Plan.id.contains(query))
+        )
+
+    def with_product_name_containing(self, query: str) -> PlanQueryResult:
+        return self._with_modified_query(
+            lambda db_query: db_query.filter(models.Plan.prd_name.ilike(f"%{query}%"))
+        )
+
+    def that_are_approved(self) -> PlanQueryResult:
+        return self._with_modified_query(
+            lambda query: self.query.join(models.PlanReview).filter(
+                models.PlanReview.approval_date != None
+            )
+        )
+
+    def that_are_productive(self) -> PlanQueryResult:
+        return self._with_modified_query(
+            lambda query: query.filter(models.Plan.is_public_service == False)
+        )
+
+    def that_are_public(self) -> PlanQueryResult:
+        return self._with_modified_query(
+            lambda query: query.filter(models.Plan.is_public_service == True)
+        )
+
+    def planned_by(self, company: UUID) -> PlanQueryResult:
+        return self._with_modified_query(
+            lambda query: query.filter(models.Plan.planner == str(company))
+        )
+
+    def _with_modified_query(
+        self, modification: Callable[[Any], Any]
+    ) -> PlanQueryResult:
+        return type(self)(query=modification(self.query), mapper=self.mapper)
+
+
+class MemberQueryResult(FlaskQueryResult[entities.Member]):
+    def working_at_company(self, company: UUID) -> MemberQueryResult:
+        return type(self)(
+            query=self.query.filter(models.Member.workplaces.any(id=str(company))),
+            mapper=self.mapper,
+        )
+
 
 @inject
 @dataclass
@@ -42,15 +126,6 @@ class CompanyWorkerRepository:
         if company is None:
             return
         member.workplaces.append(company)
-
-    def get_company_workers(self, company: UUID) -> List[entities.Member]:
-        company_orm = models.Company.query.get(str(company))
-        if company_orm is None:
-            return []
-        return [
-            self.member_repository.object_from_orm(member)
-            for member in company_orm.workers
-        ]
 
     def get_member_workplaces(self, member: UUID) -> List[entities.Company]:
         member_orm = Member.query.filter_by(id=str(member)).first()
@@ -72,7 +147,12 @@ class UserAddressBookImpl:
             self.db.session.query(models.User)
             .join(models.Member, isouter=True)
             .join(models.Company, isouter=True)
-            .filter((models.Member.id == str(user)) | (models.Company.id == str(user)))
+            .join(models.Accountant, isouter=True)
+            .filter(
+                (models.Member.id == str(user))
+                | (models.Company.id == str(user))
+                | (models.Accountant.id == str(user))
+            )
             .first()
         )
         if user_orm:
@@ -193,8 +273,11 @@ class MemberRepository(repositories.MemberRepository):
     def count_registered_members(self) -> int:
         return int(self.db.session.query(func.count(Member.id)).one()[0])
 
-    def get_all_members(self) -> Iterator[entities.Member]:
-        return (self.object_from_orm(member) for member in Member.query.all())
+    def get_all_members(self) -> MemberQueryResult:
+        return MemberQueryResult(
+            mapper=self.object_from_orm,
+            query=Member.query,
+        )
 
     def _get_or_create_user(self, email: str, password: str) -> models.User:
         return self.db.session.query(models.User).filter(
@@ -614,6 +697,12 @@ class PlanRepository(repositories.PlanRepository):
     db: SQLAlchemy
     draft_repository: PlanDraftRepository
 
+    def get_all_plans(self) -> PlanQueryResult:
+        return PlanQueryResult(
+            query=models.Plan.query,
+            mapper=self.object_from_orm,
+        )
+
     def create_plan_from_draft(self, draft_id: UUID) -> Optional[UUID]:
         draft = self.draft_repository.get_by_id(draft_id)
         if draft is None:
@@ -622,7 +711,12 @@ class PlanRepository(repositories.PlanRepository):
         return UUID(plan_orm.id)
 
     def get_all_plans_without_completed_review(self) -> Iterable[UUID]:
-        raise NotImplementedError()
+        return [
+            UUID(plan.id)
+            for plan in models.Plan.query.join(models.PlanReview).filter(
+                models.PlanReview.approval_date == None
+            )
+        ]
 
     def object_from_orm(self, plan: models.Plan) -> entities.Plan:
         production_costs = entities.ProductionCosts(
@@ -647,7 +741,6 @@ class PlanRepository(repositories.PlanRepository):
             approval_reason=plan.review.approval_reason,
             is_active=plan.is_active,
             expired=plan.expired,
-            expiration_date=plan.expiration_date,
             activation_date=plan.activation_date,
             active_days=plan.active_days,
             payout_count=plan.payout_count,
@@ -689,7 +782,6 @@ class PlanRepository(repositories.PlanRepository):
             is_public_service=plan.is_public_service,
             is_active=False,
             activation_date=None,
-            expiration_date=None,
             active_days=None,
             payout_count=0,
             is_available=True,
@@ -701,13 +793,13 @@ class PlanRepository(repositories.PlanRepository):
         self.db.session.add(plan_review)
         return plan
 
-    def set_plan_approval_date(
-        self, draft: entities.PlanDraft, approval_timestamp: datetime
-    ) -> entities.Plan:
-        plan_orm = self._create_plan_from_draft(draft)
-        plan_orm.review.approval_reason = "approved"
-        plan_orm.review.approval_date = approval_timestamp
-        return self.object_from_orm(plan_orm)
+    def set_plan_approval_date(self, plan: UUID, approval_timestamp: datetime):
+        models.PlanReview.query.filter(models.PlanReview.plan_id == str(plan)).update(
+            dict(
+                approval_reason="approved",
+                approval_date=approval_timestamp,
+            )
+        )
 
     def activate_plan(self, plan: entities.Plan, activation_date: datetime) -> None:
         plan.is_active = True
@@ -725,14 +817,6 @@ class PlanRepository(repositories.PlanRepository):
         plan_orm.expired = True
         plan_orm.is_active = False
 
-    def set_expiration_date(
-        self, plan: entities.Plan, expiration_date: datetime
-    ) -> None:
-        plan.expiration_date = expiration_date
-
-        plan_orm = self.object_to_orm(plan)
-        plan_orm.expiration_date = expiration_date
-
     def set_active_days(self, plan: entities.Plan, full_active_days: int) -> None:
         plan.active_days = full_active_days
 
@@ -745,34 +829,10 @@ class PlanRepository(repositories.PlanRepository):
         plan_orm = self.object_to_orm(plan)
         plan_orm.payout_count += 1
 
-    def get_active_plans(self) -> Iterator[entities.Plan]:
-        return (
-            self.object_from_orm(plan_orm)
-            for plan_orm in models.Plan.query.filter_by(is_active=True).all()
-        )
-
-    def get_three_latest_active_plans_ordered_by_activation_date(
-        self,
-    ) -> Iterator[entities.Plan]:
-        return (
-            self.object_from_orm(plan_orm)
-            for plan_orm in models.Plan.query.filter_by(is_active=True)
-            .order_by(models.Plan.activation_date.desc())
-            .limit(3)
-        )
-
-    def count_active_plans(self) -> int:
-        return int(
-            self.db.session.query(func.count(models.Plan.id))
-            .filter_by(is_active=True)
-            .one()[0]
-        )
-
-    def count_active_public_plans(self) -> int:
-        return int(
-            self.db.session.query(func.count(models.Plan.id))
-            .filter_by(is_active=True, is_public_service=True)
-            .one()[0]
+    def get_active_plans(self) -> PlanQueryResult:
+        return PlanQueryResult(
+            query=models.Plan.query.filter_by(is_active=True),
+            mapper=self.object_from_orm,
         )
 
     def avg_timeframe_of_active_plans(self) -> Decimal:
@@ -815,82 +875,10 @@ class PlanRepository(repositories.PlanRepository):
             ).all()
         )
 
-    def all_productive_plans_approved_active_and_not_expired(
-        self,
-    ) -> Iterator[entities.Plan]:
-        return (
-            self.object_from_orm(plan_orm)
-            for plan_orm in models.Plan.query.join(models.PlanReview).filter(
-                models.Plan.is_active == True
-                and models.Plan.expired == False
-                and models.Plan.is_public_service == False
-                and models.PlanReview.approval_date != None
-            )
-        )
-
-    def all_public_plans_approved_active_and_not_expired(
-        self,
-    ) -> Iterator[entities.Plan]:
-        return (
-            self.object_from_orm(plan_orm)
-            for plan_orm in models.Plan.query.join(models.PlanReview).filter(
-                models.Plan.is_active == True
-                and models.Plan.expired == False
-                and models.Plan.is_public_service == True
-                and models.PlanReview.approval_date != None
-            )
-        )
-
-    def all_plans_approved_active_and_not_expired(self) -> Iterator[entities.Plan]:
-        return (
-            self.object_from_orm(plan_orm)
-            for plan_orm in models.Plan.query.join(models.PlanReview).filter(
-                models.Plan.is_active == True
-                and models.Plan.expired == False
-                and models.PlanReview.approval_date != None
-            )
-        )
-
     def hide_plan(self, plan_id: UUID) -> None:
         plan_orm = models.Plan.query.filter_by(id=str(plan_id)).first()
         assert plan_orm
         plan_orm.hidden_by_user = True
-
-    def query_active_plans_by_product_name(self, query: str) -> Iterator[entities.Plan]:
-        return (
-            self.object_from_orm(plan)
-            for plan in models.Plan.query.filter(
-                models.Plan.is_active == True, models.Plan.prd_name.ilike(f"%{query}%")
-            ).all()
-        )
-
-    def query_active_plans_by_plan_id(self, query: str) -> Iterator[entities.Plan]:
-        return (
-            self.object_from_orm(plan)
-            for plan in models.Plan.query.filter(
-                models.Plan.is_active == True, models.Plan.id.contains(query)
-            ).all()
-        )
-
-    def get_all_plans_for_company_descending(
-        self, company_id: UUID
-    ) -> Iterator[entities.Plan]:
-        return (
-            self.object_from_orm(plan_orm)
-            for plan_orm in models.Plan.query.filter(
-                models.Plan.planner == str(company_id)
-            ).order_by(models.Plan.plan_creation_date.desc())
-        )
-
-    def get_all_active_plans_for_company(
-        self, company_id: UUID
-    ) -> Iterator[entities.Plan]:
-        return (
-            self.object_from_orm(plan_orm)
-            for plan_orm in models.Plan.query.filter(
-                models.Plan.planner == str(company_id), models.Plan.is_active == True
-            )
-        )
 
     def toggle_product_availability(self, plan: entities.Plan) -> None:
         plan.is_available = True if (plan.is_available == False) else False
@@ -1252,8 +1240,10 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
                     yield plan
 
     def get_outbound_requests(self, requester_id: UUID) -> Iterator[entities.Plan]:
-        plans_of_company = self.plan_repository.get_all_plans_for_company_descending(
-            requester_id
+        plans_of_company = (
+            self.plan_repository.get_all_plans()
+            .planned_by(requester_id)
+            .ordered_by_creation_date(ascending=False)
         )
         for plan in plans_of_company:
             if plan.requested_cooperation:
@@ -1326,7 +1316,9 @@ class AccountantRepository:
         record = models.Accountant.query.filter_by(id=str(id)).first()
         if record is None:
             return None
-        return entities.Accountant(email_address=record.user.email, name=record.name)
+        return entities.Accountant(
+            email_address=record.user.email, name=record.name, id=UUID(record.id)
+        )
 
     def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
         record = (
@@ -1363,6 +1355,16 @@ class AccountantRepository:
         ).first() or models.User(
             password=generate_password_hash(password, method="sha256"),
             email=email,
+        )
+
+    def get_all_accountants(self) -> FlaskQueryResult[entities.Accountant]:
+        return FlaskQueryResult(
+            query=models.Accountant.query.all(),
+            mapper=lambda record: entities.Accountant(
+                email_address=record.user.email,
+                name=record.name,
+                id=UUID(record.id),
+            ),
         )
 
 
