@@ -613,7 +613,7 @@ def my_cooperations(
         ListOutboundCoopRequestsRequest(UUID(current_user.id))
     )
     list_my_coop_plans_response = list_my_cooperating_plans.list_cooperations(
-        UUID(current_user.id)
+        ListMyCooperatingPlansUseCase.Request(company=UUID(current_user.id))
     )
 
     view_model = presenter.present(

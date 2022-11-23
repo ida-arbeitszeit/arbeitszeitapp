@@ -18,6 +18,10 @@ from arbeitszeit.repositories import (
 @dataclass
 class ListMyCooperatingPlansUseCase:
     @dataclass
+    class Request:
+        company: UUID
+
+    @dataclass
     class CooperatingPlan:
         plan_id: UUID
         plan_name: str
@@ -35,13 +39,13 @@ class ListMyCooperatingPlansUseCase:
     cooperation_repository: CooperationRepository
     plan_repository: PlanRepository
 
-    def list_cooperations(self, requester: UUID) -> Response:
-        company = self.company_repository.get_by_id(requester)
+    def list_cooperations(self, request: Request) -> Response:
+        company = self.company_repository.get_by_id(request.company)
         if not company:
             raise self.Failure()
         plans = (
             self.plan_repository.get_active_plans()
-            .planned_by(requester)
+            .planned_by(request.company)
             .that_are_cooperating()
         )
         return self.Response(
