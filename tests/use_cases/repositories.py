@@ -1031,7 +1031,6 @@ class AccountantRepositoryTestImpl:
             id=id,
         )
         self.accountants[id] = record
-        print(self.accountants)
         return id
 
     def has_accountant_with_email(self, email: str) -> bool:

@@ -307,7 +307,6 @@ class ConfirmMemberTests(FlaskTestCase):
         expected_count = 5
         for _ in range(5):
             self.member_generator.create_member_entity()
-        print(list(self.repository.get_members()))
         assert (
             expected_count
             == self.repository.get_members().set_confirmation_timestamp(
