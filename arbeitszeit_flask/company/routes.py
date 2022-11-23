@@ -88,6 +88,9 @@ from arbeitszeit_web.presenters.file_plan_with_accounting_presenter import (
 from arbeitszeit_web.presenters.show_a_account_details_presenter import (
     ShowAAccountDetailsPresenter,
 )
+from arbeitszeit_web.presenters.company_purchases_presenter import (
+    CompanyPurchasesPresenter,
+)
 from arbeitszeit_web.presenters.show_p_account_details_presenter import (
     ShowPAccountDetailsPresenter,
 )
@@ -169,12 +172,18 @@ def my_purchases(
     query_purchases: use_cases.QueryPurchases,
     company_repository: CompanyRepository,
     template_renderer: UserTemplateRenderer,
-):
+    presenter: CompanyPurchasesPresenter,
+    ):
     company = company_repository.get_by_id(UUID(current_user.id))
     assert company is not None
-    purchases = list(query_purchases(company))
-    return template_renderer.render_template(
-        "company/my_purchases.html", context=dict(purchases=purchases)
+    
+    response = query_purchases(company)
+    view_model = presenter.present(response)
+    return FlaskResponse(
+        template_renderer.render_template(
+            "company/my_purchases.html",
+            context=dict(purchases=view_model),
+        )        
     )
 
 
