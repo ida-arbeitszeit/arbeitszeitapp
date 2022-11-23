@@ -21,8 +21,8 @@ from arbeitszeit_web.presenters.register_member_presenter import RegisterMemberP
 from arbeitszeit_web.presenters.send_work_certificates_to_worker_presenter import (
     SendWorkCertificatesToWorkerPresenter,
 )
-from arbeitszeit_web.presenters.show_my_purchases_presenter import (
-    ShowMyPurchasesPresenter,
+from arbeitszeit_web.presenters.company_purchases_presenter import (
+    CompanyPurchasesPresenter,
 )
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.request_cooperation import RequestCooperationPresenter
@@ -223,10 +223,10 @@ class PresenterTestsInjector(Module):
         )
 
     @provider
-    def provide_show_my_purchases_presenter(
+    def provide_company_purchases_presenter(
         self, datetime_service: FakeDatetimeService
-    ) -> ShowMyPurchasesPresenter:
-        return ShowMyPurchasesPresenter(
+    ) -> CompanyPurchasesPresenter:
+        return CompanyPurchasesPresenter(
             datetime_service=datetime_service,
         )
 

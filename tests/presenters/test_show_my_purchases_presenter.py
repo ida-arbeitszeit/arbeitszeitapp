@@ -2,8 +2,8 @@ from decimal import Decimal
 from unittest import TestCase
 
 from arbeitszeit.use_cases.query_purchases import QueryPurchases
-from arbeitszeit_web.presenters.show_my_purchases_presenter import (
-    ShowMyPurchasesPresenter,
+from arbeitszeit_web.presenters.company_purchases_presenter import (
+    CompanyPurchasesPresenter,
     ViewModel,
 )
 from tests.data_generators import CompanyGenerator, MemberGenerator, PurchaseGenerator
@@ -22,7 +22,7 @@ class TestPresenter(TestCase):
 
     def test_show_purchases_from_member(self):
         injector = get_dependency_injector()
-        presenter = injector.get(ShowMyPurchasesPresenter)  # DUT
+        presenter = injector.get(CompanyPurchasesPresenter)  # DUT
 
         now = self.datetime_service.now()
 
@@ -77,7 +77,7 @@ class TestPresenter(TestCase):
 
     def test_show_purchases_from_company(self):
         injector = get_dependency_injector()
-        presenter = injector.get(ShowMyPurchasesPresenter)  # DUT
+        presenter = injector.get(CompanyPurchasesPresenter)  # DUT
 
         now = self.datetime_service.now()
 

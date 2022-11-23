@@ -48,7 +48,7 @@ class ViewModel:
 
 @inject
 @dataclass
-class ShowMyPurchasesPresenter:
+class CompanyPurchasesPresenter:
 
     datetime_service: DatetimeService
 
