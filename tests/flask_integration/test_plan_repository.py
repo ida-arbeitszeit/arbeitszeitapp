@@ -352,3 +352,11 @@ class GetAllPlans(FlaskTestCase):
         )
         assert plan_requesting_at_coop.id in [plan.id for plan in results]
         assert plan_requesting_at_other_coop.id not in [plan.id for plan in results]
+
+    def test_can_filter_for_cooperating_plans(self):
+        coop = self.cooperation_generator.create_cooperation()
+        cooperating_plan = self.plan_generator.create_plan(cooperation=coop)
+        non_cooperating_plan = self.plan_generator.create_plan(cooperation=None)
+        results = self.plan_repository.get_plans().that_are_cooperating()
+        assert cooperating_plan.id in [plan.id for plan in results]
+        assert non_cooperating_plan.id not in [plan.id for plan in results]
