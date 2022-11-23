@@ -19,6 +19,9 @@ from arbeitszeit_web.presenters.accountant_invitation_presenter import (
     AccountantInvitationEmailPresenter,
     AccountantInvitationEmailView,
 )
+from arbeitszeit_web.presenters.company_purchases_presenter import (
+    CompanyPurchasesPresenter,
+)
 from arbeitszeit_web.presenters.list_available_languages_presenter import (
     ListAvailableLanguagesPresenter,
 )
@@ -38,9 +41,6 @@ from arbeitszeit_web.presenters.registration_email_presenter import (
 )
 from arbeitszeit_web.presenters.send_work_certificates_to_worker_presenter import (
     SendWorkCertificatesToWorkerPresenter,
-)
-from arbeitszeit_web.presenters.company_purchases_presenter import (
-    CompanyPurchasesPresenter,
 )
 from arbeitszeit_web.request_cooperation import RequestCooperationPresenter
 from arbeitszeit_web.session import Session
