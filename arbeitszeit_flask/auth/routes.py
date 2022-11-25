@@ -4,7 +4,6 @@ from flask import Blueprint, flash, redirect, render_template, request, session,
 from flask_login import current_user, login_required
 
 from arbeitszeit.use_cases.confirm_company import ConfirmCompanyUseCase
-from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit.use_cases.confirm_member import ConfirmMemberUseCase
 from arbeitszeit.use_cases.log_in_accountant import LogInAccountantUseCase
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
@@ -205,7 +204,9 @@ def signup_company(view: SignupCompanyView):
 @auth.route("/company/confirm/<token>")
 @commit_changes
 @with_injection()
-def confirm_email_company(token, confirm_company_use_case: ConfirmCompanyUseCase, session: FlaskSession):
+def confirm_email_company(
+    token, confirm_company_use_case: ConfirmCompanyUseCase, session: FlaskSession
+):
     request = ConfirmCompanyUseCase.Request(token)
     response = confirm_company_use_case.confirm_company(request)
     if not response.is_confirmed:
