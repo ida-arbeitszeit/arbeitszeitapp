@@ -345,6 +345,10 @@ class CompanyRepository(ABC):
         pass
 
     @abstractmethod
+    def is_company_confirmed(self, company: UUID) -> bool:
+        pass
+
+    @abstractmethod
     def confirm_company(self, company: UUID, confirmation_timestamp: datetime) -> None:
         pass
 

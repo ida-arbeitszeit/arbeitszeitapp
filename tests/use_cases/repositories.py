@@ -566,6 +566,11 @@ class CompanyRepository(interfaces.CompanyRepository):
         if model := self.get_by_id(company):
             model.confirmed_on = confirmation_timestamp
 
+    def is_company_confirmed(self, company: UUID) -> bool:
+        if model := self.get_by_id(company):
+            return model.confirmed_on is not None
+        return False
+
 
 @singleton
 class PlanRepository(interfaces.PlanRepository):
