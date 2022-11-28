@@ -1,6 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import List
+from typing import List, Optional
 from unittest import TestCase
 
 from arbeitszeit.transactions import TransactionTypes
@@ -152,7 +152,7 @@ class TestPresenter(TestCase):
         self.assertTrue(view_model.transactions[0].purpose)
 
     def get_use_case_response(
-        self, transactions: List[TransactionInfo], balance: Decimal = None
+        self, transactions: List[TransactionInfo], balance: Optional[Decimal] = None
     ) -> GetMemberAccountResponse:
         if balance is None:
             balance = Decimal("10")
@@ -160,9 +160,9 @@ class TestPresenter(TestCase):
 
     def get_transaction(
         self,
-        date: datetime = None,
-        transaction_volume: Decimal = None,
-        type: TransactionTypes = None,
+        date: Optional[datetime] = None,
+        transaction_volume: Optional[Decimal] = None,
+        type: Optional[TransactionTypes] = None,
     ) -> TransactionInfo:
         if date is None:
             date = self.datetime_service.now()

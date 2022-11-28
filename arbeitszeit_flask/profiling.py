@@ -1,6 +1,6 @@
 from typing import Dict
 
-from flask import Flask
+from flask import Flask, Response
 from flask_sqlalchemy import get_debug_queries
 from werkzeug.middleware.profiler import ProfilerMiddleware
 
@@ -11,7 +11,7 @@ def show_profile_info(app):
 
 def show_sql_queries(app):
     @app.after_request
-    def after_request(response):
+    def after_request(response: Response) -> Response:
         queries: Dict[int, int] = dict()
         for query in get_debug_queries():
             queries = _update_queries_dict(queries, query)
