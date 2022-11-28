@@ -1,3 +1,4 @@
+from typing import Optional
 from unittest import TestCase
 
 from arbeitszeit.use_cases import RequestCooperationResponse
@@ -151,7 +152,9 @@ class RequestCooperationPresenterTests(TestCase):
         )
 
     def get_successful_request(
-        self, coordinator_mail: str = None, coordinator_name: str = None
+        self,
+        coordinator_mail: Optional[str] = None,
+        coordinator_name: Optional[str] = None,
     ) -> RequestCooperationResponse:
         if coordinator_mail is None:
             coordinator_mail = "company@comp.any"

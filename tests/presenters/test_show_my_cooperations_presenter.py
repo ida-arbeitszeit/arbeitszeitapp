@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases import (
@@ -35,7 +36,9 @@ LIST_COORDINATIONS_RESPONSE_LEN_1 = ListCoordinationsResponse(
 
 
 def get_inbound_response_length_1(
-    coop_id: UUID = None, plan_id: UUID = None, planner_id: UUID = None
+    coop_id: Optional[UUID] = None,
+    plan_id: Optional[UUID] = None,
+    planner_id: Optional[UUID] = None,
 ) -> ListInboundCoopRequestsResponse:
     if coop_id is None:
         coop_id = uuid4()
@@ -58,7 +61,7 @@ def get_inbound_response_length_1(
 
 
 def get_outbound_response_length_1(
-    plan_id: UUID = None, coop_id: UUID = None
+    plan_id: Optional[UUID] = None, coop_id: Optional[UUID] = None
 ) -> ListOutboundCoopRequestsResponse:
     if plan_id is None:
         plan_id = uuid4()
@@ -77,7 +80,7 @@ def get_outbound_response_length_1(
 
 
 def get_coop_plans_response_length_1(
-    plan_id: UUID = None, coop_id: UUID = None
+    plan_id: Optional[UUID] = None, coop_id: Optional[UUID] = None
 ) -> ListMyCooperatingPlansUseCase.Response:
     if plan_id is None:
         plan_id = uuid4()

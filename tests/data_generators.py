@@ -156,7 +156,7 @@ class CompanyGenerator:
         labour_account: Optional[Account] = None,
         password: str = "password",
         workers: Optional[Iterable[Union[Member, UUID]]] = None,
-        registered_on: datetime = None,
+        registered_on: Optional[datetime] = None,
     ) -> Company:
         if email is None:
             email = self.email_generator.get_random_email()
@@ -392,8 +392,8 @@ class PurchaseGenerator:
         buyer: Optional[Company] = None,
         purchase_date=None,
         amount=1,
-        price_per_unit: Decimal = None,
-        plan: Plan = None,
+        price_per_unit: Optional[Decimal] = None,
+        plan: Optional[Plan] = None,
     ) -> Purchase:
         if buyer is None:
             buyer = self.company_generator.create_company_entity()
@@ -417,8 +417,8 @@ class PurchaseGenerator:
         buyer: Optional[Member] = None,
         purchase_date=None,
         amount=1,
-        price_per_unit: Decimal = None,
-        plan: Plan = None,
+        price_per_unit: Optional[Decimal] = None,
+        plan: Optional[Plan] = None,
     ) -> Purchase:
         if buyer is None:
             buyer = self.member_generator.create_member_entity()
@@ -491,9 +491,9 @@ class CooperationGenerator:
 
     def create_cooperation(
         self,
-        name: str = None,
+        name: Optional[str] = None,
         coordinator: Optional[Company] = None,
-        plans: List[Plan] = None,
+        plans: Optional[List[Plan]] = None,
     ) -> Cooperation:
         if name is None:
             name = "test name"

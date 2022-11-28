@@ -1,6 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import List
+from typing import List, Optional
 from unittest import TestCase
 from uuid import UUID, uuid4
 
@@ -122,10 +122,10 @@ class QueryPlansPresenterTests(TestCase):
 
     def _get_queried_plan(
         self,
-        plan_id: UUID = None,
-        company_id: UUID = None,
-        is_cooperating: bool = None,
-        description: str = None,
+        plan_id: Optional[UUID] = None,
+        company_id: Optional[UUID] = None,
+        is_cooperating: Optional[bool] = None,
+        description: Optional[str] = None,
     ) -> QueriedPlan:
         if plan_id is None:
             plan_id = uuid4()

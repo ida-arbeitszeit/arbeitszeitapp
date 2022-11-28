@@ -179,7 +179,7 @@ class CompanyTransactionsPresenterTests(TestCase):
 
     def _get_transaction_info(
         self,
-        transaction_type: TransactionTypes = None,
+        transaction_type: Optional[TransactionTypes] = None,
         buyer: Optional[ShowPRDAccountDetailsUseCase.Buyer] = None,
     ):
         if transaction_type is None:

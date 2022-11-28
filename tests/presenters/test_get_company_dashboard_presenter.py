@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 from unittest import TestCase
 from uuid import uuid4
 
@@ -106,14 +106,12 @@ class TestPresenter(TestCase):
 
     def get_use_case_response(
         self,
-        has_workers: bool = None,
-        company_info: GetCompanyDashboardUseCase.Response.CompanyInfo = None,
-        latest_plans: List[
-            GetCompanyDashboardUseCase.Response.LatestPlansDetails
+        has_workers: bool = False,
+        company_info: Optional[GetCompanyDashboardUseCase.Response.CompanyInfo] = None,
+        latest_plans: Optional[
+            List[GetCompanyDashboardUseCase.Response.LatestPlansDetails]
         ] = None,
     ):
-        if has_workers is None:
-            has_workers = False
         if company_info is None:
             company_info = GetCompanyDashboardUseCase.Response.CompanyInfo(
                 id=uuid4(), name="company name", email="mail@test.de"

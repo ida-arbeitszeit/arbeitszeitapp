@@ -1,5 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
+from typing import Optional
 from unittest import TestCase
 
 from dateutil import tz
@@ -137,11 +138,11 @@ class CompanyTransactionsPresenterTests(TestCase):
 
     def _get_single_transaction_info(
         self,
-        transaction_type: TransactionTypes = None,
-        date: datetime = None,
-        transaction_volume: Decimal = None,
-        account_type: AccountTypes = None,
-        purpose: str = None,
+        transaction_type: Optional[TransactionTypes] = None,
+        date: Optional[datetime] = None,
+        transaction_volume: Optional[Decimal] = None,
+        account_type: Optional[AccountTypes] = None,
+        purpose: Optional[str] = None,
     ) -> TransactionInfo:
         if transaction_type is None:
             transaction_type = TransactionTypes.credit_for_fixed_means
