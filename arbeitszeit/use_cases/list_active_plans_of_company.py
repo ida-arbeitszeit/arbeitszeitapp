@@ -21,7 +21,7 @@ class ListPlansResponse:
 
 @inject
 @dataclass
-class ListPlans:
+class ListActivePlansOfCompany:
     plan_repository: PlanRepository
 
     def __call__(self, company_id: UUID) -> ListPlansResponse:

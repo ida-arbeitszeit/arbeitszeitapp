@@ -3,7 +3,7 @@ from uuid import UUID
 
 from flask import Response
 
-from arbeitszeit.use_cases import ListPlans, RequestCooperation
+from arbeitszeit.use_cases import ListActivePlansOfCompany, RequestCooperation
 from arbeitszeit_flask.forms import RequestCooperationForm
 from arbeitszeit_flask.template import TemplateRenderer
 from arbeitszeit_web.list_plans import ListPlansPresenter
@@ -20,7 +20,7 @@ from .http_404_view import Http404View
 class RequestCooperationView:
     current_user_id: UUID
     form: RequestCooperationForm
-    list_plans: ListPlans
+    list_plans: ListActivePlansOfCompany
     list_plans_presenter: ListPlansPresenter
     request_cooperation: RequestCooperation
     controller: RequestCooperationController

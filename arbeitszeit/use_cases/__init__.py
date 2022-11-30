@@ -57,6 +57,11 @@ from .get_plan_summary_member import GetPlanSummaryMember
 from .get_statistics import GetStatistics, StatisticsResponse
 from .hide_plan import HidePlan, HidePlanResponse
 from .invite_worker_to_company import InviteWorkerToCompanyUseCase
+from .list_active_plans_of_company import (
+    ListActivePlansOfCompany,
+    ListedPlan,
+    ListPlansResponse,
+)
 from .list_all_cooperations import (
     ListAllCooperations,
     ListAllCooperationsResponse,
@@ -80,7 +85,6 @@ from .list_outbound_coop_requests import (
     ListOutboundCoopRequestsRequest,
     ListOutboundCoopRequestsResponse,
 )
-from .list_plans import ListedPlan, ListPlans, ListPlansResponse
 from .list_workers import ListedWorker, ListWorkers, ListWorkersResponse
 from .pay_consumer_product import (
     PayConsumerProduct,
@@ -188,7 +192,7 @@ __all__ = [
     "ListOutboundCoopRequests",
     "ListOutboundCoopRequestsRequest",
     "ListOutboundCoopRequestsResponse",
-    "ListPlans",
+    "ListActivePlansOfCompany",
     "ListPlansResponse",
     "ListWorkers",
     "ListWorkersResponse",

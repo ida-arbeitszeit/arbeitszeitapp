@@ -17,6 +17,7 @@ from arbeitszeit.use_cases import (
     DenyCooperationResponse,
     GetCompanySummary,
     HidePlan,
+    ListActivePlansOfCompany,
     ListAllCooperations,
     ListCoordinations,
     ListCoordinationsRequest,
@@ -24,7 +25,6 @@ from arbeitszeit.use_cases import (
     ListInboundCoopRequestsRequest,
     ListOutboundCoopRequests,
     ListOutboundCoopRequestsRequest,
-    ListPlans,
     RequestCooperation,
     ToggleProductAvailability,
 )
@@ -536,7 +536,7 @@ def create_cooperation(view: CreateCooperationView):
 @CompanyRoute("/company/request_cooperation", methods=["GET", "POST"])
 @commit_changes
 def request_cooperation(
-    list_plans: ListPlans,
+    list_plans: ListActivePlansOfCompany,
     list_plans_presenter: ListPlansPresenter,
     request_cooperation: RequestCooperation,
     controller: RequestCooperationController,
