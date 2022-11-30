@@ -10,6 +10,9 @@ from arbeitszeit_web.pay_consumer_product import PayConsumerProductPresenter
 from arbeitszeit_web.presenters.accountant_invitation_presenter import (
     AccountantInvitationEmailPresenter,
 )
+from arbeitszeit_web.presenters.company_purchases_presenter import (
+    CompanyPurchasesPresenter,
+)
 from arbeitszeit_web.presenters.list_available_languages_presenter import (
     ListAvailableLanguagesPresenter,
 )
@@ -216,6 +219,14 @@ class PresenterTestsInjector(Module):
         self, datetime_service: FakeDatetimeService
     ) -> MemberPurchasesPresenter:
         return MemberPurchasesPresenter(
+            datetime_service=datetime_service,
+        )
+
+    @provider
+    def provide_company_purchases_presenter(
+        self, datetime_service: FakeDatetimeService
+    ) -> CompanyPurchasesPresenter:
+        return CompanyPurchasesPresenter(
             datetime_service=datetime_service,
         )
 

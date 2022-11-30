@@ -84,6 +84,9 @@ from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.hide_plan import HidePlanPresenter
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_plans import ListPlansPresenter
+from arbeitszeit_web.presenters.company_purchases_presenter import (
+    CompanyPurchasesPresenter,
+)
 from arbeitszeit_web.presenters.delete_draft_presenter import DeleteDraftPresenter
 from arbeitszeit_web.presenters.file_plan_with_accounting_presenter import (
     FilePlanWithAccountingPresenter,
@@ -167,17 +170,23 @@ def query_companies(
         return view.respond_to_get()
 
 
-@CompanyRoute("/company/kaeufe")
+@CompanyRoute("/company/purchases")
 def my_purchases(
     query_purchases: use_cases.QueryPurchases,
     company_repository: CompanyRepository,
     template_renderer: UserTemplateRenderer,
+    presenter: CompanyPurchasesPresenter,
 ):
     company = company_repository.get_by_id(UUID(current_user.id))
     assert company is not None
-    purchases = list(query_purchases(company))
-    return template_renderer.render_template(
-        "company/my_purchases.html", context=dict(purchases=purchases)
+
+    response = query_purchases(company)
+    view_model = presenter.present(response)
+    return FlaskResponse(
+        template_renderer.render_template(
+            "company/my_purchases.html",
+            context=dict(purchases=view_model),
+        )
     )
 
 

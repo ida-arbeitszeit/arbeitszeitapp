@@ -19,6 +19,9 @@ from arbeitszeit_web.presenters.accountant_invitation_presenter import (
     AccountantInvitationEmailPresenter,
     AccountantInvitationEmailView,
 )
+from arbeitszeit_web.presenters.company_purchases_presenter import (
+    CompanyPurchasesPresenter,
+)
 from arbeitszeit_web.presenters.list_available_languages_presenter import (
     ListAvailableLanguagesPresenter,
 )
@@ -155,3 +158,11 @@ class PresenterModule(Module):
         datetime_service: DatetimeService,
     ) -> MemberPurchasesPresenter:
         return MemberPurchasesPresenter(datetime_service=datetime_service)
+
+    @provider
+    def provide_company_purchases_presenter(
+        self, datetime_service: DatetimeService
+    ) -> CompanyPurchasesPresenter:
+        return CompanyPurchasesPresenter(
+            datetime_service=datetime_service,
+        )
