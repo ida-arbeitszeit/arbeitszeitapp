@@ -36,11 +36,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1669965147,
-        "narHash": "sha256-Nd3jr/KXCQ/pXCo9P37bQ/NTpK9MpkNFC/lPWdArSZo=",
+        "lastModified": 1670001976,
+        "narHash": "sha256-67qR0RT+b9ci/tGiiQhLMiEFKqFzxtNPWs0FG1vdn0E=",
         "owner": "seppeljordan",
         "repo": "flask-profiler",
-        "rev": "a9c250c55af7ca7bf48e19d2f1e3ec44a5649712",
+        "rev": "6e177484d6a1a3945b5a68408d32ef447414cf3b",
         "type": "github"
       },
       "original": {
@@ -67,11 +67,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1669900182,
-        "narHash": "sha256-EKxjHxRJnP1w+2nnm8pq4Uqkqa5McnfPXcO8cG8Mxzc=",
+        "lastModified": 1669927173,
+        "narHash": "sha256-Z7rSKzC5OuWv5Q7RRNQPZb0jVJRJk0BJB6/fGZzaAIU=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "bcb6dbbe30ce7631e5a0865dff1ab9b63d92977d",
+        "rev": "9063accddd2e68dcc71032459a58399e977374c9",
         "type": "github"
       },
       "original": {
