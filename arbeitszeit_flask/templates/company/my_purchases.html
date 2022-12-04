@@ -36,13 +36,13 @@
         {% if purchases is defined and purchases|length %}
         {% for purchase in purchases %}
         <tr>
-          <td>{{ purchase.purchase_date|format_datetime(zone='Europe/Berlin', fmt='%d.%m.%Y') }}</td>
+          <td>{{ purchase.purchase_date }}</td>
           <td>{{ purchase.product_name }}</td>
           <td>{{ purchase.product_description }}</td>
           <td>{{ purchase.purpose }}</td>
-          <td>{{ purchase.price_per_unit|round(1) }}</td>
+          <td>{{ purchase.price_per_unit }}</td>
           <th>{{ purchase.amount }}</th>
-          <th>{{ purchase.price_total|round(1) }}</th>
+          <th>{{ purchase.price_total }}</th>
         </tr>
         {% endfor %}
         {% else %}

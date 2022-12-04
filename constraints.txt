@@ -71,7 +71,6 @@ pytz==2022.2.1
 PyYAML==6.0
 requests==2.28.1
 setuptools==65.3.0
-simplejson==3.17.6
 six==1.16.0
 snowballstemmer==2.2.0
 speaklater==1.3
