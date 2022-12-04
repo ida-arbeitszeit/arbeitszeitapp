@@ -6,7 +6,7 @@ from uuid import uuid4
 from arbeitszeit_web.api_presenters.query_plans_api_presenter import (
     QueryPlansApiPresenter,
 )
-from tests.data_generators import QueriedPlanGenerator
+from tests.presenters.data_generators import QueriedPlanGenerator
 
 from ..base_test_case import BaseTestCase
 
@@ -15,12 +15,13 @@ class PresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.presenter = self.injector.get(QueryPlansApiPresenter)
-        self.queried_plan_generator = QueriedPlanGenerator()
+        self.queried_plan_generator = self.injector.get(QueriedPlanGenerator)
 
     def test_that_json_string_has_empty_results_if_no_plans_exist(self):
         use_case_response = self.queried_plan_generator.get_response(queried_plans=[])
         json_string = self.presenter.get_json(use_case_response)
-        self.assertEqual(json_string, '{"results": []}')
+        deserialized = json.loads(json_string)
+        self.assertFalse(deserialized["results"])
 
     def test_that_json_string_has_one_result_if_one_plan_exists(self):
         use_case_response = self.queried_plan_generator.get_response(

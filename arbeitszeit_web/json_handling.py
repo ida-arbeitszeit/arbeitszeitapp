@@ -16,5 +16,5 @@ class JsonEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, o)
 
 
-def dict_to_json(dictionary: Dict) -> str:
+def serialize_to_json(dictionary: Dict) -> str:
     return json.dumps(dictionary, cls=JsonEncoder)
