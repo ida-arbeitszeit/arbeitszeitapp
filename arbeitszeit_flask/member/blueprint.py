@@ -61,7 +61,11 @@ class MemberRoute:
                 )
                 session.logout()
                 return redirect(url_for("auth.start", next=self.route_string))
-            elif not member_repository.is_member_confirmed(user_id):
+            elif (
+                not member_repository.get_members()
+                .with_id(user_id)
+                .that_are_confirmed()
+            ):
                 # not a confirmed member
                 return redirect(url_for("auth.unconfirmed_member"))
             return func(*args, **kwargs)

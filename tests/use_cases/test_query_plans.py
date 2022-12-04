@@ -201,8 +201,8 @@ def test_that_correct_price_per_unit_of_zero_is_displayed_for_a_public_plan(
 
 def make_request(
     query: Optional[str] = None,
-    category: PlanFilter = None,
-    sorting: PlanSorting = None,
+    category: Optional[PlanFilter] = None,
+    sorting: Optional[PlanSorting] = None,
 ):
     return QueryPlansRequestTestImpl(
         query=query or "",

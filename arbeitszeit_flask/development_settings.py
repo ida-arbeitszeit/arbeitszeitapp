@@ -23,7 +23,6 @@ MAIL_USE_SSL = True
 
 FLASK_PROFILER = {
     "enabled": True,
-    "storage": {"engine": "sqlite"},
     "ignore": ["^/static/.*"],
     "endpointRoot": "profiling",
 }

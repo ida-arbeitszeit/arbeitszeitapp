@@ -65,6 +65,9 @@ class PlanResult(QueryResult[Plan], Protocol):
     def that_are_public(self) -> PlanResult:
         ...
 
+    def that_are_cooperating(self) -> PlanResult:
+        ...
+
     def planned_by(self, company: UUID) -> PlanResult:
         ...
 
@@ -88,6 +91,12 @@ class MemberResult(QueryResult[Member], Protocol):
         ...
 
     def with_email_address(self, email: str) -> MemberResult:
+        ...
+
+    def set_confirmation_timestamp(self, timestamp: datetime) -> int:
+        ...
+
+    def that_are_confirmed(self) -> MemberResult:
         ...
 
 
@@ -258,6 +267,7 @@ class MemberRepository(ABC):
     @abstractmethod
     def create_member(
         self,
+        *,
         email: str,
         name: str,
         password: str,
@@ -272,14 +282,6 @@ class MemberRepository(ABC):
 
     @abstractmethod
     def get_members(self) -> MemberResult:
-        pass
-
-    @abstractmethod
-    def confirm_member(self, member: UUID, confirmed_on: datetime) -> None:
-        pass
-
-    @abstractmethod
-    def is_member_confirmed(self, member: UUID) -> bool:
         pass
 
 
@@ -340,6 +342,10 @@ class CompanyRepository(ABC):
 
     @abstractmethod
     def validate_credentials(self, email_address: str, password: str) -> Optional[UUID]:
+        pass
+
+    @abstractmethod
+    def is_company_confirmed(self, company: UUID) -> bool:
         pass
 
     @abstractmethod

@@ -13,6 +13,9 @@ from arbeitszeit.use_cases import (
     ListInboundCoopRequestsResponse,
     ListOutboundCoopRequestsResponse,
 )
+from arbeitszeit.use_cases.list_my_cooperating_plans import (
+    ListMyCooperatingPlansUseCase,
+)
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
@@ -34,15 +37,31 @@ class ListOfInboundCooperationRequestsRow:
     coop_name: str
     plan_id: str
     plan_name: str
+    plan_url: str
     planner_name: str
+    planner_url: str
 
 
 @dataclass
 class ListOfOutboundCooperationRequestsRow:
     plan_id: str
     plan_name: str
+    plan_url: str
     coop_id: str
     coop_name: str
+
+
+@dataclass
+class CooperatingPlan:
+    plan_name: str
+    plan_url: str
+    coop_name: str
+    coop_url: str
+
+
+@dataclass
+class ListOfMyCooperatingPlans:
+    rows: List[CooperatingPlan]
 
 
 @dataclass
@@ -69,6 +88,7 @@ class ShowMyCooperationsViewModel:
     deny_message: List[str]
     deny_message_success: bool
     list_of_outbound_coop_requests: ListOfOutboundCooperationRequestsTable
+    list_of_my_cooperating_plans: ListOfMyCooperatingPlans
     cancel_message: List[str]
     cancel_message_success: bool
 
@@ -90,6 +110,7 @@ class ShowMyCooperationsPresenter:
         deny_cooperation_response: Optional[DenyCooperationResponse],
         list_outbound_coop_requests_response: ListOutboundCoopRequestsResponse,
         cancel_cooperation_solicitation_response: Optional[bool],
+        list_my_cooperating_plans_response: ListMyCooperatingPlansUseCase.Response,
     ) -> ShowMyCooperationsViewModel:
         list_of_coordinations = ListOfCoordinationsTable(
             rows=[
@@ -122,6 +143,12 @@ class ShowMyCooperationsPresenter:
                 for plan in list_outbound_coop_requests_response.cooperation_requests
             ]
         )
+        list_of_my_cooperating_plans = ListOfMyCooperatingPlans(
+            rows=[
+                self._display_my_cooperating_plans(plan)
+                for plan in list_my_cooperating_plans_response.cooperating_plans
+            ]
+        )
 
         return ShowMyCooperationsViewModel(
             list_of_coordinations,
@@ -131,6 +158,7 @@ class ShowMyCooperationsPresenter:
             deny_message,
             deny_message_success,
             list_of_outbound_coop_requests,
+            list_of_my_cooperating_plans,
             cancel_message,
             cancel_message_success,
         )
@@ -157,7 +185,13 @@ class ShowMyCooperationsPresenter:
             coop_name=plan.coop_name,
             plan_id=str(plan.plan_id),
             plan_name=plan.plan_name,
+            plan_url=self.url_index.get_plan_summary_url(
+                user_role=UserRole.company, plan_id=plan.plan_id
+            ),
             planner_name=plan.planner_name,
+            planner_url=self.url_index.get_company_summary_url(
+                user_role=UserRole.company, company_id=plan.planner_id
+            ),
         )
 
     def _display_outbound_coop_requests(
@@ -166,8 +200,25 @@ class ShowMyCooperationsPresenter:
         return ListOfOutboundCooperationRequestsRow(
             plan_id=str(plan.plan_id),
             plan_name=plan.plan_name,
+            plan_url=self.url_index.get_plan_summary_url(
+                user_role=UserRole.company, plan_id=plan.plan_id
+            ),
             coop_id=str(plan.coop_id),
             coop_name=plan.coop_name,
+        )
+
+    def _display_my_cooperating_plans(
+        self, plan: ListMyCooperatingPlansUseCase.CooperatingPlan
+    ) -> CooperatingPlan:
+        return CooperatingPlan(
+            plan_name=plan.plan_name,
+            plan_url=self.url_index.get_plan_summary_url(
+                user_role=UserRole.company, plan_id=plan.plan_id
+            ),
+            coop_name=plan.coop_name,
+            coop_url=self.url_index.get_coop_summary_url(
+                user_role=UserRole.company, coop_id=plan.coop_id
+            ),
         )
 
     def _accept_message_info(

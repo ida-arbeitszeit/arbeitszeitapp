@@ -18,7 +18,7 @@ from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
 from injector import inject
-from sqlalchemy import and_, func
+from sqlalchemy import and_, func, update
 from sqlalchemy.sql.expression import Select
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -43,15 +43,18 @@ FlaskQueryResultT = TypeVar("FlaskQueryResultT", bound="FlaskQueryResult")
 
 
 class FlaskQueryResult(Generic[T]):
-    def __init__(self, query: Select, mapper: Callable[[Any], T]) -> None:
+    def __init__(
+        self, query: Select, mapper: Callable[[Any], T], db: SQLAlchemy
+    ) -> None:
         self.query = query
         self.mapper = mapper
+        self.db = db
 
     def limit(self: FlaskQueryResultT, n: int) -> FlaskQueryResultT:
-        return type(self)(query=self.query.limit(n), mapper=self.mapper)
+        return type(self)(query=self.query.limit(n), mapper=self.mapper, db=self.db)
 
     def offset(self: FlaskQueryResultT, n: int) -> FlaskQueryResultT:
-        return type(self)(query=self.query.offset(n), mapper=self.mapper)
+        return type(self)(query=self.query.offset(n), mapper=self.mapper, db=self.db)
 
     def first(self) -> Optional[T]:
         element = self.query.first()
@@ -62,7 +65,9 @@ class FlaskQueryResult(Generic[T]):
     def _with_modified_query(
         self: FlaskQueryResultT, modification: Callable[[Any], Any]
     ) -> FlaskQueryResultT:
-        return type(self)(query=modification(self.query), mapper=self.mapper)
+        return type(self)(
+            query=modification(self.query), mapper=self.mapper, db=self.db
+        )
 
     def __iter__(self) -> Iterator[T]:
         return (self.mapper(item) for item in self.query)
@@ -103,6 +108,11 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
     def that_are_public(self) -> PlanQueryResult:
         return self._with_modified_query(
             lambda query: query.filter(models.Plan.is_public_service == True)
+        )
+
+    def that_are_cooperating(self) -> PlanQueryResult:
+        return self._with_modified_query(
+            lambda query: query.filter(models.Plan.cooperation != None)
         )
 
     def planned_by(self, company: UUID) -> PlanQueryResult:
@@ -148,6 +158,25 @@ class MemberQueryResult(FlaskQueryResult[entities.Member]):
     def with_email_address(self, email: str) -> MemberQueryResult:
         return self._with_modified_query(
             lambda query: query.join(models.User).filter(models.User.email == email)
+        )
+
+    def set_confirmation_timestamp(self, timestamp: datetime) -> int:
+        sql_statement = (
+            update(models.Member)
+            .where(
+                models.Member.id.in_(
+                    self.query.with_entities(models.Member.id).scalar_subquery()
+                )
+            )
+            .values(confirmed_on=timestamp)
+            .execution_options(synchronize_session="fetch")
+        )
+        result = self.db.session.execute(sql_statement)
+        return result.rowcount
+
+    def that_are_confirmed(self) -> MemberQueryResult:
+        return self._with_modified_query(
+            lambda query: query.filter(models.Member.confirmed_on != None)
         )
 
 
@@ -255,22 +284,6 @@ class MemberRepository(repositories.MemberRepository):
         assert member_orm
         return member_orm
 
-    def confirm_member(self, member: UUID, confirmed_on: datetime) -> None:
-        self.db.session.query(models.Member).filter(
-            models.Member.id == str(member)
-        ).update({models.Member.confirmed_on: confirmed_on})
-
-    def is_member_confirmed(self, member: UUID) -> bool:
-        orm = (
-            self.db.session.query(models.Member)
-            .filter(models.Member.id == str(member))
-            .first()
-        )
-        if orm:
-            return orm.confirmed_on is not None
-        else:
-            return False
-
     def object_from_orm(self, orm_object: Member) -> entities.Member:
         member_account = self.account_repository.object_from_orm(orm_object.account)
         return entities.Member(
@@ -287,6 +300,7 @@ class MemberRepository(repositories.MemberRepository):
 
     def create_member(
         self,
+        *,
         email: str,
         name: str,
         password: str,
@@ -311,6 +325,7 @@ class MemberRepository(repositories.MemberRepository):
         return MemberQueryResult(
             mapper=self.object_from_orm,
             query=Member.query,
+            db=self.db,
         )
 
     def _get_or_create_user(self, email: str, password: str) -> models.User:
@@ -708,6 +723,7 @@ class PurchaseRepository(repositories.PurchaseRepository):
         return PurchaseQueryResult(
             mapper=self.object_from_orm,
             query=models.Purchase.query,
+            db=self.db,
         )
 
 
@@ -722,6 +738,7 @@ class PlanRepository(repositories.PlanRepository):
         return PlanQueryResult(
             query=models.Plan.query,
             mapper=self.object_from_orm,
+            db=self.db,
         )
 
     def create_plan_from_draft(self, draft_id: UUID) -> Optional[UUID]:
@@ -839,6 +856,7 @@ class PlanRepository(repositories.PlanRepository):
         return PlanQueryResult(
             query=models.Plan.query.filter_by(is_active=True),
             mapper=self.object_from_orm,
+            db=self.db,
         )
 
     def avg_timeframe_of_active_plans(self) -> Decimal:
@@ -1361,6 +1379,7 @@ class AccountantRepository:
                 name=record.name,
                 id=UUID(record.id),
             ),
+            db=self.db,
         )
 
 

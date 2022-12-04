@@ -1,9 +1,9 @@
-from datetime import datetime
 from uuid import UUID
 
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
 
+from arbeitszeit.use_cases.confirm_company import ConfirmCompanyUseCase
 from arbeitszeit.use_cases.confirm_member import ConfirmMemberUseCase
 from arbeitszeit.use_cases.log_in_accountant import LogInAccountantUseCase
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
@@ -20,7 +20,6 @@ from arbeitszeit_flask.dependency_injection import (
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import LoginForm
 from arbeitszeit_flask.template import AnonymousUserTemplateRenderer
-from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views.signup_accountant_view import SignupAccountantView
 from arbeitszeit_flask.views.signup_company_view import SignupCompanyView
@@ -73,7 +72,11 @@ def set_language(language=None):
 @with_injection()
 @login_required
 def unconfirmed_member(member_repository: MemberRepository):
-    if member_repository.is_member_confirmed(UUID(current_user.id)):
+    if (
+        member_repository.get_members()
+        .with_id(UUID(current_user.id))
+        .that_are_confirmed()
+    ):
         return redirect(url_for("auth.start"))
     return render_template("auth/unconfirmed_member.html")
 
@@ -201,26 +204,19 @@ def signup_company(view: SignupCompanyView):
 @auth.route("/company/confirm/<token>")
 @commit_changes
 @with_injection()
-def confirm_email_company(token, company_repository: CompanyRepository):
-    def redirect_invalid_request():
+def confirm_email_company(
+    token, confirm_company_use_case: ConfirmCompanyUseCase, session: FlaskSession
+):
+    request = ConfirmCompanyUseCase.Request(token)
+    response = confirm_company_use_case.confirm_company(request)
+    if not response.is_confirmed:
         flash("Der Bestätigungslink ist ungültig oder ist abgelaufen.")
         return redirect(url_for("auth.unconfirmed_company"))
-
-    token_service = FlaskTokenService()
-    try:
-        email = token_service.confirm_token(token)
-    except Exception:
-        return redirect_invalid_request()
-    if email is None:
-        return redirect_invalid_request()
-    company = company_repository.get_by_email(email)
-    assert company
-    if company_repository.is_company_confirmed(company.id):
-        flash("Konto ist bereits bestätigt.")
     else:
-        company_repository.confirm_company(company.id, datetime.now())
+        assert response.user_id
+        session.login_company(response.user_id)
         flash("Das Konto wurde bestätigt. Danke!")
-    return redirect(url_for("auth.login_company"))
+        return redirect(url_for("auth.login_company"))
 
 
 @auth.route("/company/resend")

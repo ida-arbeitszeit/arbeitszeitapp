@@ -28,14 +28,16 @@ class ConfirmMemberUseCase:
     def confirm_member(self, request: Request) -> Response:
         unwrapped_token = self.token_validator.unwrap_confirmation_token(request.token)
         if unwrapped_token:
-            member = (
-                self.member_repository.get_members()
-                .with_email_address(unwrapped_token)
-                .first()
+            members = self.member_repository.get_members().with_email_address(
+                unwrapped_token
             )
-            if not member:
+            if not members:
                 return self.Response(is_confirmed=False)
-            if member.confirmed_on is None:
-                self.member_repository.confirm_member(member.id, datetime.min)
+            if members.that_are_confirmed():
+                pass
+            else:
+                members.set_confirmation_timestamp(datetime.min)
+                member = members.first()
+                assert member
                 return self.Response(is_confirmed=True, member=member.id)
         return self.Response(is_confirmed=False)

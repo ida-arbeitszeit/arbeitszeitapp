@@ -24,6 +24,7 @@ class ListedInboundCoopRequest:
     plan_id: UUID
     plan_name: str
     planner_name: str
+    planner_id: UUID
 
 
 @dataclass
@@ -69,4 +70,5 @@ class ListInboundCoopRequests:
             plan_id=plan.id,
             plan_name=plan.prd_name,
             planner_name=plan.planner.name,
+            planner_id=plan.planner.id,
         )

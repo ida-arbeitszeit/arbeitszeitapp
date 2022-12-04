@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.start_page import StartPageUseCase
@@ -36,9 +36,9 @@ class PresenterTester(BaseTestCase):
 
     def get_latest_plan(
         self,
-        activation_date: datetime = None,
-        plan_id: UUID = None,
-        product_name: str = None,
+        activation_date: Optional[datetime] = None,
+        plan_id: Optional[UUID] = None,
+        product_name: Optional[str] = None,
     ) -> StartPageUseCase.PlanDetail:
         if activation_date is None:
             activation_date = datetime(2022, 5, 1)

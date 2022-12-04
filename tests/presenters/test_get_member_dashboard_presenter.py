@@ -1,6 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import List
+from typing import List, Optional
 from unittest import TestCase
 from uuid import UUID, uuid4
 
@@ -171,7 +171,7 @@ class GetMemberDashboardPresenterTests(TestCase):
         )
 
     def get_invite(
-        self, invite_id: UUID = None, company_name: str = None
+        self, invite_id: Optional[UUID] = None, company_name: Optional[str] = None
     ) -> GetMemberDashboard.WorkInvitation:
         if invite_id is None:
             invite_id = uuid4()
@@ -183,10 +183,10 @@ class GetMemberDashboardPresenterTests(TestCase):
 
     def get_response(
         self,
-        workplaces: List[GetMemberDashboard.Workplace] = None,
-        account_balance: Decimal = None,
-        three_latest_plans: List[GetMemberDashboard.PlanDetails] = None,
-        invites: List[GetMemberDashboard.WorkInvitation] = None,
+        workplaces: Optional[List[GetMemberDashboard.Workplace]] = None,
+        account_balance: Optional[Decimal] = None,
+        three_latest_plans: Optional[List[GetMemberDashboard.PlanDetails]] = None,
+        invites: Optional[List[GetMemberDashboard.WorkInvitation]] = None,
     ) -> GetMemberDashboard.Response:
         if workplaces is None:
             workplaces = []

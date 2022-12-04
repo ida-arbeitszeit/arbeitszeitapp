@@ -33,6 +33,9 @@ from arbeitszeit.use_cases.delete_draft import DeleteDraftUseCase
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
 from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
 from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
+from arbeitszeit.use_cases.list_my_cooperating_plans import (
+    ListMyCooperatingPlansUseCase,
+)
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_flask.database import CompanyRepository, commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
@@ -81,6 +84,9 @@ from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.hide_plan import HidePlanPresenter
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.list_plans import ListPlansPresenter
+from arbeitszeit_web.presenters.company_purchases_presenter import (
+    CompanyPurchasesPresenter,
+)
 from arbeitszeit_web.presenters.delete_draft_presenter import DeleteDraftPresenter
 from arbeitszeit_web.presenters.file_plan_with_accounting_presenter import (
     FilePlanWithAccountingPresenter,
@@ -164,17 +170,23 @@ def query_companies(
         return view.respond_to_get()
 
 
-@CompanyRoute("/company/kaeufe")
+@CompanyRoute("/company/purchases")
 def my_purchases(
     query_purchases: use_cases.QueryPurchases,
     company_repository: CompanyRepository,
     template_renderer: UserTemplateRenderer,
+    presenter: CompanyPurchasesPresenter,
 ):
     company = company_repository.get_by_id(UUID(current_user.id))
     assert company is not None
-    purchases = list(query_purchases(company))
-    return template_renderer.render_template(
-        "company/my_purchases.html", context=dict(purchases=purchases)
+
+    response = query_purchases(company)
+    view_model = presenter.present(response)
+    return FlaskResponse(
+        template_renderer.render_template(
+            "company/my_purchases.html",
+            context=dict(purchases=view_model),
+        )
     )
 
 
@@ -571,6 +583,7 @@ def my_cooperations(
     accept_cooperation: AcceptCooperation,
     deny_cooperation: DenyCooperation,
     list_outbound_coop_requests: ListOutboundCoopRequests,
+    list_my_cooperating_plans: ListMyCooperatingPlansUseCase,
     presenter: ShowMyCooperationsPresenter,
     cancel_cooperation_solicitation: CancelCooperationSolicitation,
 ):
@@ -608,6 +621,9 @@ def my_cooperations(
     list_outbound_coop_requests_response = list_outbound_coop_requests(
         ListOutboundCoopRequestsRequest(UUID(current_user.id))
     )
+    list_my_coop_plans_response = list_my_cooperating_plans.list_cooperations(
+        ListMyCooperatingPlansUseCase.Request(company=UUID(current_user.id))
+    )
 
     view_model = presenter.present(
         list_coord_response,
@@ -616,6 +632,7 @@ def my_cooperations(
         deny_cooperation_response,
         list_outbound_coop_requests_response,
         cancel_cooperation_solicitation_response,
+        list_my_coop_plans_response,
     )
     return template_renderer.render_template(
         "company/my_cooperations.html", context=view_model.to_dict()

@@ -115,6 +115,9 @@ class PlanResult(QueryResultImpl[Plan], interfaces.PlanResult):
     def that_are_public(self) -> PlanResult:
         return self._filtered_by(lambda plan: plan.is_public_service)
 
+    def that_are_cooperating(self) -> PlanResult:
+        return self._filtered_by(lambda plan: plan.cooperation is not None)
+
     def planned_by(self, company: UUID) -> PlanResult:
         return self._filtered_by(lambda plan: plan.planner.id == company)
 
@@ -153,6 +156,15 @@ class MemberResult(QueryResultImpl[Member], interfaces.MemberResult):
 
     def with_email_address(self, email: str) -> MemberResult:
         return self._filtered_by(lambda model: model.email == email)
+
+    def set_confirmation_timestamp(self, timestamp: datetime) -> int:
+        members = list(self)
+        for member in members:
+            member.confirmed_on = timestamp
+        return len(members)
+
+    def that_are_confirmed(self) -> MemberResult:
+        return self._filtered_by(lambda model: model.confirmed_on is not None)
 
     def _filtered_by(self, key: Callable[[Member], bool]) -> MemberResult:
         return type(self)(
@@ -425,6 +437,7 @@ class MemberRepository(interfaces.MemberRepository):
 
     def create_member(
         self,
+        *,
         email: str,
         name: str,
         password: str,
@@ -449,17 +462,6 @@ class MemberRepository(interfaces.MemberRepository):
             if self.passwords[member.id] == password:
                 return member.id
         return None
-
-    def confirm_member(self, member: UUID, confirmed_on: datetime) -> None:
-        entity = self.members[member]
-        entity.confirmed_on = confirmed_on
-
-    def is_member_confirmed(self, member: UUID) -> bool:
-        entity = self.members.get(member)
-        if entity:
-            return entity.confirmed_on is not None
-        else:
-            return False
 
     def get_members(self) -> MemberResult:
         return MemberResult(
@@ -563,6 +565,11 @@ class CompanyRepository(interfaces.CompanyRepository):
     def confirm_company(self, company: UUID, confirmation_timestamp: datetime) -> None:
         if model := self.get_by_id(company):
             model.confirmed_on = confirmation_timestamp
+
+    def is_company_confirmed(self, company: UUID) -> bool:
+        if model := self.get_by_id(company):
+            return model.confirmed_on is not None
+        return False
 
 
 @singleton
@@ -1032,7 +1039,6 @@ class AccountantRepositoryTestImpl:
             id=id,
         )
         self.accountants[id] = record
-        print(self.accountants)
         return id
 
     def has_accountant_with_email(self, email: str) -> bool:
