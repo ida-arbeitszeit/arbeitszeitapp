@@ -13,14 +13,12 @@ class ControllerTests(BaseTestCase):
 
     def test_that_by_default_a_request_gets_returned_which_sorts_by_activation(self):
         use_case_request = self.controller.get_request()
-        self.assertEqual(
-            use_case_request.get_sorting_category(), PlanSorting.by_activation
-        )
+        self.assertEqual(use_case_request.sorting_category, PlanSorting.by_activation)
 
     def test_that_by_default_a_request_gets_returned_which_filters_by_plan_id(self):
         use_case_request = self.controller.get_request()
-        self.assertEqual(use_case_request.get_filter_category(), PlanFilter.by_plan_id)
+        self.assertEqual(use_case_request.filter_category, PlanFilter.by_plan_id)
 
     def test_that_by_default_a_request_gets_returned_without_query_string(self):
         use_case_request = self.controller.get_request()
-        self.assertIsNone(use_case_request.get_query_string())
+        self.assertIsNone(use_case_request.query_string)
