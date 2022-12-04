@@ -561,6 +561,7 @@ class QueriedPlanGenerator:
         is_cooperating: Optional[bool] = None,
         description: Optional[str] = None,
         activation_date: Optional[datetime] = None,
+        price_per_unit: Optional[Decimal] = None,
     ) -> QueriedPlan:
         if plan_id is None:
             plan_id = uuid4()
@@ -572,13 +573,15 @@ class QueriedPlanGenerator:
             description = "For eating\nNext paragraph\rThird one"
         if activation_date is None:
             activation_date = datetime.now()
+        if price_per_unit is None:
+            price_per_unit = Decimal(5)
         return QueriedPlan(
             plan_id=plan_id,
             company_name="Planner name",
             company_id=company_id,
             product_name="Bread",
             description=description,
-            price_per_unit=Decimal(5),
+            price_per_unit=price_per_unit,
             is_public_service=False,
             is_available=True,
             is_cooperating=is_cooperating,
