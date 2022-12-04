@@ -50,6 +50,7 @@ from arbeitszeit.use_cases.create_plan_draft import (
     CreatePlanDraftRequest,
 )
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
+from arbeitszeit.use_cases.query_plans import PlanQueryResponse, QueriedPlan
 from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
 from arbeitszeit.use_cases.register_company import RegisterCompany
 from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
@@ -550,3 +551,39 @@ class AccountantGenerator:
         user_id = response.user_id
         assert user_id is not None
         return user_id
+
+
+class QueriedPlanGenerator:
+    def get_plan(
+        self,
+        plan_id: Optional[UUID] = None,
+        company_id: Optional[UUID] = None,
+        is_cooperating: Optional[bool] = None,
+        description: Optional[str] = None,
+        activation_date: Optional[datetime] = None,
+    ) -> QueriedPlan:
+        if plan_id is None:
+            plan_id = uuid4()
+        if company_id is None:
+            company_id = uuid4()
+        if is_cooperating is None:
+            is_cooperating = False
+        if description is None:
+            description = "For eating\nNext paragraph\rThird one"
+        if activation_date is None:
+            activation_date = datetime.now()
+        return QueriedPlan(
+            plan_id=plan_id,
+            company_name="Planner name",
+            company_id=company_id,
+            product_name="Bread",
+            description=description,
+            price_per_unit=Decimal(5),
+            is_public_service=False,
+            is_available=True,
+            is_cooperating=is_cooperating,
+            activation_date=activation_date,
+        )
+
+    def get_response(self, queried_plans: List[QueriedPlan]) -> PlanQueryResponse:
+        return PlanQueryResponse(results=[plan for plan in queried_plans])
