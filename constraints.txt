@@ -1,5 +1,6 @@
 alabaster==0.7.12
 alembic==1.8.1
+aniso8601==9.0.1
 asgiref==3.5.2
 async-timeout==4.0.2
 attrs==22.1.0
@@ -24,6 +25,7 @@ Flask-HTTPAuth==4.7.0
 Flask-Login==0.6.2
 Flask-Mail==0.9.1
 Flask-Migrate==3.1.0
+flask-restx==1.0.3
 Flask-SQLAlchemy==2.5.1
 flask-talisman==1.0.0
 Flask-WTF==1.0.1
@@ -38,6 +40,7 @@ is-safe-url==1.0
 isort==5.10.1
 itsdangerous==2.1.2
 Jinja2==3.1.2
+jsonschema==4.17.0
 kiwisolver==1.4.4
 Mako==1.2.2
 MarkupSafe==2.1.1
@@ -62,6 +65,7 @@ pycparser==2.21
 pyflakes==2.5.0
 Pygments==2.13.0
 pyparsing==3.0.9
+pyrsistent==0.18.1
 PySocks==1.7.1
 PyStemmer==2.0.1
 pytest==7.1.3
