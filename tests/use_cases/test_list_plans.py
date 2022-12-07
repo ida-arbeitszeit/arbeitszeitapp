@@ -2,7 +2,7 @@ from datetime import datetime
 from uuid import uuid4
 
 from arbeitszeit.entities import Company, Plan
-from arbeitszeit.use_cases import ListPlans, ListPlansResponse
+from arbeitszeit.use_cases import ListActivePlansOfCompany, ListPlansResponse
 from tests.data_generators import CompanyGenerator, PlanGenerator
 
 from .dependency_injection import injection_test
@@ -19,7 +19,7 @@ def plan_in_results(plan: Plan, response: ListPlansResponse) -> bool:
 
 @injection_test
 def test_list_plans_response_is_empty_for_nonexisting_company(
-    list_plans: ListPlans,
+    list_plans: ListActivePlansOfCompany,
 ):
     response: ListPlansResponse = list_plans(company_id=uuid4())
     assert not response.plans
@@ -27,7 +27,7 @@ def test_list_plans_response_is_empty_for_nonexisting_company(
 
 @injection_test
 def test_list_plans_response_is_empty_for_company_without_plans(
-    list_plans: ListPlans,
+    list_plans: ListActivePlansOfCompany,
     company_generator: CompanyGenerator,
 ):
     company: Company = company_generator.create_company_entity()
@@ -37,7 +37,7 @@ def test_list_plans_response_is_empty_for_company_without_plans(
 
 @injection_test
 def test_list_plans_response_includes_single_plan(
-    list_plans: ListPlans,
+    list_plans: ListActivePlansOfCompany,
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
 ):
@@ -51,7 +51,7 @@ def test_list_plans_response_includes_single_plan(
 
 @injection_test
 def test_list_plans_response_includes_multiple_plans(
-    list_plans: ListPlans,
+    list_plans: ListActivePlansOfCompany,
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
 ):

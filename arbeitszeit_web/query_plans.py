@@ -27,22 +27,6 @@ class QueryPlansFormData(Protocol):
         ...
 
 
-@dataclass
-class QueryPlansRequestImpl(QueryPlansRequest):
-    query: Optional[str]
-    filter_category: PlanFilter
-    sorting_category: PlanSorting
-
-    def get_query_string(self) -> Optional[str]:
-        return self.query
-
-    def get_filter_category(self) -> PlanFilter:
-        return self.filter_category
-
-    def get_sorting_category(self) -> PlanSorting:
-        return self.sorting_category
-
-
 class QueryPlansController:
     def import_form_data(self, form: Optional[QueryPlansFormData]) -> QueryPlansRequest:
         if form is None:
@@ -53,8 +37,8 @@ class QueryPlansController:
             query = form.get_query_string().strip() or None
             filter_category = self._import_filter_category(form)
             sorting_category = self._import_sorting_category(form)
-        return QueryPlansRequestImpl(
-            query=query,
+        return QueryPlansRequest(
+            query_string=query,
             filter_category=filter_category,
             sorting_category=sorting_category,
         )

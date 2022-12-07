@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional
@@ -204,24 +203,8 @@ def make_request(
     category: Optional[PlanFilter] = None,
     sorting: Optional[PlanSorting] = None,
 ):
-    return QueryPlansRequestTestImpl(
-        query=query or "",
+    return QueryPlansRequest(
+        query_string=query or "",
         filter_category=category or PlanFilter.by_product_name,
         sorting_category=sorting or PlanSorting.by_activation,
     )
-
-
-@dataclass
-class QueryPlansRequestTestImpl(QueryPlansRequest):
-    query: Optional[str]
-    filter_category: PlanFilter
-    sorting_category: PlanSorting
-
-    def get_query_string(self) -> Optional[str]:
-        return self.query
-
-    def get_filter_category(self) -> PlanFilter:
-        return self.filter_category
-
-    def get_sorting_category(self) -> PlanSorting:
-        return self.sorting_category

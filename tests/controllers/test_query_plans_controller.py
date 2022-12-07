@@ -20,25 +20,25 @@ class QueryPlansControllerTests(TestCase):
         self,
     ) -> None:
         request = self.controller.import_form_data(make_fake_form(query=""))
-        self.assertTrue(request.get_query_string() is None)
+        self.assertIsNone(request.query_string)
 
     def test_that_a_query_string_is_taken_as_the_literal_string_in_request(
         self,
     ) -> None:
         request = self.controller.import_form_data(make_fake_form(query="test"))
-        self.assertEqual(request.get_query_string(), "test")
+        self.assertEqual(request.query_string, "test")
 
     def test_that_leading_and_trailing_whitespaces_are_ignored(self) -> None:
         request = self.controller.import_form_data(make_fake_form(query=" test  "))
-        self.assertEqual(request.get_query_string(), "test")
+        self.assertEqual(request.query_string, "test")
         request = self.controller.import_form_data(make_fake_form(query="   "))
-        self.assertTrue(request.get_query_string() is None)
+        self.assertIsNone(request.query_string)
 
     def test_that_plan_id_choice_produces_requests_filter_by_plan_id(self) -> None:
         request = self.controller.import_form_data(
             make_fake_form(filter_category="Plan-ID")
         )
-        self.assertEqual(request.get_filter_category(), PlanFilter.by_plan_id)
+        self.assertEqual(request.filter_category, PlanFilter.by_plan_id)
 
     def test_that_product_name_choice_produces_requests_filter_by_product_name(
         self,
@@ -46,7 +46,7 @@ class QueryPlansControllerTests(TestCase):
         request = self.controller.import_form_data(
             make_fake_form(filter_category="Produktname")
         )
-        self.assertEqual(request.get_filter_category(), PlanFilter.by_product_name)
+        self.assertEqual(request.filter_category, PlanFilter.by_product_name)
 
     def test_that_random_string_produces_requests_filter_by_plan_id(
         self,
@@ -54,19 +54,19 @@ class QueryPlansControllerTests(TestCase):
         request = self.controller.import_form_data(
             make_fake_form(filter_category="awqwrndaj")
         )
-        self.assertEqual(request.get_filter_category(), PlanFilter.by_product_name)
+        self.assertEqual(request.filter_category, PlanFilter.by_product_name)
 
     def test_that_default_request_model_includes_no_search_query(
         self,
     ) -> None:
         request = self.controller.import_form_data(form=None)
-        self.assertTrue(request.get_query_string() is None)
+        self.assertIsNone(request.query_string)
 
     def test_that_empty_sorting_field_results_in_sorting_by_activation_date(
         self,
     ) -> None:
         request = self.controller.import_form_data(form=None)
-        self.assertEqual(request.get_sorting_category(), PlanSorting.by_activation)
+        self.assertEqual(request.sorting_category, PlanSorting.by_activation)
 
     def test_that_nonexisting_sorting_field_results_in_sorting_by_activation_date(
         self,
@@ -74,7 +74,7 @@ class QueryPlansControllerTests(TestCase):
         request = self.controller.import_form_data(
             form=make_fake_form(sorting_category="somethingjsbjbsd")
         )
-        self.assertEqual(request.get_sorting_category(), PlanSorting.by_activation)
+        self.assertEqual(request.sorting_category, PlanSorting.by_activation)
 
     def test_that_company_name_in_sorting_field_results_in_sorting_by_company_name(
         self,
@@ -82,7 +82,7 @@ class QueryPlansControllerTests(TestCase):
         request = self.controller.import_form_data(
             form=make_fake_form(sorting_category="company_name")
         )
-        self.assertEqual(request.get_sorting_category(), PlanSorting.by_company_name)
+        self.assertEqual(request.sorting_category, PlanSorting.by_company_name)
 
     def test_that_price_in_sorting_field_results_in_sorting_by_price(
         self,
@@ -90,7 +90,7 @@ class QueryPlansControllerTests(TestCase):
         request = self.controller.import_form_data(
             form=make_fake_form(sorting_category="price")
         )
-        self.assertEqual(request.get_sorting_category(), PlanSorting.by_price)
+        self.assertEqual(request.sorting_category, PlanSorting.by_price)
 
 
 def make_fake_form(

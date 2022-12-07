@@ -19,8 +19,8 @@ from arbeitszeit.use_cases.query_plans import (
     PlanSorting,
     QueriedPlan,
     QueryPlans,
+    QueryPlansRequest,
 )
-from arbeitszeit_web.query_plans import QueryPlansRequestImpl as QueryPlansRequest
 
 from .base_test_case import BaseTestCase
 from .repositories import (
@@ -193,7 +193,7 @@ class UseCaseTests(BaseTestCase):
     def get_latest_activated_plan(self) -> QueriedPlan:
         response = self.query_plans(
             QueryPlansRequest(
-                query=None,
+                query_string=None,
                 filter_category=PlanFilter.by_plan_id,
                 sorting_category=PlanSorting.by_activation,
             )

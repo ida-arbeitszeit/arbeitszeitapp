@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import enum
-from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
@@ -45,18 +44,11 @@ class QueriedPlan:
     activation_date: datetime
 
 
-class QueryPlansRequest(ABC):
-    @abstractmethod
-    def get_query_string(self) -> Optional[str]:
-        pass
-
-    @abstractmethod
-    def get_filter_category(self) -> PlanFilter:
-        pass
-
-    @abstractmethod
-    def get_sorting_category(self) -> PlanSorting:
-        pass
+@dataclass
+class QueryPlansRequest:
+    query_string: Optional[str]
+    filter_category: PlanFilter
+    sorting_category: PlanSorting
 
 
 @inject
@@ -66,9 +58,9 @@ class QueryPlans:
     plan_cooperation_repository: PlanCooperationRepository
 
     def __call__(self, request: QueryPlansRequest) -> PlanQueryResponse:
-        query = request.get_query_string()
-        filter_by = request.get_filter_category()
-        sort_by = request.get_sorting_category()
+        query = request.query_string
+        filter_by = request.filter_category
+        sort_by = request.sorting_category
         plans = self.plan_repository.get_active_plans()
         if query is None:
             pass
