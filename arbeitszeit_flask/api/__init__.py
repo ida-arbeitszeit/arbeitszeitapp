@@ -1,5 +1,6 @@
 from flask import Blueprint
 from flask_restx import Api
+
 from .plans import namespace as plans_ns
 
 blueprint = Blueprint("api", __name__, url_prefix="/api/v1")

@@ -53,6 +53,8 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
 
     load_configuration(app=app, configuration=config)
 
+    app.config["RESTX_MASK_SWAGGER"] = False
+
     if db is None:
         db = arbeitszeit_flask.extensions.db
 
