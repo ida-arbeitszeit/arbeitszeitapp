@@ -1,68 +1,81 @@
-from decimal import Decimal
-from unittest import TestCase
-from uuid import uuid4
-
-from arbeitszeit.use_cases.query_plans import PlanQueryResponse, QueriedPlan
-from arbeitszeit_web.api_presenters.fields import Fields
-from arbeitszeit_web.api_presenters.list_active_plans_presenter import (
-    list_active_plans_presenter_get,
+from arbeitszeit_web.api_presenters.plans import list_plans_presenter
+from tests.api.helper import (
+    DecimalImpl,
+    FieldTypes,
+    NamespaceImpl,
+    NestedImpl,
+    StringImpl,
 )
-from arbeitszeit_web.api_presenters.namespace import Namespace
-from tests.api.dependency_injection import get_dependency_injector
-from tests.api.fields import NestedListFieldImpl
-from tests.datetime_service import FakeDatetimeService
-
-use_case_response = PlanQueryResponse(
-    results=[
-        QueriedPlan(
-            activation_date=FakeDatetimeService().now(),
-            company_name="xxx",
-            company_id=uuid4(),
-            plan_id=uuid4(),
-            product_name="xyxy",
-            description="vvvc",
-            price_per_unit=Decimal("15"),
-            is_public_service=False,
-            is_available=True,
-            is_cooperating=False,
-        )
-    ]
-)
+from tests.api.presenters.base_test_case import BaseTestCase
+from tests.presenters.data_generators import QueriedPlanGenerator
 
 
-def get_func():
-    return use_case_response
-
-
-injector = get_dependency_injector()
-namespace = injector.get(Namespace)
-fields = injector.get(Fields)
-
-presenter = list_active_plans_presenter_get(
-    namespace=namespace, fields=fields
-)
-
-
-class TestGetPresenter(TestCase):
+class TestGetPresenter(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.response = presenter(get_func)
+        self.queried_plan_generator = self.injector.get(QueriedPlanGenerator)
+        self.namespace = NamespaceImpl("test name", "test description")
+        self.expected_top_level = "results"
+        self.expected_2nd_level = [
+            "plan_id",
+            "company_name",
+            "company_id",
+            "product_name",
+            "description",
+            "price_per_unit",
+        ]
 
-    # top level
-    def test_top_level_model_has_correct_name(self):
-        self.assertEqual(self.response.name, "PlanList")
+    def test_no_models_are_registered_in_namespace_by_default(self):
+        assert not self.namespace.models
 
-    def test_top_level_has_one_object(self):
-        self.assertEqual(len(self.response.model.keys()), 1)
+    def test_two_models_get_registered_in_namespace_when_presenter_is_initiated(self):
+        self.presenter_decorator
+        assert len(self.namespace.models) == 2
+        assert "Plan" in self.namespace.models.keys()
+        assert "PlanList" in self.namespace.models.keys()
 
-    def test_top_level_name_is_correct(self):
-        expected_name = "results"
-        self.assertTrue(self.response.model[expected_name])
+    def test_top_level_has_correct_name(self):
+        fields = self.presenter_decorator.model.keys()
+        assert len(fields) == 1
+        assert self.expected_top_level in fields
 
-    # second level
-    def test_second_level_model_has_correct_name(self):
-        expected_name = "Plan"
-        self.assertEqual(self.response.model["results"].model.name, expected_name)
+    def test_top_level_has_correct_type(self):
+        m = self.presenter_decorator.model
+        assert isinstance(m[self.expected_top_level], NestedImpl)
 
-    def test_second_level_object_is_nested_list(self):
-        self.assertIsInstance(self.response.model["results"], NestedListFieldImpl)
+    def test_second_level_has_correct_names(self):
+        fields = self.presenter_decorator.model[self.expected_top_level].model
+        assert len(fields) == 6
+        for expected in self.expected_2nd_level:
+            assert expected in fields
+
+    def test_second_level_has_correct_types(self):
+        second_level = self.presenter_decorator.model[self.expected_top_level].model
+        expected_types = [
+            StringImpl,
+            StringImpl,
+            StringImpl,
+            StringImpl,
+            StringImpl,
+            DecimalImpl,
+        ]
+        for count, expected in enumerate(self.expected_2nd_level):
+            assert second_level[expected] == expected_types[count]
+
+    def test_function_gets_marshalled(self):
+        assert self.marshalled_response.has_been_marshalled
+
+    @property
+    def presenter_decorator(self) -> list_plans_presenter:
+        presenter_decorator = list_plans_presenter(
+            namespace=self.namespace, fields=FieldTypes()
+        )
+        return presenter_decorator
+
+    @property
+    def marshalled_response(self):
+        use_case_response = self.queried_plan_generator.get_response(
+            [self.queried_plan_generator.get_plan()]
+        )
+        response = self.presenter_decorator(lambda: use_case_response)
+        return response

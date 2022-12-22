@@ -1,7 +1,6 @@
 from functools import wraps
 from typing import List, Optional
 
-from flask_restx import fields
 from flask_sqlalchemy import SQLAlchemy
 from injector import (
     Binder,
@@ -74,14 +73,6 @@ from arbeitszeit_flask.translator import FlaskTranslator
 from arbeitszeit_flask.url_index import CompanyUrlIndex, GeneralUrlIndex
 from arbeitszeit_flask.views import Http404View
 from arbeitszeit_web.answer_company_work_invite import AnswerCompanyWorkInviteController
-from arbeitszeit_web.api_presenters.fields import (
-    BooleanField,
-    DateTimeField,
-    DecimalField,
-    Fields,
-    NestedListField,
-    StringField,
-)
 from arbeitszeit_web.colors import Colors
 from arbeitszeit_web.controllers.end_cooperation_controller import (
     EndCooperationController,
@@ -169,45 +160,6 @@ class CompanyModule(CompanyPresenterModule):
         self, session: Session
     ) -> CreateDraftController:
         return CreateDraftController(session=session)
-
-
-class FlaskApiModule(Module):
-    @provider
-    def provide_nested_list_field(self) -> NestedListField:
-        return fields.Nested
-
-    @provider
-    def provide_date_time_field(self) -> DateTimeField:
-        return fields.DateTime
-
-    @provider
-    def provide_string_field(self) -> StringField:
-        return fields.String
-
-    @provider
-    def provide_decimal_field(self) -> DecimalField:
-        return fields.Arbitrary
-
-    @provider
-    def provide_boolean_field(self) -> BooleanField:
-        return fields.Boolean
-
-    @provider
-    def provide_fields(
-        self,
-        string_field: StringField,
-        datetime_field: DateTimeField,
-        nested_list_field: NestedListField,
-        decimal_field: DecimalField,
-        boolean_field: BooleanField,
-    ) -> Fields:
-        return Fields(
-            nested_list_field=nested_list_field,
-            string_field=string_field,
-            datetime_field=datetime_field,
-            decimal_field=decimal_field,
-            boolean_field=boolean_field,
-        )
 
 
 class FlaskModule(PresenterModule):
@@ -500,7 +452,6 @@ class with_injection:
         self._modules = modules if modules is not None else []
         all_modules: List[Module] = []
         all_modules.append(FlaskModule())
-        all_modules.append(FlaskApiModule())
         all_modules.append(ViewsModule())
         all_modules += self._modules
         self._injector = Injector(all_modules)
