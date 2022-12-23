@@ -9,7 +9,6 @@ mkShell {
     gunicorn
     types-dateutil
     coverage
-    flask-restx
   ]) ++ [ nixfmt ]
     ++ python3.pkgs.arbeitszeitapp.optional-dependencies.profiling;
   inputsFrom = [ python3.pkgs.arbeitszeitapp ];
