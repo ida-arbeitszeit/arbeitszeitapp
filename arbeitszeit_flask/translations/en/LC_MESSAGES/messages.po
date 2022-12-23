@@ -7,16 +7,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-12-05 19:48+0100\n"
+"POT-Creation-Date: 2022-12-23 13:40+0100\n"
 "PO-Revision-Date: 2022-01-16 19:09+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: en <LL@li.org>\n"
 "Language: en\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
+"Language-Team: en <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"Generated-By: Babel 2.10.3\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.11.0\n"
 
 #: arbeitszeit_flask/forms.py:44
 #: arbeitszeit_web/controllers/pay_means_of_production_controller.py:30
@@ -1121,8 +1121,8 @@ msgstr ""
 
 #: arbeitszeit_flask/templates/macros/draft_form.html:101
 msgid ""
-"Describe the smallest delivery unit and what amount of these units you will "
-"produce."
+"Describe the smallest delivery unit and what amount of these units you will"
+" produce."
 msgstr ""
 
 #: arbeitszeit_flask/templates/macros/draft_form.html:102
@@ -1698,3 +1698,4 @@ msgstr ""
 #: arbeitszeit_web/presenters/show_prd_account_details_presenter.py:66
 msgid "Sale"
 msgstr ""
+
