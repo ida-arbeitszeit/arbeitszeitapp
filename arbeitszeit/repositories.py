@@ -120,12 +120,12 @@ class CompanyResult(QueryResult[Company], Protocol):
     def with_email_address(self, email: str) -> CompanyResult:
         ...
 
+    def that_are_workplace_of_member(self, member: UUID) -> CompanyResult:
+        ...
+
 
 class CompanyWorkerRepository(Protocol):
     def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
-        ...
-
-    def get_member_workplaces(self, member: UUID) -> Iterable[Company]:
         ...
 
 

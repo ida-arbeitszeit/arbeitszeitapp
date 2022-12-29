@@ -219,6 +219,13 @@ class CompanyQueryResult(FlaskQueryResult[entities.Company]):
             lambda query: query.join(models.User).filter(models.User.email == email)
         )
 
+    def that_are_workplace_of_member(self, member: UUID) -> CompanyQueryResult:
+        return self._with_modified_query(
+            lambda query: query.filter(
+                models.Company.workers.any(models.Member.id == str(member))
+            )
+        )
+
 
 @inject
 @dataclass
@@ -234,16 +241,6 @@ class CompanyWorkerRepository:
         if company is None:
             return
         member.workplaces.append(company)
-
-    def get_member_workplaces(self, member: UUID) -> List[entities.Company]:
-        member_orm = Member.query.filter_by(id=str(member)).first()
-        if member_orm is None:
-            return []
-        workplaces_orm = member_orm.workplaces.all()
-        return [
-            self.company_repository.object_from_orm(workplace_orm)
-            for workplace_orm in workplaces_orm
-        ]
 
 
 @dataclass

@@ -304,3 +304,25 @@ class ConfirmCompanyTests(FlaskTestCase):
             products_account=products_account,
             registered_on=datetime(2000, 1, 1),
         )
+
+
+class ThatAreWorkplaceOfMemberTests(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.repository = self.injector.get(CompanyRepository)
+        self.company_generator = self.injector.get(CompanyGenerator)
+        self.member_generator = self.injector.get(MemberGenerator)
+
+    def test_that_by_default_random_members_are_not_assigned_to_a_company(self) -> None:
+        self.company_generator.create_company()
+        member = self.member_generator.create_member()
+        assert not self.repository.get_all_companies().that_are_workplace_of_member(
+            member
+        )
+
+    def test_that_companies_are_retrieved_if_member_is_explict_worker_at_company(
+        self,
+    ) -> None:
+        member = self.member_generator.create_member()
+        self.company_generator.create_company(workers=[member])
+        assert self.repository.get_all_companies().that_are_workplace_of_member(member)

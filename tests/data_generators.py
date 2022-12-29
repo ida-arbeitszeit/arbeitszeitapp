@@ -196,6 +196,7 @@ class CompanyGenerator:
         confirmed: bool = True,
         email: Optional[str] = None,
         password: Optional[str] = None,
+        workers: Optional[Iterable[UUID]] = None,
     ) -> UUID:
         if email is None:
             email = self.email_generator.get_random_email()
@@ -210,6 +211,9 @@ class CompanyGenerator:
         )
         company = response.company_id
         assert company
+        if workers:
+            for worker in workers:
+                self.company_manager.add_worker_to_company(company, worker)
         if not confirmed:
             return company
         self.company_repository.confirm_company(company, self.datetime_service.now())

@@ -228,6 +228,15 @@ class CompanyResult(QueryResultImpl[Company], interfaces.CompanyResult):
             entities=self.entities,
         )
 
+    def that_are_workplace_of_member(self, member: UUID) -> CompanyResult:
+        return type(self)(
+            items=lambda: filter(
+                lambda company: member in self.entities.company_workers[company.id],
+                self.items(),
+            ),
+            entities=self.entities,
+        )
+
 
 @singleton
 class PurchaseRepository(interfaces.PurchaseRepository):
@@ -466,14 +475,6 @@ class MemberRepository(interfaces.MemberRepository):
 
     def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
         self.entities.company_workers[company].add(worker)
-
-    def get_member_workplaces(self, member: UUID) -> Iterable[Company]:
-        for company_id, workers in self.entities.company_workers.items():
-            if member not in workers:
-                continue
-            for company in self.entities.companies.values():
-                if company.id == company_id:
-                    yield company
 
 
 class CompanyRepository(interfaces.CompanyRepository):
