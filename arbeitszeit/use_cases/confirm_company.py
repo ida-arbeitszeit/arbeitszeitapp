@@ -32,7 +32,7 @@ class ConfirmCompanyUseCase:
         if email_address is None:
             return self.Response(is_confirmed=False, user_id=None)
         company = (
-            self.company_repository.get_all_companies()
+            self.company_repository.get_companies()
             .with_email_address(email_address)
             .first()
         )

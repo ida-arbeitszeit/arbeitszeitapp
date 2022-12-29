@@ -61,7 +61,7 @@ class GetMemberDashboard:
                 workplace_name=workplace.name,
                 workplace_email=workplace.email,
             )
-            for workplace in self.company_repository.get_all_companies().that_are_workplace_of_member(
+            for workplace in self.company_repository.get_companies().that_are_workplace_of_member(
                 member
             )
         ]

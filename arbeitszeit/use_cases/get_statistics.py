@@ -47,7 +47,7 @@ class GetStatistics:
             available_product,
         ) = self._count_certificates_and_available_product()
         return StatisticsResponse(
-            registered_companies_count=len(self.company_repository.get_all_companies()),
+            registered_companies_count=len(self.company_repository.get_companies()),
             registered_members_count=len(self.member_repository.get_members()),
             cooperations_count=self.cooperation_respository.count_cooperations(),
             certificates_count=certs_total,
@@ -80,7 +80,7 @@ class GetStatistics:
         """available product is sum of prd account balances *(-1)"""
         certs_in_company_accounts = Decimal(0)
         available_product = Decimal(0)
-        all_companies = self.company_repository.get_all_companies()
+        all_companies = self.company_repository.get_companies()
         for company in all_companies:
             available_product += self.account_respository.get_account_balance(
                 company.product_account

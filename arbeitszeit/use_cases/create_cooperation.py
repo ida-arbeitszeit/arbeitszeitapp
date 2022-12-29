@@ -57,7 +57,7 @@ class CreateCooperation:
 
     def _validate_request(self, request: CreateCooperationRequest) -> Company:
         coordinator = (
-            self.company_repository.get_all_companies()
+            self.company_repository.get_companies()
             .with_id(request.coordinator_id)
             .first()
         )

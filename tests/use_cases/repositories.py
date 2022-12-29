@@ -518,7 +518,7 @@ class CompanyRepository(interfaces.CompanyRepository):
             if query.lower() in email.lower():
                 yield company
 
-    def get_all_companies(self) -> CompanyResult:
+    def get_companies(self) -> CompanyResult:
         return CompanyResult(
             items=lambda: self.entities.companies.values(),
             entities=self.entities,
@@ -737,7 +737,7 @@ class PlanDraftRepository(interfaces.PlanDraftRepository):
         is_public_service: bool,
         creation_timestamp: datetime,
     ) -> PlanDraft:
-        company = self.company_repository.get_all_companies().with_id(planner).first()
+        company = self.company_repository.get_companies().with_id(planner).first()
         assert company is not None
         draft = PlanDraft(
             id=uuid4(),
@@ -837,9 +837,7 @@ class WorkerInviteRepository(interfaces.WorkerInviteRepository):
             company_id, worker_id = self.invites[id]
         except KeyError:
             return None
-        company = (
-            self.company_repository.get_all_companies().with_id(company_id).first()
-        )
+        company = self.company_repository.get_companies().with_id(company_id).first()
         if company is None:
             return None
         member = self.member_repository.get_members().with_id(worker_id).first()

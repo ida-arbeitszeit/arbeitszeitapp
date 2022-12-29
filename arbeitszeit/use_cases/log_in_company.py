@@ -39,7 +39,7 @@ class LogInCompanyUseCase:
         else:
             reason = (
                 self.RejectionReason.invalid_password
-                if self.company_repository.get_all_companies().with_email_address(
+                if self.company_repository.get_companies().with_email_address(
                     request.email_address
                 )
                 else self.RejectionReason.invalid_email_address

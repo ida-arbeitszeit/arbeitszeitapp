@@ -45,7 +45,7 @@ class SendWorkCertificatesToWorker:
         self, use_case_request: SendWorkCertificatesToWorkerRequest
     ) -> SendWorkCertificatesToWorkerResponse:
         company = (
-            self.company_repository.get_all_companies()
+            self.company_repository.get_companies()
             .with_id(use_case_request.company_id)
             .first()
         )

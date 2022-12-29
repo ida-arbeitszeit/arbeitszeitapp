@@ -85,9 +85,7 @@ class PayMeansOfProduction:
     def _validate_buyer_is_not_planner(
         self, request: PayMeansOfProductionRequest, plan: Plan
     ) -> Company:
-        buyer = (
-            self.company_repository.get_all_companies().with_id(request.buyer).first()
-        )
+        buyer = self.company_repository.get_companies().with_id(request.buyer).first()
         assert buyer is not None
         if plan.planner == buyer:
             raise PayMeansOfProductionResponse.RejectionReason.buyer_is_planner

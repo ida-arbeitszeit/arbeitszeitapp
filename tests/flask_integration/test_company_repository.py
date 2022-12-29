@@ -37,12 +37,12 @@ class RepositoryTester(FlaskTestCase):
         assert actual_company == expected_company
 
     def test_cannot_retrieve_company_from_arbitrary_uuid(self) -> None:
-        assert not self.company_repository.get_all_companies().with_id(uuid4())
+        assert not self.company_repository.get_companies().with_id(uuid4())
 
     def test_can_retrieve_a_company_by_its_uuid(self) -> None:
         company = self.company_generator.create_company_entity()
         assert (
-            self.company_repository.get_all_companies().with_id(company.id).first()
+            self.company_repository.get_companies().with_id(company.id).first()
             == company
         )
 
@@ -52,7 +52,7 @@ class RepositoryTester(FlaskTestCase):
             email=expected_email
         )
         assert (
-            self.company_repository.get_all_companies()
+            self.company_repository.get_companies()
             .with_email_address(expected_email)
             .first()
             == expected_company
@@ -61,7 +61,7 @@ class RepositoryTester(FlaskTestCase):
     def test_that_random_email_returns_no_company(self) -> None:
         random_email = "xyz123@testmail.com"
         self.company_generator.create_company_entity(email="test_mail@testmail.com")
-        assert not self.company_repository.get_all_companies().with_email_address(
+        assert not self.company_repository.get_companies().with_email_address(
             random_email
         )
 
@@ -85,29 +85,29 @@ class RepositoryTester(FlaskTestCase):
 
     def test_can_detect_if_company_with_email_is_already_present(self) -> None:
         expected_email = "rosa@cp.org"
-        companies = self.company_repository.get_all_companies()
+        companies = self.company_repository.get_companies()
         assert not companies.with_email_address(expected_email)
         self.company_generator.create_company_entity(email=expected_email)
         assert companies.with_email_address(expected_email)
 
     def test_does_not_identify_random_id_with_company(self) -> None:
         company_id = uuid4()
-        assert not self.company_repository.get_all_companies().with_id(company_id)
+        assert not self.company_repository.get_companies().with_id(company_id)
 
     def test_does_not_identify_member_as_company(self) -> None:
         member = self.member_generator.create_member()
-        assert not self.company_repository.get_all_companies().with_id(member)
+        assert not self.company_repository.get_companies().with_id(member)
 
     def test_does_identify_company_id_as_company(self) -> None:
         company = self.company_generator.create_company_entity()
-        assert self.company_repository.get_all_companies().with_id(company.id)
+        assert self.company_repository.get_companies().with_id(company.id)
 
     def test_count_no_registered_company_if_none_was_created(self) -> None:
-        assert len(self.company_repository.get_all_companies()) == 0
+        assert len(self.company_repository.get_companies()) == 0
 
     def test_count_one_registered_company_if_one_was_created(self) -> None:
         self.company_generator.create_company_entity()
-        assert len(self.company_repository.get_all_companies()) == 1
+        assert len(self.company_repository.get_companies()) == 1
 
     def test_that_can_not_register_company_with_same_email_twice(self) -> None:
         with raises(IntegrityError):
@@ -121,7 +121,7 @@ class RepositoryTester(FlaskTestCase):
         expected_company2 = self.company_generator.create_company_entity(
             email="company2@provider.de"
         )
-        all_companies = list(self.company_repository.get_all_companies())
+        all_companies = list(self.company_repository.get_companies())
         assert company_in_companies(expected_company1, all_companies)
         assert company_in_companies(expected_company2, all_companies)
 
@@ -316,13 +316,11 @@ class ThatAreWorkplaceOfMemberTests(FlaskTestCase):
     def test_that_by_default_random_members_are_not_assigned_to_a_company(self) -> None:
         self.company_generator.create_company()
         member = self.member_generator.create_member()
-        assert not self.repository.get_all_companies().that_are_workplace_of_member(
-            member
-        )
+        assert not self.repository.get_companies().that_are_workplace_of_member(member)
 
     def test_that_companies_are_retrieved_if_member_is_explict_worker_at_company(
         self,
     ) -> None:
         member = self.member_generator.create_member()
         self.company_generator.create_company(workers=[member])
-        assert self.repository.get_all_companies().that_are_workplace_of_member(member)
+        assert self.repository.get_companies().that_are_workplace_of_member(member)

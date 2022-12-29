@@ -21,7 +21,7 @@ class RepositoryTester(FlaskTestCase):
         self.repo.add_worker_to_company(company=company.id, worker=member)
         assert (
             company
-            in self.company_repository.get_all_companies().that_are_workplace_of_member(
+            in self.company_repository.get_companies().that_are_workplace_of_member(
                 member
             )
         )

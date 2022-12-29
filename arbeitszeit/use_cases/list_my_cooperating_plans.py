@@ -40,7 +40,7 @@ class ListMyCooperatingPlansUseCase:
     plan_repository: PlanRepository
 
     def list_cooperations(self, request: Request) -> Response:
-        if not self.company_repository.get_all_companies().with_id(request.company):
+        if not self.company_repository.get_companies().with_id(request.company):
             raise self.Failure()
         plans = (
             self.plan_repository.get_active_plans()

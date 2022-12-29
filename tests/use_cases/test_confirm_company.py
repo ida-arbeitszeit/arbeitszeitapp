@@ -53,7 +53,7 @@ class UseCaseTests(BaseTestCase):
         company = self.token_deliverer.presented_company_tokens[-1].user
         self.use_case.confirm_company(request=UseCase.Request(token=token))
         company_entity = (
-            self.company_repository.get_all_companies().with_id(company).first()
+            self.company_repository.get_companies().with_id(company).first()
         )
         assert company_entity
         assert company_entity.confirmed_on == expected_confirmation_timestamp

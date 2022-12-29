@@ -325,7 +325,7 @@ class CompanyRepository(ABC):
         pass
 
     @abstractmethod
-    def get_all_companies(self) -> CompanyResult:
+    def get_companies(self) -> CompanyResult:
         pass
 
     @abstractmethod

@@ -177,9 +177,7 @@ def my_purchases(
     template_renderer: UserTemplateRenderer,
     presenter: CompanyPurchasesPresenter,
 ):
-    company = (
-        company_repository.get_all_companies().with_id(UUID(current_user.id)).first()
-    )
+    company = company_repository.get_companies().with_id(UUID(current_user.id)).first()
     assert company is not None
 
     response = query_purchases(company)

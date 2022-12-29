@@ -26,7 +26,7 @@ class ShowMyAccounts:
 
     def __call__(self, request: ShowMyAccountsRequest) -> ShowMyAccountsResponse:
         company = (
-            self.company_repository.get_all_companies()
+            self.company_repository.get_companies()
             .with_id(request.current_user)
             .first()
         )

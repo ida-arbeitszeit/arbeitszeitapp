@@ -425,7 +425,7 @@ class CompanyRepository(repositories.CompanyRepository):
         )
         return (self.object_from_orm(company) for company in companies)
 
-    def get_all_companies(self) -> CompanyQueryResult:
+    def get_companies(self) -> CompanyQueryResult:
         return CompanyQueryResult(
             query=Company.query,
             mapper=self.object_from_orm,
@@ -724,9 +724,7 @@ class PlanRepository(repositories.PlanRepository):
             means_cost=plan.costs_p,
         )
         planner = (
-            self.company_repository.get_all_companies()
-            .with_id(UUID(plan.planner))
-            .first()
+            self.company_repository.get_companies().with_id(UUID(plan.planner)).first()
         )
         assert planner is not None
         return entities.Plan(
@@ -1061,9 +1059,7 @@ class PlanDraftRepository(repositories.PlanDraftRepository):
         PlanDraft.query.filter_by(id=str(id)).delete()
 
     def _object_from_orm(self, orm: PlanDraft) -> entities.PlanDraft:
-        planner = (
-            self.company_repository.get_all_companies().with_id(orm.planner).first()
-        )
+        planner = self.company_repository.get_companies().with_id(orm.planner).first()
         assert planner is not None
         return entities.PlanDraft(
             id=orm.id,
@@ -1132,7 +1128,7 @@ class WorkerInviteRepository(repositories.WorkerInviteRepository):
             invite_orm := CompanyWorkInvite.query.filter_by(id=str(id)).first()
         ) is not None:
             company = (
-                self.company_repository.get_all_companies()
+                self.company_repository.get_companies()
                 .with_id(UUID(invite_orm.company))
                 .first()
             )
@@ -1181,7 +1177,7 @@ class CooperationRepository(repositories.CooperationRepository):
 
     def object_from_orm(self, cooperation_orm: Cooperation) -> entities.Cooperation:
         coordinator = (
-            self.company_repository.get_all_companies()
+            self.company_repository.get_companies()
             .with_id(cooperation_orm.coordinator)
             .first()
         )

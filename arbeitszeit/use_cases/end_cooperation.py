@@ -53,7 +53,7 @@ class EndCooperation:
 
     def _validate_request(self, request: EndCooperationRequest) -> None:
         requester = (
-            self.company_repository.get_all_companies()
+            self.company_repository.get_companies()
             .with_id(request.requester_id)
             .first()
         )

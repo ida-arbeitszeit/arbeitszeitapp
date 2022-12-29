@@ -49,7 +49,7 @@ class QueryCompanies:
         query = request.get_query_string()
         filter_by = request.get_filter_category()
         if query is None:
-            found_companies = self.company_repository.get_all_companies()
+            found_companies = self.company_repository.get_companies()
         elif filter_by == CompanyFilter.by_name:
             found_companies = self.company_repository.query_companies_by_name(query)
         else:

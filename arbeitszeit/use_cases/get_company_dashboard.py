@@ -39,9 +39,7 @@ class GetCompanyDashboardUseCase:
     plan_repository: PlanRepository
 
     def get_dashboard(self, company_id: UUID) -> Response:
-        company = (
-            self.company_repository.get_all_companies().with_id(company_id).first()
-        )
+        company = self.company_repository.get_companies().with_id(company_id).first()
         if company is None:
             raise self.Failure()
         company_info = self.Response.CompanyInfo(

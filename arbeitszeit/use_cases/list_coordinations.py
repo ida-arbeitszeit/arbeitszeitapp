@@ -41,7 +41,7 @@ class ListCoordinations:
     plan_cooperation_repository: PlanCooperationRepository
 
     def __call__(self, request: ListCoordinationsRequest) -> ListCoordinationsResponse:
-        if not self.company_repository.get_all_companies().with_id(request.company):
+        if not self.company_repository.get_companies().with_id(request.company):
             return ListCoordinationsResponse(coordinations=[])
         cooperations = [
             CooperationInfo(

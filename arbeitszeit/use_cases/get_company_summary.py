@@ -75,9 +75,7 @@ class GetCompanySummary:
     purchase_repository: PurchaseRepository
 
     def __call__(self, company_id: UUID) -> GetCompanySummaryResponse:
-        company = (
-            self.company_repository.get_all_companies().with_id(company_id).first()
-        )
+        company = self.company_repository.get_companies().with_id(company_id).first()
         if company is None:
             return None
         plans = (
@@ -192,9 +190,7 @@ class GetCompanySummary:
     def _get_supplier_info(
         self, supplier_id: UUID, transaction_volume: Decimal
     ) -> Supplier:
-        supplier = (
-            self.company_repository.get_all_companies().with_id(supplier_id).first()
-        )
+        supplier = self.company_repository.get_companies().with_id(supplier_id).first()
         assert supplier
         return Supplier(
             company_id=supplier_id,

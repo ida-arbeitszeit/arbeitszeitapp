@@ -32,7 +32,7 @@ class ListWorkers:
     member_repository: MemberRepository
 
     def __call__(self, request: ListWorkersRequest) -> ListWorkersResponse:
-        if not self.company_repository.get_all_companies().with_id(request.company):
+        if not self.company_repository.get_companies().with_id(request.company):
             return ListWorkersResponse(workers=[])
         members = self.member_repository.get_members().working_at_company(
             request.company

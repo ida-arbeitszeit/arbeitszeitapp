@@ -133,9 +133,7 @@ class ViewTestCase(FlaskTestCase):
         if confirm_company:
             self._confirm_company(email)
         updated_company = (
-            self.company_repository.get_all_companies()
-            .with_email_address(email)
-            .first()
+            self.company_repository.get_companies().with_email_address(email).first()
         )
         assert updated_company
         return updated_company
