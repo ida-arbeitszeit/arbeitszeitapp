@@ -47,7 +47,7 @@ class GetStatistics:
             available_product,
         ) = self._count_certificates_and_available_product()
         return StatisticsResponse(
-            registered_companies_count=self.company_repository.count_registered_companies(),
+            registered_companies_count=len(self.company_repository.get_all_companies()),
             registered_members_count=len(self.member_repository.get_members()),
             cooperations_count=self.cooperation_respository.count_cooperations(),
             certificates_count=certs_total,

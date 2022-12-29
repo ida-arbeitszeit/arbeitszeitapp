@@ -92,22 +92,22 @@ class RepositoryTester(FlaskTestCase):
 
     def test_does_not_identify_random_id_with_company(self) -> None:
         company_id = uuid4()
-        assert not self.company_repository.is_company(company_id)
+        assert not self.company_repository.get_all_companies().with_id(company_id)
 
     def test_does_not_identify_member_as_company(self) -> None:
         member = self.member_generator.create_member()
-        assert not self.company_repository.is_company(member)
+        assert not self.company_repository.get_all_companies().with_id(member)
 
     def test_does_identify_company_id_as_company(self) -> None:
         company = self.company_generator.create_company_entity()
-        assert self.company_repository.is_company(company.id)
+        assert self.company_repository.get_all_companies().with_id(company.id)
 
     def test_count_no_registered_company_if_none_was_created(self) -> None:
-        assert self.company_repository.count_registered_companies() == 0
+        assert len(self.company_repository.get_all_companies()) == 0
 
     def test_count_one_registered_company_if_one_was_created(self) -> None:
         self.company_generator.create_company_entity()
-        assert self.company_repository.count_registered_companies() == 1
+        assert len(self.company_repository.get_all_companies()) == 1
 
     def test_that_can_not_register_company_with_same_email_twice(self) -> None:
         with raises(IntegrityError):

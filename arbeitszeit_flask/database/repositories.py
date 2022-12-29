@@ -382,13 +382,6 @@ class CompanyRepository(repositories.CompanyRepository):
             confirmed_on=company_orm.confirmed_on,
         )
 
-    def is_company(self, id: UUID) -> bool:
-        return bool(
-            self.db.session.query(models.Company)
-            .filter(models.Company.id == str(id))
-            .count()
-        )
-
     def create_company(
         self,
         email: str,
@@ -418,9 +411,6 @@ class CompanyRepository(repositories.CompanyRepository):
             account_orm = self.account_repository.object_to_orm(account)
             account_orm.account_owner_company = company.id
         return self.object_from_orm(company)
-
-    def count_registered_companies(self) -> int:
-        return int(self.db.session.query(func.count(Company.id)).one()[0])
 
     def query_companies_by_name(self, query: str) -> Iterator[entities.Company]:
         return (

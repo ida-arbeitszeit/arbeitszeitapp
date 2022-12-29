@@ -507,12 +507,6 @@ class CompanyRepository(interfaces.CompanyRepository):
         self.entities.company_passwords[new_company.id] = password
         return new_company
 
-    def is_company(self, id: UUID) -> bool:
-        return bool(self.get_all_companies().with_id(id))
-
-    def count_registered_companies(self) -> int:
-        return len(self.entities.companies)
-
     def query_companies_by_name(self, query: str) -> Iterator[Company]:
         for company in self.entities.companies.values():
             if query.lower() in company.name.lower():

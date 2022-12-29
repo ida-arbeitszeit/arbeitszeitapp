@@ -317,14 +317,6 @@ class CompanyRepository(ABC):
         pass
 
     @abstractmethod
-    def is_company(self, id: UUID) -> bool:
-        pass
-
-    @abstractmethod
-    def count_registered_companies(self) -> int:
-        pass
-
-    @abstractmethod
     def query_companies_by_name(self, query: str) -> Iterator[Company]:
         pass
 
