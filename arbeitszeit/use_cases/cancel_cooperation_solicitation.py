@@ -25,7 +25,9 @@ class CancelCooperationSolicitation:
 
     def __call__(self, request: CancelCooperationSolicitationRequest) -> bool:
         plan = self.plan_repo.get_plans().with_id(request.plan_id).first()
-        requester = self.company_repo.get_by_id(request.requester_id)
+        requester = (
+            self.company_repo.get_all_companies().with_id(request.requester_id).first()
+        )
         assert plan
         assert requester
         if plan.planner != requester:

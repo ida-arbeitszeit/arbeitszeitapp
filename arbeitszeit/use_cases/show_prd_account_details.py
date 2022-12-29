@@ -48,7 +48,9 @@ class ShowPRDAccountDetailsUseCase:
     account_repository: AccountRepository
 
     def __call__(self, company_id: UUID) -> Response:
-        company = self.company_repository.get_by_id(company_id)
+        company = (
+            self.company_repository.get_all_companies().with_id(company_id).first()
+        )
         assert company
         transactions = [
             self._create_info(company, transaction)

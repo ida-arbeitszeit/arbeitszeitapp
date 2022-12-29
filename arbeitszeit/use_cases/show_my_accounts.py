@@ -25,7 +25,11 @@ class ShowMyAccounts:
     account_repository: AccountRepository
 
     def __call__(self, request: ShowMyAccountsRequest) -> ShowMyAccountsResponse:
-        company = self.company_repository.get_by_id(request.current_user)
+        company = (
+            self.company_repository.get_all_companies()
+            .with_id(request.current_user)
+            .first()
+        )
         assert company
         balances = [
             self.account_repository.get_account_balance(account)

@@ -208,6 +208,13 @@ class PurchaseQueryResult(FlaskQueryResult[entities.Purchase]):
         )
 
 
+class CompanyQueryResult(FlaskQueryResult[entities.Company]):
+    def with_id(self, id_: UUID) -> CompanyQueryResult:
+        return self._with_modified_query(
+            lambda query: query.filter(models.Company.id == str(id_))
+        )
+
+
 @inject
 @dataclass
 class CompanyWorkerRepository:
@@ -380,13 +387,6 @@ class CompanyRepository(repositories.CompanyRepository):
         assert company_orm
         return company_orm
 
-    def get_by_id(self, id: UUID) -> Optional[entities.Company]:
-        company_orm = Company.query.filter_by(id=str(id)).first()
-        if company_orm is None:
-            return None
-        else:
-            return self.object_from_orm(company_orm)
-
     def get_by_email(self, email: str) -> Optional[entities.Company]:
         company_orm = (
             self.db.session.query(models.Company)
@@ -460,8 +460,12 @@ class CompanyRepository(repositories.CompanyRepository):
         )
         return (self.object_from_orm(company) for company in companies)
 
-    def get_all_companies(self) -> Iterator[entities.Company]:
-        return (self.object_from_orm(company) for company in Company.query.all())
+    def get_all_companies(self) -> CompanyQueryResult:
+        return CompanyQueryResult(
+            query=Company.query,
+            mapper=self.object_from_orm,
+            db=self.db,
+        )
 
     def validate_credentials(self, email_address: str, password: str) -> Optional[UUID]:
         if (
@@ -754,7 +758,11 @@ class PlanRepository(repositories.PlanRepository):
             resource_cost=plan.costs_r,
             means_cost=plan.costs_p,
         )
-        planner = self.company_repository.get_by_id(UUID(plan.planner))
+        planner = (
+            self.company_repository.get_all_companies()
+            .with_id(UUID(plan.planner))
+            .first()
+        )
         assert planner is not None
         return entities.Plan(
             id=UUID(plan.id),
@@ -1088,7 +1096,9 @@ class PlanDraftRepository(repositories.PlanDraftRepository):
         PlanDraft.query.filter_by(id=str(id)).delete()
 
     def _object_from_orm(self, orm: PlanDraft) -> entities.PlanDraft:
-        planner = self.company_repository.get_by_id(orm.planner)
+        planner = (
+            self.company_repository.get_all_companies().with_id(orm.planner).first()
+        )
         assert planner is not None
         return entities.PlanDraft(
             id=orm.id,
@@ -1156,7 +1166,11 @@ class WorkerInviteRepository(repositories.WorkerInviteRepository):
         if (
             invite_orm := CompanyWorkInvite.query.filter_by(id=str(id)).first()
         ) is not None:
-            company = self.company_repository.get_by_id(UUID(invite_orm.company))
+            company = (
+                self.company_repository.get_all_companies()
+                .with_id(UUID(invite_orm.company))
+                .first()
+            )
             if company is None:
                 return None
             member = (
@@ -1201,7 +1215,11 @@ class CooperationRepository(repositories.CooperationRepository):
         return self.object_from_orm(cooperation)
 
     def object_from_orm(self, cooperation_orm: Cooperation) -> entities.Cooperation:
-        coordinator = self.company_repository.get_by_id(cooperation_orm.coordinator)
+        coordinator = (
+            self.company_repository.get_all_companies()
+            .with_id(cooperation_orm.coordinator)
+            .first()
+        )
         assert coordinator is not None
         return entities.Cooperation(
             id=UUID(cooperation_orm.id),

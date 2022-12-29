@@ -32,10 +32,11 @@ class ListWorkers:
     member_repository: MemberRepository
 
     def __call__(self, request: ListWorkersRequest) -> ListWorkersResponse:
-        company = self.company_repository.get_by_id(request.company)
-        if company is None:
+        if not self.company_repository.get_all_companies().with_id(request.company):
             return ListWorkersResponse(workers=[])
-        members = self.member_repository.get_members().working_at_company(company.id)
+        members = self.member_repository.get_members().working_at_company(
+            request.company
+        )
         return ListWorkersResponse(
             workers=[self._create_worker_response_model(member) for member in members]
         )

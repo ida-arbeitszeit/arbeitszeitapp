@@ -56,7 +56,11 @@ class CreateCooperation:
         )
 
     def _validate_request(self, request: CreateCooperationRequest) -> Company:
-        coordinator = self.company_repository.get_by_id(request.coordinator_id)
+        coordinator = (
+            self.company_repository.get_all_companies()
+            .with_id(request.coordinator_id)
+            .first()
+        )
         coop_with_name_exists = (
             len(list(self.cooperation_repository.get_by_name(request.name))) > 0
         )

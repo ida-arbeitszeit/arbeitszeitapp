@@ -38,7 +38,9 @@ class ResendConfirmationMailUseCase:
             )
             return self.Response(is_token_sent=True)
         if (
-            company := self.company_repository.get_by_id(request.user)
+            company := self.company_repository.get_all_companies()
+            .with_id(request.user)
+            .first()
         ) and company.confirmed_on is None:
             token = self.token_service.generate_token(company.email)
             self.company_registration_message_presenter.show_company_registration_message(

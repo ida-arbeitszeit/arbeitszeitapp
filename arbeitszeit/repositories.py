@@ -113,6 +113,11 @@ class PurchaseResult(QueryResult[Purchase], Protocol):
         ...
 
 
+class CompanyResult(QueryResult[Company], Protocol):
+    def with_id(self, id_: UUID) -> CompanyResult:
+        ...
+
+
 class CompanyWorkerRepository(Protocol):
     def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
         ...
@@ -313,10 +318,6 @@ class CompanyRepository(ABC):
         pass
 
     @abstractmethod
-    def get_by_id(self, id: UUID) -> Optional[Company]:
-        pass
-
-    @abstractmethod
     def get_by_email(self, email: str) -> Optional[Company]:
         pass
 
@@ -337,7 +338,7 @@ class CompanyRepository(ABC):
         pass
 
     @abstractmethod
-    def get_all_companies(self) -> Iterator[Company]:
+    def get_all_companies(self) -> CompanyResult:
         pass
 
     @abstractmethod

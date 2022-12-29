@@ -55,8 +55,9 @@ class ListOutboundCoopRequests:
         )
 
     def _requester_exists(self, request: ListOutboundCoopRequestsRequest) -> bool:
-        requester = self.company_repository.get_by_id(request.requester_id)
-        return bool(requester)
+        return bool(
+            self.company_repository.get_all_companies().with_id(request.requester_id)
+        )
 
     def _plan_to_response_model(self, plan: Plan) -> ListedOutboundCoopRequest:
         assert plan.requested_cooperation

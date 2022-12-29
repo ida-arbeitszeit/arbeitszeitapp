@@ -3,7 +3,7 @@ from __future__ import annotations
 import enum
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import Iterable, List, Optional
 from uuid import UUID
 
 from injector import inject
@@ -45,6 +45,7 @@ class QueryCompanies:
     company_repository: CompanyRepository
 
     def __call__(self, request: QueryCompaniesRequest) -> CompanyQueryResponse:
+        found_companies: Iterable[Company]
         query = request.get_query_string()
         filter_by = request.get_filter_category()
         if query is None:
