@@ -36,7 +36,7 @@ class RegisterCompanyTests(TestCase):
             RegisterCompany.Request(email=expected_mail, **request_args)
         )
         expected_company = [
-            company.id for company in self.company_repo.companies.values()
+            company.id for company in self.company_repo.get_companies()
         ][0]
         self.assertEqual(
             self.token_delivery.presented_company_tokens[0].user,
@@ -69,11 +69,11 @@ class RegisterCompanyTests(TestCase):
                 AccountTypes.prd,
             )
 
-    def test_that_correct_member_attributes_are_registered(self):
+    def test_that_correct_member_attributes_are_registered(self) -> None:
         request = RegisterCompany.Request(**DEFAULT)
         self.use_case.register_company(request)
-        assert len(self.company_repo.companies) == 1
-        for company in self.company_repo.companies.values():
+        assert len(self.company_repo.get_companies()) == 1
+        for company in self.company_repo.get_companies():
             assert company.email == request.email
             assert company.name == request.name
             assert company.registered_on is not None

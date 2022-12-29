@@ -55,7 +55,7 @@ class CreatePlanDraft:
                 draft_id=None,
                 rejection_reason=CreatePlanDraftResponse.RejectionReason.negative_plan_input,
             )
-        if not self.company_repository.get_by_id(request.planner):
+        if not self.company_repository.get_companies().with_id(request.planner):
             return CreatePlanDraftResponse(
                 draft_id=None,
                 rejection_reason=CreatePlanDraftResponse.RejectionReason.planner_does_not_exist,

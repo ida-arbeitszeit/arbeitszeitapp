@@ -10,7 +10,7 @@ from injector import inject
 
 from arbeitszeit.repositories import (
     AccountRepository,
-    CompanyWorkerRepository,
+    CompanyRepository,
     MemberRepository,
     PlanRepository,
     WorkerInviteRepository,
@@ -47,7 +47,7 @@ class GetMemberDashboard:
         email: str
         id: UUID
 
-    company_worker_repository: CompanyWorkerRepository
+    company_repository: CompanyRepository
     account_repository: AccountRepository
     member_repository: MemberRepository
     plan_repository: PlanRepository
@@ -61,7 +61,7 @@ class GetMemberDashboard:
                 workplace_name=workplace.name,
                 workplace_email=workplace.email,
             )
-            for workplace in self.company_worker_repository.get_member_workplaces(
+            for workplace in self.company_repository.get_companies().that_are_workplace_of_member(
                 member
             )
         ]
