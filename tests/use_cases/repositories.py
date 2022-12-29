@@ -222,6 +222,12 @@ class CompanyResult(QueryResultImpl[Company], interfaces.CompanyResult):
             entities=self.entities,
         )
 
+    def with_email_address(self, email: str) -> CompanyResult:
+        return type(self)(
+            items=lambda: filter(lambda company: company.email == email, self.items()),
+            entities=self.entities,
+        )
+
 
 @singleton
 class PurchaseRepository(interfaces.PurchaseRepository):
@@ -500,12 +506,6 @@ class CompanyRepository(interfaces.CompanyRepository):
         self.entities.companies[email] = new_company
         self.entities.company_passwords[new_company.id] = password
         return new_company
-
-    def has_company_with_email(self, email: str) -> bool:
-        return email in self.entities.companies
-
-    def get_by_email(self, email: str) -> Optional[Company]:
-        return self.entities.companies.get(email)
 
     def is_company(self, id: UUID) -> bool:
         return bool(self.get_all_companies().with_id(id))

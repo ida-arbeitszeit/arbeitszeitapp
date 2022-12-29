@@ -132,7 +132,11 @@ class ViewTestCase(FlaskTestCase):
         assert response.status_code < 400
         if confirm_company:
             self._confirm_company(email)
-        updated_company = self.company_repository.get_by_email(email)
+        updated_company = (
+            self.company_repository.get_all_companies()
+            .with_email_address(email)
+            .first()
+        )
         assert updated_company
         return updated_company
 

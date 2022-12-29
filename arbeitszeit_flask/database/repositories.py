@@ -214,6 +214,11 @@ class CompanyQueryResult(FlaskQueryResult[entities.Company]):
             lambda query: query.filter(models.Company.id == str(id_))
         )
 
+    def with_email_address(self, email: str) -> CompanyQueryResult:
+        return self._with_modified_query(
+            lambda query: query.join(models.User).filter(models.User.email == email)
+        )
+
 
 @inject
 @dataclass
@@ -377,25 +382,6 @@ class CompanyRepository(repositories.CompanyRepository):
             confirmed_on=company_orm.confirmed_on,
         )
 
-    def get_company_orm_by_mail(self, email: str) -> Company:
-        company_orm = (
-            self.db.session.query(models.Company)
-            .join(models.User)
-            .filter(models.User.email == email)
-            .first()
-        )
-        assert company_orm
-        return company_orm
-
-    def get_by_email(self, email: str) -> Optional[entities.Company]:
-        company_orm = (
-            self.db.session.query(models.Company)
-            .join(models.User)
-            .filter(models.User.email == email)
-            .first()
-        )
-        return self.object_from_orm(company_orm) if company_orm else None
-
     def is_company(self, id: UUID) -> bool:
         return bool(
             self.db.session.query(models.Company)
@@ -432,14 +418,6 @@ class CompanyRepository(repositories.CompanyRepository):
             account_orm = self.account_repository.object_to_orm(account)
             account_orm.account_owner_company = company.id
         return self.object_from_orm(company)
-
-    def has_company_with_email(self, email: str) -> bool:
-        return bool(
-            self.db.session.query(models.Company)
-            .join(models.User)
-            .filter(models.User.email == email)
-            .first()
-        )
 
     def count_registered_companies(self) -> int:
         return int(self.db.session.query(func.count(Company.id)).one()[0])

@@ -117,6 +117,9 @@ class CompanyResult(QueryResult[Company], Protocol):
     def with_id(self, id_: UUID) -> CompanyResult:
         ...
 
+    def with_email_address(self, email: str) -> CompanyResult:
+        ...
+
 
 class CompanyWorkerRepository(Protocol):
     def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
@@ -311,14 +314,6 @@ class CompanyRepository(ABC):
         products_account: Account,
         registered_on: datetime,
     ) -> Company:
-        pass
-
-    @abstractmethod
-    def has_company_with_email(self, email: str) -> bool:
-        pass
-
-    @abstractmethod
-    def get_by_email(self, email: str) -> Optional[Company]:
         pass
 
     @abstractmethod

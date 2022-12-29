@@ -51,12 +51,19 @@ class RepositoryTester(FlaskTestCase):
         expected_company = self.company_generator.create_company_entity(
             email=expected_email
         )
-        assert self.company_repository.get_by_email(expected_email) == expected_company
+        assert (
+            self.company_repository.get_all_companies()
+            .with_email_address(expected_email)
+            .first()
+            == expected_company
+        )
 
     def test_that_random_email_returns_no_company(self) -> None:
         random_email = "xyz123@testmail.com"
         self.company_generator.create_company_entity(email="test_mail@testmail.com")
-        assert self.company_repository.get_by_email(random_email) is None
+        assert not self.company_repository.get_all_companies().with_email_address(
+            random_email
+        )
 
     def test_can_create_company_with_correct_name(self) -> None:
         means_account = self.account_repository.create_account(AccountTypes.p)
@@ -78,9 +85,10 @@ class RepositoryTester(FlaskTestCase):
 
     def test_can_detect_if_company_with_email_is_already_present(self) -> None:
         expected_email = "rosa@cp.org"
-        assert not self.company_repository.has_company_with_email(expected_email)
+        companies = self.company_repository.get_all_companies()
+        assert not companies.with_email_address(expected_email)
         self.company_generator.create_company_entity(email=expected_email)
-        assert self.company_repository.has_company_with_email(expected_email)
+        assert companies.with_email_address(expected_email)
 
     def test_does_not_identify_random_id_with_company(self) -> None:
         company_id = uuid4()
