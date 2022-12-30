@@ -119,7 +119,7 @@ class PlanResult(QueryResultImpl[Plan], interfaces.PlanResult):
     def without_completed_review(self) -> PlanResult:
         return self._filtered_by(lambda plan: plan.approval_date is None)
 
-    def with_open_coordination_request(
+    def with_open_cooperation_request(
         self, *, cooperation: Optional[UUID] = None
     ) -> PlanResult:
         return self._filtered_by(
@@ -131,6 +131,23 @@ class PlanResult(QueryResultImpl[Plan], interfaces.PlanResult):
     def _filtered_by(self, key: Callable[[Plan], bool]) -> PlanResult:
         return type(self)(
             items=lambda: filter(key, self.items()),
+            entities=self.entities,
+        )
+
+    def that_are_in_same_cooperation_as(self, plan: UUID) -> PlanResult:
+        def items_generator():
+            plan_entity = self.entities.plans.get(plan)
+            if not plan_entity:
+                return
+            if plan_entity.cooperation is None:
+                yield from filter(lambda p: p.id == plan, self.items())
+            else:
+                yield from filter(
+                    lambda p: p.cooperation == plan_entity.cooperation, self.items()
+                )
+
+        return type(self)(
+            items=items_generator,
             entities=self.entities,
         )
 
@@ -551,13 +568,12 @@ class PlanRepository(interfaces.PlanRepository):
         draft_repository: PlanDraftRepository,
         entities: EntityStorage,
     ) -> None:
-        self.plans: Dict[UUID, Plan] = {}
         self.draft_repository = draft_repository
         self.entities = entities
 
     def get_plans(self) -> PlanResult:
         return PlanResult(
-            items=lambda: self.plans.values(),
+            items=lambda: self.entities.plans.values(),
             entities=self.entities,
         )
 
@@ -579,14 +595,14 @@ class PlanRepository(interfaces.PlanRepository):
         return plan.id
 
     def set_plan_approval_date(self, plan: UUID, approval_timestamp: datetime):
-        plan_model = self.plans.get(plan)
+        plan_model = self.entities.plans.get(plan)
         if plan_model is None:
             return
         plan_model.approval_date = approval_timestamp
         plan_model.approval_reason = "approved"
 
     def __len__(self) -> int:
-        return len(self.plans)
+        return len(self.entities.plans)
 
     def activate_plan(self, plan: Plan, activation_date: datetime) -> None:
         plan.is_active = True
@@ -604,14 +620,20 @@ class PlanRepository(interfaces.PlanRepository):
 
     def get_active_plans(self) -> PlanResult:
         return PlanResult(
-            items=lambda: filter(lambda plan: plan.is_active, self.plans.values()),
+            items=lambda: filter(
+                lambda plan: plan.is_active, self.entities.plans.values()
+            ),
             entities=self.entities,
         )
 
     def avg_timeframe_of_active_plans(self) -> Decimal:
         try:
             avg_timeframe = mean(
-                (plan.timeframe for plan in self.plans.values() if plan.is_active)
+                (
+                    plan.timeframe
+                    for plan in self.entities.plans.values()
+                    if plan.is_active
+                )
             )
         except StatisticsError:
             avg_timeframe = 0
@@ -621,7 +643,7 @@ class PlanRepository(interfaces.PlanRepository):
         return decimal_sum(
             (
                 plan.production_costs.labour_cost
-                for plan in self.plans.values()
+                for plan in self.entities.plans.values()
                 if plan.is_active
             )
         )
@@ -630,7 +652,7 @@ class PlanRepository(interfaces.PlanRepository):
         return decimal_sum(
             (
                 plan.production_costs.resource_cost
-                for plan in self.plans.values()
+                for plan in self.entities.plans.values()
                 if plan.is_active
             )
         )
@@ -639,18 +661,18 @@ class PlanRepository(interfaces.PlanRepository):
         return decimal_sum(
             (
                 plan.production_costs.means_cost
-                for plan in self.plans.values()
+                for plan in self.entities.plans.values()
                 if plan.is_active
             )
         )
 
     def all_plans_approved_and_not_expired(self) -> Iterator[Plan]:
-        for plan in self.plans.values():
+        for plan in self.entities.plans.values():
             if plan.is_approved and not plan.expired:
                 yield plan
 
     def hide_plan(self, plan_id: UUID) -> None:
-        plan = self.plans.get(plan_id)
+        plan = self.entities.plans.get(plan_id)
         assert plan
         plan.hidden_by_user = True
 
@@ -690,7 +712,7 @@ class PlanRepository(interfaces.PlanRepository):
             is_available=True,
             hidden_by_user=False,
         )
-        self.plans[plan.id] = plan
+        self.entities.plans[plan.id] = plan
         return plan
 
     def toggle_product_availability(self, plan: Plan) -> None:
@@ -699,7 +721,7 @@ class PlanRepository(interfaces.PlanRepository):
     def get_plan_name_and_description(
         self, id: UUID
     ) -> interfaces.PlanRepository.NameAndDescription:
-        plan = self.plans.get(id)
+        plan = self.entities.plans.get(id)
         assert plan
         name_and_description = interfaces.PlanRepository.NameAndDescription(
             name=plan.prd_name, description=plan.description
@@ -707,7 +729,7 @@ class PlanRepository(interfaces.PlanRepository):
         return name_and_description
 
     def get_planner_id(self, plan_id: UUID) -> Optional[UUID]:
-        plan = self.plans.get(plan_id)
+        plan = self.entities.plans.get(plan_id)
         if plan is None:
             return None
         return plan.planner.id
@@ -915,9 +937,11 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
         self,
         plan_repository: PlanRepository,
         cooperation_repository: CooperationRepository,
+        entities: EntityStorage,
     ) -> None:
         self.plan_repository = plan_repository
         self.cooperation_repository = cooperation_repository
+        self.entities = entities
 
     def get_inbound_requests(self, coordinator_id: UUID) -> Iterator[Plan]:
         coops_of_company = list(
@@ -925,22 +949,9 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
                 coordinator_id
             )
         )
-        for plan in self.plan_repository.plans.values():
+        for plan in self.entities.plans.values():
             if plan.requested_cooperation in [coop.id for coop in coops_of_company]:
                 yield plan
-
-    def get_cooperating_plans(self, plan_id: UUID) -> List[Plan]:
-        cooperating_plans = []
-        plan = self.plan_repository.get_plans().with_id(plan_id).first()
-        assert plan
-        cooperation_id = plan.cooperation
-        if cooperation_id:
-            for p in self.plan_repository.plans.values():
-                if p.cooperation == cooperation_id:
-                    cooperating_plans.append(p)
-            return cooperating_plans
-        else:
-            return [plan]
 
     def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         plan = self.plan_repository.get_plans().with_id(plan_id).first()
@@ -964,13 +975,13 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
 
     def count_plans_in_cooperation(self, cooperation_id: UUID) -> int:
         count = 0
-        for plan in self.plan_repository.plans.values():
+        for plan in self.entities.plans.values():
             if plan.cooperation == cooperation_id:
                 count += 1
         return count
 
     def get_plans_in_cooperation(self, cooperation_id: UUID) -> Iterable[Plan]:
-        plans = self.plan_repository.plans.values()
+        plans = self.entities.plans.values()
         for plan in plans:
             if plan.cooperation == cooperation_id:
                 yield plan
@@ -1082,3 +1093,4 @@ class EntityStorage:
         self.company_workers: Dict[UUID, Set[UUID]] = defaultdict(lambda: set())
         self.companies: Dict[str, Company] = {}
         self.company_passwords: Dict[UUID, str] = {}
+        self.plans: Dict[UUID, Plan] = {}

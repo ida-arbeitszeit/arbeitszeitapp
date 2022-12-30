@@ -18,7 +18,7 @@ from tests.datetime_service import FakeDatetimeService
 from .dependency_injection import get_dependency_injector, injection_test
 from .repositories import (
     AccountRepository,
-    PlanCooperationRepository,
+    PlanRepository,
     PurchaseRepository,
     TransactionRepository,
 )
@@ -111,7 +111,7 @@ def test_balance_of_buyer_of_means_of_prod_reduced(
     plan_generator: PlanGenerator,
     account_repository: AccountRepository,
     datetime_service: FakeDatetimeService,
-    plan_cooperation_repository: PlanCooperationRepository,
+    plan_repository: PlanRepository,
 ):
     sender = company_generator.create_company_entity()
     plan = plan_generator.create_plan(
@@ -125,7 +125,7 @@ def test_balance_of_buyer_of_means_of_prod_reduced(
     )
 
     price_total = pieces * calculate_price(
-        plan_cooperation_repository.get_cooperating_plans(plan.id)
+        list(plan_repository.get_plans().that_are_in_same_cooperation_as(plan.id))
     )
     assert account_repository.get_account_balance(sender.means_account) == -price_total
 
@@ -137,7 +137,7 @@ def test_balance_of_buyer_of_raw_materials_reduced(
     plan_generator: PlanGenerator,
     account_repository: AccountRepository,
     datetime_service: FakeDatetimeService,
-    plan_cooperation_repository: PlanCooperationRepository,
+    plan_repository: PlanRepository,
 ):
     sender = company_generator.create_company_entity()
     plan = plan_generator.create_plan(
@@ -151,7 +151,7 @@ def test_balance_of_buyer_of_raw_materials_reduced(
     )
 
     price_total = pieces * calculate_price(
-        plan_cooperation_repository.get_cooperating_plans(plan.id)
+        list(plan_repository.get_plans().that_are_in_same_cooperation_as(plan.id))
     )
     assert (
         account_repository.get_account_balance(sender.raw_material_account)
@@ -237,7 +237,7 @@ def test_correct_transaction_added_if_means_of_production_were_paid(
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
     datetime_service: FakeDatetimeService,
-    plan_cooperation_repository: PlanCooperationRepository,
+    plan_repository: PlanRepository,
 ):
     sender = company_generator.create_company_entity()
     plan = plan_generator.create_plan(
@@ -250,7 +250,7 @@ def test_correct_transaction_added_if_means_of_production_were_paid(
         PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
     )
     price_total = pieces * calculate_price(
-        plan_cooperation_repository.get_cooperating_plans(plan.id)
+        list(plan_repository.get_plans().that_are_in_same_cooperation_as(plan.id))
     )
     assert len(transaction_repository.transactions) == transactions_before_payment + 1
     assert (
@@ -271,7 +271,7 @@ def test_correct_transaction_added_if_raw_materials_were_paid(
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
     datetime_service: FakeDatetimeService,
-    plan_cooperation_repository: PlanCooperationRepository,
+    plan_repository: PlanRepository,
 ):
     sender = company_generator.create_company_entity()
     plan = plan_generator.create_plan(
@@ -284,7 +284,7 @@ def test_correct_transaction_added_if_raw_materials_were_paid(
         PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
     )
     price_total = pieces * calculate_price(
-        plan_cooperation_repository.get_cooperating_plans(plan.id)
+        list(plan_repository.get_plans().that_are_in_same_cooperation_as(plan.id))
     )
     assert len(transaction_repository.transactions) == transactions_before_payment + 1
     assert (
@@ -306,7 +306,7 @@ def test_correct_purchase_added_if_means_of_production_were_paid(
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
     datetime_service: FakeDatetimeService,
-    plan_cooperation_repository: PlanCooperationRepository,
+    plan_repository: PlanRepository,
 ):
     sender = company_generator.create_company_entity()
     plan = plan_generator.create_plan(
@@ -321,7 +321,7 @@ def test_correct_purchase_added_if_means_of_production_were_paid(
     assert len(purchase_repository.purchases) == 1
     assert purchase_added.plan == plan.id
     assert purchase_added.price_per_unit == calculate_price(
-        plan_cooperation_repository.get_cooperating_plans(plan.id)
+        list(plan_repository.get_plans().that_are_in_same_cooperation_as(plan.id))
     )
     assert purchase_added.amount == pieces
     assert purchase_added.purpose == PurposesOfPurchases.means_of_prod
@@ -337,7 +337,7 @@ def test_correct_purchase_added_if_raw_materials_were_paid(
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
     datetime_service: FakeDatetimeService,
-    plan_cooperation_repository: PlanCooperationRepository,
+    plan_repository: PlanRepository,
 ):
     sender = company_generator.create_company_entity()
     plan = plan_generator.create_plan(
@@ -352,7 +352,7 @@ def test_correct_purchase_added_if_raw_materials_were_paid(
     assert len(purchase_repository.purchases) == 1
     assert purchase_added.plan == plan.id
     assert purchase_added.price_per_unit == calculate_price(
-        plan_cooperation_repository.get_cooperating_plans(plan.id)
+        list(plan_repository.get_plans().that_are_in_same_cooperation_as(plan.id))
     )
     assert purchase_added.amount == pieces
     assert purchase_added.purpose == PurposesOfPurchases.raw_materials

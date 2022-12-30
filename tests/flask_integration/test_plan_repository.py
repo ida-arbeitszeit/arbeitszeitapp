@@ -332,7 +332,7 @@ class GetAllPlans(FlaskTestCase):
         coop = self.cooperation_generator.create_cooperation()
         requesting_plan = self.plan_generator.create_plan(requested_cooperation=coop)
         non_requesting_plan = self.plan_generator.create_plan()
-        results = self.plan_repository.get_plans().with_open_coordination_request()
+        results = self.plan_repository.get_plans().with_open_cooperation_request()
         assert requesting_plan.id in [plan.id for plan in results]
         assert non_requesting_plan.id not in [plan.id for plan in results]
 
@@ -347,7 +347,7 @@ class GetAllPlans(FlaskTestCase):
         plan_requesting_at_other_coop = self.plan_generator.create_plan(
             requested_cooperation=other_coop
         )
-        results = self.plan_repository.get_plans().with_open_coordination_request(
+        results = self.plan_repository.get_plans().with_open_cooperation_request(
             cooperation=coop.id
         )
         assert plan_requesting_at_coop.id in [plan.id for plan in results]

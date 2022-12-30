@@ -8,7 +8,7 @@ from arbeitszeit.use_cases import AcceptCooperation, AcceptCooperationRequest
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
 
 from .dependency_injection import injection_test
-from .repositories import PlanCooperationRepository
+from .repositories import PlanRepository
 
 
 @injection_test
@@ -173,7 +173,7 @@ def test_two_cooperating_plans_have_same_prices(
     cooperation_generator: CooperationGenerator,
     plan_generator: PlanGenerator,
     company_generator: CompanyGenerator,
-    plan_cooperation_repository: PlanCooperationRepository,
+    plan_repository: PlanRepository,
 ):
     requester = company_generator.create_company_entity()
     cooperation = cooperation_generator.create_cooperation(coordinator=requester)
@@ -196,8 +196,10 @@ def test_two_cooperating_plans_have_same_prices(
     accept_cooperation(request1)
     accept_cooperation(request2)
     assert calculate_price(
-        plan_cooperation_repository.get_cooperating_plans(plan1.id)
-    ) == calculate_price(plan_cooperation_repository.get_cooperating_plans(plan2.id))
+        list(plan_repository.get_plans().that_are_in_same_cooperation_as(plan1.id))
+    ) == calculate_price(
+        list(plan_repository.get_plans().that_are_in_same_cooperation_as(plan2.id))
+    )
 
 
 @injection_test
@@ -206,7 +208,7 @@ def test_price_of_cooperating_plans_is_correctly_calculated(
     cooperation_generator: CooperationGenerator,
     plan_generator: PlanGenerator,
     company_generator: CompanyGenerator,
-    plan_cooperation_repository: PlanCooperationRepository,
+    plan_repository: PlanRepository,
 ):
     requester = company_generator.create_company_entity()
     cooperation = cooperation_generator.create_cooperation(coordinator=requester)
@@ -232,8 +234,12 @@ def test_price_of_cooperating_plans_is_correctly_calculated(
     accept_cooperation(request2)
     # In total costs of 30h and 20 units -> price should be 1.5h per unit
     assert (
-        calculate_price(plan_cooperation_repository.get_cooperating_plans(plan1.id))
-        == calculate_price(plan_cooperation_repository.get_cooperating_plans(plan2.id))
+        calculate_price(
+            list(plan_repository.get_plans().that_are_in_same_cooperation_as(plan1.id))
+        )
+        == calculate_price(
+            list(plan_repository.get_plans().that_are_in_same_cooperation_as(plan2.id))
+        )
         == Decimal("1.5")
     )
 

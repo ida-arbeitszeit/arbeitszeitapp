@@ -8,7 +8,7 @@ from injector import inject
 
 from arbeitszeit.entities import Plan
 from arbeitszeit.price_calculator import calculate_price
-from arbeitszeit.repositories import PlanCooperationRepository
+from arbeitszeit.repositories import PlanRepository
 
 
 @dataclass
@@ -39,11 +39,15 @@ class PlanSummary:
 @inject
 @dataclass
 class PlanSummaryService:
-    plan_cooperation_repository: PlanCooperationRepository
+    plan_repository: PlanRepository
 
     def get_summary_from_plan(self, plan: Plan) -> PlanSummary:
         price_per_unit = calculate_price(
-            self.plan_cooperation_repository.get_cooperating_plans(plan.id)
+            list(
+                self.plan_repository.get_plans().that_are_in_same_cooperation_as(
+                    plan.id
+                )
+            )
         )
         return PlanSummary(
             plan_id=plan.id,

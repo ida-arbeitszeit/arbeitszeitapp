@@ -12,7 +12,6 @@ from arbeitszeit.entities import Company, Plan, PurposesOfPurchases
 from arbeitszeit.price_calculator import calculate_price
 from arbeitszeit.repositories import (
     CompanyRepository,
-    PlanCooperationRepository,
     PlanRepository,
     PurchaseRepository,
     TransactionRepository,
@@ -107,7 +106,7 @@ class Payment:
     purchase_repository: PurchaseRepository
     transaction_repository: TransactionRepository
     datetime_service: DatetimeService
-    plan_cooperation_repository: PlanCooperationRepository
+    plan_repository: PlanRepository
     plan: Plan
     buyer: Company
     amount: int
@@ -115,7 +114,11 @@ class Payment:
 
     def record_purchase(self) -> None:
         price_per_unit = calculate_price(
-            self.plan_cooperation_repository.get_cooperating_plans(self.plan.id)
+            list(
+                self.plan_repository.get_plans().that_are_in_same_cooperation_as(
+                    self.plan.id
+                )
+            )
         )
         self.purchase_repository.create_purchase_by_company(
             purchase_date=self.datetime_service.now(),
@@ -128,7 +131,11 @@ class Payment:
 
     def create_transaction(self) -> None:
         coop_price = self.amount * calculate_price(
-            self.plan_cooperation_repository.get_cooperating_plans(self.plan.id)
+            list(
+                self.plan_repository.get_plans().that_are_in_same_cooperation_as(
+                    self.plan.id
+                )
+            )
         )
         individual_price = self.amount * calculate_price([self.plan])
         if self.purpose == PurposesOfPurchases.means_of_prod:
@@ -152,7 +159,7 @@ class PaymentFactory:
     purchase_repository: PurchaseRepository
     transaction_repository: TransactionRepository
     datetime_service: DatetimeService
-    plan_cooperation_repository: PlanCooperationRepository
+    plan_repository: PlanRepository
 
     def get_payment(
         self, plan: Plan, buyer: Company, amount: int, purpose: PurposesOfPurchases
@@ -161,7 +168,7 @@ class PaymentFactory:
             self.purchase_repository,
             self.transaction_repository,
             self.datetime_service,
-            self.plan_cooperation_repository,
+            self.plan_repository,
             plan,
             buyer,
             amount,

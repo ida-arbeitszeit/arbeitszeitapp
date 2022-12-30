@@ -138,6 +138,7 @@ def test_only_cooperating_plans_are_returned(
     plan_generator: PlanGenerator,
     cooperation_repository: CooperationRepository,
     company_generator: CompanyGenerator,
+    plan_repository: PlanRepository,
 ):
     coop = cooperation_repository.create_cooperation(
         creation_timestamp=datetime.now(),
@@ -148,7 +149,9 @@ def test_only_cooperating_plans_are_returned(
     plan1 = plan_generator.create_plan(activation_date=datetime.min, cooperation=coop)
     plan2 = plan_generator.create_plan(activation_date=datetime.min, cooperation=coop)
     plan_generator.create_plan(activation_date=datetime.min, requested_cooperation=None)
-    cooperating_plans = repository.get_cooperating_plans(plan1.id)
+    cooperating_plans = list(
+        plan_repository.get_plans().that_are_in_same_cooperation_as(plan1.id)
+    )
     assert len(cooperating_plans) == 2
     assert plan_in_list(plan1, cooperating_plans)
     assert plan_in_list(plan2, cooperating_plans)
@@ -183,9 +186,12 @@ def test_correct_plans_in_cooperation_returned(
 def test_single_plan_is_returned_as_a_1_plan_cooperation(
     repository: PlanCooperationRepository,
     plan_generator: PlanGenerator,
+    plan_repository: PlanRepository,
 ):
     plan = plan_generator.create_plan(activation_date=datetime.min, cooperation=None)
-    cooperating_plans = repository.get_cooperating_plans(plan.id)
+    cooperating_plans = list(
+        plan_repository.get_plans().that_are_in_same_cooperation_as(plan.id)
+    )
     assert len(cooperating_plans) == 1
     assert plan_in_list(plan, cooperating_plans)
 
