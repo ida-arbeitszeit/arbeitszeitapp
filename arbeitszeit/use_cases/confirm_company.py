@@ -31,7 +31,11 @@ class ConfirmCompanyUseCase:
         email_address = self.token_validator.unwrap_confirmation_token(request.token)
         if email_address is None:
             return self.Response(is_confirmed=False, user_id=None)
-        company = self.company_repository.get_by_email(email_address)
+        company = (
+            self.company_repository.get_companies()
+            .with_email_address(email_address)
+            .first()
+        )
         assert company
         if company.confirmed_on is None:
             self.company_repository.confirm_company(

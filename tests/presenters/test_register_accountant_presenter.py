@@ -47,7 +47,7 @@ class PresenterTests(TestCase):
         expected_id = uuid4()
         response = self.create_accepted_response(user_id=expected_id)
         self.presenter.present_registration_result(response)
-        self.assertLoggedIn(lambda l: l.user_id == expected_id)
+        self.assertLoggedIn(lambda login: login.user_id == expected_id)
 
     def test_that_user_is_not_logged_in_when_failing_to_register(self) -> None:
         response = self.create_rejected_response()
@@ -58,7 +58,7 @@ class PresenterTests(TestCase):
         response = self.create_accepted_response()
         self.presenter.present_registration_result(response)
         self.assertLoggedIn(
-            lambda l: l.user_role == UserRole.accountant,
+            lambda login: login.user_role == UserRole.accountant,
         )
 
     def test_for_correct_error_message_when_failing_to_log_in(self) -> None:

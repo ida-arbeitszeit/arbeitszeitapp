@@ -18,7 +18,7 @@ from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
 from injector import inject
-from sqlalchemy import and_, func, update
+from sqlalchemy import and_, func, or_, update
 from sqlalchemy.sql.expression import Select
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -132,7 +132,7 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
             )
         )
 
-    def with_open_coordination_request(
+    def with_open_cooperation_request(
         self, *, cooperation: Optional[UUID] = None
     ) -> PlanQueryResult:
         return self._with_modified_query(
@@ -140,6 +140,23 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
                 models.Plan.requested_cooperation == str(cooperation)
                 if cooperation
                 else models.Plan.requested_cooperation != None
+            )
+        )
+
+    def that_are_in_same_cooperation_as(self, plan: UUID) -> PlanQueryResult:
+        return self._with_modified_query(
+            lambda query: query.filter(
+                or_(
+                    models.Plan.id == str(plan),
+                    and_(
+                        models.Plan.cooperation != None,
+                        models.Plan.cooperation.in_(
+                            models.Plan.query.filter(
+                                models.Plan.id == str(plan)
+                            ).with_entities(models.Plan.cooperation)
+                        ),
+                    ),
+                )
             )
         )
 
@@ -208,6 +225,25 @@ class PurchaseQueryResult(FlaskQueryResult[entities.Purchase]):
         )
 
 
+class CompanyQueryResult(FlaskQueryResult[entities.Company]):
+    def with_id(self, id_: UUID) -> CompanyQueryResult:
+        return self._with_modified_query(
+            lambda query: query.filter(models.Company.id == str(id_))
+        )
+
+    def with_email_address(self, email: str) -> CompanyQueryResult:
+        return self._with_modified_query(
+            lambda query: query.join(models.User).filter(models.User.email == email)
+        )
+
+    def that_are_workplace_of_member(self, member: UUID) -> CompanyQueryResult:
+        return self._with_modified_query(
+            lambda query: query.filter(
+                models.Company.workers.any(models.Member.id == str(member))
+            )
+        )
+
+
 @inject
 @dataclass
 class CompanyWorkerRepository:
@@ -222,16 +258,6 @@ class CompanyWorkerRepository:
         if company is None:
             return
         member.workplaces.append(company)
-
-    def get_member_workplaces(self, member: UUID) -> List[entities.Company]:
-        member_orm = Member.query.filter_by(id=str(member)).first()
-        if member_orm is None:
-            return []
-        workplaces_orm = member_orm.workplaces.all()
-        return [
-            self.company_repository.object_from_orm(workplace_orm)
-            for workplace_orm in workplaces_orm
-        ]
 
 
 @dataclass
@@ -370,39 +396,6 @@ class CompanyRepository(repositories.CompanyRepository):
             confirmed_on=company_orm.confirmed_on,
         )
 
-    def get_company_orm_by_mail(self, email: str) -> Company:
-        company_orm = (
-            self.db.session.query(models.Company)
-            .join(models.User)
-            .filter(models.User.email == email)
-            .first()
-        )
-        assert company_orm
-        return company_orm
-
-    def get_by_id(self, id: UUID) -> Optional[entities.Company]:
-        company_orm = Company.query.filter_by(id=str(id)).first()
-        if company_orm is None:
-            return None
-        else:
-            return self.object_from_orm(company_orm)
-
-    def get_by_email(self, email: str) -> Optional[entities.Company]:
-        company_orm = (
-            self.db.session.query(models.Company)
-            .join(models.User)
-            .filter(models.User.email == email)
-            .first()
-        )
-        return self.object_from_orm(company_orm) if company_orm else None
-
-    def is_company(self, id: UUID) -> bool:
-        return bool(
-            self.db.session.query(models.Company)
-            .filter(models.Company.id == str(id))
-            .count()
-        )
-
     def create_company(
         self,
         email: str,
@@ -433,17 +426,6 @@ class CompanyRepository(repositories.CompanyRepository):
             account_orm.account_owner_company = company.id
         return self.object_from_orm(company)
 
-    def has_company_with_email(self, email: str) -> bool:
-        return bool(
-            self.db.session.query(models.Company)
-            .join(models.User)
-            .filter(models.User.email == email)
-            .first()
-        )
-
-    def count_registered_companies(self) -> int:
-        return int(self.db.session.query(func.count(Company.id)).one()[0])
-
     def query_companies_by_name(self, query: str) -> Iterator[entities.Company]:
         return (
             self.object_from_orm(company)
@@ -460,8 +442,12 @@ class CompanyRepository(repositories.CompanyRepository):
         )
         return (self.object_from_orm(company) for company in companies)
 
-    def get_all_companies(self) -> Iterator[entities.Company]:
-        return (self.object_from_orm(company) for company in Company.query.all())
+    def get_companies(self) -> CompanyQueryResult:
+        return CompanyQueryResult(
+            query=Company.query,
+            mapper=self.object_from_orm,
+            db=self.db,
+        )
 
     def validate_credentials(self, email_address: str, password: str) -> Optional[UUID]:
         if (
@@ -754,7 +740,9 @@ class PlanRepository(repositories.PlanRepository):
             resource_cost=plan.costs_r,
             means_cost=plan.costs_p,
         )
-        planner = self.company_repository.get_by_id(UUID(plan.planner))
+        planner = (
+            self.company_repository.get_companies().with_id(UUID(plan.planner)).first()
+        )
         assert planner is not None
         return entities.Plan(
             id=UUID(plan.id),
@@ -1088,7 +1076,7 @@ class PlanDraftRepository(repositories.PlanDraftRepository):
         PlanDraft.query.filter_by(id=str(id)).delete()
 
     def _object_from_orm(self, orm: PlanDraft) -> entities.PlanDraft:
-        planner = self.company_repository.get_by_id(orm.planner)
+        planner = self.company_repository.get_companies().with_id(orm.planner).first()
         assert planner is not None
         return entities.PlanDraft(
             id=orm.id,
@@ -1156,7 +1144,11 @@ class WorkerInviteRepository(repositories.WorkerInviteRepository):
         if (
             invite_orm := CompanyWorkInvite.query.filter_by(id=str(id)).first()
         ) is not None:
-            company = self.company_repository.get_by_id(UUID(invite_orm.company))
+            company = (
+                self.company_repository.get_companies()
+                .with_id(UUID(invite_orm.company))
+                .first()
+            )
             if company is None:
                 return None
             member = (
@@ -1201,7 +1193,11 @@ class CooperationRepository(repositories.CooperationRepository):
         return self.object_from_orm(cooperation)
 
     def object_from_orm(self, cooperation_orm: Cooperation) -> entities.Cooperation:
-        coordinator = self.company_repository.get_by_id(cooperation_orm.coordinator)
+        coordinator = (
+            self.company_repository.get_companies()
+            .with_id(cooperation_orm.coordinator)
+            .first()
+        )
         assert coordinator is not None
         return entities.Cooperation(
             id=UUID(cooperation_orm.id),
@@ -1266,19 +1262,6 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
                     )
                 ]:
                     yield plan
-
-    def get_cooperating_plans(self, plan_id: UUID) -> List[entities.Plan]:
-        plan_orm = models.Plan.query.filter_by(id=str(plan_id)).first()
-        if plan_orm is None:
-            return []
-        coop_orm = plan_orm.coop
-        if coop_orm is None:
-            return list(self.plan_repository.get_plans().with_id(plan_id))
-        else:
-            return [
-                self.plan_repository.object_from_orm(plan)
-                for plan in coop_orm.plans.all()
-            ]
 
     def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         plan_orm = models.Plan.query.filter_by(id=str(plan_id)).first()

@@ -9,12 +9,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- do not translate -->
   <title>Arbeitszeit</title>
-  <link rel="stylesheet" href="/static/bulma.css">
-  <link rel="stylesheet" href="/static/main.css">
+  <link rel="stylesheet" href="{{ url_for('.static', filename='bulma.css') }}">
+  <link rel="stylesheet" href="{{ url_for('.static', filename='main.css') }}">
   {% block style %}
   {% endblock %}
   <script defer src="https://use.fontawesome.com/releases/v6.1.1/js/all.js"></script>
-  <script src="/static/main.js"></script>
+  <script src="{{ url_for('.static', filename='main.js') }}"></script>
 </head>
 
 <body>

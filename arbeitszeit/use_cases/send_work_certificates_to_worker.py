@@ -44,7 +44,11 @@ class SendWorkCertificatesToWorker:
     def __call__(
         self, use_case_request: SendWorkCertificatesToWorkerRequest
     ) -> SendWorkCertificatesToWorkerResponse:
-        company = self.company_repository.get_by_id(use_case_request.company_id)
+        company = (
+            self.company_repository.get_companies()
+            .with_id(use_case_request.company_id)
+            .first()
+        )
         worker = (
             self.member_repository.get_members()
             .with_id(use_case_request.worker_id)

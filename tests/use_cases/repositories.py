@@ -50,28 +50,21 @@ T = TypeVar("T")
 
 class QueryResultImpl(Generic[T]):
     def __init__(
-        self,
-        items: Callable[[], Iterable[T]],
-        *,
-        member_repository: MemberRepository,
-        company_repository: CompanyRepository,
+        self, items: Callable[[], Iterable[T]], *, entities: EntityStorage
     ) -> None:
         self.items = items
-        self.member_repository = member_repository
-        self.company_repository = company_repository
+        self.entities = entities
 
     def limit(self, n: int) -> QueryResultImpl[T]:
         return type(self)(
             items=lambda: islice(self.items(), n),
-            member_repository=self.member_repository,
-            company_repository=self.company_repository,
+            entities=self.entities,
         )
 
     def offset(self, n: int) -> QueryResultImpl[T]:
         return type(self)(
             items=lambda: islice(self.items(), n, None),
-            member_repository=self.member_repository,
-            company_repository=self.company_repository,
+            entities=self.entities,
         )
 
     def first(self) -> Optional[T]:
@@ -96,8 +89,7 @@ class PlanResult(QueryResultImpl[Plan], interfaces.PlanResult):
                 key=lambda plan: plan.plan_creation_date,
                 reverse=not ascending,
             ),
-            member_repository=self.member_repository,
-            company_repository=self.company_repository,
+            entities=self.entities,
         )
 
     def with_id_containing(self, query: str) -> PlanResult:
@@ -127,7 +119,7 @@ class PlanResult(QueryResultImpl[Plan], interfaces.PlanResult):
     def without_completed_review(self) -> PlanResult:
         return self._filtered_by(lambda plan: plan.approval_date is None)
 
-    def with_open_coordination_request(
+    def with_open_cooperation_request(
         self, *, cooperation: Optional[UUID] = None
     ) -> PlanResult:
         return self._filtered_by(
@@ -139,16 +131,31 @@ class PlanResult(QueryResultImpl[Plan], interfaces.PlanResult):
     def _filtered_by(self, key: Callable[[Plan], bool]) -> PlanResult:
         return type(self)(
             items=lambda: filter(key, self.items()),
-            member_repository=self.member_repository,
-            company_repository=self.company_repository,
+            entities=self.entities,
+        )
+
+    def that_are_in_same_cooperation_as(self, plan: UUID) -> PlanResult:
+        def items_generator():
+            plan_entity = self.entities.plans.get(plan)
+            if not plan_entity:
+                return
+            if plan_entity.cooperation is None:
+                yield from filter(lambda p: p.id == plan, self.items())
+            else:
+                yield from filter(
+                    lambda p: p.cooperation == plan_entity.cooperation, self.items()
+                )
+
+        return type(self)(
+            items=items_generator,
+            entities=self.entities,
         )
 
 
 class MemberResult(QueryResultImpl[Member], interfaces.MemberResult):
     def working_at_company(self, company: UUID) -> MemberResult:
         return self._filtered_by(
-            lambda member: member.id
-            in self.member_repository.company_workers.get(company, []),
+            lambda member: member.id in self.entities.company_workers.get(company, []),
         )
 
     def with_id(self, member: UUID) -> MemberResult:
@@ -169,8 +176,7 @@ class MemberResult(QueryResultImpl[Member], interfaces.MemberResult):
     def _filtered_by(self, key: Callable[[Member], bool]) -> MemberResult:
         return type(self)(
             items=lambda: filter(key, self.items()),
-            member_repository=self.member_repository,
-            company_repository=self.company_repository,
+            entities=self.entities,
         )
 
 
@@ -182,8 +188,7 @@ class PurchaseResult(QueryResultImpl[Purchase], interfaces.PurchaseResult):
                 key=lambda purchase: purchase.purchase_date,
                 reverse=not ascending,
             ),
-            member_repository=self.member_repository,
-            company_repository=self.company_repository,
+            entities=self.entities,
         )
 
     def where_buyer_is_company(
@@ -194,7 +199,7 @@ class PurchaseResult(QueryResultImpl[Purchase], interfaces.PurchaseResult):
             def key_function(purchase: Purchase) -> bool:
                 return (
                     purchase.buyer is not None
-                    and self.company_repository.is_company(purchase.buyer)
+                    and purchase.buyer in self.entities.companies
                 )
 
         else:
@@ -204,8 +209,7 @@ class PurchaseResult(QueryResultImpl[Purchase], interfaces.PurchaseResult):
 
         return type(self)(
             items=lambda: filter(key_function, self.items()),
-            member_repository=self.member_repository,
-            company_repository=self.company_repository,
+            entities=self.entities,
         )
 
     def where_buyer_is_member(self, *, member: Optional[UUID] = None) -> PurchaseResult:
@@ -214,7 +218,7 @@ class PurchaseResult(QueryResultImpl[Purchase], interfaces.PurchaseResult):
             def key_function(purchase: Purchase) -> bool:
                 return (
                     purchase.buyer is not None
-                    and purchase.buyer in self.member_repository.members
+                    and purchase.buyer in self.entities.members
                 )
 
         else:
@@ -224,20 +228,39 @@ class PurchaseResult(QueryResultImpl[Purchase], interfaces.PurchaseResult):
 
         return type(self)(
             items=lambda: filter(key_function, self.items()),
-            member_repository=self.member_repository,
-            company_repository=self.company_repository,
+            entities=self.entities,
+        )
+
+
+class CompanyResult(QueryResultImpl[Company], interfaces.CompanyResult):
+    def with_id(self, id_: UUID) -> CompanyResult:
+        return type(self)(
+            items=lambda: filter(lambda company: company.id == id_, self.items()),
+            entities=self.entities,
+        )
+
+    def with_email_address(self, email: str) -> CompanyResult:
+        return type(self)(
+            items=lambda: filter(lambda company: company.email == email, self.items()),
+            entities=self.entities,
+        )
+
+    def that_are_workplace_of_member(self, member: UUID) -> CompanyResult:
+        return type(self)(
+            items=lambda: filter(
+                lambda company: member in self.entities.company_workers[company.id],
+                self.items(),
+            ),
+            entities=self.entities,
         )
 
 
 @singleton
 class PurchaseRepository(interfaces.PurchaseRepository):
     @inject
-    def __init__(
-        self, member_repository: MemberRepository, company_repository: CompanyRepository
-    ):
+    def __init__(self, entities: EntityStorage):
         self.purchases: List[Purchase] = []
-        self.member_repository = member_repository
-        self.company_repository = company_repository
+        self.entities = entities
 
     def create_purchase_by_company(
         self,
@@ -283,8 +306,7 @@ class PurchaseRepository(interfaces.PurchaseRepository):
     def get_purchases(self) -> PurchaseResult:
         return PurchaseResult(
             items=lambda: self.purchases,
-            member_repository=self.member_repository,
-            company_repository=self.company_repository,
+            entities=self.entities,
         )
 
 
@@ -399,12 +421,10 @@ class AccountOwnerRepository(interfaces.AccountOwnerRepository):
     @inject
     def __init__(
         self,
-        company_repository: CompanyRepository,
-        member_repository: MemberRepository,
+        entities: EntityStorage,
         social_accounting: SocialAccounting,
     ):
-        self.member_repository = member_repository
-        self.company_repository = company_repository
+        self.entities = entities
         self.social_accounting = social_accounting
 
     def get_account_owner(
@@ -412,10 +432,10 @@ class AccountOwnerRepository(interfaces.AccountOwnerRepository):
     ) -> Union[Member, Company, SocialAccounting]:
         if account.account_type == AccountTypes.accounting:
             return self.social_accounting
-        for member in self.member_repository.members.values():
+        for member in self.entities.members.values():
             if account == member.account:
                 return member
-        for company in self.company_repository.companies.values():
+        for company in self.entities.companies.values():
             if account in company.accounts():
                 return company
         # This exception is not meant to be caught. That's why we
@@ -426,14 +446,9 @@ class AccountOwnerRepository(interfaces.AccountOwnerRepository):
 @singleton
 class MemberRepository(interfaces.MemberRepository):
     @inject
-    def __init__(
-        self, datetime_service: DatetimeService, company_repository: CompanyRepository
-    ):
-        self.members: Dict[UUID, Member] = {}
-        self.passwords: Dict[UUID, str] = {}
+    def __init__(self, datetime_service: DatetimeService, entities: EntityStorage):
         self.datetime_service = datetime_service
-        self.company_workers: Dict[UUID, Set[UUID]] = defaultdict(lambda: set())
-        self.company_repository = company_repository
+        self.entities = entities
 
     def create_member(
         self,
@@ -453,47 +468,36 @@ class MemberRepository(interfaces.MemberRepository):
             registered_on=registered_on,
             confirmed_on=None,
         )
-        self.members[id] = member
-        self.passwords[id] = password
+        self.entities.members[id] = member
+        self.entities.member_passwords[id] = password
         return member
 
     def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
         if member := self._get_member_by_email(email):
-            if self.passwords[member.id] == password:
+            if self.entities.member_passwords[member.id] == password:
                 return member.id
         return None
 
     def get_members(self) -> MemberResult:
         return MemberResult(
-            items=lambda: self.members.values(),
-            member_repository=self,
-            company_repository=self.company_repository,
+            items=lambda: self.entities.members.values(),
+            entities=self.entities,
         )
 
     def _get_member_by_email(self, email: str) -> Optional[Member]:
-        for member in self.members.values():
+        for member in self.entities.members.values():
             if member.email == email:
                 return member
         return None
 
     def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
-        self.company_workers[company].add(worker)
-
-    def get_member_workplaces(self, member: UUID) -> Iterable[Company]:
-        for company_id, workers in self.company_workers.items():
-            if member not in workers:
-                continue
-            company = self.company_repository.get_by_id(company_id)
-            if company is not None:
-                yield company
+        self.entities.company_workers[company].add(worker)
 
 
-@singleton
 class CompanyRepository(interfaces.CompanyRepository):
     @inject
-    def __init__(self) -> None:
-        self.companies: Dict[str, Company] = {}
-        self.passwords: Dict[UUID, str] = {}
+    def __init__(self, entities: EntityStorage) -> None:
+        self.entities = entities
 
     def create_company(
         self,
@@ -517,58 +521,42 @@ class CompanyRepository(interfaces.CompanyRepository):
             registered_on=registered_on,
             confirmed_on=None,
         )
-        self.companies[email] = new_company
-        self.passwords[new_company.id] = password
+        self.entities.companies[email] = new_company
+        self.entities.company_passwords[new_company.id] = password
         return new_company
 
-    def has_company_with_email(self, email: str) -> bool:
-        return email in self.companies
-
-    def get_by_id(self, id: UUID) -> Optional[Company]:
-        for company in self.companies.values():
-            if company.id == id:
-                return company
-        return None
-
-    def get_by_email(self, email: str) -> Optional[Company]:
-        for company in self.companies.values():
-            if company.email == email:
-                return company
-        return None
-
-    def is_company(self, id: UUID) -> bool:
-        return bool(self.get_by_id(id))
-
-    def count_registered_companies(self) -> int:
-        return len(self.companies)
-
     def query_companies_by_name(self, query: str) -> Iterator[Company]:
-        for company in self.companies.values():
+        for company in self.entities.companies.values():
             if query.lower() in company.name.lower():
                 yield company
 
     def query_companies_by_email(self, query: str) -> Iterator[Company]:
-        for email, company in self.companies.items():
+        for email, company in self.entities.companies.items():
             if query.lower() in email.lower():
                 yield company
 
-    def get_all_companies(self) -> Iterator[Company]:
-        yield from self.companies.values()
+    def get_companies(self) -> CompanyResult:
+        return CompanyResult(
+            items=lambda: self.entities.companies.values(),
+            entities=self.entities,
+        )
 
     def validate_credentials(self, email_address: str, password: str) -> Optional[UUID]:
-        if company := self.companies.get(email_address):
-            if correct_password := self.passwords.get(company.id):
+        if company := self.entities.companies.get(email_address):
+            if correct_password := self.entities.company_passwords.get(company.id):
                 if password == correct_password:
                     return company.id
         return None
 
     def confirm_company(self, company: UUID, confirmation_timestamp: datetime) -> None:
-        if model := self.get_by_id(company):
-            model.confirmed_on = confirmation_timestamp
+        for model in self.entities.companies.values():
+            if model.id == company:
+                model.confirmed_on = confirmation_timestamp
 
     def is_company_confirmed(self, company: UUID) -> bool:
-        if model := self.get_by_id(company):
-            return model.confirmed_on is not None
+        for model in self.entities.companies.values():
+            if model.id == company and model.confirmed_on is not None:
+                return True
         return False
 
 
@@ -577,30 +565,24 @@ class PlanRepository(interfaces.PlanRepository):
     @inject
     def __init__(
         self,
-        company_repository: CompanyRepository,
         draft_repository: PlanDraftRepository,
-        member_repository: MemberRepository,
+        entities: EntityStorage,
     ) -> None:
-        self.plans: Dict[UUID, Plan] = {}
-        self.company_repository = company_repository
         self.draft_repository = draft_repository
-        self.member_repository = member_repository
+        self.entities = entities
 
     def get_plans(self) -> PlanResult:
         return PlanResult(
-            items=lambda: self.plans.values(),
-            member_repository=self.member_repository,
-            company_repository=self.company_repository,
+            items=lambda: self.entities.plans.values(),
+            entities=self.entities,
         )
 
     def create_plan_from_draft(self, draft_id: UUID) -> Optional[UUID]:
         draft = self.draft_repository.get_by_id(draft_id)
         assert draft
-        planner = self.company_repository.get_by_id(draft.planner.id)
-        assert planner
         plan = self._create_plan(
             id=draft.id,
-            planner=planner,
+            planner=draft.planner,
             costs=draft.production_costs,
             product_name=draft.product_name,
             production_unit=draft.unit_of_distribution,
@@ -613,14 +595,14 @@ class PlanRepository(interfaces.PlanRepository):
         return plan.id
 
     def set_plan_approval_date(self, plan: UUID, approval_timestamp: datetime):
-        plan_model = self.plans.get(plan)
+        plan_model = self.entities.plans.get(plan)
         if plan_model is None:
             return
         plan_model.approval_date = approval_timestamp
         plan_model.approval_reason = "approved"
 
     def __len__(self) -> int:
-        return len(self.plans)
+        return len(self.entities.plans)
 
     def activate_plan(self, plan: Plan, activation_date: datetime) -> None:
         plan.is_active = True
@@ -638,15 +620,20 @@ class PlanRepository(interfaces.PlanRepository):
 
     def get_active_plans(self) -> PlanResult:
         return PlanResult(
-            items=lambda: filter(lambda plan: plan.is_active, self.plans.values()),
-            member_repository=self.member_repository,
-            company_repository=self.company_repository,
+            items=lambda: filter(
+                lambda plan: plan.is_active, self.entities.plans.values()
+            ),
+            entities=self.entities,
         )
 
     def avg_timeframe_of_active_plans(self) -> Decimal:
         try:
             avg_timeframe = mean(
-                (plan.timeframe for plan in self.plans.values() if plan.is_active)
+                (
+                    plan.timeframe
+                    for plan in self.entities.plans.values()
+                    if plan.is_active
+                )
             )
         except StatisticsError:
             avg_timeframe = 0
@@ -656,7 +643,7 @@ class PlanRepository(interfaces.PlanRepository):
         return decimal_sum(
             (
                 plan.production_costs.labour_cost
-                for plan in self.plans.values()
+                for plan in self.entities.plans.values()
                 if plan.is_active
             )
         )
@@ -665,7 +652,7 @@ class PlanRepository(interfaces.PlanRepository):
         return decimal_sum(
             (
                 plan.production_costs.resource_cost
-                for plan in self.plans.values()
+                for plan in self.entities.plans.values()
                 if plan.is_active
             )
         )
@@ -674,18 +661,18 @@ class PlanRepository(interfaces.PlanRepository):
         return decimal_sum(
             (
                 plan.production_costs.means_cost
-                for plan in self.plans.values()
+                for plan in self.entities.plans.values()
                 if plan.is_active
             )
         )
 
     def all_plans_approved_and_not_expired(self) -> Iterator[Plan]:
-        for plan in self.plans.values():
+        for plan in self.entities.plans.values():
             if plan.is_approved and not plan.expired:
                 yield plan
 
     def hide_plan(self, plan_id: UUID) -> None:
-        plan = self.plans.get(plan_id)
+        plan = self.entities.plans.get(plan_id)
         assert plan
         plan.hidden_by_user = True
 
@@ -725,7 +712,7 @@ class PlanRepository(interfaces.PlanRepository):
             is_available=True,
             hidden_by_user=False,
         )
-        self.plans[plan.id] = plan
+        self.entities.plans[plan.id] = plan
         return plan
 
     def toggle_product_availability(self, plan: Plan) -> None:
@@ -734,7 +721,7 @@ class PlanRepository(interfaces.PlanRepository):
     def get_plan_name_and_description(
         self, id: UUID
     ) -> interfaces.PlanRepository.NameAndDescription:
-        plan = self.plans.get(id)
+        plan = self.entities.plans.get(id)
         assert plan
         name_and_description = interfaces.PlanRepository.NameAndDescription(
             name=plan.prd_name, description=plan.description
@@ -742,7 +729,7 @@ class PlanRepository(interfaces.PlanRepository):
         return name_and_description
 
     def get_planner_id(self, plan_id: UUID) -> Optional[UUID]:
-        plan = self.plans.get(plan_id)
+        plan = self.entities.plans.get(plan_id)
         if plan is None:
             return None
         return plan.planner.id
@@ -772,7 +759,7 @@ class PlanDraftRepository(interfaces.PlanDraftRepository):
         is_public_service: bool,
         creation_timestamp: datetime,
     ) -> PlanDraft:
-        company = self.company_repository.get_by_id(planner)
+        company = self.company_repository.get_companies().with_id(planner).first()
         assert company is not None
         draft = PlanDraft(
             id=uuid4(),
@@ -872,7 +859,7 @@ class WorkerInviteRepository(interfaces.WorkerInviteRepository):
             company_id, worker_id = self.invites[id]
         except KeyError:
             return None
-        company = self.company_repository.get_by_id(company_id)
+        company = self.company_repository.get_companies().with_id(company_id).first()
         if company is None:
             return None
         member = self.member_repository.get_members().with_id(worker_id).first()
@@ -950,9 +937,11 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
         self,
         plan_repository: PlanRepository,
         cooperation_repository: CooperationRepository,
+        entities: EntityStorage,
     ) -> None:
         self.plan_repository = plan_repository
         self.cooperation_repository = cooperation_repository
+        self.entities = entities
 
     def get_inbound_requests(self, coordinator_id: UUID) -> Iterator[Plan]:
         coops_of_company = list(
@@ -960,22 +949,9 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
                 coordinator_id
             )
         )
-        for plan in self.plan_repository.plans.values():
+        for plan in self.entities.plans.values():
             if plan.requested_cooperation in [coop.id for coop in coops_of_company]:
                 yield plan
-
-    def get_cooperating_plans(self, plan_id: UUID) -> List[Plan]:
-        cooperating_plans = []
-        plan = self.plan_repository.get_plans().with_id(plan_id).first()
-        assert plan
-        cooperation_id = plan.cooperation
-        if cooperation_id:
-            for p in self.plan_repository.plans.values():
-                if p.cooperation == cooperation_id:
-                    cooperating_plans.append(p)
-            return cooperating_plans
-        else:
-            return [plan]
 
     def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         plan = self.plan_repository.get_plans().with_id(plan_id).first()
@@ -999,13 +975,13 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
 
     def count_plans_in_cooperation(self, cooperation_id: UUID) -> int:
         count = 0
-        for plan in self.plan_repository.plans.values():
+        for plan in self.entities.plans.values():
             if plan.cooperation == cooperation_id:
                 count += 1
         return count
 
     def get_plans_in_cooperation(self, cooperation_id: UUID) -> Iterable[Plan]:
-        plans = self.plan_repository.plans.values()
+        plans = self.entities.plans.values()
         for plan in plans:
             if plan.cooperation == cooperation_id:
                 yield plan
@@ -1021,14 +997,11 @@ class AccountantRepositoryTestImpl:
         id: UUID
 
     @inject
-    def __init__(
-        self, member_repository: MemberRepository, company_repository: CompanyRepository
-    ) -> None:
+    def __init__(self, entities: EntityStorage) -> None:
         self.accountants: Dict[
             UUID, AccountantRepositoryTestImpl._AccountantRecord
         ] = dict()
-        self.member_repository = member_repository
-        self.company_repository = company_repository
+        self.entities = entities
 
     def create_accountant(self, email: str, name: str, password: str) -> UUID:
         id = uuid4()
@@ -1065,8 +1038,7 @@ class AccountantRepositoryTestImpl:
                 Accountant(email_address=record.email, name=record.name, id=record.id)
                 for record in self.accountants.values()
             ),
-            member_repository=self.member_repository,
-            company_repository=self.company_repository,
+            entities=self.entities,
         )
 
 
@@ -1110,3 +1082,15 @@ class FakePayoutFactorRepository:
             return None
         else:
             return model.factor
+
+
+@singleton
+class EntityStorage:
+    @inject
+    def __init__(self, datetime_service: DatetimeService) -> None:
+        self.members: Dict[UUID, Member] = {}
+        self.member_passwords: Dict[UUID, str] = {}
+        self.company_workers: Dict[UUID, Set[UUID]] = defaultdict(lambda: set())
+        self.companies: Dict[str, Company] = {}
+        self.company_passwords: Dict[UUID, str] = {}
+        self.plans: Dict[UUID, Plan] = {}

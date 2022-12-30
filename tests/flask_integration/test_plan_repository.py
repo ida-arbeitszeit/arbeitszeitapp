@@ -332,7 +332,7 @@ class GetAllPlans(FlaskTestCase):
         coop = self.cooperation_generator.create_cooperation()
         requesting_plan = self.plan_generator.create_plan(requested_cooperation=coop)
         non_requesting_plan = self.plan_generator.create_plan()
-        results = self.plan_repository.get_plans().with_open_coordination_request()
+        results = self.plan_repository.get_plans().with_open_cooperation_request()
         assert requesting_plan.id in [plan.id for plan in results]
         assert non_requesting_plan.id not in [plan.id for plan in results]
 
@@ -347,7 +347,7 @@ class GetAllPlans(FlaskTestCase):
         plan_requesting_at_other_coop = self.plan_generator.create_plan(
             requested_cooperation=other_coop
         )
-        results = self.plan_repository.get_plans().with_open_coordination_request(
+        results = self.plan_repository.get_plans().with_open_cooperation_request(
             cooperation=coop.id
         )
         assert plan_requesting_at_coop.id in [plan.id for plan in results]
@@ -360,3 +360,29 @@ class GetAllPlans(FlaskTestCase):
         results = self.plan_repository.get_plans().that_are_cooperating()
         assert cooperating_plan.id in [plan.id for plan in results]
         assert non_cooperating_plan.id not in [plan.id for plan in results]
+
+    def test_plan_without_cooperation_is_considered_to_be_only_plan_in_its_own_cooperation(
+        self,
+    ) -> None:
+        plan = self.plan_generator.create_plan(
+            activation_date=datetime.min, cooperation=None
+        )
+        cooperating_plans = (
+            self.plan_repository.get_plans().that_are_in_same_cooperation_as(plan.id)
+        )
+        assert len(cooperating_plans) == 1
+        assert plan in cooperating_plans
+
+    def test_that_plans_outside_of_cooperation_are_excluded_when_filtering_for_cooperating_plans(
+        self,
+    ) -> None:
+        coop = self.cooperation_generator.create_cooperation()
+        plan1 = self.plan_generator.create_plan(cooperation=coop)
+        plan2 = self.plan_generator.create_plan(cooperation=coop)
+        self.plan_generator.create_plan(requested_cooperation=None)
+        cooperating_plans = (
+            self.plan_repository.get_plans().that_are_in_same_cooperation_as(plan1.id)
+        )
+        assert len(cooperating_plans) == 2
+        assert plan1.id in [p.id for p in cooperating_plans]
+        assert plan2.id in [p.id for p in cooperating_plans]

@@ -67,7 +67,7 @@ GetCompanySummaryResponse = Optional[GetCompanySummarySuccess]
 
 @dataclass
 class GetCompanySummary:
-    company_respository: CompanyRepository
+    company_repository: CompanyRepository
     plan_repository: PlanRepository
     account_repository: AccountRepository
     transaction_repository: TransactionRepository
@@ -75,7 +75,7 @@ class GetCompanySummary:
     purchase_repository: PurchaseRepository
 
     def __call__(self, company_id: UUID) -> GetCompanySummaryResponse:
-        company = self.company_respository.get_by_id(company_id)
+        company = self.company_repository.get_companies().with_id(company_id).first()
         if company is None:
             return None
         plans = (
@@ -190,7 +190,7 @@ class GetCompanySummary:
     def _get_supplier_info(
         self, supplier_id: UUID, transaction_volume: Decimal
     ) -> Supplier:
-        supplier = self.company_respository.get_by_id(supplier_id)
+        supplier = self.company_repository.get_companies().with_id(supplier_id).first()
         assert supplier
         return Supplier(
             company_id=supplier_id,

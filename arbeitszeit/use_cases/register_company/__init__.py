@@ -48,7 +48,7 @@ class RegisterCompany:
         return self.Response(rejection_reason=None, company_id=company_id)
 
     def _register_company(self, request: Request) -> UUID:
-        if self.company_repository.has_company_with_email(request.email):
+        if self.company_repository.get_companies().with_email_address(request.email):
             raise self.Response.RejectionReason.company_already_exists
         means_account = self.account_repository.create_account(AccountTypes.p)
         resources_account = self.account_repository.create_account(AccountTypes.r)

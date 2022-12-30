@@ -11,7 +11,7 @@ from injector import inject
 
 from arbeitszeit.entities import Plan
 from arbeitszeit.price_calculator import calculate_price
-from arbeitszeit.repositories import PlanCooperationRepository, PlanRepository
+from arbeitszeit.repositories import PlanRepository
 
 
 class PlanFilter(enum.Enum):
@@ -55,7 +55,6 @@ class QueryPlansRequest:
 @dataclass
 class QueryPlans:
     plan_repository: PlanRepository
-    plan_cooperation_repository: PlanCooperationRepository
 
     def __call__(self, request: QueryPlansRequest) -> PlanQueryResponse:
         query = request.query_string
@@ -76,7 +75,11 @@ class QueryPlans:
 
     def _plan_to_response_model(self, plan: Plan) -> QueriedPlan:
         price_per_unit = calculate_price(
-            self.plan_cooperation_repository.get_cooperating_plans(plan.id)
+            list(
+                self.plan_repository.get_plans().that_are_in_same_cooperation_as(
+                    plan.id
+                )
+            )
         )
         assert plan.activation_date
         return QueriedPlan(

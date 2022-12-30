@@ -55,8 +55,9 @@ class ListInboundCoopRequests:
         )
 
     def _coordinator_exists(self, request: ListInboundCoopRequestsRequest) -> bool:
-        coordinator = self.company_repository.get_by_id(request.coordinator_id)
-        return bool(coordinator)
+        return bool(
+            self.company_repository.get_companies().with_id(request.coordinator_id)
+        )
 
     def _plan_to_response_model(self, plan: Plan) -> ListedInboundCoopRequest:
         assert plan.requested_cooperation

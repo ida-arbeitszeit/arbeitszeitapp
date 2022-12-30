@@ -224,9 +224,9 @@ We use `Flask-Babel <https://python-babel.github.io/flask-babel/>`_ for translat
     
      python setup.py update_catalog
 
-#. Translate language specific .po-files.
+#. Translate language specific .po-files. For translation programs see `this page <https://www.gnu.org/software/trans-coord/manual/web-trans/html_node/PO-Editors.html>`_
 	
-#. Compile translation files:
+#. Compile translation files (.mo-files):
 
    .. code-block::  bash
 

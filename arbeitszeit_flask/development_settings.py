@@ -23,6 +23,5 @@ MAIL_USE_SSL = True
 
 FLASK_PROFILER = {
     "enabled": True,
-    "ignore": ["^/static/.*"],
     "endpointRoot": "profiling",
 }

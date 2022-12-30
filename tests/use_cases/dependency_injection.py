@@ -3,16 +3,12 @@ from injector import Injector, Module, inject, provider, singleton
 import arbeitszeit.repositories as interfaces
 from arbeitszeit import entities
 from arbeitszeit.accountant_notifications import NotifyAccountantsAboutNewPlanPresenter
-from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.token import InvitationTokenValidator, TokenService
 from arbeitszeit.use_cases import GetCompanySummary
 from arbeitszeit.use_cases.edit_draft import EditDraftUseCase
 from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
-from arbeitszeit.use_cases.pay_consumer_product.consumer_product_transaction import (
-    ConsumerProductTransactionFactory,
-)
 from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitation_presenter import (
     AccountantInvitationPresenter,
 )
@@ -197,25 +193,6 @@ class InMemoryModule(Module):
     @provider
     def provide_control_thresholds_test_impl(self) -> ControlThresholdsTestImpl:
         return ControlThresholdsTestImpl()
-
-    @provider
-    def provide_consumer_product_transaction_factory(
-        self,
-        datetime_service: DatetimeService,
-        purchase_repository: interfaces.PurchaseRepository,
-        transaction_repository: interfaces.TransactionRepository,
-        plan_cooperation_repository: interfaces.PlanCooperationRepository,
-        account_repository: interfaces.AccountRepository,
-        control_thresholds: ControlThresholdsTestImpl,
-    ) -> ConsumerProductTransactionFactory:
-        return ConsumerProductTransactionFactory(
-            datetime_service=datetime_service,
-            purchase_repository=purchase_repository,
-            transaction_repository=transaction_repository,
-            plan_cooperation_repository=plan_cooperation_repository,
-            account_repository=account_repository,
-            control_thresholds=control_thresholds,
-        )
 
     @provider
     def provide_list_available_languages_use_case(

@@ -34,8 +34,7 @@ class InviteWorkerToCompanyUseCase:
         addressee = self.member_repository.get_members().with_id(request.worker).first()
         if addressee is None:
             return self.Response(is_success=False)
-        sender = self.company_repository.get_by_id(request.company)
-        if sender is None:
+        if not self.company_repository.get_companies().with_id(request.company):
             return self.Response(is_success=False)
         if self.worker_invite_repository.is_worker_invited_to_company(
             request.company, request.worker

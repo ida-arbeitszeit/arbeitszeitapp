@@ -92,7 +92,11 @@ class ShowMyPlansUseCase:
             id=plan.id,
             prd_name=plan.prd_name,
             price_per_unit=calculate_price(
-                self.plan_cooperation_repository.get_cooperating_plans(plan.id)
+                list(
+                    self.plan_repository.get_plans().that_are_in_same_cooperation_as(
+                        plan.id
+                    )
+                )
             ),
             is_public_service=plan.is_public_service,
             plan_creation_date=plan.plan_creation_date,

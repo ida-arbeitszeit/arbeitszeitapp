@@ -61,7 +61,11 @@ class AcceptCooperation:
         return AcceptCooperationResponse(rejection_reason=None)
 
     def _validate_request(self, request: AcceptCooperationRequest) -> None:
-        requester = self.company_repository.get_by_id(request.requester_id)
+        requester = (
+            self.company_repository.get_companies()
+            .with_id(request.requester_id)
+            .first()
+        )
         plan = self.plan_repository.get_plans().with_id(request.plan_id).first()
         cooperation = self.cooperation_repository.get_by_id(request.cooperation_id)
         if plan is None:

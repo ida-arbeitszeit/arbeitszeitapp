@@ -77,9 +77,12 @@ class PlanResult(QueryResult[Plan], Protocol):
     def without_completed_review(self) -> PlanResult:
         ...
 
-    def with_open_coordination_request(
+    def with_open_cooperation_request(
         self, *, cooperation: Optional[UUID] = ...
     ) -> PlanResult:
+        ...
+
+    def that_are_in_same_cooperation_as(self, plan: UUID) -> PlanResult:
         ...
 
 
@@ -113,11 +116,19 @@ class PurchaseResult(QueryResult[Purchase], Protocol):
         ...
 
 
-class CompanyWorkerRepository(Protocol):
-    def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
+class CompanyResult(QueryResult[Company], Protocol):
+    def with_id(self, id_: UUID) -> CompanyResult:
         ...
 
-    def get_member_workplaces(self, member: UUID) -> Iterable[Company]:
+    def with_email_address(self, email: str) -> CompanyResult:
+        ...
+
+    def that_are_workplace_of_member(self, member: UUID) -> CompanyResult:
+        ...
+
+
+class CompanyWorkerRepository(Protocol):
+    def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
         ...
 
 
@@ -309,26 +320,6 @@ class CompanyRepository(ABC):
         pass
 
     @abstractmethod
-    def has_company_with_email(self, email: str) -> bool:
-        pass
-
-    @abstractmethod
-    def get_by_id(self, id: UUID) -> Optional[Company]:
-        pass
-
-    @abstractmethod
-    def get_by_email(self, email: str) -> Optional[Company]:
-        pass
-
-    @abstractmethod
-    def is_company(self, id: UUID) -> bool:
-        pass
-
-    @abstractmethod
-    def count_registered_companies(self) -> int:
-        pass
-
-    @abstractmethod
     def query_companies_by_name(self, query: str) -> Iterator[Company]:
         pass
 
@@ -337,7 +328,7 @@ class CompanyRepository(ABC):
         pass
 
     @abstractmethod
-    def get_all_companies(self) -> Iterator[Company]:
+    def get_companies(self) -> CompanyResult:
         pass
 
     @abstractmethod
@@ -464,10 +455,6 @@ class CooperationRepository(ABC):
 
 
 class PlanCooperationRepository(ABC):
-    @abstractmethod
-    def get_cooperating_plans(self, plan_id: UUID) -> List[Plan]:
-        pass
-
     @abstractmethod
     def get_inbound_requests(self, coordinator_id: UUID) -> Iterator[Plan]:
         pass
