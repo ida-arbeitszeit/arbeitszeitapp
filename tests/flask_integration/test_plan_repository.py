@@ -78,16 +78,16 @@ class PlanRepositoryTests(FlaskTestCase):
             self.plan_generator.create_plan(activation_date=datetime.min)
             for _ in range(number_of_plans)
         ]
-        retrieved_plans = list(self.plan_repository.get_active_plans())
+        retrieved_plans = list(self.plan_repository.get_plans().that_are_active())
         assert len(retrieved_plans) == number_of_plans
         for plan in list_of_plans:
             assert plan in retrieved_plans
 
     def test_plans_that_were_set_to_expired_dont_show_up_in_active_plans(self) -> None:
         plan = self.plan_generator.create_plan(activation_date=datetime.min)
-        assert plan in list(self.plan_repository.get_active_plans())
+        assert plan in list(self.plan_repository.get_plans().that_are_active())
         self.plan_repository.set_plan_as_expired(plan)
-        assert plan not in list(self.plan_repository.get_active_plans())
+        assert plan not in list(self.plan_repository.get_plans().that_are_active())
 
     def test_that_plan_gets_hidden(self) -> None:
         plan = self.plan_generator.create_plan()
@@ -171,7 +171,7 @@ class GetActivePlansTests(FlaskTestCase):
         self.company_generator = self.injector.get(CompanyGenerator)
         self.approve_plan_use_case = self.injector.get(ApprovePlanUseCase)
 
-    def test_active_plans_can_be_ordered_by_creation_date_in_descending_order(
+    def test_plans_can_be_ordered_by_creation_date_in_descending_order(
         self,
     ) -> None:
         activation_dates = [
@@ -187,7 +187,7 @@ class GetActivePlansTests(FlaskTestCase):
             plans.append(self.plan_generator.create_plan(activation_date=timestamp))
         self.datetime_service.unfreeze_time()
         retrieved_plans = list(
-            self.plan_repository.get_active_plans()
+            self.plan_repository.get_plans()
             .ordered_by_creation_date(ascending=False)
             .limit(3)
         )
@@ -196,39 +196,35 @@ class GetActivePlansTests(FlaskTestCase):
         assert retrieved_plans[1] == plans[2]
         assert retrieved_plans[2] == plans[4]
 
-    def test_that_active_plans_can_be_filtered_by_product_name(self) -> None:
+    def test_that_plans_can_be_filtered_by_product_name(self) -> None:
         expected_plan = self.plan_generator.create_plan(
             activation_date=datetime.min, product_name="Delivery of goods"
         )
         returned_plan = list(
-            self.plan_repository.get_active_plans().with_product_name_containing(
+            self.plan_repository.get_plans().with_product_name_containing(
                 "Delivery of goods"
             )
         )
         assert returned_plan
         assert returned_plan[0] == expected_plan
 
-    def test_that_active_plans_can_be_filtered_by_substrings_of_product_name(
+    def test_that_plans_can_be_filtered_by_substrings_of_product_name(
         self,
     ) -> None:
         expected_plan = self.plan_generator.create_plan(
             activation_date=datetime.min, product_name="Delivery of goods"
         )
         returned_plan = list(
-            self.plan_repository.get_active_plans().with_product_name_containing(
-                "very of go"
-            )
+            self.plan_repository.get_plans().with_product_name_containing("very of go")
         )
         assert returned_plan
         assert returned_plan[0] == expected_plan
 
-    def test_that_query_active_plans_by_substring_of_plan_id_returns_plan(self) -> None:
+    def test_that_query_plans_by_substring_of_plan_id_returns_plan(self) -> None:
         expected_plan = self.plan_generator.create_plan(activation_date=datetime.min)
         expected_plan_id = expected_plan.id
         query = str(expected_plan_id)[3:8]
-        returned_plan = list(
-            self.plan_repository.get_active_plans().with_id_containing(query)
-        )
+        returned_plan = list(self.plan_repository.get_plans().with_id_containing(query))
         assert returned_plan
         assert returned_plan[0] == expected_plan
 

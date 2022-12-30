@@ -160,6 +160,11 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
             )
         )
 
+    def that_are_active(self) -> PlanQueryResult:
+        return self._with_modified_query(
+            lambda query: query.filter(models.Plan.is_active == True)
+        )
+
 
 class MemberQueryResult(FlaskQueryResult[entities.Member]):
     def working_at_company(self, company: UUID) -> MemberQueryResult:
@@ -840,13 +845,6 @@ class PlanRepository(repositories.PlanRepository):
         plan_orm = self.object_to_orm(plan)
         plan_orm.payout_count += 1
 
-    def get_active_plans(self) -> PlanQueryResult:
-        return PlanQueryResult(
-            query=models.Plan.query.filter_by(is_active=True),
-            mapper=self.object_from_orm,
-            db=self.db,
-        )
-
     def avg_timeframe_of_active_plans(self) -> Decimal:
         return Decimal(
             self.db.session.query(func.avg(models.Plan.timeframe))
@@ -1253,7 +1251,7 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
     cooperation_repository: CooperationRepository
 
     def get_inbound_requests(self, coordinator_id: UUID) -> Iterator[entities.Plan]:
-        for plan in self.plan_repository.get_active_plans():
+        for plan in self.plan_repository.get_plans().that_are_active():
             if plan.requested_cooperation:
                 if plan.requested_cooperation in [
                     coop.id

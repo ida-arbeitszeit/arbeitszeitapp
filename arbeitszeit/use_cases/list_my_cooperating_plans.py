@@ -43,7 +43,8 @@ class ListMyCooperatingPlansUseCase:
         if not self.company_repository.get_companies().with_id(request.company):
             raise self.Failure()
         plans = (
-            self.plan_repository.get_active_plans()
+            self.plan_repository.get_plans()
+            .that_are_active()
             .planned_by(request.company)
             .that_are_cooperating()
         )

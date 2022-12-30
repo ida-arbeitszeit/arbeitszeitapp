@@ -33,12 +33,12 @@ class UpdatePlansAndPayout:
         self._calculate_plan_expiration()
         payout_factor = self.payout_factor_service.calculate_payout_factor()
         self.payout_factor_service.store_payout_factor(payout_factor)
-        plans = self.plan_repository.get_active_plans()
+        plans = self.plan_repository.get_plans().that_are_active()
         for plan in plans:
             self._payout_work_certificates(plan, payout_factor)
 
     def _calculate_plan_expiration(self) -> None:
-        for plan in self.plan_repository.get_active_plans():
+        for plan in self.plan_repository.get_plans().that_are_active():
             assert plan.is_active, "Plan is not active!"
             assert plan.activation_date, "Plan has no activation date!"
 

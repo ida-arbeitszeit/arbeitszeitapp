@@ -60,7 +60,7 @@ class QueryPlans:
         query = request.query_string
         filter_by = request.filter_category
         sort_by = request.sorting_category
-        plans = self.plan_repository.get_active_plans()
+        plans = self.plan_repository.get_plans().that_are_active()
         if query is None:
             pass
         elif filter_by == PlanFilter.by_plan_id:

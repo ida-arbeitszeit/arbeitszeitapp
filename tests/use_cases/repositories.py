@@ -151,6 +151,9 @@ class PlanResult(QueryResultImpl[Plan], interfaces.PlanResult):
             entities=self.entities,
         )
 
+    def that_are_active(self) -> PlanResult:
+        return self._filtered_by(lambda plan: plan.is_active)
+
 
 class MemberResult(QueryResultImpl[Member], interfaces.MemberResult):
     def working_at_company(self, company: UUID) -> MemberResult:
@@ -617,14 +620,6 @@ class PlanRepository(interfaces.PlanRepository):
 
     def increase_payout_count_by_one(self, plan: Plan) -> None:
         plan.payout_count += 1
-
-    def get_active_plans(self) -> PlanResult:
-        return PlanResult(
-            items=lambda: filter(
-                lambda plan: plan.is_active, self.entities.plans.values()
-            ),
-            entities=self.entities,
-        )
 
     def avg_timeframe_of_active_plans(self) -> Decimal:
         try:
