@@ -6,7 +6,11 @@ from uuid import UUID
 from injector import inject
 
 from arbeitszeit.price_calculator import calculate_price
-from arbeitszeit.repositories import CooperationRepository, PlanCooperationRepository
+from arbeitszeit.repositories import (
+    CooperationRepository,
+    PlanCooperationRepository,
+    PlanRepository,
+)
 
 
 @dataclass
@@ -42,6 +46,7 @@ GetCoopSummaryResponse = Optional[GetCoopSummarySuccess]
 @dataclass
 class GetCoopSummary:
     cooperation_repository: CooperationRepository
+    plan_repository: PlanRepository
     plan_cooperation_repository: PlanCooperationRepository
 
     def __call__(self, request: GetCoopSummaryRequest) -> GetCoopSummaryResponse:
@@ -57,7 +62,11 @@ class GetCoopSummary:
                 if not plan.is_public_service
                 else Decimal(0),
                 plan_coop_price=calculate_price(
-                    self.plan_cooperation_repository.get_cooperating_plans(plan.id)
+                    list(
+                        self.plan_repository.get_plans().that_are_in_same_cooperation_as(
+                            plan.id
+                        )
+                    )
                 ),
             )
             for plan in self.plan_cooperation_repository.get_plans_in_cooperation(

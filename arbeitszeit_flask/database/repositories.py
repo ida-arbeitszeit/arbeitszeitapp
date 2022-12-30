@@ -18,7 +18,7 @@ from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
 from injector import inject
-from sqlalchemy import and_, func, update
+from sqlalchemy import and_, func, or_, update
 from sqlalchemy.sql.expression import Select
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -132,7 +132,7 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
             )
         )
 
-    def with_open_coordination_request(
+    def with_open_cooperation_request(
         self, *, cooperation: Optional[UUID] = None
     ) -> PlanQueryResult:
         return self._with_modified_query(
@@ -140,6 +140,23 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
                 models.Plan.requested_cooperation == str(cooperation)
                 if cooperation
                 else models.Plan.requested_cooperation != None
+            )
+        )
+
+    def that_are_in_same_cooperation_as(self, plan: UUID) -> PlanQueryResult:
+        return self._with_modified_query(
+            lambda query: query.filter(
+                or_(
+                    models.Plan.id == str(plan),
+                    and_(
+                        models.Plan.cooperation != None,
+                        models.Plan.cooperation.in_(
+                            models.Plan.query.filter(
+                                models.Plan.id == str(plan)
+                            ).with_entities(models.Plan.cooperation)
+                        ),
+                    ),
+                )
             )
         )
 
@@ -1245,19 +1262,6 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
                     )
                 ]:
                     yield plan
-
-    def get_cooperating_plans(self, plan_id: UUID) -> List[entities.Plan]:
-        plan_orm = models.Plan.query.filter_by(id=str(plan_id)).first()
-        if plan_orm is None:
-            return []
-        coop_orm = plan_orm.coop
-        if coop_orm is None:
-            return list(self.plan_repository.get_plans().with_id(plan_id))
-        else:
-            return [
-                self.plan_repository.object_from_orm(plan)
-                for plan in coop_orm.plans.all()
-            ]
 
     def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         plan_orm = models.Plan.query.filter_by(id=str(plan_id)).first()

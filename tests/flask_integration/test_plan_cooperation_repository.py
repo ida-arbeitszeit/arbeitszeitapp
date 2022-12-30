@@ -133,28 +133,6 @@ def test_plans_in_cooperation_correctly_counted(
 
 
 @injection_test
-def test_only_cooperating_plans_are_returned(
-    repository: PlanCooperationRepository,
-    plan_generator: PlanGenerator,
-    cooperation_repository: CooperationRepository,
-    company_generator: CompanyGenerator,
-):
-    coop = cooperation_repository.create_cooperation(
-        creation_timestamp=datetime.now(),
-        name="test name",
-        definition="test description",
-        coordinator=company_generator.create_company_entity(),
-    )
-    plan1 = plan_generator.create_plan(activation_date=datetime.min, cooperation=coop)
-    plan2 = plan_generator.create_plan(activation_date=datetime.min, cooperation=coop)
-    plan_generator.create_plan(activation_date=datetime.min, requested_cooperation=None)
-    cooperating_plans = repository.get_cooperating_plans(plan1.id)
-    assert len(cooperating_plans) == 2
-    assert plan_in_list(plan1, cooperating_plans)
-    assert plan_in_list(plan2, cooperating_plans)
-
-
-@injection_test
 def test_correct_plans_in_cooperation_returned(
     repository: PlanCooperationRepository,
     plan_generator: PlanGenerator,
@@ -177,17 +155,6 @@ def test_correct_plans_in_cooperation_returned(
     assert plan_in_list(plan1, plans)
     assert plan_in_list(plan2, plans)
     assert not plan_in_list(plan3, plans)
-
-
-@injection_test
-def test_single_plan_is_returned_as_a_1_plan_cooperation(
-    repository: PlanCooperationRepository,
-    plan_generator: PlanGenerator,
-):
-    plan = plan_generator.create_plan(activation_date=datetime.min, cooperation=None)
-    cooperating_plans = repository.get_cooperating_plans(plan.id)
-    assert len(cooperating_plans) == 1
-    assert plan_in_list(plan, cooperating_plans)
 
 
 @injection_test

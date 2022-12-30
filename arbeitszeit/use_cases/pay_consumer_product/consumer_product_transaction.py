@@ -10,7 +10,7 @@ from arbeitszeit.entities import Member, Plan
 from arbeitszeit.price_calculator import calculate_price
 from arbeitszeit.repositories import (
     AccountRepository,
-    PlanCooperationRepository,
+    PlanRepository,
     PurchaseRepository,
     TransactionRepository,
 )
@@ -22,7 +22,7 @@ class ConsumerProductTransactionFactory:
     datetime_service: DatetimeService
     purchase_repository: PurchaseRepository
     transaction_repository: TransactionRepository
-    plan_cooperation_repository: PlanCooperationRepository
+    plan_repository: PlanRepository
     account_repository: AccountRepository
     control_thresholds: ControlThresholds
 
@@ -39,7 +39,7 @@ class ConsumerProductTransactionFactory:
             self.datetime_service,
             self.purchase_repository,
             self.transaction_repository,
-            self.plan_cooperation_repository,
+            self.plan_repository,
             self.account_repository,
             self.control_thresholds,
         )
@@ -53,7 +53,7 @@ class ConsumerProductTransaction:
     datetime_service: DatetimeService
     purchase_repository: PurchaseRepository
     transaction_repository: TransactionRepository
-    plan_cooperation_repository: PlanCooperationRepository
+    plan_repository: PlanRepository
     account_repository: AccountRepository
     control_thresholds: ControlThresholds
 
@@ -65,7 +65,11 @@ class ConsumerProductTransaction:
             self.buyer.account
         )
         price = self.amount * calculate_price(
-            self.plan_cooperation_repository.get_cooperating_plans(self.plan.id)
+            list(
+                self.plan_repository.get_plans().that_are_in_same_cooperation_as(
+                    self.plan.id
+                )
+            )
         )
         if price == 0:
             return True
@@ -75,7 +79,11 @@ class ConsumerProductTransaction:
 
     def record_purchase(self) -> None:
         price_per_unit = calculate_price(
-            self.plan_cooperation_repository.get_cooperating_plans(self.plan.id)
+            list(
+                self.plan_repository.get_plans().that_are_in_same_cooperation_as(
+                    self.plan.id
+                )
+            )
         )
         self.purchase_repository.create_purchase_by_member(
             purchase_date=self.datetime_service.now(),
@@ -87,7 +95,11 @@ class ConsumerProductTransaction:
 
     def exchange_currency(self) -> None:
         coop_price = self.amount * calculate_price(
-            self.plan_cooperation_repository.get_cooperating_plans(self.plan.id)
+            list(
+                self.plan_repository.get_plans().that_are_in_same_cooperation_as(
+                    self.plan.id
+                )
+            )
         )
         individual_price = self.amount * calculate_price([self.plan])
         sending_account = self.buyer.account

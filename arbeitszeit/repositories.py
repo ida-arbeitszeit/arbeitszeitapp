@@ -77,9 +77,12 @@ class PlanResult(QueryResult[Plan], Protocol):
     def without_completed_review(self) -> PlanResult:
         ...
 
-    def with_open_coordination_request(
+    def with_open_cooperation_request(
         self, *, cooperation: Optional[UUID] = ...
     ) -> PlanResult:
+        ...
+
+    def that_are_in_same_cooperation_as(self, plan: UUID) -> PlanResult:
         ...
 
 
@@ -452,10 +455,6 @@ class CooperationRepository(ABC):
 
 
 class PlanCooperationRepository(ABC):
-    @abstractmethod
-    def get_cooperating_plans(self, plan_id: UUID) -> List[Plan]:
-        pass
-
     @abstractmethod
     def get_inbound_requests(self, coordinator_id: UUID) -> Iterator[Plan]:
         pass
