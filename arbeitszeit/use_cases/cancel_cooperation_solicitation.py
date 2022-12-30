@@ -3,11 +3,7 @@ from uuid import UUID
 
 from injector import inject
 
-from arbeitszeit.repositories import (
-    CompanyRepository,
-    PlanCooperationRepository,
-    PlanRepository,
-)
+from arbeitszeit.repositories import PlanCooperationRepository, PlanRepository
 
 
 @dataclass

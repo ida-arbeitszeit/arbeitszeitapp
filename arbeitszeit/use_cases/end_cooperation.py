@@ -6,7 +6,6 @@ from uuid import UUID
 from injector import inject
 
 from arbeitszeit.repositories import (
-    CompanyRepository,
     CooperationRepository,
     PlanCooperationRepository,
     PlanRepository,
