@@ -10,6 +10,7 @@ from arbeitszeit.entities import Member, Plan
 from arbeitszeit.price_calculator import calculate_price
 from arbeitszeit.repositories import (
     AccountRepository,
+    CompanyRepository,
     PlanRepository,
     PurchaseRepository,
     TransactionRepository,
@@ -25,6 +26,7 @@ class ConsumerProductTransactionFactory:
     plan_repository: PlanRepository
     account_repository: AccountRepository
     control_thresholds: ControlThresholds
+    company_repository: CompanyRepository
 
     def create_consumer_product_transaction(
         self,
@@ -42,6 +44,7 @@ class ConsumerProductTransactionFactory:
             self.plan_repository,
             self.account_repository,
             self.control_thresholds,
+            self.company_repository,
         )
 
 
@@ -56,6 +59,7 @@ class ConsumerProductTransaction:
     plan_repository: PlanRepository
     account_repository: AccountRepository
     control_thresholds: ControlThresholds
+    company_repository: CompanyRepository
 
     def is_account_balance_sufficient(self) -> bool:
         allowed_overdraw = (
@@ -103,10 +107,14 @@ class ConsumerProductTransaction:
         )
         individual_price = self.amount * calculate_price([self.plan])
         sending_account = self.buyer.account
+        planner = (
+            self.company_repository.get_companies().with_id(self.plan.planner).first()
+        )
+        assert planner
         self.transaction_repository.create_transaction(
             date=self.datetime_service.now(),
             sending_account=sending_account,
-            receiving_account=self.plan.planner.product_account,
+            receiving_account=planner.product_account,
             amount_sent=coop_price,
             amount_received=individual_price,
             purpose=f"Plan-Id: {self.plan.id}",

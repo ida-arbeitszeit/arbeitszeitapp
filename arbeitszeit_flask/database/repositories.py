@@ -745,14 +745,10 @@ class PlanRepository(repositories.PlanRepository):
             resource_cost=plan.costs_r,
             means_cost=plan.costs_p,
         )
-        planner = (
-            self.company_repository.get_companies().with_id(UUID(plan.planner)).first()
-        )
-        assert planner is not None
         return entities.Plan(
             id=UUID(plan.id),
             plan_creation_date=plan.plan_creation_date,
-            planner=planner,
+            planner=UUID(plan.planner),
             production_costs=production_costs,
             prd_name=plan.prd_name,
             prd_unit=plan.prd_unit,
@@ -977,12 +973,22 @@ class TransactionRepository(repositories.TransactionRepository):
         ]
 
     def get_sales_balance_of_plan(self, plan: entities.Plan) -> Decimal:
+        # return Decimal(
+        #     self.db.session.query(func.sum(Transaction.amount_received))
+        #     .filter(
+        #         Transaction.receiving_account == str(plan.planner.product_account.id),
+        #         Transaction.purpose.contains(str(plan.id)),
+        #     )
+        #     .one()[0]
+        #     or 0
+        # )
         return Decimal(
-            self.db.session.query(func.sum(Transaction.amount_received))
-            .filter(
-                Transaction.receiving_account == str(plan.planner.product_account.id),
-                Transaction.purpose.contains(f"{plan.id}"),
+            models.Transaction.query.join(
+                models.Account,
+                models.Transaction.receiving_account == models.Account.id,
             )
+            .filter(models.Account.account_owner_company == str(plan.planner))
+            .with_entities(func.sum(models.Transaction.amount_received))
             .one()[0]
             or 0
         )

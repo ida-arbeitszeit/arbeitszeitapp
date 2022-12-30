@@ -137,7 +137,7 @@ class PlanDraft:
 class Plan:
     id: UUID
     plan_creation_date: datetime
-    planner: Company
+    planner: UUID
     production_costs: ProductionCosts
     prd_name: str
     prd_unit: str

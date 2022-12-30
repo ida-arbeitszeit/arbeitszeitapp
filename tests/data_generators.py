@@ -317,12 +317,12 @@ class PlanGenerator:
         if requested_cooperation:
             self.request_cooperation(
                 RequestCooperationRequest(
-                    plan.planner.id, plan.id, requested_cooperation.id
+                    plan.planner, plan.id, requested_cooperation.id
                 )
             )
         if cooperation:
             self.request_cooperation(
-                RequestCooperationRequest(plan.planner.id, plan.id, cooperation.id)
+                RequestCooperationRequest(plan.planner, plan.id, cooperation.id)
             )
             self.accept_cooperation(
                 AcceptCooperationRequest(

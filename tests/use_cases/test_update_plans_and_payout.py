@@ -1,7 +1,8 @@
 import datetime
 from decimal import Decimal
+from uuid import UUID
 
-from arbeitszeit.entities import AccountTypes, Company, ProductionCosts
+from arbeitszeit.entities import Account, AccountTypes, Company, ProductionCosts
 from arbeitszeit.use_cases import UpdatePlansAndPayout
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts, ShowMyAccountsRequest
 from tests.data_generators import CooperationGenerator
@@ -10,6 +11,7 @@ from tests.use_cases.base_test_case import BaseTestCase
 from .dependency_injection import get_dependency_injector
 from .repositories import (
     AccountRepository,
+    CompanyRepository,
     FakePayoutFactorRepository,
     TransactionRepository,
 )
@@ -25,6 +27,7 @@ class UseCaseTests(BaseTestCase):
         self.transaction_repository = self.injector.get(TransactionRepository)
         self.payout_factor_repository = self.injector.get(FakePayoutFactorRepository)
         self.show_my_accounts = self.injector.get(ShowMyAccounts)
+        self.company_repository = self.injector.get(CompanyRepository)
 
     def test_that_a_plan_that_is_not_active_can_not_expire(self) -> None:
         plan = self.plan_generator.create_plan(activation_date=None)
@@ -143,7 +146,9 @@ class UseCaseTests(BaseTestCase):
         self.payout()
 
         assert (
-            self.account_repository.get_account_balance(plan.planner.work_account)
+            self.account_repository.get_account_balance(
+                self.get_work_account(plan.planner)
+            )
             == expected_payout
         )
 
@@ -159,7 +164,9 @@ class UseCaseTests(BaseTestCase):
         self.payout()
 
         assert (
-            self.account_repository.get_account_balance(plan.planner.work_account)
+            self.account_repository.get_account_balance(
+                self.get_work_account(plan.planner)
+            )
             == plan.production_costs.labour_cost
         )
 
@@ -194,11 +201,15 @@ class UseCaseTests(BaseTestCase):
         self.payout()
 
         assert (
-            self.account_repository.get_account_balance(plan1.planner.work_account)
+            self.account_repository.get_account_balance(
+                self.get_work_account(plan1.planner)
+            )
             == expected_payout1
         )
         assert (
-            self.account_repository.get_account_balance(plan2.planner.work_account)
+            self.account_repository.get_account_balance(
+                self.get_work_account(plan2.planner)
+            )
             == expected_payout2
         )
 
@@ -243,11 +254,15 @@ class UseCaseTests(BaseTestCase):
         self.payout()
 
         assert (
-            self.account_repository.get_account_balance(plan1.planner.work_account)
+            self.account_repository.get_account_balance(
+                self.get_work_account(plan1.planner)
+            )
             == expected_payout1
         )
         assert (
-            self.account_repository.get_account_balance(plan2.planner.work_account)
+            self.account_repository.get_account_balance(
+                self.get_work_account(plan2.planner)
+            )
             == expected_payout2
         )
 
@@ -274,7 +289,9 @@ class UseCaseTests(BaseTestCase):
         self.payout()
 
         self.assertEqual(
-            self.account_repository.get_account_balance(plan1.planner.work_account),
+            self.account_repository.get_account_balance(
+                self.get_work_account(plan1.planner)
+            ),
             expected_payout1,
         )
 
@@ -375,3 +392,8 @@ class UseCaseTests(BaseTestCase):
                 if transaction.receiving_account.account_type == AccountTypes.a
             ]
         )
+
+    def get_work_account(self, company: UUID) -> Account:
+        model = self.company_repository.get_companies().with_id(company).first()
+        assert model
+        return model.work_account

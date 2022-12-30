@@ -145,8 +145,8 @@ class PlanRepositoryTests(FlaskTestCase):
 
     def test_that_correct_id_of_planning_company_gets_returned(self) -> None:
         expected_plan = self.plan_generator.create_plan()
-        plan_id = self.plan_repository.get_planner_id(expected_plan.id)
-        assert plan_id == expected_plan.planner.id
+        planner_id = self.plan_repository.get_planner_id(expected_plan.id)
+        assert planner_id == expected_plan.planner
 
     def test_cannot_create_plan_from_non_existing_draft(self) -> None:
         assert self.plan_repository.create_plan_from_draft(uuid4()) is None

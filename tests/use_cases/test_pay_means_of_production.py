@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 from decimal import Decimal
-from uuid import uuid4
+from uuid import UUID, uuid4
 
-from arbeitszeit.entities import Company, ProductionCosts, PurposesOfPurchases
+from arbeitszeit.entities import Account, Company, ProductionCosts, PurposesOfPurchases
 from arbeitszeit.price_calculator import calculate_price
 from arbeitszeit.use_cases import (
     GetCompanyTransactions,
@@ -16,6 +16,7 @@ from tests.data_generators import CooperationGenerator
 from .base_test_case import BaseTestCase
 from .repositories import (
     AccountRepository,
+    CompanyRepository,
     PlanRepository,
     PurchaseRepository,
     TransactionRepository,
@@ -32,6 +33,7 @@ class PayMeansOfProductionTests(BaseTestCase):
         self.purchase_repository = self.injector.get(PurchaseRepository)
         self.transaction_repository = self.injector.get(TransactionRepository)
         self.update_plans_and_payout = self.injector.get(UpdatePlansAndPayout)
+        self.company_repository = self.injector.get(CompanyRepository)
 
     def test_reject_payment_if_plan_is_expired(self) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
@@ -148,14 +150,14 @@ class PayMeansOfProductionTests(BaseTestCase):
         purpose = PurposesOfPurchases.raw_materials
         pieces = 5
         assert self.account_repository.get_account_balance(
-            plan.planner.product_account
+            self.get_product_account(plan.planner)
         ) == Decimal("-3")
         self.pay_means_of_production(
             PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
         )
 
         assert self.account_repository.get_account_balance(
-            plan.planner.product_account
+            self.get_product_account(plan.planner)
         ) == Decimal("0")
 
     def test_balance_of_seller_increased_correctly_when_plan_is_in_cooperation(
@@ -178,7 +180,7 @@ class PayMeansOfProductionTests(BaseTestCase):
         pieces = 5
 
         balance_before_transaction = self.account_repository.get_account_balance(
-            plan.planner.product_account
+            self.get_product_account(plan.planner)
         )
 
         self.pay_means_of_production(
@@ -186,7 +188,7 @@ class PayMeansOfProductionTests(BaseTestCase):
         )
 
         assert self.account_repository.get_account_balance(
-            plan.planner.product_account
+            self.get_product_account(plan.planner)
         ) == balance_before_transaction + (
             plan.production_costs.total_cost() / Decimal(plan.prd_amount) * 5
         )
@@ -217,10 +219,9 @@ class PayMeansOfProductionTests(BaseTestCase):
             self.transaction_repository.transactions[-1].sending_account
             == sender.means_account
         )
-        assert (
-            self.transaction_repository.transactions[-1].receiving_account
-            == plan.planner.product_account
-        )
+        assert self.transaction_repository.transactions[
+            -1
+        ].receiving_account == self.get_product_account(plan.planner)
         assert self.transaction_repository.transactions[-1].amount_sent == price_total
         assert (
             self.transaction_repository.transactions[-1].amount_received == price_total
@@ -252,10 +253,9 @@ class PayMeansOfProductionTests(BaseTestCase):
             self.transaction_repository.transactions[-1].sending_account
             == sender.raw_material_account
         )
-        assert (
-            self.transaction_repository.transactions[-1].receiving_account
-            == plan.planner.product_account
-        )
+        assert self.transaction_repository.transactions[
+            -1
+        ].receiving_account == self.get_product_account(plan.planner)
         assert self.transaction_repository.transactions[-1].amount_sent == price_total
         assert (
             self.transaction_repository.transactions[-1].amount_received == price_total
@@ -339,6 +339,11 @@ class PayMeansOfProductionTests(BaseTestCase):
         )
         assert not response.is_rejected
         assert response.rejection_reason is None
+
+    def get_product_account(self, company: UUID) -> Account:
+        model = self.company_repository.get_companies().with_id(company).first()
+        assert model
+        return model.product_account
 
 
 class TestSuccessfulPayment(BaseTestCase):

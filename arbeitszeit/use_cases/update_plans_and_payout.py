@@ -7,6 +7,7 @@ from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan, SocialAccounting
 from arbeitszeit.payout_factor import PayoutFactorService
 from arbeitszeit.repositories import (
+    CompanyRepository,
     PayoutFactorRepository,
     PlanCooperationRepository,
     PlanRepository,
@@ -24,6 +25,7 @@ class UpdatePlansAndPayout:
     plan_cooperation_repository: PlanCooperationRepository
     payout_factor_service: PayoutFactorService
     payout_factor_repository: PayoutFactorRepository
+    company_repository: CompanyRepository
 
     def __call__(self) -> None:
         """
@@ -74,10 +76,12 @@ class UpdatePlansAndPayout:
 
     def _payout(self, plan: Plan, payout_factor: Decimal) -> None:
         amount = payout_factor * plan.production_costs.labour_cost / plan.timeframe
+        planner = self.company_repository.get_companies().with_id(plan.planner).first()
+        assert planner
         self.transaction_repository.create_transaction(
             date=self.datetime_service.now(),
             sending_account=self.social_accounting.account,
-            receiving_account=plan.planner.work_account,
+            receiving_account=planner.work_account,
             amount_sent=round(amount, 2),
             amount_received=round(amount, 2),
             purpose=f"Plan-Id: {plan.id}",
