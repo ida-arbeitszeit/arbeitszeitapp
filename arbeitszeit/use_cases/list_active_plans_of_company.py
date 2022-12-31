@@ -27,7 +27,9 @@ class ListActivePlansOfCompany:
     def __call__(self, company_id: UUID) -> ListPlansResponse:
         plans = [
             self._create_plan_response_model(plan)
-            for plan in self.plan_repository.get_active_plans().planned_by(company_id)
+            for plan in self.plan_repository.get_plans()
+            .that_are_active()
+            .planned_by(company_id)
         ]
         if not plans:
             return ListPlansResponse(plans=[])

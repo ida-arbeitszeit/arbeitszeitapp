@@ -6,7 +6,6 @@ from uuid import UUID
 from injector import inject
 
 from arbeitszeit.repositories import (
-    CompanyRepository,
     CooperationRepository,
     PlanCooperationRepository,
     PlanRepository,
@@ -40,7 +39,6 @@ class EndCooperationResponse:
 class EndCooperation:
     plan_repository: PlanRepository
     cooperation_repository: CooperationRepository
-    company_repository: CompanyRepository
     plan_cooperation_repository: PlanCooperationRepository
 
     def __call__(self, request: EndCooperationRequest) -> EndCooperationResponse:
@@ -52,11 +50,6 @@ class EndCooperation:
         return EndCooperationResponse(rejection_reason=None)
 
     def _validate_request(self, request: EndCooperationRequest) -> None:
-        requester = (
-            self.company_repository.get_companies()
-            .with_id(request.requester_id)
-            .first()
-        )
         plan = self.plan_repository.get_plans().with_id(request.plan_id).first()
         cooperation = self.cooperation_repository.get_by_id(request.cooperation_id)
         if plan is None:
@@ -65,5 +58,7 @@ class EndCooperation:
             raise EndCooperationResponse.RejectionReason.cooperation_not_found
         if plan.cooperation is None:
             raise EndCooperationResponse.RejectionReason.plan_has_no_cooperation
-        if (requester != cooperation.coordinator) and (requester != plan.planner):
+        if (request.requester_id != cooperation.coordinator.id) and (
+            request.requester_id != plan.planner
+        ):
             raise EndCooperationResponse.RejectionReason.requester_is_not_authorized

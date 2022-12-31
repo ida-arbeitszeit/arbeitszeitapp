@@ -7,7 +7,7 @@ from uuid import UUID
 from injector import inject
 
 from arbeitszeit import entities
-from arbeitszeit.repositories import PlanRepository
+from arbeitszeit.repositories import CompanyRepository, PlanRepository
 
 
 @inject
@@ -28,6 +28,7 @@ class ListPlansWithPendingReviewUseCase:
         plans: List[ListPlansWithPendingReviewUseCase.Plan]
 
     plan_repository: PlanRepository
+    company_repository: CompanyRepository
 
     def list_plans_with_pending_review(self, request: Request) -> Response:
         return self.Response(
@@ -38,9 +39,13 @@ class ListPlansWithPendingReviewUseCase:
         )
 
     def _get_info_for_plan(self, plan_model: entities.Plan) -> Plan:
+        planner = (
+            self.company_repository.get_companies().with_id(plan_model.planner).first()
+        )
+        assert planner
         return self.Plan(
             id=plan_model.id,
             product_name=plan_model.prd_name,
-            planner_name=plan_model.planner.name,
-            planner_id=plan_model.planner.id,
+            planner_name=planner.name,
+            planner_id=planner.id,
         )

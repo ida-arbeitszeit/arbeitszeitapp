@@ -783,16 +783,14 @@ def test_that_supplier_with_highest_sales_volume_is_listed_before_other_supplier
     response = get_company_summary(buyer.id)
     assert response
     assert (
-        response.suppliers_ordered_by_volume[0].company_id
-        == top_supplier_plan.planner.id
+        response.suppliers_ordered_by_volume[0].company_id == top_supplier_plan.planner
     )
     assert (
         response.suppliers_ordered_by_volume[1].company_id
-        == medium_supplier_plan.planner.id
+        == medium_supplier_plan.planner
     )
     assert (
-        response.suppliers_ordered_by_volume[2].company_id
-        == low_supplier_plan.planner.id
+        response.suppliers_ordered_by_volume[2].company_id == low_supplier_plan.planner
     )
 
 

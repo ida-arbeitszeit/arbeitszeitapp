@@ -11,7 +11,7 @@ from injector import inject
 
 from arbeitszeit.entities import Plan
 from arbeitszeit.price_calculator import calculate_price
-from arbeitszeit.repositories import PlanRepository
+from arbeitszeit.repositories import CompanyRepository, PlanRepository
 
 
 class PlanFilter(enum.Enum):
@@ -55,12 +55,13 @@ class QueryPlansRequest:
 @dataclass
 class QueryPlans:
     plan_repository: PlanRepository
+    company_repository: CompanyRepository
 
     def __call__(self, request: QueryPlansRequest) -> PlanQueryResponse:
         query = request.query_string
         filter_by = request.filter_category
         sort_by = request.sorting_category
-        plans = self.plan_repository.get_active_plans()
+        plans = self.plan_repository.get_plans().that_are_active()
         if query is None:
             pass
         elif filter_by == PlanFilter.by_plan_id:
@@ -82,10 +83,12 @@ class QueryPlans:
             )
         )
         assert plan.activation_date
+        planner = self.company_repository.get_companies().with_id(plan.planner).first()
+        assert planner
         return QueriedPlan(
             plan_id=plan.id,
-            company_name=plan.planner.name,
-            company_id=plan.planner.id,
+            company_name=planner.name,
+            company_id=plan.planner,
             product_name=plan.prd_name,
             description=plan.description,
             price_per_unit=price_per_unit,

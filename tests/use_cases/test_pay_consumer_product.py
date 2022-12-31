@@ -17,6 +17,7 @@ from tests.data_generators import TransactionGenerator
 from .base_test_case import BaseTestCase
 from .repositories import (
     AccountRepository,
+    CompanyRepository,
     PlanCooperationRepository,
     PlanRepository,
     PurchaseRepository,
@@ -37,6 +38,7 @@ class PayConsumerProductTests(BaseTestCase):
         self.buyer = self.member_generator.create_member_entity()
         self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
         self.update_plans_and_payout = self.injector.get(UpdatePlansAndPayout)
+        self.company_repository = self.injector.get(CompanyRepository)
 
     def test_payment_fails_when_plan_does_not_exist(self):
         response = self.pay_consumer_product.pay_consumer_product(
@@ -207,8 +209,9 @@ class PayConsumerProductTests(BaseTestCase):
             )
         )
         expected_amount_received = pieces * calculate_price([plan])
+        planner = self.company_repository.get_companies().with_id(plan.planner).first()
         assert transaction_added.sending_account == self.buyer.account
-        assert transaction_added.receiving_account == plan.planner.product_account
+        assert transaction_added.receiving_account == planner.product_account
         assert transaction_added.amount_sent == expected_amount_sent
         assert transaction_added.amount_received == expected_amount_received
 
@@ -241,12 +244,16 @@ class PayConsumerProductTests(BaseTestCase):
             self.account_repository.get_account_balance(self.buyer.account),
             expected_balance,
         )
+        planner = self.company_repository.get_companies().with_id(plan.planner).first()
+        assert planner
         self.assertEqual(
-            self.account_repository.get_account_balance(plan.planner.product_account),
+            self.account_repository.get_account_balance(planner.product_account),
             Decimal("-9") + costs,
         )
 
-    def test_that_correct_transaction_is_added_when_plan_is_public_service(self):
+    def test_that_correct_transaction_is_added_when_plan_is_public_service(
+        self,
+    ) -> None:
         plan = self.plan_generator.create_plan(
             is_public_service=True,
             activation_date=self.datetime_service.now_minus_one_day(),
@@ -261,11 +268,12 @@ class PayConsumerProductTests(BaseTestCase):
             transactions_before_payment + 1,
         )
         transaction_added = self.transaction_repository.transactions[-1]
+        planner = self.company_repository.get_companies().with_id(plan.planner).first()
         assert transaction_added.sending_account == self.buyer.account
-        assert transaction_added.receiving_account == plan.planner.product_account
+        assert transaction_added.receiving_account == planner.product_account
         assert transaction_added.amount_sent == transaction_added.amount_received == 0
 
-    def test_balances_are_adjusted_correctly_when_plan_is_public_service(self):
+    def test_balances_are_adjusted_correctly_when_plan_is_public_service(self) -> None:
         plan = self.plan_generator.create_plan(
             is_public_service=True,
             activation_date=self.datetime_service.now_minus_one_day(),
@@ -281,9 +289,10 @@ class PayConsumerProductTests(BaseTestCase):
                 )
             )
         )
+        planner = self.company_repository.get_companies().with_id(plan.planner).first()
         assert self.account_repository.get_account_balance(self.buyer.account) == -costs
         assert (
-            self.account_repository.get_account_balance(plan.planner.product_account)
+            self.account_repository.get_account_balance(planner.product_account)
             == costs
         )
 

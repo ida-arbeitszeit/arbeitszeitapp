@@ -1,6 +1,9 @@
 from datetime import datetime
 from decimal import Decimal
 
+from sqlalchemy import and_
+
+from arbeitszeit_flask import models
 from arbeitszeit_flask.database.repositories import TransactionRepository
 from tests.data_generators import AccountGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
@@ -55,7 +58,12 @@ def test_correct_sales_balance_of_plan_gets_returned_after_one_transaction(
 ) -> None:
     plan = plan_generator.create_plan()
     sender_account = account_generator.create_account()
-    receiver_account = plan.planner.product_account
+    receiver_account = models.Account.query.filter(
+        and_(
+            models.Account.account_owner_company == str(plan.planner),
+            models.Account.account_type == models.AccountTypes.prd,
+        )
+    ).first()
     account_balance_before_transaction = repository.get_sales_balance_of_plan(plan)
     repository.create_transaction(
         datetime_service.now(),
@@ -79,7 +87,12 @@ def test_correct_sales_balance_of_plan_gets_returned_after_two_transactions(
     plan = plan_generator.create_plan()
     sender_account_1 = account_generator.create_account()
     sender_account_2 = account_generator.create_account()
-    receiver_account = plan.planner.product_account
+    receiver_account = models.Account.query.filter(
+        and_(
+            models.Account.account_owner_company == str(plan.planner),
+            models.Account.account_type == models.AccountTypes.prd,
+        )
+    ).first()
     sales_balance_before_transactions = repository.get_sales_balance_of_plan(plan)
     repository.create_transaction(
         datetime.now(),

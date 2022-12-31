@@ -99,7 +99,7 @@ class UseCaseTests(BaseTestCase):
         )
         self.use_case.approve_plan(self.create_request(plan=plan.id))
         self.assertEqual(
-            self.get_company_account_balances(plan.planner.id).means, Decimal(5)
+            self.get_company_account_balances(plan.planner).means, Decimal(5)
         )
 
     def test_that_means_of_production_costs_are_correctly_rounded_and_transfered(self):
@@ -113,7 +113,7 @@ class UseCaseTests(BaseTestCase):
         )
         self.use_case.approve_plan(self.create_request(plan=plan.id))
         self.assertEqual(
-            self.get_company_account_balances(plan.planner.id).means, Decimal("5.16")
+            self.get_company_account_balances(plan.planner).means, Decimal("5.16")
         )
 
     def test_that_costs_for_resources_are_transfered(self) -> None:
@@ -125,7 +125,7 @@ class UseCaseTests(BaseTestCase):
         )
         self.use_case.approve_plan(self.create_request(plan=plan.id))
         self.assertEqual(
-            self.get_company_account_balances(plan.planner.id).raw_material, Decimal(5)
+            self.get_company_account_balances(plan.planner).raw_material, Decimal(5)
         )
 
     def test_that_resource_costs_are_correctly_rounded_and_transfered(self):
@@ -139,7 +139,7 @@ class UseCaseTests(BaseTestCase):
         )
         self.use_case.approve_plan(self.create_request(plan=plan.id))
         self.assertEqual(
-            self.get_company_account_balances(plan.planner.id).raw_material,
+            self.get_company_account_balances(plan.planner).raw_material,
             Decimal("5.16"),
         )
 
@@ -154,7 +154,7 @@ class UseCaseTests(BaseTestCase):
         )
         self.use_case.approve_plan(self.create_request(plan=plan.id))
         self.assertEqual(
-            self.get_company_account_balances(plan.planner.id).work,
+            self.get_company_account_balances(plan.planner).work,
             Decimal(0),
         )
 
@@ -169,7 +169,7 @@ class UseCaseTests(BaseTestCase):
         )
         self.use_case.approve_plan(self.create_request(plan=plan.id))
         self.assertEqual(
-            self.get_company_account_balances(plan.planner.id).product,
+            self.get_company_account_balances(plan.planner).product,
             Decimal("-6"),
         )
 

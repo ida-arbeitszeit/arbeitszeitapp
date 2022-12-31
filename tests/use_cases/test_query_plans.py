@@ -21,7 +21,7 @@ def plan_in_results(plan: Plan, response: PlanQueryResponse) -> bool:
         (
             plan.id == result.plan_id
             and plan.prd_name == result.product_name
-            and plan.planner.id == result.company_id
+            and plan.planner == result.company_id
             and plan.activation_date == result.activation_date
             for result in response.results
         )

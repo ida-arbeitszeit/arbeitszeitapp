@@ -8,6 +8,7 @@ from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
 from tests.data_generators import CooperationGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
 from tests.use_cases.dependency_injection import get_dependency_injector
+from tests.use_cases.repositories import CompanyRepository
 
 
 class PlanSummaryServiceTests(TestCase):
@@ -17,6 +18,11 @@ class PlanSummaryServiceTests(TestCase):
         self.plan_generator = self.injector.get(PlanGenerator)
         self.coop_generator = self.injector.get(CooperationGenerator)
         self.plan = self.plan_generator.create_plan()
+        self.company_repository = self.injector.get(CompanyRepository)
+        self.planner = (
+            self.company_repository.get_companies().with_id(self.plan.planner).first()
+        )
+        assert self.planner
         self.summary = self.service.get_summary_from_plan(self.plan)
         self.payout_use_case = self.injector.get(UpdatePlansAndPayout)
         self.datetime_service = self.injector.get(FakeDatetimeService)
@@ -25,7 +31,7 @@ class PlanSummaryServiceTests(TestCase):
         self.assertEqual(self.summary.plan_id, self.plan.id)
 
     def test_that_correct_planner_name_is_shown(self):
-        self.assertEqual(self.summary.planner_name, self.plan.planner.name)
+        self.assertEqual(self.summary.planner_name, self.planner.name)
 
     def test_that_correct_active_status_is_shown_when_plan_is_active(self):
         plan = self.plan_generator.create_plan(activation_date=datetime.min)

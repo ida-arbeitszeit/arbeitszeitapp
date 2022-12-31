@@ -65,11 +65,13 @@ class ListInboundCoopRequests:
             plan.requested_cooperation
         )
         assert requested_cooperation_name
+        planner = self.company_repository.get_companies().with_id(plan.planner).first()
+        assert planner
         return ListedInboundCoopRequest(
             coop_id=plan.requested_cooperation,
             coop_name=requested_cooperation_name,
             plan_id=plan.id,
             plan_name=plan.prd_name,
-            planner_name=plan.planner.name,
-            planner_id=plan.planner.id,
+            planner_name=planner.name,
+            planner_id=planner.id,
         )

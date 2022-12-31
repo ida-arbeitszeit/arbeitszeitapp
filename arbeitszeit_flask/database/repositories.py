@@ -160,6 +160,11 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
             )
         )
 
+    def that_are_active(self) -> PlanQueryResult:
+        return self._with_modified_query(
+            lambda query: query.filter(models.Plan.is_active == True)
+        )
+
 
 class MemberQueryResult(FlaskQueryResult[entities.Member]):
     def working_at_company(self, company: UUID) -> MemberQueryResult:
@@ -740,14 +745,10 @@ class PlanRepository(repositories.PlanRepository):
             resource_cost=plan.costs_r,
             means_cost=plan.costs_p,
         )
-        planner = (
-            self.company_repository.get_companies().with_id(UUID(plan.planner)).first()
-        )
-        assert planner is not None
         return entities.Plan(
             id=UUID(plan.id),
             plan_creation_date=plan.plan_creation_date,
-            planner=planner,
+            planner=UUID(plan.planner),
             production_costs=production_costs,
             prd_name=plan.prd_name,
             prd_unit=plan.prd_unit,
@@ -839,13 +840,6 @@ class PlanRepository(repositories.PlanRepository):
 
         plan_orm = self.object_to_orm(plan)
         plan_orm.payout_count += 1
-
-    def get_active_plans(self) -> PlanQueryResult:
-        return PlanQueryResult(
-            query=models.Plan.query.filter_by(is_active=True),
-            mapper=self.object_from_orm,
-            db=self.db,
-        )
 
     def avg_timeframe_of_active_plans(self) -> Decimal:
         return Decimal(
@@ -980,11 +974,12 @@ class TransactionRepository(repositories.TransactionRepository):
 
     def get_sales_balance_of_plan(self, plan: entities.Plan) -> Decimal:
         return Decimal(
-            self.db.session.query(func.sum(Transaction.amount_received))
-            .filter(
-                Transaction.receiving_account == str(plan.planner.product_account.id),
-                Transaction.purpose.contains(f"{plan.id}"),
+            models.Transaction.query.join(
+                models.Account,
+                models.Transaction.receiving_account == models.Account.id,
             )
+            .filter(models.Account.account_owner_company == str(plan.planner))
+            .with_entities(func.sum(models.Transaction.amount_received))
             .one()[0]
             or 0
         )
@@ -1253,7 +1248,7 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
     cooperation_repository: CooperationRepository
 
     def get_inbound_requests(self, coordinator_id: UUID) -> Iterator[entities.Plan]:
-        for plan in self.plan_repository.get_active_plans():
+        for plan in self.plan_repository.get_plans().that_are_active():
             if plan.requested_cooperation:
                 if plan.requested_cooperation in [
                     coop.id

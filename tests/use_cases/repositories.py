@@ -111,7 +111,7 @@ class PlanResult(QueryResultImpl[Plan], interfaces.PlanResult):
         return self._filtered_by(lambda plan: plan.cooperation is not None)
 
     def planned_by(self, company: UUID) -> PlanResult:
-        return self._filtered_by(lambda plan: plan.planner.id == company)
+        return self._filtered_by(lambda plan: plan.planner == company)
 
     def with_id(self, id_: UUID) -> PlanResult:
         return self._filtered_by(lambda plan: plan.id == id_)
@@ -150,6 +150,9 @@ class PlanResult(QueryResultImpl[Plan], interfaces.PlanResult):
             items=items_generator,
             entities=self.entities,
         )
+
+    def that_are_active(self) -> PlanResult:
+        return self._filtered_by(lambda plan: plan.is_active)
 
 
 class MemberResult(QueryResultImpl[Member], interfaces.MemberResult):
@@ -313,8 +316,9 @@ class PurchaseRepository(interfaces.PurchaseRepository):
 @singleton
 class TransactionRepository(interfaces.TransactionRepository):
     @inject
-    def __init__(self) -> None:
+    def __init__(self, entities: EntityStorage) -> None:
         self.transactions: List[Transaction] = []
+        self.entities = entities
 
     def create_transaction(
         self,
@@ -355,8 +359,10 @@ class TransactionRepository(interfaces.TransactionRepository):
 
     def get_sales_balance_of_plan(self, plan: Plan) -> Decimal:
         balance = Decimal(0)
+        planner = self.entities.get_company_by_id(plan.planner)
+        assert planner
         for transaction in self.transactions:
-            if (transaction.receiving_account == plan.planner.product_account) and (
+            if (transaction.receiving_account == planner.product_account) and (
                 str(plan.id) in transaction.purpose
             ):
                 balance += transaction.amount_received
@@ -618,14 +624,6 @@ class PlanRepository(interfaces.PlanRepository):
     def increase_payout_count_by_one(self, plan: Plan) -> None:
         plan.payout_count += 1
 
-    def get_active_plans(self) -> PlanResult:
-        return PlanResult(
-            items=lambda: filter(
-                lambda plan: plan.is_active, self.entities.plans.values()
-            ),
-            entities=self.entities,
-        )
-
     def avg_timeframe_of_active_plans(self) -> Decimal:
         try:
             avg_timeframe = mean(
@@ -692,7 +690,7 @@ class PlanRepository(interfaces.PlanRepository):
         plan = Plan(
             id=id,
             plan_creation_date=creation_timestamp,
-            planner=planner,
+            planner=planner.id,
             production_costs=costs,
             prd_name=product_name,
             prd_unit=production_unit,
@@ -732,7 +730,7 @@ class PlanRepository(interfaces.PlanRepository):
         plan = self.entities.plans.get(plan_id)
         if plan is None:
             return None
-        return plan.planner.id
+        return plan.planner
 
 
 @singleton
@@ -1094,3 +1092,9 @@ class EntityStorage:
         self.companies: Dict[str, Company] = {}
         self.company_passwords: Dict[UUID, str] = {}
         self.plans: Dict[UUID, Plan] = {}
+
+    def get_company_by_id(self, company: UUID) -> Optional[Company]:
+        for model in self.companies.values():
+            if model.id == company:
+                return model
+        return None

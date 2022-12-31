@@ -7,6 +7,7 @@ from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan, SocialAccounting
 from arbeitszeit.payout_factor import PayoutFactorService
 from arbeitszeit.repositories import (
+    CompanyRepository,
     PayoutFactorRepository,
     PlanCooperationRepository,
     PlanRepository,
@@ -24,6 +25,7 @@ class UpdatePlansAndPayout:
     plan_cooperation_repository: PlanCooperationRepository
     payout_factor_service: PayoutFactorService
     payout_factor_repository: PayoutFactorRepository
+    company_repository: CompanyRepository
 
     def __call__(self) -> None:
         """
@@ -33,12 +35,12 @@ class UpdatePlansAndPayout:
         self._calculate_plan_expiration()
         payout_factor = self.payout_factor_service.calculate_payout_factor()
         self.payout_factor_service.store_payout_factor(payout_factor)
-        plans = self.plan_repository.get_active_plans()
+        plans = self.plan_repository.get_plans().that_are_active()
         for plan in plans:
             self._payout_work_certificates(plan, payout_factor)
 
     def _calculate_plan_expiration(self) -> None:
-        for plan in self.plan_repository.get_active_plans():
+        for plan in self.plan_repository.get_plans().that_are_active():
             assert plan.is_active, "Plan is not active!"
             assert plan.activation_date, "Plan has no activation date!"
 
@@ -74,10 +76,12 @@ class UpdatePlansAndPayout:
 
     def _payout(self, plan: Plan, payout_factor: Decimal) -> None:
         amount = payout_factor * plan.production_costs.labour_cost / plan.timeframe
+        planner = self.company_repository.get_companies().with_id(plan.planner).first()
+        assert planner
         self.transaction_repository.create_transaction(
             date=self.datetime_service.now(),
             sending_account=self.social_accounting.account,
-            receiving_account=plan.planner.work_account,
+            receiving_account=planner.work_account,
             amount_sent=round(amount, 2),
             amount_received=round(amount, 2),
             purpose=f"Plan-Id: {plan.id}",

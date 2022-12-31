@@ -8,7 +8,7 @@ from injector import inject
 
 from arbeitszeit.entities import Plan
 from arbeitszeit.price_calculator import calculate_price
-from arbeitszeit.repositories import PlanRepository
+from arbeitszeit.repositories import CompanyRepository, PlanRepository
 
 
 @dataclass
@@ -40,6 +40,7 @@ class PlanSummary:
 @dataclass
 class PlanSummaryService:
     plan_repository: PlanRepository
+    company_repository: CompanyRepository
 
     def get_summary_from_plan(self, plan: Plan) -> PlanSummary:
         price_per_unit = calculate_price(
@@ -49,11 +50,13 @@ class PlanSummaryService:
                 )
             )
         )
+        planner = self.company_repository.get_companies().with_id(plan.planner).first()
+        assert planner
         return PlanSummary(
             plan_id=plan.id,
             is_active=plan.is_active,
-            planner_id=plan.planner.id,
-            planner_name=plan.planner.name,
+            planner_id=planner.id,
+            planner_name=planner.name,
             product_name=plan.prd_name,
             description=plan.description,
             timeframe=plan.timeframe,

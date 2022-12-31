@@ -85,6 +85,9 @@ class PlanResult(QueryResult[Plan], Protocol):
     def that_are_in_same_cooperation_as(self, plan: UUID) -> PlanResult:
         ...
 
+    def that_are_active(self) -> PlanResult:
+        ...
+
 
 class MemberResult(QueryResult[Member], Protocol):
     def working_at_company(self, company: UUID) -> MemberResult:
@@ -184,10 +187,6 @@ class PlanRepository(ABC):
 
     @abstractmethod
     def increase_payout_count_by_one(self, plan: Plan) -> None:
-        pass
-
-    @abstractmethod
-    def get_active_plans(self) -> PlanResult:
         pass
 
     @abstractmethod

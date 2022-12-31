@@ -68,11 +68,6 @@ class RequestCooperation:
         )
 
     def _validate_request(self, request: RequestCooperationRequest) -> Cooperation:
-        requester = (
-            self.company_repository.get_companies()
-            .with_id(request.requester_id)
-            .first()
-        )
         plan = self.plan_repository.get_plans().with_id(request.plan_id).first()
         cooperation = self.cooperation_repository.get_by_id(request.cooperation_id)
         if plan is None:
@@ -87,6 +82,6 @@ class RequestCooperation:
             raise RequestCooperationResponse.RejectionReason.plan_is_already_requesting_cooperation
         if plan.is_public_service:
             raise RequestCooperationResponse.RejectionReason.plan_is_public_service
-        if requester != plan.planner:
+        if request.requester_id != plan.planner:
             raise RequestCooperationResponse.RejectionReason.requester_is_not_planner
         return cooperation

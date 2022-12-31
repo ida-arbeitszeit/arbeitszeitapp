@@ -52,9 +52,9 @@ class GetStatistics:
             cooperations_count=self.cooperation_respository.count_cooperations(),
             certificates_count=certs_total,
             available_product=available_product,
-            active_plans_count=len(self.plan_repository.get_active_plans()),
+            active_plans_count=len(self.plan_repository.get_plans().that_are_active()),
             active_plans_public_count=len(
-                self.plan_repository.get_active_plans().that_are_public()
+                self.plan_repository.get_plans().that_are_active().that_are_public()
             ),
             avg_timeframe=self.plan_repository.avg_timeframe_of_active_plans(),
             planned_work=self.plan_repository.sum_of_active_planned_work(),

@@ -84,10 +84,10 @@ class PayMeansOfProduction:
     def _validate_buyer_is_not_planner(
         self, request: PayMeansOfProductionRequest, plan: Plan
     ) -> Company:
+        if plan.planner == request.buyer:
+            raise PayMeansOfProductionResponse.RejectionReason.buyer_is_planner
         buyer = self.company_repository.get_companies().with_id(request.buyer).first()
         assert buyer is not None
-        if plan.planner == buyer:
-            raise PayMeansOfProductionResponse.RejectionReason.buyer_is_planner
         return buyer
 
     def _validate_purpose(
@@ -107,6 +107,7 @@ class Payment:
     transaction_repository: TransactionRepository
     datetime_service: DatetimeService
     plan_repository: PlanRepository
+    company_repository: CompanyRepository
     plan: Plan
     buyer: Company
     amount: int
@@ -142,11 +143,14 @@ class Payment:
             sending_account = self.buyer.means_account
         elif self.purpose == PurposesOfPurchases.raw_materials:
             sending_account = self.buyer.raw_material_account
-
+        planner = (
+            self.company_repository.get_companies().with_id(self.plan.planner).first()
+        )
+        assert planner
         self.transaction_repository.create_transaction(
             date=self.datetime_service.now(),
             sending_account=sending_account,
-            receiving_account=self.plan.planner.product_account,
+            receiving_account=planner.product_account,
             amount_sent=coop_price,
             amount_received=individual_price,
             purpose=f"Plan-Id: {self.plan.id}",
@@ -160,6 +164,7 @@ class PaymentFactory:
     transaction_repository: TransactionRepository
     datetime_service: DatetimeService
     plan_repository: PlanRepository
+    company_repository: CompanyRepository
 
     def get_payment(
         self, plan: Plan, buyer: Company, amount: int, purpose: PurposesOfPurchases
@@ -169,6 +174,7 @@ class PaymentFactory:
             self.transaction_repository,
             self.datetime_service,
             self.plan_repository,
+            self.company_repository,
             plan,
             buyer,
             amount,

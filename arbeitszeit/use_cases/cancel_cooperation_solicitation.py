@@ -3,11 +3,7 @@ from uuid import UUID
 
 from injector import inject
 
-from arbeitszeit.repositories import (
-    CompanyRepository,
-    PlanCooperationRepository,
-    PlanRepository,
-)
+from arbeitszeit.repositories import PlanCooperationRepository, PlanRepository
 
 
 @dataclass
@@ -21,16 +17,11 @@ class CancelCooperationSolicitationRequest:
 class CancelCooperationSolicitation:
     plan_coop_repo: PlanCooperationRepository
     plan_repo: PlanRepository
-    company_repo: CompanyRepository
 
     def __call__(self, request: CancelCooperationSolicitationRequest) -> bool:
         plan = self.plan_repo.get_plans().with_id(request.plan_id).first()
-        requester = (
-            self.company_repo.get_companies().with_id(request.requester_id).first()
-        )
         assert plan
-        assert requester
-        if plan.planner != requester:
+        if plan.planner != request.requester_id:
             return False
         if plan.requested_cooperation is None:
             return False

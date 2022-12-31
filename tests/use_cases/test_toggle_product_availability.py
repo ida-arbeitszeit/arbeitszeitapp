@@ -23,18 +23,18 @@ class UseCaseTester(BaseTestCase):
         self,
     ) -> None:
         plan = self.plan_generator.create_plan()
-        response = self.toggle(plan.planner.id, plan.id)
+        response = self.toggle(plan.planner, plan.id)
         assert response.is_success
 
     def test_that_toggling_changes_availability_to_true(self) -> None:
         plan = self.plan_generator.create_plan()
         plan.is_available = False
         assert not plan.is_available
-        self.toggle(plan.planner.id, plan.id)
+        self.toggle(plan.planner, plan.id)
         assert plan.is_available
 
     def test_that_toggling_changes_availability_to_false(self) -> None:
         plan = self.plan_generator.create_plan()
         assert plan.is_available
-        self.toggle(plan.planner.id, plan.id)
+        self.toggle(plan.planner, plan.id)
         assert not plan.is_available
