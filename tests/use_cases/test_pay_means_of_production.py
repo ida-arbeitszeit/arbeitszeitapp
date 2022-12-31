@@ -3,7 +3,6 @@ from decimal import Decimal
 from uuid import UUID, uuid4
 
 from arbeitszeit.entities import Account, Company, ProductionCosts, PurposesOfPurchases
-from arbeitszeit.price_calculator import calculate_price
 from arbeitszeit.use_cases import (
     GetCompanyTransactions,
     PayMeansOfProduction,
@@ -17,7 +16,6 @@ from .base_test_case import BaseTestCase
 from .repositories import (
     AccountRepository,
     CompanyRepository,
-    PlanRepository,
     PurchaseRepository,
     TransactionRepository,
 )
@@ -27,7 +25,6 @@ class PayMeansOfProductionTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.pay_means_of_production = self.injector.get(PayMeansOfProduction)
-        self.plan_repository = self.injector.get(PlanRepository)
         self.account_repository = self.injector.get(AccountRepository)
         self.cooperation_generator = self.injector.get(CooperationGenerator)
         self.purchase_repository = self.injector.get(PurchaseRepository)
@@ -101,13 +98,7 @@ class PayMeansOfProductionTests(BaseTestCase):
             PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
         )
 
-        price_total = pieces * calculate_price(
-            list(
-                self.plan_repository.get_plans().that_are_in_same_cooperation_as(
-                    plan.id
-                )
-            )
-        )
+        price_total = pieces * self.price_checker.get_unit_price(plan.id)
         assert (
             self.account_repository.get_account_balance(sender.means_account)
             == -price_total
@@ -125,13 +116,7 @@ class PayMeansOfProductionTests(BaseTestCase):
             PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
         )
 
-        price_total = pieces * calculate_price(
-            list(
-                self.plan_repository.get_plans().that_are_in_same_cooperation_as(
-                    plan.id
-                )
-            )
-        )
+        price_total = pieces * self.price_checker.get_unit_price(plan.id)
         assert (
             self.account_repository.get_account_balance(sender.raw_material_account)
             == -price_total
@@ -204,13 +189,7 @@ class PayMeansOfProductionTests(BaseTestCase):
         self.pay_means_of_production(
             PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
         )
-        price_total = pieces * calculate_price(
-            list(
-                self.plan_repository.get_plans().that_are_in_same_cooperation_as(
-                    plan.id
-                )
-            )
-        )
+        price_total = pieces * self.price_checker.get_unit_price(plan.id)
         assert (
             len(self.transaction_repository.transactions)
             == transactions_before_payment + 1
@@ -238,13 +217,7 @@ class PayMeansOfProductionTests(BaseTestCase):
         self.pay_means_of_production(
             PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
         )
-        price_total = pieces * calculate_price(
-            list(
-                self.plan_repository.get_plans().that_are_in_same_cooperation_as(
-                    plan.id
-                )
-            )
-        )
+        price_total = pieces * self.price_checker.get_unit_price(plan.id)
         assert (
             len(self.transaction_repository.transactions)
             == transactions_before_payment + 1
@@ -274,12 +247,8 @@ class PayMeansOfProductionTests(BaseTestCase):
         purchase_added = self.purchase_repository.purchases[0]
         assert len(self.purchase_repository.purchases) == 1
         assert purchase_added.plan == plan.id
-        assert purchase_added.price_per_unit == calculate_price(
-            list(
-                self.plan_repository.get_plans().that_are_in_same_cooperation_as(
-                    plan.id
-                )
-            )
+        assert purchase_added.price_per_unit == self.price_checker.get_unit_price(
+            plan.id
         )
         assert purchase_added.amount == pieces
         assert purchase_added.purpose == PurposesOfPurchases.means_of_prod
@@ -300,12 +269,8 @@ class PayMeansOfProductionTests(BaseTestCase):
         purchase_added = self.purchase_repository.purchases[0]
         assert len(self.purchase_repository.purchases) == 1
         assert purchase_added.plan == plan.id
-        assert purchase_added.price_per_unit == calculate_price(
-            list(
-                self.plan_repository.get_plans().that_are_in_same_cooperation_as(
-                    plan.id
-                )
-            )
+        assert purchase_added.price_per_unit == self.price_checker.get_unit_price(
+            plan.id
         )
         assert purchase_added.amount == pieces
         assert purchase_added.purpose == PurposesOfPurchases.raw_materials
