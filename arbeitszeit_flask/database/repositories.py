@@ -973,15 +973,6 @@ class TransactionRepository(repositories.TransactionRepository):
         ]
 
     def get_sales_balance_of_plan(self, plan: entities.Plan) -> Decimal:
-        # return Decimal(
-        #     self.db.session.query(func.sum(Transaction.amount_received))
-        #     .filter(
-        #         Transaction.receiving_account == str(plan.planner.product_account.id),
-        #         Transaction.purpose.contains(str(plan.id)),
-        #     )
-        #     .one()[0]
-        #     or 0
-        # )
         return Decimal(
             models.Transaction.query.join(
                 models.Account,
