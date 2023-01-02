@@ -1,4 +1,4 @@
-from arbeitszeit_flask.database.repositories import CompanyWorkerRepository
+from tests.company import CompanyManager
 
 from .flask import ViewTestCase
 
@@ -8,7 +8,7 @@ class AuthenticatedCompanyTests(ViewTestCase):
         super().setUp()
         self.company = self.login_company()
         self.url = "company/transfer_to_worker"
-        self.company_worker_repository = self.injector.get(CompanyWorkerRepository)
+        self.company_manager = self.injector.get(CompanyManager)
 
     def test_company_gets_200_when_accessing_page(self) -> None:
         response = self.client.get(self.url)
@@ -20,7 +20,7 @@ class AuthenticatedCompanyTests(ViewTestCase):
 
     def test_company_gets_200_when_posting_correct_data(self) -> None:
         worker = self.member_generator.create_member()
-        self.company_worker_repository.add_worker_to_company(self.company.id, worker)
+        self.company_manager.add_worker_to_company(self.company.id, worker)
         response = self.client.post(
             self.url,
             data=dict(member_id=str(worker), amount="10"),
@@ -41,7 +41,7 @@ class AuthenticatedCompanyTests(ViewTestCase):
         self,
     ) -> None:
         worker = self.member_generator.create_member_entity()
-        self.company_worker_repository.add_worker_to_company(self.company, worker)
+        self.company_manager.add_worker_to_company(self.company.id, worker.id)
         response = self.client.post(
             self.url,
             data=dict(member_id=str(worker.id), amount="-10"),

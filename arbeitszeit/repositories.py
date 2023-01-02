@@ -129,9 +129,7 @@ class CompanyResult(QueryResult[Company], Protocol):
     def that_are_workplace_of_member(self, member: UUID) -> CompanyResult:
         ...
 
-
-class CompanyWorkerRepository(Protocol):
-    def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
+    def add_worker(self, member: UUID) -> int:
         ...
 
 

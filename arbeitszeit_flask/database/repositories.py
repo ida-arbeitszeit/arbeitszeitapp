@@ -248,21 +248,13 @@ class CompanyQueryResult(FlaskQueryResult[entities.Company]):
             )
         )
 
-
-@inject
-@dataclass
-class CompanyWorkerRepository:
-    member_repository: MemberRepository
-    company_repository: CompanyRepository
-
-    def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
-        member = models.Member.query.get(str(worker))
-        if member is None:
-            return
-        company = models.Company.query.get(str(company))
-        if company is None:
-            return
-        member.workplaces.append(company)
+    def add_worker(self, member: UUID) -> int:
+        companies_changed = 0
+        member = models.Member.query.get(str(member))
+        for company in self.query:
+            companies_changed += 1
+            company.workers.append(member)
+        return companies_changed
 
 
 @dataclass

@@ -324,3 +324,13 @@ class ThatAreWorkplaceOfMemberTests(FlaskTestCase):
         member = self.member_generator.create_member()
         self.company_generator.create_company(workers=[member])
         assert self.repository.get_companies().that_are_workplace_of_member(member)
+
+    def test_that_workplace_is_returned_after_one_is_registered(self) -> None:
+        member = self.member_generator.create_member()
+        company = self.company_generator.create_company()
+        self.repository.get_companies().with_id(company).add_worker(member)
+        assert (
+            self.repository.get_companies()
+            .that_are_workplace_of_member(member)
+            .with_id(company)
+        )
