@@ -69,7 +69,7 @@ class GetCoopSummary:
                     )
                 ),
             )
-            for plan in self.plan_cooperation_repository.get_plans_in_cooperation(
+            for plan in self.plan_repository.get_plans().that_are_part_of_cooperation(
                 request.coop_id
             )
         ]
