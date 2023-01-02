@@ -2,11 +2,12 @@
   description = "Arbeitszeitapp";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixos-stable.url = "github:NixOS/nixpkgs/nixos-22.11";
     flake-utils.url = "github:numtide/flake-utils";
     flask-profiler.url = "github:seppeljordan/flask-profiler";
   };
 
-  outputs = { self, nixpkgs, flake-utils, flask-profiler }:
+  outputs = { self, nixpkgs, flake-utils, flask-profiler, nixos-stable }:
     let
       supportedSystems = [ "x86_64-linux" ];
       systemDependent = flake-utils.lib.eachSystem supportedSystems (system:
@@ -15,8 +16,15 @@
             inherit system;
             overlays = [ self.overlays.default ];
           };
+          pkgsStable = import nixos-stable {
+            inherit system;
+            overlays = [ self.overlays.default ];
+          };
         in {
-          devShells.default = pkgs.callPackage nix/devShell.nix { };
+          devShells = {
+            default = pkgs.callPackage nix/devShell.nix { };
+            stable = pkgsStable.callPackage nix/devShell.nix { };
+          };
           packages = {
             default = pkgs.python3.pkgs.arbeitszeitapp;
             inherit (pkgs) python3;
