@@ -382,3 +382,28 @@ class GetAllPlans(FlaskTestCase):
         assert len(cooperating_plans) == 2
         assert plan1.id in [p.id for p in cooperating_plans]
         assert plan2.id in [p.id for p in cooperating_plans]
+
+    def test_correct_plans_in_cooperation_returned(self) -> None:
+        coop = self.cooperation_generator.create_cooperation()
+        plan1 = self.plan_generator.create_plan(
+            activation_date=datetime.min, cooperation=coop
+        )
+        plan2 = self.plan_generator.create_plan(
+            activation_date=datetime.min, cooperation=coop
+        )
+        plan3 = self.plan_generator.create_plan(
+            activation_date=datetime.min, requested_cooperation=None
+        )
+        plans = self.plan_repository.get_plans().that_are_part_of_cooperation(coop.id)
+        assert len(plans) == 2
+        assert plans.with_id(plan1.id)
+        assert plans.with_id(plan2.id)
+        assert not plans.with_id(plan3.id)
+
+    def test_nothing_returned_when_no_plans_in_cooperation(self) -> None:
+        coop = self.cooperation_generator.create_cooperation()
+        self.plan_generator.create_plan(
+            activation_date=datetime.min, requested_cooperation=None
+        )
+        plans = self.plan_repository.get_plans().that_are_part_of_cooperation(coop.id)
+        assert len(plans) == 0

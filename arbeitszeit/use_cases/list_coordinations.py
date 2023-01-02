@@ -9,7 +9,7 @@ from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.repositories import (
     CompanyRepository,
     CooperationRepository,
-    PlanCooperationRepository,
+    PlanRepository,
 )
 
 
@@ -38,7 +38,7 @@ class ListCoordinations:
     company_repository: CompanyRepository
     cooperation_repository: CooperationRepository
     datetime_service: DatetimeService
-    plan_cooperation_repository: PlanCooperationRepository
+    plan_repository: PlanRepository
 
     def __call__(self, request: ListCoordinationsRequest) -> ListCoordinationsResponse:
         if not self.company_repository.get_companies().with_id(request.company):
@@ -49,8 +49,10 @@ class ListCoordinations:
                 creation_date=coop.creation_date,
                 name=coop.name,
                 definition=coop.definition,
-                count_plans_in_coop=self.plan_cooperation_repository.count_plans_in_cooperation(
-                    coop.id
+                count_plans_in_coop=len(
+                    self.plan_repository.get_plans().that_are_part_of_cooperation(
+                        coop.id
+                    )
                 ),
             )
             for coop in self.cooperation_repository.get_cooperations_coordinated_by_company(

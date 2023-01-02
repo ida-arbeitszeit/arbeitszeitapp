@@ -165,6 +165,11 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
             lambda query: query.filter(models.Plan.is_active == True)
         )
 
+    def that_are_part_of_cooperation(self, cooperation: UUID) -> PlanQueryResult:
+        return self._with_modified_query(
+            lambda query: query.filter_by(cooperation=str(cooperation))
+        )
+
 
 class MemberQueryResult(FlaskQueryResult[entities.Member]):
     def working_at_company(self, company: UUID) -> MemberQueryResult:
@@ -1277,15 +1282,6 @@ class PlanCooperationRepository(repositories.PlanCooperationRepository):
         plan_orm = models.Plan.query.filter_by(id=str(plan_id)).first()
         assert plan_orm
         plan_orm.requested_cooperation = None
-
-    def count_plans_in_cooperation(self, cooperation_id: UUID) -> int:
-        count = models.Plan.query.filter_by(cooperation=str(cooperation_id)).count()
-        return count
-
-    def get_plans_in_cooperation(self, cooperation_id: UUID) -> Iterable[entities.Plan]:
-        plans = models.Plan.query.filter_by(cooperation=str(cooperation_id)).all()
-        for plan in plans:
-            yield self.plan_repository.object_from_orm(plan)
 
 
 @inject

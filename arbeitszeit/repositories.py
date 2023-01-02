@@ -88,6 +88,9 @@ class PlanResult(QueryResult[Plan], Protocol):
     def that_are_active(self) -> PlanResult:
         ...
 
+    def that_are_part_of_cooperation(self, cooperation: UUID) -> PlanResult:
+        ...
+
 
 class MemberResult(QueryResult[Member], Protocol):
     def working_at_company(self, company: UUID) -> MemberResult:
@@ -472,14 +475,6 @@ class PlanCooperationRepository(ABC):
 
     @abstractmethod
     def set_requested_cooperation_to_none(self, plan_id: UUID) -> None:
-        pass
-
-    @abstractmethod
-    def count_plans_in_cooperation(self, cooperation_id: UUID) -> int:
-        pass
-
-    @abstractmethod
-    def get_plans_in_cooperation(self, cooperation_id: UUID) -> Iterable[Plan]:
         pass
 
 

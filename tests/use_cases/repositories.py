@@ -154,6 +154,9 @@ class PlanResult(QueryResultImpl[Plan], interfaces.PlanResult):
     def that_are_active(self) -> PlanResult:
         return self._filtered_by(lambda plan: plan.is_active)
 
+    def that_are_part_of_cooperation(self, cooperation: UUID) -> PlanResult:
+        return self._filtered_by(lambda plan: plan.cooperation == cooperation)
+
 
 class MemberResult(QueryResultImpl[Member], interfaces.MemberResult):
     def working_at_company(self, company: UUID) -> MemberResult:
@@ -970,19 +973,6 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
         plan = self.plan_repository.get_plans().with_id(plan_id).first()
         assert plan
         plan.requested_cooperation = None
-
-    def count_plans_in_cooperation(self, cooperation_id: UUID) -> int:
-        count = 0
-        for plan in self.entities.plans.values():
-            if plan.cooperation == cooperation_id:
-                count += 1
-        return count
-
-    def get_plans_in_cooperation(self, cooperation_id: UUID) -> Iterable[Plan]:
-        plans = self.entities.plans.values()
-        for plan in plans:
-            if plan.cooperation == cooperation_id:
-                yield plan
 
 
 @singleton
