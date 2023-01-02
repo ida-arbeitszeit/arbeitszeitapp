@@ -7,7 +7,6 @@ from typing import Optional
 from uuid import UUID, uuid4
 
 from arbeitszeit.entities import ProductionCosts, PurposesOfPurchases
-from arbeitszeit.price_calculator import calculate_price
 from arbeitszeit.use_cases import PayConsumerProduct
 from arbeitszeit.use_cases.pay_consumer_product import RejectionReason
 from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
@@ -19,7 +18,6 @@ from .repositories import (
     AccountRepository,
     CompanyRepository,
     PlanCooperationRepository,
-    PlanRepository,
     PurchaseRepository,
     TransactionRepository,
 )
@@ -34,7 +32,6 @@ class PayConsumerProductTests(BaseTestCase):
         self.account_repository = self.injector.get(AccountRepository)
         self.purchase_repository = self.injector.get(PurchaseRepository)
         self.plan_cooperation_repository = self.injector.get(PlanCooperationRepository)
-        self.plan_repository = self.injector.get(PlanRepository)
         self.buyer = self.member_generator.create_member_entity()
         self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
         self.update_plans_and_payout = self.injector.get(UpdatePlansAndPayout)
@@ -201,14 +198,8 @@ class PayConsumerProductTests(BaseTestCase):
             transactions_before_payment + 2,
         )
         transaction_added = self.transaction_repository.transactions[-1]
-        expected_amount_sent = pieces * calculate_price(
-            list(
-                self.plan_repository.get_plans().that_are_in_same_cooperation_as(
-                    plan.id
-                )
-            )
-        )
-        expected_amount_received = pieces * calculate_price([plan])
+        expected_amount_sent = pieces * self.price_checker.get_unit_price(plan.id)
+        expected_amount_received = pieces * self.price_checker.get_unit_cost(plan.id)
         planner = self.company_repository.get_companies().with_id(plan.planner).first()
         assert transaction_added.sending_account == self.buyer.account
         assert transaction_added.receiving_account == planner.product_account
@@ -231,13 +222,7 @@ class PayConsumerProductTests(BaseTestCase):
         self.pay_consumer_product.pay_consumer_product(
             self.make_request(plan.id, bought_pieces)
         )
-        costs = bought_pieces * calculate_price(
-            list(
-                self.plan_repository.get_plans().that_are_in_same_cooperation_as(
-                    plan.id
-                )
-            )
-        )
+        costs = bought_pieces * self.price_checker.get_unit_price(plan.id)
 
         expected_balance = start_balance - costs
         self.assertEqual(
@@ -282,13 +267,7 @@ class PayConsumerProductTests(BaseTestCase):
         self.pay_consumer_product.pay_consumer_product(
             self.make_request(plan.id, pieces)
         )
-        costs = pieces * calculate_price(
-            list(
-                self.plan_repository.get_plans().that_are_in_same_cooperation_as(
-                    plan.id
-                )
-            )
-        )
+        costs = pieces * self.price_checker.get_unit_price(plan.id)
         planner = self.company_repository.get_companies().with_id(plan.planner).first()
         assert self.account_repository.get_account_balance(self.buyer.account) == -costs
         assert (
@@ -307,12 +286,8 @@ class PayConsumerProductTests(BaseTestCase):
         )
         assert len(self.purchase_repository.purchases) == 1
         purchase_added = self.purchase_repository.purchases[0]
-        assert purchase_added.price_per_unit == calculate_price(
-            list(
-                self.plan_repository.get_plans().that_are_in_same_cooperation_as(
-                    plan.id
-                )
-            )
+        assert purchase_added.price_per_unit == self.price_checker.get_unit_price(
+            plan.id
         )
         assert purchase_added.amount == pieces
         assert purchase_added.purpose == PurposesOfPurchases.consumption
