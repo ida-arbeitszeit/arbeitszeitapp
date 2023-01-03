@@ -31,7 +31,6 @@ from arbeitszeit_flask.database.repositories import (
     AccountOwnerRepository,
     AccountRepository,
     CompanyRepository,
-    CompanyWorkerRepository,
     CooperationRepository,
     MemberRepository,
     PayoutFactorRepository,
@@ -165,12 +164,6 @@ class CompanyModule(CompanyPresenterModule):
 class FlaskModule(PresenterModule):
     @provider
     def provide_text_renderer(self, instance: TextRendererImpl) -> TextRenderer:
-        return instance
-
-    @provider
-    def provide_company_worker_repository(
-        self, instance: CompanyWorkerRepository
-    ) -> interfaces.CompanyWorkerRepository:
         return instance
 
     @provider

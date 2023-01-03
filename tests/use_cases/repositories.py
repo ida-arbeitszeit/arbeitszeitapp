@@ -260,6 +260,13 @@ class CompanyResult(QueryResultImpl[Company], interfaces.CompanyResult):
             entities=self.entities,
         )
 
+    def add_worker(self, member: UUID) -> int:
+        companies_changed = 0
+        for company in self.items():
+            companies_changed += 1
+            self.entities.company_workers[company.id].add(member)
+        return companies_changed
+
 
 @singleton
 class PurchaseRepository(interfaces.PurchaseRepository):
@@ -498,9 +505,6 @@ class MemberRepository(interfaces.MemberRepository):
             if member.email == email:
                 return member
         return None
-
-    def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
-        self.entities.company_workers[company].add(worker)
 
 
 class CompanyRepository(interfaces.CompanyRepository):

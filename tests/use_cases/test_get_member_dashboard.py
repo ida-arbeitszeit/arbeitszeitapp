@@ -21,22 +21,20 @@ class UseCaseTests(TestCase):
         self.member = self.member_generator.create_member_entity()
 
     def test_that_correct_workplace_email_is_shown(self):
-        workplace = self.company_generator.create_company_entity(
-            email="companyname@mail.com"
+        self.company_generator.create_company_entity(
+            email="companyname@mail.com",
+            workers=[self.member.id],
         )
-        self.member_repository.add_worker_to_company(workplace.id, self.member.id)
-
         member_info = self.get_member_dashboard(self.member.id)
         self.assertEqual(
             member_info.workplaces[0].workplace_email, "companyname@mail.com"
         )
 
     def test_that_correct_workplace_name_is_shown(self):
-        workplace = self.company_generator.create_company_entity(
-            name="SomeCompanyNameXY"
+        self.company_generator.create_company_entity(
+            name="SomeCompanyNameXY",
+            workers=[self.member.id],
         )
-        self.member_repository.add_worker_to_company(workplace.id, self.member.id)
-
         member_info = self.get_member_dashboard(self.member.id)
         self.assertEqual(member_info.workplaces[0].workplace_name, "SomeCompanyNameXY")
 

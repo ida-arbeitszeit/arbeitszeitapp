@@ -85,12 +85,6 @@ class InMemoryModule(Module):
         return repo
 
     @provider
-    def provide_company_worker_repo(
-        self, repo: repositories.MemberRepository
-    ) -> interfaces.CompanyWorkerRepository:
-        return repo
-
-    @provider
     @singleton
     def provide_worker_invite_repo(
         self, repo: repositories.WorkerInviteRepository
