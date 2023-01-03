@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from arbeitszeit_flask.database.repositories import AccountRepository
 from tests.data_generators import AccountGenerator, TransactionGenerator
 
@@ -62,3 +64,16 @@ class RepositoryTester(FlaskTestCase):
             amount_received=10,
         )
         assert self.repository.get_account_balance(account) == 0
+
+    def test_that_a_priori_no_accounts_can_be_queried(self) -> None:
+        assert not self.repository.get_accounts()
+
+    def test_there_are_accounts_to_be_queried_when_one_was_created(self) -> None:
+        self.account_generator.create_account()
+        assert self.repository.get_accounts()
+
+    def test_only_include_relevant_account_when_filtering_by_id(self) -> None:
+        random_id = uuid4()
+        actual_id = self.account_generator.create_account().id
+        assert not self.repository.get_accounts().with_id(random_id)
+        assert self.repository.get_accounts().with_id(actual_id)

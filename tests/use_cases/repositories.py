@@ -318,6 +318,14 @@ class TransactionResult(QueryResultImpl[Transaction], interfaces.TransactionResu
         )
 
 
+class AccountResult(QueryResultImpl[Account], interfaces.AccountResult):
+    def with_id(self, id_: UUID) -> AccountResult:
+        return replace(
+            self,
+            items=filter(lambda account: account.id == id_, self.items()),
+        )
+
+
 @singleton
 class PurchaseRepository(interfaces.PurchaseRepository):
     @inject
@@ -421,9 +429,12 @@ class TransactionRepository(interfaces.TransactionRepository):
 @singleton
 class AccountRepository(interfaces.AccountRepository):
     @inject
-    def __init__(self, transaction_repository: TransactionRepository):
+    def __init__(
+        self, transaction_repository: TransactionRepository, entities: EntityStorage
+    ):
         self.accounts: List[Account] = []
         self.transaction_repository = transaction_repository
+        self.entities = entities
 
     def __contains__(self, account: object) -> bool:
         if not isinstance(account, Account):
@@ -437,6 +448,12 @@ class AccountRepository(interfaces.AccountRepository):
         )
         self.accounts.append(account)
         return account
+
+    def get_accounts(self) -> AccountResult:
+        return AccountResult(
+            items=lambda: self.accounts,
+            entities=self.entities,
+        )
 
     def get_account_balance(self, account: Account) -> Decimal:
         transactions = self.transaction_repository.get_transactions()

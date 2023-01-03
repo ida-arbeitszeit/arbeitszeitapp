@@ -305,6 +305,13 @@ class TransactionQueryResult(FlaskQueryResult[entities.Transaction]):
         )
 
 
+class AccountQueryResult(FlaskQueryResult[entities.Account]):
+    def with_id(self, id_: UUID) -> AccountQueryResult:
+        return self._with_modified_query(
+            lambda query: query.filter(models.Account.id == str(id_))
+        )
+
+
 @dataclass
 class UserAddressBookImpl:
     db: SQLAlchemy
@@ -604,6 +611,13 @@ class AccountRepository(repositories.AccountRepository):
 
     def get_by_id(self, id: UUID) -> entities.Account:
         return self.object_from_orm(Account.query.get(str(id)))
+
+    def get_accounts(self) -> AccountQueryResult:
+        return AccountQueryResult(
+            db=self.db,
+            mapper=self.object_from_orm,
+            query=models.Account.query,
+        )
 
 
 @inject
