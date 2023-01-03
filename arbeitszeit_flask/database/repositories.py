@@ -3,17 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import (
-    Any,
-    Callable,
-    Generic,
-    Iterable,
-    Iterator,
-    List,
-    Optional,
-    TypeVar,
-    Union,
-)
+from typing import Any, Callable, Generic, Iterable, Iterator, Optional, TypeVar, Union
 from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
@@ -260,6 +250,59 @@ class CompanyQueryResult(FlaskQueryResult[entities.Company]):
             companies_changed += 1
             company.workers.append(member)
         return companies_changed
+
+
+class TransactionQueryResult(FlaskQueryResult[entities.Transaction]):
+    def where_account_is_sender_or_receiver(
+        self, *account: UUID
+    ) -> TransactionQueryResult:
+        accounts = map(str, account)
+        return self._with_modified_query(
+            lambda query: query.filter(
+                or_(
+                    models.Transaction.receiving_account.in_(accounts),
+                    models.Transaction.sending_account.in_(accounts),
+                )
+            )
+        )
+
+    def where_account_is_sender(self, *account: UUID) -> TransactionQueryResult:
+        accounts = map(str, account)
+        return self._with_modified_query(
+            lambda query: query.filter(
+                models.Transaction.sending_account.in_(accounts),
+            )
+        )
+
+    def where_account_is_receiver(self, *account: UUID) -> TransactionQueryResult:
+        accounts = map(str, account)
+        return self._with_modified_query(
+            lambda query: query.filter(
+                models.Transaction.receiving_account.in_(accounts),
+            )
+        )
+
+    def ordered_by_transaction_date(
+        self, descending: bool = False
+    ) -> TransactionQueryResult:
+        ordering = models.Transaction.date
+        if descending:
+            ordering = ordering.desc()
+        return self._with_modified_query(lambda query: self.query.order_by(ordering))
+
+    def where_sender_is_social_accounting(self) -> TransactionQueryResult:
+        return self._with_modified_query(
+            lambda query: self.query.filter(
+                models.Transaction.sending_account.in_(
+                    models.Account.query.filter(
+                        models.Account.account_owner_social_accounting != None
+                    )
+                    .with_entities(models.Account.id)
+                    .subquery()
+                    .select()
+                )
+            )
+        )
 
 
 @dataclass
@@ -951,23 +994,12 @@ class TransactionRepository(repositories.TransactionRepository):
         self.db.session.add(transaction)
         return self.object_from_orm(transaction)
 
-    def all_transactions_sent_by_account(
-        self, account: entities.Account
-    ) -> List[entities.Transaction]:
-        account_orm = self.account_repository.object_to_orm(account)
-        return [
-            self.object_from_orm(transaction)
-            for transaction in account_orm.transactions_sent.all()
-        ]
-
-    def all_transactions_received_by_account(
-        self, account: entities.Account
-    ) -> List[entities.Transaction]:
-        account_orm = self.account_repository.object_to_orm(account)
-        return [
-            self.object_from_orm(transaction)
-            for transaction in account_orm.transactions_received.all()
-        ]
+    def get_transactions(self) -> TransactionQueryResult:
+        return TransactionQueryResult(
+            query=models.Transaction.query,
+            mapper=self.object_from_orm,
+            db=self.db,
+        )
 
     def get_sales_balance_of_plan(self, plan: entities.Plan) -> Decimal:
         return Decimal(

@@ -37,20 +37,13 @@ class UserAccountingService:
     def get_all_transactions_sorted(
         self, user: Union[Member, Company]
     ) -> List[Transaction]:
-        all_transactions = set()
-        for account in user.accounts():
-            all_transactions.update(
-                self.transaction_repository.all_transactions_sent_by_account(account)
+        return list(
+            self.transaction_repository.get_transactions()
+            .where_account_is_sender_or_receiver(
+                *(account.id for account in user.accounts())
             )
-            all_transactions.update(
-                self.transaction_repository.all_transactions_received_by_account(
-                    account
-                )
-            )
-        all_transactions_sorted = sorted(
-            all_transactions, key=lambda x: x.date, reverse=True
+            .ordered_by_transaction_date(descending=True)
         )
-        return all_transactions_sorted
 
     def get_account_transactions_sorted(
         self, user: Union[Member, Company], queried_account_type: AccountTypes
@@ -58,19 +51,14 @@ class UserAccountingService:
         for acc in user.accounts():
             if acc.account_type == queried_account_type:
                 queried_account = acc
-        transactions = set()
-        transactions.update(
-            self.transaction_repository.all_transactions_sent_by_account(
-                queried_account
-            )
+                break
+        else:
+            return []
+        return list(
+            self.transaction_repository.get_transactions()
+            .where_account_is_sender_or_receiver(queried_account.id)
+            .ordered_by_transaction_date(descending=True)
         )
-        transactions.update(
-            self.transaction_repository.all_transactions_received_by_account(
-                queried_account
-            )
-        )
-        transactions_sorted = sorted(transactions, key=lambda x: x.date, reverse=True)
-        return transactions_sorted
 
     def user_is_sender(
         self, transaction: Transaction, user: Union[Member, Company]

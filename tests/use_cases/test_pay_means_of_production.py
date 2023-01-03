@@ -185,26 +185,29 @@ class PayMeansOfProductionTests(BaseTestCase):
         )
         purpose = PurposesOfPurchases.means_of_prod
         pieces = 5
-        transactions_before_payment = len(self.transaction_repository.transactions)
+        transactions_before_payment = len(
+            self.transaction_repository.get_transactions()
+        )
         self.pay_means_of_production(
             PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
         )
         price_total = pieces * self.price_checker.get_unit_price(plan.id)
         assert (
-            len(self.transaction_repository.transactions)
+            len(self.transaction_repository.get_transactions())
             == transactions_before_payment + 1
         )
-        assert (
-            self.transaction_repository.transactions[-1].sending_account
-            == sender.means_account
+        latest_transaction = (
+            self.transaction_repository.get_transactions()
+            .ordered_by_transaction_date(descending=True)
+            .first()
         )
-        assert self.transaction_repository.transactions[
-            -1
-        ].receiving_account == self.get_product_account(plan.planner)
-        assert self.transaction_repository.transactions[-1].amount_sent == price_total
-        assert (
-            self.transaction_repository.transactions[-1].amount_received == price_total
+        assert latest_transaction
+        assert latest_transaction.sending_account == sender.means_account
+        assert latest_transaction.receiving_account == self.get_product_account(
+            plan.planner
         )
+        assert latest_transaction.amount_sent == price_total
+        assert latest_transaction.amount_received == price_total
 
     def test_correct_transaction_added_if_raw_materials_were_paid(self) -> None:
         sender = self.company_generator.create_company_entity()
@@ -213,26 +216,29 @@ class PayMeansOfProductionTests(BaseTestCase):
         )
         purpose = PurposesOfPurchases.raw_materials
         pieces = 5
-        transactions_before_payment = len(self.transaction_repository.transactions)
+        transactions_before_payment = len(
+            self.transaction_repository.get_transactions()
+        )
         self.pay_means_of_production(
             PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
         )
         price_total = pieces * self.price_checker.get_unit_price(plan.id)
         assert (
-            len(self.transaction_repository.transactions)
+            len(self.transaction_repository.get_transactions())
             == transactions_before_payment + 1
         )
-        assert (
-            self.transaction_repository.transactions[-1].sending_account
-            == sender.raw_material_account
+        latest_transaction = (
+            self.transaction_repository.get_transactions()
+            .ordered_by_transaction_date(descending=True)
+            .first()
         )
-        assert self.transaction_repository.transactions[
-            -1
-        ].receiving_account == self.get_product_account(plan.planner)
-        assert self.transaction_repository.transactions[-1].amount_sent == price_total
-        assert (
-            self.transaction_repository.transactions[-1].amount_received == price_total
+        assert latest_transaction
+        assert latest_transaction.sending_account == sender.raw_material_account
+        assert latest_transaction.receiving_account == self.get_product_account(
+            plan.planner
         )
+        assert latest_transaction.amount_sent == price_total
+        assert latest_transaction.amount_received == price_total
 
     def test_correct_purchase_added_if_means_of_production_were_paid(self) -> None:
         sender = self.company_generator.create_company_entity()

@@ -167,10 +167,10 @@ class UseCaseTests(BaseTestCase):
             Decimal("-6"),
         )
 
-    def test_that_all_transactions_have_accounting_as_sender(self):
+    def test_that_all_transactions_have_accounting_as_sender(self) -> None:
         plan = self.plan_generator.create_plan(approved=False)
         self.use_case.approve_plan(self.create_request(plan=plan.id))
-        for transaction in self.transaction_repository.transactions:
+        for transaction in self.transaction_repository.get_transactions():
             self.assertEqual(
                 transaction.sending_account.account_type, AccountTypes.accounting
             )

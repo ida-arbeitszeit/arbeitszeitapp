@@ -73,7 +73,7 @@ class UseCaseTester(BaseTestCase):
         self.send_work_certificates_to_worker(
             SendWorkCertificatesToWorkerRequest(company.id, worker, amount_to_transfer)
         )
-        assert len(self.transaction_repository.transactions) == 1
+        assert len(self.transaction_repository.get_transactions()) == 1
 
     def test_that_after_transfer_correct_transaction_is_added(self) -> None:
         worker = self.member_generator.create_member_entity()
@@ -85,8 +85,9 @@ class UseCaseTester(BaseTestCase):
             )
         )
 
-        assert len(self.transaction_repository.transactions) == 1
-        transaction = self.transaction_repository.transactions[0]
+        assert len(self.transaction_repository.get_transactions()) == 1
+        transaction = self.transaction_repository.get_transactions().first()
+        assert transaction
         assert transaction.amount_sent == amount_to_transfer
         assert transaction.amount_received == amount_to_transfer
         assert transaction.sending_account == company.work_account

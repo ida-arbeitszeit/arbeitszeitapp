@@ -388,7 +388,7 @@ class UseCaseTests(BaseTestCase):
         return len(
             [
                 transaction
-                for transaction in self.transaction_repository.transactions
+                for transaction in self.transaction_repository.get_transactions()
                 if transaction.receiving_account.account_type == AccountTypes.a
             ]
         )
