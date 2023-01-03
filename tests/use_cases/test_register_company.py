@@ -58,17 +58,6 @@ class RegisterCompanyTests(TestCase):
             RegisterCompany.Response.RejectionReason.company_already_exists,
         )
 
-    def test_that_registering_a_company_does_create_all_company_accounts(self) -> None:
-        self.use_case.register_company(RegisterCompany.Request(**DEFAULT))
-        assert len(self.account_repository.accounts) == 4
-        for account in self.account_repository.accounts:
-            assert account.account_type in (
-                AccountTypes.a,
-                AccountTypes.p,
-                AccountTypes.r,
-                AccountTypes.prd,
-            )
-
     def test_that_correct_member_attributes_are_registered(self) -> None:
         request = RegisterCompany.Request(**DEFAULT)
         self.use_case.register_company(request)

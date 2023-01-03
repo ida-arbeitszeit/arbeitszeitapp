@@ -94,9 +94,9 @@ class InMemoryModule(Module):
     @provider
     @singleton
     def provide_social_accounting_instance(
-        self, generator: data_generators.SocialAccountingGenerator
+        self, entity_storage: repositories.EntityStorage
     ) -> entities.SocialAccounting:
-        return generator.create_social_accounting()
+        return entity_storage.social_accounting
 
     @provider
     def provide_account_repository(

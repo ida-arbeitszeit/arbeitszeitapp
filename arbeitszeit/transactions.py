@@ -6,7 +6,11 @@ from typing import List, Union
 from injector import inject
 
 from .entities import AccountTypes, Company, Member, SocialAccounting, Transaction
-from .repositories import AccountOwnerRepository, TransactionRepository
+from .repositories import (
+    AccountOwnerRepository,
+    AccountRepository,
+    TransactionRepository,
+)
 
 
 class TransactionTypes(Enum):
@@ -33,6 +37,7 @@ class TransactionTypes(Enum):
 class UserAccountingService:
     transaction_repository: TransactionRepository
     account_owner_repository: AccountOwnerRepository
+    account_repository: AccountRepository
 
     def get_all_transactions_sorted(
         self, user: Union[Member, Company]
@@ -63,7 +68,9 @@ class UserAccountingService:
     def user_is_sender(
         self, transaction: Transaction, user: Union[Member, Company]
     ) -> bool:
-        return transaction.sending_account in user.accounts()
+        return transaction.sending_account in [
+            account.id for account in user.accounts()
+        ]
 
     def get_transaction_type(
         self, transaction: Transaction, user_is_sender: bool
@@ -72,9 +79,20 @@ class UserAccountingService:
         Based on wether the user is sender or receiver,
         this method returns the 'subjective' transaction type.
         """
-        sending_account = transaction.sending_account.account_type
-        receiving_account = transaction.receiving_account.account_type
-
+        sender = (
+            self.account_repository.get_accounts()
+            .with_id(transaction.sending_account)
+            .first()
+        )
+        assert sender
+        sending_account = sender.account_type
+        receiver = (
+            self.account_repository.get_accounts()
+            .with_id(transaction.receiving_account)
+            .first()
+        )
+        assert receiver
+        receiving_account = receiver.account_type
         if user_is_sender:
             if sending_account == AccountTypes.a:
                 transaction_type = TransactionTypes.payment_of_wages
@@ -84,7 +102,6 @@ class UserAccountingService:
                 transaction_type = TransactionTypes.payment_of_liquid_means
             elif sending_account == AccountTypes.member:
                 transaction_type = TransactionTypes.payment_of_consumer_product
-
         else:
             if sending_account == AccountTypes.accounting:
                 if receiving_account == AccountTypes.a:
@@ -97,7 +114,6 @@ class UserAccountingService:
                     transaction_type = TransactionTypes.expected_sales
                 elif receiving_account == AccountTypes.member:
                     transaction_type = TransactionTypes.incoming_wages
-
             elif sending_account == AccountTypes.p:
                 transaction_type = TransactionTypes.sale_of_fixed_means
             elif sending_account == AccountTypes.r:
@@ -106,7 +122,6 @@ class UserAccountingService:
                 transaction_type = TransactionTypes.incoming_wages
             elif sending_account == AccountTypes.member:
                 transaction_type = TransactionTypes.sale_of_consumer_product
-
         assert transaction_type
         return transaction_type
 
@@ -136,7 +151,12 @@ class UserAccountingService:
             TransactionTypes.sale_of_liquid_means,
         ):
             return None
-        buyer_account = transaction.sending_account
+        buyer_account = (
+            self.account_repository.get_accounts()
+            .with_id(transaction.sending_account)
+            .first()
+        )
+        assert buyer_account
         buyer = self.account_owner_repository.get_account_owner(buyer_account)
         assert not isinstance(
             buyer, SocialAccounting

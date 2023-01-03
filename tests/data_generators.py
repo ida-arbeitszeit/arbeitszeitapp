@@ -222,20 +222,6 @@ class CompanyGenerator:
 
 @inject
 @dataclass
-class SocialAccountingGenerator:
-    account_generator: AccountGenerator
-
-    def create_social_accounting(self) -> SocialAccounting:
-        return SocialAccounting(
-            id=uuid4(),
-            account=self.account_generator.create_account(
-                account_type=AccountTypes.accounting
-            ),
-        )
-
-
-@inject
-@dataclass
 class AccountGenerator:
     account_repository: AccountRepository
 

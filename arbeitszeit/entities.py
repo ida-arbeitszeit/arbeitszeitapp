@@ -210,8 +210,8 @@ class Transaction:
 
     id: UUID
     date: datetime
-    sending_account: Account
-    receiving_account: Account
+    sending_account: UUID
+    receiving_account: UUID
     amount_sent: Decimal
     amount_received: Decimal
     purpose: str

@@ -966,7 +966,6 @@ class PlanRepository(repositories.PlanRepository):
 @inject
 @dataclass
 class TransactionRepository(repositories.TransactionRepository):
-    account_repository: AccountRepository
     db: SQLAlchemy
 
     def object_to_orm(self, transaction: entities.Transaction) -> Transaction:
@@ -976,12 +975,8 @@ class TransactionRepository(repositories.TransactionRepository):
         return entities.Transaction(
             id=UUID(transaction.id),
             date=transaction.date,
-            sending_account=self.account_repository.get_by_id(
-                transaction.sending_account
-            ),
-            receiving_account=self.account_repository.get_by_id(
-                transaction.receiving_account
-            ),
+            sending_account=UUID(transaction.sending_account),
+            receiving_account=UUID(transaction.receiving_account),
             amount_sent=Decimal(transaction.amount_sent),
             amount_received=Decimal(transaction.amount_received),
             purpose=transaction.purpose,

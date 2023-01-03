@@ -271,8 +271,8 @@ class TransactionResult(QueryResultImpl[Transaction], interfaces.TransactionResu
         return replace(
             self,
             items=lambda: filter(
-                lambda transaction: transaction.sending_account.id in account
-                or transaction.receiving_account.id in account,
+                lambda transaction: transaction.sending_account in account
+                or transaction.receiving_account in account,
                 self.items(),
             ),
         )
@@ -281,7 +281,7 @@ class TransactionResult(QueryResultImpl[Transaction], interfaces.TransactionResu
         return replace(
             self,
             items=lambda: filter(
-                lambda transaction: transaction.sending_account.id in account,
+                lambda transaction: transaction.sending_account in account,
                 self.items(),
             ),
         )
@@ -290,7 +290,7 @@ class TransactionResult(QueryResultImpl[Transaction], interfaces.TransactionResu
         return replace(
             self,
             items=lambda: filter(
-                lambda transaction: transaction.receiving_account.id in account,
+                lambda transaction: transaction.receiving_account in account,
                 self.items(),
             ),
         )
@@ -311,8 +311,8 @@ class TransactionResult(QueryResultImpl[Transaction], interfaces.TransactionResu
         return replace(
             self,
             items=lambda: filter(
-                lambda transaction: transaction.sending_account.account_type
-                == AccountTypes.accounting,
+                lambda transaction: transaction.sending_account
+                == self.entities.social_accounting.account.id,
                 self.items(),
             ),
         )
@@ -322,7 +322,7 @@ class AccountResult(QueryResultImpl[Account], interfaces.AccountResult):
     def with_id(self, id_: UUID) -> AccountResult:
         return replace(
             self,
-            items=filter(lambda account: account.id == id_, self.items()),
+            items=lambda: filter(lambda account: account.id == id_, self.items()),
         )
 
 
@@ -399,8 +399,8 @@ class TransactionRepository(interfaces.TransactionRepository):
         transaction = Transaction(
             id=uuid4(),
             date=date,
-            sending_account=sending_account,
-            receiving_account=receiving_account,
+            sending_account=sending_account.id,
+            receiving_account=receiving_account.id,
             amount_sent=amount_sent,
             amount_received=amount_received,
             purpose=purpose,
@@ -419,7 +419,7 @@ class TransactionRepository(interfaces.TransactionRepository):
         planner = self.entities.get_company_by_id(plan.planner)
         assert planner
         for transaction in self.entities.transactions:
-            if (transaction.receiving_account == planner.product_account) and (
+            if (transaction.receiving_account == planner.product_account.id) and (
                 str(plan.id) in transaction.purpose
             ):
                 balance += transaction.amount_received
@@ -432,26 +432,20 @@ class AccountRepository(interfaces.AccountRepository):
     def __init__(
         self, transaction_repository: TransactionRepository, entities: EntityStorage
     ):
-        self.accounts: List[Account] = []
         self.transaction_repository = transaction_repository
         self.entities = entities
 
     def __contains__(self, account: object) -> bool:
         if not isinstance(account, Account):
             return False
-        return account in self.accounts
+        return account in self.entities.accounts
 
     def create_account(self, account_type: AccountTypes) -> Account:
-        account = Account(
-            id=uuid4(),
-            account_type=account_type,
-        )
-        self.accounts.append(account)
-        return account
+        return self.entities.create_account(account_type)
 
     def get_accounts(self) -> AccountResult:
         return AccountResult(
-            items=lambda: self.accounts,
+            items=lambda: self.entities.accounts,
             entities=self.entities,
         )
 
@@ -1119,6 +1113,19 @@ class EntityStorage:
         self.company_passwords: Dict[UUID, str] = {}
         self.plans: Dict[UUID, Plan] = {}
         self.transactions: List[Transaction] = []
+        self.accounts: List[Account] = []
+        self.social_accounting = SocialAccounting(
+            id=uuid4(),
+            account=self.create_account(account_type=AccountTypes.accounting),
+        )
+
+    def create_account(self, account_type: AccountTypes) -> Account:
+        account = Account(
+            id=uuid4(),
+            account_type=account_type,
+        )
+        self.accounts.append(account)
+        return account
 
     def get_company_by_id(self, company: UUID) -> Optional[Company]:
         for model in self.companies.values():

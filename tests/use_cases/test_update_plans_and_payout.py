@@ -2,7 +2,13 @@ import datetime
 from decimal import Decimal
 from uuid import UUID
 
-from arbeitszeit.entities import Account, AccountTypes, Company, ProductionCosts
+from arbeitszeit.entities import (
+    Account,
+    AccountTypes,
+    Company,
+    ProductionCosts,
+    Transaction,
+)
 from arbeitszeit.use_cases import UpdatePlansAndPayout
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts, ShowMyAccountsRequest
 from tests.data_generators import CooperationGenerator
@@ -389,9 +395,18 @@ class UseCaseTests(BaseTestCase):
             [
                 transaction
                 for transaction in self.transaction_repository.get_transactions()
-                if transaction.receiving_account.account_type == AccountTypes.a
+                if self._transaction_received_on_a_account(transaction)
             ]
         )
+
+    def _transaction_received_on_a_account(self, transaction: Transaction) -> bool:
+        account = (
+            self.account_repository.get_accounts()
+            .with_id(transaction.receiving_account)
+            .first()
+        )
+        assert account
+        return account.account_type == AccountTypes.a
 
     def get_work_account(self, company: UUID) -> Account:
         model = self.company_repository.get_companies().with_id(company).first()
