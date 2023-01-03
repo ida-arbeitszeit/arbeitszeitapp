@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime
 from decimal import Decimal
 from itertools import islice
@@ -48,12 +48,10 @@ from tests.search_tree import SearchTree
 T = TypeVar("T")
 
 
+@dataclass
 class QueryResultImpl(Generic[T]):
-    def __init__(
-        self, items: Callable[[], Iterable[T]], *, entities: EntityStorage
-    ) -> None:
-        self.items = items
-        self.entities = entities
+    items: Callable[[], Iterable[T]]
+    entities: EntityStorage
 
     def limit(self, n: int) -> QueryResultImpl[T]:
         return type(self)(
@@ -268,6 +266,58 @@ class CompanyResult(QueryResultImpl[Company], interfaces.CompanyResult):
         return companies_changed
 
 
+class TransactionResult(QueryResultImpl[Transaction], interfaces.TransactionResult):
+    def where_account_is_sender_or_receiver(self, *account: UUID) -> TransactionResult:
+        return replace(
+            self,
+            items=lambda: filter(
+                lambda transaction: transaction.sending_account.id in account
+                or transaction.receiving_account.id in account,
+                self.items(),
+            ),
+        )
+
+    def where_account_is_sender(self, *account: UUID) -> TransactionResult:
+        return replace(
+            self,
+            items=lambda: filter(
+                lambda transaction: transaction.sending_account.id in account,
+                self.items(),
+            ),
+        )
+
+    def where_account_is_receiver(self, *account: UUID) -> TransactionResult:
+        return replace(
+            self,
+            items=lambda: filter(
+                lambda transaction: transaction.receiving_account.id in account,
+                self.items(),
+            ),
+        )
+
+    def ordered_by_transaction_date(
+        self, descending: bool = False
+    ) -> TransactionResult:
+        return replace(
+            self,
+            items=lambda: sorted(
+                list(self.items()),
+                key=lambda transaction: transaction.date,
+                reverse=descending,
+            ),
+        )
+
+    def where_sender_is_social_accounting(self) -> TransactionResult:
+        return replace(
+            self,
+            items=lambda: filter(
+                lambda transaction: transaction.sending_account.account_type
+                == AccountTypes.accounting,
+                self.items(),
+            ),
+        )
+
+
 @singleton
 class PurchaseRepository(interfaces.PurchaseRepository):
     @inject
@@ -327,7 +377,6 @@ class PurchaseRepository(interfaces.PurchaseRepository):
 class TransactionRepository(interfaces.TransactionRepository):
     @inject
     def __init__(self, entities: EntityStorage) -> None:
-        self.transactions: List[Transaction] = []
         self.entities = entities
 
     def create_transaction(
@@ -348,30 +397,20 @@ class TransactionRepository(interfaces.TransactionRepository):
             amount_received=amount_received,
             purpose=purpose,
         )
-        self.transactions.append(transaction)
+        self.entities.transactions.append(transaction)
         return transaction
 
-    def all_transactions_sent_by_account(self, account: Account) -> List[Transaction]:
-        all_sent = []
-        for transaction in self.transactions:
-            if transaction.sending_account == account:
-                all_sent.append(transaction)
-        return all_sent
-
-    def all_transactions_received_by_account(
-        self, account: Account
-    ) -> List[Transaction]:
-        all_received = []
-        for transaction in self.transactions:
-            if transaction.receiving_account == account:
-                all_received.append(transaction)
-        return all_received
+    def get_transactions(self) -> TransactionResult:
+        return TransactionResult(
+            items=lambda: self.entities.transactions,
+            entities=self.entities,
+        )
 
     def get_sales_balance_of_plan(self, plan: Plan) -> Decimal:
         balance = Decimal(0)
         planner = self.entities.get_company_by_id(plan.planner)
         assert planner
-        for transaction in self.transactions:
+        for transaction in self.entities.transactions:
             if (transaction.receiving_account == planner.product_account) and (
                 str(plan.id) in transaction.purpose
             ):
@@ -400,36 +439,12 @@ class AccountRepository(interfaces.AccountRepository):
         return account
 
     def get_account_balance(self, account: Account) -> Decimal:
-        received_transactions = (
-            self.transaction_repository.all_transactions_received_by_account(account)
-        )
-        sent_transactions = (
-            self.transaction_repository.all_transactions_sent_by_account(account)
-        )
-        self._remove_intersection(received_transactions, sent_transactions)
+        transactions = self.transaction_repository.get_transactions()
+        received_transactions = transactions.where_account_is_receiver(account.id)
+        sent_transactions = transactions.where_account_is_sender(account.id)
         return decimal_sum(
             transaction.amount_received for transaction in received_transactions
         ) - decimal_sum(transaction.amount_sent for transaction in sent_transactions)
-
-    @classmethod
-    def _remove_intersection(
-        cls,
-        transactions_received: List[Transaction],
-        transactions_sent: List[Transaction],
-    ) -> None:
-        intersection = {transaction.id for transaction in transactions_received} & {
-            transaction.id for transaction in transactions_sent
-        }
-        transactions_received[:] = [
-            transaction
-            for transaction in transactions_received
-            if transaction.id not in intersection
-        ]
-        transactions_sent[:] = [
-            transaction
-            for transaction in transactions_sent
-            if transaction.id not in intersection
-        ]
 
 
 @singleton
@@ -1086,6 +1101,7 @@ class EntityStorage:
         self.companies: Dict[str, Company] = {}
         self.company_passwords: Dict[UUID, str] = {}
         self.plans: Dict[UUID, Plan] = {}
+        self.transactions: List[Transaction] = []
 
     def get_company_by_id(self, company: UUID) -> Optional[Company]:
         for model in self.companies.values():

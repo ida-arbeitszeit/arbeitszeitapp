@@ -3,113 +3,195 @@ from decimal import Decimal
 
 from sqlalchemy import and_
 
+from arbeitszeit.entities import SocialAccounting
 from arbeitszeit_flask import models
 from arbeitszeit_flask.database.repositories import TransactionRepository
 from tests.data_generators import AccountGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
 
-from .dependency_injection import injection_test
+from .flask import FlaskTestCase
 
 
-@injection_test
-def test_created_transactions_show_up_in_all_transactions_received_by_account(
-    repository: TransactionRepository,
-    account_generator: AccountGenerator,
-) -> None:
-    sender_account = account_generator.create_account()
-    receiver_account = account_generator.create_account()
-    transaction = repository.create_transaction(
-        datetime.now(),
-        sending_account=sender_account,
-        receiving_account=receiver_account,
-        amount_sent=Decimal(1),
-        amount_received=Decimal(1),
-        purpose="test purpose",
-    )
-    assert repository.all_transactions_received_by_account(receiver_account) == [
-        transaction
-    ]
+class TransactionRepositoryTests(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.account_generator = self.injector.get(AccountGenerator)
+        self.repository = self.injector.get(TransactionRepository)
+        self.plan_generator = self.injector.get(PlanGenerator)
+        self.datetime_service = self.injector.get(FakeDatetimeService)
+        self.social_accounting = self.injector.get(SocialAccounting)
 
-
-@injection_test
-def test_created_transactions_show_up_in_all_sent_received_by_account(
-    repository: TransactionRepository,
-    account_generator: AccountGenerator,
-) -> None:
-    sender_account = account_generator.create_account()
-    receiver_account = account_generator.create_account()
-    transaction = repository.create_transaction(
-        datetime.now(),
-        sending_account=sender_account,
-        receiving_account=receiver_account,
-        amount_sent=Decimal(1),
-        amount_received=Decimal(1),
-        purpose="test purpose",
-    )
-    assert repository.all_transactions_sent_by_account(sender_account) == [transaction]
-
-
-@injection_test
-def test_correct_sales_balance_of_plan_gets_returned_after_one_transaction(
-    repository: TransactionRepository,
-    account_generator: AccountGenerator,
-    plan_generator: PlanGenerator,
-    datetime_service: FakeDatetimeService,
-) -> None:
-    plan = plan_generator.create_plan()
-    sender_account = account_generator.create_account()
-    receiver_account = models.Account.query.filter(
-        and_(
-            models.Account.account_owner_company == str(plan.planner),
-            models.Account.account_type == models.AccountTypes.prd,
+    def test_created_transactions_show_up_in_all_transactions_received_by_account(
+        self,
+    ) -> None:
+        sender_account = self.account_generator.create_account()
+        receiver_account = self.account_generator.create_account()
+        transaction = self.repository.create_transaction(
+            datetime.now(),
+            sending_account=sender_account,
+            receiving_account=receiver_account,
+            amount_sent=Decimal(1),
+            amount_received=Decimal(1),
+            purpose="test purpose",
         )
-    ).first()
-    account_balance_before_transaction = repository.get_sales_balance_of_plan(plan)
-    repository.create_transaction(
-        datetime_service.now(),
-        sending_account=sender_account,
-        receiving_account=receiver_account,
-        amount_sent=Decimal(12),
-        amount_received=Decimal(10),
-        purpose=f"test {plan.id} test",
-    )
-    assert repository.get_sales_balance_of_plan(
-        plan
-    ) == account_balance_before_transaction + Decimal(10)
+        assert list(
+            self.repository.get_transactions().where_account_is_receiver(
+                receiver_account.id
+            )
+        ) == [transaction]
 
-
-@injection_test
-def test_correct_sales_balance_of_plan_gets_returned_after_two_transactions(
-    repository: TransactionRepository,
-    account_generator: AccountGenerator,
-    plan_generator: PlanGenerator,
-) -> None:
-    plan = plan_generator.create_plan()
-    sender_account_1 = account_generator.create_account()
-    sender_account_2 = account_generator.create_account()
-    receiver_account = models.Account.query.filter(
-        and_(
-            models.Account.account_owner_company == str(plan.planner),
-            models.Account.account_type == models.AccountTypes.prd,
+    def test_created_transactions_shows_up_in_all_transactions(
+        self,
+    ) -> None:
+        sender_account = self.account_generator.create_account()
+        receiver_account = self.account_generator.create_account()
+        transaction = self.repository.create_transaction(
+            datetime.now(),
+            sending_account=sender_account,
+            receiving_account=receiver_account,
+            amount_sent=Decimal(1),
+            amount_received=Decimal(1),
+            purpose="test purpose",
         )
-    ).first()
-    sales_balance_before_transactions = repository.get_sales_balance_of_plan(plan)
-    repository.create_transaction(
-        datetime.now(),
-        sending_account=sender_account_1,
-        receiving_account=receiver_account,
-        amount_sent=Decimal(12),
-        amount_received=Decimal(10),
-        purpose=f"test {plan.id} test",
-    )
-    repository.create_transaction(
-        datetime.now(),
-        sending_account=sender_account_2,
-        receiving_account=receiver_account,
-        amount_sent=Decimal(12),
-        amount_received=Decimal(15),
-        purpose=f"test2 {plan.id} test2",
-    )
-    assert repository.get_sales_balance_of_plan(
-        plan
-    ) == sales_balance_before_transactions + Decimal(25)
+        assert list(self.repository.get_transactions()) == [transaction]
+
+    def test_transactions_from_social_accounting_can_be_filtered(
+        self,
+    ) -> None:
+        receiver_account = self.account_generator.create_account()
+        transaction = self.repository.create_transaction(
+            datetime.now(),
+            sending_account=self.social_accounting.account,
+            receiving_account=receiver_account,
+            amount_sent=Decimal(1),
+            amount_received=Decimal(1),
+            purpose="test purpose",
+        )
+        assert list(
+            self.repository.get_transactions().where_sender_is_social_accounting()
+        ) == [transaction]
+
+    def test_transactions_not_from_social_accounting_dont_show_up_when_filtering_for_transactions_from_social_accounting(
+        self,
+    ) -> None:
+        sender_account = self.account_generator.create_account()
+        receiver_account = self.account_generator.create_account()
+        self.repository.create_transaction(
+            datetime.now(),
+            sending_account=sender_account,
+            receiving_account=receiver_account,
+            amount_sent=Decimal(1),
+            amount_received=Decimal(1),
+            purpose="test purpose",
+        )
+        assert (
+            not self.repository.get_transactions().where_sender_is_social_accounting()
+        )
+
+    def test_that_transactions_can_be_ordered_by_transaction_date(
+        self,
+    ) -> None:
+        sender_account = self.account_generator.create_account()
+        receiver_account = self.account_generator.create_account()
+        first_transaction = self.repository.create_transaction(
+            datetime(2000, 1, 1),
+            sending_account=sender_account,
+            receiving_account=receiver_account,
+            amount_sent=Decimal(1),
+            amount_received=Decimal(1),
+            purpose="test purpose",
+        )
+        second_transaction = self.repository.create_transaction(
+            datetime(2000, 1, 2),
+            sending_account=sender_account,
+            receiving_account=receiver_account,
+            amount_sent=Decimal(1),
+            amount_received=Decimal(1),
+            purpose="test purpose",
+        )
+        assert list(
+            self.repository.get_transactions().ordered_by_transaction_date()
+        ) == [first_transaction, second_transaction]
+        assert list(
+            self.repository.get_transactions().ordered_by_transaction_date(
+                descending=True
+            )
+        ) == [second_transaction, first_transaction]
+
+    def test_created_transactions_show_up_in_all_sent_received_by_account(self) -> None:
+        sender_account = self.account_generator.create_account()
+        receiver_account = self.account_generator.create_account()
+        transaction = self.repository.create_transaction(
+            datetime.now(),
+            sending_account=sender_account,
+            receiving_account=receiver_account,
+            amount_sent=Decimal(1),
+            amount_received=Decimal(1),
+            purpose="test purpose",
+        )
+        assert list(
+            self.repository.get_transactions().where_account_is_sender(
+                sender_account.id
+            )
+        ) == [transaction]
+
+    def test_correct_sales_balance_of_plan_gets_returned_after_one_transaction(
+        self,
+    ) -> None:
+        plan = self.plan_generator.create_plan()
+        sender_account = self.account_generator.create_account()
+        receiver_account = models.Account.query.filter(
+            and_(
+                models.Account.account_owner_company == str(plan.planner),
+                models.Account.account_type == models.AccountTypes.prd,
+            )
+        ).first()
+        account_balance_before_transaction = self.repository.get_sales_balance_of_plan(
+            plan
+        )
+        self.repository.create_transaction(
+            self.datetime_service.now(),
+            sending_account=sender_account,
+            receiving_account=receiver_account,
+            amount_sent=Decimal(12),
+            amount_received=Decimal(10),
+            purpose=f"test {plan.id} test",
+        )
+        assert self.repository.get_sales_balance_of_plan(
+            plan
+        ) == account_balance_before_transaction + Decimal(10)
+
+    def test_correct_sales_balance_of_plan_gets_returned_after_two_transactions(
+        self,
+    ) -> None:
+        plan = self.plan_generator.create_plan()
+        sender_account_1 = self.account_generator.create_account()
+        sender_account_2 = self.account_generator.create_account()
+        receiver_account = models.Account.query.filter(
+            and_(
+                models.Account.account_owner_company == str(plan.planner),
+                models.Account.account_type == models.AccountTypes.prd,
+            )
+        ).first()
+        sales_balance_before_transactions = self.repository.get_sales_balance_of_plan(
+            plan
+        )
+        self.repository.create_transaction(
+            datetime.now(),
+            sending_account=sender_account_1,
+            receiving_account=receiver_account,
+            amount_sent=Decimal(12),
+            amount_received=Decimal(10),
+            purpose=f"test {plan.id} test",
+        )
+        self.repository.create_transaction(
+            datetime.now(),
+            sending_account=sender_account_2,
+            receiving_account=receiver_account,
+            amount_sent=Decimal(12),
+            amount_received=Decimal(15),
+            purpose=f"test2 {plan.id} test2",
+        )
+        assert self.repository.get_sales_balance_of_plan(
+            plan
+        ) == sales_balance_before_transactions + Decimal(25)

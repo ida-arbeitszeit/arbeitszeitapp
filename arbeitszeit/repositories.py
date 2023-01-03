@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Generic, Iterable, Iterator, List, Optional, Protocol, TypeVar, Union
+from typing import Generic, Iterable, Iterator, Optional, Protocol, TypeVar, Union
 from uuid import UUID
 
 from arbeitszeit.entities import (
@@ -136,6 +136,23 @@ class CompanyResult(QueryResult[Company], Protocol):
         ...
 
 
+class TransactionResult(QueryResult[Transaction], Protocol):
+    def where_account_is_sender_or_receiver(self, *account: UUID) -> TransactionResult:
+        ...
+
+    def where_account_is_sender(self, *account: UUID) -> TransactionResult:
+        ...
+
+    def where_account_is_receiver(self, *account: UUID) -> TransactionResult:
+        ...
+
+    def ordered_by_transaction_date(self, descending: bool = ...) -> TransactionResult:
+        ...
+
+    def where_sender_is_social_accounting(self) -> TransactionResult:
+        ...
+
+
 class PurchaseRepository(ABC):
     @abstractmethod
     def create_purchase_by_company(
@@ -238,6 +255,10 @@ class PlanRepository(ABC):
 
 class TransactionRepository(ABC):
     @abstractmethod
+    def get_transactions(self) -> TransactionResult:
+        pass
+
+    @abstractmethod
     def create_transaction(
         self,
         date: datetime,
@@ -247,16 +268,6 @@ class TransactionRepository(ABC):
         amount_received: Decimal,
         purpose: str,
     ) -> Transaction:
-        pass
-
-    @abstractmethod
-    def all_transactions_sent_by_account(self, account: Account) -> List[Transaction]:
-        pass
-
-    @abstractmethod
-    def all_transactions_received_by_account(
-        self, account: Account
-    ) -> List[Transaction]:
         pass
 
     @abstractmethod
