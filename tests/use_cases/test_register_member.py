@@ -1,4 +1,3 @@
-from arbeitszeit.entities import AccountTypes
 from arbeitszeit.use_cases import RegisterMemberUseCase
 from arbeitszeit.use_cases.get_member_dashboard import GetMemberDashboard
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase

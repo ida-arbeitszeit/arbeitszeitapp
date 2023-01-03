@@ -1,6 +1,5 @@
 from unittest import TestCase
 
-from arbeitszeit.entities import AccountTypes
 from arbeitszeit.use_cases import RegisterCompany
 from tests.data_generators import CompanyGenerator
 from tests.token import TokenDeliveryService

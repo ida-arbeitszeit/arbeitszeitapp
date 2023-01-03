@@ -24,7 +24,6 @@ from arbeitszeit.entities import (
     ProductionCosts,
     Purchase,
     PurposesOfPurchases,
-    SocialAccounting,
     Transaction,
 )
 from arbeitszeit.repositories import (

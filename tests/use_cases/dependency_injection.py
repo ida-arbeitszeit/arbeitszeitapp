@@ -12,7 +12,6 @@ from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitation_presenter import (
     AccountantInvitationPresenter,
 )
-from tests import data_generators
 from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
 from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.dependency_injection import TestingModule
