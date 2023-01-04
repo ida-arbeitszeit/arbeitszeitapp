@@ -202,9 +202,10 @@ class PayMeansOfProductionTests(BaseTestCase):
             .first()
         )
         assert latest_transaction
-        assert latest_transaction.sending_account == sender.means_account
-        assert latest_transaction.receiving_account == self.get_product_account(
-            plan.planner
+        assert latest_transaction.sending_account == sender.means_account.id
+        assert (
+            latest_transaction.receiving_account
+            == self.get_product_account(plan.planner).id
         )
         assert latest_transaction.amount_sent == price_total
         assert latest_transaction.amount_received == price_total
@@ -233,9 +234,10 @@ class PayMeansOfProductionTests(BaseTestCase):
             .first()
         )
         assert latest_transaction
-        assert latest_transaction.sending_account == sender.raw_material_account
-        assert latest_transaction.receiving_account == self.get_product_account(
-            plan.planner
+        assert latest_transaction.sending_account == sender.raw_material_account.id
+        assert (
+            latest_transaction.receiving_account
+            == self.get_product_account(plan.planner).id
         )
         assert latest_transaction.amount_sent == price_total
         assert latest_transaction.amount_received == price_total

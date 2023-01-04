@@ -7,7 +7,7 @@ from uuid import UUID
 from injector import inject
 
 from arbeitszeit.entities import AccountTypes, Company, Transaction
-from arbeitszeit.repositories import CompanyRepository
+from arbeitszeit.repositories import AccountRepository, CompanyRepository
 from arbeitszeit.transactions import TransactionTypes, UserAccountingService
 
 
@@ -30,6 +30,7 @@ class GetCompanyTransactionsResponse:
 class GetCompanyTransactions:
     accounting_service: UserAccountingService
     company_repository: CompanyRepository
+    account_repository: AccountRepository
 
     def __call__(self, company_id: UUID) -> GetCompanyTransactionsResponse:
         company = self.company_repository.get_companies().with_id(company_id).first()
@@ -67,8 +68,14 @@ class GetCompanyTransactions:
     def _get_account_type(
         self, transaction: Transaction, user_is_sender: bool
     ) -> AccountTypes:
-        if user_is_sender:
-            account_type = transaction.sending_account.account_type
-        else:
-            account_type = transaction.receiving_account.account_type
-        return account_type
+        account = (
+            self.account_repository.get_accounts()
+            .with_id(
+                id_=transaction.sending_account
+                if user_is_sender
+                else transaction.receiving_account
+            )
+            .first()
+        )
+        assert account
+        return account.account_type

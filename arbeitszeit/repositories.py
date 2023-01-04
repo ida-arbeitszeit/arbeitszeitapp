@@ -153,6 +153,11 @@ class TransactionResult(QueryResult[Transaction], Protocol):
         ...
 
 
+class AccountResult(QueryResult[Account], Protocol):
+    def with_id(self, id_: UUID) -> AccountResult:
+        ...
+
+
 class PurchaseRepository(ABC):
     @abstractmethod
     def create_purchase_by_company(
@@ -278,6 +283,10 @@ class TransactionRepository(ABC):
 class AccountRepository(ABC):
     @abstractmethod
     def create_account(self, account_type: AccountTypes) -> Account:
+        pass
+
+    @abstractmethod
+    def get_accounts(self) -> AccountResult:
         pass
 
     @abstractmethod

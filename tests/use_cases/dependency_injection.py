@@ -12,7 +12,6 @@ from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitation_presenter import (
     AccountantInvitationPresenter,
 )
-from tests import data_generators
 from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
 from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.dependency_injection import TestingModule
@@ -94,9 +93,9 @@ class InMemoryModule(Module):
     @provider
     @singleton
     def provide_social_accounting_instance(
-        self, generator: data_generators.SocialAccountingGenerator
+        self, entity_storage: repositories.EntityStorage
     ) -> entities.SocialAccounting:
-        return generator.create_social_accounting()
+        return entity_storage.social_accounting
 
     @provider
     def provide_account_repository(

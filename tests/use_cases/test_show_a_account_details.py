@@ -7,7 +7,6 @@ from arbeitszeit.use_cases import ShowAAccountDetailsUseCase
 from tests.data_generators import (
     CompanyGenerator,
     MemberGenerator,
-    SocialAccountingGenerator,
     TransactionGenerator,
 )
 
@@ -290,12 +289,10 @@ def test_that_plotting_info_is_generated_in_the_correct_order_after_transfer_of_
 def test_that_correct_plotting_info_is_generated_after_receiving_of_work_certificates_from_social_accounting(
     show_a_account_details: ShowAAccountDetailsUseCase,
     company_generator: CompanyGenerator,
-    accounting_generator: SocialAccountingGenerator,
     transaction_generator: TransactionGenerator,
+    social_accounting: SocialAccounting,
 ):
     company = company_generator.create_company_entity()
-    social_accounting = accounting_generator.create_social_accounting()
-
     trans = transaction_generator.create_transaction(
         sending_account=social_accounting.account,
         receiving_account=company.work_account,

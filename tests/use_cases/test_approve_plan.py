@@ -171,9 +171,13 @@ class UseCaseTests(BaseTestCase):
         plan = self.plan_generator.create_plan(approved=False)
         self.use_case.approve_plan(self.create_request(plan=plan.id))
         for transaction in self.transaction_repository.get_transactions():
-            self.assertEqual(
-                transaction.sending_account.account_type, AccountTypes.accounting
+            account = (
+                self.account_repository.get_accounts()
+                .with_id(transaction.sending_account)
+                .first()
             )
+            assert account
+            self.assertEqual(account.account_type, AccountTypes.accounting)
 
     def get_company_transactions(self, company: UUID) -> List[TransactionInfo]:
         response = self.get_company_transactions_use_case(company)

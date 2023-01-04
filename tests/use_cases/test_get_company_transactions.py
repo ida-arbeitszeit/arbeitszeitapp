@@ -8,7 +8,6 @@ from tests.data_generators import (
     CompanyGenerator,
     FakeDatetimeService,
     MemberGenerator,
-    SocialAccountingGenerator,
     TransactionGenerator,
 )
 
@@ -217,13 +216,12 @@ def test_that_correct_info_for_company_is_generated_in_correct_order_after_sever
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
     member_generator: MemberGenerator,
-    social_accounting_generator: SocialAccountingGenerator,
+    social_accounting: SocialAccounting,
     datetime_service: FakeDatetimeService,
 ):
     company1 = company_generator.create_company_entity()
     company2 = company_generator.create_company_entity()
     member = member_generator.create_member_entity()
-    social_accounting = social_accounting_generator.create_social_accounting()
 
     transaction_generator.create_transaction(
         sending_account=company1.means_account,

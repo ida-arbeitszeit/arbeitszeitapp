@@ -305,6 +305,13 @@ class TransactionQueryResult(FlaskQueryResult[entities.Transaction]):
         )
 
 
+class AccountQueryResult(FlaskQueryResult[entities.Account]):
+    def with_id(self, id_: UUID) -> AccountQueryResult:
+        return self._with_modified_query(
+            lambda query: query.filter(models.Account.id == str(id_))
+        )
+
+
 @dataclass
 class UserAddressBookImpl:
     db: SQLAlchemy
@@ -604,6 +611,13 @@ class AccountRepository(repositories.AccountRepository):
 
     def get_by_id(self, id: UUID) -> entities.Account:
         return self.object_from_orm(Account.query.get(str(id)))
+
+    def get_accounts(self) -> AccountQueryResult:
+        return AccountQueryResult(
+            db=self.db,
+            mapper=self.object_from_orm,
+            query=models.Account.query,
+        )
 
 
 @inject
@@ -952,7 +966,6 @@ class PlanRepository(repositories.PlanRepository):
 @inject
 @dataclass
 class TransactionRepository(repositories.TransactionRepository):
-    account_repository: AccountRepository
     db: SQLAlchemy
 
     def object_to_orm(self, transaction: entities.Transaction) -> Transaction:
@@ -962,12 +975,8 @@ class TransactionRepository(repositories.TransactionRepository):
         return entities.Transaction(
             id=UUID(transaction.id),
             date=transaction.date,
-            sending_account=self.account_repository.get_by_id(
-                transaction.sending_account
-            ),
-            receiving_account=self.account_repository.get_by_id(
-                transaction.receiving_account
-            ),
+            sending_account=UUID(transaction.sending_account),
+            receiving_account=UUID(transaction.receiving_account),
             amount_sent=Decimal(transaction.amount_sent),
             amount_received=Decimal(transaction.amount_received),
             purpose=transaction.purpose,

@@ -24,7 +24,6 @@ from arbeitszeit.entities import (
     ProductionCosts,
     Purchase,
     PurposesOfPurchases,
-    SocialAccounting,
     Transaction,
 )
 from arbeitszeit.repositories import (
@@ -218,20 +217,6 @@ class CompanyGenerator:
             return company
         self.company_repository.confirm_company(company, self.datetime_service.now())
         return company
-
-
-@inject
-@dataclass
-class SocialAccountingGenerator:
-    account_generator: AccountGenerator
-
-    def create_social_accounting(self) -> SocialAccounting:
-        return SocialAccounting(
-            id=uuid4(),
-            account=self.account_generator.create_account(
-                account_type=AccountTypes.accounting
-            ),
-        )
 
 
 @inject
