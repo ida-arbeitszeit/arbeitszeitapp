@@ -44,9 +44,9 @@ def upgrade():
     sa.Column('account_owner_company', sa.String(), nullable=True),
     sa.Column('account_owner_member', sa.String(), nullable=True),
     sa.Column('account_type', sa.Enum('p', 'r', 'a', 'prd', 'member', 'accounting', name='accounttypes'), nullable=False),
-    sa.ForeignKeyConstraint(['account_owner_company'], ['company.id'], ),
-    sa.ForeignKeyConstraint(['account_owner_member'], ['member.id'], ),
-    sa.ForeignKeyConstraint(['account_owner_social_accounting'], ['social_accounting.id'], ),
+    sa.ForeignKeyConstraint(['account_owner_company'], ['company.id'], name='account_account_owner_company_fkey'),
+    sa.ForeignKeyConstraint(['account_owner_member'], ['member.id'], name='account_account_owner_member_fkey'),
+    sa.ForeignKeyConstraint(['account_owner_social_accounting'], ['social_accounting.id'], name='account_account_owner_social_accounting_fkey'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('jobs',

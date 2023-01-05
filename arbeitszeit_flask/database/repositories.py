@@ -466,6 +466,10 @@ class CompanyRepository(repositories.CompanyRepository):
             registered_on=registered_on,
             confirmed_on=None,
             user=user_orm,
+            p_account=str(means_account.id),
+            r_account=str(resource_account.id),
+            a_account=str(labour_account.id),
+            prd_account=str(products_account.id),
         )
         self.db.session.add(company)
         for account in [
@@ -540,22 +544,22 @@ class CompanyRepository(repositories.CompanyRepository):
         )
 
     def _get_means_account(self, company: Company) -> Account:
-        account = company.accounts.filter_by(account_type="p").first()
+        account = models.Account.query.get(company.p_account)
         assert account
         return account
 
     def _get_resources_account(self, company: Company) -> Account:
-        account = company.accounts.filter_by(account_type="r").first()
+        account = models.Account.query.get(company.r_account)
         assert account
         return account
 
     def _get_labour_account(self, company: Company) -> Account:
-        account = company.accounts.filter_by(account_type="a").first()
+        account = models.Account.query.get(company.a_account)
         assert account
         return account
 
     def _get_products_account(self, company: Company) -> Account:
-        account = company.accounts.filter_by(account_type="prd").first()
+        account = models.Account.query.get(company.prd_account)
         assert account
         return account
 
@@ -637,13 +641,21 @@ class AccountOwnerRepository(repositories.AccountOwnerRepository):
         account_orm = self.account_repository.object_to_orm(account)
         if account_orm.account_owner_member:
             account_owner = self.member_repository.object_from_orm(account_orm.member)
-        elif account_orm.account_owner_company:
-            account_owner = self.company_repository.object_from_orm(account_orm.company)
         elif account_orm.account_owner_social_accounting:
             account_owner = self.social_accounting_repository.object_from_orm(
                 account_orm.social_accounting
             )
-
+        else:
+            account_owner = self.company_repository.object_from_orm(
+                models.Company.query.filter(
+                    or_(
+                        models.Company.p_account == account_orm.id,
+                        models.Company.r_account == account_orm.id,
+                        models.Company.a_account == account_orm.id,
+                        models.Company.prd_account == account_orm.id,
+                    )
+                ).first()
+            )
         assert account_owner
         return account_owner
 
@@ -1016,7 +1028,11 @@ class TransactionRepository(repositories.TransactionRepository):
                 models.Account,
                 models.Transaction.receiving_account == models.Account.id,
             )
-            .filter(models.Account.account_owner_company == str(plan.planner))
+            .join(
+                models.Company,
+                models.Account.id == models.Company.prd_account,
+            )
+            .filter(models.Company.id == str(plan.planner))
             .with_entities(func.sum(models.Transaction.amount_received))
             .one()[0]
             or 0

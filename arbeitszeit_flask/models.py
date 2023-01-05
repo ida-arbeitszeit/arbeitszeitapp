@@ -64,9 +64,12 @@ class Company(UserMixin, db.Model):
     confirmed_on = db.Column(db.DateTime, nullable=True)
     user = db.relationship("User", lazy=True, uselist=False, backref="company")
     plans = db.relationship("Plan", lazy="dynamic", backref="company")
-    accounts = db.relationship("Account", lazy="dynamic", backref="company")
     purchases = db.relationship("Purchase", lazy="dynamic")
     drafts = db.relationship("PlanDraft", lazy="dynamic")
+    p_account = db.Column(db.ForeignKey("account.id"), nullable=False)
+    r_account = db.Column(db.ForeignKey("account.id"), nullable=False)
+    a_account = db.Column(db.ForeignKey("account.id"), nullable=False)
+    prd_account = db.Column(db.ForeignKey("account.id"), nullable=False)
 
     def __repr__(self):
         return "<Company(name='%s')>" % (self.name,)
@@ -146,9 +149,6 @@ class Account(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
     account_owner_social_accounting = db.Column(
         db.String, db.ForeignKey("social_accounting.id"), nullable=True
-    )
-    account_owner_company = db.Column(
-        db.String, db.ForeignKey("company.id"), nullable=True
     )
     account_owner_member = db.Column(
         db.String, db.ForeignKey("member.id"), nullable=True

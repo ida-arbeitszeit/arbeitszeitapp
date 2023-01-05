@@ -1,8 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import and_
-
 from arbeitszeit.entities import SocialAccounting
 from arbeitszeit_flask import models
 from arbeitszeit_flask.database.repositories import TransactionRepository
@@ -141,10 +139,12 @@ class TransactionRepositoryTests(FlaskTestCase):
         plan = self.plan_generator.create_plan()
         sender_account = self.account_generator.create_account()
         receiver_account = models.Account.query.filter(
-            and_(
-                models.Account.account_owner_company == str(plan.planner),
-                models.Account.account_type == models.AccountTypes.prd,
-            )
+            models.Account.id.in_(
+                models.Company.query.filter(models.Company.id == str(plan.planner))
+                .with_entities(models.Company.prd_account)
+                .subquery()
+                .select()
+            ),
         ).first()
         account_balance_before_transaction = self.repository.get_sales_balance_of_plan(
             plan
@@ -168,10 +168,12 @@ class TransactionRepositoryTests(FlaskTestCase):
         sender_account_1 = self.account_generator.create_account()
         sender_account_2 = self.account_generator.create_account()
         receiver_account = models.Account.query.filter(
-            and_(
-                models.Account.account_owner_company == str(plan.planner),
-                models.Account.account_type == models.AccountTypes.prd,
-            )
+            models.Account.id.in_(
+                models.Company.query.filter(models.Company.id == str(plan.planner))
+                .with_entities(models.Company.prd_account)
+                .subquery()
+                .select()
+            ),
         ).first()
         sales_balance_before_transactions = self.repository.get_sales_balance_of_plan(
             plan

@@ -1,4 +1,4 @@
-{ mkShell, python3, nixfmt }:
+{ mkShell, python3, nixfmt, sqlite }:
 mkShell {
   packages = (with python3.pkgs; [
     black
@@ -9,7 +9,7 @@ mkShell {
     gunicorn
     types-dateutil
     coverage
-  ]) ++ [ nixfmt ]
+  ]) ++ [ nixfmt sqlite ]
     ++ python3.pkgs.arbeitszeitapp.optional-dependencies.profiling;
   inputsFrom = [ python3.pkgs.arbeitszeitapp ];
 }
