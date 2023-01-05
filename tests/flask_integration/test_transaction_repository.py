@@ -1,8 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import and_
-
 from arbeitszeit.entities import SocialAccounting
 from arbeitszeit_flask import models
 from arbeitszeit_flask.database.repositories import TransactionRepository
