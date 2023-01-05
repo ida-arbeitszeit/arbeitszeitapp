@@ -82,9 +82,35 @@ def upgrade():
     with op.batch_alter_table('account') as batch_op:
         batch_op.drop_constraint('account_account_owner_company_fkey', type_='foreignkey')
     op.drop_column('account', 'account_owner_company')
+    with op.batch_alter_table('company') as batch_op:
+        batch_op.alter_column('p_account',
+                   existing_type=sa.VARCHAR(),
+                   nullable=False)
+        batch_op.alter_column('r_account',
+                   existing_type=sa.VARCHAR(),
+                   nullable=False)
+        batch_op.alter_column('a_account',
+                   existing_type=sa.VARCHAR(),
+                   nullable=False)
+        batch_op.alter_column('prd_account',
+                   existing_type=sa.VARCHAR(),
+                   nullable=False)
 
 
 def downgrade():
+    with op.batch_alter_table('company') as batch_op:
+        batch_op.alter_column('prd_account',
+                   existing_type=sa.VARCHAR(),
+                   nullable=True)
+        batch_op.alter_column('a_account',
+                   existing_type=sa.VARCHAR(),
+                   nullable=True)
+        batch_op.alter_column('r_account',
+                   existing_type=sa.VARCHAR(),
+                   nullable=True)
+        batch_op.alter_column('p_account',
+                   existing_type=sa.VARCHAR(),
+                   nullable=True)
     op.add_column('account', sa.Column('account_owner_company', sa.String()))
     with op.batch_alter_table('account') as batch_op:
         batch_op.create_foreign_key('account_account_owner_company_fkey', 'company', ['account_owner_company'], ['id'])
