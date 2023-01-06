@@ -1,12 +1,13 @@
 import enum
 from dataclasses import dataclass
 from decimal import Decimal
+from uuid import UUID
 
 from injector import inject
 
 from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Account, Member
+from arbeitszeit.entities import Member
 from arbeitszeit.repositories import AccountRepository, TransactionRepository
 
 
@@ -27,7 +28,7 @@ class GiroOffice:
     def record_transaction_from_member(
         self,
         sender: Member,
-        receiving_account: Account,
+        receiving_account: UUID,
         amount_sent: Decimal,
         amount_received: Decimal,
         purpose: str,
@@ -45,7 +46,7 @@ class GiroOffice:
         )
 
     def _is_account_balance_sufficient(
-        self, transaction_volume: Decimal, sending_account: Account
+        self, transaction_volume: Decimal, sending_account: UUID
     ) -> bool:
         if transaction_volume <= 0:
             return True
