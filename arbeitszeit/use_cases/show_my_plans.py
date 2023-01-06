@@ -7,7 +7,7 @@ from uuid import UUID
 from injector import inject
 
 from arbeitszeit.entities import Plan, PlanDraft
-from arbeitszeit.price_calculator import calculate_price
+from arbeitszeit.price_calculator import PriceCalculator
 from arbeitszeit.repositories import (
     PlanCooperationRepository,
     PlanDraftRepository,
@@ -49,6 +49,7 @@ class ShowMyPlansUseCase:
     plan_repository: PlanRepository
     plan_cooperation_repository: PlanCooperationRepository
     draft_repository: PlanDraftRepository
+    price_calculator: PriceCalculator
 
     def show_company_plans(self, request: ShowMyPlansRequest) -> ShowMyPlansResponse:
         all_plans_of_company = list(
@@ -91,13 +92,7 @@ class ShowMyPlansUseCase:
         return PlanInfo(
             id=plan.id,
             prd_name=plan.prd_name,
-            price_per_unit=calculate_price(
-                list(
-                    self.plan_repository.get_plans().that_are_in_same_cooperation_as(
-                        plan.id
-                    )
-                )
-            ),
+            price_per_unit=self.price_calculator.calculate_cooperative_price(plan),
             is_public_service=plan.is_public_service,
             plan_creation_date=plan.plan_creation_date,
             activation_date=plan.activation_date,
