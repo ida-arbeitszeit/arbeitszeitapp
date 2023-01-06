@@ -2,13 +2,7 @@ import datetime
 from decimal import Decimal
 from uuid import UUID
 
-from arbeitszeit.entities import (
-    Account,
-    AccountTypes,
-    Company,
-    ProductionCosts,
-    Transaction,
-)
+from arbeitszeit.entities import AccountTypes, Company, ProductionCosts, Transaction
 from arbeitszeit.use_cases import UpdatePlansAndPayout
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts, ShowMyAccountsRequest
 from tests.data_generators import CooperationGenerator

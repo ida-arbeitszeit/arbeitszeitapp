@@ -7,7 +7,7 @@ from uuid import UUID
 from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Account, Plan, SocialAccounting
+from arbeitszeit.entities import Plan, SocialAccounting
 from arbeitszeit.repositories import (
     CompanyRepository,
     PlanRepository,

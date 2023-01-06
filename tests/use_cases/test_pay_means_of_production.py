@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from uuid import UUID, uuid4
 
-from arbeitszeit.entities import Account, Company, ProductionCosts, PurposesOfPurchases
+from arbeitszeit.entities import Company, ProductionCosts, PurposesOfPurchases
 from arbeitszeit.use_cases import (
     GetCompanyTransactions,
     PayMeansOfProduction,
