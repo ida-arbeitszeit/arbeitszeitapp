@@ -71,7 +71,7 @@ class GetCompanyTransactions:
         account = (
             self.account_repository.get_accounts()
             .with_id(
-                id_=transaction.sending_account
+                transaction.sending_account
                 if user_is_sender
                 else transaction.receiving_account
             )

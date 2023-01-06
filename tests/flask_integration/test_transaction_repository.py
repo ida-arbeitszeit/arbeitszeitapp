@@ -1,5 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
+from uuid import UUID
 
 from arbeitszeit.entities import SocialAccounting
 from arbeitszeit_flask import models
@@ -14,10 +15,14 @@ class TransactionRepositoryTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.account_generator = self.injector.get(AccountGenerator)
-        self.repository = self.injector.get(TransactionRepository)
-        self.plan_generator = self.injector.get(PlanGenerator)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
-        self.social_accounting = self.injector.get(SocialAccounting)
+        self.repository: TransactionRepository = self.injector.get(
+            TransactionRepository
+        )
+        self.plan_generator: PlanGenerator = self.injector.get(PlanGenerator)
+        self.datetime_service: FakeDatetimeService = self.injector.get(
+            FakeDatetimeService
+        )
+        self.social_accounting: SocialAccounting = self.injector.get(SocialAccounting)
 
     def test_created_transactions_show_up_in_all_transactions_received_by_account(
         self,
@@ -26,8 +31,8 @@ class TransactionRepositoryTests(FlaskTestCase):
         receiver_account = self.account_generator.create_account()
         transaction = self.repository.create_transaction(
             datetime.now(),
-            sending_account=sender_account,
-            receiving_account=receiver_account,
+            sending_account=sender_account.id,
+            receiving_account=receiver_account.id,
             amount_sent=Decimal(1),
             amount_received=Decimal(1),
             purpose="test purpose",
@@ -45,8 +50,8 @@ class TransactionRepositoryTests(FlaskTestCase):
         receiver_account = self.account_generator.create_account()
         transaction = self.repository.create_transaction(
             datetime.now(),
-            sending_account=sender_account,
-            receiving_account=receiver_account,
+            sending_account=sender_account.id,
+            receiving_account=receiver_account.id,
             amount_sent=Decimal(1),
             amount_received=Decimal(1),
             purpose="test purpose",
@@ -59,8 +64,8 @@ class TransactionRepositoryTests(FlaskTestCase):
         receiver_account = self.account_generator.create_account()
         transaction = self.repository.create_transaction(
             datetime.now(),
-            sending_account=self.social_accounting.account,
-            receiving_account=receiver_account,
+            sending_account=self.social_accounting.account.id,
+            receiving_account=receiver_account.id,
             amount_sent=Decimal(1),
             amount_received=Decimal(1),
             purpose="test purpose",
@@ -76,8 +81,8 @@ class TransactionRepositoryTests(FlaskTestCase):
         receiver_account = self.account_generator.create_account()
         self.repository.create_transaction(
             datetime.now(),
-            sending_account=sender_account,
-            receiving_account=receiver_account,
+            sending_account=sender_account.id,
+            receiving_account=receiver_account.id,
             amount_sent=Decimal(1),
             amount_received=Decimal(1),
             purpose="test purpose",
@@ -93,16 +98,16 @@ class TransactionRepositoryTests(FlaskTestCase):
         receiver_account = self.account_generator.create_account()
         first_transaction = self.repository.create_transaction(
             datetime(2000, 1, 1),
-            sending_account=sender_account,
-            receiving_account=receiver_account,
+            sending_account=sender_account.id,
+            receiving_account=receiver_account.id,
             amount_sent=Decimal(1),
             amount_received=Decimal(1),
             purpose="test purpose",
         )
         second_transaction = self.repository.create_transaction(
             datetime(2000, 1, 2),
-            sending_account=sender_account,
-            receiving_account=receiver_account,
+            sending_account=sender_account.id,
+            receiving_account=receiver_account.id,
             amount_sent=Decimal(1),
             amount_received=Decimal(1),
             purpose="test purpose",
@@ -121,8 +126,8 @@ class TransactionRepositoryTests(FlaskTestCase):
         receiver_account = self.account_generator.create_account()
         transaction = self.repository.create_transaction(
             datetime.now(),
-            sending_account=sender_account,
-            receiving_account=receiver_account,
+            sending_account=sender_account.id,
+            receiving_account=receiver_account.id,
             amount_sent=Decimal(1),
             amount_received=Decimal(1),
             purpose="test purpose",
@@ -151,8 +156,8 @@ class TransactionRepositoryTests(FlaskTestCase):
         )
         self.repository.create_transaction(
             self.datetime_service.now(),
-            sending_account=sender_account,
-            receiving_account=receiver_account,
+            sending_account=sender_account.id,
+            receiving_account=UUID(receiver_account.id),
             amount_sent=Decimal(12),
             amount_received=Decimal(10),
             purpose=f"test {plan.id} test",
@@ -180,16 +185,16 @@ class TransactionRepositoryTests(FlaskTestCase):
         )
         self.repository.create_transaction(
             datetime.now(),
-            sending_account=sender_account_1,
-            receiving_account=receiver_account,
+            sending_account=sender_account_1.id,
+            receiving_account=UUID(receiver_account.id),
             amount_sent=Decimal(12),
             amount_received=Decimal(10),
             purpose=f"test {plan.id} test",
         )
         self.repository.create_transaction(
             datetime.now(),
-            sending_account=sender_account_2,
-            receiving_account=receiver_account,
+            sending_account=sender_account_2.id,
+            receiving_account=UUID(receiver_account.id),
             amount_sent=Decimal(12),
             amount_received=Decimal(15),
             purpose=f"test2 {plan.id} test2",

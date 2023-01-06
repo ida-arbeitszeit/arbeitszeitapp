@@ -90,5 +90,5 @@ class UseCaseTester(BaseTestCase):
         assert transaction
         assert transaction.amount_sent == amount_to_transfer
         assert transaction.amount_received == amount_to_transfer
-        assert transaction.sending_account == company.work_account.id
-        assert transaction.receiving_account == worker.account.id
+        assert transaction.sending_account == company.work_account
+        assert transaction.receiving_account == worker.account

@@ -44,16 +44,15 @@ class UserAccountingService:
     ) -> List[Transaction]:
         return list(
             self.transaction_repository.get_transactions()
-            .where_account_is_sender_or_receiver(
-                *(account.id for account in user.accounts())
-            )
+            .where_account_is_sender_or_receiver(*user.accounts())
             .ordered_by_transaction_date(descending=True)
         )
 
     def get_account_transactions_sorted(
         self, user: Union[Member, Company], queried_account_type: AccountTypes
     ) -> List[Transaction]:
-        for acc in user.accounts():
+        accounts = self.account_repository.get_accounts().with_id(*user.accounts())
+        for acc in accounts:
             if acc.account_type == queried_account_type:
                 queried_account = acc
                 break
@@ -68,9 +67,7 @@ class UserAccountingService:
     def user_is_sender(
         self, transaction: Transaction, user: Union[Member, Company]
     ) -> bool:
-        return transaction.sending_account in [
-            account.id for account in user.accounts()
-        ]
+        return transaction.sending_account in user.accounts()
 
     def get_transaction_type(
         self, transaction: Transaction, user_is_sender: bool

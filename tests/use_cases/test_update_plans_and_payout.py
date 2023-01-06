@@ -408,7 +408,7 @@ class UseCaseTests(BaseTestCase):
         assert account
         return account.account_type == AccountTypes.a
 
-    def get_work_account(self, company: UUID) -> Account:
-        model = self.company_repository.get_companies().with_id(company).first()
-        assert model
-        return model.work_account
+    def get_work_account(self, company: UUID) -> UUID:
+        company_model = self.company_repository.get_companies().with_id(company).first()
+        assert company_model
+        return company_model.work_account

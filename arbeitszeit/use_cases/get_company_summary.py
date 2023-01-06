@@ -128,7 +128,7 @@ class GetCompanySummary:
                 map(
                     lambda t: t.amount_received,
                     self.transaction_repository.get_transactions()
-                    .where_account_is_sender_or_receiver(account.id)
+                    .where_account_is_sender_or_receiver(account)
                     .where_sender_is_social_accounting(),
                 )
             )
@@ -138,7 +138,7 @@ class GetCompanySummary:
             map(
                 lambda t: t.amount_received,
                 self.transaction_repository.get_transactions()
-                .where_account_is_sender_or_receiver(company.product_account.id)
+                .where_account_is_sender_or_receiver(company.product_account)
                 .where_sender_is_social_accounting(),
             )
         )

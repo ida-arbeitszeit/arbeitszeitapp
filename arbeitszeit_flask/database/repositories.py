@@ -105,14 +105,16 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
             lambda query: query.filter(models.Plan.cooperation != None)
         )
 
-    def planned_by(self, company: UUID) -> PlanQueryResult:
+    def planned_by(self, *company: UUID) -> PlanQueryResult:
+        companies = list(map(str, company))
         return self._with_modified_query(
-            lambda query: query.filter(models.Plan.planner == str(company))
+            lambda query: query.filter(models.Plan.planner.in_(companies))
         )
 
-    def with_id(self, id_: UUID) -> PlanQueryResult:
+    def with_id(self, *id_: UUID) -> PlanQueryResult:
+        ids = list(map(str, id_))
         return self._with_modified_query(
-            lambda query: query.filter(models.Plan.id == str(id_))
+            lambda query: query.filter(models.Plan.id.in_(ids))
         )
 
     def without_completed_review(self) -> PlanQueryResult:
@@ -306,9 +308,10 @@ class TransactionQueryResult(FlaskQueryResult[entities.Transaction]):
 
 
 class AccountQueryResult(FlaskQueryResult[entities.Account]):
-    def with_id(self, id_: UUID) -> AccountQueryResult:
+    def with_id(self, *id_: UUID) -> AccountQueryResult:
+        ids = list(map(str, id_))
         return self._with_modified_query(
-            lambda query: query.filter(models.Account.id == str(id_))
+            lambda query: query.filter(models.Account.id.in_(ids))
         )
 
 
@@ -363,11 +366,10 @@ class MemberRepository(repositories.MemberRepository):
         return member_orm
 
     def object_from_orm(self, orm_object: Member) -> entities.Member:
-        member_account = self.account_repository.object_from_orm(orm_object.account)
         return entities.Member(
             id=UUID(orm_object.id),
             name=orm_object.name,
-            account=member_account,
+            account=UUID(orm_object.account.id),
             email=orm_object.user.email,
             registered_on=orm_object.registered_on,
             confirmed_on=orm_object.confirmed_on,
@@ -421,7 +423,6 @@ class MemberRepository(repositories.MemberRepository):
 @inject
 @dataclass
 class CompanyRepository(repositories.CompanyRepository):
-    account_repository: AccountRepository
     db: SQLAlchemy
 
     def object_to_orm(self, company: entities.Company) -> Company:
@@ -432,18 +433,10 @@ class CompanyRepository(repositories.CompanyRepository):
             id=UUID(company_orm.id),
             email=company_orm.user.email,
             name=company_orm.name,
-            means_account=self.account_repository.object_from_orm(
-                self._get_means_account(company_orm)
-            ),
-            raw_material_account=self.account_repository.object_from_orm(
-                self._get_resources_account(company_orm)
-            ),
-            work_account=self.account_repository.object_from_orm(
-                self._get_labour_account(company_orm)
-            ),
-            product_account=self.account_repository.object_from_orm(
-                self._get_products_account(company_orm)
-            ),
+            means_account=UUID(company_orm.p_account),
+            raw_material_account=UUID(company_orm.r_account),
+            work_account=UUID(company_orm.a_account),
+            product_account=UUID(company_orm.prd_account),
             registered_on=company_orm.registered_on,
             confirmed_on=company_orm.confirmed_on,
         )
@@ -472,14 +465,7 @@ class CompanyRepository(repositories.CompanyRepository):
             prd_account=str(products_account.id),
         )
         self.db.session.add(company)
-        for account in [
-            means_account,
-            labour_account,
-            resource_account,
-            products_account,
-        ]:
-            account_orm = self.account_repository.object_to_orm(account)
-            account_orm.account_owner_company = company.id
+        self.db.session.flush()
         return self.object_from_orm(company)
 
     def query_companies_by_name(self, query: str) -> Iterator[entities.Company]:
@@ -533,15 +519,19 @@ class CompanyRepository(repositories.CompanyRepository):
             return orm.confirmed_on is not None
 
     def _get_or_create_user(self, email: str, password: str) -> models.User:
-        return self.db.session.query(models.User).filter(
+        user = models.User.query.filter(
             and_(
                 models.User.email == email,
-                models.User.company == None,
             )
-        ).first() or models.User(
-            email=email,
-            password=generate_password_hash(password, method="sha256"),
-        )
+        ).first()
+        if not user:
+            user = models.User(
+                email=email,
+                password=generate_password_hash(password, method="sha256"),
+                id=str(uuid4()),
+            )
+            self.db.session.add(user)
+        return user
 
     def _get_means_account(self, company: Company) -> Account:
         account = models.Account.query.get(company.p_account)
@@ -602,8 +592,8 @@ class AccountRepository(repositories.AccountRepository):
         self.db.session.add(account)
         return self.object_from_orm(account)
 
-    def get_account_balance(self, account: entities.Account) -> Decimal:
-        account_orm = self.object_to_orm(account)
+    def get_account_balance(self, account: UUID) -> Decimal:
+        account_orm = models.Account.query.get(str(account))
         received = set(account_orm.transactions_received)
         sent = set(account_orm.transactions_sent)
         intersection = received & sent
@@ -997,8 +987,8 @@ class TransactionRepository(repositories.TransactionRepository):
     def create_transaction(
         self,
         date: datetime,
-        sending_account: entities.Account,
-        receiving_account: entities.Account,
+        sending_account: UUID,
+        receiving_account: UUID,
         amount_sent: Decimal,
         amount_received: Decimal,
         purpose: str,
@@ -1006,8 +996,8 @@ class TransactionRepository(repositories.TransactionRepository):
         transaction = Transaction(
             id=str(uuid4()),
             date=date,
-            sending_account=str(sending_account.id),
-            receiving_account=str(receiving_account.id),
+            sending_account=str(sending_account),
+            receiving_account=str(receiving_account),
             amount_sent=amount_sent,
             amount_received=amount_received,
             purpose=purpose,
