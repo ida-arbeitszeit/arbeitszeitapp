@@ -9,7 +9,7 @@ from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Company, Plan, PurposesOfPurchases
-from arbeitszeit.price_calculator import calculate_price
+from arbeitszeit.price_calculator import PriceCalculator
 from arbeitszeit.repositories import (
     CompanyRepository,
     PlanRepository,
@@ -47,7 +47,10 @@ class PayMeansOfProductionResponse:
 class PayMeansOfProduction:
     plan_repository: PlanRepository
     company_repository: CompanyRepository
-    payment_factory: PaymentFactory
+    price_calculator: PriceCalculator
+    purchase_repository: PurchaseRepository
+    datetime_service: DatetimeService
+    transaction_repository: TransactionRepository
 
     def __call__(
         self, request: PayMeansOfProductionRequest
@@ -56,9 +59,12 @@ class PayMeansOfProduction:
             plan, buyer, purpose = self._validate_request(request)
         except PayMeansOfProductionResponse.RejectionReason as reason:
             return PayMeansOfProductionResponse(rejection_reason=reason)
-        payment = self.payment_factory.get_payment(plan, buyer, request.amount, purpose)
-        payment.record_purchase()
-        payment.create_transaction()
+        self.record_purchase(
+            plan=plan, amount=request.amount, purpose=request.purpose, buyer_id=buyer.id
+        )
+        self.create_transaction(
+            buyer=buyer, plan=plan, amount=request.amount, purpose=purpose
+        )
         return PayMeansOfProductionResponse(rejection_reason=None)
 
     def _validate_request(
@@ -100,52 +106,31 @@ class PayMeansOfProduction:
             raise PayMeansOfProductionResponse.RejectionReason.invalid_purpose
         return request.purpose
 
-
-@dataclass
-class Payment:
-    purchase_repository: PurchaseRepository
-    transaction_repository: TransactionRepository
-    datetime_service: DatetimeService
-    plan_repository: PlanRepository
-    company_repository: CompanyRepository
-    plan: Plan
-    buyer: Company
-    amount: int
-    purpose: PurposesOfPurchases
-
-    def record_purchase(self) -> None:
-        price_per_unit = calculate_price(
-            list(
-                self.plan_repository.get_plans().that_are_in_same_cooperation_as(
-                    self.plan.id
-                )
-            )
-        )
+    def record_purchase(
+        self, plan: Plan, amount: int, purpose: PurposesOfPurchases, buyer_id: UUID
+    ) -> None:
+        price_per_unit = self.price_calculator.calculate_cooperative_price(plan)
         self.purchase_repository.create_purchase_by_company(
             purchase_date=self.datetime_service.now(),
-            plan=self.plan.id,
-            buyer=self.buyer.id,
+            plan=plan.id,
+            buyer=buyer_id,
             price_per_unit=price_per_unit,
-            amount=self.amount,
-            purpose=self.purpose,
+            amount=amount,
+            purpose=purpose,
         )
 
-    def create_transaction(self) -> None:
-        coop_price = self.amount * calculate_price(
-            list(
-                self.plan_repository.get_plans().that_are_in_same_cooperation_as(
-                    self.plan.id
-                )
-            )
+    def create_transaction(
+        self, amount: int, purpose: PurposesOfPurchases, buyer: Company, plan: Plan
+    ) -> None:
+        coop_price = amount * self.price_calculator.calculate_cooperative_price(plan)
+        individual_price = amount * self.price_calculator.calculate_individual_price(
+            plan
         )
-        individual_price = self.amount * calculate_price([self.plan])
-        if self.purpose == PurposesOfPurchases.means_of_prod:
-            sending_account = self.buyer.means_account
-        elif self.purpose == PurposesOfPurchases.raw_materials:
-            sending_account = self.buyer.raw_material_account
-        planner = (
-            self.company_repository.get_companies().with_id(self.plan.planner).first()
-        )
+        if purpose == PurposesOfPurchases.means_of_prod:
+            sending_account = buyer.means_account
+        elif purpose == PurposesOfPurchases.raw_materials:
+            sending_account = buyer.raw_material_account
+        planner = self.company_repository.get_companies().with_id(plan.planner).first()
         assert planner
         self.transaction_repository.create_transaction(
             date=self.datetime_service.now(),
@@ -153,30 +138,5 @@ class Payment:
             receiving_account=planner.product_account,
             amount_sent=coop_price,
             amount_received=individual_price,
-            purpose=f"Plan-Id: {self.plan.id}",
-        )
-
-
-@inject
-@dataclass
-class PaymentFactory:
-    purchase_repository: PurchaseRepository
-    transaction_repository: TransactionRepository
-    datetime_service: DatetimeService
-    plan_repository: PlanRepository
-    company_repository: CompanyRepository
-
-    def get_payment(
-        self, plan: Plan, buyer: Company, amount: int, purpose: PurposesOfPurchases
-    ) -> Payment:
-        return Payment(
-            self.purchase_repository,
-            self.transaction_repository,
-            self.datetime_service,
-            self.plan_repository,
-            self.company_repository,
-            plan,
-            buyer,
-            amount,
-            purpose,
+            purpose=f"Plan-Id: {plan.id}",
         )
