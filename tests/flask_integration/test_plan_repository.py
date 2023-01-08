@@ -451,3 +451,19 @@ class GetAllPlans(FlaskTestCase):
         assert len(inbound_requests) == 2
         assert requesting_plan1.id in map(lambda p: p.id, inbound_requests)
         assert requesting_plan2.id in map(lambda p: p.id, inbound_requests)
+
+    def test_possible_to_add_and_to_remove_plan_to_cooperation(self) -> None:
+        cooperation = self.cooperation_generator.create_cooperation()
+        plan = self.plan_generator.create_plan()
+
+        self.plan_repository.get_plans().with_id(plan.id).set_cooperation(
+            cooperation.id
+        )
+        plan_from_orm = self.plan_repository.get_plans().with_id(plan.id).first()
+        assert plan_from_orm
+        assert plan_from_orm.cooperation == cooperation.id
+
+        self.plan_repository.get_plans().with_id(plan.id).set_cooperation(None)
+        plan_from_orm = self.plan_repository.get_plans().with_id(plan.id).first()
+        assert plan_from_orm
+        assert plan_from_orm.cooperation is None

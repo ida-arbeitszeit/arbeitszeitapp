@@ -8,7 +8,6 @@ from arbeitszeit.entities import Plan
 from arbeitszeit.repositories import (
     CompanyRepository,
     CooperationRepository,
-    PlanCooperationRepository,
     PlanRepository,
 )
 

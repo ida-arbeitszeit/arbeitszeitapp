@@ -56,31 +56,3 @@ def test_possible_to_set_and_unset_requested_cooperation_attribute(
     plan_from_orm = plan_repository.get_plans().with_id(plan.id).first()
     assert plan_from_orm
     assert plan_from_orm.requested_cooperation is None
-
-
-@injection_test
-def test_possible_to_add_and_to_remove_plan_to_cooperation(
-    repository: PlanCooperationRepository,
-    plan_repository: PlanRepository,
-    plan_generator: PlanGenerator,
-    cooperation_repository: CooperationRepository,
-    company_generator: CompanyGenerator,
-):
-
-    cooperation = cooperation_repository.create_cooperation(
-        creation_timestamp=datetime.now(),
-        name="test name",
-        definition="test description",
-        coordinator=company_generator.create_company_entity(),
-    )
-    plan = plan_generator.create_plan()
-
-    repository.add_plan_to_cooperation(plan.id, cooperation.id)
-    plan_from_orm = plan_repository.get_plans().with_id(plan.id).first()
-    assert plan_from_orm
-    assert plan_from_orm.cooperation == cooperation.id
-
-    repository.remove_plan_from_cooperation(plan.id)
-    plan_from_orm = plan_repository.get_plans().with_id(plan.id).first()
-    assert plan_from_orm
-    assert plan_from_orm.cooperation is None

@@ -52,8 +52,10 @@ class AcceptCooperation:
         except AcceptCooperationResponse.RejectionReason as reason:
             return AcceptCooperationResponse(rejection_reason=reason)
 
-        self.plan_cooperation_repository.add_plan_to_cooperation(
-            request.plan_id, request.cooperation_id
+        assert (
+            self.plan_repository.get_plans()
+            .with_id(request.plan_id)
+            .set_cooperation(request.cooperation_id)
         )
         self.plan_cooperation_repository.set_requested_cooperation_to_none(
             request.plan_id

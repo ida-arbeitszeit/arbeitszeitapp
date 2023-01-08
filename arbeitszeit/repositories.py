@@ -94,6 +94,9 @@ class PlanResult(QueryResult[Plan], Protocol):
     def that_request_cooperation_with_coordinator(self, *company: UUID) -> PlanResult:
         ...
 
+    def set_cooperation(self, cooperation: Optional[UUID]) -> int:
+        ...
+
 
 class MemberResult(QueryResult[Member], Protocol):
     def working_at_company(self, company: UUID) -> MemberResult:
@@ -478,14 +481,6 @@ class CooperationRepository(ABC):
 
 
 class PlanCooperationRepository(ABC):
-    @abstractmethod
-    def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
-        pass
-
-    @abstractmethod
-    def remove_plan_from_cooperation(self, plan_id: UUID) -> None:
-        pass
-
     @abstractmethod
     def set_requested_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         pass

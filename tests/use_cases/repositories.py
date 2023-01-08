@@ -172,6 +172,13 @@ class PlanResult(QueryResultImpl[Plan], interfaces.PlanResult):
             items=new_items,
         )
 
+    def set_cooperation(self, cooperation: Optional[UUID]) -> int:
+        plans_changed = 0
+        for plan in self.items():
+            plan.cooperation = cooperation
+            plans_changed += 1
+        return plans_changed
+
 
 class MemberResult(QueryResultImpl[Member], interfaces.MemberResult):
     def working_at_company(self, company: UUID) -> MemberResult:
@@ -990,16 +997,6 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
         self.plan_repository = plan_repository
         self.cooperation_repository = cooperation_repository
         self.entities = entities
-
-    def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
-        plan = self.plan_repository.get_plans().with_id(plan_id).first()
-        assert plan
-        plan.cooperation = cooperation_id
-
-    def remove_plan_from_cooperation(self, plan_id: UUID) -> None:
-        plan = self.plan_repository.get_plans().with_id(plan_id).first()
-        assert plan
-        plan.cooperation = None
 
     def set_requested_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         plan = self.plan_repository.get_plans().with_id(plan_id).first()

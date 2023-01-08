@@ -132,4 +132,4 @@ class UpdatePlansAndPayout:
         if plan.requested_cooperation:
             self.plan_cooperation_repository.set_requested_cooperation_to_none(plan.id)
         if plan.cooperation:
-            self.plan_cooperation_repository.remove_plan_from_cooperation(plan.id)
+            self.plan_repository.get_plans().with_id(plan.id).set_cooperation(None)
