@@ -162,6 +162,19 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
             lambda query: query.filter_by(cooperation=str(cooperation))
         )
 
+    def that_request_cooperation_with_coordinator(
+        self, *company: UUID
+    ) -> PlanQueryResult:
+        companies = list(map(str, company))
+        return self._with_modified_query(
+            lambda query: query.join(
+                models.Cooperation,
+                models.Plan.requested_cooperation == models.Cooperation.id,
+            )
+            .join(models.Company, models.Cooperation.coordinator == models.Company.id)
+            .filter(models.Company.id.in_(companies))
+        )
+
 
 class MemberQueryResult(FlaskQueryResult[entities.Member]):
     def working_at_company(self, company: UUID) -> MemberQueryResult:
@@ -1290,17 +1303,6 @@ class CooperationRepository(repositories.CooperationRepository):
 class PlanCooperationRepository(repositories.PlanCooperationRepository):
     plan_repository: PlanRepository
     cooperation_repository: CooperationRepository
-
-    def get_inbound_requests(self, coordinator_id: UUID) -> Iterator[entities.Plan]:
-        for plan in self.plan_repository.get_plans().that_are_active():
-            if plan.requested_cooperation:
-                if plan.requested_cooperation in [
-                    coop.id
-                    for coop in self.cooperation_repository.get_cooperations_coordinated_by_company(
-                        coordinator_id
-                    )
-                ]:
-                    yield plan
 
     def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         plan_orm = models.Plan.query.filter_by(id=str(plan_id)).first()

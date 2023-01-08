@@ -429,3 +429,25 @@ class GetAllPlans(FlaskTestCase):
         )
         plans = self.plan_repository.get_plans().that_are_part_of_cooperation(coop.id)
         assert len(plans) == 0
+
+    def test_correct_inbound_requests_are_returned(self) -> None:
+        coordinator = self.company_generator.create_company_entity()
+        coop = self.cooperation_generator.create_cooperation(coordinator=coordinator)
+        requesting_plan1 = self.plan_generator.create_plan(
+            activation_date=datetime.min, requested_cooperation=coop
+        )
+        requesting_plan2 = self.plan_generator.create_plan(
+            activation_date=datetime.min, requested_cooperation=coop
+        )
+        other_coop = self.cooperation_generator.create_cooperation()
+        self.plan_generator.create_plan(
+            activation_date=datetime.min, requested_cooperation=other_coop
+        )
+        inbound_requests = (
+            self.plan_repository.get_plans().that_request_cooperation_with_coordinator(
+                coordinator.id
+            )
+        )
+        assert len(inbound_requests) == 2
+        assert requesting_plan1.id in map(lambda p: p.id, inbound_requests)
+        assert requesting_plan2.id in map(lambda p: p.id, inbound_requests)

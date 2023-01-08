@@ -155,6 +155,23 @@ class PlanResult(QueryResultImpl[Plan], interfaces.PlanResult):
     def that_are_part_of_cooperation(self, cooperation: UUID) -> PlanResult:
         return self._filtered_by(lambda plan: plan.cooperation == cooperation)
 
+    def that_request_cooperation_with_coordinator(self, *company: UUID) -> PlanResult:
+        def new_items() -> Iterator[Plan]:
+            cooperations: Set[UUID] = {
+                key
+                for key, value in self.entities.cooperations.items()
+                if value.coordinator.id in company
+            }
+            return filter(
+                lambda plan: plan.requested_cooperation in cooperations,
+                self.items(),
+            )
+
+        return replace(
+            self,
+            items=new_items,
+        )
+
 
 class MemberResult(QueryResultImpl[Member], interfaces.MemberResult):
     def working_at_company(self, company: UUID) -> MemberResult:
@@ -909,8 +926,8 @@ class WorkerInviteRepository(interfaces.WorkerInviteRepository):
 @singleton
 class CooperationRepository(interfaces.CooperationRepository):
     @inject
-    def __init__(self) -> None:
-        self.cooperations: Dict[UUID, Cooperation] = dict()
+    def __init__(self, entities: EntityStorage) -> None:
+        self.entities = entities
 
     def create_cooperation(
         self,
@@ -927,38 +944,38 @@ class CooperationRepository(interfaces.CooperationRepository):
             definition=definition,
             coordinator=coordinator,
         )
-        self.cooperations[cooperation_id] = cooperation
+        self.entities.cooperations[cooperation_id] = cooperation
         return cooperation
 
     def get_by_id(self, id: UUID) -> Optional[Cooperation]:
-        return self.cooperations.get(id)
+        return self.entities.cooperations.get(id)
 
     def get_by_name(self, name: str) -> Iterator[Cooperation]:
-        for cooperation in self.cooperations.values():
+        for cooperation in self.entities.cooperations.values():
             if cooperation.name.lower() == name.lower():
                 yield cooperation
 
     def get_cooperations_coordinated_by_company(
         self, company_id: UUID
     ) -> Iterator[Cooperation]:
-        for cooperation in self.cooperations.values():
+        for cooperation in self.entities.cooperations.values():
             if cooperation.coordinator.id == company_id:
                 yield cooperation
 
     def get_cooperation_name(self, coop_id: UUID) -> Optional[str]:
-        coop = self.cooperations.get(coop_id)
+        coop = self.entities.cooperations.get(coop_id)
         if coop is None:
             return None
         return coop.name
 
     def get_all_cooperations(self) -> Iterator[Cooperation]:
-        return (cooperation for cooperation in self.cooperations.values())
+        return (cooperation for cooperation in self.entities.cooperations.values())
 
     def count_cooperations(self) -> int:
-        return len(self.cooperations)
+        return len(self.entities.cooperations)
 
     def __len__(self) -> int:
-        return len(self.cooperations)
+        return len(self.entities.cooperations)
 
 
 @singleton
@@ -973,16 +990,6 @@ class PlanCooperationRepository(interfaces.PlanCooperationRepository):
         self.plan_repository = plan_repository
         self.cooperation_repository = cooperation_repository
         self.entities = entities
-
-    def get_inbound_requests(self, coordinator_id: UUID) -> Iterator[Plan]:
-        coops_of_company = list(
-            self.cooperation_repository.get_cooperations_coordinated_by_company(
-                coordinator_id
-            )
-        )
-        for plan in self.entities.plans.values():
-            if plan.requested_cooperation in [coop.id for coop in coops_of_company]:
-                yield plan
 
     def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         plan = self.plan_repository.get_plans().with_id(plan_id).first()
@@ -1118,6 +1125,7 @@ class EntityStorage:
             id=uuid4(),
             account=self.create_account(account_type=AccountTypes.accounting),
         )
+        self.cooperations: Dict[UUID, Cooperation] = dict()
 
     def create_account(self, account_type: AccountTypes) -> Account:
         account = Account(

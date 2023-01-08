@@ -91,6 +91,9 @@ class PlanResult(QueryResult[Plan], Protocol):
     def that_are_part_of_cooperation(self, cooperation: UUID) -> PlanResult:
         ...
 
+    def that_request_cooperation_with_coordinator(self, *company: UUID) -> PlanResult:
+        ...
+
 
 class MemberResult(QueryResult[Member], Protocol):
     def working_at_company(self, company: UUID) -> MemberResult:
@@ -193,7 +196,7 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def set_plan_approval_date(self, plan: UUID, approval_timestamp: datetime):
+    def set_plan_approval_date(self, plan: UUID, approval_timestamp: datetime) -> None:
         pass
 
     @abstractmethod
@@ -475,10 +478,6 @@ class CooperationRepository(ABC):
 
 
 class PlanCooperationRepository(ABC):
-    @abstractmethod
-    def get_inbound_requests(self, coordinator_id: UUID) -> Iterator[Plan]:
-        pass
-
     @abstractmethod
     def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
         pass
