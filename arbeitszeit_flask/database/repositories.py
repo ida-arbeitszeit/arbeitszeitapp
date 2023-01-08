@@ -528,7 +528,6 @@ class CompanyRepository(repositories.CompanyRepository):
             user = models.User(
                 email=email,
                 password=generate_password_hash(password, method="sha256"),
-                id=str(uuid4()),
             )
             self.db.session.add(user)
         return user
