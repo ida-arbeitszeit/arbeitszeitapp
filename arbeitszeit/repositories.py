@@ -88,16 +88,21 @@ class PlanResult(QueryResult[Plan], Protocol):
     def that_are_active(self) -> PlanResult:
         ...
 
-    def that_are_part_of_cooperation(self, cooperation: UUID) -> PlanResult:
-        ...
+    def that_are_part_of_cooperation(self, *cooperation: UUID) -> PlanResult:
+        """If no cooperations are specified, then all the repository
+        should return plans that are part of any cooperation.
+        """
 
     def that_request_cooperation_with_coordinator(self, *company: UUID) -> PlanResult:
-        ...
+        """If no companies are specified then the repository should
+        return all plans that request cooperation with any
+        coordinator.
+        """
 
     def set_cooperation(self, cooperation: Optional[UUID]) -> int:
         ...
 
-    def set_requested_cooperation(self, cooperatoin: Optional[UUID]) -> int:
+    def set_requested_cooperation(self, cooperation: Optional[UUID]) -> int:
         ...
 
 

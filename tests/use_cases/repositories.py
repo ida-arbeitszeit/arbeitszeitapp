@@ -152,8 +152,12 @@ class PlanResult(QueryResultImpl[Plan], interfaces.PlanResult):
     def that_are_active(self) -> PlanResult:
         return self._filtered_by(lambda plan: plan.is_active)
 
-    def that_are_part_of_cooperation(self, cooperation: UUID) -> PlanResult:
-        return self._filtered_by(lambda plan: plan.cooperation == cooperation)
+    def that_are_part_of_cooperation(self, *cooperation: UUID) -> PlanResult:
+        return self._filtered_by(
+            (lambda plan: plan.cooperation in cooperation)
+            if cooperation
+            else (lambda plan: plan.cooperation is not None)
+        )
 
     def that_request_cooperation_with_coordinator(self, *company: UUID) -> PlanResult:
         def new_items() -> Iterator[Plan]:
