@@ -163,7 +163,9 @@ class PlanResult(QueryResultImpl[Plan], interfaces.PlanResult):
                 if value.coordinator.id in company
             }
             return filter(
-                lambda plan: plan.requested_cooperation in cooperations,
+                lambda plan: plan.requested_cooperation in cooperations
+                if company
+                else plan.requested_cooperation is not None,
                 self.items(),
             )
 
@@ -176,6 +178,13 @@ class PlanResult(QueryResultImpl[Plan], interfaces.PlanResult):
         plans_changed = 0
         for plan in self.items():
             plan.cooperation = cooperation
+            plans_changed += 1
+        return plans_changed
+
+    def set_requested_cooperation(self, cooperation: Optional[UUID]) -> int:
+        plans_changed = 0
+        for plan in self.items():
+            plan.requested_cooperation = cooperation
             plans_changed += 1
         return plans_changed
 
@@ -983,30 +992,6 @@ class CooperationRepository(interfaces.CooperationRepository):
 
     def __len__(self) -> int:
         return len(self.entities.cooperations)
-
-
-@singleton
-class PlanCooperationRepository(interfaces.PlanCooperationRepository):
-    @inject
-    def __init__(
-        self,
-        plan_repository: PlanRepository,
-        cooperation_repository: CooperationRepository,
-        entities: EntityStorage,
-    ) -> None:
-        self.plan_repository = plan_repository
-        self.cooperation_repository = cooperation_repository
-        self.entities = entities
-
-    def set_requested_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
-        plan = self.plan_repository.get_plans().with_id(plan_id).first()
-        assert plan
-        plan.requested_cooperation = cooperation_id
-
-    def set_requested_cooperation_to_none(self, plan_id: UUID) -> None:
-        plan = self.plan_repository.get_plans().with_id(plan_id).first()
-        assert plan
-        plan.requested_cooperation = None
 
 
 @singleton

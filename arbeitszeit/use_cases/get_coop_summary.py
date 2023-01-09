@@ -6,11 +6,7 @@ from uuid import UUID
 from injector import inject
 
 from arbeitszeit.price_calculator import PriceCalculator
-from arbeitszeit.repositories import (
-    CooperationRepository,
-    PlanCooperationRepository,
-    PlanRepository,
-)
+from arbeitszeit.repositories import CooperationRepository, PlanRepository
 
 
 @dataclass
@@ -47,7 +43,6 @@ GetCoopSummaryResponse = Optional[GetCoopSummarySuccess]
 class GetCoopSummary:
     cooperation_repository: CooperationRepository
     plan_repository: PlanRepository
-    plan_cooperation_repository: PlanCooperationRepository
     price_calculator: PriceCalculator
 
     def __call__(self, request: GetCoopSummaryRequest) -> GetCoopSummaryResponse:

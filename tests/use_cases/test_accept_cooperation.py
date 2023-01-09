@@ -1,9 +1,10 @@
 from datetime import datetime
 from decimal import Decimal
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from arbeitszeit.entities import ProductionCosts
 from arbeitszeit.use_cases import AcceptCooperation, AcceptCooperationRequest
+from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
 from tests.data_generators import CooperationGenerator
 
 from .base_test_case import BaseTestCase
@@ -14,6 +15,7 @@ class AcceptCooperationTests(BaseTestCase):
         super().setUp()
         self.cooperation_generator = self.injector.get(CooperationGenerator)
         self.accept_cooperation = self.injector.get(AcceptCooperation)
+        self.get_plan_summary_use_case = self.injector.get(GetPlanSummaryCompany)
 
     def test_error_is_raised_when_plan_does_not_exist(self) -> None:
         requester = self.company_generator.create_company_entity()
@@ -137,7 +139,7 @@ class AcceptCooperationTests(BaseTestCase):
             requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation.id
         )
         self.accept_cooperation(request)
-        assert plan.cooperation == cooperation.id
+        self.assert_plan_in_cooperation(plan.id, cooperation.id)
 
     def test_two_cooperating_plans_have_same_prices(self) -> None:
         requester = self.company_generator.create_company_entity()
@@ -214,3 +216,11 @@ class AcceptCooperationTests(BaseTestCase):
         assert plan.requested_cooperation == cooperation.id
         self.accept_cooperation(request)
         assert plan.requested_cooperation is None
+
+    def assert_plan_in_cooperation(self, plan: UUID, cooperation: UUID) -> None:
+        summary_response = self.get_plan_summary_use_case.get_plan_summary_for_company(
+            plan_id=plan,
+            company_id=self.company_generator.create_company(),
+        )
+        assert summary_response.plan_summary
+        assert summary_response.plan_summary.cooperation == cooperation

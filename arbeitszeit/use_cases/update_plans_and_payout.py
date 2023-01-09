@@ -9,7 +9,6 @@ from arbeitszeit.payout_factor import PayoutFactorService
 from arbeitszeit.repositories import (
     CompanyRepository,
     PayoutFactorRepository,
-    PlanCooperationRepository,
     PlanRepository,
     TransactionRepository,
 )
@@ -22,7 +21,6 @@ class UpdatePlansAndPayout:
     datetime_service: DatetimeService
     transaction_repository: TransactionRepository
     social_accounting: SocialAccounting
-    plan_cooperation_repository: PlanCooperationRepository
     payout_factor_service: PayoutFactorService
     payout_factor_repository: PayoutFactorRepository
     company_repository: CompanyRepository
@@ -129,7 +127,6 @@ class UpdatePlansAndPayout:
         return active_days
 
     def _delete_cooperation_and_coop_request_from_plan(self, plan: Plan) -> None:
-        if plan.requested_cooperation:
-            self.plan_cooperation_repository.set_requested_cooperation_to_none(plan.id)
-        if plan.cooperation:
-            self.plan_repository.get_plans().with_id(plan.id).set_cooperation(None)
+        plans = self.plan_repository.get_plans().with_id(plan.id)
+        plans.set_requested_cooperation(None)
+        plans.set_cooperation(None)

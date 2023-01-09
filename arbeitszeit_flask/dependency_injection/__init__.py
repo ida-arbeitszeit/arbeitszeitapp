@@ -34,7 +34,6 @@ from arbeitszeit_flask.database.repositories import (
     CooperationRepository,
     MemberRepository,
     PayoutFactorRepository,
-    PlanCooperationRepository,
     PlanDraftRepository,
     PlanRepository,
     PurchaseRepository,
@@ -427,10 +426,6 @@ class FlaskModule(PresenterModule):
         binder.bind(
             interfaces.CooperationRepository,  # type: ignore
             to=ClassProvider(CooperationRepository),
-        )
-        binder.bind(
-            interfaces.PlanCooperationRepository,  # type: ignore
-            to=ClassProvider(PlanCooperationRepository),
         )
         binder.bind(TokenService, to=ClassProvider(FlaskTokenService))  # type: ignore
         binder.bind(UserAddressBook, to=ClassProvider(inject(UserAddressBookImpl)))  # type: ignore

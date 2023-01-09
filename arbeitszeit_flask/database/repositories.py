@@ -157,23 +157,36 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
             lambda query: query.filter(models.Plan.is_active == True)
         )
 
-    def that_are_part_of_cooperation(self, cooperation: UUID) -> PlanQueryResult:
-        return self._with_modified_query(
-            lambda query: query.filter_by(cooperation=str(cooperation))
-        )
+    def that_are_part_of_cooperation(self, *cooperation: UUID) -> PlanQueryResult:
+        cooperations = list(map(str, cooperation))
+        if not cooperation:
+            return self._with_modified_query(
+                lambda query: query.filter(models.Plan.cooperation != None)
+            )
+        else:
+            return self._with_modified_query(
+                lambda query: query.filter(models.Plan.cooperation.in_(cooperations))
+            )
 
     def that_request_cooperation_with_coordinator(
         self, *company: UUID
     ) -> PlanQueryResult:
         companies = list(map(str, company))
-        return self._with_modified_query(
-            lambda query: query.join(
-                models.Cooperation,
-                models.Plan.requested_cooperation == models.Cooperation.id,
+        if companies:
+            return self._with_modified_query(
+                lambda query: query.join(
+                    models.Cooperation,
+                    models.Plan.requested_cooperation == models.Cooperation.id,
+                )
+                .join(
+                    models.Company, models.Cooperation.coordinator == models.Company.id
+                )
+                .filter(models.Company.id.in_(companies))
             )
-            .join(models.Company, models.Cooperation.coordinator == models.Company.id)
-            .filter(models.Company.id.in_(companies))
-        )
+        else:
+            return self._with_modified_query(
+                lambda query: query.filter(models.Plan.requested_cooperation != None)
+            )
 
     def set_cooperation(self, cooperation: Optional[UUID]) -> int:
         sql_statement = (
@@ -184,6 +197,20 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
                 )
             )
             .values(cooperation=str(cooperation) if cooperation else None)
+            .execution_options(synchronize_session="fetch")
+        )
+        result = self.db.session.execute(sql_statement)
+        return result.rowcount
+
+    def set_requested_cooperation(self, cooperation: Optional[UUID]) -> int:
+        sql_statement = (
+            update(models.Plan)
+            .where(
+                models.Plan.id.in_(
+                    self.query.with_entities(models.Plan.id).scalar_subquery()
+                )
+            )
+            .values(requested_cooperation=str(cooperation) if cooperation else None)
             .execution_options(synchronize_session="fetch")
         )
         result = self.db.session.execute(sql_statement)
@@ -1309,23 +1336,6 @@ class CooperationRepository(repositories.CooperationRepository):
 
     def count_cooperations(self) -> int:
         return int(self.db.session.query(func.count(Cooperation.id)).one()[0])
-
-
-@inject
-@dataclass
-class PlanCooperationRepository(repositories.PlanCooperationRepository):
-    plan_repository: PlanRepository
-    cooperation_repository: CooperationRepository
-
-    def set_requested_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
-        plan_orm = models.Plan.query.filter_by(id=str(plan_id)).first()
-        assert plan_orm
-        plan_orm.requested_cooperation = str(cooperation_id)
-
-    def set_requested_cooperation_to_none(self, plan_id: UUID) -> None:
-        plan_orm = models.Plan.query.filter_by(id=str(plan_id)).first()
-        assert plan_orm
-        plan_orm.requested_cooperation = None
 
 
 @inject

@@ -97,6 +97,9 @@ class PlanResult(QueryResult[Plan], Protocol):
     def set_cooperation(self, cooperation: Optional[UUID]) -> int:
         ...
 
+    def set_requested_cooperation(self, cooperatoin: Optional[UUID]) -> int:
+        ...
+
 
 class MemberResult(QueryResult[Member], Protocol):
     def working_at_company(self, company: UUID) -> MemberResult:
@@ -477,16 +480,6 @@ class CooperationRepository(ABC):
 
     @abstractmethod
     def count_cooperations(self) -> int:
-        pass
-
-
-class PlanCooperationRepository(ABC):
-    @abstractmethod
-    def set_requested_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
-        pass
-
-    @abstractmethod
-    def set_requested_cooperation_to_none(self, plan_id: UUID) -> None:
         pass
 
 

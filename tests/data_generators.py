@@ -299,11 +299,12 @@ class PlanGenerator:
         if activation_date:
             self.plan_repository.activate_plan(plan, activation_date)
         if requested_cooperation:
-            self.request_cooperation(
+            request_cooperation_response = self.request_cooperation(
                 RequestCooperationRequest(
                     plan.planner, plan.id, requested_cooperation.id
                 )
             )
+            assert not request_cooperation_response.is_rejected
         if cooperation:
             self.request_cooperation(
                 RequestCooperationRequest(plan.planner, plan.id, cooperation.id)
