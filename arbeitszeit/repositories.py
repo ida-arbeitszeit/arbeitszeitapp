@@ -100,10 +100,19 @@ class PlanResult(QueryResult[Plan], Protocol):
         """
 
     def set_cooperation(self, cooperation: Optional[UUID]) -> int:
-        ...
+        """Set the associated cooperation of all matching plans to the
+        one specified via the cooperation argument. Specifying `None`
+        will unset the cooperation field. The return value counts all
+        plans that were updated through this method.
+        """
 
     def set_requested_cooperation(self, cooperation: Optional[UUID]) -> int:
-        ...
+        """Set the `requested_cooperation` field of all matching plans
+        to the specified value.  A value `None` means that these plans
+        are marked as not requesting membership in any
+        cooperation. The return value counts all plans that were
+        updated through this method.
+        """
 
 
 class MemberResult(QueryResult[Member], Protocol):
