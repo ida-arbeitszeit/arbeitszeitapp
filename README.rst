@@ -13,9 +13,10 @@ Introduction
 Description
 ------------
 
-Arbeitszeitapp is a plattform to exchange services and products on the 
-basis of working time. It is designed to be self-hosted by communities or 
-organizations. A test instance is running on https://arbeitszeitapp.herokuapp.com/.
+Arbeitszeitapp is a plattform to exchange services and products on the
+basis of working time. It is designed to be self-hosted by communities
+or organizations. A test instance is running on
+https://demo-app.arbeitszeitrechnung.org/.
 
 
 Theory
