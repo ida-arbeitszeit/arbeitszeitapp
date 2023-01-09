@@ -5,11 +5,7 @@ from uuid import UUID
 
 from injector import inject
 
-from arbeitszeit.repositories import (
-    CooperationRepository,
-    PlanCooperationRepository,
-    PlanRepository,
-)
+from arbeitszeit.repositories import CooperationRepository, PlanRepository
 
 
 @dataclass
@@ -39,14 +35,17 @@ class EndCooperationResponse:
 class EndCooperation:
     plan_repository: PlanRepository
     cooperation_repository: CooperationRepository
-    plan_cooperation_repository: PlanCooperationRepository
 
     def __call__(self, request: EndCooperationRequest) -> EndCooperationResponse:
         try:
             self._validate_request(request)
         except EndCooperationResponse.RejectionReason as reason:
             return EndCooperationResponse(rejection_reason=reason)
-        self.plan_cooperation_repository.remove_plan_from_cooperation(request.plan_id)
+        assert (
+            self.plan_repository.get_plans()
+            .with_id(request.plan_id)
+            .set_cooperation(None)
+        )
         return EndCooperationResponse(rejection_reason=None)
 
     def _validate_request(self, request: EndCooperationRequest) -> None:

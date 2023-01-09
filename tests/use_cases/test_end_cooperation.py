@@ -135,7 +135,6 @@ class TestEndCooperation(TestCase):
         plan = self.plan_generator.create_plan(planner=self.requester)
         cooperation = self.coop_generator.create_cooperation(plans=[plan])
         assert plan.cooperation == cooperation.id
-
         request = EndCooperationRequest(
             requester_id=self.requester.id,
             plan_id=plan.id,

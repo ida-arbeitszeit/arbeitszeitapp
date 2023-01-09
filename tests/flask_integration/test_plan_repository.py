@@ -405,17 +405,27 @@ class GetAllPlans(FlaskTestCase):
         assert plan1.id in [p.id for p in cooperating_plans]
         assert plan2.id in [p.id for p in cooperating_plans]
 
+    def test_can_filter_plans_that_are_part_of_any_cooperation(self) -> None:
+        cooperation = self.cooperation_generator.create_cooperation()
+        self.plan_generator.create_plan(cooperation=cooperation)
+        plans = self.plan_repository.get_plans().that_are_part_of_cooperation()
+        assert plans
+
+    def test_can_filter_plans_from_multiple_cooperations(self) -> None:
+        cooperation1 = self.cooperation_generator.create_cooperation()
+        cooperation2 = self.cooperation_generator.create_cooperation()
+        self.plan_generator.create_plan(cooperation=cooperation1)
+        self.plan_generator.create_plan(cooperation=cooperation2)
+        plans = self.plan_repository.get_plans().that_are_part_of_cooperation(
+            cooperation1.id, cooperation2.id
+        )
+        assert len(plans) == 2
+
     def test_correct_plans_in_cooperation_returned(self) -> None:
         coop = self.cooperation_generator.create_cooperation()
-        plan1 = self.plan_generator.create_plan(
-            activation_date=datetime.min, cooperation=coop
-        )
-        plan2 = self.plan_generator.create_plan(
-            activation_date=datetime.min, cooperation=coop
-        )
-        plan3 = self.plan_generator.create_plan(
-            activation_date=datetime.min, requested_cooperation=None
-        )
+        plan1 = self.plan_generator.create_plan(cooperation=coop)
+        plan2 = self.plan_generator.create_plan(cooperation=coop)
+        plan3 = self.plan_generator.create_plan(requested_cooperation=None)
         plans = self.plan_repository.get_plans().that_are_part_of_cooperation(coop.id)
         assert len(plans) == 2
         assert plans.with_id(plan1.id)
@@ -424,8 +434,47 @@ class GetAllPlans(FlaskTestCase):
 
     def test_nothing_returned_when_no_plans_in_cooperation(self) -> None:
         coop = self.cooperation_generator.create_cooperation()
-        self.plan_generator.create_plan(
-            activation_date=datetime.min, requested_cooperation=None
-        )
+        self.plan_generator.create_plan(requested_cooperation=None)
         plans = self.plan_repository.get_plans().that_are_part_of_cooperation(coop.id)
         assert len(plans) == 0
+
+    def test_correct_inbound_requests_are_returned(self) -> None:
+        coordinator = self.company_generator.create_company_entity()
+        coop = self.cooperation_generator.create_cooperation(coordinator=coordinator)
+        requesting_plan1 = self.plan_generator.create_plan(requested_cooperation=coop)
+        requesting_plan2 = self.plan_generator.create_plan(requested_cooperation=coop)
+        other_coop = self.cooperation_generator.create_cooperation()
+        self.plan_generator.create_plan(requested_cooperation=other_coop)
+        inbound_requests = (
+            self.plan_repository.get_plans().that_request_cooperation_with_coordinator(
+                coordinator.id
+            )
+        )
+        assert len(inbound_requests) == 2
+        assert requesting_plan1.id in map(lambda p: p.id, inbound_requests)
+        assert requesting_plan2.id in map(lambda p: p.id, inbound_requests)
+
+    def test_possible_to_add_and_to_remove_plan_to_cooperation(self) -> None:
+        cooperation = self.cooperation_generator.create_cooperation()
+        plan = self.plan_generator.create_plan()
+
+        self.plan_repository.get_plans().with_id(plan.id).set_cooperation(
+            cooperation.id
+        )
+        plan_from_orm = self.plan_repository.get_plans().with_id(plan.id).first()
+        assert plan_from_orm
+        assert plan_from_orm.cooperation == cooperation.id
+
+        self.plan_repository.get_plans().with_id(plan.id).set_cooperation(None)
+        plan_from_orm = self.plan_repository.get_plans().with_id(plan.id).first()
+        assert plan_from_orm
+        assert plan_from_orm.cooperation is None
+
+    def test_possible_to_set_and_unset_requested_cooperation_attribute(self):
+        cooperation = self.cooperation_generator.create_cooperation()
+        plan = self.plan_generator.create_plan()
+        plan_result = self.plan_repository.get_plans().with_id(plan.id)
+        plan_result.set_requested_cooperation(cooperation.id)
+        assert plan_result.that_request_cooperation_with_coordinator()
+        plan_result.set_requested_cooperation(None)
+        assert not plan_result.that_request_cooperation_with_coordinator()

@@ -8,11 +8,7 @@ from injector import inject
 
 from arbeitszeit.entities import Plan, PlanDraft
 from arbeitszeit.price_calculator import PriceCalculator
-from arbeitszeit.repositories import (
-    PlanCooperationRepository,
-    PlanDraftRepository,
-    PlanRepository,
-)
+from arbeitszeit.repositories import PlanDraftRepository, PlanRepository
 
 
 @dataclass
@@ -47,7 +43,6 @@ class ShowMyPlansResponse:
 @dataclass
 class ShowMyPlansUseCase:
     plan_repository: PlanRepository
-    plan_cooperation_repository: PlanCooperationRepository
     draft_repository: PlanDraftRepository
     price_calculator: PriceCalculator
 

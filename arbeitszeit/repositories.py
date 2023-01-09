@@ -88,8 +88,31 @@ class PlanResult(QueryResult[Plan], Protocol):
     def that_are_active(self) -> PlanResult:
         ...
 
-    def that_are_part_of_cooperation(self, cooperation: UUID) -> PlanResult:
-        ...
+    def that_are_part_of_cooperation(self, *cooperation: UUID) -> PlanResult:
+        """If no cooperations are specified, then all the repository
+        should return plans that are part of any cooperation.
+        """
+
+    def that_request_cooperation_with_coordinator(self, *company: UUID) -> PlanResult:
+        """If no companies are specified then the repository should
+        return all plans that request cooperation with any
+        coordinator.
+        """
+
+    def set_cooperation(self, cooperation: Optional[UUID]) -> int:
+        """Set the associated cooperation of all matching plans to the
+        one specified via the cooperation argument. Specifying `None`
+        will unset the cooperation field. The return value counts all
+        plans that were updated through this method.
+        """
+
+    def set_requested_cooperation(self, cooperation: Optional[UUID]) -> int:
+        """Set the `requested_cooperation` field of all matching plans
+        to the specified value.  A value `None` means that these plans
+        are marked as not requesting membership in any
+        cooperation. The return value counts all plans that were
+        updated through this method.
+        """
 
 
 class MemberResult(QueryResult[Member], Protocol):
@@ -193,7 +216,7 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def set_plan_approval_date(self, plan: UUID, approval_timestamp: datetime):
+    def set_plan_approval_date(self, plan: UUID, approval_timestamp: datetime) -> None:
         pass
 
     @abstractmethod
@@ -471,28 +494,6 @@ class CooperationRepository(ABC):
 
     @abstractmethod
     def count_cooperations(self) -> int:
-        pass
-
-
-class PlanCooperationRepository(ABC):
-    @abstractmethod
-    def get_inbound_requests(self, coordinator_id: UUID) -> Iterator[Plan]:
-        pass
-
-    @abstractmethod
-    def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
-        pass
-
-    @abstractmethod
-    def remove_plan_from_cooperation(self, plan_id: UUID) -> None:
-        pass
-
-    @abstractmethod
-    def set_requested_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
-        pass
-
-    @abstractmethod
-    def set_requested_cooperation_to_none(self, plan_id: UUID) -> None:
         pass
 
 

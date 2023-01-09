@@ -17,7 +17,6 @@ from .base_test_case import BaseTestCase
 from .repositories import (
     AccountRepository,
     CompanyRepository,
-    PlanCooperationRepository,
     PurchaseRepository,
     TransactionRepository,
 )
@@ -31,7 +30,6 @@ class PayConsumerProductTests(BaseTestCase):
         self.transaction_repository = self.injector.get(TransactionRepository)
         self.account_repository = self.injector.get(AccountRepository)
         self.purchase_repository = self.injector.get(PurchaseRepository)
-        self.plan_cooperation_repository = self.injector.get(PlanCooperationRepository)
         self.buyer = self.member_generator.create_member_entity()
         self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
         self.update_plans_and_payout = self.injector.get(UpdatePlansAndPayout)

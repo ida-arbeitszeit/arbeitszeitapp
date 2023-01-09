@@ -140,12 +140,6 @@ class InMemoryModule(Module):
     ) -> interfaces.CooperationRepository:
         return repo
 
-    @provider
-    def provide_plan_cooperation_repository(
-        self, repo: repositories.PlanCooperationRepository
-    ) -> interfaces.PlanCooperationRepository:
-        return repo
-
     @singleton
     @provider
     def provide_payout_factor_repository(
