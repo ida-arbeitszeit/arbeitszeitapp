@@ -80,7 +80,7 @@ class UpdatePlansAndPayout:
         assert planner
         self.transaction_repository.create_transaction(
             date=self.datetime_service.now(),
-            sending_account=self.social_accounting.account,
+            sending_account=self.social_accounting.account.id,
             receiving_account=planner.work_account,
             amount_sent=round(amount, 2),
             amount_received=round(amount, 2),

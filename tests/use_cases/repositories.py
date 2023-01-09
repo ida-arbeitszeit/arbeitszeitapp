@@ -108,11 +108,11 @@ class PlanResult(QueryResultImpl[Plan], interfaces.PlanResult):
     def that_are_cooperating(self) -> PlanResult:
         return self._filtered_by(lambda plan: plan.cooperation is not None)
 
-    def planned_by(self, company: UUID) -> PlanResult:
-        return self._filtered_by(lambda plan: plan.planner == company)
+    def planned_by(self, *company: UUID) -> PlanResult:
+        return self._filtered_by(lambda plan: plan.planner in company)
 
-    def with_id(self, id_: UUID) -> PlanResult:
-        return self._filtered_by(lambda plan: plan.id == id_)
+    def with_id(self, *id_: UUID) -> PlanResult:
+        return self._filtered_by(lambda plan: plan.id in id_)
 
     def without_completed_review(self) -> PlanResult:
         return self._filtered_by(lambda plan: plan.approval_date is None)
@@ -319,10 +319,10 @@ class TransactionResult(QueryResultImpl[Transaction], interfaces.TransactionResu
 
 
 class AccountResult(QueryResultImpl[Account], interfaces.AccountResult):
-    def with_id(self, id_: UUID) -> AccountResult:
+    def with_id(self, *id_: UUID) -> AccountResult:
         return replace(
             self,
-            items=lambda: filter(lambda account: account.id == id_, self.items()),
+            items=lambda: filter(lambda account: account.id in id_, self.items()),
         )
 
 
@@ -390,8 +390,8 @@ class TransactionRepository(interfaces.TransactionRepository):
     def create_transaction(
         self,
         date: datetime,
-        sending_account: Account,
-        receiving_account: Account,
+        sending_account: UUID,
+        receiving_account: UUID,
         amount_sent: Decimal,
         amount_received: Decimal,
         purpose: str,
@@ -399,8 +399,8 @@ class TransactionRepository(interfaces.TransactionRepository):
         transaction = Transaction(
             id=uuid4(),
             date=date,
-            sending_account=sending_account.id,
-            receiving_account=receiving_account.id,
+            sending_account=sending_account,
+            receiving_account=receiving_account,
             amount_sent=amount_sent,
             amount_received=amount_received,
             purpose=purpose,
@@ -419,7 +419,7 @@ class TransactionRepository(interfaces.TransactionRepository):
         planner = self.entities.get_company_by_id(plan.planner)
         assert planner
         for transaction in self.entities.transactions:
-            if (transaction.receiving_account == planner.product_account.id) and (
+            if (transaction.receiving_account == planner.product_account) and (
                 str(plan.id) in transaction.purpose
             ):
                 balance += transaction.amount_received
@@ -449,10 +449,10 @@ class AccountRepository(interfaces.AccountRepository):
             entities=self.entities,
         )
 
-    def get_account_balance(self, account: Account) -> Decimal:
+    def get_account_balance(self, account: UUID) -> Decimal:
         transactions = self.transaction_repository.get_transactions()
-        received_transactions = transactions.where_account_is_receiver(account.id)
-        sent_transactions = transactions.where_account_is_sender(account.id)
+        received_transactions = transactions.where_account_is_receiver(account)
+        sent_transactions = transactions.where_account_is_sender(account)
         return decimal_sum(
             transaction.amount_received for transaction in received_transactions
         ) - decimal_sum(transaction.amount_sent for transaction in sent_transactions)
@@ -475,10 +475,10 @@ class AccountOwnerRepository(interfaces.AccountOwnerRepository):
         if account.account_type == AccountTypes.accounting:
             return self.social_accounting
         for member in self.entities.members.values():
-            if account == member.account:
+            if account.id == member.account:
                 return member
         for company in self.entities.companies.values():
-            if account in company.accounts():
+            if account.id in company.accounts():
                 return company
         # This exception is not meant to be caught. That's why we
         # raise a base exception
@@ -506,7 +506,7 @@ class MemberRepository(interfaces.MemberRepository):
             id=id,
             name=name,
             email=email,
-            account=account,
+            account=account.id,
             registered_on=registered_on,
             confirmed_on=None,
         )
@@ -553,10 +553,10 @@ class CompanyRepository(interfaces.CompanyRepository):
             id=uuid4(),
             email=email,
             name=name,
-            means_account=means_account,
-            raw_material_account=resource_account,
-            work_account=labour_account,
-            product_account=products_account,
+            means_account=means_account.id,
+            raw_material_account=resource_account.id,
+            work_account=labour_account.id,
+            product_account=products_account.id,
             registered_on=registered_on,
             confirmed_on=None,
         )

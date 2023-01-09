@@ -212,8 +212,8 @@ class PayConsumerProductTests(BaseTestCase):
         expected_amount_received = pieces * self.price_checker.get_unit_cost(plan.id)
         planner = self.company_repository.get_companies().with_id(plan.planner).first()
         assert planner
-        assert transaction_added.sending_account == self.buyer.account.id
-        assert transaction_added.receiving_account == planner.product_account.id
+        assert transaction_added.sending_account == self.buyer.account
+        assert transaction_added.receiving_account == planner.product_account
         assert transaction_added.amount_sent == expected_amount_sent
         assert transaction_added.amount_received == expected_amount_received
 
@@ -273,8 +273,8 @@ class PayConsumerProductTests(BaseTestCase):
         assert transaction_added
         planner = self.company_repository.get_companies().with_id(plan.planner).first()
         assert planner
-        assert transaction_added.sending_account == self.buyer.account.id
-        assert transaction_added.receiving_account == planner.product_account.id
+        assert transaction_added.sending_account == self.buyer.account
+        assert transaction_added.receiving_account == planner.product_account
         assert transaction_added.amount_sent == transaction_added.amount_received == 0
 
     def test_balances_are_adjusted_correctly_when_plan_is_public_service(self) -> None:

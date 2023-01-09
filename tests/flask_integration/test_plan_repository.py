@@ -302,11 +302,33 @@ class GetAllPlans(FlaskTestCase):
         self.plan_generator.create_plan(planner=planner)
         assert self.plan_repository.get_plans().planned_by(planner.id)
 
+    def test_can_filter_plans_by_multiple_planners(self) -> None:
+        planner_1 = self.company_generator.create_company_entity()
+        planner_2 = self.company_generator.create_company_entity()
+        self.plan_generator.create_plan()
+        self.plan_generator.create_plan(planner=planner_1)
+        self.plan_generator.create_plan(planner=planner_2)
+        assert (
+            len(self.plan_repository.get_plans().planned_by(planner_1.id, planner_2.id))
+            == 2
+        )
+
     def test_can_get_plan_by_its_id(self) -> None:
         expected_plan = self.plan_generator.create_plan()
         assert expected_plan in self.plan_repository.get_plans().with_id(
             expected_plan.id
         )
+
+    def test_can_filter_plans_by_multiple_ids(self) -> None:
+        expected_plan_1 = self.plan_generator.create_plan()
+        expected_plan_2 = self.plan_generator.create_plan()
+        other_plan = self.plan_generator.create_plan()
+        query = self.plan_repository.get_plans().with_id(
+            expected_plan_1.id, expected_plan_2.id
+        )
+        assert expected_plan_1 in query
+        assert expected_plan_2 in query
+        assert other_plan not in query
 
     def test_nothing_is_returned_if_plan_with_specified_uuid_is_not_present(
         self,

@@ -68,10 +68,10 @@ class PlanResult(QueryResult[Plan], Protocol):
     def that_are_cooperating(self) -> PlanResult:
         ...
 
-    def planned_by(self, company: UUID) -> PlanResult:
+    def planned_by(self, *company: UUID) -> PlanResult:
         ...
 
-    def with_id(self, id_: UUID) -> PlanResult:
+    def with_id(self, *id_: UUID) -> PlanResult:
         ...
 
     def without_completed_review(self) -> PlanResult:
@@ -267,8 +267,8 @@ class TransactionRepository(ABC):
     def create_transaction(
         self,
         date: datetime,
-        sending_account: Account,
-        receiving_account: Account,
+        sending_account: UUID,
+        receiving_account: UUID,
         amount_sent: Decimal,
         amount_received: Decimal,
         purpose: str,
@@ -290,7 +290,7 @@ class AccountRepository(ABC):
         pass
 
     @abstractmethod
-    def get_account_balance(self, account: Account) -> Decimal:
+    def get_account_balance(self, account: UUID) -> Decimal:
         pass
 
 

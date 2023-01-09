@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from uuid import UUID, uuid4
 
-from arbeitszeit.entities import Account, Company, ProductionCosts, PurposesOfPurchases
+from arbeitszeit.entities import Company, ProductionCosts, PurposesOfPurchases
 from arbeitszeit.use_cases import (
     GetCompanyTransactions,
     PayMeansOfProduction,
@@ -202,10 +202,9 @@ class PayMeansOfProductionTests(BaseTestCase):
             .first()
         )
         assert latest_transaction
-        assert latest_transaction.sending_account == sender.means_account.id
-        assert (
-            latest_transaction.receiving_account
-            == self.get_product_account(plan.planner).id
+        assert latest_transaction.sending_account == sender.means_account
+        assert latest_transaction.receiving_account == self.get_product_account(
+            plan.planner
         )
         assert latest_transaction.amount_sent == price_total
         assert latest_transaction.amount_received == price_total
@@ -234,10 +233,9 @@ class PayMeansOfProductionTests(BaseTestCase):
             .first()
         )
         assert latest_transaction
-        assert latest_transaction.sending_account == sender.raw_material_account.id
-        assert (
-            latest_transaction.receiving_account
-            == self.get_product_account(plan.planner).id
+        assert latest_transaction.sending_account == sender.raw_material_account
+        assert latest_transaction.receiving_account == self.get_product_account(
+            plan.planner
         )
         assert latest_transaction.amount_sent == price_total
         assert latest_transaction.amount_received == price_total
@@ -313,10 +311,10 @@ class PayMeansOfProductionTests(BaseTestCase):
         assert not response.is_rejected
         assert response.rejection_reason is None
 
-    def get_product_account(self, company: UUID) -> Account:
-        model = self.company_repository.get_companies().with_id(company).first()
-        assert model
-        return model.product_account
+    def get_product_account(self, company: UUID) -> UUID:
+        company_model = self.company_repository.get_companies().with_id(company).first()
+        assert company_model
+        return company_model.product_account
 
 
 class TestSuccessfulPayment(BaseTestCase):

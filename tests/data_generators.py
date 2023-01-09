@@ -437,8 +437,8 @@ class TransactionGenerator:
         self,
         sending_account_type=AccountTypes.p,
         receiving_account_type=AccountTypes.prd,
-        sending_account=None,
-        receiving_account=None,
+        sending_account: Optional[UUID] = None,
+        receiving_account: Optional[UUID] = None,
         amount_sent=None,
         amount_received=None,
         purpose=None,
@@ -447,11 +447,11 @@ class TransactionGenerator:
         if sending_account is None:
             sending_account = self.account_generator.create_account(
                 account_type=sending_account_type
-            )
+            ).id
         if receiving_account is None:
             receiving_account = self.account_generator.create_account(
                 account_type=receiving_account_type
-            )
+            ).id
         if amount_sent is None:
             amount_sent = Decimal(10)
         if amount_received is None:

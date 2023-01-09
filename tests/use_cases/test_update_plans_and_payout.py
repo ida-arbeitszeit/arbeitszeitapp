@@ -2,13 +2,7 @@ import datetime
 from decimal import Decimal
 from uuid import UUID
 
-from arbeitszeit.entities import (
-    Account,
-    AccountTypes,
-    Company,
-    ProductionCosts,
-    Transaction,
-)
+from arbeitszeit.entities import AccountTypes, Company, ProductionCosts, Transaction
 from arbeitszeit.use_cases import UpdatePlansAndPayout
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts, ShowMyAccountsRequest
 from tests.data_generators import CooperationGenerator
@@ -408,7 +402,7 @@ class UseCaseTests(BaseTestCase):
         assert account
         return account.account_type == AccountTypes.a
 
-    def get_work_account(self, company: UUID) -> Account:
-        model = self.company_repository.get_companies().with_id(company).first()
-        assert model
-        return model.work_account
+    def get_work_account(self, company: UUID) -> UUID:
+        company_model = self.company_repository.get_companies().with_id(company).first()
+        assert company_model
+        return company_model.work_account

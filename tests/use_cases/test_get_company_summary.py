@@ -90,7 +90,7 @@ def test_returns_correct_expectations_after_company_receives_credit_for_means_of
     amount_transferred = Decimal(20)
     transaction_repository.create_transaction(
         date=datetime.min,
-        sending_account=social_accounting.account,
+        sending_account=social_accounting.account.id,
         receiving_account=receiving_company.means_account,
         amount_sent=amount_transferred,
         amount_received=amount_transferred,
@@ -112,7 +112,7 @@ def test_returns_correct_expectations_after_company_receives_credit_for_raw_mate
     amount_transferred = Decimal(20)
     transaction_repository.create_transaction(
         date=datetime.min,
-        sending_account=social_accounting.account,
+        sending_account=social_accounting.account.id,
         receiving_account=receiving_company.raw_material_account,
         amount_sent=amount_transferred,
         amount_received=amount_transferred,
@@ -134,7 +134,7 @@ def test_returns_correct_expectations_after_company_receives_credit_for_labour(
     amount_transferred = Decimal(20)
     transaction_repository.create_transaction(
         date=datetime.min,
-        sending_account=social_accounting.account,
+        sending_account=social_accounting.account.id,
         receiving_account=receiving_company.work_account,
         amount_sent=amount_transferred,
         amount_received=amount_transferred,
@@ -156,7 +156,7 @@ def test_returns_correct_expectations_after_company_receives_negative_amount_on_
     amount_transferred = Decimal(-20)
     transaction_repository.create_transaction(
         date=datetime.min,
-        sending_account=social_accounting.account,
+        sending_account=social_accounting.account.id,
         receiving_account=receiving_company.product_account,
         amount_sent=amount_transferred,
         amount_received=amount_transferred,
@@ -178,7 +178,7 @@ def test_returns_correct_expectations_after_company_receives_positive_amount_on_
     amount_transferred = Decimal(20)
     transaction_repository.create_transaction(
         date=datetime.min,
-        sending_account=social_accounting.account,
+        sending_account=social_accounting.account.id,
         receiving_account=receiving_company.product_account,
         amount_sent=amount_transferred,
         amount_received=amount_transferred,
@@ -291,7 +291,7 @@ def test_show_relative_deviation_of_100_after_social_accounting_sends_credit_to_
     amount_transferred = Decimal(5)
     transaction_repository.create_transaction(
         date=datetime.min,
-        sending_account=social_accounting.account,
+        sending_account=social_accounting.account.id,
         receiving_account=receiving_company.means_account,
         amount_sent=amount_transferred,
         amount_received=amount_transferred,
@@ -339,7 +339,7 @@ def test_show_relative_deviation_of_100_when_social_accounting_sends_minus_5_to_
     amount_transferred = Decimal(-5)
     transaction_repository.create_transaction(
         date=datetime.min,
-        sending_account=social_accounting.account,
+        sending_account=social_accounting.account.id,
         receiving_account=receiving_company.product_account,
         amount_sent=amount_transferred,
         amount_received=amount_transferred,
@@ -363,7 +363,7 @@ def test_show_relative_deviation_of_50_when_company_sells_half_of_expected_sales
     expected_sales = Decimal(-10)
     transaction_repository.create_transaction(
         date=datetime.min,
-        sending_account=social_accounting.account,
+        sending_account=social_accounting.account.id,
         receiving_account=company.product_account,
         amount_sent=expected_sales,
         amount_received=expected_sales,

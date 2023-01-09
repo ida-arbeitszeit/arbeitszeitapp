@@ -7,7 +7,7 @@ from uuid import UUID
 from injector import inject
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Account, Plan, SocialAccounting
+from arbeitszeit.entities import Plan, SocialAccounting
 from arbeitszeit.repositories import (
     CompanyRepository,
     PlanRepository,
@@ -57,11 +57,11 @@ class ApprovePlanUseCase:
         return self.Response()
 
     def _create_transaction_from_social_accounting(
-        self, plan: Plan, account: Account, amount: Decimal
+        self, plan: Plan, account: UUID, amount: Decimal
     ) -> None:
         self.transaction_repository.create_transaction(
             date=self.datetime_service.now(),
-            sending_account=self.social_accounting.account,
+            sending_account=self.social_accounting.account.id,
             receiving_account=account,
             amount_sent=round(amount, 2),
             amount_received=round(amount, 2),
