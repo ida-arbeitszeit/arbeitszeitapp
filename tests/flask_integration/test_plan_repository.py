@@ -138,16 +138,6 @@ class PlanRepositoryTests(FlaskTestCase):
         assert plan_info.name == expected_name
         assert plan_info.description == expected_description
 
-    def test_that_non_existing_plan_returns_no_planner_id(self) -> None:
-        self.plan_generator.create_plan()
-        nothing = self.plan_repository.get_planner_id(uuid4())
-        assert nothing is None
-
-    def test_that_correct_id_of_planning_company_gets_returned(self) -> None:
-        expected_plan = self.plan_generator.create_plan()
-        planner_id = self.plan_repository.get_planner_id(expected_plan.id)
-        assert planner_id == expected_plan.planner
-
     def test_cannot_create_plan_from_non_existing_draft(self) -> None:
         assert self.plan_repository.create_plan_from_draft(uuid4()) is None
 
@@ -478,3 +468,17 @@ class GetAllPlans(FlaskTestCase):
         assert plan_result.that_request_cooperation_with_coordinator()
         plan_result.set_requested_cooperation(None)
         assert not plan_result.that_request_cooperation_with_coordinator()
+
+    def test_can_set_approval_date(self) -> None:
+        plan = self.plan_generator.create_plan()
+        plans = self.plan_repository.get_plans().with_id(plan.id)
+        expected_approval_date = datetime(2000, 3, 2)
+        assert plans.set_approval_date(expected_approval_date)
+        assert all(plan.approval_date == expected_approval_date for plan in plans)
+
+    def test_can_set_approval_reason(self) -> None:
+        plan = self.plan_generator.create_plan()
+        plans = self.plan_repository.get_plans().with_id(plan.id)
+        expected_approval_reason = "test approval reason"
+        assert plans.set_approval_reason(expected_approval_reason)
+        assert all(plan.approval_reason == expected_approval_reason for plan in plans)

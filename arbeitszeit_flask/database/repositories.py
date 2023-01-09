@@ -216,6 +216,34 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
         result = self.db.session.execute(sql_statement)
         return result.rowcount
 
+    def set_approval_date(self, approval_date: Optional[datetime]) -> int:
+        sql_statement = (
+            update(models.PlanReview)
+            .where(
+                models.PlanReview.plan_id.in_(
+                    self.query.with_entities(models.Plan.id).scalar_subquery()
+                )
+            )
+            .values(approval_date=approval_date)
+            .execution_options(synchronize_session="fetch")
+        )
+        result = self.db.session.execute(sql_statement)
+        return result.rowcount
+
+    def set_approval_reason(self, reason: Optional[str]) -> int:
+        sql_statement = (
+            update(models.PlanReview)
+            .where(
+                models.PlanReview.plan_id.in_(
+                    self.query.with_entities(models.Plan.id).scalar_subquery()
+                )
+            )
+            .values(approval_reason=reason)
+            .execution_options(synchronize_session="fetch")
+        )
+        result = self.db.session.execute(sql_statement)
+        return result.rowcount
+
 
 class MemberQueryResult(FlaskQueryResult[entities.Member]):
     def working_at_company(self, company: UUID) -> MemberQueryResult:
@@ -914,14 +942,6 @@ class PlanRepository(repositories.PlanRepository):
         self.db.session.add(plan_review)
         return plan
 
-    def set_plan_approval_date(self, plan: UUID, approval_timestamp: datetime):
-        models.PlanReview.query.filter(models.PlanReview.plan_id == str(plan)).update(
-            dict(
-                approval_reason="approved",
-                approval_date=approval_timestamp,
-            )
-        )
-
     def activate_plan(self, plan: entities.Plan, activation_date: datetime) -> None:
         plan.is_active = True
         plan.activation_date = activation_date
@@ -1009,10 +1029,6 @@ class PlanRepository(repositories.PlanRepository):
             name=plan.prd_name, description=plan.description
         )
         return name_and_description
-
-    def get_planner_id(self, plan_id: UUID) -> Optional[UUID]:
-        plan = models.Plan.query.get(str(plan_id))
-        return UUID(plan.planner) if plan else None
 
     def __len__(self) -> int:
         return len(models.Plan.query.all())

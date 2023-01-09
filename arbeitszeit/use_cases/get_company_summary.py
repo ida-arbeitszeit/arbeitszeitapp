@@ -201,7 +201,8 @@ class GetCompanySummary:
     ) -> List[Tuple[UUID, Decimal]]:
         suppliers: Dict[UUID, Decimal] = defaultdict(lambda: Decimal("0"))
         for purchase in purchases:
-            supplier_id = self.plan_repository.get_planner_id(purchase.plan)
-            if supplier_id:
-                suppliers[supplier_id] += purchase.amount * purchase.price_per_unit
+            plan = self.plan_repository.get_plans().with_id(purchase.plan).first()
+            assert plan
+            if plan:
+                suppliers[plan.planner] += purchase.amount * purchase.price_per_unit
         return list(suppliers.items())

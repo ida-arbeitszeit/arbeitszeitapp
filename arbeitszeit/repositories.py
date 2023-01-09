@@ -114,6 +114,12 @@ class PlanResult(QueryResult[Plan], Protocol):
         updated through this method.
         """
 
+    def set_approval_date(self, approval_date: Optional[datetime]) -> int:
+        ...
+
+    def set_approval_reason(self, reason: Optional[str]) -> int:
+        ...
+
 
 class MemberResult(QueryResult[Member], Protocol):
     def working_at_company(self, company: UUID) -> MemberResult:
@@ -216,10 +222,6 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def set_plan_approval_date(self, plan: UUID, approval_timestamp: datetime) -> None:
-        pass
-
-    @abstractmethod
     def activate_plan(self, plan: Plan, activation_date: datetime) -> None:
         pass
 
@@ -270,10 +272,6 @@ class PlanRepository(ABC):
 
     @abstractmethod
     def get_plan_name_and_description(self, id: UUID) -> NameAndDescription:
-        pass
-
-    @abstractmethod
-    def get_planner_id(self, plan_id: UUID) -> Optional[UUID]:
         pass
 
     @abstractmethod
