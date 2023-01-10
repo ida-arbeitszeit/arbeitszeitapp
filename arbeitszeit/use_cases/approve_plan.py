@@ -33,15 +33,15 @@ class ApprovePlanUseCase:
     company_repository: CompanyRepository
 
     def approve_plan(self, request: Request) -> Response:
-        plan = self.plan_repository.get_plans().with_id(request.plan).first()
+        matching_plans = self.plan_repository.get_plans().with_id(request.plan)
+        plan = matching_plans.first()
         assert plan
         planner = self.company_repository.get_companies().with_id(plan.planner).first()
         assert planner
         if plan.is_approved:
             return self.Response(is_approved=False)
-        self.plan_repository.set_plan_approval_date(
-            plan=request.plan, approval_timestamp=self.datetime_service.now()
-        )
+        matching_plans.set_approval_date(self.datetime_service.now())
+        matching_plans.set_approval_reason("approved")
         self.plan_repository.activate_plan(
             plan=plan, activation_date=self.datetime_service.now()
         )

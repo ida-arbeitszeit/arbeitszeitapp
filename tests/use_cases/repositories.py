@@ -192,6 +192,20 @@ class PlanResult(QueryResultImpl[Plan], interfaces.PlanResult):
             plans_changed += 1
         return plans_changed
 
+    def set_approval_date(self, approval_date: Optional[datetime]) -> int:
+        plans_changed = 0
+        for plan in self.items():
+            plan.approval_date = approval_date
+            plans_changed += 1
+        return plans_changed
+
+    def set_approval_reason(self, reason: Optional[str]) -> int:
+        plans_changed = 0
+        for plan in self.items():
+            plan.approval_reason = reason
+            plans_changed += 1
+        return plans_changed
+
 
 class MemberResult(QueryResultImpl[Member], interfaces.MemberResult):
     def working_at_company(self, company: UUID) -> MemberResult:
@@ -670,13 +684,6 @@ class PlanRepository(interfaces.PlanRepository):
         )
         return plan.id
 
-    def set_plan_approval_date(self, plan: UUID, approval_timestamp: datetime):
-        plan_model = self.entities.plans.get(plan)
-        if plan_model is None:
-            return
-        plan_model.approval_date = approval_timestamp
-        plan_model.approval_reason = "approved"
-
     def __len__(self) -> int:
         return len(self.entities.plans)
 
@@ -785,22 +792,6 @@ class PlanRepository(interfaces.PlanRepository):
 
     def toggle_product_availability(self, plan: Plan) -> None:
         plan.is_available = True if (plan.is_available == False) else False
-
-    def get_plan_name_and_description(
-        self, id: UUID
-    ) -> interfaces.PlanRepository.NameAndDescription:
-        plan = self.entities.plans.get(id)
-        assert plan
-        name_and_description = interfaces.PlanRepository.NameAndDescription(
-            name=plan.prd_name, description=plan.description
-        )
-        return name_and_description
-
-    def get_planner_id(self, plan_id: UUID) -> Optional[UUID]:
-        plan = self.entities.plans.get(plan_id)
-        if plan is None:
-            return None
-        return plan.planner
 
 
 @singleton
