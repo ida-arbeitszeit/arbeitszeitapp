@@ -1021,15 +1021,6 @@ class PlanRepository(repositories.PlanRepository):
         plan_orm = self.object_to_orm(plan)
         plan_orm.is_available = True if (plan_orm.is_available == False) else False
 
-    def get_plan_name_and_description(
-        self, id: UUID
-    ) -> repositories.PlanRepository.NameAndDescription:
-        plan = models.Plan.query.get(str(id))
-        name_and_description = repositories.PlanRepository.NameAndDescription(
-            name=plan.prd_name, description=plan.description
-        )
-        return name_and_description
-
     def __len__(self) -> int:
         return len(models.Plan.query.all())
 
@@ -1351,7 +1342,7 @@ class CooperationRepository(repositories.CooperationRepository):
         )
 
     def count_cooperations(self) -> int:
-        return int(self.db.session.query(func.count(Cooperation.id)).one()[0])
+        return models.Cooperation.query.count()
 
 
 @inject

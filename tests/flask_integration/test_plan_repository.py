@@ -128,16 +128,6 @@ class PlanRepositoryTests(FlaskTestCase):
         assert plan_from_repo
         assert plan_from_repo.is_available == True
 
-    def test_correct_name_and_description_returned(self) -> None:
-        expected_name = "name 20220621"
-        expected_description = "description 20220621"
-        plan = self.plan_generator.create_plan(
-            product_name=expected_name, description=expected_description
-        )
-        plan_info = self.plan_repository.get_plan_name_and_description(plan.id)
-        assert plan_info.name == expected_name
-        assert plan_info.description == expected_description
-
     def test_cannot_create_plan_from_non_existing_draft(self) -> None:
         assert self.plan_repository.create_plan_from_draft(uuid4()) is None
 
