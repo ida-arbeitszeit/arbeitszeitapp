@@ -11,4 +11,4 @@ injector
 is_safe_url
 matplotlib
 
--r constraints.txt
+-c constraints.txt

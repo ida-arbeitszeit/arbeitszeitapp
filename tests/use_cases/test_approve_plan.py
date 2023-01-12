@@ -23,12 +23,7 @@ from arbeitszeit.use_cases.query_plans import (
 )
 
 from .base_test_case import BaseTestCase
-from .repositories import (
-    AccountRepository,
-    PlanDraftRepository,
-    PlanRepository,
-    TransactionRepository,
-)
+from .repositories import AccountRepository, PlanDraftRepository, TransactionRepository
 
 
 class UseCaseTests(BaseTestCase):
@@ -38,7 +33,6 @@ class UseCaseTests(BaseTestCase):
         self.get_company_summary = self.injector.get(GetCompanySummary)
         self.query_plans = self.injector.get(QueryPlans)
         self.draft_repository = self.injector.get(PlanDraftRepository)
-        self.plan_repository = self.injector.get(PlanRepository)
         self.pay_means_of_production = self.injector.get(PayMeansOfProduction)
         self.account_repository = self.injector.get(AccountRepository)
         self.transaction_repository = self.injector.get(TransactionRepository)
@@ -99,7 +93,7 @@ class UseCaseTests(BaseTestCase):
         )
         self.use_case.approve_plan(self.create_request(plan=plan.id))
         self.assertEqual(
-            self.get_company_account_balances(plan.planner.id).means, Decimal(5)
+            self.get_company_account_balances(plan.planner).means, Decimal(5)
         )
 
     def test_that_means_of_production_costs_are_correctly_rounded_and_transfered(self):
@@ -113,7 +107,7 @@ class UseCaseTests(BaseTestCase):
         )
         self.use_case.approve_plan(self.create_request(plan=plan.id))
         self.assertEqual(
-            self.get_company_account_balances(plan.planner.id).means, Decimal("5.16")
+            self.get_company_account_balances(plan.planner).means, Decimal("5.16")
         )
 
     def test_that_costs_for_resources_are_transfered(self) -> None:
@@ -125,7 +119,7 @@ class UseCaseTests(BaseTestCase):
         )
         self.use_case.approve_plan(self.create_request(plan=plan.id))
         self.assertEqual(
-            self.get_company_account_balances(plan.planner.id).raw_material, Decimal(5)
+            self.get_company_account_balances(plan.planner).raw_material, Decimal(5)
         )
 
     def test_that_resource_costs_are_correctly_rounded_and_transfered(self):
@@ -139,7 +133,7 @@ class UseCaseTests(BaseTestCase):
         )
         self.use_case.approve_plan(self.create_request(plan=plan.id))
         self.assertEqual(
-            self.get_company_account_balances(plan.planner.id).raw_material,
+            self.get_company_account_balances(plan.planner).raw_material,
             Decimal("5.16"),
         )
 
@@ -154,7 +148,7 @@ class UseCaseTests(BaseTestCase):
         )
         self.use_case.approve_plan(self.create_request(plan=plan.id))
         self.assertEqual(
-            self.get_company_account_balances(plan.planner.id).work,
+            self.get_company_account_balances(plan.planner).work,
             Decimal(0),
         )
 
@@ -169,17 +163,21 @@ class UseCaseTests(BaseTestCase):
         )
         self.use_case.approve_plan(self.create_request(plan=plan.id))
         self.assertEqual(
-            self.get_company_account_balances(plan.planner.id).product,
+            self.get_company_account_balances(plan.planner).product,
             Decimal("-6"),
         )
 
-    def test_that_all_transactions_have_accounting_as_sender(self):
+    def test_that_all_transactions_have_accounting_as_sender(self) -> None:
         plan = self.plan_generator.create_plan(approved=False)
         self.use_case.approve_plan(self.create_request(plan=plan.id))
-        for transaction in self.transaction_repository.transactions:
-            self.assertEqual(
-                transaction.sending_account.account_type, AccountTypes.accounting
+        for transaction in self.transaction_repository.get_transactions():
+            account = (
+                self.account_repository.get_accounts()
+                .with_id(transaction.sending_account)
+                .first()
             )
+            assert account
+            self.assertEqual(account.account_type, AccountTypes.accounting)
 
     def get_company_transactions(self, company: UUID) -> List[TransactionInfo]:
         response = self.get_company_transactions_use_case(company)

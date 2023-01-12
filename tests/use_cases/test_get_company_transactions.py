@@ -8,7 +8,6 @@ from tests.data_generators import (
     CompanyGenerator,
     FakeDatetimeService,
     MemberGenerator,
-    SocialAccountingGenerator,
     TransactionGenerator,
 )
 
@@ -110,7 +109,7 @@ def test_that_correct_info_for_company_is_generated_after_transaction_where_cred
     company = company_generator.create_company_entity()
 
     trans = transaction_generator.create_transaction(
-        sending_account=social_accounting.account,
+        sending_account=social_accounting.account.id,
         receiving_account=company.means_account,
         amount_sent=Decimal(10),
         amount_received=Decimal(8.5),
@@ -134,7 +133,7 @@ def test_that_correct_info_for_company_is_generated_after_transaction_where_cred
     company = company_generator.create_company_entity()
 
     trans = transaction_generator.create_transaction(
-        sending_account=social_accounting.account,
+        sending_account=social_accounting.account.id,
         receiving_account=company.raw_material_account,
         amount_sent=Decimal(10),
         amount_received=Decimal(8.5),
@@ -158,7 +157,7 @@ def test_that_correct_info_for_company_is_generated_after_transaction_where_cred
     company = company_generator.create_company_entity()
 
     trans = transaction_generator.create_transaction(
-        sending_account=social_accounting.account,
+        sending_account=social_accounting.account.id,
         receiving_account=company.work_account,
         amount_sent=Decimal(10),
         amount_received=Decimal(8.5),
@@ -217,13 +216,12 @@ def test_that_correct_info_for_company_is_generated_in_correct_order_after_sever
     company_generator: CompanyGenerator,
     transaction_generator: TransactionGenerator,
     member_generator: MemberGenerator,
-    social_accounting_generator: SocialAccountingGenerator,
+    social_accounting: SocialAccounting,
     datetime_service: FakeDatetimeService,
 ):
     company1 = company_generator.create_company_entity()
     company2 = company_generator.create_company_entity()
     member = member_generator.create_member_entity()
-    social_accounting = social_accounting_generator.create_social_accounting()
 
     transaction_generator.create_transaction(
         sending_account=company1.means_account,
@@ -246,7 +244,7 @@ def test_that_correct_info_for_company_is_generated_in_correct_order_after_sever
         date=datetime_service.now() - timedelta(hours=2),
     )
     expected_trans5 = transaction_generator.create_transaction(
-        sending_account=social_accounting.account,
+        sending_account=social_accounting.account.id,
         receiving_account=company1.product_account,
         date=datetime_service.now() - timedelta(hours=1),
     )

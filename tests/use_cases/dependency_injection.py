@@ -12,7 +12,6 @@ from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitation_presenter import (
     AccountantInvitationPresenter,
 )
-from tests import data_generators
 from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
 from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.dependency_injection import TestingModule
@@ -85,12 +84,6 @@ class InMemoryModule(Module):
         return repo
 
     @provider
-    def provide_company_worker_repo(
-        self, repo: repositories.MemberRepository
-    ) -> interfaces.CompanyWorkerRepository:
-        return repo
-
-    @provider
     @singleton
     def provide_worker_invite_repo(
         self, repo: repositories.WorkerInviteRepository
@@ -100,9 +93,9 @@ class InMemoryModule(Module):
     @provider
     @singleton
     def provide_social_accounting_instance(
-        self, generator: data_generators.SocialAccountingGenerator
+        self, entity_storage: repositories.EntityStorage
     ) -> entities.SocialAccounting:
-        return generator.create_social_accounting()
+        return entity_storage.social_accounting
 
     @provider
     def provide_account_repository(
@@ -145,12 +138,6 @@ class InMemoryModule(Module):
     def provide_cooperation_repository(
         self, repo: repositories.CooperationRepository
     ) -> interfaces.CooperationRepository:
-        return repo
-
-    @provider
-    def provide_plan_cooperation_repository(
-        self, repo: repositories.PlanCooperationRepository
-    ) -> interfaces.PlanCooperationRepository:
         return repo
 
     @singleton

@@ -8,7 +8,7 @@ from arbeitszeit.entities import Plan
 from arbeitszeit.repositories import (
     CompanyRepository,
     CooperationRepository,
-    PlanCooperationRepository,
+    PlanRepository,
 )
 
 
@@ -36,7 +36,7 @@ class ListInboundCoopRequestsResponse:
 @dataclass
 class ListInboundCoopRequests:
     company_repository: CompanyRepository
-    plan_cooperation_repository: PlanCooperationRepository
+    plan_repository: PlanRepository
     cooperation_repository: CooperationRepository
 
     def __call__(
@@ -46,7 +46,7 @@ class ListInboundCoopRequests:
             return ListInboundCoopRequestsResponse(cooperation_requests=[])
         cooperation_requests = [
             self._plan_to_response_model(plan)
-            for plan in self.plan_cooperation_repository.get_inbound_requests(
+            for plan in self.plan_repository.get_plans().that_request_cooperation_with_coordinator(
                 request.coordinator_id
             )
         ]
@@ -65,11 +65,13 @@ class ListInboundCoopRequests:
             plan.requested_cooperation
         )
         assert requested_cooperation_name
+        planner = self.company_repository.get_companies().with_id(plan.planner).first()
+        assert planner
         return ListedInboundCoopRequest(
             coop_id=plan.requested_cooperation,
             coop_name=requested_cooperation_name,
             plan_id=plan.id,
             plan_name=plan.prd_name,
-            planner_name=plan.planner.name,
-            planner_id=plan.planner.id,
+            planner_name=planner.name,
+            planner_id=planner.id,
         )

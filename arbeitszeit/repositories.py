@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Generic, Iterable, Iterator, List, Optional, Protocol, TypeVar, Union
+from typing import Generic, Iterable, Iterator, Optional, Protocol, TypeVar, Union
 from uuid import UUID
 
 from arbeitszeit.entities import (
@@ -68,10 +68,10 @@ class PlanResult(QueryResult[Plan], Protocol):
     def that_are_cooperating(self) -> PlanResult:
         ...
 
-    def planned_by(self, company: UUID) -> PlanResult:
+    def planned_by(self, *company: UUID) -> PlanResult:
         ...
 
-    def with_id(self, id_: UUID) -> PlanResult:
+    def with_id(self, *id_: UUID) -> PlanResult:
         ...
 
     def without_completed_review(self) -> PlanResult:
@@ -84,6 +84,45 @@ class PlanResult(QueryResult[Plan], Protocol):
 
     def that_are_in_same_cooperation_as(self, plan: UUID) -> PlanResult:
         ...
+
+    def that_are_active(self) -> PlanResult:
+        ...
+
+    def that_are_part_of_cooperation(self, *cooperation: UUID) -> PlanResult:
+        """If no cooperations are specified, then all the repository
+        should return plans that are part of any cooperation.
+        """
+
+    def that_request_cooperation_with_coordinator(self, *company: UUID) -> PlanResult:
+        """If no companies are specified then the repository should
+        return all plans that request cooperation with any
+        coordinator.
+        """
+
+    def set_cooperation(self, cooperation: Optional[UUID]) -> int:
+        """Set the associated cooperation of all matching plans to the
+        one specified via the cooperation argument. Specifying `None`
+        will unset the cooperation field. The return value counts all
+        plans that were updated through this method.
+        """
+
+    def set_requested_cooperation(self, cooperation: Optional[UUID]) -> int:
+        """Set the `requested_cooperation` field of all matching plans
+        to the specified value.  A value `None` means that these plans
+        are marked as not requesting membership in any
+        cooperation. The return value counts all plans that were
+        updated through this method.
+        """
+
+    def set_approval_date(self, approval_date: Optional[datetime]) -> int:
+        """Set the approval date of all matching plans. The return
+        value counts all the plans that were changed by this methods.
+        """
+
+    def set_approval_reason(self, reason: Optional[str]) -> int:
+        """Set the approval reason for all matching plans. The return
+        value counts all the plans that were changed by this method.
+        """
 
 
 class MemberResult(QueryResult[Member], Protocol):
@@ -126,9 +165,29 @@ class CompanyResult(QueryResult[Company], Protocol):
     def that_are_workplace_of_member(self, member: UUID) -> CompanyResult:
         ...
 
+    def add_worker(self, member: UUID) -> int:
+        ...
 
-class CompanyWorkerRepository(Protocol):
-    def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
+
+class TransactionResult(QueryResult[Transaction], Protocol):
+    def where_account_is_sender_or_receiver(self, *account: UUID) -> TransactionResult:
+        ...
+
+    def where_account_is_sender(self, *account: UUID) -> TransactionResult:
+        ...
+
+    def where_account_is_receiver(self, *account: UUID) -> TransactionResult:
+        ...
+
+    def ordered_by_transaction_date(self, descending: bool = ...) -> TransactionResult:
+        ...
+
+    def where_sender_is_social_accounting(self) -> TransactionResult:
+        ...
+
+
+class AccountResult(QueryResult[Account], Protocol):
+    def with_id(self, id_: UUID) -> AccountResult:
         ...
 
 
@@ -167,10 +226,6 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def set_plan_approval_date(self, plan: UUID, approval_timestamp: datetime):
-        pass
-
-    @abstractmethod
     def activate_plan(self, plan: Plan, activation_date: datetime) -> None:
         pass
 
@@ -184,10 +239,6 @@ class PlanRepository(ABC):
 
     @abstractmethod
     def increase_payout_count_by_one(self, plan: Plan) -> None:
-        pass
-
-    @abstractmethod
-    def get_active_plans(self) -> PlanResult:
         pass
 
     @abstractmethod
@@ -218,19 +269,6 @@ class PlanRepository(ABC):
     def toggle_product_availability(self, plan: Plan) -> None:
         pass
 
-    @dataclass
-    class NameAndDescription:
-        name: str
-        description: str
-
-    @abstractmethod
-    def get_plan_name_and_description(self, id: UUID) -> NameAndDescription:
-        pass
-
-    @abstractmethod
-    def get_planner_id(self, plan_id: UUID) -> Optional[UUID]:
-        pass
-
     @abstractmethod
     def get_plans(self) -> PlanResult:
         pass
@@ -238,25 +276,19 @@ class PlanRepository(ABC):
 
 class TransactionRepository(ABC):
     @abstractmethod
+    def get_transactions(self) -> TransactionResult:
+        pass
+
+    @abstractmethod
     def create_transaction(
         self,
         date: datetime,
-        sending_account: Account,
-        receiving_account: Account,
+        sending_account: UUID,
+        receiving_account: UUID,
         amount_sent: Decimal,
         amount_received: Decimal,
         purpose: str,
     ) -> Transaction:
-        pass
-
-    @abstractmethod
-    def all_transactions_sent_by_account(self, account: Account) -> List[Transaction]:
-        pass
-
-    @abstractmethod
-    def all_transactions_received_by_account(
-        self, account: Account
-    ) -> List[Transaction]:
         pass
 
     @abstractmethod
@@ -270,7 +302,11 @@ class AccountRepository(ABC):
         pass
 
     @abstractmethod
-    def get_account_balance(self, account: Account) -> Decimal:
+    def get_accounts(self) -> AccountResult:
+        pass
+
+    @abstractmethod
+    def get_account_balance(self, account: UUID) -> Decimal:
         pass
 
 
@@ -451,36 +487,6 @@ class CooperationRepository(ABC):
 
     @abstractmethod
     def count_cooperations(self) -> int:
-        pass
-
-
-class PlanCooperationRepository(ABC):
-    @abstractmethod
-    def get_inbound_requests(self, coordinator_id: UUID) -> Iterator[Plan]:
-        pass
-
-    @abstractmethod
-    def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
-        pass
-
-    @abstractmethod
-    def remove_plan_from_cooperation(self, plan_id: UUID) -> None:
-        pass
-
-    @abstractmethod
-    def set_requested_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
-        pass
-
-    @abstractmethod
-    def set_requested_cooperation_to_none(self, plan_id: UUID) -> None:
-        pass
-
-    @abstractmethod
-    def count_plans_in_cooperation(self, cooperation_id: UUID) -> int:
-        pass
-
-    @abstractmethod
-    def get_plans_in_cooperation(self, cooperation_id: UUID) -> Iterable[Plan]:
         pass
 
 

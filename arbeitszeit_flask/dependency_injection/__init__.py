@@ -31,11 +31,9 @@ from arbeitszeit_flask.database.repositories import (
     AccountOwnerRepository,
     AccountRepository,
     CompanyRepository,
-    CompanyWorkerRepository,
     CooperationRepository,
     MemberRepository,
     PayoutFactorRepository,
-    PlanCooperationRepository,
     PlanDraftRepository,
     PlanRepository,
     PurchaseRepository,
@@ -165,12 +163,6 @@ class CompanyModule(CompanyPresenterModule):
 class FlaskModule(PresenterModule):
     @provider
     def provide_text_renderer(self, instance: TextRendererImpl) -> TextRenderer:
-        return instance
-
-    @provider
-    def provide_company_worker_repository(
-        self, instance: CompanyWorkerRepository
-    ) -> interfaces.CompanyWorkerRepository:
         return instance
 
     @provider
@@ -434,10 +426,6 @@ class FlaskModule(PresenterModule):
         binder.bind(
             interfaces.CooperationRepository,  # type: ignore
             to=ClassProvider(CooperationRepository),
-        )
-        binder.bind(
-            interfaces.PlanCooperationRepository,  # type: ignore
-            to=ClassProvider(PlanCooperationRepository),
         )
         binder.bind(TokenService, to=ClassProvider(FlaskTokenService))  # type: ignore
         binder.bind(UserAddressBook, to=ClassProvider(inject(UserAddressBookImpl)))  # type: ignore

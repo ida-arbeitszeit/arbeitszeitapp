@@ -64,12 +64,20 @@ class GetMemberAccount:
         user: Member,
         transaction: Transaction,
     ) -> TransactionInfo:
-        sender = self.acount_owner_repository.get_account_owner(
-            transaction.sending_account
+        sending_account = (
+            self.account_repository.get_accounts()
+            .with_id(transaction.sending_account)
+            .first()
         )
-        receiver = self.acount_owner_repository.get_account_owner(
-            transaction.receiving_account
+        assert sending_account
+        receiving_account = (
+            self.account_repository.get_accounts()
+            .with_id(transaction.receiving_account)
+            .first()
         )
+        assert receiving_account
+        sender = self.acount_owner_repository.get_account_owner(sending_account)
+        receiver = self.acount_owner_repository.get_account_owner(receiving_account)
         user_is_sender = self.accounting_service.user_is_sender(transaction, user)
         peer_name = self._get_peer_name(user_is_sender, sender, receiver)
         transaction_volume = self.accounting_service.get_transaction_volume(

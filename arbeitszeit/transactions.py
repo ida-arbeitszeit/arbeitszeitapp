@@ -6,7 +6,11 @@ from typing import List, Union
 from injector import inject
 
 from .entities import AccountTypes, Company, Member, SocialAccounting, Transaction
-from .repositories import AccountOwnerRepository, TransactionRepository
+from .repositories import (
+    AccountOwnerRepository,
+    AccountRepository,
+    TransactionRepository,
+)
 
 
 class TransactionTypes(Enum):
@@ -33,44 +37,32 @@ class TransactionTypes(Enum):
 class UserAccountingService:
     transaction_repository: TransactionRepository
     account_owner_repository: AccountOwnerRepository
+    account_repository: AccountRepository
 
     def get_all_transactions_sorted(
         self, user: Union[Member, Company]
     ) -> List[Transaction]:
-        all_transactions = set()
-        for account in user.accounts():
-            all_transactions.update(
-                self.transaction_repository.all_transactions_sent_by_account(account)
-            )
-            all_transactions.update(
-                self.transaction_repository.all_transactions_received_by_account(
-                    account
-                )
-            )
-        all_transactions_sorted = sorted(
-            all_transactions, key=lambda x: x.date, reverse=True
+        return list(
+            self.transaction_repository.get_transactions()
+            .where_account_is_sender_or_receiver(*user.accounts())
+            .ordered_by_transaction_date(descending=True)
         )
-        return all_transactions_sorted
 
     def get_account_transactions_sorted(
         self, user: Union[Member, Company], queried_account_type: AccountTypes
     ) -> List[Transaction]:
-        for acc in user.accounts():
+        accounts = self.account_repository.get_accounts().with_id(*user.accounts())
+        for acc in accounts:
             if acc.account_type == queried_account_type:
                 queried_account = acc
-        transactions = set()
-        transactions.update(
-            self.transaction_repository.all_transactions_sent_by_account(
-                queried_account
-            )
+                break
+        else:
+            return []
+        return list(
+            self.transaction_repository.get_transactions()
+            .where_account_is_sender_or_receiver(queried_account.id)
+            .ordered_by_transaction_date(descending=True)
         )
-        transactions.update(
-            self.transaction_repository.all_transactions_received_by_account(
-                queried_account
-            )
-        )
-        transactions_sorted = sorted(transactions, key=lambda x: x.date, reverse=True)
-        return transactions_sorted
 
     def user_is_sender(
         self, transaction: Transaction, user: Union[Member, Company]
@@ -84,9 +76,20 @@ class UserAccountingService:
         Based on wether the user is sender or receiver,
         this method returns the 'subjective' transaction type.
         """
-        sending_account = transaction.sending_account.account_type
-        receiving_account = transaction.receiving_account.account_type
-
+        sender = (
+            self.account_repository.get_accounts()
+            .with_id(transaction.sending_account)
+            .first()
+        )
+        assert sender
+        sending_account = sender.account_type
+        receiver = (
+            self.account_repository.get_accounts()
+            .with_id(transaction.receiving_account)
+            .first()
+        )
+        assert receiver
+        receiving_account = receiver.account_type
         if user_is_sender:
             if sending_account == AccountTypes.a:
                 transaction_type = TransactionTypes.payment_of_wages
@@ -96,7 +99,6 @@ class UserAccountingService:
                 transaction_type = TransactionTypes.payment_of_liquid_means
             elif sending_account == AccountTypes.member:
                 transaction_type = TransactionTypes.payment_of_consumer_product
-
         else:
             if sending_account == AccountTypes.accounting:
                 if receiving_account == AccountTypes.a:
@@ -109,7 +111,6 @@ class UserAccountingService:
                     transaction_type = TransactionTypes.expected_sales
                 elif receiving_account == AccountTypes.member:
                     transaction_type = TransactionTypes.incoming_wages
-
             elif sending_account == AccountTypes.p:
                 transaction_type = TransactionTypes.sale_of_fixed_means
             elif sending_account == AccountTypes.r:
@@ -118,7 +119,6 @@ class UserAccountingService:
                 transaction_type = TransactionTypes.incoming_wages
             elif sending_account == AccountTypes.member:
                 transaction_type = TransactionTypes.sale_of_consumer_product
-
         assert transaction_type
         return transaction_type
 
@@ -148,7 +148,12 @@ class UserAccountingService:
             TransactionTypes.sale_of_liquid_means,
         ):
             return None
-        buyer_account = transaction.sending_account
+        buyer_account = (
+            self.account_repository.get_accounts()
+            .with_id(transaction.sending_account)
+            .first()
+        )
+        assert buyer_account
         buyer = self.account_owner_repository.get_account_owner(buyer_account)
         assert not isinstance(
             buyer, SocialAccounting

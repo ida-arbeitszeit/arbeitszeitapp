@@ -22,11 +22,11 @@ class Member:
     id: UUID
     name: str
     email: str
-    account: Account
+    account: UUID
     registered_on: datetime
     confirmed_on: Optional[datetime]
 
-    def accounts(self) -> List[Account]:
+    def accounts(self) -> List[UUID]:
         return [self.account]
 
     def get_name(self) -> str:
@@ -38,14 +38,14 @@ class Company:
     id: UUID
     email: str
     name: str
-    means_account: Account
-    raw_material_account: Account
-    work_account: Account
-    product_account: Account
+    means_account: UUID
+    raw_material_account: UUID
+    work_account: UUID
+    product_account: UUID
     registered_on: datetime
     confirmed_on: Optional[datetime]
 
-    def accounts(self) -> List[Account]:
+    def accounts(self) -> List[UUID]:
         return [
             self.means_account,
             self.raw_material_account,
@@ -137,7 +137,7 @@ class PlanDraft:
 class Plan:
     id: UUID
     plan_creation_date: datetime
-    planner: Company
+    planner: UUID
     production_costs: ProductionCosts
     prd_name: str
     prd_unit: str
@@ -210,8 +210,8 @@ class Transaction:
 
     id: UUID
     date: datetime
-    sending_account: Account
-    receiving_account: Account
+    sending_account: UUID
+    receiving_account: UUID
     amount_sent: Decimal
     amount_received: Decimal
     purpose: str

@@ -1,4 +1,3 @@
-from arbeitszeit.entities import AccountTypes
 from arbeitszeit.use_cases import RegisterMemberUseCase
 from arbeitszeit.use_cases.get_member_dashboard import GetMemberDashboard
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
@@ -43,13 +42,6 @@ class RegisterMemberTests(BaseTestCase):
         request = RegisterMemberUseCase.Request(**DEFAULT)
         response = self.use_case.register_member(request)
         self.assertFalse(response.is_rejected)
-
-    def test_that_registering_a_member_does_create_a_member_account(self) -> None:
-        self.use_case.register_member(RegisterMemberUseCase.Request(**DEFAULT))
-        self.assertEqual(len(self.account_repository.accounts), 1)
-        self.assertEqual(
-            self.account_repository.accounts[0].account_type, AccountTypes.member
-        )
 
     def test_that_correct_member_attributes_are_registered(self) -> None:
         request = RegisterMemberUseCase.Request(**DEFAULT)

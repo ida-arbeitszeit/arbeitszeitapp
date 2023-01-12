@@ -6,7 +6,7 @@ from uuid import UUID
 from injector import inject
 
 from arbeitszeit.repositories import (
-    CompanyWorkerRepository,
+    CompanyRepository,
     MemberRepository,
     WorkerInviteRepository,
 )
@@ -35,7 +35,7 @@ class AnswerCompanyWorkInviteResponse:
 @dataclass
 class AnswerCompanyWorkInvite:
     worker_invite_repository: WorkerInviteRepository
-    company_worker_repository: CompanyWorkerRepository
+    company_repository: CompanyRepository
     member_repository: MemberRepository
 
     def __call__(
@@ -51,10 +51,9 @@ class AnswerCompanyWorkInvite:
                 reason=AnswerCompanyWorkInviteResponse.Failure.member_was_not_invited
             )
         elif request.is_accepted:
-            self.company_worker_repository.add_worker_to_company(
-                invite.company.id,
-                invite.member.id,
-            )
+            self.company_repository.get_companies().with_id(
+                invite.company.id
+            ).add_worker(invite.member.id)
         self.worker_invite_repository.delete_invite(request.invite_id)
         return AnswerCompanyWorkInviteResponse(
             is_success=True,

@@ -26,7 +26,6 @@ target-version = ['py39']
 extend-exclude = '''
 (
   ^/arbeitszeit_flask/development_settings\.py |
-  ^/arbeitszeit_flask/production_settings\.py |
   ^/arbeitszeit_flask/migrations/
 )
 '''

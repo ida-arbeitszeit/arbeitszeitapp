@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime
 from decimal import Decimal
 from itertools import islice
@@ -48,12 +48,10 @@ from tests.search_tree import SearchTree
 T = TypeVar("T")
 
 
+@dataclass
 class QueryResultImpl(Generic[T]):
-    def __init__(
-        self, items: Callable[[], Iterable[T]], *, entities: EntityStorage
-    ) -> None:
-        self.items = items
-        self.entities = entities
+    items: Callable[[], Iterable[T]]
+    entities: EntityStorage
 
     def limit(self, n: int) -> QueryResultImpl[T]:
         return type(self)(
@@ -110,11 +108,11 @@ class PlanResult(QueryResultImpl[Plan], interfaces.PlanResult):
     def that_are_cooperating(self) -> PlanResult:
         return self._filtered_by(lambda plan: plan.cooperation is not None)
 
-    def planned_by(self, company: UUID) -> PlanResult:
-        return self._filtered_by(lambda plan: plan.planner.id == company)
+    def planned_by(self, *company: UUID) -> PlanResult:
+        return self._filtered_by(lambda plan: plan.planner in company)
 
-    def with_id(self, id_: UUID) -> PlanResult:
-        return self._filtered_by(lambda plan: plan.id == id_)
+    def with_id(self, *id_: UUID) -> PlanResult:
+        return self._filtered_by(lambda plan: plan.id in id_)
 
     def without_completed_review(self) -> PlanResult:
         return self._filtered_by(lambda plan: plan.approval_date is None)
@@ -150,6 +148,63 @@ class PlanResult(QueryResultImpl[Plan], interfaces.PlanResult):
             items=items_generator,
             entities=self.entities,
         )
+
+    def that_are_active(self) -> PlanResult:
+        return self._filtered_by(lambda plan: plan.is_active)
+
+    def that_are_part_of_cooperation(self, *cooperation: UUID) -> PlanResult:
+        return self._filtered_by(
+            (lambda plan: plan.cooperation in cooperation)
+            if cooperation
+            else (lambda plan: plan.cooperation is not None)
+        )
+
+    def that_request_cooperation_with_coordinator(self, *company: UUID) -> PlanResult:
+        def new_items() -> Iterator[Plan]:
+            cooperations: Set[UUID] = {
+                key
+                for key, value in self.entities.cooperations.items()
+                if value.coordinator.id in company
+            }
+            return filter(
+                lambda plan: plan.requested_cooperation in cooperations
+                if company
+                else plan.requested_cooperation is not None,
+                self.items(),
+            )
+
+        return replace(
+            self,
+            items=new_items,
+        )
+
+    def set_cooperation(self, cooperation: Optional[UUID]) -> int:
+        plans_changed = 0
+        for plan in self.items():
+            plan.cooperation = cooperation
+            plans_changed += 1
+        return plans_changed
+
+    def set_requested_cooperation(self, cooperation: Optional[UUID]) -> int:
+        plans_changed = 0
+        for plan in self.items():
+            plan.requested_cooperation = cooperation
+            plans_changed += 1
+        return plans_changed
+
+    def set_approval_date(self, approval_date: Optional[datetime]) -> int:
+        plans_changed = 0
+        for plan in self.items():
+            plan.approval_date = approval_date
+            plans_changed += 1
+        return plans_changed
+
+    def set_approval_reason(self, reason: Optional[str]) -> int:
+        plans_changed = 0
+        for plan in self.items():
+            plan.approval_reason = reason
+            plans_changed += 1
+        return plans_changed
 
 
 class MemberResult(QueryResultImpl[Member], interfaces.MemberResult):
@@ -254,6 +309,73 @@ class CompanyResult(QueryResultImpl[Company], interfaces.CompanyResult):
             entities=self.entities,
         )
 
+    def add_worker(self, member: UUID) -> int:
+        companies_changed = 0
+        for company in self.items():
+            companies_changed += 1
+            self.entities.company_workers[company.id].add(member)
+        return companies_changed
+
+
+class TransactionResult(QueryResultImpl[Transaction], interfaces.TransactionResult):
+    def where_account_is_sender_or_receiver(self, *account: UUID) -> TransactionResult:
+        return replace(
+            self,
+            items=lambda: filter(
+                lambda transaction: transaction.sending_account in account
+                or transaction.receiving_account in account,
+                self.items(),
+            ),
+        )
+
+    def where_account_is_sender(self, *account: UUID) -> TransactionResult:
+        return replace(
+            self,
+            items=lambda: filter(
+                lambda transaction: transaction.sending_account in account,
+                self.items(),
+            ),
+        )
+
+    def where_account_is_receiver(self, *account: UUID) -> TransactionResult:
+        return replace(
+            self,
+            items=lambda: filter(
+                lambda transaction: transaction.receiving_account in account,
+                self.items(),
+            ),
+        )
+
+    def ordered_by_transaction_date(
+        self, descending: bool = False
+    ) -> TransactionResult:
+        return replace(
+            self,
+            items=lambda: sorted(
+                list(self.items()),
+                key=lambda transaction: transaction.date,
+                reverse=descending,
+            ),
+        )
+
+    def where_sender_is_social_accounting(self) -> TransactionResult:
+        return replace(
+            self,
+            items=lambda: filter(
+                lambda transaction: transaction.sending_account
+                == self.entities.social_accounting.account.id,
+                self.items(),
+            ),
+        )
+
+
+class AccountResult(QueryResultImpl[Account], interfaces.AccountResult):
+    def with_id(self, *id_: UUID) -> AccountResult:
+        return replace(
+            self,
+            items=lambda: filter(lambda account: account.id in id_, self.items()),
+        )
+
 
 @singleton
 class PurchaseRepository(interfaces.PurchaseRepository):
@@ -313,14 +435,14 @@ class PurchaseRepository(interfaces.PurchaseRepository):
 @singleton
 class TransactionRepository(interfaces.TransactionRepository):
     @inject
-    def __init__(self) -> None:
-        self.transactions: List[Transaction] = []
+    def __init__(self, entities: EntityStorage) -> None:
+        self.entities = entities
 
     def create_transaction(
         self,
         date: datetime,
-        sending_account: Account,
-        receiving_account: Account,
+        sending_account: UUID,
+        receiving_account: UUID,
         amount_sent: Decimal,
         amount_received: Decimal,
         purpose: str,
@@ -334,29 +456,21 @@ class TransactionRepository(interfaces.TransactionRepository):
             amount_received=amount_received,
             purpose=purpose,
         )
-        self.transactions.append(transaction)
+        self.entities.transactions.append(transaction)
         return transaction
 
-    def all_transactions_sent_by_account(self, account: Account) -> List[Transaction]:
-        all_sent = []
-        for transaction in self.transactions:
-            if transaction.sending_account == account:
-                all_sent.append(transaction)
-        return all_sent
-
-    def all_transactions_received_by_account(
-        self, account: Account
-    ) -> List[Transaction]:
-        all_received = []
-        for transaction in self.transactions:
-            if transaction.receiving_account == account:
-                all_received.append(transaction)
-        return all_received
+    def get_transactions(self) -> TransactionResult:
+        return TransactionResult(
+            items=lambda: self.entities.transactions,
+            entities=self.entities,
+        )
 
     def get_sales_balance_of_plan(self, plan: Plan) -> Decimal:
         balance = Decimal(0)
-        for transaction in self.transactions:
-            if (transaction.receiving_account == plan.planner.product_account) and (
+        planner = self.entities.get_company_by_id(plan.planner)
+        assert planner
+        for transaction in self.entities.transactions:
+            if (transaction.receiving_account == planner.product_account) and (
                 str(plan.id) in transaction.purpose
             ):
                 balance += transaction.amount_received
@@ -366,54 +480,33 @@ class TransactionRepository(interfaces.TransactionRepository):
 @singleton
 class AccountRepository(interfaces.AccountRepository):
     @inject
-    def __init__(self, transaction_repository: TransactionRepository):
-        self.accounts: List[Account] = []
+    def __init__(
+        self, transaction_repository: TransactionRepository, entities: EntityStorage
+    ):
         self.transaction_repository = transaction_repository
+        self.entities = entities
 
     def __contains__(self, account: object) -> bool:
         if not isinstance(account, Account):
             return False
-        return account in self.accounts
+        return account in self.entities.accounts
 
     def create_account(self, account_type: AccountTypes) -> Account:
-        account = Account(
-            id=uuid4(),
-            account_type=account_type,
-        )
-        self.accounts.append(account)
-        return account
+        return self.entities.create_account(account_type)
 
-    def get_account_balance(self, account: Account) -> Decimal:
-        received_transactions = (
-            self.transaction_repository.all_transactions_received_by_account(account)
+    def get_accounts(self) -> AccountResult:
+        return AccountResult(
+            items=lambda: self.entities.accounts,
+            entities=self.entities,
         )
-        sent_transactions = (
-            self.transaction_repository.all_transactions_sent_by_account(account)
-        )
-        self._remove_intersection(received_transactions, sent_transactions)
+
+    def get_account_balance(self, account: UUID) -> Decimal:
+        transactions = self.transaction_repository.get_transactions()
+        received_transactions = transactions.where_account_is_receiver(account)
+        sent_transactions = transactions.where_account_is_sender(account)
         return decimal_sum(
             transaction.amount_received for transaction in received_transactions
         ) - decimal_sum(transaction.amount_sent for transaction in sent_transactions)
-
-    @classmethod
-    def _remove_intersection(
-        cls,
-        transactions_received: List[Transaction],
-        transactions_sent: List[Transaction],
-    ) -> None:
-        intersection = {transaction.id for transaction in transactions_received} & {
-            transaction.id for transaction in transactions_sent
-        }
-        transactions_received[:] = [
-            transaction
-            for transaction in transactions_received
-            if transaction.id not in intersection
-        ]
-        transactions_sent[:] = [
-            transaction
-            for transaction in transactions_sent
-            if transaction.id not in intersection
-        ]
 
 
 @singleton
@@ -433,10 +526,10 @@ class AccountOwnerRepository(interfaces.AccountOwnerRepository):
         if account.account_type == AccountTypes.accounting:
             return self.social_accounting
         for member in self.entities.members.values():
-            if account == member.account:
+            if account.id == member.account:
                 return member
         for company in self.entities.companies.values():
-            if account in company.accounts():
+            if account.id in company.accounts():
                 return company
         # This exception is not meant to be caught. That's why we
         # raise a base exception
@@ -464,7 +557,7 @@ class MemberRepository(interfaces.MemberRepository):
             id=id,
             name=name,
             email=email,
-            account=account,
+            account=account.id,
             registered_on=registered_on,
             confirmed_on=None,
         )
@@ -490,9 +583,6 @@ class MemberRepository(interfaces.MemberRepository):
                 return member
         return None
 
-    def add_worker_to_company(self, company: UUID, worker: UUID) -> None:
-        self.entities.company_workers[company].add(worker)
-
 
 class CompanyRepository(interfaces.CompanyRepository):
     @inject
@@ -514,10 +604,10 @@ class CompanyRepository(interfaces.CompanyRepository):
             id=uuid4(),
             email=email,
             name=name,
-            means_account=means_account,
-            raw_material_account=resource_account,
-            work_account=labour_account,
-            product_account=products_account,
+            means_account=means_account.id,
+            raw_material_account=resource_account.id,
+            work_account=labour_account.id,
+            product_account=products_account.id,
             registered_on=registered_on,
             confirmed_on=None,
         )
@@ -594,13 +684,6 @@ class PlanRepository(interfaces.PlanRepository):
         )
         return plan.id
 
-    def set_plan_approval_date(self, plan: UUID, approval_timestamp: datetime):
-        plan_model = self.entities.plans.get(plan)
-        if plan_model is None:
-            return
-        plan_model.approval_date = approval_timestamp
-        plan_model.approval_reason = "approved"
-
     def __len__(self) -> int:
         return len(self.entities.plans)
 
@@ -617,14 +700,6 @@ class PlanRepository(interfaces.PlanRepository):
 
     def increase_payout_count_by_one(self, plan: Plan) -> None:
         plan.payout_count += 1
-
-    def get_active_plans(self) -> PlanResult:
-        return PlanResult(
-            items=lambda: filter(
-                lambda plan: plan.is_active, self.entities.plans.values()
-            ),
-            entities=self.entities,
-        )
 
     def avg_timeframe_of_active_plans(self) -> Decimal:
         try:
@@ -692,7 +767,7 @@ class PlanRepository(interfaces.PlanRepository):
         plan = Plan(
             id=id,
             plan_creation_date=creation_timestamp,
-            planner=planner,
+            planner=planner.id,
             production_costs=costs,
             prd_name=product_name,
             prd_unit=production_unit,
@@ -717,22 +792,6 @@ class PlanRepository(interfaces.PlanRepository):
 
     def toggle_product_availability(self, plan: Plan) -> None:
         plan.is_available = True if (plan.is_available == False) else False
-
-    def get_plan_name_and_description(
-        self, id: UUID
-    ) -> interfaces.PlanRepository.NameAndDescription:
-        plan = self.entities.plans.get(id)
-        assert plan
-        name_and_description = interfaces.PlanRepository.NameAndDescription(
-            name=plan.prd_name, description=plan.description
-        )
-        return name_and_description
-
-    def get_planner_id(self, plan_id: UUID) -> Optional[UUID]:
-        plan = self.entities.plans.get(plan_id)
-        if plan is None:
-            return None
-        return plan.planner.id
 
 
 @singleton
@@ -878,8 +937,8 @@ class WorkerInviteRepository(interfaces.WorkerInviteRepository):
 @singleton
 class CooperationRepository(interfaces.CooperationRepository):
     @inject
-    def __init__(self) -> None:
-        self.cooperations: Dict[UUID, Cooperation] = dict()
+    def __init__(self, entities: EntityStorage) -> None:
+        self.entities = entities
 
     def create_cooperation(
         self,
@@ -896,95 +955,38 @@ class CooperationRepository(interfaces.CooperationRepository):
             definition=definition,
             coordinator=coordinator,
         )
-        self.cooperations[cooperation_id] = cooperation
+        self.entities.cooperations[cooperation_id] = cooperation
         return cooperation
 
     def get_by_id(self, id: UUID) -> Optional[Cooperation]:
-        return self.cooperations.get(id)
+        return self.entities.cooperations.get(id)
 
     def get_by_name(self, name: str) -> Iterator[Cooperation]:
-        for cooperation in self.cooperations.values():
+        for cooperation in self.entities.cooperations.values():
             if cooperation.name.lower() == name.lower():
                 yield cooperation
 
     def get_cooperations_coordinated_by_company(
         self, company_id: UUID
     ) -> Iterator[Cooperation]:
-        for cooperation in self.cooperations.values():
+        for cooperation in self.entities.cooperations.values():
             if cooperation.coordinator.id == company_id:
                 yield cooperation
 
     def get_cooperation_name(self, coop_id: UUID) -> Optional[str]:
-        coop = self.cooperations.get(coop_id)
+        coop = self.entities.cooperations.get(coop_id)
         if coop is None:
             return None
         return coop.name
 
     def get_all_cooperations(self) -> Iterator[Cooperation]:
-        return (cooperation for cooperation in self.cooperations.values())
+        return (cooperation for cooperation in self.entities.cooperations.values())
 
     def count_cooperations(self) -> int:
-        return len(self.cooperations)
+        return len(self.entities.cooperations)
 
     def __len__(self) -> int:
-        return len(self.cooperations)
-
-
-@singleton
-class PlanCooperationRepository(interfaces.PlanCooperationRepository):
-    @inject
-    def __init__(
-        self,
-        plan_repository: PlanRepository,
-        cooperation_repository: CooperationRepository,
-        entities: EntityStorage,
-    ) -> None:
-        self.plan_repository = plan_repository
-        self.cooperation_repository = cooperation_repository
-        self.entities = entities
-
-    def get_inbound_requests(self, coordinator_id: UUID) -> Iterator[Plan]:
-        coops_of_company = list(
-            self.cooperation_repository.get_cooperations_coordinated_by_company(
-                coordinator_id
-            )
-        )
-        for plan in self.entities.plans.values():
-            if plan.requested_cooperation in [coop.id for coop in coops_of_company]:
-                yield plan
-
-    def add_plan_to_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
-        plan = self.plan_repository.get_plans().with_id(plan_id).first()
-        assert plan
-        plan.cooperation = cooperation_id
-
-    def remove_plan_from_cooperation(self, plan_id: UUID) -> None:
-        plan = self.plan_repository.get_plans().with_id(plan_id).first()
-        assert plan
-        plan.cooperation = None
-
-    def set_requested_cooperation(self, plan_id: UUID, cooperation_id: UUID) -> None:
-        plan = self.plan_repository.get_plans().with_id(plan_id).first()
-        assert plan
-        plan.requested_cooperation = cooperation_id
-
-    def set_requested_cooperation_to_none(self, plan_id: UUID) -> None:
-        plan = self.plan_repository.get_plans().with_id(plan_id).first()
-        assert plan
-        plan.requested_cooperation = None
-
-    def count_plans_in_cooperation(self, cooperation_id: UUID) -> int:
-        count = 0
-        for plan in self.entities.plans.values():
-            if plan.cooperation == cooperation_id:
-                count += 1
-        return count
-
-    def get_plans_in_cooperation(self, cooperation_id: UUID) -> Iterable[Plan]:
-        plans = self.entities.plans.values()
-        for plan in plans:
-            if plan.cooperation == cooperation_id:
-                yield plan
+        return len(self.entities.cooperations)
 
 
 @singleton
@@ -1094,3 +1096,24 @@ class EntityStorage:
         self.companies: Dict[str, Company] = {}
         self.company_passwords: Dict[UUID, str] = {}
         self.plans: Dict[UUID, Plan] = {}
+        self.transactions: List[Transaction] = []
+        self.accounts: List[Account] = []
+        self.social_accounting = SocialAccounting(
+            id=uuid4(),
+            account=self.create_account(account_type=AccountTypes.accounting),
+        )
+        self.cooperations: Dict[UUID, Cooperation] = dict()
+
+    def create_account(self, account_type: AccountTypes) -> Account:
+        account = Account(
+            id=uuid4(),
+            account_type=account_type,
+        )
+        self.accounts.append(account)
+        return account
+
+    def get_company_by_id(self, company: UUID) -> Optional[Company]:
+        for model in self.companies.values():
+            if model.id == company:
+                return model
+        return None

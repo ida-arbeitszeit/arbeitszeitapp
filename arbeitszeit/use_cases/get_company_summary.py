@@ -125,24 +125,22 @@ class GetCompanySummary:
     def _get_expectations(self, company: Company) -> Expectations:
         credits = [
             decimal_sum(
-                [
-                    trans.amount_received
-                    for trans in self.transaction_repository.all_transactions_received_by_account(
-                        account
-                    )
-                    if trans.sending_account == self.social_accounting.account
-                ]
+                map(
+                    lambda t: t.amount_received,
+                    self.transaction_repository.get_transactions()
+                    .where_account_is_sender_or_receiver(account)
+                    .where_sender_is_social_accounting(),
+                )
             )
             for account in company.accounts()[:3]
         ]
         expected_sales = decimal_sum(
-            [
-                trans.amount_received
-                for trans in self.transaction_repository.all_transactions_received_by_account(
-                    company.product_account
-                )
-                if trans.sending_account == self.social_accounting.account
-            ]
+            map(
+                lambda t: t.amount_received,
+                self.transaction_repository.get_transactions()
+                .where_account_is_sender_or_receiver(company.product_account)
+                .where_sender_is_social_accounting(),
+            )
         )
         return Expectations(
             means=credits[0],
@@ -203,7 +201,8 @@ class GetCompanySummary:
     ) -> List[Tuple[UUID, Decimal]]:
         suppliers: Dict[UUID, Decimal] = defaultdict(lambda: Decimal("0"))
         for purchase in purchases:
-            supplier_id = self.plan_repository.get_planner_id(purchase.plan)
-            if supplier_id:
-                suppliers[supplier_id] += purchase.amount * purchase.price_per_unit
+            plan = self.plan_repository.get_plans().with_id(purchase.plan).first()
+            assert plan
+            if plan:
+                suppliers[plan.planner] += purchase.amount * purchase.price_per_unit
         return list(suppliers.items())

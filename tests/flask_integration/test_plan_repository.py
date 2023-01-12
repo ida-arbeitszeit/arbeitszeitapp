@@ -78,16 +78,16 @@ class PlanRepositoryTests(FlaskTestCase):
             self.plan_generator.create_plan(activation_date=datetime.min)
             for _ in range(number_of_plans)
         ]
-        retrieved_plans = list(self.plan_repository.get_active_plans())
+        retrieved_plans = list(self.plan_repository.get_plans().that_are_active())
         assert len(retrieved_plans) == number_of_plans
         for plan in list_of_plans:
             assert plan in retrieved_plans
 
     def test_plans_that_were_set_to_expired_dont_show_up_in_active_plans(self) -> None:
         plan = self.plan_generator.create_plan(activation_date=datetime.min)
-        assert plan in list(self.plan_repository.get_active_plans())
+        assert plan in list(self.plan_repository.get_plans().that_are_active())
         self.plan_repository.set_plan_as_expired(plan)
-        assert plan not in list(self.plan_repository.get_active_plans())
+        assert plan not in list(self.plan_repository.get_plans().that_are_active())
 
     def test_that_plan_gets_hidden(self) -> None:
         plan = self.plan_generator.create_plan()
@@ -128,26 +128,6 @@ class PlanRepositoryTests(FlaskTestCase):
         assert plan_from_repo
         assert plan_from_repo.is_available == True
 
-    def test_correct_name_and_description_returned(self) -> None:
-        expected_name = "name 20220621"
-        expected_description = "description 20220621"
-        plan = self.plan_generator.create_plan(
-            product_name=expected_name, description=expected_description
-        )
-        plan_info = self.plan_repository.get_plan_name_and_description(plan.id)
-        assert plan_info.name == expected_name
-        assert plan_info.description == expected_description
-
-    def test_that_non_existing_plan_returns_no_planner_id(self) -> None:
-        self.plan_generator.create_plan()
-        nothing = self.plan_repository.get_planner_id(uuid4())
-        assert nothing is None
-
-    def test_that_correct_id_of_planning_company_gets_returned(self) -> None:
-        expected_plan = self.plan_generator.create_plan()
-        plan_id = self.plan_repository.get_planner_id(expected_plan.id)
-        assert plan_id == expected_plan.planner.id
-
     def test_cannot_create_plan_from_non_existing_draft(self) -> None:
         assert self.plan_repository.create_plan_from_draft(uuid4()) is None
 
@@ -171,7 +151,7 @@ class GetActivePlansTests(FlaskTestCase):
         self.company_generator = self.injector.get(CompanyGenerator)
         self.approve_plan_use_case = self.injector.get(ApprovePlanUseCase)
 
-    def test_active_plans_can_be_ordered_by_creation_date_in_descending_order(
+    def test_plans_can_be_ordered_by_creation_date_in_descending_order(
         self,
     ) -> None:
         activation_dates = [
@@ -187,7 +167,7 @@ class GetActivePlansTests(FlaskTestCase):
             plans.append(self.plan_generator.create_plan(activation_date=timestamp))
         self.datetime_service.unfreeze_time()
         retrieved_plans = list(
-            self.plan_repository.get_active_plans()
+            self.plan_repository.get_plans()
             .ordered_by_creation_date(ascending=False)
             .limit(3)
         )
@@ -196,39 +176,35 @@ class GetActivePlansTests(FlaskTestCase):
         assert retrieved_plans[1] == plans[2]
         assert retrieved_plans[2] == plans[4]
 
-    def test_that_active_plans_can_be_filtered_by_product_name(self) -> None:
+    def test_that_plans_can_be_filtered_by_product_name(self) -> None:
         expected_plan = self.plan_generator.create_plan(
             activation_date=datetime.min, product_name="Delivery of goods"
         )
         returned_plan = list(
-            self.plan_repository.get_active_plans().with_product_name_containing(
+            self.plan_repository.get_plans().with_product_name_containing(
                 "Delivery of goods"
             )
         )
         assert returned_plan
         assert returned_plan[0] == expected_plan
 
-    def test_that_active_plans_can_be_filtered_by_substrings_of_product_name(
+    def test_that_plans_can_be_filtered_by_substrings_of_product_name(
         self,
     ) -> None:
         expected_plan = self.plan_generator.create_plan(
             activation_date=datetime.min, product_name="Delivery of goods"
         )
         returned_plan = list(
-            self.plan_repository.get_active_plans().with_product_name_containing(
-                "very of go"
-            )
+            self.plan_repository.get_plans().with_product_name_containing("very of go")
         )
         assert returned_plan
         assert returned_plan[0] == expected_plan
 
-    def test_that_query_active_plans_by_substring_of_plan_id_returns_plan(self) -> None:
+    def test_that_query_plans_by_substring_of_plan_id_returns_plan(self) -> None:
         expected_plan = self.plan_generator.create_plan(activation_date=datetime.min)
         expected_plan_id = expected_plan.id
         query = str(expected_plan_id)[3:8]
-        returned_plan = list(
-            self.plan_repository.get_active_plans().with_id_containing(query)
-        )
+        returned_plan = list(self.plan_repository.get_plans().with_id_containing(query))
         assert returned_plan
         assert returned_plan[0] == expected_plan
 
@@ -306,11 +282,33 @@ class GetAllPlans(FlaskTestCase):
         self.plan_generator.create_plan(planner=planner)
         assert self.plan_repository.get_plans().planned_by(planner.id)
 
+    def test_can_filter_plans_by_multiple_planners(self) -> None:
+        planner_1 = self.company_generator.create_company_entity()
+        planner_2 = self.company_generator.create_company_entity()
+        self.plan_generator.create_plan()
+        self.plan_generator.create_plan(planner=planner_1)
+        self.plan_generator.create_plan(planner=planner_2)
+        assert (
+            len(self.plan_repository.get_plans().planned_by(planner_1.id, planner_2.id))
+            == 2
+        )
+
     def test_can_get_plan_by_its_id(self) -> None:
         expected_plan = self.plan_generator.create_plan()
         assert expected_plan in self.plan_repository.get_plans().with_id(
             expected_plan.id
         )
+
+    def test_can_filter_plans_by_multiple_ids(self) -> None:
+        expected_plan_1 = self.plan_generator.create_plan()
+        expected_plan_2 = self.plan_generator.create_plan()
+        other_plan = self.plan_generator.create_plan()
+        query = self.plan_repository.get_plans().with_id(
+            expected_plan_1.id, expected_plan_2.id
+        )
+        assert expected_plan_1 in query
+        assert expected_plan_2 in query
+        assert other_plan not in query
 
     def test_nothing_is_returned_if_plan_with_specified_uuid_is_not_present(
         self,
@@ -386,3 +384,91 @@ class GetAllPlans(FlaskTestCase):
         assert len(cooperating_plans) == 2
         assert plan1.id in [p.id for p in cooperating_plans]
         assert plan2.id in [p.id for p in cooperating_plans]
+
+    def test_can_filter_plans_that_are_part_of_any_cooperation(self) -> None:
+        cooperation = self.cooperation_generator.create_cooperation()
+        self.plan_generator.create_plan(cooperation=cooperation)
+        plans = self.plan_repository.get_plans().that_are_part_of_cooperation()
+        assert plans
+
+    def test_can_filter_plans_from_multiple_cooperations(self) -> None:
+        cooperation1 = self.cooperation_generator.create_cooperation()
+        cooperation2 = self.cooperation_generator.create_cooperation()
+        self.plan_generator.create_plan(cooperation=cooperation1)
+        self.plan_generator.create_plan(cooperation=cooperation2)
+        plans = self.plan_repository.get_plans().that_are_part_of_cooperation(
+            cooperation1.id, cooperation2.id
+        )
+        assert len(plans) == 2
+
+    def test_correct_plans_in_cooperation_returned(self) -> None:
+        coop = self.cooperation_generator.create_cooperation()
+        plan1 = self.plan_generator.create_plan(cooperation=coop)
+        plan2 = self.plan_generator.create_plan(cooperation=coop)
+        plan3 = self.plan_generator.create_plan(requested_cooperation=None)
+        plans = self.plan_repository.get_plans().that_are_part_of_cooperation(coop.id)
+        assert len(plans) == 2
+        assert plans.with_id(plan1.id)
+        assert plans.with_id(plan2.id)
+        assert not plans.with_id(plan3.id)
+
+    def test_nothing_returned_when_no_plans_in_cooperation(self) -> None:
+        coop = self.cooperation_generator.create_cooperation()
+        self.plan_generator.create_plan(requested_cooperation=None)
+        plans = self.plan_repository.get_plans().that_are_part_of_cooperation(coop.id)
+        assert len(plans) == 0
+
+    def test_correct_inbound_requests_are_returned(self) -> None:
+        coordinator = self.company_generator.create_company_entity()
+        coop = self.cooperation_generator.create_cooperation(coordinator=coordinator)
+        requesting_plan1 = self.plan_generator.create_plan(requested_cooperation=coop)
+        requesting_plan2 = self.plan_generator.create_plan(requested_cooperation=coop)
+        other_coop = self.cooperation_generator.create_cooperation()
+        self.plan_generator.create_plan(requested_cooperation=other_coop)
+        inbound_requests = (
+            self.plan_repository.get_plans().that_request_cooperation_with_coordinator(
+                coordinator.id
+            )
+        )
+        assert len(inbound_requests) == 2
+        assert requesting_plan1.id in map(lambda p: p.id, inbound_requests)
+        assert requesting_plan2.id in map(lambda p: p.id, inbound_requests)
+
+    def test_possible_to_add_and_to_remove_plan_to_cooperation(self) -> None:
+        cooperation = self.cooperation_generator.create_cooperation()
+        plan = self.plan_generator.create_plan()
+
+        self.plan_repository.get_plans().with_id(plan.id).set_cooperation(
+            cooperation.id
+        )
+        plan_from_orm = self.plan_repository.get_plans().with_id(plan.id).first()
+        assert plan_from_orm
+        assert plan_from_orm.cooperation == cooperation.id
+
+        self.plan_repository.get_plans().with_id(plan.id).set_cooperation(None)
+        plan_from_orm = self.plan_repository.get_plans().with_id(plan.id).first()
+        assert plan_from_orm
+        assert plan_from_orm.cooperation is None
+
+    def test_possible_to_set_and_unset_requested_cooperation_attribute(self):
+        cooperation = self.cooperation_generator.create_cooperation()
+        plan = self.plan_generator.create_plan()
+        plan_result = self.plan_repository.get_plans().with_id(plan.id)
+        plan_result.set_requested_cooperation(cooperation.id)
+        assert plan_result.that_request_cooperation_with_coordinator()
+        plan_result.set_requested_cooperation(None)
+        assert not plan_result.that_request_cooperation_with_coordinator()
+
+    def test_can_set_approval_date(self) -> None:
+        plan = self.plan_generator.create_plan()
+        plans = self.plan_repository.get_plans().with_id(plan.id)
+        expected_approval_date = datetime(2000, 3, 2)
+        assert plans.set_approval_date(expected_approval_date)
+        assert all(plan.approval_date == expected_approval_date for plan in plans)
+
+    def test_can_set_approval_reason(self) -> None:
+        plan = self.plan_generator.create_plan()
+        plans = self.plan_repository.get_plans().with_id(plan.id)
+        expected_approval_reason = "test approval reason"
+        assert plans.set_approval_reason(expected_approval_reason)
+        assert all(plan.approval_reason == expected_approval_reason for plan in plans)

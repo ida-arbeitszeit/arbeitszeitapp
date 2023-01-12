@@ -7,8 +7,8 @@ from uuid import UUID
 from injector import inject
 
 from arbeitszeit.entities import Plan
-from arbeitszeit.price_calculator import calculate_price
-from arbeitszeit.repositories import PlanRepository
+from arbeitszeit.price_calculator import PriceCalculator
+from arbeitszeit.repositories import CompanyRepository, PlanRepository
 
 
 @dataclass
@@ -40,20 +40,18 @@ class PlanSummary:
 @dataclass
 class PlanSummaryService:
     plan_repository: PlanRepository
+    company_repository: CompanyRepository
+    price_calculator: PriceCalculator
 
     def get_summary_from_plan(self, plan: Plan) -> PlanSummary:
-        price_per_unit = calculate_price(
-            list(
-                self.plan_repository.get_plans().that_are_in_same_cooperation_as(
-                    plan.id
-                )
-            )
-        )
+        price_per_unit = self.price_calculator.calculate_cooperative_price(plan)
+        planner = self.company_repository.get_companies().with_id(plan.planner).first()
+        assert planner
         return PlanSummary(
             plan_id=plan.id,
             is_active=plan.is_active,
-            planner_id=plan.planner.id,
-            planner_name=plan.planner.name,
+            planner_id=planner.id,
+            planner_name=planner.name,
             product_name=plan.prd_name,
             description=plan.description,
             timeframe=plan.timeframe,

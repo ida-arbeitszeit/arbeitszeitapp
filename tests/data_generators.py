@@ -24,7 +24,6 @@ from arbeitszeit.entities import (
     ProductionCosts,
     Purchase,
     PurposesOfPurchases,
-    SocialAccounting,
     Transaction,
 )
 from arbeitszeit.repositories import (
@@ -32,7 +31,6 @@ from arbeitszeit.repositories import (
     CompanyRepository,
     CooperationRepository,
     MemberRepository,
-    PlanCooperationRepository,
     PlanDraftRepository,
     PlanRepository,
     PurchaseRepository,
@@ -222,20 +220,6 @@ class CompanyGenerator:
 
 @inject
 @dataclass
-class SocialAccountingGenerator:
-    account_generator: AccountGenerator
-
-    def create_social_accounting(self) -> SocialAccounting:
-        return SocialAccounting(
-            id=uuid4(),
-            account=self.account_generator.create_account(
-                account_type=AccountTypes.accounting
-            ),
-        )
-
-
-@inject
-@dataclass
 class AccountGenerator:
     account_repository: AccountRepository
 
@@ -315,14 +299,15 @@ class PlanGenerator:
         if activation_date:
             self.plan_repository.activate_plan(plan, activation_date)
         if requested_cooperation:
-            self.request_cooperation(
+            request_cooperation_response = self.request_cooperation(
                 RequestCooperationRequest(
-                    plan.planner.id, plan.id, requested_cooperation.id
+                    plan.planner, plan.id, requested_cooperation.id
                 )
             )
+            assert not request_cooperation_response.is_rejected
         if cooperation:
             self.request_cooperation(
-                RequestCooperationRequest(plan.planner.id, plan.id, cooperation.id)
+                RequestCooperationRequest(plan.planner, plan.id, cooperation.id)
             )
             self.accept_cooperation(
                 AcceptCooperationRequest(
@@ -452,8 +437,8 @@ class TransactionGenerator:
         self,
         sending_account_type=AccountTypes.p,
         receiving_account_type=AccountTypes.prd,
-        sending_account=None,
-        receiving_account=None,
+        sending_account: Optional[UUID] = None,
+        receiving_account: Optional[UUID] = None,
         amount_sent=None,
         amount_received=None,
         purpose=None,
@@ -462,11 +447,11 @@ class TransactionGenerator:
         if sending_account is None:
             sending_account = self.account_generator.create_account(
                 account_type=sending_account_type
-            )
+            ).id
         if receiving_account is None:
             receiving_account = self.account_generator.create_account(
                 account_type=receiving_account_type
-            )
+            ).id
         if amount_sent is None:
             amount_sent = Decimal(10)
         if amount_received is None:
@@ -491,7 +476,7 @@ class CooperationGenerator:
     cooperation_repository: CooperationRepository
     datetime_service: FakeDatetimeService
     company_generator: CompanyGenerator
-    plan_cooperation_repository: PlanCooperationRepository
+    plan_repository: PlanRepository
 
     def create_cooperation(
         self,
@@ -510,10 +495,11 @@ class CooperationGenerator:
             coordinator=coordinator,
         )
         if plans is not None:
-            for plan in plans:
-                self.plan_cooperation_repository.add_plan_to_cooperation(
-                    plan.id, cooperation.id
-                )
+            assert (
+                self.plan_repository.get_plans()
+                .with_id(*[plan.id for plan in plans])
+                .set_cooperation(cooperation.id)
+            )
         return cooperation
 
 
