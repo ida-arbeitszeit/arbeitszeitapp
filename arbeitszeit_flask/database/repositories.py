@@ -376,15 +376,9 @@ class TransactionQueryResult(FlaskQueryResult[entities.Transaction]):
 
     def where_sender_is_social_accounting(self) -> TransactionQueryResult:
         return self._with_modified_query(
-            lambda query: self.query.filter(
-                models.Transaction.sending_account.in_(
-                    models.Account.query.filter(
-                        models.Account.account_owner_social_accounting != None
-                    )
-                    .with_entities(models.Account.id)
-                    .subquery()
-                    .select()
-                )
+            lambda query: self.query.join(
+                models.SocialAccounting,
+                models.SocialAccounting.account == models.Transaction.sending_account,
             )
         )
 
@@ -451,7 +445,7 @@ class MemberRepository(repositories.MemberRepository):
         return entities.Member(
             id=UUID(orm_object.id),
             name=orm_object.name,
-            account=UUID(orm_object.account.id),
+            account=UUID(orm_object.account),
             email=orm_object.user.email,
             registered_on=orm_object.registered_on,
             confirmed_on=orm_object.confirmed_on,
@@ -469,17 +463,15 @@ class MemberRepository(repositories.MemberRepository):
         account: entities.Account,
         registered_on: datetime,
     ) -> entities.Member:
-        orm_account = self.account_repository.object_to_orm(account)
         user_orm = self._get_or_create_user(email, password)
         orm_member = Member(
             id=str(uuid4()),
             user=user_orm,
             name=name,
-            account=orm_account,
+            account=str(account.id),
             registered_on=registered_on,
             confirmed_on=None,
         )
-        orm_account.account_owner_member = orm_member.id
         self.db.session.add(orm_member)
         return self.object_from_orm(orm_member)
 
@@ -706,29 +698,45 @@ class AccountOwnerRepository(repositories.AccountOwnerRepository):
     def get_account_owner(
         self, account: entities.Account
     ) -> Union[entities.Member, entities.Company, entities.SocialAccounting]:
+        account_id = str(account.id)
         account_owner: Union[
-            entities.Member, entities.Company, entities.SocialAccounting
-        ]
-        account_orm = self.account_repository.object_to_orm(account)
-        if account_orm.account_owner_member:
-            account_owner = self.member_repository.object_from_orm(account_orm.member)
-        elif account_orm.account_owner_social_accounting:
-            account_owner = self.social_accounting_repository.object_from_orm(
-                account_orm.social_accounting
-            )
-        else:
-            account_owner = self.company_repository.object_from_orm(
-                models.Company.query.filter(
-                    or_(
-                        models.Company.p_account == account_orm.id,
-                        models.Company.r_account == account_orm.id,
-                        models.Company.a_account == account_orm.id,
-                        models.Company.prd_account == account_orm.id,
-                    )
-                ).first()
-            )
+            entities.Member, entities.Company, entities.SocialAccounting, None
+        ] = (
+            self._get_account_owner_company(account_id)
+            or self._get_account_owner_member(account_id)
+            or self._get_account_owner_social_accounting(account_id)
+        )
         assert account_owner
         return account_owner
+
+    def _get_account_owner_member(self, account_id: str) -> Optional[entities.Member]:
+        model = models.Member.query.filter(models.Member.account == account_id).first()
+        if not model:
+            return None
+        return self.member_repository.object_from_orm(model)
+
+    def _get_account_owner_social_accounting(
+        self, account_id: str
+    ) -> Optional[entities.SocialAccounting]:
+        model = models.SocialAccounting.query.filter(
+            models.SocialAccounting.account == account_id
+        ).first()
+        if not model:
+            return None
+        return self.social_accounting_repository.object_from_orm(model)
+
+    def _get_account_owner_company(self, account_id: str) -> Optional[entities.Company]:
+        model = models.Company.query.filter(
+            or_(
+                models.Company.p_account == account_id,
+                models.Company.r_account == account_id,
+                models.Company.a_account == account_id,
+                models.Company.prd_account == account_id,
+            )
+        ).first()
+        if not model:
+            return None
+        return self.company_repository.object_from_orm(model)
 
 
 @inject
@@ -740,12 +748,9 @@ class AccountingRepository:
     def object_from_orm(
         self, accounting_orm: SocialAccounting
     ) -> entities.SocialAccounting:
-        accounting_account_orm = accounting_orm.account
-        accounting_account = self.account_repository.object_from_orm(
-            accounting_account_orm
-        )
+        account = self.account_repository.get_by_id(UUID(accounting_orm.account))
         return entities.SocialAccounting(
-            account=accounting_account,
+            account=account,
             id=UUID(accounting_orm.id),
         )
 
@@ -753,7 +758,7 @@ class AccountingRepository:
         return self.object_from_orm(self.get_or_create_social_accounting_orm())
 
     def get_or_create_social_accounting_orm(self) -> SocialAccounting:
-        social_accounting = SocialAccounting.query.first()
+        social_accounting = models.SocialAccounting.query.first()
         if not social_accounting:
             social_accounting = SocialAccounting(
                 id=str(uuid4()),
@@ -761,7 +766,7 @@ class AccountingRepository:
             account = self.account_repository.create_account(
                 entities.AccountTypes.accounting
             )
-            social_accounting.account = self.account_repository.object_to_orm(account)
+            social_accounting.account = str(account.id)
             self.db.session.add(social_accounting, account)
         return social_accounting
 
