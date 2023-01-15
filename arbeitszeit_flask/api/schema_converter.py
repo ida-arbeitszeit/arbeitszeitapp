@@ -1,11 +1,16 @@
 from typing import Any, Dict, Union
 
-from flask_restx import Model, Namespace, fields
+from flask_restx import Model, fields
 
-from arbeitszeit_web.api_presenters.interfaces import JsonDict, JsonString, JsonValue
+from arbeitszeit_web.api_presenters.interfaces import (
+    JsonDict,
+    JsonString,
+    JsonValue,
+    Namespace,
+)
 
 
-def register(schema: JsonDict, namespace: Namespace) -> Model:
+def _register(schema: JsonDict, namespace: Namespace) -> Model:
     assert schema.schema_name
     model = {
         key: json_schema_to_flaskx(schema=value, namespace=namespace)
@@ -15,7 +20,7 @@ def register(schema: JsonDict, namespace: Namespace) -> Model:
     return result
 
 
-def register_as_nested(schema: JsonDict, namespace: Namespace) -> Model:
+def _register_as_nested(schema: JsonDict, namespace: Namespace) -> Model:
     assert schema.schema_name
     assert schema.as_list
     model = {
@@ -40,12 +45,11 @@ def json_schema_to_flaskx(
             return result
         else:
             if schema.as_list:
-                model = register_as_nested(schema, namespace)
+                model = _register_as_nested(schema, namespace)
                 return model
             else:
-                model = register(schema, namespace)
+                model = _register(schema, namespace)
                 return model
-    elif isinstance(schema, JsonString):
-        return fields.String
     else:
-        raise ValueError()
+        assert isinstance(schema, JsonString)
+        return fields.String

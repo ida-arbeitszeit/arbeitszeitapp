@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, Optional, Protocol, Union
+from typing import Any, Dict, Optional, Protocol, Union
 
 JsonValue = Union["JsonDict", "JsonString"]
 
@@ -19,6 +19,14 @@ class JsonDict:
 @dataclass
 class JsonString:
     pass
+
+
+class Namespace(Protocol):
+    def __init__(self, name: str, description: str) -> None:
+        ...
+
+    def model(self, name: str, model: Any) -> Any:
+        ...
 
 
 class ApiPresenter(Protocol):
