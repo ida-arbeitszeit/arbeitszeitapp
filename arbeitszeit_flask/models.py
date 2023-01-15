@@ -26,10 +26,7 @@ class User(db.Model):
 
 class SocialAccounting(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
-
-    account = db.relationship(
-        "Account", uselist=False, lazy=True, backref="social_accounting"
-    )
+    account = db.Column(db.ForeignKey("account.id"), nullable=False)
 
 
 # Association table Company - Member
@@ -46,8 +43,7 @@ class Member(UserMixin, db.Model):
     name = db.Column(db.String(1000), nullable=False)
     registered_on = db.Column(db.DateTime, nullable=False)
     confirmed_on = db.Column(db.DateTime, nullable=True)
-
-    account = db.relationship("Account", uselist=False, lazy=True, backref="member")
+    account = db.Column(db.ForeignKey("account.id"), nullable=False)
     purchases = db.relationship("Purchase", lazy="dynamic")
     user = db.relationship("User", lazy=True, uselist=False, backref="member")
 
@@ -125,6 +121,7 @@ class Plan(db.Model):
     )
     cooperation = db.Column(db.String, db.ForeignKey("cooperation.id"), nullable=True)
     hidden_by_user = db.Column(db.Boolean, nullable=False, default=False)
+
     review = db.relationship("PlanReview", uselist=False, back_populates="plan")
 
 
@@ -133,6 +130,7 @@ class PlanReview(db.Model):
     approval_date = db.Column(db.DateTime, nullable=True, default=None)
     approval_reason = db.Column(db.String(1000), nullable=True, default=None)
     plan_id = db.Column(db.String, db.ForeignKey("plan.id"), nullable=False)
+
     plan = db.relationship("Plan", back_populates="review")
 
     def __repr__(self) -> str:
@@ -150,13 +148,8 @@ class AccountTypes(Enum):
 
 class Account(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
-    account_owner_social_accounting = db.Column(
-        db.String, db.ForeignKey("social_accounting.id"), nullable=True
-    )
-    account_owner_member = db.Column(
-        db.String, db.ForeignKey("member.id"), nullable=True
-    )
     account_type = db.Column(db.Enum(AccountTypes), nullable=False)
+
     transactions_sent = db.relationship(
         "Transaction",
         foreign_keys="Transaction.sending_account",
