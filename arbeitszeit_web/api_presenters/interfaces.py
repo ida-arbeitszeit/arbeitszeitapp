@@ -1,7 +1,7 @@
 from dataclasses import dataclass
-from typing import Dict, Optional, Protocol, TypeAlias, Union
+from typing import Dict, Optional, Protocol, Union
 
-JsonValue: TypeAlias = "Union[JsonDict, JsonString]"
+JsonValue = Union["JsonDict", "JsonString"]
 
 
 @dataclass
