@@ -10,6 +10,7 @@ from tests.data_generators import (
 )
 from tests.datetime_service import FakeDatetimeService
 
+from .balance_checker import BalanceChecker
 from .dependency_injection import get_dependency_injector
 from .price_checker import PriceChecker
 
@@ -61,3 +62,4 @@ class BaseTestCase(TestCase):
     coop_generator = _lazy_property(CooperationGenerator)
     datetime_service = _lazy_property(FakeDatetimeService)
     price_checker = _lazy_property(PriceChecker)
+    balance_checker = _lazy_property(BalanceChecker)

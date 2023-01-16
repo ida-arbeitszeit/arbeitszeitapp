@@ -58,11 +58,11 @@ class UseCaseTester(BaseTestCase):
             )
         )
         assert (
-            self.account_repository.get_account_balance(company.work_account)
+            self.balance_checker.get_company_account_balances(company.id).a_account
             == -amount_to_transfer
         )
         assert (
-            self.account_repository.get_account_balance(worker.account)
+            self.balance_checker.get_member_account_balance(worker.id)
             == amount_to_transfer
         )
 

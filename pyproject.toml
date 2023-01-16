@@ -48,7 +48,12 @@ exclude = '''
 '''
 
 [[tool.mypy.overrides]]
-module = "arbeitszeit,arbeitszeit_web,arbeitszeit_flask,tests"
+module = [
+    "arbeitszeit",
+    "arbeitszeit_web",
+    "arbeitszeit_flask",
+    "tests"
+]
 allow_untyped_defs = false
 
 [[tool.mypy.overrides]]
