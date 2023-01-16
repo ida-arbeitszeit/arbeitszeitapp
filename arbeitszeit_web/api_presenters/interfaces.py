@@ -25,6 +25,10 @@ class Namespace(Protocol):
     def __init__(self, name: str, description: str) -> None:
         ...
 
+    @property
+    def models(self) -> Dict[str, Any]:
+        ...
+
     def model(self, name: str, model: Any) -> Any:
         ...
 
