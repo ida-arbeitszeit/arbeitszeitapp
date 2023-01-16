@@ -5,7 +5,7 @@ from tests.data_generators import CompanyGenerator
 from tests.token import TokenDeliveryService
 
 from .dependency_injection import get_dependency_injector
-from .repositories import AccountRepository, CompanyRepository
+from .repositories import CompanyRepository
 
 DEFAULT = dict(
     email="test@cp.org",
@@ -18,7 +18,6 @@ class RegisterCompanyTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.use_case = self.injector.get(RegisterCompany)
-        self.account_repository = self.injector.get(AccountRepository)
         self.company_repo = self.injector.get(CompanyRepository)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.token_delivery = self.injector.get(TokenDeliveryService)

@@ -13,19 +13,13 @@ from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsRespo
 from tests.data_generators import CooperationGenerator
 
 from .base_test_case import BaseTestCase
-from .repositories import (
-    AccountRepository,
-    CompanyRepository,
-    PurchaseRepository,
-    TransactionRepository,
-)
+from .repositories import CompanyRepository, PurchaseRepository, TransactionRepository
 
 
 class PayMeansOfProductionTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.pay_means_of_production = self.injector.get(PayMeansOfProduction)
-        self.account_repository = self.injector.get(AccountRepository)
         self.cooperation_generator = self.injector.get(CooperationGenerator)
         self.purchase_repository = self.injector.get(PurchaseRepository)
         self.transaction_repository = self.injector.get(TransactionRepository)

@@ -4,7 +4,6 @@ from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from tests.token import TokenDeliveryService
 
 from .base_test_case import BaseTestCase
-from .repositories import AccountRepository
 
 DEFAULT = dict(
     email="test@cp.org",
@@ -17,7 +16,6 @@ class RegisterMemberTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.use_case = self.injector.get(RegisterMemberUseCase)
-        self.account_repository = self.injector.get(AccountRepository)
         self.token_delivery = self.injector.get(TokenDeliveryService)
         self.login_use_case = self.injector.get(LogInMemberUseCase)
         self.get_member_dashboard = self.injector.get(GetMemberDashboard)
