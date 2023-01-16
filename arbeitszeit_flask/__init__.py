@@ -104,7 +104,7 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
 
         # register blueprints
         from . import accountant, company, member
-        from .api import routes as api_routes
+        from .api import blueprint as api_blueprint
         from .auth import routes as auth_routes
         from .plots import routes as plots_routes
 
@@ -113,7 +113,7 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
         app.register_blueprint(company.blueprint.main_company)
         app.register_blueprint(member.blueprint.main_member)
         app.register_blueprint(accountant.blueprint.main_accountant)
-        app.register_blueprint(api_routes.api)
+        app.register_blueprint(api_blueprint)
 
         if app.config["DEBUG_DETAILS"] == True:
             show_profile_info(app)
