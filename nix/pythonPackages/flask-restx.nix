@@ -3,12 +3,12 @@
 
 buildPythonPackage rec {
   pname = "flask-restx";
-  version = "1.0.3";
+  version = "1.0.5";
   format = "setuptools";
 
   src = fetchPypi {
     inherit pname version;
-    sha256 = "sha256-X9rNIwMdJf9GQvFBpHp/qHfwfj4mEJnMxevE/CVN6Ew=";
+    sha256 = "sha256-4j3E/ySGnJL6pxm3pYvhID7XQSdf8yyfA9CrVu0BVGw=";
   };
 
   propagatedBuildInputs = [ flask aniso8601 jsonschema pytz werkzeug ];

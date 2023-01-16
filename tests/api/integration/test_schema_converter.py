@@ -3,7 +3,10 @@ from unittest import TestCase
 
 from flask_restx import fields
 
-from arbeitszeit_flask.api.schema_converter import json_schema_to_flaskx
+from arbeitszeit_flask.api.schema_converter import (
+    ModelWithSameNameExists,
+    json_schema_to_flaskx,
+)
 from arbeitszeit_web.api_presenters.interfaces import JsonDict, JsonString
 from tests.api.implementations import NamespaceImpl
 
@@ -78,3 +81,14 @@ class SchemaConversionTests(TestCase):
         self.convert(model, self.namespace)
         registered_model = self.namespace.models["SchemaName"]
         self.assertEqual(registered_model["item_name"].model, fields.String)
+
+    def test_raise_exception_when_two_models_with_same_name_are_registered_on_same_namespace(
+        self,
+    ) -> None:
+        model1 = JsonDict(members={"item_name": JsonString()}, schema_name="SchemaName")
+        model2 = JsonDict(
+            members={"item_name2": JsonString()}, schema_name="SchemaName"
+        )
+        self.convert(model1, self.namespace)
+        with self.assertRaises(ModelWithSameNameExists):
+            self.convert(model2, self.namespace)
