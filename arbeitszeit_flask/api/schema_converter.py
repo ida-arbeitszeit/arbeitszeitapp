@@ -10,6 +10,10 @@ from arbeitszeit_web.api_presenters.interfaces import (
 )
 
 
+class ModelWithSameNameExists(Exception):
+    pass
+
+
 def _register(schema: JsonDict, namespace: Namespace) -> Model:
     assert schema.schema_name
     model = {
@@ -33,6 +37,21 @@ def _register_as_nested(schema: JsonDict, namespace: Namespace) -> Model:
     return result
 
 
+def _prevent_overriding_of_model(schema: JsonDict, namespace: Namespace) -> None:
+    """
+    Ensure that a model previously registered on namespace does not get overridden.
+    """
+    assert schema.schema_name
+    try:
+        namespace.models[schema.schema_name]
+    except KeyError:
+        pass
+    else:
+        raise ModelWithSameNameExists(
+            f"Model with name {schema.schema_name} exists already."
+        )
+
+
 def json_schema_to_flaskx(
     schema: JsonValue, namespace: Namespace
 ) -> Union[Model, Dict[str, Any], type[fields.String]]:
@@ -44,6 +63,7 @@ def json_schema_to_flaskx(
             }
             return result
         else:
+            _prevent_overriding_of_model(schema, namespace)
             if schema.as_list:
                 model = _register_as_nested(schema, namespace)
                 return model
