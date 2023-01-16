@@ -14,12 +14,7 @@ from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.data_generators import TransactionGenerator
 
 from .base_test_case import BaseTestCase
-from .repositories import (
-    AccountRepository,
-    CompanyRepository,
-    PurchaseRepository,
-    TransactionRepository,
-)
+from .repositories import CompanyRepository, PurchaseRepository, TransactionRepository
 
 
 class PayConsumerProductTests(BaseTestCase):
@@ -28,7 +23,6 @@ class PayConsumerProductTests(BaseTestCase):
         self.transaction_generator = self.injector.get(TransactionGenerator)
         self.pay_consumer_product = self.injector.get(PayConsumerProduct)
         self.transaction_repository = self.injector.get(TransactionRepository)
-        self.account_repository = self.injector.get(AccountRepository)
         self.purchase_repository = self.injector.get(PurchaseRepository)
         self.buyer = self.member_generator.create_member_entity()
         self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
@@ -72,8 +66,7 @@ class PayConsumerProductTests(BaseTestCase):
         plan = self.plan_generator.create_plan(
             activation_date=self.datetime_service.now(),
         )
-        account = self.buyer.account
-        assert self.account_repository.get_account_balance(account) == 0
+        assert self.balance_checker.get_member_account_balance(self.buyer.id) == 0
         self.control_thresholds.set_allowed_overdraw_of_member_account(0)
 
         response = self.pay_consumer_product.pay_consumer_product(
@@ -94,8 +87,7 @@ class PayConsumerProductTests(BaseTestCase):
         transactions_before_payment = len(
             self.transaction_repository.get_transactions()
         )
-        account = self.buyer.account
-        assert self.account_repository.get_account_balance(account) == 0
+        assert self.balance_checker.get_member_account_balance(self.buyer.id) == 0
         self.control_thresholds.set_allowed_overdraw_of_member_account(0)
 
         self.pay_consumer_product.pay_consumer_product(
@@ -112,9 +104,7 @@ class PayConsumerProductTests(BaseTestCase):
         plan = self.plan_generator.create_plan(
             activation_date=self.datetime_service.now(),
         )
-
-        account = self.buyer.account
-        assert self.account_repository.get_account_balance(account) == 0
+        assert self.balance_checker.get_member_account_balance(self.buyer.id) == 0
         self.control_thresholds.set_allowed_overdraw_of_member_account(0)
 
         self.pay_consumer_product.pay_consumer_product(
@@ -128,9 +118,10 @@ class PayConsumerProductTests(BaseTestCase):
         plan = self.plan_generator.create_plan(
             activation_date=self.datetime_service.now(), is_public_service=True
         )
-        account = self.buyer.account
         self.make_transaction_to_buyer_account(Decimal("-10"))
-        assert self.account_repository.get_account_balance(account) == Decimal("-10")
+        assert self.balance_checker.get_member_account_balance(
+            self.buyer.id
+        ) == Decimal("-10")
         self.control_thresholds.set_allowed_overdraw_of_member_account(0)
 
         response = self.pay_consumer_product.pay_consumer_product(
@@ -149,9 +140,7 @@ class PayConsumerProductTests(BaseTestCase):
             ),
             amount=1,
         )
-
-        account = self.buyer.account
-        assert self.account_repository.get_account_balance(account) == 0
+        assert self.balance_checker.get_member_account_balance(self.buyer.id) == 0
         self.control_thresholds.set_allowed_overdraw_of_member_account(9)
 
         response = self.pay_consumer_product.pay_consumer_product(
@@ -175,8 +164,7 @@ class PayConsumerProductTests(BaseTestCase):
             amount=1,
             cooperation=None,
         )
-        account = self.buyer.account
-        assert self.account_repository.get_account_balance(account) == 0
+        assert self.balance_checker.get_member_account_balance(self.buyer.id) == 0
         self.control_thresholds.set_allowed_overdraw_of_member_account(11)
 
         response = self.pay_consumer_product.pay_consumer_product(
@@ -234,15 +222,15 @@ class PayConsumerProductTests(BaseTestCase):
         costs = bought_pieces * self.price_checker.get_unit_price(plan.id)
 
         expected_balance = start_balance - costs
-        self.assertEqual(
-            self.account_repository.get_account_balance(self.buyer.account),
-            expected_balance,
+        assert (
+            self.balance_checker.get_member_account_balance(self.buyer.id)
+            == expected_balance
         )
         planner = self.company_repository.get_companies().with_id(plan.planner).first()
         assert planner
-        self.assertEqual(
-            self.account_repository.get_account_balance(planner.product_account),
-            Decimal("-9") + costs,
+        assert (
+            self.balance_checker.get_company_account_balances(planner.id).prd_account
+            == Decimal("-9") + costs
         )
 
     def test_that_correct_transaction_is_added_when_plan_is_public_service(
@@ -287,9 +275,9 @@ class PayConsumerProductTests(BaseTestCase):
         costs = pieces * self.price_checker.get_unit_price(plan.id)
         planner = self.company_repository.get_companies().with_id(plan.planner).first()
         assert planner
-        assert self.account_repository.get_account_balance(self.buyer.account) == -costs
+        assert self.balance_checker.get_member_account_balance(self.buyer.id) == -costs
         assert (
-            self.account_repository.get_account_balance(planner.product_account)
+            self.balance_checker.get_company_account_balances(planner.id).prd_account
             == costs
         )
 

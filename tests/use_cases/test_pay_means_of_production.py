@@ -13,19 +13,13 @@ from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsRespo
 from tests.data_generators import CooperationGenerator
 
 from .base_test_case import BaseTestCase
-from .repositories import (
-    AccountRepository,
-    CompanyRepository,
-    PurchaseRepository,
-    TransactionRepository,
-)
+from .repositories import CompanyRepository, PurchaseRepository, TransactionRepository
 
 
 class PayMeansOfProductionTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.pay_means_of_production = self.injector.get(PayMeansOfProduction)
-        self.account_repository = self.injector.get(AccountRepository)
         self.cooperation_generator = self.injector.get(CooperationGenerator)
         self.purchase_repository = self.injector.get(PurchaseRepository)
         self.transaction_repository = self.injector.get(TransactionRepository)
@@ -100,7 +94,7 @@ class PayMeansOfProductionTests(BaseTestCase):
 
         price_total = pieces * self.price_checker.get_unit_price(plan.id)
         assert (
-            self.account_repository.get_account_balance(sender.means_account)
+            self.balance_checker.get_company_account_balances(sender.id).p_account
             == -price_total
         )
 
@@ -118,7 +112,7 @@ class PayMeansOfProductionTests(BaseTestCase):
 
         price_total = pieces * self.price_checker.get_unit_price(plan.id)
         assert (
-            self.account_repository.get_account_balance(sender.raw_material_account)
+            self.balance_checker.get_company_account_balances(sender.id).r_account
             == -price_total
         )
 
@@ -134,16 +128,15 @@ class PayMeansOfProductionTests(BaseTestCase):
         )
         purpose = PurposesOfPurchases.raw_materials
         pieces = 5
-        assert self.account_repository.get_account_balance(
-            self.get_product_account(plan.planner)
-        ) == Decimal("-3")
+        assert self.balance_checker.get_company_account_balances(
+            plan.planner
+        ).prd_account == Decimal("-3")
         self.pay_means_of_production(
             PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
         )
-
-        assert self.account_repository.get_account_balance(
-            self.get_product_account(plan.planner)
-        ) == Decimal("0")
+        assert self.balance_checker.get_company_account_balances(
+            plan.planner
+        ).prd_account == Decimal("0")
 
     def test_balance_of_seller_increased_correctly_when_plan_is_in_cooperation(
         self,
@@ -160,22 +153,18 @@ class PayMeansOfProductionTests(BaseTestCase):
             amount=200,
             cooperation=coop,
         )
-
         purpose = PurposesOfPurchases.raw_materials
         pieces = 5
-
-        balance_before_transaction = self.account_repository.get_account_balance(
-            self.get_product_account(plan.planner)
-        )
-
+        balance_before_transaction = self.balance_checker.get_company_account_balances(
+            plan.planner
+        ).prd_account
         self.pay_means_of_production(
             PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
         )
-
-        assert self.account_repository.get_account_balance(
-            self.get_product_account(plan.planner)
-        ) == balance_before_transaction + (
-            plan.production_costs.total_cost() / Decimal(plan.prd_amount) * 5
+        assert (
+            self.balance_checker.get_company_account_balances(plan.planner).prd_account
+            == balance_before_transaction
+            + self.price_checker.get_unit_cost(plan.id) * 5
         )
 
     def test_correct_transaction_added_if_means_of_production_were_paid(self) -> None:

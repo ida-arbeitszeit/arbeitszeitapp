@@ -144,11 +144,8 @@ class UseCaseTests(BaseTestCase):
         expected_payout_factor = 1
         expected_payout = expected_payout_factor * plan.production_costs.labour_cost / 5
         self.payout()
-
         assert (
-            self.account_repository.get_account_balance(
-                self.get_work_account(plan.planner)
-            )
+            self.balance_checker.get_company_account_balances(plan.planner).a_account
             == expected_payout
         )
 
@@ -164,9 +161,7 @@ class UseCaseTests(BaseTestCase):
         self.payout()
 
         assert (
-            self.account_repository.get_account_balance(
-                self.get_work_account(plan.planner)
-            )
+            self.balance_checker.get_company_account_balances(plan.planner).a_account
             == plan.production_costs.labour_cost
         )
 
@@ -201,15 +196,11 @@ class UseCaseTests(BaseTestCase):
         self.payout()
 
         assert (
-            self.account_repository.get_account_balance(
-                self.get_work_account(plan1.planner)
-            )
+            self.balance_checker.get_company_account_balances(plan1.planner).a_account
             == expected_payout1
         )
         assert (
-            self.account_repository.get_account_balance(
-                self.get_work_account(plan2.planner)
-            )
+            self.balance_checker.get_company_account_balances(plan2.planner).a_account
             == expected_payout2
         )
 
@@ -254,15 +245,11 @@ class UseCaseTests(BaseTestCase):
         self.payout()
 
         assert (
-            self.account_repository.get_account_balance(
-                self.get_work_account(plan1.planner)
-            )
+            self.balance_checker.get_company_account_balances(plan1.planner).a_account
             == expected_payout1
         )
         assert (
-            self.account_repository.get_account_balance(
-                self.get_work_account(plan2.planner)
-            )
+            self.balance_checker.get_company_account_balances(plan2.planner).a_account
             == expected_payout2
         )
 
@@ -288,11 +275,9 @@ class UseCaseTests(BaseTestCase):
         )
         self.payout()
 
-        self.assertEqual(
-            self.account_repository.get_account_balance(
-                self.get_work_account(plan1.planner)
-            ),
-            expected_payout1,
+        assert (
+            self.balance_checker.get_company_account_balances(plan1.planner).a_account
+            == expected_payout1
         )
 
     def test_that_wages_are_paid_out_twice_after_25_hours_when_plan_has_timeframe_of_3(

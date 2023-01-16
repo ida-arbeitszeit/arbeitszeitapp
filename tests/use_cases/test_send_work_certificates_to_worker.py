@@ -7,7 +7,7 @@ from arbeitszeit.use_cases import (
 )
 
 from .base_test_case import BaseTestCase
-from .repositories import AccountRepository, MemberRepository, TransactionRepository
+from .repositories import MemberRepository, TransactionRepository
 
 
 class UseCaseTester(BaseTestCase):
@@ -17,7 +17,6 @@ class UseCaseTester(BaseTestCase):
             SendWorkCertificatesToWorker
         )
         self.member_repository = self.injector.get(MemberRepository)
-        self.account_repository = self.injector.get(AccountRepository)
         self.transaction_repository = self.injector.get(TransactionRepository)
 
     def test_that_transfer_is_rejected_if_money_is_sent_to_worker_not_working_in_company(
@@ -58,11 +57,11 @@ class UseCaseTester(BaseTestCase):
             )
         )
         assert (
-            self.account_repository.get_account_balance(company.work_account)
+            self.balance_checker.get_company_account_balances(company.id).a_account
             == -amount_to_transfer
         )
         assert (
-            self.account_repository.get_account_balance(worker.account)
+            self.balance_checker.get_member_account_balance(worker.id)
             == amount_to_transfer
         )
 
