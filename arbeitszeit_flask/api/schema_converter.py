@@ -42,11 +42,7 @@ def _prevent_overriding_of_model(schema: JsonDict, namespace: Namespace) -> None
     Ensure that a model previously registered on namespace does not get overridden.
     """
     assert schema.schema_name
-    try:
-        namespace.models[schema.schema_name]
-    except KeyError:
-        pass
-    else:
+    if schema.schema_name in namespace.models:
         raise ModelWithSameNameExists(
             f"Model with name {schema.schema_name} exists already."
         )
