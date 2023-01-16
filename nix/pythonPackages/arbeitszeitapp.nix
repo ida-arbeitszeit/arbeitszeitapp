@@ -2,8 +2,8 @@
 
 # python packages
 , email_validator, flask, flask-babel, flask-talisman, flask_login, flask_mail
-, flask_migrate, flask_wtf, injector, is_safe_url, matplotlib, sphinx
-, flask-profiler }:
+, flask_migrate, flask-restx, flask_wtf, injector, is_safe_url, matplotlib
+, sphinx, flask-profiler }:
 buildPythonPackage {
   pname = "arbeitszeitapp";
   version = "0.0.0";
@@ -20,6 +20,7 @@ buildPythonPackage {
     flask_login
     flask_mail
     flask_migrate
+    flask-restx
     flask_wtf
     injector
     is_safe_url
