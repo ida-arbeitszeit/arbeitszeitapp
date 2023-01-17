@@ -253,7 +253,7 @@ class PlanGenerator:
         costs: Optional[ProductionCosts] = None,
         description="Beschreibung für Produkt A.",
         is_public_service: bool = False,
-        planner: Optional[Company] = None,
+        planner: Optional[Union[Company, UUID]] = None,
         product_name: str = "Produkt A",
         production_unit: str = "500 Gramm",
         timeframe: Optional[int] = None,
@@ -322,7 +322,7 @@ class PlanGenerator:
 
     def draft_plan(
         self,
-        planner: Optional[Company] = None,
+        planner: Optional[Union[Company, UUID]] = None,
         timeframe: Optional[int] = None,
         costs: Optional[ProductionCosts] = None,
         is_public_service: Optional[bool] = None,
@@ -344,7 +344,7 @@ class PlanGenerator:
         if costs is None:
             costs = ProductionCosts(Decimal(1), Decimal(1), Decimal(1))
         if planner is None:
-            planner = self.company_generator.create_company_entity()
+            planner = self.company_generator.create_company()
         if timeframe is None:
             timeframe = 14
         response = self.create_plan_draft_use_case(
@@ -356,7 +356,7 @@ class PlanGenerator:
                 description=description,
                 timeframe_in_days=timeframe,
                 is_public_service=is_public_service,
-                planner=planner.id,
+                planner=planner.id if isinstance(planner, Company) else planner,
             )
         )
         assert not response.is_rejected
