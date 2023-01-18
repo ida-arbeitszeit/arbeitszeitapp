@@ -11,15 +11,11 @@ from arbeitszeit_web.api_presenters.plans import ActivePlansPresenter
 
 namespace = Namespace("plans", "Plan related endpoints.")
 
-
-def register_api_presenter(presenter: ApiPresenter):
-    model = json_schema_to_flaskx(schema=presenter.get_schema(), namespace=namespace)
-    return namespace.marshal_with(model)
-
+model = json_schema_to_flaskx(schema=ActivePlansPresenter().get_schema(), namespace=namespace)
 
 @namespace.route("/active")
 class ListActivePlans(Resource):
-    @register_api_presenter(ActivePlansPresenter())
+    @namespace.marshal_with(model)
     @with_injection()
     def get(self, controller: QueryPlansApiController, query_plans: QueryPlans):
         """List active plans."""
