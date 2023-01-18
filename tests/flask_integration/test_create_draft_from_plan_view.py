@@ -12,7 +12,7 @@ class ViewTests(ViewTestCase):
 
     def test_can_create_render_creation_page_from_existing_plan(self) -> None:
         company = self.login_company()
-        plan = self.plan_generator.create_plan(planner=company)
+        plan = self.plan_generator.create_plan(planner=company.id)
         response = self.client.get(self._get_url(plan.id))
         self.assertEqual(response.status_code, 200)
 
@@ -23,7 +23,7 @@ class ViewTests(ViewTestCase):
 
     def test_get_400_when_posting_random_form_data(self) -> None:
         company = self.login_company()
-        plan = self.plan_generator.create_plan(planner=company)
+        plan = self.plan_generator.create_plan(planner=company.id)
         response = self.client.post(self._get_url(plan.id), data={"test": "1"})
         self.assertEqual(response.status_code, 400)
 

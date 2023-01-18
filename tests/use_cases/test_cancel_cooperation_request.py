@@ -27,9 +27,9 @@ def test_that_false_is_returned_when_plan_has_no_pending_requests(
     plan_generator: PlanGenerator,
     company_generator: CompanyGenerator,
 ):
-    company = company_generator.create_company_entity()
+    company = company_generator.create_company()
     plan = plan_generator.create_plan(planner=company)
-    response = use_case(CancelCooperationSolicitationRequest(company.id, plan.id))
+    response = use_case(CancelCooperationSolicitationRequest(company, plan.id))
     assert response == False
 
 
@@ -41,11 +41,11 @@ def test_that_true_is_returned_when_coop_request_gets_canceled(
     coop_generator: CooperationGenerator,
 ):
     coop = coop_generator.create_cooperation()
-    company = company_generator.create_company_entity()
+    company = company_generator.create_company()
     plan = plan_generator.create_plan(
         planner=company, activation_date=datetime.min, requested_cooperation=coop
     )
     assert plan.requested_cooperation is not None
-    response = use_case(CancelCooperationSolicitationRequest(company.id, plan.id))
+    response = use_case(CancelCooperationSolicitationRequest(company, plan.id))
     assert response == True
     assert plan.requested_cooperation is None

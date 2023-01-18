@@ -56,14 +56,17 @@ def test_returns_email(
 
 @injection_test
 def test_returns_register_date(
-    get_company_summary: GetCompanySummary, company_generator: CompanyGenerator
+    get_company_summary: GetCompanySummary,
+    company_generator: CompanyGenerator,
+    datetime_service: FakeDatetimeService,
 ):
-    company = company_generator.create_company_entity(
-        registered_on=datetime(2022, 1, 25)
-    )
-    response = get_company_summary(company.id)
+    expected_registration_date = datetime(2022, 1, 25)
+    datetime_service.freeze_time(expected_registration_date)
+    company = company_generator.create_company()
+    datetime_service.freeze_time(datetime(2022, 1, 26))
+    response = get_company_summary(company)
     assert response
-    assert response.registered_on == datetime(2022, 1, 25)
+    assert response.registered_on == expected_registration_date
 
 
 @injection_test
@@ -404,10 +407,10 @@ def test_returns_list_of_companys_plans_when_there_are_any(
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
 ):
-    company = company_generator.create_company_entity()
+    company = company_generator.create_company()
     plan_generator.create_plan(planner=company, activation_date=datetime.min)
     plan_generator.create_plan(planner=company, activation_date=None)
-    response = get_company_summary(company.id)
+    response = get_company_summary(company)
     assert response
     assert len(response.plan_details) == 2
 
@@ -419,7 +422,7 @@ def test_returns_list_of_companys_plans_in_descending_order(
     plan_generator: PlanGenerator,
     datetime_service: FakeDatetimeService,
 ):
-    company = company_generator.create_company_entity()
+    company = company_generator.create_company()
     datetime_service.freeze_time(datetime(2000, 1, 1))
     third = plan_generator.create_plan(planner=company)
     datetime_service.freeze_time(datetime_service.now() - timedelta(days=9))
@@ -427,7 +430,7 @@ def test_returns_list_of_companys_plans_in_descending_order(
     datetime_service.freeze_time(datetime_service.now() + timedelta(days=8))
     second = plan_generator.create_plan(planner=company)
     datetime_service.freeze_time(datetime(2000, 1, 2))
-    response = get_company_summary(company.id)
+    response = get_company_summary(company)
     assert response
     assert response.plan_details[0].id == third.id
     assert response.plan_details[1].id == second.id
@@ -440,13 +443,13 @@ def test_returns_correct_sales_volume_of_zero_if_plan_is_public(
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
 ):
-    company = company_generator.create_company_entity()
+    company = company_generator.create_company()
     plan_generator.create_plan(
         planner=company,
         is_public_service=True,
         costs=ProductionCosts(Decimal(2), Decimal(2), Decimal(2)),
     )
-    response = get_company_summary(company.id)
+    response = get_company_summary(company)
     assert response
     assert response.plan_details[0].sales_volume == 0
 
@@ -457,12 +460,12 @@ def test_returns_correct_sales_volume_if_plan_is_productive(
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
 ):
-    company = company_generator.create_company_entity()
+    company = company_generator.create_company()
     plan_generator.create_plan(
         planner=company,
         costs=ProductionCosts(Decimal(2), Decimal(2), Decimal(2)),
     )
-    response = get_company_summary(company.id)
+    response = get_company_summary(company)
     assert response
     assert response.plan_details[0].sales_volume == Decimal(6)
 
@@ -473,11 +476,11 @@ def test_returns_correct_sales_balance_if_plan_is_productive_and_no_transactions
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
 ):
-    company = company_generator.create_company_entity()
+    company = company_generator.create_company()
     plan_generator.create_plan(
         planner=company, costs=ProductionCosts(Decimal(1), Decimal(1), Decimal(1))
     )
-    response = get_company_summary(company.id)
+    response = get_company_summary(company)
     assert response
     assert response.plan_details[0].sales_balance == Decimal("-3")
 
@@ -491,7 +494,7 @@ def test_returns_correct_sales_balance_if_plan_is_productive_and_one_transaction
 ):
     company = company_generator.create_company_entity()
     plan = plan_generator.create_plan(
-        planner=company,
+        planner=company.id,
         costs=ProductionCosts(Decimal(1), Decimal(1), Decimal(1)),
     )
     transaction_generator.create_transaction(
@@ -513,7 +516,7 @@ def test_returns_correct_infinite_sales_deviation_if_plan_is_productive_with_cos
 ):
     company = company_generator.create_company_entity()
     plan = plan_generator.create_plan(
-        planner=company,
+        planner=company.id,
         costs=ProductionCosts(Decimal(0), Decimal(0), Decimal(0)),
     )
     transaction_generator.create_transaction(
@@ -535,7 +538,7 @@ def test_returns_correct_sales_deviation_of_100_if_plan_is_productive_with_costs
 ):
     company = company_generator.create_company_entity()
     plan = plan_generator.create_plan(
-        planner=company,
+        planner=company.id,
         costs=ProductionCosts(Decimal(5), Decimal(5), Decimal(0)),
     )
     transaction_generator.create_transaction(
@@ -555,12 +558,12 @@ def test_returns_correct_sales_deviation_of_100_if_plan_is_productive_with_costs
     plan_generator: PlanGenerator,
     transaction_generator: TransactionGenerator,
 ):
-    company = company_generator.create_company_entity()
+    company = company_generator.create_company()
     plan_generator.create_plan(
         planner=company,
         costs=ProductionCosts(Decimal(5), Decimal(5), Decimal(0)),
     )
-    response = get_company_summary(company.id)
+    response = get_company_summary(company)
     assert response
     assert response.plan_details[0].deviation_relative == Decimal(100)
 
@@ -574,7 +577,7 @@ def test_returns_correct_sales_deviation_of_0_if_plan_is_productive_with_costs_o
 ):
     company = company_generator.create_company_entity()
     plan = plan_generator.create_plan(
-        planner=company,
+        planner=company.id,
         costs=ProductionCosts(Decimal(5), Decimal(5), Decimal(0)),
     )
     transaction_generator.create_transaction(
@@ -596,7 +599,7 @@ def test_returns_correct_sales_deviation_of_infinite_if_plan_is_public_but_recei
 ):
     company = company_generator.create_company_entity()
     plan = plan_generator.create_plan(
-        planner=company,
+        planner=company.id,
         is_public_service=True,
         costs=ProductionCosts(Decimal(5), Decimal(5), Decimal(0)),
     )
@@ -619,7 +622,7 @@ def test_returns_correct_sales_deviation_of_0_if_plan_is_public_with_balance_of_
 ):
     company = company_generator.create_company_entity()
     plan = plan_generator.create_plan(
-        planner=company,
+        planner=company.id,
         is_public_service=True,
         costs=ProductionCosts(Decimal(5), Decimal(5), Decimal(0)),
     )
@@ -638,8 +641,8 @@ def test_that_empty_list_of_suppliers_is_returned_when_company_did_not_purchase_
     get_company_summary: GetCompanySummary,
     company_generator: CompanyGenerator,
 ):
-    company = company_generator.create_company_entity()
-    response = get_company_summary(company.id)
+    company = company_generator.create_company()
+    response = get_company_summary(company)
     assert response
     assert not response.suppliers_ordered_by_volume
 
@@ -666,8 +669,8 @@ def test_that_list_of_suppliers_contains_one_supplier_when_company_did_two_purch
 ):
     buyer = company_generator.create_company_entity()
     seller = company_generator.create_company_entity()
-    plan1 = plan_generator.create_plan(planner=seller)
-    plan2 = plan_generator.create_plan(planner=seller)
+    plan1 = plan_generator.create_plan(planner=seller.id)
+    plan2 = plan_generator.create_plan(planner=seller.id)
     purchase_generator.create_purchase_by_company(buyer=buyer, plan=plan1)
     purchase_generator.create_purchase_by_company(buyer=buyer, plan=plan2)
     response = get_company_summary(buyer.id)
@@ -699,7 +702,7 @@ def test_that_correct_supplier_id_is_shown(
 ):
     buyer = company_generator.create_company_entity()
     supplier = company_generator.create_company_entity()
-    offered_plan = plan_generator.create_plan(planner=supplier)
+    offered_plan = plan_generator.create_plan(planner=supplier.id)
     purchase_generator.create_purchase_by_company(buyer=buyer, plan=offered_plan)
     response = get_company_summary(buyer.id)
     assert response
@@ -716,7 +719,7 @@ def test_that_correct_supplier_name_is_shown(
     buyer = company_generator.create_company_entity()
     supplier_name = "supplier coop"
     supplier = company_generator.create_company_entity(name=supplier_name)
-    offered_plan = plan_generator.create_plan(planner=supplier)
+    offered_plan = plan_generator.create_plan(planner=supplier.id)
     purchase_generator.create_purchase_by_company(buyer=buyer, plan=offered_plan)
     response = get_company_summary(buyer.id)
     assert response
@@ -747,8 +750,8 @@ def test_that_correct_volume_of_sale_of_supplier_is_calculated_after_two_purchas
 ):
     buyer = company_generator.create_company_entity()
     seller = company_generator.create_company_entity()
-    plan1 = plan_generator.create_plan(planner=seller)
-    plan2 = plan_generator.create_plan(planner=seller)
+    plan1 = plan_generator.create_plan(planner=seller.id)
+    plan2 = plan_generator.create_plan(planner=seller.id)
     purchase_generator.create_purchase_by_company(
         buyer=buyer, plan=plan1, price_per_unit=Decimal("8.5"), amount=1
     )

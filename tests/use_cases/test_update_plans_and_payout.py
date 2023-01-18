@@ -2,7 +2,7 @@ import datetime
 from decimal import Decimal
 from uuid import UUID
 
-from arbeitszeit.entities import AccountTypes, Company, ProductionCosts
+from arbeitszeit.entities import AccountTypes, ProductionCosts
 from arbeitszeit.use_cases import UpdatePlansAndPayout, get_company_transactions
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts, ShowMyAccountsRequest
 from tests.data_generators import CooperationGenerator
@@ -325,7 +325,7 @@ class UseCaseTests(BaseTestCase):
         self.assertEqual(self.count_transactions_of_type_a(planner), 1)
 
     def test_that_company_receives_correct_wage_credit(self) -> None:
-        planner = self.company_generator.create_company_entity()
+        planner = self.company_generator.create_company()
         expected_wage_payout = Decimal("3")
         self.datetime_service.freeze_time(datetime.datetime(2021, 1, 1, 23, 45))
         self.plan_generator.create_plan(
@@ -374,9 +374,9 @@ class UseCaseTests(BaseTestCase):
         self.payout()
         assert self.payout_factor_repository.get_latest_payout_factor() is not None
 
-    def get_company_work_account_balance(self, company: Company) -> Decimal:
+    def get_company_work_account_balance(self, company: UUID) -> Decimal:
         show_my_accounts_response = self.show_my_accounts(
-            ShowMyAccountsRequest(company.id)
+            ShowMyAccountsRequest(company)
         )
         return show_my_accounts_response.balances[2]
 

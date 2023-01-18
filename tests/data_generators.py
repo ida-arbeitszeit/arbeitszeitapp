@@ -151,17 +151,12 @@ class CompanyGenerator:
         *,
         email: Optional[str] = None,
         name: str = "Company Name",
-        labour_account: Optional[Account] = None,
         password: str = "password",
         workers: Optional[Iterable[Union[Member, UUID]]] = None,
         registered_on: Optional[datetime] = None,
     ) -> Company:
         if email is None:
             email = self.email_generator.get_random_email()
-        if labour_account is None:
-            labour_account = self.account_generator.create_account(
-                account_type=AccountTypes.a
-            )
         if registered_on is None:
             registered_on = self.datetime_service.now()
         company = self.company_repository.create_company(
@@ -177,7 +172,9 @@ class CompanyGenerator:
             products_account=self.account_generator.create_account(
                 account_type=AccountTypes.prd
             ),
-            labour_account=labour_account,
+            labour_account=self.account_generator.create_account(
+                account_type=AccountTypes.a
+            ),
             registered_on=registered_on,
         )
         if workers is not None:
@@ -191,6 +188,7 @@ class CompanyGenerator:
     def create_company(
         self,
         *,
+        name: str = "test company",
         confirmed: bool = True,
         email: Optional[str] = None,
         password: Optional[str] = None,
@@ -202,7 +200,7 @@ class CompanyGenerator:
             password = "test password"
         response = self.register_company_use_case.register_company(
             request=RegisterCompany.Request(
-                name="test company",
+                name=name,
                 email=email,
                 password=password,
             )
@@ -253,7 +251,7 @@ class PlanGenerator:
         costs: Optional[ProductionCosts] = None,
         description="Beschreibung für Produkt A.",
         is_public_service: bool = False,
-        planner: Optional[Union[Company, UUID]] = None,
+        planner: Optional[UUID] = None,
         product_name: str = "Produkt A",
         production_unit: str = "500 Gramm",
         timeframe: Optional[int] = None,
@@ -322,7 +320,7 @@ class PlanGenerator:
 
     def draft_plan(
         self,
-        planner: Optional[Union[Company, UUID]] = None,
+        planner: Optional[Union[UUID]] = None,
         timeframe: Optional[int] = None,
         costs: Optional[ProductionCosts] = None,
         is_public_service: Optional[bool] = None,
@@ -356,7 +354,7 @@ class PlanGenerator:
                 description=description,
                 timeframe_in_days=timeframe,
                 is_public_service=is_public_service,
-                planner=planner.id if isinstance(planner, Company) else planner,
+                planner=planner,
             )
         )
         assert not response.is_rejected
@@ -477,17 +475,23 @@ class CooperationGenerator:
     datetime_service: FakeDatetimeService
     company_generator: CompanyGenerator
     plan_repository: PlanRepository
+    company_repository: CompanyRepository
 
     def create_cooperation(
         self,
         name: Optional[str] = None,
-        coordinator: Optional[Company] = None,
+        coordinator: Optional[Union[Company, UUID]] = None,
         plans: Optional[List[Plan]] = None,
     ) -> Cooperation:
         if name is None:
             name = "test name"
         if coordinator is None:
             coordinator = self.company_generator.create_company_entity()
+        if isinstance(coordinator, UUID):
+            coordinator = (
+                self.company_repository.get_companies().with_id(coordinator).first()
+            )
+            assert coordinator
         cooperation = self.cooperation_repository.create_cooperation(
             self.datetime_service.now(),
             name=name,

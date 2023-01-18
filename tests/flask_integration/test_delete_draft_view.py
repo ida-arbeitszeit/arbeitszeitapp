@@ -12,7 +12,7 @@ class DeleteDraftViewTests(ViewTestCase):
 
     def test_get_405_when_getting_url_as_company(self) -> None:
         company = self.login_company()
-        draft = self.plan_generator.draft_plan(planner=company)
+        draft = self.plan_generator.draft_plan(planner=company.id)
         response = self.client.get(self.get_url(draft.id))
         self.assertEqual(response.status_code, 405)
 
@@ -23,13 +23,13 @@ class DeleteDraftViewTests(ViewTestCase):
 
     def test_get_302_when_posting_url_as_company_for_existing_draft(self) -> None:
         company = self.login_company()
-        draft = self.plan_generator.draft_plan(planner=company)
+        draft = self.plan_generator.draft_plan(planner=company.id)
         response = self.client.post(self.get_url(draft.id))
         self.assertEqual(response.status_code, 302)
 
     def test_get_404_when_posting_draft_twice_as_company(self) -> None:
         company = self.login_company()
-        draft = self.plan_generator.draft_plan(planner=company)
+        draft = self.plan_generator.draft_plan(planner=company.id)
         self.client.post(self.get_url(draft.id))
         response = self.client.post(self.get_url(draft.id))
         self.assertEqual(response.status_code, 404)
