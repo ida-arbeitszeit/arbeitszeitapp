@@ -12,3 +12,11 @@ class Nested:
 
 class Arbitrary:
     ...
+
+
+class Boolean:
+    ...
+
+
+class DateTime:
+    ...

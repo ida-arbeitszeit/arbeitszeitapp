@@ -6,12 +6,14 @@ from arbeitszeit_flask.dependency_injection import with_injection
 from arbeitszeit_web.api_controllers.query_plans_api_controller import (
     QueryPlansApiController,
 )
-from arbeitszeit_web.api_presenters.interfaces import ApiPresenter
 from arbeitszeit_web.api_presenters.plans import ActivePlansPresenter
 
 namespace = Namespace("plans", "Plan related endpoints.")
 
-model = json_schema_to_flaskx(schema=ActivePlansPresenter().get_schema(), namespace=namespace)
+model = json_schema_to_flaskx(
+    schema=ActivePlansPresenter().get_schema(), namespace=namespace
+)
+
 
 @namespace.route("/active")
 class ListActivePlans(Resource):

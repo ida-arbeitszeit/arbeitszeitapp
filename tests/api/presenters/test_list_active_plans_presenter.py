@@ -1,4 +1,10 @@
-from arbeitszeit_web.api_presenters.interfaces import JsonDict, JsonString
+from arbeitszeit_web.api_presenters.interfaces import (
+    JsonBoolean,
+    JsonDatetime,
+    JsonDecimal,
+    JsonDict,
+    JsonString,
+)
 from arbeitszeit_web.api_presenters.plans import ActivePlansPresenter
 from tests.api.presenters.base_test_case import BaseTestCase
 from tests.presenters.data_generators import QueriedPlanGenerator
@@ -36,7 +42,8 @@ class TestGetPresenter(BaseTestCase):
         schema = top_schema.members["results"]
         assert isinstance(schema, JsonDict)
 
-        assert len(schema.members) == 5
+        assert len(schema.members) == 10
+
         for name in [
             "plan_id",
             "company_name",
@@ -45,3 +52,10 @@ class TestGetPresenter(BaseTestCase):
             "description",
         ]:
             assert isinstance(schema.members[name], JsonString)
+
+        for name in ["is_public_service", "is_available", "is_cooperating"]:
+            assert isinstance(schema.members[name], JsonBoolean)
+
+        assert isinstance(schema.members["price_per_unit"], JsonDecimal)
+
+        assert isinstance(schema.members["activation_date"], JsonDatetime)

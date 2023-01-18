@@ -3,6 +3,9 @@ from typing import Any, Dict, Union
 from flask_restx import Model, fields
 
 from arbeitszeit_web.api_presenters.interfaces import (
+    JsonBoolean,
+    JsonDatetime,
+    JsonDecimal,
     JsonDict,
     JsonString,
     JsonValue,
@@ -50,7 +53,14 @@ def _prevent_overriding_of_model(schema: JsonDict, namespace: Namespace) -> None
 
 def json_schema_to_flaskx(
     schema: JsonValue, namespace: Namespace
-) -> Union[Model, Dict[str, Any], type[fields.String]]:
+) -> Union[
+    Model,
+    Dict[str, Any],
+    type[fields.String],
+    type[fields.Arbitrary],
+    type[fields.Boolean],
+    type[fields.DateTime],
+]:
     if isinstance(schema, JsonDict):
         if not schema.schema_name:
             result = {
@@ -66,6 +76,12 @@ def json_schema_to_flaskx(
             else:
                 model = _register(schema, namespace)
                 return model
+    elif isinstance(schema, JsonDecimal):
+        return fields.Arbitrary
+    elif isinstance(schema, JsonBoolean):
+        return fields.Boolean
+    elif isinstance(schema, JsonDatetime):
+        return fields.DateTime
     else:
         assert isinstance(schema, JsonString)
         return fields.String

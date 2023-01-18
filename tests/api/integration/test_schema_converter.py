@@ -7,7 +7,13 @@ from arbeitszeit_flask.api.schema_converter import (
     ModelWithSameNameExists,
     json_schema_to_flaskx,
 )
-from arbeitszeit_web.api_presenters.interfaces import JsonDict, JsonString
+from arbeitszeit_web.api_presenters.interfaces import (
+    JsonBoolean,
+    JsonDatetime,
+    JsonDecimal,
+    JsonDict,
+    JsonString,
+)
 from tests.api.implementations import NamespaceImpl
 
 
@@ -23,6 +29,21 @@ class SchemaConversionTests(TestCase):
         model = JsonString()
         converted = self.convert(model, self.namespace)
         self.assertEqual(converted, fields.String)
+
+    def test_convert_to_arbitrary_float_if_input_was_decimal(self) -> None:
+        model = JsonDecimal()
+        converted = self.convert(model, self.namespace)
+        self.assertEqual(converted, fields.Arbitrary)
+
+    def test_convert_to_boolean_if_input_was_boolean(self) -> None:
+        model = JsonBoolean()
+        converted = self.convert(model, self.namespace)
+        self.assertEqual(converted, fields.Boolean)
+
+    def test_convert_to_datetime_if_input_was_datetime(self) -> None:
+        model = JsonDatetime()
+        converted = self.convert(model, self.namespace)
+        self.assertEqual(converted, fields.DateTime)
 
     def test_convert_to_dict_if_input_was_dict(self) -> None:
         model = JsonDict(members={})
