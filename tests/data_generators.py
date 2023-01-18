@@ -320,7 +320,7 @@ class PlanGenerator:
 
     def draft_plan(
         self,
-        planner: Optional[Union[UUID]] = None,
+        planner: Optional[UUID] = None,
         timeframe: Optional[int] = None,
         costs: Optional[ProductionCosts] = None,
         is_public_service: Optional[bool] = None,
