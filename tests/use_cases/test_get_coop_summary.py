@@ -12,7 +12,6 @@ from arbeitszeit.use_cases import (
     GetCoopSummaryResponse,
     GetCoopSummarySuccess,
 )
-from tests.data_generators import CooperationGenerator
 
 from .base_test_case import BaseTestCase
 
@@ -21,7 +20,6 @@ class GetCoopSummaryTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.get_coop_summary = self.injector.get(GetCoopSummary)
-        self.cooperation_generator = self.injector.get(CooperationGenerator)
 
     def test_that_none_is_returned_when_cooperation_does_not_exist(self) -> None:
         requester = self.company_generator.create_company_entity()
