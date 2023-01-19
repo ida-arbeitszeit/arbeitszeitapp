@@ -276,21 +276,20 @@ class GetAllPlans(FlaskTestCase):
         assert len(self.plan_repository.get_plans()) == 3
 
     def test_can_filter_by_planner(self) -> None:
-        planner = self.company_generator.create_company_entity()
+        planner = self.company_generator.create_company()
         self.plan_generator.create_plan()
-        assert not self.plan_repository.get_plans().planned_by(planner.id)
+        assert not self.plan_repository.get_plans().planned_by(planner)
         self.plan_generator.create_plan(planner=planner)
-        assert self.plan_repository.get_plans().planned_by(planner.id)
+        assert self.plan_repository.get_plans().planned_by(planner)
 
     def test_can_filter_plans_by_multiple_planners(self) -> None:
-        planner_1 = self.company_generator.create_company_entity()
-        planner_2 = self.company_generator.create_company_entity()
+        planner_1 = self.company_generator.create_company()
+        planner_2 = self.company_generator.create_company()
         self.plan_generator.create_plan()
         self.plan_generator.create_plan(planner=planner_1)
         self.plan_generator.create_plan(planner=planner_2)
         assert (
-            len(self.plan_repository.get_plans().planned_by(planner_1.id, planner_2.id))
-            == 2
+            len(self.plan_repository.get_plans().planned_by(planner_1, planner_2)) == 2
         )
 
     def test_can_get_plan_by_its_id(self) -> None:

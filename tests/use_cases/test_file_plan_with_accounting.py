@@ -23,7 +23,7 @@ class BaseUseCaseTestCase(BaseTestCase):
             ListPlansWithPendingReviewUseCase
         )
         self.get_plan_summary_member_use_case = self.injector.get(GetPlanSummaryMember)
-        self.planner = self.company_generator.create_company_entity()
+        self.planner = self.company_generator.create_company()
         self.notify_accountants_presenter = self.injector.get(
             NotifyAccountantsAboutNewPlanPresenterImpl
         )
@@ -62,7 +62,7 @@ class BaseUseCaseTestCase(BaseTestCase):
         filing_company: Optional[UUID] = None,
     ) -> FilePlanWithAccounting.Request:
         if filing_company is None:
-            filing_company = self.planner.id
+            filing_company = self.planner
         if draft is None:
             draft = self.create_draft()
         return FilePlanWithAccounting.Request(
@@ -170,7 +170,7 @@ class UseCaseTests(BaseUseCaseTestCase):
         response = self.use_case.file_plan_with_accounting(
             request=self.create_request(
                 draft=draft,
-                filing_company=self.planner.id,
+                filing_company=self.planner,
             )
         )
         self.assertTrue(

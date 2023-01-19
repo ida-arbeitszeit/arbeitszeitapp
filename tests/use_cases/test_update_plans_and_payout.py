@@ -2,15 +2,14 @@ import datetime
 from decimal import Decimal
 from uuid import UUID
 
-from arbeitszeit.entities import AccountTypes, Company, ProductionCosts, Transaction
-from arbeitszeit.use_cases import UpdatePlansAndPayout
+from arbeitszeit.entities import AccountTypes, ProductionCosts
+from arbeitszeit.use_cases import UpdatePlansAndPayout, get_company_transactions
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts, ShowMyAccountsRequest
 from tests.data_generators import CooperationGenerator
 from tests.use_cases.base_test_case import BaseTestCase
 
 from .dependency_injection import get_dependency_injector
 from .repositories import (
-    AccountRepository,
     CompanyRepository,
     FakePayoutFactorRepository,
     TransactionRepository,
@@ -23,11 +22,13 @@ class UseCaseTests(BaseTestCase):
         self.injector = get_dependency_injector()
         self.payout = self.injector.get(UpdatePlansAndPayout)
         self.cooperation_generator = self.injector.get(CooperationGenerator)
-        self.account_repository = self.injector.get(AccountRepository)
         self.transaction_repository = self.injector.get(TransactionRepository)
         self.payout_factor_repository = self.injector.get(FakePayoutFactorRepository)
         self.show_my_accounts = self.injector.get(ShowMyAccounts)
         self.company_repository = self.injector.get(CompanyRepository)
+        self.get_company_transactions = self.injector.get(
+            get_company_transactions.GetCompanyTransactions
+        )
 
     def test_that_a_plan_that_is_not_active_can_not_expire(self) -> None:
         plan = self.plan_generator.create_plan(activation_date=None)
@@ -109,28 +110,35 @@ class UseCaseTests(BaseTestCase):
         assert not plan.cooperation
 
     def test_that_wages_are_paid_out(self) -> None:
+        planner = self.company_generator.create_company()
         self.plan_generator.create_plan(
-            approved=True, activation_date=self.datetime_service.now_minus_one_day()
+            approved=True,
+            activation_date=self.datetime_service.now_minus_one_day(),
+            planner=planner,
         )
         self.payout()
-        self.assertTrue(self.count_transactions_of_type_a())
+        self.assertTrue(self.count_transactions_of_type_a(planner))
 
     def test_that_past_3_due_wages_get_paid_out_when_plan_expires(self) -> None:
+        planner = self.company_generator.create_company()
         self.plan_generator.create_plan(
             activation_date=self.datetime_service.now_minus_ten_days(),
             timeframe=3,
+            planner=planner,
         )
         self.payout()
-        assert self.count_transactions_of_type_a() == 3
+        assert self.count_transactions_of_type_a(planner) == 3
 
     def test_that_one_past_due_wage_does_get_paid_out_only_once(self) -> None:
+        planner = self.company_generator.create_company()
         self.plan_generator.create_plan(
             activation_date=self.datetime_service.now_minus_ten_days(),
             timeframe=1,
+            planner=planner,
         )
         self.payout()
         self.payout()
-        assert self.count_transactions_of_type_a() == 1
+        assert self.count_transactions_of_type_a(planner) == 1
 
     def test_account_balances_correctly_adjusted_for_work_account(self) -> None:
         self.datetime_service.freeze_time(datetime.datetime(2021, 10, 2, 10))
@@ -283,38 +291,41 @@ class UseCaseTests(BaseTestCase):
     def test_that_wages_are_paid_out_twice_after_25_hours_when_plan_has_timeframe_of_3(
         self,
     ) -> None:
+        planner = self.company_generator.create_company()
         self.datetime_service.freeze_time(datetime.datetime(2021, 1, 1, 10))
         self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now(), timeframe=3
+            activation_date=self.datetime_service.now(), timeframe=3, planner=planner
         )
         self.datetime_service.freeze_time(datetime.datetime(2021, 1, 2, 11))
         self.payout()
 
-        self.assertEqual(self.count_transactions_of_type_a(), 2)
+        self.assertEqual(self.count_transactions_of_type_a(planner), 2)
 
     def test_that_wages_are_paid_out_twice_after_two_days(self) -> None:
+        planner = self.company_generator.create_company()
         self.datetime_service.freeze_time(datetime.datetime(2021, 1, 1, 1))
         self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now(), timeframe=3
+            activation_date=self.datetime_service.now(), timeframe=3, planner=planner
         )
         self.payout()
         self.datetime_service.freeze_time(datetime.datetime(2021, 1, 2, 1))
         self.payout()
-        self.assertEqual(self.count_transactions_of_type_a(), 2)
+        self.assertEqual(self.count_transactions_of_type_a(planner), 2)
 
     def test_that_a_company_receives_wage_if_activation_is_before_midnight_and_no_payout_until_next_morning_and_timeframe_of_1(
         self,
     ) -> None:
+        planner = self.company_generator.create_company()
         self.datetime_service.freeze_time(datetime.datetime(2021, 1, 1, 23, 45))
         self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now(), timeframe=1
+            activation_date=self.datetime_service.now(), timeframe=1, planner=planner
         )
         self.datetime_service.freeze_time(datetime.datetime(2021, 1, 2, 0, 1))
         self.payout()
-        self.assertEqual(self.count_transactions_of_type_a(), 1)
+        self.assertEqual(self.count_transactions_of_type_a(planner), 1)
 
     def test_that_company_receives_correct_wage_credit(self) -> None:
-        planner = self.company_generator.create_company_entity()
+        planner = self.company_generator.create_company()
         expected_wage_payout = Decimal("3")
         self.datetime_service.freeze_time(datetime.datetime(2021, 1, 1, 23, 45))
         self.plan_generator.create_plan(
@@ -363,31 +374,23 @@ class UseCaseTests(BaseTestCase):
         self.payout()
         assert self.payout_factor_repository.get_latest_payout_factor() is not None
 
-    def get_company_work_account_balance(self, company: Company) -> Decimal:
+    def get_company_work_account_balance(self, company: UUID) -> Decimal:
         show_my_accounts_response = self.show_my_accounts(
-            ShowMyAccountsRequest(company.id)
+            ShowMyAccountsRequest(company)
         )
         return show_my_accounts_response.balances[2]
 
-    def count_transactions_of_type_a(self) -> int:
+    def count_transactions_of_type_a(self, company: UUID) -> int:
+        response = self.get_company_transactions(company)
         return len(
             [
                 transaction
-                for transaction in self.transaction_repository.get_transactions()
+                for transaction in response.transactions
                 if self._transaction_received_on_a_account(transaction)
             ]
         )
 
-    def _transaction_received_on_a_account(self, transaction: Transaction) -> bool:
-        account = (
-            self.account_repository.get_accounts()
-            .with_id(transaction.receiving_account)
-            .first()
-        )
-        assert account
-        return account.account_type == AccountTypes.a
-
-    def get_work_account(self, company: UUID) -> UUID:
-        company_model = self.company_repository.get_companies().with_id(company).first()
-        assert company_model
-        return company_model.work_account
+    def _transaction_received_on_a_account(
+        self, transaction: get_company_transactions.TransactionInfo
+    ) -> bool:
+        return transaction.account_type == AccountTypes.a

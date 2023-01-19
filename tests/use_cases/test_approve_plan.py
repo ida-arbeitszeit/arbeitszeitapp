@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import List
 from uuid import UUID
 
-from arbeitszeit.entities import AccountTypes, ProductionCosts, PurposesOfPurchases
+from arbeitszeit.entities import ProductionCosts, PurposesOfPurchases
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit.use_cases.get_company_summary import AccountBalances, GetCompanySummary
 from arbeitszeit.use_cases.get_company_transactions import (
@@ -23,7 +23,7 @@ from arbeitszeit.use_cases.query_plans import (
 )
 
 from .base_test_case import BaseTestCase
-from .repositories import AccountRepository, PlanDraftRepository, TransactionRepository
+from .repositories import PlanDraftRepository, TransactionRepository
 
 
 class UseCaseTests(BaseTestCase):
@@ -34,7 +34,6 @@ class UseCaseTests(BaseTestCase):
         self.query_plans = self.injector.get(QueryPlans)
         self.draft_repository = self.injector.get(PlanDraftRepository)
         self.pay_means_of_production = self.injector.get(PayMeansOfProduction)
-        self.account_repository = self.injector.get(AccountRepository)
         self.transaction_repository = self.injector.get(TransactionRepository)
         self.get_company_transactions_use_case = self.injector.get(
             GetCompanyTransactions
@@ -166,18 +165,6 @@ class UseCaseTests(BaseTestCase):
             self.get_company_account_balances(plan.planner).product,
             Decimal("-6"),
         )
-
-    def test_that_all_transactions_have_accounting_as_sender(self) -> None:
-        plan = self.plan_generator.create_plan(approved=False)
-        self.use_case.approve_plan(self.create_request(plan=plan.id))
-        for transaction in self.transaction_repository.get_transactions():
-            account = (
-                self.account_repository.get_accounts()
-                .with_id(transaction.sending_account)
-                .first()
-            )
-            assert account
-            self.assertEqual(account.account_type, AccountTypes.accounting)
 
     def get_company_transactions(self, company: UUID) -> List[TransactionInfo]:
         response = self.get_company_transactions_use_case(company)

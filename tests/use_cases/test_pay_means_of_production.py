@@ -69,19 +69,19 @@ class PayMeansOfProductionTests(BaseTestCase):
         )
 
     def test_reject_payment_trying_to_pay_own_product(self) -> None:
-        sender = self.company_generator.create_company_entity()
+        sender = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(
             activation_date=self.datetime_service.now_minus_one_day(), planner=sender
         )
         purpose = PurposesOfPurchases.means_of_prod
         response = self.pay_means_of_production(
-            PayMeansOfProductionRequest(sender.id, plan.id, 5, purpose)
+            PayMeansOfProductionRequest(sender, plan.id, 5, purpose)
         )
         assert response.is_rejected
         assert response.rejection_reason == response.RejectionReason.buyer_is_planner
 
     def test_balance_of_buyer_of_means_of_prod_reduced(self) -> None:
-        sender = self.company_generator.create_company_entity()
+        sender = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(
             activation_date=self.datetime_service.now_minus_one_day()
         )
@@ -89,17 +89,17 @@ class PayMeansOfProductionTests(BaseTestCase):
         pieces = 5
 
         self.pay_means_of_production(
-            PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
+            PayMeansOfProductionRequest(sender, plan.id, pieces, purpose)
         )
 
         price_total = pieces * self.price_checker.get_unit_price(plan.id)
         assert (
-            self.balance_checker.get_company_account_balances(sender.id).p_account
+            self.balance_checker.get_company_account_balances(sender).p_account
             == -price_total
         )
 
     def test_balance_of_buyer_of_raw_materials_reduced(self) -> None:
-        sender = self.company_generator.create_company_entity()
+        sender = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(
             activation_date=self.datetime_service.now_minus_one_day()
         )
@@ -107,17 +107,17 @@ class PayMeansOfProductionTests(BaseTestCase):
         pieces = 5
 
         self.pay_means_of_production(
-            PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
+            PayMeansOfProductionRequest(sender, plan.id, pieces, purpose)
         )
 
         price_total = pieces * self.price_checker.get_unit_price(plan.id)
         assert (
-            self.balance_checker.get_company_account_balances(sender.id).r_account
+            self.balance_checker.get_company_account_balances(sender).r_account
             == -price_total
         )
 
     def test_balance_of_seller_increased(self) -> None:
-        sender = self.company_generator.create_company_entity()
+        sender = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(
             costs=ProductionCosts(
                 labour_cost=Decimal(1),
@@ -132,7 +132,7 @@ class PayMeansOfProductionTests(BaseTestCase):
             plan.planner
         ).prd_account == Decimal("-3")
         self.pay_means_of_production(
-            PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
+            PayMeansOfProductionRequest(sender, plan.id, pieces, purpose)
         )
         assert self.balance_checker.get_company_account_balances(
             plan.planner
@@ -142,7 +142,7 @@ class PayMeansOfProductionTests(BaseTestCase):
         self,
     ) -> None:
         coop = self.cooperation_generator.create_cooperation()
-        sender = self.company_generator.create_company_entity()
+        sender = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(
             activation_date=self.datetime_service.now_minus_one_day(),
             amount=50,
@@ -159,7 +159,7 @@ class PayMeansOfProductionTests(BaseTestCase):
             plan.planner
         ).prd_account
         self.pay_means_of_production(
-            PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
+            PayMeansOfProductionRequest(sender, plan.id, pieces, purpose)
         )
         assert (
             self.balance_checker.get_company_account_balances(plan.planner).prd_account
@@ -310,7 +310,7 @@ class TestSuccessfulPayment(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.buyer = self.company_generator.create_company_entity()
-        self.planner = self.company_generator.create_company_entity()
+        self.planner = self.company_generator.create_company()
         self.plan = self.plan_generator.create_plan(
             planner=self.planner, activation_date=datetime.min
         )
@@ -319,7 +319,7 @@ class TestSuccessfulPayment(BaseTestCase):
         self.transaction_time = datetime(2020, 10, 1, 22, 30)
         self.datetime_service.freeze_time(self.transaction_time)
         self.planner_transactions_before_payment = len(
-            self.get_company_transactions(self.planner.id).transactions
+            self.get_company_transactions(self.planner).transactions
         )
         self.response = self.pay_means_of_production(
             PayMeansOfProductionRequest(
@@ -336,7 +336,7 @@ class TestSuccessfulPayment(BaseTestCase):
         self.assertEqual(len(transaction_info.transactions), 1)
 
     def test_transaction_shows_up_in_transaction_listing_for_planner(self) -> None:
-        transaction_info = self.get_company_transactions(self.planner.id)
+        transaction_info = self.get_company_transactions(self.planner)
         self.assertEqual(
             len(transaction_info.transactions),
             self.planner_transactions_before_payment + 1,
@@ -347,7 +347,7 @@ class TestSuccessfulPayment(BaseTestCase):
         self.assertEqual(transaction_info.transactions[0].date, self.transaction_time)
 
     def test_transaction_info_of_planner_shows_transaction_timestamp(self) -> None:
-        transaction_info = self.get_company_transactions(self.planner.id)
+        transaction_info = self.get_company_transactions(self.planner)
         self.assertEqual(transaction_info.transactions[-1].date, self.transaction_time)
 
     def get_buyer_transaction_infos(

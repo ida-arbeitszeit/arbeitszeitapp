@@ -1,7 +1,6 @@
 from typing import Optional
 from uuid import UUID
 
-from arbeitszeit.entities import Company
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
 from arbeitszeit.use_cases.list_plans_with_pending_review import (
     ListPlansWithPendingReviewUseCase,
@@ -53,9 +52,7 @@ class UseCaseTests(BaseTestCase):
 
     def test_name_of_planning_company_is_in_reponse(self) -> None:
         expected_company_name = "example company name"
-        planner = self.company_generator.create_company_entity(
-            name=expected_company_name
-        )
+        planner = self.company_generator.create_company(name=expected_company_name)
         self.file_plan_draft(planner=planner)
         response = self.use_case.list_plans_with_pending_review(
             request=ListPlansWithPendingReviewUseCase.Request()
@@ -65,18 +62,18 @@ class UseCaseTests(BaseTestCase):
         )
 
     def test_id_of_planning_company_is_in_response(self) -> None:
-        planner = self.company_generator.create_company_entity()
+        planner = self.company_generator.create_company()
         self.file_plan_draft(planner=planner)
         response = self.use_case.list_plans_with_pending_review(
             request=ListPlansWithPendingReviewUseCase.Request()
         )
-        self.assertIn(planner.id, [plan.planner_id for plan in response.plans])
+        self.assertIn(planner, [plan.planner_id for plan in response.plans])
 
     def file_plan_draft(
-        self, product_name: Optional[str] = None, planner: Optional[Company] = None
+        self, product_name: Optional[str] = None, planner: Optional[UUID] = None
     ) -> UUID:
         if planner is None:
-            planner = self.company_generator.create_company_entity()
+            planner = self.company_generator.create_company()
         if product_name is None:
             product_name = "test draft name"
         draft = self.plan_generator.draft_plan(

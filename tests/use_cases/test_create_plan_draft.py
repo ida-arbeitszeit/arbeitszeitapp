@@ -125,6 +125,6 @@ def test_that_drafted_plan_has_same_planner_as_specified_on_creation(
     plan_generator: PlanGenerator,
     company_generator: CompanyGenerator,
 ) -> None:
-    planner = company_generator.create_company_entity()
+    planner = company_generator.create_company()
     draft = plan_generator.draft_plan(planner=planner)
-    assert draft.planner.id == planner.id
+    assert draft.planner.id == planner

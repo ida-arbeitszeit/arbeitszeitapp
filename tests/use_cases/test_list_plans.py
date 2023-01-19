@@ -41,11 +41,11 @@ def test_list_plans_response_includes_single_plan(
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
 ):
-    company: Company = company_generator.create_company_entity()
+    company = company_generator.create_company()
     plan: Plan = plan_generator.create_plan(
         planner=company, activation_date=datetime.min
     )
-    response: ListPlansResponse = list_plans(company_id=company.id)
+    response: ListPlansResponse = list_plans(company_id=company)
     assert plan_in_results(plan, response)
 
 
@@ -55,12 +55,12 @@ def test_list_plans_response_includes_multiple_plans(
     company_generator: CompanyGenerator,
     plan_generator: PlanGenerator,
 ):
-    company: Company = company_generator.create_company_entity()
+    company = company_generator.create_company()
     plan1: Plan = plan_generator.create_plan(
         planner=company, activation_date=datetime.min
     )
     plan2: Plan = plan_generator.create_plan(
         planner=company, activation_date=datetime.min
     )
-    response: ListPlansResponse = list_plans(company_id=company.id)
+    response: ListPlansResponse = list_plans(company_id=company)
     assert plan_in_results(plan1, response) and plan_in_results(plan2, response)

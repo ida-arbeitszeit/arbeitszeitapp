@@ -21,17 +21,15 @@ class UseCaseTests(BaseTestCase):
             )
 
     def test_that_no_failure_is_raised_if_draft_is_deleted_by_its_owner(self) -> None:
-        planner = self.company_generator.create_company_entity()
+        planner = self.company_generator.create_company()
         draft = self.plan_generator.draft_plan(planner=planner)
-        self.use_case.delete_draft(
-            self.create_request(deleter=planner.id, draft=draft.id)
-        )
+        self.use_case.delete_draft(self.create_request(deleter=planner, draft=draft.id))
 
     def test_that_failure_is_raised_if_draft_does_not_exist(self) -> None:
-        planner = self.company_generator.create_company_entity()
+        planner = self.company_generator.create_company()
         with self.assertRaises(DeleteDraftUseCase.Failure):
             self.use_case.delete_draft(
-                self.create_request(deleter=planner.id, draft=uuid4()),
+                self.create_request(deleter=planner, draft=uuid4()),
             )
 
     def test_that_failure_is_raised_if_company_does_not_exist(self) -> None:
@@ -42,11 +40,9 @@ class UseCaseTests(BaseTestCase):
             )
 
     def test_that_after_deleting_draft_summary_is_not_available_anymore(self) -> None:
-        planner = self.company_generator.create_company_entity()
+        planner = self.company_generator.create_company()
         draft = self.plan_generator.draft_plan(planner=planner)
-        self.use_case.delete_draft(
-            self.create_request(deleter=planner.id, draft=draft.id)
-        )
+        self.use_case.delete_draft(self.create_request(deleter=planner, draft=draft.id))
         response = self.get_draft_summary(draft_id=draft.id)
         self.assertIsNone(response)
 
@@ -70,12 +66,12 @@ class UseCaseTests(BaseTestCase):
 
     def test_show_draft_name_in_successful_deletion_response(self) -> None:
         expected_name = "test product draft"
-        planner = self.company_generator.create_company_entity()
+        planner = self.company_generator.create_company()
         draft = self.plan_generator.draft_plan(
             planner=planner, product_name=expected_name
         )
         response = self.use_case.delete_draft(
-            self.create_request(deleter=planner.id, draft=draft.id)
+            self.create_request(deleter=planner, draft=draft.id)
         )
         self.assertEqual(response.product_name, expected_name)
 

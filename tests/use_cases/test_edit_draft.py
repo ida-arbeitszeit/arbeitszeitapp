@@ -25,26 +25,26 @@ class UseCaseTests(TestCase):
         self.assertFalse(response.is_success)
 
     def test_planner_can_edit_successfully_an_existing_draft(self) -> None:
-        planner = self.company_generator.create_company_entity()
+        planner = self.company_generator.create_company()
         draft = self.plan_generator.draft_plan(planner=planner)
-        request = self.create_request(draft=draft.id, editor=planner.id)
+        request = self.create_request(draft=draft.id, editor=planner)
         response = self.use_case.edit_draft(request)
         self.assertTrue(response.is_success)
 
     def test_non_planner_cannot_edit_draft_successfully(self) -> None:
-        other_company = self.company_generator.create_company_entity()
+        other_company = self.company_generator.create_company()
         draft = self.plan_generator.draft_plan()
-        request = self.create_request(draft=draft.id, editor=other_company.id)
+        request = self.create_request(draft=draft.id, editor=other_company)
         response = self.use_case.edit_draft(request)
         self.assertFalse(response.is_success)
 
     def test_can_change_product_name_in_draft(self) -> None:
-        planner = self.company_generator.create_company_entity()
+        planner = self.company_generator.create_company()
         draft = self.plan_generator.draft_plan(
             planner=planner, product_name="original name"
         )
         request = self.create_request(
-            draft=draft.id, editor=planner.id, product_name="new name"
+            draft=draft.id, editor=planner, product_name="new name"
         )
         self.use_case.edit_draft(request)
         self.assertDraft(
@@ -53,7 +53,7 @@ class UseCaseTests(TestCase):
         )
 
     def test_can_change_labour_cost_in_draft(self) -> None:
-        planner = self.company_generator.create_company_entity()
+        planner = self.company_generator.create_company()
         draft = self.plan_generator.draft_plan(
             planner=planner,
             costs=ProductionCosts(
@@ -63,7 +63,7 @@ class UseCaseTests(TestCase):
             ),
         )
         request = self.create_request(
-            draft=draft.id, editor=planner.id, labour_cost=Decimal(2)
+            draft=draft.id, editor=planner, labour_cost=Decimal(2)
         )
         self.use_case.edit_draft(request)
         self.assertDraft(
@@ -72,7 +72,7 @@ class UseCaseTests(TestCase):
         )
 
     def test_can_change_means_cost_in_draft(self) -> None:
-        planner = self.company_generator.create_company_entity()
+        planner = self.company_generator.create_company()
         draft = self.plan_generator.draft_plan(
             planner=planner,
             costs=ProductionCosts(
@@ -82,7 +82,7 @@ class UseCaseTests(TestCase):
             ),
         )
         request = self.create_request(
-            draft=draft.id, editor=planner.id, means_cost=Decimal(2)
+            draft=draft.id, editor=planner, means_cost=Decimal(2)
         )
         self.use_case.edit_draft(request)
         self.assertDraft(
@@ -91,7 +91,7 @@ class UseCaseTests(TestCase):
         )
 
     def test_can_change_resource_cost_in_draft(self) -> None:
-        planner = self.company_generator.create_company_entity()
+        planner = self.company_generator.create_company()
         draft = self.plan_generator.draft_plan(
             planner=planner,
             costs=ProductionCosts(
@@ -101,7 +101,7 @@ class UseCaseTests(TestCase):
             ),
         )
         request = self.create_request(
-            draft=draft.id, editor=planner.id, resource_cost=Decimal(2)
+            draft=draft.id, editor=planner, resource_cost=Decimal(2)
         )
         self.use_case.edit_draft(request)
         self.assertDraft(
@@ -110,13 +110,13 @@ class UseCaseTests(TestCase):
         )
 
     def test_can_change_description_in_draft(self) -> None:
-        planner = self.company_generator.create_company_entity()
+        planner = self.company_generator.create_company()
         draft = self.plan_generator.draft_plan(
             planner=planner,
             description="old description",
         )
         request = self.create_request(
-            draft=draft.id, editor=planner.id, description="new description"
+            draft=draft.id, editor=planner, description="new description"
         )
         self.use_case.edit_draft(request)
         self.assertDraft(
@@ -125,42 +125,42 @@ class UseCaseTests(TestCase):
         )
 
     def test_can_change_draft_from_public_to_productive(self) -> None:
-        planner = self.company_generator.create_company_entity()
+        planner = self.company_generator.create_company()
         draft = self.plan_generator.draft_plan(
             planner=planner,
             is_public_service=True,
         )
         request = self.create_request(
             draft=draft.id,
-            editor=planner.id,
+            editor=planner,
             is_public_service=False,
         )
         self.use_case.edit_draft(request)
         self.assertDraft(draft.id, lambda d: not d.is_public_service)
 
     def test_can_edit_timeframe(self) -> None:
-        planner = self.company_generator.create_company_entity()
+        planner = self.company_generator.create_company()
         draft = self.plan_generator.draft_plan(
             planner=planner,
             timeframe=1,
         )
         request = self.create_request(
             draft=draft.id,
-            editor=planner.id,
+            editor=planner,
             timeframe=2,
         )
         self.use_case.edit_draft(request)
         self.assertDraft(draft.id, lambda d: d.timeframe == 2)
 
     def test_can_change_unit_of_distribution(self) -> None:
-        planner = self.company_generator.create_company_entity()
+        planner = self.company_generator.create_company()
         draft = self.plan_generator.draft_plan(
             planner=planner,
             production_unit="old unit",
         )
         request = self.create_request(
             draft=draft.id,
-            editor=planner.id,
+            editor=planner,
             unit_of_distribution="new unit",
         )
         self.use_case.edit_draft(request)

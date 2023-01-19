@@ -155,7 +155,7 @@ class GeneralUrlIndexTests(ViewTestCase):
         self,
     ) -> None:
         company = self.login_company()
-        draft = self.plan_generator.draft_plan(planner=company)
+        draft = self.plan_generator.draft_plan(planner=company.id)
         url = self.url_index.get_draft_summary_url(draft_id=draft.id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)

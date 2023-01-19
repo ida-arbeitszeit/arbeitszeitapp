@@ -40,7 +40,7 @@ class LoggedInCompanyTests(ViewTestCase):
 
     def test_get_request_shows_truncated_plan_name_and_id_of_company_plan(self) -> None:
         plan = self.plan_generator.create_plan(
-            activation_date=datetime.min, planner=self.company
+            activation_date=datetime.min, planner=self.company.id
         )
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
