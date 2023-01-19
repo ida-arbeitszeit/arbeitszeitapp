@@ -49,7 +49,7 @@ class DenyCooperation:
 
         self.plan_repository.get_plans().with_id(
             request.plan_id
-        ).set_requested_cooperation(None)
+        ).update().set_requested_cooperation(None).perform()
         return DenyCooperationResponse(rejection_reason=None)
 
     def _validate_request(self, request: DenyCooperationRequest) -> None:

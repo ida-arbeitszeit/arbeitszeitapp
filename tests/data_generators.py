@@ -502,7 +502,9 @@ class CooperationGenerator:
             assert (
                 self.plan_repository.get_plans()
                 .with_id(*[plan.id for plan in plans])
+                .update()
                 .set_cooperation(cooperation.id)
+                .perform()
             )
         return cooperation
 

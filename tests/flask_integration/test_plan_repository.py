@@ -437,14 +437,16 @@ class GetAllPlans(FlaskTestCase):
         cooperation = self.cooperation_generator.create_cooperation()
         plan = self.plan_generator.create_plan()
 
-        self.plan_repository.get_plans().with_id(plan.id).set_cooperation(
+        self.plan_repository.get_plans().with_id(plan.id).update().set_cooperation(
             cooperation.id
-        )
+        ).perform()
         plan_from_orm = self.plan_repository.get_plans().with_id(plan.id).first()
         assert plan_from_orm
         assert plan_from_orm.cooperation == cooperation.id
 
-        self.plan_repository.get_plans().with_id(plan.id).set_cooperation(None)
+        self.plan_repository.get_plans().with_id(plan.id).update().set_cooperation(
+            None
+        ).perform()
         plan_from_orm = self.plan_repository.get_plans().with_id(plan.id).first()
         assert plan_from_orm
         assert plan_from_orm.cooperation is None
@@ -453,21 +455,21 @@ class GetAllPlans(FlaskTestCase):
         cooperation = self.cooperation_generator.create_cooperation()
         plan = self.plan_generator.create_plan()
         plan_result = self.plan_repository.get_plans().with_id(plan.id)
-        plan_result.set_requested_cooperation(cooperation.id)
+        plan_result.update().set_requested_cooperation(cooperation.id).perform()
         assert plan_result.that_request_cooperation_with_coordinator()
-        plan_result.set_requested_cooperation(None)
+        plan_result.update().set_requested_cooperation(None).perform()
         assert not plan_result.that_request_cooperation_with_coordinator()
 
     def test_can_set_approval_date(self) -> None:
         plan = self.plan_generator.create_plan()
         plans = self.plan_repository.get_plans().with_id(plan.id)
         expected_approval_date = datetime(2000, 3, 2)
-        assert plans.set_approval_date(expected_approval_date)
+        assert plans.update().set_approval_date(expected_approval_date).perform()
         assert all(plan.approval_date == expected_approval_date for plan in plans)
 
     def test_can_set_approval_reason(self) -> None:
         plan = self.plan_generator.create_plan()
         plans = self.plan_repository.get_plans().with_id(plan.id)
         expected_approval_reason = "test approval reason"
-        assert plans.set_approval_reason(expected_approval_reason)
+        assert plans.update().set_approval_reason(expected_approval_reason).perform()
         assert all(plan.approval_reason == expected_approval_reason for plan in plans)

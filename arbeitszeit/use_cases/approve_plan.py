@@ -40,8 +40,9 @@ class ApprovePlanUseCase:
         assert planner
         if plan.is_approved:
             return self.Response(is_approved=False)
-        matching_plans.set_approval_date(self.datetime_service.now())
-        matching_plans.set_approval_reason("approved")
+        matching_plans.update().set_approval_date(
+            self.datetime_service.now()
+        ).set_approval_reason("approved").perform()
         self.plan_repository.activate_plan(
             plan=plan, activation_date=self.datetime_service.now()
         )

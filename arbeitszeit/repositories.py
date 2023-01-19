@@ -99,14 +99,23 @@ class PlanResult(QueryResult[Plan], Protocol):
         coordinator.
         """
 
-    def set_cooperation(self, cooperation: Optional[UUID]) -> int:
+    def update(self) -> PlanUpdate:
+        """Prepare an update for all selected Plans."""
+
+
+class PlanUpdate(Protocol):
+    """Aggregate updates on a previously selected set of plan rows in
+    the DB and execute them all in one.
+    """
+
+    def set_cooperation(self, cooperation: Optional[UUID]) -> PlanUpdate:
         """Set the associated cooperation of all matching plans to the
         one specified via the cooperation argument. Specifying `None`
         will unset the cooperation field. The return value counts all
         plans that were updated through this method.
         """
 
-    def set_requested_cooperation(self, cooperation: Optional[UUID]) -> int:
+    def set_requested_cooperation(self, cooperation: Optional[UUID]) -> PlanUpdate:
         """Set the `requested_cooperation` field of all matching plans
         to the specified value.  A value `None` means that these plans
         are marked as not requesting membership in any
@@ -114,14 +123,19 @@ class PlanResult(QueryResult[Plan], Protocol):
         updated through this method.
         """
 
-    def set_approval_date(self, approval_date: Optional[datetime]) -> int:
+    def set_approval_date(self, approval_date: Optional[datetime]) -> PlanUpdate:
         """Set the approval date of all matching plans. The return
         value counts all the plans that were changed by this methods.
         """
 
-    def set_approval_reason(self, reason: Optional[str]) -> int:
+    def set_approval_reason(self, reason: Optional[str]) -> PlanUpdate:
         """Set the approval reason for all matching plans. The return
         value counts all the plans that were changed by this method.
+        """
+
+    def perform(self) -> int:
+        """Perform the update action and return the number of columns
+        affected.
         """
 
 

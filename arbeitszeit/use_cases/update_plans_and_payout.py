@@ -128,5 +128,4 @@ class UpdatePlansAndPayout:
 
     def _delete_cooperation_and_coop_request_from_plan(self, plan: Plan) -> None:
         plans = self.plan_repository.get_plans().with_id(plan.id)
-        plans.set_requested_cooperation(None)
-        plans.set_cooperation(None)
+        plans.update().set_requested_cooperation(None).set_cooperation(None).perform()
