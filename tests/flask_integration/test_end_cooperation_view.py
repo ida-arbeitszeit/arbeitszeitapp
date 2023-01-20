@@ -49,7 +49,7 @@ class AuthenticatedCompanyTests(ViewTestCase):
     def test_get_302_when_coop_and_plan_do_exist_and_requester_is_planner(
         self,
     ) -> None:
-        plan = self.plan_generator.create_plan(planner=self.company)
+        plan = self.plan_generator.create_plan(planner=self.company.id)
         cooperation = self.cooperation_generator.create_cooperation(plans=[plan])
         url = f"/company/end_cooperation?plan_id={str(plan.id)}&cooperation_id={str(cooperation.id)}"
         response = self.client.get(url)

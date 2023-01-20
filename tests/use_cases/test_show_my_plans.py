@@ -19,27 +19,27 @@ class UseCaseTests(BaseTestCase):
     def test_that_one_approved_plan_is_returned_after_one_plan_was_created(
         self,
     ) -> None:
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company()
         self.plan_generator.create_plan(planner=company)
         response = self.use_case.show_company_plans(
-            request=ShowMyPlansRequest(company_id=company.id)
+            request=ShowMyPlansRequest(company_id=company)
         )
         assert response.count_all_plans == 1
 
     def test_that_no_plans_for_a_company_without_plans_are_found(self) -> None:
-        company = self.company_generator.create_company_entity()
-        other_company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company()
+        other_company = self.company_generator.create_company()
         self.plan_generator.create_plan(approved=True, planner=company)
         response = self.use_case.show_company_plans(
-            request=ShowMyPlansRequest(company_id=other_company.id)
+            request=ShowMyPlansRequest(company_id=other_company)
         )
         assert not response.count_all_plans
 
     def test_that_with_one_draft_that_plan_count_is_one(self) -> None:
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company()
         self.plan_generator.draft_plan(planner=company)
         response = self.use_case.show_company_plans(
-            request=ShowMyPlansRequest(company_id=company.id)
+            request=ShowMyPlansRequest(company_id=company)
         )
         self.assertEqual(response.count_all_plans, 1)
 
@@ -55,7 +55,7 @@ class UseCaseTests(BaseTestCase):
         creation_time_2 = creation_time_1 - timedelta(hours=5)
         creation_time_3 = creation_time_1 + timedelta(days=2)
 
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company()
 
         self.datetime_service.freeze_time(creation_time_2)
         expected_third_plan = self.plan_generator.draft_plan(planner=company)
@@ -65,7 +65,7 @@ class UseCaseTests(BaseTestCase):
         expected_first_plan = self.plan_generator.draft_plan(planner=company)
 
         response = self.use_case.show_company_plans(
-            request=ShowMyPlansRequest(company_id=company.id)
+            request=ShowMyPlansRequest(company_id=company)
         )
         self.assertEqual(response.drafts[0].id, expected_first_plan.id)
         self.assertEqual(response.drafts[1].id, expected_second_plan.id)

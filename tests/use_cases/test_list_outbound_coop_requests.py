@@ -34,10 +34,10 @@ def test_empty_list_is_returned_when_there_are_no_outbound_requests(
     plan_generator: PlanGenerator,
     company_generator: CompanyGenerator,
 ):
-    requester = company_generator.create_company_entity()
+    requester = company_generator.create_company()
     coop = coop_generator.create_cooperation()
     plan_generator.create_plan(requested_cooperation=coop, activation_date=datetime.min)
-    response = list_requests(ListOutboundCoopRequestsRequest(requester.id))
+    response = list_requests(ListOutboundCoopRequestsRequest(requester))
     assert len(response.cooperation_requests) == 0
 
 
@@ -48,7 +48,7 @@ def test_correct_plans_are_returned_when_there_are_outbound_requests(
     plan_generator: PlanGenerator,
     company_generator: CompanyGenerator,
 ):
-    requester = company_generator.create_company_entity()
+    requester = company_generator.create_company()
     coop = coop_generator.create_cooperation()
     requesting_plan1 = plan_generator.create_plan(
         requested_cooperation=coop, activation_date=datetime.min, planner=requester
@@ -56,7 +56,7 @@ def test_correct_plans_are_returned_when_there_are_outbound_requests(
     requesting_plan2 = plan_generator.create_plan(
         requested_cooperation=coop, activation_date=datetime.min, planner=requester
     )
-    response = list_requests(ListOutboundCoopRequestsRequest(requester.id))
+    response = list_requests(ListOutboundCoopRequestsRequest(requester))
     assert len(response.cooperation_requests) == 2
     assert plan_in_list(requesting_plan1, response)
     assert plan_in_list(requesting_plan2, response)

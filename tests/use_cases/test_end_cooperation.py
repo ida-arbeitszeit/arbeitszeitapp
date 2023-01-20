@@ -20,12 +20,12 @@ class TestEndCooperation(TestCase):
         self.plan_generator = self.injector.get(PlanGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.cooperation_repository = self.injector.get(CooperationRepository)
-        self.requester = self.company_generator.create_company_entity()
+        self.requester = self.company_generator.create_company()
 
     def test_error_is_raised_when_plan_does_not_exist(self) -> None:
         cooperation = self.coop_generator.create_cooperation()
         request = EndCooperationRequest(
-            requester_id=self.requester.id,
+            requester_id=self.requester,
             plan_id=uuid4(),
             cooperation_id=cooperation.id,
         )
@@ -39,7 +39,7 @@ class TestEndCooperation(TestCase):
     def test_error_is_raised_when_cooperation_does_not_exist(self) -> None:
         plan = self.plan_generator.create_plan()
         request = EndCooperationRequest(
-            requester_id=self.requester.id, plan_id=plan.id, cooperation_id=uuid4()
+            requester_id=self.requester, plan_id=plan.id, cooperation_id=uuid4()
         )
         response = self.end_cooperation(request)
         assert response.is_rejected
@@ -52,7 +52,7 @@ class TestEndCooperation(TestCase):
         cooperation = self.coop_generator.create_cooperation()
         plan = self.plan_generator.create_plan(cooperation=None)
         request = EndCooperationRequest(
-            requester_id=self.requester.id,
+            requester_id=self.requester,
             plan_id=plan.id,
             cooperation_id=cooperation.id,
         )
@@ -72,7 +72,7 @@ class TestEndCooperation(TestCase):
         cooperation = self.coop_generator.create_cooperation(plans=[plan])
 
         request = EndCooperationRequest(
-            requester_id=self.requester.id,
+            requester_id=self.requester,
             plan_id=plan.id,
             cooperation_id=cooperation.id,
         )
@@ -90,7 +90,7 @@ class TestEndCooperation(TestCase):
         cooperation = self.coop_generator.create_cooperation(plans=[plan])
 
         request = EndCooperationRequest(
-            requester_id=self.requester.id,
+            requester_id=self.requester,
             plan_id=plan.id,
             cooperation_id=cooperation.id,
         )
@@ -106,7 +106,7 @@ class TestEndCooperation(TestCase):
         )
 
         request = EndCooperationRequest(
-            requester_id=self.requester.id,
+            requester_id=self.requester,
             plan_id=plan.id,
             cooperation_id=cooperation.id,
         )
@@ -121,7 +121,7 @@ class TestEndCooperation(TestCase):
         assert plan.cooperation == cooperation.id
 
         request = EndCooperationRequest(
-            requester_id=self.requester.id,
+            requester_id=self.requester,
             plan_id=plan.id,
             cooperation_id=cooperation.id,
         )
@@ -136,7 +136,7 @@ class TestEndCooperation(TestCase):
         cooperation = self.coop_generator.create_cooperation(plans=[plan])
         assert plan.cooperation == cooperation.id
         request = EndCooperationRequest(
-            requester_id=self.requester.id,
+            requester_id=self.requester,
             plan_id=plan.id,
             cooperation_id=cooperation.id,
         )

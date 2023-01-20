@@ -23,6 +23,8 @@ class CancelCooperationSolicitation:
             .with_id(request.plan_id)
             .planned_by(request.requester_id)
             .that_request_cooperation_with_coordinator()
+            .update()
             .set_requested_cooperation(None)
+            .perform()
         )
         return bool(plans_changed_count)

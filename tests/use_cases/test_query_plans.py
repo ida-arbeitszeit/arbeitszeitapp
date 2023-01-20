@@ -152,7 +152,7 @@ def test_that_plans_are_returned_in_order_of_company_name_when_requested(
     for name in ["c_name", "a_name", "B_name"]:
         plan_generator.create_plan(
             activation_date=datetime_service.now(),
-            planner=company_generator.create_company_entity(name=name),
+            planner=company_generator.create_company(name=name),
         )
     response = query_plans(make_request(sorting=PlanSorting.by_company_name))
     assert response.results[0].company_name == "a_name"

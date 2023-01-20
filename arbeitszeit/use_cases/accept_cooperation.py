@@ -50,8 +50,9 @@ class AcceptCooperation:
         except AcceptCooperationResponse.RejectionReason as reason:
             return AcceptCooperationResponse(rejection_reason=reason)
         plan = self.plan_repository.get_plans().with_id(request.plan_id)
-        plan.set_cooperation(request.cooperation_id)
-        plan.set_requested_cooperation(None)
+        plan.update().set_cooperation(request.cooperation_id).set_requested_cooperation(
+            None
+        ).perform()
         return AcceptCooperationResponse(rejection_reason=None)
 
     def _validate_request(self, request: AcceptCooperationRequest) -> None:

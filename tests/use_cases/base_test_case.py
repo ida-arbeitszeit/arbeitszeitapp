@@ -55,11 +55,14 @@ class BaseTestCase(TestCase):
         self._lazy_property_cache = dict()
         super().tearDown()
 
-    member_generator = _lazy_property(MemberGenerator)
-    company_generator = _lazy_property(CompanyGenerator)
-    plan_generator = _lazy_property(PlanGenerator)
+    # It would be nice to have the following list sorted
+    # alphabetically
     accountant_generator = _lazy_property(AccountantGenerator)
-    coop_generator = _lazy_property(CooperationGenerator)
-    datetime_service = _lazy_property(FakeDatetimeService)
-    price_checker = _lazy_property(PriceChecker)
     balance_checker = _lazy_property(BalanceChecker)
+    company_generator = _lazy_property(CompanyGenerator)
+    coop_generator = _lazy_property(CooperationGenerator)
+    cooperation_generator = _lazy_property(CooperationGenerator)
+    datetime_service = _lazy_property(FakeDatetimeService)
+    member_generator = _lazy_property(MemberGenerator)
+    plan_generator = _lazy_property(PlanGenerator)
+    price_checker = _lazy_property(PriceChecker)
