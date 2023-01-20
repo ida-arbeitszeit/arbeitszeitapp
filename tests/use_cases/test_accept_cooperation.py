@@ -5,7 +5,6 @@ from uuid import UUID, uuid4
 from arbeitszeit.entities import ProductionCosts
 from arbeitszeit.use_cases import AcceptCooperation, AcceptCooperationRequest
 from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
-from tests.data_generators import CooperationGenerator
 
 from .base_test_case import BaseTestCase
 
@@ -13,7 +12,6 @@ from .base_test_case import BaseTestCase
 class AcceptCooperationTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.cooperation_generator = self.injector.get(CooperationGenerator)
         self.accept_cooperation = self.injector.get(AcceptCooperation)
         self.get_plan_summary_use_case = self.injector.get(GetPlanSummaryCompany)
 

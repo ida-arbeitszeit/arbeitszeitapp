@@ -5,7 +5,6 @@ from uuid import UUID
 from arbeitszeit.entities import AccountTypes, ProductionCosts
 from arbeitszeit.use_cases import UpdatePlansAndPayout, get_company_transactions
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts, ShowMyAccountsRequest
-from tests.data_generators import CooperationGenerator
 from tests.use_cases.base_test_case import BaseTestCase
 
 from .dependency_injection import get_dependency_injector
@@ -21,7 +20,6 @@ class UseCaseTests(BaseTestCase):
         super().setUp()
         self.injector = get_dependency_injector()
         self.payout = self.injector.get(UpdatePlansAndPayout)
-        self.cooperation_generator = self.injector.get(CooperationGenerator)
         self.transaction_repository = self.injector.get(TransactionRepository)
         self.payout_factor_repository = self.injector.get(FakePayoutFactorRepository)
         self.show_my_accounts = self.injector.get(ShowMyAccounts)
