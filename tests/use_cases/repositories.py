@@ -46,6 +46,7 @@ from arbeitszeit.entities import (
 from tests.search_tree import SearchTree
 
 T = TypeVar("T")
+QueryResultT = TypeVar("QueryResultT", bound="QueryResultImpl")
 
 
 @dataclass
@@ -53,13 +54,13 @@ class QueryResultImpl(Generic[T]):
     items: Callable[[], Iterable[T]]
     entities: EntityStorage
 
-    def limit(self, n: int) -> QueryResultImpl[T]:
+    def limit(self: QueryResultT, n: int) -> QueryResultT:
         return type(self)(
             items=lambda: islice(self.items(), n),
             entities=self.entities,
         )
 
-    def offset(self, n: int) -> QueryResultImpl[T]:
+    def offset(self: QueryResultT, n: int) -> QueryResultT:
         return type(self)(
             items=lambda: islice(self.items(), n, None),
             entities=self.entities,
@@ -79,7 +80,7 @@ class QueryResultImpl(Generic[T]):
         return len(list(self.items()))
 
 
-class PlanResult(QueryResultImpl[Plan], interfaces.PlanResult):
+class PlanResult(QueryResultImpl[Plan]):
     def ordered_by_creation_date(self, ascending: bool = True) -> PlanResult:
         return type(self)(
             items=lambda: sorted(
@@ -124,12 +125,6 @@ class PlanResult(QueryResultImpl[Plan], interfaces.PlanResult):
             lambda plan: plan.requested_cooperation == cooperation
             if cooperation
             else plan.requested_cooperation is not None
-        )
-
-    def _filtered_by(self, key: Callable[[Plan], bool]) -> PlanResult:
-        return type(self)(
-            items=lambda: filter(key, self.items()),
-            entities=self.entities,
         )
 
     def that_are_in_same_cooperation_as(self, plan: UUID) -> PlanResult:
@@ -178,36 +173,61 @@ class PlanResult(QueryResultImpl[Plan], interfaces.PlanResult):
             items=new_items,
         )
 
-    def set_cooperation(self, cooperation: Optional[UUID]) -> int:
-        plans_changed = 0
-        for plan in self.items():
+    def update(self) -> PlanUpdate:
+        return PlanUpdate(
+            items=self.items,
+            update_functions=[],
+        )
+
+    def _filtered_by(self, key: Callable[[Plan], bool]) -> PlanResult:
+        return type(self)(
+            items=lambda: filter(key, self.items()),
+            entities=self.entities,
+        )
+
+
+@dataclass
+class PlanUpdate:
+    items: Callable[[], Iterable[Plan]]
+    update_functions: List[Callable[[Plan], None]]
+
+    def set_cooperation(self, cooperation: Optional[UUID]) -> PlanUpdate:
+        def update(plan: Plan) -> None:
             plan.cooperation = cooperation
-            plans_changed += 1
-        return plans_changed
 
-    def set_requested_cooperation(self, cooperation: Optional[UUID]) -> int:
-        plans_changed = 0
-        for plan in self.items():
+        return self._add_update(update)
+
+    def set_requested_cooperation(self, cooperation: Optional[UUID]) -> PlanUpdate:
+        def update(plan: Plan) -> None:
             plan.requested_cooperation = cooperation
-            plans_changed += 1
-        return plans_changed
 
-    def set_approval_date(self, approval_date: Optional[datetime]) -> int:
-        plans_changed = 0
-        for plan in self.items():
+        return self._add_update(update)
+
+    def set_approval_date(self, approval_date: Optional[datetime]) -> PlanUpdate:
+        def update(plan: Plan) -> None:
             plan.approval_date = approval_date
-            plans_changed += 1
-        return plans_changed
 
-    def set_approval_reason(self, reason: Optional[str]) -> int:
-        plans_changed = 0
-        for plan in self.items():
+        return self._add_update(update)
+
+    def set_approval_reason(self, reason: Optional[str]) -> PlanUpdate:
+        def update(plan: Plan) -> None:
             plan.approval_reason = reason
-            plans_changed += 1
-        return plans_changed
+
+        return self._add_update(update)
+
+    def perform(self) -> int:
+        items_affected = 0
+        for item in self.items():
+            for update in self.update_functions:
+                update(item)
+            items_affected += 1
+        return items_affected
+
+    def _add_update(self, update: Callable[[Plan], None]) -> PlanUpdate:
+        return replace(self, update_functions=self.update_functions + [update])
 
 
-class MemberResult(QueryResultImpl[Member], interfaces.MemberResult):
+class MemberResult(QueryResultImpl[Member]):
     def working_at_company(self, company: UUID) -> MemberResult:
         return self._filtered_by(
             lambda member: member.id in self.entities.company_workers.get(company, []),
@@ -235,7 +255,7 @@ class MemberResult(QueryResultImpl[Member], interfaces.MemberResult):
         )
 
 
-class PurchaseResult(QueryResultImpl[Purchase], interfaces.PurchaseResult):
+class PurchaseResult(QueryResultImpl[Purchase]):
     def ordered_by_creation_date(self, ascending: bool = True) -> PurchaseResult:
         return type(self)(
             items=lambda: sorted(
@@ -287,7 +307,7 @@ class PurchaseResult(QueryResultImpl[Purchase], interfaces.PurchaseResult):
         )
 
 
-class CompanyResult(QueryResultImpl[Company], interfaces.CompanyResult):
+class CompanyResult(QueryResultImpl[Company]):
     def with_id(self, id_: UUID) -> CompanyResult:
         return type(self)(
             items=lambda: filter(lambda company: company.id == id_, self.items()),
@@ -317,7 +337,7 @@ class CompanyResult(QueryResultImpl[Company], interfaces.CompanyResult):
         return companies_changed
 
 
-class TransactionResult(QueryResultImpl[Transaction], interfaces.TransactionResult):
+class TransactionResult(QueryResultImpl[Transaction]):
     def where_account_is_sender_or_receiver(self, *account: UUID) -> TransactionResult:
         return replace(
             self,
@@ -369,7 +389,7 @@ class TransactionResult(QueryResultImpl[Transaction], interfaces.TransactionResu
         )
 
 
-class AccountResult(QueryResultImpl[Account], interfaces.AccountResult):
+class AccountResult(QueryResultImpl[Account]):
     def with_id(self, *id_: UUID) -> AccountResult:
         return replace(
             self,

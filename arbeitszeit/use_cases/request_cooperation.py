@@ -58,7 +58,7 @@ class RequestCooperation:
             )
         self.plan_repository.get_plans().with_id(
             request.plan_id
-        ).set_requested_cooperation(request.cooperation_id)
+        ).update().set_requested_cooperation(request.cooperation_id).perform()
         return RequestCooperationResponse(
             coordinator_name=cooperation.coordinator.name,
             coordinator_email=cooperation.coordinator.email,

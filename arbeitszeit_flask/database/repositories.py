@@ -1,9 +1,19 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field, replace
 from datetime import datetime
 from decimal import Decimal
-from typing import Any, Callable, Generic, Iterable, Iterator, Optional, TypeVar, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generic,
+    Iterable,
+    Iterator,
+    Optional,
+    TypeVar,
+    Union,
+)
 from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
@@ -188,61 +198,83 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
                 lambda query: query.filter(models.Plan.requested_cooperation != None)
             )
 
-    def set_cooperation(self, cooperation: Optional[UUID]) -> int:
-        sql_statement = (
-            update(models.Plan)
-            .where(
-                models.Plan.id.in_(
-                    self.query.with_entities(models.Plan.id).scalar_subquery()
-                )
-            )
-            .values(cooperation=str(cooperation) if cooperation else None)
-            .execution_options(synchronize_session="fetch")
+    def update(self) -> PlanUpdate:
+        return PlanUpdate(
+            query=self.query,
+            db=self.db,
         )
-        result = self.db.session.execute(sql_statement)
-        return result.rowcount
 
-    def set_requested_cooperation(self, cooperation: Optional[UUID]) -> int:
-        sql_statement = (
-            update(models.Plan)
-            .where(
-                models.Plan.id.in_(
-                    self.query.with_entities(models.Plan.id).scalar_subquery()
-                )
-            )
-            .values(requested_cooperation=str(cooperation) if cooperation else None)
-            .execution_options(synchronize_session="fetch")
-        )
-        result = self.db.session.execute(sql_statement)
-        return result.rowcount
 
-    def set_approval_date(self, approval_date: Optional[datetime]) -> int:
-        sql_statement = (
-            update(models.PlanReview)
-            .where(
-                models.PlanReview.plan_id.in_(
-                    self.query.with_entities(models.Plan.id).scalar_subquery()
-                )
-            )
-            .values(approval_date=approval_date)
-            .execution_options(synchronize_session="fetch")
-        )
-        result = self.db.session.execute(sql_statement)
-        return result.rowcount
+@dataclass
+class PlanUpdate:
+    query: Select
+    db: SQLAlchemy
+    plan_update_values: Dict[str, Any] = field(default_factory=dict)
+    review_update_values: Dict[str, Any] = field(default_factory=dict)
 
-    def set_approval_reason(self, reason: Optional[str]) -> int:
-        sql_statement = (
-            update(models.PlanReview)
-            .where(
-                models.PlanReview.plan_id.in_(
-                    self.query.with_entities(models.Plan.id).scalar_subquery()
+    def perform(self) -> int:
+        row_count = 0
+        if self.plan_update_values:
+            sql_statement = (
+                update(models.Plan)
+                .where(
+                    models.Plan.id.in_(
+                        self.query.with_entities(models.Plan.id).scalar_subquery()
+                    )
                 )
+                .values(**self.plan_update_values)
+                .execution_options(synchronize_session="fetch")
             )
-            .values(approval_reason=reason)
-            .execution_options(synchronize_session="fetch")
+            result = self.db.session.execute(sql_statement)
+            row_count = result.rowcount
+        if self.review_update_values:
+            sql_statement = (
+                update(models.PlanReview)
+                .where(
+                    models.PlanReview.plan_id.in_(
+                        self.query.with_entities(models.Plan.id).scalar_subquery()
+                    )
+                )
+                .values(**self.review_update_values)
+                .execution_options(synchronize_session="fetch")
+            )
+            result = self.db.session.execute(sql_statement)
+            row_count = max(row_count, result.rowcount)
+        return row_count
+
+    def set_cooperation(self, cooperation: Optional[UUID]) -> PlanUpdate:
+        return replace(
+            self,
+            plan_update_values=dict(
+                self.plan_update_values,
+                cooperation=str(cooperation) if cooperation else None,
+            ),
         )
-        result = self.db.session.execute(sql_statement)
-        return result.rowcount
+
+    def set_requested_cooperation(self, cooperation: Optional[UUID]) -> PlanUpdate:
+        return replace(
+            self,
+            plan_update_values=dict(
+                self.plan_update_values,
+                requested_cooperation=str(cooperation) if cooperation else None,
+            ),
+        )
+
+    def set_approval_date(self, approval_date: Optional[datetime]) -> PlanUpdate:
+        return replace(
+            self,
+            review_update_values=dict(
+                self.review_update_values, approval_date=approval_date
+            ),
+        )
+
+    def set_approval_reason(self, reason: Optional[str]) -> PlanUpdate:
+        return replace(
+            self,
+            review_update_values=dict(
+                self.review_update_values, approval_reason=reason
+            ),
+        )
 
 
 class MemberQueryResult(FlaskQueryResult[entities.Member]):

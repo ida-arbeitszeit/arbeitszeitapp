@@ -44,7 +44,9 @@ class EndCooperation:
         assert (
             self.plan_repository.get_plans()
             .with_id(request.plan_id)
+            .update()
             .set_cooperation(None)
+            .perform()
         )
         return EndCooperationResponse(rejection_reason=None)
 
