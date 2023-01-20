@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 from typing import Any, Dict, Optional, Protocol, Union
 
-JsonValue = Union["JsonDict", "JsonString"]
+JsonValue = Union[
+    "JsonDict", "JsonString", "JsonDecimal", "JsonBoolean", "JsonDatetime"
+]
 
 
 @dataclass
@@ -18,6 +20,23 @@ class JsonDict:
 
 @dataclass
 class JsonString:
+    pass
+
+
+@dataclass
+class JsonDecimal:
+    """A floating point number with an arbitrary precision."""
+
+    pass
+
+
+@dataclass
+class JsonBoolean:
+    pass
+
+
+@dataclass
+class JsonDatetime:
     pass
 
 
