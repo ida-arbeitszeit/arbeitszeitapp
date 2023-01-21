@@ -41,5 +41,14 @@ class QueriedPlanGenerator:
             activation_date=activation_date,
         )
 
-    def get_response(self, queried_plans: List[QueriedPlan]) -> PlanQueryResponse:
-        return PlanQueryResponse(results=[plan for plan in queried_plans])
+    def get_response(
+        self,
+        queried_plans: List[QueriedPlan],
+        page: Optional[int] = None,
+        num_pages: Optional[int] = None,
+    ) -> PlanQueryResponse:
+        return PlanQueryResponse(
+            results=[plan for plan in queried_plans],
+            page=page or 1,
+            num_pages=num_pages or 1,
+        )
