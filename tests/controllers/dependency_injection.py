@@ -16,8 +16,8 @@ from arbeitszeit_web.controllers.show_my_accounts_controller import (
 from arbeitszeit_web.create_draft import CreateDraftController
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyController
 from arbeitszeit_web.pay_consumer_product import PayConsumerProductController
-from arbeitszeit_web.request_cooperation import RequestCooperationController
 from arbeitszeit_web.request import Request
+from arbeitszeit_web.request_cooperation import RequestCooperationController
 from tests.dependency_injection import TestingModule
 from tests.request import FakeRequest
 from tests.session import FakeSession

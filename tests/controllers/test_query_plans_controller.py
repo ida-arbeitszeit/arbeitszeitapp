@@ -2,12 +2,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Optional
-from unittest import TestCase
 
 from arbeitszeit.use_cases import PlanFilter
 from arbeitszeit.use_cases.query_plans import PlanSorting
 from arbeitszeit_web.query_plans import NotAnIntegerError, QueryPlansController
-
 from tests.controllers.base_test_case import BaseTestCase
 from tests.request import FakeRequest
 
@@ -93,8 +91,11 @@ class QueryPlansControllerTests(BaseTestCase):
         )
         self.assertEqual(request.sorting_category, PlanSorting.by_price)
 
+
 class PaginationTests(BaseTestCase):
-    def test_no_page_is_passed_to_use_case_request_if_none_was_given_in_request_query(self):
+    def test_no_page_is_passed_to_use_case_request_if_none_was_given_in_request_query(
+        self,
+    ):
         request = FakeRequest()
         controller = QueryPlansController(request=request)
         use_case_request = controller.import_form_data(form=None)
@@ -106,7 +107,7 @@ class PaginationTests(BaseTestCase):
         controller = QueryPlansController(request=request)
         with self.assertRaises(NotAnIntegerError):
             controller.import_form_data(form=None)
-            
+
     def test_request_page_parameter_gets_passed_to_use_case_request(self):
         request = FakeRequest()
         request.set_arg(arg="page", value="123")
