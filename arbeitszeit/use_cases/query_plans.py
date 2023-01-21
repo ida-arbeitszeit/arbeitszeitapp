@@ -49,6 +49,7 @@ class QueryPlansRequest:
     query_string: Optional[str]
     filter_category: PlanFilter
     sorting_category: PlanSorting
+    page: Optional[int] = None
 
 
 @inject

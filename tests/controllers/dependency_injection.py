@@ -17,6 +17,7 @@ from arbeitszeit_web.create_draft import CreateDraftController
 from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyController
 from arbeitszeit_web.pay_consumer_product import PayConsumerProductController
 from arbeitszeit_web.request_cooperation import RequestCooperationController
+from arbeitszeit_web.request import Request
 from tests.dependency_injection import TestingModule
 from tests.request import FakeRequest
 from tests.session import FakeSession
@@ -25,6 +26,10 @@ from tests.use_cases.dependency_injection import InMemoryModule
 
 
 class ControllerTestsModule(Module):
+    @provider
+    def provide_request(self) -> Request:
+        return FakeRequest()
+
     @provider
     def provide_answer_company_work_invite_controller(
         self, session: FakeSession

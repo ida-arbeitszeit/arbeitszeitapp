@@ -9,12 +9,17 @@ from arbeitszeit.use_cases.query_plans import (
     PlanSorting,
     QueryPlansRequest,
 )
+from arbeitszeit_web.pagination import PAGE_PARAMETER_NAME
 from arbeitszeit_web.session import Session
+from arbeitszeit_web.request import Request
 from arbeitszeit_web.translator import Translator
 
 from .notification import Notifier
 from .url_index import UrlIndex, UserUrlIndex
 
+
+class NotAnIntegerError(Exception):
+    pass
 
 class QueryPlansFormData(Protocol):
     def get_query_string(self) -> str:
@@ -27,7 +32,11 @@ class QueryPlansFormData(Protocol):
         ...
 
 
+@inject
+@dataclass
 class QueryPlansController:
+    request: Request
+
     def import_form_data(self, form: Optional[QueryPlansFormData]) -> QueryPlansRequest:
         if form is None:
             query = None
@@ -41,7 +50,18 @@ class QueryPlansController:
             query_string=query,
             filter_category=filter_category,
             sorting_category=sorting_category,
+            page=self._get_page()
         )
+
+    def _get_page(self) -> Optional[int]:
+        page_str = self.request.query_string().get(PAGE_PARAMETER_NAME)
+        if page_str is None:
+            return None
+        else:
+            try:
+                return int(page_str)
+            except ValueError:
+                raise NotAnIntegerError(f"Page parameter '{page_str}' is not an integer.")
 
     def _import_filter_category(self, form: QueryPlansFormData) -> PlanFilter:
         if form.get_category_string() == "Plan-ID":

@@ -6,14 +6,15 @@ from unittest import TestCase
 
 from arbeitszeit.use_cases import PlanFilter
 from arbeitszeit.use_cases.query_plans import PlanSorting
-from arbeitszeit_web.query_plans import QueryPlansController
+from arbeitszeit_web.query_plans import NotAnIntegerError, QueryPlansController
 
-from .dependency_injection import get_dependency_injector
+from tests.controllers.base_test_case import BaseTestCase
+from tests.request import FakeRequest
 
 
-class QueryPlansControllerTests(TestCase):
+class QueryPlansControllerTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.controller = self.injector.get(QueryPlansController)
 
     def test_that_empty_query_string_translates_to_no_query_string_in_request(
@@ -91,6 +92,27 @@ class QueryPlansControllerTests(TestCase):
             form=make_fake_form(sorting_category="price")
         )
         self.assertEqual(request.sorting_category, PlanSorting.by_price)
+
+class PaginationTests(BaseTestCase):
+    def test_no_page_is_passed_to_use_case_request_if_none_was_given_in_request_query(self):
+        request = FakeRequest()
+        controller = QueryPlansController(request=request)
+        use_case_request = controller.import_form_data(form=None)
+        self.assertIsNone(use_case_request.page)
+
+    def test_error_is_raised_if_request_has_invalid_page_parameter(self):
+        request = FakeRequest()
+        request.set_arg(arg="page", value="123abc")
+        controller = QueryPlansController(request=request)
+        with self.assertRaises(NotAnIntegerError):
+            controller.import_form_data(form=None)
+            
+    def test_request_page_parameter_gets_passed_to_use_case_request(self):
+        request = FakeRequest()
+        request.set_arg(arg="page", value="123")
+        controller = QueryPlansController(request=request)
+        use_case_request = controller.import_form_data(form=None)
+        self.assertEqual(use_case_request.page, 123)
 
 
 def make_fake_form(
