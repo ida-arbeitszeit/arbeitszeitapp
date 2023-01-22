@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from arbeitszeit.entities import Cooperation
 from arbeitszeit.use_cases import ListAllCooperations, ListAllCooperationsResponse
 from tests.data_generators import CooperationGenerator, PlanGenerator

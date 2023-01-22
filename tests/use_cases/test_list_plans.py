@@ -1,4 +1,3 @@
-from datetime import datetime
 from uuid import uuid4
 
 from arbeitszeit.entities import Company, Plan

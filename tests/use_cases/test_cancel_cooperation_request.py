@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from arbeitszeit.use_cases import (
     CancelCooperationSolicitation,
     CancelCooperationSolicitationRequest,
