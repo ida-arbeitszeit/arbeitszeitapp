@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from decimal import Decimal
 from unittest import TestCase
 
@@ -35,35 +35,31 @@ class TestPlanExpirationDate(TestCase):
     def test_that_plan_has_no_expiration_date_if_plan_has_not_been_approved(
         self,
     ) -> None:
-        plan = self.plan_generator.create_plan(approved=False, activation_date=None)
+        plan = self.plan_generator.create_plan(approved=False)
         self.assertIsNone(plan.expiration_date)
 
     def test_that_plan_has_an_expiration_date_if_plan_has_been_approved(self) -> None:
-        plan = self.plan_generator.create_plan(
-            timeframe=2, approved=True, activation_date=self.datetime_service.now()
-        )
+        plan = self.plan_generator.create_plan(timeframe=2, approved=True)
         self.assertIsNotNone(plan.expiration_date)
 
     def test_that_expiration_date_is_correctly_calculated_if_plan_expires_now(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime.datetime.now())
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
         plan = self.plan_generator.create_plan(
             timeframe=1,
-            activation_date=self.datetime_service.now_minus_one_day(),
             approved=True,
         )
-        expected_expiration_time = self.datetime_service.now()
+        expected_expiration_time = datetime(2000, 1, 2)
         assert plan.expiration_date == expected_expiration_time
 
     def test_that_expiration_date_is_correctly_calculated_if_plan_expires_in_the_future(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime.datetime.now())
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
         plan = self.plan_generator.create_plan(
             timeframe=2,
-            activation_date=self.datetime_service.now_minus_one_day(),
             approved=True,
         )
-        expected_expiration_time = self.datetime_service.now_plus_one_day()
+        expected_expiration_time = datetime(2000, 1, 3)
         assert plan.expiration_date == expected_expiration_time

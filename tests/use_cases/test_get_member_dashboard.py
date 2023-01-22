@@ -45,7 +45,7 @@ class UseCaseTests(TestCase):
     def test_three_latest_plans_has_at_least_one_entry_if_there_is_one_active_plan(
         self,
     ):
-        self.plan_generator.create_plan(activation_date=datetime.min)
+        self.plan_generator.create_plan()
         response = self.get_member_dashboard(self.member.id)
         self.assertTrue(response.three_latest_plans)
 

@@ -43,7 +43,7 @@ def test_one_returned_cooperation_shows_correct_info(
     cooperation_generator: CooperationGenerator,
     plan_generator: PlanGenerator,
 ):
-    plan = plan_generator.create_plan(activation_date=datetime.min)
+    plan = plan_generator.create_plan()
     cooperation = cooperation_generator.create_cooperation(plans=[plan])
     response = use_case()
     assert len(response.cooperations) == 1
@@ -59,8 +59,8 @@ def test_one_cooperation_with_correct_plan_count_is_returned_if_there_is_one_coo
     cooperation_generator: CooperationGenerator,
     plan_generator: PlanGenerator,
 ):
-    plan1 = plan_generator.create_plan(activation_date=datetime.min)
-    plan2 = plan_generator.create_plan(activation_date=datetime.min)
+    plan1 = plan_generator.create_plan()
+    plan2 = plan_generator.create_plan()
     cooperation = cooperation_generator.create_cooperation(plans=[plan1, plan2])
     response = use_case()
     assert response.cooperations[0].plan_count == 2

@@ -42,24 +42,24 @@ class GetCoopSummaryTests(BaseTestCase):
 
     def test_that_correct_amount_of_associated_plans_are_shown(self) -> None:
         requester = self.company_generator.create_company_entity()
-        plan1 = self.plan_generator.create_plan(activation_date=datetime.min)
-        plan2 = self.plan_generator.create_plan(activation_date=datetime.min)
+        plan1 = self.plan_generator.create_plan()
+        plan2 = self.plan_generator.create_plan()
         coop = self.cooperation_generator.create_cooperation(plans=[plan1, plan2])
         summary = self.get_coop_summary(GetCoopSummaryRequest(requester.id, coop.id))
         self.assert_success(summary, lambda s: len(s.plans) == 2)
 
     def test_that_correct_coordinator_id_is_shown(self) -> None:
         requester = self.company_generator.create_company_entity()
-        plan1 = self.plan_generator.create_plan(activation_date=datetime.min)
-        plan2 = self.plan_generator.create_plan(activation_date=datetime.min)
+        plan1 = self.plan_generator.create_plan()
+        plan2 = self.plan_generator.create_plan()
         coop = self.cooperation_generator.create_cooperation(plans=[plan1, plan2])
         summary = self.get_coop_summary(GetCoopSummaryRequest(requester.id, coop.id))
         self.assert_success(summary, lambda s: s.coordinator_id == coop.coordinator.id)
 
     def test_that_correct_coordinator_name_is_shown(self) -> None:
         requester = self.company_generator.create_company_entity()
-        plan1 = self.plan_generator.create_plan(activation_date=datetime.min)
-        plan2 = self.plan_generator.create_plan(activation_date=datetime.min)
+        plan1 = self.plan_generator.create_plan()
+        plan2 = self.plan_generator.create_plan()
         coop = self.cooperation_generator.create_cooperation(plans=[plan1, plan2])
         summary = self.get_coop_summary(GetCoopSummaryRequest(requester.id, coop.id))
         self.assert_success(
@@ -69,12 +69,10 @@ class GetCoopSummaryTests(BaseTestCase):
     def test_that_correct_info_of_associated_plan_is_shown(self) -> None:
         requester = self.company_generator.create_company_entity()
         plan1 = self.plan_generator.create_plan(
-            activation_date=datetime.min,
             costs=ProductionCosts(Decimal(2), Decimal(2), Decimal(1)),
             amount=10,
         )
         plan2 = self.plan_generator.create_plan(
-            activation_date=datetime.min,
             costs=ProductionCosts(Decimal(4), Decimal(4), Decimal(2)),
             amount=10,
         )

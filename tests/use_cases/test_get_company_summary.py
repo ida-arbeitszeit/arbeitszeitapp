@@ -313,8 +313,8 @@ class UseCaseTests(BaseTestCase):
 
     def test_returns_list_of_companys_plans_when_there_are_any(self) -> None:
         company = self.company_generator.create_company()
-        self.plan_generator.create_plan(planner=company, activation_date=datetime.min)
-        self.plan_generator.create_plan(planner=company, activation_date=None)
+        self.plan_generator.create_plan(planner=company)
+        self.plan_generator.create_plan(planner=company, approved=False)
         response = self.get_company_summary(company)
         assert response
         assert len(response.plan_details) == 2

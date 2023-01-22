@@ -245,7 +245,6 @@ class PlanGenerator:
     def create_plan(
         self,
         *,
-        activation_date: Optional[datetime] = None,
         amount: int = 100,
         approved: bool = True,
         costs: Optional[ProductionCosts] = None,
@@ -294,15 +293,15 @@ class PlanGenerator:
         )
         assert plan
         assert plan.is_approved
-        if activation_date:
-            self.plan_repository.activate_plan(plan, activation_date)
         if requested_cooperation:
             request_cooperation_response = self.request_cooperation(
                 RequestCooperationRequest(
                     plan.planner, plan.id, requested_cooperation.id
                 )
             )
-            assert not request_cooperation_response.is_rejected
+            assert (
+                not request_cooperation_response.is_rejected
+            ), f"Cooperation request failed: {request_cooperation_response}"
         if cooperation:
             self.request_cooperation(
                 RequestCooperationRequest(plan.planner, plan.id, cooperation.id)
@@ -316,6 +315,10 @@ class PlanGenerator:
             self.plan_repository.hide_plan(plan.id)
         if not is_available:
             self.plan_repository.toggle_product_availability(plan)
+        plan = (
+            self.plan_repository.get_plans().with_id(file_plan_response.plan_id).first()
+        )
+        assert plan
         return plan
 
     def draft_plan(

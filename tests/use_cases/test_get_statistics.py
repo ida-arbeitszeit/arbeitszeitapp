@@ -130,22 +130,16 @@ class GetStatisticsTester(TestCase):
         assert stats.available_product == num_companies * Decimal(22)
 
     def test_counting_of_active_plans(self) -> None:
-        self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day()
-        )
-        self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day()
-        )
+        self.plan_generator.create_plan()
+        self.plan_generator.create_plan()
         stats = self.use_case()
         assert stats.active_plans_count == 2
 
     def test_counting_of_plans_that_are_both_active_and_public(self) -> None:
         self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day(),
             is_public_service=True,
         )
         self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day(),
             is_public_service=True,
         )
         stats = self.use_case()
@@ -155,33 +149,25 @@ class GetStatisticsTester(TestCase):
         self,
     ) -> None:
         self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day(),
             is_public_service=False,
         )
         self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day(),
             is_public_service=True,
         )
         stats = self.use_case()
         assert stats.active_plans_public_count == 1
 
     def test_average_calculation_of_two_active_plan_timeframes(self) -> None:
-        self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day(), timeframe=3
-        )
-        self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day(), timeframe=7
-        )
+        self.plan_generator.create_plan(timeframe=3)
+        self.plan_generator.create_plan(timeframe=7)
         stats = self.use_case()
         assert stats.avg_timeframe == 5
 
     def test_adding_up_work_of_two_plans(self) -> None:
         self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day(),
             costs=production_costs(3, 1, 1),
         )
         self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day(),
             costs=production_costs(2, 1, 1),
         )
         stats = self.use_case()
@@ -189,11 +175,9 @@ class GetStatisticsTester(TestCase):
 
     def test_adding_up_resources_of_two_plans(self) -> None:
         self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day(),
             costs=production_costs(1, 3, 1),
         )
         self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day(),
             costs=production_costs(1, 2, 1),
         )
         stats = self.use_case()
@@ -201,11 +185,9 @@ class GetStatisticsTester(TestCase):
 
     def test_adding_up_means_of_two_plans(self) -> None:
         self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day(),
             costs=production_costs(1, 1, 3),
         )
         self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day(),
             costs=production_costs(1, 1, 2),
         )
         stats = self.use_case()

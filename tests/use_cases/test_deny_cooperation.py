@@ -47,7 +47,7 @@ class UseCaseTests(BaseTestCase):
 
     def test_error_is_raised_when_cooperation_was_not_requested(self) -> None:
         requester = self.company_generator.create_company()
-        plan = self.plan_generator.create_plan(activation_date=datetime.now())
+        plan = self.plan_generator.create_plan()
         cooperation = self.cooperation_generator.create_cooperation(
             coordinator=requester
         )
@@ -69,9 +69,7 @@ class UseCaseTests(BaseTestCase):
         cooperation = self.cooperation_generator.create_cooperation(
             coordinator=coordinator
         )
-        plan = self.plan_generator.create_plan(
-            activation_date=datetime.now(), requested_cooperation=cooperation
-        )
+        plan = self.plan_generator.create_plan(requested_cooperation=cooperation)
         request = DenyCooperationRequest(
             requester_id=requester, plan_id=plan.id, cooperation_id=cooperation.id
         )
@@ -87,9 +85,7 @@ class UseCaseTests(BaseTestCase):
         cooperation = self.cooperation_generator.create_cooperation(
             coordinator=requester
         )
-        plan = self.plan_generator.create_plan(
-            activation_date=datetime.now(), requested_cooperation=cooperation
-        )
+        plan = self.plan_generator.create_plan(requested_cooperation=cooperation)
         request = DenyCooperationRequest(
             requester_id=requester, plan_id=plan.id, cooperation_id=cooperation.id
         )
@@ -103,9 +99,7 @@ class UseCaseTests(BaseTestCase):
         cooperation = self.cooperation_generator.create_cooperation(
             coordinator=requester
         )
-        plan = self.plan_generator.create_plan(
-            activation_date=datetime.now(), requested_cooperation=cooperation
-        )
+        plan = self.plan_generator.create_plan(requested_cooperation=cooperation)
         request = DenyCooperationRequest(
             requester_id=requester, plan_id=plan.id, cooperation_id=cooperation.id
         )

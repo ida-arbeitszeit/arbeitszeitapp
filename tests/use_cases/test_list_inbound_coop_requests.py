@@ -33,12 +33,8 @@ class UseCaseTest(BaseTestCase):
     ):
         coordinator = self.company_generator.create_company_entity()
         coop = self.coop_generator.create_cooperation(coordinator=coordinator)
-        requesting_plan1 = self.plan_generator.create_plan(
-            requested_cooperation=coop, activation_date=datetime.min
-        )
-        requesting_plan2 = self.plan_generator.create_plan(
-            requested_cooperation=coop, activation_date=datetime.min
-        )
+        requesting_plan1 = self.plan_generator.create_plan(requested_cooperation=coop)
+        requesting_plan2 = self.plan_generator.create_plan(requested_cooperation=coop)
         response = self.use_case(ListInboundCoopRequestsRequest(coordinator.id))
         assert len(response.cooperation_requests) == 2
         assert self.plan_in_list(requesting_plan1, response)

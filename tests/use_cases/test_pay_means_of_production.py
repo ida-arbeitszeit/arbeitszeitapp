@@ -42,7 +42,7 @@ class PayMeansOfProductionTests(BaseTestCase):
 
     def test_payment_is_rejected_when_purpose_is_consumption(self) -> None:
         sender = self.company_generator.create_company_entity()
-        plan = self.plan_generator.create_plan(activation_date=datetime.min)
+        plan = self.plan_generator.create_plan()
         purpose = PurposesOfPurchases.consumption
         response = self.pay_means_of_production(
             PayMeansOfProductionRequest(sender.id, plan.id, 5, purpose)
@@ -52,10 +52,7 @@ class PayMeansOfProductionTests(BaseTestCase):
 
     def test_reject_payment_trying_to_pay_public_service(self) -> None:
         sender = self.company_generator.create_company_entity()
-        plan = self.plan_generator.create_plan(
-            is_public_service=True,
-            activation_date=self.datetime_service.now_minus_one_day(),
-        )
+        plan = self.plan_generator.create_plan(is_public_service=True)
         purpose = PurposesOfPurchases.means_of_prod
         response = self.pay_means_of_production(
             PayMeansOfProductionRequest(sender.id, plan.id, 5, purpose)
@@ -68,9 +65,7 @@ class PayMeansOfProductionTests(BaseTestCase):
 
     def test_reject_payment_trying_to_pay_own_product(self) -> None:
         sender = self.company_generator.create_company()
-        plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day(), planner=sender
-        )
+        plan = self.plan_generator.create_plan(planner=sender)
         purpose = PurposesOfPurchases.means_of_prod
         response = self.pay_means_of_production(
             PayMeansOfProductionRequest(sender, plan.id, 5, purpose)
@@ -80,9 +75,7 @@ class PayMeansOfProductionTests(BaseTestCase):
 
     def test_balance_of_buyer_of_means_of_prod_reduced(self) -> None:
         sender = self.company_generator.create_company()
-        plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day()
-        )
+        plan = self.plan_generator.create_plan()
         purpose = PurposesOfPurchases.means_of_prod
         pieces = 5
 
@@ -98,9 +91,7 @@ class PayMeansOfProductionTests(BaseTestCase):
 
     def test_balance_of_buyer_of_raw_materials_reduced(self) -> None:
         sender = self.company_generator.create_company()
-        plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day()
-        )
+        plan = self.plan_generator.create_plan()
         purpose = PurposesOfPurchases.raw_materials
         pieces = 5
 
@@ -141,16 +132,8 @@ class PayMeansOfProductionTests(BaseTestCase):
     ) -> None:
         coop = self.cooperation_generator.create_cooperation()
         sender = self.company_generator.create_company()
-        plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day(),
-            amount=50,
-            cooperation=coop,
-        )
-        self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day(),
-            amount=200,
-            cooperation=coop,
-        )
+        plan = self.plan_generator.create_plan(amount=50, cooperation=coop)
+        self.plan_generator.create_plan(amount=200, cooperation=coop)
         purpose = PurposesOfPurchases.raw_materials
         pieces = 5
         balance_before_transaction = self.balance_checker.get_company_account_balances(
@@ -167,9 +150,7 @@ class PayMeansOfProductionTests(BaseTestCase):
 
     def test_correct_transaction_added_if_means_of_production_were_paid(self) -> None:
         sender = self.company_generator.create_company_entity()
-        plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day()
-        )
+        plan = self.plan_generator.create_plan()
         purpose = PurposesOfPurchases.means_of_prod
         pieces = 5
         transactions_before_payment = len(
@@ -198,9 +179,7 @@ class PayMeansOfProductionTests(BaseTestCase):
 
     def test_correct_transaction_added_if_raw_materials_were_paid(self) -> None:
         sender = self.company_generator.create_company_entity()
-        plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day()
-        )
+        plan = self.plan_generator.create_plan()
         purpose = PurposesOfPurchases.raw_materials
         pieces = 5
         transactions_before_payment = len(
@@ -229,9 +208,7 @@ class PayMeansOfProductionTests(BaseTestCase):
 
     def test_correct_purchase_added_if_means_of_production_were_paid(self) -> None:
         sender = self.company_generator.create_company_entity()
-        plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day()
-        )
+        plan = self.plan_generator.create_plan()
         purpose = PurposesOfPurchases.means_of_prod
         pieces = 5
         self.pay_means_of_production(
@@ -251,9 +228,7 @@ class PayMeansOfProductionTests(BaseTestCase):
 
     def test_correct_purchase_added_if_raw_materials_were_paid(self) -> None:
         sender = self.company_generator.create_company_entity()
-        plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day()
-        )
+        plan = self.plan_generator.create_plan()
         purpose = PurposesOfPurchases.raw_materials
         pieces = 5
         self.pay_means_of_production(
@@ -286,7 +261,7 @@ class PayMeansOfProductionTests(BaseTestCase):
 
     def test_plan_found_accepts_payment(self) -> None:
         buyer = self.company_generator.create_company_entity()
-        plan = self.plan_generator.create_plan(activation_date=datetime.min)
+        plan = self.plan_generator.create_plan()
         response = self.pay_means_of_production(
             PayMeansOfProductionRequest(
                 buyer=buyer.id,
@@ -309,9 +284,7 @@ class TestSuccessfulPayment(BaseTestCase):
         super().setUp()
         self.buyer = self.company_generator.create_company_entity()
         self.planner = self.company_generator.create_company()
-        self.plan = self.plan_generator.create_plan(
-            planner=self.planner, activation_date=datetime.min
-        )
+        self.plan = self.plan_generator.create_plan(planner=self.planner)
         self.pay_means_of_production = self.injector.get(PayMeansOfProduction)
         self.get_company_transactions = self.injector.get(GetCompanyTransactions)
         self.transaction_time = datetime(2020, 10, 1, 22, 30)

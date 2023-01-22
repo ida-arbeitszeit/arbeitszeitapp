@@ -42,10 +42,11 @@ class ApprovePlanUseCase:
             return self.Response(is_approved=False)
         matching_plans.update().set_approval_date(
             self.datetime_service.now()
-        ).set_approval_reason("approved").perform()
-        self.plan_repository.activate_plan(
-            plan=plan, activation_date=self.datetime_service.now()
-        )
+        ).set_approval_reason("approved").set_activation_timestamp(
+            self.datetime_service.now()
+        ).set_activation_status(
+            is_active=True
+        ).perform()
         self._create_transaction_from_social_accounting(
             plan, planner.means_account, plan.production_costs.means_cost
         )

@@ -58,9 +58,7 @@ class RequestCooperationTests(TestCase):
         cooperation2 = self.coop_generator.create_cooperation(
             coordinator=self.requester
         )
-        plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now(), cooperation=cooperation1
-        )
+        plan = self.plan_generator.create_plan(cooperation=cooperation1)
         request = RequestCooperationRequest(
             requester_id=self.requester,
             plan_id=plan.id,
@@ -78,7 +76,6 @@ class RequestCooperationTests(TestCase):
         requester = self.company_generator.create_company()
         cooperation1 = self.coop_generator.create_cooperation()
         plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now(),
             requested_cooperation=cooperation1,
         )
         cooperation2 = self.coop_generator.create_cooperation(coordinator=requester)
@@ -94,9 +91,7 @@ class RequestCooperationTests(TestCase):
 
     def test_error_is_raised_when_plan_is_public_plan(self) -> None:
         requester = self.company_generator.create_company()
-        plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now(), is_public_service=True
-        )
+        plan = self.plan_generator.create_plan(is_public_service=True)
         cooperation = self.coop_generator.create_cooperation(coordinator=requester)
         request = RequestCooperationRequest(
             requester_id=requester, plan_id=plan.id, cooperation_id=cooperation.id
@@ -109,9 +104,7 @@ class RequestCooperationTests(TestCase):
 
     def test_error_is_raised_when_requester_is_not_planner(self) -> None:
         requester = self.company_generator.create_company()
-        plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now()
-        )
+        plan = self.plan_generator.create_plan()
         cooperation = self.coop_generator.create_cooperation(coordinator=requester)
         request = RequestCooperationRequest(
             requester_id=requester, plan_id=plan.id, cooperation_id=cooperation.id
@@ -125,9 +118,7 @@ class RequestCooperationTests(TestCase):
 
     def test_requesting_cooperation_is_successful(self) -> None:
         requester = self.company_generator.create_company()
-        plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now(), planner=requester
-        )
+        plan = self.plan_generator.create_plan(planner=requester)
         cooperation = self.coop_generator.create_cooperation(coordinator=requester)
         request = RequestCooperationRequest(
             requester_id=requester, plan_id=plan.id, cooperation_id=cooperation.id
@@ -137,9 +128,7 @@ class RequestCooperationTests(TestCase):
 
     def test_successful_cooperation_request_returns_coordinator_data(self) -> None:
         requester = self.company_generator.create_company()
-        plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now(), planner=requester
-        )
+        plan = self.plan_generator.create_plan(planner=requester)
         cooperation = self.coop_generator.create_cooperation(coordinator=requester)
         request = RequestCooperationRequest(
             requester_id=requester, plan_id=plan.id, cooperation_id=cooperation.id
@@ -152,9 +141,7 @@ class RequestCooperationTests(TestCase):
         self,
     ) -> None:
         requester = self.company_generator.create_company()
-        plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now(), planner=requester
-        )
+        plan = self.plan_generator.create_plan(planner=requester)
         cooperation = self.coop_generator.create_cooperation(coordinator=requester)
         request = RequestCooperationRequest(
             requester_id=requester, plan_id=plan.id, cooperation_id=cooperation.id

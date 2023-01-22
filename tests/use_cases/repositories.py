@@ -215,6 +215,20 @@ class PlanUpdate:
 
         return self._add_update(update)
 
+    def set_activation_timestamp(
+        self, activation_timestamp: Optional[datetime]
+    ) -> PlanUpdate:
+        def update(plan: Plan) -> None:
+            plan.activation_date = activation_timestamp
+
+        return self._add_update(update)
+
+    def set_activation_status(self, *, is_active: bool) -> PlanUpdate:
+        def update(plan: Plan) -> None:
+            plan.is_active = is_active
+
+        return self._add_update(update)
+
     def perform(self) -> int:
         items_affected = 0
         for item in self.items():
@@ -706,10 +720,6 @@ class PlanRepository(interfaces.PlanRepository):
 
     def __len__(self) -> int:
         return len(self.entities.plans)
-
-    def activate_plan(self, plan: Plan, activation_date: datetime) -> None:
-        plan.is_active = True
-        plan.activation_date = activation_date
 
     def set_plan_as_expired(self, plan: Plan) -> None:
         plan.expired = True
