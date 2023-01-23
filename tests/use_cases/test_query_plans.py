@@ -43,7 +43,7 @@ def test_that_plans_where_id_is_exact_match_are_returned(
     query_plans: QueryPlans,
     plan_generator: PlanGenerator,
 ):
-    expected_plan = plan_generator.create_plan(activation_date=datetime.min)
+    expected_plan = plan_generator.create_plan()
     query = str(expected_plan.id)
     response = query_plans(make_request(query, PlanFilter.by_plan_id))
     assert plan_in_results(expected_plan, response)
@@ -54,7 +54,7 @@ def test_query_with_substring_of_id_returns_correct_result(
     query_plans: QueryPlans,
     plan_generator: PlanGenerator,
 ):
-    expected_plan = plan_generator.create_plan(activation_date=datetime.min)
+    expected_plan = plan_generator.create_plan()
     substring_query = str(expected_plan.id)[5:10]
     response = query_plans(make_request(substring_query, PlanFilter.by_plan_id))
     assert plan_in_results(expected_plan, response)
@@ -66,7 +66,7 @@ def test_that_plans_where_product_name_is_exact_match_are_returned(
     plan_generator: PlanGenerator,
 ):
     expected_plan = plan_generator.create_plan(
-        product_name="Name XYZ", activation_date=datetime.min
+        product_name="Name XYZ",
     )
     query = "Name XYZ"
     response = query_plans(make_request(query, PlanFilter.by_product_name))
@@ -79,7 +79,7 @@ def test_query_with_substring_of_product_name_returns_correct_result(
     plan_generator: PlanGenerator,
 ):
     expected_plan = plan_generator.create_plan(
-        product_name="Name XYZ", activation_date=datetime.min
+        product_name="Name XYZ",
     )
     query = "me X"
     response = query_plans(make_request(query, PlanFilter.by_product_name))
@@ -92,7 +92,7 @@ def test_query_with_substring_of_product_is_case_insensitive(
     plan_generator: PlanGenerator,
 ):
     expected_plan = plan_generator.create_plan(
-        product_name="Name XYZ", activation_date=datetime.min
+        product_name="Name XYZ",
     )
     query = "xyz"
     response = query_plans(make_request(query, PlanFilter.by_product_name))
@@ -105,13 +105,13 @@ def test_that_plans_are_returned_in_order_of_activation_when_requested_with_newe
     plan_generator: PlanGenerator,
     datetime_service: FakeDatetimeService,
 ):
-    expected_second = plan_generator.create_plan(
-        activation_date=datetime_service.now_minus_20_hours()
-    )
-    expected_first = plan_generator.create_plan(activation_date=datetime_service.now())
-    expected_third = plan_generator.create_plan(
-        activation_date=datetime_service.now_minus_two_days()
-    )
+    datetime_service.freeze_time(datetime(2000, 1, 2))
+    expected_second = plan_generator.create_plan()
+    datetime_service.freeze_time(datetime(2000, 1, 3))
+    expected_first = plan_generator.create_plan()
+    datetime_service.freeze_time(datetime(2000, 1, 1))
+    expected_third = plan_generator.create_plan()
+    datetime_service.unfreeze_time()
     response = query_plans(make_request(sorting=PlanSorting.by_activation))
     assert response.results[0].plan_id == expected_first.id
     assert response.results[1].plan_id == expected_second.id
@@ -125,15 +125,12 @@ def test_that_plans_are_returned_in_order_of_price_when_requested_with_cheapest_
     datetime_service: FakeDatetimeService,
 ):
     expected_second = plan_generator.create_plan(
-        activation_date=datetime_service.now(),
         costs=ProductionCosts(Decimal(1), Decimal(1), Decimal(1)),
     )
     expected_first = plan_generator.create_plan(
-        activation_date=datetime_service.now(),
         costs=ProductionCosts(Decimal(0), Decimal(0), Decimal(0)),
     )
     expected_third = plan_generator.create_plan(
-        activation_date=datetime_service.now(),
         costs=ProductionCosts(Decimal(2), Decimal(2), Decimal(2)),
     )
     response = query_plans(make_request(sorting=PlanSorting.by_price))
@@ -151,7 +148,6 @@ def test_that_plans_are_returned_in_order_of_company_name_when_requested(
 ):
     for name in ["c_name", "a_name", "B_name"]:
         plan_generator.create_plan(
-            activation_date=datetime_service.now(),
             planner=company_generator.create_company(name=name),
         )
     response = query_plans(make_request(sorting=PlanSorting.by_company_name))
@@ -166,16 +162,13 @@ def test_that_filtered_plans_by_name_are_returned_in_order_of_activation(
     plan_generator: PlanGenerator,
     datetime_service: FakeDatetimeService,
 ):
-    expected_second = plan_generator.create_plan(
-        activation_date=datetime_service.now_minus_20_hours(), product_name="abcde"
-    )
-    expected_first = plan_generator.create_plan(
-        activation_date=datetime_service.now(), product_name="xyabc"
-    )
+    datetime_service.freeze_time(datetime(2000, 1, 4))
+    expected_second = plan_generator.create_plan(product_name="abcde")
+    datetime_service.freeze_time(datetime(2000, 1, 5))
+    expected_first = plan_generator.create_plan(product_name="xyabc")
+    datetime_service.unfreeze_time()
     # unexpected plan
-    plan_generator.create_plan(
-        activation_date=datetime_service.now_minus_two_days(), product_name="cba"
-    )
+    plan_generator.create_plan(product_name="cba")
     response = query_plans(
         make_request(
             sorting=PlanSorting.by_activation,
@@ -193,7 +186,7 @@ def test_that_correct_price_per_unit_of_zero_is_displayed_for_a_public_plan(
     query_plans: QueryPlans,
     plan_generator: PlanGenerator,
 ):
-    plan_generator.create_plan(is_public_service=True, activation_date=datetime.min)
+    plan_generator.create_plan(is_public_service=True)
     response = query_plans(make_request())
     assert response.results[0].price_per_unit == 0
 

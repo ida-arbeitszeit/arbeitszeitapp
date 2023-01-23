@@ -33,7 +33,9 @@ class UseCaseTester(TestCase):
 
     def test_that_correct_activation_date_of_plan_is_returned(self) -> None:
         expected_date = datetime(2022, 12, 1, 10)
-        self.plan_generator.create_plan(activation_date=expected_date)
+        self.datetime_service.freeze_time(expected_date)
+        self.plan_generator.create_plan()
+        self.datetime_service.unfreeze_time()
         response = self.use_case.show_start_page()
         self.assertEqual(response.latest_plans[0].activation_date, expected_date)
 

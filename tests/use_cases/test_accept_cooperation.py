@@ -1,4 +1,3 @@
-from datetime import datetime
 from decimal import Decimal
 from uuid import UUID, uuid4
 
@@ -45,9 +44,7 @@ class AcceptCooperationTests(BaseTestCase):
         cooperation2 = self.cooperation_generator.create_cooperation(
             coordinator=requester
         )
-        plan = self.plan_generator.create_plan(
-            activation_date=datetime.now(), cooperation=cooperation1
-        )
+        plan = self.plan_generator.create_plan(cooperation=cooperation1)
         request = AcceptCooperationRequest(
             requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation2.id
         )
@@ -59,9 +56,7 @@ class AcceptCooperationTests(BaseTestCase):
 
     def test_error_is_raised_when_plan_is_public_plan(self) -> None:
         requester = self.company_generator.create_company_entity()
-        plan = self.plan_generator.create_plan(
-            activation_date=datetime.now(), is_public_service=True
-        )
+        plan = self.plan_generator.create_plan(is_public_service=True)
         cooperation = self.cooperation_generator.create_cooperation(
             coordinator=requester
         )
@@ -76,7 +71,7 @@ class AcceptCooperationTests(BaseTestCase):
 
     def test_error_is_raised_when_cooperation_was_not_requested(self) -> None:
         requester = self.company_generator.create_company_entity()
-        plan = self.plan_generator.create_plan(activation_date=datetime.now())
+        plan = self.plan_generator.create_plan()
         cooperation = self.cooperation_generator.create_cooperation(
             coordinator=requester
         )
@@ -98,9 +93,7 @@ class AcceptCooperationTests(BaseTestCase):
         cooperation = self.cooperation_generator.create_cooperation(
             coordinator=coordinator
         )
-        plan = self.plan_generator.create_plan(
-            activation_date=datetime.now(), requested_cooperation=cooperation
-        )
+        plan = self.plan_generator.create_plan(requested_cooperation=cooperation)
         request = AcceptCooperationRequest(
             requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation.id
         )
@@ -116,9 +109,7 @@ class AcceptCooperationTests(BaseTestCase):
         cooperation = self.cooperation_generator.create_cooperation(
             coordinator=requester
         )
-        plan = self.plan_generator.create_plan(
-            activation_date=datetime.now(), requested_cooperation=cooperation
-        )
+        plan = self.plan_generator.create_plan(requested_cooperation=cooperation)
         request = AcceptCooperationRequest(
             requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation.id
         )
@@ -130,9 +121,7 @@ class AcceptCooperationTests(BaseTestCase):
         cooperation = self.cooperation_generator.create_cooperation(
             coordinator=requester
         )
-        plan = self.plan_generator.create_plan(
-            activation_date=datetime.now(), requested_cooperation=cooperation
-        )
+        plan = self.plan_generator.create_plan(requested_cooperation=cooperation)
         request = AcceptCooperationRequest(
             requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation.id
         )
@@ -145,12 +134,10 @@ class AcceptCooperationTests(BaseTestCase):
             coordinator=requester
         )
         plan1 = self.plan_generator.create_plan(
-            activation_date=datetime.now(),
             costs=ProductionCosts(Decimal(10), Decimal(20), Decimal(30)),
             requested_cooperation=cooperation,
         )
         plan2 = self.plan_generator.create_plan(
-            activation_date=datetime.now(),
             costs=ProductionCosts(Decimal(1), Decimal(2), Decimal(3)),
             requested_cooperation=cooperation,
         )
@@ -172,13 +159,11 @@ class AcceptCooperationTests(BaseTestCase):
             coordinator=requester
         )
         plan1 = self.plan_generator.create_plan(
-            activation_date=datetime.now(),
             costs=ProductionCosts(Decimal(10), Decimal(5), Decimal(5)),
             amount=10,
             requested_cooperation=cooperation,
         )
         plan2 = self.plan_generator.create_plan(
-            activation_date=datetime.now(),
             costs=ProductionCosts(Decimal(5), Decimal(3), Decimal(2)),
             amount=10,
             requested_cooperation=cooperation,
@@ -205,9 +190,7 @@ class AcceptCooperationTests(BaseTestCase):
         cooperation = self.cooperation_generator.create_cooperation(
             coordinator=requester
         )
-        plan = self.plan_generator.create_plan(
-            activation_date=datetime.now(), requested_cooperation=cooperation
-        )
+        plan = self.plan_generator.create_plan(requested_cooperation=cooperation)
         request = AcceptCooperationRequest(
             requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation.id
         )

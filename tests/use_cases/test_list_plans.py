@@ -1,4 +1,3 @@
-from datetime import datetime
 from uuid import uuid4
 
 from arbeitszeit.entities import Company, Plan
@@ -42,9 +41,7 @@ def test_list_plans_response_includes_single_plan(
     plan_generator: PlanGenerator,
 ):
     company = company_generator.create_company()
-    plan: Plan = plan_generator.create_plan(
-        planner=company, activation_date=datetime.min
-    )
+    plan: Plan = plan_generator.create_plan(planner=company)
     response: ListPlansResponse = list_plans(company_id=company)
     assert plan_in_results(plan, response)
 
@@ -56,11 +53,7 @@ def test_list_plans_response_includes_multiple_plans(
     plan_generator: PlanGenerator,
 ):
     company = company_generator.create_company()
-    plan1: Plan = plan_generator.create_plan(
-        planner=company, activation_date=datetime.min
-    )
-    plan2: Plan = plan_generator.create_plan(
-        planner=company, activation_date=datetime.min
-    )
+    plan1: Plan = plan_generator.create_plan(planner=company)
+    plan2: Plan = plan_generator.create_plan(planner=company)
     response: ListPlansResponse = list_plans(company_id=company)
     assert plan_in_results(plan1, response) and plan_in_results(plan2, response)

@@ -39,11 +39,9 @@ class PlanRepositoryTests(FlaskTestCase):
     def test_sum_of_active_planned_work_calculated_correctly(self) -> None:
         assert self.plan_repository.sum_of_active_planned_work() == 0
         self.plan_generator.create_plan(
-            activation_date=datetime.min,
             costs=production_costs(2, 0, 0),
         )
         self.plan_generator.create_plan(
-            activation_date=datetime.min,
             costs=production_costs(3, 0, 0),
         )
         assert self.plan_repository.sum_of_active_planned_work() == 5
@@ -51,11 +49,9 @@ class PlanRepositoryTests(FlaskTestCase):
     def test_sum_of_active_planned_resources_calculated_correctly(self) -> None:
         assert self.plan_repository.sum_of_active_planned_resources() == 0
         self.plan_generator.create_plan(
-            activation_date=datetime.min,
             costs=production_costs(0, 2, 0),
         )
         self.plan_generator.create_plan(
-            activation_date=datetime.min,
             costs=production_costs(0, 3, 0),
         )
         assert self.plan_repository.sum_of_active_planned_resources() == 5
@@ -63,11 +59,9 @@ class PlanRepositoryTests(FlaskTestCase):
     def test_sum_of_active_planned_means_calculated_correctly(self) -> None:
         assert self.plan_repository.sum_of_active_planned_means() == 0
         self.plan_generator.create_plan(
-            activation_date=datetime.min,
             costs=production_costs(0, 0, 2),
         )
         self.plan_generator.create_plan(
-            activation_date=datetime.min,
             costs=production_costs(0, 0, 3),
         )
         assert self.plan_repository.sum_of_active_planned_means() == 5
@@ -75,8 +69,7 @@ class PlanRepositoryTests(FlaskTestCase):
     def test_all_active_plans_get_retrieved(self) -> None:
         number_of_plans = 5
         list_of_plans = [
-            self.plan_generator.create_plan(activation_date=datetime.min)
-            for _ in range(number_of_plans)
+            self.plan_generator.create_plan() for _ in range(number_of_plans)
         ]
         retrieved_plans = list(self.plan_repository.get_plans().that_are_active())
         assert len(retrieved_plans) == number_of_plans
@@ -84,7 +77,7 @@ class PlanRepositoryTests(FlaskTestCase):
             assert plan in retrieved_plans
 
     def test_plans_that_were_set_to_expired_dont_show_up_in_active_plans(self) -> None:
-        plan = self.plan_generator.create_plan(activation_date=datetime.min)
+        plan = self.plan_generator.create_plan()
         assert plan in list(self.plan_repository.get_plans().that_are_active())
         self.plan_repository.set_plan_as_expired(plan)
         assert plan not in list(self.plan_repository.get_plans().that_are_active())
@@ -97,7 +90,7 @@ class PlanRepositoryTests(FlaskTestCase):
         assert plan_from_repo.hidden_by_user
 
     def test_that_active_days_are_set(self) -> None:
-        plan = self.plan_generator.create_plan(activation_date=datetime.min)
+        plan = self.plan_generator.create_plan()
         assert plan.active_days is None
         self.plan_repository.set_active_days(plan, 3)
         plan_from_repo = self.plan_repository.get_plans().with_id(plan.id).first()
@@ -105,7 +98,7 @@ class PlanRepositoryTests(FlaskTestCase):
         assert plan_from_repo.active_days == 3
 
     def test_that_payout_count_is_increased_by_one(self) -> None:
-        plan = self.plan_generator.create_plan(activation_date=datetime.min)
+        plan = self.plan_generator.create_plan()
         assert plan.payout_count == 0
         self.plan_repository.increase_payout_count_by_one(plan)
         plan_from_repo = self.plan_repository.get_plans().with_id(plan.id).first()
@@ -164,7 +157,7 @@ class GetActivePlansTests(FlaskTestCase):
         plans: List[Plan] = list()
         for timestamp in activation_dates:
             self.datetime_service.freeze_time(timestamp)
-            plans.append(self.plan_generator.create_plan(activation_date=timestamp))
+            plans.append(self.plan_generator.create_plan())
         self.datetime_service.unfreeze_time()
         retrieved_plans = list(
             self.plan_repository.get_plans()
@@ -178,7 +171,7 @@ class GetActivePlansTests(FlaskTestCase):
 
     def test_that_plans_can_be_filtered_by_product_name(self) -> None:
         expected_plan = self.plan_generator.create_plan(
-            activation_date=datetime.min, product_name="Delivery of goods"
+            product_name="Delivery of goods"
         )
         returned_plan = list(
             self.plan_repository.get_plans().with_product_name_containing(
@@ -192,7 +185,7 @@ class GetActivePlansTests(FlaskTestCase):
         self,
     ) -> None:
         expected_plan = self.plan_generator.create_plan(
-            activation_date=datetime.min, product_name="Delivery of goods"
+            product_name="Delivery of goods"
         )
         returned_plan = list(
             self.plan_repository.get_plans().with_product_name_containing("very of go")
@@ -201,7 +194,7 @@ class GetActivePlansTests(FlaskTestCase):
         assert returned_plan[0] == expected_plan
 
     def test_that_query_plans_by_substring_of_plan_id_returns_plan(self) -> None:
-        expected_plan = self.plan_generator.create_plan(activation_date=datetime.min)
+        expected_plan = self.plan_generator.create_plan()
         expected_plan_id = expected_plan.id
         query = str(expected_plan_id)[3:8]
         returned_plan = list(self.plan_repository.get_plans().with_id_containing(query))
@@ -361,9 +354,7 @@ class GetAllPlans(FlaskTestCase):
     def test_plan_without_cooperation_is_considered_to_be_only_plan_in_its_own_cooperation(
         self,
     ) -> None:
-        plan = self.plan_generator.create_plan(
-            activation_date=datetime.min, cooperation=None
-        )
+        plan = self.plan_generator.create_plan(cooperation=None)
         cooperating_plans = (
             self.plan_repository.get_plans().that_are_in_same_cooperation_as(plan.id)
         )

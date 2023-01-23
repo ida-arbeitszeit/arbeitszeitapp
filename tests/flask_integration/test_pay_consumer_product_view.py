@@ -1,4 +1,3 @@
-from datetime import datetime
 from decimal import Decimal
 from uuid import uuid4
 
@@ -36,7 +35,7 @@ class AuthenticatedMemberTests(ViewTestCase):
         self.transaction_generator.create_transaction(
             receiving_account=self.member.account, amount_received=Decimal(100)
         )
-        plan = self.plan_generator.create_plan(activation_date=datetime.min)
+        plan = self.plan_generator.create_plan()
         response = self.client.post(
             "/member/pay_consumer_product",
             data=dict(

@@ -1,4 +1,3 @@
-from datetime import datetime
 from uuid import uuid4
 
 from arbeitszeit.entities import Plan
@@ -36,7 +35,7 @@ def test_empty_list_is_returned_when_there_are_no_outbound_requests(
 ):
     requester = company_generator.create_company()
     coop = coop_generator.create_cooperation()
-    plan_generator.create_plan(requested_cooperation=coop, activation_date=datetime.min)
+    plan_generator.create_plan(requested_cooperation=coop)
     response = list_requests(ListOutboundCoopRequestsRequest(requester))
     assert len(response.cooperation_requests) == 0
 
@@ -51,10 +50,10 @@ def test_correct_plans_are_returned_when_there_are_outbound_requests(
     requester = company_generator.create_company()
     coop = coop_generator.create_cooperation()
     requesting_plan1 = plan_generator.create_plan(
-        requested_cooperation=coop, activation_date=datetime.min, planner=requester
+        requested_cooperation=coop, planner=requester
     )
     requesting_plan2 = plan_generator.create_plan(
-        requested_cooperation=coop, activation_date=datetime.min, planner=requester
+        requested_cooperation=coop, planner=requester
     )
     response = list_requests(ListOutboundCoopRequestsRequest(requester))
     assert len(response.cooperation_requests) == 2

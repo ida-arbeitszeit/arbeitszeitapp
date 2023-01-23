@@ -63,9 +63,7 @@ class PayConsumerProductTests(BaseTestCase):
     def test_payment_is_unsuccessful_if_member_has_no_certs_and_an_account_limit_of_zero(
         self,
     ) -> None:
-        plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now(),
-        )
+        plan = self.plan_generator.create_plan()
         assert self.balance_checker.get_member_account_balance(self.buyer.id) == 0
         self.control_thresholds.set_allowed_overdraw_of_member_account(0)
 
@@ -80,9 +78,7 @@ class PayConsumerProductTests(BaseTestCase):
     def test_no_transaction_is_added_when_member_has_insufficient_balance(
         self,
     ) -> None:
-        plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now(),
-        )
+        plan = self.plan_generator.create_plan()
 
         transactions_before_payment = len(
             self.transaction_repository.get_transactions()
@@ -101,9 +97,7 @@ class PayConsumerProductTests(BaseTestCase):
     def test_no_purchase_is_added_when_member_has_insufficient_balance(
         self,
     ) -> None:
-        plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now(),
-        )
+        plan = self.plan_generator.create_plan()
         assert self.balance_checker.get_member_account_balance(self.buyer.id) == 0
         self.control_thresholds.set_allowed_overdraw_of_member_account(0)
 
@@ -115,9 +109,7 @@ class PayConsumerProductTests(BaseTestCase):
     def test_payment_is_successful_if_member_has_negative_certs_and_buys_public_product(
         self,
     ) -> None:
-        plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now(), is_public_service=True
-        )
+        plan = self.plan_generator.create_plan(is_public_service=True)
         self.make_transaction_to_buyer_account(Decimal("-10"))
         assert self.balance_checker.get_member_account_balance(
             self.buyer.id
@@ -155,7 +147,6 @@ class PayConsumerProductTests(BaseTestCase):
         self,
     ) -> None:
         plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now(),
             costs=ProductionCosts(
                 means_cost=Decimal("4"),
                 resource_cost=Decimal("4"),
@@ -173,9 +164,7 @@ class PayConsumerProductTests(BaseTestCase):
         self.assertTrue(response.is_accepted)
 
     def test_that_correct_transaction_is_added(self) -> None:
-        plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day()
-        )
+        plan = self.plan_generator.create_plan()
         transactions_before_payment = len(
             self.transaction_repository.get_transactions()
         )
@@ -205,7 +194,6 @@ class PayConsumerProductTests(BaseTestCase):
 
     def test_balances_are_adjusted_correctly(self) -> None:
         plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day(),
             costs=ProductionCosts(
                 means_cost=Decimal(3),
                 resource_cost=Decimal(3),
@@ -236,10 +224,7 @@ class PayConsumerProductTests(BaseTestCase):
     def test_that_correct_transaction_is_added_when_plan_is_public_service(
         self,
     ) -> None:
-        plan = self.plan_generator.create_plan(
-            is_public_service=True,
-            activation_date=self.datetime_service.now_minus_one_day(),
-        )
+        plan = self.plan_generator.create_plan(is_public_service=True)
         transactions_before_payment = len(
             self.transaction_repository.get_transactions()
         )
@@ -264,10 +249,7 @@ class PayConsumerProductTests(BaseTestCase):
         assert transaction_added.amount_sent == transaction_added.amount_received == 0
 
     def test_balances_are_adjusted_correctly_when_plan_is_public_service(self) -> None:
-        plan = self.plan_generator.create_plan(
-            is_public_service=True,
-            activation_date=self.datetime_service.now_minus_one_day(),
-        )
+        plan = self.plan_generator.create_plan(is_public_service=True)
         pieces = 3
         self.pay_consumer_product.pay_consumer_product(
             self.make_request(plan.id, pieces)
@@ -282,9 +264,7 @@ class PayConsumerProductTests(BaseTestCase):
         )
 
     def test_correct_purchase_is_added(self) -> None:
-        plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day()
-        )
+        plan = self.plan_generator.create_plan()
         self.make_transaction_to_buyer_account(Decimal("100"))
         pieces = 3
         self.pay_consumer_product.pay_consumer_product(
@@ -301,10 +281,7 @@ class PayConsumerProductTests(BaseTestCase):
         assert purchase_added.plan == plan.id
 
     def test_correct_purchase_is_added_when_plan_is_public_service(self) -> None:
-        plan = self.plan_generator.create_plan(
-            is_public_service=True,
-            activation_date=self.datetime_service.now_minus_one_day(),
-        )
+        plan = self.plan_generator.create_plan(is_public_service=True)
         pieces = 3
         self.pay_consumer_product.pay_consumer_product(
             self.make_request(plan.id, pieces)
