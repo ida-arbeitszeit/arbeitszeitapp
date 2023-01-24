@@ -36,11 +36,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1673865710,
-        "narHash": "sha256-45+nLM6Y+/QYErBfVjbzsOwD/L70L6tDKCSGHdN6RiI=",
+        "lastModified": 1674565085,
+        "narHash": "sha256-DUTk1hPCFYvDt/pSpxzXVZJGwhnAQ73ELRiAkGyglZ4=",
         "owner": "seppeljordan",
         "repo": "flask-profiler",
-        "rev": "39a2887cba9c427bdb35a38b81417b8027676618",
+        "rev": "881736981681056ffd3ffda837375279b04f68ad",
         "type": "github"
       },
       "original": {
