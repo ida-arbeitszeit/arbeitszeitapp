@@ -76,12 +76,6 @@ class PlanRepositoryTests(FlaskTestCase):
         for plan in list_of_plans:
             assert plan in retrieved_plans
 
-    def test_plans_that_were_set_to_expired_dont_show_up_in_active_plans(self) -> None:
-        plan = self.plan_generator.create_plan()
-        assert plan in list(self.plan_repository.get_plans().that_are_active())
-        self.plan_repository.set_plan_as_expired(plan)
-        assert plan not in list(self.plan_repository.get_plans().that_are_active())
-
     def test_that_plan_gets_hidden(self) -> None:
         plan = self.plan_generator.create_plan()
         self.plan_repository.hide_plan(plan.id)
@@ -464,3 +458,11 @@ class GetAllPlans(FlaskTestCase):
         expected_approval_reason = "test approval reason"
         assert plans.update().set_approval_reason(expected_approval_reason).perform()
         assert all(plan.approval_reason == expected_approval_reason for plan in plans)
+
+    def test_can_set_expiration_status_to_true_and_then_to_false_again(self) -> None:
+        plan_id = self.plan_generator.create_plan().id
+        plan = self.plan_repository.get_plans().with_id(plan_id)
+        plan.update().set_expiration_status(is_expired=True).perform()
+        assert plan.first().expired
+        plan.update().set_expiration_status(is_expired=False).perform()
+        assert not plan.first().expired

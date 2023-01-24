@@ -26,8 +26,7 @@ class UpdatePlansAndPayout:
     company_repository: CompanyRepository
 
     def __call__(self) -> None:
-        """
-        This function should be called at least once per day,
+        """This function should be called at least once per day,
         preferably more often (e.g. every hour).
         """
         self._calculate_plan_expiration()
@@ -91,10 +90,9 @@ class UpdatePlansAndPayout:
         return self.datetime_service.now() > plan.expiration_date
 
     def _handle_expired_plan(self, plan: Plan) -> None:
-        """
-        payout overdue wages, if there are any, applying the latest payout factor stored in repo
-        delete plan's cooperation and coop request, if there is any
-        set plan as expired
+        """Payout overdue wages, if there are any, applying the latest
+        payout factor stored in repo. Delete plan's cooperation and
+        coop request, if there is any. Set plan as expired.
         """
         assert plan.active_days
         while plan.payout_count < plan.active_days:
@@ -106,26 +104,19 @@ class UpdatePlansAndPayout:
             else:
                 payout_factor_value = payout_factor.value
             self._payout(plan, payout_factor_value)
-        self._delete_cooperation_and_coop_request_from_plan(plan)
-        self.plan_repository.set_plan_as_expired(plan)
+        plans = self.plan_repository.get_plans().with_id(plan.id)
+        plans.update().set_requested_cooperation(None).set_cooperation(
+            None
+        ).set_activation_status(is_active=False).set_expiration_status(
+            is_expired=True
+        ).perform()
 
     def _calculate_active_days(self, plan: Plan) -> int:
-        """
-        returns the full days a plan has been active,
-        not considering days exceeding it's timeframe
+        """Returns the full days a plan has been active, not
+        considering days exceeding it's timeframe.
         """
         assert plan.activation_date
         days_passed_since_activation = (
             self.datetime_service.now() - plan.activation_date
         ).days
-
-        active_days = (
-            plan.timeframe
-            if (plan.timeframe < days_passed_since_activation)
-            else days_passed_since_activation
-        )
-        return active_days
-
-    def _delete_cooperation_and_coop_request_from_plan(self, plan: Plan) -> None:
-        plans = self.plan_repository.get_plans().with_id(plan.id)
-        plans.update().set_requested_cooperation(None).set_cooperation(None).perform()
+        return min(plan.timeframe, days_passed_since_activation)
