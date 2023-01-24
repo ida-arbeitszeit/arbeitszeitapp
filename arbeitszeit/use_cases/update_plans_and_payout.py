@@ -106,8 +106,12 @@ class UpdatePlansAndPayout:
             else:
                 payout_factor_value = payout_factor.value
             self._payout(plan, payout_factor_value)
-        self._delete_cooperation_and_coop_request_from_plan(plan)
-        self.plan_repository.set_plan_as_expired(plan)
+        plans = self.plan_repository.get_plans().with_id(plan.id)
+        plans.update().set_requested_cooperation(None).set_cooperation(
+            None
+        ).set_activation_status(is_active=False).set_expiration_status(
+            is_expired=True
+        ).perform()
 
     def _calculate_active_days(self, plan: Plan) -> int:
         """
@@ -125,7 +129,3 @@ class UpdatePlansAndPayout:
             else days_passed_since_activation
         )
         return active_days
-
-    def _delete_cooperation_and_coop_request_from_plan(self, plan: Plan) -> None:
-        plans = self.plan_repository.get_plans().with_id(plan.id)
-        plans.update().set_requested_cooperation(None).set_cooperation(None).perform()
