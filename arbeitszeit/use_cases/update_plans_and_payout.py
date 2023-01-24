@@ -91,8 +91,8 @@ class UpdatePlansAndPayout:
 
     def _handle_expired_plan(self, plan: Plan) -> None:
         """Payout overdue wages, if there are any, applying the latest
-        payout factor stored in repo delete plan's cooperation and
-        coop request, if there is any set plan as expired.
+        payout factor stored in repo. Delete plan's cooperation and
+        coop request, if there is any. Set plan as expired.
         """
         assert plan.active_days
         while plan.payout_count < plan.active_days:
