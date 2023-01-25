@@ -1,8 +1,7 @@
 from datetime import datetime
-from decimal import Decimal
 from typing import Optional
 
-from arbeitszeit.entities import Plan, ProductionCosts
+from arbeitszeit.entities import Plan
 from arbeitszeit.use_cases import (
     PlanFilter,
     PlanQueryResponse,
@@ -83,26 +82,6 @@ class UseCaseTests(BaseTestCase):
         response = self.query_plans(
             self.make_request(sorting=PlanSorting.by_activation)
         )
-        assert response.results[0].plan_id == expected_first.id
-        assert response.results[1].plan_id == expected_second.id
-        assert response.results[2].plan_id == expected_third.id
-
-    def test_that_plans_are_returned_in_order_of_price_when_requested_with_cheapest_product_first(
-        self,
-    ):
-        expected_second = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now(),
-            costs=ProductionCosts(Decimal(1), Decimal(1), Decimal(1)),
-        )
-        expected_first = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now(),
-            costs=ProductionCosts(Decimal(0), Decimal(0), Decimal(0)),
-        )
-        expected_third = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now(),
-            costs=ProductionCosts(Decimal(2), Decimal(2), Decimal(2)),
-        )
-        response = self.query_plans(self.make_request(sorting=PlanSorting.by_price))
         assert response.results[0].plan_id == expected_first.id
         assert response.results[1].plan_id == expected_second.id
         assert response.results[2].plan_id == expected_third.id

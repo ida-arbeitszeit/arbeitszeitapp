@@ -83,14 +83,6 @@ class QueryPlansControllerTests(BaseTestCase):
         )
         self.assertEqual(request.sorting_category, PlanSorting.by_company_name)
 
-    def test_that_price_in_sorting_field_results_in_sorting_by_price(
-        self,
-    ) -> None:
-        request = self.controller.import_form_data(
-            form=make_fake_form(sorting_category="price")
-        )
-        self.assertEqual(request.sorting_category, PlanSorting.by_price)
-
 
 class PaginationTests(BaseTestCase):
     def test_no_page_is_passed_to_use_case_request_if_none_was_given_in_request_query(

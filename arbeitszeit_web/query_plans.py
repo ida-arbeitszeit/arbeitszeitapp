@@ -75,9 +75,7 @@ class QueryPlansController:
 
     def _import_sorting_category(self, form: QueryPlansFormData) -> PlanSorting:
         sorting = form.get_radio_string()
-        if sorting == "price":
-            sorting_category = PlanSorting.by_price
-        elif sorting == "company_name":
+        if sorting == "company_name":
             sorting_category = PlanSorting.by_company_name
         else:
             sorting_category = PlanSorting.by_activation

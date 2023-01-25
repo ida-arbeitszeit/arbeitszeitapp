@@ -23,7 +23,6 @@ class PlanFilter(enum.Enum):
 class PlanSorting(enum.Enum):
     by_activation = enum.auto()
     by_company_name = enum.auto()
-    by_price = enum.auto()
 
 
 @dataclass
@@ -134,8 +133,6 @@ class QueryPlans:
     ) -> List[QueriedPlan]:
         if sort_by == PlanSorting.by_activation:
             plans = sorted(plans, key=lambda x: x.activation_date, reverse=True)
-        elif sort_by == PlanSorting.by_price:
-            plans = sorted(plans, key=lambda x: x.price_per_unit)
         else:
             plans = sorted(plans, key=lambda x: x.company_name.casefold())
         return plans
