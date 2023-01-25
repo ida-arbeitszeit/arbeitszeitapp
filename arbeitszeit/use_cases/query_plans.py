@@ -12,7 +12,7 @@ from injector import inject
 
 from arbeitszeit.entities import Plan
 from arbeitszeit.price_calculator import PriceCalculator
-from arbeitszeit.repositories import CompanyRepository, PlanRepository
+from arbeitszeit.repositories import CompanyRepository, PlanRepository, PlanResult
 
 
 class PlanFilter(enum.Enum):
@@ -72,27 +72,33 @@ class QueryPlans:
         )
 
         plans = self.plan_repository.get_plans().that_are_active()
-
-        # apply filter
-        if query is None:
-            pass
-        elif filter_by == PlanFilter.by_plan_id:
-            plans = plans.with_id_containing(query)
-        else:
-            assert filter_by == PlanFilter.by_product_name
-            plans = plans.with_product_name_containing(query)
-
-        # apply sorting
-        if sort_by == PlanSorting.by_activation:
-            plans = plans.ordered_by_activation_date(ascending=False)
-
-        # apply offset/limit
+        plans = self._apply_filter(plans, query, filter_by)
+        plans = self._apply_sorting(plans, sort_by)
+        # apply offset and limit
         plans = plans.offset(n=offset).limit(n=LIMIT)
 
         results = [self._plan_to_response_model(plan) for plan in plans]
         return PlanQueryResponse(
             results=results, page=current_page, num_pages=num_pages
         )
+
+    def _apply_filter(
+        self, plans: PlanResult, query: Optional[str], filter_by: PlanFilter
+    ) -> PlanResult:
+        if query is None:
+            pass
+        elif filter_by == PlanFilter.by_plan_id:
+            plans = plans.with_id_containing(query)
+        else:
+            plans = plans.with_product_name_containing(query)
+        return plans
+
+    def _apply_sorting(self, plans: PlanResult, sort_by: PlanSorting) -> PlanResult:
+        if sort_by == PlanSorting.by_company_name:
+            plans = plans.ordered_by_company_name()
+        else:
+            plans = plans.ordered_by_activation_date(ascending=False)
+        return plans
 
     def _get_pagination_attributes(
         self, limit: int, request: QueryPlansRequest
@@ -121,12 +127,3 @@ class QueryPlans:
             is_cooperating=bool(plan.cooperation),
             activation_date=plan.activation_date,
         )
-
-    def _sort_plans(
-        self, plans: List[QueriedPlan], sort_by: PlanSorting
-    ) -> List[QueriedPlan]:
-        if sort_by == PlanSorting.by_activation:
-            plans = sorted(plans, key=lambda x: x.activation_date, reverse=True)
-        else:
-            plans = sorted(plans, key=lambda x: x.company_name.casefold())
-        return plans

@@ -89,6 +89,14 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
             ordering = ordering.desc()
         return self._with_modified_query(lambda query: query.order_by(ordering))
 
+    def ordered_by_company_name(self, ascending: bool = True) -> PlanQueryResult:
+        ordering = models.Company.name
+        if not ascending:
+            ordering = ordering.desc()
+        return self._with_modified_query(
+            lambda query: self.query.join(models.Company).order_by(func.lower(ordering))
+        )
+
     def with_id_containing(self, query: str) -> PlanQueryResult:
         return self._with_modified_query(
             lambda db_query: db_query.filter(models.Plan.id.contains(query))

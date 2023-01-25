@@ -201,6 +201,25 @@ class GetActivePlansTests(FlaskTestCase):
         assert retrieved_plans[1] == plans[2]
         assert retrieved_plans[2] == plans[4]
 
+    def test_plans_can_be_ordered_by_company_name(
+        self,
+    ) -> None:
+        planner_names = ["1_name", "B_name", "d_name", "c_name"]
+        planners = [
+            self.company_generator.create_company_entity(name=name)
+            for name in planner_names
+        ]
+        plans: List[Plan] = list()
+        for company in planners:
+            plans.append(self.plan_generator.create_plan(planner=company.id))
+        retrieved_plans = list(
+            self.plan_repository.get_plans().ordered_by_company_name().limit(3)
+        )
+        assert len(retrieved_plans) == 3
+        assert retrieved_plans[0] == plans[0]
+        assert retrieved_plans[1] == plans[1]
+        assert retrieved_plans[2] == plans[3]
+
     def test_that_plans_can_be_filtered_by_product_name(self) -> None:
         expected_plan = self.plan_generator.create_plan(
             activation_date=datetime.min, product_name="Delivery of goods"
