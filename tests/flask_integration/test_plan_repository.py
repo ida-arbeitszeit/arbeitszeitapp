@@ -151,7 +151,7 @@ class GetActivePlansTests(FlaskTestCase):
         plans: List[Plan] = list()
         for timestamp in creation_dates:
             self.datetime_service.freeze_time(timestamp)
-            plans.append(self.plan_generator.create_plan(activation_date=None))
+            plans.append(self.plan_generator.create_plan())
         self.datetime_service.unfreeze_time()
         retrieved_plans = list(
             self.plan_repository.get_plans()

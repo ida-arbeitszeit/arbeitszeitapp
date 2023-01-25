@@ -24,13 +24,13 @@ class UseCaseTests(BaseTestCase):
         assert not response.results
 
     def test_that_plans_where_id_is_exact_match_are_returned(self):
-        expected_plan = self.plan_generator.create_plan(activation_date=datetime.min)
+        expected_plan = self.plan_generator.create_plan()
         query = str(expected_plan.id)
         response = self.query_plans(self.make_request(query, PlanFilter.by_plan_id))
         assert self.assertPlanInResults(expected_plan, response)
 
     def test_query_with_substring_of_id_returns_correct_result(self):
-        expected_plan = self.plan_generator.create_plan(activation_date=datetime.min)
+        expected_plan = self.plan_generator.create_plan()
         substring_query = str(expected_plan.id)[5:10]
         response = self.query_plans(
             self.make_request(substring_query, PlanFilter.by_plan_id)
@@ -38,9 +38,7 @@ class UseCaseTests(BaseTestCase):
         assert self.assertPlanInResults(expected_plan, response)
 
     def test_that_plans_where_product_name_is_exact_match_are_returned(self):
-        expected_plan = self.plan_generator.create_plan(
-            product_name="Name XYZ", activation_date=datetime.min
-        )
+        expected_plan = self.plan_generator.create_plan(product_name="Name XYZ")
         query = "Name XYZ"
         response = self.query_plans(
             self.make_request(query, PlanFilter.by_product_name)
@@ -48,9 +46,7 @@ class UseCaseTests(BaseTestCase):
         assert self.assertPlanInResults(expected_plan, response)
 
     def test_query_with_substring_of_product_name_returns_correct_result(self):
-        expected_plan = self.plan_generator.create_plan(
-            product_name="Name XYZ", activation_date=datetime.min
-        )
+        expected_plan = self.plan_generator.create_plan(product_name="Name XYZ")
         query = "me X"
         response = self.query_plans(
             self.make_request(query, PlanFilter.by_product_name)
@@ -58,9 +54,7 @@ class UseCaseTests(BaseTestCase):
         assert self.assertPlanInResults(expected_plan, response)
 
     def test_query_with_substring_of_product_is_case_insensitive(self):
-        expected_plan = self.plan_generator.create_plan(
-            product_name="Name XYZ", activation_date=datetime.min
-        )
+        expected_plan = self.plan_generator.create_plan(product_name="Name XYZ")
         query = "xyz"
         response = self.query_plans(
             self.make_request(query, PlanFilter.by_product_name)
@@ -70,15 +64,13 @@ class UseCaseTests(BaseTestCase):
     def test_that_plans_are_returned_in_order_of_activation_when_requested_with_newest_plan_first(
         self,
     ):
-        expected_second = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_20_hours()
-        )
-        expected_first = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now()
-        )
-        expected_third = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_two_days()
-        )
+        self.datetime_service.freeze_time(datetime(2000, 1, 2))
+        expected_second = self.plan_generator.create_plan()
+        self.datetime_service.freeze_time(datetime(2000, 1, 3))
+        expected_first = self.plan_generator.create_plan()
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        expected_third = self.plan_generator.create_plan()
+        self.datetime_service.unfreeze_time()
         response = self.query_plans(
             self.make_request(sorting=PlanSorting.by_activation)
         )
@@ -89,7 +81,6 @@ class UseCaseTests(BaseTestCase):
     def test_that_plans_are_returned_in_order_of_company_name_when_requested(self):
         for name in ["c_name", "a_name", "B_name"]:
             self.plan_generator.create_plan(
-                activation_date=self.datetime_service.now(),
                 planner=self.company_generator.create_company(name=name),
             )
         response = self.query_plans(
@@ -100,16 +91,13 @@ class UseCaseTests(BaseTestCase):
         assert response.results[2].company_name == "c_name"
 
     def test_that_filtered_plans_by_name_are_returned_in_order_of_activation(self):
-        expected_second = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_20_hours(),
-            product_name="abcde",
-        )
-        expected_first = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now(), product_name="xyabc"
-        )
+        self.datetime_service.freeze_time(datetime(2000, 1, 4))
+        expected_second = self.plan_generator.create_plan(product_name="abcde")
+        self.datetime_service.freeze_time(datetime(2000, 1, 5))
+        expected_first = self.plan_generator.create_plan(product_name="xyabc")
+        self.datetime_service.unfreeze_time()
         # unexpected plan
         self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_two_days(),
             product_name="cba",
         )
         response = self.query_plans(
@@ -124,18 +112,14 @@ class UseCaseTests(BaseTestCase):
         assert response.results[1].plan_id == expected_second.id
 
     def test_that_correct_price_per_unit_of_zero_is_displayed_for_a_public_plan(self):
-        self.plan_generator.create_plan(
-            is_public_service=True, activation_date=datetime.min
-        )
+        self.plan_generator.create_plan(is_public_service=True)
         response = self.query_plans(self.make_request())
         assert response.results[0].price_per_unit == 0
 
     def test_that_first_page_of_one_is_returned_if_1_plan_exists_and_no_page_is_requested(
         self,
     ):
-        self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_20_hours()
-        )
+        self.plan_generator.create_plan()
         response = self.query_plans(self.make_request())
         self.assertEqual(response.page, 1)
         self.assertEqual(response.num_pages, 1)
@@ -144,9 +128,7 @@ class UseCaseTests(BaseTestCase):
         self,
     ):
         for _ in range(20):
-            self.plan_generator.create_plan(
-                activation_date=self.datetime_service.now_minus_20_hours()
-            )
+            self.plan_generator.create_plan()
         response = self.query_plans(self.make_request())
         self.assertEqual(response.page, 1)
         self.assertEqual(response.num_pages, 2)
@@ -155,9 +137,7 @@ class UseCaseTests(BaseTestCase):
         self,
     ):
         for _ in range(20):
-            self.plan_generator.create_plan(
-                activation_date=self.datetime_service.now_minus_20_hours()
-            )
+            self.plan_generator.create_plan()
         response = self.query_plans(self.make_request())
         self.assertEqual(len(response.results), 15)
 
@@ -165,9 +145,7 @@ class UseCaseTests(BaseTestCase):
         self,
     ):
         for _ in range(20):
-            self.plan_generator.create_plan(
-                activation_date=self.datetime_service.now_minus_20_hours()
-            )
+            self.plan_generator.create_plan()
         response = self.query_plans(self.make_request(page=2))
         self.assertEqual(len(response.results), 5)
 
