@@ -154,6 +154,31 @@ class GetActivePlansTests(FlaskTestCase):
     def test_plans_can_be_ordered_by_creation_date_in_descending_order(
         self,
     ) -> None:
+        creation_dates = [
+            self.datetime_service.now_minus_ten_days(),
+            self.datetime_service.now(),
+            self.datetime_service.now_minus_20_hours(),
+            self.datetime_service.now_minus_25_hours(),
+            self.datetime_service.now_minus_one_day(),
+        ]
+        plans: List[Plan] = list()
+        for timestamp in creation_dates:
+            self.datetime_service.freeze_time(timestamp)
+            plans.append(self.plan_generator.create_plan(activation_date=None))
+        self.datetime_service.unfreeze_time()
+        retrieved_plans = list(
+            self.plan_repository.get_plans()
+            .ordered_by_creation_date(ascending=False)
+            .limit(3)
+        )
+        assert len(retrieved_plans) == 3
+        assert retrieved_plans[0] == plans[1]
+        assert retrieved_plans[1] == plans[2]
+        assert retrieved_plans[2] == plans[4]
+
+    def test_plans_can_be_ordered_by_activation_date_in_descending_order(
+        self,
+    ) -> None:
         activation_dates = [
             self.datetime_service.now_minus_ten_days(),
             self.datetime_service.now(),
@@ -168,7 +193,7 @@ class GetActivePlansTests(FlaskTestCase):
         self.datetime_service.unfreeze_time()
         retrieved_plans = list(
             self.plan_repository.get_plans()
-            .ordered_by_creation_date(ascending=False)
+            .ordered_by_activation_date(ascending=False)
             .limit(3)
         )
         assert len(retrieved_plans) == 3

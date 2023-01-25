@@ -71,33 +71,27 @@ class QueryPlans:
             limit=LIMIT, request=request
         )
 
+        plans = self.plan_repository.get_plans().that_are_active()
+
+        # apply filter
         if query is None:
-            plans = (
-                self.plan_repository.get_plans()
-                .that_are_active()
-                .offset(n=offset)
-                .limit(n=LIMIT)
-            )
+            pass
         elif filter_by == PlanFilter.by_plan_id:
-            plans = (
-                self.plan_repository.get_plans()
-                .that_are_active()
-                .with_id_containing(query)
-                .offset(n=offset)
-                .limit(n=LIMIT)
-            )
+            plans = plans.with_id_containing(query)
         else:
-            plans = (
-                self.plan_repository.get_plans()
-                .that_are_active()
-                .with_product_name_containing(query)
-                .offset(n=offset)
-                .limit(n=LIMIT)
-            )
+            assert filter_by == PlanFilter.by_product_name
+            plans = plans.with_product_name_containing(query)
+
+        # apply sorting
+        if sort_by == PlanSorting.by_activation:
+            plans = plans.ordered_by_activation_date(ascending=False)
+
+        # apply offset/limit
+        plans = plans.offset(n=offset).limit(n=LIMIT)
+
         results = [self._plan_to_response_model(plan) for plan in plans]
-        results_sorted = self._sort_plans(results, sort_by)
         return PlanQueryResponse(
-            results=results_sorted, page=current_page, num_pages=num_pages
+            results=results, page=current_page, num_pages=num_pages
         )
 
     def _get_pagination_attributes(
