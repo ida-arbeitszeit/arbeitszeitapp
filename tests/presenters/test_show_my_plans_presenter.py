@@ -61,7 +61,7 @@ class ShowMyPlansPresenterTests(TestCase):
         self.assertFalse(self.notifier.warnings)
 
     def test_do_only_show_active_plans_when_user_has_one_active_plan(self):
-        plan = self.plan_generator.create_plan(activation_date=datetime.now())
+        plan = self.plan_generator.create_plan()
         RESPONSE_WITH_ONE_ACTIVE_PLAN = self.response_with_one_active_plan(plan)
         presentation = self.presenter.present(RESPONSE_WITH_ONE_ACTIVE_PLAN)
         self.assertTrue(presentation.show_active_plans)
@@ -69,9 +69,7 @@ class ShowMyPlansPresenterTests(TestCase):
         self.assertFalse(presentation.show_non_active_plans)
 
     def test_presenter_shows_correct_info_of_one_single_active_plan(self):
-        plan = self.plan_generator.create_plan(
-            activation_date=datetime.now(), cooperation=None, is_available=True
-        )
+        plan = self.plan_generator.create_plan(cooperation=None, is_available=True)
         RESPONSE_WITH_ONE_ACTIVE_PLAN = self.response_with_one_active_plan(plan)
         presentation = self.presenter.present(RESPONSE_WITH_ONE_ACTIVE_PLAN)
         self.assertEqual(
@@ -100,9 +98,7 @@ class ShowMyPlansPresenterTests(TestCase):
     def test_presenter_shows_correct_info_of_one_single_plan_that_is_cooperating(self):
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         coop = self.coop_generator.create_cooperation()
-        plan = self.plan_generator.create_plan(
-            activation_date=datetime(2000, 1, 1), cooperation=coop, is_available=True
-        )
+        plan = self.plan_generator.create_plan(cooperation=coop, is_available=True)
         RESPONSE_WITH_COOPERATING_PLAN = self.response_with_one_active_plan(plan)
         presentation = self.presenter.present(RESPONSE_WITH_COOPERATING_PLAN)
         self.assertEqual(
@@ -136,7 +132,7 @@ class ShowMyPlansPresenterTests(TestCase):
         )
 
     def test_presenter_shows_correct_info_of_one_single_non_active_plan(self) -> None:
-        plan = self.plan_generator.create_plan(activation_date=None)
+        plan = self.plan_generator.create_plan(approved=False)
         RESPONSE_WITH_ONE_NON_ACTIVE_PLAN = self.response_with_one_non_active_plan(plan)
         presentation = self.presenter.present(RESPONSE_WITH_ONE_NON_ACTIVE_PLAN)
         row1 = presentation.non_active_plans.rows[0]
@@ -317,7 +313,6 @@ class ShowMyPlansPresenterTests(TestCase):
 
     def _create_active_plan(self, timeframe: int = 1) -> Plan:
         plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now(),
             timeframe=timeframe,
         )
         self.update_plans_use_case()

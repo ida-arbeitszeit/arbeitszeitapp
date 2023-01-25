@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from arbeitszeit.use_cases import (
     CancelCooperationSolicitation,
     CancelCooperationSolicitationRequest,
@@ -31,7 +29,7 @@ class UseCaseTests(BaseTestCase):
         coop = self.coop_generator.create_cooperation()
         company = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(
-            planner=company, activation_date=datetime.min, requested_cooperation=coop
+            planner=company, requested_cooperation=coop
         )
         assert plan.requested_cooperation is not None
         response = self.use_case(CancelCooperationSolicitationRequest(company, plan.id))

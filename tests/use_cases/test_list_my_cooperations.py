@@ -1,4 +1,3 @@
-from datetime import datetime
 from uuid import uuid4
 
 from arbeitszeit.use_cases.list_my_cooperating_plans import (
@@ -33,16 +32,14 @@ class UseCaseTest(BaseTestCase):
     def test_no_plans_are_returned_if_requester_has_no_active_plans(self) -> None:
         company = self.company_generator.create_company()
         request = ListMyCooperatingPlansUseCase.Request(company=company)
-        self.plan_generator.create_plan(planner=company, activation_date=None)
+        self.plan_generator.create_plan(planner=company, approved=False)
         result = self.use_case.list_cooperations(request=request)
         assert len(result.cooperating_plans) == 0
 
     def test_no_plans_are_returned_if_requester_has_no_cooperating_plans(self) -> None:
         company = self.company_generator.create_company()
         request = ListMyCooperatingPlansUseCase.Request(company=company)
-        self.plan_generator.create_plan(
-            planner=company, activation_date=datetime(2020, 5, 1), cooperation=None
-        )
+        self.plan_generator.create_plan(planner=company, cooperation=None)
         result = self.use_case.list_cooperations(request=request)
         assert len(result.cooperating_plans) == 0
 
@@ -52,9 +49,7 @@ class UseCaseTest(BaseTestCase):
         coop = self.coop_generator.create_cooperation()
         company = self.company_generator.create_company()
         request = ListMyCooperatingPlansUseCase.Request(company=company)
-        self.plan_generator.create_plan(
-            planner=company, activation_date=datetime(2020, 5, 1), cooperation=coop
-        )
+        self.plan_generator.create_plan(planner=company, cooperation=coop)
         result = self.use_case.list_cooperations(request=request)
         assert len(result.cooperating_plans) == 1
 
@@ -62,9 +57,7 @@ class UseCaseTest(BaseTestCase):
         coop = self.coop_generator.create_cooperation()
         company = self.company_generator.create_company()
         request = ListMyCooperatingPlansUseCase.Request(company=company)
-        plan = self.plan_generator.create_plan(
-            planner=company, activation_date=datetime(2020, 5, 1), cooperation=coop
-        )
+        plan = self.plan_generator.create_plan(planner=company, cooperation=coop)
         result = self.use_case.list_cooperations(request=request)
         cooperating_plan = result.cooperating_plans[0]
         assert cooperating_plan.coop_id == coop.id
@@ -78,11 +71,7 @@ class UseCaseTest(BaseTestCase):
         coop = self.coop_generator.create_cooperation()
         company = self.company_generator.create_company()
         request = ListMyCooperatingPlansUseCase.Request(company=company)
-        self.plan_generator.create_plan(
-            planner=company, activation_date=datetime(2020, 5, 1), cooperation=coop
-        )
-        self.plan_generator.create_plan(
-            planner=company, activation_date=datetime(2021, 5, 1), cooperation=coop
-        )
+        self.plan_generator.create_plan(planner=company, cooperation=coop)
+        self.plan_generator.create_plan(planner=company, cooperation=coop)
         result = self.use_case.list_cooperations(request=request)
         assert len(result.cooperating_plans) == 2

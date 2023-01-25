@@ -290,6 +290,35 @@ class PlanUpdate:
             ),
         )
 
+    def set_activation_timestamp(
+        self, activation_timestamp: Optional[datetime]
+    ) -> PlanUpdate:
+        return replace(
+            self,
+            plan_update_values=dict(
+                self.plan_update_values,
+                activation_date=activation_timestamp,
+            ),
+        )
+
+    def set_activation_status(self, *, is_active: bool) -> PlanUpdate:
+        return replace(
+            self,
+            plan_update_values=dict(
+                self.plan_update_values,
+                is_active=is_active,
+            ),
+        )
+
+    def set_expiration_status(self, *, is_expired: bool) -> PlanUpdate:
+        return replace(
+            self,
+            plan_update_values=dict(
+                self.plan_update_values,
+                expired=is_expired,
+            ),
+        )
+
 
 class MemberQueryResult(FlaskQueryResult[entities.Member]):
     def working_at_company(self, company: UUID) -> MemberQueryResult:
@@ -992,22 +1021,6 @@ class PlanRepository(repositories.PlanRepository):
         )
         self.db.session.add(plan_review)
         return plan
-
-    def activate_plan(self, plan: entities.Plan, activation_date: datetime) -> None:
-        plan.is_active = True
-        plan.activation_date = activation_date
-
-        plan_orm = self.object_to_orm(plan)
-        plan_orm.is_active = True
-        plan_orm.activation_date = activation_date
-
-    def set_plan_as_expired(self, plan: entities.Plan) -> None:
-        plan.expired = True
-        plan.is_active = False
-
-        plan_orm = self.object_to_orm(plan)
-        plan_orm.expired = True
-        plan_orm.is_active = False
 
     def set_active_days(self, plan: entities.Plan, full_active_days: int) -> None:
         plan.active_days = full_active_days

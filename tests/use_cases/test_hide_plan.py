@@ -44,9 +44,9 @@ class UseCaseTests(TestCase):
         assert response.is_success == False
 
     def create_expired_plan(self) -> Plan:
-        plan = self.plan_generator.create_plan(
-            timeframe=1, activation_date=datetime(1999, 1, 1)
-        )
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        plan = self.plan_generator.create_plan(timeframe=1)
+        self.datetime_service.unfreeze_time()
         self.update_plans_and_payout()
         return plan
 

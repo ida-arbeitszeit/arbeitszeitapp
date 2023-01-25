@@ -34,7 +34,7 @@ class PlanSummaryServiceTests(TestCase):
         self.assertEqual(self.summary.planner_name, self.planner.name)
 
     def test_that_correct_active_status_is_shown_when_plan_is_active(self):
-        plan = self.plan_generator.create_plan(activation_date=datetime.min)
+        plan = self.plan_generator.create_plan()
         assert plan.is_active
         summary = self.service.get_summary_from_plan(plan)
         self.assertTrue(summary.is_active)
@@ -105,24 +105,20 @@ class PlanSummaryServiceTests(TestCase):
         self.assertTrue(summary.is_available)
 
     def test_that_no_cooperation_is_shown_when_plan_is_not_cooperating(self):
-        plan = self.plan_generator.create_plan(
-            activation_date=datetime.min, cooperation=None
-        )
+        plan = self.plan_generator.create_plan(cooperation=None)
         summary = self.service.get_summary_from_plan(plan)
         self.assertFalse(summary.is_cooperating)
         self.assertIsNone(summary.cooperation)
 
     def test_that_correct_cooperation_is_shown(self):
         coop = self.coop_generator.create_cooperation()
-        plan = self.plan_generator.create_plan(
-            activation_date=datetime.min, cooperation=coop
-        )
+        plan = self.plan_generator.create_plan(cooperation=coop)
         summary = self.service.get_summary_from_plan(plan)
         self.assertTrue(summary.is_cooperating)
         self.assertEqual(summary.cooperation, coop.id)
 
     def test_that_zero_active_days_is_shown_if_plan_is_not_active_yet(self):
-        plan = self.plan_generator.create_plan(activation_date=None)
+        plan = self.plan_generator.create_plan(approved=False)
         self.payout_use_case()
         summary = self.service.get_summary_from_plan(plan)
         self.assertEqual(summary.active_days, 0)
@@ -130,9 +126,7 @@ class PlanSummaryServiceTests(TestCase):
     def test_that_zero_active_days_is_shown_if_plan_is_active_since_less_than_one_day(
         self,
     ):
-        plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now()
-        )
+        plan = self.plan_generator.create_plan()
         self.payout_use_case()
         summary = self.service.get_summary_from_plan(plan)
         self.assertEqual(summary.active_days, 0)
@@ -140,9 +134,9 @@ class PlanSummaryServiceTests(TestCase):
     def test_that_one_active_days_is_shown_if_plan_is_active_since_25_hours(
         self,
     ):
-        plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_25_hours()
-        )
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        plan = self.plan_generator.create_plan()
+        self.datetime_service.freeze_time(datetime(2000, 1, 2, hour=1))
         self.payout_use_case()
         summary = self.service.get_summary_from_plan(plan)
         self.assertEqual(summary.active_days, 1)
@@ -151,10 +145,11 @@ class PlanSummaryServiceTests(TestCase):
         self,
     ):
         timeframe = 7
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
         plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_ten_days(),
             timeframe=timeframe,
         )
+        self.datetime_service.freeze_time(datetime(2000, 1, 11))
         self.payout_use_case()
         summary = self.service.get_summary_from_plan(plan)
         self.assertEqual(summary.active_days, timeframe)
@@ -167,9 +162,7 @@ class PlanSummaryServiceTests(TestCase):
         self.assertEqual(self.summary.approval_date, self.plan.approval_date)
 
     def test_that_expiration_date_is_shown_if_it_exists(self):
-        plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now(), timeframe=5
-        )
+        plan = self.plan_generator.create_plan(timeframe=5)
         self.payout_use_case()
         assert plan.expiration_date
         summary = self.service.get_summary_from_plan(plan)

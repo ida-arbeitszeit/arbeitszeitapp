@@ -70,9 +70,7 @@ class ThreeLatestPlansTests(TestCase):
         self,
     ):
         for _ in range(5):
-            self.plan_generator.create_plan(
-                activation_date=self.datetime_service.now_minus_one_day()
-            )
+            self.plan_generator.create_plan()
         company = self.company_generator.create_company_entity()
         response = self.use_case.get_dashboard(company.id)
         self.assertEqual(len(response.three_latest_plans), 3)
@@ -80,9 +78,7 @@ class ThreeLatestPlansTests(TestCase):
     def test_that_plan_id_of_latest_plan_is_set_correctly(
         self,
     ):
-        plan = self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day()
-        )
+        plan = self.plan_generator.create_plan()
         company = self.company_generator.create_company_entity()
         response = self.use_case.get_dashboard(company.id)
         self.assertEqual(response.three_latest_plans[0].plan_id, plan.id)
@@ -91,10 +87,7 @@ class ThreeLatestPlansTests(TestCase):
         self,
     ):
         expected_name = "test product xy"
-        self.plan_generator.create_plan(
-            activation_date=self.datetime_service.now_minus_one_day(),
-            product_name=expected_name,
-        )
+        self.plan_generator.create_plan(product_name=expected_name)
         company = self.company_generator.create_company_entity()
         response = self.use_case.get_dashboard(company.id)
         self.assertEqual(response.three_latest_plans[0].prd_name, expected_name)
@@ -103,7 +96,9 @@ class ThreeLatestPlansTests(TestCase):
         self,
     ):
         expected_datetime = datetime(2020, 10, 10)
-        self.plan_generator.create_plan(activation_date=expected_datetime)
+        self.datetime_service.freeze_time(expected_datetime)
+        self.plan_generator.create_plan()
+        self.datetime_service.unfreeze_time()
         company = self.company_generator.create_company_entity()
         response = self.use_case.get_dashboard(company.id)
         self.assertEqual(

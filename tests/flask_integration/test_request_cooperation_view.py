@@ -1,4 +1,3 @@
-from datetime import datetime
 from uuid import uuid4
 
 from tests.data_generators import PlanGenerator
@@ -39,9 +38,7 @@ class LoggedInCompanyTests(ViewTestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_get_request_shows_truncated_plan_name_and_id_of_company_plan(self) -> None:
-        plan = self.plan_generator.create_plan(
-            activation_date=datetime.min, planner=self.company.id
-        )
+        plan = self.plan_generator.create_plan(planner=self.company.id)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertIn(plan.prd_name[:10], response.get_data(as_text=True))

@@ -6,7 +6,7 @@ import json
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Iterable, Optional, Tuple
+from typing import Dict, Iterable, Iterator, Optional, Tuple
 
 
 def main() -> None:
@@ -30,14 +30,11 @@ class RequirementsUpdater:
     package_filter: PackageFilter
 
     def process_requirements_file(self) -> None:
-        for (
-            package_name,
-            package_version,
-        ) in self.python_environment.get_installed_packages():
+        for package in self.python_environment.get_installed_packages():
             if self.package_filter.is_package_to_be_included_in_requirements(
-                package_name
+                package.name
             ):
-                self.requirements_file.update_package(package_name, package_version)
+                self.requirements_file.update_package(package.name, package.version)
         self.requirements_file.save_to_disk()
 
 
@@ -64,8 +61,14 @@ class RequirementsFile:
         )
 
 
+@dataclass
+class PythonPackage:
+    name: str
+    version: str
+
+
 class PythonEnvironment:
-    def get_installed_packages(self) -> Iterable[Tuple[str, str]]:
+    def get_installed_packages(self) -> Iterator[PythonPackage]:
         process_info = subprocess.run(
             [
                 "pip",
@@ -79,7 +82,10 @@ class PythonEnvironment:
         )
         packages = json.loads(process_info.stdout)
         for package in packages:
-            yield package["name"], package["version"]
+            yield PythonPackage(
+                name=package["name"],
+                version=package["version"],
+            )
 
 
 class VersionStringCleaner:
@@ -112,15 +118,9 @@ class VersionStringCleaner:
 
 class PackageFilter:
     def is_package_to_be_included_in_requirements(self, package_name: str) -> bool:
-        # As of 12. Jul 2022 the nix environment uses mccabe 0.7,
-        # which is in conflict with flake8 requirements 'mccabe <
-        # 0.7'. mccabe 0.6.1 and 0.7 seem to work fine with flake8. So
-        # to avoid pip complaining about dependency conflicts we
-        # filter mccabe and let pip decide which version to use. There
-        # is a similar situation with docutils and sphinx.  Since we
-        # use a custom flask-profiler package we need to exclude it
-        # from constraints.txt
-        return package_name not in ["mccabe", "docutils", "flask-profiler"]
+        # Since we use a custom flask-profiler package we need to
+        # exclude it from constraints.txt
+        return package_name not in ["flask-profiler"]
 
 
 def parse_arguments():

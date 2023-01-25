@@ -129,6 +129,17 @@ class PlanUpdate(Protocol):
         updated through this method.
         """
 
+    def set_activation_timestamp(
+        self, activation_timestamp: Optional[datetime]
+    ) -> PlanUpdate:
+        """Set the `activation_date` field of all selected plans."""
+
+    def set_activation_status(self, *, is_active: bool) -> PlanUpdate:
+        """Mark selected plans as active or inactive."""
+
+    def set_expiration_status(self, *, is_expired: bool) -> PlanUpdate:
+        """Mark selected plans as expired or not expired."""
+
     def set_approval_date(self, approval_date: Optional[datetime]) -> PlanUpdate:
         """Set the approval date of all matching plans. The return
         value counts all the plans that were changed by this methods.
@@ -243,14 +254,6 @@ class PurchaseRepository(ABC):
 class PlanRepository(ABC):
     @abstractmethod
     def create_plan_from_draft(self, draft_id: UUID) -> Optional[UUID]:
-        pass
-
-    @abstractmethod
-    def activate_plan(self, plan: Plan, activation_date: datetime) -> None:
-        pass
-
-    @abstractmethod
-    def set_plan_as_expired(self, plan: Plan) -> None:
         pass
 
     @abstractmethod
