@@ -95,7 +95,7 @@ class QueryPlans:
 
     def _apply_sorting(self, plans: PlanResult, sort_by: PlanSorting) -> PlanResult:
         if sort_by == PlanSorting.by_company_name:
-            plans = plans.ordered_by_company_name()
+            plans = plans.ordered_by_planner_name()
         else:
             plans = plans.ordered_by_activation_date(ascending=False)
         return plans

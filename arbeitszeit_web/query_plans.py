@@ -18,7 +18,7 @@ from .notification import Notifier
 from .url_index import UrlIndex, UserUrlIndex
 
 
-class NotAnIntegerError(Exception):
+class NotAnIntegerError(ValueError):
     pass
 
 

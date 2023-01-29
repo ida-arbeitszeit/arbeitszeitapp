@@ -103,7 +103,7 @@ class PlanResult(QueryResultImpl[Plan]):
             entities=self.entities,
         )
 
-    def ordered_by_company_name(self, ascending: bool = True) -> PlanResult:
+    def ordered_by_planner_name(self, ascending: bool = True) -> PlanResult:
         def get_company_name(planner_id: UUID):
             planner = self.entities.get_company_by_id(planner_id)
             assert planner

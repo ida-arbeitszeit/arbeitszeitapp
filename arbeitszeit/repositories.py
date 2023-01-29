@@ -53,7 +53,7 @@ class PlanResult(QueryResult[Plan], Protocol):
     def ordered_by_activation_date(self, ascending: bool = ...) -> PlanResult:
         ...
 
-    def ordered_by_company_name(self, ascending: bool = ...) -> PlanResult:
+    def ordered_by_planner_name(self, ascending: bool = ...) -> PlanResult:
         ...
 
     def with_id_containing(self, query: str) -> PlanResult:

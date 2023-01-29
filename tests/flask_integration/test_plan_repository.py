@@ -188,7 +188,7 @@ class GetActivePlansTests(FlaskTestCase):
         assert retrieved_plans[1] == plans[2]
         assert retrieved_plans[2] == plans[4]
 
-    def test_plans_can_be_ordered_by_company_name(
+    def test_plans_can_be_ordered_by_planner_name(
         self,
     ) -> None:
         planner_names = ["1_name", "B_name", "d_name", "c_name"]
@@ -200,7 +200,7 @@ class GetActivePlansTests(FlaskTestCase):
         for company in planners:
             plans.append(self.plan_generator.create_plan(planner=company.id))
         retrieved_plans = list(
-            self.plan_repository.get_plans().ordered_by_company_name().limit(3)
+            self.plan_repository.get_plans().ordered_by_planner_name().limit(3)
         )
         assert len(retrieved_plans) == 3
         assert retrieved_plans[0] == plans[0]

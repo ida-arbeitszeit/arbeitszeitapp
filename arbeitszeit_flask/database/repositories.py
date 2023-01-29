@@ -89,7 +89,7 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
             ordering = ordering.desc()
         return self._with_modified_query(lambda query: query.order_by(ordering))
 
-    def ordered_by_company_name(self, ascending: bool = True) -> PlanQueryResult:
+    def ordered_by_planner_name(self, ascending: bool = True) -> PlanQueryResult:
         ordering = models.Company.name
         if not ascending:
             ordering = ordering.desc()
