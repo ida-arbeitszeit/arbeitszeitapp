@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import Any, Dict, Optional, Protocol
 
 from flask import render_template
-from injector import inject
 
 from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
 from arbeitszeit_web.presenters.list_available_languages_presenter import (
@@ -68,7 +67,6 @@ class AnonymousUserTemplateRenderer:
         return self.inner_renderer.render_template(name, context)
 
 
-@inject
 @dataclass
 class UserTemplateRenderer:
     inner_renderer: TemplateRenderer

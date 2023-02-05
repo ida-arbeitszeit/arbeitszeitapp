@@ -4,8 +4,6 @@ from decimal import Decimal
 from typing import List, Optional
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.entities import Plan, PlanDraft
 from arbeitszeit.price_calculator import PriceCalculator
 from arbeitszeit.repositories import PlanDraftRepository, PlanRepository
@@ -39,7 +37,6 @@ class ShowMyPlansResponse:
     drafts: List[PlanInfo]
 
 
-@inject
 @dataclass
 class ShowMyPlansUseCase:
     plan_repository: PlanRepository

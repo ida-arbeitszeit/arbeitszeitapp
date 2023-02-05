@@ -7,14 +7,11 @@ from itertools import accumulate
 from typing import List, Optional, Union
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.entities import AccountTypes, Company, Member, Transaction
 from arbeitszeit.repositories import AccountRepository, CompanyRepository
 from arbeitszeit.transactions import TransactionTypes, UserAccountingService
 
 
-@inject
 @dataclass
 class ShowPRDAccountDetailsUseCase:
     @dataclass

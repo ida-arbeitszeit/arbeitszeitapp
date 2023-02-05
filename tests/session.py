@@ -4,9 +4,11 @@ from dataclasses import dataclass
 from typing import List, Optional
 from uuid import UUID
 
+from arbeitszeit.injector import singleton
 from arbeitszeit_web.session import UserRole
 
 
+@singleton
 class FakeSession:
     @dataclass
     class LoginAttempt:

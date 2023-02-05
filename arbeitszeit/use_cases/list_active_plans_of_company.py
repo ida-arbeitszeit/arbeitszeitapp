@@ -2,8 +2,6 @@ from dataclasses import dataclass
 from typing import List
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.entities import Plan
 from arbeitszeit.repositories import PlanRepository
 
@@ -19,7 +17,6 @@ class ListPlansResponse:
     plans: List[ListedPlan]
 
 
-@inject
 @dataclass
 class ListActivePlansOfCompany:
     plan_repository: PlanRepository

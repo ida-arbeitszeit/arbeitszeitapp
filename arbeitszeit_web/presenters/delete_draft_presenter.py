@@ -1,7 +1,5 @@
 from dataclasses import dataclass
 
-from injector import inject
-
 from arbeitszeit.use_cases.delete_draft import DeleteDraftUseCase
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.session import Session
@@ -9,7 +7,6 @@ from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 
 
-@inject
 @dataclass
 class DeleteDraftPresenter:
     url_index: UrlIndex

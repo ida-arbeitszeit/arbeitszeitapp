@@ -2,8 +2,6 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import Optional, Tuple
 
-from injector import inject
-
 from arbeitszeit.entities import PayoutFactor
 from arbeitszeit.repositories import (
     AccountRepository,
@@ -31,7 +29,6 @@ class StatisticsResponse:
     payout_factor: Optional[PayoutFactor]
 
 
-@inject
 @dataclass
 class GetStatistics:
     company_repository: CompanyRepository

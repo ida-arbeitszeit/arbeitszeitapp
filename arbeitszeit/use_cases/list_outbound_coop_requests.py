@@ -2,8 +2,6 @@ from dataclasses import dataclass
 from typing import List
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.entities import Plan
 from arbeitszeit.repositories import (
     CompanyRepository,
@@ -30,7 +28,6 @@ class ListOutboundCoopRequestsResponse:
     cooperation_requests: List[ListedOutboundCoopRequest]
 
 
-@inject
 @dataclass
 class ListOutboundCoopRequests:
     company_repository: CompanyRepository

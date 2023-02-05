@@ -1,14 +1,11 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from injector import inject
-
 from arbeitszeit.use_cases import ShowCompanyWorkInviteDetailsResponse
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 
 
-@inject
 @dataclass
 class ShowCompanyWorkInviteDetailsPresenter:
     @dataclass

@@ -1,8 +1,6 @@
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, Optional
 
-from injector import inject
-
 from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
 from arbeitszeit_web.formatters.plan_summary_formatter import (
     PlanSummaryFormatter,
@@ -34,7 +32,6 @@ class GetPlanSummaryCompanyViewModel:
         return asdict(self)
 
 
-@inject
 @dataclass
 class GetPlanSummaryCompanySuccessPresenter:
     trans: Translator

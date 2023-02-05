@@ -3,15 +3,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List
 
-from injector import inject
-
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.get_member_account import GetMemberAccountResponse
 from arbeitszeit_web.translator import Translator
 
 
-@inject
 @dataclass
 class GetMemberAccountPresenter:
     @dataclass

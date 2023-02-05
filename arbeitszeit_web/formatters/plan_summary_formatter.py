@@ -2,8 +2,6 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import List, Optional, Tuple
 
-from injector import inject
-
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.plan_summary import PlanSummary
 from arbeitszeit_web.session import Session
@@ -33,7 +31,6 @@ class PlanSummaryWeb:
     expiration_date: str
 
 
-@inject
 @dataclass
 class PlanSummaryFormatter:
     url_index: UrlIndex

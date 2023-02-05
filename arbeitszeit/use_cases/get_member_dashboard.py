@@ -6,8 +6,6 @@ from decimal import Decimal
 from typing import List
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
@@ -17,7 +15,6 @@ from arbeitszeit.repositories import (
 )
 
 
-@inject
 @dataclass
 class GetMemberDashboard:
     @dataclass

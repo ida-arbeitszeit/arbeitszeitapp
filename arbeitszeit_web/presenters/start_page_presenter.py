@@ -3,13 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List
 
-from injector import inject
-
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.use_cases.start_page import StartPageUseCase
 
 
-@inject
 @dataclass
 class StartPagePresenter:
     @dataclass

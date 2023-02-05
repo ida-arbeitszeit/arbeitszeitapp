@@ -4,14 +4,11 @@ from dataclasses import dataclass
 from typing import Optional
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.repositories import CompanyRepository
 from arbeitszeit.token import InvitationTokenValidator
 
 
-@inject
 @dataclass
 class ConfirmCompanyUseCase:
     @dataclass

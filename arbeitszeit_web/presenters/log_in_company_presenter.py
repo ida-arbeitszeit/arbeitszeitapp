@@ -3,8 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
-from injector import inject
-
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit_web.forms import LoginCompanyForm
 from arbeitszeit_web.session import Session
@@ -12,7 +10,6 @@ from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 
 
-@inject
 @dataclass
 class LogInCompanyPresenter:
     @dataclass

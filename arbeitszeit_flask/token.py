@@ -1,8 +1,9 @@
 from typing import Optional
 
 from flask import current_app
-from injector import singleton
 from itsdangerous import BadSignature, URLSafeTimedSerializer
+
+from arbeitszeit.injector import singleton
 
 
 @singleton

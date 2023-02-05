@@ -1,8 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Iterator
 
-from injector import inject
-
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.use_cases.query_purchases import PurchaseQueryResponse
 
@@ -46,7 +44,6 @@ class ViewModel:
         yield from self.purchases
 
 
-@inject
 @dataclass
 class CompanyPurchasesPresenter:
 

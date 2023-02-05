@@ -4,13 +4,10 @@ from dataclasses import dataclass
 from typing import Union
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.plan_summary import PlanSummary, PlanSummaryService
 from arbeitszeit.repositories import PlanRepository
 
 
-@inject
 @dataclass
 class GetPlanSummaryAccountant:
     @dataclass

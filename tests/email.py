@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import List, Optional, Set
 from uuid import UUID
 
-from injector import singleton
+from arbeitszeit.injector import singleton
 
 
 @dataclass
@@ -13,6 +13,7 @@ class Email:
     sender: str
 
 
+@singleton
 class FakeEmailSender:
     def __init__(self) -> None:
         self.sent_mails: List[Email] = []

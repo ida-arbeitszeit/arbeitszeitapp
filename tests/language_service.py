@@ -1,6 +1,9 @@
 from typing import Dict, Optional
 
+from arbeitszeit.injector import singleton
 
+
+@singleton
 class FakeLanguageService:
     def __init__(self) -> None:
         self._names: Dict[str, str] = dict()

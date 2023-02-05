@@ -1,8 +1,6 @@
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional, Protocol
 
-from injector import inject
-
 from arbeitszeit.use_cases.query_plans import (
     PlanFilter,
     PlanQueryResponse,
@@ -88,7 +86,6 @@ class QueryPlansViewModel:
         return asdict(self)
 
 
-@inject
 @dataclass
 class QueryPlansPresenter:
     user_url_index: UserUrlIndex

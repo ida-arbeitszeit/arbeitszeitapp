@@ -4,8 +4,6 @@ from decimal import Decimal
 from typing import List
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.entities import AccountTypes, Company, Transaction
 from arbeitszeit.repositories import AccountRepository, CompanyRepository
 from arbeitszeit.transactions import TransactionTypes, UserAccountingService
@@ -25,7 +23,6 @@ class GetCompanyTransactionsResponse:
     transactions: List[TransactionInfo]
 
 
-@inject
 @dataclass
 class GetCompanyTransactions:
     accounting_service: UserAccountingService

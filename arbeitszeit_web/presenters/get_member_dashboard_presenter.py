@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from typing import List
 
-from injector import inject
-
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.use_cases.get_member_dashboard import GetMemberDashboard
 from arbeitszeit_web.session import UserRole
@@ -44,7 +42,6 @@ class GetMemberDashboardViewModel:
     show_invites: bool
 
 
-@inject
 @dataclass
 class GetMemberDashboardPresenter:
     translator: Translator

@@ -4,8 +4,6 @@ from enum import Enum, auto
 from typing import Optional
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.repositories import (
     CompanyRepository,
@@ -33,7 +31,6 @@ class SendWorkCertificatesToWorkerResponse:
         return self.rejection_reason is not None
 
 
-@inject
 @dataclass
 class SendWorkCertificatesToWorker:
     company_repository: CompanyRepository

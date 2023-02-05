@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 
+from arbeitszeit.injector import singleton
 
+
+@singleton
 @dataclass
 class ControlThresholdsTestImpl:
     allowed_overdraw_of_member_account: int = 0

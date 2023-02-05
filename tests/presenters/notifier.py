@@ -1,6 +1,9 @@
 from typing import List
 
+from arbeitszeit.injector import singleton
 
+
+@singleton
 class NotifierTestImpl:
     def __init__(self) -> None:
         self.warnings: List[str] = []

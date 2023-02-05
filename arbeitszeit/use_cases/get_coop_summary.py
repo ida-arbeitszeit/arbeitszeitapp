@@ -3,8 +3,6 @@ from decimal import Decimal
 from typing import List, Optional
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.price_calculator import PriceCalculator
 from arbeitszeit.repositories import CooperationRepository, PlanRepository
 
@@ -38,7 +36,6 @@ class GetCoopSummarySuccess:
 GetCoopSummaryResponse = Optional[GetCoopSummarySuccess]
 
 
-@inject
 @dataclass
 class GetCoopSummary:
     cooperation_repository: CooperationRepository

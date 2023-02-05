@@ -21,8 +21,6 @@ from typing import (
 )
 from uuid import UUID, uuid4
 
-from injector import inject, singleton
-
 import arbeitszeit.repositories as interfaces
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
@@ -43,6 +41,7 @@ from arbeitszeit.entities import (
     SocialAccounting,
     Transaction,
 )
+from arbeitszeit.injector import singleton
 from tests.search_tree import SearchTree
 
 T = TypeVar("T")
@@ -419,7 +418,6 @@ class AccountResult(QueryResultImpl[Account]):
 
 @singleton
 class PurchaseRepository(interfaces.PurchaseRepository):
-    @inject
     def __init__(self, entities: EntityStorage):
         self.purchases: List[Purchase] = []
         self.entities = entities
@@ -474,7 +472,6 @@ class PurchaseRepository(interfaces.PurchaseRepository):
 
 @singleton
 class TransactionRepository(interfaces.TransactionRepository):
-    @inject
     def __init__(self, entities: EntityStorage) -> None:
         self.entities = entities
 
@@ -519,7 +516,6 @@ class TransactionRepository(interfaces.TransactionRepository):
 
 @singleton
 class AccountRepository(interfaces.AccountRepository):
-    @inject
     def __init__(
         self, transaction_repository: TransactionRepository, entities: EntityStorage
     ):
@@ -551,7 +547,6 @@ class AccountRepository(interfaces.AccountRepository):
 
 @singleton
 class AccountOwnerRepository(interfaces.AccountOwnerRepository):
-    @inject
     def __init__(
         self,
         entities: EntityStorage,
@@ -578,7 +573,6 @@ class AccountOwnerRepository(interfaces.AccountOwnerRepository):
 
 @singleton
 class MemberRepository(interfaces.MemberRepository):
-    @inject
     def __init__(self, datetime_service: DatetimeService, entities: EntityStorage):
         self.datetime_service = datetime_service
         self.entities = entities
@@ -624,8 +618,8 @@ class MemberRepository(interfaces.MemberRepository):
         return None
 
 
+@singleton
 class CompanyRepository(interfaces.CompanyRepository):
-    @inject
     def __init__(self, entities: EntityStorage) -> None:
         self.entities = entities
 
@@ -692,7 +686,6 @@ class CompanyRepository(interfaces.CompanyRepository):
 
 @singleton
 class PlanRepository(interfaces.PlanRepository):
-    @inject
     def __init__(
         self,
         draft_repository: PlanDraftRepository,
@@ -828,12 +821,12 @@ class PlanRepository(interfaces.PlanRepository):
 
 @singleton
 class PlanDraftRepository(interfaces.PlanDraftRepository):
-    @inject
     def __init__(
         self,
         datetime_service: DatetimeService,
         company_repository: interfaces.CompanyRepository,
     ) -> None:
+        print("hi")
         self.drafts: List[PlanDraft] = []
         self.datetime_service = datetime_service
         self.company_repository = company_repository
@@ -911,8 +904,8 @@ class PlanDraftRepository(interfaces.PlanDraftRepository):
         return result
 
 
+@singleton
 class WorkerInviteRepository(interfaces.WorkerInviteRepository):
-    @inject
     def __init__(
         self, company_repository: CompanyRepository, member_repository: MemberRepository
     ) -> None:
@@ -968,7 +961,6 @@ class WorkerInviteRepository(interfaces.WorkerInviteRepository):
 
 @singleton
 class CooperationRepository(interfaces.CooperationRepository):
-    @inject
     def __init__(self, entities: EntityStorage) -> None:
         self.entities = entities
 
@@ -1030,7 +1022,6 @@ class AccountantRepositoryTestImpl:
         password: str
         id: UUID
 
-    @inject
     def __init__(self, entities: EntityStorage) -> None:
         self.accountants: Dict[
             UUID, AccountantRepositoryTestImpl._AccountantRecord
@@ -1076,6 +1067,7 @@ class AccountantRepositoryTestImpl:
         )
 
 
+@singleton
 class FakeLanguageRepository:
     def __init__(self) -> None:
         self._language_codes: Set[str] = set()
@@ -1096,7 +1088,6 @@ class FakePayoutFactorRepository:
         def __lt__(self, other: FakePayoutFactorRepository._PayoutFactorModel) -> bool:
             return self.factor.calculation_date < other.factor.calculation_date
 
-    @inject
     def __init__(self) -> None:
         self._payout_factors: SearchTree[
             FakePayoutFactorRepository._PayoutFactorModel
@@ -1120,7 +1111,6 @@ class FakePayoutFactorRepository:
 
 @singleton
 class EntityStorage:
-    @inject
     def __init__(self, datetime_service: DatetimeService) -> None:
         self.members: Dict[UUID, Member] = {}
         self.member_passwords: Dict[UUID, str] = {}

@@ -1,7 +1,6 @@
-from injector import Module, provider, singleton
-
 from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.injector import Binder, ClassProvider, Module
 from arbeitszeit.token import (
     CompanyRegistrationMessagePresenter,
     MemberRegistrationMessagePresenter,
@@ -10,108 +9,42 @@ from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitat
     AccountantInvitationPresenter,
 )
 from arbeitszeit_web.colors import Colors
+from arbeitszeit_web.email import UserAddressBook
 from arbeitszeit_web.plotter import Plotter
-from arbeitszeit_web.session import Session
+from arbeitszeit_web.request import Request
 from arbeitszeit_web.text_renderer import TextRenderer
 from arbeitszeit_web.translator import Translator
 from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
 from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.datetime_service import FakeDatetimeService
-from tests.email import FakeEmailSender
-from tests.language_service import FakeLanguageService
+from tests.email import FakeAddressBook
 from tests.plotter import FakePlotter
 from tests.presenters.test_colors import ColorsTestImpl
 from tests.request import FakeRequest
-from tests.session import FakeSession
 from tests.text_renderer import TextRendererImpl
-from tests.token import FakeTokenService, TokenDeliveryService
+from tests.token import TokenDeliveryService
 from tests.translator import FakeTranslator
 
 
 class TestingModule(Module):
-    @provider
-    def provide_company_registration_message_presenter(
-        self, token_delivery_service: TokenDeliveryService
-    ) -> CompanyRegistrationMessagePresenter:
-        return token_delivery_service
-
-    @provider
-    def provide_member_registration_message_presenter(
-        self, token_delivery_service: TokenDeliveryService
-    ) -> MemberRegistrationMessagePresenter:
-        return token_delivery_service
-
-    @provider
-    def provide_text_renderer(self, instance: TextRendererImpl) -> TextRenderer:
-        return instance  # type: ignore
-
-    @provider
-    def provide_colors(self, colors: ColorsTestImpl) -> Colors:
-        return colors
-
-    @provider
-    def provide_plotter(self, plotter: FakePlotter) -> Plotter:
-        return plotter
-
-    @provider
-    def provide_control_thresholds(
-        self, thresholds: ControlThresholdsTestImpl
-    ) -> ControlThresholds:
-        return thresholds
-
-    @provider
-    def provide_translator(self, translator: FakeTranslator) -> Translator:
-        return translator
-
-    @singleton
-    @provider
-    def provide_language_service(self) -> FakeLanguageService:
-        return FakeLanguageService()
-
-    @singleton
-    @provider
-    def provide_fake_email_service(self) -> FakeEmailSender:
-        return FakeEmailSender()
-
-    @singleton
-    @provider
-    def provide_fake_session(self) -> FakeSession:
-        return FakeSession()
-
-    @singleton
-    @provider
-    def provide_session(self, instance: FakeSession) -> Session:
-        return instance
-
-    @provider
-    def provide_fake_token_service(
-        self, datetime_service: DatetimeService
-    ) -> FakeTokenService:
-        return FakeTokenService(datetime_service=datetime_service)
-
-    @provider
-    def provide_accountant_invitation_presenter(
-        self, presenter: AccountantInvitationPresenterTestImpl
-    ) -> AccountantInvitationPresenter:
-        return presenter
-
-    @singleton
-    @provider
-    def provide_accountant_invitation_presenter_test_impl(
-        self,
-    ) -> AccountantInvitationPresenterTestImpl:
-        return AccountantInvitationPresenterTestImpl()
-
-    @singleton
-    @provider
-    def provide_fake_datetime_service(self) -> FakeDatetimeService:
-        return FakeDatetimeService()
-
-    @provider
-    def provide_datetime_service(self, service: FakeDatetimeService) -> DatetimeService:
-        return service
-
-    @singleton
-    @provider
-    def provide_fake_request(self) -> FakeRequest:
-        return FakeRequest()
+    def configure(self, binder: Binder) -> None:
+        super().configure(binder)
+        binder[CompanyRegistrationMessagePresenter] = ClassProvider(  # type: ignore
+            TokenDeliveryService
+        )
+        binder[MemberRegistrationMessagePresenter] = ClassProvider(  # type: ignore
+            TokenDeliveryService
+        )
+        binder[TextRenderer] = ClassProvider(TextRendererImpl)  # type: ignore
+        binder[Colors] = ClassProvider(ColorsTestImpl)  # type: ignore
+        binder[Plotter] = ClassProvider(FakePlotter)  # type: ignore
+        binder[ControlThresholds] = ClassProvider(  # type: ignore
+            ControlThresholdsTestImpl
+        )
+        binder[Translator] = ClassProvider(FakeTranslator)  # type: ignore
+        binder[AccountantInvitationPresenter] = ClassProvider(  # type: ignore
+            AccountantInvitationPresenterTestImpl
+        )
+        binder[DatetimeService] = ClassProvider(FakeDatetimeService)  # type: ignore
+        binder[UserAddressBook] = ClassProvider(FakeAddressBook)  # type: ignore
+        binder[Request] = ClassProvider(FakeRequest)  # type: ignore

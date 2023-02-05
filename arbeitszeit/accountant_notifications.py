@@ -2,8 +2,6 @@ from dataclasses import dataclass
 from typing import Protocol
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.repositories import AccountantRepository
 
 
@@ -19,7 +17,6 @@ class NotifyAccountantsAboutNewPlanPresenter(Protocol):
         ...
 
 
-@inject
 @dataclass
 class AccountantNotifier:
     presenter: NotifyAccountantsAboutNewPlanPresenter

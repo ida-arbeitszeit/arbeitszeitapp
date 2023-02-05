@@ -5,8 +5,10 @@ from typing import List, Optional
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.injector import singleton
 
 
+@singleton
 @dataclass
 class FakeTokenService:
     datetime_service: DatetimeService
@@ -40,6 +42,7 @@ class DeliveredToken:
     user: UUID
 
 
+@singleton
 class TokenDeliveryService:
     def __init__(self) -> None:
         self.presented_member_tokens: List[DeliveredToken] = []

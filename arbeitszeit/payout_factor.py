@@ -1,15 +1,12 @@
 from dataclasses import dataclass
 from decimal import Decimal
 
-from injector import inject
-
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.entities import ProductionCosts
 from arbeitszeit.repositories import PayoutFactorRepository, PlanRepository
 
 
-@inject
 @dataclass
 class PayoutFactorService:
     plan_repository: PlanRepository
