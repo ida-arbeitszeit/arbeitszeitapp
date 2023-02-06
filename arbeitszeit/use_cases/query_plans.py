@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 import enum
-import math
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import List, Optional, Tuple
+from typing import List, Optional
 from uuid import UUID
 
 from injector import inject
@@ -28,8 +27,7 @@ class PlanSorting(enum.Enum):
 @dataclass
 class PlanQueryResponse:
     results: List[QueriedPlan]
-    page: int
-    num_pages: int
+    total_results: int
 
 
 @dataclass
@@ -51,7 +49,8 @@ class QueryPlansRequest:
     query_string: Optional[str]
     filter_category: PlanFilter
     sorting_category: PlanSorting
-    page: Optional[int] = None
+    offset: Optional[int] = None
+    limit: Optional[int] = None
 
 
 @inject
@@ -65,22 +64,18 @@ class QueryPlans:
         query = request.query_string
         filter_by = request.filter_category
         sort_by = request.sorting_category
-
-        LIMIT = 15
-        current_page, offset, num_pages = self._get_pagination_attributes(
-            limit=LIMIT, request=request
-        )
-
         plans = self.plan_repository.get_plans().that_are_active()
         plans = self._apply_filter(plans, query, filter_by)
+        total_results = len(plans)
         plans = self._apply_sorting(plans, sort_by)
         # apply offset and limit
-        plans = plans.offset(n=offset).limit(n=LIMIT)
+        if request.offset is not None:
+            plans = plans.offset(n=request.offset)
+        if request.limit is not None:
+            plans = plans.limit(n=request.limit)
 
         results = [self._plan_to_response_model(plan) for plan in plans]
-        return PlanQueryResponse(
-            results=results, page=current_page, num_pages=num_pages
-        )
+        return PlanQueryResponse(results=results, total_results=total_results)
 
     def _apply_filter(
         self, plans: PlanResult, query: Optional[str], filter_by: PlanFilter
@@ -99,16 +94,6 @@ class QueryPlans:
         else:
             plans = plans.ordered_by_activation_date(ascending=False)
         return plans
-
-    def _get_pagination_attributes(
-        self, limit: int, request: QueryPlansRequest
-    ) -> Tuple[int, int, int]:
-        current_page = 1 if request.page is None else request.page
-        offset = (current_page - 1) * limit
-        num_pages = math.ceil(
-            len(self.plan_repository.get_plans().that_are_active()) / limit
-        )
-        return (current_page, offset, num_pages)
 
     def _plan_to_response_model(self, plan: Plan) -> QueriedPlan:
         price_per_unit = self.price_calculator.calculate_cooperative_price(plan)
