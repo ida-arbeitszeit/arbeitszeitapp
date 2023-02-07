@@ -49,7 +49,7 @@ class QueriedPlanGenerator:
 
     def get_response(
         self,
-        queried_plans: List[QueriedPlan],
+        queried_plans: Optional[List[QueriedPlan]] = None,
         page: Optional[int] = None,
         num_pages: Optional[int] = None,
         total_results: Optional[int] = None,
@@ -59,6 +59,8 @@ class QueriedPlanGenerator:
         requested_filter_category: PlanFilter = PlanFilter.by_product_name,
         requested_sorting_category: PlanSorting = PlanSorting.by_activation,
     ) -> PlanQueryResponse:
+        if queried_plans is None:
+            queried_plans = [self.get_plan() for _ in range(5)]
         if total_results is None:
             total_results = max(len(queried_plans), 100)
         return PlanQueryResponse(

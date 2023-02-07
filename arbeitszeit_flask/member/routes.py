@@ -9,6 +9,7 @@ from flask_login import current_user
 from arbeitszeit import use_cases
 from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
 from arbeitszeit_flask.database import MemberRepository, commit_changes
+from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.forms import (
     AnswerCompanyWorkInviteForm,
     CompanySearchForm,
@@ -79,7 +80,7 @@ def query_plans(
         template_name,
         template_renderer,
     )
-    return view.respond_to_get(search_form)
+    return view.respond_to_get(search_form, FlaskRequest())
 
 
 @MemberRoute("/member/query_companies", methods=["GET", "POST"])

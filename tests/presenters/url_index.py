@@ -1,6 +1,7 @@
 """This module shall contain a mock implementation of the UrlIndex."""
 
 from typing import Any, Callable
+from urllib.parse import quote
 from uuid import UUID
 
 
@@ -14,7 +15,7 @@ class UrlIndexMethod:
             sorted_args.sort()
             sorted_kwargs = [f"{key}: {value}" for key, value in kwargs.items()]
             sorted_kwargs.sort()
-            return f"url index placeholder text for {self._attribute_name}, context: args={sorted_args}, kwargs={','.join(sorted_kwargs)}"
+            return f'url://{quote(self._attribute_name)}/args/{"/".join(map(quote, args))}/kwargs/{"/".join(map(lambda t: quote(str(t)), kwargs))}'
 
         return method
 
@@ -57,6 +58,8 @@ class UrlIndexTestImpl:
     get_approve_plan_url = UrlIndexMethod()
     get_my_plan_drafts_url = UrlIndexMethod()
     get_create_draft_url = UrlIndexMethod()
+    get_member_query_plans_url = UrlIndexMethod()
+    get_company_query_plans_url = UrlIndexMethod()
 
     def get_member_confirmation_url(self, *, token: str) -> str:
         return f"get_member_confirmation_url {token}"

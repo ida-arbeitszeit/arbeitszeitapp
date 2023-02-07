@@ -1,3 +1,5 @@
+{% from 'macros/pagination.html' import render_pagination %}
+
 {% macro query_plans(form, view_model) %}
 <div class="section has-text-centered">
     <div class="columns is-centered">
@@ -27,6 +29,7 @@
                         {% endfor %}
                     </div>
                 </div>
+                <input type="hidden" name="page" value="1">
                 <button class="button is-block is-primary is-large is-fullwidth">
                     Suche
                 </button>
@@ -42,6 +45,7 @@
 <div class="section">
     <div class="columns is-centered">
         <div class="column is-one-third">
+            {{ render_pagination(view_model.pagination) }}
             {% for column in view_model.results.rows %}
             <article class="media">
                 <div class="media-content">
@@ -77,6 +81,7 @@
                 </div>
             </article>
             {% endfor %}
+            {{ render_pagination(view_model.pagination) }}
         </div>
     </div>
 </div>

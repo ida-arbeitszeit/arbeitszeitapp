@@ -140,7 +140,7 @@ def query_plans(
         template_name,
         template_renderer,
     )
-    return view.respond_to_get(search_form)
+    return view.respond_to_get(search_form, FlaskRequest())
 
 
 @CompanyRoute("/company/query_companies", methods=["GET", "POST"])

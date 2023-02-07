@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from flask import Response
 
 from arbeitszeit import use_cases
+from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.forms import PlanSearchForm
 from arbeitszeit_flask.template import TemplateRenderer
 from arbeitszeit_web.query_plans import (
@@ -20,11 +21,13 @@ class QueryPlansView:
     template_name: str
     template_renderer: TemplateRenderer
 
-    def respond_to_get(self, form: PlanSearchForm) -> Response:
+    def respond_to_get(self, form: PlanSearchForm, request: FlaskRequest) -> Response:
         if not form.validate():
             return self._get_invalid_form_response(form=form)
-        use_case_request = self.controller.import_form_data(form)
-        return self._handle_use_case_request(use_case_request, form=form)
+        use_case_request = self.controller.import_form_data(form, request)
+        return self._handle_use_case_request(
+            use_case_request, form=form, request=request
+        )
 
     def _get_invalid_form_response(self, form: PlanSearchForm) -> Response:
         return Response(
@@ -36,10 +39,13 @@ class QueryPlansView:
         )
 
     def _handle_use_case_request(
-        self, use_case_request: use_cases.QueryPlansRequest, form: PlanSearchForm
+        self,
+        use_case_request: use_cases.QueryPlansRequest,
+        form: PlanSearchForm,
+        request: FlaskRequest,
     ) -> Response:
         response = self.query_plans(use_case_request)
-        view_model = self.presenter.present(response)
+        view_model = self.presenter.present(response, request)
         return Response(self._render_response_content(view_model, form=form))
 
     def _render_response_content(

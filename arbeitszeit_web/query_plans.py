@@ -9,12 +9,18 @@ from arbeitszeit.use_cases.query_plans import (
     PlanSorting,
     QueryPlansRequest,
 )
-from arbeitszeit_web.pagination import PAGE_PARAMETER_NAME
+from arbeitszeit_web.pagination import (
+    PAGE_PARAMETER_NAME,
+    PageLink,
+    Pagination,
+    Paginator,
+)
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
 
 from .notification import Notifier
+from .session import UserRole
 from .url_index import UrlIndex, UserUrlIndex
 
 
@@ -58,7 +64,7 @@ class QueryPlansController:
             filter_category=filter_category,
             sorting_category=sorting_category,
             offset=offset,
-            limit=15,
+            limit=_PAGE_SIZE,
         )
 
     def _get_pagination_offset(self, request: Request) -> int:
@@ -109,6 +115,7 @@ class ResultsTable:
 class QueryPlansViewModel:
     results: ResultsTable
     show_results: bool
+    pagination: Pagination
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -123,9 +130,28 @@ class QueryPlansPresenter:
     trans: Translator
     session: Session
 
-    def present(self, response: PlanQueryResponse) -> QueryPlansViewModel:
+    def present(
+        self, response: PlanQueryResponse, request: Request
+    ) -> QueryPlansViewModel:
         if not response.results:
             self.user_notifier.display_warning(self.trans.gettext("No results."))
+        page_count = 1 + (response.total_results - 1) // _PAGE_SIZE
+        base_url = (
+            self.url_index.get_member_query_plans_url()
+            if self.session.get_user_role() == UserRole.member
+            else self.url_index.get_company_query_plans_url()
+        )
+        paginator = Paginator(
+            base_url=base_url, query_arguments=dict(request.query_string().items())
+        )
+        pages = [
+            PageLink(
+                label=str(n + 1),
+                href=paginator.get_page_link(page=n + 1),
+                is_current=(response.request.offset or 0) // _PAGE_SIZE == n,
+            )
+            for n in range(page_count)
+        ]
         return QueryPlansViewModel(
             show_results=bool(response.results),
             results=ResultsTable(
@@ -149,10 +175,15 @@ class QueryPlansPresenter:
                     for result in response.results
                 ],
             ),
+            pagination=Pagination(
+                is_visible=page_count > 1,
+                pages=pages,
+            ),
         )
 
     def get_empty_view_model(self) -> QueryPlansViewModel:
         return QueryPlansViewModel(
             results=ResultsTable(rows=[]),
             show_results=False,
+            pagination=Pagination(is_visible=False, pages=[]),
         )
