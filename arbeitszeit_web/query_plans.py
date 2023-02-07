@@ -9,12 +9,7 @@ from arbeitszeit.use_cases.query_plans import (
     PlanSorting,
     QueryPlansRequest,
 )
-from arbeitszeit_web.pagination import (
-    PAGE_PARAMETER_NAME,
-    PageLink,
-    Pagination,
-    Paginator,
-)
+from arbeitszeit_web.pagination import PAGE_PARAMETER_NAME, Pagination, Paginator
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
@@ -135,23 +130,11 @@ class QueryPlansPresenter:
     ) -> QueryPlansViewModel:
         if not response.results:
             self.user_notifier.display_warning(self.trans.gettext("No results."))
-        page_count = 1 + (response.total_results - 1) // _PAGE_SIZE
-        base_url = (
-            self.url_index.get_member_query_plans_url()
-            if self.session.get_user_role() == UserRole.member
-            else self.url_index.get_company_query_plans_url()
+        paginator = self._create_paginator(
+            request,
+            total_results=response.total_results,
+            current_offset=response.request.offset or 0,
         )
-        paginator = Paginator(
-            base_url=base_url, query_arguments=dict(request.query_string().items())
-        )
-        pages = [
-            PageLink(
-                label=str(n + 1),
-                href=paginator.get_page_link(page=n + 1),
-                is_current=(response.request.offset or 0) // _PAGE_SIZE == n,
-            )
-            for n in range(page_count)
-        ]
         return QueryPlansViewModel(
             show_results=bool(response.results),
             results=ResultsTable(
@@ -176,8 +159,8 @@ class QueryPlansPresenter:
                 ],
             ),
             pagination=Pagination(
-                is_visible=page_count > 1,
-                pages=pages,
+                is_visible=paginator.page_count > 1,
+                pages=paginator.get_pages(),
             ),
         )
 
@@ -186,4 +169,22 @@ class QueryPlansPresenter:
             results=ResultsTable(rows=[]),
             show_results=False,
             pagination=Pagination(is_visible=False, pages=[]),
+        )
+
+    def _create_paginator(
+        self, request: Request, total_results: int, current_offset: int
+    ) -> Paginator:
+        return Paginator(
+            base_url=self._get_pagination_base_url(request),
+            query_arguments=dict(request.query_string().items()),
+            page_size=_PAGE_SIZE,
+            total_results=total_results,
+            current_offset=current_offset,
+        )
+
+    def _get_pagination_base_url(self, request: Request) -> str:
+        return (
+            self.url_index.get_member_query_plans_url()
+            if self.session.get_user_role() == UserRole.member
+            else self.url_index.get_company_query_plans_url()
         )

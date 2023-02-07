@@ -8,7 +8,7 @@
     <li>
       <a
         class="pagination-link {% if page.is_current %}is-current{% endif %}"
-        aria-label="Goto page 1"
+        aria-label="Goto page {{ page.label }}"
         href="{{ page.href }}"
         {% if page.is_current %}aria-current="page"{% endif %}>
         {{ page.label }}
