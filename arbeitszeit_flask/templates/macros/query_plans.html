@@ -5,8 +5,7 @@
             <h1 class="title">
                 {{ gettext("Active plans") }}
             </h1>
-            <form method="post">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <form method="get">
                 <div class="field">
                     <div class="control">
                         <div class="select is-large is-fullwidth">
