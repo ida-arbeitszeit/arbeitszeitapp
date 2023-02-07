@@ -28,6 +28,7 @@ class PlanSorting(enum.Enum):
 class PlanQueryResponse:
     results: List[QueriedPlan]
     total_results: int
+    request: QueryPlansRequest
 
 
 @dataclass
@@ -75,7 +76,9 @@ class QueryPlans:
             plans = plans.limit(n=request.limit)
 
         results = [self._plan_to_response_model(plan) for plan in plans]
-        return PlanQueryResponse(results=results, total_results=total_results)
+        return PlanQueryResponse(
+            results=results, total_results=total_results, request=request
+        )
 
     def _apply_filter(
         self, plans: PlanResult, query: Optional[str], filter_by: PlanFilter

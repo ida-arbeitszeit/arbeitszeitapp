@@ -33,12 +33,17 @@ class QueryPlansFormData(Protocol):
         ...
 
 
+_PAGE_SIZE = 15
+
+
 @inject
 @dataclass
 class QueryPlansController:
-    request: Request
-
-    def import_form_data(self, form: Optional[QueryPlansFormData]) -> QueryPlansRequest:
+    def import_form_data(
+        self,
+        form: Optional[QueryPlansFormData] = None,
+        request: Optional[Request] = None,
+    ) -> QueryPlansRequest:
         if form is None:
             query = None
             filter_category = PlanFilter.by_product_name
@@ -47,24 +52,24 @@ class QueryPlansController:
             query = form.get_query_string().strip() or None
             filter_category = self._import_filter_category(form)
             sorting_category = self._import_sorting_category(form)
+        offset = self._get_pagination_offset(request) if request else 0
         return QueryPlansRequest(
             query_string=query,
             filter_category=filter_category,
             sorting_category=sorting_category,
-            page=self._get_page(),
+            offset=offset,
+            limit=15,
         )
 
-    def _get_page(self) -> Optional[int]:
-        page_str = self.request.query_string().get(PAGE_PARAMETER_NAME)
+    def _get_pagination_offset(self, request: Request) -> int:
+        page_str = request.query_string().get(PAGE_PARAMETER_NAME)
         if page_str is None:
-            return None
-        else:
-            try:
-                return int(page_str)
-            except ValueError:
-                raise NotAnIntegerError(
-                    f"Page parameter '{page_str}' is not an integer."
-                )
+            return 0
+        try:
+            page_number = int(page_str)
+        except ValueError:
+            return 0
+        return (page_number - 1) * _PAGE_SIZE
 
     def _import_filter_category(self, form: QueryPlansFormData) -> PlanFilter:
         if form.get_category_string() == "Plan-ID":

@@ -58,13 +58,13 @@ class QueryPlansControllerTests(BaseTestCase):
     def test_that_default_request_model_includes_no_search_query(
         self,
     ) -> None:
-        request = self.controller.import_form_data(form=None)
+        request = self.controller.import_form_data()
         self.assertIsNone(request.query_string)
 
     def test_that_empty_sorting_field_results_in_sorting_by_activation_date(
         self,
     ) -> None:
-        request = self.controller.import_form_data(form=None)
+        request = self.controller.import_form_data()
         self.assertEqual(request.sorting_category, PlanSorting.by_activation)
 
     def test_that_nonexisting_sorting_field_results_in_sorting_by_activation_date(
@@ -85,27 +85,43 @@ class QueryPlansControllerTests(BaseTestCase):
 
 
 class PaginationTests(BaseTestCase):
-    def test_no_page_is_passed_to_use_case_request_if_none_was_given_in_request_query(
+    def setUp(self) -> None:
+        super().setUp()
+        self.controller = self.injector.get(QueryPlansController)
+
+    def test_if_no_page_is_specified_in_query_args_use_offset_of_0(
         self,
     ):
         request = FakeRequest()
-        controller = QueryPlansController(request=request)
-        use_case_request = controller.import_form_data(form=None)
-        self.assertIsNone(use_case_request.page)
+        use_case_request = self.controller.import_form_data(request=request)
+        assert use_case_request.offset == 0
 
-    def test_error_is_raised_if_request_has_invalid_page_parameter(self):
+    def test_that_without_request_specified_the_offset_is_set_to_0(self) -> None:
+        use_case_request = self.controller.import_form_data(request=None)
+        assert use_case_request.offset == 0
+
+    def test_that_page_two_has_an_offset_of_15(self) -> None:
+        request = FakeRequest()
+        request.set_arg(arg="page", value="2")
+        use_case_request = self.controller.import_form_data(request=request)
+        assert use_case_request.offset == 15
+
+    def test_that_offset_0_is_assumed_if_no_valid_integer_is_specified_as_page(self):
         request = FakeRequest()
         request.set_arg(arg="page", value="123abc")
-        controller = QueryPlansController(request=request)
-        with self.assertRaises(NotAnIntegerError):
-            controller.import_form_data(form=None)
+        use_case_request = self.controller.import_form_data(request=request)
+        assert use_case_request.offset == 0
 
-    def test_request_page_parameter_gets_passed_to_use_case_request(self):
+    def test_that_offset_is_150_for_page_11(self) -> None:
         request = FakeRequest()
-        request.set_arg(arg="page", value="123")
-        controller = QueryPlansController(request=request)
-        use_case_request = controller.import_form_data(form=None)
-        self.assertEqual(use_case_request.page, 123)
+        request.set_arg(arg="page", value="11")
+        use_case_request = self.controller.import_form_data(request=request)
+        assert use_case_request.offset == 150
+
+    def test_that_limit_is_15(self) -> None:
+        request = FakeRequest()
+        use_case_request = self.controller.import_form_data(request=request)
+        assert use_case_request.limit == 15
 
 
 def make_fake_form(

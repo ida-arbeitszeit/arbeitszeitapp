@@ -1,4 +1,3 @@
-from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit_web.query_plans import QueryPlansPresenter
@@ -6,43 +5,43 @@ from arbeitszeit_web.session import UserRole
 from tests.presenters.data_generators import QueriedPlanGenerator
 from tests.session import FakeSession
 
-from .dependency_injection import get_dependency_injector
+from .base_test_case import BaseTestCase
 from .notifier import NotifierTestImpl
 from .url_index import UrlIndexTestImpl
 
 
-class QueryPlansPresenterTests(TestCase):
-    def setUp(self):
-        self.injector = get_dependency_injector()
+class QueryPlansPresenterTests(BaseTestCase):
+    def setUp(self) -> None:
+        super().setUp()
         self.url_index = self.injector.get(UrlIndexTestImpl)
         self.notifier = self.injector.get(NotifierTestImpl)
         self.presenter = self.injector.get(QueryPlansPresenter)
         self.session = self.injector.get(FakeSession)
         self.queried_plan_generator = QueriedPlanGenerator()
-        self.session.login_member("test@test.test")
+        self.session.login_member(uuid4())
 
-    def test_presenting_empty_response_leads_to_not_showing_results(self):
+    def test_presenting_empty_response_leads_to_not_showing_results(self) -> None:
         response = self.queried_plan_generator.get_response([])
         presentation = self.presenter.present(response)
         self.assertFalse(presentation.show_results)
 
-    def test_empty_view_model_does_not_show_results(self):
+    def test_empty_view_model_does_not_show_results(self) -> None:
         presentation = self.presenter.get_empty_view_model()
         self.assertFalse(presentation.show_results)
 
-    def test_non_empty_use_case_response_leads_to_showing_results(self):
+    def test_non_empty_use_case_response_leads_to_showing_results(self) -> None:
         response = self.queried_plan_generator.get_response(
             [self.queried_plan_generator.get_plan()]
         )
         presentation = self.presenter.present(response)
         self.assertTrue(presentation.show_results)
 
-    def test_show_warning_when_no_results_are_found(self):
+    def test_show_warning_when_no_results_are_found(self) -> None:
         response = self.queried_plan_generator.get_response([])
         self.presenter.present(response)
         self.assertTrue(self.notifier.warnings)
 
-    def test_dont_show_warning_when_results_are_found(self):
+    def test_dont_show_warning_when_results_are_found(self) -> None:
         response = self.queried_plan_generator.get_response(
             [self.queried_plan_generator.get_plan()]
         )
