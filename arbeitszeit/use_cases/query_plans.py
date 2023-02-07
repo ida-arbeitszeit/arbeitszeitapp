@@ -69,7 +69,6 @@ class QueryPlans:
         plans = self._apply_filter(plans, query, filter_by)
         total_results = len(plans)
         plans = self._apply_sorting(plans, sort_by)
-        # apply offset and limit
         if request.offset is not None:
             plans = plans.offset(n=request.offset)
         if request.limit is not None:

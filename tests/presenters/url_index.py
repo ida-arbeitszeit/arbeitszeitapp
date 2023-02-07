@@ -11,11 +11,18 @@ class UrlIndexMethod:
 
     def __get__(self, obj: Any, objtype=None) -> Callable[..., str]:
         def method(*args, **kwargs) -> str:
-            sorted_args = list(map(str, args))
-            sorted_args.sort()
-            sorted_kwargs = [f"{key}: {value}" for key, value in kwargs.items()]
-            sorted_kwargs.sort()
-            return f'url://{quote(self._attribute_name)}/args/{"/".join(map(quote, args))}/kwargs/{"/".join(map(lambda t: quote(str(t)), kwargs))}'
+            sorted_args = sorted(list(map(str, args)))
+            sorted_kwargs = sorted(
+                [f"{key}: {str(value)}" for key, value in kwargs.items()]
+            )
+            url = f"url://{quote(self._attribute_name)}"
+            url += f'/args/{"/".join(map(quote, sorted_args))}' if sorted_args else ""
+            url += (
+                f'/kwargs/{"/".join(map(lambda t: quote(str(t)), sorted_kwargs))}'
+                if sorted_kwargs
+                else ""
+            )
+            return url
 
         return method
 
