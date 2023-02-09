@@ -38,7 +38,6 @@ gunicorn==20.1.0
 idna==3.4
 imagesize==1.4.1
 iniconfig==1.1.1
-injector==0.20.1
 is-safe-url==1.0
 isort==5.11.4
 itsdangerous==2.1.2
