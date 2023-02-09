@@ -1,14 +1,15 @@
 import os
 from typing import Any, Optional
 
-from flask import Flask, current_app, request, session
+from flask import Flask, session
 from flask_migrate import upgrade
 from flask_talisman import Talisman
 from flask_wtf.csrf import CSRFProtect
 
 import arbeitszeit_flask.extensions
+from arbeitszeit_flask.babel import initialize_babel
 from arbeitszeit_flask.datetime import RealtimeDatetimeService
-from arbeitszeit_flask.extensions import babel, login_manager, mail
+from arbeitszeit_flask.extensions import login_manager, mail
 from arbeitszeit_flask.profiling import (
     initialize_flask_profiler,
     show_profile_info,
@@ -73,7 +74,7 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
     login_manager.init_app(app)
     initialize_migrations(app=app, db=db)
     mail.init_app(app)
-    babel.init_app(app)
+    initialize_babel(app)
 
     # Setup template filter
     app.template_filter()(RealtimeDatetimeService().format_datetime)
@@ -124,13 +125,3 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
         initialize_flask_profiler(app)
 
         return app
-
-
-@babel.localeselector
-def get_locale() -> Any:
-    try:
-        return session["language"]
-    except KeyError:
-        return request.accept_languages.best_match(
-            current_app.config["LANGUAGES"].keys()
-        )
