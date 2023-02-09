@@ -1,8 +1,6 @@
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, List
 
-from injector import inject
-
 from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.use_cases.get_company_summary import (
@@ -56,7 +54,6 @@ class GetCompanySummaryViewModel:
         return asdict(self)
 
 
-@inject
 @dataclass
 class GetCompanySummarySuccessPresenter:
     user_url_index: UserUrlIndex

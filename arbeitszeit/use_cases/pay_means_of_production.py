@@ -5,8 +5,6 @@ from enum import Enum, auto
 from typing import Optional, Tuple
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Company, Plan, PurposesOfPurchases
 from arbeitszeit.price_calculator import PriceCalculator
@@ -42,7 +40,6 @@ class PayMeansOfProductionResponse:
         return self.rejection_reason is not None
 
 
-@inject
 @dataclass(frozen=True)
 class PayMeansOfProduction:
     plan_repository: PlanRepository

@@ -3,8 +3,6 @@ from enum import Enum, auto
 from typing import Optional
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.repositories import (
     CompanyRepository,
     CooperationRepository,
@@ -34,7 +32,6 @@ class DenyCooperationResponse:
         return self.rejection_reason is not None
 
 
-@inject
 @dataclass
 class DenyCooperation:
     plan_repository: PlanRepository

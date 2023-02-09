@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from typing import List
 
-from injector import inject
-
 from arbeitszeit.use_cases import ListAllCooperationsResponse
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.url_index import UrlIndex
@@ -22,7 +20,6 @@ class ListAllCooperationsViewModel:
     show_results: bool
 
 
-@inject
 @dataclass
 class ListAllCooperationsPresenter:
     url_index: UrlIndex

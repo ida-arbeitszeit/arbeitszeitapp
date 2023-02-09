@@ -1,14 +1,11 @@
 from dataclasses import dataclass
 
-from injector import inject
-
 from arbeitszeit.repositories import AccountantRepository
 from arbeitszeit.token import TokenService
 
 from .accountant_invitation_presenter import AccountantInvitationPresenter
 
 
-@inject
 @dataclass
 class SendAccountantRegistrationTokenUseCase:
     class Response:

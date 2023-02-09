@@ -1,8 +1,7 @@
 import os.path as path
 from typing import List
 
-from injector import Module, provider
-
+from arbeitszeit.injector import Binder, CallableProvider, Module
 from arbeitszeit_flask.template import FlaskTemplateRenderer
 
 from ..dependency_injection import FlaskConfiguration
@@ -30,8 +29,14 @@ class FlaskTemplateRendererTests(FlaskTestCase):
 
 
 class FlaskModule(Module):
-    @provider
-    def provide_flask_configuration(self) -> FlaskConfiguration:
+    def configure(self, binder: Binder) -> None:
+        super().configure(binder)
+        binder[FlaskConfiguration] = CallableProvider(
+            FlaskModule.provide_flask_configuration, is_singleton=True
+        )
+
+    @staticmethod
+    def provide_flask_configuration() -> FlaskConfiguration:
         config = FlaskConfiguration.default()
         config.template_folder = path.dirname(__file__)
         return config

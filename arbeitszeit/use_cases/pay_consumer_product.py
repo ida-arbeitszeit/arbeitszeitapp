@@ -6,8 +6,6 @@ from enum import Enum, auto
 from typing import Optional, Protocol
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit import errors
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Member, Plan
@@ -48,7 +46,6 @@ class PayConsumerProductResponse:
         return self.rejection_reason is None
 
 
-@inject
 @dataclass
 class PayConsumerProduct:
     member_repository: MemberRepository

@@ -7,8 +7,6 @@ from decimal import Decimal
 from typing import List, Optional
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.entities import Plan
 from arbeitszeit.price_calculator import PriceCalculator
 from arbeitszeit.repositories import CompanyRepository, PlanRepository
@@ -51,7 +49,6 @@ class QueryPlansRequest:
     sorting_category: PlanSorting
 
 
-@inject
 @dataclass
 class QueryPlans:
     plan_repository: PlanRepository

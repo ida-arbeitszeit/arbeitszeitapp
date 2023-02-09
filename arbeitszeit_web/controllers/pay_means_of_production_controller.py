@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.entities import PurposesOfPurchases
 from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProductionRequest
 from arbeitszeit_web.forms import PayMeansOfProductionForm
@@ -10,7 +8,6 @@ from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
 
 
-@inject
 @dataclass
 class PayMeansOfProductionController:
     class FormError(Exception):

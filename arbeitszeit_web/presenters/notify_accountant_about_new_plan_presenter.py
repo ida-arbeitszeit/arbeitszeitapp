@@ -1,14 +1,11 @@
 from dataclasses import dataclass
 
-from injector import inject
-
 from arbeitszeit.accountant_notifications import Notification
 from arbeitszeit_web.email import EmailConfiguration, MailService, UserAddressBook
 from arbeitszeit_web.text_renderer import TextRenderer
 from arbeitszeit_web.translator import Translator
 
 
-@inject
 @dataclass
 class NotifyAccountantsAboutNewPlanPresenterImpl:
     email_sender: MailService

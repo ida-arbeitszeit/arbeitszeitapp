@@ -1,8 +1,6 @@
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional, Protocol
 
-from injector import inject
-
 from arbeitszeit.use_cases.query_companies import (
     CompanyFilter,
     CompanyQueryResponse,
@@ -73,7 +71,6 @@ class QueryCompaniesViewModel:
         return asdict(self)
 
 
-@inject
 @dataclass
 class QueryCompaniesPresenter:
     user_notifier: Notifier

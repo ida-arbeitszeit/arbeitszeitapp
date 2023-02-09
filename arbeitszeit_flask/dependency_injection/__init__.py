@@ -2,28 +2,25 @@ from functools import wraps
 from typing import List, Optional
 
 from flask_sqlalchemy import SQLAlchemy
-from injector import (
+
+from arbeitszeit import entities
+from arbeitszeit import repositories as interfaces
+from arbeitszeit.accountant_notifications import NotifyAccountantsAboutNewPlanPresenter
+from arbeitszeit.control_thresholds import ControlThresholds
+from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.injector import (
     Binder,
     CallableProvider,
     ClassProvider,
     Injector,
-    InstanceProvider,
     Module,
-    inject,
-    provider,
-    singleton,
 )
-
-from arbeitszeit import entities
-from arbeitszeit import repositories as interfaces
-from arbeitszeit.control_thresholds import ControlThresholds
-from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.token import InvitationTokenValidator, TokenService
-from arbeitszeit.use_cases import GetCompanySummary
-from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
-from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
-from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
-from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts
+from arbeitszeit.token import (
+    CompanyRegistrationMessagePresenter,
+    InvitationTokenValidator,
+    MemberRegistrationMessagePresenter,
+    TokenService,
+)
 from arbeitszeit_flask.control_thresholds import ControlThresholdsFlask
 from arbeitszeit_flask.database import get_social_accounting
 from arbeitszeit_flask.database.repositories import (
@@ -56,325 +53,64 @@ from arbeitszeit_flask.mail_service import (
 from arbeitszeit_flask.notifications import FlaskFlashNotifier
 from arbeitszeit_flask.template import (
     AccountantTemplateIndex,
-    AnonymousUserTemplateRenderer,
     CompanyTemplateIndex,
     FlaskTemplateRenderer,
     MemberRegistrationEmailTemplateImpl,
     MemberTemplateIndex,
     TemplateIndex,
     TemplateRenderer,
-    UserTemplateRenderer,
 )
 from arbeitszeit_flask.text_renderer import TextRendererImpl
 from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.translator import FlaskTranslator
 from arbeitszeit_flask.url_index import CompanyUrlIndex, GeneralUrlIndex
-from arbeitszeit_flask.views import Http404View
-from arbeitszeit_web.answer_company_work_invite import AnswerCompanyWorkInviteController
 from arbeitszeit_web.colors import Colors
-from arbeitszeit_web.controllers.end_cooperation_controller import (
-    EndCooperationController,
-)
-from arbeitszeit_web.controllers.list_workers_controller import ListWorkersController
-from arbeitszeit_web.controllers.send_work_certificates_to_worker_controller import (
-    SendWorkCertificatesToWorkerController,
-)
-from arbeitszeit_web.controllers.show_company_work_invite_details_controller import (
-    ShowCompanyWorkInviteDetailsController,
-)
-from arbeitszeit_web.controllers.show_my_accounts_controller import (
-    ShowMyAccountsController,
-)
-from arbeitszeit_web.create_draft import CreateDraftController
 from arbeitszeit_web.email import EmailConfiguration, UserAddressBook
-from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyController
 from arbeitszeit_web.language_service import LanguageService
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.plotter import Plotter
-from arbeitszeit_web.presenters.list_available_languages_presenter import (
-    ListAvailableLanguagesPresenter,
+from arbeitszeit_web.presenters.notify_accountant_about_new_plan_presenter import (
+    NotifyAccountantsAboutNewPlanPresenterImpl,
 )
 from arbeitszeit_web.presenters.registration_email_presenter import (
+    RegistrationEmailPresenter,
     RegistrationEmailTemplate,
 )
 from arbeitszeit_web.request import Request
-from arbeitszeit_web.request_cooperation import RequestCooperationController
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.text_renderer import TextRenderer
 from arbeitszeit_web.translator import Translator
-from arbeitszeit_web.url_index import HidePlanUrlIndex, RenewPlanUrlIndex, UrlIndex
-
-from .presenters import CompanyPresenterModule, PresenterModule
-from .views import ViewsModule
-
-__all__ = [
-    "ViewsModule",
-]
+from arbeitszeit_web.url_index import (
+    HidePlanUrlIndex,
+    LanguageChangerUrlIndex,
+    RenewPlanUrlIndex,
+    UrlIndex,
+)
 
 
 class AccountantModule(Module):
-    @provider
-    def provide_template_index(self) -> TemplateIndex:
-        return AccountantTemplateIndex()
+    def configure(self, binder: Binder) -> None:
+        super().configure(binder)
+        binder[TemplateIndex] = ClassProvider(AccountantTemplateIndex)  # type: ignore
 
 
 class MemberModule(Module):
-    @provider
-    def provide_template_index(self) -> TemplateIndex:
-        return MemberTemplateIndex()
-
-
-class CompanyModule(CompanyPresenterModule):
-    @provider
-    def provide_renew_plan_url_index(
-        self, company_index: CompanyUrlIndex
-    ) -> RenewPlanUrlIndex:
-        return company_index
-
-    @provider
-    def provide_hide_plan_url_index(
-        self, company_index: CompanyUrlIndex
-    ) -> HidePlanUrlIndex:
-        return company_index
-
-    @provider
-    def provide_template_index(self) -> TemplateIndex:
-        return CompanyTemplateIndex()
-
-    @provider
-    def provide_end_cooperation_controller(
-        self, session: FlaskSession, request: FlaskRequest
-    ) -> EndCooperationController:
-        return EndCooperationController(session, request)
-
-    @provider
-    def provide_send_work_certificates_to_worker_controller(
-        self, session: FlaskSession, request: FlaskRequest
-    ) -> SendWorkCertificatesToWorkerController:
-        return SendWorkCertificatesToWorkerController(session, request)
-
-    @provider
-    def provide_prefilled_draft_data_controller(
-        self, session: Session
-    ) -> CreateDraftController:
-        return CreateDraftController(session=session)
-
-
-class FlaskModule(PresenterModule):
-    @provider
-    def provide_text_renderer(self, instance: TextRendererImpl) -> TextRenderer:
-        return instance
-
-    @provider
-    def provide_request(self, request: FlaskRequest) -> Request:
-        return request
-
-    @provider
-    def provide_url_index(self, index: GeneralUrlIndex) -> UrlIndex:
-        return index
-
-    @provider
-    def provide_invitation_token_validator(
-        self, validator: FlaskTokenService
-    ) -> InvitationTokenValidator:
-        return validator
-
-    @provider
-    def provide_flask_session(
-        self,
-        member_repository: MemberRepository,
-        company_repository: CompanyRepository,
-        accountant_repository: AccountantRepository,
-    ) -> FlaskSession:
-        return FlaskSession(
-            member_repository, company_repository, accountant_repository
-        )
-
-    @provider
-    def provide_member_registration_email_template(
-        self,
-    ) -> RegistrationEmailTemplate:
-        return MemberRegistrationEmailTemplateImpl()
-
-    @provider
-    def provide_get_company_summary(
-        self,
-        company_repository: interfaces.CompanyRepository,
-        plan_repository: interfaces.PlanRepository,
-        account_repository: interfaces.AccountRepository,
-        transaction_repository: interfaces.TransactionRepository,
-        social_accounting: entities.SocialAccounting,
-        purchase_repository: interfaces.PurchaseRepository,
-    ) -> GetCompanySummary:
-        return GetCompanySummary(
-            company_repository,
-            plan_repository,
-            account_repository,
-            transaction_repository,
-            social_accounting,
-            purchase_repository,
-        )
-
-    @provider
-    def provide_language_repository(
-        self, language_repository: LanguageRepositoryImpl
-    ) -> interfaces.LanguageRepository:
-        return language_repository
-
-    @provider
-    def provide_language_service(
-        self, language_repository_impl: LanguageRepositoryImpl
-    ) -> LanguageService:
-        return language_repository_impl
-
-    @provider
-    def provide_list_workers_controller(
-        self, session: Session
-    ) -> ListWorkersController:
-        return ListWorkersController(session=session)
-
-    @provider
-    def provide_show_company_work_invite_details_controller(
-        self,
-        session: Session,
-    ) -> ShowCompanyWorkInviteDetailsController:
-        return ShowCompanyWorkInviteDetailsController(
-            session=session,
-        )
-
-    @provider
-    def provide_answer_company_work_invite_controller(
-        self, session: Session
-    ) -> AnswerCompanyWorkInviteController:
-        return AnswerCompanyWorkInviteController(session)
-
-    @provider
-    def provide_email_configuration(self) -> EmailConfiguration:
-        return FlaskEmailConfiguration()
-
-    @provider
-    def provide_http_404_view(
-        self, template_renderer: TemplateRenderer, template_index: TemplateIndex
-    ) -> Http404View:
-        return Http404View(
-            template_index=template_index, template_renderer=template_renderer
-        )
-
-    @provider
-    def provide_transaction_repository(
-        self, instance: TransactionRepository
-    ) -> interfaces.TransactionRepository:
-        return instance
-
-    @provider
-    def provide_accountant_repository(
-        self, instance: AccountantRepository
-    ) -> interfaces.AccountantRepository:
-        return instance
-
-    @provider
-    def provide_template_renderer(self) -> TemplateRenderer:
-        return FlaskTemplateRenderer()
-
-    @provider
-    def provide_invite_worker_to_company_controller(
-        self, session: Session
-    ) -> InviteWorkerToCompanyController:
-        return InviteWorkerToCompanyController(session)
-
-    @provider
-    def provide_user_template_renderer(
-        self, flask_template_renderer: FlaskTemplateRenderer
-    ) -> UserTemplateRenderer:
-        return UserTemplateRenderer(flask_template_renderer)
-
-    @provider
-    def provide_anonymous_user_template_renderer(
-        self,
-        inner_renderer: TemplateRenderer,
-        list_languages_user_case: ListAvailableLanguagesUseCase,
-        list_languages_presenter: ListAvailableLanguagesPresenter,
-    ) -> AnonymousUserTemplateRenderer:
-        return AnonymousUserTemplateRenderer(
-            inner_renderer=inner_renderer,
-            list_languages_use_case=list_languages_user_case,
-            list_languages_presenter=list_languages_presenter,
-        )
-
-    @provider
-    def provide_request_cooperation_controller(
-        self, session: Session, translator: Translator
-    ) -> RequestCooperationController:
-        return RequestCooperationController(session, translator)
-
-    @provider
-    def provide_session(self, flask_session: FlaskSession) -> Session:
-        return flask_session
-
-    @provider
-    def provide_notifier(self) -> Notifier:
-        return FlaskFlashNotifier()
-
-    @singleton
-    @provider
-    def provide_mail_service(self) -> MailService:
-        return get_mail_service()
-
-    @provider
-    def provide_translator(self) -> Translator:
-        return FlaskTranslator()
-
-    @provider
-    def provide_plotter(self) -> Plotter:
-        return FlaskPlotter()
-
-    @provider
-    def provide_colors(self) -> Colors:
-        return FlaskColors()
-
-    @provider
-    def provide_show_my_accounts_controller(
-        self, session: FlaskSession
-    ) -> ShowMyAccountsController:
-        return ShowMyAccountsController(session)
-
-    @provider
-    def provide_show_my_accounts_use_case(
-        self,
-        company_repository: CompanyRepository,
-        account_repository: AccountRepository,
-    ) -> ShowMyAccounts:
-        return ShowMyAccounts(company_repository, account_repository)
-
-    @provider
-    def provide_list_available_languages_use_case(
-        self, language_repository: interfaces.LanguageRepository
-    ) -> ListAvailableLanguagesUseCase:
-        return ListAvailableLanguagesUseCase(language_repository=language_repository)
-
-    @provider
-    def provide_log_in_member_use_case(
-        self, member_repository: MemberRepository
-    ) -> LogInMemberUseCase:
-        return LogInMemberUseCase(
-            member_repository=member_repository,
-        )
-
-    @provider
-    def provide_control_thresholds(
-        self, control_thresholds: ControlThresholdsFlask
-    ) -> ControlThresholds:
-        return control_thresholds
-
-    @provider
-    def provide_log_in_company_use_case(
-        self, company_repository: CompanyRepository
-    ) -> LogInCompanyUseCase:
-        return LogInCompanyUseCase(
-            company_repository=company_repository,
-        )
-
     def configure(self, binder: Binder) -> None:
+        super().configure(binder)
+        binder[TemplateIndex] = ClassProvider(MemberTemplateIndex)  # type: ignore
+
+
+class CompanyModule(Module):
+    def configure(self, binder: Binder) -> None:
+        super().configure(binder)
+        binder[RenewPlanUrlIndex] = ClassProvider(CompanyUrlIndex)  # type: ignore
+        binder[HidePlanUrlIndex] = ClassProvider(CompanyUrlIndex)  # type: ignore
+        binder[TemplateIndex] = ClassProvider(CompanyTemplateIndex)  # type: ignore
+
+
+class FlaskModule(Module):
+    def configure(self, binder: Binder) -> None:
+        super().configure(binder)
         binder.bind(
             interfaces.PurchaseRepository,  # type: ignore
             to=ClassProvider(PurchaseRepository),
@@ -421,18 +157,48 @@ class FlaskModule(PresenterModule):
         )
         binder.bind(
             SQLAlchemy,
-            to=InstanceProvider(db),
+            to=CallableProvider(self.provide_sqlalchemy, is_singleton=True),
         )
         binder.bind(
             interfaces.CooperationRepository,  # type: ignore
             to=ClassProvider(CooperationRepository),
         )
         binder.bind(TokenService, to=ClassProvider(FlaskTokenService))  # type: ignore
-        binder.bind(UserAddressBook, to=ClassProvider(inject(UserAddressBookImpl)))  # type: ignore
+        binder.bind(UserAddressBook, to=ClassProvider(UserAddressBookImpl))  # type: ignore
         binder.bind(
             interfaces.PayoutFactorRepository,  # type: ignore
             to=ClassProvider(PayoutFactorRepository),
         )
+        binder[NotifyAccountantsAboutNewPlanPresenter] = ClassProvider(NotifyAccountantsAboutNewPlanPresenterImpl)  # type: ignore
+        binder[TextRenderer] = ClassProvider(TextRendererImpl)  # type: ignore
+        binder[Request] = ClassProvider(FlaskRequest)  # type: ignore
+        binder[UrlIndex] = ClassProvider(GeneralUrlIndex)  # type: ignore
+        binder[InvitationTokenValidator] = ClassProvider(FlaskTokenService)  # type: ignore
+        binder[RegistrationEmailTemplate] = ClassProvider(MemberRegistrationEmailTemplateImpl)  # type: ignore
+        binder[interfaces.LanguageRepository] = ClassProvider(LanguageRepositoryImpl)  # type: ignore
+        binder[LanguageService] = ClassProvider(LanguageRepositoryImpl)  # type: ignore
+        binder[EmailConfiguration] = ClassProvider(FlaskEmailConfiguration)  # type: ignore
+        binder[interfaces.TransactionRepository] = ClassProvider(TransactionRepository)  # type: ignore
+        binder[interfaces.AccountantRepository] = ClassProvider(AccountantRepository)  # type: ignore
+        binder[TemplateRenderer] = ClassProvider(FlaskTemplateRenderer)  # type: ignore
+        binder[Session] = ClassProvider(FlaskSession)  # type: ignore
+        binder[Notifier] = ClassProvider(FlaskFlashNotifier)  # type: ignore
+        binder[MailService] = CallableProvider(get_mail_service)  # type: ignore
+        binder[Translator] = ClassProvider(FlaskTranslator)  # type: ignore
+        binder[Plotter] = ClassProvider(FlaskPlotter)  # type: ignore
+        binder[Colors] = ClassProvider(FlaskColors)  # type: ignore
+        binder[ControlThresholds] = ClassProvider(ControlThresholdsFlask)  # type: ignore
+        binder[LanguageChangerUrlIndex] = ClassProvider(GeneralUrlIndex)  # type: ignore
+        binder[CompanyRegistrationMessagePresenter] = ClassProvider(  # type: ignore
+            RegistrationEmailPresenter
+        )
+        binder[MemberRegistrationMessagePresenter] = ClassProvider(  # type: ignore
+            RegistrationEmailPresenter
+        )
+
+    @staticmethod
+    def provide_sqlalchemy() -> SQLAlchemy:
+        return db
 
 
 class with_injection:
@@ -440,7 +206,6 @@ class with_injection:
         self._modules = modules if modules is not None else []
         all_modules: List[Module] = []
         all_modules.append(FlaskModule())
-        all_modules.append(ViewsModule())
         all_modules += self._modules
         self._injector = Injector(all_modules)
 
@@ -453,7 +218,7 @@ class with_injection:
         @wraps(original_function)
         def wrapped_function(*args, **kwargs):
             return self._injector.call_with_injection(
-                inject(original_function), args=args, kwargs=kwargs
+                original_function, args=args, kwargs=kwargs
             )
 
         return wrapped_function

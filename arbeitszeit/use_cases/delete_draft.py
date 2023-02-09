@@ -1,12 +1,9 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.repositories import CompanyRepository, PlanDraftRepository
 
 
-@inject
 @dataclass
 class DeleteDraftUseCase:
     @dataclass

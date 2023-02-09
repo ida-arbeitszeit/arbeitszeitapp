@@ -1,8 +1,6 @@
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
-from injector import inject
-
 from arbeitszeit.use_cases import (
     AcceptCooperationResponse,
     CooperationInfo,
@@ -96,7 +94,6 @@ class ShowMyCooperationsViewModel:
         return asdict(self)
 
 
-@inject
 @dataclass
 class ShowMyCooperationsPresenter:
     url_index: UrlIndex

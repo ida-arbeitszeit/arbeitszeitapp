@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.use_cases.pay_consumer_product import (
     PayConsumerProductResponse,
     RejectionReason,
@@ -29,7 +27,6 @@ class PayConsumerProductRequestImpl:
         return self.amount
 
 
-@inject
 @dataclass
 class PayConsumerProductController:
     class FormError(Exception):
@@ -62,13 +59,11 @@ class PayConsumerProductController:
         return PayConsumerProductRequestImpl(current_user, plan_id, amount)
 
 
-@inject
 @dataclass
 class PayConsumerProductViewModel:
     status_code: int
 
 
-@inject
 @dataclass
 class PayConsumerProductPresenter:
     user_notifier: Notifier

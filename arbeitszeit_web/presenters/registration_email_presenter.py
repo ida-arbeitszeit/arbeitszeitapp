@@ -2,8 +2,6 @@ from dataclasses import dataclass
 from typing import Protocol
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit_web.email import EmailConfiguration, MailService, UserAddressBook
 from arbeitszeit_web.text_renderer import TextRenderer
 from arbeitszeit_web.translator import Translator
@@ -15,7 +13,6 @@ class RegistrationEmailTemplate(Protocol):
         ...
 
 
-@inject
 @dataclass
 class RegistrationEmailPresenter:
     email_sender: MailService

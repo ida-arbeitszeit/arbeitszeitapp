@@ -5,13 +5,10 @@ from datetime import datetime
 from typing import List
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.entities import Plan
 from arbeitszeit.repositories import PlanRepository
 
 
-@inject
 @dataclass
 class StartPageUseCase:
     @dataclass

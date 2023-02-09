@@ -3,7 +3,6 @@ from typing import Optional
 
 from flask import Response as FlaskResponse
 from flask import redirect, request, url_for
-from injector import inject
 
 from arbeitszeit.use_cases import PayConsumerProduct
 from arbeitszeit_flask.flask_session import FlaskSession
@@ -16,7 +15,6 @@ from arbeitszeit_web.pay_consumer_product import (
 )
 
 
-@inject
 @dataclass
 class PayConsumerProductView:
     flask_session: FlaskSession

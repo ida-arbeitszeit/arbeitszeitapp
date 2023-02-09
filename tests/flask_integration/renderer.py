@@ -1,6 +1,9 @@
 from typing import Any, Dict, Optional
 
+from arbeitszeit.injector import singleton
 
+
+@singleton
 class FakeTemplateRenderer:
     """Used for testing the properties of renderers that internally call
     another renderer.

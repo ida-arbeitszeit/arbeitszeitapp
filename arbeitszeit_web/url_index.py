@@ -12,8 +12,6 @@ from decimal import Decimal
 from typing import Optional, Protocol
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit_web.session import Session, UserRole
 
 
@@ -141,7 +139,6 @@ class LanguageChangerUrlIndex(Protocol):
         ...
 
 
-@inject
 @dataclass
 class UserUrlIndex:
     """This class is not an interface and therefore should not be

@@ -1,14 +1,11 @@
 from dataclasses import dataclass
 
-from injector import inject
-
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex, UserUrlIndex
 
 
-@inject
 @dataclass
 class FilePlanWithAccountingPresenter:
     @dataclass

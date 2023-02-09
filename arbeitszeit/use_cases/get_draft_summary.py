@@ -3,8 +3,6 @@ from decimal import Decimal
 from typing import Optional
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.repositories import PlanDraftRepository
 
 
@@ -26,7 +24,6 @@ class DraftSummarySuccess:
 DraftSummaryResponse = Optional[DraftSummarySuccess]
 
 
-@inject
 @dataclass
 class GetDraftSummary:
     draft_repository: PlanDraftRepository

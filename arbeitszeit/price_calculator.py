@@ -2,8 +2,6 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import List
 
-from injector import inject
-
 from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.entities import Plan
 from arbeitszeit.repositories import PlanRepository
@@ -17,7 +15,6 @@ class PriceComponents:
     is_public_service: bool
 
 
-@inject
 @dataclass
 class PriceCalculator:
     plan_repository: PlanRepository

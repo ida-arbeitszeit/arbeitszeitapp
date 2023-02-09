@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from decimal import Decimal
 
-from injector import inject
-
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan, SocialAccounting
 from arbeitszeit.payout_factor import PayoutFactorService
@@ -14,7 +12,6 @@ from arbeitszeit.repositories import (
 )
 
 
-@inject
 @dataclass
 class UpdatePlansAndPayout:
     plan_repository: PlanRepository

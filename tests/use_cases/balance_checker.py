@@ -2,8 +2,6 @@ from dataclasses import dataclass
 from decimal import Decimal
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.use_cases import get_company_summary, get_member_dashboard
 
 
@@ -15,7 +13,6 @@ class AccountBalances:
     prd_account: Decimal
 
 
-@inject
 @dataclass
 class BalanceChecker:
     get_company_summary: get_company_summary.GetCompanySummary

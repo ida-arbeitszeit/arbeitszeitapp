@@ -1,12 +1,9 @@
 from dataclasses import dataclass
 
-from injector import inject
-
 from arbeitszeit.use_cases.get_accountant_dashboard import GetAccountantDashboardUseCase
 from arbeitszeit_web.url_index import UrlIndex
 
 
-@inject
 @dataclass
 class GetAccountantDashboardPresenter:
     @dataclass

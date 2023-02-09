@@ -2,8 +2,6 @@ from dataclasses import dataclass
 from typing import List
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.entities import Member
 from arbeitszeit.repositories import CompanyRepository, MemberRepository
 
@@ -25,7 +23,6 @@ class ListWorkersRequest:
     company: UUID
 
 
-@inject
 @dataclass
 class ListWorkers:
     company_repository: CompanyRepository

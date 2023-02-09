@@ -3,8 +3,6 @@ from decimal import Decimal
 from enum import Enum, auto
 from typing import List, Union
 
-from injector import inject
-
 from .entities import AccountTypes, Company, Member, SocialAccounting, Transaction
 from .repositories import (
     AccountOwnerRepository,
@@ -32,7 +30,6 @@ class TransactionTypes(Enum):
     sale_of_liquid_means = auto()
 
 
-@inject
 @dataclass
 class UserAccountingService:
     transaction_repository: TransactionRepository

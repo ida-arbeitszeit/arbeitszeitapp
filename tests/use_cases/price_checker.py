@@ -2,12 +2,9 @@ from dataclasses import dataclass
 from decimal import Decimal
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.use_cases.get_plan_summary_member import GetPlanSummaryMember
 
 
-@inject
 @dataclass
 class PriceChecker:
     get_plan_summary_member: GetPlanSummaryMember

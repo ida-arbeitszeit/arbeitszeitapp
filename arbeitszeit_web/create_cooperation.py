@@ -1,7 +1,5 @@
 from dataclasses import dataclass
 
-from injector import inject
-
 from arbeitszeit.use_cases import CreateCooperationResponse
 
 from .notification import Notifier
@@ -13,7 +11,6 @@ class CreateCooperationViewModel:
     pass
 
 
-@inject
 @dataclass(frozen=True)
 class CreateCooperationPresenter:
     user_notifier: Notifier

@@ -2,8 +2,6 @@ from dataclasses import dataclass
 from typing import Optional
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.repositories import MemberRepository, WorkerInviteRepository
 
 
@@ -27,7 +25,6 @@ class ShowCompanyWorkInviteDetailsRequest:
     member: UUID
 
 
-@inject
 @dataclass
 class ShowCompanyWorkInviteDetailsUseCase:
     member_repository: MemberRepository

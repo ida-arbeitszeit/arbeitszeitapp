@@ -3,8 +3,6 @@ from datetime import datetime
 from typing import List
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.repositories import (
     CompanyRepository,
@@ -32,7 +30,6 @@ class ListCoordinationsResponse:
     coordinations: List[CooperationInfo]
 
 
-@inject
 @dataclass
 class ListCoordinations:
     company_repository: CompanyRepository

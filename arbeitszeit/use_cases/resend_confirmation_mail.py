@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.repositories import CompanyRepository, MemberRepository
 from arbeitszeit.token import (
     CompanyRegistrationMessagePresenter,
@@ -11,7 +9,6 @@ from arbeitszeit.token import (
 )
 
 
-@inject
 @dataclass
 class ResendConfirmationMailUseCase:
     @dataclass

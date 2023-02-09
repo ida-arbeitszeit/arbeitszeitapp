@@ -33,7 +33,7 @@ class CompanyRoute:
     def _apply_decorators(self, function):
         injection = with_injection([CompanyModule()])
         return main_company.route(self.route_string, methods=self.methods)(
-            injection((self._check_is_company_and_confirmed)(function))
+            injection(self._check_is_company_and_confirmed(function))
         )
 
     @with_injection([CompanyModule()])

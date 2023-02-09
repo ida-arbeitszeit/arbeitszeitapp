@@ -3,8 +3,6 @@ from dataclasses import dataclass
 from decimal import Decimal
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Member
@@ -15,7 +13,6 @@ class TransactionRejection(Exception, enum.Enum):
     insufficient_account_balance = enum.auto()
 
 
-@inject
 @dataclass
 class GiroOffice:
     """Conduct certificate transactions from one account to another."""

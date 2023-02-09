@@ -3,8 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List
 
-from injector import inject
-
 from arbeitszeit.use_cases.list_plans_with_pending_review import (
     ListPlansWithPendingReviewUseCase as UseCase,
 )
@@ -12,7 +10,6 @@ from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.url_index import UrlIndex
 
 
-@inject
 @dataclass
 class ListPlansWithPendingReviewPresenter:
     @dataclass

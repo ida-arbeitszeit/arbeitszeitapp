@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from injector import inject
-
 from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.session import Session
@@ -10,7 +8,6 @@ from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 
 
-@inject
 @dataclass
 class RegisterAccountantPresenter:
     @dataclass

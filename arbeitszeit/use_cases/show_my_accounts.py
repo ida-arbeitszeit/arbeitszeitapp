@@ -3,8 +3,6 @@ from decimal import Decimal
 from typing import List
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.repositories import AccountRepository, CompanyRepository
 
 
@@ -18,7 +16,6 @@ class ShowMyAccountsResponse:
     balances: List[Decimal]
 
 
-@inject
 @dataclass
 class ShowMyAccounts:
     company_repository: CompanyRepository

@@ -4,13 +4,10 @@ from dataclasses import dataclass
 from typing import List
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit import entities
 from arbeitszeit.repositories import CompanyRepository, PlanRepository
 
 
-@inject
 @dataclass
 class ListPlansWithPendingReviewUseCase:
     class Request:
