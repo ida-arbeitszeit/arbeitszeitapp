@@ -9,9 +9,9 @@ from arbeitszeit.accountant_notifications import NotifyAccountantsAboutNewPlanPr
 from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.injector import (
+    AliasProvider,
     Binder,
     CallableProvider,
-    ClassProvider,
     Injector,
     Module,
 )
@@ -91,21 +91,21 @@ from arbeitszeit_web.url_index import (
 class AccountantModule(Module):
     def configure(self, binder: Binder) -> None:
         super().configure(binder)
-        binder[TemplateIndex] = ClassProvider(AccountantTemplateIndex)  # type: ignore
+        binder[TemplateIndex] = AliasProvider(AccountantTemplateIndex)  # type: ignore
 
 
 class MemberModule(Module):
     def configure(self, binder: Binder) -> None:
         super().configure(binder)
-        binder[TemplateIndex] = ClassProvider(MemberTemplateIndex)  # type: ignore
+        binder[TemplateIndex] = AliasProvider(MemberTemplateIndex)  # type: ignore
 
 
 class CompanyModule(Module):
     def configure(self, binder: Binder) -> None:
         super().configure(binder)
-        binder[RenewPlanUrlIndex] = ClassProvider(CompanyUrlIndex)  # type: ignore
-        binder[HidePlanUrlIndex] = ClassProvider(CompanyUrlIndex)  # type: ignore
-        binder[TemplateIndex] = ClassProvider(CompanyTemplateIndex)  # type: ignore
+        binder[RenewPlanUrlIndex] = AliasProvider(CompanyUrlIndex)  # type: ignore
+        binder[HidePlanUrlIndex] = AliasProvider(CompanyUrlIndex)  # type: ignore
+        binder[TemplateIndex] = AliasProvider(CompanyTemplateIndex)  # type: ignore
 
 
 class FlaskModule(Module):
@@ -113,7 +113,7 @@ class FlaskModule(Module):
         super().configure(binder)
         binder.bind(
             interfaces.PurchaseRepository,  # type: ignore
-            to=ClassProvider(PurchaseRepository),
+            to=AliasProvider(PurchaseRepository),
         )
         binder.bind(
             entities.SocialAccounting,
@@ -121,39 +121,39 @@ class FlaskModule(Module):
         )
         binder.bind(
             interfaces.AccountRepository,  # type: ignore
-            to=ClassProvider(AccountRepository),
+            to=AliasProvider(AccountRepository),
         )
         binder.bind(
             interfaces.MemberRepository,  # type: ignore
-            to=ClassProvider(MemberRepository),
+            to=AliasProvider(MemberRepository),
         )
         binder.bind(
             interfaces.CompanyRepository,  # type: ignore
-            to=ClassProvider(CompanyRepository),
+            to=AliasProvider(CompanyRepository),
         )
         binder.bind(
             interfaces.PurchaseRepository,  # type: ignore
-            to=ClassProvider(PurchaseRepository),
+            to=AliasProvider(PurchaseRepository),
         )
         binder.bind(
             interfaces.PlanRepository,  # type: ignore
-            to=ClassProvider(PlanRepository),
+            to=AliasProvider(PlanRepository),
         )
         binder.bind(
             interfaces.AccountOwnerRepository,  # type: ignore
-            to=ClassProvider(AccountOwnerRepository),
+            to=AliasProvider(AccountOwnerRepository),
         )
         binder.bind(
             interfaces.PlanDraftRepository,  # type: ignore
-            to=ClassProvider(PlanDraftRepository),
+            to=AliasProvider(PlanDraftRepository),
         )
         binder.bind(
             DatetimeService,  # type: ignore
-            to=ClassProvider(RealtimeDatetimeService),
+            to=AliasProvider(RealtimeDatetimeService),
         )
         binder.bind(
             interfaces.WorkerInviteRepository,  # type: ignore
-            to=ClassProvider(WorkerInviteRepository),
+            to=AliasProvider(WorkerInviteRepository),
         )
         binder.bind(
             SQLAlchemy,
@@ -161,38 +161,38 @@ class FlaskModule(Module):
         )
         binder.bind(
             interfaces.CooperationRepository,  # type: ignore
-            to=ClassProvider(CooperationRepository),
+            to=AliasProvider(CooperationRepository),
         )
-        binder.bind(TokenService, to=ClassProvider(FlaskTokenService))  # type: ignore
-        binder.bind(UserAddressBook, to=ClassProvider(UserAddressBookImpl))  # type: ignore
+        binder.bind(TokenService, to=AliasProvider(FlaskTokenService))  # type: ignore
+        binder.bind(UserAddressBook, to=AliasProvider(UserAddressBookImpl))  # type: ignore
         binder.bind(
             interfaces.PayoutFactorRepository,  # type: ignore
-            to=ClassProvider(PayoutFactorRepository),
+            to=AliasProvider(PayoutFactorRepository),
         )
-        binder[NotifyAccountantsAboutNewPlanPresenter] = ClassProvider(NotifyAccountantsAboutNewPlanPresenterImpl)  # type: ignore
-        binder[TextRenderer] = ClassProvider(TextRendererImpl)  # type: ignore
-        binder[Request] = ClassProvider(FlaskRequest)  # type: ignore
-        binder[UrlIndex] = ClassProvider(GeneralUrlIndex)  # type: ignore
-        binder[InvitationTokenValidator] = ClassProvider(FlaskTokenService)  # type: ignore
-        binder[RegistrationEmailTemplate] = ClassProvider(MemberRegistrationEmailTemplateImpl)  # type: ignore
-        binder[interfaces.LanguageRepository] = ClassProvider(LanguageRepositoryImpl)  # type: ignore
-        binder[LanguageService] = ClassProvider(LanguageRepositoryImpl)  # type: ignore
-        binder[EmailConfiguration] = ClassProvider(FlaskEmailConfiguration)  # type: ignore
-        binder[interfaces.TransactionRepository] = ClassProvider(TransactionRepository)  # type: ignore
-        binder[interfaces.AccountantRepository] = ClassProvider(AccountantRepository)  # type: ignore
-        binder[TemplateRenderer] = ClassProvider(FlaskTemplateRenderer)  # type: ignore
-        binder[Session] = ClassProvider(FlaskSession)  # type: ignore
-        binder[Notifier] = ClassProvider(FlaskFlashNotifier)  # type: ignore
+        binder[NotifyAccountantsAboutNewPlanPresenter] = AliasProvider(NotifyAccountantsAboutNewPlanPresenterImpl)  # type: ignore
+        binder[TextRenderer] = AliasProvider(TextRendererImpl)  # type: ignore
+        binder[Request] = AliasProvider(FlaskRequest)  # type: ignore
+        binder[UrlIndex] = AliasProvider(GeneralUrlIndex)  # type: ignore
+        binder[InvitationTokenValidator] = AliasProvider(FlaskTokenService)  # type: ignore
+        binder[RegistrationEmailTemplate] = AliasProvider(MemberRegistrationEmailTemplateImpl)  # type: ignore
+        binder[interfaces.LanguageRepository] = AliasProvider(LanguageRepositoryImpl)  # type: ignore
+        binder[LanguageService] = AliasProvider(LanguageRepositoryImpl)  # type: ignore
+        binder[EmailConfiguration] = AliasProvider(FlaskEmailConfiguration)  # type: ignore
+        binder[interfaces.TransactionRepository] = AliasProvider(TransactionRepository)  # type: ignore
+        binder[interfaces.AccountantRepository] = AliasProvider(AccountantRepository)  # type: ignore
+        binder[TemplateRenderer] = AliasProvider(FlaskTemplateRenderer)  # type: ignore
+        binder[Session] = AliasProvider(FlaskSession)  # type: ignore
+        binder[Notifier] = AliasProvider(FlaskFlashNotifier)  # type: ignore
         binder[MailService] = CallableProvider(get_mail_service)  # type: ignore
-        binder[Translator] = ClassProvider(FlaskTranslator)  # type: ignore
-        binder[Plotter] = ClassProvider(FlaskPlotter)  # type: ignore
-        binder[Colors] = ClassProvider(FlaskColors)  # type: ignore
-        binder[ControlThresholds] = ClassProvider(ControlThresholdsFlask)  # type: ignore
-        binder[LanguageChangerUrlIndex] = ClassProvider(GeneralUrlIndex)  # type: ignore
-        binder[CompanyRegistrationMessagePresenter] = ClassProvider(  # type: ignore
+        binder[Translator] = AliasProvider(FlaskTranslator)  # type: ignore
+        binder[Plotter] = AliasProvider(FlaskPlotter)  # type: ignore
+        binder[Colors] = AliasProvider(FlaskColors)  # type: ignore
+        binder[ControlThresholds] = AliasProvider(ControlThresholdsFlask)  # type: ignore
+        binder[LanguageChangerUrlIndex] = AliasProvider(GeneralUrlIndex)  # type: ignore
+        binder[CompanyRegistrationMessagePresenter] = AliasProvider(  # type: ignore
             RegistrationEmailPresenter
         )
-        binder[MemberRegistrationMessagePresenter] = ClassProvider(  # type: ignore
+        binder[MemberRegistrationMessagePresenter] = AliasProvider(  # type: ignore
             RegistrationEmailPresenter
         )
 

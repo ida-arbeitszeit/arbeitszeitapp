@@ -1,6 +1,6 @@
 from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.injector import Binder, ClassProvider, Module
+from arbeitszeit.injector import AliasProvider, Binder, Module
 from arbeitszeit.token import (
     CompanyRegistrationMessagePresenter,
     MemberRegistrationMessagePresenter,
@@ -29,22 +29,22 @@ from tests.translator import FakeTranslator
 class TestingModule(Module):
     def configure(self, binder: Binder) -> None:
         super().configure(binder)
-        binder[CompanyRegistrationMessagePresenter] = ClassProvider(  # type: ignore
+        binder[CompanyRegistrationMessagePresenter] = AliasProvider(  # type: ignore
             TokenDeliveryService
         )
-        binder[MemberRegistrationMessagePresenter] = ClassProvider(  # type: ignore
+        binder[MemberRegistrationMessagePresenter] = AliasProvider(  # type: ignore
             TokenDeliveryService
         )
-        binder[TextRenderer] = ClassProvider(TextRendererImpl)  # type: ignore
-        binder[Colors] = ClassProvider(ColorsTestImpl)  # type: ignore
-        binder[Plotter] = ClassProvider(FakePlotter)  # type: ignore
-        binder[ControlThresholds] = ClassProvider(  # type: ignore
+        binder[TextRenderer] = AliasProvider(TextRendererImpl)  # type: ignore
+        binder[Colors] = AliasProvider(ColorsTestImpl)  # type: ignore
+        binder[Plotter] = AliasProvider(FakePlotter)  # type: ignore
+        binder[ControlThresholds] = AliasProvider(  # type: ignore
             ControlThresholdsTestImpl
         )
-        binder[Translator] = ClassProvider(FakeTranslator)  # type: ignore
-        binder[AccountantInvitationPresenter] = ClassProvider(  # type: ignore
+        binder[Translator] = AliasProvider(FakeTranslator)  # type: ignore
+        binder[AccountantInvitationPresenter] = AliasProvider(  # type: ignore
             AccountantInvitationPresenterTestImpl
         )
-        binder[DatetimeService] = ClassProvider(FakeDatetimeService)  # type: ignore
-        binder[UserAddressBook] = ClassProvider(FakeAddressBook)  # type: ignore
-        binder[Request] = ClassProvider(FakeRequest)  # type: ignore
+        binder[DatetimeService] = AliasProvider(FakeDatetimeService)  # type: ignore
+        binder[UserAddressBook] = AliasProvider(FakeAddressBook)  # type: ignore
+        binder[Request] = AliasProvider(FakeRequest)  # type: ignore

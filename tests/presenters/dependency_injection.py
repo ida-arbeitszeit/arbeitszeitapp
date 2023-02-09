@@ -1,4 +1,4 @@
-from arbeitszeit.injector import Binder, ClassProvider, Injector, Module
+from arbeitszeit.injector import AliasProvider, Binder, Injector, Module
 from arbeitszeit_web.email import EmailConfiguration, MailService
 from arbeitszeit_web.language_service import LanguageService
 from arbeitszeit_web.notification import Notifier
@@ -35,20 +35,20 @@ from .url_index import (
 class PresenterTestsInjector(Module):
     def configure(self, binder: Binder) -> None:
         super().configure(binder)
-        binder[AccountantInvitationEmailView] = ClassProvider(  # type: ignore
+        binder[AccountantInvitationEmailView] = AliasProvider(  # type: ignore
             AccountantInvitationEmailViewImpl
         )
-        binder[EmailConfiguration] = ClassProvider(FakeEmailConfiguration)  # type: ignore
-        binder[AccountantInvitationUrlIndex] = ClassProvider(AccountantInvitationUrlIndexImpl)  # type: ignore
-        binder[Notifier] = ClassProvider(NotifierTestImpl)  # type: ignore
-        binder[UrlIndex] = ClassProvider(UrlIndexTestImpl)
-        binder[Session] = ClassProvider(FakeSession)  # type: ignore
-        binder[Request] = ClassProvider(FakeRequest)  # type: ignore
-        binder[LanguageChangerUrlIndex] = ClassProvider(LanguageChangerUrlIndexImpl)  # type: ignore
-        binder[LanguageService] = ClassProvider(FakeLanguageService)  # type: ignore
-        binder[MailService] = ClassProvider(FakeEmailSender)  # type: ignore
-        binder[RenewPlanUrlIndex] = ClassProvider(RenewPlanUrlIndexTestImpl)  # type: ignore
-        binder[HidePlanUrlIndex] = ClassProvider(HidePlanUrlIndexTestImpl)  # type: ignore
+        binder[EmailConfiguration] = AliasProvider(FakeEmailConfiguration)  # type: ignore
+        binder[AccountantInvitationUrlIndex] = AliasProvider(AccountantInvitationUrlIndexImpl)  # type: ignore
+        binder[Notifier] = AliasProvider(NotifierTestImpl)  # type: ignore
+        binder[UrlIndex] = AliasProvider(UrlIndexTestImpl)
+        binder[Session] = AliasProvider(FakeSession)  # type: ignore
+        binder[Request] = AliasProvider(FakeRequest)  # type: ignore
+        binder[LanguageChangerUrlIndex] = AliasProvider(LanguageChangerUrlIndexImpl)  # type: ignore
+        binder[LanguageService] = AliasProvider(FakeLanguageService)  # type: ignore
+        binder[MailService] = AliasProvider(FakeEmailSender)  # type: ignore
+        binder[RenewPlanUrlIndex] = AliasProvider(RenewPlanUrlIndexTestImpl)  # type: ignore
+        binder[HidePlanUrlIndex] = AliasProvider(HidePlanUrlIndexTestImpl)  # type: ignore
 
 
 def get_dependency_injector() -> Injector:

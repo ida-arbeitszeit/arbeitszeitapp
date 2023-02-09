@@ -826,7 +826,6 @@ class PlanDraftRepository(interfaces.PlanDraftRepository):
         datetime_service: DatetimeService,
         company_repository: interfaces.CompanyRepository,
     ) -> None:
-        print("hi")
         self.drafts: List[PlanDraft] = []
         self.datetime_service = datetime_service
         self.company_repository = company_repository
