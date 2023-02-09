@@ -1,4 +1,3 @@
-from flask_babel import Babel
 from flask_login import LoginManager
 from flask_mail import Mail
 from flask_migrate import Migrate
@@ -8,4 +7,3 @@ db = SQLAlchemy()
 login_manager = LoginManager()
 migrate = Migrate()
 mail = Mail()
-babel = Babel()
