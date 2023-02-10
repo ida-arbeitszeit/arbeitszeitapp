@@ -2,9 +2,9 @@ import arbeitszeit.repositories as interfaces
 from arbeitszeit import entities
 from arbeitszeit.accountant_notifications import NotifyAccountantsAboutNewPlanPresenter
 from arbeitszeit.injector import (
+    AliasProvider,
     Binder,
     CallableProvider,
-    ClassProvider,
     Injector,
     Module,
 )
@@ -31,59 +31,56 @@ def provide_social_accounting_instance(
 class InMemoryModule(Module):
     def configure(self, binder: Binder) -> None:
         super().configure(binder)
-        binder[NotifyAccountantsAboutNewPlanPresenter] = ClassProvider(NotifyAccountantsAboutNewPlanPresenterImpl)  # type: ignore
-        binder[interfaces.LanguageRepository] = ClassProvider(  # type: ignore
+        binder[NotifyAccountantsAboutNewPlanPresenter] = AliasProvider(NotifyAccountantsAboutNewPlanPresenterImpl)  # type: ignore
+        binder[interfaces.LanguageRepository] = AliasProvider(  # type: ignore
             repositories.FakeLanguageRepository
         )
-        binder[interfaces.AccountantRepository] = ClassProvider(  # type: ignore
+        binder[interfaces.AccountantRepository] = AliasProvider(  # type: ignore
             repositories.AccountantRepositoryTestImpl
         )
-        binder[AccountantInvitationPresenter] = ClassProvider(  # type: ignore
+        binder[AccountantInvitationPresenter] = AliasProvider(  # type: ignore
             AccountantInvitationPresenterTestImpl
         )
-        binder[InvitationTokenValidator] = ClassProvider(FakeTokenService)  # type: ignore
-        binder[InvitationTokenValidator] = ClassProvider(FakeTokenService)  # type: ignore
-        binder[interfaces.PurchaseRepository] = ClassProvider(  # type: ignore
+        binder[InvitationTokenValidator] = AliasProvider(FakeTokenService)  # type: ignore
+        binder[InvitationTokenValidator] = AliasProvider(FakeTokenService)  # type: ignore
+        binder[interfaces.PurchaseRepository] = AliasProvider(  # type: ignore
             repositories.PurchaseRepository
         )
-        binder[interfaces.TransactionRepository] = ClassProvider(  # type: ignore
+        binder[interfaces.TransactionRepository] = AliasProvider(  # type: ignore
             repositories.TransactionRepository
         )
-        binder[interfaces.WorkerInviteRepository] = ClassProvider(  # type: ignore
+        binder[interfaces.WorkerInviteRepository] = AliasProvider(  # type: ignore
             repositories.WorkerInviteRepository
         )
         binder[entities.SocialAccounting] = CallableProvider(
             provide_social_accounting_instance
         )
-        binder[interfaces.AccountRepository] = ClassProvider(  # type: ignore
+        binder[interfaces.AccountRepository] = AliasProvider(  # type: ignore
             repositories.AccountRepository
         )
-        binder[repositories.AccountRepository] = ClassProvider(
-            repositories.AccountRepository
-        )
-        binder[interfaces.MemberRepository] = ClassProvider(  # type: ignore
+        binder[interfaces.MemberRepository] = AliasProvider(  # type: ignore
             repositories.MemberRepository
         )
-        binder[interfaces.MemberRepository] = ClassProvider(  # type: ignore
+        binder[interfaces.MemberRepository] = AliasProvider(  # type: ignore
             repositories.MemberRepository
         )
-        binder[interfaces.CompanyRepository] = ClassProvider(  # type: ignore
+        binder[interfaces.CompanyRepository] = AliasProvider(  # type: ignore
             repositories.CompanyRepository
         )
-        binder[interfaces.PlanRepository] = ClassProvider(repositories.PlanRepository)  # type: ignore
-        binder[interfaces.PlanDraftRepository] = ClassProvider(  # type: ignore
+        binder[interfaces.PlanRepository] = AliasProvider(repositories.PlanRepository)  # type: ignore
+        binder[interfaces.PlanDraftRepository] = AliasProvider(  # type: ignore
             repositories.PlanDraftRepository
         )
-        binder[interfaces.AccountOwnerRepository] = ClassProvider(  # type: ignore
+        binder[interfaces.AccountOwnerRepository] = AliasProvider(  # type: ignore
             repositories.AccountOwnerRepository
         )
-        binder[interfaces.CooperationRepository] = ClassProvider(  # type: ignore
+        binder[interfaces.CooperationRepository] = AliasProvider(  # type: ignore
             repositories.CooperationRepository
         )
-        binder[interfaces.PayoutFactorRepository] = ClassProvider(  # type: ignore
+        binder[interfaces.PayoutFactorRepository] = AliasProvider(  # type: ignore
             repositories.FakePayoutFactorRepository
         )
-        binder[TokenService] = ClassProvider(FakeTokenService)  # type: ignore
+        binder[TokenService] = AliasProvider(FakeTokenService)  # type: ignore
 
 
 def get_dependency_injector() -> Injector:

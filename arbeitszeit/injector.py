@@ -91,7 +91,25 @@ class Provider(Protocol, Generic[T_cov]):
         ...
 
 
+class AliasProvider(Generic[T]):
+    """This provider provides instances by simply refering to another
+    class.  This can be useful when specifying the concret
+    implementation of an abstract base class (ABC) or a Protocol.
+    """
+
+    def __init__(self, cls: Type[T]) -> None:
+        self.cls = cls
+
+    def provide(self, binder: Binder) -> T:
+        provider = binder.get(self.cls)
+        return provider.provide(binder)
+
+
 class InstanceProvider(Provider[T]):
+    """Provide an instance of of a class by specifying the concrete
+    instance in the provider.
+    """
+
     def __init__(self, instance: T) -> None:
         self.instance = instance
 
@@ -100,6 +118,15 @@ class InstanceProvider(Provider[T]):
 
 
 class ClassProvider(Provider[T]):
+    """Provide an instance of a type by calling its constructor
+    (__init__ method) and providing its arguments from dependency
+    injection.
+
+    This provider usually doen't need to be specified directly since
+    it is assumed to be the default in case no other provider was
+    specified.
+    """
+
     def __init__(self, cls: Type[T]) -> None:
         self.cls = cls
 
@@ -128,6 +155,10 @@ class ClassProvider(Provider[T]):
 
 
 class CallableProvider(Provider[T]):
+    """Provide an instance by calling a function.  The arguments to
+    the function will be provide by dependency injection.
+    """
+
     def __init__(self, f: Callable[..., T], is_singleton: bool = False) -> None:
         self.f = f
         self._is_singleton = is_singleton
