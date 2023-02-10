@@ -30,6 +30,7 @@
             inherit (pkgs) python3;
           };
           checks = {
+            arbeitszeit-python311 = pkgs.python311.pkgs.arbeitszeitapp;
             arbeitszeit-python310 = pkgs.python310.pkgs.arbeitszeitapp;
             arbeitszeit-python39 = pkgs.python39.pkgs.arbeitszeitapp;
           };
