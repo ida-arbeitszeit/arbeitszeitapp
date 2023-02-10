@@ -9,6 +9,7 @@ from flask_login import current_user
 from arbeitszeit import use_cases
 from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
 from arbeitszeit_flask.database import MemberRepository, commit_changes
+from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.forms import (
     AnswerCompanyWorkInviteForm,
     CompanySearchForm,
@@ -63,7 +64,7 @@ def my_purchases(
     )
 
 
-@MemberRoute("/member/query_plans", methods=["GET", "POST"])
+@MemberRoute("/member/query_plans", methods=["GET"])
 def query_plans(
     query_plans: use_cases.QueryPlans,
     controller: QueryPlansController,
@@ -73,17 +74,13 @@ def query_plans(
     template_name = "member/query_plans.html"
     search_form = PlanSearchForm(request.form)
     view = QueryPlansView(
-        search_form,
         query_plans,
         presenter,
         controller,
         template_name,
         template_renderer,
     )
-    if request.method == "POST":
-        return view.respond_to_post()
-    else:
-        return view.respond_to_get()
+    return view.respond_to_get(search_form, FlaskRequest())
 
 
 @MemberRoute("/member/query_companies", methods=["GET", "POST"])

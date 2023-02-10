@@ -9,7 +9,7 @@ from uuid import UUID
 
 from arbeitszeit.entities import Plan
 from arbeitszeit.price_calculator import PriceCalculator
-from arbeitszeit.repositories import CompanyRepository, PlanRepository
+from arbeitszeit.repositories import CompanyRepository, PlanRepository, PlanResult
 
 
 class PlanFilter(enum.Enum):
@@ -20,12 +20,13 @@ class PlanFilter(enum.Enum):
 class PlanSorting(enum.Enum):
     by_activation = enum.auto()
     by_company_name = enum.auto()
-    by_price = enum.auto()
 
 
 @dataclass
 class PlanQueryResponse:
     results: List[QueriedPlan]
+    total_results: int
+    request: QueryPlansRequest
 
 
 @dataclass
@@ -47,6 +48,8 @@ class QueryPlansRequest:
     query_string: Optional[str]
     filter_category: PlanFilter
     sorting_category: PlanSorting
+    offset: Optional[int] = None
+    limit: Optional[int] = None
 
 
 @dataclass
@@ -60,17 +63,36 @@ class QueryPlans:
         filter_by = request.filter_category
         sort_by = request.sorting_category
         plans = self.plan_repository.get_plans().that_are_active()
+        plans = self._apply_filter(plans, query, filter_by)
+        total_results = len(plans)
+        plans = self._apply_sorting(plans, sort_by)
+        if request.offset is not None:
+            plans = plans.offset(n=request.offset)
+        if request.limit is not None:
+            plans = plans.limit(n=request.limit)
+
+        results = [self._plan_to_response_model(plan) for plan in plans]
+        return PlanQueryResponse(
+            results=results, total_results=total_results, request=request
+        )
+
+    def _apply_filter(
+        self, plans: PlanResult, query: Optional[str], filter_by: PlanFilter
+    ) -> PlanResult:
         if query is None:
             pass
         elif filter_by == PlanFilter.by_plan_id:
             plans = plans.with_id_containing(query)
         else:
             plans = plans.with_product_name_containing(query)
-        results = [self._plan_to_response_model(plan) for plan in plans]
-        results_sorted = self._sort_plans(results, sort_by)
-        return PlanQueryResponse(
-            results=results_sorted,
-        )
+        return plans
+
+    def _apply_sorting(self, plans: PlanResult, sort_by: PlanSorting) -> PlanResult:
+        if sort_by == PlanSorting.by_company_name:
+            plans = plans.ordered_by_planner_name()
+        else:
+            plans = plans.ordered_by_activation_date(ascending=False)
+        return plans
 
     def _plan_to_response_model(self, plan: Plan) -> QueriedPlan:
         price_per_unit = self.price_calculator.calculate_cooperative_price(plan)
@@ -89,14 +111,3 @@ class QueryPlans:
             is_cooperating=bool(plan.cooperation),
             activation_date=plan.activation_date,
         )
-
-    def _sort_plans(
-        self, plans: List[QueriedPlan], sort_by: PlanSorting
-    ) -> List[QueriedPlan]:
-        if sort_by == PlanSorting.by_activation:
-            plans = sorted(plans, key=lambda x: x.activation_date, reverse=True)
-        elif sort_by == PlanSorting.by_price:
-            plans = sorted(plans, key=lambda x: x.price_per_unit)
-        else:
-            plans = sorted(plans, key=lambda x: x.company_name.casefold())
-        return plans

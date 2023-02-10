@@ -124,7 +124,7 @@ def dashboard(view: CompanyDashboardView):
     return view.respond_to_get()
 
 
-@CompanyRoute("/company/query_plans", methods=["GET", "POST"])
+@CompanyRoute("/company/query_plans", methods=["GET"])
 def query_plans(
     query_plans: use_cases.QueryPlans,
     controller: QueryPlansController,
@@ -132,19 +132,15 @@ def query_plans(
     presenter: QueryPlansPresenter,
 ):
     template_name = "company/query_plans.html"
-    search_form = PlanSearchForm(request.form)
+    search_form = PlanSearchForm(request.args)
     view = QueryPlansView(
-        search_form,
         query_plans,
         presenter,
         controller,
         template_name,
         template_renderer,
     )
-    if request.method == "POST":
-        return view.respond_to_post()
-    else:
-        return view.respond_to_get()
+    return view.respond_to_get(search_form, FlaskRequest())
 
 
 @CompanyRoute("/company/query_companies", methods=["GET", "POST"])

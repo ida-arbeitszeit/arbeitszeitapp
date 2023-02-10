@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Dict, Iterable, Optional, Tuple
 
 from flask import request
 
@@ -12,6 +12,9 @@ class QueryStringImpl:
 
     def get(self, key: str) -> Optional[str]:
         return self.args.get(key)
+
+    def items(self) -> Iterable[Tuple[str, str]]:
+        return self.args.items()
 
 
 class FlaskRequest:
