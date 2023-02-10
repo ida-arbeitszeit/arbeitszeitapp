@@ -1,7 +1,10 @@
 from dataclasses import dataclass
 from typing import List
 
+from arbeitszeit.injector import singleton
 
+
+@singleton
 class AccountantInvitationPresenterTestImpl:
     @dataclass
     class Invitation:

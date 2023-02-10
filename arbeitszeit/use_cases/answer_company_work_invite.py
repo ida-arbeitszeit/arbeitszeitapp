@@ -3,8 +3,6 @@ from enum import Enum, auto
 from typing import Optional
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.repositories import (
     CompanyRepository,
     MemberRepository,
@@ -31,7 +29,6 @@ class AnswerCompanyWorkInviteResponse:
     failure_reason: Optional[Failure]
 
 
-@inject
 @dataclass
 class AnswerCompanyWorkInvite:
     worker_invite_repository: WorkerInviteRepository

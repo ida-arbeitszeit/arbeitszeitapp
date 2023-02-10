@@ -11,8 +11,6 @@ from decimal import Decimal
 from typing import Iterable, List, Optional, Union
 from uuid import UUID, uuid4
 
-from injector import inject
-
 from arbeitszeit.entities import (
     Account,
     AccountTypes,
@@ -59,7 +57,6 @@ from tests.company import CompanyManager
 from tests.datetime_service import FakeDatetimeService
 
 
-@inject
 @dataclass
 class MemberGenerator:
     account_generator: AccountGenerator
@@ -136,7 +133,6 @@ class MemberGenerator:
         return member.id
 
 
-@inject
 @dataclass
 class CompanyGenerator:
     account_generator: AccountGenerator
@@ -216,7 +212,6 @@ class CompanyGenerator:
         return company
 
 
-@inject
 @dataclass
 class AccountGenerator:
     account_repository: AccountRepository
@@ -230,7 +225,6 @@ class EmailGenerator:
         return str(uuid4()) + "@cp.org"
 
 
-@inject
 @dataclass
 class PlanGenerator:
     company_generator: CompanyGenerator
@@ -367,7 +361,6 @@ class PlanGenerator:
         return draft
 
 
-@inject
 @dataclass
 class PurchaseGenerator:
     plan_generator: PlanGenerator
@@ -427,7 +420,6 @@ class PurchaseGenerator:
         )
 
 
-@inject
 @dataclass
 class TransactionGenerator:
     account_generator: AccountGenerator
@@ -471,7 +463,6 @@ class TransactionGenerator:
         )
 
 
-@inject
 @dataclass
 class CooperationGenerator:
     cooperation_repository: CooperationRepository
@@ -512,7 +503,6 @@ class CooperationGenerator:
         return cooperation
 
 
-@inject
 @dataclass
 class AccountantGenerator:
     invite_accountant_use_case: SendAccountantRegistrationTokenUseCase

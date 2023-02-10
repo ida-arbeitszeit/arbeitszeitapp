@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.repositories import PlanRepository
 
 
@@ -12,7 +10,6 @@ class CancelCooperationSolicitationRequest:
     plan_id: UUID
 
 
-@inject
 @dataclass
 class CancelCooperationSolicitation:
     plan_repo: PlanRepository

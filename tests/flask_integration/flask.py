@@ -3,9 +3,10 @@ from unittest import TestCase
 from uuid import UUID
 
 from flask import Flask
-from injector import Module
+from flask_sqlalchemy import SQLAlchemy
 
 from arbeitszeit.entities import Company, Member
+from arbeitszeit.injector import Module
 from arbeitszeit.repositories import CompanyRepository, MemberRepository
 from arbeitszeit_flask.token import FlaskTokenService
 from tests.data_generators import (
@@ -22,6 +23,7 @@ from .dependency_injection import get_dependency_injector
 class FlaskTestCase(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector(self.get_injection_modules())
+        self.db = self.injector.get(SQLAlchemy)
         self.app = self.injector.get(Flask)
 
     def get_injection_modules(self) -> List[Module]:

@@ -17,7 +17,6 @@ from typing import (
 from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
-from injector import inject
 from sqlalchemy import and_, func, or_, update
 from sqlalchemy.sql.expression import Select
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -489,7 +488,6 @@ class UserAddressBookImpl:
             return None
 
 
-@inject
 @dataclass
 class MemberRepository(repositories.MemberRepository):
     account_repository: AccountRepository
@@ -569,7 +567,6 @@ class MemberRepository(repositories.MemberRepository):
         )
 
 
-@inject
 @dataclass
 class CompanyRepository(repositories.CompanyRepository):
     db: SQLAlchemy
@@ -702,7 +699,6 @@ class CompanyRepository(repositories.CompanyRepository):
         return account
 
 
-@inject
 @dataclass
 class AccountRepository(repositories.AccountRepository):
     db: SQLAlchemy
@@ -762,7 +758,6 @@ class AccountRepository(repositories.AccountRepository):
         )
 
 
-@inject
 @dataclass
 class AccountOwnerRepository(repositories.AccountOwnerRepository):
     account_repository: AccountRepository
@@ -814,7 +809,6 @@ class AccountOwnerRepository(repositories.AccountOwnerRepository):
         return self.company_repository.object_from_orm(model)
 
 
-@inject
 @dataclass
 class AccountingRepository:
     account_repository: AccountRepository
@@ -852,7 +846,6 @@ class AccountingRepository:
         return self.object_from_orm(accounting_orm)
 
 
-@inject
 @dataclass
 class PurchaseRepository(repositories.PurchaseRepository):
     member_repository: MemberRepository
@@ -935,7 +928,6 @@ class PurchaseRepository(repositories.PurchaseRepository):
         )
 
 
-@inject
 @dataclass
 class PlanRepository(repositories.PlanRepository):
     company_repository: CompanyRepository
@@ -1089,7 +1081,6 @@ class PlanRepository(repositories.PlanRepository):
         return len(models.Plan.query.all())
 
 
-@inject
 @dataclass
 class TransactionRepository(repositories.TransactionRepository):
     db: SQLAlchemy
@@ -1153,7 +1144,6 @@ class TransactionRepository(repositories.TransactionRepository):
         )
 
 
-@inject
 @dataclass
 class PlanDraftRepository(repositories.PlanDraftRepository):
     db: SQLAlchemy
@@ -1265,7 +1255,6 @@ class PlanDraftRepository(repositories.PlanDraftRepository):
         return (self._object_from_orm(draft) for draft in drafts)
 
 
-@inject
 @dataclass
 class WorkerInviteRepository(repositories.WorkerInviteRepository):
     db: SQLAlchemy
@@ -1332,7 +1321,6 @@ class WorkerInviteRepository(repositories.WorkerInviteRepository):
         CompanyWorkInvite.query.filter_by(id=str(id)).delete()
 
 
-@inject
 @dataclass
 class CooperationRepository(repositories.CooperationRepository):
     db: SQLAlchemy
@@ -1409,7 +1397,6 @@ class CooperationRepository(repositories.CooperationRepository):
         return models.Cooperation.query.count()
 
 
-@inject
 @dataclass
 class AccountantRepository:
     db: SQLAlchemy
@@ -1482,7 +1469,6 @@ class AccountantRepository:
         )
 
 
-@inject
 @dataclass
 class PayoutFactorRepository:
     db: SQLAlchemy

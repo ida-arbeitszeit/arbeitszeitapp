@@ -57,6 +57,10 @@ module = [
 allow_untyped_defs = false
 
 [[tool.mypy.overrides]]
+module = [ "arbeitszeit_flask.models" ]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
 module = [
     "flask_babel",
     "flask_mail",

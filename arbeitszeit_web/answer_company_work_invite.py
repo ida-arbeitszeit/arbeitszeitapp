@@ -2,8 +2,6 @@ from dataclasses import dataclass
 from typing import Protocol, Union
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.use_cases import (
     AnswerCompanyWorkInviteRequest,
     AnswerCompanyWorkInviteResponse,
@@ -37,7 +35,6 @@ class AnswerCompanyWorkInviteController:
             return None
 
 
-@inject
 @dataclass
 class AnswerCompanyWorkInvitePresenter:
     @dataclass

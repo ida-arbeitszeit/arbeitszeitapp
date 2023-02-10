@@ -4,14 +4,12 @@ from typing import List, Optional
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from injector import Injector, Module, inject, provider, singleton
 
+from arbeitszeit.injector import Binder, CallableProvider, Injector, Module
 from arbeitszeit_flask import create_app
-from arbeitszeit_flask.dependency_injection import FlaskModule, ViewsModule
+from arbeitszeit_flask.dependency_injection import FlaskModule
 from arbeitszeit_flask.extensions import db
 from tests.dependency_injection import TestingModule
-
-from .renderer import FakeTemplateRenderer
 
 
 class FlaskConfiguration(dict):
@@ -25,7 +23,7 @@ class FlaskConfiguration(dict):
     def default(cls) -> FlaskConfiguration:
         return cls(
             {
-                "SQLALCHEMY_DATABASE_URI": "sqlite://",
+                "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",
                 "SQLALCHEMY_TRACK_MODIFICATIONS": False,
                 "SECRET_KEY": "dev secret key",
                 "WTF_CSRF_ENABLED": False,
@@ -60,36 +58,30 @@ class FlaskConfiguration(dict):
     template_folder = property(_get_template_folder, _set_template_folder)
 
 
+# We require the application for the database. This is done to
+# ensure that the correct flask application context is present.
+def provide_sqlalchemy(app: Flask) -> SQLAlchemy:
+    db.create_all()
+    return db
+
+
+def provide_app(config: FlaskConfiguration) -> Flask:
+    app = create_app(config=config, db=db, template_folder=config.template_folder)
+    app.app_context().push()
+    return app
+
+
 class SqliteModule(Module):
-    @provider
-    @singleton
-    # We require the application for the database. This is done to
-    # ensure that the correct flask application context is present.
-    def provide_sqlalchemy(self, app: Flask) -> SQLAlchemy:
-        db.create_all()
-        return db
-
-    @provider
-    @singleton
-    def provide_app(self, config: FlaskConfiguration) -> Flask:
-        app = create_app(config=config, db=db, template_folder=config.template_folder)
-        app.app_context().push()
-        return app
-
-    @provider
-    def provide_flask_configuration(self) -> FlaskConfiguration:
-        return FlaskConfiguration.default()
-
-    @singleton
-    @provider
-    def provide_fake_template_renderer(self) -> FakeTemplateRenderer:
-        return FakeTemplateRenderer()
+    def configure(self, binder: Binder) -> None:
+        super().configure(binder)
+        binder[SQLAlchemy] = CallableProvider(provide_sqlalchemy, is_singleton=True)
+        binder[Flask] = CallableProvider(provide_app, is_singleton=True)
+        binder[FlaskConfiguration] = CallableProvider(FlaskConfiguration.default)
 
 
 def get_dependency_injector(additional_modules: Optional[List[Module]] = None):
     modules: List[Module] = [
         FlaskModule(),
-        ViewsModule(),
         TestingModule(),
         SqliteModule(),
     ]
@@ -102,8 +94,6 @@ def injection_test(original_test):
     injector = get_dependency_injector()
 
     def wrapper(*args, **kwargs):
-        return injector.call_with_injection(
-            inject(original_test), args=args, kwargs=kwargs
-        )
+        return injector.call_with_injection(original_test, args=args, kwargs=kwargs)
 
     return wrapper

@@ -4,8 +4,6 @@ from decimal import Decimal
 from typing import Iterator, Union
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.entities import Company, Member, Purchase, PurposesOfPurchases
 from arbeitszeit.repositories import PlanRepository, PurchaseRepository
 
@@ -22,7 +20,6 @@ class PurchaseQueryResponse:
     price_total: Decimal
 
 
-@inject
 @dataclass
 class QueryPurchases:
     purchase_repository: PurchaseRepository

@@ -4,8 +4,6 @@ from dataclasses import dataclass
 from decimal import Decimal
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan, SocialAccounting
 from arbeitszeit.repositories import (
@@ -15,7 +13,6 @@ from arbeitszeit.repositories import (
 )
 
 
-@inject
 @dataclass
 class ApprovePlanUseCase:
     @dataclass

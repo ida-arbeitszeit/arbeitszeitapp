@@ -2,8 +2,6 @@ from dataclasses import dataclass
 from typing import List
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.repositories import WorkerInviteRepository
 
 
@@ -22,7 +20,6 @@ class ShowWorkInvitesRequest:
     member: UUID
 
 
-@inject
 @dataclass
 class ShowWorkInvites:
     worker_invite_repository: WorkerInviteRepository

@@ -1,7 +1,6 @@
 from typing import Dict, List
 
-from injector import Module, provider
-
+from arbeitszeit.injector import Binder, CallableProvider, Module
 from arbeitszeit_flask.language_repository import LanguageRepositoryImpl
 
 from .dependency_injection import FlaskConfiguration
@@ -17,8 +16,14 @@ class LanguageRepositoryTestCase(FlaskTestCase):
         expected_languages = self.expected_languages
 
         class _Module(Module):
-            @provider
-            def provide_flask_configuration(self) -> FlaskConfiguration:
+            def configure(self, binder: Binder) -> None:
+                super().configure(binder)
+                binder[FlaskConfiguration] = CallableProvider(
+                    _Module.provide_flask_configuration
+                )
+
+            @staticmethod
+            def provide_flask_configuration() -> FlaskConfiguration:
                 configuration = FlaskConfiguration.default()
                 configuration["LANGUAGES"] = expected_languages
                 return configuration

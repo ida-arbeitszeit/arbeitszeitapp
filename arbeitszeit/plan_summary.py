@@ -4,8 +4,6 @@ from decimal import Decimal
 from typing import Optional
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.entities import Plan
 from arbeitszeit.price_calculator import PriceCalculator
 from arbeitszeit.repositories import CompanyRepository, PlanRepository
@@ -36,7 +34,6 @@ class PlanSummary:
     expiration_date: Optional[datetime]
 
 
-@inject
 @dataclass
 class PlanSummaryService:
     plan_repository: PlanRepository

@@ -2,13 +2,10 @@ from dataclasses import dataclass
 from typing import Optional
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.repositories import AccountantRepository
 from arbeitszeit.token import InvitationTokenValidator
 
 
-@inject
 @dataclass
 class RegisterAccountantUseCase:
     @dataclass

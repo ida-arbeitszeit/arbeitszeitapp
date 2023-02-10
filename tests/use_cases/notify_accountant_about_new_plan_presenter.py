@@ -1,8 +1,7 @@
 from typing import List
 
-from injector import singleton
-
 from arbeitszeit.accountant_notifications import Notification
+from arbeitszeit.injector import singleton
 
 
 @singleton

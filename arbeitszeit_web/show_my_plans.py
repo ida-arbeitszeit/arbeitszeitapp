@@ -3,8 +3,6 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
 
-from injector import inject
-
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansResponse
 from arbeitszeit_web.notification import Notifier
@@ -94,7 +92,6 @@ class ShowMyPlansViewModel:
         return asdict(self)
 
 
-@inject
 @dataclass
 class ShowMyPlansPresenter:
     url_index: UrlIndex

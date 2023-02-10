@@ -1,14 +1,11 @@
 from dataclasses import dataclass
 
-from injector import inject
-
 from arbeitszeit.use_cases.hide_plan import HidePlanResponse
 from arbeitszeit_web.translator import Translator
 
 from .notification import Notifier
 
 
-@inject
 @dataclass
 class HidePlanPresenter:
     notifier: Notifier

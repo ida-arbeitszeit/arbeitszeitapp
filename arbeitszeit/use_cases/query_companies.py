@@ -6,8 +6,6 @@ from dataclasses import dataclass
 from typing import Iterable, List, Optional
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.entities import Company
 from arbeitszeit.repositories import CompanyRepository
 
@@ -39,7 +37,6 @@ class QueryCompaniesRequest(ABC):
         pass
 
 
-@inject
 @dataclass
 class QueryCompanies:
     company_repository: CompanyRepository

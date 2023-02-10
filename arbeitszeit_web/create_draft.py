@@ -3,8 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional, Union
 
-from injector import inject
-
 from arbeitszeit.entities import ProductionCosts
 from arbeitszeit.plan_summary import PlanSummary
 from arbeitszeit.use_cases import CreatePlanDraftRequest, DraftSummarySuccess
@@ -39,7 +37,6 @@ class CreateDraftController:
         )
 
 
-@inject
 @dataclass
 class GetPrefilledDraftDataPresenter:
     @dataclass
@@ -69,7 +66,6 @@ class GetPrefilledDraftDataPresenter:
         )
 
 
-@inject
 @dataclass
 class CreateDraftPresenter:
     @dataclass

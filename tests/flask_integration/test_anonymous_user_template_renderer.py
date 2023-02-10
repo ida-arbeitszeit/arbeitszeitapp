@@ -1,7 +1,6 @@
 from typing import Dict, List
 
-from injector import Module, provider
-
+from arbeitszeit.injector import Binder, CallableProvider, Module
 from arbeitszeit_flask.template import AnonymousUserTemplateRenderer, TemplateRenderer
 from tests.language_service import FakeLanguageService
 
@@ -60,15 +59,22 @@ class CompanyTemplateRendererTests(FlaskTestCase):
         expected_languages = self.expected_languages
 
         class _Module(Module):
-            @provider
-            def provide_flask_configuration(self) -> FlaskConfiguration:
+            def configure(self, binder: Binder) -> None:
+                super().configure(binder)
+                binder[FlaskConfiguration] = CallableProvider(
+                    _Module.provide_flask_configuration
+                )
+                binder[TemplateRenderer] = CallableProvider(_Module.provide_template_renderer)  # type: ignore
+
+            @staticmethod
+            def provide_flask_configuration() -> FlaskConfiguration:
                 configuration = FlaskConfiguration.default()
                 configuration["LANGUAGES"] = expected_languages
                 return configuration
 
-            @provider
+            @staticmethod
             def provide_template_renderer(
-                self, template_renderer: FakeTemplateRenderer
+                template_renderer: FakeTemplateRenderer,
             ) -> TemplateRenderer:
                 return template_renderer
 

@@ -3,8 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
-from injector import inject
-
 from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProductionResponse
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
@@ -12,7 +10,6 @@ from arbeitszeit_web.url_index import UrlIndex
 from .notification import Notifier
 
 
-@inject
 @dataclass
 class PayMeansOfProductionPresenter:
     @dataclass

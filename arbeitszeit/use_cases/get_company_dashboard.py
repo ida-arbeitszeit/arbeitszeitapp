@@ -5,12 +5,9 @@ from datetime import datetime
 from typing import List
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.repositories import CompanyRepository, MemberRepository, PlanRepository
 
 
-@inject
 @dataclass
 class GetCompanyDashboardUseCase:
     class Failure(Exception):

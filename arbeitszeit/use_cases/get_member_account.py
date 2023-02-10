@@ -4,8 +4,6 @@ from decimal import Decimal
 from typing import List, Union
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.entities import (
     AccountTypes,
     Company,
@@ -39,7 +37,6 @@ class GetMemberAccountResponse:
     balance: Decimal
 
 
-@inject
 @dataclass
 class GetMemberAccount:
     accounting_service: UserAccountingService

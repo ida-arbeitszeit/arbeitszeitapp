@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from injector import inject
-
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import PayoutFactor
 from arbeitszeit.use_cases import StatisticsResponse
@@ -33,7 +31,6 @@ class GetStatisticsViewModel:
     barplot_plans_url: str
 
 
-@inject
 @dataclass
 class GetStatisticsPresenter:
     translator: Translator

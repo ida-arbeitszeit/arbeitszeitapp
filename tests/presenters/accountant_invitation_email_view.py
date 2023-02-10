@@ -1,8 +1,10 @@
 from typing import Optional
 
+from arbeitszeit.injector import singleton
 from arbeitszeit_web.presenters.accountant_invitation_presenter import ViewModel
 
 
+@singleton
 class AccountantInvitationEmailViewImpl:
     def __init__(self) -> None:
         self.view_model: Optional[ViewModel] = None

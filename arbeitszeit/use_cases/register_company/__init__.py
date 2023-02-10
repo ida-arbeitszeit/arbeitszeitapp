@@ -5,15 +5,12 @@ from enum import Enum, auto
 from typing import Optional
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import AccountTypes
 from arbeitszeit.repositories import AccountRepository, CompanyRepository
 from arbeitszeit.token import CompanyRegistrationMessagePresenter, TokenService
 
 
-@inject
 @dataclass
 class RegisterCompany:
     company_repository: CompanyRepository

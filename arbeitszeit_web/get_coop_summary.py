@@ -2,8 +2,6 @@ from dataclasses import asdict, dataclass
 from decimal import Decimal
 from typing import Any, Dict, List
 
-from injector import inject
-
 from arbeitszeit.use_cases.get_coop_summary import GetCoopSummarySuccess
 from arbeitszeit_web.session import Session
 
@@ -35,7 +33,6 @@ class GetCoopSummaryViewModel:
         return asdict(self)
 
 
-@inject
 @dataclass
 class GetCoopSummarySuccessPresenter:
     user_url_index: UserUrlIndex

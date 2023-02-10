@@ -5,12 +5,9 @@ from dataclasses import dataclass
 from typing import Optional
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.repositories import AccountantRepository
 
 
-@inject
 @dataclass
 class LogInAccountantUseCase:
     @dataclass

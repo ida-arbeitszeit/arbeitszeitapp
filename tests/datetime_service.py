@@ -3,9 +3,9 @@ from typing import Optional
 
 import pytz
 from dateutil import tz
-from injector import singleton
 
 from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.injector import singleton
 
 
 @singleton

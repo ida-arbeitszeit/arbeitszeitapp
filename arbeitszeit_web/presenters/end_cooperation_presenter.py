@@ -2,8 +2,6 @@ from dataclasses import dataclass
 from urllib.parse import urlparse
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.use_cases.end_cooperation import EndCooperationResponse
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.request import Request
@@ -12,7 +10,6 @@ from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 
 
-@inject
 @dataclass
 class EndCooperationPresenter:
     @dataclass

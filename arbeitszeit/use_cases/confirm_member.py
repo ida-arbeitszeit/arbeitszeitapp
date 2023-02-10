@@ -3,13 +3,10 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from injector import inject
-
 from arbeitszeit.repositories import MemberRepository
 from arbeitszeit.token import InvitationTokenValidator, TokenService
 
 
-@inject
 @dataclass
 class ConfirmMemberUseCase:
     @dataclass
