@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, Protocol
+from typing import Iterable, Optional, Protocol, Tuple
 
 
 class Request(Protocol):
@@ -16,4 +16,7 @@ class Request(Protocol):
 
 class QueryString(Protocol):
     def get(self, key: str) -> Optional[str]:
-        ...
+        """Get the value for a particular query arguments."""
+
+    def items(self) -> Iterable[Tuple[str, str]]:
+        """Return all query arguments in no particular order."""

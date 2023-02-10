@@ -116,51 +116,59 @@ class UseCaseTests(BaseTestCase):
         response = self.query_plans(self.make_request())
         assert response.results[0].price_per_unit == 0
 
-    def test_that_first_page_of_one_is_returned_if_1_plan_exists_and_no_page_is_requested(
+    def test_that_total_results_is_1_if_one_plan_is_present(
         self,
     ):
         self.plan_generator.create_plan()
         response = self.query_plans(self.make_request())
-        self.assertEqual(response.page, 1)
-        self.assertEqual(response.num_pages, 1)
+        self.assertEqual(response.total_results, 1)
 
-    def test_that_first_page_of_two_is_returned_if_20_plans_exist_and_no_page_is_requested(
+    def test_that_total_results_is_6_if_six_plans_are_present(
+        self,
+    ):
+        for _ in range(6):
+            self.plan_generator.create_plan()
+        response = self.query_plans(self.make_request())
+        assert response.total_results == 6
+
+    def test_that_first_10_plans_are_returned_if_limit_is_10(
+        self,
+    ):
+        for _ in range(20):
+            self.plan_generator.create_plan()
+        response = self.query_plans(self.make_request(limit=10))
+        assert len(response.results) == 10
+
+    def test_that_all_plans_are_returned_if_limit_is_0_and_there_are_20_plans(
         self,
     ):
         for _ in range(20):
             self.plan_generator.create_plan()
         response = self.query_plans(self.make_request())
-        self.assertEqual(response.page, 1)
-        self.assertEqual(response.num_pages, 2)
+        assert len(response.results) == 20
 
-    def test_that_15_plans_are_returned_on_first_page_if_20_plans_exist_and_no_page_is_requested(
+    def test_that_5_plans_are_returned_on_second_page_if_20_plans_exist_and_offset_is_15(
         self,
     ):
         for _ in range(20):
             self.plan_generator.create_plan()
-        response = self.query_plans(self.make_request())
-        self.assertEqual(len(response.results), 15)
-
-    def test_that_5_plans_are_returned_on_second_page_if_20_plans_exist_and_second_page_is_requested(
-        self,
-    ):
-        for _ in range(20):
-            self.plan_generator.create_plan()
-        response = self.query_plans(self.make_request(page=2))
-        self.assertEqual(len(response.results), 5)
+        response = self.query_plans(self.make_request(offset=15))
+        assert len(response.results) == 5
 
     def make_request(
         self,
         query: Optional[str] = None,
         category: Optional[PlanFilter] = None,
         sorting: Optional[PlanSorting] = None,
-        page: Optional[int] = None,
+        offset: Optional[int] = None,
+        limit: Optional[int] = None,
     ):
         return QueryPlansRequest(
             query_string=query or "",
             filter_category=category or PlanFilter.by_product_name,
             sorting_category=sorting or PlanSorting.by_activation,
-            page=page,
+            offset=offset,
+            limit=limit,
         )
 
     def assertPlanInResults(self, plan: Plan, response: PlanQueryResponse) -> bool:

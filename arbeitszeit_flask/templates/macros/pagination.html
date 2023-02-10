@@ -1,0 +1,23 @@
+{% macro render_pagination(pagination) %}
+
+{% if pagination.is_visible %}
+
+<nav class="pagination" role="navigation" aria-label="pagination">
+  <ul class="pagination-list">
+    {% for page in pagination.pages %}
+    <li>
+      <a
+        class="pagination-link {% if page.is_current %}is-current{% endif %}"
+        aria-label="Goto page {{ page.label }}"
+        href="{{ page.href }}"
+        {% if page.is_current %}aria-current="page"{% endif %}>
+        {{ page.label }}
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+</nav>
+
+{% endif %}
+
+{% endmacro %}
