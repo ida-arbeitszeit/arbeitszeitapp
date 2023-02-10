@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import List, Optional
 
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 
 from arbeitszeit.injector import Binder, CallableProvider, Injector, Module
 from arbeitszeit_flask import create_app
@@ -58,23 +57,13 @@ class FlaskConfiguration(dict):
     template_folder = property(_get_template_folder, _set_template_folder)
 
 
-# We require the application for the database. This is done to
-# ensure that the correct flask application context is present.
-def provide_sqlalchemy(app: Flask) -> SQLAlchemy:
-    db.create_all()
-    return db
-
-
 def provide_app(config: FlaskConfiguration) -> Flask:
-    app = create_app(config=config, db=db, template_folder=config.template_folder)
-    app.app_context().push()
-    return app
+    return create_app(config=config, db=db, template_folder=config.template_folder)
 
 
 class SqliteModule(Module):
     def configure(self, binder: Binder) -> None:
         super().configure(binder)
-        binder[SQLAlchemy] = CallableProvider(provide_sqlalchemy, is_singleton=True)
         binder[Flask] = CallableProvider(provide_app, is_singleton=True)
         binder[FlaskConfiguration] = CallableProvider(FlaskConfiguration.default)
 
@@ -88,12 +77,3 @@ def get_dependency_injector(additional_modules: Optional[List[Module]] = None):
     if additional_modules is not None:
         modules.extend(additional_modules)
     return Injector(modules)
-
-
-def injection_test(original_test):
-    injector = get_dependency_injector()
-
-    def wrapper(*args, **kwargs):
-        return injector.call_with_injection(original_test, args=args, kwargs=kwargs)
-
-    return wrapper
