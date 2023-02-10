@@ -68,7 +68,6 @@ class RepositoryTester(FlaskTestCase):
         assert self.repository.get_account_balance(account.id) == 0
 
     def test_that_a_priori_no_accounts_can_be_queried(self) -> None:
-        print(list(self.repository.get_accounts()))
         assert not self.repository.get_accounts()
 
     def test_there_are_accounts_to_be_queried_when_one_was_created(self) -> None:
