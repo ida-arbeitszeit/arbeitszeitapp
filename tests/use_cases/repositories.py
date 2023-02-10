@@ -90,6 +90,34 @@ class PlanResult(QueryResultImpl[Plan]):
             entities=self.entities,
         )
 
+    def ordered_by_activation_date(self, ascending: bool = True) -> PlanResult:
+        return type(self)(
+            items=lambda: sorted(
+                list(self.items()),
+                key=lambda plan: plan.activation_date
+                if plan.activation_date
+                else datetime.min,
+                reverse=not ascending,
+            ),
+            entities=self.entities,
+        )
+
+    def ordered_by_planner_name(self, ascending: bool = True) -> PlanResult:
+        def get_company_name(planner_id: UUID):
+            planner = self.entities.get_company_by_id(planner_id)
+            assert planner
+            planner_name = planner.name
+            return planner_name.casefold()
+
+        return type(self)(
+            items=lambda: sorted(
+                list(self.items()),
+                key=lambda plan: get_company_name(plan.planner),
+                reverse=not ascending,
+            ),
+            entities=self.entities,
+        )
+
     def with_id_containing(self, query: str) -> PlanResult:
         return self._filtered_by(lambda plan: query in str(plan.id))
 

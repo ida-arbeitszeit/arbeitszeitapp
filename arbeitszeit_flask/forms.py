@@ -73,23 +73,20 @@ class PlanSearchForm(Form):
         trans.lazy_gettext("Search Plans"),
         choices=choices,
         validators=[validators.DataRequired()],
+        default="Produktname",
     )
     search = StringField(
         trans.lazy_gettext("Search term"),
-        validators=[
-            FieldMustExist(message=trans.lazy_gettext("Required")),
-        ],
+        default="",
     )
 
     choices_radio = [
         ("activation", trans.lazy_gettext("Newest")),
         ("company_name", trans.lazy_gettext("Company name")),
-        ("price", trans.lazy_gettext("Lowest cost")),
     ]
     radio = RadioField(
         choices=choices_radio,
         default="activation",
-        validators=[FieldMustExist(message=trans.lazy_gettext("Required"))],
     )
 
     def get_query_string(self) -> str:

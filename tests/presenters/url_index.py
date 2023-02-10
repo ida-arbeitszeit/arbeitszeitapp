@@ -1,6 +1,7 @@
 """This module shall contain a mock implementation of the UrlIndex."""
 
 from typing import Any, Callable
+from urllib.parse import quote
 from uuid import UUID
 
 
@@ -10,11 +11,18 @@ class UrlIndexMethod:
 
     def __get__(self, obj: Any, objtype=None) -> Callable[..., str]:
         def method(*args, **kwargs) -> str:
-            sorted_args = list(map(str, args))
-            sorted_args.sort()
-            sorted_kwargs = [f"{key}: {value}" for key, value in kwargs.items()]
-            sorted_kwargs.sort()
-            return f"url index placeholder text for {self._attribute_name}, context: args={sorted_args}, kwargs={','.join(sorted_kwargs)}"
+            sorted_args = sorted(list(map(str, args)))
+            sorted_kwargs = sorted(
+                [f"{key}: {str(value)}" for key, value in kwargs.items()]
+            )
+            url = f"url://{quote(self._attribute_name)}"
+            url += f'/args/{"/".join(map(quote, sorted_args))}' if sorted_args else ""
+            url += (
+                f'/kwargs/{"/".join(map(lambda t: quote(str(t)), sorted_kwargs))}'
+                if sorted_kwargs
+                else ""
+            )
+            return url
 
         return method
 
@@ -57,6 +65,8 @@ class UrlIndexTestImpl:
     get_approve_plan_url = UrlIndexMethod()
     get_my_plan_drafts_url = UrlIndexMethod()
     get_create_draft_url = UrlIndexMethod()
+    get_member_query_plans_url = UrlIndexMethod()
+    get_company_query_plans_url = UrlIndexMethod()
 
     def get_member_confirmation_url(self, *, token: str) -> str:
         return f"get_member_confirmation_url {token}"

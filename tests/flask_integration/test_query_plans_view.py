@@ -13,19 +13,14 @@ class AuthenticatedMemberTests(ViewTestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
 
-    def test_posting_empty_search_string_is_valid(self):
+    def test_getting_empty_search_string_is_valid(self):
         self.default_data["search"] = ""
-        response = self.client.post(self.url, data=self.default_data)
+        response = self.client.get(self.url, data=self.default_data)
         self.assertEqual(response.status_code, 200)
 
-    def test_posting_query_without_query_string_is_invalid(self):
-        self.default_data.pop("search")
-        response = self.client.post(self.url, data=self.default_data)
-        self.assertEqual(response.status_code, 400)
-
-    def test_posting_query_without_sorting_category_is_invalid(self):
-        self.default_data.pop("radio")
-        response = self.client.post(self.url, data=self.default_data)
+    def test_getting_query_with_invalid_sorting_category_results_in_400(self):
+        self.default_data["radio"] = "invalid category"
+        response = self.client.get(self.url, data=self.default_data)
         self.assertEqual(response.status_code, 400)
 
     def test_get_redirected_when_trying_to_access_query_plans_for_company(self):

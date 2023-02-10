@@ -7,11 +7,18 @@ from arbeitszeit.use_cases.query_plans import (
     PlanSorting,
     QueryPlansRequest,
 )
+from arbeitszeit_web.pagination import PAGE_PARAMETER_NAME, Pagination, Paginator
+from arbeitszeit_web.request import Request
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
 
 from .notification import Notifier
+from .session import UserRole
 from .url_index import UrlIndex, UserUrlIndex
+
+
+class NotAnIntegerError(ValueError):
+    pass
 
 
 class QueryPlansFormData(Protocol):
@@ -25,8 +32,16 @@ class QueryPlansFormData(Protocol):
         ...
 
 
+_PAGE_SIZE = 15
+
+
+@dataclass
 class QueryPlansController:
-    def import_form_data(self, form: Optional[QueryPlansFormData]) -> QueryPlansRequest:
+    def import_form_data(
+        self,
+        form: Optional[QueryPlansFormData] = None,
+        request: Optional[Request] = None,
+    ) -> QueryPlansRequest:
         if form is None:
             query = None
             filter_category = PlanFilter.by_product_name
@@ -35,11 +50,24 @@ class QueryPlansController:
             query = form.get_query_string().strip() or None
             filter_category = self._import_filter_category(form)
             sorting_category = self._import_sorting_category(form)
+        offset = self._get_pagination_offset(request) if request else 0
         return QueryPlansRequest(
             query_string=query,
             filter_category=filter_category,
             sorting_category=sorting_category,
+            offset=offset,
+            limit=_PAGE_SIZE,
         )
+
+    def _get_pagination_offset(self, request: Request) -> int:
+        page_str = request.query_string().get(PAGE_PARAMETER_NAME)
+        if page_str is None:
+            return 0
+        try:
+            page_number = int(page_str)
+        except ValueError:
+            return 0
+        return (page_number - 1) * _PAGE_SIZE
 
     def _import_filter_category(self, form: QueryPlansFormData) -> PlanFilter:
         if form.get_category_string() == "Plan-ID":
@@ -50,9 +78,7 @@ class QueryPlansController:
 
     def _import_sorting_category(self, form: QueryPlansFormData) -> PlanSorting:
         sorting = form.get_radio_string()
-        if sorting == "price":
-            sorting_category = PlanSorting.by_price
-        elif sorting == "company_name":
+        if sorting == "company_name":
             sorting_category = PlanSorting.by_company_name
         else:
             sorting_category = PlanSorting.by_activation
@@ -81,6 +107,7 @@ class ResultsTable:
 class QueryPlansViewModel:
     results: ResultsTable
     show_results: bool
+    pagination: Pagination
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -94,9 +121,16 @@ class QueryPlansPresenter:
     trans: Translator
     session: Session
 
-    def present(self, response: PlanQueryResponse) -> QueryPlansViewModel:
+    def present(
+        self, response: PlanQueryResponse, request: Request
+    ) -> QueryPlansViewModel:
         if not response.results:
             self.user_notifier.display_warning(self.trans.gettext("No results."))
+        paginator = self._create_paginator(
+            request,
+            total_results=response.total_results,
+            current_offset=response.request.offset or 0,
+        )
         return QueryPlansViewModel(
             show_results=bool(response.results),
             results=ResultsTable(
@@ -120,10 +154,33 @@ class QueryPlansPresenter:
                     for result in response.results
                 ],
             ),
+            pagination=Pagination(
+                is_visible=paginator.page_count > 1,
+                pages=paginator.get_pages(),
+            ),
         )
 
     def get_empty_view_model(self) -> QueryPlansViewModel:
         return QueryPlansViewModel(
             results=ResultsTable(rows=[]),
             show_results=False,
+            pagination=Pagination(is_visible=False, pages=[]),
+        )
+
+    def _create_paginator(
+        self, request: Request, total_results: int, current_offset: int
+    ) -> Paginator:
+        return Paginator(
+            base_url=self._get_pagination_base_url(request),
+            query_arguments=dict(request.query_string().items()),
+            page_size=_PAGE_SIZE,
+            total_results=total_results,
+            current_offset=current_offset,
+        )
+
+    def _get_pagination_base_url(self, request: Request) -> str:
+        return (
+            self.url_index.get_member_query_plans_url()
+            if self.session.get_user_role() == UserRole.member
+            else self.url_index.get_company_query_plans_url()
         )

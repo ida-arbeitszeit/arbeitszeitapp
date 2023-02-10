@@ -3,7 +3,13 @@ from decimal import Decimal
 from typing import List, Optional
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases.query_plans import PlanQueryResponse, QueriedPlan
+from arbeitszeit.use_cases.query_plans import (
+    PlanFilter,
+    PlanQueryResponse,
+    PlanSorting,
+    QueriedPlan,
+    QueryPlansRequest,
+)
 
 
 class QueriedPlanGenerator:
@@ -41,5 +47,30 @@ class QueriedPlanGenerator:
             activation_date=activation_date,
         )
 
-    def get_response(self, queried_plans: List[QueriedPlan]) -> PlanQueryResponse:
-        return PlanQueryResponse(results=[plan for plan in queried_plans])
+    def get_response(
+        self,
+        queried_plans: Optional[List[QueriedPlan]] = None,
+        page: Optional[int] = None,
+        num_pages: Optional[int] = None,
+        total_results: Optional[int] = None,
+        query_string: Optional[str] = None,
+        requested_offset: int = 0,
+        requested_limit: Optional[int] = None,
+        requested_filter_category: PlanFilter = PlanFilter.by_product_name,
+        requested_sorting_category: PlanSorting = PlanSorting.by_activation,
+    ) -> PlanQueryResponse:
+        if queried_plans is None:
+            queried_plans = [self.get_plan() for _ in range(5)]
+        if total_results is None:
+            total_results = max(len(queried_plans), 100)
+        return PlanQueryResponse(
+            results=[plan for plan in queried_plans],
+            total_results=total_results,
+            request=QueryPlansRequest(
+                offset=requested_offset,
+                limit=requested_limit,
+                query_string=query_string,
+                filter_category=requested_filter_category,
+                sorting_category=requested_sorting_category,
+            ),
+        )
