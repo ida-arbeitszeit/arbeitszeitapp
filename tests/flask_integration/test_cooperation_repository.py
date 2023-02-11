@@ -1,5 +1,4 @@
 from datetime import datetime
-from unittest import TestCase
 
 import arbeitszeit.repositories
 from arbeitszeit.entities import Cooperation
@@ -9,12 +8,12 @@ from arbeitszeit_flask.database.repositories import (
 )
 from tests.data_generators import CompanyGenerator, PlanGenerator
 
-from .dependency_injection import get_dependency_injector
+from .flask import FlaskTestCase
 
 
-class CooperationRepositoryTests(TestCase):
+class CooperationRepositoryTests(FlaskTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.company_generator = self.injector.get(CompanyGenerator)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.repo = self.injector.get(CooperationRepository)

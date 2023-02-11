@@ -1,20 +1,20 @@
-from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit import repositories as interfaces
 from arbeitszeit_flask.database.repositories import WorkerInviteRepository
 from tests.data_generators import CompanyGenerator, MemberGenerator
 
-from .dependency_injection import get_dependency_injector
+from .flask import FlaskTestCase
 
 
-class WorkerInviteRepositoryTests(TestCase):
+class WorkerInviteRepositoryTests(FlaskTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.repository = self.injector.get(WorkerInviteRepository)
         self.member_generator = self.injector.get(MemberGenerator)
-        self.company = uuid4()
-        self.worker = uuid4()
+        self.company_generator = self.injector.get(CompanyGenerator)
+        self.company = self.company_generator.create_company()
+        self.worker = self.member_generator.create_member()
 
     def test_companies_a_member_is_invited_to_is_empty_with_no_invites_sent(
         self,
@@ -49,9 +49,9 @@ class WorkerInviteRepositoryTests(TestCase):
         self.assertFalse(list(self.repository.get_invites_for_worker(self.worker)))
 
 
-class IsWorkerInvitedToCompanyTests(TestCase):
+class IsWorkerInvitedToCompanyTests(FlaskTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.repository = self.injector.get(WorkerInviteRepository)
         company_generator = self.injector.get(CompanyGenerator)
         member_generator = self.injector.get(MemberGenerator)

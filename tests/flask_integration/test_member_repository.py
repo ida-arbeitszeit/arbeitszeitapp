@@ -8,131 +8,99 @@ from arbeitszeit.entities import AccountTypes
 from arbeitszeit_flask.database.repositories import AccountRepository, MemberRepository
 from tests.data_generators import AccountantGenerator, CompanyGenerator, MemberGenerator
 
-from .dependency_injection import injection_test
 from .flask import FlaskTestCase
 
 
-@injection_test
-def test_that_users_can_be_converted_from_and_to_orm_objects(
-    member_repository: MemberRepository, account_repository: AccountRepository
-):
-    account = account_repository.create_account(AccountTypes.member)
-    expected_member = member_repository.create_member(
-        email="member@cp.org",
-        name="karl",
-        password="password",
-        account=account,
-        registered_on=datetime.now(),
-    )
-    converted_member = member_repository.object_from_orm(
-        member_repository.object_to_orm(
-            expected_member,
+class RepositoryTests(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.member_generator = self.injector.get(MemberGenerator)
+        self.company_generator = self.injector.get(CompanyGenerator)
+        self.member_repository = self.injector.get(MemberRepository)
+        self.account_repository = self.injector.get(AccountRepository)
+
+    def test_that_users_can_be_converted_from_and_to_orm_objects(self) -> None:
+        account = self.account_repository.create_account(AccountTypes.member)
+        expected_member = self.member_repository.create_member(
+            email="member@cp.org",
+            name="karl",
+            password="password",
+            account=account,
+            registered_on=datetime.now(),
         )
-    )
-    assert converted_member == expected_member
+        converted_member = self.member_repository.object_from_orm(
+            self.member_repository.object_to_orm(
+                expected_member,
+            )
+        )
+        assert converted_member == expected_member
 
+    def test_that_member_can_be_retrieved_by_its_id(self) -> None:
+        expected_member = self.member_generator.create_member()
+        retrieved_member = (
+            self.member_repository.get_members().with_id(expected_member).first()
+        )
+        assert retrieved_member
+        assert retrieved_member.id == expected_member
 
-@injection_test
-def test_that_member_can_be_retrieved_by_its_id(
-    repository: MemberRepository,
-    member_generator: MemberGenerator,
-):
-    expected_member = member_generator.create_member()
-    retrieved_member = repository.get_members().with_id(expected_member).first()
-    assert retrieved_member
-    assert retrieved_member.id == expected_member
+    def test_that_member_can_be_retrieved_by_its_email(self) -> None:
+        expected_mail = "test_mail@testmail.com"
+        expected_member = self.member_generator.create_member_entity(
+            email=expected_mail
+        )
+        assert (
+            self.member_repository.get_members()
+            .with_email_address(expected_mail)
+            .first()
+            == expected_member
+        )
 
+    def test_that_random_email_returns_no_member(self) -> None:
+        random_email = "xyz123@testmail.com"
+        self.member_generator.create_member_entity(email="test_mail@testmail.com")
+        assert not self.member_repository.get_members().with_email_address(random_email)
 
-@injection_test
-def test_that_member_can_be_retrieved_by_its_email(
-    repository: MemberRepository, member_generator: MemberGenerator
-):
-    expected_mail = "test_mail@testmail.com"
-    expected_member = member_generator.create_member_entity(email=expected_mail)
-    assert (
-        repository.get_members().with_email_address(expected_mail).first()
-        == expected_member
-    )
+    def test_cannot_find_member_by_email_before_it_was_added(self) -> None:
+        members = self.member_repository.get_members()
+        assert not members.with_email_address("member@cp.org")
+        account = self.account_repository.create_account(AccountTypes.member)
+        self.member_repository.create_member(
+            email="member@cp.org",
+            name="karl",
+            password="password",
+            account=account,
+            registered_on=datetime.now(),
+        )
+        assert members.with_email_address("member@cp.org")
 
+    def test_does_not_identify_random_id_with_member(self) -> None:
+        member_id = uuid4()
+        assert not self.member_repository.get_members().with_id(member_id)
 
-@injection_test
-def test_that_random_email_returns_no_member(
-    repository: MemberRepository, member_generator: MemberGenerator
-):
-    random_email = "xyz123@testmail.com"
-    member_generator.create_member_entity(email="test_mail@testmail.com")
-    assert not repository.get_members().with_email_address(random_email)
+    def test_does_not_identify_company_as_member(self) -> None:
+        company = self.company_generator.create_company_entity()
+        assert not self.member_repository.get_members().with_id(company.id)
 
+    def test_does_identify_member_id_as_member(self) -> None:
+        account = self.account_repository.create_account(AccountTypes.member)
+        member = self.member_repository.create_member(
+            email="member@cp.org",
+            name="karl",
+            password="password",
+            account=account,
+            registered_on=datetime.now(),
+        )
+        assert self.member_repository.get_members().with_id(member.id)
 
-@injection_test
-def test_cannot_find_member_by_email_before_it_was_added(
-    member_repository: MemberRepository,
-    account_repository: AccountRepository,
-):
-    members = member_repository.get_members()
-    assert not members.with_email_address("member@cp.org")
-    account = account_repository.create_account(AccountTypes.member)
-    member_repository.create_member(
-        email="member@cp.org",
-        name="karl",
-        password="password",
-        account=account,
-        registered_on=datetime.now(),
-    )
-    assert members.with_email_address("member@cp.org")
+    def test_member_count_is_0_when_none_were_created(self) -> None:
+        assert len(self.member_repository.get_members()) == 0
 
+    def test_count_one_registered_member_when_one_was_created(self) -> None:
+        self.member_generator.create_member_entity()
+        assert len(self.member_repository.get_members()) == 1
 
-@injection_test
-def test_does_not_identify_random_id_with_member(member_repository: MemberRepository):
-    member_id = uuid4()
-    assert not member_repository.get_members().with_id(member_id)
-
-
-@injection_test
-def test_does_not_identify_company_as_member(
-    company_generator: CompanyGenerator, member_repository: MemberRepository
-):
-    company = company_generator.create_company_entity()
-    assert not member_repository.get_members().with_id(company.id)
-
-
-@injection_test
-def test_does_identify_member_id_as_member(
-    member_repository: MemberRepository,
-    account_repository: AccountRepository,
-):
-    account = account_repository.create_account(AccountTypes.member)
-    member = member_repository.create_member(
-        email="member@cp.org",
-        name="karl",
-        password="password",
-        account=account,
-        registered_on=datetime.now(),
-    )
-    assert member_repository.get_members().with_id(member.id)
-
-
-@injection_test
-def test_member_count_is_0_when_none_were_created(
-    repository: MemberRepository,
-) -> None:
-    assert len(repository.get_members()) == 0
-
-
-@injection_test
-def test_count_one_registered_member_when_one_was_created(
-    generator: MemberGenerator,
-    repository: MemberRepository,
-) -> None:
-    generator.create_member_entity()
-    assert len(repository.get_members()) == 1
-
-
-@injection_test
-def test_with_id_returns_no_members_when_member_does_not_exist(
-    repository: MemberRepository,
-) -> None:
-    assert not repository.get_members().with_id(uuid4())
+    def test_with_id_returns_no_members_when_member_does_not_exist(self) -> None:
+        assert not self.member_repository.get_members().with_id(uuid4())
 
 
 class GetAllMembersTests(FlaskTestCase):

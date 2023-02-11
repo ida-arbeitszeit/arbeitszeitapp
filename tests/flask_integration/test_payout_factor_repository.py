@@ -1,16 +1,15 @@
 from datetime import datetime
 from decimal import Decimal
-from unittest import TestCase
 
 from arbeitszeit.repositories import PayoutFactorRepository
 from tests.datetime_service import FakeDatetimeService
 
-from .dependency_injection import get_dependency_injector
+from .flask import FlaskTestCase
 
 
-class PayoutFactorRepositoryTests(TestCase):
+class PayoutFactorRepositoryTests(FlaskTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.repository = self.injector.get(PayoutFactorRepository)
 
