@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
 
-from arbeitszeit.entities import SocialAccounting
+from arbeitszeit.entities import SocialAccounting, Transaction
 from arbeitszeit_flask import models
 from arbeitszeit_flask.database.repositories import TransactionRepository
 from tests.data_generators import AccountGenerator, PlanGenerator
@@ -30,7 +30,7 @@ class TransactionRepositoryTests(FlaskTestCase):
         sender_account = self.account_generator.create_account()
         receiver_account = self.account_generator.create_account()
         transaction = self.repository.create_transaction(
-            datetime.now(),
+            self.datetime_service.now(),
             sending_account=sender_account.id,
             receiving_account=receiver_account.id,
             amount_sent=Decimal(1),
@@ -49,7 +49,7 @@ class TransactionRepositoryTests(FlaskTestCase):
         sender_account = self.account_generator.create_account()
         receiver_account = self.account_generator.create_account()
         transaction = self.repository.create_transaction(
-            datetime.now(),
+            self.datetime_service.now(),
             sending_account=sender_account.id,
             receiving_account=receiver_account.id,
             amount_sent=Decimal(1),
@@ -63,7 +63,7 @@ class TransactionRepositoryTests(FlaskTestCase):
     ) -> None:
         receiver_account = self.account_generator.create_account()
         transaction = self.repository.create_transaction(
-            datetime.now(),
+            self.datetime_service.now(),
             sending_account=self.social_accounting.account.id,
             receiving_account=receiver_account.id,
             amount_sent=Decimal(1),
@@ -80,7 +80,7 @@ class TransactionRepositoryTests(FlaskTestCase):
         sender_account = self.account_generator.create_account()
         receiver_account = self.account_generator.create_account()
         self.repository.create_transaction(
-            datetime.now(),
+            self.datetime_service.now(),
             sending_account=sender_account.id,
             receiving_account=receiver_account.id,
             amount_sent=Decimal(1),
@@ -125,7 +125,7 @@ class TransactionRepositoryTests(FlaskTestCase):
         sender_account = self.account_generator.create_account()
         receiver_account = self.account_generator.create_account()
         transaction = self.repository.create_transaction(
-            datetime.now(),
+            self.datetime_service.now(),
             sending_account=sender_account.id,
             receiving_account=receiver_account.id,
             amount_sent=Decimal(1),
@@ -184,7 +184,7 @@ class TransactionRepositoryTests(FlaskTestCase):
             plan
         )
         self.repository.create_transaction(
-            datetime.now(),
+            self.datetime_service.now(),
             sending_account=sender_account_1.id,
             receiving_account=UUID(receiver_account.id),
             amount_sent=Decimal(12),
@@ -192,7 +192,7 @@ class TransactionRepositoryTests(FlaskTestCase):
             purpose=f"test {plan.id} test",
         )
         self.repository.create_transaction(
-            datetime.now(),
+            self.datetime_service.now(),
             sending_account=sender_account_2.id,
             receiving_account=UUID(receiver_account.id),
             amount_sent=Decimal(12),
@@ -202,3 +202,53 @@ class TransactionRepositoryTests(FlaskTestCase):
         assert self.repository.get_sales_balance_of_plan(
             plan
         ) == sales_balance_before_transactions + Decimal(25)
+
+
+class TestWhereAccountIsSenderOrReceiver(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.account_generator = self.injector.get(AccountGenerator)
+        self.repository: TransactionRepository = self.injector.get(
+            TransactionRepository
+        )
+        self.datetime_service: FakeDatetimeService = self.injector.get(
+            FakeDatetimeService
+        )
+
+    def test_transactions_are_presented_in_result_when_receiver_matches_account_id(
+        self,
+    ) -> None:
+        sender_account = self.account_generator.create_account()
+        receiver_account = self.account_generator.create_account()
+        transaction = self.create_transaction(
+            sender=sender_account.id, receiver=receiver_account.id
+        )
+        assert list(
+            self.repository.get_transactions().where_account_is_sender_or_receiver(
+                receiver_account.id
+            )
+        ) == [transaction]
+
+    def test_transactions_are_presented_in_result_when_sender_matches_account_id(
+        self,
+    ) -> None:
+        sender_account = self.account_generator.create_account()
+        receiver_account = self.account_generator.create_account()
+        transaction = self.create_transaction(
+            sender=sender_account.id, receiver=receiver_account.id
+        )
+        assert list(
+            self.repository.get_transactions().where_account_is_sender_or_receiver(
+                sender_account.id
+            )
+        ) == [transaction]
+
+    def create_transaction(self, *, sender: UUID, receiver: UUID) -> Transaction:
+        return self.repository.create_transaction(
+            self.datetime_service.now(),
+            sending_account=sender,
+            receiving_account=receiver,
+            amount_sent=Decimal(1),
+            amount_received=Decimal(1),
+            purpose="test purpose",
+        )
