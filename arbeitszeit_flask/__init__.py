@@ -10,7 +10,7 @@ import arbeitszeit_flask.extensions
 from arbeitszeit_flask.babel import initialize_babel
 from arbeitszeit_flask.datetime import RealtimeDatetimeService
 from arbeitszeit_flask.extensions import login_manager, mail
-from arbeitszeit_flask.profiling import (
+from arbeitszeit_flask.profiling import (  # type: ignore
     initialize_flask_profiler,
     show_profile_info,
     show_sql_queries,
