@@ -414,7 +414,7 @@ class TransactionQueryResult(FlaskQueryResult[entities.Transaction]):
     def where_account_is_sender_or_receiver(
         self, *account: UUID
     ) -> TransactionQueryResult:
-        accounts = map(str, account)
+        accounts = list(map(str, account))
         return self._with_modified_query(
             lambda query: query.filter(
                 or_(
