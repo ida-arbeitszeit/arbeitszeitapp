@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
 
-from arbeitszeit.entities import SocialAccounting
+from arbeitszeit.entities import SocialAccounting, Transaction
 from arbeitszeit_flask import models
 from arbeitszeit_flask.database.repositories import TransactionRepository
 from tests.data_generators import AccountGenerator, PlanGenerator
@@ -220,13 +220,8 @@ class TestWhereAccountIsSenderOrReceiver(FlaskTestCase):
     ) -> None:
         sender_account = self.account_generator.create_account()
         receiver_account = self.account_generator.create_account()
-        transaction = self.repository.create_transaction(
-            self.datetime_service.now(),
-            sending_account=sender_account.id,
-            receiving_account=receiver_account.id,
-            amount_sent=Decimal(1),
-            amount_received=Decimal(1),
-            purpose="test purpose",
+        transaction = self.create_transaction(
+            sender=sender_account.id, receiver=receiver_account.id
         )
         assert list(
             self.repository.get_transactions().where_account_is_sender_or_receiver(
@@ -239,16 +234,21 @@ class TestWhereAccountIsSenderOrReceiver(FlaskTestCase):
     ) -> None:
         sender_account = self.account_generator.create_account()
         receiver_account = self.account_generator.create_account()
-        transaction = self.repository.create_transaction(
-            self.datetime_service.now(),
-            sending_account=sender_account.id,
-            receiving_account=receiver_account.id,
-            amount_sent=Decimal(1),
-            amount_received=Decimal(1),
-            purpose="test purpose",
+        transaction = self.create_transaction(
+            sender=sender_account.id, receiver=receiver_account.id
         )
         assert list(
             self.repository.get_transactions().where_account_is_sender_or_receiver(
                 sender_account.id
             )
         ) == [transaction]
+
+    def create_transaction(self, *, sender: UUID, receiver: UUID) -> Transaction:
+        return self.repository.create_transaction(
+            self.datetime_service.now(),
+            sending_account=sender,
+            receiving_account=receiver,
+            amount_sent=Decimal(1),
+            amount_received=Decimal(1),
+            purpose="test purpose",
+        )
