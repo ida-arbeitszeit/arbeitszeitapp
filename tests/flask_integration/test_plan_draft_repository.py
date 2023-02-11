@@ -1,7 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
 from typing import Any
-from unittest import TestCase
 from uuid import uuid4
 
 import arbeitszeit.repositories
@@ -9,7 +8,7 @@ from arbeitszeit.entities import PlanDraft, ProductionCosts
 from arbeitszeit_flask.database.repositories import PlanDraftRepository
 from tests.data_generators import CompanyGenerator
 
-from .dependency_injection import get_dependency_injector
+from .flask import FlaskTestCase
 
 DEFAULT_COST = ProductionCosts(
     labour_cost=Decimal(1),
@@ -18,9 +17,9 @@ DEFAULT_COST = ProductionCosts(
 )
 
 
-class PlanDraftRepositoryTests(TestCase):
+class PlanDraftRepositoryTests(FlaskTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.repo = self.injector.get(PlanDraftRepository)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.planner = self.company_generator.create_company_entity()
@@ -95,9 +94,9 @@ class PlanDraftRepositoryTests(TestCase):
         self.assertFalse(list(drafts))
 
 
-class UpdateDraftTests(TestCase):
+class UpdateDraftTests(FlaskTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.repo = self.injector.get(PlanDraftRepository)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.planner = self.company_generator.create_company_entity()

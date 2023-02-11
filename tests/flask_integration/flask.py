@@ -22,9 +22,17 @@ from .dependency_injection import get_dependency_injector
 
 class FlaskTestCase(TestCase):
     def setUp(self) -> None:
+        super().setUp()
         self.injector = get_dependency_injector(self.get_injection_modules())
         self.db = self.injector.get(SQLAlchemy)
         self.app = self.injector.get(Flask)
+        self.app_context = self.app.app_context()
+        self.app_context.push()
+        self.db.create_all()
+
+    def tearDown(self) -> None:
+        self.app_context.pop()
+        super().tearDown()
 
     def get_injection_modules(self) -> List[Module]:
         return []

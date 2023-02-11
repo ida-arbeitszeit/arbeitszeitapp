@@ -1,15 +1,14 @@
-from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit_flask.database.repositories import UserAddressBookImpl
 from tests.data_generators import AccountantGenerator, CompanyGenerator, MemberGenerator
 
-from .dependency_injection import get_dependency_injector
+from .flask import FlaskTestCase
 
 
-class UserAddressBookTests(TestCase):
+class UserAddressBookTests(FlaskTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.repository = self.injector.get(UserAddressBookImpl)
         self.member_generator = self.injector.get(MemberGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)

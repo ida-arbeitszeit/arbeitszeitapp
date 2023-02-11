@@ -1,16 +1,15 @@
 from datetime import datetime
-from unittest import TestCase
 
 from arbeitszeit_flask.database.repositories import PurchaseRepository
 from tests.data_generators import CompanyGenerator, MemberGenerator, PurchaseGenerator
 from tests.datetime_service import FakeDatetimeService
 
-from .dependency_injection import get_dependency_injector
+from .flask import FlaskTestCase
 
 
-class GetPurchasesTests(TestCase):
+class GetPurchasesTests(FlaskTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.repository = self.injector.get(PurchaseRepository)
         self.purchase_generator = self.injector.get(PurchaseGenerator)
         self.member_generator = self.injector.get(MemberGenerator)
