@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from typing import List, Optional
 
 from flask import Flask
@@ -22,7 +23,7 @@ class FlaskConfiguration(dict):
     def default(cls) -> FlaskConfiguration:
         return cls(
             {
-                "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",
+                "SQLALCHEMY_DATABASE_URI": cls.get_database_uri(),
                 "SQLALCHEMY_TRACK_MODIFICATIONS": False,
                 "SECRET_KEY": "dev secret key",
                 "WTF_CSRF_ENABLED": False,
@@ -36,6 +37,16 @@ class FlaskConfiguration(dict):
                 "LANGUAGES": {"en": "English", "de": "Deutsch"},
             }
         )
+
+    @classmethod
+    def get_database_uri(cls) -> str:
+        db_uri_variable_name = "ARBEITSZEITAPP_TEST_DB"
+        db_uri = os.getenv(db_uri_variable_name)
+        if db_uri is None:
+            raise ValueError(
+                f"Environment variable {db_uri_variable_name} is unset. Set it to point to a postgres db"
+            )
+        return db_uri
 
     def _get_template_folder(self) -> Optional[str]:
         return self.get("template_folder")

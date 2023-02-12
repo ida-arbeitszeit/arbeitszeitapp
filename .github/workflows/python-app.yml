@@ -14,8 +14,23 @@ jobs:
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
     - run: nix flake check --print-build-logs
     - run: nix build --print-build-logs
-    # We don't need to run this unittests since they are run as part of 'nix build'
-    - run: nix develop --command ./run-checks --no-unittests
+    - run: nix develop --command ./run-checks
+      env:
+        ARBEITSZEITAPP_TEST_DB: postgresql://postgres:postgres@localhost:5432/postgres
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
   build-pip:
     runs-on: ubuntu-latest
@@ -38,12 +53,28 @@ jobs:
         . ./venv/bin/activate
         ./run-checks
         deactivate
+      env:
+        ARBEITSZEITAPP_TEST_DB: postgresql://postgres:postgres@localhost:5432/postgres
 
     - name: Try build developer documentation
       run: |
         . ./venv/bin/activate
         make html
         deactivate
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
   nixos-stable:
     runs-on: ubuntu-latest
@@ -55,3 +86,19 @@ jobs:
         name: arbeitszeit
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
     - run: nix develop .#stable --command ./run-checks
+      env:
+        ARBEITSZEITAPP_TEST_DB: postgresql://postgres:postgres@localhost:5432/postgres
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
