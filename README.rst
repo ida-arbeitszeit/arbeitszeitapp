@@ -22,18 +22,19 @@ https://demo-app.arbeitszeitrechnung.org/.
 Theory
 -----------
 
-Companies usually calculate with labour time internally, 
-but switch to money on the market. This app 
-extends planning and labour time calculation beyond the 
-company boundaries and supports networks that exchanges products on the basis of labour time. 
+Companies usually calculate with labour time internally, but switch to
+money on the market. This app extends planning and labour time
+calculation beyond the company boundaries and supports networks that
+exchanges products on the basis of labour time.
 
-It provides a planning interface for companies and 
-communities as well as a working time management for companies and workers. 
-Plans can get filed and approved, products can get published and paid, 
-work certificates can get transferred. 
+It provides a planning interface for companies and communities as well
+as a working time management for companies and workers.  Plans can get
+filed and approved, products can get published and paid, work
+certificates can get transferred.
 
-It is the implementation of a theory (`"Arbeitszeitrechnung" 
-<https://aaap.be/Pages/Transition-en-Fundamental-Principles-1930.html>`_) elaborated in the 1920s working class movement. 
+It is the implementation of a theory (`"Arbeitszeitrechnung"
+<https://aaap.be/Pages/Transition-en-Fundamental-Principles-1930.html>`_)
+elaborated in the 1920s working class movement.
 
 
 User roles
@@ -41,11 +42,16 @@ User roles
 
 There are three user roles:
 
-* **Companies** can file plans for each product (or service) they offer. A plan describes a product and defines how much working time it will cost. 
+* **Companies** can file plans for each product (or service) they
+  offer. A plan describes a product and defines how much working time
+  it will cost.
 
-* **Members** are workers in companies. They receive work certificates for their worked hours. They can use them to purchase products. 
+* **Members** are workers in companies. They receive work certificates
+  for their worked hours. They can use them to purchase products.
 
-* **Accountants** are delegates of the cooperating network of companies. They can approve company plans based on collectively agreed criteria. 
+* **Accountants** are delegates of the cooperating network of
+  companies. They can approve company plans based on collectively
+  agreed criteria.
 
 .. end-introduction-do-not-delete
 
@@ -54,7 +60,8 @@ There are three user roles:
 Development setup
 =================
 
-The preferred development environment is Linux. We encourage to use nix. A nix flake is located in this repository.  
+The preferred development environment is Linux. We encourage to use
+nix. A nix flake is located in this repository.
 
 
 Development philosophy
@@ -95,24 +102,13 @@ directories in the source code.
 PostgreSQL setup
 -------------------
 
-Debian: ``sudo apt install -y postgresql``
-
-Arch: ``sudo pacman -Syu postgresql``
-
-Installing PostgreSQL will create a user named *postgres*.
-Switch to postgres user: ``sudo -iu postgres``
-
-Initialize the database: ``initdb -D /var/lib/postgres/data``
-
-Exit user: ``exit``
-
-Start the postgresql service: ``systemctl postgresql.service start``
-
-To start the service automatically at boot: ``systemctl enable postgresql.service``
-
-Switch to postgres user: ``sudo -iu postgres``
-
-Create database: ``createdb <name of database>``
+To work on Arbeitszeitapp you need to have two PostgeSQL databases set
+up on your computer.  One as a development database that holds the
+data for your test users.  You will use this DB when running the
+development server as you test the application with newly developed
+features or bugfixes.  The other database is used for the automated
+test suite.  Check out the documentation of PostgreSQL and your
+operating system to learn how the database is set up.
 
 
 General setup
@@ -135,6 +131,7 @@ environment variables:
      export DEV_DATABASE_URI="postgresql://postgres@localhost:5432/<name of database>"
      export DEV_SECRET_KEY=my_secret_key
      export ARBEITSZEIT_APP_SERVER_NAME=localhost:5000
+     export ARBEITSZEIT_TEST_DB="postgresql://postgres@localhost:5432/<name of test database>"
 
 After configuring the database connection you need to run the database
 migrations via ``flask db upgrade``.
@@ -161,9 +158,10 @@ adding lines to ``.autoformattingrc``.
 
 
 We use type hints.  You can check the consistency of the type hints
-via the ``mypy`` command. Furthermore ``flake8`` is employed to prevent certain mistakes like
-for example unused imports or uninitialized variables. Invoke both commands without
-arguments to test all the eligable code.
+via the ``mypy`` command. Furthermore ``flake8`` is employed to
+prevent certain mistakes like for example unused imports or
+uninitialized variables. Invoke both commands without arguments to
+test all the eligable code.
 
 
 Testing
@@ -193,7 +191,8 @@ We use `Flask-Babel <https://python-babel.github.io/flask-babel/>`_ for translat
     python setup.py init_catalog -l LANGUAGE_CODE
 
    
-#. Add the new language to the LANGUAGES variable in ``arbeitszeit_flask/configuration_base.py``.
+#. Add the new language to the LANGUAGES variable in
+   ``arbeitszeit_flask/configuration_base.py``.
 
 #. Mark translatable, user-facing strings in the code.
 
@@ -225,7 +224,9 @@ We use `Flask-Babel <https://python-babel.github.io/flask-babel/>`_ for translat
     
      python setup.py update_catalog
 
-#. Translate language specific .po-files. For translation programs see `this page <https://www.gnu.org/software/trans-coord/manual/web-trans/html_node/PO-Editors.html>`_
+#. Translate language specific .po-files. For translation programs see
+   `this page
+   <https://www.gnu.org/software/trans-coord/manual/web-trans/html_node/PO-Editors.html>`_
 	
 #. Compile translation files (.mo-files):
 
