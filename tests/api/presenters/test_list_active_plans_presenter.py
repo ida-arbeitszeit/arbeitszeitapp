@@ -19,7 +19,7 @@ class TestGetPresenter(BaseTestCase):
     def test_schema_top_level(self) -> None:
         schema = self.presenter.get_schema()
         assert isinstance(schema, JsonDict)
-        assert schema.as_list
+        assert not schema.as_list
         assert schema.schema_name == "PlanList"
 
     def test_schema_top_level_members(self) -> None:
@@ -33,7 +33,7 @@ class TestGetPresenter(BaseTestCase):
         schema = top_schema.members["results"]
         assert isinstance(schema, JsonDict)
 
-        assert not schema.as_list
+        assert schema.as_list
         assert schema.schema_name == "Plan"
 
     def test_schema_second_level_members_field_types_are_correct(self) -> None:

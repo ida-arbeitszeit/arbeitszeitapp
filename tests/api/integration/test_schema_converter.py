@@ -86,7 +86,7 @@ class SchemaConversionTests(ApiTestCase):
         self,
     ) -> None:
         model = JsonDict(
-            members={"item_name": JsonString()}, schema_name="SchemaName", as_list=True
+            members={"item_name": JsonString(as_list=True)}, schema_name="SchemaName"
         )
         self.convert(model, self.namespace)
         registered_model = self.namespace.models["SchemaName"]
@@ -97,11 +97,34 @@ class SchemaConversionTests(ApiTestCase):
         self,
     ) -> None:
         model = JsonDict(
-            members={"item_name": JsonString()}, schema_name="SchemaName", as_list=True
+            members={"item_name": JsonString(as_list=True)}, schema_name="SchemaName"
         )
         self.convert(model, self.namespace)
         registered_model = self.namespace.models["SchemaName"]
+        assert isinstance(registered_model["item_name"], fields.Nested)
         self.assertEqual(registered_model["item_name"].model, fields.String)
+
+    def test_two_members_of_dict_are_registered_when_one_is_as_list(
+        self,
+    ) -> None:
+        model = JsonDict(
+            members={
+                "has_list_elements": JsonDict(
+                    schema_name="InnerModel",
+                    as_list=True,
+                    members=dict(one=JsonString(), two=JsonBoolean()),
+                ),
+                "has_no_list_elements": JsonDecimal(),
+            },
+            schema_name="SchemaName",
+            as_list=False,
+        )
+        self.convert(model, self.namespace)
+        registered_model = self.namespace.models["SchemaName"]
+
+        self.assertEqual(len(registered_model), 2)
+        self.assertTrue(registered_model["has_list_elements"])
+        self.assertTrue(registered_model["has_no_list_elements"])
 
     def test_raise_exception_when_two_models_with_same_name_are_registered_on_same_namespace(
         self,

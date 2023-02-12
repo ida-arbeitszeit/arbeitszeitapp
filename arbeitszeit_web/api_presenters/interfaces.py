@@ -10,7 +10,7 @@ JsonValue = Union[
 class JsonDict:
     """
     if `schema_name` is given, this JsonDict will be registered as a model with the given name.
-    if `as_list` is True, it's members will be returned in an array.
+    if `as_list` is True, it will be returned in an array.
     """
 
     members: Dict[str, JsonValue]
@@ -20,24 +20,24 @@ class JsonDict:
 
 @dataclass
 class JsonString:
-    pass
+    as_list: bool = False
 
 
 @dataclass
 class JsonDecimal:
     """A floating point number with an arbitrary precision."""
 
-    pass
+    as_list: bool = False
 
 
 @dataclass
 class JsonBoolean:
-    pass
+    as_list: bool = False
 
 
 @dataclass
 class JsonDatetime:
-    pass
+    as_list: bool = False
 
 
 class Namespace(Protocol):

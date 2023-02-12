@@ -27,8 +27,8 @@ class ActivePlansPresenter:
                         activation_date=JsonDatetime(),
                     ),
                     schema_name="Plan",
+                    as_list=True,
                 )
             ),
             schema_name="PlanList",
-            as_list=True,
         )
