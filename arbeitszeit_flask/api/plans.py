@@ -6,9 +6,11 @@ from arbeitszeit_flask.api.input_converter import expected_inputs_to_flaskx_pars
 from arbeitszeit_flask.api.schema_converter import json_schema_to_flaskx
 from arbeitszeit_flask.dependency_injection import with_injection
 from arbeitszeit_flask.flask_request import FlaskRequest
-from arbeitszeit_web.api_controllers.query_plans_api_controller import (
+from arbeitszeit_web.api_controllers.errors import (
     NegativeNumberError,
     NotAnIntegerError,
+)
+from arbeitszeit_web.api_controllers.query_plans_api_controller import (
     QueryPlansApiController,
 )
 from arbeitszeit_web.api_presenters.plans import ActivePlansPresenter

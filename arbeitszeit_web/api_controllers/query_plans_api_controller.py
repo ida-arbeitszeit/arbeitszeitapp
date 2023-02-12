@@ -1,27 +1,15 @@
-from dataclasses import dataclass
-from typing import List, Type, Union
+from typing import List
 
 from arbeitszeit.use_cases.query_plans import PlanFilter, PlanSorting, QueryPlansRequest
+from arbeitszeit_web.api_controllers.errors import (
+    NegativeNumberError,
+    NotAnIntegerError,
+)
+from arbeitszeit_web.api_controllers.expected_input import ExpectedInput
 from arbeitszeit_web.request import Request
 
 DEFAULT_OFFSET = 0
 DEFAULT_LIMIT = 30
-
-
-class NotAnIntegerError(ValueError):
-    pass
-
-
-class NegativeNumberError(ValueError):
-    pass
-
-
-@dataclass
-class ExpectedInput:
-    name: str
-    type: Type
-    description: str
-    default: Union[None, str, int, bool]
 
 
 class QueryPlansApiController:
