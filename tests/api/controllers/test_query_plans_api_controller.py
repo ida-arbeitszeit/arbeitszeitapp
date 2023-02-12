@@ -46,7 +46,7 @@ class ControllerTests(BaseTestCase):
 
     def test_correct_limit_gets_returned_if_it_was_set_in_query_string(self):
         expected_limit = 7
-        self.request.set_arg(arg="limit", value=str(expected_limit))
+        self.request.set_arg(arg="limit", value=expected_limit)
         use_case_request = self.controller.get_request(self.request)
         self.assertEqual(use_case_request.limit, expected_limit)
 
@@ -54,7 +54,7 @@ class ControllerTests(BaseTestCase):
         self,
     ):
         expected_limit = 7
-        self.request.set_arg(arg="limit", value=str(expected_limit))
+        self.request.set_arg(arg="limit", value=expected_limit)
         expected_offset = 8
         self.request.set_arg(arg="offset", value=str(expected_offset))
         use_case_request = self.controller.get_request(self.request)

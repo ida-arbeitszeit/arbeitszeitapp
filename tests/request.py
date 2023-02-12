@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 from arbeitszeit.injector import singleton
 
@@ -19,8 +19,8 @@ class FakeRequest:
     def get_header(self, key: str) -> Optional[str]:
         return self._environ.get(key, None)
 
-    def set_arg(self, arg: str, value: str) -> None:
-        self._args[arg] = value
+    def set_arg(self, arg: str, value: Union[str, int]) -> None:
+        self._args[arg] = str(value)
 
     def set_form(self, key: str, value: str) -> None:
         self._form[key] = value
