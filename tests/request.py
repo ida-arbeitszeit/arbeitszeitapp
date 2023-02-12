@@ -19,7 +19,7 @@ class FakeRequest:
     def get_header(self, key: str) -> Optional[str]:
         return self._environ.get(key, None)
 
-    def set_arg(self, arg: str, value: Union[str, int]) -> None:
+    def set_arg(self, arg: str, value: object) -> None:
         self._args[arg] = str(value)
 
     def set_form(self, key: str, value: str) -> None:
