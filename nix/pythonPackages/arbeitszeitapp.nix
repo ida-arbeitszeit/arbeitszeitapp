@@ -30,4 +30,5 @@ buildPythonPackage {
     python -m sphinx -a $src/docs $doc/share/doc/arbeitszeitapp
   '';
   passthru.optional-dependencies = { profiling = [ flask-profiler ]; };
+  DISABLED_TESTS = "database_required";
 }
