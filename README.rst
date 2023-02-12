@@ -131,7 +131,7 @@ environment variables:
      export DEV_DATABASE_URI="postgresql://postgres@localhost:5432/<name of database>"
      export DEV_SECRET_KEY=my_secret_key
      export ARBEITSZEIT_APP_SERVER_NAME=localhost:5000
-     export ARBEITSZEIT_TEST_DB="postgresql://postgres@localhost:5432/<name of test database>"
+     export ARBEITSZEITAPP_TEST_DB="postgresql://postgres@localhost:5432/<name of test database>"
 
 After configuring the database connection you need to run the database
 migrations via ``flask db upgrade``.
