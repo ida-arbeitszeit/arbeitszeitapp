@@ -1,4 +1,4 @@
-from tests.flask_integration.flask import ApiTestCase
+from tests.api.integration.base_test_case import ApiTestCase
 
 
 class ListActivePlansTests(ApiTestCase):

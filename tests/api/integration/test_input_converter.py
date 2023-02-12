@@ -1,11 +1,11 @@
 from typing import Optional, Type, Union
-from unittest import TestCase
 
 from arbeitszeit_flask.api.input_documentation import generate_input_documentation
 from arbeitszeit_web.api_controllers.expected_input import ExpectedInput
+from tests.api.integration.base_test_case import ApiTestCase
 
 
-class TestInputConverter(TestCase):
+class TestInputConverter(ApiTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.convert = generate_input_documentation
@@ -16,13 +16,13 @@ class TestInputConverter(TestCase):
         assert not parser.args
 
     def test_converter_returns_one_input_into_request_parser_with_one_argument(self):
-        parser = self.convert(expected_inputs=[self.get_expected_input()])
+        parser = self.convert(expected_inputs=[self.create_expected_input()])
         assert parser
         assert len(parser.args) == 1
 
     def test_converter_returns_two_inputs_into_request_parser_with_two_arguments(self):
         parser = self.convert(
-            expected_inputs=[self.get_expected_input(), self.get_expected_input()]
+            expected_inputs=[self.create_expected_input(), self.create_expected_input()]
         )
         assert parser
         assert len(parser.args) == 2
@@ -34,7 +34,7 @@ class TestInputConverter(TestCase):
         expected_type = str
         expected_description = "test description"
         expected_default = "default"
-        input = self.get_expected_input(
+        input = self.create_expected_input(
             name=expected_name,
             type=expected_type,
             description=expected_description,
@@ -52,15 +52,15 @@ class TestInputConverter(TestCase):
     ):
         parser = self.convert(
             expected_inputs=[
-                self.get_expected_input(name="name1"),
-                self.get_expected_input(name="name2"),
+                self.create_expected_input(name="name1"),
+                self.create_expected_input(name="name2"),
             ]
         )
         argument1 = parser.args[0]
         argument2 = parser.args[1]
         assert argument1.name != argument2.name
 
-    def get_expected_input(
+    def create_expected_input(
         self,
         name: Optional[str] = None,
         type: Optional[Type] = None,

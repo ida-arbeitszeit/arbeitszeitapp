@@ -14,7 +14,6 @@ from tests.data_generators import (
     CompanyGenerator,
     EmailGenerator,
     MemberGenerator,
-    PlanGenerator,
 )
 
 from .dependency_injection import get_dependency_injector
@@ -36,15 +35,6 @@ class FlaskTestCase(TestCase):
 
     def get_injection_modules(self) -> List[Module]:
         return []
-
-
-class ApiTestCase(FlaskTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.url_prefix = "/api/v1"
-        self.client = self.app.test_client()
-        self.plan_generator = self.injector.get(PlanGenerator)
-
 
 class ViewTestCase(FlaskTestCase):
     def setUp(self) -> None:
