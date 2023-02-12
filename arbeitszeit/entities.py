@@ -150,7 +150,6 @@ class Plan:
     is_active: bool
     expired: bool
     activation_date: Optional[datetime]
-    active_days: Optional[int]
     payout_count: int
     requested_cooperation: Optional[UUID]
     cooperation: Optional[UUID]
@@ -180,6 +179,16 @@ class Plan:
             return None
         exp_date = self.activation_date + timedelta(days=int(self.timeframe))
         return exp_date
+
+    def active_days(self, reference_timestamp: datetime) -> Optional[int]:
+        """Returns the full days a plan would be active at the
+        specified timestamp, not considering days exceeding it's
+        timeframe.
+        """
+        if not self.activation_date:
+            return None
+        days_passed_since_activation = (reference_timestamp - self.activation_date).days
+        return min(self.timeframe, days_passed_since_activation)
 
 
 class PurposesOfPurchases(Enum):

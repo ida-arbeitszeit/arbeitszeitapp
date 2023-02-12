@@ -21,6 +21,9 @@ from arbeitszeit.token import (
     MemberRegistrationMessagePresenter,
     TokenService,
 )
+from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitation_presenter import (
+    AccountantInvitationPresenter,
+)
 from arbeitszeit_flask.control_thresholds import ControlThresholdsFlask
 from arbeitszeit_flask.database import get_social_accounting
 from arbeitszeit_flask.database.repositories import (
@@ -64,11 +67,18 @@ from arbeitszeit_flask.text_renderer import TextRendererImpl
 from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.translator import FlaskTranslator
 from arbeitszeit_flask.url_index import CompanyUrlIndex, GeneralUrlIndex
+from arbeitszeit_flask.views.accountant_invitation_email_view import (
+    AccountantInvitationEmailViewImpl,
+)
 from arbeitszeit_web.colors import Colors
 from arbeitszeit_web.email import EmailConfiguration, UserAddressBook
 from arbeitszeit_web.language_service import LanguageService
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.plotter import Plotter
+from arbeitszeit_web.presenters.accountant_invitation_presenter import (
+    AccountantInvitationEmailPresenter,
+    AccountantInvitationEmailView,
+)
 from arbeitszeit_web.presenters.notify_accountant_about_new_plan_presenter import (
     NotifyAccountantsAboutNewPlanPresenterImpl,
 )
@@ -81,6 +91,7 @@ from arbeitszeit_web.session import Session
 from arbeitszeit_web.text_renderer import TextRenderer
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import (
+    AccountantInvitationUrlIndex,
     HidePlanUrlIndex,
     LanguageChangerUrlIndex,
     RenewPlanUrlIndex,
@@ -194,6 +205,18 @@ class FlaskModule(Module):
         )
         binder[MemberRegistrationMessagePresenter] = AliasProvider(  # type: ignore
             RegistrationEmailPresenter
+        )
+        binder.bind(
+            AccountantInvitationPresenter,  # type: ignore
+            to=AliasProvider(AccountantInvitationEmailPresenter),
+        )
+        binder.bind(
+            AccountantInvitationEmailView,  # type: ignore
+            to=AliasProvider(AccountantInvitationEmailViewImpl),
+        )
+        binder.bind(
+            AccountantInvitationUrlIndex,  # type: ignore
+            to=AliasProvider(GeneralUrlIndex),
         )
 
     @staticmethod

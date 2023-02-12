@@ -4,6 +4,7 @@ from decimal import Decimal
 from typing import Optional
 from uuid import UUID
 
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan
 from arbeitszeit.price_calculator import PriceCalculator
 from arbeitszeit.repositories import CompanyRepository, PlanRepository
@@ -39,6 +40,7 @@ class PlanSummaryService:
     plan_repository: PlanRepository
     company_repository: CompanyRepository
     price_calculator: PriceCalculator
+    datetime_service: DatetimeService
 
     def get_summary_from_plan(self, plan: Plan) -> PlanSummary:
         price_per_unit = self.price_calculator.calculate_cooperative_price(plan)
@@ -52,7 +54,7 @@ class PlanSummaryService:
             product_name=plan.prd_name,
             description=plan.description,
             timeframe=plan.timeframe,
-            active_days=plan.active_days or 0,
+            active_days=plan.active_days(self.datetime_service.now()) or 0,
             production_unit=plan.prd_unit,
             amount=plan.prd_amount,
             means_cost=plan.production_costs.means_cost,

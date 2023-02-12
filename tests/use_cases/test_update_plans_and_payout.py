@@ -33,28 +33,6 @@ class UseCaseTests(BaseTestCase):
         self.payout()
         self.assertFalse(plan.expired)
 
-    def test_that_active_days_is_set_if_plan_is_active(self) -> None:
-        plan = self.plan_generator.create_plan(timeframe=2)
-        self.assertIsNone(plan.active_days)
-        self.payout()
-        self.assertIsNotNone(plan.active_days)
-
-    def test_that_active_days_is_set_correctly(self) -> None:
-        self.datetime_service.freeze_time(datetime(2021, 10, 2, 2))
-        plan = self.plan_generator.create_plan(timeframe=5)
-        self.datetime_service.freeze_time(datetime(2021, 10, 4, 3))
-        self.payout()
-        assert plan.active_days == 2
-
-    def test_that_active_days_is_set_correctly_if_current_time_exceeds_timeframe(
-        self,
-    ) -> None:
-        self.datetime_service.freeze_time(datetime(2021, 10, 2, 2))
-        plan = self.plan_generator.create_plan(timeframe=5)
-        self.datetime_service.freeze_time(datetime(2021, 10, 10, 3))
-        self.payout()
-        assert plan.active_days == 5
-
     def test_that_plan_is_set_expired_and_deactivated_if_expired(self) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         plan = self.plan_generator.create_plan(timeframe=5)

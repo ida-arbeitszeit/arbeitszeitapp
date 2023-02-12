@@ -257,10 +257,6 @@ class PlanRepository(ABC):
         pass
 
     @abstractmethod
-    def set_active_days(self, plan: Plan, full_active_days: int) -> None:
-        pass
-
-    @abstractmethod
     def increase_payout_count_by_one(self, plan: Plan) -> None:
         pass
 
