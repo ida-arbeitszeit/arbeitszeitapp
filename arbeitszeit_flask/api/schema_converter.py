@@ -7,6 +7,7 @@ from arbeitszeit_web.api_presenters.interfaces import (
     JsonDatetime,
     JsonDecimal,
     JsonDict,
+    JsonInteger,
     JsonString,
     JsonValue,
     Namespace,
@@ -67,6 +68,7 @@ def json_schema_to_flaskx(
     type[fields.Arbitrary],
     type[fields.Boolean],
     type[fields.DateTime],
+    type[fields.Integer],
 ]:
     if isinstance(schema, JsonDict):
         model = _convert_json_dict(schema, namespace)
@@ -77,6 +79,8 @@ def json_schema_to_flaskx(
         return fields.Boolean
     elif isinstance(schema, JsonDatetime):
         return fields.DateTime
+    elif isinstance(schema, JsonInteger):
+        return fields.Integer
     else:
         assert isinstance(schema, JsonString)
         return fields.String

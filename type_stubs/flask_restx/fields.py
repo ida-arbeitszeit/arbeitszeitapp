@@ -24,3 +24,7 @@ class Boolean:
 
 class DateTime:
     ...
+
+
+class Integer:
+    ...

@@ -2,7 +2,12 @@ from dataclasses import dataclass
 from typing import Any, Dict, Optional, Protocol, Union
 
 JsonValue = Union[
-    "JsonDict", "JsonString", "JsonDecimal", "JsonBoolean", "JsonDatetime"
+    "JsonDict",
+    "JsonString",
+    "JsonDecimal",
+    "JsonBoolean",
+    "JsonDatetime",
+    "JsonInteger",
 ]
 
 
@@ -32,6 +37,11 @@ class JsonDecimal:
 
 @dataclass
 class JsonBoolean:
+    as_list: bool = False
+
+
+@dataclass
+class JsonInteger:
     as_list: bool = False
 
 

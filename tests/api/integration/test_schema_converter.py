@@ -11,6 +11,7 @@ from arbeitszeit_web.api_presenters.interfaces import (
     JsonDatetime,
     JsonDecimal,
     JsonDict,
+    JsonInteger,
     JsonString,
 )
 from tests.api.implementations import NamespaceImpl
@@ -39,6 +40,11 @@ class SchemaConversionTests(ApiTestCase):
         model = JsonBoolean()
         converted = self.convert(model, self.namespace)
         self.assertEqual(converted, fields.Boolean)
+
+    def test_convert_to_integer_if_input_was_integer(self) -> None:
+        model = JsonInteger()
+        converted = self.convert(model, self.namespace)
+        self.assertEqual(converted, fields.Integer)
 
     def test_convert_to_datetime_if_input_was_datetime(self) -> None:
         model = JsonDatetime()
