@@ -20,7 +20,9 @@ namespace = Namespace("plans", "Plan related endpoints.")
 model = json_schema_to_flaskx(
     schema=ActivePlansPresenter().get_schema(), namespace=namespace
 )
-input_documentation = generate_input_documentation(QueryPlansApiController().get_expected_inputs())
+input_documentation = generate_input_documentation(
+    QueryPlansApiController().get_expected_inputs()
+)
 
 
 @namespace.route("/active")

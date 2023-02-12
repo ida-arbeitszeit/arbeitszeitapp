@@ -36,6 +36,7 @@ class FlaskTestCase(TestCase):
     def get_injection_modules(self) -> List[Module]:
         return []
 
+
 class ViewTestCase(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()

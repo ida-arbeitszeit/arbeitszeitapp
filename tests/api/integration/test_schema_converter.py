@@ -1,5 +1,4 @@
 from typing import Dict
-from unittest import TestCase
 
 from flask_restx import fields
 
@@ -16,6 +15,7 @@ from arbeitszeit_web.api_presenters.interfaces import (
 )
 from tests.api.implementations import NamespaceImpl
 from tests.api.integration.base_test_case import ApiTestCase
+
 
 class SchemaConversionTests(ApiTestCase):
     def setUp(self) -> None:

@@ -40,7 +40,7 @@ class QueryPlansApiController:
             offset=offset,
             limit=limit,
         )
-    
+
     def _string_to_non_negative_integer(self, string: str) -> int:
         try:
             integer = int(string)
