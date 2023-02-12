@@ -1,14 +1,14 @@
 from typing import Optional, Type, Union
 from unittest import TestCase
 
-from arbeitszeit_flask.api.input_converter import expected_inputs_to_flaskx_parser
+from arbeitszeit_flask.api.input_documentation import generate_input_documentation
 from arbeitszeit_web.api_controllers.expected_input import ExpectedInput
 
 
 class TestInputConverter(TestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.convert = expected_inputs_to_flaskx_parser
+        self.convert = generate_input_documentation
 
     def test_converter_returns_empty_inputs_into_request_parser_with_no_argument(self):
         parser = self.convert(expected_inputs=[])

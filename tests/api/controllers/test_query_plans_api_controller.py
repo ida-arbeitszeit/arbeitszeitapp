@@ -90,7 +90,7 @@ class ExpectedInputsTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.controller = self.injector.get(QueryPlansApiController)
-        self.inputs = self.controller.expected_inputs
+        self.inputs = self.controller.get_expected_inputs()
 
     def test_controller_has_two_expected_inputs(self):
         self.assertEqual(len(self.inputs), 2)

@@ -8,13 +8,13 @@ from arbeitszeit_web.api_controllers.errors import (
 from arbeitszeit_web.api_controllers.expected_input import ExpectedInput
 from arbeitszeit_web.request import Request
 
-DEFAULT_OFFSET = 0
-DEFAULT_LIMIT = 30
+DEFAULT_OFFSET: int = 0
+DEFAULT_LIMIT: int = 30
 
 
 class QueryPlansApiController:
-    @property
-    def expected_inputs(self) -> List[ExpectedInput]:
+    @classmethod
+    def get_expected_inputs(cls) -> List[ExpectedInput]:
         return [
             ExpectedInput(
                 name="offset",
@@ -40,31 +40,27 @@ class QueryPlansApiController:
             offset=offset,
             limit=limit,
         )
-
-    def _parse_offset(self, request: Request) -> int:
-        offset: int = DEFAULT_OFFSET
-        value = request.query_string().get("offset")
-        if not value:
-            return offset
+    
+    def _string_to_non_negative_integer(self, string: str) -> int:
         try:
-            offset = int(value)
+            integer = int(string)
         except ValueError:
             raise NotAnIntegerError()
         else:
-            if offset < 0:
+            if integer < 0:
                 raise NegativeNumberError()
+        return integer
+
+    def _parse_offset(self, request: Request) -> int:
+        offset_string = request.query_string().get("offset")
+        if not offset_string:
+            return DEFAULT_OFFSET
+        offset = self._string_to_non_negative_integer(offset_string)
         return offset
 
     def _parse_limit(self, request: Request) -> int:
-        limit: int = DEFAULT_LIMIT
-        value = request.query_string().get("limit")
-        if not value:
-            return limit
-        try:
-            limit = int(value)
-        except ValueError:
-            raise NotAnIntegerError()
-        else:
-            if limit < 0:
-                raise NegativeNumberError()
+        limit_string = request.query_string().get("limit")
+        if not limit_string:
+            return DEFAULT_LIMIT
+        limit = self._string_to_non_negative_integer(limit_string)
         return limit

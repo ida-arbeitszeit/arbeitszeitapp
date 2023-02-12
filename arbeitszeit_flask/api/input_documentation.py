@@ -5,7 +5,7 @@ from flask_restx.reqparse import RequestParser
 from arbeitszeit_web.api_controllers.query_plans_api_controller import ExpectedInput
 
 
-def expected_inputs_to_flaskx_parser(
+def generate_input_documentation(
     expected_inputs: List[ExpectedInput],
 ) -> RequestParser:
     parser = RequestParser()
