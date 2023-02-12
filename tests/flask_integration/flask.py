@@ -15,10 +15,12 @@ from tests.data_generators import (
     EmailGenerator,
     MemberGenerator,
 )
+from tests.markers import database_required
 
 from .dependency_injection import get_dependency_injector
 
 
+@database_required
 class FlaskTestCase(TestCase):
     def setUp(self) -> None:
         super().setUp()
@@ -27,6 +29,7 @@ class FlaskTestCase(TestCase):
         self.app = self.injector.get(Flask)
         self.app_context = self.app.app_context()
         self.app_context.push()
+        self.db.drop_all()
         self.db.create_all()
 
     def tearDown(self) -> None:

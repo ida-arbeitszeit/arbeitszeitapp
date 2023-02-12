@@ -1,10 +1,11 @@
-from unittest import TestCase
-
 from arbeitszeit_flask.template import CompanyTemplateIndex, MemberTemplateIndex
 
+from .flask import FlaskTestCase
 
-class MemberIndexTests(TestCase):
+
+class MemberIndexTests(FlaskTestCase):
     def setUp(self) -> None:
+        super().setUp()
         self.index = MemberTemplateIndex()
 
     def test_that_template_resolves_to_correct_path(self) -> None:
@@ -12,8 +13,9 @@ class MemberIndexTests(TestCase):
         self.assertEqual(template, "member/test_template.html")
 
 
-class CompanyIndexTests(TestCase):
+class CompanyIndexTests(FlaskTestCase):
     def setUp(self) -> None:
+        super().setUp()
         self.index = CompanyTemplateIndex()
 
     def test_that_template_resolves_to_correct_path(self) -> None:

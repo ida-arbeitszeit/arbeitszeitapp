@@ -1,9 +1,9 @@
-from unittest import TestCase
-
 from arbeitszeit_flask.flask_request import QueryStringImpl
 
+from .flask import FlaskTestCase
 
-class QueryStringTests(TestCase):
+
+class QueryStringTests(FlaskTestCase):
     def test_can_get_values_passed_in(self) -> None:
         query_string = QueryStringImpl(dict(a="1"))
         self.assertEqual(query_string.get("a"), "1")

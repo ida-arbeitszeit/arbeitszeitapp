@@ -1,3 +1,0 @@
-from os import getenv
-
-SQLALCHEMY_DATABASE_URI = getenv("ARBEITSZEITAPP_TEST_DB_URL")
