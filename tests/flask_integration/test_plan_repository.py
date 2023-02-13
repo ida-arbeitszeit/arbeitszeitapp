@@ -83,14 +83,6 @@ class PlanRepositoryTests(FlaskTestCase):
         assert plan_from_repo
         assert plan_from_repo.hidden_by_user
 
-    def test_that_active_days_are_set(self) -> None:
-        plan = self.plan_generator.create_plan()
-        assert plan.active_days is None
-        self.plan_repository.set_active_days(plan, 3)
-        plan_from_repo = self.plan_repository.get_plans().with_id(plan.id).first()
-        assert plan_from_repo
-        assert plan_from_repo.active_days == 3
-
     def test_that_payout_count_is_increased_by_one(self) -> None:
         plan = self.plan_generator.create_plan()
         assert plan.payout_count == 0

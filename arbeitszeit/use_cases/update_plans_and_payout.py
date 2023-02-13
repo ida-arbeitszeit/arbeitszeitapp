@@ -37,12 +37,6 @@ class UpdatePlansAndPayout:
         for plan in self.plan_repository.get_plans().that_are_active():
             assert plan.is_active, "Plan is not active!"
             assert plan.activation_date, "Plan has no activation date!"
-
-            self.plan_repository.set_active_days(
-                plan, self._calculate_active_days(plan)
-            )
-
-            assert plan.active_days is not None
             if self._plan_is_expired(plan):
                 self._handle_expired_plan(plan)
 
@@ -64,8 +58,9 @@ class UpdatePlansAndPayout:
 
         If this requirement is not met, a payout is triggered to increase the number of payouts by one.
         """
-        assert plan.active_days is not None
-        while plan.payout_count <= plan.active_days:
+        active_days = plan.active_days(self.datetime_service.now())
+        assert active_days is not None
+        while plan.payout_count <= active_days:
             self._payout(plan, payout_factor)
 
     def _payout(self, plan: Plan, payout_factor: Decimal) -> None:
@@ -91,8 +86,9 @@ class UpdatePlansAndPayout:
         payout factor stored in repo. Delete plan's cooperation and
         coop request, if there is any. Set plan as expired.
         """
-        assert plan.active_days
-        while plan.payout_count < plan.active_days:
+        active_days = plan.active_days(self.datetime_service.now())
+        assert active_days is not None
+        while plan.payout_count < active_days:
             payout_factor = self.payout_factor_repository.get_latest_payout_factor()
             if payout_factor is None:
                 # overdue wages and no pf in repo should hardly ever happen
@@ -107,13 +103,3 @@ class UpdatePlansAndPayout:
         ).set_activation_status(is_active=False).set_expiration_status(
             is_expired=True
         ).perform()
-
-    def _calculate_active_days(self, plan: Plan) -> int:
-        """Returns the full days a plan has been active, not
-        considering days exceeding it's timeframe.
-        """
-        assert plan.activation_date
-        days_passed_since_activation = (
-            self.datetime_service.now() - plan.activation_date
-        ).days
-        return min(plan.timeframe, days_passed_since_activation)

@@ -970,7 +970,6 @@ class PlanRepository(repositories.PlanRepository):
             is_active=plan.is_active,
             expired=plan.expired,
             activation_date=plan.activation_date,
-            active_days=plan.active_days,
             payout_count=plan.payout_count,
             requested_cooperation=UUID(plan.requested_cooperation)
             if plan.requested_cooperation
@@ -1003,7 +1002,6 @@ class PlanRepository(repositories.PlanRepository):
             is_public_service=plan.is_public_service,
             is_active=False,
             activation_date=None,
-            active_days=None,
             payout_count=0,
             is_available=True,
         )
@@ -1013,12 +1011,6 @@ class PlanRepository(repositories.PlanRepository):
         )
         self.db.session.add(plan_review)
         return plan
-
-    def set_active_days(self, plan: entities.Plan, full_active_days: int) -> None:
-        plan.active_days = full_active_days
-
-        plan_orm = self.object_to_orm(plan)
-        plan_orm.active_days = full_active_days
 
     def increase_payout_count_by_one(self, plan: entities.Plan) -> None:
         plan.payout_count += 1

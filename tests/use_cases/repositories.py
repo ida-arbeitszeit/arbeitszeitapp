@@ -748,9 +748,6 @@ class PlanRepository(interfaces.PlanRepository):
     def __len__(self) -> int:
         return len(self.entities.plans)
 
-    def set_active_days(self, plan: Plan, full_active_days: int) -> None:
-        plan.active_days = full_active_days
-
     def increase_payout_count_by_one(self, plan: Plan) -> None:
         plan.payout_count += 1
 
@@ -833,7 +830,6 @@ class PlanRepository(interfaces.PlanRepository):
             approval_date=None,
             approval_reason=None,
             expired=False,
-            active_days=None,
             payout_count=0,
             requested_cooperation=None,
             cooperation=None,
