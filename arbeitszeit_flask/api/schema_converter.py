@@ -7,6 +7,7 @@ from arbeitszeit_web.api_presenters.interfaces import (
     JsonDatetime,
     JsonDecimal,
     JsonDict,
+    JsonInteger,
     JsonString,
     JsonValue,
     Namespace,
@@ -17,38 +18,45 @@ class ModelWithSameNameExists(Exception):
     pass
 
 
-def _register(schema: JsonDict, namespace: Namespace) -> Model:
-    assert schema.schema_name
-    model = {
-        key: json_schema_to_flaskx(schema=value, namespace=namespace)
-        for key, value in schema.members.items()
-    }
-    result = namespace.model(name=schema.schema_name, model=model)
-    return result
-
-
-def _register_as_nested(schema: JsonDict, namespace: Namespace) -> Model:
-    assert schema.schema_name
-    assert schema.as_list
-    model = {
-        key: fields.Nested(
-            json_schema_to_flaskx(schema=value, namespace=namespace), as_list=True
-        )
-        for key, value in schema.members.items()
-    }
-    result = namespace.model(name=schema.schema_name, model=model)
-    return result
-
-
-def _prevent_overriding_of_model(schema: JsonDict, namespace: Namespace) -> None:
+def _prevent_overriding(schema_name: str, namespace: Namespace) -> None:
     """
     Ensure that a model previously registered on namespace does not get overridden.
     """
-    assert schema.schema_name
-    if schema.schema_name in namespace.models:
-        raise ModelWithSameNameExists(
-            f"Model with name {schema.schema_name} exists already."
-        )
+    assert schema_name
+    if schema_name in namespace.models:
+        raise ModelWithSameNameExists(f"Model with name {schema_name} exists already.")
+
+
+def _register_model_for_documentation(
+    schema_name: str, namespace: Namespace, model: Dict[str, Any]
+):
+    assert schema_name
+    _prevent_overriding(schema_name, namespace)
+    registered_model = namespace.model(name=schema_name, model=model)
+    return registered_model
+
+
+def _convert_json_dict(
+    schema: JsonDict, namespace: Namespace
+) -> Union[Dict[str, Any], Model]:
+    model: Dict[str, Any] = {}
+    for key, value in schema.members.items():
+        if value.as_list:
+            model.update(
+                {
+                    key: fields.Nested(
+                        json_schema_to_flaskx(schema=value, namespace=namespace),
+                        as_list=True,
+                    )
+                }
+            )
+        else:
+            model.update(
+                {key: json_schema_to_flaskx(schema=value, namespace=namespace)}
+            )
+    if schema.schema_name:
+        return _register_model_for_documentation(schema.schema_name, namespace, model)
+    return model
 
 
 def json_schema_to_flaskx(
@@ -60,28 +68,19 @@ def json_schema_to_flaskx(
     type[fields.Arbitrary],
     type[fields.Boolean],
     type[fields.DateTime],
+    type[fields.Integer],
 ]:
     if isinstance(schema, JsonDict):
-        if not schema.schema_name:
-            result = {
-                key: json_schema_to_flaskx(schema=value, namespace=namespace)
-                for key, value in schema.members.items()
-            }
-            return result
-        else:
-            _prevent_overriding_of_model(schema, namespace)
-            if schema.as_list:
-                model = _register_as_nested(schema, namespace)
-                return model
-            else:
-                model = _register(schema, namespace)
-                return model
+        model = _convert_json_dict(schema, namespace)
+        return model
     elif isinstance(schema, JsonDecimal):
         return fields.Arbitrary
     elif isinstance(schema, JsonBoolean):
         return fields.Boolean
     elif isinstance(schema, JsonDatetime):
         return fields.DateTime
+    elif isinstance(schema, JsonInteger):
+        return fields.Integer
     else:
         assert isinstance(schema, JsonString)
         return fields.String

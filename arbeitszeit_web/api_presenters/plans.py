@@ -3,6 +3,7 @@ from arbeitszeit_web.api_presenters.interfaces import (
     JsonDatetime,
     JsonDecimal,
     JsonDict,
+    JsonInteger,
     JsonString,
     JsonValue,
 )
@@ -27,8 +28,9 @@ class ActivePlansPresenter:
                         activation_date=JsonDatetime(),
                     ),
                     schema_name="Plan",
-                )
+                    as_list=True,
+                ),
+                total_results=JsonInteger(),
             ),
             schema_name="PlanList",
-            as_list=True,
         )
