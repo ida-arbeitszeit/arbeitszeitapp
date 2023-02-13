@@ -13,12 +13,12 @@ from arbeitszeit_web.api_controllers.errors import (
 from arbeitszeit_web.api_controllers.query_plans_api_controller import (
     QueryPlansApiController,
 )
-from arbeitszeit_web.api_presenters.plans import ActivePlansPresenter
+from arbeitszeit_web.api_presenters.query_plans_api_presenter import QueryPlansApiPresenter
 
 namespace = Namespace("plans", "Plan related endpoints.")
 
 model = json_schema_to_flaskx(
-    schema=ActivePlansPresenter().get_schema(), namespace=namespace
+    schema=QueryPlansApiPresenter().get_schema(), namespace=namespace
 )
 input_documentation = generate_input_documentation(
     QueryPlansApiController().get_expected_inputs()

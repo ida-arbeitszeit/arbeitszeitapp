@@ -6,7 +6,7 @@ from arbeitszeit_web.api_presenters.interfaces import (
     JsonInteger,
     JsonString,
 )
-from arbeitszeit_web.api_presenters.plans import ActivePlansPresenter
+from arbeitszeit_web.api_presenters.query_plans_api_presenter import QueryPlansApiPresenter
 from tests.api.presenters.base_test_case import BaseTestCase
 from tests.presenters.data_generators import QueriedPlanGenerator
 
@@ -15,7 +15,7 @@ class TestGetPresenter(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.queried_plan_generator = self.injector.get(QueriedPlanGenerator)
-        self.presenter = ActivePlansPresenter()
+        self.presenter = QueryPlansApiPresenter()
 
     def test_schema_top_level(self) -> None:
         schema = self.presenter.get_schema()

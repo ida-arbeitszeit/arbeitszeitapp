@@ -9,7 +9,7 @@ from arbeitszeit_web.api_presenters.interfaces import (
 )
 
 
-class ActivePlansPresenter:
+class QueryPlansApiPresenter:
     @classmethod
     def get_schema(cls) -> JsonValue:
         return JsonDict(
@@ -34,3 +34,4 @@ class ActivePlansPresenter:
             ),
             schema_name="PlanList",
         )
+        
