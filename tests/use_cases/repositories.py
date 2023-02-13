@@ -236,12 +236,6 @@ class PlanUpdate:
 
         return self._add_update(update)
 
-    def set_approval_reason(self, reason: Optional[str]) -> PlanUpdate:
-        def update(plan: Plan) -> None:
-            plan.approval_reason = reason
-
-        return self._add_update(update)
-
     def set_activation_timestamp(
         self, activation_timestamp: Optional[datetime]
     ) -> PlanUpdate:
@@ -828,7 +822,6 @@ class PlanRepository(interfaces.PlanRepository):
             is_active=False,
             activation_date=None,
             approval_date=None,
-            approval_reason=None,
             expired=False,
             payout_count=0,
             requested_cooperation=None,

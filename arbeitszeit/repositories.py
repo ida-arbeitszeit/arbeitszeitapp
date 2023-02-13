@@ -145,11 +145,6 @@ class PlanUpdate(Protocol):
         value counts all the plans that were changed by this methods.
         """
 
-    def set_approval_reason(self, reason: Optional[str]) -> PlanUpdate:
-        """Set the approval reason for all matching plans. The return
-        value counts all the plans that were changed by this method.
-        """
-
     def perform(self) -> int:
         """Perform the update action and return the number of columns
         affected.
