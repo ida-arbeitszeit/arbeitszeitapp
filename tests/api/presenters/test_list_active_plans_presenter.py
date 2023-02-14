@@ -19,19 +19,19 @@ class TestViewModelCreation(BaseTestCase):
         self.presenter = self.injector.get(QueryPlansApiPresenter)
         self.queried_plan_generator = self.injector.get(QueriedPlanGenerator)
 
-    def test_presenter_raises_when_no_limit_was_requested(self):
+    def test_presenter_shows_limit_as_None_when_no_limit_was_requested(self):
         use_case_response = self.queried_plan_generator.get_response(
             requested_limit=None, requested_offset=10
         )
-        with self.assertRaises(AssertionError):
-            self.presenter.create_view_model(use_case_response)
+        view_model = self.presenter.create_view_model(use_case_response)
+        self.assertIsNone(view_model.limit)
 
-    def test_presenter_raises_when_no_offset_was_requested(self):
+    def test_presenter_shows_offset_as_None_when_no_offset_was_requested(self):
         use_case_response = self.queried_plan_generator.get_response(
             requested_offset=None, requested_limit=10
         )
-        with self.assertRaises(AssertionError):
-            self.presenter.create_view_model(use_case_response)
+        view_model = self.presenter.create_view_model(use_case_response)
+        self.assertIsNone(view_model.offset)
 
     def test_view_model_shows_requested_offset(self):
         use_case_response = self.queried_plan_generator.get_response(
