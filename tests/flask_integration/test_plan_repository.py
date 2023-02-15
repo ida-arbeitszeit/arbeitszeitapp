@@ -488,13 +488,6 @@ class GetAllPlans(FlaskTestCase):
         assert plans.update().set_approval_date(expected_approval_date).perform()
         assert all(plan.approval_date == expected_approval_date for plan in plans)
 
-    def test_can_set_approval_reason(self) -> None:
-        plan = self.plan_generator.create_plan()
-        plans = self.plan_repository.get_plans().with_id(plan.id)
-        expected_approval_reason = "test approval reason"
-        assert plans.update().set_approval_reason(expected_approval_reason).perform()
-        assert all(plan.approval_reason == expected_approval_reason for plan in plans)
-
     def test_can_set_expiration_status_to_true_and_then_to_false_again(self) -> None:
         plan_id = self.plan_generator.create_plan().id
         plan = self.plan_repository.get_plans().with_id(plan_id)

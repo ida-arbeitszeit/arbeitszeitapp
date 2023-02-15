@@ -281,14 +281,6 @@ class PlanUpdate:
             ),
         )
 
-    def set_approval_reason(self, reason: Optional[str]) -> PlanUpdate:
-        return replace(
-            self,
-            review_update_values=dict(
-                self.review_update_values, approval_reason=reason
-            ),
-        )
-
     def set_activation_timestamp(
         self, activation_timestamp: Optional[datetime]
     ) -> PlanUpdate:
@@ -966,7 +958,6 @@ class PlanRepository(repositories.PlanRepository):
             timeframe=int(plan.timeframe),
             is_public_service=plan.is_public_service,
             approval_date=plan.review.approval_date,
-            approval_reason=plan.review.approval_reason,
             is_active=plan.is_active,
             expired=plan.expired,
             activation_date=plan.activation_date,
@@ -1006,9 +997,7 @@ class PlanRepository(repositories.PlanRepository):
             is_available=True,
         )
         self.db.session.add(plan)
-        plan_review = models.PlanReview(
-            approval_date=None, approval_reason=None, plan=plan
-        )
+        plan_review = models.PlanReview(approval_date=None, plan=plan)
         self.db.session.add(plan_review)
         return plan
 

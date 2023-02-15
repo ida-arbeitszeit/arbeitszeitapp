@@ -146,7 +146,6 @@ class Plan:
     timeframe: int
     is_public_service: bool
     approval_date: Optional[datetime]
-    approval_reason: Optional[str]
     is_active: bool
     expired: bool
     activation_date: Optional[datetime]
