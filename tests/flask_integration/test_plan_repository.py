@@ -83,14 +83,6 @@ class PlanRepositoryTests(FlaskTestCase):
         assert plan_from_repo
         assert plan_from_repo.hidden_by_user
 
-    def test_that_payout_count_is_increased_by_one(self) -> None:
-        plan = self.plan_generator.create_plan()
-        assert plan.payout_count == 0
-        self.plan_repository.increase_payout_count_by_one(plan)
-        plan_from_repo = self.plan_repository.get_plans().with_id(plan.id).first()
-        assert plan_from_repo
-        assert plan_from_repo.payout_count == 1
-
     def test_that_availability_is_toggled_to_false(self) -> None:
         plan = self.plan_generator.create_plan()
         assert plan.is_available == True

@@ -113,7 +113,6 @@ class Plan(db.Model):
     is_active = db.Column(db.Boolean, nullable=False, default=False)
     activation_date = db.Column(db.DateTime, nullable=True)
     expired = db.Column(db.Boolean, nullable=False, default=False)
-    payout_count = db.Column(db.Integer, nullable=False, default=0)
     is_available = db.Column(db.Boolean, nullable=False, default=True)
     requested_cooperation = db.Column(
         db.String, db.ForeignKey("cooperation.id"), nullable=True
@@ -184,6 +183,16 @@ class Purchase(db.Model):
     price_per_unit = db.Column(db.Numeric(), nullable=False)
     amount = db.Column(db.Integer, nullable=False)
     purpose = db.Column(db.Enum(entities.PurposesOfPurchases), nullable=False)
+
+
+class LabourCertificatesPayout(db.Model):
+    transaction_id = db.Column(
+        db.String,
+        db.ForeignKey("transaction.id"),
+        nullable=False,
+        primary_key=True,
+    )
+    plan_id = db.Column(db.String, db.ForeignKey("plan.id"), nullable=False)
 
 
 class CompanyWorkInvite(db.Model):
