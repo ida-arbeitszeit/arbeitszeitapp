@@ -1,3 +1,7 @@
+from dataclasses import dataclass
+from typing import List, Optional
+
+from arbeitszeit.use_cases.query_plans import PlanQueryResponse, QueriedPlan
 from arbeitszeit_web.api_presenters.interfaces import (
     JsonBoolean,
     JsonDatetime,
@@ -9,7 +13,14 @@ from arbeitszeit_web.api_presenters.interfaces import (
 )
 
 
-class ActivePlansPresenter:
+class QueryPlansApiPresenter:
+    @dataclass
+    class ViewModel:
+        results: List[QueriedPlan]
+        total_results: int
+        offset: Optional[int]
+        limit: Optional[int]
+
     @classmethod
     def get_schema(cls) -> JsonValue:
         return JsonDict(
@@ -31,6 +42,16 @@ class ActivePlansPresenter:
                     as_list=True,
                 ),
                 total_results=JsonInteger(),
+                offset=JsonInteger(),
+                limit=JsonInteger(),
             ),
             schema_name="PlanList",
+        )
+
+    def create_view_model(self, use_case_response: PlanQueryResponse) -> ViewModel:
+        return self.ViewModel(
+            results=use_case_response.results,
+            total_results=use_case_response.total_results,
+            offset=use_case_response.request.offset,
+            limit=use_case_response.request.limit,
         )

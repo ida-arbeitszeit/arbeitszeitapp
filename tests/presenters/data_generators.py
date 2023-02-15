@@ -50,8 +50,6 @@ class QueriedPlanGenerator:
     def get_response(
         self,
         queried_plans: Optional[List[QueriedPlan]] = None,
-        page: Optional[int] = None,
-        num_pages: Optional[int] = None,
         total_results: Optional[int] = None,
         query_string: Optional[str] = None,
         requested_offset: int = 0,
