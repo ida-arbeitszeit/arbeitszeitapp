@@ -13,12 +13,14 @@ from arbeitszeit_web.api_controllers.errors import (
 from arbeitszeit_web.api_controllers.query_plans_api_controller import (
     QueryPlansApiController,
 )
-from arbeitszeit_web.api_presenters.plans import ActivePlansPresenter
+from arbeitszeit_web.api_presenters.query_plans_api_presenter import (
+    QueryPlansApiPresenter,
+)
 
 namespace = Namespace("plans", "Plan related endpoints.")
 
 model = json_schema_to_flaskx(
-    schema=ActivePlansPresenter().get_schema(), namespace=namespace
+    schema=QueryPlansApiPresenter().get_schema(), namespace=namespace
 )
 input_documentation = generate_input_documentation(
     QueryPlansApiController().get_expected_inputs()
@@ -30,7 +32,12 @@ class ListActivePlans(Resource):
     @namespace.expect(input_documentation)
     @namespace.marshal_with(model)
     @with_injection()
-    def get(self, controller: QueryPlansApiController, query_plans: QueryPlans):
+    def get(
+        self,
+        controller: QueryPlansApiController,
+        query_plans: QueryPlans,
+        presenter: QueryPlansApiPresenter,
+    ):
         """List active plans."""
         try:
             use_case_request = controller.get_request(FlaskRequest())
@@ -39,4 +46,5 @@ class ListActivePlans(Resource):
         except NegativeNumberError:
             abort(400, "The parameter must not be be a negative number.")
         response = query_plans(request=use_case_request)
-        return response
+        view_model = presenter.create_view_model(response)
+        return view_model
