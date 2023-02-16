@@ -83,3 +83,17 @@ class PayMeansOfProductionForm(Protocol):
 
     def category_field(self) -> FormField[str]:
         ...
+
+
+class RegisterForm(Protocol):
+    @property
+    def email_field(self) -> FormField[str]:
+        ...
+
+    @property
+    def password_field(self) -> FormField[str]:
+        ...
+
+    @property
+    def name_field(self) -> FormField[str]:
+        ...

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from decimal import Decimal
 from typing import Generic, List, Optional, TypeVar
 from uuid import uuid4
@@ -142,3 +143,31 @@ class FormFieldImpl(Generic[T]):
 
     def set_value(self, value: T) -> None:
         self.value = value
+
+
+@dataclass
+class RegisterFormImpl:
+    email_field: FormFieldImpl[str]
+    password_field: FormFieldImpl[str]
+    name_field: FormFieldImpl[str]
+
+    @classmethod
+    def create(
+        cls,
+        email: str = "test@test.test",
+        password: str = "testpassword",
+        name: str = "testname",
+    ) -> RegisterFormImpl:
+        return cls(
+            email_field=FormFieldImpl(value=email),
+            password_field=FormFieldImpl(value=password),
+            name_field=FormFieldImpl(value=name),
+        )
+
+    def errors(self) -> List[str]:
+        """Contains all errors of all fields of the form"""
+        return (
+            self.email_field.errors
+            + self.password_field.errors
+            + self.name_field.errors
+        )

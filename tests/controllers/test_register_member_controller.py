@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import Optional
 from unittest import TestCase
 
 from arbeitszeit_web.register_member import RegisterMemberController
+from tests.forms import RegisterFormImpl
 
 from .dependency_injection import get_dependency_injector
 
@@ -29,28 +29,9 @@ def make_fake_form(
     email: Optional[str] = None,
     name: Optional[str] = None,
     password: Optional[str] = None,
-) -> FakeRegisterMemberForm:
-    return FakeRegisterMemberForm(
+) -> RegisterFormImpl:
+    return RegisterFormImpl.create(
         email=email or "someone@cp.org",
         name=name or "Someone",
         password=password or "super_safe_pw",
     )
-
-
-@dataclass
-class FakeRegisterMemberForm:
-    email: str
-    name: str
-    password: str
-
-    def get_email_string(self) -> str:
-        return self.email
-
-    def get_name_string(self) -> str:
-        return self.name
-
-    def get_password_string(self) -> str:
-        return self.password
-
-    def add_email_error(self, error: str) -> None:
-        pass

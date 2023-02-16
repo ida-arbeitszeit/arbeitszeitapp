@@ -124,17 +124,17 @@ class RegisterForm(Form):
         ],
     )
 
-    def get_email_string(self) -> str:
-        return self.data["email"]
+    @property
+    def email_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="email")
 
-    def get_name_string(self) -> str:
-        return self.data["name"]
+    @property
+    def password_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="password")
 
-    def get_password_string(self) -> str:
-        return self.data["password"]
-
-    def add_email_error(self, error: str) -> None:
-        self.email.errors.append(error)
+    @property
+    def name_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="name")
 
 
 class RegisterAccountantForm(Form):

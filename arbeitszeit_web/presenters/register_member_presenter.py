@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
-from arbeitszeit_web.register_member import RegisterForm
+from arbeitszeit_web.forms import RegisterForm
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
 
@@ -24,7 +24,7 @@ class RegisterMemberPresenter:
                 response.rejection_reason
                 == RegisterMemberUseCase.Response.RejectionReason.member_already_exists
             ):
-                form.add_email_error(
+                form.email_field.attach_error(
                     self.translator.gettext("This email address is already registered.")
                 )
             return RegisterMemberViewModel(is_success_view=False)

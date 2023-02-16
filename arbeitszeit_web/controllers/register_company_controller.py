@@ -1,13 +1,13 @@
-from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
+from arbeitszeit.use_cases import RegisterCompany
 from arbeitszeit_web.forms import RegisterForm
 
 
-class RegisterMemberController:
+class RegisterCompanyController:
     def create_request(
         self,
         form: RegisterForm,
-    ) -> RegisterMemberUseCase.Request:
-        return RegisterMemberUseCase.Request(
+    ) -> RegisterCompany.Request:
+        return RegisterCompany.Request(
             email=form.email_field.get_value(),
             name=form.name_field.get_value(),
             password=form.password_field.get_value(),

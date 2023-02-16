@@ -7,10 +7,12 @@ from arbeitszeit.use_cases.register_company import RegisterCompany
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import RegisterForm
 from arbeitszeit_flask.types import Response
+from arbeitszeit_web.controllers.register_company_controller import (
+    RegisterCompanyController,
+)
 from arbeitszeit_web.presenters.register_company_presenter import (
     RegisterCompanyPresenter,
 )
-from arbeitszeit_web.register_company import RegisterCompanyController
 
 
 @dataclass
