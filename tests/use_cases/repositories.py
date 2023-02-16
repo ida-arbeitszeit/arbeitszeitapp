@@ -42,7 +42,6 @@ from arbeitszeit.entities import (
     Transaction,
 )
 from arbeitszeit.injector import singleton
-from tests.search_tree import SearchTree
 
 T = TypeVar("T")
 QueryResultT = TypeVar("QueryResultT", bound="QueryResultImpl")
@@ -463,6 +462,21 @@ class LabourCertificatesPayoutResult(
         return replace(
             self,
             items=lambda: filter(lambda payout: payout.plan_id == plan, self.items()),
+        )
+
+
+class PayoutFactorResult(QueryResultImpl[entities.PayoutFactor]):
+    def ordered_by_calculation_date(
+        self, *, descending: bool = False
+    ) -> PayoutFactorResult:
+        def sorted_factors() -> Iterable[entities.PayoutFactor]:
+            return sorted(
+                self.items(), key=lambda f: f.calculation_date, reverse=descending
+            )
+
+        return replace(
+            self,
+            items=sorted_factors,
         )
 
 
@@ -1075,36 +1089,6 @@ class FakeLanguageRepository:
 
 
 @singleton
-class FakePayoutFactorRepository:
-    @dataclass
-    class _PayoutFactorModel:
-        factor: PayoutFactor
-
-        def __lt__(self, other: FakePayoutFactorRepository._PayoutFactorModel) -> bool:
-            return self.factor.calculation_date < other.factor.calculation_date
-
-    def __init__(self) -> None:
-        self._payout_factors: SearchTree[
-            FakePayoutFactorRepository._PayoutFactorModel
-        ] = SearchTree()
-
-    def store_payout_factor(self, timestamp: datetime, payout_factor: Decimal) -> None:
-        model = self._PayoutFactorModel(
-            PayoutFactor(calculation_date=timestamp, value=payout_factor)
-        )
-        self._payout_factors.insert(model)
-
-    def get_latest_payout_factor(
-        self,
-    ) -> Optional[PayoutFactor]:
-        model = self._payout_factors.last()
-        if model is None:
-            return None
-        else:
-            return model.factor
-
-
-@singleton
 class EntityStorage:
     def __init__(self, datetime_service: DatetimeService) -> None:
         self.members: Dict[UUID, Member] = {}
@@ -1123,6 +1107,7 @@ class EntityStorage:
         self.labour_certificates_payouts: Dict[
             UUID, entities.LabourCertificatesPayout
         ] = dict()
+        self.payout_factors: List[entities.PayoutFactor] = list()
 
     def create_labour_certificates_payout(
         self, transaction: UUID, plan: UUID
@@ -1139,6 +1124,19 @@ class EntityStorage:
             items=lambda: self.labour_certificates_payouts.values(),
             entities=self,
         )
+
+    def get_payout_factors(self) -> PayoutFactorResult:
+        return PayoutFactorResult(
+            items=lambda: self.payout_factors,
+            entities=self,
+        )
+
+    def create_payout_factor(
+        self, timestamp: datetime, payout_factor: Decimal
+    ) -> PayoutFactor:
+        factor = entities.PayoutFactor(calculation_date=timestamp, value=payout_factor)
+        self.payout_factors.append(factor)
+        return factor
 
     def create_account(self, account_type: AccountTypes) -> Account:
         account = Account(

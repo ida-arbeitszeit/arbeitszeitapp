@@ -484,6 +484,16 @@ class LabourCertificatesPayoutResult(
         )
 
 
+class PayoutFactorResult(FlaskQueryResult[entities.PayoutFactor]):
+    def ordered_by_calculation_date(
+        self, descending: bool = False
+    ) -> PayoutFactorResult:
+        ordering = models.PayoutFactor.timestamp
+        if descending:
+            ordering = ordering.desc()
+        return self._with_modified_query(lambda query: query.order_by(ordering))
+
+
 @dataclass
 class UserAddressBookImpl:
     db: SQLAlchemy
@@ -1431,32 +1441,6 @@ class AccountantRepository:
 
 
 @dataclass
-class PayoutFactorRepository:
-    db: SQLAlchemy
-
-    def store_payout_factor(self, timestamp: datetime, payout_factor: Decimal) -> None:
-        payout_factor = models.PayoutFactor(
-            timestamp=timestamp, payout_factor=payout_factor
-        )
-        self.db.session.add(payout_factor)
-
-    def get_latest_payout_factor(
-        self,
-    ) -> Optional[entities.PayoutFactor]:
-        payout_factor_orm = (
-            self.db.session.query(models.PayoutFactor)
-            .order_by(models.PayoutFactor.timestamp.desc())
-            .first()
-        )
-        if not payout_factor_orm:
-            return None
-        return entities.PayoutFactor(
-            calculation_date=payout_factor_orm.timestamp,
-            value=Decimal(payout_factor_orm.payout_factor),
-        )
-
-
-@dataclass
 class DatabaseGatewayImpl:
     db: SQLAlchemy
 
@@ -1477,10 +1461,35 @@ class DatabaseGatewayImpl:
         self.db.session.add(orm)
         return self._labour_certificates_payout_from_orm(orm)
 
+    def create_payout_factor(
+        self, timestamp: datetime, payout_factor: Decimal
+    ) -> entities.PayoutFactor:
+        orm = models.PayoutFactor(
+            timestamp=timestamp,
+            payout_factor=payout_factor,
+        )
+        self.db.session.add(orm)
+        return self._payout_factor_from_orm(orm)
+
+    def get_payout_factors(self) -> PayoutFactorResult:
+        return PayoutFactorResult(
+            query=models.PayoutFactor.query,
+            db=self.db,
+            mapper=self._payout_factor_from_orm,
+        )
+
     def _labour_certificates_payout_from_orm(
         self, orm: models.LabourCertificatesPayout
     ) -> entities.LabourCertificatesPayout:
         return entities.LabourCertificatesPayout(
             plan_id=UUID(orm.plan_id),
             transaction_id=UUID(orm.transaction_id),
+        )
+
+    def _payout_factor_from_orm(
+        self, orm: models.PayoutFactor
+    ) -> entities.PayoutFactor:
+        return entities.PayoutFactor(
+            calculation_date=orm.timestamp,
+            value=orm.payout_factor,
         )

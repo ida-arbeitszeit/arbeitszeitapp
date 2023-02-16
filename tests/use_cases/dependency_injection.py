@@ -77,9 +77,6 @@ class InMemoryModule(Module):
         binder[interfaces.CooperationRepository] = AliasProvider(  # type: ignore
             repositories.CooperationRepository
         )
-        binder[interfaces.PayoutFactorRepository] = AliasProvider(  # type: ignore
-            repositories.FakePayoutFactorRepository
-        )
         binder[TokenService] = AliasProvider(FakeTokenService)  # type: ignore
         binder.bind(
             interfaces.DatabaseGateway,  # type: ignore

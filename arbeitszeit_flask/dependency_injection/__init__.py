@@ -34,7 +34,6 @@ from arbeitszeit_flask.database.repositories import (
     CooperationRepository,
     DatabaseGatewayImpl,
     MemberRepository,
-    PayoutFactorRepository,
     PlanDraftRepository,
     PlanRepository,
     PurchaseRepository,
@@ -177,10 +176,6 @@ class FlaskModule(Module):
         )
         binder.bind(TokenService, to=AliasProvider(FlaskTokenService))  # type: ignore
         binder.bind(UserAddressBook, to=AliasProvider(UserAddressBookImpl))  # type: ignore
-        binder.bind(
-            interfaces.PayoutFactorRepository,  # type: ignore
-            to=AliasProvider(PayoutFactorRepository),
-        )
         binder[NotifyAccountantsAboutNewPlanPresenter] = AliasProvider(NotifyAccountantsAboutNewPlanPresenterImpl)  # type: ignore
         binder[TextRenderer] = AliasProvider(TextRendererImpl)  # type: ignore
         binder[Request] = AliasProvider(FlaskRequest)  # type: ignore

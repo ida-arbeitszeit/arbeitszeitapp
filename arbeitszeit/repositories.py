@@ -229,6 +229,13 @@ class LabourCertificatesPayoutResult(QueryResult[LabourCertificatesPayout], Prot
         ...
 
 
+class PayoutFactorResult(QueryResult[PayoutFactor], Protocol):
+    def ordered_by_calculation_date(
+        self, *, descending: bool = ...
+    ) -> PayoutFactorResult:
+        ...
+
+
 class PurchaseRepository(ABC):
     @abstractmethod
     def create_purchase_by_company(
@@ -514,14 +521,6 @@ class LanguageRepository(Protocol):
         ...
 
 
-class PayoutFactorRepository(Protocol):
-    def store_payout_factor(self, timestamp: datetime, payout_factor: Decimal) -> None:
-        ...
-
-    def get_latest_payout_factor(self) -> Optional[PayoutFactor]:
-        ...
-
-
 class DatabaseGateway(Protocol):
     def get_labour_certificates_payouts(self) -> LabourCertificatesPayoutResult:
         ...
@@ -529,4 +528,12 @@ class DatabaseGateway(Protocol):
     def create_labour_certificates_payout(
         self, transaction: UUID, plan: UUID
     ) -> LabourCertificatesPayout:
+        ...
+
+    def get_payout_factors(self) -> PayoutFactorResult:
+        ...
+
+    def create_payout_factor(
+        self, timestamp: datetime, payout_factor: Decimal
+    ) -> PayoutFactor:
         ...
