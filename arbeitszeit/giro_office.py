@@ -51,7 +51,6 @@ class GiroOffice:
             self.control_thresholds.get_allowed_overdraw_of_member_account()
         )
         account_balance = self.account_repository.get_account_balance(sending_account)
-        print(account_balance, transaction_volume, allowed_overdraw)
         if transaction_volume > account_balance + allowed_overdraw:
             return False
         return True

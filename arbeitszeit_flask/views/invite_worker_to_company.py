@@ -45,7 +45,6 @@ class InviteWorkerGetRequestHandler:
         use_case_request = self.controller.create_use_case_request()
         use_case_response = self.use_case(use_case_request)
         view_model = self.presenter.show_workers_list(use_case_response)
-        print(view_model)
         return Response(
             self.template_renderer.render_template(
                 template_name,
