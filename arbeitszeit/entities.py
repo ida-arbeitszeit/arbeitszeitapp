@@ -149,7 +149,6 @@ class Plan:
     is_active: bool
     expired: bool
     activation_date: Optional[datetime]
-    payout_count: int
     requested_cooperation: Optional[UUID]
     cooperation: Optional[UUID]
     is_available: bool
@@ -246,3 +245,9 @@ class Accountant:
 class PayoutFactor:
     calculation_date: datetime
     value: Decimal
+
+
+@dataclass
+class LabourCertificatesPayout:
+    plan_id: UUID
+    transaction_id: UUID

@@ -81,6 +81,10 @@ class InMemoryModule(Module):
             repositories.FakePayoutFactorRepository
         )
         binder[TokenService] = AliasProvider(FakeTokenService)  # type: ignore
+        binder.bind(
+            interfaces.DatabaseGateway,  # type: ignore
+            to=AliasProvider(repositories.EntityStorage),
+        )
 
 
 def get_dependency_injector() -> Injector:

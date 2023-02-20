@@ -14,6 +14,7 @@ from arbeitszeit.entities import (
     Company,
     CompanyWorkInvite,
     Cooperation,
+    LabourCertificatesPayout,
     Member,
     PayoutFactor,
     Plan,
@@ -217,6 +218,11 @@ class AccountResult(QueryResult[Account], Protocol):
         ...
 
 
+class LabourCertificatesPayoutResult(QueryResult[LabourCertificatesPayout], Protocol):
+    def for_plan(self, plan: UUID) -> LabourCertificatesPayoutResult:
+        ...
+
+
 class PurchaseRepository(ABC):
     @abstractmethod
     def create_purchase_by_company(
@@ -249,10 +255,6 @@ class PurchaseRepository(ABC):
 class PlanRepository(ABC):
     @abstractmethod
     def create_plan_from_draft(self, draft_id: UUID) -> Optional[UUID]:
-        pass
-
-    @abstractmethod
-    def increase_payout_count_by_one(self, plan: Plan) -> None:
         pass
 
     @abstractmethod
@@ -531,4 +533,14 @@ class PayoutFactorRepository(Protocol):
         ...
 
     def get_latest_payout_factor(self) -> Optional[PayoutFactor]:
+        ...
+
+
+class DatabaseGateway(Protocol):
+    def get_labour_certificates_payouts(self) -> LabourCertificatesPayoutResult:
+        ...
+
+    def create_labour_certificates_payout(
+        self, transaction: UUID, plan: UUID
+    ) -> LabourCertificatesPayout:
         ...
