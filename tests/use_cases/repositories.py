@@ -22,6 +22,7 @@ from typing import (
 from uuid import UUID, uuid4
 
 import arbeitszeit.repositories as interfaces
+from arbeitszeit import entities
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.entities import (
@@ -438,6 +439,16 @@ class AccountResult(QueryResultImpl[Account]):
         )
 
 
+class LabourCertificatesPayoutResult(
+    QueryResultImpl[entities.LabourCertificatesPayout]
+):
+    def for_plan(self, plan: UUID) -> LabourCertificatesPayoutResult:
+        return replace(
+            self,
+            items=lambda: filter(lambda payout: payout.plan_id == plan, self.items()),
+        )
+
+
 @singleton
 class PurchaseRepository(interfaces.PurchaseRepository):
     def __init__(self, entities: EntityStorage):
@@ -742,9 +753,6 @@ class PlanRepository(interfaces.PlanRepository):
     def __len__(self) -> int:
         return len(self.entities.plans)
 
-    def increase_payout_count_by_one(self, plan: Plan) -> None:
-        plan.payout_count += 1
-
     def avg_timeframe_of_active_plans(self) -> Decimal:
         try:
             avg_timeframe = mean(
@@ -823,7 +831,6 @@ class PlanRepository(interfaces.PlanRepository):
             activation_date=None,
             approval_date=None,
             expired=False,
-            payout_count=0,
             requested_cooperation=None,
             cooperation=None,
             is_available=True,
@@ -1141,6 +1148,25 @@ class EntityStorage:
             account=self.create_account(account_type=AccountTypes.accounting),
         )
         self.cooperations: Dict[UUID, Cooperation] = dict()
+        self.labour_certificates_payouts: Dict[
+            UUID, entities.LabourCertificatesPayout
+        ] = dict()
+
+    def create_labour_certificates_payout(
+        self, transaction: UUID, plan: UUID
+    ) -> entities.LabourCertificatesPayout:
+        assert transaction not in self.labour_certificates_payouts
+        payout = entities.LabourCertificatesPayout(
+            transaction_id=transaction, plan_id=plan
+        )
+        self.labour_certificates_payouts[transaction] = payout
+        return payout
+
+    def get_labour_certificates_payouts(self) -> LabourCertificatesPayoutResult:
+        return LabourCertificatesPayoutResult(
+            items=lambda: self.labour_certificates_payouts.values(),
+            entities=self,
+        )
 
     def create_account(self, account_type: AccountTypes) -> Account:
         account = Account(

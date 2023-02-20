@@ -457,6 +457,17 @@ class AccountQueryResult(FlaskQueryResult[entities.Account]):
         )
 
 
+class LabourCertificatesPayoutResult(
+    FlaskQueryResult[entities.LabourCertificatesPayout]
+):
+    def for_plan(self, plan: UUID) -> LabourCertificatesPayoutResult:
+        return self._with_modified_query(
+            lambda query: query.filter(
+                models.LabourCertificatesPayout.plan_id == str(plan),
+            )
+        )
+
+
 @dataclass
 class UserAddressBookImpl:
     db: SQLAlchemy
@@ -961,7 +972,6 @@ class PlanRepository(repositories.PlanRepository):
             is_active=plan.is_active,
             expired=plan.expired,
             activation_date=plan.activation_date,
-            payout_count=plan.payout_count,
             requested_cooperation=UUID(plan.requested_cooperation)
             if plan.requested_cooperation
             else None,
@@ -993,19 +1003,12 @@ class PlanRepository(repositories.PlanRepository):
             is_public_service=plan.is_public_service,
             is_active=False,
             activation_date=None,
-            payout_count=0,
             is_available=True,
         )
         self.db.session.add(plan)
         plan_review = models.PlanReview(approval_date=None, plan=plan)
         self.db.session.add(plan_review)
         return plan
-
-    def increase_payout_count_by_one(self, plan: entities.Plan) -> None:
-        plan.payout_count += 1
-
-        plan_orm = self.object_to_orm(plan)
-        plan_orm.payout_count += 1
 
     def avg_timeframe_of_active_plans(self) -> Decimal:
         return Decimal(
@@ -1099,6 +1102,7 @@ class TransactionRepository(repositories.TransactionRepository):
             purpose=purpose,
         )
         self.db.session.add(transaction)
+        self.db.session.flush()
         return self.object_from_orm(transaction)
 
     def get_transactions(self) -> TransactionQueryResult:
@@ -1473,4 +1477,34 @@ class PayoutFactorRepository:
         return entities.PayoutFactor(
             calculation_date=payout_factor_orm.timestamp,
             value=Decimal(payout_factor_orm.payout_factor),
+        )
+
+
+@dataclass
+class DatabaseGatewayImpl:
+    db: SQLAlchemy
+
+    def get_labour_certificates_payouts(self) -> LabourCertificatesPayoutResult:
+        return LabourCertificatesPayoutResult(
+            query=models.LabourCertificatesPayout.query,
+            mapper=self._labour_certificates_payout_from_orm,
+            db=self.db,
+        )
+
+    def create_labour_certificates_payout(
+        self, transaction: UUID, plan: UUID
+    ) -> entities.LabourCertificatesPayout:
+        orm = models.LabourCertificatesPayout(
+            transaction_id=str(transaction),
+            plan_id=str(plan),
+        )
+        self.db.session.add(orm)
+        return self._labour_certificates_payout_from_orm(orm)
+
+    def _labour_certificates_payout_from_orm(
+        self, orm: models.LabourCertificatesPayout
+    ) -> entities.LabourCertificatesPayout:
+        return entities.LabourCertificatesPayout(
+            plan_id=UUID(orm.plan_id),
+            transaction_id=UUID(orm.transaction_id),
         )

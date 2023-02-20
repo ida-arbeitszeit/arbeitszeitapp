@@ -32,6 +32,7 @@ from arbeitszeit_flask.database.repositories import (
     AccountRepository,
     CompanyRepository,
     CooperationRepository,
+    DatabaseGatewayImpl,
     MemberRepository,
     PayoutFactorRepository,
     PlanDraftRepository,
@@ -191,6 +192,10 @@ class FlaskModule(Module):
         binder[EmailConfiguration] = AliasProvider(FlaskEmailConfiguration)  # type: ignore
         binder[interfaces.TransactionRepository] = AliasProvider(TransactionRepository)  # type: ignore
         binder[interfaces.AccountantRepository] = AliasProvider(AccountantRepository)  # type: ignore
+        binder.bind(
+            interfaces.DatabaseGateway,  # type: ignore
+            to=AliasProvider(DatabaseGatewayImpl),
+        )
         binder[TemplateRenderer] = AliasProvider(FlaskTemplateRenderer)  # type: ignore
         binder[Session] = AliasProvider(FlaskSession)  # type: ignore
         binder[Notifier] = AliasProvider(FlaskFlashNotifier)  # type: ignore
