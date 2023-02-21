@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 from unittest import TestCase
 from uuid import UUID, uuid4
 
@@ -6,6 +6,7 @@ from arbeitszeit.use_cases.register_company import RegisterCompany
 from arbeitszeit_web.presenters.register_company_presenter import (
     RegisterCompanyPresenter,
 )
+from tests.forms import RegisterFormImpl
 from tests.session import FakeSession
 from tests.translator import FakeTranslator
 
@@ -18,7 +19,7 @@ class PresenterTests(TestCase):
         self.presenter = self.injector.get(RegisterCompanyPresenter)
         self.translator = self.injector.get(FakeTranslator)
         self.session = self.injector.get(FakeSession)
-        self.form = FakeRegisterForm()
+        self.form = RegisterFormImpl.create()
 
     def test_that_correct_error_message_is_displayed_when_email_is_already_registered(
         self,
@@ -27,7 +28,7 @@ class PresenterTests(TestCase):
         response = self.create_response(rejection_reason=reason)
         self.presenter.present_company_registration(response, self.form)
         self.assertEqual(
-            self.form.errors[0],
+            self.form.email_field.errors[0],
             self.translator.gettext("This email address is already registered."),
         )
 
@@ -50,7 +51,7 @@ class PresenterTests(TestCase):
     def test_that_no_error_is_displayed_when_registration_was_successful(self) -> None:
         response = self.create_response()
         self.presenter.present_company_registration(response, self.form)
-        self.assertFalse(self.form.errors)
+        self.assertFalse(self.form.errors())
 
     def test_view_model_signals_successful_registration_if_view_model_signals_success(
         self,
@@ -77,20 +78,3 @@ class PresenterTests(TestCase):
         return RegisterCompany.Response(
             rejection_reason=rejection_reason, company_id=company_id
         )
-
-
-class FakeRegisterForm:
-    def __init__(self) -> None:
-        self.errors: List[str] = []
-
-    def get_email_string(self) -> str:
-        return "test@test.test"
-
-    def get_name_string(self) -> str:
-        return "test name"
-
-    def get_password_string(self) -> str:
-        return "test password"
-
-    def add_email_error(self, message: str) -> None:
-        self.errors.append(message)

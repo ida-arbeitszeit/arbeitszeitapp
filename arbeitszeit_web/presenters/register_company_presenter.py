@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from arbeitszeit.use_cases.register_company import RegisterCompany
-from arbeitszeit_web.register_company import RegisterForm
+from arbeitszeit_web.forms import RegisterForm
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
 
@@ -20,7 +20,7 @@ class RegisterCompanyPresenter:
         self, response: RegisterCompany.Response, form: RegisterForm
     ) -> ViewModel:
         if response.is_rejected:
-            form.add_email_error(
+            form.email_field.attach_error(
                 self.translator.gettext("This email address is already registered.")
             )
             return ViewModel(is_success_view=False)
