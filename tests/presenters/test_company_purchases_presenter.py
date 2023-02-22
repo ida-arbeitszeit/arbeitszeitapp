@@ -44,7 +44,7 @@ class TestPresenter(BaseTestCase):
             purpose=PurposesOfPurchases.means_of_prod,
         )
 
-        presentation = presenter.present(self.query_purchases(company))  # DUT
+        presentation = presenter.present(self.query_purchases(company.id))  # DUT
 
         assert isinstance(presentation, ViewModel)
 

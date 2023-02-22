@@ -22,7 +22,7 @@ def test_that_no_purchase_is_returned_when_searching_an_empty_repo(
     query_purchases: QueryCompanyPurchases,
     company_generator: CompanyGenerator,
 ):
-    company = company_generator.create_company_entity()
+    company = company_generator.create_company()
     results = list(query_purchases(company))
     assert not results
 
@@ -37,7 +37,7 @@ def test_that_correct_purchases_are_returned(
     expected_purchase_company = purchase_generator.create_purchase_by_company(
         buyer=company
     )
-    results = list(query_purchases(company))
+    results = list(query_purchases(company.id))
     assert len(results) == 1
     assert purchase_in_results(expected_purchase_company, results)
 
@@ -57,7 +57,7 @@ def test_that_purchases_are_returned_in_correct_order(
     expected_recent_purchase = purchase_generator.create_purchase_by_company(
         buyer=company, purchase_date=datetime_service.now_minus_one_day()
     )
-    results = list(query_purchases(company))
+    results = list(query_purchases(company.id))
     assert purchase_in_results(
         expected_recent_purchase, [results[0]]
     )  # more recent purchase is first

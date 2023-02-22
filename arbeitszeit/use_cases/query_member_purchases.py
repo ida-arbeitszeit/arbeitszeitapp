@@ -4,7 +4,7 @@ from decimal import Decimal
 from typing import Iterator
 from uuid import UUID
 
-from arbeitszeit.entities import Member, Purchase
+from arbeitszeit.entities import Purchase
 from arbeitszeit.repositories import PlanRepository, PurchaseRepository
 
 
@@ -26,10 +26,10 @@ class QueryMemberPurchases:
 
     def __call__(
         self,
-        user: Member,
+        member: UUID,
     ) -> Iterator[PurchaseQueryResponse]:
         purchases = self.purchase_repository.get_purchases()
-        purchases = purchases.where_buyer_is_member(member=user.id)
+        purchases = purchases.where_buyer_is_member(member=member)
         return (
             self._purchase_to_response_model(purchase)
             for purchase in purchases.ordered_by_creation_date(ascending=False)

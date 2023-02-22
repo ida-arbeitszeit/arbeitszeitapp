@@ -8,7 +8,7 @@ from flask_login import current_user
 
 from arbeitszeit import use_cases
 from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
-from arbeitszeit_flask.database import MemberRepository, commit_changes
+from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.forms import (
     AnswerCompanyWorkInviteForm,
@@ -48,13 +48,10 @@ from .blueprint import MemberRoute
 @MemberRoute("/member/purchases")
 def my_purchases(
     query_purchases: use_cases.QueryMemberPurchases,
-    member_repository: MemberRepository,
     template_renderer: UserTemplateRenderer,
     presenter: MemberPurchasesPresenter,
 ) -> Response:
-    member = member_repository.get_members().with_id(UUID(current_user.id)).first()
-    assert member is not None
-    response = query_purchases(member)
+    response = query_purchases(UUID(current_user.id))
     view_model = presenter.present_member_purchases(response)
     return FlaskResponse(
         template_renderer.render_template(

@@ -19,7 +19,7 @@ def test_that_no_purchase_is_returned_when_searching_an_empty_repo(
     query_purchases: QueryMemberPurchases,
     member_generator: MemberGenerator,
 ):
-    member = member_generator.create_member_entity()
+    member = member_generator.create_member()
     results = list(query_purchases(member))
     assert not results
 
@@ -34,7 +34,7 @@ def test_that_correct_purchases_are_returned(
     expected_purchase_member = purchase_generator.create_purchase_by_member(
         buyer=member
     )
-    results = list(query_purchases(member))
+    results = list(query_purchases(member.id))
     assert len(results) == 1
     assert purchase_in_results(expected_purchase_member, results)
 
@@ -54,7 +54,7 @@ def test_that_purchases_are_returned_in_correct_order(
     expected_recent_purchase = purchase_generator.create_purchase_by_member(
         buyer=member, purchase_date=datetime_service.now_minus_one_day()
     )
-    results = list(query_purchases(member))
+    results = list(query_purchases(member.id))
     assert purchase_in_results(
         expected_recent_purchase, [results[0]]
     )  # more recent purchase is first
