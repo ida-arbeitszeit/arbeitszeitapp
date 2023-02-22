@@ -14,7 +14,7 @@ class PurchaseQueryResponse:
     plan_id: UUID
     product_name: str
     product_description: str
-    purpose: str
+    purpose: PurposesOfPurchases
     price_per_unit: Decimal
     amount: int
     price_total: Decimal
@@ -40,12 +40,6 @@ class QueryPurchases:
         )
 
     def _purchase_to_response_model(self, purchase: Purchase) -> PurchaseQueryResponse:
-        if purchase.purpose == PurposesOfPurchases.means_of_prod:
-            purpose = "Prod.mittel"
-        elif purchase.purpose == PurposesOfPurchases.raw_materials:
-            purpose = "Rohmat."
-        else:
-            purpose = "Konsum"
         plan = self.plan_repository.get_plans().with_id(purchase.plan).first()
         assert plan
         return PurchaseQueryResponse(
@@ -53,7 +47,7 @@ class QueryPurchases:
             plan_id=purchase.plan,
             product_name=plan.prd_name,
             product_description=plan.description,
-            purpose=purpose,
+            purpose=purchase.purpose,
             price_per_unit=purchase.price_per_unit,
             amount=purchase.amount,
             price_total=purchase.price_per_unit * purchase.amount,

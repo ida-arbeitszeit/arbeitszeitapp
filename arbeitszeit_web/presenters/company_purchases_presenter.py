@@ -2,7 +2,9 @@ from dataclasses import dataclass, field
 from typing import Iterator
 
 from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.entities import PurposesOfPurchases
 from arbeitszeit.use_cases.query_purchases import PurchaseQueryResponse
+from arbeitszeit_web.translator import Translator
 
 
 @dataclass
@@ -18,6 +20,7 @@ class ViewModel:
         price_total: str
 
     datetime_service: DatetimeService
+    translator: Translator
     purchases: list[Purchase] = field(default_factory=list)
 
     def append(self, purchase_respond: PurchaseQueryResponse) -> None:
@@ -30,12 +33,20 @@ class ViewModel:
             ),
             product_name=purchase_respond.product_name,
             product_description=purchase_respond.product_description,
-            purpose=purchase_respond.purpose,
+            purpose=self._convert_purpose(purchase_respond.purpose),
             price_per_unit=str(round(purchase_respond.price_per_unit, 2)),
             amount=str(purchase_respond.amount),
             price_total=str(round(purchase_respond.price_total, 2)),
         )
         self.purchases.append(p)
+
+    def _convert_purpose(self, purpose: PurposesOfPurchases) -> str:
+        if purpose == PurposesOfPurchases.raw_materials:
+            return self.translator.gettext("Liquid means of production")
+        elif purpose == PurposesOfPurchases.means_of_prod:
+            return self.translator.gettext("Fixed means of production")
+        else:
+            return self.translator.gettext("Consumption")
 
     def __len__(self) -> int:
         return len(self.purchases)
@@ -46,12 +57,11 @@ class ViewModel:
 
 @dataclass
 class CompanyPurchasesPresenter:
-
     datetime_service: DatetimeService
+    translator: Translator
 
     def present(self, use_case_response: Iterator[PurchaseQueryResponse]) -> ViewModel:
-
-        model = ViewModel(self.datetime_service)
+        model = ViewModel(self.datetime_service, self.translator)
 
         for p in use_case_response:
             model.append(p)
