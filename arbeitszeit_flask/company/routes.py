@@ -168,7 +168,7 @@ def query_companies(
 
 @CompanyRoute("/company/purchases")
 def my_purchases(
-    query_purchases: use_cases.QueryPurchases,
+    query_purchases: use_cases.QueryCompanyPurchases,
     company_repository: CompanyRepository,
     template_renderer: UserTemplateRenderer,
     presenter: CompanyPurchasesPresenter,

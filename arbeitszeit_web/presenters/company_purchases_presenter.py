@@ -3,7 +3,7 @@ from typing import Iterator
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import PurposesOfPurchases
-from arbeitszeit.use_cases.query_purchases import PurchaseQueryResponse
+from arbeitszeit.use_cases.query_company_purchases import PurchaseQueryResponse
 from arbeitszeit_web.translator import Translator
 
 
@@ -43,10 +43,8 @@ class ViewModel:
     def _convert_purpose(self, purpose: PurposesOfPurchases) -> str:
         if purpose == PurposesOfPurchases.raw_materials:
             return self.translator.gettext("Liquid means of production")
-        elif purpose == PurposesOfPurchases.means_of_prod:
-            return self.translator.gettext("Fixed means of production")
         else:
-            return self.translator.gettext("Consumption")
+            return self.translator.gettext("Fixed means of production")
 
     def __len__(self) -> int:
         return len(self.purchases)

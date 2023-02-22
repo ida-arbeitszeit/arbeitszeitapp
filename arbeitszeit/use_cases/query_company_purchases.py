@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterator, Union
+from typing import Iterator
 from uuid import UUID
 
-from arbeitszeit.entities import Company, Member, Purchase, PurposesOfPurchases
+from arbeitszeit.entities import Company, Purchase, PurposesOfPurchases
 from arbeitszeit.repositories import PlanRepository, PurchaseRepository
 
 
@@ -21,19 +21,16 @@ class PurchaseQueryResponse:
 
 
 @dataclass
-class QueryPurchases:
+class QueryCompanyPurchases:
     purchase_repository: PurchaseRepository
     plan_repository: PlanRepository
 
     def __call__(
         self,
-        user: Union[Member, Company],
+        user: Company,
     ) -> Iterator[PurchaseQueryResponse]:
         purchases = self.purchase_repository.get_purchases()
-        if isinstance(user, Member):
-            purchases = purchases.where_buyer_is_member(member=user.id)
-        else:
-            purchases = purchases.where_buyer_is_company(company=user.id)
+        purchases = purchases.where_buyer_is_company(company=user.id)
         return (
             self._purchase_to_response_model(purchase)
             for purchase in purchases.ordered_by_creation_date(ascending=False)

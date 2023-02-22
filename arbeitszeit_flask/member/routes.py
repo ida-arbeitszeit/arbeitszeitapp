@@ -47,7 +47,7 @@ from .blueprint import MemberRoute
 
 @MemberRoute("/member/purchases")
 def my_purchases(
-    query_purchases: use_cases.QueryPurchases,
+    query_purchases: use_cases.QueryMemberPurchases,
     member_repository: MemberRepository,
     template_renderer: UserTemplateRenderer,
     presenter: MemberPurchasesPresenter,
