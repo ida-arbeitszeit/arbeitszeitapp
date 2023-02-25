@@ -33,14 +33,14 @@ class ViewModel:
             ),
             product_name=purchase_respond.product_name,
             product_description=purchase_respond.product_description,
-            purpose=self._convert_purpose(purchase_respond.purpose),
+            purpose=self._format_purpose(purchase_respond.purpose),
             price_per_unit=str(round(purchase_respond.price_per_unit, 2)),
             amount=str(purchase_respond.amount),
             price_total=str(round(purchase_respond.price_total, 2)),
         )
         self.purchases.append(p)
 
-    def _convert_purpose(self, purpose: PurposesOfPurchases) -> str:
+    def _format_purpose(self, purpose: PurposesOfPurchases) -> str:
         if purpose == PurposesOfPurchases.raw_materials:
             return self.translator.gettext("Liquid means of production")
         else:

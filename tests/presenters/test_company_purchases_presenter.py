@@ -9,13 +9,12 @@ from arbeitszeit_web.presenters.company_purchases_presenter import (
 from tests.data_generators import CompanyGenerator, PurchaseGenerator
 from tests.datetime_service import FakeDatetimeService
 from tests.presenters.base_test_case import BaseTestCase
-from tests.presenters.dependency_injection import get_dependency_injector
 from tests.translator import FakeTranslator
 
 
 class TestPresenter(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.query_purchases = self.injector.get(QueryCompanyPurchases)
         self.purchase_generator = self.injector.get(PurchaseGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
