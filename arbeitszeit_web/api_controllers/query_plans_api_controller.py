@@ -14,7 +14,7 @@ DEFAULT_LIMIT: int = 30
 
 class QueryPlansApiController:
     @classmethod
-    def get_expected_inputs(cls) -> List[ExpectedInput]:
+    def create_expected_inputs(cls) -> List[ExpectedInput]:
         return [
             ExpectedInput(
                 name="offset",
@@ -30,7 +30,7 @@ class QueryPlansApiController:
             ),
         ]
 
-    def get_request(self, request: Request) -> QueryPlansRequest:
+    def create_request(self, request: Request) -> QueryPlansRequest:
         offset = self._parse_offset(request)
         limit = self._parse_limit(request)
         return QueryPlansRequest(

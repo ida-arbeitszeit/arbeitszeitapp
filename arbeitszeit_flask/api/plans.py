@@ -19,11 +19,12 @@ from arbeitszeit_web.api_presenters.query_plans_api_presenter import (
 
 namespace = Namespace("plans", "Plan related endpoints.")
 
+input_documentation = generate_input_documentation(
+    QueryPlansApiController().create_expected_inputs()
+)
+
 model = json_schema_to_flaskx(
     schema=QueryPlansApiPresenter().get_schema(), namespace=namespace
-)
-input_documentation = generate_input_documentation(
-    QueryPlansApiController().get_expected_inputs()
 )
 
 
@@ -40,7 +41,7 @@ class ListActivePlans(Resource):
     ):
         """List active plans."""
         try:
-            use_case_request = controller.get_request(FlaskRequest())
+            use_case_request = controller.create_request(FlaskRequest())
         except NotAnIntegerError:
             abort(400, "The parameter must be an integer.")
         except NegativeNumberError:
