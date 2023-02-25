@@ -28,23 +28,23 @@ class TestQueryCompanies(BaseTestCase):
         )
 
     def test_that_no_company_is_returned_when_searching_an_empty_repository(self):
-        response = self.query_companies(self.make_request(None, CompanyFilter.by_name))
+        response = self.query_companies(make_request(None, CompanyFilter.by_name))
         assert not response.results
-        response = self.query_companies(self.make_request(None, CompanyFilter.by_email))
+        response = self.query_companies(make_request(None, CompanyFilter.by_email))
         assert not response.results
 
     def test_that_company_is_returned_when_searching_without_query(self):
         expected_company = self.company_generator.create_company_entity(
             name="My Company"
         )
-        response = self.query_companies(self.make_request(None, CompanyFilter.by_name))
+        response = self.query_companies(make_request(None, CompanyFilter.by_name))
         assert self.company_in_results(expected_company, response)
 
     def test_that_company_is_returned_when_searching_with_empty_query_string(self):
         expected_company = self.company_generator.create_company_entity(
             name="My Company"
         )
-        response = self.query_companies(self.make_request("", CompanyFilter.by_name))
+        response = self.query_companies(make_request("", CompanyFilter.by_name))
         assert self.company_in_results(expected_company, response)
 
     def test_that_companies_where_name_is_exact_match_are_returned(self):
@@ -52,7 +52,7 @@ class TestQueryCompanies(BaseTestCase):
             name="My Company"
         )
         response = self.query_companies(
-            self.make_request("My Company", CompanyFilter.by_name)
+            make_request("My Company", CompanyFilter.by_name)
         )
         assert self.company_in_results(expected_company, response)
 
@@ -60,25 +60,19 @@ class TestQueryCompanies(BaseTestCase):
         expected_company = self.company_generator.create_company_entity(
             name="My Company"
         )
-        response = self.query_companies(
-            self.make_request("Company", CompanyFilter.by_name)
-        )
+        response = self.query_companies(make_request("Company", CompanyFilter.by_name))
         assert self.company_in_results(expected_company, response)
 
     def test_that_companies_where_name_not_match_are_not_returned(self):
         self.company_generator.create_company_entity(name="My Company")
-        response = self.query_companies(
-            self.make_request("Factory", CompanyFilter.by_name)
-        )
+        response = self.query_companies(make_request("Factory", CompanyFilter.by_name))
         assert not response.results
 
     def test_that_capitalization_is_ignored_in_name(self):
         expected_company = self.company_generator.create_company_entity(
             name="My Company"
         )
-        response = self.query_companies(
-            self.make_request("company", CompanyFilter.by_name)
-        )
+        response = self.query_companies(make_request("company", CompanyFilter.by_name))
         assert self.company_in_results(expected_company, response)
 
     def test_that_companies_where_email_is_exact_match_are_returned(self):
@@ -86,7 +80,7 @@ class TestQueryCompanies(BaseTestCase):
             email="company@provider.de"
         )
         response = self.query_companies(
-            self.make_request("company@provider.de", CompanyFilter.by_email)
+            make_request("company@provider.de", CompanyFilter.by_email)
         )
         assert self.company_in_results(expected_company, response)
 
@@ -94,41 +88,50 @@ class TestQueryCompanies(BaseTestCase):
         expected_company = self.company_generator.create_company_entity(
             email="company@provider.de"
         )
-        response = self.query_companies(
-            self.make_request("company", CompanyFilter.by_email)
-        )
+        response = self.query_companies(make_request("company", CompanyFilter.by_email))
         assert self.company_in_results(expected_company, response)
 
     def test_that_companies_where_email_not_match_are_not_returned(self):
         self.company_generator.create_company_entity(email="company@provider.de")
-        response = self.query_companies(
-            self.make_request("factory", CompanyFilter.by_email)
-        )
+        response = self.query_companies(make_request("factory", CompanyFilter.by_email))
         assert not response.results
 
     def test_that_capitalization_is_ignored_in_email(self):
         expected_company = self.company_generator.create_company_entity(
             email="company@provider.de"
         )
-        response = self.query_companies(
-            self.make_request("Company", CompanyFilter.by_email)
-        )
+        response = self.query_companies(make_request("Company", CompanyFilter.by_email))
         assert self.company_in_results(expected_company, response)
 
-    def make_request(self, query: Optional[str], category: CompanyFilter):
-        return QueryCompaniesRequestTestImpl(
-            query=query,
-            filter_category=category,
-        )
+
+class TestPagination(BaseTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.query_companies = self.injector.get(QueryCompanies)
+
+
+def make_request(query: Optional[str], category: CompanyFilter):
+    return QueryCompaniesRequestTestImpl(
+        query=query,
+        filter_category=category,
+    )
 
 
 @dataclass
 class QueryCompaniesRequestTestImpl(QueryCompaniesRequest):
     query: Optional[str]
     filter_category: CompanyFilter
+    offset: Optional[int] = None
+    limit: Optional[int] = None
 
     def get_query_string(self) -> Optional[str]:
         return self.query
 
     def get_filter_category(self) -> CompanyFilter:
         return self.filter_category
+
+    def get_offset(self) -> Optional[int]:
+        return self.offset
+
+    def get_limit(self) -> Optional[int]:
+        return self.limit

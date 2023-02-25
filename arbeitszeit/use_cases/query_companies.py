@@ -36,6 +36,14 @@ class QueryCompaniesRequest(ABC):
     def get_filter_category(self) -> CompanyFilter:
         pass
 
+    @abstractmethod
+    def get_offset(self) -> Optional[int]:
+        pass
+
+    @abstractmethod
+    def get_limit(self) -> Optional[int]:
+        pass
+
 
 @dataclass
 class QueryCompanies:
