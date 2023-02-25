@@ -1,11 +1,8 @@
 from typing import List
 
 from arbeitszeit.use_cases.query_plans import PlanFilter, PlanSorting, QueryPlansRequest
-from arbeitszeit_web.api_controllers.errors import (
-    NegativeNumberError,
-    NotAnIntegerError,
-)
 from arbeitszeit_web.api_controllers.expected_input import ExpectedInput
+from arbeitszeit_web.api_controllers import query_parser
 from arbeitszeit_web.request import Request
 
 DEFAULT_OFFSET: int = 0
@@ -41,26 +38,16 @@ class QueryPlansApiController:
             limit=limit,
         )
 
-    def _string_to_non_negative_integer(self, string: str) -> int:
-        try:
-            integer = int(string)
-        except ValueError:
-            raise NotAnIntegerError()
-        else:
-            if integer < 0:
-                raise NegativeNumberError()
-        return integer
-
     def _parse_offset(self, request: Request) -> int:
         offset_string = request.query_string().get("offset")
         if not offset_string:
             return DEFAULT_OFFSET
-        offset = self._string_to_non_negative_integer(offset_string)
+        offset = query_parser.string_to_non_negative_integer(offset_string)
         return offset
 
     def _parse_limit(self, request: Request) -> int:
         limit_string = request.query_string().get("limit")
         if not limit_string:
             return DEFAULT_LIMIT
-        limit = self._string_to_non_negative_integer(limit_string)
+        limit = query_parser.string_to_non_negative_integer(limit_string)
         return limit
