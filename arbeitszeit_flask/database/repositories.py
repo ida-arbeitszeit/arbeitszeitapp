@@ -401,6 +401,18 @@ class CompanyQueryResult(FlaskQueryResult[entities.Company]):
             company.workers.append(member)
         return companies_changed
 
+    def with_name_containing(self, query: str) -> CompanyQueryResult:
+        return self._with_modified_query(
+            lambda db_query: db_query.filter(models.Company.name.ilike(f"%{query}%"))
+        )
+
+    def with_email_containing(self, query: str) -> CompanyQueryResult:
+        return self._with_modified_query(
+            lambda db_query: db_query.join(models.User).filter(
+                models.User.email.ilike(f"%{query}%")
+            )
+        )
+
 
 class TransactionQueryResult(FlaskQueryResult[entities.Transaction]):
     def where_account_is_sender_or_receiver(
@@ -616,22 +628,6 @@ class CompanyRepository(repositories.CompanyRepository):
         self.db.session.add(company)
         self.db.session.flush()
         return self.object_from_orm(company)
-
-    def query_companies_by_name(self, query: str) -> Iterator[entities.Company]:
-        return (
-            self.object_from_orm(company)
-            for company in Company.query.filter(
-                Company.name.ilike("%" + query + "%")
-            ).all()
-        )
-
-    def query_companies_by_email(self, query: str) -> Iterator[entities.Company]:
-        companies = (
-            self.db.session.query(models.Company)
-            .join(models.User)
-            .filter(models.User.email.ilike("%" + query + "%"))
-        )
-        return (self.object_from_orm(company) for company in companies)
 
     def get_companies(self) -> CompanyQueryResult:
         return CompanyQueryResult(

@@ -125,74 +125,6 @@ class RepositoryTester(FlaskTestCase):
         assert company_in_companies(expected_company1, all_companies)
         assert company_in_companies(expected_company2, all_companies)
 
-    def test_query_companies_by_name_matching_exactly(self) -> None:
-        expected_company = self.company_generator.create_company_entity(
-            name="Company1", email="company1@provider.de"
-        )
-        unexpected_company = self.company_generator.create_company_entity(
-            name="Company2", email="company2@provider.de"
-        )
-        companies_by_name = list(
-            self.company_repository.query_companies_by_name("Company1")
-        )
-        assert company_in_companies(expected_company, companies_by_name)
-        assert not company_in_companies(unexpected_company, companies_by_name)
-
-    def test_query_companies_by_name_with_matching_substring(self) -> None:
-        expected_company = self.company_generator.create_company_entity(
-            name="Company One", email="company1@provider.de"
-        )
-        unexpected_company = self.company_generator.create_company_entity(
-            name="Company Two", email="company2@provider.de"
-        )
-        companies_by_name = list(self.company_repository.query_companies_by_name("One"))
-        assert company_in_companies(expected_company, companies_by_name)
-        assert not company_in_companies(unexpected_company, companies_by_name)
-
-    def test_query_companies_by_name_with_capitalization(self) -> None:
-        expected_company = self.company_generator.create_company_entity(
-            name="COMPANY", email="company@provider.de"
-        )
-        companies_result = list(
-            self.company_repository.query_companies_by_name("company")
-        )
-        assert company_in_companies(expected_company, companies_result)
-
-    def test_query_companies_by_email_matching_exactly(self) -> None:
-        expected_company = self.company_generator.create_company_entity(
-            email="company1@provider.de"
-        )
-        unexpected_company = self.company_generator.create_company_entity(
-            email="company2@provider.de"
-        )
-        companies_by_email = list(
-            self.company_repository.query_companies_by_email("company1@provider.de")
-        )
-        assert company_in_companies(expected_company, companies_by_email)
-        assert not company_in_companies(unexpected_company, companies_by_email)
-
-    def test_query_companies_by_email_with_matching_substring(self) -> None:
-        expected_company = self.company_generator.create_company_entity(
-            email="company.one@provider.de"
-        )
-        unexpected_company = self.company_generator.create_company_entity(
-            email="company.two@provider.de"
-        )
-        companies_by_email = list(
-            self.company_repository.query_companies_by_email("one")
-        )
-        assert company_in_companies(expected_company, companies_by_email)
-        assert not company_in_companies(unexpected_company, companies_by_email)
-
-    def test_query_companies_by_email_with_capitalization(self) -> None:
-        expected_company = self.company_generator.create_company_entity(
-            email="company@provider.de"
-        )
-        companies_result = list(
-            self.company_repository.query_companies_by_email("COMPANY")
-        )
-        assert company_in_companies(expected_company, companies_result)
-
 
 class ValidateCredentialsTest(FlaskTestCase):
     def setUp(self) -> None:
@@ -334,3 +266,71 @@ class ThatAreWorkplaceOfMemberTests(FlaskTestCase):
             .that_are_workplace_of_member(member)
             .with_id(company)
         )
+
+
+class WithNameContainingTests(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.repository = self.injector.get(CompanyRepository)
+        self.company_generator = self.injector.get(CompanyGenerator)
+
+    def test_that_companies_can_be_filtered_by_name(self):
+        expected_company_id = self.company_generator.create_company(name="abc123")
+        returned_company = list(
+            self.repository.get_companies().with_name_containing("abc123")
+        )
+        assert returned_company
+        assert returned_company[0].id == expected_company_id
+
+    def test_that_companies_can_be_filtered_by_subset_of_name(self):
+        expected_company_id = self.company_generator.create_company(name="abc123")
+        returned_company = list(
+            self.repository.get_companies().with_name_containing("bc1")
+        )
+        assert returned_company
+        assert returned_company[0].id == expected_company_id
+
+    def test_that_companies_can_be_filtered_by_subset_of_name_regardless_of_case(self):
+        expected_company_id = self.company_generator.create_company(name="abc123")
+        returned_company = list(
+            self.repository.get_companies().with_name_containing("bC1")
+        )
+        assert returned_company
+        assert returned_company[0].id == expected_company_id
+
+
+class WithEmailContainingTests(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.repository = self.injector.get(CompanyRepository)
+        self.company_generator = self.injector.get(CompanyGenerator)
+
+    def test_that_companies_can_be_filtered_by_email(self):
+        expected_company_id = self.company_generator.create_company(
+            email="some.mail@cp.org"
+        )
+        returned_company = list(
+            self.repository.get_companies().with_email_containing("some.mail@cp.org")
+        )
+        assert returned_company
+        assert returned_company[0].id == expected_company_id
+
+    def test_that_companies_can_be_filtered_by_substring_of_email(self):
+        expected_company_id = self.company_generator.create_company(
+            email="some.mail@cp.org"
+        )
+        returned_company = list(
+            self.repository.get_companies().with_email_containing("ail@cp")
+        )
+        assert returned_company
+        assert returned_company[0].id == expected_company_id
+
+    def test_that_companies_can_be_filtered_regardless_of_case(self):
+        expected_company_id = self.company_generator.create_company(
+            email="some.mail@cp.org"
+        )
+        returned_company = list(
+            self.repository.get_companies().with_email_containing("aIL@cp")
+        )
+        assert returned_company
+        assert returned_company[0].id == expected_company_id

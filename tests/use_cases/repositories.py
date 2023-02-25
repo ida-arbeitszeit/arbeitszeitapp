@@ -378,6 +378,18 @@ class CompanyResult(QueryResultImpl[Company]):
             self.entities.company_workers[company.id].add(member)
         return companies_changed
 
+    def with_name_containing(self, query: str) -> CompanyResult:
+        return self._filtered_by(lambda company: query.lower() in company.name.lower())
+
+    def with_email_containing(self, query: str) -> CompanyResult:
+        return self._filtered_by(lambda company: query.lower() in company.email.lower())
+
+    def _filtered_by(self, key: Callable[[Company], bool]) -> CompanyResult:
+        return type(self)(
+            items=lambda: filter(key, self.items()),
+            entities=self.entities,
+        )
+
 
 class TransactionResult(QueryResultImpl[Transaction]):
     def where_account_is_sender_or_receiver(self, *account: UUID) -> TransactionResult:
@@ -681,16 +693,6 @@ class CompanyRepository(interfaces.CompanyRepository):
         self.entities.companies[email] = new_company
         self.entities.company_passwords[new_company.id] = password
         return new_company
-
-    def query_companies_by_name(self, query: str) -> Iterator[Company]:
-        for company in self.entities.companies.values():
-            if query.lower() in company.name.lower():
-                yield company
-
-    def query_companies_by_email(self, query: str) -> Iterator[Company]:
-        for email, company in self.entities.companies.items():
-            if query.lower() in email.lower():
-                yield company
 
     def get_companies(self) -> CompanyResult:
         return CompanyResult(
