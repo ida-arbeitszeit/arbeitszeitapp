@@ -69,6 +69,9 @@ from arbeitszeit_web.controllers.delete_draft_controller import DeleteDraftContr
 from arbeitszeit_web.controllers.file_plan_with_accounting_controller import (
     FilePlanWithAccountingController,
 )
+from arbeitszeit_web.controllers.query_companies_controller import (
+    QueryCompaniesController,
+)
 from arbeitszeit_web.create_draft import (
     CreateDraftController,
     CreateDraftPresenter,
@@ -91,6 +94,7 @@ from arbeitszeit_web.presenters.delete_draft_presenter import DeleteDraftPresent
 from arbeitszeit_web.presenters.file_plan_with_accounting_presenter import (
     FilePlanWithAccountingPresenter,
 )
+from arbeitszeit_web.presenters.query_companies_presenter import QueryCompaniesPresenter
 from arbeitszeit_web.presenters.show_a_account_details_presenter import (
     ShowAAccountDetailsPresenter,
 )
@@ -102,10 +106,6 @@ from arbeitszeit_web.presenters.show_prd_account_details_presenter import (
 )
 from arbeitszeit_web.presenters.show_r_account_details_presenter import (
     ShowRAccountDetailsPresenter,
-)
-from arbeitszeit_web.query_companies import (
-    QueryCompaniesController,
-    QueryCompaniesPresenter,
 )
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
 from arbeitszeit_web.request_cooperation import (

@@ -25,6 +25,9 @@ from arbeitszeit_flask.views import (
     QueryCompaniesView,
     QueryPlansView,
 )
+from arbeitszeit_web.controllers.query_companies_controller import (
+    QueryCompaniesController,
+)
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_plan_summary_member import GetPlanSummaryMemberSuccessPresenter
@@ -36,10 +39,7 @@ from arbeitszeit_web.presenters.get_member_dashboard_presenter import (
     GetMemberDashboardPresenter,
 )
 from arbeitszeit_web.presenters.member_purchases import MemberPurchasesPresenter
-from arbeitszeit_web.query_companies import (
-    QueryCompaniesController,
-    QueryCompaniesPresenter,
-)
+from arbeitszeit_web.presenters.query_companies_presenter import QueryCompaniesPresenter
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
 
 from .blueprint import MemberRoute

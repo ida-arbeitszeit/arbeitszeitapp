@@ -4,7 +4,9 @@ from dataclasses import dataclass
 from typing import Optional
 
 from arbeitszeit.use_cases.query_companies import CompanyFilter
-from arbeitszeit_web.query_companies import QueryCompaniesController
+from arbeitszeit_web.controllers.query_companies_controller import (
+    QueryCompaniesController,
+)
 from tests.controllers.base_test_case import BaseTestCase
 from tests.request import FakeRequest
 

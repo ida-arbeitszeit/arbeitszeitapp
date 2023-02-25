@@ -2,7 +2,7 @@ from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases.query_companies import CompanyQueryResponse, QueriedCompany
-from arbeitszeit_web.query_companies import QueryCompaniesPresenter
+from arbeitszeit_web.presenters.query_companies_presenter import QueryCompaniesPresenter
 
 from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl
