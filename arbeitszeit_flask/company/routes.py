@@ -177,7 +177,7 @@ def my_purchases(
     return FlaskResponse(
         template_renderer.render_template(
             "company/my_purchases.html",
-            context=dict(purchases=view_model),
+            context=dict(view_model=view_model),
         )
     )
 

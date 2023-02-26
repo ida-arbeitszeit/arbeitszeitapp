@@ -1,4 +1,5 @@
 from decimal import Decimal
+from uuid import uuid4
 
 from arbeitszeit.entities import PurposesOfPurchases
 from arbeitszeit.use_cases.query_company_purchases import QueryCompanyPurchases
@@ -20,6 +21,7 @@ class TestPresenter(BaseTestCase):
         self.company_generator = self.injector.get(CompanyGenerator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.translator = self.injector.get(FakeTranslator)
+        self.presenter = self.injector.get(CompanyPurchasesPresenter)
 
     def test_show_purchases_from_company(self):
         presenter = self.injector.get(CompanyPurchasesPresenter)  # DUT
@@ -80,3 +82,17 @@ class TestPresenter(BaseTestCase):
         assert presentation.purchases[1].price_per_unit == "100000.00"
         assert presentation.purchases[1].amount == "1"
         assert presentation.purchases[1].price_total == "100000.00"
+
+    def test_show_purchases_if_there_is_one_purchase(self):
+        buying_company = self.company_generator.create_company_entity()
+        self.purchase_generator.create_purchase_by_company(buyer=buying_company)
+        use_case_response = self.query_purchases(company=buying_company.id)
+        view_model = self.presenter.present(use_case_response)
+        assert view_model.show_purchases
+
+    def test_do_not_show_purchases_if_there_is_no_purchase_of_querying_company(self):
+        random_company = self.company_generator.create_company_entity()
+        self.purchase_generator.create_purchase_by_company(buyer=random_company)
+        use_case_response = self.query_purchases(company=uuid4())
+        view_model = self.presenter.present(use_case_response)
+        assert not view_model.show_purchases
