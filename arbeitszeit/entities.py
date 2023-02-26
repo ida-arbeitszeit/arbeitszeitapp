@@ -105,6 +105,10 @@ class ProductionCosts:
             means_cost=self.means_cost + other.means_cost,
         )
 
+    @classmethod
+    def zero(cls) -> ProductionCosts:
+        return cls(Decimal(0), Decimal(0), Decimal(0))
+
 
 @dataclass
 class PlanDraft:
@@ -251,3 +255,9 @@ class PayoutFactor:
 class LabourCertificatesPayout:
     plan_id: UUID
     transaction_id: UUID
+
+
+@dataclass
+class PlanningStatistics:
+    average_plan_duration_in_days: Decimal
+    total_planned_costs: ProductionCosts
