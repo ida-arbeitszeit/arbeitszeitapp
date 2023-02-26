@@ -67,6 +67,8 @@ class UrlIndexTestImpl:
     get_create_draft_url = UrlIndexMethod()
     get_member_query_plans_url = UrlIndexMethod()
     get_company_query_plans_url = UrlIndexMethod()
+    get_member_query_companies_url = UrlIndexMethod()
+    get_company_query_companies_url = UrlIndexMethod()
 
     def get_member_confirmation_url(self, *, token: str) -> str:
         return f"get_member_confirmation_url {token}"
