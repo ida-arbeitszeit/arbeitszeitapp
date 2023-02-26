@@ -109,11 +109,57 @@ class TestPagination(BaseTestCase):
         super().setUp()
         self.query_companies = self.injector.get(QueryCompanies)
 
+    def test_that_total_results_is_1_if_one_company_exists(
+        self,
+    ):
+        self.company_generator.create_company()
+        response = self.query_companies(make_request())
+        self.assertEqual(response.total_results, 1)
 
-def make_request(query: Optional[str], category: CompanyFilter):
+    def test_that_total_results_is_6_if_six_companies_are_present(
+        self,
+    ):
+        for _ in range(6):
+            self.company_generator.create_company()
+        response = self.query_companies(make_request())
+        assert response.total_results == 6
+
+    def test_that_first_10_companies_are_returned_if_limit_is_10(
+        self,
+    ):
+        for _ in range(20):
+            self.company_generator.create_company()
+        response = self.query_companies(make_request(limit=10))
+        assert len(response.results) == 10
+
+    def test_that_all_companies_are_returned_if_limit_is_0_and_there_are_20_companies(
+        self,
+    ):
+        for _ in range(20):
+            self.company_generator.create_company()
+        response = self.query_companies(make_request())
+        assert len(response.results) == 20
+
+    def test_that_5_companies_are_returned_on_second_page_if_20_companies_exist_and_offset_is_15(
+        self,
+    ):
+        for _ in range(20):
+            self.company_generator.create_company()
+        response = self.query_companies(make_request(offset=15))
+        assert len(response.results) == 5
+
+
+def make_request(
+    query: Optional[str] = None,
+    category: Optional[CompanyFilter] = None,
+    offset: Optional[int] = None,
+    limit: Optional[int] = None,
+) -> QueryCompaniesRequest:
     return QueryCompaniesRequestTestImpl(
-        query=query,
-        filter_category=category,
+        query=query or "",
+        filter_category=category or CompanyFilter.by_name,
+        offset=offset,
+        limit=limit,
     )
 
 
