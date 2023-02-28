@@ -211,6 +211,22 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
                 lambda query: query.filter(models.Plan.requested_cooperation != None)
             )
 
+    def get_statistics(self) -> entities.PlanningStatistics:
+        result = self.query.with_entities(
+            func.avg(models.Plan.timeframe).label("duration"),
+            func.sum(models.Plan.costs_p).label("costs_p"),
+            func.sum(models.Plan.costs_r).label("costs_r"),
+            func.sum(models.Plan.costs_a).label("costs_a"),
+        ).first()
+        return entities.PlanningStatistics(
+            average_plan_duration_in_days=result.duration or Decimal(0),
+            total_planned_costs=entities.ProductionCosts(
+                means_cost=result.costs_p or Decimal(0),
+                resource_cost=result.costs_r or Decimal(0),
+                labour_cost=result.costs_a or Decimal(0),
+            ),
+        )
+
     def update(self) -> PlanUpdate:
         return PlanUpdate(
             query=self.query,
@@ -1009,46 +1025,6 @@ class PlanRepository(repositories.PlanRepository):
         plan_review = models.PlanReview(approval_date=None, plan=plan)
         self.db.session.add(plan_review)
         return plan
-
-    def avg_timeframe_of_active_plans(self) -> Decimal:
-        return Decimal(
-            self.db.session.query(func.avg(models.Plan.timeframe))
-            .filter_by(is_active=True)
-            .one()[0]
-            or 0
-        )
-
-    def sum_of_active_planned_work(self) -> Decimal:
-        return Decimal(
-            self.db.session.query(func.sum(models.Plan.costs_a))
-            .filter_by(is_active=True)
-            .one()[0]
-            or 0
-        )
-
-    def sum_of_active_planned_resources(self) -> Decimal:
-        return Decimal(
-            self.db.session.query(func.sum(models.Plan.costs_r))
-            .filter_by(is_active=True)
-            .one()[0]
-            or 0
-        )
-
-    def sum_of_active_planned_means(self) -> Decimal:
-        return Decimal(
-            self.db.session.query(func.sum(models.Plan.costs_p))
-            .filter_by(is_active=True)
-            .one()[0]
-            or 0
-        )
-
-    def all_plans_approved_and_not_expired(self) -> Iterator[entities.Plan]:
-        return (
-            self.object_from_orm(plan_orm)
-            for plan_orm in models.Plan.query.filter_by(
-                approved=True, expired=False
-            ).all()
-        )
 
     def hide_plan(self, plan_id: UUID) -> None:
         plan_orm = models.Plan.query.filter_by(id=str(plan_id)).first()

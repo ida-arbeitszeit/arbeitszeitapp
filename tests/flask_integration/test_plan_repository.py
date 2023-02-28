@@ -30,42 +30,6 @@ class PlanRepositoryTests(FlaskTestCase):
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.company_generator = self.injector.get(CompanyGenerator)
 
-    def test_avg_timeframe_of_active_plans_is_calculated_correctly(self) -> None:
-        assert self.plan_repository.avg_timeframe_of_active_plans() == 0
-        self.plan_generator.create_plan(timeframe=5)
-        self.plan_generator.create_plan(timeframe=3)
-        assert self.plan_repository.avg_timeframe_of_active_plans() == 4
-
-    def test_sum_of_active_planned_work_calculated_correctly(self) -> None:
-        assert self.plan_repository.sum_of_active_planned_work() == 0
-        self.plan_generator.create_plan(
-            costs=production_costs(2, 0, 0),
-        )
-        self.plan_generator.create_plan(
-            costs=production_costs(3, 0, 0),
-        )
-        assert self.plan_repository.sum_of_active_planned_work() == 5
-
-    def test_sum_of_active_planned_resources_calculated_correctly(self) -> None:
-        assert self.plan_repository.sum_of_active_planned_resources() == 0
-        self.plan_generator.create_plan(
-            costs=production_costs(0, 2, 0),
-        )
-        self.plan_generator.create_plan(
-            costs=production_costs(0, 3, 0),
-        )
-        assert self.plan_repository.sum_of_active_planned_resources() == 5
-
-    def test_sum_of_active_planned_means_calculated_correctly(self) -> None:
-        assert self.plan_repository.sum_of_active_planned_means() == 0
-        self.plan_generator.create_plan(
-            costs=production_costs(0, 0, 2),
-        )
-        self.plan_generator.create_plan(
-            costs=production_costs(0, 0, 3),
-        )
-        assert self.plan_repository.sum_of_active_planned_means() == 5
-
     def test_all_active_plans_get_retrieved(self) -> None:
         number_of_plans = 5
         list_of_plans = [
@@ -487,3 +451,70 @@ class GetAllPlans(FlaskTestCase):
         assert plan.first().expired
         plan.update().set_expiration_status(is_expired=False).perform()
         assert not plan.first().expired
+
+
+class GetStatisticsTests(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.company_generator = self.injector.get(CompanyGenerator)
+        self.plan_repository = self.injector.get(PlanRepository)
+        self.plan_generator = self.injector.get(PlanGenerator)
+        self.datetime_service = self.injector.get(FakeDatetimeService)
+        self.cooperation_generator = self.injector.get(CooperationGenerator)
+
+    def test_with_no_plans_that_average_planning_duration_is_0(self) -> None:
+        stats = self.plan_repository.get_plans().get_statistics()
+        assert stats.average_plan_duration_in_days == Decimal(0)
+
+    def test_with_no_plans_that_planning_costs_are_0(self) -> None:
+        stats = self.plan_repository.get_plans().get_statistics()
+        assert stats.total_planned_costs == ProductionCosts.zero()
+
+    def test_with_one_active_plan_that_average_duration_is_exactly_the_length_of_that_plan(
+        self,
+    ) -> None:
+        self.plan_generator.create_plan(timeframe=3)
+        stats = self.plan_repository.get_plans().get_statistics()
+        assert stats.average_plan_duration_in_days == Decimal(3)
+
+    def test_with_two_active_plans_the_average_duration_is_the_mean_of_those_plans(
+        self,
+    ) -> None:
+        self.plan_generator.create_plan(timeframe=3)
+        self.plan_generator.create_plan(timeframe=5)
+        stats = self.plan_repository.get_plans().get_statistics()
+        assert stats.average_plan_duration_in_days == Decimal(4)
+
+    def test_with_one_active_plan_the_total_planned_costs_is_exactly_that_plans_cost(
+        self,
+    ) -> None:
+        expected_costs = ProductionCosts(
+            labour_cost=Decimal(4), resource_cost=Decimal(3), means_cost=Decimal(5)
+        )
+        self.plan_generator.create_plan(costs=expected_costs)
+        stats = self.plan_repository.get_plans().get_statistics()
+        assert stats.total_planned_costs == expected_costs
+
+    def test_with_two_active_plans_the_total_planned_costs_is_exactly_the_sum_of_plans_costs(
+        self,
+    ) -> None:
+        self.plan_generator.create_plan(
+            costs=ProductionCosts(
+                means_cost=Decimal(2),
+                resource_cost=Decimal(6),
+                labour_cost=Decimal(8),
+            )
+        )
+        self.plan_generator.create_plan(
+            costs=ProductionCosts(
+                means_cost=Decimal(3),
+                resource_cost=Decimal(7),
+                labour_cost=Decimal(9),
+            )
+        )
+        stats = self.plan_repository.get_plans().get_statistics()
+        assert stats.total_planned_costs == ProductionCosts(
+            means_cost=Decimal(5),
+            resource_cost=Decimal(13),
+            labour_cost=Decimal(17),
+        )

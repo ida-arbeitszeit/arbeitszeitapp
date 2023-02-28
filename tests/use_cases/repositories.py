@@ -5,7 +5,6 @@ from dataclasses import dataclass, replace
 from datetime import datetime
 from decimal import Decimal
 from itertools import islice
-from statistics import StatisticsError, mean
 from typing import (
     Callable,
     Dict,
@@ -199,6 +198,24 @@ class PlanResult(QueryResultImpl[Plan]):
         return replace(
             self,
             items=new_items,
+        )
+
+    def get_statistics(self) -> entities.PlanningStatistics:
+        """Return aggregate planning information for all plans
+        included in a result set.
+        """
+        duration_sum = 0
+        plan_count = 0
+        production_costs = entities.ProductionCosts(Decimal(0), Decimal(0), Decimal(0))
+        for plan in self.items():
+            plan_count += 1
+            production_costs += plan.production_costs
+            duration_sum += plan.timeframe
+        return entities.PlanningStatistics(
+            average_plan_duration_in_days=(Decimal(duration_sum) / Decimal(plan_count))
+            if plan_count > 0
+            else Decimal(0),
+            total_planned_costs=production_costs,
         )
 
     def update(self) -> PlanUpdate:
@@ -752,51 +769,6 @@ class PlanRepository(interfaces.PlanRepository):
 
     def __len__(self) -> int:
         return len(self.entities.plans)
-
-    def avg_timeframe_of_active_plans(self) -> Decimal:
-        try:
-            avg_timeframe = mean(
-                (
-                    plan.timeframe
-                    for plan in self.entities.plans.values()
-                    if plan.is_active
-                )
-            )
-        except StatisticsError:
-            avg_timeframe = 0
-        return Decimal(avg_timeframe)
-
-    def sum_of_active_planned_work(self) -> Decimal:
-        return decimal_sum(
-            (
-                plan.production_costs.labour_cost
-                for plan in self.entities.plans.values()
-                if plan.is_active
-            )
-        )
-
-    def sum_of_active_planned_resources(self) -> Decimal:
-        return decimal_sum(
-            (
-                plan.production_costs.resource_cost
-                for plan in self.entities.plans.values()
-                if plan.is_active
-            )
-        )
-
-    def sum_of_active_planned_means(self) -> Decimal:
-        return decimal_sum(
-            (
-                plan.production_costs.means_cost
-                for plan in self.entities.plans.values()
-                if plan.is_active
-            )
-        )
-
-    def all_plans_approved_and_not_expired(self) -> Iterator[Plan]:
-        for plan in self.entities.plans.values():
-            if plan.is_approved and not plan.expired:
-                yield plan
 
     def hide_plan(self, plan_id: UUID) -> None:
         plan = self.entities.plans.get(plan_id)

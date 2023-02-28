@@ -43,20 +43,20 @@ class GetStatistics:
             certs_total,
             available_product,
         ) = self._count_certificates_and_available_product()
+        active_plans = self.plan_repository.get_plans().that_are_active()
+        planning_statistics = active_plans.get_statistics()
         return StatisticsResponse(
             registered_companies_count=len(self.company_repository.get_companies()),
             registered_members_count=len(self.member_repository.get_members()),
             cooperations_count=self.cooperation_respository.count_cooperations(),
             certificates_count=certs_total,
             available_product=available_product,
-            active_plans_count=len(self.plan_repository.get_plans().that_are_active()),
-            active_plans_public_count=len(
-                self.plan_repository.get_plans().that_are_active().that_are_public()
-            ),
-            avg_timeframe=self.plan_repository.avg_timeframe_of_active_plans(),
-            planned_work=self.plan_repository.sum_of_active_planned_work(),
-            planned_resources=self.plan_repository.sum_of_active_planned_resources(),
-            planned_means=self.plan_repository.sum_of_active_planned_means(),
+            active_plans_count=len(active_plans),
+            active_plans_public_count=len(active_plans.that_are_public()),
+            avg_timeframe=planning_statistics.average_plan_duration_in_days,
+            planned_work=planning_statistics.total_planned_costs.labour_cost,
+            planned_resources=planning_statistics.total_planned_costs.resource_cost,
+            planned_means=planning_statistics.total_planned_costs.means_cost,
             payout_factor=self.payout_factor_repository.get_latest_payout_factor(),
         )
 

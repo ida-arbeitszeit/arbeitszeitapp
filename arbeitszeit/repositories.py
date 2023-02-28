@@ -19,6 +19,7 @@ from arbeitszeit.entities import (
     PayoutFactor,
     Plan,
     PlanDraft,
+    PlanningStatistics,
     ProductionCosts,
     Purchase,
     PurposesOfPurchases,
@@ -104,6 +105,11 @@ class PlanResult(QueryResult[Plan], Protocol):
         """If no companies are specified then the repository should
         return all plans that request cooperation with any
         coordinator.
+        """
+
+    def get_statistics(self) -> PlanningStatistics:
+        """Return aggregate planning information for all plans
+        included in a result set.
         """
 
     def update(self) -> PlanUpdate:
@@ -255,26 +261,6 @@ class PurchaseRepository(ABC):
 class PlanRepository(ABC):
     @abstractmethod
     def create_plan_from_draft(self, draft_id: UUID) -> Optional[UUID]:
-        pass
-
-    @abstractmethod
-    def avg_timeframe_of_active_plans(self) -> Decimal:
-        pass
-
-    @abstractmethod
-    def sum_of_active_planned_work(self) -> Decimal:
-        pass
-
-    @abstractmethod
-    def sum_of_active_planned_resources(self) -> Decimal:
-        pass
-
-    @abstractmethod
-    def sum_of_active_planned_means(self) -> Decimal:
-        pass
-
-    @abstractmethod
-    def all_plans_approved_and_not_expired(self) -> Iterator[Plan]:
         pass
 
     @abstractmethod
