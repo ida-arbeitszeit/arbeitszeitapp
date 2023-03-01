@@ -448,9 +448,9 @@ class GetAllPlans(FlaskTestCase):
         plan_id = self.plan_generator.create_plan().id
         plan = self.plan_repository.get_plans().with_id(plan_id)
         plan.update().set_expiration_status(is_expired=True).perform()
-        assert plan.first().expired
+        assert plan.first().expired  # type: ignore
         plan.update().set_expiration_status(is_expired=False).perform()
-        assert not plan.first().expired
+        assert not plan.first().expired  # type: ignore
 
 
 class GetStatisticsTests(FlaskTestCase):

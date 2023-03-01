@@ -79,7 +79,9 @@ class SqliteModule(Module):
         binder[FlaskConfiguration] = CallableProvider(FlaskConfiguration.default)
 
 
-def get_dependency_injector(additional_modules: Optional[List[Module]] = None):
+def get_dependency_injector(
+    additional_modules: Optional[List[Module]] = None,
+) -> Injector:
     modules: List[Module] = [
         FlaskModule(),
         TestingModule(),
