@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from arbeitszeit.entities import ProductionCosts, SocialAccounting
 from arbeitszeit.use_cases import GetCompanySummary
-from tests.data_generators import PurchaseGenerator, TransactionGenerator
+from tests.data_generators import TransactionGenerator
 
 from .base_test_case import BaseTestCase
 from .repositories import TransactionRepository
@@ -16,7 +16,6 @@ class UseCaseTests(BaseTestCase):
         self.get_company_summary = self.injector.get(GetCompanySummary)
         self.transaction_repository = self.injector.get(TransactionRepository)
         self.social_accounting = self.injector.get(SocialAccounting)
-        self.purchase_generator = self.injector.get(PurchaseGenerator)
         self.transaction_generator = self.injector.get(TransactionGenerator)
 
     def test_returns_none_when_company_does_not_exist(self) -> None:

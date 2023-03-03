@@ -7,6 +7,7 @@ from tests.data_generators import (
     CooperationGenerator,
     MemberGenerator,
     PlanGenerator,
+    PurchaseGenerator,
 )
 from tests.datetime_service import FakeDatetimeService
 
@@ -66,3 +67,4 @@ class BaseTestCase(TestCase):
     member_generator = _lazy_property(MemberGenerator)
     plan_generator = _lazy_property(PlanGenerator)
     price_checker = _lazy_property(PriceChecker)
+    purchase_generator = _lazy_property(PurchaseGenerator)

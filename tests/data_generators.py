@@ -377,6 +377,7 @@ class PurchaseGenerator:
         amount=1,
         price_per_unit: Optional[Decimal] = None,
         plan: Optional[Plan] = None,
+        purpose: Optional[PurposesOfPurchases] = None,
     ) -> Purchase:
         if buyer is None:
             buyer = self.company_generator.create_company_entity()
@@ -386,13 +387,15 @@ class PurchaseGenerator:
             price_per_unit = Decimal(10)
         if plan is None:
             plan = self.plan_generator.create_plan()
+        if purpose is None:
+            purpose = PurposesOfPurchases.means_of_prod
         return self.purchase_repository.create_purchase_by_company(
             purchase_date=purchase_date,
             plan=plan.id,
             buyer=buyer.id,
             price_per_unit=price_per_unit,
             amount=amount,
-            purpose=PurposesOfPurchases.means_of_prod,
+            purpose=purpose,
         )
 
     def create_purchase_by_member(
