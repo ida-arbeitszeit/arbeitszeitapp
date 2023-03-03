@@ -98,8 +98,9 @@ from .query_companies import (
     QueryCompanies,
     QueryCompaniesRequest,
 )
+from .query_company_purchases import QueryCompanyPurchases
+from .query_member_purchases import PurchaseQueryResponse, QueryMemberPurchases
 from .query_plans import PlanFilter, PlanQueryResponse, QueryPlans, QueryPlansRequest
-from .query_purchases import PurchaseQueryResponse, QueryPurchases
 from .register_company import RegisterCompany
 from .register_member import RegisterMemberUseCase
 from .request_cooperation import (
@@ -213,7 +214,8 @@ __all__ = [
     "QueryCompaniesRequest",
     "QueryPlans",
     "QueryPlansRequest",
-    "QueryPurchases",
+    "QueryCompanyPurchases",
+    "QueryMemberPurchases",
     "RegisterCompany",
     "RegisterMemberUseCase",
     "RequestCooperation",
