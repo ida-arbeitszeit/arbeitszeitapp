@@ -37,7 +37,7 @@ from arbeitszeit.use_cases.list_my_cooperating_plans import (
     ListMyCooperatingPlansUseCase,
 )
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
-from arbeitszeit_flask.database import CompanyRepository, commit_changes
+from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import (
@@ -168,20 +168,16 @@ def query_companies(
 
 @CompanyRoute("/company/purchases")
 def my_purchases(
-    query_purchases: use_cases.QueryPurchases,
-    company_repository: CompanyRepository,
+    query_purchases: use_cases.QueryCompanyPurchases,
     template_renderer: UserTemplateRenderer,
     presenter: CompanyPurchasesPresenter,
 ):
-    company = company_repository.get_companies().with_id(UUID(current_user.id)).first()
-    assert company is not None
-
-    response = query_purchases(company)
+    response = query_purchases(UUID(current_user.id))
     view_model = presenter.present(response)
     return FlaskResponse(
         template_renderer.render_template(
             "company/my_purchases.html",
-            context=dict(purchases=view_model),
+            context=dict(view_model=view_model),
         )
     )
 

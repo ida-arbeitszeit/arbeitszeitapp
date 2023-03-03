@@ -4,7 +4,7 @@ from typing import List
 from unittest import TestCase
 from uuid import uuid4
 
-from arbeitszeit.use_cases.query_purchases import PurchaseQueryResponse
+from arbeitszeit.use_cases.query_member_purchases import PurchaseQueryResponse
 from arbeitszeit_web.presenters.member_purchases import MemberPurchasesPresenter
 from tests.datetime_service import FakeDatetimeService
 
@@ -39,7 +39,6 @@ class PresenterTests(TestCase):
                 plan_id=uuid4(),
                 product_name="test product",
                 product_description="test product description",
-                purpose="not relevant",
                 price_per_unit=Decimal("1"),
                 amount=1,
                 price_total=Decimal("1"),
