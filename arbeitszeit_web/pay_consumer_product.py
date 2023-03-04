@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from uuid import UUID
 
 from arbeitszeit.use_cases.pay_consumer_product import (
+    PayConsumerProductRequest,
     PayConsumerProductResponse,
     RejectionReason,
 )
@@ -9,22 +10,6 @@ from arbeitszeit_web.forms import PayConsumerProductForm
 from arbeitszeit_web.translator import Translator
 
 from .notification import Notifier
-
-
-@dataclass
-class PayConsumerProductRequestImpl:
-    user: UUID
-    plan: UUID
-    amount: int
-
-    def get_buyer_id(self) -> UUID:
-        return self.user
-
-    def get_plan_id(self) -> UUID:
-        return self.plan
-
-    def get_amount(self) -> int:
-        return self.amount
 
 
 @dataclass
@@ -36,7 +21,7 @@ class PayConsumerProductController:
 
     def import_form_data(
         self, current_user: UUID, form: PayConsumerProductForm
-    ) -> PayConsumerProductRequestImpl:
+    ) -> PayConsumerProductRequest:
         try:
             plan_id = UUID(form.plan_id_field().get_value())
         except ValueError:
@@ -56,7 +41,9 @@ class PayConsumerProductController:
                 self.translator.gettext("This is not an integer.")
             )
             raise self.FormError()
-        return PayConsumerProductRequestImpl(current_user, plan_id, amount)
+        return PayConsumerProductRequest(
+            buyer=current_user, plan=plan_id, amount=amount
+        )
 
 
 @dataclass

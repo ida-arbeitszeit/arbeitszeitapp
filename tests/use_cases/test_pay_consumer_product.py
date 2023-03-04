@@ -1,20 +1,23 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 from uuid import UUID, uuid4
 
-from arbeitszeit.entities import ProductionCosts, PurposesOfPurchases
-from arbeitszeit.use_cases import PayConsumerProduct
-from arbeitszeit.use_cases.pay_consumer_product import RejectionReason
+from arbeitszeit.entities import ProductionCosts
+from arbeitszeit.use_cases import query_member_purchases
+from arbeitszeit.use_cases.pay_consumer_product import (
+    PayConsumerProduct,
+    PayConsumerProductRequest,
+    RejectionReason,
+)
 from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
 from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.data_generators import TransactionGenerator
 
 from .base_test_case import BaseTestCase
-from .repositories import CompanyRepository, PurchaseRepository, TransactionRepository
+from .repositories import CompanyRepository, TransactionRepository
 
 
 class PayConsumerProductTests(BaseTestCase):
@@ -23,11 +26,13 @@ class PayConsumerProductTests(BaseTestCase):
         self.transaction_generator = self.injector.get(TransactionGenerator)
         self.pay_consumer_product = self.injector.get(PayConsumerProduct)
         self.transaction_repository = self.injector.get(TransactionRepository)
-        self.purchase_repository = self.injector.get(PurchaseRepository)
         self.buyer = self.member_generator.create_member_entity()
         self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
         self.update_plans_and_payout = self.injector.get(UpdatePlansAndPayout)
         self.company_repository = self.injector.get(CompanyRepository)
+        self.query_member_purchases = self.injector.get(
+            query_member_purchases.QueryMemberPurchases
+        )
 
     def test_payment_fails_when_plan_does_not_exist(self) -> None:
         response = self.pay_consumer_product.pay_consumer_product(
@@ -104,7 +109,8 @@ class PayConsumerProductTests(BaseTestCase):
         self.pay_consumer_product.pay_consumer_product(
             self.make_request(plan.id, amount=3)
         )
-        assert len(self.purchase_repository.purchases) == 0
+        user_purchases = list(self.query_member_purchases(self.buyer.id))
+        assert len(user_purchases) == 0
 
     def test_payment_is_successful_if_member_has_negative_certs_and_buys_public_product(
         self,
@@ -265,20 +271,20 @@ class PayConsumerProductTests(BaseTestCase):
 
     def test_correct_purchase_is_added(self) -> None:
         plan = self.plan_generator.create_plan()
+        print(plan)
         self.make_transaction_to_buyer_account(Decimal("100"))
         pieces = 3
         self.pay_consumer_product.pay_consumer_product(
             self.make_request(plan.id, pieces)
         )
-        assert len(self.purchase_repository.purchases) == 1
-        purchase_added = self.purchase_repository.purchases[0]
-        assert purchase_added.price_per_unit == self.price_checker.get_unit_price(
+        user_purchases = list(self.query_member_purchases(self.buyer.id))
+        assert len(user_purchases) == 1
+        latest_purchase = user_purchases[0]
+        assert latest_purchase.price_per_unit == self.price_checker.get_unit_price(
             plan.id
         )
-        assert purchase_added.amount == pieces
-        assert purchase_added.purpose == PurposesOfPurchases.consumption
-        assert purchase_added.buyer == self.buyer.id
-        assert purchase_added.plan == plan.id
+        assert latest_purchase.amount == pieces
+        assert latest_purchase.plan_id == plan.id
 
     def test_correct_purchase_is_added_when_plan_is_public_service(self) -> None:
         plan = self.plan_generator.create_plan(is_public_service=True)
@@ -286,17 +292,18 @@ class PayConsumerProductTests(BaseTestCase):
         self.pay_consumer_product.pay_consumer_product(
             self.make_request(plan.id, pieces)
         )
-        assert len(self.purchase_repository.purchases) == 1
-        purchase_added = self.purchase_repository.purchases[0]
-        assert purchase_added.price_per_unit == 0
-        assert purchase_added.plan == plan.id
+        user_purchases = list(self.query_member_purchases(self.buyer.id))
+        assert len(user_purchases) == 1
+        latest_purchase = user_purchases[0]
+        assert latest_purchase.price_per_unit == Decimal(0)
+        assert latest_purchase.plan_id == plan.id
 
     def make_request(
         self, plan: UUID, amount: int, buyer: Optional[UUID] = None
-    ) -> PayConsumerProductRequestTestImpl:
+    ) -> PayConsumerProductRequest:
         if buyer is None:
             buyer = self.buyer.id
-        return PayConsumerProductRequestTestImpl(
+        return PayConsumerProductRequest(
             buyer=buyer,
             plan=plan,
             amount=amount,
@@ -307,19 +314,3 @@ class PayConsumerProductTests(BaseTestCase):
             receiving_account=self.buyer.account,
             amount_received=amount,
         )
-
-
-@dataclass
-class PayConsumerProductRequestTestImpl:
-    buyer: UUID
-    plan: UUID
-    amount: int
-
-    def get_amount(self) -> int:
-        return self.amount
-
-    def get_plan_id(self) -> UUID:
-        return self.plan
-
-    def get_buyer_id(self) -> UUID:
-        return self.buyer

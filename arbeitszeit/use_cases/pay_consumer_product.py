@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum, auto
-from typing import Optional, Protocol
+from typing import Optional
 from uuid import UUID
 
 from arbeitszeit import errors
@@ -13,9 +13,9 @@ from arbeitszeit.giro_office import GiroOffice, TransactionRejection
 from arbeitszeit.price_calculator import PriceCalculator
 from arbeitszeit.repositories import (
     CompanyRepository,
+    DatabaseGateway,
     MemberRepository,
     PlanRepository,
-    PurchaseRepository,
 )
 
 
@@ -26,15 +26,11 @@ class RejectionReason(Enum):
     buyer_does_not_exist = auto()
 
 
-class PayConsumerProductRequest(Protocol):
-    def get_buyer_id(self) -> UUID:
-        ...
-
-    def get_plan_id(self) -> UUID:
-        ...
-
-    def get_amount(self) -> int:
-        ...
+@dataclass
+class PayConsumerProductRequest:
+    buyer: UUID
+    plan: UUID
+    amount: int
 
 
 @dataclass
@@ -52,9 +48,9 @@ class PayConsumerProduct:
     plan_repository: PlanRepository
     giro_office: GiroOffice
     datetime_service: DatetimeService
-    purchase_repository: PurchaseRepository
     company_repository: CompanyRepository
     price_calculator: PriceCalculator
+    database_gateway: DatabaseGateway
 
     def pay_consumer_product(
         self, request: PayConsumerProductRequest
@@ -74,9 +70,7 @@ class PayConsumerProduct:
         self, request: PayConsumerProductRequest
     ) -> PayConsumerProductResponse:
         plan = self._get_active_plan(request)
-        buyer = (
-            self.member_repository.get_members().with_id(request.get_buyer_id()).first()
-        )
+        buyer = self.member_repository.get_members().with_id(request.buyer).first()
         if buyer is None:
             return PayConsumerProductResponse(
                 rejection_reason=RejectionReason.buyer_does_not_exist
@@ -87,7 +81,7 @@ class PayConsumerProduct:
         )
         try:
             self._transfer_certificates(
-                request.get_amount(),
+                request.amount,
                 plan,
                 buyer,
                 coop_price_per_unit=coop_price_per_unit,
@@ -97,16 +91,10 @@ class PayConsumerProduct:
             return PayConsumerProductResponse(
                 rejection_reason=RejectionReason.insufficient_balance
             )
-        self._record_purchase(
-            plan_id=plan.id,
-            amount=request.get_amount(),
-            buyer_id=buyer.id,
-            price_per_unit=coop_price_per_unit,
-        )
         return PayConsumerProductResponse(rejection_reason=None)
 
     def _get_active_plan(self, request: PayConsumerProductRequest) -> Plan:
-        plan = self.plan_repository.get_plans().with_id(request.get_plan_id()).first()
+        plan = self.plan_repository.get_plans().with_id(request.plan).first()
         if plan is None:
             raise self.PlanNotFound("Plan could not be found")
         if not plan.is_active:
@@ -128,21 +116,15 @@ class PayConsumerProduct:
     ) -> None:
         planner = self.company_repository.get_companies().with_id(plan.planner).first()
         assert planner
-        self.giro_office.record_transaction_from_member(
+        transaction = self.giro_office.record_transaction_from_member(
             sender=buyer,
             receiving_account=planner.product_account,
             amount_sent=coop_price_per_unit * amount,
             amount_received=individual_price_per_unit * amount,
             purpose=f"Plan-Id: {plan.id}",
         )
-
-    def _record_purchase(
-        self, plan_id: UUID, amount: int, buyer_id: UUID, price_per_unit: Decimal
-    ) -> None:
-        self.purchase_repository.create_purchase_by_member(
-            purchase_date=self.datetime_service.now(),
-            plan=plan_id,
-            buyer=buyer_id,
-            price_per_unit=price_per_unit,
+        self.database_gateway.create_consumer_purchase(
             amount=amount,
+            plan=plan.id,
+            transaction=transaction.id,
         )

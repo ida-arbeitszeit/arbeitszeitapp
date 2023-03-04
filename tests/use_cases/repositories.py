@@ -36,8 +36,6 @@ from arbeitszeit.entities import (
     Plan,
     PlanDraft,
     ProductionCosts,
-    Purchase,
-    PurposesOfPurchases,
     SocialAccounting,
     Transaction,
 )
@@ -313,58 +311,6 @@ class MemberResult(QueryResultImpl[Member]):
         )
 
 
-class PurchaseResult(QueryResultImpl[Purchase]):
-    def ordered_by_creation_date(self, ascending: bool = True) -> PurchaseResult:
-        return type(self)(
-            items=lambda: sorted(
-                list(self.items()),
-                key=lambda purchase: purchase.purchase_date,
-                reverse=not ascending,
-            ),
-            entities=self.entities,
-        )
-
-    def where_buyer_is_company(
-        self, *, company: Optional[UUID] = None
-    ) -> PurchaseResult:
-        if company is None:
-
-            def key_function(purchase: Purchase) -> bool:
-                return (
-                    purchase.buyer is not None
-                    and purchase.buyer in self.entities.companies
-                )
-
-        else:
-
-            def key_function(purchase: Purchase) -> bool:
-                return purchase.buyer == company
-
-        return type(self)(
-            items=lambda: filter(key_function, self.items()),
-            entities=self.entities,
-        )
-
-    def where_buyer_is_member(self, *, member: Optional[UUID] = None) -> PurchaseResult:
-        if member is None:
-
-            def key_function(purchase: Purchase) -> bool:
-                return (
-                    purchase.buyer is not None
-                    and purchase.buyer in self.entities.members
-                )
-
-        else:
-
-            def key_function(purchase: Purchase) -> bool:
-                return purchase.buyer == member
-
-        return type(self)(
-            items=lambda: filter(key_function, self.items()),
-            entities=self.entities,
-        )
-
-
 class CompanyResult(QueryResultImpl[Company]):
     def with_id(self, id_: UUID) -> CompanyResult:
         return type(self)(
@@ -447,6 +393,119 @@ class TransactionResult(QueryResultImpl[Transaction]):
         )
 
 
+class ConsumerPurchaseResult(QueryResultImpl[entities.ConsumerPurchase]):
+    def ordered_by_creation_date(
+        self, *, ascending: bool = True
+    ) -> ConsumerPurchaseResult:
+        def purchase_sorting_key(purchase):
+            transaction = self.entities.transactions[purchase.transaction_id]
+            return transaction.date
+
+        return type(self)(
+            items=lambda: sorted(
+                list(self.items()),
+                key=purchase_sorting_key,
+                reverse=not ascending,
+            ),
+            entities=self.entities,
+        )
+
+    def where_buyer_is_member(self, member: UUID) -> ConsumerPurchaseResult:
+        def filtered_items():
+            member_account = self.entities.members[member].account
+            for purchase in self.items():
+                transaction = self.entities.transactions[purchase.transaction_id]
+                if transaction.sending_account == member_account:
+                    yield purchase
+
+        return replace(
+            self,
+            items=filtered_items,
+        )
+
+    def with_transaction_and_plan(
+        self,
+    ) -> QueryResultImpl[Tuple[entities.ConsumerPurchase, Transaction, Plan]]:
+        def joined_items() -> Iterator[
+            Tuple[entities.ConsumerPurchase, Transaction, Plan]
+        ]:
+            for purchase in self.items():
+                transaction = self.entities.transactions[purchase.transaction_id]
+                plan = self.entities.plans[purchase.plan_id]
+                yield purchase, transaction, plan
+
+        return replace(
+            self,  # type: ignore
+            items=joined_items,
+        )
+
+
+class CompanyPurchaseResult(QueryResultImpl[entities.CompanyPurchase]):
+    def ordered_by_creation_date(
+        self, *, ascending: bool = True
+    ) -> CompanyPurchaseResult:
+        def purchase_sorting_key(purchase):
+            transaction = self.entities.transactions[purchase.transaction_id]
+            return transaction.date
+
+        return type(self)(
+            items=lambda: sorted(
+                list(self.items()),
+                key=purchase_sorting_key,
+                reverse=not ascending,
+            ),
+            entities=self.entities,
+        )
+
+    def where_buyer_is_company(self, company: UUID) -> CompanyPurchaseResult:
+        def filtered_items():
+            company_record = self.entities.get_company_by_id(company)
+            for purchase in self.items():
+                transaction = self.entities.transactions[purchase.transaction_id]
+                if (
+                    transaction.sending_account == company_record.means_account
+                    or transaction.sending_account
+                    == company_record.raw_material_account
+                ):
+                    yield purchase
+
+        return replace(
+            self,
+            items=filtered_items,
+        )
+
+    def with_transaction_and_plan(
+        self,
+    ) -> QueryResultImpl[Tuple[entities.CompanyPurchase, Transaction, Plan]]:
+        def joined_items() -> Iterator[
+            Tuple[entities.CompanyPurchase, Transaction, Plan]
+        ]:
+            for purchase in self.items():
+                transaction = self.entities.transactions[purchase.transaction_id]
+                plan = self.entities.plans[purchase.plan_id]
+                yield purchase, transaction, plan
+
+        return replace(
+            self,  # type: ignore
+            items=joined_items,
+        )
+
+    def with_transaction(
+        self,
+    ) -> QueryResultImpl[Tuple[entities.CompanyPurchase, entities.Transaction]]:
+        def joined_items() -> Iterator[
+            Tuple[entities.CompanyPurchase, entities.Transaction]
+        ]:
+            for purchase in self.items():
+                transaction = self.entities.transactions[purchase.transaction_id]
+                yield purchase, transaction
+
+        return replace(
+            self,  # type: ignore
+            items=joined_items,
+        )
+
+
 class AccountResult(QueryResultImpl[Account]):
     def with_id(self, *id_: UUID) -> AccountResult:
         return replace(
@@ -481,60 +540,6 @@ class PayoutFactorResult(QueryResultImpl[entities.PayoutFactor]):
 
 
 @singleton
-class PurchaseRepository(interfaces.PurchaseRepository):
-    def __init__(self, entities: EntityStorage):
-        self.purchases: List[Purchase] = []
-        self.entities = entities
-
-    def create_purchase_by_company(
-        self,
-        purchase_date: datetime,
-        plan: UUID,
-        buyer: UUID,
-        price_per_unit: Decimal,
-        amount: int,
-        purpose: PurposesOfPurchases,
-    ) -> Purchase:
-        purchase = Purchase(
-            purchase_date=purchase_date,
-            plan=plan,
-            buyer=buyer,
-            is_buyer_a_member=False,
-            price_per_unit=price_per_unit,
-            amount=amount,
-            purpose=purpose,
-        )
-        self.purchases.append(purchase)
-        return purchase
-
-    def create_purchase_by_member(
-        self,
-        purchase_date: datetime,
-        plan: UUID,
-        buyer: UUID,
-        price_per_unit: Decimal,
-        amount: int,
-    ) -> Purchase:
-        purchase = Purchase(
-            purchase_date=purchase_date,
-            plan=plan,
-            buyer=buyer,
-            is_buyer_a_member=True,
-            price_per_unit=price_per_unit,
-            amount=amount,
-            purpose=PurposesOfPurchases.consumption,
-        )
-        self.purchases.append(purchase)
-        return purchase
-
-    def get_purchases(self) -> PurchaseResult:
-        return PurchaseResult(
-            items=lambda: self.purchases,
-            entities=self.entities,
-        )
-
-
-@singleton
 class TransactionRepository(interfaces.TransactionRepository):
     def __init__(self, entities: EntityStorage) -> None:
         self.entities = entities
@@ -557,12 +562,12 @@ class TransactionRepository(interfaces.TransactionRepository):
             amount_received=amount_received,
             purpose=purpose,
         )
-        self.entities.transactions.append(transaction)
+        self.entities.transactions[transaction.id] = transaction
         return transaction
 
     def get_transactions(self) -> TransactionResult:
         return TransactionResult(
-            items=lambda: self.entities.transactions,
+            items=lambda: self.entities.transactions.values(),
             entities=self.entities,
         )
 
@@ -570,7 +575,7 @@ class TransactionRepository(interfaces.TransactionRepository):
         balance = Decimal(0)
         planner = self.entities.get_company_by_id(plan.planner)
         assert planner
-        for transaction in self.entities.transactions:
+        for transaction in self.entities.transactions.values():
             if (transaction.receiving_account == planner.product_account) and (
                 str(plan.id) in transaction.purpose
             ):
@@ -1097,7 +1102,7 @@ class EntityStorage:
         self.companies: Dict[str, Company] = {}
         self.company_passwords: Dict[UUID, str] = {}
         self.plans: Dict[UUID, Plan] = {}
-        self.transactions: List[Transaction] = []
+        self.transactions: Dict[UUID, Transaction] = dict()
         self.accounts: List[Account] = []
         self.social_accounting = SocialAccounting(
             id=uuid4(),
@@ -1108,6 +1113,8 @@ class EntityStorage:
             UUID, entities.LabourCertificatesPayout
         ] = dict()
         self.payout_factors: List[entities.PayoutFactor] = list()
+        self.consumer_purchases: Dict[UUID, entities.ConsumerPurchase] = dict()
+        self.company_purchases: Dict[UUID, entities.CompanyPurchase] = dict()
 
     def create_labour_certificates_payout(
         self, transaction: UUID, plan: UUID
@@ -1151,3 +1158,36 @@ class EntityStorage:
             if model.id == company:
                 return model
         return None
+
+    def create_consumer_purchase(
+        self, transaction: UUID, amount: int, plan: UUID
+    ) -> entities.ConsumerPurchase:
+        purchase = entities.ConsumerPurchase(
+            id=uuid4(),
+            plan_id=plan,
+            transaction_id=transaction,
+            amount=amount,
+        )
+        self.consumer_purchases[purchase.id] = purchase
+        return purchase
+
+    def get_consumer_purchases(self) -> ConsumerPurchaseResult:
+        return ConsumerPurchaseResult(
+            entities=self,
+            items=self.consumer_purchases.values,
+        )
+
+    def create_company_purchase(
+        self, transaction: UUID, amount: int, plan: UUID
+    ) -> entities.CompanyPurchase:
+        purchase = entities.CompanyPurchase(
+            id=uuid4(),
+            amount=amount,
+            plan_id=plan,
+            transaction_id=transaction,
+        )
+        self.company_purchases[purchase.id] = purchase
+        return purchase
+
+    def get_company_purchases(self) -> CompanyPurchaseResult:
+        return CompanyPurchaseResult(entities=self, items=self.company_purchases.values)

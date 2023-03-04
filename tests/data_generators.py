@@ -11,6 +11,7 @@ from decimal import Decimal
 from typing import Iterable, List, Optional, Union
 from uuid import UUID, uuid4
 
+from arbeitszeit import use_cases
 from arbeitszeit.entities import (
     Account,
     AccountTypes,
@@ -20,7 +21,6 @@ from arbeitszeit.entities import (
     Plan,
     PlanDraft,
     ProductionCosts,
-    Purchase,
     PurposesOfPurchases,
     Transaction,
 )
@@ -31,7 +31,6 @@ from arbeitszeit.repositories import (
     MemberRepository,
     PlanDraftRepository,
     PlanRepository,
-    PurchaseRepository,
     TransactionRepository,
 )
 from arbeitszeit.use_cases import (
@@ -364,63 +363,54 @@ class PlanGenerator:
 @dataclass
 class PurchaseGenerator:
     plan_generator: PlanGenerator
-    datetime_service: FakeDatetimeService
-    purchase_repository: PurchaseRepository
     company_generator: CompanyGenerator
     member_generator: MemberGenerator
+    pay_means_of_production: use_cases.pay_means_of_production.PayMeansOfProduction
+    pay_consumer_product: use_cases.pay_consumer_product.PayConsumerProduct
 
-    def create_purchase_by_company(
+    def create_resource_purchase_by_company(
         self,
         *,
-        buyer: Optional[Company] = None,
-        purchase_date=None,
-        amount=1,
-        price_per_unit: Optional[Decimal] = None,
-        plan: Optional[Plan] = None,
-        purpose: Optional[PurposesOfPurchases] = None,
-    ) -> Purchase:
+        buyer: Optional[UUID] = None,
+        plan: Optional[UUID] = None,
+        amount: int = 1,
+    ) -> use_cases.pay_means_of_production.PayMeansOfProductionResponse:
         if buyer is None:
-            buyer = self.company_generator.create_company_entity()
-        if purchase_date is None:
-            purchase_date = self.datetime_service.now_minus_one_day()
-        if price_per_unit is None:
-            price_per_unit = Decimal(10)
+            buyer = self.company_generator.create_company()
         if plan is None:
-            plan = self.plan_generator.create_plan()
-        if purpose is None:
-            purpose = PurposesOfPurchases.means_of_prod
-        return self.purchase_repository.create_purchase_by_company(
-            purchase_date=purchase_date,
-            plan=plan.id,
-            buyer=buyer.id,
-            price_per_unit=price_per_unit,
+            plan = self.plan_generator.create_plan().id
+        request = use_cases.pay_means_of_production.PayMeansOfProductionRequest(
+            buyer=buyer,
+            plan=plan,
             amount=amount,
-            purpose=purpose,
+            purpose=PurposesOfPurchases.raw_materials,
         )
+        response = self.pay_means_of_production(request)
+        assert (
+            not response.is_rejected
+        ), f"Could not create purchase, response was {response}"
+        return response
 
     def create_purchase_by_member(
         self,
-        buyer: Optional[Member] = None,
-        purchase_date=None,
-        amount=1,
-        price_per_unit: Optional[Decimal] = None,
-        plan: Optional[Plan] = None,
-    ) -> Purchase:
+        buyer: Optional[UUID] = None,
+        amount: int = 1,
+        plan: Optional[UUID] = None,
+    ) -> use_cases.pay_consumer_product.PayConsumerProductResponse:
         if buyer is None:
-            buyer = self.member_generator.create_member_entity()
-        if purchase_date is None:
-            purchase_date = self.datetime_service.now_minus_one_day()
-        if price_per_unit is None:
-            price_per_unit = Decimal(10)
+            buyer = self.member_generator.create_member()
         if plan is None:
-            plan = self.plan_generator.create_plan()
-        return self.purchase_repository.create_purchase_by_member(
-            purchase_date=purchase_date,
-            plan=plan.id,
-            buyer=buyer.id,
-            price_per_unit=price_per_unit,
+            plan = self.plan_generator.create_plan().id
+        request = use_cases.pay_consumer_product.PayConsumerProductRequest(
             amount=amount,
+            plan=plan,
+            buyer=buyer,
         )
+        response = self.pay_consumer_product.pay_consumer_product(request)
+        assert (
+            response.is_accepted
+        ), f"Could not create member purchase. Response was {response}"
+        return response
 
 
 @dataclass

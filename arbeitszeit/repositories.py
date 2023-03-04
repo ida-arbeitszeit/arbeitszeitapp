@@ -4,7 +4,16 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Generic, Iterable, Iterator, Optional, Protocol, TypeVar, Union
+from typing import (
+    Generic,
+    Iterable,
+    Iterator,
+    Optional,
+    Protocol,
+    Tuple,
+    TypeVar,
+    Union,
+)
 from uuid import UUID
 
 from arbeitszeit.entities import (
@@ -12,7 +21,9 @@ from arbeitszeit.entities import (
     Accountant,
     AccountTypes,
     Company,
+    CompanyPurchase,
     CompanyWorkInvite,
+    ConsumerPurchase,
     Cooperation,
     LabourCertificatesPayout,
     Member,
@@ -21,8 +32,6 @@ from arbeitszeit.entities import (
     PlanDraft,
     PlanningStatistics,
     ProductionCosts,
-    Purchase,
-    PurposesOfPurchases,
     SocialAccounting,
     Transaction,
 )
@@ -175,16 +184,36 @@ class MemberResult(QueryResult[Member], Protocol):
         ...
 
 
-class PurchaseResult(QueryResult[Purchase], Protocol):
-    def ordered_by_creation_date(self, *, ascending: bool = ...) -> PurchaseResult:
+class ConsumerPurchaseResult(QueryResult[ConsumerPurchase], Protocol):
+    def ordered_by_creation_date(
+        self, *, ascending: bool = ...
+    ) -> ConsumerPurchaseResult:
         ...
 
-    def where_buyer_is_company(
-        self, *, company: Optional[UUID] = ...
-    ) -> PurchaseResult:
+    def where_buyer_is_member(self, member: UUID) -> ConsumerPurchaseResult:
         ...
 
-    def where_buyer_is_member(self, *, member: Optional[UUID] = ...) -> PurchaseResult:
+    def with_transaction_and_plan(
+        self,
+    ) -> QueryResult[Tuple[ConsumerPurchase, Transaction, Plan]]:
+        ...
+
+
+class CompanyPurchaseResult(QueryResult[CompanyPurchase], Protocol):
+    def ordered_by_creation_date(
+        self, *, ascending: bool = ...
+    ) -> CompanyPurchaseResult:
+        ...
+
+    def where_buyer_is_company(self, company: UUID) -> CompanyPurchaseResult:
+        ...
+
+    def with_transaction_and_plan(
+        self,
+    ) -> QueryResult[Tuple[CompanyPurchase, Transaction, Plan]]:
+        ...
+
+    def with_transaction(self) -> QueryResult[Tuple[CompanyPurchase, Transaction]]:
         ...
 
 
@@ -234,35 +263,6 @@ class PayoutFactorResult(QueryResult[PayoutFactor], Protocol):
         self, *, descending: bool = ...
     ) -> PayoutFactorResult:
         ...
-
-
-class PurchaseRepository(ABC):
-    @abstractmethod
-    def create_purchase_by_company(
-        self,
-        purchase_date: datetime,
-        plan: UUID,
-        buyer: UUID,
-        price_per_unit: Decimal,
-        amount: int,
-        purpose: PurposesOfPurchases,
-    ) -> Purchase:
-        pass
-
-    @abstractmethod
-    def create_purchase_by_member(
-        self,
-        purchase_date: datetime,
-        plan: UUID,
-        buyer: UUID,
-        price_per_unit: Decimal,
-        amount: int,
-    ) -> Purchase:
-        pass
-
-    @abstractmethod
-    def get_purchases(self) -> PurchaseResult:
-        pass
 
 
 class PlanRepository(ABC):
@@ -536,4 +536,20 @@ class DatabaseGateway(Protocol):
     def create_payout_factor(
         self, timestamp: datetime, payout_factor: Decimal
     ) -> PayoutFactor:
+        ...
+
+    def create_consumer_purchase(
+        self, transaction: UUID, amount: int, plan: UUID
+    ) -> ConsumerPurchase:
+        ...
+
+    def get_consumer_purchases(self) -> ConsumerPurchaseResult:
+        ...
+
+    def create_company_purchase(
+        self, transaction: UUID, amount: int, plan: UUID
+    ) -> CompanyPurchase:
+        ...
+
+    def get_company_purchases(self) -> CompanyPurchaseResult:
         ...
