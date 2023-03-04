@@ -271,7 +271,6 @@ class PayConsumerProductTests(BaseTestCase):
 
     def test_correct_purchase_is_added(self) -> None:
         plan = self.plan_generator.create_plan()
-        print(plan)
         self.make_transaction_to_buyer_account(Decimal("100"))
         pieces = 3
         self.pay_consumer_product.pay_consumer_product(
