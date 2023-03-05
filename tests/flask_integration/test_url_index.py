@@ -214,6 +214,7 @@ class GeneralUrlIndexTests(ViewTestCase):
                 worker=member,
             )
         )
+        assert response.invite_id
         return response.invite_id
 
     def test_url_for_payment_of_consumer_product_leads_to_functional_url(self) -> None:

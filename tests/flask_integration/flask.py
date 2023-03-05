@@ -7,7 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 from arbeitszeit.entities import Company, Member
 from arbeitszeit.injector import Module
-from arbeitszeit.repositories import CompanyRepository, MemberRepository
+from arbeitszeit_flask.database.repositories import CompanyRepository, MemberRepository
 from arbeitszeit_flask.token import FlaskTokenService
 from tests.data_generators import (
     AccountantGenerator,

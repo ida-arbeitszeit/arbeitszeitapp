@@ -41,4 +41,5 @@ class AuthenticatedTests(ViewTestCase):
                 self.member.id,
             )
         )
+        assert response.invite_id
         return response.invite_id
