@@ -1,12 +1,12 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import Any
-from uuid import uuid4
+from typing import Any, Optional
+from uuid import UUID, uuid4
 
-import arbeitszeit.repositories
 from arbeitszeit.entities import PlanDraft, ProductionCosts
 from arbeitszeit_flask.database.repositories import PlanDraftRepository
 from tests.data_generators import CompanyGenerator
+from tests.datetime_service import FakeDatetimeService
 
 from .flask import FlaskTestCase
 
@@ -17,72 +17,108 @@ DEFAULT_COST = ProductionCosts(
 )
 
 
-class PlanDraftRepositoryTests(FlaskTestCase):
+class PlanDraftRepositoryBaseTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.repo = self.injector.get(PlanDraftRepository)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.planner = self.company_generator.create_company_entity()
-        self.DEFAULT_CREATE_ARGUMENTS = dict(
-            planner=self.planner.id,
-            product_name="test product name",
-            description="test description",
-            costs=DEFAULT_COST,
-            production_unit="test unit",
-            amount=1,
-            timeframe_in_days=1,
-            is_public_service=True,
-            creation_timestamp=datetime.now(),
+        self.datetime_service = self.injector.get(FakeDatetimeService)
+
+    def create_plan_draft(
+        self,
+        product_name: str = "product name",
+        planner: Optional[UUID] = None,
+        description: str = "test description",
+        costs: ProductionCosts = ProductionCosts(Decimal(0), Decimal(0), Decimal(0)),
+        production_unit: str = "test unit",
+        amount: int = 1,
+        duration: int = 1,
+        is_public_service: bool = True,
+        creation_timestamp: Optional[datetime] = None,
+    ) -> PlanDraft:
+        if planner is None:
+            planner = self.planner.id
+        if creation_timestamp is None:
+            creation_timestamp = self.datetime_service.now()
+        return self.repo.create_plan_draft(
+            planner=planner,
+            product_name=product_name,
+            description=description,
+            costs=costs,
+            production_unit=production_unit,
+            amount=amount,
+            timeframe_in_days=duration,
+            is_public_service=is_public_service,
+            creation_timestamp=creation_timestamp,
         )
 
+
+class PlanDraftRepositoryTests(PlanDraftRepositoryBaseTests):
     def test_plan_draft_repository(self) -> None:
         draft = self.repo.get_by_id(uuid4())
         assert draft is None
 
-    def test_drafts_can_be_created(self) -> None:
-        draft = self.repo.create_plan_draft(**self.DEFAULT_CREATE_ARGUMENTS)
-        assert isinstance(draft, PlanDraft)
-
     def test_created_drafts_can_be_retrieved_by_their_id(self) -> None:
-        expected_draft = self.repo.create_plan_draft(**self.DEFAULT_CREATE_ARGUMENTS)
+        expected_draft = self.create_plan_draft()
         self.assertEqual(expected_draft, self.repo.get_by_id(expected_draft.id))
 
-    def test_created_draft_has_correct_attributes(self) -> None:
-        draft = self.repo.create_plan_draft(**self.DEFAULT_CREATE_ARGUMENTS)
-        self.assertEqual(
-            draft.product_name, self.DEFAULT_CREATE_ARGUMENTS["product_name"]
-        )
-        self.assertEqual(draft.planner.id, self.DEFAULT_CREATE_ARGUMENTS["planner"])
-        self.assertEqual(draft.production_costs, self.DEFAULT_CREATE_ARGUMENTS["costs"])
-        self.assertEqual(
-            draft.creation_date, self.DEFAULT_CREATE_ARGUMENTS["creation_timestamp"]
-        )
-        self.assertEqual(
-            draft.unit_of_distribution, self.DEFAULT_CREATE_ARGUMENTS["production_unit"]
-        )
-        self.assertEqual(draft.amount_produced, self.DEFAULT_CREATE_ARGUMENTS["amount"])
-        self.assertEqual(
-            draft.description, self.DEFAULT_CREATE_ARGUMENTS["description"]
-        )
-        self.assertEqual(
-            draft.timeframe, self.DEFAULT_CREATE_ARGUMENTS["timeframe_in_days"]
-        )
-        self.assertEqual(
-            draft.is_public_service, self.DEFAULT_CREATE_ARGUMENTS["is_public_service"]
-        )
+    def test_created_draft_name_specified_on_creation(self) -> None:
+        expected_product_name = "test product name"
+        draft = self.create_plan_draft(product_name=expected_product_name)
+        assert draft.product_name == expected_product_name
 
-    def test_can_instantiate_a_repository_through_dependency_injection(self) -> None:
-        instance = self.injector.get(arbeitszeit.repositories.PlanDraftRepository)
-        self.assertIsInstance(instance, PlanDraftRepository)
+    def test_created_draft_has_planner_that_it_was_created_with(self) -> None:
+        expected_planner = self.company_generator.create_company()
+        draft = self.create_plan_draft(planner=expected_planner)
+        assert draft.planner.id == expected_planner
+
+    def test_that_created_draft_as_production_costs_specified_on_creation(self) -> None:
+        expected_production_costs = ProductionCosts(Decimal(5), Decimal(3), Decimal(1))
+        draft = self.create_plan_draft(costs=expected_production_costs)
+        assert draft.production_costs == expected_production_costs
+
+    def test_that_created_draft_has_creation_timestamp_it_was_created_with(
+        self,
+    ) -> None:
+        expected_timestamp = datetime(2000, 1, 2)
+        draft = self.create_plan_draft(creation_timestamp=expected_timestamp)
+        assert draft.creation_date == expected_timestamp
+
+    def test_that_created_draft_has_production_unit_it_was_created_with(self) -> None:
+        expected_unit = "test unit 123"
+        draft = self.create_plan_draft(production_unit=expected_unit)
+        assert draft.unit_of_distribution == expected_unit
+
+    def test_that_created_draft_has_amount_it_was_created_with(self) -> None:
+        expected_amount = 4231
+        draft = self.create_plan_draft(amount=expected_amount)
+        assert draft.amount_produced == expected_amount
+
+    def test_that_created_draft_has_description_it_was_created_with(self) -> None:
+        expected_description = "test description 123123"
+        draft = self.create_plan_draft(description=expected_description)
+        assert draft.description == expected_description
+
+    def test_that_created_draft_has_timeframe_it_was_created_with(self) -> None:
+        expected_timeframe = 1231
+        draft = self.create_plan_draft(duration=expected_timeframe)
+        assert draft.timeframe == expected_timeframe
+
+    def test_that_created_draft_is_public_service_if_it_was_created_as_such(
+        self,
+    ) -> None:
+        draft = self.create_plan_draft(is_public_service=True)
+        assert draft.is_public_service
 
     def test_deleted_drafts_cannot_be_retrieved_anymore(self) -> None:
-        draft = self.repo.create_plan_draft(**self.DEFAULT_CREATE_ARGUMENTS)
+        draft = self.create_plan_draft()
         self.repo.delete_draft(draft.id)
         self.assertIsNone(self.repo.get_by_id(draft.id))
 
     def test_all_drafts_can_be_retrieved(self) -> None:
-        expected_draft1 = self.repo.create_plan_draft(**self.DEFAULT_CREATE_ARGUMENTS)
-        expected_draft2 = self.repo.create_plan_draft(**self.DEFAULT_CREATE_ARGUMENTS)
+        expected_draft1 = self.create_plan_draft()
+        expected_draft2 = self.create_plan_draft()
         drafts = self.repo.all_drafts_of_company(self.planner.id)
         self.assertIn(expected_draft1, drafts)
         self.assertIn(expected_draft2, drafts)
@@ -94,25 +130,12 @@ class PlanDraftRepositoryTests(FlaskTestCase):
         self.assertFalse(list(drafts))
 
 
-class UpdateDraftTests(FlaskTestCase):
+class UpdateDraftTests(PlanDraftRepositoryBaseTests):
     def setUp(self) -> None:
         super().setUp()
         self.repo = self.injector.get(PlanDraftRepository)
-        self.company_generator = self.injector.get(CompanyGenerator)
-        self.planner = self.company_generator.create_company_entity()
-        self.DEFAULT_CREATE_ARGUMENTS = dict(
-            planner=self.planner.id,
-            product_name="test product name",
-            description="test description",
-            costs=DEFAULT_COST,
-            production_unit="test unit",
-            amount=1,
-            timeframe_in_days=1,
-            is_public_service=True,
-            creation_timestamp=datetime.now(),
-        )
-        self.old_draft = self.repo.create_plan_draft(**self.DEFAULT_CREATE_ARGUMENTS)
-        self.other_draft = self.repo.create_plan_draft(**self.DEFAULT_CREATE_ARGUMENTS)
+        self.old_draft = self.create_plan_draft()
+        self.other_draft = self.create_plan_draft()
 
     def test_can_update_draft_name(self) -> None:
         self.assertUpdate(

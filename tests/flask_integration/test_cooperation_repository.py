@@ -1,6 +1,5 @@
 from datetime import datetime
 
-import arbeitszeit.repositories
 from arbeitszeit.entities import Cooperation
 from arbeitszeit_flask.database.repositories import (
     CooperationRepository,
@@ -55,10 +54,6 @@ class CooperationRepositoryTests(FlaskTestCase):
             cooperation.coordinator,
             self.DEFAULT_CREATE_ARGUMENTS["coordinator"],
         )
-
-    def test_can_instantiate_a_repository_through_dependency_injection(self) -> None:
-        instance = self.injector.get(arbeitszeit.repositories.CooperationRepository)
-        self.assertIsInstance(instance, CooperationRepository)
 
     def test_cooperation_can_be_retrieved_by_its_exact_name_and_case_insensitive(self):
         expected_cooperation = self.repo.create_cooperation(

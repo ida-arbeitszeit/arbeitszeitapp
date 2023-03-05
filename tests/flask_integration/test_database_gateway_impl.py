@@ -232,6 +232,7 @@ class CompanyPurchaseTests(FlaskTestCase):
         plan = self.plan_generator.create_plan()
         self.purchase_generator.create_resource_purchase_by_company(plan=plan.id)
         purchase = self.database_gateway.get_company_purchases().first()
+        assert purchase
         assert purchase.plan_id == plan.id
 
     def test_that_transaction_id_retrieved_is_the_same_twice_in_a_row(self) -> None:
@@ -293,19 +294,23 @@ class CompanyPurchaseTests(FlaskTestCase):
 
     def test_can_retrieve_plan_and_transaction_with_purchase(self) -> None:
         self.purchase_generator.create_resource_purchase_by_company()
-        purchase, transaction, plan = (
+        result = (
             self.database_gateway.get_company_purchases()
             .with_transaction_and_plan()
             .first()
         )
+        assert result
+        purchase, transaction, plan = result
         assert purchase.transaction_id == transaction.id
         assert purchase.plan_id == plan.id
 
     def test_can_retrieve_transaction_with_purchase(self) -> None:
         self.purchase_generator.create_resource_purchase_by_company()
-        purchase, transaction = (
+        result = (
             self.database_gateway.get_company_purchases().with_transaction().first()
         )
+        assert result
+        purchase, transaction = result
         assert purchase.transaction_id == transaction.id
 
     def test_can_combine_filtering_and_joining_of_purchases_with_transactions_and_plans(
@@ -357,6 +362,7 @@ class ConsumerPurchaseTests(FlaskTestCase):
         plan = self.plan_generator.create_plan()
         self.purchase_generator.create_purchase_by_member(plan=plan.id)
         purchase = self.database_gateway.get_consumer_purchases().first()
+        assert purchase
         assert purchase.plan_id == plan.id
 
     def test_that_transaction_id_retrieved_is_the_same_twice_in_a_row(self) -> None:
@@ -416,11 +422,13 @@ class ConsumerPurchaseTests(FlaskTestCase):
 
     def test_can_retrieve_plan_and_transaction_with_purchase(self) -> None:
         self.purchase_generator.create_purchase_by_member()
-        purchase, transaction, plan = (
+        result = (
             self.database_gateway.get_consumer_purchases()
             .with_transaction_and_plan()
             .first()
         )
+        assert result
+        purchase, transaction, plan = result
         assert purchase.transaction_id == transaction.id
         assert purchase.plan_id == plan.id
 
