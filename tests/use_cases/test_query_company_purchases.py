@@ -1,10 +1,6 @@
-from typing import Iterable
+from datetime import datetime, timedelta
 
-from arbeitszeit.entities import Purchase
-from arbeitszeit.use_cases.query_company_purchases import (
-    PurchaseQueryResponse,
-    QueryCompanyPurchases,
-)
+from arbeitszeit.use_cases.query_company_purchases import QueryCompanyPurchases
 from tests.use_cases.base_test_case import BaseTestCase
 
 
@@ -13,37 +9,40 @@ class UseCaseTests(BaseTestCase):
         super().setUp()
         self.query_purchases = self.injector.get(QueryCompanyPurchases)
 
-    def purchase_in_results(
-        self, purchase: Purchase, results: Iterable[PurchaseQueryResponse]
-    ) -> bool:
-        return purchase.plan in [result.plan_id for result in results]
-
     def test_that_no_purchase_is_returned_when_searching_an_empty_repo(
         self,
-    ):
+    ) -> None:
         company = self.company_generator.create_company()
         results = list(self.query_purchases(company))
         assert not results
 
-    def test_that_correct_purchases_are_returned(self):
-        company = self.company_generator.create_company_entity()
-        expected_purchase_company = self.purchase_generator.create_purchase_by_company(
-            buyer=company
+    def test_that_purchase_with_specified_plan_is_queried_after_purchase_for_this_plan_was_done(
+        self,
+    ) -> None:
+        company = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan()
+        self.purchase_generator.create_resource_purchase_by_company(
+            buyer=company, plan=plan.id
         )
-        results = list(self.query_purchases(company.id))
+        results = list(self.query_purchases(company))
         assert len(results) == 1
-        assert self.purchase_in_results(expected_purchase_company, results)
+        latest_purchase = results[0]
+        assert latest_purchase.plan_id == plan.id
 
-    def test_that_purchases_are_returned_in_correct_order(self):
-        company = self.company_generator.create_company_entity()
-        # Creating older purchase first to test correct ordering
-        self.purchase_generator.create_purchase_by_company(
-            buyer=company, purchase_date=self.datetime_service.now_minus_two_days()
+    def test_latter_of_two_purchases_is_returned_first_other_one_is_returned_second(
+        self,
+    ) -> None:
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        first_plan = self.plan_generator.create_plan().id
+        second_plan = self.plan_generator.create_plan().id
+        company = self.company_generator.create_company()
+        self.purchase_generator.create_resource_purchase_by_company(
+            buyer=company, plan=first_plan
         )
-        expected_recent_purchase = self.purchase_generator.create_purchase_by_company(
-            buyer=company, purchase_date=self.datetime_service.now_minus_one_day()
+        self.datetime_service.advance_time(timedelta(days=1))
+        self.purchase_generator.create_resource_purchase_by_company(
+            buyer=company, plan=second_plan
         )
-        results = list(self.query_purchases(company.id))
-        assert self.purchase_in_results(
-            expected_recent_purchase, [results[0]]
-        )  # more recent purchase is first
+        results = list(self.query_purchases(company))
+        assert results[0].plan_id == second_plan
+        assert results[1].plan_id == first_plan

@@ -200,17 +200,6 @@ class PurposesOfPurchases(Enum):
 
 
 @dataclass
-class Purchase:
-    purchase_date: datetime
-    plan: UUID
-    buyer: UUID
-    is_buyer_a_member: bool
-    price_per_unit: Decimal
-    amount: int
-    purpose: PurposesOfPurchases
-
-
-@dataclass
 class Transaction:
     """
     The amount received by a transaction can differ from the amount sent.
@@ -261,3 +250,19 @@ class LabourCertificatesPayout:
 class PlanningStatistics:
     average_plan_duration_in_days: Decimal
     total_planned_costs: ProductionCosts
+
+
+@dataclass
+class ConsumerPurchase:
+    id: UUID
+    plan_id: UUID
+    transaction_id: UUID
+    amount: int
+
+
+@dataclass
+class CompanyPurchase:
+    id: UUID
+    plan_id: UUID
+    transaction_id: UUID
+    amount: int

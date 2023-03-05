@@ -7,7 +7,6 @@ from enum import Enum
 
 from flask_login import UserMixin
 
-from arbeitszeit import entities
 from arbeitszeit_flask.extensions import db
 
 
@@ -44,9 +43,8 @@ class Member(UserMixin, db.Model):
     registered_on = db.Column(db.DateTime, nullable=False)
     confirmed_on = db.Column(db.DateTime, nullable=True)
     account = db.Column(db.ForeignKey("account.id"), nullable=False)
-    purchases = db.relationship("Purchase", lazy="dynamic")
-    user = db.relationship("User", lazy=True, uselist=False, backref="member")
 
+    user = db.relationship("User", lazy=True, uselist=False, backref="member")
     workplaces = db.relationship(
         "Company",
         secondary=jobs,
@@ -61,14 +59,14 @@ class Company(UserMixin, db.Model):
     name = db.Column(db.String(1000), nullable=False)
     registered_on = db.Column(db.DateTime, nullable=False)
     confirmed_on = db.Column(db.DateTime, nullable=True)
-    user = db.relationship("User", lazy=True, uselist=False, backref="company")
-    plans = db.relationship("Plan", lazy="dynamic", backref="company")
-    purchases = db.relationship("Purchase", lazy="dynamic")
-    drafts = db.relationship("PlanDraft", lazy="dynamic")
     p_account = db.Column(db.ForeignKey("account.id"), nullable=False)
     r_account = db.Column(db.ForeignKey("account.id"), nullable=False)
     a_account = db.Column(db.ForeignKey("account.id"), nullable=False)
     prd_account = db.Column(db.ForeignKey("account.id"), nullable=False)
+
+    drafts = db.relationship("PlanDraft", lazy="dynamic")
+    user = db.relationship("User", lazy=True, uselist=False, backref="company")
+    plans = db.relationship("Plan", lazy="dynamic", backref="company")
 
     def __repr__(self):
         return "<Company(name='%s')>" % (self.name,)
@@ -173,16 +171,22 @@ class Transaction(db.Model):
     purpose = db.Column(db.String(1000), nullable=True)  # Verwendungszweck
 
 
-class Purchase(db.Model):
+class ConsumerPurchase(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
-    purchase_date = db.Column(db.DateTime, nullable=False)
     plan_id = db.Column(db.String, db.ForeignKey("plan.id"), nullable=False)
-    type_member = db.Column(db.Boolean, nullable=False)
-    company = db.Column(db.String, db.ForeignKey("company.id"), nullable=True)
-    member = db.Column(db.String, db.ForeignKey("member.id"), nullable=True)
-    price_per_unit = db.Column(db.Numeric(), nullable=False)
+    transaction_id = db.Column(
+        db.String, db.ForeignKey("transaction.id"), nullable=True
+    )
     amount = db.Column(db.Integer, nullable=False)
-    purpose = db.Column(db.Enum(entities.PurposesOfPurchases), nullable=False)
+
+
+class CompanyPurchase(db.Model):
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
+    plan_id = db.Column(db.String, db.ForeignKey("plan.id"), nullable=False)
+    transaction_id = db.Column(
+        db.String, db.ForeignKey("transaction.id"), nullable=True
+    )
+    amount = db.Column(db.Integer, nullable=False)
 
 
 class LabourCertificatesPayout(db.Model):

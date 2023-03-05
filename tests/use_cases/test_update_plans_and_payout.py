@@ -9,11 +9,7 @@ from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
 from tests.use_cases.base_test_case import BaseTestCase
 
 from .dependency_injection import get_dependency_injector
-from .repositories import (
-    CompanyRepository,
-    FakePayoutFactorRepository,
-    TransactionRepository,
-)
+from .repositories import CompanyRepository, TransactionRepository
 
 
 class UseCaseTests(BaseTestCase):
@@ -22,7 +18,6 @@ class UseCaseTests(BaseTestCase):
         self.injector = get_dependency_injector()
         self.payout = self.injector.get(UpdatePlansAndPayout)
         self.transaction_repository = self.injector.get(TransactionRepository)
-        self.payout_factor_repository = self.injector.get(FakePayoutFactorRepository)
         self.show_my_accounts = self.injector.get(ShowMyAccounts)
         self.company_repository = self.injector.get(CompanyRepository)
         self.get_company_transactions = self.injector.get(
@@ -305,31 +300,36 @@ class UseCaseTests(BaseTestCase):
     def test_that_payout_factor_ignores_plan_that_has_recently_expired(
         self,
     ) -> None:
-        time_of_plan_activation = datetime(2020, 5, 1, 8)
-        timeframe_of_plan = 1
-        time_of_payout_factor_calculation = time_of_plan_activation + timedelta(
-            days=1, minutes=1
-        )
-        expected_payout_factor = 0
-        self.datetime_service.freeze_time(time_of_plan_activation)
+        """The premise of this test is that we have a big public plan
+        in the past and another productive plan that starts after the
+        first public plan has expired.  We test for the fact that The
+        labour certificate payout factor should be exactly 1 for the
+        productive plan since there are no public plans at the same
+        time.
+        """
+        expected_balance = Decimal(10)
+        self.datetime_service.freeze_time(datetime(2020, 1, 1))
         self.plan_generator.create_plan(
             approved=True,
             is_public_service=True,
-            timeframe=timeframe_of_plan,
+            timeframe=1,
             costs=ProductionCosts(Decimal(10), Decimal(10), Decimal(10)),
         )
-        self.datetime_service.freeze_time(time_of_payout_factor_calculation)
+        self.datetime_service.advance_time(timedelta(days=2))
+        planner = self.company_generator.create_company()
+        self.plan_generator.create_plan(
+            is_public_service=False,
+            timeframe=1,
+            costs=ProductionCosts(
+                means_cost=Decimal(0),
+                resource_cost=Decimal(0),
+                labour_cost=expected_balance,
+            ),
+            planner=planner,
+        )
         self.payout()
-        pf = self.payout_factor_repository.get_latest_payout_factor()
-        assert pf
-        self.assertEqual(pf.value, expected_payout_factor)
-
-    def test_that_a_payout_factor_gets_stored_in_repository(
-        self,
-    ) -> None:
-        assert self.payout_factor_repository.get_latest_payout_factor() is None
-        self.payout()
-        assert self.payout_factor_repository.get_latest_payout_factor() is not None
+        balances = self.balance_checker.get_company_account_balances(planner)
+        assert balances.a_account == expected_balance
 
     def get_company_work_account_balance(self, company: UUID) -> Decimal:
         show_my_accounts_response = self.show_my_accounts(

@@ -3,6 +3,7 @@ from decimal import Decimal
 from uuid import UUID, uuid4
 
 from arbeitszeit.entities import Company, ProductionCosts, PurposesOfPurchases
+from arbeitszeit.use_cases import query_company_purchases
 from arbeitszeit.use_cases.get_company_transactions import GetCompanyTransactions
 from arbeitszeit.use_cases.pay_means_of_production import (
     PayMeansOfProduction,
@@ -12,17 +13,19 @@ from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsResponse
 
 from .base_test_case import BaseTestCase
-from .repositories import CompanyRepository, PurchaseRepository, TransactionRepository
+from .repositories import CompanyRepository, TransactionRepository
 
 
 class PayMeansOfProductionTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.pay_means_of_production = self.injector.get(PayMeansOfProduction)
-        self.purchase_repository = self.injector.get(PurchaseRepository)
         self.transaction_repository = self.injector.get(TransactionRepository)
         self.update_plans_and_payout = self.injector.get(UpdatePlansAndPayout)
         self.company_repository = self.injector.get(CompanyRepository)
+        self.query_company_purchases = self.injector.get(
+            query_company_purchases.QueryCompanyPurchases
+        )
 
     def test_reject_payment_if_plan_is_expired(self) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
@@ -214,17 +217,15 @@ class PayMeansOfProductionTests(BaseTestCase):
         self.pay_means_of_production(
             PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
         )
-        purchase_added = self.purchase_repository.purchases[0]
-        assert len(self.purchase_repository.purchases) == 1
-        assert purchase_added.plan == plan.id
-        assert purchase_added.price_per_unit == self.price_checker.get_unit_price(
+        purchases = list(self.query_company_purchases(sender.id))
+        assert len(purchases) == 1
+        latest_purchase = purchases[0]
+        assert latest_purchase.plan_id == plan.id
+        assert latest_purchase.price_per_unit == self.price_checker.get_unit_price(
             plan.id
         )
-        assert purchase_added.amount == pieces
-        assert purchase_added.purpose == PurposesOfPurchases.means_of_prod
-        assert purchase_added.buyer == sender.id
-        assert purchase_added.plan == plan.id
-        assert purchase_added.is_buyer_a_member == False
+        assert latest_purchase.amount == pieces
+        assert latest_purchase.purpose == PurposesOfPurchases.means_of_prod
 
     def test_correct_purchase_added_if_raw_materials_were_paid(self) -> None:
         sender = self.company_generator.create_company_entity()
@@ -234,17 +235,15 @@ class PayMeansOfProductionTests(BaseTestCase):
         self.pay_means_of_production(
             PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
         )
-        purchase_added = self.purchase_repository.purchases[0]
-        assert len(self.purchase_repository.purchases) == 1
-        assert purchase_added.plan == plan.id
-        assert purchase_added.price_per_unit == self.price_checker.get_unit_price(
+        purchases = list(self.query_company_purchases(sender.id))
+        assert len(purchases) == 1
+        latest_purchase = purchases[0]
+        assert latest_purchase.plan_id == plan.id
+        assert latest_purchase.price_per_unit == self.price_checker.get_unit_price(
             plan.id
         )
-        assert purchase_added.amount == pieces
-        assert purchase_added.purpose == PurposesOfPurchases.raw_materials
-        assert purchase_added.buyer == sender.id
-        assert purchase_added.plan == plan.id
-        assert purchase_added.is_buyer_a_member == False
+        assert latest_purchase.amount == pieces
+        assert latest_purchase.purpose == PurposesOfPurchases.raw_materials
 
     def test_plan_not_found_rejects_payment(self) -> None:
         buyer = self.company_generator.create_company_entity()

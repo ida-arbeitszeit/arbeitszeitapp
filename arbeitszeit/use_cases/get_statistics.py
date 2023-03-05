@@ -7,8 +7,8 @@ from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
     CooperationRepository,
+    DatabaseGateway,
     MemberRepository,
-    PayoutFactorRepository,
     PlanRepository,
 )
 
@@ -36,7 +36,7 @@ class GetStatistics:
     plan_repository: PlanRepository
     cooperation_respository: CooperationRepository
     account_respository: AccountRepository
-    payout_factor_repository: PayoutFactorRepository
+    database: DatabaseGateway
 
     def __call__(self) -> StatisticsResponse:
         (
@@ -57,7 +57,9 @@ class GetStatistics:
             planned_work=planning_statistics.total_planned_costs.labour_cost,
             planned_resources=planning_statistics.total_planned_costs.resource_cost,
             planned_means=planning_statistics.total_planned_costs.means_cost,
-            payout_factor=self.payout_factor_repository.get_latest_payout_factor(),
+            payout_factor=self.database.get_payout_factors()
+            .ordered_by_calculation_date(descending=True)
+            .first(),
         )
 
     def _count_certificates_and_available_product(self) -> Tuple[Decimal, Decimal]:
