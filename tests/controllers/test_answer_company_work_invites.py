@@ -5,7 +5,9 @@ from typing import Any, Callable, cast
 from unittest import TestCase
 from uuid import uuid4
 
-from arbeitszeit.use_cases import AnswerCompanyWorkInviteRequest
+from arbeitszeit.use_cases.answer_company_work_invite import (
+    AnswerCompanyWorkInviteRequest,
+)
 from arbeitszeit_web.answer_company_work_invite import AnswerCompanyWorkInviteController
 
 from ..session import FakeSession

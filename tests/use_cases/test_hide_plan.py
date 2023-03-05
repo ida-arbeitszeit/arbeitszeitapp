@@ -2,7 +2,7 @@ from datetime import datetime
 from unittest import TestCase
 
 from arbeitszeit.entities import Plan
-from arbeitszeit.use_cases import HidePlan
+from arbeitszeit.use_cases.hide_plan import HidePlan
 from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
 from tests.data_generators import PlanGenerator
 from tests.datetime_service import FakeDatetimeService

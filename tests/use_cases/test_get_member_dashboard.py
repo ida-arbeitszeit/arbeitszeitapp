@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from arbeitszeit.use_cases import GetMemberDashboard
+from arbeitszeit.use_cases.get_member_dashboard import GetMemberDashboard
 from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
 from tests.data_generators import CompanyGenerator, MemberGenerator, PlanGenerator
 

@@ -6,37 +6,47 @@ from flask import redirect, request, url_for
 from flask_login import current_user
 
 from arbeitszeit import use_cases
-from arbeitszeit.use_cases import (
+from arbeitszeit.use_cases.accept_cooperation import (
     AcceptCooperation,
     AcceptCooperationRequest,
     AcceptCooperationResponse,
+)
+from arbeitszeit.use_cases.cancel_cooperation_solicitation import (
     CancelCooperationSolicitation,
     CancelCooperationSolicitationRequest,
-    DenyCooperation,
-    DenyCooperationRequest,
-    DenyCooperationResponse,
-    GetCompanySummary,
-    HidePlan,
-    ListActivePlansOfCompany,
-    ListAllCooperations,
-    ListCoordinations,
-    ListCoordinationsRequest,
-    ListInboundCoopRequests,
-    ListInboundCoopRequestsRequest,
-    ListOutboundCoopRequests,
-    ListOutboundCoopRequestsRequest,
-    RequestCooperation,
-    ToggleProductAvailability,
 )
 from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
 from arbeitszeit.use_cases.delete_draft import DeleteDraftUseCase
+from arbeitszeit.use_cases.deny_cooperation import (
+    DenyCooperation,
+    DenyCooperationRequest,
+    DenyCooperationResponse,
+)
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
+from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
 from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
 from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
+from arbeitszeit.use_cases.hide_plan import HidePlan
+from arbeitszeit.use_cases.list_active_plans_of_company import ListActivePlansOfCompany
+from arbeitszeit.use_cases.list_all_cooperations import ListAllCooperations
+from arbeitszeit.use_cases.list_coordinations import (
+    ListCoordinations,
+    ListCoordinationsRequest,
+)
+from arbeitszeit.use_cases.list_inbound_coop_requests import (
+    ListInboundCoopRequests,
+    ListInboundCoopRequestsRequest,
+)
 from arbeitszeit.use_cases.list_my_cooperating_plans import (
     ListMyCooperatingPlansUseCase,
 )
+from arbeitszeit.use_cases.list_outbound_coop_requests import (
+    ListOutboundCoopRequests,
+    ListOutboundCoopRequestsRequest,
+)
+from arbeitszeit.use_cases.request_cooperation import RequestCooperation
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
+from arbeitszeit.use_cases.toggle_product_availablity import ToggleProductAvailability
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.flask_session import FlaskSession
@@ -126,7 +136,7 @@ def dashboard(view: CompanyDashboardView):
 
 @CompanyRoute("/company/query_plans", methods=["GET"])
 def query_plans(
-    query_plans: use_cases.QueryPlans,
+    query_plans: use_cases.query_plans.QueryPlans,
     controller: QueryPlansController,
     template_renderer: UserTemplateRenderer,
     presenter: QueryPlansPresenter,
@@ -145,7 +155,7 @@ def query_plans(
 
 @CompanyRoute("/company/query_companies", methods=["GET", "POST"])
 def query_companies(
-    query_companies: use_cases.QueryCompanies,
+    query_companies: use_cases.query_companies.QueryCompanies,
     controller: QueryCompaniesController,
     template_renderer: UserTemplateRenderer,
     presenter: QueryCompaniesPresenter,
@@ -168,7 +178,7 @@ def query_companies(
 
 @CompanyRoute("/company/purchases")
 def my_purchases(
-    query_purchases: use_cases.QueryCompanyPurchases,
+    query_purchases: use_cases.query_company_purchases.QueryCompanyPurchases,
     template_renderer: UserTemplateRenderer,
     presenter: CompanyPurchasesPresenter,
 ):
@@ -358,7 +368,7 @@ def my_accounts(view: ShowMyAccountsView):
 
 @CompanyRoute("/company/my_accounts/all_transactions")
 def list_all_transactions(
-    get_company_transactions: use_cases.GetCompanyTransactions,
+    get_company_transactions: use_cases.get_company_transactions.GetCompanyTransactions,
     template_renderer: UserTemplateRenderer,
     presenter: GetCompanyTransactionsPresenter,
 ):
@@ -375,7 +385,7 @@ def list_all_transactions(
 
 @CompanyRoute("/company/my_accounts/account_p")
 def account_p(
-    show_p_account_details: use_cases.ShowPAccountDetailsUseCase,
+    show_p_account_details: use_cases.show_p_account_details.ShowPAccountDetailsUseCase,
     template_renderer: UserTemplateRenderer,
     presenter: ShowPAccountDetailsPresenter,
 ):
@@ -390,7 +400,7 @@ def account_p(
 
 @CompanyRoute("/company/my_accounts/account_r")
 def account_r(
-    show_r_account_details: use_cases.ShowRAccountDetailsUseCase,
+    show_r_account_details: use_cases.show_r_account_details.ShowRAccountDetailsUseCase,
     template_renderer: UserTemplateRenderer,
     presenter: ShowRAccountDetailsPresenter,
 ):
@@ -405,7 +415,7 @@ def account_r(
 
 @CompanyRoute("/company/my_accounts/account_a")
 def account_a(
-    show_a_account_details: use_cases.ShowAAccountDetailsUseCase,
+    show_a_account_details: use_cases.show_a_account_details.ShowAAccountDetailsUseCase,
     template_renderer: UserTemplateRenderer,
     presenter: ShowAAccountDetailsPresenter,
 ):
@@ -420,7 +430,7 @@ def account_a(
 
 @CompanyRoute("/company/my_accounts/account_prd")
 def account_prd(
-    show_prd_account_details: use_cases.ShowPRDAccountDetailsUseCase,
+    show_prd_account_details: use_cases.show_prd_account_details.ShowPRDAccountDetailsUseCase,
     template_renderer: UserTemplateRenderer,
     presenter: ShowPRDAccountDetailsPresenter,
 ):
@@ -454,7 +464,7 @@ def transfer_to_company(view: PayMeansOfProductionView):
 
 @CompanyRoute("/company/statistics")
 def statistics(
-    get_statistics: use_cases.GetStatistics,
+    get_statistics: use_cases.get_statistics.GetStatistics,
     presenter: GetStatisticsPresenter,
     template_renderer: UserTemplateRenderer,
 ):
@@ -468,7 +478,7 @@ def statistics(
 @CompanyRoute("/company/plan_summary/<uuid:plan_id>")
 def plan_summary(
     plan_id: UUID,
-    get_plan_summary_company: use_cases.GetPlanSummaryCompany,
+    get_plan_summary_company: use_cases.get_plan_summary_company.GetPlanSummaryCompany,
     template_renderer: UserTemplateRenderer,
     presenter: GetPlanSummaryCompanySuccessPresenter,
     http_404_view: Http404View,
@@ -494,7 +504,9 @@ def company_summary(
     http_404_view: Http404View,
 ):
     use_case_response = get_company_summary(company_id)
-    if isinstance(use_case_response, use_cases.GetCompanySummarySuccess):
+    if isinstance(
+        use_case_response, use_cases.get_company_summary.GetCompanySummarySuccess
+    ):
         view_model = presenter.present(use_case_response)
         return template_renderer.render_template(
             "company/company_summary.html",
@@ -507,15 +519,15 @@ def company_summary(
 @CompanyRoute("/company/cooperation_summary/<uuid:coop_id>")
 def coop_summary(
     coop_id: UUID,
-    get_coop_summary: use_cases.GetCoopSummary,
+    get_coop_summary: use_cases.get_coop_summary.GetCoopSummary,
     presenter: GetCoopSummarySuccessPresenter,
     template_renderer: UserTemplateRenderer,
     http_404_view: Http404View,
 ):
     use_case_response = get_coop_summary(
-        use_cases.GetCoopSummaryRequest(UUID(current_user.id), coop_id)
+        use_cases.get_coop_summary.GetCoopSummaryRequest(UUID(current_user.id), coop_id)
     )
-    if isinstance(use_case_response, use_cases.GetCoopSummarySuccess):
+    if isinstance(use_case_response, use_cases.get_coop_summary.GetCoopSummarySuccess):
         view_model = presenter.present(use_case_response)
         return template_renderer.render_template(
             "company/coop_summary.html", context=dict(view_model=view_model.to_dict())

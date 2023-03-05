@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases import CreateCooperationResponse
+from arbeitszeit.use_cases.create_cooperation import CreateCooperationResponse
 
 from .notification import Notifier
 from .translator import Translator

@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from arbeitszeit.use_cases import ToggleProductAvailability
+from arbeitszeit.use_cases.toggle_product_availablity import ToggleProductAvailability
 
 from .base_test_case import BaseTestCase
 

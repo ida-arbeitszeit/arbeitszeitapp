@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from arbeitszeit.use_cases import ShowCompanyWorkInviteDetailsResponse
+from arbeitszeit.use_cases.show_company_work_invite_details import (
+    ShowCompanyWorkInviteDetailsResponse,
+)
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 

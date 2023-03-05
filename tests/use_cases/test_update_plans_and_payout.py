@@ -3,8 +3,9 @@ from decimal import Decimal
 from uuid import UUID
 
 from arbeitszeit.entities import AccountTypes, ProductionCosts
-from arbeitszeit.use_cases import UpdatePlansAndPayout, get_company_transactions
+from arbeitszeit.use_cases import get_company_transactions
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts, ShowMyAccountsRequest
+from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
 from tests.use_cases.base_test_case import BaseTestCase
 
 from .dependency_injection import get_dependency_injector

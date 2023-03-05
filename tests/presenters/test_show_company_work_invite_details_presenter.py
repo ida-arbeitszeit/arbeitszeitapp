@@ -2,7 +2,9 @@ from typing import Optional
 from unittest import TestCase
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases import ShowCompanyWorkInviteDetailsResponse
+from arbeitszeit.use_cases.show_company_work_invite_details import (
+    ShowCompanyWorkInviteDetailsResponse,
+)
 from arbeitszeit_web.presenters.show_company_work_invite_details_presenter import (
     ShowCompanyWorkInviteDetailsPresenter,
 )

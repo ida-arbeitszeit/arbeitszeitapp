@@ -4,8 +4,8 @@ from uuid import UUID
 
 from flask import Response, redirect
 
-from arbeitszeit.use_cases import (
-    AnswerCompanyWorkInvite,
+from arbeitszeit.use_cases.answer_company_work_invite import AnswerCompanyWorkInvite
+from arbeitszeit.use_cases.show_company_work_invite_details import (
     ShowCompanyWorkInviteDetailsUseCase,
 )
 from arbeitszeit_flask.database import commit_changes

@@ -2,7 +2,7 @@ from datetime import timedelta
 from decimal import Decimal
 
 from arbeitszeit.transactions import TransactionTypes
-from arbeitszeit.use_cases import GetMemberAccount
+from arbeitszeit.use_cases.get_member_account import GetMemberAccount
 from tests.data_generators import (
     CompanyGenerator,
     FakeDatetimeService,

@@ -1,7 +1,10 @@
 from typing import Iterable
 
 from arbeitszeit.entities import Purchase
-from arbeitszeit.use_cases import PurchaseQueryResponse, QueryMemberPurchases
+from arbeitszeit.use_cases.query_member_purchases import (
+    PurchaseQueryResponse,
+    QueryMemberPurchases,
+)
 from tests.use_cases.base_test_case import BaseTestCase
 
 

@@ -1,5 +1,8 @@
 from arbeitszeit.entities import Cooperation
-from arbeitszeit.use_cases import ListAllCooperations, ListAllCooperationsResponse
+from arbeitszeit.use_cases.list_all_cooperations import (
+    ListAllCooperations,
+    ListAllCooperationsResponse,
+)
 from tests.data_generators import CooperationGenerator, PlanGenerator
 
 from .dependency_injection import injection_test

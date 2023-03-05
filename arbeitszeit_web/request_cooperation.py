@@ -3,7 +3,10 @@ from html import escape
 from typing import List, Protocol, Union
 from uuid import UUID
 
-from arbeitszeit.use_cases import RequestCooperationRequest, RequestCooperationResponse
+from arbeitszeit.use_cases.request_cooperation import (
+    RequestCooperationRequest,
+    RequestCooperationResponse,
+)
 from arbeitszeit_web.email import EmailConfiguration, MailService
 from arbeitszeit_web.translator import Translator
 

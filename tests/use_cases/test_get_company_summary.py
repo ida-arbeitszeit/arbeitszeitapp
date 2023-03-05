@@ -3,7 +3,7 @@ from decimal import Decimal
 from uuid import uuid4
 
 from arbeitszeit.entities import ProductionCosts, SocialAccounting
-from arbeitszeit.use_cases import GetCompanySummary
+from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
 from tests.data_generators import TransactionGenerator
 
 from .base_test_case import BaseTestCase

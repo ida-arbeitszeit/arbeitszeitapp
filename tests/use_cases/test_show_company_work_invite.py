@@ -2,8 +2,8 @@ from typing import Callable, cast
 from unittest import TestCase
 from uuid import uuid4
 
-from arbeitszeit.use_cases import (
-    InviteWorkerToCompanyUseCase,
+from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
+from arbeitszeit.use_cases.show_company_work_invite_details import (
     ShowCompanyWorkInviteDetailsRequest,
     ShowCompanyWorkInviteDetailsResponse,
     ShowCompanyWorkInviteDetailsUseCase,

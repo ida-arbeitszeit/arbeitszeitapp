@@ -2,7 +2,10 @@ from typing import Optional
 from unittest import TestCase
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases import ListAllCooperationsResponse, ListedCooperation
+from arbeitszeit.use_cases.list_all_cooperations import (
+    ListAllCooperationsResponse,
+    ListedCooperation,
+)
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.session import UserRole
 from tests.session import FakeSession

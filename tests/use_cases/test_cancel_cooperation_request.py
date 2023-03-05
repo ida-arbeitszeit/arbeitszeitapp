@@ -1,4 +1,4 @@
-from arbeitszeit.use_cases import (
+from arbeitszeit.use_cases.cancel_cooperation_solicitation import (
     CancelCooperationSolicitation,
     CancelCooperationSolicitationRequest,
 )

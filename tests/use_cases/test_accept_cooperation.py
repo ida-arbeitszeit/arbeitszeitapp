@@ -2,7 +2,10 @@ from decimal import Decimal
 from uuid import UUID, uuid4
 
 from arbeitszeit.entities import ProductionCosts
-from arbeitszeit.use_cases import AcceptCooperation, AcceptCooperationRequest
+from arbeitszeit.use_cases.accept_cooperation import (
+    AcceptCooperation,
+    AcceptCooperationRequest,
+)
 from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
 
 from .base_test_case import BaseTestCase

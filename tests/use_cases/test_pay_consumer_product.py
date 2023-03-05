@@ -7,8 +7,10 @@ from typing import Optional
 from uuid import UUID, uuid4
 
 from arbeitszeit.entities import ProductionCosts, PurposesOfPurchases
-from arbeitszeit.use_cases import PayConsumerProduct
-from arbeitszeit.use_cases.pay_consumer_product import RejectionReason
+from arbeitszeit.use_cases.pay_consumer_product import (
+    PayConsumerProduct,
+    RejectionReason,
+)
 from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
 from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.data_generators import TransactionGenerator

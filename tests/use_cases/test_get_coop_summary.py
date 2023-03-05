@@ -5,7 +5,7 @@ from uuid import uuid4
 from pytest import approx
 
 from arbeitszeit.entities import ProductionCosts
-from arbeitszeit.use_cases import (
+from arbeitszeit.use_cases.get_coop_summary import (
     GetCoopSummary,
     GetCoopSummaryRequest,
     GetCoopSummaryResponse,

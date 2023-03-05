@@ -1,6 +1,9 @@
 from uuid import uuid4
 
-from arbeitszeit.use_cases import ListCoordinations, ListCoordinationsRequest
+from arbeitszeit.use_cases.list_coordinations import (
+    ListCoordinations,
+    ListCoordinationsRequest,
+)
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
 
 from .dependency_injection import injection_test

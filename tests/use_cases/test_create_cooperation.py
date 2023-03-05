@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from arbeitszeit.use_cases import (
+from arbeitszeit.use_cases.create_cooperation import (
     CreateCooperation,
     CreateCooperationRequest,
     CreateCooperationResponse,
