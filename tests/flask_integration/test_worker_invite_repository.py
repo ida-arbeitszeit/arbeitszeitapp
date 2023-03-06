@@ -1,6 +1,5 @@
 from uuid import uuid4
 
-from arbeitszeit import repositories as interfaces
 from arbeitszeit_flask.database.repositories import WorkerInviteRepository
 from tests.data_generators import CompanyGenerator, MemberGenerator
 
@@ -36,12 +35,6 @@ class WorkerInviteRepositoryTests(FlaskTestCase):
         self.assertFalse(
             list(self.repository.get_companies_worker_is_invited_to(other_member)),
         )
-
-    def test_that_we_get_production_instance_of_repository_from_dependency_injection(
-        self,
-    ) -> None:
-        repository = self.injector.get(interfaces.WorkerInviteRepository)
-        self.assertIsInstance(repository, WorkerInviteRepository)
 
     def test_no_invites_for_worker_gets_returned_with_no_invites_send(
         self,

@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 
-from arbeitszeit.repositories import PayoutFactorRepository
+from arbeitszeit_flask.database.repositories import PayoutFactorRepository
 from tests.datetime_service import FakeDatetimeService
 
 from .flask import FlaskTestCase
