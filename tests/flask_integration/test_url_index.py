@@ -1,7 +1,7 @@
 from decimal import Decimal
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases import InviteWorkerToCompanyUseCase
+from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
 from arbeitszeit.use_cases.send_accountant_registration_token import (
     SendAccountantRegistrationTokenUseCase,
 )

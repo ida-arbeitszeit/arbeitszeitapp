@@ -33,11 +33,9 @@ from arbeitszeit.repositories import (
     PlanRepository,
     TransactionRepository,
 )
-from arbeitszeit.use_cases import (
+from arbeitszeit.use_cases.accept_cooperation import (
     AcceptCooperation,
     AcceptCooperationRequest,
-    RequestCooperation,
-    RequestCooperationRequest,
 )
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit.use_cases.create_plan_draft import (
@@ -48,6 +46,10 @@ from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounti
 from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
 from arbeitszeit.use_cases.register_company import RegisterCompany
 from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
+from arbeitszeit.use_cases.request_cooperation import (
+    RequestCooperation,
+    RequestCooperationRequest,
+)
 from arbeitszeit.use_cases.send_accountant_registration_token import (
     SendAccountantRegistrationTokenUseCase,
 )

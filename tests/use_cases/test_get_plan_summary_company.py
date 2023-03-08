@@ -1,7 +1,7 @@
 from unittest import TestCase
 from uuid import uuid4
 
-from arbeitszeit.use_cases import GetPlanSummaryCompany
+from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
 from tests.data_generators import CompanyGenerator, PlanGenerator
 
 from .dependency_injection import get_dependency_injector

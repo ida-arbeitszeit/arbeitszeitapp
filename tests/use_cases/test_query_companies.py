@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from arbeitszeit.entities import Company
-from arbeitszeit.use_cases import (
+from arbeitszeit.use_cases.query_companies import (
     CompanyFilter,
     CompanyQueryResponse,
     QueryCompanies,

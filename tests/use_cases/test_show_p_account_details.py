@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from arbeitszeit.entities import SocialAccounting
 from arbeitszeit.transactions import TransactionTypes
-from arbeitszeit.use_cases import ShowPAccountDetailsUseCase
+from arbeitszeit.use_cases.show_p_account_details import ShowPAccountDetailsUseCase
 from tests.data_generators import TransactionGenerator
 
 from .base_test_case import BaseTestCase

@@ -3,11 +3,11 @@ from decimal import Decimal
 from uuid import UUID, uuid4
 
 from arbeitszeit.entities import Company, ProductionCosts, PurposesOfPurchases
-from arbeitszeit.use_cases import (
-    GetCompanyTransactions,
+from arbeitszeit.use_cases import query_company_purchases
+from arbeitszeit.use_cases.get_company_transactions import GetCompanyTransactions
+from arbeitszeit.use_cases.pay_means_of_production import (
     PayMeansOfProduction,
     PayMeansOfProductionRequest,
-    query_company_purchases,
 )
 from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsResponse

@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from arbeitszeit.use_cases import QueryMemberPurchases
+from arbeitszeit.use_cases.query_member_purchases import QueryMemberPurchases
 from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.use_cases.base_test_case import BaseTestCase
 

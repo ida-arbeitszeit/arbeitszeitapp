@@ -3,7 +3,7 @@ from typing import Union
 from unittest import TestCase
 
 from arbeitszeit.entities import ProductionCosts
-from arbeitszeit.use_cases import GetStatistics
+from arbeitszeit.use_cases.get_statistics import GetStatistics
 from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
 from tests.data_generators import (
     CompanyGenerator,
