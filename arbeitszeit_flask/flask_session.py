@@ -47,17 +47,22 @@ class FlaskSession:
             return None
 
     def login_member(self, member: UUID, remember: bool = False) -> None:
-        member = models.Member.query.get(str(member))
+        member = models.Member.query.filter(models.Member.id == (str(member))).first()
+        assert member
         login_user(member, remember=remember)
         session["user_type"] = "member"
 
     def login_company(self, company: UUID, remember: bool = False) -> None:
-        company = models.Company.query.get(str(company))
+        company = models.Company.query.filter(models.Company.id == str(company)).first()
+        assert company
         login_user(company, remember=remember)
         session["user_type"] = "company"
 
     def login_accountant(self, accountant: UUID, remember: bool = False) -> None:
-        accountant = models.Accountant.query.get(str(accountant))
+        accountant = models.Accountant.query.filter(
+            models.Accountant.id == str(accountant)
+        ).first()
+        assert accountant
         login_user(accountant, remember=remember)
         session["user_type"] = "accountant"
 
