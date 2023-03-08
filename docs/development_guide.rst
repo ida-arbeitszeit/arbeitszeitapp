@@ -46,8 +46,8 @@ See this example for reference::
           response = business_logic(request)
           return response
 
-Implementing calls to persistent storage (a.k.a the database)
---------------------------------------------------------------
+Implementing calls to relational database servers
+-------------------------------------------------
 
 We segregate our business logic from implementation details as much as
 possible. One such implementation detail is persistent storage, which
@@ -56,151 +56,176 @@ business logic and the DB need to be established, otherwise this
 segregation cannot be facilitated.
 
 We establish these boundaries by declaring Python ``Protocol`` types
-(called protocols from now on). These protocols should describe what
-methods can be invoked on the DB and what the result of the invocation
-is. The inputs and outputs of these methods must always be "simple"
-data types with no explicitly defined methods.
+(called protocols from now on). These protocols describe what methods
+can be invoked on the DB and what the result of these invocations
+is. The main entry point for calls to the DB is the `DatabaseGateway`
+protocol. It has two types of methods: ``create_*`` methods to persist
+new data records in the DB and ``get_*`` methods that allow us to
+query existing data records. The kinds of data records that DB
+implementations should understand are defined in
+``arbeitszeit/entities.py``. The simple dataclasses defined there are
+called entities from now on.
 
-Let's look at an example for illustration purposes.  Here is some code
-that handles information about books being borrowed by customers of a
-library::
+Some readers might notice that the usage of the term *entity* in this
+manner does not follow the principles of clean architecture. The
+authors are aware of this problem and acknowledge that the term
+*entity* is used incorrectly but continue to do so until the proper
+changes are implemented in the code base.
 
-  from dataclasses import dataclass
-  from typing import Dict, List, Optional, Protocol, Union
-  from unittest import TestCase
+Object creation
+...............
 
+Methods that are supposed to create a new data record in the DB are
+expected to follow some basic principles.
 
-  # This is a value for distinguishing between "not setting a value"
-  # and "setting a value to None/NIL/NULL
-  class Null:
-      pass
+First of all they should be named ``create_RECORD_NAME``.  If we would
+have an entity called ``CouncilReport`` then the appropriate name for
+the create method is ``create_council_report``.
 
+Secondly every *create method* must return the entity that was created
+in the DB. In our example the return value of
+``create_council_report`` would be ``-> CouncilReport``.
 
-  NULL = Null()
+Thirdly the *create method* must not have any optional arguments.  For
+example arguments of the form ``argument: Optional[ArgType] = None``
+are not allowed. The reason for this is that optional arguments would
+mean that the default value for those optional arguments would be
+implementation specific, which would make it harder to ensure
+consistency across different implementations.
 
+To give a small example::
 
-  # Define the BookStorage Protocol. This defines the available methods
-  # on our "abstract" book storage.
-  class BookStorage(Protocol):
-      def get_book_count_borrowed_by_customer(self, customer_id: int) -> int:
-          ...
-
-      @dataclass
-      class UpdateBooksModel:
-          book_ids: List[int]
-          borrowed_to: Union[None, Null, int]
-
-      def update_books(self, update: UpdateBooksModel) -> None:
-          ...
-
-Now let's look at a possible implementation of the ``BookStorage``
-protocol where the data about the books is stored in an SQL database::
-
-  # Implement the BookStorage protocol by accessing an sql database.
-  # Instances of this class can be used anywhere where the BookStorage
-  # protocol is required.
-  class BookStorageSqlImplementation:
-      def get_book_count_borrowed_by_customer(self, customer_id: int) -> int:
-          return self.run_query(
-              "select count(*) from books where borrowed_to = ?;", customer_id
-          )
-
-      def update_books(self, update: BookStorage.UpdateBooksModel) -> None:
-          if update.borrowed_to is None:
-              return
-          self.run_query(
-              "update books set borrowed_to = ? where id in ?",
-              update.borrowed_to,
-              update.book_ids,
-          )
-
-      def run_query(self, query, *args):
-          # run the specified query against the database
-          pass
-
-Now let us see how another class can use the interface to implement a
-use case::
-
-  # Implement a use case that uses the BookStorage protocol. This class
-  # implements the "business logic" of borrowing books from a library.
-  # The customer cannot borrow any more books if they currently borrow
-  # 20 other books.
+  # entities.py
   @dataclass
-  class BorrowBookUseCase:
-      book_storage: BookStorage
+  class CouncilReport:
+      release_date: date
+      total_labor_time: Decimal
 
-      def borrow_book(self, customer_id: int, books: List[int]) -> str:
-          books_borrowed_already = self.book_storage.get_book_count_borrowed_by_customer(
-              customer_id
-          )
-          if books_borrowed_already > 20:
-              return "denied, cannot borrow any more books"
-          else:
-              self.book_storage.update_books(
-                  update=BookStorage.UpdateBooksModel(
-                      book_ids=books, borrowed_to=customer_id
-                  )
-              )
-              return "success, books are lended to customer"
+  # repositories.py
+  class DatabaseGateway(Protocol):
+      def create_council_report(
+	  self,
+	  release_date: date,
+	  total_labor_time: Decimal,
+      ) -> CouncilReport:
+	  ...
 
-Notice how the implementation of the use case does not depend on the
-concret implementation of the BookStorage but instead only on the
-protocol.  This allows ``BookStorageSqlImplementation`` to change
-independently from the ``BorrowBookUseCase`` and vice versa.  A side
-benefit is that we can easily change the implementation of
-``BookStorage`` to another one. This comes handy when writing test
-code. Here is an example for how one might implement a test for the
-use case without the need to create an SQL database::
+Querying
+........
 
-  # In our test case we don't want to use the sql implementation since
-  # it is "expensive" to create new tables and set up database
-  # schemes. Therefore we use a BookStorage implementation that just
-  # stores all the relevant information in a python dictionary.
-  class UseCaseTests(TestCase):
-      def setUp(self) -> None:
-          self.book_storage = BookStorageTestImpl()
-          self.use_case = BorrowBookUseCase(book_storage=self.book_storage)
+Obviously we want to query the records that we created. To that end we
+declare *get methods* on the database gateway interface.
 
-      def test_customer_cannot_borrow_books_if_they_already_borrowed_20(self) -> None:
-          customer_id = 42
-          for book_id in range(20):
-              self.book_storage.create_book(book_id=book_id, borrowed_to=customer_id)
-          response = self.use_case.borrow_book(customer_id, books=[1, 2, 3])
-          self.assertTrue(response.startswith("denied"))
+Those *get methods* must be named ``get_RECORD_NAMEs``. If we would
+like to declare a method to query ``CouncilReport`` records from the
+DB the appropriate name for the *get method* would be
+``get_council_records``. Note the plural in the method name.
 
+The return value of those *get methods* must be a subclass of
+``arbeitszeit.repositories.QueryResult`` with the proper type
+parameter. Those result types are also protocols. Here would be an
+example for the ``CouncilReport`` record type::
 
-  # This class implements all the methods defined in the protocol
-  # BookStorage. Notice how we can define additional methods like the
-  # create_book method that is not declared in the protocol.
-  class BookStorageTestImpl:
-      def __init__(self) -> None:
-          # This dictionary stores book ids and the customer id for
-          # potential customers that borrowed the specific book.
-          self.books: Dict[int, Optional[int]] = dict()
+  class CouncilReportResult(QueryResult[CouncilResult], Protocol):
+      def released_after(self, timestamp: datetime) -> CouncilReportResult:
+          ...
 
-      def get_book_count_borrowed_by_customer(self, customer_id: int) -> int:
-          return sum(
-              1 for _ in filter(lambda _id: _id == customer_id, self.books.values())
-          )
+Instances of ``CouncilReportResult`` represent a specific selection of
+all available council report rows in our database.  In our example the
+``CouncilReportResult`` protocol declares one additional method,
+namely ``released_after``.  As we can see in the example code, this
+method returns an instance of ``CouncilReportResult``.  Instances are
+required to return a new instance ``CouncilReport`` without changing
+the "original" instance.  Let's look at an example::
 
-      def update_books(self, update: BookStorage.UpdateBooksModel) -> None:
-          if update.borrowed_to is None:
-              return
-          customer_id = update.book_ids
-          for book in update.book_ids:
-              self.books[book] = customer_id
+  all_council_reports = database_gateway.get_council_reports()
+  # all_council_reports represents a query that will yield all CouncilReport records
+  # stored in the DB
+  recent_council_reports = all_council_reports.release_after(datetime(2020, 1, 1))
+  # recent_council_reports represents a query that will yield all CouncilReport records
+  # with a release_date after the 1. Jan 2020.  all_council_reports remains unchanged
+  # and still yields all records from DB without any filtering.
 
-      def create_book(self, book_id: int, borrowed_to: Optional[int]) -> None:
-          self.books[book_id] = borrowed_to
+*Get methods* must not accept any explicit
+arguments. Here is an example for such a *get method*::
 
-The protocols that define DB access in the *arbeitszeitapp* are
-located under ``arbeitszeit.repositories``. Note that while the above
-method, using protocols, is the standard for new implementations there
-is some "legacy" code in this module.  All the production
-implementations are located under
-``arbeitszeit_flask.database.repositories`` and the in-memory testing
-implementations can be found under ``tests.use_cases.repositories``.
+  class DatabaseGateway(Protocol):
+      def get_council_reports(self) -> CouncilReportResult:
+	  ...
 
+The ``QueryResult`` interface declares some basic functionality for
+working with records from the DB.  Most importantly is the
+``__iter__`` method that returns an iterator over all records
+retrieved by the DB call.  If we wanted to iterate over all
+``CoucilReport`` rows in our example we would write something like the
+following code::
+
+  for report in database_gateway.get_council_reports():
+      print(
+	  f"Report released by council on {report.release_date} "
+	  "declared a total of {report.total_labor_time} hours "
+	  "being worked in the economy"
+      )
+
+It is worth noting that implementations of the ``QueryResult``
+interface are expected to yield the records present at the time of
+iteration (e.g. when the ``__iter__`` method is called) and not when
+the ``QueryResult`` object is instantiated. In our example this would
+mean that in the following code the newly created ``CouncilRecord`` is
+part of the iteration the for loop::
+
+  records = database_gateway.get_council_reports()
+  database_gateway.create_council_report(release_date=datetime(...), total_labour_hours=...)
+  for record in records:
+      # the record created two lines above will also be printed.
+      print(record)
+
+Updating
+........
+
+Sometimes it is necessary to change records stored in the DB.  We
+facilitate these updates via an update protocol.  We declare an
+``update`` method on ``QueryResult`` subclasses for records that we
+want to change.  The update method must return an *update object*.
+These objects describe what updates are supported for the selected
+rows. Let's imagine an *update object* interface for our council
+report record::
+
+  class CouncilReportUpdate(Protocol):
+      def set_total_labor_hours(self, total_labor_hours: Decimal) -> CouncilReportUpdate:
+          ...
+
+      def perform(self) -> int:
+          ...
+
+In our example we can see two methods being declared. The
+``set_total_labor_hours`` allows us to update the respective field for
+the selected ``CouncilReport`` records.  The ``perform`` method will
+actually conduct the changes in the DB.  Let's look an an example::
+
+  reports = database_gateway.get_council_reports()
+  update = reports.update()
+  update.set_total_labor_hours(Decimal(12)).perform()
+
+In this example we selected all ``CouncilReport`` records from the
+database.  Then we scheduled an update from this query where the
+``total_labor_time`` field of each individual council report will be
+set to 12.  This update is immediately performed by calling the
+``perform`` method on it.  Here is the same example written as one
+statement::
+  
+  (
+      database_gateway
+      .get_council_reports()
+      .update()
+      .set_total_labor_hours(Decimal(12))
+      .perform()
+  )
+
+The production implementation of the database gateway would emit one
+single UPDATE statement to the SQL database server since only the
+``perform`` method at the end of the method chain will send commands
+to it.
 
 Subclassing unittest.TestCase
 -----------------------------
