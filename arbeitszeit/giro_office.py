@@ -5,7 +5,7 @@ from uuid import UUID
 
 from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Member
+from arbeitszeit.entities import Member, Transaction
 from arbeitszeit.repositories import AccountRepository, TransactionRepository
 
 
@@ -29,11 +29,11 @@ class GiroOffice:
         amount_sent: Decimal,
         amount_received: Decimal,
         purpose: str,
-    ) -> None:
+    ) -> Transaction:
         sending_account = sender.account
         if not self._is_account_balance_sufficient(amount_sent, sending_account):
             raise TransactionRejection.insufficient_account_balance
-        self.transaction_repository.create_transaction(
+        return self.transaction_repository.create_transaction(
             date=self.datetime_service.now(),
             sending_account=sending_account,
             receiving_account=receiving_account,

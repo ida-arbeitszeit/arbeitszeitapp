@@ -19,6 +19,11 @@ class FakeDatetimeService(DatetimeService):
     def unfreeze_time(self) -> None:
         self.frozen_time = None
 
+    def advance_time(self, dt: timedelta) -> None:
+        assert dt > timedelta(0)
+        assert self.frozen_time
+        self.frozen_time += dt
+
     def now(self) -> datetime:
         return self.frozen_time if self.frozen_time else datetime.now()
 

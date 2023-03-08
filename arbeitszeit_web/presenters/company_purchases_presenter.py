@@ -45,7 +45,7 @@ class CompanyPurchasesPresenter:
             purpose=self._format_purpose(purchase.purpose),
             price_per_unit=str(round(purchase.price_per_unit, 2)),
             amount=str(purchase.amount),
-            price_total=str(round(purchase.price_total, 2)),
+            price_total=str(round(purchase.price_per_unit * purchase.amount, 2)),
         )
 
     def _format_purpose(self, purpose: PurposesOfPurchases) -> str:

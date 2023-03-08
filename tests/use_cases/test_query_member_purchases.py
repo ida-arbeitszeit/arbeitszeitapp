@@ -1,7 +1,7 @@
-from typing import Iterable
+from datetime import datetime, timedelta
 
-from arbeitszeit.entities import Purchase
-from arbeitszeit.use_cases import PurchaseQueryResponse, QueryMemberPurchases
+from arbeitszeit.use_cases import QueryMemberPurchases
+from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.use_cases.base_test_case import BaseTestCase
 
 
@@ -9,36 +9,34 @@ class TestQueryMemberPurchases(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.query_purchases = self.injector.get(QueryMemberPurchases)
+        self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
+        self.control_thresholds.set_allowed_overdraw_of_member_account(10000)
 
-    def assertPurchaseInResults(
-        self, purchase: Purchase, results: Iterable[PurchaseQueryResponse]
-    ) -> bool:
-        return purchase.plan in [result.plan_id for result in results]
-
-    def test_that_no_purchase_is_returned_when_searching_an_empty_repo(self):
+    def test_that_no_purchase_is_returned_when_searching_an_empty_repo(self) -> None:
         member = self.member_generator.create_member()
         results = list(self.query_purchases(member))
         assert not results
 
-    def test_that_correct_purchases_are_returned(self):
-        member = self.member_generator.create_member_entity()
-        expected_purchase_member = self.purchase_generator.create_purchase_by_member(
-            buyer=member
-        )
-        results = list(self.query_purchases(member.id))
-        assert len(results) == 1
-        assert self.assertPurchaseInResults(expected_purchase_member, results)
-
-    def test_that_purchases_are_returned_in_correct_order(self):
-        member = self.member_generator.create_member_entity()
-        # Creating older purchase first to test correct ordering
+    def test_that_correct_purchases_are_returned(self) -> None:
+        expected_plan = self.plan_generator.create_plan().id
+        member = self.member_generator.create_member()
         self.purchase_generator.create_purchase_by_member(
-            buyer=member, purchase_date=self.datetime_service.now_minus_two_days()
+            buyer=member, plan=expected_plan
         )
-        expected_recent_purchase = self.purchase_generator.create_purchase_by_member(
-            buyer=member, purchase_date=self.datetime_service.now_minus_one_day()
+        results = list(self.query_purchases(member))
+        assert len(results) == 1
+        assert results[0].plan_id == expected_plan
+
+    def test_that_purchases_are_returned_in_correct_order(self) -> None:
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        first_plan = self.plan_generator.create_plan().id
+        second_plan = self.plan_generator.create_plan().id
+        member = self.member_generator.create_member()
+        self.purchase_generator.create_purchase_by_member(buyer=member, plan=first_plan)
+        self.datetime_service.advance_time(timedelta(days=1))
+        self.purchase_generator.create_purchase_by_member(
+            buyer=member, plan=second_plan
         )
-        results = list(self.query_purchases(member.id))
-        assert self.assertPurchaseInResults(
-            expected_recent_purchase, [results[0]]
-        )  # more recent purchase is first
+        results = list(self.query_purchases(member))
+        assert results[0].plan_id == second_plan
+        assert results[1].plan_id == first_plan
