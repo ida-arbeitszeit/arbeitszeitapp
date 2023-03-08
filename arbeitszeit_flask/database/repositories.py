@@ -409,7 +409,8 @@ class CompanyQueryResult(FlaskQueryResult[entities.Company]):
 
     def add_worker(self, member: UUID) -> int:
         companies_changed = 0
-        member = models.Member.query.get(str(member))
+        member = models.Member.query.filter(models.Member.id == str(member)).first()
+        assert member
         for company in self.query:
             companies_changed += 1
             company.workers.append(member)
@@ -683,8 +684,8 @@ class MemberRepository(repositories.MemberRepository):
             confirmed_on=orm_object.confirmed_on,
         )
 
-    def object_to_orm(self, member: entities.Member) -> Member:
-        return Member.query.get(str(member.id))
+    def object_to_orm(self, member: entities.Member) -> models.Member:
+        return models.Member.query.filter(models.Member.id == str(member.id)).first()
 
     def create_member(
         self,
@@ -731,7 +732,9 @@ class CompanyRepository(repositories.CompanyRepository):
     db: SQLAlchemy
 
     def object_to_orm(self, company: entities.Company) -> Company:
-        return Company.query.get(str(company.id))
+        orm = models.Company.query.filter(models.Company.id == str(company.id)).first()
+        assert orm
+        return orm
 
     def object_from_orm(self, company_orm: Company) -> entities.Company:
         return entities.Company(
@@ -896,7 +899,10 @@ class AccountRepository(repositories.AccountRepository):
         return self.object_from_orm(account)
 
     def get_account_balance(self, account: UUID) -> Decimal:
-        account_orm = models.Account.query.get(str(account))
+        account_orm = models.Account.query.filter(
+            models.Account.id == str(account)
+        ).first()
+        assert account_orm
         received = set(account_orm.transactions_received)
         sent = set(account_orm.transactions_sent)
         intersection = received & sent
@@ -907,7 +913,9 @@ class AccountRepository(repositories.AccountRepository):
         )
 
     def get_by_id(self, id: UUID) -> entities.Account:
-        return self.object_from_orm(Account.query.get(str(id)))
+        orm = Account.query.filter(models.Account.id == str(id)).first()
+        assert orm
+        return self.object_from_orm(orm)
 
     def get_accounts(self) -> AccountQueryResult:
         return AccountQueryResult(
@@ -1056,7 +1064,9 @@ class PlanRepository(repositories.PlanRepository):
         )
 
     def object_to_orm(self, plan: entities.Plan) -> models.Plan:
-        return models.Plan.query.get(str(plan.id))
+        orm = models.Plan.query.filter(models.Plan.id == str(plan.id)).first()
+        assert orm
+        return orm
 
     def _create_plan_from_draft(
         self,
@@ -1240,7 +1250,7 @@ class PlanDraftRepository(repositories.PlanDraftRepository):
             ).update(update_instructions)
 
     def get_by_id(self, id: UUID) -> Optional[entities.PlanDraft]:
-        orm = PlanDraft.query.get(str(id))
+        orm = models.PlanDraft.query.filter(models.PlanDraft.id == str(id)).first()
         if orm is None:
             return None
         else:
