@@ -177,11 +177,21 @@ class MemberResult(QueryResult[Member], Protocol):
     def with_email_address(self, email: str) -> MemberResult:
         ...
 
-    def set_confirmation_timestamp(self, timestamp: datetime) -> int:
-        ...
+    def update(self) -> MemberUpdate:
+        """Prepare an update for all selected members."""
 
     def that_are_confirmed(self) -> MemberResult:
         ...
+
+
+class MemberUpdate(Protocol):
+    def set_confirmation_timestamp(self, timestamp: datetime) -> MemberUpdate:
+        ...
+
+    def perform(self) -> int:
+        """Perform the update action and return the number of columns
+        affected.
+        """
 
 
 class ConsumerPurchaseResult(QueryResult[ConsumerPurchase], Protocol):

@@ -107,7 +107,9 @@ class MemberGenerator:
         assert (
             self.member_repository.get_members()
             .with_id(member.id)
+            .update()
             .set_confirmation_timestamp(registered_on)
+            .perform()
         )
         member = self.member_repository.get_members().with_id(member.id).first()
         assert member
