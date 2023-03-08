@@ -295,20 +295,43 @@ class MemberResult(QueryResultImpl[Member]):
     def with_email_address(self, email: str) -> MemberResult:
         return self._filtered_by(lambda model: model.email == email)
 
-    def set_confirmation_timestamp(self, timestamp: datetime) -> int:
-        members = list(self)
-        for member in members:
-            member.confirmed_on = timestamp
-        return len(members)
-
     def that_are_confirmed(self) -> MemberResult:
         return self._filtered_by(lambda model: model.confirmed_on is not None)
+
+    def update(self) -> MemberUpdate:
+        return MemberUpdate(
+            members=self.items,
+            update_functions=list(),
+        )
 
     def _filtered_by(self, key: Callable[[Member], bool]) -> MemberResult:
         return type(self)(
             items=lambda: filter(key, self.items()),
             entities=self.entities,
         )
+
+
+@dataclass
+class MemberUpdate:
+    members: Callable[[], Iterable[entities.Member]]
+    update_functions: List[Callable[[entities.Member], None]]
+
+    def set_confirmation_timestamp(self, timestamp: datetime) -> MemberUpdate:
+        def update(member: entities.Member) -> None:
+            member.confirmed_on = timestamp
+
+        return replace(
+            self,
+            update_functions=self.update_functions + [update],
+        )
+
+    def perform(self) -> int:
+        items_affected = 0
+        for member in self.members():
+            for update in self.update_functions:
+                update(member)
+            items_affected += 1
+        return items_affected
 
 
 class CompanyResult(QueryResultImpl[Company]):

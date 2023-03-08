@@ -344,24 +344,49 @@ class MemberQueryResult(FlaskQueryResult[entities.Member]):
             lambda query: query.join(models.User).filter(models.User.email == email)
         )
 
-    def set_confirmation_timestamp(self, timestamp: datetime) -> int:
-        sql_statement = (
-            update(models.Member)
-            .where(
-                models.Member.id.in_(
-                    self.query.with_entities(models.Member.id).scalar_subquery()
-                )
-            )
-            .values(confirmed_on=timestamp)
-            .execution_options(synchronize_session="fetch")
-        )
-        result = self.db.session.execute(sql_statement)
-        return result.rowcount
-
     def that_are_confirmed(self) -> MemberQueryResult:
         return self._with_modified_query(
             lambda query: query.filter(models.Member.confirmed_on != None)
         )
+
+    def update(self) -> MemberUpdate:
+        return MemberUpdate(
+            query=self.query,
+            db=self.db,
+        )
+
+
+@dataclass
+class MemberUpdate:
+    query: Select
+    db: SQLAlchemy
+    member_update_values: Dict[str, Any] = field(default_factory=dict)
+
+    def set_confirmation_timestamp(self, timestamp: datetime) -> MemberUpdate:
+        return replace(
+            self,
+            member_update_values=dict(
+                self.member_update_values,
+                confirmed_on=timestamp,
+            ),
+        )
+
+    def perform(self) -> int:
+        row_count = 0
+        if self.member_update_values:
+            sql_statement = (
+                update(models.Member)
+                .where(
+                    models.Member.id.in_(
+                        self.query.with_entities(models.Member.id).scalar_subquery()
+                    )
+                )
+                .values(**self.member_update_values)
+                .execution_options(synchronize_session="fetch")
+            )
+            result = self.db.session.execute(sql_statement)
+            row_count = result.rowcount
+        return row_count
 
 
 class CompanyQueryResult(FlaskQueryResult[entities.Company]):
@@ -733,7 +758,7 @@ class CompanyRepository(repositories.CompanyRepository):
         registered_on: datetime,
     ) -> entities.Company:
         user_orm = self._get_or_create_user(email, password)
-        company = Company(
+        company = models.Company(
             id=str(uuid4()),
             name=name,
             registered_on=registered_on,
