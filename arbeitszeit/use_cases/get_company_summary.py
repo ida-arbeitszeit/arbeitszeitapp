@@ -6,12 +6,18 @@ from typing import Dict, Iterable, List, Optional, Tuple
 from uuid import UUID
 
 from arbeitszeit.decimal import decimal_sum
-from arbeitszeit.entities import Company, Plan, Purchase, SocialAccounting
+from arbeitszeit.entities import (
+    Company,
+    CompanyPurchase,
+    Plan,
+    SocialAccounting,
+    Transaction,
+)
 from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
+    DatabaseGateway,
     PlanRepository,
-    PurchaseRepository,
     TransactionRepository,
 )
 
@@ -72,7 +78,7 @@ class GetCompanySummary:
     account_repository: AccountRepository
     transaction_repository: TransactionRepository
     social_accounting: SocialAccounting
-    purchase_repository: PurchaseRepository
+    database_gateway: DatabaseGateway
 
     def __call__(self, company_id: UUID) -> GetCompanySummaryResponse:
         company = self.company_repository.get_companies().with_id(company_id).first()
@@ -83,8 +89,10 @@ class GetCompanySummary:
             .planned_by(company.id)
             .ordered_by_creation_date(ascending=False)
         )
-        purchases = self.purchase_repository.get_purchases().where_buyer_is_company(
-            company=company_id
+        purchases = (
+            self.database_gateway.get_company_purchases().where_buyer_is_company(
+                company=company_id
+            )
         )
         expectations = self._get_expectations(company)
         account_balances = self._get_account_balances(company)
@@ -103,7 +111,9 @@ class GetCompanySummary:
                 for account_name in ["means", "raw_material", "work", "product"]
             ],
             plan_details=[self._get_plan_details(plan) for plan in plans],
-            suppliers_ordered_by_volume=self._get_suppliers(purchases),
+            suppliers_ordered_by_volume=self._get_suppliers(
+                purchases.with_transaction()
+            ),
         )
 
     def _get_plan_details(self, plan: Plan) -> PlanDetails:
@@ -173,7 +183,9 @@ class GetCompanySummary:
         except DivisionByZero:  # non-zero devided by zero
             return Decimal("Infinity")
 
-    def _get_suppliers(self, purchases: Iterable[Purchase]) -> List[Supplier]:
+    def _get_suppliers(
+        self, purchases: Iterable[Tuple[CompanyPurchase, Transaction]]
+    ) -> List[Supplier]:
         ordered_suppliers = sorted(
             self._get_suppliers_and_volume_of_sales(purchases),
             key=lambda item: item[1],
@@ -197,12 +209,12 @@ class GetCompanySummary:
         )
 
     def _get_suppliers_and_volume_of_sales(
-        self, purchases: Iterable[Purchase]
+        self, purchases: Iterable[Tuple[CompanyPurchase, Transaction]]
     ) -> List[Tuple[UUID, Decimal]]:
         suppliers: Dict[UUID, Decimal] = defaultdict(lambda: Decimal("0"))
-        for purchase in purchases:
-            plan = self.plan_repository.get_plans().with_id(purchase.plan).first()
+        for purchase, transaction in purchases:
+            plan = self.plan_repository.get_plans().with_id(purchase.plan_id).first()
             assert plan
             if plan:
-                suppliers[plan.planner] += purchase.amount * purchase.price_per_unit
+                suppliers[plan.planner] += transaction.amount_sent
         return list(suppliers.items())

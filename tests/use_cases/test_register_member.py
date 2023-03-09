@@ -1,6 +1,6 @@
-from arbeitszeit.use_cases import RegisterMemberUseCase
 from arbeitszeit.use_cases.get_member_dashboard import GetMemberDashboard
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
+from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
 from tests.token import TokenDeliveryService
 
 from .base_test_case import BaseTestCase

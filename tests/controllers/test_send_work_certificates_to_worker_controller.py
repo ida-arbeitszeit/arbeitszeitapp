@@ -2,7 +2,9 @@ from decimal import Decimal
 from unittest import TestCase
 from uuid import uuid4
 
-from arbeitszeit.use_cases import SendWorkCertificatesToWorkerRequest
+from arbeitszeit.use_cases.send_work_certificates_to_worker import (
+    SendWorkCertificatesToWorkerRequest,
+)
 from arbeitszeit_web.controllers.send_work_certificates_to_worker_controller import (
     ControllerRejection,
     SendWorkCertificatesToWorkerController,

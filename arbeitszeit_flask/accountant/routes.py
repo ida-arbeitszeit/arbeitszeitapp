@@ -107,7 +107,9 @@ def company_summary(
     http_404_view: Http404View,
 ):
     use_case_response = get_company_summary(company_id)
-    if isinstance(use_case_response, use_cases.GetCompanySummarySuccess):
+    if isinstance(
+        use_case_response, use_cases.get_company_summary.GetCompanySummarySuccess
+    ):
         view_model = presenter.present(use_case_response)
         return template_renderer.render_template(
             "accountant/company_summary.html",

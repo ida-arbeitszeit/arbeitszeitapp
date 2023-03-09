@@ -3,7 +3,7 @@ from typing import Optional
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import PayoutFactor
-from arbeitszeit.use_cases import StatisticsResponse
+from arbeitszeit.use_cases.get_statistics import StatisticsResponse
 from arbeitszeit_web.colors import Colors
 from arbeitszeit_web.plotter import Plotter
 from arbeitszeit_web.translator import Translator

@@ -4,7 +4,7 @@ from typing import Optional
 from flask import Response as FlaskResponse
 from flask import redirect, request, url_for
 
-from arbeitszeit.use_cases import PayConsumerProduct
+from arbeitszeit.use_cases.pay_consumer_product import PayConsumerProduct
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import PayConsumerProductForm
 from arbeitszeit_flask.template import TemplateRenderer

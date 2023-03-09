@@ -3,8 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
-from arbeitszeit.use_cases import PlanFilter
-from arbeitszeit.use_cases.query_plans import PlanSorting
+from arbeitszeit.use_cases.query_plans import PlanFilter, PlanSorting
 from arbeitszeit_web.query_plans import QueryPlansController
 from tests.controllers.base_test_case import BaseTestCase
 from tests.request import FakeRequest

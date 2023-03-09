@@ -1,7 +1,7 @@
 from typing import Optional
 from unittest import TestCase
 
-from arbeitszeit.use_cases import RequestCooperationResponse
+from arbeitszeit.use_cases.request_cooperation import RequestCooperationResponse
 from arbeitszeit_web.request_cooperation import RequestCooperationPresenter
 from tests.email import FakeEmailSender
 from tests.translator import FakeTranslator

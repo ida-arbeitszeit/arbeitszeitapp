@@ -3,7 +3,7 @@ from decimal import Decimal
 from uuid import uuid4
 
 from arbeitszeit.plan_summary import PlanSummary
-from arbeitszeit.use_cases import DraftSummarySuccess
+from arbeitszeit.use_cases.get_draft_summary import DraftSummarySuccess
 from arbeitszeit_web.create_draft import GetPrefilledDraftDataPresenter
 from tests.forms import DraftForm
 from tests.presenters.base_test_case import BaseTestCase

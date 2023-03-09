@@ -46,7 +46,7 @@ class TwoLanguagesAvailableTests(LanguageRepositoryTestCase):
         self.assertTrue(self.repository.get_available_language_codes())
 
     def test_that_repository_returns_exactly_two_codes(self) -> None:
-        self.assertEqual(len(self.repository.get_available_language_codes()), 2)
+        self.assertEqual(len(list(self.repository.get_available_language_codes())), 2)
 
     def test_that_proper_language_name_is_returned_for_english(self) -> None:
         self.assertEqual(

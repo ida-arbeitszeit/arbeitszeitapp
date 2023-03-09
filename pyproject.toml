@@ -77,9 +77,3 @@ module = [
     "wtforms"
 ]
 ignore_missing_imports = true
-
-[tool.pytest.ini_options]
-filterwarnings = [
-    '''ignore:'_app_ctx_stack' is deprecated:DeprecationWarning''',
-    'ignore:Dialect sqlite\+pysqlite does \*not\* support Decimal objects natively, and SQLAlchemy must convert from floating point - rounding errors and other issues may occur',
-]

@@ -1,10 +1,10 @@
 import click
 from flask_babel import force_locale
 
-from arbeitszeit.use_cases import UpdatePlansAndPayout
 from arbeitszeit.use_cases.send_accountant_registration_token import (
     SendAccountantRegistrationTokenUseCase,
 )
+from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.dependency_injection import with_injection
 
