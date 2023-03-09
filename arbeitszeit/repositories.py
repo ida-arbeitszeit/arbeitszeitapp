@@ -283,7 +283,18 @@ class PayoutFactorResult(QueryResult[PayoutFactor], Protocol):
 
 class PlanRepository(ABC):
     @abstractmethod
-    def create_plan_from_draft(self, draft_id: UUID) -> Optional[UUID]:
+    def create_plan(
+        self,
+        creation_timestamp: datetime,
+        planner: UUID,
+        production_costs: ProductionCosts,
+        product_name: str,
+        distribution_unit: str,
+        amount_produced: int,
+        product_description: str,
+        duration_in_days: int,
+        is_public_service: bool,
+    ) -> Plan:
         pass
 
     @abstractmethod

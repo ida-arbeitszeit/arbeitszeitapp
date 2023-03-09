@@ -1022,12 +1022,36 @@ class PlanRepository(repositories.PlanRepository):
             db=self.db,
         )
 
-    def create_plan_from_draft(self, draft_id: UUID) -> Optional[UUID]:
-        draft = self.draft_repository.get_by_id(draft_id)
-        if draft is None:
-            return None
-        plan_orm = self._create_plan_from_draft(draft)
-        return UUID(plan_orm.id)
+    def create_plan(
+        self,
+        creation_timestamp: datetime,
+        planner: UUID,
+        production_costs: entities.ProductionCosts,
+        product_name: str,
+        distribution_unit: str,
+        amount_produced: int,
+        product_description: str,
+        duration_in_days: int,
+        is_public_service: bool,
+    ) -> entities.Plan:
+        plan = models.Plan(
+            id=str(uuid4()),
+            plan_creation_date=creation_timestamp,
+            planner=str(planner),
+            costs_p=production_costs.means_cost,
+            costs_r=production_costs.resource_cost,
+            costs_a=production_costs.labour_cost,
+            prd_name=product_name,
+            prd_unit=distribution_unit,
+            prd_amount=amount_produced,
+            description=product_description,
+            timeframe=duration_in_days,
+            is_public_service=is_public_service,
+        )
+        review = models.PlanReview(approval_date=None, plan=plan)
+        self.db.session.add(plan)
+        self.db.session.add(review)
+        return self.object_from_orm(plan)
 
     @classmethod
     def object_from_orm(cls, plan: models.Plan) -> entities.Plan:
@@ -1063,33 +1087,6 @@ class PlanRepository(repositories.PlanRepository):
         orm = models.Plan.query.filter(models.Plan.id == str(plan.id)).first()
         assert orm
         return orm
-
-    def _create_plan_from_draft(
-        self,
-        plan: entities.PlanDraft,
-    ) -> models.Plan:
-        costs = plan.production_costs
-        plan = models.Plan(
-            id=plan.id,
-            plan_creation_date=plan.creation_date,
-            planner=self.company_repository.object_to_orm(plan.planner).id,
-            costs_p=costs.means_cost,
-            costs_r=costs.resource_cost,
-            costs_a=costs.labour_cost,
-            prd_name=plan.product_name,
-            prd_unit=plan.unit_of_distribution,
-            prd_amount=plan.amount_produced,
-            description=plan.description,
-            timeframe=plan.timeframe,
-            is_public_service=plan.is_public_service,
-            is_active=False,
-            activation_date=None,
-            is_available=True,
-        )
-        self.db.session.add(plan)
-        plan_review = models.PlanReview(approval_date=None, plan=plan)
-        self.db.session.add(plan_review)
-        return plan
 
     def hide_plan(self, plan_id: UUID) -> None:
         plan_orm = models.Plan.query.filter_by(id=str(plan_id)).first()

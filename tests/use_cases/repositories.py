@@ -794,23 +794,6 @@ class PlanRepository(interfaces.PlanRepository):
             entities=self.entities,
         )
 
-    def create_plan_from_draft(self, draft_id: UUID) -> Optional[UUID]:
-        draft = self.draft_repository.get_by_id(draft_id)
-        assert draft
-        plan = self._create_plan(
-            id=draft.id,
-            planner=draft.planner,
-            costs=draft.production_costs,
-            product_name=draft.product_name,
-            production_unit=draft.unit_of_distribution,
-            amount=draft.amount_produced,
-            description=draft.description,
-            timeframe_in_days=draft.timeframe,
-            is_public_service=draft.is_public_service,
-            creation_timestamp=draft.creation_date,
-        )
-        return plan.id
-
     def __len__(self) -> int:
         return len(self.entities.plans)
 
@@ -819,29 +802,31 @@ class PlanRepository(interfaces.PlanRepository):
         assert plan
         plan.hidden_by_user = True
 
-    def _create_plan(
+    def toggle_product_availability(self, plan: Plan) -> None:
+        plan.is_available = True if (plan.is_available == False) else False
+
+    def create_plan(
         self,
-        id: UUID,
-        planner: Company,
-        costs: ProductionCosts,
-        product_name: str,
-        production_unit: str,
-        amount: int,
-        description: str,
-        timeframe_in_days: int,
-        is_public_service: bool,
         creation_timestamp: datetime,
-    ) -> Plan:
+        planner: UUID,
+        production_costs: ProductionCosts,
+        product_name: str,
+        distribution_unit: str,
+        amount_produced: int,
+        product_description: str,
+        duration_in_days: int,
+        is_public_service: bool,
+    ) -> entities.Plan:
         plan = Plan(
-            id=id,
+            id=uuid4(),
             plan_creation_date=creation_timestamp,
-            planner=planner.id,
-            production_costs=costs,
+            planner=planner,
+            production_costs=production_costs,
             prd_name=product_name,
-            prd_unit=production_unit,
-            prd_amount=amount,
-            description=description,
-            timeframe=timeframe_in_days,
+            prd_unit=distribution_unit,
+            prd_amount=amount_produced,
+            description=product_description,
+            timeframe=duration_in_days,
             is_public_service=is_public_service,
             is_active=False,
             activation_date=None,
@@ -854,9 +839,6 @@ class PlanRepository(interfaces.PlanRepository):
         )
         self.entities.plans[plan.id] = plan
         return plan
-
-    def toggle_product_availability(self, plan: Plan) -> None:
-        plan.is_available = True if (plan.is_available == False) else False
 
 
 @singleton
