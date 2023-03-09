@@ -1,52 +1,11 @@
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, List, Optional, Protocol
+from typing import Any, Dict, List
 
-from arbeitszeit.use_cases.query_companies import (
-    CompanyFilter,
-    CompanyQueryResponse,
-    QueryCompaniesRequest,
-)
+from arbeitszeit.use_cases.query_companies import CompanyQueryResponse
+from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
-
-from .notification import Notifier
-
-
-class QueryCompaniesFormData(Protocol):
-    def get_query_string(self) -> str:
-        ...
-
-    def get_category_string(self) -> str:
-        ...
-
-
-@dataclass
-class QueryCompaniesRequestImpl(QueryCompaniesRequest):
-    query: Optional[str]
-    filter_category: CompanyFilter
-
-    def get_query_string(self) -> Optional[str]:
-        return self.query
-
-    def get_filter_category(self) -> CompanyFilter:
-        return self.filter_category
-
-
-class QueryCompaniesController:
-    def import_form_data(
-        self, form: Optional[QueryCompaniesFormData]
-    ) -> QueryCompaniesRequest:
-        if form is None:
-            filter_category = CompanyFilter.by_name
-            query = None
-        else:
-            query = form.get_query_string().strip() or None
-            if form.get_category_string() == "Email":
-                filter_category = CompanyFilter.by_email
-            else:
-                filter_category = CompanyFilter.by_name
-        return QueryCompaniesRequestImpl(query=query, filter_category=filter_category)
 
 
 @dataclass

@@ -36,6 +36,14 @@ class QueryCompaniesRequest(ABC):
     def get_filter_category(self) -> CompanyFilter:
         pass
 
+    @abstractmethod
+    def get_offset(self) -> Optional[int]:
+        pass
+
+    @abstractmethod
+    def get_limit(self) -> Optional[int]:
+        pass
+
 
 @dataclass
 class QueryCompanies:
@@ -45,12 +53,13 @@ class QueryCompanies:
         found_companies: Iterable[Company]
         query = request.get_query_string()
         filter_by = request.get_filter_category()
+        found_companies = self.company_repository.get_companies()
         if query is None:
-            found_companies = self.company_repository.get_companies()
+            pass
         elif filter_by == CompanyFilter.by_name:
-            found_companies = self.company_repository.query_companies_by_name(query)
+            found_companies = found_companies.with_name_containing(query)
         else:
-            found_companies = self.company_repository.query_companies_by_email(query)
+            found_companies = found_companies.with_email_containing(query)
         results = [
             self._company_to_response_model(company) for company in found_companies
         ]

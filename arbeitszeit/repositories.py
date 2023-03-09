@@ -240,6 +240,12 @@ class CompanyResult(QueryResult[Company], Protocol):
     def add_worker(self, member: UUID) -> int:
         ...
 
+    def with_name_containing(self, query: str) -> CompanyResult:
+        ...
+
+    def with_email_containing(self, query: str) -> CompanyResult:
+        ...
+
 
 class TransactionResult(QueryResult[Transaction], Protocol):
     def where_account_is_sender_or_receiver(self, *account: UUID) -> TransactionResult:
@@ -372,14 +378,6 @@ class CompanyRepository(ABC):
         products_account: Account,
         registered_on: datetime,
     ) -> Company:
-        pass
-
-    @abstractmethod
-    def query_companies_by_name(self, query: str) -> Iterator[Company]:
-        pass
-
-    @abstractmethod
-    def query_companies_by_email(self, query: str) -> Iterator[Company]:
         pass
 
     @abstractmethod
