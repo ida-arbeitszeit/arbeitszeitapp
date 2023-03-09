@@ -2,13 +2,13 @@ from datetime import datetime
 from typing import Optional
 
 from arbeitszeit.entities import Plan
-from arbeitszeit.use_cases import (
+from arbeitszeit.use_cases.query_plans import (
     PlanFilter,
     PlanQueryResponse,
+    PlanSorting,
     QueryPlans,
     QueryPlansRequest,
 )
-from arbeitszeit.use_cases.query_plans import PlanSorting
 from tests.use_cases.base_test_case import BaseTestCase
 
 

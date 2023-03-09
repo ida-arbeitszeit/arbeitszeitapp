@@ -33,7 +33,7 @@ class ConfirmMemberUseCase:
             if members.that_are_confirmed():
                 pass
             else:
-                members.set_confirmation_timestamp(datetime.min)
+                members.update().set_confirmation_timestamp(datetime.min).perform()
                 member = members.first()
                 assert member
                 return self.Response(is_confirmed=True, member=member.id)

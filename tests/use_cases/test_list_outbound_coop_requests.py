@@ -1,7 +1,7 @@
 from uuid import uuid4
 
 from arbeitszeit.entities import Plan
-from arbeitszeit.use_cases import (
+from arbeitszeit.use_cases.list_outbound_coop_requests import (
     ListOutboundCoopRequests,
     ListOutboundCoopRequestsRequest,
     ListOutboundCoopRequestsResponse,

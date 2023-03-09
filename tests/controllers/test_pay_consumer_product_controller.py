@@ -2,16 +2,14 @@ from typing import Optional
 from unittest import TestCase
 from uuid import UUID, uuid4
 
-from arbeitszeit_web.pay_consumer_product import (
-    PayConsumerProductController,
-    PayConsumerProductRequestImpl,
-)
+from arbeitszeit.use_cases.pay_consumer_product import PayConsumerProductRequest
+from arbeitszeit_web.pay_consumer_product import PayConsumerProductController
 from tests.forms import PayConsumerProductFakeForm
 from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
 
-ControllerResult = Optional[PayConsumerProductRequestImpl]
+ControllerResult = Optional[PayConsumerProductRequest]
 
 
 class PayConsumerProductControllerTests(TestCase):
@@ -132,7 +130,7 @@ class PayConsumerProductControllerTests(TestCase):
         buyer_uuid = uuid4()
         result = self._process_form(buyer=buyer_uuid)
         assert result
-        self.assertEqual(result.user, buyer_uuid)
+        self.assertEqual(result.buyer, buyer_uuid)
 
     def _process_form(
         self,

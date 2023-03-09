@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from arbeitszeit.use_cases import (
+from arbeitszeit.use_cases.send_work_certificates_to_worker import (
     SendWorkCertificatesToWorker,
     SendWorkCertificatesToWorkerRequest,
     SendWorkCertificatesToWorkerResponse,

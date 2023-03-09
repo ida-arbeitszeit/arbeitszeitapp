@@ -1,7 +1,7 @@
 from unittest import TestCase
 from uuid import uuid4
 
-from arbeitszeit.use_cases import ListedPlan
+from arbeitszeit.use_cases.list_active_plans_of_company import ListedPlan
 from arbeitszeit_web.list_plans import ListPlansPresenter, ListPlansResponse
 
 from .dependency_injection import get_dependency_injector

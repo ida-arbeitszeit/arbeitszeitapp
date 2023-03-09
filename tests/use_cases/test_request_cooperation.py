@@ -1,9 +1,11 @@
 from unittest import TestCase
 from uuid import uuid4
 
-from arbeitszeit.use_cases import (
+from arbeitszeit.use_cases.accept_cooperation import (
     AcceptCooperation,
     AcceptCooperationRequest,
+)
+from arbeitszeit.use_cases.request_cooperation import (
     RequestCooperation,
     RequestCooperationRequest,
     RequestCooperationResponse,

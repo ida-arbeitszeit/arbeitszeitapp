@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import List, Protocol
 from uuid import UUID
 
-from arbeitszeit.use_cases import InviteWorkerToCompanyUseCase
+from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
 from arbeitszeit_web.translator import Translator
 
 from .session import Session

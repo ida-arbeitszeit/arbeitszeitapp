@@ -2,7 +2,9 @@ from dataclasses import dataclass
 from typing import Optional
 from uuid import UUID
 
-from arbeitszeit.use_cases import ShowCompanyWorkInviteDetailsRequest
+from arbeitszeit.use_cases.show_company_work_invite_details import (
+    ShowCompanyWorkInviteDetailsRequest,
+)
 
 from ..session import Session
 

@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from uuid import uuid4
 
-from arbeitszeit.use_cases import ShowMyPlansRequest, ShowMyPlansUseCase
+from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from tests.use_cases.base_test_case import BaseTestCase
 
 

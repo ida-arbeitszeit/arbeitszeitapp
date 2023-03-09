@@ -34,10 +34,8 @@ from arbeitszeit_flask.database.repositories import (
     CooperationRepository,
     DatabaseGatewayImpl,
     MemberRepository,
-    PayoutFactorRepository,
     PlanDraftRepository,
     PlanRepository,
-    PurchaseRepository,
     TransactionRepository,
     UserAddressBookImpl,
     WorkerInviteRepository,
@@ -124,10 +122,6 @@ class FlaskModule(Module):
     def configure(self, binder: Binder) -> None:
         super().configure(binder)
         binder.bind(
-            interfaces.PurchaseRepository,  # type: ignore
-            to=AliasProvider(PurchaseRepository),
-        )
-        binder.bind(
             entities.SocialAccounting,
             to=CallableProvider(get_social_accounting),
         )
@@ -142,10 +136,6 @@ class FlaskModule(Module):
         binder.bind(
             interfaces.CompanyRepository,  # type: ignore
             to=AliasProvider(CompanyRepository),
-        )
-        binder.bind(
-            interfaces.PurchaseRepository,  # type: ignore
-            to=AliasProvider(PurchaseRepository),
         )
         binder.bind(
             interfaces.PlanRepository,  # type: ignore
@@ -177,10 +167,6 @@ class FlaskModule(Module):
         )
         binder.bind(TokenService, to=AliasProvider(FlaskTokenService))  # type: ignore
         binder.bind(UserAddressBook, to=AliasProvider(UserAddressBookImpl))  # type: ignore
-        binder.bind(
-            interfaces.PayoutFactorRepository,  # type: ignore
-            to=AliasProvider(PayoutFactorRepository),
-        )
         binder[NotifyAccountantsAboutNewPlanPresenter] = AliasProvider(NotifyAccountantsAboutNewPlanPresenterImpl)  # type: ignore
         binder[TextRenderer] = AliasProvider(TextRendererImpl)  # type: ignore
         binder[Request] = AliasProvider(FlaskRequest)  # type: ignore

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from flask import Response
 
-from arbeitszeit import use_cases
+from arbeitszeit.use_cases import query_plans as use_case
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.forms import PlanSearchForm
 from arbeitszeit_flask.template import TemplateRenderer
@@ -15,7 +15,7 @@ from arbeitszeit_web.query_plans import (
 
 @dataclass
 class QueryPlansView:
-    query_plans: use_cases.QueryPlans
+    query_plans: use_case.QueryPlans
     presenter: QueryPlansPresenter
     controller: QueryPlansController
     template_name: str
@@ -40,7 +40,7 @@ class QueryPlansView:
 
     def _handle_use_case_request(
         self,
-        use_case_request: use_cases.QueryPlansRequest,
+        use_case_request: use_case.QueryPlansRequest,
         form: PlanSearchForm,
         request: FlaskRequest,
     ) -> Response:

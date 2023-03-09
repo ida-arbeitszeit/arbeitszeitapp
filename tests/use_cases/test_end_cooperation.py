@@ -1,7 +1,7 @@
 from unittest import TestCase
 from uuid import uuid4
 
-from arbeitszeit.use_cases import (
+from arbeitszeit.use_cases.end_cooperation import (
     EndCooperation,
     EndCooperationRequest,
     EndCooperationResponse,

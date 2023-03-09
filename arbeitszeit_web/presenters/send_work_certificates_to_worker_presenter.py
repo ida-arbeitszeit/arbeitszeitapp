@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases import SendWorkCertificatesToWorkerResponse
+from arbeitszeit.use_cases.send_work_certificates_to_worker import (
+    SendWorkCertificatesToWorkerResponse,
+)
 from arbeitszeit_web.controllers.send_work_certificates_to_worker_controller import (
     ControllerRejection,
 )

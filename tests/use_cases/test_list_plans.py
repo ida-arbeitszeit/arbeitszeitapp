@@ -1,7 +1,10 @@
 from uuid import uuid4
 
 from arbeitszeit.entities import Company, Plan
-from arbeitszeit.use_cases import ListActivePlansOfCompany, ListPlansResponse
+from arbeitszeit.use_cases.list_active_plans_of_company import (
+    ListActivePlansOfCompany,
+    ListPlansResponse,
+)
 from tests.data_generators import CompanyGenerator, PlanGenerator
 
 from .dependency_injection import injection_test

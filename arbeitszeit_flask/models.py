@@ -7,7 +7,6 @@ from enum import Enum
 
 from flask_login import UserMixin
 
-from arbeitszeit import entities
 from arbeitszeit_flask.extensions import db
 
 
@@ -44,14 +43,18 @@ class Member(UserMixin, db.Model):
     registered_on = db.Column(db.DateTime, nullable=False)
     confirmed_on = db.Column(db.DateTime, nullable=True)
     account = db.Column(db.ForeignKey("account.id"), nullable=False)
-    purchases = db.relationship("Purchase", lazy="dynamic")
-    user = db.relationship("User", lazy=True, uselist=False, backref="member")
 
+    user = db.relationship(
+        "User",
+        lazy=True,
+        uselist=False,
+        backref=db.backref("member", cascade_backrefs=False),
+    )
     workplaces = db.relationship(
         "Company",
         secondary=jobs,
         lazy="dynamic",
-        backref=db.backref("workers", lazy="dynamic"),
+        backref=db.backref("workers", lazy="dynamic", cascade_backrefs=False),
     )
 
 
@@ -61,14 +64,23 @@ class Company(UserMixin, db.Model):
     name = db.Column(db.String(1000), nullable=False)
     registered_on = db.Column(db.DateTime, nullable=False)
     confirmed_on = db.Column(db.DateTime, nullable=True)
-    user = db.relationship("User", lazy=True, uselist=False, backref="company")
-    plans = db.relationship("Plan", lazy="dynamic", backref="company")
-    purchases = db.relationship("Purchase", lazy="dynamic")
-    drafts = db.relationship("PlanDraft", lazy="dynamic")
     p_account = db.Column(db.ForeignKey("account.id"), nullable=False)
     r_account = db.Column(db.ForeignKey("account.id"), nullable=False)
     a_account = db.Column(db.ForeignKey("account.id"), nullable=False)
     prd_account = db.Column(db.ForeignKey("account.id"), nullable=False)
+
+    drafts = db.relationship("PlanDraft", lazy="dynamic")
+    user = db.relationship(
+        "User",
+        lazy=True,
+        uselist=False,
+        backref=db.backref("company", cascade_backrefs=False),
+    )
+    plans = db.relationship(
+        "Plan",
+        lazy="dynamic",
+        backref=db.backref("company", cascade_backrefs=False),
+    )
 
     def __repr__(self):
         return "<Company(name='%s')>" % (self.name,)
@@ -79,7 +91,12 @@ class Accountant(UserMixin, db.Model):
     user_id = db.Column(db.ForeignKey("user.id"), nullable=False)
     name = db.Column(db.String(1000), nullable=False)
 
-    user = db.relationship("User", lazy=True, uselist=False, backref="accountant")
+    user = db.relationship(
+        "User",
+        lazy=True,
+        uselist=False,
+        backref=db.backref("accountant", cascade_backrefs=False),
+    )
 
 
 class PlanDraft(db.Model):
@@ -120,7 +137,9 @@ class Plan(db.Model):
     cooperation = db.Column(db.String, db.ForeignKey("cooperation.id"), nullable=True)
     hidden_by_user = db.Column(db.Boolean, nullable=False, default=False)
 
-    review = db.relationship("PlanReview", uselist=False, back_populates="plan")
+    review = db.relationship(
+        "PlanReview", uselist=False, back_populates="plan", cascade_backrefs=False
+    )
 
 
 class PlanReview(db.Model):
@@ -128,7 +147,7 @@ class PlanReview(db.Model):
     approval_date = db.Column(db.DateTime, nullable=True, default=None)
     plan_id = db.Column(db.String, db.ForeignKey("plan.id"), nullable=False)
 
-    plan = db.relationship("Plan", back_populates="review")
+    plan = db.relationship("Plan", back_populates="review", cascade_backrefs=False)
 
     def __repr__(self) -> str:
         return f"PlanReview(id={self.id!r}, plan_id={self.plan_id!r}, approval_date={self.approval_date!r})"
@@ -151,13 +170,13 @@ class Account(db.Model):
         "Transaction",
         foreign_keys="Transaction.sending_account",
         lazy="dynamic",
-        backref="account_from",
+        backref=db.backref("account_from", cascade_backrefs=False),
     )
     transactions_received = db.relationship(
         "Transaction",
         foreign_keys="Transaction.receiving_account",
         lazy="dynamic",
-        backref="account_to",
+        backref=db.backref("account_to", cascade_backrefs=False),
     )
 
 
@@ -173,16 +192,22 @@ class Transaction(db.Model):
     purpose = db.Column(db.String(1000), nullable=True)  # Verwendungszweck
 
 
-class Purchase(db.Model):
+class ConsumerPurchase(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
-    purchase_date = db.Column(db.DateTime, nullable=False)
     plan_id = db.Column(db.String, db.ForeignKey("plan.id"), nullable=False)
-    type_member = db.Column(db.Boolean, nullable=False)
-    company = db.Column(db.String, db.ForeignKey("company.id"), nullable=True)
-    member = db.Column(db.String, db.ForeignKey("member.id"), nullable=True)
-    price_per_unit = db.Column(db.Numeric(), nullable=False)
+    transaction_id = db.Column(
+        db.String, db.ForeignKey("transaction.id"), nullable=True
+    )
     amount = db.Column(db.Integer, nullable=False)
-    purpose = db.Column(db.Enum(entities.PurposesOfPurchases), nullable=False)
+
+
+class CompanyPurchase(db.Model):
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
+    plan_id = db.Column(db.String, db.ForeignKey("plan.id"), nullable=False)
+    transaction_id = db.Column(
+        db.String, db.ForeignKey("transaction.id"), nullable=True
+    )
+    amount = db.Column(db.Integer, nullable=False)
 
 
 class LabourCertificatesPayout(db.Model):
@@ -209,7 +234,10 @@ class Cooperation(db.Model):
     coordinator = db.Column(db.String, db.ForeignKey("company.id"), nullable=False)
 
     plans = db.relationship(
-        "Plan", foreign_keys="Plan.cooperation", lazy="dynamic", backref="coop"
+        "Plan",
+        foreign_keys="Plan.cooperation",
+        lazy="dynamic",
+        backref=db.backref("coop", cascade_backrefs=False),
     )
 
 

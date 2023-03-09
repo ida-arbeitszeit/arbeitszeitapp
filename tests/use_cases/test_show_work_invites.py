@@ -1,5 +1,5 @@
-from arbeitszeit.use_cases import (
-    InviteWorkerToCompanyUseCase,
+from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
+from arbeitszeit.use_cases.show_work_invites import (
     ShowWorkInvites,
     ShowWorkInvitesRequest,
 )

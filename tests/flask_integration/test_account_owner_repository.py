@@ -28,6 +28,7 @@ class RepositoryTester(FlaskTestCase):
         account = (
             self.account_repository.get_accounts().with_id(company.work_account).first()
         )
+        assert account
         assert self.repository.get_account_owner(account) == company
 
     def test_can_get_owner_of_public_account(self) -> None:

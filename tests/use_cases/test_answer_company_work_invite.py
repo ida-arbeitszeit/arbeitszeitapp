@@ -1,12 +1,12 @@
 from typing import Optional
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases import (
+from arbeitszeit.use_cases.answer_company_work_invite import (
     AnswerCompanyWorkInvite,
     AnswerCompanyWorkInviteRequest,
     AnswerCompanyWorkInviteResponse,
-    InviteWorkerToCompanyUseCase,
 )
+from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
 from tests.use_cases.repositories import MemberRepository, WorkerInviteRepository
 
 from .base_test_case import BaseTestCase

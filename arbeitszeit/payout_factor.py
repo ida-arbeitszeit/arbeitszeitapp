@@ -4,14 +4,14 @@ from decimal import Decimal
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.entities import ProductionCosts
-from arbeitszeit.repositories import PayoutFactorRepository, PlanRepository
+from arbeitszeit.repositories import DatabaseGateway, PlanRepository
 
 
 @dataclass
 class PayoutFactorService:
     plan_repository: PlanRepository
     datetime_service: DatetimeService
-    payout_factor_repository: PayoutFactorRepository
+    database_gateway: DatabaseGateway
 
     def calculate_payout_factor(self) -> Decimal:
         active_plans = self.plan_repository.get_plans().that_are_active()
@@ -38,6 +38,6 @@ class PayoutFactorService:
         return Decimal(payout_factor)
 
     def store_payout_factor(self, payout_factor: Decimal) -> None:
-        self.payout_factor_repository.store_payout_factor(
+        self.database_gateway.create_payout_factor(
             self.datetime_service.now(), payout_factor
         )
