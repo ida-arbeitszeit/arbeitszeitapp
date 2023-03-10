@@ -1,8 +1,15 @@
+from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from typing import List, Optional
 from uuid import UUID, uuid4
 
+from arbeitszeit.use_cases.query_companies import (
+    CompanyFilter,
+    CompanyQueryResponse,
+    QueriedCompany,
+    QueryCompaniesRequest,
+)
 from arbeitszeit.use_cases.query_plans import (
     PlanFilter,
     PlanQueryResponse,
@@ -72,3 +79,56 @@ class QueriedPlanGenerator:
                 sorting_category=requested_sorting_category,
             ),
         )
+
+
+class QueriedCompanyGenerator:
+    def get_company(self, name: Optional[str] = None) -> QueriedCompany:
+        if name is None:
+            name = "Some Company Name"
+        return QueriedCompany(
+            company_id=uuid4(), company_email="some.mail@cp.org", company_name=name
+        )
+
+    def get_response(
+        self,
+        queried_companies: Optional[List[QueriedCompany]] = None,
+        total_results: Optional[int] = None,
+        query_string: Optional[str] = None,
+        requested_offset: int = 0,
+        requested_limit: Optional[int] = None,
+        requested_filter_category: CompanyFilter = CompanyFilter.by_name,
+    ) -> CompanyQueryResponse:
+        if queried_companies is None:
+            queried_companies = [self.get_company() for _ in range(5)]
+        if total_results is None:
+            total_results = max(len(queried_companies), 100)
+        return CompanyQueryResponse(
+            results=[company for company in queried_companies],
+            total_results=total_results,
+            request=QueryCompaniesRequestTestImpl(
+                offset=requested_offset,
+                limit=requested_limit,
+                query=query_string,
+                filter_category=requested_filter_category,
+            ),
+        )
+
+
+@dataclass
+class QueryCompaniesRequestTestImpl(QueryCompaniesRequest):
+    query: Optional[str]
+    filter_category: CompanyFilter
+    offset: Optional[int] = None
+    limit: Optional[int] = None
+
+    def get_query_string(self) -> Optional[str]:
+        return self.query
+
+    def get_filter_category(self) -> CompanyFilter:
+        return self.filter_category
+
+    def get_offset(self) -> Optional[int]:
+        return self.offset
+
+    def get_limit(self) -> Optional[int]:
+        return self.limit
