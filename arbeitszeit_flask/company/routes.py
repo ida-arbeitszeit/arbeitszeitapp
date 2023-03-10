@@ -171,9 +171,9 @@ def query_companies(
         template_renderer,
     )
     if request.method == "POST":
-        return view.respond_to_post()
+        return view.respond_to_post(FlaskRequest())
     else:
-        return view.respond_to_get()
+        return view.respond_to_get(FlaskRequest())
 
 
 @CompanyRoute("/company/purchases")
