@@ -27,12 +27,14 @@ class QueryCompaniesView:
     def respond_to_post(self, flask_request: FlaskRequest) -> Response:
         if not self.search_form.validate():
             return self._get_invalid_form_response()
-        use_case_request = self.controller.import_form_data(self.search_form)
+        use_case_request = self.controller.import_form_data(
+            self.search_form, flask_request
+        )
         return self._handle_use_case_request(use_case_request, flask_request)
 
     def respond_to_get(self, flask_request: FlaskRequest) -> Response:
         return self._handle_use_case_request(
-            self.controller.import_form_data(None), flask_request
+            self.controller.import_form_data(None, flask_request), flask_request
         )
 
     def _get_invalid_form_response(self) -> Response:
