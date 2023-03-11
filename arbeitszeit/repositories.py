@@ -4,7 +4,16 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Generic, Iterable, Iterator, Optional, Protocol, TypeVar, Union
+from typing import (
+    Generic,
+    Iterable,
+    Iterator,
+    Optional,
+    Protocol,
+    Tuple,
+    TypeVar,
+    Union,
+)
 from uuid import UUID
 
 from arbeitszeit.entities import (
@@ -12,16 +21,17 @@ from arbeitszeit.entities import (
     Accountant,
     AccountTypes,
     Company,
+    CompanyPurchase,
     CompanyWorkInvite,
+    ConsumerPurchase,
     Cooperation,
     LabourCertificatesPayout,
     Member,
     PayoutFactor,
     Plan,
     PlanDraft,
+    PlanningStatistics,
     ProductionCosts,
-    Purchase,
-    PurposesOfPurchases,
     SocialAccounting,
     Transaction,
 )
@@ -106,6 +116,11 @@ class PlanResult(QueryResult[Plan], Protocol):
         coordinator.
         """
 
+    def get_statistics(self) -> PlanningStatistics:
+        """Return aggregate planning information for all plans
+        included in a result set.
+        """
+
     def update(self) -> PlanUpdate:
         """Prepare an update for all selected Plans."""
 
@@ -162,23 +177,53 @@ class MemberResult(QueryResult[Member], Protocol):
     def with_email_address(self, email: str) -> MemberResult:
         ...
 
-    def set_confirmation_timestamp(self, timestamp: datetime) -> int:
-        ...
+    def update(self) -> MemberUpdate:
+        """Prepare an update for all selected members."""
 
     def that_are_confirmed(self) -> MemberResult:
         ...
 
 
-class PurchaseResult(QueryResult[Purchase], Protocol):
-    def ordered_by_creation_date(self, *, ascending: bool = ...) -> PurchaseResult:
+class MemberUpdate(Protocol):
+    def set_confirmation_timestamp(self, timestamp: datetime) -> MemberUpdate:
         ...
 
-    def where_buyer_is_company(
-        self, *, company: Optional[UUID] = ...
-    ) -> PurchaseResult:
+    def perform(self) -> int:
+        """Perform the update action and return the number of columns
+        affected.
+        """
+
+
+class ConsumerPurchaseResult(QueryResult[ConsumerPurchase], Protocol):
+    def ordered_by_creation_date(
+        self, *, ascending: bool = ...
+    ) -> ConsumerPurchaseResult:
         ...
 
-    def where_buyer_is_member(self, *, member: Optional[UUID] = ...) -> PurchaseResult:
+    def where_buyer_is_member(self, member: UUID) -> ConsumerPurchaseResult:
+        ...
+
+    def with_transaction_and_plan(
+        self,
+    ) -> QueryResult[Tuple[ConsumerPurchase, Transaction, Plan]]:
+        ...
+
+
+class CompanyPurchaseResult(QueryResult[CompanyPurchase], Protocol):
+    def ordered_by_creation_date(
+        self, *, ascending: bool = ...
+    ) -> CompanyPurchaseResult:
+        ...
+
+    def where_buyer_is_company(self, company: UUID) -> CompanyPurchaseResult:
+        ...
+
+    def with_transaction_and_plan(
+        self,
+    ) -> QueryResult[Tuple[CompanyPurchase, Transaction, Plan]]:
+        ...
+
+    def with_transaction(self) -> QueryResult[Tuple[CompanyPurchase, Transaction]]:
         ...
 
 
@@ -193,6 +238,12 @@ class CompanyResult(QueryResult[Company], Protocol):
         ...
 
     def add_worker(self, member: UUID) -> int:
+        ...
+
+    def with_name_containing(self, query: str) -> CompanyResult:
+        ...
+
+    def with_email_containing(self, query: str) -> CompanyResult:
         ...
 
 
@@ -223,58 +274,16 @@ class LabourCertificatesPayoutResult(QueryResult[LabourCertificatesPayout], Prot
         ...
 
 
-class PurchaseRepository(ABC):
-    @abstractmethod
-    def create_purchase_by_company(
-        self,
-        purchase_date: datetime,
-        plan: UUID,
-        buyer: UUID,
-        price_per_unit: Decimal,
-        amount: int,
-        purpose: PurposesOfPurchases,
-    ) -> Purchase:
-        pass
-
-    @abstractmethod
-    def create_purchase_by_member(
-        self,
-        purchase_date: datetime,
-        plan: UUID,
-        buyer: UUID,
-        price_per_unit: Decimal,
-        amount: int,
-    ) -> Purchase:
-        pass
-
-    @abstractmethod
-    def get_purchases(self) -> PurchaseResult:
-        pass
+class PayoutFactorResult(QueryResult[PayoutFactor], Protocol):
+    def ordered_by_calculation_date(
+        self, *, descending: bool = ...
+    ) -> PayoutFactorResult:
+        ...
 
 
 class PlanRepository(ABC):
     @abstractmethod
     def create_plan_from_draft(self, draft_id: UUID) -> Optional[UUID]:
-        pass
-
-    @abstractmethod
-    def avg_timeframe_of_active_plans(self) -> Decimal:
-        pass
-
-    @abstractmethod
-    def sum_of_active_planned_work(self) -> Decimal:
-        pass
-
-    @abstractmethod
-    def sum_of_active_planned_resources(self) -> Decimal:
-        pass
-
-    @abstractmethod
-    def sum_of_active_planned_means(self) -> Decimal:
-        pass
-
-    @abstractmethod
-    def all_plans_approved_and_not_expired(self) -> Iterator[Plan]:
         pass
 
     @abstractmethod
@@ -369,14 +378,6 @@ class CompanyRepository(ABC):
         products_account: Account,
         registered_on: datetime,
     ) -> Company:
-        pass
-
-    @abstractmethod
-    def query_companies_by_name(self, query: str) -> Iterator[Company]:
-        pass
-
-    @abstractmethod
-    def query_companies_by_email(self, query: str) -> Iterator[Company]:
         pass
 
     @abstractmethod
@@ -528,14 +529,6 @@ class LanguageRepository(Protocol):
         ...
 
 
-class PayoutFactorRepository(Protocol):
-    def store_payout_factor(self, timestamp: datetime, payout_factor: Decimal) -> None:
-        ...
-
-    def get_latest_payout_factor(self) -> Optional[PayoutFactor]:
-        ...
-
-
 class DatabaseGateway(Protocol):
     def get_labour_certificates_payouts(self) -> LabourCertificatesPayoutResult:
         ...
@@ -543,4 +536,28 @@ class DatabaseGateway(Protocol):
     def create_labour_certificates_payout(
         self, transaction: UUID, plan: UUID
     ) -> LabourCertificatesPayout:
+        ...
+
+    def get_payout_factors(self) -> PayoutFactorResult:
+        ...
+
+    def create_payout_factor(
+        self, timestamp: datetime, payout_factor: Decimal
+    ) -> PayoutFactor:
+        ...
+
+    def create_consumer_purchase(
+        self, transaction: UUID, amount: int, plan: UUID
+    ) -> ConsumerPurchase:
+        ...
+
+    def get_consumer_purchases(self) -> ConsumerPurchaseResult:
+        ...
+
+    def create_company_purchase(
+        self, transaction: UUID, amount: int, plan: UUID
+    ) -> CompanyPurchase:
+        ...
+
+    def get_company_purchases(self) -> CompanyPurchaseResult:
         ...

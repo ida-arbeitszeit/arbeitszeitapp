@@ -1,7 +1,9 @@
 from typing import Optional
 from unittest import TestCase
 
-from arbeitszeit.use_cases import AnswerCompanyWorkInviteResponse
+from arbeitszeit.use_cases.answer_company_work_invite import (
+    AnswerCompanyWorkInviteResponse,
+)
 from arbeitszeit_web.answer_company_work_invite import AnswerCompanyWorkInvitePresenter
 from tests.translator import FakeTranslator
 

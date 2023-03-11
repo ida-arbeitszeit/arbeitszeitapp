@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from flask import redirect, render_template, request, url_for
 from flask_login import current_user
 
-from arbeitszeit.use_cases import RegisterMemberUseCase
+from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
 from arbeitszeit_flask.database import MemberRepository
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import RegisterForm

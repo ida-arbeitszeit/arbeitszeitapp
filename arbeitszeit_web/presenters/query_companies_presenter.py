@@ -1,52 +1,13 @@
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, List, Optional, Protocol
+from typing import Any, Dict, List
 
-from arbeitszeit.use_cases.query_companies import (
-    CompanyFilter,
-    CompanyQueryResponse,
-    QueryCompaniesRequest,
-)
-from arbeitszeit_web.session import Session
+from arbeitszeit.use_cases.query_companies import CompanyQueryResponse
+from arbeitszeit_web.notification import Notifier
+from arbeitszeit_web.pagination import DEFAULT_PAGE_SIZE, Pagination, Paginator
+from arbeitszeit_web.request import Request
+from arbeitszeit_web.session import Session, UserRole
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
-
-from .notification import Notifier
-
-
-class QueryCompaniesFormData(Protocol):
-    def get_query_string(self) -> str:
-        ...
-
-    def get_category_string(self) -> str:
-        ...
-
-
-@dataclass
-class QueryCompaniesRequestImpl(QueryCompaniesRequest):
-    query: Optional[str]
-    filter_category: CompanyFilter
-
-    def get_query_string(self) -> Optional[str]:
-        return self.query
-
-    def get_filter_category(self) -> CompanyFilter:
-        return self.filter_category
-
-
-class QueryCompaniesController:
-    def import_form_data(
-        self, form: Optional[QueryCompaniesFormData]
-    ) -> QueryCompaniesRequest:
-        if form is None:
-            filter_category = CompanyFilter.by_name
-            query = None
-        else:
-            query = form.get_query_string().strip() or None
-            if form.get_category_string() == "Email":
-                filter_category = CompanyFilter.by_email
-            else:
-                filter_category = CompanyFilter.by_name
-        return QueryCompaniesRequestImpl(query=query, filter_category=filter_category)
 
 
 @dataclass
@@ -66,6 +27,7 @@ class ResultsTable:
 class QueryCompaniesViewModel:
     results: ResultsTable
     show_results: bool
+    pagination: Pagination
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -78,9 +40,16 @@ class QueryCompaniesPresenter:
     translator: Translator
     session: Session
 
-    def present(self, response: CompanyQueryResponse) -> QueryCompaniesViewModel:
+    def present(
+        self, response: CompanyQueryResponse, request: Request
+    ) -> QueryCompaniesViewModel:
         if not response.results:
             self.user_notifier.display_warning(self.translator.gettext("No results"))
+        paginator = self._create_paginator(
+            request,
+            total_results=response.total_results,
+            current_offset=response.request.get_offset() or 0,
+        )
         return QueryCompaniesViewModel(
             show_results=bool(response.results),
             results=ResultsTable(
@@ -97,10 +66,33 @@ class QueryCompaniesPresenter:
                     for result in response.results
                 ],
             ),
+            pagination=Pagination(
+                is_visible=paginator.page_count > 1,
+                pages=paginator.get_pages(),
+            ),
         )
 
     def get_empty_view_model(self) -> QueryCompaniesViewModel:
         return QueryCompaniesViewModel(
             results=ResultsTable(rows=[]),
             show_results=False,
+            pagination=Pagination(is_visible=False, pages=[]),
+        )
+
+    def _create_paginator(
+        self, request: Request, total_results: int, current_offset: int
+    ) -> Paginator:
+        return Paginator(
+            base_url=self._get_pagination_base_url(),
+            query_arguments=dict(request.query_string().items()),
+            page_size=DEFAULT_PAGE_SIZE,
+            total_results=total_results,
+            current_offset=current_offset,
+        )
+
+    def _get_pagination_base_url(self) -> str:
+        return (
+            self.url_index.get_member_query_companies_url()
+            if self.session.get_user_role() == UserRole.member
+            else self.url_index.get_company_query_companies_url()
         )

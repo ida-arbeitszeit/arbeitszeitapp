@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from arbeitszeit.entities import AccountTypes, SocialAccounting
 from arbeitszeit.transactions import TransactionTypes
-from arbeitszeit.use_cases import GetCompanyTransactions
+from arbeitszeit.use_cases.get_company_transactions import GetCompanyTransactions
 from tests.data_generators import (
     CompanyGenerator,
     FakeDatetimeService,

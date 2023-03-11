@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Protocol, Union
 from uuid import UUID
 
-from arbeitszeit.use_cases import (
+from arbeitszeit.use_cases.answer_company_work_invite import (
     AnswerCompanyWorkInviteRequest,
     AnswerCompanyWorkInviteResponse,
 )

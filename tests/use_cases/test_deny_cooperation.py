@@ -1,9 +1,11 @@
 from uuid import uuid4
 
-from arbeitszeit.use_cases import (
+from arbeitszeit.use_cases.deny_cooperation import (
     DenyCooperation,
     DenyCooperationRequest,
     DenyCooperationResponse,
+)
+from arbeitszeit.use_cases.request_cooperation import (
     RequestCooperation,
     RequestCooperationRequest,
 )

@@ -3,14 +3,12 @@ from decimal import Decimal
 from arbeitszeit.entities import ProductionCosts
 from arbeitszeit.payout_factor import PayoutFactorService
 from tests.use_cases.base_test_case import BaseTestCase
-from tests.use_cases.repositories import FakePayoutFactorRepository
 
 
 class CalculationTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.service = self.injector.get(PayoutFactorService)
-        self.payout_factor_repository = self.injector.get(FakePayoutFactorRepository)
 
     def test_that_payout_factor_is_zero_if_no_plans_exist(self):
         pf = self.service.calculate_payout_factor()

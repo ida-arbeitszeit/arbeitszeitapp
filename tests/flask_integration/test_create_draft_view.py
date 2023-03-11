@@ -34,7 +34,7 @@ class AuthenticatedCompanyTestsForPost(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.plan_generator = self.injector.get(PlanGenerator)
-        self.plan_draft_repository = self.injector.get(PlanDraftRepository)
+        self.plan_draft_repository = self.injector.get(PlanDraftRepository)  # type: ignore
         self.form = self.injector.get(FakeRequest)
         self.company = self.login_company()
 

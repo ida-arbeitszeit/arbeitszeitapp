@@ -1,4 +1,4 @@
-from arbeitszeit.use_cases import RegisterCompany
+from arbeitszeit.use_cases.register_company import RegisterCompany
 from arbeitszeit_web.forms import RegisterForm
 
 

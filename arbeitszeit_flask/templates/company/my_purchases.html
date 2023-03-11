@@ -33,8 +33,8 @@
         </tr>
       </thead>
       <tbody>
-        {% if purchases is defined and purchases|length %}
-        {% for purchase in purchases %}
+        {% if view_model.show_purchases %}
+        {% for purchase in view_model.purchases %}
         <tr>
           <td>{{ purchase.purchase_date }}</td>
           <td>{{ purchase.product_name }}</td>

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from arbeitszeit.use_cases import ListAllCooperationsResponse
+from arbeitszeit.use_cases.list_all_cooperations import ListAllCooperationsResponse
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.url_index import UrlIndex
 

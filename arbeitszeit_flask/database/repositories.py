@@ -11,6 +11,7 @@ from typing import (
     Iterable,
     Iterator,
     Optional,
+    Tuple,
     TypeVar,
     Union,
 )
@@ -18,6 +19,7 @@ from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_, func, or_, update
+from sqlalchemy.orm import aliased
 from sqlalchemy.sql.expression import Select
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -32,7 +34,6 @@ from arbeitszeit_flask.models import (
     Cooperation,
     Member,
     PlanDraft,
-    Purchase,
     SocialAccounting,
     Transaction,
 )
@@ -211,6 +212,22 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
                 lambda query: query.filter(models.Plan.requested_cooperation != None)
             )
 
+    def get_statistics(self) -> entities.PlanningStatistics:
+        result = self.query.with_entities(
+            func.avg(models.Plan.timeframe).label("duration"),
+            func.sum(models.Plan.costs_p).label("costs_p"),
+            func.sum(models.Plan.costs_r).label("costs_r"),
+            func.sum(models.Plan.costs_a).label("costs_a"),
+        ).first()
+        return entities.PlanningStatistics(
+            average_plan_duration_in_days=result.duration or Decimal(0),
+            total_planned_costs=entities.ProductionCosts(
+                means_cost=result.costs_p or Decimal(0),
+                resource_cost=result.costs_r or Decimal(0),
+                labour_cost=result.costs_a or Decimal(0),
+            ),
+        )
+
     def update(self) -> PlanUpdate:
         return PlanUpdate(
             query=self.query,
@@ -327,52 +344,49 @@ class MemberQueryResult(FlaskQueryResult[entities.Member]):
             lambda query: query.join(models.User).filter(models.User.email == email)
         )
 
-    def set_confirmation_timestamp(self, timestamp: datetime) -> int:
-        sql_statement = (
-            update(models.Member)
-            .where(
-                models.Member.id.in_(
-                    self.query.with_entities(models.Member.id).scalar_subquery()
-                )
-            )
-            .values(confirmed_on=timestamp)
-            .execution_options(synchronize_session="fetch")
-        )
-        result = self.db.session.execute(sql_statement)
-        return result.rowcount
-
     def that_are_confirmed(self) -> MemberQueryResult:
         return self._with_modified_query(
             lambda query: query.filter(models.Member.confirmed_on != None)
         )
 
-
-class PurchaseQueryResult(FlaskQueryResult[entities.Purchase]):
-    def ordered_by_creation_date(
-        self, *, ascending: bool = True
-    ) -> PurchaseQueryResult:
-        ordering = models.Purchase.purchase_date
-        if not ascending:
-            ordering = ordering.desc()
-        return self._with_modified_query(lambda query: query.order_by(ordering))
-
-    def where_buyer_is_company(
-        self, *, company: Optional[UUID] = None
-    ) -> PurchaseQueryResult:
-        return self._with_modified_query(
-            lambda query: self.query.filter(models.Purchase.company == str(company))
-            if company
-            else self.query.filter(models.Purchase.company != None)
+    def update(self) -> MemberUpdate:
+        return MemberUpdate(
+            query=self.query,
+            db=self.db,
         )
 
-    def where_buyer_is_member(
-        self, *, member: Optional[UUID] = None
-    ) -> PurchaseQueryResult:
-        return self._with_modified_query(
-            lambda query: self.query.filter(models.Purchase.member == str(member))
-            if member
-            else self.query.filter(models.Purchase.member != None)
+
+@dataclass
+class MemberUpdate:
+    query: Select
+    db: SQLAlchemy
+    member_update_values: Dict[str, Any] = field(default_factory=dict)
+
+    def set_confirmation_timestamp(self, timestamp: datetime) -> MemberUpdate:
+        return replace(
+            self,
+            member_update_values=dict(
+                self.member_update_values,
+                confirmed_on=timestamp,
+            ),
         )
+
+    def perform(self) -> int:
+        row_count = 0
+        if self.member_update_values:
+            sql_statement = (
+                update(models.Member)
+                .where(
+                    models.Member.id.in_(
+                        self.query.with_entities(models.Member.id).scalar_subquery()
+                    )
+                )
+                .values(**self.member_update_values)
+                .execution_options(synchronize_session="fetch")
+            )
+            result = self.db.session.execute(sql_statement)
+            row_count = result.rowcount
+        return row_count
 
 
 class CompanyQueryResult(FlaskQueryResult[entities.Company]):
@@ -395,11 +409,24 @@ class CompanyQueryResult(FlaskQueryResult[entities.Company]):
 
     def add_worker(self, member: UUID) -> int:
         companies_changed = 0
-        member = models.Member.query.get(str(member))
+        member = models.Member.query.filter(models.Member.id == str(member)).first()
+        assert member
         for company in self.query:
             companies_changed += 1
             company.workers.append(member)
         return companies_changed
+
+    def with_name_containing(self, query: str) -> CompanyQueryResult:
+        return self._with_modified_query(
+            lambda db_query: db_query.filter(models.Company.name.ilike(f"%{query}%"))
+        )
+
+    def with_email_containing(self, query: str) -> CompanyQueryResult:
+        return self._with_modified_query(
+            lambda db_query: db_query.join(models.User).filter(
+                models.User.email.ilike(f"%{query}%")
+            )
+        )
 
 
 class TransactionQueryResult(FlaskQueryResult[entities.Transaction]):
@@ -468,6 +495,148 @@ class LabourCertificatesPayoutResult(
         )
 
 
+class PayoutFactorResult(FlaskQueryResult[entities.PayoutFactor]):
+    def ordered_by_calculation_date(
+        self, descending: bool = False
+    ) -> PayoutFactorResult:
+        ordering = models.PayoutFactor.timestamp
+        if descending:
+            ordering = ordering.desc()
+        return self._with_modified_query(lambda query: query.order_by(ordering))
+
+
+class CompanyPurchaseResult(FlaskQueryResult[entities.CompanyPurchase]):
+    def where_buyer_is_company(self, company: UUID) -> CompanyPurchaseResult:
+        transaction = aliased(models.Transaction)
+        account = aliased(models.Account)
+        buying_company = aliased(models.Company)
+        return self._with_modified_query(
+            lambda query: query.join(transaction)
+            .join(account, transaction.sending_account == account.id)
+            .join(
+                buying_company,
+                or_(
+                    account.id == buying_company.p_account,
+                    account.id == buying_company.r_account,
+                ),
+            )
+            .filter(buying_company.id == str(company))
+        )
+
+    def ordered_by_creation_date(
+        self, *, ascending: bool = True
+    ) -> CompanyPurchaseResult:
+        transaction = aliased(models.Transaction)
+        ordering = transaction.date
+        if not ascending:
+            ordering = ordering.desc()
+        return self._with_modified_query(
+            lambda query: query.join(transaction).order_by(ordering)
+        )
+
+    def with_transaction_and_plan(
+        self,
+    ) -> FlaskQueryResult[
+        Tuple[entities.CompanyPurchase, entities.Transaction, entities.Plan]
+    ]:
+        def mapper(
+            orm,
+        ) -> Tuple[entities.CompanyPurchase, entities.Transaction, entities.Plan]:
+            purchase_orm, transaction_orm, plan_orm = orm
+            return (
+                DatabaseGatewayImpl.company_purchase_from_orm(purchase_orm),
+                TransactionRepository.object_from_orm(transaction_orm),
+                PlanRepository.object_from_orm(plan_orm),
+            )
+
+        transaction = aliased(models.Transaction)
+        plan = aliased(models.Plan)
+        return FlaskQueryResult(
+            db=self.db,
+            mapper=mapper,
+            query=self.query.join(
+                transaction, models.CompanyPurchase.transaction_id == transaction.id
+            )
+            .join(plan, models.CompanyPurchase.plan_id == plan.id)
+            .with_entities(models.CompanyPurchase, transaction, plan),
+        )
+
+    def with_transaction(
+        self,
+    ) -> FlaskQueryResult[Tuple[entities.CompanyPurchase, entities.Transaction]]:
+        def mapper(
+            orm,
+        ) -> Tuple[entities.CompanyPurchase, entities.Transaction]:
+            purchase_orm, transaction_orm = orm
+            return (
+                DatabaseGatewayImpl.company_purchase_from_orm(purchase_orm),
+                TransactionRepository.object_from_orm(transaction_orm),
+            )
+
+        transaction = aliased(models.Transaction)
+        return FlaskQueryResult(
+            db=self.db,
+            mapper=mapper,
+            query=self.query.join(
+                transaction, models.CompanyPurchase.transaction_id == transaction.id
+            ).with_entities(models.CompanyPurchase, transaction),
+        )
+
+
+class ConsumerPurchaseResult(FlaskQueryResult[entities.ConsumerPurchase]):
+    def where_buyer_is_member(self, member: UUID) -> ConsumerPurchaseResult:
+        transaction = aliased(models.Transaction)
+        account = aliased(models.Account)
+        buying_member = aliased(models.Member)
+        return self._with_modified_query(
+            lambda query: query.join(transaction)
+            .join(account, transaction.sending_account == account.id)
+            .join(
+                buying_member,
+                account.id == buying_member.account,
+            )
+            .filter(buying_member.id == str(member))
+        )
+
+    def ordered_by_creation_date(
+        self, *, ascending: bool = True
+    ) -> ConsumerPurchaseResult:
+        transaction = aliased(models.Transaction)
+        ordering = transaction.date
+        if not ascending:
+            ordering = ordering.desc()
+        return self._with_modified_query(
+            lambda query: query.join(transaction).order_by(ordering)
+        )
+
+    def with_transaction_and_plan(
+        self,
+    ) -> FlaskQueryResult[
+        Tuple[entities.ConsumerPurchase, entities.Transaction, entities.Plan]
+    ]:
+        def mapper(
+            orm,
+        ) -> Tuple[entities.ConsumerPurchase, entities.Transaction, entities.Plan]:
+            purchase_orm, transaction_orm, plan_orm = orm
+            return (
+                DatabaseGatewayImpl.consumer_purchase_from_orm(purchase_orm),
+                TransactionRepository.object_from_orm(transaction_orm),
+                PlanRepository.object_from_orm(plan_orm),
+            )
+
+        transaction = aliased(models.Transaction)
+        plan = aliased(models.Plan)
+        return FlaskQueryResult(
+            db=self.db,
+            mapper=mapper,
+            query=self.query.join(
+                transaction, models.ConsumerPurchase.transaction_id == transaction.id
+            )
+            .join(plan, models.ConsumerPurchase.plan_id == plan.id)
+            .with_entities(models.ConsumerPurchase, transaction, plan),
+        )
+
+
 @dataclass
 class UserAddressBookImpl:
     db: SQLAlchemy
@@ -527,8 +696,8 @@ class MemberRepository(repositories.MemberRepository):
             confirmed_on=orm_object.confirmed_on,
         )
 
-    def object_to_orm(self, member: entities.Member) -> Member:
-        return Member.query.get(str(member.id))
+    def object_to_orm(self, member: entities.Member) -> models.Member:
+        return models.Member.query.filter(models.Member.id == str(member.id)).first()
 
     def create_member(
         self,
@@ -575,7 +744,9 @@ class CompanyRepository(repositories.CompanyRepository):
     db: SQLAlchemy
 
     def object_to_orm(self, company: entities.Company) -> Company:
-        return Company.query.get(str(company.id))
+        orm = models.Company.query.filter(models.Company.id == str(company.id)).first()
+        assert orm
+        return orm
 
     def object_from_orm(self, company_orm: Company) -> entities.Company:
         return entities.Company(
@@ -602,7 +773,7 @@ class CompanyRepository(repositories.CompanyRepository):
         registered_on: datetime,
     ) -> entities.Company:
         user_orm = self._get_or_create_user(email, password)
-        company = Company(
+        company = models.Company(
             id=str(uuid4()),
             name=name,
             registered_on=registered_on,
@@ -616,22 +787,6 @@ class CompanyRepository(repositories.CompanyRepository):
         self.db.session.add(company)
         self.db.session.flush()
         return self.object_from_orm(company)
-
-    def query_companies_by_name(self, query: str) -> Iterator[entities.Company]:
-        return (
-            self.object_from_orm(company)
-            for company in Company.query.filter(
-                Company.name.ilike("%" + query + "%")
-            ).all()
-        )
-
-    def query_companies_by_email(self, query: str) -> Iterator[entities.Company]:
-        companies = (
-            self.db.session.query(models.Company)
-            .join(models.User)
-            .filter(models.User.email.ilike("%" + query + "%"))
-        )
-        return (self.object_from_orm(company) for company in companies)
 
     def get_companies(self) -> CompanyQueryResult:
         return CompanyQueryResult(
@@ -740,7 +895,10 @@ class AccountRepository(repositories.AccountRepository):
         return self.object_from_orm(account)
 
     def get_account_balance(self, account: UUID) -> Decimal:
-        account_orm = models.Account.query.get(str(account))
+        account_orm = models.Account.query.filter(
+            models.Account.id == str(account)
+        ).first()
+        assert account_orm
         received = set(account_orm.transactions_received)
         sent = set(account_orm.transactions_sent)
         intersection = received & sent
@@ -751,7 +909,9 @@ class AccountRepository(repositories.AccountRepository):
         )
 
     def get_by_id(self, id: UUID) -> entities.Account:
-        return self.object_from_orm(Account.query.get(str(id)))
+        orm = Account.query.filter(models.Account.id == str(id)).first()
+        assert orm
+        return self.object_from_orm(orm)
 
     def get_accounts(self) -> AccountQueryResult:
         return AccountQueryResult(
@@ -850,88 +1010,6 @@ class AccountingRepository:
 
 
 @dataclass
-class PurchaseRepository(repositories.PurchaseRepository):
-    member_repository: MemberRepository
-    company_repository: CompanyRepository
-    db: SQLAlchemy
-
-    def object_to_orm(self, purchase: entities.Purchase) -> Purchase:
-        return Purchase(
-            purchase_date=purchase.purchase_date,
-            plan_id=str(purchase.plan),
-            type_member=purchase.is_buyer_a_member,
-            company=str(purchase.buyer) if not purchase.is_buyer_a_member else None,
-            member=str(purchase.buyer) if purchase.is_buyer_a_member else None,
-            price_per_unit=float(purchase.price_per_unit),
-            amount=purchase.amount,
-            purpose=purchase.purpose.value,
-        )
-
-    def object_from_orm(self, purchase: Purchase) -> entities.Purchase:
-        return entities.Purchase(
-            purchase_date=purchase.purchase_date,
-            plan=UUID(purchase.plan_id),
-            buyer=UUID(purchase.member)
-            if purchase.type_member
-            else UUID(purchase.company),
-            is_buyer_a_member=purchase.type_member,
-            price_per_unit=Decimal(purchase.price_per_unit),
-            amount=purchase.amount,
-            purpose=purchase.purpose,
-        )
-
-    def create_purchase_by_company(
-        self,
-        purchase_date: datetime,
-        plan: UUID,
-        buyer: UUID,
-        price_per_unit: Decimal,
-        amount: int,
-        purpose: entities.PurposesOfPurchases,
-    ) -> entities.Purchase:
-        purchase = entities.Purchase(
-            purchase_date=purchase_date,
-            plan=plan,
-            buyer=buyer,
-            is_buyer_a_member=False,
-            price_per_unit=price_per_unit,
-            amount=amount,
-            purpose=purpose,
-        )
-        purchase_orm = self.object_to_orm(purchase)
-        self.db.session.add(purchase_orm)
-        return purchase
-
-    def create_purchase_by_member(
-        self,
-        purchase_date: datetime,
-        plan: UUID,
-        buyer: UUID,
-        price_per_unit: Decimal,
-        amount: int,
-    ) -> entities.Purchase:
-        purchase = entities.Purchase(
-            purchase_date=purchase_date,
-            plan=plan,
-            buyer=buyer,
-            is_buyer_a_member=True,
-            price_per_unit=price_per_unit,
-            amount=amount,
-            purpose=entities.PurposesOfPurchases.consumption,
-        )
-        purchase_orm = self.object_to_orm(purchase)
-        self.db.session.add(purchase_orm)
-        return purchase
-
-    def get_purchases(self) -> PurchaseQueryResult:
-        return PurchaseQueryResult(
-            mapper=self.object_from_orm,
-            query=models.Purchase.query,
-            db=self.db,
-        )
-
-
-@dataclass
 class PlanRepository(repositories.PlanRepository):
     company_repository: CompanyRepository
     db: SQLAlchemy
@@ -951,7 +1029,8 @@ class PlanRepository(repositories.PlanRepository):
         plan_orm = self._create_plan_from_draft(draft)
         return UUID(plan_orm.id)
 
-    def object_from_orm(self, plan: models.Plan) -> entities.Plan:
+    @classmethod
+    def object_from_orm(cls, plan: models.Plan) -> entities.Plan:
         production_costs = entities.ProductionCosts(
             labour_cost=plan.costs_a,
             resource_cost=plan.costs_r,
@@ -981,7 +1060,9 @@ class PlanRepository(repositories.PlanRepository):
         )
 
     def object_to_orm(self, plan: entities.Plan) -> models.Plan:
-        return models.Plan.query.get(str(plan.id))
+        orm = models.Plan.query.filter(models.Plan.id == str(plan.id)).first()
+        assert orm
+        return orm
 
     def _create_plan_from_draft(
         self,
@@ -1010,46 +1091,6 @@ class PlanRepository(repositories.PlanRepository):
         self.db.session.add(plan_review)
         return plan
 
-    def avg_timeframe_of_active_plans(self) -> Decimal:
-        return Decimal(
-            self.db.session.query(func.avg(models.Plan.timeframe))
-            .filter_by(is_active=True)
-            .one()[0]
-            or 0
-        )
-
-    def sum_of_active_planned_work(self) -> Decimal:
-        return Decimal(
-            self.db.session.query(func.sum(models.Plan.costs_a))
-            .filter_by(is_active=True)
-            .one()[0]
-            or 0
-        )
-
-    def sum_of_active_planned_resources(self) -> Decimal:
-        return Decimal(
-            self.db.session.query(func.sum(models.Plan.costs_r))
-            .filter_by(is_active=True)
-            .one()[0]
-            or 0
-        )
-
-    def sum_of_active_planned_means(self) -> Decimal:
-        return Decimal(
-            self.db.session.query(func.sum(models.Plan.costs_p))
-            .filter_by(is_active=True)
-            .one()[0]
-            or 0
-        )
-
-    def all_plans_approved_and_not_expired(self) -> Iterator[entities.Plan]:
-        return (
-            self.object_from_orm(plan_orm)
-            for plan_orm in models.Plan.query.filter_by(
-                approved=True, expired=False
-            ).all()
-        )
-
     def hide_plan(self, plan_id: UUID) -> None:
         plan_orm = models.Plan.query.filter_by(id=str(plan_id)).first()
         assert plan_orm
@@ -1072,7 +1113,8 @@ class TransactionRepository(repositories.TransactionRepository):
     def object_to_orm(self, transaction: entities.Transaction) -> Transaction:
         return Transaction.query.get(str(transaction.id))
 
-    def object_from_orm(self, transaction: Transaction) -> entities.Transaction:
+    @classmethod
+    def object_from_orm(cls, transaction: Transaction) -> entities.Transaction:
         return entities.Transaction(
             id=UUID(transaction.id),
             date=transaction.date,
@@ -1204,7 +1246,7 @@ class PlanDraftRepository(repositories.PlanDraftRepository):
             ).update(update_instructions)
 
     def get_by_id(self, id: UUID) -> Optional[entities.PlanDraft]:
-        orm = PlanDraft.query.get(str(id))
+        orm = models.PlanDraft.query.filter(models.PlanDraft.id == str(id)).first()
         if orm is None:
             return None
         else:
@@ -1455,32 +1497,6 @@ class AccountantRepository:
 
 
 @dataclass
-class PayoutFactorRepository:
-    db: SQLAlchemy
-
-    def store_payout_factor(self, timestamp: datetime, payout_factor: Decimal) -> None:
-        payout_factor = models.PayoutFactor(
-            timestamp=timestamp, payout_factor=payout_factor
-        )
-        self.db.session.add(payout_factor)
-
-    def get_latest_payout_factor(
-        self,
-    ) -> Optional[entities.PayoutFactor]:
-        payout_factor_orm = (
-            self.db.session.query(models.PayoutFactor)
-            .order_by(models.PayoutFactor.timestamp.desc())
-            .first()
-        )
-        if not payout_factor_orm:
-            return None
-        return entities.PayoutFactor(
-            calculation_date=payout_factor_orm.timestamp,
-            value=Decimal(payout_factor_orm.payout_factor),
-        )
-
-
-@dataclass
 class DatabaseGatewayImpl:
     db: SQLAlchemy
 
@@ -1501,10 +1517,96 @@ class DatabaseGatewayImpl:
         self.db.session.add(orm)
         return self._labour_certificates_payout_from_orm(orm)
 
+    def create_payout_factor(
+        self, timestamp: datetime, payout_factor: Decimal
+    ) -> entities.PayoutFactor:
+        orm = models.PayoutFactor(
+            timestamp=timestamp,
+            payout_factor=payout_factor,
+        )
+        self.db.session.add(orm)
+        return self._payout_factor_from_orm(orm)
+
+    def get_payout_factors(self) -> PayoutFactorResult:
+        return PayoutFactorResult(
+            query=models.PayoutFactor.query,
+            db=self.db,
+            mapper=self._payout_factor_from_orm,
+        )
+
     def _labour_certificates_payout_from_orm(
         self, orm: models.LabourCertificatesPayout
     ) -> entities.LabourCertificatesPayout:
         return entities.LabourCertificatesPayout(
+            plan_id=UUID(orm.plan_id),
+            transaction_id=UUID(orm.transaction_id),
+        )
+
+    def _payout_factor_from_orm(
+        self, orm: models.PayoutFactor
+    ) -> entities.PayoutFactor:
+        return entities.PayoutFactor(
+            calculation_date=orm.timestamp,
+            value=orm.payout_factor,
+        )
+
+    def create_company_purchase(
+        self, transaction: UUID, amount: int, plan: UUID
+    ) -> entities.CompanyPurchase:
+        orm = models.CompanyPurchase(
+            plan_id=str(plan),
+            transaction_id=str(transaction),
+            amount=amount,
+        )
+        self.db.session.add(orm)
+        self.db.session.flush()
+        return self.company_purchase_from_orm(orm)
+
+    def get_company_purchases(self) -> CompanyPurchaseResult:
+        return CompanyPurchaseResult(
+            query=models.CompanyPurchase.query,
+            mapper=self.company_purchase_from_orm,
+            db=self.db,
+        )
+
+    @classmethod
+    def company_purchase_from_orm(
+        cls, orm: models.CompanyPurchase
+    ) -> entities.CompanyPurchase:
+        return entities.CompanyPurchase(
+            id=uuid4(),
+            plan_id=UUID(orm.plan_id),
+            transaction_id=UUID(orm.transaction_id),
+            amount=orm.amount,
+        )
+
+    def create_consumer_purchase(
+        self, transaction: UUID, amount: int, plan: UUID
+    ) -> entities.ConsumerPurchase:
+        orm = models.ConsumerPurchase(
+            id=str(uuid4()),
+            amount=amount,
+            plan_id=str(plan),
+            transaction_id=str(transaction),
+        )
+        self.db.session.add(orm)
+        self.db.session.flush()
+        return self.consumer_purchase_from_orm(orm)
+
+    def get_consumer_purchases(self) -> ConsumerPurchaseResult:
+        return ConsumerPurchaseResult(
+            db=self.db,
+            query=models.ConsumerPurchase.query,
+            mapper=self.consumer_purchase_from_orm,
+        )
+
+    @classmethod
+    def consumer_purchase_from_orm(
+        self, orm: models.ConsumerPurchase
+    ) -> entities.ConsumerPurchase:
+        return entities.ConsumerPurchase(
+            id=UUID(orm.id),
+            amount=orm.amount,
             plan_id=UUID(orm.plan_id),
             transaction_id=UUID(orm.transaction_id),
         )

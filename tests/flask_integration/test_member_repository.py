@@ -237,21 +237,11 @@ class ConfirmMemberTests(FlaskTestCase):
         self.timestamp = datetime(2000, 1, 1)
         self.member_generator = self.injector.get(MemberGenerator)
 
-    def test_that_confirmed_on_gets_updated_for_affected_user(self) -> None:
-        expected_timestamp = datetime(2000, 1, 2)
-        member_id = self.create_member()
-        self.repository.get_members().with_id(member_id).set_confirmation_timestamp(
-            expected_timestamp
-        )
-        member = self.repository.get_members().with_id(member_id).first()
-        assert member
-        assert member.confirmed_on == expected_timestamp
-
     def test_that_member_is_confirmed_after_confirmation_date_is_set(self) -> None:
         member_id = self.create_member()
-        self.repository.get_members().with_id(member_id).set_confirmation_timestamp(
-            datetime(2000, 1, 2)
-        )
+        self.repository.get_members().with_id(
+            member_id
+        ).update().set_confirmation_timestamp(datetime(2000, 1, 2)).perform()
         assert self.repository.get_members().with_id(member_id).that_are_confirmed()
 
     def test_that_member_is_not_confirmed_before_setting_confirmation_date(
@@ -259,28 +249,6 @@ class ConfirmMemberTests(FlaskTestCase):
     ) -> None:
         member_id = self.create_member()
         assert not self.repository.get_members().that_are_confirmed().with_id(member_id)
-
-    def test_that_confirmed_on_does_not_get_updated_for_other_user(self) -> None:
-        other_member_id = self.member_generator.create_member_entity(confirmed=False).id
-        expected_timestamp = datetime(2000, 1, 2)
-        member_id = self.create_member()
-        self.repository.get_members().with_id(member_id).set_confirmation_timestamp(
-            expected_timestamp
-        )
-        member = self.repository.get_members().with_id(other_member_id).first()
-        assert member
-        assert member.confirmed_on is None
-
-    def test_that_member_confirmation_returns_the_count_of_update_members(self) -> None:
-        expected_count = 5
-        for _ in range(5):
-            self.member_generator.create_member_entity()
-        assert (
-            expected_count
-            == self.repository.get_members().set_confirmation_timestamp(
-                datetime(2000, 1, 1)
-            )
-        )
 
     def create_member(self) -> UUID:
         member = self.repository.create_member(
@@ -336,3 +304,58 @@ class CreateMemberTests(FlaskTestCase):
                 registered_on=self.timestamp,
             )
             self.db.session.flush()
+
+
+class MemberUpdateTests(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.repository = self.injector.get(MemberRepository)
+        self.account_repository = self.injector.get(AccountRepository)
+        self.account = self.account_repository.create_account(
+            account_type=AccountTypes.member
+        )
+        self.timestamp = datetime(2000, 1, 1)
+        self.member_generator = self.injector.get(MemberGenerator)
+
+    def test_that_confirmed_on_gets_updated_for_affected_user(self) -> None:
+        expected_timestamp = datetime(2000, 1, 2)
+        member_id = self.create_member()
+        self.repository.get_members().with_id(
+            member_id
+        ).update().set_confirmation_timestamp(expected_timestamp).perform()
+        member = self.repository.get_members().with_id(member_id).first()
+        assert member
+        assert member.confirmed_on == expected_timestamp
+
+    def test_that_member_confirmation_returns_the_count_of_update_members(self) -> None:
+        expected_count = 5
+        for _ in range(5):
+            self.member_generator.create_member_entity()
+        assert (
+            expected_count
+            == self.repository.get_members()
+            .update()
+            .set_confirmation_timestamp(datetime(2000, 1, 1))
+            .perform()
+        )
+
+    def test_that_confirmed_on_does_not_get_updated_for_other_user(self) -> None:
+        other_member_id = self.member_generator.create_member_entity(confirmed=False).id
+        expected_timestamp = datetime(2000, 1, 2)
+        member_id = self.create_member()
+        self.repository.get_members().with_id(
+            member_id
+        ).update().set_confirmation_timestamp(expected_timestamp).perform()
+        member = self.repository.get_members().with_id(other_member_id).first()
+        assert member
+        assert member.confirmed_on is None
+
+    def create_member(self) -> UUID:
+        member = self.repository.create_member(
+            email="test email",
+            name="test name",
+            password="test password",
+            account=self.account,
+            registered_on=self.timestamp,
+        )
+        return member.id

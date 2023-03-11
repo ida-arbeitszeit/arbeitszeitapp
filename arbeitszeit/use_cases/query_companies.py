@@ -7,7 +7,7 @@ from typing import Iterable, List, Optional
 from uuid import UUID
 
 from arbeitszeit.entities import Company
-from arbeitszeit.repositories import CompanyRepository
+from arbeitszeit.repositories import CompanyRepository, CompanyResult
 
 
 class CompanyFilter(enum.Enum):
@@ -18,6 +18,8 @@ class CompanyFilter(enum.Enum):
 @dataclass
 class CompanyQueryResponse:
     results: List[QueriedCompany]
+    total_results: int
+    request: QueryCompaniesRequest
 
 
 @dataclass
@@ -36,27 +38,53 @@ class QueryCompaniesRequest(ABC):
     def get_filter_category(self) -> CompanyFilter:
         pass
 
+    @abstractmethod
+    def get_offset(self) -> Optional[int]:
+        pass
+
+    @abstractmethod
+    def get_limit(self) -> Optional[int]:
+        pass
+
 
 @dataclass
 class QueryCompanies:
     company_repository: CompanyRepository
 
     def __call__(self, request: QueryCompaniesRequest) -> CompanyQueryResponse:
-        found_companies: Iterable[Company]
+        companies: Iterable[Company]
         query = request.get_query_string()
         filter_by = request.get_filter_category()
-        if query is None:
-            found_companies = self.company_repository.get_companies()
-        elif filter_by == CompanyFilter.by_name:
-            found_companies = self.company_repository.query_companies_by_name(query)
-        else:
-            found_companies = self.company_repository.query_companies_by_email(query)
-        results = [
-            self._company_to_response_model(company) for company in found_companies
-        ]
+        companies = self.company_repository.get_companies()
+        companies = self._apply_filters(companies, query, filter_by)
+        total_results = len(companies)
+        companies = self._apply_offset_and_limit(companies, request)
+        results = [self._company_to_response_model(company) for company in companies]
         return CompanyQueryResponse(
-            results=results,
+            results=results, total_results=total_results, request=request
         )
+
+    def _apply_filters(
+        self, companies: CompanyResult, query: Optional[str], filter_by: CompanyFilter
+    ) -> CompanyResult:
+        if query is None:
+            pass
+        elif filter_by == CompanyFilter.by_name:
+            companies = companies.with_name_containing(query)
+        else:
+            companies = companies.with_email_containing(query)
+        return companies
+
+    def _apply_offset_and_limit(
+        self, companies: CompanyResult, request: QueryCompaniesRequest
+    ) -> CompanyResult:
+        offset = request.get_offset()
+        limit = request.get_limit()
+        if offset is not None:
+            companies = companies.offset(n=offset)
+        if limit is not None:
+            companies = companies.limit(n=limit)
+        return companies
 
     def _company_to_response_model(self, company: Company) -> QueriedCompany:
         return QueriedCompany(

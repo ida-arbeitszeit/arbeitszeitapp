@@ -8,7 +8,7 @@ from flask_login import current_user
 
 from arbeitszeit import use_cases
 from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
-from arbeitszeit_flask.database import MemberRepository, commit_changes
+from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.forms import (
     AnswerCompanyWorkInviteForm,
@@ -25,6 +25,9 @@ from arbeitszeit_flask.views import (
     QueryCompaniesView,
     QueryPlansView,
 )
+from arbeitszeit_web.controllers.query_companies_controller import (
+    QueryCompaniesController,
+)
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_plan_summary_member import GetPlanSummaryMemberSuccessPresenter
@@ -36,10 +39,7 @@ from arbeitszeit_web.presenters.get_member_dashboard_presenter import (
     GetMemberDashboardPresenter,
 )
 from arbeitszeit_web.presenters.member_purchases import MemberPurchasesPresenter
-from arbeitszeit_web.query_companies import (
-    QueryCompaniesController,
-    QueryCompaniesPresenter,
-)
+from arbeitszeit_web.presenters.query_companies_presenter import QueryCompaniesPresenter
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
 
 from .blueprint import MemberRoute
@@ -47,14 +47,11 @@ from .blueprint import MemberRoute
 
 @MemberRoute("/member/purchases")
 def my_purchases(
-    query_purchases: use_cases.QueryPurchases,
-    member_repository: MemberRepository,
+    query_purchases: use_cases.query_member_purchases.QueryMemberPurchases,
     template_renderer: UserTemplateRenderer,
     presenter: MemberPurchasesPresenter,
 ) -> Response:
-    member = member_repository.get_members().with_id(UUID(current_user.id)).first()
-    assert member is not None
-    response = query_purchases(member)
+    response = query_purchases(UUID(current_user.id))
     view_model = presenter.present_member_purchases(response)
     return FlaskResponse(
         template_renderer.render_template(
@@ -66,7 +63,7 @@ def my_purchases(
 
 @MemberRoute("/member/query_plans", methods=["GET"])
 def query_plans(
-    query_plans: use_cases.QueryPlans,
+    query_plans: use_cases.query_plans.QueryPlans,
     controller: QueryPlansController,
     template_renderer: UserTemplateRenderer,
     presenter: QueryPlansPresenter,
@@ -85,7 +82,7 @@ def query_plans(
 
 @MemberRoute("/member/query_companies", methods=["GET", "POST"])
 def query_companies(
-    query_companies: use_cases.QueryCompanies,
+    query_companies: use_cases.query_companies.QueryCompanies,
     controller: QueryCompaniesController,
     template_renderer: UserTemplateRenderer,
     presenter: QueryCompaniesPresenter,
@@ -101,9 +98,9 @@ def query_companies(
         template_renderer,
     )
     if request.method == "POST":
-        return view.respond_to_post()
+        return view.respond_to_post(FlaskRequest())
     else:
-        return view.respond_to_get()
+        return view.respond_to_get(FlaskRequest())
 
 
 @MemberRoute("/member/pay_consumer_product", methods=["GET", "POST"])
@@ -118,7 +115,7 @@ def pay_consumer_product(view: PayConsumerProductView) -> Response:
 
 @MemberRoute("/member/dashboard")
 def dashboard(
-    get_member_dashboard: use_cases.GetMemberDashboard,
+    get_member_dashboard: use_cases.get_member_dashboard.GetMemberDashboard,
     presenter: GetMemberDashboardPresenter,
     template_renderer: UserTemplateRenderer,
 ) -> Response:
@@ -134,7 +131,7 @@ def dashboard(
 
 @MemberRoute("/member/my_account")
 def my_account(
-    get_member_account: use_cases.GetMemberAccount,
+    get_member_account: use_cases.get_member_account.GetMemberAccount,
     template_renderer: UserTemplateRenderer,
     presenter: GetMemberAccountPresenter,
 ) -> Response:
@@ -150,7 +147,7 @@ def my_account(
 
 @MemberRoute("/member/statistics")
 def statistics(
-    get_statistics: use_cases.GetStatistics,
+    get_statistics: use_cases.get_statistics.GetStatistics,
     presenter: GetStatisticsPresenter,
     template_renderer: UserTemplateRenderer,
 ) -> Response:
@@ -166,13 +163,16 @@ def statistics(
 @MemberRoute("/member/plan_summary/<uuid:plan_id>")
 def plan_summary(
     plan_id: UUID,
-    get_plan_summary_member: use_cases.GetPlanSummaryMember,
+    get_plan_summary_member: use_cases.get_plan_summary_member.GetPlanSummaryMember,
     template_renderer: UserTemplateRenderer,
     presenter: GetPlanSummaryMemberSuccessPresenter,
     http_404_view: Http404View,
 ) -> Response:
     use_case_response = get_plan_summary_member(plan_id)
-    if isinstance(use_case_response, use_cases.GetPlanSummaryMember.Success):
+    if isinstance(
+        use_case_response,
+        use_cases.get_plan_summary_member.GetPlanSummaryMember.Success,
+    ):
         view_model = presenter.present(use_case_response)
         return FlaskResponse(
             template_renderer.render_template(
@@ -193,7 +193,9 @@ def company_summary(
     http_404_view: Http404View,
 ):
     use_case_response = get_company_summary(company_id)
-    if isinstance(use_case_response, use_cases.GetCompanySummarySuccess):
+    if isinstance(
+        use_case_response, use_cases.get_company_summary.GetCompanySummarySuccess
+    ):
         view_model = presenter.present(use_case_response)
         return template_renderer.render_template(
             "member/company_summary.html",
@@ -206,15 +208,15 @@ def company_summary(
 @MemberRoute("/member/cooperation_summary/<uuid:coop_id>")
 def coop_summary(
     coop_id: UUID,
-    get_coop_summary: use_cases.GetCoopSummary,
+    get_coop_summary: use_cases.get_coop_summary.GetCoopSummary,
     presenter: GetCoopSummarySuccessPresenter,
     template_renderer: UserTemplateRenderer,
     http_404_view: Http404View,
 ):
     use_case_response = get_coop_summary(
-        use_cases.GetCoopSummaryRequest(UUID(current_user.id), coop_id)
+        use_cases.get_coop_summary.GetCoopSummaryRequest(UUID(current_user.id), coop_id)
     )
-    if isinstance(use_case_response, use_cases.GetCoopSummarySuccess):
+    if isinstance(use_case_response, use_cases.get_coop_summary.GetCoopSummarySuccess):
         view_model = presenter.present(use_case_response)
         return template_renderer.render_template(
             "member/coop_summary.html", context=dict(view_model=view_model.to_dict())

@@ -172,6 +172,12 @@ class GeneralUrlIndex:
     def get_company_query_plans_url(self) -> str:
         return url_for(endpoint="main_company.query_plans")
 
+    def get_member_query_companies_url(self) -> str:
+        return url_for(endpoint="main_member.query_companies")
+
+    def get_company_query_companies_url(self) -> str:
+        return url_for(endpoint="main_company.query_companies")
+
 
 class CompanyUrlIndex:
     def get_renew_plan_url(self, plan_id: UUID) -> str:

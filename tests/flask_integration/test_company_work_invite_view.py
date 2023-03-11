@@ -1,6 +1,6 @@
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases import InviteWorkerToCompanyUseCase
+from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
 from tests.data_generators import CompanyGenerator
 
 from .flask import ViewTestCase
@@ -41,4 +41,5 @@ class AuthenticatedTests(ViewTestCase):
                 self.member.id,
             )
         )
+        assert response.invite_id
         return response.invite_id

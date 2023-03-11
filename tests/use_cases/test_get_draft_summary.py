@@ -3,7 +3,7 @@ from typing import Callable
 from uuid import uuid4
 
 from arbeitszeit.entities import ProductionCosts
-from arbeitszeit.use_cases import (
+from arbeitszeit.use_cases.get_draft_summary import (
     DraftSummaryResponse,
     DraftSummarySuccess,
     GetDraftSummary,

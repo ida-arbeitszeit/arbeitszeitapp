@@ -10,8 +10,8 @@ from arbeitszeit.entities import Company, Plan, PurposesOfPurchases
 from arbeitszeit.price_calculator import PriceCalculator
 from arbeitszeit.repositories import (
     CompanyRepository,
+    DatabaseGateway,
     PlanRepository,
-    PurchaseRepository,
     TransactionRepository,
 )
 
@@ -45,9 +45,9 @@ class PayMeansOfProduction:
     plan_repository: PlanRepository
     company_repository: CompanyRepository
     price_calculator: PriceCalculator
-    purchase_repository: PurchaseRepository
     datetime_service: DatetimeService
     transaction_repository: TransactionRepository
+    database_gateway: DatabaseGateway
 
     def __call__(
         self, request: PayMeansOfProductionRequest
@@ -56,9 +56,6 @@ class PayMeansOfProduction:
             plan, buyer, purpose = self._validate_request(request)
         except PayMeansOfProductionResponse.RejectionReason as reason:
             return PayMeansOfProductionResponse(rejection_reason=reason)
-        self.record_purchase(
-            plan=plan, amount=request.amount, purpose=request.purpose, buyer_id=buyer.id
-        )
         self.create_transaction(
             buyer=buyer, plan=plan, amount=request.amount, purpose=purpose
         )
@@ -103,19 +100,6 @@ class PayMeansOfProduction:
             raise PayMeansOfProductionResponse.RejectionReason.invalid_purpose
         return request.purpose
 
-    def record_purchase(
-        self, plan: Plan, amount: int, purpose: PurposesOfPurchases, buyer_id: UUID
-    ) -> None:
-        price_per_unit = self.price_calculator.calculate_cooperative_price(plan)
-        self.purchase_repository.create_purchase_by_company(
-            purchase_date=self.datetime_service.now(),
-            plan=plan.id,
-            buyer=buyer_id,
-            price_per_unit=price_per_unit,
-            amount=amount,
-            purpose=purpose,
-        )
-
     def create_transaction(
         self, amount: int, purpose: PurposesOfPurchases, buyer: Company, plan: Plan
     ) -> None:
@@ -129,11 +113,16 @@ class PayMeansOfProduction:
             sending_account = buyer.raw_material_account
         planner = self.company_repository.get_companies().with_id(plan.planner).first()
         assert planner
-        self.transaction_repository.create_transaction(
+        transaction = self.transaction_repository.create_transaction(
             date=self.datetime_service.now(),
             sending_account=sending_account,
             receiving_account=planner.product_account,
             amount_sent=coop_price,
             amount_received=individual_price,
             purpose=f"Plan-Id: {plan.id}",
+        )
+        self.database_gateway.create_company_purchase(
+            amount=amount,
+            transaction=transaction.id,
+            plan=plan.id,
         )

@@ -2,7 +2,7 @@ from typing import List
 from unittest import TestCase
 from uuid import uuid4
 
-from arbeitszeit.use_cases import CreateCooperationResponse
+from arbeitszeit.use_cases.create_cooperation import CreateCooperationResponse
 from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
 from tests.translator import FakeTranslator
 

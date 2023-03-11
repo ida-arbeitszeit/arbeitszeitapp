@@ -1,7 +1,7 @@
 from decimal import Decimal
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases import InviteWorkerToCompanyUseCase
+from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
 from arbeitszeit.use_cases.send_accountant_registration_token import (
     SendAccountantRegistrationTokenUseCase,
 )
@@ -214,6 +214,7 @@ class GeneralUrlIndexTests(ViewTestCase):
                 worker=member,
             )
         )
+        assert response.invite_id
         return response.invite_id
 
     def test_url_for_payment_of_consumer_product_leads_to_functional_url(self) -> None:
@@ -304,5 +305,21 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_company()
         url = self.url_index.get_create_draft_url()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_company_queries_companies_url_leads_to_functional_url(
+        self,
+    ) -> None:
+        self.login_company()
+        url = self.url_index.get_company_query_companies_url()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_member_queries_companies_url_leads_to_functional_url(
+        self,
+    ) -> None:
+        self.login_member()
+        url = self.url_index.get_member_query_companies_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
