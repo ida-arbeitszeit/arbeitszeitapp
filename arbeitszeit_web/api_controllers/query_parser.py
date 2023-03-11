@@ -1,4 +1,7 @@
-from arbeitszeit_web.api_controllers.errors import NegativeNumberError, NotAnIntegerError
+from arbeitszeit_web.api_controllers.errors import (
+    NegativeNumberError,
+    NotAnIntegerError,
+)
 
 
 def string_to_non_negative_integer(string: str) -> int:
