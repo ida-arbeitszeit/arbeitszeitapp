@@ -63,18 +63,52 @@ class PlanRepositoryTests(FlaskTestCase):
         assert plan_from_repo
         assert plan_from_repo.is_available == True
 
-    def test_cannot_create_plan_from_non_existing_draft(self) -> None:
-        assert self.plan_repository.create_plan_from_draft(uuid4()) is None
+    def test_create_plan_propagates_specified_arguments_to_created_plan(self) -> None:
+        expected_planner = self.company_generator.create_company()
+        plan = self.plan_repository.create_plan(
+            creation_timestamp=(expected_timestamp := datetime(2000, 1, 1)),
+            planner=expected_planner,
+            production_costs=(
+                expected_costs := ProductionCosts(Decimal(1), Decimal(2), Decimal(3))
+            ),
+            product_name=(expected_product_name := "test product name"),
+            distribution_unit=(expected_distribution_unit := "test unit"),
+            amount_produced=(expected_amount := 642),
+            product_description=(expected_description := "test description"),
+            duration_in_days=(expected_duration := 631),
+            is_public_service=(expected_is_public_service := False),
+        )
+        assert plan.plan_creation_date == expected_timestamp
+        assert plan.planner == expected_planner
+        assert plan.production_costs == expected_costs
+        assert plan.prd_name == expected_product_name
+        assert plan.prd_unit == expected_distribution_unit
+        assert plan.prd_amount == expected_amount
+        assert plan.description == expected_description
+        assert plan.timeframe == expected_duration
+        assert plan.is_public_service == expected_is_public_service
 
-    def test_can_create_plan_from_exiting_draft(self) -> None:
-        draft = self.plan_generator.draft_plan()
-        assert self.plan_repository.create_plan_from_draft(draft.id) is not None
+    def test_that_created_plan_can_have_its_approval_date_changed(self) -> None:
+        plan = self.create_plan()
+        expected_approval_date = datetime(2000, 3, 2)
+        self.plan_repository.get_plans().with_id(plan.id).update().set_approval_date(
+            expected_approval_date
+        ).perform()
+        changed_plan: Plan = self.plan_repository.get_plans().with_id(plan.id).first()  # type: ignore
+        assert changed_plan.approval_date == expected_approval_date
 
-    def test_query_plan_after_it_was_created_from_draft(self) -> None:
-        draft = self.plan_generator.draft_plan()
-        plan_id = self.plan_repository.create_plan_from_draft(draft.id)
-        assert plan_id
-        assert self.plan_repository.get_plans().with_id(plan_id)
+    def create_plan(self) -> Plan:
+        return self.plan_repository.create_plan(
+            creation_timestamp=datetime(2000, 1, 1),
+            planner=self.company_generator.create_company(),
+            production_costs=ProductionCosts(Decimal(1), Decimal(2), Decimal(3)),
+            product_name="test product name",
+            distribution_unit="test unit",
+            amount_produced=642,
+            product_description="test description",
+            duration_in_days=631,
+            is_public_service=False,
+        )
 
 
 class GetActivePlansTests(FlaskTestCase):
