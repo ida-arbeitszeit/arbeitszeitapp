@@ -14,7 +14,7 @@ Description
 ------------
 
 Arbeitszeitapp is a plattform to exchange services and products on the
-basis of working time. It is designed to be self-hosted by communities
+basis of working time. It is designed as a web app to be self-hosted by communities
 or organizations. A test instance is running on
 https://demo-app.arbeitszeitrechnung.org/.
 
@@ -151,8 +151,8 @@ browser and your account will be activated.
 Code formatting and analysis
 -----------------------------
 
-There is a script that auto formats python files.  It uses ``black`` and
-``isort`` for that purpose.  Currently this script only applies auto
+Run ``./format_code.py`` to auto format python files. The script uses ``black`` and
+``isort``.  Currently the script applies auto
 formatting to a limited selection of paths.  You can add more paths by
 adding lines to ``.autoformattingrc``.
 
@@ -316,6 +316,11 @@ is called "arbeitszeit".  Check the `cachix docs
 how to set this up locally.  The benefit of this for you is that you
 can avoid building dependencies there where already build in the CI
 pipeline once.
+
+Web API
+--------
+
+We are currently developing a JSON Web API that provides access to core features of Arbeitszeitapp. It's OpenAPI specification can be found under path `/api/v1/doc/`
 
 .. end-development-setup-do-not-delete
 
