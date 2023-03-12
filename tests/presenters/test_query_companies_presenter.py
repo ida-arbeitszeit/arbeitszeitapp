@@ -1,11 +1,11 @@
 from uuid import uuid4
 
+from arbeitszeit_web.pagination import DEFAULT_PAGE_SIZE
 from arbeitszeit_web.presenters.query_companies_presenter import QueryCompaniesPresenter
 from arbeitszeit_web.session import UserRole
 from tests.presenters.base_test_case import BaseTestCase
 from tests.presenters.data_generators import QueriedCompanyGenerator
 from tests.presenters.url_index import UrlIndexTestImpl
-from tests.request import FakeRequest
 from tests.session import FakeSession
 
 from .notifier import NotifierTestImpl
@@ -70,7 +70,6 @@ class PaginationTests(BaseTestCase):
         super().setUp()
         self.queried_company_generator = self.injector.get(QueriedCompanyGenerator)
         self.presenter = self.injector.get(QueryCompaniesPresenter)
-        self.request = self.injector.get(FakeRequest)
 
     def test_that_with_only_1_company_in_response_no_page_links_are_returned(
         self,
@@ -79,56 +78,12 @@ class PaginationTests(BaseTestCase):
         view_model = self.presenter.present(response)
         assert not view_model.pagination.is_visible
 
-    def test_that_with_16_companies_in_response_the_pagination_is_visible(self) -> None:
-        response = self.queried_company_generator.get_response(total_results=16)
-        view_model = self.presenter.present(response)
-        assert view_model.pagination.is_visible
-
-    def test_that_with_15_companies_in_response_the_pagination_is_not_visible(
+    def test_that_with_sufficient_companies_in_response_the_pagination_is_visible(
         self,
     ) -> None:
-        response = self.queried_company_generator.get_response(total_results=15)
-        view_model = self.presenter.present(response)
-        assert not view_model.pagination.is_visible
-
-    def test_that_with_16_companies_there_are_2_pages(self) -> None:
-        response = self.queried_company_generator.get_response(total_results=16)
-        view_model = self.presenter.present(response)
-        assert len(view_model.pagination.pages) == 2
-
-    def test_that_with_31_companies_there_are_3_pages(self) -> None:
-        response = self.queried_company_generator.get_response(total_results=31)
-        view_model = self.presenter.present(response)
-        assert len(view_model.pagination.pages) == 3
-
-    def test_that_with_30_companies_there_are_2_pages(self) -> None:
-        response = self.queried_company_generator.get_response(total_results=30)
-        view_model = self.presenter.present(response)
-        assert len(view_model.pagination.pages) == 2
-
-    def test_that_label_of_first_page_is_1(self) -> None:
-        response = self.queried_company_generator.get_response(total_results=30)
-        view_model = self.presenter.present(response)
-        assert view_model.pagination.pages[0].label == "1"
-
-    def test_that_label_of_second_page_is_2(self) -> None:
-        response = self.queried_company_generator.get_response(total_results=30)
-        view_model = self.presenter.present(response)
-        assert view_model.pagination.pages[1].label == "2"
-
-    def test_with_requested_offset_of_0_the_first_page_is_current(self) -> None:
-        response = self.queried_company_generator.get_response(requested_offset=0)
-        view_model = self.presenter.present(response)
-        assert view_model.pagination.pages[0].is_current
-
-    def test_with_requested_offset_of_0_the_second_page_is_not_current(self) -> None:
+        companies_count = DEFAULT_PAGE_SIZE + 1
         response = self.queried_company_generator.get_response(
-            requested_offset=0, total_results=30
+            total_results=companies_count
         )
         view_model = self.presenter.present(response)
-        assert not view_model.pagination.pages[1].is_current
-
-    def test_with_requested_offset_of_15_the_first_page_is_not_current(self) -> None:
-        response = self.queried_company_generator.get_response(requested_offset=15)
-        view_model = self.presenter.present(response)
-        assert not view_model.pagination.pages[0].is_current
+        assert view_model.pagination.is_visible
