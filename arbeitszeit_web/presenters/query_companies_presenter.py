@@ -39,14 +39,12 @@ class QueryCompaniesPresenter:
     url_index: UrlIndex
     translator: Translator
     session: Session
+    request: Request
 
-    def present(
-        self, response: CompanyQueryResponse, request: Request
-    ) -> QueryCompaniesViewModel:
+    def present(self, response: CompanyQueryResponse) -> QueryCompaniesViewModel:
         if not response.results:
             self.user_notifier.display_warning(self.translator.gettext("No results"))
         paginator = self._create_paginator(
-            request,
             total_results=response.total_results,
             current_offset=response.request.get_offset() or 0,
         )
@@ -79,12 +77,10 @@ class QueryCompaniesPresenter:
             pagination=Pagination(is_visible=False, pages=[]),
         )
 
-    def _create_paginator(
-        self, request: Request, total_results: int, current_offset: int
-    ) -> Paginator:
+    def _create_paginator(self, total_results: int, current_offset: int) -> Paginator:
         return Paginator(
             base_url=self._get_pagination_base_url(),
-            query_arguments=dict(request.query_string().items()),
+            query_arguments=dict(self.request.query_string().items()),
             page_size=DEFAULT_PAGE_SIZE,
             total_results=total_results,
             current_offset=current_offset,
