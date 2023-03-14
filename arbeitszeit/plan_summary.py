@@ -5,7 +5,6 @@ from typing import Optional
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Plan
 from arbeitszeit.price_calculator import PriceCalculator
 from arbeitszeit.repositories import CompanyRepository, PlanRepository
 
@@ -37,12 +36,16 @@ class PlanSummary:
 
 @dataclass
 class PlanSummaryService:
+
     plan_repository: PlanRepository
     company_repository: CompanyRepository
     price_calculator: PriceCalculator
     datetime_service: DatetimeService
 
-    def get_summary_from_plan(self, plan: Plan) -> PlanSummary:
+    def get_summary_from_plan(self, plan_id: UUID) -> Optional[PlanSummary]:
+        plan = self.plan_repository.get_plans().with_id(plan_id).first()
+        if plan is None:
+            return None
         price_per_unit = self.price_calculator.calculate_cooperative_price(plan)
         planner = self.company_repository.get_companies().with_id(plan.planner).first()
         assert planner

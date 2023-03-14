@@ -22,9 +22,7 @@ class GetPlanSummaryAccountant:
     plan_summary_service: PlanSummaryService
 
     def get_plan_summary(self, plan_id: UUID) -> Union[Success, Failure]:
-        plan = self.plan_repository.get_plans().with_id(plan_id).first()
-        if plan is None:
+        plan_summary = self.plan_summary_service.get_summary_from_plan(plan_id)
+        if plan_summary is None:
             return self.Failure()
-        return self.Success(
-            plan_summary=self.plan_summary_service.get_summary_from_plan(plan)
-        )
+        return self.Success(plan_summary=plan_summary)
