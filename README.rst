@@ -57,15 +57,11 @@ There are three user roles:
 
 .. start-development-setup-do-not-delete
 
-Development setup
-=================
+Development philosophy
+=======================
 
 The preferred development environment is Linux. We encourage to use
 nix. A nix flake is located in this repository.
-
-
-Development philosophy
------------------------
 
 We employ rigorous testing when developing new features for the
 application or fixing bugs.  This might seem like a burden to "rapid"
@@ -99,29 +95,13 @@ directories in the source code.
    every line of code in the other directories in here.
 
 
-PostgreSQL setup
--------------------
+Getting started
+================
 
-To work on Arbeitszeitapp you need to have two PostgeSQL databases set
-up on your computer.  One as a development database that holds the
-data for your test users.  You will use this DB when running the
-development server as you test the application with newly developed
-features or bugfixes.  The other database is used for the automated
-test suite.  Check out the documentation of PostgreSQL and your
-operating system to learn how the database is set up.
+Set environment variables
+--------------------------
 
-
-General setup
--------------
-
-Create a virtual environment with ``python -m venv venv``
-
-To execute the virtual environment ``source ./venv/bin/activate``
-
-Install all packages when not using nix: ``pip install -r requirements-dev.txt``
-
-To run the app in development mode you first have to define some
-environment variables:
+In order to contribute to development, you first have to define some environment variables:
 
     .. code-block:: bash
 
@@ -133,19 +113,41 @@ environment variables:
      export ARBEITSZEIT_APP_SERVER_NAME=localhost:5000
      export ARBEITSZEITAPP_TEST_DB="postgresql://postgres@localhost:5432/<name of test database>"
 
-After configuring the database connection you need to run the database
+
+Activate development environment
+---------------------------------
+
+Then, if using nix (recommended), you can simply run ``nix develop``.
+
+If not using nix, first activate a virtual environment, then install the dependencies into it
+by running ``pip install -r requirements-dev.txt``
+
+
+PostgreSQL setup
+-------------------
+
+To work on Arbeitszeitapp you need to have two PostgeSQL databases set
+up on your computer.  One as a development database that holds the
+data for your test users.  You will use this DB when running the
+development server as you test the application with newly developed
+features or bugfixes.  The other database is used for the automated
+test suite.  Check out the documentation of PostgreSQL and your
+operating system to learn how the database is set up.
+
+After setting up the databases run the database
 migrations via ``flask db upgrade``.
 
-Afterwards you can start the development server with ``python -m flask
-run -h localhost``.  Unfortunately ``flask run`` might not work due to
-a bug in the ``werkzeug`` library.
 
-Create an user by signing up and providing the required fields.  You
-will be redirected to a site that asks to confirm your account
-creating with the link provided in your Email.  This link can be found
-in the commandline you ran ``python -m flask run`` starting with
-*<p><a href="* until the next quotation marks.  Copy this link to your
-browser and your account will be activated.
+Start the development server
+-----------------------------
+
+Now you can start the development server with ``python -m flask
+run -h localhost``.  (Unfortunately ``flask run`` might not work due to
+a bug in the ``werkzeug`` library.) Open arbeitszeitapp in a browser via ``http://localhost:5000/``. 
+
+
+Further development setup
+==========================
 
 
 Code formatting and analysis
@@ -199,6 +201,20 @@ When you feel confident about your changes and you want to run all the
 tests, you can do so by executing ``./run-checks``, which will run all
 tests that need to pass before merging your change into the main
 development branch can be considered.
+
+
+Creation of test users
+-----------------------
+
+You can create test users in order to explore and to manually test arbeitszeitapp. When signing up users in a development instance, you do not have to provide a real email adress: 
+
+
+- Sign up a user in a development instance.
+
+- You will be redirected to a site that asks to confirm your account. At this point, the confirmation link can be found in the terminal (starting with *<p><a href="*).
+
+- Visit this link in your browser and the user account will be activated.
+
 
 Translation
 -----------
@@ -272,6 +288,7 @@ See the `flask mail documentation
 <https://pythonhosted.org/Flask-Mail/>`_ on how to configure the
 production backend.
 
+
 Profiling
 ---------
 
@@ -317,10 +334,12 @@ how to set this up locally.  The benefit of this for you is that you
 can avoid building dependencies there where already build in the CI
 pipeline once.
 
-Web API
---------
+Web API development
+--------------------
 
-We are currently developing a JSON Web API that provides access to core features of Arbeitszeitapp. It's OpenAPI specification can be found under path `/api/v1/doc/`
+We are currently developing a JSON Web API that provides access to core features of 
+Arbeitszeitapp. It's OpenAPI specification gets rendered in any running instance 
+under path `/api/v1/doc/`
 
 .. end-development-setup-do-not-delete
 
