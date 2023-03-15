@@ -12,7 +12,9 @@ Source code: `<https://github.com/arbeitszeit/arbeitszeitapp>`_
    :maxdepth: 2
 
    introduction
-   development_setup
+   development_philosophy
+   getting_started
+   further_development_setup
    development_guide
    modules/modules
    license

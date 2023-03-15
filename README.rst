@@ -55,7 +55,7 @@ There are three user roles:
 
 .. end-introduction-do-not-delete
 
-.. start-development-setup-do-not-delete
+.. start-development-philosophy-do-not-delete
 
 Development philosophy
 =======================
@@ -94,6 +94,9 @@ directories in the source code.
    Contains all the tests.  You should find at least one test for
    every line of code in the other directories in here.
 
+.. end-development-philosophy-do-not-delete
+
+.. start-getting-started-do-not-delete
 
 Getting started
 ================
@@ -145,6 +148,9 @@ Now you can start the development server with ``python -m flask
 run -h localhost``.  (Unfortunately ``flask run`` might not work due to
 a bug in the ``werkzeug`` library.) Open arbeitszeitapp in a browser via ``http://localhost:5000/``. 
 
+.. end-getting-started-do-not-delete
+
+.. start-further-development-setup-do-not-delete
 
 Further development setup
 ==========================
@@ -341,7 +347,7 @@ We are currently developing a JSON Web API that provides access to core features
 Arbeitszeitapp. It's OpenAPI specification gets rendered in any running instance 
 under path `/api/v1/doc/`
 
-.. end-development-setup-do-not-delete
+.. end-further-development-setup-do-not-delete
 
 .. start-license-do-not-delete
 
