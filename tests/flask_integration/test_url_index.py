@@ -307,3 +307,19 @@ class GeneralUrlIndexTests(ViewTestCase):
         url = self.url_index.get_create_draft_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
+
+    def test_company_queries_companies_url_leads_to_functional_url(
+        self,
+    ) -> None:
+        self.login_company()
+        url = self.url_index.get_company_query_companies_url()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_member_queries_companies_url_leads_to_functional_url(
+        self,
+    ) -> None:
+        self.login_member()
+        url = self.url_index.get_member_query_companies_url()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)

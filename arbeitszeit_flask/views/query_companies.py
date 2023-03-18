@@ -41,7 +41,8 @@ class QueryCompaniesView:
         )
 
     def _handle_use_case_request(
-        self, use_case_request: use_case.QueryCompaniesRequest
+        self,
+        use_case_request: use_case.QueryCompaniesRequest,
     ) -> Response:
         response = self.query_companies(use_case_request)
         view_model = self.presenter.present(response)

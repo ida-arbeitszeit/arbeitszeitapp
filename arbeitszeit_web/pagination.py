@@ -5,6 +5,8 @@ from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 PAGE_PARAMETER_NAME = "page"
 """The name of the request query parameter used for pagination."""
 
+DEFAULT_PAGE_SIZE = 15
+
 
 @dataclass
 class PageLink:
