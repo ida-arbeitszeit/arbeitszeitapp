@@ -215,6 +215,23 @@ class PlanResult(QueryResultImpl[Plan]):
             total_planned_costs=production_costs,
         )
 
+    def where_payout_counts_are_less_then_active_days(
+        self, timestamp: datetime
+    ) -> PlanResult:
+        def plan_filter(plan: Plan) -> bool:
+            if plan.activation_date is None:
+                return False
+            active_days = min(
+                (timestamp - plan.activation_date).days,
+                plan.timeframe,
+            )
+            payout_count = len(
+                self.entities.labour_certificates_payouts_by_plan[plan.id]
+            )
+            return payout_count < active_days
+
+        return self._filtered_by(plan_filter)
+
     def update(self) -> PlanUpdate:
         return PlanUpdate(
             items=self.items,
@@ -1116,9 +1133,12 @@ class EntityStorage:
             account=self.create_account(account_type=AccountTypes.accounting),
         )
         self.cooperations: Dict[UUID, Cooperation] = dict()
-        self.labour_certificates_payouts: Dict[
+        self.labour_certificates_payouts_by_transaction: Dict[
             UUID, entities.LabourCertificatesPayout
         ] = dict()
+        self.labour_certificates_payouts_by_plan: Dict[
+            UUID, List[entities.LabourCertificatesPayout]
+        ] = defaultdict(list)
         self.payout_factors: List[entities.PayoutFactor] = list()
         self.consumer_purchases: Dict[UUID, entities.ConsumerPurchase] = dict()
         self.company_purchases: Dict[UUID, entities.CompanyPurchase] = dict()
@@ -1126,16 +1146,17 @@ class EntityStorage:
     def create_labour_certificates_payout(
         self, transaction: UUID, plan: UUID
     ) -> entities.LabourCertificatesPayout:
-        assert transaction not in self.labour_certificates_payouts
+        assert transaction not in self.labour_certificates_payouts_by_transaction
         payout = entities.LabourCertificatesPayout(
             transaction_id=transaction, plan_id=plan
         )
-        self.labour_certificates_payouts[transaction] = payout
+        self.labour_certificates_payouts_by_transaction[transaction] = payout
+        self.labour_certificates_payouts_by_plan[plan].append(payout)
         return payout
 
     def get_labour_certificates_payouts(self) -> LabourCertificatesPayoutResult:
         return LabourCertificatesPayoutResult(
-            items=lambda: self.labour_certificates_payouts.values(),
+            items=lambda: self.labour_certificates_payouts_by_transaction.values(),
             entities=self,
         )
 

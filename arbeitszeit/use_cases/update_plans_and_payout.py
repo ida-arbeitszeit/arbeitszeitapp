@@ -26,10 +26,13 @@ class UpdatePlansAndPayout:
         """This function should be called at least once per day,
         preferably more often (e.g. every hour).
         """
+        now = self.datetime_service.now()
         self._calculate_plan_expiration()
         payout_factor = self.payout_factor_service.calculate_payout_factor()
         self.payout_factor_service.store_payout_factor(payout_factor)
-        plans = self.plan_repository.get_plans().that_are_active()
+        plans = self.plan_repository.get_plans().where_payout_counts_are_less_then_active_days(
+            now
+        )
         for plan in plans:
             payout_count = len(
                 self.database_gateway.get_labour_certificates_payouts().for_plan(
@@ -49,29 +52,18 @@ class UpdatePlansAndPayout:
     def _payout_work_certificates(
         self, plan: Plan, payout_factor: Decimal, payout_count: int
     ) -> None:
-        """
-        Plans have an attribute "timeframe", that describe the length of the
-        planning cycle in days.
-
-        Work Certificates ("wages") have to be paid out daily
-        and upfront (approx. at the time of day of the original plan activation) until
-        the plan expires.
-
-        The daily payout amount = current payout factor * total labour costs / plan timeframe.
-
-        Thus, at any point in time, the number of payouts
-        a company has received for a plan must be larger (by one)
-        than the number of full days the plan has been active.
-        (Only after expiration both numbers are equal.)
-
-        If this requirement is not met, a payout is triggered to increase the number of payouts by one.
+        """Work Certificates ("wages") are paid out daily until the
+        plan expires.
         """
         active_days = plan.active_days(self.datetime_service.now())
         assert active_days is not None
-        for _ in range(max(active_days - payout_count + 1, 0)):
+        for _ in range(max(active_days - payout_count, 0)):
             self._payout(plan, payout_factor)
 
     def _payout(self, plan: Plan, payout_factor: Decimal) -> None:
+        """The daily payout amount = current payout factor * total
+        labour costs / plan timeframe.
+        """
         amount = payout_factor * plan.production_costs.labour_cost / plan.timeframe
         planner = self.company_repository.get_companies().with_id(plan.planner).first()
         assert planner

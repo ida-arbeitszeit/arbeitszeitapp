@@ -36,7 +36,6 @@ class PlanSummary:
 
 @dataclass
 class PlanSummaryService:
-
     plan_repository: PlanRepository
     company_repository: CompanyRepository
     price_calculator: PriceCalculator

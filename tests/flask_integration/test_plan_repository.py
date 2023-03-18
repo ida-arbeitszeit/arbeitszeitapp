@@ -1,10 +1,11 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import List, Union
 from uuid import uuid4
 
 from arbeitszeit.entities import Plan, ProductionCosts
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
+from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
 from arbeitszeit_flask.database.repositories import PlanRepository
 from tests.datetime_service import FakeDatetimeService
 
@@ -485,6 +486,53 @@ class GetAllPlans(FlaskTestCase):
         assert plan.first().expired  # type: ignore
         plan.update().set_expiration_status(is_expired=False).perform()
         assert not plan.first().expired  # type: ignore
+
+
+class WherePayoutCountsAreLessThenActiveDaysTests(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.plan_repository = self.injector.get(PlanRepository)
+        self.plan_generator = self.injector.get(PlanGenerator)
+        self.datetime_service = self.injector.get(FakeDatetimeService)
+        self.update_and_payout = self.injector.get(UpdatePlansAndPayout)
+
+    def test_that_plan_is_included_in_results_if_two_days_have_passed_since_activation_and_no_certs_have_been_paid_out(
+        self,
+    ) -> None:
+        now = datetime(2000, 1, 1)
+        self.datetime_service.freeze_time(now)
+        self.plan_generator.create_plan()
+        query = self.plan_repository.get_plans()
+        assert query.where_payout_counts_are_less_then_active_days(
+            now + timedelta(days=2)
+        )
+
+    def test_that_plan_is_not_included_in_results_if_two_days_have_passed_and_certificates_have_been_payed_out(
+        self,
+    ) -> None:
+        plan_creation = datetime(2000, 1, 1)
+        self.datetime_service.freeze_time(plan_creation)
+        self.plan_generator.create_plan()
+        self.datetime_service.advance_time(timedelta(days=2))
+        self.update_and_payout()
+        query = self.plan_repository.get_plans()
+        assert not query.where_payout_counts_are_less_then_active_days(
+            self.datetime_service.now()
+        )
+
+    def test_2_days_after_expiration_the_payout_count_is_still_not_less_then_active_days(
+        self,
+    ) -> None:
+        plan_creation = datetime(2000, 1, 1)
+        self.datetime_service.freeze_time(plan_creation)
+        self.plan_generator.create_plan(timeframe=2)
+        self.datetime_service.advance_time(timedelta(days=2))
+        self.update_and_payout()
+        self.datetime_service.advance_time(timedelta(days=2))
+        query = self.plan_repository.get_plans()
+        assert not query.where_payout_counts_are_less_then_active_days(
+            self.datetime_service.now()
+        )
 
 
 class GetStatisticsTests(FlaskTestCase):

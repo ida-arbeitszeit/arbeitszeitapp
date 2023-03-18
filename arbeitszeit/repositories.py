@@ -121,6 +121,18 @@ class PlanResult(QueryResult[Plan], Protocol):
         included in a result set.
         """
 
+    def where_payout_counts_are_less_then_active_days(
+        self, timestamp: datetime
+    ) -> PlanResult:
+        """Filter only those plans where the plan duration that is
+        already passed in days is lower than the amount of times where
+        labor certificates where payed.
+
+        The plan duration considered for the comparison with the
+        payout count can never be more than the total plan duration in
+        days.
+        """
+
     def update(self) -> PlanUpdate:
         """Prepare an update for all selected Plans."""
 
