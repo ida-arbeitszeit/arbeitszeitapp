@@ -1,6 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 from unittest import TestCase
+from uuid import uuid4
 
 from arbeitszeit.entities import ProductionCosts
 from arbeitszeit.plan_summary import PlanSummaryService
@@ -23,9 +24,14 @@ class PlanSummaryServiceTests(TestCase):
             self.company_repository.get_companies().with_id(self.plan.planner).first()
         )
         assert self.planner
-        self.summary = self.service.get_summary_from_plan(self.plan)
+        self.summary = self.service.get_summary_from_plan(self.plan.id)
+        assert self.summary
         self.payout_use_case = self.injector.get(UpdatePlansAndPayout)
         self.datetime_service = self.injector.get(FakeDatetimeService)
+
+    def test_that_no_summary_is_returned_when_plan_id_does_not_exist(self):
+        summary = self.service.get_summary_from_plan(uuid4())
+        assert not summary
 
     def test_that_correct_planner_id_is_shown(self):
         self.assertEqual(self.summary.plan_id, self.plan.id)
@@ -36,7 +42,8 @@ class PlanSummaryServiceTests(TestCase):
     def test_that_correct_active_status_is_shown_when_plan_is_active(self):
         plan = self.plan_generator.create_plan()
         assert plan.is_active
-        summary = self.service.get_summary_from_plan(plan)
+        summary = self.service.get_summary_from_plan(plan.id)
+        assert summary
         self.assertTrue(summary.is_active)
 
     def test_that_correct_production_costs_are_shown(self):
@@ -47,7 +54,8 @@ class PlanSummaryServiceTests(TestCase):
                 resource_cost=Decimal(3),
             )
         )
-        summary = self.service.get_summary_from_plan(plan)
+        summary = self.service.get_summary_from_plan(plan.id)
+        assert summary
         self.assertEqual(summary.means_cost, Decimal(1))
         self.assertEqual(summary.labour_cost, Decimal(2))
         self.assertEqual(summary.resources_cost, Decimal(3))
@@ -63,7 +71,8 @@ class PlanSummaryServiceTests(TestCase):
                 resource_cost=Decimal(3),
             ),
         )
-        summary = self.service.get_summary_from_plan(plan)
+        summary = self.service.get_summary_from_plan(plan.id)
+        assert summary
         self.assertEqual(summary.price_per_unit, Decimal(0))
 
     def test_that_correct_price_per_unit_is_shown_when_plan_is_productive(self):
@@ -76,7 +85,8 @@ class PlanSummaryServiceTests(TestCase):
                 resource_cost=Decimal(3),
             ),
         )
-        summary = self.service.get_summary_from_plan(plan)
+        summary = self.service.get_summary_from_plan(plan.id)
+        assert summary
         self.assertEqual(summary.price_per_unit, Decimal(3))
 
     def test_that_correct_product_name_is_shown(self):
@@ -90,37 +100,43 @@ class PlanSummaryServiceTests(TestCase):
 
     def test_that_correct_amount_is_shown(self):
         plan = self.plan_generator.create_plan(amount=123)
-        summary = self.service.get_summary_from_plan(plan)
+        summary = self.service.get_summary_from_plan(plan.id)
+        assert summary
         self.assertEqual(summary.amount, 123)
 
     def test_that_correct_public_service_is_shown(self):
         plan = self.plan_generator.create_plan(is_public_service=True)
-        summary = self.service.get_summary_from_plan(plan)
+        summary = self.service.get_summary_from_plan(plan.id)
+        assert summary
         self.assertTrue(summary.is_public_service)
 
     def test_that_correct_availability_is_shown(self):
         plan = self.plan_generator.create_plan()
         assert plan.is_available
-        summary = self.service.get_summary_from_plan(plan)
+        summary = self.service.get_summary_from_plan(plan.id)
+        assert summary
         self.assertTrue(summary.is_available)
 
     def test_that_no_cooperation_is_shown_when_plan_is_not_cooperating(self):
         plan = self.plan_generator.create_plan(cooperation=None)
-        summary = self.service.get_summary_from_plan(plan)
+        summary = self.service.get_summary_from_plan(plan.id)
+        assert summary
         self.assertFalse(summary.is_cooperating)
         self.assertIsNone(summary.cooperation)
 
     def test_that_correct_cooperation_is_shown(self):
         coop = self.coop_generator.create_cooperation()
         plan = self.plan_generator.create_plan(cooperation=coop)
-        summary = self.service.get_summary_from_plan(plan)
+        summary = self.service.get_summary_from_plan(plan.id)
+        assert summary
         self.assertTrue(summary.is_cooperating)
         self.assertEqual(summary.cooperation, coop.id)
 
     def test_that_zero_active_days_is_shown_if_plan_is_not_active_yet(self):
         plan = self.plan_generator.create_plan(approved=False)
         self.payout_use_case()
-        summary = self.service.get_summary_from_plan(plan)
+        summary = self.service.get_summary_from_plan(plan.id)
+        assert summary
         self.assertEqual(summary.active_days, 0)
 
     def test_that_zero_active_days_is_shown_if_plan_is_active_since_less_than_one_day(
@@ -128,7 +144,8 @@ class PlanSummaryServiceTests(TestCase):
     ):
         plan = self.plan_generator.create_plan()
         self.payout_use_case()
-        summary = self.service.get_summary_from_plan(plan)
+        summary = self.service.get_summary_from_plan(plan.id)
+        assert summary
         self.assertEqual(summary.active_days, 0)
 
     def test_that_one_active_days_is_shown_if_plan_is_active_since_25_hours(
@@ -138,7 +155,8 @@ class PlanSummaryServiceTests(TestCase):
         plan = self.plan_generator.create_plan()
         self.datetime_service.freeze_time(datetime(2000, 1, 2, hour=1))
         self.payout_use_case()
-        summary = self.service.get_summary_from_plan(plan)
+        summary = self.service.get_summary_from_plan(plan.id)
+        assert summary
         self.assertEqual(summary.active_days, 1)
 
     def test_that_a_plans_timeframe_is_shown_as_active_days_if_plan_is_expired(
@@ -151,7 +169,8 @@ class PlanSummaryServiceTests(TestCase):
         )
         self.datetime_service.freeze_time(datetime(2000, 1, 11))
         self.payout_use_case()
-        summary = self.service.get_summary_from_plan(plan)
+        summary = self.service.get_summary_from_plan(plan.id)
+        assert summary
         self.assertEqual(summary.active_days, timeframe)
 
     def test_that_creation_date_is_shown(self):
@@ -165,5 +184,6 @@ class PlanSummaryServiceTests(TestCase):
         plan = self.plan_generator.create_plan(timeframe=5)
         self.payout_use_case()
         assert plan.expiration_date
-        summary = self.service.get_summary_from_plan(plan)
+        summary = self.service.get_summary_from_plan(plan.id)
+        assert summary
         self.assertTrue(summary.expiration_date)
