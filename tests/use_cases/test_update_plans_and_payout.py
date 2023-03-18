@@ -75,15 +75,6 @@ class UseCaseTests(BaseTestCase):
         assert not plan.is_active
         assert not plan.cooperation
 
-    def test_that_wages_are_paid_out(self) -> None:
-        planner = self.company_generator.create_company()
-        self.plan_generator.create_plan(
-            approved=True,
-            planner=planner,
-        )
-        self.payout()
-        self.assertTrue(self.count_transactions_of_type_a(planner))
-
     def test_that_past_3_due_wages_get_paid_out_when_plan_expires(self) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         planner = self.company_generator.create_company()
@@ -94,6 +85,29 @@ class UseCaseTests(BaseTestCase):
         self.datetime_service.freeze_time(datetime(2000, 1, 11))
         self.payout()
         assert self.count_transactions_of_type_a(planner) == 3
+
+    def test_that_exact_amount_of_wages_planned_for_gets_paid_if_plans_are_updated_exactly_on_plan_expiry(
+        self,
+    ) -> None:
+        plan_duration = 2
+        total_labor_cost = Decimal(3)
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        planner = self.company_generator.create_company()
+        self.plan_generator.create_plan(
+            timeframe=plan_duration,
+            planner=planner,
+            costs=ProductionCosts(
+                means_cost=Decimal(0),
+                resource_cost=Decimal(0),
+                labour_cost=total_labor_cost,
+            ),
+        )
+        self.datetime_service.advance_time(timedelta(plan_duration))
+        self.payout()
+        assert (
+            self.balance_checker.get_company_account_balances(planner).a_account
+            == total_labor_cost
+        )
 
     def test_that_one_past_due_wage_does_get_paid_out_only_once(self) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
@@ -107,16 +121,17 @@ class UseCaseTests(BaseTestCase):
         self.payout()
         assert self.count_transactions_of_type_a(planner) == 1
 
-    def test_account_balances_correctly_adjusted_for_work_account(self) -> None:
+    def test_that_25_hours_after_plan_activation_that_first_part_of_labour_certificates_got_transferred(
+        self,
+    ) -> None:
         self.datetime_service.freeze_time(datetime(2021, 10, 2, 10))
         plan = self.plan_generator.create_plan(
             approved=True,
             is_public_service=False,
             timeframe=5,
         )
-        self.datetime_service.freeze_time(datetime(2021, 10, 3, 9))
-        expected_payout_factor = 1
-        expected_payout = expected_payout_factor * plan.production_costs.labour_cost / 5
+        self.datetime_service.advance_time(timedelta(hours=25))
+        expected_payout = plan.production_costs.labour_cost / 5
         self.payout()
         assert (
             self.balance_checker.get_company_account_balances(plan.planner).a_account
@@ -154,15 +169,9 @@ class UseCaseTests(BaseTestCase):
             timeframe=2,
             costs=ProductionCosts(Decimal(3), Decimal(3), Decimal(3)),
         )
-
-        self.datetime_service.freeze_time(datetime(2021, 10, 3, 9))
-        expected_payout_factor = 1
-        expected_payout1 = (
-            expected_payout_factor * plan1.production_costs.labour_cost / 5
-        )
-        expected_payout2 = (
-            expected_payout_factor * plan2.production_costs.labour_cost / 2
-        )
+        self.datetime_service.advance_time(timedelta(days=1))
+        expected_payout1 = plan1.production_costs.labour_cost / 5
+        expected_payout2 = plan2.production_costs.labour_cost / 2
         self.payout()
 
         assert (
@@ -189,7 +198,7 @@ class UseCaseTests(BaseTestCase):
             timeframe=5,
             costs=ProductionCosts(Decimal(3), Decimal(3), Decimal(3)),
         )
-        self.datetime_service.freeze_time(datetime(2021, 10, 3, 9))
+        self.datetime_service.advance_time(timedelta(days=1))
         # (A − ( P o + R o )) / (A + A o) =
         # (1/2 - (3/5 + 3/5)) / (1/2 + 3/5) =
         # -0.7 / 1.1 = -0.636363636
@@ -225,30 +234,23 @@ class UseCaseTests(BaseTestCase):
         self,
     ) -> None:
         self.datetime_service.freeze_time(datetime(2021, 10, 2, 10))
-        plan1 = self.plan_generator.create_plan(
+        plan = self.plan_generator.create_plan(
             is_public_service=False,
             timeframe=2,
             costs=ProductionCosts(Decimal(1), Decimal(1), Decimal(1)),
         )
-
-        self.datetime_service.freeze_time(datetime(2021, 10, 3, 9))
-        expected_payout_factor = Decimal(1)
-        expected_payout1 = round(
-            (
-                expected_payout_factor
-                * plan1.production_costs.labour_cost
-                / plan1.timeframe
-            ),
+        self.datetime_service.advance_time(timedelta(days=1))
+        expected_payout = round(
+            (plan.production_costs.labour_cost / plan.timeframe),
             2,
         )
         self.payout()
-
         assert (
-            self.balance_checker.get_company_account_balances(plan1.planner).a_account
-            == expected_payout1
+            self.balance_checker.get_company_account_balances(plan.planner).a_account
+            == expected_payout
         )
 
-    def test_that_wages_are_paid_out_twice_after_25_hours_when_plan_has_timeframe_of_3(
+    def test_that_wages_are_paid_out_once_after_25_hours_when_plan_has_timeframe_of_3(
         self,
     ) -> None:
         planner = self.company_generator.create_company()
@@ -257,28 +259,20 @@ class UseCaseTests(BaseTestCase):
         self.datetime_service.freeze_time(datetime(2021, 1, 2, 11))
         self.payout()
 
-        self.assertEqual(self.count_transactions_of_type_a(planner), 2)
+        self.assertEqual(self.count_transactions_of_type_a(planner), 1)
 
-    def test_that_wages_are_paid_out_twice_after_two_days(self) -> None:
+    def test_that_wages_are_paid_out_once_after_one_day(self) -> None:
         planner = self.company_generator.create_company()
         self.datetime_service.freeze_time(datetime(2021, 1, 1, 1))
         self.plan_generator.create_plan(timeframe=3, planner=planner)
         self.payout()
         self.datetime_service.freeze_time(datetime(2021, 1, 2, 1))
         self.payout()
-        self.assertEqual(self.count_transactions_of_type_a(planner), 2)
-
-    def test_that_a_company_receives_wage_if_activation_is_before_midnight_and_no_payout_until_next_morning_and_timeframe_of_1(
-        self,
-    ) -> None:
-        planner = self.company_generator.create_company()
-        self.datetime_service.freeze_time(datetime(2021, 1, 1, 23, 45))
-        self.plan_generator.create_plan(timeframe=1, planner=planner)
-        self.datetime_service.freeze_time(datetime(2021, 1, 2, 0, 1))
-        self.payout()
         self.assertEqual(self.count_transactions_of_type_a(planner), 1)
 
-    def test_that_company_receives_correct_wage_credit(self) -> None:
+    def test_that_company_gets_planned_labour_costs_transferred_after_plan_is_expired(
+        self,
+    ) -> None:
         planner = self.company_generator.create_company()
         expected_wage_payout = Decimal("3")
         self.datetime_service.freeze_time(datetime(2021, 1, 1, 23, 45))
@@ -291,11 +285,10 @@ class UseCaseTests(BaseTestCase):
                 means_cost=Decimal("0"),
             ),
         )
-        self.datetime_service.freeze_time(datetime(2021, 1, 2, 0, 1))
+        self.datetime_service.advance_time(timedelta(days=1, hours=1))
         self.payout()
-        self.assertEqual(
-            self.get_company_work_account_balance(planner), expected_wage_payout
-        )
+        balances = self.balance_checker.get_company_account_balances(planner)
+        assert balances.a_account == expected_wage_payout
 
     def test_that_payout_factor_ignores_plan_that_has_recently_expired(
         self,
@@ -327,6 +320,7 @@ class UseCaseTests(BaseTestCase):
             ),
             planner=planner,
         )
+        self.datetime_service.advance_time(timedelta(days=1))
         self.payout()
         balances = self.balance_checker.get_company_account_balances(planner)
         assert balances.a_account == expected_balance

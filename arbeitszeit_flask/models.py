@@ -191,6 +191,20 @@ class Transaction(db.Model):
     amount_received = db.Column(db.Numeric(), nullable=False)
     purpose = db.Column(db.String(1000), nullable=True)  # Verwendungszweck
 
+    def __repr__(self) -> str:
+        fields = ", ".join(
+            [
+                f"id={self.id!r}",
+                f"date={self.date!r}",
+                f"sending_account={self.sending_account!r}",
+                f"receiving_account={self.receiving_account!r}",
+                f"amount_sent={self.amount_sent!r}",
+                f"amount_received={self.amount_received!r}",
+                f"purpose={self.purpose!r}",
+            ]
+        )
+        return f"Transaction({fields})"
+
 
 class ConsumerPurchase(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
@@ -218,6 +232,15 @@ class LabourCertificatesPayout(db.Model):
         primary_key=True,
     )
     plan_id = db.Column(db.String, db.ForeignKey("plan.id"), nullable=False)
+
+    def __repr__(self) -> str:
+        fields = ", ".join(
+            [
+                f"transaction_id={self.transaction_id!r}",
+                f"plan_id={self.plan_id!r}",
+            ]
+        )
+        return f"LabourCertificatesPayout({fields})"
 
 
 class CompanyWorkInvite(db.Model):

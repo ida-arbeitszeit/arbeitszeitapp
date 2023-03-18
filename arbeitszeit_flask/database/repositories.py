@@ -18,7 +18,7 @@ from typing import (
 from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import and_, func, or_, update
+from sqlalchemy import Integer, and_, case, cast, func, or_, update
 from sqlalchemy.orm import aliased
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -224,6 +224,40 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
                 labour_cost=result.costs_a or Decimal(0),
             ),
         )
+
+    def where_payout_counts_are_less_then_active_days(
+        self, timestamp: datetime
+    ) -> PlanQueryResult:
+        payout = aliased(models.LabourCertificatesPayout)
+        payouts_counted = (
+            self.db.session.query(
+                func.count("*").label("payout_count"),
+                payout.plan_id,
+            )
+            .group_by(payout.plan_id)
+            .subquery()
+        )
+        days_passed = cast(
+            func.extract("day", func.age(timestamp, models.Plan.activation_date)),
+            Integer,
+        )
+        active_days = case(
+            (days_passed > models.Plan.timeframe, models.Plan.timeframe),
+            else_=days_passed,
+        )
+        q = self._with_modified_query(
+            lambda query: query.join(
+                payouts_counted,
+                payouts_counted.c.plan_id == models.Plan.id,
+                isouter=True,
+            ).filter(
+                or_(
+                    active_days > payouts_counted.c.payout_count,
+                    payouts_counted.c.payout_count == None,
+                )
+            )
+        )
+        return q
 
     def update(self) -> PlanUpdate:
         return PlanUpdate(
