@@ -225,7 +225,6 @@ class ShowMyCooperationsPresenter:
     def _accept_message_info(
         self, accept_cooperation_response: Optional[AcceptCooperationResponse]
     ) -> Tuple[List[str], bool]:
-
         if accept_cooperation_response:
             accept_message, accept_message_success = self._create_accept_message(
                 accept_cooperation_response
@@ -282,7 +281,6 @@ class ShowMyCooperationsPresenter:
     def _deny_message_info(
         self, deny_cooperation_response: Optional[DenyCooperationResponse]
     ) -> Tuple[List[str], bool]:
-
         if deny_cooperation_response:
             deny_message, deny_message_success = self._create_deny_message(
                 deny_cooperation_response

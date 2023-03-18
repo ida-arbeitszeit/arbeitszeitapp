@@ -461,9 +461,9 @@ class ConsumerPurchaseResult(QueryResultImpl[entities.ConsumerPurchase]):
     def with_transaction_and_plan(
         self,
     ) -> QueryResultImpl[Tuple[entities.ConsumerPurchase, Transaction, Plan]]:
-        def joined_items() -> Iterator[
-            Tuple[entities.ConsumerPurchase, Transaction, Plan]
-        ]:
+        def joined_items() -> (
+            Iterator[Tuple[entities.ConsumerPurchase, Transaction, Plan]]
+        ):
             for purchase in self.items():
                 transaction = self.entities.transactions[purchase.transaction_id]
                 plan = self.entities.plans[purchase.plan_id]
@@ -512,9 +512,9 @@ class CompanyPurchaseResult(QueryResultImpl[entities.CompanyPurchase]):
     def with_transaction_and_plan(
         self,
     ) -> QueryResultImpl[Tuple[entities.CompanyPurchase, Transaction, Plan]]:
-        def joined_items() -> Iterator[
-            Tuple[entities.CompanyPurchase, Transaction, Plan]
-        ]:
+        def joined_items() -> (
+            Iterator[Tuple[entities.CompanyPurchase, Transaction, Plan]]
+        ):
             for purchase in self.items():
                 transaction = self.entities.transactions[purchase.transaction_id]
                 plan = self.entities.plans[purchase.plan_id]
@@ -528,9 +528,9 @@ class CompanyPurchaseResult(QueryResultImpl[entities.CompanyPurchase]):
     def with_transaction(
         self,
     ) -> QueryResultImpl[Tuple[entities.CompanyPurchase, entities.Transaction]]:
-        def joined_items() -> Iterator[
-            Tuple[entities.CompanyPurchase, entities.Transaction]
-        ]:
+        def joined_items() -> (
+            Iterator[Tuple[entities.CompanyPurchase, entities.Transaction]]
+        ):
             for purchase in self.items():
                 transaction = self.entities.transactions[purchase.transaction_id]
                 yield purchase, transaction

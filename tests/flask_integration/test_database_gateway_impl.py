@@ -28,6 +28,9 @@ class LabourCertificatesPayoutTests(FlaskTestCase):
         self.account_repository = self.injector.get(AccountRepository)
         self.plan_generator = self.injector.get(PlanGenerator)
 
+    def test_that_first_payout_is_none_if_no_payouts_are_in_db(self) -> None:
+        assert self.database_gateway.get_labour_certificates_payouts().first() is None
+
     def test_that_by_default_no_payouts_are_found_in_db(self) -> None:
         assert not self.database_gateway.get_labour_certificates_payouts()
 

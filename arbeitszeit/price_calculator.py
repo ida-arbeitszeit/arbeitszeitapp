@@ -62,7 +62,6 @@ class PriceCalculator:
         )
 
     def _calculate_coop_price(self, components: List[PriceComponents]) -> Decimal:
-
         for comp in components:
             assert (
                 not comp.is_public_service
