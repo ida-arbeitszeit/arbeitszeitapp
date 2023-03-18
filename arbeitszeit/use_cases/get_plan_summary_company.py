@@ -20,13 +20,15 @@ class GetPlanSummaryCompany:
     plan_summary_service: PlanSummaryService
 
     def get_plan_summary_for_company(self, plan_id: UUID, company_id: UUID) -> Response:
-        plan = self.plan_repository.get_plans().with_id(plan_id).first()
-        if plan is None:
+        plan_summary = self.plan_summary_service.get_summary_from_plan(plan_id)
+        if plan_summary is None:
             return self.Response(
                 plan_summary=None,
                 current_user_is_planner=False,
             )
+        plan = self.plan_repository.get_plans().with_id(plan_id).first()
+        assert plan  # exists because plan_summary exists
         return self.Response(
-            plan_summary=self.plan_summary_service.get_summary_from_plan(plan),
+            plan_summary=plan_summary,
             current_user_is_planner=(plan.planner == company_id),
         )

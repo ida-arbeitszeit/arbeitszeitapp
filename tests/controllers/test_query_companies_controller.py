@@ -67,39 +67,35 @@ class PaginationTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.controller = self.injector.get(QueryCompaniesController)
+        self.request = self.injector.get(FakeRequest)
 
     def test_if_no_page_is_specified_in_query_args_use_offset_of_0(
         self,
     ):
-        request = FakeRequest()
-        use_case_request = self.controller.import_form_data(request=request)
+        use_case_request = self.controller.import_form_data()
         assert use_case_request.get_offset() == 0
 
     def test_that_without_request_specified_the_offset_is_set_to_0(self) -> None:
-        use_case_request = self.controller.import_form_data(request=None)
+        use_case_request = self.controller.import_form_data()
         assert use_case_request.get_offset() == 0
 
     def test_that_page_two_has_an_offset_of_15(self) -> None:
-        request = FakeRequest()
-        request.set_arg(arg="page", value="2")
-        use_case_request = self.controller.import_form_data(request=request)
+        self.request.set_arg(arg="page", value="2")
+        use_case_request = self.controller.import_form_data()
         assert use_case_request.get_offset() == 15
 
     def test_that_offset_0_is_assumed_if_no_valid_integer_is_specified_as_page(self):
-        request = FakeRequest()
-        request.set_arg(arg="page", value="123abc")
-        use_case_request = self.controller.import_form_data(request=request)
+        self.request.set_arg(arg="page", value="123abc")
+        use_case_request = self.controller.import_form_data()
         assert use_case_request.get_offset() == 0
 
     def test_that_offset_is_150_for_page_11(self) -> None:
-        request = FakeRequest()
-        request.set_arg(arg="page", value="11")
-        use_case_request = self.controller.import_form_data(request=request)
+        self.request.set_arg(arg="page", value="11")
+        use_case_request = self.controller.import_form_data()
         assert use_case_request.get_offset() == 150
 
     def test_that_limit_is_15(self) -> None:
-        request = FakeRequest()
-        use_case_request = self.controller.import_form_data(request=request)
+        use_case_request = self.controller.import_form_data()
         assert use_case_request.get_limit() == 15
 
 

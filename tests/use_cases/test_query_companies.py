@@ -111,14 +111,14 @@ class TestPagination(BaseTestCase):
 
     def test_that_total_results_is_1_if_one_company_exists(
         self,
-    ):
+    ) -> None:
         self.company_generator.create_company()
         response = self.query_companies(make_request())
         self.assertEqual(response.total_results, 1)
 
     def test_that_total_results_is_6_if_six_companies_are_present(
         self,
-    ):
+    ) -> None:
         for _ in range(6):
             self.company_generator.create_company()
         response = self.query_companies(make_request())
@@ -126,7 +126,7 @@ class TestPagination(BaseTestCase):
 
     def test_that_first_10_companies_are_returned_if_limit_is_10(
         self,
-    ):
+    ) -> None:
         for _ in range(20):
             self.company_generator.create_company()
         response = self.query_companies(make_request(limit=10))
@@ -134,7 +134,7 @@ class TestPagination(BaseTestCase):
 
     def test_that_all_companies_are_returned_if_limit_is_0_and_there_are_20_companies(
         self,
-    ):
+    ) -> None:
         for _ in range(20):
             self.company_generator.create_company()
         response = self.query_companies(make_request())
@@ -142,7 +142,7 @@ class TestPagination(BaseTestCase):
 
     def test_that_5_companies_are_returned_on_second_page_if_20_companies_exist_and_offset_is_15(
         self,
-    ):
+    ) -> None:
         for _ in range(20):
             self.company_generator.create_company()
         response = self.query_companies(make_request(offset=15))

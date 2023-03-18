@@ -37,11 +37,13 @@ class QueryCompaniesRequestImpl(QueryCompaniesRequest):
         return self.limit
 
 
+@dataclass
 class QueryCompaniesController:
+    request: Request
+
     def import_form_data(
         self,
         form: Optional[QueryCompaniesFormData] = None,
-        request: Optional[Request] = None,
     ) -> QueryCompaniesRequest:
         if form is None:
             filter_category = CompanyFilter.by_name
@@ -52,7 +54,7 @@ class QueryCompaniesController:
                 filter_category = CompanyFilter.by_email
             else:
                 filter_category = CompanyFilter.by_name
-        offset = self._get_pagination_offset(request) if request else 0
+        offset = self._get_pagination_offset()
         return QueryCompaniesRequestImpl(
             query=query,
             filter_category=filter_category,
@@ -60,8 +62,8 @@ class QueryCompaniesController:
             limit=_page_size,
         )
 
-    def _get_pagination_offset(self, request: Request) -> int:
-        page_str = request.query_string().get(PAGE_PARAMETER_NAME)
+    def _get_pagination_offset(self) -> int:
+        page_str = self.request.query_string().get(PAGE_PARAMETER_NAME)
         if page_str is None:
             return 0
         try:
