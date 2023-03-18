@@ -80,7 +80,6 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
     app.template_filter()(RealtimeDatetimeService().format_datetime)
 
     with app.app_context():
-
         from arbeitszeit_flask.commands import invite_accountant, update_and_payout
 
         app.cli.command("payout")(update_and_payout)

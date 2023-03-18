@@ -20,7 +20,6 @@ from uuid import UUID, uuid4
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_, func, or_, update
 from sqlalchemy.orm import aliased
-from sqlalchemy.sql.expression import Select
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from arbeitszeit import entities, repositories
@@ -43,9 +42,7 @@ FlaskQueryResultT = TypeVar("FlaskQueryResultT", bound="FlaskQueryResult")
 
 
 class FlaskQueryResult(Generic[T]):
-    def __init__(
-        self, query: Select, mapper: Callable[[Any], T], db: SQLAlchemy
-    ) -> None:
+    def __init__(self, query: Any, mapper: Callable[[Any], T], db: SQLAlchemy) -> None:
         self.query = query
         self.mapper = mapper
         self.db = db
@@ -237,7 +234,7 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
 
 @dataclass
 class PlanUpdate:
-    query: Select
+    query: Any
     db: SQLAlchemy
     plan_update_values: Dict[str, Any] = field(default_factory=dict)
     review_update_values: Dict[str, Any] = field(default_factory=dict)
@@ -256,7 +253,7 @@ class PlanUpdate:
                 .execution_options(synchronize_session="fetch")
             )
             result = self.db.session.execute(sql_statement)
-            row_count = result.rowcount
+            row_count = result.rowcount  # type: ignore
         if self.review_update_values:
             sql_statement = (
                 update(models.PlanReview)
@@ -269,7 +266,7 @@ class PlanUpdate:
                 .execution_options(synchronize_session="fetch")
             )
             result = self.db.session.execute(sql_statement)
-            row_count = max(row_count, result.rowcount)
+            row_count = max(row_count, result.rowcount)  # type: ignore
         return row_count
 
     def set_cooperation(self, cooperation: Optional[UUID]) -> PlanUpdate:
@@ -358,7 +355,7 @@ class MemberQueryResult(FlaskQueryResult[entities.Member]):
 
 @dataclass
 class MemberUpdate:
-    query: Select
+    query: Any
     db: SQLAlchemy
     member_update_values: Dict[str, Any] = field(default_factory=dict)
 
@@ -385,7 +382,7 @@ class MemberUpdate:
                 .execution_options(synchronize_session="fetch")
             )
             result = self.db.session.execute(sql_statement)
-            row_count = result.rowcount
+            row_count = result.rowcount  # type: ignore
         return row_count
 
 
@@ -999,7 +996,7 @@ class AccountingRepository:
                 entities.AccountTypes.accounting
             )
             social_accounting.account = str(account.id)
-            self.db.session.add(social_accounting, account)
+            self.db.session.add(social_accounting)
         return social_accounting
 
     def get_by_id(self, id: UUID) -> Optional[entities.SocialAccounting]:
