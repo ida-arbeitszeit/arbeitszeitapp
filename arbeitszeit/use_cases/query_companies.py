@@ -56,15 +56,15 @@ class QueryCompanies:
         query = request.get_query_string()
         filter_by = request.get_filter_category()
         companies = self.company_repository.get_companies()
-        companies = self._apply_filters(companies, query, filter_by)
+        companies = self._filter_companies(companies, query, filter_by)
         total_results = len(companies)
-        companies = self._apply_offset_and_limit(companies, request)
+        companies = self._limit_results(companies, request)
         results = [self._company_to_response_model(company) for company in companies]
         return CompanyQueryResponse(
             results=results, total_results=total_results, request=request
         )
 
-    def _apply_filters(
+    def _filter_companies(
         self, companies: CompanyResult, query: Optional[str], filter_by: CompanyFilter
     ) -> CompanyResult:
         if query is None:
@@ -75,7 +75,7 @@ class QueryCompanies:
             companies = companies.with_email_containing(query)
         return companies
 
-    def _apply_offset_and_limit(
+    def _limit_results(
         self, companies: CompanyResult, request: QueryCompaniesRequest
     ) -> CompanyResult:
         offset = request.get_offset()
