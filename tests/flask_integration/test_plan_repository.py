@@ -41,7 +41,9 @@ class PlanRepositoryTests(FlaskTestCase):
     def test_that_availability_is_toggled_to_false(self) -> None:
         plan = self.plan_generator.create_plan()
         assert plan.is_available == True
-        self.plan_repository.toggle_product_availability(plan)
+        self.plan_repository.get_plans().with_id(
+            plan.id
+        ).update().toggle_product_availability().perform()
         plan_from_repo = self.plan_repository.get_plans().with_id(plan.id).first()
         assert plan_from_repo
         assert plan_from_repo.is_available == False
@@ -49,7 +51,9 @@ class PlanRepositoryTests(FlaskTestCase):
     def test_that_availability_is_toggled_to_true(self) -> None:
         plan = self.plan_generator.create_plan(is_available=False)
         assert plan.is_available == False
-        self.plan_repository.toggle_product_availability(plan)
+        self.plan_repository.get_plans().with_id(
+            plan.id
+        ).update().toggle_product_availability().perform()
         plan_from_repo = self.plan_repository.get_plans().with_id(plan.id).first()
         assert plan_from_repo
         assert plan_from_repo.is_available == True

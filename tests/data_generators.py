@@ -313,9 +313,9 @@ class PlanGenerator:
         )
         update = selected_plan.update()
         if hidden_by_user:
-            update.hide()
+            update = update.hide()
         if not is_available:
-            self.plan_repository.toggle_product_availability(plan)
+            update = update.toggle_product_availability()
         update.perform()
         plan = (
             self.plan_repository.get_plans().with_id(file_plan_response.plan_id).first()

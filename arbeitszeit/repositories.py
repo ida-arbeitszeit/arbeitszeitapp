@@ -184,6 +184,9 @@ class PlanUpdate(Protocol):
     def hide(self) -> Self:
         ...
 
+    def toggle_product_availability(self) -> Self:
+        ...
+
     def perform(self) -> int:
         """Perform the update action and return the number of columns
         affected.
@@ -318,10 +321,6 @@ class PlanRepository(ABC):
         duration_in_days: int,
         is_public_service: bool,
     ) -> Plan:
-        pass
-
-    @abstractmethod
-    def toggle_product_availability(self, plan: Plan) -> None:
         pass
 
     @abstractmethod

@@ -16,10 +16,10 @@ class ToggleProductAvailability:
     def __call__(
         self, current_user_id: UUID, plan_id: UUID
     ) -> ToggleProductAvailabilityResponse:
-        plan = self.plan_repository.get_plans().with_id(plan_id).first()
-        if plan is None:
+        plan = self.plan_repository.get_plans().with_id(plan_id)
+        if not plan:
             return ToggleProductAvailabilityResponse(is_success=False)
-        if plan.planner != current_user_id:
+        if not plan.planned_by(current_user_id):
             return ToggleProductAvailabilityResponse(is_success=False)
-        self.plan_repository.toggle_product_availability(plan)
+        plan.update().toggle_product_availability().perform()
         return ToggleProductAvailabilityResponse(is_success=True)
