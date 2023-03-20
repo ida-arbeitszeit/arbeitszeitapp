@@ -308,10 +308,15 @@ class PlanGenerator:
                     cooperation.coordinator.id, plan.id, cooperation.id
                 )
             )
+        selected_plan = self.plan_repository.get_plans().with_id(
+            file_plan_response.plan_id
+        )
+        update = selected_plan.update()
         if hidden_by_user:
-            self.plan_repository.hide_plan(plan.id)
+            update.hide()
         if not is_available:
             self.plan_repository.toggle_product_availability(plan)
+        update.perform()
         plan = (
             self.plan_repository.get_plans().with_id(file_plan_response.plan_id).first()
         )

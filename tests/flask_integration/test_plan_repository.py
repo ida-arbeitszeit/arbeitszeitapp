@@ -33,7 +33,7 @@ class PlanRepositoryTests(FlaskTestCase):
 
     def test_that_plan_gets_hidden(self) -> None:
         plan = self.plan_generator.create_plan()
-        self.plan_repository.hide_plan(plan.id)
+        self.plan_repository.get_plans().with_id(plan.id).update().hide().perform()
         plan_from_repo = self.plan_repository.get_plans().with_id(plan.id).first()
         assert plan_from_repo
         assert plan_from_repo.hidden_by_user
@@ -652,3 +652,19 @@ class ThatWillExpireAfterTests(FlaskTestCase):
         assert not self.plan_repository.get_plans().that_will_expire_after(
             datetime(2000, 1, 3)
         )
+
+
+class ThatAreNotHiddenTests(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.plan_repository = self.injector.get(PlanRepository)
+        self.plan_generator = self.injector.get(PlanGenerator)
+
+    def test_that_plan_that_is_not_hidden_will_show_in_results(self) -> None:
+        self.plan_generator.create_plan()
+        assert self.plan_repository.get_plans().that_are_not_hidden()
+
+    def test_that_plan_that_is_hidden_is_not_in_result_set(self) -> None:
+        self.plan_generator.create_plan()
+        self.plan_repository.get_plans().update().hide().perform()
+        assert not self.plan_repository.get_plans().that_are_not_hidden()

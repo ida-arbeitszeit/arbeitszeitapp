@@ -247,6 +247,9 @@ class PlanResult(QueryResultImpl[Plan]):
 
         return self._filtered_by(plan_filter)
 
+    def that_are_not_hidden(self) -> Self:
+        return self._filtered_by(lambda plan: not plan.hidden_by_user)
+
     def update(self) -> PlanUpdate:
         return PlanUpdate(
             items=self.items,
@@ -291,6 +294,12 @@ class PlanUpdate:
 
         return self._add_update(update)
 
+    def hide(self) -> Self:
+        def update(plan: entities.Plan) -> None:
+            plan.hidden_by_user = True
+
+        return self._add_update(update)
+
     def perform(self) -> int:
         items_affected = 0
         for item in self.items():
@@ -299,7 +308,7 @@ class PlanUpdate:
             items_affected += 1
         return items_affected
 
-    def _add_update(self, update: Callable[[Plan], None]) -> PlanUpdate:
+    def _add_update(self, update: Callable[[Plan], None]) -> Self:
         return replace(self, update_functions=self.update_functions + [update])
 
 
@@ -818,11 +827,6 @@ class PlanRepository(interfaces.PlanRepository):
 
     def __len__(self) -> int:
         return len(self.entities.plans)
-
-    def hide_plan(self, plan_id: UUID) -> None:
-        plan = self.entities.plans.get(plan_id)
-        assert plan
-        plan.hidden_by_user = True
 
     def toggle_product_availability(self, plan: Plan) -> None:
         plan.is_available = True if (plan.is_available == False) else False

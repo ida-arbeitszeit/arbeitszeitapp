@@ -269,6 +269,11 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
         )
         return q
 
+    def that_are_not_hidden(self) -> Self:
+        return self._with_modified_query(
+            lambda query: query.filter(models.Plan.hidden_by_user == False)
+        )
+
     def update(self) -> PlanUpdate:
         return PlanUpdate(
             query=self.query,
@@ -347,6 +352,15 @@ class PlanUpdate:
             plan_update_values=dict(
                 self.plan_update_values,
                 activation_date=activation_timestamp,
+            ),
+        )
+
+    def hide(self) -> Self:
+        return replace(
+            self,
+            plan_update_values=dict(
+                self.plan_update_values,
+                hidden_by_user=True,
             ),
         )
 
@@ -1108,11 +1122,6 @@ class PlanRepository(repositories.PlanRepository):
         orm = models.Plan.query.filter(models.Plan.id == str(plan.id)).first()
         assert orm
         return orm
-
-    def hide_plan(self, plan_id: UUID) -> None:
-        plan_orm = models.Plan.query.filter_by(id=str(plan_id)).first()
-        assert plan_orm
-        plan_orm.hidden_by_user = True
 
     def toggle_product_availability(self, plan: entities.Plan) -> None:
         plan.is_available = True if (plan.is_available == False) else False

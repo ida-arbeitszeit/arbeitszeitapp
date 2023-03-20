@@ -51,6 +51,7 @@ class ShowMyPlansUseCase:
             self.plan_repository.get_plans()
             .planned_by(request.company_id)
             .ordered_by_creation_date(ascending=False)
+            .that_are_not_hidden()
         )
         drafts = list(
             map(
@@ -81,7 +82,7 @@ class ShowMyPlansUseCase:
         expired_plans = [
             self._create_plan_info_from_plan(plan)
             for plan in all_plans_of_company
-            if plan.is_expired_as_of(now) and (not plan.hidden_by_user)
+            if plan.is_expired_as_of(now)
         ]
         return ShowMyPlansResponse(
             count_all_plans=count_all_plans,
