@@ -27,7 +27,6 @@ class UpdatePlansAndPayout:
         preferably more often (e.g. every hour).
         """
         now = self.datetime_service.now()
-        self._calculate_plan_expiration()
         payout_factor = self.payout_factor_service.calculate_payout_factor()
         self.payout_factor_service.store_payout_factor(payout_factor)
         plans = self.plan_repository.get_plans().where_payout_counts_are_less_then_active_days(
@@ -41,14 +40,6 @@ class UpdatePlansAndPayout:
             )
             self._payout_work_certificates(plan, payout_factor, payout_count)
 
-    def _calculate_plan_expiration(self) -> None:
-        payout_factor = self._get_latest_payout_factor()
-        for plan in self.plan_repository.get_plans().that_are_active():
-            assert plan.is_active, "Plan is not active!"
-            assert plan.activation_date, "Plan has no activation date!"
-            if self._plan_is_expired(plan):
-                self._handle_expired_plan(plan, payout_factor)
-
     def _payout_work_certificates(
         self, plan: Plan, payout_factor: Decimal, payout_count: int
     ) -> None:
@@ -59,6 +50,8 @@ class UpdatePlansAndPayout:
         assert active_days is not None
         for _ in range(max(active_days - payout_count, 0)):
             self._payout(plan, payout_factor)
+        if self._plan_is_expired(plan):
+            self._handle_expired_plan(plan, payout_factor)
 
     def _payout(self, plan: Plan, payout_factor: Decimal) -> None:
         """The daily payout amount = current payout factor * total
@@ -96,11 +89,7 @@ class UpdatePlansAndPayout:
         for _ in range(max(0, active_days - payout_count)):
             self._payout(plan, payout_factor)
         plans = self.plan_repository.get_plans().with_id(plan.id)
-        plans.update().set_requested_cooperation(None).set_cooperation(
-            None
-        ).set_activation_status(is_active=False).set_expiration_status(
-            is_expired=True
-        ).perform()
+        plans.update().set_requested_cooperation(None).set_cooperation(None).perform()
 
     def _get_latest_payout_factor(self) -> Decimal:
         factor = (

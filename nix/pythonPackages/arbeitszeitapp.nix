@@ -3,7 +3,7 @@
 # python packages
 , email_validator, flask, flask-babel, flask-talisman, flask_login, flask_mail
 , flask_migrate, flask-restx, flask_wtf, is_safe_url, matplotlib, sphinx
-, flask-profiler }:
+, flask-profiler, typing-extensions }:
 buildPythonPackage {
   pname = "arbeitszeitapp";
   version = "0.0.0";
@@ -24,6 +24,7 @@ buildPythonPackage {
     flask_wtf
     is_safe_url
     matplotlib
+    typing-extensions
   ];
   buildDocsPhase = ''
     mkdir -p $doc/share/doc/arbeitszeitapp

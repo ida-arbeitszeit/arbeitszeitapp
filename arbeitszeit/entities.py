@@ -150,8 +150,6 @@ class Plan:
     timeframe: int
     is_public_service: bool
     approval_date: Optional[datetime]
-    is_active: bool
-    expired: bool
     activation_date: Optional[datetime]
     requested_cooperation: Optional[UUID]
     cooperation: Optional[UUID]
@@ -191,6 +189,16 @@ class Plan:
             return None
         days_passed_since_activation = (reference_timestamp - self.activation_date).days
         return min(self.timeframe, days_passed_since_activation)
+
+    def is_active_as_of(self, timestamp: datetime) -> bool:
+        return (
+            self.activation_date is not None
+            and self.activation_date <= timestamp
+            and not self.is_expired_as_of(timestamp)
+        )
+
+    def is_expired_as_of(self, timestamp: datetime) -> bool:
+        return self.expiration_date is not None and timestamp >= self.expiration_date
 
 
 class PurposesOfPurchases(Enum):

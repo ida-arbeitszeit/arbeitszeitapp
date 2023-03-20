@@ -62,7 +62,8 @@ class UseCaseTests(BaseTestCase):
         expected_activation_timestamp = datetime(2000, 1, 1, tzinfo=timezone.utc)
         self.datetime_service.freeze_time(expected_activation_timestamp)
         plan = self.plan_generator.create_plan(approved=False)
-        self.use_case.approve_plan(self.create_request(plan=plan.id))
+        response = self.use_case.approve_plan(self.create_request(plan=plan.id))
+        assert response.is_approved
         assert (
             self.get_latest_activated_plan().activation_date
             == expected_activation_timestamp

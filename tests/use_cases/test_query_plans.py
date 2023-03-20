@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
 from arbeitszeit.entities import Plan
@@ -64,13 +64,13 @@ class UseCaseTests(BaseTestCase):
     def test_that_plans_are_returned_in_order_of_activation_when_requested_with_newest_plan_first(
         self,
     ):
-        self.datetime_service.freeze_time(datetime(2000, 1, 2))
-        expected_second = self.plan_generator.create_plan()
-        self.datetime_service.freeze_time(datetime(2000, 1, 3))
-        expected_first = self.plan_generator.create_plan()
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         expected_third = self.plan_generator.create_plan()
-        self.datetime_service.unfreeze_time()
+        self.datetime_service.advance_time(timedelta(days=1))
+        expected_second = self.plan_generator.create_plan()
+        self.datetime_service.advance_time(timedelta(days=1))
+        expected_first = self.plan_generator.create_plan()
+        self.datetime_service.advance_time(timedelta(days=1))
         response = self.query_plans(
             self.make_request(sorting=PlanSorting.by_activation)
         )
@@ -93,9 +93,9 @@ class UseCaseTests(BaseTestCase):
     def test_that_filtered_plans_by_name_are_returned_in_order_of_activation(self):
         self.datetime_service.freeze_time(datetime(2000, 1, 4))
         expected_second = self.plan_generator.create_plan(product_name="abcde")
-        self.datetime_service.freeze_time(datetime(2000, 1, 5))
+        self.datetime_service.advance_time(timedelta(days=1))
         expected_first = self.plan_generator.create_plan(product_name="xyabc")
-        self.datetime_service.unfreeze_time()
+        self.datetime_service.advance_time(timedelta(days=1))
         # unexpected plan
         self.plan_generator.create_plan(
             product_name="cba",

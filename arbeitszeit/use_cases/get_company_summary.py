@@ -5,6 +5,7 @@ from decimal import Decimal, DivisionByZero, InvalidOperation
 from typing import Dict, Iterable, List, Optional, Tuple
 from uuid import UUID
 
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.entities import (
     Company,
@@ -79,6 +80,7 @@ class GetCompanySummary:
     transaction_repository: TransactionRepository
     social_accounting: SocialAccounting
     database_gateway: DatabaseGateway
+    datetime_service: DatetimeService
 
     def __call__(self, company_id: UUID) -> GetCompanySummaryResponse:
         company = self.company_repository.get_companies().with_id(company_id).first()
@@ -121,10 +123,11 @@ class GetCompanySummary:
         sales_balance_of_plan = self.transaction_repository.get_sales_balance_of_plan(
             plan
         )
+        now = self.datetime_service.now()
         return PlanDetails(
             id=plan.id,
             name=plan.prd_name,
-            is_active=plan.is_active,
+            is_active=plan.is_active_as_of(now),
             sales_volume=expected_sales_volume,
             sales_balance=sales_balance_of_plan,
             deviation_relative=self._calculate_deviation(

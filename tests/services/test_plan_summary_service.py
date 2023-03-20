@@ -41,7 +41,6 @@ class PlanSummaryServiceTests(TestCase):
 
     def test_that_correct_active_status_is_shown_when_plan_is_active(self):
         plan = self.plan_generator.create_plan()
-        assert plan.is_active
         summary = self.service.get_summary_from_plan(plan.id)
         assert summary
         self.assertTrue(summary.is_active)

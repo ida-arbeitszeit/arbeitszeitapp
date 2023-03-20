@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import Optional, Tuple
 
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import PayoutFactor
 from arbeitszeit.repositories import (
     AccountRepository,
@@ -37,13 +38,19 @@ class GetStatistics:
     cooperation_respository: CooperationRepository
     account_respository: AccountRepository
     database: DatabaseGateway
+    datetime_service: DatetimeService
 
     def __call__(self) -> StatisticsResponse:
         (
             certs_total,
             available_product,
         ) = self._count_certificates_and_available_product()
-        active_plans = self.plan_repository.get_plans().that_are_active()
+        now = self.datetime_service.now()
+        active_plans = (
+            self.plan_repository.get_plans()
+            .that_will_expire_after(now)
+            .that_were_activated_before(now)
+        )
         planning_statistics = active_plans.get_statistics()
         return StatisticsResponse(
             registered_companies_count=len(self.company_repository.get_companies()),

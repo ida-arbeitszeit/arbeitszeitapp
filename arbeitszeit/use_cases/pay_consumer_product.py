@@ -94,10 +94,11 @@ class PayConsumerProduct:
         return PayConsumerProductResponse(rejection_reason=None)
 
     def _get_active_plan(self, request: PayConsumerProductRequest) -> Plan:
+        now = self.datetime_service.now()
         plan = self.plan_repository.get_plans().with_id(request.plan).first()
         if plan is None:
             raise self.PlanNotFound("Plan could not be found")
-        if not plan.is_active:
+        if not plan.is_active_as_of(now):
             raise errors.PlanIsInactive(
                 plan=plan,
             )

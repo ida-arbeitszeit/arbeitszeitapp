@@ -31,16 +31,6 @@ class PlanRepositoryTests(FlaskTestCase):
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.company_generator = self.injector.get(CompanyGenerator)
 
-    def test_all_active_plans_get_retrieved(self) -> None:
-        number_of_plans = 5
-        list_of_plans = [
-            self.plan_generator.create_plan() for _ in range(number_of_plans)
-        ]
-        retrieved_plans = list(self.plan_repository.get_plans().that_are_active())
-        assert len(retrieved_plans) == number_of_plans
-        for plan in list_of_plans:
-            assert plan in retrieved_plans
-
     def test_that_plan_gets_hidden(self) -> None:
         plan = self.plan_generator.create_plan()
         self.plan_repository.hide_plan(plan.id)
@@ -479,14 +469,6 @@ class GetAllPlans(FlaskTestCase):
         assert plans.update().set_approval_date(expected_approval_date).perform()
         assert all(plan.approval_date == expected_approval_date for plan in plans)
 
-    def test_can_set_expiration_status_to_true_and_then_to_false_again(self) -> None:
-        plan_id = self.plan_generator.create_plan().id
-        plan = self.plan_repository.get_plans().with_id(plan_id)
-        plan.update().set_expiration_status(is_expired=True).perform()
-        assert plan.first().expired  # type: ignore
-        plan.update().set_expiration_status(is_expired=False).perform()
-        assert not plan.first().expired  # type: ignore
-
 
 class WherePayoutCountsAreLessThenActiveDaysTests(FlaskTestCase):
     def setUp(self) -> None:
@@ -599,4 +581,74 @@ class GetStatisticsTests(FlaskTestCase):
             means_cost=Decimal(5),
             resource_cost=Decimal(13),
             labour_cost=Decimal(17),
+        )
+
+
+class ThatWereActivatedBeforeTests(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.plan_repository = self.injector.get(PlanRepository)
+        self.plan_generator = self.injector.get(PlanGenerator)
+        self.datetime_service = self.injector.get(FakeDatetimeService)
+
+    def test_plan_activated_before_a_specified_timestamp_are_included_in_the_result(
+        self,
+    ) -> None:
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.plan_generator.create_plan()
+        assert self.plan_repository.get_plans().that_were_activated_before(
+            datetime(2000, 1, 2)
+        )
+
+    def test_plan_activated_exactly_at_a_specified_timestamp_are_included_in_the_result(
+        self,
+    ) -> None:
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.plan_generator.create_plan()
+        assert self.plan_repository.get_plans().that_were_activated_before(
+            datetime(2000, 1, 1)
+        )
+
+    def test_plan_activated_after_a_specified_timestamp_are_excluded_from_result(
+        self,
+    ) -> None:
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.plan_generator.create_plan()
+        assert not self.plan_repository.get_plans().that_were_activated_before(
+            datetime(1999, 12, 31)
+        )
+
+
+class ThatWillExpireAfterTests(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.plan_repository = self.injector.get(PlanRepository)
+        self.plan_generator = self.injector.get(PlanGenerator)
+        self.datetime_service = self.injector.get(FakeDatetimeService)
+
+    def test_that_plan_that_will_expire_after_specified_date_is_included_in_results(
+        self,
+    ) -> None:
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.plan_generator.create_plan(timeframe=1)
+        assert self.plan_repository.get_plans().that_will_expire_after(
+            datetime(2000, 1, 1)
+        )
+
+    def test_that_plan_that_will_expire_exactly_at_specified_timestamp_is_not_included_in_results(
+        self,
+    ) -> None:
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.plan_generator.create_plan(timeframe=1)
+        assert not self.plan_repository.get_plans().that_will_expire_after(
+            datetime(2000, 1, 2)
+        )
+
+    def test_plan_that_will_expire_before_specified_timestamp_is_not_included_in_result(
+        self,
+    ) -> None:
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.plan_generator.create_plan(timeframe=1)
+        assert not self.plan_repository.get_plans().that_will_expire_after(
+            datetime(2000, 1, 3)
         )

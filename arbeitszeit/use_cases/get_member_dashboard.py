@@ -6,6 +6,7 @@ from decimal import Decimal
 from typing import List
 from uuid import UUID
 
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
@@ -49,6 +50,7 @@ class GetMemberDashboard:
     member_repository: MemberRepository
     plan_repository: PlanRepository
     worker_invite_repository: WorkerInviteRepository
+    datetime_service: DatetimeService
 
     def __call__(self, member: UUID) -> Response:
         _member = self.member_repository.get_members().with_id(member).first()
@@ -83,9 +85,11 @@ class GetMemberDashboard:
         )
 
     def _get_three_latest_plans(self) -> List[PlanDetails]:
+        now = self.datetime_service.now()
         latest_plans = (
             self.plan_repository.get_plans()
-            .that_are_active()
+            .that_will_expire_after(now)
+            .that_were_activated_before(now)
             .ordered_by_creation_date(ascending=False)
             .limit(3)
         )
