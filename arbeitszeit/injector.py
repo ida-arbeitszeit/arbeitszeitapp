@@ -6,6 +6,7 @@ from typing import (
     Callable,
     Dict,
     Generic,
+    Iterable,
     List,
     Optional,
     Protocol,
@@ -37,7 +38,7 @@ class Injector:
     def call_with_injection(
         self,
         f: Callable[..., T],
-        args: Optional[List[Any]] = None,
+        args: Optional[Iterable[Any]] = None,
         kwargs: Optional[Dict[str, Any]] = None,
     ) -> T:
         if args is None:

@@ -100,7 +100,7 @@ class PlanResult(QueryResultImpl[Plan]):
         )
 
     def ordered_by_planner_name(self, ascending: bool = True) -> PlanResult:
-        def get_company_name(planner_id: UUID):
+        def get_company_name(planner_id: UUID) -> str:
             planner = self.entities.get_company_by_id(planner_id)
             assert planner
             planner_name = planner.name
@@ -152,15 +152,19 @@ class PlanResult(QueryResultImpl[Plan]):
         )
 
     def that_are_in_same_cooperation_as(self, plan: UUID) -> PlanResult:
-        def items_generator():
+        def items_generator() -> Iterator[entities.Plan]:
             plan_entity = self.entities.plans.get(plan)
             if not plan_entity:
                 return
             if plan_entity.cooperation is None:
-                yield from filter(lambda p: p.id == plan, self.items())
+                yield from (
+                    other_plan for other_plan in self.items() if other_plan.id == plan
+                )
             else:
-                yield from filter(
-                    lambda p: p.cooperation == plan_entity.cooperation, self.items()
+                yield from (
+                    plan
+                    for plan in self.items()
+                    if plan.cooperation == plan_entity.cooperation
                 )
 
         return type(self)(
@@ -449,7 +453,7 @@ class ConsumerPurchaseResult(QueryResultImpl[entities.ConsumerPurchase]):
     def ordered_by_creation_date(
         self, *, ascending: bool = True
     ) -> ConsumerPurchaseResult:
-        def purchase_sorting_key(purchase):
+        def purchase_sorting_key(purchase: entities.ConsumerPurchase) -> datetime:
             transaction = self.entities.transactions[purchase.transaction_id]
             return transaction.date
 
@@ -463,7 +467,7 @@ class ConsumerPurchaseResult(QueryResultImpl[entities.ConsumerPurchase]):
         )
 
     def where_buyer_is_member(self, member: UUID) -> ConsumerPurchaseResult:
-        def filtered_items():
+        def filtered_items() -> Iterator[entities.ConsumerPurchase]:
             member_account = self.entities.members[member].account
             for purchase in self.items():
                 transaction = self.entities.transactions[purchase.transaction_id]
@@ -496,7 +500,7 @@ class CompanyPurchaseResult(QueryResultImpl[entities.CompanyPurchase]):
     def ordered_by_creation_date(
         self, *, ascending: bool = True
     ) -> CompanyPurchaseResult:
-        def purchase_sorting_key(purchase):
+        def purchase_sorting_key(purchase: entities.CompanyPurchase) -> datetime:
             transaction = self.entities.transactions[purchase.transaction_id]
             return transaction.date
 
@@ -510,8 +514,10 @@ class CompanyPurchaseResult(QueryResultImpl[entities.CompanyPurchase]):
         )
 
     def where_buyer_is_company(self, company: UUID) -> CompanyPurchaseResult:
-        def filtered_items():
+        def filtered_items() -> Iterator[entities.CompanyPurchase]:
             company_record = self.entities.get_company_by_id(company)
+            if company_record is None:
+                return None
             for purchase in self.items():
                 transaction = self.entities.transactions[purchase.transaction_id]
                 if (
