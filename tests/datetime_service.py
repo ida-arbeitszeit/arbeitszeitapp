@@ -10,10 +10,10 @@ from arbeitszeit.injector import singleton
 
 @singleton
 class FakeDatetimeService(DatetimeService):
-    def __init__(self):
-        self.frozen_time = None
+    def __init__(self) -> None:
+        self.frozen_time: Optional[datetime] = None
 
-    def freeze_time(self, timestamp: datetime):
+    def freeze_time(self, timestamp: datetime) -> None:
         self.frozen_time = timestamp
 
     def unfreeze_time(self) -> None:

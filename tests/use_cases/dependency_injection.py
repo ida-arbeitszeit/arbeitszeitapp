@@ -1,3 +1,5 @@
+from typing import Any, Callable, TypeVar, cast
+
 import arbeitszeit.repositories as interfaces
 from arbeitszeit import entities
 from arbeitszeit.accountant_notifications import NotifyAccountantsAboutNewPlanPresenter
@@ -85,10 +87,13 @@ def get_dependency_injector() -> Injector:
     return Injector([TestingModule(), InMemoryModule()])
 
 
-def injection_test(original_test):
+CallableT = TypeVar("CallableT", bound=Callable)
+
+
+def injection_test(original_test: CallableT) -> CallableT:
     injector = get_dependency_injector()
 
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
         return injector.call_with_injection(original_test, args=args, kwargs=kwargs)
 
-    return wrapper
+    return cast(CallableT, wrapper)
