@@ -15,7 +15,6 @@ from arbeitszeit.repositories import (
     CompanyRepository,
     DatabaseGateway,
     MemberRepository,
-    PlanRepository,
 )
 
 
@@ -45,7 +44,6 @@ class PayConsumerProductResponse:
 @dataclass
 class PayConsumerProduct:
     member_repository: MemberRepository
-    plan_repository: PlanRepository
     giro_office: GiroOffice
     datetime_service: DatetimeService
     company_repository: CompanyRepository
@@ -95,7 +93,7 @@ class PayConsumerProduct:
 
     def _get_active_plan(self, request: PayConsumerProductRequest) -> Plan:
         now = self.datetime_service.now()
-        plan = self.plan_repository.get_plans().with_id(request.plan).first()
+        plan = self.database_gateway.get_plans().with_id(request.plan).first()
         if plan is None:
             raise self.PlanNotFound("Plan could not be found")
         if not plan.is_active_as_of(now):

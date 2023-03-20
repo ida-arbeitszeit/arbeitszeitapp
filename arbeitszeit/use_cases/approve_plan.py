@@ -8,7 +8,7 @@ from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan, SocialAccounting
 from arbeitszeit.repositories import (
     CompanyRepository,
-    PlanRepository,
+    DatabaseGateway,
     TransactionRepository,
 )
 
@@ -23,7 +23,7 @@ class ApprovePlanUseCase:
     class Response:
         is_approved: bool = True
 
-    plan_repository: PlanRepository
+    database_gateway: DatabaseGateway
     datetime_service: DatetimeService
     social_accounting: SocialAccounting
     transaction_repository: TransactionRepository
@@ -31,7 +31,7 @@ class ApprovePlanUseCase:
 
     def approve_plan(self, request: Request) -> Response:
         now = self.datetime_service.now()
-        matching_plans = self.plan_repository.get_plans().with_id(request.plan)
+        matching_plans = self.database_gateway.get_plans().with_id(request.plan)
         plan = matching_plans.first()
         assert plan
         planner = self.company_repository.get_companies().with_id(plan.planner).first()

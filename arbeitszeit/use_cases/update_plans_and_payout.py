@@ -7,14 +7,12 @@ from arbeitszeit.payout_factor import PayoutFactorService
 from arbeitszeit.repositories import (
     CompanyRepository,
     DatabaseGateway,
-    PlanRepository,
     TransactionRepository,
 )
 
 
 @dataclass
 class UpdatePlansAndPayout:
-    plan_repository: PlanRepository
     datetime_service: DatetimeService
     transaction_repository: TransactionRepository
     social_accounting: SocialAccounting
@@ -29,7 +27,7 @@ class UpdatePlansAndPayout:
         now = self.datetime_service.now()
         payout_factor = self.payout_factor_service.calculate_payout_factor()
         self.payout_factor_service.store_payout_factor(payout_factor)
-        plans = self.plan_repository.get_plans().where_payout_counts_are_less_then_active_days(
+        plans = self.database_gateway.get_plans().where_payout_counts_are_less_then_active_days(
             now
         )
         for plan in plans:
@@ -88,7 +86,7 @@ class UpdatePlansAndPayout:
         )
         for _ in range(max(0, active_days - payout_count)):
             self._payout(plan, payout_factor)
-        plans = self.plan_repository.get_plans().with_id(plan.id)
+        plans = self.database_gateway.get_plans().with_id(plan.id)
         plans.update().set_requested_cooperation(None).set_cooperation(None).perform()
 
     def _get_latest_payout_factor(self) -> Decimal:

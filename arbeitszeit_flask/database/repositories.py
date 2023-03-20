@@ -592,7 +592,7 @@ class CompanyPurchaseResult(FlaskQueryResult[entities.CompanyPurchase]):
             return (
                 DatabaseGatewayImpl.company_purchase_from_orm(purchase_orm),
                 TransactionRepository.object_from_orm(transaction_orm),
-                PlanRepository.object_from_orm(plan_orm),
+                DatabaseGatewayImpl.plan_from_orm(plan_orm),
             )
 
         transaction = aliased(models.Transaction)
@@ -667,7 +667,7 @@ class ConsumerPurchaseResult(FlaskQueryResult[entities.ConsumerPurchase]):
             return (
                 DatabaseGatewayImpl.consumer_purchase_from_orm(purchase_orm),
                 TransactionRepository.object_from_orm(transaction_orm),
-                PlanRepository.object_from_orm(plan_orm),
+                DatabaseGatewayImpl.plan_from_orm(plan_orm),
             )
 
         transaction = aliased(models.Transaction)
@@ -1053,87 +1053,6 @@ class AccountingRepository:
         if accounting_orm is None:
             return None
         return self.object_from_orm(accounting_orm)
-
-
-@dataclass
-class PlanRepository(repositories.PlanRepository):
-    company_repository: CompanyRepository
-    db: SQLAlchemy
-    draft_repository: PlanDraftRepository
-
-    def get_plans(self) -> PlanQueryResult:
-        return PlanQueryResult(
-            query=models.Plan.query,
-            mapper=self.object_from_orm,
-            db=self.db,
-        )
-
-    def create_plan(
-        self,
-        creation_timestamp: datetime,
-        planner: UUID,
-        production_costs: entities.ProductionCosts,
-        product_name: str,
-        distribution_unit: str,
-        amount_produced: int,
-        product_description: str,
-        duration_in_days: int,
-        is_public_service: bool,
-    ) -> entities.Plan:
-        plan = models.Plan(
-            id=str(uuid4()),
-            plan_creation_date=creation_timestamp,
-            planner=str(planner),
-            costs_p=production_costs.means_cost,
-            costs_r=production_costs.resource_cost,
-            costs_a=production_costs.labour_cost,
-            prd_name=product_name,
-            prd_unit=distribution_unit,
-            prd_amount=amount_produced,
-            description=product_description,
-            timeframe=duration_in_days,
-            is_public_service=is_public_service,
-        )
-        review = models.PlanReview(approval_date=None, plan=plan)
-        self.db.session.add(plan)
-        self.db.session.add(review)
-        return self.object_from_orm(plan)
-
-    @classmethod
-    def object_from_orm(cls, plan: models.Plan) -> entities.Plan:
-        production_costs = entities.ProductionCosts(
-            labour_cost=plan.costs_a,
-            resource_cost=plan.costs_r,
-            means_cost=plan.costs_p,
-        )
-        return entities.Plan(
-            id=UUID(plan.id),
-            plan_creation_date=plan.plan_creation_date,
-            planner=UUID(plan.planner),
-            production_costs=production_costs,
-            prd_name=plan.prd_name,
-            prd_unit=plan.prd_unit,
-            prd_amount=plan.prd_amount,
-            description=plan.description,
-            timeframe=int(plan.timeframe),
-            is_public_service=plan.is_public_service,
-            approval_date=plan.review.approval_date,
-            activation_date=plan.activation_date,
-            requested_cooperation=UUID(plan.requested_cooperation)
-            if plan.requested_cooperation
-            else None,
-            cooperation=UUID(plan.cooperation) if plan.cooperation else None,
-            is_available=plan.is_available,
-            hidden_by_user=plan.hidden_by_user,
-        )
-
-    def object_to_orm(self, plan: entities.Plan) -> models.Plan:
-        orm = models.Plan.query.filter(models.Plan.id == str(plan.id)).first()
-        assert orm
-        return orm
-
-    def __len__(self) -> int:
-        return len(models.Plan.query.all())
 
 
 @dataclass
@@ -1639,4 +1558,70 @@ class DatabaseGatewayImpl:
             amount=orm.amount,
             plan_id=UUID(orm.plan_id),
             transaction_id=UUID(orm.transaction_id),
+        )
+
+    def get_plans(self) -> PlanQueryResult:
+        return PlanQueryResult(
+            query=models.Plan.query,
+            mapper=self.plan_from_orm,
+            db=self.db,
+        )
+
+    def create_plan(
+        self,
+        creation_timestamp: datetime,
+        planner: UUID,
+        production_costs: entities.ProductionCosts,
+        product_name: str,
+        distribution_unit: str,
+        amount_produced: int,
+        product_description: str,
+        duration_in_days: int,
+        is_public_service: bool,
+    ) -> entities.Plan:
+        plan = models.Plan(
+            id=str(uuid4()),
+            plan_creation_date=creation_timestamp,
+            planner=str(planner),
+            costs_p=production_costs.means_cost,
+            costs_r=production_costs.resource_cost,
+            costs_a=production_costs.labour_cost,
+            prd_name=product_name,
+            prd_unit=distribution_unit,
+            prd_amount=amount_produced,
+            description=product_description,
+            timeframe=duration_in_days,
+            is_public_service=is_public_service,
+        )
+        review = models.PlanReview(approval_date=None, plan=plan)
+        self.db.session.add(plan)
+        self.db.session.add(review)
+        return self.plan_from_orm(plan)
+
+    @classmethod
+    def plan_from_orm(cls, plan: models.Plan) -> entities.Plan:
+        production_costs = entities.ProductionCosts(
+            labour_cost=plan.costs_a,
+            resource_cost=plan.costs_r,
+            means_cost=plan.costs_p,
+        )
+        return entities.Plan(
+            id=UUID(plan.id),
+            plan_creation_date=plan.plan_creation_date,
+            planner=UUID(plan.planner),
+            production_costs=production_costs,
+            prd_name=plan.prd_name,
+            prd_unit=plan.prd_unit,
+            prd_amount=plan.prd_amount,
+            description=plan.description,
+            timeframe=int(plan.timeframe),
+            is_public_service=plan.is_public_service,
+            approval_date=plan.review.approval_date,
+            activation_date=plan.activation_date,
+            requested_cooperation=UUID(plan.requested_cooperation)
+            if plan.requested_cooperation
+            else None,
+            cooperation=UUID(plan.cooperation) if plan.cooperation else None,
+            is_available=plan.is_available,
+            hidden_by_user=plan.hidden_by_user,
         )

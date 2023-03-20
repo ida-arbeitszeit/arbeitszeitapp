@@ -6,7 +6,7 @@ from arbeitszeit.entities import Plan
 from arbeitszeit.repositories import (
     CompanyRepository,
     CooperationRepository,
-    PlanRepository,
+    DatabaseGateway,
 )
 
 
@@ -33,7 +33,7 @@ class ListInboundCoopRequestsResponse:
 @dataclass
 class ListInboundCoopRequests:
     company_repository: CompanyRepository
-    plan_repository: PlanRepository
+    database_gateway: DatabaseGateway
     cooperation_repository: CooperationRepository
 
     def __call__(
@@ -43,7 +43,7 @@ class ListInboundCoopRequests:
             return ListInboundCoopRequestsResponse(cooperation_requests=[])
         cooperation_requests = [
             self._plan_to_response_model(plan)
-            for plan in self.plan_repository.get_plans().that_request_cooperation_with_coordinator(
+            for plan in self.database_gateway.get_plans().that_request_cooperation_with_coordinator(
                 request.coordinator_id
             )
         ]

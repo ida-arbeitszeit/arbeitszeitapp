@@ -16,8 +16,7 @@ from tests.data_generators import (
     PurchaseGenerator,
 )
 from tests.datetime_service import FakeDatetimeService
-
-from .flask import FlaskTestCase
+from tests.flask_integration.flask import FlaskTestCase
 
 
 class LabourCertificatesPayoutTests(FlaskTestCase):

@@ -8,7 +8,7 @@ from arbeitszeit.entities import Cooperation
 from arbeitszeit.repositories import (
     CompanyRepository,
     CooperationRepository,
-    PlanRepository,
+    DatabaseGateway,
 )
 
 
@@ -41,7 +41,7 @@ class RequestCooperationResponse:
 
 @dataclass
 class RequestCooperation:
-    plan_repository: PlanRepository
+    database_gateway: DatabaseGateway
     cooperation_repository: CooperationRepository
     company_repository: CompanyRepository
     datetime_service: DatetimeService
@@ -55,7 +55,7 @@ class RequestCooperation:
             return RequestCooperationResponse(
                 coordinator_name=None, coordinator_email=None, rejection_reason=reason
             )
-        self.plan_repository.get_plans().with_id(
+        self.database_gateway.get_plans().with_id(
             request.plan_id
         ).update().set_requested_cooperation(request.cooperation_id).perform()
         return RequestCooperationResponse(
@@ -66,7 +66,7 @@ class RequestCooperation:
 
     def _validate_request(self, request: RequestCooperationRequest) -> Cooperation:
         now = self.datetime_service.now()
-        plan = self.plan_repository.get_plans().with_id(request.plan_id).first()
+        plan = self.database_gateway.get_plans().with_id(request.plan_id).first()
         cooperation = self.cooperation_repository.get_by_id(request.cooperation_id)
         if plan is None:
             raise RequestCooperationResponse.RejectionReason.plan_not_found

@@ -4,7 +4,7 @@ from typing import List, Optional
 from uuid import UUID
 
 from arbeitszeit.price_calculator import PriceCalculator
-from arbeitszeit.repositories import CooperationRepository, PlanRepository
+from arbeitszeit.repositories import CooperationRepository, DatabaseGateway
 
 
 @dataclass
@@ -39,7 +39,7 @@ GetCoopSummaryResponse = Optional[GetCoopSummarySuccess]
 @dataclass
 class GetCoopSummary:
     cooperation_repository: CooperationRepository
-    plan_repository: PlanRepository
+    database_gateway: DatabaseGateway
     price_calculator: PriceCalculator
 
     def __call__(self, request: GetCoopSummaryRequest) -> GetCoopSummaryResponse:
@@ -56,7 +56,7 @@ class GetCoopSummary:
                 else Decimal(0),
                 plan_coop_price=self.price_calculator.calculate_cooperative_price(plan),
             )
-            for plan in self.plan_repository.get_plans().that_are_part_of_cooperation(
+            for plan in self.database_gateway.get_plans().that_are_part_of_cooperation(
                 request.coop_id
             )
         ]

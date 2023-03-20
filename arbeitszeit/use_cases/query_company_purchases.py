@@ -11,7 +11,7 @@ from arbeitszeit.entities import (
     PurposesOfPurchases,
     Transaction,
 )
-from arbeitszeit.repositories import CompanyRepository, DatabaseGateway, PlanRepository
+from arbeitszeit.repositories import CompanyRepository, DatabaseGateway
 
 
 @dataclass
@@ -27,7 +27,6 @@ class PurchaseQueryResponse:
 
 @dataclass
 class QueryCompanyPurchases:
-    plan_repository: PlanRepository
     database_gateway: DatabaseGateway
     company_repository: CompanyRepository
 

@@ -10,7 +10,6 @@ from arbeitszeit.repositories import (
     CooperationRepository,
     DatabaseGateway,
     MemberRepository,
-    PlanRepository,
 )
 
 
@@ -34,7 +33,6 @@ class StatisticsResponse:
 class GetStatistics:
     company_repository: CompanyRepository
     member_repository: MemberRepository
-    plan_repository: PlanRepository
     cooperation_respository: CooperationRepository
     account_respository: AccountRepository
     database: DatabaseGateway
@@ -47,7 +45,7 @@ class GetStatistics:
         ) = self._count_certificates_and_available_product()
         now = self.datetime_service.now()
         active_plans = (
-            self.plan_repository.get_plans()
+            self.database.get_plans()
             .that_will_expire_after(now)
             .that_were_activated_before(now)
         )

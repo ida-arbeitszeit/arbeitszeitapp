@@ -6,7 +6,7 @@ from arbeitszeit.entities import Plan
 from arbeitszeit.repositories import (
     CompanyRepository,
     CooperationRepository,
-    PlanRepository,
+    DatabaseGateway,
 )
 
 
@@ -32,7 +32,7 @@ class ListOutboundCoopRequestsResponse:
 class ListOutboundCoopRequests:
     company_repository: CompanyRepository
     cooperation_repository: CooperationRepository
-    plan_repository: PlanRepository
+    database_gateway: DatabaseGateway
 
     def __call__(
         self, request: ListOutboundCoopRequestsRequest
@@ -40,7 +40,7 @@ class ListOutboundCoopRequests:
         if not self._requester_exists(request):
             return ListOutboundCoopRequestsResponse(cooperation_requests=[])
         plans_with_open_requests = (
-            self.plan_repository.get_plans()
+            self.database_gateway.get_plans()
             .planned_by(request.requester_id)
             .with_open_cooperation_request()
         )

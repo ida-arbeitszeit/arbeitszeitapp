@@ -1,66 +1,55 @@
 from datetime import datetime, timedelta
 from decimal import Decimal
-from typing import List, Union
+from typing import List
 from uuid import uuid4
 
 from arbeitszeit.entities import Plan, ProductionCosts
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
-from arbeitszeit_flask.database.repositories import PlanRepository
+from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
+from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
-
-from ..data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
-from .flask import FlaskTestCase
-
-Number = Union[int, Decimal]
+from tests.flask_integration.flask import FlaskTestCase
 
 
-def production_costs(a: Number, r: Number, p: Number) -> ProductionCosts:
-    return ProductionCosts(
-        Decimal(a),
-        Decimal(r),
-        Decimal(p),
-    )
-
-
-class PlanRepositoryTests(FlaskTestCase):
+class PlanResultTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.plan_repository = self.injector.get(PlanRepository)
+        self.database_gateway = self.injector.get(DatabaseGatewayImpl)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.company_generator = self.injector.get(CompanyGenerator)
 
     def test_that_plan_gets_hidden(self) -> None:
         plan = self.plan_generator.create_plan()
-        self.plan_repository.get_plans().with_id(plan.id).update().hide().perform()
-        plan_from_repo = self.plan_repository.get_plans().with_id(plan.id).first()
+        self.database_gateway.get_plans().with_id(plan.id).update().hide().perform()
+        plan_from_repo = self.database_gateway.get_plans().with_id(plan.id).first()
         assert plan_from_repo
         assert plan_from_repo.hidden_by_user
 
     def test_that_availability_is_toggled_to_false(self) -> None:
         plan = self.plan_generator.create_plan()
         assert plan.is_available == True
-        self.plan_repository.get_plans().with_id(
+        self.database_gateway.get_plans().with_id(
             plan.id
         ).update().toggle_product_availability().perform()
-        plan_from_repo = self.plan_repository.get_plans().with_id(plan.id).first()
+        plan_from_repo = self.database_gateway.get_plans().with_id(plan.id).first()
         assert plan_from_repo
         assert plan_from_repo.is_available == False
 
     def test_that_availability_is_toggled_to_true(self) -> None:
         plan = self.plan_generator.create_plan(is_available=False)
         assert plan.is_available == False
-        self.plan_repository.get_plans().with_id(
+        self.database_gateway.get_plans().with_id(
             plan.id
         ).update().toggle_product_availability().perform()
-        plan_from_repo = self.plan_repository.get_plans().with_id(plan.id).first()
+        plan_from_repo = self.database_gateway.get_plans().with_id(plan.id).first()
         assert plan_from_repo
         assert plan_from_repo.is_available == True
 
     def test_create_plan_propagates_specified_arguments_to_created_plan(self) -> None:
         expected_planner = self.company_generator.create_company()
-        plan = self.plan_repository.create_plan(
+        plan = self.database_gateway.create_plan(
             creation_timestamp=(expected_timestamp := datetime(2000, 1, 1)),
             planner=expected_planner,
             production_costs=(
@@ -86,14 +75,14 @@ class PlanRepositoryTests(FlaskTestCase):
     def test_that_created_plan_can_have_its_approval_date_changed(self) -> None:
         plan = self.create_plan()
         expected_approval_date = datetime(2000, 3, 2)
-        self.plan_repository.get_plans().with_id(plan.id).update().set_approval_date(
+        self.database_gateway.get_plans().with_id(plan.id).update().set_approval_date(
             expected_approval_date
         ).perform()
-        changed_plan: Plan = self.plan_repository.get_plans().with_id(plan.id).first()  # type: ignore
+        changed_plan: Plan = self.database_gateway.get_plans().with_id(plan.id).first()  # type: ignore
         assert changed_plan.approval_date == expected_approval_date
 
     def create_plan(self) -> Plan:
-        return self.plan_repository.create_plan(
+        return self.database_gateway.create_plan(
             creation_timestamp=datetime(2000, 1, 1),
             planner=self.company_generator.create_company(),
             production_costs=ProductionCosts(Decimal(1), Decimal(2), Decimal(3)),
@@ -109,7 +98,7 @@ class PlanRepositoryTests(FlaskTestCase):
 class GetActivePlansTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.plan_repository = self.injector.get(PlanRepository)
+        self.database_gateway = self.injector.get(DatabaseGatewayImpl)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.company_generator = self.injector.get(CompanyGenerator)
@@ -131,7 +120,7 @@ class GetActivePlansTests(FlaskTestCase):
             plans.append(self.plan_generator.create_plan())
         self.datetime_service.unfreeze_time()
         retrieved_plans = list(
-            self.plan_repository.get_plans()
+            self.database_gateway.get_plans()
             .ordered_by_creation_date(ascending=False)
             .limit(3)
         )
@@ -156,7 +145,7 @@ class GetActivePlansTests(FlaskTestCase):
             plans.append(self.plan_generator.create_plan())
         self.datetime_service.unfreeze_time()
         retrieved_plans = list(
-            self.plan_repository.get_plans()
+            self.database_gateway.get_plans()
             .ordered_by_activation_date(ascending=False)
             .limit(3)
         )
@@ -177,7 +166,7 @@ class GetActivePlansTests(FlaskTestCase):
         for company in planners:
             plans.append(self.plan_generator.create_plan(planner=company.id))
         retrieved_plans = list(
-            self.plan_repository.get_plans().ordered_by_planner_name().limit(3)
+            self.database_gateway.get_plans().ordered_by_planner_name().limit(3)
         )
         assert len(retrieved_plans) == 3
         assert retrieved_plans[0] == plans[0]
@@ -189,7 +178,7 @@ class GetActivePlansTests(FlaskTestCase):
             product_name="Delivery of goods"
         )
         returned_plan = list(
-            self.plan_repository.get_plans().with_product_name_containing(
+            self.database_gateway.get_plans().with_product_name_containing(
                 "Delivery of goods"
             )
         )
@@ -203,7 +192,7 @@ class GetActivePlansTests(FlaskTestCase):
             product_name="Delivery of goods"
         )
         returned_plan = list(
-            self.plan_repository.get_plans().with_product_name_containing("very of go")
+            self.database_gateway.get_plans().with_product_name_containing("very of go")
         )
         assert returned_plan
         assert returned_plan[0] == expected_plan
@@ -212,7 +201,9 @@ class GetActivePlansTests(FlaskTestCase):
         expected_plan = self.plan_generator.create_plan()
         expected_plan_id = expected_plan.id
         query = str(expected_plan_id)[3:8]
-        returned_plan = list(self.plan_repository.get_plans().with_id_containing(query))
+        returned_plan = list(
+            self.database_gateway.get_plans().with_id_containing(query)
+        )
         assert returned_plan
         assert returned_plan[0] == expected_plan
 
@@ -235,7 +226,7 @@ class GetActivePlansTests(FlaskTestCase):
                 plan=first_plan.id,
             )
         )
-        plans = list(self.plan_repository.get_plans().ordered_by_creation_date())
+        plans = list(self.database_gateway.get_plans().ordered_by_creation_date())
         assert plans[0].id == first_plan.id
         assert plans[1].id == second_plan.id
 
@@ -244,51 +235,51 @@ class GetAllPlans(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.company_generator = self.injector.get(CompanyGenerator)
-        self.plan_repository = self.injector.get(PlanRepository)
+        self.database_gateway = self.injector.get(DatabaseGatewayImpl)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.cooperation_generator = self.injector.get(CooperationGenerator)
 
     def test_that_without_any_plans_nothing_is_returned(self) -> None:
-        assert not list(self.plan_repository.get_plans())
+        assert not list(self.database_gateway.get_plans())
 
     def test_that_unapproved_plans_are_returned(self) -> None:
         self.plan_generator.create_plan(approved=False)
-        assert list(self.plan_repository.get_plans())
+        assert list(self.database_gateway.get_plans())
 
     def test_that_approved_plans_are_returned(self) -> None:
         self.plan_generator.create_plan(approved=True)
-        assert list(self.plan_repository.get_plans())
+        assert list(self.database_gateway.get_plans())
 
     def test_that_can_filter_unapproved_plans_from_results(self) -> None:
         self.plan_generator.create_plan(approved=False)
-        assert not list(self.plan_repository.get_plans().that_are_approved())
+        assert not list(self.database_gateway.get_plans().that_are_approved())
 
     def test_can_filter_public_plans(self) -> None:
         self.plan_generator.create_plan(is_public_service=False)
-        assert not list(self.plan_repository.get_plans().that_are_public())
+        assert not list(self.database_gateway.get_plans().that_are_public())
         self.plan_generator.create_plan(is_public_service=True)
-        assert list(self.plan_repository.get_plans().that_are_public())
+        assert list(self.database_gateway.get_plans().that_are_public())
 
     def test_can_filter_productive_plans(self) -> None:
         self.plan_generator.create_plan(is_public_service=True)
-        assert not list(self.plan_repository.get_plans().that_are_productive())
+        assert not list(self.database_gateway.get_plans().that_are_productive())
         self.plan_generator.create_plan(is_public_service=False)
-        assert list(self.plan_repository.get_plans().that_are_productive())
+        assert list(self.database_gateway.get_plans().that_are_productive())
 
     def test_can_count_all_plans(self) -> None:
         self.plan_generator.create_plan()
-        assert len(self.plan_repository.get_plans()) == 1
+        assert len(self.database_gateway.get_plans()) == 1
         self.plan_generator.create_plan()
         self.plan_generator.create_plan()
-        assert len(self.plan_repository.get_plans()) == 3
+        assert len(self.database_gateway.get_plans()) == 3
 
     def test_can_filter_by_planner(self) -> None:
         planner = self.company_generator.create_company()
         self.plan_generator.create_plan()
-        assert not self.plan_repository.get_plans().planned_by(planner)
+        assert not self.database_gateway.get_plans().planned_by(planner)
         self.plan_generator.create_plan(planner=planner)
-        assert self.plan_repository.get_plans().planned_by(planner)
+        assert self.database_gateway.get_plans().planned_by(planner)
 
     def test_can_filter_plans_by_multiple_planners(self) -> None:
         planner_1 = self.company_generator.create_company()
@@ -297,12 +288,12 @@ class GetAllPlans(FlaskTestCase):
         self.plan_generator.create_plan(planner=planner_1)
         self.plan_generator.create_plan(planner=planner_2)
         assert (
-            len(self.plan_repository.get_plans().planned_by(planner_1, planner_2)) == 2
+            len(self.database_gateway.get_plans().planned_by(planner_1, planner_2)) == 2
         )
 
     def test_can_get_plan_by_its_id(self) -> None:
         expected_plan = self.plan_generator.create_plan()
-        assert expected_plan in self.plan_repository.get_plans().with_id(
+        assert expected_plan in self.database_gateway.get_plans().with_id(
             expected_plan.id
         )
 
@@ -310,7 +301,7 @@ class GetAllPlans(FlaskTestCase):
         expected_plan_1 = self.plan_generator.create_plan()
         expected_plan_2 = self.plan_generator.create_plan()
         other_plan = self.plan_generator.create_plan()
-        query = self.plan_repository.get_plans().with_id(
+        query = self.database_gateway.get_plans().with_id(
             expected_plan_1.id, expected_plan_2.id
         )
         assert expected_plan_1 in query
@@ -321,23 +312,23 @@ class GetAllPlans(FlaskTestCase):
         self,
     ) -> None:
         self.plan_generator.create_plan()
-        assert not self.plan_repository.get_plans().with_id(uuid4())
+        assert not self.database_gateway.get_plans().with_id(uuid4())
 
     def test_can_filter_results_for_unreviewed_plans(self) -> None:
         self.plan_generator.create_plan(approved=True)
-        assert not self.plan_repository.get_plans().without_completed_review()
+        assert not self.database_gateway.get_plans().without_completed_review()
 
     def test_filtering_unreviewed_plans_will_still_contain_unreviewed_plans(
         self,
     ) -> None:
         self.plan_generator.create_plan(approved=False)
-        assert self.plan_repository.get_plans().without_completed_review()
+        assert self.database_gateway.get_plans().without_completed_review()
 
     def test_that_plans_with_open_cooperation_request_can_be_filtered(self) -> None:
         coop = self.cooperation_generator.create_cooperation()
         requesting_plan = self.plan_generator.create_plan(requested_cooperation=coop)
         non_requesting_plan = self.plan_generator.create_plan()
-        results = self.plan_repository.get_plans().with_open_cooperation_request()
+        results = self.database_gateway.get_plans().with_open_cooperation_request()
         assert requesting_plan.id in [plan.id for plan in results]
         assert non_requesting_plan.id not in [plan.id for plan in results]
 
@@ -352,7 +343,7 @@ class GetAllPlans(FlaskTestCase):
         plan_requesting_at_other_coop = self.plan_generator.create_plan(
             requested_cooperation=other_coop
         )
-        results = self.plan_repository.get_plans().with_open_cooperation_request(
+        results = self.database_gateway.get_plans().with_open_cooperation_request(
             cooperation=coop.id
         )
         assert plan_requesting_at_coop.id in [plan.id for plan in results]
@@ -362,7 +353,7 @@ class GetAllPlans(FlaskTestCase):
         coop = self.cooperation_generator.create_cooperation()
         cooperating_plan = self.plan_generator.create_plan(cooperation=coop)
         non_cooperating_plan = self.plan_generator.create_plan(cooperation=None)
-        results = self.plan_repository.get_plans().that_are_cooperating()
+        results = self.database_gateway.get_plans().that_are_cooperating()
         assert cooperating_plan.id in [plan.id for plan in results]
         assert non_cooperating_plan.id not in [plan.id for plan in results]
 
@@ -371,7 +362,7 @@ class GetAllPlans(FlaskTestCase):
     ) -> None:
         plan = self.plan_generator.create_plan(cooperation=None)
         cooperating_plans = (
-            self.plan_repository.get_plans().that_are_in_same_cooperation_as(plan.id)
+            self.database_gateway.get_plans().that_are_in_same_cooperation_as(plan.id)
         )
         assert len(cooperating_plans) == 1
         assert plan in cooperating_plans
@@ -384,7 +375,7 @@ class GetAllPlans(FlaskTestCase):
         plan2 = self.plan_generator.create_plan(cooperation=coop)
         self.plan_generator.create_plan(requested_cooperation=None)
         cooperating_plans = (
-            self.plan_repository.get_plans().that_are_in_same_cooperation_as(plan1.id)
+            self.database_gateway.get_plans().that_are_in_same_cooperation_as(plan1.id)
         )
         assert len(cooperating_plans) == 2
         assert plan1.id in [p.id for p in cooperating_plans]
@@ -393,7 +384,7 @@ class GetAllPlans(FlaskTestCase):
     def test_can_filter_plans_that_are_part_of_any_cooperation(self) -> None:
         cooperation = self.cooperation_generator.create_cooperation()
         self.plan_generator.create_plan(cooperation=cooperation)
-        plans = self.plan_repository.get_plans().that_are_part_of_cooperation()
+        plans = self.database_gateway.get_plans().that_are_part_of_cooperation()
         assert plans
 
     def test_can_filter_plans_from_multiple_cooperations(self) -> None:
@@ -401,7 +392,7 @@ class GetAllPlans(FlaskTestCase):
         cooperation2 = self.cooperation_generator.create_cooperation()
         self.plan_generator.create_plan(cooperation=cooperation1)
         self.plan_generator.create_plan(cooperation=cooperation2)
-        plans = self.plan_repository.get_plans().that_are_part_of_cooperation(
+        plans = self.database_gateway.get_plans().that_are_part_of_cooperation(
             cooperation1.id, cooperation2.id
         )
         assert len(plans) == 2
@@ -411,7 +402,7 @@ class GetAllPlans(FlaskTestCase):
         plan1 = self.plan_generator.create_plan(cooperation=coop)
         plan2 = self.plan_generator.create_plan(cooperation=coop)
         plan3 = self.plan_generator.create_plan(requested_cooperation=None)
-        plans = self.plan_repository.get_plans().that_are_part_of_cooperation(coop.id)
+        plans = self.database_gateway.get_plans().that_are_part_of_cooperation(coop.id)
         assert len(plans) == 2
         assert plans.with_id(plan1.id)
         assert plans.with_id(plan2.id)
@@ -420,7 +411,7 @@ class GetAllPlans(FlaskTestCase):
     def test_nothing_returned_when_no_plans_in_cooperation(self) -> None:
         coop = self.cooperation_generator.create_cooperation()
         self.plan_generator.create_plan(requested_cooperation=None)
-        plans = self.plan_repository.get_plans().that_are_part_of_cooperation(coop.id)
+        plans = self.database_gateway.get_plans().that_are_part_of_cooperation(coop.id)
         assert len(plans) == 0
 
     def test_correct_inbound_requests_are_returned(self) -> None:
@@ -431,7 +422,7 @@ class GetAllPlans(FlaskTestCase):
         other_coop = self.cooperation_generator.create_cooperation()
         self.plan_generator.create_plan(requested_cooperation=other_coop)
         inbound_requests = (
-            self.plan_repository.get_plans().that_request_cooperation_with_coordinator(
+            self.database_gateway.get_plans().that_request_cooperation_with_coordinator(
                 coordinator.id
             )
         )
@@ -443,24 +434,24 @@ class GetAllPlans(FlaskTestCase):
         cooperation = self.cooperation_generator.create_cooperation()
         plan = self.plan_generator.create_plan()
 
-        self.plan_repository.get_plans().with_id(plan.id).update().set_cooperation(
+        self.database_gateway.get_plans().with_id(plan.id).update().set_cooperation(
             cooperation.id
         ).perform()
-        plan_from_orm = self.plan_repository.get_plans().with_id(plan.id).first()
+        plan_from_orm = self.database_gateway.get_plans().with_id(plan.id).first()
         assert plan_from_orm
         assert plan_from_orm.cooperation == cooperation.id
 
-        self.plan_repository.get_plans().with_id(plan.id).update().set_cooperation(
+        self.database_gateway.get_plans().with_id(plan.id).update().set_cooperation(
             None
         ).perform()
-        plan_from_orm = self.plan_repository.get_plans().with_id(plan.id).first()
+        plan_from_orm = self.database_gateway.get_plans().with_id(plan.id).first()
         assert plan_from_orm
         assert plan_from_orm.cooperation is None
 
     def test_possible_to_set_and_unset_requested_cooperation_attribute(self):
         cooperation = self.cooperation_generator.create_cooperation()
         plan = self.plan_generator.create_plan()
-        plan_result = self.plan_repository.get_plans().with_id(plan.id)
+        plan_result = self.database_gateway.get_plans().with_id(plan.id)
         plan_result.update().set_requested_cooperation(cooperation.id).perform()
         assert plan_result.that_request_cooperation_with_coordinator()
         plan_result.update().set_requested_cooperation(None).perform()
@@ -468,7 +459,7 @@ class GetAllPlans(FlaskTestCase):
 
     def test_can_set_approval_date(self) -> None:
         plan = self.plan_generator.create_plan()
-        plans = self.plan_repository.get_plans().with_id(plan.id)
+        plans = self.database_gateway.get_plans().with_id(plan.id)
         expected_approval_date = datetime(2000, 3, 2)
         assert plans.update().set_approval_date(expected_approval_date).perform()
         assert all(plan.approval_date == expected_approval_date for plan in plans)
@@ -477,7 +468,7 @@ class GetAllPlans(FlaskTestCase):
 class WherePayoutCountsAreLessThenActiveDaysTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.plan_repository = self.injector.get(PlanRepository)
+        self.database_gateway = self.injector.get(DatabaseGatewayImpl)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.update_and_payout = self.injector.get(UpdatePlansAndPayout)
@@ -488,7 +479,7 @@ class WherePayoutCountsAreLessThenActiveDaysTests(FlaskTestCase):
         now = datetime(2000, 1, 1)
         self.datetime_service.freeze_time(now)
         self.plan_generator.create_plan()
-        query = self.plan_repository.get_plans()
+        query = self.database_gateway.get_plans()
         assert query.where_payout_counts_are_less_then_active_days(
             now + timedelta(days=2)
         )
@@ -501,7 +492,7 @@ class WherePayoutCountsAreLessThenActiveDaysTests(FlaskTestCase):
         self.plan_generator.create_plan()
         self.datetime_service.advance_time(timedelta(days=2))
         self.update_and_payout()
-        query = self.plan_repository.get_plans()
+        query = self.database_gateway.get_plans()
         assert not query.where_payout_counts_are_less_then_active_days(
             self.datetime_service.now()
         )
@@ -515,7 +506,7 @@ class WherePayoutCountsAreLessThenActiveDaysTests(FlaskTestCase):
         self.datetime_service.advance_time(timedelta(days=2))
         self.update_and_payout()
         self.datetime_service.advance_time(timedelta(days=2))
-        query = self.plan_repository.get_plans()
+        query = self.database_gateway.get_plans()
         assert not query.where_payout_counts_are_less_then_active_days(
             self.datetime_service.now()
         )
@@ -525,24 +516,24 @@ class GetStatisticsTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.company_generator = self.injector.get(CompanyGenerator)
-        self.plan_repository = self.injector.get(PlanRepository)
+        self.database_gateway = self.injector.get(DatabaseGatewayImpl)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.cooperation_generator = self.injector.get(CooperationGenerator)
 
     def test_with_no_plans_that_average_planning_duration_is_0(self) -> None:
-        stats = self.plan_repository.get_plans().get_statistics()
+        stats = self.database_gateway.get_plans().get_statistics()
         assert stats.average_plan_duration_in_days == Decimal(0)
 
     def test_with_no_plans_that_planning_costs_are_0(self) -> None:
-        stats = self.plan_repository.get_plans().get_statistics()
+        stats = self.database_gateway.get_plans().get_statistics()
         assert stats.total_planned_costs == ProductionCosts.zero()
 
     def test_with_one_active_plan_that_average_duration_is_exactly_the_length_of_that_plan(
         self,
     ) -> None:
         self.plan_generator.create_plan(timeframe=3)
-        stats = self.plan_repository.get_plans().get_statistics()
+        stats = self.database_gateway.get_plans().get_statistics()
         assert stats.average_plan_duration_in_days == Decimal(3)
 
     def test_with_two_active_plans_the_average_duration_is_the_mean_of_those_plans(
@@ -550,7 +541,7 @@ class GetStatisticsTests(FlaskTestCase):
     ) -> None:
         self.plan_generator.create_plan(timeframe=3)
         self.plan_generator.create_plan(timeframe=5)
-        stats = self.plan_repository.get_plans().get_statistics()
+        stats = self.database_gateway.get_plans().get_statistics()
         assert stats.average_plan_duration_in_days == Decimal(4)
 
     def test_with_one_active_plan_the_total_planned_costs_is_exactly_that_plans_cost(
@@ -560,7 +551,7 @@ class GetStatisticsTests(FlaskTestCase):
             labour_cost=Decimal(4), resource_cost=Decimal(3), means_cost=Decimal(5)
         )
         self.plan_generator.create_plan(costs=expected_costs)
-        stats = self.plan_repository.get_plans().get_statistics()
+        stats = self.database_gateway.get_plans().get_statistics()
         assert stats.total_planned_costs == expected_costs
 
     def test_with_two_active_plans_the_total_planned_costs_is_exactly_the_sum_of_plans_costs(
@@ -580,7 +571,7 @@ class GetStatisticsTests(FlaskTestCase):
                 labour_cost=Decimal(9),
             )
         )
-        stats = self.plan_repository.get_plans().get_statistics()
+        stats = self.database_gateway.get_plans().get_statistics()
         assert stats.total_planned_costs == ProductionCosts(
             means_cost=Decimal(5),
             resource_cost=Decimal(13),
@@ -591,7 +582,7 @@ class GetStatisticsTests(FlaskTestCase):
 class ThatWereActivatedBeforeTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.plan_repository = self.injector.get(PlanRepository)
+        self.database_gateway = self.injector.get(DatabaseGatewayImpl)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
 
@@ -600,7 +591,7 @@ class ThatWereActivatedBeforeTests(FlaskTestCase):
     ) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         self.plan_generator.create_plan()
-        assert self.plan_repository.get_plans().that_were_activated_before(
+        assert self.database_gateway.get_plans().that_were_activated_before(
             datetime(2000, 1, 2)
         )
 
@@ -609,7 +600,7 @@ class ThatWereActivatedBeforeTests(FlaskTestCase):
     ) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         self.plan_generator.create_plan()
-        assert self.plan_repository.get_plans().that_were_activated_before(
+        assert self.database_gateway.get_plans().that_were_activated_before(
             datetime(2000, 1, 1)
         )
 
@@ -618,7 +609,7 @@ class ThatWereActivatedBeforeTests(FlaskTestCase):
     ) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         self.plan_generator.create_plan()
-        assert not self.plan_repository.get_plans().that_were_activated_before(
+        assert not self.database_gateway.get_plans().that_were_activated_before(
             datetime(1999, 12, 31)
         )
 
@@ -626,7 +617,7 @@ class ThatWereActivatedBeforeTests(FlaskTestCase):
 class ThatWillExpireAfterTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.plan_repository = self.injector.get(PlanRepository)
+        self.database_gateway = self.injector.get(DatabaseGatewayImpl)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
 
@@ -635,7 +626,7 @@ class ThatWillExpireAfterTests(FlaskTestCase):
     ) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         self.plan_generator.create_plan(timeframe=1)
-        assert self.plan_repository.get_plans().that_will_expire_after(
+        assert self.database_gateway.get_plans().that_will_expire_after(
             datetime(2000, 1, 1)
         )
 
@@ -644,7 +635,7 @@ class ThatWillExpireAfterTests(FlaskTestCase):
     ) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         self.plan_generator.create_plan(timeframe=1)
-        assert not self.plan_repository.get_plans().that_will_expire_after(
+        assert not self.database_gateway.get_plans().that_will_expire_after(
             datetime(2000, 1, 2)
         )
 
@@ -653,7 +644,7 @@ class ThatWillExpireAfterTests(FlaskTestCase):
     ) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         self.plan_generator.create_plan(timeframe=1)
-        assert not self.plan_repository.get_plans().that_will_expire_after(
+        assert not self.database_gateway.get_plans().that_will_expire_after(
             datetime(2000, 1, 3)
         )
 
@@ -661,14 +652,14 @@ class ThatWillExpireAfterTests(FlaskTestCase):
 class ThatAreNotHiddenTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.plan_repository = self.injector.get(PlanRepository)
+        self.database_gateway = self.injector.get(DatabaseGatewayImpl)
         self.plan_generator = self.injector.get(PlanGenerator)
 
     def test_that_plan_that_is_not_hidden_will_show_in_results(self) -> None:
         self.plan_generator.create_plan()
-        assert self.plan_repository.get_plans().that_are_not_hidden()
+        assert self.database_gateway.get_plans().that_are_not_hidden()
 
     def test_that_plan_that_is_hidden_is_not_in_result_set(self) -> None:
         self.plan_generator.create_plan()
-        self.plan_repository.get_plans().update().hide().perform()
-        assert not self.plan_repository.get_plans().that_are_not_hidden()
+        self.database_gateway.get_plans().update().hide().perform()
+        assert not self.database_gateway.get_plans().that_are_not_hidden()

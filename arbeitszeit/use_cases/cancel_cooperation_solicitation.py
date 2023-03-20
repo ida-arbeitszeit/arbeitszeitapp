@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from arbeitszeit.repositories import PlanRepository
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -12,11 +12,11 @@ class CancelCooperationSolicitationRequest:
 
 @dataclass
 class CancelCooperationSolicitation:
-    plan_repo: PlanRepository
+    database_gateway: DatabaseGateway
 
     def __call__(self, request: CancelCooperationSolicitationRequest) -> bool:
         plans_changed_count = (
-            self.plan_repo.get_plans()
+            self.database_gateway.get_plans()
             .with_id(request.plan_id)
             .planned_by(request.requester_id)
             .that_request_cooperation_with_coordinator()

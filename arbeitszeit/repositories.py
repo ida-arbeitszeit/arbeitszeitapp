@@ -144,7 +144,7 @@ class PlanResult(QueryResult[Plan], Protocol):
 
     def that_are_not_hidden(self) -> Self:
         """Filter out those plans which are hidden. The result will
-        only plans that are not hidden.
+        only contain plans that are not hidden.
         """
 
     def update(self) -> PlanUpdate:
@@ -305,27 +305,6 @@ class PayoutFactorResult(QueryResult[PayoutFactor], Protocol):
         self, *, descending: bool = ...
     ) -> PayoutFactorResult:
         ...
-
-
-class PlanRepository(ABC):
-    @abstractmethod
-    def create_plan(
-        self,
-        creation_timestamp: datetime,
-        planner: UUID,
-        production_costs: ProductionCosts,
-        product_name: str,
-        distribution_unit: str,
-        amount_produced: int,
-        product_description: str,
-        duration_in_days: int,
-        is_public_service: bool,
-    ) -> Plan:
-        pass
-
-    @abstractmethod
-    def get_plans(self) -> PlanResult:
-        pass
 
 
 class TransactionRepository(ABC):
@@ -590,3 +569,20 @@ class DatabaseGateway(Protocol):
 
     def get_company_purchases(self) -> CompanyPurchaseResult:
         ...
+
+    def create_plan(
+        self,
+        creation_timestamp: datetime,
+        planner: UUID,
+        production_costs: ProductionCosts,
+        product_name: str,
+        distribution_unit: str,
+        amount_produced: int,
+        product_description: str,
+        duration_in_days: int,
+        is_public_service: bool,
+    ) -> Plan:
+        pass
+
+    def get_plans(self) -> PlanResult:
+        pass

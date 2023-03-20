@@ -5,7 +5,7 @@ from typing import Optional
 from uuid import UUID
 
 from arbeitszeit.plan_summary import PlanSummary, PlanSummaryService
-from arbeitszeit.repositories import CompanyRepository, PlanRepository
+from arbeitszeit.repositories import CompanyRepository, DatabaseGateway
 
 
 @dataclass
@@ -15,7 +15,7 @@ class GetPlanSummaryCompany:
         plan_summary: Optional[PlanSummary]
         current_user_is_planner: bool
 
-    plan_repository: PlanRepository
+    database_gateway: DatabaseGateway
     company_repository: CompanyRepository
     plan_summary_service: PlanSummaryService
 
@@ -26,7 +26,7 @@ class GetPlanSummaryCompany:
                 plan_summary=None,
                 current_user_is_planner=False,
             )
-        plan = self.plan_repository.get_plans().with_id(plan_id).first()
+        plan = self.database_gateway.get_plans().with_id(plan_id).first()
         assert plan  # exists because plan_summary exists
         return self.Response(
             plan_summary=plan_summary,

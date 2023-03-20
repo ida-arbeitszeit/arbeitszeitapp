@@ -66,7 +66,6 @@ class InMemoryModule(Module):
         binder[interfaces.CompanyRepository] = AliasProvider(  # type: ignore
             repositories.CompanyRepository
         )
-        binder[interfaces.PlanRepository] = AliasProvider(repositories.PlanRepository)  # type: ignore
         binder[interfaces.PlanDraftRepository] = AliasProvider(  # type: ignore
             repositories.PlanDraftRepository
         )

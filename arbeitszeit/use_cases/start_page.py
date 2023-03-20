@@ -7,7 +7,7 @@ from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan
-from arbeitszeit.repositories import PlanRepository
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -22,14 +22,14 @@ class StartPageUseCase:
     class Response:
         latest_plans: List[StartPageUseCase.PlanDetail]
 
-    plan_respository: PlanRepository
+    database_gateway: DatabaseGateway
     datetime_service: DatetimeService
 
     def show_start_page(self) -> Response:
         now = self.datetime_service.now()
         latest_plans = [
             self._get_plan(plan)
-            for plan in self.plan_respository.get_plans()
+            for plan in self.database_gateway.get_plans()
             .that_will_expire_after(now)
             .that_were_activated_before(now)
             .ordered_by_creation_date(ascending=False)

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from arbeitszeit.repositories import PlanRepository
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -11,12 +11,12 @@ class ToggleProductAvailabilityResponse:
 
 @dataclass
 class ToggleProductAvailability:
-    plan_repository: PlanRepository
+    database_gateway: DatabaseGateway
 
     def __call__(
         self, current_user_id: UUID, plan_id: UUID
     ) -> ToggleProductAvailabilityResponse:
-        plan = self.plan_repository.get_plans().with_id(plan_id)
+        plan = self.database_gateway.get_plans().with_id(plan_id)
         if not plan:
             return ToggleProductAvailabilityResponse(is_success=False)
         if not plan.planned_by(current_user_id):

@@ -5,7 +5,7 @@ from typing import List
 from uuid import UUID
 
 from arbeitszeit import entities
-from arbeitszeit.repositories import CompanyRepository, PlanRepository
+from arbeitszeit.repositories import CompanyRepository, DatabaseGateway
 
 
 @dataclass
@@ -24,14 +24,14 @@ class ListPlansWithPendingReviewUseCase:
     class Response:
         plans: List[ListPlansWithPendingReviewUseCase.Plan]
 
-    plan_repository: PlanRepository
+    database_gateway: DatabaseGateway
     company_repository: CompanyRepository
 
     def list_plans_with_pending_review(self, request: Request) -> Response:
         return self.Response(
             plans=[
                 self._get_info_for_plan(plan)
-                for plan in self.plan_repository.get_plans().without_completed_review()
+                for plan in self.database_gateway.get_plans().without_completed_review()
             ]
         )
 

@@ -4,7 +4,7 @@ from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan
-from arbeitszeit.repositories import PlanRepository
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -20,14 +20,14 @@ class ListPlansResponse:
 
 @dataclass
 class ListActivePlansOfCompany:
-    plan_repository: PlanRepository
+    database_gateway: DatabaseGateway
     datetime_service: DatetimeService
 
     def __call__(self, company_id: UUID) -> ListPlansResponse:
         now = self.datetime_service.now()
         plans = [
             self._create_plan_response_model(plan)
-            for plan in self.plan_repository.get_plans()
+            for plan in self.database_gateway.get_plans()
             .that_will_expire_after(now)
             .that_were_activated_before(now)
             .planned_by(company_id)

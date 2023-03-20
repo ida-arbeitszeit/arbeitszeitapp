@@ -816,59 +816,6 @@ class CompanyRepository(interfaces.CompanyRepository):
 
 
 @singleton
-class PlanRepository(interfaces.PlanRepository):
-    def __init__(
-        self,
-        draft_repository: PlanDraftRepository,
-        entities: EntityStorage,
-    ) -> None:
-        self.draft_repository = draft_repository
-        self.entities = entities
-
-    def get_plans(self) -> PlanResult:
-        return PlanResult(
-            items=lambda: self.entities.plans.values(),
-            entities=self.entities,
-        )
-
-    def __len__(self) -> int:
-        return len(self.entities.plans)
-
-    def create_plan(
-        self,
-        creation_timestamp: datetime,
-        planner: UUID,
-        production_costs: ProductionCosts,
-        product_name: str,
-        distribution_unit: str,
-        amount_produced: int,
-        product_description: str,
-        duration_in_days: int,
-        is_public_service: bool,
-    ) -> entities.Plan:
-        plan = Plan(
-            id=uuid4(),
-            plan_creation_date=creation_timestamp,
-            planner=planner,
-            production_costs=production_costs,
-            prd_name=product_name,
-            prd_unit=distribution_unit,
-            prd_amount=amount_produced,
-            description=product_description,
-            timeframe=duration_in_days,
-            is_public_service=is_public_service,
-            activation_date=None,
-            approval_date=None,
-            requested_cooperation=None,
-            cooperation=None,
-            is_available=True,
-            hidden_by_user=False,
-        )
-        self.entities.plans[plan.id] = plan
-        return plan
-
-
-@singleton
 class PlanDraftRepository(interfaces.PlanDraftRepository):
     def __init__(
         self,
@@ -1229,3 +1176,42 @@ class EntityStorage:
 
     def get_company_purchases(self) -> CompanyPurchaseResult:
         return CompanyPurchaseResult(entities=self, items=self.company_purchases.values)
+
+    def get_plans(self) -> PlanResult:
+        return PlanResult(
+            items=lambda: self.plans.values(),
+            entities=self,
+        )
+
+    def create_plan(
+        self,
+        creation_timestamp: datetime,
+        planner: UUID,
+        production_costs: ProductionCosts,
+        product_name: str,
+        distribution_unit: str,
+        amount_produced: int,
+        product_description: str,
+        duration_in_days: int,
+        is_public_service: bool,
+    ) -> entities.Plan:
+        plan = Plan(
+            id=uuid4(),
+            plan_creation_date=creation_timestamp,
+            planner=planner,
+            production_costs=production_costs,
+            prd_name=product_name,
+            prd_unit=distribution_unit,
+            prd_amount=amount_produced,
+            description=product_description,
+            timeframe=duration_in_days,
+            is_public_service=is_public_service,
+            activation_date=None,
+            approval_date=None,
+            requested_cooperation=None,
+            cooperation=None,
+            is_available=True,
+            hidden_by_user=False,
+        )
+        self.plans[plan.id] = plan
+        return plan

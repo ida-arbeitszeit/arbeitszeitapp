@@ -7,7 +7,7 @@ from uuid import UUID
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan, PlanDraft
 from arbeitszeit.price_calculator import PriceCalculator
-from arbeitszeit.repositories import PlanDraftRepository, PlanRepository
+from arbeitszeit.repositories import DatabaseGateway, PlanDraftRepository
 
 
 @dataclass
@@ -40,7 +40,7 @@ class ShowMyPlansResponse:
 
 @dataclass
 class ShowMyPlansUseCase:
-    plan_repository: PlanRepository
+    database_gateway: DatabaseGateway
     draft_repository: PlanDraftRepository
     price_calculator: PriceCalculator
     datetime_service: DatetimeService
@@ -48,7 +48,7 @@ class ShowMyPlansUseCase:
     def show_company_plans(self, request: ShowMyPlansRequest) -> ShowMyPlansResponse:
         now = self.datetime_service.now()
         all_plans_of_company = list(
-            self.plan_repository.get_plans()
+            self.database_gateway.get_plans()
             .planned_by(request.company_id)
             .ordered_by_creation_date(ascending=False)
             .that_are_not_hidden()

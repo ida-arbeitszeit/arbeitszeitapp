@@ -10,7 +10,7 @@ from uuid import UUID
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan
 from arbeitszeit.price_calculator import PriceCalculator
-from arbeitszeit.repositories import CompanyRepository, PlanRepository, PlanResult
+from arbeitszeit.repositories import CompanyRepository, DatabaseGateway, PlanResult
 
 
 class PlanFilter(enum.Enum):
@@ -55,10 +55,10 @@ class QueryPlansRequest:
 
 @dataclass
 class QueryPlans:
-    plan_repository: PlanRepository
     company_repository: CompanyRepository
     price_calculator: PriceCalculator
     datetime_service: DatetimeService
+    database_gateway: DatabaseGateway
 
     def __call__(self, request: QueryPlansRequest) -> PlanQueryResponse:
         now = self.datetime_service.now()
@@ -66,7 +66,7 @@ class QueryPlans:
         filter_by = request.filter_category
         sort_by = request.sorting_category
         plans = (
-            self.plan_repository.get_plans()
+            self.database_gateway.get_plans()
             .that_will_expire_after(now)
             .that_were_activated_before(now)
         )

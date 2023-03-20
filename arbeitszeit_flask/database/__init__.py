@@ -12,7 +12,6 @@ from .repositories import (
     AccountRepository,
     CompanyRepository,
     MemberRepository,
-    PlanRepository,
     TransactionRepository,
 )
 
@@ -22,7 +21,6 @@ __all__ = [
     "AccountingRepository",
     "CompanyRepository",
     "MemberRepository",
-    "PlanRepository",
     "TransactionRepository",
     "commit_changes",
 ]

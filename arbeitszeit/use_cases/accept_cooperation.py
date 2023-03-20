@@ -7,7 +7,7 @@ from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.repositories import (
     CompanyRepository,
     CooperationRepository,
-    PlanRepository,
+    DatabaseGateway,
 )
 
 
@@ -38,7 +38,7 @@ class AcceptCooperationResponse:
 
 @dataclass
 class AcceptCooperation:
-    plan_repository: PlanRepository
+    database_gateway: DatabaseGateway
     cooperation_repository: CooperationRepository
     company_repository: CompanyRepository
     datetime_service: DatetimeService
@@ -48,7 +48,7 @@ class AcceptCooperation:
             self._validate_request(request)
         except AcceptCooperationResponse.RejectionReason as reason:
             return AcceptCooperationResponse(rejection_reason=reason)
-        plan = self.plan_repository.get_plans().with_id(request.plan_id)
+        plan = self.database_gateway.get_plans().with_id(request.plan_id)
         plan.update().set_cooperation(request.cooperation_id).set_requested_cooperation(
             None
         ).perform()
@@ -60,7 +60,7 @@ class AcceptCooperation:
             .with_id(request.requester_id)
             .first()
         )
-        plan = self.plan_repository.get_plans().with_id(request.plan_id).first()
+        plan = self.database_gateway.get_plans().with_id(request.plan_id).first()
         cooperation = self.cooperation_repository.get_by_id(request.cooperation_id)
         now = self.datetime_service.now()
         if plan is None:
