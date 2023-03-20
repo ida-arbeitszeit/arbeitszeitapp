@@ -355,6 +355,15 @@ class PlanUpdate:
             ),
         )
 
+    def toggle_product_availability(self) -> Self:
+        return replace(
+            self,
+            plan_update_values=dict(
+                self.plan_update_values,
+                is_available=func.not_(models.Plan.is_available),
+            ),
+        )
+
     def hide(self) -> Self:
         return replace(
             self,
@@ -1122,12 +1131,6 @@ class PlanRepository(repositories.PlanRepository):
         orm = models.Plan.query.filter(models.Plan.id == str(plan.id)).first()
         assert orm
         return orm
-
-    def toggle_product_availability(self, plan: entities.Plan) -> None:
-        plan.is_available = True if (plan.is_available == False) else False
-
-        plan_orm = self.object_to_orm(plan)
-        plan_orm.is_available = True if (plan_orm.is_available == False) else False
 
     def __len__(self) -> int:
         return len(models.Plan.query.all())

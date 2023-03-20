@@ -300,6 +300,12 @@ class PlanUpdate:
 
         return self._add_update(update)
 
+    def toggle_product_availability(self) -> Self:
+        def update(plan: entities.Plan) -> None:
+            plan.is_available = not plan.is_available
+
+        return self._add_update(update)
+
     def perform(self) -> int:
         items_affected = 0
         for item in self.items():
@@ -827,9 +833,6 @@ class PlanRepository(interfaces.PlanRepository):
 
     def __len__(self) -> int:
         return len(self.entities.plans)
-
-    def toggle_product_availability(self, plan: Plan) -> None:
-        plan.is_available = True if (plan.is_available == False) else False
 
     def create_plan(
         self,
