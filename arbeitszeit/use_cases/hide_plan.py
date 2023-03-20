@@ -18,9 +18,8 @@ class HidePlan:
 
     def __call__(self, plan_id: UUID) -> HidePlanResponse:
         now = self.datetime_service.now()
-        plan = self.plan_repository.get_plans().with_id(plan_id).first()
-        assert plan is not None
-        if plan.is_active_as_of(now):
+        plan = self.plan_repository.get_plans().with_id(plan_id)
+        if plan.that_will_expire_after(now):
             return HidePlanResponse(plan_id=plan_id, is_success=False)
-        self.plan_repository.hide_plan(plan_id)
+        plan.update().hide().perform()
         return HidePlanResponse(plan_id=plan_id, is_success=True)

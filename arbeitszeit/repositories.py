@@ -142,6 +142,11 @@ class PlanResult(QueryResult[Plan], Protocol):
         days.
         """
 
+    def that_are_not_hidden(self) -> Self:
+        """Filter out those plans which are hidden. The result will
+        only plans that are not hidden.
+        """
+
     def update(self) -> PlanUpdate:
         """Prepare an update for all selected Plans."""
 
@@ -175,6 +180,9 @@ class PlanUpdate(Protocol):
         """Set the approval date of all matching plans. The return
         value counts all the plans that were changed by this methods.
         """
+
+    def hide(self) -> Self:
+        ...
 
     def perform(self) -> int:
         """Perform the update action and return the number of columns
@@ -310,10 +318,6 @@ class PlanRepository(ABC):
         duration_in_days: int,
         is_public_service: bool,
     ) -> Plan:
-        pass
-
-    @abstractmethod
-    def hide_plan(self, plan_id: UUID) -> None:
         pass
 
     @abstractmethod
