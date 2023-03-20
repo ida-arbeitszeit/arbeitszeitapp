@@ -6,7 +6,7 @@ from uuid import UUID
 from arbeitszeit.repositories import (
     CompanyRepository,
     CooperationRepository,
-    PlanRepository,
+    DatabaseGateway,
 )
 
 
@@ -34,7 +34,7 @@ class DenyCooperationResponse:
 
 @dataclass
 class DenyCooperation:
-    plan_repository: PlanRepository
+    database_gateway: DatabaseGateway
     cooperation_repository: CooperationRepository
     company_repository: CompanyRepository
 
@@ -44,7 +44,7 @@ class DenyCooperation:
         except DenyCooperationResponse.RejectionReason as reason:
             return DenyCooperationResponse(rejection_reason=reason)
 
-        self.plan_repository.get_plans().with_id(
+        self.database_gateway.get_plans().with_id(
             request.plan_id
         ).update().set_requested_cooperation(None).perform()
         return DenyCooperationResponse(rejection_reason=None)
@@ -55,7 +55,7 @@ class DenyCooperation:
             .with_id(request.requester_id)
             .first()
         )
-        plan = self.plan_repository.get_plans().with_id(request.plan_id).first()
+        plan = self.database_gateway.get_plans().with_id(request.plan_id).first()
         cooperation = self.cooperation_repository.get_by_id(request.cooperation_id)
         if plan is None:
             raise DenyCooperationResponse.RejectionReason.plan_not_found

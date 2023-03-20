@@ -5,7 +5,6 @@ from typing import Union
 from uuid import UUID
 
 from arbeitszeit.plan_summary import PlanSummary, PlanSummaryService
-from arbeitszeit.repositories import PlanRepository
 
 
 @dataclass
@@ -18,7 +17,6 @@ class GetPlanSummaryAccountant:
     class Failure:
         pass
 
-    plan_repository: PlanRepository
     plan_summary_service: PlanSummaryService
 
     def get_plan_summary(self, plan_id: UUID) -> Union[Success, Failure]:

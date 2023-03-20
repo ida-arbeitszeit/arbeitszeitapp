@@ -6,7 +6,7 @@ from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.price_calculator import PriceCalculator
-from arbeitszeit.repositories import CompanyRepository, PlanRepository
+from arbeitszeit.repositories import CompanyRepository, DatabaseGateway
 
 
 @dataclass
@@ -36,14 +36,14 @@ class PlanSummary:
 
 @dataclass
 class PlanSummaryService:
-    plan_repository: PlanRepository
+    database_gateway: DatabaseGateway
     company_repository: CompanyRepository
     price_calculator: PriceCalculator
     datetime_service: DatetimeService
 
     def get_summary_from_plan(self, plan_id: UUID) -> Optional[PlanSummary]:
         now = self.datetime_service.now()
-        plan = self.plan_repository.get_plans().with_id(plan_id).first()
+        plan = self.database_gateway.get_plans().with_id(plan_id).first()
         if plan is None:
             return None
         price_per_unit = self.price_calculator.calculate_cooperative_price(plan)

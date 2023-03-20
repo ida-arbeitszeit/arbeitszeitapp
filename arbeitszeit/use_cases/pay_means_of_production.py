@@ -11,7 +11,6 @@ from arbeitszeit.price_calculator import PriceCalculator
 from arbeitszeit.repositories import (
     CompanyRepository,
     DatabaseGateway,
-    PlanRepository,
     TransactionRepository,
 )
 
@@ -42,7 +41,6 @@ class PayMeansOfProductionResponse:
 
 @dataclass(frozen=True)
 class PayMeansOfProduction:
-    plan_repository: PlanRepository
     company_repository: CompanyRepository
     price_calculator: PriceCalculator
     datetime_service: DatetimeService
@@ -73,7 +71,7 @@ class PayMeansOfProduction:
 
     def _validate_plan(self, request: PayMeansOfProductionRequest) -> Plan:
         now = self.datetime_service.now()
-        plan = self.plan_repository.get_plans().with_id(request.plan).first()
+        plan = self.database_gateway.get_plans().with_id(request.plan).first()
         if plan is None:
             raise PayMeansOfProductionResponse.RejectionReason.plan_not_found
         if not plan.is_active_as_of(now):

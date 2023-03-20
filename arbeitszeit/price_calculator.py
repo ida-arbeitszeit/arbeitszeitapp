@@ -4,7 +4,7 @@ from typing import List
 
 from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.entities import Plan
-from arbeitszeit.repositories import PlanRepository
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -17,14 +17,14 @@ class PriceComponents:
 
 @dataclass
 class PriceCalculator:
-    plan_repository: PlanRepository
+    database_gateway: DatabaseGateway
 
     def calculate_cooperative_price(self, plan: Plan) -> Decimal:
         if plan.is_public_service:
             return Decimal(0)
         return self._calculate_price(
             list(
-                self.plan_repository.get_plans().that_are_in_same_cooperation_as(
+                self.database_gateway.get_plans().that_are_in_same_cooperation_as(
                     plan.id
                 )
             )

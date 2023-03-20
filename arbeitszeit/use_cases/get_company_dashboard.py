@@ -6,7 +6,11 @@ from typing import List
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.repositories import CompanyRepository, MemberRepository, PlanRepository
+from arbeitszeit.repositories import (
+    CompanyRepository,
+    DatabaseGateway,
+    MemberRepository,
+)
 
 
 @dataclass
@@ -34,7 +38,7 @@ class GetCompanyDashboardUseCase:
 
     company_repository: CompanyRepository
     member_repository: MemberRepository
-    plan_repository: PlanRepository
+    database_gateway: DatabaseGateway
     datetime_service: DatetimeService
 
     def get_dashboard(self, company_id: UUID) -> Response:
@@ -57,7 +61,7 @@ class GetCompanyDashboardUseCase:
     def _get_three_latest_plans(self) -> List[Response.LatestPlansDetails]:
         now = self.datetime_service.now()
         latest_plans = (
-            self.plan_repository.get_plans()
+            self.database_gateway.get_plans()
             .that_will_expire_after(now)
             .that_were_activated_before(now)
             .ordered_by_creation_date(ascending=False)

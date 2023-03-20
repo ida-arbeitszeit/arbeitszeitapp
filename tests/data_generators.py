@@ -28,9 +28,9 @@ from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
     CooperationRepository,
+    DatabaseGateway,
     MemberRepository,
     PlanDraftRepository,
-    PlanRepository,
     TransactionRepository,
 )
 from arbeitszeit.use_cases.accept_cooperation import (
@@ -231,7 +231,7 @@ class EmailGenerator:
 @dataclass
 class PlanGenerator:
     company_generator: CompanyGenerator
-    plan_repository: PlanRepository
+    database_gateway: DatabaseGateway
     request_cooperation: RequestCooperation
     accept_cooperation: AcceptCooperation
     draft_repository: PlanDraftRepository
@@ -275,7 +275,7 @@ class PlanGenerator:
         assert file_plan_response.is_plan_successfully_filed
         if not approved:
             plan = (
-                self.plan_repository.get_plans()
+                self.database_gateway.get_plans()
                 .with_id(file_plan_response.plan_id)
                 .first()
             )
@@ -286,7 +286,9 @@ class PlanGenerator:
         )
         assert response.is_approved
         plan = (
-            self.plan_repository.get_plans().with_id(file_plan_response.plan_id).first()
+            self.database_gateway.get_plans()
+            .with_id(file_plan_response.plan_id)
+            .first()
         )
         assert plan
         assert plan.is_approved
@@ -308,7 +310,7 @@ class PlanGenerator:
                     cooperation.coordinator.id, plan.id, cooperation.id
                 )
             )
-        selected_plan = self.plan_repository.get_plans().with_id(
+        selected_plan = self.database_gateway.get_plans().with_id(
             file_plan_response.plan_id
         )
         update = selected_plan.update()
@@ -318,7 +320,9 @@ class PlanGenerator:
             update = update.toggle_product_availability()
         update.perform()
         plan = (
-            self.plan_repository.get_plans().with_id(file_plan_response.plan_id).first()
+            self.database_gateway.get_plans()
+            .with_id(file_plan_response.plan_id)
+            .first()
         )
         assert plan
         return plan
@@ -470,7 +474,7 @@ class CooperationGenerator:
     cooperation_repository: CooperationRepository
     datetime_service: FakeDatetimeService
     company_generator: CompanyGenerator
-    plan_repository: PlanRepository
+    database_gateway: DatabaseGateway
     company_repository: CompanyRepository
 
     def create_cooperation(
@@ -496,7 +500,7 @@ class CooperationGenerator:
         )
         if plans is not None:
             assert (
-                self.plan_repository.get_plans()
+                self.database_gateway.get_plans()
                 .with_id(*[plan.id for plan in plans])
                 .update()
                 .set_cooperation(cooperation.id)

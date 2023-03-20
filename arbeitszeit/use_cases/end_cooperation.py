@@ -3,7 +3,7 @@ from enum import Enum, auto
 from typing import Optional
 from uuid import UUID
 
-from arbeitszeit.repositories import CooperationRepository, PlanRepository
+from arbeitszeit.repositories import CooperationRepository, DatabaseGateway
 
 
 @dataclass
@@ -30,7 +30,7 @@ class EndCooperationResponse:
 
 @dataclass
 class EndCooperation:
-    plan_repository: PlanRepository
+    database_gateway: DatabaseGateway
     cooperation_repository: CooperationRepository
 
     def __call__(self, request: EndCooperationRequest) -> EndCooperationResponse:
@@ -39,7 +39,7 @@ class EndCooperation:
         except EndCooperationResponse.RejectionReason as reason:
             return EndCooperationResponse(rejection_reason=reason)
         assert (
-            self.plan_repository.get_plans()
+            self.database_gateway.get_plans()
             .with_id(request.plan_id)
             .update()
             .set_cooperation(None)
@@ -48,7 +48,7 @@ class EndCooperation:
         return EndCooperationResponse(rejection_reason=None)
 
     def _validate_request(self, request: EndCooperationRequest) -> None:
-        plan = self.plan_repository.get_plans().with_id(request.plan_id).first()
+        plan = self.database_gateway.get_plans().with_id(request.plan_id).first()
         cooperation = self.cooperation_repository.get_by_id(request.cooperation_id)
         if plan is None:
             raise EndCooperationResponse.RejectionReason.plan_not_found

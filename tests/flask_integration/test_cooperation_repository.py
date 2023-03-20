@@ -1,10 +1,7 @@
 from datetime import datetime
 
 from arbeitszeit.entities import Cooperation
-from arbeitszeit_flask.database.repositories import (
-    CooperationRepository,
-    PlanRepository,
-)
+from arbeitszeit_flask.database.repositories import CooperationRepository
 from tests.data_generators import CompanyGenerator, PlanGenerator
 
 from .flask import FlaskTestCase
@@ -16,7 +13,6 @@ class CooperationRepositoryTests(FlaskTestCase):
         self.company_generator = self.injector.get(CompanyGenerator)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.repo = self.injector.get(CooperationRepository)
-        self.plan_repo = self.injector.get(PlanRepository)
         self.DEFAULT_CREATE_ARGUMENTS = dict(
             creation_timestamp=datetime.now(),
             name="test name",

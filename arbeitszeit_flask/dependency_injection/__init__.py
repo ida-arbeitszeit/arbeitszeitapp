@@ -35,7 +35,6 @@ from arbeitszeit_flask.database.repositories import (
     DatabaseGatewayImpl,
     MemberRepository,
     PlanDraftRepository,
-    PlanRepository,
     TransactionRepository,
     UserAddressBookImpl,
     WorkerInviteRepository,
@@ -136,10 +135,6 @@ class FlaskModule(Module):
         binder.bind(
             interfaces.CompanyRepository,  # type: ignore
             to=AliasProvider(CompanyRepository),
-        )
-        binder.bind(
-            interfaces.PlanRepository,  # type: ignore
-            to=AliasProvider(PlanRepository),
         )
         binder.bind(
             interfaces.AccountOwnerRepository,  # type: ignore

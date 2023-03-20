@@ -9,7 +9,7 @@ from arbeitszeit.entities import Plan
 from arbeitszeit.repositories import (
     CompanyRepository,
     CooperationRepository,
-    PlanRepository,
+    DatabaseGateway,
 )
 
 
@@ -35,7 +35,7 @@ class ListMyCooperatingPlansUseCase:
 
     company_repository: CompanyRepository
     cooperation_repository: CooperationRepository
-    plan_repository: PlanRepository
+    database_gateway: DatabaseGateway
     datetime_service: DatetimeService
 
     def list_cooperations(self, request: Request) -> Response:
@@ -43,7 +43,7 @@ class ListMyCooperatingPlansUseCase:
             raise self.Failure()
         now = self.datetime_service.now()
         plans = (
-            self.plan_repository.get_plans()
+            self.database_gateway.get_plans()
             .that_will_expire_after(now)
             .that_were_activated_before(now)
             .planned_by(request.company)

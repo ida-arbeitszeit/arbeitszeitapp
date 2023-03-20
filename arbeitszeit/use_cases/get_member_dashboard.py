@@ -10,8 +10,8 @@ from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
+    DatabaseGateway,
     MemberRepository,
-    PlanRepository,
     WorkerInviteRepository,
 )
 
@@ -48,7 +48,7 @@ class GetMemberDashboard:
     company_repository: CompanyRepository
     account_repository: AccountRepository
     member_repository: MemberRepository
-    plan_repository: PlanRepository
+    database_gateway: DatabaseGateway
     worker_invite_repository: WorkerInviteRepository
     datetime_service: DatetimeService
 
@@ -87,7 +87,7 @@ class GetMemberDashboard:
     def _get_three_latest_plans(self) -> List[PlanDetails]:
         now = self.datetime_service.now()
         latest_plans = (
-            self.plan_repository.get_plans()
+            self.database_gateway.get_plans()
             .that_will_expire_after(now)
             .that_were_activated_before(now)
             .ordered_by_creation_date(ascending=False)

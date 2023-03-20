@@ -5,7 +5,7 @@ from typing import Iterator
 from uuid import UUID
 
 from arbeitszeit.entities import ConsumerPurchase, Plan, Transaction
-from arbeitszeit.repositories import DatabaseGateway, PlanRepository
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -21,7 +21,6 @@ class PurchaseQueryResponse:
 
 @dataclass
 class QueryMemberPurchases:
-    plan_repository: PlanRepository
     database_gateway: DatabaseGateway
 
     def __call__(

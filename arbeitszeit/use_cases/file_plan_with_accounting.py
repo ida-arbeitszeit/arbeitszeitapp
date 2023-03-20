@@ -6,7 +6,7 @@ from uuid import UUID
 
 from arbeitszeit.accountant_notifications import AccountantNotifier
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.repositories import PlanDraftRepository, PlanRepository
+from arbeitszeit.repositories import DatabaseGateway, PlanDraftRepository
 
 
 @dataclass
@@ -22,14 +22,14 @@ class FilePlanWithAccounting:
         plan_id: Optional[UUID]
 
     draft_repository: PlanDraftRepository
-    plan_repository: PlanRepository
+    database_gateway: DatabaseGateway
     datetime_service: DatetimeService
     accountant_notifier: AccountantNotifier
 
     def file_plan_with_accounting(self, request: Request) -> Response:
         draft = self.draft_repository.get_by_id(id=request.draft_id)
         if draft is not None and draft.planner.id == request.filing_company:
-            plan = self.plan_repository.create_plan(
+            plan = self.database_gateway.create_plan(
                 creation_timestamp=self.datetime_service.now(),
                 planner=draft.planner.id,
                 production_costs=draft.production_costs,

@@ -18,7 +18,6 @@ from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
     DatabaseGateway,
-    PlanRepository,
     TransactionRepository,
 )
 
@@ -75,7 +74,6 @@ GetCompanySummaryResponse = Optional[GetCompanySummarySuccess]
 @dataclass
 class GetCompanySummary:
     company_repository: CompanyRepository
-    plan_repository: PlanRepository
     account_repository: AccountRepository
     transaction_repository: TransactionRepository
     social_accounting: SocialAccounting
@@ -87,7 +85,7 @@ class GetCompanySummary:
         if company is None:
             return None
         plans = (
-            self.plan_repository.get_plans()
+            self.database_gateway.get_plans()
             .planned_by(company.id)
             .ordered_by_creation_date(ascending=False)
         )
@@ -216,7 +214,7 @@ class GetCompanySummary:
     ) -> List[Tuple[UUID, Decimal]]:
         suppliers: Dict[UUID, Decimal] = defaultdict(lambda: Decimal("0"))
         for purchase, transaction in purchases:
-            plan = self.plan_repository.get_plans().with_id(purchase.plan_id).first()
+            plan = self.database_gateway.get_plans().with_id(purchase.plan_id).first()
             assert plan
             if plan:
                 suppliers[plan.planner] += transaction.amount_sent
