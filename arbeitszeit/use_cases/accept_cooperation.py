@@ -3,6 +3,7 @@ from enum import Enum, auto
 from typing import Optional
 from uuid import UUID
 
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.repositories import (
     CompanyRepository,
     CooperationRepository,
@@ -40,6 +41,7 @@ class AcceptCooperation:
     plan_repository: PlanRepository
     cooperation_repository: CooperationRepository
     company_repository: CompanyRepository
+    datetime_service: DatetimeService
 
     def __call__(self, request: AcceptCooperationRequest) -> AcceptCooperationResponse:
         try:
@@ -60,11 +62,12 @@ class AcceptCooperation:
         )
         plan = self.plan_repository.get_plans().with_id(request.plan_id).first()
         cooperation = self.cooperation_repository.get_by_id(request.cooperation_id)
+        now = self.datetime_service.now()
         if plan is None:
             raise AcceptCooperationResponse.RejectionReason.plan_not_found
         if cooperation is None:
             raise AcceptCooperationResponse.RejectionReason.cooperation_not_found
-        if not plan.is_active:
+        if not plan.is_active_as_of(now):
             raise AcceptCooperationResponse.RejectionReason.plan_inactive
         if plan.cooperation:
             raise AcceptCooperationResponse.RejectionReason.plan_has_cooperation

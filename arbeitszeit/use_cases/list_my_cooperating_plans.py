@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import List
 from uuid import UUID
 
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan
 from arbeitszeit.repositories import (
     CompanyRepository,
@@ -35,13 +36,16 @@ class ListMyCooperatingPlansUseCase:
     company_repository: CompanyRepository
     cooperation_repository: CooperationRepository
     plan_repository: PlanRepository
+    datetime_service: DatetimeService
 
     def list_cooperations(self, request: Request) -> Response:
         if not self.company_repository.get_companies().with_id(request.company):
             raise self.Failure()
+        now = self.datetime_service.now()
         plans = (
             self.plan_repository.get_plans()
-            .that_are_active()
+            .that_will_expire_after(now)
+            .that_were_activated_before(now)
             .planned_by(request.company)
             .that_are_cooperating()
         )

@@ -24,27 +24,6 @@ class UseCaseTests(BaseTestCase):
             get_company_transactions.GetCompanyTransactions
         )
 
-    def test_that_a_plan_that_is_not_active_can_not_expire(self) -> None:
-        plan = self.plan_generator.create_plan(approved=False)
-        self.payout()
-        self.assertFalse(plan.expired)
-
-    def test_that_plan_is_set_expired_and_deactivated_if_expired(self) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
-        plan = self.plan_generator.create_plan(timeframe=5)
-        self.datetime_service.freeze_time(datetime(2000, 1, 11))
-        self.payout()
-        assert plan.expired
-        assert not plan.is_active
-
-    def test_that_plan_is_not_set_expired_and_not_deactivated_if_not_yet_expired(
-        self,
-    ) -> None:
-        plan = self.plan_generator.create_plan(timeframe=5)
-        self.payout()
-        assert not plan.expired
-        assert plan.is_active
-
     def test_that_plan_with_requested_cooperation_has_no_requested_cooperation_after_expiration(
         self,
     ) -> None:
@@ -57,8 +36,6 @@ class UseCaseTests(BaseTestCase):
         assert plan.requested_cooperation
         self.datetime_service.freeze_time(datetime(2000, 1, 11))
         self.payout()
-        assert plan.expired
-        assert not plan.is_active
         assert not plan.requested_cooperation
 
     def test_that_cooperating_plan_is_not_cooperating_after_expiration(self) -> None:
@@ -71,8 +48,6 @@ class UseCaseTests(BaseTestCase):
         assert plan.cooperation
         self.datetime_service.freeze_time(datetime(2000, 1, 11))
         self.payout()
-        assert plan.expired
-        assert not plan.is_active
         assert not plan.cooperation
 
     def test_that_past_3_due_wages_get_paid_out_when_plan_expires(self) -> None:
@@ -138,15 +113,15 @@ class UseCaseTests(BaseTestCase):
             == expected_payout
         )
 
-    def test_sum_of_payouts_is_equals_to_costs_for_labour(self) -> None:
+    def test_sum_of_payouts_is_equal_to_costs_for_labour(self) -> None:
+        plan_duration = 5
         self.datetime_service.freeze_time(datetime(2021, 10, 2, 10))
         plan = self.plan_generator.create_plan(
             is_public_service=False,
-            timeframe=5,
+            timeframe=plan_duration,
         )
-        self.datetime_service.freeze_time(datetime(2021, 10, 12, 11))
+        self.datetime_service.advance_time(timedelta(days=plan_duration + 1))
         self.payout()
-
         assert (
             self.balance_checker.get_company_account_balances(plan.planner).a_account
             == plan.production_costs.labour_cost

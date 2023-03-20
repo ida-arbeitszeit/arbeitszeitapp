@@ -14,10 +14,17 @@ class PayoutFactorService:
     database_gateway: DatabaseGateway
 
     def calculate_payout_factor(self) -> Decimal:
-        active_plans = self.plan_repository.get_plans().that_are_active()
+        now = self.datetime_service.now()
+        active_plans = (
+            self.plan_repository.get_plans()
+            .that_will_expire_after(now)
+            .that_were_activated_before(now)
+        )
         # payout factor = (A − ( P o + R o )) / (A + A o)
         productive_plans = active_plans.that_are_productive()
         public_plans = active_plans.that_are_public()
+        if not public_plans:
+            return Decimal(1)
         # A o, P o, R o
         public_costs_per_day: ProductionCosts = sum(
             (p.production_costs / p.timeframe for p in public_plans),

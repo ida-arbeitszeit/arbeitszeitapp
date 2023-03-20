@@ -127,9 +127,7 @@ class Plan(db.Model):
     description = db.Column(db.String(5000), nullable=False)
     timeframe = db.Column(db.Numeric(), nullable=False)
     is_public_service = db.Column(db.Boolean, nullable=False, default=False)
-    is_active = db.Column(db.Boolean, nullable=False, default=False)
     activation_date = db.Column(db.DateTime, nullable=True)
-    expired = db.Column(db.Boolean, nullable=False, default=False)
     is_available = db.Column(db.Boolean, nullable=False, default=True)
     requested_cooperation = db.Column(
         db.String, db.ForeignKey("cooperation.id"), nullable=True

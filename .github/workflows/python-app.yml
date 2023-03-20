@@ -89,7 +89,15 @@ jobs:
       with:
         name: arbeitszeit
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-    - run: nix develop .#stable --command ./run-checks
+    # One might be tempted to run all the tests from `./run-checks`
+    # but this could be a bad idea.  The python packages used with
+    # nixos-stable are older then nixos-unstable.  This means that
+    # there might be incompatibilities between different versions of
+    # the tools used, e.g. mypy, flake8, black and so on. To avoid
+    # running into these incompatibilities we simply don't run
+    # them. As long as all the tests from `pytest` run successfully we
+    # should be okay.
+    - run: nix develop .#stable --command pytest
       env:
         ARBEITSZEITAPP_TEST_DB: postgresql://postgres:postgres@localhost:5432/postgres
     services:

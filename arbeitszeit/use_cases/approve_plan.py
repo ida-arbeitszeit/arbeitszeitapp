@@ -30,6 +30,7 @@ class ApprovePlanUseCase:
     company_repository: CompanyRepository
 
     def approve_plan(self, request: Request) -> Response:
+        now = self.datetime_service.now()
         matching_plans = self.plan_repository.get_plans().with_id(request.plan)
         plan = matching_plans.first()
         assert plan
@@ -37,10 +38,8 @@ class ApprovePlanUseCase:
         assert planner
         if plan.is_approved:
             return self.Response(is_approved=False)
-        matching_plans.update().set_approval_date(
-            self.datetime_service.now()
-        ).set_activation_timestamp(self.datetime_service.now()).set_activation_status(
-            is_active=True
+        matching_plans.update().set_approval_date(now).set_activation_timestamp(
+            now
         ).perform()
         self._create_transaction_from_social_accounting(
             plan, planner.means_account, plan.production_costs.means_cost

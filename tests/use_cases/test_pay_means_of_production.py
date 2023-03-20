@@ -36,7 +36,6 @@ class PayMeansOfProductionTests(BaseTestCase):
         self.update_plans_and_payout()
         purpose = PurposesOfPurchases.means_of_prod
         pieces = 5
-        plan.expired = True
         response = self.pay_means_of_production(
             PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
         )
@@ -281,13 +280,13 @@ class PayMeansOfProductionTests(BaseTestCase):
 class TestSuccessfulPayment(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.buyer = self.company_generator.create_company_entity()
-        self.planner = self.company_generator.create_company()
-        self.plan = self.plan_generator.create_plan(planner=self.planner)
-        self.pay_means_of_production = self.injector.get(PayMeansOfProduction)
-        self.get_company_transactions = self.injector.get(GetCompanyTransactions)
         self.transaction_time = datetime(2020, 10, 1, 22, 30)
         self.datetime_service.freeze_time(self.transaction_time)
+        self.buyer = self.company_generator.create_company_entity()
+        self.planner = self.company_generator.create_company()
+        self.plan = self.plan_generator.create_plan(planner=self.planner, timeframe=2)
+        self.pay_means_of_production = self.injector.get(PayMeansOfProduction)
+        self.get_company_transactions = self.injector.get(GetCompanyTransactions)
         self.planner_transactions_before_payment = len(
             self.get_company_transactions(self.planner).transactions
         )
@@ -299,7 +298,7 @@ class TestSuccessfulPayment(BaseTestCase):
                 purpose=PurposesOfPurchases.means_of_prod,
             )
         )
-        self.datetime_service.freeze_time(self.transaction_time + timedelta(days=1))
+        self.datetime_service.advance_time(timedelta(days=1))
 
     def test_transaction_shows_up_in_transaction_listing_for_buyer(self) -> None:
         transaction_info = self.get_buyer_transaction_infos(self.buyer)
@@ -314,6 +313,7 @@ class TestSuccessfulPayment(BaseTestCase):
 
     def test_transaction_info_of_buyer_shows_transaction_timestamp(self) -> None:
         transaction_info = self.get_company_transactions(self.buyer.id)
+        assert not self.response.is_rejected
         self.assertEqual(transaction_info.transactions[0].date, self.transaction_time)
 
     def test_transaction_info_of_planner_shows_transaction_timestamp(self) -> None:

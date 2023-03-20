@@ -4,6 +4,7 @@ from decimal import Decimal
 from typing import List, Optional
 from uuid import UUID
 
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan, PlanDraft
 from arbeitszeit.price_calculator import PriceCalculator
 from arbeitszeit.repositories import PlanDraftRepository, PlanRepository
@@ -42,8 +43,10 @@ class ShowMyPlansUseCase:
     plan_repository: PlanRepository
     draft_repository: PlanDraftRepository
     price_calculator: PriceCalculator
+    datetime_service: DatetimeService
 
     def show_company_plans(self, request: ShowMyPlansRequest) -> ShowMyPlansResponse:
+        now = self.datetime_service.now()
         all_plans_of_company = list(
             self.plan_repository.get_plans()
             .planned_by(request.company_id)
@@ -60,17 +63,25 @@ class ShowMyPlansUseCase:
         non_active_plans = [
             self._create_plan_info_from_plan(plan)
             for plan in all_plans_of_company
-            if (not plan.is_approved and not plan.is_active and not plan.expired)
+            if (
+                not plan.is_approved
+                and not plan.is_active_as_of(now)
+                and not plan.is_expired_as_of(now)
+            )
         ]
         active_plans = [
             self._create_plan_info_from_plan(plan)
             for plan in all_plans_of_company
-            if (plan.is_approved and plan.is_active and not plan.expired)
+            if (
+                plan.is_approved
+                and plan.is_active_as_of(now)
+                and not plan.is_expired_as_of(now)
+            )
         ]
         expired_plans = [
             self._create_plan_info_from_plan(plan)
             for plan in all_plans_of_company
-            if plan.expired and (not plan.hidden_by_user)
+            if plan.is_expired_as_of(now) and (not plan.hidden_by_user)
         ]
         return ShowMyPlansResponse(
             count_all_plans=count_all_plans,

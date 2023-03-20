@@ -10,9 +10,9 @@ class CalculationTests(BaseTestCase):
         super().setUp()
         self.service = self.injector.get(PayoutFactorService)
 
-    def test_that_payout_factor_is_zero_if_no_plans_exist(self):
+    def test_that_payout_factor_is_one_if_no_plans_exist(self):
         pf = self.service.calculate_payout_factor()
-        self.assertEqual(pf, 0)
+        self.assertEqual(pf, 1)
 
     def test_that_payout_factor_is_negative_with_one_public_plan_that_includes_p_or_r(
         self,

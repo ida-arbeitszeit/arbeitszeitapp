@@ -16,6 +16,8 @@ from typing import (
 )
 from uuid import UUID
 
+from typing_extensions import Self
+
 from arbeitszeit.entities import (
     Account,
     Accountant,
@@ -76,6 +78,16 @@ class PlanResult(QueryResult[Plan], Protocol):
     def that_are_approved(self) -> PlanResult:
         ...
 
+    def that_were_activated_before(self, timestamp: datetime) -> Self:
+        """Plans that were approved exactly at `timestamp` should also
+        be included in the result.
+        """
+
+    def that_will_expire_after(self, timestamp: datetime) -> Self:
+        """Plans that will expire exactly on the specified timestamp
+        should not be included in the result.
+        """
+
     def that_are_productive(self) -> PlanResult:
         ...
 
@@ -100,9 +112,6 @@ class PlanResult(QueryResult[Plan], Protocol):
         ...
 
     def that_are_in_same_cooperation_as(self, plan: UUID) -> PlanResult:
-        ...
-
-    def that_are_active(self) -> PlanResult:
         ...
 
     def that_are_part_of_cooperation(self, *cooperation: UUID) -> PlanResult:
@@ -161,12 +170,6 @@ class PlanUpdate(Protocol):
         self, activation_timestamp: Optional[datetime]
     ) -> PlanUpdate:
         """Set the `activation_date` field of all selected plans."""
-
-    def set_activation_status(self, *, is_active: bool) -> PlanUpdate:
-        """Mark selected plans as active or inactive."""
-
-    def set_expiration_status(self, *, is_expired: bool) -> PlanUpdate:
-        """Mark selected plans as expired or not expired."""
 
     def set_approval_date(self, approval_date: Optional[datetime]) -> PlanUpdate:
         """Set the approval date of all matching plans. The return

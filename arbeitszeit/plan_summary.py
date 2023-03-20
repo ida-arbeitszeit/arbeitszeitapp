@@ -42,6 +42,7 @@ class PlanSummaryService:
     datetime_service: DatetimeService
 
     def get_summary_from_plan(self, plan_id: UUID) -> Optional[PlanSummary]:
+        now = self.datetime_service.now()
         plan = self.plan_repository.get_plans().with_id(plan_id).first()
         if plan is None:
             return None
@@ -50,13 +51,13 @@ class PlanSummaryService:
         assert planner
         return PlanSummary(
             plan_id=plan.id,
-            is_active=plan.is_active,
+            is_active=plan.is_active_as_of(now),
             planner_id=planner.id,
             planner_name=planner.name,
             product_name=plan.prd_name,
             description=plan.description,
             timeframe=plan.timeframe,
-            active_days=plan.active_days(self.datetime_service.now()) or 0,
+            active_days=plan.active_days(now) or 0,
             production_unit=plan.prd_unit,
             amount=plan.prd_amount,
             means_cost=plan.production_costs.means_cost,

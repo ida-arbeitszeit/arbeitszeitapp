@@ -72,10 +72,11 @@ class PayMeansOfProduction:
         )
 
     def _validate_plan(self, request: PayMeansOfProductionRequest) -> Plan:
+        now = self.datetime_service.now()
         plan = self.plan_repository.get_plans().with_id(request.plan).first()
         if plan is None:
             raise PayMeansOfProductionResponse.RejectionReason.plan_not_found
-        if not plan.is_active:
+        if not plan.is_active_as_of(now):
             raise PayMeansOfProductionResponse.RejectionReason.plan_is_not_active
         if plan.is_public_service:
             raise PayMeansOfProductionResponse.RejectionReason.cannot_buy_public_service

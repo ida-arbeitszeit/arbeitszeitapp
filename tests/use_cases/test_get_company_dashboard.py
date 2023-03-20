@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest import TestCase
 from uuid import uuid4
 
@@ -98,7 +98,7 @@ class ThreeLatestPlansTests(TestCase):
         expected_datetime = datetime(2020, 10, 10)
         self.datetime_service.freeze_time(expected_datetime)
         self.plan_generator.create_plan()
-        self.datetime_service.unfreeze_time()
+        self.datetime_service.advance_time(timedelta(hours=1))
         company = self.company_generator.create_company_entity()
         response = self.use_case.get_dashboard(company.id)
         self.assertEqual(

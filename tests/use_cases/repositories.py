@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import dataclass, replace
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from itertools import islice
 from typing import (
@@ -19,6 +19,8 @@ from typing import (
     Union,
 )
 from uuid import UUID, uuid4
+
+from typing_extensions import Self
 
 import arbeitszeit.repositories as interfaces
 from arbeitszeit import entities
@@ -124,6 +126,18 @@ class PlanResult(QueryResultImpl[Plan]):
     def that_are_approved(self) -> PlanResult:
         return self._filtered_by(lambda plan: plan.approval_date is not None)
 
+    def that_were_activated_before(self, timestamp: datetime) -> Self:
+        return self._filtered_by(
+            lambda plan: plan.activation_date is not None
+            and plan.activation_date <= timestamp
+        )
+
+    def that_will_expire_after(self, timestamp: datetime) -> Self:
+        return self._filtered_by(
+            lambda plan: plan.approval_date is not None
+            and plan.approval_date + timedelta(days=plan.timeframe) > timestamp
+        )
+
     def that_are_productive(self) -> PlanResult:
         return self._filtered_by(lambda plan: not plan.is_public_service)
 
@@ -171,9 +185,6 @@ class PlanResult(QueryResultImpl[Plan]):
             items=items_generator,
             entities=self.entities,
         )
-
-    def that_are_active(self) -> PlanResult:
-        return self._filtered_by(lambda plan: plan.is_active)
 
     def that_are_part_of_cooperation(self, *cooperation: UUID) -> PlanResult:
         return self._filtered_by(
@@ -242,7 +253,7 @@ class PlanResult(QueryResultImpl[Plan]):
             update_functions=[],
         )
 
-    def _filtered_by(self, key: Callable[[Plan], bool]) -> PlanResult:
+    def _filtered_by(self, key: Callable[[Plan], bool]) -> Self:
         return type(self)(
             items=lambda: filter(key, self.items()),
             entities=self.entities,
@@ -277,18 +288,6 @@ class PlanUpdate:
     ) -> PlanUpdate:
         def update(plan: Plan) -> None:
             plan.activation_date = activation_timestamp
-
-        return self._add_update(update)
-
-    def set_activation_status(self, *, is_active: bool) -> PlanUpdate:
-        def update(plan: Plan) -> None:
-            plan.is_active = is_active
-
-        return self._add_update(update)
-
-    def set_expiration_status(self, *, is_expired: bool) -> PlanUpdate:
-        def update(plan: Plan) -> None:
-            plan.expired = is_expired
 
         return self._add_update(update)
 
@@ -851,10 +850,8 @@ class PlanRepository(interfaces.PlanRepository):
             description=product_description,
             timeframe=duration_in_days,
             is_public_service=is_public_service,
-            is_active=False,
             activation_date=None,
             approval_date=None,
-            expired=False,
             requested_cooperation=None,
             cooperation=None,
             is_available=True,

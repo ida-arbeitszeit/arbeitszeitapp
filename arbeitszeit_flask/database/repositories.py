@@ -19,7 +19,10 @@ from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Integer, and_, case, cast, func, or_, update
+from sqlalchemy.dialects.postgresql import INTERVAL
 from sqlalchemy.orm import aliased
+from sqlalchemy.sql.functions import concat
+from typing_extensions import Self
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from arbeitszeit import entities, repositories
@@ -59,9 +62,7 @@ class FlaskQueryResult(Generic[T]):
             return None
         return self.mapper(element)
 
-    def _with_modified_query(
-        self: FlaskQueryResultT, modification: Callable[[Any], Any]
-    ) -> FlaskQueryResultT:
+    def _with_modified_query(self, modification: Callable[[Any], Any]) -> Self:
         return type(self)(
             query=modification(self.query), mapper=self.mapper, db=self.db
         )
@@ -109,6 +110,20 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
             lambda query: self.query.join(models.PlanReview).filter(
                 models.PlanReview.approval_date != None
             )
+        )
+
+    def that_were_activated_before(self, timestamp: datetime) -> Self:
+        return self._with_modified_query(
+            lambda query: query.filter(models.Plan.activation_date <= timestamp)
+        )
+
+    def that_will_expire_after(self, timestamp: datetime) -> Self:
+        expiration_date = (
+            func.cast(concat(models.Plan.timeframe, "days"), INTERVAL)
+            + models.Plan.activation_date
+        )
+        return self._with_modified_query(
+            lambda query: query.filter(expiration_date > timestamp)
         )
 
     def that_are_productive(self) -> PlanQueryResult:
@@ -171,11 +186,6 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
                     ),
                 )
             )
-        )
-
-    def that_are_active(self) -> PlanQueryResult:
-        return self._with_modified_query(
-            lambda query: query.filter(models.Plan.is_active == True)
         )
 
     def that_are_part_of_cooperation(self, *cooperation: UUID) -> PlanQueryResult:
@@ -337,24 +347,6 @@ class PlanUpdate:
             plan_update_values=dict(
                 self.plan_update_values,
                 activation_date=activation_timestamp,
-            ),
-        )
-
-    def set_activation_status(self, *, is_active: bool) -> PlanUpdate:
-        return replace(
-            self,
-            plan_update_values=dict(
-                self.plan_update_values,
-                is_active=is_active,
-            ),
-        )
-
-    def set_expiration_status(self, *, is_expired: bool) -> PlanUpdate:
-        return replace(
-            self,
-            plan_update_values=dict(
-                self.plan_update_values,
-                expired=is_expired,
             ),
         )
 
@@ -1103,8 +1095,6 @@ class PlanRepository(repositories.PlanRepository):
             timeframe=int(plan.timeframe),
             is_public_service=plan.is_public_service,
             approval_date=plan.review.approval_date,
-            is_active=plan.is_active,
-            expired=plan.expired,
             activation_date=plan.activation_date,
             requested_cooperation=UUID(plan.requested_cooperation)
             if plan.requested_cooperation
