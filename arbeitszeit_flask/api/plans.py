@@ -20,7 +20,7 @@ from arbeitszeit_web.api_presenters.query_plans_api_presenter import (
 namespace = Namespace("plans", "Plan related endpoints.")
 
 input_documentation = generate_input_documentation(
-    QueryPlansApiController().create_expected_inputs()
+    QueryPlansApiController.create_expected_inputs()
 )
 
 model = json_schema_to_flaskx(

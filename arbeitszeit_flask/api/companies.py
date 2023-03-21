@@ -22,7 +22,7 @@ from arbeitszeit_web.api_presenters.query_companies_api_presenter import (
 namespace = Namespace("companies", "Companies related endpoints.")
 
 input_documentation = generate_input_documentation(
-    QueryCompaniesApiController().create_expected_inputs()
+    QueryCompaniesApiController.create_expected_inputs()
 )
 
 model = json_schema_to_flaskx(
