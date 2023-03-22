@@ -1,0 +1,3 @@
+sphinx
+
+-r ../requirements.txt
