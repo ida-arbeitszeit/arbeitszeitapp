@@ -1,10 +1,10 @@
 from tests.api.integration.base_test_case import ApiTestCase
 
 
-class ListActivePlansTests(ApiTestCase):
+class QueryCompaniesTests(ApiTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.url = self.url_prefix + "/plans/active"
+        self.url = self.url_prefix + "/companies"
 
     def test_get_returns_200(self):
         response = self.client.get(self.url)

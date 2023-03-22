@@ -1,6 +1,7 @@
-from typing import List
+from dataclasses import dataclass
+from typing import List, Optional
 
-from arbeitszeit.use_cases.query_plans import PlanFilter, PlanSorting, QueryPlansRequest
+from arbeitszeit.use_cases.query_companies import CompanyFilter, QueryCompaniesRequest
 from arbeitszeit_web.api_controllers import query_parser
 from arbeitszeit_web.api_controllers.expected_input import ExpectedInput
 from arbeitszeit_web.request import Request
@@ -9,7 +10,27 @@ DEFAULT_OFFSET: int = 0
 DEFAULT_LIMIT: int = 30
 
 
-class QueryPlansApiController:
+@dataclass
+class QueryCompaniesRequestImpl(QueryCompaniesRequest):
+    query: Optional[str]
+    filter_category: CompanyFilter
+    offset: int
+    limit: int
+
+    def get_query_string(self) -> Optional[str]:
+        return self.query
+
+    def get_filter_category(self) -> CompanyFilter:
+        return self.filter_category
+
+    def get_offset(self) -> Optional[int]:
+        return self.offset
+
+    def get_limit(self) -> Optional[int]:
+        return self.limit
+
+
+class QueryCompaniesApiController:
     @classmethod
     def create_expected_inputs(cls) -> List[ExpectedInput]:
         return [
@@ -27,13 +48,12 @@ class QueryPlansApiController:
             ),
         ]
 
-    def create_request(self, request: Request) -> QueryPlansRequest:
+    def create_request(self, request: Request) -> QueryCompaniesRequest:
         offset = self._parse_offset(request)
         limit = self._parse_limit(request)
-        return QueryPlansRequest(
-            query_string=None,
-            filter_category=PlanFilter.by_plan_id,
-            sorting_category=PlanSorting.by_activation,
+        return QueryCompaniesRequestImpl(
+            query=None,
+            filter_category=CompanyFilter.by_name,
             offset=offset,
             limit=limit,
         )
