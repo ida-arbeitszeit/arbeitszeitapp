@@ -11,7 +11,6 @@ from decimal import Decimal
 from typing import Iterable, List, Optional, Union
 from uuid import UUID, uuid4
 
-from arbeitszeit import use_cases
 from arbeitszeit.entities import (
     Account,
     AccountTypes,
@@ -33,6 +32,7 @@ from arbeitszeit.repositories import (
     PlanDraftRepository,
     TransactionRepository,
 )
+from arbeitszeit.use_cases import pay_consumer_product, pay_means_of_production
 from arbeitszeit.use_cases.accept_cooperation import (
     AcceptCooperation,
     AcceptCooperationRequest,
@@ -378,8 +378,8 @@ class PurchaseGenerator:
     plan_generator: PlanGenerator
     company_generator: CompanyGenerator
     member_generator: MemberGenerator
-    pay_means_of_production: use_cases.pay_means_of_production.PayMeansOfProduction
-    pay_consumer_product: use_cases.pay_consumer_product.PayConsumerProduct
+    pay_means: pay_means_of_production.PayMeansOfProduction
+    pay_product: pay_consumer_product.PayConsumerProduct
 
     def create_resource_purchase_by_company(
         self,
@@ -387,18 +387,18 @@ class PurchaseGenerator:
         buyer: Optional[UUID] = None,
         plan: Optional[UUID] = None,
         amount: int = 1,
-    ) -> use_cases.pay_means_of_production.PayMeansOfProductionResponse:
+    ) -> pay_means_of_production.PayMeansOfProductionResponse:
         if buyer is None:
             buyer = self.company_generator.create_company()
         if plan is None:
             plan = self.plan_generator.create_plan().id
-        request = use_cases.pay_means_of_production.PayMeansOfProductionRequest(
+        request = pay_means_of_production.PayMeansOfProductionRequest(
             buyer=buyer,
             plan=plan,
             amount=amount,
             purpose=PurposesOfPurchases.raw_materials,
         )
-        response = self.pay_means_of_production(request)
+        response = self.pay_means(request)
         assert (
             not response.is_rejected
         ), f"Could not create purchase, response was {response}"
@@ -409,17 +409,17 @@ class PurchaseGenerator:
         buyer: Optional[UUID] = None,
         amount: int = 1,
         plan: Optional[UUID] = None,
-    ) -> use_cases.pay_consumer_product.PayConsumerProductResponse:
+    ) -> pay_consumer_product.PayConsumerProductResponse:
         if buyer is None:
             buyer = self.member_generator.create_member()
         if plan is None:
             plan = self.plan_generator.create_plan().id
-        request = use_cases.pay_consumer_product.PayConsumerProductRequest(
+        request = pay_consumer_product.PayConsumerProductRequest(
             amount=amount,
             plan=plan,
             buyer=buyer,
         )
-        response = self.pay_consumer_product.pay_consumer_product(request)
+        response = self.pay_product.pay_consumer_product(request)
         assert (
             response.is_accepted
         ), f"Could not create member purchase. Response was {response}"
