@@ -388,6 +388,35 @@ class PurchaseGenerator:
         plan: Optional[UUID] = None,
         amount: int = 1,
     ) -> pay_means_of_production.PayMeansOfProductionResponse:
+        return self._create_company_purchase(
+            purpose=PurposesOfPurchases.raw_materials,
+            buyer=buyer,
+            plan=plan,
+            amount=amount,
+        )
+
+    def create_fixed_means_purchase(
+        self,
+        *,
+        buyer: Optional[UUID] = None,
+        plan: Optional[UUID] = None,
+        amount: int = 1,
+    ) -> pay_means_of_production.PayMeansOfProductionResponse:
+        return self._create_company_purchase(
+            purpose=PurposesOfPurchases.means_of_prod,
+            buyer=buyer,
+            plan=plan,
+            amount=amount,
+        )
+
+    def _create_company_purchase(
+        self,
+        *,
+        purpose: PurposesOfPurchases,
+        buyer: Optional[UUID] = None,
+        plan: Optional[UUID] = None,
+        amount: int = 1,
+    ) -> pay_means_of_production.PayMeansOfProductionResponse:
         if buyer is None:
             buyer = self.company_generator.create_company()
         if plan is None:
@@ -396,7 +425,7 @@ class PurchaseGenerator:
             buyer=buyer,
             plan=plan,
             amount=amount,
-            purpose=PurposesOfPurchases.raw_materials,
+            purpose=purpose,
         )
         response = self.pay_means(request)
         assert (
