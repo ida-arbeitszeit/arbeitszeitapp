@@ -28,10 +28,10 @@ class FilePlanWithAccounting:
 
     def file_plan_with_accounting(self, request: Request) -> Response:
         draft = self.draft_repository.get_by_id(id=request.draft_id)
-        if draft is not None and draft.planner.id == request.filing_company:
+        if draft is not None and draft.planner == request.filing_company:
             plan = self.database_gateway.create_plan(
                 creation_timestamp=self.datetime_service.now(),
-                planner=draft.planner.id,
+                planner=draft.planner,
                 production_costs=draft.production_costs,
                 product_name=draft.product_name,
                 distribution_unit=draft.unit_of_distribution,

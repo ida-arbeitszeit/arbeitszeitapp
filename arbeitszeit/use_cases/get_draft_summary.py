@@ -34,7 +34,7 @@ class GetDraftSummary:
             return None
         return DraftSummarySuccess(
             draft_id=draft.id,
-            planner_id=draft.planner.id,
+            planner_id=draft.planner,
             product_name=draft.product_name,
             description=draft.description,
             timeframe=draft.timeframe,

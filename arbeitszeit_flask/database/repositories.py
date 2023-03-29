@@ -1123,7 +1123,6 @@ class TransactionRepository(repositories.TransactionRepository):
 @dataclass
 class PlanDraftRepository(repositories.PlanDraftRepository):
     db: SQLAlchemy
-    company_repository: CompanyRepository
 
     def create_plan_draft(
         self,
@@ -1205,12 +1204,10 @@ class PlanDraftRepository(repositories.PlanDraftRepository):
         PlanDraft.query.filter_by(id=str(id)).delete()
 
     def _object_from_orm(self, orm: PlanDraft) -> entities.PlanDraft:
-        planner = self.company_repository.get_companies().with_id(orm.planner).first()
-        assert planner is not None
         return entities.PlanDraft(
             id=orm.id,
             creation_date=orm.plan_creation_date,
-            planner=planner,
+            planner=UUID(orm.planner),
             production_costs=entities.ProductionCosts(
                 labour_cost=orm.costs_a,
                 resource_cost=orm.costs_r,

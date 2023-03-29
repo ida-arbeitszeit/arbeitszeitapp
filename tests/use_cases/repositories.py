@@ -817,14 +817,8 @@ class CompanyRepository(interfaces.CompanyRepository):
 
 @singleton
 class PlanDraftRepository(interfaces.PlanDraftRepository):
-    def __init__(
-        self,
-        datetime_service: DatetimeService,
-        company_repository: interfaces.CompanyRepository,
-    ) -> None:
+    def __init__(self) -> None:
         self.drafts: List[PlanDraft] = []
-        self.datetime_service = datetime_service
-        self.company_repository = company_repository
 
     def create_plan_draft(
         self,
@@ -838,12 +832,10 @@ class PlanDraftRepository(interfaces.PlanDraftRepository):
         is_public_service: bool,
         creation_timestamp: datetime,
     ) -> PlanDraft:
-        company = self.company_repository.get_companies().with_id(planner).first()
-        assert company is not None
         draft = PlanDraft(
             id=uuid4(),
             creation_date=creation_timestamp,
-            planner=company,
+            planner=planner,
             product_name=product_name,
             production_costs=costs,
             unit_of_distribution=production_unit,
@@ -894,7 +886,7 @@ class PlanDraftRepository(interfaces.PlanDraftRepository):
     def all_drafts_of_company(self, id: UUID) -> Iterable[PlanDraft]:
         result = []
         for draft in self.drafts:
-            if draft.planner.id == id:
+            if draft.planner == id:
                 result.append(draft)
         return result
 

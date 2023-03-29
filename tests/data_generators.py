@@ -268,7 +268,7 @@ class PlanGenerator:
         )
         file_plan_response = self.file_plan_with_accounting.file_plan_with_accounting(
             request=FilePlanWithAccounting.Request(
-                draft_id=draft.id, filing_company=draft.planner.id
+                draft_id=draft.id, filing_company=draft.planner
             )
         )
         assert file_plan_response.plan_id
