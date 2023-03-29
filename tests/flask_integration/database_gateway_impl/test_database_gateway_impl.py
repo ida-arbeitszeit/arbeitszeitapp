@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from uuid import UUID, uuid4
 
-from arbeitszeit import entities
 from arbeitszeit_flask.database.repositories import (
     AccountRepository,
     DatabaseGatewayImpl,
@@ -106,12 +105,8 @@ class LabourCertificatesPayoutTests(FlaskTestCase):
         assert self.database_gateway.get_labour_certificates_payouts().for_plan(plan)
 
     def create_transaction(self) -> UUID:
-        sending_account = self.account_repository.create_account(
-            entities.AccountTypes.accounting
-        )
-        receiving_account = self.account_repository.create_account(
-            entities.AccountTypes.a
-        )
+        sending_account = self.account_repository.create_account()
+        receiving_account = self.account_repository.create_account()
         transaction = self.transaction_repository.create_transaction(
             date=datetime(2000, 1, 1),
             sending_account=sending_account.id,

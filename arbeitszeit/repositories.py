@@ -21,7 +21,6 @@ from typing_extensions import Self
 from arbeitszeit.entities import (
     Account,
     Accountant,
-    AccountTypes,
     Company,
     CompanyPurchase,
     CompanyWorkInvite,
@@ -331,7 +330,7 @@ class TransactionRepository(ABC):
 
 class AccountRepository(ABC):
     @abstractmethod
-    def create_account(self, account_type: AccountTypes) -> Account:
+    def create_account(self) -> Account:
         pass
 
     @abstractmethod
@@ -368,7 +367,7 @@ class MemberRepository(ABC):
 class AccountOwnerRepository(ABC):
     @abstractmethod
     def get_account_owner(
-        self, account: Account
+        self, account: UUID
     ) -> Union[Member, Company, SocialAccounting]:
         pass
 

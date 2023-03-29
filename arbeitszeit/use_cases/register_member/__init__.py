@@ -6,7 +6,6 @@ from typing import Optional
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import AccountTypes
 from arbeitszeit.repositories import AccountRepository, MemberRepository
 from arbeitszeit.token import MemberRegistrationMessagePresenter, TokenService
 
@@ -48,7 +47,7 @@ class RegisterMemberUseCase:
         if self.member_repository.get_members().with_email_address(request.email):
             raise self.Response.RejectionReason.member_already_exists
 
-        member_account = self.account_repository.create_account(AccountTypes.member)
+        member_account = self.account_repository.create_account()
         registered_on = self.datetime_service.now()
         member = self.member_repository.create_member(
             email=request.email,

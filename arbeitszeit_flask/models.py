@@ -162,7 +162,6 @@ class AccountTypes(Enum):
 
 class Account(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
-    account_type = db.Column(db.Enum(AccountTypes), nullable=False)
 
     transactions_sent = db.relationship(
         "Transaction",
