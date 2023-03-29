@@ -911,7 +911,6 @@ class AccountRepository(repositories.AccountRepository):
         assert account_orm
         return entities.Account(
             id=UUID(account_orm.id),
-            account_type=self._transform_account_type(account_orm.account_type),
         )
 
     def _transform_account_type(
@@ -935,8 +934,8 @@ class AccountRepository(repositories.AccountRepository):
         assert account_orm
         return account_orm
 
-    def create_account(self, account_type: entities.AccountTypes) -> entities.Account:
-        account = Account(id=str(uuid4()), account_type=account_type.value)
+    def create_account(self) -> entities.Account:
+        account = Account(id=str(uuid4()))
         self.db.session.add(account)
         return self.object_from_orm(account)
 
@@ -975,9 +974,9 @@ class AccountOwnerRepository(repositories.AccountOwnerRepository):
     social_accounting_repository: AccountingRepository
 
     def get_account_owner(
-        self, account: entities.Account
+        self, account: UUID
     ) -> Union[entities.Member, entities.Company, entities.SocialAccounting]:
-        account_id = str(account.id)
+        account_id = str(account)
         account_owner: Union[
             entities.Member, entities.Company, entities.SocialAccounting, None
         ] = (
@@ -1041,9 +1040,7 @@ class AccountingRepository:
             social_accounting = SocialAccounting(
                 id=str(uuid4()),
             )
-            account = self.account_repository.create_account(
-                entities.AccountTypes.accounting
-            )
+            account = self.account_repository.create_account()
             social_accounting.account = str(account.id)
             self.db.session.add(social_accounting)
         return social_accounting

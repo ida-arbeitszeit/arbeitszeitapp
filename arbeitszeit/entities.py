@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from decimal import Decimal
 from enum import Enum
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 from uuid import UUID
 
 
@@ -15,6 +15,11 @@ class SocialAccounting:
 
     def get_name(self) -> str:
         return "Social Accounting"
+
+    def get_account_type(self, account: UUID) -> Optional[AccountTypes]:
+        if account == self.account.id:
+            return AccountTypes.accounting
+        return None
 
 
 @dataclass
@@ -32,6 +37,17 @@ class Member:
     def get_name(self) -> str:
         return self.name
 
+    def get_account_by_type(self, account_type: AccountTypes) -> Optional[UUID]:
+        if account_type == AccountTypes.member:
+            return self.account
+        return None
+
+    def get_account_type(self, account: UUID) -> Optional[AccountTypes]:
+        if self.account == account:
+            return AccountTypes.member
+        else:
+            return None
+
 
 @dataclass
 class Company:
@@ -45,16 +61,31 @@ class Company:
     registered_on: datetime
     confirmed_on: Optional[datetime]
 
+    def _accounts_by_type(self) -> Dict[AccountTypes, UUID]:
+        return {
+            AccountTypes.p: self.means_account,
+            AccountTypes.r: self.raw_material_account,
+            AccountTypes.a: self.work_account,
+            AccountTypes.prd: self.product_account,
+        }
+
     def accounts(self) -> List[UUID]:
-        return [
-            self.means_account,
-            self.raw_material_account,
-            self.work_account,
-            self.product_account,
-        ]
+        return list(self._accounts_by_type().values())
 
     def get_name(self) -> str:
         return self.name
+
+    def get_account_by_type(self, account_type: AccountTypes) -> Optional[UUID]:
+        return self._accounts_by_type().get(account_type)
+
+    def get_account_type(self, account: UUID) -> Optional[AccountTypes]:
+        account_types = {
+            self.means_account: AccountTypes.p,
+            self.raw_material_account: AccountTypes.r,
+            self.work_account: AccountTypes.a,
+            self.product_account: AccountTypes.prd,
+        }
+        return account_types.get(account)
 
 
 class AccountTypes(Enum):
@@ -69,7 +100,6 @@ class AccountTypes(Enum):
 @dataclass
 class Account:
     id: UUID
-    account_type: AccountTypes
 
 
 @dataclass

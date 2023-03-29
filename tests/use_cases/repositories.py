@@ -29,7 +29,6 @@ from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.entities import (
     Account,
     Accountant,
-    AccountTypes,
     Company,
     CompanyWorkInvite,
     Cooperation,
@@ -668,8 +667,8 @@ class AccountRepository(interfaces.AccountRepository):
             return False
         return account in self.entities.accounts
 
-    def create_account(self, account_type: AccountTypes) -> Account:
-        return self.entities.create_account(account_type)
+    def create_account(self) -> Account:
+        return self.entities.create_account()
 
     def get_accounts(self) -> AccountResult:
         return AccountResult(
@@ -697,15 +696,15 @@ class AccountOwnerRepository(interfaces.AccountOwnerRepository):
         self.social_accounting = social_accounting
 
     def get_account_owner(
-        self, account: Account
+        self, account: UUID
     ) -> Union[Member, Company, SocialAccounting]:
-        if account.account_type == AccountTypes.accounting:
+        if self.social_accounting.account.id == account:
             return self.social_accounting
         for member in self.entities.members.values():
-            if account.id == member.account:
+            if account == member.account:
                 return member
         for company in self.entities.companies.values():
-            if account.id in company.accounts():
+            if account in company.accounts():
                 return company
         # This exception is not meant to be caught. That's why we
         # raise a base exception
@@ -1079,7 +1078,7 @@ class EntityStorage:
         self.accounts: List[Account] = []
         self.social_accounting = SocialAccounting(
             id=uuid4(),
-            account=self.create_account(account_type=AccountTypes.accounting),
+            account=self.create_account(),
         )
         self.cooperations: Dict[UUID, Cooperation] = dict()
         self.labour_certificates_payouts_by_transaction: Dict[
@@ -1122,10 +1121,9 @@ class EntityStorage:
         self.payout_factors.append(factor)
         return factor
 
-    def create_account(self, account_type: AccountTypes) -> Account:
+    def create_account(self) -> Account:
         account = Account(
             id=uuid4(),
-            account_type=account_type,
         )
         self.accounts.append(account)
         return account

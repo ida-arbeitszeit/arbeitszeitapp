@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from pytest import raises
 from sqlalchemy.exc import IntegrityError
 
-from arbeitszeit.entities import AccountTypes, Company
+from arbeitszeit.entities import Company
 from arbeitszeit_flask.database.repositories import AccountRepository, CompanyRepository
 from tests.data_generators import CompanyGenerator, MemberGenerator
 
@@ -66,10 +66,10 @@ class RepositoryTester(FlaskTestCase):
         )
 
     def test_can_create_company_with_correct_name(self) -> None:
-        means_account = self.account_repository.create_account(AccountTypes.p)
-        labour_account = self.account_repository.create_account(AccountTypes.a)
-        resource_account = self.account_repository.create_account(AccountTypes.r)
-        products_account = self.account_repository.create_account(AccountTypes.prd)
+        means_account = self.account_repository.create_account()
+        labour_account = self.account_repository.create_account()
+        resource_account = self.account_repository.create_account()
+        products_account = self.account_repository.create_account()
         expected_name = "Rosa"
         company = self.company_repository.create_company(
             email="rosa@cp.org",
@@ -172,10 +172,10 @@ class CreateCompanyTests(FlaskTestCase):
         self.repository = self.injector.get(CompanyRepository)
         self.account_repository = self.injector.get(AccountRepository)
         self.company_generator = self.injector.get(CompanyGenerator)
-        self.means_account = self.account_repository.create_account(AccountTypes.p)
-        self.labour_account = self.account_repository.create_account(AccountTypes.a)
-        self.resource_account = self.account_repository.create_account(AccountTypes.r)
-        self.products_account = self.account_repository.create_account(AccountTypes.prd)
+        self.means_account = self.account_repository.create_account()
+        self.labour_account = self.account_repository.create_account()
+        self.resource_account = self.account_repository.create_account()
+        self.products_account = self.account_repository.create_account()
         self.timestamp = datetime(2000, 1, 1)
         self.member_generator = self.injector.get(MemberGenerator)
 
@@ -222,10 +222,10 @@ class ConfirmCompanyTests(FlaskTestCase):
         self.assertFalse(self.repository.is_company_confirmed(company=uuid4()))
 
     def _create_company(self, email: str = "test@test.test") -> Company:
-        means_account = self.account_repository.create_account(AccountTypes.p)
-        labour_account = self.account_repository.create_account(AccountTypes.a)
-        resource_account = self.account_repository.create_account(AccountTypes.r)
-        products_account = self.account_repository.create_account(AccountTypes.prd)
+        means_account = self.account_repository.create_account()
+        labour_account = self.account_repository.create_account()
+        resource_account = self.account_repository.create_account()
+        products_account = self.account_repository.create_account()
         return self.repository.create_company(
             email=email,
             name="test name",

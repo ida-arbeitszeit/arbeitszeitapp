@@ -6,7 +6,6 @@ from typing import Optional
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import AccountTypes
 from arbeitszeit.repositories import AccountRepository, CompanyRepository
 from arbeitszeit.token import CompanyRegistrationMessagePresenter, TokenService
 
@@ -47,10 +46,10 @@ class RegisterCompany:
     def _register_company(self, request: Request) -> UUID:
         if self.company_repository.get_companies().with_email_address(request.email):
             raise self.Response.RejectionReason.company_already_exists
-        means_account = self.account_repository.create_account(AccountTypes.p)
-        resources_account = self.account_repository.create_account(AccountTypes.r)
-        labour_account = self.account_repository.create_account(AccountTypes.a)
-        products_account = self.account_repository.create_account(AccountTypes.prd)
+        means_account = self.account_repository.create_account()
+        resources_account = self.account_repository.create_account()
+        labour_account = self.account_repository.create_account()
+        products_account = self.account_repository.create_account()
         registered_on = self.datetime_service.now()
         company = self.company_repository.create_company(
             request.email,

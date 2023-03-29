@@ -1,4 +1,4 @@
-from arbeitszeit.entities import AccountTypes, SocialAccounting
+from arbeitszeit.entities import SocialAccounting
 from arbeitszeit_flask.database.repositories import (
     AccountOwnerRepository,
     AccountRepository,
@@ -19,9 +19,9 @@ class RepositoryTester(FlaskTestCase):
         self.account_repository = self.injector.get(AccountRepository)
 
     def test_can_retrieve_owner_of_member_accounts(self) -> None:
-        account = self.account_generator.create_account(AccountTypes.member)
+        account = self.account_generator.create_account()
         member = self.member_generator.create_member_entity(account=account)
-        assert self.repository.get_account_owner(account).id == member.id
+        assert self.repository.get_account_owner(account.id).id == member.id
 
     def test_can_retrieve_owner_of_company_accounts(self) -> None:
         company = self.company_generator.create_company_entity()
@@ -29,10 +29,10 @@ class RepositoryTester(FlaskTestCase):
             self.account_repository.get_accounts().with_id(company.work_account).first()
         )
         assert account
-        assert self.repository.get_account_owner(account) == company
+        assert self.repository.get_account_owner(account.id) == company
 
     def test_can_get_owner_of_public_account(self) -> None:
         assert (
-            self.repository.get_account_owner(self.social_accounting.account)
+            self.repository.get_account_owner(self.social_accounting.account.id)
             == self.social_accounting
         )

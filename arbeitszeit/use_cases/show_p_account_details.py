@@ -7,7 +7,6 @@ from itertools import accumulate
 from typing import List
 from uuid import UUID
 
-from arbeitszeit.entities import AccountTypes, Company, Transaction
 from arbeitszeit.repositories import AccountRepository, CompanyRepository
 from arbeitszeit.transactions import TransactionTypes, UserAccountingService
 
@@ -41,9 +40,14 @@ class ShowPAccountDetailsUseCase:
         company = self.company_repository.get_companies().with_id(company_id).first()
         assert company
         transactions = [
-            self._create_info(company, transaction)
-            for transaction in self.accounting_service.get_account_transactions_sorted(
-                company, AccountTypes.p
+            self.TransactionInfo(
+                transaction_type=row.transaction_type,
+                date=row.transaction.date,
+                transaction_volume=row.volume,
+                purpose=row.transaction.purpose,
+            )
+            for row in self.accounting_service.get_statement_of_account(
+                company, [company.means_account]
             )
         ]
         account_balance = self.account_repository.get_account_balance(
@@ -59,26 +63,6 @@ class ShowPAccountDetailsUseCase:
             transactions=transactions,
             account_balance=account_balance,
             plot=plot,
-        )
-
-    def _create_info(
-        self,
-        company: Company,
-        transaction: Transaction,
-    ) -> TransactionInfo:
-        user_is_sender = self.accounting_service.user_is_sender(transaction, company)
-        transaction_type = self.accounting_service.get_transaction_type(
-            transaction, user_is_sender
-        )
-        transaction_volume = self.accounting_service.get_transaction_volume(
-            transaction,
-            user_is_sender,
-        )
-        return self.TransactionInfo(
-            transaction_type,
-            transaction.date,
-            transaction_volume,
-            transaction.purpose,
         )
 
     def _get_plot_dates(self, transactions: List[TransactionInfo]) -> List[datetime]:

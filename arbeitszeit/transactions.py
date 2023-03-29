@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum, auto
-from typing import List, Union
+from typing import Iterable, List, Union
+from uuid import UUID
 
 from .entities import AccountTypes, Company, Member, SocialAccounting, Transaction
 from .repositories import (
@@ -31,6 +32,14 @@ class TransactionTypes(Enum):
 
 
 @dataclass
+class AccountStatementRow:
+    transaction: Transaction
+    volume: Decimal
+    transaction_type: TransactionTypes
+    account_type: AccountTypes
+
+
+@dataclass
 class UserAccountingService:
     transaction_repository: TransactionRepository
     account_owner_repository: AccountOwnerRepository
@@ -48,45 +57,38 @@ class UserAccountingService:
     def get_account_transactions_sorted(
         self, user: Union[Member, Company], queried_account_type: AccountTypes
     ) -> List[Transaction]:
-        accounts = self.account_repository.get_accounts().with_id(*user.accounts())
-        for acc in accounts:
-            if acc.account_type == queried_account_type:
-                queried_account = acc
-                break
-        else:
+        account = user.get_account_by_type(queried_account_type)
+        if account is None:
             return []
-        return list(
-            self.transaction_repository.get_transactions()
-            .where_account_is_sender_or_receiver(queried_account.id)
-            .ordered_by_transaction_date(descending=True)
-        )
+        else:
+            return list(
+                self.transaction_repository.get_transactions()
+                .where_account_is_sender_or_receiver(account)
+                .ordered_by_transaction_date(descending=True)
+            )
 
     def user_is_sender(
         self, transaction: Transaction, user: Union[Member, Company]
     ) -> bool:
         return transaction.sending_account in user.accounts()
 
-    def get_transaction_type(
+    def _get_transaction_type(
         self, transaction: Transaction, user_is_sender: bool
     ) -> TransactionTypes:
         """
         Based on wether the user is sender or receiver,
         this method returns the 'subjective' transaction type.
         """
-        sender = (
-            self.account_repository.get_accounts()
-            .with_id(transaction.sending_account)
-            .first()
+        sender = self.account_owner_repository.get_account_owner(
+            transaction.sending_account
         )
-        assert sender
-        sending_account = sender.account_type
-        receiver = (
-            self.account_repository.get_accounts()
-            .with_id(transaction.receiving_account)
-            .first()
+        sending_account = sender.get_account_type(transaction.sending_account)
+        assert sending_account
+        receiver = self.account_owner_repository.get_account_owner(
+            transaction.receiving_account
         )
-        assert receiver
-        receiving_account = receiver.account_type
+        receiving_account = receiver.get_account_type(transaction.receiving_account)
+        assert receiving_account
         if user_is_sender:
             if sending_account == AccountTypes.a:
                 transaction_type = TransactionTypes.payment_of_wages
@@ -151,8 +153,36 @@ class UserAccountingService:
             .first()
         )
         assert buyer_account
-        buyer = self.account_owner_repository.get_account_owner(buyer_account)
+        buyer = self.account_owner_repository.get_account_owner(buyer_account.id)
         assert not isinstance(
             buyer, SocialAccounting
         )  # from the transactiontype we know: buyer can't be social accounting
         return buyer
+
+    def get_statement_of_account(
+        self, user: Union[Member, Company], accounts: Iterable[UUID]
+    ) -> Iterable[AccountStatementRow]:
+        accounts = set(accounts) & set(user.accounts())
+        transactions = (
+            self.transaction_repository.get_transactions()
+            .where_account_is_sender_or_receiver(*accounts)
+            .ordered_by_transaction_date(descending=True)
+        )
+        for transaction in transactions:
+            user_is_sender = transaction.sending_account in accounts
+            account_type = user.get_account_type(
+                transaction.sending_account
+                if user_is_sender
+                else transaction.receiving_account
+            )
+            assert account_type
+            yield AccountStatementRow(
+                transaction=transaction,
+                volume=-transaction.amount_sent
+                if user_is_sender
+                else transaction.amount_received,
+                transaction_type=self._get_transaction_type(
+                    transaction, user_is_sender
+                ),
+                account_type=account_type,
+            )

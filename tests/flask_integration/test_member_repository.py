@@ -4,7 +4,6 @@ from uuid import UUID, uuid4
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
 
-from arbeitszeit.entities import AccountTypes
 from arbeitszeit_flask.database.repositories import AccountRepository, MemberRepository
 from tests.data_generators import AccountantGenerator, CompanyGenerator, MemberGenerator
 
@@ -20,7 +19,7 @@ class RepositoryTests(FlaskTestCase):
         self.account_repository = self.injector.get(AccountRepository)
 
     def test_that_users_can_be_converted_from_and_to_orm_objects(self) -> None:
-        account = self.account_repository.create_account(AccountTypes.member)
+        account = self.account_repository.create_account()
         expected_member = self.member_repository.create_member(
             email="member@cp.org",
             name="karl",
@@ -63,7 +62,7 @@ class RepositoryTests(FlaskTestCase):
     def test_cannot_find_member_by_email_before_it_was_added(self) -> None:
         members = self.member_repository.get_members()
         assert not members.with_email_address("member@cp.org")
-        account = self.account_repository.create_account(AccountTypes.member)
+        account = self.account_repository.create_account()
         self.member_repository.create_member(
             email="member@cp.org",
             name="karl",
@@ -82,7 +81,7 @@ class RepositoryTests(FlaskTestCase):
         assert not self.member_repository.get_members().with_id(company.id)
 
     def test_does_identify_member_id_as_member(self) -> None:
-        account = self.account_repository.create_account(AccountTypes.member)
+        account = self.account_repository.create_account()
         member = self.member_repository.create_member(
             email="member@cp.org",
             name="karl",
@@ -148,9 +147,7 @@ class ValidateCredentialTests(FlaskTestCase):
         super().setUp()
         self.repository = self.injector.get(MemberRepository)
         self.account_repository = self.injector.get(AccountRepository)
-        self.account = self.account_repository.create_account(
-            account_type=AccountTypes.member
-        )
+        self.account = self.account_repository.create_account()
         self.timestamp = datetime(2000, 1, 1)
 
     def test_correct_email_and_password_can_be_validated(self) -> None:
@@ -231,9 +228,7 @@ class ConfirmMemberTests(FlaskTestCase):
         super().setUp()
         self.repository = self.injector.get(MemberRepository)
         self.account_repository = self.injector.get(AccountRepository)
-        self.account = self.account_repository.create_account(
-            account_type=AccountTypes.member
-        )
+        self.account = self.account_repository.create_account()
         self.timestamp = datetime(2000, 1, 1)
         self.member_generator = self.injector.get(MemberGenerator)
 
@@ -268,9 +263,7 @@ class CreateMemberTests(FlaskTestCase):
         self.company_generator = self.injector.get(CompanyGenerator)
         self.accountant_generator = self.injector.get(AccountantGenerator)
         self.account_repository = self.injector.get(AccountRepository)
-        self.account = self.account_repository.create_account(
-            account_type=AccountTypes.member
-        )
+        self.account = self.account_repository.create_account()
         self.timestamp = datetime(2000, 1, 1)
         self.db = self.injector.get(SQLAlchemy)
 
@@ -311,9 +304,7 @@ class MemberUpdateTests(FlaskTestCase):
         super().setUp()
         self.repository = self.injector.get(MemberRepository)
         self.account_repository = self.injector.get(AccountRepository)
-        self.account = self.account_repository.create_account(
-            account_type=AccountTypes.member
-        )
+        self.account = self.account_repository.create_account()
         self.timestamp = datetime(2000, 1, 1)
         self.member_generator = self.injector.get(MemberGenerator)
 

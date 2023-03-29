@@ -92,9 +92,7 @@ class MemberGenerator:
             assert member
             return member
         if account is None:
-            account = self.account_generator.create_account(
-                account_type=AccountTypes.member
-            )
+            account = self.account_generator.create_account()
         if registered_on is None:
             registered_on = self.datetime_service.now()
         member = self.member_repository.create_member(
@@ -162,18 +160,10 @@ class CompanyGenerator:
             email=email,
             name=name,
             password=password,
-            means_account=self.account_generator.create_account(
-                account_type=AccountTypes.p
-            ),
-            resource_account=self.account_generator.create_account(
-                account_type=AccountTypes.r
-            ),
-            products_account=self.account_generator.create_account(
-                account_type=AccountTypes.prd
-            ),
-            labour_account=self.account_generator.create_account(
-                account_type=AccountTypes.a
-            ),
+            means_account=self.account_generator.create_account(),
+            resource_account=self.account_generator.create_account(),
+            products_account=self.account_generator.create_account(),
+            labour_account=self.account_generator.create_account(),
             registered_on=registered_on,
         )
         if workers is not None:
@@ -219,8 +209,8 @@ class CompanyGenerator:
 class AccountGenerator:
     account_repository: AccountRepository
 
-    def create_account(self, account_type: AccountTypes = AccountTypes.a) -> Account:
-        return self.account_repository.create_account(account_type)
+    def create_account(self) -> Account:
+        return self.account_repository.create_account()
 
 
 class EmailGenerator:
@@ -473,13 +463,9 @@ class TransactionGenerator:
         date=None,
     ) -> Transaction:
         if sending_account is None:
-            sending_account = self.account_generator.create_account(
-                account_type=sending_account_type
-            ).id
+            sending_account = self.account_generator.create_account().id
         if receiving_account is None:
-            receiving_account = self.account_generator.create_account(
-                account_type=receiving_account_type
-            ).id
+            receiving_account = self.account_generator.create_account().id
         if amount_sent is None:
             amount_sent = Decimal(10)
         if amount_received is None:
