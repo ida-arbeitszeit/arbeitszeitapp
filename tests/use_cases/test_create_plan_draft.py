@@ -97,4 +97,4 @@ class UseCaseTests(BaseTestCase):
     def test_that_drafted_plan_has_same_planner_as_specified_on_creation(self) -> None:
         planner = self.company_generator.create_company()
         draft = self.plan_generator.draft_plan(planner=planner)
-        assert draft.planner.id == planner
+        assert draft.planner == planner

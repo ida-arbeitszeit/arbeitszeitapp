@@ -71,7 +71,7 @@ class PlanDraftRepositoryTests(PlanDraftRepositoryBaseTests):
     def test_created_draft_has_planner_that_it_was_created_with(self) -> None:
         expected_planner = self.company_generator.create_company()
         draft = self.create_plan_draft(planner=expected_planner)
-        assert draft.planner.id == expected_planner
+        assert draft.planner == expected_planner
 
     def test_that_created_draft_as_production_costs_specified_on_creation(self) -> None:
         expected_production_costs = ProductionCosts(Decimal(5), Decimal(3), Decimal(1))

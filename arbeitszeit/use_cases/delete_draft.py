@@ -28,7 +28,7 @@ class DeleteDraftUseCase:
         draft = self.draft_repository.get_by_id(request.draft)
         if not draft or not deleter:
             raise self.Failure()
-        if draft.planner.id != deleter.id:
+        if draft.planner != deleter.id:
             raise self.Failure()
         self.draft_repository.delete_draft(request.draft)
         return self.Response(product_name=draft.product_name)
