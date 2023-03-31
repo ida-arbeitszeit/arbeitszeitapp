@@ -3,9 +3,9 @@ from decimal import Decimal
 from uuid import UUID
 
 from arbeitszeit.entities import SocialAccounting, Transaction
-from arbeitszeit_flask import models
 from arbeitszeit_flask.database.repositories import TransactionRepository
-from tests.data_generators import AccountGenerator, PlanGenerator
+from tests.control_thresholds import ControlThresholdsTestImpl
+from tests.data_generators import AccountGenerator, PlanGenerator, PurchaseGenerator
 from tests.datetime_service import FakeDatetimeService
 
 from .flask import FlaskTestCase
@@ -138,71 +138,6 @@ class TransactionRepositoryTests(FlaskTestCase):
             )
         ) == [transaction]
 
-    def test_correct_sales_balance_of_plan_gets_returned_after_one_transaction(
-        self,
-    ) -> None:
-        plan = self.plan_generator.create_plan()
-        sender_account = self.account_generator.create_account()
-        receiver_account = models.Account.query.filter(
-            models.Account.id.in_(
-                models.Company.query.filter(models.Company.id == str(plan.planner))
-                .with_entities(models.Company.prd_account)
-                .subquery()
-                .select()
-            ),
-        ).first()
-        account_balance_before_transaction = self.repository.get_sales_balance_of_plan(
-            plan
-        )
-        self.repository.create_transaction(
-            self.datetime_service.now(),
-            sending_account=sender_account.id,
-            receiving_account=UUID(receiver_account.id),
-            amount_sent=Decimal(12),
-            amount_received=Decimal(10),
-            purpose=f"test {plan.id} test",
-        )
-        assert self.repository.get_sales_balance_of_plan(
-            plan
-        ) == account_balance_before_transaction + Decimal(10)
-
-    def test_correct_sales_balance_of_plan_gets_returned_after_two_transactions(
-        self,
-    ) -> None:
-        plan = self.plan_generator.create_plan()
-        sender_account_1 = self.account_generator.create_account()
-        sender_account_2 = self.account_generator.create_account()
-        receiver_account = models.Account.query.filter(
-            models.Account.id.in_(
-                models.Company.query.filter(models.Company.id == str(plan.planner))
-                .with_entities(models.Company.prd_account)
-                .subquery()
-                .select()
-            ),
-        ).first()
-        sales_balance_before_transactions = self.repository.get_sales_balance_of_plan(
-            plan
-        )
-        self.repository.create_transaction(
-            self.datetime_service.now(),
-            sending_account=sender_account_1.id,
-            receiving_account=UUID(receiver_account.id),
-            amount_sent=Decimal(12),
-            amount_received=Decimal(10),
-            purpose=f"test {plan.id} test",
-        )
-        self.repository.create_transaction(
-            self.datetime_service.now(),
-            sending_account=sender_account_2.id,
-            receiving_account=UUID(receiver_account.id),
-            amount_sent=Decimal(12),
-            amount_received=Decimal(15),
-            purpose=f"test2 {plan.id} test2",
-        )
-        assert self.repository.get_sales_balance_of_plan(
-            plan
-        ) == sales_balance_before_transactions + Decimal(25)
-
 
 class TestWhereAccountIsSenderOrReceiver(FlaskTestCase):
     def setUp(self) -> None:
@@ -252,3 +187,56 @@ class TestWhereAccountIsSenderOrReceiver(FlaskTestCase):
             amount_received=Decimal(1),
             purpose="test purpose",
         )
+
+
+class ThatWereASaleForPlanResultTests(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.repository: TransactionRepository = self.injector.get(
+            TransactionRepository
+        )
+        self.plan_generator = self.injector.get(PlanGenerator)
+        self.purchase_generator = self.injector.get(PurchaseGenerator)
+        self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
+        self.control_thresholds.set_allowed_overdraw_of_member_account(1000000)
+
+    def test_that_without_any_transactions_in_db_nothing_is_returned(
+        self,
+    ) -> None:
+        assert not self.repository.get_transactions().that_were_a_sale_for_plan()
+
+    def test_with_approved_plan_but_without_any_sales_dont_return_any_transactions(
+        self,
+    ) -> None:
+        self.plan_generator.create_plan()
+        assert not self.repository.get_transactions().that_were_a_sale_for_plan()
+
+    def test_with_approved_plan_that_has_a_consumer_purchase_that_we_find_some_transactions(
+        self,
+    ) -> None:
+        plan = self.plan_generator.create_plan()
+        self.purchase_generator.create_purchase_by_member(plan=plan.id)
+        assert self.repository.get_transactions().that_were_a_sale_for_plan()
+
+    def test_with_approved_plan_that_has_a_fixed_means_purchase_that_we_find_some_transactions(
+        self,
+    ) -> None:
+        plan = self.plan_generator.create_plan()
+        self.purchase_generator.create_fixed_means_purchase(plan=plan.id)
+        assert self.repository.get_transactions().that_were_a_sale_for_plan()
+
+    def test_dont_show_find_transactions_for_newly_approved_plan_when_there_are_company_purchases_for_other_plans(
+        self,
+    ) -> None:
+        plan = self.plan_generator.create_plan()
+        other_plan = self.plan_generator.create_plan()
+        self.purchase_generator.create_fixed_means_purchase(plan=other_plan.id)
+        assert not self.repository.get_transactions().that_were_a_sale_for_plan(plan.id)
+
+    def test_dont_show_find_transactions_for_newly_approved_plan_when_there_are_consumer_purchase_for_other_plans(
+        self,
+    ) -> None:
+        plan = self.plan_generator.create_plan()
+        other_plan = self.plan_generator.create_plan()
+        self.purchase_generator.create_purchase_by_member(plan=other_plan.id)
+        assert not self.repository.get_transactions().that_were_a_sale_for_plan(plan.id)

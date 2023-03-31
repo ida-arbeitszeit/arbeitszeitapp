@@ -461,6 +461,26 @@ class TransactionResult(QueryResultImpl[Transaction]):
             ),
         )
 
+    def that_were_a_sale_for_plan(self, *plan: UUID) -> Self:
+        def transaction_filter(transaction: Transaction) -> bool:
+            purchase = self.entities.consumer_purchase_by_transaction.get(
+                transaction.id
+            ) or self.entities.company_purchase_by_transaction.get(transaction.id)
+            if purchase is None:
+                return False
+            elif not plan:
+                return purchase.plan_id is not None
+            else:
+                return purchase.plan_id in plan
+
+        return replace(
+            self,
+            items=lambda: filter(
+                transaction_filter,
+                self.items(),
+            ),
+        )
+
 
 class ConsumerPurchaseResult(QueryResultImpl[entities.ConsumerPurchase]):
     def ordered_by_creation_date(
@@ -641,17 +661,6 @@ class TransactionRepository(interfaces.TransactionRepository):
             items=lambda: self.entities.transactions.values(),
             entities=self.entities,
         )
-
-    def get_sales_balance_of_plan(self, plan: Plan) -> Decimal:
-        balance = Decimal(0)
-        planner = self.entities.get_company_by_id(plan.planner)
-        assert planner
-        for transaction in self.entities.transactions.values():
-            if (transaction.receiving_account == planner.product_account) and (
-                str(plan.id) in transaction.purpose
-            ):
-                balance += transaction.amount_received
-        return balance
 
 
 @singleton
@@ -1089,7 +1098,13 @@ class EntityStorage:
         ] = defaultdict(list)
         self.payout_factors: List[entities.PayoutFactor] = list()
         self.consumer_purchases: Dict[UUID, entities.ConsumerPurchase] = dict()
+        self.consumer_purchase_by_transaction: Dict[
+            UUID, entities.ConsumerPurchase
+        ] = dict()
         self.company_purchases: Dict[UUID, entities.CompanyPurchase] = dict()
+        self.company_purchase_by_transaction: Dict[
+            UUID, entities.CompanyPurchase
+        ] = dict()
 
     def create_labour_certificates_payout(
         self, transaction: UUID, plan: UUID
@@ -1144,6 +1159,7 @@ class EntityStorage:
             amount=amount,
         )
         self.consumer_purchases[purchase.id] = purchase
+        self.consumer_purchase_by_transaction[transaction] = purchase
         return purchase
 
     def get_consumer_purchases(self) -> ConsumerPurchaseResult:
@@ -1162,6 +1178,7 @@ class EntityStorage:
             transaction_id=transaction,
         )
         self.company_purchases[purchase.id] = purchase
+        self.company_purchase_by_transaction[transaction] = purchase
         return purchase
 
     def get_company_purchases(self) -> CompanyPurchaseResult:
