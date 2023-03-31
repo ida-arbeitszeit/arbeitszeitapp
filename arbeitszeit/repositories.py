@@ -289,6 +289,21 @@ class TransactionResult(QueryResult[Transaction], Protocol):
     def where_sender_is_social_accounting(self) -> TransactionResult:
         ...
 
+    def that_were_a_sale_for_plan(self, *plan: UUID) -> Self:
+        """Filter all transactions in the current result set such that
+        the new result set contains only those transactions that are
+        part of a "sale".
+
+        If no `plan` argument is specified then the result set will
+        contain all previously selected transactions that are part of
+        any purchase.
+
+        The `plan` argument can be specified multiple times. A
+        transaction will be part of the result set if it is the
+        payment for purchase for any plan that was specified by its
+        UUID.
+        """
+
 
 class AccountResult(QueryResult[Account], Protocol):
     def with_id(self, id_: UUID) -> AccountResult:
@@ -322,10 +337,6 @@ class TransactionRepository(ABC):
         amount_received: Decimal,
         purpose: str,
     ) -> Transaction:
-        pass
-
-    @abstractmethod
-    def get_sales_balance_of_plan(self, plan: Plan) -> Decimal:
         pass
 
 

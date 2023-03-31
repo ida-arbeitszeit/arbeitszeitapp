@@ -130,32 +130,6 @@ class UseCaseTests(BaseTestCase):
         assert response
         assert response.plan_details[0].sales_volume == Decimal(6)
 
-    def test_returns_correct_sales_balance_if_plan_is_productive_and_no_transactions_took_place(
-        self,
-    ) -> None:
-        company = self.company_generator.create_company()
-        self.plan_generator.create_plan(
-            planner=company, costs=ProductionCosts(Decimal(1), Decimal(1), Decimal(1))
-        )
-        response = self.get_company_summary(company)
-        assert response
-        assert response.plan_details[0].sales_balance == Decimal("-3")
-
-    def test_show_sales_balance_of_half_production_costs_if_one_of_two_units_were_sold(
-        self,
-    ) -> None:
-        costs = ProductionCosts(Decimal(1), Decimal(1), Decimal(1))
-        company = self.company_generator.create_company()
-        plan = self.plan_generator.create_plan(
-            planner=company,
-            costs=costs,
-            amount=2,
-        )
-        self.purchase_generator.create_fixed_means_purchase(plan=plan.id)
-        response = self.get_company_summary(company)
-        assert response
-        assert response.plan_details[0].sales_balance == -costs.total_cost() / 2
-
     def test_that_empty_list_of_suppliers_is_returned_when_company_did_not_purchase_anything(
         self,
     ) -> None:

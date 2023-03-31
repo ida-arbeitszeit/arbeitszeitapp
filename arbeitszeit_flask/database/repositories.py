@@ -521,6 +521,36 @@ class TransactionQueryResult(FlaskQueryResult[entities.Transaction]):
             )
         )
 
+    def that_were_a_sale_for_plan(self, *plan: UUID) -> Self:
+        plan_ids = [str(p) for p in plan]
+        consumer_purchase = aliased(models.ConsumerPurchase)
+        company_purchase = aliased(models.CompanyPurchase)
+        valid_consumer_purchase = consumer_purchase.query
+        valid_company_purchase = company_purchase.query
+        if plan:
+            valid_company_purchase = valid_company_purchase.filter(
+                company_purchase.plan_id.in_(plan_ids)
+            )
+            valid_consumer_purchase = valid_consumer_purchase.filter(
+                consumer_purchase.plan_id.in_(plan_ids)
+            )
+        return self._with_modified_query(
+            lambda query: query.filter(
+                or_(
+                    models.Transaction.id.in_(
+                        valid_consumer_purchase.with_entities(
+                            consumer_purchase.transaction_id
+                        ).scalar_subquery()
+                    ),
+                    models.Transaction.id.in_(
+                        valid_company_purchase.with_entities(
+                            company_purchase.transaction_id
+                        ).scalar_subquery()
+                    ),
+                )
+            )
+        )
+
 
 class AccountQueryResult(FlaskQueryResult[entities.Account]):
     def with_id(self, *id_: UUID) -> AccountQueryResult:
@@ -1101,22 +1131,6 @@ class TransactionRepository(repositories.TransactionRepository):
             query=models.Transaction.query,
             mapper=self.object_from_orm,
             db=self.db,
-        )
-
-    def get_sales_balance_of_plan(self, plan: entities.Plan) -> Decimal:
-        return Decimal(
-            models.Transaction.query.join(
-                models.Account,
-                models.Transaction.receiving_account == models.Account.id,
-            )
-            .join(
-                models.Company,
-                models.Account.id == models.Company.prd_account,
-            )
-            .filter(models.Company.id == str(plan.planner))
-            .with_entities(func.sum(models.Transaction.amount_received))
-            .one()[0]
-            or 0
         )
 
 
