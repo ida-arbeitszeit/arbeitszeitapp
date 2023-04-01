@@ -76,6 +76,12 @@ class QueryResultImpl(Generic[T]):
     def __len__(self) -> int:
         return len(list(self.items()))
 
+    def _filter_elements(self, condition: Callable[[T], bool]) -> Self:
+        return replace(
+            self,
+            items=lambda: filter(condition, self.items()),
+        )
+
 
 class PlanResult(QueryResultImpl[Plan]):
     def ordered_by_creation_date(self, ascending: bool = True) -> PlanResult:
@@ -408,6 +414,16 @@ class CompanyResult(QueryResultImpl[Company]):
             items=lambda: filter(key, self.items()),
             entities=self.entities,
         )
+
+
+class AccountantResult(QueryResultImpl[Accountant]):
+    def with_email_address(self, email: str) -> Self:
+        return self._filter_elements(
+            lambda accountant: accountant.email_address == email
+        )
+
+    def with_id(self, id_: UUID) -> Self:
+        return self._filter_elements(lambda accountant: accountant.id == id_)
 
 
 class TransactionResult(QueryResultImpl[Transaction]):
@@ -1034,15 +1050,6 @@ class AccountantRepositoryTestImpl:
         self.accountants[id] = record
         return id
 
-    def has_accountant_with_email(self, email: str) -> bool:
-        return any(record.email == email for record in self.accountants.values())
-
-    def get_by_id(self, id: UUID) -> Optional[Accountant]:
-        record = self.accountants.get(id)
-        if record is None:
-            return None
-        return Accountant(email_address=record.email, name=record.name, id=id)
-
     def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
         for uuid, record in self.accountants.items():
             if record.email == email:
@@ -1052,8 +1059,8 @@ class AccountantRepositoryTestImpl:
                     return None
         return None
 
-    def get_all_accountants(self) -> QueryResultImpl[Accountant]:
-        return QueryResultImpl(
+    def get_accountants(self) -> AccountantResult:
+        return AccountantResult(
             items=lambda: (
                 Accountant(email_address=record.email, name=record.name, id=record.id)
                 for record in self.accountants.values()

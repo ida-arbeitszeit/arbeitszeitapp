@@ -28,7 +28,8 @@ class RegisterAccountantUseCase:
         invited_email = self.token_service.unwrap_invitation_token(request.token)
         if invited_email != request.email:
             return self._failed_registration(request)
-        if self.accountant_repository.has_accountant_with_email(request.email):
+        accountants = self.accountant_repository.get_accountants()
+        if accountants.with_email_address(request.email):
             return self._failed_registration(request)
         user_id = self.accountant_repository.create_accountant(
             email=request.email,

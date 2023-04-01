@@ -28,4 +28,6 @@ class SendAccountantRegistrationTokenUseCase:
         return self.Response()
 
     def _is_user_existing(self, email: str) -> bool:
-        return self.accountant_repository.has_accountant_with_email(email)
+        return bool(
+            self.accountant_repository.get_accountants().with_email_address(email)
+        )

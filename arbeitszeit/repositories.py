@@ -272,6 +272,14 @@ class CompanyResult(QueryResult[Company], Protocol):
         ...
 
 
+class AccountantResult(QueryResult[Accountant], Protocol):
+    def with_email_address(self, email: str) -> Self:
+        ...
+
+    def with_id(self, id_: UUID) -> Self:
+        ...
+
+
 class TransactionResult(QueryResult[Transaction], Protocol):
     def where_account_is_sender_or_receiver(self, *account: UUID) -> TransactionResult:
         ...
@@ -529,16 +537,10 @@ class AccountantRepository(Protocol):
     def create_accountant(self, email: str, name: str, password: str) -> UUID:
         ...
 
-    def has_accountant_with_email(self, email: str) -> bool:
-        ...
-
-    def get_by_id(self, id: UUID) -> Optional[Accountant]:
-        ...
-
     def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
         ...
 
-    def get_all_accountants(self) -> QueryResult[Accountant]:
+    def get_accountants(self) -> AccountantResult:
         ...
 
 
