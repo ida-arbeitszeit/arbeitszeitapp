@@ -475,6 +475,19 @@ class CompanyQueryResult(FlaskQueryResult[entities.Company]):
         )
 
 
+class AccountantResult(FlaskQueryResult[entities.Accountant]):
+    def with_email_address(self, email: str) -> Self:
+        user = aliased(models.User)
+        return self._with_modified_query(
+            lambda query: query.join(user).filter(user.email == email)
+        )
+
+    def with_id(self, id_: UUID) -> Self:
+        return self._with_modified_query(
+            lambda query: query.filter(models.Accountant.id == str(id_))
+        )
+
+
 class TransactionQueryResult(FlaskQueryResult[entities.Transaction]):
     def where_account_is_sender_or_receiver(
         self, *account: UUID
@@ -1396,14 +1409,6 @@ class AccountantRepository:
         self.db.session.add(accountant)
         return user_id
 
-    def get_by_id(self, id: UUID) -> Optional[entities.Accountant]:
-        record = models.Accountant.query.filter_by(id=str(id)).first()
-        if record is None:
-            return None
-        return entities.Accountant(
-            email_address=record.user.email, name=record.name, id=UUID(record.id)
-        )
-
     def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
         record = (
             self.db.session.query(models.Accountant)
@@ -1417,22 +1422,6 @@ class AccountantRepository:
             return None
         return UUID(record.id)
 
-    def has_accountant_with_email(self, email: str) -> bool:
-        return bool(
-            self.db.session.query(models.Accountant)
-            .join(models.User)
-            .filter(models.User.email == email)
-            .first()
-        )
-
-    def get_accountant_orm_by_mail(self, email: str) -> Optional[models.Accountant]:
-        return (
-            self.db.session.query(models.Accountant)
-            .join(models.User)
-            .filter(models.User.email == email)
-            .first()
-        )
-
     def _get_or_create_user(self, email: str, password: str) -> models.User:
         return self.db.session.query(models.User).filter(
             and_(models.User.email == email, models.User.accountant == None)
@@ -1441,9 +1430,9 @@ class AccountantRepository:
             email=email,
         )
 
-    def get_all_accountants(self) -> FlaskQueryResult[entities.Accountant]:
-        return FlaskQueryResult(
-            query=models.Accountant.query.all(),
+    def get_accountants(self) -> AccountantResult:
+        return AccountantResult(
+            query=models.Accountant.query,
             mapper=lambda record: entities.Accountant(
                 email_address=record.user.email,
                 name=record.name,

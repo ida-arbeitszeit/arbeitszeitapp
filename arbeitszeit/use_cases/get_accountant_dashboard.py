@@ -18,7 +18,7 @@ class GetAccountantDashboardUseCase:
     accountant_repository: AccountantRepository
 
     def get_dashboard(self, user: UUID) -> Response:
-        accountant = self.accountant_repository.get_by_id(user)
+        accountant = self.accountant_repository.get_accountants().with_id(user).first()
         if not accountant:
             raise self.Failure()
         return self.Response(

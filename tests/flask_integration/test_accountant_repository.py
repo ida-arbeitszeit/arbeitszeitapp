@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
 
@@ -22,12 +24,12 @@ class CreateAccountantTests(FlaskTestCase):
         )
 
     def test_repository_stores_email_address_correctly(self) -> None:
-        accountant = self.repository.get_by_id(self.uuid)
+        accountant = self.repository.get_accountants().with_id(self.uuid).first()
         assert accountant
         self.assertEqual(accountant.email_address, self.expected_email)
 
     def test_repository_stores_name_correctly(self) -> None:
-        accountant = self.repository.get_by_id(self.uuid)
+        accountant = self.repository.get_accountants().with_id(self.uuid).first()
         assert accountant
         self.assertEqual(accountant.name, self.expected_name)
 
@@ -36,22 +38,6 @@ class CreateAccountantTests(FlaskTestCase):
             self.repository.validate_credentials(
                 self.expected_email, self.expected_password
             )
-        )
-
-    def test_repository_has_user_with_email_after_creation(self) -> None:
-        self.assertTrue(self.repository.has_accountant_with_email(self.expected_email))
-
-    def test_repository_doesnt_have_user_with_other_email(self) -> None:
-        self.assertFalse(
-            self.repository.has_accountant_with_email(email="different@email.org")
-        )
-
-    def test_can_retrieve_accountant_orm_by_mail(self) -> None:
-        self.assertTrue(self.repository.get_accountant_orm_by_mail(self.expected_email))
-
-    def test_return_no_accountant_with_specified_email_exists(self) -> None:
-        self.assertIsNone(
-            self.repository.get_accountant_orm_by_mail("different@email.org")
         )
 
     def test_cannot_create_accountant_with_same_email_twice(self) -> None:
@@ -107,26 +93,26 @@ class ValidationTests(FlaskTestCase):
         )
 
 
-class GetAllAccountantsTests(FlaskTestCase):
+class GetAccountantsTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.repository = self.injector.get(AccountantRepository)
 
     def test_that_by_default_there_are_no_accountants_in_db(self) -> None:
-        assert not list(self.repository.get_all_accountants())
+        assert not self.repository.get_accountants()
 
     def test_that_one_item_is_shown_after_accountant_was_created(self) -> None:
         self.repository.create_accountant(
             email="test@test.test", name="test accountant", password="1234"
         )
-        assert len(list(self.repository.get_all_accountants())) == 1
+        assert len(self.repository.get_accountants()) == 1
 
     def test_that_correct_email_address_is_retrieved(self) -> None:
         expected_email_address = "test@email.com"
         self.repository.create_accountant(
             email=expected_email_address, name="test accountant", password="1234"
         )
-        item = list(self.repository.get_all_accountants())[0]
+        item = list(self.repository.get_accountants())[0]
         assert item.email_address == expected_email_address
 
     def test_that_correct_name_is_retrieved(self) -> None:
@@ -134,5 +120,62 @@ class GetAllAccountantsTests(FlaskTestCase):
         self.repository.create_accountant(
             email="test@test.test", name=expected_name, password="1234"
         )
-        item = list(self.repository.get_all_accountants())[0]
+        item = list(self.repository.get_accountants())[0]
         assert item.name == expected_name
+
+
+class WithIdTests(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.repository = self.injector.get(AccountantRepository)
+
+    def test_with_any_accountants_in_db_that_result_set_is_empty(self) -> None:
+        assert not self.repository.get_accountants().with_id(uuid4())
+
+    def test_result_set_is_empty_with_with_unknown_id_and_one_accountant_in_db(
+        self,
+    ) -> None:
+        self.repository.create_accountant(
+            email="test@test.test", name="test name", password="1234"
+        )
+        assert not self.repository.get_accountants().with_id(uuid4())
+
+    def test_result_set_contains_1_entry_with_id_for_previously_created_accountant(
+        self,
+    ) -> None:
+        accountant_id = self.repository.create_accountant(
+            email="test@test.test", name="test name", password="1234"
+        )
+        assert len(self.repository.get_accountants().with_id(accountant_id)) == 1
+
+
+class WithEmailAddressTests(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.repository = self.injector.get(AccountantRepository)
+
+    def test_result_set_is_empty_with_empty_db(self) -> None:
+        assert not self.repository.get_accountants().with_email_address(
+            "fake@mail.test"
+        )
+
+    def test_result_set_is_empty_with_unknown_email_address_and_one_accountant_in_db(
+        self,
+    ) -> None:
+        self.repository.create_accountant(
+            email="test@test.test", name="test name", password="1234"
+        )
+        assert not self.repository.get_accountants().with_email_address(
+            "fake@mail.test"
+        )
+
+    def test_result_set_contains_one_record_with_known_email_address_of_existing_accountant(
+        self,
+    ) -> None:
+        self.repository.create_accountant(
+            email="test@test.test", name="test name", password="1234"
+        )
+        assert (
+            len(self.repository.get_accountants().with_email_address("test@test.test"))
+            == 1
+        )

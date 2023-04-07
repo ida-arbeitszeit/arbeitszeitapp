@@ -28,9 +28,8 @@ class LogInAccountantUseCase:
     accountant_repository: AccountantRepository
 
     def log_in_accountant(self, request: Request) -> Response:
-        if not self.accountant_repository.has_accountant_with_email(
-            request.email_address
-        ):
+        accountants = self.accountant_repository.get_accountants()
+        if not accountants.with_email_address(request.email_address):
             return self.Response(
                 rejection_reason=self.RejectionReason.email_is_not_accountant
             )

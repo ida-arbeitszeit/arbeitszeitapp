@@ -25,7 +25,7 @@ class AccountantNotifier:
     def notify_all_accountants_about_new_plan(
         self, product_name: str, plan_id: UUID
     ) -> None:
-        for accountant in self.accountant_repository.get_all_accountants():
+        for accountant in self.accountant_repository.get_accountants():
             self.presenter.notify_accountant_about_new_plan(
                 Notification(
                     product_name=product_name,
