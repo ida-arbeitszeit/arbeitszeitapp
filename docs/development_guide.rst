@@ -227,6 +227,25 @@ single UPDATE statement to the SQL database server since only the
 ``perform`` method at the end of the method chain will send commands
 to it.
 
+User identification
+-------------------
+
+Arbeitszeitapp knows 3 different types of users: members, companies
+and accountants. Members represent individual workers, companies
+represent worker organized production units, e.g. workshops, factories
+or offices. Accountants keep track of all transactions and review
+plans. Each of these different user types is represented by a
+dedicated user account with a universally unique identifier (UUID).
+
+The application disallows the reuse of email addresses per account
+type. This means that there can only ever be one member with the email
+address ``test@test.test`` but there might be a company that shares
+this email address. Passwords for logging into the application
+(authentication) are set for each email address, meaning that a
+company with the email address ``test@test.test`` and a member with
+the same email address share a password and it is not possible to set
+differing passwords for these two accounts.
+
 Subclassing unittest.TestCase
 -----------------------------
 
