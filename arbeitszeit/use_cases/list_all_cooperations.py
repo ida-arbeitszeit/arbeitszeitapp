@@ -3,7 +3,7 @@ from typing import List
 from uuid import UUID
 
 from arbeitszeit.entities import Cooperation
-from arbeitszeit.repositories import CooperationRepository, DatabaseGateway
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -20,11 +20,10 @@ class ListAllCooperationsResponse:
 
 @dataclass
 class ListAllCooperations:
-    cooperation_repository: CooperationRepository
     database_gateway: DatabaseGateway
 
     def __call__(self) -> ListAllCooperationsResponse:
-        all_cooperations = list(self.cooperation_repository.get_all_cooperations())
+        all_cooperations = self.database_gateway.get_cooperations()
         if not all_cooperations:
             return ListAllCooperationsResponse(cooperations=[])
         cooperations = [self._coop_to_response_model(coop) for coop in all_cooperations]

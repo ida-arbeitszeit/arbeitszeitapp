@@ -9,7 +9,6 @@ from arbeitszeit.use_cases.end_cooperation import (
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
 
 from .dependency_injection import get_dependency_injector
-from .repositories import CooperationRepository
 
 
 class TestEndCooperation(TestCase):
@@ -19,7 +18,6 @@ class TestEndCooperation(TestCase):
         self.coop_generator = self.injector.get(CooperationGenerator)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
-        self.cooperation_repository = self.injector.get(CooperationRepository)
         self.requester = self.company_generator.create_company()
 
     def test_error_is_raised_when_plan_does_not_exist(self) -> None:

@@ -3,11 +3,7 @@ from typing import List
 from uuid import UUID
 
 from arbeitszeit.entities import Plan
-from arbeitszeit.repositories import (
-    CompanyRepository,
-    CooperationRepository,
-    DatabaseGateway,
-)
+from arbeitszeit.repositories import CompanyRepository, DatabaseGateway
 
 
 @dataclass
@@ -31,7 +27,6 @@ class ListOutboundCoopRequestsResponse:
 @dataclass
 class ListOutboundCoopRequests:
     company_repository: CompanyRepository
-    cooperation_repository: CooperationRepository
     database_gateway: DatabaseGateway
 
     def __call__(
@@ -58,13 +53,15 @@ class ListOutboundCoopRequests:
 
     def _plan_to_response_model(self, plan: Plan) -> ListedOutboundCoopRequest:
         assert plan.requested_cooperation
-        requested_cooperation_name = self.cooperation_repository.get_cooperation_name(
-            plan.requested_cooperation
+        requested_cooperation = (
+            self.database_gateway.get_cooperations()
+            .with_id(plan.requested_cooperation)
+            .first()
         )
-        assert requested_cooperation_name
+        assert requested_cooperation
         return ListedOutboundCoopRequest(
             plan_id=plan.id,
             plan_name=plan.prd_name,
             coop_id=plan.requested_cooperation,
-            coop_name=requested_cooperation_name,
+            coop_name=requested_cooperation.name,
         )

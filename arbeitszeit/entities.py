@@ -108,7 +108,7 @@ class Cooperation:
     creation_date: datetime
     name: str
     definition: str
-    coordinator: Company
+    coordinator: UUID
 
 
 @dataclass

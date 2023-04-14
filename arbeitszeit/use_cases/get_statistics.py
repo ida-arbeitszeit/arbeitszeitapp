@@ -7,7 +7,6 @@ from arbeitszeit.entities import PayoutFactor
 from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
-    CooperationRepository,
     DatabaseGateway,
     MemberRepository,
 )
@@ -33,8 +32,7 @@ class StatisticsResponse:
 class GetStatistics:
     company_repository: CompanyRepository
     member_repository: MemberRepository
-    cooperation_respository: CooperationRepository
-    account_respository: AccountRepository
+    account_repository: AccountRepository
     database: DatabaseGateway
     datetime_service: DatetimeService
 
@@ -53,7 +51,7 @@ class GetStatistics:
         return StatisticsResponse(
             registered_companies_count=len(self.company_repository.get_companies()),
             registered_members_count=len(self.member_repository.get_members()),
-            cooperations_count=self.cooperation_respository.count_cooperations(),
+            cooperations_count=len(self.database.get_cooperations()),
             certificates_count=certs_total,
             available_product=available_product,
             active_plans_count=len(active_plans),
@@ -86,10 +84,10 @@ class GetStatistics:
         available_product = Decimal(0)
         all_companies = self.company_repository.get_companies()
         for company in all_companies:
-            available_product += self.account_respository.get_account_balance(
+            available_product += self.account_repository.get_account_balance(
                 company.product_account
             )
-            certs_in_company_accounts += self.account_respository.get_account_balance(
+            certs_in_company_accounts += self.account_repository.get_account_balance(
                 company.work_account
             )
         return certs_in_company_accounts, available_product * -1
@@ -98,7 +96,7 @@ class GetStatistics:
         certs_in_member_accounts = Decimal(0)
         all_members = self.member_repository.get_members()
         for member in all_members:
-            certs_in_member_accounts += self.account_respository.get_account_balance(
+            certs_in_member_accounts += self.account_repository.get_account_balance(
                 member.account
             )
         return certs_in_member_accounts

@@ -203,7 +203,7 @@ class PlanResult(QueryResultImpl[Plan]):
             cooperations: Set[UUID] = {
                 key
                 for key, value in self.entities.cooperations.items()
-                if value.coordinator.id in company
+                if value.coordinator in company
             }
             return filter(
                 lambda plan: plan.requested_cooperation in cooperations
@@ -321,6 +321,46 @@ class PlanUpdate:
 
     def _add_update(self, update: Callable[[Plan], None]) -> Self:
         return replace(self, update_functions=self.update_functions + [update])
+
+
+class CooperationResult(QueryResultImpl[Cooperation]):
+    def with_id(self, id_: UUID) -> Self:
+        return replace(
+            self,
+            items=lambda: filter(lambda coop: coop.id == id_, self.items()),
+        )
+
+    def with_name_ignoring_case(self, name: str) -> Self:
+        return replace(
+            self,
+            items=lambda: filter(
+                lambda coop: coop.name.lower() == name.lower(), self.items()
+            ),
+        )
+
+    def coordinated_by_company(self, company_id: UUID) -> Self:
+        return replace(
+            self,
+            items=lambda: filter(
+                lambda coop: coop.coordinator == company_id, self.items()
+            ),
+        )
+
+    def joined_with_coordinator(self) -> QueryResultImpl[Tuple[Cooperation, Company]]:
+        def mapping(
+            coop: entities.Cooperation,
+        ) -> Tuple[entities.Cooperation, entities.Company]:
+            coordinator = self.entities.get_company_by_id(coop.coordinator)
+            assert coordinator
+            return (coop, coordinator)
+
+        return QueryResultImpl(
+            items=lambda: map(
+                mapping,
+                self.items(),
+            ),
+            entities=self.entities,
+        )
 
 
 class MemberResult(QueryResultImpl[Member]):
@@ -810,7 +850,7 @@ class CompanyRepository(interfaces.CompanyRepository):
             registered_on=registered_on,
             confirmed_on=None,
         )
-        self.entities.companies[email] = new_company
+        self.entities.companies[new_company.id] = new_company
         self.entities.company_passwords[new_company.id] = password
         return new_company
 
@@ -821,19 +861,21 @@ class CompanyRepository(interfaces.CompanyRepository):
         )
 
     def validate_credentials(self, email_address: str, password: str) -> Optional[UUID]:
-        if company := self.entities.companies.get(email_address):
-            if correct_password := self.entities.company_passwords.get(company.id):
-                if password == correct_password:
-                    return company.id
+        for candidate in self.entities.companies.values():
+            if candidate.email == email_address:
+                if correct_password := self.entities.company_passwords.get(
+                    candidate.id
+                ):
+                    if password == correct_password:
+                        return candidate.id
         return None
 
     def confirm_company(self, company: UUID, confirmation_timestamp: datetime) -> None:
-        for model in self.entities.companies.values():
-            if model.id == company:
-                model.confirmed_on = confirmation_timestamp
+        model = self.entities.companies[company]
+        model.confirmed_on = confirmation_timestamp
 
     def is_company_confirmed(self, company: UUID) -> bool:
-        for model in self.entities.companies.values():
+        if (model := self.entities.companies.get(company)) is not None:
             if model.id == company and model.confirmed_on is not None:
                 return True
         return False
@@ -971,60 +1013,6 @@ class WorkerInviteRepository(interfaces.WorkerInviteRepository):
 
 
 @singleton
-class CooperationRepository(interfaces.CooperationRepository):
-    def __init__(self, entities: EntityStorage) -> None:
-        self.entities = entities
-
-    def create_cooperation(
-        self,
-        creation_timestamp: datetime,
-        name: str,
-        definition: str,
-        coordinator: Company,
-    ) -> Cooperation:
-        cooperation_id = uuid4()
-        cooperation = Cooperation(
-            id=cooperation_id,
-            creation_date=creation_timestamp,
-            name=name,
-            definition=definition,
-            coordinator=coordinator,
-        )
-        self.entities.cooperations[cooperation_id] = cooperation
-        return cooperation
-
-    def get_by_id(self, id: UUID) -> Optional[Cooperation]:
-        return self.entities.cooperations.get(id)
-
-    def get_by_name(self, name: str) -> Iterator[Cooperation]:
-        for cooperation in self.entities.cooperations.values():
-            if cooperation.name.lower() == name.lower():
-                yield cooperation
-
-    def get_cooperations_coordinated_by_company(
-        self, company_id: UUID
-    ) -> Iterator[Cooperation]:
-        for cooperation in self.entities.cooperations.values():
-            if cooperation.coordinator.id == company_id:
-                yield cooperation
-
-    def get_cooperation_name(self, coop_id: UUID) -> Optional[str]:
-        coop = self.entities.cooperations.get(coop_id)
-        if coop is None:
-            return None
-        return coop.name
-
-    def get_all_cooperations(self) -> Iterator[Cooperation]:
-        return (cooperation for cooperation in self.entities.cooperations.values())
-
-    def count_cooperations(self) -> int:
-        return len(self.entities.cooperations)
-
-    def __len__(self) -> int:
-        return len(self.entities.cooperations)
-
-
-@singleton
 class AccountantRepositoryTestImpl:
     @dataclass
     class _AccountantRecord:
@@ -1087,7 +1075,7 @@ class EntityStorage:
         self.members: Dict[UUID, Member] = {}
         self.member_passwords: Dict[UUID, str] = {}
         self.company_workers: Dict[UUID, Set[UUID]] = defaultdict(lambda: set())
-        self.companies: Dict[str, Company] = {}
+        self.companies: Dict[UUID, Company] = {}
         self.company_passwords: Dict[UUID, str] = {}
         self.plans: Dict[UUID, Plan] = {}
         self.transactions: Dict[UUID, Transaction] = dict()
@@ -1151,10 +1139,7 @@ class EntityStorage:
         return account
 
     def get_company_by_id(self, company: UUID) -> Optional[Company]:
-        for model in self.companies.values():
-            if model.id == company:
-                return model
-        return None
+        return self.companies.get(company)
 
     def create_consumer_purchase(
         self, transaction: UUID, amount: int, plan: UUID
@@ -1229,3 +1214,27 @@ class EntityStorage:
         )
         self.plans[plan.id] = plan
         return plan
+
+    def create_cooperation(
+        self,
+        creation_timestamp: datetime,
+        name: str,
+        definition: str,
+        coordinator: UUID,
+    ) -> Cooperation:
+        cooperation_id = uuid4()
+        cooperation = Cooperation(
+            id=cooperation_id,
+            creation_date=creation_timestamp,
+            name=name,
+            definition=definition,
+            coordinator=coordinator,
+        )
+        self.cooperations[cooperation_id] = cooperation
+        return cooperation
+
+    def get_cooperations(self) -> CooperationResult:
+        return CooperationResult(
+            items=lambda: self.cooperations.values(),
+            entities=self,
+        )

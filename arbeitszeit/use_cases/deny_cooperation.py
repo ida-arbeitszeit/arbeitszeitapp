@@ -3,11 +3,7 @@ from enum import Enum, auto
 from typing import Optional
 from uuid import UUID
 
-from arbeitszeit.repositories import (
-    CompanyRepository,
-    CooperationRepository,
-    DatabaseGateway,
-)
+from arbeitszeit.repositories import CompanyRepository, DatabaseGateway
 
 
 @dataclass
@@ -35,7 +31,6 @@ class DenyCooperationResponse:
 @dataclass
 class DenyCooperation:
     database_gateway: DatabaseGateway
-    cooperation_repository: CooperationRepository
     company_repository: CompanyRepository
 
     def __call__(self, request: DenyCooperationRequest) -> DenyCooperationResponse:
@@ -50,18 +45,17 @@ class DenyCooperation:
         return DenyCooperationResponse(rejection_reason=None)
 
     def _validate_request(self, request: DenyCooperationRequest) -> None:
-        requester = (
-            self.company_repository.get_companies()
-            .with_id(request.requester_id)
+        plan = self.database_gateway.get_plans().with_id(request.plan_id).first()
+        cooperation = (
+            self.database_gateway.get_cooperations()
+            .with_id(request.cooperation_id)
             .first()
         )
-        plan = self.database_gateway.get_plans().with_id(request.plan_id).first()
-        cooperation = self.cooperation_repository.get_by_id(request.cooperation_id)
         if plan is None:
             raise DenyCooperationResponse.RejectionReason.plan_not_found
         if cooperation is None:
             raise DenyCooperationResponse.RejectionReason.cooperation_not_found
         if plan.requested_cooperation != cooperation.id:
             raise DenyCooperationResponse.RejectionReason.cooperation_was_not_requested
-        if requester != cooperation.coordinator:
+        if request.requester_id != cooperation.coordinator:
             raise DenyCooperationResponse.RejectionReason.requester_is_not_coordinator

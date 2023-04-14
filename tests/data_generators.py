@@ -26,7 +26,6 @@ from arbeitszeit.entities import (
 from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
-    CooperationRepository,
     DatabaseGateway,
     MemberRepository,
     PlanDraftRepository,
@@ -297,7 +296,7 @@ class PlanGenerator:
             )
             self.accept_cooperation(
                 AcceptCooperationRequest(
-                    cooperation.coordinator.id, plan.id, cooperation.id
+                    cooperation.coordinator, plan.id, cooperation.id
                 )
             )
         selected_plan = self.database_gateway.get_plans().with_id(
@@ -486,7 +485,6 @@ class TransactionGenerator:
 
 @dataclass
 class CooperationGenerator:
-    cooperation_repository: CooperationRepository
     datetime_service: FakeDatetimeService
     company_generator: CompanyGenerator
     database_gateway: DatabaseGateway
@@ -502,12 +500,9 @@ class CooperationGenerator:
             name = "test name"
         if coordinator is None:
             coordinator = self.company_generator.create_company_entity()
-        if isinstance(coordinator, UUID):
-            coordinator = (
-                self.company_repository.get_companies().with_id(coordinator).first()
-            )
-            assert coordinator
-        cooperation = self.cooperation_repository.create_cooperation(
+        if isinstance(coordinator, Company):
+            coordinator = coordinator.id
+        cooperation = self.database_gateway.create_cooperation(
             self.datetime_service.now(),
             name=name,
             definition="test info",

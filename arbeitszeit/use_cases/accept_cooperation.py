@@ -4,11 +4,7 @@ from typing import Optional
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.repositories import (
-    CompanyRepository,
-    CooperationRepository,
-    DatabaseGateway,
-)
+from arbeitszeit.repositories import CompanyRepository, DatabaseGateway
 
 
 @dataclass
@@ -39,7 +35,6 @@ class AcceptCooperationResponse:
 @dataclass
 class AcceptCooperation:
     database_gateway: DatabaseGateway
-    cooperation_repository: CooperationRepository
     company_repository: CompanyRepository
     datetime_service: DatetimeService
 
@@ -55,13 +50,12 @@ class AcceptCooperation:
         return AcceptCooperationResponse(rejection_reason=None)
 
     def _validate_request(self, request: AcceptCooperationRequest) -> None:
-        requester = (
-            self.company_repository.get_companies()
-            .with_id(request.requester_id)
+        plan = self.database_gateway.get_plans().with_id(request.plan_id).first()
+        cooperation = (
+            self.database_gateway.get_cooperations()
+            .with_id(request.cooperation_id)
             .first()
         )
-        plan = self.database_gateway.get_plans().with_id(request.plan_id).first()
-        cooperation = self.cooperation_repository.get_by_id(request.cooperation_id)
         now = self.datetime_service.now()
         if plan is None:
             raise AcceptCooperationResponse.RejectionReason.plan_not_found
@@ -75,5 +69,5 @@ class AcceptCooperation:
             raise AcceptCooperationResponse.RejectionReason.plan_is_public_service
         if plan.requested_cooperation != cooperation.id:
             raise AcceptCooperationResponse.RejectionReason.cooperation_was_not_requested
-        if requester != cooperation.coordinator:
+        if request.requester_id != cooperation.coordinator:
             raise AcceptCooperationResponse.RejectionReason.requester_is_not_coordinator

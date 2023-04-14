@@ -33,7 +33,6 @@ from arbeitszeit_flask.models import (
     AccountTypes,
     Company,
     CompanyWorkInvite,
-    Cooperation,
     Member,
     PlanDraft,
     SocialAccounting,
@@ -726,6 +725,48 @@ class ConsumerPurchaseResult(FlaskQueryResult[entities.ConsumerPurchase]):
         )
 
 
+class CooperationResult(FlaskQueryResult[entities.Cooperation]):
+    def with_id(self, id_: UUID) -> Self:
+        return self._with_modified_query(
+            lambda query: query.filter(models.Cooperation.id == str(id_))
+        )
+
+    def with_name_ignoring_case(self, name: str) -> Self:
+        return self._with_modified_query(
+            lambda query: query.filter(
+                func.lower(models.Cooperation.name) == func.lower(name)
+            )
+        )
+
+    def coordinated_by_company(self, company_id: UUID) -> Self:
+        return self._with_modified_query(
+            lambda query: query.filter(
+                models.Cooperation.coordinator == str(company_id)
+            )
+        )
+
+    def joined_with_coordinator(
+        self,
+    ) -> FlaskQueryResult[Tuple[entities.Cooperation, entities.Company]]:
+        def mapper(
+            orm,
+        ) -> Tuple[entities.Cooperation, entities.Company]:
+            cooperation_orm, company_orm = orm
+            return (
+                DatabaseGatewayImpl.cooperation_from_orm(cooperation_orm),
+                CompanyRepository.object_from_orm(company_orm),
+            )
+
+        company = aliased(models.Company)
+        return FlaskQueryResult(
+            db=self.db,
+            query=self.query.join(
+                company, models.Cooperation.coordinator == company.id
+            ).with_entities(models.Cooperation, company),
+            mapper=mapper,
+        )
+
+
 @dataclass
 class UserAddressBookImpl:
     db: SQLAlchemy
@@ -837,7 +878,8 @@ class CompanyRepository(repositories.CompanyRepository):
         assert orm
         return orm
 
-    def object_from_orm(self, company_orm: Company) -> entities.Company:
+    @classmethod
+    def object_from_orm(cls, company_orm: Company) -> entities.Company:
         return entities.Company(
             id=UUID(company_orm.id),
             email=company_orm.user.email,
@@ -1319,82 +1361,6 @@ class WorkerInviteRepository(repositories.WorkerInviteRepository):
 
 
 @dataclass
-class CooperationRepository(repositories.CooperationRepository):
-    db: SQLAlchemy
-    company_repository: CompanyRepository
-
-    def create_cooperation(
-        self,
-        creation_timestamp: datetime,
-        name: str,
-        definition: str,
-        coordinator: entities.Company,
-    ) -> entities.Cooperation:
-        cooperation = Cooperation(
-            id=str(uuid4()),
-            creation_date=creation_timestamp,
-            name=name,
-            definition=definition,
-            coordinator=str(coordinator.id),
-        )
-        self.db.session.add(cooperation)
-        return self.object_from_orm(cooperation)
-
-    def object_from_orm(self, cooperation_orm: Cooperation) -> entities.Cooperation:
-        coordinator = (
-            self.company_repository.get_companies()
-            .with_id(cooperation_orm.coordinator)
-            .first()
-        )
-        assert coordinator is not None
-        return entities.Cooperation(
-            id=UUID(cooperation_orm.id),
-            creation_date=cooperation_orm.creation_date,
-            name=cooperation_orm.name,
-            definition=cooperation_orm.definition,
-            coordinator=coordinator,
-        )
-
-    def get_by_id(self, id: UUID) -> Optional[entities.Cooperation]:
-        cooperation_orm = Cooperation.query.filter_by(id=str(id)).first()
-        if cooperation_orm is None:
-            return None
-        return self.object_from_orm(cooperation_orm)
-
-    def get_by_name(self, name: str) -> Iterator[entities.Cooperation]:
-        return (
-            self.object_from_orm(cooperation)
-            for cooperation in Cooperation.query.filter(
-                Cooperation.name.ilike(name)
-            ).all()
-        )
-
-    def get_cooperations_coordinated_by_company(
-        self, company_id: UUID
-    ) -> Iterator[entities.Cooperation]:
-        return (
-            self.object_from_orm(cooperation)
-            for cooperation in Cooperation.query.filter_by(
-                coordinator=str(company_id)
-            ).all()
-        )
-
-    def get_cooperation_name(self, coop_id: UUID) -> Optional[str]:
-        coop_orm = Cooperation.query.filter_by(id=str(coop_id)).first()
-        if coop_orm is None:
-            return None
-        return coop_orm.name
-
-    def get_all_cooperations(self) -> Iterator[entities.Cooperation]:
-        return (
-            self.object_from_orm(cooperation) for cooperation in Cooperation.query.all()
-        )
-
-    def count_cooperations(self) -> int:
-        return models.Cooperation.query.count()
-
-
-@dataclass
 class AccountantRepository:
     db: SQLAlchemy
 
@@ -1621,4 +1587,38 @@ class DatabaseGatewayImpl:
             cooperation=UUID(plan.cooperation) if plan.cooperation else None,
             is_available=plan.is_available,
             hidden_by_user=plan.hidden_by_user,
+        )
+
+    def create_cooperation(
+        self,
+        creation_timestamp: datetime,
+        name: str,
+        definition: str,
+        coordinator: UUID,
+    ) -> entities.Cooperation:
+        cooperation = models.Cooperation(
+            creation_date=creation_timestamp,
+            name=name,
+            definition=definition,
+            coordinator=str(coordinator),
+        )
+        self.db.session.add(cooperation)
+        self.db.session.flush()
+        return self.cooperation_from_orm(cooperation)
+
+    def get_cooperations(self) -> CooperationResult:
+        return CooperationResult(
+            mapper=self.cooperation_from_orm,
+            query=models.Cooperation.query,
+            db=self.db,
+        )
+
+    @classmethod
+    def cooperation_from_orm(self, orm: models.Cooperation) -> entities.Cooperation:
+        return entities.Cooperation(
+            id=UUID(orm.id),
+            creation_date=orm.creation_date,
+            name=orm.name,
+            definition=orm.definition,
+            coordinator=UUID(orm.coordinator),
         )

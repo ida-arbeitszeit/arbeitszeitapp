@@ -4,11 +4,7 @@ from typing import List
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.repositories import (
-    CompanyRepository,
-    CooperationRepository,
-    DatabaseGateway,
-)
+from arbeitszeit.repositories import CompanyRepository, DatabaseGateway
 
 
 @dataclass
@@ -33,7 +29,6 @@ class ListCoordinationsResponse:
 @dataclass
 class ListCoordinations:
     company_repository: CompanyRepository
-    cooperation_repository: CooperationRepository
     datetime_service: DatetimeService
     database_gateway: DatabaseGateway
 
@@ -52,7 +47,7 @@ class ListCoordinations:
                     )
                 ),
             )
-            for coop in self.cooperation_repository.get_cooperations_coordinated_by_company(
+            for coop in self.database_gateway.get_cooperations().coordinated_by_company(
                 request.company
             )
         ]

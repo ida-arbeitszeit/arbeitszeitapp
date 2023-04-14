@@ -4,7 +4,7 @@ from typing import List, Optional
 from uuid import UUID
 
 from arbeitszeit.price_calculator import PriceCalculator
-from arbeitszeit.repositories import CooperationRepository, DatabaseGateway
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -38,14 +38,19 @@ GetCoopSummaryResponse = Optional[GetCoopSummarySuccess]
 
 @dataclass
 class GetCoopSummary:
-    cooperation_repository: CooperationRepository
     database_gateway: DatabaseGateway
     price_calculator: PriceCalculator
 
     def __call__(self, request: GetCoopSummaryRequest) -> GetCoopSummaryResponse:
-        coop = self.cooperation_repository.get_by_id(request.coop_id)
-        if coop is None:
+        coop_and_coordinator = (
+            self.database_gateway.get_cooperations()
+            .with_id(request.coop_id)
+            .joined_with_coordinator()
+            .first()
+        )
+        if coop_and_coordinator is None:
             return None
+        coop, coordinator = coop_and_coordinator
         plans = [
             AssociatedPlan(
                 plan_id=plan.id,
@@ -61,11 +66,11 @@ class GetCoopSummary:
             )
         ]
         return GetCoopSummarySuccess(
-            requester_is_coordinator=bool(coop.coordinator.id == request.requester_id),
+            requester_is_coordinator=coop.coordinator == request.requester_id,
             coop_id=coop.id,
             coop_name=coop.name,
             coop_definition=coop.definition,
-            coordinator_id=coop.coordinator.id,
-            coordinator_name=coop.coordinator.name,
+            coordinator_id=coop.coordinator,
+            coordinator_name=coordinator.name,
             plans=plans,
         )
