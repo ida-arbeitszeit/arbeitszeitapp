@@ -5,7 +5,7 @@ from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Company
-from arbeitszeit.repositories import CompanyRepository, CooperationRepository
+from arbeitszeit.repositories import CompanyRepository, DatabaseGateway
 
 
 @dataclass
@@ -32,8 +32,8 @@ class CreateCooperationResponse:
 @dataclass
 class CreateCooperation:
     company_repository: CompanyRepository
-    cooperation_repository: CooperationRepository
     datetime_service: DatetimeService
+    database_gateway: DatabaseGateway
 
     def __call__(self, request: CreateCooperationRequest) -> CreateCooperationResponse:
         try:
@@ -42,11 +42,11 @@ class CreateCooperation:
             return CreateCooperationResponse(
                 rejection_reason=reason, cooperation_id=None
             )
-        cooperation = self.cooperation_repository.create_cooperation(
+        cooperation = self.database_gateway.create_cooperation(
             self.datetime_service.now(),
             request.name,
             request.definition,
-            coordinator,
+            coordinator.id,
         )
         return CreateCooperationResponse(
             rejection_reason=None, cooperation_id=cooperation.id
@@ -58,11 +58,13 @@ class CreateCooperation:
             .with_id(request.coordinator_id)
             .first()
         )
-        coop_with_name_exists = (
-            len(list(self.cooperation_repository.get_by_name(request.name))) > 0
+        coops_with_requested_name = (
+            self.database_gateway.get_cooperations().with_name_ignoring_case(
+                request.name
+            )
         )
         if coordinator is None:
             raise CreateCooperationResponse.RejectionReason.coordinator_not_found
-        if coop_with_name_exists:
+        if coops_with_requested_name:
             raise CreateCooperationResponse.RejectionReason.cooperation_with_name_exists
         return coordinator

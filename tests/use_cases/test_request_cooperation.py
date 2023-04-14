@@ -14,7 +14,6 @@ from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGe
 from tests.datetime_service import FakeDatetimeService
 
 from .dependency_injection import get_dependency_injector
-from .repositories import CooperationRepository
 
 
 class RequestCooperationTests(TestCase):
@@ -25,7 +24,6 @@ class RequestCooperationTests(TestCase):
         self.coop_generator = self.injector.get(CooperationGenerator)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
-        self.cooperation_repository = self.injector.get(CooperationRepository)
         self.requester = self.company_generator.create_company()
         self.datetime_service = self.injector.get(FakeDatetimeService)
 

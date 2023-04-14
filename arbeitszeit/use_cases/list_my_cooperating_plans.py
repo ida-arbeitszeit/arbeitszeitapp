@@ -6,11 +6,7 @@ from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan
-from arbeitszeit.repositories import (
-    CompanyRepository,
-    CooperationRepository,
-    DatabaseGateway,
-)
+from arbeitszeit.repositories import CompanyRepository, DatabaseGateway
 
 
 @dataclass
@@ -34,7 +30,6 @@ class ListMyCooperatingPlansUseCase:
         pass
 
     company_repository: CompanyRepository
-    cooperation_repository: CooperationRepository
     database_gateway: DatabaseGateway
     datetime_service: DatetimeService
 
@@ -55,11 +50,13 @@ class ListMyCooperatingPlansUseCase:
 
     def _create_plan_object(self, plan: Plan) -> CooperatingPlan:
         assert plan.cooperation
-        coop_name = self.cooperation_repository.get_cooperation_name(plan.cooperation)
-        assert coop_name
+        cooperation = (
+            self.database_gateway.get_cooperations().with_id(plan.cooperation).first()
+        )
+        assert cooperation
         return self.CooperatingPlan(
             plan_id=plan.id,
             plan_name=plan.prd_name,
             coop_id=plan.cooperation,
-            coop_name=coop_name,
+            coop_name=cooperation.name,
         )

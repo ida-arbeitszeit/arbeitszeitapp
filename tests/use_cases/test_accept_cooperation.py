@@ -128,7 +128,8 @@ class AcceptCooperationTests(BaseTestCase):
         request = AcceptCooperationRequest(
             requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation.id
         )
-        self.accept_cooperation(request)
+        response = self.accept_cooperation(request)
+        assert not response.is_rejected
         self.assert_plan_in_cooperation(plan.id, cooperation.id)
 
     def test_two_cooperating_plans_have_same_prices(self) -> None:

@@ -31,7 +31,6 @@ from arbeitszeit_flask.database.repositories import (
     AccountOwnerRepository,
     AccountRepository,
     CompanyRepository,
-    CooperationRepository,
     DatabaseGatewayImpl,
     MemberRepository,
     PlanDraftRepository,
@@ -155,10 +154,6 @@ class FlaskModule(Module):
         binder.bind(
             SQLAlchemy,
             to=CallableProvider(self.provide_sqlalchemy, is_singleton=True),
-        )
-        binder.bind(
-            interfaces.CooperationRepository,  # type: ignore
-            to=AliasProvider(CooperationRepository),
         )
         binder.bind(TokenService, to=AliasProvider(FlaskTokenService))  # type: ignore
         binder.bind(UserAddressBook, to=AliasProvider(UserAddressBookImpl))  # type: ignore

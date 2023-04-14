@@ -53,16 +53,18 @@ class GetCoopSummaryTests(BaseTestCase):
         plan2 = self.plan_generator.create_plan()
         coop = self.cooperation_generator.create_cooperation(plans=[plan1, plan2])
         summary = self.get_coop_summary(GetCoopSummaryRequest(requester.id, coop.id))
-        self.assert_success(summary, lambda s: s.coordinator_id == coop.coordinator.id)
+        self.assert_success(summary, lambda s: s.coordinator_id == coop.coordinator)
 
     def test_that_correct_coordinator_name_is_shown(self) -> None:
+        expected_coordinator_name = "expected coordinator name"
+        coordinator = self.company_generator.create_company(
+            name=expected_coordinator_name
+        )
         requester = self.company_generator.create_company_entity()
-        plan1 = self.plan_generator.create_plan()
-        plan2 = self.plan_generator.create_plan()
-        coop = self.cooperation_generator.create_cooperation(plans=[plan1, plan2])
+        coop = self.cooperation_generator.create_cooperation(coordinator=coordinator)
         summary = self.get_coop_summary(GetCoopSummaryRequest(requester.id, coop.id))
         self.assert_success(
-            summary, lambda s: s.coordinator_name == coop.coordinator.name
+            summary, lambda s: s.coordinator_name == expected_coordinator_name
         )
 
     def test_that_correct_info_of_associated_plan_is_shown(self) -> None:

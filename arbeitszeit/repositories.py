@@ -192,6 +192,20 @@ class PlanUpdate(Protocol):
         """
 
 
+class CooperationResult(QueryResult[Cooperation], Protocol):
+    def with_id(self, id_: UUID) -> Self:
+        ...
+
+    def with_name_ignoring_case(self, name: str) -> Self:
+        ...
+
+    def coordinated_by_company(self, company_id: UUID) -> Self:
+        ...
+
+    def joined_with_coordinator(self) -> QueryResult[Tuple[Cooperation, Company]]:
+        ...
+
+
 class MemberResult(QueryResult[Member], Protocol):
     def working_at_company(self, company: UUID) -> MemberResult:
         ...
@@ -495,44 +509,6 @@ class WorkerInviteRepository(ABC):
         pass
 
 
-class CooperationRepository(ABC):
-    @abstractmethod
-    def create_cooperation(
-        self,
-        creation_timestamp: datetime,
-        name: str,
-        definition: str,
-        coordinator: Company,
-    ) -> Cooperation:
-        pass
-
-    @abstractmethod
-    def get_by_id(self, id: UUID) -> Optional[Cooperation]:
-        pass
-
-    @abstractmethod
-    def get_by_name(self, name: str) -> Iterator[Cooperation]:
-        pass
-
-    @abstractmethod
-    def get_cooperations_coordinated_by_company(
-        self, company_id: UUID
-    ) -> Iterator[Cooperation]:
-        pass
-
-    @abstractmethod
-    def get_cooperation_name(self, coop_id: UUID) -> Optional[str]:
-        pass
-
-    @abstractmethod
-    def get_all_cooperations(self) -> Iterator[Cooperation]:
-        pass
-
-    @abstractmethod
-    def count_cooperations(self) -> int:
-        pass
-
-
 class AccountantRepository(Protocol):
     def create_accountant(self, email: str, name: str, password: str) -> UUID:
         ...
@@ -597,4 +573,16 @@ class DatabaseGateway(Protocol):
         pass
 
     def get_plans(self) -> PlanResult:
+        pass
+
+    def create_cooperation(
+        self,
+        creation_timestamp: datetime,
+        name: str,
+        definition: str,
+        coordinator: UUID,
+    ) -> Cooperation:
+        pass
+
+    def get_cooperations(self) -> CooperationResult:
         pass
