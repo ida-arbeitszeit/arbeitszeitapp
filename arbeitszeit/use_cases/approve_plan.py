@@ -6,11 +6,7 @@ from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan, SocialAccounting
-from arbeitszeit.repositories import (
-    CompanyRepository,
-    DatabaseGateway,
-    TransactionRepository,
-)
+from arbeitszeit.repositories import CompanyRepository, DatabaseGateway
 
 
 @dataclass
@@ -26,7 +22,6 @@ class ApprovePlanUseCase:
     database_gateway: DatabaseGateway
     datetime_service: DatetimeService
     social_accounting: SocialAccounting
-    transaction_repository: TransactionRepository
     company_repository: CompanyRepository
 
     def approve_plan(self, request: Request) -> Response:
@@ -55,7 +50,7 @@ class ApprovePlanUseCase:
     def _create_transaction_from_social_accounting(
         self, plan: Plan, account: UUID, amount: Decimal
     ) -> None:
-        self.transaction_repository.create_transaction(
+        self.database_gateway.create_transaction(
             date=self.datetime_service.now(),
             sending_account=self.social_accounting.account.id,
             receiving_account=account,

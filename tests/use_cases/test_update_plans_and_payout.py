@@ -9,7 +9,7 @@ from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
 from tests.use_cases.base_test_case import BaseTestCase
 
 from .dependency_injection import get_dependency_injector
-from .repositories import CompanyRepository, TransactionRepository
+from .repositories import CompanyRepository
 
 
 class UseCaseTests(BaseTestCase):
@@ -17,7 +17,6 @@ class UseCaseTests(BaseTestCase):
         super().setUp()
         self.injector = get_dependency_injector()
         self.payout = self.injector.get(UpdatePlansAndPayout)
-        self.transaction_repository = self.injector.get(TransactionRepository)
         self.show_my_accounts = self.injector.get(ShowMyAccounts)
         self.company_repository = self.injector.get(CompanyRepository)
         self.get_company_transactions = self.injector.get(

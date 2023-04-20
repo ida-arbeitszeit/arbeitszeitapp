@@ -17,7 +17,7 @@ from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.data_generators import TransactionGenerator
 
 from .base_test_case import BaseTestCase
-from .repositories import CompanyRepository, TransactionRepository
+from .repositories import CompanyRepository, EntityStorage
 
 
 class PayConsumerProductTests(BaseTestCase):
@@ -25,7 +25,7 @@ class PayConsumerProductTests(BaseTestCase):
         super().setUp()
         self.transaction_generator = self.injector.get(TransactionGenerator)
         self.pay_consumer_product = self.injector.get(PayConsumerProduct)
-        self.transaction_repository = self.injector.get(TransactionRepository)
+        self.entity_storage = self.injector.get(EntityStorage)
         self.buyer = self.member_generator.create_member_entity()
         self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
         self.update_plans_and_payout = self.injector.get(UpdatePlansAndPayout)
@@ -85,9 +85,7 @@ class PayConsumerProductTests(BaseTestCase):
     ) -> None:
         plan = self.plan_generator.create_plan()
 
-        transactions_before_payment = len(
-            self.transaction_repository.get_transactions()
-        )
+        transactions_before_payment = len(self.entity_storage.get_transactions())
         assert self.balance_checker.get_member_account_balance(self.buyer.id) == 0
         self.control_thresholds.set_allowed_overdraw_of_member_account(0)
 
@@ -95,7 +93,7 @@ class PayConsumerProductTests(BaseTestCase):
             self.make_request(plan.id, amount=3)
         )
         self.assertEqual(
-            len(self.transaction_repository.get_transactions()),
+            len(self.entity_storage.get_transactions()),
             transactions_before_payment,
         )
 
@@ -171,20 +169,18 @@ class PayConsumerProductTests(BaseTestCase):
 
     def test_that_correct_transaction_is_added(self) -> None:
         plan = self.plan_generator.create_plan()
-        transactions_before_payment = len(
-            self.transaction_repository.get_transactions()
-        )
+        transactions_before_payment = len(self.entity_storage.get_transactions())
         pieces = 3
         self.make_transaction_to_buyer_account(Decimal(100))
         self.pay_consumer_product.pay_consumer_product(
             self.make_request(plan.id, pieces)
         )
         self.assertEqual(
-            len(self.transaction_repository.get_transactions()),
+            len(self.entity_storage.get_transactions()),
             transactions_before_payment + 2,
         )
         transaction_added = (
-            self.transaction_repository.get_transactions()
+            self.entity_storage.get_transactions()
             .ordered_by_transaction_date(descending=True)
             .first()
         )
@@ -231,19 +227,17 @@ class PayConsumerProductTests(BaseTestCase):
         self,
     ) -> None:
         plan = self.plan_generator.create_plan(is_public_service=True)
-        transactions_before_payment = len(
-            self.transaction_repository.get_transactions()
-        )
+        transactions_before_payment = len(self.entity_storage.get_transactions())
         pieces = 3
         self.pay_consumer_product.pay_consumer_product(
             self.make_request(plan.id, pieces)
         )
         self.assertEqual(
-            len(self.transaction_repository.get_transactions()),
+            len(self.entity_storage.get_transactions()),
             transactions_before_payment + 1,
         )
         transaction_added = (
-            self.transaction_repository.get_transactions()
+            self.entity_storage.get_transactions()
             .ordered_by_transaction_date(descending=True)
             .first()
         )

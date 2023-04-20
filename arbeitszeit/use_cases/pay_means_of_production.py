@@ -8,11 +8,7 @@ from uuid import UUID
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Company, Plan, PurposesOfPurchases
 from arbeitszeit.price_calculator import PriceCalculator
-from arbeitszeit.repositories import (
-    CompanyRepository,
-    DatabaseGateway,
-    TransactionRepository,
-)
+from arbeitszeit.repositories import CompanyRepository, DatabaseGateway
 
 
 @dataclass
@@ -44,7 +40,6 @@ class PayMeansOfProduction:
     company_repository: CompanyRepository
     price_calculator: PriceCalculator
     datetime_service: DatetimeService
-    transaction_repository: TransactionRepository
     database_gateway: DatabaseGateway
 
     def __call__(
@@ -112,7 +107,7 @@ class PayMeansOfProduction:
             sending_account = buyer.raw_material_account
         planner = self.company_repository.get_companies().with_id(plan.planner).first()
         assert planner
-        transaction = self.transaction_repository.create_transaction(
+        transaction = self.database_gateway.create_transaction(
             date=self.datetime_service.now(),
             sending_account=sending_account,
             receiving_account=planner.product_account,

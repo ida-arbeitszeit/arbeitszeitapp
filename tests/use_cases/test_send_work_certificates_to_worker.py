@@ -7,7 +7,7 @@ from arbeitszeit.use_cases.send_work_certificates_to_worker import (
 )
 
 from .base_test_case import BaseTestCase
-from .repositories import MemberRepository, TransactionRepository
+from .repositories import EntityStorage, MemberRepository
 
 
 class UseCaseTester(BaseTestCase):
@@ -17,7 +17,7 @@ class UseCaseTester(BaseTestCase):
             SendWorkCertificatesToWorker
         )
         self.member_repository = self.injector.get(MemberRepository)
-        self.transaction_repository = self.injector.get(TransactionRepository)
+        self.entity_storage = self.injector.get(EntityStorage)
 
     def test_that_transfer_is_rejected_if_money_is_sent_to_worker_not_working_in_company(
         self,
@@ -72,7 +72,7 @@ class UseCaseTester(BaseTestCase):
         self.send_work_certificates_to_worker(
             SendWorkCertificatesToWorkerRequest(company.id, worker, amount_to_transfer)
         )
-        assert len(self.transaction_repository.get_transactions()) == 1
+        assert len(self.entity_storage.get_transactions()) == 1
 
     def test_that_after_transfer_correct_transaction_is_added(self) -> None:
         worker = self.member_generator.create_member_entity()
@@ -84,8 +84,8 @@ class UseCaseTester(BaseTestCase):
             )
         )
 
-        assert len(self.transaction_repository.get_transactions()) == 1
-        transaction = self.transaction_repository.get_transactions().first()
+        assert len(self.entity_storage.get_transactions()) == 1
+        transaction = self.entity_storage.get_transactions().first()
         assert transaction
         assert transaction.amount_sent == amount_to_transfer
         assert transaction.amount_received == amount_to_transfer

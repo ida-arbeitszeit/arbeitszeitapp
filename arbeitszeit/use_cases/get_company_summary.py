@@ -18,7 +18,6 @@ from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
     DatabaseGateway,
-    TransactionRepository,
 )
 
 
@@ -75,7 +74,6 @@ GetCompanySummaryResponse = Optional[GetCompanySummarySuccess]
 class GetCompanySummary:
     company_repository: CompanyRepository
     account_repository: AccountRepository
-    transaction_repository: TransactionRepository
     social_accounting: SocialAccounting
     database_gateway: DatabaseGateway
     datetime_service: DatetimeService
@@ -118,10 +116,8 @@ class GetCompanySummary:
 
     def _get_plan_details(self, plan: Plan) -> PlanDetails:
         expected_sales_volume = plan.expected_sales_value
-        sales = (
-            self.transaction_repository.get_transactions().that_were_a_sale_for_plan(
-                plan.id
-            )
+        sales = self.database_gateway.get_transactions().that_were_a_sale_for_plan(
+            plan.id
         )
         certificates_from_sales = sum(sale.amount_received for sale in sales)
         sales_balance_of_plan = certificates_from_sales - expected_sales_volume
@@ -142,7 +138,7 @@ class GetCompanySummary:
             decimal_sum(
                 map(
                     lambda t: t.amount_received,
-                    self.transaction_repository.get_transactions()
+                    self.database_gateway.get_transactions()
                     .where_account_is_sender_or_receiver(account)
                     .where_sender_is_social_accounting(),
                 )
@@ -152,7 +148,7 @@ class GetCompanySummary:
         expected_sales = decimal_sum(
             map(
                 lambda t: t.amount_received,
-                self.transaction_repository.get_transactions()
+                self.database_gateway.get_transactions()
                 .where_account_is_sender_or_receiver(company.product_account)
                 .where_sender_is_social_accounting(),
             )

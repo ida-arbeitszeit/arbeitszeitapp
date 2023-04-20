@@ -343,24 +343,6 @@ class PayoutFactorResult(QueryResult[PayoutFactor], Protocol):
         ...
 
 
-class TransactionRepository(ABC):
-    @abstractmethod
-    def get_transactions(self) -> TransactionResult:
-        pass
-
-    @abstractmethod
-    def create_transaction(
-        self,
-        date: datetime,
-        sending_account: UUID,
-        receiving_account: UUID,
-        amount_sent: Decimal,
-        amount_received: Decimal,
-        purpose: str,
-    ) -> Transaction:
-        pass
-
-
 class AccountRepository(ABC):
     @abstractmethod
     def create_account(self) -> Account:
@@ -570,10 +552,10 @@ class DatabaseGateway(Protocol):
         duration_in_days: int,
         is_public_service: bool,
     ) -> Plan:
-        pass
+        ...
 
     def get_plans(self) -> PlanResult:
-        pass
+        ...
 
     def create_cooperation(
         self,
@@ -582,7 +564,21 @@ class DatabaseGateway(Protocol):
         definition: str,
         coordinator: UUID,
     ) -> Cooperation:
-        pass
+        ...
 
     def get_cooperations(self) -> CooperationResult:
-        pass
+        ...
+
+    def get_transactions(self) -> TransactionResult:
+        ...
+
+    def create_transaction(
+        self,
+        date: datetime,
+        sending_account: UUID,
+        receiving_account: UUID,
+        amount_sent: Decimal,
+        amount_received: Decimal,
+        purpose: str,
+    ) -> Transaction:
+        ...

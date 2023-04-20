@@ -4,17 +4,12 @@ from decimal import Decimal
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan, SocialAccounting
 from arbeitszeit.payout_factor import PayoutFactorService
-from arbeitszeit.repositories import (
-    CompanyRepository,
-    DatabaseGateway,
-    TransactionRepository,
-)
+from arbeitszeit.repositories import CompanyRepository, DatabaseGateway
 
 
 @dataclass
 class UpdatePlansAndPayout:
     datetime_service: DatetimeService
-    transaction_repository: TransactionRepository
     social_accounting: SocialAccounting
     payout_factor_service: PayoutFactorService
     company_repository: CompanyRepository
@@ -58,7 +53,7 @@ class UpdatePlansAndPayout:
         amount = payout_factor * plan.production_costs.labour_cost / plan.timeframe
         planner = self.company_repository.get_companies().with_id(plan.planner).first()
         assert planner
-        transaction = self.transaction_repository.create_transaction(
+        transaction = self.database_gateway.create_transaction(
             date=self.datetime_service.now(),
             sending_account=self.social_accounting.account.id,
             receiving_account=planner.work_account,

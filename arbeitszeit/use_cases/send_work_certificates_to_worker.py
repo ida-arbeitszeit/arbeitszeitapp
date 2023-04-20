@@ -7,8 +7,8 @@ from uuid import UUID
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.repositories import (
     CompanyRepository,
+    DatabaseGateway,
     MemberRepository,
-    TransactionRepository,
 )
 
 
@@ -35,7 +35,7 @@ class SendWorkCertificatesToWorkerResponse:
 class SendWorkCertificatesToWorker:
     company_repository: CompanyRepository
     member_repository: MemberRepository
-    transaction_repository: TransactionRepository
+    database_gateway: DatabaseGateway
     datetime_service: DatetimeService
 
     def __call__(
@@ -60,7 +60,7 @@ class SendWorkCertificatesToWorker:
             return SendWorkCertificatesToWorkerResponse(
                 rejection_reason=SendWorkCertificatesToWorkerResponse.RejectionReason.worker_not_at_company
             )
-        self.transaction_repository.create_transaction(
+        self.database_gateway.create_transaction(
             date=self.datetime_service.now(),
             sending_account=company.work_account,
             receiving_account=worker.account,

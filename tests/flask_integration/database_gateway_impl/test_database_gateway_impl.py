@@ -5,7 +5,6 @@ from uuid import UUID, uuid4
 from arbeitszeit_flask.database.repositories import (
     AccountRepository,
     DatabaseGatewayImpl,
-    TransactionRepository,
 )
 from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.data_generators import (
@@ -22,7 +21,6 @@ class LabourCertificatesPayoutTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.database_gateway = self.injector.get(DatabaseGatewayImpl)
-        self.transaction_repository = self.injector.get(TransactionRepository)
         self.account_repository = self.injector.get(AccountRepository)
         self.plan_generator = self.injector.get(PlanGenerator)
 
@@ -107,7 +105,7 @@ class LabourCertificatesPayoutTests(FlaskTestCase):
     def create_transaction(self) -> UUID:
         sending_account = self.account_repository.create_account()
         receiving_account = self.account_repository.create_account()
-        transaction = self.transaction_repository.create_transaction(
+        transaction = self.database_gateway.create_transaction(
             date=datetime(2000, 1, 1),
             sending_account=sending_account.id,
             receiving_account=receiving_account.id,

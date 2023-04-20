@@ -687,44 +687,8 @@ class PayoutFactorResult(QueryResultImpl[entities.PayoutFactor]):
 
 
 @singleton
-class TransactionRepository(interfaces.TransactionRepository):
-    def __init__(self, entities: EntityStorage) -> None:
-        self.entities = entities
-
-    def create_transaction(
-        self,
-        date: datetime,
-        sending_account: UUID,
-        receiving_account: UUID,
-        amount_sent: Decimal,
-        amount_received: Decimal,
-        purpose: str,
-    ) -> Transaction:
-        transaction = Transaction(
-            id=uuid4(),
-            date=date,
-            sending_account=sending_account,
-            receiving_account=receiving_account,
-            amount_sent=amount_sent,
-            amount_received=amount_received,
-            purpose=purpose,
-        )
-        self.entities.transactions[transaction.id] = transaction
-        return transaction
-
-    def get_transactions(self) -> TransactionResult:
-        return TransactionResult(
-            items=lambda: self.entities.transactions.values(),
-            entities=self.entities,
-        )
-
-
-@singleton
 class AccountRepository(interfaces.AccountRepository):
-    def __init__(
-        self, transaction_repository: TransactionRepository, entities: EntityStorage
-    ):
-        self.transaction_repository = transaction_repository
+    def __init__(self, entities: EntityStorage):
         self.entities = entities
 
     def __contains__(self, account: object) -> bool:
@@ -742,7 +706,7 @@ class AccountRepository(interfaces.AccountRepository):
         )
 
     def get_account_balance(self, account: UUID) -> Decimal:
-        transactions = self.transaction_repository.get_transactions()
+        transactions = self.entities.get_transactions()
         received_transactions = transactions.where_account_is_receiver(account)
         sent_transactions = transactions.where_account_is_sender(account)
         return decimal_sum(
@@ -1236,5 +1200,32 @@ class EntityStorage:
     def get_cooperations(self) -> CooperationResult:
         return CooperationResult(
             items=lambda: self.cooperations.values(),
+            entities=self,
+        )
+
+    def create_transaction(
+        self,
+        date: datetime,
+        sending_account: UUID,
+        receiving_account: UUID,
+        amount_sent: Decimal,
+        amount_received: Decimal,
+        purpose: str,
+    ) -> Transaction:
+        transaction = Transaction(
+            id=uuid4(),
+            date=date,
+            sending_account=sending_account,
+            receiving_account=receiving_account,
+            amount_sent=amount_sent,
+            amount_received=amount_received,
+            purpose=purpose,
+        )
+        self.transactions[transaction.id] = transaction
+        return transaction
+
+    def get_transactions(self) -> TransactionResult:
+        return TransactionResult(
+            items=lambda: self.transactions.values(),
             entities=self,
         )
