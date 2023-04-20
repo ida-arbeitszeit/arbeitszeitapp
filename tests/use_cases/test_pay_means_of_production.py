@@ -13,14 +13,14 @@ from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsResponse
 
 from .base_test_case import BaseTestCase
-from .repositories import CompanyRepository, TransactionRepository
+from .repositories import CompanyRepository, EntityStorage
 
 
 class PayMeansOfProductionTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.pay_means_of_production = self.injector.get(PayMeansOfProduction)
-        self.transaction_repository = self.injector.get(TransactionRepository)
+        self.entity_storage = self.injector.get(EntityStorage)
         self.update_plans_and_payout = self.injector.get(UpdatePlansAndPayout)
         self.company_repository = self.injector.get(CompanyRepository)
         self.query_company_purchases = self.injector.get(
@@ -155,19 +155,17 @@ class PayMeansOfProductionTests(BaseTestCase):
         plan = self.plan_generator.create_plan()
         purpose = PurposesOfPurchases.means_of_prod
         pieces = 5
-        transactions_before_payment = len(
-            self.transaction_repository.get_transactions()
-        )
+        transactions_before_payment = len(self.entity_storage.get_transactions())
         self.pay_means_of_production(
             PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
         )
         price_total = pieces * self.price_checker.get_unit_price(plan.id)
         assert (
-            len(self.transaction_repository.get_transactions())
+            len(self.entity_storage.get_transactions())
             == transactions_before_payment + 1
         )
         latest_transaction = (
-            self.transaction_repository.get_transactions()
+            self.entity_storage.get_transactions()
             .ordered_by_transaction_date(descending=True)
             .first()
         )
@@ -184,19 +182,17 @@ class PayMeansOfProductionTests(BaseTestCase):
         plan = self.plan_generator.create_plan()
         purpose = PurposesOfPurchases.raw_materials
         pieces = 5
-        transactions_before_payment = len(
-            self.transaction_repository.get_transactions()
-        )
+        transactions_before_payment = len(self.entity_storage.get_transactions())
         self.pay_means_of_production(
             PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
         )
         price_total = pieces * self.price_checker.get_unit_price(plan.id)
         assert (
-            len(self.transaction_repository.get_transactions())
+            len(self.entity_storage.get_transactions())
             == transactions_before_payment + 1
         )
         latest_transaction = (
-            self.transaction_repository.get_transactions()
+            self.entity_storage.get_transactions()
             .ordered_by_transaction_date(descending=True)
             .first()
         )

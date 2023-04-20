@@ -633,7 +633,7 @@ class CompanyPurchaseResult(FlaskQueryResult[entities.CompanyPurchase]):
             purchase_orm, transaction_orm, plan_orm = orm
             return (
                 DatabaseGatewayImpl.company_purchase_from_orm(purchase_orm),
-                TransactionRepository.object_from_orm(transaction_orm),
+                DatabaseGatewayImpl.transaction_from_orm(transaction_orm),
                 DatabaseGatewayImpl.plan_from_orm(plan_orm),
             )
 
@@ -658,7 +658,7 @@ class CompanyPurchaseResult(FlaskQueryResult[entities.CompanyPurchase]):
             purchase_orm, transaction_orm = orm
             return (
                 DatabaseGatewayImpl.company_purchase_from_orm(purchase_orm),
-                TransactionRepository.object_from_orm(transaction_orm),
+                DatabaseGatewayImpl.transaction_from_orm(transaction_orm),
             )
 
         transaction = aliased(models.Transaction)
@@ -708,7 +708,7 @@ class ConsumerPurchaseResult(FlaskQueryResult[entities.ConsumerPurchase]):
             purchase_orm, transaction_orm, plan_orm = orm
             return (
                 DatabaseGatewayImpl.consumer_purchase_from_orm(purchase_orm),
-                TransactionRepository.object_from_orm(transaction_orm),
+                DatabaseGatewayImpl.transaction_from_orm(transaction_orm),
                 DatabaseGatewayImpl.plan_from_orm(plan_orm),
             )
 
@@ -1135,55 +1135,6 @@ class AccountingRepository:
         if accounting_orm is None:
             return None
         return self.object_from_orm(accounting_orm)
-
-
-@dataclass
-class TransactionRepository(repositories.TransactionRepository):
-    db: SQLAlchemy
-
-    def object_to_orm(self, transaction: entities.Transaction) -> Transaction:
-        return Transaction.query.get(str(transaction.id))
-
-    @classmethod
-    def object_from_orm(cls, transaction: Transaction) -> entities.Transaction:
-        return entities.Transaction(
-            id=UUID(transaction.id),
-            date=transaction.date,
-            sending_account=UUID(transaction.sending_account),
-            receiving_account=UUID(transaction.receiving_account),
-            amount_sent=Decimal(transaction.amount_sent),
-            amount_received=Decimal(transaction.amount_received),
-            purpose=transaction.purpose,
-        )
-
-    def create_transaction(
-        self,
-        date: datetime,
-        sending_account: UUID,
-        receiving_account: UUID,
-        amount_sent: Decimal,
-        amount_received: Decimal,
-        purpose: str,
-    ) -> entities.Transaction:
-        transaction = Transaction(
-            id=str(uuid4()),
-            date=date,
-            sending_account=str(sending_account),
-            receiving_account=str(receiving_account),
-            amount_sent=amount_sent,
-            amount_received=amount_received,
-            purpose=purpose,
-        )
-        self.db.session.add(transaction)
-        self.db.session.flush()
-        return self.object_from_orm(transaction)
-
-    def get_transactions(self) -> TransactionQueryResult:
-        return TransactionQueryResult(
-            query=models.Transaction.query,
-            mapper=self.object_from_orm,
-            db=self.db,
-        )
 
 
 @dataclass
@@ -1621,4 +1572,45 @@ class DatabaseGatewayImpl:
             name=orm.name,
             definition=orm.definition,
             coordinator=UUID(orm.coordinator),
+        )
+
+    @classmethod
+    def transaction_from_orm(cls, transaction: Transaction) -> entities.Transaction:
+        return entities.Transaction(
+            id=UUID(transaction.id),
+            date=transaction.date,
+            sending_account=UUID(transaction.sending_account),
+            receiving_account=UUID(transaction.receiving_account),
+            amount_sent=Decimal(transaction.amount_sent),
+            amount_received=Decimal(transaction.amount_received),
+            purpose=transaction.purpose,
+        )
+
+    def create_transaction(
+        self,
+        date: datetime,
+        sending_account: UUID,
+        receiving_account: UUID,
+        amount_sent: Decimal,
+        amount_received: Decimal,
+        purpose: str,
+    ) -> entities.Transaction:
+        transaction = Transaction(
+            id=str(uuid4()),
+            date=date,
+            sending_account=str(sending_account),
+            receiving_account=str(receiving_account),
+            amount_sent=amount_sent,
+            amount_received=amount_received,
+            purpose=purpose,
+        )
+        self.db.session.add(transaction)
+        self.db.session.flush()
+        return self.transaction_from_orm(transaction)
+
+    def get_transactions(self) -> TransactionQueryResult:
+        return TransactionQueryResult(
+            query=models.Transaction.query,
+            mapper=self.transaction_from_orm,
+            db=self.db,
         )

@@ -5,11 +5,7 @@ from typing import Iterable, List, Union
 from uuid import UUID
 
 from .entities import AccountTypes, Company, Member, SocialAccounting, Transaction
-from .repositories import (
-    AccountOwnerRepository,
-    AccountRepository,
-    TransactionRepository,
-)
+from .repositories import AccountOwnerRepository, AccountRepository, DatabaseGateway
 
 
 class TransactionTypes(Enum):
@@ -41,7 +37,7 @@ class AccountStatementRow:
 
 @dataclass
 class UserAccountingService:
-    transaction_repository: TransactionRepository
+    database_gateway: DatabaseGateway
     account_owner_repository: AccountOwnerRepository
     account_repository: AccountRepository
 
@@ -49,7 +45,7 @@ class UserAccountingService:
         self, user: Union[Member, Company]
     ) -> List[Transaction]:
         return list(
-            self.transaction_repository.get_transactions()
+            self.database_gateway.get_transactions()
             .where_account_is_sender_or_receiver(*user.accounts())
             .ordered_by_transaction_date(descending=True)
         )
@@ -62,7 +58,7 @@ class UserAccountingService:
             return []
         else:
             return list(
-                self.transaction_repository.get_transactions()
+                self.database_gateway.get_transactions()
                 .where_account_is_sender_or_receiver(account)
                 .ordered_by_transaction_date(descending=True)
             )
@@ -164,7 +160,7 @@ class UserAccountingService:
     ) -> Iterable[AccountStatementRow]:
         accounts = set(accounts) & set(user.accounts())
         transactions = (
-            self.transaction_repository.get_transactions()
+            self.database_gateway.get_transactions()
             .where_account_is_sender_or_receiver(*accounts)
             .ordered_by_transaction_date(descending=True)
         )

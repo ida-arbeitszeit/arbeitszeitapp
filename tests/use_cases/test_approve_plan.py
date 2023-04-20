@@ -23,7 +23,7 @@ from arbeitszeit.use_cases.query_plans import (
 )
 
 from .base_test_case import BaseTestCase
-from .repositories import PlanDraftRepository, TransactionRepository
+from .repositories import PlanDraftRepository
 
 
 class UseCaseTests(BaseTestCase):
@@ -34,7 +34,6 @@ class UseCaseTests(BaseTestCase):
         self.query_plans = self.injector.get(QueryPlans)
         self.draft_repository = self.injector.get(PlanDraftRepository)
         self.pay_means_of_production = self.injector.get(PayMeansOfProduction)
-        self.transaction_repository = self.injector.get(TransactionRepository)
         self.get_company_transactions_use_case = self.injector.get(
             GetCompanyTransactions
         )

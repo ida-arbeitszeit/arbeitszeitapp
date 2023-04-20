@@ -6,7 +6,7 @@ from uuid import UUID
 from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Member, Transaction
-from arbeitszeit.repositories import AccountRepository, TransactionRepository
+from arbeitszeit.repositories import AccountRepository, DatabaseGateway
 
 
 class TransactionRejection(Exception, enum.Enum):
@@ -19,7 +19,7 @@ class GiroOffice:
 
     account_repository: AccountRepository
     control_thresholds: ControlThresholds
-    transaction_repository: TransactionRepository
+    database_gateway: DatabaseGateway
     datetime_service: DatetimeService
 
     def record_transaction_from_member(
@@ -33,7 +33,7 @@ class GiroOffice:
         sending_account = sender.account
         if not self._is_account_balance_sufficient(amount_sent, sending_account):
             raise TransactionRejection.insufficient_account_balance
-        return self.transaction_repository.create_transaction(
+        return self.database_gateway.create_transaction(
             date=self.datetime_service.now(),
             sending_account=sending_account,
             receiving_account=receiving_account,

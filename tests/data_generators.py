@@ -29,7 +29,6 @@ from arbeitszeit.repositories import (
     DatabaseGateway,
     MemberRepository,
     PlanDraftRepository,
-    TransactionRepository,
 )
 from arbeitszeit.use_cases import pay_consumer_product, pay_means_of_production
 from arbeitszeit.use_cases.accept_cooperation import (
@@ -447,8 +446,8 @@ class PurchaseGenerator:
 @dataclass
 class TransactionGenerator:
     account_generator: AccountGenerator
-    transaction_repository: TransactionRepository
     datetime_service: FakeDatetimeService
+    database_gateway: DatabaseGateway
 
     def create_transaction(
         self,
@@ -473,7 +472,7 @@ class TransactionGenerator:
             purpose = "test purpose"
         if date is None:
             date = self.datetime_service.now_minus_one_day()
-        return self.transaction_repository.create_transaction(
+        return self.database_gateway.create_transaction(
             date=date,
             sending_account=sending_account,
             receiving_account=receiving_account,
