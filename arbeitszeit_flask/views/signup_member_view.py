@@ -37,7 +37,7 @@ class SignupMemberView:
         view_model = self.register_member_presenter.present_member_registration(
             response, register_form
         )
-        if view_model.is_success_view:
-            return redirect(url_for("auth.unconfirmed_member"))
+        if view_model.redirect_to:
+            return redirect(view_model.redirect_to)
         else:
             return render_template("auth/signup_member.html", form=register_form)

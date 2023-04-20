@@ -323,3 +323,9 @@ class GeneralUrlIndexTests(ViewTestCase):
         url = self.url_index.get_member_query_companies_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
+
+    def test_unconfirmed_member_url_leads_to_function_route(self) -> None:
+        self.login_member()
+        url = self.url_index.get_unconfirmed_member_url()
+        response = self.client.get(url)
+        assert response.status_code < 400

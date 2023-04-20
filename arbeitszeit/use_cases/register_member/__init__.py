@@ -6,7 +6,11 @@ from typing import Optional
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.repositories import AccountRepository, MemberRepository
+from arbeitszeit.repositories import (
+    AccountRepository,
+    CompanyRepository,
+    MemberRepository,
+)
 from arbeitszeit.token import MemberRegistrationMessagePresenter, TokenService
 
 
@@ -17,14 +21,17 @@ class RegisterMemberUseCase:
     datetime_service: DatetimeService
     token_service: TokenService
     member_registration_message_presenter: MemberRegistrationMessagePresenter
+    company_repository: CompanyRepository
 
     @dataclass
     class Response:
         class RejectionReason(Exception, Enum):
             member_already_exists = auto()
+            company_with_different_password_exists = auto()
 
         rejection_reason: Optional[RejectionReason]
         user_id: Optional[UUID]
+        is_confirmation_required: bool
 
         @property
         def is_rejected(self) -> bool:
@@ -38,14 +45,23 @@ class RegisterMemberUseCase:
 
     def register_member(self, request: Request) -> Response:
         try:
-            user_id = self._register_member(request)
+            return self._register_member(request)
         except RegisterMemberUseCase.Response.RejectionReason as reason:
-            return RegisterMemberUseCase.Response(rejection_reason=reason, user_id=None)
-        return RegisterMemberUseCase.Response(rejection_reason=None, user_id=user_id)
+            return RegisterMemberUseCase.Response(
+                rejection_reason=reason, user_id=None, is_confirmation_required=False
+            )
 
-    def _register_member(self, request: Request) -> Optional[UUID]:
+    def _register_member(self, request: Request) -> Response:
         if self.member_repository.get_members().with_email_address(request.email):
             raise self.Response.RejectionReason.member_already_exists
+        if self.company_repository.get_companies().with_email_address(request.email):
+            is_company_with_same_email_already_registered = True
+            if not self.company_repository.validate_credentials(
+                request.email, request.password
+            ):
+                raise self.Response.RejectionReason.company_with_different_password_exists
+        else:
+            is_company_with_same_email_already_registered = False
 
         member_account = self.account_repository.create_account()
         registered_on = self.datetime_service.now()
@@ -56,8 +72,13 @@ class RegisterMemberUseCase:
             account=member_account,
             registered_on=registered_on,
         )
-        self._create_confirmation_mail(request, member.id)
-        return member.id
+        if not is_company_with_same_email_already_registered:
+            self._create_confirmation_mail(request, member.id)
+        return self.Response(
+            rejection_reason=None,
+            user_id=member.id,
+            is_confirmation_required=not is_company_with_same_email_already_registered,
+        )
 
     def _create_confirmation_mail(self, request: Request, member: UUID) -> None:
         token = self.token_service.generate_token(request.email)

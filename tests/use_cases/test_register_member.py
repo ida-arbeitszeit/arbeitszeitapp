@@ -36,6 +36,13 @@ class RegisterMemberTests(BaseTestCase):
             response.user_id,
         )
 
+    def test_confirmation_is_required_is_email_is_not_already_known(self) -> None:
+        request_args = DEFAULT.copy()
+        response = self.use_case.register_member(
+            RegisterMemberUseCase.Request(**request_args)
+        )
+        assert response.is_confirmation_required
+
     def test_that_registering_member_is_possible(self) -> None:
         request = RegisterMemberUseCase.Request(**DEFAULT)
         response = self.use_case.register_member(request)
@@ -59,6 +66,14 @@ class RegisterMemberTests(BaseTestCase):
             RegisterMemberUseCase.Response.RejectionReason.member_already_exists,
         )
 
+    def test_no_confirmation_is_required_if_member_already_existed_pre_registration(
+        self,
+    ) -> None:
+        self.member_generator.create_member_entity(email="test@cp.org")
+        request = RegisterMemberUseCase.Request(**DEFAULT)
+        response = self.use_case.register_member(request)
+        assert not response.is_confirmation_required
+
     def test_that_uuid_returned_is_the_same_as_when_logging_in(self) -> None:
         register_response = self.use_case.register_member(
             RegisterMemberUseCase.Request(**DEFAULT)
@@ -70,3 +85,79 @@ class RegisterMemberTests(BaseTestCase):
             )
         )
         assert login_response.user_id == register_response.user_id
+
+    def test_that_registration_is_denied_if_company_with_same_mail_already_exists_but_passwords_differ(
+        self,
+    ) -> None:
+        expected_email = "test@test.test"
+        self.company_generator.create_company(
+            email=expected_email, password="test password"
+        )
+        register_response = self.use_case.register_member(
+            RegisterMemberUseCase.Request(
+                email=expected_email,
+                name="test name",
+                password="different password",
+            )
+        )
+        assert register_response.is_rejected
+
+    def test_that_registration_is_succesful_if_company_with_same_mail_already_exists_and_passwords_match(
+        self,
+    ) -> None:
+        expected_email = "test@test.test"
+        expected_password = "test password 123"
+        self.company_generator.create_company(
+            email=expected_email,
+            password=expected_password,
+        )
+        register_response = self.use_case.register_member(
+            RegisterMemberUseCase.Request(
+                email=expected_email,
+                name="test name",
+                password=expected_password,
+            )
+        )
+        assert not register_response.is_rejected
+
+    def test_that_no_confirmation_email_is_sent_out_if_registering_email_address_is_already_in_use_by_a_company(
+        self,
+    ) -> None:
+        expected_email = "test@test.test"
+        expected_password = "test password 123"
+        self.company_generator.create_company(
+            email=expected_email,
+            password=expected_password,
+        )
+        pre_registration_confirmation_tokens = len(
+            self.token_delivery.presented_member_tokens
+        )
+        self.use_case.register_member(
+            RegisterMemberUseCase.Request(
+                email=expected_email,
+                name="test name",
+                password=expected_password,
+            )
+        )
+        assert (
+            len(self.token_delivery.presented_member_tokens)
+            == pre_registration_confirmation_tokens
+        )
+
+    def test_that_email_confirmation_is_not_required_if_email_is_already_confirmed_for_matching_company(
+        self,
+    ) -> None:
+        expected_email = "test@test.test"
+        expected_password = "test password 123"
+        self.company_generator.create_company(
+            email=expected_email,
+            password=expected_password,
+        )
+        response = self.use_case.register_member(
+            RegisterMemberUseCase.Request(
+                email=expected_email,
+                name="test name",
+                password=expected_password,
+            )
+        )
+        assert not response.is_confirmation_required

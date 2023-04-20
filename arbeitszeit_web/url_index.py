@@ -130,6 +130,9 @@ class UrlIndex(Protocol):
     def get_company_query_companies_url(self) -> str:
         ...
 
+    def get_unconfirmed_member_url(self) -> str:
+        ...
+
 
 class RenewPlanUrlIndex(Protocol):
     def get_renew_plan_url(self, plan_id: UUID) -> str:
