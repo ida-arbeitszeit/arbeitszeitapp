@@ -390,8 +390,9 @@ class MemberQueryResult(FlaskQueryResult[entities.Member]):
         )
 
     def that_are_confirmed(self) -> MemberQueryResult:
+        user = aliased(models.User)
         return self._with_modified_query(
-            lambda query: query.filter(models.Member.confirmed_on != None)
+            lambda query: query.join(user).filter(user.email_confirmed_on != None)
         )
 
     def update(self) -> MemberUpdate:
@@ -405,28 +406,29 @@ class MemberQueryResult(FlaskQueryResult[entities.Member]):
 class MemberUpdate:
     query: Any
     db: SQLAlchemy
-    member_update_values: Dict[str, Any] = field(default_factory=dict)
+    user_update_values: Dict[str, Any] = field(default_factory=dict)
 
     def set_confirmation_timestamp(self, timestamp: datetime) -> MemberUpdate:
         return replace(
             self,
-            member_update_values=dict(
-                self.member_update_values,
-                confirmed_on=timestamp,
+            user_update_values=dict(
+                self.user_update_values,
+                email_confirmed_on=timestamp,
             ),
         )
 
     def perform(self) -> int:
+        user = aliased(models.User)
         row_count = 0
-        if self.member_update_values:
+        if self.user_update_values:
             sql_statement = (
-                update(models.Member)
+                update(models.User)
                 .where(
-                    models.Member.id.in_(
-                        self.query.with_entities(models.Member.id).scalar_subquery()
+                    models.User.id.in_(
+                        self.query.join(user).with_entities(user.id).scalar_subquery()
                     )
                 )
-                .values(**self.member_update_values)
+                .values(**self.user_update_values)
                 .execution_options(synchronize_session="fetch")
             )
             result = self.db.session.execute(sql_statement)
@@ -823,7 +825,7 @@ class MemberRepository(repositories.MemberRepository):
             account=UUID(orm_object.account),
             email=orm_object.user.email,
             registered_on=orm_object.registered_on,
-            confirmed_on=orm_object.confirmed_on,
+            confirmed_on=orm_object.user.email_confirmed_on,
         )
 
     def object_to_orm(self, member: entities.Member) -> models.Member:
@@ -838,14 +840,13 @@ class MemberRepository(repositories.MemberRepository):
         account: entities.Account,
         registered_on: datetime,
     ) -> entities.Member:
-        user_orm = self._get_or_create_user(email, password)
+        user_orm = self._get_or_create_user(email, password, email_confirmed_on=None)
         orm_member = Member(
             id=str(uuid4()),
             user=user_orm,
             name=name,
             account=str(account.id),
             registered_on=registered_on,
-            confirmed_on=None,
         )
         self.db.session.add(orm_member)
         return self.object_from_orm(orm_member)
@@ -857,7 +858,9 @@ class MemberRepository(repositories.MemberRepository):
             db=self.db,
         )
 
-    def _get_or_create_user(self, email: str, password: str) -> models.User:
+    def _get_or_create_user(
+        self, email: str, password: str, email_confirmed_on: Optional[datetime]
+    ) -> models.User:
         return self.db.session.query(models.User).filter(
             and_(
                 models.User.email == email,
@@ -866,6 +869,7 @@ class MemberRepository(repositories.MemberRepository):
         ).first() or models.User(
             email=email,
             password=generate_password_hash(password, method="sha256"),
+            email_confirmed_on=email_confirmed_on,
         )
 
 
@@ -889,7 +893,7 @@ class CompanyRepository(repositories.CompanyRepository):
             work_account=UUID(company_orm.a_account),
             product_account=UUID(company_orm.prd_account),
             registered_on=company_orm.registered_on,
-            confirmed_on=company_orm.confirmed_on,
+            confirmed_on=company_orm.user.email_confirmed_on,
         )
 
     def create_company(
@@ -903,12 +907,11 @@ class CompanyRepository(repositories.CompanyRepository):
         products_account: entities.Account,
         registered_on: datetime,
     ) -> entities.Company:
-        user_orm = self._get_or_create_user(email, password)
+        user_orm = self._get_or_create_user(email, password, email_confirmed_on=None)
         company = models.Company(
             id=str(uuid4()),
             name=name,
             registered_on=registered_on,
-            confirmed_on=None,
             user=user_orm,
             p_account=str(means_account.id),
             r_account=str(resource_account.id),
@@ -938,9 +941,18 @@ class CompanyRepository(repositories.CompanyRepository):
         return None
 
     def confirm_company(self, company: UUID, confirmed_on: datetime) -> None:
-        self.db.session.query(models.Company).filter(
-            models.Company.id == str(company)
-        ).update({models.Company.confirmed_on: confirmed_on})
+        self.db.session.execute(
+            update(models.User)
+            .where(
+                models.User.id.in_(
+                    models.Company.query.filter(models.Company.id == str(company))
+                    .with_entities(models.Company.user_id)
+                    .scalar_subquery()
+                )
+            )
+            .values(email_confirmed_on=confirmed_on)
+            .execution_options(synchronize_session="fetch")
+        )
 
     def is_company_confirmed(self, company: UUID) -> bool:
         orm = (
@@ -951,9 +963,11 @@ class CompanyRepository(repositories.CompanyRepository):
         if orm is None:
             return False
         else:
-            return orm.confirmed_on is not None
+            return orm.user.email_confirmed_on is not None
 
-    def _get_or_create_user(self, email: str, password: str) -> models.User:
+    def _get_or_create_user(
+        self, email: str, password: str, email_confirmed_on: Optional[datetime]
+    ) -> models.User:
         user = models.User.query.filter(
             and_(
                 models.User.email == email,
@@ -963,6 +977,7 @@ class CompanyRepository(repositories.CompanyRepository):
             user = models.User(
                 email=email,
                 password=generate_password_hash(password, method="sha256"),
+                email_confirmed_on=email_confirmed_on,
             )
             self.db.session.add(user)
         return user

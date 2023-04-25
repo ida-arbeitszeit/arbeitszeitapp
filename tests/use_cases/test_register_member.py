@@ -36,7 +36,7 @@ class RegisterMemberTests(BaseTestCase):
             response.user_id,
         )
 
-    def test_confirmation_is_required_is_email_is_not_already_known(self) -> None:
+    def test_confirmation_is_required_if_email_is_not_already_known(self) -> None:
         request_args = DEFAULT.copy()
         response = self.use_case.register_member(
             RegisterMemberUseCase.Request(**request_args)

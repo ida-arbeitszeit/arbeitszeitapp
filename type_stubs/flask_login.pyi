@@ -13,12 +13,12 @@ def login_required(callable: T) -> T: ...
 
 class User:
     email: str
+    email_confirmed_on: Optional[datetime]
 
 class CurrentUser:
     id: str
     user: User
     is_authenticated: bool
-    confirmed_on: Optional[datetime]
     name: str
 
 current_user: CurrentUser

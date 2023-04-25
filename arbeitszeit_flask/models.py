@@ -18,6 +18,7 @@ class User(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
+    email_confirmed_on = db.Column(db.DateTime, nullable=True)
 
     def __str__(self) -> str:
         return f"User {self.email} ({self.id})"
@@ -41,7 +42,6 @@ class Member(UserMixin, db.Model):
     user_id = db.Column(db.ForeignKey("user.id"), nullable=False)
     name = db.Column(db.String(1000), nullable=False)
     registered_on = db.Column(db.DateTime, nullable=False)
-    confirmed_on = db.Column(db.DateTime, nullable=True)
     account = db.Column(db.ForeignKey("account.id"), nullable=False)
 
     user = db.relationship(
@@ -63,7 +63,6 @@ class Company(UserMixin, db.Model):
     user_id = db.Column(db.ForeignKey("user.id"), nullable=False, unique=True)
     name = db.Column(db.String(1000), nullable=False)
     registered_on = db.Column(db.DateTime, nullable=False)
-    confirmed_on = db.Column(db.DateTime, nullable=True)
     p_account = db.Column(db.ForeignKey("account.id"), nullable=False)
     r_account = db.Column(db.ForeignKey("account.id"), nullable=False)
     a_account = db.Column(db.ForeignKey("account.id"), nullable=False)
