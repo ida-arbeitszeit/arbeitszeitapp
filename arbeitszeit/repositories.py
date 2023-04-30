@@ -343,6 +343,20 @@ class PayoutFactorResult(QueryResult[PayoutFactor], Protocol):
         ...
 
 
+class CompanyWorkInviteResult(QueryResult[CompanyWorkInvite], Protocol):
+    def issued_by(self, company: UUID) -> Self:
+        ...
+
+    def addressing(self, member: UUID) -> Self:
+        ...
+
+    def with_id(self, id: UUID) -> Self:
+        ...
+
+    def delete(self) -> None:
+        ...
+
+
 class AccountRepository(ABC):
     @abstractmethod
     def create_account(self) -> Account:
@@ -465,32 +479,6 @@ class PlanDraftRepository(ABC):
         pass
 
 
-class WorkerInviteRepository(ABC):
-    @abstractmethod
-    def is_worker_invited_to_company(self, company: UUID, worker: UUID) -> bool:
-        pass
-
-    @abstractmethod
-    def create_company_worker_invite(self, company: UUID, worker: UUID) -> UUID:
-        pass
-
-    @abstractmethod
-    def get_companies_worker_is_invited_to(self, member: UUID) -> Iterable[UUID]:
-        pass
-
-    @abstractmethod
-    def get_invites_for_worker(self, member: UUID) -> Iterable[CompanyWorkInvite]:
-        pass
-
-    @abstractmethod
-    def get_by_id(self, id: UUID) -> Optional[CompanyWorkInvite]:
-        pass
-
-    @abstractmethod
-    def delete_invite(self, id: UUID) -> None:
-        pass
-
-
 class AccountantRepository(Protocol):
     def create_accountant(self, email: str, name: str, password: str) -> UUID:
         ...
@@ -581,4 +569,12 @@ class DatabaseGateway(Protocol):
         amount_received: Decimal,
         purpose: str,
     ) -> Transaction:
+        ...
+
+    def create_company_work_invite(
+        self, company: UUID, member: UUID
+    ) -> CompanyWorkInvite:
+        ...
+
+    def get_company_work_invites(self) -> CompanyWorkInviteResult:
         ...

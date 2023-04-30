@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import List
 from uuid import UUID
 
-from arbeitszeit.repositories import WorkerInviteRepository
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -22,15 +22,15 @@ class ShowWorkInvitesRequest:
 
 @dataclass
 class ShowWorkInvites:
-    worker_invite_repository: WorkerInviteRepository
+    database_gateway: DatabaseGateway
 
     def __call__(self, request: ShowWorkInvitesRequest) -> ShowWorkInvitesResponse:
         return ShowWorkInvitesResponse(
             invites=[
                 WorkInvitation(
-                    company_id=company_id,
+                    company_id=invite.company,
                 )
-                for company_id in self.worker_invite_repository.get_companies_worker_is_invited_to(
+                for invite in self.database_gateway.get_company_work_invites().addressing(
                     request.member
                 )
             ]

@@ -7,7 +7,7 @@ from arbeitszeit.use_cases.answer_company_work_invite import (
     AnswerCompanyWorkInviteResponse,
 )
 from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
-from tests.use_cases.repositories import MemberRepository, WorkerInviteRepository
+from tests.use_cases.repositories import MemberRepository
 
 from .base_test_case import BaseTestCase
 
@@ -17,7 +17,6 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
         super().setUp()
         self.answer_company_work_invite = self.injector.get(AnswerCompanyWorkInvite)
         self.invite_worker_to_company = self.injector.get(InviteWorkerToCompanyUseCase)
-        self.invite_repository = self.injector.get(WorkerInviteRepository)
         self.member_repository = self.injector.get(MemberRepository)
         self.company = self.company_generator.create_company_entity()
         self.member = self.member_generator.create_member()
@@ -115,15 +114,16 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
         )
         self.assertTrue(response.is_success)
 
-    def test_invite_gets_deleted_after_rejecting_an_invite(self) -> None:
+    def test_cannot_answer_to_invite_twice(self) -> None:
         invite_id = self._invite_worker()
-        self.answer_company_work_invite(
-            self._create_request(
-                is_accepted=False,
-                invite_id=invite_id,
+        for _ in range(2):
+            response = self.answer_company_work_invite(
+                self._create_request(
+                    is_accepted=True,
+                    invite_id=invite_id,
+                )
             )
-        )
-        self.assertIsNone(self.invite_repository.get_by_id(invite_id))
+        assert not response.is_success
 
     def test_answer_invite_as_non_existing_member_returns_negative_reponse(
         self,

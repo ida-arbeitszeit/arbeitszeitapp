@@ -7,12 +7,12 @@ from typing import List
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.entities import CompanyWorkInvite
 from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
     DatabaseGateway,
     MemberRepository,
-    WorkerInviteRepository,
 )
 
 
@@ -49,7 +49,6 @@ class GetMemberDashboard:
     account_repository: AccountRepository
     member_repository: MemberRepository
     database_gateway: DatabaseGateway
-    worker_invite_repository: WorkerInviteRepository
     datetime_service: DatetimeService
 
     def __call__(self, member: UUID) -> Response:
@@ -65,12 +64,10 @@ class GetMemberDashboard:
             )
         ]
         invites = [
-            self.WorkInvitation(
-                invite_id=invite.id,
-                company_id=invite.company.id,
-                company_name=invite.company.name,
+            self._render_company_work_invite(invite)
+            for invite in self.database_gateway.get_company_work_invites().addressing(
+                member
             )
-            for invite in self.worker_invite_repository.get_invites_for_worker(member)
         ]
         return self.Response(
             workplaces=workplaces,
@@ -82,6 +79,17 @@ class GetMemberDashboard:
             name=_member.name,
             email=_member.email,
             id=_member.id,
+        )
+
+    def _render_company_work_invite(self, invite: CompanyWorkInvite) -> WorkInvitation:
+        company = (
+            self.company_repository.get_companies().with_id(invite.company).first()
+        )
+        assert company
+        return self.WorkInvitation(
+            invite_id=invite.id,
+            company_id=invite.company,
+            company_name=company.name,
         )
 
     def _get_three_latest_plans(self) -> List[PlanDetails]:

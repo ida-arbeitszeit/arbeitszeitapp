@@ -32,7 +32,6 @@ from arbeitszeit_flask.models import (
     Account,
     AccountTypes,
     Company,
-    CompanyWorkInvite,
     Member,
     PlanDraft,
     SocialAccounting,
@@ -769,6 +768,26 @@ class CooperationResult(FlaskQueryResult[entities.Cooperation]):
         )
 
 
+class CompanyWorkInviteResult(FlaskQueryResult[entities.CompanyWorkInvite]):
+    def with_id(self, id: UUID) -> Self:
+        return self._with_modified_query(
+            lambda query: query.filter(models.CompanyWorkInvite.id == str(id))
+        )
+
+    def issued_by(self, company: UUID) -> Self:
+        return self._with_modified_query(
+            lambda query: query.filter(models.CompanyWorkInvite.company == str(company))
+        )
+
+    def addressing(self, member: UUID) -> Self:
+        return self._with_modified_query(
+            lambda query: query.filter(models.CompanyWorkInvite.member == str(member))
+        )
+
+    def delete(self) -> None:
+        self.query.delete()
+
+
 @dataclass
 class UserAddressBookImpl:
     db: SQLAlchemy
@@ -1261,72 +1280,6 @@ class PlanDraftRepository(repositories.PlanDraftRepository):
 
 
 @dataclass
-class WorkerInviteRepository(repositories.WorkerInviteRepository):
-    db: SQLAlchemy
-    company_repository: CompanyRepository
-    member_repository: MemberRepository
-
-    def is_worker_invited_to_company(self, company: UUID, worker: UUID) -> bool:
-        return (
-            CompanyWorkInvite.query.filter_by(
-                company=str(company),
-                member=str(worker),
-            ).count()
-            > 0
-        )
-
-    def create_company_worker_invite(self, company: UUID, worker: UUID) -> UUID:
-        invite = CompanyWorkInvite(
-            id=str(uuid4()),
-            company=str(company),
-            member=str(worker),
-        )
-        self.db.session.add(invite)
-        return invite.id
-
-    def get_companies_worker_is_invited_to(self, member: UUID) -> Iterable[UUID]:
-        for invite in CompanyWorkInvite.query.filter_by(member=str(member)):
-            yield UUID(invite.company)
-
-    def get_invites_for_worker(
-        self, member: UUID
-    ) -> Iterable[entities.CompanyWorkInvite]:
-        for invite in CompanyWorkInvite.query.filter_by(member=str(member)):
-            invite_object = self.get_by_id(invite.id)
-            if invite_object is None:
-                continue
-            yield invite_object
-
-    def get_by_id(self, id: UUID) -> Optional[entities.CompanyWorkInvite]:
-        if (
-            invite_orm := CompanyWorkInvite.query.filter_by(id=str(id)).first()
-        ) is not None:
-            company = (
-                self.company_repository.get_companies()
-                .with_id(UUID(invite_orm.company))
-                .first()
-            )
-            if company is None:
-                return None
-            member = (
-                self.member_repository.get_members()
-                .with_id(UUID(invite_orm.member))
-                .first()
-            )
-            if member is None:
-                return None
-            return entities.CompanyWorkInvite(
-                id=id,
-                company=company,
-                member=member,
-            )
-        return None
-
-    def delete_invite(self, id: UUID) -> None:
-        CompanyWorkInvite.query.filter_by(id=str(id)).delete()
-
-
-@dataclass
 class AccountantRepository:
     db: SQLAlchemy
 
@@ -1628,4 +1581,32 @@ class DatabaseGatewayImpl:
             query=models.Transaction.query,
             mapper=self.transaction_from_orm,
             db=self.db,
+        )
+
+    def get_company_work_invites(self) -> CompanyWorkInviteResult:
+        return CompanyWorkInviteResult(
+            query=models.CompanyWorkInvite.query,
+            db=self.db,
+            mapper=self.company_work_invite_from_orm,
+        )
+
+    def create_company_work_invite(
+        self, company: UUID, member: UUID
+    ) -> entities.CompanyWorkInvite:
+        orm = models.CompanyWorkInvite(
+            id=str(uuid4()),
+            company=str(company),
+            member=str(member),
+        )
+        self.db.session.add(orm)
+        return self.company_work_invite_from_orm(orm)
+
+    @classmethod
+    def company_work_invite_from_orm(
+        cls, orm: models.CompanyWorkInvite
+    ) -> entities.CompanyWorkInvite:
+        return entities.CompanyWorkInvite(
+            id=UUID(orm.id),
+            member=UUID(orm.member),
+            company=UUID(orm.company),
         )

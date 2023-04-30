@@ -6,8 +6,8 @@ from uuid import UUID
 
 from arbeitszeit.repositories import (
     CompanyRepository,
+    DatabaseGateway,
     MemberRepository,
-    WorkerInviteRepository,
 )
 
 
@@ -23,7 +23,7 @@ class InviteWorkerToCompanyUseCase:
         is_success: bool
         invite_id: Optional[UUID] = None
 
-    worker_invite_repository: WorkerInviteRepository
+    database_gateway: DatabaseGateway
     member_repository: MemberRepository
     company_repository: CompanyRepository
 
@@ -33,12 +33,14 @@ class InviteWorkerToCompanyUseCase:
             return self.Response(is_success=False)
         if not self.company_repository.get_companies().with_id(request.company):
             return self.Response(is_success=False)
-        if self.worker_invite_repository.is_worker_invited_to_company(
-            request.company, request.worker
+        if (
+            self.database_gateway.get_company_work_invites()
+            .addressing(request.worker)
+            .issued_by(request.company)
         ):
             return self.Response(is_success=False)
         else:
-            invite_id = self.worker_invite_repository.create_company_worker_invite(
+            invite = self.database_gateway.create_company_work_invite(
                 request.company, request.worker
             )
-            return self.Response(is_success=True, invite_id=invite_id)
+            return self.Response(is_success=True, invite_id=invite.id)

@@ -261,8 +261,8 @@ class Transaction:
 @dataclass
 class CompanyWorkInvite:
     id: UUID
-    company: Company
-    member: Member
+    company: UUID
+    member: UUID
 
 
 @dataclass

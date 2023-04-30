@@ -35,7 +35,6 @@ from arbeitszeit_flask.database.repositories import (
     MemberRepository,
     PlanDraftRepository,
     UserAddressBookImpl,
-    WorkerInviteRepository,
 )
 from arbeitszeit_flask.datetime import RealtimeDatetimeService
 from arbeitszeit_flask.extensions import db
@@ -145,10 +144,6 @@ class FlaskModule(Module):
         binder.bind(
             DatetimeService,  # type: ignore
             to=AliasProvider(RealtimeDatetimeService),
-        )
-        binder.bind(
-            interfaces.WorkerInviteRepository,  # type: ignore
-            to=AliasProvider(WorkerInviteRepository),
         )
         binder.bind(
             SQLAlchemy,
