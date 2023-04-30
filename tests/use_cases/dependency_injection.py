@@ -45,9 +45,6 @@ class InMemoryModule(Module):
         )
         binder[InvitationTokenValidator] = AliasProvider(FakeTokenService)  # type: ignore
         binder[InvitationTokenValidator] = AliasProvider(FakeTokenService)  # type: ignore
-        binder[interfaces.WorkerInviteRepository] = AliasProvider(  # type: ignore
-            repositories.WorkerInviteRepository
-        )
         binder[entities.SocialAccounting] = CallableProvider(
             provide_social_accounting_instance
         )

@@ -686,6 +686,43 @@ class PayoutFactorResult(QueryResultImpl[entities.PayoutFactor]):
         )
 
 
+class CompanyWorkInviteResult(QueryResultImpl[CompanyWorkInvite]):
+    def issued_by(self, company: UUID) -> Self:
+        return replace(
+            self,
+            items=lambda: filter(
+                lambda invite: invite.company == company,
+                self.items(),
+            ),
+        )
+
+    def addressing(self, member: UUID) -> Self:
+        return replace(
+            self,
+            items=lambda: filter(
+                lambda invite: invite.member == member,
+                self.items(),
+            ),
+        )
+
+    def with_id(self, id: UUID) -> Self:
+        return replace(
+            self,
+            items=lambda: filter(
+                lambda invite: invite.id == id,
+                self.items(),
+            ),
+        )
+
+    def delete(self) -> None:
+        invites_to_delete = set(invite.id for invite in self.items())
+        self.entities.company_work_invites = [
+            invite
+            for invite in self.entities.company_work_invites
+            if invite.id not in invites_to_delete
+        ]
+
+
 @singleton
 class AccountRepository(interfaces.AccountRepository):
     def __init__(self, entities: EntityStorage):
@@ -922,61 +959,6 @@ class PlanDraftRepository(interfaces.PlanDraftRepository):
 
 
 @singleton
-class WorkerInviteRepository(interfaces.WorkerInviteRepository):
-    def __init__(
-        self, company_repository: CompanyRepository, member_repository: MemberRepository
-    ) -> None:
-        self.invites: Dict[UUID, Tuple[UUID, UUID]] = dict()
-        self.company_repository = company_repository
-        self.member_repository = member_repository
-
-    def is_worker_invited_to_company(self, company: UUID, worker: UUID) -> bool:
-        return (company, worker) in self.invites.values()
-
-    def create_company_worker_invite(
-        self,
-        company: UUID,
-        worker: UUID,
-    ) -> UUID:
-        invite_id = uuid4()
-        self.invites[invite_id] = (company, worker)
-        return invite_id
-
-    def get_companies_worker_is_invited_to(self, member: UUID) -> Iterable[UUID]:
-        for company, invited_worker in self.invites.values():
-            if invited_worker == member:
-                yield company
-
-    def get_invites_for_worker(self, member: UUID) -> Iterable[CompanyWorkInvite]:
-        for invite_id in self.invites:
-            if self.invites[invite_id][1] == member:
-                invite = self.get_by_id(invite_id)
-                if invite is None:
-                    continue
-                yield invite
-
-    def get_by_id(self, id: UUID) -> Optional[CompanyWorkInvite]:
-        try:
-            company_id, worker_id = self.invites[id]
-        except KeyError:
-            return None
-        company = self.company_repository.get_companies().with_id(company_id).first()
-        if company is None:
-            return None
-        member = self.member_repository.get_members().with_id(worker_id).first()
-        if member is None:
-            return None
-        return CompanyWorkInvite(
-            id=id,
-            company=company,
-            member=member,
-        )
-
-    def delete_invite(self, id: UUID) -> None:
-        del self.invites[id]
-
-
-@singleton
 class AccountantRepositoryTestImpl:
     @dataclass
     class _AccountantRecord:
@@ -1064,6 +1046,7 @@ class EntityStorage:
         self.company_purchase_by_transaction: Dict[
             UUID, entities.CompanyPurchase
         ] = dict()
+        self.company_work_invites: List[CompanyWorkInvite] = list()
 
     def create_labour_certificates_payout(
         self, transaction: UUID, plan: UUID
@@ -1227,5 +1210,22 @@ class EntityStorage:
     def get_transactions(self) -> TransactionResult:
         return TransactionResult(
             items=lambda: self.transactions.values(),
+            entities=self,
+        )
+
+    def create_company_work_invite(
+        self, company: UUID, member: UUID
+    ) -> CompanyWorkInvite:
+        invite = CompanyWorkInvite(
+            id=uuid4(),
+            member=member,
+            company=company,
+        )
+        self.company_work_invites.append(invite)
+        return invite
+
+    def get_company_work_invites(self) -> CompanyWorkInviteResult:
+        return CompanyWorkInviteResult(
+            items=lambda: self.company_work_invites,
             entities=self,
         )

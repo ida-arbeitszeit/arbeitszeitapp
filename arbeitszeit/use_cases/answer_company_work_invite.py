@@ -5,8 +5,8 @@ from uuid import UUID
 
 from arbeitszeit.repositories import (
     CompanyRepository,
+    DatabaseGateway,
     MemberRepository,
-    WorkerInviteRepository,
 )
 
 
@@ -31,31 +31,41 @@ class AnswerCompanyWorkInviteResponse:
 
 @dataclass
 class AnswerCompanyWorkInvite:
-    worker_invite_repository: WorkerInviteRepository
+    database_gateway: DatabaseGateway
     company_repository: CompanyRepository
     member_repository: MemberRepository
 
     def __call__(
         self, request: AnswerCompanyWorkInviteRequest
     ) -> AnswerCompanyWorkInviteResponse:
-        invite = self.worker_invite_repository.get_by_id(request.invite_id)
+        invite = (
+            self.database_gateway.get_company_work_invites()
+            .with_id(request.invite_id)
+            .first()
+        )
         if invite is None:
             return self._create_failure_response(
                 reason=AnswerCompanyWorkInviteResponse.Failure.invite_not_found
             )
-        if invite.member.id != request.user:
+        if invite.member != request.user:
             return self._create_failure_response(
                 reason=AnswerCompanyWorkInviteResponse.Failure.member_was_not_invited
             )
         elif request.is_accepted:
-            self.company_repository.get_companies().with_id(
-                invite.company.id
-            ).add_worker(invite.member.id)
-        self.worker_invite_repository.delete_invite(request.invite_id)
+            self.company_repository.get_companies().with_id(invite.company).add_worker(
+                invite.member
+            )
+            self.database_gateway.get_company_work_invites().with_id(
+                request.invite_id
+            ).delete()
+        company = (
+            self.company_repository.get_companies().with_id(invite.company).first()
+        )
+        assert company
         return AnswerCompanyWorkInviteResponse(
             is_success=True,
             is_accepted=request.is_accepted,
-            company_name=invite.company.name,
+            company_name=company.name,
             failure_reason=None,
         )
 
