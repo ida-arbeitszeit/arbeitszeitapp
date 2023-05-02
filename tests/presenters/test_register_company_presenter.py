@@ -12,6 +12,8 @@ from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
 
+RejectionReason = RegisterCompany.Response.RejectionReason
+
 
 class PresenterTests(TestCase):
     def setUp(self) -> None:
@@ -24,27 +26,42 @@ class PresenterTests(TestCase):
     def test_that_correct_error_message_is_displayed_when_email_is_already_registered(
         self,
     ) -> None:
-        reason = RegisterCompany.Response.RejectionReason.company_already_exists
-        response = self.create_response(rejection_reason=reason)
+        response = self.create_response(
+            rejection_reason=RejectionReason.company_already_exists
+        )
         self.presenter.present_company_registration(response, self.form)
         self.assertEqual(
             self.form.email_field.errors[0],
             self.translator.gettext("This email address is already registered."),
         )
 
+    def test_that_correct_error_message_is_displayed_on_password_field_when_password_is_invalid(
+        self,
+    ) -> None:
+        response = self.create_response(
+            rejection_reason=RejectionReason.user_password_is_invalid
+        )
+        self.presenter.present_company_registration(response, self.form)
+        self.assertEqual(
+            self.form.password_field.errors[0],
+            self.translator.gettext("Wrong password."),
+        )
+
     def test_that_view_model_signals_unsuccessful_view_when_registration_was_rejected(
         self,
     ) -> None:
-        reason = RegisterCompany.Response.RejectionReason.company_already_exists
-        response = self.create_response(rejection_reason=reason)
+        response = self.create_response(
+            rejection_reason=RejectionReason.company_already_exists
+        )
         view_model = self.presenter.present_company_registration(response, self.form)
         self.assertFalse(view_model.is_success_view)
 
     def test_that_user_is_not_logged_in_when_registration_was_rejected(
         self,
     ) -> None:
-        reason = RegisterCompany.Response.RejectionReason.company_already_exists
-        response = self.create_response(rejection_reason=reason)
+        response = self.create_response(
+            rejection_reason=RejectionReason.company_already_exists
+        )
         self.presenter.present_company_registration(response, self.form)
         self.assertFalse(self.session.is_logged_in())
 
