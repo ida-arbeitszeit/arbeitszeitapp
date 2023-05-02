@@ -20,9 +20,17 @@ class RegisterCompanyPresenter:
         self, response: RegisterCompany.Response, form: RegisterForm
     ) -> ViewModel:
         if response.is_rejected:
-            form.email_field.attach_error(
-                self.translator.gettext("This email address is already registered.")
-            )
+            if (
+                response.rejection_reason
+                == RegisterCompany.Response.RejectionReason.company_already_exists
+            ):
+                form.email_field.attach_error(
+                    self.translator.gettext("This email address is already registered.")
+                )
+            else:
+                form.password_field.attach_error(
+                    self.translator.gettext("Wrong password.")
+                )
             return ViewModel(is_success_view=False)
         assert response.company_id
         self.session.login_company(company=response.company_id)

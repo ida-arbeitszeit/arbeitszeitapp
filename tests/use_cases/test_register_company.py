@@ -1,19 +1,16 @@
-from unittest import TestCase
 from uuid import UUID
 
 from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCase
 from arbeitszeit.use_cases.register_company import RegisterCompany
-from tests.data_generators import CompanyGenerator
 from tests.token import TokenDeliveryService
 
-from .dependency_injection import get_dependency_injector
+from .base_test_case import BaseTestCase
 
 
-class RegisterCompanyTests(TestCase):
+class RegisterCompanyTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.use_case = self.injector.get(RegisterCompany)
-        self.company_generator = self.injector.get(CompanyGenerator)
         self.token_delivery = self.injector.get(TokenDeliveryService)
         self.get_company_dashboard_use_case = self.injector.get(
             GetCompanyDashboardUseCase
@@ -56,13 +53,55 @@ class RegisterCompanyTests(TestCase):
         assert company_info.name == expected_name
         assert company_info.email == expected_email
 
+    def test_that_company_registration_with_preexisting_member_email_address_is_rejected_when_provided_password_does_not_match_member_password(
+        self,
+    ) -> None:
+        email_address = "test@test.test"
+        self.member_generator.create_member(
+            email=email_address, password="member password"
+        )
+        request = self._create_request(email=email_address, password="company password")
+        response = self.use_case.register_company(request)
+        assert response.is_rejected
+
+    def test_that_company_registration_succeeds_with_preexisting_member_email_address_when_provided_password_matches_member_password(
+        self,
+    ) -> None:
+        email_address = "test@test.test"
+        password = "matching password"
+        self.member_generator.create_member(
+            email=email_address,
+            password=password,
+        )
+        request = self._create_request(email=email_address, password=password)
+        response = self.use_case.register_company(request)
+        assert not response.is_rejected
+
+    def test_when_provided_password_does_not_match_preexisting_member_password_then_proper_rejection_reason_is_given(
+        self,
+    ) -> None:
+        email_address = "test@test.test"
+        self.member_generator.create_member(
+            email=email_address, password="member password"
+        )
+        request = self._create_request(email=email_address, password="company password")
+        response = self.use_case.register_company(request)
+        assert (
+            response.rejection_reason
+            == RegisterCompany.Response.RejectionReason.user_password_is_invalid
+        )
+
     def _create_request(
-        self, *, email: str = "test@cp.org", name: str = "test name"
+        self,
+        *,
+        email: str = "test@cp.org",
+        name: str = "test name",
+        password: str = "test password",
     ) -> RegisterCompany.Request:
         return RegisterCompany.Request(
             email=email,
             name=name,
-            password="super safe",
+            password=password,
         )
 
     def _get_company_info(

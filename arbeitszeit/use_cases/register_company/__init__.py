@@ -6,7 +6,11 @@ from typing import Optional
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.repositories import AccountRepository, CompanyRepository
+from arbeitszeit.repositories import (
+    AccountRepository,
+    CompanyRepository,
+    MemberRepository,
+)
 from arbeitszeit.token import CompanyRegistrationMessagePresenter, TokenService
 
 
@@ -14,6 +18,7 @@ from arbeitszeit.token import CompanyRegistrationMessagePresenter, TokenService
 class RegisterCompany:
     company_repository: CompanyRepository
     account_repository: AccountRepository
+    member_repository: MemberRepository
     datetime_service: DatetimeService
     token_service: TokenService
     company_registration_message_presenter: CompanyRegistrationMessagePresenter
@@ -22,6 +27,7 @@ class RegisterCompany:
     class Response:
         class RejectionReason(Exception, Enum):
             company_already_exists = auto()
+            user_password_is_invalid = auto()
 
         rejection_reason: Optional[RejectionReason]
         company_id: Optional[UUID]
@@ -46,6 +52,11 @@ class RegisterCompany:
     def _register_company(self, request: Request) -> UUID:
         if self.company_repository.get_companies().with_email_address(request.email):
             raise self.Response.RejectionReason.company_already_exists
+        if self.member_repository.get_members().with_email_address(request.email):
+            if not self.member_repository.validate_credentials(
+                email=request.email, password=request.password
+            ):
+                raise self.Response.RejectionReason.user_password_is_invalid
         means_account = self.account_repository.create_account()
         resources_account = self.account_repository.create_account()
         labour_account = self.account_repository.create_account()
