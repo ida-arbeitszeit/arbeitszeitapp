@@ -620,7 +620,9 @@ class CompanyPurchaseResult(FlaskQueryResult[entities.CompanyPurchase]):
         if not ascending:
             ordering = ordering.desc()
         return self._with_modified_query(
-            lambda query: query.join(transaction).order_by(ordering)
+            lambda query: query.join(
+                transaction, models.CompanyPurchase.transaction_id == transaction.id
+            ).order_by(ordering)
         )
 
     def with_transaction_and_plan(
@@ -695,7 +697,9 @@ class ConsumerPurchaseResult(FlaskQueryResult[entities.ConsumerPurchase]):
         if not ascending:
             ordering = ordering.desc()
         return self._with_modified_query(
-            lambda query: query.join(transaction).order_by(ordering)
+            lambda query: query.join(
+                transaction, models.ConsumerPurchase.transaction_id == transaction.id
+            ).order_by(ordering)
         )
 
     def with_transaction_and_plan(
