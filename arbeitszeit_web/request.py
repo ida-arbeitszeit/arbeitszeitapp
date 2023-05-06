@@ -13,6 +13,9 @@ class Request(Protocol):
     def get_header(self, key: str) -> Optional[str]:
         ...
 
+    def get_request_target(self) -> str:
+        ...
+
 
 class QueryString(Protocol):
     def get(self, key: str) -> Optional[str]:

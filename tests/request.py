@@ -27,3 +27,6 @@ class FakeRequest:
 
     def set_header(self, key: str, value: str) -> None:
         self._environ[key] = value
+
+    def get_request_target(self) -> str:
+        return "/"

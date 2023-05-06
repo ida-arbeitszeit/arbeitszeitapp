@@ -23,6 +23,9 @@ class Session(Protocol):
     def login_accountant(self, accountant: UUID, remember: bool = ...) -> None:
         ...
 
+    def logout(self) -> None:
+        ...
+
     def pop_next_url(self) -> Optional[str]:
         ...
 

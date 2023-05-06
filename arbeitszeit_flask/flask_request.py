@@ -28,3 +28,6 @@ class FlaskRequest:
 
     def get_header(self, key: str) -> Optional[str]:
         return request.headers.get(key, None)
+
+    def get_request_target(self) -> str:
+        return request.url
