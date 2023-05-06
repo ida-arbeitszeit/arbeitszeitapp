@@ -16,7 +16,7 @@ class AnonymousUserTest(ViewTestCase):
         self,
     ):
         response = self.client.get(self.url)
-        self.assertEqual(response.location, "/?next=%2Fcompany%2Fpurchases")
+        self.assertEqual(response.location, "/")
 
 
 class MemberTest(ViewTestCase):
@@ -33,7 +33,7 @@ class MemberTest(ViewTestCase):
         self,
     ) -> None:
         response = self.client.get(self.url)
-        self.assertEqual(response.location, "/?next=%2Fcompany%2Fpurchases")
+        self.assertEqual(response.location, "/")
 
 
 class UnconfirmedCompanyTests(ViewTestCase):

@@ -41,13 +41,9 @@ auth = Blueprint("auth", __name__, template_folder="templates", static_folder="s
 @with_injection()
 def start(
     template_renderer: AnonymousUserTemplateRenderer,
-    session: FlaskSession,
     start_page: StartPageUseCase,
     start_page_presenter: StartPagePresenter,
 ):
-    next_url = request.args.get("next")
-    if next_url is not None:
-        session.set_next_url(next_url)
     response = start_page.show_start_page()
     view_model = start_page_presenter.show_start_page(response)
     return template_renderer.render_template(

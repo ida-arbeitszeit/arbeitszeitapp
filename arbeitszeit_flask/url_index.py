@@ -181,6 +181,12 @@ class GeneralUrlIndex:
     def get_unconfirmed_member_url(self) -> str:
         return url_for(endpoint="auth.unconfirmed_member")
 
+    def get_unconfirmed_company_url(self) -> str:
+        return url_for(endpoint="auth.unconfirmed_company")
+
+    def get_start_page_url(self) -> str:
+        return url_for(endpoint="auth.start")
+
 
 class CompanyUrlIndex:
     def get_renew_plan_url(self, plan_id: UUID) -> str:

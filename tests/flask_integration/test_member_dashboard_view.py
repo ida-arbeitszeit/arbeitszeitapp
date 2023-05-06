@@ -12,11 +12,11 @@ class AnonymousUserTest(ViewTestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 302)
 
-    def test_anonymous_user_gets_redirected_to_start_with_next_url_set_correctly(
+    def test_anonymous_user_gets_redirected_to_start(
         self,
     ):
         response = self.client.get(self.url)
-        self.assertEqual(response.location, "/?next=%2Fmember%2Fdashboard")
+        self.assertEqual(response.location, "/")
 
 
 class CompanyTest(ViewTestCase):
@@ -29,11 +29,11 @@ class CompanyTest(ViewTestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 302)
 
-    def test_company_gets_redirected_to_start_page_with_next_url_set_correctly(
+    def test_company_gets_redirected_to_start_page(
         self,
     ) -> None:
         response = self.client.get(self.url)
-        self.assertEqual(response.location, "/?next=%2Fmember%2Fdashboard")
+        self.assertEqual(response.location, "/")
 
 
 class UnconfirmedMemberTests(ViewTestCase):
