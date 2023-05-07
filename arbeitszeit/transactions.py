@@ -4,8 +4,15 @@ from enum import Enum, auto
 from typing import Iterable, List, Union
 from uuid import UUID
 
-from .entities import AccountTypes, Company, Member, SocialAccounting, Transaction
-from .repositories import AccountOwnerRepository, AccountRepository, DatabaseGateway
+from .entities import (
+    AccountOwner,
+    AccountTypes,
+    Company,
+    Member,
+    SocialAccounting,
+    Transaction,
+)
+from .repositories import AccountRepository, DatabaseGateway
 
 
 class TransactionTypes(Enum):
@@ -38,7 +45,6 @@ class AccountStatementRow:
 @dataclass
 class UserAccountingService:
     database_gateway: DatabaseGateway
-    account_owner_repository: AccountOwnerRepository
     account_repository: AccountRepository
 
     def get_all_transactions_sorted(
@@ -69,20 +75,18 @@ class UserAccountingService:
         return transaction.sending_account in user.accounts()
 
     def _get_transaction_type(
-        self, transaction: Transaction, user_is_sender: bool
+        self,
+        transaction: Transaction,
+        sender: AccountOwner,
+        receiver: AccountOwner,
+        user_is_sender: bool,
     ) -> TransactionTypes:
         """
         Based on wether the user is sender or receiver,
         this method returns the 'subjective' transaction type.
         """
-        sender = self.account_owner_repository.get_account_owner(
-            transaction.sending_account
-        )
         sending_account = sender.get_account_type(transaction.sending_account)
         assert sending_account
-        receiver = self.account_owner_repository.get_account_owner(
-            transaction.receiving_account
-        )
         receiving_account = receiver.get_account_type(transaction.receiving_account)
         assert receiving_account
         if user_is_sender:
@@ -149,7 +153,7 @@ class UserAccountingService:
             .first()
         )
         assert buyer_account
-        buyer = self.account_owner_repository.get_account_owner(buyer_account.id)
+        buyer = self._get_account_owner(buyer_account.id)
         assert not isinstance(
             buyer, SocialAccounting
         )  # from the transactiontype we know: buyer can't be social accounting
@@ -178,7 +182,21 @@ class UserAccountingService:
                 if user_is_sender
                 else transaction.amount_received,
                 transaction_type=self._get_transaction_type(
-                    transaction, user_is_sender
+                    transaction=transaction,
+                    user_is_sender=user_is_sender,
+                    sender=self._get_account_owner(transaction.sending_account),
+                    receiver=self._get_account_owner(transaction.receiving_account),
                 ),
                 account_type=account_type,
             )
+
+    def _get_account_owner(self, account_id: UUID) -> AccountOwner:
+        result = (
+            self.account_repository.get_accounts()
+            .with_id(account_id)
+            .joined_with_owner()
+            .first()
+        )
+        assert result
+        _, owner = result
+        return owner

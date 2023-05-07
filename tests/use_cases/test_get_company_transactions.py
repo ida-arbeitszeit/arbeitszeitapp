@@ -109,7 +109,7 @@ def test_that_correct_info_for_company_is_generated_after_transaction_where_cred
     company = company_generator.create_company_entity()
 
     trans = transaction_generator.create_transaction(
-        sending_account=social_accounting.account.id,
+        sending_account=social_accounting.account,
         receiving_account=company.means_account,
         amount_sent=Decimal(10),
         amount_received=Decimal(8.5),
@@ -133,7 +133,7 @@ def test_that_correct_info_for_company_is_generated_after_transaction_where_cred
     company = company_generator.create_company_entity()
 
     trans = transaction_generator.create_transaction(
-        sending_account=social_accounting.account.id,
+        sending_account=social_accounting.account,
         receiving_account=company.raw_material_account,
         amount_sent=Decimal(10),
         amount_received=Decimal(8.5),
@@ -157,7 +157,7 @@ def test_that_correct_info_for_company_is_generated_after_transaction_where_cred
     company = company_generator.create_company_entity()
 
     trans = transaction_generator.create_transaction(
-        sending_account=social_accounting.account.id,
+        sending_account=social_accounting.account,
         receiving_account=company.work_account,
         amount_sent=Decimal(10),
         amount_received=Decimal(8.5),
@@ -244,7 +244,7 @@ def test_that_correct_info_for_company_is_generated_in_correct_order_after_sever
         date=datetime_service.now() - timedelta(hours=2),
     )
     expected_trans5 = transaction_generator.create_transaction(
-        sending_account=social_accounting.account.id,
+        sending_account=social_accounting.account,
         receiving_account=company1.product_account,
         date=datetime_service.now() - timedelta(hours=1),
     )

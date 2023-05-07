@@ -16,7 +16,6 @@ from typing import (
     Set,
     Tuple,
     TypeVar,
-    Union,
 )
 from uuid import UUID, uuid4
 
@@ -512,7 +511,7 @@ class TransactionResult(QueryResultImpl[Transaction]):
             self,
             items=lambda: filter(
                 lambda transaction: transaction.sending_account
-                == self.entities.social_accounting.account.id,
+                == self.entities.social_accounting.account,
                 self.items(),
             ),
         )
@@ -660,6 +659,30 @@ class AccountResult(QueryResultImpl[Account]):
             items=lambda: filter(lambda account: account.id in id_, self.items()),
         )
 
+    def joined_with_owner(
+        self,
+    ) -> QueryResultImpl[Tuple[Account, entities.AccountOwner]]:
+        def items() -> Iterable[Tuple[Account, entities.AccountOwner]]:
+            for account in self.items():
+                if account.id == self.entities.social_accounting.account:
+                    yield account, self.entities.social_accounting
+                for member in self.entities.members.values():
+                    if account.id == member.account:
+                        yield account, member
+                for company in self.entities.companies.values():
+                    if account.id in [
+                        company.means_account,
+                        company.raw_material_account,
+                        company.work_account,
+                        company.product_account,
+                    ]:
+                        yield account, company
+
+        return QueryResultImpl(
+            items=items,
+            entities=self.entities,
+        )
+
 
 class LabourCertificatesPayoutResult(
     QueryResultImpl[entities.LabourCertificatesPayout]
@@ -749,32 +772,6 @@ class AccountRepository(interfaces.AccountRepository):
         return decimal_sum(
             transaction.amount_received for transaction in received_transactions
         ) - decimal_sum(transaction.amount_sent for transaction in sent_transactions)
-
-
-@singleton
-class AccountOwnerRepository(interfaces.AccountOwnerRepository):
-    def __init__(
-        self,
-        entities: EntityStorage,
-        social_accounting: SocialAccounting,
-    ):
-        self.entities = entities
-        self.social_accounting = social_accounting
-
-    def get_account_owner(
-        self, account: UUID
-    ) -> Union[Member, Company, SocialAccounting]:
-        if self.social_accounting.account.id == account:
-            return self.social_accounting
-        for member in self.entities.members.values():
-            if account == member.account:
-                return member
-        for company in self.entities.companies.values():
-            if account in company.accounts():
-                return company
-        # This exception is not meant to be caught. That's why we
-        # raise a base exception
-        raise Exception("Owner not found")
 
 
 @singleton
@@ -1028,7 +1025,7 @@ class EntityStorage:
         self.accounts: List[Account] = []
         self.social_accounting = SocialAccounting(
             id=uuid4(),
-            account=self.create_account(),
+            account=self.create_account().id,
         )
         self.cooperations: Dict[UUID, Cooperation] = dict()
         self.labour_certificates_payouts_by_transaction: Dict[

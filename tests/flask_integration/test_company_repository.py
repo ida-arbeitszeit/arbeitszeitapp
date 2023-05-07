@@ -25,17 +25,6 @@ class RepositoryTester(FlaskTestCase):
         self.company_repository = self.injector.get(CompanyRepository)
         self.account_repository = self.injector.get(AccountRepository)
 
-    def test_company_repository_can_convert_to_and_from_orm_without_changing_the_object(
-        self,
-    ) -> None:
-        expected_company = self.company_generator.create_company_entity()
-        actual_company = self.company_repository.object_from_orm(
-            self.company_repository.object_to_orm(
-                expected_company,
-            )
-        )
-        assert actual_company == expected_company
-
     def test_cannot_retrieve_company_from_arbitrary_uuid(self) -> None:
         assert not self.company_repository.get_companies().with_id(uuid4())
 

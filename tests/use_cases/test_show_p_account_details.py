@@ -69,7 +69,7 @@ class UseCaseTester(BaseTestCase):
         company = self.company_generator.create_company_entity()
 
         self.transaction_generator.create_transaction(
-            sending_account=self.social_accounting.account.id,
+            sending_account=self.social_accounting.account,
             receiving_account=company.raw_material_account,
             amount_sent=Decimal(10),
             amount_received=Decimal(8.5),
@@ -82,7 +82,7 @@ class UseCaseTester(BaseTestCase):
         company = self.company_generator.create_company_entity()
 
         self.transaction_generator.create_transaction(
-            sending_account=self.social_accounting.account.id,
+            sending_account=self.social_accounting.account,
             receiving_account=company.means_account,
             amount_sent=Decimal(10),
             amount_received=Decimal(8.5),
@@ -216,7 +216,7 @@ class UseCaseTester(BaseTestCase):
     ) -> None:
         company = self.company_generator.create_company_entity()
         trans = self.transaction_generator.create_transaction(
-            sending_account=self.social_accounting.account.id,
+            sending_account=self.social_accounting.account,
             receiving_account=company.means_account,
             amount_sent=Decimal(10),
             amount_received=Decimal(8.5),

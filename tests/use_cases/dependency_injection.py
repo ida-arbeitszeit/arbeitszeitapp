@@ -63,9 +63,6 @@ class InMemoryModule(Module):
         binder[interfaces.PlanDraftRepository] = AliasProvider(  # type: ignore
             repositories.PlanDraftRepository
         )
-        binder[interfaces.AccountOwnerRepository] = AliasProvider(  # type: ignore
-            repositories.AccountOwnerRepository
-        )
         binder[TokenService] = AliasProvider(FakeTokenService)  # type: ignore
         binder.bind(
             interfaces.DatabaseGateway,  # type: ignore

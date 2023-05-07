@@ -13,7 +13,6 @@ from typing import (
     Optional,
     Tuple,
     TypeVar,
-    Union,
 )
 from uuid import UUID, uuid4
 
@@ -30,7 +29,6 @@ from arbeitszeit.decimal import decimal_sum
 from arbeitszeit_flask import models
 from arbeitszeit_flask.models import (
     Account,
-    AccountTypes,
     Company,
     Member,
     PlanDraft,
@@ -572,6 +570,54 @@ class AccountQueryResult(FlaskQueryResult[entities.Account]):
             lambda query: query.filter(models.Account.id.in_(ids))
         )
 
+    def joined_with_owner(
+        self,
+    ) -> FlaskQueryResult[Tuple[entities.Account, entities.AccountOwner]]:
+        member = aliased(models.Member)
+        company = aliased(models.Company)
+        social_accounting = aliased(models.SocialAccounting)
+        query = (
+            self.query.join(member, member.account == models.Account.id, isouter=True)
+            .join(
+                company,
+                or_(
+                    company.p_account == models.Account.id,
+                    company.r_account == models.Account.id,
+                    company.a_account == models.Account.id,
+                    company.prd_account == models.Account.id,
+                ),
+                isouter=True,
+            )
+            .join(
+                social_accounting,
+                models.Account.id == social_accounting.account,
+                isouter=True,
+            )
+            .with_entities(models.Account, member, company, social_accounting)
+        )
+        return FlaskQueryResult(
+            query=query,
+            mapper=self.map_account_and_owner,
+            db=self.db,
+        )
+
+    @classmethod
+    def map_account_and_owner(
+        cls, orm: Any
+    ) -> Tuple[entities.Account, entities.AccountOwner]:
+        owner: entities.AccountOwner
+        account, member, company, social_accounting = orm
+        if member:
+            owner = MemberRepository.member_from_orm(member)
+        elif company:
+            owner = CompanyRepository.company_from_orm(company)
+        else:
+            owner = AccountingRepository.social_accounting_from_orm(social_accounting)
+        return (
+            AccountRepository.account_from_orm(account),
+            owner,
+        )
+
 
 class LabourCertificatesPayoutResult(
     FlaskQueryResult[entities.LabourCertificatesPayout]
@@ -759,7 +805,7 @@ class CooperationResult(FlaskQueryResult[entities.Cooperation]):
             cooperation_orm, company_orm = orm
             return (
                 DatabaseGatewayImpl.cooperation_from_orm(cooperation_orm),
-                CompanyRepository.object_from_orm(company_orm),
+                CompanyRepository.company_from_orm(company_orm),
             )
 
         company = aliased(models.Company)
@@ -817,7 +863,6 @@ class UserAddressBookImpl:
 
 @dataclass
 class MemberRepository(repositories.MemberRepository):
-    account_repository: AccountRepository
     db: SQLAlchemy
 
     def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
@@ -831,17 +876,8 @@ class MemberRepository(repositories.MemberRepository):
                 return UUID(member.id)
         return None
 
-    def get_member_orm_by_mail(self, email: str) -> Member:
-        member_orm = (
-            self.db.session.query(models.Member)
-            .join(models.User)
-            .filter(models.User.email == email)
-            .first()
-        )
-        assert member_orm
-        return member_orm
-
-    def object_from_orm(self, orm_object: Member) -> entities.Member:
+    @classmethod
+    def member_from_orm(cls, orm_object: Member) -> entities.Member:
         return entities.Member(
             id=UUID(orm_object.id),
             name=orm_object.name,
@@ -872,11 +908,11 @@ class MemberRepository(repositories.MemberRepository):
             registered_on=registered_on,
         )
         self.db.session.add(orm_member)
-        return self.object_from_orm(orm_member)
+        return self.member_from_orm(orm_member)
 
     def get_members(self) -> MemberQueryResult:
         return MemberQueryResult(
-            mapper=self.object_from_orm,
+            mapper=self.member_from_orm,
             query=Member.query,
             db=self.db,
         )
@@ -900,13 +936,8 @@ class MemberRepository(repositories.MemberRepository):
 class CompanyRepository(repositories.CompanyRepository):
     db: SQLAlchemy
 
-    def object_to_orm(self, company: entities.Company) -> Company:
-        orm = models.Company.query.filter(models.Company.id == str(company.id)).first()
-        assert orm
-        return orm
-
     @classmethod
-    def object_from_orm(cls, company_orm: Company) -> entities.Company:
+    def company_from_orm(cls, company_orm: Company) -> entities.Company:
         return entities.Company(
             id=UUID(company_orm.id),
             email=company_orm.user.email,
@@ -943,12 +974,12 @@ class CompanyRepository(repositories.CompanyRepository):
         )
         self.db.session.add(company)
         self.db.session.flush()
-        return self.object_from_orm(company)
+        return self.company_from_orm(company)
 
     def get_companies(self) -> CompanyQueryResult:
         return CompanyQueryResult(
             query=Company.query,
-            mapper=self.object_from_orm,
+            mapper=self.company_from_orm,
             db=self.db,
         )
 
@@ -1005,62 +1036,21 @@ class CompanyRepository(repositories.CompanyRepository):
             self.db.session.add(user)
         return user
 
-    def _get_means_account(self, company: Company) -> Account:
-        account = models.Account.query.get(company.p_account)
-        assert account
-        return account
-
-    def _get_resources_account(self, company: Company) -> Account:
-        account = models.Account.query.get(company.r_account)
-        assert account
-        return account
-
-    def _get_labour_account(self, company: Company) -> Account:
-        account = models.Account.query.get(company.a_account)
-        assert account
-        return account
-
-    def _get_products_account(self, company: Company) -> Account:
-        account = models.Account.query.get(company.prd_account)
-        assert account
-        return account
-
 
 @dataclass
 class AccountRepository(repositories.AccountRepository):
     db: SQLAlchemy
 
-    def object_from_orm(self, account_orm: Account) -> entities.Account:
-        assert account_orm
+    @classmethod
+    def account_from_orm(cls, account_orm: Account) -> entities.Account:
         return entities.Account(
             id=UUID(account_orm.id),
         )
 
-    def _transform_account_type(
-        self, orm_account_type: AccountTypes
-    ) -> entities.AccountTypes:
-        if orm_account_type == AccountTypes.p:
-            return entities.AccountTypes.p
-        elif orm_account_type == AccountTypes.r:
-            return entities.AccountTypes.r
-        elif orm_account_type == AccountTypes.a:
-            return entities.AccountTypes.a
-        elif orm_account_type == AccountTypes.prd:
-            return entities.AccountTypes.prd
-        elif orm_account_type == AccountTypes.member:
-            return entities.AccountTypes.member
-        else:
-            return entities.AccountTypes.accounting
-
-    def object_to_orm(self, account: entities.Account) -> Account:
-        account_orm = Account.query.filter_by(id=str(account.id)).first()
-        assert account_orm
-        return account_orm
-
     def create_account(self) -> entities.Account:
         account = Account(id=str(uuid4()))
         self.db.session.add(account)
-        return self.object_from_orm(account)
+        return self.account_from_orm(account)
 
     def get_account_balance(self, account: UUID) -> Decimal:
         account_orm = models.Account.query.filter(
@@ -1076,68 +1066,12 @@ class AccountRepository(repositories.AccountRepository):
             t.amount_sent for t in sent
         )
 
-    def get_by_id(self, id: UUID) -> entities.Account:
-        orm = Account.query.filter(models.Account.id == str(id)).first()
-        assert orm
-        return self.object_from_orm(orm)
-
     def get_accounts(self) -> AccountQueryResult:
         return AccountQueryResult(
             db=self.db,
-            mapper=self.object_from_orm,
+            mapper=self.account_from_orm,
             query=models.Account.query,
         )
-
-
-@dataclass
-class AccountOwnerRepository(repositories.AccountOwnerRepository):
-    account_repository: AccountRepository
-    member_repository: MemberRepository
-    company_repository: CompanyRepository
-    social_accounting_repository: AccountingRepository
-
-    def get_account_owner(
-        self, account: UUID
-    ) -> Union[entities.Member, entities.Company, entities.SocialAccounting]:
-        account_id = str(account)
-        account_owner: Union[
-            entities.Member, entities.Company, entities.SocialAccounting, None
-        ] = (
-            self._get_account_owner_company(account_id)
-            or self._get_account_owner_member(account_id)
-            or self._get_account_owner_social_accounting(account_id)
-        )
-        assert account_owner
-        return account_owner
-
-    def _get_account_owner_member(self, account_id: str) -> Optional[entities.Member]:
-        model = models.Member.query.filter(models.Member.account == account_id).first()
-        if not model:
-            return None
-        return self.member_repository.object_from_orm(model)
-
-    def _get_account_owner_social_accounting(
-        self, account_id: str
-    ) -> Optional[entities.SocialAccounting]:
-        model = models.SocialAccounting.query.filter(
-            models.SocialAccounting.account == account_id
-        ).first()
-        if not model:
-            return None
-        return self.social_accounting_repository.object_from_orm(model)
-
-    def _get_account_owner_company(self, account_id: str) -> Optional[entities.Company]:
-        model = models.Company.query.filter(
-            or_(
-                models.Company.p_account == account_id,
-                models.Company.r_account == account_id,
-                models.Company.a_account == account_id,
-                models.Company.prd_account == account_id,
-            )
-        ).first()
-        if not model:
-            return None
-        return self.company_repository.object_from_orm(model)
 
 
 @dataclass
@@ -1145,17 +1079,19 @@ class AccountingRepository:
     account_repository: AccountRepository
     db: SQLAlchemy
 
-    def object_from_orm(
-        self, accounting_orm: SocialAccounting
+    @classmethod
+    def social_accounting_from_orm(
+        cls, accounting_orm: SocialAccounting
     ) -> entities.SocialAccounting:
-        account = self.account_repository.get_by_id(UUID(accounting_orm.account))
         return entities.SocialAccounting(
-            account=account,
+            account=UUID(accounting_orm.account),
             id=UUID(accounting_orm.id),
         )
 
     def get_or_create_social_accounting(self) -> entities.SocialAccounting:
-        return self.object_from_orm(self.get_or_create_social_accounting_orm())
+        return self.social_accounting_from_orm(
+            self.get_or_create_social_accounting_orm()
+        )
 
     def get_or_create_social_accounting_orm(self) -> SocialAccounting:
         social_accounting = models.SocialAccounting.query.first()
@@ -1172,7 +1108,7 @@ class AccountingRepository:
         accounting_orm = SocialAccounting.query.filter_by(id=str(id)).first()
         if accounting_orm is None:
             return None
-        return self.object_from_orm(accounting_orm)
+        return self.social_accounting_from_orm(accounting_orm)
 
 
 @dataclass
