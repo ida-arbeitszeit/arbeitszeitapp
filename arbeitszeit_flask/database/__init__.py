@@ -8,14 +8,12 @@ from arbeitszeit_flask.extensions import db
 
 from .repositories import (
     AccountingRepository,
-    AccountOwnerRepository,
     AccountRepository,
     CompanyRepository,
     MemberRepository,
 )
 
 __all__ = [
-    "AccountOwnerRepository",
     "AccountRepository",
     "AccountingRepository",
     "CompanyRepository",

@@ -4,16 +4,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import (
-    Generic,
-    Iterable,
-    Iterator,
-    Optional,
-    Protocol,
-    Tuple,
-    TypeVar,
-    Union,
-)
+from typing import Generic, Iterable, Iterator, Optional, Protocol, Tuple, TypeVar
 from uuid import UUID
 
 from typing_extensions import Self
@@ -21,6 +12,7 @@ from typing_extensions import Self
 from arbeitszeit.entities import (
     Account,
     Accountant,
+    AccountOwner,
     Company,
     CompanyPurchase,
     CompanyWorkInvite,
@@ -33,7 +25,6 @@ from arbeitszeit.entities import (
     PlanDraft,
     PlanningStatistics,
     ProductionCosts,
-    SocialAccounting,
     Transaction,
 )
 
@@ -330,6 +321,9 @@ class AccountResult(QueryResult[Account], Protocol):
     def with_id(self, id_: UUID) -> AccountResult:
         ...
 
+    def joined_with_owner(self) -> QueryResult[Tuple[Account, AccountOwner]]:
+        ...
+
 
 class LabourCertificatesPayoutResult(QueryResult[LabourCertificatesPayout], Protocol):
     def for_plan(self, plan: UUID) -> LabourCertificatesPayoutResult:
@@ -390,14 +384,6 @@ class MemberRepository(ABC):
 
     @abstractmethod
     def get_members(self) -> MemberResult:
-        pass
-
-
-class AccountOwnerRepository(ABC):
-    @abstractmethod
-    def get_account_owner(
-        self, account: UUID
-    ) -> Union[Member, Company, SocialAccounting]:
         pass
 
 

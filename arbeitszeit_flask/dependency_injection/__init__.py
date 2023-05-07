@@ -28,7 +28,6 @@ from arbeitszeit_flask.control_thresholds import ControlThresholdsFlask
 from arbeitszeit_flask.database import get_social_accounting
 from arbeitszeit_flask.database.repositories import (
     AccountantRepository,
-    AccountOwnerRepository,
     AccountRepository,
     CompanyRepository,
     DatabaseGatewayImpl,
@@ -132,10 +131,6 @@ class FlaskModule(Module):
         binder.bind(
             interfaces.CompanyRepository,  # type: ignore
             to=AliasProvider(CompanyRepository),
-        )
-        binder.bind(
-            interfaces.AccountOwnerRepository,  # type: ignore
-            to=AliasProvider(AccountOwnerRepository),
         )
         binder.bind(
             interfaces.PlanDraftRepository,  # type: ignore

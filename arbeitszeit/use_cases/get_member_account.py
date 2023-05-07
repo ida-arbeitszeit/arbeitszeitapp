@@ -1,19 +1,12 @@
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import List, Union
+from typing import List
 from uuid import UUID
 
-from arbeitszeit.entities import Company, Member, SocialAccounting, Transaction
-from arbeitszeit.repositories import (
-    AccountOwnerRepository,
-    AccountRepository,
-    MemberRepository,
-)
+from arbeitszeit.entities import AccountOwner, Member, Transaction
+from arbeitszeit.repositories import AccountRepository, MemberRepository
 from arbeitszeit.transactions import TransactionTypes, UserAccountingService
-
-User = Union[Member, Company]
-UserOrSocialAccounting = Union[User, SocialAccounting]
 
 
 @dataclass
@@ -35,7 +28,6 @@ class GetMemberAccountResponse:
 class GetMemberAccount:
     accounting_service: UserAccountingService
     member_repository: MemberRepository
-    acount_owner_repository: AccountOwnerRepository
     account_repository: AccountRepository
 
     def __call__(self, member_id: UUID) -> GetMemberAccountResponse:
@@ -59,22 +51,17 @@ class GetMemberAccount:
     def _get_peer_name(self, user: Member, transaction: Transaction) -> str:
         user_is_sender = self.accounting_service.user_is_sender(transaction, user)
         if user_is_sender:
-            receiving_account = (
-                self.account_repository.get_accounts()
-                .with_id(transaction.receiving_account)
-                .first()
-            )
-            assert receiving_account
-            receiver = self.acount_owner_repository.get_account_owner(
-                receiving_account.id
-            )
-            return receiver.get_name()
+            return self.get_account_owner(transaction.receiving_account).get_name()
         else:
-            sending_account = (
-                self.account_repository.get_accounts()
-                .with_id(transaction.sending_account)
-                .first()
-            )
-            assert sending_account
-            sender = self.acount_owner_repository.get_account_owner(sending_account.id)
-            return sender.get_name()
+            return self.get_account_owner(transaction.sending_account).get_name()
+
+    def get_account_owner(self, account_id: UUID) -> AccountOwner:
+        result = (
+            self.account_repository.get_accounts()
+            .with_id(account_id)
+            .joined_with_owner()
+            .first()
+        )
+        assert result
+        _, owner = result
+        return owner

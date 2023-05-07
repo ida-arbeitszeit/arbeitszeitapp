@@ -103,7 +103,7 @@ def test_that_no_info_is_generated_when_credit_for_r_is_granted(
     company = company_generator.create_company_entity()
 
     transaction_generator.create_transaction(
-        sending_account=social_accounting.account.id,
+        sending_account=social_accounting.account,
         receiving_account=company.raw_material_account,
         amount_sent=Decimal(10),
         amount_received=Decimal(8.5),
@@ -123,7 +123,7 @@ def test_that_correct_info_is_generated_when_credit_for_wages_is_granted(
     company = company_generator.create_company_entity()
 
     transaction_generator.create_transaction(
-        sending_account=social_accounting.account.id,
+        sending_account=social_accounting.account,
         receiving_account=company.work_account,
         amount_sent=Decimal(10),
         amount_received=Decimal(8.5),
@@ -294,7 +294,7 @@ def test_that_correct_plotting_info_is_generated_after_receiving_of_work_certifi
 ):
     company = company_generator.create_company_entity()
     trans = transaction_generator.create_transaction(
-        sending_account=social_accounting.account.id,
+        sending_account=social_accounting.account,
         receiving_account=company.work_account,
         amount_sent=Decimal(10),
         amount_received=Decimal(8.5),

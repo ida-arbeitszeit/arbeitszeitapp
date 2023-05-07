@@ -52,7 +52,7 @@ class ApprovePlanUseCase:
     ) -> None:
         self.database_gateway.create_transaction(
             date=self.datetime_service.now(),
-            sending_account=self.social_accounting.account.id,
+            sending_account=self.social_accounting.account,
             receiving_account=account,
             amount_sent=round(amount, 2),
             amount_received=round(amount, 2),

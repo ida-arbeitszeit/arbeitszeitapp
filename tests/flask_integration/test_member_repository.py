@@ -27,7 +27,7 @@ class RepositoryTests(FlaskTestCase):
             account=account,
             registered_on=datetime.now(),
         )
-        converted_member = self.member_repository.object_from_orm(
+        converted_member = self.member_repository.member_from_orm(
             self.member_repository.object_to_orm(
                 expected_member,
             )

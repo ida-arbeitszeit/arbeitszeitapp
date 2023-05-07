@@ -11,13 +11,13 @@ from uuid import UUID
 @dataclass
 class SocialAccounting:
     id: UUID
-    account: Account
+    account: UUID
 
     def get_name(self) -> str:
         return "Social Accounting"
 
     def get_account_type(self, account: UUID) -> Optional[AccountTypes]:
-        if account == self.account.id:
+        if account == self.account:
             return AccountTypes.accounting
         return None
 
@@ -304,3 +304,6 @@ class CompanyPurchase:
     plan_id: UUID
     transaction_id: UUID
     amount: int
+
+
+AccountOwner = Union[Member, Company, SocialAccounting]

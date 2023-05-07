@@ -62,7 +62,7 @@ class TransactionRepositoryTests(FlaskTestCase):
         receiver_account = self.account_generator.create_account()
         transaction = self.database_gateway.create_transaction(
             self.datetime_service.now(),
-            sending_account=self.social_accounting.account.id,
+            sending_account=self.social_accounting.account,
             receiving_account=receiver_account.id,
             amount_sent=Decimal(1),
             amount_received=Decimal(1),
