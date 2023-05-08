@@ -4,12 +4,11 @@ from typing import Any, Optional
 from flask import Flask, session
 from flask_migrate import upgrade
 from flask_talisman import Talisman
-from flask_wtf.csrf import CSRFProtect
 
 import arbeitszeit_flask.extensions
 from arbeitszeit_flask.babel import initialize_babel
 from arbeitszeit_flask.datetime import RealtimeDatetimeService
-from arbeitszeit_flask.extensions import login_manager, mail
+from arbeitszeit_flask.extensions import csrf_protect, login_manager, mail
 from arbeitszeit_flask.profiling import (  # type: ignore
     initialize_flask_profiler,
     show_profile_info,
@@ -69,7 +68,7 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
         )
 
     # init flask extensions
-    CSRFProtect(app)
+    csrf_protect.init_app(app)
     db.init_app(app)
     login_manager.init_app(app)
     initialize_migrations(app=app, db=db)
