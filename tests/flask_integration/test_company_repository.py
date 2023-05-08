@@ -63,7 +63,7 @@ class RepositoryTester(FlaskTestCase):
         company = self.company_repository.create_company(
             email="rosa@cp.org",
             name=expected_name,
-            password="testpassword",
+            password_hash="testpassword",
             means_account=means_account,
             labour_account=labour_account,
             resource_account=resource_account,
@@ -115,45 +115,6 @@ class RepositoryTester(FlaskTestCase):
         assert company_in_companies(expected_company2, all_companies)
 
 
-class ValidateCredentialsTest(FlaskTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.repository = self.injector.get(CompanyRepository)
-        self.company_generator = self.injector.get(CompanyGenerator)
-
-    def test_cannot_validate_random_user_with_empty_database(self) -> None:
-        company_id = self.repository.validate_credentials(
-            email_address="test@test.test",
-            password="test password",
-        )
-        self.assertIsNone(company_id)
-
-    def test_can_validate_company_with_correct_credentials(self) -> None:
-        expected_email = "test@test.test"
-        expected_password = "test password"
-        expected_company = self.company_generator.create_company_entity(
-            email=expected_email,
-            password=expected_password,
-        )
-        company_id = self.repository.validate_credentials(
-            expected_email,
-            expected_password,
-        )
-        self.assertEqual(company_id, expected_company.id)
-
-    def test_cannot_validate_user_with_wrong_password(self) -> None:
-        expected_email = "test@test.test"
-        self.company_generator.create_company_entity(
-            email=expected_email,
-            password="test password",
-        )
-        company_id = self.repository.validate_credentials(
-            expected_email,
-            "wrong_password",
-        )
-        self.assertIsNone(company_id)
-
-
 class CreateCompanyTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
@@ -176,7 +137,7 @@ class CreateCompanyTests(FlaskTestCase):
         self.repository.create_company(
             email=email,
             name="test name",
-            password="testpassword",
+            password_hash="testpassword",
             means_account=self.means_account,
             labour_account=self.labour_account,
             resource_account=self.resource_account,
@@ -218,7 +179,7 @@ class ConfirmCompanyTests(FlaskTestCase):
         return self.repository.create_company(
             email=email,
             name="test name",
-            password="some password",
+            password_hash="some password",
             means_account=means_account,
             labour_account=labour_account,
             resource_account=resource_account,

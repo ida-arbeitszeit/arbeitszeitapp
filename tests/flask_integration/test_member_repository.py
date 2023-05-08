@@ -18,22 +18,6 @@ class RepositoryTests(FlaskTestCase):
         self.member_repository = self.injector.get(MemberRepository)
         self.account_repository = self.injector.get(AccountRepository)
 
-    def test_that_users_can_be_converted_from_and_to_orm_objects(self) -> None:
-        account = self.account_repository.create_account()
-        expected_member = self.member_repository.create_member(
-            email="member@cp.org",
-            name="karl",
-            password="password",
-            account=account,
-            registered_on=datetime.now(),
-        )
-        converted_member = self.member_repository.member_from_orm(
-            self.member_repository.object_to_orm(
-                expected_member,
-            )
-        )
-        assert converted_member == expected_member
-
     def test_that_member_can_be_retrieved_by_its_id(self) -> None:
         expected_member = self.member_generator.create_member()
         retrieved_member = (
@@ -66,7 +50,7 @@ class RepositoryTests(FlaskTestCase):
         self.member_repository.create_member(
             email="member@cp.org",
             name="karl",
-            password="password",
+            password_hash="password",
             account=account,
             registered_on=datetime.now(),
         )
@@ -85,7 +69,7 @@ class RepositoryTests(FlaskTestCase):
         member = self.member_repository.create_member(
             email="member@cp.org",
             name="karl",
-            password="password",
+            password_hash="password",
             account=account,
             registered_on=datetime.now(),
         )
@@ -142,87 +126,6 @@ class GetAllMembersTests(FlaskTestCase):
         assert len(self.repository.get_members().working_at_company(company.id)) == 1
 
 
-class ValidateCredentialTests(FlaskTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.repository = self.injector.get(MemberRepository)
-        self.account_repository = self.injector.get(AccountRepository)
-        self.account = self.account_repository.create_account()
-        self.timestamp = datetime(2000, 1, 1)
-
-    def test_correct_email_and_password_can_be_validated(self) -> None:
-        expected_email = "test@test.test"
-        password = "test password"
-        self.repository.create_member(
-            email=expected_email,
-            name="test",
-            password=password,
-            account=self.account,
-            registered_on=self.timestamp,
-        )
-        self.assertTrue(
-            self.repository.validate_credentials(
-                email=expected_email, password=password
-            )
-        )
-
-    def test_correct_member_id_is_returned(self) -> None:
-        expected_email = "test@test.test"
-        password = "test password"
-        member = self.repository.create_member(
-            email=expected_email,
-            name="test",
-            password=password,
-            account=self.account,
-            registered_on=self.timestamp,
-        )
-        self.assertEqual(
-            self.repository.validate_credentials(
-                email=expected_email, password=password
-            ),
-            member.id,
-        )
-
-    def test_cannot_validate_with_wrong_password(self) -> None:
-        expected_email = "test@test.test"
-        self.repository.create_member(
-            email=expected_email,
-            name="test",
-            password="test password",
-            account=self.account,
-            registered_on=self.timestamp,
-        )
-        self.assertFalse(
-            self.repository.validate_credentials(
-                email=expected_email,
-                password="other password",
-            )
-        )
-
-    def test_cannot_validate_with_wrong_email(self) -> None:
-        password = "test password"
-        self.repository.create_member(
-            email="test@test.test",
-            name="test",
-            password=password,
-            account=self.account,
-            registered_on=self.timestamp,
-        )
-        self.assertFalse(
-            self.repository.validate_credentials(
-                email="other@email.test",
-                password=password,
-            )
-        )
-
-    def test_that_validation_fails_with_no_members_in_db(self) -> None:
-        self.assertFalse(
-            self.repository.validate_credentials(
-                email="test@test.test", password="test"
-            )
-        )
-
-
 class ConfirmMemberTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
@@ -249,7 +152,7 @@ class ConfirmMemberTests(FlaskTestCase):
         member = self.repository.create_member(
             email="test email",
             name="test name",
-            password="test password",
+            password_hash="test password",
             account=self.account,
             registered_on=self.timestamp,
         )
@@ -273,7 +176,7 @@ class CreateMemberTests(FlaskTestCase):
         self.repository.create_member(
             email=email,
             name="test name",
-            password="test password",
+            password_hash="test password",
             account=self.account,
             registered_on=self.timestamp,
         )
@@ -284,7 +187,7 @@ class CreateMemberTests(FlaskTestCase):
         self.repository.create_member(
             email=email,
             name="test name",
-            password="test password",
+            password_hash="test password",
             account=self.account,
             registered_on=self.timestamp,
         )
@@ -292,7 +195,7 @@ class CreateMemberTests(FlaskTestCase):
             self.repository.create_member(
                 email=email,
                 name="test name",
-                password="test password",
+                password_hash="test password",
                 account=self.account,
                 registered_on=self.timestamp,
             )
@@ -345,7 +248,7 @@ class MemberUpdateTests(FlaskTestCase):
         member = self.repository.create_member(
             email="test email",
             name="test name",
-            password="test password",
+            password_hash="test password",
             account=self.account,
             registered_on=self.timestamp,
         )

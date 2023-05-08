@@ -22,7 +22,6 @@ from sqlalchemy.dialects.postgresql import INTERVAL
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql.functions import concat
 from typing_extensions import Self
-from werkzeug.security import check_password_hash, generate_password_hash
 
 from arbeitszeit import entities, repositories
 from arbeitszeit.decimal import decimal_sum
@@ -865,17 +864,6 @@ class UserAddressBookImpl:
 class MemberRepository(repositories.MemberRepository):
     db: SQLAlchemy
 
-    def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
-        if (
-            member := self.db.session.query(Member)
-            .join(models.User)
-            .filter(models.User.email == email)
-            .first()
-        ):
-            if check_password_hash(member.user.password, password):
-                return UUID(member.id)
-        return None
-
     @classmethod
     def member_from_orm(cls, orm_object: Member) -> entities.Member:
         return entities.Member(
@@ -885,21 +873,21 @@ class MemberRepository(repositories.MemberRepository):
             email=orm_object.user.email,
             registered_on=orm_object.registered_on,
             confirmed_on=orm_object.user.email_confirmed_on,
+            password_hash=orm_object.user.password,
         )
-
-    def object_to_orm(self, member: entities.Member) -> models.Member:
-        return models.Member.query.filter(models.Member.id == str(member.id)).first()
 
     def create_member(
         self,
         *,
         email: str,
         name: str,
-        password: str,
+        password_hash: str,
         account: entities.Account,
         registered_on: datetime,
     ) -> entities.Member:
-        user_orm = self._get_or_create_user(email, password, email_confirmed_on=None)
+        user_orm = self._get_or_create_user(
+            email, password_hash=password_hash, email_confirmed_on=None
+        )
         orm_member = Member(
             id=str(uuid4()),
             user=user_orm,
@@ -918,7 +906,7 @@ class MemberRepository(repositories.MemberRepository):
         )
 
     def _get_or_create_user(
-        self, email: str, password: str, email_confirmed_on: Optional[datetime]
+        self, email: str, password_hash: str, email_confirmed_on: Optional[datetime]
     ) -> models.User:
         return self.db.session.query(models.User).filter(
             and_(
@@ -927,7 +915,7 @@ class MemberRepository(repositories.MemberRepository):
             )
         ).first() or models.User(
             email=email,
-            password=generate_password_hash(password, method="sha256"),
+            password=password_hash,
             email_confirmed_on=email_confirmed_on,
         )
 
@@ -948,20 +936,23 @@ class CompanyRepository(repositories.CompanyRepository):
             product_account=UUID(company_orm.prd_account),
             registered_on=company_orm.registered_on,
             confirmed_on=company_orm.user.email_confirmed_on,
+            password_hash=company_orm.user.password,
         )
 
     def create_company(
         self,
         email: str,
         name: str,
-        password: str,
+        password_hash: str,
         means_account: entities.Account,
         labour_account: entities.Account,
         resource_account: entities.Account,
         products_account: entities.Account,
         registered_on: datetime,
     ) -> entities.Company:
-        user_orm = self._get_or_create_user(email, password, email_confirmed_on=None)
+        user_orm = self._get_or_create_user(
+            email, password_hash=password_hash, email_confirmed_on=None
+        )
         company = models.Company(
             id=str(uuid4()),
             name=name,
@@ -982,17 +973,6 @@ class CompanyRepository(repositories.CompanyRepository):
             mapper=self.company_from_orm,
             db=self.db,
         )
-
-    def validate_credentials(self, email_address: str, password: str) -> Optional[UUID]:
-        if (
-            company := self.db.session.query(models.Company)
-            .join(models.User)
-            .filter(models.User.email == email_address)
-            .first()
-        ):
-            if check_password_hash(company.user.password, password):
-                return UUID(company.id)
-        return None
 
     def confirm_company(self, company: UUID, confirmed_on: datetime) -> None:
         self.db.session.execute(
@@ -1020,7 +1000,7 @@ class CompanyRepository(repositories.CompanyRepository):
             return orm.user.email_confirmed_on is not None
 
     def _get_or_create_user(
-        self, email: str, password: str, email_confirmed_on: Optional[datetime]
+        self, email: str, password_hash: str, email_confirmed_on: Optional[datetime]
     ) -> models.User:
         user = models.User.query.filter(
             and_(
@@ -1030,7 +1010,7 @@ class CompanyRepository(repositories.CompanyRepository):
         if not user:
             user = models.User(
                 email=email,
-                password=generate_password_hash(password, method="sha256"),
+                password=password_hash,
                 email_confirmed_on=email_confirmed_on,
             )
             self.db.session.add(user)
@@ -1223,9 +1203,9 @@ class PlanDraftRepository(repositories.PlanDraftRepository):
 class AccountantRepository:
     db: SQLAlchemy
 
-    def create_accountant(self, email: str, name: str, password: str) -> UUID:
+    def create_accountant(self, email: str, name: str, password_hash: str) -> UUID:
         user_id = uuid4()
-        user_orm = self._get_or_create_user(email, password)
+        user_orm = self._get_or_create_user(email, password_hash=password_hash)
         accountant = models.Accountant(
             id=str(user_id),
             name=name,
@@ -1234,36 +1214,28 @@ class AccountantRepository:
         self.db.session.add(accountant)
         return user_id
 
-    def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
-        record = (
-            self.db.session.query(models.Accountant)
-            .join(models.User)
-            .filter(models.User.email == email)
-            .first()
-        )
-        if record is None:
-            return None
-        if not check_password_hash(record.user.password, password):
-            return None
-        return UUID(record.id)
-
-    def _get_or_create_user(self, email: str, password: str) -> models.User:
+    def _get_or_create_user(self, email: str, password_hash: str) -> models.User:
         return self.db.session.query(models.User).filter(
             and_(models.User.email == email, models.User.accountant == None)
         ).first() or models.User(
-            password=generate_password_hash(password, method="sha256"),
+            password=password_hash,
             email=email,
         )
 
     def get_accountants(self) -> AccountantResult:
         return AccountantResult(
             query=models.Accountant.query,
-            mapper=lambda record: entities.Accountant(
-                email_address=record.user.email,
-                name=record.name,
-                id=UUID(record.id),
-            ),
+            mapper=self.accountant_from_orm,
             db=self.db,
+        )
+
+    @classmethod
+    def accountant_from_orm(self, orm: models.Accountant) -> entities.Accountant:
+        return entities.Accountant(
+            email_address=orm.user.email,
+            name=orm.name,
+            id=UUID(orm.id),
+            password_hash=orm.user.password,
         )
 
 

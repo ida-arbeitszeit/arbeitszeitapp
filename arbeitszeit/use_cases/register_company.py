@@ -6,6 +6,7 @@ from typing import Optional
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
@@ -22,6 +23,7 @@ class RegisterCompany:
     datetime_service: DatetimeService
     token_service: TokenService
     company_registration_message_presenter: CompanyRegistrationMessagePresenter
+    password_hasher: PasswordHasher
 
     @dataclass
     class Response:
@@ -52,9 +54,14 @@ class RegisterCompany:
     def _register_company(self, request: Request) -> UUID:
         if self.company_repository.get_companies().with_email_address(request.email):
             raise self.Response.RejectionReason.company_already_exists
-        if self.member_repository.get_members().with_email_address(request.email):
-            if not self.member_repository.validate_credentials(
-                email=request.email, password=request.password
+        member = (
+            self.member_repository.get_members()
+            .with_email_address(request.email)
+            .first()
+        )
+        if member:
+            if not self.password_hasher.is_password_matching_hash(
+                password=request.password, password_hash=member.password_hash
             ):
                 raise self.Response.RejectionReason.user_password_is_invalid
         means_account = self.account_repository.create_account()
@@ -63,14 +70,16 @@ class RegisterCompany:
         products_account = self.account_repository.create_account()
         registered_on = self.datetime_service.now()
         company = self.company_repository.create_company(
-            request.email,
-            request.name,
-            request.password,
-            means_account,
-            labour_account,
-            resources_account,
-            products_account,
-            registered_on,
+            email=request.email,
+            name=request.name,
+            password_hash=self.password_hasher.calculate_password_hash(
+                request.password
+            ),
+            means_account=means_account,
+            labour_account=labour_account,
+            resource_account=resources_account,
+            products_account=products_account,
+            registered_on=registered_on,
         )
         self._create_confirmation_mail(request, company.id)
         return company.id

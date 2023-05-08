@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import Optional
 from uuid import UUID
 
+from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.repositories import AccountantRepository
 
 
@@ -26,16 +27,20 @@ class LogInAccountantUseCase:
         rejection_reason: Optional[LogInAccountantUseCase.RejectionReason] = None
 
     accountant_repository: AccountantRepository
+    password_hasher: PasswordHasher
 
     def log_in_accountant(self, request: Request) -> Response:
-        accountants = self.accountant_repository.get_accountants()
-        if not accountants.with_email_address(request.email_address):
+        accountant = (
+            self.accountant_repository.get_accountants()
+            .with_email_address(request.email_address)
+            .first()
+        )
+        if accountant is None:
             return self.Response(
                 rejection_reason=self.RejectionReason.email_is_not_accountant
             )
-        user_id = self.accountant_repository.validate_credentials(
-            email=request.email_address, password=request.password
-        )
-        if user_id is None:
+        elif not self.password_hasher.is_password_matching_hash(
+            password=request.password, password_hash=accountant.password_hash
+        ):
             return self.Response(rejection_reason=self.RejectionReason.wrong_password)
-        return self.Response(user_id=user_id)
+        return self.Response(user_id=accountant.id)
