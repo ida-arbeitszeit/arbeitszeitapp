@@ -10,12 +10,14 @@ from arbeitszeit.injector import (
     Injector,
     Module,
 )
+from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.token import InvitationTokenValidator, TokenService
 from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitation_presenter import (
     AccountantInvitationPresenter,
 )
 from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
 from tests.dependency_injection import TestingModule
+from tests.password_hasher import PasswordHasherImpl
 from tests.token import FakeTokenService
 
 from . import repositories
@@ -67,6 +69,10 @@ class InMemoryModule(Module):
         binder.bind(
             interfaces.DatabaseGateway,  # type: ignore
             to=AliasProvider(repositories.EntityStorage),
+        )
+        binder.bind(
+            PasswordHasher,  # type: ignore
+            to=AliasProvider(PasswordHasherImpl),
         )
 
 

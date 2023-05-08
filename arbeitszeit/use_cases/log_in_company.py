@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import Optional
 from uuid import UUID
 
+from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.repositories import CompanyRepository
 
 
@@ -27,34 +28,30 @@ class LogInCompanyUseCase:
         user_id: Optional[UUID]
 
     company_repository: CompanyRepository
+    password_hasher: PasswordHasher
 
     def log_in_company(self, request: Request) -> Response:
-        if company := self.valid_company_credentials(request):
+        company = (
+            self.company_repository.get_companies()
+            .with_email_address(request.email_address)
+            .first()
+        )
+        if company is None:
+            reason = self.RejectionReason.invalid_email_address
+        elif not self.password_hasher.is_password_matching_hash(
+            password=request.password, password_hash=company.password_hash
+        ):
+            reason = self.RejectionReason.invalid_password
+        else:
             return self.Response(
                 rejection_reason=None,
                 is_logged_in=True,
                 email_address=request.email_address,
-                user_id=company,
+                user_id=company.id,
             )
-        else:
-            reason = (
-                self.RejectionReason.invalid_password
-                if self.company_repository.get_companies().with_email_address(
-                    request.email_address
-                )
-                else self.RejectionReason.invalid_email_address
-            )
-            return self.Response(
-                rejection_reason=reason,
-                is_logged_in=False,
-                email_address=None,
-                user_id=None,
-            )
-
-    def valid_company_credentials(
-        self, request: LogInCompanyUseCase.Request
-    ) -> Optional[UUID]:
-        return self.company_repository.validate_credentials(
-            email_address=request.email_address,
-            password=request.password,
+        return self.Response(
+            rejection_reason=reason,
+            is_logged_in=False,
+            email_address=None,
+            user_id=None,
         )

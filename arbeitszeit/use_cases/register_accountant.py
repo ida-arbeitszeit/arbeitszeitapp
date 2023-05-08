@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 from uuid import UUID
 
+from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.repositories import AccountantRepository
 from arbeitszeit.token import InvitationTokenValidator
 
@@ -23,6 +24,7 @@ class RegisterAccountantUseCase:
 
     token_service: InvitationTokenValidator
     accountant_repository: AccountantRepository
+    password_hasher: PasswordHasher
 
     def register_accountant(self, request: Request) -> Response:
         invited_email = self.token_service.unwrap_invitation_token(request.token)
@@ -34,7 +36,9 @@ class RegisterAccountantUseCase:
         user_id = self.accountant_repository.create_accountant(
             email=request.email,
             name=request.name,
-            password=request.password,
+            password_hash=self.password_hasher.calculate_password_hash(
+                request.password
+            ),
         )
         return self.Response(
             is_accepted=True, user_id=user_id, email_address=request.email

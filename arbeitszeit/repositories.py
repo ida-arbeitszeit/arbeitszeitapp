@@ -372,14 +372,10 @@ class MemberRepository(ABC):
         *,
         email: str,
         name: str,
-        password: str,
+        password_hash: str,
         account: Account,
         registered_on: datetime,
     ) -> Member:
-        pass
-
-    @abstractmethod
-    def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
         pass
 
     @abstractmethod
@@ -393,7 +389,7 @@ class CompanyRepository(ABC):
         self,
         email: str,
         name: str,
-        password: str,
+        password_hash: str,
         means_account: Account,
         labour_account: Account,
         resource_account: Account,
@@ -404,10 +400,6 @@ class CompanyRepository(ABC):
 
     @abstractmethod
     def get_companies(self) -> CompanyResult:
-        pass
-
-    @abstractmethod
-    def validate_credentials(self, email_address: str, password: str) -> Optional[UUID]:
         pass
 
     @abstractmethod
@@ -466,10 +458,7 @@ class PlanDraftRepository(ABC):
 
 
 class AccountantRepository(Protocol):
-    def create_accountant(self, email: str, name: str, password: str) -> UUID:
-        ...
-
-    def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
+    def create_accountant(self, email: str, name: str, password_hash: str) -> UUID:
         ...
 
     def get_accountants(self) -> AccountantResult:

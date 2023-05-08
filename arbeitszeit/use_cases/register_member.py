@@ -6,6 +6,7 @@ from typing import Optional
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
@@ -22,6 +23,7 @@ class RegisterMemberUseCase:
     token_service: TokenService
     member_registration_message_presenter: MemberRegistrationMessagePresenter
     company_repository: CompanyRepository
+    password_hasher: PasswordHasher
 
     @dataclass
     class Response:
@@ -54,10 +56,16 @@ class RegisterMemberUseCase:
     def _register_member(self, request: Request) -> Response:
         if self.member_repository.get_members().with_email_address(request.email):
             raise self.Response.RejectionReason.member_already_exists
-        if self.company_repository.get_companies().with_email_address(request.email):
+        company = (
+            self.company_repository.get_companies()
+            .with_email_address(request.email)
+            .first()
+        )
+        if company:
             is_company_with_same_email_already_registered = True
-            if not self.company_repository.validate_credentials(
-                request.email, request.password
+            if not self.password_hasher.is_password_matching_hash(
+                password=request.password,
+                password_hash=company.password_hash,
             ):
                 raise self.Response.RejectionReason.company_with_different_password_exists
         else:
@@ -68,7 +76,9 @@ class RegisterMemberUseCase:
         member = self.member_repository.create_member(
             email=request.email,
             name=request.name,
-            password=request.password,
+            password_hash=self.password_hasher.calculate_password_hash(
+                request.password
+            ),
             account=member_account,
             registered_on=registered_on,
         )

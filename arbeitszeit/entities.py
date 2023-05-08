@@ -30,6 +30,7 @@ class Member:
     account: UUID
     registered_on: datetime
     confirmed_on: Optional[datetime]
+    password_hash: str
 
     def accounts(self) -> List[UUID]:
         return [self.account]
@@ -60,6 +61,7 @@ class Company:
     product_account: UUID
     registered_on: datetime
     confirmed_on: Optional[datetime]
+    password_hash: str
 
     def _accounts_by_type(self) -> Dict[AccountTypes, UUID]:
         return {
@@ -270,6 +272,7 @@ class Accountant:
     id: UUID
     email_address: str
     name: str
+    password_hash: str
 
 
 @dataclass

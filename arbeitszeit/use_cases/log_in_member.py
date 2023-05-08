@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import Optional
 from uuid import UUID
 
+from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.repositories import MemberRepository
 
 
@@ -28,22 +29,27 @@ class LogInMemberUseCase:
         user_id: Optional[UUID]
 
     member_repository: MemberRepository
+    password_hasher: PasswordHasher
 
     def log_in_member(self, request: Request) -> Response:
-        member_id = self.member_repository.validate_credentials(
-            email=request.email, password=request.password
+        member = (
+            self.member_repository.get_members()
+            .with_email_address(request.email)
+            .first()
         )
-        if member_id:
+        if not member:
+            reason = self.RejectionReason.unknown_email_address
+        elif not self.password_hasher.is_password_matching_hash(
+            password=request.password, password_hash=member.password_hash
+        ):
+            reason = self.RejectionReason.invalid_password
+        else:
             return self.Response(
                 is_logged_in=True,
                 rejection_reason=None,
                 email=request.email,
-                user_id=member_id,
+                user_id=member.id,
             )
-        if self.member_repository.get_members().with_email_address(request.email):
-            reason = self.RejectionReason.invalid_password
-        else:
-            reason = self.RejectionReason.unknown_email_address
         return self.Response(
             is_logged_in=False,
             rejection_reason=reason,

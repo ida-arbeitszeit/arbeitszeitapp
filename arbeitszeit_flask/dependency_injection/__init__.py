@@ -15,6 +15,7 @@ from arbeitszeit.injector import (
     Injector,
     Module,
 )
+from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.token import (
     CompanyRegistrationMessagePresenter,
     InvitationTokenValidator,
@@ -48,6 +49,7 @@ from arbeitszeit_flask.mail_service import (
     get_mail_service,
 )
 from arbeitszeit_flask.notifications import FlaskFlashNotifier
+from arbeitszeit_flask.password_hasher import PasswordHasherImpl
 from arbeitszeit_flask.template import (
     AccountantTemplateIndex,
     CompanyTemplateIndex,
@@ -186,6 +188,10 @@ class FlaskModule(Module):
         binder.bind(
             AccountantInvitationUrlIndex,  # type: ignore
             to=AliasProvider(GeneralUrlIndex),
+        )
+        binder.bind(
+            PasswordHasher,  # type: ignore
+            to=AliasProvider(PasswordHasherImpl),
         )
 
     @staticmethod

@@ -785,7 +785,7 @@ class MemberRepository(interfaces.MemberRepository):
         *,
         email: str,
         name: str,
-        password: str,
+        password_hash: str,
         account: Account,
         registered_on: datetime,
     ) -> Member:
@@ -797,16 +797,10 @@ class MemberRepository(interfaces.MemberRepository):
             account=account.id,
             registered_on=registered_on,
             confirmed_on=None,
+            password_hash=password_hash,
         )
         self.entities.members[id] = member
-        self.entities.member_passwords[id] = password
         return member
-
-    def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
-        if member := self._get_member_by_email(email):
-            if self.entities.member_passwords[member.id] == password:
-                return member.id
-        return None
 
     def get_members(self) -> MemberResult:
         return MemberResult(
@@ -830,7 +824,7 @@ class CompanyRepository(interfaces.CompanyRepository):
         self,
         email: str,
         name: str,
-        password: str,
+        password_hash: str,
         means_account: Account,
         labour_account: Account,
         resource_account: Account,
@@ -847,9 +841,9 @@ class CompanyRepository(interfaces.CompanyRepository):
             product_account=products_account.id,
             registered_on=registered_on,
             confirmed_on=None,
+            password_hash=password_hash,
         )
         self.entities.companies[new_company.id] = new_company
-        self.entities.company_passwords[new_company.id] = password
         return new_company
 
     def get_companies(self) -> CompanyResult:
@@ -857,16 +851,6 @@ class CompanyRepository(interfaces.CompanyRepository):
             items=lambda: self.entities.companies.values(),
             entities=self.entities,
         )
-
-    def validate_credentials(self, email_address: str, password: str) -> Optional[UUID]:
-        for candidate in self.entities.companies.values():
-            if candidate.email == email_address:
-                if correct_password := self.entities.company_passwords.get(
-                    candidate.id
-                ):
-                    if password == correct_password:
-                        return candidate.id
-        return None
 
     def confirm_company(self, company: UUID, confirmation_timestamp: datetime) -> None:
         model = self.entities.companies[company]
@@ -957,45 +941,24 @@ class PlanDraftRepository(interfaces.PlanDraftRepository):
 
 @singleton
 class AccountantRepositoryTestImpl:
-    @dataclass
-    class _AccountantRecord:
-        email: str
-        name: str
-        password: str
-        id: UUID
-
     def __init__(self, entities: EntityStorage) -> None:
-        self.accountants: Dict[
-            UUID, AccountantRepositoryTestImpl._AccountantRecord
-        ] = dict()
+        self.accountants: Dict[UUID, Accountant] = dict()
         self.entities = entities
 
-    def create_accountant(self, email: str, name: str, password: str) -> UUID:
+    def create_accountant(self, email: str, name: str, password_hash: str) -> UUID:
         id = uuid4()
-        record = self._AccountantRecord(
-            email=email,
+        record = Accountant(
+            email_address=email,
             name=name,
-            password=password,
+            password_hash=password_hash,
             id=id,
         )
         self.accountants[id] = record
-        return id
-
-    def validate_credentials(self, email: str, password: str) -> Optional[UUID]:
-        for uuid, record in self.accountants.items():
-            if record.email == email:
-                if record.password == password:
-                    return uuid
-                else:
-                    return None
-        return None
+        return record.id
 
     def get_accountants(self) -> AccountantResult:
         return AccountantResult(
-            items=lambda: (
-                Accountant(email_address=record.email, name=record.name, id=record.id)
-                for record in self.accountants.values()
-            ),
+            items=lambda: self.accountants.values(),
             entities=self.entities,
         )
 
@@ -1016,7 +979,6 @@ class FakeLanguageRepository:
 class EntityStorage:
     def __init__(self, datetime_service: DatetimeService) -> None:
         self.members: Dict[UUID, Member] = {}
-        self.member_passwords: Dict[UUID, str] = {}
         self.company_workers: Dict[UUID, Set[UUID]] = defaultdict(lambda: set())
         self.companies: Dict[UUID, Company] = {}
         self.company_passwords: Dict[UUID, str] = {}

@@ -23,6 +23,7 @@ from arbeitszeit.entities import (
     PurposesOfPurchases,
     Transaction,
 )
+from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
@@ -63,6 +64,7 @@ class MemberGenerator:
     member_repository: MemberRepository
     datetime_service: FakeDatetimeService
     register_member_use_case: RegisterMemberUseCase
+    password_hasher: PasswordHasher
 
     def create_member_entity(
         self,
@@ -96,7 +98,7 @@ class MemberGenerator:
         member = self.member_repository.create_member(
             email=email,
             name=name,
-            password=password,
+            password_hash=self.password_hasher.calculate_password_hash(password),
             account=account,
             registered_on=registered_on,
         )
@@ -140,6 +142,7 @@ class CompanyGenerator:
     datetime_service: FakeDatetimeService
     company_manager: CompanyManager
     register_company_use_case: RegisterCompany
+    password_hasher: PasswordHasher
 
     def create_company_entity(
         self,
@@ -157,7 +160,7 @@ class CompanyGenerator:
         company = self.company_repository.create_company(
             email=email,
             name=name,
-            password=password,
+            password_hash=self.password_hasher.calculate_password_hash(password),
             means_account=self.account_generator.create_account(),
             resource_account=self.account_generator.create_account(),
             products_account=self.account_generator.create_account(),
