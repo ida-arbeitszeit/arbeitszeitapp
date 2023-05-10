@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import List, Protocol
 
 from arbeitszeit_web.email import EmailConfiguration
+from arbeitszeit_web.token import TokenService
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import AccountantInvitationUrlIndex
 
@@ -25,8 +26,10 @@ class AccountantInvitationEmailPresenter:
     email_configuration: EmailConfiguration
     translator: Translator
     invitation_url_index: AccountantInvitationUrlIndex
+    token_service: TokenService
 
-    def send_accountant_invitation(self, email: str, token: str) -> None:
+    def send_accountant_invitation(self, email: str) -> None:
+        token = self.token_service.generate_token(email)
         view_model = ViewModel(
             subject=self.translator.gettext("Invitation to Arbeitszeitapp"),
             recipients=[email],

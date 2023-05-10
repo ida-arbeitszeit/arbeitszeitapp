@@ -1,12 +1,10 @@
 from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.injector import AliasProvider, Binder, Module
-from arbeitszeit.token import (
+from arbeitszeit.presenters import (
+    AccountantInvitationPresenter,
     CompanyRegistrationMessagePresenter,
     MemberRegistrationMessagePresenter,
-)
-from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitation_presenter import (
-    AccountantInvitationPresenter,
 )
 from arbeitszeit_web.colors import Colors
 from arbeitszeit_web.email import UserAddressBook

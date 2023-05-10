@@ -1,6 +1,9 @@
-from typing import Protocol
+from dataclasses import dataclass
+from datetime import timedelta
+from typing import Optional, Protocol
 
 from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
+from arbeitszeit_web.token import TokenService
 
 
 class RegisterAccountantForm(Protocol):
@@ -14,13 +17,19 @@ class RegisterAccountantForm(Protocol):
         ...
 
 
+@dataclass
 class RegisterAccountantController:
+    token_service: TokenService
+
     def register_accountant(
         self, form: RegisterAccountantForm, token: str
-    ) -> RegisterAccountantUseCase.Request:
+    ) -> Optional[RegisterAccountantUseCase.Request]:
+        unpacked_token = self.token_service.confirm_token(token, timedelta(days=1))
+        email_address = form.get_email_address()
+        if unpacked_token != email_address:
+            return None
         return RegisterAccountantUseCase.Request(
-            token=token,
             name=form.get_name(),
-            email=form.get_email_address(),
+            email=email_address,
             password=form.get_password(),
         )

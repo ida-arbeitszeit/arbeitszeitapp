@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from arbeitszeit.accountant_notifications import Notification
+from arbeitszeit.presenters import NotifyAccountantsAboutNewPlanPresenter as Interface
 from arbeitszeit_web.presenters.notify_accountant_about_new_plan_presenter import (
     NotifyAccountantsAboutNewPlanPresenterImpl,
 )
@@ -9,6 +9,8 @@ from tests.text_renderer import TextRendererImpl
 from tests.translator import FakeTranslator
 
 from .base_test_case import BaseTestCase
+
+Notification = Interface.Notification
 
 
 class PresenterTests(BaseTestCase):

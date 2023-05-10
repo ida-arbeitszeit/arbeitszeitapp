@@ -1,3 +1,4 @@
+from datetime import timedelta
 from typing import Optional
 
 from flask import current_app
@@ -18,17 +19,13 @@ class FlaskTokenService:
         assert isinstance(token, str)
         return token
 
-    def confirm_token(self, token: str, max_age_in_sec: int = 3600) -> Optional[str]:
+    def confirm_token(self, token: str, max_age: timedelta) -> Optional[str]:
         try:
-            return self._load_token(token, max_age_in_seconds=max_age_in_sec)
+            return self._load_token(
+                token, max_age_in_seconds=int(max_age.total_seconds())
+            )
         except BadSignature:
             return None
-
-    def unwrap_invitation_token(self, token: str) -> Optional[str]:
-        return self.confirm_token(token=token, max_age_in_sec=7 * 24 * 3600)  # 1 week
-
-    def unwrap_confirmation_token(self, token: str) -> Optional[str]:
-        return self.confirm_token(token=token, max_age_in_sec=3600)  # 1 week
 
     def _load_token(
         self, token: str, max_age_in_seconds: Optional[int] = None

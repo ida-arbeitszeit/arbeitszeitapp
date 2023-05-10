@@ -24,36 +24,22 @@ class UseCaseTests(TestCase):
         self.company_generator = self.injector.get(CompanyGenerator)
         self.accountant_generator = self.injector.get(AccountantGenerator)
 
-    def test_that_user_with_random_token_and_email_cannot_register(self) -> None:
-        request = self.create_request(token="random token")
-        response = self.use_case.register_accountant(request)
-        self.assertFalse(response.is_accepted)
-
     def test_that_user_that_was_invited_can_register(self) -> None:
         expected_email = "testmail@test.test"
-        token = self.invite_user(email=expected_email)
+        self.invite_user(email=expected_email)
         request = self.create_request(
-            token=token,
             email=expected_email,
         )
         response = self.use_case.register_accountant(request)
         self.assertTrue(response.is_accepted)
 
-    def test_that_token_cannot_be_used_for_registering_email_that_was_was_not_invited(
-        self,
-    ) -> None:
-        token = self.invite_user(email="invited@email.test")
-        request = self.create_request(token=token, email="other@email.test")
-        response = self.use_case.register_accountant(request)
-        self.assertFalse(response.is_accepted)
-
     def test_that_user_can_register_with_email_already_belonging_to_a_member(
         self,
     ) -> None:
         email_address = "test@test.test"
-        token = self.invite_user(email=email_address)
+        self.invite_user(email=email_address)
         self.member_generator.create_member_entity(email=email_address)
-        request = self.create_request(token=token, email=email_address)
+        request = self.create_request(email=email_address)
         response = self.use_case.register_accountant(request)
         self.assertTrue(response.is_accepted)
 
@@ -61,17 +47,16 @@ class UseCaseTests(TestCase):
         self,
     ) -> None:
         email_address = "test@test.test"
-        token = self.invite_user(email=email_address)
+        self.invite_user(email=email_address)
         self.company_generator.create_company_entity(email=email_address)
-        request = self.create_request(token=token, email=email_address)
+        request = self.create_request(email=email_address)
         response = self.use_case.register_accountant(request)
         self.assertTrue(response.is_accepted)
 
     def test_that_user_cannot_register_twice_with_same_email_address(self) -> None:
         expected_email = "testmail@test.test"
-        token = self.invite_user(email=expected_email)
+        self.invite_user(email=expected_email)
         request = self.create_request(
-            token=token,
             email=expected_email,
         )
         self.use_case.register_accountant(request)
@@ -82,9 +67,9 @@ class UseCaseTests(TestCase):
         self,
     ) -> None:
         email_address = "test@test.test"
-        token = self.invite_user(email=email_address)
+        self.invite_user(email=email_address)
         self.accountant_generator.create_accountant(email_address=email_address)
-        request = self.create_request(token=token, email=email_address)
+        request = self.create_request(email=email_address)
         response = self.use_case.register_accountant(request)
         self.assertIsNone(response.user_id)
 
@@ -93,8 +78,8 @@ class UseCaseTests(TestCase):
     ) -> None:
         for email_address in self.example_email_addresses:
             with self.subTest():
-                token = self.invite_user(email=email_address)
-                request = self.create_request(token=token, email=email_address)
+                self.invite_user(email=email_address)
+                request = self.create_request(email=email_address)
                 response = self.use_case.register_accountant(request)
                 self.assertEqual(response.email_address, email_address)
 
@@ -103,23 +88,20 @@ class UseCaseTests(TestCase):
     ) -> None:
         for email_address in self.example_email_addresses:
             with self.subTest():
-                token = self.invite_user(email=email_address)
-                request = self.create_request(token=token, email=email_address)
+                request = self.create_request(email=email_address)
                 self.accountant_generator.create_accountant(email_address=email_address)
                 response = self.use_case.register_accountant(request)
                 self.assertEqual(response.email_address, email_address)
 
-    def invite_user(self, email: str) -> str:
+    def invite_user(self, email: str) -> None:
         self.send_registration_token_use_case.send_accountant_registration_token(
             request=self.send_registration_token_use_case.Request(email=email)
         )
-        return self.invitation_presenter.invitations[-1].token
 
     def create_request(
-        self, token: str, email: str = "test@mail.test", name: str = "test name"
+        self, email: str = "test@mail.test", name: str = "test name"
     ) -> RegisterAccountantUseCase.Request:
         return self.use_case.Request(
-            token=token,
             email=email,
             name=name,
             password="test password",
