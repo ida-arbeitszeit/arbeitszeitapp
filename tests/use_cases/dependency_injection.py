@@ -2,7 +2,6 @@ from typing import Any, Callable, TypeVar, cast
 
 import arbeitszeit.repositories as interfaces
 from arbeitszeit import entities
-from arbeitszeit.accountant_notifications import NotifyAccountantsAboutNewPlanPresenter
 from arbeitszeit.injector import (
     AliasProvider,
     Binder,
@@ -11,10 +10,11 @@ from arbeitszeit.injector import (
     Module,
 )
 from arbeitszeit.password_hasher import PasswordHasher
-from arbeitszeit.token import InvitationTokenValidator, TokenService
-from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitation_presenter import (
+from arbeitszeit.presenters import (
     AccountantInvitationPresenter,
+    NotifyAccountantsAboutNewPlanPresenter,
 )
+from arbeitszeit_web.token import TokenService
 from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
 from tests.dependency_injection import TestingModule
 from tests.password_hasher import PasswordHasherImpl
@@ -45,8 +45,6 @@ class InMemoryModule(Module):
         binder[AccountantInvitationPresenter] = AliasProvider(  # type: ignore
             AccountantInvitationPresenterTestImpl
         )
-        binder[InvitationTokenValidator] = AliasProvider(FakeTokenService)  # type: ignore
-        binder[InvitationTokenValidator] = AliasProvider(FakeTokenService)  # type: ignore
         binder[entities.SocialAccounting] = CallableProvider(
             provide_social_accounting_instance
         )
@@ -65,7 +63,6 @@ class InMemoryModule(Module):
         binder[interfaces.PlanDraftRepository] = AliasProvider(  # type: ignore
             repositories.PlanDraftRepository
         )
-        binder[TokenService] = AliasProvider(FakeTokenService)  # type: ignore
         binder.bind(
             interfaces.DatabaseGateway,  # type: ignore
             to=AliasProvider(repositories.EntityStorage),
@@ -73,6 +70,10 @@ class InMemoryModule(Module):
         binder.bind(
             PasswordHasher,  # type: ignore
             to=AliasProvider(PasswordHasherImpl),
+        )
+        binder.bind(
+            TokenService,  # type: ignore
+            to=AliasProvider(FakeTokenService),
         )
 
 

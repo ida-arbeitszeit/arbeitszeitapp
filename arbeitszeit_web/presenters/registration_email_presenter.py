@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from typing import Protocol
-from uuid import UUID
 
-from arbeitszeit_web.email import EmailConfiguration, MailService, UserAddressBook
+from arbeitszeit_web.email import EmailConfiguration, MailService
 from arbeitszeit_web.text_renderer import TextRenderer
+from arbeitszeit_web.token import TokenService
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 
@@ -16,36 +16,36 @@ class RegistrationEmailTemplate(Protocol):
 @dataclass
 class RegistrationEmailPresenter:
     email_sender: MailService
-    address_book: UserAddressBook
     url_index: UrlIndex
     email_configuration: EmailConfiguration
     translator: Translator
     text_renderer: TextRenderer
+    token_service: TokenService
 
-    def show_member_registration_message(self, member: UUID, token: str) -> None:
+    def show_member_registration_message(self, email_address: str) -> None:
+        token = self.token_service.generate_token(email_address)
         self._show_registration_message(
-            member,
+            email_address=email_address,
             content=self.text_renderer.render_member_registration_message(
                 confirmation_url=self.url_index.get_member_confirmation_url(token=token)
             ),
         )
 
-    def show_company_registration_message(self, company: UUID, token: str) -> None:
+    def show_company_registration_message(self, email_address: str) -> None:
+        token = self.token_service.generate_token(email_address)
         self._show_registration_message(
-            company,
-            self.text_renderer.render_company_registration_message(
+            email_address=email_address,
+            content=self.text_renderer.render_company_registration_message(
                 confirmation_url=self.url_index.get_company_confirmation_url(
                     token=token
                 )
             ),
         )
 
-    def _show_registration_message(self, user: UUID, content: str) -> None:
-        recipient = self.address_book.get_user_email_address(user)
-        assert recipient
+    def _show_registration_message(self, *, email_address: str, content: str) -> None:
         self.email_sender.send_message(
             self.translator.gettext("Account confirmation"),
-            [recipient],
+            [email_address],
             content,
             self.email_configuration.get_sender_address(),
         )

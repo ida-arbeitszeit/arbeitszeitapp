@@ -544,16 +544,13 @@ class AccountantGenerator:
         self.invite_accountant_use_case.send_accountant_registration_token(
             request=SendAccountantRegistrationTokenUseCase.Request(email=email_address)
         )
-        token = self.invite_accountant_presenter.invitations[-1].token
         response = self.register_accountant_use_case.register_accountant(
             request=RegisterAccountantUseCase.Request(
                 name=name,
                 email=email_address,
-                token=token,
                 password=password,
             )
         )
         assert response.is_accepted
-        user_id = response.user_id
-        assert user_id is not None
-        return user_id
+        assert response.user_id
+        return response.user_id

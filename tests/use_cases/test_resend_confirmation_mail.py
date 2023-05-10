@@ -38,26 +38,6 @@ class MemberTests(BaseTestCase):
             == tokens_delivered_so_far + 1
         )
 
-    def test_that_confirmation_message_is_sent_contains_valid_token(self) -> None:
-        member = self.member_generator.create_member(confirmed=False)
-        self.use_case.resend_confirmation_mail(request=UseCase.Request(user=member))
-        assert self.token_service.confirm_token(
-            self.token_presenter.presented_member_tokens[-1].token, 10000
-        )
-
-    def test_that_token_sent_to_member_is_valid_email_address(self) -> None:
-        expected_email_address = "member@test.test"
-        member = self.member_generator.create_member(
-            confirmed=False, email=expected_email_address
-        )
-        self.use_case.resend_confirmation_mail(request=UseCase.Request(user=member))
-        assert (
-            self.token_service.confirm_token(
-                self.token_presenter.presented_member_tokens[-1].token, 10000
-            )
-            == expected_email_address
-        )
-
 
 class NoValidUserTests(BaseTestCase):
     def setUp(self) -> None:
@@ -101,24 +81,4 @@ class CompanyTests(BaseTestCase):
         assert (
             len(self.token_presenter.presented_company_tokens)
             == tokens_delivered_so_far + 1
-        )
-
-    def test_that_confirmation_message_is_sent_contains_valid_token(self) -> None:
-        company = self.company_generator.create_company(confirmed=False)
-        self.use_case.resend_confirmation_mail(request=UseCase.Request(user=company))
-        assert self.token_service.confirm_token(
-            self.token_presenter.presented_company_tokens[-1].token, 10000
-        )
-
-    def test_that_token_sent_to_company_is_valid_email_address(self) -> None:
-        expected_email_address = "company@test.test"
-        company = self.company_generator.create_company(
-            confirmed=False, email=expected_email_address
-        )
-        self.use_case.resend_confirmation_mail(request=UseCase.Request(user=company))
-        assert (
-            self.token_service.confirm_token(
-                self.token_presenter.presented_company_tokens[-1].token, 10000
-            )
-            == expected_email_address
         )

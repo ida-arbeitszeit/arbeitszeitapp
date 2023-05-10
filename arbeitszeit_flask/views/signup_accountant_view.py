@@ -29,8 +29,9 @@ class SignupAccountantView:
 
     def handle_post_request(self, token: str) -> types.Response:
         form = RegisterAccountantForm(request.form)
-        if form.validate():
-            use_case_request = self.controller.register_accountant(form, token)
+        if form.validate() and (
+            use_case_request := self.controller.register_accountant(form, token)
+        ):
             use_case_response = self.use_case.register_accountant(use_case_request)
             view_model = self.presenter.present_registration_result(use_case_response)
             if view_model.redirect_url:

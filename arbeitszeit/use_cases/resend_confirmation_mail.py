@@ -1,12 +1,11 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from arbeitszeit.repositories import CompanyRepository, MemberRepository
-from arbeitszeit.token import (
+from arbeitszeit.presenters import (
     CompanyRegistrationMessagePresenter,
     MemberRegistrationMessagePresenter,
-    TokenService,
 )
+from arbeitszeit.repositories import CompanyRepository, MemberRepository
 
 
 @dataclass
@@ -23,15 +22,12 @@ class ResendConfirmationMailUseCase:
     company_registration_message_presenter: CompanyRegistrationMessagePresenter
     member_repository: MemberRepository
     member_registration_message_presenter: MemberRegistrationMessagePresenter
-    token_service: TokenService
 
     def resend_confirmation_mail(self, request: Request) -> Response:
         member = self.member_repository.get_members().with_id(request.user).first()
         if member and member.confirmed_on is None:
-            token = self.token_service.generate_token(member.email)
             self.member_registration_message_presenter.show_member_registration_message(
-                request.user,
-                token=token,
+                member.email,
             )
             return self.Response(is_token_sent=True)
         if (
@@ -39,10 +35,8 @@ class ResendConfirmationMailUseCase:
             .with_id(request.user)
             .first()
         ) and company.confirmed_on is None:
-            token = self.token_service.generate_token(company.email)
             self.company_registration_message_presenter.show_company_registration_message(
-                company=company.id,
-                token=token,
+                company.email,
             )
             return self.Response(is_token_sent=True)
         return self.Response()

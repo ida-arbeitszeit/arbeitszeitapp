@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from arbeitszeit.accountant_notifications import Notification
+from arbeitszeit.presenters import NotifyAccountantsAboutNewPlanPresenter as Interface
 from arbeitszeit_web.email import EmailConfiguration, MailService, UserAddressBook
 from arbeitszeit_web.text_renderer import TextRenderer
 from arbeitszeit_web.translator import Translator
@@ -14,7 +14,9 @@ class NotifyAccountantsAboutNewPlanPresenterImpl:
     email_configuration: EmailConfiguration
     text_renderer: TextRenderer
 
-    def notify_accountant_about_new_plan(self, notification: Notification) -> None:
+    def notify_accountant_about_new_plan(
+        self, notification: Interface.Notification
+    ) -> None:
         recipient = self.address_book.get_user_email_address(notification.accountant_id)
         if not recipient:
             return

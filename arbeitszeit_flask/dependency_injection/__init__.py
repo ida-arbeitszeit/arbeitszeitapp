@@ -5,7 +5,6 @@ from flask_sqlalchemy import SQLAlchemy
 
 from arbeitszeit import entities
 from arbeitszeit import repositories as interfaces
-from arbeitszeit.accountant_notifications import NotifyAccountantsAboutNewPlanPresenter
 from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.injector import (
@@ -16,14 +15,11 @@ from arbeitszeit.injector import (
     Module,
 )
 from arbeitszeit.password_hasher import PasswordHasher
-from arbeitszeit.token import (
-    CompanyRegistrationMessagePresenter,
-    InvitationTokenValidator,
-    MemberRegistrationMessagePresenter,
-    TokenService,
-)
-from arbeitszeit.use_cases.send_accountant_registration_token.accountant_invitation_presenter import (
+from arbeitszeit.presenters import (
     AccountantInvitationPresenter,
+    CompanyRegistrationMessagePresenter,
+    MemberRegistrationMessagePresenter,
+    NotifyAccountantsAboutNewPlanPresenter,
 )
 from arbeitszeit_flask.control_thresholds import ControlThresholdsFlask
 from arbeitszeit_flask.database import get_social_accounting
@@ -85,6 +81,7 @@ from arbeitszeit_web.presenters.registration_email_presenter import (
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.text_renderer import TextRenderer
+from arbeitszeit_web.token import TokenService
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import (
     AccountantInvitationUrlIndex,
@@ -146,13 +143,11 @@ class FlaskModule(Module):
             SQLAlchemy,
             to=CallableProvider(self.provide_sqlalchemy, is_singleton=True),
         )
-        binder.bind(TokenService, to=AliasProvider(FlaskTokenService))  # type: ignore
         binder.bind(UserAddressBook, to=AliasProvider(UserAddressBookImpl))  # type: ignore
         binder[NotifyAccountantsAboutNewPlanPresenter] = AliasProvider(NotifyAccountantsAboutNewPlanPresenterImpl)  # type: ignore
         binder[TextRenderer] = AliasProvider(TextRendererImpl)  # type: ignore
         binder[Request] = AliasProvider(FlaskRequest)  # type: ignore
         binder[UrlIndex] = AliasProvider(GeneralUrlIndex)  # type: ignore
-        binder[InvitationTokenValidator] = AliasProvider(FlaskTokenService)  # type: ignore
         binder[RegistrationEmailTemplate] = AliasProvider(MemberRegistrationEmailTemplateImpl)  # type: ignore
         binder[interfaces.LanguageRepository] = AliasProvider(LanguageRepositoryImpl)  # type: ignore
         binder[LanguageService] = AliasProvider(LanguageRepositoryImpl)  # type: ignore
@@ -192,6 +187,10 @@ class FlaskModule(Module):
         binder.bind(
             PasswordHasher,  # type: ignore
             to=AliasProvider(PasswordHasherImpl),
+        )
+        binder.bind(
+            TokenService,  # type: ignore
+            to=AliasProvider(FlaskTokenService),
         )
 
     @staticmethod

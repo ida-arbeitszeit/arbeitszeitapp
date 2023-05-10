@@ -22,11 +22,8 @@ class RegisterCompanyTests(BaseTestCase):
 
     def test_registration_message_was_delivered_to_user(self) -> None:
         expected_mail = "mailtest321@cp.org"
-        response = self.use_case.register_company(
-            self._create_request(email=expected_mail)
-        )
-        assert response.company_id
-        self._assert_company_received_registration_message(response.company_id)
+        self.use_case.register_company(self._create_request(email=expected_mail))
+        self._assert_company_received_registration_message(expected_mail)
 
     def test_that_registering_company_is_possible(self) -> None:
         response = self.use_case.register_company(self._create_request())
@@ -110,9 +107,9 @@ class RegisterCompanyTests(BaseTestCase):
         response = self.get_company_dashboard_use_case.get_dashboard(company)
         return response.company_info
 
-    def _assert_company_received_registration_message(self, company: UUID) -> None:
+    def _assert_company_received_registration_message(self, email: str) -> None:
         for token in self.token_delivery.presented_company_tokens:
-            if token.user == company:
+            if token.email_address == email:
                 break
         else:
             assert False, "Token was not delivered to registering user"

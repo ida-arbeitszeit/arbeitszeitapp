@@ -24,6 +24,12 @@ from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views.signup_accountant_view import SignupAccountantView
 from arbeitszeit_flask.views.signup_company_view import SignupCompanyView
 from arbeitszeit_flask.views.signup_member_view import SignupMemberView
+from arbeitszeit_web.controllers.confirm_company_controller import (
+    ConfirmCompanyController,
+)
+from arbeitszeit_web.controllers.confirm_member_controller import (
+    ConfirmMemberController,
+)
 from arbeitszeit_web.controllers.log_in_accountant_controller import (
     LogInAccountantController,
 )
@@ -87,12 +93,16 @@ def signup_member(view: SignupMemberView):
 @auth.route("/member/confirm/<token>")
 @commit_changes
 @with_injection()
-def confirm_email_member(token: str, use_case: ConfirmMemberUseCase) -> Response:
-    response = use_case.confirm_member(request=use_case.Request(token=token))
-    if not response.is_confirmed:
-        flash("Der Bestätigungslink ist ungültig oder ist abgelaufen.")
-        return redirect(url_for("auth.unconfirmed_member"))
-    return redirect(url_for("auth.login_member"))
+def confirm_email_member(
+    token: str, use_case: ConfirmMemberUseCase, controller: ConfirmMemberController
+) -> Response:
+    use_case_request = controller.process_request(token)
+    if use_case_request is not None:
+        response = use_case.confirm_member(request=use_case_request)
+        if response.is_confirmed:
+            return redirect(url_for("auth.login_member"))
+    flash("Der Bestätigungslink ist ungültig oder ist abgelaufen.")
+    return redirect(url_for("auth.unconfirmed_member"))
 
 
 @auth.route("/member/login", methods=["GET", "POST"])
@@ -201,18 +211,21 @@ def signup_company(view: SignupCompanyView):
 @commit_changes
 @with_injection()
 def confirm_email_company(
-    token, confirm_company_use_case: ConfirmCompanyUseCase, session: FlaskSession
-):
-    request = ConfirmCompanyUseCase.Request(token)
-    response = confirm_company_use_case.confirm_company(request)
-    if not response.is_confirmed:
-        flash("Der Bestätigungslink ist ungültig oder ist abgelaufen.")
-        return redirect(url_for("auth.unconfirmed_company"))
-    else:
-        assert response.user_id
-        session.login_company(response.user_id)
-        flash("Das Konto wurde bestätigt. Danke!")
-        return redirect(url_for("auth.login_company"))
+    token,
+    confirm_company_use_case: ConfirmCompanyUseCase,
+    session: FlaskSession,
+    controller: ConfirmCompanyController,
+) -> Response:
+    use_case_request = controller.process_request(token=token)
+    if use_case_request:
+        response = confirm_company_use_case.confirm_company(request=use_case_request)
+        if response.is_confirmed:
+            assert response.user_id
+            session.login_company(response.user_id)
+            flash("Das Konto wurde bestätigt. Danke!")
+            return redirect(url_for("auth.login_company"))
+    flash("Der Bestätigungslink ist ungültig oder ist abgelaufen.")
+    return redirect(url_for("auth.unconfirmed_company"))
 
 
 @auth.route("/company/resend")

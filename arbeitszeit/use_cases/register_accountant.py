@@ -4,14 +4,12 @@ from uuid import UUID
 
 from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.repositories import AccountantRepository
-from arbeitszeit.token import InvitationTokenValidator
 
 
 @dataclass
 class RegisterAccountantUseCase:
     @dataclass
     class Request:
-        token: str
         email: str
         name: str
         password: str
@@ -22,14 +20,10 @@ class RegisterAccountantUseCase:
         user_id: Optional[UUID]
         email_address: str
 
-    token_service: InvitationTokenValidator
     accountant_repository: AccountantRepository
     password_hasher: PasswordHasher
 
     def register_accountant(self, request: Request) -> Response:
-        invited_email = self.token_service.unwrap_invitation_token(request.token)
-        if invited_email != request.email:
-            return self._failed_registration(request)
         accountants = self.accountant_repository.get_accountants()
         if accountants.with_email_address(request.email):
             return self._failed_registration(request)
