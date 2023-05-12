@@ -2,6 +2,7 @@ arbeitszeit/
 arbeitszeit_web/
 tests/
 arbeitszeit_flask/
+arbeitszeit_benchmark/
 format_code.py
 type_stubs
 run-checks

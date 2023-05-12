@@ -40,7 +40,8 @@ files = [
     "arbeitszeit/**/*.py",
     "tests/**/*.py",
     "arbeitszeit_flask/__init__.py",
-    "arbeitszeit_web/**/*.py"
+    "arbeitszeit_web/**/*.py",
+    "arbeitszeit_benchmark/**/*.py"
 ]
 mypy_path = "type_stubs"
 exclude = '''
