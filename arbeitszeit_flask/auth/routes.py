@@ -160,7 +160,11 @@ def resend_confirmation_member(use_case: ResendConfirmationMailUseCase):
 @with_injection()
 @login_required
 def unconfirmed_company(company_repository: CompanyRepository):
-    if company_repository.is_company_confirmed(UUID(current_user.id)):
+    if (
+        company_repository.get_companies()
+        .with_id(UUID(current_user.id))
+        .that_are_confirmed()
+    ):
         return redirect(url_for("auth.start"))
     return render_template("auth/unconfirmed_company.html")
 

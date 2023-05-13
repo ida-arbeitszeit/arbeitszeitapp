@@ -178,7 +178,7 @@ class PlanUpdate(Protocol):
         ...
 
     def perform(self) -> int:
-        """Perform the update action and return the number of columns
+        """Perform the update action and return the number of rows
         affected.
         """
 
@@ -219,7 +219,7 @@ class MemberUpdate(Protocol):
         ...
 
     def perform(self) -> int:
-        """Perform the update action and return the number of columns
+        """Perform the update action and return the number of rows
         affected.
         """
 
@@ -275,6 +275,22 @@ class CompanyResult(QueryResult[Company], Protocol):
 
     def with_email_containing(self, query: str) -> CompanyResult:
         ...
+
+    def that_are_confirmed(self) -> Self:
+        ...
+
+    def update(self) -> CompanyUpdate:
+        ...
+
+
+class CompanyUpdate(Protocol):
+    def set_confirmation_timestamp(self, timestamp: datetime) -> Self:
+        ...
+
+    def perform(self) -> int:
+        """Perform the update action and return the number of rows
+        affected.
+        """
 
 
 class AccountantResult(QueryResult[Accountant], Protocol):
@@ -405,14 +421,6 @@ class CompanyRepository(ABC):
 
     @abstractmethod
     def get_companies(self) -> CompanyResult:
-        pass
-
-    @abstractmethod
-    def is_company_confirmed(self, company: UUID) -> bool:
-        pass
-
-    @abstractmethod
-    def confirm_company(self, company: UUID, confirmation_timestamp: datetime) -> None:
         pass
 
 

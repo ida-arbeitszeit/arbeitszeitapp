@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from datetime import datetime, timedelta
 from decimal import Decimal
 from itertools import islice
@@ -448,11 +448,42 @@ class CompanyResult(QueryResultImpl[Company]):
     def with_email_containing(self, query: str) -> CompanyResult:
         return self._filtered_by(lambda company: query.lower() in company.email.lower())
 
-    def _filtered_by(self, key: Callable[[Company], bool]) -> CompanyResult:
+    def that_are_confirmed(self) -> Self:
+        return self._filtered_by(lambda company: company.confirmed_on is not None)
+
+    def update(self) -> CompanyUpdate:
+        return CompanyUpdate(
+            companies=self.items,
+        )
+
+    def _filtered_by(self, key: Callable[[Company], bool]) -> Self:
         return type(self)(
             items=lambda: filter(key, self.items()),
             entities=self.entities,
         )
+
+
+@dataclass
+class CompanyUpdate:
+    companies: Callable[[], Iterable[Company]]
+    updates: List[Callable[[Company], None]] = field(default_factory=list)
+
+    def set_confirmation_timestamp(self, timestamp: datetime) -> Self:
+        def update(company: Company) -> None:
+            company.confirmed_on = timestamp
+
+        return replace(
+            self,
+            updates=self.updates + [update],
+        )
+
+    def perform(self) -> int:
+        companies_affected = 0
+        for company in self.companies():
+            for update in self.updates:
+                update(company)
+            companies_affected += 1
+        return companies_affected
 
 
 class AccountantResult(QueryResultImpl[Accountant]):
@@ -886,16 +917,6 @@ class CompanyRepository(interfaces.CompanyRepository):
             items=lambda: self.entities.companies.values(),
             entities=self.entities,
         )
-
-    def confirm_company(self, company: UUID, confirmation_timestamp: datetime) -> None:
-        model = self.entities.companies[company]
-        model.confirmed_on = confirmation_timestamp
-
-    def is_company_confirmed(self, company: UUID) -> bool:
-        if (model := self.entities.companies.get(company)) is not None:
-            if model.id == company and model.confirmed_on is not None:
-                return True
-        return False
 
 
 @singleton

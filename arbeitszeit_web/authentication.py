@@ -71,7 +71,11 @@ class CompanyAuthenticator:
             self.session.logout()
             self.session.set_next_url(self.request.get_request_target())
             return self.url_index.get_start_page_url()
-        elif not self.company_repository.is_company_confirmed(user_id):
+        elif (
+            not self.company_repository.get_companies()
+            .with_id(user_id)
+            .that_are_confirmed()
+        ):
             # not a confirmed company
             return self.url_index.get_unconfirmed_company_url()
         return None

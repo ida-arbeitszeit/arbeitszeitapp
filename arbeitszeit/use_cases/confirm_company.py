@@ -34,9 +34,9 @@ class ConfirmCompanyUseCase:
                 is_confirmed=False,
             )
         elif company.confirmed_on is None:
-            self.company_repository.confirm_company(
-                company.id, self.datetime_service.now()
-            )
+            self.company_repository.get_companies().with_email_address(
+                request.email_address
+            ).update().set_confirmation_timestamp(self.datetime_service.now()).perform()
             return self.Response(is_confirmed=True, user_id=company.id)
         else:
             return self.Response(is_confirmed=False, user_id=None)
