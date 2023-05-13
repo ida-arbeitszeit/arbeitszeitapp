@@ -37,6 +37,7 @@ from arbeitszeit.use_cases.accept_cooperation import (
     AcceptCooperationRequest,
 )
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
+from arbeitszeit.use_cases.confirm_company import ConfirmCompanyUseCase
 from arbeitszeit.use_cases.create_plan_draft import (
     CreatePlanDraft,
     CreatePlanDraftRequest,
@@ -142,6 +143,7 @@ class CompanyGenerator:
     datetime_service: FakeDatetimeService
     company_manager: CompanyManager
     register_company_use_case: RegisterCompany
+    confirm_company_use_case: ConfirmCompanyUseCase
     password_hasher: PasswordHasher
 
     def create_company_entity(
@@ -202,7 +204,10 @@ class CompanyGenerator:
                 self.company_manager.add_worker_to_company(company, worker)
         if not confirmed:
             return company
-        self.company_repository.confirm_company(company, self.datetime_service.now())
+        confirm_response = self.confirm_company_use_case.confirm_company(
+            request=ConfirmCompanyUseCase.Request(email_address=email)
+        )
+        assert confirm_response.is_confirmed
         return company
 
 
