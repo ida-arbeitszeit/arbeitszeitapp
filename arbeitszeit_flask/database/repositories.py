@@ -561,6 +561,110 @@ class TransactionQueryResult(FlaskQueryResult[entities.Transaction]):
             )
         )
 
+    def joined_with_sender_and_receiver(
+        self,
+    ) -> FlaskQueryResult[
+        Tuple[entities.Transaction, entities.AccountOwner, entities.AccountOwner]
+    ]:
+        sender_member = aliased(models.Member)
+        sender_company = aliased(models.Company)
+        sender_social_accounting = aliased(models.SocialAccounting)
+        receiver_member = aliased(models.Member)
+        receiver_company = aliased(models.Company)
+        receiver_social_accounting = aliased(models.SocialAccounting)
+        return FlaskQueryResult(
+            query=self.query.join(
+                sender_member,
+                sender_member.account == models.Transaction.sending_account,
+                isouter=True,
+            )
+            .join(
+                sender_company,
+                or_(
+                    sender_company.r_account == models.Transaction.sending_account,
+                    sender_company.p_account == models.Transaction.sending_account,
+                    sender_company.a_account == models.Transaction.sending_account,
+                    sender_company.prd_account == models.Transaction.sending_account,
+                ),
+                isouter=True,
+            )
+            .join(
+                sender_social_accounting,
+                sender_social_accounting.account == models.Transaction.sending_account,
+                isouter=True,
+            )
+            .join(
+                receiver_member,
+                receiver_member.account == models.Transaction.receiving_account,
+                isouter=True,
+            )
+            .join(
+                receiver_company,
+                or_(
+                    receiver_company.r_account == models.Transaction.receiving_account,
+                    receiver_company.p_account == models.Transaction.receiving_account,
+                    receiver_company.a_account == models.Transaction.receiving_account,
+                    receiver_company.prd_account
+                    == models.Transaction.receiving_account,
+                ),
+                isouter=True,
+            )
+            .join(
+                receiver_social_accounting,
+                receiver_social_accounting.account
+                == models.Transaction.receiving_account,
+                isouter=True,
+            )
+            .with_entities(
+                models.Transaction,
+                sender_member,
+                sender_company,
+                sender_social_accounting,
+                receiver_member,
+                receiver_company,
+                receiver_social_accounting,
+            ),
+            mapper=self.map_transaction_and_sender_and_receiver,
+            db=self.db,
+        )
+
+    @classmethod
+    def map_transaction_and_sender_and_receiver(
+        cls, orm: Any
+    ) -> Tuple[entities.Transaction, entities.AccountOwner, entities.AccountOwner]:
+        (
+            transaction,
+            sending_member,
+            sending_company,
+            sender_social_accounting,
+            receiver_member,
+            receiver_company,
+            receiver_social_accounting,
+        ) = orm
+        sender: entities.AccountOwner
+        receiver: entities.AccountOwner
+        if sending_member:
+            sender = MemberRepository.member_from_orm(sending_member)
+        elif sending_company:
+            sender = CompanyRepository.company_from_orm(sending_company)
+        else:
+            sender = AccountingRepository.social_accounting_from_orm(
+                sender_social_accounting
+            )
+        if receiver_member:
+            receiver = MemberRepository.member_from_orm(receiver_member)
+        elif receiver_company:
+            receiver = CompanyRepository.company_from_orm(receiver_company)
+        else:
+            receiver = AccountingRepository.social_accounting_from_orm(
+                receiver_social_accounting
+            )
+        return (
+            DatabaseGatewayImpl.transaction_from_orm(transaction),
+            sender,
+            receiver,
+        )
+
 
 class AccountQueryResult(FlaskQueryResult[entities.Account]):
     def with_id(self, *id_: UUID) -> AccountQueryResult:

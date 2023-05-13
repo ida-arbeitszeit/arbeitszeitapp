@@ -536,6 +536,36 @@ class TransactionResult(QueryResultImpl[Transaction]):
             ),
         )
 
+    def joined_with_sender_and_receiver(
+        self,
+    ) -> QueryResultImpl[
+        Tuple[entities.Transaction, entities.AccountOwner, entities.AccountOwner]
+    ]:
+        def get_account_owner(account_id: UUID) -> entities.AccountOwner:
+            owner = self.entities.account_owner_by_account.get(account_id)
+            if owner:
+                return owner
+            raise Exception(
+                f"Tried to get owner for account {account_id} but failed to find one"
+            )
+
+        def items() -> (
+            Iterable[
+                Tuple[
+                    entities.Transaction, entities.AccountOwner, entities.AccountOwner
+                ]
+            ]
+        ):
+            for transaction in self.items():
+                yield transaction, get_account_owner(
+                    transaction.sending_account
+                ), get_account_owner(transaction.receiving_account)
+
+        return QueryResultImpl(
+            items=items,
+            entities=self.entities,
+        )
+
 
 class ConsumerPurchaseResult(QueryResultImpl[entities.ConsumerPurchase]):
     def ordered_by_creation_date(
@@ -800,6 +830,7 @@ class MemberRepository(interfaces.MemberRepository):
             password_hash=password_hash,
         )
         self.entities.members[id] = member
+        self.entities.account_owner_by_account[member.account] = member
         return member
 
     def get_members(self) -> MemberResult:
@@ -844,6 +875,10 @@ class CompanyRepository(interfaces.CompanyRepository):
             password_hash=password_hash,
         )
         self.entities.companies[new_company.id] = new_company
+        self.entities.account_owner_by_account[means_account.id] = new_company
+        self.entities.account_owner_by_account[labour_account.id] = new_company
+        self.entities.account_owner_by_account[resource_account.id] = new_company
+        self.entities.account_owner_by_account[products_account.id] = new_company
         return new_company
 
     def get_companies(self) -> CompanyResult:
@@ -989,6 +1024,9 @@ class EntityStorage:
             id=uuid4(),
             account=self.create_account().id,
         )
+        self.account_owner_by_account: Dict[UUID, entities.AccountOwner] = {
+            self.social_accounting.account: self.social_accounting
+        }
         self.cooperations: Dict[UUID, Cooperation] = dict()
         self.labour_certificates_payouts_by_transaction: Dict[
             UUID, entities.LabourCertificatesPayout
