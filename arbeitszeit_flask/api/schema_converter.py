@@ -14,24 +14,31 @@ from arbeitszeit_web.api_presenters.interfaces import (
 )
 
 
-class ModelWithSameNameExists(Exception):
+class DifferentModelWithSameNameExists(Exception):
     pass
 
 
-def _prevent_overriding(schema_name: str, namespace: Namespace) -> None:
+def _prevent_overriding(
+    schema_name: str, namespace: Namespace, model: Dict[str, Any]
+) -> None:
     """
-    Ensure that a model previously registered on namespace does not get overridden.
+    Ensure that a model previously registered on namespace does not get overridden by a different one that has the same name.
     """
     assert schema_name
     if schema_name in namespace.models:
-        raise ModelWithSameNameExists(f"Model with name {schema_name} exists already.")
+        if namespace.models[schema_name] == model:
+            pass
+        else:
+            raise DifferentModelWithSameNameExists(
+                f"Different model with name {schema_name} exists already."
+            )
 
 
 def _register_model_for_documentation(
     schema_name: str, namespace: Namespace, model: Dict[str, Any]
 ):
     assert schema_name
-    _prevent_overriding(schema_name, namespace)
+    _prevent_overriding(schema_name, namespace, model)
     registered_model = namespace.model(name=schema_name, model=model)
     return registered_model
 
