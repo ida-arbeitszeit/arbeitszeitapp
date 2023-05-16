@@ -28,8 +28,8 @@ class ControllerTests(BaseTestCase):
     def test_email_and_password_are_passed_to_use_case_request(self) -> None:
         EXPECTED_MAIL = "test@test.org"
         EXPECTED_PASSWORD = "123safe"
-        self.request.set_arg(arg="email", value=EXPECTED_MAIL)
-        self.request.set_arg(arg="password", value=EXPECTED_PASSWORD)
+        self.request.set_form(key="email", value=EXPECTED_MAIL)
+        self.request.set_form(key="password", value=EXPECTED_PASSWORD)
         use_case_request = self.controller.create_request(self.request)
         assert use_case_request
         self.assertEqual(use_case_request.email, EXPECTED_MAIL)
