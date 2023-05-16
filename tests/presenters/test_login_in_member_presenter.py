@@ -123,7 +123,7 @@ class PresenterTests(TestCase):
             expected_url,
         )
 
-    def test_that_user_is_logged_in_with_correct_email_address(self) -> None:
+    def test_that_user_is_logged_in_with_correct_user_id(self) -> None:
         expected_id = uuid4()
         response = self.create_success_response(user_id=expected_id)
         self.presenter.present_login_process(response, self.form)

@@ -19,9 +19,21 @@ class QueryCompaniesTests(ApiTestCase):
         response = self.client.get(self.url + "?offset=1&limit=1")
         self.assertEqual(response.status_code, 200)
 
-    def test_get_returns_400_with_letters_in_offset_param(self):
+    def test_get_returns_400_with_correct_message_when_letters_are_in_offset_param(
+        self,
+    ):
         response = self.client.get(self.url + "?offset=abc")
         self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json["message"], "The parameter must be an integer.")
+
+    def test_get_returns_400_with_correct_message_when_offset_param_is_negative_number(
+        self,
+    ):
+        response = self.client.get(self.url + "?offset=-1")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.json["message"], "The parameter must not be be a negative number."
+        )
 
     def test_post_returns_405(self):
         response = self.client.post(self.url)
