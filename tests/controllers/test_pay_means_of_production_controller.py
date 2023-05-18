@@ -50,20 +50,22 @@ class AuthenticatedCompanyTests(TestCase):
         output = self.controller.process_input_data(self.get_fake_form(amount="10"))
         self.assertEqual(output.amount, expected_amount)
 
-    def test_successfull_use_case_request_has_correct_category_of_fixed_means_of_production(
+    def test_successfull_use_case_request_has_correct_type_of_payment_of_fixed_means_of_production(
         self,
     ):
-        expected_category = PurposesOfPurchases.means_of_prod
-        assert self.get_fake_form().category_field().get_value() == "Fixed"
+        expected_type_of_payment = PurposesOfPurchases.means_of_prod
+        assert self.get_fake_form().type_of_payment_field().get_value() == "Fixed"
         output = self.controller.process_input_data(self.get_fake_form())
-        self.assertEqual(output.purpose, expected_category)
+        self.assertEqual(output.purpose, expected_type_of_payment)
 
-    def test_successfull_use_case_request_has_correct_category_of_liquid_means(self):
-        expected_category = PurposesOfPurchases.raw_materials
+    def test_successfull_use_case_request_has_correct_type_of_payment_of_liquid_means(
+        self,
+    ):
+        expected_type_of_payment = PurposesOfPurchases.raw_materials
         output = self.controller.process_input_data(
-            self.get_fake_form(category="Liquid")
+            self.get_fake_form(type_of_payment="Liquid")
         )
-        self.assertEqual(output.purpose, expected_category)
+        self.assertEqual(output.purpose, expected_type_of_payment)
 
     def test_error_is_raised_if_amount_field_is_empty(self):
         with self.assertRaises(self.controller.FormError):
@@ -73,9 +75,9 @@ class AuthenticatedCompanyTests(TestCase):
         with self.assertRaises(self.controller.FormError):
             self.controller.process_input_data(self.get_fake_form(plan_id=""))
 
-    def test_error_is_raised_if_category_field_is_empty(self):
+    def test_error_is_raised_if_type_of_payment_field_is_empty(self):
         with self.assertRaises(self.controller.FormError):
-            self.controller.process_input_data(self.get_fake_form(category=""))
+            self.controller.process_input_data(self.get_fake_form(type_of_payment=""))
 
     def test_correct_error_message_when_amount_is_negative(self):
         form = self.get_fake_form(amount="-1")
@@ -130,15 +132,20 @@ class AuthenticatedCompanyTests(TestCase):
     def test_correct_error_message_returned_when_category_is_empty(
         self,
     ) -> None:
-        form = self.get_fake_form(category="")
+        form = self.get_fake_form(type_of_payment="")
         with self.assertRaises(self.controller.FormError):
             self.controller.process_input_data(form)
         self.assertEqual(
-            form.category_field().errors,
+            form.type_of_payment_field().errors,
             [self.translator.gettext("This field is required.")],
         )
 
     def get_fake_form(
-        self, amount: str = "10", plan_id: str = str(uuid4()), category: str = "Fixed"
+        self,
+        amount: str = "10",
+        plan_id: str = str(uuid4()),
+        type_of_payment: str = "Fixed",
     ) -> PayMeansFakeForm:
-        return PayMeansFakeForm(amount=amount, plan_id=plan_id, category=category)
+        return PayMeansFakeForm(
+            amount=amount, plan_id=plan_id, type_of_payment=type_of_payment
+        )
