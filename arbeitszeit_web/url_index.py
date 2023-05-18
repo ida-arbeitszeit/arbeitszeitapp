@@ -12,6 +12,7 @@ from decimal import Decimal
 from typing import Optional, Protocol
 from uuid import UUID
 
+from arbeitszeit.entities import PurposesOfPurchases
 from arbeitszeit_web.session import Session, UserRole
 
 
@@ -81,7 +82,12 @@ class UrlIndex(Protocol):
     ) -> str:
         ...
 
-    def get_pay_means_of_production_url(self, plan_id: Optional[UUID] = None) -> str:
+    def get_pay_means_of_production_url(
+        self,
+        plan_id: Optional[UUID] = None,
+        amount: Optional[int] = None,
+        type_of_payment: Optional[PurposesOfPurchases] = None,
+    ) -> str:
         ...
 
     def get_toggle_availability_url(self, plan_id: UUID) -> str:

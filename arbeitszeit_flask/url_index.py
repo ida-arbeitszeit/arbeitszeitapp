@@ -4,6 +4,7 @@ from uuid import UUID
 
 from flask import url_for
 
+from arbeitszeit.entities import PurposesOfPurchases
 from arbeitszeit_web.session import UserRole
 
 
@@ -124,8 +125,24 @@ class GeneralUrlIndex:
             company_id=str(company_id),
         )
 
-    def get_pay_means_of_production_url(self, plan_id: Optional[UUID] = None) -> str:
-        return url_for(endpoint="main_company.transfer_to_company", plan_id=plan_id)
+    def get_pay_means_of_production_url(
+        self,
+        plan_id: Optional[UUID] = None,
+        amount: Optional[int] = None,
+        type_of_payment: Optional[PurposesOfPurchases] = None,
+    ) -> str:
+        if type_of_payment == PurposesOfPurchases.means_of_prod:
+            type_string = "Fixed"
+        elif type_of_payment == PurposesOfPurchases.raw_materials:
+            type_string = "Liquid"
+        else:
+            type_string = None
+        return url_for(
+            endpoint="main_company.transfer_to_company",
+            plan_id=plan_id,
+            amount=amount,
+            type_of_payment=type_string,
+        )
 
     def get_toggle_availability_url(self, plan_id: UUID) -> str:
         return url_for("main_company.toggle_availability", plan_id=plan_id)

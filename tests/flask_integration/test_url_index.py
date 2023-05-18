@@ -1,6 +1,7 @@
 from decimal import Decimal
 from uuid import UUID, uuid4
 
+from arbeitszeit.entities import PurposesOfPurchases
 from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
 from arbeitszeit.use_cases.send_accountant_registration_token import (
     SendAccountantRegistrationTokenUseCase,
@@ -246,6 +247,24 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_company()
         url = self.url_index.get_pay_means_of_production_url(uuid4())
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_url_for_payment_of_means_of_production_with_amount_parameter_leads_to_functional_url(
+        self,
+    ) -> None:
+        self.login_company()
+        url = self.url_index.get_pay_means_of_production_url(plan_id=uuid4(), amount=3)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_url_for_payment_of_means_of_production_with_type_of_payment_parameter_leads_to_functional_url(
+        self,
+    ) -> None:
+        self.login_company()
+        url = self.url_index.get_pay_means_of_production_url(
+            plan_id=uuid4(), amount=3, type_of_payment=PurposesOfPurchases.means_of_prod
+        )
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
