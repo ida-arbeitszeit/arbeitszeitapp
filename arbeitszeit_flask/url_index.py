@@ -65,7 +65,9 @@ class GeneralUrlIndex:
     def get_answer_company_work_invite_url(self, invite_id: UUID) -> str:
         return url_for("main_member.show_company_work_invite", invite_id=invite_id)
 
-    def get_pay_consumer_product_url(self, amount: int, plan_id: UUID) -> str:
+    def get_pay_consumer_product_url(
+        self, amount: Optional[int] = None, plan_id: Optional[UUID] = None
+    ) -> str:
         return url_for(
             endpoint="main_member.pay_consumer_product", amount=amount, plan_id=plan_id
         )
