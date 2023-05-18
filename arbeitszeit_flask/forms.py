@@ -361,9 +361,9 @@ class PayMeansOfProductionForm(Form):
     )
     choices = [
         ("", ""),
-        ("Fixed", trans.lazy_gettext(trans.lazy_gettext("Fixed means of production"))),
+        ("fixed", trans.lazy_gettext(trans.lazy_gettext("Fixed means of production"))),
         (
-            "Liquid",
+            "liquid",
             trans.lazy_gettext("Liquid means of production"),
         ),
     ]

@@ -54,7 +54,7 @@ class AuthenticatedCompanyTests(TestCase):
         self,
     ):
         expected_type_of_payment = PurposesOfPurchases.means_of_prod
-        assert self.get_fake_form().type_of_payment_field().get_value() == "Fixed"
+        assert self.get_fake_form().type_of_payment_field().get_value() == "fixed"
         output = self.controller.process_input_data(self.get_fake_form())
         self.assertEqual(output.purpose, expected_type_of_payment)
 
@@ -63,7 +63,7 @@ class AuthenticatedCompanyTests(TestCase):
     ):
         expected_type_of_payment = PurposesOfPurchases.raw_materials
         output = self.controller.process_input_data(
-            self.get_fake_form(type_of_payment="Liquid")
+            self.get_fake_form(type_of_payment="liquid")
         )
         self.assertEqual(output.purpose, expected_type_of_payment)
 
@@ -144,7 +144,7 @@ class AuthenticatedCompanyTests(TestCase):
         self,
         amount: str = "10",
         plan_id: str = str(uuid4()),
-        type_of_payment: str = "Fixed",
+        type_of_payment: str = "fixed",
     ) -> PayMeansFakeForm:
         return PayMeansFakeForm(
             amount=amount, plan_id=plan_id, type_of_payment=type_of_payment

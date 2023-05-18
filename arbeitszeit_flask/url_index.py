@@ -132,9 +132,9 @@ class GeneralUrlIndex:
         type_of_payment: Optional[PurposesOfPurchases] = None,
     ) -> str:
         if type_of_payment == PurposesOfPurchases.means_of_prod:
-            type_string = "Fixed"
+            type_string = "fixed"
         elif type_of_payment == PurposesOfPurchases.raw_materials:
-            type_string = "Liquid"
+            type_string = "liquid"
         else:
             type_string = None
         return url_for(

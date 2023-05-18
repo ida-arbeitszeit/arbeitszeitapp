@@ -46,7 +46,7 @@ class PayMeansOfProductionController:
             raise self.FormError()
         purpose = (
             PurposesOfPurchases.means_of_prod
-            if type_of_payment == "Fixed"
+            if type_of_payment == "fixed"
             else PurposesOfPurchases.raw_materials
         )
         return PayMeansOfProductionRequest(buyer, plan, amount, purpose)
