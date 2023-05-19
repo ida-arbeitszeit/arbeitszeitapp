@@ -1,30 +1,29 @@
-from .flask import ViewTestCase
+from typing import Optional
+
+from parameterized import parameterized
+
+from .flask import LogInUser, ViewTestCase
 
 
-class AuthenticatedAsAccountantTests(ViewTestCase):
+class AuthTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.accountant = self.login_accountant()
+        self.url = "/accountant/dashboard"
 
-    def test_get_200_response(self) -> None:
-        response = self.client.get("/accountant/dashboard")
-        self.assertEqual(response.status_code, 200)
-
-
-class UnauthenticatedTests(ViewTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-
-    def test_does_not_return_200_response(self) -> None:
-        response = self.client.get("/accountant/dashboard")
-        self.assertNotEqual(response.status_code, 200)
-
-
-class AuthenticatedAsMemberTests(ViewTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.login_member()
-
-    def test_does_not_return_200_response(self) -> None:
-        response = self.client.get("/accountant/dashboard")
-        self.assertNotEqual(response.status_code, 200)
+    @parameterized.expand(
+        [
+            (LogInUser.accountant, 200),
+            (None, 302),
+            (LogInUser.company, 302),
+            (LogInUser.member, 302),
+        ]
+    )
+    def test_correct_status_codes_on_get_requests(
+        self, login: Optional[LogInUser], expected_code: int
+    ) -> None:
+        self.assert_response_has_expected_code(
+            url=self.url,
+            method="get",
+            login=login,
+            expected_code=expected_code,
+        )
