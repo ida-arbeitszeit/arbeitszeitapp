@@ -5,7 +5,6 @@ from arbeitszeit_flask.api.input_documentation import generate_input_documentati
 from arbeitszeit_flask.api.response_documentation import with_response_documentation
 from arbeitszeit_flask.api.schema_converter import json_schema_to_flaskx
 from arbeitszeit_flask.dependency_injection import with_injection
-from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_web.api_controllers.login_member_api_controller import (
     LoginMemberApiController,
 )
@@ -40,7 +39,7 @@ class LoginMember(Resource):
         """
         Login with a member account.
         """
-        use_case_request = controller.create_request(FlaskRequest())
+        use_case_request = controller.create_request()
         response = login_member.log_in_member(use_case_request)
         view_model = presenter.create_view_model(response)
         return view_model

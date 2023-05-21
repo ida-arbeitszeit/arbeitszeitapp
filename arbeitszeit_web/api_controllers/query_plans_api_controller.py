@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import List
 
 from arbeitszeit.use_cases.query_plans import PlanFilter, PlanSorting, QueryPlansRequest
@@ -9,6 +10,7 @@ DEFAULT_OFFSET: int = 0
 DEFAULT_LIMIT: int = 30
 
 
+@dataclass
 class QueryPlansApiController:
     @classmethod
     def create_expected_inputs(cls) -> List[ExpectedInput]:
@@ -26,10 +28,12 @@ class QueryPlansApiController:
                 default=DEFAULT_LIMIT,
             ),
         ]
+    
+    request: Request
 
-    def create_request(self, request: Request) -> QueryPlansRequest:
-        offset = self._parse_offset(request)
-        limit = self._parse_limit(request)
+    def create_request(self) -> QueryPlansRequest:
+        offset = self._parse_offset(self.request)
+        limit = self._parse_limit(self.request)
         return QueryPlansRequest(
             query_string=None,
             filter_category=PlanFilter.by_plan_id,

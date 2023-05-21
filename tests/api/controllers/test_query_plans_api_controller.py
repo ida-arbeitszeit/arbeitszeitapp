@@ -13,41 +13,41 @@ class ControllerTests(BaseTestCase):
         self.request = self.injector.get(FakeRequest)
 
     def test_that_by_default_a_request_gets_returned_which_sorts_by_activation(self):
-        use_case_request = self.controller.create_request(self.request)
+        use_case_request = self.controller.create_request()
         self.assertEqual(use_case_request.sorting_category, PlanSorting.by_activation)
 
     def test_that_by_default_a_request_gets_returned_which_filters_by_plan_id(self):
-        use_case_request = self.controller.create_request(self.request)
+        use_case_request = self.controller.create_request()
         self.assertEqual(use_case_request.filter_category, PlanFilter.by_plan_id)
 
     def test_that_by_default_a_request_gets_returned_without_query_string(self):
-        use_case_request = self.controller.create_request(self.request)
+        use_case_request = self.controller.create_request()
         self.assertIsNone(use_case_request.query_string)
 
     def test_that_by_default_a_use_case_request_with_offset_0_gets_returned_if_offset_query_string_was_empty(
         self,
     ):
         assert not self.request.query_string().get("offset")
-        use_case_request = self.controller.create_request(self.request)
+        use_case_request = self.controller.create_request()
         self.assertEqual(use_case_request.offset, 0)
 
     def test_that_by_default_a_use_case_request_with_limit_30_gets_returned_if_limit_query_string_was_empty(
         self,
     ):
         assert not self.request.query_string().get("limit")
-        use_case_request = self.controller.create_request(self.request)
+        use_case_request = self.controller.create_request()
         self.assertEqual(use_case_request.limit, 30)
 
     def test_correct_offset_gets_returned_if_it_was_set_in_query_string(self):
         expected_offset = 8
         self.request.set_arg(arg="offset", value=str(expected_offset))
-        use_case_request = self.controller.create_request(self.request)
+        use_case_request = self.controller.create_request()
         self.assertEqual(use_case_request.offset, expected_offset)
 
     def test_correct_limit_gets_returned_if_it_was_set_in_query_string(self):
         expected_limit = 7
         self.request.set_arg(arg="limit", value=expected_limit)
-        use_case_request = self.controller.create_request(self.request)
+        use_case_request = self.controller.create_request()
         self.assertEqual(use_case_request.limit, expected_limit)
 
     def test_both_correct_limit_and_offset_get_returned_if_specified_in_query_string(
@@ -57,33 +57,33 @@ class ControllerTests(BaseTestCase):
         self.request.set_arg(arg="limit", value=expected_limit)
         expected_offset = 8
         self.request.set_arg(arg="offset", value=str(expected_offset))
-        use_case_request = self.controller.create_request(self.request)
+        use_case_request = self.controller.create_request()
         self.assertEqual(use_case_request.limit, expected_limit)
         self.assertEqual(use_case_request.offset, expected_offset)
 
     def test_controller_raises_value_error_if_offset_query_string_has_letters(self):
         self.request.set_arg(arg="offset", value="123abc")
         with self.assertRaises(ValueError):
-            self.controller.create_request(self.request)
+            self.controller.create_request()
 
     def test_controller_raises_value_error_if_offset_query_string_is_negative_number(
         self,
     ):
         self.request.set_arg(arg="offset", value="-123")
         with self.assertRaises(ValueError):
-            self.controller.create_request(self.request)
+            self.controller.create_request()
 
     def test_controller_raises_value_error_if_limit_query_string_has_letters(self):
         self.request.set_arg(arg="limit", value="123abc")
         with self.assertRaises(ValueError):
-            self.controller.create_request(self.request)
+            self.controller.create_request()
 
     def test_controller_raises_value_error_if_limit_query_string_is_negative_number(
         self,
     ):
         self.request.set_arg(arg="limit", value="-123")
         with self.assertRaises(ValueError):
-            self.controller.create_request(self.request)
+            self.controller.create_request()
 
 
 class ExpectedInputsTests(BaseTestCase):

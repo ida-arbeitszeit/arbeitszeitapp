@@ -41,7 +41,7 @@ class ListActivePlans(Resource):
     ):
         """List active plans."""
         try:
-            use_case_request = controller.create_request(FlaskRequest())
+            use_case_request = controller.create_request()
         except NotAnIntegerError:
             abort(400, "The parameter must be an integer.")
         except NegativeNumberError:

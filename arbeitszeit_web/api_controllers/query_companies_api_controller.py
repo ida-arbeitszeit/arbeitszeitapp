@@ -30,6 +30,7 @@ class QueryCompaniesRequestImpl(QueryCompaniesRequest):
         return self.limit
 
 
+@dataclass
 class QueryCompaniesApiController:
     @classmethod
     def create_expected_inputs(cls) -> List[ExpectedInput]:
@@ -47,10 +48,12 @@ class QueryCompaniesApiController:
                 default=DEFAULT_LIMIT,
             ),
         ]
+    
+    request: Request
 
-    def create_request(self, request: Request) -> QueryCompaniesRequest:
-        offset = self._parse_offset(request)
-        limit = self._parse_limit(request)
+    def create_request(self) -> QueryCompaniesRequest:
+        offset = self._parse_offset(self.request)
+        limit = self._parse_limit(self.request)
         return QueryCompaniesRequestImpl(
             query=None,
             filter_category=CompanyFilter.by_name,

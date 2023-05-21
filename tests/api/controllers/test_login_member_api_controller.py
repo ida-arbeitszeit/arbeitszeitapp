@@ -16,13 +16,13 @@ class ControllerTests(BaseTestCase):
         self,
     ) -> None:
         with self.assertRaises(Unauthorized) as err:
-            self.controller.create_request(self.request)
+            self.controller.create_request()
         self.assertEqual(err.exception.message, "Email or password missing.")
 
     def test_correct_error_raised_when_request_has_email_but_no_password(self) -> None:
         self.request.set_arg(arg="email", value="test@test.org")
         with self.assertRaises(Unauthorized) as err:
-            self.controller.create_request(self.request)
+            self.controller.create_request()
         self.assertEqual(err.exception.message, "Email or password missing.")
 
     def test_email_and_password_are_passed_to_use_case_request(self) -> None:
@@ -30,7 +30,7 @@ class ControllerTests(BaseTestCase):
         EXPECTED_PASSWORD = "123safe"
         self.request.set_form(key="email", value=EXPECTED_MAIL)
         self.request.set_form(key="password", value=EXPECTED_PASSWORD)
-        use_case_request = self.controller.create_request(self.request)
+        use_case_request = self.controller.create_request()
         assert use_case_request
         self.assertEqual(use_case_request.email, EXPECTED_MAIL)
         self.assertEqual(use_case_request.password, EXPECTED_PASSWORD)
