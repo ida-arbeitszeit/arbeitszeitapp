@@ -1,8 +1,7 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from flask import Response as FlaskResponse
-from flask import redirect, request
+from flask import redirect
 
 from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProduction
 from arbeitszeit_flask.forms import PayMeansOfProductionForm
@@ -22,15 +21,6 @@ class PayMeansOfProductionView:
     template_renderer: UserTemplateRenderer
 
     def respond_to_get(self, form: PayMeansOfProductionForm) -> Response:
-        plan_id: Optional[str] = request.args.get("plan_id")
-        amount: Optional[str] = request.args.get("amount")
-        type_of_payment: Optional[str] = request.args.get("type_of_payment")
-        if plan_id:
-            form.plan_id_field().set_value(plan_id)
-        if amount:
-            form.amount_field().set_value(amount)
-        if type_of_payment:
-            form.type_of_payment_field().set_value(type_of_payment)
         return FlaskResponse(self._render_template(form), status=200)
 
     def respond_to_post(self, form: PayMeansOfProductionForm) -> Response:
