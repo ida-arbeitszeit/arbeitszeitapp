@@ -1,4 +1,49 @@
-from .flask import ViewTestCase
+from typing import Any, Optional
+
+from parameterized import parameterized
+
+from .flask import LogInUser, ViewTestCase
+
+
+class AuthTests(ViewTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.url = "/company/query_companies"
+
+    @parameterized.expand(
+        [
+            (LogInUser.accountant, 302),
+            (None, 302),
+            (LogInUser.company, 200),
+            (LogInUser.member, 302),
+        ]
+    )
+    def test_correct_status_codes_on_get_requests(
+        self, login: Optional[LogInUser], expected_code: int
+    ) -> None:
+        self.assert_response_has_expected_code(
+            url=self.url,
+            method="get",
+            login=login,
+            expected_code=expected_code,
+        )
+
+    @parameterized.expand(
+        [
+            (LogInUser.company, 200, dict(select="Email", search="Test search")),
+            (LogInUser.member, 302, dict(select="Email", search="Test search")),
+        ]
+    )
+    def test_correct_status_codes_on_post_requests(
+        self, login: LogInUser, expected_code: int, data: dict[Any, Any]
+    ) -> None:
+        self.assert_response_has_expected_code(
+            url=self.url,
+            method="post",
+            login=login,
+            expected_code=expected_code,
+            data=data,
+        )
 
 
 class CompanyViewTests(ViewTestCase):

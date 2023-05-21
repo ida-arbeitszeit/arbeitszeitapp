@@ -1,8 +1,29 @@
-from .flask import ViewTestCase
+from typing import Optional
+
+from parameterized import parameterized
+
+from .flask import LogInUser, ViewTestCase
 
 
-class CompanyTests(ViewTestCase):
-    def test_that_logged_in_company_get_200_response(self) -> None:
-        self.company = self.login_company()
-        response = self.client.get("/company/my_accounts")
-        self.assertEqual(response.status_code, 200)
+class AuthTests(ViewTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.url = "/company/my_accounts"
+
+    @parameterized.expand(
+        [
+            (LogInUser.accountant, 302),
+            (None, 302),
+            (LogInUser.company, 200),
+            (LogInUser.member, 302),
+        ]
+    )
+    def test_correct_status_codes_on_get_requests(
+        self, login: Optional[LogInUser], expected_code: int
+    ) -> None:
+        self.assert_response_has_expected_code(
+            url=self.url,
+            method="get",
+            login=login,
+            expected_code=expected_code,
+        )
