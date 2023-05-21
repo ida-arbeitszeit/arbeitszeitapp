@@ -26,3 +26,11 @@ class Unauthorized(ApiResponseError, Exception):
 
     def __init__(self, message: str) -> None:
         self.message = message
+
+
+class BadRequest(ApiResponseError, Exception):
+    code = 400
+    description = "Bad Request"
+
+    def __init__(self, message: str) -> None:
+        self.message = message

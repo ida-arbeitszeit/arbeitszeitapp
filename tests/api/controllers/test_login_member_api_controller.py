@@ -1,7 +1,7 @@
 from arbeitszeit_web.api_controllers.login_member_api_controller import (
     LoginMemberApiController,
 )
-from arbeitszeit_web.api_presenters.response_errors import Unauthorized
+from arbeitszeit_web.api_presenters.response_errors import BadRequest
 from tests.controllers.base_test_case import BaseTestCase
 from tests.request import FakeRequest
 
@@ -12,16 +12,16 @@ class ControllerTests(BaseTestCase):
         self.controller = self.injector.get(LoginMemberApiController)
         self.request = self.injector.get(FakeRequest)
 
-    def test_correct_error_raised_when_request_has_no_email_and_no_password(
+    def test_bad_request_raised_when_request_has_no_email_and_no_password(
         self,
     ) -> None:
-        with self.assertRaises(Unauthorized) as err:
+        with self.assertRaises(BadRequest) as err:
             self.controller.create_request()
         self.assertEqual(err.exception.message, "Email or password missing.")
 
-    def test_correct_error_raised_when_request_has_email_but_no_password(self) -> None:
+    def test_bad_request_raised_when_request_has_email_but_no_password(self) -> None:
         self.request.set_arg(arg="email", value="test@test.org")
-        with self.assertRaises(Unauthorized) as err:
+        with self.assertRaises(BadRequest) as err:
             self.controller.create_request()
         self.assertEqual(err.exception.message, "Email or password missing.")
 

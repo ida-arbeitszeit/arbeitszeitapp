@@ -11,7 +11,7 @@ from arbeitszeit_web.api_controllers.login_member_api_controller import (
 from arbeitszeit_web.api_presenters.login_member_api_presenter import (
     LoginMemberApiPresenter,
 )
-from arbeitszeit_web.api_presenters.response_errors import Unauthorized
+from arbeitszeit_web.api_presenters.response_errors import BadRequest, Unauthorized
 
 namespace = Namespace("auth", "Authentification related endpoints.")
 
@@ -28,7 +28,9 @@ model = json_schema_to_flaskx(
 class LoginMember(Resource):
     @namespace.expect(input_documentation)
     @namespace.marshal_with(model)
-    @with_response_documentation(error_responses=[Unauthorized], namespace=namespace)
+    @with_response_documentation(
+        error_responses=[Unauthorized, BadRequest], namespace=namespace
+    )
     @with_injection()
     def post(
         self,
