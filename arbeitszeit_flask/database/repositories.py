@@ -414,14 +414,15 @@ class MemberUpdate:
         )
 
     def perform(self) -> int:
-        user = aliased(models.User)
         row_count = 0
         if self.user_update_values:
             sql_statement = (
                 update(models.User)
                 .where(
                     models.User.id.in_(
-                        self.query.join(user).with_entities(user.id).scalar_subquery()
+                        self.query.with_entities(
+                            models.Member.user_id
+                        ).scalar_subquery()
                     )
                 )
                 .values(**self.user_update_values)
@@ -470,6 +471,54 @@ class CompanyQueryResult(FlaskQueryResult[entities.Company]):
                 models.User.email.ilike(f"%{query}%")
             )
         )
+
+    def that_are_confirmed(self) -> Self:
+        user = aliased(models.User)
+        return self._with_modified_query(
+            lambda query: query.join(user, user.id == models.Company.user_id).filter(
+                user.email_confirmed_on != None
+            )
+        )
+
+    def update(self) -> CompanyUpdate:
+        return CompanyUpdate(
+            query=self.query,
+            db=self.db,
+        )
+
+
+@dataclass
+class CompanyUpdate:
+    query: Any
+    db: SQLAlchemy
+    user_update_values: Dict[str, Any] = field(default_factory=dict)
+
+    def set_confirmation_timestamp(self, timestamp: datetime) -> Self:
+        return replace(
+            self,
+            user_update_values=dict(
+                self.user_update_values, email_confirmed_on=timestamp
+            ),
+        )
+
+    def perform(self) -> int:
+        row_count = 0
+        if self.user_update_values:
+            sql_statement = (
+                update(models.User)
+                .where(
+                    models.User.id.in_(
+                        self.query.with_entities(
+                            models.Company.user_id
+                        ).scalar_subquery()
+                    )
+                )
+                .values(**self.user_update_values)
+                .execution_options(synchronize_session="fetch")
+            )
+            result = self.db.session.execute(sql_statement)
+            row_count = result.rowcount  # type: ignore
+        return row_count
 
 
 class AccountantResult(FlaskQueryResult[entities.Accountant]):
@@ -559,6 +608,110 @@ class TransactionQueryResult(FlaskQueryResult[entities.Transaction]):
                     ),
                 )
             )
+        )
+
+    def joined_with_sender_and_receiver(
+        self,
+    ) -> FlaskQueryResult[
+        Tuple[entities.Transaction, entities.AccountOwner, entities.AccountOwner]
+    ]:
+        sender_member = aliased(models.Member)
+        sender_company = aliased(models.Company)
+        sender_social_accounting = aliased(models.SocialAccounting)
+        receiver_member = aliased(models.Member)
+        receiver_company = aliased(models.Company)
+        receiver_social_accounting = aliased(models.SocialAccounting)
+        return FlaskQueryResult(
+            query=self.query.join(
+                sender_member,
+                sender_member.account == models.Transaction.sending_account,
+                isouter=True,
+            )
+            .join(
+                sender_company,
+                or_(
+                    sender_company.r_account == models.Transaction.sending_account,
+                    sender_company.p_account == models.Transaction.sending_account,
+                    sender_company.a_account == models.Transaction.sending_account,
+                    sender_company.prd_account == models.Transaction.sending_account,
+                ),
+                isouter=True,
+            )
+            .join(
+                sender_social_accounting,
+                sender_social_accounting.account == models.Transaction.sending_account,
+                isouter=True,
+            )
+            .join(
+                receiver_member,
+                receiver_member.account == models.Transaction.receiving_account,
+                isouter=True,
+            )
+            .join(
+                receiver_company,
+                or_(
+                    receiver_company.r_account == models.Transaction.receiving_account,
+                    receiver_company.p_account == models.Transaction.receiving_account,
+                    receiver_company.a_account == models.Transaction.receiving_account,
+                    receiver_company.prd_account
+                    == models.Transaction.receiving_account,
+                ),
+                isouter=True,
+            )
+            .join(
+                receiver_social_accounting,
+                receiver_social_accounting.account
+                == models.Transaction.receiving_account,
+                isouter=True,
+            )
+            .with_entities(
+                models.Transaction,
+                sender_member,
+                sender_company,
+                sender_social_accounting,
+                receiver_member,
+                receiver_company,
+                receiver_social_accounting,
+            ),
+            mapper=self.map_transaction_and_sender_and_receiver,
+            db=self.db,
+        )
+
+    @classmethod
+    def map_transaction_and_sender_and_receiver(
+        cls, orm: Any
+    ) -> Tuple[entities.Transaction, entities.AccountOwner, entities.AccountOwner]:
+        (
+            transaction,
+            sending_member,
+            sending_company,
+            sender_social_accounting,
+            receiver_member,
+            receiver_company,
+            receiver_social_accounting,
+        ) = orm
+        sender: entities.AccountOwner
+        receiver: entities.AccountOwner
+        if sending_member:
+            sender = MemberRepository.member_from_orm(sending_member)
+        elif sending_company:
+            sender = CompanyRepository.company_from_orm(sending_company)
+        else:
+            sender = AccountingRepository.social_accounting_from_orm(
+                sender_social_accounting
+            )
+        if receiver_member:
+            receiver = MemberRepository.member_from_orm(receiver_member)
+        elif receiver_company:
+            receiver = CompanyRepository.company_from_orm(receiver_company)
+        else:
+            receiver = AccountingRepository.social_accounting_from_orm(
+                receiver_social_accounting
+            )
+        return (
+            DatabaseGatewayImpl.transaction_from_orm(transaction),
+            sender,
+            receiver,
         )
 
 
@@ -973,31 +1126,6 @@ class CompanyRepository(repositories.CompanyRepository):
             mapper=self.company_from_orm,
             db=self.db,
         )
-
-    def confirm_company(self, company: UUID, confirmed_on: datetime) -> None:
-        self.db.session.execute(
-            update(models.User)
-            .where(
-                models.User.id.in_(
-                    models.Company.query.filter(models.Company.id == str(company))
-                    .with_entities(models.Company.user_id)
-                    .scalar_subquery()
-                )
-            )
-            .values(email_confirmed_on=confirmed_on)
-            .execution_options(synchronize_session="fetch")
-        )
-
-    def is_company_confirmed(self, company: UUID) -> bool:
-        orm = (
-            self.db.session.query(models.Company)
-            .filter(models.Company.id == str(company))
-            .first()
-        )
-        if orm is None:
-            return False
-        else:
-            return orm.user.email_confirmed_on is not None
 
     def _get_or_create_user(
         self, email: str, password_hash: str, email_confirmed_on: Optional[datetime]

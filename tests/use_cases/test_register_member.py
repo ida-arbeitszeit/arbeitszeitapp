@@ -25,15 +25,15 @@ class RegisterMemberTests(BaseTestCase):
         self.assertTrue(self.token_delivery.presented_member_tokens)
 
     def test_that_token_was_delivered_to_registering_user(self) -> None:
+        expected_email_address = "test@test.test"
         request_args = DEFAULT.copy()
         request_args.pop("email")
-        response = self.use_case.register_member(
-            RegisterMemberUseCase.Request(email="test@test.test", **request_args)
+        self.use_case.register_member(
+            RegisterMemberUseCase.Request(email=expected_email_address, **request_args)
         )
-        assert response.user_id
         self.assertEqual(
-            self.token_delivery.presented_member_tokens[0].user,
-            response.user_id,
+            self.token_delivery.presented_member_tokens[0].email_address,
+            expected_email_address,
         )
 
     def test_confirmation_is_required_if_email_is_not_already_known(self) -> None:

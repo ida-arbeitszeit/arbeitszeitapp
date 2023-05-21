@@ -168,7 +168,11 @@ class UserAccountingService:
             .where_account_is_sender_or_receiver(*accounts)
             .ordered_by_transaction_date(descending=True)
         )
-        for transaction in transactions:
+        for (
+            transaction,
+            sender,
+            receiver,
+        ) in transactions.joined_with_sender_and_receiver():
             user_is_sender = transaction.sending_account in accounts
             account_type = user.get_account_type(
                 transaction.sending_account
@@ -184,8 +188,8 @@ class UserAccountingService:
                 transaction_type=self._get_transaction_type(
                     transaction=transaction,
                     user_is_sender=user_is_sender,
-                    sender=self._get_account_owner(transaction.sending_account),
-                    receiver=self._get_account_owner(transaction.receiving_account),
+                    sender=sender,
+                    receiver=receiver,
                 ),
                 account_type=account_type,
             )

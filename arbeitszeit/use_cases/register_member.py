@@ -7,12 +7,12 @@ from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.password_hasher import PasswordHasher
+from arbeitszeit.presenters import MemberRegistrationMessagePresenter
 from arbeitszeit.repositories import (
     AccountRepository,
     CompanyRepository,
     MemberRepository,
 )
-from arbeitszeit.token import MemberRegistrationMessagePresenter, TokenService
 
 
 @dataclass
@@ -20,7 +20,6 @@ class RegisterMemberUseCase:
     account_repository: AccountRepository
     member_repository: MemberRepository
     datetime_service: DatetimeService
-    token_service: TokenService
     member_registration_message_presenter: MemberRegistrationMessagePresenter
     company_repository: CompanyRepository
     password_hasher: PasswordHasher
@@ -83,15 +82,14 @@ class RegisterMemberUseCase:
             registered_on=registered_on,
         )
         if not is_company_with_same_email_already_registered:
-            self._create_confirmation_mail(request, member.id)
+            self._create_confirmation_mail(member.email)
         return self.Response(
             rejection_reason=None,
             user_id=member.id,
             is_confirmation_required=not is_company_with_same_email_already_registered,
         )
 
-    def _create_confirmation_mail(self, request: Request, member: UUID) -> None:
-        token = self.token_service.generate_token(request.email)
+    def _create_confirmation_mail(self, email_address: str) -> None:
         self.member_registration_message_presenter.show_member_registration_message(
-            token=token, member=member
+            email_address=email_address
         )

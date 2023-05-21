@@ -34,6 +34,6 @@ class GetPlanSummaryMemberSuccessPresenter:
                 response.plan_summary
             ),
             pay_product_url=self.url_index.get_pay_consumer_product_url(
-                amount=1, plan_id=response.plan_summary.plan_id
+                amount=None, plan_id=response.plan_summary.plan_id
             ),
         )

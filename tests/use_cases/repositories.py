@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from datetime import datetime, timedelta
 from decimal import Decimal
 from itertools import islice
@@ -448,11 +448,42 @@ class CompanyResult(QueryResultImpl[Company]):
     def with_email_containing(self, query: str) -> CompanyResult:
         return self._filtered_by(lambda company: query.lower() in company.email.lower())
 
-    def _filtered_by(self, key: Callable[[Company], bool]) -> CompanyResult:
+    def that_are_confirmed(self) -> Self:
+        return self._filtered_by(lambda company: company.confirmed_on is not None)
+
+    def update(self) -> CompanyUpdate:
+        return CompanyUpdate(
+            companies=self.items,
+        )
+
+    def _filtered_by(self, key: Callable[[Company], bool]) -> Self:
         return type(self)(
             items=lambda: filter(key, self.items()),
             entities=self.entities,
         )
+
+
+@dataclass
+class CompanyUpdate:
+    companies: Callable[[], Iterable[Company]]
+    updates: List[Callable[[Company], None]] = field(default_factory=list)
+
+    def set_confirmation_timestamp(self, timestamp: datetime) -> Self:
+        def update(company: Company) -> None:
+            company.confirmed_on = timestamp
+
+        return replace(
+            self,
+            updates=self.updates + [update],
+        )
+
+    def perform(self) -> int:
+        companies_affected = 0
+        for company in self.companies():
+            for update in self.updates:
+                update(company)
+            companies_affected += 1
+        return companies_affected
 
 
 class AccountantResult(QueryResultImpl[Accountant]):
@@ -534,6 +565,36 @@ class TransactionResult(QueryResultImpl[Transaction]):
                 transaction_filter,
                 self.items(),
             ),
+        )
+
+    def joined_with_sender_and_receiver(
+        self,
+    ) -> QueryResultImpl[
+        Tuple[entities.Transaction, entities.AccountOwner, entities.AccountOwner]
+    ]:
+        def get_account_owner(account_id: UUID) -> entities.AccountOwner:
+            owner = self.entities.account_owner_by_account.get(account_id)
+            if owner:
+                return owner
+            raise Exception(
+                f"Tried to get owner for account {account_id} but failed to find one"
+            )
+
+        def items() -> (
+            Iterable[
+                Tuple[
+                    entities.Transaction, entities.AccountOwner, entities.AccountOwner
+                ]
+            ]
+        ):
+            for transaction in self.items():
+                yield transaction, get_account_owner(
+                    transaction.sending_account
+                ), get_account_owner(transaction.receiving_account)
+
+        return QueryResultImpl(
+            items=items,
+            entities=self.entities,
         )
 
 
@@ -800,6 +861,7 @@ class MemberRepository(interfaces.MemberRepository):
             password_hash=password_hash,
         )
         self.entities.members[id] = member
+        self.entities.account_owner_by_account[member.account] = member
         return member
 
     def get_members(self) -> MemberResult:
@@ -844,6 +906,10 @@ class CompanyRepository(interfaces.CompanyRepository):
             password_hash=password_hash,
         )
         self.entities.companies[new_company.id] = new_company
+        self.entities.account_owner_by_account[means_account.id] = new_company
+        self.entities.account_owner_by_account[labour_account.id] = new_company
+        self.entities.account_owner_by_account[resource_account.id] = new_company
+        self.entities.account_owner_by_account[products_account.id] = new_company
         return new_company
 
     def get_companies(self) -> CompanyResult:
@@ -851,16 +917,6 @@ class CompanyRepository(interfaces.CompanyRepository):
             items=lambda: self.entities.companies.values(),
             entities=self.entities,
         )
-
-    def confirm_company(self, company: UUID, confirmation_timestamp: datetime) -> None:
-        model = self.entities.companies[company]
-        model.confirmed_on = confirmation_timestamp
-
-    def is_company_confirmed(self, company: UUID) -> bool:
-        if (model := self.entities.companies.get(company)) is not None:
-            if model.id == company and model.confirmed_on is not None:
-                return True
-        return False
 
 
 @singleton
@@ -989,6 +1045,9 @@ class EntityStorage:
             id=uuid4(),
             account=self.create_account().id,
         )
+        self.account_owner_by_account: Dict[UUID, entities.AccountOwner] = {
+            self.social_accounting.account: self.social_accounting
+        }
         self.cooperations: Dict[UUID, Cooperation] = dict()
         self.labour_certificates_payouts_by_transaction: Dict[
             UUID, entities.LabourCertificatesPayout

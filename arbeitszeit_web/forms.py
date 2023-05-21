@@ -81,7 +81,7 @@ class PayMeansOfProductionForm(Protocol):
     def plan_id_field(self) -> FormField[str]:
         ...
 
-    def category_field(self) -> FormField[str]:
+    def type_of_payment_field(self) -> FormField[str]:
         ...
 
 

@@ -1,4 +1,5 @@
-from typing import List, Optional
+from enum import Enum, auto
+from typing import Any, List, Optional
 from unittest import TestCase
 from uuid import UUID
 
@@ -18,6 +19,12 @@ from tests.data_generators import (
 from tests.markers import database_required
 
 from .dependency_injection import get_dependency_injector
+
+
+class LogInUser(Enum):
+    member = auto()
+    company = auto()
+    accountant = auto()
 
 
 @database_required
@@ -152,3 +159,29 @@ class ViewTestCase(FlaskTestCase):
             follow_redirects=True,
         )
         assert response.status_code < 400
+
+    def assert_response_has_expected_code(
+        self,
+        url: str,
+        method: str,
+        expected_code: int,
+        login: Optional[LogInUser],
+        data: Optional[dict[Any, Any]] = None,
+    ) -> None:
+        if login is None:
+            pass
+        elif login == LogInUser.member:
+            self.login_member()
+        elif login == LogInUser.company:
+            self.login_company()
+        else:
+            self.login_accountant()
+
+        if method.lower() == "get":
+            response = self.client.get(url, data=data)
+        elif method.lower() == "post":
+            response = self.client.post(url, data=data)
+        else:
+            raise ValueError(f"Unknown {method=}")
+
+        self.assertEqual(response.status_code, expected_code)

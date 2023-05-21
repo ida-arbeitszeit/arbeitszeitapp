@@ -30,7 +30,7 @@ class PresenterTests(TestCase):
         self.assertEqual(
             view_model.pay_product_url,
             self.url_index.get_pay_consumer_product_url(
-                amount=1, plan_id=use_case_response.plan_summary.plan_id
+                amount=None, plan_id=use_case_response.plan_summary.plan_id
             ),
         )
 

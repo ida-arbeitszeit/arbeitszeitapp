@@ -6,38 +6,37 @@ from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.repositories import CompanyRepository
-from arbeitszeit.token import InvitationTokenValidator
 
 
 @dataclass
 class ConfirmCompanyUseCase:
     @dataclass
     class Request:
-        token: str
+        email_address: str
 
     @dataclass
     class Response:
         is_confirmed: bool
         user_id: Optional[UUID]
 
-    token_validator: InvitationTokenValidator
     company_repository: CompanyRepository
     datetime_service: DatetimeService
 
     def confirm_company(self, request: Request) -> Response:
-        email_address = self.token_validator.unwrap_confirmation_token(request.token)
-        if email_address is None:
-            return self.Response(is_confirmed=False, user_id=None)
         company = (
             self.company_repository.get_companies()
-            .with_email_address(email_address)
+            .with_email_address(request.email_address)
             .first()
         )
-        assert company
-        if company.confirmed_on is None:
-            self.company_repository.confirm_company(
-                company.id, self.datetime_service.now()
+        if not company:
+            return self.Response(
+                user_id=None,
+                is_confirmed=False,
             )
+        elif company.confirmed_on is None:
+            self.company_repository.get_companies().with_email_address(
+                request.email_address
+            ).update().set_confirmation_timestamp(self.datetime_service.now()).perform()
             return self.Response(is_confirmed=True, user_id=company.id)
         else:
             return self.Response(is_confirmed=False, user_id=None)

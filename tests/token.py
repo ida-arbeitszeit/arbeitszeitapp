@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import timedelta
 from typing import List, Optional
-from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.injector import singleton
@@ -17,29 +17,22 @@ class FakeTokenService:
         timestamp = self.datetime_service.now().timestamp()
         return f"token_{timestamp}_{input}"
 
-    def confirm_token(self, token: str, max_age_in_sec: int) -> Optional[str]:
+    def confirm_token(self, token: str, max_age: timedelta) -> Optional[str]:
         try:
             prefix, timestamp, text = tuple(token.split("_", 2))
         except ValueError:
             return None
         now = self.datetime_service.now().timestamp()
         time_passed = now - float(timestamp)
-        if (prefix == "token") and (time_passed < max_age_in_sec):
+        if (prefix == "token") and (time_passed < max_age.total_seconds()):
             return text
         else:
-            raise Exception()
-
-    def unwrap_invitation_token(self, token: str) -> Optional[str]:
-        return self.confirm_token(token, 10000000)
-
-    def unwrap_confirmation_token(self, token: str) -> Optional[str]:
-        return self.confirm_token(token, 10000000)
+            return None
 
 
 @dataclass
 class DeliveredToken:
-    token: str
-    user: UUID
+    email_address: str
 
 
 @singleton
@@ -48,14 +41,16 @@ class TokenDeliveryService:
         self.presented_member_tokens: List[DeliveredToken] = []
         self.presented_company_tokens: List[DeliveredToken] = []
 
-    def show_member_registration_message(self, member: UUID, token: str) -> None:
-        self.presented_member_tokens.append(DeliveredToken(user=member, token=token))
+    def show_member_registration_message(self, email_address: str) -> None:
+        self.presented_member_tokens.append(DeliveredToken(email_address=email_address))
 
-    def show_company_registration_message(self, company: UUID, token: str) -> None:
-        self.presented_company_tokens.append(DeliveredToken(user=company, token=token))
+    def show_company_registration_message(self, email_address: str) -> None:
+        self.presented_company_tokens.append(
+            DeliveredToken(email_address=email_address)
+        )
 
-    def get_deliviered_member_token(self, member: UUID) -> Optional[str]:
+    def has_token_delivered_for(self, email_address: str) -> bool:
         for delivered_token in reversed(self.presented_member_tokens):
-            if delivered_token.user == member:
-                return delivered_token.token
-        return None
+            if delivered_token.email_address == email_address:
+                return True
+        return False

@@ -1,16 +1,34 @@
+from typing import Optional
+
+from parameterized import parameterized
+
 from arbeitszeit_flask.extensions import mail
 
-from .flask import ViewTestCase
+from .flask import LogInUser, ViewTestCase
 
 
-class UnauthenticatedMemberTests(ViewTestCase):
-    def setUp(self):
+class AuthTests(ViewTestCase):
+    def setUp(self) -> None:
         super().setUp()
         self.url = "/member/resend"
 
-    def test_unauthenticated_users_get_redirected(self):
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 302)
+    @parameterized.expand(
+        [
+            (LogInUser.accountant, 302),
+            (None, 302),
+            (LogInUser.company, 302),
+            (LogInUser.member, 302),
+        ]
+    )
+    def test_correct_status_codes_on_get_requests(
+        self, login: Optional[LogInUser], expected_code: int
+    ) -> None:
+        self.assert_response_has_expected_code(
+            url=self.url,
+            method="get",
+            login=login,
+            expected_code=expected_code,
+        )
 
 
 class AuthenticatedButUnconfirmedMemberTests(ViewTestCase):

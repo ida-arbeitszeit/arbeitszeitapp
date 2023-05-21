@@ -17,7 +17,7 @@ class CompanyTests(ViewTestCase):
     ) -> None:
         response = self.client.post(
             "/company/transfer_to_company",
-            data=dict(plan_id=str(uuid4()), amount=3, category="Fixed"),
+            data=dict(plan_id=str(uuid4()), amount=3, type_of_payment="fixed"),
         )
         self.assertEqual(response.status_code, 200)
 
@@ -26,6 +26,6 @@ class CompanyTests(ViewTestCase):
     ) -> None:
         response = self.client.post(
             "/company/transfer_to_company",
-            data=dict(plan_id="no uuid", amount=3, category="Fixed"),
+            data=dict(plan_id="no uuid", amount=3, type_of_payment="fixed"),
         )
         self.assertEqual(response.status_code, 400)
