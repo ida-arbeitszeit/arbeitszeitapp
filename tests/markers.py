@@ -1,12 +1,13 @@
 import enum
 import os
 from typing import Set, TypeVar
+from unittest import TestCase
 
 _MARKERS: Set[str] = {
     marker.strip() for marker in os.getenv("DISABLED_TESTS", "").split(",")
 }
 
-T = TypeVar("T")
+T = TypeVar("T", bound=TestCase)
 
 
 class Category(enum.Enum):

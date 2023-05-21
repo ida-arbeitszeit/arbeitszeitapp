@@ -11,7 +11,7 @@ buildPythonPackage {
   outputs = [ "out" "doc" ];
   postPhases = [ "buildDocsPhase" ];
   format = "pyproject";
-  buildInputs = [ pytestCheckHook sphinx ];
+  buildInputs = [ pytestCheckHook sphinx parameterized ];
   propagatedBuildInputs = [
     email_validator
     flask
@@ -25,7 +25,6 @@ buildPythonPackage {
     is_safe_url
     matplotlib
     typing-extensions
-    parameterized
   ];
   buildDocsPhase = ''
     mkdir -p $doc/share/doc/arbeitszeitapp
