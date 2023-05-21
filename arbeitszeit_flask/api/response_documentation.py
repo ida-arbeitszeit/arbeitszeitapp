@@ -12,6 +12,7 @@ class with_response_documentation:
         self._namespace = namespace
 
     def __call__(self, original_function):
+        decorated_fn = original_function
         for response in self._error_responses:
             error_schema = json_schema_to_flaskx(
                 schema=response.get_schema(), namespace=self._namespace
@@ -19,5 +20,5 @@ class with_response_documentation:
             decorator = self._namespace.response(
                 code=response.code, description=response.description, model=error_schema
             )
-            decorated_fn = decorator(original_function)
+            decorated_fn = decorator(decorated_fn)
         return decorated_fn

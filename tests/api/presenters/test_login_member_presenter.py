@@ -18,7 +18,7 @@ class TestViewModelCreation(BaseTestCase):
         self.presenter = self.injector.get(LoginMemberApiPresenter)
         self.session = self.injector.get(FakeSession)
 
-    def test_correct_error_raises_if_wrong_mail_adress_was_given(self) -> None:
+    def test_unauthorized_raises_if_wrong_mail_adress_was_given(self) -> None:
         response = self.create_failure_response(
             rejection_reason=LogInMemberUseCase.RejectionReason.unknown_email_address,
         )
@@ -26,7 +26,7 @@ class TestViewModelCreation(BaseTestCase):
             self.presenter.create_view_model(response)
         self.assertEqual(err.exception.message, "Unknown email adress.")
 
-    def test_correct_error_raises_if_wrong_password_was_given(self) -> None:
+    def test_unauthorized_raises_if_wrong_password_was_given(self) -> None:
         response = self.create_failure_response(
             rejection_reason=LogInMemberUseCase.RejectionReason.invalid_password,
         )
