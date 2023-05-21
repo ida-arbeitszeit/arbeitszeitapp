@@ -36,11 +36,11 @@
                     </div>
                 </div>
                 <div class="field">
-                    <label class="label">{{ form.category.label }}</label>
+                    <label class="label">{{ form.type_of_payment.label }}</label>
                     <div class="control">
                         <div class="select">
-                            <select name="category" required>
-                                {% for option in form.category %}
+                            <select name="type_of_payment" required>
+                                {% for option in form.type_of_payment %}
                                 {{ option }}
                                 {% endfor %}
                             </select>
