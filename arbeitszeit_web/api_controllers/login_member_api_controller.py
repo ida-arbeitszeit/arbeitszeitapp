@@ -6,6 +6,7 @@ from arbeitszeit_web.api_controllers.expected_input import ExpectedInput
 from arbeitszeit_web.api_presenters.response_errors import Unauthorized
 from arbeitszeit_web.request import Request
 
+
 @dataclass
 class LoginMemberApiController:
     @classmethod
@@ -16,12 +17,14 @@ class LoginMemberApiController:
                 type=str,
                 description="Email.",
                 default=None,
+                location="form",
             ),
             ExpectedInput(
                 name="password",
                 type=str,
                 description="Password.",
                 default=None,
+                location="form",
             ),
         ]
 

@@ -55,6 +55,7 @@ class ExpectedInputsTests(BaseTestCase):
         self.assertEqual(input.type, str)
         self.assertEqual(input.description, "Email.")
         self.assertEqual(input.default, None)
+        self.assertEqual(input.location, "form")
 
     def test_second_expected_input_is_password(self) -> None:
         input = self.inputs[1]
@@ -66,3 +67,4 @@ class ExpectedInputsTests(BaseTestCase):
         self.assertEqual(input.type, str)
         self.assertEqual(input.description, "Password.")
         self.assertEqual(input.default, None)
+        self.assertEqual(input.location, "form")

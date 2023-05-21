@@ -48,7 +48,7 @@ class QueryCompaniesApiController:
                 default=DEFAULT_LIMIT,
             ),
         ]
-    
+
     request: Request
 
     def create_request(self) -> QueryCompaniesRequest:
