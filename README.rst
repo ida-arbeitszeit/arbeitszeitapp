@@ -305,6 +305,18 @@ Regenerate the API docs via:
 
      ./regenerate-api-docs
 
+Benchmarking
+------------
+
+Included in the source code for this project there is a rudimentary
+framework for testing the run time of our code called
+``arbeitszeit_benchmark``.  You can run all the benchmarks via
+``python -m arbeitszeit_benchmark``.  This benchmarking tool can be
+used to compare the change in runtime characteristics between
+changes. A contributor to the ``arbeitszeitapp`` might want to compare
+the results of those benchmarks from the master branch to the results
+from their changes. The output of this tool is in JSON.
+
 Using a binary cache
 --------------------
 

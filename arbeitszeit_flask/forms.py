@@ -361,13 +361,13 @@ class PayMeansOfProductionForm(Form):
     )
     choices = [
         ("", ""),
-        ("Fixed", trans.lazy_gettext(trans.lazy_gettext("Fixed means of production"))),
+        ("fixed", trans.lazy_gettext(trans.lazy_gettext("Fixed means of production"))),
         (
-            "Liquid",
+            "liquid",
             trans.lazy_gettext("Liquid means of production"),
         ),
     ]
-    category = SelectField(
+    type_of_payment = SelectField(
         trans.lazy_gettext("Type of payment"),
         choices=choices,
         validators=[validators.DataRequired()],
@@ -379,8 +379,8 @@ class PayMeansOfProductionForm(Form):
     def plan_id_field(self) -> WtFormField[str]:
         return WtFormField(form=self, field_name="plan_id")
 
-    def category_field(self) -> WtFormField[str]:
-        return WtFormField(form=self, field_name="category")
+    def type_of_payment_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="type_of_payment")
 
 
 class AnswerCompanyWorkInviteForm(Form):

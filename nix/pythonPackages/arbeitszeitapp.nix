@@ -3,7 +3,7 @@
 # python packages
 , email_validator, flask, flask-babel, flask-talisman, flask_login, flask_mail
 , flask_migrate, flask-restx, flask_wtf, is_safe_url, matplotlib, sphinx
-, flask-profiler, typing-extensions }:
+, flask-profiler, typing-extensions, parameterized }:
 buildPythonPackage {
   pname = "arbeitszeitapp";
   version = "0.0.0";
@@ -11,7 +11,7 @@ buildPythonPackage {
   outputs = [ "out" "doc" ];
   postPhases = [ "buildDocsPhase" ];
   format = "pyproject";
-  buildInputs = [ pytestCheckHook sphinx ];
+  buildInputs = [ pytestCheckHook sphinx parameterized ];
   propagatedBuildInputs = [
     email_validator
     flask

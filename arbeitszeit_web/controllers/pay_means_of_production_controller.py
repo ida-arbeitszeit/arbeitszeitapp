@@ -38,15 +38,15 @@ class PayMeansOfProductionController:
                 self.translator.gettext("Must be a number larger than zero.")
             )
             raise self.FormError()
-        category = form.category_field().get_value()
-        if not category:
-            form.category_field().attach_error(
+        type_of_payment = form.type_of_payment_field().get_value()
+        if not type_of_payment:
+            form.type_of_payment_field().attach_error(
                 self.translator.gettext("This field is required.")
             )
             raise self.FormError()
         purpose = (
             PurposesOfPurchases.means_of_prod
-            if category == "Fixed"
+            if type_of_payment == "fixed"
             else PurposesOfPurchases.raw_materials
         )
         return PayMeansOfProductionRequest(buyer, plan, amount, purpose)

@@ -51,6 +51,7 @@ mypy-extensions==0.4.3
 numpy==1.24.2
 olefile==0.46
 packaging==23.0
+parameterized==0.8.1
 pathspec==0.11.0
 pbr==5.11.1
 Pillow==9.4.0
@@ -69,8 +70,8 @@ PySocks==1.7.1
 PyStemmer==2.2.0
 pytest==7.2.1
 python-dateutil==2.8.2
-pytz==2023.2
-requests==2.28.2
+pytz==2023.3
+requests==2.29.0
 setuptools==67.4.0
 six==1.16.0
 snowballstemmer==2.2.0
@@ -83,7 +84,7 @@ sphinxcontrib-jsmath==1.0.1
 sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.5
 sphinxcontrib-websupport==1.2.4
-SQLAlchemy==2.0.9
+SQLAlchemy==2.0.13
 tomli==2.0.1
 types-python-dateutil==2.8.19
 typing_extensions==4.5.0
