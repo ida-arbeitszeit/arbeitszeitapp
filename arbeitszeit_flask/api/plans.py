@@ -5,7 +5,6 @@ from arbeitszeit.use_cases.query_plans import QueryPlans
 from arbeitszeit_flask.api.input_documentation import generate_input_documentation
 from arbeitszeit_flask.api.schema_converter import json_schema_to_flaskx
 from arbeitszeit_flask.dependency_injection import with_injection
-from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_web.api_controllers.errors import (
     NegativeNumberError,
     NotAnIntegerError,
@@ -41,7 +40,7 @@ class ListActivePlans(Resource):
     ):
         """List active plans."""
         try:
-            use_case_request = controller.create_request(FlaskRequest())
+            use_case_request = controller.create_request()
         except NotAnIntegerError:
             abort(400, "The parameter must be an integer.")
         except NegativeNumberError:

@@ -3,7 +3,7 @@ from typing import Dict
 from flask_restx import fields
 
 from arbeitszeit_flask.api.schema_converter import (
-    ModelWithSameNameExists,
+    DifferentModelWithSameNameExists,
     json_schema_to_flaskx,
 )
 from arbeitszeit_web.api_presenters.interfaces import (
@@ -132,7 +132,7 @@ class SchemaConversionTests(ApiTestCase):
         self.assertTrue(registered_model["has_list_elements"])
         self.assertTrue(registered_model["has_no_list_elements"])
 
-    def test_raise_exception_when_two_models_with_same_name_are_registered_on_same_namespace(
+    def test_raise_exception_when_two_different_models_with_same_name_are_registered_on_same_namespace(
         self,
     ) -> None:
         model1 = JsonDict(members={"item_name": JsonString()}, schema_name="SchemaName")
@@ -140,5 +140,13 @@ class SchemaConversionTests(ApiTestCase):
             members={"item_name2": JsonString()}, schema_name="SchemaName"
         )
         self.convert(model1, self.namespace)
-        with self.assertRaises(ModelWithSameNameExists):
+        with self.assertRaises(DifferentModelWithSameNameExists):
             self.convert(model2, self.namespace)
+
+    def test_no_error_is_raised_when_two_identical_models_with_same_name_are_registered_on_same_namespace(
+        self,
+    ) -> None:
+        model1 = JsonDict(members={"item_name": JsonString()}, schema_name="SchemaName")
+        model2 = JsonDict(members={"item_name": JsonString()}, schema_name="SchemaName")
+        self.convert(model1, self.namespace)
+        self.convert(model2, self.namespace)
