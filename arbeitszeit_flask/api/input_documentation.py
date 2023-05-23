@@ -15,5 +15,6 @@ def generate_input_documentation(
             type=input.type,
             help=input.description,
             default=input.default,
+            location=input.location,
         )
     return parser

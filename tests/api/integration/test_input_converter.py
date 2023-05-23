@@ -34,11 +34,13 @@ class TestInputConverter(ApiTestCase):
         expected_type = str
         expected_description = "test description"
         expected_default = "default"
+        expected_location = None
         input = self.create_expected_input(
             name=expected_name,
             type=expected_type,
             description=expected_description,
             default=expected_default,
+            location=expected_location,
         )
         parser = self.convert(expected_inputs=[input])
         argument = parser.args[0]
@@ -46,6 +48,7 @@ class TestInputConverter(ApiTestCase):
         assert argument.type == expected_type
         assert argument.help == expected_description
         assert argument.default == expected_default
+        assert argument.location is None
 
     def test_converter_returns_two_inputs_into_request_parser_with_two_different_arguments(
         self,
@@ -66,6 +69,7 @@ class TestInputConverter(ApiTestCase):
         type: Optional[Type] = None,
         description: Optional[str] = None,
         default: Union[None, str, int, bool] = None,
+        location: Optional[str] = None,
     ) -> ExpectedInput:
         if name is None:
             name = "example"
@@ -76,5 +80,9 @@ class TestInputConverter(ApiTestCase):
         if default is None:
             default = "default"
         return ExpectedInput(
-            name=name, type=type, description=description, default=default
+            name=name,
+            type=type,
+            description=description,
+            default=default,
+            location=location,
         )
