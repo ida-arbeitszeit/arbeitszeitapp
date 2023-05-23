@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 
 class String:
@@ -6,7 +6,7 @@ class String:
 
 
 class Nested:
-    def __init__(self, model: Any, as_list: bool) -> None:
+    def __init__(self, model: Any, as_list: Optional[bool] = ...) -> None:
         ...
 
     @property
@@ -28,3 +28,10 @@ class DateTime:
 
 class Integer:
     ...
+
+
+class List:
+    def __init__(self, cls_or_instance, **kwargs):
+        ...
+    @property
+    def container(self): ...

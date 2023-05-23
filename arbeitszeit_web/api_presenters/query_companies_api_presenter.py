@@ -3,8 +3,8 @@ from typing import List, Optional
 
 from arbeitszeit.use_cases.query_companies import CompanyQueryResponse, QueriedCompany
 from arbeitszeit_web.api_presenters.interfaces import (
-    JsonDict,
     JsonInteger,
+    JsonObject,
     JsonString,
     JsonValue,
 )
@@ -20,22 +20,22 @@ class QueryCompaniesApiPresenter:
 
     @classmethod
     def get_schema(cls) -> JsonValue:
-        return JsonDict(
+        return JsonObject(
             members=dict(
-                results=JsonDict(
+                results=JsonObject(
                     members=dict(
                         company_id=JsonString(),
                         company_email=JsonString(),
                         company_name=JsonString(),
                     ),
-                    schema_name="Company",
+                    name="Company",
                     as_list=True,
                 ),
                 total_results=JsonInteger(),
                 offset=JsonInteger(),
                 limit=JsonInteger(),
             ),
-            schema_name="CompanyList",
+            name="CompanyList",
         )
 
     def create_view_model(self, use_case_response: CompanyQueryResponse) -> ViewModel:

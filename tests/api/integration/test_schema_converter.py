@@ -1,6 +1,4 @@
-from typing import Dict
-
-from flask_restx import fields
+from flask_restx import Model, Namespace, fields
 
 from arbeitszeit_flask.api.schema_converter import (
     DifferentModelWithSameNameExists,
@@ -10,20 +8,17 @@ from arbeitszeit_web.api_presenters.interfaces import (
     JsonBoolean,
     JsonDatetime,
     JsonDecimal,
-    JsonDict,
     JsonInteger,
+    JsonObject,
     JsonString,
 )
-from tests.api.implementations import NamespaceImpl
 from tests.api.integration.base_test_case import ApiTestCase
 
 
 class SchemaConversionTests(ApiTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.namespace = NamespaceImpl(
-            name="test_ns", description="Test related endpoints"
-        )
+        self.namespace = Namespace(name="test_ns")
         self.convert = json_schema_to_flaskx
 
     def test_convert_to_string_if_input_was_string(self) -> None:
@@ -51,81 +46,94 @@ class SchemaConversionTests(ApiTestCase):
         converted = self.convert(model, self.namespace)
         self.assertEqual(converted, fields.DateTime)
 
-    def test_convert_to_dict_if_input_was_dict(self) -> None:
-        model = JsonDict(members={})
-        converted = self.convert(model, self.namespace)
-        self.assertEqual(converted, {})
+    def test_convert_to_model_if_input_was_object(self) -> None:
+        obj = JsonObject(members={}, name="some_name")
+        converted = self.convert(obj, self.namespace)
+        self.assertIsInstance(converted, Model)
+        self.assertEqual(converted, Model(name="some_name"))
 
-    def test_convert_to_nested_dict(self) -> None:
-        model = JsonDict(members={"inner_dict": JsonDict(members={})})
-        converted = self.convert(model, self.namespace)
-        assert isinstance(converted, Dict)
-        self.assertEqual(converted["inner_dict"], {})
-
-    def test_convert_to_nested_dict_with_value_string(self) -> None:
-        model = JsonDict(
-            members={"inner_dict": JsonDict(members={"string": JsonString()})}
+    def test_convert_to_nested_model(self) -> None:
+        obj = JsonObject(
+            name="outer", members={"inner_obj": JsonObject(name="inner", members={})}
         )
-        converted = self.convert(model, self.namespace)
-        assert isinstance(converted, Dict)
-        self.assertEqual(converted["inner_dict"]["string"], fields.String)
+        converted = self.convert(obj, self.namespace)
+        assert isinstance(converted, Model)
+        self.assertEqual(converted["inner_obj"], {})
 
-    def test_do_not_register_dict_on_namespace_if_no_name_was_provided(self) -> None:
-        model = JsonDict(members={}, schema_name=None)
-        self.convert(model, self.namespace)
-        self.assertFalse(self.namespace.models)
+    def test_convert_to_nested_model_with_value_of_string(self) -> None:
+        obj = JsonObject(
+            name="outer",
+            members={
+                "inner_obj": JsonObject(name="inner", members={"string": JsonString()})
+            },
+        )
+        converted = self.convert(obj, self.namespace)
+        assert isinstance(converted, Model)
+        self.assertEqual(converted["inner_obj"]["string"], fields.String)
 
-    def test_register_dict_on_namespace_if_name_was_provided(self) -> None:
-        model = JsonDict(members={}, schema_name="TestName")
-        self.convert(model, self.namespace)
-        self.assertTrue(self.namespace.models)
+    def test_register_obj_on_namespace_with_correct_name(self) -> None:
+        expected_name = "TestName"
+        expected_model: dict = dict()
+        obj = JsonObject(members=expected_model, name=expected_name)
+        self.convert(obj, self.namespace)
+        self.assertEqual(self.namespace.models[expected_name], expected_model)
 
-    def test_register_dict_members_on_namespace_as_strings_if_string_was_given(
+    def test_register_obj_members_on_namespace_as_strings_if_string_was_given(
         self,
     ) -> None:
-        model = JsonDict(members={"item_name": JsonString()}, schema_name="SchemaName")
-        self.convert(model, self.namespace)
+        obj = JsonObject(members={"item_name": JsonString()}, name="SchemaName")
+        self.convert(obj, self.namespace)
         registered_model = self.namespace.models["SchemaName"]
         self.assertEqual(registered_model["item_name"], fields.String)
 
-    def test_register_dict_members_on_namespace_as_nested_if_as_list_was_given(
+    def test_convert_object_members_to_list(
         self,
     ) -> None:
-        model = JsonDict(
-            members={"item_name": JsonString(as_list=True)}, schema_name="SchemaName"
+        obj = JsonObject(
+            members={"item_name": JsonString(as_list=True)}, name="SchemaName"
         )
-        self.convert(model, self.namespace)
+        self.convert(obj, self.namespace)
         registered_model = self.namespace.models["SchemaName"]
-        self.assertIsInstance(registered_model["item_name"], fields.Nested)
-        self.assertTrue(registered_model["item_name"].as_list)
+        self.assertIsInstance(registered_model["item_name"], fields.List)
+        self.assertIsInstance(registered_model["item_name"].container, fields.String)
 
-    def test_register_dict_members_on_namespace_as_nested_string_if_as_list_was_given(
+    def test_convert_nested_objects_to_list_of_nested_objects(
         self,
     ) -> None:
-        model = JsonDict(
-            members={"item_name": JsonString(as_list=True)}, schema_name="SchemaName"
-        )
-        self.convert(model, self.namespace)
-        registered_model = self.namespace.models["SchemaName"]
-        assert isinstance(registered_model["item_name"], fields.Nested)
-        self.assertEqual(registered_model["item_name"].model, fields.String)
-
-    def test_two_members_of_dict_are_registered_when_one_is_as_list(
-        self,
-    ) -> None:
-        model = JsonDict(
+        model = JsonObject(
             members={
-                "has_list_elements": JsonDict(
-                    schema_name="InnerModel",
+                "item_name": JsonObject(
+                    name="some_name",
+                    members={"some_string": JsonString()},
+                    as_list=True,
+                )
+            },
+            name="SchemaName",
+        )
+        self.convert(model, self.namespace)
+        registered_model = self.namespace.models["SchemaName"]
+        assert isinstance(registered_model["item_name"], fields.List)
+        assert isinstance(registered_model["item_name"].container, fields.Nested)
+        assert isinstance(
+            registered_model["item_name"].container.model["some_string"], fields.String
+        )
+
+    def test_two_members_of_objects_are_registered_when_one_is_as_list(
+        self,
+    ) -> None:
+        obj = JsonObject(
+            members={
+                "has_list_elements": JsonObject(
+                    name="InnerModel",
                     as_list=True,
                     members=dict(one=JsonString(), two=JsonBoolean()),
                 ),
                 "has_no_list_elements": JsonDecimal(),
             },
-            schema_name="SchemaName",
+            name="SchemaName",
             as_list=False,
         )
-        self.convert(model, self.namespace)
+        self.convert(obj, self.namespace)
         registered_model = self.namespace.models["SchemaName"]
 
         self.assertEqual(len(registered_model), 2)
@@ -135,10 +143,8 @@ class SchemaConversionTests(ApiTestCase):
     def test_raise_exception_when_two_different_models_with_same_name_are_registered_on_same_namespace(
         self,
     ) -> None:
-        model1 = JsonDict(members={"item_name": JsonString()}, schema_name="SchemaName")
-        model2 = JsonDict(
-            members={"item_name2": JsonString()}, schema_name="SchemaName"
-        )
+        model1 = JsonObject(members={"item_name": JsonString()}, name="SchemaName")
+        model2 = JsonObject(members={"item_name2": JsonString()}, name="SchemaName")
         self.convert(model1, self.namespace)
         with self.assertRaises(DifferentModelWithSameNameExists):
             self.convert(model2, self.namespace)
@@ -146,7 +152,7 @@ class SchemaConversionTests(ApiTestCase):
     def test_no_error_is_raised_when_two_identical_models_with_same_name_are_registered_on_same_namespace(
         self,
     ) -> None:
-        model1 = JsonDict(members={"item_name": JsonString()}, schema_name="SchemaName")
-        model2 = JsonDict(members={"item_name": JsonString()}, schema_name="SchemaName")
+        model1 = JsonObject(members={"item_name": JsonString()}, name="SchemaName")
+        model2 = JsonObject(members={"item_name": JsonString()}, name="SchemaName")
         self.convert(model1, self.namespace)
         self.convert(model2, self.namespace)
