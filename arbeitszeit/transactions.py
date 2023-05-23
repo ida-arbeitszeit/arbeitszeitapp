@@ -40,6 +40,7 @@ class AccountStatementRow:
     volume: Decimal
     transaction_type: TransactionTypes
     account_type: AccountTypes
+    peer: AccountOwner
 
 
 @dataclass
@@ -180,6 +181,7 @@ class UserAccountingService:
                 else transaction.receiving_account
             )
             assert account_type
+            peer = receiver if user_is_sender else sender
             yield AccountStatementRow(
                 transaction=transaction,
                 volume=-transaction.amount_sent
@@ -192,6 +194,7 @@ class UserAccountingService:
                     receiver=receiver,
                 ),
                 account_type=account_type,
+                peer=peer,
             )
 
     def _get_account_owner(self, account_id: UUID) -> AccountOwner:
