@@ -21,6 +21,9 @@ class SocialAccounting:
             return AccountTypes.accounting
         return None
 
+    def is_member(self) -> bool:
+        return False
+
 
 @dataclass
 class Member:
@@ -48,6 +51,9 @@ class Member:
             return AccountTypes.member
         else:
             return None
+
+    def is_member(self) -> bool:
+        return True
 
 
 @dataclass
@@ -88,6 +94,9 @@ class Company:
             self.product_account: AccountTypes.prd,
         }
         return account_types.get(account)
+
+    def is_member(self) -> bool:
+        return False
 
 
 class AccountTypes(Enum):

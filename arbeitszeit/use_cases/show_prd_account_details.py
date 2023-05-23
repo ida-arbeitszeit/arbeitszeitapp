@@ -4,10 +4,10 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from itertools import accumulate
-from typing import List, Optional, Union
+from typing import List, Optional
 from uuid import UUID
 
-from arbeitszeit.entities import Company, Member
+from arbeitszeit.entities import AccountOwner, SocialAccounting
 from arbeitszeit.repositories import AccountRepository, CompanyRepository
 from arbeitszeit.transactions import TransactionTypes, UserAccountingService
 
@@ -53,16 +53,13 @@ class ShowPRDAccountDetailsUseCase:
                 date=row.transaction.date,
                 transaction_volume=row.volume,
                 purpose=row.transaction.purpose,
-                buyer=self._create_buyer_info(
-                    self.accounting_service.get_buyer(
-                        row.transaction_type, row.transaction
-                    )
-                ),
+                buyer=self._create_buyer_info(row.peer),
             )
             for row in self.accounting_service.get_statement_of_account(
                 company, [company.product_account]
             )
         ]
+        transactions.reverse()
         account_balance = self.account_repository.get_account_balance(
             company.product_account
         )
@@ -79,22 +76,19 @@ class ShowPRDAccountDetailsUseCase:
 
     def _get_plot_dates(self, transactions: List[TransactionInfo]) -> List[datetime]:
         timestamps = [t.date for t in transactions]
-        timestamps.reverse()
         return timestamps
 
     def _get_plot_volumes(self, transactions: List[TransactionInfo]) -> List[Decimal]:
-        volumes = [t.transaction_volume for t in transactions]
-        volumes.reverse()
-        volumes_cumsum = list(accumulate(volumes))
+        volumes_cumsum = list(accumulate(t.transaction_volume for t in transactions))
         return volumes_cumsum
 
     def _create_buyer_info(
-        self, buyer: Union[Company, Member, None]
+        self, buyer: AccountOwner
     ) -> Optional[ShowPRDAccountDetailsUseCase.Buyer]:
-        if not buyer:
+        if isinstance(buyer, SocialAccounting):
             return None
         return self.Buyer(
-            buyer_is_member=True if isinstance(buyer, Member) else False,
+            buyer_is_member=buyer.is_member(),
             buyer_id=buyer.id,
             buyer_name=buyer.get_name(),
         )
