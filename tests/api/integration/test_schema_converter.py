@@ -114,7 +114,7 @@ class SchemaConversionTests(ApiTestCase):
         registered_model = self.namespace.models["SchemaName"]
         assert isinstance(registered_model["item_name"], fields.List)
         assert isinstance(registered_model["item_name"].container, fields.Nested)
-        assert isinstance(
+        self.assertEqual(
             registered_model["item_name"].container.model["some_string"], fields.String
         )
 

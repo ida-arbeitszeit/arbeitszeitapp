@@ -41,38 +41,48 @@ def _register_model(
     return registered_model
 
 
-def _convert_json_object_to_restx_model(
+def _unpack_member_in_list(
+    raw_model: Dict[str, Any], namespace: Namespace, key: str, json_value: JsonValue
+) -> Dict[str, Any]:
+    if isinstance(json_value, JsonObject):
+        raw_model.update(
+            {
+                key: fields.List(
+                    fields.Nested(
+                        json_schema_to_flaskx(schema=json_value, namespace=namespace),
+                    )
+                )
+            }
+        )
+    else:
+        raw_model.update(
+            {
+                key: fields.List(
+                    json_schema_to_flaskx(schema=json_value, namespace=namespace)
+                )
+            }
+        )
+    return raw_model
+
+
+def _unpack_object_members_recursively(
     json_object: JsonObject, namespace: Namespace
-) -> Model:
+) -> Dict[str, Any]:
     raw_model: Dict[str, Any] = {}
     for key, json_value in json_object.members.items():
         if json_value.as_list:
-            if isinstance(json_value, JsonObject):
-                raw_model.update(
-                    {
-                        key: fields.List(
-                            fields.Nested(
-                                json_schema_to_flaskx(
-                                    schema=json_value, namespace=namespace
-                                ),
-                            )
-                        )
-                    }
-                )
-            else:
-                raw_model.update(
-                    {
-                        key: fields.List(
-                            json_schema_to_flaskx(
-                                schema=json_value, namespace=namespace
-                            )
-                        )
-                    }
-                )
+            raw_model = _unpack_member_in_list(raw_model, namespace, key, json_value)
         else:
             raw_model.update(
                 {key: json_schema_to_flaskx(schema=json_value, namespace=namespace)}
             )
+    return raw_model
+
+
+def _convert_json_object_to_restx_model(
+    json_object: JsonObject, namespace: Namespace
+) -> Model:
+    raw_model = _unpack_object_members_recursively(json_object, namespace)
     registered_model = _register_model(
         model_name=json_object.name, namespace=namespace, raw_model=raw_model
     )
