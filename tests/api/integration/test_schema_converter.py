@@ -2,7 +2,7 @@ from flask_restx import Model, Namespace, fields
 
 from arbeitszeit_flask.api.schema_converter import (
     DifferentModelWithSameNameExists,
-    json_schema_to_flaskx,
+    SchemaConverter,
 )
 from arbeitszeit_web.api_presenters.interfaces import (
     JsonBoolean,
@@ -19,36 +19,36 @@ class SchemaConversionTests(ApiTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.namespace = Namespace(name="test_ns")
-        self.convert = json_schema_to_flaskx
+        self.converter = SchemaConverter(self.namespace)
 
     def test_convert_to_string_if_input_was_string(self) -> None:
         model = JsonString()
-        converted = self.convert(model, self.namespace)
+        converted = self.converter.json_schema_to_flaskx(model)
         self.assertEqual(converted, fields.String)
 
     def test_convert_to_arbitrary_float_if_input_was_decimal(self) -> None:
         model = JsonDecimal()
-        converted = self.convert(model, self.namespace)
+        converted = self.converter.json_schema_to_flaskx(model)
         self.assertEqual(converted, fields.Arbitrary)
 
     def test_convert_to_boolean_if_input_was_boolean(self) -> None:
         model = JsonBoolean()
-        converted = self.convert(model, self.namespace)
+        converted = self.converter.json_schema_to_flaskx(model)
         self.assertEqual(converted, fields.Boolean)
 
     def test_convert_to_integer_if_input_was_integer(self) -> None:
         model = JsonInteger()
-        converted = self.convert(model, self.namespace)
+        converted = self.converter.json_schema_to_flaskx(model)
         self.assertEqual(converted, fields.Integer)
 
     def test_convert_to_datetime_if_input_was_datetime(self) -> None:
         model = JsonDatetime()
-        converted = self.convert(model, self.namespace)
+        converted = self.converter.json_schema_to_flaskx(model)
         self.assertEqual(converted, fields.DateTime)
 
     def test_convert_to_model_if_input_was_object(self) -> None:
         obj = JsonObject(members={}, name="some_name")
-        converted = self.convert(obj, self.namespace)
+        converted = self.converter.json_schema_to_flaskx(obj)
         self.assertIsInstance(converted, Model)
         self.assertEqual(converted, Model(name="some_name"))
 
@@ -56,7 +56,7 @@ class SchemaConversionTests(ApiTestCase):
         obj = JsonObject(
             name="outer", members={"inner_obj": JsonObject(name="inner", members={})}
         )
-        converted = self.convert(obj, self.namespace)
+        converted = self.converter.json_schema_to_flaskx(obj)
         assert isinstance(converted, Model)
         self.assertEqual(converted["inner_obj"], {})
 
@@ -67,7 +67,7 @@ class SchemaConversionTests(ApiTestCase):
                 "inner_obj": JsonObject(name="inner", members={"string": JsonString()})
             },
         )
-        converted = self.convert(obj, self.namespace)
+        converted = self.converter.json_schema_to_flaskx(obj)
         assert isinstance(converted, Model)
         self.assertEqual(converted["inner_obj"]["string"], fields.String)
 
@@ -75,14 +75,14 @@ class SchemaConversionTests(ApiTestCase):
         expected_name = "TestName"
         expected_model: dict = dict()
         obj = JsonObject(members=expected_model, name=expected_name)
-        self.convert(obj, self.namespace)
+        self.converter.json_schema_to_flaskx(obj)
         self.assertEqual(self.namespace.models[expected_name], expected_model)
 
     def test_register_obj_members_on_namespace_as_strings_if_string_was_given(
         self,
     ) -> None:
         obj = JsonObject(members={"item_name": JsonString()}, name="SchemaName")
-        self.convert(obj, self.namespace)
+        self.converter.json_schema_to_flaskx(obj)
         registered_model = self.namespace.models["SchemaName"]
         self.assertEqual(registered_model["item_name"], fields.String)
 
@@ -92,7 +92,7 @@ class SchemaConversionTests(ApiTestCase):
         obj = JsonObject(
             members={"item_name": JsonString(as_list=True)}, name="SchemaName"
         )
-        self.convert(obj, self.namespace)
+        self.converter.json_schema_to_flaskx(obj)
         registered_model = self.namespace.models["SchemaName"]
         self.assertIsInstance(registered_model["item_name"], fields.List)
         self.assertIsInstance(registered_model["item_name"].container, fields.String)
@@ -110,7 +110,7 @@ class SchemaConversionTests(ApiTestCase):
             },
             name="SchemaName",
         )
-        self.convert(model, self.namespace)
+        self.converter.json_schema_to_flaskx(model)
         registered_model = self.namespace.models["SchemaName"]
         assert isinstance(registered_model["item_name"], fields.List)
         assert isinstance(registered_model["item_name"].container, fields.Nested)
@@ -133,7 +133,7 @@ class SchemaConversionTests(ApiTestCase):
             name="SchemaName",
             as_list=False,
         )
-        self.convert(obj, self.namespace)
+        self.converter.json_schema_to_flaskx(obj)
         registered_model = self.namespace.models["SchemaName"]
 
         self.assertEqual(len(registered_model), 2)
@@ -145,14 +145,14 @@ class SchemaConversionTests(ApiTestCase):
     ) -> None:
         model1 = JsonObject(members={"item_name": JsonString()}, name="SchemaName")
         model2 = JsonObject(members={"item_name2": JsonString()}, name="SchemaName")
-        self.convert(model1, self.namespace)
+        self.converter.json_schema_to_flaskx(model1)
         with self.assertRaises(DifferentModelWithSameNameExists):
-            self.convert(model2, self.namespace)
+            self.converter.json_schema_to_flaskx(model2)
 
     def test_no_error_is_raised_when_two_identical_models_with_same_name_are_registered_on_same_namespace(
         self,
     ) -> None:
         model1 = JsonObject(members={"item_name": JsonString()}, name="SchemaName")
         model2 = JsonObject(members={"item_name": JsonString()}, name="SchemaName")
-        self.convert(model1, self.namespace)
-        self.convert(model2, self.namespace)
+        self.converter.json_schema_to_flaskx(model1)
+        self.converter.json_schema_to_flaskx(model2)

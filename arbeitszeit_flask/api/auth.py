@@ -3,7 +3,7 @@ from flask_restx import Namespace, Resource
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit_flask.api.input_documentation import generate_input_documentation
 from arbeitszeit_flask.api.response_documentation import with_response_documentation
-from arbeitszeit_flask.api.schema_converter import json_schema_to_flaskx
+from arbeitszeit_flask.api.schema_converter import SchemaConverter
 from arbeitszeit_flask.dependency_injection import with_injection
 from arbeitszeit_web.api_controllers.login_member_api_controller import (
     LoginMemberApiController,
@@ -19,8 +19,8 @@ input_documentation = generate_input_documentation(
     LoginMemberApiController.create_expected_inputs()
 )
 
-model = json_schema_to_flaskx(
-    schema=LoginMemberApiPresenter.get_schema(), namespace=namespace
+model = SchemaConverter(namespace).json_schema_to_flaskx(
+    schema=LoginMemberApiPresenter.get_schema()
 )
 
 
