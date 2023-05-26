@@ -2,6 +2,7 @@ from arbeitszeit.use_cases.query_companies import CompanyFilter
 from arbeitszeit_web.api_controllers.query_companies_api_controller import (
     QueryCompaniesApiController,
 )
+from arbeitszeit_web.api_presenters.response_errors import BadRequest
 from tests.controllers.base_test_case import BaseTestCase
 from tests.request import FakeRequest
 
@@ -58,6 +59,46 @@ class ControllerTests(BaseTestCase):
         use_case_request = self.controller.create_request()
         self.assertEqual(use_case_request.get_limit(), expected_limit)
         self.assertEqual(use_case_request.get_offset(), expected_offset)
+
+    def test_controller_raises_bad_request_if_offset_query_string_has_letters(self):
+        input = "123abc"
+        self.request.set_arg(arg="offset", value=input)
+        with self.assertRaises(BadRequest) as err:
+            self.controller.create_request()
+        self.assertEqual(
+            err.exception.message, f"Input must be an integer, not {input}."
+        )
+
+    def test_controller_raises_bad_request_if_offset_query_string_is_negative_number(
+        self,
+    ):
+        input = "-123"
+        self.request.set_arg(arg="offset", value=input)
+        with self.assertRaises(BadRequest) as err:
+            self.controller.create_request()
+        self.assertEqual(
+            err.exception.message, f"Input must be greater or equal zero, not {input}."
+        )
+
+    def test_controller_raises_bad_request_if_limit_query_string_has_letters(self):
+        input = "123abc"
+        self.request.set_arg(arg="limit", value=input)
+        with self.assertRaises(BadRequest) as err:
+            self.controller.create_request()
+        self.assertEqual(
+            err.exception.message, f"Input must be an integer, not {input}."
+        )
+
+    def test_controller_raises_bad_request_if_limit_query_string_is_negative_number(
+        self,
+    ):
+        input = "-123"
+        self.request.set_arg(arg="limit", value=input)
+        with self.assertRaises(BadRequest) as err:
+            self.controller.create_request()
+        self.assertEqual(
+            err.exception.message, f"Input must be greater or equal zero, not {input}."
+        )
 
 
 class ExpectedInputsTests(BaseTestCase):
