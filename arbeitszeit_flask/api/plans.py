@@ -2,7 +2,7 @@ from flask_restx import Namespace, Resource
 
 from arbeitszeit.use_cases.query_plans import QueryPlans
 from arbeitszeit_flask.api.input_documentation import generate_input_documentation
-from arbeitszeit_flask.api.response_documentation import with_response_documentation
+from arbeitszeit_flask.api.response_handling import error_response_handling
 from arbeitszeit_flask.api.schema_converter import SchemaConverter
 from arbeitszeit_flask.dependency_injection import with_injection
 from arbeitszeit_web.api_controllers.query_plans_api_controller import (
@@ -28,7 +28,7 @@ model = SchemaConverter(namespace).json_schema_to_flaskx(
 class ListActivePlans(Resource):
     @namespace.expect(input_documentation)
     @namespace.marshal_with(model)
-    @with_response_documentation(error_responses=[BadRequest], namespace=namespace)
+    @error_response_handling(error_responses=[BadRequest], namespace=namespace)
     @with_injection()
     def get(
         self,

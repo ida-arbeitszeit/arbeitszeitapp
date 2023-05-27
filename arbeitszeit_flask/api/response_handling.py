@@ -4,14 +4,27 @@ from arbeitszeit_flask.api.schema_converter import SchemaConverter
 from arbeitszeit_web.api_presenters.response_errors import ApiResponseError
 
 
-class with_response_documentation:
+def handle_exception(error: ApiResponseError):
+    return {"message": error.message}, error.code
+
+
+class error_response_handling:
     def __init__(
         self, error_responses: list[type[ApiResponseError]], namespace: Namespace
     ) -> None:
         self._error_responses = error_responses
         self._namespace = namespace
+        self._register_error_handlers()
 
     def __call__(self, original_function):
+        decorated_fn = self._add_documention_of_error_responses(original_function)
+        return decorated_fn
+
+    def _register_error_handlers(self) -> None:
+        for error in self._error_responses:
+            self._namespace.error_handlers[error] = handle_exception
+
+    def _add_documention_of_error_responses(self, original_function):
         decorated_fn = original_function
         for response in self._error_responses:
             error_schema = SchemaConverter(self._namespace).json_schema_to_flaskx(
