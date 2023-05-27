@@ -3,7 +3,7 @@ from typing import List
 
 from arbeitszeit.use_cases.query_plans import PlanFilter, PlanSorting, QueryPlansRequest
 from arbeitszeit_web.api_controllers import query_parser
-from arbeitszeit_web.api_controllers.expected_input import ExpectedInput
+from arbeitszeit_web.api_controllers.expected_input import ExpectedInput, InputLocation
 from arbeitszeit_web.request import Request
 
 DEFAULT_OFFSET: int = 0
@@ -20,12 +20,14 @@ class QueryPlansApiController:
                 type=str,
                 description="The query offset.",
                 default=DEFAULT_OFFSET,
+                location=InputLocation.query,
             ),
             ExpectedInput(
                 name="limit",
                 type=str,
                 description="The query limit.",
                 default=DEFAULT_LIMIT,
+                location=InputLocation.query,
             ),
         ]
 

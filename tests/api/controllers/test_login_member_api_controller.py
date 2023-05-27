@@ -1,3 +1,4 @@
+from arbeitszeit_web.api_controllers.expected_input import InputLocation
 from arbeitszeit_web.api_controllers.login_member_api_controller import (
     LoginMemberApiController,
 )
@@ -55,7 +56,8 @@ class ExpectedInputsTests(BaseTestCase):
         self.assertEqual(input.type, str)
         self.assertEqual(input.description, "Email.")
         self.assertEqual(input.default, None)
-        self.assertEqual(input.location, "form")
+        self.assertEqual(input.location, InputLocation.form)
+        self.assertEqual(input.required, True)
 
     def test_second_expected_input_is_password(self) -> None:
         input = self.inputs[1]
@@ -67,4 +69,5 @@ class ExpectedInputsTests(BaseTestCase):
         self.assertEqual(input.type, str)
         self.assertEqual(input.description, "Password.")
         self.assertEqual(input.default, None)
-        self.assertEqual(input.location, "form")
+        self.assertEqual(input.location, InputLocation.form)
+        self.assertEqual(input.required, True)

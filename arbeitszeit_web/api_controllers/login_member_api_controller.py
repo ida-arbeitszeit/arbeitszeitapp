@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import List
 
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
-from arbeitszeit_web.api_controllers.expected_input import ExpectedInput
+from arbeitszeit_web.api_controllers.expected_input import ExpectedInput, InputLocation
 from arbeitszeit_web.api_presenters.response_errors import BadRequest
 from arbeitszeit_web.request import Request
 
@@ -17,14 +17,16 @@ class LoginMemberApiController:
                 type=str,
                 description="Email.",
                 default=None,
-                location="form",
+                location=InputLocation.form,
+                required=True,
             ),
             ExpectedInput(
                 name="password",
                 type=str,
                 description="Password.",
                 default=None,
-                location="form",
+                location=InputLocation.form,
+                required=True,
             ),
         ]
 

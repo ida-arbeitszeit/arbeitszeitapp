@@ -1,4 +1,5 @@
 from arbeitszeit.use_cases.query_plans import PlanFilter, PlanSorting
+from arbeitszeit_web.api_controllers.expected_input import InputLocation
 from arbeitszeit_web.api_controllers.query_plans_api_controller import (
     QueryPlansApiController,
 )
@@ -122,7 +123,8 @@ class ExpectedInputsTests(BaseTestCase):
         self.assertEqual(input.type, str)
         self.assertEqual(input.description, "The query offset.")
         self.assertEqual(input.default, 0)
-        self.assertEqual(input.location, None)
+        self.assertEqual(input.location, InputLocation.query)
+        self.assertEqual(input.required, False)
 
     def test_second_expected_input_is_limit(self):
         input = self.inputs[1]
@@ -134,4 +136,5 @@ class ExpectedInputsTests(BaseTestCase):
         self.assertEqual(input.type, str)
         self.assertEqual(input.description, "The query limit.")
         self.assertEqual(input.default, 30)
-        self.assertEqual(input.location, None)
+        self.assertEqual(input.location, InputLocation.query)
+        self.assertEqual(input.required, False)

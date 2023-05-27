@@ -1,5 +1,12 @@
 from dataclasses import dataclass
-from typing import Optional, Type, Union
+from enum import Enum, auto
+from typing import Type, Union
+
+
+class InputLocation(Enum):
+    query = auto()
+    path = auto()
+    form = auto()
 
 
 @dataclass
@@ -7,5 +14,6 @@ class ExpectedInput:
     name: str
     type: Type
     description: str
+    location: InputLocation
     default: Union[None, str, int, bool]
-    location: Optional[str] = None
+    required: bool = False
