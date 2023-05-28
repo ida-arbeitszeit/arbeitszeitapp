@@ -20,6 +20,7 @@ class JsonObject:
 
 @dataclass
 class JsonString:
+    required: bool = True
     as_list: bool = False
 
 
@@ -27,21 +28,25 @@ class JsonString:
 class JsonDecimal:
     """A floating point number with an arbitrary precision."""
 
+    required: bool = True
     as_list: bool = False
 
 
 @dataclass
 class JsonBoolean:
+    required: bool = True
     as_list: bool = False
 
 
 @dataclass
 class JsonInteger:
+    required: bool = True
     as_list: bool = False
 
 
 @dataclass
 class JsonDatetime:
+    required: bool = True
     as_list: bool = False
 
 

@@ -1,9 +1,9 @@
 { buildPythonPackage, pytestCheckHook
 
 # python packages
-, email_validator, flask, flask-babel, flask-talisman, flask_login, flask_mail
-, flask_migrate, flask-restx, flask_wtf, is_safe_url, matplotlib, sphinx
-, flask-profiler, typing-extensions, parameterized }:
+, deepdiff, email_validator, flask, flask-babel, flask-talisman, flask_login
+, flask_mail, flask_migrate, flask-restx, flask_wtf, is_safe_url, matplotlib
+, sphinx, flask-profiler, typing-extensions, parameterized }:
 buildPythonPackage {
   pname = "arbeitszeitapp";
   version = "0.0.0";
@@ -13,6 +13,7 @@ buildPythonPackage {
   format = "pyproject";
   buildInputs = [ pytestCheckHook sphinx parameterized ];
   propagatedBuildInputs = [
+    deepdiff
     email_validator
     flask
     flask-babel

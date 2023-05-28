@@ -27,7 +27,7 @@ model = SchemaConverter(namespace).json_schema_to_flaskx(
 @namespace.route("/login_member")
 class LoginMember(Resource):
     @namespace.expect(input_documentation)
-    @namespace.marshal_with(model)
+    @namespace.marshal_with(model, skip_none=True)
     @error_response_handling(
         error_responses=[Unauthorized, BadRequest], namespace=namespace
     )
