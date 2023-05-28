@@ -200,6 +200,20 @@ tests, you can do so by executing ``./run-checks``, which will run all
 tests that need to pass before merging your change into the main
 development branch can be considered.
 
+Development dependencies
+------------------------
+
+We use ``nix`` to manage the development dependencies of
+``arbeitszeitapp``. We try to leverage ``nixpkgs`` as a source for our
+development dependencies as much as possible to reduce the required
+maintenance effort. Some package however are currently managed outside
+of ``nixpkgs`` through custom mechanisms. The python program
+``arbeitszeit_development/update_dependencies.py`` automates this
+custom package management as much as possible. You can update the
+development dependencies via ``python -m
+arbeitszeit_development.update_dependencies``.
+
+
 Translation
 -----------
 
