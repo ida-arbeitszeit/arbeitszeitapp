@@ -1,8 +1,8 @@
 from dataclasses import dataclass
-from typing import Any, Dict, Optional, Protocol, Union
+from typing import Any, Dict, Protocol, Union
 
 JsonValue = Union[
-    "JsonDict",
+    "JsonObject",
     "JsonString",
     "JsonDecimal",
     "JsonBoolean",
@@ -12,14 +12,9 @@ JsonValue = Union[
 
 
 @dataclass
-class JsonDict:
-    """
-    if `schema_name` is given, this JsonDict will be registered as a model with the given name.
-    if `as_list` is True, it will be returned in an array.
-    """
-
+class JsonObject:
     members: Dict[str, JsonValue]
-    schema_name: Optional[str] = None
+    name: str
     as_list: bool = False
 
 

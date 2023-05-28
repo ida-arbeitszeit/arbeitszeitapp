@@ -2,8 +2,8 @@ from arbeitszeit_web.api_presenters.interfaces import (
     JsonBoolean,
     JsonDatetime,
     JsonDecimal,
-    JsonDict,
     JsonInteger,
+    JsonObject,
     JsonString,
 )
 from arbeitszeit_web.api_presenters.query_plans_api_presenter import (
@@ -78,21 +78,21 @@ class TestSchema(BaseTestCase):
 
     def test_schema_top_level(self) -> None:
         schema = self.presenter.get_schema()
-        assert isinstance(schema, JsonDict)
+        assert isinstance(schema, JsonObject)
         assert not schema.as_list
-        assert schema.schema_name == "PlanList"
+        assert schema.name == "PlanList"
 
     def test_schema_top_level_members(self) -> None:
         schema = self.presenter.get_schema()
-        assert isinstance(schema, JsonDict)
-        assert isinstance(schema.members["results"], JsonDict)
+        assert isinstance(schema, JsonObject)
+        assert isinstance(schema.members["results"], JsonObject)
 
     def test_schema_top_level_members_field_types_are_correct(self) -> None:
         top_level_schema = self.presenter.get_schema()
-        assert isinstance(top_level_schema, JsonDict)
+        assert isinstance(top_level_schema, JsonObject)
 
         field_expectations = [
-            ("results", JsonDict),
+            ("results", JsonObject),
             ("total_results", JsonInteger),
             ("offset", JsonInteger),
             ("limit", JsonInteger),
@@ -105,29 +105,29 @@ class TestSchema(BaseTestCase):
 
     def test_results_is_dictionary(self) -> None:
         schema = self.presenter.get_schema()
-        assert isinstance(schema, JsonDict)
+        assert isinstance(schema, JsonObject)
         results_schema = schema.members["results"]
-        assert isinstance(results_schema, JsonDict)
+        assert isinstance(results_schema, JsonObject)
 
     def test_results_is_dictionary_as_list(self) -> None:
         schema = self.presenter.get_schema()
-        assert isinstance(schema, JsonDict)
+        assert isinstance(schema, JsonObject)
         results_schema = schema.members["results"]
-        assert isinstance(results_schema, JsonDict)
+        assert isinstance(results_schema, JsonObject)
         assert results_schema.as_list
 
     def test_results_has_correct_schema_name(self) -> None:
         schema = self.presenter.get_schema()
-        assert isinstance(schema, JsonDict)
+        assert isinstance(schema, JsonObject)
         results_schema = schema.members["results"]
-        assert isinstance(results_schema, JsonDict)
-        assert results_schema.schema_name == "Plan"
+        assert isinstance(results_schema, JsonObject)
+        assert results_schema.name == "Plan"
 
     def test_results_members_field_types_are_correct(self) -> None:
         schema = self.presenter.get_schema()
-        assert isinstance(schema, JsonDict)
+        assert isinstance(schema, JsonObject)
         results_schema = schema.members["results"]
-        assert isinstance(results_schema, JsonDict)
+        assert isinstance(results_schema, JsonObject)
 
         field_expectations = [
             ("plan_id", JsonString),

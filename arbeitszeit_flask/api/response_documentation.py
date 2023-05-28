@@ -1,6 +1,6 @@
 from flask_restx import Namespace
 
-from arbeitszeit_flask.api.schema_converter import json_schema_to_flaskx
+from arbeitszeit_flask.api.schema_converter import SchemaConverter
 from arbeitszeit_web.api_presenters.response_errors import ApiResponseError
 
 
@@ -14,8 +14,8 @@ class with_response_documentation:
     def __call__(self, original_function):
         decorated_fn = original_function
         for response in self._error_responses:
-            error_schema = json_schema_to_flaskx(
-                schema=response.get_schema(), namespace=self._namespace
+            error_schema = SchemaConverter(self._namespace).json_schema_to_flaskx(
+                schema=response.get_schema()
             )
             decorator = self._namespace.response(
                 code=response.code, description=response.description, model=error_schema
