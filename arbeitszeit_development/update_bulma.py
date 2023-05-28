@@ -15,7 +15,7 @@ from urllib.request import urlopen
 
 def main() -> None:
     logging.basicConfig(level=logging.INFO)
-    logger = logging.getLogger(name="update-bulma")
+    logger = logging.getLogger(name="update_bulma")
     zip_factory = ZipFactory(logger=logger)
     github_api = GithubApi(logger=logger)
     updater = BulmaUpdater(
@@ -50,7 +50,7 @@ class BulmaUpdater:
 
     def get_target_path(self) -> Path:
         module_path = Path(__file__)
-        return module_path.parent / "arbeitszeit_flask" / "static" / "bulma.css"
+        return module_path.parent.parent / "arbeitszeit_flask" / "static" / "bulma.css"
 
     def get_asset_name(self, release: GithubRelease) -> str:
         for asset in release.asset_names:

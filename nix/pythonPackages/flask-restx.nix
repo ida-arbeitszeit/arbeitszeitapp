@@ -6,10 +6,7 @@ buildPythonPackage rec {
   version = "1.1.0";
   format = "setuptools";
 
-  src = fetchPypi {
-    inherit pname version;
-    sha256 = "sha256-Yra2yd5l5ZYM9PizXhvT7KaZiDigGy9x4qnUwUpMzRQ=";
-  };
+  src = fetchPypi (builtins.fromJSON (builtins.readFile ./flask-restx.json));
 
   propagatedBuildInputs = [ flask aniso8601 jsonschema pytz werkzeug ];
 

@@ -38,10 +38,11 @@ skip = "arbeitszeit_flask/migrations"
 [tool.mypy]
 files = [
     "arbeitszeit/**/*.py",
-    "tests/**/*.py",
+    "arbeitszeit_benchmark/**/*.py",
+    "arbeitszeit_development/**/*.py",
     "arbeitszeit_flask/__init__.py",
     "arbeitszeit_web/**/*.py",
-    "arbeitszeit_benchmark/**/*.py"
+    "tests/**/*.py",
 ]
 mypy_path = "type_stubs"
 exclude = '''
