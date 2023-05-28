@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
-from arbeitszeit_web.api_presenters.interfaces import JsonBoolean, JsonDict, JsonValue
+from arbeitszeit_web.api_presenters.interfaces import JsonBoolean, JsonObject, JsonValue
 from arbeitszeit_web.api_presenters.response_errors import Unauthorized
 from arbeitszeit_web.session import Session
 
@@ -14,9 +14,9 @@ class LoginMemberApiPresenter:
 
     @classmethod
     def get_schema(cls) -> JsonValue:
-        return JsonDict(
+        return JsonObject(
             members=dict(success=JsonBoolean()),
-            schema_name="LoginMemberResponse",
+            name="LoginMemberResponse",
         )
 
     session: Session

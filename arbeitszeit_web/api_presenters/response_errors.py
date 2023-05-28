@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from arbeitszeit_web.api_presenters.interfaces import JsonDict, JsonString, JsonValue
+from arbeitszeit_web.api_presenters.interfaces import JsonObject, JsonString, JsonValue
 
 
 class ApiResponseError(Protocol):
@@ -33,9 +33,9 @@ class Unauthorized(Exception):
 
     @classmethod
     def get_schema(cls) -> JsonValue:
-        return JsonDict(
+        return JsonObject(
             members=dict(message=JsonString()),
-            schema_name="Error",
+            name="Error",
         )
 
 
@@ -48,7 +48,7 @@ class BadRequest(Exception):
 
     @classmethod
     def get_schema(cls) -> JsonValue:
-        return JsonDict(
+        return JsonObject(
             members=dict(message=JsonString()),
-            schema_name="Error",
+            name="Error",
         )

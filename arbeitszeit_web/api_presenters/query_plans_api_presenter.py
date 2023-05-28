@@ -6,8 +6,8 @@ from arbeitszeit_web.api_presenters.interfaces import (
     JsonBoolean,
     JsonDatetime,
     JsonDecimal,
-    JsonDict,
     JsonInteger,
+    JsonObject,
     JsonString,
     JsonValue,
 )
@@ -23,9 +23,9 @@ class QueryPlansApiPresenter:
 
     @classmethod
     def get_schema(cls) -> JsonValue:
-        return JsonDict(
+        return JsonObject(
             members=dict(
-                results=JsonDict(
+                results=JsonObject(
                     members=dict(
                         plan_id=JsonString(),
                         company_name=JsonString(),
@@ -38,14 +38,14 @@ class QueryPlansApiPresenter:
                         is_cooperating=JsonBoolean(),
                         activation_date=JsonDatetime(),
                     ),
-                    schema_name="Plan",
+                    name="Plan",
                     as_list=True,
                 ),
                 total_results=JsonInteger(),
                 offset=JsonInteger(),
                 limit=JsonInteger(),
             ),
-            schema_name="PlanList",
+            name="PlanList",
         )
 
     def create_view_model(self, use_case_response: PlanQueryResponse) -> ViewModel:

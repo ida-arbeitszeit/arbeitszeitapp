@@ -2,7 +2,7 @@ from typing import Optional
 from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
-from arbeitszeit_web.api_presenters.interfaces import JsonBoolean, JsonDict
+from arbeitszeit_web.api_presenters.interfaces import JsonBoolean, JsonObject
 from arbeitszeit_web.api_presenters.login_member_api_presenter import (
     LoginMemberApiPresenter,
 )
@@ -112,11 +112,11 @@ class TestSchema(BaseTestCase):
 
     def test_schema_top_level(self) -> None:
         schema = self.presenter.get_schema()
-        assert isinstance(schema, JsonDict)
+        assert isinstance(schema, JsonObject)
         assert not schema.as_list
-        assert schema.schema_name == "LoginMemberResponse"
+        assert schema.name == "LoginMemberResponse"
 
     def test_schema_top_level_members(self) -> None:
         schema = self.presenter.get_schema()
-        assert isinstance(schema, JsonDict)
+        assert isinstance(schema, JsonObject)
         assert isinstance(schema.members["success"], JsonBoolean)

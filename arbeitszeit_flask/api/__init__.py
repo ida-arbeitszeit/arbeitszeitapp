@@ -13,7 +13,7 @@ blueprint = Blueprint("api", __name__, url_prefix="/api/v1")
 api_extension = Api(
     app=blueprint,
     title="Arbeitszeitapp API",
-    version="1.0",
+    version="0.1",
     description="The JSON API of Arbeitszeitapp.",
     doc="/doc/",
     decorators=[csrf_protect.exempt],
