@@ -8,21 +8,16 @@ from uuid import UUID
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.presenters import MemberRegistrationMessagePresenter
-from arbeitszeit.repositories import (
-    AccountRepository,
-    CompanyRepository,
-    MemberRepository,
-)
+from arbeitszeit.repositories import AccountRepository, DatabaseGateway
 
 
 @dataclass
 class RegisterMemberUseCase:
     account_repository: AccountRepository
-    member_repository: MemberRepository
     datetime_service: DatetimeService
     member_registration_message_presenter: MemberRegistrationMessagePresenter
-    company_repository: CompanyRepository
     password_hasher: PasswordHasher
+    database: DatabaseGateway
 
     @dataclass
     class Response:
@@ -53,12 +48,10 @@ class RegisterMemberUseCase:
             )
 
     def _register_member(self, request: Request) -> Response:
-        if self.member_repository.get_members().with_email_address(request.email):
+        if self.database.get_members().with_email_address(request.email):
             raise self.Response.RejectionReason.member_already_exists
         company = (
-            self.company_repository.get_companies()
-            .with_email_address(request.email)
-            .first()
+            self.database.get_companies().with_email_address(request.email).first()
         )
         if company:
             is_company_with_same_email_already_registered = True
@@ -72,7 +65,7 @@ class RegisterMemberUseCase:
 
         member_account = self.account_repository.create_account()
         registered_on = self.datetime_service.now()
-        member = self.member_repository.create_member(
+        member = self.database.create_member(
             email=request.email,
             name=request.name,
             password_hash=self.password_hasher.calculate_password_hash(

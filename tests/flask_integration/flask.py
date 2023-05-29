@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 from arbeitszeit.entities import Company, Member
 from arbeitszeit.injector import Module
-from arbeitszeit_flask.database.repositories import CompanyRepository, MemberRepository
+from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
 from arbeitszeit_flask.token import FlaskTokenService
 from tests.data_generators import (
     AccountantGenerator,
@@ -38,6 +38,7 @@ class FlaskTestCase(TestCase):
         self.app_context.push()
         self.db.drop_all()
         self.db.create_all()
+        self.database_gateway = self.injector.get(DatabaseGatewayImpl)
 
     def tearDown(self) -> None:
         self.app_context.pop()
@@ -54,8 +55,6 @@ class ViewTestCase(FlaskTestCase):
         self.member_generator = self.injector.get(MemberGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.email_generator = self.injector.get(EmailGenerator)
-        self.member_repository = self.injector.get(MemberRepository)
-        self.company_repository = self.injector.get(CompanyRepository)
         self.accountant_generator = self.injector.get(AccountantGenerator)
 
     def login_member(
@@ -85,7 +84,7 @@ class ViewTestCase(FlaskTestCase):
         if confirm_member:
             self._confirm_member(email)
         updated_member = (
-            self.member_repository.get_members().with_email_address(email).first()
+            self.database_gateway.get_members().with_email_address(email).first()
         )
         assert updated_member
         return updated_member
@@ -144,7 +143,7 @@ class ViewTestCase(FlaskTestCase):
         if confirm_company:
             self._confirm_company(email)
         updated_company = (
-            self.company_repository.get_companies().with_email_address(email).first()
+            self.database_gateway.get_companies().with_email_address(email).first()
         )
         assert updated_company
         return updated_company

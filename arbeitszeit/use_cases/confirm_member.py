@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from arbeitszeit.repositories import MemberRepository
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -17,12 +17,10 @@ class ConfirmMemberUseCase:
         is_confirmed: bool
         member: Optional[UUID] = None
 
-    member_repository: MemberRepository
+    database: DatabaseGateway
 
     def confirm_member(self, request: Request) -> Response:
-        members = self.member_repository.get_members().with_email_address(
-            request.email_address
-        )
+        members = self.database.get_members().with_email_address(request.email_address)
         if not members:
             return self.Response(is_confirmed=False)
         if members.that_are_confirmed():

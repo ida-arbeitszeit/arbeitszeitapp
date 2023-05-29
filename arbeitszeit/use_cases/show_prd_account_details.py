@@ -8,7 +8,7 @@ from typing import List, Optional
 from uuid import UUID
 
 from arbeitszeit.entities import AccountOwner, SocialAccounting
-from arbeitszeit.repositories import AccountRepository, CompanyRepository
+from arbeitszeit.repositories import AccountRepository, DatabaseGateway
 from arbeitszeit.transactions import TransactionTypes, UserAccountingService
 
 
@@ -41,11 +41,11 @@ class ShowPRDAccountDetailsUseCase:
         plot: ShowPRDAccountDetailsUseCase.PlotDetails
 
     accounting_service: UserAccountingService
-    company_repository: CompanyRepository
     account_repository: AccountRepository
+    database: DatabaseGateway
 
     def __call__(self, company_id: UUID) -> Response:
-        company = self.company_repository.get_companies().with_id(company_id).first()
+        company = self.database.get_companies().with_id(company_id).first()
         assert company
         transactions = [
             self.TransactionInfo(

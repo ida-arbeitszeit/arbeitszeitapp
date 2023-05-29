@@ -39,7 +39,7 @@ jobs = db.Table(
 
 class Member(UserMixin, db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
-    user_id = db.Column(db.ForeignKey("user.id"), nullable=False)
+    user_id = db.Column(db.ForeignKey("user.id"), nullable=False, unique=True)
     name = db.Column(db.String(1000), nullable=False)
     registered_on = db.Column(db.DateTime, nullable=False)
     account = db.Column(db.ForeignKey("account.id"), nullable=False)
@@ -87,7 +87,7 @@ class Company(UserMixin, db.Model):
 
 class Accountant(UserMixin, db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
-    user_id = db.Column(db.ForeignKey("user.id"), nullable=False)
+    user_id = db.Column(db.ForeignKey("user.id"), nullable=False, unique=True)
     name = db.Column(db.String(1000), nullable=False)
 
     user = db.relationship(

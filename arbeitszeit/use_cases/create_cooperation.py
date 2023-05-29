@@ -5,7 +5,7 @@ from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Company
-from arbeitszeit.repositories import CompanyRepository, DatabaseGateway
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -31,7 +31,6 @@ class CreateCooperationResponse:
 
 @dataclass
 class CreateCooperation:
-    company_repository: CompanyRepository
     datetime_service: DatetimeService
     database_gateway: DatabaseGateway
 
@@ -54,7 +53,7 @@ class CreateCooperation:
 
     def _validate_request(self, request: CreateCooperationRequest) -> Company:
         coordinator = (
-            self.company_repository.get_companies()
+            self.database_gateway.get_companies()
             .with_id(request.coordinator_id)
             .first()
         )

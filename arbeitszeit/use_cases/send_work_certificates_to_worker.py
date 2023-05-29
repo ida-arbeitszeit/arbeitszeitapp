@@ -5,11 +5,7 @@ from typing import Optional
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.repositories import (
-    CompanyRepository,
-    DatabaseGateway,
-    MemberRepository,
-)
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -33,8 +29,6 @@ class SendWorkCertificatesToWorkerResponse:
 
 @dataclass
 class SendWorkCertificatesToWorker:
-    company_repository: CompanyRepository
-    member_repository: MemberRepository
     database_gateway: DatabaseGateway
     datetime_service: DatetimeService
 
@@ -42,18 +36,18 @@ class SendWorkCertificatesToWorker:
         self, use_case_request: SendWorkCertificatesToWorkerRequest
     ) -> SendWorkCertificatesToWorkerResponse:
         company = (
-            self.company_repository.get_companies()
+            self.database_gateway.get_companies()
             .with_id(use_case_request.company_id)
             .first()
         )
         worker = (
-            self.member_repository.get_members()
+            self.database_gateway.get_members()
             .with_id(use_case_request.worker_id)
             .first()
         )
         assert company
         assert worker
-        company_workers = self.member_repository.get_members().working_at_company(
+        company_workers = self.database_gateway.get_members().working_at_company(
             company.id
         )
         if worker not in company_workers:

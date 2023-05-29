@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from arbeitszeit.repositories import AccountantRepository
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -15,10 +15,10 @@ class GetAccountantDashboardUseCase:
     class Failure(Exception):
         pass
 
-    accountant_repository: AccountantRepository
+    database: DatabaseGateway
 
     def get_dashboard(self, user: UUID) -> Response:
-        accountant = self.accountant_repository.get_accountants().with_id(user).first()
+        accountant = self.database.get_accountants().with_id(user).first()
         if not accountant:
             raise self.Failure()
         return self.Response(

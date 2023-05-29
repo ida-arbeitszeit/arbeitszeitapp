@@ -3,7 +3,7 @@ from enum import Enum, auto
 from typing import Optional
 from uuid import UUID
 
-from arbeitszeit.repositories import CompanyRepository, DatabaseGateway
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -31,7 +31,6 @@ class DenyCooperationResponse:
 @dataclass
 class DenyCooperation:
     database_gateway: DatabaseGateway
-    company_repository: CompanyRepository
 
     def __call__(self, request: DenyCooperationRequest) -> DenyCooperationResponse:
         try:

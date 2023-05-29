@@ -17,7 +17,7 @@ from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.data_generators import TransactionGenerator
 
 from .base_test_case import BaseTestCase
-from .repositories import CompanyRepository, EntityStorage
+from .repositories import EntityStorage
 
 
 class PayConsumerProductTests(BaseTestCase):
@@ -29,7 +29,6 @@ class PayConsumerProductTests(BaseTestCase):
         self.buyer = self.member_generator.create_member_entity()
         self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
         self.update_plans_and_payout = self.injector.get(UpdatePlansAndPayout)
-        self.company_repository = self.injector.get(CompanyRepository)
         self.query_member_purchases = self.injector.get(
             query_member_purchases.QueryMemberPurchases
         )
@@ -187,7 +186,7 @@ class PayConsumerProductTests(BaseTestCase):
         assert transaction_added
         expected_amount_sent = pieces * self.price_checker.get_unit_price(plan.id)
         expected_amount_received = pieces * self.price_checker.get_unit_cost(plan.id)
-        planner = self.company_repository.get_companies().with_id(plan.planner).first()
+        planner = self.entity_storage.get_companies().with_id(plan.planner).first()
         assert planner
         assert transaction_added.sending_account == self.buyer.account
         assert transaction_added.receiving_account == planner.product_account
@@ -216,7 +215,7 @@ class PayConsumerProductTests(BaseTestCase):
             self.balance_checker.get_member_account_balance(self.buyer.id)
             == expected_balance
         )
-        planner = self.company_repository.get_companies().with_id(plan.planner).first()
+        planner = self.entity_storage.get_companies().with_id(plan.planner).first()
         assert planner
         assert (
             self.balance_checker.get_company_account_balances(planner.id).prd_account
@@ -242,7 +241,7 @@ class PayConsumerProductTests(BaseTestCase):
             .first()
         )
         assert transaction_added
-        planner = self.company_repository.get_companies().with_id(plan.planner).first()
+        planner = self.entity_storage.get_companies().with_id(plan.planner).first()
         assert planner
         assert transaction_added.sending_account == self.buyer.account
         assert transaction_added.receiving_account == planner.product_account
@@ -255,7 +254,7 @@ class PayConsumerProductTests(BaseTestCase):
             self.make_request(plan.id, pieces)
         )
         costs = pieces * self.price_checker.get_unit_price(plan.id)
-        planner = self.company_repository.get_companies().with_id(plan.planner).first()
+        planner = self.entity_storage.get_companies().with_id(plan.planner).first()
         assert planner
         assert self.balance_checker.get_member_account_balance(self.buyer.id) == -costs
         assert (

@@ -7,9 +7,9 @@ from arbeitszeit.use_cases.answer_company_work_invite import (
     AnswerCompanyWorkInviteResponse,
 )
 from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
-from tests.use_cases.repositories import MemberRepository
 
 from .base_test_case import BaseTestCase
+from .repositories import EntityStorage
 
 
 class AnwerCompanyWorkInviteTests(BaseTestCase):
@@ -17,7 +17,7 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
         super().setUp()
         self.answer_company_work_invite = self.injector.get(AnswerCompanyWorkInvite)
         self.invite_worker_to_company = self.injector.get(InviteWorkerToCompanyUseCase)
-        self.member_repository = self.injector.get(MemberRepository)
+        self.entity_storage = self.injector.get(EntityStorage)
         self.company = self.company_generator.create_company_entity()
         self.member = self.member_generator.create_member()
 
@@ -78,7 +78,7 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
             self.member,
             {
                 worker.id
-                for worker in self.member_repository.get_members().working_at_company(
+                for worker in self.entity_storage.get_members().working_at_company(
                     self.company.id
                 )
             },
@@ -107,7 +107,7 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
             self.member,
             {
                 worker.id
-                for worker in self.member_repository.get_members().working_at_company(
+                for worker in self.entity_storage.get_members().working_at_company(
                     self.company.id
                 )
             },

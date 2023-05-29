@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from arbeitszeit.repositories import CompanyRepository, MemberRepository
+from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.session import Session
@@ -11,7 +11,7 @@ from arbeitszeit_web.url_index import UrlIndex
 
 @dataclass
 class MemberAuthenticator:
-    member_repository: MemberRepository
+    database: DatabaseGateway
     session: Session
     translator: Translator
     notifier: Notifier
@@ -27,7 +27,7 @@ class MemberAuthenticator:
             )
             self.session.set_next_url(self.request.get_request_target())
             return self.url_index.get_start_page_url()
-        elif not self.member_repository.get_members().with_id(user_id):
+        elif not self.database.get_members().with_id(user_id):
             # not a member
             self.notifier.display_warning(
                 self.translator.gettext("You are not logged with the correct account.")
@@ -35,11 +35,7 @@ class MemberAuthenticator:
             self.session.logout()
             self.session.set_next_url(self.request.get_request_target())
             return self.url_index.get_start_page_url()
-        elif (
-            not self.member_repository.get_members()
-            .with_id(user_id)
-            .that_are_confirmed()
-        ):
+        elif not self.database.get_members().with_id(user_id).that_are_confirmed():
             # not a confirmed member
             return self.url_index.get_unconfirmed_member_url()
         return None
@@ -47,7 +43,7 @@ class MemberAuthenticator:
 
 @dataclass
 class CompanyAuthenticator:
-    company_repository: CompanyRepository
+    database: DatabaseGateway
     session: Session
     translator: Translator
     notifier: Notifier
@@ -63,7 +59,7 @@ class CompanyAuthenticator:
             )
             self.session.set_next_url(self.request.get_request_target())
             return self.url_index.get_start_page_url()
-        elif not self.company_repository.get_companies().with_id(user_id):
+        elif not self.database.get_companies().with_id(user_id):
             # not a company
             self.notifier.display_warning(
                 self.translator.gettext("You are not logged with the correct account.")
@@ -71,11 +67,7 @@ class CompanyAuthenticator:
             self.session.logout()
             self.session.set_next_url(self.request.get_request_target())
             return self.url_index.get_start_page_url()
-        elif (
-            not self.company_repository.get_companies()
-            .with_id(user_id)
-            .that_are_confirmed()
-        ):
+        elif not self.database.get_companies().with_id(user_id).that_are_confirmed():
             # not a confirmed company
             return self.url_index.get_unconfirmed_company_url()
         return None

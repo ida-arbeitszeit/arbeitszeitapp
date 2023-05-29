@@ -8,21 +8,16 @@ from uuid import UUID
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.presenters import CompanyRegistrationMessagePresenter
-from arbeitszeit.repositories import (
-    AccountRepository,
-    CompanyRepository,
-    MemberRepository,
-)
+from arbeitszeit.repositories import AccountRepository, DatabaseGateway
 
 
 @dataclass
 class RegisterCompany:
-    company_repository: CompanyRepository
     account_repository: AccountRepository
-    member_repository: MemberRepository
     datetime_service: DatetimeService
     company_registration_message_presenter: CompanyRegistrationMessagePresenter
     password_hasher: PasswordHasher
+    database: DatabaseGateway
 
     @dataclass
     class Response:
@@ -51,13 +46,9 @@ class RegisterCompany:
         return self.Response(rejection_reason=None, company_id=company_id)
 
     def _register_company(self, request: Request) -> UUID:
-        if self.company_repository.get_companies().with_email_address(request.email):
+        if self.database.get_companies().with_email_address(request.email):
             raise self.Response.RejectionReason.company_already_exists
-        member = (
-            self.member_repository.get_members()
-            .with_email_address(request.email)
-            .first()
-        )
+        member = self.database.get_members().with_email_address(request.email).first()
         if member:
             if not self.password_hasher.is_password_matching_hash(
                 password=request.password, password_hash=member.password_hash
@@ -68,7 +59,7 @@ class RegisterCompany:
         labour_account = self.account_repository.create_account()
         products_account = self.account_repository.create_account()
         registered_on = self.datetime_service.now()
-        company = self.company_repository.create_company(
+        company = self.database.create_company(
             email=request.email,
             name=request.name,
             password_hash=self.password_hasher.calculate_password_hash(

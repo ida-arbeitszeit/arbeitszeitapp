@@ -8,7 +8,7 @@ from uuid import UUID
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Company, Plan, PurposesOfPurchases
 from arbeitszeit.price_calculator import PriceCalculator
-from arbeitszeit.repositories import CompanyRepository, DatabaseGateway
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -37,7 +37,6 @@ class PayMeansOfProductionResponse:
 
 @dataclass(frozen=True)
 class PayMeansOfProduction:
-    company_repository: CompanyRepository
     price_calculator: PriceCalculator
     datetime_service: DatetimeService
     database_gateway: DatabaseGateway
@@ -80,7 +79,7 @@ class PayMeansOfProduction:
     ) -> Company:
         if plan.planner == request.buyer:
             raise PayMeansOfProductionResponse.RejectionReason.buyer_is_planner
-        buyer = self.company_repository.get_companies().with_id(request.buyer).first()
+        buyer = self.database_gateway.get_companies().with_id(request.buyer).first()
         assert buyer is not None
         return buyer
 
@@ -105,7 +104,7 @@ class PayMeansOfProduction:
             sending_account = buyer.means_account
         elif purpose == PurposesOfPurchases.raw_materials:
             sending_account = buyer.raw_material_account
-        planner = self.company_repository.get_companies().with_id(plan.planner).first()
+        planner = self.database_gateway.get_companies().with_id(plan.planner).first()
         assert planner
         transaction = self.database_gateway.create_transaction(
             date=self.datetime_service.now(),

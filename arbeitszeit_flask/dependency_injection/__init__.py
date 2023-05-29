@@ -24,11 +24,8 @@ from arbeitszeit.presenters import (
 from arbeitszeit_flask.control_thresholds import ControlThresholdsFlask
 from arbeitszeit_flask.database import get_social_accounting
 from arbeitszeit_flask.database.repositories import (
-    AccountantRepository,
     AccountRepository,
-    CompanyRepository,
     DatabaseGatewayImpl,
-    MemberRepository,
     PlanDraftRepository,
     UserAddressBookImpl,
 )
@@ -124,14 +121,6 @@ class FlaskModule(Module):
             to=AliasProvider(AccountRepository),
         )
         binder.bind(
-            interfaces.MemberRepository,  # type: ignore
-            to=AliasProvider(MemberRepository),
-        )
-        binder.bind(
-            interfaces.CompanyRepository,  # type: ignore
-            to=AliasProvider(CompanyRepository),
-        )
-        binder.bind(
             interfaces.PlanDraftRepository,  # type: ignore
             to=AliasProvider(PlanDraftRepository),
         )
@@ -152,7 +141,6 @@ class FlaskModule(Module):
         binder[interfaces.LanguageRepository] = AliasProvider(LanguageRepositoryImpl)  # type: ignore
         binder[LanguageService] = AliasProvider(LanguageRepositoryImpl)  # type: ignore
         binder[EmailConfiguration] = AliasProvider(FlaskEmailConfiguration)  # type: ignore
-        binder[interfaces.AccountantRepository] = AliasProvider(AccountantRepository)  # type: ignore
         binder.bind(
             interfaces.DatabaseGateway,  # type: ignore
             to=AliasProvider(DatabaseGatewayImpl),

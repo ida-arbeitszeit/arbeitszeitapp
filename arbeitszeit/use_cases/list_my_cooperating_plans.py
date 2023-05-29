@@ -6,7 +6,7 @@ from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan
-from arbeitszeit.repositories import CompanyRepository, DatabaseGateway
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -29,12 +29,11 @@ class ListMyCooperatingPlansUseCase:
     class Failure(Exception):
         pass
 
-    company_repository: CompanyRepository
     database_gateway: DatabaseGateway
     datetime_service: DatetimeService
 
     def list_cooperations(self, request: Request) -> Response:
-        if not self.company_repository.get_companies().with_id(request.company):
+        if not self.database_gateway.get_companies().with_id(request.company):
             raise self.Failure()
         now = self.datetime_service.now()
         plans = (
