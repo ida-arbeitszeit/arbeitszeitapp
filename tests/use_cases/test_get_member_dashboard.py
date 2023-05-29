@@ -5,14 +5,12 @@ from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompany
 from tests.data_generators import CompanyGenerator, MemberGenerator, PlanGenerator
 
 from .dependency_injection import get_dependency_injector
-from .repositories import MemberRepository
 
 
 class UseCaseTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.get_member_dashboard = self.injector.get(GetMemberDashboard)
-        self.member_repository = self.injector.get(MemberRepository)
         self.member_generator = self.injector.get(MemberGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.plan_generator = self.injector.get(PlanGenerator)

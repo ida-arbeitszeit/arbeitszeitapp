@@ -7,7 +7,7 @@ from typing import Iterable, List, Optional
 from uuid import UUID
 
 from arbeitszeit.entities import Company
-from arbeitszeit.repositories import CompanyRepository, CompanyResult
+from arbeitszeit.repositories import CompanyResult, DatabaseGateway
 
 
 class CompanyFilter(enum.Enum):
@@ -49,13 +49,13 @@ class QueryCompaniesRequest(ABC):
 
 @dataclass
 class QueryCompanies:
-    company_repository: CompanyRepository
+    database: DatabaseGateway
 
     def __call__(self, request: QueryCompaniesRequest) -> CompanyQueryResponse:
         companies: Iterable[Company]
         query = request.get_query_string()
         filter_by = request.get_filter_category()
-        companies = self.company_repository.get_companies()
+        companies = self.database.get_companies()
         companies = self._filter_companies(companies, query, filter_by)
         total_results = len(companies)
         companies = self._limit_results(companies, request)

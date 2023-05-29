@@ -7,7 +7,7 @@ from arbeitszeit.use_cases.send_work_certificates_to_worker import (
 )
 
 from .base_test_case import BaseTestCase
-from .repositories import EntityStorage, MemberRepository
+from .repositories import EntityStorage
 
 
 class UseCaseTester(BaseTestCase):
@@ -16,7 +16,6 @@ class UseCaseTester(BaseTestCase):
         self.send_work_certificates_to_worker = self.injector.get(
             SendWorkCertificatesToWorker
         )
-        self.member_repository = self.injector.get(MemberRepository)
         self.entity_storage = self.injector.get(EntityStorage)
 
     def test_that_transfer_is_rejected_if_money_is_sent_to_worker_not_working_in_company(

@@ -386,44 +386,6 @@ class AccountRepository(ABC):
         pass
 
 
-class MemberRepository(ABC):
-    @abstractmethod
-    def create_member(
-        self,
-        *,
-        email: str,
-        name: str,
-        password_hash: str,
-        account: Account,
-        registered_on: datetime,
-    ) -> Member:
-        pass
-
-    @abstractmethod
-    def get_members(self) -> MemberResult:
-        pass
-
-
-class CompanyRepository(ABC):
-    @abstractmethod
-    def create_company(
-        self,
-        email: str,
-        name: str,
-        password_hash: str,
-        means_account: Account,
-        labour_account: Account,
-        resource_account: Account,
-        products_account: Account,
-        registered_on: datetime,
-    ) -> Company:
-        pass
-
-    @abstractmethod
-    def get_companies(self) -> CompanyResult:
-        pass
-
-
 class PlanDraftRepository(ABC):
     @abstractmethod
     def create_plan_draft(
@@ -468,14 +430,6 @@ class PlanDraftRepository(ABC):
     @abstractmethod
     def all_drafts_of_company(self, id: UUID) -> Iterable[PlanDraft]:
         pass
-
-
-class AccountantRepository(Protocol):
-    def create_accountant(self, email: str, name: str, password_hash: str) -> UUID:
-        ...
-
-    def get_accountants(self) -> AccountantResult:
-        ...
 
 
 class LanguageRepository(Protocol):
@@ -565,4 +519,40 @@ class DatabaseGateway(Protocol):
         ...
 
     def get_company_work_invites(self) -> CompanyWorkInviteResult:
+        ...
+
+    def create_member(
+        self,
+        *,
+        email: str,
+        name: str,
+        password_hash: str,
+        account: Account,
+        registered_on: datetime,
+    ) -> Member:
+        ...
+
+    def get_members(self) -> MemberResult:
+        ...
+
+    def create_company(
+        self,
+        email: str,
+        name: str,
+        password_hash: str,
+        means_account: Account,
+        labour_account: Account,
+        resource_account: Account,
+        products_account: Account,
+        registered_on: datetime,
+    ) -> Company:
+        ...
+
+    def get_companies(self) -> CompanyResult:
+        ...
+
+    def create_accountant(self, email: str, name: str, password_hash: str) -> UUID:
+        ...
+
+    def get_accountants(self) -> AccountantResult:
         ...

@@ -6,7 +6,7 @@ from typing import Optional
 from uuid import UUID
 
 from arbeitszeit.password_hasher import PasswordHasher
-from arbeitszeit.repositories import MemberRepository
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -28,15 +28,11 @@ class LogInMemberUseCase:
         email: str
         user_id: Optional[UUID]
 
-    member_repository: MemberRepository
+    database: DatabaseGateway
     password_hasher: PasswordHasher
 
     def log_in_member(self, request: Request) -> Response:
-        member = (
-            self.member_repository.get_members()
-            .with_email_address(request.email)
-            .first()
-        )
+        member = self.database.get_members().with_email_address(request.email).first()
         if not member:
             reason = self.RejectionReason.unknown_email_address
         elif not self.password_hasher.is_password_matching_hash(

@@ -6,7 +6,7 @@ from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan, SocialAccounting
-from arbeitszeit.repositories import CompanyRepository, DatabaseGateway
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -22,14 +22,13 @@ class ApprovePlanUseCase:
     database_gateway: DatabaseGateway
     datetime_service: DatetimeService
     social_accounting: SocialAccounting
-    company_repository: CompanyRepository
 
     def approve_plan(self, request: Request) -> Response:
         now = self.datetime_service.now()
         matching_plans = self.database_gateway.get_plans().with_id(request.plan)
         plan = matching_plans.first()
         assert plan
-        planner = self.company_repository.get_companies().with_id(plan.planner).first()
+        planner = self.database_gateway.get_companies().with_id(plan.planner).first()
         assert planner
         if plan.is_approved:
             return self.Response(is_approved=False)

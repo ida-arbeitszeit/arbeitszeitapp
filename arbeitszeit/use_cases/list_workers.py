@@ -3,7 +3,7 @@ from typing import List
 from uuid import UUID
 
 from arbeitszeit.entities import Member
-from arbeitszeit.repositories import CompanyRepository, MemberRepository
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -25,15 +25,12 @@ class ListWorkersRequest:
 
 @dataclass
 class ListWorkers:
-    company_repository: CompanyRepository
-    member_repository: MemberRepository
+    database: DatabaseGateway
 
     def __call__(self, request: ListWorkersRequest) -> ListWorkersResponse:
-        if not self.company_repository.get_companies().with_id(request.company):
+        if not self.database.get_companies().with_id(request.company):
             return ListWorkersResponse(workers=[])
-        members = self.member_repository.get_members().working_at_company(
-            request.company
-        )
+        members = self.database.get_members().working_at_company(request.company)
         return ListWorkersResponse(
             workers=[self._create_worker_response_model(member) for member in members]
         )

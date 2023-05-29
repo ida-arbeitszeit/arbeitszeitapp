@@ -3,7 +3,7 @@ from typing import Optional
 from uuid import UUID
 
 from arbeitszeit.password_hasher import PasswordHasher
-from arbeitszeit.repositories import AccountantRepository
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -20,14 +20,14 @@ class RegisterAccountantUseCase:
         user_id: Optional[UUID]
         email_address: str
 
-    accountant_repository: AccountantRepository
     password_hasher: PasswordHasher
+    database: DatabaseGateway
 
     def register_accountant(self, request: Request) -> Response:
-        accountants = self.accountant_repository.get_accountants()
+        accountants = self.database.get_accountants()
         if accountants.with_email_address(request.email):
             return self._failed_registration(request)
-        user_id = self.accountant_repository.create_accountant(
+        user_id = self.database.create_accountant(
             email=request.email,
             name=request.name,
             password_hash=self.password_hasher.calculate_password_hash(

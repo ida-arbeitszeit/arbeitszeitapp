@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from arbeitszeit.presenters import AccountantInvitationPresenter
-from arbeitszeit.repositories import AccountantRepository
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -14,7 +14,7 @@ class SendAccountantRegistrationTokenUseCase:
         email: str
 
     invitation_presenter: AccountantInvitationPresenter
-    accountant_repository: AccountantRepository
+    database: DatabaseGateway
 
     def send_accountant_registration_token(self, request: Request) -> Response:
         if not self._is_user_existing(request.email):
@@ -22,6 +22,4 @@ class SendAccountantRegistrationTokenUseCase:
         return self.Response()
 
     def _is_user_existing(self, email: str) -> bool:
-        return bool(
-            self.accountant_repository.get_accountants().with_email_address(email)
-        )
+        return bool(self.database.get_accountants().with_email_address(email))

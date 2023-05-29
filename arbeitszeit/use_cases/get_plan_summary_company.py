@@ -5,7 +5,7 @@ from typing import Optional
 from uuid import UUID
 
 from arbeitszeit.plan_summary import PlanSummary, PlanSummaryService
-from arbeitszeit.repositories import CompanyRepository, DatabaseGateway
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -16,7 +16,6 @@ class GetPlanSummaryCompany:
         current_user_is_planner: bool
 
     database_gateway: DatabaseGateway
-    company_repository: CompanyRepository
     plan_summary_service: PlanSummaryService
 
     def get_plan_summary_for_company(self, plan_id: UUID, company_id: UUID) -> Response:

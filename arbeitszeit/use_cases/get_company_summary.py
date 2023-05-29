@@ -14,11 +14,7 @@ from arbeitszeit.entities import (
     SocialAccounting,
     Transaction,
 )
-from arbeitszeit.repositories import (
-    AccountRepository,
-    CompanyRepository,
-    DatabaseGateway,
-)
+from arbeitszeit.repositories import AccountRepository, DatabaseGateway
 
 
 @dataclass
@@ -72,14 +68,13 @@ GetCompanySummaryResponse = Optional[GetCompanySummarySuccess]
 
 @dataclass
 class GetCompanySummary:
-    company_repository: CompanyRepository
     account_repository: AccountRepository
     social_accounting: SocialAccounting
     database_gateway: DatabaseGateway
     datetime_service: DatetimeService
 
     def __call__(self, company_id: UUID) -> GetCompanySummaryResponse:
-        company = self.company_repository.get_companies().with_id(company_id).first()
+        company = self.database_gateway.get_companies().with_id(company_id).first()
         if company is None:
             return None
         plans = (
@@ -201,7 +196,7 @@ class GetCompanySummary:
     def _get_supplier_info(
         self, supplier_id: UUID, transaction_volume: Decimal
     ) -> Supplier:
-        supplier = self.company_repository.get_companies().with_id(supplier_id).first()
+        supplier = self.database_gateway.get_companies().with_id(supplier_id).first()
         assert supplier
         return Supplier(
             company_id=supplier_id,

@@ -11,11 +11,7 @@ from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Member, Plan
 from arbeitszeit.giro_office import GiroOffice, TransactionRejection
 from arbeitszeit.price_calculator import PriceCalculator
-from arbeitszeit.repositories import (
-    CompanyRepository,
-    DatabaseGateway,
-    MemberRepository,
-)
+from arbeitszeit.repositories import DatabaseGateway
 
 
 class RejectionReason(Enum):
@@ -43,10 +39,8 @@ class PayConsumerProductResponse:
 
 @dataclass
 class PayConsumerProduct:
-    member_repository: MemberRepository
     giro_office: GiroOffice
     datetime_service: DatetimeService
-    company_repository: CompanyRepository
     price_calculator: PriceCalculator
     database_gateway: DatabaseGateway
 
@@ -68,7 +62,7 @@ class PayConsumerProduct:
         self, request: PayConsumerProductRequest
     ) -> PayConsumerProductResponse:
         plan = self._get_active_plan(request)
-        buyer = self.member_repository.get_members().with_id(request.buyer).first()
+        buyer = self.database_gateway.get_members().with_id(request.buyer).first()
         if buyer is None:
             return PayConsumerProductResponse(
                 rejection_reason=RejectionReason.buyer_does_not_exist
@@ -113,7 +107,7 @@ class PayConsumerProduct:
         coop_price_per_unit: Decimal,
         individual_price_per_unit: Decimal,
     ) -> None:
-        planner = self.company_repository.get_companies().with_id(plan.planner).first()
+        planner = self.database_gateway.get_companies().with_id(plan.planner).first()
         assert planner
         transaction = self.giro_office.record_transaction_from_member(
             sender=buyer,

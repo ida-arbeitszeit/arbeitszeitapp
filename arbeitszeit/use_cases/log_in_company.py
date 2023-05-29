@@ -6,7 +6,7 @@ from typing import Optional
 from uuid import UUID
 
 from arbeitszeit.password_hasher import PasswordHasher
-from arbeitszeit.repositories import CompanyRepository
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -27,12 +27,12 @@ class LogInCompanyUseCase:
         email_address: Optional[str]
         user_id: Optional[UUID]
 
-    company_repository: CompanyRepository
+    database: DatabaseGateway
     password_hasher: PasswordHasher
 
     def log_in_company(self, request: Request) -> Response:
         company = (
-            self.company_repository.get_companies()
+            self.database.get_companies()
             .with_email_address(request.email_address)
             .first()
         )

@@ -5,7 +5,7 @@ from typing import List
 from uuid import UUID
 
 from arbeitszeit.entities import AccountOwner, Member, Transaction
-from arbeitszeit.repositories import AccountRepository, MemberRepository
+from arbeitszeit.repositories import AccountRepository, DatabaseGateway
 from arbeitszeit.transactions import TransactionTypes, UserAccountingService
 
 
@@ -27,11 +27,11 @@ class GetMemberAccountResponse:
 @dataclass
 class GetMemberAccount:
     accounting_service: UserAccountingService
-    member_repository: MemberRepository
+    database: DatabaseGateway
     account_repository: AccountRepository
 
     def __call__(self, member_id: UUID) -> GetMemberAccountResponse:
-        member = self.member_repository.get_members().with_id(member_id).first()
+        member = self.database.get_members().with_id(member_id).first()
         assert member
         transaction_info = [
             TransactionInfo(

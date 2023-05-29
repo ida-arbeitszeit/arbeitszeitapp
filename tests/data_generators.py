@@ -26,9 +26,7 @@ from arbeitszeit.entities import (
 from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.repositories import (
     AccountRepository,
-    CompanyRepository,
     DatabaseGateway,
-    MemberRepository,
     PlanDraftRepository,
 )
 from arbeitszeit.use_cases import pay_consumer_product, pay_means_of_production
@@ -62,7 +60,7 @@ from tests.datetime_service import FakeDatetimeService
 class MemberGenerator:
     account_generator: AccountGenerator
     email_generator: EmailGenerator
-    member_repository: MemberRepository
+    database: DatabaseGateway
     datetime_service: FakeDatetimeService
     register_member_use_case: RegisterMemberUseCase
     password_hasher: PasswordHasher
@@ -87,16 +85,14 @@ class MemberGenerator:
                 )
             )
             assert not response.is_rejected
-            member = (
-                self.member_repository.get_members().with_email_address(email).first()
-            )
+            member = self.database.get_members().with_email_address(email).first()
             assert member
             return member
         if account is None:
             account = self.account_generator.create_account()
         if registered_on is None:
             registered_on = self.datetime_service.now()
-        member = self.member_repository.create_member(
+        member = self.database.create_member(
             email=email,
             name=name,
             password_hash=self.password_hasher.calculate_password_hash(password),
@@ -104,13 +100,13 @@ class MemberGenerator:
             registered_on=registered_on,
         )
         assert (
-            self.member_repository.get_members()
+            self.database.get_members()
             .with_id(member.id)
             .update()
             .set_confirmation_timestamp(registered_on)
             .perform()
         )
-        member = self.member_repository.get_members().with_id(member.id).first()
+        member = self.database.get_members().with_id(member.id).first()
         assert member
         return member
 
@@ -138,13 +134,13 @@ class MemberGenerator:
 @dataclass
 class CompanyGenerator:
     account_generator: AccountGenerator
-    company_repository: CompanyRepository
     email_generator: EmailGenerator
     datetime_service: FakeDatetimeService
     company_manager: CompanyManager
     register_company_use_case: RegisterCompany
     confirm_company_use_case: ConfirmCompanyUseCase
     password_hasher: PasswordHasher
+    database: DatabaseGateway
 
     def create_company_entity(
         self,
@@ -159,7 +155,7 @@ class CompanyGenerator:
             email = self.email_generator.get_random_email()
         if registered_on is None:
             registered_on = self.datetime_service.now()
-        company = self.company_repository.create_company(
+        company = self.database.create_company(
             email=email,
             name=name,
             password_hash=self.password_hasher.calculate_password_hash(password),
@@ -495,7 +491,6 @@ class CooperationGenerator:
     datetime_service: FakeDatetimeService
     company_generator: CompanyGenerator
     database_gateway: DatabaseGateway
-    company_repository: CompanyRepository
 
     def create_cooperation(
         self,

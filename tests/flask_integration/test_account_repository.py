@@ -1,11 +1,7 @@
 from uuid import uuid4
 
 from arbeitszeit.entities import SocialAccounting
-from arbeitszeit_flask.database.repositories import (
-    AccountRepository,
-    CompanyRepository,
-    MemberRepository,
-)
+from arbeitszeit_flask.database.repositories import AccountRepository
 from tests.data_generators import (
     AccountGenerator,
     CompanyGenerator,
@@ -26,8 +22,6 @@ class RepositoryTester(FlaskTestCase):
         self.repository: AccountRepository = self.injector.get(AccountRepository)
         self.member_generator = self.injector.get(MemberGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
-        self.member_repository = self.injector.get(MemberRepository)
-        self.company_repository = self.injector.get(CompanyRepository)
         self.social_accounting = self.injector.get(SocialAccounting)
 
     def test_the_account_balance_of_newly_created_accounts_is_0(self) -> None:
@@ -102,8 +96,7 @@ class RepositoryTester(FlaskTestCase):
         assert self.repository.get_accounts().with_id(actual_id)
 
     def test_that_account_joined_with_owner_yields_original_member(self) -> None:
-        member_id = self.member_generator.create_member()
-        member = self.member_repository.get_members().with_id(member_id).first()
+        member = self.member_generator.create_member_entity()
         assert member
         result = (
             self.repository.get_accounts()
@@ -115,8 +108,7 @@ class RepositoryTester(FlaskTestCase):
         assert member == result[1]
 
     def test_that_p_account_joined_with_owner_yields_original_company(self) -> None:
-        self.company_generator.create_company()
-        company = self.company_repository.get_companies().first()
+        company = self.company_generator.create_company_entity()
         assert company
         result = (
             self.repository.get_accounts()
@@ -128,8 +120,7 @@ class RepositoryTester(FlaskTestCase):
         assert company == result[1]
 
     def test_that_r_account_joined_with_owner_yields_original_company(self) -> None:
-        self.company_generator.create_company()
-        company = self.company_repository.get_companies().first()
+        company = self.company_generator.create_company_entity()
         assert company
         result = (
             self.repository.get_accounts()
@@ -141,8 +132,7 @@ class RepositoryTester(FlaskTestCase):
         assert company == result[1]
 
     def test_that_a_account_joined_with_owner_yields_original_company(self) -> None:
-        self.company_generator.create_company()
-        company = self.company_repository.get_companies().first()
+        company = self.company_generator.create_company_entity()
         assert company
         result = (
             self.repository.get_accounts()
@@ -154,8 +144,7 @@ class RepositoryTester(FlaskTestCase):
         assert company == result[1]
 
     def test_that_prd_account_joined_with_owner_yields_original_company(self) -> None:
-        self.company_generator.create_company()
-        company = self.company_repository.get_companies().first()
+        company = self.company_generator.create_company_entity()
         assert company
         result = (
             self.repository.get_accounts()

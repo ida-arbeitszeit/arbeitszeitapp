@@ -11,7 +11,7 @@ from arbeitszeit.entities import (
     PurposesOfPurchases,
     Transaction,
 )
-from arbeitszeit.repositories import CompanyRepository, DatabaseGateway
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -28,7 +28,6 @@ class PurchaseQueryResponse:
 @dataclass
 class QueryCompanyPurchases:
     database_gateway: DatabaseGateway
-    company_repository: CompanyRepository
 
     def __call__(
         self,
@@ -36,9 +35,7 @@ class QueryCompanyPurchases:
     ) -> Iterator[PurchaseQueryResponse]:
         purchases = self.database_gateway.get_company_purchases()
         purchases = purchases.where_buyer_is_company(company=company)
-        company_entity = (
-            self.company_repository.get_companies().with_id(company).first()
-        )
+        company_entity = self.database_gateway.get_companies().with_id(company).first()
         assert company_entity
         return (
             self._purchase_to_response_model(

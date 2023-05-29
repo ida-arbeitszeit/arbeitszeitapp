@@ -836,90 +836,6 @@ class AccountRepository(interfaces.AccountRepository):
 
 
 @singleton
-class MemberRepository(interfaces.MemberRepository):
-    def __init__(self, datetime_service: DatetimeService, entities: EntityStorage):
-        self.datetime_service = datetime_service
-        self.entities = entities
-
-    def create_member(
-        self,
-        *,
-        email: str,
-        name: str,
-        password_hash: str,
-        account: Account,
-        registered_on: datetime,
-    ) -> Member:
-        id = uuid4()
-        member = Member(
-            id=id,
-            name=name,
-            email=email,
-            account=account.id,
-            registered_on=registered_on,
-            confirmed_on=None,
-            password_hash=password_hash,
-        )
-        self.entities.members[id] = member
-        self.entities.account_owner_by_account[member.account] = member
-        return member
-
-    def get_members(self) -> MemberResult:
-        return MemberResult(
-            items=lambda: self.entities.members.values(),
-            entities=self.entities,
-        )
-
-    def _get_member_by_email(self, email: str) -> Optional[Member]:
-        for member in self.entities.members.values():
-            if member.email == email:
-                return member
-        return None
-
-
-@singleton
-class CompanyRepository(interfaces.CompanyRepository):
-    def __init__(self, entities: EntityStorage) -> None:
-        self.entities = entities
-
-    def create_company(
-        self,
-        email: str,
-        name: str,
-        password_hash: str,
-        means_account: Account,
-        labour_account: Account,
-        resource_account: Account,
-        products_account: Account,
-        registered_on: datetime,
-    ) -> Company:
-        new_company = Company(
-            id=uuid4(),
-            email=email,
-            name=name,
-            means_account=means_account.id,
-            raw_material_account=resource_account.id,
-            work_account=labour_account.id,
-            product_account=products_account.id,
-            registered_on=registered_on,
-            confirmed_on=None,
-            password_hash=password_hash,
-        )
-        self.entities.companies[new_company.id] = new_company
-        self.entities.account_owner_by_account[means_account.id] = new_company
-        self.entities.account_owner_by_account[labour_account.id] = new_company
-        self.entities.account_owner_by_account[resource_account.id] = new_company
-        self.entities.account_owner_by_account[products_account.id] = new_company
-        return new_company
-
-    def get_companies(self) -> CompanyResult:
-        return CompanyResult(
-            items=lambda: self.entities.companies.values(),
-            entities=self.entities,
-        )
-
-
-@singleton
 class PlanDraftRepository(interfaces.PlanDraftRepository):
     def __init__(self) -> None:
         self.drafts: List[PlanDraft] = []
@@ -996,30 +912,6 @@ class PlanDraftRepository(interfaces.PlanDraftRepository):
 
 
 @singleton
-class AccountantRepositoryTestImpl:
-    def __init__(self, entities: EntityStorage) -> None:
-        self.accountants: Dict[UUID, Accountant] = dict()
-        self.entities = entities
-
-    def create_accountant(self, email: str, name: str, password_hash: str) -> UUID:
-        id = uuid4()
-        record = Accountant(
-            email_address=email,
-            name=name,
-            password_hash=password_hash,
-            id=id,
-        )
-        self.accountants[id] = record
-        return record.id
-
-    def get_accountants(self) -> AccountantResult:
-        return AccountantResult(
-            items=lambda: self.accountants.values(),
-            entities=self.entities,
-        )
-
-
-@singleton
 class FakeLanguageRepository:
     def __init__(self) -> None:
         self._language_codes: Set[str] = set()
@@ -1041,6 +933,7 @@ class EntityStorage:
         self.plans: Dict[UUID, Plan] = {}
         self.transactions: Dict[UUID, Transaction] = dict()
         self.accounts: List[Account] = []
+        self.accountants: Dict[UUID, Accountant] = dict()
         self.social_accounting = SocialAccounting(
             id=uuid4(),
             account=self.create_account().id,
@@ -1245,5 +1138,87 @@ class EntityStorage:
     def get_company_work_invites(self) -> CompanyWorkInviteResult:
         return CompanyWorkInviteResult(
             items=lambda: self.company_work_invites,
+            entities=self,
+        )
+
+    def create_accountant(self, email: str, name: str, password_hash: str) -> UUID:
+        id = uuid4()
+        record = Accountant(
+            email_address=email,
+            name=name,
+            password_hash=password_hash,
+            id=id,
+        )
+        self.accountants[id] = record
+        return record.id
+
+    def get_accountants(self) -> AccountantResult:
+        return AccountantResult(
+            items=lambda: self.accountants.values(),
+            entities=self,
+        )
+
+    def create_member(
+        self,
+        *,
+        email: str,
+        name: str,
+        password_hash: str,
+        account: Account,
+        registered_on: datetime,
+    ) -> Member:
+        id = uuid4()
+        member = Member(
+            id=id,
+            name=name,
+            email=email,
+            account=account.id,
+            registered_on=registered_on,
+            confirmed_on=None,
+            password_hash=password_hash,
+        )
+        self.members[id] = member
+        self.account_owner_by_account[member.account] = member
+        return member
+
+    def get_members(self) -> MemberResult:
+        return MemberResult(
+            items=lambda: self.members.values(),
+            entities=self,
+        )
+
+    def create_company(
+        self,
+        email: str,
+        name: str,
+        password_hash: str,
+        means_account: Account,
+        labour_account: Account,
+        resource_account: Account,
+        products_account: Account,
+        registered_on: datetime,
+    ) -> Company:
+        new_company = Company(
+            id=uuid4(),
+            email=email,
+            name=name,
+            means_account=means_account.id,
+            raw_material_account=resource_account.id,
+            work_account=labour_account.id,
+            product_account=products_account.id,
+            registered_on=registered_on,
+            confirmed_on=None,
+            password_hash=password_hash,
+        )
+        self.companies[new_company.id] = new_company
+        self.account_owner_by_account[means_account.id] = new_company
+        self.account_owner_by_account[labour_account.id] = new_company
+        self.account_owner_by_account[resource_account.id] = new_company
+        self.account_owner_by_account[products_account.id] = new_company
+        return new_company
+
+    def get_companies(self) -> CompanyResult:
+        return CompanyResult(
+            items=lambda: self.companies.values(),
             entities=self,
         )

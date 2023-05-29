@@ -10,7 +10,7 @@ from uuid import UUID
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan
 from arbeitszeit.price_calculator import PriceCalculator
-from arbeitszeit.repositories import CompanyRepository, DatabaseGateway, PlanResult
+from arbeitszeit.repositories import DatabaseGateway, PlanResult
 
 
 class PlanFilter(enum.Enum):
@@ -55,7 +55,6 @@ class QueryPlansRequest:
 
 @dataclass
 class QueryPlans:
-    company_repository: CompanyRepository
     price_calculator: PriceCalculator
     datetime_service: DatetimeService
     database_gateway: DatabaseGateway
@@ -104,7 +103,7 @@ class QueryPlans:
     def _plan_to_response_model(self, plan: Plan) -> QueriedPlan:
         price_per_unit = self.price_calculator.calculate_cooperative_price(plan)
         assert plan.activation_date
-        planner = self.company_repository.get_companies().with_id(plan.planner).first()
+        planner = self.database_gateway.get_companies().with_id(plan.planner).first()
         assert planner
         return QueriedPlan(
             plan_id=plan.id,

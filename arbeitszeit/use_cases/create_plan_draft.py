@@ -5,7 +5,7 @@ from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import ProductionCosts
-from arbeitszeit.repositories import CompanyRepository, PlanDraftRepository
+from arbeitszeit.repositories import DatabaseGateway, PlanDraftRepository
 
 
 @dataclass
@@ -37,7 +37,7 @@ class CreatePlanDraftResponse:
 @dataclass
 class CreatePlanDraft:
     plan_draft_repository: PlanDraftRepository
-    company_repository: CompanyRepository
+    database: DatabaseGateway
     datetime_service: DatetimeService
 
     def __call__(self, request: CreatePlanDraftRequest) -> CreatePlanDraftResponse:
@@ -52,7 +52,7 @@ class CreatePlanDraft:
                 draft_id=None,
                 rejection_reason=CreatePlanDraftResponse.RejectionReason.negative_plan_input,
             )
-        if not self.company_repository.get_companies().with_id(request.planner):
+        if not self.database.get_companies().with_id(request.planner):
             return CreatePlanDraftResponse(
                 draft_id=None,
                 rejection_reason=CreatePlanDraftResponse.RejectionReason.planner_does_not_exist,

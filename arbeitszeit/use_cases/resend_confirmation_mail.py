@@ -5,7 +5,7 @@ from arbeitszeit.presenters import (
     CompanyRegistrationMessagePresenter,
     MemberRegistrationMessagePresenter,
 )
-from arbeitszeit.repositories import CompanyRepository, MemberRepository
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -18,22 +18,19 @@ class ResendConfirmationMailUseCase:
     class Response:
         is_token_sent: bool = False
 
-    company_repository: CompanyRepository
     company_registration_message_presenter: CompanyRegistrationMessagePresenter
-    member_repository: MemberRepository
     member_registration_message_presenter: MemberRegistrationMessagePresenter
+    database: DatabaseGateway
 
     def resend_confirmation_mail(self, request: Request) -> Response:
-        member = self.member_repository.get_members().with_id(request.user).first()
+        member = self.database.get_members().with_id(request.user).first()
         if member and member.confirmed_on is None:
             self.member_registration_message_presenter.show_member_registration_message(
                 member.email,
             )
             return self.Response(is_token_sent=True)
         if (
-            company := self.company_repository.get_companies()
-            .with_id(request.user)
-            .first()
+            company := self.database.get_companies().with_id(request.user).first()
         ) and company.confirmed_on is None:
             self.company_registration_message_presenter.show_company_registration_message(
                 company.email,

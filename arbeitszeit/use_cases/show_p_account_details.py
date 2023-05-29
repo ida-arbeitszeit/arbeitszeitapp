@@ -7,7 +7,7 @@ from itertools import accumulate
 from typing import List
 from uuid import UUID
 
-from arbeitszeit.repositories import AccountRepository, CompanyRepository
+from arbeitszeit.repositories import AccountRepository, DatabaseGateway
 from arbeitszeit.transactions import TransactionTypes, UserAccountingService
 
 
@@ -33,11 +33,11 @@ class ShowPAccountDetailsUseCase:
         plot: ShowPAccountDetailsUseCase.PlotDetails
 
     accounting_service: UserAccountingService
-    company_repository: CompanyRepository
     account_repository: AccountRepository
+    database: DatabaseGateway
 
     def __call__(self, company_id: UUID) -> Response:
-        company = self.company_repository.get_companies().with_id(company_id).first()
+        company = self.database.get_companies().with_id(company_id).first()
         assert company
         transactions = [
             self.TransactionInfo(

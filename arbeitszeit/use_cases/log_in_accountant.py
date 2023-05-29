@@ -6,7 +6,7 @@ from typing import Optional
 from uuid import UUID
 
 from arbeitszeit.password_hasher import PasswordHasher
-from arbeitszeit.repositories import AccountantRepository
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -26,12 +26,12 @@ class LogInAccountantUseCase:
         user_id: Optional[UUID] = None
         rejection_reason: Optional[LogInAccountantUseCase.RejectionReason] = None
 
-    accountant_repository: AccountantRepository
+    database: DatabaseGateway
     password_hasher: PasswordHasher
 
     def log_in_accountant(self, request: Request) -> Response:
         accountant = (
-            self.accountant_repository.get_accountants()
+            self.database.get_accountants()
             .with_email_address(request.email_address)
             .first()
         )

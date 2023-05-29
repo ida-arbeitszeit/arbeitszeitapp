@@ -39,9 +39,6 @@ class InMemoryModule(Module):
         binder[interfaces.LanguageRepository] = AliasProvider(  # type: ignore
             repositories.FakeLanguageRepository
         )
-        binder[interfaces.AccountantRepository] = AliasProvider(  # type: ignore
-            repositories.AccountantRepositoryTestImpl
-        )
         binder[AccountantInvitationPresenter] = AliasProvider(  # type: ignore
             AccountantInvitationPresenterTestImpl
         )
@@ -50,15 +47,6 @@ class InMemoryModule(Module):
         )
         binder[interfaces.AccountRepository] = AliasProvider(  # type: ignore
             repositories.AccountRepository
-        )
-        binder[interfaces.MemberRepository] = AliasProvider(  # type: ignore
-            repositories.MemberRepository
-        )
-        binder[interfaces.MemberRepository] = AliasProvider(  # type: ignore
-            repositories.MemberRepository
-        )
-        binder[interfaces.CompanyRepository] = AliasProvider(  # type: ignore
-            repositories.CompanyRepository
         )
         binder[interfaces.PlanDraftRepository] = AliasProvider(  # type: ignore
             repositories.PlanDraftRepository

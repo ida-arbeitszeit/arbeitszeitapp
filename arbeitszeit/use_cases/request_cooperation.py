@@ -5,7 +5,7 @@ from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Company, Cooperation
-from arbeitszeit.repositories import CompanyRepository, DatabaseGateway
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -38,7 +38,6 @@ class RequestCooperationResponse:
 @dataclass
 class RequestCooperation:
     database_gateway: DatabaseGateway
-    company_repository: CompanyRepository
     datetime_service: DatetimeService
 
     def __call__(

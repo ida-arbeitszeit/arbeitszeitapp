@@ -4,11 +4,7 @@ from dataclasses import dataclass
 from typing import Optional
 from uuid import UUID
 
-from arbeitszeit.repositories import (
-    CompanyRepository,
-    DatabaseGateway,
-    MemberRepository,
-)
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -24,14 +20,12 @@ class InviteWorkerToCompanyUseCase:
         invite_id: Optional[UUID] = None
 
     database_gateway: DatabaseGateway
-    member_repository: MemberRepository
-    company_repository: CompanyRepository
 
     def __call__(self, request: Request) -> Response:
-        addressee = self.member_repository.get_members().with_id(request.worker).first()
+        addressee = self.database_gateway.get_members().with_id(request.worker).first()
         if addressee is None:
             return self.Response(is_success=False)
-        if not self.company_repository.get_companies().with_id(request.company):
+        if not self.database_gateway.get_companies().with_id(request.company):
             return self.Response(is_success=False)
         if (
             self.database_gateway.get_company_work_invites()
