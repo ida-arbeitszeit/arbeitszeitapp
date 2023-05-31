@@ -2,7 +2,17 @@ from typing import List
 
 from flask_restx.reqparse import RequestParser
 
+from arbeitszeit_web.api_controllers.expected_input import InputLocation
 from arbeitszeit_web.api_controllers.query_plans_api_controller import ExpectedInput
+
+
+def _generate_location(location: InputLocation) -> str:
+    if location == InputLocation.query:
+        return "query"
+    elif location == InputLocation.form:
+        return "form"
+    else:
+        return "path"
 
 
 def generate_input_documentation(
@@ -15,6 +25,7 @@ def generate_input_documentation(
             type=input.type,
             help=input.description,
             default=input.default,
-            location=input.location,
+            location=_generate_location(input.location),
+            required=input.required,
         )
     return parser

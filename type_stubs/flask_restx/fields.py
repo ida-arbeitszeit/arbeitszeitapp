@@ -2,11 +2,18 @@ from typing import Any, Optional
 
 
 class String:
-    ...
+    def __init__(self, required: bool = ...):
+        pass
+
+    @property
+    def required(self):
+        ...
 
 
 class Nested:
-    def __init__(self, model: Any, as_list: Optional[bool] = ...) -> None:
+    def __init__(
+        self, model: Any, as_list: Optional[bool] = ..., skip_none: bool = ...
+    ) -> None:
         ...
 
     @property
@@ -15,19 +22,39 @@ class Nested:
 
 
 class Arbitrary:
-    ...
+    def __init__(self, required: bool = ...):
+        pass
+
+    @property
+    def required(self):
+        ...
 
 
 class Boolean:
-    ...
+    def __init__(self, required: bool = ...):
+        pass
+
+    @property
+    def required(self):
+        ...
 
 
 class DateTime:
-    ...
+    def __init__(self, required: bool = ...):
+        pass
+
+    @property
+    def required(self):
+        ...
 
 
 class Integer:
-    ...
+    def __init__(self, required: bool = ...):
+        pass
+
+    @property
+    def required(self):
+        ...
 
 
 class List:
@@ -36,4 +63,8 @@ class List:
 
     @property
     def container(self):
+        ...
+
+    @property
+    def required(self):
         ...
