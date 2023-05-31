@@ -17,8 +17,7 @@ class error_response_handling:
         self._register_error_handlers()
 
     def __call__(self, original_function):
-        decorated_fn = self._add_documention_of_error_responses(original_function)
-        return decorated_fn
+        return self._add_documention_of_error_responses(original_function)
 
     def _register_error_handlers(self) -> None:
         for error in self._error_responses:
