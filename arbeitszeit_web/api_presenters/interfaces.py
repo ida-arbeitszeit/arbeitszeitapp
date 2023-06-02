@@ -16,6 +16,7 @@ class JsonObject:
     members: Dict[str, JsonValue]
     name: str
     as_list: bool = False
+    required: bool = True
 
 
 @dataclass

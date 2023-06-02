@@ -24,6 +24,12 @@ class ApiResponseError(Protocol):
         ...
 
 
+error_response_schema = JsonObject(
+    members=dict(message=JsonString()),
+    name="Error",
+)
+
+
 class Unauthorized(Exception):
     code = 401
     description = "Unauthorized"
@@ -33,10 +39,7 @@ class Unauthorized(Exception):
 
     @classmethod
     def get_schema(cls) -> JsonValue:
-        return JsonObject(
-            members=dict(message=JsonString()),
-            name="Error",
-        )
+        return error_response_schema
 
 
 class BadRequest(Exception):
@@ -48,7 +51,16 @@ class BadRequest(Exception):
 
     @classmethod
     def get_schema(cls) -> JsonValue:
-        return JsonObject(
-            members=dict(message=JsonString()),
-            name="Error",
-        )
+        return error_response_schema
+
+
+class NotFound(Exception):
+    code = 404
+    description = "Not Found"
+
+    def __init__(self, message: str) -> None:
+        self.message = message
+
+    @classmethod
+    def get_schema(cls) -> JsonValue:
+        return error_response_schema
