@@ -49,7 +49,7 @@ class GetPlanSummaryCompanySuccessPresenter:
         show_own_plan_action_section = (
             response.current_user_is_planner and plan_summary.is_active
         )
-        return GetPlanSummaryCompanyViewModel(
+        view_model = GetPlanSummaryCompanyViewModel(
             summary=self.plan_summary_service.format_plan_summary(plan_summary),
             show_own_plan_action_section=show_own_plan_action_section,
             own_plan_action=OwnPlanAction(
@@ -61,7 +61,7 @@ class GetPlanSummaryCompanySuccessPresenter:
                 end_coop_url=self.url_index.get_end_coop_url(
                     plan_id=plan_id, cooperation_id=coop_id
                 )
-                if coop_id
+                if (coop_id and is_cooperating)
                 else None,
                 request_coop_url=self.url_index.get_request_coop_url()
                 if not is_cooperating
@@ -70,3 +70,4 @@ class GetPlanSummaryCompanySuccessPresenter:
             show_payment_url=True if not response.current_user_is_planner else False,
             payment_url=self.url_index.get_pay_means_of_production_url(plan_id),
         )
+        return view_model
