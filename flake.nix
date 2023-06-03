@@ -2,12 +2,14 @@
   description = "Arbeitszeitapp";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    nixos-stable.url = "github:NixOS/nixpkgs/nixos-22.11";
+    nixos-22-11.url = "github:NixOS/nixpkgs/nixos-22.11";
+    nixos-23-05.url = "github:NixOS/nixpkgs/nixos-23.05";
     flake-utils.url = "github:numtide/flake-utils";
     flask-profiler.url = "github:seppeljordan/flask-profiler";
   };
 
-  outputs = { self, nixpkgs, flake-utils, flask-profiler, nixos-stable }:
+  outputs =
+    { self, nixpkgs, flake-utils, flask-profiler, nixos-22-11, nixos-23-05 }:
     let
       supportedSystems = [ "x86_64-linux" ];
       systemDependent = flake-utils.lib.eachSystem supportedSystems (system:
@@ -16,14 +18,19 @@
             inherit system;
             overlays = [ self.overlays.default ];
           };
-          pkgsStable = import nixos-stable {
+          pkgs-22-11 = import nixos-22-11 {
+            inherit system;
+            overlays = [ self.overlays.default ];
+          };
+          pkgs-23-05 = import nixos-23-05 {
             inherit system;
             overlays = [ self.overlays.default ];
           };
         in {
           devShells = {
             default = pkgs.callPackage nix/devShell.nix { };
-            stable = pkgsStable.callPackage nix/devShell.nix { };
+            nixos-22-11 = pkgs-22-11.callPackage nix/devShell.nix { };
+            nixos-23-05 = pkgs-23-05.callPackage nix/devShell.nix { };
           };
           packages = {
             default = pkgs.python3.pkgs.arbeitszeitapp;
