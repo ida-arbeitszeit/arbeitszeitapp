@@ -29,7 +29,11 @@ from arbeitszeit.repositories import (
     DatabaseGateway,
     PlanDraftRepository,
 )
-from arbeitszeit.use_cases import pay_consumer_product, pay_means_of_production
+from arbeitszeit.use_cases import (
+    confirm_member,
+    pay_consumer_product,
+    pay_means_of_production,
+)
 from arbeitszeit.use_cases.accept_cooperation import (
     AcceptCooperation,
     AcceptCooperationRequest,
@@ -63,6 +67,7 @@ class MemberGenerator:
     database: DatabaseGateway
     datetime_service: FakeDatetimeService
     register_member_use_case: RegisterMemberUseCase
+    confirm_member_use_case: confirm_member.ConfirmMemberUseCase
     password_hasher: PasswordHasher
 
     def create_member_entity(
@@ -70,43 +75,25 @@ class MemberGenerator:
         *,
         email: Optional[str] = None,
         name: str = "test member name",
-        account: Optional[Account] = None,
         password: str = "password",
-        registered_on: Optional[datetime] = None,
         confirmed: bool = True,
     ) -> Member:
-        if not email:
+        if email is None:
             email = self.email_generator.get_random_email()
-        assert email is not None
-        if not confirmed:
-            response = self.register_member_use_case.register_member(
-                request=RegisterMemberUseCase.Request(
-                    email=email, name=name, password=password
+        register_response = self.register_member_use_case.register_member(
+            request=RegisterMemberUseCase.Request(
+                email=email, name=name, password=password
+            )
+        )
+        assert register_response.user_id
+        if confirmed:
+            confirm_response = self.confirm_member_use_case.confirm_member(
+                confirm_member.ConfirmMemberUseCase.Request(
+                    email_address=email,
                 )
             )
-            assert not response.is_rejected
-            member = self.database.get_members().with_email_address(email).first()
-            assert member
-            return member
-        if account is None:
-            account = self.account_generator.create_account()
-        if registered_on is None:
-            registered_on = self.datetime_service.now()
-        member = self.database.create_member(
-            email=email,
-            name=name,
-            password_hash=self.password_hasher.calculate_password_hash(password),
-            account=account,
-            registered_on=registered_on,
-        )
-        assert (
-            self.database.get_members()
-            .with_id(member.id)
-            .update()
-            .set_confirmation_timestamp(registered_on)
-            .perform()
-        )
-        member = self.database.get_members().with_id(member.id).first()
+            assert confirm_response.is_confirmed
+        member = self.database.get_members().with_id(register_response.user_id).first()
         assert member
         return member
 
@@ -115,17 +102,13 @@ class MemberGenerator:
         *,
         email: Optional[str] = None,
         name: str = "test member name",
-        account: Optional[Account] = None,
         password: str = "password",
-        registered_on: Optional[datetime] = None,
         confirmed: bool = True,
     ) -> UUID:
         member = self.create_member_entity(
             email=email,
             name=name,
             password=password,
-            account=account,
-            registered_on=registered_on,
             confirmed=confirmed,
         )
         return member.id
@@ -216,7 +199,7 @@ class AccountGenerator:
 
 
 class EmailGenerator:
-    def get_random_email(self):
+    def get_random_email(self) -> str:
         return str(uuid4()) + "@cp.org"
 
 
