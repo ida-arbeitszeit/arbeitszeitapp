@@ -220,9 +220,15 @@ class MemberUpdateTests(FlaskTestCase):
         self.database_gateway.get_members().with_id(
             member_id
         ).update().set_confirmation_timestamp(expected_timestamp).perform()
-        member = self.database_gateway.get_members().with_id(member_id).first()
-        assert member
-        assert member.confirmed_on == expected_timestamp
+        record = (
+            self.database_gateway.get_members()
+            .with_id(member_id)
+            .joined_with_email_address()
+            .first()
+        )
+        assert record
+        _, email = record
+        assert email.confirmed_on == expected_timestamp
 
     def test_that_member_confirmation_returns_the_count_of_update_members(self) -> None:
         expected_count = 5
@@ -243,9 +249,15 @@ class MemberUpdateTests(FlaskTestCase):
         self.database_gateway.get_members().with_id(
             member_id
         ).update().set_confirmation_timestamp(expected_timestamp).perform()
-        member = self.database_gateway.get_members().with_id(other_member_id).first()
-        assert member
-        assert member.confirmed_on is None
+        record = (
+            self.database_gateway.get_members()
+            .with_id(other_member_id)
+            .joined_with_email_address()
+            .first()
+        )
+        assert record
+        _, email = record
+        assert email.confirmed_on is None
 
     def create_member(self) -> UUID:
         member = self.database_gateway.create_member(
