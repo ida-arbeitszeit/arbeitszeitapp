@@ -18,6 +18,7 @@ from arbeitszeit.entities import (
     CompanyWorkInvite,
     ConsumerPurchase,
     Cooperation,
+    EmailAddress,
     LabourCertificatesPayout,
     Member,
     PayoutFactor,
@@ -207,6 +208,9 @@ class MemberResult(QueryResult[Member], Protocol):
     def with_email_address(self, email: str) -> MemberResult:
         ...
 
+    def joined_with_email_address(self) -> QueryResult[Tuple[Member, EmailAddress]]:
+        ...
+
     def update(self) -> MemberUpdate:
         """Prepare an update for all selected members."""
 
@@ -277,6 +281,9 @@ class CompanyResult(QueryResult[Company], Protocol):
         ...
 
     def that_are_confirmed(self) -> Self:
+        ...
+
+    def joined_with_email_address(self) -> QueryResult[Tuple[Company, EmailAddress]]:
         ...
 
     def update(self) -> CompanyUpdate:
@@ -370,6 +377,10 @@ class CompanyWorkInviteResult(QueryResult[CompanyWorkInvite], Protocol):
 
     def delete(self) -> None:
         ...
+
+
+class EmailAddressResult(QueryResult[EmailAddress], Protocol):
+    ...
 
 
 class AccountRepository(ABC):

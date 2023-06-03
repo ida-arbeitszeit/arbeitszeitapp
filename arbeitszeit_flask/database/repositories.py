@@ -391,6 +391,25 @@ class MemberQueryResult(FlaskQueryResult[entities.Member]):
             lambda query: query.join(user).filter(user.email_confirmed_on != None)
         )
 
+    def joined_with_email_address(
+        self,
+    ) -> FlaskQueryResult[Tuple[entities.Member, entities.EmailAddress]]:
+        def mapper(row):
+            member_orm, user_orm = row
+            return (
+                DatabaseGatewayImpl.member_from_orm(member_orm),
+                DatabaseGatewayImpl.email_address_from_orm(user_orm),
+            )
+
+        user = aliased(models.User)
+        return FlaskQueryResult(
+            mapper=mapper,
+            db=self.db,
+            query=self.query.join(user, user.id == models.Member.user_id).with_entities(
+                models.Member, user
+            ),
+        )
+
     def update(self) -> MemberUpdate:
         return MemberUpdate(
             query=self.query,
@@ -478,6 +497,25 @@ class CompanyQueryResult(FlaskQueryResult[entities.Company]):
             lambda query: query.join(user, user.id == models.Company.user_id).filter(
                 user.email_confirmed_on != None
             )
+        )
+
+    def joined_with_email_address(
+        self,
+    ) -> FlaskQueryResult[Tuple[entities.Company, entities.EmailAddress]]:
+        def mapper(row):
+            company_orm, user_orm = row
+            return (
+                DatabaseGatewayImpl.company_from_orm(company_orm),
+                DatabaseGatewayImpl.email_address_from_orm(user_orm),
+            )
+
+        user = aliased(models.User)
+        return FlaskQueryResult(
+            mapper=mapper,
+            db=self.db,
+            query=self.query.join(
+                user, user.id == models.Company.user_id
+            ).with_entities(models.Company, user),
         )
 
     def update(self) -> CompanyUpdate:
@@ -1487,7 +1525,6 @@ class DatabaseGatewayImpl:
             account=UUID(orm_object.account),
             email=orm_object.user.email,
             registered_on=orm_object.registered_on,
-            confirmed_on=orm_object.user.email_confirmed_on,
             password_hash=orm_object.user.password,
         )
 
@@ -1542,7 +1579,6 @@ class DatabaseGatewayImpl:
             work_account=UUID(company_orm.a_account),
             product_account=UUID(company_orm.prd_account),
             registered_on=company_orm.registered_on,
-            confirmed_on=company_orm.user.email_confirmed_on,
             password_hash=company_orm.user.password,
         )
 
@@ -1608,4 +1644,11 @@ class DatabaseGatewayImpl:
             name=orm.name,
             id=UUID(orm.id),
             password_hash=orm.user.password,
+        )
+
+    @classmethod
+    def email_address_from_orm(self, orm: models.User) -> entities.EmailAddress:
+        return entities.EmailAddress(
+            orm.email,
+            confirmed_on=orm.email_confirmed_on,
         )

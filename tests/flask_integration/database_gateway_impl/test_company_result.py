@@ -301,3 +301,20 @@ class WithEmailContainingTests(FlaskTestCase):
         )
         assert returned_company
         assert returned_company[0].id == expected_company_id
+
+
+class JoinedWithEmailTests(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.company_generator = self.injector.get(CompanyGenerator)
+
+    def test_that_company_email_is_yielded(self) -> None:
+        expected_email = "test@test.test"
+        company = self.company_generator.create_company(email=expected_email)
+        record = (
+            self.database_gateway.get_companies()
+            .with_id(company)
+            .joined_with_email_address()
+            .first()
+        )
+        assert record

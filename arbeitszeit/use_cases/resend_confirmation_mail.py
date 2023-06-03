@@ -23,17 +23,30 @@ class ResendConfirmationMailUseCase:
     database: DatabaseGateway
 
     def resend_confirmation_mail(self, request: Request) -> Response:
-        member = self.database.get_members().with_id(request.user).first()
-        if member and member.confirmed_on is None:
-            self.member_registration_message_presenter.show_member_registration_message(
-                member.email,
-            )
-            return self.Response(is_token_sent=True)
-        if (
-            company := self.database.get_companies().with_id(request.user).first()
-        ) and company.confirmed_on is None:
-            self.company_registration_message_presenter.show_company_registration_message(
-                company.email,
-            )
-            return self.Response(is_token_sent=True)
+        member_record = (
+            self.database.get_members()
+            .with_id(request.user)
+            .joined_with_email_address()
+            .first()
+        )
+        if member_record is not None:
+            _, email = member_record
+            if email.confirmed_on is None:
+                self.member_registration_message_presenter.show_member_registration_message(
+                    email.address,
+                )
+                return self.Response(is_token_sent=True)
+        company_record = (
+            self.database.get_companies()
+            .with_id(request.user)
+            .joined_with_email_address()
+            .first()
+        )
+        if company_record is not None:
+            _, email = company_record
+            if email.confirmed_on is None:
+                self.company_registration_message_presenter.show_company_registration_message(
+                    email.address,
+                )
+                return self.Response(is_token_sent=True)
         return self.Response()

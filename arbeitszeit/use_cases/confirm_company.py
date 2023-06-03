@@ -23,17 +23,19 @@ class ConfirmCompanyUseCase:
     datetime_service: DatetimeService
 
     def confirm_company(self, request: Request) -> Response:
-        company = (
+        record = (
             self.database.get_companies()
             .with_email_address(request.email_address)
+            .joined_with_email_address()
             .first()
         )
-        if not company:
+        if not record:
             return self.Response(
                 user_id=None,
                 is_confirmed=False,
             )
-        elif company.confirmed_on is None:
+        company, email = record
+        if email.confirmed_on is None:
             self.database.get_companies().with_email_address(
                 request.email_address
             ).update().set_confirmation_timestamp(self.datetime_service.now()).perform()
