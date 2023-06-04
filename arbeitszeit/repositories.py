@@ -184,6 +184,14 @@ class PlanUpdate(Protocol):
         """
 
 
+class PlanDraftResult(QueryResult[PlanDraft], Protocol):
+    def with_id(self, id_: UUID) -> Self:
+        ...
+
+    def planned_by(self, *company: UUID) -> Self:
+        ...
+
+
 class CooperationResult(QueryResult[Cooperation], Protocol):
     def with_id(self, id_: UUID) -> Self:
         ...
@@ -431,15 +439,11 @@ class PlanDraftRepository(ABC):
         pass
 
     @abstractmethod
-    def get_by_id(self, id: UUID) -> Optional[PlanDraft]:
+    def get_plan_drafts(self) -> PlanDraftResult:
         pass
 
     @abstractmethod
     def delete_draft(self, id: UUID) -> None:
-        pass
-
-    @abstractmethod
-    def all_drafts_of_company(self, id: UUID) -> Iterable[PlanDraft]:
         pass
 
 

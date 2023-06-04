@@ -56,12 +56,15 @@ class PlanDraftRepositoryBaseTests(FlaskTestCase):
 
 class PlanDraftRepositoryTests(PlanDraftRepositoryBaseTests):
     def test_plan_draft_repository(self) -> None:
-        draft = self.repo.get_by_id(uuid4())
+        draft = self.repo.get_plan_drafts().with_id(uuid4()).first()
         assert draft is None
 
     def test_created_drafts_can_be_retrieved_by_their_id(self) -> None:
         expected_draft = self.create_plan_draft()
-        self.assertEqual(expected_draft, self.repo.get_by_id(expected_draft.id))
+        self.assertEqual(
+            expected_draft,
+            self.repo.get_plan_drafts().with_id(expected_draft.id).first(),
+        )
 
     def test_created_draft_name_specified_on_creation(self) -> None:
         expected_product_name = "test product name"
@@ -114,20 +117,19 @@ class PlanDraftRepositoryTests(PlanDraftRepositoryBaseTests):
     def test_deleted_drafts_cannot_be_retrieved_anymore(self) -> None:
         draft = self.create_plan_draft()
         self.repo.delete_draft(draft.id)
-        self.assertIsNone(self.repo.get_by_id(draft.id))
+        self.assertIsNone(self.repo.get_plan_drafts().with_id(draft.id).first())
 
     def test_all_drafts_can_be_retrieved(self) -> None:
         expected_draft1 = self.create_plan_draft()
         expected_draft2 = self.create_plan_draft()
-        drafts = self.repo.all_drafts_of_company(self.planner.id)
+        drafts = self.repo.get_plan_drafts().planned_by(self.planner.id)
         self.assertIn(expected_draft1, drafts)
         self.assertIn(expected_draft2, drafts)
 
     def test_that_nothing_is_returned_when_repo_is_empty_and_querying_all_drafts(
         self,
     ) -> None:
-        drafts = self.repo.all_drafts_of_company(self.planner.id)
-        self.assertFalse(list(drafts))
+        assert not self.repo.get_plan_drafts().planned_by(self.planner.id)
 
 
 class UpdateDraftTests(PlanDraftRepositoryBaseTests):
@@ -156,7 +158,7 @@ class UpdateDraftTests(PlanDraftRepositoryBaseTests):
                 product_name=None,
             )
         )
-        updated_draft = self.repo.get_by_id(self.old_draft.id)
+        updated_draft = self.repo.get_plan_drafts().with_id(self.old_draft.id).first()
         assert updated_draft
         self.assertEqual(updated_draft.product_name, expected_product_name)
 
@@ -184,7 +186,7 @@ class UpdateDraftTests(PlanDraftRepositoryBaseTests):
             expected_amount,
         )
 
-    def test_can_update_costs(self):
+    def test_can_update_costs(self) -> None:
         expected_costs = ProductionCosts(
             labour_cost=Decimal(54),
             means_cost=Decimal(274),
@@ -219,7 +221,7 @@ class UpdateDraftTests(PlanDraftRepositoryBaseTests):
                 id=self.old_draft.id, product_name="new product name"
             )
         )
-        other_draft = self.repo.get_by_id(self.other_draft.id)
+        other_draft = self.repo.get_plan_drafts().with_id(self.other_draft.id).first()
         assert other_draft
         self.assertNotEqual(other_draft.product_name, "new product name")
 
@@ -232,6 +234,6 @@ class UpdateDraftTests(PlanDraftRepositoryBaseTests):
         self.repo.update_draft(
             update=update,
         )
-        updated_draft = self.repo.get_by_id(self.old_draft.id)
+        updated_draft = self.repo.get_plan_drafts().with_id(self.old_draft.id).first()
         assert updated_draft
         self.assertEqual(getattr(updated_draft, attribute_name), expected_value)

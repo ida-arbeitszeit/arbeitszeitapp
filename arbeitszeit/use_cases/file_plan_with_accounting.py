@@ -27,7 +27,9 @@ class FilePlanWithAccounting:
     accountant_notifier: AccountantNotifier
 
     def file_plan_with_accounting(self, request: Request) -> Response:
-        draft = self.draft_repository.get_by_id(id=request.draft_id)
+        draft = (
+            self.draft_repository.get_plan_drafts().with_id(request.draft_id).first()
+        )
         if draft is not None and draft.planner == request.filing_company:
             plan = self.database_gateway.create_plan(
                 creation_timestamp=self.datetime_service.now(),

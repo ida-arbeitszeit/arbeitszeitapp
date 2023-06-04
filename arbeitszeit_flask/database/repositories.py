@@ -3,17 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field, replace
 from datetime import datetime
 from decimal import Decimal
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Generic,
-    Iterable,
-    Iterator,
-    Optional,
-    Tuple,
-    TypeVar,
-)
+from typing import Any, Callable, Dict, Generic, Iterator, Optional, Tuple, TypeVar
 from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
@@ -366,6 +356,20 @@ class PlanUpdate:
                 self.plan_update_values,
                 hidden_by_user=True,
             ),
+        )
+
+
+class PlanDraftResult(FlaskQueryResult[entities.PlanDraft]):
+    def with_id(self, id_: UUID) -> Self:
+        return self._with_modified_query(
+            lambda query: query.filter(models.PlanDraft.id == str(id_))
+        )
+
+    def planned_by(self, *company: UUID) -> Self:
+        return self._with_modified_query(
+            lambda query: query.filter(
+                models.PlanDraft.planner.in_([str(i) for i in company])
+            )
         )
 
 
@@ -1156,7 +1160,7 @@ class PlanDraftRepository(repositories.PlanDraftRepository):
             is_public_service=is_public_service,
         )
         self.db.session.add(orm)
-        return self._object_from_orm(orm)
+        return self.plan_draft_from_orm(orm)
 
     def update_draft(
         self, update: repositories.PlanDraftRepository.UpdateDraft
@@ -1198,17 +1202,18 @@ class PlanDraftRepository(repositories.PlanDraftRepository):
                 models.PlanDraft.id == str(update.id)
             ).update(update_instructions)
 
-    def get_by_id(self, id: UUID) -> Optional[entities.PlanDraft]:
-        orm = models.PlanDraft.query.filter(models.PlanDraft.id == str(id)).first()
-        if orm is None:
-            return None
-        else:
-            return self._object_from_orm(orm)
+    def get_plan_drafts(self) -> PlanDraftResult:
+        return PlanDraftResult(
+            db=self.db,
+            query=models.PlanDraft.query,
+            mapper=self.plan_draft_from_orm,
+        )
 
     def delete_draft(self, id: UUID) -> None:
         PlanDraft.query.filter_by(id=str(id)).delete()
 
-    def _object_from_orm(self, orm: PlanDraft) -> entities.PlanDraft:
+    @classmethod
+    def plan_draft_from_orm(cls, orm: models.PlanDraft) -> entities.PlanDraft:
         return entities.PlanDraft(
             id=orm.id,
             creation_date=orm.plan_creation_date,
@@ -1225,12 +1230,6 @@ class PlanDraftRepository(repositories.PlanDraftRepository):
             timeframe=orm.timeframe,
             is_public_service=orm.is_public_service,
         )
-
-    def all_drafts_of_company(self, id: UUID) -> Iterable[entities.PlanDraft]:
-        draft_owner = Company.query.filter_by(id=str(id)).first()
-        assert draft_owner is not None
-        drafts = draft_owner.drafts.all()
-        return (self._object_from_orm(draft) for draft in drafts)
 
 
 @dataclass

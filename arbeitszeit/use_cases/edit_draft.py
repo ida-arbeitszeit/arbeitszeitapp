@@ -30,7 +30,12 @@ class EditDraftUseCase:
 
     def edit_draft(self, request: Request) -> Response:
         if (
-            (draft := self.draft_repository.get_by_id(request.draft)) is not None
+            (
+                draft := self.draft_repository.get_plan_drafts()
+                .with_id(request.draft)
+                .first()
+            )
+            is not None
         ) and draft.planner == request.editor:
             self.draft_repository.update_draft(
                 update=self.draft_repository.UpdateDraft(
