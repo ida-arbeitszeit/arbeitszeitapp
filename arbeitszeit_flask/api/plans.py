@@ -1,6 +1,6 @@
 from flask_restx import Namespace, Resource
 
-from arbeitszeit.plan_summary import PlanSummaryService
+from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
 from arbeitszeit.use_cases.query_plans import QueryPlans
 from arbeitszeit_flask.api.input_documentation import generate_input_documentation
 from arbeitszeit_flask.api.response_handling import error_response_handling
@@ -62,11 +62,11 @@ class Plan(Resource):
         self,
         plan_id: str,
         controller: GetPlanApiController,
-        service: PlanSummaryService,
+        use_case: GetPlanSummaryUseCase,
         presenter: GetPlanApiPresenter,
     ):
         """Get plan summary."""
-        plan_uuid = controller.format_input(plan_id)
-        plan_summary = service.get_summary_from_plan(plan_uuid)
-        view_model = presenter.create_view_model(plan_summary)
+        use_case_request = controller.create_request(plan_id)
+        use_case_response = use_case.get_plan_summary(use_case_request)
+        view_model = presenter.create_view_model(use_case_response)
         return view_model

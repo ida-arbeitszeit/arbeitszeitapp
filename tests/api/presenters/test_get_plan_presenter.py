@@ -1,3 +1,4 @@
+from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
 from arbeitszeit_web.api_presenters.get_plan_api_presenter import GetPlanApiPresenter
 from arbeitszeit_web.api_presenters.interfaces import (
     JsonBoolean,
@@ -18,7 +19,7 @@ class TestViewModelCreation(BaseTestCase):
         self.presenter = self.injector.get(GetPlanApiPresenter)
         self.plan_summary_generator = self.injector.get(PlanSummaryGenerator)
 
-    def test_not_found_is_raised_if_no_plan_summary_is_given(self) -> None:
+    def test_not_found_is_raised_if_use_case_response_is_none(self) -> None:
         with self.assertRaises(NotFound) as err:
             self.presenter.create_view_model(None)
         self.assertEqual(err.exception.message, "No plan with such ID.")
@@ -27,7 +28,10 @@ class TestViewModelCreation(BaseTestCase):
         self,
     ) -> None:
         expected_plan_summary = self.plan_summary_generator.create_plan_summary()
-        view_model = self.presenter.create_view_model(expected_plan_summary)
+        use_case_response = GetPlanSummaryUseCase.Response(
+            plan_summary=expected_plan_summary
+        )
+        view_model = self.presenter.create_view_model(use_case_response)
         self.assertEqual(view_model, expected_plan_summary)
 
 

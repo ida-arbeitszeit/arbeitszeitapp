@@ -1,3 +1,7 @@
+"""
+some functionalities are tested in tests/presenters/test_plan_summary_formatter.py
+"""
+
 from uuid import uuid4
 
 from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
@@ -12,10 +16,6 @@ UseCaseResponse = GetPlanSummaryUseCase.Response
 
 
 class TestPresenterForPlanner(BaseTestCase):
-    """
-    some functionality are tested in tests/presenters/test_plan_summary_formatter.py
-    """
-
     def setUp(self) -> None:
         super().setUp()
         self.url_index = self.injector.get(UrlIndexTestImpl)
