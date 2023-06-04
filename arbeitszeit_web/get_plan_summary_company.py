@@ -34,13 +34,13 @@ class GetPlanSummaryCompanyViewModel:
 
 
 @dataclass
-class GetPlanSummaryCompanySuccessPresenter:
+class GetPlanSummaryCompanyPresenter:
     plan_summary_service: PlanSummaryFormatter
     url_index: UrlIndex
     session: Session
 
     def present(
-        self, response: GetPlanSummaryUseCase.Success
+        self, response: GetPlanSummaryUseCase.Response
     ) -> GetPlanSummaryCompanyViewModel:
         plan_summary = response.plan_summary
         current_user = self.session.get_current_user()

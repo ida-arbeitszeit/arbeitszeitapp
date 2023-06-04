@@ -10,13 +10,15 @@ class PriceChecker:
     get_plan_summary: GetPlanSummaryUseCase
 
     def get_unit_price(self, plan: UUID) -> Decimal:
-        response = self.get_plan_summary.get_plan_summary(plan)
-        assert isinstance(response, GetPlanSummaryUseCase.Success)
+        request = GetPlanSummaryUseCase.Request(plan)
+        response = self.get_plan_summary.get_plan_summary(request)
+        assert response
         return response.plan_summary.price_per_unit
 
     def get_unit_cost(self, plan: UUID) -> Decimal:
-        response = self.get_plan_summary.get_plan_summary(plan)
-        assert isinstance(response, GetPlanSummaryUseCase.Success)
+        request = GetPlanSummaryUseCase.Request(plan)
+        response = self.get_plan_summary.get_plan_summary(request)
+        assert response
         summary = response.plan_summary
         return (
             summary.means_cost + summary.resources_cost + summary.labour_cost

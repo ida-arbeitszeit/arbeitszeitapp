@@ -1,4 +1,4 @@
-from typing import Callable, Optional, cast
+from typing import Callable, Optional
 from uuid import UUID, uuid4
 
 from arbeitszeit.entities import ProductionCosts
@@ -70,23 +70,24 @@ class BaseUseCaseTestCase(BaseTestCase):
         )
 
     def assertPlanSummaryIsAvailable(self, plan: UUID) -> None:
-        response = self.get_plan_summary_use_case.get_plan_summary(plan_id=plan)
-        self.assertIsInstance(
+        request = GetPlanSummaryUseCase.Request(plan)
+        response = self.get_plan_summary_use_case.get_plan_summary(request)
+        self.assertTrue(
             response,
-            GetPlanSummaryUseCase.Success,
             msg=f"Plan summary for plan {plan} is not available",
         )
 
     def assertPlanSummary(
         self, plan: UUID, condition: Callable[[PlanSummary], bool]
     ) -> None:
-        response = self.get_plan_summary_use_case.get_plan_summary(plan_id=plan)
-        self.assertIsInstance(
+        request = GetPlanSummaryUseCase.Request(plan)
+        response = self.get_plan_summary_use_case.get_plan_summary(request)
+        self.assertTrue(
             response,
-            GetPlanSummaryUseCase.Success,
             msg=f"Plan summary for plan {plan} is not available",
         )
-        summary = cast(GetPlanSummaryUseCase.Success, response).plan_summary
+        assert response
+        summary = response.plan_summary
         self.assertTrue(condition(summary), msg=f"{summary}")
 
 

@@ -19,7 +19,7 @@ from arbeitszeit_flask.views.http_404_view import Http404View
 from arbeitszeit_web.controllers.approve_plan_controller import ApprovePlanController
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_plan_summary_accountant import (
-    GetPlanSummaryAccountantSuccessPresenter,
+    GetPlanSummaryAccountantPresenter,
 )
 from arbeitszeit_web.presenters.approve_plan_presenter import ApprovePlanPresenter
 from arbeitszeit_web.presenters.get_accountant_dashboard_presenter import (
@@ -82,11 +82,12 @@ def plan_summary(
     plan_id: UUID,
     use_case: GetPlanSummaryUseCase,
     template_renderer: UserTemplateRenderer,
-    presenter: GetPlanSummaryAccountantSuccessPresenter,
+    presenter: GetPlanSummaryAccountantPresenter,
     http_404_view: Http404View,
 ) -> Response:
-    use_case_response = use_case.get_plan_summary(plan_id)
-    if isinstance(use_case_response, GetPlanSummaryUseCase.Success):
+    use_case_request = GetPlanSummaryUseCase.Request(plan_id)
+    use_case_response = use_case.get_plan_summary(use_case_request)
+    if use_case_response:
         view_model = presenter.present(use_case_response)
         return FlaskResponse(
             template_renderer.render_template(

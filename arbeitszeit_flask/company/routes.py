@@ -90,9 +90,7 @@ from arbeitszeit_web.create_draft import (
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
-from arbeitszeit_web.get_plan_summary_company import (
-    GetPlanSummaryCompanySuccessPresenter,
-)
+from arbeitszeit_web.get_plan_summary_company import GetPlanSummaryCompanyPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.hide_plan import HidePlanPresenter
 from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
@@ -225,8 +223,9 @@ def create_draft_from_plan(
 ) -> Response:
     form = CreateDraftForm(request.form)
     if request.method == "GET":
-        response = get_plan_summary_use_case.get_plan_summary(plan_id)
-        if isinstance(response, GetPlanSummaryUseCase.Failure):
+        use_case_request_get = GetPlanSummaryUseCase.Request(plan_id)
+        response = get_plan_summary_use_case.get_plan_summary(use_case_request_get)
+        if not response:
             return not_found_view.get_response()
         view_model_get = get_plan_summary_presenter.show_prefilled_draft_data(
             summary_data=response.plan_summary, form=form
@@ -476,11 +475,12 @@ def plan_summary(
     plan_id: UUID,
     use_case: GetPlanSummaryUseCase,
     template_renderer: UserTemplateRenderer,
-    presenter: GetPlanSummaryCompanySuccessPresenter,
+    presenter: GetPlanSummaryCompanyPresenter,
     http_404_view: Http404View,
 ):
-    use_case_response = use_case.get_plan_summary(plan_id)
-    if isinstance(use_case_response, GetPlanSummaryUseCase.Failure):
+    use_case_request = GetPlanSummaryUseCase.Request(plan_id)
+    use_case_response = use_case.get_plan_summary(use_case_request)
+    if not use_case_response:
         return http_404_view.get_response()
     view_model = presenter.present(use_case_response)
     return template_renderer.render_template(

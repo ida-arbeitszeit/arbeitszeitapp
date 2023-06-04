@@ -31,7 +31,7 @@ from arbeitszeit_web.controllers.query_companies_controller import (
 )
 from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
-from arbeitszeit_web.get_plan_summary_member import GetPlanSummaryMemberSuccessPresenter
+from arbeitszeit_web.get_plan_summary_member import GetPlanSummaryMemberMemberPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.presenters.get_member_account_presenter import (
     GetMemberAccountPresenter,
@@ -166,14 +166,12 @@ def plan_summary(
     plan_id: UUID,
     use_case: GetPlanSummaryUseCase,
     template_renderer: UserTemplateRenderer,
-    presenter: GetPlanSummaryMemberSuccessPresenter,
+    presenter: GetPlanSummaryMemberMemberPresenter,
     http_404_view: Http404View,
 ) -> Response:
-    use_case_response = use_case.get_plan_summary(plan_id)
-    if isinstance(
-        use_case_response,
-        use_case.Success,
-    ):
+    use_case_request = GetPlanSummaryUseCase.Request(plan_id)
+    use_case_response = use_case.get_plan_summary(use_case_request)
+    if use_case_response:
         view_model = presenter.present(use_case_response)
         return FlaskResponse(
             template_renderer.render_template(

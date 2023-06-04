@@ -21,13 +21,13 @@ class GetPlanSummaryMemberViewModel:
 
 
 @dataclass
-class GetPlanSummaryMemberSuccessPresenter:
+class GetPlanSummaryMemberMemberPresenter:
     trans: Translator
     plan_summary_service: PlanSummaryFormatter
     url_index: UrlIndex
 
     def present(
-        self, response: GetPlanSummaryUseCase.Success
+        self, response: GetPlanSummaryUseCase.Response
     ) -> GetPlanSummaryMemberViewModel:
         return GetPlanSummaryMemberViewModel(
             summary=self.plan_summary_service.format_plan_summary(

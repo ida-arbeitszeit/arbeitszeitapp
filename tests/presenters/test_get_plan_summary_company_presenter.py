@@ -1,16 +1,14 @@
 from uuid import uuid4
 
 from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
-from arbeitszeit_web.get_plan_summary_company import (
-    GetPlanSummaryCompanySuccessPresenter,
-)
+from arbeitszeit_web.get_plan_summary_company import GetPlanSummaryCompanyPresenter
 from tests.presenters.base_test_case import BaseTestCase
 from tests.presenters.data_generators import PlanSummaryGenerator
 from tests.session import FakeSession
 
 from .url_index import UrlIndexTestImpl
 
-UseCaseSuccessResponse = GetPlanSummaryUseCase.Success
+UseCaseResponse = GetPlanSummaryUseCase.Response
 
 
 class TestPresenterForPlanner(BaseTestCase):
@@ -21,14 +19,14 @@ class TestPresenterForPlanner(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.url_index = self.injector.get(UrlIndexTestImpl)
-        self.presenter = self.injector.get(GetPlanSummaryCompanySuccessPresenter)
+        self.presenter = self.injector.get(GetPlanSummaryCompanyPresenter)
         self.plan_summary_generator = self.injector.get(PlanSummaryGenerator)
         self.session = self.injector.get(FakeSession)
         self.expected_planner = uuid4()
         self.session.login_company(company=self.expected_planner)
 
     def test_action_section_is_shown_when_current_user_is_planner(self):
-        response = UseCaseSuccessResponse(
+        response = UseCaseResponse(
             plan_summary=self.plan_summary_generator.create_plan_summary(
                 planner_id=self.expected_planner
             ),
@@ -39,7 +37,7 @@ class TestPresenterForPlanner(BaseTestCase):
     def test_action_section_is_not_shown_when_current_user_is_planner_but_plan_is_expired(
         self,
     ):
-        response = UseCaseSuccessResponse(
+        response = UseCaseResponse(
             plan_summary=self.plan_summary_generator.create_plan_summary(
                 is_active=False, planner_id=self.expected_planner
             ),
@@ -49,7 +47,7 @@ class TestPresenterForPlanner(BaseTestCase):
 
     def test_url_for_changing_availability_is_displayed_correctly(self):
         expected_plan_id = uuid4()
-        response = UseCaseSuccessResponse(
+        response = UseCaseResponse(
             plan_summary=self.plan_summary_generator.create_plan_summary(
                 plan_id=expected_plan_id, planner_id=self.expected_planner
             ),
@@ -65,7 +63,7 @@ class TestPresenterForPlanner(BaseTestCase):
     ):
         expected_plan_id = uuid4()
         expected_cooperation_id = uuid4()
-        response = UseCaseSuccessResponse(
+        response = UseCaseResponse(
             plan_summary=self.plan_summary_generator.create_plan_summary(
                 is_cooperating=True,
                 plan_id=expected_plan_id,
@@ -85,7 +83,7 @@ class TestPresenterForPlanner(BaseTestCase):
     def test_no_url_for_requesting_cooperation_is_displayed_when_plan_is_cooperating(
         self,
     ):
-        response = UseCaseSuccessResponse(
+        response = UseCaseResponse(
             plan_summary=self.plan_summary_generator.create_plan_summary(
                 is_cooperating=True, planner_id=self.expected_planner
             ),
@@ -96,7 +94,7 @@ class TestPresenterForPlanner(BaseTestCase):
     def test_no_url_for_ending_cooperation_is_displayed_when_plan_is_not_cooperating(
         self,
     ):
-        response = UseCaseSuccessResponse(
+        response = UseCaseResponse(
             plan_summary=self.plan_summary_generator.create_plan_summary(
                 is_cooperating=False, cooperation=None, planner_id=self.expected_planner
             ),
@@ -107,7 +105,7 @@ class TestPresenterForPlanner(BaseTestCase):
     def test_url_for_requesting_cooperation_is_displayed_correctly_when_plan_is_not_cooperating(
         self,
     ):
-        response = UseCaseSuccessResponse(
+        response = UseCaseResponse(
             plan_summary=self.plan_summary_generator.create_plan_summary(
                 is_cooperating=False, cooperation=None, planner_id=self.expected_planner
             ),
@@ -122,7 +120,7 @@ class TestPresenterForPlanner(BaseTestCase):
     def test_url_for_paying_product_is_not_displayed_when_user_is_planner_of_plan(
         self,
     ):
-        response = UseCaseSuccessResponse(
+        response = UseCaseResponse(
             self.plan_summary_generator.create_plan_summary(
                 planner_id=self.expected_planner
             ),
@@ -135,20 +133,20 @@ class TestPresenterForNonPlanningCompany(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.url_index = self.injector.get(UrlIndexTestImpl)
-        self.presenter = self.injector.get(GetPlanSummaryCompanySuccessPresenter)
+        self.presenter = self.injector.get(GetPlanSummaryCompanyPresenter)
         self.plan_summary_generator = self.injector.get(PlanSummaryGenerator)
         self.session = self.injector.get(FakeSession)
         self.session.login_company(uuid4())
 
     def test_action_section_is_not_shown_when_current_user_is_not_planner(self):
-        response = UseCaseSuccessResponse(
+        response = UseCaseResponse(
             plan_summary=self.plan_summary_generator.create_plan_summary(),
         )
         view_model = self.presenter.present(response)
         self.assertFalse(view_model.show_own_plan_action_section)
 
     def test_view_model_shows_availability_when_plan_is_available(self):
-        response = UseCaseSuccessResponse(
+        response = UseCaseResponse(
             plan_summary=self.plan_summary_generator.create_plan_summary(
                 is_available=True
             ),
@@ -159,7 +157,7 @@ class TestPresenterForNonPlanningCompany(BaseTestCase):
     def test_view_model_shows_plan_as_cooperating_when_plan_is_cooperating(
         self,
     ):
-        response = UseCaseSuccessResponse(
+        response = UseCaseResponse(
             plan_summary=self.plan_summary_generator.create_plan_summary(
                 is_cooperating=True
             ),
@@ -170,7 +168,7 @@ class TestPresenterForNonPlanningCompany(BaseTestCase):
     def test_url_for_paying_product_is_displayed_when_user_is_not_planner_of_plan(
         self,
     ):
-        response = UseCaseSuccessResponse(
+        response = UseCaseResponse(
             self.plan_summary_generator.create_plan_summary(),
         )
         view_model = self.presenter.present(response)
@@ -180,7 +178,7 @@ class TestPresenterForNonPlanningCompany(BaseTestCase):
         self,
     ):
         expected_plan_id = uuid4()
-        response = UseCaseSuccessResponse(
+        response = UseCaseResponse(
             self.plan_summary_generator.create_plan_summary(plan_id=expected_plan_id),
         )
         view_model = self.presenter.present(response)

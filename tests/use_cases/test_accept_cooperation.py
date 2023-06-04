@@ -203,9 +203,8 @@ class AcceptCooperationTests(BaseTestCase):
         assert plan.requested_cooperation is None
 
     def assert_plan_in_cooperation(self, plan: UUID, cooperation: UUID) -> None:
-        summary_response = self.get_plan_summary_use_case.get_plan_summary(
-            plan_id=plan,
-        )
-        assert isinstance(summary_response, GetPlanSummaryUseCase.Success)
+        request = GetPlanSummaryUseCase.Request(plan)
+        summary_response = self.get_plan_summary_use_case.get_plan_summary(request)
+        assert summary_response
         assert summary_response.plan_summary
         assert summary_response.plan_summary.cooperation == cooperation
