@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import List, Optional
+from typing import List, Literal, Optional, Union
 from uuid import UUID, uuid4
 
 from arbeitszeit.plan_summary import PlanSummary
@@ -155,10 +155,10 @@ class PlanSummaryGenerator:
         price_per_unit: Optional[Decimal] = None,
         is_available: Optional[bool] = None,
         is_cooperating: Optional[bool] = None,
-        cooperation: Optional[UUID] = uuid4(),
+        cooperation: Union[None, UUID, Literal["None"]] = "None",
         creation_date: Optional[datetime] = None,
-        approval_date: Optional[datetime] = datetime(2023, 5, 2),
-        expiration_date: Optional[datetime] = datetime(2023, 5, 3),
+        approval_date: Union[None, datetime, Literal["None"]] = "None",
+        expiration_date: Union[None, datetime, Literal["None"]] = "None",
     ) -> PlanSummary:
         if plan_id is None:
             plan_id = uuid4()
@@ -194,8 +194,15 @@ class PlanSummaryGenerator:
             is_available = True
         if is_cooperating is None:
             is_cooperating = False
+        if cooperation == "None":
+            cooperation = uuid4()
         if creation_date is None:
             creation_date = datetime(2023, 5, 1)
+        if approval_date == "None":
+            approval_date = datetime(2023, 5, 2)
+        if expiration_date == "None":
+            expiration_date = datetime(2023, 5, 3)
+        assert isinstance(cooperation, UUID) or (cooperation is None)
         return PlanSummary(
             plan_id=plan_id,
             is_active=is_active,
