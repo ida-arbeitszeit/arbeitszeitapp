@@ -360,7 +360,9 @@ class PlanGenerator:
         )
         assert not response.is_rejected
         assert response.draft_id
-        draft = self.draft_repository.get_by_id(response.draft_id)
+        draft = (
+            self.draft_repository.get_plan_drafts().with_id(response.draft_id).first()
+        )
         assert draft
         return draft
 

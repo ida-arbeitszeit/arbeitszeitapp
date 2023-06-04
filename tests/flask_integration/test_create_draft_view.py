@@ -70,5 +70,5 @@ class AuthenticatedCompanyTestsForPost(ViewTestCase):
 
     def _count_drafts_of_company(self) -> int:
         return len(
-            list(self.plan_draft_repository.all_drafts_of_company(self.company.id))
+            self.plan_draft_repository.get_plan_drafts().planned_by(self.company.id)
         )

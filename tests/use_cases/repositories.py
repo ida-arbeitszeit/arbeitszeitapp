@@ -322,6 +322,26 @@ class PlanUpdate:
         return replace(self, update_functions=self.update_functions + [update])
 
 
+class PlanDraftResult(QueryResultImpl[entities.PlanDraft]):
+    def with_id(self, id_: UUID) -> Self:
+        return replace(
+            self,
+            items=lambda: filter(
+                lambda draft: draft.id == id_,
+                self.items(),
+            ),
+        )
+
+    def planned_by(self, *company: UUID) -> Self:
+        return replace(
+            self,
+            items=lambda: filter(
+                lambda draft: draft.planner in company,
+                self.items(),
+            ),
+        )
+
+
 class CooperationResult(QueryResultImpl[Cooperation]):
     def with_id(self, id_: UUID) -> Self:
         return replace(
@@ -879,8 +899,9 @@ class AccountRepository(interfaces.AccountRepository):
 
 @singleton
 class PlanDraftRepository(interfaces.PlanDraftRepository):
-    def __init__(self) -> None:
+    def __init__(self, entities: EntityStorage) -> None:
         self.drafts: List[PlanDraft] = []
+        self.entities = entities
 
     def create_plan_draft(
         self,
@@ -910,7 +931,7 @@ class PlanDraftRepository(interfaces.PlanDraftRepository):
         return draft
 
     def update_draft(self, update: interfaces.PlanDraftRepository.UpdateDraft) -> None:
-        draft = self.get_by_id(update.id)
+        draft = self.get_plan_drafts().with_id(update.id).first()
         if draft is None:
             return
         if update.product_name is not None:
@@ -933,24 +954,14 @@ class PlanDraftRepository(interfaces.PlanDraftRepository):
             draft.unit_of_distribution = update.unit_of_distribution
         return
 
-    def get_by_id(self, id: UUID) -> Optional[PlanDraft]:
-        for draft in self.drafts:
-            if draft.id == id:
-                return draft
-        return None
-
-    def __len__(self) -> int:
-        return len(self.drafts)
-
     def delete_draft(self, id: UUID) -> None:
         self.drafts = [draft for draft in self.drafts if draft.id != id]
 
-    def all_drafts_of_company(self, id: UUID) -> Iterable[PlanDraft]:
-        result = []
-        for draft in self.drafts:
-            if draft.planner == id:
-                result.append(draft)
-        return result
+    def get_plan_drafts(self) -> PlanDraftResult:
+        return PlanDraftResult(
+            items=lambda: self.drafts,
+            entities=self.entities,
+        )
 
 
 @singleton
