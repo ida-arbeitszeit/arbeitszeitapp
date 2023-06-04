@@ -1,7 +1,7 @@
 from unittest import TestCase
 from uuid import uuid4
 
-from arbeitszeit.use_cases.get_plan_summary_member import GetPlanSummaryMember
+from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
 from arbeitszeit_web.get_plan_summary_member import GetPlanSummaryMemberSuccessPresenter
 from tests.presenters.data_generators import PlanSummaryGenerator
 from tests.presenters.url_index import UrlIndexTestImpl
@@ -22,7 +22,7 @@ class PresenterTests(TestCase):
 
     def test_that_pay_product_url_is_shown_correctly(self):
         PLAN_ID = uuid4()
-        use_case_response = GetPlanSummaryMember.Success(
+        use_case_response = GetPlanSummaryUseCase.Success(
             plan_summary=self.plan_summary_generator.create_plan_summary(
                 plan_id=PLAN_ID
             )

@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 from arbeitszeit.entities import ProductionCosts
 from arbeitszeit.plan_summary import PlanSummary
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
-from arbeitszeit.use_cases.get_plan_summary_member import GetPlanSummaryMember
+from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
 from arbeitszeit.use_cases.list_plans_with_pending_review import (
     ListPlansWithPendingReviewUseCase,
 )
@@ -22,7 +22,7 @@ class BaseUseCaseTestCase(BaseTestCase):
         self.list_plans_with_pending_review_use_case = self.injector.get(
             ListPlansWithPendingReviewUseCase
         )
-        self.get_plan_summary_member_use_case = self.injector.get(GetPlanSummaryMember)
+        self.get_plan_summary_use_case = self.injector.get(GetPlanSummaryUseCase)
         self.planner = self.company_generator.create_company()
         self.notify_accountants_presenter = self.injector.get(
             NotifyAccountantsAboutNewPlanPresenterImpl
@@ -70,23 +70,23 @@ class BaseUseCaseTestCase(BaseTestCase):
         )
 
     def assertPlanSummaryIsAvailable(self, plan: UUID) -> None:
-        response = self.get_plan_summary_member_use_case(plan_id=plan)
+        response = self.get_plan_summary_use_case.get_plan_summary(plan_id=plan)
         self.assertIsInstance(
             response,
-            GetPlanSummaryMember.Success,
+            GetPlanSummaryUseCase.Success,
             msg=f"Plan summary for plan {plan} is not available",
         )
 
     def assertPlanSummary(
         self, plan: UUID, condition: Callable[[PlanSummary], bool]
     ) -> None:
-        response = self.get_plan_summary_member_use_case(plan_id=plan)
+        response = self.get_plan_summary_use_case.get_plan_summary(plan_id=plan)
         self.assertIsInstance(
             response,
-            GetPlanSummaryMember.Success,
+            GetPlanSummaryUseCase.Success,
             msg=f"Plan summary for plan {plan} is not available",
         )
-        summary = cast(GetPlanSummaryMember.Success, response).plan_summary
+        summary = cast(GetPlanSummaryUseCase.Success, response).plan_summary
         self.assertTrue(condition(summary), msg=f"{summary}")
 
 

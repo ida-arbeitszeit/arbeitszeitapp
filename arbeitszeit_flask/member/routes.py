@@ -8,6 +8,7 @@ from flask_login import current_user
 
 from arbeitszeit import use_cases
 from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
+from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.forms import (
@@ -163,15 +164,15 @@ def statistics(
 @MemberRoute("/member/plan_summary/<uuid:plan_id>")
 def plan_summary(
     plan_id: UUID,
-    get_plan_summary_member: use_cases.get_plan_summary_member.GetPlanSummaryMember,
+    use_case: GetPlanSummaryUseCase,
     template_renderer: UserTemplateRenderer,
     presenter: GetPlanSummaryMemberSuccessPresenter,
     http_404_view: Http404View,
 ) -> Response:
-    use_case_response = get_plan_summary_member(plan_id)
+    use_case_response = use_case.get_plan_summary(plan_id)
     if isinstance(
         use_case_response,
-        use_cases.get_plan_summary_member.GetPlanSummaryMember.Success,
+        use_case.Success,
     ):
         view_model = presenter.present(use_case_response)
         return FlaskResponse(

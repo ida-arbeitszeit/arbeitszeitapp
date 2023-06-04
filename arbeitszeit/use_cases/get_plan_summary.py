@@ -8,7 +8,7 @@ from arbeitszeit.plan_summary import PlanSummary, PlanSummaryService
 
 
 @dataclass
-class GetPlanSummaryMember:
+class GetPlanSummaryUseCase:
     @dataclass
     class Success:
         plan_summary: PlanSummary
@@ -19,7 +19,7 @@ class GetPlanSummaryMember:
 
     plan_summary_service: PlanSummaryService
 
-    def __call__(self, plan_id: UUID) -> Union[Success, Failure]:
+    def get_plan_summary(self, plan_id: UUID) -> Union[Success, Failure]:
         plan_summary = self.plan_summary_service.get_summary_from_plan(plan_id)
         if plan_summary is None:
             return self.Failure()

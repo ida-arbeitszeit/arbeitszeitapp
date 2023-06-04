@@ -7,7 +7,7 @@ from arbeitszeit import use_cases
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit.use_cases.get_accountant_dashboard import GetAccountantDashboardUseCase
 from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
-from arbeitszeit.use_cases.get_plan_summary_accountant import GetPlanSummaryAccountant
+from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
 from arbeitszeit.use_cases.list_plans_with_pending_review import (
     ListPlansWithPendingReviewUseCase,
 )
@@ -80,13 +80,13 @@ def approve_plan(
 @AccountantRoute("/accountant/plan_summary/<uuid:plan_id>")
 def plan_summary(
     plan_id: UUID,
-    use_case: GetPlanSummaryAccountant,
+    use_case: GetPlanSummaryUseCase,
     template_renderer: UserTemplateRenderer,
     presenter: GetPlanSummaryAccountantSuccessPresenter,
     http_404_view: Http404View,
 ) -> Response:
     use_case_response = use_case.get_plan_summary(plan_id)
-    if isinstance(use_case_response, GetPlanSummaryAccountant.Success):
+    if isinstance(use_case_response, GetPlanSummaryUseCase.Success):
         view_model = presenter.present(use_case_response)
         return FlaskResponse(
             template_renderer.render_template(
