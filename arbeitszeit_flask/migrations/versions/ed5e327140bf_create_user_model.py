@@ -125,11 +125,9 @@ class ForwardMigrator:
     def _fetch_user_credentials(self, table):
         for id_, email, password in self.connection.execute(
             sa.select(
-                [
-                    table.c.id,
-                    table.c.email,
-                    table.c.password,
-                ]
+                table.c.id,
+                table.c.email,
+                table.c.password,
             )
         ).fetchall():
             yield {
