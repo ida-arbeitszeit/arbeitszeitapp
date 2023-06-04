@@ -3,11 +3,7 @@ from enum import Enum, auto
 from typing import Optional
 from uuid import UUID
 
-from arbeitszeit.repositories import (
-    CompanyRepository,
-    DatabaseGateway,
-    MemberRepository,
-)
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -32,8 +28,6 @@ class AnswerCompanyWorkInviteResponse:
 @dataclass
 class AnswerCompanyWorkInvite:
     database_gateway: DatabaseGateway
-    company_repository: CompanyRepository
-    member_repository: MemberRepository
 
     def __call__(
         self, request: AnswerCompanyWorkInviteRequest
@@ -52,15 +46,13 @@ class AnswerCompanyWorkInvite:
                 reason=AnswerCompanyWorkInviteResponse.Failure.member_was_not_invited
             )
         elif request.is_accepted:
-            self.company_repository.get_companies().with_id(invite.company).add_worker(
+            self.database_gateway.get_companies().with_id(invite.company).add_worker(
                 invite.member
             )
             self.database_gateway.get_company_work_invites().with_id(
                 request.invite_id
             ).delete()
-        company = (
-            self.company_repository.get_companies().with_id(invite.company).first()
-        )
+        company = self.database_gateway.get_companies().with_id(invite.company).first()
         assert company
         return AnswerCompanyWorkInviteResponse(
             is_success=True,

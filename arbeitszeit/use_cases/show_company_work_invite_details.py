@@ -2,11 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 from uuid import UUID
 
-from arbeitszeit.repositories import (
-    CompanyRepository,
-    DatabaseGateway,
-    MemberRepository,
-)
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -31,14 +27,12 @@ class ShowCompanyWorkInviteDetailsRequest:
 
 @dataclass
 class ShowCompanyWorkInviteDetailsUseCase:
-    member_repository: MemberRepository
-    company_repository: CompanyRepository
     database_gateway: DatabaseGateway
 
     def show_company_work_invite_details(
         self, request: ShowCompanyWorkInviteDetailsRequest
     ) -> ShowCompanyWorkInviteDetailsResponse:
-        if not self.member_repository.get_members().with_id(request.member):
+        if not self.database_gateway.get_members().with_id(request.member):
             return failure_response
         invite = (
             self.database_gateway.get_company_work_invites()
@@ -49,9 +43,7 @@ class ShowCompanyWorkInviteDetailsUseCase:
             return failure_response
         if invite.member != request.member:
             return failure_response
-        company = (
-            self.company_repository.get_companies().with_id(invite.company).first()
-        )
+        company = self.database_gateway.get_companies().with_id(invite.company).first()
         assert company
         return ShowCompanyWorkInviteDetailsResponse(
             details=ShowCompanyWorkInviteDetailsResponse.Details(

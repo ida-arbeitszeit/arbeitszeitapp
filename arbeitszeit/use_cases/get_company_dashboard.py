@@ -6,11 +6,7 @@ from typing import List
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.repositories import (
-    CompanyRepository,
-    DatabaseGateway,
-    MemberRepository,
-)
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -36,20 +32,18 @@ class GetCompanyDashboardUseCase:
         has_workers: bool
         three_latest_plans: List[LatestPlansDetails]
 
-    company_repository: CompanyRepository
-    member_repository: MemberRepository
     database_gateway: DatabaseGateway
     datetime_service: DatetimeService
 
     def get_dashboard(self, company_id: UUID) -> Response:
-        company = self.company_repository.get_companies().with_id(company_id).first()
+        company = self.database_gateway.get_companies().with_id(company_id).first()
         if company is None:
             raise self.Failure()
         company_info = self.Response.CompanyInfo(
             id=company.id, name=company.name, email=company.email
         )
         has_workers = bool(
-            self.member_repository.get_members().working_at_company(company_id)
+            self.database_gateway.get_members().working_at_company(company_id)
         )
         three_latest_plans = self._get_three_latest_plans()
         return self.Response(

@@ -5,7 +5,7 @@ from typing import List
 from uuid import UUID
 
 from arbeitszeit.entities import AccountTypes
-from arbeitszeit.repositories import CompanyRepository
+from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit.transactions import TransactionTypes, UserAccountingService
 
 
@@ -26,10 +26,10 @@ class GetCompanyTransactionsResponse:
 @dataclass
 class GetCompanyTransactions:
     accounting_service: UserAccountingService
-    company_repository: CompanyRepository
+    database_gateway: DatabaseGateway
 
     def __call__(self, company_id: UUID) -> GetCompanyTransactionsResponse:
-        company = self.company_repository.get_companies().with_id(company_id).first()
+        company = self.database_gateway.get_companies().with_id(company_id).first()
         assert company
         transactions = [
             TransactionInfo(

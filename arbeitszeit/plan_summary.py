@@ -6,7 +6,7 @@ from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.price_calculator import PriceCalculator
-from arbeitszeit.repositories import CompanyRepository, DatabaseGateway
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -37,7 +37,6 @@ class PlanSummary:
 @dataclass
 class PlanSummaryService:
     database_gateway: DatabaseGateway
-    company_repository: CompanyRepository
     price_calculator: PriceCalculator
     datetime_service: DatetimeService
 
@@ -47,7 +46,7 @@ class PlanSummaryService:
         if plan is None:
             return None
         price_per_unit = self.price_calculator.calculate_cooperative_price(plan)
-        planner = self.company_repository.get_companies().with_id(plan.planner).first()
+        planner = self.database_gateway.get_companies().with_id(plan.planner).first()
         assert planner
         return PlanSummary(
             plan_id=plan.id,

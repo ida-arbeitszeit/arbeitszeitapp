@@ -29,7 +29,7 @@ class GetDraftSummary:
     draft_repository: PlanDraftRepository
 
     def __call__(self, draft_id: UUID) -> DraftSummaryResponse:
-        draft = self.draft_repository.get_by_id(draft_id)
+        draft = self.draft_repository.get_plan_drafts().with_id(draft_id).first()
         if draft is None:
             return None
         return DraftSummarySuccess(

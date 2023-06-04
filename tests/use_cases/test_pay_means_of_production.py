@@ -13,7 +13,7 @@ from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsResponse
 
 from .base_test_case import BaseTestCase
-from .repositories import CompanyRepository, EntityStorage
+from .repositories import EntityStorage
 
 
 class PayMeansOfProductionTests(BaseTestCase):
@@ -22,7 +22,6 @@ class PayMeansOfProductionTests(BaseTestCase):
         self.pay_means_of_production = self.injector.get(PayMeansOfProduction)
         self.entity_storage = self.injector.get(EntityStorage)
         self.update_plans_and_payout = self.injector.get(UpdatePlansAndPayout)
-        self.company_repository = self.injector.get(CompanyRepository)
         self.query_company_purchases = self.injector.get(
             query_company_purchases.QueryCompanyPurchases
         )
@@ -268,7 +267,7 @@ class PayMeansOfProductionTests(BaseTestCase):
         assert response.rejection_reason is None
 
     def get_product_account(self, company: UUID) -> UUID:
-        company_model = self.company_repository.get_companies().with_id(company).first()
+        company_model = self.entity_storage.get_companies().with_id(company).first()
         assert company_model
         return company_model.product_account
 

@@ -3,17 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field, replace
 from datetime import datetime
 from decimal import Decimal
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Generic,
-    Iterable,
-    Iterator,
-    Optional,
-    Tuple,
-    TypeVar,
-)
+from typing import Any, Callable, Dict, Generic, Iterator, Optional, Tuple, TypeVar
 from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
@@ -369,6 +359,20 @@ class PlanUpdate:
         )
 
 
+class PlanDraftResult(FlaskQueryResult[entities.PlanDraft]):
+    def with_id(self, id_: UUID) -> Self:
+        return self._with_modified_query(
+            lambda query: query.filter(models.PlanDraft.id == str(id_))
+        )
+
+    def planned_by(self, *company: UUID) -> Self:
+        return self._with_modified_query(
+            lambda query: query.filter(
+                models.PlanDraft.planner.in_([str(i) for i in company])
+            )
+        )
+
+
 class MemberQueryResult(FlaskQueryResult[entities.Member]):
     def working_at_company(self, company: UUID) -> MemberQueryResult:
         return self._with_modified_query(
@@ -389,6 +393,25 @@ class MemberQueryResult(FlaskQueryResult[entities.Member]):
         user = aliased(models.User)
         return self._with_modified_query(
             lambda query: query.join(user).filter(user.email_confirmed_on != None)
+        )
+
+    def joined_with_email_address(
+        self,
+    ) -> FlaskQueryResult[Tuple[entities.Member, entities.EmailAddress]]:
+        def mapper(row):
+            member_orm, user_orm = row
+            return (
+                DatabaseGatewayImpl.member_from_orm(member_orm),
+                DatabaseGatewayImpl.email_address_from_orm(user_orm),
+            )
+
+        user = aliased(models.User)
+        return FlaskQueryResult(
+            mapper=mapper,
+            db=self.db,
+            query=self.query.join(user, user.id == models.Member.user_id).with_entities(
+                models.Member, user
+            ),
         )
 
     def update(self) -> MemberUpdate:
@@ -478,6 +501,25 @@ class CompanyQueryResult(FlaskQueryResult[entities.Company]):
             lambda query: query.join(user, user.id == models.Company.user_id).filter(
                 user.email_confirmed_on != None
             )
+        )
+
+    def joined_with_email_address(
+        self,
+    ) -> FlaskQueryResult[Tuple[entities.Company, entities.EmailAddress]]:
+        def mapper(row):
+            company_orm, user_orm = row
+            return (
+                DatabaseGatewayImpl.company_from_orm(company_orm),
+                DatabaseGatewayImpl.email_address_from_orm(user_orm),
+            )
+
+        user = aliased(models.User)
+        return FlaskQueryResult(
+            mapper=mapper,
+            db=self.db,
+            query=self.query.join(
+                user, user.id == models.Company.user_id
+            ).with_entities(models.Company, user),
         )
 
     def update(self) -> CompanyUpdate:
@@ -693,17 +735,17 @@ class TransactionQueryResult(FlaskQueryResult[entities.Transaction]):
         sender: entities.AccountOwner
         receiver: entities.AccountOwner
         if sending_member:
-            sender = MemberRepository.member_from_orm(sending_member)
+            sender = DatabaseGatewayImpl.member_from_orm(sending_member)
         elif sending_company:
-            sender = CompanyRepository.company_from_orm(sending_company)
+            sender = DatabaseGatewayImpl.company_from_orm(sending_company)
         else:
             sender = AccountingRepository.social_accounting_from_orm(
                 sender_social_accounting
             )
         if receiver_member:
-            receiver = MemberRepository.member_from_orm(receiver_member)
+            receiver = DatabaseGatewayImpl.member_from_orm(receiver_member)
         elif receiver_company:
-            receiver = CompanyRepository.company_from_orm(receiver_company)
+            receiver = DatabaseGatewayImpl.company_from_orm(receiver_company)
         else:
             receiver = AccountingRepository.social_accounting_from_orm(
                 receiver_social_accounting
@@ -760,9 +802,9 @@ class AccountQueryResult(FlaskQueryResult[entities.Account]):
         owner: entities.AccountOwner
         account, member, company, social_accounting = orm
         if member:
-            owner = MemberRepository.member_from_orm(member)
+            owner = DatabaseGatewayImpl.member_from_orm(member)
         elif company:
-            owner = CompanyRepository.company_from_orm(company)
+            owner = DatabaseGatewayImpl.company_from_orm(company)
         else:
             owner = AccountingRepository.social_accounting_from_orm(social_accounting)
         return (
@@ -957,7 +999,7 @@ class CooperationResult(FlaskQueryResult[entities.Cooperation]):
             cooperation_orm, company_orm = orm
             return (
                 DatabaseGatewayImpl.cooperation_from_orm(cooperation_orm),
-                CompanyRepository.company_from_orm(company_orm),
+                DatabaseGatewayImpl.company_from_orm(company_orm),
             )
 
         company = aliased(models.Company)
@@ -1011,138 +1053,6 @@ class UserAddressBookImpl:
             return user_orm.email
         else:
             return None
-
-
-@dataclass
-class MemberRepository(repositories.MemberRepository):
-    db: SQLAlchemy
-
-    @classmethod
-    def member_from_orm(cls, orm_object: Member) -> entities.Member:
-        return entities.Member(
-            id=UUID(orm_object.id),
-            name=orm_object.name,
-            account=UUID(orm_object.account),
-            email=orm_object.user.email,
-            registered_on=orm_object.registered_on,
-            confirmed_on=orm_object.user.email_confirmed_on,
-            password_hash=orm_object.user.password,
-        )
-
-    def create_member(
-        self,
-        *,
-        email: str,
-        name: str,
-        password_hash: str,
-        account: entities.Account,
-        registered_on: datetime,
-    ) -> entities.Member:
-        user_orm = self._get_or_create_user(
-            email, password_hash=password_hash, email_confirmed_on=None
-        )
-        orm_member = Member(
-            id=str(uuid4()),
-            user=user_orm,
-            name=name,
-            account=str(account.id),
-            registered_on=registered_on,
-        )
-        self.db.session.add(orm_member)
-        return self.member_from_orm(orm_member)
-
-    def get_members(self) -> MemberQueryResult:
-        return MemberQueryResult(
-            mapper=self.member_from_orm,
-            query=Member.query,
-            db=self.db,
-        )
-
-    def _get_or_create_user(
-        self, email: str, password_hash: str, email_confirmed_on: Optional[datetime]
-    ) -> models.User:
-        return self.db.session.query(models.User).filter(
-            and_(
-                models.User.email == email,
-                models.User.member == None,
-            )
-        ).first() or models.User(
-            email=email,
-            password=password_hash,
-            email_confirmed_on=email_confirmed_on,
-        )
-
-
-@dataclass
-class CompanyRepository(repositories.CompanyRepository):
-    db: SQLAlchemy
-
-    @classmethod
-    def company_from_orm(cls, company_orm: Company) -> entities.Company:
-        return entities.Company(
-            id=UUID(company_orm.id),
-            email=company_orm.user.email,
-            name=company_orm.name,
-            means_account=UUID(company_orm.p_account),
-            raw_material_account=UUID(company_orm.r_account),
-            work_account=UUID(company_orm.a_account),
-            product_account=UUID(company_orm.prd_account),
-            registered_on=company_orm.registered_on,
-            confirmed_on=company_orm.user.email_confirmed_on,
-            password_hash=company_orm.user.password,
-        )
-
-    def create_company(
-        self,
-        email: str,
-        name: str,
-        password_hash: str,
-        means_account: entities.Account,
-        labour_account: entities.Account,
-        resource_account: entities.Account,
-        products_account: entities.Account,
-        registered_on: datetime,
-    ) -> entities.Company:
-        user_orm = self._get_or_create_user(
-            email, password_hash=password_hash, email_confirmed_on=None
-        )
-        company = models.Company(
-            id=str(uuid4()),
-            name=name,
-            registered_on=registered_on,
-            user=user_orm,
-            p_account=str(means_account.id),
-            r_account=str(resource_account.id),
-            a_account=str(labour_account.id),
-            prd_account=str(products_account.id),
-        )
-        self.db.session.add(company)
-        self.db.session.flush()
-        return self.company_from_orm(company)
-
-    def get_companies(self) -> CompanyQueryResult:
-        return CompanyQueryResult(
-            query=Company.query,
-            mapper=self.company_from_orm,
-            db=self.db,
-        )
-
-    def _get_or_create_user(
-        self, email: str, password_hash: str, email_confirmed_on: Optional[datetime]
-    ) -> models.User:
-        user = models.User.query.filter(
-            and_(
-                models.User.email == email,
-            )
-        ).first()
-        if not user:
-            user = models.User(
-                email=email,
-                password=password_hash,
-                email_confirmed_on=email_confirmed_on,
-            )
-            self.db.session.add(user)
-        return user
 
 
 @dataclass
@@ -1250,7 +1160,7 @@ class PlanDraftRepository(repositories.PlanDraftRepository):
             is_public_service=is_public_service,
         )
         self.db.session.add(orm)
-        return self._object_from_orm(orm)
+        return self.plan_draft_from_orm(orm)
 
     def update_draft(
         self, update: repositories.PlanDraftRepository.UpdateDraft
@@ -1292,17 +1202,18 @@ class PlanDraftRepository(repositories.PlanDraftRepository):
                 models.PlanDraft.id == str(update.id)
             ).update(update_instructions)
 
-    def get_by_id(self, id: UUID) -> Optional[entities.PlanDraft]:
-        orm = models.PlanDraft.query.filter(models.PlanDraft.id == str(id)).first()
-        if orm is None:
-            return None
-        else:
-            return self._object_from_orm(orm)
+    def get_plan_drafts(self) -> PlanDraftResult:
+        return PlanDraftResult(
+            db=self.db,
+            query=models.PlanDraft.query,
+            mapper=self.plan_draft_from_orm,
+        )
 
     def delete_draft(self, id: UUID) -> None:
         PlanDraft.query.filter_by(id=str(id)).delete()
 
-    def _object_from_orm(self, orm: PlanDraft) -> entities.PlanDraft:
+    @classmethod
+    def plan_draft_from_orm(cls, orm: models.PlanDraft) -> entities.PlanDraft:
         return entities.PlanDraft(
             id=orm.id,
             creation_date=orm.plan_creation_date,
@@ -1318,52 +1229,6 @@ class PlanDraftRepository(repositories.PlanDraftRepository):
             description=orm.description,
             timeframe=orm.timeframe,
             is_public_service=orm.is_public_service,
-        )
-
-    def all_drafts_of_company(self, id: UUID) -> Iterable[entities.PlanDraft]:
-        draft_owner = Company.query.filter_by(id=str(id)).first()
-        assert draft_owner is not None
-        drafts = draft_owner.drafts.all()
-        return (self._object_from_orm(draft) for draft in drafts)
-
-
-@dataclass
-class AccountantRepository:
-    db: SQLAlchemy
-
-    def create_accountant(self, email: str, name: str, password_hash: str) -> UUID:
-        user_id = uuid4()
-        user_orm = self._get_or_create_user(email, password_hash=password_hash)
-        accountant = models.Accountant(
-            id=str(user_id),
-            name=name,
-            user=user_orm,
-        )
-        self.db.session.add(accountant)
-        return user_id
-
-    def _get_or_create_user(self, email: str, password_hash: str) -> models.User:
-        return self.db.session.query(models.User).filter(
-            and_(models.User.email == email, models.User.accountant == None)
-        ).first() or models.User(
-            password=password_hash,
-            email=email,
-        )
-
-    def get_accountants(self) -> AccountantResult:
-        return AccountantResult(
-            query=models.Accountant.query,
-            mapper=self.accountant_from_orm,
-            db=self.db,
-        )
-
-    @classmethod
-    def accountant_from_orm(self, orm: models.Accountant) -> entities.Accountant:
-        return entities.Accountant(
-            email_address=orm.user.email,
-            name=orm.name,
-            id=UUID(orm.id),
-            password_hash=orm.user.password,
         )
 
 
@@ -1649,4 +1514,140 @@ class DatabaseGatewayImpl:
             id=UUID(orm.id),
             member=UUID(orm.member),
             company=UUID(orm.company),
+        )
+
+    @classmethod
+    def member_from_orm(cls, orm_object: Member) -> entities.Member:
+        return entities.Member(
+            id=UUID(orm_object.id),
+            name=orm_object.name,
+            account=UUID(orm_object.account),
+            email=orm_object.user.email,
+            registered_on=orm_object.registered_on,
+            password_hash=orm_object.user.password,
+        )
+
+    def create_member(
+        self,
+        *,
+        email: str,
+        name: str,
+        password_hash: str,
+        account: entities.Account,
+        registered_on: datetime,
+    ) -> entities.Member:
+        user_orm = self._get_or_create_user(
+            email=email, password_hash=password_hash, email_confirmed_on=None
+        )
+        orm_member = Member(
+            id=str(uuid4()),
+            user=user_orm,
+            name=name,
+            account=str(account.id),
+            registered_on=registered_on,
+        )
+        self.db.session.add(orm_member)
+        return self.member_from_orm(orm_member)
+
+    def get_members(self) -> MemberQueryResult:
+        return MemberQueryResult(
+            mapper=self.member_from_orm,
+            query=Member.query,
+            db=self.db,
+        )
+
+    def _get_or_create_user(
+        self, *, email: str, password_hash: str, email_confirmed_on: Optional[datetime]
+    ) -> models.User:
+        return self.db.session.query(models.User).filter(
+            models.User.email == email
+        ).first() or models.User(
+            email=email,
+            password=password_hash,
+            email_confirmed_on=email_confirmed_on,
+        )
+
+    @classmethod
+    def company_from_orm(cls, company_orm: Company) -> entities.Company:
+        return entities.Company(
+            id=UUID(company_orm.id),
+            email=company_orm.user.email,
+            name=company_orm.name,
+            means_account=UUID(company_orm.p_account),
+            raw_material_account=UUID(company_orm.r_account),
+            work_account=UUID(company_orm.a_account),
+            product_account=UUID(company_orm.prd_account),
+            registered_on=company_orm.registered_on,
+            password_hash=company_orm.user.password,
+        )
+
+    def create_company(
+        self,
+        email: str,
+        name: str,
+        password_hash: str,
+        means_account: entities.Account,
+        labour_account: entities.Account,
+        resource_account: entities.Account,
+        products_account: entities.Account,
+        registered_on: datetime,
+    ) -> entities.Company:
+        user_orm = self._get_or_create_user(
+            email=email, password_hash=password_hash, email_confirmed_on=None
+        )
+        company = models.Company(
+            id=str(uuid4()),
+            name=name,
+            registered_on=registered_on,
+            user=user_orm,
+            p_account=str(means_account.id),
+            r_account=str(resource_account.id),
+            a_account=str(labour_account.id),
+            prd_account=str(products_account.id),
+        )
+        self.db.session.add(company)
+        self.db.session.flush()
+        return self.company_from_orm(company)
+
+    def get_companies(self) -> CompanyQueryResult:
+        return CompanyQueryResult(
+            query=Company.query,
+            mapper=self.company_from_orm,
+            db=self.db,
+        )
+
+    def create_accountant(self, email: str, name: str, password_hash: str) -> UUID:
+        user_id = uuid4()
+        user_orm = self._get_or_create_user(
+            email=email, password_hash=password_hash, email_confirmed_on=None
+        )
+        accountant = models.Accountant(
+            id=str(user_id),
+            name=name,
+            user=user_orm,
+        )
+        self.db.session.add(accountant)
+        return user_id
+
+    def get_accountants(self) -> AccountantResult:
+        return AccountantResult(
+            query=models.Accountant.query,
+            mapper=self.accountant_from_orm,
+            db=self.db,
+        )
+
+    @classmethod
+    def accountant_from_orm(self, orm: models.Accountant) -> entities.Accountant:
+        return entities.Accountant(
+            email_address=orm.user.email,
+            name=orm.name,
+            id=UUID(orm.id),
+            password_hash=orm.user.password,
+        )
+
+    @classmethod
+    def email_address_from_orm(self, orm: models.User) -> entities.EmailAddress:
+        return entities.EmailAddress(
+            orm.email,
+            confirmed_on=orm.email_confirmed_on,
         )

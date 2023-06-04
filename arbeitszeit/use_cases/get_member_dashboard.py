@@ -8,12 +8,7 @@ from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import CompanyWorkInvite
-from arbeitszeit.repositories import (
-    AccountRepository,
-    CompanyRepository,
-    DatabaseGateway,
-    MemberRepository,
-)
+from arbeitszeit.repositories import AccountRepository, DatabaseGateway
 
 
 @dataclass
@@ -45,21 +40,19 @@ class GetMemberDashboard:
         email: str
         id: UUID
 
-    company_repository: CompanyRepository
     account_repository: AccountRepository
-    member_repository: MemberRepository
     database_gateway: DatabaseGateway
     datetime_service: DatetimeService
 
     def __call__(self, member: UUID) -> Response:
-        _member = self.member_repository.get_members().with_id(member).first()
+        _member = self.database_gateway.get_members().with_id(member).first()
         assert _member is not None
         workplaces = [
             self.Workplace(
                 workplace_name=workplace.name,
                 workplace_email=workplace.email,
             )
-            for workplace in self.company_repository.get_companies().that_are_workplace_of_member(
+            for workplace in self.database_gateway.get_companies().that_are_workplace_of_member(
                 member
             )
         ]
@@ -82,9 +75,7 @@ class GetMemberDashboard:
         )
 
     def _render_company_work_invite(self, invite: CompanyWorkInvite) -> WorkInvitation:
-        company = (
-            self.company_repository.get_companies().with_id(invite.company).first()
-        )
+        company = self.database_gateway.get_companies().with_id(invite.company).first()
         assert company
         return self.WorkInvitation(
             invite_id=invite.id,

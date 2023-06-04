@@ -37,9 +37,9 @@ class UseCaseTests(BaseTestCase):
     def test_that_create_plan_creates_a_plan_draft_that_is_not_rejected(self) -> None:
         planner = self.company_generator.create_company()
         request = replace(REQUEST, planner=planner)
-        assert not len(self.plan_draft_repository)
+        assert not self.plan_draft_repository.get_plan_drafts()
         response = self.create_plan_draft(request)
-        assert len(self.plan_draft_repository) == 1
+        assert len(self.plan_draft_repository.get_plan_drafts()) == 1
         assert not response.is_rejected
 
     def test_that_create_plan_returns_a_draft_id(self) -> None:

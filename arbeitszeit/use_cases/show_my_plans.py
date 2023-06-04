@@ -56,7 +56,7 @@ class ShowMyPlansUseCase:
         drafts = list(
             map(
                 self._create_plan_info_from_draft,
-                self.draft_repository.all_drafts_of_company(id=request.company_id),
+                self.draft_repository.get_plan_drafts().planned_by(request.company_id),
             )
         )
         drafts.sort(key=lambda x: x.plan_creation_date, reverse=True)

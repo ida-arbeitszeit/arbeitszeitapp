@@ -4,7 +4,7 @@ from typing import Optional
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.repositories import CompanyRepository, DatabaseGateway
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -35,7 +35,6 @@ class AcceptCooperationResponse:
 @dataclass
 class AcceptCooperation:
     database_gateway: DatabaseGateway
-    company_repository: CompanyRepository
     datetime_service: DatetimeService
 
     def __call__(self, request: AcceptCooperationRequest) -> AcceptCooperationResponse:

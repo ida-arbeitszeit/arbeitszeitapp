@@ -11,7 +11,7 @@ from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit.use_cases.resend_confirmation_mail import ResendConfirmationMailUseCase
 from arbeitszeit.use_cases.start_page import StartPageUseCase
 from arbeitszeit_flask.database import commit_changes
-from arbeitszeit_flask.database.repositories import CompanyRepository, MemberRepository
+from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
 from arbeitszeit_flask.dependency_injection import (
     CompanyModule,
     MemberModule,
@@ -73,12 +73,8 @@ def set_language(language=None):
 @auth.route("/member/unconfirmed")
 @with_injection()
 @login_required
-def unconfirmed_member(member_repository: MemberRepository):
-    if (
-        member_repository.get_members()
-        .with_id(UUID(current_user.id))
-        .that_are_confirmed()
-    ):
+def unconfirmed_member(database: DatabaseGatewayImpl):
+    if database.get_members().with_id(UUID(current_user.id)).that_are_confirmed():
         return redirect(url_for("auth.start"))
     return render_template("auth/unconfirmed_member.html")
 
@@ -159,12 +155,8 @@ def resend_confirmation_member(use_case: ResendConfirmationMailUseCase):
 @auth.route("/company/unconfirmed")
 @with_injection()
 @login_required
-def unconfirmed_company(company_repository: CompanyRepository):
-    if (
-        company_repository.get_companies()
-        .with_id(UUID(current_user.id))
-        .that_are_confirmed()
-    ):
+def unconfirmed_company(database: DatabaseGatewayImpl):
+    if database.get_companies().with_id(UUID(current_user.id)).that_are_confirmed():
         return redirect(url_for("auth.start"))
     return render_template("auth/unconfirmed_company.html")
 

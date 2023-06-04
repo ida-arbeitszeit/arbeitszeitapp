@@ -9,6 +9,12 @@ from uuid import UUID
 
 
 @dataclass
+class EmailAddress:
+    address: str
+    confirmed_on: Optional[datetime]
+
+
+@dataclass
 class SocialAccounting:
     id: UUID
     account: UUID
@@ -32,7 +38,6 @@ class Member:
     email: str
     account: UUID
     registered_on: datetime
-    confirmed_on: Optional[datetime]
     password_hash: str
 
     def accounts(self) -> List[UUID]:
@@ -66,7 +71,6 @@ class Company:
     work_account: UUID
     product_account: UUID
     registered_on: datetime
-    confirmed_on: Optional[datetime]
     password_hash: str
 
     def _accounts_by_type(self) -> Dict[AccountTypes, UUID]:

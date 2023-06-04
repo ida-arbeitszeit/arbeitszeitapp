@@ -322,6 +322,26 @@ class PlanUpdate:
         return replace(self, update_functions=self.update_functions + [update])
 
 
+class PlanDraftResult(QueryResultImpl[entities.PlanDraft]):
+    def with_id(self, id_: UUID) -> Self:
+        return replace(
+            self,
+            items=lambda: filter(
+                lambda draft: draft.id == id_,
+                self.items(),
+            ),
+        )
+
+    def planned_by(self, *company: UUID) -> Self:
+        return replace(
+            self,
+            items=lambda: filter(
+                lambda draft: draft.planner in company,
+                self.items(),
+            ),
+        )
+
+
 class CooperationResult(QueryResultImpl[Cooperation]):
     def with_id(self, id_: UUID) -> Self:
         return replace(
@@ -375,12 +395,29 @@ class MemberResult(QueryResultImpl[Member]):
         return self._filtered_by(lambda model: model.email == email)
 
     def that_are_confirmed(self) -> MemberResult:
-        return self._filtered_by(lambda model: model.confirmed_on is not None)
+        def filtered(model: entities.Member) -> bool:
+            email = self.entities.email_addresses[model.email]
+            return email.confirmed_on is not None
+
+        return self._filtered_by(filtered)
+
+    def joined_with_email_address(
+        self,
+    ) -> QueryResultImpl[Tuple[entities.Member, entities.EmailAddress]]:
+        def items() -> Iterable[Tuple[entities.Member, entities.EmailAddress]]:
+            for member in self.items():
+                yield member, self.entities.email_addresses[member.email]
+
+        return QueryResultImpl(
+            items=items,
+            entities=self.entities,
+        )
 
     def update(self) -> MemberUpdate:
         return MemberUpdate(
             members=self.items,
             update_functions=list(),
+            entities=self.entities,
         )
 
     def _filtered_by(self, key: Callable[[Member], bool]) -> MemberResult:
@@ -394,10 +431,12 @@ class MemberResult(QueryResultImpl[Member]):
 class MemberUpdate:
     members: Callable[[], Iterable[entities.Member]]
     update_functions: List[Callable[[entities.Member], None]]
+    entities: EntityStorage
 
     def set_confirmation_timestamp(self, timestamp: datetime) -> MemberUpdate:
         def update(member: entities.Member) -> None:
-            member.confirmed_on = timestamp
+            email = self.entities.email_addresses[member.email]
+            email.confirmed_on = timestamp
 
         return replace(
             self,
@@ -449,11 +488,28 @@ class CompanyResult(QueryResultImpl[Company]):
         return self._filtered_by(lambda company: query.lower() in company.email.lower())
 
     def that_are_confirmed(self) -> Self:
-        return self._filtered_by(lambda company: company.confirmed_on is not None)
+        def filtered(company: entities.Company) -> bool:
+            email = self.entities.email_addresses[company.email]
+            return email.confirmed_on is not None
+
+        return self._filtered_by(filtered)
 
     def update(self) -> CompanyUpdate:
         return CompanyUpdate(
             companies=self.items,
+            entities=self.entities,
+        )
+
+    def joined_with_email_address(
+        self,
+    ) -> QueryResultImpl[Tuple[entities.Company, entities.EmailAddress]]:
+        def items() -> Iterable[Tuple[entities.Company, entities.EmailAddress]]:
+            for company in self.items():
+                yield company, self.entities.email_addresses[company.email]
+
+        return QueryResultImpl(
+            items=items,
+            entities=self.entities,
         )
 
     def _filtered_by(self, key: Callable[[Company], bool]) -> Self:
@@ -466,11 +522,13 @@ class CompanyResult(QueryResultImpl[Company]):
 @dataclass
 class CompanyUpdate:
     companies: Callable[[], Iterable[Company]]
+    entities: EntityStorage
     updates: List[Callable[[Company], None]] = field(default_factory=list)
 
     def set_confirmation_timestamp(self, timestamp: datetime) -> Self:
         def update(company: Company) -> None:
-            company.confirmed_on = timestamp
+            email = self.entities.email_addresses[company.email]
+            email.confirmed_on = timestamp
 
         return replace(
             self,
@@ -807,6 +865,10 @@ class CompanyWorkInviteResult(QueryResultImpl[CompanyWorkInvite]):
         ]
 
 
+class EmailAddressResult(QueryResultImpl[entities.EmailAddress]):
+    ...
+
+
 @singleton
 class AccountRepository(interfaces.AccountRepository):
     def __init__(self, entities: EntityStorage):
@@ -836,93 +898,10 @@ class AccountRepository(interfaces.AccountRepository):
 
 
 @singleton
-class MemberRepository(interfaces.MemberRepository):
-    def __init__(self, datetime_service: DatetimeService, entities: EntityStorage):
-        self.datetime_service = datetime_service
-        self.entities = entities
-
-    def create_member(
-        self,
-        *,
-        email: str,
-        name: str,
-        password_hash: str,
-        account: Account,
-        registered_on: datetime,
-    ) -> Member:
-        id = uuid4()
-        member = Member(
-            id=id,
-            name=name,
-            email=email,
-            account=account.id,
-            registered_on=registered_on,
-            confirmed_on=None,
-            password_hash=password_hash,
-        )
-        self.entities.members[id] = member
-        self.entities.account_owner_by_account[member.account] = member
-        return member
-
-    def get_members(self) -> MemberResult:
-        return MemberResult(
-            items=lambda: self.entities.members.values(),
-            entities=self.entities,
-        )
-
-    def _get_member_by_email(self, email: str) -> Optional[Member]:
-        for member in self.entities.members.values():
-            if member.email == email:
-                return member
-        return None
-
-
-@singleton
-class CompanyRepository(interfaces.CompanyRepository):
-    def __init__(self, entities: EntityStorage) -> None:
-        self.entities = entities
-
-    def create_company(
-        self,
-        email: str,
-        name: str,
-        password_hash: str,
-        means_account: Account,
-        labour_account: Account,
-        resource_account: Account,
-        products_account: Account,
-        registered_on: datetime,
-    ) -> Company:
-        new_company = Company(
-            id=uuid4(),
-            email=email,
-            name=name,
-            means_account=means_account.id,
-            raw_material_account=resource_account.id,
-            work_account=labour_account.id,
-            product_account=products_account.id,
-            registered_on=registered_on,
-            confirmed_on=None,
-            password_hash=password_hash,
-        )
-        self.entities.companies[new_company.id] = new_company
-        self.entities.account_owner_by_account[means_account.id] = new_company
-        self.entities.account_owner_by_account[labour_account.id] = new_company
-        self.entities.account_owner_by_account[resource_account.id] = new_company
-        self.entities.account_owner_by_account[products_account.id] = new_company
-        return new_company
-
-    def get_companies(self) -> CompanyResult:
-        return CompanyResult(
-            items=lambda: self.entities.companies.values(),
-            entities=self.entities,
-        )
-
-
-@singleton
 class PlanDraftRepository(interfaces.PlanDraftRepository):
-    def __init__(self) -> None:
+    def __init__(self, entities: EntityStorage) -> None:
         self.drafts: List[PlanDraft] = []
+        self.entities = entities
 
     def create_plan_draft(
         self,
@@ -952,7 +931,7 @@ class PlanDraftRepository(interfaces.PlanDraftRepository):
         return draft
 
     def update_draft(self, update: interfaces.PlanDraftRepository.UpdateDraft) -> None:
-        draft = self.get_by_id(update.id)
+        draft = self.get_plan_drafts().with_id(update.id).first()
         if draft is None:
             return
         if update.product_name is not None:
@@ -975,46 +954,12 @@ class PlanDraftRepository(interfaces.PlanDraftRepository):
             draft.unit_of_distribution = update.unit_of_distribution
         return
 
-    def get_by_id(self, id: UUID) -> Optional[PlanDraft]:
-        for draft in self.drafts:
-            if draft.id == id:
-                return draft
-        return None
-
-    def __len__(self) -> int:
-        return len(self.drafts)
-
     def delete_draft(self, id: UUID) -> None:
         self.drafts = [draft for draft in self.drafts if draft.id != id]
 
-    def all_drafts_of_company(self, id: UUID) -> Iterable[PlanDraft]:
-        result = []
-        for draft in self.drafts:
-            if draft.planner == id:
-                result.append(draft)
-        return result
-
-
-@singleton
-class AccountantRepositoryTestImpl:
-    def __init__(self, entities: EntityStorage) -> None:
-        self.accountants: Dict[UUID, Accountant] = dict()
-        self.entities = entities
-
-    def create_accountant(self, email: str, name: str, password_hash: str) -> UUID:
-        id = uuid4()
-        record = Accountant(
-            email_address=email,
-            name=name,
-            password_hash=password_hash,
-            id=id,
-        )
-        self.accountants[id] = record
-        return record.id
-
-    def get_accountants(self) -> AccountantResult:
-        return AccountantResult(
-            items=lambda: self.accountants.values(),
+    def get_plan_drafts(self) -> PlanDraftResult:
+        return PlanDraftResult(
+            items=lambda: self.drafts,
             entities=self.entities,
         )
 
@@ -1041,6 +986,7 @@ class EntityStorage:
         self.plans: Dict[UUID, Plan] = {}
         self.transactions: Dict[UUID, Transaction] = dict()
         self.accounts: List[Account] = []
+        self.accountants: Dict[UUID, Accountant] = dict()
         self.social_accounting = SocialAccounting(
             id=uuid4(),
             account=self.create_account().id,
@@ -1065,6 +1011,17 @@ class EntityStorage:
             UUID, entities.CompanyPurchase
         ] = dict()
         self.company_work_invites: List[CompanyWorkInvite] = list()
+        self.email_addresses: Dict[str, entities.EmailAddress] = dict()
+
+    def create_email_address(
+        self, *, address: str, confirmed_on: Optional[datetime]
+    ) -> entities.EmailAddress:
+        record = entities.EmailAddress(
+            address=address,
+            confirmed_on=confirmed_on,
+        )
+        self.email_addresses[address] = record
+        return record
 
     def create_labour_certificates_payout(
         self, transaction: UUID, plan: UUID
@@ -1245,5 +1202,88 @@ class EntityStorage:
     def get_company_work_invites(self) -> CompanyWorkInviteResult:
         return CompanyWorkInviteResult(
             items=lambda: self.company_work_invites,
+            entities=self,
+        )
+
+    def create_accountant(self, email: str, name: str, password_hash: str) -> UUID:
+        self.create_email_address(address=email, confirmed_on=None)
+        id = uuid4()
+        record = Accountant(
+            email_address=email,
+            name=name,
+            password_hash=password_hash,
+            id=id,
+        )
+        self.accountants[id] = record
+        return record.id
+
+    def get_accountants(self) -> AccountantResult:
+        return AccountantResult(
+            items=lambda: self.accountants.values(),
+            entities=self,
+        )
+
+    def create_member(
+        self,
+        *,
+        email: str,
+        name: str,
+        password_hash: str,
+        account: Account,
+        registered_on: datetime,
+    ) -> Member:
+        self.create_email_address(address=email, confirmed_on=None)
+        id = uuid4()
+        member = Member(
+            id=id,
+            name=name,
+            email=email,
+            account=account.id,
+            registered_on=registered_on,
+            password_hash=password_hash,
+        )
+        self.members[id] = member
+        self.account_owner_by_account[member.account] = member
+        return member
+
+    def get_members(self) -> MemberResult:
+        return MemberResult(
+            items=lambda: self.members.values(),
+            entities=self,
+        )
+
+    def create_company(
+        self,
+        email: str,
+        name: str,
+        password_hash: str,
+        means_account: Account,
+        labour_account: Account,
+        resource_account: Account,
+        products_account: Account,
+        registered_on: datetime,
+    ) -> Company:
+        self.create_email_address(address=email, confirmed_on=None)
+        new_company = Company(
+            id=uuid4(),
+            email=email,
+            name=name,
+            means_account=means_account.id,
+            raw_material_account=resource_account.id,
+            work_account=labour_account.id,
+            product_account=products_account.id,
+            registered_on=registered_on,
+            password_hash=password_hash,
+        )
+        self.companies[new_company.id] = new_company
+        self.account_owner_by_account[means_account.id] = new_company
+        self.account_owner_by_account[labour_account.id] = new_company
+        self.account_owner_by_account[resource_account.id] = new_company
+        self.account_owner_by_account[products_account.id] = new_company
+        return new_company
+
+    def get_companies(self) -> CompanyResult:
+        return CompanyResult(
+            items=lambda: self.companies.values(),
             entities=self,
         )

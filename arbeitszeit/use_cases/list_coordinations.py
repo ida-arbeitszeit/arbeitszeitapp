@@ -4,7 +4,7 @@ from typing import List
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.repositories import CompanyRepository, DatabaseGateway
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -28,12 +28,11 @@ class ListCoordinationsResponse:
 
 @dataclass
 class ListCoordinations:
-    company_repository: CompanyRepository
     datetime_service: DatetimeService
     database_gateway: DatabaseGateway
 
     def __call__(self, request: ListCoordinationsRequest) -> ListCoordinationsResponse:
-        if not self.company_repository.get_companies().with_id(request.company):
+        if not self.database_gateway.get_companies().with_id(request.company):
             return ListCoordinationsResponse(coordinations=[])
         cooperations = [
             CooperationInfo(

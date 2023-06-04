@@ -18,6 +18,7 @@ from arbeitszeit.entities import (
     CompanyWorkInvite,
     ConsumerPurchase,
     Cooperation,
+    EmailAddress,
     LabourCertificatesPayout,
     Member,
     PayoutFactor,
@@ -183,6 +184,14 @@ class PlanUpdate(Protocol):
         """
 
 
+class PlanDraftResult(QueryResult[PlanDraft], Protocol):
+    def with_id(self, id_: UUID) -> Self:
+        ...
+
+    def planned_by(self, *company: UUID) -> Self:
+        ...
+
+
 class CooperationResult(QueryResult[Cooperation], Protocol):
     def with_id(self, id_: UUID) -> Self:
         ...
@@ -205,6 +214,9 @@ class MemberResult(QueryResult[Member], Protocol):
         ...
 
     def with_email_address(self, email: str) -> MemberResult:
+        ...
+
+    def joined_with_email_address(self) -> QueryResult[Tuple[Member, EmailAddress]]:
         ...
 
     def update(self) -> MemberUpdate:
@@ -277,6 +289,9 @@ class CompanyResult(QueryResult[Company], Protocol):
         ...
 
     def that_are_confirmed(self) -> Self:
+        ...
+
+    def joined_with_email_address(self) -> QueryResult[Tuple[Company, EmailAddress]]:
         ...
 
     def update(self) -> CompanyUpdate:
@@ -372,6 +387,10 @@ class CompanyWorkInviteResult(QueryResult[CompanyWorkInvite], Protocol):
         ...
 
 
+class EmailAddressResult(QueryResult[EmailAddress], Protocol):
+    ...
+
+
 class AccountRepository(ABC):
     @abstractmethod
     def create_account(self) -> Account:
@@ -383,44 +402,6 @@ class AccountRepository(ABC):
 
     @abstractmethod
     def get_account_balance(self, account: UUID) -> Decimal:
-        pass
-
-
-class MemberRepository(ABC):
-    @abstractmethod
-    def create_member(
-        self,
-        *,
-        email: str,
-        name: str,
-        password_hash: str,
-        account: Account,
-        registered_on: datetime,
-    ) -> Member:
-        pass
-
-    @abstractmethod
-    def get_members(self) -> MemberResult:
-        pass
-
-
-class CompanyRepository(ABC):
-    @abstractmethod
-    def create_company(
-        self,
-        email: str,
-        name: str,
-        password_hash: str,
-        means_account: Account,
-        labour_account: Account,
-        resource_account: Account,
-        products_account: Account,
-        registered_on: datetime,
-    ) -> Company:
-        pass
-
-    @abstractmethod
-    def get_companies(self) -> CompanyResult:
         pass
 
 
@@ -458,24 +439,12 @@ class PlanDraftRepository(ABC):
         pass
 
     @abstractmethod
-    def get_by_id(self, id: UUID) -> Optional[PlanDraft]:
+    def get_plan_drafts(self) -> PlanDraftResult:
         pass
 
     @abstractmethod
     def delete_draft(self, id: UUID) -> None:
         pass
-
-    @abstractmethod
-    def all_drafts_of_company(self, id: UUID) -> Iterable[PlanDraft]:
-        pass
-
-
-class AccountantRepository(Protocol):
-    def create_accountant(self, email: str, name: str, password_hash: str) -> UUID:
-        ...
-
-    def get_accountants(self) -> AccountantResult:
-        ...
 
 
 class LanguageRepository(Protocol):
@@ -565,4 +534,40 @@ class DatabaseGateway(Protocol):
         ...
 
     def get_company_work_invites(self) -> CompanyWorkInviteResult:
+        ...
+
+    def create_member(
+        self,
+        *,
+        email: str,
+        name: str,
+        password_hash: str,
+        account: Account,
+        registered_on: datetime,
+    ) -> Member:
+        ...
+
+    def get_members(self) -> MemberResult:
+        ...
+
+    def create_company(
+        self,
+        email: str,
+        name: str,
+        password_hash: str,
+        means_account: Account,
+        labour_account: Account,
+        resource_account: Account,
+        products_account: Account,
+        registered_on: datetime,
+    ) -> Company:
+        ...
+
+    def get_companies(self) -> CompanyResult:
+        ...
+
+    def create_accountant(self, email: str, name: str, password_hash: str) -> UUID:
+        ...
+
+    def get_accountants(self) -> AccountantResult:
         ...
