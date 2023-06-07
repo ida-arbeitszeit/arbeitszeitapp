@@ -17,7 +17,7 @@ class ShowAAccountDetailsPresenter:
         transaction_type: str
         date: str
         transaction_volume: str
-        purpose: str
+        plan: str
 
     @dataclass
     class ViewModel:
@@ -48,7 +48,7 @@ class ShowAAccountDetailsPresenter:
         self, transaction: ShowAAccountDetailsUseCase.TransactionInfo
     ) -> TransactionInfo:
         transaction_type = (
-            self.trans.gettext("Payment")
+            self.trans.gettext("Wage")
             if transaction.transaction_type == TransactionTypes.payment_of_wages
             else self.trans.gettext("Credit")
         )
@@ -58,5 +58,5 @@ class ShowAAccountDetailsPresenter:
                 date=transaction.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
             ),
             str(round(transaction.transaction_volume, 2)),
-            transaction.purpose,
+            f"{transaction.plan}" if transaction.plan else "",
         )

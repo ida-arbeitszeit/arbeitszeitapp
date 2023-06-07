@@ -524,7 +524,7 @@ class DatabaseGateway(Protocol):
         receiving_account: UUID,
         amount_sent: Decimal,
         amount_received: Decimal,
-        purpose: str,
+        plan: Optional[UUID],
     ) -> Transaction:
         ...
 

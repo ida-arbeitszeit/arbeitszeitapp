@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from decimal import Decimal
+from uuid import uuid4
 
 from arbeitszeit.entities import SocialAccounting
 from arbeitszeit.transactions import TransactionTypes
@@ -112,12 +113,13 @@ class UseCaseTester(BaseTestCase):
             receiving_account=company.product_account,
             amount_sent=Decimal(10),
             amount_received=Decimal(8.5),
+            plan=uuid4(),
         )
 
         response = self.show_prd_account_details(company.id)
         assert len(response.transactions) == 1
         assert response.transactions[0].transaction_volume == Decimal(8.5)
-        assert response.transactions[0].purpose is not None
+        assert response.transactions[0].plan is not None
         assert isinstance(response.transactions[0].date, datetime)
         assert (
             response.transactions[0].transaction_type
@@ -136,12 +138,13 @@ class UseCaseTester(BaseTestCase):
             receiving_account=company2.product_account,
             amount_sent=Decimal(10),
             amount_received=Decimal(8.5),
+            plan=uuid4(),
         )
 
         response = self.show_prd_account_details(company2.id)
         assert len(response.transactions) == 1
         assert response.transactions[0].transaction_volume == Decimal(8.5)
-        assert response.transactions[0].purpose is not None
+        assert response.transactions[0].plan is not None
         assert isinstance(response.transactions[0].date, datetime)
         assert (
             response.transactions[0].transaction_type
@@ -158,12 +161,13 @@ class UseCaseTester(BaseTestCase):
             receiving_account=company2.product_account,
             amount_sent=Decimal(10),
             amount_received=Decimal(8.5),
+            plan=uuid4(),
         )
 
         response = self.show_prd_account_details(company2.id)
         assert len(response.transactions) == 1
         assert response.transactions[0].transaction_volume == Decimal(8.5)
-        assert response.transactions[0].purpose is not None
+        assert response.transactions[0].plan is not None
         assert isinstance(response.transactions[0].date, datetime)
         assert (
             response.transactions[0].transaction_type

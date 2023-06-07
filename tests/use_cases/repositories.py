@@ -1168,7 +1168,7 @@ class EntityStorage:
         receiving_account: UUID,
         amount_sent: Decimal,
         amount_received: Decimal,
-        purpose: str,
+        plan: Optional[UUID],
     ) -> Transaction:
         transaction = Transaction(
             id=uuid4(),
@@ -1177,7 +1177,7 @@ class EntityStorage:
             receiving_account=receiving_account,
             amount_sent=amount_sent,
             amount_received=amount_received,
-            purpose=purpose,
+            plan=plan,
         )
         self.transactions[transaction.id] = transaction
         return transaction

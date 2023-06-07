@@ -18,14 +18,14 @@ DEFAULT_INFO1 = ShowPAccountDetailsUseCase.TransactionInfo(
     transaction_type=TransactionTypes.credit_for_fixed_means,
     date=datetime.now(),
     transaction_volume=Decimal(10.002),
-    purpose="Test purpose",
+    plan=uuid4(),
 )
 
 DEFAULT_INFO2 = ShowPAccountDetailsUseCase.TransactionInfo(
     transaction_type=TransactionTypes.credit_for_wages,
     date=datetime.now(),
     transaction_volume=Decimal(20),
-    purpose="Test purpose",
+    plan=uuid4(),
 )
 
 
@@ -60,7 +60,7 @@ class CompanyTransactionsPresenterTests(TestCase):
         self.assertEqual(
             trans.transaction_volume, str(round(DEFAULT_INFO1.transaction_volume, 2))
         )
-        self.assertIsInstance(trans.purpose, str)
+        self.assertIsInstance(trans.plan, str)
 
     def test_return_two_transactions_when_two_transactions_took_place(self):
         response = self._use_case_response(

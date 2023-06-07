@@ -2,6 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 from unittest import TestCase
+from uuid import UUID, uuid4
 
 from dateutil import tz
 
@@ -115,16 +116,14 @@ class CompanyTransactionsPresenterTests(TestCase):
                     self._get_account_name(account_type),
                 )
 
-    def test_that_transaction_purpose_is_shown_as_correct_string(self):
-        expected_purpose = "purpose test"
-        expected_transaction = self._get_single_transaction_info(
-            purpose=expected_purpose
-        )
+    def test_that_transaction_plan_is_shown_as_correct_string(self):
+        expected_plan = uuid4()
+        expected_transaction = self._get_single_transaction_info(plan=expected_plan)
         response = GetCompanyTransactionsResponse(transactions=[expected_transaction])
         view_model = self.presenter.present(response)
         presented_transaction = view_model.transactions[0]
-        self.assertIsInstance(presented_transaction.purpose, str)
-        self.assertEqual(presented_transaction.purpose, expected_purpose)
+        self.assertIsInstance(presented_transaction.plan, str)
+        self.assertEqual(presented_transaction.plan, str(expected_plan))
 
     def test_return_two_transactions_when_two_transactions_took_place(self):
         response = GetCompanyTransactionsResponse(
@@ -142,7 +141,7 @@ class CompanyTransactionsPresenterTests(TestCase):
         date: Optional[datetime] = None,
         transaction_volume: Optional[Decimal] = None,
         account_type: Optional[AccountTypes] = None,
-        purpose: Optional[str] = None,
+        plan: Optional[UUID] = None,
     ) -> TransactionInfo:
         if transaction_type is None:
             transaction_type = TransactionTypes.credit_for_fixed_means
@@ -152,14 +151,14 @@ class CompanyTransactionsPresenterTests(TestCase):
             transaction_volume = Decimal(10)
         if account_type is None:
             account_type = AccountTypes.p
-        if purpose is None:
-            purpose = "Test purpose"
+        if plan is None:
+            plan = uuid4()
         return TransactionInfo(
             transaction_type=transaction_type,
             date=date,
             transaction_volume=transaction_volume,
             account_type=account_type,
-            purpose=purpose,
+            plan=plan,
         )
 
     def _get_transaction_name(self, transaction_type: TransactionTypes):

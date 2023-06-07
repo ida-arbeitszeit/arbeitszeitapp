@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from itertools import accumulate
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 
 from arbeitszeit.repositories import AccountRepository, DatabaseGateway
@@ -18,7 +18,7 @@ class ShowPAccountDetailsUseCase:
         transaction_type: TransactionTypes
         date: datetime
         transaction_volume: Decimal
-        purpose: str
+        plan: Optional[UUID]
 
     @dataclass
     class PlotDetails:
@@ -44,7 +44,7 @@ class ShowPAccountDetailsUseCase:
                 transaction_type=row.transaction_type,
                 date=row.transaction.date,
                 transaction_volume=row.volume,
-                purpose=row.transaction.purpose,
+                plan=row.transaction.plan,
             )
             for row in self.accounting_service.get_statement_of_account(
                 company, [company.means_account]

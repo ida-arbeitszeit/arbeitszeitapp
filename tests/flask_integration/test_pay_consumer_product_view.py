@@ -32,14 +32,16 @@ class AuthenticatedMemberTests(ViewTestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_posting_with_valid_form_data_results_in_302(self) -> None:
+        expected_plan = self.plan_generator.create_plan()
         self.transaction_generator.create_transaction(
-            receiving_account=self.member.account, amount_received=Decimal(100)
+            receiving_account=self.member.account,
+            amount_received=Decimal(100),
+            plan=expected_plan.id,
         )
-        plan = self.plan_generator.create_plan()
         response = self.client.post(
             "/member/pay_consumer_product",
             data=dict(
-                plan_id=plan.id,
+                plan_id=expected_plan.id,
                 amount=2,
             ),
         )

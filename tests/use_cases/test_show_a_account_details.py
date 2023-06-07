@@ -127,12 +127,13 @@ def test_that_correct_info_is_generated_when_credit_for_wages_is_granted(
         receiving_account=company.work_account,
         amount_sent=Decimal(10),
         amount_received=Decimal(8.5),
+        plan=None,
     )
 
     response = show_a_account_details(company.id)
     assert len(response.transactions) == 1
     assert response.transactions[0].transaction_volume == Decimal(8.5)
-    assert response.transactions[0].purpose is not None
+    assert response.transactions[0].plan is None
     assert isinstance(response.transactions[0].date, datetime)
     assert (
         response.transactions[0].transaction_type == TransactionTypes.credit_for_wages

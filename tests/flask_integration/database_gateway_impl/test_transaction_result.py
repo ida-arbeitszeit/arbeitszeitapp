@@ -40,7 +40,7 @@ class TransactionRepositoryTests(FlaskTestCase):
             receiving_account=receiver_account.id,
             amount_sent=Decimal(1),
             amount_received=Decimal(1),
-            purpose="test purpose",
+            plan=None,
         )
         assert list(
             self.database_gateway.get_transactions().where_account_is_receiver(
@@ -59,7 +59,7 @@ class TransactionRepositoryTests(FlaskTestCase):
             receiving_account=receiver_account.id,
             amount_sent=Decimal(1),
             amount_received=Decimal(1),
-            purpose="test purpose",
+            plan=None,
         )
         assert list(self.database_gateway.get_transactions()) == [transaction]
 
@@ -73,7 +73,7 @@ class TransactionRepositoryTests(FlaskTestCase):
             receiving_account=receiver_account.id,
             amount_sent=Decimal(1),
             amount_received=Decimal(1),
-            purpose="test purpose",
+            plan=None,
         )
         assert list(
             self.database_gateway.get_transactions().where_sender_is_social_accounting()
@@ -90,7 +90,7 @@ class TransactionRepositoryTests(FlaskTestCase):
             receiving_account=receiver_account.id,
             amount_sent=Decimal(1),
             amount_received=Decimal(1),
-            purpose="test purpose",
+            plan=None,
         )
         assert (
             not self.database_gateway.get_transactions().where_sender_is_social_accounting()
@@ -107,7 +107,7 @@ class TransactionRepositoryTests(FlaskTestCase):
             receiving_account=receiver_account.id,
             amount_sent=Decimal(1),
             amount_received=Decimal(1),
-            purpose="test purpose",
+            plan=None,
         )
         second_transaction = self.database_gateway.create_transaction(
             datetime(2000, 1, 2),
@@ -115,7 +115,7 @@ class TransactionRepositoryTests(FlaskTestCase):
             receiving_account=receiver_account.id,
             amount_sent=Decimal(1),
             amount_received=Decimal(1),
-            purpose="test purpose",
+            plan=None,
         )
         assert list(
             self.database_gateway.get_transactions().ordered_by_transaction_date()
@@ -135,7 +135,7 @@ class TransactionRepositoryTests(FlaskTestCase):
             receiving_account=receiver_account.id,
             amount_sent=Decimal(1),
             amount_received=Decimal(1),
-            purpose="test purpose",
+            plan=None,
         )
         assert list(
             self.database_gateway.get_transactions().where_account_is_sender(
@@ -188,7 +188,7 @@ class TestWhereAccountIsSenderOrReceiver(FlaskTestCase):
             receiving_account=receiver,
             amount_sent=Decimal(1),
             amount_received=Decimal(1),
-            purpose="test purpose",
+            plan=None,
         )
 
 
@@ -420,7 +420,7 @@ class JoinedWithSenderAndReceiverTests(FlaskTestCase):
             receiving_account=receiver,
             amount_sent=Decimal(1),
             amount_received=Decimal(1),
-            purpose="test purpose",
+            plan=None,
         )
 
     def create_account(self) -> UUID:

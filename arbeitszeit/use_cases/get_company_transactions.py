@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 
 from arbeitszeit.entities import AccountTypes
@@ -15,7 +15,7 @@ class TransactionInfo:
     date: datetime
     transaction_volume: Decimal
     account_type: AccountTypes
-    purpose: str
+    plan: Optional[UUID]
 
 
 @dataclass
@@ -37,7 +37,7 @@ class GetCompanyTransactions:
                 date=row.transaction.date,
                 transaction_volume=row.volume,
                 account_type=row.account_type,
-                purpose=row.transaction.purpose,
+                plan=row.transaction.plan,
             )
             for row in self.accounting_service.get_statement_of_account(
                 company, company.accounts()

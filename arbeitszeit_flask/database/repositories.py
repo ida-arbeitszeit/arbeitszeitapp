@@ -1456,7 +1456,7 @@ class DatabaseGatewayImpl:
             receiving_account=UUID(transaction.receiving_account),
             amount_sent=Decimal(transaction.amount_sent),
             amount_received=Decimal(transaction.amount_received),
-            purpose=transaction.purpose,
+            plan=UUID(transaction.plan) if transaction.plan else None,
         )
 
     def create_transaction(
@@ -1466,7 +1466,7 @@ class DatabaseGatewayImpl:
         receiving_account: UUID,
         amount_sent: Decimal,
         amount_received: Decimal,
-        purpose: str,
+        plan: Optional[UUID],
     ) -> entities.Transaction:
         transaction = Transaction(
             id=str(uuid4()),
@@ -1475,7 +1475,7 @@ class DatabaseGatewayImpl:
             receiving_account=str(receiving_account),
             amount_sent=amount_sent,
             amount_received=amount_received,
-            purpose=purpose,
+            plan=str(plan) if plan else None,
         )
         self.db.session.add(transaction)
         self.db.session.flush()

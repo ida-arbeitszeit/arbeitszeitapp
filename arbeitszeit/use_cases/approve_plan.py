@@ -55,5 +55,5 @@ class ApprovePlanUseCase:
             receiving_account=account,
             amount_sent=round(amount, 2),
             amount_received=round(amount, 2),
-            purpose=f"Plan-Id: {plan.id}",
+            plan=plan.id,
         )

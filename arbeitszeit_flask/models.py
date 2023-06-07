@@ -185,7 +185,7 @@ class Transaction(db.Model):
     )
     amount_sent = db.Column(db.Numeric(), nullable=False)
     amount_received = db.Column(db.Numeric(), nullable=False)
-    purpose = db.Column(db.String(1000), nullable=True)  # Verwendungszweck
+    plan = db.Column(db.String, db.ForeignKey("plan.id"), nullable=True)
 
     def __repr__(self) -> str:
         fields = ", ".join(
@@ -196,7 +196,7 @@ class Transaction(db.Model):
                 f"receiving_account={self.receiving_account!r}",
                 f"amount_sent={self.amount_sent!r}",
                 f"amount_received={self.amount_received!r}",
-                f"purpose={self.purpose!r}",
+                f"plan={self.plan!r}",
             ]
         )
         return f"Transaction({fields})"

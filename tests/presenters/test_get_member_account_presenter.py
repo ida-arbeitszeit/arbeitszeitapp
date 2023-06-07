@@ -2,6 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import List, Optional
 from unittest import TestCase
+from uuid import uuid4
 
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.get_member_account import (
@@ -144,12 +145,12 @@ class TestPresenter(TestCase):
         view_model = self.presenter.present_member_account(response)
         self.assertTrue(view_model.transactions[0].user_name)
 
-    def test_that_purpose_is_shown(
+    def test_that_plan_is_shown(
         self,
     ):
         response = self.get_use_case_response([self.get_transaction()])
         view_model = self.presenter.present_member_account(response)
-        self.assertTrue(view_model.transactions[0].purpose)
+        self.assertTrue(view_model.transactions[0].plan)
 
     def get_use_case_response(
         self, transactions: List[TransactionInfo], balance: Optional[Decimal] = None
@@ -174,6 +175,6 @@ class TestPresenter(TestCase):
             date=date,
             peer_name="test company",
             transaction_volume=transaction_volume,
-            purpose="test purpose",
+            plan=uuid4(),
             type=type,
         )

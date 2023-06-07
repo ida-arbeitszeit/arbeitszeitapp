@@ -57,7 +57,7 @@ class CompanyTransactionsPresenterTests(TestCase):
             ),
         )
         self.assertEqual(trans.transaction_volume, "10.01")
-        self.assertIsInstance(trans.purpose, str)
+        self.assertIsInstance(trans.plan, str)
 
     def test_return_correct_info_when_one_transaction_of_selling_consumer_product_took_place(
         self,
@@ -84,7 +84,7 @@ class CompanyTransactionsPresenterTests(TestCase):
             ),
         )
         self.assertEqual(trans.transaction_volume, "10.01")
-        self.assertIsInstance(trans.purpose, str)
+        self.assertIsInstance(trans.plan, str)
 
     def test_return_two_transactions_when_two_transactions_took_place(self):
         response = self._use_case_response(
@@ -188,6 +188,6 @@ class CompanyTransactionsPresenterTests(TestCase):
             transaction_type=transaction_type,
             date=datetime.now(),
             transaction_volume=Decimal(10.007),
-            purpose="Test purpose",
+            plan=None,
             buyer=buyer,
         )

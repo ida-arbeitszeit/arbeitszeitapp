@@ -28,7 +28,7 @@ class GiroOffice:
         receiving_account: UUID,
         amount_sent: Decimal,
         amount_received: Decimal,
-        purpose: str,
+        plan: UUID,
     ) -> Transaction:
         sending_account = sender.account
         if not self._is_account_balance_sufficient(amount_sent, sending_account):
@@ -39,7 +39,7 @@ class GiroOffice:
             receiving_account=receiving_account,
             amount_sent=amount_sent,
             amount_received=amount_received,
-            purpose=purpose,
+            plan=plan,
         )
 
     def _is_account_balance_sufficient(

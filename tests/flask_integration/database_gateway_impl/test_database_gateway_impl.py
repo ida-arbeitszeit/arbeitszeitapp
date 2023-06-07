@@ -109,7 +109,7 @@ class LabourCertificatesPayoutTests(FlaskTestCase):
             date=datetime(2000, 1, 1),
             sending_account=sending_account.id,
             receiving_account=receiving_account.id,
-            purpose="",
+            plan=None,
             amount_sent=Decimal(1),
             amount_received=Decimal(1),
         )

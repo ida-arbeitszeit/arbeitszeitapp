@@ -13,7 +13,6 @@ from uuid import UUID, uuid4
 
 from arbeitszeit.entities import (
     Account,
-    AccountTypes,
     Company,
     Cooperation,
     Member,
@@ -440,13 +439,11 @@ class TransactionGenerator:
 
     def create_transaction(
         self,
-        sending_account_type=AccountTypes.p,
-        receiving_account_type=AccountTypes.prd,
         sending_account: Optional[UUID] = None,
         receiving_account: Optional[UUID] = None,
         amount_sent=None,
         amount_received=None,
-        purpose=None,
+        plan: Optional[UUID] = None,
         date=None,
     ) -> Transaction:
         if sending_account is None:
@@ -457,8 +454,6 @@ class TransactionGenerator:
             amount_sent = Decimal(10)
         if amount_received is None:
             amount_received = Decimal(10)
-        if purpose is None:
-            purpose = "test purpose"
         if date is None:
             date = self.datetime_service.now_minus_one_day()
         return self.database_gateway.create_transaction(
@@ -467,7 +462,7 @@ class TransactionGenerator:
             receiving_account=receiving_account,
             amount_sent=amount_sent,
             amount_received=amount_received,
-            purpose=purpose,
+            plan=plan,
         )
 
 

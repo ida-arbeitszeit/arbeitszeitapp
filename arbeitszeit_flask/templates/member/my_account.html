@@ -24,7 +24,7 @@
         <div class="column is-half">
             {% if view_model.transactions is defined and view_model.transactions|length %}
             {% for transaction in view_model.transactions %}
-            {{ member_transaction(transaction.date, transaction.type, transaction.purpose, transaction.user_name, transaction.volume, transaction.is_volume_positive) }}
+            {{ member_transaction(transaction.date, transaction.type, transaction.plan, transaction.user_name, transaction.volume, transaction.is_volume_positive) }}
             {% endfor %}
             {% endif %}
         </div>

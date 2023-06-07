@@ -58,7 +58,7 @@ class UpdatePlansAndPayout:
             receiving_account=planner.work_account,
             amount_sent=round(amount, 2),
             amount_received=round(amount, 2),
-            purpose=f"Plan-Id: {plan.id}",
+            plan=plan.id,
         )
         self.database_gateway.create_labour_certificates_payout(
             transaction=transaction.id, plan=plan.id

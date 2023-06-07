@@ -60,6 +60,6 @@ class SendWorkCertificatesToWorker:
             receiving_account=worker.account,
             amount_sent=use_case_request.amount,
             amount_received=use_case_request.amount,
-            purpose="Lohn",
+            plan=None,
         )
         return SendWorkCertificatesToWorkerResponse(rejection_reason=None)

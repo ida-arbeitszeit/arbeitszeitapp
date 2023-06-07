@@ -17,7 +17,7 @@ class ShowRAccountDetailsPresenter:
         transaction_type: str
         date: str
         transaction_volume: str
-        purpose: str
+        plan: str
 
     @dataclass
     class ViewModel:
@@ -58,5 +58,5 @@ class ShowRAccountDetailsPresenter:
                 date=transaction.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
             ),
             str(round(transaction.transaction_volume, 2)),
-            transaction.purpose,
+            str(transaction.plan) if transaction.plan else "",
         )

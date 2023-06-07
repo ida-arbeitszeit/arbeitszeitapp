@@ -1,5 +1,5 @@
 <!--Used in company's p, r, a accounts-->
-{% macro basic_transaction(date, type, purpose, volume) %}
+{% macro basic_transaction(date, type, plan, volume) %}
 <article class="media">
     <div class="media-left">
         <p class="pt-1">
@@ -13,7 +13,7 @@
                     {{ type }}
                 </strong>
                 <br>
-                <small>{{ purpose }}</small>
+                <small>{{ plan }}</small>
             </p>
         </div>
     </div>
@@ -26,7 +26,7 @@
 {% endmacro %}
 
 <!--Used in company's prd account-->
-{% macro transaction_with_buyer(date, type, purpose, volume, buyer_name, buyer_type_icon) %}
+{% macro transaction_with_buyer(date, type, plan, volume, buyer_name, buyer_type_icon) %}
 <article class="media">
     <div class="media-left">
         <p class="pt-1">
@@ -40,7 +40,7 @@
                     {{ type }}
                 </strong><span class="icon"><i class='{{ buyer_type_icon }}'></i></span><span>{{ buyer_name }}</span>
                 <br>
-                <small>{{ purpose }}</small>
+                <small>{{ plan }}</small>
             </p>
         </div>
     </div>
@@ -53,7 +53,7 @@
 {% endmacro %}
 
 <!--Used in company's transaction overview-->
-{% macro transaction_with_account(date, type, purpose, volume, account) %}
+{% macro transaction_with_account(date, type, plan, volume, account) %}
 <article class="media">
     <div class="media-left">
         <p class="pt-1">
@@ -67,7 +67,7 @@
                     {{ account }}: {{ type }}
                 </strong>
                 <br>
-                <small>{{ purpose }}</small>
+                <small>{{ plan }}</small>
             </p>
         </div>
     </div>
@@ -80,7 +80,7 @@
 {% endmacro %}
 
 <!--Used in member account-->
-{% macro member_transaction(date, type, purpose, user_name, volume, is_volume_positive) %}
+{% macro member_transaction(date, type, plan, user_name, volume, is_volume_positive) %}
 <article class="media">
     <div class="media-left">
         <p class="pt-1">
@@ -94,7 +94,7 @@
                     {{ type }}
                 </strong>
                 <br>
-                <small>{{ purpose }}</small>
+                <small>{{ plan }}</small>
                 <br>
                 <small>{{ user_name }}</small>
             </p>

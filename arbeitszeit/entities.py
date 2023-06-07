@@ -267,7 +267,9 @@ class Transaction:
     receiving_account: UUID
     amount_sent: Decimal
     amount_received: Decimal
-    purpose: str
+    plan: Optional[
+        UUID
+    ]  # all transactions are related to plans, unless wages payouts from company to worker
 
     def __hash__(self) -> int:
         return hash(self.id)

@@ -25,7 +25,7 @@ class ShowPRDAccountDetailsUseCase:
         transaction_type: TransactionTypes
         date: datetime
         transaction_volume: Decimal
-        purpose: str
+        plan: Optional[UUID]
         buyer: Optional[ShowPRDAccountDetailsUseCase.Buyer]
 
     @dataclass
@@ -52,7 +52,7 @@ class ShowPRDAccountDetailsUseCase:
                 transaction_type=row.transaction_type,
                 date=row.transaction.date,
                 transaction_volume=row.volume,
-                purpose=row.transaction.purpose,
+                plan=row.transaction.plan,
                 buyer=self._create_buyer_info(row.peer),
             )
             for row in self.accounting_service.get_statement_of_account(

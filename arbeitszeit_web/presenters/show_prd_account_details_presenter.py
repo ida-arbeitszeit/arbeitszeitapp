@@ -17,7 +17,7 @@ class ShowPRDAccountDetailsPresenter:
         transaction_type: str
         date: str
         transaction_volume: str
-        purpose: str
+        plan: str
         buyer_name: str
         buyer_type_icon: Optional[str]
 
@@ -68,7 +68,7 @@ class ShowPRDAccountDetailsPresenter:
                 date=transaction.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
             ),
             transaction_volume=str(round(transaction.transaction_volume, 2)),
-            purpose=transaction.purpose,
+            plan=str(transaction.plan) if transaction.plan else "",
             buyer_name=transaction.buyer.buyer_name if transaction.buyer else "",
             buyer_type_icon=self._get_buyer_type_icon(transaction.buyer),
         )

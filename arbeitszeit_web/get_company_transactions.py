@@ -18,7 +18,7 @@ class ViewModelTransactionInfo:
     date: str
     transaction_volume: Decimal
     account: str
-    purpose: str
+    plan: str
 
 
 @dataclass
@@ -50,7 +50,7 @@ class GetCompanyTransactionsPresenter:
             ),
             transaction_volume=round(transaction.transaction_volume, 2),
             account=account,
-            purpose=transaction.purpose,
+            plan=str(transaction.plan) if transaction.plan else "",
         )
 
     def _get_account(self, account_type: AccountTypes) -> str:

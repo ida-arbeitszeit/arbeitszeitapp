@@ -114,7 +114,7 @@ class PayConsumerProduct:
             receiving_account=planner.product_account,
             amount_sent=coop_price_per_unit * amount,
             amount_received=individual_price_per_unit * amount,
-            purpose=f"Plan-Id: {plan.id}",
+            plan=plan.id,
         )
         self.database_gateway.create_consumer_purchase(
             amount=amount,

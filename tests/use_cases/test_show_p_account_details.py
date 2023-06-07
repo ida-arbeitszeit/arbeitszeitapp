@@ -1,5 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
+from uuid import uuid4
 
 from arbeitszeit.entities import SocialAccounting
 from arbeitszeit.transactions import TransactionTypes
@@ -86,12 +87,13 @@ class UseCaseTester(BaseTestCase):
             receiving_account=company.means_account,
             amount_sent=Decimal(10),
             amount_received=Decimal(8.5),
+            plan=uuid4(),
         )
 
         response = self.show_p_account_details(company.id)
         assert len(response.transactions) == 1
         assert response.transactions[0].transaction_volume == Decimal(8.5)
-        assert response.transactions[0].purpose is not None
+        assert response.transactions[0].plan is not None
         assert isinstance(response.transactions[0].date, datetime)
         assert (
             response.transactions[0].transaction_type

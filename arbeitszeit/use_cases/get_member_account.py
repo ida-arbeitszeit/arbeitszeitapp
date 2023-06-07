@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 
 from arbeitszeit.entities import AccountOwner, Member, Transaction
@@ -14,7 +14,7 @@ class TransactionInfo:
     date: datetime
     peer_name: str
     transaction_volume: Decimal
-    purpose: str
+    plan: Optional[UUID]
     type: TransactionTypes
 
 
@@ -38,7 +38,7 @@ class GetMemberAccount:
                 date=row.transaction.date,
                 peer_name=self._get_peer_name(member, row.transaction),
                 transaction_volume=row.volume,
-                purpose=row.transaction.purpose,
+                plan=row.transaction.plan,
                 type=row.transaction_type,
             )
             for row in self.accounting_service.get_statement_of_account(

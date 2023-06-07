@@ -18,7 +18,7 @@ class GetMemberAccountPresenter:
         user_name: str
         volume: str
         is_volume_positive: bool
-        purpose: str
+        plan: str
 
     @dataclass
     class ViewModel:
@@ -43,7 +43,7 @@ class GetMemberAccountPresenter:
                 user_name=t.peer_name,
                 volume=f"{round(t.transaction_volume, 2)}",
                 is_volume_positive=t.transaction_volume >= 0,
-                purpose=t.purpose,
+                plan=str(t.plan) if t.plan else "",
             )
             for t in use_case_response.transactions
         ]
