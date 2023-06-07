@@ -4,6 +4,7 @@ from decimal import Decimal
 from typing import List, Optional
 from uuid import UUID, uuid4
 
+from arbeitszeit.plan_summary import PlanSummary
 from arbeitszeit.use_cases.query_companies import (
     CompanyFilter,
     CompanyQueryResponse,
@@ -132,3 +133,90 @@ class QueryCompaniesRequestTestImpl(QueryCompaniesRequest):
 
     def get_limit(self) -> Optional[int]:
         return self.limit
+
+
+class PlanSummaryGenerator:
+    def create_plan_summary(
+        self,
+        plan_id: Optional[UUID] = None,
+        is_active: Optional[bool] = None,
+        planner_id: Optional[UUID] = None,
+        planner_name: Optional[str] = None,
+        product_name: Optional[str] = None,
+        description: Optional[str] = None,
+        active_days: Optional[int] = None,
+        timeframe: Optional[int] = None,
+        production_unit: Optional[str] = None,
+        amount: Optional[int] = None,
+        means_cost: Optional[Decimal] = None,
+        resources_cost: Optional[Decimal] = None,
+        labour_cost: Optional[Decimal] = None,
+        is_public_service: Optional[bool] = None,
+        price_per_unit: Optional[Decimal] = None,
+        is_available: Optional[bool] = None,
+        is_cooperating: Optional[bool] = None,
+        cooperation: Optional[UUID] = None,
+        creation_date: Optional[datetime] = None,
+        approval_date: Optional[datetime] = None,
+        expiration_date: Optional[datetime] = None,
+    ) -> PlanSummary:
+        if plan_id is None:
+            plan_id = uuid4()
+        if is_active is None:
+            is_active = True
+        if planner_id is None:
+            planner_id = uuid4()
+        if planner_name is None:
+            planner_name = "planner name"
+        if product_name is None:
+            product_name = "product name"
+        if description is None:
+            description = "test description"
+        if active_days is None:
+            active_days = 5
+        if timeframe is None:
+            timeframe = 7
+        if production_unit is None:
+            production_unit = "Piece"
+        if amount is None:
+            amount = 100
+        if means_cost is None:
+            means_cost = Decimal(1)
+        if resources_cost is None:
+            resources_cost = Decimal(2)
+        if labour_cost is None:
+            labour_cost = Decimal(3)
+        if is_public_service is None:
+            is_public_service = False
+        if price_per_unit is None:
+            price_per_unit = Decimal("0.061")
+        if is_available is None:
+            is_available = True
+        if is_cooperating is None:
+            is_cooperating = False
+        if creation_date is None:
+            creation_date = datetime(2023, 5, 1)
+        assert isinstance(cooperation, UUID) or (cooperation is None)
+        return PlanSummary(
+            plan_id=plan_id,
+            is_active=is_active,
+            planner_id=planner_id,
+            planner_name=planner_name,
+            product_name=product_name,
+            description=description,
+            active_days=active_days,
+            timeframe=timeframe,
+            production_unit=production_unit,
+            amount=amount,
+            means_cost=means_cost,
+            resources_cost=resources_cost,
+            labour_cost=labour_cost,
+            is_public_service=is_public_service,
+            price_per_unit=price_per_unit,
+            is_available=is_available,
+            is_cooperating=is_cooperating,
+            cooperation=cooperation,
+            creation_date=creation_date,
+            approval_date=approval_date,
+            expiration_date=expiration_date,
+        )

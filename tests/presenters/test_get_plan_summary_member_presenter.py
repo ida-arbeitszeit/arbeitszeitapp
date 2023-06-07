@@ -1,13 +1,12 @@
-from datetime import datetime
-from decimal import Decimal
 from unittest import TestCase
 from uuid import uuid4
 
-from arbeitszeit.plan_summary import PlanSummary
-from arbeitszeit.use_cases.get_plan_summary_member import GetPlanSummaryMember
-from arbeitszeit_web.get_plan_summary_member import GetPlanSummaryMemberSuccessPresenter
-from tests.presenters.dependency_injection import injection_test
+from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
+from arbeitszeit_web.get_plan_summary_member import GetPlanSummaryMemberMemberPresenter
+from tests.presenters.data_generators import PlanSummaryGenerator
 from tests.presenters.url_index import UrlIndexTestImpl
+
+from .dependency_injection import get_dependency_injector
 
 
 class PresenterTests(TestCase):
@@ -15,48 +14,21 @@ class PresenterTests(TestCase):
     some functionality tested in tests/presenters/test_plan_summary_formatter.py
     """
 
-    @injection_test
-    def setUp(
-        self,
-        url_index: UrlIndexTestImpl,
-        presenter: GetPlanSummaryMemberSuccessPresenter,
-    ) -> None:
-        self.url_index = url_index
-        self.presenter = presenter
+    def setUp(self) -> None:
+        self.injector = get_dependency_injector()
+        self.url_index = self.injector.get(UrlIndexTestImpl)
+        self.presenter = self.injector.get(GetPlanSummaryMemberMemberPresenter)
+        self.plan_summary_generator = self.injector.get(PlanSummaryGenerator)
 
     def test_that_pay_product_url_is_shown_correctly(self):
-        use_case_response = self.get_use_case_response()
+        PLAN_ID = uuid4()
+        use_case_response = GetPlanSummaryUseCase.Response(
+            plan_summary=self.plan_summary_generator.create_plan_summary(
+                plan_id=PLAN_ID
+            )
+        )
         view_model = self.presenter.present(use_case_response)
         self.assertEqual(
             view_model.pay_product_url,
-            self.url_index.get_pay_consumer_product_url(
-                amount=None, plan_id=use_case_response.plan_summary.plan_id
-            ),
-        )
-
-    def get_use_case_response(self):
-        return GetPlanSummaryMember.Success(
-            plan_summary=PlanSummary(
-                plan_id=uuid4(),
-                is_active=True,
-                planner_id=uuid4(),
-                planner_name="planner name",
-                product_name="test product name",
-                description="test description",
-                active_days=5,
-                timeframe=7,
-                production_unit="Piece",
-                amount=100,
-                means_cost=Decimal(1),
-                resources_cost=Decimal(2),
-                labour_cost=Decimal(3),
-                is_public_service=False,
-                price_per_unit=Decimal("0.061"),
-                is_available=True,
-                is_cooperating=True,
-                cooperation=uuid4(),
-                creation_date=datetime.now(),
-                approval_date=None,
-                expiration_date=None,
-            ),
+            self.url_index.get_pay_consumer_product_url(amount=None, plan_id=PLAN_ID),
         )

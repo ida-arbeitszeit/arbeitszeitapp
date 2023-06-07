@@ -1,145 +1,114 @@
-from dataclasses import replace
-from datetime import datetime
-from decimal import Decimal
-from unittest import TestCase
+"""
+some functionalities are tested in tests/presenters/test_plan_summary_formatter.py
+"""
+
 from uuid import uuid4
 
-from arbeitszeit.plan_summary import PlanSummary
-from arbeitszeit.use_cases.get_plan_summary_company import GetPlanSummaryCompany
-from arbeitszeit_web.get_plan_summary_company import (
-    GetPlanSummaryCompanySuccessPresenter,
-)
+from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
+from arbeitszeit_web.get_plan_summary_company import GetPlanSummaryCompanyPresenter
+from tests.presenters.base_test_case import BaseTestCase
+from tests.presenters.data_generators import PlanSummaryGenerator
+from tests.session import FakeSession
 
-from .dependency_injection import get_dependency_injector
 from .url_index import UrlIndexTestImpl
 
-TESTING_PLAN_SUMMARY = PlanSummary(
-    plan_id=uuid4(),
-    is_active=True,
-    planner_id=uuid4(),
-    planner_name="planner name",
-    product_name="test product name",
-    description="test description",
-    active_days=5,
-    timeframe=7,
-    production_unit="Piece",
-    amount=100,
-    means_cost=Decimal(1),
-    resources_cost=Decimal(2),
-    labour_cost=Decimal(3),
-    is_public_service=False,
-    price_per_unit=Decimal("0.061"),
-    is_available=True,
-    is_cooperating=True,
-    cooperation=uuid4(),
-    creation_date=datetime.now(),
-    approval_date=None,
-    expiration_date=None,
-)
-
-TESTING_RESPONSE_MODEL = GetPlanSummaryCompany.Response(
-    plan_summary=TESTING_PLAN_SUMMARY,
-    current_user_is_planner=True,
-)
+UseCaseResponse = GetPlanSummaryUseCase.Response
 
 
-class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
-    """
-    some functionality are tested in tests/presenters/test_plan_summary_formatter.py
-    """
-
+class TestPresenterForPlanner(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.url_index = self.injector.get(UrlIndexTestImpl)
-        self.presenter = self.injector.get(GetPlanSummaryCompanySuccessPresenter)
+        self.presenter = self.injector.get(GetPlanSummaryCompanyPresenter)
+        self.plan_summary_generator = self.injector.get(PlanSummaryGenerator)
+        self.session = self.injector.get(FakeSession)
+        self.expected_planner = uuid4()
+        self.session.login_company(company=self.expected_planner)
 
     def test_action_section_is_shown_when_current_user_is_planner(self):
-        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
-        self.assertTrue(view_model.show_own_plan_action_section)
-
-    def test_action_section_is_not_shown_when_current_user_is_not_planner(self):
-        response = replace(TESTING_RESPONSE_MODEL, current_user_is_planner=False)
+        response = UseCaseResponse(
+            plan_summary=self.plan_summary_generator.create_plan_summary(
+                planner_id=self.expected_planner
+            ),
+        )
         view_model = self.presenter.present(response)
-        self.assertFalse(view_model.show_own_plan_action_section)
+        self.assertTrue(view_model.show_own_plan_action_section)
 
     def test_action_section_is_not_shown_when_current_user_is_planner_but_plan_is_expired(
         self,
     ):
-        summary_of_inactive_plan = replace(TESTING_PLAN_SUMMARY, is_active=False)
-        use_case_response = GetPlanSummaryCompany.Response(
-            plan_summary=summary_of_inactive_plan, current_user_is_planner=True
+        response = UseCaseResponse(
+            plan_summary=self.plan_summary_generator.create_plan_summary(
+                is_active=False, planner_id=self.expected_planner
+            ),
         )
-        view_model = self.presenter.present(use_case_response)
+        view_model = self.presenter.present(response)
         self.assertFalse(view_model.show_own_plan_action_section)
 
-    def test_view_model_shows_availability_when_plan_is_available(self):
-        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
-        self.assertEqual(
-            view_model.own_plan_action.is_available_bool,
-            TESTING_PLAN_SUMMARY.is_available,
-        )
-
     def test_url_for_changing_availability_is_displayed_correctly(self):
-        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        expected_plan_id = uuid4()
+        response = UseCaseResponse(
+            plan_summary=self.plan_summary_generator.create_plan_summary(
+                plan_id=expected_plan_id, planner_id=self.expected_planner
+            ),
+        )
+        view_model = self.presenter.present(response)
         self.assertEqual(
             view_model.own_plan_action.toggle_availability_url,
-            self.url_index.get_toggle_availability_url(TESTING_PLAN_SUMMARY.plan_id),
-        )
-
-    def test_view_model_shows_plan_as_cooperating_when_plan_is_cooperating(
-        self,
-    ):
-        assert TESTING_PLAN_SUMMARY.cooperation
-        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
-        self.assertTrue(view_model.own_plan_action.is_cooperating)
-        self.assertEqual(
-            view_model.own_plan_action.is_cooperating,
-            TESTING_PLAN_SUMMARY.is_cooperating,
+            self.url_index.get_toggle_availability_url(expected_plan_id),
         )
 
     def test_url_for_ending_cooperation_is_displayed_correctly_when_plan_is_cooperating(
         self,
     ):
-        assert TESTING_PLAN_SUMMARY.cooperation
-        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
-        self.assertTrue(view_model.own_plan_action.is_cooperating)
+        expected_plan_id = uuid4()
+        expected_cooperation_id = uuid4()
+        response = UseCaseResponse(
+            plan_summary=self.plan_summary_generator.create_plan_summary(
+                is_cooperating=True,
+                plan_id=expected_plan_id,
+                cooperation=expected_cooperation_id,
+                planner_id=self.expected_planner,
+            ),
+        )
+        view_model = self.presenter.present(response)
         self.assertEqual(
             view_model.own_plan_action.end_coop_url,
             self.url_index.get_end_coop_url(
-                plan_id=TESTING_PLAN_SUMMARY.plan_id,
-                cooperation_id=TESTING_PLAN_SUMMARY.cooperation,
+                plan_id=expected_plan_id,
+                cooperation_id=expected_cooperation_id,
             ),
         )
 
     def test_no_url_for_requesting_cooperation_is_displayed_when_plan_is_cooperating(
         self,
     ):
-        assert TESTING_PLAN_SUMMARY.cooperation
-        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
-        self.assertTrue(view_model.own_plan_action.is_cooperating)
+        response = UseCaseResponse(
+            plan_summary=self.plan_summary_generator.create_plan_summary(
+                is_cooperating=True, planner_id=self.expected_planner
+            ),
+        )
+        view_model = self.presenter.present(response)
         self.assertIsNone(view_model.own_plan_action.request_coop_url)
 
     def test_no_url_for_ending_cooperation_is_displayed_when_plan_is_not_cooperating(
         self,
     ):
-        plan_summary = replace(
-            TESTING_PLAN_SUMMARY, is_cooperating=False, cooperation=None
-        )
-        response = GetPlanSummaryCompany.Response(
-            plan_summary=plan_summary, current_user_is_planner=True
+        response = UseCaseResponse(
+            plan_summary=self.plan_summary_generator.create_plan_summary(
+                is_cooperating=False, cooperation=None, planner_id=self.expected_planner
+            ),
         )
         view_model = self.presenter.present(response)
-        self.assertFalse(view_model.own_plan_action.is_cooperating)
         self.assertIsNone(view_model.own_plan_action.end_coop_url)
 
     def test_url_for_requesting_cooperation_is_displayed_correctly_when_plan_is_not_cooperating(
         self,
     ):
-        plan_summary = replace(
-            TESTING_PLAN_SUMMARY, is_cooperating=False, cooperation=None
-        )
-        response = GetPlanSummaryCompany.Response(
-            plan_summary=plan_summary, current_user_is_planner=True
+        response = UseCaseResponse(
+            plan_summary=self.plan_summary_generator.create_plan_summary(
+                is_cooperating=False, cooperation=None, planner_id=self.expected_planner
+            ),
         )
         view_model = self.presenter.present(response)
         self.assertFalse(view_model.own_plan_action.is_cooperating)
@@ -148,28 +117,72 @@ class GetPlanSummaryCompanySuccessPresenterTests(TestCase):
             self.url_index.get_request_coop_url(),
         )
 
+    def test_url_for_paying_product_is_not_displayed_when_user_is_planner_of_plan(
+        self,
+    ):
+        response = UseCaseResponse(
+            self.plan_summary_generator.create_plan_summary(
+                planner_id=self.expected_planner
+            ),
+        )
+        view_model = self.presenter.present(response)
+        self.assertFalse(view_model.show_payment_url)
+
+
+class TestPresenterForNonPlanningCompany(BaseTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.url_index = self.injector.get(UrlIndexTestImpl)
+        self.presenter = self.injector.get(GetPlanSummaryCompanyPresenter)
+        self.plan_summary_generator = self.injector.get(PlanSummaryGenerator)
+        self.session = self.injector.get(FakeSession)
+        self.session.login_company(uuid4())
+
+    def test_action_section_is_not_shown_when_current_user_is_not_planner(self):
+        response = UseCaseResponse(
+            plan_summary=self.plan_summary_generator.create_plan_summary(),
+        )
+        view_model = self.presenter.present(response)
+        self.assertFalse(view_model.show_own_plan_action_section)
+
+    def test_view_model_shows_availability_when_plan_is_available(self):
+        response = UseCaseResponse(
+            plan_summary=self.plan_summary_generator.create_plan_summary(
+                is_available=True
+            ),
+        )
+        view_model = self.presenter.present(response)
+        self.assertTrue(view_model.own_plan_action.is_available_bool)
+
+    def test_view_model_shows_plan_as_cooperating_when_plan_is_cooperating(
+        self,
+    ):
+        response = UseCaseResponse(
+            plan_summary=self.plan_summary_generator.create_plan_summary(
+                is_cooperating=True
+            ),
+        )
+        view_model = self.presenter.present(response)
+        self.assertTrue(view_model.own_plan_action.is_cooperating)
+
     def test_url_for_paying_product_is_displayed_when_user_is_not_planner_of_plan(
         self,
     ):
-        response = replace(TESTING_RESPONSE_MODEL, current_user_is_planner=False)
+        response = UseCaseResponse(
+            self.plan_summary_generator.create_plan_summary(),
+        )
         view_model = self.presenter.present(response)
         self.assertTrue(view_model.show_payment_url)
 
     def test_correct_url_for_paying_product_is_displayed(
         self,
     ):
-        response = replace(TESTING_RESPONSE_MODEL, current_user_is_planner=False)
+        expected_plan_id = uuid4()
+        response = UseCaseResponse(
+            self.plan_summary_generator.create_plan_summary(plan_id=expected_plan_id),
+        )
         view_model = self.presenter.present(response)
         self.assertEqual(
             view_model.payment_url,
-            self.url_index.get_pay_means_of_production_url(
-                TESTING_PLAN_SUMMARY.plan_id
-            ),
+            self.url_index.get_pay_means_of_production_url(expected_plan_id),
         )
-
-    def test_url_for_paying_product_is_not_displayed_when_user_is_planner_of_plan(
-        self,
-    ):
-        assert TESTING_RESPONSE_MODEL.current_user_is_planner
-        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
-        self.assertFalse(view_model.show_payment_url)

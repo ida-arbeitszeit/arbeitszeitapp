@@ -1,7 +1,7 @@
 from dataclasses import asdict, dataclass
 from typing import Any, Dict
 
-from arbeitszeit.use_cases.get_plan_summary_accountant import GetPlanSummaryAccountant
+from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
 from arbeitszeit_web.formatters.plan_summary_formatter import (
     PlanSummaryFormatter,
     PlanSummaryWeb,
@@ -20,13 +20,13 @@ class GetPlanSummaryAccountantViewModel:
 
 
 @dataclass
-class GetPlanSummaryAccountantSuccessPresenter:
+class GetPlanSummaryAccountantPresenter:
     trans: Translator
     plan_summary_service: PlanSummaryFormatter
     url_index: UrlIndex
 
     def present(
-        self, response: GetPlanSummaryAccountant.Success
+        self, response: GetPlanSummaryUseCase.Response
     ) -> GetPlanSummaryAccountantViewModel:
         return GetPlanSummaryAccountantViewModel(
             summary=self.plan_summary_service.format_plan_summary(
