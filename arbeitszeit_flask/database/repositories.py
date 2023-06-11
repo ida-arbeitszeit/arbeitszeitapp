@@ -372,6 +372,9 @@ class PlanDraftResult(FlaskQueryResult[entities.PlanDraft]):
             )
         )
 
+    def delete(self) -> int:
+        return self.query.delete()
+
 
 class MemberQueryResult(FlaskQueryResult[entities.Member]):
     def working_at_company(self, company: UUID) -> MemberQueryResult:
@@ -1208,9 +1211,6 @@ class PlanDraftRepository(repositories.PlanDraftRepository):
             query=models.PlanDraft.query,
             mapper=self.plan_draft_from_orm,
         )
-
-    def delete_draft(self, id: UUID) -> None:
-        PlanDraft.query.filter_by(id=str(id)).delete()
 
     @classmethod
     def plan_draft_from_orm(cls, orm: models.PlanDraft) -> entities.PlanDraft:

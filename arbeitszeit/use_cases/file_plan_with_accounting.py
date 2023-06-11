@@ -27,9 +27,8 @@ class FilePlanWithAccounting:
     accountant_notifier: AccountantNotifier
 
     def file_plan_with_accounting(self, request: Request) -> Response:
-        draft = (
-            self.draft_repository.get_plan_drafts().with_id(request.draft_id).first()
-        )
+        draft_query = self.draft_repository.get_plan_drafts().with_id(request.draft_id)
+        draft = draft_query.first()
         if draft is not None and draft.planner == request.filing_company:
             plan = self.database_gateway.create_plan(
                 creation_timestamp=self.datetime_service.now(),
@@ -43,7 +42,7 @@ class FilePlanWithAccounting:
                 is_public_service=draft.is_public_service,
             )
             assert plan
-            self.draft_repository.delete_draft(id=request.draft_id)
+            draft_query.delete()
             is_plan_successfully_filed = True
             self.accountant_notifier.notify_all_accountants_about_new_plan(
                 product_name=draft.product_name,

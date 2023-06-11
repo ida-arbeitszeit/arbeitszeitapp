@@ -193,6 +193,9 @@ class PlanDraftResult(QueryResult[PlanDraft], Protocol):
     def planned_by(self, *company: UUID) -> Self:
         ...
 
+    def delete(self) -> int:
+        ...
+
 
 class CooperationResult(QueryResult[Cooperation], Protocol):
     def with_id(self, id_: UUID) -> Self:
@@ -432,10 +435,6 @@ class PlanDraftRepository(ABC):
 
     @abstractmethod
     def get_plan_drafts(self) -> PlanDraftResult:
-        pass
-
-    @abstractmethod
-    def delete_draft(self, id: UUID) -> None:
         pass
 
 
