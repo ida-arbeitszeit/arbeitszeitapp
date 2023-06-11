@@ -116,8 +116,15 @@ class PlanDraftRepositoryTests(PlanDraftRepositoryBaseTests):
 
     def test_deleted_drafts_cannot_be_retrieved_anymore(self) -> None:
         draft = self.create_plan_draft()
-        self.repo.delete_draft(draft.id)
+        self.repo.get_plan_drafts().with_id(draft.id).delete()
         self.assertIsNone(self.repo.get_plan_drafts().with_id(draft.id).first())
+
+    def test_that_deletion_of_one_plan_returns_1_if_plan_existed(self) -> None:
+        draft = self.create_plan_draft()
+        assert self.repo.get_plan_drafts().with_id(draft.id).delete() == 1
+
+    def test_that_deletion_of_non_existing_plan_returns_0(self) -> None:
+        assert self.repo.get_plan_drafts().with_id(uuid4()).delete() == 0
 
     def test_all_drafts_can_be_retrieved(self) -> None:
         expected_draft1 = self.create_plan_draft()

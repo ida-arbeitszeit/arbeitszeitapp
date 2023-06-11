@@ -341,6 +341,15 @@ class PlanDraftResult(QueryResultImpl[entities.PlanDraft]):
             ),
         )
 
+    def delete(self) -> int:
+        drafts_to_delete = [draft.id for draft in self.items()]
+        drafts_deleted = 0
+        for draft in drafts_to_delete:
+            if draft in self.entities.drafts:
+                del self.entities.drafts[draft]
+                drafts_deleted += 1
+        return drafts_deleted
+
 
 class CooperationResult(QueryResultImpl[Cooperation]):
     def with_id(self, id_: UUID) -> Self:
@@ -900,7 +909,6 @@ class AccountRepository(interfaces.AccountRepository):
 @singleton
 class PlanDraftRepository(interfaces.PlanDraftRepository):
     def __init__(self, entities: EntityStorage) -> None:
-        self.drafts: List[PlanDraft] = []
         self.entities = entities
 
     def create_plan_draft(
@@ -927,7 +935,7 @@ class PlanDraftRepository(interfaces.PlanDraftRepository):
             timeframe=timeframe_in_days,
             is_public_service=is_public_service,
         )
-        self.drafts.append(draft)
+        self.entities.drafts[draft.id] = draft
         return draft
 
     def update_draft(self, update: interfaces.PlanDraftRepository.UpdateDraft) -> None:
@@ -954,12 +962,9 @@ class PlanDraftRepository(interfaces.PlanDraftRepository):
             draft.unit_of_distribution = update.unit_of_distribution
         return
 
-    def delete_draft(self, id: UUID) -> None:
-        self.drafts = [draft for draft in self.drafts if draft.id != id]
-
     def get_plan_drafts(self) -> PlanDraftResult:
         return PlanDraftResult(
-            items=lambda: self.drafts,
+            items=lambda: self.entities.drafts.values(),
             entities=self.entities,
         )
 
@@ -1012,6 +1017,7 @@ class EntityStorage:
         ] = dict()
         self.company_work_invites: List[CompanyWorkInvite] = list()
         self.email_addresses: Dict[str, entities.EmailAddress] = dict()
+        self.drafts: Dict[UUID, PlanDraft] = dict()
 
     def create_email_address(
         self, *, address: str, confirmed_on: Optional[datetime]

@@ -23,10 +23,11 @@ class DeleteDraftUseCase:
 
     def delete_draft(self, request: Request) -> Response:
         deleter = self.database.get_companies().with_id(request.deleter).first()
-        draft = self.draft_repository.get_plan_drafts().with_id(request.draft).first()
+        draft_query = self.draft_repository.get_plan_drafts().with_id(request.draft)
+        draft = draft_query.first()
         if not draft or not deleter:
             raise self.Failure()
         if draft.planner != deleter.id:
             raise self.Failure()
-        self.draft_repository.delete_draft(request.draft)
+        draft_query.delete()
         return self.Response(product_name=draft.product_name)
