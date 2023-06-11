@@ -50,6 +50,13 @@ class QueryResult(Protocol, Generic[T]):
         ...
 
 
+class DatabaseUpdate(Protocol):
+    def perform(self) -> int:
+        """Peform the update and return the number of records/rows
+        affected.
+        """
+
+
 class PlanResult(QueryResult[Plan], Protocol):
     def ordered_by_creation_date(self, ascending: bool = ...) -> PlanResult:
         ...
@@ -142,7 +149,7 @@ class PlanResult(QueryResult[Plan], Protocol):
         """Prepare an update for all selected Plans."""
 
 
-class PlanUpdate(Protocol):
+class PlanUpdate(DatabaseUpdate, Protocol):
     """Aggregate updates on a previously selected set of plan rows in
     the DB and execute them all in one.
     """
@@ -177,11 +184,6 @@ class PlanUpdate(Protocol):
 
     def toggle_product_availability(self) -> Self:
         ...
-
-    def perform(self) -> int:
-        """Perform the update action and return the number of rows
-        affected.
-        """
 
 
 class PlanDraftResult(QueryResult[PlanDraft], Protocol):
@@ -226,14 +228,9 @@ class MemberResult(QueryResult[Member], Protocol):
         ...
 
 
-class MemberUpdate(Protocol):
+class MemberUpdate(DatabaseUpdate, Protocol):
     def set_confirmation_timestamp(self, timestamp: datetime) -> MemberUpdate:
         ...
-
-    def perform(self) -> int:
-        """Perform the update action and return the number of rows
-        affected.
-        """
 
 
 class ConsumerPurchaseResult(QueryResult[ConsumerPurchase], Protocol):
@@ -298,14 +295,9 @@ class CompanyResult(QueryResult[Company], Protocol):
         ...
 
 
-class CompanyUpdate(Protocol):
+class CompanyUpdate(DatabaseUpdate, Protocol):
     def set_confirmation_timestamp(self, timestamp: datetime) -> Self:
         ...
-
-    def perform(self) -> int:
-        """Perform the update action and return the number of rows
-        affected.
-        """
 
 
 class AccountantResult(QueryResult[Accountant], Protocol):
