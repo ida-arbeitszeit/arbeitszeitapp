@@ -1,4 +1,5 @@
 # my own
+*.swp
 my_database_key.py
 *.pyc
 *.png
