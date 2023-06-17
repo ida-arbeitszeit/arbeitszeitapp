@@ -1,12 +1,12 @@
 import subprocess
 
-from . import update_flask_restx
+from . import update_python_packages
 
 
 def main() -> None:
     update_flake()
     update_bulma()
-    update_flask_restx.main()
+    update_python_packages.main()
     update_constraints()
 
 
