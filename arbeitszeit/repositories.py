@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from typing import Generic, Iterable, Iterator, Optional, Protocol, Tuple, TypeVar
@@ -193,7 +192,39 @@ class PlanDraftResult(QueryResult[PlanDraft], Protocol):
     def planned_by(self, *company: UUID) -> Self:
         ...
 
+    def update(self) -> PlanDraftUpdate:
+        ...
+
     def delete(self) -> int:
+        ...
+
+
+class PlanDraftUpdate(DatabaseUpdate, Protocol):
+    def set_product_name(self, name: str) -> Self:
+        ...
+
+    def set_amount(self, n: int) -> Self:
+        ...
+
+    def set_description(self, description: str) -> Self:
+        ...
+
+    def set_labour_cost(self, costs: Decimal) -> Self:
+        ...
+
+    def set_means_cost(self, costs: Decimal) -> Self:
+        ...
+
+    def set_resource_cost(self, costs: Decimal) -> Self:
+        ...
+
+    def set_is_public_service(self, is_public_service: bool) -> Self:
+        ...
+
+    def set_timeframe(self, days: int) -> Self:
+        ...
+
+    def set_unit_of_distribution(self, unit: str) -> Self:
         ...
 
 
@@ -414,23 +445,6 @@ class PlanDraftRepository(ABC):
         is_public_service: bool,
         creation_timestamp: datetime,
     ) -> PlanDraft:
-        pass
-
-    @dataclass
-    class UpdateDraft:
-        id: UUID
-        product_name: Optional[str] = None
-        amount: Optional[int] = None
-        description: Optional[str] = None
-        labour_cost: Optional[Decimal] = None
-        means_cost: Optional[Decimal] = None
-        resource_cost: Optional[Decimal] = None
-        is_public_service: Optional[bool] = None
-        timeframe: Optional[int] = None
-        unit_of_distribution: Optional[str] = None
-
-    @abstractmethod
-    def update_draft(self, update: UpdateDraft) -> None:
         pass
 
     @abstractmethod

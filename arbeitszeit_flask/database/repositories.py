@@ -375,6 +375,61 @@ class PlanDraftResult(FlaskQueryResult[entities.PlanDraft]):
     def delete(self) -> int:
         return self.query.delete()
 
+    def update(self) -> PlanDraftUpdate:
+        return PlanDraftUpdate(db=self.db, query=self.query)
+
+
+@dataclass
+class PlanDraftUpdate:
+    db: SQLAlchemy
+    query: Any
+    changes: Dict[str, Any] = field(default_factory=dict)
+
+    def set_product_name(self, name: str) -> Self:
+        return self._update_column("prd_name", name)
+
+    def set_amount(self, n: int) -> Self:
+        return self._update_column("prd_amount", n)
+
+    def set_description(self, description: str) -> Self:
+        return self._update_column("description", description)
+
+    def set_labour_cost(self, costs: Decimal) -> Self:
+        return self._update_column("costs_a", costs)
+
+    def set_means_cost(self, costs: Decimal) -> Self:
+        return self._update_column("costs_p", costs)
+
+    def set_resource_cost(self, costs: Decimal) -> Self:
+        return self._update_column("costs_r", costs)
+
+    def set_is_public_service(self, is_public_service: bool) -> Self:
+        return self._update_column("is_public_service", is_public_service)
+
+    def set_timeframe(self, days: int) -> Self:
+        return self._update_column("timeframe", days)
+
+    def set_unit_of_distribution(self, unit: str) -> Self:
+        return self._update_column("prd_unit", unit)
+
+    def _update_column(self, column: str, value: Any) -> Self:
+        return replace(self, changes=dict(self.changes, **{column: value}))
+
+    def perform(self) -> int:
+        if not self.changes:
+            return 0
+        sql_statement = (
+            update(models.PlanDraft)
+            .where(
+                models.PlanDraft.id.in_(
+                    self.query.with_entities(models.PlanDraft.id).scalar_subquery()
+                )
+            )
+            .values(**self.changes)
+            .execution_options(synchronize_session="fetch")
+        )
+        return self.db.session.execute(sql_statement).rowcount  # type: ignore
+
 
 class MemberQueryResult(FlaskQueryResult[entities.Member]):
     def working_at_company(self, company: UUID) -> MemberQueryResult:
@@ -1165,46 +1220,6 @@ class PlanDraftRepository(repositories.PlanDraftRepository):
         self.db.session.add(orm)
         return self.plan_draft_from_orm(orm)
 
-    def update_draft(
-        self, update: repositories.PlanDraftRepository.UpdateDraft
-    ) -> None:
-        class UpdateInstructions(dict):
-            def update_attribute(self, key, value):
-                if value is not None:
-                    self[key] = value
-
-        update_instructions = UpdateInstructions()
-        update_instructions.update_attribute(
-            models.PlanDraft.prd_name, update.product_name
-        )
-        update_instructions.update_attribute(
-            models.PlanDraft.description, update.description
-        )
-        update_instructions.update_attribute(
-            models.PlanDraft.prd_unit, update.unit_of_distribution
-        )
-        update_instructions.update_attribute(
-            models.PlanDraft.costs_p, update.means_cost
-        )
-        update_instructions.update_attribute(
-            models.PlanDraft.costs_a,
-            update.labour_cost,
-        )
-        update_instructions.update_attribute(
-            models.PlanDraft.costs_r, update.resource_cost
-        )
-        update_instructions.update_attribute(
-            models.PlanDraft.is_public_service, update.is_public_service
-        )
-        update_instructions.update_attribute(
-            models.PlanDraft.timeframe, update.timeframe
-        )
-        update_instructions.update_attribute(models.PlanDraft.prd_amount, update.amount)
-        if update_instructions:
-            self.db.session.query(models.PlanDraft).filter(
-                models.PlanDraft.id == str(update.id)
-            ).update(update_instructions)
-
     def get_plan_drafts(self) -> PlanDraftResult:
         return PlanDraftResult(
             db=self.db,
@@ -1227,7 +1242,7 @@ class PlanDraftRepository(repositories.PlanDraftRepository):
             unit_of_distribution=orm.prd_unit,
             amount_produced=orm.prd_amount,
             description=orm.description,
-            timeframe=orm.timeframe,
+            timeframe=int(orm.timeframe),
             is_public_service=orm.is_public_service,
         )
 
