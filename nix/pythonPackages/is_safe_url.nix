@@ -1,9 +1,7 @@
 { buildPythonPackage, fetchPypi }:
-buildPythonPackage rec {
-  pname = "is_safe_url";
-  version = "1.0";
-  src = fetchPypi {
-    inherit pname version;
-    sha256 = "13YYb2h3IR2u/eahjaHfUg3phaWCspPnqiTqHfHNWrs=";
-  };
+let pypiSource = (builtins.fromJSON (builtins.readFile ./is-safe-url.json));
+in buildPythonPackage rec {
+  pname = pypiSource.pname;
+  version = pypiSource.version;
+  src = fetchPypi pypiSource;
 }
