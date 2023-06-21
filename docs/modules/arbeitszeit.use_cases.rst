@@ -1,17 +1,6 @@
 arbeitszeit.use\_cases package
 ==============================
 
-Subpackages
------------
-
-.. toctree::
-   :maxdepth: 4
-
-   arbeitszeit.use_cases.pay_consumer_product
-   arbeitszeit.use_cases.register_company
-   arbeitszeit.use_cases.register_member
-   arbeitszeit.use_cases.send_accountant_registration_token
-
 Submodules
 ----------
 
@@ -31,10 +20,34 @@ arbeitszeit.use\_cases.answer\_company\_work\_invite module
    :undoc-members:
    :show-inheritance:
 
+arbeitszeit.use\_cases.approve\_plan module
+-------------------------------------------
+
+.. automodule:: arbeitszeit.use_cases.approve_plan
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit.use\_cases.cancel\_cooperation\_solicitation module
 ---------------------------------------------------------------
 
 .. automodule:: arbeitszeit.use_cases.cancel_cooperation_solicitation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit.use\_cases.confirm\_company module
+----------------------------------------------
+
+.. automodule:: arbeitszeit.use_cases.confirm_company
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit.use\_cases.confirm\_member module
+---------------------------------------------
+
+.. automodule:: arbeitszeit.use_cases.confirm_member
    :members:
    :undoc-members:
    :show-inheritance:
@@ -87,10 +100,18 @@ arbeitszeit.use\_cases.end\_cooperation module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit.use\_cases.get\_accountant\_profile\_info module
-------------------------------------------------------------
+arbeitszeit.use\_cases.file\_plan\_with\_accounting module
+----------------------------------------------------------
 
-.. automodule:: arbeitszeit.use_cases.get_accountant_profile_info
+.. automodule:: arbeitszeit.use_cases.file_plan_with_accounting
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit.use\_cases.get\_accountant\_dashboard module
+--------------------------------------------------------
+
+.. automodule:: arbeitszeit.use_cases.get_accountant_dashboard
    :members:
    :undoc-members:
    :show-inheritance:
@@ -151,18 +172,10 @@ arbeitszeit.use\_cases.get\_member\_dashboard module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit.use\_cases.get\_plan\_summary\_company module
----------------------------------------------------------
+arbeitszeit.use\_cases.get\_plan\_summary module
+------------------------------------------------
 
-.. automodule:: arbeitszeit.use_cases.get_plan_summary_company
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-arbeitszeit.use\_cases.get\_plan\_summary\_member module
---------------------------------------------------------
-
-.. automodule:: arbeitszeit.use_cases.get_plan_summary_member
+.. automodule:: arbeitszeit.use_cases.get_plan_summary
    :members:
    :undoc-members:
    :show-inheritance:
@@ -191,6 +204,14 @@ arbeitszeit.use\_cases.invite\_worker\_to\_company module
    :undoc-members:
    :show-inheritance:
 
+arbeitszeit.use\_cases.list\_active\_plans\_of\_company module
+--------------------------------------------------------------
+
+.. automodule:: arbeitszeit.use_cases.list_active_plans_of_company
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit.use\_cases.list\_all\_cooperations module
 -----------------------------------------------------
 
@@ -215,18 +236,18 @@ arbeitszeit.use\_cases.list\_coordinations module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit.use\_cases.list\_drafts\_of\_company module
--------------------------------------------------------
-
-.. automodule:: arbeitszeit.use_cases.list_drafts_of_company
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 arbeitszeit.use\_cases.list\_inbound\_coop\_requests module
 -----------------------------------------------------------
 
 .. automodule:: arbeitszeit.use_cases.list_inbound_coop_requests
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit.use\_cases.list\_my\_cooperating\_plans module
+----------------------------------------------------------
+
+.. automodule:: arbeitszeit.use_cases.list_my_cooperating_plans
    :members:
    :undoc-members:
    :show-inheritance:
@@ -239,10 +260,10 @@ arbeitszeit.use\_cases.list\_outbound\_coop\_requests module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit.use\_cases.list\_plans module
------------------------------------------
+arbeitszeit.use\_cases.list\_plans\_with\_pending\_review module
+----------------------------------------------------------------
 
-.. automodule:: arbeitszeit.use_cases.list_plans
+.. automodule:: arbeitszeit.use_cases.list_plans_with_pending_review
    :members:
    :undoc-members:
    :show-inheritance:
@@ -279,6 +300,14 @@ arbeitszeit.use\_cases.log\_in\_member module
    :undoc-members:
    :show-inheritance:
 
+arbeitszeit.use\_cases.pay\_consumer\_product module
+----------------------------------------------------
+
+.. automodule:: arbeitszeit.use_cases.pay_consumer_product
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit.use\_cases.pay\_means\_of\_production module
 --------------------------------------------------------
 
@@ -295,6 +324,22 @@ arbeitszeit.use\_cases.query\_companies module
    :undoc-members:
    :show-inheritance:
 
+arbeitszeit.use\_cases.query\_company\_purchases module
+-------------------------------------------------------
+
+.. automodule:: arbeitszeit.use_cases.query_company_purchases
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit.use\_cases.query\_member\_purchases module
+------------------------------------------------------
+
+.. automodule:: arbeitszeit.use_cases.query_member_purchases
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit.use\_cases.query\_plans module
 ------------------------------------------
 
@@ -303,18 +348,26 @@ arbeitszeit.use\_cases.query\_plans module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit.use\_cases.query\_purchases module
-----------------------------------------------
-
-.. automodule:: arbeitszeit.use_cases.query_purchases
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 arbeitszeit.use\_cases.register\_accountant module
 --------------------------------------------------
 
 .. automodule:: arbeitszeit.use_cases.register_accountant
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit.use\_cases.register\_company module
+-----------------------------------------------
+
+.. automodule:: arbeitszeit.use_cases.register_company
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit.use\_cases.register\_member module
+----------------------------------------------
+
+.. automodule:: arbeitszeit.use_cases.register_member
    :members:
    :undoc-members:
    :show-inheritance:
@@ -335,10 +388,10 @@ arbeitszeit.use\_cases.resend\_confirmation\_mail module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit.use\_cases.self\_approve\_plan module
--------------------------------------------------
+arbeitszeit.use\_cases.send\_accountant\_registration\_token module
+-------------------------------------------------------------------
 
-.. automodule:: arbeitszeit.use_cases.self_approve_plan
+.. automodule:: arbeitszeit.use_cases.send_accountant_registration_token
    :members:
    :undoc-members:
    :show-inheritance:
@@ -411,6 +464,14 @@ arbeitszeit.use\_cases.show\_work\_invites module
 -------------------------------------------------
 
 .. automodule:: arbeitszeit.use_cases.show_work_invites
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit.use\_cases.start\_page module
+-----------------------------------------
+
+.. automodule:: arbeitszeit.use_cases.start_page
    :members:
    :undoc-members:
    :show-inheritance:

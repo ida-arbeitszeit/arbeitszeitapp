@@ -12,6 +12,14 @@ Subpackages
 Submodules
 ----------
 
+arbeitszeit.accountant\_notifications module
+--------------------------------------------
+
+.. automodule:: arbeitszeit.accountant_notifications
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit.control\_thresholds module
 --------------------------------------
 
@@ -52,6 +60,30 @@ arbeitszeit.errors module
    :undoc-members:
    :show-inheritance:
 
+arbeitszeit.giro\_office module
+-------------------------------
+
+.. automodule:: arbeitszeit.giro_office
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit.injector module
+---------------------------
+
+.. automodule:: arbeitszeit.injector
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit.password\_hasher module
+-----------------------------------
+
+.. automodule:: arbeitszeit.password_hasher
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit.payout\_factor module
 ---------------------------------
 
@@ -68,6 +100,14 @@ arbeitszeit.plan\_summary module
    :undoc-members:
    :show-inheritance:
 
+arbeitszeit.presenters module
+-----------------------------
+
+.. automodule:: arbeitszeit.presenters
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit.price\_calculator module
 ------------------------------------
 
@@ -80,14 +120,6 @@ arbeitszeit.repositories module
 -------------------------------
 
 .. automodule:: arbeitszeit.repositories
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-arbeitszeit.token module
-------------------------
-
-.. automodule:: arbeitszeit.token
    :members:
    :undoc-members:
    :show-inheritance:

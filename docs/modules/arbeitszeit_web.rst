@@ -7,6 +7,8 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   arbeitszeit_web.api_controllers
+   arbeitszeit_web.api_presenters
    arbeitszeit_web.controllers
    arbeitszeit_web.formatters
    arbeitszeit_web.presenters
@@ -18,6 +20,14 @@ arbeitszeit\_web.answer\_company\_work\_invite module
 -----------------------------------------------------
 
 .. automodule:: arbeitszeit_web.answer_company_work_invite
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit\_web.authentication module
+--------------------------------------
+
+.. automodule:: arbeitszeit_web.authentication
    :members:
    :undoc-members:
    :show-inheritance:
@@ -94,6 +104,14 @@ arbeitszeit\_web.get\_coop\_summary module
    :undoc-members:
    :show-inheritance:
 
+arbeitszeit\_web.get\_plan\_summary\_accountant module
+------------------------------------------------------
+
+.. automodule:: arbeitszeit_web.get_plan_summary_accountant
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit\_web.get\_plan\_summary\_company module
 ---------------------------------------------------
 
@@ -150,14 +168,6 @@ arbeitszeit\_web.list\_all\_cooperations module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit\_web.list\_drafts\_of\_company module
--------------------------------------------------
-
-.. automodule:: arbeitszeit_web.list_drafts_of_company
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 arbeitszeit\_web.list\_plans module
 -----------------------------------
 
@@ -178,6 +188,14 @@ arbeitszeit\_web.notification module
 ------------------------------------
 
 .. automodule:: arbeitszeit_web.notification
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit\_web.pagination module
+----------------------------------
+
+.. automodule:: arbeitszeit_web.pagination
    :members:
    :undoc-members:
    :show-inheritance:
@@ -206,26 +224,10 @@ arbeitszeit\_web.plotter module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit\_web.query\_companies module
-----------------------------------------
-
-.. automodule:: arbeitszeit_web.query_companies
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 arbeitszeit\_web.query\_plans module
 ------------------------------------
 
 .. automodule:: arbeitszeit_web.query_plans
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-arbeitszeit\_web.register\_company module
------------------------------------------
-
-.. automodule:: arbeitszeit_web.register_company
    :members:
    :undoc-members:
    :show-inheritance:
@@ -274,6 +276,22 @@ arbeitszeit\_web.show\_my\_plans module
 ---------------------------------------
 
 .. automodule:: arbeitszeit_web.show_my_plans
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit\_web.text\_renderer module
+--------------------------------------
+
+.. automodule:: arbeitszeit_web.text_renderer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit\_web.token module
+-----------------------------
+
+.. automodule:: arbeitszeit_web.token
    :members:
    :undoc-members:
    :show-inheritance:
