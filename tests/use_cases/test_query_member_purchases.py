@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 
 from arbeitszeit.use_cases.query_member_purchases import QueryMemberPurchases
-from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.use_cases.base_test_case import BaseTestCase
 
 
@@ -9,7 +8,6 @@ class TestQueryMemberPurchases(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.query_purchases = self.injector.get(QueryMemberPurchases)
-        self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
         self.control_thresholds.set_allowed_overdraw_of_member_account(10000)
 
     def test_that_no_purchase_is_returned_when_searching_an_empty_repo(self) -> None:
