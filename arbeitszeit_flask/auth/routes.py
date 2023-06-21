@@ -139,7 +139,7 @@ def login_member(
 @login_required
 def resend_confirmation_member(use_case: ResendConfirmationMailUseCase):
     assert (
-        current_user.user.email
+        current_user.user.email_address
     )  # current user object must have email because it is logged in
 
     request = use_case.Request(user=UUID(current_user.id))
@@ -229,7 +229,7 @@ def confirm_email_company(
 @login_required
 def resend_confirmation_company(use_case: ResendConfirmationMailUseCase):
     assert (
-        current_user.user.email
+        current_user.user.email_address
     )  # current user object must have email because it is logged in
 
     request = use_case.Request(user=UUID(current_user.id))

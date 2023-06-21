@@ -16,12 +16,18 @@ def generate_uuid() -> str:
 
 class User(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
-    email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
-    email_confirmed_on = db.Column(db.DateTime, nullable=True)
+    email_address = db.Column(
+        db.ForeignKey("email.address"), nullable=False, unique=True
+    )
 
     def __str__(self) -> str:
-        return f"User {self.email} ({self.id})"
+        return f"User {self.email_address} ({self.id})"
+
+
+class Email(db.Model):
+    address = db.Column(db.String, primary_key=True, nullable=False)
+    confirmed_on = db.Column(db.DateTime, nullable=True)
 
 
 class SocialAccounting(db.Model):
