@@ -443,33 +443,38 @@ class MemberQueryResult(FlaskQueryResult[entities.Member]):
         )
 
     def with_email_address(self, email: str) -> MemberQueryResult:
+        user = aliased(models.User)
         return self._with_modified_query(
-            lambda query: query.join(models.User).filter(models.User.email == email)
+            lambda query: query.join(user).filter(user.email_address == email)
         )
 
     def that_are_confirmed(self) -> MemberQueryResult:
         user = aliased(models.User)
+        email_address = aliased(models.Email)
         return self._with_modified_query(
-            lambda query: query.join(user).filter(user.email_confirmed_on != None)
+            lambda query: query.join(user, models.Member.user_id == user.id)
+            .join(email_address, user.email_address == email_address.address)
+            .filter(email_address.confirmed_on != None)
         )
 
     def joined_with_email_address(
         self,
     ) -> FlaskQueryResult[Tuple[entities.Member, entities.EmailAddress]]:
         def mapper(row):
-            member_orm, user_orm = row
+            member_orm, email_orm = row
             return (
                 DatabaseGatewayImpl.member_from_orm(member_orm),
-                DatabaseGatewayImpl.email_address_from_orm(user_orm),
+                DatabaseGatewayImpl.email_address_from_orm(email_orm),
             )
 
         user = aliased(models.User)
+        email = aliased(models.Email)
         return FlaskQueryResult(
             mapper=mapper,
             db=self.db,
-            query=self.query.join(user, user.id == models.Member.user_id).with_entities(
-                models.Member, user
-            ),
+            query=self.query.join(user, user.id == models.Member.user_id)
+            .join(email, email.address == user.email_address)
+            .with_entities(models.Member, email),
         )
 
     def update(self) -> MemberUpdate:
@@ -483,30 +488,31 @@ class MemberQueryResult(FlaskQueryResult[entities.Member]):
 class MemberUpdate:
     query: Any
     db: SQLAlchemy
-    user_update_values: Dict[str, Any] = field(default_factory=dict)
+    email_update_values: Dict[str, Any] = field(default_factory=dict)
 
     def set_confirmation_timestamp(self, timestamp: datetime) -> MemberUpdate:
         return replace(
             self,
-            user_update_values=dict(
-                self.user_update_values,
-                email_confirmed_on=timestamp,
+            email_update_values=dict(
+                self.email_update_values,
+                confirmed_on=timestamp,
             ),
         )
 
     def perform(self) -> int:
         row_count = 0
-        if self.user_update_values:
+        if self.email_update_values:
+            users = aliased(models.User)
             sql_statement = (
-                update(models.User)
+                update(models.Email)
                 .where(
-                    models.User.id.in_(
-                        self.query.with_entities(
-                            models.Member.user_id
-                        ).scalar_subquery()
+                    models.Email.address.in_(
+                        self.query.join(users, users.id == models.Member.user_id)
+                        .with_entities(users.email_address)
+                        .scalar_subquery()
                     )
                 )
-                .values(**self.user_update_values)
+                .values(**self.email_update_values)
                 .execution_options(synchronize_session="fetch")
             )
             result = self.db.session.execute(sql_statement)
@@ -522,7 +528,9 @@ class CompanyQueryResult(FlaskQueryResult[entities.Company]):
 
     def with_email_address(self, email: str) -> CompanyQueryResult:
         return self._with_modified_query(
-            lambda query: query.join(models.User).filter(models.User.email == email)
+            lambda query: query.join(models.User).filter(
+                models.User.email_address == email
+            )
         )
 
     def that_are_workplace_of_member(self, member: UUID) -> CompanyQueryResult:
@@ -549,35 +557,37 @@ class CompanyQueryResult(FlaskQueryResult[entities.Company]):
     def with_email_containing(self, query: str) -> CompanyQueryResult:
         return self._with_modified_query(
             lambda db_query: db_query.join(models.User).filter(
-                models.User.email.ilike(f"%{query}%")
+                models.User.email_address.ilike(f"%{query}%")
             )
         )
 
     def that_are_confirmed(self) -> Self:
         user = aliased(models.User)
+        email_address = aliased(models.Email)
         return self._with_modified_query(
-            lambda query: query.join(user, user.id == models.Company.user_id).filter(
-                user.email_confirmed_on != None
-            )
+            lambda query: query.join(user, user.id == models.Company.user_id)
+            .join(email_address, email_address.address == user.email_address)
+            .filter(email_address.confirmed_on != None)
         )
 
     def joined_with_email_address(
         self,
     ) -> FlaskQueryResult[Tuple[entities.Company, entities.EmailAddress]]:
         def mapper(row):
-            company_orm, user_orm = row
+            company_orm, email_orm = row
             return (
                 DatabaseGatewayImpl.company_from_orm(company_orm),
-                DatabaseGatewayImpl.email_address_from_orm(user_orm),
+                DatabaseGatewayImpl.email_address_from_orm(email_orm),
             )
 
         user = aliased(models.User)
+        email = aliased(models.Email)
         return FlaskQueryResult(
             mapper=mapper,
             db=self.db,
-            query=self.query.join(
-                user, user.id == models.Company.user_id
-            ).with_entities(models.Company, user),
+            query=self.query.join(user, user.id == models.Company.user_id)
+            .join(email, email.address == user.email_address)
+            .with_entities(models.Company, email),
         )
 
     def update(self) -> CompanyUpdate:
@@ -591,29 +601,28 @@ class CompanyQueryResult(FlaskQueryResult[entities.Company]):
 class CompanyUpdate:
     query: Any
     db: SQLAlchemy
-    user_update_values: Dict[str, Any] = field(default_factory=dict)
+    email_update_values: Dict[str, Any] = field(default_factory=dict)
 
     def set_confirmation_timestamp(self, timestamp: datetime) -> Self:
         return replace(
             self,
-            user_update_values=dict(
-                self.user_update_values, email_confirmed_on=timestamp
-            ),
+            email_update_values=dict(self.email_update_values, confirmed_on=timestamp),
         )
 
     def perform(self) -> int:
         row_count = 0
-        if self.user_update_values:
+        if self.email_update_values:
+            users = aliased(models.User)
             sql_statement = (
-                update(models.User)
+                update(models.Email)
                 .where(
-                    models.User.id.in_(
-                        self.query.with_entities(
-                            models.Company.user_id
-                        ).scalar_subquery()
+                    models.Email.address.in_(
+                        self.query.join(users, users.id == models.Company.user_id)
+                        .with_entities(users.email_address)
+                        .scalar_subquery()
                     )
                 )
-                .values(**self.user_update_values)
+                .values(**self.email_update_values)
                 .execution_options(synchronize_session="fetch")
             )
             result = self.db.session.execute(sql_statement)
@@ -625,7 +634,7 @@ class AccountantResult(FlaskQueryResult[entities.Accountant]):
     def with_email_address(self, email: str) -> Self:
         user = aliased(models.User)
         return self._with_modified_query(
-            lambda query: query.join(user).filter(user.email == email)
+            lambda query: query.join(user).filter(user.email_address == email)
         )
 
     def with_id(self, id_: UUID) -> Self:
@@ -1108,7 +1117,7 @@ class UserAddressBookImpl:
             .first()
         )
         if user_orm:
-            return user_orm.email
+            return user_orm.email_address
         else:
             return None
 
@@ -1537,7 +1546,7 @@ class DatabaseGatewayImpl:
             id=UUID(orm_object.id),
             name=orm_object.name,
             account=UUID(orm_object.account),
-            email=orm_object.user.email,
+            email=orm_object.user.email_address,
             registered_on=orm_object.registered_on,
             password_hash=orm_object.user.password,
         )
@@ -1574,19 +1583,29 @@ class DatabaseGatewayImpl:
     def _get_or_create_user(
         self, *, email: str, password_hash: str, email_confirmed_on: Optional[datetime]
     ) -> models.User:
-        return self.db.session.query(models.User).filter(
-            models.User.email == email
-        ).first() or models.User(
-            email=email,
+        if (
+            user := self.db.session.query(models.User)
+            .filter(models.User.email_address == email)
+            .first()
+        ):
+            return user
+        email_address = models.Email.query.filter(models.Email.address == email).first()
+        if not email_address:
+            email_address = models.Email(
+                address=email,
+                confirmed_on=email_confirmed_on,
+            )
+            self.db.session.add(email_address)
+        return models.User(
+            email_address=email_address.address,
             password=password_hash,
-            email_confirmed_on=email_confirmed_on,
         )
 
     @classmethod
     def company_from_orm(cls, company_orm: Company) -> entities.Company:
         return entities.Company(
             id=UUID(company_orm.id),
-            email=company_orm.user.email,
+            email=company_orm.user.email_address,
             name=company_orm.name,
             means_account=UUID(company_orm.p_account),
             raw_material_account=UUID(company_orm.r_account),
@@ -1654,15 +1673,15 @@ class DatabaseGatewayImpl:
     @classmethod
     def accountant_from_orm(self, orm: models.Accountant) -> entities.Accountant:
         return entities.Accountant(
-            email_address=orm.user.email,
+            email_address=orm.user.email_address,
             name=orm.name,
             id=UUID(orm.id),
             password_hash=orm.user.password,
         )
 
     @classmethod
-    def email_address_from_orm(self, orm: models.User) -> entities.EmailAddress:
+    def email_address_from_orm(self, orm: models.Email) -> entities.EmailAddress:
         return entities.EmailAddress(
-            orm.email,
-            confirmed_on=orm.email_confirmed_on,
+            orm.address,
+            confirmed_on=orm.confirmed_on,
         )
