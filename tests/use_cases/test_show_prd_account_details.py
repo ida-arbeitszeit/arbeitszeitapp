@@ -1,10 +1,9 @@
 from datetime import datetime, timedelta
 from decimal import Decimal
 
-from arbeitszeit.entities import SocialAccounting
+from arbeitszeit.entities import ProductionCosts, SocialAccounting
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.show_prd_account_details import ShowPRDAccountDetailsUseCase
-from tests.data_generators import FakeDatetimeService, TransactionGenerator
 
 from .base_test_case import BaseTestCase
 
@@ -13,8 +12,8 @@ class UseCaseTester(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.show_prd_account_details = self.injector.get(ShowPRDAccountDetailsUseCase)
-        self.transaction_generator = self.injector.get(TransactionGenerator)
         self.social_accounting = self.injector.get(SocialAccounting)
+        self.control_thresholds.set_allowed_overdraw_of_member_account(10000)
 
     def test_no_transactions_returned_when_no_transactions_took_place(self) -> None:
         self.member_generator.create_member()
@@ -38,143 +37,110 @@ class UseCaseTester(BaseTestCase):
         assert response.company_id == company.id
 
     def test_that_no_info_is_generated_after_company_buying_p(self) -> None:
-        company1 = self.company_generator.create_company_entity()
-        company2 = self.company_generator.create_company_entity()
-
-        self.transaction_generator.create_transaction(
-            sending_account=company1.means_account,
-            receiving_account=company2.product_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(8.5),
-        )
-
-        response = self.show_prd_account_details(company1.id)
+        buyer = self.company_generator.create_company()
+        self.purchase_generator.create_fixed_means_purchase(buyer=buyer)
+        response = self.show_prd_account_details(buyer)
         assert len(response.transactions) == 0
 
     def test_that_no_info_is_generated_after_company_buying_r(self) -> None:
-        company1 = self.company_generator.create_company_entity()
-        company2 = self.company_generator.create_company_entity()
-
-        self.transaction_generator.create_transaction(
-            sending_account=company1.raw_material_account,
-            receiving_account=company2.product_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(8.5),
-        )
-
-        response = self.show_prd_account_details(company1.id)
+        buyer = self.company_generator.create_company()
+        self.purchase_generator.create_resource_purchase_by_company(buyer=buyer)
+        response = self.show_prd_account_details(buyer)
         assert len(response.transactions) == 0
 
-    def test_that_no_info_is_generated_when_credit_for_r_is_granted(self) -> None:
-        company = self.company_generator.create_company_entity()
-
-        self.transaction_generator.create_transaction(
-            sending_account=self.social_accounting.account,
-            receiving_account=company.raw_material_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(8.5),
-        )
-        response = self.show_prd_account_details(company.id)
-        assert len(response.transactions) == 0
-
-    def test_that_no_info_is_generated_when_credit_for_p_is_granted(self) -> None:
-        company = self.company_generator.create_company_entity()
-
-        self.transaction_generator.create_transaction(
-            sending_account=self.social_accounting.account,
-            receiving_account=company.means_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(8.5),
-        )
-        response = self.show_prd_account_details(company.id)
-        assert len(response.transactions) == 0
-
-    def test_that_no_info_is_generated_when_credit_for_a_is_granted(self) -> None:
-        company = self.company_generator.create_company_entity()
-
-        self.transaction_generator.create_transaction(
-            sending_account=self.social_accounting.account,
-            receiving_account=company.work_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(8.5),
-        )
-        response = self.show_prd_account_details(company.id)
-        assert len(response.transactions) == 0
+    def test_that_one_transaction_is_shown_after_filed_plan_is_accepted(self) -> None:
+        company = self.company_generator.create_company()
+        assert not self.show_prd_account_details(company).transactions
+        self.plan_generator.create_plan(planner=company)
+        response = self.show_prd_account_details(company)
+        assert len(response.transactions) == 1
 
     def test_that_correct_info_is_generated_after_selling_of_consumer_product(
         self,
     ) -> None:
-        member = self.member_generator.create_member_entity()
-        company = self.company_generator.create_company_entity()
-
-        self.transaction_generator.create_transaction(
-            sending_account=member.account,
-            receiving_account=company.product_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(8.5),
+        buyer = self.member_generator.create_member()
+        planner = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(
+            planner=planner,
+            costs=ProductionCosts(
+                labour_cost=Decimal(2),
+                means_cost=Decimal(0),
+                resource_cost=Decimal(0),
+            ),
+            amount=1,
         )
-
-        response = self.show_prd_account_details(company.id)
+        response = self.show_prd_account_details(planner)
         assert len(response.transactions) == 1
-        assert response.transactions[0].transaction_volume == Decimal(8.5)
-        assert response.transactions[0].purpose is not None
-        assert isinstance(response.transactions[0].date, datetime)
+        self.purchase_generator.create_purchase_by_member(
+            plan=plan.id,
+            buyer=buyer,
+            amount=1,
+        )
+        response = self.show_prd_account_details(planner)
+        assert len(response.transactions) == 2
+        assert response.transactions[-1].transaction_volume == Decimal(2)
+        assert response.transactions[-1].purpose is not None
+        assert isinstance(response.transactions[-1].date, datetime)
         assert (
-            response.transactions[0].transaction_type
+            response.transactions[-1].transaction_type
             == TransactionTypes.sale_of_consumer_product
         )
-        assert response.account_balance == Decimal(8.5)
+        assert response.account_balance == Decimal(0)
 
     def test_that_correct_info_is_generated_after_selling_of_means_of_production(
         self,
     ) -> None:
-        company1 = self.company_generator.create_company_entity()
-        company2 = self.company_generator.create_company_entity()
-
-        self.transaction_generator.create_transaction(
-            sending_account=company1.means_account,
-            receiving_account=company2.product_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(8.5),
+        buyer = self.company_generator.create_company()
+        planner = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(
+            planner=planner,
+            costs=ProductionCosts(
+                labour_cost=Decimal(2), means_cost=Decimal(0), resource_cost=Decimal(0)
+            ),
+            amount=1,
         )
-
-        response = self.show_prd_account_details(company2.id)
+        response = self.show_prd_account_details(planner)
         assert len(response.transactions) == 1
-        assert response.transactions[0].transaction_volume == Decimal(8.5)
-        assert response.transactions[0].purpose is not None
-        assert isinstance(response.transactions[0].date, datetime)
+        self.purchase_generator.create_fixed_means_purchase(plan=plan.id, buyer=buyer)
+        response = self.show_prd_account_details(planner)
+        assert len(response.transactions) == 2
+        assert response.transactions[-1].transaction_volume == Decimal(2)
+        assert response.transactions[-1].purpose is not None
+        assert isinstance(response.transactions[-1].date, datetime)
         assert (
-            response.transactions[0].transaction_type
+            response.transactions[-1].transaction_type
             == TransactionTypes.sale_of_fixed_means
         )
-        assert response.account_balance == Decimal(8.5)
+        assert response.account_balance == Decimal(0)
 
     def test_that_correct_info_is_generated_after_selling_of_raw_material(self) -> None:
-        company1 = self.company_generator.create_company_entity()
-        company2 = self.company_generator.create_company_entity()
-
-        self.transaction_generator.create_transaction(
-            sending_account=company1.raw_material_account,
-            receiving_account=company2.product_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(8.5),
+        buyer = self.company_generator.create_company()
+        planner = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(
+            planner=planner,
+            costs=ProductionCosts(
+                labour_cost=Decimal(2), means_cost=Decimal(0), resource_cost=Decimal(0)
+            ),
+            amount=1,
         )
-
-        response = self.show_prd_account_details(company2.id)
+        response = self.show_prd_account_details(planner)
         assert len(response.transactions) == 1
-        assert response.transactions[0].transaction_volume == Decimal(8.5)
-        assert response.transactions[0].purpose is not None
-        assert isinstance(response.transactions[0].date, datetime)
+        self.purchase_generator.create_resource_purchase_by_company(
+            plan=plan.id, buyer=buyer
+        )
+        response = self.show_prd_account_details(planner)
+        assert len(response.transactions) == 2
+        assert response.transactions[-1].transaction_volume == Decimal(2)
+        assert response.transactions[-1].purpose is not None
+        assert isinstance(response.transactions[-1].date, datetime)
         assert (
-            response.transactions[0].transaction_type
+            response.transactions[-1].transaction_type
             == TransactionTypes.sale_of_liquid_means
         )
-        assert response.account_balance == Decimal(8.5)
+        assert response.account_balance == Decimal(0)
 
     def test_that_plotting_info_is_empty_when_no_transactions_occurred(self) -> None:
-        self.member_generator.create_member()
         company = self.company_generator.create_company_entity()
-
         response = self.show_prd_account_details(company.id)
         assert not response.plot.timestamps
         assert not response.plot.accumulated_volumes
@@ -182,142 +148,93 @@ class UseCaseTester(BaseTestCase):
     def test_that_plotting_info_is_generated_after_selling_of_consumer_product(
         self,
     ) -> None:
-        member = self.member_generator.create_member_entity()
-        company = self.company_generator.create_company_entity()
-
-        self.transaction_generator.create_transaction(
-            sending_account=member.account,
-            receiving_account=company.product_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(8.5),
-        )
-
-        response = self.show_prd_account_details(company.id)
+        planner = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(planner=planner)
+        self.purchase_generator.create_purchase_by_member(plan=plan.id)
+        response = self.show_prd_account_details(planner)
         assert response.plot.timestamps
         assert response.plot.accumulated_volumes
 
     def test_that_correct_plotting_info_is_generated_after_selling_of_two_consumer_products(
         self,
     ) -> None:
-        member = self.member_generator.create_member_entity()
-        company = self.company_generator.create_company_entity()
-        datetime_service = FakeDatetimeService()
-
-        trans1 = self.transaction_generator.create_transaction(
-            sending_account=member.account,
-            receiving_account=company.product_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(5),
-            date=datetime_service.now() - timedelta(hours=2),
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        planner = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(
+            planner=planner,
+            costs=ProductionCosts(
+                labour_cost=Decimal(1), means_cost=Decimal(0), resource_cost=Decimal(0)
+            ),
+            amount=1,
         )
-
-        trans2 = self.transaction_generator.create_transaction(
-            sending_account=member.account,
-            receiving_account=company.product_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(10),
-            date=datetime_service.now() - timedelta(hours=1),
-        )
-
-        response = self.show_prd_account_details(company.id)
-        assert len(response.plot.timestamps) == 2
-        assert len(response.plot.accumulated_volumes) == 2
-
-        assert trans1.date in response.plot.timestamps
-        assert trans2.date in response.plot.timestamps
-
-        assert trans1.amount_received in response.plot.accumulated_volumes
-        assert (
-            trans1.amount_received + trans2.amount_received
-        ) in response.plot.accumulated_volumes
+        transaction_1_timestamp = self.datetime_service.advance_time(timedelta(days=1))
+        self.purchase_generator.create_purchase_by_member(plan=plan.id, amount=1)
+        transaction_2_timestamp = self.datetime_service.advance_time(timedelta(days=1))
+        self.purchase_generator.create_purchase_by_member(plan=plan.id, amount=2)
+        response = self.show_prd_account_details(planner)
+        assert len(response.plot.timestamps) == 3
+        assert len(response.plot.accumulated_volumes) == 3
+        assert transaction_1_timestamp in response.plot.timestamps
+        assert transaction_2_timestamp in response.plot.timestamps
+        assert Decimal(0) in response.plot.accumulated_volumes
+        assert Decimal(2) in response.plot.accumulated_volumes
 
     def test_that_plotting_info_is_generated_in_the_correct_order_after_selling_of_three_consumer_products(
         self,
     ) -> None:
-        member = self.member_generator.create_member_entity()
-        company = self.company_generator.create_company_entity()
-        datetime_service = FakeDatetimeService()
-
-        trans1 = self.transaction_generator.create_transaction(
-            sending_account=member.account,
-            receiving_account=company.product_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(1),
-            date=datetime_service.now() - timedelta(hours=3),
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        planner = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(
+            planner=planner,
+            costs=ProductionCosts(
+                labour_cost=Decimal(0), means_cost=Decimal(1), resource_cost=Decimal(0)
+            ),
+            amount=1,
         )
-
-        trans2 = self.transaction_generator.create_transaction(
-            sending_account=member.account,
-            receiving_account=company.product_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(2),
-            date=datetime_service.now() - timedelta(hours=2),
-        )
-
-        trans3 = self.transaction_generator.create_transaction(
-            sending_account=member.account,
-            receiving_account=company.product_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(3),
-            date=datetime_service.now() - timedelta(hours=1),
-        )
-
-        response = self.show_prd_account_details(company.id)
-        assert response.plot.timestamps[0] == trans1.date
-        assert response.plot.timestamps[2] == trans3.date
-
-        assert response.plot.accumulated_volumes[0] == trans1.amount_received
-        assert response.plot.accumulated_volumes[2] == (
-            trans1.amount_received + trans2.amount_received + trans3.amount_received
-        )
+        transaction_1_timestamp = self.datetime_service.advance_time(timedelta(days=1))
+        self.purchase_generator.create_purchase_by_member(plan=plan.id, amount=1)
+        self.datetime_service.advance_time(timedelta(days=1))
+        self.purchase_generator.create_purchase_by_member(plan=plan.id, amount=2)
+        transaction_3_timestamp = self.datetime_service.advance_time(timedelta(days=1))
+        self.purchase_generator.create_purchase_by_member(plan=plan.id, amount=3)
+        response = self.show_prd_account_details(planner)
+        assert response.plot.timestamps[1] == transaction_1_timestamp
+        assert response.plot.timestamps[3] == transaction_3_timestamp
+        # production costs were one so we have to take this into
+        # consideration when checking for accumulated account volume.
+        assert response.plot.accumulated_volumes[1] == Decimal(0)
+        assert response.plot.accumulated_volumes[3] == Decimal(5)
 
     def test_that_no_buyer_is_shown_in_transaction_detail_when_transaction_is_debit_for_expected_sales(
         self,
     ) -> None:
-        company = self.company_generator.create_company_entity()
-
-        self.transaction_generator.create_transaction(
-            sending_account=self.social_accounting.account,
-            receiving_account=company.product_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(5),
-        )
-
-        response = self.show_prd_account_details(company.id)
+        planner = self.company_generator.create_company()
+        self.plan_generator.create_plan(planner=planner)
+        response = self.show_prd_account_details(planner)
         assert response.transactions[0].buyer is None
 
     def test_that_correct_buyer_info_is_shown_when_company_sold_to_member(self) -> None:
-        company = self.company_generator.create_company_entity()
-        member = self.member_generator.create_member_entity()
-
-        self.transaction_generator.create_transaction(
-            sending_account=member.account,
-            receiving_account=company.product_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(5),
-        )
-
-        response = self.show_prd_account_details(company.id)
-        assert response.transactions[0].buyer
-        assert response.transactions[0].buyer.buyer_is_member == True
-        assert response.transactions[0].buyer.buyer_id == member.id
-        assert response.transactions[0].buyer.buyer_name == member.name
+        planner = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(planner=planner)
+        buyer = self.member_generator.create_member_entity()
+        self.purchase_generator.create_purchase_by_member(plan=plan.id, buyer=buyer.id)
+        response = self.show_prd_account_details(planner)
+        assert response.transactions[-1].buyer
+        assert response.transactions[-1].buyer.buyer_is_member == True
+        assert response.transactions[-1].buyer.buyer_id == buyer.id
+        assert response.transactions[-1].buyer.buyer_name == buyer.name
 
     def test_that_correct_buyer_info_is_shown_when_company_sold_to_company(
         self,
     ) -> None:
-        company1 = self.company_generator.create_company_entity()
-        company2 = self.company_generator.create_company_entity()
-
-        self.transaction_generator.create_transaction(
-            sending_account=company1.means_account,
-            receiving_account=company2.product_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(5),
+        buyer = self.company_generator.create_company_entity()
+        planner = self.company_generator.create_company_entity()
+        plan = self.plan_generator.create_plan(planner=planner.id)
+        self.purchase_generator.create_fixed_means_purchase(
+            buyer=buyer.id, plan=plan.id
         )
-
-        response = self.show_prd_account_details(company2.id)
-        assert response.transactions[0].buyer
-        assert response.transactions[0].buyer.buyer_is_member == False
-        assert response.transactions[0].buyer.buyer_id == company1.id
-        assert response.transactions[0].buyer.buyer_name == company1.name
+        response = self.show_prd_account_details(planner.id)
+        assert response.transactions[-1].buyer
+        assert response.transactions[-1].buyer.buyer_is_member == False
+        assert response.transactions[-1].buyer.buyer_id == buyer.id
+        assert response.transactions[-1].buyer.buyer_name == buyer.name

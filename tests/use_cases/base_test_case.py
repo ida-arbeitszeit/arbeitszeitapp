@@ -1,6 +1,7 @@
 from typing import Any, Dict, Generic, Type, TypeVar
 from unittest import TestCase
 
+from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.data_generators import (
     AccountantGenerator,
     CompanyGenerator,
@@ -61,6 +62,7 @@ class BaseTestCase(TestCase):
     accountant_generator = _lazy_property(AccountantGenerator)
     balance_checker = _lazy_property(BalanceChecker)
     company_generator = _lazy_property(CompanyGenerator)
+    control_thresholds = _lazy_property(ControlThresholdsTestImpl)
     coop_generator = _lazy_property(CooperationGenerator)
     cooperation_generator = _lazy_property(CooperationGenerator)
     datetime_service = _lazy_property(FakeDatetimeService)

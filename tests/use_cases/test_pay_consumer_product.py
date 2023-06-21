@@ -13,7 +13,6 @@ from arbeitszeit.use_cases.pay_consumer_product import (
     RejectionReason,
 )
 from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
-from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.data_generators import TransactionGenerator
 
 from .base_test_case import BaseTestCase
@@ -27,7 +26,6 @@ class PayConsumerProductTests(BaseTestCase):
         self.pay_consumer_product = self.injector.get(PayConsumerProduct)
         self.entity_storage = self.injector.get(EntityStorage)
         self.buyer = self.member_generator.create_member_entity()
-        self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
         self.update_plans_and_payout = self.injector.get(UpdatePlansAndPayout)
         self.query_member_purchases = self.injector.get(
             query_member_purchases.QueryMemberPurchases
