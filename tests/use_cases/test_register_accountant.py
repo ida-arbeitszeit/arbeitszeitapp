@@ -1,5 +1,6 @@
 from unittest import TestCase
 
+from arbeitszeit.use_cases.confirm_company import ConfirmCompanyUseCase
 from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
 from arbeitszeit.use_cases.send_accountant_registration_token import (
     SendAccountantRegistrationTokenUseCase,
@@ -23,6 +24,7 @@ class UseCaseTests(TestCase):
         self.member_generator = self.injector.get(MemberGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.accountant_generator = self.injector.get(AccountantGenerator)
+        self.confirm_company_use_case = self.injector.get(ConfirmCompanyUseCase)
 
     def test_that_user_that_was_invited_can_register(self) -> None:
         expected_email = "testmail@test.test"
@@ -38,7 +40,7 @@ class UseCaseTests(TestCase):
     ) -> None:
         email_address = "test@test.test"
         self.invite_user(email=email_address)
-        self.member_generator.create_member_entity(email=email_address)
+        self.member_generator.create_member(email=email_address)
         request = self.create_request(email=email_address)
         response = self.use_case.register_accountant(request)
         self.assertTrue(response.is_accepted)
@@ -48,10 +50,25 @@ class UseCaseTests(TestCase):
     ) -> None:
         email_address = "test@test.test"
         self.invite_user(email=email_address)
-        self.company_generator.create_company_entity(email=email_address)
+        self.company_generator.create_company(email=email_address)
         request = self.create_request(email=email_address)
         response = self.use_case.register_accountant(request)
         self.assertTrue(response.is_accepted)
+
+    def test_that_user_registering_an_accountant_confirms_the_email_address_also_for_companies_with_the_same_address(
+        self,
+    ) -> None:
+        email_address = "test@test.test"
+        self.company_generator.create_company(email=email_address, confirmed=False)
+        self.invite_user(email=email_address)
+        request = self.create_request(email=email_address)
+        self.use_case.register_accountant(request)
+        response = self.confirm_company_use_case.confirm_company(
+            ConfirmCompanyUseCase.Request(
+                email_address=email_address,
+            )
+        )
+        assert not response.is_confirmed
 
     def test_that_user_cannot_register_twice_with_same_email_address(self) -> None:
         expected_email = "testmail@test.test"

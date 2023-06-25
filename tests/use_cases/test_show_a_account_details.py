@@ -186,7 +186,7 @@ def test_that_plotting_info_is_generated_after_transfer_of_work_certificates(
     transaction_generator: TransactionGenerator,
 ):
     worker = member_generator.create_member_entity()
-    own_company = company_generator.create_company_entity(workers=[worker])
+    own_company = company_generator.create_company_entity(workers=[worker.id])
 
     transaction_generator.create_transaction(
         sending_account=own_company.work_account,
@@ -209,7 +209,9 @@ def test_that_correct_plotting_info_is_generated_after_transferring_of_work_cert
 ):
     worker1 = member_generator.create_member_entity()
     worker2 = member_generator.create_member_entity()
-    own_company = company_generator.create_company_entity(workers=[worker1, worker2])
+    own_company = company_generator.create_company_entity(
+        workers=[worker1.id, worker2.id]
+    )
 
     trans1 = transaction_generator.create_transaction(
         sending_account=own_company.work_account,
@@ -249,7 +251,7 @@ def test_that_plotting_info_is_generated_in_the_correct_order_after_transfer_of_
     worker2 = member_generator.create_member_entity()
     worker3 = member_generator.create_member_entity()
     own_company = company_generator.create_company_entity(
-        workers=[worker1, worker2, worker3]
+        workers=[worker1.id, worker2.id, worker3.id]
     )
 
     trans1 = transaction_generator.create_transaction(

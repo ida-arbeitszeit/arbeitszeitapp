@@ -3,8 +3,6 @@ from typing import List
 from uuid import uuid4
 
 from flask_sqlalchemy import SQLAlchemy
-from pytest import raises
-from sqlalchemy.exc import IntegrityError
 
 from arbeitszeit.entities import Company
 from arbeitszeit_flask.database.repositories import AccountRepository
@@ -96,11 +94,6 @@ class RepositoryTester(FlaskTestCase):
         self.company_generator.create_company_entity()
         assert len(self.database_gateway.get_companies()) == 1
 
-    def test_that_can_not_register_company_with_same_email_twice(self) -> None:
-        with raises(IntegrityError):
-            self.company_generator.create_company_entity(email="company@provider.de")
-            self.company_generator.create_company_entity(email="company@provider.de")
-
     def test_that_get_all_companies_returns_all_companies(self) -> None:
         expected_company1 = self.company_generator.create_company_entity(
             email="company1@provider.de"
@@ -158,25 +151,14 @@ class ConfirmCompanyTests(FlaskTestCase):
         )
 
     def test_that_company_is_confirmed_after_confirm_was_called(self) -> None:
-        company = self._create_company()
-        self.database_gateway.get_companies().with_id(
-            company.id
+        email = "test@test.test"
+        company = self._create_company(email=email)
+        self.database_gateway.get_email_addresses().with_address(
+            email
         ).update().set_confirmation_timestamp(datetime(2000, 1, 2)).perform()
         self.assertTrue(
             self.database_gateway.get_companies()
             .with_id(company.id)
-            .that_are_confirmed()
-        )
-
-    def test_when_confirming_company_other_company_stays_unconfirmed(self) -> None:
-        company = self._create_company()
-        other_company = self._create_company("other@company.org")
-        self.database_gateway.get_companies().with_id(
-            company.id
-        ).update().set_confirmation_timestamp(datetime(2000, 1, 2)).perform()
-        self.assertFalse(
-            self.database_gateway.get_companies()
-            .with_id(other_company.id)
             .that_are_confirmed()
         )
 

@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from arbeitszeit.use_cases.confirm_member import ConfirmMemberUseCase
 from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCase
 from arbeitszeit.use_cases.register_company import RegisterCompany
 from tests.token import TokenDeliveryService
@@ -15,6 +16,7 @@ class RegisterCompanyTests(BaseTestCase):
         self.get_company_dashboard_use_case = self.injector.get(
             GetCompanyDashboardUseCase
         )
+        self.confirm_member_use_case = self.injector.get(ConfirmMemberUseCase)
 
     def test_that_a_token_is_sent_out_when_a_company_registers(self) -> None:
         self.use_case.register_company(self._create_request())
@@ -87,6 +89,22 @@ class RegisterCompanyTests(BaseTestCase):
             response.rejection_reason
             == RegisterCompany.Response.RejectionReason.user_password_is_invalid
         )
+
+    def test_that_creating_a_company_with_same_email_as_member_does_not_require_confirmation_of_member_email_again(
+        self,
+    ) -> None:
+        email_address = "test@test.test"
+        password = "matching password"
+        self.member_generator.create_member(
+            email=email_address,
+            password=password,
+        )
+        request = self._create_request(email=email_address, password=password)
+        self.use_case.register_company(request)
+        response = self.confirm_member_use_case.confirm_member(
+            ConfirmMemberUseCase.Request(email_address=email_address)
+        )
+        assert not response.is_confirmed
 
     def _create_request(
         self,

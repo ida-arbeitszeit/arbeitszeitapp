@@ -26,7 +26,9 @@ class ConfirmMemberUseCase:
         if members.that_are_confirmed():
             pass
         else:
-            members.update().set_confirmation_timestamp(datetime.min).perform()
+            self.database.get_email_addresses().with_address(
+                request.email_address
+            ).update().set_confirmation_timestamp(datetime.min).perform()
             member = members.first()
             assert member
             return self.Response(is_confirmed=True, member=member.id)
