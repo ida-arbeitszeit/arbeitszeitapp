@@ -1,3 +1,4 @@
+from arbeitszeit.use_cases.confirm_company import ConfirmCompanyUseCase
 from arbeitszeit.use_cases.get_member_dashboard import GetMemberDashboard
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
@@ -19,6 +20,7 @@ class RegisterMemberTests(BaseTestCase):
         self.token_delivery = self.injector.get(TokenDeliveryService)
         self.login_use_case = self.injector.get(LogInMemberUseCase)
         self.get_member_dashboard = self.injector.get(GetMemberDashboard)
+        self.confirm_company_use_case = self.injector.get(ConfirmCompanyUseCase)
 
     def test_that_a_token_is_sent_out_when_a_member_registers(self) -> None:
         self.use_case.register_member(RegisterMemberUseCase.Request(**DEFAULT))
@@ -119,6 +121,27 @@ class RegisterMemberTests(BaseTestCase):
             )
         )
         assert not register_response.is_rejected
+
+    def test_registering_a_member_with_same_email_as_company_does_not_require_company_to_reconfirm_email(
+        self,
+    ) -> None:
+        expected_email = "test@test.test"
+        expected_password = "test password 123"
+        self.company_generator.create_company(
+            email=expected_email,
+            password=expected_password,
+        )
+        self.use_case.register_member(
+            RegisterMemberUseCase.Request(
+                email=expected_email,
+                name="test name",
+                password=expected_password,
+            )
+        )
+        response = self.confirm_company_use_case.confirm_company(
+            ConfirmCompanyUseCase.Request(email_address=expected_email)
+        )
+        assert not response.is_confirmed
 
     def test_that_no_confirmation_email_is_sent_out_if_registering_email_address_is_already_in_use_by_a_company(
         self,

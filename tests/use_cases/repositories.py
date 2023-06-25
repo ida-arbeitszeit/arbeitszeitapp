@@ -523,43 +523,11 @@ class MemberResult(QueryResultImpl[Member]):
             entities=self.entities,
         )
 
-    def update(self) -> MemberUpdate:
-        return MemberUpdate(
-            members=self.items,
-            update_functions=list(),
-            entities=self.entities,
-        )
-
     def _filtered_by(self, key: Callable[[Member], bool]) -> MemberResult:
         return type(self)(
             items=lambda: filter(key, self.items()),
             entities=self.entities,
         )
-
-
-@dataclass
-class MemberUpdate:
-    members: Callable[[], Iterable[entities.Member]]
-    update_functions: List[Callable[[entities.Member], None]]
-    entities: EntityStorage
-
-    def set_confirmation_timestamp(self, timestamp: datetime) -> MemberUpdate:
-        def update(member: entities.Member) -> None:
-            email = self.entities.email_addresses[member.email]
-            email.confirmed_on = timestamp
-
-        return replace(
-            self,
-            update_functions=self.update_functions + [update],
-        )
-
-    def perform(self) -> int:
-        items_affected = 0
-        for member in self.members():
-            for update in self.update_functions:
-                update(member)
-            items_affected += 1
-        return items_affected
 
 
 class CompanyResult(QueryResultImpl[Company]):
@@ -604,12 +572,6 @@ class CompanyResult(QueryResultImpl[Company]):
 
         return self._filtered_by(filtered)
 
-    def update(self) -> CompanyUpdate:
-        return CompanyUpdate(
-            companies=self.items,
-            entities=self.entities,
-        )
-
     def joined_with_email_address(
         self,
     ) -> QueryResultImpl[Tuple[entities.Company, entities.EmailAddress]]:
@@ -627,31 +589,6 @@ class CompanyResult(QueryResultImpl[Company]):
             items=lambda: filter(key, self.items()),
             entities=self.entities,
         )
-
-
-@dataclass
-class CompanyUpdate:
-    companies: Callable[[], Iterable[Company]]
-    entities: EntityStorage
-    updates: List[Callable[[Company], None]] = field(default_factory=list)
-
-    def set_confirmation_timestamp(self, timestamp: datetime) -> Self:
-        def update(company: Company) -> None:
-            email = self.entities.email_addresses[company.email]
-            email.confirmed_on = timestamp
-
-        return replace(
-            self,
-            updates=self.updates + [update],
-        )
-
-    def perform(self) -> int:
-        companies_affected = 0
-        for company in self.companies():
-            for update in self.updates:
-                update(company)
-            companies_affected += 1
-        return companies_affected
 
 
 class AccountantResult(QueryResultImpl[Accountant]):
@@ -976,7 +913,41 @@ class CompanyWorkInviteResult(QueryResultImpl[CompanyWorkInvite]):
 
 
 class EmailAddressResult(QueryResultImpl[entities.EmailAddress]):
-    ...
+    def with_address(self, *addresses: str) -> Self:
+        return replace(
+            self,
+            items=lambda: filter(
+                lambda a: a.address in addresses,
+                self.items(),
+            ),
+        )
+
+    def update(self) -> EmailAddressUpdate:
+        return EmailAddressUpdate(
+            items=self.items,
+        )
+
+
+@dataclass
+class EmailAddressUpdate:
+    items: Callable[[], Iterable[entities.EmailAddress]]
+    transformation: Callable[[entities.EmailAddress], None] = field(
+        default=lambda _: None
+    )
+
+    def set_confirmation_timestamp(self, timestamp: Optional[datetime]) -> Self:
+        def transformation(item: entities.EmailAddress) -> None:
+            self.transformation(item)
+            item.confirmed_on = timestamp
+
+        return replace(self, transformation=transformation)
+
+    def perform(self) -> int:
+        email_addresses_affected = 0
+        for address in self.items():
+            self.transformation(address)
+            email_addresses_affected += 1
+        return email_addresses_affected
 
 
 @singleton
@@ -1099,6 +1070,7 @@ class EntityStorage:
     def create_email_address(
         self, *, address: str, confirmed_on: Optional[datetime]
     ) -> entities.EmailAddress:
+        assert address not in self.email_addresses
         record = entities.EmailAddress(
             address=address,
             confirmed_on=confirmed_on,
@@ -1289,7 +1261,7 @@ class EntityStorage:
         )
 
     def create_accountant(self, email: str, name: str, password_hash: str) -> UUID:
-        self.create_email_address(address=email, confirmed_on=None)
+        assert email in self.email_addresses
         id = uuid4()
         record = Accountant(
             email_address=email,
@@ -1315,7 +1287,7 @@ class EntityStorage:
         account: Account,
         registered_on: datetime,
     ) -> Member:
-        self.create_email_address(address=email, confirmed_on=None)
+        assert email in self.email_addresses
         id = uuid4()
         member = Member(
             id=id,
@@ -1346,7 +1318,7 @@ class EntityStorage:
         products_account: Account,
         registered_on: datetime,
     ) -> Company:
-        self.create_email_address(address=email, confirmed_on=None)
+        assert email in self.email_addresses
         new_company = Company(
             id=uuid4(),
             email=email,
@@ -1369,4 +1341,10 @@ class EntityStorage:
         return CompanyResult(
             items=lambda: self.companies.values(),
             entities=self,
+        )
+
+    def get_email_addresses(self) -> EmailAddressResult:
+        return EmailAddressResult(
+            entities=self,
+            items=lambda: self.email_addresses.values(),
         )

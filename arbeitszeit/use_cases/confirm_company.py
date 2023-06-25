@@ -36,7 +36,7 @@ class ConfirmCompanyUseCase:
             )
         company, email = record
         if email.confirmed_on is None:
-            self.database.get_companies().with_email_address(
+            self.database.get_email_addresses().with_address(
                 request.email_address
             ).update().set_confirmation_timestamp(self.datetime_service.now()).perform()
             return self.Response(is_confirmed=True, user_id=company.id)

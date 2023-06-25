@@ -255,15 +255,7 @@ class MemberResult(QueryResult[Member], Protocol):
     def joined_with_email_address(self) -> QueryResult[Tuple[Member, EmailAddress]]:
         ...
 
-    def update(self) -> MemberUpdate:
-        """Prepare an update for all selected members."""
-
     def that_are_confirmed(self) -> MemberResult:
-        ...
-
-
-class MemberUpdate(DatabaseUpdate, Protocol):
-    def set_confirmation_timestamp(self, timestamp: datetime) -> MemberUpdate:
         ...
 
 
@@ -323,14 +315,6 @@ class CompanyResult(QueryResult[Company], Protocol):
         ...
 
     def joined_with_email_address(self) -> QueryResult[Tuple[Company, EmailAddress]]:
-        ...
-
-    def update(self) -> CompanyUpdate:
-        ...
-
-
-class CompanyUpdate(DatabaseUpdate, Protocol):
-    def set_confirmation_timestamp(self, timestamp: datetime) -> Self:
         ...
 
 
@@ -414,7 +398,16 @@ class CompanyWorkInviteResult(QueryResult[CompanyWorkInvite], Protocol):
 
 
 class EmailAddressResult(QueryResult[EmailAddress], Protocol):
-    ...
+    def with_address(self, *addresses: str) -> Self:
+        ...
+
+    def update(self) -> EmailAddressUpdate:
+        ...
+
+
+class EmailAddressUpdate(DatabaseUpdate, Protocol):
+    def set_confirmation_timestamp(self, timestamp: Optional[datetime]) -> Self:
+        ...
 
 
 class AccountRepository(ABC):
@@ -575,4 +568,12 @@ class DatabaseGateway(Protocol):
         ...
 
     def get_accountants(self) -> AccountantResult:
+        ...
+
+    def create_email_address(
+        self, *, address: str, confirmed_on: Optional[datetime]
+    ) -> EmailAddress:
+        ...
+
+    def get_email_addresses(self) -> EmailAddressResult:
         ...

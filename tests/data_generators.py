@@ -6,7 +6,6 @@ repository.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
 from decimal import Decimal
 from typing import Iterable, List, Optional, Union
 from uuid import UUID, uuid4
@@ -131,29 +130,13 @@ class CompanyGenerator:
         email: Optional[str] = None,
         name: str = "Company Name",
         password: str = "password",
-        workers: Optional[Iterable[Union[Member, UUID]]] = None,
-        registered_on: Optional[datetime] = None,
+        workers: Optional[Iterable[UUID]] = None,
     ) -> Company:
-        if email is None:
-            email = self.email_generator.get_random_email()
-        if registered_on is None:
-            registered_on = self.datetime_service.now()
-        company = self.database.create_company(
-            email=email,
-            name=name,
-            password_hash=self.password_hasher.calculate_password_hash(password),
-            means_account=self.account_generator.create_account(),
-            resource_account=self.account_generator.create_account(),
-            products_account=self.account_generator.create_account(),
-            labour_account=self.account_generator.create_account(),
-            registered_on=registered_on,
+        company_id = self.create_company(
+            email=email, confirmed=True, name=name, workers=workers, password=password
         )
-        if workers is not None:
-            for worker in workers:
-                if isinstance(worker, UUID):
-                    self.company_manager.add_worker_to_company(company.id, worker)
-                else:
-                    self.company_manager.add_worker_to_company(company.id, worker.id)
+        company = self.database.get_companies().with_id(company_id).first()
+        assert company
         return company
 
     def create_company(

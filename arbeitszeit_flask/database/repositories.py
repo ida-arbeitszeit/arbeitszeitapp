@@ -477,48 +477,6 @@ class MemberQueryResult(FlaskQueryResult[entities.Member]):
             .with_entities(models.Member, email),
         )
 
-    def update(self) -> MemberUpdate:
-        return MemberUpdate(
-            query=self.query,
-            db=self.db,
-        )
-
-
-@dataclass
-class MemberUpdate:
-    query: Any
-    db: SQLAlchemy
-    email_update_values: Dict[str, Any] = field(default_factory=dict)
-
-    def set_confirmation_timestamp(self, timestamp: datetime) -> MemberUpdate:
-        return replace(
-            self,
-            email_update_values=dict(
-                self.email_update_values,
-                confirmed_on=timestamp,
-            ),
-        )
-
-    def perform(self) -> int:
-        row_count = 0
-        if self.email_update_values:
-            users = aliased(models.User)
-            sql_statement = (
-                update(models.Email)
-                .where(
-                    models.Email.address.in_(
-                        self.query.join(users, users.id == models.Member.user_id)
-                        .with_entities(users.email_address)
-                        .scalar_subquery()
-                    )
-                )
-                .values(**self.email_update_values)
-                .execution_options(synchronize_session="fetch")
-            )
-            result = self.db.session.execute(sql_statement)
-            row_count = result.rowcount  # type: ignore
-        return row_count
-
 
 class CompanyQueryResult(FlaskQueryResult[entities.Company]):
     def with_id(self, id_: UUID) -> CompanyQueryResult:
@@ -589,45 +547,6 @@ class CompanyQueryResult(FlaskQueryResult[entities.Company]):
             .join(email, email.address == user.email_address)
             .with_entities(models.Company, email),
         )
-
-    def update(self) -> CompanyUpdate:
-        return CompanyUpdate(
-            query=self.query,
-            db=self.db,
-        )
-
-
-@dataclass
-class CompanyUpdate:
-    query: Any
-    db: SQLAlchemy
-    email_update_values: Dict[str, Any] = field(default_factory=dict)
-
-    def set_confirmation_timestamp(self, timestamp: datetime) -> Self:
-        return replace(
-            self,
-            email_update_values=dict(self.email_update_values, confirmed_on=timestamp),
-        )
-
-    def perform(self) -> int:
-        row_count = 0
-        if self.email_update_values:
-            users = aliased(models.User)
-            sql_statement = (
-                update(models.Email)
-                .where(
-                    models.Email.address.in_(
-                        self.query.join(users, users.id == models.Company.user_id)
-                        .with_entities(users.email_address)
-                        .scalar_subquery()
-                    )
-                )
-                .values(**self.email_update_values)
-                .execution_options(synchronize_session="fetch")
-            )
-            result = self.db.session.execute(sql_statement)
-            row_count = result.rowcount  # type: ignore
-        return row_count
 
 
 class AccountantResult(FlaskQueryResult[entities.Accountant]):
@@ -1097,6 +1016,41 @@ class CompanyWorkInviteResult(FlaskQueryResult[entities.CompanyWorkInvite]):
 
     def delete(self) -> None:
         self.query.delete()
+
+
+class EmailAddressResult(FlaskQueryResult[entities.EmailAddress]):
+    def with_address(self, *addresses: str) -> Self:
+        return self._with_modified_query(
+            lambda query: query.filter(models.Email.address.in_(addresses))
+        )
+
+    def update(self) -> EmailAddressUpdate:
+        return EmailAddressUpdate(db=self.db, query=self.query)
+
+
+@dataclass
+class EmailAddressUpdate:
+    db: SQLAlchemy
+    query: Any
+    changes: Dict[str, Any] = field(default_factory=dict)
+
+    def set_confirmation_timestamp(self, timestamp: Optional[datetime]) -> Self:
+        return replace(self, changes=dict(self.changes, confirmed_on=timestamp))
+
+    def perform(self) -> int:
+        if not self.changes:
+            return 0
+        sql_statement = (
+            update(models.Email)
+            .where(
+                models.Email.address.in_(
+                    self.query.with_entities(models.Email.address).scalar_subquery()
+                )
+            )
+            .values(**self.changes)
+            .execution_options(synchronize_session="fetch")
+        )
+        return self.db.session.execute(sql_statement).rowcount  # type: ignore
 
 
 @dataclass
@@ -1685,3 +1639,18 @@ class DatabaseGatewayImpl:
             orm.address,
             confirmed_on=orm.confirmed_on,
         )
+
+    def get_email_addresses(self) -> EmailAddressResult:
+        return EmailAddressResult(
+            query=models.Email.query,
+            mapper=self.email_address_from_orm,
+            db=self.db,
+        )
+
+    def create_email_address(
+        self, *, address: str, confirmed_on: Optional[datetime]
+    ) -> entities.EmailAddress:
+        orm = models.Email(address=address, confirmed_on=confirmed_on)
+        self.db.session.add(orm)
+        self.db.session.flush()
+        return self.email_address_from_orm(orm)

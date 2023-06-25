@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 from uuid import UUID
 
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.repositories import DatabaseGateway
 
@@ -22,11 +23,21 @@ class RegisterAccountantUseCase:
 
     password_hasher: PasswordHasher
     database: DatabaseGateway
+    datetime_service: DatetimeService
 
     def register_accountant(self, request: Request) -> Response:
         accountants = self.database.get_accountants()
         if accountants.with_email_address(request.email):
             return self._failed_registration(request)
+        if not self.database.get_email_addresses().with_address(request.email):
+            self.database.create_email_address(
+                address=request.email,
+                confirmed_on=self.datetime_service.now(),
+            )
+        else:
+            self.database.get_email_addresses().with_address(
+                request.email
+            ).update().set_confirmation_timestamp(self.datetime_service.now()).perform()
         user_id = self.database.create_accountant(
             email=request.email,
             name=request.name,

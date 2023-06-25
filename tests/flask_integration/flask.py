@@ -118,7 +118,7 @@ class ViewTestCase(FlaskTestCase):
 
     def login_company(
         self,
-        company: Optional[Company] = None,
+        company: Optional[UUID] = None,
         password: Optional[str] = None,
         email: Optional[str] = None,
         confirm_company: bool = True,
@@ -128,8 +128,8 @@ class ViewTestCase(FlaskTestCase):
         if email is None:
             email = self.email_generator.get_random_email()
         if company is None:
-            company = self.company_generator.create_company_entity(
-                password=password, email=email
+            company = self.company_generator.create_company(
+                password=password, email=email, confirmed=False
             )
         response = self.client.post(
             "/company/login",

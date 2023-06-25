@@ -59,6 +59,8 @@ class RegisterCompany:
         labour_account = self.account_repository.create_account()
         products_account = self.account_repository.create_account()
         registered_on = self.datetime_service.now()
+        if not self.database.get_email_addresses().with_address(request.email):
+            self.database.create_email_address(address=request.email, confirmed_on=None)
         company = self.database.create_company(
             email=request.email,
             name=request.name,
