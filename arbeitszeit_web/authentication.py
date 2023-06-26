@@ -30,7 +30,9 @@ class MemberAuthenticator:
         elif not self.database.get_members().with_id(user_id):
             # not a member
             self.notifier.display_warning(
-                self.translator.gettext("You are not logged with the correct account.")
+                self.translator.gettext(
+                    "You are not logged in with the correct account."
+                )
             )
             self.session.logout()
             self.session.set_next_url(self.request.get_request_target())
@@ -62,7 +64,9 @@ class CompanyAuthenticator:
         elif not self.database.get_companies().with_id(user_id):
             # not a company
             self.notifier.display_warning(
-                self.translator.gettext("You are not logged with the correct account.")
+                self.translator.gettext(
+                    "You are not logged in with the correct account."
+                )
             )
             self.session.logout()
             self.session.set_next_url(self.request.get_request_target())
