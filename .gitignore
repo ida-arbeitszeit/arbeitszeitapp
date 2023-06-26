@@ -1,5 +1,6 @@
 # my own
 *.swp
+.DS_Store
 my_database_key.py
 *.pyc
 *.png
