@@ -145,37 +145,76 @@ environment variables:
      export ARBEITSZEIT_APP_SERVER_NAME=localhost:5000
      export ARBEITSZEITAPP_TEST_DB="postgresql://postgres@localhost:5432/<name of test database>"
 
-If you are using Nix instead of ``venv``, you can safely omit four of 
-the above environment variable settings, since the relevant information is 
-drawn from files used by Nix:
-
-    .. code-block:: bash
-
-     export FLASK_APP=arbeitszeit_flask
-     export FLASK_DEBUG=1
-     export ARBEITSZEITAPP_TEST_DB="postgresql://postgres@localhost:5432/<name of test database>"
-
 You may find it useful to copy these shell commands into a script file and 
 run it at the beginning of every development session.  (If you do this, be sure
 to list your script in ``.gitignore`` so that it does not get committed into 
 the repo.) A more pleasant alternative is to copy them into a configuration
 file called ``.envrc`` in the top-level directory of the repo.  (This file name
-is already included in ``.gitignore``.)  Then, you can install the `direnv
+is already included in ``.gitignore``.)  Then, you can install the `Direnv
 <https://direnv.net>`_
 utility program on your system --- outside of your virtual environment.  (If you
 are using ``venv``, you can step out of the virtual environment with the ``deactivate``
 command.  If you are using Nix and have issued the command ``nix develop``, you can
 end the Nix session simply with ``exit`` or Ctl-D.) If you choose this route, be 
-sure to follow the ``direnv`` setup instructions for editing your shell configuration
+sure to follow the Direnv setup instructions for editing your shell configuration
 script.  Once you do this, in any new shell, when you step into the top-level
-directory of the repo (where ``.envrc`` resides), ``direnv`` will automatically 
+directory of the repo (where ``.envrc`` resides), Direnv will automatically 
 set the environment variables for you.  If you then add the line ``use flake`` 
-at the top of your ``.envrc`` file, ``direnv``
-will first invoke Nix and install all dependencies in the virtual environment ---
-automatically, every time you enter the root code directory.
+at the top of your ``.envrc`` file, Direnv will first invoke Nix and install 
+all dependencies in the virtual environment ---
+automatically, every time you enter the root code directory. Note that the
+first time you use Direnv, and any time you change ``.envrc``, you will need
+to run the command ``direnv allow`` to enable Direnv to proceed.
+
+    **A note for Mac users:**  You may find it convenient to place your clone
+    of the Arbeitszeit application code base in an iCloud directory, so that 
+    you can have access to the same files, in the same state, from various devices
+    logged into the same iCloud account.  In this case, however, the value of 
+    ``ARBEITSZEITAPP_CONFIGURATION_PATH`` as determined above using the ``PWD`` 
+    environment variable may be incorrect. Once you have stepped into the 
+    ``arbeitszeit`` directory and triggered Direnv to load the environment 
+    variables, check the value of ``ARBEITSZEITAPP_CONFIGURATION_PATH``:
+    
+        .. code-block:: bash
+    
+         echo $ARBEITSZEITAPP_CONFIGURATION_PATH
+    
+    If the value is incorrect, you can hard-code your iCloud-based path as a workaround:
+    
+        .. code-block:: bash
+    
+         DIR=<actual_present_working_directory>
+         export ARBEITSZEITAPP_CONFIGURATION_PATH="$DIR/arbeitszeit_flask/development_settings.py"
+
+The configuration file ``development_settings.py`` sets several variables, but you
+may find it convenient to get by with a smaller group of variables, whose values 
+you can set in a top-level file, ``custom_settings.py``, to which you should direct
+Flask by means of the value of ``ARBEITSZEITAPP_CONFIGURATION_PATH`` *instead*
+of the value given above:
+
+Here is a smaller ``.envrc`` that makes use of a ``custom_settings.py``:
+
+    .. code-block:: bash
+
+     use flake
+     export ARBEITSZEITAPP_CONFIGURATION_PATH=$PWD/custom_settings.py
+     export FLASK_APP=arbeitszeit_flask
+     export FLASK_DEBUG=1
+     export ARBEITSZEITAPP_TEST_DB="postgresql:///<name_of_your_test_DB>"
+
+Then, here is a sample ``custom_settings.py``:
+
+    .. code-block:: bash
+
+     from arbeitszeit_flask.development_settings import *
+     
+     SECRET_KEY = 'somesecretkey'
+     SQLALCHEMY_DATABASE_URI = 'postgresql:///<name_of_your_development_DB>'
+     SERVER_NAME = "localhost:5000"
 
 After configuring the database connection, you need to run the database
-migrations via ``flask db upgrade``.
+migrations via ``flask db upgrade``. It is mandatory to run this command 
+once before developing for the first time.
 
 Afterwards, you can start the development server with ``python -m flask
 run -h localhost``.  Unfortunately ``flask run`` might not work due to
