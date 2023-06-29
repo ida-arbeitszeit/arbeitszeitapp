@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from arbeitszeit.repositories import DatabaseGateway, PlanDraftRepository
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -19,11 +19,10 @@ class DeleteDraftUseCase:
         pass
 
     database: DatabaseGateway
-    draft_repository: PlanDraftRepository
 
     def delete_draft(self, request: Request) -> Response:
         deleter = self.database.get_companies().with_id(request.deleter).first()
-        draft_query = self.draft_repository.get_plan_drafts().with_id(request.draft)
+        draft_query = self.database.get_plan_drafts().with_id(request.draft)
         draft = draft_query.first()
         if not draft or not deleter:
             raise self.Failure()

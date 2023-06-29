@@ -979,45 +979,6 @@ class AccountRepository(interfaces.AccountRepository):
 
 
 @singleton
-class PlanDraftRepository(interfaces.PlanDraftRepository):
-    def __init__(self, entities: EntityStorage) -> None:
-        self.entities = entities
-
-    def create_plan_draft(
-        self,
-        planner: UUID,
-        product_name: str,
-        description: str,
-        costs: ProductionCosts,
-        production_unit: str,
-        amount: int,
-        timeframe_in_days: int,
-        is_public_service: bool,
-        creation_timestamp: datetime,
-    ) -> PlanDraft:
-        draft = PlanDraft(
-            id=uuid4(),
-            creation_date=creation_timestamp,
-            planner=planner,
-            product_name=product_name,
-            production_costs=costs,
-            unit_of_distribution=production_unit,
-            amount_produced=amount,
-            description=description,
-            timeframe=timeframe_in_days,
-            is_public_service=is_public_service,
-        )
-        self.entities.drafts[draft.id] = draft
-        return draft
-
-    def get_plan_drafts(self) -> PlanDraftResult:
-        return PlanDraftResult(
-            items=lambda: self.entities.drafts.values(),
-            entities=self.entities,
-        )
-
-
-@singleton
 class FakeLanguageRepository:
     def __init__(self) -> None:
         self._language_codes: Set[str] = set()
@@ -1347,4 +1308,37 @@ class EntityStorage:
         return EmailAddressResult(
             entities=self,
             items=lambda: self.email_addresses.values(),
+        )
+
+    def create_plan_draft(
+        self,
+        planner: UUID,
+        product_name: str,
+        description: str,
+        costs: ProductionCosts,
+        production_unit: str,
+        amount: int,
+        timeframe_in_days: int,
+        is_public_service: bool,
+        creation_timestamp: datetime,
+    ) -> PlanDraft:
+        draft = PlanDraft(
+            id=uuid4(),
+            creation_date=creation_timestamp,
+            planner=planner,
+            product_name=product_name,
+            production_costs=costs,
+            unit_of_distribution=production_unit,
+            amount_produced=amount,
+            description=description,
+            timeframe=timeframe_in_days,
+            is_public_service=is_public_service,
+        )
+        self.drafts[draft.id] = draft
+        return draft
+
+    def get_plan_drafts(self) -> PlanDraftResult:
+        return PlanDraftResult(
+            items=lambda: self.drafts.values(),
+            entities=self,
         )

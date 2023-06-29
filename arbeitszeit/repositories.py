@@ -424,27 +424,6 @@ class AccountRepository(ABC):
         pass
 
 
-class PlanDraftRepository(ABC):
-    @abstractmethod
-    def create_plan_draft(
-        self,
-        planner: UUID,
-        product_name: str,
-        description: str,
-        costs: ProductionCosts,
-        production_unit: str,
-        amount: int,
-        timeframe_in_days: int,
-        is_public_service: bool,
-        creation_timestamp: datetime,
-    ) -> PlanDraft:
-        pass
-
-    @abstractmethod
-    def get_plan_drafts(self) -> PlanDraftResult:
-        pass
-
-
 class LanguageRepository(Protocol):
     def get_available_language_codes(self) -> Iterable[str]:
         ...
@@ -576,4 +555,21 @@ class DatabaseGateway(Protocol):
         ...
 
     def get_email_addresses(self) -> EmailAddressResult:
+        ...
+
+    def create_plan_draft(
+        self,
+        planner: UUID,
+        product_name: str,
+        description: str,
+        costs: ProductionCosts,
+        production_unit: str,
+        amount: int,
+        timeframe_in_days: int,
+        is_public_service: bool,
+        creation_timestamp: datetime,
+    ) -> PlanDraft:
+        ...
+
+    def get_plan_drafts(self) -> PlanDraftResult:
         ...

@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import Optional
 from uuid import UUID
 
-from arbeitszeit.repositories import PlanDraftRepository
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -26,20 +26,14 @@ class EditDraftUseCase:
     class Response:
         is_success: bool
 
-    draft_repository: PlanDraftRepository
+    database: DatabaseGateway
 
     def edit_draft(self, request: Request) -> Response:
         if (
-            (
-                draft := self.draft_repository.get_plan_drafts()
-                .with_id(request.draft)
-                .first()
-            )
+            (draft := self.database.get_plan_drafts().with_id(request.draft).first())
             is not None
         ) and draft.planner == request.editor:
-            update = (
-                self.draft_repository.get_plan_drafts().with_id(request.draft).update()
-            )
+            update = self.database.get_plan_drafts().with_id(request.draft).update()
             if request.product_name is not None:
                 update = update.set_product_name(request.product_name)
             if request.amount is not None:

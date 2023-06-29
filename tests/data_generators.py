@@ -17,17 +17,12 @@ from arbeitszeit.entities import (
     Cooperation,
     Member,
     Plan,
-    PlanDraft,
     ProductionCosts,
     PurposesOfPurchases,
     Transaction,
 )
 from arbeitszeit.password_hasher import PasswordHasher
-from arbeitszeit.repositories import (
-    AccountRepository,
-    DatabaseGateway,
-    PlanDraftRepository,
-)
+from arbeitszeit.repositories import AccountRepository, DatabaseGateway
 from arbeitszeit.use_cases import (
     confirm_member,
     pay_consumer_product,
@@ -192,7 +187,6 @@ class PlanGenerator:
     database_gateway: DatabaseGateway
     request_cooperation: RequestCooperation
     accept_cooperation: AcceptCooperation
-    draft_repository: PlanDraftRepository
     create_plan_draft_use_case: CreatePlanDraft
     file_plan_with_accounting: FilePlanWithAccounting
     approve_plan_use_case: ApprovePlanUseCase
@@ -214,6 +208,8 @@ class PlanGenerator:
         is_available: bool = True,
         hidden_by_user: bool = False,
     ) -> Plan:
+        if planner is None:
+            planner = self.company_generator.create_company()
         draft = self.draft_plan(
             planner=planner,
             costs=costs,
@@ -226,7 +222,7 @@ class PlanGenerator:
         )
         file_plan_response = self.file_plan_with_accounting.file_plan_with_accounting(
             request=FilePlanWithAccounting.Request(
-                draft_id=draft.id, filing_company=draft.planner
+                draft_id=draft, filing_company=planner
             )
         )
         assert file_plan_response.plan_id
@@ -295,7 +291,7 @@ class PlanGenerator:
         description: Optional[str] = None,
         production_unit: Optional[str] = None,
         amount: Optional[int] = None,
-    ) -> PlanDraft:
+    ) -> UUID:
         if amount is None:
             amount = 5
         if production_unit is None:
@@ -326,11 +322,7 @@ class PlanGenerator:
         )
         assert not response.is_rejected
         assert response.draft_id
-        draft = (
-            self.draft_repository.get_plan_drafts().with_id(response.draft_id).first()
-        )
-        assert draft
-        return draft
+        return response.draft_id
 
 
 @dataclass
