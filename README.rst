@@ -355,7 +355,7 @@ We use `Flask-Babel <https://python-babel.github.io/flask-babel/>`_ for translat
 
 
 E-mail Configuration
--------------------
+--------------------
 
 There are two e-mail backend implementations available.  One
 implementation is meant for production using ``flask_mail``.
