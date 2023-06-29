@@ -1151,66 +1151,6 @@ class AccountingRepository:
 
 
 @dataclass
-class PlanDraftRepository(repositories.PlanDraftRepository):
-    db: SQLAlchemy
-
-    def create_plan_draft(
-        self,
-        planner: UUID,
-        product_name: str,
-        description: str,
-        costs: entities.ProductionCosts,
-        production_unit: str,
-        amount: int,
-        timeframe_in_days: int,
-        is_public_service: bool,
-        creation_timestamp: datetime,
-    ) -> entities.PlanDraft:
-        orm = PlanDraft(
-            id=str(uuid4()),
-            plan_creation_date=creation_timestamp,
-            planner=str(planner),
-            costs_p=costs.means_cost,
-            costs_r=costs.resource_cost,
-            costs_a=costs.labour_cost,
-            prd_name=product_name,
-            prd_unit=production_unit,
-            prd_amount=amount,
-            description=description,
-            timeframe=timeframe_in_days,
-            is_public_service=is_public_service,
-        )
-        self.db.session.add(orm)
-        return self.plan_draft_from_orm(orm)
-
-    def get_plan_drafts(self) -> PlanDraftResult:
-        return PlanDraftResult(
-            db=self.db,
-            query=models.PlanDraft.query,
-            mapper=self.plan_draft_from_orm,
-        )
-
-    @classmethod
-    def plan_draft_from_orm(cls, orm: models.PlanDraft) -> entities.PlanDraft:
-        return entities.PlanDraft(
-            id=orm.id,
-            creation_date=orm.plan_creation_date,
-            planner=UUID(orm.planner),
-            production_costs=entities.ProductionCosts(
-                labour_cost=orm.costs_a,
-                resource_cost=orm.costs_r,
-                means_cost=orm.costs_p,
-            ),
-            product_name=orm.prd_name,
-            unit_of_distribution=orm.prd_unit,
-            amount_produced=orm.prd_amount,
-            description=orm.description,
-            timeframe=int(orm.timeframe),
-            is_public_service=orm.is_public_service,
-        )
-
-
-@dataclass
 class DatabaseGatewayImpl:
     db: SQLAlchemy
 
@@ -1654,3 +1594,58 @@ class DatabaseGatewayImpl:
         self.db.session.add(orm)
         self.db.session.flush()
         return self.email_address_from_orm(orm)
+
+    def create_plan_draft(
+        self,
+        planner: UUID,
+        product_name: str,
+        description: str,
+        costs: entities.ProductionCosts,
+        production_unit: str,
+        amount: int,
+        timeframe_in_days: int,
+        is_public_service: bool,
+        creation_timestamp: datetime,
+    ) -> entities.PlanDraft:
+        orm = PlanDraft(
+            id=str(uuid4()),
+            plan_creation_date=creation_timestamp,
+            planner=str(planner),
+            costs_p=costs.means_cost,
+            costs_r=costs.resource_cost,
+            costs_a=costs.labour_cost,
+            prd_name=product_name,
+            prd_unit=production_unit,
+            prd_amount=amount,
+            description=description,
+            timeframe=timeframe_in_days,
+            is_public_service=is_public_service,
+        )
+        self.db.session.add(orm)
+        return self.plan_draft_from_orm(orm)
+
+    def get_plan_drafts(self) -> PlanDraftResult:
+        return PlanDraftResult(
+            db=self.db,
+            query=models.PlanDraft.query,
+            mapper=self.plan_draft_from_orm,
+        )
+
+    @classmethod
+    def plan_draft_from_orm(cls, orm: models.PlanDraft) -> entities.PlanDraft:
+        return entities.PlanDraft(
+            id=orm.id,
+            creation_date=orm.plan_creation_date,
+            planner=UUID(orm.planner),
+            production_costs=entities.ProductionCosts(
+                labour_cost=orm.costs_a,
+                resource_cost=orm.costs_r,
+                means_cost=orm.costs_p,
+            ),
+            product_name=orm.prd_name,
+            unit_of_distribution=orm.prd_unit,
+            amount_produced=orm.prd_amount,
+            description=orm.description,
+            timeframe=int(orm.timeframe),
+            is_public_service=orm.is_public_service,
+        )

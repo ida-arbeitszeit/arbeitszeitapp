@@ -21,7 +21,7 @@ def test_that_correct_planner_id_is_returned(
 ):
     planner = company_generator.create_company()
     draft = plan_generator.draft_plan(planner=planner)
-    summary = get_draft_summary(draft.id)
+    summary = get_draft_summary(draft)
     assert_success(summary, lambda s: s.planner_id == planner)
 
 
@@ -37,7 +37,7 @@ def test_that_correct_production_costs_are_shown(
             resource_cost=Decimal(3),
         )
     )
-    summary = get_draft_summary(draft.id)
+    summary = get_draft_summary(draft)
     assert_success(
         summary,
         lambda s: all(
@@ -56,7 +56,7 @@ def test_that_correct_product_name_is_shown(
     get_draft_summary: GetDraftSummary,
 ):
     draft = plan_generator.draft_plan(product_name="test product")
-    summary = get_draft_summary(draft.id)
+    summary = get_draft_summary(draft)
     assert_success(summary, lambda s: s.product_name == "test product")
 
 
@@ -66,7 +66,7 @@ def test_that_correct_product_description_is_shown(
     get_draft_summary: GetDraftSummary,
 ):
     draft = plan_generator.draft_plan(description="test description")
-    summary = get_draft_summary(draft.id)
+    summary = get_draft_summary(draft)
     assert_success(summary, lambda s: s.description == "test description")
 
 
@@ -76,7 +76,7 @@ def test_that_correct_product_unit_is_shown(
     get_draft_summary: GetDraftSummary,
 ):
     draft = plan_generator.draft_plan(production_unit="test unit")
-    summary = get_draft_summary(draft.id)
+    summary = get_draft_summary(draft)
     assert_success(summary, lambda s: s.production_unit == "test unit")
 
 
@@ -86,7 +86,7 @@ def test_that_correct_amount_is_shown(
     get_draft_summary: GetDraftSummary,
 ):
     draft = plan_generator.draft_plan(amount=123)
-    summary = get_draft_summary(draft.id)
+    summary = get_draft_summary(draft)
     assert_success(summary, lambda s: s.amount == 123)
 
 
@@ -96,7 +96,7 @@ def test_that_correct_public_service_is_shown(
     get_draft_summary: GetDraftSummary,
 ):
     draft = plan_generator.draft_plan(is_public_service=True)
-    summary = get_draft_summary(draft.id)
+    summary = get_draft_summary(draft)
     assert_success(summary, lambda s: s.is_public_service == True)
 
 

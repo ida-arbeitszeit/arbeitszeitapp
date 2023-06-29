@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import Optional
 from uuid import UUID
 
-from arbeitszeit.repositories import PlanDraftRepository
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -26,10 +26,10 @@ DraftSummaryResponse = Optional[DraftSummarySuccess]
 
 @dataclass
 class GetDraftSummary:
-    draft_repository: PlanDraftRepository
+    database: DatabaseGateway
 
     def __call__(self, draft_id: UUID) -> DraftSummaryResponse:
-        draft = self.draft_repository.get_plan_drafts().with_id(draft_id).first()
+        draft = self.database.get_plan_drafts().with_id(draft_id).first()
         if draft is None:
             return None
         return DraftSummarySuccess(

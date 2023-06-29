@@ -26,7 +26,6 @@ from arbeitszeit_flask.database import get_social_accounting
 from arbeitszeit_flask.database.repositories import (
     AccountRepository,
     DatabaseGatewayImpl,
-    PlanDraftRepository,
     UserAddressBookImpl,
 )
 from arbeitszeit_flask.datetime import RealtimeDatetimeService
@@ -119,10 +118,6 @@ class FlaskModule(Module):
         binder.bind(
             interfaces.AccountRepository,  # type: ignore
             to=AliasProvider(AccountRepository),
-        )
-        binder.bind(
-            interfaces.PlanDraftRepository,  # type: ignore
-            to=AliasProvider(PlanDraftRepository),
         )
         binder.bind(
             DatetimeService,  # type: ignore

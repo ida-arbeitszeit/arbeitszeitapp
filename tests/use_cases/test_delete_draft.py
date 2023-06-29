@@ -23,7 +23,7 @@ class UseCaseTests(BaseTestCase):
     def test_that_no_failure_is_raised_if_draft_is_deleted_by_its_owner(self) -> None:
         planner = self.company_generator.create_company()
         draft = self.plan_generator.draft_plan(planner=planner)
-        self.use_case.delete_draft(self.create_request(deleter=planner, draft=draft.id))
+        self.use_case.delete_draft(self.create_request(deleter=planner, draft=draft))
 
     def test_that_failure_is_raised_if_draft_does_not_exist(self) -> None:
         planner = self.company_generator.create_company()
@@ -36,14 +36,14 @@ class UseCaseTests(BaseTestCase):
         draft = self.plan_generator.draft_plan()
         with self.assertRaises(DeleteDraftUseCase.Failure):
             self.use_case.delete_draft(
-                self.create_request(deleter=uuid4(), draft=draft.id),
+                self.create_request(deleter=uuid4(), draft=draft),
             )
 
     def test_that_after_deleting_draft_summary_is_not_available_anymore(self) -> None:
         planner = self.company_generator.create_company()
         draft = self.plan_generator.draft_plan(planner=planner)
-        self.use_case.delete_draft(self.create_request(deleter=planner, draft=draft.id))
-        response = self.get_draft_summary(draft_id=draft.id)
+        self.use_case.delete_draft(self.create_request(deleter=planner, draft=draft))
+        response = self.get_draft_summary(draft_id=draft)
         self.assertIsNone(response)
 
     def test_that_plan_is_not_deleted_if_deleter_is_not_planner(self) -> None:
@@ -51,9 +51,9 @@ class UseCaseTests(BaseTestCase):
         draft = self.plan_generator.draft_plan()
         with self.assertRaises(DeleteDraftUseCase.Failure):
             self.use_case.delete_draft(
-                self.create_request(deleter=company.id, draft=draft.id)
+                self.create_request(deleter=company.id, draft=draft)
             )
-        response = self.get_draft_summary(draft_id=draft.id)
+        response = self.get_draft_summary(draft_id=draft)
         self.assertIsNotNone(response)
 
     def test_failure_is_raised_if_deleter_is_not_planner(self) -> None:
@@ -61,7 +61,7 @@ class UseCaseTests(BaseTestCase):
         draft = self.plan_generator.draft_plan()
         with self.assertRaises(DeleteDraftUseCase.Failure):
             self.use_case.delete_draft(
-                self.create_request(deleter=company.id, draft=draft.id)
+                self.create_request(deleter=company.id, draft=draft)
             )
 
     def test_show_draft_name_in_successful_deletion_response(self) -> None:
@@ -71,7 +71,7 @@ class UseCaseTests(BaseTestCase):
             planner=planner, product_name=expected_name
         )
         response = self.use_case.delete_draft(
-            self.create_request(deleter=planner, draft=draft.id)
+            self.create_request(deleter=planner, draft=draft)
         )
         self.assertEqual(response.product_name, expected_name)
 

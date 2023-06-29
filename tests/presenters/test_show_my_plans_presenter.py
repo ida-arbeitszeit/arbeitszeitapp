@@ -1,13 +1,19 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from unittest import TestCase
+from uuid import uuid4
 
 from arbeitszeit.entities import Plan, PlanDraft
-from arbeitszeit.use_cases.show_my_plans import PlanInfo, ShowMyPlansResponse
+from arbeitszeit.use_cases.show_my_plans import (
+    PlanInfo,
+    ShowMyPlansRequest,
+    ShowMyPlansResponse,
+    ShowMyPlansUseCase,
+)
 from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
-from tests.data_generators import CooperationGenerator, PlanGenerator
+from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
 from tests.presenters.notifier import NotifierTestImpl
 from tests.session import FakeSession
@@ -22,7 +28,8 @@ from .url_index import (
 
 
 class ShowMyPlansPresenterTests(TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
+        super().setUp()
         self.injector = get_dependency_injector()
         self.url_index = self.injector.get(UrlIndexTestImpl)
         self.renew_plan_url_index = self.injector.get(RenewPlanUrlIndexTestImpl)
@@ -35,9 +42,12 @@ class ShowMyPlansPresenterTests(TestCase):
         self.update_plans_use_case = self.injector.get(UpdatePlansAndPayout)
         self.notifier = self.injector.get(NotifierTestImpl)
         self.session = self.injector.get(FakeSession)
-        self.session.login_company("test@test.test")
+        self.session.login_company(uuid4())
+        self.show_my_plans = self.injector.get(ShowMyPlansUseCase)
+        self.company_generator = self.injector.get(CompanyGenerator)
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
 
-    def test_show_correct_notification_when_user_has_no_plans(self):
+    def test_show_correct_notification_when_user_has_no_plans(self) -> None:
         self.presenter.present(
             ShowMyPlansResponse(
                 count_all_plans=0,
@@ -53,14 +63,14 @@ class ShowMyPlansPresenterTests(TestCase):
             [self.translator.gettext("You don't have any plans.")],
         )
 
-    def test_do_not_show_notification_when_user_has_one_plan(self):
+    def test_do_not_show_notification_when_user_has_one_plan(self) -> None:
         plan = self.plan_generator.create_plan()
         RESPONSE_WITH_ONE_PLAN = self.response_with_one_plan(plan)
         self.presenter.present(RESPONSE_WITH_ONE_PLAN)
         self.assertFalse(self.notifier.infos)
         self.assertFalse(self.notifier.warnings)
 
-    def test_do_only_show_active_plans_when_user_has_one_active_plan(self):
+    def test_do_only_show_active_plans_when_user_has_one_active_plan(self) -> None:
         plan = self.plan_generator.create_plan()
         RESPONSE_WITH_ONE_ACTIVE_PLAN = self.response_with_one_active_plan(plan)
         presentation = self.presenter.present(RESPONSE_WITH_ONE_ACTIVE_PLAN)
@@ -68,7 +78,7 @@ class ShowMyPlansPresenterTests(TestCase):
         self.assertFalse(presentation.show_expired_plans)
         self.assertFalse(presentation.show_non_active_plans)
 
-    def test_presenter_shows_correct_info_of_one_single_active_plan(self):
+    def test_presenter_shows_correct_info_of_one_single_active_plan(self) -> None:
         plan = self.plan_generator.create_plan(cooperation=None, is_available=True)
         RESPONSE_WITH_ONE_ACTIVE_PLAN = self.response_with_one_active_plan(plan)
         presentation = self.presenter.present(RESPONSE_WITH_ONE_ACTIVE_PLAN)
@@ -95,7 +105,9 @@ class ShowMyPlansPresenterTests(TestCase):
             False,
         )
 
-    def test_presenter_shows_correct_info_of_one_single_plan_that_is_cooperating(self):
+    def test_presenter_shows_correct_info_of_one_single_plan_that_is_cooperating(
+        self,
+    ) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         coop = self.coop_generator.create_cooperation()
         plan = self.plan_generator.create_plan(cooperation=coop, is_available=True)
@@ -106,29 +118,29 @@ class ShowMyPlansPresenterTests(TestCase):
             True,
         )
 
-    def test_presenter_shows_correct_info_of_one_single_expired_plan(self):
-        plan = self.plan_generator.create_plan()
-        plan.expired = True
-        RESPONSE_WITH_ONE_EXPIRED_PLAN = self.response_with_one_expired_plan(plan)
+    def test_presenter_shows_correct_info_of_one_single_expired_plan(self) -> None:
+        RESPONSE_WITH_ONE_EXPIRED_PLAN = self.response_with_one_expired_plan()
         presentation = self.presenter.present(RESPONSE_WITH_ONE_EXPIRED_PLAN)
         row1 = presentation.expired_plans.rows[0]
         expected_plan = RESPONSE_WITH_ONE_EXPIRED_PLAN.expired_plans[0]
         self.assertEqual(
             row1.plan_summary_url,
             self.url_index.get_plan_summary_url(
-                user_role=UserRole.company, plan_id=plan.id
+                user_role=UserRole.company, plan_id=expected_plan.id
             ),
         )
         self.assertEqual(
             row1.prd_name,
             expected_plan.prd_name,
         )
-        self.assertEqual(row1.is_public_service, plan.is_public_service)
+        self.assertEqual(row1.is_public_service, expected_plan.is_public_service)
         self.assertEqual(
-            row1.renew_plan_url, self.renew_plan_url_index.get_renew_plan_url(plan.id)
+            row1.renew_plan_url,
+            self.renew_plan_url_index.get_renew_plan_url(expected_plan.id),
         )
         self.assertEqual(
-            row1.hide_plan_url, self.hide_plan_url_index.get_hide_plan_url(plan.id)
+            row1.hide_plan_url,
+            self.hide_plan_url_index.get_hide_plan_url(expected_plan.id),
         )
 
     def test_presenter_shows_correct_info_of_one_single_non_active_plan(self) -> None:
@@ -252,14 +264,13 @@ class ShowMyPlansPresenterTests(TestCase):
     def response_with_one_draft(
         self, *, product_name: str = "test name"
     ) -> ShowMyPlansResponse:
-        draft = self.plan_generator.draft_plan(product_name=product_name)
-        plan_info = self._convert_draft_into_plan_info(draft)
-        return ShowMyPlansResponse(
-            count_all_plans=1,
-            non_active_plans=[],
-            active_plans=[],
-            expired_plans=[],
-            drafts=[plan_info],
+        planner = self.company_generator.create_company()
+        self.plan_generator.draft_plan(
+            product_name=product_name, timeframe=1, planner=planner
+        )
+        self.datetime_service.advance_time(timedelta(days=2))
+        return self.show_my_plans.show_company_plans(
+            request=ShowMyPlansRequest(company_id=planner)
         )
 
     def response_with_no_plans(self) -> ShowMyPlansResponse:
@@ -291,14 +302,12 @@ class ShowMyPlansPresenterTests(TestCase):
             drafts=[],
         )
 
-    def response_with_one_expired_plan(self, plan: Plan) -> ShowMyPlansResponse:
-        plan_info = self._convert_into_plan_info(plan)
-        return ShowMyPlansResponse(
-            count_all_plans=1,
-            non_active_plans=[],
-            active_plans=[],
-            expired_plans=[plan_info],
-            drafts=[],
+    def response_with_one_expired_plan(self) -> ShowMyPlansResponse:
+        planner = self.company_generator.create_company()
+        self.plan_generator.create_plan(planner=planner, timeframe=1)
+        self.datetime_service.advance_time(timedelta(days=2))
+        return self.show_my_plans.show_company_plans(
+            request=ShowMyPlansRequest(company_id=planner)
         )
 
     def response_with_one_non_active_plan(self, plan: Plan) -> ShowMyPlansResponse:

@@ -3,6 +3,7 @@ from decimal import Decimal
 from uuid import uuid4
 
 from arbeitszeit.entities import ProductionCosts
+from arbeitszeit.use_cases import get_draft_summary
 from arbeitszeit.use_cases.create_plan_draft import (
     CreatePlanDraft,
     CreatePlanDraftRequest,
@@ -10,7 +11,6 @@ from arbeitszeit.use_cases.create_plan_draft import (
 )
 
 from .base_test_case import BaseTestCase
-from .repositories import PlanDraftRepository
 
 REQUEST = CreatePlanDraftRequest(
     planner=uuid4(),
@@ -32,15 +32,17 @@ class UseCaseTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.create_plan_draft = self.injector.get(CreatePlanDraft)
-        self.plan_draft_repository = self.injector.get(PlanDraftRepository)
+        self.get_draft_summary = self.injector.get(get_draft_summary.GetDraftSummary)
 
-    def test_that_create_plan_creates_a_plan_draft_that_is_not_rejected(self) -> None:
+    def test_that_plan_plan_summary_can_be_accessed_after_draft_is_created(
+        self,
+    ) -> None:
         planner = self.company_generator.create_company()
         request = replace(REQUEST, planner=planner)
-        assert not self.plan_draft_repository.get_plan_drafts()
         response = self.create_plan_draft(request)
-        assert len(self.plan_draft_repository.get_plan_drafts()) == 1
         assert not response.is_rejected
+        assert response.draft_id
+        assert self.get_draft_summary(response.draft_id)
 
     def test_that_create_plan_returns_a_draft_id(self) -> None:
         planner = self.company_generator.create_company()
@@ -96,5 +98,9 @@ class UseCaseTests(BaseTestCase):
 
     def test_that_drafted_plan_has_same_planner_as_specified_on_creation(self) -> None:
         planner = self.company_generator.create_company()
-        draft = self.plan_generator.draft_plan(planner=planner)
-        assert draft.planner == planner
+        request = replace(REQUEST, planner=planner)
+        response = self.create_plan_draft(request)
+        assert response.draft_id
+        summary = self.get_draft_summary(response.draft_id)
+        assert summary
+        assert summary.planner_id == planner

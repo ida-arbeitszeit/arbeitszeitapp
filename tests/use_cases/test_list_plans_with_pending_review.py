@@ -79,9 +79,7 @@ class UseCaseTests(BaseTestCase):
         draft = self.plan_generator.draft_plan(
             product_name=product_name, planner=planner
         )
-        request = FilePlanWithAccounting.Request(
-            draft_id=draft.id, filing_company=draft.planner
-        )
+        request = FilePlanWithAccounting.Request(draft_id=draft, filing_company=planner)
         response = self.file_plan_with_accounting_use_case.file_plan_with_accounting(
             request
         )

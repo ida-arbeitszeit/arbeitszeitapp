@@ -13,7 +13,7 @@ class ViewTests(ViewTestCase):
 
     def test_get_proper_response_code_with_correct_draft_id(self) -> None:
         draft = self.plan_generator.draft_plan(planner=self.company.id)
-        response = self.client.get(self.get_url(draft.id))
+        response = self.client.get(self.get_url(draft))
         self.assertEqual(response.status_code, 200)
 
     def test_get_404_with_random_uuid(self) -> None:

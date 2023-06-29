@@ -54,7 +54,7 @@ class BaseUseCaseTestCase(BaseTestCase):
             timeframe=timeframe,
             planner=self.planner,
         )
-        return draft.id
+        return draft
 
     def create_request(
         self,

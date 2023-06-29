@@ -48,9 +48,6 @@ class InMemoryModule(Module):
         binder[interfaces.AccountRepository] = AliasProvider(  # type: ignore
             repositories.AccountRepository
         )
-        binder[interfaces.PlanDraftRepository] = AliasProvider(  # type: ignore
-            repositories.PlanDraftRepository
-        )
         binder.bind(
             interfaces.DatabaseGateway,  # type: ignore
             to=AliasProvider(repositories.EntityStorage),

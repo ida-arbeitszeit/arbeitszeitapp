@@ -1,7 +1,7 @@
 from decimal import Decimal
 from typing import Dict
 
-from arbeitszeit.repositories import PlanDraftRepository
+from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from tests.data_generators import PlanGenerator
 from tests.request import FakeRequest
 
@@ -34,9 +34,9 @@ class AuthenticatedCompanyTestsForPost(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.plan_generator = self.injector.get(PlanGenerator)
-        self.plan_draft_repository = self.injector.get(PlanDraftRepository)  # type: ignore
         self.form = self.injector.get(FakeRequest)
         self.company = self.login_company()
+        self.show_my_plans = self.injector.get(ShowMyPlansUseCase)
 
     def test_post_user_canceling_leads_to_302_and_no_draft_gets_created(self) -> None:
         test_data = self._create_form_data()
@@ -69,6 +69,6 @@ class AuthenticatedCompanyTestsForPost(ViewTestCase):
         )
 
     def _count_drafts_of_company(self) -> int:
-        return len(
-            self.plan_draft_repository.get_plan_drafts().planned_by(self.company.id)
-        )
+        request = ShowMyPlansRequest(company_id=self.company.id)
+        response = self.show_my_plans.show_company_plans(request)
+        return len(response.drafts)

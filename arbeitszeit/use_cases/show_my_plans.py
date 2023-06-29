@@ -7,7 +7,7 @@ from uuid import UUID
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan, PlanDraft
 from arbeitszeit.price_calculator import PriceCalculator
-from arbeitszeit.repositories import DatabaseGateway, PlanDraftRepository
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -41,7 +41,6 @@ class ShowMyPlansResponse:
 @dataclass
 class ShowMyPlansUseCase:
     database_gateway: DatabaseGateway
-    draft_repository: PlanDraftRepository
     price_calculator: PriceCalculator
     datetime_service: DatetimeService
 
@@ -56,7 +55,7 @@ class ShowMyPlansUseCase:
         drafts = list(
             map(
                 self._create_plan_info_from_draft,
-                self.draft_repository.get_plan_drafts().planned_by(request.company_id),
+                self.database_gateway.get_plan_drafts().planned_by(request.company_id),
             )
         )
         drafts.sort(key=lambda x: x.plan_creation_date, reverse=True)

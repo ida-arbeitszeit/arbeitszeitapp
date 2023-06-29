@@ -27,14 +27,14 @@ class UseCaseTests(TestCase):
     def test_planner_can_edit_successfully_an_existing_draft(self) -> None:
         planner = self.company_generator.create_company()
         draft = self.plan_generator.draft_plan(planner=planner)
-        request = self.create_request(draft=draft.id, editor=planner)
+        request = self.create_request(draft=draft, editor=planner)
         response = self.use_case.edit_draft(request)
         self.assertTrue(response.is_success)
 
     def test_non_planner_cannot_edit_draft_successfully(self) -> None:
         other_company = self.company_generator.create_company()
         draft = self.plan_generator.draft_plan()
-        request = self.create_request(draft=draft.id, editor=other_company)
+        request = self.create_request(draft=draft, editor=other_company)
         response = self.use_case.edit_draft(request)
         self.assertFalse(response.is_success)
 
@@ -44,11 +44,11 @@ class UseCaseTests(TestCase):
             planner=planner, product_name="original name"
         )
         request = self.create_request(
-            draft=draft.id, editor=planner, product_name="new name"
+            draft=draft, editor=planner, product_name="new name"
         )
         self.use_case.edit_draft(request)
         self.assertDraft(
-            draft.id,
+            draft,
             lambda d: d.product_name == "new name",
         )
 
@@ -63,11 +63,11 @@ class UseCaseTests(TestCase):
             ),
         )
         request = self.create_request(
-            draft=draft.id, editor=planner, labour_cost=Decimal(2)
+            draft=draft, editor=planner, labour_cost=Decimal(2)
         )
         self.use_case.edit_draft(request)
         self.assertDraft(
-            draft.id,
+            draft,
             lambda d: d.labour_cost == Decimal(2),
         )
 
@@ -82,11 +82,11 @@ class UseCaseTests(TestCase):
             ),
         )
         request = self.create_request(
-            draft=draft.id, editor=planner, means_cost=Decimal(2)
+            draft=draft, editor=planner, means_cost=Decimal(2)
         )
         self.use_case.edit_draft(request)
         self.assertDraft(
-            draft.id,
+            draft,
             lambda d: d.means_cost == Decimal(2),
         )
 
@@ -101,11 +101,11 @@ class UseCaseTests(TestCase):
             ),
         )
         request = self.create_request(
-            draft=draft.id, editor=planner, resource_cost=Decimal(2)
+            draft=draft, editor=planner, resource_cost=Decimal(2)
         )
         self.use_case.edit_draft(request)
         self.assertDraft(
-            draft.id,
+            draft,
             lambda d: d.resources_cost == Decimal(2),
         )
 
@@ -116,11 +116,11 @@ class UseCaseTests(TestCase):
             description="old description",
         )
         request = self.create_request(
-            draft=draft.id, editor=planner, description="new description"
+            draft=draft, editor=planner, description="new description"
         )
         self.use_case.edit_draft(request)
         self.assertDraft(
-            draft.id,
+            draft,
             lambda d: d.description == "new description",
         )
 
@@ -131,12 +131,12 @@ class UseCaseTests(TestCase):
             is_public_service=True,
         )
         request = self.create_request(
-            draft=draft.id,
+            draft=draft,
             editor=planner,
             is_public_service=False,
         )
         self.use_case.edit_draft(request)
-        self.assertDraft(draft.id, lambda d: not d.is_public_service)
+        self.assertDraft(draft, lambda d: not d.is_public_service)
 
     def test_can_edit_timeframe(self) -> None:
         planner = self.company_generator.create_company()
@@ -145,12 +145,12 @@ class UseCaseTests(TestCase):
             timeframe=1,
         )
         request = self.create_request(
-            draft=draft.id,
+            draft=draft,
             editor=planner,
             timeframe=2,
         )
         self.use_case.edit_draft(request)
-        self.assertDraft(draft.id, lambda d: d.timeframe == 2)
+        self.assertDraft(draft, lambda d: d.timeframe == 2)
 
     def test_can_change_unit_of_distribution(self) -> None:
         planner = self.company_generator.create_company()
@@ -159,12 +159,12 @@ class UseCaseTests(TestCase):
             production_unit="old unit",
         )
         request = self.create_request(
-            draft=draft.id,
+            draft=draft,
             editor=planner,
             unit_of_distribution="new unit",
         )
         self.use_case.edit_draft(request)
-        self.assertDraft(draft.id, lambda d: d.production_unit == "new unit")
+        self.assertDraft(draft, lambda d: d.production_unit == "new unit")
 
     def assertDraft(
         self, draft_id: UUID, condition: Callable[[DraftSummarySuccess], bool]

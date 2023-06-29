@@ -67,6 +67,6 @@ class UseCaseTests(BaseTestCase):
         response = self.use_case.show_company_plans(
             request=ShowMyPlansRequest(company_id=company)
         )
-        self.assertEqual(response.drafts[0].id, expected_first_plan.id)
-        self.assertEqual(response.drafts[1].id, expected_second_plan.id)
-        self.assertEqual(response.drafts[2].id, expected_third_plan.id)
+        self.assertEqual(response.drafts[0].id, expected_first_plan)
+        self.assertEqual(response.drafts[1].id, expected_second_plan)
+        self.assertEqual(response.drafts[2].id, expected_third_plan)
