@@ -9,6 +9,7 @@ from flask_login import current_user
 from arbeitszeit import use_cases
 from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
 from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
+from arbeitszeit.use_cases.get_user_account_details import GetUserAccountDetailsUseCase
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.forms import (
@@ -26,6 +27,9 @@ from arbeitszeit_flask.views import (
     QueryCompaniesView,
     QueryPlansView,
 )
+from arbeitszeit_web.controllers.get_member_account_details_controller import (
+    GetMemberAccountDetailsController,
+)
 from arbeitszeit_web.controllers.query_companies_controller import (
     QueryCompaniesController,
 )
@@ -33,6 +37,9 @@ from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresente
 from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_plan_summary_member import GetPlanSummaryMemberMemberPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
+from arbeitszeit_web.presenters.get_member_account_details_presenter import (
+    GetMemberAccountDetailsPresenter,
+)
 from arbeitszeit_web.presenters.get_member_account_presenter import (
     GetMemberAccountPresenter,
 )
@@ -236,3 +243,21 @@ def show_company_work_invite(invite_id: UUID, view: CompanyWorkInviteView):
         return view.respond_to_post(form, invite_id)
     else:
         return view.respond_to_get(invite_id)
+
+
+@MemberRoute("/member/account")
+def get_member_account_details(
+    controller: GetMemberAccountDetailsController,
+    presenter: GetMemberAccountDetailsPresenter,
+    use_case: GetUserAccountDetailsUseCase,
+    template_renderer: UserTemplateRenderer,
+):
+    uc_request = controller.parse_web_request()
+    uc_response = use_case.get_user_account_details(uc_request)
+    view_model = presenter.render_member_account_details(uc_response)
+    return FlaskResponse(
+        template_renderer.render_template(
+            "member/get_member_account_details.html", dict(view_model=view_model)
+        ),
+        status=200,
+    )
