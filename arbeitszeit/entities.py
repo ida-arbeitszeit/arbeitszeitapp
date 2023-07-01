@@ -60,6 +60,10 @@ class Member:
     def is_member(self) -> bool:
         return True
 
+    @property
+    def email_address(self) -> str:
+        return self.email
+
 
 @dataclass
 class Company:
@@ -101,6 +105,10 @@ class Company:
 
     def is_member(self) -> bool:
         return False
+
+    @property
+    def email_address(self) -> str:
+        return self.email
 
 
 class AccountTypes(Enum):
