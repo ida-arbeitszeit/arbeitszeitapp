@@ -3,7 +3,7 @@ from typing import Any, Dict, Union
 from deepdiff import DeepDiff
 from flask_restx import Model, fields
 
-from arbeitszeit_web.api_presenters.interfaces import (
+from arbeitszeit_web.api.presenters.interfaces import (
     JsonBoolean,
     JsonDatetime,
     JsonDecimal,

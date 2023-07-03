@@ -5,13 +5,13 @@ from arbeitszeit_flask.api.input_documentation import generate_input_documentati
 from arbeitszeit_flask.api.response_handling import error_response_handling
 from arbeitszeit_flask.api.schema_converter import SchemaConverter
 from arbeitszeit_flask.dependency_injection import with_injection
-from arbeitszeit_web.api_controllers.login_member_api_controller import (
+from arbeitszeit_web.api.controllers.login_member_api_controller import (
     LoginMemberApiController,
 )
-from arbeitszeit_web.api_presenters.login_member_api_presenter import (
+from arbeitszeit_web.api.presenters.login_member_api_presenter import (
     LoginMemberApiPresenter,
 )
-from arbeitszeit_web.api_presenters.response_errors import BadRequest, Unauthorized
+from arbeitszeit_web.api.presenters.response_errors import BadRequest, Unauthorized
 
 namespace = Namespace("auth", "Authentification related endpoints.")
 

@@ -1,4 +1,4 @@
-from arbeitszeit_web.api_presenters.response_errors import BadRequest
+from arbeitszeit_web.api.presenters.response_errors import BadRequest
 
 
 def string_to_non_negative_integer(string: str) -> int:

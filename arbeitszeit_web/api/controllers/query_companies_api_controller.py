@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from typing import List, Optional
 
 from arbeitszeit.use_cases.query_companies import CompanyFilter, QueryCompaniesRequest
-from arbeitszeit_web.api_controllers import query_parser
-from arbeitszeit_web.api_controllers.expected_input import ExpectedInput, InputLocation
+from arbeitszeit_web.api.controllers import query_parser
+from arbeitszeit_web.api.controllers.expected_input import ExpectedInput, InputLocation
 from arbeitszeit_web.request import Request
 
 DEFAULT_OFFSET: int = 0

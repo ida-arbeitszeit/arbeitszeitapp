@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from uuid import UUID
 
 from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
-from arbeitszeit_web.api_presenters.response_errors import BadRequest
+from arbeitszeit_web.api.presenters.response_errors import BadRequest
 
 
 @dataclass

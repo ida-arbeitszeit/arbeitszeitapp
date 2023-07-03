@@ -2,11 +2,11 @@ from typing import Optional
 from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
-from arbeitszeit_web.api_presenters.interfaces import JsonBoolean, JsonObject
-from arbeitszeit_web.api_presenters.login_member_api_presenter import (
+from arbeitszeit_web.api.presenters.interfaces import JsonBoolean, JsonObject
+from arbeitszeit_web.api.presenters.login_member_api_presenter import (
     LoginMemberApiPresenter,
 )
-from arbeitszeit_web.api_presenters.response_errors import Unauthorized
+from arbeitszeit_web.api.presenters.response_errors import Unauthorized
 from arbeitszeit_web.session import UserRole
 from tests.api.presenters.base_test_case import BaseTestCase
 from tests.session import FakeSession

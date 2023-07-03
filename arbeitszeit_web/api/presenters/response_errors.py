@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from arbeitszeit_web.api_presenters.interfaces import JsonObject, JsonString, JsonValue
+from arbeitszeit_web.api.presenters.interfaces import JsonObject, JsonString, JsonValue
 
 
 class ApiResponseError(Protocol):

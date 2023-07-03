@@ -2,7 +2,7 @@ from typing import Optional
 
 from arbeitszeit.plan_summary import PlanSummary
 from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
-from arbeitszeit_web.api_presenters.interfaces import (
+from arbeitszeit_web.api.presenters.interfaces import (
     JsonBoolean,
     JsonDatetime,
     JsonDecimal,
@@ -11,7 +11,7 @@ from arbeitszeit_web.api_presenters.interfaces import (
     JsonString,
     JsonValue,
 )
-from arbeitszeit_web.api_presenters.response_errors import NotFound
+from arbeitszeit_web.api.presenters.response_errors import NotFound
 
 
 class GetPlanApiPresenter:

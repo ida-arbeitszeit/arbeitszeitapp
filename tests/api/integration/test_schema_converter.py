@@ -4,7 +4,7 @@ from arbeitszeit_flask.api.schema_converter import (
     DifferentModelWithSameNameExists,
     SchemaConverter,
 )
-from arbeitszeit_web.api_presenters.interfaces import (
+from arbeitszeit_web.api.presenters.interfaces import (
     JsonBoolean,
     JsonDatetime,
     JsonDecimal,

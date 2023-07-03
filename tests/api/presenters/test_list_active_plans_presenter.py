@@ -1,4 +1,4 @@
-from arbeitszeit_web.api_presenters.interfaces import (
+from arbeitszeit_web.api.presenters.interfaces import (
     JsonBoolean,
     JsonDatetime,
     JsonDecimal,
@@ -6,7 +6,7 @@ from arbeitszeit_web.api_presenters.interfaces import (
     JsonObject,
     JsonString,
 )
-from arbeitszeit_web.api_presenters.query_plans_api_presenter import (
+from arbeitszeit_web.api.presenters.query_plans_api_presenter import (
     QueryPlansApiPresenter,
 )
 from tests.api.presenters.base_test_case import BaseTestCase
