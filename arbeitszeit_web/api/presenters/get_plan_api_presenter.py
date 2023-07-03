@@ -11,7 +11,7 @@ from arbeitszeit_web.api.presenters.interfaces import (
     JsonString,
     JsonValue,
 )
-from arbeitszeit_web.api.presenters.response_errors import NotFound
+from arbeitszeit_web.api.response_errors import NotFound
 
 
 class GetPlanApiPresenter:

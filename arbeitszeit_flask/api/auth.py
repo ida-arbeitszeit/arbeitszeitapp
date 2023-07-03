@@ -11,7 +11,7 @@ from arbeitszeit_web.api.controllers.login_member_api_controller import (
 from arbeitszeit_web.api.presenters.login_member_api_presenter import (
     LoginMemberApiPresenter,
 )
-from arbeitszeit_web.api.presenters.response_errors import BadRequest, Unauthorized
+from arbeitszeit_web.api.response_errors import BadRequest, Unauthorized
 
 namespace = Namespace("auth", "Authentification related endpoints.")
 

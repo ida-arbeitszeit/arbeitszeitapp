@@ -13,7 +13,7 @@ from arbeitszeit_web.api.controllers.query_companies_api_controller import (
 from arbeitszeit_web.api.presenters.query_companies_api_presenter import (
     QueryCompaniesApiPresenter,
 )
-from arbeitszeit_web.api.presenters.response_errors import BadRequest
+from arbeitszeit_web.api.response_errors import BadRequest
 
 namespace = Namespace("companies", "Companies related endpoints.")
 

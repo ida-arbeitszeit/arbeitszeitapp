@@ -2,7 +2,7 @@ from arbeitszeit_web.api.controllers.expected_input import InputLocation
 from arbeitszeit_web.api.controllers.login_member_api_controller import (
     LoginMemberApiController,
 )
-from arbeitszeit_web.api.presenters.response_errors import BadRequest
+from arbeitszeit_web.api.response_errors import BadRequest
 from tests.controllers.base_test_case import BaseTestCase
 from tests.request import FakeRequest
 

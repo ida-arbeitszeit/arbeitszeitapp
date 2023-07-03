@@ -8,7 +8,7 @@ from arbeitszeit_web.api.presenters.interfaces import (
     JsonObject,
     JsonString,
 )
-from arbeitszeit_web.api.presenters.response_errors import NotFound
+from arbeitszeit_web.api.response_errors import NotFound
 from tests.api.presenters.base_test_case import BaseTestCase
 from tests.presenters.data_generators import PlanSummaryGenerator
 

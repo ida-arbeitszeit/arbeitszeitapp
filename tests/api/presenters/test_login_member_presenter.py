@@ -6,7 +6,7 @@ from arbeitszeit_web.api.presenters.interfaces import JsonBoolean, JsonObject
 from arbeitszeit_web.api.presenters.login_member_api_presenter import (
     LoginMemberApiPresenter,
 )
-from arbeitszeit_web.api.presenters.response_errors import Unauthorized
+from arbeitszeit_web.api.response_errors import Unauthorized
 from arbeitszeit_web.session import UserRole
 from tests.api.presenters.base_test_case import BaseTestCase
 from tests.session import FakeSession

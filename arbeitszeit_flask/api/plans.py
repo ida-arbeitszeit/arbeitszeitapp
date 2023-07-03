@@ -14,7 +14,7 @@ from arbeitszeit_web.api.presenters.get_plan_api_presenter import GetPlanApiPres
 from arbeitszeit_web.api.presenters.query_plans_api_presenter import (
     QueryPlansApiPresenter,
 )
-from arbeitszeit_web.api.presenters.response_errors import BadRequest, NotFound
+from arbeitszeit_web.api.response_errors import BadRequest, NotFound
 
 namespace = Namespace("plans", "Plan related endpoints.")
 
