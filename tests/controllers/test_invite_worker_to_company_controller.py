@@ -2,7 +2,9 @@ from dataclasses import dataclass
 from unittest import TestCase
 from uuid import uuid4
 
-from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyController
+from arbeitszeit_web.controllers.invite_worker_to_company_controller import (
+    InviteWorkerToCompanyController,
+)
 from tests.session import FakeSession
 
 from .dependency_injection import get_dependency_injector

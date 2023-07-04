@@ -9,9 +9,11 @@ from arbeitszeit.use_cases.list_workers import ListWorkers
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.forms import InviteWorkerToCompanyForm
 from arbeitszeit_flask.template import TemplateIndex, TemplateRenderer
-from arbeitszeit_web.controllers.list_workers_controller import ListWorkersController
-from arbeitszeit_web.invite_worker_to_company import (
+from arbeitszeit_web.controllers.invite_worker_to_company_controller import (
     InviteWorkerToCompanyController,
+)
+from arbeitszeit_web.controllers.list_workers_controller import ListWorkersController
+from arbeitszeit_web.presenters.invite_worker_to_company_presenter import (
     InviteWorkerToCompanyPresenter,
     ViewModel,
 )
